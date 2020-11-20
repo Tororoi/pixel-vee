@@ -32,6 +32,11 @@ canvas {
     flex-flow: column wrap;
   }
 
+.undoredo {
+    display: flex;
+    justify-content: space-evenly;
+}
+
 .undo-button {
     user-select: none;
     width: 100px;
