@@ -27,11 +27,14 @@ let offScreenCTX = offScreenCVS.getContext("2d");
 //Create an Image with a default source of the existing onscreen canvas
 let img = new Image;
 let source = offScreenCVS.toDataURL();
+let tempCanvas = document.getElementById("temp-canvas");
+tempCanvas.src = source;
 
 //Add event listeners for the mouse moving, downclick, and upclick
 onScreenCVS.addEventListener('mousemove', handleMouseMove);
 onScreenCVS.addEventListener('mousedown', handleMouseDown);
 onScreenCVS.addEventListener('mouseup', handleMouseUp);
+onScreenCVS.addEventListener('mouseout', handleMouseOut);
 
 //Add event listeners for the toolbox
 undoBtn.addEventListener('click', handleUndo)
@@ -57,6 +60,7 @@ function handleMouseMove(e) {
         let trueX = mouseX*ratio;
         let trueY = mouseY*ratio;
         if (trueX !== lastOnX || trueY !== lastOnY) {
+            onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
             drawCanvas();
             onScreenCTX.fillStyle = brushColor;
             onScreenCTX.fillRect(trueX,trueY,ratio,ratio);
@@ -78,6 +82,12 @@ function handleMouseUp() {
     points = [];
     //Reset redostack
     redoStack = [];
+}
+
+function handleMouseOut() {
+    clicked = false;
+    onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
+    drawCanvas();
 }
 
 function handleUndo() {
@@ -145,14 +155,15 @@ function redrawPoints() {
 function renderImage() {
     img.src = source;
     img.onload = () => {
+        onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
         drawCanvas();
     }
 }
 
 function drawCanvas() {
     //if the image is being drawn due to resizing, reset the width and height. Putting the width and height outside the img.onload function will make scaling smoother, but the image will flicker as you scale. Pick your poison.
-    onScreenCVS.width = baseDimension;
-    onScreenCVS.height = baseDimension;
+    // onScreenCVS.width = baseDimension;
+    // onScreenCVS.height = baseDimension;
     //Prevent blurring
     onScreenCTX.imageSmoothingEnabled = false;
     onScreenCTX.drawImage(img,0,0,onScreenCVS.width,onScreenCVS.height)
