@@ -27,8 +27,8 @@ let offScreenCTX = offScreenCVS.getContext("2d");
 //Create an Image with a default source of the existing onscreen canvas
 let img = new Image;
 let source = offScreenCVS.toDataURL();
-let tempCanvas = document.getElementById("temp-canvas");
-tempCanvas.src = source;
+// let tempCanvas = document.getElementById("temp-canvas");
+// tempCanvas.src = source;
 
 //Add event listeners for the mouse moving, downclick, and upclick
 onScreenCVS.addEventListener('mousemove', handleMouseMove);
@@ -55,8 +55,9 @@ function handleMouseMove(e) {
     } else {
         //Hover brush
         let ratio = onScreenCVS.width/offScreenCVS.width;
-        let mouseX = Math.floor(e.offsetX/ratio);
-        let mouseY = Math.floor(e.offsetY/ratio);
+        let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
+        let mouseX = Math.floor(e.offsetX/trueRatio);
+        let mouseY = Math.floor(e.offsetY/trueRatio);
         let trueX = mouseX*ratio;
         let trueY = mouseY*ratio;
         if (trueX !== lastOnX || trueY !== lastOnY) {
@@ -108,7 +109,7 @@ let points = [];
 
 //Action functions
 function actionDraw(e) {
-    let ratio = onScreenCVS.width/offScreenCVS.width;
+    let ratio = baseDimension/offScreenCVS.width;
     let mouseX = Math.floor(e.offsetX/ratio);
     let mouseY = Math.floor(e.offsetY/ratio);
     // extend the polyline
@@ -178,6 +179,9 @@ function setSize() {
 //Resize the canvas if the window is resized
 function flexCanvasSize() {
     setSize();
+    // tempCanvas.src = onScreenCVS.toDataURL();
+    // onScreenCVS.width = baseDimension;
+    // onScreenCVS.height = baseDimension;
     renderImage();
 }
 

@@ -17,7 +17,17 @@ body {
 
 canvas {
     background: #66CCCC;
-  }
+    position: absolute;
+    /* z-index: 100; */
+    /* transition: all 1s; */
+    width: 70%;
+}
+
+#tempCanvas {
+    position: absolute;
+    /* z-index: 1; */
+    border: 5px solid blue;
+}
 
 /* Toolbox */
 
