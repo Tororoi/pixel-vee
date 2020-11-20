@@ -39,13 +39,30 @@ redoBtn.addEventListener('click', handleRedo)
 
 //We only want the mouse to move if the mouse is down, so we need a variable to disable drawing while the mouse is not clicked.
 let clicked = false;
+let lastOnX;
+let lastOnY;
 
 //Base settings
-brushColor = "red";
+let brushColor = "red";
+let toolType = "draw";
 
 function handleMouseMove(e) {
     if (clicked) {
         actionDraw(e);
+    } else {
+        //Hover brush
+        let ratio = onScreenCVS.width/offScreenCVS.width;
+        let mouseX = Math.floor(e.offsetX/ratio);
+        let mouseY = Math.floor(e.offsetY/ratio);
+        let trueX = mouseX*ratio;
+        let trueY = mouseY*ratio;
+        if (trueX !== lastOnX || trueY !== lastOnY) {
+            drawCanvas();
+            onScreenCTX.fillStyle = brushColor;
+            onScreenCTX.fillRect(trueX,trueY,ratio,ratio);
+            lastOnX = trueX;
+            lastOnY = trueY;
+        }
     }
 }
 
@@ -94,7 +111,7 @@ function actionDraw(e) {
             y: mouseY,
             // size: brushSize,
             color: brushColor,
-            // mode: "draw"
+            mode: toolType
         });
         source = offScreenCVS.toDataURL();
         renderImage();
@@ -128,13 +145,17 @@ function redrawPoints() {
 function renderImage() {
     img.src = source;
     img.onload = () => {
-      //if the image is being drawn due to resizing, reset the width and height. Putting the width and height outside the img.onload function will make scaling smoother, but the image will flicker as you scale. Pick your poison.
-      onScreenCVS.width = baseDimension;
-      onScreenCVS.height = baseDimension;
-      //Prevent blurring
-      onScreenCTX.imageSmoothingEnabled = false;
-      onScreenCTX.drawImage(img,0,0,onScreenCVS.width,onScreenCVS.height)
+        drawCanvas();
     }
+}
+
+function drawCanvas() {
+    //if the image is being drawn due to resizing, reset the width and height. Putting the width and height outside the img.onload function will make scaling smoother, but the image will flicker as you scale. Pick your poison.
+    onScreenCVS.width = baseDimension;
+    onScreenCVS.height = baseDimension;
+    //Prevent blurring
+    onScreenCTX.imageSmoothingEnabled = false;
+    onScreenCTX.drawImage(img,0,0,onScreenCVS.width,onScreenCVS.height)
 }
 
 //Get the size of the parentNode which is subject to flexbox. Fit the square by making sure the dimensions are based on the smaller of the width and height.
