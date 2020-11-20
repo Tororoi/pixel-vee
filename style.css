@@ -1,0 +1,63 @@
+body {
+    margin: 0px;
+}
+
+.full-page {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+}
+
+/* Canvas */
+
+.canvas-container {
+    background-color: bisque;
+    width: 70%;
+}
+
+canvas {
+    background: #66CCCC;
+  }
+
+/* Toolbox */
+
+.sidebar {
+    background-color: burlywood;
+    width: 30%;
+}
+
+.toolbox {
+    margin: 8px;
+    display: flex;
+    flex-flow: column wrap;
+  }
+
+.undo-button {
+    user-select: none;
+    width: 100px;
+    text-align: center;
+    color: white;
+    height: 60px;
+    border-radius: 10px;
+    background: rgb(212, 45, 45);
+    opacity: 1;
+}
+  
+.undo-button:hover {
+    opacity: 0.8;
+}
+
+.redo-button {
+    user-select: none;
+    width: 100px;
+    text-align: center;
+    color: white;
+    height: 60px;
+    border-radius: 10px;
+    background: rgba(104, 233, 157, 0.849);
+    opacity: 1;
+}
+  
+.redo-button:hover {
+    opacity: 0.8;
+}
