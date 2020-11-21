@@ -6,6 +6,16 @@ let onScreenCTX = onScreenCVS.getContext("2d");
 let undoBtn = document.getElementById("undo");
 let redoBtn = document.getElementById("redo");
 
+//Get tool buttons
+let toolsCont = document.querySelector(".tools");
+
+//Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
+let offScreenCVS = document.createElement('canvas');
+let offScreenCTX = offScreenCVS.getContext("2d");
+//Set the dimensions of the drawing canvas
+offScreenCVS.width = 32;
+offScreenCVS.height = 32;
+
 //Set initial size of canvas. If using a non-square, make sure to set the ratio the same as the offscreen canvas by multiplying either the height or width by the correct ratio.
 let baseDimension;
 let rect;
@@ -17,28 +27,10 @@ let rect;
 let undoStack = [];
 let redoStack = [];
 
-//Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
-let offScreenCVS = document.createElement('canvas');
-let offScreenCTX = offScreenCVS.getContext("2d");
-//Set the dimensions of the drawing canvas
-  offScreenCVS.width = 32;
-  offScreenCVS.height = 32;
-
-//Create an Image with a default source of the existing onscreen canvas
-let img = new Image;
-let source = offScreenCVS.toDataURL();
-// let tempCanvas = document.getElementById("temp-canvas");
-// tempCanvas.src = source;
-
-//Add event listeners for the mouse moving, downclick, and upclick
-onScreenCVS.addEventListener('mousemove', handleMouseMove);
-onScreenCVS.addEventListener('mousedown', handleMouseDown);
-onScreenCVS.addEventListener('mouseup', handleMouseUp);
-onScreenCVS.addEventListener('mouseout', handleMouseOut);
-
-//Add event listeners for the toolbox
-undoBtn.addEventListener('click', handleUndo)
-redoBtn.addEventListener('click', handleRedo)
+//Other global variables
+let lastX;
+let lastY;
+let points = [];
 
 //We only want the mouse to move if the mouse is down, so we need a variable to disable drawing while the mouse is not clicked.
 let clicked = false;
@@ -47,7 +39,23 @@ let lastOnY;
 
 //Base settings
 let brushColor = "red";
-let toolType = "draw";
+let toolType = "pencil";
+
+//Create an Image with a default source of the existing onscreen canvas
+let img = new Image;
+let source = offScreenCVS.toDataURL();
+
+//Add event listeners for the mouse moving, downclick, and upclick
+onScreenCVS.addEventListener('mousemove', handleMouseMove);
+onScreenCVS.addEventListener('mousedown', handleMouseDown);
+onScreenCVS.addEventListener('mouseup', handleMouseUp);
+onScreenCVS.addEventListener('mouseout', handleMouseOut);
+
+//Add event listeners for the toolbox
+undoBtn.addEventListener('click', handleUndo);
+redoBtn.addEventListener('click', handleRedo);
+
+toolsCont.addEventListener("click", handleTools);
 
 function handleMouseMove(e) {
     if (clicked) {
@@ -103,15 +111,19 @@ function handleRedo() {
     }
 }
 
-let lastX;
-let lastY;
-let points = [];
+function handleTools(e) {
+    let selection = e.target.closest(".tool").id;
+    currentTool = selection;
+}
 
 //Action functions
 function actionDraw(e) {
-    let ratio = baseDimension/offScreenCVS.width;
-    let mouseX = Math.floor(e.offsetX/ratio);
-    let mouseY = Math.floor(e.offsetY/ratio);
+    // let ratio = baseDimension/offScreenCVS.width;
+    // let mouseX = Math.floor(e.offsetX/ratio);
+    // let mouseY = Math.floor(e.offsetY/ratio);
+    let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
+    let mouseX = Math.floor(e.offsetX/trueRatio);
+    let mouseY = Math.floor(e.offsetY/trueRatio);
     // extend the polyline
     offScreenCTX.fillStyle = brushColor;
     offScreenCTX.fillRect(mouseX,mouseY,1,1);
@@ -131,6 +143,10 @@ function actionDraw(e) {
     //save last point
     lastX = mouseX;
     lastY = mouseY;
+}
+
+function actionFill(e) {
+    
 }
 
 //Helper functions
@@ -177,12 +193,12 @@ function setSize() {
 }
 
 //Resize the canvas if the window is resized
-function flexCanvasSize() {
-    setSize();
-    // tempCanvas.src = onScreenCVS.toDataURL();
-    // onScreenCVS.width = baseDimension;
-    // onScreenCVS.height = baseDimension;
-    renderImage();
-}
+// function flexCanvasSize() {
+//     setSize();
+//     // tempCanvas.src = onScreenCVS.toDataURL();
+//     // onScreenCVS.width = baseDimension;
+//     // onScreenCVS.height = baseDimension;
+//     renderImage();
+// }
 
-window.onresize = flexCanvasSize;
+// window.onresize = flexCanvasSize;

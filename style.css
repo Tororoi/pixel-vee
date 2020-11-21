@@ -47,32 +47,57 @@ canvas {
     justify-content: space-evenly;
 }
 
-.undo-button {
+.undoredo div {
     user-select: none;
     width: 100px;
     text-align: center;
     color: white;
     height: 60px;
     border-radius: 10px;
-    background: rgb(212, 45, 45);
     opacity: 1;
 }
-  
-.undo-button:hover {
+
+.undoredo div:hover {
     opacity: 0.8;
 }
 
+.undo-button {
+    background: rgb(212, 45, 45);
+}
+
 .redo-button {
+    background: rgb(104, 181, 233);
+}
+
+/* Tools */
+
+.tools {
+    display: flex;
+    justify-content: space-evenly;
+}
+
+.tools div {
     user-select: none;
     width: 100px;
     text-align: center;
     color: white;
     height: 60px;
     border-radius: 10px;
-    background: rgba(104, 233, 157, 0.849);
     opacity: 1;
 }
-  
-.redo-button:hover {
+
+.tools div:hover {
     opacity: 0.8;
+}
+
+#pencil {
+    background: rgb(173, 233, 104);
+}
+
+#line {
+    background: rgb(195, 207, 83);
+}
+
+#fill {
+    background: rgb(212, 203, 76);
 }
