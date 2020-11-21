@@ -73,6 +73,11 @@ function handleMouseMove(e) {
             drawCanvas();
             onScreenCTX.fillStyle = brushColor;
             onScreenCTX.fillRect(trueX,trueY,ratio,ratio);
+            onScreenCTX.beginPath();
+            onScreenCTX.rect(trueX,trueY,ratio,ratio);
+            onScreenCTX.lineWidth = 1;
+            onScreenCTX.strokeStyle = "black";
+            onScreenCTX.stroke();
             lastOnX = trueX;
             lastOnY = trueY;
         }
@@ -145,8 +150,15 @@ function actionDraw(e) {
     lastY = mouseY;
 }
 
+//Fill vars
+
+
 function actionFill(e) {
-    
+    //Get imagedata
+
+    //Start with click coords
+    let pixelStack = [];
+    //Travel up until finding a boundary
 }
 
 //Helper functions
