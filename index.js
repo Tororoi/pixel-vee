@@ -1,6 +1,12 @@
 //Set onscreen canvas and its context
 let onScreenCVS = document.getElementById("onScreen");
 let onScreenCTX = onScreenCVS.getContext("2d");
+let ocWidth = onScreenCVS.width;
+let ocHeight = onScreenCVS.height;
+let sharpness = 4;
+onScreenCVS.width = ocWidth * sharpness;
+onScreenCVS.height = ocHeight * sharpness;
+onScreenCTX.scale(sharpness, sharpness);
 
 //Get the undo buttons
 let undoBtn = document.getElementById("undo");
@@ -19,12 +25,19 @@ let offScreenCTX = offScreenCVS.getContext("2d");
 offScreenCVS.width = 32;
 offScreenCVS.height = 32;
 
+// //Create an offscreen canvas for graphics that won't be part of actual image
+// let gCVS = document.createElement('canvas');
+// let gCTX = offScreenCVS.getContext("2d");
+// //Set the dimensions of the graphics canvas the same as drawing canvas
+// gCVS.width = 32;
+// gCVS.height = 32;
+
 //Set initial size of canvas. If using a non-square, make sure to set the ratio the same as the offscreen canvas by multiplying either the height or width by the correct ratio.
-let baseDimension;
-let rect;
-    setSize();
-    onScreenCVS.width = baseDimension;
-    onScreenCVS.height = baseDimension;
+// let baseDimension;
+// let rect;
+//     setSize();
+//     onScreenCVS.width = baseDimension;
+//     onScreenCVS.height = baseDimension;
 
 //Create history stacks for the undo functionality
 let undoStack = [];
@@ -70,7 +83,7 @@ function handleMouseMove(e) {
     let mouseX = Math.floor(e.offsetX/trueRatio);
     let mouseY = Math.floor(e.offsetY/trueRatio);
     //Hover brush
-    let ratio = onScreenCVS.width/offScreenCVS.width;
+    let ratio = onScreenCVS.width/offScreenCVS.width/sharpness;
     let onX = mouseX*ratio;
     let onY = mouseY*ratio;
     if (clicked) {
@@ -81,12 +94,17 @@ function handleMouseMove(e) {
                     //get color
                     sampleColor(mouseX,mouseY);
                     //draw square
-                    onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
+                    onScreenCTX.clearRect(0,0,onScreenCVS.width/sharpness,onScreenCVS.height/sharpness);
                     drawCanvas();
                     onScreenCTX.beginPath();
                     onScreenCTX.rect(onX,onY,ratio,ratio);
                     onScreenCTX.lineWidth = 1;
                     onScreenCTX.strokeStyle = "black";
+                    onScreenCTX.stroke();
+                    onScreenCTX.beginPath();
+                    onScreenCTX.rect(onX+1,onY+1,ratio-2,ratio-2);
+                    onScreenCTX.lineWidth = 1;
+                    onScreenCTX.strokeStyle = "white";
                     onScreenCTX.stroke();
                     lastOnX = onX;
                     lastOnY = onY;
@@ -100,7 +118,7 @@ function handleMouseMove(e) {
                 //draw line from origin point to current point onscreen
                 //only draw when necessary
                 if (onX !== lastOnX || onY !== lastOnY) {
-                    onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
+                    onScreenCTX.clearRect(0,0,onScreenCVS.width/sharpness,onScreenCVS.height/sharpness);
                     drawCanvas();
                     //set offscreen endpoint
                     lastX = mouseX;
@@ -130,7 +148,7 @@ function handleMouseMove(e) {
     } else {
         //only draw when necessary
         if (onX !== lastOnX || onY !== lastOnY) {
-            onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
+            onScreenCTX.clearRect(0,0,onScreenCVS.width/sharpness,onScreenCVS.height/sharpness);
             drawCanvas();
             switch (toolType) {
                 case "picker":
@@ -145,6 +163,11 @@ function handleMouseMove(e) {
             onScreenCTX.rect(onX,onY,ratio,ratio);
             onScreenCTX.lineWidth = 1;
             onScreenCTX.strokeStyle = "black";
+            onScreenCTX.stroke();
+            onScreenCTX.beginPath();
+            onScreenCTX.rect(onX+1,onY+1,ratio-2,ratio-2);
+            onScreenCTX.lineWidth = 1;
+            onScreenCTX.strokeStyle = "white";
             onScreenCTX.stroke();
             lastOnX = onX;
             lastOnY = onY;
@@ -235,7 +258,7 @@ function handleMouseOut() {
     points = [];
     //Reset redostack
     redoStack = [];
-    onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
+    onScreenCTX.clearRect(0,0,onScreenCVS.width/sharpness,onScreenCVS.height/sharpness);
     drawCanvas();
 }
 
@@ -428,7 +451,7 @@ function redrawPoints() {
 function renderImage() {
     img.src = source;
     img.onload = () => {
-        onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
+        onScreenCTX.clearRect(0,0,onScreenCVS.width/sharpness,onScreenCVS.height/sharpness);
         drawCanvas();
     }
 }
@@ -436,14 +459,14 @@ function renderImage() {
 function drawCanvas() {
     //Prevent blurring
     onScreenCTX.imageSmoothingEnabled = false;
-    onScreenCTX.drawImage(img,0,0,onScreenCVS.width,onScreenCVS.height)
+    onScreenCTX.drawImage(img,0,0,onScreenCVS.width/sharpness,onScreenCVS.height/sharpness)
 }
 
 //Get the size of the parentNode which is subject to flexbox. Fit the square by making sure the dimensions are based on the smaller of the width and height.
-function setSize() {
-    rect = onScreenCVS.parentNode.getBoundingClientRect();
-    rect.height > rect.width ? baseDimension = rect.width : baseDimension = rect.height;
-}
+// function setSize() {
+//     rect = onScreenCVS.parentNode.getBoundingClientRect();
+//     rect.height > rect.width ? baseDimension = rect.width : baseDimension = rect.height;
+// }
 
 function setColor(r,g,b) {
     brushColor.color = `rgba(${r},${g},${b},255)`;
