@@ -70,6 +70,10 @@ canvas {
     background: rgb(104, 181, 233);
 }
 
+.columns {
+    display: flex;
+}
+
 /* Color Picker */
 .swatch {
     background: rgb(255, 0, 0);
@@ -80,6 +84,11 @@ canvas {
 }
 
 /* Tools */
+
+h4 {
+    text-align: center;
+    margin: 0px;
+}
 
 .tools {
     display: flex;
@@ -116,4 +125,17 @@ canvas {
 
 #picker {
     background: rgb(105, 76, 212);
+}
+
+/* Modes */
+
+.modes {
+    display: flex;
+    justify-content: flex-start;
+    flex-flow: column wrap;
+    margin: 16px;
+}
+
+.modes div {
+    background: rgb(37, 0, 139);
 }
