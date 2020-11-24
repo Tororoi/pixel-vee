@@ -64,6 +64,27 @@ function handleMouseMove(e) {
     let mouseY = Math.floor(e.offsetY/trueRatio);
     if (clicked) {
         switch(toolType) {
+            case "picker":
+                //move picker on screen
+                let ratio = onScreenCVS.width/offScreenCVS.width;
+                let onX = mouseX*ratio;
+                let onY = mouseY*ratio;
+                //only draw when necessary, get color here too
+                if (onX !== lastOnX || onY !== lastOnY) {
+                    //get color
+
+                    //draw square
+                    onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
+                    drawCanvas();
+                    onScreenCTX.beginPath();
+                    onScreenCTX.rect(onX,onY,ratio,ratio);
+                    onScreenCTX.lineWidth = 1;
+                    onScreenCTX.strokeStyle = "black";
+                    onScreenCTX.stroke();
+                    lastOnX = onX;
+                    lastOnY = onY;
+                }
+                break;
             case "fill":
                 //do nothing
                 break;
@@ -89,11 +110,19 @@ function handleMouseMove(e) {
         let ratio = onScreenCVS.width/offScreenCVS.width;
         let onX = mouseX*ratio;
         let onY = mouseY*ratio;
+        //only draw when necessary
         if (onX !== lastOnX || onY !== lastOnY) {
             onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
             drawCanvas();
-            onScreenCTX.fillStyle = brushColor.color;
-            onScreenCTX.fillRect(onX,onY,ratio,ratio);
+            switch (toolType) {
+                case "picker":
+                    //empty square
+                    break;
+                default:
+                    //colored square
+                    onScreenCTX.fillStyle = brushColor.color;
+                    onScreenCTX.fillRect(onX,onY,ratio,ratio);
+            }
             onScreenCTX.beginPath();
             onScreenCTX.rect(onX,onY,ratio,ratio);
             onScreenCTX.lineWidth = 1;
@@ -111,6 +140,9 @@ function handleMouseDown(e) {
     let mouseX = Math.floor(e.offsetX/trueRatio);
     let mouseY = Math.floor(e.offsetY/trueRatio);
     switch(toolType) {
+        case "picker":
+            //set color
+            break;
         case "fill":
             actionFill(mouseX,mouseY,brushColor);
             points.push({
@@ -147,7 +179,9 @@ function handleMouseUp(e) {
     clicked = false;
     randomizeColor();
     //add to undo stack
-    undoStack.push(points);
+    if (points.length) {
+        undoStack.push(points);
+    }
     points = [];
     //Reset redostack
     redoStack = [];
@@ -155,7 +189,7 @@ function handleMouseUp(e) {
 
 function handleMouseOut() {
     clicked = false;
-    randomizeColor();
+    // randomizeColor();
     onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
     drawCanvas();
 }

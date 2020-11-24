@@ -44,10 +44,11 @@ canvas {
 
 .undoredo {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: flex-start;
 }
 
 .undoredo div {
+    margin: 16px;
     user-select: none;
     width: 100px;
     text-align: center;
@@ -73,7 +74,9 @@ canvas {
 
 .tools {
     display: flex;
-    justify-content: space-evenly;
+    justify-content: flex-start;
+    flex-flow: column wrap;
+    margin: 16px;
 }
 
 .tools div {
@@ -100,6 +103,10 @@ canvas {
 
 #fill {
     background: rgb(212, 203, 76);
+}
+
+#picker {
+    background: rgb(105, 76, 212);
 }
 
 .color {
