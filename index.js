@@ -1,6 +1,7 @@
 //Set onscreen canvas and its context
 let onScreenCVS = document.getElementById("onScreen");
 let onScreenCTX = onScreenCVS.getContext("2d");
+//improve sharpness
 let ocWidth = onScreenCVS.width;
 let ocHeight = onScreenCVS.height;
 let sharpness = 4;
@@ -83,7 +84,7 @@ function handleMouseMove(e) {
     let mouseX = Math.floor(e.offsetX/trueRatio);
     let mouseY = Math.floor(e.offsetY/trueRatio);
     //Hover brush
-    let ratio = onScreenCVS.width/offScreenCVS.width/sharpness;
+    let ratio = ocWidth/offScreenCVS.width;
     let onX = mouseX*ratio;
     let onY = mouseY*ratio;
     if (clicked) {
@@ -94,16 +95,16 @@ function handleMouseMove(e) {
                     //get color
                     sampleColor(mouseX,mouseY);
                     //draw square
-                    onScreenCTX.clearRect(0,0,onScreenCVS.width/sharpness,onScreenCVS.height/sharpness);
+                    onScreenCTX.clearRect(0,0,ocWidth,ocHeight);
                     drawCanvas();
                     onScreenCTX.beginPath();
                     onScreenCTX.rect(onX,onY,ratio,ratio);
-                    onScreenCTX.lineWidth = 1;
+                    onScreenCTX.lineWidth = 0.5;
                     onScreenCTX.strokeStyle = "black";
                     onScreenCTX.stroke();
                     onScreenCTX.beginPath();
-                    onScreenCTX.rect(onX+1,onY+1,ratio-2,ratio-2);
-                    onScreenCTX.lineWidth = 1;
+                    onScreenCTX.rect(onX+0.5,onY+0.5,ratio-1,ratio-1);
+                    onScreenCTX.lineWidth = 0.5;
                     onScreenCTX.strokeStyle = "white";
                     onScreenCTX.stroke();
                     lastOnX = onX;
@@ -118,7 +119,7 @@ function handleMouseMove(e) {
                 //draw line from origin point to current point onscreen
                 //only draw when necessary
                 if (onX !== lastOnX || onY !== lastOnY) {
-                    onScreenCTX.clearRect(0,0,onScreenCVS.width/sharpness,onScreenCVS.height/sharpness);
+                    onScreenCTX.clearRect(0,0,ocWidth,ocHeight);
                     drawCanvas();
                     //set offscreen endpoint
                     lastX = mouseX;
@@ -148,7 +149,7 @@ function handleMouseMove(e) {
     } else {
         //only draw when necessary
         if (onX !== lastOnX || onY !== lastOnY) {
-            onScreenCTX.clearRect(0,0,onScreenCVS.width/sharpness,onScreenCVS.height/sharpness);
+            onScreenCTX.clearRect(0,0,ocWidth,ocHeight);
             drawCanvas();
             switch (toolType) {
                 case "picker":
@@ -161,12 +162,12 @@ function handleMouseMove(e) {
             }
             onScreenCTX.beginPath();
             onScreenCTX.rect(onX,onY,ratio,ratio);
-            onScreenCTX.lineWidth = 1;
+            onScreenCTX.lineWidth = 0.5;
             onScreenCTX.strokeStyle = "black";
             onScreenCTX.stroke();
             onScreenCTX.beginPath();
-            onScreenCTX.rect(onX+1,onY+1,ratio-2,ratio-2);
-            onScreenCTX.lineWidth = 1;
+            onScreenCTX.rect(onX+0.5,onY+0.5,ratio-1,ratio-1);
+            onScreenCTX.lineWidth = 0.5;
             onScreenCTX.strokeStyle = "white";
             onScreenCTX.stroke();
             lastOnX = onX;
@@ -258,7 +259,7 @@ function handleMouseOut() {
     points = [];
     //Reset redostack
     redoStack = [];
-    onScreenCTX.clearRect(0,0,onScreenCVS.width/sharpness,onScreenCVS.height/sharpness);
+    onScreenCTX.clearRect(0,0,ocWidth,ocHeight);
     drawCanvas();
 }
 
@@ -307,26 +308,6 @@ function actionLine(sx,sy,tx,ty,currentColor,ctx,scale = 1) {
                     Math.round(ty)*scale, // thus no aliasing
                     scale,scale); // fill in one pixel, 1x1
 }
-
-//onScreen draw
-// function drawOnLine(sx,sy,tx,ty,currentColor,ctx,scale = 1) {
-//     ctx.fillStyle = currentColor.color;
-//     // finds the distance between points
-//     function DBP(x1,y1,x2,y2) {
-//         return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
-//     }
-//     // finds the angle of (x,y) on a plane from the origin
-//     function getAngle(x,y) { return Math.atan(y/(x==0?0.01:x))+(x<0?Math.PI:0); }
-
-//     let dist = DBP(sx,sy,tx,ty); // length of line
-//     let ang = getAngle(tx-sx,ty-sy); // angle of line
-//     for(var i=0;i<dist;i++) {
-//         // for each point along the line
-//         ctx.fillRect(Math.floor(sx + Math.cos(ang)*i)*scale, // round for perfect pixels
-//                     Math.floor(sy + Math.sin(ang)*i)*scale, // thus no aliasing
-//                     scale,scale); // fill in one pixel, 1x1
-//     }
-// }
 
 //For undo ability, store starting coords, and pass them into actionFill
 function actionFill(startX,startY,currentColor) {
@@ -451,7 +432,7 @@ function redrawPoints() {
 function renderImage() {
     img.src = source;
     img.onload = () => {
-        onScreenCTX.clearRect(0,0,onScreenCVS.width/sharpness,onScreenCVS.height/sharpness);
+        onScreenCTX.clearRect(0,0,ocWidth,ocHeight);
         drawCanvas();
     }
 }
@@ -459,7 +440,7 @@ function renderImage() {
 function drawCanvas() {
     //Prevent blurring
     onScreenCTX.imageSmoothingEnabled = false;
-    onScreenCTX.drawImage(img,0,0,onScreenCVS.width/sharpness,onScreenCVS.height/sharpness)
+    onScreenCTX.drawImage(img,0,0,ocWidth,ocHeight)
 }
 
 //Get the size of the parentNode which is subject to flexbox. Fit the square by making sure the dimensions are based on the smaller of the width and height.
