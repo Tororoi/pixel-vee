@@ -33,12 +33,16 @@ let redoStack = [];
 //Other global variables
 let lastX;
 let lastY;
+let lineX;
+let lineY;
 let points = [];
 
 //We only want the mouse to move if the mouse is down, so we need a variable to disable drawing while the mouse is not clicked.
 let clicked = false;
 let lastOnX;
 let lastOnY;
+let lineOnX;
+let lineOnY;
 
 //Base settings
 // let brushColor = "rgba(255, 0, 0, 255)";
@@ -67,13 +71,13 @@ function handleMouseMove(e) {
     let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
     let mouseX = Math.floor(e.offsetX/trueRatio);
     let mouseY = Math.floor(e.offsetY/trueRatio);
+    //Hover brush
+    let ratio = onScreenCVS.width/offScreenCVS.width;
+    let onX = mouseX*ratio;
+    let onY = mouseY*ratio;
     if (clicked) {
         switch(toolType) {
             case "picker":
-                //move picker on screen
-                let ratio = onScreenCVS.width/offScreenCVS.width;
-                let onX = mouseX*ratio;
-                let onY = mouseY*ratio;
                 //only draw when necessary, get color here too
                 if (onX !== lastOnX || onY !== lastOnY) {
                     //get color
@@ -93,6 +97,21 @@ function handleMouseMove(e) {
             case "fill":
                 //do nothing
                 break;
+            case "line":
+                //reset end point
+                //draw line from origin point to current point onscreen
+                //only draw when necessary
+                if (onX !== lastOnX || onY !== lastOnY) {
+                    onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
+                    drawCanvas();
+                    //set offscreen endpoint
+                    lastX = mouseX;
+                    lastY = mouseY;
+                    actionLine(lineX,lineY,lastX,lastY,brushColor,onScreenCTX,ratio);
+                    lastOnX = onX;
+                    lastOnY = onY;
+                }
+                break;
             default:
                 actionDraw(mouseX,mouseY,brushColor);
                 if (lastX !== mouseX || lastY !== mouseY) {
@@ -111,10 +130,6 @@ function handleMouseMove(e) {
                 lastY = mouseY;
         }
     } else {
-        //Hover brush
-        let ratio = onScreenCVS.width/offScreenCVS.width;
-        let onX = mouseX*ratio;
-        let onY = mouseY*ratio;
         //only draw when necessary
         if (onX !== lastOnX || onY !== lastOnY) {
             onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
@@ -161,29 +176,50 @@ function handleMouseDown(e) {
             source = offScreenCVS.toDataURL();
             renderImage();
             break;
+        case "line":
+            //Set origin point
+            lineX = mouseX;
+            lineY = mouseY;
+            //onscreen
+            let ratio = onScreenCVS.width/offScreenCVS.width;
+            lineOnX = lineX*ratio;
+            lineOnY = lineY*ratio;
+            break;
         default:
             actionDraw(mouseX,mouseY,brushColor);
-            //only push new points
-            if (lastX !== mouseX || lastY !== mouseY) {
-                points.push({
-                    x: mouseX,
-                    y: mouseY,
-                    // size: brushSize,
-                    color: {...brushColor},
-                    mode: toolType
-                });
-                source = offScreenCVS.toDataURL();
-                renderImage();
-            }
-            //save last point
-            lastX = mouseX;
-            lastY = mouseY;
+            points.push({
+                x: mouseX,
+                y: mouseY,
+                // size: brushSize,
+                color: {...brushColor},
+                mode: toolType
+            });
+            source = offScreenCVS.toDataURL();
+            renderImage();
     }
 }
 
 function handleMouseUp(e) {
     clicked = false;
     // randomizeColor();
+    //draw line if line tool
+    if (toolType === "line") {
+        //render line
+        //push to points
+        //reset line attributes (origin, end)
+        actionLine(lineX,lineY,lastX,lastY,brushColor,offScreenCTX);
+        points.push({
+            startX: lineX,
+            startY: lineY,
+            endX: lastX,
+            endY: lastY,
+            // size: brushSize,
+            color: {...brushColor},
+            mode: toolType
+        });
+        source = offScreenCVS.toDataURL();
+        renderImage();
+    }
     //add to undo stack
     if (points.length) {
         undoStack.push(points);
@@ -228,6 +264,45 @@ function actionDraw(coordX,coordY,currentColor) {
     offScreenCTX.fillStyle = currentColor.color;
     offScreenCTX.fillRect(coordX,coordY,1,1);
 }
+
+function actionLine(sx,sy,tx,ty,currentColor,ctx,scale = 1) {
+    ctx.fillStyle = currentColor.color;
+    // finds the distance between points
+    function DBP(x1,y1,x2,y2) {
+        return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+    }
+    // finds the angle of (x,y) on a plane from the origin
+    function getAngle(x,y) { return Math.atan(y/(x==0?0.01:x))+(x<0?Math.PI:0); }
+
+    let dist = DBP(sx,sy,tx,ty); // length of line
+    let ang = getAngle(tx-sx,ty-sy); // angle of line
+    for(var i=0;i<dist;i++) {
+        // for each point along the line
+        ctx.fillRect(Math.floor(sx + Math.cos(ang)*i)*scale, // round for perfect pixels
+                    Math.floor(sy + Math.sin(ang)*i)*scale, // thus no aliasing
+                    scale,scale); // fill in one pixel, 1x1
+    }
+}
+
+//onScreen draw
+// function drawOnLine(sx,sy,tx,ty,currentColor,ctx,scale = 1) {
+//     ctx.fillStyle = currentColor.color;
+//     // finds the distance between points
+//     function DBP(x1,y1,x2,y2) {
+//         return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+//     }
+//     // finds the angle of (x,y) on a plane from the origin
+//     function getAngle(x,y) { return Math.atan(y/(x==0?0.01:x))+(x<0?Math.PI:0); }
+
+//     let dist = DBP(sx,sy,tx,ty); // length of line
+//     let ang = getAngle(tx-sx,ty-sy); // angle of line
+//     for(var i=0;i<dist;i++) {
+//         // for each point along the line
+//         ctx.fillRect(Math.floor(sx + Math.cos(ang)*i)*scale, // round for perfect pixels
+//                     Math.floor(sy + Math.sin(ang)*i)*scale, // thus no aliasing
+//                     scale,scale); // fill in one pixel, 1x1
+//     }
+// }
 
 //For undo ability, store starting coords, and pass them into actionFill
 function actionFill(startX,startY,currentColor) {
@@ -338,6 +413,8 @@ function redrawPoints() {
                 case "fill":
                     actionFill(p.x,p.y,p.color);
                     break;
+                case "line":
+                    actionLine(p.startX,p.startY,p.endX,p.endY,p.color,offScreenCTX)
                 default:
                     actionDraw(p.x,p.y,p.color);
             }

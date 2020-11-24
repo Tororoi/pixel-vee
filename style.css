@@ -98,6 +98,7 @@ h4 {
 }
 
 .tool {
+    background: rgb(105, 76, 212);
     user-select: none;
     width: 100px;
     text-align: center;
@@ -111,22 +112,6 @@ h4 {
     opacity: 0.8;
 }
 
-#pencil {
-    background: rgb(173, 233, 104);
-}
-
-#line {
-    background: rgb(195, 207, 83);
-}
-
-#fill {
-    background: rgb(212, 203, 76);
-}
-
-#picker {
-    background: rgb(105, 76, 212);
-}
-
 /* Modes */
 
 .modes {
@@ -136,6 +121,17 @@ h4 {
     margin: 16px;
 }
 
-.modes div {
+.mode {
     background: rgb(37, 0, 139);
+    user-select: none;
+    width: 100px;
+    text-align: center;
+    color: white;
+    height: 60px;
+    border-radius: 10px;
+    opacity: 1;
+}
+
+.mode:hover {
+    opacity: 0.8;
 }
