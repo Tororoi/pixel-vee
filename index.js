@@ -94,7 +94,17 @@ function handleMouseDown(e) {
     clicked = true;
     switch(toolType) {
         case "fill":
-            actionFill(e);
+            let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
+            let mouseX = Math.floor(e.offsetX/trueRatio);
+            let mouseY = Math.floor(e.offsetY/trueRatio);
+            actionFill(mouseX,mouseY);
+            points.push({
+                x: mouseX,
+                y: mouseY,
+                // size: brushSize,
+                color: brushColor,
+                mode: toolType
+            });
             break;
         default:
             actionDraw(e);
@@ -167,16 +177,13 @@ let currR = 0;
 let currG = 255;
 let currB = 0;
 
-function actionFill(e) {
+//For undo ability, store starting coords, and pass them into actionFill
+
+function actionFill(startX,startY) {
     //get imageData
     let colorLayer = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
-    //get clicked color
 
-    let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
-    let mouseX = Math.floor(e.offsetX/trueRatio);
-    let mouseY = Math.floor(e.offsetY/trueRatio);
-
-    let startPos = (mouseY*offScreenCVS.width + mouseX) * 4;
+    let startPos = (startY*offScreenCVS.width + startX) * 4;
 
     //clicked color
     let startR = colorLayer.data[startPos];	
@@ -186,10 +193,10 @@ function actionFill(e) {
         return;
     }
     //Start with click coords
-    let pixelStack = [[mouseX,mouseY]];
+    let pixelStack = [[startX,startY]];
     let newPos, x, y, pixelPos, reachLeft, reachRight;
-    recursiveFill();
-    function recursiveFill() {
+    floodFill();
+    function floodFill() {
         newPos = pixelStack.pop();
         x = newPos[0];
         y = newPos[1];
@@ -238,21 +245,21 @@ function actionFill(e) {
             pixelPos += offScreenCVS.width * 4;
         }
 
-    offScreenCTX.putImageData(colorLayer, 0, 0);
-    source = offScreenCVS.toDataURL();
-    renderImage();
-    
-    if (pixelStack.length) {
-        recursiveFill();
-        // window.setTimeout(recursiveFill, 100);
-    }
-    //end
+        // offScreenCTX.putImageData(colorLayer, 0, 0);
+        // source = offScreenCVS.toDataURL();
+        // renderImage();
+        
+        if (pixelStack.length) {
+            floodFill();
+            // window.setTimeout(recursiveFill, 100);
+        }
+        //end
     }
 
     //Only this one if no delay
-    // offScreenCTX.putImageData(colorLayer, 0, 0);
-    // source = offScreenCVS.toDataURL();
-    // renderImage();
+    offScreenCTX.putImageData(colorLayer, 0, 0);
+    source = offScreenCVS.toDataURL();
+    renderImage();
 
     function matchStartColor(pixelPos)
     {
@@ -283,10 +290,17 @@ function actionUndoRedo(pushStack,popStack) {
 }
 
 function redrawPoints() {
-    undoStack.forEach(s => {
-        s.forEach(p => {
-            offScreenCTX.fillStyle = p.color;
-            offScreenCTX.fillRect(p.x,p.y,1,1);
+    undoStack.forEach(action => {
+        action.forEach(p => {
+            switch (p.mode) {
+                case "fill":
+                    actionFill(p.x,p.y);
+                    break;
+                default:
+                    offScreenCTX.fillStyle = p.color;
+                    offScreenCTX.fillRect(p.x,p.y,1,1);
+            }
+
         })
     })
 }
