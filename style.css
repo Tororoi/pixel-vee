@@ -101,3 +101,7 @@ canvas {
 #fill {
     background: rgb(212, 203, 76);
 }
+
+.color {
+    background: red;
+}

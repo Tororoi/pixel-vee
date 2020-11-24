@@ -59,7 +59,13 @@ toolsCont.addEventListener("click", handleTools);
 
 function handleMouseMove(e) {
     if (clicked) {
-        actionDraw(e);
+        switch(toolType) {
+            case "fill":
+                //do nothing
+                break;
+            default:
+                actionDraw(e);
+        }
     } else {
         //Hover brush
         let ratio = onScreenCVS.width/offScreenCVS.width;
@@ -86,10 +92,16 @@ function handleMouseMove(e) {
 
 function handleMouseDown(e) {
     clicked = true;
-    actionDraw(e);
+    switch(toolType) {
+        case "fill":
+            actionFill(e);
+            break;
+        default:
+            actionDraw(e);
+    }
 }
 
-function handleMouseUp() {
+function handleMouseUp(e) {
     clicked = false;
     //add to undo stack
     undoStack.push(points);
@@ -118,7 +130,7 @@ function handleRedo() {
 
 function handleTools(e) {
     let selection = e.target.closest(".tool").id;
-    currentTool = selection;
+    toolType = selection;
 }
 
 //Action functions
@@ -151,14 +163,97 @@ function actionDraw(e) {
 }
 
 //Fill vars
-
+let currR = 0;
+let currG = 255;
+let currB = 0;
 
 function actionFill(e) {
-    //Get imagedata
+    //get imageData
+    let colorLayer = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
+    //get clicked color
 
+    let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
+    let mouseX = Math.floor(e.offsetX/trueRatio);
+    let mouseY = Math.floor(e.offsetY/trueRatio);
+
+    let startPos = (mouseY*offScreenCVS.width + mouseX) * 4;
+
+    //clicked color
+    let startR = colorLayer.data[startPos];	
+    let startG = colorLayer.data[startPos+1];	
+    let startB = colorLayer.data[startPos+2];
+    if (currR === startR && currG === startG && currB === startB) {
+        return;
+    }
     //Start with click coords
-    let pixelStack = [];
-    //Travel up until finding a boundary
+    let pixelStack = [[mouseX,mouseY]];
+    while (pixelStack.length) {
+        let newPos, x, y, pixelPos, reachLeft, reachRight;
+        newPos = pixelStack.pop();
+        x = newPos[0];
+        y = newPos[1];
+
+        pixelPos = (y*offScreenCVS.width + x) * 4;
+        //Travel up until finding a boundary
+        while(y > 0 && matchStartColor(pixelPos)) {
+            y--;
+            pixelPos -= offScreenCVS.width * 4;
+        }
+        //Don't overextend
+        pixelPos += offScreenCVS.width * 4;
+        ++y;
+        reachLeft = false;
+        reachRight = false;
+        //color in
+        while(y < offScreenCVS.height && matchStartColor(pixelPos)) {
+            y++;
+            colorPixel(pixelPos);
+
+            if(x > 0) {
+                if(matchStartColor(pixelPos - 4)) {
+                    if(!reachLeft) {
+                        pixelStack.push([x - 1, y]);
+                        reachLeft = true;
+                    }
+                } else if(reachLeft) {
+                    reachLeft = false;
+                }
+            }
+        
+            if(x < offScreenCVS.width-1) {
+                if(matchStartColor(pixelPos + 4)) {
+                    if(!reachRight) {
+                        pixelStack.push([x + 1, y]);
+                        reachRight = true;
+                    }
+                } else if(reachRight) {
+                    reachRight = false;
+                }
+            }
+                    
+            pixelPos += offScreenCVS.width * 4;
+        }
+    }
+    offScreenCTX.putImageData(colorLayer, 0, 0);
+    source = offScreenCVS.toDataURL();
+    renderImage();
+
+    function matchStartColor(pixelPos)
+    {
+    let r = colorLayer.data[pixelPos];	
+    let g = colorLayer.data[pixelPos+1];	
+    let b = colorLayer.data[pixelPos+2];
+
+    return (r === startR && g === startG && b === startB);
+    }
+
+    function colorPixel(pixelPos)
+    {
+    colorLayer.data[pixelPos] = currR;
+    colorLayer.data[pixelPos+1] = currG;
+    colorLayer.data[pixelPos+2] = currB;
+    colorLayer.data[pixelPos+3] = 255;
+    }
 }
 
 //Helper functions
