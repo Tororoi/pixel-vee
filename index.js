@@ -41,8 +41,6 @@ let points = [];
 let clicked = false;
 let lastOnX;
 let lastOnY;
-let lineOnX;
-let lineOnY;
 
 //Base settings
 // let brushColor = "rgba(255, 0, 0, 255)";
@@ -107,7 +105,7 @@ function handleMouseMove(e) {
                     //set offscreen endpoint
                     lastX = mouseX;
                     lastY = mouseY;
-                    actionLine(lineX,lineY,lastX,lastY,brushColor,onScreenCTX,ratio);
+                    actionLine(lineX,lineY,mouseX,mouseY,brushColor,onScreenCTX,ratio);
                     lastOnX = onX;
                     lastOnY = onY;
                 }
@@ -180,10 +178,6 @@ function handleMouseDown(e) {
             //Set origin point
             lineX = mouseX;
             lineY = mouseY;
-            //onscreen
-            let ratio = onScreenCVS.width/offScreenCVS.width;
-            lineOnX = lineX*ratio;
-            lineOnY = lineY*ratio;
             break;
         default:
             actionDraw(mouseX,mouseY,brushColor);
@@ -202,17 +196,20 @@ function handleMouseDown(e) {
 function handleMouseUp(e) {
     clicked = false;
     // randomizeColor();
+    let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
+    let mouseX = Math.floor(e.offsetX/trueRatio);
+    let mouseY = Math.floor(e.offsetY/trueRatio);
     //draw line if line tool
     if (toolType === "line") {
         //render line
         //push to points
         //reset line attributes (origin, end)
-        actionLine(lineX,lineY,lastX,lastY,brushColor,offScreenCTX);
+        actionLine(lineX,lineY,mouseX,mouseY,brushColor,offScreenCTX);
         points.push({
             startX: lineX,
             startY: lineY,
-            endX: lastX,
-            endY: lastY,
+            endX: mouseX,
+            endY: mouseY,
             // size: brushSize,
             color: {...brushColor},
             mode: toolType
@@ -276,12 +273,16 @@ function actionLine(sx,sy,tx,ty,currentColor,ctx,scale = 1) {
 
     let dist = DBP(sx,sy,tx,ty); // length of line
     let ang = getAngle(tx-sx,ty-sy); // angle of line
-    for(var i=0;i<dist;i++) {
+    for(let i=0;i<dist;i++) {
         // for each point along the line
-        ctx.fillRect(Math.floor(sx + Math.cos(ang)*i)*scale, // round for perfect pixels
-                    Math.floor(sy + Math.sin(ang)*i)*scale, // thus no aliasing
+        ctx.fillRect(Math.round(sx + Math.cos(ang)*i)*scale, // round for perfect pixels
+                    Math.round(sy + Math.sin(ang)*i)*scale, // thus no aliasing
                     scale,scale); // fill in one pixel, 1x1
     }
+    //fill endpoint
+    ctx.fillRect(Math.round(tx)*scale, // round for perfect pixels
+                    Math.round(ty)*scale, // thus no aliasing
+                    scale,scale); // fill in one pixel, 1x1
 }
 
 //onScreen draw
