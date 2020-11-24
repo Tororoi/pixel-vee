@@ -187,31 +187,34 @@ function actionFill(e) {
     }
     //Start with click coords
     let pixelStack = [[mouseX,mouseY]];
-    while (pixelStack.length) {
-        let newPos, x, y, pixelPos, reachLeft, reachRight;
+    let newPos, x, y, pixelPos, reachLeft, reachRight;
+    recursiveFill();
+    function recursiveFill() {
         newPos = pixelStack.pop();
         x = newPos[0];
         y = newPos[1];
 
+        //get current pixel position
         pixelPos = (y*offScreenCVS.width + x) * 4;
-        //Travel up until finding a boundary
-        while(y > 0 && matchStartColor(pixelPos)) {
+        // Go up as long as the color matches and are inside the canvas
+        while(y >= 0 && matchStartColor(pixelPos)) {
             y--;
             pixelPos -= offScreenCVS.width * 4;
         }
         //Don't overextend
         pixelPos += offScreenCVS.width * 4;
-        ++y;
+        y++;
         reachLeft = false;
         reachRight = false;
-        //color in
+        // Go down as long as the color matches and in inside the canvas
         while(y < offScreenCVS.height && matchStartColor(pixelPos)) {
-            y++;
+            
             colorPixel(pixelPos);
 
             if(x > 0) {
                 if(matchStartColor(pixelPos - 4)) {
                     if(!reachLeft) {
+                        //Add pixel to stack
                         pixelStack.push([x - 1, y]);
                         reachLeft = true;
                     }
@@ -220,9 +223,10 @@ function actionFill(e) {
                 }
             }
         
-            if(x < offScreenCVS.width-1) {
+            if(x < offScreenCVS.width) {
                 if(matchStartColor(pixelPos + 4)) {
                     if(!reachRight) {
+                        //Add pixel to stack
                         pixelStack.push([x + 1, y]);
                         reachRight = true;
                     }
@@ -230,13 +234,25 @@ function actionFill(e) {
                     reachRight = false;
                 }
             }
-                    
+            y++;        
             pixelPos += offScreenCVS.width * 4;
         }
-    }
+
     offScreenCTX.putImageData(colorLayer, 0, 0);
     source = offScreenCVS.toDataURL();
     renderImage();
+    
+    if (pixelStack.length) {
+        recursiveFill();
+        // window.setTimeout(recursiveFill, 100);
+    }
+    //end
+    }
+
+    //Only this one if no delay
+    // offScreenCTX.putImageData(colorLayer, 0, 0);
+    // source = offScreenCVS.toDataURL();
+    // renderImage();
 
     function matchStartColor(pixelPos)
     {
