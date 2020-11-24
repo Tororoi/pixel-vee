@@ -38,7 +38,8 @@ let lastOnX;
 let lastOnY;
 
 //Base settings
-let brushColor = "red";
+// let brushColor = "rgba(255, 0, 0, 255)";
+let brushColor = {color: "rgba(255, 0, 0, 255)", r: 255, g: 0, b: 0, a: 255};
 let toolType = "pencil";
 
 //Create an Image with a default source of the existing onscreen canvas
@@ -77,7 +78,7 @@ function handleMouseMove(e) {
         if (trueX !== lastOnX || trueY !== lastOnY) {
             onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
             drawCanvas();
-            onScreenCTX.fillStyle = brushColor;
+            onScreenCTX.fillStyle = brushColor.color;
             onScreenCTX.fillRect(trueX,trueY,ratio,ratio);
             onScreenCTX.beginPath();
             onScreenCTX.rect(trueX,trueY,ratio,ratio);
@@ -97,12 +98,12 @@ function handleMouseDown(e) {
             let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
             let mouseX = Math.floor(e.offsetX/trueRatio);
             let mouseY = Math.floor(e.offsetY/trueRatio);
-            actionFill(mouseX,mouseY);
+            actionFill(mouseX,mouseY,brushColor);
             points.push({
                 x: mouseX,
                 y: mouseY,
                 // size: brushSize,
-                color: brushColor,
+                color: {...brushColor},
                 mode: toolType
             });
             break;
@@ -152,7 +153,7 @@ function actionDraw(e) {
     let mouseX = Math.floor(e.offsetX/trueRatio);
     let mouseY = Math.floor(e.offsetY/trueRatio);
     // extend the polyline
-    offScreenCTX.fillStyle = brushColor;
+    offScreenCTX.fillStyle = brushColor.color;
     offScreenCTX.fillRect(mouseX,mouseY,1,1);
 
     if (lastX !== mouseX || lastY !== mouseY) {
@@ -160,7 +161,7 @@ function actionDraw(e) {
             x: mouseX,
             y: mouseY,
             // size: brushSize,
-            color: brushColor,
+            color: {...brushColor},
             mode: toolType
         });
         source = offScreenCVS.toDataURL();
@@ -172,14 +173,9 @@ function actionDraw(e) {
     lastY = mouseY;
 }
 
-//Fill vars
-let currR = 0;
-let currG = 255;
-let currB = 0;
-
 //For undo ability, store starting coords, and pass them into actionFill
 
-function actionFill(startX,startY) {
+function actionFill(startX,startY,currentColor) {
     //get imageData
     let colorLayer = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
 
@@ -189,7 +185,8 @@ function actionFill(startX,startY) {
     let startR = colorLayer.data[startPos];	
     let startG = colorLayer.data[startPos+1];	
     let startB = colorLayer.data[startPos+2];
-    if (currR === startR && currG === startG && currB === startB) {
+    //exit if color is the same
+    if (currentColor.r === startR && currentColor.g === startG && currentColor.b === startB) {
         return;
     }
     //Start with click coords
@@ -261,21 +258,19 @@ function actionFill(startX,startY) {
     source = offScreenCVS.toDataURL();
     renderImage();
 
-    function matchStartColor(pixelPos)
-    {
-    let r = colorLayer.data[pixelPos];	
-    let g = colorLayer.data[pixelPos+1];	
-    let b = colorLayer.data[pixelPos+2];
+    function matchStartColor(pixelPos) {
+        let r = colorLayer.data[pixelPos];	
+        let g = colorLayer.data[pixelPos+1];	
+        let b = colorLayer.data[pixelPos+2];
 
-    return (r === startR && g === startG && b === startB);
+        return (r === startR && g === startG && b === startB);
     }
 
-    function colorPixel(pixelPos)
-    {
-    colorLayer.data[pixelPos] = currR;
-    colorLayer.data[pixelPos+1] = currG;
-    colorLayer.data[pixelPos+2] = currB;
-    colorLayer.data[pixelPos+3] = 255;
+    function colorPixel(pixelPos) {
+        colorLayer.data[pixelPos] = currentColor.r;
+        colorLayer.data[pixelPos+1] = currentColor.g;
+        colorLayer.data[pixelPos+2] = currentColor.b;
+        colorLayer.data[pixelPos+3] = 255;
     }
 }
 
@@ -294,10 +289,10 @@ function redrawPoints() {
         action.forEach(p => {
             switch (p.mode) {
                 case "fill":
-                    actionFill(p.x,p.y);
+                    actionFill(p.x,p.y,p.color);
                     break;
                 default:
-                    offScreenCTX.fillStyle = p.color;
+                    offScreenCTX.fillStyle = p.color.color;
                     offScreenCTX.fillRect(p.x,p.y,1,1);
             }
 
