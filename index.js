@@ -362,7 +362,7 @@ function actionFill(startX,startY,currentColor) {
                 }
             }
         
-            if(x < offScreenCVS.width) {
+            if(x < offScreenCVS.width-1) {
                 if(matchStartColor(pixelPos + 4)) {
                     if(!reachRight) {
                         //Add pixel to stack
@@ -376,9 +376,14 @@ function actionFill(startX,startY,currentColor) {
             y++;        
             pixelPos += offScreenCVS.width * 4;
         }
+
+        // offScreenCTX.putImageData(colorLayer, 0, 0);
+        // source = offScreenCVS.toDataURL();
+        // renderImage();
         
         if (pixelStack.length) {
             floodFill();
+            // window.setTimeout(floodFill, 100);
         }
     }
 
