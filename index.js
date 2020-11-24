@@ -195,6 +195,13 @@ function handleMouseUp(e) {
 
 function handleMouseOut() {
     clicked = false;
+    //add to undo stack
+    if (points.length) {
+        undoStack.push(points);
+    }
+    points = [];
+    //Reset redostack
+    redoStack = [];
     onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
     drawCanvas();
 }
