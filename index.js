@@ -59,45 +59,59 @@ redoBtn.addEventListener('click', handleRedo);
 toolsCont.addEventListener("click", handleTools);
 
 function handleMouseMove(e) {
+    let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
+    let mouseX = Math.floor(e.offsetX/trueRatio);
+    let mouseY = Math.floor(e.offsetY/trueRatio);
     if (clicked) {
         switch(toolType) {
             case "fill":
                 //do nothing
                 break;
             default:
-                actionDraw(e);
+                actionDraw(mouseX,mouseY,brushColor);
+                if (lastX !== mouseX || lastY !== mouseY) {
+                    points.push({
+                        x: mouseX,
+                        y: mouseY,
+                        // size: brushSize,
+                        color: {...brushColor},
+                        mode: toolType
+                    });
+                    source = offScreenCVS.toDataURL();
+                    renderImage();
+                }
+                //save last point
+                lastX = mouseX;
+                lastY = mouseY;
         }
     } else {
         //Hover brush
         let ratio = onScreenCVS.width/offScreenCVS.width;
-        let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
-        let mouseX = Math.floor(e.offsetX/trueRatio);
-        let mouseY = Math.floor(e.offsetY/trueRatio);
-        let trueX = mouseX*ratio;
-        let trueY = mouseY*ratio;
-        if (trueX !== lastOnX || trueY !== lastOnY) {
+        let onX = mouseX*ratio;
+        let onY = mouseY*ratio;
+        if (onX !== lastOnX || onY !== lastOnY) {
             onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
             drawCanvas();
             onScreenCTX.fillStyle = brushColor.color;
-            onScreenCTX.fillRect(trueX,trueY,ratio,ratio);
+            onScreenCTX.fillRect(onX,onY,ratio,ratio);
             onScreenCTX.beginPath();
-            onScreenCTX.rect(trueX,trueY,ratio,ratio);
+            onScreenCTX.rect(onX,onY,ratio,ratio);
             onScreenCTX.lineWidth = 1;
             onScreenCTX.strokeStyle = "black";
             onScreenCTX.stroke();
-            lastOnX = trueX;
-            lastOnY = trueY;
+            lastOnX = onX;
+            lastOnY = onY;
         }
     }
 }
 
 function handleMouseDown(e) {
     clicked = true;
+    let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
+    let mouseX = Math.floor(e.offsetX/trueRatio);
+    let mouseY = Math.floor(e.offsetY/trueRatio);
     switch(toolType) {
         case "fill":
-            let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
-            let mouseX = Math.floor(e.offsetX/trueRatio);
-            let mouseY = Math.floor(e.offsetY/trueRatio);
             actionFill(mouseX,mouseY,brushColor);
             points.push({
                 x: mouseX,
@@ -106,14 +120,32 @@ function handleMouseDown(e) {
                 color: {...brushColor},
                 mode: toolType
             });
+            source = offScreenCVS.toDataURL();
+            renderImage();
             break;
         default:
-            actionDraw(e);
+            actionDraw(mouseX,mouseY,brushColor);
+            //only push new points
+            if (lastX !== mouseX || lastY !== mouseY) {
+                points.push({
+                    x: mouseX,
+                    y: mouseY,
+                    // size: brushSize,
+                    color: {...brushColor},
+                    mode: toolType
+                });
+                source = offScreenCVS.toDataURL();
+                renderImage();
+            }
+            //save last point
+            lastX = mouseX;
+            lastY = mouseY;
     }
 }
 
 function handleMouseUp(e) {
     clicked = false;
+    randomizeColor();
     //add to undo stack
     undoStack.push(points);
     points = [];
@@ -123,6 +155,7 @@ function handleMouseUp(e) {
 
 function handleMouseOut() {
     clicked = false;
+    randomizeColor();
     onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
     drawCanvas();
 }
@@ -145,36 +178,12 @@ function handleTools(e) {
 }
 
 //Action functions
-function actionDraw(e) {
-    // let ratio = baseDimension/offScreenCVS.width;
-    // let mouseX = Math.floor(e.offsetX/ratio);
-    // let mouseY = Math.floor(e.offsetY/ratio);
-    let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
-    let mouseX = Math.floor(e.offsetX/trueRatio);
-    let mouseY = Math.floor(e.offsetY/trueRatio);
-    // extend the polyline
-    offScreenCTX.fillStyle = brushColor.color;
-    offScreenCTX.fillRect(mouseX,mouseY,1,1);
-
-    if (lastX !== mouseX || lastY !== mouseY) {
-        points.push({
-            x: mouseX,
-            y: mouseY,
-            // size: brushSize,
-            color: {...brushColor},
-            mode: toolType
-        });
-        source = offScreenCVS.toDataURL();
-        renderImage();
-    }
-
-    //save last point
-    lastX = mouseX;
-    lastY = mouseY;
+function actionDraw(coordX,coordY,currentColor) {
+    offScreenCTX.fillStyle = currentColor.color;
+    offScreenCTX.fillRect(coordX,coordY,1,1);
 }
 
 //For undo ability, store starting coords, and pass them into actionFill
-
 function actionFill(startX,startY,currentColor) {
     //get imageData
     let colorLayer = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
@@ -241,28 +250,20 @@ function actionFill(startX,startY,currentColor) {
             y++;        
             pixelPos += offScreenCVS.width * 4;
         }
-
-        // offScreenCTX.putImageData(colorLayer, 0, 0);
-        // source = offScreenCVS.toDataURL();
-        // renderImage();
         
         if (pixelStack.length) {
             floodFill();
-            // window.setTimeout(recursiveFill, 100);
         }
-        //end
     }
 
-    //Only this one if no delay
+    //render floodFill result
     offScreenCTX.putImageData(colorLayer, 0, 0);
-    source = offScreenCVS.toDataURL();
-    renderImage();
 
+    //helpers
     function matchStartColor(pixelPos) {
         let r = colorLayer.data[pixelPos];	
         let g = colorLayer.data[pixelPos+1];	
         let b = colorLayer.data[pixelPos+2];
-
         return (r === startR && g === startG && b === startB);
     }
 
@@ -292,8 +293,7 @@ function redrawPoints() {
                     actionFill(p.x,p.y,p.color);
                     break;
                 default:
-                    offScreenCTX.fillStyle = p.color.color;
-                    offScreenCTX.fillRect(p.x,p.y,1,1);
+                    actionDraw(p.x,p.y,p.color);
             }
 
         })
@@ -310,9 +310,6 @@ function renderImage() {
 }
 
 function drawCanvas() {
-    //if the image is being drawn due to resizing, reset the width and height. Putting the width and height outside the img.onload function will make scaling smoother, but the image will flicker as you scale. Pick your poison.
-    // onScreenCVS.width = baseDimension;
-    // onScreenCVS.height = baseDimension;
     //Prevent blurring
     onScreenCTX.imageSmoothingEnabled = false;
     onScreenCTX.drawImage(img,0,0,onScreenCVS.width,onScreenCVS.height)
@@ -324,13 +321,12 @@ function setSize() {
     rect.height > rect.width ? baseDimension = rect.width : baseDimension = rect.height;
 }
 
-//Resize the canvas if the window is resized
-// function flexCanvasSize() {
-//     setSize();
-//     // tempCanvas.src = onScreenCVS.toDataURL();
-//     // onScreenCVS.width = baseDimension;
-//     // onScreenCVS.height = baseDimension;
-//     renderImage();
-// }
-
-// window.onresize = flexCanvasSize;
+function randomizeColor() {
+    let r = Math.floor(Math.random()*256);
+    let g = Math.floor(Math.random()*256);
+    let b = Math.floor(Math.random()*256);
+    brushColor.color = `rgba(${r},${g},${b},255)`;
+    brushColor.r = r;
+    brushColor.g = g;
+    brushColor.b = b;
+}
