@@ -70,6 +70,15 @@ canvas {
     background: rgb(104, 181, 233);
 }
 
+/* Color Picker */
+.swatch {
+    background: rgb(255, 0, 0);
+    width: 100px;
+    height: 100px;
+    margin: 16px;
+    border-radius: 10px;
+}
+
 /* Tools */
 
 .tools {
@@ -79,7 +88,7 @@ canvas {
     margin: 16px;
 }
 
-.tools div {
+.tool {
     user-select: none;
     width: 100px;
     text-align: center;
@@ -89,7 +98,7 @@ canvas {
     opacity: 1;
 }
 
-.tools div:hover {
+.tool:hover {
     opacity: 0.8;
 }
 
@@ -107,8 +116,4 @@ canvas {
 
 #picker {
     background: rgb(105, 76, 212);
-}
-
-.color {
-    background: rgb(255, 0, 0);
 }

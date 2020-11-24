@@ -6,6 +6,9 @@ let onScreenCTX = onScreenCVS.getContext("2d");
 let undoBtn = document.getElementById("undo");
 let redoBtn = document.getElementById("redo");
 
+//Get swatch
+let swatch = document.querySelector(".swatch");
+
 //Get tool buttons
 let toolsCont = document.querySelector(".tools");
 
@@ -56,7 +59,9 @@ onScreenCVS.addEventListener('mouseout', handleMouseOut);
 undoBtn.addEventListener('click', handleUndo);
 redoBtn.addEventListener('click', handleRedo);
 
-toolsCont.addEventListener("click", handleTools);
+swatch.addEventListener('click', randomizeColor);
+
+toolsCont.addEventListener('click', handleTools);
 
 function handleMouseMove(e) {
     let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
@@ -72,7 +77,7 @@ function handleMouseMove(e) {
                 //only draw when necessary, get color here too
                 if (onX !== lastOnX || onY !== lastOnY) {
                     //get color
-
+                    sampleColor(mouseX,mouseY);
                     //draw square
                     onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
                     drawCanvas();
@@ -142,6 +147,7 @@ function handleMouseDown(e) {
     switch(toolType) {
         case "picker":
             //set color
+            sampleColor(mouseX,mouseY);
             break;
         case "fill":
             actionFill(mouseX,mouseY,brushColor);
@@ -177,7 +183,7 @@ function handleMouseDown(e) {
 
 function handleMouseUp(e) {
     clicked = false;
-    randomizeColor();
+    // randomizeColor();
     //add to undo stack
     if (points.length) {
         undoStack.push(points);
@@ -189,7 +195,6 @@ function handleMouseUp(e) {
 
 function handleMouseOut() {
     clicked = false;
-    // randomizeColor();
     onScreenCTX.clearRect(0,0,onScreenCVS.width,onScreenCVS.height);
     drawCanvas();
 }
@@ -355,12 +360,30 @@ function setSize() {
     rect.height > rect.width ? baseDimension = rect.width : baseDimension = rect.height;
 }
 
-function randomizeColor() {
-    let r = Math.floor(Math.random()*256);
-    let g = Math.floor(Math.random()*256);
-    let b = Math.floor(Math.random()*256);
+function setColor(r,g,b) {
     brushColor.color = `rgba(${r},${g},${b},255)`;
     brushColor.r = r;
     brushColor.g = g;
     brushColor.b = b;
+    swatch.style.background = brushColor.color;
+}
+
+function randomizeColor() {
+    let r = Math.floor(Math.random()*256);
+    let g = Math.floor(Math.random()*256);
+    let b = Math.floor(Math.random()*256);
+    setColor(r,g,b);
+}
+
+function sampleColor(x,y) {
+        //get imageData
+        let colorLayer = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
+
+        let colorPos = (y*offScreenCVS.width + x) * 4;
+    
+        //clicked color
+        let r = colorLayer.data[colorPos];	
+        let g = colorLayer.data[colorPos+1];	
+        let b = colorLayer.data[colorPos+2];
+        setColor(r,g,b);
 }
