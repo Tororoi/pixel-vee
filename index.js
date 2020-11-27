@@ -26,20 +26,6 @@ let offScreenCTX = offScreenCVS.getContext("2d");
 offScreenCVS.width = 32;
 offScreenCVS.height = 32;
 
-// //Create an offscreen canvas for graphics that won't be part of actual image
-// let gCVS = document.createElement('canvas');
-// let gCTX = offScreenCVS.getContext("2d");
-// //Set the dimensions of the graphics canvas the same as drawing canvas
-// gCVS.width = 32;
-// gCVS.height = 32;
-
-//Set initial size of canvas. If using a non-square, make sure to set the ratio the same as the offscreen canvas by multiplying either the height or width by the correct ratio.
-// let baseDimension;
-// let rect;
-//     setSize();
-//     onScreenCVS.width = baseDimension;
-//     onScreenCVS.height = baseDimension;
-
 //Create history stacks for the undo functionality
 let undoStack = [];
 let redoStack = [];
