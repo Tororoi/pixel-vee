@@ -19,6 +19,8 @@ let swatch = document.querySelector(".swatch");
 //Get tool buttons
 let toolsCont = document.querySelector(".tools");
 
+let modesCont = document.querySelector(".modes");
+
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
 let offScreenCVS = document.createElement('canvas');
 let offScreenCTX = offScreenCVS.getContext("2d");
@@ -45,6 +47,7 @@ let lastOnY;
 //Base settings
 // let brushColor = "rgba(255, 0, 0, 255)";
 let brushColor = {color: "rgba(255, 0, 0, 255)", r: 255, g: 0, b: 0, a: 255};
+let modeType = "draw";
 let toolType = "pencil";
 
 //Create an Image with a default source of the existing onscreen canvas
@@ -64,6 +67,7 @@ redoBtn.addEventListener('click', handleRedo);
 swatch.addEventListener('click', randomizeColor);
 
 toolsCont.addEventListener('click', handleTools);
+modesCont.addEventListener('click', handleModes);
 
 function handleMouseMove(e) {
     let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
@@ -116,14 +120,15 @@ function handleMouseMove(e) {
                 }
                 break;
             default:
-                actionDraw(mouseX,mouseY,brushColor);
+                actionDraw(mouseX,mouseY,brushColor,modeType);
                 if (lastX !== mouseX || lastY !== mouseY) {
                     points.push({
                         x: mouseX,
                         y: mouseY,
                         // size: brushSize,
                         color: {...brushColor},
-                        mode: toolType
+                        tool: toolType,
+                        mode: modeType
                     });
                     source = offScreenCVS.toDataURL();
                     renderImage();
@@ -190,13 +195,14 @@ function handleMouseDown(e) {
             lineY = mouseY;
             break;
         default:
-            actionDraw(mouseX,mouseY,brushColor);
+            actionDraw(mouseX,mouseY,brushColor,modeType);
             points.push({
                 x: mouseX,
                 y: mouseY,
                 // size: brushSize,
                 color: {...brushColor},
-                mode: toolType
+                tool: toolType,
+                mode: modeType
             });
             source = offScreenCVS.toDataURL();
             renderImage();
@@ -266,10 +272,21 @@ function handleTools(e) {
     toolType = selection;
 }
 
+function handleModes(e) {
+    let selection = e.target.closest(".mode").id;
+    modeType = selection;
+}
+
 //Action functions
-function actionDraw(coordX,coordY,currentColor) {
+function actionDraw(coordX,coordY,currentColor,currentMode) {
     offScreenCTX.fillStyle = currentColor.color;
-    offScreenCTX.fillRect(coordX,coordY,1,1);
+    switch (currentMode) {
+        case "erase":
+            offScreenCTX.clearRect(coordX,coordY,1,1);
+            break;
+        default:
+            offScreenCTX.fillRect(coordX,coordY,1,1);
+    }
 }
 
 function actionLine(sx,sy,tx,ty,currentColor,ctx,scale = 1) {
@@ -415,14 +432,14 @@ function actionUndoRedo(pushStack,popStack) {
 function redrawPoints() {
     undoStack.forEach(action => {
         action.forEach(p => {
-            switch (p.mode) {
+            switch (p.tool) {
                 case "fill":
                     actionFill(p.x,p.y,p.color);
                     break;
                 case "line":
                     actionLine(p.startX,p.startY,p.endX,p.endY,p.color,offScreenCTX)
                 default:
-                    actionDraw(p.x,p.y,p.color);
+                    actionDraw(p.x,p.y,p.color,p.mode);
             }
 
         })
