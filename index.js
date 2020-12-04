@@ -178,13 +178,14 @@ function handleMouseDown(e) {
             sampleColor(mouseX,mouseY);
             break;
         case "fill":
-            actionFill(mouseX,mouseY,brushColor);
+            actionFill(mouseX,mouseY,brushColor,modeType);
             points.push({
                 x: mouseX,
                 y: mouseY,
                 // size: brushSize,
                 color: {...brushColor},
-                mode: toolType
+                tool: toolType,
+                mode: modeType
             });
             source = offScreenCVS.toDataURL();
             renderImage();
@@ -228,7 +229,8 @@ function handleMouseUp(e) {
             endY: mouseY,
             // size: brushSize,
             color: {...brushColor},
-            mode: toolType
+            tool: toolType,
+            mode: modeType
         });
         source = offScreenCVS.toDataURL();
         renderImage();
@@ -323,7 +325,7 @@ function actionLine(sx,sy,tx,ty,currentColor,ctx,scale = 1) {
 }
 
 //For undo ability, store starting coords, and pass them into actionFill
-function actionFill(startX,startY,currentColor) {
+function actionFill(startX,startY,currentColor,currentMode) {
     //get imageData
     let colorLayer = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
 
@@ -415,7 +417,7 @@ function actionFill(startX,startY,currentColor) {
         colorLayer.data[pixelPos] = currentColor.r;
         colorLayer.data[pixelPos+1] = currentColor.g;
         colorLayer.data[pixelPos+2] = currentColor.b;
-        colorLayer.data[pixelPos+3] = 255;
+        colorLayer.data[pixelPos+3] = currentMode === "erase" ? 0 : 255;
     }
 }
 
@@ -434,7 +436,7 @@ function redrawPoints() {
         action.forEach(p => {
             switch (p.tool) {
                 case "fill":
-                    actionFill(p.x,p.y,p.color);
+                    actionFill(p.x,p.y,p.color,p.mode);
                     break;
                 case "line":
                     actionLine(p.startX,p.startY,p.endX,p.endY,p.color,offScreenCTX)
