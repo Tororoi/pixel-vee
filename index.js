@@ -274,15 +274,12 @@ function actionDraw(coordX,coordY,currentColor) {
 
 function actionLine(sx,sy,tx,ty,currentColor,ctx,scale = 1) {
     ctx.fillStyle = currentColor.color;
-    // finds the distance between points
-    // function DBP(x1,y1,x2,y2) {
-    //     return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
-    // }
+    //create triangle object
     let tri = {}
-    function longSide(x1,y1,x2,y2,ang) {
+    function getTriangle(x1,y1,x2,y2,ang) {
         if(Math.abs(x1-x2) > Math.abs(y1-y2)) {
-            tri.y = Math.tan(ang)*Math.sign(Math.cos(ang));
             tri.x = Math.sign(Math.cos(ang));
+            tri.y = Math.tan(ang)*Math.sign(Math.cos(ang));
             tri.long = Math.abs(x1-x2);
         } else { 
             tri.x = Math.tan((Math.PI/2)-ang)*Math.sign(Math.cos((Math.PI/2)-ang));
@@ -293,20 +290,14 @@ function actionLine(sx,sy,tx,ty,currentColor,ctx,scale = 1) {
     // finds the angle of (x,y) on a plane from the origin
     function getAngle(x,y) { return Math.atan(y/(x==0?0.01:x))+(x<0?Math.PI:0); }
 
-    // let dist = DBP(sx,sy,tx,ty); // length of line
     let angle = getAngle(tx-sx,ty-sy); // angle of line
-    longSide(sx,sy,tx,ty, angle);
+    getTriangle(sx,sy,tx,ty, angle);
     for(let i=0;i<tri.long;i++) {
         let thispoint = {x: Math.round(sx + tri.x*i), y: Math.round(sy + tri.y*i)};
         // for each point along the line
-        // ctx.fillStyle = currentColor.color
         ctx.fillRect(thispoint.x*scale, // round for perfect pixels
                     thispoint.y*scale, // thus no aliasing
                     scale,scale); // fill in one pixel, 1x1
-        // ctx.fillStyle = "black"
-        // ctx.fillRect((sx + tri.x*i)*scale, // round for perfect pixels
-        // (sy + tri.y*i)*scale, // thus no aliasing
-        //     scale/4,scale/4); // fill in one pixel, 1x1
     }
     //fill endpoint
     ctx.fillRect(Math.round(tx)*scale, // round for perfect pixels
