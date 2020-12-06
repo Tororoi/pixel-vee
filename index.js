@@ -114,7 +114,7 @@ function handleMouseMove(e) {
                     //set offscreen endpoint
                     lastX = mouseX;
                     lastY = mouseY;
-                    actionLine(lineX,lineY,mouseX,mouseY,brushColor,onScreenCTX,ratio);
+                    actionLine(lineX,lineY,mouseX,mouseY,brushColor,onScreenCTX,modeType,ratio);
                     lastOnX = onX;
                     lastOnY = onY;
                 }
@@ -221,7 +221,7 @@ function handleMouseUp(e) {
         //render line
         //push to points
         //reset line attributes (origin, end)
-        actionLine(lineX,lineY,mouseX,mouseY,brushColor,offScreenCTX);
+        actionLine(lineX,lineY,mouseX,mouseY,brushColor,offScreenCTX,modeType);
         points.push({
             startX: lineX,
             startY: lineY,
@@ -291,8 +291,10 @@ function actionDraw(coordX,coordY,currentColor,currentMode) {
     }
 }
 
-function actionLine(sx,sy,tx,ty,currentColor,ctx,scale = 1) {
+function actionLine(sx,sy,tx,ty,currentColor,ctx,currentMode,scale = 1) {
     ctx.fillStyle = currentColor.color;
+    let drawPixel = (x,y,w,h) => {return currentMode === "erase" ? ctx.clearRect(x,y,w,h) : ctx.fillRect(x,y,w,h)};
+    console.log(drawPixel)
     //create triangle object
     let tri = {}
     function getTriangle(x1,y1,x2,y2,ang) {
@@ -314,12 +316,12 @@ function actionLine(sx,sy,tx,ty,currentColor,ctx,scale = 1) {
     for(let i=0;i<tri.long;i++) {
         let thispoint = {x: Math.round(sx + tri.x*i), y: Math.round(sy + tri.y*i)};
         // for each point along the line
-        ctx.fillRect(thispoint.x*scale, // round for perfect pixels
+        drawPixel(thispoint.x*scale, // round for perfect pixels
                     thispoint.y*scale, // thus no aliasing
                     scale,scale); // fill in one pixel, 1x1
     }
     //fill endpoint
-    ctx.fillRect(Math.round(tx)*scale, // round for perfect pixels
+    drawPixel(Math.round(tx)*scale, // round for perfect pixels
                     Math.round(ty)*scale, // thus no aliasing
                     scale,scale); // fill in one pixel, 1x1
 }
@@ -417,6 +419,7 @@ function actionFill(startX,startY,currentColor,currentMode) {
         colorLayer.data[pixelPos] = currentColor.r;
         colorLayer.data[pixelPos+1] = currentColor.g;
         colorLayer.data[pixelPos+2] = currentColor.b;
+        //not ideal
         colorLayer.data[pixelPos+3] = currentMode === "erase" ? 0 : 255;
     }
 }
@@ -439,7 +442,7 @@ function redrawPoints() {
                     actionFill(p.x,p.y,p.color,p.mode);
                     break;
                 case "line":
-                    actionLine(p.startX,p.startY,p.endX,p.endY,p.color,offScreenCTX)
+                    actionLine(p.startX,p.startY,p.endX,p.endY,p.color,offScreenCTX,p.mode)
                 default:
                     actionDraw(p.x,p.y,p.color,p.mode);
             }
