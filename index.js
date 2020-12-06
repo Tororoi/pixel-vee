@@ -19,9 +19,11 @@ let swatch = document.querySelector(".swatch");
 //Get tool buttons
 let toolsCont = document.querySelector(".tools");
 let toolBtn = document.querySelector("#pencil");
+toolBtn.style.background = "rgb(192, 45, 19)";
 
 let modesCont = document.querySelector(".modes");
 let modeBtn = document.querySelector("#draw");
+modeBtn.style.background = "rgb(192, 45, 19)";
 
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
 let offScreenCVS = document.createElement('canvas');
