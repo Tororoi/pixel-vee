@@ -18,8 +18,10 @@ let swatch = document.querySelector(".swatch");
 
 //Get tool buttons
 let toolsCont = document.querySelector(".tools");
+let toolBtn = document.querySelector("#pencil");
 
 let modesCont = document.querySelector(".modes");
+let modeBtn = document.querySelector("#draw");
 
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
 let offScreenCVS = document.createElement('canvas');
@@ -270,13 +272,21 @@ function handleRedo() {
 }
 
 function handleTools(e) {
-    let selection = e.target.closest(".tool").id;
-    toolType = selection;
+    //reset old button
+    toolBtn.style.background = "rgb(105, 76, 212)";
+    //get new button and select it
+    toolBtn = e.target.closest(".tool");
+    toolBtn.style.background = "rgb(192, 45, 19)";
+    toolType = toolBtn.id;
 }
 
 function handleModes(e) {
-    let selection = e.target.closest(".mode").id;
-    modeType = selection;
+    //reset old button
+    modeBtn.style.background = "rgb(37, 0, 139)";
+    //get new button and select it
+    modeBtn = e.target.closest(".mode");
+    modeBtn.style.background = "rgb(192, 45, 19)";
+    modeType = modeBtn.id;
 }
 
 //Action functions
@@ -294,7 +304,6 @@ function actionDraw(coordX,coordY,currentColor,currentMode) {
 function actionLine(sx,sy,tx,ty,currentColor,ctx,currentMode,scale = 1) {
     ctx.fillStyle = currentColor.color;
     let drawPixel = (x,y,w,h) => {return currentMode === "erase" ? ctx.clearRect(x,y,w,h) : ctx.fillRect(x,y,w,h)};
-    console.log(drawPixel)
     //create triangle object
     let tri = {}
     function getTriangle(x1,y1,x2,y2,ang) {
@@ -337,6 +346,9 @@ function actionFill(startX,startY,currentColor,currentMode) {
     let startR = colorLayer.data[startPos];	
     let startG = colorLayer.data[startPos+1];	
     let startB = colorLayer.data[startPos+2];
+
+    if (currentMode === "erase") currentColor = {color: "rgba(0, 0, 0, 0)", r: 0, g: 0, b: 0, a: 0};
+    
     //exit if color is the same
     if (currentColor.r === startR && currentColor.g === startG && currentColor.b === startB) {
         return;
@@ -420,7 +432,7 @@ function actionFill(startX,startY,currentColor,currentMode) {
         colorLayer.data[pixelPos+1] = currentColor.g;
         colorLayer.data[pixelPos+2] = currentColor.b;
         //not ideal
-        colorLayer.data[pixelPos+3] = currentMode === "erase" ? 0 : 255;
+        colorLayer.data[pixelPos+3] = currentColor.a;
     }
 }
 

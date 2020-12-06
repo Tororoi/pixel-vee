@@ -27,7 +27,7 @@ canvas {
 #tempCanvas {
     position: absolute;
     /* z-index: 1; */
-    border: 5px solid blue;
+    border: 5px solid rgb(209, 61, 35);
 }
 
 /* Toolbox */
