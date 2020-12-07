@@ -29,8 +29,8 @@ modeBtn.style.background = "rgb(192, 45, 19)";
 let offScreenCVS = document.createElement('canvas');
 let offScreenCTX = offScreenCVS.getContext("2d");
 //Set the dimensions of the drawing canvas
-offScreenCVS.width = 32;
-offScreenCVS.height = 32;
+offScreenCVS.width = 128;
+offScreenCVS.height = 128;
 
 //Create history stacks for the undo functionality
 let undoStack = [];
@@ -124,9 +124,11 @@ function handleMouseMove(e) {
                 }
                 break;
             default:
-                // perfectPixels(mouseX,mouseY);
+                //draw onscreen current pixel
+                onScreenCTX.fillStyle = brushColor.color;
+                onScreenCTX.fillRect(onX,onY,ratio,ratio);
                 if (lastX !== mouseX || lastY !== mouseY) {
-                    //draw between points
+                    //draw between points when drawing fast
                     if (Math.abs(mouseX-lastX) > 1 || Math.abs(mouseY-lastY) > 1) {
                         actionLine(lastX,lastY,mouseX,mouseY,brushColor,offScreenCTX,modeType);
                         points.push({
@@ -244,23 +246,35 @@ function handleMouseUp(e) {
     let mouseX = Math.floor(e.offsetX/trueRatio);
     let mouseY = Math.floor(e.offsetY/trueRatio);
     //draw line if line tool
-    if (toolType === "line") {
-        //render line
-        //push to points
-        //reset line attributes (origin, end)
-        actionLine(lineX,lineY,mouseX,mouseY,brushColor,offScreenCTX,modeType);
-        points.push({
-            startX: lineX,
-            startY: lineY,
-            endX: mouseX,
-            endY: mouseY,
-            // size: brushSize,
-            color: {...brushColor},
-            tool: toolType,
-            mode: modeType
-        });
-        source = offScreenCVS.toDataURL();
-        renderImage();
+    switch (toolType) {
+        case "line":
+            actionLine(lineX,lineY,mouseX,mouseY,brushColor,offScreenCTX,modeType);
+            points.push({
+                startX: lineX,
+                startY: lineY,
+                endX: mouseX,
+                endY: mouseY,
+                // size: brushSize,
+                color: {...brushColor},
+                tool: toolType,
+                mode: modeType
+            });
+            source = offScreenCVS.toDataURL();
+            renderImage();
+            break;
+        case "pencil":
+            actionDraw(mouseX,mouseY,brushColor,modeType);
+            points.push({
+                x: mouseX,
+                y: mouseY,
+                // size: brushSize,
+                color: {...brushColor},
+                tool: toolType,
+                mode: modeType
+            });
+            source = offScreenCVS.toDataURL();
+            renderImage();
+            break;
     }
     //add to undo stack
     if (points.length) {
