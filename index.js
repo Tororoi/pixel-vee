@@ -140,15 +140,16 @@ function handleMouseMove(e) {
                             mode: modeType
                         });
                     } else {
-                        actionDraw(mouseX,mouseY,brushColor,modeType);
-                        points.push({
-                            x: mouseX,
-                            y: mouseY,
-                            // size: brushSize,
-                            color: {...brushColor},
-                            tool: toolType,
-                            mode: modeType
-                        });
+                        perfectPixels(mouseX,mouseY);
+                        // actionDraw(mouseX,mouseY,brushColor,modeType);
+                        // points.push({
+                        //     x: mouseX,
+                        //     y: mouseY,
+                        //     // size: brushSize,
+                        //     color: {...brushColor},
+                        //     tool: toolType,
+                        //     mode: modeType
+                        // });
                     }
                     source = offScreenCVS.toDataURL();
                     renderImage();
@@ -315,16 +316,19 @@ function handleModes(e) {
 
 let lastDrawnX,lastDrawnY;
 let waitingPixelX, waitingPixelY;
-//currently not in use until gaps from drawing too fast can be solved
 function perfectPixels(currentX,currentY) {
     //if currentPixel not neighbor to lastDrawn, draw waitingpixel
     if (Math.abs(currentX-lastDrawnX) > 1 || Math.abs(currentY-lastDrawnY) > 1) {
         actionDraw(waitingPixelX,waitingPixelY,brushColor,modeType);
+        //update queue
         lastDrawnX = waitingPixelX;
         lastDrawnY = waitingPixelY;
+        waitingPixelX = currentX;
+        waitingPixelY = currentY;
+        //add to points stack
         points.push({
-            x: waitingPixelX,
-            y: waitingPixelY,
+            x: lastDrawnX,
+            y: lastDrawnY,
             // size: brushSize,
             color: {...brushColor},
             tool: toolType,
