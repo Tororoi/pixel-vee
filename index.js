@@ -124,20 +124,36 @@ function handleMouseMove(e) {
                 }
                 break;
             default:
-                actionDraw(mouseX,mouseY,brushColor,modeType);
+                // perfectPixels(mouseX,mouseY);
                 if (lastX !== mouseX || lastY !== mouseY) {
-                    points.push({
-                        x: mouseX,
-                        y: mouseY,
-                        // size: brushSize,
-                        color: {...brushColor},
-                        tool: toolType,
-                        mode: modeType
-                    });
+                    //draw between points
+                    if (Math.abs(mouseX-lastX) > 1 || Math.abs(mouseY-lastY) > 1) {
+                        actionLine(lastX,lastY,mouseX,mouseY,brushColor,offScreenCTX,modeType);
+                        points.push({
+                            startX: lastX,
+                            startY: lastY,
+                            endX: mouseX,
+                            endY: mouseY,
+                            // size: brushSize,
+                            color: {...brushColor},
+                            tool: "line",
+                            mode: modeType
+                        });
+                    } else {
+                        actionDraw(mouseX,mouseY,brushColor,modeType);
+                        points.push({
+                            x: mouseX,
+                            y: mouseY,
+                            // size: brushSize,
+                            color: {...brushColor},
+                            tool: toolType,
+                            mode: modeType
+                        });
+                    }
                     source = offScreenCVS.toDataURL();
                     renderImage();
                 }
-                //save last point
+                // save last point
                 lastX = mouseX;
                 lastY = mouseY;
         }
@@ -201,6 +217,12 @@ function handleMouseDown(e) {
             break;
         default:
             actionDraw(mouseX,mouseY,brushColor,modeType);
+            lastX = mouseX;
+            lastY = mouseY;
+            lastDrawnX = mouseX;
+            lastDrawnY = mouseY;
+            waitingPixelX = mouseX;
+            waitingPixelY = mouseY;
             points.push({
                 x: mouseX,
                 y: mouseY,
@@ -291,6 +313,31 @@ function handleModes(e) {
     modeType = modeBtn.id;
 }
 
+let lastDrawnX,lastDrawnY;
+let waitingPixelX, waitingPixelY;
+//currently not in use until gaps from drawing too fast can be solved
+function perfectPixels(currentX,currentY) {
+    //if currentPixel not neighbor to lastDrawn, draw waitingpixel
+    if (Math.abs(currentX-lastDrawnX) > 1 || Math.abs(currentY-lastDrawnY) > 1) {
+        actionDraw(waitingPixelX,waitingPixelY,brushColor,modeType);
+        lastDrawnX = waitingPixelX;
+        lastDrawnY = waitingPixelY;
+        points.push({
+            x: waitingPixelX,
+            y: waitingPixelY,
+            // size: brushSize,
+            color: {...brushColor},
+            tool: toolType,
+            mode: modeType
+        });
+        source = offScreenCVS.toDataURL();
+        renderImage();
+    } else {
+        waitingPixelX = currentX;
+        waitingPixelY = currentY;
+    }
+}
+
 //Action functions
 function actionDraw(coordX,coordY,currentColor,currentMode) {
     offScreenCTX.fillStyle = currentColor.color;
@@ -321,15 +368,16 @@ function actionLine(sx,sy,tx,ty,currentColor,ctx,currentMode,scale = 1) {
     }
     // finds the angle of (x,y) on a plane from the origin
     function getAngle(x,y) { return Math.atan(y/(x==0?0.01:x))+(x<0?Math.PI:0); }
-
     let angle = getAngle(tx-sx,ty-sy); // angle of line
     getTriangle(sx,sy,tx,ty, angle);
+
     for(let i=0;i<tri.long;i++) {
         let thispoint = {x: Math.round(sx + tri.x*i), y: Math.round(sy + tri.y*i)};
         // for each point along the line
         drawPixel(thispoint.x*scale, // round for perfect pixels
                     thispoint.y*scale, // thus no aliasing
                     scale,scale); // fill in one pixel, 1x1
+        
     }
     //fill endpoint
     drawPixel(Math.round(tx)*scale, // round for perfect pixels
