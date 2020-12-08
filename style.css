@@ -17,7 +17,19 @@ body {
 }
 
 canvas {
-    background: #66CCCC;
+    /* background:
+	linear-gradient(135deg, transparent 75%, rgb(216, 216, 216) 0%) 0 0,
+	linear-gradient(-45deg, transparent 75%, rgb(216, 216, 216) 0%) 15px 15px,
+	linear-gradient(135deg, transparent 75%, rgb(216, 216, 216) 0%) 15px 15px,
+	linear-gradient(-45deg, transparent 75%, rgb(216, 216, 216) 0%) 0 0,
+    white;
+    background-size: 30px 30px; */
+    /* background-repeat: round; */
+    background-image: repeating-linear-gradient(-45deg,
+    white,
+    white 5px,
+    rgb(216, 216, 216) 5px,
+    rgb(216, 216, 216) 10px);
     position: absolute;
     /* z-index: 100; */
     /* transition: all 1s; */
