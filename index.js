@@ -15,6 +15,7 @@ let redoBtn = document.getElementById("redo");
 
 //Get swatch
 let swatch = document.querySelector(".swatch");
+let backSwatch = document.querySelector(".back-swatch");
 
 //Get tool buttons
 let toolsCont = document.querySelector(".tools");
@@ -51,6 +52,7 @@ let lastOnY;
 //Base settings
 // let brushColor = "rgba(255, 0, 0, 255)";
 let brushColor = {color: "rgba(255, 0, 0, 255)", r: 255, g: 0, b: 0, a: 255};
+let backColor = {color: "rgba(255, 255, 255, 255)", r: 255, g: 255, b: 255, a: 255};
 let modeType = "draw";
 let toolType = "pencil";
 
@@ -69,6 +71,7 @@ undoBtn.addEventListener('click', handleUndo);
 redoBtn.addEventListener('click', handleRedo);
 
 swatch.addEventListener('click', randomizeColor);
+backSwatch.addEventListener('click', randomizeColor);
 
 toolsCont.addEventListener('click', handleTools);
 modesCont.addEventListener('click', handleModes);
@@ -552,19 +555,28 @@ function drawCanvas() {
 //     rect.height > rect.width ? baseDimension = rect.width : baseDimension = rect.height;
 // }
 
-function setColor(r,g,b) {
-    brushColor.color = `rgba(${r},${g},${b},255)`;
-    brushColor.r = r;
-    brushColor.g = g;
-    brushColor.b = b;
-    swatch.style.background = brushColor.color;
+function setColor(r,g,b,target) {
+    if (target === "swatch") {
+        brushColor.color = `rgba(${r},${g},${b},255)`;
+        brushColor.r = r;
+        brushColor.g = g;
+        brushColor.b = b;
+        swatch.style.background = brushColor.color;
+    } else {
+        backColor.color = `rgba(${r},${g},${b},255)`;
+        backColor.r = r;
+        backColor.g = g;
+        backColor.b = b;
+        backSwatch.style.background = backColor.color;
+    }
+
 }
 
-function randomizeColor() {
+function randomizeColor(e) {
     let r = Math.floor(Math.random()*256);
     let g = Math.floor(Math.random()*256);
     let b = Math.floor(Math.random()*256);
-    setColor(r,g,b);
+    setColor(r,g,b,e.target.className);
 }
 
 function sampleColor(x,y) {

@@ -88,8 +88,20 @@ canvas {
 }
 
 /* Color Picker */
+.colors {
+    display: flex;
+}
+
 .swatch {
     background: rgb(255, 0, 0);
+    width: 100px;
+    height: 100px;
+    margin: 16px;
+    border-radius: 10px;
+}
+
+.back-swatch {
+    background: rgb(255, 255, 255);
     width: 100px;
     height: 100px;
     margin: 16px;
