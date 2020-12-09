@@ -16,6 +16,7 @@ let redoBtn = document.getElementById("redo");
 //Get swatch
 let swatch = document.querySelector(".swatch");
 let backSwatch = document.querySelector(".back-swatch");
+let colorSwitch = document.querySelector(".switch");
 
 //Get tool buttons
 let toolsCont = document.querySelector(".tools");
@@ -72,6 +73,7 @@ redoBtn.addEventListener('click', handleRedo);
 
 swatch.addEventListener('click', randomizeColor);
 backSwatch.addEventListener('click', randomizeColor);
+colorSwitch.addEventListener('click', switchColors);
 
 toolsCont.addEventListener('click', handleTools);
 modesCont.addEventListener('click', handleModes);
@@ -577,6 +579,14 @@ function randomizeColor(e) {
     let g = Math.floor(Math.random()*256);
     let b = Math.floor(Math.random()*256);
     setColor(r,g,b,e.target.className);
+}
+
+function switchColors(e) {
+    let temp = brushColor;
+    brushColor = backColor;
+    swatch.style.background = brushColor.color;
+    backColor = temp;
+    backSwatch.style.background = backColor.color;
 }
 
 function sampleColor(x,y) {
