@@ -145,6 +145,7 @@ function handleMouseMove(e) {
                 if (lastX !== mouseX || lastY !== mouseY) {
                     //draw between points when drawing fast
                     if (Math.abs(mouseX-lastX) > 1 || Math.abs(mouseY-lastY) > 1) {
+                        //add to options, only execute if "continuous line" is on
                         actionLine(lastX,lastY,mouseX,mouseY,brushColor,offScreenCTX,modeType);
                         points.push({
                             startX: lastX,
