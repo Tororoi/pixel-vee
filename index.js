@@ -31,8 +31,8 @@ modeBtn.style.background = "rgb(192, 45, 19)";
 let offScreenCVS = document.createElement('canvas');
 let offScreenCTX = offScreenCVS.getContext("2d");
 //Set the dimensions of the drawing canvas
-offScreenCVS.width = 128;
-offScreenCVS.height = 128;
+offScreenCVS.width = 64;
+offScreenCVS.height = 64;
 
 //Create history stacks for the undo functionality
 let undoStack = [];
@@ -128,6 +128,12 @@ function handleMouseMove(e) {
                     lastOnY = onY;
                 }
                 break;
+            case "replace":
+                //only execute when necessary
+                //sample color
+                //draw onscreen current pixel if match to backColor
+                //replace if match to backColor
+                break;
             default:
                 //draw onscreen current pixel
                 if (modeType === "erase") {
@@ -151,16 +157,20 @@ function handleMouseMove(e) {
                             mode: modeType
                         });
                     } else {
-                        perfectPixels(mouseX,mouseY);
-                        // actionDraw(mouseX,mouseY,brushColor,modeType);
-                        // points.push({
-                        //     x: mouseX,
-                        //     y: mouseY,
-                        //     // size: brushSize,
-                        //     color: {...brushColor},
-                        //     tool: toolType,
-                        //     mode: modeType
-                        // });
+                        //perfect will be option, not mode
+                        if (modeType === "perfect") {
+                            perfectPixels(mouseX,mouseY);
+                        } else {
+                            actionDraw(mouseX,mouseY,brushColor,modeType);
+                            points.push({
+                                x: mouseX,
+                                y: mouseY,
+                                // size: brushSize,
+                                color: {...brushColor},
+                                tool: toolType,
+                                mode: modeType
+                            });
+                        }
                     }
                     source = offScreenCVS.toDataURL();
                     renderImage();
@@ -227,6 +237,10 @@ function handleMouseDown(e) {
             lineX = mouseX;
             lineY = mouseY;
             break;
+        case "replace":
+            //get global colorlayer data to use while mouse is down
+            //sample color and replace if match to backColor
+            break;
         default:
             actionDraw(mouseX,mouseY,brushColor,modeType);
             lastX = mouseX;
@@ -271,7 +285,12 @@ function handleMouseUp(e) {
             source = offScreenCVS.toDataURL();
             renderImage();
             break;
+        case "replace":
+            //only needed if perfect pixels option is on
+            //sample color and replace if match
+            break;
         case "pencil":
+            //only needed if perfect pixels option is on
             actionDraw(mouseX,mouseY,brushColor,modeType);
             points.push({
                 x: mouseX,
@@ -412,7 +431,7 @@ function actionLine(sx,sy,tx,ty,currentColor,ctx,currentMode,scale = 1) {
                     scale,scale); // fill in one pixel, 1x1
 }
 
-//helper for replace and fill to get color on canvas
+//helper for replace and fill to get color on canvas **NOT IN USE**
 function getColor(startX,startY,colorLayer) {
     let canvasColor = {};
 
