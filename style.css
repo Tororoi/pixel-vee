@@ -31,6 +31,7 @@ canvas {
     rgb(216, 216, 216) 5px,
     rgb(216, 216, 216) 10px);
     position: absolute;
+    cursor: none;
     /* z-index: 100; */
     /* transition: all 1s; */
     width: 70%;
@@ -97,6 +98,7 @@ canvas {
     width: 100px;
     height: 100px;
     margin: 16px;
+    margin-right: 6px;
     border-radius: 10px;
 }
 
@@ -114,6 +116,7 @@ canvas {
     width: 100px;
     height: 100px;
     margin: 16px;
+    margin-left: 6px;
     border-radius: 10px;
 }
 

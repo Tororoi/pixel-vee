@@ -130,8 +130,12 @@ function handleMouseMove(e) {
                 break;
             default:
                 //draw onscreen current pixel
-                onScreenCTX.fillStyle = brushColor.color;
-                onScreenCTX.fillRect(onX,onY,ratio,ratio);
+                if (modeType === "erase") {
+                    onScreenCTX.clearRect(onX,onY,ratio,ratio);
+                } else {
+                    onScreenCTX.fillStyle = brushColor.color;
+                    onScreenCTX.fillRect(onX,onY,ratio,ratio);
+                }
                 if (lastX !== mouseX || lastY !== mouseY) {
                     //draw between points when drawing fast
                     if (Math.abs(mouseX-lastX) > 1 || Math.abs(mouseY-lastY) > 1) {
@@ -408,6 +412,20 @@ function actionLine(sx,sy,tx,ty,currentColor,ctx,currentMode,scale = 1) {
                     scale,scale); // fill in one pixel, 1x1
 }
 
+//helper for replace and fill to get color on canvas
+function getColor(startX,startY,colorLayer) {
+    let canvasColor = {};
+
+    let startPos = (startY*offScreenCVS.width + startX) * 4;
+    //clicked color
+    canvasColor.r = colorLayer.data[startPos];	
+    canvasColor.g = colorLayer.data[startPos+1];	
+    canvasColor.b = colorLayer.data[startPos+2];
+    canvasColor.a = colorLayer.data[startPos+3];
+    canvasColor.color = `rgba(${canvasColor.r},${canvasColor.g},${canvasColor.b},${canvasColor.a})`
+    return canvasColor;
+}
+
 //For undo ability, store starting coords, and pass them into actionFill
 function actionFill(startX,startY,currentColor,currentMode) {
     //get imageData
@@ -419,11 +437,12 @@ function actionFill(startX,startY,currentColor,currentMode) {
     let startR = colorLayer.data[startPos];	
     let startG = colorLayer.data[startPos+1];	
     let startB = colorLayer.data[startPos+2];
+    let startA = colorLayer.data[startPos+3];
 
     if (currentMode === "erase") currentColor = {color: "rgba(0, 0, 0, 0)", r: 0, g: 0, b: 0, a: 0};
     
     //exit if color is the same
-    if (currentColor.r === startR && currentColor.g === startG && currentColor.b === startB) {
+    if (currentColor.r === startR && currentColor.g === startG && currentColor.b === startB && currentColor.a === startA) {
         return;
     }
     //Start with click coords
@@ -497,7 +516,8 @@ function actionFill(startX,startY,currentColor,currentMode) {
         let r = colorLayer.data[pixelPos];	
         let g = colorLayer.data[pixelPos+1];	
         let b = colorLayer.data[pixelPos+2];
-        return (r === startR && g === startG && b === startB);
+        let a = colorLayer.data[pixelPos+3];
+        return (r === startR && g === startG && b === startB && a === startA);
     }
 
     function colorPixel(pixelPos) {
@@ -599,5 +619,5 @@ function sampleColor(x,y) {
         let r = colorLayer.data[colorPos];	
         let g = colorLayer.data[colorPos+1];	
         let b = colorLayer.data[colorPos+2];
-        setColor(r,g,b);
+        setColor(r,g,b,"swatch");
 }
