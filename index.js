@@ -144,6 +144,17 @@ function handleMouseMove(e) {
                 }
                 if (lastX !== mouseX || lastY !== mouseY) {
                     //draw between points when drawing fast
+                    if (modeType === "noncont") { //temp
+                        actionDraw(mouseX,mouseY,brushColor,modeType);
+                        points.push({
+                            x: mouseX,
+                            y: mouseY,
+                            // size: brushSize,
+                            color: {...brushColor},
+                            tool: toolType,
+                            mode: modeType
+                        });
+                    } else { //temp
                     if (Math.abs(mouseX-lastX) > 1 || Math.abs(mouseY-lastY) > 1) {
                         //add to options, only execute if "continuous line" is on
                         actionLine(lastX,lastY,mouseX,mouseY,brushColor,offScreenCTX,modeType);
@@ -173,6 +184,7 @@ function handleMouseMove(e) {
                             });
                         }
                     }
+                    } //temp
                     source = offScreenCVS.toDataURL();
                     renderImage();
                 }
@@ -560,6 +572,7 @@ function actionUndoRedo(pushStack,popStack) {
 }
 
 function redrawPoints() {
+    //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
     undoStack.forEach(action => {
         action.forEach(p => {
             switch (p.tool) {
