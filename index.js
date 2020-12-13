@@ -54,6 +54,7 @@ let lastOnY;
 // let brushColor = "rgba(255, 0, 0, 255)";
 let brushColor = {color: "rgba(255, 0, 0, 255)", r: 255, g: 0, b: 0, a: 255};
 let backColor = {color: "rgba(255, 255, 255, 255)", r: 255, g: 255, b: 255, a: 255};
+let brushSize = 1;
 let modeType = "draw";
 let toolType = "pencil";
 
@@ -145,11 +146,11 @@ function handleMouseMove(e) {
                 if (lastX !== mouseX || lastY !== mouseY) {
                     //draw between points when drawing fast
                     if (modeType === "noncont") { //temp
-                        actionDraw(mouseX,mouseY,brushColor,modeType);
+                        actionDraw(mouseX,mouseY,brushColor,brushSize,modeType);
                         points.push({
                             x: mouseX,
                             y: mouseY,
-                            // size: brushSize,
+                            size: brushSize,
                             color: {...brushColor},
                             tool: toolType,
                             mode: modeType
@@ -173,11 +174,11 @@ function handleMouseMove(e) {
                         if (modeType === "perfect") {
                             perfectPixels(mouseX,mouseY);
                         } else {
-                            actionDraw(mouseX,mouseY,brushColor,modeType);
+                            actionDraw(mouseX,mouseY,brushColor,brushSize,modeType);
                             points.push({
                                 x: mouseX,
                                 y: mouseY,
-                                // size: brushSize,
+                                size: brushSize,
                                 color: {...brushColor},
                                 tool: toolType,
                                 mode: modeType
@@ -255,7 +256,7 @@ function handleMouseDown(e) {
             //sample color and replace if match to backColor
             break;
         default:
-            actionDraw(mouseX,mouseY,brushColor,modeType);
+            actionDraw(mouseX,mouseY,brushColor,brushSize,modeType);
             lastX = mouseX;
             lastY = mouseY;
             lastDrawnX = mouseX;
@@ -265,7 +266,7 @@ function handleMouseDown(e) {
             points.push({
                 x: mouseX,
                 y: mouseY,
-                // size: brushSize,
+                size: brushSize,
                 color: {...brushColor},
                 tool: toolType,
                 mode: modeType
@@ -304,11 +305,11 @@ function handleMouseUp(e) {
             break;
         case "pencil":
             //only needed if perfect pixels option is on
-            actionDraw(mouseX,mouseY,brushColor,modeType);
+            actionDraw(mouseX,mouseY,brushColor,brushSize,modeType);
             points.push({
                 x: mouseX,
                 y: mouseY,
-                // size: brushSize,
+                size: brushSize,
                 color: {...brushColor},
                 tool: toolType,
                 mode: modeType
@@ -374,7 +375,7 @@ let waitingPixelX, waitingPixelY;
 function perfectPixels(currentX,currentY) {
     //if currentPixel not neighbor to lastDrawn, draw waitingpixel
     if (Math.abs(currentX-lastDrawnX) > 1 || Math.abs(currentY-lastDrawnY) > 1) {
-        actionDraw(waitingPixelX,waitingPixelY,brushColor,modeType);
+        actionDraw(waitingPixelX,waitingPixelY,brushColor,brushSize,modeType);
         //update queue
         lastDrawnX = waitingPixelX;
         lastDrawnY = waitingPixelY;
@@ -398,14 +399,14 @@ function perfectPixels(currentX,currentY) {
 }
 
 //Action functions
-function actionDraw(coordX,coordY,currentColor,currentMode) {
+function actionDraw(coordX,coordY,currentColor,size,currentMode) {
     offScreenCTX.fillStyle = currentColor.color;
     switch (currentMode) {
         case "erase":
-            offScreenCTX.clearRect(coordX,coordY,1,1);
+            offScreenCTX.clearRect(Math.ceil(coordX-size/2),Math.ceil(coordY-size/2),size,size);
             break;
         default:
-            offScreenCTX.fillRect(coordX,coordY,1,1);
+            offScreenCTX.fillRect(Math.ceil(coordX-size/2),Math.ceil(coordY-size/2),size,size);
     }
 }
 
@@ -582,7 +583,7 @@ function redrawPoints() {
                 case "line":
                     actionLine(p.startX,p.startY,p.endX,p.endY,p.color,offScreenCTX,p.mode)
                 default:
-                    actionDraw(p.x,p.y,p.color,p.mode);
+                    actionDraw(p.x,p.y,p.color,p.size,p.mode);
             }
 
         })
