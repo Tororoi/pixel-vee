@@ -327,7 +327,7 @@ function handleMouseUp(e) {
     redoStack = [];
 }
 
-function handleMouseOut() {
+function handleMouseOut(e) {
     clicked = false;
     //add to undo stack
     if (points.length) {
@@ -385,7 +385,7 @@ function perfectPixels(currentX,currentY) {
         points.push({
             x: lastDrawnX,
             y: lastDrawnY,
-            // size: brushSize,
+            size: brushSize,
             color: {...brushColor},
             tool: toolType,
             mode: modeType
