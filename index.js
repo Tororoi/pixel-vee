@@ -491,7 +491,7 @@ function actionLine(sx,sy,tx,ty,currentColor,ctx,currentMode,scale = 1) {
                     scale,scale); // fill in one pixel, 1x1
 }
 
-//helper for replace and fill to get color on canvas **NOT IN USE**
+//helper for replace and fill to get color on canvas
 function getColor(startX,startY,colorLayer) {
     let canvasColor = {};
 
@@ -509,11 +509,8 @@ function actionReplace(coordX,coordY,currentColor,replacedColor,colorLayer,size,
 
     //while clicked, get color at coords
     //if color matches replacedcolor, draw currentcolor
-    let clickedColor = getColor(coordX,coordY,colorLayer);
-    if (clickedColor.color === replacedColor.color) {
-        actionDraw(coordX,coordY,currentColor,size,currentMode);
-
-    }
+    //instead of draw, replace color data
+    //treated like a mask?
 }
 
 //For undo ability, store starting coords, and pass them into actionFill
