@@ -43,6 +43,12 @@ let lastX;
 let lastY;
 let lineX;
 let lineY;
+//for perfect pixels
+let lastDrawnX,lastDrawnY;
+let waitingPixelX, waitingPixelY;
+//for replace
+let colorLayerGlobal;
+//main storage array
 let points = [];
 
 //We only want the mouse to move if the mouse is down, so we need a variable to disable drawing while the mouse is not clicked.
@@ -52,8 +58,8 @@ let lastOnY;
 
 //Base settings
 // let brushColor = "rgba(255, 0, 0, 255)";
-let brushColor = {color: "rgba(255, 0, 0, 255)", r: 255, g: 0, b: 0, a: 255};
-let backColor = {color: "rgba(255, 255, 255, 255)", r: 255, g: 255, b: 255, a: 255};
+let brushColor = {color: "rgba(255,0,0,255)", r: 255, g: 0, b: 0, a: 255};
+let backColor = {color: "rgba(255,255,255,255)", r: 255, g: 255, b: 255, a: 255};
 let brushSize = 1;
 let modeType = "draw";
 let toolType = "pencil";
@@ -133,7 +139,20 @@ function handleMouseMove(e) {
                 //only execute when necessary
                 //sample color
                 //draw onscreen current pixel if match to backColor
-                //replace if match to backColor
+                let clickedColor = getColor(mouseX,mouseY,colorLayerGlobal);
+                if (clickedColor.color === backColor.color) {
+                    actionDraw(mouseX,mouseY,brushColor,brushSize,modeType);
+                    points.push({
+                        x: mouseX,
+                        y: mouseY,
+                        size: brushSize,
+                        color: {...brushColor},
+                        tool: toolType,
+                        mode: modeType
+                    });
+                    source = offScreenCVS.toDataURL();
+                    renderImage();
+                }
                 break;
             default:
                 //draw onscreen current pixel
@@ -253,7 +272,22 @@ function handleMouseDown(e) {
             break;
         case "replace":
             //get global colorlayer data to use while mouse is down
+            colorLayerGlobal = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
             //sample color and replace if match to backColor
+            let clickedColor = getColor(mouseX,mouseY,colorLayerGlobal);
+            if (clickedColor.color === backColor.color) {
+                actionDraw(mouseX,mouseY,brushColor,brushSize,modeType);
+                points.push({
+                    x: mouseX,
+                    y: mouseY,
+                    size: brushSize,
+                    color: {...brushColor},
+                    tool: toolType,
+                    mode: modeType
+                });
+                source = offScreenCVS.toDataURL();
+                renderImage();
+            }
             break;
         default:
             actionDraw(mouseX,mouseY,brushColor,brushSize,modeType);
@@ -302,6 +336,20 @@ function handleMouseUp(e) {
         case "replace":
             //only needed if perfect pixels option is on
             //sample color and replace if match
+            let clickedColor = getColor(mouseX,mouseY,colorLayerGlobal);
+            if (clickedColor.color === backColor.color) {
+                actionDraw(mouseX,mouseY,brushColor,brushSize,modeType);
+                points.push({
+                    x: mouseX,
+                    y: mouseY,
+                    size: brushSize,
+                    color: {...brushColor},
+                    tool: toolType,
+                    mode: modeType
+                });
+                source = offScreenCVS.toDataURL();
+                renderImage();
+            }
             break;
         case "pencil":
             //only needed if perfect pixels option is on
@@ -370,8 +418,6 @@ function handleModes(e) {
     modeType = modeBtn.id;
 }
 
-let lastDrawnX,lastDrawnY;
-let waitingPixelX, waitingPixelY;
 function perfectPixels(currentX,currentY) {
     //if currentPixel not neighbor to lastDrawn, draw waitingpixel
     if (Math.abs(currentX-lastDrawnX) > 1 || Math.abs(currentY-lastDrawnY) > 1) {
@@ -457,6 +503,17 @@ function getColor(startX,startY,colorLayer) {
     canvasColor.a = colorLayer.data[startPos+3];
     canvasColor.color = `rgba(${canvasColor.r},${canvasColor.g},${canvasColor.b},${canvasColor.a})`
     return canvasColor;
+}
+
+function actionReplace(coordX,coordY,currentColor,replacedColor,colorLayer,size,currentMode) {
+
+    //while clicked, get color at coords
+    //if color matches replacedcolor, draw currentcolor
+    let clickedColor = getColor(coordX,coordY,colorLayer);
+    if (clickedColor.color === replacedColor.color) {
+        actionDraw(coordX,coordY,currentColor,size,currentMode);
+
+    }
 }
 
 //For undo ability, store starting coords, and pass them into actionFill
