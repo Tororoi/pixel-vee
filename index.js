@@ -38,6 +38,47 @@ offScreenCVS.height = 64;
 let undoStack = [];
 let redoStack = [];
 
+//state
+let state = {
+    //timeline
+    points: [],
+    undoStack: [],
+    redoStack: [],
+    //settings
+    tool: {
+        name: "pencil",
+        fn: actionDraw,
+        brushSize: 1,
+        options: ["perfect", "erase"]
+    },
+    mode: "draw",
+    brushColor: {color: "rgba(255,0,0,255)", r: 255, g: 0, b: 0, a: 255},
+    backColor: {color: "rgba(255,255,255,255)", r: 255, g: 255, b: 255, a: 255},
+    palette: {},
+    options: {
+        perfect: false,
+        erase: false,
+        contiguous: false
+    },
+    //active variables
+    event: "none",
+    clicked: false,
+    lastOnX: null,
+    lastOnY: null,
+    lastX: null,
+    lastY: null,
+    //x2/y2 for line tool
+    lineX: null,
+    lineY: null,
+    //for perfect pixels
+    lastDrawnX: null,
+    lastDrawnY: null,
+    waitingPixelX: null,
+    waitingPixelY: null,
+    //for replace
+    colorLayerGlobal: null
+}
+
 //Other global variables
 let lastX;
 let lastY;
@@ -86,6 +127,7 @@ toolsCont.addEventListener('click', handleTools);
 modesCont.addEventListener('click', handleModes);
 
 function handleMouseMove(e) {
+    state.event = "mousemove";
     let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
     let mouseX = Math.floor(e.offsetX/trueRatio);
     let mouseY = Math.floor(e.offsetY/trueRatio);
@@ -243,6 +285,7 @@ function handleMouseMove(e) {
 }
 
 function handleMouseDown(e) {
+    state.event = "mousedown";
     clicked = true;
     let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
     let mouseX = Math.floor(e.offsetX/trueRatio);
@@ -312,6 +355,7 @@ function handleMouseDown(e) {
 }
 
 function handleMouseUp(e) {
+    state.event = "mouseup";
     clicked = false;
     // randomizeColor();
     let trueRatio = onScreenCVS.offsetWidth/offScreenCVS.width;
@@ -374,9 +418,11 @@ function handleMouseUp(e) {
     points = [];
     //Reset redostack
     redoStack = [];
+    state.event = "none";
 }
 
 function handleMouseOut(e) {
+    state.event = "mouseout";
     clicked = false;
     //add to undo stack
     if (points.length) {
@@ -387,6 +433,7 @@ function handleMouseOut(e) {
     redoStack = [];
     onScreenCTX.clearRect(0,0,ocWidth,ocHeight);
     drawCanvas();
+    state.event = "none";
 }
 
 function handleUndo() {
