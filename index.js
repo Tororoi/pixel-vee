@@ -21,7 +21,7 @@ let colorSwitch = document.querySelector(".switch");
 //Get tool buttons
 let toolsCont = document.querySelector(".tools");
 let toolBtn = document.querySelector("#pencil");
-toolBtn.style.background = "rgb(192, 45, 19)";
+toolBtn.style.background = "rgb(185, 28, 0)";
 
 let modesCont = document.querySelector(".modes");
 let modeBtn = document.querySelector("#draw");
@@ -285,9 +285,10 @@ function handleMouseDown(e) {
                     tool: toolType,
                     mode: modeType
                 });
-                source = offScreenCVS.toDataURL();
-                renderImage();
             }
+            //get rid of onscreen cursor
+            source = offScreenCVS.toDataURL();
+            renderImage();
             break;
         default:
             actionDraw(mouseX,mouseY,brushColor,brushSize,modeType);
@@ -401,21 +402,25 @@ function handleRedo() {
 }
 
 function handleTools(e) {
-    //reset old button
-    toolBtn.style.background = "rgb(105, 76, 212)";
-    //get new button and select it
-    toolBtn = e.target.closest(".tool");
-    toolBtn.style.background = "rgb(192, 45, 19)";
-    toolType = toolBtn.id;
+    if (e.target.closest(".tool")) {
+        //reset old button
+        toolBtn.style.background = "rgb(131, 131, 131)";
+        //get new button and select it
+        toolBtn = e.target.closest(".tool");
+        toolBtn.style.background = "rgb(185, 28, 0)";
+        toolType = toolBtn.id;
+    }
 }
 
 function handleModes(e) {
-    //reset old button
-    modeBtn.style.background = "rgb(37, 0, 139)";
-    //get new button and select it
-    modeBtn = e.target.closest(".mode");
-    modeBtn.style.background = "rgb(192, 45, 19)";
-    modeType = modeBtn.id;
+    if (e.target.closest(".mode")) {
+        //reset old button
+        modeBtn.style.background = "rgb(37, 0, 139)";
+        //get new button and select it
+        modeBtn = e.target.closest(".mode");
+        modeBtn.style.background = "rgb(192, 45, 19)";
+        modeType = modeBtn.id;
+    }
 }
 
 function perfectPixels(currentX,currentY) {

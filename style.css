@@ -1,3 +1,8 @@
+@font-face {
+    font-family: "04Font";
+    src: url("./public/04B_03__.ttf") format("truetype");
+}
+
 body {
     margin: 0px;
 }
@@ -6,6 +11,7 @@ body {
     display: flex;
     width: 100vw;
     height: 100vh;
+    font-family: "04Font";
 }
 
 /* Canvas */
@@ -31,7 +37,7 @@ canvas {
     rgb(216, 216, 216) 5px,
     rgb(216, 216, 216) 10px);
     position: absolute;
-    cursor: none;
+    cursor: crosshair;
     /* z-index: 100; */
     /* transition: all 1s; */
     width: 70%;
@@ -135,18 +141,25 @@ h4 {
 }
 
 .tool {
-    background: rgb(105, 76, 212);
+    background: rgb(131, 131, 131);
     user-select: none;
     width: 100px;
     text-align: center;
     color: white;
     height: 60px;
-    border-radius: 10px;
+    margin: 3px;
     opacity: 1;
+
+    box-shadow: 
+    2px 0px rgb(131, 131, 131),
+    -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131),
+    0px 2px rgb(131, 131, 131);
 }
 
 .tool:hover {
     opacity: 0.8;
+    /* background: rgb(185, 28, 0); */
 }
 
 /* Modes */
