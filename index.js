@@ -331,39 +331,8 @@ function addToTimeline(tool) {
     renderImage();
 }
 
-function perfectPixels(currentX, currentY) {
-    //if currentPixel not neighbor to lastDrawn, draw waitingpixel
-    if (Math.abs(currentX - state.lastDrawnX) > 1 || Math.abs(currentY - state.lastDrawnY) > 1) {
-        actionDraw(state.waitingPixelX, state.waitingPixelY, state.brushColor, state.tool.brushSize, state.mode);
-        //update queue
-        state.lastDrawnX = state.waitingPixelX;
-        state.lastDrawnY = state.waitingPixelY;
-        state.waitingPixelX = currentX;
-        state.waitingPixelY = currentY;
-        //add to points stack
-        //can't be replaced by current timeline function due to wrong x,y values
-        state.points.push({
-            //for line
-            startX: state.lastX,
-            startY: state.lastY,
-            //for everything
-            x: state.lastDrawnX,
-            y: state.lastDrawnY,
-            size: state.tool.brushSize,
-            color: { ...state.brushColor },
-            tool: state.tool.name,
-            action: state.tool.fn,
-            mode: state.mode
-        });
-        source = offScreenCVS.toDataURL();
-        renderImage();
-    } else {
-        state.waitingPixelX = currentX;
-        state.waitingPixelY = currentY;
-    }
-}
-
 //Action functions
+//controller for draw
 function drawSteps() {
     switch (state.event) {
         case "mousedown":
@@ -421,6 +390,38 @@ function drawSteps() {
             break;
         default:
         //do nothing
+    }
+}
+
+function perfectPixels(currentX, currentY) {
+    //if currentPixel not neighbor to lastDrawn, draw waitingpixel
+    if (Math.abs(currentX - state.lastDrawnX) > 1 || Math.abs(currentY - state.lastDrawnY) > 1) {
+        actionDraw(state.waitingPixelX, state.waitingPixelY, state.brushColor, state.tool.brushSize, state.mode);
+        //update queue
+        state.lastDrawnX = state.waitingPixelX;
+        state.lastDrawnY = state.waitingPixelY;
+        state.waitingPixelX = currentX;
+        state.waitingPixelY = currentY;
+        //add to points stack
+        //can't be replaced by current timeline function due to wrong x,y values
+        state.points.push({
+            //for line
+            startX: state.lastX,
+            startY: state.lastY,
+            //for everything
+            x: state.lastDrawnX,
+            y: state.lastDrawnY,
+            size: state.tool.brushSize,
+            color: { ...state.brushColor },
+            tool: state.tool.name,
+            action: state.tool.fn,
+            mode: state.mode
+        });
+        source = offScreenCVS.toDataURL();
+        renderImage();
+    } else {
+        state.waitingPixelX = currentX;
+        state.waitingPixelY = currentY;
     }
 }
 
@@ -517,6 +518,11 @@ function getColor(startX, startY, colorLayer) {
     return canvasColor;
 }
 
+//controller for replace
+function replaceSteps() {
+
+}
+
 function actionReplace(coordX, coordY, currentColor, replacedColor, colorLayer, size, currentMode) {
 
     //while clicked, get color at coords
@@ -525,6 +531,10 @@ function actionReplace(coordX, coordY, currentColor, replacedColor, colorLayer, 
     //treated like a mask?
 }
 
+//controller for fill
+function fillSteps() {
+
+}
 //For undo ability, store starting coords, and pass them into actionFill
 function actionFill(startX, startY, currentColor, currentMode) {
     //get imageData
@@ -704,6 +714,7 @@ function switchColors(e) {
     backSwatch.style.background = state.backColor.color;
 }
 
+//picker function, tool but not an action
 function sampleColor(x, y) {
     //get imageData
     let colorLayer = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
