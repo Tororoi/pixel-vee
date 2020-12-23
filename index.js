@@ -119,26 +119,7 @@ function handleMouseMove(e) {
     if (state.clicked) {
         switch (state.tool.name) {
             case "picker":
-                //only draw when necessary, get color here too
-                if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
-                    //get color
-                    sampleColor(state.mouseX, state.mouseY);
-                    //draw square
-                    onScreenCTX.clearRect(0, 0, ocWidth, ocHeight);
-                    drawCanvas();
-                    onScreenCTX.beginPath();
-                    onScreenCTX.rect(state.onX, state.onY, state.ratio, state.ratio);
-                    onScreenCTX.lineWidth = 0.5;
-                    onScreenCTX.strokeStyle = "black";
-                    onScreenCTX.stroke();
-                    onScreenCTX.beginPath();
-                    onScreenCTX.rect(state.onX + 0.5, state.onY + 0.5, state.ratio - 1, state.ratio - 1);
-                    onScreenCTX.lineWidth = 0.5;
-                    onScreenCTX.strokeStyle = "white";
-                    onScreenCTX.stroke();
-                    state.lastOnX = state.onX;
-                    state.lastOnY = state.onY;
-                }
+                pickerSteps();
                 break;
             case "fill":
                 //does nothing
@@ -154,7 +135,7 @@ function handleMouseMove(e) {
                 drawSteps();
         }
     } else {
-        //only draw when necessary
+        //only draw preview brush when necessary
         if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
             onScreenCTX.clearRect(0, 0, ocWidth, ocHeight);
             drawCanvas();
@@ -191,17 +172,13 @@ function handleMouseDown(e) {
     state.mouseY = Math.floor(e.offsetY / state.trueRatio);
     switch (state.tool.name) {
         case "picker":
-            //set color
-            sampleColor(state.mouseX, state.mouseY);
+            pickerSteps();
             break;
         case "fill":
             fillSteps();
             break;
         case "line":
-            //Set origin point
             lineSteps();
-            // state.lastX = state.mouseX;
-            // state.lastY = state.mouseY;
             break;
         case "replace":
             replaceSteps();
@@ -214,7 +191,6 @@ function handleMouseDown(e) {
 function handleMouseUp(e) {
     state.event = "mouseup";
     state.clicked = false;
-    // randomizeColor();
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width;
     state.mouseX = Math.floor(e.offsetX / state.trueRatio);
     state.mouseY = Math.floor(e.offsetY / state.trueRatio);
@@ -483,10 +459,10 @@ function actionLine(sx, sy, tx, ty, currentColor, ctx, currentMode, scale = 1) {
 }
 
 //helper for replace and fill to get color on canvas
-function getColor(startX, startY, colorLayer) {
+function getColor(x, y, colorLayer) {
     let canvasColor = {};
 
-    let startPos = (startY * offScreenCVS.width + startX) * 4;
+    let startPos = (y * offScreenCVS.width + x) * 4;
     //clicked color
     canvasColor.r = colorLayer.data[startPos];
     canvasColor.g = colorLayer.data[startPos + 1];
@@ -502,36 +478,21 @@ function replaceSteps() {
         case "mousedown":
             //get global colorlayer data to use while mouse is down
             state.colorLayerGlobal = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
-            //sample color and replace if match to backColor
-            state.clickedColor = getColor(state.mouseX, state.mouseY, state.colorLayerGlobal);
-            if (state.clickedColor.color === state.backColor.color) {
-                actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
-                addToTimeline(state.tool.name);
-            }
+            actionReplace();
             //get rid of onscreen cursor
             source = offScreenCVS.toDataURL();
             renderImage();
             break;
         case "mousemove":
             //only execute when necessary
-            //sample color
             //draw onscreen current pixel if match to backColor
             if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
-                state.clickedColor = getColor(state.mouseX, state.mouseY, state.colorLayerGlobal);
-                if (state.clickedColor.color === state.backColor.color) {
-                    actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
-                    addToTimeline(state.tool.name);
-                }
+                actionReplace();
             }
             break;
         case "mouseup":
             //only needed if perfect pixels option is on
-            //sample color and replace if match
-            state.clickedColor = getColor(state.mouseX, state.mouseY, state.colorLayerGlobal);
-            if (state.clickedColor.color === state.backColor.color) {
-                actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
-                addToTimeline(state.tool.name);
-            }
+            actionReplace();
             break;
         case "mouseout":
             //do nothing
@@ -541,12 +502,14 @@ function replaceSteps() {
     }
 }
 
-function actionReplace(coordX, coordY, currentColor, replacedColor, colorLayer, size, currentMode) {
-
-    //while clicked, get color at coords
-    //if color matches replacedcolor, draw currentcolor
-    //instead of draw, replace color data
-    //treated like a mask?
+function actionReplace() {
+    //
+    //sample color and replace if match
+    state.clickedColor = getColor(state.mouseX, state.mouseY, state.colorLayerGlobal);
+    if (state.clickedColor.color === state.backColor.color) {
+        actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
+        addToTimeline(state.tool.name);
+    }
 }
 
 //controller for fill
@@ -569,23 +532,22 @@ function fillSteps() {
         //do nothing
     }
 }
-//For undo ability, store starting coords, and pass them into actionFill
+
+//For undo ability, store starting coords and settings and pass them into actionFill
 function actionFill(startX, startY, currentColor, currentMode) {
     //get imageData
-    let colorLayer = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
+    state.colorLayerGlobal = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
 
-    let startPos = (startY * offScreenCVS.width + startX) * 4;
-
-    //clicked color
-    let startR = colorLayer.data[startPos];
-    let startG = colorLayer.data[startPos + 1];
-    let startB = colorLayer.data[startPos + 2];
-    let startA = colorLayer.data[startPos + 3];
+    state.clickedColor = getColor(startX, startY, state.colorLayerGlobal);
 
     if (currentMode === "erase") currentColor = { color: "rgba(0, 0, 0, 0)", r: 0, g: 0, b: 0, a: 0 };
 
     //exit if color is the same
-    if (currentColor.r === startR && currentColor.g === startG && currentColor.b === startB && currentColor.a === startA) {
+    // if (currentColor.r === state.clickedColor.r && currentColor.g === state.clickedColor.g && currentColor.b === state.clickedColor.b && currentColor.a === state.clickedColor.a) {
+    //     return;
+    // }
+
+    if (currentColor.color === state.clickedColor.color) {
         return;
     }
     //Start with click coords
@@ -641,39 +603,101 @@ function actionFill(startX, startY, currentColor, currentMode) {
             pixelPos += offScreenCVS.width * 4;
         }
 
-        // offScreenCTX.putImageData(colorLayer, 0, 0);
-        // source = offScreenCVS.toDataURL();
-        // renderImage();
-
         if (pixelStack.length) {
             floodFill();
-            // window.setTimeout(floodFill, 100);
         }
     }
 
     //render floodFill result
-    offScreenCTX.putImageData(colorLayer, 0, 0);
+    offScreenCTX.putImageData(state.colorLayerGlobal, 0, 0);
 
     //helpers
     function matchStartColor(pixelPos) {
-        let r = colorLayer.data[pixelPos];
-        let g = colorLayer.data[pixelPos + 1];
-        let b = colorLayer.data[pixelPos + 2];
-        let a = colorLayer.data[pixelPos + 3];
-        return (r === startR && g === startG && b === startB && a === startA);
+        let r = state.colorLayerGlobal.data[pixelPos];
+        let g = state.colorLayerGlobal.data[pixelPos + 1];
+        let b = state.colorLayerGlobal.data[pixelPos + 2];
+        let a = state.colorLayerGlobal.data[pixelPos + 3];
+        return (r === state.clickedColor.r && g === state.clickedColor.g && b === state.clickedColor.b && a === state.clickedColor.a);
     }
 
     function colorPixel(pixelPos) {
-        colorLayer.data[pixelPos] = currentColor.r;
-        colorLayer.data[pixelPos + 1] = currentColor.g;
-        colorLayer.data[pixelPos + 2] = currentColor.b;
+        state.colorLayerGlobal.data[pixelPos] = currentColor.r;
+        state.colorLayerGlobal.data[pixelPos + 1] = currentColor.g;
+        state.colorLayerGlobal.data[pixelPos + 2] = currentColor.b;
         //not ideal
-        colorLayer.data[pixelPos + 3] = currentColor.a;
+        state.colorLayerGlobal.data[pixelPos + 3] = currentColor.a;
     }
 }
 
-//Helper functions
+//Non-actions
+//Color picker
+function pickerSteps() {
+    switch (state.event) {
+        case "mousedown":
+            //set color
+            sampleColor(state.mouseX, state.mouseY);
+            break;
+        case "mousemove":
+            //only draw when necessary, get color here too
+            if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
+                //get color
+                sampleColor(state.mouseX, state.mouseY);
+                //draw square
+                onScreenCTX.clearRect(0, 0, ocWidth, ocHeight);
+                drawCanvas();
+                onScreenCTX.beginPath();
+                onScreenCTX.rect(state.onX, state.onY, state.ratio, state.ratio);
+                onScreenCTX.lineWidth = 0.5;
+                onScreenCTX.strokeStyle = "black";
+                onScreenCTX.stroke();
+                onScreenCTX.beginPath();
+                onScreenCTX.rect(state.onX + 0.5, state.onY + 0.5, state.ratio - 1, state.ratio - 1);
+                onScreenCTX.lineWidth = 0.5;
+                onScreenCTX.strokeStyle = "white";
+                onScreenCTX.stroke();
+                state.lastOnX = state.onX;
+                state.lastOnY = state.onY;
+            }
+            break;
+        case "mouseup":
+            //do nothing
+            break;
+        case "mouseout":
+            //do nothing
+            break;
+        default:
+        //do nothing
+    }
+}
 
+//picker function, tool but not an action
+function sampleColor(x, y) {
+    //get imageData
+    state.colorLayerGlobal = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
+
+    let newColor = getColor(x,y,state.colorLayerGlobal);
+    //not simply passing whole color in until random color function is refined
+    setColor(newColor.r, newColor.g, newColor.b, "swatch");
+}
+
+function setColor(r, g, b, target) {
+    if (target === "swatch") {
+        state.brushColor.color = `rgba(${r},${g},${b},255)`;
+        state.brushColor.r = r;
+        state.brushColor.g = g;
+        state.brushColor.b = b;
+        swatch.style.background = state.brushColor.color;
+    } else {
+        state.backColor.color = `rgba(${r},${g},${b},255)`;
+        state.backColor.r = r;
+        state.backColor.g = g;
+        state.backColor.b = b;
+        backSwatch.style.background = state.backColor.color;
+    }
+
+}
+
+//Main pillar of the code structure
 function actionUndoRedo(pushStack, popStack) {
     pushStack.push(popStack.pop());
     offScreenCTX.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
@@ -716,23 +740,6 @@ function drawCanvas() {
     onScreenCTX.drawImage(img, 0, 0, ocWidth, ocHeight)
 }
 
-function setColor(r, g, b, target) {
-    if (target === "swatch") {
-        state.brushColor.color = `rgba(${r},${g},${b},255)`;
-        state.brushColor.r = r;
-        state.brushColor.g = g;
-        state.brushColor.b = b;
-        swatch.style.background = state.brushColor.color;
-    } else {
-        state.backColor.color = `rgba(${r},${g},${b},255)`;
-        state.backColor.r = r;
-        state.backColor.g = g;
-        state.backColor.b = b;
-        backSwatch.style.background = state.backColor.color;
-    }
-
-}
-
 function randomizeColor(e) {
     let r = Math.floor(Math.random() * 256);
     let g = Math.floor(Math.random() * 256);
@@ -741,23 +748,9 @@ function randomizeColor(e) {
 }
 
 function switchColors(e) {
-    let temp = state.brushColor;
+    let temp = { ...state.brushColor };
     state.brushColor = state.backColor;
     swatch.style.background = state.brushColor.color;
     state.backColor = temp;
     backSwatch.style.background = state.backColor.color;
-}
-
-//picker function, tool but not an action
-function sampleColor(x, y) {
-    //get imageData
-    let colorLayer = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
-
-    let colorPos = (y * offScreenCVS.width + x) * 4;
-
-    //clicked color
-    let r = colorLayer.data[colorPos];
-    let g = colorLayer.data[colorPos + 1];
-    let b = colorLayer.data[colorPos + 2];
-    setColor(r, g, b, "swatch");
 }
