@@ -63,6 +63,7 @@ let state = {
     //active variables for canvas
     event: "none",
     clicked: false,
+    clickedColor: null,
     mouseX: null,
     mouseY: null,
     ratio: null,
@@ -140,20 +141,14 @@ function handleMouseMove(e) {
                 }
                 break;
             case "fill":
-                //do nothing
+                //does nothing
+                fillSteps();
                 break;
             case "line":
                 lineSteps();
                 break;
             case "replace":
-                //only execute when necessary
-                //sample color
-                //draw onscreen current pixel if match to backColor
-                let clickedColor = getColor(state.mouseX, state.mouseY, state.colorLayerGlobal);
-                if (clickedColor.color === state.backColor.color) {
-                    actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
-                    addToTimeline(state.tool.name);
-                }
+                replaceSteps();
                 break;
             default:
                 drawSteps();
@@ -200,8 +195,7 @@ function handleMouseDown(e) {
             sampleColor(state.mouseX, state.mouseY);
             break;
         case "fill":
-            actionFill(state.mouseX, state.mouseY, state.brushColor, state.mode);
-            addToTimeline(state.tool.name);
+            fillSteps();
             break;
         case "line":
             //Set origin point
@@ -210,17 +204,7 @@ function handleMouseDown(e) {
             // state.lastY = state.mouseY;
             break;
         case "replace":
-            //get global colorlayer data to use while mouse is down
-            state.colorLayerGlobal = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
-            //sample color and replace if match to backColor
-            let clickedColor = getColor(state.mouseX, state.mouseY, state.colorLayerGlobal);
-            if (clickedColor.color === state.backColor.color) {
-                actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
-                addToTimeline(state.tool.name);
-            }
-            //get rid of onscreen cursor
-            source = offScreenCVS.toDataURL();
-            renderImage();
+            replaceSteps();
             break;
         default:
             drawSteps();
@@ -240,13 +224,7 @@ function handleMouseUp(e) {
             lineSteps();
             break;
         case "replace":
-            //only needed if perfect pixels option is on
-            //sample color and replace if match
-            let clickedColor = getColor(state.mouseX, state.mouseY, state.colorLayerGlobal);
-            if (clickedColor.color === state.backColor.color) {
-                actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
-                addToTimeline(state.tool.name);
-            }
+            replaceSteps();
             break;
         case "pencil":
             drawSteps();
@@ -520,7 +498,45 @@ function getColor(startX, startY, colorLayer) {
 
 //controller for replace
 function replaceSteps() {
-
+    switch (state.event) {
+        case "mousedown":
+            //get global colorlayer data to use while mouse is down
+            state.colorLayerGlobal = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
+            //sample color and replace if match to backColor
+            let clickedColor = getColor(state.mouseX, state.mouseY, state.colorLayerGlobal);
+            if (clickedColor.color === state.backColor.color) {
+                actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
+                addToTimeline(state.tool.name);
+            }
+            //get rid of onscreen cursor
+            source = offScreenCVS.toDataURL();
+            renderImage();
+            break;
+        case "mousemove":
+            //only execute when necessary
+            //sample color
+            //draw onscreen current pixel if match to backColor
+            state.clickedColor = getColor(state.mouseX, state.mouseY, state.colorLayerGlobal);
+            if (state.clickedColor.color === state.backColor.color) {
+                actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
+                addToTimeline(state.tool.name);
+            }
+            break;
+        case "mouseup":
+            //only needed if perfect pixels option is on
+            //sample color and replace if match
+            state.clickedColor = getColor(state.mouseX, state.mouseY, state.colorLayerGlobal);
+            if (state.clickedColor.color === state.backColor.color) {
+                actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
+                addToTimeline(state.tool.name);
+            }
+            break;
+        case "mouseout":
+            //do nothing
+            break;
+        default:
+        //do nothing
+    }
 }
 
 function actionReplace(coordX, coordY, currentColor, replacedColor, colorLayer, size, currentMode) {
@@ -533,7 +549,23 @@ function actionReplace(coordX, coordY, currentColor, replacedColor, colorLayer, 
 
 //controller for fill
 function fillSteps() {
-
+    switch (state.event) {
+        case "mousedown":
+            actionFill(state.mouseX, state.mouseY, state.brushColor, state.mode);
+            addToTimeline(state.tool.name);
+            break;
+        case "mousemove":
+            //do nothing
+            break;
+        case "mouseup":
+            //do nothing
+            break;
+        case "mouseout":
+            //do nothing
+            break;
+        default:
+        //do nothing
+    }
 }
 //For undo ability, store starting coords, and pass them into actionFill
 function actionFill(startX, startY, currentColor, currentMode) {
