@@ -34,10 +34,6 @@ let offScreenCTX = offScreenCVS.getContext("2d");
 offScreenCVS.width = 64;
 offScreenCVS.height = 64;
 
-//Create history stacks for the undo functionality
-let undoStack = [];
-let redoStack = [];
-
 //state
 let state = {
     //timeline
@@ -84,6 +80,40 @@ let state = {
     waitingPixelY: null,
     //for replace
     colorLayerGlobal: null
+}
+
+//tool objects
+let tools = {
+    pencil: {
+        name: "pencil",
+        fn: drawSteps,
+        brushSize: 1,
+        options: ["perfect"]
+    },
+    fill: {
+        name: "replace",
+        fn: replaceSteps,
+        brushSize: 1,
+        options: ["perfect"]
+    },
+    line: {
+        name: "line",
+        fn: lineSteps,
+        brushSize: 1,
+        options: []
+    },
+    fill: {
+        name: "fill",
+        fn: fillSteps,
+        brushSize: 1,
+        options: []
+    },
+    picker: {
+        name: "picker",
+        fn: pickerSteps,
+        brushSize: 1,
+        options: []
+    }
 }
 
 //Create an Image with a default source of the existing onscreen canvas
@@ -339,9 +369,6 @@ function drawSteps() {
             actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
             addToTimeline(state.tool.name);
             break;
-        case "mouseout":
-            //do nothing
-            break;
         default:
         //do nothing
     }
@@ -414,9 +441,6 @@ function lineSteps() {
         case "mouseup":
             actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, offScreenCTX, state.mode);
             addToTimeline(state.tool.name);
-            break;
-        case "mouseout":
-            //do nothing
             break;
         default:
         //do nothing
@@ -494,9 +518,6 @@ function replaceSteps() {
             //only needed if perfect pixels option is on
             actionReplace();
             break;
-        case "mouseout":
-            //do nothing
-            break;
         default:
         //do nothing
     }
@@ -518,15 +539,6 @@ function fillSteps() {
         case "mousedown":
             actionFill(state.mouseX, state.mouseY, state.brushColor, state.mode);
             addToTimeline(state.tool.name);
-            break;
-        case "mousemove":
-            //do nothing
-            break;
-        case "mouseup":
-            //do nothing
-            break;
-        case "mouseout":
-            //do nothing
             break;
         default:
         //do nothing
@@ -659,12 +671,6 @@ function pickerSteps() {
                 state.lastOnY = state.onY;
             }
             break;
-        case "mouseup":
-            //do nothing
-            break;
-        case "mouseout":
-            //do nothing
-            break;
         default:
         //do nothing
     }
@@ -675,7 +681,7 @@ function sampleColor(x, y) {
     //get imageData
     state.colorLayerGlobal = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
 
-    let newColor = getColor(x,y,state.colorLayerGlobal);
+    let newColor = getColor(x, y, state.colorLayerGlobal);
     //not simply passing whole color in until random color function is refined
     setColor(newColor.r, newColor.g, newColor.b, "swatch");
 }
