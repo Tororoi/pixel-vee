@@ -503,8 +503,8 @@ function replaceSteps() {
             //get global colorlayer data to use while mouse is down
             state.colorLayerGlobal = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
             //sample color and replace if match to backColor
-            let clickedColor = getColor(state.mouseX, state.mouseY, state.colorLayerGlobal);
-            if (clickedColor.color === state.backColor.color) {
+            state.clickedColor = getColor(state.mouseX, state.mouseY, state.colorLayerGlobal);
+            if (state.clickedColor.color === state.backColor.color) {
                 actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
                 addToTimeline(state.tool.name);
             }
@@ -516,10 +516,12 @@ function replaceSteps() {
             //only execute when necessary
             //sample color
             //draw onscreen current pixel if match to backColor
-            state.clickedColor = getColor(state.mouseX, state.mouseY, state.colorLayerGlobal);
-            if (state.clickedColor.color === state.backColor.color) {
-                actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
-                addToTimeline(state.tool.name);
+            if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
+                state.clickedColor = getColor(state.mouseX, state.mouseY, state.colorLayerGlobal);
+                if (state.clickedColor.color === state.backColor.color) {
+                    actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
+                    addToTimeline(state.tool.name);
+                }
             }
             break;
         case "mouseup":
