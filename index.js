@@ -34,6 +34,40 @@ let offScreenCTX = offScreenCVS.getContext("2d");
 offScreenCVS.width = 64;
 offScreenCVS.height = 64;
 
+//tool objects
+let tools = {
+    pencil: {
+        name: "pencil",
+        fn: drawSteps,
+        brushSize: 1,
+        options: ["perfect"]
+    },
+    replace: {
+        name: "replace",
+        fn: replaceSteps,
+        brushSize: 1,
+        options: ["perfect"]
+    },
+    line: {
+        name: "line",
+        fn: lineSteps,
+        brushSize: 1,
+        options: []
+    },
+    fill: {
+        name: "fill",
+        fn: fillSteps,
+        brushSize: 1,
+        options: []
+    },
+    picker: {
+        name: "picker",
+        fn: pickerSteps,
+        brushSize: 1,
+        options: []
+    }
+}
+
 //state
 let state = {
     //timeline
@@ -41,12 +75,7 @@ let state = {
     undoStack: [],
     redoStack: [],
     //settings
-    tool: {
-        name: "pencil",
-        fn: actionDraw,
-        brushSize: 1,
-        options: ["perfect"]
-    },
+    tool: { ...tools.pencil },
     mode: "draw",
     brushColor: { color: "rgba(255,0,0,255)", r: 255, g: 0, b: 0, a: 255 },
     backColor: { color: "rgba(255,255,255,255)", r: 255, g: 255, b: 255, a: 255 },
@@ -82,40 +111,6 @@ let state = {
     colorLayerGlobal: null
 }
 
-//tool objects
-let tools = {
-    pencil: {
-        name: "pencil",
-        fn: drawSteps,
-        brushSize: 1,
-        options: ["perfect"]
-    },
-    fill: {
-        name: "replace",
-        fn: replaceSteps,
-        brushSize: 1,
-        options: ["perfect"]
-    },
-    line: {
-        name: "line",
-        fn: lineSteps,
-        brushSize: 1,
-        options: []
-    },
-    fill: {
-        name: "fill",
-        fn: fillSteps,
-        brushSize: 1,
-        options: []
-    },
-    picker: {
-        name: "picker",
-        fn: pickerSteps,
-        brushSize: 1,
-        options: []
-    }
-}
-
 //Create an Image with a default source of the existing onscreen canvas
 let img = new Image;
 let source = offScreenCVS.toDataURL();
@@ -147,23 +142,8 @@ function handleMouseMove(e) {
     state.onX = state.mouseX * state.ratio;
     state.onY = state.mouseY * state.ratio;
     if (state.clicked) {
-        switch (state.tool.name) {
-            case "picker":
-                pickerSteps();
-                break;
-            case "fill":
-                //does nothing
-                fillSteps();
-                break;
-            case "line":
-                lineSteps();
-                break;
-            case "replace":
-                replaceSteps();
-                break;
-            default:
-                drawSteps();
-        }
+        //run selected tool step function
+        state.tool.fn();
     } else {
         //only draw preview brush when necessary
         if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
@@ -200,22 +180,8 @@ function handleMouseDown(e) {
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width;
     state.mouseX = Math.floor(e.offsetX / state.trueRatio);
     state.mouseY = Math.floor(e.offsetY / state.trueRatio);
-    switch (state.tool.name) {
-        case "picker":
-            pickerSteps();
-            break;
-        case "fill":
-            fillSteps();
-            break;
-        case "line":
-            lineSteps();
-            break;
-        case "replace":
-            replaceSteps();
-            break;
-        default:
-            drawSteps();
-    }
+    //run selected tool step function
+    state.tool.fn();
 }
 
 function handleMouseUp(e) {
@@ -224,18 +190,8 @@ function handleMouseUp(e) {
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width;
     state.mouseX = Math.floor(e.offsetX / state.trueRatio);
     state.mouseY = Math.floor(e.offsetY / state.trueRatio);
-    //draw line if line tool
-    switch (state.tool.name) {
-        case "line":
-            lineSteps();
-            break;
-        case "replace":
-            replaceSteps();
-            break;
-        case "pencil":
-            drawSteps();
-            break;
-    }
+    //run selected tool step function
+    state.tool.fn();
     //add to undo stack
     if (state.points.length) {
         state.undoStack.push(state.points);
@@ -280,7 +236,8 @@ function handleTools(e) {
         //get new button and select it
         toolBtn = e.target.closest(".tool");
         toolBtn.style.background = "rgb(185, 28, 0)";
-        state.tool.name = toolBtn.id;
+        state.tool = tools[toolBtn.id]
+        // state.tool.name = toolBtn.id;
     }
 }
 
