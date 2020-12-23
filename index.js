@@ -231,13 +231,15 @@ function handleRedo() {
 
 function handleTools(e) {
     if (e.target.closest(".tool")) {
-        //reset old button
-        toolBtn.style.background = "rgb(131, 131, 131)";
-        //get new button and select it
-        toolBtn = e.target.closest(".tool");
-        toolBtn.style.background = "rgb(185, 28, 0)";
-        state.tool = tools[toolBtn.id]
-        // state.tool.name = toolBtn.id;
+        //failsafe for hacking tool ids
+        if (tools[e.target.closest(".tool").id]) {
+            //reset old button
+            toolBtn.style.background = "rgb(131, 131, 131)";
+            //get new button and select it
+            toolBtn = e.target.closest(".tool");
+            toolBtn.style.background = "rgb(185, 28, 0)";
+            state.tool = tools[toolBtn.id];
+        }
     }
 }
 
@@ -252,7 +254,7 @@ function handleModes(e) {
     }
 }
 
-function addToTimeline(tool) {
+function addToTimeline(tool,x,y) {
     //use current state for variables
     //pencil, replace
     state.points.push({
@@ -260,8 +262,8 @@ function addToTimeline(tool) {
         startX: state.lastX,
         startY: state.lastY,
         //for everything
-        x: state.mouseX,
-        y: state.mouseY,
+        x: x,
+        y: y,
         size: state.tool.brushSize,
         color: { ...state.brushColor },
         tool: tool,
@@ -284,7 +286,7 @@ function drawSteps() {
             state.lastDrawnY = state.mouseY;
             state.waitingPixelX = state.mouseX;
             state.waitingPixelY = state.mouseY;
-            addToTimeline(state.tool.name);
+            addToTimeline(state.tool.name,state.mouseX,state.mouseY);
             break;
         case "mousemove":
             //draw onscreen current pixel
@@ -296,21 +298,21 @@ function drawSteps() {
             }
             if (state.lastX !== state.mouseX || state.lastY !== state.mouseY) {
                 //draw between points when drawing fast
-                if (state.mode === "noncont") { //temp
+                if (state.mode === "noncont") { //temp, not a desired mode eventually
                     actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
-                    addToTimeline(state.tool.name);
+                    addToTimeline(state.tool.name,state.mouseX,state.mouseY);
                 } else { //temp
                     if (Math.abs(state.mouseX - state.lastX) > 1 || Math.abs(state.mouseY - state.lastY) > 1) {
                         //add to options, only execute if "continuous line" is on
                         actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, offScreenCTX, state.mode);
-                        addToTimeline("line");
+                        addToTimeline("line",state.mouseX,state.mouseY);
                     } else {
                         //perfect will be option, not mode
                         if (state.mode === "perfect") {
                             perfectPixels(state.mouseX, state.mouseY);
                         } else {
                             actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
-                            addToTimeline(state.tool.name);
+                            addToTimeline(state.tool.name,state.mouseX,state.mouseY);
                         }
                     }
                 } //temp
@@ -324,7 +326,7 @@ function drawSteps() {
         case "mouseup":
             //only needed if perfect pixels option is on
             actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
-            addToTimeline(state.tool.name);
+            addToTimeline(state.tool.name,state.mouseX,state.mouseY);
             break;
         default:
         //do nothing
@@ -397,7 +399,7 @@ function lineSteps() {
             break;
         case "mouseup":
             actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, offScreenCTX, state.mode);
-            addToTimeline(state.tool.name);
+            addToTimeline(state.tool.name,state.mouseX,state.mouseY);
             break;
         default:
         //do nothing
@@ -460,6 +462,12 @@ function replaceSteps() {
             //get global colorlayer data to use while mouse is down
             state.colorLayerGlobal = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
             actionReplace();
+            state.lastX = state.mouseX;
+            state.lastY = state.mouseY;
+            // state.lastDrawnX = state.mouseX;
+            // state.lastDrawnY = state.mouseY;
+            // state.waitingPixelX = state.mouseX;
+            // state.waitingPixelY = state.mouseY;
             //get rid of onscreen cursor
             source = offScreenCVS.toDataURL();
             renderImage();
@@ -467,9 +475,24 @@ function replaceSteps() {
         case "mousemove":
             //only execute when necessary
             //draw onscreen current pixel if match to backColor
-            if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
+            // can't add smoother lines until line replace method is added
+            if (state.lastX !== state.mouseX || state.lastY !== state.mouseY) {
                 actionReplace();
+                if (Math.abs(state.mouseX - state.lastX) > 1 || Math.abs(state.mouseY - state.lastY) > 1) {
+                    //add to options, only execute if "continuous line" is on
+                    lineReplace(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, offScreenCTX, state.mode);
+                } else {
+                    //perfect will be option, not mode
+                    // if (state.mode === "perfect") {
+                    //     perfectPixels(state.mouseX, state.mouseY);
+                    // } else {
+                        actionReplace();
+                    // }
+                }
             }
+            // save last point
+            state.lastX = state.mouseX;
+            state.lastY = state.mouseY;
             break;
         case "mouseup":
             //only needed if perfect pixels option is on
@@ -480,13 +503,49 @@ function replaceSteps() {
     }
 }
 
+function lineReplace(sx, sy, tx, ty, currentColor, ctx, currentMode) {
+    ctx.fillStyle = currentColor.color;
+    //create triangle object
+    let tri = {}
+    function getTriangle(x1, y1, x2, y2, ang) {
+        if (Math.abs(x1 - x2) > Math.abs(y1 - y2)) {
+            tri.x = Math.sign(Math.cos(ang));
+            tri.y = Math.tan(ang) * Math.sign(Math.cos(ang));
+            tri.long = Math.abs(x1 - x2);
+        } else {
+            tri.x = Math.tan((Math.PI / 2) - ang) * Math.sign(Math.cos((Math.PI / 2) - ang));
+            tri.y = Math.sign(Math.cos((Math.PI / 2) - ang));
+            tri.long = Math.abs(y1 - y2);
+        }
+    }
+    // finds the angle of (x,y) on a plane from the origin
+    function getAngle(x, y) { return Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0); }
+    let angle = getAngle(tx - sx, ty - sy); // angle of line
+    getTriangle(sx, sy, tx, ty, angle);
+
+    for (let i = 0; i < tri.long; i++) {
+        let thispoint = { x: Math.round(sx + tri.x * i), y: Math.round(sy + tri.y * i) };
+        // for each point along the line
+        let clickedColor = getColor(thispoint.x, thispoint.y, state.colorLayerGlobal);
+        if (clickedColor.color === state.backColor.color) {
+            actionDraw(thispoint.x, thispoint.y, state.brushColor, state.tool.brushSize, currentMode);
+            addToTimeline(state.tool.name,thispoint.x,thispoint.y);
+        }
+    }
+    //fill endpoint
+        let clickedColor = getColor(Math.round(tx), Math.round(ty), state.colorLayerGlobal);
+        if (clickedColor.color === state.backColor.color) {
+            actionDraw(Math.round(tx), Math.round(ty), state.brushColor, state.tool.brushSize, currentMode);
+            addToTimeline(state.tool.name,Math.round(tx),Math.round(ty));
+        }
+}
+
 function actionReplace() {
-    //
     //sample color and replace if match
     state.clickedColor = getColor(state.mouseX, state.mouseY, state.colorLayerGlobal);
     if (state.clickedColor.color === state.backColor.color) {
         actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
-        addToTimeline(state.tool.name);
+        addToTimeline(state.tool.name,state.mouseX,state.mouseY);
     }
 }
 
@@ -495,7 +554,7 @@ function fillSteps() {
     switch (state.event) {
         case "mousedown":
             actionFill(state.mouseX, state.mouseY, state.brushColor, state.mode);
-            addToTimeline(state.tool.name);
+            addToTimeline(state.tool.name,state.mouseX,state.mouseY);
             break;
         default:
         //do nothing
