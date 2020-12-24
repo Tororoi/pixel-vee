@@ -59,7 +59,7 @@ const tools = {
         name: "fill",
         fn: fillSteps,
         brushSize: 1,
-        options: []
+        options: ["contiguous"]
     },
     picker: {
         name: "picker",
@@ -82,6 +82,10 @@ const state = {
     undoStack: [],
     redoStack: [],
     //settings
+    options: {
+        perfect: false,
+        contiguous: false
+    },
     tool: { ...tools.pencil },
     mode: "draw",
     brushColor: { color: "rgba(255,0,0,255)", r: 255, g: 0, b: 0, a: 255 },
@@ -732,6 +736,8 @@ function grabSteps() {
         case "mouseup":
             state.lastOffsetX = state.xOffset;
             state.lastOffsetY = state.yOffset;
+            state.lastOnX = state.onX;
+            state.lastOnY = state.onY;
             break;
         case "mouseout":
             state.lastOffsetX = state.xOffset;
