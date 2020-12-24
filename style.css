@@ -22,6 +22,12 @@ body {
     /* height: 70%; */
 }
 
+.bg-space {
+    background-color: rgb(80, 80, 80);
+    width: 100%;
+    overflow: hidden;
+}
+
 canvas {
     /* background:
 	linear-gradient(135deg, transparent 75%, rgb(216, 216, 216) 0%) 0 0,

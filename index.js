@@ -731,11 +731,11 @@ function grabSteps() {
             break;
         case "mouseup":
             state.lastOffsetX = state.xOffset;
-            state.lastOffsetY = state.yOffset;;
+            state.lastOffsetY = state.yOffset;
             break;
         case "mouseout":
             state.lastOffsetX = state.xOffset;
-            state.lastOffsetY = state.yOffset;;
+            state.lastOffsetY = state.yOffset;
             break;
         default:
         //do nothing
