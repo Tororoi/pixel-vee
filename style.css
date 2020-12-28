@@ -121,6 +121,7 @@ canvas {
     height: 20px;
     transform: rotate(45deg);
     align-self: center;
+    cursor: pointer;
 }
 
 .back-swatch {
