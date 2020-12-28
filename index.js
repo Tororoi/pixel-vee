@@ -171,24 +171,31 @@ function handleMouseMove(e) {
             onScreenCTX.clearRect(0, 0, ocWidth, ocHeight);
             drawCanvas();
             switch (state.tool.name) {
+                case "grab":
+                    //show nothing
+                    break;
                 case "picker":
                     //empty square
+                    drawCursorBox();
                     break;
                 default:
                     //colored square
                     onScreenCTX.fillStyle = state.brushColor.color;
                     onScreenCTX.fillRect(state.onX, state.onY, state.ratio, state.ratio);
+                    drawCursorBox();
             }
-            onScreenCTX.beginPath();
-            onScreenCTX.rect(state.onX, state.onY, state.ratio, state.ratio);
-            onScreenCTX.lineWidth = 0.5;
-            onScreenCTX.strokeStyle = "black";
-            onScreenCTX.stroke();
-            onScreenCTX.beginPath();
-            onScreenCTX.rect(state.onX + 0.5, state.onY + 0.5, state.ratio - 1, state.ratio - 1);
-            onScreenCTX.lineWidth = 0.5;
-            onScreenCTX.strokeStyle = "white";
-            onScreenCTX.stroke();
+            function drawCursorBox() {
+                onScreenCTX.beginPath();
+                onScreenCTX.rect(state.onX, state.onY, state.ratio, state.ratio);
+                onScreenCTX.lineWidth = 0.5;
+                onScreenCTX.strokeStyle = "black";
+                onScreenCTX.stroke();
+                onScreenCTX.beginPath();
+                onScreenCTX.rect(state.onX + 0.5, state.onY + 0.5, state.ratio - 1, state.ratio - 1);
+                onScreenCTX.lineWidth = 0.5;
+                onScreenCTX.strokeStyle = "white";
+                onScreenCTX.stroke();
+            }
             state.lastOnX = state.onX;
             state.lastOnY = state.onY;
         }
@@ -265,6 +272,11 @@ function handleTools(e) {
             toolBtn = e.target.closest(".tool");
             toolBtn.style.background = "rgb(185, 28, 0)";
             state.tool = tools[toolBtn.id];
+            if (toolBtn.id === "grab") {
+                onScreenCVS.style.cursor = "move";
+            } else {
+                onScreenCVS.style.cursor = "crosshair";
+            }
         }
     }
 }
@@ -798,6 +810,11 @@ function drawCanvas() {
     onScreenCTX.imageSmoothingEnabled = false;
     // onScreenCTX.drawImage(img, 0, 0, ocWidth, ocHeight);
     onScreenCTX.drawImage(img, state.xOffset, state.yOffset, ocWidth, ocHeight);
+    onScreenCTX.beginPath();
+    onScreenCTX.rect(state.xOffset-1, state.yOffset-1, ocWidth+2, ocHeight+2);
+    onScreenCTX.lineWidth = 2;
+    onScreenCTX.strokeStyle = "black";
+    onScreenCTX.stroke();
 }
 
 function randomizeColor(e) {

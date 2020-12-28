@@ -28,7 +28,7 @@ body {
     overflow: hidden;
 }
 
-canvas {
+#onScreen {
     /* background:
 	linear-gradient(135deg, transparent 75%, rgb(216, 216, 216) 0%) 0 0,
 	linear-gradient(-45deg, transparent 75%, rgb(216, 216, 216) 0%) 15px 15px,
