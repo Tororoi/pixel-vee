@@ -43,7 +43,7 @@ body {
     rgb(216, 216, 216) 5px,
     rgb(216, 216, 216) 10px);
     position: absolute;
-    cursor: crosshair;
+    cursor: none;
     /* z-index: 100; */
     /* transition: all 1s; */
     width: 70%;

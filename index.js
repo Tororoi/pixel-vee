@@ -179,9 +179,14 @@ function handleMouseMove(e) {
                     drawCursorBox();
                     break;
                 default:
-                    //colored square
-                    onScreenCTX.fillStyle = state.brushColor.color;
-                    onScreenCTX.fillRect(state.onX, state.onY, state.ratio, state.ratio);
+                    if (state.mode === "erase") {
+                        //cleared square
+                        onScreenCTX.clearRect(state.onX, state.onY, state.ratio, state.ratio);
+                    } else {
+                        //colored square
+                        onScreenCTX.fillStyle = state.brushColor.color;
+                        onScreenCTX.fillRect(state.onX, state.onY, state.ratio, state.ratio);
+                    }
                     drawCursorBox();
             }
             function drawCursorBox() {
@@ -274,8 +279,10 @@ function handleTools(e) {
             state.tool = tools[toolBtn.id];
             if (toolBtn.id === "grab") {
                 onScreenCVS.style.cursor = "move";
-            } else {
+            } else if (toolBtn.id === "replace") {
                 onScreenCVS.style.cursor = "crosshair";
+            } else {
+                onScreenCVS.style.cursor = "none";
             }
         }
     }
@@ -596,7 +603,7 @@ function actionFill(startX, startY, currentColor, currentMode) {
 
     state.clickedColor = getColor(startX, startY, state.colorLayerGlobal);
 
-    if (currentMode === "erase") currentColor = { color: "rgba(0, 0, 0, 0)", r: 0, g: 0, b: 0, a: 0 };
+    if (currentMode === "erase") currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 };
 
     //exit if color is the same
     // if (currentColor.r === state.clickedColor.r && currentColor.g === state.clickedColor.g && currentColor.b === state.clickedColor.b && currentColor.a === state.clickedColor.a) {
