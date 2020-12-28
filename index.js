@@ -238,14 +238,7 @@ function renderCursor() {
             drawCursorBox();
             break;
         default:
-            if (state.mode === "erase") {
-                //cleared square
-                onScreenCTX.clearRect(state.onX, state.onY, state.ratio, state.ratio);
-            } else {
-                //colored square
-                onScreenCTX.fillStyle = state.brushColor.color;
-                onScreenCTX.fillRect(state.onX, state.onY, state.ratio, state.ratio);
-            }
+            drawCurrentPixel();
             drawCursorBox();
     }
     function drawCursorBox() {
@@ -259,6 +252,16 @@ function renderCursor() {
         onScreenCTX.lineWidth = 0.5;
         onScreenCTX.strokeStyle = "white";
         onScreenCTX.stroke();
+    }
+}
+
+function drawCurrentPixel() {
+    //draw onscreen current pixel
+    if (state.mode === "erase") {
+        onScreenCTX.clearRect(state.onX, state.onY, state.ratio, state.ratio);
+    } else {
+        onScreenCTX.fillStyle = state.brushColor.color;
+        onScreenCTX.fillRect(state.onX, state.onY, state.ratio, state.ratio);
     }
 }
 
@@ -286,7 +289,7 @@ function handleTools(e) {
             state.tool = tools[toolBtn.id];
             if (toolBtn.id === "grab") {
                 onScreenCVS.style.cursor = "move";
-            } else if (toolBtn.id === "replace") {
+            } else if (toolBtn.id === "replace" || toolBtn.id === "pencil") {
                 onScreenCVS.style.cursor = "crosshair";
             } else {
                 onScreenCVS.style.cursor = "none";
@@ -341,14 +344,10 @@ function drawSteps() {
             addToTimeline(state.tool.name, state.mouseX, state.mouseY);
             break;
         case "mousemove":
-            //draw onscreen current pixel
-            if (state.mode === "erase") {
-                onScreenCTX.clearRect(state.onX, state.onY, state.ratio, state.ratio);
-            } else {
-                onScreenCTX.fillStyle = state.brushColor.color;
-                onScreenCTX.fillRect(state.onX, state.onY, state.ratio, state.ratio);
-            }
+            drawCurrentPixel();
             if (state.lastX !== state.mouseX || state.lastY !== state.mouseY) {
+                renderImage();
+                drawCurrentPixel();
                 //draw between points when drawing fast
                 if (Math.abs(state.mouseX - state.lastX) > 1 || Math.abs(state.mouseY - state.lastY) > 1) {
                     //add to options, only execute if "continuous line" is on
