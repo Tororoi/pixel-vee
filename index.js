@@ -539,6 +539,8 @@ function replaceSteps() {
         case "mouseup":
             //only needed if perfect pixels option is on
             actionReplace();
+            //re-render image to allow onscreen cursor to render
+            renderImage();
             break;
         default:
         //do nothing
