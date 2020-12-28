@@ -441,6 +441,8 @@ function lineSteps() {
         case "mouseup":
             actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, offScreenCTX, state.mode);
             addToTimeline(state.tool.name, state.mouseX, state.mouseY);
+            //seriously, why do I need this? img.onload should've fired when I called renderImage from addToTimeline
+            window.setTimeout(renderImage, 0)
             break;
         default:
         //do nothing
@@ -816,17 +818,19 @@ function redrawPoints() {
 
 //Once the image is loaded, draw the image onto the onscreen canvas.
 function renderImage() {
-    img.src = source;
     img.onload = () => {
         onScreenCTX.clearRect(0, 0, ocWidth, ocHeight);
         drawCanvas();
     }
+    img.src = source;
 }
 
 function drawCanvas() {
     //Prevent blurring
     onScreenCTX.imageSmoothingEnabled = false;
-    // onScreenCTX.drawImage(img, 0, 0, ocWidth, ocHeight);
+    // onScreenCTX.fillStyle = "gray";
+    // onScreenCTX.fillRect(0,0,ocWidth,ocHeight);
+    // onScreenCTX.clearRect(state.xOffset, state.yOffset, ocWidth, ocHeight);
     onScreenCTX.drawImage(img, state.xOffset, state.yOffset, ocWidth, ocHeight);
     onScreenCTX.beginPath();
     onScreenCTX.rect(state.xOffset - 1, state.yOffset - 1, ocWidth + 2, ocHeight + 2);
