@@ -102,6 +102,8 @@ const state = {
     clickedColor: null,
     mouseX: null,
     mouseY: null,
+    mox: null, //mouse coords with offset
+    moy: null,
     ratio: null,
     trueRatio: null,
     onX: null,
@@ -151,12 +153,15 @@ modesCont.addEventListener('click', handleModes);
 function handleMouseMove(e) {
     state.event = "mousemove";
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width;
-    state.mouseX = Math.floor(e.offsetX / state.trueRatio);
-    state.mouseY = Math.floor(e.offsetY / state.trueRatio);
-    //Hover brush
     state.ratio = ocWidth / offScreenCVS.width;
-    state.onX = state.mouseX * state.ratio;
-    state.onY = state.mouseY * state.ratio;
+    //coords
+    state.mox = Math.floor(e.offsetX / state.trueRatio);
+    state.moy = Math.floor(e.offsetY / state.trueRatio);
+    state.mouseX = state.mox-(state.xOffset/state.ratio);
+    state.mouseY = state.moy-(state.yOffset/state.ratio);
+    //Hover brush
+    state.onX = state.mox * state.ratio;
+    state.onY = state.moy * state.ratio;
     if (state.clicked) {
         //run selected tool step function
         state.tool.fn();
@@ -194,8 +199,10 @@ function handleMouseDown(e) {
     state.event = "mousedown";
     state.clicked = true;
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width;
-    state.mouseX = Math.floor(e.offsetX / state.trueRatio);
-    state.mouseY = Math.floor(e.offsetY / state.trueRatio);
+    state.mox = Math.floor(e.offsetX / state.trueRatio);
+    state.moy = Math.floor(e.offsetY / state.trueRatio);
+    state.mouseX = state.mox-(state.xOffset/state.ratio);
+    state.mouseY = state.moy-(state.yOffset/state.ratio);
     //run selected tool step function
     state.tool.fn();
 }
@@ -204,8 +211,10 @@ function handleMouseUp(e) {
     state.event = "mouseup";
     state.clicked = false;
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width;
-    state.mouseX = Math.floor(e.offsetX / state.trueRatio);
-    state.mouseY = Math.floor(e.offsetY / state.trueRatio);
+    state.mox = Math.floor(e.offsetX / state.trueRatio);
+    state.moy = Math.floor(e.offsetY / state.trueRatio);
+    state.mouseX = state.mox-(state.xOffset/state.ratio);
+    state.mouseY = state.moy-(state.yOffset/state.ratio);
     //run selected tool step function
     state.tool.fn();
     //add to undo stack
@@ -399,7 +408,7 @@ function lineSteps() {
             if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
                 onScreenCTX.clearRect(0, 0, ocWidth, ocHeight);
                 drawCanvas();
-                actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, onScreenCTX, state.mode, state.ratio);
+                actionLine(state.lastX+(state.xOffset/state.ratio), state.lastY+(state.yOffset/state.ratio), state.mox, state.moy, state.brushColor, onScreenCTX, state.mode, state.ratio);
                 state.lastOnX = state.onX;
                 state.lastOnY = state.onY;
             }
