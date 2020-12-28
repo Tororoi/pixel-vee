@@ -8,7 +8,7 @@ let sharpness = 4;
 let zoom = 1;
 onScreenCVS.width = ocWidth * sharpness;
 onScreenCVS.height = ocHeight * sharpness;
-onScreenCTX.scale(sharpness/zoom, sharpness/zoom);
+onScreenCTX.scale(sharpness / zoom, sharpness / zoom);
 
 //Get the undo buttons
 let undoBtn = document.getElementById("undo");
@@ -157,8 +157,8 @@ function handleMouseMove(e) {
     //coords
     state.mox = Math.floor(e.offsetX / state.trueRatio);
     state.moy = Math.floor(e.offsetY / state.trueRatio);
-    state.mouseX = state.mox-(state.xOffset/state.ratio);
-    state.mouseY = state.moy-(state.yOffset/state.ratio);
+    state.mouseX = state.mox - (state.xOffset / state.ratio);
+    state.mouseY = state.moy - (state.yOffset / state.ratio);
     //Hover brush
     state.onX = state.mox * state.ratio;
     state.onY = state.moy * state.ratio;
@@ -170,37 +170,7 @@ function handleMouseMove(e) {
         if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
             onScreenCTX.clearRect(0, 0, ocWidth, ocHeight);
             drawCanvas();
-            switch (state.tool.name) {
-                case "grab":
-                    //show nothing
-                    break;
-                case "picker":
-                    //empty square
-                    drawCursorBox();
-                    break;
-                default:
-                    if (state.mode === "erase") {
-                        //cleared square
-                        onScreenCTX.clearRect(state.onX, state.onY, state.ratio, state.ratio);
-                    } else {
-                        //colored square
-                        onScreenCTX.fillStyle = state.brushColor.color;
-                        onScreenCTX.fillRect(state.onX, state.onY, state.ratio, state.ratio);
-                    }
-                    drawCursorBox();
-            }
-            function drawCursorBox() {
-                onScreenCTX.beginPath();
-                onScreenCTX.rect(state.onX, state.onY, state.ratio, state.ratio);
-                onScreenCTX.lineWidth = 0.5;
-                onScreenCTX.strokeStyle = "black";
-                onScreenCTX.stroke();
-                onScreenCTX.beginPath();
-                onScreenCTX.rect(state.onX + 0.5, state.onY + 0.5, state.ratio - 1, state.ratio - 1);
-                onScreenCTX.lineWidth = 0.5;
-                onScreenCTX.strokeStyle = "white";
-                onScreenCTX.stroke();
-            }
+            renderCursor();
             state.lastOnX = state.onX;
             state.lastOnY = state.onY;
         }
@@ -213,8 +183,8 @@ function handleMouseDown(e) {
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width;
     state.mox = Math.floor(e.offsetX / state.trueRatio);
     state.moy = Math.floor(e.offsetY / state.trueRatio);
-    state.mouseX = state.mox-(state.xOffset/state.ratio);
-    state.mouseY = state.moy-(state.yOffset/state.ratio);
+    state.mouseX = state.mox - (state.xOffset / state.ratio);
+    state.mouseY = state.moy - (state.yOffset / state.ratio);
     //run selected tool step function
     state.tool.fn();
 }
@@ -225,8 +195,8 @@ function handleMouseUp(e) {
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width;
     state.mox = Math.floor(e.offsetX / state.trueRatio);
     state.moy = Math.floor(e.offsetY / state.trueRatio);
-    state.mouseX = state.mox-(state.xOffset/state.ratio);
-    state.mouseY = state.moy-(state.yOffset/state.ratio);
+    state.mouseX = state.mox - (state.xOffset / state.ratio);
+    state.mouseY = state.moy - (state.yOffset / state.ratio);
     //run selected tool step function
     state.tool.fn();
     //add to undo stack
@@ -237,6 +207,9 @@ function handleMouseUp(e) {
     //Reset redostack
     state.redoStack = [];
     state.event = "none";
+    img.onload = () => {
+        renderCursor();
+    }
 }
 
 function handleMouseOut(e) {
@@ -253,6 +226,40 @@ function handleMouseOut(e) {
     onScreenCTX.clearRect(0, 0, ocWidth, ocHeight);
     drawCanvas();
     state.event = "none";
+}
+
+function renderCursor() {
+    switch (state.tool.name) {
+        case "grab":
+            //show nothing
+            break;
+        case "picker":
+            //empty square
+            drawCursorBox();
+            break;
+        default:
+            if (state.mode === "erase") {
+                //cleared square
+                onScreenCTX.clearRect(state.onX, state.onY, state.ratio, state.ratio);
+            } else {
+                //colored square
+                onScreenCTX.fillStyle = state.brushColor.color;
+                onScreenCTX.fillRect(state.onX, state.onY, state.ratio, state.ratio);
+            }
+            drawCursorBox();
+    }
+    function drawCursorBox() {
+        onScreenCTX.beginPath();
+        onScreenCTX.rect(state.onX, state.onY, state.ratio, state.ratio);
+        onScreenCTX.lineWidth = 0.5;
+        onScreenCTX.strokeStyle = "black";
+        onScreenCTX.stroke();
+        onScreenCTX.beginPath();
+        onScreenCTX.rect(state.onX + 0.5, state.onY + 0.5, state.ratio - 1, state.ratio - 1);
+        onScreenCTX.lineWidth = 0.5;
+        onScreenCTX.strokeStyle = "white";
+        onScreenCTX.stroke();
+    }
 }
 
 function handleUndo() {
@@ -427,7 +434,7 @@ function lineSteps() {
             if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
                 onScreenCTX.clearRect(0, 0, ocWidth, ocHeight);
                 drawCanvas();
-                actionLine(state.lastX+(state.xOffset/state.ratio), state.lastY+(state.yOffset/state.ratio), state.mox, state.moy, state.brushColor, onScreenCTX, state.mode, state.ratio);
+                actionLine(state.lastX + (state.xOffset / state.ratio), state.lastY + (state.yOffset / state.ratio), state.mox, state.moy, state.brushColor, onScreenCTX, state.mode, state.ratio);
                 state.lastOnX = state.onX;
                 state.lastOnY = state.onY;
             }
@@ -591,6 +598,9 @@ function fillSteps() {
             actionFill(state.mouseX, state.mouseY, state.brushColor, state.mode);
             addToTimeline(state.tool.name, state.mouseX, state.mouseY);
             break;
+        case "mouseup":
+            //re-render image to allow onscreen cursor to render
+            renderImage();
         default:
         //do nothing
     }
@@ -757,8 +767,8 @@ function grabSteps() {
     switch (state.event) {
         case "mousemove":
             //only draw when necessary, get color here too
-            state.xOffset = state.onX-state.lastOnX+state.lastOffsetX;
-            state.yOffset = state.onY-state.lastOnY+state.lastOffsetY;
+            state.xOffset = state.onX - state.lastOnX + state.lastOffsetX;
+            state.yOffset = state.onY - state.lastOnY + state.lastOffsetY;
             renderImage();
             break;
         case "mouseup":
@@ -818,7 +828,7 @@ function drawCanvas() {
     // onScreenCTX.drawImage(img, 0, 0, ocWidth, ocHeight);
     onScreenCTX.drawImage(img, state.xOffset, state.yOffset, ocWidth, ocHeight);
     onScreenCTX.beginPath();
-    onScreenCTX.rect(state.xOffset-1, state.yOffset-1, ocWidth+2, ocHeight+2);
+    onScreenCTX.rect(state.xOffset - 1, state.yOffset - 1, ocWidth + 2, ocHeight + 2);
     onScreenCTX.lineWidth = 2;
     onScreenCTX.strokeStyle = "black";
     onScreenCTX.stroke();
