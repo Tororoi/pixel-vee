@@ -299,10 +299,12 @@ function handleZoom(e) {
             state.yOffset -= 32 / zoom;
             zoom *= z;
         }
-        state.lastOffsetX = state.xOffset;
-        state.lastOffsetY = state.yOffset;
         //re scale canvas
         onScreenCTX.scale(z, z);
+        state.xOffset = Math.floor(state.xOffset - (state.xOffset % 5)); //temp 5 as it is the original scale ratio (320/64)
+        state.yOffset = Math.floor(state.yOffset - (state.yOffset % 5));
+        state.lastOffsetX = state.xOffset;
+        state.lastOffsetY = state.yOffset;
         renderImage();
         // onScreenCTX.fillStyle = "red";
         // onScreenCTX.fillRect(ocWidth/2,ocHeight/2,50,50)
