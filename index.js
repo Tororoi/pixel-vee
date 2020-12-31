@@ -5,10 +5,10 @@ let onScreenCTX = onScreenCVS.getContext("2d");
 let ocWidth = onScreenCVS.width;
 let ocHeight = onScreenCVS.height;
 let sharpness = 4;
-let zoom = 1;
+let zoom = 0.5;
 onScreenCVS.width = ocWidth * sharpness;
 onScreenCVS.height = ocHeight * sharpness;
-onScreenCTX.scale(sharpness / zoom, sharpness / zoom);
+onScreenCTX.scale(sharpness * zoom, sharpness * zoom);
 
 //Get the undo buttons
 let undoBtn = document.getElementById("undo");
@@ -153,23 +153,23 @@ modesCont.addEventListener('click', handleModes);
 function handleMouseMove(e) {
     state.event = "mousemove";
     //currently only square dimensions work
-    state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width;
-    state.ratio = ocWidth / offScreenCVS.width;
+    state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
+    state.ratio = ocWidth / offScreenCVS.width * zoom;
     //coords
     state.mox = Math.floor(e.offsetX / state.trueRatio);
     state.moy = Math.floor(e.offsetY / state.trueRatio);
-    state.mouseX = state.mox - (state.xOffset / state.ratio);
-    state.mouseY = state.moy - (state.yOffset / state.ratio);
+    state.mouseX = state.mox - (state.xOffset / state.ratio * zoom);
+    state.mouseY = state.moy - (state.yOffset / state.ratio * zoom);
     //Hover brush
-    state.onX = state.mox * state.ratio;
-    state.onY = state.moy * state.ratio;
+    state.onX = state.mox * state.ratio / zoom;
+    state.onY = state.moy * state.ratio / zoom;
     if (state.clicked) {
         //run selected tool step function
         state.tool.fn();
     } else {
         //only draw preview brush when necessary
         if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
-            onScreenCTX.clearRect(0, 0, ocWidth, ocHeight);
+            onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
             drawCanvas();
             renderCursor();
             state.lastOnX = state.onX;
@@ -181,11 +181,11 @@ function handleMouseMove(e) {
 function handleMouseDown(e) {
     state.event = "mousedown";
     state.clicked = true;
-    state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width;
+    state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
     state.mox = Math.floor(e.offsetX / state.trueRatio);
     state.moy = Math.floor(e.offsetY / state.trueRatio);
-    state.mouseX = state.mox - (state.xOffset / state.ratio);
-    state.mouseY = state.moy - (state.yOffset / state.ratio);
+    state.mouseX = state.mox - (state.xOffset / state.ratio * zoom);
+    state.mouseY = state.moy - (state.yOffset / state.ratio * zoom);
     //run selected tool step function
     state.tool.fn();
 }
@@ -193,11 +193,11 @@ function handleMouseDown(e) {
 function handleMouseUp(e) {
     state.event = "mouseup";
     state.clicked = false;
-    state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width;
+    state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
     state.mox = Math.floor(e.offsetX / state.trueRatio);
     state.moy = Math.floor(e.offsetY / state.trueRatio);
-    state.mouseX = state.mox - (state.xOffset / state.ratio);
-    state.mouseY = state.moy - (state.yOffset / state.ratio);
+    state.mouseX = state.mox - (state.xOffset / state.ratio * zoom);
+    state.mouseY = state.moy - (state.yOffset / state.ratio * zoom);
     //run selected tool step function
     state.tool.fn();
     //add to undo stack
@@ -224,7 +224,7 @@ function handleMouseOut(e) {
     state.points = [];
     //Reset redostack
     state.redoStack = [];
-    onScreenCTX.clearRect(0, 0, ocWidth, ocHeight);
+    onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
     drawCanvas();
     state.event = "none";
 }
@@ -244,12 +244,12 @@ function renderCursor() {
     }
     function drawCursorBox() {
         onScreenCTX.beginPath();
-        onScreenCTX.rect(state.onX, state.onY, state.ratio, state.ratio);
+        onScreenCTX.rect(state.onX, state.onY, state.ratio / zoom, state.ratio / zoom);
         onScreenCTX.lineWidth = 0.5;
         onScreenCTX.strokeStyle = "black";
         onScreenCTX.stroke();
         onScreenCTX.beginPath();
-        onScreenCTX.rect(state.onX + 0.5, state.onY + 0.5, state.ratio - 1, state.ratio - 1);
+        onScreenCTX.rect(state.onX + 0.5, state.onY + 0.5, state.ratio / zoom - 1, state.ratio / zoom - 1);
         onScreenCTX.lineWidth = 0.5;
         onScreenCTX.strokeStyle = "white";
         onScreenCTX.stroke();
@@ -259,10 +259,10 @@ function renderCursor() {
 function drawCurrentPixel() {
     //draw onscreen current pixel
     if (state.mode === "erase") {
-        onScreenCTX.clearRect(state.onX, state.onY, state.ratio, state.ratio);
+        onScreenCTX.clearRect(state.onX, state.onY, state.ratio / zoom, state.ratio / zoom);
     } else {
         onScreenCTX.fillStyle = state.brushColor.color;
-        onScreenCTX.fillRect(state.onX, state.onY, state.ratio, state.ratio);
+        onScreenCTX.fillRect(state.onX, state.onY, state.ratio / zoom, state.ratio / zoom);
     }
 }
 
@@ -432,9 +432,9 @@ function lineSteps() {
             //draw line from origin point to current point onscreen
             //only draw when necessary
             if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
-                onScreenCTX.clearRect(0, 0, ocWidth, ocHeight);
+                onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
                 drawCanvas();
-                actionLine(state.lastX + (state.xOffset / state.ratio), state.lastY + (state.yOffset / state.ratio), state.mox, state.moy, state.brushColor, onScreenCTX, state.mode, state.ratio);
+                actionLine(state.lastX + (state.xOffset / state.ratio * zoom), state.lastY + (state.yOffset / state.ratio * zoom), state.mox, state.moy, state.brushColor, onScreenCTX, state.mode, state.ratio / zoom);
                 state.lastOnX = state.onX;
                 state.lastOnY = state.onY;
             }
@@ -716,18 +716,9 @@ function pickerSteps() {
                 //get color
                 sampleColor(state.mouseX, state.mouseY);
                 //draw square
-                onScreenCTX.clearRect(0, 0, ocWidth, ocHeight);
+                onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
                 drawCanvas();
-                onScreenCTX.beginPath();
-                onScreenCTX.rect(state.onX, state.onY, state.ratio, state.ratio);
-                onScreenCTX.lineWidth = 0.5;
-                onScreenCTX.strokeStyle = "black";
-                onScreenCTX.stroke();
-                onScreenCTX.beginPath();
-                onScreenCTX.rect(state.onX + 0.5, state.onY + 0.5, state.ratio - 1, state.ratio - 1);
-                onScreenCTX.lineWidth = 0.5;
-                onScreenCTX.strokeStyle = "white";
-                onScreenCTX.stroke();
+                renderCursor();
                 state.lastOnX = state.onX;
                 state.lastOnY = state.onY;
             }
@@ -816,7 +807,7 @@ function redrawPoints() {
 //Once the image is loaded, draw the image onto the onscreen canvas.
 function renderImage() {
     img.onload = () => {
-        onScreenCTX.clearRect(0, 0, ocWidth, ocHeight);
+        onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
         drawCanvas();
     }
     img.src = source;
