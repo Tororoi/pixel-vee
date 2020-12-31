@@ -152,6 +152,7 @@ modesCont.addEventListener('click', handleModes);
 
 function handleMouseMove(e) {
     state.event = "mousemove";
+    //currently only square dimensions work
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width;
     state.ratio = ocWidth / offScreenCVS.width;
     //coords
@@ -442,7 +443,7 @@ function lineSteps() {
             actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, offScreenCTX, state.mode);
             addToTimeline(state.tool.name, state.mouseX, state.mouseY);
             //seriously, why do I need this? img.onload should've fired when I called renderImage from addToTimeline
-            window.setTimeout(renderImage, 0)
+            window.setTimeout(renderImage, 0);
             break;
         default:
         //do nothing
