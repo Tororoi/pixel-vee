@@ -157,6 +157,47 @@ body {
     /* border-radius: 10px; */
 }
 
+/* Zoom */
+
+.zoom {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.square {
+    width: 40px;
+    height: 40px;
+    margin: 8px 46px 8px 46px;
+}
+
+.square div {
+    background: black;
+}
+
+.minus {
+    width: 24px;
+    height: 8px;
+    position: relative;
+    margin: 16px 8px 16px 8px;
+}
+
+.plus {
+    width: 24px;
+    height: 8px;
+    position: relative;
+    margin: 16px 8px 16px 8px;
+}
+
+.plus:after {
+    background: black;
+    content: "";
+    width: 8px;
+    height: 24px;
+    left: 8px;
+    top: -8px;
+    position: absolute;
+}
+
 /* Tools */
 
 h4 {

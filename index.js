@@ -5,7 +5,7 @@ let onScreenCTX = onScreenCVS.getContext("2d");
 let ocWidth = onScreenCVS.width;
 let ocHeight = onScreenCVS.height;
 let sharpness = 4;
-let zoom = 0.5;
+let zoom = 1;
 onScreenCVS.width = ocWidth * sharpness;
 onScreenCVS.height = ocHeight * sharpness;
 onScreenCTX.scale(sharpness * zoom, sharpness * zoom);
@@ -18,6 +18,9 @@ let redoBtn = document.getElementById("redo");
 let swatch = document.querySelector(".swatch");
 let backSwatch = document.querySelector(".back-swatch");
 let colorSwitch = document.querySelector(".switch");
+
+//zoom buttons
+let zoomCont = document.querySelector(".zoom");
 
 //Get tool buttons
 let toolsCont = document.querySelector(".tools");
@@ -142,6 +145,8 @@ onScreenCVS.addEventListener('mouseout', handleMouseOut);
 //Add event listeners for the toolbox
 undoBtn.addEventListener('click', handleUndo);
 redoBtn.addEventListener('click', handleRedo);
+
+zoomCont.addEventListener('click', handleZoom);
 
 swatch.addEventListener('click', randomizeColor);
 backSwatch.addEventListener('click', randomizeColor);
@@ -275,6 +280,32 @@ function handleUndo() {
 function handleRedo() {
     if (state.redoStack.length >= 1) {
         actionUndoRedo(state.undoStack, state.redoStack);
+    }
+}
+
+
+function handleZoom(e) {
+    if (e.target.closest(".square")) {
+        let zoomBtn = e.target.closest(".square");
+        let z;
+        if (zoomBtn.id === "minus") { 
+            z = 0.8;
+            zoom *= z;
+            state.xOffset += 32 / zoom;
+            state.yOffset += 32 / zoom;
+        } else if (zoomBtn.id === "plus") {
+            z = 1.25;
+            state.xOffset -= 32 / zoom;
+            state.yOffset -= 32 / zoom;
+            zoom *= z;
+        }
+        state.lastOffsetX = state.xOffset;
+        state.lastOffsetY = state.yOffset;
+        //re scale canvas
+        onScreenCTX.scale(z, z);
+        renderImage();
+        // onScreenCTX.fillStyle = "red";
+        // onScreenCTX.fillRect(ocWidth/2,ocHeight/2,50,50)
     }
 }
 
@@ -816,9 +847,9 @@ function renderImage() {
 function drawCanvas() {
     //Prevent blurring
     onScreenCTX.imageSmoothingEnabled = false;
-    // onScreenCTX.fillStyle = "gray";
-    // onScreenCTX.fillRect(0,0,ocWidth,ocHeight);
-    // onScreenCTX.clearRect(state.xOffset, state.yOffset, ocWidth, ocHeight);
+    onScreenCTX.fillStyle = "gray";
+    onScreenCTX.fillRect(0,0,ocWidth / zoom,ocHeight / zoom);
+    onScreenCTX.clearRect(state.xOffset, state.yOffset, ocWidth, ocHeight);
     onScreenCTX.drawImage(img, state.xOffset, state.yOffset, ocWidth, ocHeight);
     onScreenCTX.beginPath();
     onScreenCTX.rect(state.xOffset - 1, state.yOffset - 1, ocWidth + 2, ocHeight + 2);
