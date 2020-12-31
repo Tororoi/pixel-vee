@@ -22,11 +22,11 @@ let colorSwitch = document.querySelector(".switch");
 //Get tool buttons
 let toolsCont = document.querySelector(".tools");
 let toolBtn = document.querySelector("#pencil");
-toolBtn.style.background = "rgb(185, 28, 0)";
+toolBtn.style.background = "rgb(238, 206, 102)";
 
 let modesCont = document.querySelector(".modes");
 let modeBtn = document.querySelector("#draw");
-modeBtn.style.background = "rgb(185, 28, 0)";
+modeBtn.style.background = "rgb(238, 206, 102)";
 
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
 let offScreenCVS = document.createElement('canvas');
@@ -286,7 +286,7 @@ function handleTools(e) {
             toolBtn.style.background = "rgb(131, 131, 131)";
             //get new button and select it
             toolBtn = e.target.closest(".tool");
-            toolBtn.style.background = "rgb(185, 28, 0)";
+            toolBtn.style.background = "rgb(238, 206, 102)";
             state.tool = tools[toolBtn.id];
             if (toolBtn.id === "grab") {
                 onScreenCVS.style.cursor = "move";
@@ -305,7 +305,7 @@ function handleModes(e) {
         modeBtn.style.background = "rgb(131, 131, 131)";
         //get new button and select it
         modeBtn = e.target.closest(".mode");
-        modeBtn.style.background = "rgb(185, 28, 0)";
+        modeBtn.style.background = "rgb(238, 206, 102)";
         state.mode = modeBtn.id;
     }
 }
@@ -611,7 +611,7 @@ function fillSteps() {
 }
 
 //For undo ability, store starting coords and settings and pass them into actionFill
-function actionFill(startX, startY, currentColor, currentMode) {
+function actionFill(startX, startY, currentColor, currentMode) { //BUG: fill works when clicking outside border of canvas
     //get imageData
     state.colorLayerGlobal = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
 
@@ -620,10 +620,6 @@ function actionFill(startX, startY, currentColor, currentMode) {
     if (currentMode === "erase") currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 };
 
     //exit if color is the same
-    // if (currentColor.r === state.clickedColor.r && currentColor.g === state.clickedColor.g && currentColor.b === state.clickedColor.b && currentColor.a === state.clickedColor.a) {
-    //     return;
-    // }
-
     if (currentColor.color === state.clickedColor.color) {
         return;
     }

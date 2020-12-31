@@ -5,6 +5,7 @@
 
 body {
     margin: 0px;
+    color: white;
 }
 
 .full-page {
@@ -58,6 +59,35 @@ body {
 
 /* Toolbox */
 
+/* Buttons */
+
+.btn {
+    background: rgb(131, 131, 131);
+    user-select: none;
+    width: 100px;
+    text-align: center;
+    color: white;
+    height: 60px;
+    margin: 3px;
+    opacity: 1;
+
+    box-shadow: 
+    2px 0px rgb(131, 131, 131),
+    -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131),
+    0px 2px rgb(131, 131, 131);
+}
+
+.btn:hover {
+    box-shadow: 
+    2px 0px rgb(255, 255, 255),
+    -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255),
+    0px 2px rgb(255, 255, 255);
+    /* cursor: pointer; */
+    /* opacity: 0.8; */
+}
+
 .sidebar {
     background-color: rgb(80, 80, 80);
     width: 280px;
@@ -75,24 +105,12 @@ body {
 }
 
 .undoredo div {
-    user-select: none;
-    width: 100px;
-    text-align: center;
-    color: white;
-    height: 60px;
     margin: 16px;
-    opacity: 1;
-
-    box-shadow: 
-    2px 0px rgb(131, 131, 131),
-    -2px 0px rgb(131, 131, 131),
-    0px -2px rgb(131, 131, 131),
-    0px 2px rgb(131, 131, 131);
 }
 
-.undoredo div:hover {
+/* .undoredo div:hover {
     opacity: 0.8;
-}
+} */
 
 .undo-button {
     background: rgb(212, 45, 45);
@@ -153,7 +171,7 @@ h4 {
     margin: 13px;
 }
 
-.tool {
+/* .tool {
     background: rgb(131, 131, 131);
     user-select: none;
     width: 100px;
@@ -168,12 +186,15 @@ h4 {
     -2px 0px rgb(131, 131, 131),
     0px -2px rgb(131, 131, 131),
     0px 2px rgb(131, 131, 131);
-}
+} */
 
-.tool:hover {
-    opacity: 0.8;
-    /* background: rgb(185, 28, 0); */
-}
+/* .tool:hover {
+    box-shadow: 
+    2px 0px rgb(255, 255, 255),
+    -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255),
+    0px 2px rgb(255, 255, 255);
+} */
 
 /* Modes */
 
@@ -184,7 +205,7 @@ h4 {
     margin: 13px;
 }
 
-.mode {
+/* .mode {
     background: rgb(131, 131, 131);
     user-select: none;
     width: 100px;
@@ -199,8 +220,13 @@ h4 {
     -2px 0px rgb(131, 131, 131),
     0px -2px rgb(131, 131, 131),
     0px 2px rgb(131, 131, 131);
-}
+} */
 
-.mode:hover {
-    opacity: 0.8;
-}
+/* .mode:hover {
+    box-shadow: 
+    2px 0px rgb(255, 255, 255),
+    -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255),
+    0px 2px rgb(255, 255, 255);
+} */
+
