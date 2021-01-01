@@ -163,8 +163,8 @@ function handleMouseMove(e) {
     //coords
     state.mox = Math.floor(e.offsetX / state.trueRatio);
     state.moy = Math.floor(e.offsetY / state.trueRatio);
-    state.mouseX = state.mox - (state.xOffset / state.ratio * zoom);
-    state.mouseY = state.moy - (state.yOffset / state.ratio * zoom);
+    state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio * zoom));
+    state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio * zoom));
     //Hover brush
     state.onX = state.mox * state.ratio / zoom;
     state.onY = state.moy * state.ratio / zoom;
@@ -189,8 +189,8 @@ function handleMouseDown(e) {
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
     state.mox = Math.floor(e.offsetX / state.trueRatio);
     state.moy = Math.floor(e.offsetY / state.trueRatio);
-    state.mouseX = state.mox - (state.xOffset / state.ratio * zoom);
-    state.mouseY = state.moy - (state.yOffset / state.ratio * zoom);
+    state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio * zoom));
+    state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio * zoom));
     //run selected tool step function
     state.tool.fn();
 }
@@ -201,8 +201,8 @@ function handleMouseUp(e) {
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
     state.mox = Math.floor(e.offsetX / state.trueRatio);
     state.moy = Math.floor(e.offsetY / state.trueRatio);
-    state.mouseX = state.mox - (state.xOffset / state.ratio * zoom);
-    state.mouseY = state.moy - (state.yOffset / state.ratio * zoom);
+    state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio * zoom));
+    state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio * zoom));
     //run selected tool step function
     state.tool.fn();
     //add to undo stack
@@ -291,23 +291,21 @@ function handleZoom(e) {
         if (zoomBtn.id === "minus") { 
             z = 0.8;
             zoom *= z;
-            state.xOffset += 32 / zoom;
-            state.yOffset += 32 / zoom;
+            state.xOffset += ocWidth / 10 / zoom;
+            state.yOffset += ocHeight / 10 / zoom;
         } else if (zoomBtn.id === "plus") {
             z = 1.25;
-            state.xOffset -= 32 / zoom;
-            state.yOffset -= 32 / zoom;
+            state.xOffset -= ocWidth / 10 / zoom;
+            state.yOffset -= ocHeight / 10 / zoom;
             zoom *= z;
         }
         //re scale canvas
         onScreenCTX.scale(z, z);
-        state.xOffset = Math.floor(state.xOffset - (state.xOffset % 5)); //temp 5 as it is the original scale ratio (320/64)
-        state.yOffset = Math.floor(state.yOffset - (state.yOffset % 5));
+        state.xOffset = Math.floor(state.xOffset - (state.xOffset % (ocWidth / offScreenCVS.width)));
+        state.yOffset = Math.floor(state.yOffset - (state.yOffset % (ocHeight / offScreenCVS.height)));
         state.lastOffsetX = state.xOffset;
         state.lastOffsetY = state.yOffset;
         renderImage();
-        // onScreenCTX.fillStyle = "red";
-        // onScreenCTX.fillRect(ocWidth/2,ocHeight/2,50,50)
     }
 }
 
@@ -645,6 +643,10 @@ function fillSteps() {
 
 //For undo ability, store starting coords and settings and pass them into actionFill
 function actionFill(startX, startY, currentColor, currentMode) { //BUG: fill works when clicking outside border of canvas
+    //exit if outside borders
+    if (startX < 0 || startX > offScreenCVS.width || startY < 0 || startY > offScreenCVS.height) {
+        return;
+    }
     //get imageData
     state.colorLayerGlobal = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
 
