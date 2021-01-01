@@ -644,7 +644,7 @@ function fillSteps() {
 //For undo ability, store starting coords and settings and pass them into actionFill
 function actionFill(startX, startY, currentColor, currentMode) { //BUG: fill works when clicking outside border of canvas
     //exit if outside borders
-    if (startX < 0 || startX > offScreenCVS.width || startY < 0 || startY > offScreenCVS.height) {
+    if (startX < 0 || startX >= offScreenCVS.width || startY < 0 || startY >= offScreenCVS.height) {
         return;
     }
     //get imageData
