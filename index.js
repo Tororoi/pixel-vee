@@ -85,10 +85,6 @@ const state = {
     undoStack: [],
     redoStack: [],
     //settings
-    options: {
-        perfect: false,
-        contiguous: false
-    },
     tool: { ...tools.pencil },
     mode: "draw",
     brushColor: { color: "rgba(255,0,0,255)", r: 255, g: 0, b: 0, a: 255 },
