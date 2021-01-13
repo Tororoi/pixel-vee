@@ -736,7 +736,6 @@ function actionFill(startX, startY, currentColor, currentMode) { //BUG: fill wor
 //temp
 let clickCounter = 0;
 let x1, y1, x2, y2, x3, y3;
-let dydx1, dydx2, a0, a1, a2, a3;
 let curvePoints = [];
 
 function curveSteps() {
@@ -794,52 +793,58 @@ function actionCurve(x1, y1, x2, y2, x3, y3) {
     //linetool after defining x2y2
 
     //curve after defining x3y3
+    // bezier curve
+
     //f(x) = a0 + a1x + a2x^2 + a3x^3 polynomial
-    d1 = (y3 - y1) / (x3 - x1);
-    d2 = (y3 - y2) / (x3 - x2);
+    // d1 = (y3 - y1) / (x3 - x1);
+    // d2 = (y3 - y2) / (x3 - x2);
 
-    let denom = Math.pow((x1 - x2), 3);
+    // let denom = Math.pow((x1 - x2), 3);
 
-    a0 = -1 * (
-        (d2 * Math.pow(x1, 3) * x2) +
-        (d1 * Math.pow(x1, 2) * Math.pow(x2, 2)) -
-        (d2 * Math.pow(x1, 2) * Math.pow(x2, 2)) -
-        (d1 * x1 * Math.pow(x2, 3)) -
-        (3 * x1 * Math.pow(x2, 2) * y1) +
-        (Math.pow(x2, 3) * y1) -
-        (Math.pow(x1, 3) * y2) +
-        (3 * Math.pow(x1, 2) * x2 * y2)
-    ) / denom;
-    a1 = -1 * (
-        (-1*d2 * Math.pow(x1, 3)) -
-        (2*d1 * Math.pow(x1, 2) * x2) -
-        (d2 * Math.pow(x1, 2) * x2) +
-        (d1 * x1 * Math.pow(x2, 2)) +
-        (2 * d2 * x1 * Math.pow(x2, 2)) +
-        (d1 * Math.pow(x2, 3)) +
-        (6 * x1 * x2 * y1) -
-        (6 * x1 * x2 * y2)
-    ) / denom;
-    a2 = -1 * (
-        (d1 * Math.pow(x1, 2)) +
-        (2*d2 * Math.pow(x1, 2)) +
-        (d1 * x1 * x2) -
-        (d2 * x1 * x2) -
-        (2 * d1 * Math.pow(x2, 2)) -
-        (d2 * Math.pow(x2, 2)) -
-        (3 * x1 * y1) -
-        (3 * x2 * y1) +
-        (3*x1*y2) +
-        (3*x2*y2)
-    ) / denom;
-    a3 = -1 * (
-        (-1 * d1 * x1) -
-        (d2 * x1) +
-        (d1 * x2) +
-        (d2 * x2) +
-        (2 * y1) -
-        (2 * y2)
-    ) / denom;
+    // let a0 = -1 * (
+    //     (d2 * Math.pow(x1, 3) * x2) +
+    //     (d1 * Math.pow(x1, 2) * Math.pow(x2, 2)) -
+    //     (d2 * Math.pow(x1, 2) * Math.pow(x2, 2)) -
+    //     (d1 * x1 * Math.pow(x2, 3)) -
+    //     (3 * x1 * Math.pow(x2, 2) * y1) +
+    //     (Math.pow(x2, 3) * y1) -
+    //     (Math.pow(x1, 3) * y2) +
+    //     (3 * Math.pow(x1, 2) * x2 * y2)
+    // ) / denom;
+    // let a1 = -1 * (
+    //     (-1*d2 * Math.pow(x1, 3)) -
+    //     (2*d1 * Math.pow(x1, 2) * x2) -
+    //     (d2 * Math.pow(x1, 2) * x2) +
+    //     (d1 * x1 * Math.pow(x2, 2)) +
+    //     (2 * d2 * x1 * Math.pow(x2, 2)) +
+    //     (d1 * Math.pow(x2, 3)) +
+    //     (6 * x1 * x2 * y1) -
+    //     (6 * x1 * x2 * y2)
+    // ) / denom;
+    // let a2 = -1 * (
+    //     (d1 * Math.pow(x1, 2)) +
+    //     (2*d2 * Math.pow(x1, 2)) +
+    //     (d1 * x1 * x2) -
+    //     (d2 * x1 * x2) -
+    //     (2 * d1 * Math.pow(x2, 2)) -
+    //     (d2 * Math.pow(x2, 2)) -
+    //     (3 * x1 * y1) -
+    //     (3 * x2 * y1) +
+    //     (3*x1*y2) +
+    //     (3*x2*y2)
+    // ) / denom;
+    // let a3 = -1 * (
+    //     (-1 * d1 * x1) -
+    //     (d2 * x1) +
+    //     (d1 * x2) +
+    //     (d2 * x2) +
+    //     (2 * y1) -
+    //     (2 * y2)
+    // ) / denom;
+
+    // function polynomial(x) {
+    //     return a0 + a1*x + a2*Math.pow(x,2) + a3*Math.pow(x,3);
+    // }
 }
 
 //Non-actions
