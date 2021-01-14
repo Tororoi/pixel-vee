@@ -64,6 +64,12 @@ const tools = {
         brushSize: 1,
         options: ["contiguous"]
     },
+    curve: {
+        name: "curve",
+        fn: curveSteps,
+        brushSize: 1,
+        options: []
+    },
     picker: {
         name: "picker",
         fn: pickerSteps,
@@ -164,7 +170,7 @@ function handleMouseMove(e) {
     //Hover brush
     state.onX = state.mox * state.ratio / zoom;
     state.onY = state.moy * state.ratio / zoom;
-    if (state.clicked) {
+    if (state.clicked || (state.tool.name === "curve" && clickCounter > 0)) {
         //run selected tool step function
         state.tool.fn();
     } else {
@@ -760,7 +766,8 @@ function curveSteps() {
                 //do nothing
             }
             //definitive step occurs on offscreen canvas
-            actionCurve();
+            // actionCurve(x1, y1, x2, y2, x3, y3, clickCounter, state.brushColor, offScreenCTX, state.mode);
+            // drawCanvas();
             break;
         case "mousemove":
             //draw line from origin point to current point onscreen
@@ -769,14 +776,16 @@ function curveSteps() {
                 onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
                 drawCanvas();
                 //onscreen preview
-                actionCurve();
+                actionCurve(x1+ (state.xOffset / state.ratio * zoom), y1 + (state.yOffset / state.ratio * zoom), x2+ (state.xOffset / state.ratio * zoom), y2 + (state.yOffset / state.ratio * zoom), x3+ (state.xOffset / state.ratio * zoom), y3 + (state.yOffset / state.ratio * zoom), clickCounter, state.brushColor, onScreenCTX, state.mode, state.ratio / zoom);
                 state.lastOnX = state.onX;
                 state.lastOnY = state.onY;
             }
             break;
         case "mouseup" || "mouseout":
             if (clickCounter === 3) {
-                addToTimeline(state.tool.name, curvePoints);
+                actionCurve(x1, y1, x2, y2, x3, y3, clickCounter, state.brushColor, offScreenCTX, state.mode)
+                clickCounter = 0;
+                // addToTimeline(state.tool.name, curvePoints);
                 //seriously, why do I need this? img.onload should've fired when I called renderImage from addToTimeline
                 window.setTimeout(renderImage, 0);
             }
@@ -787,14 +796,39 @@ function curveSteps() {
 }
 
 //Curved Lines
-function actionCurve(x1, y1, x2, y2, x3, y3) {
-    //point after defining x1y1
+function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, currentMode, scale = 1) {
+    ctx.fillStyle = currentColor.color;
 
-    //linetool after defining x2y2
-
-    //curve after defining x3y3
-    // bezier curve
-
+    if (stepNum === 1) {
+        //point after defining x1y1
+        //linetool after defining x2y2
+        actionLine(x1, y1, state.mox, state.moy, currentColor, onScreenCTX, currentMode, scale);
+    } else if (stepNum === 2) {
+        //preview curve
+        // bezier curve
+        function zt(z1, z2, z3, t) {
+            return z2 + Math.pow((1 - t), 2) * (z1 - z2) + Math.pow(t, 2) * (z3 - z2);
+        }
+        for (let i = 0; i < 30; i++) {
+            let xt = zt(x1, x2, state.mox, i/30);
+            let yt = zt(y1, y2, state.moy, i/30);
+            onScreenCTX.fillRect(xt, yt, scale, scale)
+        }
+    } else if (stepNum === 3) {
+        //curve after defining x3y3
+        // bezier curve
+        function zt(z1, z2, z3, t) {
+            return z2 + Math.pow((1 - t), 2) * (z1 - z2) + Math.pow(t, 2) * (z3 - z2);
+        }
+        for (let i = 0; i < 30; i++) {
+            let xt = zt(x1, x2, x3, i/30);
+            let yt = zt(y1, y2, y3, i/30);
+            console.log(xt, yt)
+            ctx.fillRect(xt, yt, scale, scale)
+        }
+        source = offScreenCVS.toDataURL();
+        renderImage();
+    }
     //f(x) = a0 + a1x + a2x^2 + a3x^3 polynomial
     // d1 = (y3 - y1) / (x3 - x1);
     // d2 = (y3 - y2) / (x3 - x2);
