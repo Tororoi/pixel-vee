@@ -35,8 +35,8 @@ modeBtn.style.background = "rgb(238, 206, 102)";
 let offScreenCVS = document.createElement('canvas');
 let offScreenCTX = offScreenCVS.getContext("2d");
 //Set the dimensions of the drawing canvas
-offScreenCVS.width = 64;
-offScreenCVS.height = 64;
+offScreenCVS.width = 128;
+offScreenCVS.height = 128;
 
 //tool objects
 const tools = {
@@ -323,7 +323,7 @@ function handleTools(e) {
             state.tool = tools[toolBtn.id];
             if (toolBtn.id === "grab") {
                 onScreenCVS.style.cursor = "move";
-            } else if (toolBtn.id === "replace" || toolBtn.id === "pencil") {
+            } else if (toolBtn.id === "replace" || toolBtn.id === "pencil" || toolBtn.id === "curve") {
                 onScreenCVS.style.cursor = "crosshair";
             } else {
                 onScreenCVS.style.cursor = "none";
@@ -799,83 +799,39 @@ function curveSteps() {
 function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, currentMode, scale = 1) {
     ctx.fillStyle = currentColor.color;
     function zt(z1, z2, z3, t) {
-        return z3 + Math.pow((1 - t), 2) * (z1 - z3) + Math.pow(t, 2) * (z2 - z3);
+        return Math.round(z3 + Math.pow((1 - t), 2) * (z1 - z3) + Math.pow(t, 2) * (z2 - z3));
     }
+    let tNum = 32;
+    let lastXt = x1;
+    let lastYt = y1;
 
     if (stepNum === 1) {
-        //point after defining x1y1
-        //linetool after defining x2y2
+        //after defining x1y1
         actionLine(x1, y1, state.mox, state.moy, currentColor, onScreenCTX, currentMode, scale);
     } else if (stepNum === 2) {
-        //preview curve
+        // after defining x2y2
+        //onscreen preview curve
         // bezier curve
-        for (let i = 0; i < 30; i++) {
-            let xt = zt(x1, x2, state.mox, i / 30);
-            let yt = zt(y1, y2, state.moy, i / 30);
+        for (let i = 0; i < tNum; i++) {
+            let xt = zt(x1, x2, state.mox, i / tNum);
+            let yt = zt(y1, y2, state.moy, i / tNum);
+            actionLine(lastXt, lastYt, xt, yt, currentColor, onScreenCTX, currentMode, scale);
+            lastXt = xt;
+            lastYt = yt;
             onScreenCTX.fillRect(xt * state.ratio / zoom, yt * state.ratio / zoom, scale, scale);
         }
+        actionLine(lastXt, lastYt, x2, y2, currentColor, onScreenCTX, currentMode, scale);
     } else if (stepNum === 3) {
         //curve after defining x3y3
         // bezier curve
-        for (let i = 0; i < 30; i++) {
-            let xt = zt(x1, x2, x3, i / 30);
-            let yt = zt(y1, y2, y3, i / 30);
-            console.log(xt, yt)
+        for (let i = 0; i < tNum; i++) {
+            let xt = zt(x1, x2, x3, i / tNum);
+            let yt = zt(y1, y2, y3, i / tNum);
             ctx.fillRect(xt, yt, scale, scale)
         }
         source = offScreenCVS.toDataURL();
         renderImage();
     }
-    //f(x) = a0 + a1x + a2x^2 + a3x^3 polynomial
-    // d1 = (y3 - y1) / (x3 - x1);
-    // d2 = (y3 - y2) / (x3 - x2);
-
-    // let denom = Math.pow((x1 - x2), 3);
-
-    // let a0 = -1 * (
-    //     (d2 * Math.pow(x1, 3) * x2) +
-    //     (d1 * Math.pow(x1, 2) * Math.pow(x2, 2)) -
-    //     (d2 * Math.pow(x1, 2) * Math.pow(x2, 2)) -
-    //     (d1 * x1 * Math.pow(x2, 3)) -
-    //     (3 * x1 * Math.pow(x2, 2) * y1) +
-    //     (Math.pow(x2, 3) * y1) -
-    //     (Math.pow(x1, 3) * y2) +
-    //     (3 * Math.pow(x1, 2) * x2 * y2)
-    // ) / denom;
-    // let a1 = -1 * (
-    //     (-1*d2 * Math.pow(x1, 3)) -
-    //     (2*d1 * Math.pow(x1, 2) * x2) -
-    //     (d2 * Math.pow(x1, 2) * x2) +
-    //     (d1 * x1 * Math.pow(x2, 2)) +
-    //     (2 * d2 * x1 * Math.pow(x2, 2)) +
-    //     (d1 * Math.pow(x2, 3)) +
-    //     (6 * x1 * x2 * y1) -
-    //     (6 * x1 * x2 * y2)
-    // ) / denom;
-    // let a2 = -1 * (
-    //     (d1 * Math.pow(x1, 2)) +
-    //     (2*d2 * Math.pow(x1, 2)) +
-    //     (d1 * x1 * x2) -
-    //     (d2 * x1 * x2) -
-    //     (2 * d1 * Math.pow(x2, 2)) -
-    //     (d2 * Math.pow(x2, 2)) -
-    //     (3 * x1 * y1) -
-    //     (3 * x2 * y1) +
-    //     (3*x1*y2) +
-    //     (3*x2*y2)
-    // ) / denom;
-    // let a3 = -1 * (
-    //     (-1 * d1 * x1) -
-    //     (d2 * x1) +
-    //     (d1 * x2) +
-    //     (d2 * x2) +
-    //     (2 * y1) -
-    //     (2 * y2)
-    // ) / denom;
-
-    // function polynomial(x) {
-    //     return a0 + a1*x + a2*Math.pow(x,2) + a3*Math.pow(x,3);
-    // }
 }
 
 //Non-actions
