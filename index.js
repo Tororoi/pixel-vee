@@ -741,7 +741,7 @@ function actionFill(startX, startY, currentColor, currentMode) { //BUG: fill wor
 
 //temp
 let clickCounter = 0;
-let x1, y1, x2, y2, x3, y3;
+let px1, py1, px2, py2, px3, py3;
 let curvePoints = [];
 
 function curveSteps() {
@@ -751,16 +751,16 @@ function curveSteps() {
             if (clickCounter > 3) clickCounter = 1;
             switch (clickCounter) {
                 case 1:
-                    x1 = state.mouseX;
-                    y1 = state.mouseY;
+                    px1 = state.mouseX;
+                    py1 = state.mouseY;
                     break;
                 case 2:
-                    x2 = state.mouseX;
-                    y2 = state.mouseY;
+                    px2 = state.mouseX;
+                    py2 = state.mouseY;
                     break;
                 case 3:
-                    x3 = state.mouseX;
-                    y3 = state.mouseY;
+                    px3 = state.mouseX;
+                    py3 = state.mouseY;
                     break;
                 default:
                 //do nothing
@@ -776,14 +776,14 @@ function curveSteps() {
                 onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
                 drawCanvas();
                 //onscreen preview
-                actionCurve(x1+ (state.xOffset / state.ratio * zoom), y1 + (state.yOffset / state.ratio * zoom), x2+ (state.xOffset / state.ratio * zoom), y2 + (state.yOffset / state.ratio * zoom), x3+ (state.xOffset / state.ratio * zoom), y3 + (state.yOffset / state.ratio * zoom), clickCounter, state.brushColor, onScreenCTX, state.mode, state.ratio / zoom);
+                actionCurve(px1 + (state.xOffset / state.ratio * zoom), py1 + (state.yOffset / state.ratio * zoom), px2 + (state.xOffset / state.ratio * zoom), py2 + (state.yOffset / state.ratio * zoom), px3 + (state.xOffset / state.ratio * zoom), py3 + (state.yOffset / state.ratio * zoom), clickCounter, state.brushColor, onScreenCTX, state.mode, state.ratio / zoom);
                 state.lastOnX = state.onX;
                 state.lastOnY = state.onY;
             }
             break;
         case "mouseup" || "mouseout":
             if (clickCounter === 3) {
-                actionCurve(x1, y1, x2, y2, x3, y3, clickCounter, state.brushColor, offScreenCTX, state.mode)
+                actionCurve(px1, py1, px2, py2, px3, py3, clickCounter, state.brushColor, offScreenCTX, state.mode)
                 clickCounter = 0;
                 // addToTimeline(state.tool.name, curvePoints);
                 //seriously, why do I need this? img.onload should've fired when I called renderImage from addToTimeline
@@ -798,6 +798,9 @@ function curveSteps() {
 //Curved Lines
 function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, currentMode, scale = 1) {
     ctx.fillStyle = currentColor.color;
+    function zt(z1, z2, z3, t) {
+        return z3 + Math.pow((1 - t), 2) * (z1 - z3) + Math.pow(t, 2) * (z2 - z3);
+    }
 
     if (stepNum === 1) {
         //point after defining x1y1
@@ -806,23 +809,17 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
     } else if (stepNum === 2) {
         //preview curve
         // bezier curve
-        function zt(z1, z2, z3, t) {
-            return z2 + Math.pow((1 - t), 2) * (z1 - z2) + Math.pow(t, 2) * (z3 - z2);
-        }
         for (let i = 0; i < 30; i++) {
-            let xt = zt(x1, x2, state.mox, i/30);
-            let yt = zt(y1, y2, state.moy, i/30);
+            let xt = zt(x1, x2, state.mox, i / 30);
+            let yt = zt(y1, y2, state.moy, i / 30);
             onScreenCTX.fillRect(xt, yt, scale, scale)
         }
     } else if (stepNum === 3) {
         //curve after defining x3y3
         // bezier curve
-        function zt(z1, z2, z3, t) {
-            return z2 + Math.pow((1 - t), 2) * (z1 - z2) + Math.pow(t, 2) * (z3 - z2);
-        }
         for (let i = 0; i < 30; i++) {
-            let xt = zt(x1, x2, x3, i/30);
-            let yt = zt(y1, y2, y3, i/30);
+            let xt = zt(x1, x2, x3, i / 30);
+            let yt = zt(y1, y2, y3, i / 30);
             console.log(xt, yt)
             ctx.fillRect(xt, yt, scale, scale)
         }
