@@ -812,7 +812,7 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         for (let i = 0; i < 30; i++) {
             let xt = zt(x1, x2, state.mox, i / 30);
             let yt = zt(y1, y2, state.moy, i / 30);
-            onScreenCTX.fillRect(xt, yt, scale, scale)
+            onScreenCTX.fillRect(xt * state.ratio / zoom, yt * state.ratio / zoom, scale, scale);
         }
     } else if (stepNum === 3) {
         //curve after defining x3y3
