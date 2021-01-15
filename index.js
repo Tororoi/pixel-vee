@@ -831,6 +831,7 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
             let yt = zt(y1, y2, y3, i / tNum);
             ctx.fillRect(xt, yt, scale, scale)
         }
+        //store control points for timeline
         source = offScreenCVS.toDataURL();
         renderImage();
     }
