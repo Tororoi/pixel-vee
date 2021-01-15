@@ -35,8 +35,8 @@ modeBtn.style.background = "rgb(238, 206, 102)";
 let offScreenCVS = document.createElement('canvas');
 let offScreenCTX = offScreenCVS.getContext("2d");
 //Set the dimensions of the drawing canvas
-offScreenCVS.width = 128;
-offScreenCVS.height = 128;
+offScreenCVS.width = 320;
+offScreenCVS.height = 320;
 
 //tool objects
 const tools = {
@@ -798,8 +798,8 @@ function curveSteps() {
 //Curved Lines
 function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, currentMode, scale = 1) {
     ctx.fillStyle = currentColor.color;
-    function zt(z1, z2, z3, t) {
-        return Math.round(z3 + Math.pow((1 - t), 2) * (z1 - z3) + Math.pow(t, 2) * (z2 - z3));
+    function pt(p1, p2, p3, t) {
+        return Math.round(p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3));
     }
     let tNum = 32;
     let lastXt = x1;
@@ -815,11 +815,12 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         //onscreen preview curve
         // bezier curve
         for (let i = 0; i < tNum; i++) {
-            let xt = zt(x1, x2, state.mox, i / tNum);
-            let yt = zt(y1, y2, state.moy, i / tNum);
+            let xt = pt(x1, x2, state.mox, i / tNum);
+            let yt = pt(y1, y2, state.moy, i / tNum);
             actionLine(lastXt, lastYt, xt, yt, currentColor, onScreenCTX, currentMode, scale);
             lastXt = xt;
             lastYt = yt;
+            // onScreenCTX.fillStyle = "black";
             onScreenCTX.fillRect(xt * state.ratio / zoom, yt * state.ratio / zoom, scale, scale);
         }
         actionLine(lastXt, lastYt, x2, y2, currentColor, onScreenCTX, currentMode, scale);
@@ -827,10 +828,14 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         //curve after defining x3y3
         // bezier curve
         for (let i = 0; i < tNum; i++) {
-            let xt = zt(x1, x2, x3, i / tNum);
-            let yt = zt(y1, y2, y3, i / tNum);
+            let xt = pt(x1, x2, x3, i / tNum);
+            let yt = pt(y1, y2, y3, i / tNum);
+            actionLine(lastXt, lastYt, xt, yt, currentColor, ctx, currentMode, scale);
+            lastXt = xt;
+            lastYt = yt;
             ctx.fillRect(xt, yt, scale, scale)
         }
+        actionLine(lastXt, lastYt, x2, y2, currentColor, ctx, currentMode, scale);
         //store control points for timeline
         source = offScreenCVS.toDataURL();
         renderImage();
