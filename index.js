@@ -810,6 +810,8 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         actionLine(x1, y1, state.mox, state.moy, currentColor, onScreenCTX, currentMode, scale);
     } else if (stepNum === 2) {
         // after defining x2y2
+        //calc tNum
+        // tNum = ()
         //onscreen preview curve
         // bezier curve
         for (let i = 0; i < tNum; i++) {
