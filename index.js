@@ -35,8 +35,8 @@ modeBtn.style.background = "rgb(238, 206, 102)";
 let offScreenCVS = document.createElement('canvas');
 let offScreenCTX = offScreenCVS.getContext("2d");
 //Set the dimensions of the drawing canvas
-offScreenCVS.width = 320;
-offScreenCVS.height = 320;
+offScreenCVS.width = 128;
+offScreenCVS.height = 128;
 
 //tool objects
 const tools = {
