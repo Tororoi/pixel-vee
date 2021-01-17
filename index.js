@@ -343,7 +343,7 @@ function handleModes(e) {
     }
 }
 
-function addToTimeline(tool, x, y) {
+function addToTimeline(tool, x, y, cpoints = null) {
     //use current state for variables
     //pencil, replace
     state.points.push({
@@ -785,7 +785,7 @@ function curveSteps() {
             if (clickCounter === 3) {
                 actionCurve(px1, py1, px2, py2, px3, py3, clickCounter, state.brushColor, offScreenCTX, state.mode)
                 clickCounter = 0;
-                // addToTimeline(state.tool.name, curvePoints);
+                addToTimeline(state.tool.name, { x1: px1, x2: px2, x3: px3 }, { y1: py1, y2: py2, y3: py3 });
                 //seriously, why do I need this? img.onload should've fired when I called renderImage from addToTimeline
                 window.setTimeout(renderImage, 0);
             }
@@ -936,6 +936,9 @@ function redrawPoints() {
                     break;
                 case "line":
                     actionLine(p.startX, p.startY, p.x, p.y, p.color, offScreenCTX, p.mode)
+                    break;
+                case "curve":
+                    actionCurve(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.x.x3, p.y.y3, 3, p.color, offScreenCTX, p.mode)
                     break;
                 default:
                     actionDraw(p.x, p.y, p.color, p.size, p.mode);
