@@ -343,14 +343,11 @@ function handleModes(e) {
     }
 }
 
-function addToTimeline(tool, x, y, cpoints = null) {
+function addToTimeline(tool, x, y) {
     //use current state for variables
     //pencil, replace
     state.points.push({
-        //for line
-        startX: state.lastX,
-        startY: state.lastY,
-        //for everything
+        //x/y are sometimes objects with multiple values
         x: x,
         y: y,
         size: state.tool.brushSize,
@@ -386,7 +383,7 @@ function drawSteps() {
                 if (Math.abs(state.mouseX - state.lastX) > 1 || Math.abs(state.mouseY - state.lastY) > 1) {
                     //add to options, only execute if "continuous line" is on
                     actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, offScreenCTX, state.mode);
-                    addToTimeline("line", state.mouseX, state.mouseY);
+                    addToTimeline("line", { x1: state.lastX, x2: state.mouseX }, { y1: state.lastY, y2: state.mouseY });
                 } else {
                     //perfect will be option, not mode
                     if (state.mode === "perfect") {
@@ -474,7 +471,7 @@ function lineSteps() {
             break;
         case "mouseup":
             actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, offScreenCTX, state.mode);
-            addToTimeline(state.tool.name, state.mouseX, state.mouseY);
+            addToTimeline(state.tool.name, { x1: state.lastX, x2: state.mouseX }, { y1: state.lastY, y2: state.mouseY });
             //seriously, why do I need this? img.onload should've fired when I called renderImage from addToTimeline
             window.setTimeout(renderImage, 0);
             break;
@@ -935,7 +932,7 @@ function redrawPoints() {
                     actionFill(p.x, p.y, p.color, p.mode);
                     break;
                 case "line":
-                    actionLine(p.startX, p.startY, p.x, p.y, p.color, offScreenCTX, p.mode)
+                    actionLine(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.color, offScreenCTX, p.mode)
                     break;
                 case "curve":
                     actionCurve(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.x.x3, p.y.y3, 3, p.color, offScreenCTX, p.mode)
