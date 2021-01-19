@@ -101,9 +101,6 @@ const state = {
         erase: false,
         contiguous: false
     },
-    //keyboard shortcuts
-    space: false,
-    option: false,
     //active variables for canvas
     event: "none",
     clicked: false,
@@ -145,6 +142,8 @@ let source = offScreenCVS.toDataURL();
 document.addEventListener('keydown', handleKeyDown);
 document.addEventListener('keyup', handleKeyUp);
 
+onScreenCVS.addEventListener('wheel', handleWheel)
+
 //Add event listeners for the mouse moving, downclick, and upclick
 onScreenCVS.addEventListener('mousemove', handleMouseMove);
 onScreenCVS.addEventListener('mousedown', handleMouseDown);
@@ -166,7 +165,6 @@ modesCont.addEventListener('click', handleModes);
 
 function handleKeyDown(e) {
     if (e.code === 'Space') {
-        state.space = true;
         state.tool = tools["grab"];
         onScreenCVS.style.cursor = "move";
     }
@@ -174,7 +172,6 @@ function handleKeyDown(e) {
 
 function handleKeyUp(e) {
     if (e.code === 'Space') {
-        state.space = false;
         state.tool = tools[toolBtn.id];
         if (toolBtn.id === "grab") {
             onScreenCVS.style.cursor = "move";
@@ -184,6 +181,32 @@ function handleKeyUp(e) {
             onScreenCVS.style.cursor = "none";
         }
     }
+}
+
+function handleWheel(e) {
+    let delta = Math.sign(e.deltaY);
+    //BUG: zoom is off center just a bit and drawing before moving the mouse has odd effects
+    //zoom based on mouse coords
+    let z;
+    let rw = ocWidth / offScreenCVS.width;
+    let nox = Math.round(((state.mox * state.ratio) / 5 / zoom) / rw) * rw;
+    let noy = Math.round(((state.moy * state.ratio) / 5 / zoom) / rw) * rw;
+    if (delta < 0) {
+        z = 0.8;
+        zoom *= z;
+        state.xOffset += nox;
+        state.yOffset += noy;
+    } else if (delta > 0) {
+        z = 1.25;
+        state.xOffset -= nox;
+        state.yOffset -= noy;
+        zoom *= z;
+    }
+    //re scale canvas
+    onScreenCTX.scale(z, z);
+    state.lastOffsetX = state.xOffset;
+    state.lastOffsetY = state.yOffset;
+    renderImage();
 }
 
 function handleMouseMove(e) {
@@ -316,24 +339,26 @@ function handleRedo() {
 
 
 function handleZoom(e) {
+    //general zoom based on center
     if (e.target.closest(".square")) {
         let zoomBtn = e.target.closest(".square");
         let z;
+        let rw = ocWidth / offScreenCVS.width;
+        let nox = Math.round((ocWidth / 10 / zoom) / rw) * rw;
+        let noy = Math.round((ocHeight / 10 / zoom) / rw) * rw;
         if (zoomBtn.id === "minus") {
             z = 0.8;
             zoom *= z;
-            state.xOffset += ocWidth / 10 / zoom;
-            state.yOffset += ocHeight / 10 / zoom;
+            state.xOffset += nox;
+            state.yOffset += noy;
         } else if (zoomBtn.id === "plus") {
             z = 1.25;
-            state.xOffset -= ocWidth / 10 / zoom;
-            state.yOffset -= ocHeight / 10 / zoom;
+            state.xOffset -= nox;
+            state.yOffset -= noy;
             zoom *= z;
         }
         //re scale canvas
         onScreenCTX.scale(z, z);
-        state.xOffset = Math.floor(state.xOffset - (state.xOffset % (ocWidth / offScreenCVS.width)));
-        state.yOffset = Math.floor(state.yOffset - (state.yOffset % (ocHeight / offScreenCVS.height)));
         state.lastOffsetX = state.xOffset;
         state.lastOffsetY = state.yOffset;
         renderImage();
