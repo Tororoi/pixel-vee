@@ -101,6 +101,9 @@ const state = {
         erase: false,
         contiguous: false
     },
+    //keyboard shortcuts
+    space: false,
+    option: false,
     //active variables for canvas
     event: "none",
     clicked: false,
@@ -138,6 +141,10 @@ const state = {
 let img = new Image;
 let source = offScreenCVS.toDataURL();
 
+//shortcuts
+document.addEventListener('keydown', handleKeyDown);
+document.addEventListener('keyup', handleKeyUp);
+
 //Add event listeners for the mouse moving, downclick, and upclick
 onScreenCVS.addEventListener('mousemove', handleMouseMove);
 onScreenCVS.addEventListener('mousedown', handleMouseDown);
@@ -156,6 +163,28 @@ colorSwitch.addEventListener('click', switchColors);
 
 toolsCont.addEventListener('click', handleTools);
 modesCont.addEventListener('click', handleModes);
+
+function handleKeyDown(e) {
+    if (e.code === 'Space') {
+        state.space = true;
+        state.tool = tools["grab"];
+        onScreenCVS.style.cursor = "move";
+    }
+}
+
+function handleKeyUp(e) {
+    if (e.code === 'Space') {
+        state.space = false;
+        state.tool = tools[toolBtn.id];
+        if (toolBtn.id === "grab") {
+            onScreenCVS.style.cursor = "move";
+        } else if (toolBtn.id === "replace" || toolBtn.id === "pencil" || toolBtn.id === "curve") {
+            onScreenCVS.style.cursor = "crosshair";
+        } else {
+            onScreenCVS.style.cursor = "none";
+        }
+    }
+}
 
 function handleMouseMove(e) {
     state.event = "mousemove";
@@ -738,8 +767,7 @@ function actionFill(startX, startY, currentColor, currentMode) { //BUG: fill wor
 
 //temp
 let clickCounter = 0;
-let px1, py1, px2, py2, px3, py3;
-let curvePoints = [];
+let px1, py1, px2, py2, px3, py3, px4, py4;
 
 function curveSteps() {
     switch (state.event) {
