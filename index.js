@@ -164,9 +164,18 @@ toolsCont.addEventListener('click', handleTools);
 modesCont.addEventListener('click', handleModes);
 
 function handleKeyDown(e) {
+    console.log(e.code)
     if (e.code === 'Space') {
         state.tool = tools["grab"];
         onScreenCVS.style.cursor = "move";
+    } else if (e.code === 'KeyB') {
+        //reset old button
+        toolBtn.style.background = "rgb(131, 131, 131)";
+        //set new button
+        toolBtn = document.querySelector("#pencil");
+        toolBtn.style.background = "rgb(238, 206, 102)";
+        state.tool = tools["pencil"];
+        onScreenCVS.style.cursor = "crosshair";
     }
 }
 
