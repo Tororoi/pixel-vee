@@ -102,7 +102,7 @@ body {
     /* border-radius: 6px; */
     padding: 5px 0;
     align-self: center;
-    transform: translateX(-160px) translateY(8px);
+    transform: translateX(-160px) translateY(60px);
     transition: 0.3s all;
     opacity: 0;
     box-shadow: 
@@ -122,10 +122,9 @@ body {
     right: -2px;
     background: rgb(255, 255, 199);
     box-shadow: 
-    2px 0px rgb(255, 255, 199),
-    4px 0px rgb(255, 255, 199),
-    2px 2px rgb(255, 255, 199),
-    2px 4px rgb(255, 255, 199);
+    -2px -2px rgb(255, 255, 199),
+    0px -2px rgb(255, 255, 199),
+    0px -4px rgb(255, 255, 199);
 }
 
 .btn:hover .tooltip {
