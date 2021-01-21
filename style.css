@@ -88,6 +88,50 @@ body {
     /* opacity: 0.8; */
 }
 
+.tooltip {
+    visibility: hidden;
+    pointer-events: none;
+    position: absolute;
+    z-index: 1;
+    color: black;
+    background: rgb(255, 255, 199);
+    text-align: center;
+    width: 100px;
+    font-family: "04Font";
+    font-size: 16px;
+    /* border-radius: 6px; */
+    padding: 5px 0;
+    transform: translateX(-160px) translateY(8px);
+    transition: 0.3s all;
+    opacity: 0;
+    box-shadow: 
+    2px 0px rgb(255, 255, 199),
+    -2px 0px rgb(255, 255, 199),
+    0px -2px rgb(255, 255, 199),
+    0px 2px rgb(255, 255, 199);
+}
+
+.tooltip:after {
+    content: "";
+    display: inline-block;
+    width: 2px;
+    height: 2px;
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: rgb(255, 255, 199);
+    box-shadow: 
+    2px 0px rgb(255, 255, 199),
+    -2px 0px rgb(255, 255, 199),
+    0px -2px rgb(255, 255, 199),
+    0px 2px rgb(255, 255, 199);
+}
+
+.btn:hover .tooltip {
+    visibility: visible;
+    opacity: 1;
+}
+
 .sidebar {
     background-color: rgb(80, 80, 80);
     width: 280px;
