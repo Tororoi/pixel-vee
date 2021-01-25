@@ -142,7 +142,7 @@ let source = offScreenCVS.toDataURL();
 document.addEventListener('keydown', handleKeyDown);
 document.addEventListener('keyup', handleKeyUp);
 
-onScreenCVS.addEventListener('wheel', handleWheel)
+onScreenCVS.addEventListener('wheel', handleWheel);
 
 //Add event listeners for the mouse moving, downclick, and upclick
 onScreenCVS.addEventListener('mousemove', handleMouseMove);
@@ -165,30 +165,50 @@ modesCont.addEventListener('click', handleModes);
 
 function handleKeyDown(e) {
     console.log(e.code)
-    if (e.code === 'Space') {
-        state.tool = tools["grab"];
-        onScreenCVS.style.cursor = "move";
-    } else if (e.code === 'KeyB') {
-        //reset old button
-        toolBtn.style.background = "rgb(131, 131, 131)";
-        //set new button
-        toolBtn = document.querySelector("#pencil");
-        toolBtn.style.background = "rgb(238, 206, 102)";
-        state.tool = tools["pencil"];
-        onScreenCVS.style.cursor = "crosshair";
+    switch (e.code) {
+        case 'Space':
+            state.tool = tools["grab"];
+            onScreenCVS.style.cursor = "move";
+            break;
+        case 'AltLeft':
+            //option key
+            state.tool = tools["picker"];
+            onScreenCVS.style.cursor = "none";
+            break;
+        case 'KeyB':
+            //reset old button
+            toolBtn.style.background = "rgb(131, 131, 131)";
+            //set new button
+            toolBtn = document.querySelector("#pencil");
+            toolBtn.style.background = "rgb(238, 206, 102)";
+            state.tool = tools["pencil"];
+            onScreenCVS.style.cursor = "crosshair";
+            break;
+        case 'KeyR':
+            //reset old button
+            toolBtn.style.background = "rgb(131, 131, 131)";
+            //set new button
+            toolBtn = document.querySelector("#replace");
+            toolBtn.style.background = "rgb(238, 206, 102)";
+            state.tool = tools["replace"];
+            onScreenCVS.style.cursor = "crosshair";
+            break;
+        default:
+        //do nothing
     }
 }
 
 function handleKeyUp(e) {
-    if (e.code === 'Space') {
+    if (e.code === 'Space' || e.code === 'AltLeft') {
         state.tool = tools[toolBtn.id];
-        if (toolBtn.id === "grab") {
-            onScreenCVS.style.cursor = "move";
-        } else if (toolBtn.id === "replace" || toolBtn.id === "pencil" || toolBtn.id === "curve") {
-            onScreenCVS.style.cursor = "crosshair";
-        } else {
-            onScreenCVS.style.cursor = "none";
-        }
+    }
+
+    if (toolBtn.id === "grab") {
+        onScreenCVS.style.cursor = "move";
+    } else if (toolBtn.id === "replace" || toolBtn.id === "pencil" || toolBtn.id === "curve") {
+        onScreenCVS.style.cursor = "crosshair";
+    } else {
+        onScreenCVS.style.cursor = "none";
     }
 }
 
