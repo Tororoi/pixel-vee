@@ -192,7 +192,6 @@ function handleKeyDown(e) {
             break;
         case 'ShiftLeft':
         case 'ShiftRight':
-            console.log("hey!")
             if (toolBtn.id === "pencil") {
                 state.tool = tools["line"];
                 onScreenCVS.style.cursor = "none";
