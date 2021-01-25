@@ -164,16 +164,22 @@ toolsCont.addEventListener('click', handleTools);
 modesCont.addEventListener('click', handleModes);
 
 function handleKeyDown(e) {
-    console.log(e.code)
+    // console.log(e.code)
     switch (e.code) {
         case 'Space':
             state.tool = tools["grab"];
             onScreenCVS.style.cursor = "move";
             break;
-        case 'AltLeft':
+        case 'AltLeft' || 'AltRight':
             //option key
             state.tool = tools["picker"];
             onScreenCVS.style.cursor = "none";
+            break;
+        case 'ShiftLeft' || 'ShiftRight':
+            if (toolBtn.id === "pencil") {
+                state.tool = tools["line"];
+                onScreenCVS.style.cursor = "none";
+            }
             break;
         case 'KeyB':
             //reset old button
@@ -226,7 +232,7 @@ function handleKeyDown(e) {
 }
 
 function handleKeyUp(e) {
-    if (e.code === 'Space' || e.code === 'AltLeft') {
+    if (e.code === 'Space' || e.code === 'AltLeft' || e.code === 'AltRight' || e.code === 'ShiftLeft' || e.code === 'ShiftRight') {
         state.tool = tools[toolBtn.id];
     }
 
