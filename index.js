@@ -197,11 +197,35 @@ function handleKeyDown(e) {
                 onScreenCVS.style.cursor = "none";
             }
             break;
-        case 'KeyP':
+        case 'KeyS':
             let r = Math.floor(Math.random() * 256);
             let g = Math.floor(Math.random() * 256);
             let b = Math.floor(Math.random() * 256);
-            setColor(r, g, b, "swatch");
+            setColor(r, g, b, "swatch btn");
+            break;
+        case 'KeyD':
+            //reset old button
+            modeBtn.style.background = "rgb(131, 131, 131)";
+            //set new button
+            modeBtn = document.querySelector("#draw");
+            modeBtn.style.background = "rgb(238, 206, 102)";
+            state.mode = "draw";
+            break;
+        case 'KeyE':
+            //reset old button
+            modeBtn.style.background = "rgb(131, 131, 131)";
+            //set new button
+            modeBtn = document.querySelector("#erase");
+            modeBtn.style.background = "rgb(238, 206, 102)";
+            state.mode = "erase";
+            break;
+        case 'KeyP':
+            //reset old button
+            modeBtn.style.background = "rgb(131, 131, 131)";
+            //set new button
+            modeBtn = document.querySelector("#perfect");
+            modeBtn.style.background = "rgb(238, 206, 102)";
+            state.mode = "perfect";
             break;
         case 'KeyB':
             //reset old button
@@ -1015,7 +1039,7 @@ function sampleColor(x, y) {
 }
 
 function setColor(r, g, b, target) {
-    if (target === "swatch") {
+    if (target === "swatch btn") {
         state.brushColor.color = `rgba(${r},${g},${b},255)`;
         state.brushColor.r = r;
         state.brushColor.g = g;
