@@ -170,16 +170,25 @@ function handleKeyDown(e) {
             state.tool = tools["grab"];
             onScreenCVS.style.cursor = "move";
             break;
-        case 'AltLeft' || 'AltRight':
+        case 'AltLeft':
+        case 'AltRight':
             //option key
             state.tool = tools["picker"];
             onScreenCVS.style.cursor = "none";
             break;
-        case 'ShiftLeft' || 'ShiftRight':
+        case 'ShiftLeft':
+        case 'ShiftRight':
+            console.log("hey!")
             if (toolBtn.id === "pencil") {
                 state.tool = tools["line"];
                 onScreenCVS.style.cursor = "none";
             }
+            break;
+        case 'KeyP':
+            let r = Math.floor(Math.random() * 256);
+            let g = Math.floor(Math.random() * 256);
+            let b = Math.floor(Math.random() * 256);
+            setColor(r, g, b, "swatch");
             break;
         case 'KeyB':
             //reset old button
