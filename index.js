@@ -164,8 +164,22 @@ toolsCont.addEventListener('click', handleTools);
 modesCont.addEventListener('click', handleModes);
 
 function handleKeyDown(e) {
-    // console.log(e.code)
+    // console.log(e.key)
     switch (e.code) {
+        case 'KeyZ':
+            if (e.metaKey) {
+                if (e.key === 'Ω') {
+                    //alt+meta+z
+                    handleRedo();
+                } else {
+                    handleUndo();
+                }
+            }
+            break;
+        case 'MetaLeft':
+        case 'MetaRight':
+            //command key
+            break;
         case 'Space':
             state.tool = tools["grab"];
             onScreenCVS.style.cursor = "move";
@@ -344,18 +358,20 @@ function handleMouseUp(e) {
 }
 
 function handleMouseOut(e) {
-    state.event = "mouseout";
-    state.clicked = false;
-    state.tool.fn();
-    //add to undo stack
-    if (state.points.length) {
-        state.undoStack.push(state.points);
+    if (state.clicked) {
+        state.event = "mouseout";
+        state.clicked = false;
+        state.tool.fn();
+        //add to undo stack
+        if (state.points.length) {
+            state.undoStack.push(state.points);
+        }
+        state.points = [];
+        //Reset redostack
+        state.redoStack = [];
+        onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
+        drawCanvas();
     }
-    state.points = [];
-    //Reset redostack
-    state.redoStack = [];
-    onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
-    drawCanvas();
     state.event = "none";
 }
 
