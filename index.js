@@ -193,6 +193,33 @@ function handleKeyDown(e) {
             state.tool = tools["replace"];
             onScreenCVS.style.cursor = "crosshair";
             break;
+        case 'KeyL':
+            //reset old button
+            toolBtn.style.background = "rgb(131, 131, 131)";
+            //set new button
+            toolBtn = document.querySelector("#line");
+            toolBtn.style.background = "rgb(238, 206, 102)";
+            state.tool = tools["line"];
+            onScreenCVS.style.cursor = "none";
+            break;
+        case 'KeyF':
+            //reset old button
+            toolBtn.style.background = "rgb(131, 131, 131)";
+            //set new button
+            toolBtn = document.querySelector("#fill");
+            toolBtn.style.background = "rgb(238, 206, 102)";
+            state.tool = tools["fill"];
+            onScreenCVS.style.cursor = "none";
+            break;
+        case 'KeyC':
+            //reset old button
+            toolBtn.style.background = "rgb(131, 131, 131)";
+            //set new button
+            toolBtn = document.querySelector("#curve");
+            toolBtn.style.background = "rgb(238, 206, 102)";
+            state.tool = tools["curve"];
+            onScreenCVS.style.cursor = "none";
+            break;
         default:
         //do nothing
     }
