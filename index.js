@@ -1035,7 +1035,7 @@ function sampleColor(x, y) {
 
     let newColor = getColor(x, y, state.colorLayerGlobal);
     //not simply passing whole color in until random color function is refined
-    setColor(newColor.r, newColor.g, newColor.b, "swatch");
+    setColor(newColor.r, newColor.g, newColor.b, "swatch btn");
 }
 
 function setColor(r, g, b, target) {
