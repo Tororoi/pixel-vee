@@ -17,6 +17,10 @@ body {
 
 /* Canvas */
 
+canvas {
+    image-rendering: pixelated;
+}
+
 .canvas-container {
     background-color: bisque;
     width: calc(100% - 280px);
