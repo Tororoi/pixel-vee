@@ -19,6 +19,10 @@ let swatch = document.querySelector(".swatch");
 let backSwatch = document.querySelector(".back-swatch");
 let colorSwitch = document.querySelector(".switch");
 
+//Get the reset buttons
+let recenterBtn = document.querySelector(".recenter");
+let clearBtn = document.querySelector(".clear");
+
 //zoom buttons
 let zoomCont = document.querySelector(".zoom");
 
@@ -153,6 +157,9 @@ onScreenCVS.addEventListener('mouseout', handleMouseOut);
 //Add event listeners for the toolbox
 undoBtn.addEventListener('click', handleUndo);
 redoBtn.addEventListener('click', handleRedo);
+
+recenterBtn.addEventListener('click', handleRecenter);
+clearBtn.addEventListener('click', handleClear);
 
 zoomCont.addEventListener('click', handleZoom);
 
@@ -447,6 +454,19 @@ function handleRedo() {
     }
 }
 
+function handleRecenter(e) {
+    onScreenCTX.scale(1/zoom, 1/zoom);
+    zoom = 1;
+    state.xOffset = 0;
+    state.yOffset = 0;
+    state.lastOffsetX = 0;
+    state.lastOffsetY = 0;
+    renderImage();
+}
+
+function handleClear() {
+
+}
 
 function handleZoom(e) {
     //general zoom based on center
