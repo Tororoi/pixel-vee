@@ -465,7 +465,13 @@ function handleRecenter(e) {
 }
 
 function handleClear() {
-
+    addToTimeline("clear",0,0);
+    state.undoStack.push(state.points);
+    state.points = [];
+    state.redoStack = [];
+    offScreenCTX.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
+    source = offScreenCVS.toDataURL();
+    renderImage();
 }
 
 function handleZoom(e) {
@@ -1111,6 +1117,9 @@ function redrawPoints() {
     state.undoStack.forEach(action => {
         action.forEach(p => {
             switch (p.tool) {
+                case "clear":
+                    offScreenCTX.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
+                    break;
                 case "fill":
                     actionFill(p.x, p.y, p.color, p.mode);
                     break;
