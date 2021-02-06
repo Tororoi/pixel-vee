@@ -419,15 +419,31 @@ function renderCursor() {
             drawCursorBox();
     }
     function drawCursorBox() {
+        //line offset to stroke offcenter;
+        let ol = 0;
         onScreenCTX.beginPath();
-        onScreenCTX.rect(state.onX, state.onY, state.ratio / zoom, state.ratio / zoom);
         onScreenCTX.lineWidth = 0.5;
         onScreenCTX.strokeStyle = "black";
-        onScreenCTX.stroke();
-        onScreenCTX.beginPath();
-        onScreenCTX.rect(state.onX + 0.5, state.onY + 0.5, state.ratio / zoom - 1, state.ratio / zoom - 1);
-        onScreenCTX.lineWidth = 0.5;
-        onScreenCTX.strokeStyle = "white";
+        //top
+        onScreenCTX.moveTo(state.onX, state.onY-ol);
+        onScreenCTX.lineTo(state.onX+state.ratio / zoom, state.onY-ol);
+        //right
+        onScreenCTX.moveTo(state.onX+ol+state.ratio / zoom, state.onY);
+        onScreenCTX.lineTo(state.onX+ol+state.ratio / zoom, state.onY+state.ratio / zoom);
+        //bottom
+        onScreenCTX.moveTo(state.onX, state.onY+ol+state.ratio / zoom);
+        onScreenCTX.lineTo(state.onX+state.ratio / zoom, state.onY+ol+state.ratio / zoom);
+        //left
+        onScreenCTX.moveTo(state.onX-ol, state.onY);
+        onScreenCTX.lineTo(state.onX-ol, state.onY+state.ratio / zoom);
+        // onScreenCTX.rect(state.onX, state.onY, state.ratio / zoom, state.ratio / zoom);
+        // onScreenCTX.lineWidth = 0.5;
+        // onScreenCTX.strokeStyle = "black";
+        // onScreenCTX.stroke();
+        // onScreenCTX.beginPath();
+        // onScreenCTX.rect(state.onX + 0.5, state.onY + 0.5, state.ratio / zoom - 1, state.ratio / zoom - 1);
+        // onScreenCTX.lineWidth = 0.5;
+        // onScreenCTX.strokeStyle = "white";
         onScreenCTX.stroke();
     }
 }
