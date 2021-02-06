@@ -205,6 +205,23 @@ canvas {
     /* border-radius: 10px; */
 }
 
+/* Resets */
+.resets {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.resets div {
+    margin: 16px;
+}
+
+.recenter {
+    background-color: rgb(77, 151, 28);
+}
+
+.clear {
+    background-color: rgb(0, 0, 0);
+}
 /* Zoom */
 
 .zoom {
