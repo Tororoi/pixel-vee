@@ -75,7 +75,36 @@ canvas {
     border: 5px solid rgb(209, 61, 35);
 }
 
+/* Color Picker */
+
+
 /* Toolbox */
+.colorpicker {
+    visibility: hidden;
+    pointer-events: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    /* z-index: 1; */
+    color: white;
+    background: rgb(61, 61, 61);
+    text-align: center;
+    width: 500px;
+    height: 300px;
+    font-family: "04Font";
+    font-size: 16px;
+    /* border-radius: 6px; */
+    padding: 0;
+    align-self: center;
+    transform: translate(-50%, -50%);
+    transition: 0.3s all;
+    opacity: 1;
+    box-shadow: 
+    2px 0px rgb(255, 255, 255),
+    -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255),
+    0px 2px rgb(255, 255, 255);
+}
 
 /* Buttons */
 
