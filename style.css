@@ -110,12 +110,15 @@ canvas {
 /* Buttons */
 
 .btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
     background: rgb(131, 131, 131);
     user-select: none;
     width: 100px;
     text-align: center;
     color: white;
-    height: 60px;
+    height: 48px;
     margin: 3px;
     opacity: 1;
 
@@ -136,6 +139,10 @@ canvas {
     /* opacity: 0.8; */
 }
 
+/* .btn h3 {
+    margin: 0;
+} */
+
 .tooltip {
     visibility: hidden;
     pointer-events: none;
@@ -150,7 +157,7 @@ canvas {
     /* border-radius: 6px; */
     padding: 5px 0;
     align-self: center;
-    transform: translateX(-160px) translateY(60px);
+    transform: translateX(-110px) translateY(48px);
     transition: 0.3s all;
     opacity: 0;
     box-shadow: 

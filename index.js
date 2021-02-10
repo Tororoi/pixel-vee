@@ -987,6 +987,7 @@ function curveSteps() {
             if (clickCounter === 3) {
                 actionCurve(px1, py1, px2, py2, px3, py3, clickCounter, state.brushColor, offScreenCTX, state.mode)
                 clickCounter = 0;
+                //store control points for timeline
                 addToTimeline(state.tool.name, { x1: px1, x2: px2, x3: px3 }, { y1: py1, y2: py2, y3: py3 });
                 //seriously, why do I need this? img.onload should've fired when I called renderImage from addToTimeline
                 window.setTimeout(renderImage, 0);
@@ -1012,8 +1013,6 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         actionLine(x1, y1, state.mox, state.moy, currentColor, onScreenCTX, currentMode, scale);
     } else if (stepNum === 2) {
         // after defining x2y2
-        //calc tNum
-        // tNum = ()
         //onscreen preview curve
         // bezier curve
         for (let i = 0; i < tNum; i++) {
@@ -1038,7 +1037,7 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
             ctx.fillRect(xt, yt, scale, scale)
         }
         actionLine(lastXt, lastYt, x2, y2, currentColor, ctx, currentMode, scale);
-        //store control points for timeline
+        //render drawing
         source = offScreenCVS.toDataURL();
         renderImage();
     }
