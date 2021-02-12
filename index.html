@@ -110,7 +110,58 @@
         </div>
         <span class="color-container">
             <h3>Color Picker</h3>
-            <canvas id="color-picker"></canvas>
+            <div id="interface">
+                <div id="left">
+                    <div id="picker">
+                    <canvas id="color-picker"></canvas>
+                    <input type="range" id="hue" name="hue" value="255" min="0" max="255">
+                </div>
+                    <div id="buttons">
+                        <btn>OK</btn>
+                        <btn>Cancel</btn>
+                    </div>
+                </div>
+                <div id="right">
+                    <div id="colors">
+                        <h5>New
+                        <div id="newcolor"></div>
+                    </h5>
+                        <h5>Old
+                        <div id="oldcolor"></div>
+                    </h5>
+                    </div>
+                    <div id="rgbahsl">
+                        <div id="rgba">
+                            <label>R:
+                                <input type="number" id="r">
+                            </label>
+                            <label>G:
+                                <input type="number" id="g">
+                            </label>
+                            <label>B:
+                                <input type="number" id="b">
+                            </label>
+                            <label>A:
+                                <input type="number" id="a">
+                            </label>
+                        </div>
+                        <div id="hsl">
+                            <label>H:
+                                <input type="number" id="h">
+                            </label>
+                            <label>S:
+                                <input type="number" id="s">
+                            </label>
+                            <label>L:
+                                <input type="number" id="l">
+                            </label>
+                        </div>
+                    </div>
+                    <label id="hex">Hex:
+                        <input type="string" id="hexcode">
+                    </label>
+                </div>
+            </div>
         </span>
     </div>
 </body>
