@@ -51,13 +51,33 @@ class Picker {
     }
 
     draw() {
+        //draw gradient
         for (let row = 0; row < this.height; row++) {
             let grad = this.context.createLinearGradient(0, 0, this.width, 0);
-            grad.addColorStop(0, 'hsl(' + this.hue + ', 100%, ' + (100 - (row/this.height)*100) + '%)');
-            grad.addColorStop(1, 'hsl(' + this.hue + ', 0%, ' + (100 - (row/this.height)*100) + '%)');
+            grad.addColorStop(0, 'hsl(' + this.hue + ', 0%, ' + (100 - (row/this.height)*100) + '%)');
+            grad.addColorStop(1, 'hsl(' + this.hue + ', 100%, ' + (100 - (row/this.height)*100) + '%)');
             this.context.fillStyle = grad;
             this.context.fillRect(0, row, this.width, 1);
         }
+
+        //draw selector
+        this.context.beginPath();
+        this.context.lineWidth = 1;
+        this.context.strokeStyle = "black";
+        //top
+        this.context.moveTo(this.pickerCircle.x, this.pickerCircle.y-0.5);
+        this.context.lineTo(this.pickerCircle.x+this.pickerCircle.width, this.pickerCircle.y-0.5);
+        //right
+        this.context.moveTo(this.pickerCircle.x+this.pickerCircle.width+0.5, this.pickerCircle.y);
+        this.context.lineTo(this.pickerCircle.x+this.pickerCircle.width+0.5, this.pickerCircle.y+this.pickerCircle.height);
+        //bottom
+        this.context.moveTo(this.pickerCircle.x, this.pickerCircle.y+this.pickerCircle.height+0.5);
+        this.context.lineTo(this.pickerCircle.x+this.pickerCircle.width, this.pickerCircle.y+this.pickerCircle.height+0.5);
+        //left
+        this.context.moveTo(this.pickerCircle.x-0.5, this.pickerCircle.y);
+        this.context.lineTo(this.pickerCircle.x-0.5, this.pickerCircle.y+this.pickerCircle.height);
+
+        this.context.stroke();
     }
 }
 
