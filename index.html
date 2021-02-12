@@ -6,6 +6,7 @@
     <title>Undo Button</title>
     <link rel="stylesheet" href="style.css">
     <script defer src="index.js"></script>
+    <script defer src="Tools/Picker.js"></script>
     <meta property="og:site_name" content="Undo Button">
     <meta property="og:image" content="./public/link-preview.png">
     <meta property="og:description" content="A pixel art drawing app">
@@ -113,9 +114,9 @@
             <div id="interface">
                 <div id="left">
                     <div id="picker">
-                    <canvas id="color-picker"></canvas>
-                    <input type="range" id="hue" name="hue" value="255" min="0" max="255">
-                </div>
+                        <canvas id="color-picker"></canvas>
+                        <input type="range" id="hue" name="hue" value="255" min="0" max="255">
+                    </div>
                     <div id="buttons">
                         <btn>OK</btn>
                         <btn>Cancel</btn>
@@ -124,11 +125,11 @@
                 <div id="right">
                     <div id="colors">
                         <h5>New
-                        <div id="newcolor"></div>
-                    </h5>
+                            <div id="newcolor"></div>
+                        </h5>
                         <h5>Old
-                        <div id="oldcolor"></div>
-                    </h5>
+                            <div id="oldcolor"></div>
+                        </h5>
                     </div>
                     <div id="rgbahsl">
                         <div id="rgba">

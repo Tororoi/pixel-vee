@@ -1,16 +1,69 @@
 class Picker {
     constructor(target, width, height) {
-      this.target = target;
-      this.width = width;
-      this.height = height;
-      this.target.width = width;
-      this.target.height = height;
-      //Get context 
-      this.context = this.target.getContext("2d");
-      //Circle (Color Selector Circle)
-      this.pickerCircle = { x: 10, y: 10, width: 7, height: 7 };
-  
-      draw() {
-        //Drawing Here
-      }
-  }
+        this.target = target;
+        this.width = width;
+        this.height = height;
+        this.target.width = width;
+        this.target.height = height;
+        //Get context 
+        this.context = this.target.getContext("2d");
+        //Circle (Color Selector Circle)
+        this.pickerCircle = { x: 10, y: 10, width: 8, height: 8 };
+    }
+
+    get hue() { return this.RGBToHSL(state.brushColor); }
+
+    RGBToHSL(color) {
+        // Make r, g, and b fractions of 1
+        let r = color.r / 255;
+        let g = color.g / 255;
+        let b = color.b / 255;
+
+        // Find greatest and smallest channel values
+        let cmin = Math.min(r, g, b),
+            cmax = Math.max(r, g, b),
+            delta = cmax - cmin,
+            h = 0,
+            s = 0,
+            l = 0;
+
+        // Calculate hue
+        // No difference
+        if (delta == 0)
+            h = 0;
+        // Red is max
+        else if (cmax == r)
+            h = ((g - b) / delta) % 6;
+        // Green is max
+        else if (cmax == g)
+            h = (b - r) / delta + 2;
+        // Blue is max
+        else
+            h = (r - g) / delta + 4;
+
+        h = Math.round(h * 60);
+
+        // Make negative hues positive behind 360°
+        if (h < 0) h += 360;
+
+        //************ more to come ************//
+        return h;
+    }
+
+    draw() {
+        for (let row = 0; row < this.height; row++) {
+            let grad = this.context.createLinearGradient(0, 0, this.width, 0);
+            grad.addColorStop(0, 'hsl(' + this.hue + ', 100%, ' + (100 - (row/this.height)*100) + '%)');
+            grad.addColorStop(1, 'hsl(' + this.hue + ', 0%, ' + (100 - (row/this.height)*100) + '%)');
+            this.context.fillStyle = grad;
+            this.context.fillRect(0, row, this.width, 1);
+        }
+    }
+}
+
+//Render color picker
+//Create an instance passing it the canvas, width and height
+let picker = new Picker(document.getElementById("color-picker"), 250, 250);
+
+//Draw 
+picker.draw();
