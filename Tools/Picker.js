@@ -98,6 +98,11 @@ class Picker {
         this.lightness = l;
     }
 
+    calcSelector() {
+        this.pickerCircle.x = Math.round(this.saturation * this.width / 100) - 3;
+        this.pickerCircle.y = Math.round(this.lightness * this.height / 100) - 3;
+    }
+
     drawHSLGrad() {
         //draw gradient
         for (let row = 0; row < this.height; row++) {
@@ -107,6 +112,8 @@ class Picker {
             this.context.fillStyle = grad;
             this.context.fillRect(0, row, this.width, 1);
         }
+
+        this.calcSelector();
 
         //draw selector
         this.context.beginPath();
