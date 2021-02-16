@@ -20,8 +20,19 @@ class Picker {
         this.red;
         this.green;
         this.blue;
+        // this.alpha = 255;
+        this.hexcode;
         //*interface*//
-
+        this.rgba = document.getElementById("rgba");
+        this.r = document.getElementById("r");
+        this.g = document.getElementById("g");
+        this.b = document.getElementById("b");
+        // this.a = document.getElementById("a");
+        this.hsl = document.getElementById("hsl");
+        this.h = document.getElementById("h");
+        this.s = document.getElementById("s");
+        this.l = document.getElementById("l");
+        this.hex = document.getElementById("hexcode");
         //Colors
         this.oldcolor = document.getElementById("oldcolor");
         this.newcolor = document.getElementById("newcolor");
@@ -51,12 +62,14 @@ class Picker {
         this.lightness = Math.round(e.offsetY / this.height * 100);
         // console.log("hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)")
         //set newcolor
+        this.HSLToRGB();
         this.updateColor();
     }
 
     updateHue(e) {
         this.hue = e.target.value;
         this.drawHSLGrad();
+        this.HSLToRGB();
         this.updateColor();
     }
 
@@ -66,6 +79,34 @@ class Picker {
 
     updateColor() {
         this.newcolor.style.backgroundColor = "hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)";
+        this.r.value = this.red;
+        this.g.value = this.green;
+        this.b.value = this.blue;
+        // this.a.value = this.alpha;
+        this.h.value = this.hue;
+        this.s.value = this.saturation;
+        this.l.value = this.lightness;
+        this.hex.value = this.hexcode;
+    }
+
+    updateRGB(e) {
+        this.red = this.r.value;
+        this.green = this.g.value;
+        this.blue = this.b.value;
+        // this.alpha = this.a.value;
+        this.RGBToHSL();
+        this.drawHSLGrad();
+        this.updateColor();
+
+    }
+
+    updateHSL(e) {
+        this.hue = this.h.value;
+        this.saturation = this.s.value;
+        this.lightness = this.l.value;
+        this.HSLToRGB();
+        this.drawHSLGrad();
+        this.updateColor();
     }
 
     //* Mouse Events on Canvas *//
@@ -113,9 +154,9 @@ class Picker {
 
     RGBToHSL() {
         // Make r, g, and b fractions of 1
-        let r = this.reference.r / 255;
-        let g = this.reference.g / 255;
-        let b = this.reference.b / 255;
+        let r = this.red / 255;
+        let g = this.green / 255;
+        let b = this.blue / 255;
 
         // Find greatest and smallest channel values
         let cmin = Math.min(r, g, b),
@@ -262,6 +303,9 @@ class Picker {
 
     //* Update Picker *//
     update() {
+        this.red = this.reference.r;
+        this.green = this.reference.g;
+        this.blue = this.reference.b;
         //get current hsl
         this.RGBToHSL();
         //draw gradient rectangle
@@ -272,12 +316,15 @@ class Picker {
         this.oldcolor.style.backgroundColor = this.reference.color;
 
         //set newcolor
-        this.newcolor.style.backgroundColor = this.reference.color;
+        this.updateColor();
     }
 
     //* Initial Build *//
 
     build() {
+        this.red = this.reference.r;
+        this.green = this.reference.g;
+        this.blue = this.reference.b;
         //get current hsl
         this.RGBToHSL();
         //draw gradient rectangle
@@ -315,6 +362,14 @@ class Picker {
         this.cancelBtn.addEventListener("click", (e) => {
             this.handleCancel(e);
         });
+        //channel listeners
+        this.rgba.addEventListener("change", (e) => {
+            this.updateRGB(e);
+        })
+
+        this.hsl.addEventListener("change", (e) => {
+            this.updateHSL(e);
+        })
     }
 }
 

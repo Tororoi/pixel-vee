@@ -195,6 +195,7 @@ canvas {
 
 /* Color Picker */
 .color-container {
+    user-select: none;
     display: flex;
     flex-flow: column nowrap;
     visibility: hidden;
@@ -377,7 +378,20 @@ canvas {
 }
 
 input[type=number] {
-    width: 40px;
+    width: 50px;
+    font-family: "04Font";
+    font-size: 16px;
+    background-color: rgb(41, 41, 41);
+    color: white;
+    -webkit-appearance: none;
+    border: none;
+    outline: none;
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
 }
 
 #hex {
