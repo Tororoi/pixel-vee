@@ -10,28 +10,35 @@ class Picker {
         //Circle (Color Selector Circle)
         this.pickerCircle = { x: 10, y: 10, width: 6, height: 6 };
         this.clicked = false;
+        //color
+        this.hue;
+        this.saturation;
+        this.lightness;
         //interface
         this.oldcolor = document.getElementById("oldcolor");
         this.newcolor = document.getElementById("newcolor");
     }
 
-    get hue() { return this.RGBToHSL(state.brushColor).hue; }
-    get saturation() { return this.RGBToHSL(state.brushColor).saturation; }
-    get lightness() { return this.RGBToHSL(state.brushColor).lightness; }
-
-    handleMouseDown(e) {
-        this.clicked = true;
+    selectSL(e) {
         this.pickerCircle.x = e.offsetX - 3;
         this.pickerCircle.y = e.offsetY - 3;
         this.drawHSLGrad()
-        // console.log(e.offsetX/this.width) saturation
+
+        this.saturation = Math.round(e.offsetX/this.width * 100);
+        this.lightness = Math.round(e.offsetY/this.height * 100);
+        // console.log("hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)")
+        //set newcolor
+        this.newcolor.style.backgroundColor = "hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)";
+    }
+
+    handleMouseDown(e) {
+        this.clicked = true;
+        this.selectSL(e)
     }
 
     handleMouseMove(e) {
         if (this.clicked) {
-            this.pickerCircle.x = e.offsetX - 3;
-            this.pickerCircle.y = e.offsetY - 3;
-            this.drawHSLGrad()
+            this.selectSL(e);
         }
     }
 
@@ -86,15 +93,17 @@ class Picker {
         s = +(s * 100).toFixed(1);
         l = +(l * 100).toFixed(1);
 
-        return { hue: h, saturation: s, lightness: l };
+        this.hue = h;
+        this.saturation = s;
+        this.lightness = l;
     }
 
     drawHSLGrad() {
         //draw gradient
         for (let row = 0; row < this.height; row++) {
             let grad = this.context.createLinearGradient(0, 0, this.width, 0);
-            grad.addColorStop(0, 'hsl(' + this.hue + ', 0%, ' + (100 - (row / this.height) * 100) + '%)');
-            grad.addColorStop(1, 'hsl(' + this.hue + ', 100%, ' + (100 - (row / this.height) * 100) + '%)');
+            grad.addColorStop(0, 'hsl(' + this.hue + ', 0%, ' + ((row / this.height) * 100) + '%)');
+            grad.addColorStop(1, 'hsl(' + this.hue + ', 100%, ' + ((row / this.height) * 100) + '%)');
             this.context.fillStyle = grad;
             this.context.fillRect(0, row, this.width, 1);
         }
@@ -155,8 +164,10 @@ class Picker {
     }
 
     build() {
+        //get current hsl
+        this.RGBToHSL(state.brushColor);
         //draw gradient rectangle
-        this.drawHSLGrad()
+        this.drawHSLGrad();
 
         //set oldcolor
         this.oldcolor.style.backgroundColor = state.brushColor.color;
