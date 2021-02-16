@@ -8,12 +8,40 @@ class Picker {
         //Get context 
         this.context = this.target.getContext("2d");
         //Circle (Color Selector Circle)
-        this.pickerCircle = { x: 10, y: 10, width: 8, height: 8 };
+        this.pickerCircle = { x: 10, y: 10, width: 6, height: 6 };
+        this.clicked = false;
+        //interface
+        this.oldcolor = document.getElementById("oldcolor");
+        this.newcolor = document.getElementById("newcolor");
     }
 
     get hue() { return this.RGBToHSL(state.brushColor).hue; }
     get saturation() { return this.RGBToHSL(state.brushColor).saturation; }
     get lightness() { return this.RGBToHSL(state.brushColor).lightness; }
+
+    handleMouseDown(e) {
+        this.clicked = true;
+        this.pickerCircle.x = e.offsetX - 3;
+        this.pickerCircle.y = e.offsetY - 3;
+        this.drawHSLGrad()
+        // console.log(e.offsetX/this.width) saturation
+    }
+
+    handleMouseMove(e) {
+        if (this.clicked) {
+            this.pickerCircle.x = e.offsetX - 3;
+            this.pickerCircle.y = e.offsetY - 3;
+            this.drawHSLGrad()
+        }
+    }
+
+    handleMouseUp(e) {
+        this.clicked = false;
+    }
+
+    handleMouseOut(e) {
+        this.clicked = false;
+    }
 
     RGBToHSL(color) {
         // Make r, g, and b fractions of 1
@@ -58,10 +86,10 @@ class Picker {
         s = +(s * 100).toFixed(1);
         l = +(l * 100).toFixed(1);
 
-        return {hue: h, saturation: s, lightness: l};
+        return { hue: h, saturation: s, lightness: l };
     }
 
-    draw() {
+    drawHSLGrad() {
         //draw gradient
         for (let row = 0; row < this.height; row++) {
             let grad = this.context.createLinearGradient(0, 0, this.width, 0);
@@ -73,8 +101,7 @@ class Picker {
 
         //draw selector
         this.context.beginPath();
-        this.context.lineWidth = 1;
-        this.context.strokeStyle = "black";
+
         //top
         this.context.moveTo(this.pickerCircle.x, this.pickerCircle.y - 0.5);
         this.context.lineTo(this.pickerCircle.x + this.pickerCircle.width, this.pickerCircle.y - 0.5);
@@ -88,7 +115,68 @@ class Picker {
         this.context.moveTo(this.pickerCircle.x - 0.5, this.pickerCircle.y);
         this.context.lineTo(this.pickerCircle.x - 0.5, this.pickerCircle.y + this.pickerCircle.height);
 
+        this.context.lineWidth = 1;
+        this.context.strokeStyle = "black";
         this.context.stroke();
+        this.context.closePath();
+
+        this.context.beginPath();
+
+        //top
+        this.context.moveTo(this.pickerCircle.x, this.pickerCircle.y - 1.5);
+        this.context.lineTo(this.pickerCircle.x + this.pickerCircle.width, this.pickerCircle.y - 1.5);
+        //right
+        this.context.moveTo(this.pickerCircle.x + this.pickerCircle.width + 1.5, this.pickerCircle.y);
+        this.context.lineTo(this.pickerCircle.x + this.pickerCircle.width + 1.5, this.pickerCircle.y + this.pickerCircle.height);
+        //bottom
+        this.context.moveTo(this.pickerCircle.x, this.pickerCircle.y + this.pickerCircle.height + 1.5);
+        this.context.lineTo(this.pickerCircle.x + this.pickerCircle.width, this.pickerCircle.y + this.pickerCircle.height + 1.5);
+        //left
+        this.context.moveTo(this.pickerCircle.x - 1.5, this.pickerCircle.y);
+        this.context.lineTo(this.pickerCircle.x - 1.5, this.pickerCircle.y + this.pickerCircle.height);
+        //corners
+        this.context.fillStyle = "white";
+        this.context.fillRect(this.pickerCircle.x-1, this.pickerCircle.y-1, 1, 1);
+        this.context.fillRect(this.pickerCircle.x + this.pickerCircle.width, this.pickerCircle.y-1, 1, 1);
+        this.context.fillRect(this.pickerCircle.x-1, this.pickerCircle.y + this.pickerCircle.height, 1, 1);
+        this.context.fillRect(this.pickerCircle.x + this.pickerCircle.width, this.pickerCircle.y + this.pickerCircle.height, 1, 1);
+
+        this.context.lineWidth = 1;
+        this.context.strokeStyle = "white";
+        this.context.stroke();
+    }
+
+    drawHueGrad() {
+
+    }
+
+    setColors() {
+
+    }
+
+    build() {
+        //draw gradient rectangle
+        this.drawHSLGrad()
+
+        //set oldcolor
+        this.oldcolor.style.backgroundColor = state.brushColor.color;
+
+        //set newcolor
+        this.newcolor.style.backgroundColor = state.brushColor.color;
+
+        //canvas listeners
+        this.target.addEventListener("mousedown", (e) => {
+            this.handleMouseDown(e);
+        });
+        this.target.addEventListener("mousemove", (e) => {
+            this.handleMouseMove(e);
+        });
+        window.addEventListener("mouseup", (e) => {
+            this.handleMouseUp(e);
+        });
+        // this.target.addEventListener("mouseout", (e) => {
+        //     this.handleMouseOut(e);
+        // });
     }
 }
 
@@ -97,4 +185,4 @@ class Picker {
 let picker = new Picker(document.getElementById("color-picker"), 250, 250);
 
 //Draw 
-picker.draw();
+picker.build();

@@ -254,6 +254,7 @@ canvas {
     width: 250px;
     height: 250px;
     margin: 20px;
+    cursor: crosshair;
     box-shadow: 
     2px 0px rgb(131, 131, 131),
     -2px 0px rgb(131, 131, 131),
