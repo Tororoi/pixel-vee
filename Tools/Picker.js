@@ -11,7 +11,9 @@ class Picker {
         this.pickerCircle = { x: 10, y: 10, width: 8, height: 8 };
     }
 
-    get hue() { return this.RGBToHSL(state.brushColor); }
+    get hue() { return this.RGBToHSL(state.brushColor).hue; }
+    get saturation() { return this.RGBToHSL(state.brushColor).saturation; }
+    get lightness() { return this.RGBToHSL(state.brushColor).lightness; }
 
     RGBToHSL(color) {
         // Make r, g, and b fractions of 1
@@ -27,7 +29,7 @@ class Picker {
             s = 0,
             l = 0;
 
-        // Calculate hue
+        //* Hue *//
         // No difference
         if (delta == 0)
             h = 0;
@@ -46,16 +48,25 @@ class Picker {
         // Make negative hues positive behind 360°
         if (h < 0) h += 360;
 
-        //************ more to come ************//
-        return h;
+        //* Lightness *//
+        l = (cmax + cmin) / 2;
+
+        //* Saturation *//
+        s = delta == 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+
+        // Multiply l and s by 100
+        s = +(s * 100).toFixed(1);
+        l = +(l * 100).toFixed(1);
+
+        return {hue: h, saturation: s, lightness: l};
     }
 
     draw() {
         //draw gradient
         for (let row = 0; row < this.height; row++) {
             let grad = this.context.createLinearGradient(0, 0, this.width, 0);
-            grad.addColorStop(0, 'hsl(' + this.hue + ', 0%, ' + (100 - (row/this.height)*100) + '%)');
-            grad.addColorStop(1, 'hsl(' + this.hue + ', 100%, ' + (100 - (row/this.height)*100) + '%)');
+            grad.addColorStop(0, 'hsl(' + this.hue + ', 0%, ' + (100 - (row / this.height) * 100) + '%)');
+            grad.addColorStop(1, 'hsl(' + this.hue + ', 100%, ' + (100 - (row / this.height) * 100) + '%)');
             this.context.fillStyle = grad;
             this.context.fillRect(0, row, this.width, 1);
         }
@@ -65,17 +76,17 @@ class Picker {
         this.context.lineWidth = 1;
         this.context.strokeStyle = "black";
         //top
-        this.context.moveTo(this.pickerCircle.x, this.pickerCircle.y-0.5);
-        this.context.lineTo(this.pickerCircle.x+this.pickerCircle.width, this.pickerCircle.y-0.5);
+        this.context.moveTo(this.pickerCircle.x, this.pickerCircle.y - 0.5);
+        this.context.lineTo(this.pickerCircle.x + this.pickerCircle.width, this.pickerCircle.y - 0.5);
         //right
-        this.context.moveTo(this.pickerCircle.x+this.pickerCircle.width+0.5, this.pickerCircle.y);
-        this.context.lineTo(this.pickerCircle.x+this.pickerCircle.width+0.5, this.pickerCircle.y+this.pickerCircle.height);
+        this.context.moveTo(this.pickerCircle.x + this.pickerCircle.width + 0.5, this.pickerCircle.y);
+        this.context.lineTo(this.pickerCircle.x + this.pickerCircle.width + 0.5, this.pickerCircle.y + this.pickerCircle.height);
         //bottom
-        this.context.moveTo(this.pickerCircle.x, this.pickerCircle.y+this.pickerCircle.height+0.5);
-        this.context.lineTo(this.pickerCircle.x+this.pickerCircle.width, this.pickerCircle.y+this.pickerCircle.height+0.5);
+        this.context.moveTo(this.pickerCircle.x, this.pickerCircle.y + this.pickerCircle.height + 0.5);
+        this.context.lineTo(this.pickerCircle.x + this.pickerCircle.width, this.pickerCircle.y + this.pickerCircle.height + 0.5);
         //left
-        this.context.moveTo(this.pickerCircle.x-0.5, this.pickerCircle.y);
-        this.context.lineTo(this.pickerCircle.x-0.5, this.pickerCircle.y+this.pickerCircle.height);
+        this.context.moveTo(this.pickerCircle.x - 0.5, this.pickerCircle.y);
+        this.context.lineTo(this.pickerCircle.x - 0.5, this.pickerCircle.y + this.pickerCircle.height);
 
         this.context.stroke();
     }
