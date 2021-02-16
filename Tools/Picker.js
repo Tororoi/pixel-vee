@@ -10,6 +10,8 @@ class Picker {
         //Circle (Color Selector Circle)
         this.pickerCircle = { x: 10, y: 10, width: 6, height: 6 };
         this.clicked = false;
+        //hue slider
+        this.hueRange = document.getElementById("hueslider");
         //color
         this.hue;
         this.saturation;
@@ -24,10 +26,14 @@ class Picker {
         this.pickerCircle.y = e.offsetY - 3;
         this.drawHSLGrad()
 
-        this.saturation = Math.round(e.offsetX/this.width * 100);
-        this.lightness = Math.round(e.offsetY/this.height * 100);
+        this.saturation = Math.round(e.offsetX / this.width * 100);
+        this.lightness = Math.round(e.offsetY / this.height * 100);
         // console.log("hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)")
         //set newcolor
+        this.updateColor();
+    }
+
+    updateColor() {
         this.newcolor.style.backgroundColor = "hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)";
     }
 
@@ -152,9 +158,9 @@ class Picker {
         this.context.lineTo(this.pickerCircle.x - 1.5, this.pickerCircle.y + this.pickerCircle.height);
         //corners
         this.context.fillStyle = "white";
-        this.context.fillRect(this.pickerCircle.x-1, this.pickerCircle.y-1, 1, 1);
-        this.context.fillRect(this.pickerCircle.x + this.pickerCircle.width, this.pickerCircle.y-1, 1, 1);
-        this.context.fillRect(this.pickerCircle.x-1, this.pickerCircle.y + this.pickerCircle.height, 1, 1);
+        this.context.fillRect(this.pickerCircle.x - 1, this.pickerCircle.y - 1, 1, 1);
+        this.context.fillRect(this.pickerCircle.x + this.pickerCircle.width, this.pickerCircle.y - 1, 1, 1);
+        this.context.fillRect(this.pickerCircle.x - 1, this.pickerCircle.y + this.pickerCircle.height, 1, 1);
         this.context.fillRect(this.pickerCircle.x + this.pickerCircle.width, this.pickerCircle.y + this.pickerCircle.height, 1, 1);
 
         this.context.lineWidth = 1;
@@ -163,7 +169,13 @@ class Picker {
     }
 
     drawHueGrad() {
+        this.hueRange.style.background = "linear-gradient(90deg, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)"
+    }
 
+    updateHue(e) {
+        this.hue = e.target.value;
+        this.drawHSLGrad();
+        this.updateColor();
     }
 
     setColors() {
@@ -175,6 +187,11 @@ class Picker {
         this.RGBToHSL(state.brushColor);
         //draw gradient rectangle
         this.drawHSLGrad();
+        //draw hue slider
+        this.drawHueGrad();
+        this.hueRange.addEventListener("input", (e) => {
+            this.updateHue(e);
+        });
 
         //set oldcolor
         this.oldcolor.style.backgroundColor = state.brushColor.color;
