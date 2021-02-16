@@ -13,12 +13,33 @@ class Picker {
         //hue slider
         this.hueRange = document.getElementById("hueslider");
         //color
+        this.swatch = "swatch btn";
         this.hue;
         this.saturation;
         this.lightness;
-        //interface
+        this.red;
+        this.green;
+        this.blue;
+        //*interface*//
+
+        //Colors
         this.oldcolor = document.getElementById("oldcolor");
         this.newcolor = document.getElementById("newcolor");
+        //OK/Cancel
+        this.confirmBtn = document.getElementById("confirm-btn");
+        this.cancelBtn = document.getElementById("cancel-btn");
+    }
+
+    //* Getters *//
+    get reference() {
+        return this.swatch === "back-swatch btn" ? state.backColor : state.brushColor;
+    }
+
+    //* Calculations *//
+
+    calcSelector() {
+        this.pickerCircle.x = Math.round(this.saturation * this.width / 100) - 3;
+        this.pickerCircle.y = Math.round(this.lightness * this.height / 100) - 3;
     }
 
     selectSL(e) {
@@ -33,9 +54,21 @@ class Picker {
         this.updateColor();
     }
 
+    updateHue(e) {
+        this.hue = e.target.value;
+        this.drawHSLGrad();
+        this.updateColor();
+    }
+
+    setHueSlider() {
+        this.hueRange.value = this.hue;
+    }
+
     updateColor() {
         this.newcolor.style.backgroundColor = "hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)";
     }
+
+    //* Mouse Events on Canvas *//
 
     handleMouseDown(e) {
         this.clicked = true;
@@ -56,11 +89,33 @@ class Picker {
         this.clicked = false;
     }
 
-    RGBToHSL(color) {
+    //* Interface *//
+    closeWindow() {
+        colorPicker.style.visibility = "hidden";
+        colorPicker.style.pointerEvents = "none";
+    }
+
+    handleConfirm(e) {
+        //get rgb values
+        this.HSLToRGB();
+        //set color to brush
+        setColor(this.red, this.green, this.blue, this.swatch);
+        //close window
+        this.closeWindow();
+    }
+
+    handleCancel(e) {
+        //close window
+        this.closeWindow();
+    }
+
+    //* Color Space Conversion *//
+
+    RGBToHSL() {
         // Make r, g, and b fractions of 1
-        let r = color.r / 255;
-        let g = color.g / 255;
-        let b = color.b / 255;
+        let r = this.reference.r / 255;
+        let g = this.reference.g / 255;
+        let b = this.reference.b / 255;
 
         // Find greatest and smallest channel values
         let cmin = Math.min(r, g, b),
@@ -104,10 +159,43 @@ class Picker {
         this.lightness = l;
     }
 
-    calcSelector() {
-        this.pickerCircle.x = Math.round(this.saturation * this.width / 100) - 3;
-        this.pickerCircle.y = Math.round(this.lightness * this.height / 100) - 3;
+    HSLToRGB() {
+        let h = this.hue;
+        // Must be fractions of 1
+        let s = this.saturation / 100;
+        let l = this.lightness / 100;
+
+        //Find Chroma (color intensity)
+        let c = (1 - Math.abs(2 * l - 1)) * s,
+            x = c * (1 - Math.abs((h / 60) % 2 - 1)),
+            m = l - c / 2,
+            r = 0,
+            g = 0,
+            b = 0;
+
+        if (0 <= h && h < 60) {
+            r = c; g = x; b = 0;
+        } else if (60 <= h && h < 120) {
+            r = x; g = c; b = 0;
+        } else if (120 <= h && h < 180) {
+            r = 0; g = c; b = x;
+        } else if (180 <= h && h < 240) {
+            r = 0; g = x; b = c;
+        } else if (240 <= h && h < 300) {
+            r = x; g = 0; b = c;
+        } else if (300 <= h && h < 360) {
+            r = c; g = 0; b = x;
+        }
+        r = Math.round((r + m) * 255);
+        g = Math.round((g + m) * 255);
+        b = Math.round((b + m) * 255);
+
+        this.red = r;
+        this.green = g;
+        this.blue = b;
     }
+
+    //* Render Gradients Functions *//
 
     drawHSLGrad() {
         //draw gradient
@@ -172,19 +260,26 @@ class Picker {
         this.hueRange.style.background = "linear-gradient(90deg, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)"
     }
 
-    updateHue(e) {
-        this.hue = e.target.value;
+    //* Update Picker *//
+    update() {
+        //get current hsl
+        this.RGBToHSL();
+        //draw gradient rectangle
         this.drawHSLGrad();
-        this.updateColor();
+        //set hue slider
+        this.setHueSlider();
+        //set oldcolor
+        this.oldcolor.style.backgroundColor = this.reference.color;
+
+        //set newcolor
+        this.newcolor.style.backgroundColor = this.reference.color;
     }
 
-    setColors() {
-
-    }
+    //* Initial Build *//
 
     build() {
         //get current hsl
-        this.RGBToHSL(state.brushColor);
+        this.RGBToHSL();
         //draw gradient rectangle
         this.drawHSLGrad();
         //draw hue slider
@@ -194,10 +289,10 @@ class Picker {
         });
 
         //set oldcolor
-        this.oldcolor.style.backgroundColor = state.brushColor.color;
+        this.oldcolor.style.backgroundColor = this.reference.color;
 
         //set newcolor
-        this.newcolor.style.backgroundColor = state.brushColor.color;
+        this.newcolor.style.backgroundColor = this.reference.color;
 
         //canvas listeners
         this.target.addEventListener("mousedown", (e) => {
@@ -212,6 +307,14 @@ class Picker {
         // this.target.addEventListener("mouseout", (e) => {
         //     this.handleMouseOut(e);
         // });
+
+        //Interface listeners
+        this.confirmBtn.addEventListener("click", (e) => {
+            this.handleConfirm(e);
+        });
+        this.cancelBtn.addEventListener("click", (e) => {
+            this.handleCancel(e);
+        });
     }
 }
 

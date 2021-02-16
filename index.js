@@ -19,6 +19,8 @@ let swatch = document.querySelector(".swatch");
 let backSwatch = document.querySelector(".back-swatch");
 let colorSwitch = document.querySelector(".switch");
 
+let colorPicker = document.querySelector(".color-container");
+
 //Get the reset buttons
 let recenterBtn = document.querySelector(".recenter");
 let clearBtn = document.querySelector(".clear");
@@ -163,8 +165,8 @@ clearBtn.addEventListener('click', handleClear);
 
 zoomCont.addEventListener('click', handleZoom);
 
-swatch.addEventListener('click', randomizeColor);
-backSwatch.addEventListener('click', randomizeColor);
+swatch.addEventListener('click', openColorPicker);
+backSwatch.addEventListener('click', openColorPicker);
 colorSwitch.addEventListener('click', switchColors);
 
 toolsCont.addEventListener('click', handleTools);
@@ -1179,6 +1181,13 @@ function randomizeColor(e) {
     let g = Math.floor(Math.random() * 256);
     let b = Math.floor(Math.random() * 256);
     setColor(r, g, b, e.target.className);
+}
+
+function openColorPicker(e) {
+    picker.swatch = e.target.className;
+    picker.update();
+    colorPicker.style.visibility = "visible";
+    colorPicker.style.pointerEvents = "auto";
 }
 
 function switchColors(e) {
