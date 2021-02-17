@@ -56,9 +56,9 @@ class Picker {
         this.pickerCircle.y = Math.round(this.lightness * this.height / 100) - 3;
     }
 
-    selectSL(e) {
-        this.saturation = Math.round(e.offsetX / this.width * 100);
-        this.lightness = Math.round(e.offsetY / this.height * 100);
+    selectSL(x,y) {
+        this.saturation = Math.round(x / this.width * 100);
+        this.lightness = Math.round(y / this.height * 100);
         this.drawHSLGrad();
         //set newcolor
         this.HSLToRGB();
@@ -177,12 +177,21 @@ class Picker {
 
     handleMouseDown(e) {
         this.clicked = true;
-        this.selectSL(e)
+        this.selectSL(e.offsetX, e.offsetY);
     }
 
     handleMouseMove(e) {
         if (this.clicked) {
-            this.selectSL(e);
+            let canvasXOffset = this.target.getBoundingClientRect().left  -  document.getElementsByTagName("html")[0].getBoundingClientRect().left;
+            let canvasYOffset = this.target.getBoundingClientRect().top  -  document.getElementsByTagName("html")[0].getBoundingClientRect().top;
+            let canvasX = e.pageX-canvasXOffset;
+            let canvasY = e.pageY - canvasYOffset;
+            //constrain coordinates
+            if (canvasX > this.width) {canvasX = this.width}
+            if (canvasX < 0) {canvasX = 0}
+            if (canvasY > this.height) {canvasY = this.height}
+            if (canvasY < 0) {canvasY = 0}
+            this.selectSL(canvasX, canvasY);
         }
     }
 
@@ -190,9 +199,9 @@ class Picker {
         this.clicked = false;
     }
 
-    handleMouseOut(e) {
-        this.clicked = false;
-    }
+    // handleMouseOut(e) {
+    //     this.clicked = false;
+    // }
 
     //* Interface *//
     closeWindow() {
@@ -446,7 +455,7 @@ class Picker {
         this.target.addEventListener("mousedown", (e) => {
             this.handleMouseDown(e);
         });
-        this.target.addEventListener("mousemove", (e) => {
+        window.addEventListener("mousemove", (e) => {
             this.handleMouseMove(e);
         });
         window.addEventListener("mouseup", (e) => {
