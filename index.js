@@ -111,6 +111,7 @@ const state = {
         contiguous: false
     },
     //active variables for canvas
+    shortcuts: true,
     event: "none",
     clicked: false,
     clickedColor: null,
@@ -177,115 +178,117 @@ modesCont.addEventListener('click', handleModes);
 
 function handleKeyDown(e) {
     // console.log(e.key)
-    switch (e.code) {
-        case 'KeyZ':
-            if (e.metaKey) {
-                if (e.key === 'Ω') {
-                    //alt+meta+z
-                    handleRedo();
-                } else {
-                    handleUndo();
+    if (state.shortcuts) {
+        switch (e.code) {
+            case 'KeyZ':
+                if (e.metaKey) {
+                    if (e.key === 'Ω') {
+                        //alt+meta+z
+                        handleRedo();
+                    } else {
+                        handleUndo();
+                    }
                 }
-            }
-            break;
-        case 'MetaLeft':
-        case 'MetaRight':
-            //command key
-            break;
-        case 'Space':
-            state.tool = tools["grab"];
-            onScreenCVS.style.cursor = "move";
-            break;
-        case 'AltLeft':
-        case 'AltRight':
-            //option key
-            state.tool = tools["picker"];
-            onScreenCVS.style.cursor = "none";
-            break;
-        case 'ShiftLeft':
-        case 'ShiftRight':
-            if (toolBtn.id === "pencil") {
+                break;
+            case 'MetaLeft':
+            case 'MetaRight':
+                //command key
+                break;
+            case 'Space':
+                state.tool = tools["grab"];
+                onScreenCVS.style.cursor = "move";
+                break;
+            case 'AltLeft':
+            case 'AltRight':
+                //option key
+                state.tool = tools["picker"];
+                onScreenCVS.style.cursor = "none";
+                break;
+            case 'ShiftLeft':
+            case 'ShiftRight':
+                if (toolBtn.id === "pencil") {
+                    state.tool = tools["line"];
+                    onScreenCVS.style.cursor = "none";
+                }
+                break;
+            case 'KeyS':
+                let r = Math.floor(Math.random() * 256);
+                let g = Math.floor(Math.random() * 256);
+                let b = Math.floor(Math.random() * 256);
+                setColor(r, g, b, "swatch btn");
+                break;
+            case 'KeyD':
+                //reset old button
+                modeBtn.style.background = "rgb(131, 131, 131)";
+                //set new button
+                modeBtn = document.querySelector("#draw");
+                modeBtn.style.background = "rgb(238, 206, 102)";
+                state.mode = "draw";
+                break;
+            case 'KeyE':
+                //reset old button
+                modeBtn.style.background = "rgb(131, 131, 131)";
+                //set new button
+                modeBtn = document.querySelector("#erase");
+                modeBtn.style.background = "rgb(238, 206, 102)";
+                state.mode = "erase";
+                break;
+            case 'KeyP':
+                //reset old button
+                modeBtn.style.background = "rgb(131, 131, 131)";
+                //set new button
+                modeBtn = document.querySelector("#perfect");
+                modeBtn.style.background = "rgb(238, 206, 102)";
+                state.mode = "perfect";
+                break;
+            case 'KeyB':
+                //reset old button
+                toolBtn.style.background = "rgb(131, 131, 131)";
+                //set new button
+                toolBtn = document.querySelector("#pencil");
+                toolBtn.style.background = "rgb(238, 206, 102)";
+                state.tool = tools["pencil"];
+                onScreenCVS.style.cursor = "crosshair";
+                break;
+            case 'KeyR':
+                //reset old button
+                toolBtn.style.background = "rgb(131, 131, 131)";
+                //set new button
+                toolBtn = document.querySelector("#replace");
+                toolBtn.style.background = "rgb(238, 206, 102)";
+                state.tool = tools["replace"];
+                onScreenCVS.style.cursor = "crosshair";
+                break;
+            case 'KeyL':
+                //reset old button
+                toolBtn.style.background = "rgb(131, 131, 131)";
+                //set new button
+                toolBtn = document.querySelector("#line");
+                toolBtn.style.background = "rgb(238, 206, 102)";
                 state.tool = tools["line"];
                 onScreenCVS.style.cursor = "none";
-            }
-            break;
-        case 'KeyS':
-            let r = Math.floor(Math.random() * 256);
-            let g = Math.floor(Math.random() * 256);
-            let b = Math.floor(Math.random() * 256);
-            setColor(r, g, b, "swatch btn");
-            break;
-        case 'KeyD':
-            //reset old button
-            modeBtn.style.background = "rgb(131, 131, 131)";
-            //set new button
-            modeBtn = document.querySelector("#draw");
-            modeBtn.style.background = "rgb(238, 206, 102)";
-            state.mode = "draw";
-            break;
-        case 'KeyE':
-            //reset old button
-            modeBtn.style.background = "rgb(131, 131, 131)";
-            //set new button
-            modeBtn = document.querySelector("#erase");
-            modeBtn.style.background = "rgb(238, 206, 102)";
-            state.mode = "erase";
-            break;
-        case 'KeyP':
-            //reset old button
-            modeBtn.style.background = "rgb(131, 131, 131)";
-            //set new button
-            modeBtn = document.querySelector("#perfect");
-            modeBtn.style.background = "rgb(238, 206, 102)";
-            state.mode = "perfect";
-            break;
-        case 'KeyB':
-            //reset old button
-            toolBtn.style.background = "rgb(131, 131, 131)";
-            //set new button
-            toolBtn = document.querySelector("#pencil");
-            toolBtn.style.background = "rgb(238, 206, 102)";
-            state.tool = tools["pencil"];
-            onScreenCVS.style.cursor = "crosshair";
-            break;
-        case 'KeyR':
-            //reset old button
-            toolBtn.style.background = "rgb(131, 131, 131)";
-            //set new button
-            toolBtn = document.querySelector("#replace");
-            toolBtn.style.background = "rgb(238, 206, 102)";
-            state.tool = tools["replace"];
-            onScreenCVS.style.cursor = "crosshair";
-            break;
-        case 'KeyL':
-            //reset old button
-            toolBtn.style.background = "rgb(131, 131, 131)";
-            //set new button
-            toolBtn = document.querySelector("#line");
-            toolBtn.style.background = "rgb(238, 206, 102)";
-            state.tool = tools["line"];
-            onScreenCVS.style.cursor = "none";
-            break;
-        case 'KeyF':
-            //reset old button
-            toolBtn.style.background = "rgb(131, 131, 131)";
-            //set new button
-            toolBtn = document.querySelector("#fill");
-            toolBtn.style.background = "rgb(238, 206, 102)";
-            state.tool = tools["fill"];
-            onScreenCVS.style.cursor = "none";
-            break;
-        case 'KeyC':
-            //reset old button
-            toolBtn.style.background = "rgb(131, 131, 131)";
-            //set new button
-            toolBtn = document.querySelector("#curve");
-            toolBtn.style.background = "rgb(238, 206, 102)";
-            state.tool = tools["curve"];
-            onScreenCVS.style.cursor = "none";
-            break;
-        default:
-        //do nothing
+                break;
+            case 'KeyF':
+                //reset old button
+                toolBtn.style.background = "rgb(131, 131, 131)";
+                //set new button
+                toolBtn = document.querySelector("#fill");
+                toolBtn.style.background = "rgb(238, 206, 102)";
+                state.tool = tools["fill"];
+                onScreenCVS.style.cursor = "none";
+                break;
+            case 'KeyC':
+                //reset old button
+                toolBtn.style.background = "rgb(131, 131, 131)";
+                //set new button
+                toolBtn = document.querySelector("#curve");
+                toolBtn.style.background = "rgb(238, 206, 102)";
+                state.tool = tools["curve"];
+                onScreenCVS.style.cursor = "none";
+                break;
+            default:
+            //do nothing
+        }
     }
 }
 
@@ -430,17 +433,17 @@ function renderCursor() {
         onScreenCTX.lineWidth = 0.5;
         onScreenCTX.strokeStyle = "black";
         //top
-        onScreenCTX.moveTo(state.onX, state.onY-ol);
-        onScreenCTX.lineTo(state.onX+state.ratio / zoom, state.onY-ol);
+        onScreenCTX.moveTo(state.onX, state.onY - ol);
+        onScreenCTX.lineTo(state.onX + state.ratio / zoom, state.onY - ol);
         //right
-        onScreenCTX.moveTo(state.onX+ol+state.ratio / zoom, state.onY);
-        onScreenCTX.lineTo(state.onX+ol+state.ratio / zoom, state.onY+state.ratio / zoom);
+        onScreenCTX.moveTo(state.onX + ol + state.ratio / zoom, state.onY);
+        onScreenCTX.lineTo(state.onX + ol + state.ratio / zoom, state.onY + state.ratio / zoom);
         //bottom
-        onScreenCTX.moveTo(state.onX, state.onY+ol+state.ratio / zoom);
-        onScreenCTX.lineTo(state.onX+state.ratio / zoom, state.onY+ol+state.ratio / zoom);
+        onScreenCTX.moveTo(state.onX, state.onY + ol + state.ratio / zoom);
+        onScreenCTX.lineTo(state.onX + state.ratio / zoom, state.onY + ol + state.ratio / zoom);
         //left
-        onScreenCTX.moveTo(state.onX-ol, state.onY);
-        onScreenCTX.lineTo(state.onX-ol, state.onY+state.ratio / zoom);
+        onScreenCTX.moveTo(state.onX - ol, state.onY);
+        onScreenCTX.lineTo(state.onX - ol, state.onY + state.ratio / zoom);
         // onScreenCTX.rect(state.onX, state.onY, state.ratio / zoom, state.ratio / zoom);
         // onScreenCTX.lineWidth = 0.5;
         // onScreenCTX.strokeStyle = "black";
@@ -476,7 +479,7 @@ function handleRedo() {
 }
 
 function handleRecenter(e) {
-    onScreenCTX.scale(1/zoom, 1/zoom);
+    onScreenCTX.scale(1 / zoom, 1 / zoom);
     zoom = 1;
     state.xOffset = 0;
     state.yOffset = 0;
@@ -486,7 +489,7 @@ function handleRecenter(e) {
 }
 
 function handleClear() {
-    addToTimeline("clear",0,0);
+    addToTimeline("clear", 0, 0);
     state.undoStack.push(state.points);
     state.points = [];
     state.redoStack = [];
@@ -1189,7 +1192,10 @@ function randomizeColor(e) {
 function openColorPicker(e) {
     picker.swatch = e.target.className;
     picker.update();
+    //main page can't be interacted with
     fullPage.style.pointerEvents = "none";
+    //disable shortcuts
+    state.shortcuts = false;
     //show colorpicker
     colorPicker.style.display = "flex";
     //allow colorPicker events

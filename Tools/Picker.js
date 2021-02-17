@@ -209,6 +209,8 @@ class Picker {
         colorPicker.style.display = "none";
         //restore pointer events to page
         fullPage.style.pointerEvents = "auto";
+        //enable keyboard shortcuts
+        state.shortcuts = true;
     }
 
     handleConfirm(e) {
