@@ -49,21 +49,29 @@ class Picker {
         return this.swatch === "back-swatch btn" ? state.backColor : state.brushColor;
     }
 
-    //* Calculations *//
+    //* Interface *//
 
-    calcSelector() {
-        this.pickerCircle.x = Math.round(this.saturation * this.width / 100) - 3;
-        this.pickerCircle.y = Math.round(this.lightness * this.height / 100) - 3;
+    closeWindow() {
+        // hide colorpicker
+        colorPicker.style.display = "none";
+        //restore pointer events to page
+        fullPage.style.pointerEvents = "auto";
+        //enable keyboard shortcuts
+        state.shortcuts = true;
     }
 
-    selectSL(x,y) {
-        this.saturation = Math.round(x / this.width * 100);
-        this.lightness = Math.round(y / this.height * 100);
-        this.drawHSLGrad();
-        //set newcolor
+    handleConfirm(e) {
+        //get rgb values
         this.HSLToRGB();
-        this.RGBToHex();
-        this.updateColor();
+        //set color to brush
+        setColor(this.red, this.green, this.blue, this.swatch);
+        //close window
+        this.closeWindow();
+    }
+
+    handleCancel(e) {
+        //close window
+        this.closeWindow();
     }
 
     updateHue(e) {
@@ -74,12 +82,9 @@ class Picker {
         this.updateColor();
     }
 
-    setHueSlider() {
-        this.hueRange.value = this.hue;
-    }
-
     updateColor() {
         this.newcolor.style.backgroundColor = "hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)";
+        //update interface values to match new color
         this.r.value = this.red;
         this.g.value = this.green;
         this.b.value = this.blue;
@@ -88,6 +93,37 @@ class Picker {
         this.s.value = this.saturation;
         this.l.value = this.lightness;
         this.hex.value = this.hexcode;
+        //update hue slider
+        this.hueRange.value = this.hue;
+    }
+
+    updateRGB(e) {
+        this.red = +this.r.value;
+        this.green = +this.g.value;
+        this.blue = +this.b.value;
+        // this.alpha = this.a.value;
+        this.RGBToHSL();
+        this.RGBToHex();
+        this.drawHSLGrad();
+        this.updateColor();
+    }
+
+    updateHSL(e) {
+        this.hue = +this.h.value;
+        this.saturation = +this.s.value;
+        this.lightness = +this.l.value;
+        this.HSLToRGB();
+        this.RGBToHex();
+        this.drawHSLGrad();
+        this.updateColor();
+    }
+
+    updateHex(e) {
+        this.hexcode = this.hex.value;
+        this.hexToRGB();
+        this.RGBToHSL();
+        this.drawHSLGrad();
+        this.updateColor();
     }
 
     handleIncrement(e) {
@@ -140,40 +176,7 @@ class Picker {
         }
     }
 
-    updateRGB(e) {
-        this.red = +this.r.value;
-        this.green = +this.g.value;
-        this.blue = +this.b.value;
-        // this.alpha = this.a.value;
-        this.RGBToHSL();
-        this.RGBToHex();
-        this.drawHSLGrad();
-        this.updateColor();
-        this.setHueSlider();
-
-    }
-
-    updateHSL(e) {
-        this.hue = +this.h.value;
-        this.saturation = +this.s.value;
-        this.lightness = +this.l.value;
-        this.HSLToRGB();
-        this.RGBToHex();
-        this.drawHSLGrad();
-        this.updateColor();
-        this.setHueSlider();
-    }
-
-    updateHex(e) {
-        this.hexcode = this.hex.value;
-        this.hexToRGB();
-        this.RGBToHSL();
-        this.drawHSLGrad();
-        this.updateColor();
-        this.setHueSlider();
-    }
-
-    //* Mouse Events on Canvas *//
+    //* Canvas Interaction *//
 
     handleMouseDown(e) {
         this.clicked = true;
@@ -182,15 +185,15 @@ class Picker {
 
     handleMouseMove(e) {
         if (this.clicked) {
-            let canvasXOffset = this.target.getBoundingClientRect().left  -  document.getElementsByTagName("html")[0].getBoundingClientRect().left;
-            let canvasYOffset = this.target.getBoundingClientRect().top  -  document.getElementsByTagName("html")[0].getBoundingClientRect().top;
-            let canvasX = e.pageX-canvasXOffset;
+            let canvasXOffset = this.target.getBoundingClientRect().left - document.getElementsByTagName("html")[0].getBoundingClientRect().left;
+            let canvasYOffset = this.target.getBoundingClientRect().top - document.getElementsByTagName("html")[0].getBoundingClientRect().top;
+            let canvasX = e.pageX - canvasXOffset;
             let canvasY = e.pageY - canvasYOffset;
             //constrain coordinates
-            if (canvasX > this.width) {canvasX = this.width}
-            if (canvasX < 0) {canvasX = 0}
-            if (canvasY > this.height) {canvasY = this.height}
-            if (canvasY < 0) {canvasY = 0}
+            if (canvasX > this.width) { canvasX = this.width }
+            if (canvasX < 0) { canvasX = 0 }
+            if (canvasY > this.height) { canvasY = this.height }
+            if (canvasY < 0) { canvasY = 0 }
             this.selectSL(canvasX, canvasY);
         }
     }
@@ -199,32 +202,14 @@ class Picker {
         this.clicked = false;
     }
 
-    // handleMouseOut(e) {
-    //     this.clicked = false;
-    // }
-
-    //* Interface *//
-    closeWindow() {
-        // hide colorpicker
-        colorPicker.style.display = "none";
-        //restore pointer events to page
-        fullPage.style.pointerEvents = "auto";
-        //enable keyboard shortcuts
-        state.shortcuts = true;
-    }
-
-    handleConfirm(e) {
-        //get rgb values
+    selectSL(x, y) {
+        this.saturation = Math.round(x / this.width * 100);
+        this.lightness = Math.round(y / this.height * 100);
+        this.drawHSLGrad();
+        //set newcolor
         this.HSLToRGB();
-        //set color to brush
-        setColor(this.red, this.green, this.blue, this.swatch);
-        //close window
-        this.closeWindow();
-    }
-
-    handleCancel(e) {
-        //close window
-        this.closeWindow();
+        this.RGBToHex();
+        this.updateColor();
     }
 
     //* Color Space Conversion *//
@@ -348,8 +333,13 @@ class Picker {
 
     //* Render Gradients Functions *//
 
+    calcSelector() {
+        this.pickerCircle.x = Math.round(this.saturation * this.width / 100) - 3;
+        this.pickerCircle.y = Math.round(this.lightness * this.height / 100) - 3;
+    }
+
     drawHSLGrad() {
-        //draw gradient
+        //draw hsl gradient
         for (let row = 0; row < this.height; row++) {
             let grad = this.context.createLinearGradient(0, 0, this.width, 0);
             grad.addColorStop(0, 'hsl(' + this.hue + ', 0%, ' + ((row / this.height) * 100) + '%)');
@@ -408,10 +398,12 @@ class Picker {
     }
 
     drawHueGrad() {
+        //hue slider gradient
         this.hueRange.style.background = "linear-gradient(90deg, #ff0000 0%, #ffff00 17%, #00ff00 33%, #00ffff 50%, #0000ff 67%, #ff00ff 83%, #ff0000 100%)"
     }
 
     //* Update Picker *//
+
     update() {
         this.red = this.reference.r;
         this.green = this.reference.g;
@@ -420,12 +412,10 @@ class Picker {
         this.RGBToHSL();
         //draw gradient rectangle
         this.drawHSLGrad();
-        //set hue slider
-        this.setHueSlider();
         //set oldcolor
         this.oldcolor.style.backgroundColor = this.reference.color;
 
-        //set newcolor
+        //set newcolor and interface
         this.updateColor();
     }
 
@@ -463,9 +453,6 @@ class Picker {
         window.addEventListener("mouseup", (e) => {
             this.handleMouseUp(e);
         });
-        // this.target.addEventListener("mouseout", (e) => {
-        //     this.handleMouseOut(e);
-        // });
 
         //Interface listeners
         this.confirmBtn.addEventListener("click", (e) => {
