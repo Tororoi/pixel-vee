@@ -248,7 +248,7 @@ canvas {
     display: flex;
     flex-flow: row nowrap;
     height: 290px;
-    width: 330px;
+    width: 310px;
 }
 
 #color-picker {
@@ -338,13 +338,13 @@ canvas {
     flex-flow: column nowrap;
     align-items: flex-start;
     height: 346px;
-    width: 240px;
+    width: 260px;
 }
 
 #right #colors {
     display: flex;
     justify-content: center;
-    margin: 0px 20px 0px 20px;
+    width: 100%;
 }
 
 #right #colors div {
@@ -357,12 +357,13 @@ canvas {
 #rgbahsl {
     display: flex;
     flex-flow: row nowrap;
-    margin: 0px 20px 0px 20px;
+    width: 100%;
 }
 
 #rgba {
     display: flex;
     flex-flow: column nowrap;
+    margin-left: 20px;
 }
 
 #rgba label {
@@ -372,6 +373,7 @@ canvas {
 #hsl {
     display: flex;
     flex-flow: column nowrap;
+    margin-left: 20px;
 }
 
 #hsl label {
@@ -379,7 +381,7 @@ canvas {
 }
 
 input[type=number] {
-    width: 50px;
+    width: 40px;
     font-family: "04Font";
     font-size: 16px;
     background-color: rgb(41, 41, 41);
@@ -406,6 +408,27 @@ input[type=number]::-webkit-inner-spin-button,
 input[type=number]::-webkit-outer-spin-button { 
   -webkit-appearance: none; 
   margin: 0; 
+}
+
+#sliderbox {
+    position: absolute;
+    background-color: rgb(41, 41, 41);
+    width: 16px;
+    height: 18px;
+    transform: translateX(6px);
+    box-shadow: 
+    2px 0px rgb(131, 131, 131),
+    -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131),
+    0px 2px rgb(131, 131, 131);
+}
+
+#sliderbox:hover {
+    box-shadow: 
+    2px 0px rgb(255, 255, 255),
+    -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255),
+    0px 2px rgb(255, 255, 255);
 }
 
 #hex {
