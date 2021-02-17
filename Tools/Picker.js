@@ -54,13 +54,9 @@ class Picker {
     }
 
     selectSL(e) {
-        this.pickerCircle.x = e.offsetX - 3;
-        this.pickerCircle.y = e.offsetY - 3;
-        this.drawHSLGrad()
-
         this.saturation = Math.round(e.offsetX / this.width * 100);
         this.lightness = Math.round(e.offsetY / this.height * 100);
-        // console.log("hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)")
+        this.drawHSLGrad();
         //set newcolor
         this.HSLToRGB();
         this.RGBToHex();
@@ -92,25 +88,27 @@ class Picker {
     }
 
     updateRGB(e) {
-        this.red = this.r.value;
-        this.green = this.g.value;
-        this.blue = this.b.value;
+        this.red = +this.r.value;
+        this.green = +this.g.value;
+        this.blue = +this.b.value;
         // this.alpha = this.a.value;
         this.RGBToHSL();
         this.RGBToHex();
         this.drawHSLGrad();
         this.updateColor();
+        this.setHueSlider();
 
     }
 
     updateHSL(e) {
-        this.hue = this.h.value;
-        this.saturation = this.s.value;
-        this.lightness = this.l.value;
+        this.hue = +this.h.value;
+        this.saturation = +this.s.value;
+        this.lightness = +this.l.value;
         this.HSLToRGB();
         this.RGBToHex();
         this.drawHSLGrad();
         this.updateColor();
+        this.setHueSlider();
     }
 
     updateHex(e) {
@@ -119,6 +117,7 @@ class Picker {
         this.RGBToHSL();
         this.drawHSLGrad();
         this.updateColor();
+        this.setHueSlider();
     }
 
     //* Mouse Events on Canvas *//
@@ -263,6 +262,9 @@ class Picker {
           g = "0x" + H[3] + H[4];
           b = "0x" + H[5] + H[6];
         }
+        this.red = +r;
+        this.green = +g;
+        this.blue = +b;
     }
 
     RGBToHex() {
