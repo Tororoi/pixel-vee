@@ -108,7 +108,7 @@ class Picker {
                 maxvalue = 255;
         }
         if (e.target.id === "inc") {
-            let newValue = +channel.value;
+            let newValue = Math.floor(+channel.value);
             if (newValue < maxvalue) {
                 channel.value = newValue + 1;
             }
