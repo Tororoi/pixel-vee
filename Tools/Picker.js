@@ -63,6 +63,7 @@ class Picker {
         // console.log("hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)")
         //set newcolor
         this.HSLToRGB();
+        this.RGBToHex();
         this.updateColor();
     }
 
@@ -70,6 +71,7 @@ class Picker {
         this.hue = e.target.value;
         this.drawHSLGrad();
         this.HSLToRGB();
+        this.RGBToHex();
         this.updateColor();
     }
 
@@ -95,6 +97,7 @@ class Picker {
         this.blue = this.b.value;
         // this.alpha = this.a.value;
         this.RGBToHSL();
+        this.RGBToHex();
         this.drawHSLGrad();
         this.updateColor();
 
@@ -105,6 +108,15 @@ class Picker {
         this.saturation = this.s.value;
         this.lightness = this.l.value;
         this.HSLToRGB();
+        this.RGBToHex();
+        this.drawHSLGrad();
+        this.updateColor();
+    }
+
+    updateHex(e) {
+        this.hexcode = this.hex.value;
+        this.hexToRGB();
+        this.RGBToHSL();
         this.drawHSLGrad();
         this.updateColor();
     }
@@ -238,6 +250,36 @@ class Picker {
         this.blue = b;
     }
 
+    hexToRGB() {
+        let H = this.hexcode;
+        // Convert hex to RGB
+        let r = 0, g = 0, b = 0;
+        if (H.length == 4) {
+          r = "0x" + H[1] + H[1];
+          g = "0x" + H[2] + H[2];
+          b = "0x" + H[3] + H[3];
+        } else if (H.length == 7) {
+          r = "0x" + H[1] + H[2];
+          g = "0x" + H[3] + H[4];
+          b = "0x" + H[5] + H[6];
+        }
+    }
+
+    RGBToHex() {
+        let r = this.red.toString(16);
+        let g = this.green.toString(16);
+        let b = this.blue.toString(16);
+      
+        if (r.length == 1)
+          r = "0" + r;
+        if (g.length == 1)
+          g = "0" + g;
+        if (b.length == 1)
+          b = "0" + b;
+      
+        this.hexcode = "#" + r + g + b;
+      }
+
     //* Render Gradients Functions *//
 
     drawHSLGrad() {
@@ -329,6 +371,8 @@ class Picker {
         this.blue = this.reference.b;
         //get current hsl
         this.RGBToHSL();
+        //get hex
+        this.RGBToHex();
         //draw gradient rectangle
         this.drawHSLGrad();
         //draw hue slider
@@ -368,9 +412,11 @@ class Picker {
         this.rgba.addEventListener("change", (e) => {
             this.updateRGB(e);
         })
-
         this.hsl.addEventListener("change", (e) => {
             this.updateHSL(e);
+        })
+        this.hex.addEventListener("change", (e) => {
+            this.updateHex(e);
         })
     }
 }
