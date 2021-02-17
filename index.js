@@ -1,3 +1,6 @@
+//Main
+let fullPage = document.querySelector(".full-page");
+
 //Set onscreen canvas and its context
 let onScreenCVS = document.getElementById("onScreen");
 let onScreenCTX = onScreenCVS.getContext("2d");
@@ -1186,7 +1189,10 @@ function randomizeColor(e) {
 function openColorPicker(e) {
     picker.swatch = e.target.className;
     picker.update();
-    colorPicker.style.visibility = "visible";
+    fullPage.style.pointerEvents = "none";
+    //show colorpicker
+    colorPicker.style.display = "flex";
+    //allow colorPicker events
     colorPicker.style.pointerEvents = "auto";
 }
 

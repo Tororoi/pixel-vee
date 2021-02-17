@@ -132,8 +132,10 @@ class Picker {
 
     //* Interface *//
     closeWindow() {
-        colorPicker.style.visibility = "hidden";
-        colorPicker.style.pointerEvents = "none";
+        // hide colorpicker
+        colorPicker.style.display = "none";
+        //restore pointer events to page
+        fullPage.style.pointerEvents = "auto";
     }
 
     handleConfirm(e) {
