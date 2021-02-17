@@ -410,12 +410,15 @@ input[type=number]::-webkit-outer-spin-button {
   margin: 0; 
 }
 
+/* Increment color channels */
+
 #sliderbox {
     position: absolute;
     background-color: rgb(41, 41, 41);
     width: 16px;
     height: 18px;
     transform: translateX(6px);
+    overflow: hidden;
     box-shadow: 
     2px 0px rgb(131, 131, 131),
     -2px 0px rgb(131, 131, 131),
@@ -430,6 +433,36 @@ input[type=number]::-webkit-outer-spin-button {
     0px -2px rgb(255, 255, 255),
     0px 2px rgb(255, 255, 255);
 }
+
+.channel-btn {
+    position: absolute;
+    text-align: center;
+    width: 16px;
+    height: 9px;
+    left: 0;
+    color: white;
+}
+
+#inc {
+    top: 0;
+}
+
+#dec {
+    bottom: 0;
+}
+
+.channel-btn p {
+    transform: translateX(1px) translateY(-2px);
+    margin: 0;
+    pointer-events: none;
+}
+
+.channel-btn:hover {
+    background: white;
+    color: rgb(41, 41, 41)
+}
+
+/* Hexcode Box */
 
 #hex {
     margin: 23px;

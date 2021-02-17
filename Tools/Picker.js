@@ -7,6 +7,8 @@ class Picker {
         this.target.height = height;
         //Get context 
         this.context = this.target.getContext("2d");
+        //mouse
+        this.mouseState = "none";
         //Circle (Color Selector Circle)
         this.pickerCircle = { x: 10, y: 10, width: 6, height: 6 };
         this.clicked = false;
@@ -23,6 +25,7 @@ class Picker {
         // this.alpha = 255;
         this.hexcode;
         //*interface*//
+        this.rgbahsl = document.getElementById("rgbahsl");
         this.rgba = document.getElementById("rgba");
         this.r = document.getElementById("r");
         this.g = document.getElementById("g");
@@ -85,6 +88,56 @@ class Picker {
         this.s.value = this.saturation;
         this.l.value = this.lightness;
         this.hex.value = this.hexcode;
+    }
+
+    handleIncrement(e) {
+        let channel = e.target.parentNode.previousSibling.previousSibling;
+        let maxvalue;
+        switch (channel) {
+            case this.h:
+                maxvalue = 359;
+                break;
+            case this.s:
+                maxvalue = 100;
+                break;
+            case this.l:
+                maxvalue = 100;
+                break;
+            default:
+                //rgba
+                maxvalue = 255;
+        }
+        if (e.target.id === "inc") {
+            let newValue = +channel.value;
+            if (newValue < maxvalue) {
+                channel.value = newValue + 1;
+            }
+        } else if (e.target.id === "dec") {
+            let newValue = +channel.value;
+            if (newValue > 0) {
+                channel.value = newValue - 1;
+            }
+        }
+    }
+
+    handleRGBIncrement(e) {
+        if (this.mouseState === "mousedown") {
+            this.handleIncrement(e);
+            this.updateRGB(e);
+            window.setTimeout(() => this.handleRGBIncrement(e), 100);
+        } else {
+            //stop recursion
+        }
+    }
+
+    handleHSLIncrement(e) {
+        if (this.mouseState === "mousedown") {
+            this.handleIncrement(e);
+            this.updateHSL(e);
+            window.setTimeout(() => this.handleHSLIncrement(e), 100);
+        } else {
+            //stop recursion
+        }
     }
 
     updateRGB(e) {
@@ -254,13 +307,13 @@ class Picker {
         // Convert hex to RGB
         let r = 0, g = 0, b = 0;
         if (H.length == 4) {
-          r = "0x" + H[1] + H[1];
-          g = "0x" + H[2] + H[2];
-          b = "0x" + H[3] + H[3];
+            r = "0x" + H[1] + H[1];
+            g = "0x" + H[2] + H[2];
+            b = "0x" + H[3] + H[3];
         } else if (H.length == 7) {
-          r = "0x" + H[1] + H[2];
-          g = "0x" + H[3] + H[4];
-          b = "0x" + H[5] + H[6];
+            r = "0x" + H[1] + H[2];
+            g = "0x" + H[3] + H[4];
+            b = "0x" + H[5] + H[6];
         }
         this.red = +r;
         this.green = +g;
@@ -271,16 +324,16 @@ class Picker {
         let r = this.red.toString(16);
         let g = this.green.toString(16);
         let b = this.blue.toString(16);
-      
+
         if (r.length == 1)
-          r = "0" + r;
+            r = "0" + r;
         if (g.length == 1)
-          g = "0" + g;
+            g = "0" + g;
         if (b.length == 1)
-          b = "0" + b;
-      
+            b = "0" + b;
+
         this.hexcode = "#" + r + g + b;
-      }
+    }
 
     //* Render Gradients Functions *//
 
@@ -411,15 +464,39 @@ class Picker {
             this.handleCancel(e);
         });
         //channel listeners
+        this.rgba.addEventListener("mousedown", (e) => {
+            this.mouseState = e.type;
+            this.handleRGBIncrement(e);
+        });
+        this.rgba.addEventListener("mouseup", (e) => {
+            this.mouseState = e.type;
+            this.handleRGBIncrement(e);
+        });
+        this.rgba.addEventListener("mouseout", (e) => {
+            this.mouseState = e.type;
+            this.handleRGBIncrement(e);
+        });
         this.rgba.addEventListener("change", (e) => {
             this.updateRGB(e);
-        })
+        });
+        this.hsl.addEventListener("mousedown", (e) => {
+            this.mouseState = e.type;
+            this.handleHSLIncrement(e);
+        });
+        this.hsl.addEventListener("mouseup", (e) => {
+            this.mouseState = e.type;
+            this.handleHSLIncrement(e);
+        });
+        this.hsl.addEventListener("mouseout", (e) => {
+            this.mouseState = e.type;
+            this.handleHSLIncrement(e);
+        });
         this.hsl.addEventListener("change", (e) => {
             this.updateHSL(e);
-        })
+        });
         this.hex.addEventListener("change", (e) => {
             this.updateHex(e);
-        })
+        });
     }
 }
 
