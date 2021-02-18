@@ -149,7 +149,7 @@ class Picker {
                 channel.value = newValue + 1;
             }
         } else if (e.target.id === "dec") {
-            let newValue = +channel.value;
+            let newValue = Math.floor(+channel.value);
             if (newValue > 0) {
                 channel.value = newValue - 1;
             }
