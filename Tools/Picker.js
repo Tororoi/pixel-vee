@@ -499,6 +499,8 @@ class Picker {
 }
 
 //Render color picker
+//Should there be multiple separate color pickers, for bg and fg?
+//Refactor to include html built into class, instead of being called by class?
 //Create an instance passing it the canvas, width and height
 let picker = new Picker(document.getElementById("color-picker"), 250, 250);
 
