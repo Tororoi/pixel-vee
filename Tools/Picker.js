@@ -9,7 +9,7 @@ class Picker {
         this.context = this.target.getContext("2d");
         //mouse
         this.mouseState = "none";
-        //Circle (Color Selector Circle)
+        //color selector circle
         this.pickerCircle = { x: 10, y: 10, width: 6, height: 6 };
         this.clicked = false;
         //hue slider

@@ -61,6 +61,9 @@ const tools = {
         brushSize: 1,
         options: ["perfect"]
     },
+    // shading: {
+        // user selects hsl shading color which mixes with colors that the user draws on to create dynamic shading
+    // },
     line: {
         name: "line",
         fn: lineSteps,
@@ -73,12 +76,18 @@ const tools = {
         brushSize: 1,
         options: ["contiguous"]
     },
+    // gradient: {
+        // Create a dithered gradient
+    // },
     curve: {
         name: "curve",
         fn: curveSteps,
         brushSize: 1,
         options: []
     },
+    // shapes: {
+        // square, circle, and custom saved shape?
+    // },
     picker: {
         name: "picker",
         fn: pickerSteps,

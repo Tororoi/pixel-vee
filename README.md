@@ -65,12 +65,13 @@ Visit here: https://nifty-perlman-5fc2c8.netlify.app/
 ### Stretch Features to be added
 
 - Ability to import a custom background image
-- Dithered gradient tool
+- Dithered Gradient Tool
 - Ability to toggle gridlines
 - Increase functionality of curve tool to include more points
 - Shapes Tool
 - 9-Grid Mode
 - Preview window
+- Shading Tool
 
 ### UI Fixes Scheduled
 
