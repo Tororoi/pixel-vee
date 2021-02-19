@@ -508,6 +508,7 @@ function handleClear() {
 }
 
 function handleZoom(e) {
+    //BUG: offcenter
     //general zoom based on center
     if (e.target.closest(".square")) {
         let zoomBtn = e.target.closest(".square");
@@ -1017,6 +1018,7 @@ function curveSteps() {
 
 //Curved Lines
 function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, currentMode, scale = 1) {
+    // BUG: connecting dots with lines is imperfect
     ctx.fillStyle = currentColor.color;
     function pt(p1, p2, p3, t) {
         return Math.round(p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3));
@@ -1043,6 +1045,7 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         }
         actionLine(lastXt, lastYt, x2, y2, currentColor, onScreenCTX, currentMode, scale);
     } else if (stepNum === 3) {
+        //BUG: holding mouseclick for the third point causes visual glitch
         //curve after defining x3y3
         // bezier curve
         for (let i = 0; i < tNum; i++) {
