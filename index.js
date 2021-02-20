@@ -1018,9 +1018,12 @@ function curveSteps() {
 
 //Curved Lines
 function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, currentMode, scale = 1) {
+    //New algo to try: stepper function that recurs if t < 1, steps 1 pixel and checks 8 surrounding pixels to assess which pixel falls on curve best
+    //Instead of solving for x and y based on t, solve for t based on x and y to determine which pixel gets drawn
     // BUG: connecting dots with lines is imperfect
     ctx.fillStyle = currentColor.color;
     function pt(p1, p2, p3, t) {
+        //quadratic bezier equation to find point along curve (solves for x/y coordinates based on t) 
         return Math.round(p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3));
     }
     let tNum = 32;
@@ -1045,7 +1048,7 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         }
         actionLine(lastXt, lastYt, x2, y2, currentColor, onScreenCTX, currentMode, scale);
     } else if (stepNum === 3) {
-        //BUG: holding mouseclick for the third point causes visual glitch
+        //BUG: holding mouseclick for the third point causes visual glitch, variable ctx is onscreen but should be offscreen
         //curve after defining x3y3
         // bezier curve
         for (let i = 0; i < tNum; i++) {

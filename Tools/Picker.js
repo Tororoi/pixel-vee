@@ -468,11 +468,11 @@ class Picker {
         });
         this.rgba.addEventListener("mouseup", (e) => {
             this.mouseState = e.type;
-            this.handleRGBIncrement(e);
+            // this.handleRGBIncrement(e);
         });
         this.rgba.addEventListener("mouseout", (e) => {
             this.mouseState = e.type;
-            this.handleRGBIncrement(e);
+            // this.handleRGBIncrement(e);
         });
         this.rgba.addEventListener("change", (e) => {
             this.updateRGB(e);
@@ -483,11 +483,11 @@ class Picker {
         });
         this.hsl.addEventListener("mouseup", (e) => {
             this.mouseState = e.type;
-            this.handleHSLIncrement(e);
+            // this.handleHSLIncrement(e);
         });
         this.hsl.addEventListener("mouseout", (e) => {
             this.mouseState = e.type;
-            this.handleHSLIncrement(e);
+            // this.handleHSLIncrement(e);
         });
         this.hsl.addEventListener("change", (e) => {
             this.updateHSL(e);
