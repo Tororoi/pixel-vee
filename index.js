@@ -979,8 +979,8 @@ function curveSteps() {
                     py2 = state.mouseY;
                     break;
                 case 3:
-                    px3 = state.mouseX;
-                    py3 = state.mouseY;
+                    // px3 = state.mouseX;
+                    // py3 = state.mouseY;
                     break;
                 default:
                 //do nothing
@@ -1003,7 +1003,9 @@ function curveSteps() {
             break;
         case "mouseup" || "mouseout":
             if (clickCounter === 3) {
-                actionCurve(px1, py1, px2, py2, px3, py3, clickCounter, state.brushColor, offScreenCTX, state.mode)
+                px3 = state.mouseX;
+                py3 = state.mouseY;
+                actionCurve(px1, py1, px2, py2, px3, py3, clickCounter + 1, state.brushColor, offScreenCTX, state.mode)
                 clickCounter = 0;
                 //store control points for timeline
                 addToTimeline(state.tool.name, { x1: px1, x2: px2, x3: px3 }, { y1: py1, y2: py2, y3: py3 });
@@ -1033,7 +1035,7 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
     if (stepNum === 1) {
         //after defining x1y1
         actionLine(x1, y1, state.mox, state.moy, currentColor, onScreenCTX, currentMode, scale);
-    } else if (stepNum === 2) {
+    } else if (stepNum === 2 || stepNum === 3) {
         // after defining x2y2
         //onscreen preview curve
         // bezier curve
@@ -1047,7 +1049,7 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
             onScreenCTX.fillRect(xt * state.ratio / zoom, yt * state.ratio / zoom, scale, scale);
         }
         actionLine(lastXt, lastYt, x2, y2, currentColor, onScreenCTX, currentMode, scale);
-    } else if (stepNum === 3) {
+    } else if (stepNum === 4) {
         //BUG: holding mouseclick for the third point causes visual glitch, variable ctx is onscreen but should be offscreen
         //curve after defining x3y3
         // bezier curve
