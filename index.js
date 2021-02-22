@@ -1050,7 +1050,7 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         }
         actionLine(lastXt, lastYt, x2, y2, currentColor, onScreenCTX, currentMode, scale);
     } else if (stepNum === 4) {
-        //BUG: holding mouseclick for the third point causes visual glitch, variable ctx is onscreen but should be offscreen
+        //BUG: holding mouseclick for the third point causes visual glitch, variable ctx is onscreen but should be offscreen (FIXED but needs improvement on refactor)
         //curve after defining x3y3
         // bezier curve
         for (let i = 0; i < tNum; i++) {
