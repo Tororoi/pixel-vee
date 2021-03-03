@@ -62,7 +62,7 @@ const tools = {
         options: ["perfect"]
     },
     // shading: {
-        // user selects hsl shading color which mixes with colors that the user draws on to create dynamic shading
+    // user selects hsl shading color which mixes with colors that the user draws on to create dynamic shading
     // },
     line: {
         name: "line",
@@ -77,7 +77,7 @@ const tools = {
         options: ["contiguous"]
     },
     // gradient: {
-        // Create a dithered gradient
+    // Create a dithered gradient
     // },
     curve: {
         name: "curve",
@@ -86,7 +86,7 @@ const tools = {
         options: []
     },
     // shapes: {
-        // square, circle, and custom saved shape?
+    // square, circle, and custom saved shape?
     // },
     picker: {
         name: "picker",
@@ -1067,6 +1067,61 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         renderImage();
     }
 }
+
+// //Updated Curved Lines
+// function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, currentMode, scale = 1) {    
+//     //Instead of solving for x and y based on t, solve for t based on x and y to determine which pixel gets drawn
+//     //split into several explicit curves?
+//     // BUG: connecting dots with lines is imperfect
+//     ctx.fillStyle = currentColor.color;
+//     function pt(p1, p2, p3, t) {
+//         //quadratic bezier equation to find point along curve (solves for x/y coordinates based on t) 
+//         // x = Math.round(p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3));
+//         return Math.floor(p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3));
+//     }
+//     let tNum = 320;
+//     let lastXt = x1;
+//     let lastYt = y1;
+
+//     //New algo to try: 
+//     //stepper function that recurs if t < 1, 
+//     //steps 1 pixel and checks 8 surrounding pixels to assess which pixel falls on curve best
+
+//     //1. write formula 
+//     //2. check 8 surrounding tiles of "lastXt/Yt" to see which is closest to bezier curve
+//     //3. draw that pixel and set it to "lastXt/Yt"
+
+//     if (stepNum === 1) {
+//         //after defining x1y1
+//         actionLine(x1, y1, state.mox, state.moy, currentColor, onScreenCTX, currentMode, scale);
+//     } else if (stepNum === 2 || stepNum === 3) {
+//         // after defining x2y2
+//         //onscreen preview curve
+//         // bezier curve
+//         for (let i = 0; i < tNum; i++) {
+//             let xt = pt(x1, x2, state.mox, i / tNum);
+//             let yt = pt(y1, y2, state.moy, i / tNum);
+//             lastXt = xt;
+//             lastYt = yt;
+//             // onScreenCTX.fillStyle = "black";
+//             onScreenCTX.fillRect(xt * state.ratio / zoom, yt * state.ratio / zoom, scale, scale);
+//         }
+//     } else if (stepNum === 4) {
+//         //BUG: holding mouseclick for the third point causes visual glitch, variable ctx is onscreen but should be offscreen (FIXED but needs improvement on refactor)
+//         //curve after defining x3y3
+//         // bezier curve
+//         for (let i = 0; i < tNum; i++) {
+//             let xt = pt(x1, x2, x3, i / tNum);
+//             let yt = pt(y1, y2, y3, i / tNum);
+//             lastXt = xt;
+//             lastYt = yt;
+//             ctx.fillRect(xt, yt, scale, scale)
+//         }
+//         //render drawing
+//         source = offScreenCVS.toDataURL();
+//         renderImage();
+//     }
+// }
 
 //Non-actions
 //Color picker
