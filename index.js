@@ -1222,7 +1222,7 @@ function redrawPoints() {
                     actionLine(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.color, offScreenCTX, p.mode)
                     break;
                 case "curve":
-                    actionCurve(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.x.x3, p.y.y3, 3, p.color, offScreenCTX, p.mode)
+                    actionCurve(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.x.x3, p.y.y3, 4, p.color, offScreenCTX, p.mode)
                     break;
                 default:
                     actionDraw(p.x, p.y, p.color, p.size, p.mode);
