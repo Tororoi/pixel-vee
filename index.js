@@ -1021,6 +1021,7 @@ function curveSteps() {
 //Curved Lines
 function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, currentMode, scale = 1) {
     //New algo to try: use bresenham's algorithm
+    //look into algorithms for pixelating vector line art
     // BUG: connecting dots with lines is imperfect
     ctx.fillStyle = currentColor.color;
     function pt(p1, p2, p3, t) {
