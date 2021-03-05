@@ -1020,17 +1020,23 @@ function curveSteps() {
 
 //Curved Lines
 function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, currentMode, scale = 1) {
-    //New algo to try: stepper function that recurs if t < 1, steps 1 pixel and checks 8 surrounding pixels to assess which pixel falls on curve best
-    //Instead of solving for x and y based on t, solve for t based on x and y to determine which pixel gets drawn
+    //New algo to try: use bresenham's algorithm
     // BUG: connecting dots with lines is imperfect
     ctx.fillStyle = currentColor.color;
     function pt(p1, p2, p3, t) {
         //quadratic bezier equation to find point along curve (solves for x/y coordinates based on t) 
-        return Math.round(p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3));
+        // return Math.floor(p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3));
+        //no rounding
+        return p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3);
     }
     let tNum = 32;
     let lastXt = x1;
     let lastYt = y1;
+
+    //derivatives for slope
+    function dpt(p1, p2, p3, t) {
+        return -2 * (1 - t) * (p1 - p3) + 2 * t * (p2 - p3);
+    }
 
     if (stepNum === 1) {
         //after defining x1y1
@@ -1056,6 +1062,8 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         for (let i = 0; i < tNum; i++) {
             let xt = pt(x1, x2, x3, i / tNum);
             let yt = pt(y1, y2, y3, i / tNum);
+            let xdt = dpt(x1, x2, x3, i / tNum);
+            let ydt = dpt(y1, y2, y3, i / tNum);
             actionLine(lastXt, lastYt, xt, yt, currentColor, ctx, currentMode, scale);
             lastXt = xt;
             lastYt = yt;
