@@ -1026,9 +1026,12 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
     ctx.fillStyle = currentColor.color;
     function pt(p1, p2, p3, t) {
         //quadratic bezier equation to find point along curve (solves for x/y coordinates based on t) 
-        // return Math.floor(p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3));
+        p1+=0.5;
+        p2+=0.5;
+        p3+=0.5;
+        return Math.floor(p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3));
         //no rounding
-        return p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3);
+        // return p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3);
     }
     let tNum = 32;
     let lastXt = x1;
