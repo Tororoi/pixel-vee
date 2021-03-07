@@ -1025,10 +1025,11 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
     // BUG: connecting dots with lines is imperfect
     ctx.fillStyle = currentColor.color;
     function pt(p1, p2, p3, t) {
-        //quadratic bezier equation to find point along curve (solves for x/y coordinates based on t) 
+        //center control points on their pixels
         p1+=0.5;
         p2+=0.5;
         p3+=0.5;
+        //quadratic bezier equation to find point along curve (solves for x/y coordinates based on t) 
         return Math.floor(p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3));
         //no rounding
         // return p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3);
