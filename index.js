@@ -4,9 +4,10 @@ let fullPage = document.querySelector(".full-page");
 //Set onscreen canvas and its context
 let onScreenCVS = document.getElementById("onScreen");
 let onScreenCTX = onScreenCVS.getContext("2d");
-//improve sharpness
+//original canvas width/height
 let ocWidth = onScreenCVS.width;
 let ocHeight = onScreenCVS.height;
+//improve sharpness
 let sharpness = 4;
 let zoom = 1;
 onScreenCVS.width = ocWidth * sharpness;
@@ -46,6 +47,13 @@ let offScreenCTX = offScreenCVS.getContext("2d");
 //Set the dimensions of the drawing canvas
 offScreenCVS.width = 128;
 offScreenCVS.height = 128;
+
+//Create a preview canvas. Also offscreen and same size as offscreen canvas. Used for UI such as cursors and previewing certain tools
+let guiCVS = document.createElement('canvas');
+let guiCTX = offScreenCVS.getContext("2d");
+//Set the dimensions of the drawing canvas
+guiCVS.width = offScreenCVS.width;
+guiCVS.height = offScreenCVS.height;
 
 //tool objects
 const tools = {
@@ -721,7 +729,9 @@ function actionLine(sx, sy, tx, ty, currentColor, ctx, currentMode, scale = 1) {
         }
     }
     // finds the angle of (x,y) on a plane from the origin
-    function getAngle(x, y) { return Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0); }
+    function getAngle(x, y) { 
+        return Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0); 
+    }
     let angle = getAngle(tx - sx, ty - sy); // angle of line
     getTriangle(sx, sy, tx, ty, angle);
 
