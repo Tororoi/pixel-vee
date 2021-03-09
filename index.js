@@ -1040,17 +1040,29 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         p2+=0.5;
         p3+=0.5;
         //quadratic bezier equation to find point along curve (solves for x/y coordinates based on t) 
-        return Math.floor(p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3));
+        // return Math.floor(p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3));
         //no rounding
-        // return p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3);
+        return p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3);
     }
     let tNum = 32;
     let lastXt = x1;
     let lastYt = y1;
 
-    //derivatives for slope
+    //derivative for slope
     function dpt(p1, p2, p3, t) {
         return -2 * (1 - t) * (p1 - p3) + 2 * t * (p2 - p3);
+    }
+
+    //second derivative for curvature
+    function ddpt(p1, p2, p3, t) {
+        return 2*(p1 - p3) + 2*(p2 - p3);
+    }
+
+    //radius of curvature for parametric functions
+    function radius(dx,dy,ddx,ddy) {
+        let numerator = Math.pow(Math.pow(dx, 2) + Math.pow(dy, 2),1.5);
+        let denominator = dx*ddy - dy*ddx;
+        return Math.abs(numerator/denominator);
     }
 
     if (stepNum === 1) {
@@ -1060,9 +1072,13 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         // after defining x2y2
         //onscreen preview curve
         // bezier curve
+        tNum = Math.abs(x1-x2) > Math.abs(y1-y2) ? Math.floor(Math.abs(x1-x2)/3) : Math.floor(Math.abs(y1-y2)/3);
         for (let i = 0; i < tNum; i++) {
-            let xt = pt(x1, x2, state.mox, i / tNum);
-            let yt = pt(y1, y2, state.moy, i / tNum);
+            let truext = pt(x1, x2, state.mox, i / tNum);
+            let trueyt = pt(y1, y2, state.moy, i / tNum);
+            //rounded values
+            let xt = Math.floor(truext);
+            let yt = Math.floor(trueyt);
             actionLine(lastXt, lastYt, xt, yt, currentColor, onScreenCTX, currentMode, scale);
             lastXt = xt;
             lastYt = yt;
@@ -1074,11 +1090,25 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         //BUG: holding mouseclick for the third point causes visual glitch, variable ctx is onscreen but should be offscreen (FIXED but needs improvement on refactor)
         //curve after defining x3y3
         // bezier curve
+        // tNum = Math.floor(Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2)));
+        tNum = Math.abs(x1-x2) > Math.abs(y1-y2) ? Math.floor(Math.abs(x1-x2)/3) : Math.floor(Math.abs(y1-y2)/3);
+        // console.log(tNum)
         for (let i = 0; i < tNum; i++) {
-            let xt = pt(x1, x2, x3, i / tNum);
-            let yt = pt(y1, y2, y3, i / tNum);
-            let xdt = dpt(x1, x2, x3, i / tNum);
-            let ydt = dpt(y1, y2, y3, i / tNum);
+            let truext = pt(x1, x2, x3, i / tNum);
+            let trueyt = pt(y1, y2, y3, i / tNum);
+
+            //derivatives
+            let dxt = dpt(x1, x2, x3, i / tNum);
+            let dyt = dpt(y1, y2, y3, i / tNum);
+            let ddxt = ddpt(x1, x2, x3, i / tNum);
+            let ddyt = ddpt(y1, y2, y3, i / tNum);
+
+            let rad = radius(dxt,dyt,ddxt,ddyt);
+            // if (i === 0) console.log(rad);
+
+            //rounded values
+            let xt = Math.floor(truext);
+            let yt = Math.floor(trueyt);
             actionLine(lastXt, lastYt, xt, yt, currentColor, ctx, currentMode, scale);
             lastXt = xt;
             lastYt = yt;
