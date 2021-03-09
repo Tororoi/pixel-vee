@@ -729,8 +729,8 @@ function actionLine(sx, sy, tx, ty, currentColor, ctx, currentMode, scale = 1) {
         }
     }
     // finds the angle of (x,y) on a plane from the origin
-    function getAngle(x, y) { 
-        return Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0); 
+    function getAngle(x, y) {
+        return Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0);
     }
     let angle = getAngle(tx - sx, ty - sy); // angle of line
     getTriangle(sx, sy, tx, ty, angle);
@@ -1036,15 +1036,15 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
     ctx.fillStyle = currentColor.color;
     function pt(p1, p2, p3, t) {
         //center control points on their pixels
-        p1+=0.5;
-        p2+=0.5;
-        p3+=0.5;
+        p1 += 0.5;
+        p2 += 0.5;
+        p3 += 0.5;
         //quadratic bezier equation to find point along curve (solves for x/y coordinates based on t) 
         // return Math.floor(p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3));
         //no rounding
         return p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3);
     }
-    let tNum = 32;
+    let tNum = 320;
     let lastXt = x1;
     let lastYt = y1;
 
@@ -1054,15 +1054,28 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
     }
 
     //second derivative for curvature
-    function ddpt(p1, p2, p3, t) {
-        return 2*(p1 - p3) + 2*(p2 - p3);
+    function ddpt(p1, p2, p3) {
+        return 2 * (p1 - p3) + 2 * (p2 - p3);
+    }
+
+    function denom(dx, dy, ddx, ddy) {
+        return dx * ddy - dy * ddx;
     }
 
     //radius of curvature for parametric functions
-    function radius(dx,dy,ddx,ddy) {
-        let numerator = Math.pow(Math.pow(dx, 2) + Math.pow(dy, 2),1.5);
-        let denominator = dx*ddy - dy*ddx;
-        return Math.abs(numerator/denominator);
+    function radius(dx, dy, ddx, ddy, i) {
+        let numerator = Math.pow(Math.pow(dx, 2) + Math.pow(dy, 2), 1.5);
+        let denominator = denom(dx, dy, ddx, ddy);
+        // if (i === 0) {
+        //     console.log("numerator", numerator)
+        //     console.log("denominator", denominator)
+        // }
+        return Math.abs(numerator / denominator);
+    }
+
+    //s
+    function speed(dx, dy) {
+        return Math.pow(Math.pow(dx, 2) + Math.pow(dy, 2), 0.5);
     }
 
     if (stepNum === 1) {
@@ -1072,13 +1085,14 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         // after defining x2y2
         //onscreen preview curve
         // bezier curve
-        tNum = Math.abs(x1-x2) > Math.abs(y1-y2) ? Math.floor(Math.abs(x1-x2)/3) : Math.floor(Math.abs(y1-y2)/3);
+        // tNum = Math.abs(x1-x2) > Math.abs(y1-y2) ? Math.floor(Math.abs(x1-x2)/3) : Math.floor(Math.abs(y1-y2)/3);
         for (let i = 0; i < tNum; i++) {
             let truext = pt(x1, x2, state.mox, i / tNum);
             let trueyt = pt(y1, y2, state.moy, i / tNum);
             //rounded values
             let xt = Math.floor(truext);
             let yt = Math.floor(trueyt);
+
             actionLine(lastXt, lastYt, xt, yt, currentColor, onScreenCTX, currentMode, scale);
             lastXt = xt;
             lastYt = yt;
@@ -1091,8 +1105,9 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         //curve after defining x3y3
         // bezier curve
         // tNum = Math.floor(Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2)));
-        tNum = Math.abs(x1-x2) > Math.abs(y1-y2) ? Math.floor(Math.abs(x1-x2)/3) : Math.floor(Math.abs(y1-y2)/3);
-        // console.log(tNum)
+        // tNum = Math.abs(x1-x2) > Math.abs(y1-y2) ? Math.floor(Math.abs(x1-x2)/3) : Math.floor(Math.abs(y1-y2)/3);
+        console.log("tNum:", tNum)
+        let xNext, yNext;
         for (let i = 0; i < tNum; i++) {
             let truext = pt(x1, x2, x3, i / tNum);
             let trueyt = pt(y1, y2, y3, i / tNum);
@@ -1100,21 +1115,103 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
             //derivatives
             let dxt = dpt(x1, x2, x3, i / tNum);
             let dyt = dpt(y1, y2, y3, i / tNum);
-            let ddxt = ddpt(x1, x2, x3, i / tNum);
-            let ddyt = ddpt(y1, y2, y3, i / tNum);
+            let ddxt = ddpt(x1, x2, x3);
+            let ddyt = ddpt(y1, y2, y3);
 
-            let rad = radius(dxt,dyt,ddxt,ddyt);
-            // if (i === 0) console.log(rad);
+            let sign = Math.sign(denom(dxt, dyt, ddxt, ddyt));
+            let rad = radius(dxt, dyt, ddxt, ddyt, i);
+            let s = speed(dxt, dyt);
+            let circlex = truext - sign * (dyt / s) * rad;
+            let circley = trueyt - sign * (-dxt / s) * rad;
 
             //rounded values
             let xt = Math.floor(truext);
             let yt = Math.floor(trueyt);
-            actionLine(lastXt, lastYt, xt, yt, currentColor, ctx, currentMode, scale);
+
+            // if (i !== 0 && (xt !== xNext || yt !== yNext)) {
+            //     //skip this t value
+            //     continue;
+            // }
+
+            //works for Q4
+            let m1 = Math.abs(Math.sqrt(Math.pow(xt + 1.5 - circlex, 2) + Math.pow(yt + 0.5 - circley, 2)) - rad);
+            let m2 = Math.abs(Math.sqrt(Math.pow(xt + 1.5 - circlex, 2) + Math.pow(yt + 1.5 - circley, 2)) - rad);
+            let m3 = Math.abs(Math.sqrt(Math.pow(xt + 0.5 - circlex, 2) + Math.pow(yt + 1.5 - circley, 2)) - rad);
+            // let m4 = Math.abs(Math.sqrt(Math.pow(xt - 0.5 - circlex, 2) + Math.pow(yt + 1.5 - circley, 2)) - rad);
+            // let m5 = Math.abs(Math.sqrt(Math.pow(xt - 0.5 - circlex, 2) + Math.pow(yt + 0.5 - circley, 2)) - rad);
+            // let m6 = Math.abs(Math.sqrt(Math.pow(xt - 0.5 - circlex, 2) + Math.pow(yt - 0.5 - circley, 2)) - rad);
+            // let m7 = Math.abs(Math.sqrt(Math.pow(xt + 0.5 - circlex, 2) + Math.pow(yt - 0.5 - circley, 2)) - rad);
+            // let m8 = Math.abs(Math.sqrt(Math.pow(xt + 1.5 - circlex, 2) + Math.pow(yt - 0.5 - circley, 2)) - rad);
+
+            let direction = [m1, m2, m3].sort();
+
+            function getNext(dir) {
+                switch (dir[0]) {
+                    case m1:
+                        xNext = xt + 1;
+                        yNext = yt;
+                        break;
+                    case m2:
+                        xNext = xt + 1;
+                        yNext = yt + 1;
+                        break;
+                    case m3:
+                        xNext = xt;
+                        yNext = yt + 1;
+                        break;
+                    // case m4:
+                    //     xNext = xt - 1;
+                    //     yNext = yt + 1;
+                    //     break;
+                    // case m5:
+                    //     xNext = xt - 1;
+                    //     yNext = yt;
+                    //     break;
+                    // case m6:
+                    //     xNext = xt - 1;
+                    //     yNext = yt - 1;
+                    //     break;
+                    // case m7:
+                    //     xNext = xt;
+                    //     yNext = yt - 1;
+                    //     break;
+                    // case m8:
+                    //     xNext = xt + 1;
+                    //     yNext = yt - 1;
+                    //     break;
+                    default:
+                    //
+                }
+                // if (xNext === lastXt && yNext === lastYt) {
+                //     dir.shift()
+                //     getNext(dir);
+                // }
+            }
+
+            getNext(direction);
+
+            // if (i === 10) {
+            //     console.log("x:",truext,"y:",trueyt);
+            //     console.log("slope:",dyt/dxt);
+            //     console.log("radius:",rad)
+            //     console.log("m1:",m1)
+            //     console.log("m2:",m2)
+            //     console.log("m3:",m3)
+            //     console.log([m3,m2,m1].sort())
+            // }
+
+            // i === 6 ? ctx.fillStyle = "blue" : ctx.fillStyle = currentColor.color;
+            // if (i === 10) {
+            //     actionLine(xt, yt, Math.floor(circlex), Math.floor(circley), currentColor, ctx, currentMode, scale);
+            // }
+
+            // actionLine(lastXt, lastYt, xt, yt, currentColor, ctx, currentMode, scale);
             lastXt = xt;
             lastYt = yt;
+
             ctx.fillRect(xt, yt, scale, scale)
         }
-        actionLine(lastXt, lastYt, x2, y2, currentColor, ctx, currentMode, scale);
+        // actionLine(lastXt, lastYt, x2, y2, currentColor, ctx, currentMode, scale);
         //render drawing
         source = offScreenCVS.toDataURL();
         renderImage();
