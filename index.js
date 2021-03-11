@@ -1249,11 +1249,8 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
                 continue;
             }
 
-
-            // // console.log(incT(dxt, dyt))
-
             //BUG: calculation breaks down for sharp curves due to small size of tangent circle
-            //maybe run curve rendering from t=1 simultaneously so it meets in the middle at t=0.5
+            //running curve rendering from t=1 simultaneously so it meets in the middle at t=0.5 is not enough
             let m1 = Math.abs(Math.sqrt(Math.pow(xt + 1.5 - circlex, 2) + Math.pow(yt + 0.5 - circley, 2)) - rad);
             let m2 = Math.abs(Math.sqrt(Math.pow(xt + 1.5 - circlex, 2) + Math.pow(yt + 1.5 - circley, 2)) - rad);
             let m3 = Math.abs(Math.sqrt(Math.pow(xt + 0.5 - circlex, 2) + Math.pow(yt + 1.5 - circley, 2)) - rad);
@@ -1265,66 +1262,94 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
 
             let direction = [];
 
+            //contained logic per case to avoid matching values among all 8 m options causing errors
             switch (true) {
                 case (Math.sign(dxt) === 1 && Math.sign(dyt) === 1):
-                    //Q1 (lower right)
+                    //Q1
                     direction.push(m1, m2, m3);
+                    direction.sort();
+                    switch (direction[0]) {
+                        case m1:
+                            xNext = xt + 1;
+                            yNext = yt;
+                            break;
+                        case m2:
+                            xNext = xt + 1;
+                            yNext = yt + 1;
+                            break;
+                        case m3:
+                            xNext = xt;
+                            yNext = yt + 1;
+                            break;
+                        default:
+                        //
+                    }
                     break;
                 case (Math.sign(dxt) === -1 && Math.sign(dyt) === 1):
                     //Q2
                     direction.push(m3, m4, m5);
+                    direction.sort();
+                    switch (direction[0]) {
+                        case m3:
+                            xNext = xt;
+                            yNext = yt + 1;
+                            break;
+                        case m4:
+                            xNext = xt - 1;
+                            yNext = yt + 1;
+                            break;
+                        case m5:
+                            xNext = xt - 1;
+                            yNext = yt;
+                            break;
+                        default:
+                        //
+                    }
                     break;
                 case (Math.sign(dxt) === -1 && Math.sign(dyt) === -1):
                     //Q3
                     direction.push(m5, m6, m7);
+                    direction.sort();
+                    switch (direction[0]) {
+                        case m5:
+                            xNext = xt - 1;
+                            yNext = yt;
+                            break;
+                        case m6:
+                            xNext = xt - 1;
+                            yNext = yt - 1;
+                            break;
+                        case m7:
+                            xNext = xt;
+                            yNext = yt - 1;
+                            break;
+                        default:
+                        //
+                    }
                     break;
                 case (Math.sign(dxt) === 1 && Math.sign(dyt) === -1):
                     //Q4
                     direction.push(m7, m8, m1);
+                    direction.sort();
+                    switch (direction[0]) {
+                        case m7:
+                            xNext = xt;
+                            yNext = yt - 1;
+                            break;
+                        case m8:
+                            xNext = xt + 1;
+                            yNext = yt - 1;
+                            break;
+                        case m1:
+                            xNext = xt + 1;
+                            yNext = yt;
+                            break;
+                        default:
+                        //
+                    }
                     break;
                 default:
                     continue;
-
-            }
-
-            direction.sort();
-
-
-            switch (direction[0]) {
-                case m1:
-                    xNext = xt + 1;
-                    yNext = yt;
-                    break;
-                case m2:
-                    xNext = xt + 1;
-                    yNext = yt + 1;
-                    break;
-                case m3:
-                    xNext = xt;
-                    yNext = yt + 1;
-                    break;
-                case m4:
-                    xNext = xt - 1;
-                    yNext = yt + 1;
-                    break;
-                case m5:
-                    xNext = xt - 1;
-                    yNext = yt;
-                    break;
-                case m6:
-                    xNext = xt - 1;
-                    yNext = yt - 1;
-                    break;
-                case m7:
-                    xNext = xt;
-                    yNext = yt - 1;
-                    break;
-                case m8:
-                    xNext = xt + 1;
-                    yNext = yt - 1;
-                    break;
-                default:
-                //
             }
 
             if (stepNum === 2 || stepNum === 3) {
@@ -1355,8 +1380,8 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
             let xt = Math.floor(truext);
             let yt = Math.floor(trueyt);
 
-            let nextxt = pt(x1, x2, controlX, t + 0.01);
-            let nextyt = pt(y1, y2, controlY, t + 0.01);
+            let nextxt = pt(x1, x2, controlX, t - 0.01);
+            let nextyt = pt(y1, y2, controlY, t - 0.01);
 
             let dist = Math.sqrt(Math.pow(nextxt - truext, 2) + Math.pow(nextyt - trueyt, 2)) * 2;
 
@@ -1367,11 +1392,6 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
                 continue;
             }
 
-
-            // // console.log(incT(dxt, dyt))
-
-            //BUG: calculation breaks down for sharp curves due to small size of tangent circle
-            //maybe run curve rendering from t=1 simultaneously so it meets in the middle at t=0.5
             let m1 = Math.abs(Math.sqrt(Math.pow(xt + 1.5 - circlex, 2) + Math.pow(yt + 0.5 - circley, 2)) - rad);
             let m2 = Math.abs(Math.sqrt(Math.pow(xt + 1.5 - circlex, 2) + Math.pow(yt + 1.5 - circley, 2)) - rad);
             let m3 = Math.abs(Math.sqrt(Math.pow(xt + 0.5 - circlex, 2) + Math.pow(yt + 1.5 - circley, 2)) - rad);
@@ -1384,65 +1404,92 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
             let direction = [];
 
             switch (true) {
-                case (Math.sign(dxt) === -1 && Math.sign(dyt) === -1):
-                    //Q1 (lower right)
+                case (Math.sign(-dxt) === 1 && Math.sign(-dyt) === 1):
+                    //Q1
                     direction.push(m1, m2, m3);
+                    direction.sort();
+                    switch (direction[0]) {
+                        case m1:
+                            xlnext = xt + 1;
+                            ylnext = yt;
+                            break;
+                        case m2:
+                            xlnext = xt + 1;
+                            ylnext = yt + 1;
+                            break;
+                        case m3:
+                            xlnext = xt;
+                            ylnext = yt + 1;
+                            break;
+                        default:
+                        //
+                    }
                     break;
-                case (Math.sign(dxt) === 1 && Math.sign(dyt) === -1):
+                case (Math.sign(-dxt) === -1 && Math.sign(-dyt) === 1):
                     //Q2
                     direction.push(m3, m4, m5);
+                    direction.sort();
+                    switch (direction[0]) {
+                        case m3:
+                            xlnext = xt;
+                            ylnext = yt + 1;
+                            break;
+                        case m4:
+                            xlnext = xt - 1;
+                            ylnext = yt + 1;
+                            break;
+                        case m5:
+                            xlnext = xt - 1;
+                            ylnext = yt;
+                            break;
+                        default:
+                        //
+                    }
                     break;
-                case (Math.sign(dxt) === 1 && Math.sign(dyt) === 1):
+                case (Math.sign(-dxt) === -1 && Math.sign(-dyt) === -1):
                     //Q3
                     direction.push(m5, m6, m7);
+                    direction.sort();
+                    switch (direction[0]) {
+                        case m5:
+                            xlnext = xt - 1;
+                            ylnext = yt;
+                            break;
+                        case m6:
+                            xlnext = xt - 1;
+                            ylnext = yt - 1;
+                            break;
+                        case m7:
+                            xlnext = xt;
+                            ylnext = yt - 1;
+                            break;
+                        default:
+                        //
+                    }
                     break;
-                case (Math.sign(dxt) === -1 && Math.sign(dyt) === 1):
+                case (Math.sign(-dxt) === 1 && Math.sign(-dyt) === -1):
                     //Q4
                     direction.push(m7, m8, m1);
+                    direction.sort();
+                    switch (direction[0]) {
+                        case m7:
+                            xlnext = xt;
+                            ylnext = yt - 1;
+                            break;
+                        case m8:
+                            xlnext = xt + 1;
+                            ylnext = yt - 1;
+                            break;
+                        case m1:
+                            xlnext = xt + 1;
+                            ylnext = yt;
+                            break;
+                        default:
+                        //
+                    }
                     break;
                 default:
                     continue;
-
-            }
-
-            direction.sort();
-
-
-            switch (direction[0]) {
-                case m1:
-                    xlnext = xt + 1;
-                    ylnext = yt;
-                    break;
-                case m2:
-                    xlnext = xt + 1;
-                    ylnext = yt + 1;
-                    break;
-                case m3:
-                    xlnext = xt;
-                    ylnext = yt + 1;
-                    break;
-                case m4:
-                    xlnext = xt - 1;
-                    ylnext = yt + 1;
-                    break;
-                case m5:
-                    xlnext = xt - 1;
-                    ylnext = yt;
-                    break;
-                case m6:
-                    xlnext = xt - 1;
-                    ylnext = yt - 1;
-                    break;
-                case m7:
-                    xlnext = xt;
-                    ylnext = yt - 1;
-                    break;
-                case m8:
-                    xlnext = xt + 1;
-                    ylnext = yt - 1;
-                    break;
-                default:
-                //
             }
 
             if (stepNum === 2 || stepNum === 3) {
