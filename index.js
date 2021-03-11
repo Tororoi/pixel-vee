@@ -875,7 +875,7 @@ function fillSteps() {
 }
 
 //For undo ability, store starting coords and settings and pass them into actionFill
-function actionFill(startX, startY, currentColor, currentMode) { //BUG: fill works when clicking outside border of canvas
+function actionFill(startX, startY, currentColor, currentMode) {
     //exit if outside borders
     if (startX < 0 || startX >= offScreenCVS.width || startY < 0 || startY >= offScreenCVS.height) {
         return;
@@ -972,7 +972,7 @@ function actionFill(startX, startY, currentColor, currentMode) { //BUG: fill wor
 
 //temp
 let clickCounter = 0;
-let px1, py1, px2, py2, px3, py3, px4, py4;
+let px1, py1, px2, py2, px3, py3;
 
 function curveSteps() {
     switch (state.event) {
@@ -1033,7 +1033,6 @@ function curveSteps() {
 function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, currentMode, scale = 1) {
     //New algo to try: use bresenham's algorithm
     //look into algorithms for pixelating vector line art
-    // BUG: connecting dots with lines is imperfect
     ctx.fillStyle = currentColor.color;
     function pt(p1, p2, p3, t) {
         //center control points on their pixels
@@ -1046,8 +1045,8 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         return p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3);
     }
     let tNum = 320;
-    // let lastXt = x1;
-    // let lastYt = y1;
+    lastXt = x1;
+    lastYt = y1;
 
     //derivative for slope
     function dpt(p1, p2, p3, t) {
@@ -1059,34 +1058,39 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         return 2 * (p1 - p3) + 2 * (p2 - p3);
     }
 
+    //radius of curvature for parametric functions
     function denom(dx, dy, ddx, ddy) {
         return dx * ddy - dy * ddx;
     }
 
-    //radius of curvature for parametric functions
-    function radius(dx, dy, ddx, ddy, i) {
+    function radius(dx, dy, ddx, ddy) {
         let numerator = Math.pow(Math.pow(dx, 2) + Math.pow(dy, 2), 1.5);
         let denominator = denom(dx, dy, ddx, ddy);
-        // if (i === 0) {
-        //     console.log("numerator", numerator)
-        //     console.log("denominator", denominator)
-        // }
         return Math.abs(numerator / denominator);
     }
 
     //s
     function speed(dx, dy) {
-        return Math.pow(Math.pow(dx, 2) + Math.pow(dy, 2), 0.5);
+        return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+    }
+
+    //increment t, constrained to less than one pixel distance
+    function incT(dx, dy) {
+        let denom = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+        let xdiff = dx / denom;
+        let ydiff = dy / denom;
+        let integral = Math.sqrt(Math.pow(xdiff, 2) + Math.pow(ydiff, 2));
+        return { xdiff: xdiff, ydiff: ydiff };
     }
 
     function renderCurve(tMax, controlX, controlY) {
         let xNext, yNext;
-        for (let i = 0; i < tMax; i++) {
-
+        for (let i = 0; i < tMax / 2; i++) {
+            let j = tMax - i;
             let truext = pt(x1, x2, controlX, i / tMax);
             let trueyt = pt(y1, y2, controlY, i / tMax);
 
-            //derivatives
+            // //derivatives
             let dxt = dpt(x1, x2, controlX, i / tMax);
             let dyt = dpt(y1, y2, controlY, i / tMax);
             let ddxt = ddpt(x1, x2, controlX);
@@ -1107,6 +1111,11 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
                 continue;
             }
 
+
+            // // console.log(incT(dxt, dyt))
+
+            //BUG: calculation breaks down for sharp curves due to small size of tangent circle
+            //maybe run curve rendering from t=1 simultaneously so it meets in the middle at t=0.5
             let m1 = Math.abs(Math.sqrt(Math.pow(xt + 1.5 - circlex, 2) + Math.pow(yt + 0.5 - circley, 2)) - rad);
             let m2 = Math.abs(Math.sqrt(Math.pow(xt + 1.5 - circlex, 2) + Math.pow(yt + 1.5 - circley, 2)) - rad);
             let m3 = Math.abs(Math.sqrt(Math.pow(xt + 0.5 - circlex, 2) + Math.pow(yt + 1.5 - circley, 2)) - rad);
@@ -1196,8 +1205,245 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
             // }
 
             // actionLine(lastXt, lastYt, xt, yt, currentColor, ctx, currentMode, scale);
-            // lastXt = xt;
-            // lastYt = yt;
+
+            if (stepNum === 2 || stepNum === 3) {
+                onScreenCTX.fillRect(xt * state.ratio / zoom, yt * state.ratio / zoom, scale, scale);
+            } else if (stepNum === 4) {
+                ctx.fillRect(xt, yt, scale, scale)
+            }
+        }
+    }
+
+    function renderCurve2(controlX, controlY) {
+        let xNext, yNext;
+        let t = 0;
+        while (t <= 0.5) {
+            let truext = pt(x1, x2, controlX, t);
+            let trueyt = pt(y1, y2, controlY, t);
+
+            //derivatives
+            let dxt = dpt(x1, x2, controlX, t);
+            let dyt = dpt(y1, y2, controlY, t);
+            let ddxt = ddpt(x1, x2, controlX);
+            let ddyt = ddpt(y1, y2, controlY);
+
+            let sign = Math.sign(denom(dxt, dyt, ddxt, ddyt));
+            let rad = radius(dxt, dyt, ddxt, ddyt);
+            let s = speed(dxt, dyt);
+            let circlex = truext - sign * (dyt / s) * rad;
+            let circley = trueyt - sign * (-dxt / s) * rad;
+
+            //rounded values
+            let xt = Math.floor(truext);
+            let yt = Math.floor(trueyt);
+
+            let nextxt = pt(x1, x2, controlX, t + 0.01);
+            let nextyt = pt(y1, y2, controlY, t + 0.01);
+
+            let dist = Math.sqrt(Math.pow(nextxt - truext, 2) + Math.pow(nextyt - trueyt, 2)) * 2;
+
+            t += 0.01 / dist;
+
+            if ((xNext && yNext) && (xt !== xNext || yt !== yNext)) {
+                //skip this t value
+                continue;
+            }
+
+
+            // // console.log(incT(dxt, dyt))
+
+            //BUG: calculation breaks down for sharp curves due to small size of tangent circle
+            //maybe run curve rendering from t=1 simultaneously so it meets in the middle at t=0.5
+            let m1 = Math.abs(Math.sqrt(Math.pow(xt + 1.5 - circlex, 2) + Math.pow(yt + 0.5 - circley, 2)) - rad);
+            let m2 = Math.abs(Math.sqrt(Math.pow(xt + 1.5 - circlex, 2) + Math.pow(yt + 1.5 - circley, 2)) - rad);
+            let m3 = Math.abs(Math.sqrt(Math.pow(xt + 0.5 - circlex, 2) + Math.pow(yt + 1.5 - circley, 2)) - rad);
+            let m4 = Math.abs(Math.sqrt(Math.pow(xt - 0.5 - circlex, 2) + Math.pow(yt + 1.5 - circley, 2)) - rad);
+            let m5 = Math.abs(Math.sqrt(Math.pow(xt - 0.5 - circlex, 2) + Math.pow(yt + 0.5 - circley, 2)) - rad);
+            let m6 = Math.abs(Math.sqrt(Math.pow(xt - 0.5 - circlex, 2) + Math.pow(yt - 0.5 - circley, 2)) - rad);
+            let m7 = Math.abs(Math.sqrt(Math.pow(xt + 0.5 - circlex, 2) + Math.pow(yt - 0.5 - circley, 2)) - rad);
+            let m8 = Math.abs(Math.sqrt(Math.pow(xt + 1.5 - circlex, 2) + Math.pow(yt - 0.5 - circley, 2)) - rad);
+
+            let direction = [];
+
+            switch (true) {
+                case (Math.sign(dxt) === 1 && Math.sign(dyt) === 1):
+                    //Q1 (lower right)
+                    direction.push(m1, m2, m3);
+                    break;
+                case (Math.sign(dxt) === -1 && Math.sign(dyt) === 1):
+                    //Q2
+                    direction.push(m3, m4, m5);
+                    break;
+                case (Math.sign(dxt) === -1 && Math.sign(dyt) === -1):
+                    //Q3
+                    direction.push(m5, m6, m7);
+                    break;
+                case (Math.sign(dxt) === 1 && Math.sign(dyt) === -1):
+                    //Q4
+                    direction.push(m7, m8, m1);
+                    break;
+                default:
+                    continue;
+
+            }
+
+            direction.sort();
+
+
+            switch (direction[0]) {
+                case m1:
+                    xNext = xt + 1;
+                    yNext = yt;
+                    break;
+                case m2:
+                    xNext = xt + 1;
+                    yNext = yt + 1;
+                    break;
+                case m3:
+                    xNext = xt;
+                    yNext = yt + 1;
+                    break;
+                case m4:
+                    xNext = xt - 1;
+                    yNext = yt + 1;
+                    break;
+                case m5:
+                    xNext = xt - 1;
+                    yNext = yt;
+                    break;
+                case m6:
+                    xNext = xt - 1;
+                    yNext = yt - 1;
+                    break;
+                case m7:
+                    xNext = xt;
+                    yNext = yt - 1;
+                    break;
+                case m8:
+                    xNext = xt + 1;
+                    yNext = yt - 1;
+                    break;
+                default:
+                //
+            }
+
+            if (stepNum === 2 || stepNum === 3) {
+                onScreenCTX.fillRect(xt * state.ratio / zoom, yt * state.ratio / zoom, scale, scale);
+            } else if (stepNum === 4) {
+                ctx.fillRect(xt, yt, scale, scale)
+            }
+        }
+        let xlnext, ylnext;
+        t = 1;
+        while (t >= 0.5) {
+            let truext = pt(x1, x2, controlX, t);
+            let trueyt = pt(y1, y2, controlY, t);
+
+            //derivatives
+            let dxt = dpt(x1, x2, controlX, t);
+            let dyt = dpt(y1, y2, controlY, t);
+            let ddxt = ddpt(x1, x2, controlX);
+            let ddyt = ddpt(y1, y2, controlY);
+
+            let sign = Math.sign(denom(dxt, dyt, ddxt, ddyt));
+            let rad = radius(dxt, dyt, ddxt, ddyt);
+            let s = speed(dxt, dyt);
+            let circlex = truext - sign * (dyt / s) * rad;
+            let circley = trueyt - sign * (-dxt / s) * rad;
+
+            //rounded values
+            let xt = Math.floor(truext);
+            let yt = Math.floor(trueyt);
+
+            let nextxt = pt(x1, x2, controlX, t + 0.01);
+            let nextyt = pt(y1, y2, controlY, t + 0.01);
+
+            let dist = Math.sqrt(Math.pow(nextxt - truext, 2) + Math.pow(nextyt - trueyt, 2)) * 2;
+
+            t -= 0.01 / dist;
+
+            if ((xlnext && ylnext) && (xt !== xlnext || yt !== ylnext)) {
+                //skip this t value
+                continue;
+            }
+
+
+            // // console.log(incT(dxt, dyt))
+
+            //BUG: calculation breaks down for sharp curves due to small size of tangent circle
+            //maybe run curve rendering from t=1 simultaneously so it meets in the middle at t=0.5
+            let m1 = Math.abs(Math.sqrt(Math.pow(xt + 1.5 - circlex, 2) + Math.pow(yt + 0.5 - circley, 2)) - rad);
+            let m2 = Math.abs(Math.sqrt(Math.pow(xt + 1.5 - circlex, 2) + Math.pow(yt + 1.5 - circley, 2)) - rad);
+            let m3 = Math.abs(Math.sqrt(Math.pow(xt + 0.5 - circlex, 2) + Math.pow(yt + 1.5 - circley, 2)) - rad);
+            let m4 = Math.abs(Math.sqrt(Math.pow(xt - 0.5 - circlex, 2) + Math.pow(yt + 1.5 - circley, 2)) - rad);
+            let m5 = Math.abs(Math.sqrt(Math.pow(xt - 0.5 - circlex, 2) + Math.pow(yt + 0.5 - circley, 2)) - rad);
+            let m6 = Math.abs(Math.sqrt(Math.pow(xt - 0.5 - circlex, 2) + Math.pow(yt - 0.5 - circley, 2)) - rad);
+            let m7 = Math.abs(Math.sqrt(Math.pow(xt + 0.5 - circlex, 2) + Math.pow(yt - 0.5 - circley, 2)) - rad);
+            let m8 = Math.abs(Math.sqrt(Math.pow(xt + 1.5 - circlex, 2) + Math.pow(yt - 0.5 - circley, 2)) - rad);
+
+            let direction = [];
+
+            switch (true) {
+                case (Math.sign(dxt) === -1 && Math.sign(dyt) === -1):
+                    //Q1 (lower right)
+                    direction.push(m1, m2, m3);
+                    break;
+                case (Math.sign(dxt) === 1 && Math.sign(dyt) === -1):
+                    //Q2
+                    direction.push(m3, m4, m5);
+                    break;
+                case (Math.sign(dxt) === 1 && Math.sign(dyt) === 1):
+                    //Q3
+                    direction.push(m5, m6, m7);
+                    break;
+                case (Math.sign(dxt) === -1 && Math.sign(dyt) === 1):
+                    //Q4
+                    direction.push(m7, m8, m1);
+                    break;
+                default:
+                    continue;
+
+            }
+
+            direction.sort();
+
+
+            switch (direction[0]) {
+                case m1:
+                    xlnext = xt + 1;
+                    ylnext = yt;
+                    break;
+                case m2:
+                    xlnext = xt + 1;
+                    ylnext = yt + 1;
+                    break;
+                case m3:
+                    xlnext = xt;
+                    ylnext = yt + 1;
+                    break;
+                case m4:
+                    xlnext = xt - 1;
+                    ylnext = yt + 1;
+                    break;
+                case m5:
+                    xlnext = xt - 1;
+                    ylnext = yt;
+                    break;
+                case m6:
+                    xlnext = xt - 1;
+                    ylnext = yt - 1;
+                    break;
+                case m7:
+                    xlnext = xt;
+                    ylnext = yt - 1;
+                    break;
+                case m8:
+                    xlnext = xt + 1;
+                    ylnext = yt - 1;
+                    break;
+                default:
+                //
+            }
 
             if (stepNum === 2 || stepNum === 3) {
                 onScreenCTX.fillRect(xt * state.ratio / zoom, yt * state.ratio / zoom, scale, scale);
@@ -1214,8 +1460,9 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         // after defining x2y2
         //onscreen preview curve
         // bezier curve
-        tNum = Math.abs(x1 - x2) > Math.abs(y1 - y2) ? Math.floor(Math.abs(x1 - x2) * 10) : Math.floor(Math.abs(y1 - y2) * 10);
-        renderCurve(tNum, state.mox, state.moy);
+        // tNum = Math.abs(x1 - x2) > Math.abs(y1 - y2) ? Math.floor(Math.abs(x1 - x2) * 20) : Math.floor(Math.abs(y1 - y2) * 20);
+        // renderCurve(tNum, state.mox, state.moy);
+        renderCurve2(state.mox, state.moy);
         // for (let i = 0; i < tNum; i++) {
         //     let truext = pt(x1, x2, state.mox, i / tNum);
         //     let trueyt = pt(y1, y2, state.moy, i / tNum);
@@ -1234,72 +1481,16 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         //curve after defining x3y3
         // bezier curve
         // tNum = Math.floor(Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2)));
-        tNum = Math.abs(x1 - x2) > Math.abs(y1 - y2) ? Math.floor(Math.abs(x1 - x2) * 10) : Math.floor(Math.abs(y1 - y2) * 10);
-        console.log("tNum:", tNum)
-        renderCurve(tNum, x3, y3);
+        // tNum = Math.abs(x1 - x2) > Math.abs(y1 - y2) ? Math.floor(Math.abs(x1 - x2) * 20) : Math.floor(Math.abs(y1 - y2) * 20);
+        // console.log("tNum:", tNum)
+        // renderCurve(tNum, x3, y3);
+        renderCurve2(x3, y3);
 
-
-        // actionLine(lastXt, lastYt, x2, y2, currentColor, ctx, currentMode, scale);
         //render drawing
         source = offScreenCVS.toDataURL();
         renderImage();
     }
 }
-
-// //Updated Curved Lines
-// function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, currentMode, scale = 1) {    
-//     //Instead of solving for x and y based on t, solve for t based on x and y to determine which pixel gets drawn
-//     //split into several explicit curves?
-//     // BUG: connecting dots with lines is imperfect
-//     ctx.fillStyle = currentColor.color;
-//     function pt(p1, p2, p3, t) {
-//         //quadratic bezier equation to find point along curve (solves for x/y coordinates based on t) 
-//         // x = Math.round(p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3));
-//         return Math.floor(p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3));
-//     }
-//     let tNum = 320;
-//     let lastXt = x1;
-//     let lastYt = y1;
-
-//     //New algo to try: 
-//     //stepper function that recurs if t < 1, 
-//     //steps 1 pixel and checks 8 surrounding pixels to assess which pixel falls on curve best
-
-//     //1. write formula 
-//     //2. check 8 surrounding tiles of "lastXt/Yt" to see which is closest to bezier curve
-//     //3. draw that pixel and set it to "lastXt/Yt"
-
-//     if (stepNum === 1) {
-//         //after defining x1y1
-//         actionLine(x1, y1, state.mox, state.moy, currentColor, onScreenCTX, currentMode, scale);
-//     } else if (stepNum === 2 || stepNum === 3) {
-//         // after defining x2y2
-//         //onscreen preview curve
-//         // bezier curve
-//         for (let i = 0; i < tNum; i++) {
-//             let xt = pt(x1, x2, state.mox, i / tNum);
-//             let yt = pt(y1, y2, state.moy, i / tNum);
-//             lastXt = xt;
-//             lastYt = yt;
-//             // onScreenCTX.fillStyle = "black";
-//             onScreenCTX.fillRect(xt * state.ratio / zoom, yt * state.ratio / zoom, scale, scale);
-//         }
-//     } else if (stepNum === 4) {
-//         //BUG: holding mouseclick for the third point causes visual glitch, variable ctx is onscreen but should be offscreen (FIXED but needs improvement on refactor)
-//         //curve after defining x3y3
-//         // bezier curve
-//         for (let i = 0; i < tNum; i++) {
-//             let xt = pt(x1, x2, x3, i / tNum);
-//             let yt = pt(y1, y2, y3, i / tNum);
-//             lastXt = xt;
-//             lastYt = yt;
-//             ctx.fillRect(xt, yt, scale, scale)
-//         }
-//         //render drawing
-//         source = offScreenCVS.toDataURL();
-//         renderImage();
-//     }
-// }
 
 //Non-actions
 //Color picker
