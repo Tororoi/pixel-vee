@@ -165,6 +165,9 @@ const state = {
 let img = new Image;
 let source = offScreenCVS.toDataURL();
 
+let preview = new Image;
+let previewSource = guiCVS.toDataURL();
+
 //shortcuts
 document.addEventListener('keydown', handleKeyDown);
 document.addEventListener('keyup', handleKeyUp);
@@ -1105,6 +1108,8 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
 
         plotQuadBezier(x1, y1, controlX, controlY, x2, y2);
 
+        //BUG: flatter curves don't work, add code to account for flat curves.
+
         function plotQuadBezier(x0, y0, x1, y1, x2, y2) { /* plot any quadratic Bezier curve */
             let x = x0 - x1, y = y0 - y1;
             let t = x0 - 2 * x1 + x2, r;
@@ -1141,7 +1146,7 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
             let xx = x0 - x1, yy = y0 - y1, xy;         /* relative values for checks */
             let dx, dy, err, cur = xx * sy - yy * sx;                    /* curvature */
 
-            assert(xx * sx <= 0 && yy * sy <= 0, "sign of gradient changed");  /* sign of gradient must not change */
+            assert(xx * sx <= 0 && yy * sy <= 0, "sign of gradient must not change");  /* sign of gradient must not change */
 
             if (sx * sx + sy * sy > xx * xx + yy * yy) { /* begin with longer part */
                 x2 = x0; x0 = sx + x1; y2 = y0; y0 = sy + y1; cur = -cur;  /* swap P0 P2 */
@@ -1166,7 +1171,33 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
             }
             /* plot remaining part to end */
             if (stepNum === 2 || stepNum === 3) {
-                actionLine(x0 * state.ratio / zoom, y0 * state.ratio / zoom, x2 * state.ratio / zoom, y2 * state.ratio / zoom, state.brushColor, onScreenCTX, state.mode, state.ratio / zoom);
+                //create triangle object
+                let tri = {}
+                function getTriangle(x1, y1, x2, y2, ang) {
+                    if (Math.abs(x1 - x2) > Math.abs(y1 - y2)) {
+                        tri.x = Math.sign(Math.cos(ang));
+                        tri.y = Math.tan(ang) * Math.sign(Math.cos(ang));
+                        tri.long = Math.abs(x1 - x2);
+                    } else {
+                        tri.x = Math.tan((Math.PI / 2) - ang) * Math.sign(Math.cos((Math.PI / 2) - ang));
+                        tri.y = Math.sign(Math.cos((Math.PI / 2) - ang));
+                        tri.long = Math.abs(y1 - y2);
+                    }
+                }
+                // finds the angle of (x,y) on a plane from the origin
+                function getAngle(x, y) {
+                    return Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0);
+                }
+                let angle = getAngle(x2 - x0, y2 - y0); // angle of line
+                getTriangle(x0, y0, x2, y2, angle);
+
+                for (let i = 0; i < tri.long; i++) {
+                    let thispoint = { x: Math.round(x0 + tri.x * i), y: Math.round(y0 + tri.y * i) };
+                    // for each point along the line
+                    plot(thispoint.x, thispoint.y)
+                }
+                //fill endpoint
+                plot(x2, y2);
             } else if (stepNum === 4) {
                 actionLine(x0, y0, x2, y2, state.brushColor, ctx, state.mode);
             }
