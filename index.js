@@ -1037,6 +1037,7 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
     //New algo to try: use bresenham's algorithm
     //look into algorithms for pixelating vector line art
     ctx.fillStyle = currentColor.color;
+
     function pt(p1, p2, p3, t) {
         //center control points on their pixels
         p1 += 0.5;
@@ -1047,9 +1048,6 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         //no rounding
         return p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3);
     }
-    let tNum = 32;
-    lastXt = x1;
-    lastYt = y1;
 
     //derivative for slope
     function dpt(p1, p2, p3, t) {
@@ -1075,15 +1073,6 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
     //s
     function speed(dx, dy) {
         return Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-    }
-
-    //increment t, constrained to less than one pixel distance
-    function incT(dx, dy) {
-        let denom = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
-        let xdiff = dx / denom;
-        let ydiff = dy / denom;
-        let integral = Math.sqrt(Math.pow(xdiff, 2) + Math.pow(ydiff, 2));
-        return { xdiff: xdiff, ydiff: ydiff };
     }
 
     function renderCurve(controlX, controlY) {
@@ -1171,6 +1160,7 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
             }
             /* plot remaining part to end */
             if (stepNum === 2 || stepNum === 3) {
+                //REFACTOR, dry it up
                 //create triangle object
                 let tri = {}
                 function getTriangle(x1, y1, x2, y2, ang) {
@@ -1498,33 +1488,11 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
     } else if (stepNum === 2 || stepNum === 3) {
         // after defining x2y2
         //onscreen preview curve
-        // bezier curve
-        // tNum = Math.abs(x1 - x2) > Math.abs(y1 - y2) ? Math.floor(Math.abs(x1 - x2) * 20) : Math.floor(Math.abs(y1 - y2) * 20);
+        //somehow use rendercurve2 for flatter curves
         renderCurve(state.mox, state.moy);
-        // renderCurve2(state.mox, state.moy);
-        // for (let i = 0; i < tNum; i++) {
-        //     let truext = pt(x1, x2, state.mox, i / tNum);
-        //     let trueyt = pt(y1, y2, state.moy, i / tNum);
-        //     //rounded values
-        //     let xt = Math.floor(truext);
-        //     let yt = Math.floor(trueyt);
-
-        //     actionLine(lastXt, lastYt, xt, yt, currentColor, onScreenCTX, currentMode, scale);
-        //     lastXt = xt;
-        //     lastYt = yt;
-        //     // onScreenCTX.fillStyle = "black";
-        //     onScreenCTX.fillRect(xt * state.ratio / zoom, yt * state.ratio / zoom, scale, scale);
-        // }
-        // actionLine(lastXt, lastYt, x2, y2, currentColor, onScreenCTX, currentMode, scale);
     } else if (stepNum === 4) {
         //curve after defining x3y3
-        // bezier curve
-        // tNum = Math.floor(Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2)));
-        // tNum = Math.abs(x1 - x2) > Math.abs(y1 - y2) ? Math.floor(Math.abs(x1 - x2) * 20) : Math.floor(Math.abs(y1 - y2) * 20);
-        // console.log("tNum:", tNum)
         renderCurve(x3, y3);
-        // renderCurve2(x3, y3);
-
         //render drawing
         source = offScreenCVS.toDataURL();
         renderImage();
@@ -1646,6 +1614,10 @@ function renderImage() {
         drawCanvas();
     }
     img.src = source;
+}
+
+function drawPreview() {
+    onScreenCTX.drawImage(preview, state.xOffset, state.yOffset, ocWidth, ocHeight)
 }
 
 function drawCanvas() {
