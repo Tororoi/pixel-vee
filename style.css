@@ -1,189 +1,169 @@
 @font-face {
-    font-family: "04Font";
-    src: url("./public/04B_03__.ttf") format("truetype");
+  font-family: "04Font";
+  src: url("./public/04B_03__.ttf") format("truetype");
 }
 
 body {
-    margin: 0px;
-    color: white;
+  margin: 0px;
+  color: white;
 }
 
 .full-page {
-    display: flex;
-    width: 100vw;
-    height: 100vh;
-    font-family: "04Font";
-    user-select: none;
-    overflow: hidden;
-    position: fixed;
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  font-family: "04Font";
+  user-select: none;
+  overflow: hidden;
+  position: fixed;
 }
 
 /* Canvas */
 
 canvas {
-    image-rendering: pixelated;
+  image-rendering: pixelated;
 }
 
 .canvas-container {
-    background-color: bisque;
-    width: calc(100% - 280px);
-    /* height: 70%; */
+  background-color: bisque;
+  width: calc(100% - 280px);
+  /* height: 70%; */
 }
 
 .bg-space {
-    background-color: rgb(80, 80, 80);
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
+  background-color: rgb(80, 80, 80);
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 #onScreen {
-    /* background:
+  /* background:
 	linear-gradient(135deg, transparent 75%, rgb(216, 216, 216) 0%) 0 0,
 	linear-gradient(-45deg, transparent 75%, rgb(216, 216, 216) 0%) 15px 15px,
 	linear-gradient(135deg, transparent 75%, rgb(216, 216, 216) 0%) 15px 15px,
 	linear-gradient(-45deg, transparent 75%, rgb(216, 216, 216) 0%) 0 0,
     white;
     background-size: 30px 30px; */
-    /* background-repeat: round; */
-    background-image: repeating-linear-gradient(-45deg,
+  /* background-repeat: round; */
+  background-image: repeating-linear-gradient(
+    -45deg,
     white,
     white 5px,
     rgb(216, 216, 216) 5px,
-    rgb(216, 216, 216) 10px);
-    position: relative;
-    cursor: crosshair;
-    /* z-index: 100; */
-    /* transition: all 1s; */
-    width: calc(100% - 6px);
-    margin: 3px;
-    box-shadow: 
-    2px 0px rgb(131, 131, 131),
-    -2px 0px rgb(131, 131, 131),
-    0px -2px rgb(131, 131, 131),
-    0px 2px rgb(131, 131, 131);
+    rgb(216, 216, 216) 10px
+  );
+  position: relative;
+  cursor: crosshair;
+  /* z-index: 100; */
+  /* transition: all 1s; */
+  width: calc(100% - 6px);
+  margin: 3px;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 
 #onScreen:hover {
-    box-shadow: 
-    2px 0px rgb(255, 255, 255),
-    -2px 0px rgb(255, 255, 255),
-    0px -2px rgb(255, 255, 255),
-    0px 2px rgb(255, 255, 255);
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 
 #tempCanvas {
-    position: absolute;
-    /* z-index: 1; */
-    border: 5px solid rgb(209, 61, 35);
+  position: absolute;
+  /* z-index: 1; */
+  border: 5px solid rgb(209, 61, 35);
 }
 
 /* Toolbox */
 
 .sidebar {
-    background-color: rgb(80, 80, 80);
-    width: 280px;
-    overflow-y: scroll;
-    overflow-x: hidden;
+  background-color: rgb(80, 80, 80);
+  width: 280px;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
 
 .sidebar::-webkit-scrollbar {
-    display: none;
-  }
+  display: none;
+}
 
 .toolbox {
-    margin: 8px;
-    display: flex;
-    flex-flow: column wrap;
+  margin: 8px;
+  display: flex;
+  flex-flow: column wrap;
 }
 
 /* Buttons */
 
 .btn {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background: rgb(131, 131, 131);
-    user-select: none;
-    width: 100px;
-    text-align: center;
-    color: white;
-    height: 48px;
-    margin: 3px;
-    opacity: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgb(131, 131, 131);
+  user-select: none;
+  width: 100px;
+  text-align: center;
+  color: white;
+  height: 48px;
+  margin: 3px;
+  opacity: 1;
 
-    box-shadow: 
-    2px 0px rgb(131, 131, 131),
-    -2px 0px rgb(131, 131, 131),
-    0px -2px rgb(131, 131, 131),
-    0px 2px rgb(131, 131, 131);
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 
 .btn:hover {
-    box-shadow: 
-    2px 0px rgb(255, 255, 255),
-    -2px 0px rgb(255, 255, 255),
-    0px -2px rgb(255, 255, 255),
-    0px 2px rgb(255, 255, 255);
-    /* cursor: pointer; */
-    /* opacity: 0.8; */
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  /* cursor: pointer; */
+  /* opacity: 0.8; */
 }
 
-/* .btn h3 {
-    margin: 0;
-} */
-
 .tooltip {
-    visibility: hidden;
-    pointer-events: none;
-    position: absolute;
-    z-index: 1;
-    color: black;
-    background: rgb(255, 255, 199);
-    text-align: center;
-    width: 100px;
-    font-family: "04Font";
-    font-size: 16px;
-    /* border-radius: 6px; */
-    padding: 5px 0;
-    align-self: center;
-    transform: translateX(-110px) translateY(48px);
-    transition: 0.3s all;
-    opacity: 0;
-    box-shadow: 
-    2px 0px rgb(255, 255, 199),
-    -2px 0px rgb(255, 255, 199),
-    0px -2px rgb(255, 255, 199),
-    0px 2px rgb(255, 255, 199);
+  visibility: hidden;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+  color: black;
+  background: rgb(255, 255, 199);
+  text-align: center;
+  width: 100px;
+  font-family: "04Font";
+  font-size: 16px;
+  padding: 5px 0;
+  align-self: flex-start;
+  transform: translateX(-110px) translateY(48px);
+  transition: 0.3s all;
+  opacity: 0;
+  box-shadow: 2px 0px rgb(255, 255, 199), -2px 0px rgb(255, 255, 199),
+    0px -2px rgb(255, 255, 199), 0px 2px rgb(255, 255, 199);
 }
 
 .tooltip:after {
-    content: "";
-    display: inline-block;
-    width: 2px;
-    height: 2px;
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    background: rgb(255, 255, 199);
-    box-shadow: 
-    -2px -2px rgb(255, 255, 199),
-    0px -2px rgb(255, 255, 199),
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 2px;
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  background: rgb(255, 255, 199);
+  box-shadow: -2px -2px rgb(255, 255, 199), 0px -2px rgb(255, 255, 199),
     0px -4px rgb(255, 255, 199);
 }
 
 .btn:hover .tooltip {
-    visibility: visible;
-    opacity: 1;
+  visibility: visible;
+  opacity: 1;
 }
 
 .undoredo {
-    display: flex;
-    justify-content: flex-start;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .undoredo div {
-    margin: 16px;
+  margin: 16px;
 }
 
 /* .undoredo div:hover {
@@ -191,420 +171,388 @@ canvas {
 } */
 
 .undo-button {
-    background: rgb(212, 45, 45);
+  background: rgb(212, 45, 45);
 }
 
 .redo-button {
-    background: rgb(104, 181, 233);
+  background: rgb(104, 181, 233);
 }
 
 .columns {
-    display: flex;
+  display: flex;
 }
 
 /* Color Picker */
 .color-container {
-    user-select: none;
-    display: none;
-    flex-flow: column nowrap;
-    /* visibility: hidden;
+  user-select: none;
+  display: none;
+  flex-flow: column nowrap;
+  /* visibility: hidden;
     pointer-events: none; */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    /* z-index: 1; */
-    color: white;
-    background: rgb(61, 61, 61);
-    text-align: center;
-    width: 570px;
-    height: 366px;
-    font-family: "04Font";
-    font-size: 16px;
-    /* border-radius: 6px; */
-    padding: 0;
-    align-self: center;
-    transform: translate(-50%, -50%);
-    transition: 0.3s all;
-    opacity: 1;
-    box-shadow: 
-    2px 0px rgb(255, 255, 255),
-    -2px 0px rgb(255, 255, 255),
-    0px -2px rgb(255, 255, 255),
-    0px 2px rgb(255, 255, 255);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  /* z-index: 1; */
+  color: white;
+  background: rgb(61, 61, 61);
+  text-align: center;
+  width: 570px;
+  height: 366px;
+  font-family: "04Font";
+  font-size: 16px;
+  /* border-radius: 6px; */
+  padding: 0;
+  align-self: center;
+  transform: translate(-50%, -50%);
+  transition: 0.3s all;
+  opacity: 1;
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 
 .color-container h3 {
-    background-color: rgb(41, 41, 41);
-    justify-self: center;
-    height: 20px;
-    margin: 0px;
+  background-color: rgb(41, 41, 41);
+  justify-self: center;
+  height: 20px;
+  margin: 0px;
 }
 
 #interface {
-    display: flex;
-    flex-flow: row nowrap;
-    height: 300px;
+  display: flex;
+  flex-flow: row nowrap;
+  height: 300px;
 }
 
 #interface #left {
-    display: flex;
-    flex-flow: column nowrap;
-    height: 346px;
+  display: flex;
+  flex-flow: column nowrap;
+  height: 346px;
 }
 
 #interface #left #picker {
-    display: flex;
-    flex-flow: row nowrap;
-    height: 290px;
-    width: 310px;
+  display: flex;
+  flex-flow: row nowrap;
+  height: 290px;
+  width: 310px;
 }
 
 #color-picker {
-    background-color: white;
-    width: 250px;
-    height: 250px;
-    margin: 20px;
-    cursor: crosshair;
-    box-shadow: 
-    2px 0px rgb(131, 131, 131),
-    -2px 0px rgb(131, 131, 131),
-    0px -2px rgb(131, 131, 131),
-    0px 2px rgb(131, 131, 131);
+  background-color: white;
+  width: 250px;
+  height: 250px;
+  margin: 20px;
+  cursor: crosshair;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 
 #color-picker:hover {
-    box-shadow: 
-    2px 0px rgb(255, 255, 255),
-    -2px 0px rgb(255, 255, 255),
-    0px -2px rgb(255, 255, 255),
-    0px 2px rgb(255, 255, 255);
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 
 #hueslider {
-    flex-shrink: 0;
-    -webkit-appearance: none;
-    appearance: none;
-    transform: rotate(90deg);
-    transform-origin: left;
-    width: 250px;
-    height: 20px;
-    margin: 10px;
-    background: white;
-    outline: none;
-    box-shadow: 
-    2px 0px rgb(131, 131, 131),
-    -2px 0px rgb(131, 131, 131),
-    0px -2px rgb(131, 131, 131),
-    0px 2px rgb(131, 131, 131);
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  transform: rotate(90deg);
+  transform-origin: left;
+  width: 250px;
+  height: 20px;
+  margin: 10px;
+  background: white;
+  outline: none;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 
 #hueslider:hover {
-    box-shadow: 
-    2px 0px rgb(255, 255, 255),
-    -2px 0px rgb(255, 255, 255),
-    0px -2px rgb(255, 255, 255),
-    0px 2px rgb(255, 255, 255);
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 
 #hueslider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    height: 24px;
-    width: 5px;
-    outline: 2px solid rgb(0, 0, 0);
+  -webkit-appearance: none;
+  height: 24px;
+  width: 5px;
+  outline: 2px solid rgb(0, 0, 0);
 }
 
 #buttons {
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: center;
-    align-items: start;
-    height: 76px;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: start;
+  height: 76px;
 }
 
 #buttons btn {
-    background-color: rgb(131, 131, 131);
-    font-size: 20px;
-    padding: 8px;
-    margin: 0px 20px 0px 20px;
-    box-shadow: 
-    2px 0px rgb(131, 131, 131),
-    -2px 0px rgb(131, 131, 131),
-    0px -2px rgb(131, 131, 131),
-    0px 2px rgb(131, 131, 131);
+  background-color: rgb(131, 131, 131);
+  font-size: 20px;
+  padding: 8px;
+  margin: 0px 20px 0px 20px;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 
 #buttons btn:hover {
-    box-shadow: 
-    2px 0px rgb(255, 255, 255),
-    -2px 0px rgb(255, 255, 255),
-    0px -2px rgb(255, 255, 255),
-    0px 2px rgb(255, 255, 255);
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 
 #interface #right {
-    display: flex;
-    flex-flow: column nowrap;
-    align-items: flex-start;
-    height: 346px;
-    width: 260px;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: flex-start;
+  height: 346px;
+  width: 260px;
 }
 
 #right #colors {
-    display: flex;
-    justify-content: center;
-    width: 100%;
+  display: flex;
+  justify-content: center;
+  width: 100%;
 }
 
 #right #colors div {
-    background-color: white;
-    width: 80px;
-    height: 40px;
-    margin: 10px 10px 0px 10px;
+  background-color: white;
+  width: 80px;
+  height: 40px;
+  margin: 10px 10px 0px 10px;
 }
 
 #rgbahsl {
-    display: flex;
-    flex-flow: row nowrap;
-    width: 100%;
+  display: flex;
+  flex-flow: row nowrap;
+  width: 100%;
 }
 
 #rgba {
-    display: flex;
-    flex-flow: column nowrap;
-    margin-left: 20px;
+  display: flex;
+  flex-flow: column nowrap;
+  margin-left: 20px;
 }
 
 #rgba label {
-    margin: 10px;
+  margin: 10px;
 }
 
 #hsl {
-    display: flex;
-    flex-flow: column nowrap;
-    margin-left: 20px;
+  display: flex;
+  flex-flow: column nowrap;
+  margin-left: 20px;
 }
 
 #hsl label {
-    margin: 10px;
+  margin: 10px;
 }
 
-input[type=number] {
-    width: 40px;
-    font-family: "04Font";
-    font-size: 16px;
-    background-color: rgb(41, 41, 41);
-    color: white;
-    -webkit-appearance: none;
-    border: none;
-    outline: none;
-    box-shadow: 
-    2px 0px rgb(131, 131, 131),
-    -2px 0px rgb(131, 131, 131),
-    0px -2px rgb(131, 131, 131),
-    0px 2px rgb(131, 131, 131);
+input[type="number"] {
+  width: 40px;
+  font-family: "04Font";
+  font-size: 16px;
+  background-color: rgb(41, 41, 41);
+  color: white;
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 
-input[type=number]:hover {
-    box-shadow: 
-    2px 0px rgb(255, 255, 255),
-    -2px 0px rgb(255, 255, 255),
-    0px -2px rgb(255, 255, 255),
-    0px 2px rgb(255, 255, 255);
+input[type="number"]:hover {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 /* Increment color channels */
 
 #sliderbox {
-    position: absolute;
-    background-color: rgb(41, 41, 41);
-    width: 16px;
-    height: 18px;
-    transform: translateX(6px);
-    overflow: hidden;
-    box-shadow: 
-    2px 0px rgb(131, 131, 131),
-    -2px 0px rgb(131, 131, 131),
-    0px -2px rgb(131, 131, 131),
-    0px 2px rgb(131, 131, 131);
+  position: absolute;
+  background-color: rgb(41, 41, 41);
+  width: 16px;
+  height: 18px;
+  transform: translateX(6px);
+  overflow: hidden;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 
 #sliderbox:hover {
-    box-shadow: 
-    2px 0px rgb(255, 255, 255),
-    -2px 0px rgb(255, 255, 255),
-    0px -2px rgb(255, 255, 255),
-    0px 2px rgb(255, 255, 255);
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 
 .channel-btn {
-    position: absolute;
-    text-align: center;
-    width: 16px;
-    height: 9px;
-    left: 0;
-    color: white;
+  position: absolute;
+  text-align: center;
+  width: 16px;
+  height: 9px;
+  left: 0;
+  color: white;
 }
 
 #inc {
-    top: 0;
+  top: 0;
 }
 
 #dec {
-    bottom: 0;
+  bottom: 0;
 }
 
 .channel-btn p {
-    transform: translateX(1px) translateY(-2px);
-    margin: 0;
-    pointer-events: none;
+  transform: translateX(1px) translateY(-2px);
+  margin: 0;
+  pointer-events: none;
 }
 
 .channel-btn:hover {
-    background: white;
-    color: rgb(41, 41, 41)
+  background: white;
+  color: rgb(41, 41, 41);
 }
 
 /* Hexcode Box */
 
 #hex {
-    margin: 23px;
-    margin-left: 30px;
+  margin: 23px;
+  margin-left: 30px;
 }
 
 #hexcode {
-    width: 80px;
-    font-family: "04Font";
-    font-size: 16px;
-    background-color: rgb(41, 41, 41);
-    color: white;
-    -webkit-appearance: none;
-    border: none;
-    outline: none;
-    box-shadow: 
-    2px 0px rgb(131, 131, 131),
-    -2px 0px rgb(131, 131, 131),
-    0px -2px rgb(131, 131, 131),
-    0px 2px rgb(131, 131, 131);
+  width: 80px;
+  font-family: "04Font";
+  font-size: 16px;
+  background-color: rgb(41, 41, 41);
+  color: white;
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 
 #hexcode:hover {
-    box-shadow: 
-    2px 0px rgb(255, 255, 255),
-    -2px 0px rgb(255, 255, 255),
-    0px -2px rgb(255, 255, 255),
-    0px 2px rgb(255, 255, 255);
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 
 /* Main Interface */
 
 .colors {
-    display: flex;
+  display: flex;
 }
 
 .swatch {
-    background: rgb(255, 0, 0);
-    width: 100px;
-    height: 100px;
-    margin: 16px;
-    margin-right: 6px;
-    /* border-radius: 10px; */
+  background: rgb(255, 0, 0);
+  width: 100px;
+  height: 100px;
+  margin: 16px;
+  margin-right: 6px;
+  /* border-radius: 10px; */
+}
+
+.swatch .tooltip {
+  transform: translateX(-110px) translateY(100px);
 }
 
 .switch {
-    background:
-    linear-gradient(rgb(0, 0, 0) 50%, rgb(0, 0, 0) 50%) 20px 20px;
-    width: 20px;
-    height: 20px;
-    transform: rotate(45deg);
-    align-self: center;
-    cursor: pointer;
+  background: linear-gradient(rgb(0, 0, 0) 50%, rgb(0, 0, 0) 50%) 20px 20px;
+  width: 20px;
+  height: 20px;
+  transform: rotate(45deg);
+  align-self: center;
+  cursor: pointer;
 }
 
 .back-swatch {
-    background: rgb(255, 255, 255);
-    width: 100px;
-    height: 100px;
-    margin: 16px;
-    margin-left: 6px;
-    /* border-radius: 10px; */
+  background: rgb(255, 255, 255);
+  width: 100px;
+  height: 100px;
+  margin: 16px;
+  margin-left: 6px;
+  /* border-radius: 10px; */
 }
 
 /* Resets */
 .resets {
-    display: flex;
-    justify-content: flex-start;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .resets div {
-    margin: 16px;
+  margin: 16px;
 }
 
 .recenter {
-    background-color: rgb(77, 151, 28);
+  background-color: rgb(77, 151, 28);
 }
 
 .clear {
-    background-color: rgb(0, 0, 0);
+  background-color: rgb(0, 0, 0);
 }
 /* Zoom */
 
 .zoom {
-    display: flex;
-    justify-content: flex-start;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .square {
-    width: 40px;
-    height: 40px;
-    margin: 8px 46px 8px 46px;
+  width: 40px;
+  height: 40px;
+  margin: 8px 46px 8px 46px;
+}
+
+.square .tooltip {
+  transform: translateX(-80px) translateY(48px);
 }
 
 .square div {
-    background: black;
+  background: black;
 }
 
 .minus {
-    width: 24px;
-    height: 8px;
-    position: relative;
-    margin: 16px 8px 16px 8px;
+  width: 24px;
+  height: 8px;
+  position: relative;
+  margin: 16px 8px 16px 8px;
 }
 
 .plus {
-    width: 24px;
-    height: 8px;
-    position: relative;
-    margin: 16px 8px 16px 8px;
+  width: 24px;
+  height: 8px;
+  position: relative;
+  margin: 16px 8px 16px 8px;
 }
 
 .plus:after {
-    background: black;
-    content: "";
-    width: 8px;
-    height: 24px;
-    left: 8px;
-    top: -8px;
-    position: absolute;
+  background: black;
+  content: "";
+  width: 8px;
+  height: 24px;
+  left: 8px;
+  top: -8px;
+  position: absolute;
 }
 
 /* Tools */
 
 h4 {
-    text-align: center;
-    margin: 0px;
+  text-align: center;
+  margin: 0px;
 }
 
 .tools {
-    display: flex;
-    justify-content: flex-start;
-    flex-flow: column wrap;
-    margin: 13px;
+  display: flex;
+  justify-content: flex-start;
+  flex-flow: column wrap;
+  margin: 13px;
 }
 
 /* .tool {
@@ -635,10 +583,10 @@ h4 {
 /* Modes */
 
 .modes {
-    display: flex;
-    justify-content: flex-start;
-    flex-flow: column wrap;
-    margin: 13px;
+  display: flex;
+  justify-content: flex-start;
+  flex-flow: column wrap;
+  margin: 13px;
 }
 
 /* .mode {
@@ -665,4 +613,3 @@ h4 {
     0px -2px rgb(255, 255, 255),
     0px 2px rgb(255, 255, 255);
 } */
-
