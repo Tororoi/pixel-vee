@@ -129,6 +129,7 @@ const state = {
     },
     //active variables for canvas
     shortcuts: true,
+    zoomable: true,
     event: "none",
     clicked: false,
     clickedColor: null,
@@ -991,10 +992,6 @@ function curveSteps() {
                     px2 = state.mouseX;
                     py2 = state.mouseY;
                     break;
-                case 3:
-                    // px3 = state.mouseX;
-                    // py3 = state.mouseY;
-                    break;
                 default:
                 //do nothing
             }
@@ -1007,7 +1004,6 @@ function curveSteps() {
             //only draw when necessary
             if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
                 // onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
-                //BUG: curve flickers due to delay when drawCanvas renders the background image and when the preview curve is drawn again. Solve by using a dedicated preview canvas
                 drawCanvas();
                 //onscreen preview
                 actionCurve(px1 + (state.xOffset / state.ratio * zoom), py1 + (state.yOffset / state.ratio * zoom), px2 + (state.xOffset / state.ratio * zoom), py2 + (state.yOffset / state.ratio * zoom), px3 + (state.xOffset / state.ratio * zoom), py3 + (state.yOffset / state.ratio * zoom), clickCounter, state.brushColor, onScreenCTX, state.mode, state.ratio / zoom);
@@ -1036,6 +1032,15 @@ function curveSteps() {
 function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, currentMode, scale = 1) {
     //New algo to try: use bresenham's algorithm
     //look into algorithms for pixelating vector line art
+
+    //force coords to int
+    x1 = Math.round(x1);
+    y1 = Math.round(y1);
+    x2 = Math.round(x2);
+    y2 = Math.round(y2);
+    x3 = Math.round(x3);
+    y3 = Math.round(y3);
+
     ctx.fillStyle = currentColor.color;
 
     function pt(p0, p2, p1, t) {
