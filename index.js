@@ -1194,7 +1194,7 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
                 //fill endpoint
                 plot(x2, y2);
             } else if (stepNum === 4) {
-                actionLine(x0, y0, x2, y2, state.brushColor, ctx, state.mode);
+                actionLine(x0, y0, x2, y2, currentColor, ctx, "draw");
             }
         }
     }
