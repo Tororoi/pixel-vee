@@ -10,6 +10,7 @@ let ocHeight = onScreenCVS.height;
 //improve sharpness
 let sharpness = 4;
 let zoom = 1;
+//adjust canvas ratio here if needed
 onScreenCVS.width = ocWidth * sharpness;
 onScreenCVS.height = ocHeight * sharpness;
 onScreenCTX.scale(sharpness * zoom, sharpness * zoom);
@@ -47,6 +48,7 @@ let offScreenCTX = offScreenCVS.getContext("2d");
 //Set the dimensions of the drawing canvas
 offScreenCVS.width = 128;
 offScreenCVS.height = 128;
+//for adjusting canvas size, adjust onscreen canvas dimensions in proportion to offscreen
 
 //Create a preview canvas. Also offscreen and same size as offscreen canvas. Used for UI such as cursors and previewing certain tools
 let guiCVS = document.createElement('canvas');
@@ -1630,6 +1632,7 @@ function drawCanvas() {
     //Prevent blurring
     onScreenCTX.imageSmoothingEnabled = false;
     onScreenCTX.fillStyle = "gray";
+    //adjust canvas ratio here
     onScreenCTX.fillRect(0, 0, ocWidth / zoom, ocHeight / zoom);
     onScreenCTX.clearRect(state.xOffset, state.yOffset, ocWidth, ocHeight);
     onScreenCTX.drawImage(img, state.xOffset, state.yOffset, ocWidth, ocHeight);
