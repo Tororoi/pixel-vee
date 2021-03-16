@@ -1038,15 +1038,14 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
     //look into algorithms for pixelating vector line art
     ctx.fillStyle = currentColor.color;
 
-    function pt(p1, p2, p3, t) {
+    function pt(p0, p2, p1, t) {
         //center control points on their pixels
-        p1 += 0.5;
-        p2 += 0.5;
-        p3 += 0.5;
+        p0 += 0.5; //start point
+        p2 += 0.5; //end point
+        p1 += 0.5; //control point
         //quadratic bezier equation to find point along curve (solves for x/y coordinates based on t) 
-        // return Math.floor(p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3));
         //no rounding
-        return p3 + Math.pow((1 - t), 2) * (p1 - p3) + Math.pow(t, 2) * (p2 - p3);
+        return p1 + Math.pow((1 - t), 2) * (p0 - p1) + Math.pow(t, 2) * (p2 - p1);
     }
 
     //derivative for slope
@@ -1095,16 +1094,17 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
             }
         }
 
+        //p1, p2 are global endpoints
         plotQuadBezier(x1, y1, controlX, controlY, x2, y2);
 
-        //BUG: flatter curves don't work, add code to account for flat curves.
+        //BUG: flatter curves aren't perfect, add code to account for flat curves.
 
         function plotQuadBezier(x0, y0, x1, y1, x2, y2) { /* plot any quadratic Bezier curve */
             let x = x0 - x1, y = y0 - y1;
             let t = x0 - 2 * x1 + x2, r;
             if (x * (x2 - x1) > 0) { /* horizontal cut at P4? */
                 if (y * (y2 - y1) > 0) /* vertical cut at P6 too? */
-                    if (Math.abs((y0 - 2 * y1 + y2) / t * x) > Math.abs(y)) { /* which first? */
+                    if (Math.abs((y0 - 2 * y1 + y2) * x / t) > Math.abs(y)) { /* which first? */
                         x0 = x2; x2 = x + x1; y0 = y2; y2 = y + y1; /* swap points */
                     } /* now horizontal cut at P4 comes first */
                 t = (x0 - x1) / t;
@@ -1129,7 +1129,7 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
             plotQuadBezierSeg(x0, y0, x1, y1, x2, y2); /* remaining part */
         }
 
-        //bresenham's algorithm for bezier limited to gradients without sign change.
+        //Bresenham's algorithm for bezier limited to gradients without sign change.
         function plotQuadBezierSeg(x0, y0, x1, y1, x2, y2) {
             let sx = x2 - x1, sy = y2 - y1;
             let xx = x0 - x1, yy = y0 - y1, xy;         /* relative values for checks */
@@ -1194,6 +1194,7 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
         }
     }
 
+    //not in use. keeping for potential use in solving the final issues of flat curves.
     function renderCurve2(controlX, controlY) {
         let xNext, yNext;
         let t = 0;
