@@ -1089,9 +1089,17 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
 
             //plot starting coordinates
             if (stepNum === 2 || stepNum === 3) {
-                onScreenCTX.fillRect(xt * state.ratio / zoom, yt * state.ratio / zoom, scale, scale);
+                if (currentMode === "erase") {
+                    onScreenCTX.clearRect(xt * state.ratio / zoom, yt * state.ratio / zoom, scale, scale);
+                } else {
+                    onScreenCTX.fillRect(xt * state.ratio / zoom, yt * state.ratio / zoom, scale, scale);
+                }
             } else if (stepNum === 4) {
-                ctx.fillRect(xt, yt, scale, scale)
+                if (currentMode === "erase") {
+                    ctx.clearRect(xt, yt, scale, scale)
+                } else {
+                    ctx.fillRect(xt, yt, scale, scale)
+                }
             }
         }
 
@@ -1196,7 +1204,7 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
                 //fill endpoint
                 plot(x2, y2);
             } else if (stepNum === 4) {
-                actionLine(x0, y0, x2, y2, currentColor, ctx, "draw");
+                actionLine(x0, y0, x2, y2, currentColor, ctx, currentMode);
             }
         }
     }
