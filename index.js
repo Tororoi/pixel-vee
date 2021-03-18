@@ -335,8 +335,8 @@ function handleWheel(e) {
     //zoom based on mouse coords
     let z;
     let rw = ocWidth / offScreenCVS.width;
-    let nox = Math.round(((state.mox * state.ratio) / 5 / zoom) / rw) * rw;
-    let noy = Math.round(((state.moy * state.ratio) / 5 / zoom) / rw) * rw;
+    let nox = Math.round(((state.mox * state.ratio) / 4 / zoom) / rw) * rw;
+    let noy = Math.round(((state.moy * state.ratio) / 4 / zoom) / rw) * rw;
     if (delta < 0) {
         z = 0.8;
         zoom *= z;
@@ -528,18 +528,26 @@ function handleZoom(e) {
         let zoomBtn = e.target.closest(".square");
         let z;
         let rw = ocWidth / offScreenCVS.width;
+        // state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
+        // let center = onScreenCVS.offsetWidth / state.trueRatio / 2;
+        // onScreenCTX.fillRect(center, center, 5, 5)
+        // let nox = Math.round(((center * state.ratio) / 4 / zoom) / rw) * rw;
+        // let noy = Math.round(((center * state.ratio) / 4 / zoom) / rw) * rw;
+        //next origin
         let nox = Math.round((ocWidth / 10 / zoom) / rw) * rw;
         let noy = Math.round((ocHeight / 10 / zoom) / rw) * rw;
+        let lox = Math.round((ocWidth / 8 / zoom) / rw) * rw;
+        let loy = Math.round((ocHeight / 8 / zoom) / rw) * rw;
         if (zoomBtn.id === "minus") {
             z = 0.8;
             zoom *= z;
-            state.xOffset += nox;
-            state.yOffset += noy;
+            state.xOffset += lox;
+            state.yOffset += loy;
         } else if (zoomBtn.id === "plus") {
             z = 1.25;
+            zoom *= z;
             state.xOffset -= nox;
             state.yOffset -= noy;
-            zoom *= z;
         }
         //re scale canvas
         onScreenCTX.scale(z, z);
