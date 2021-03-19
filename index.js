@@ -335,13 +335,15 @@ function handleWheel(e) {
     //zoom based on mouse coords
     let z;
     let rw = ocWidth / offScreenCVS.width;
-    let nox = Math.round(((state.mox * state.ratio) / 4 / zoom) / rw) * rw;
-    let noy = Math.round(((state.moy * state.ratio) / 4 / zoom) / rw) * rw;
+    let nox = Math.round(((state.mox * state.ratio) / 5 / zoom) / rw) * rw;
+    let noy = Math.round(((state.moy * state.ratio) / 5 / zoom) / rw) * rw;
+    let lox = Math.round(((state.mox * state.ratio) / 4 / zoom) / rw) * rw;
+    let loy = Math.round(((state.moy * state.ratio) / 4 / zoom) / rw) * rw;
     if (delta < 0) {
         z = 0.8;
         zoom *= z;
-        state.xOffset += nox;
-        state.yOffset += noy;
+        state.xOffset += lox;
+        state.yOffset += loy;
     } else if (delta > 0) {
         z = 1.25;
         state.xOffset -= nox;
@@ -1119,8 +1121,6 @@ function actionCurve(x1, y1, x2, y2, x3, y3, stepNum, currentColor, ctx, current
 
         //p1, p2 are global endpoints
         plotQuadBezier(x1, y1, controlX, controlY, x2, y2);
-
-        //BUG: flatter curves aren't perfect, add code to account for flat curves.
 
         function plotQuadBezier(x0, y0, x1, y1, x2, y2) { /* plot any quadratic Bezier curve */
             let x = x0 - x1, y = y0 - y1;
