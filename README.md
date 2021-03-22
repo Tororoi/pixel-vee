@@ -71,6 +71,7 @@ Visit here: https://pixelvee.netlify.app/
 
 ### Key Features to be added
 
+- Vector mode
 - Layers
 - Palette
 - Ability to export image
