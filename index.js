@@ -44,6 +44,7 @@ modeBtn.style.background = "rgb(238, 206, 102)";
 
 //Background upload
 let uploadBtn = document.querySelector("#file-upload");
+let removeBtn = document.querySelector("#file-remove");
 
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
 let offScreenCVS = document.createElement('canvas');
@@ -174,9 +175,15 @@ let source = offScreenCVS.toDataURL();
 let preview = new Image;
 let previewSource = guiCVS.toDataURL();
 
-
-
+//Background object
 let background = new Image;
+
+const bgObject = {
+    img: background,
+    x: 0,
+    y: 0,
+    scale: 1
+};
 
 //shortcuts
 document.addEventListener('keydown', handleKeyDown);
@@ -207,6 +214,7 @@ toolsCont.addEventListener('click', handleTools);
 modesCont.addEventListener('click', handleModes);
 
 uploadBtn.addEventListener("change", changeBG);
+removeBtn.addEventListener("click", removeBG);
 
 function changeBG() {
     let reader;
@@ -215,12 +223,17 @@ function changeBG() {
         reader = new FileReader();
 
         reader.onload = (e) => {
-            background.src = e.target.result;
+            bgObject.img.src = e.target.result;
             drawCanvas();
         }
 
         reader.readAsDataURL(this.files[0]);
     }
+}
+
+function removeBG() {
+    bgObject.img.src = "";
+    drawCanvas();
 }
 
 function handleKeyDown(e) {
@@ -1351,8 +1364,8 @@ function drawCanvas() {
     onScreenCTX.fillRect(0, 0, ocWidth / zoom, ocHeight / zoom);
     onScreenCTX.clearRect(state.xOffset, state.yOffset, ocWidth, ocHeight);
     //constrain background image to canvas
-    let longSide = ocWidth / background.width > ocHeight / background.height ? ocHeight / background.height : ocWidth / background.width;
-    onScreenCTX.drawImage(background, state.xOffset, state.yOffset, background.width * longSide, background.height * longSide);
+    bgObject.scale = ocWidth / bgObject.img.width > ocHeight / bgObject.img.height ? ocHeight / bgObject.img.height : ocWidth / bgObject.img.width;
+    onScreenCTX.drawImage(bgObject.img, state.xOffset + bgObject.x, state.yOffset + bgObject.y, bgObject.img.width * bgObject.scale, bgObject.img.height * bgObject.scale);
     onScreenCTX.drawImage(img, state.xOffset, state.yOffset, ocWidth, ocHeight);
     onScreenCTX.beginPath();
     onScreenCTX.rect(state.xOffset - 1, state.yOffset - 1, ocWidth + 2, ocHeight + 2);
