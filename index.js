@@ -8,7 +8,7 @@ let onScreenCTX = onScreenCVS.getContext("2d");
 let ocWidth = onScreenCVS.width;
 let ocHeight = onScreenCVS.height;
 //improve sharpness
-let sharpness = 4;
+let sharpness = 8;
 let zoom = 1;
 //adjust canvas ratio here if needed
 onScreenCVS.width = ocWidth * sharpness;
@@ -44,7 +44,7 @@ modeBtn.style.background = "rgb(238, 206, 102)";
 
 //Background upload
 let uploadBtn = document.querySelector("#file-upload");
-let removeBtn = document.querySelector("#file-remove");
+// let removeBtn = document.querySelector("#file-remove");
 
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
 let offScreenCVS = document.createElement('canvas');
@@ -56,7 +56,7 @@ offScreenCVS.height = 256;
 
 //Create a preview canvas. Also offscreen and same size as offscreen canvas. Used for UI such as cursors and previewing certain tools
 let guiCVS = document.createElement('canvas');
-let guiCTX = offScreenCVS.getContext("2d");
+let guiCTX = guiCVS.getContext("2d");
 //Set the dimensions of the drawing canvas
 guiCVS.width = offScreenCVS.width;
 guiCVS.height = offScreenCVS.height;
@@ -116,19 +116,9 @@ const tools = {
     }
 }
 
-//Background object
-let background = new Image;
-
-const bgObject = {
-    img: background,
-    x: 0,
-    y: 0,
-    scale: 1
-};
-
 //types: raster, vector, reference
 const layers = [
-    { type: "raster", title: "Layer 1", cvs: offScreenCVS, ctx: offScreenCTX, x: 0, y: 0, scale: 1 }
+    { type: "raster", title: "Layer 1", cvs: offScreenCVS, ctx: offScreenCTX, x: 0, y: 0, scale: 1, opacity: 1 }
 ]
 
 //state
@@ -211,18 +201,25 @@ colorSwitch.addEventListener('click', switchColors);
 toolsCont.addEventListener('click', handleTools);
 modesCont.addEventListener('click', handleModes);
 
-uploadBtn.addEventListener("change", changeBG);
-removeBtn.addEventListener("click", removeBG);
+uploadBtn.addEventListener("change", addReferenceLayer);
+// removeBtn.addEventListener("click", removeBG);
 
-function changeBG() {
+function addReferenceLayer() {
     let reader;
+    let img = new Image;
 
     if (this.files && this.files[0]) {
         reader = new FileReader();
 
         reader.onload = (e) => {
-            bgObject.img.src = e.target.result;
-            drawCanvas();
+            img.src = e.target.result;
+            img.onload = () => {
+                //constrain background image to canvas with scale
+                let scale = ocWidth / img.width > ocHeight / img.height ? ocHeight / img.height : ocWidth / img.width;
+                let layer = { type: "reference", title: "New Layer", img: img, x: 0, y: 0, scale: scale, opacity: 1 }
+                layers.unshift(layer)
+                drawCanvas();
+            }
         }
 
         reader.readAsDataURL(this.files[0]);
@@ -230,7 +227,7 @@ function changeBG() {
 }
 
 function removeBG() {
-    bgObject.img.src = "";
+    //doesn't do anything now
     drawCanvas();
 }
 
@@ -1352,7 +1349,17 @@ function drawPreview() {
 
 function drawLayers() {
     layers.forEach(l => {
-        onScreenCTX.drawImage(l.cvs, state.xOffset + l.x, state.yOffset + l.y, ocWidth, ocHeight);
+        if (l.type === "reference") {
+            onScreenCTX.save();
+            onScreenCTX.globalAlpha = l.opacity;
+            onScreenCTX.drawImage(l.img, state.xOffset + l.x, state.yOffset + l.y, l.img.width * l.scale, l.img.height * l.scale);
+            onScreenCTX.restore();
+        } else {
+            onScreenCTX.save();
+            onScreenCTX.globalAlpha = l.opacity;
+            onScreenCTX.drawImage(l.cvs, state.xOffset + l.x, state.yOffset + l.y, ocWidth, ocHeight);
+            onScreenCTX.restore();
+        }
     });
 }
 
@@ -1364,10 +1371,6 @@ function drawCanvas() {
     onScreenCTX.fillRect(0, 0, ocWidth / zoom, ocHeight / zoom);
     //BUG: How to mask outside drawing space?
     onScreenCTX.clearRect(state.xOffset, state.yOffset, ocWidth, ocHeight);
-    //constrain background image to canvas
-    bgObject.scale = ocWidth / bgObject.img.width > ocHeight / bgObject.img.height ? ocHeight / bgObject.img.height : ocWidth / bgObject.img.width;
-    onScreenCTX.drawImage(bgObject.img, state.xOffset + bgObject.x, state.yOffset + bgObject.y, bgObject.img.width * bgObject.scale, bgObject.img.height * bgObject.scale);
-    // onScreenCTX.drawImage(offScreenCVS, state.xOffset, state.yOffset, ocWidth, ocHeight);
     drawLayers();
     onScreenCTX.beginPath();
     onScreenCTX.rect(state.xOffset - 1, state.yOffset - 1, ocWidth + 2, ocHeight + 2);
