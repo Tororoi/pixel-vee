@@ -613,3 +613,19 @@ h4 {
     0px -2px rgb(255, 255, 255),
     0px 2px rgb(255, 255, 255);
 } */
+
+/* File Upload */
+
+input[type="file"] {
+  display: none;
+}
+
+.custom-file-upload {
+  display: inline-block;
+  margin-left: 24px;
+  white-space: wrap;
+  font-size: 20px;
+  width: 232px;
+  height: auto;
+  cursor: pointer;
+}
