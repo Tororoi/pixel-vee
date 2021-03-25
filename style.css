@@ -623,9 +623,12 @@ input[type="file"] {
 .custom-file-upload {
   display: inline-block;
   margin-left: 24px;
-  white-space: wrap;
   font-size: 20px;
   width: 232px;
   height: auto;
   cursor: pointer;
+}
+
+#file-remove {
+  margin-bottom: 24px;
 }
