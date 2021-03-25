@@ -81,7 +81,7 @@ Visit here: https://pixelvee.netlify.app/
 
 ### Stretch Features to be added
 
-- Ability to import a custom background image
+- Ability to import a custom background image (_in progress_)
 - Dithered Gradient Tool
 - Ability to toggle gridlines
 - Increase functionality of curve tool to include more points
