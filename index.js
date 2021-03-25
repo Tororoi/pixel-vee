@@ -50,8 +50,8 @@ let removeBtn = document.querySelector("#file-remove");
 let offScreenCVS = document.createElement('canvas');
 let offScreenCTX = offScreenCVS.getContext("2d");
 //Set the dimensions of the drawing canvas
-offScreenCVS.width = 128;
-offScreenCVS.height = 128;
+offScreenCVS.width = 256;
+offScreenCVS.height = 256;
 //for adjusting canvas size, adjust onscreen canvas dimensions in proportion to offscreen
 
 //Create a preview canvas. Also offscreen and same size as offscreen canvas. Used for UI such as cursors and previewing certain tools
@@ -116,6 +116,21 @@ const tools = {
     }
 }
 
+//Background object
+let background = new Image;
+
+const bgObject = {
+    img: background,
+    x: 0,
+    y: 0,
+    scale: 1
+};
+
+//types: raster, vector, reference
+const layers = [
+    { type: "raster", title: "Layer 1", cvs: offScreenCVS, ctx: offScreenCTX, x: 0, y: 0, scale: 1 }
+]
+
 //state
 const state = {
     //timeline
@@ -135,7 +150,7 @@ const state = {
     },
     //active variables for canvas
     shortcuts: true,
-    zoomable: true,
+    currentLayer: layers[0],
     event: "none",
     clicked: false,
     clickedColor: null,
@@ -167,23 +182,6 @@ const state = {
     lastOffsetX: 0,
     lastOffsetY: 0
 }
-
-//Create an Image with a default source of the existing onscreen canvas
-let img = new Image;
-let source = offScreenCVS.toDataURL();
-
-let preview = new Image;
-let previewSource = guiCVS.toDataURL();
-
-//Background object
-let background = new Image;
-
-const bgObject = {
-    img: background,
-    x: 0,
-    y: 0,
-    scale: 1
-};
 
 //shortcuts
 document.addEventListener('keydown', handleKeyDown);
@@ -452,9 +450,9 @@ function handleMouseUp(e) {
     //Reset redostack
     state.redoStack = [];
     state.event = "none";
-    img.onload = () => {
-        renderCursor();
-    }
+    // img.onload = () => {
+    renderCursor();
+    // }
 }
 
 function handleMouseOut(e) {
@@ -556,7 +554,7 @@ function handleClear() {
     state.points = [];
     state.redoStack = [];
     offScreenCTX.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
-    source = offScreenCVS.toDataURL();
+    // source = offScreenCVS.toDataURL();
     renderImage();
 }
 
@@ -641,7 +639,7 @@ function addToTimeline(tool, x, y) {
         action: state.tool.fn,
         mode: state.mode
     });
-    source = offScreenCVS.toDataURL();
+    // source = offScreenCVS.toDataURL();
     renderImage();
 }
 
@@ -717,7 +715,7 @@ function perfectPixels(currentX, currentY) {
             action: state.tool.fn,
             mode: state.mode
         });
-        source = offScreenCVS.toDataURL();
+        // source = offScreenCVS.toDataURL();
         renderImage();
     } else {
         state.waitingPixelX = currentX;
@@ -830,7 +828,7 @@ function replaceSteps() {
             // state.waitingPixelX = state.mouseX;
             // state.waitingPixelY = state.mouseY;
             //get rid of onscreen cursor
-            source = offScreenCVS.toDataURL();
+            // source = offScreenCVS.toDataURL();
             renderImage();
             break;
         case "mousemove":
@@ -1230,7 +1228,7 @@ function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, cu
         //curve after defining x3y3
         renderCurve(controlx, controly);
         //render drawing
-        source = offScreenCVS.toDataURL();
+        // source = offScreenCVS.toDataURL();
         renderImage();
     }
 }
@@ -1315,7 +1313,6 @@ function actionUndoRedo(pushStack, popStack) {
     pushStack.push(popStack.pop());
     offScreenCTX.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
     redrawPoints();
-    source = offScreenCVS.toDataURL();
     renderImage();
 }
 
@@ -1345,15 +1342,18 @@ function redrawPoints() {
 
 //Once the image is loaded, draw the image onto the onscreen canvas.
 function renderImage() {
-    img.onload = () => {
-        onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
-        drawCanvas();
-    }
-    img.src = source;
+    onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
+    drawCanvas();
 }
 
 function drawPreview() {
-    onScreenCTX.drawImage(preview, state.xOffset, state.yOffset, ocWidth, ocHeight)
+    onScreenCTX.drawImage(guiCVS, state.xOffset, state.yOffset, ocWidth, ocHeight);
+}
+
+function drawLayers() {
+    layers.forEach(l => {
+        onScreenCTX.drawImage(l.cvs, state.xOffset + l.x, state.yOffset + l.y, ocWidth, ocHeight);
+    });
 }
 
 function drawCanvas() {
@@ -1362,11 +1362,13 @@ function drawCanvas() {
     onScreenCTX.fillStyle = "gray";
     //adjust canvas ratio here
     onScreenCTX.fillRect(0, 0, ocWidth / zoom, ocHeight / zoom);
+    //BUG: How to mask outside drawing space?
     onScreenCTX.clearRect(state.xOffset, state.yOffset, ocWidth, ocHeight);
     //constrain background image to canvas
     bgObject.scale = ocWidth / bgObject.img.width > ocHeight / bgObject.img.height ? ocHeight / bgObject.img.height : ocWidth / bgObject.img.width;
     onScreenCTX.drawImage(bgObject.img, state.xOffset + bgObject.x, state.yOffset + bgObject.y, bgObject.img.width * bgObject.scale, bgObject.img.height * bgObject.scale);
-    onScreenCTX.drawImage(img, state.xOffset, state.yOffset, ocWidth, ocHeight);
+    // onScreenCTX.drawImage(offScreenCVS, state.xOffset, state.yOffset, ocWidth, ocHeight);
+    drawLayers();
     onScreenCTX.beginPath();
     onScreenCTX.rect(state.xOffset - 1, state.yOffset - 1, ocWidth + 2, ocHeight + 2);
     onScreenCTX.lineWidth = 2;
