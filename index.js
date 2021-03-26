@@ -44,7 +44,6 @@ modeBtn.style.background = "rgb(238, 206, 102)";
 
 //Background upload
 let uploadBtn = document.querySelector("#file-upload");
-// let removeBtn = document.querySelector("#file-remove");
 
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
 let offScreenCVS = document.createElement('canvas');
@@ -114,12 +113,28 @@ const tools = {
         brushSize: 1,
         options: []
     }
+    // move: {
+    // Move a layer's coordinates independent of other layers
+    // }
 }
 
 //types: raster, vector, reference
 const layers = [
     { type: "raster", title: "Layer 1", cvs: offScreenCVS, ctx: offScreenCTX, x: 0, y: 0, scale: 1, opacity: 1 }
 ]
+
+//manipulate layers with .splice
+//layer = layers.splice(n,1) to remove and store layer in variable
+//layers.splice(n,0,layer) to insert at new position
+
+//render layers interface
+//for each layer, render a template display to the dom with image, title, type
+//dragging a layer up or down should reflect in the order of the layers array
+//template should have an eye icon to toggle visibility and a slider for opacity
+
+//add move tool and scale tool for reference layers
+
+//vector layers have an option to create a raster copy layer
 
 //state
 const state = {
@@ -202,34 +217,6 @@ toolsCont.addEventListener('click', handleTools);
 modesCont.addEventListener('click', handleModes);
 
 uploadBtn.addEventListener("change", addReferenceLayer);
-// removeBtn.addEventListener("click", removeBG);
-
-function addReferenceLayer() {
-    let reader;
-    let img = new Image;
-
-    if (this.files && this.files[0]) {
-        reader = new FileReader();
-
-        reader.onload = (e) => {
-            img.src = e.target.result;
-            img.onload = () => {
-                //constrain background image to canvas with scale
-                let scale = ocWidth / img.width > ocHeight / img.height ? ocHeight / img.height : ocWidth / img.width;
-                let layer = { type: "reference", title: "New Layer", img: img, x: 0, y: 0, scale: scale, opacity: 1 }
-                layers.unshift(layer)
-                drawCanvas();
-            }
-        }
-
-        reader.readAsDataURL(this.files[0]);
-    }
-}
-
-function removeBG() {
-    //doesn't do anything now
-    drawCanvas();
-}
 
 function handleKeyDown(e) {
     // console.log(e.key)
@@ -1345,6 +1332,28 @@ function renderImage() {
 
 function drawPreview() {
     onScreenCTX.drawImage(guiCVS, state.xOffset, state.yOffset, ocWidth, ocHeight);
+}
+
+function addReferenceLayer() {
+    let reader;
+    let img = new Image;
+
+    if (this.files && this.files[0]) {
+        reader = new FileReader();
+
+        reader.onload = (e) => {
+            img.src = e.target.result;
+            img.onload = () => {
+                //constrain background image to canvas with scale
+                let scale = ocWidth / img.width > ocHeight / img.height ? ocHeight / img.height : ocWidth / img.width;
+                let layer = { type: "reference", title: "New Layer", img: img, x: 0, y: 0, scale: scale, opacity: 1 }
+                layers.unshift(layer)
+                drawCanvas();
+            }
+        }
+
+        reader.readAsDataURL(this.files[0]);
+    }
 }
 
 function drawLayers() {
