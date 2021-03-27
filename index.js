@@ -119,8 +119,14 @@ const tools = {
 }
 
 //types: raster, vector, reference
+//create first layer
+let layerCVS = document.createElement('canvas');
+let layerCTX = layerCVS.getContext("2d");
+layerCVS.width = offScreenCVS.width;
+layerCVS.height = offScreenCVS.height;
+
 const layers = [
-    { type: "raster", title: "Layer 1", cvs: offScreenCVS, ctx: offScreenCTX, x: 0, y: 0, scale: 1, opacity: 1 }
+    { type: "raster", title: "Layer 1", cvs: layerCVS, ctx: layerCTX, x: 0, y: 0, scale: 1, opacity: 1 }
 ]
 
 //manipulate layers with .splice
@@ -535,8 +541,7 @@ function handleClear() {
     state.undoStack.push(state.points);
     state.points = [];
     state.redoStack = [];
-    offScreenCTX.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
-    // source = offScreenCVS.toDataURL();
+    state.currentLayer.ctx.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
     renderImage();
 }
 
@@ -547,11 +552,6 @@ function handleZoom(e) {
         let zoomBtn = e.target.closest(".square");
         let z;
         let rw = ocWidth / offScreenCVS.width;
-        // state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
-        // let center = onScreenCVS.offsetWidth / state.trueRatio / 2;
-        // onScreenCTX.fillRect(center, center, 5, 5)
-        // let nox = Math.round(((center * state.ratio) / 4 / zoom) / rw) * rw;
-        // let noy = Math.round(((center * state.ratio) / 4 / zoom) / rw) * rw;
         //next origin
         let nox = Math.round((ocWidth / 10 / zoom) / rw) * rw;
         let noy = Math.round((ocHeight / 10 / zoom) / rw) * rw;
@@ -622,7 +622,7 @@ function addToTimeline(tool, x, y) {
         action: state.tool.fn,
         mode: state.mode
     });
-    // source = offScreenCVS.toDataURL();
+    //render action
     renderImage();
 }
 
@@ -683,36 +683,7 @@ function perfectPixels(currentX, currentY) {
         state.lastDrawnY = state.waitingPixelY;
         state.waitingPixelX = currentX;
         state.waitingPixelY = currentY;
-        //add to points stack
-        //can't be replaced by current timeline function due to wrong x,y values
-        state.points.push({
-            //for line
-            // startX: state.lastX,
-            // startY: state.lastY,
-            //for everything
-            x: state.lastDrawnX,
-            y: state.lastDrawnY,
-            layer: state.currentLayer,
-            size: state.tool.brushSize,
-            color: { ...state.brushColor },
-            tool: state.tool.name,
-            action: state.tool.fn,
-            mode: state.mode
-        });
-
-        // state.points.push({
-        //     //x/y are sometimes objects with multiple values
-        //     x: x,
-        //     y: y,
-        //     layer: state.currentLayer,
-        //     size: state.tool.brushSize,
-        //     color: { ...state.brushColor },
-        //     tool: tool,
-        //     action: state.tool.fn,
-        //     mode: state.mode
-        // });
-        // source = offScreenCVS.toDataURL();
-        renderImage();
+        addToTimeline(state.tool.name, state.lastDrawnX, state.lastDrawnY);
     } else {
         state.waitingPixelX = currentX;
         state.waitingPixelY = currentY;
@@ -751,8 +722,6 @@ function lineSteps() {
         case "mouseup":
             actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode);
             addToTimeline(state.tool.name, { x1: state.lastX, x2: state.mouseX }, { y1: state.lastY, y2: state.mouseY });
-            //seriously, why do I need this? img.onload should've fired when I called renderImage from addToTimeline
-            window.setTimeout(renderImage, 0);
             break;
         default:
         //do nothing
@@ -1026,6 +995,7 @@ let px1, py1, px2, py2, px3, py3;
 function curveSteps() {
     switch (state.event) {
         case "mousedown":
+            //solidify end points
             clickCounter += 1;
             if (clickCounter > 3) clickCounter = 1;
             switch (clickCounter) {
@@ -1040,9 +1010,6 @@ function curveSteps() {
                 default:
                 //do nothing
             }
-            //definitive step occurs on offscreen canvas
-            // actionCurve(x1, y1, x2, y2, x3, y3, clickCounter, state.brushColor, offScreenCTX, state.mode);
-            // drawCanvas();
             break;
         case "mousemove":
             //draw line from origin point to current point onscreen
@@ -1058,14 +1025,13 @@ function curveSteps() {
             break;
         case "mouseup" || "mouseout":
             if (clickCounter === 3) {
+                //solidify control point
                 px3 = state.mouseX;
                 py3 = state.mouseY;
                 actionCurve(px1, py1, px2, py2, px3, py3, clickCounter + 1, state.brushColor, state.currentLayer.ctx, state.mode)
                 clickCounter = 0;
                 //store control points for timeline
                 addToTimeline(state.tool.name, { x1: px1, x2: px2, x3: px3 }, { y1: py1, y2: py2, y3: py3 });
-                //BUG: seriously, why do I need this? img.onload should've fired when I called renderImage from addToTimeline
-                window.setTimeout(renderImage, 0);
             }
             break;
         default:
@@ -1075,8 +1041,6 @@ function curveSteps() {
 
 //Curved Lines
 function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, currentColor, ctx, currentMode, scale = 1) {
-    //New algo to try: use bresenham's algorithm
-    //look into algorithms for pixelating vector line art
 
     //force coords to int
     startx = Math.round(startx);
@@ -1225,10 +1189,6 @@ function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, cu
     } else if (stepNum === 4) {
         //curve after defining x3y3
         renderCurve(controlx, controly);
-        //render drawing
-        // source = offScreenCVS.toDataURL();
-        //DRY: necessary?
-        renderImage();
     }
 }
 
@@ -1237,6 +1197,9 @@ function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, cu
 function pickerSteps() {
     switch (state.event) {
         case "mousedown":
+            //get imageData
+            consolidateLayers();
+            state.colorLayerGlobal = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
             //set color
             sampleColor(state.mouseX, state.mouseY);
             break;
@@ -1260,10 +1223,6 @@ function pickerSteps() {
 
 //picker function, tool but not an action
 function sampleColor(x, y) {
-    //get imageData
-    //BUG: state.colorLayerGlobal needs to be replaced by a consolidated version of all raster layers
-    state.colorLayerGlobal = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
-
     let newColor = getColor(x, y, state.colorLayerGlobal);
     //not simply passing whole color in until random color function is refined
     setColor(newColor.r, newColor.g, newColor.b, "swatch btn");
@@ -1311,8 +1270,11 @@ function grabSteps() {
 //Main pillar of the code structure
 function actionUndoRedo(pushStack, popStack) {
     pushStack.push(popStack.pop());
-    //BUG: offscreenctx needs to be replaced by consolidated version of all layers
-    offScreenCTX.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
+    //clear all layers in preparation to redraw them.
+    //DRY: do all layers and actions need to be rerendered for redo?
+    layers.forEach(l => {
+        l.ctx.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
+    });
     redrawPoints();
     renderImage();
 }
@@ -1379,12 +1341,14 @@ function drawLayers() {
         if (l.type === "reference") {
             onScreenCTX.save();
             onScreenCTX.globalAlpha = l.opacity;
-            onScreenCTX.drawImage(l.img, state.xOffset + l.x, state.yOffset + l.y, l.img.width * l.scale, l.img.height * l.scale);
+            //l.x, l.y need to be normalized to the pixel grid
+            onScreenCTX.drawImage(l.img, state.xOffset + l.x * ocWidth / offScreenCVS.width, state.yOffset + l.y * ocWidth / offScreenCVS.width, l.img.width * l.scale, l.img.height * l.scale);
             onScreenCTX.restore();
         } else {
             onScreenCTX.save();
             onScreenCTX.globalAlpha = l.opacity;
-            onScreenCTX.drawImage(l.cvs, state.xOffset + l.x, state.yOffset + l.y, ocWidth, ocHeight);
+            //l.x, l.y need to be normalized to the pixel grid
+            onScreenCTX.drawImage(l.cvs, state.xOffset + l.x * ocWidth / offScreenCVS.width, state.yOffset + l.y * ocWidth / offScreenCVS.width, ocWidth, ocHeight);
             onScreenCTX.restore();
         }
     });
@@ -1404,6 +1368,15 @@ function drawCanvas() {
     onScreenCTX.lineWidth = 2;
     onScreenCTX.strokeStyle = "black";
     onScreenCTX.stroke();
+}
+
+function consolidateLayers() {
+    layers.forEach(l => {
+        offScreenCTX.save();
+        offScreenCTX.globalAlpha = l.opacity;
+        offScreenCTX.drawImage(l.cvs, l.x, l.y, offScreenCVS.width, offScreenCVS.height);
+        offScreenCTX.restore();
+    });
 }
 
 function randomizeColor(e) {
