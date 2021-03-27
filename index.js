@@ -134,7 +134,11 @@ const layers = [
 
 //add move tool and scale tool for reference layers
 
+//IMPORTANT: add reference to action's layer when adding to timeline
+
 //vector layers have an option to create a raster copy layer
+
+//vector layers need movable control points, how to organize order of added control points?
 
 //state
 const state = {
@@ -181,6 +185,7 @@ const state = {
     waitingPixelY: null,
     //for replace
     colorLayerGlobal: null,
+    localColorLayer: null,
     //for moving canvas/ grab
     xOffset: 0,
     yOffset: 0,
@@ -488,14 +493,7 @@ function renderCursor() {
         //left
         onScreenCTX.moveTo(state.onX - ol, state.onY);
         onScreenCTX.lineTo(state.onX - ol, state.onY + state.ratio / zoom);
-        // onScreenCTX.rect(state.onX, state.onY, state.ratio / zoom, state.ratio / zoom);
-        // onScreenCTX.lineWidth = 0.5;
-        // onScreenCTX.strokeStyle = "black";
-        // onScreenCTX.stroke();
-        // onScreenCTX.beginPath();
-        // onScreenCTX.rect(state.onX + 0.5, state.onY + 0.5, state.ratio / zoom - 1, state.ratio / zoom - 1);
-        // onScreenCTX.lineWidth = 0.5;
-        // onScreenCTX.strokeStyle = "white";
+
         onScreenCTX.stroke();
     }
 }
@@ -617,6 +615,7 @@ function addToTimeline(tool, x, y) {
         //x/y are sometimes objects with multiple values
         x: x,
         y: y,
+        layer: state.currentLayer,
         size: state.tool.brushSize,
         color: { ...state.brushColor },
         tool: tool,
@@ -632,7 +631,7 @@ function addToTimeline(tool, x, y) {
 function drawSteps() {
     switch (state.event) {
         case "mousedown":
-            actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
+            actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
             state.lastX = state.mouseX;
             state.lastY = state.mouseY;
             state.lastDrawnX = state.mouseX;
@@ -649,14 +648,14 @@ function drawSteps() {
                 //draw between points when drawing fast
                 if (Math.abs(state.mouseX - state.lastX) > 1 || Math.abs(state.mouseY - state.lastY) > 1) {
                     //add to options, only execute if "continuous line" is on
-                    actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, offScreenCTX, state.mode);
+                    actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode);
                     addToTimeline("line", { x1: state.lastX, x2: state.mouseX }, { y1: state.lastY, y2: state.mouseY });
                 } else {
                     //perfect will be option, not mode
                     if (state.mode === "perfect") {
                         perfectPixels(state.mouseX, state.mouseY);
                     } else {
-                        actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
+                        actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
                         addToTimeline(state.tool.name, state.mouseX, state.mouseY);
                     }
                 }
@@ -667,7 +666,7 @@ function drawSteps() {
             break;
         case "mouseup":
             //only needed if perfect pixels option is on
-            actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
+            actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
             addToTimeline(state.tool.name, state.mouseX, state.mouseY);
             break;
         default:
@@ -678,7 +677,7 @@ function drawSteps() {
 function perfectPixels(currentX, currentY) {
     //if currentPixel not neighbor to lastDrawn, draw waitingpixel
     if (Math.abs(currentX - state.lastDrawnX) > 1 || Math.abs(currentY - state.lastDrawnY) > 1) {
-        actionDraw(state.waitingPixelX, state.waitingPixelY, state.brushColor, state.tool.brushSize, state.mode);
+        actionDraw(state.waitingPixelX, state.waitingPixelY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
         //update queue
         state.lastDrawnX = state.waitingPixelX;
         state.lastDrawnY = state.waitingPixelY;
@@ -688,17 +687,30 @@ function perfectPixels(currentX, currentY) {
         //can't be replaced by current timeline function due to wrong x,y values
         state.points.push({
             //for line
-            startX: state.lastX,
-            startY: state.lastY,
+            // startX: state.lastX,
+            // startY: state.lastY,
             //for everything
             x: state.lastDrawnX,
             y: state.lastDrawnY,
+            layer: state.currentLayer,
             size: state.tool.brushSize,
             color: { ...state.brushColor },
             tool: state.tool.name,
             action: state.tool.fn,
             mode: state.mode
         });
+
+        // state.points.push({
+        //     //x/y are sometimes objects with multiple values
+        //     x: x,
+        //     y: y,
+        //     layer: state.currentLayer,
+        //     size: state.tool.brushSize,
+        //     color: { ...state.brushColor },
+        //     tool: tool,
+        //     action: state.tool.fn,
+        //     mode: state.mode
+        // });
         // source = offScreenCVS.toDataURL();
         renderImage();
     } else {
@@ -707,14 +719,14 @@ function perfectPixels(currentX, currentY) {
     }
 }
 
-function actionDraw(coordX, coordY, currentColor, size, currentMode) {
-    offScreenCTX.fillStyle = currentColor.color;
+function actionDraw(coordX, coordY, currentColor, size, ctx, currentMode) {
+    ctx.fillStyle = currentColor.color;
     switch (currentMode) {
         case "erase":
-            offScreenCTX.clearRect(Math.ceil(coordX - size / 2), Math.ceil(coordY - size / 2), size, size);
+            ctx.clearRect(Math.ceil(coordX - size / 2), Math.ceil(coordY - size / 2), size, size);
             break;
         default:
-            offScreenCTX.fillRect(Math.ceil(coordX - size / 2), Math.ceil(coordY - size / 2), size, size);
+            ctx.fillRect(Math.ceil(coordX - size / 2), Math.ceil(coordY - size / 2), size, size);
     }
 }
 
@@ -737,7 +749,7 @@ function lineSteps() {
             }
             break;
         case "mouseup":
-            actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, offScreenCTX, state.mode);
+            actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode);
             addToTimeline(state.tool.name, { x1: state.lastX, x2: state.mouseX }, { y1: state.lastY, y2: state.mouseY });
             //seriously, why do I need this? img.onload should've fired when I called renderImage from addToTimeline
             window.setTimeout(renderImage, 0);
@@ -803,8 +815,8 @@ function replaceSteps() {
     switch (state.event) {
         case "mousedown":
             //get global colorlayer data to use while mouse is down
-            state.colorLayerGlobal = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
-            actionReplace();
+            state.localColorLayer = state.currentLayer.ctx.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
+            actionReplace(state.localColorLayer);
             state.lastX = state.mouseX;
             state.lastY = state.mouseY;
             // state.lastDrawnX = state.mouseX;
@@ -820,16 +832,17 @@ function replaceSteps() {
             //draw onscreen current pixel if match to backColor
             // can't add smoother lines until line replace method is added
             if (state.lastX !== state.mouseX || state.lastY !== state.mouseY) {
-                actionReplace();
+                actionReplace(state.localColorLayer);
                 if (Math.abs(state.mouseX - state.lastX) > 1 || Math.abs(state.mouseY - state.lastY) > 1) {
                     //add to options, only execute if "continuous line" is on
-                    lineReplace(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, offScreenCTX, state.mode);
+                    //BUG: replace needs layer's color map, not the global map
+                    lineReplace(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode, state.localColorLayer);
                 } else {
                     //perfect will be option, not mode
                     // if (state.mode === "perfect") {
                     //     perfectPixels(state.mouseX, state.mouseY);
                     // } else {
-                    actionReplace();
+                    actionReplace(state.localColorLayer);
                     // }
                 }
             }
@@ -839,7 +852,7 @@ function replaceSteps() {
             break;
         case "mouseup":
             //only needed if perfect pixels option is on
-            actionReplace();
+            actionReplace(state.localColorLayer);
             //re-render image to allow onscreen cursor to render
             renderImage();
             break;
@@ -848,7 +861,8 @@ function replaceSteps() {
     }
 }
 
-function lineReplace(sx, sy, tx, ty, currentColor, ctx, currentMode) {
+//replace actions are odd as they add to timeline inside but are never called by redrawPoints.
+function lineReplace(sx, sy, tx, ty, currentColor, ctx, currentMode, colorLayer) {
     ctx.fillStyle = currentColor.color;
     //create triangle object
     let tri = {}
@@ -871,25 +885,25 @@ function lineReplace(sx, sy, tx, ty, currentColor, ctx, currentMode) {
     for (let i = 0; i < tri.long; i++) {
         let thispoint = { x: Math.round(sx + tri.x * i), y: Math.round(sy + tri.y * i) };
         // for each point along the line
-        let clickedColor = getColor(thispoint.x, thispoint.y, state.colorLayerGlobal);
+        let clickedColor = getColor(thispoint.x, thispoint.y, colorLayer);
         if (clickedColor.color === state.backColor.color) {
-            actionDraw(thispoint.x, thispoint.y, state.brushColor, state.tool.brushSize, currentMode);
+            actionDraw(thispoint.x, thispoint.y, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, currentMode);
             addToTimeline(state.tool.name, thispoint.x, thispoint.y);
         }
     }
     //fill endpoint
-    let clickedColor = getColor(Math.round(tx), Math.round(ty), state.colorLayerGlobal);
+    let clickedColor = getColor(Math.round(tx), Math.round(ty), colorLayer);
     if (clickedColor.color === state.backColor.color) {
-        actionDraw(Math.round(tx), Math.round(ty), state.brushColor, state.tool.brushSize, currentMode);
+        actionDraw(Math.round(tx), Math.round(ty), state.brushColor, state.tool.brushSize, state.currentLayer.ctx, currentMode);
         addToTimeline(state.tool.name, Math.round(tx), Math.round(ty));
     }
 }
 
-function actionReplace() {
+function actionReplace(colorLayer) {
     //sample color and replace if match
-    state.clickedColor = getColor(state.mouseX, state.mouseY, state.colorLayerGlobal);
+    state.clickedColor = getColor(state.mouseX, state.mouseY, colorLayer);
     if (state.clickedColor.color === state.backColor.color) {
-        actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.mode);
+        actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
         addToTimeline(state.tool.name, state.mouseX, state.mouseY);
     }
 }
@@ -898,7 +912,7 @@ function actionReplace() {
 function fillSteps() {
     switch (state.event) {
         case "mousedown":
-            actionFill(state.mouseX, state.mouseY, state.brushColor, state.mode);
+            actionFill(state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode);
             addToTimeline(state.tool.name, state.mouseX, state.mouseY);
             break;
         case "mouseup":
@@ -910,15 +924,15 @@ function fillSteps() {
 }
 
 //For undo ability, store starting coords and settings and pass them into actionFill
-function actionFill(startX, startY, currentColor, currentMode) {
+function actionFill(startX, startY, currentColor, ctx, currentMode) {
     //exit if outside borders
     if (startX < 0 || startX >= offScreenCVS.width || startY < 0 || startY >= offScreenCVS.height) {
         return;
     }
     //get imageData
-    state.colorLayerGlobal = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
+    state.localColorLayer = ctx.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
 
-    state.clickedColor = getColor(startX, startY, state.colorLayerGlobal);
+    state.clickedColor = getColor(startX, startY, state.localColorLayer);
 
     if (currentMode === "erase") currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 };
 
@@ -985,23 +999,23 @@ function actionFill(startX, startY, currentColor, currentMode) {
     }
 
     //render floodFill result
-    offScreenCTX.putImageData(state.colorLayerGlobal, 0, 0);
+    ctx.putImageData(state.localColorLayer, 0, 0);
 
     //helpers
     function matchStartColor(pixelPos) {
-        let r = state.colorLayerGlobal.data[pixelPos];
-        let g = state.colorLayerGlobal.data[pixelPos + 1];
-        let b = state.colorLayerGlobal.data[pixelPos + 2];
-        let a = state.colorLayerGlobal.data[pixelPos + 3];
+        let r = state.localColorLayer.data[pixelPos];
+        let g = state.localColorLayer.data[pixelPos + 1];
+        let b = state.localColorLayer.data[pixelPos + 2];
+        let a = state.localColorLayer.data[pixelPos + 3];
         return (r === state.clickedColor.r && g === state.clickedColor.g && b === state.clickedColor.b && a === state.clickedColor.a);
     }
 
     function colorPixel(pixelPos) {
-        state.colorLayerGlobal.data[pixelPos] = currentColor.r;
-        state.colorLayerGlobal.data[pixelPos + 1] = currentColor.g;
-        state.colorLayerGlobal.data[pixelPos + 2] = currentColor.b;
+        state.localColorLayer.data[pixelPos] = currentColor.r;
+        state.localColorLayer.data[pixelPos + 1] = currentColor.g;
+        state.localColorLayer.data[pixelPos + 2] = currentColor.b;
         //not ideal
-        state.colorLayerGlobal.data[pixelPos + 3] = currentColor.a;
+        state.localColorLayer.data[pixelPos + 3] = currentColor.a;
     }
 }
 
@@ -1046,11 +1060,11 @@ function curveSteps() {
             if (clickCounter === 3) {
                 px3 = state.mouseX;
                 py3 = state.mouseY;
-                actionCurve(px1, py1, px2, py2, px3, py3, clickCounter + 1, state.brushColor, offScreenCTX, state.mode)
+                actionCurve(px1, py1, px2, py2, px3, py3, clickCounter + 1, state.brushColor, state.currentLayer.ctx, state.mode)
                 clickCounter = 0;
                 //store control points for timeline
                 addToTimeline(state.tool.name, { x1: px1, x2: px2, x3: px3 }, { y1: py1, y2: py2, y3: py3 });
-                //seriously, why do I need this? img.onload should've fired when I called renderImage from addToTimeline
+                //BUG: seriously, why do I need this? img.onload should've fired when I called renderImage from addToTimeline
                 window.setTimeout(renderImage, 0);
             }
             break;
@@ -1213,6 +1227,7 @@ function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, cu
         renderCurve(controlx, controly);
         //render drawing
         // source = offScreenCVS.toDataURL();
+        //DRY: necessary?
         renderImage();
     }
 }
@@ -1246,6 +1261,7 @@ function pickerSteps() {
 //picker function, tool but not an action
 function sampleColor(x, y) {
     //get imageData
+    //BUG: state.colorLayerGlobal needs to be replaced by a consolidated version of all raster layers
     state.colorLayerGlobal = offScreenCTX.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
 
     let newColor = getColor(x, y, state.colorLayerGlobal);
@@ -1295,6 +1311,7 @@ function grabSteps() {
 //Main pillar of the code structure
 function actionUndoRedo(pushStack, popStack) {
     pushStack.push(popStack.pop());
+    //BUG: offscreenctx needs to be replaced by consolidated version of all layers
     offScreenCTX.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
     redrawPoints();
     renderImage();
@@ -1302,23 +1319,24 @@ function actionUndoRedo(pushStack, popStack) {
 
 function redrawPoints() {
     //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
+    // ADD: action's layer context
     state.undoStack.forEach(action => {
         action.forEach(p => {
             switch (p.tool) {
                 case "clear":
-                    offScreenCTX.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
+                    p.layer.ctx.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
                     break;
                 case "fill":
-                    actionFill(p.x, p.y, p.color, p.mode);
+                    actionFill(p.x, p.y, p.color, p.layer.ctx, p.mode);
                     break;
                 case "line":
-                    actionLine(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.color, offScreenCTX, p.mode)
+                    actionLine(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.color, p.layer.ctx, p.mode)
                     break;
                 case "curve":
-                    actionCurve(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.x.x3, p.y.y3, 4, p.color, offScreenCTX, p.mode)
+                    actionCurve(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.x.x3, p.y.y3, 4, p.color, p.layer.ctx, p.mode)
                     break;
                 default:
-                    actionDraw(p.x, p.y, p.color, p.size, p.mode);
+                    actionDraw(p.x, p.y, p.color, p.size, p.layer.ctx, p.mode);
             }
         })
     })
