@@ -1383,7 +1383,9 @@ function addReferenceLayer() {
     }
 }
 
-//manipulate layers with .splice
+//Psuedocode:
+
+//manipulate draggable layers with .splice
 //layer = layers.splice(n,1) to remove and store layer in variable
 //layers.splice(n,0,layer) to insert at new position
 
