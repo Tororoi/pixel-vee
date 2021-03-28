@@ -1396,7 +1396,9 @@ function addReferenceLayer() {
 
 //add move tool and scale tool for reference layers
 
-//IMPORTANT: add reference to action's layer when adding to timeline
+// QUESTION: How to deal with undo/redo when deleting a layer? 
+//If a layer is removed, actions associated with that layer will be removed 
+//and can't easily be added back in the correct order.
 
 //vector layers have an option to create a raster copy layer
 
