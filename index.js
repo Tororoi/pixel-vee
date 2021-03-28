@@ -384,7 +384,7 @@ function handleWheel(e) {
     onScreenCTX.scale(z, z);
     state.lastOffsetX = state.xOffset;
     state.lastOffsetY = state.yOffset;
-    renderImage();
+    drawCanvas();
 }
 
 function handleMouseMove(e) {
@@ -404,7 +404,7 @@ function handleMouseMove(e) {
         //run selected tool step function
         state.tool.fn();
     } else {
-        //only draw preview brush when necessary
+        //normalize cursor render to pixelgrid
         if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
             onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
             drawCanvas();
@@ -533,7 +533,7 @@ function handleRecenter(e) {
     state.yOffset = 0;
     state.lastOffsetX = 0;
     state.lastOffsetY = 0;
-    renderImage();
+    drawCanvas();
 }
 
 function handleClear() {
@@ -542,7 +542,7 @@ function handleClear() {
     state.points = [];
     state.redoStack = [];
     state.currentLayer.ctx.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
-    renderImage();
+    drawCanvas();
 }
 
 function handleZoom(e) {
@@ -572,7 +572,7 @@ function handleZoom(e) {
         onScreenCTX.scale(z, z);
         state.lastOffsetX = state.xOffset;
         state.lastOffsetY = state.yOffset;
-        renderImage();
+        drawCanvas();
     }
 }
 
@@ -623,11 +623,11 @@ function addToTimeline(tool, x, y) {
         mode: state.mode
     });
     //render action
-    renderImage();
+    drawCanvas();
 }
 
 //Action functions
-//controller for draw
+//"Steps" functions are controllers for the process
 function drawSteps() {
     switch (state.event) {
         case "mousedown":
@@ -643,7 +643,8 @@ function drawSteps() {
         case "mousemove":
             drawCurrentPixel();
             if (state.lastX !== state.mouseX || state.lastY !== state.mouseY) {
-                renderImage();
+                //necessary drawcanvas?
+                drawCanvas();
                 drawCurrentPixel();
                 //draw between points when drawing fast
                 if (Math.abs(state.mouseX - state.lastX) > 1 || Math.abs(state.mouseY - state.lastY) > 1) {
@@ -701,7 +702,6 @@ function actionDraw(coordX, coordY, currentColor, size, ctx, currentMode) {
     }
 }
 
-//controller function to run action appropriately
 function lineSteps() {
     switch (state.event) {
         case "mousedown":
@@ -788,23 +788,21 @@ function replaceSteps() {
             actionReplace(state.localColorLayer);
             state.lastX = state.mouseX;
             state.lastY = state.mouseY;
+            //for perfect pixels
             // state.lastDrawnX = state.mouseX;
             // state.lastDrawnY = state.mouseY;
             // state.waitingPixelX = state.mouseX;
             // state.waitingPixelY = state.mouseY;
             //get rid of onscreen cursor
-            // source = offScreenCVS.toDataURL();
-            renderImage();
+            drawCanvas();
             break;
         case "mousemove":
-            //only execute when necessary
             //draw onscreen current pixel if match to backColor
-            // can't add smoother lines until line replace method is added
+            //normalize mousemove to pixelgrid
             if (state.lastX !== state.mouseX || state.lastY !== state.mouseY) {
                 actionReplace(state.localColorLayer);
                 if (Math.abs(state.mouseX - state.lastX) > 1 || Math.abs(state.mouseY - state.lastY) > 1) {
                     //add to options, only execute if "continuous line" is on
-                    //BUG: replace needs layer's color map, not the global map
                     lineReplace(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode, state.localColorLayer);
                 } else {
                     //perfect will be option, not mode
@@ -823,7 +821,7 @@ function replaceSteps() {
             //only needed if perfect pixels option is on
             actionReplace(state.localColorLayer);
             //re-render image to allow onscreen cursor to render
-            renderImage();
+            drawCanvas();
             break;
         default:
         //do nothing
@@ -885,8 +883,8 @@ function fillSteps() {
             addToTimeline(state.tool.name, state.mouseX, state.mouseY);
             break;
         case "mouseup":
-            //re-render image to allow onscreen cursor to render
-            renderImage();
+            //redraw canvas to allow onscreen cursor to render
+            drawCanvas();
         default:
         //do nothing
     }
@@ -1013,7 +1011,7 @@ function curveSteps() {
             break;
         case "mousemove":
             //draw line from origin point to current point onscreen
-            //only draw when necessary
+            //normalize mousemove to pixelgrid
             if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
                 // onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
                 drawCanvas();
@@ -1204,12 +1202,11 @@ function pickerSteps() {
             sampleColor(state.mouseX, state.mouseY);
             break;
         case "mousemove":
-            //only draw when necessary, get color here too
+            //normalize mousemove to pixelgrid, get color here too
             if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
                 //get color
                 sampleColor(state.mouseX, state.mouseY);
                 //draw square
-                onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
                 drawCanvas();
                 renderCursor();
                 state.lastOnX = state.onX;
@@ -1247,10 +1244,9 @@ function setColor(r, g, b, target) {
 function grabSteps() {
     switch (state.event) {
         case "mousemove":
-            //only draw when necessary, get color here too
             state.xOffset = state.onX - state.lastOnX + state.lastOffsetX;
             state.yOffset = state.onY - state.lastOnY + state.lastOffsetY;
-            renderImage();
+            drawCanvas();
             break;
         case "mouseup":
             state.lastOffsetX = state.xOffset;
@@ -1276,7 +1272,7 @@ function actionUndoRedo(pushStack, popStack) {
         l.ctx.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
     });
     redrawPoints();
-    renderImage();
+    drawCanvas();
 }
 
 function redrawPoints() {
@@ -1302,12 +1298,6 @@ function redrawPoints() {
             }
         })
     })
-}
-
-//Once the image is loaded, draw the image onto the onscreen canvas.
-function renderImage() {
-    onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
-    drawCanvas();
 }
 
 function drawPreview() {
@@ -1355,6 +1345,8 @@ function drawLayers() {
 }
 
 function drawCanvas() {
+    //clear canvas
+    onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
     //Prevent blurring
     onScreenCTX.imageSmoothingEnabled = false;
     onScreenCTX.fillStyle = "gray";
