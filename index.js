@@ -361,7 +361,7 @@ function handleKeyUp(e) {
 
 function handleWheel(e) {
     let delta = Math.sign(e.deltaY);
-    //BUG: zoom is off center just a bit and drawing before moving the mouse has odd effects
+    //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
     //zoom based on mouse coords
     let z;
     let rw = ocWidth / offScreenCVS.width;
@@ -546,7 +546,7 @@ function handleClear() {
 }
 
 function handleZoom(e) {
-    //BUG: offcenter
+    //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
     //general zoom based on center
     if (e.target.closest(".square")) {
         let zoomBtn = e.target.closest(".square");
@@ -1349,12 +1349,13 @@ function drawCanvas() {
     onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
     //Prevent blurring
     onScreenCTX.imageSmoothingEnabled = false;
+    //fill background
     onScreenCTX.fillStyle = "gray";
-    //adjust canvas ratio here
     onScreenCTX.fillRect(0, 0, ocWidth / zoom, ocHeight / zoom);
     //BUG: How to mask outside drawing space?
     onScreenCTX.clearRect(state.xOffset, state.yOffset, ocWidth, ocHeight);
     drawLayers();
+    //draw border
     onScreenCTX.beginPath();
     onScreenCTX.rect(state.xOffset - 1, state.yOffset - 1, ocWidth + 2, ocHeight + 2);
     onScreenCTX.lineWidth = 2;
