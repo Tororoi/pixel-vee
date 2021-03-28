@@ -1,3 +1,7 @@
+//===================================//
+//========= * * * DOM * * * =========//
+//===================================//
+
 //Main
 let fullPage = document.querySelector(".full-page");
 
@@ -42,7 +46,7 @@ let modesCont = document.querySelector(".modes");
 let modeBtn = document.querySelector("#draw");
 modeBtn.style.background = "rgb(238, 206, 102)";
 
-//Background upload
+//Reference upload
 let uploadBtn = document.querySelector("#file-upload");
 
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
@@ -53,14 +57,11 @@ offScreenCVS.width = 256;
 offScreenCVS.height = 256;
 //for adjusting canvas size, adjust onscreen canvas dimensions in proportion to offscreen
 
-//Create a preview canvas. Also offscreen and same size as offscreen canvas. Used for UI such as cursors and previewing certain tools
-let guiCVS = document.createElement('canvas');
-let guiCTX = guiCVS.getContext("2d");
-//Set the dimensions of the drawing canvas
-guiCVS.width = offScreenCVS.width;
-guiCVS.height = offScreenCVS.height;
+//========================================//
+//=== * * * Important References * * * ===//
+//========================================//
 
-//tool objects
+//Tools
 const tools = {
     pencil: {
         name: "pencil",
@@ -118,35 +119,13 @@ const tools = {
     // }
 }
 
-//types: raster, vector, reference
+//Layers (types: raster, vector, reference)
+const layers = [];
+
 //create first layer
-let layerCVS = document.createElement('canvas');
-let layerCTX = layerCVS.getContext("2d");
-layerCVS.width = offScreenCVS.width;
-layerCVS.height = offScreenCVS.height;
+addRasterLayer();
 
-const layers = [
-    { type: "raster", title: "Layer 1", cvs: layerCVS, ctx: layerCTX, x: 0, y: 0, scale: 1, opacity: 1 }
-]
-
-//manipulate layers with .splice
-//layer = layers.splice(n,1) to remove and store layer in variable
-//layers.splice(n,0,layer) to insert at new position
-
-//render layers interface
-//for each layer, render a template display to the dom with image, title, type
-//dragging a layer up or down should reflect in the order of the layers array
-//template should have an eye icon to toggle visibility and a slider for opacity
-
-//add move tool and scale tool for reference layers
-
-//IMPORTANT: add reference to action's layer when adding to timeline
-
-//vector layers have an option to create a raster copy layer
-
-//vector layers need movable control points, how to organize order of added control points?
-
-//state
+//State (not yet a true state)
 const state = {
     //timeline
     points: [],
@@ -184,6 +163,14 @@ const state = {
     //x2/y2 for line tool
     lineX: null,
     lineY: null,
+    //for curve tool
+    clickCounter: 0,
+    px1: null,
+    py1: null,
+    px2: null,
+    py2: null,
+    px3: null,
+    py3: null,
     //for perfect pixels
     lastDrawnX: null,
     lastDrawnY: null,
@@ -199,19 +186,23 @@ const state = {
     lastOffsetY: 0
 }
 
-//shortcuts
+//===================================//
+//=== * * * Event Listeners * * * ===//
+//===================================//
+
+//Shortcuts
 document.addEventListener('keydown', handleKeyDown);
 document.addEventListener('keyup', handleKeyUp);
 
 onScreenCVS.addEventListener('wheel', handleWheel);
 
-//Add event listeners for the mouse moving, downclick, and upclick
+//Mouse
 onScreenCVS.addEventListener('mousemove', handleMouseMove);
 onScreenCVS.addEventListener('mousedown', handleMouseDown);
 onScreenCVS.addEventListener('mouseup', handleMouseUp);
 onScreenCVS.addEventListener('mouseout', handleMouseOut);
 
-//Add event listeners for the toolbox
+//Toolbox
 undoBtn.addEventListener('click', handleUndo);
 redoBtn.addEventListener('click', handleRedo);
 
@@ -228,6 +219,10 @@ toolsCont.addEventListener('click', handleTools);
 modesCont.addEventListener('click', handleModes);
 
 uploadBtn.addEventListener("change", addReferenceLayer);
+
+//======================================//
+//=== * * * Key Event Handlers * * * ===//
+//======================================//
 
 function handleKeyDown(e) {
     // console.log(e.key)
@@ -359,32 +354,20 @@ function handleKeyUp(e) {
     }
 }
 
-function handleWheel(e) {
-    let delta = Math.sign(e.deltaY);
-    //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
-    //zoom based on mouse coords
-    let z;
-    let rw = ocWidth / offScreenCVS.width;
-    let nox = Math.round(((state.mox * state.ratio) / 5 / zoom) / rw) * rw;
-    let noy = Math.round(((state.moy * state.ratio) / 5 / zoom) / rw) * rw;
-    let lox = Math.round(((state.mox * state.ratio) / 4 / zoom) / rw) * rw;
-    let loy = Math.round(((state.moy * state.ratio) / 4 / zoom) / rw) * rw;
-    if (delta < 0) {
-        z = 0.8;
-        zoom *= z;
-        state.xOffset += lox;
-        state.yOffset += loy;
-    } else if (delta > 0) {
-        z = 1.25;
-        state.xOffset -= nox;
-        state.yOffset -= noy;
-        zoom *= z;
-    }
-    //re scale canvas
-    onScreenCTX.scale(z, z);
-    state.lastOffsetX = state.xOffset;
-    state.lastOffsetY = state.yOffset;
-    drawCanvas();
+//========================================//
+//=== * * * Mouse Event Handlers * * * ===//
+//========================================//
+
+function handleMouseDown(e) {
+    state.event = "mousedown";
+    state.clicked = true;
+    state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
+    state.mox = Math.floor(e.offsetX / state.trueRatio);
+    state.moy = Math.floor(e.offsetY / state.trueRatio);
+    state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio * zoom));
+    state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio * zoom));
+    //run selected tool step function
+    state.tool.fn();
 }
 
 function handleMouseMove(e) {
@@ -400,7 +383,7 @@ function handleMouseMove(e) {
     //Hover brush
     state.onX = state.mox * state.ratio / zoom;
     state.onY = state.moy * state.ratio / zoom;
-    if (state.clicked || (state.tool.name === "curve" && clickCounter > 0)) {
+    if (state.clicked || (state.tool.name === "curve" && state.clickCounter > 0)) {
         //run selected tool step function
         state.tool.fn();
     } else {
@@ -413,18 +396,6 @@ function handleMouseMove(e) {
             state.lastOnY = state.onY;
         }
     }
-}
-
-function handleMouseDown(e) {
-    state.event = "mousedown";
-    state.clicked = true;
-    state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
-    state.mox = Math.floor(e.offsetX / state.trueRatio);
-    state.moy = Math.floor(e.offsetY / state.trueRatio);
-    state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio * zoom));
-    state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio * zoom));
-    //run selected tool step function
-    state.tool.fn();
 }
 
 function handleMouseUp(e) {
@@ -467,6 +438,117 @@ function handleMouseOut(e) {
     }
     state.event = "none";
 }
+
+function handleWheel(e) {
+    let delta = Math.sign(e.deltaY);
+    //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
+    //zoom based on mouse coords
+    let z;
+    let rw = ocWidth / offScreenCVS.width;
+    let nox = Math.round(((state.mox * state.ratio) / 5 / zoom) / rw) * rw;
+    let noy = Math.round(((state.moy * state.ratio) / 5 / zoom) / rw) * rw;
+    let lox = Math.round(((state.mox * state.ratio) / 4 / zoom) / rw) * rw;
+    let loy = Math.round(((state.moy * state.ratio) / 4 / zoom) / rw) * rw;
+    if (delta < 0) {
+        z = 0.8;
+        zoom *= z;
+        state.xOffset += lox;
+        state.yOffset += loy;
+    } else if (delta > 0) {
+        z = 1.25;
+        state.xOffset -= nox;
+        state.yOffset -= noy;
+        zoom *= z;
+    }
+    //re scale canvas
+    onScreenCTX.scale(z, z);
+    state.lastOffsetX = state.xOffset;
+    state.lastOffsetY = state.yOffset;
+    drawCanvas();
+}
+
+//=========================================//
+//=== * * * Button Event Handlers * * * ===//
+//=========================================//
+
+function handleZoom(e) {
+    //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
+    //general zoom based on center
+    if (e.target.closest(".square")) {
+        let zoomBtn = e.target.closest(".square");
+        let z;
+        let rw = ocWidth / offScreenCVS.width;
+        //next origin
+        let nox = Math.round((ocWidth / 10 / zoom) / rw) * rw;
+        let noy = Math.round((ocHeight / 10 / zoom) / rw) * rw;
+        let lox = Math.round((ocWidth / 8 / zoom) / rw) * rw;
+        let loy = Math.round((ocHeight / 8 / zoom) / rw) * rw;
+        if (zoomBtn.id === "minus") {
+            z = 0.8;
+            zoom *= z;
+            state.xOffset += lox;
+            state.yOffset += loy;
+        } else if (zoomBtn.id === "plus") {
+            z = 1.25;
+            zoom *= z;
+            state.xOffset -= nox;
+            state.yOffset -= noy;
+        }
+        //re scale canvas
+        onScreenCTX.scale(z, z);
+        state.lastOffsetX = state.xOffset;
+        state.lastOffsetY = state.yOffset;
+        drawCanvas();
+    }
+}
+
+function handleUndo() {
+    if (state.undoStack.length > 0) {
+        actionUndoRedo(state.redoStack, state.undoStack);
+    }
+}
+
+function handleRedo() {
+    if (state.redoStack.length >= 1) {
+        actionUndoRedo(state.undoStack, state.redoStack);
+    }
+}
+
+function handleTools(e) {
+    if (e.target.closest(".tool")) {
+        //failsafe for hacking tool ids
+        if (tools[e.target.closest(".tool").id]) {
+            //reset old button
+            toolBtn.style.background = "rgb(131, 131, 131)";
+            //get new button and select it
+            toolBtn = e.target.closest(".tool");
+            toolBtn.style.background = "rgb(238, 206, 102)";
+            state.tool = tools[toolBtn.id];
+            if (toolBtn.id === "grab") {
+                onScreenCVS.style.cursor = "move";
+            } else if (toolBtn.id === "replace" || toolBtn.id === "pencil" || toolBtn.id === "curve") {
+                onScreenCVS.style.cursor = "crosshair";
+            } else {
+                onScreenCVS.style.cursor = "none";
+            }
+        }
+    }
+}
+
+function handleModes(e) {
+    if (e.target.closest(".mode")) {
+        //reset old button
+        modeBtn.style.background = "rgb(131, 131, 131)";
+        //get new button and select it
+        modeBtn = e.target.closest(".mode");
+        modeBtn.style.background = "rgb(238, 206, 102)";
+        state.mode = modeBtn.id;
+    }
+}
+
+//===========================================//
+//=== * * * Graphics User Interface * * * ===//
+//===========================================//
 
 function renderCursor() {
     switch (state.tool.name) {
@@ -514,119 +596,10 @@ function drawCurrentPixel() {
     }
 }
 
-function handleUndo() {
-    if (state.undoStack.length > 0) {
-        actionUndoRedo(state.redoStack, state.undoStack);
-    }
-}
+//====================================//
+//===== * * * Action Tools * * * =====//
+//====================================//
 
-function handleRedo() {
-    if (state.redoStack.length >= 1) {
-        actionUndoRedo(state.undoStack, state.redoStack);
-    }
-}
-
-function handleRecenter(e) {
-    onScreenCTX.scale(1 / zoom, 1 / zoom);
-    zoom = 1;
-    state.xOffset = 0;
-    state.yOffset = 0;
-    state.lastOffsetX = 0;
-    state.lastOffsetY = 0;
-    drawCanvas();
-}
-
-function handleClear() {
-    addToTimeline("clear", 0, 0);
-    state.undoStack.push(state.points);
-    state.points = [];
-    state.redoStack = [];
-    state.currentLayer.ctx.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
-    drawCanvas();
-}
-
-function handleZoom(e) {
-    //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
-    //general zoom based on center
-    if (e.target.closest(".square")) {
-        let zoomBtn = e.target.closest(".square");
-        let z;
-        let rw = ocWidth / offScreenCVS.width;
-        //next origin
-        let nox = Math.round((ocWidth / 10 / zoom) / rw) * rw;
-        let noy = Math.round((ocHeight / 10 / zoom) / rw) * rw;
-        let lox = Math.round((ocWidth / 8 / zoom) / rw) * rw;
-        let loy = Math.round((ocHeight / 8 / zoom) / rw) * rw;
-        if (zoomBtn.id === "minus") {
-            z = 0.8;
-            zoom *= z;
-            state.xOffset += lox;
-            state.yOffset += loy;
-        } else if (zoomBtn.id === "plus") {
-            z = 1.25;
-            zoom *= z;
-            state.xOffset -= nox;
-            state.yOffset -= noy;
-        }
-        //re scale canvas
-        onScreenCTX.scale(z, z);
-        state.lastOffsetX = state.xOffset;
-        state.lastOffsetY = state.yOffset;
-        drawCanvas();
-    }
-}
-
-function handleTools(e) {
-    if (e.target.closest(".tool")) {
-        //failsafe for hacking tool ids
-        if (tools[e.target.closest(".tool").id]) {
-            //reset old button
-            toolBtn.style.background = "rgb(131, 131, 131)";
-            //get new button and select it
-            toolBtn = e.target.closest(".tool");
-            toolBtn.style.background = "rgb(238, 206, 102)";
-            state.tool = tools[toolBtn.id];
-            if (toolBtn.id === "grab") {
-                onScreenCVS.style.cursor = "move";
-            } else if (toolBtn.id === "replace" || toolBtn.id === "pencil" || toolBtn.id === "curve") {
-                onScreenCVS.style.cursor = "crosshair";
-            } else {
-                onScreenCVS.style.cursor = "none";
-            }
-        }
-    }
-}
-
-function handleModes(e) {
-    if (e.target.closest(".mode")) {
-        //reset old button
-        modeBtn.style.background = "rgb(131, 131, 131)";
-        //get new button and select it
-        modeBtn = e.target.closest(".mode");
-        modeBtn.style.background = "rgb(238, 206, 102)";
-        state.mode = modeBtn.id;
-    }
-}
-
-function addToTimeline(tool, x, y) {
-    //use current state for variables
-    //pencil, replace
-    state.points.push({
-        //x/y are sometimes objects with multiple values
-        x: x,
-        y: y,
-        layer: state.currentLayer,
-        size: state.tool.brushSize,
-        color: { ...state.brushColor },
-        tool: tool,
-        action: state.tool.fn,
-        mode: state.mode
-    });
-    //render action
-    drawCanvas();
-}
-
-//Action functions
 //"Steps" functions are controllers for the process
 function drawSteps() {
     switch (state.event) {
@@ -765,21 +738,6 @@ function actionLine(sx, sy, tx, ty, currentColor, ctx, currentMode, scale = 1) {
         scale, scale); // fill in one pixel, 1x1
 }
 
-//helper for replace and fill to get color on canvas
-function getColor(x, y, colorLayer) {
-    let canvasColor = {};
-
-    let startPos = (y * offScreenCVS.width + x) * 4;
-    //clicked color
-    canvasColor.r = colorLayer.data[startPos];
-    canvasColor.g = colorLayer.data[startPos + 1];
-    canvasColor.b = colorLayer.data[startPos + 2];
-    canvasColor.a = colorLayer.data[startPos + 3];
-    canvasColor.color = `rgba(${canvasColor.r},${canvasColor.g},${canvasColor.b},${canvasColor.a})`
-    return canvasColor;
-}
-
-//controller for replace
 function replaceSteps() {
     switch (state.event) {
         case "mousedown":
@@ -875,11 +833,11 @@ function actionReplace(colorLayer) {
     }
 }
 
-//controller for fill
 function fillSteps() {
     switch (state.event) {
         case "mousedown":
             actionFill(state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode);
+            //For undo ability, store starting coords and settings and pass them into actionFill
             addToTimeline(state.tool.name, state.mouseX, state.mouseY);
             break;
         case "mouseup":
@@ -890,7 +848,6 @@ function fillSteps() {
     }
 }
 
-//For undo ability, store starting coords and settings and pass them into actionFill
 function actionFill(startX, startY, currentColor, ctx, currentMode) {
     //exit if outside borders
     if (startX < 0 || startX >= offScreenCVS.width || startY < 0 || startY >= offScreenCVS.height) {
@@ -986,24 +943,20 @@ function actionFill(startX, startY, currentColor, ctx, currentMode) {
     }
 }
 
-//temp
-let clickCounter = 0;
-let px1, py1, px2, py2, px3, py3;
-
 function curveSteps() {
     switch (state.event) {
         case "mousedown":
             //solidify end points
-            clickCounter += 1;
-            if (clickCounter > 3) clickCounter = 1;
-            switch (clickCounter) {
+            state.clickCounter += 1;
+            if (state.clickCounter > 3) state.clickCounter = 1;
+            switch (state.clickCounter) {
                 case 1:
-                    px1 = state.mouseX;
-                    py1 = state.mouseY;
+                    state.px1 = state.mouseX;
+                    state.py1 = state.mouseY;
                     break;
                 case 2:
-                    px2 = state.mouseX;
-                    py2 = state.mouseY;
+                    state.px2 = state.mouseX;
+                    state.py2 = state.mouseY;
                     break;
                 default:
                 //do nothing
@@ -1016,20 +969,43 @@ function curveSteps() {
                 // onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
                 drawCanvas();
                 //onscreen preview
-                actionCurve(px1 + (state.xOffset / state.ratio * zoom), py1 + (state.yOffset / state.ratio * zoom), px2 + (state.xOffset / state.ratio * zoom), py2 + (state.yOffset / state.ratio * zoom), px3 + (state.xOffset / state.ratio * zoom), py3 + (state.yOffset / state.ratio * zoom), clickCounter, state.brushColor, onScreenCTX, state.mode, state.ratio / zoom);
+                actionCurve(
+                    state.px1 + (state.xOffset / state.ratio * zoom),
+                    state.py1 + (state.yOffset / state.ratio * zoom),
+                    state.px2 + (state.xOffset / state.ratio * zoom),
+                    state.py2 + (state.yOffset / state.ratio * zoom),
+                    state.px3 + (state.xOffset / state.ratio * zoom),
+                    state.py3 + (state.yOffset / state.ratio * zoom),
+                    state.clickCounter,
+                    state.brushColor,
+                    onScreenCTX,
+                    state.mode,
+                    state.ratio / zoom
+                );
                 state.lastOnX = state.onX;
                 state.lastOnY = state.onY;
             }
             break;
         case "mouseup" || "mouseout":
-            if (clickCounter === 3) {
+            if (state.clickCounter === 3) {
                 //solidify control point
-                px3 = state.mouseX;
-                py3 = state.mouseY;
-                actionCurve(px1, py1, px2, py2, px3, py3, clickCounter + 1, state.brushColor, state.currentLayer.ctx, state.mode)
-                clickCounter = 0;
+                state.px3 = state.mouseX;
+                state.py3 = state.mouseY;
+                actionCurve(
+                    state.px1,
+                    state.py1,
+                    state.px2,
+                    state.py2,
+                    state.px3,
+                    state.py3,
+                    state.clickCounter + 1,
+                    state.brushColor,
+                    state.currentLayer.ctx,
+                    state.mode
+                );
+                state.clickCounter = 0;
                 //store control points for timeline
-                addToTimeline(state.tool.name, { x1: px1, x2: px2, x3: px3 }, { y1: py1, y2: py2, y3: py3 });
+                addToTimeline(state.tool.name, { x1: state.px1, x2: state.px2, x3: state.px3 }, { y1: state.py1, y2: state.py2, y3: state.py3 });
             }
             break;
         default:
@@ -1037,7 +1013,6 @@ function curveSteps() {
     }
 }
 
-//Curved Lines
 function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, currentColor, ctx, currentMode, scale = 1) {
 
     //force coords to int
@@ -1190,8 +1165,30 @@ function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, cu
     }
 }
 
-//Non-actions
-//Color picker
+function handleClear() {
+    addToTimeline("clear", 0, 0);
+    state.undoStack.push(state.points);
+    state.points = [];
+    state.redoStack = [];
+    state.currentLayer.ctx.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
+    drawCanvas();
+}
+
+//====================================//
+//=== * * * Non-Action Tools * * * ===//
+//====================================//
+
+function handleRecenter(e) {
+    onScreenCTX.scale(1 / zoom, 1 / zoom);
+    zoom = 1;
+    state.xOffset = 0;
+    state.yOffset = 0;
+    state.lastOffsetX = 0;
+    state.lastOffsetY = 0;
+    drawCanvas();
+}
+
+//Eyedropper
 function pickerSteps() {
     switch (state.event) {
         case "mousedown":
@@ -1218,27 +1215,11 @@ function pickerSteps() {
     }
 }
 
-//picker function, tool but not an action
+//picker helper function
 function sampleColor(x, y) {
     let newColor = getColor(x, y, state.colorLayerGlobal);
     //not simply passing whole color in until random color function is refined
     setColor(newColor.r, newColor.g, newColor.b, "swatch btn");
-}
-
-function setColor(r, g, b, target) {
-    if (target === "swatch btn") {
-        state.brushColor.color = `rgba(${r},${g},${b},255)`;
-        state.brushColor.r = r;
-        state.brushColor.g = g;
-        state.brushColor.b = b;
-        swatch.style.background = state.brushColor.color;
-    } else {
-        state.backColor.color = `rgba(${r},${g},${b},255)`;
-        state.backColor.r = r;
-        state.backColor.g = g;
-        state.backColor.b = b;
-        backSwatch.style.background = state.backColor.color;
-    }
 }
 
 function grabSteps() {
@@ -1263,6 +1244,28 @@ function grabSteps() {
     }
 }
 
+//====================================//
+//========= * * * Core * * * =========//
+//====================================//
+
+function addToTimeline(tool, x, y) {
+    //use current state for variables
+    //pencil, replace
+    state.points.push({
+        //x/y are sometimes objects with multiple values
+        x: x,
+        y: y,
+        layer: state.currentLayer,
+        size: state.tool.brushSize,
+        color: { ...state.brushColor },
+        tool: tool,
+        action: state.tool.fn,
+        mode: state.mode
+    });
+    //render action
+    drawCanvas();
+}
+
 //Main pillar of the code structure
 function actionUndoRedo(pushStack, popStack) {
     pushStack.push(popStack.pop());
@@ -1277,7 +1280,6 @@ function actionUndoRedo(pushStack, popStack) {
 
 function redrawPoints() {
     //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
-    // ADD: action's layer context
     state.undoStack.forEach(action => {
         action.forEach(p => {
             switch (p.tool) {
@@ -1300,8 +1302,63 @@ function redrawPoints() {
     })
 }
 
-function drawPreview() {
-    onScreenCTX.drawImage(guiCVS, state.xOffset, state.yOffset, ocWidth, ocHeight);
+function drawCanvas() {
+    //clear canvas
+    onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
+    //Prevent blurring
+    onScreenCTX.imageSmoothingEnabled = false;
+    //fill background
+    onScreenCTX.fillStyle = "gray";
+    onScreenCTX.fillRect(0, 0, ocWidth / zoom, ocHeight / zoom);
+    //BUG: How to mask outside drawing space?
+    onScreenCTX.clearRect(state.xOffset, state.yOffset, ocWidth, ocHeight);
+    drawLayers();
+    //draw border
+    onScreenCTX.beginPath();
+    onScreenCTX.rect(state.xOffset - 1, state.yOffset - 1, ocWidth + 2, ocHeight + 2);
+    onScreenCTX.lineWidth = 2;
+    onScreenCTX.strokeStyle = "black";
+    onScreenCTX.stroke();
+}
+
+//====================================//
+//======== * * * Layers * * * ========//
+//====================================//
+
+function drawLayers() {
+    layers.forEach(l => {
+        if (l.type === "reference") {
+            onScreenCTX.save();
+            onScreenCTX.globalAlpha = l.opacity;
+            //l.x, l.y need to be normalized to the pixel grid
+            onScreenCTX.drawImage(l.img, state.xOffset + l.x * ocWidth / offScreenCVS.width, state.yOffset + l.y * ocWidth / offScreenCVS.width, l.img.width * l.scale, l.img.height * l.scale);
+            onScreenCTX.restore();
+        } else {
+            onScreenCTX.save();
+            onScreenCTX.globalAlpha = l.opacity;
+            //l.x, l.y need to be normalized to the pixel grid
+            onScreenCTX.drawImage(l.cvs, state.xOffset + l.x * ocWidth / offScreenCVS.width, state.yOffset + l.y * ocWidth / offScreenCVS.width, ocWidth, ocHeight);
+            onScreenCTX.restore();
+        }
+    });
+}
+
+function consolidateLayers() {
+    layers.forEach(l => {
+        offScreenCTX.save();
+        offScreenCTX.globalAlpha = l.opacity;
+        offScreenCTX.drawImage(l.cvs, l.x, l.y, offScreenCVS.width, offScreenCVS.height);
+        offScreenCTX.restore();
+    });
+}
+
+function addRasterLayer() {
+    let layerCVS = document.createElement('canvas');
+    let layerCTX = layerCVS.getContext("2d");
+    layerCVS.width = offScreenCVS.width;
+    layerCVS.height = offScreenCVS.height;
+    let layer = { type: "raster", title: `Layer ${layers.length + 1}`, cvs: layerCVS, ctx: layerCTX, x: 0, y: 0, scale: 1, opacity: 1 }
+    layers.unshift(layer);
 }
 
 function addReferenceLayer() {
@@ -1326,58 +1383,26 @@ function addReferenceLayer() {
     }
 }
 
-function drawLayers() {
-    layers.forEach(l => {
-        if (l.type === "reference") {
-            onScreenCTX.save();
-            onScreenCTX.globalAlpha = l.opacity;
-            //l.x, l.y need to be normalized to the pixel grid
-            onScreenCTX.drawImage(l.img, state.xOffset + l.x * ocWidth / offScreenCVS.width, state.yOffset + l.y * ocWidth / offScreenCVS.width, l.img.width * l.scale, l.img.height * l.scale);
-            onScreenCTX.restore();
-        } else {
-            onScreenCTX.save();
-            onScreenCTX.globalAlpha = l.opacity;
-            //l.x, l.y need to be normalized to the pixel grid
-            onScreenCTX.drawImage(l.cvs, state.xOffset + l.x * ocWidth / offScreenCVS.width, state.yOffset + l.y * ocWidth / offScreenCVS.width, ocWidth, ocHeight);
-            onScreenCTX.restore();
-        }
-    });
-}
+//manipulate layers with .splice
+//layer = layers.splice(n,1) to remove and store layer in variable
+//layers.splice(n,0,layer) to insert at new position
 
-function drawCanvas() {
-    //clear canvas
-    onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
-    //Prevent blurring
-    onScreenCTX.imageSmoothingEnabled = false;
-    //fill background
-    onScreenCTX.fillStyle = "gray";
-    onScreenCTX.fillRect(0, 0, ocWidth / zoom, ocHeight / zoom);
-    //BUG: How to mask outside drawing space?
-    onScreenCTX.clearRect(state.xOffset, state.yOffset, ocWidth, ocHeight);
-    drawLayers();
-    //draw border
-    onScreenCTX.beginPath();
-    onScreenCTX.rect(state.xOffset - 1, state.yOffset - 1, ocWidth + 2, ocHeight + 2);
-    onScreenCTX.lineWidth = 2;
-    onScreenCTX.strokeStyle = "black";
-    onScreenCTX.stroke();
-}
+//render layers interface
+//for each layer, render a template display to the dom with image, title, type
+//dragging a layer up or down should reflect in the order of the layers array
+//template should have an eye icon to toggle visibility and a slider for opacity
 
-function consolidateLayers() {
-    layers.forEach(l => {
-        offScreenCTX.save();
-        offScreenCTX.globalAlpha = l.opacity;
-        offScreenCTX.drawImage(l.cvs, l.x, l.y, offScreenCVS.width, offScreenCVS.height);
-        offScreenCTX.restore();
-    });
-}
+//add move tool and scale tool for reference layers
 
-function randomizeColor(e) {
-    let r = Math.floor(Math.random() * 256);
-    let g = Math.floor(Math.random() * 256);
-    let b = Math.floor(Math.random() * 256);
-    setColor(r, g, b, e.target.className);
-}
+//IMPORTANT: add reference to action's layer when adding to timeline
+
+//vector layers have an option to create a raster copy layer
+
+//vector layers need movable control points, how to organize order of added control points?
+
+//====================================//
+//======== * * * Colors * * * ========//
+//====================================//
 
 function openColorPicker(e) {
     picker.swatch = e.target.className;
@@ -1398,4 +1423,40 @@ function switchColors(e) {
     swatch.style.background = state.brushColor.color;
     state.backColor = temp;
     backSwatch.style.background = state.backColor.color;
+}
+
+function setColor(r, g, b, target) {
+    if (target === "swatch btn") {
+        state.brushColor.color = `rgba(${r},${g},${b},255)`;
+        state.brushColor.r = r;
+        state.brushColor.g = g;
+        state.brushColor.b = b;
+        swatch.style.background = state.brushColor.color;
+    } else {
+        state.backColor.color = `rgba(${r},${g},${b},255)`;
+        state.backColor.r = r;
+        state.backColor.g = g;
+        state.backColor.b = b;
+        backSwatch.style.background = state.backColor.color;
+    }
+}
+
+function randomizeColor(e) {
+    let r = Math.floor(Math.random() * 256);
+    let g = Math.floor(Math.random() * 256);
+    let b = Math.floor(Math.random() * 256);
+    setColor(r, g, b, e.target.className);
+}
+
+function getColor(x, y, colorLayer) {
+    let canvasColor = {};
+
+    let startPos = (y * offScreenCVS.width + x) * 4;
+    //clicked color
+    canvasColor.r = colorLayer.data[startPos];
+    canvasColor.g = colorLayer.data[startPos + 1];
+    canvasColor.b = colorLayer.data[startPos + 2];
+    canvasColor.a = colorLayer.data[startPos + 3];
+    canvasColor.color = `rgba(${canvasColor.r},${canvasColor.g},${canvasColor.b},${canvasColor.a})`
+    return canvasColor;
 }
