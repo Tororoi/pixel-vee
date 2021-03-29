@@ -40,11 +40,11 @@ let zoomCont = document.querySelector(".zoom");
 //Get tool buttons
 let toolsCont = document.querySelector(".tools");
 let toolBtn = document.querySelector("#pencil");
-toolBtn.style.background = "rgb(238, 206, 102)";
+toolBtn.style.background = "rgb(100, 100, 100)";
 
 let modesCont = document.querySelector(".modes");
 let modeBtn = document.querySelector("#draw");
-modeBtn.style.background = "rgb(238, 206, 102)";
+modeBtn.style.background = "rgb(100, 100, 100)";
 
 //Reference upload
 let uploadBtn = document.querySelector("#file-upload");
@@ -520,9 +520,11 @@ function handleTools(e) {
         if (tools[e.target.closest(".tool").id]) {
             //reset old button
             toolBtn.style.background = "rgb(131, 131, 131)";
+            toolBtn.querySelector(".icon").style = "opacity: 0.5;"
             //get new button and select it
             toolBtn = e.target.closest(".tool");
-            toolBtn.style.background = "rgb(238, 206, 102)";
+            toolBtn.style.background = "rgb(100, 100, 100)";
+            toolBtn.querySelector(".icon").style = "opacity: 1;"
             state.tool = tools[toolBtn.id];
             if (toolBtn.id === "grab") {
                 onScreenCVS.style.cursor = "move";
@@ -539,9 +541,11 @@ function handleModes(e) {
     if (e.target.closest(".mode")) {
         //reset old button
         modeBtn.style.background = "rgb(131, 131, 131)";
+        modeBtn.querySelector(".icon").style = "opacity: 0.5;"
         //get new button and select it
         modeBtn = e.target.closest(".mode");
-        modeBtn.style.background = "rgb(238, 206, 102)";
+        modeBtn.querySelector(".icon").style = "opacity: 1;"
+        modeBtn.style.background = "rgb(100, 100, 100)";
         state.mode = modeBtn.id;
     }
 }
