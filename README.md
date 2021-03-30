@@ -3,6 +3,7 @@
 ### Drawing application for pixel art
 
 Visit here: https://pixelvee.netlify.app/
+(Works best on Chrome)
 
 ## Functions
 
