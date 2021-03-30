@@ -12,7 +12,8 @@ let onScreenCTX = onScreenCVS.getContext("2d");
 let ocWidth = onScreenCVS.width;
 let ocHeight = onScreenCVS.height;
 //improve sharpness
-let sharpness = 8;
+//BUG: sharpness greatly affects performance in browsers other than chrome
+let sharpness = 2;
 let zoom = 1;
 //adjust canvas ratio here if needed
 onScreenCVS.width = ocWidth * sharpness;
@@ -1306,6 +1307,7 @@ function redrawPoints() {
     })
 }
 
+//FIX: Improve performance by keeping track of "redraw regions" instead of redrawing the whole thing.
 function drawCanvas() {
     //clear canvas
     onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
