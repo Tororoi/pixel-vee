@@ -12,8 +12,8 @@ let onScreenCTX = onScreenCVS.getContext("2d");
 let ocWidth = onScreenCVS.width;
 let ocHeight = onScreenCVS.height;
 //improve sharpness
-//BUG: sharpness greatly affects performance in browsers other than chrome
-let sharpness = 2;
+//BUG: sharpness (8+) greatly affects performance in browsers other than chrome (can safari and firefox not handle large canvases?)
+let sharpness = 4;
 let zoom = 1;
 //adjust canvas ratio here if needed
 onScreenCVS.width = ocWidth * sharpness;
