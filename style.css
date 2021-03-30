@@ -159,6 +159,7 @@ canvas {
 .undoredo {
   display: flex;
   justify-content: space-around;
+  margin-bottom: 12px;
 }
 
 .undoredo div {
