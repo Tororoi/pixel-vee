@@ -547,11 +547,13 @@ h4 {
   margin: 0px;
 }
 
-.tools {
+.column {
   display: flex;
   justify-content: flex-start;
+  align-items: center;
   flex-flow: column wrap;
   margin: 13px;
+  width: 50%;
 }
 
 .tool {
@@ -2275,13 +2277,6 @@ h4 {
 }
 
 /* Modes */
-
-.modes {
-  display: flex;
-  justify-content: flex-start;
-  flex-flow: column wrap;
-  margin: 13px;
-}
 
 .mode {
   width: 40px;
