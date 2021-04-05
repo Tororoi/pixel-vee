@@ -503,15 +503,6 @@ input[type="number"]::-webkit-outer-spin-button {
   justify-content: space-around;
 }
 
-.square {
-  width: 40px;
-  height: 40px;
-}
-
-.square .tooltip {
-  transform: translateX(-80px) translateY(48px);
-}
-
 .plusminus {
   width: 40px;
   height: 40px;
