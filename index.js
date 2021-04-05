@@ -475,8 +475,8 @@ function handleWheel(e) {
 function handleZoom(e) {
     //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
     //general zoom based on center
-    if (e.target.closest(".square")) {
-        let zoomBtn = e.target.closest(".square");
+    if (e.target.closest(".zoombtn")) {
+        let zoomBtn = e.target.closest(".zoombtn");
         let z;
         let rw = ocWidth / offScreenCVS.width;
         //next origin

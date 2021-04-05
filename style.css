@@ -512,11 +512,33 @@ input[type="number"]::-webkit-outer-spin-button {
   transform: translateX(-80px) translateY(48px);
 }
 
-.square div {
-  background: black;
+.plusminus {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  flex-flow: column nowrap;
 }
 
-.minus {
+.plusminus div {
+  height: 50%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+}
+
+.plusminus div:hover {
+  background: white;
+  color: black;
+}
+
+.plusminus div p {
+  pointer-events: none;
+  transform: translateX(2px) translateY(2px);
+}
+
+/* .minus {
   width: 24px;
   height: 8px;
   position: relative;
@@ -538,7 +560,7 @@ input[type="number"]::-webkit-outer-spin-button {
   left: 8px;
   top: -8px;
   position: absolute;
-}
+} */
 
 /* Tools */
 
