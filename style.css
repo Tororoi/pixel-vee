@@ -26,7 +26,7 @@ canvas {
 
 .canvas-container {
   background-color: bisque;
-  width: calc(100% - 280px);
+  width: calc(100% - 240px);
   /* height: 70%; */
 }
 
@@ -78,9 +78,12 @@ canvas {
 
 .sidebar {
   background-color: rgb(80, 80, 80);
-  width: 280px;
+  width: 240px;
   overflow-y: scroll;
   overflow-x: hidden;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
 }
 
 .sidebar::-webkit-scrollbar {
@@ -2478,9 +2481,8 @@ input[type="file"] {
 
 .custom-file-upload {
   display: inline-block;
-  margin-left: 24px;
   font-size: 20px;
-  width: 232px;
+  width: 150px;
   height: auto;
   cursor: pointer;
 }

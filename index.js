@@ -1253,6 +1253,7 @@ function grabSteps() {
 //========= * * * Core * * * =========//
 //====================================//
 
+//command pattern. (Look into saving app-state instead)
 function addToTimeline(tool, x, y) {
     //use current state for variables
     //pencil, replace
