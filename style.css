@@ -10,7 +10,7 @@ body {
 
 .full-page {
   display: flex;
-  flex-direction: row-reverse;
+  /* flex-direction: row-reverse; */
   width: 100vw;
   height: 100vh;
   font-family: "04Font";
@@ -86,10 +86,11 @@ canvas {
 }
 
 .sidebar {
-  /* position: relative; */
+  position: relative;
   background-color: rgb(80, 80, 80);
   width: 166px;
-  overflow-y: scroll;
+  /* overflow-x: visible;
+  overflow-y: scroll; */
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
@@ -103,8 +104,12 @@ canvas {
 .toolbox {
   margin: 8px;
   display: flex;
-  flex-flow: column wrap;
+  flex-flow: column nowrap;
   align-items: center;
+}
+
+.toolbox::-webkit-scrollbar {
+  display: none;
 }
 
 /* Buttons */
@@ -135,7 +140,7 @@ canvas {
   opacity: 0;
   pointer-events: none;
   position: absolute;
-  z-index: 1;
+  z-index: 10;
   color: black;
   background: rgb(255, 255, 199);
   text-align: center;
@@ -470,8 +475,8 @@ input[type="number"]::-webkit-outer-spin-button {
 /* Main Interface */
 
 .colors {
-  /* display: flex; */
-  position: relative;
+  /* position: relative; */
+  top: 0;
   width: 128px;
   height: 128px;
 }
@@ -482,7 +487,7 @@ input[type="number"]::-webkit-outer-spin-button {
   width: 72px;
   height: 72px;
   margin: 16px;
-  z-index: 2;
+  z-index: 6;
   order: 2;
 }
 
@@ -492,7 +497,7 @@ input[type="number"]::-webkit-outer-spin-button {
   width: 72px;
   height: 72px;
   margin: 16px;
-  z-index: 1;
+  z-index: 5;
   order: 1;
   transform: translateX(24px) translateY(24px);
 }
