@@ -10,7 +10,6 @@ body {
 
 .full-page {
   display: flex;
-  /* flex-direction: row-reverse; */
   width: 100vw;
   height: 100vh;
   font-family: "04Font";
@@ -27,16 +26,14 @@ canvas {
 
 .canvas-container {
   position: relative;
-  width: calc(100% - 166px);
   z-index: 1;
-  /* height: 70%; */
+  width: calc(100% - 166px);
 }
 
 .bg-space {
   background-color: rgb(80, 80, 80);
   width: 100%;
   height: 100%;
-  /* overflow: hidden; */
 }
 
 #onScreen {
@@ -57,8 +54,6 @@ canvas {
   );
   position: relative;
   cursor: crosshair;
-  /* z-index: 100; */
-  /* transition: all 1s; */
   width: calc(100% - 6px);
   margin: 3px;
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
@@ -68,12 +63,6 @@ canvas {
 #onScreen:hover {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
     0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
-}
-
-#tempCanvas {
-  position: absolute;
-  /* z-index: 1; */
-  border: 5px solid rgb(209, 61, 35);
 }
 
 /* Toolbox */
@@ -129,8 +118,6 @@ canvas {
 .btn:hover {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
     0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
-  /* cursor: pointer; */
-  /* opacity: 0.8; */
 }
 
 .tooltip {
@@ -138,7 +125,6 @@ canvas {
   opacity: 0;
   pointer-events: none;
   position: absolute;
-  z-index: 10;
   color: black;
   background: rgb(255, 255, 199);
   text-align: center;
@@ -149,6 +135,7 @@ canvas {
   align-self: flex-start;
   transform: translateX(-80px) translateY(48px);
   transition: opacity 0.3s;
+  z-index: 10;
   box-shadow: 2px 0px rgb(255, 255, 199), -2px 0px rgb(255, 255, 199),
     0px -2px rgb(255, 255, 199), 0px 2px rgb(255, 255, 199);
 }
@@ -171,39 +158,21 @@ canvas {
   opacity: 1;
 }
 
-.undoredo {
+.btn-pair {
   display: flex;
   justify-content: space-around;
   margin-bottom: 12px;
   width: 100%;
 }
 
-.undoredo div {
+.btn-pair div {
   width: 40px;
   height: 40px;
   background: transparent;
   box-shadow: none;
 }
 
-.undoredo div:hover {
-  box-shadow: none;
-}
-
-.resets {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 12px;
-  width: 100%;
-}
-
-.resets div {
-  width: 40px;
-  height: 40px;
-  background: transparent;
-  box-shadow: none;
-}
-
-.resets div:hover {
+.btn-pair div:hover {
   box-shadow: none;
 }
 
@@ -219,6 +188,7 @@ canvas {
   display: none;
   flex-flow: column nowrap;
   position: absolute;
+  z-index: 3;
   top: 50%;
   left: 50%;
   color: white;
@@ -233,7 +203,6 @@ canvas {
   transform: translate(-50%, -50%);
   transition: 0.3s all;
   opacity: 1;
-  z-index: 3;
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
     0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
@@ -474,7 +443,6 @@ input[type="number"]::-webkit-outer-spin-button {
 
 .colors {
   /* position: relative; */
-  top: 0;
   width: 128px;
   height: 128px;
 }
@@ -486,7 +454,6 @@ input[type="number"]::-webkit-outer-spin-button {
   height: 72px;
   margin: 16px;
   z-index: 6;
-  order: 2;
 }
 
 .back-swatch {
@@ -496,7 +463,6 @@ input[type="number"]::-webkit-outer-spin-button {
   height: 72px;
   margin: 16px;
   z-index: 5;
-  order: 1;
   transform: translateX(24px) translateY(24px);
 }
 
@@ -517,9 +483,6 @@ input[type="number"]::-webkit-outer-spin-button {
   cursor: pointer;
   margin-bottom: -24px;
   transform: translateX(-48px) translateY(-36px);
-}
-
-.color-switch .tooltip {
 }
 
 .color-switch:hover {
@@ -636,8 +599,6 @@ input[type="number"]::-webkit-outer-spin-button {
     24px 32px rgba(255, 255, 255, 255), 26px 32px rgba(0, 0, 0, 255),
     28px 32px rgba(255, 255, 255, 255), 26px 34px rgba(255, 255, 255, 255);
 }
-
-/* Resets */
 
 /* Zoom */
 
