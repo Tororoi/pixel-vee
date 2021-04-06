@@ -1278,7 +1278,9 @@ function actionUndoRedo(pushStack, popStack) {
     //clear all layers in preparation to redraw them.
     //DRY: do all layers and actions need to be rerendered for redo?
     layers.forEach(l => {
-        l.ctx.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
+        if (l.type === "raster") {
+            l.ctx.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
+        }
     });
     redrawPoints();
     drawCanvas();
