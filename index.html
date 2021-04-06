@@ -13,27 +13,21 @@
 
   <body>
     <div class="full-page">
-      <div class="canvas-container">
-        <div class="bg-space">
-          <canvas id="onScreen" width="512px" height="512px"></canvas>
-        </div>
-      </div>
       <div class="sidebar">
         <div class="toolbox">
           <div class="colors">
-            <div class="swatch btn">
+            <div class="swatch btn"></div>
+            <div class="back-swatch btn">
               <span class="tooltip"
-                >(S) to randomize <br /><br />
+                >Swatch (S) to randomize <br /><br />
                 Click to open Color Picker</span
               >
             </div>
-            <div class="switch">
-              <span class="tooltip">Switch foreground/ background colors</span>
-            </div>
-            <div class="back-swatch btn">
-              <span class="tooltip">Click to open Color Picker</span>
-            </div>
             <!-- Add weighted randomizer to lean towards certain colors -->
+          </div>
+          <div class="color-switch btn">
+            <!-- <span class="tooltip">Switch primary/ secondary colors</span> -->
+            <span class="icon switch"></span>
           </div>
           <div class="resets">
             <div class="recenter btn">
@@ -127,6 +121,11 @@
         </label>
         <input type="file" id="file-upload" />
         <!-- <div class="custom-file-upload btn" id="file-remove">Remove Background</div> -->
+      </div>
+      <div class="canvas-container">
+        <div class="bg-space">
+          <canvas id="onScreen" width="512px" height="512px"></canvas>
+        </div>
       </div>
       <span class="color-container">
         <h3 id="picker-header">Color Picker</h3>

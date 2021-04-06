@@ -27,7 +27,7 @@ let redoBtn = document.getElementById("redo");
 //Get swatch
 let swatch = document.querySelector(".swatch");
 let backSwatch = document.querySelector(".back-swatch");
-let colorSwitch = document.querySelector(".switch");
+let colorSwitch = document.querySelector(".color-switch");
 
 let colorPicker = document.querySelector(".color-container");
 
