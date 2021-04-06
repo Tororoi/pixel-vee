@@ -89,8 +89,6 @@ canvas {
   position: relative;
   background-color: rgb(80, 80, 80);
   width: 166px;
-  /* overflow-x: visible;
-  overflow-y: scroll; */
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
