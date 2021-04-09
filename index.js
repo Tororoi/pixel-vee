@@ -50,6 +50,9 @@ modeBtn.style.background = "rgb(255, 255, 255)";
 //Reference upload
 let uploadBtn = document.querySelector("#file-upload");
 
+//Layers
+let layersCont = document.querySelector(".layers");
+
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
 let offScreenCVS = document.createElement('canvas');
 let offScreenCTX = offScreenCVS.getContext("2d");
@@ -220,6 +223,14 @@ toolsCont.addEventListener('click', handleTools);
 modesCont.addEventListener('click', handleModes);
 
 uploadBtn.addEventListener("change", addReferenceLayer);
+
+layersCont.addEventListener("click", getInfo);
+
+function getInfo(e) {
+    let arr = [...layersCont.children];
+    let index = arr.indexOf(e.target);
+    console.log(layers[index])
+}
 
 //======================================//
 //=== * * * Key Event Handlers * * * ===//
@@ -1367,7 +1378,11 @@ function addRasterLayer() {
     layerCVS.width = offScreenCVS.width;
     layerCVS.height = offScreenCVS.height;
     let layer = { type: "raster", title: `Layer ${layers.length + 1}`, cvs: layerCVS, ctx: layerCTX, x: 0, y: 0, scale: 1, opacity: 1 }
-    layers.unshift(layer);
+    layers.push(layer);
+    let layerElement = document.createElement("div");
+    layerElement.className = "layer raster";
+    layerElement.textContent = layer.title;
+    renderLayersToDOM();
 }
 
 function addReferenceLayer() {
@@ -1384,12 +1399,26 @@ function addReferenceLayer() {
                 let scale = ocWidth / img.width > ocHeight / img.height ? ocHeight / img.height : ocWidth / img.width;
                 let layer = { type: "reference", title: "New Layer", img: img, x: 0, y: 0, scale: scale, opacity: 1 }
                 layers.unshift(layer)
+                let layerElement = document.createElement("div");
+                layerElement.className = "layer reference";
+                layerElement.textContent = layer.title;
+                renderLayersToDOM();
                 drawCanvas();
             }
         }
 
         reader.readAsDataURL(this.files[0]);
     }
+}
+
+function renderLayersToDOM() {
+    layersCont.innerHTML="";
+    layers.forEach(l => {
+        let layerElement = document.createElement("div");
+        layerElement.className = `layer ${l.type}`;
+        layerElement.textContent = l.title;
+        layersCont.appendChild(layerElement);
+    })
 }
 
 //Psuedocode:

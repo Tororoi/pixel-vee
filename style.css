@@ -76,7 +76,7 @@ canvas {
 
 .sidebar {
   position: relative;
-  background-color: rgb(80, 80, 80);
+  background-color: rgb(61, 61, 61);
   width: 166px;
   display: flex;
   flex-flow: column nowrap;
@@ -135,6 +135,7 @@ canvas {
   align-self: flex-start;
   transform: translateX(-80px) translateY(48px);
   transition: opacity 0.3s;
+  transition-delay: 0.7s;
   z-index: 10;
   box-shadow: 2px 0px rgb(255, 255, 199), -2px 0px rgb(255, 255, 199),
     0px -2px rgb(255, 255, 199), 0px 2px rgb(255, 255, 199);
@@ -2569,3 +2570,45 @@ input[type="file"] {
   height: auto;
   cursor: pointer;
 }
+
+/* Layers */
+
+.layers {
+  background: rgb(41, 41, 41);
+  width: 162px;
+  height: 120px;
+  display: flex;
+  flex-flow: column-reverse nowrap;
+  justify-content: flex-end;
+}
+
+.layers div {
+height: 40px;
+width: 100%;
+text-align: center;
+line-height: 40px;
+box-shadow: inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131),
+    inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131);
+}
+
+.layers div:hover {
+box-shadow: inset 2px 0px rgb(255, 255, 255), inset -2px 0px rgb(255, 255, 255),
+    inset 0px -2px rgb(255, 255, 255), inset 0px 2px rgb(255, 255, 255);
+}
+
+.raster {
+background: rgb(131, 131, 131);
+}
+
+.reference {
+background: rgb(95, 95, 95);
+}
+
+/* 
+  box-shadow: inset 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+
+.btn:hover {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+} */
