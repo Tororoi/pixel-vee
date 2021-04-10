@@ -2582,18 +2582,29 @@ input[type="file"] {
   justify-content: flex-end;
 }
 
-.layers div {
+.layer {
 height: 40px;
 width: 100%;
 text-align: center;
 line-height: 40px;
+display: flex;
+flex-flow: row-reverse nowrap;
+justify-content: flex-end;
+align-items: center;
 box-shadow: inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131),
     inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131);
 }
 
-.layers div:hover {
+.layer:hover {
 box-shadow: inset 2px 0px rgb(255, 255, 255), inset -2px 0px rgb(255, 255, 255),
     inset 0px -2px rgb(255, 255, 255), inset 0px 2px rgb(255, 255, 255);
+}
+
+.eye {
+  width: 28px;
+  height: 28px;
+  margin: 6px;
+  background: rgb(77, 77, 77);
 }
 
 .raster {

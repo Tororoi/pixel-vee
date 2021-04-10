@@ -224,13 +224,20 @@ modesCont.addEventListener('click', handleModes);
 
 uploadBtn.addEventListener("change", addReferenceLayer);
 
-layersCont.addEventListener("click", getInfo);
+layersCont.addEventListener("click", layerInteract);
 
-function getInfo(e) {
+function layerInteract(e) {
     let arr = [...layersCont.children];
-    let index = arr.indexOf(e.target);
-    console.log(layers[index])
-}
+    let index = arr.indexOf(e.target.closest(".layer"));
+    if (e.target.className.includes("eye")) {
+        if (layers[index].opacity === 0) {
+            layers[index].opacity = 1;
+        } else {
+            layers[index].opacity = 0;
+        };
+    };
+    drawCanvas();
+};
 
 //======================================//
 //=== * * * Key Event Handlers * * * ===//
@@ -1379,9 +1386,6 @@ function addRasterLayer() {
     layerCVS.height = offScreenCVS.height;
     let layer = { type: "raster", title: `Layer ${layers.length + 1}`, cvs: layerCVS, ctx: layerCTX, x: 0, y: 0, scale: 1, opacity: 1 }
     layers.push(layer);
-    let layerElement = document.createElement("div");
-    layerElement.className = "layer raster";
-    layerElement.textContent = layer.title;
     renderLayersToDOM();
 }
 
@@ -1397,11 +1401,8 @@ function addReferenceLayer() {
             img.onload = () => {
                 //constrain background image to canvas with scale
                 let scale = ocWidth / img.width > ocHeight / img.height ? ocHeight / img.height : ocWidth / img.width;
-                let layer = { type: "reference", title: "New Layer", img: img, x: 0, y: 0, scale: scale, opacity: 1 }
+                let layer = { type: "reference", title: `Layer ${layers.length + 1}`, img: img, x: 0, y: 0, scale: scale, opacity: 1 }
                 layers.unshift(layer)
-                let layerElement = document.createElement("div");
-                layerElement.className = "layer reference";
-                layerElement.textContent = layer.title;
                 renderLayersToDOM();
                 drawCanvas();
             }
@@ -1416,7 +1417,10 @@ function renderLayersToDOM() {
     layers.forEach(l => {
         let layerElement = document.createElement("div");
         layerElement.className = `layer ${l.type}`;
+        let eye = document.createElement("div");
+        eye.className = "eye btn";
         layerElement.textContent = l.title;
+        layerElement.appendChild(eye);
         layersCont.appendChild(layerElement);
     })
 }
