@@ -47,10 +47,11 @@ let modesCont = document.querySelector(".modes");
 let modeBtn = document.querySelector("#draw");
 modeBtn.style.background = "rgb(255, 255, 255)";
 
+//Layers
 //Reference upload
 let uploadBtn = document.querySelector("#file-upload");
+let newLayerBtn = document.querySelector(".new-raster-layer");
 
-//Layers
 let layersCont = document.querySelector(".layers");
 
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
@@ -123,12 +124,6 @@ const tools = {
     // }
 }
 
-//Layers (types: raster, vector, reference)
-const layers = [];
-
-//create first layer
-addRasterLayer();
-
 //State (not yet a true state)
 const state = {
     //timeline
@@ -148,7 +143,7 @@ const state = {
     },
     //active variables for canvas
     shortcuts: true,
-    currentLayer: layers[0],
+    currentLayer: null,
     event: "none",
     clicked: false,
     clickedColor: null,
@@ -190,6 +185,13 @@ const state = {
     lastOffsetY: 0
 }
 
+//Layers (types: raster, vector, reference)
+const layers = [];
+
+//Initialize first layer
+addRasterLayer();
+state.currentLayer = layers[0];
+
 //===================================//
 //=== * * * Event Listeners * * * ===//
 //===================================//
@@ -223,24 +225,9 @@ toolsCont.addEventListener('click', handleTools);
 modesCont.addEventListener('click', handleModes);
 
 uploadBtn.addEventListener("change", addReferenceLayer);
+newLayerBtn.addEventListener("click", addRasterLayer)
 
 layersCont.addEventListener("click", layerInteract);
-
-function layerInteract(e) {
-    let arr = [...layersCont.children];
-    let index = arr.indexOf(e.target.closest(".layer"));
-    // console.log(e.target.childNodes[0])
-    if (e.target.className.includes("hide")) {
-        if (e.target.childNodes[0].className.includes("eyeopen")) {
-            e.target.childNodes[0].className = "eyeclosed icon";
-            layers[index].opacity = 0;
-        } else if (e.target.childNodes[0].className.includes("eyeclosed")) {
-            e.target.childNodes[0].className = "eyeopen icon";
-            layers[index].opacity = 1;
-        }
-    };
-    drawCanvas();
-};
 
 //======================================//
 //=== * * * Key Event Handlers * * * ===//
@@ -1382,6 +1369,26 @@ function consolidateLayers() {
     });
 }
 
+function layerInteract(e) {
+    let arr = [...layersCont.children];
+    let index = arr.indexOf(e.target.closest(".layer"));
+    //toggle visibility
+    if (e.target.className.includes("hide")) {
+        if (e.target.childNodes[0].className.includes("eyeopen")) {
+            e.target.childNodes[0].className = "eyeclosed icon";
+            layers[index].opacity = 0;
+        } else if (e.target.childNodes[0].className.includes("eyeclosed")) {
+            e.target.childNodes[0].className = "eyeopen icon";
+            layers[index].opacity = 1;
+        }
+    } else {
+        //select current layer
+        state.currentLayer = layers[index];
+        renderLayersToDOM();
+    }
+    drawCanvas();
+};
+
 function addRasterLayer() {
     let layerCVS = document.createElement('canvas');
     let layerCTX = layerCVS.getContext("2d");
@@ -1421,6 +1428,10 @@ function renderLayersToDOM() {
         let layerElement = document.createElement("div");
         layerElement.className = `layer ${l.type}`;
         layerElement.textContent = l.title;
+        if (l === state.currentLayer) {
+            layerElement.style.background = "rgb(255, 255, 255)";
+            layerElement.style.color = "rgb(0, 0, 0)";
+        }
         let hide = document.createElement("div");
         hide.className = "hide btn";
         let eye = document.createElement("span");
