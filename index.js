@@ -229,12 +229,15 @@ layersCont.addEventListener("click", layerInteract);
 function layerInteract(e) {
     let arr = [...layersCont.children];
     let index = arr.indexOf(e.target.closest(".layer"));
+    // console.log(e.target.childNodes[0])
     if (e.target.className.includes("hide")) {
-        if (layers[index].opacity === 0) {
-            layers[index].opacity = 1;
-        } else {
+        if (e.target.childNodes[0].className.includes("eyeopen")) {
+            e.target.childNodes[0].className = "eyeclosed icon";
             layers[index].opacity = 0;
-        };
+        } else if (e.target.childNodes[0].className.includes("eyeclosed")) {
+            e.target.childNodes[0].className = "eyeopen icon";
+            layers[index].opacity = 1;
+        }
     };
     drawCanvas();
 };
@@ -1420,7 +1423,9 @@ function renderLayersToDOM() {
         layerElement.textContent = l.title;
         let hide = document.createElement("div");
         hide.className = "hide btn";
-        //create span for eye icon inside hide btn
+        let eye = document.createElement("span");
+        eye.className = "eyeopen icon"
+        hide.appendChild(eye);
         //add tooltip for toggle visibility
         layerElement.appendChild(hide);
         layersCont.appendChild(layerElement);
