@@ -229,7 +229,7 @@ layersCont.addEventListener("click", layerInteract);
 function layerInteract(e) {
     let arr = [...layersCont.children];
     let index = arr.indexOf(e.target.closest(".layer"));
-    if (e.target.className.includes("eye")) {
+    if (e.target.className.includes("hide")) {
         if (layers[index].opacity === 0) {
             layers[index].opacity = 1;
         } else {
@@ -1417,10 +1417,12 @@ function renderLayersToDOM() {
     layers.forEach(l => {
         let layerElement = document.createElement("div");
         layerElement.className = `layer ${l.type}`;
-        let eye = document.createElement("div");
-        eye.className = "eye btn";
         layerElement.textContent = l.title;
-        layerElement.appendChild(eye);
+        let hide = document.createElement("div");
+        hide.className = "hide btn";
+        //create span for eye icon inside hide btn
+        //add tooltip for toggle visibility
+        layerElement.appendChild(hide);
         layersCont.appendChild(layerElement);
     })
 }
