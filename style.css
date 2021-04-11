@@ -2697,7 +2697,6 @@ input[type="file"] {
   height: 28px;
   background: rgb(131, 131, 131);
   height: auto;
-  cursor: pointer;
 }
 
 .new-raster-layer {
