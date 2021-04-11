@@ -191,6 +191,7 @@ const layers = [];
 //Initialize first layer
 addRasterLayer();
 state.currentLayer = layers[0];
+renderLayersToDOM();
 
 //===================================//
 //=== * * * Event Listeners * * * ===//
@@ -1435,7 +1436,11 @@ function renderLayersToDOM() {
         let hide = document.createElement("div");
         hide.className = "hide btn";
         let eye = document.createElement("span");
-        eye.className = "eyeopen icon"
+        if (l.opacity === 0) {
+            eye.className = "eyeclosed icon";
+        } else {
+            eye.className = "eyeopen icon";
+        };
         hide.appendChild(eye);
         //add tooltip for toggle visibility
         layerElement.appendChild(hide);
