@@ -230,6 +230,13 @@ newLayerBtn.addEventListener("click", addRasterLayer)
 
 layersCont.addEventListener("click", layerInteract);
 
+layersCont.addEventListener("dragstart", dragLayerStart);
+layersCont.addEventListener("dragover", dragLayerOver);
+layersCont.addEventListener("dragenter", dragLayerEnter);
+layersCont.addEventListener("dragleave", dragLayerLeave);
+layersCont.addEventListener("drop", dropLayer);
+layersCont.addEventListener("dragend", dragLayerEnd);
+
 //======================================//
 //=== * * * Key Event Handlers * * * ===//
 //======================================//
@@ -1371,8 +1378,8 @@ function consolidateLayers() {
 }
 
 function layerInteract(e) {
-    let arr = [...layersCont.children];
-    let index = arr.indexOf(e.target.closest(".layer"));
+    let list = [...layersCont.children];
+    let index = list.indexOf(e.target.closest(".layer"));
     //toggle visibility
     if (e.target.className.includes("hide")) {
         if (e.target.childNodes[0].className.includes("eyeopen")) {
@@ -1384,11 +1391,59 @@ function layerInteract(e) {
         }
     } else {
         //select current layer
-        state.currentLayer = layers[index];
-        renderLayersToDOM();
+        if (layers[index].type === "raster") {
+            state.currentLayer = layers[index];
+            renderLayersToDOM();
+        }
     }
     drawCanvas();
 };
+
+let layerIndex = 0;
+let dragged;
+
+function dragLayerStart(e) {
+    let list = [...layersCont.children];
+    let index = list.indexOf(e.target.closest(".layer"));
+    layerIndex = index;
+    dragged = e.target;
+    e.target.style.boxShadow = "inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131)";
+
+}
+
+function dragLayerOver(e) {
+    e.preventDefault();
+}
+
+function dragLayerEnter(e) {
+    if (e.target.className.includes("layer")) {
+        e.target.style.boxShadow = "inset 2px 0px rgb(255, 255, 255), inset -2px 0px rgb(255, 255, 255), inset 0px -2px rgb(255, 255, 255), inset 0px 2px rgb(255, 255, 255)";
+    }
+}
+
+function dragLayerLeave(e) {
+    if (e.target.className.includes("layer")) {
+        e.target.style.boxShadow = "inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131)";
+    }
+}
+
+function dropLayer(e) {
+    if (e.target.className.includes("layer") && e.target.id !== dragged.id) {
+        let heldLayer = layers[layerIndex];
+        for (let i = 0; i < layersCont.children.length; i += 1) {
+            if (layersCont.children[i] === e.target) {
+                layers.splice(layerIndex, 1);
+                layers.splice(i, 0, heldLayer);
+            }
+        }
+        renderLayersToDOM();
+        drawCanvas();
+    }
+}
+
+function dragLayerEnd(e) {
+    renderLayersToDOM();
+}
 
 function addRasterLayer() {
     let layerCVS = document.createElement('canvas');
@@ -1425,10 +1480,14 @@ function addReferenceLayer() {
 
 function renderLayersToDOM() {
     layersCont.innerHTML="";
+    let id = 0;
     layers.forEach(l => {
         let layerElement = document.createElement("div");
         layerElement.className = `layer ${l.type}`;
+        layerElement.id = id;
+        id+=1;
         layerElement.textContent = l.title;
+        layerElement.draggable = true;
         if (l === state.currentLayer) {
             layerElement.style.background = "rgb(255, 255, 255)";
             layerElement.style.color = "rgb(0, 0, 0)";
@@ -1449,10 +1508,6 @@ function renderLayersToDOM() {
 }
 
 //Psuedocode:
-
-//manipulate draggable layers with .splice
-//layer = layers.splice(n,1) to remove and store layer in variable
-//layers.splice(n,0,layer) to insert at new position
 
 //render layers interface
 //for each layer, render a template display to the dom with image, title, type

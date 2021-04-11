@@ -2560,12 +2560,18 @@ h4 {
 /* Layers */
 
 .layers {
+position: relative;
   background: rgb(41, 41, 41);
   width: 162px;
-  height: 120px;
+  height: auto;
   display: flex;
   flex-flow: column-reverse nowrap;
   justify-content: flex-end;
+  /* overflow: scroll; */
+}
+
+.layers::-webkit-scrollbar {
+  display: none;
 }
 
 .layer {
