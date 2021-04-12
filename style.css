@@ -616,7 +616,7 @@ input[type="number"]::-webkit-outer-spin-button {
 .zoom {
   display: flex;
   justify-content: space-around;
-  margin-bottom: 12px;
+  margin-top: 46px;
   width: 100%;
 }
 
