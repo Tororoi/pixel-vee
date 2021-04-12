@@ -54,8 +54,8 @@ canvas {
   );
   position: relative;
   cursor: crosshair;
-  width: calc(100% - 6px);
-  margin: 3px;
+  width: calc(100% - 4px);
+  margin: 2px;
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
     0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
@@ -89,10 +89,19 @@ canvas {
 }
 
 .toolbox {
-  margin: 8px;
+  margin: 2px;
+  width: calc(100% - 4px);
   display: flex;
   flex-flow: column nowrap;
+  justify-content: center;
   align-items: center;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+
+.toolbox:hover {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 
 .toolbox::-webkit-scrollbar {
@@ -2559,8 +2568,24 @@ h4 {
 
 /* Layers */
 
+.layers-container {
+  margin: 2px;
+  width: calc(100% - 4px);
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+
+.layers-container:hover {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+
 .layers {
-position: relative;
+  position: relative;
   background: rgb(41, 41, 41);
   width: 162px;
   height: auto;

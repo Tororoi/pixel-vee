@@ -1408,7 +1408,6 @@ function dragLayerStart(e) {
     layerIndex = index;
     dragged = e.target;
     e.target.style.boxShadow = "inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131)";
-
 }
 
 function dragLayerOver(e) {
