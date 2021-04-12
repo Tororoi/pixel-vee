@@ -2585,9 +2585,10 @@ h4 {
 }
 
 .layers {
+  margin: 2px;
   position: relative;
   background: rgb(41, 41, 41);
-  width: 162px;
+  width: calc(100% - 4px);
   height: auto;
   display: flex;
   flex-flow: column-reverse nowrap;
@@ -2715,6 +2716,7 @@ h4 {
 .layers-control {
   display: flex;
   flex-flow: row nowrap;
+  margin: 2px;
 }
 
 input[type="file"] {
