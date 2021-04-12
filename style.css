@@ -14,7 +14,7 @@ body {
   height: 100vh;
   font-family: "04Font";
   user-select: none;
-  overflow: hidden;
+  /* overflow: hidden; */
   position: fixed;
 }
 
@@ -82,6 +82,7 @@ canvas {
   flex-flow: column nowrap;
   align-items: center;
   z-index: 2;
+  /* overflow-y: scroll; */
 }
 
 .sidebar::-webkit-scrollbar {
@@ -2571,10 +2572,12 @@ h4 {
 .layers-container {
   margin: 2px;
   width: calc(100% - 4px);
+  height: auto;
   display: flex;
   flex-flow: column nowrap;
-  justify-content: center;
+  /* justify-content: center; */
   align-items: center;
+  overflow-y: scroll;
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
     0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
@@ -2586,17 +2589,17 @@ h4 {
 
 .layers {
   margin: 2px;
-  position: relative;
+  /* position: relative; */
   background: rgb(41, 41, 41);
   width: calc(100% - 4px);
   height: auto;
   display: flex;
   flex-flow: column-reverse nowrap;
   justify-content: flex-end;
-  /* overflow: scroll; */
+  /* overflow-y: scroll; */
 }
 
-.layers::-webkit-scrollbar {
+.layers-container::-webkit-scrollbar {
   display: none;
 }
 
