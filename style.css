@@ -73,7 +73,14 @@ canvas {
   width: 2px;
 }
 
-svg:hover .outline {
+/* width/height allows safari to render inline svg, sets hoverable size */
+svg {
+  width: 100px;
+  height: 100px;
+  pointer-events: none; /* Keep from interfering with mouse interaction */
+}
+
+.btn:hover .outline {
   stroke: white;
 }
 
@@ -185,7 +192,9 @@ svg:hover .outline {
 
 .columns {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-evenly;
+  width: 100%;
+  margin-bottom: 18px;
 }
 
 /* Color Picker */
@@ -543,7 +552,6 @@ h4 {
   justify-content: flex-start;
   align-items: center;
   flex-flow: column wrap;
-  margin: 13px;
   width: 50%;
 }
 
@@ -562,7 +570,7 @@ h4 {
 /* Interfaces */
 
 .interface-container {
-  width: 100%;
+  width: 50%;
   display: flex;
   flex-flow: column nowrap;
 }
@@ -766,12 +774,9 @@ input[type="file"] {
 }
 
 .custom-file-upload {
-  /* display: inline-block; */
-  font-size: 20px;
   width: 28px;
   height: 28px;
   background: rgb(131, 131, 131);
-  height: auto;
 }
 
 .new-raster-layer {
