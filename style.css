@@ -71,16 +71,17 @@ canvas {
   transform: translateX(-19px) translateY(-19px);
   height: 2px;
   width: 2px;
-  opacity: 0.6;
+  /* opacity: 0.6; */
 }
 
 .sidebar {
   position: relative;
   background-color: rgb(61, 61, 61);
-  width: 166px;
+  width: 332px;
   display: flex;
-  flex-flow: column nowrap;
-  align-items: center;
+  flex-flow: row nowrap;
+  align-items: flex-start;
+  justify-content: center;
   z-index: 2;
   /* overflow-y: scroll; */
 }
@@ -90,6 +91,7 @@ canvas {
 }
 
 .toolbox {
+  background-color: rgb(41, 41, 41);
   margin: 2px;
   width: calc(100% - 4px);
   display: flex;
@@ -2570,6 +2572,7 @@ h4 {
 /* Layers */
 
 .layers-container {
+  background-color: rgb(41, 41, 41);
   margin: 2px;
   width: calc(100% - 4px);
   height: auto;

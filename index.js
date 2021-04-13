@@ -537,11 +537,11 @@ function handleTools(e) {
         if (tools[e.target.closest(".tool").id]) {
             //reset old button
             toolBtn.style.background = "rgb(131, 131, 131)";
-            toolBtn.querySelector(".icon").style = "opacity: 0.6;"
+            // toolBtn.querySelector(".icon").style = "opacity: 0.6;"
             //get new button and select it
             toolBtn = e.target.closest(".tool");
             toolBtn.style.background = "rgb(255, 255, 255)";
-            toolBtn.querySelector(".icon").style = "opacity: 1;"
+            // toolBtn.querySelector(".icon").style = "opacity: 1;"
             state.tool = tools[toolBtn.id];
             if (toolBtn.id === "grab") {
                 onScreenCVS.style.cursor = "move";
@@ -558,10 +558,10 @@ function handleModes(e) {
     if (e.target.closest(".mode")) {
         //reset old button
         modeBtn.style.background = "rgb(131, 131, 131)";
-        modeBtn.querySelector(".icon").style = "opacity: 0.6;"
+        // modeBtn.querySelector(".icon").style = "opacity: 0.6;"
         //get new button and select it
         modeBtn = e.target.closest(".mode");
-        modeBtn.querySelector(".icon").style = "opacity: 1;"
+        // modeBtn.querySelector(".icon").style = "opacity: 1;"
         modeBtn.style.background = "rgb(255, 255, 255)";
         state.mode = modeBtn.id;
     }
