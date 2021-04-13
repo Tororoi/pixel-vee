@@ -19,12 +19,6 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-@media screen and (max-width: 812px) {
-  .full-page {
-    overflow: auto;
-  }
-}
-
 /* Canvas */
 
 canvas {
@@ -789,4 +783,12 @@ input[type="file"] {
   width: 28px;
   height: 28px;
   background: rgb(131, 131, 131);
+}
+
+/* Media */
+
+@media (max-width: 812px) {
+  .full-page {
+    overflow: auto;
+  }
 }
