@@ -77,23 +77,18 @@ canvas {
 .sidebar {
   position: relative;
   background-color: rgb(61, 61, 61);
-  width: 332px;
+  width: 352px;
   display: flex;
   flex-flow: row nowrap;
   align-items: flex-start;
   justify-content: center;
   z-index: 2;
-  /* overflow-y: scroll; */
-}
-
-.sidebar::-webkit-scrollbar {
-  display: none;
 }
 
 .toolbox {
   background-color: rgb(41, 41, 41);
   margin: 2px;
-  width: calc(100% - 4px);
+  width: calc(50% - 4px);
   display: flex;
   flex-flow: column nowrap;
   justify-content: center;
@@ -105,10 +100,6 @@ canvas {
 .toolbox:hover {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
     0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
-}
-
-.toolbox::-webkit-scrollbar {
-  display: none;
 }
 
 /* Buttons */
@@ -2611,33 +2602,48 @@ h4 {
 
 /* Layers */
 
-.layers-container {
+.layers-interface {
   height: auto;
+  /* max-height: 523px; */
   display: flex;
   flex-flow: column nowrap;
   /* justify-content: center; */
   align-items: center;
-  overflow-y: scroll;
+  /* overflow-y: scroll; */
 }
 
-.layers-container::-webkit-scrollbar {
-  display: none;
-}
-
-.layers-container .tooltip {
+.layers-interface .tooltip {
   transform: translateX(-74px) translateY(36px);
 }
 
-.layers {
-  margin: 2px;
-  /* position: relative; */
-  background: rgb(41, 41, 41);
-  width: calc(100% - 4px);
+.layers-container {
   height: auto;
+  max-height: 481px;
+  overflow-y: auto;
+}
+
+.layers-container::-webkit-scrollbar {
+  width: 10px;
+}
+
+.layers-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.layers-container::-webkit-scrollbar-thumb {
+  background: rgb(131, 131, 131);
+  background-clip: content-box;
+  border: 2px solid transparent;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(255, 255, 255);
+}
+
+.layers {
   display: flex;
   flex-flow: column-reverse nowrap;
   justify-content: flex-end;
-  /* overflow-y: scroll; */
 }
 
 .layer {
