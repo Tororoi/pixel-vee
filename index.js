@@ -47,6 +47,9 @@ let modesCont = document.querySelector(".modes");
 let modeBtn = document.querySelector("#draw");
 modeBtn.style.background = "rgb(255, 255, 255)";
 
+//Export
+let exportBtn = document.querySelector(".export");
+
 //Layers
 //Reference upload
 let uploadBtn = document.querySelector("#file-upload");
@@ -224,6 +227,8 @@ colorSwitch.addEventListener('click', switchColors);
 
 toolsCont.addEventListener('click', handleTools);
 modesCont.addEventListener('click', handleModes);
+
+exportBtn.addEventListener('click', exportImage);
 
 uploadBtn.addEventListener("change", addReferenceLayer);
 newLayerBtn.addEventListener("click", addRasterLayer)
@@ -1347,6 +1352,20 @@ function drawCanvas() {
 }
 
 //====================================//
+//======== * * * Export * * * ========//
+//====================================//
+
+function exportImage() {
+    consolidateLayers();
+    const a = document.createElement("a");
+    a.style.display = "none";
+    a.href = offScreenCVS.toDataURL();
+    a.download = "pixelvee.png";
+    document.body.appendChild(a);
+    a.click();
+}
+
+//====================================//
 //======== * * * Layers * * * ========//
 //====================================//
 
@@ -1505,13 +1524,6 @@ function renderLayersToDOM() {
         layersCont.appendChild(layerElement);
     })
 }
-
-//Psuedocode:
-
-//render layers interface
-//for each layer, render a template display to the dom with image, title, type
-//dragging a layer up or down should reflect in the order of the layers array
-//template should have an eye icon to toggle visibility and a slider for opacity
 
 //add move tool and scale tool for reference layers
 

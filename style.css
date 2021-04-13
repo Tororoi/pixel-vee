@@ -2569,25 +2569,63 @@ h4 {
     10px 32px rgba(0, 0, 0, 255), 4px 34px rgba(0, 0, 0, 255);
 }
 
-/* Layers */
+/* Interfaces */
 
-.layers-container {
+.interface-container {
+  width: 100%;
+  display: flex;
+  flex-flow: column nowrap;
+}
+
+.container {
   background-color: rgb(41, 41, 41);
   margin: 2px;
   width: calc(100% - 4px);
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+
+.container:hover {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+
+/* Export */
+
+.export-container {
+  height: 100px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.export {
+  height: 28px;
+  width: 84px;
+}
+
+.export .tooltip {
+  transform: translateX(-100px) translateY(36px);
+}
+
+/* Layers */
+
+.layers-container {
   height: auto;
   display: flex;
   flex-flow: column nowrap;
   /* justify-content: center; */
   align-items: center;
   overflow-y: scroll;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
-    0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 
-.layers-container:hover {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
-    0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+.layers-container::-webkit-scrollbar {
+  display: none;
+}
+
+.layers-container .tooltip {
+  transform: translateX(-74px) translateY(36px);
 }
 
 .layers {
@@ -2600,10 +2638,6 @@ h4 {
   flex-flow: column-reverse nowrap;
   justify-content: flex-end;
   /* overflow-y: scroll; */
-}
-
-.layers-container::-webkit-scrollbar {
-  display: none;
 }
 
 .layer {
