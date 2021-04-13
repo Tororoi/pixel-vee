@@ -69,12 +69,34 @@ Visit here: https://pixelvee.netlify.app/
 >
 > Move the canvas position freely.
 
+## Export
+
+> #### Export
+>
+> Download the image as .png
+
+## Layers
+
+> #### Add Raster Layer
+>
+> Add a new layer for drawing
+
+> #### Add Reference Layer
+>
+> Add a new layer to be used for a background reference, such as for tracing. Reference layers cannot be drawn on.
+
+> #### Toggle Visibility
+>
+> Click the eye icon to hide/show the layer
+
+> #### Change Layer Order
+>
+> Drag a layer to change its position in the layer stack.
+
 ### Key Features to be added
 
 - Vector mode
-- Layers
 - Palette
-- Ability to export image
 - Ability to change brush size
 - Alpha channel for colors
 - Selection Tool
@@ -90,8 +112,3 @@ Visit here: https://pixelvee.netlify.app/
 - Preview window
 - Shading Tool
 
-### UI Fixes Scheduled
-
-- Zoom feature with scroll wheel should stay centered around mouse
-- Make color picker window draggable
-- Change tool buttons to icons
