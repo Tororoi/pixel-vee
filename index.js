@@ -1389,10 +1389,12 @@ function drawLayers() {
 
 function consolidateLayers() {
     layers.forEach(l => {
-        offScreenCTX.save();
-        offScreenCTX.globalAlpha = l.opacity;
-        offScreenCTX.drawImage(l.cvs, l.x, l.y, offScreenCVS.width, offScreenCVS.height);
-        offScreenCTX.restore();
+        if (l.type === "raster") {
+            offScreenCTX.save();
+            offScreenCTX.globalAlpha = l.opacity;
+            offScreenCTX.drawImage(l.cvs, l.x, l.y, offScreenCVS.width, offScreenCVS.height);
+            offScreenCTX.restore();
+        }
     });
 }
 
