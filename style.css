@@ -15,8 +15,14 @@ body {
   height: 100vh;
   font-family: "04Font";
   user-select: none;
-  overflow: auto;
-  position: fixed;
+  overflow: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media screen and (max-width: 812px) {
+  .full-page {
+    overflow: auto;
+  }
 }
 
 /* Canvas */
