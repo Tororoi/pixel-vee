@@ -6,6 +6,7 @@
 body {
   margin: 0px;
   color: white;
+  background: rgb(61, 61, 61);
 }
 
 .full-page {
@@ -14,7 +15,7 @@ body {
   height: 100vh;
   font-family: "04Font";
   user-select: none;
-  /* overflow: hidden; */
+  overflow: auto;
   position: fixed;
 }
 
@@ -496,7 +497,6 @@ input[type="number"]::-webkit-outer-spin-button {
   height: 40px;
   background: transparent;
   box-shadow: none;
-  cursor: pointer;
   margin-bottom: -24px;
   transform: translateX(-48px) translateY(-36px);
 }
