@@ -98,6 +98,7 @@ Visit here: https://pixelvee.netlify.app/
 - Vector mode
 - Palette
 - Ability to change brush size
+- Ability to change canvas size
 - Alpha channel for colors
 - Selection Tool
 
