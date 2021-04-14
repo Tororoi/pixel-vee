@@ -1448,35 +1448,35 @@ function consolidateLayers() {
 }
 
 function layerInteract(e) {
-    let list = [...layersCont.children];
-    let index = list.indexOf(e.target.closest(".layer"));
+    let layer = e.target.closest(".layer").layerObj;
     //toggle visibility
+    //TODO: add toggle, select to timeline
     if (e.target.className.includes("hide")) {
         if (e.target.childNodes[0].className.includes("eyeopen")) {
             e.target.childNodes[0].className = "eyeclosed icon";
-            layers[index].opacity = 0;
+            // layers[index].opacity = 0;
+            layer.opacity = 0;
         } else if (e.target.childNodes[0].className.includes("eyeclosed")) {
             e.target.childNodes[0].className = "eyeopen icon";
-            layers[index].opacity = 1;
+            // layers[index].opacity = 1;
+            layer.opacity = 1;
         }
     } else {
         //select current layer
-        if (layers[index].type === "raster") {
-            state.currentLayer = layers[index];
+        if (layer.type === "raster") {
+            state.currentLayer = layer;
             renderLayersToDOM();
         }
     }
     drawCanvas();
 };
 
-let layerIndex = 0;
-let dragged;
-
 function dragLayerStart(e) {
-    let list = [...layersCont.children];
-    let index = list.indexOf(e.target.closest(".layer"));
-    layerIndex = index;
-    dragged = e.target;
+    //FIX: this way of relating layersdom to layers object doesn't work if there are removed layers
+    let layer = e.target.closest(".layer").layerObj;
+    let index = layers.indexOf(layer);
+    //pass index through event
+    e.dataTransfer.setData("text", index);
     e.target.style.boxShadow = "inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131)";
 }
 
@@ -1497,12 +1497,16 @@ function dragLayerLeave(e) {
 }
 
 function dropLayer(e) {
-    if (e.target.className.includes("layer") && e.target.id !== dragged.id) {
-        let heldLayer = layers[layerIndex];
+    let targetLayer = e.target.closest(".layer").layerObj;
+    let draggedIndex = parseInt(e.dataTransfer.getData("text"));
+    let heldLayer = layers[draggedIndex];
+    //TODO: add layer change to timeline
+    if (e.target.className.includes("layer") && targetLayer !== heldLayer) {
         for (let i = 0; i < layersCont.children.length; i += 1) {
             if (layersCont.children[i] === e.target) {
-                layers.splice(layerIndex, 1);
-                layers.splice(i, 0, heldLayer);
+                let newIndex = layers.indexOf(layersCont.children[i].layerObj)
+                layers.splice(draggedIndex, 1);
+                layers.splice(newIndex, 0, heldLayer);
             }
         }
         renderLayersToDOM();
@@ -1515,16 +1519,19 @@ function dragLayerEnd(e) {
 }
 
 function addRasterLayer() {
+    //TODO: add to timeline.
+    //once layer is added and drawn on, can no longer be deleted
     let layerCVS = document.createElement('canvas');
     let layerCTX = layerCVS.getContext("2d");
     layerCVS.width = offScreenCVS.width;
     layerCVS.height = offScreenCVS.height;
-    let layer = { type: "raster", title: `Layer ${layers.length + 1}`, cvs: layerCVS, ctx: layerCTX, x: 0, y: 0, scale: 1, opacity: 1 }
+    let layer = { type: "raster", title: `Layer ${layers.length + 1}`, cvs: layerCVS, ctx: layerCTX, x: 0, y: 0, scale: 1, opacity: 1, removed: false }
     layers.push(layer);
     renderLayersToDOM();
 }
 
 function addReferenceLayer() {
+    //TODO: add to timeline
     let reader;
     let img = new Image;
 
@@ -1536,7 +1543,7 @@ function addReferenceLayer() {
             img.onload = () => {
                 //constrain background image to canvas with scale
                 let scale = ocWidth / img.width > ocHeight / img.height ? ocHeight / img.height : ocWidth / img.width;
-                let layer = { type: "reference", title: `Layer ${layers.length + 1}`, img: img, x: 0, y: 0, scale: scale, opacity: 1 }
+                let layer = { type: "reference", title: `Layer ${layers.length + 1}`, img: img, x: 0, y: 0, scale: scale, opacity: 1, removed: false }
                 layers.unshift(layer)
                 renderLayersToDOM();
                 drawCanvas();
@@ -1545,6 +1552,11 @@ function addReferenceLayer() {
 
         reader.readAsDataURL(this.files[0]);
     }
+}
+
+function removeLayer() {
+    //set "removed" flag to true on selected layer
+    //rerender dom, only layers !removed get rendered and drawn
 }
 
 function renderLayersToDOM() {
@@ -1573,6 +1585,8 @@ function renderLayersToDOM() {
         //add tooltip for toggle visibility
         layerElement.appendChild(hide);
         layersCont.appendChild(layerElement);
+        //associate object
+        layerElement.layerObj = l;
     })
 }
 
