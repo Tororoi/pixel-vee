@@ -410,6 +410,14 @@ function handleMouseDown(e) {
     state.onY = state.moy * state.ratio / zoom;
     state.lastOnX = state.onX;
     state.lastOnY = state.onY;
+    //if drawing on hidden layer, flash hide btn
+    if (state.currentLayer.opacity === 0) {
+        for (let i = 0; i < layersCont.children.length; i += 1) {
+            if (layersCont.children[i].layerObj === state.currentLayer) {
+                layersCont.children[i].querySelector(".hide").classList.add("warning");
+            }
+        }
+    }
     //run selected tool step function
     state.tool.fn();
 }
@@ -468,6 +476,13 @@ function handleMouseUp(e) {
     state.moy = Math.floor(y / state.trueRatio);
     state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio * zoom));
     state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio * zoom));
+    if (state.currentLayer.opacity === 0) {
+        for (let i = 0; i < layersCont.children.length; i += 1) {
+            if (layersCont.children[i].layerObj === state.currentLayer) {
+                layersCont.children[i].querySelector(".hide").classList.remove("warning");
+            }
+        }
+    }
     //run selected tool step function
     state.tool.fn();
     //add to undo stack
@@ -1420,18 +1435,20 @@ function exportImage() {
 
 function drawLayers() {
     layers.forEach(l => {
-        if (l.type === "reference") {
-            onScreenCTX.save();
-            onScreenCTX.globalAlpha = l.opacity;
-            //l.x, l.y need to be normalized to the pixel grid
-            onScreenCTX.drawImage(l.img, state.xOffset + l.x * ocWidth / offScreenCVS.width, state.yOffset + l.y * ocWidth / offScreenCVS.width, l.img.width * l.scale, l.img.height * l.scale);
-            onScreenCTX.restore();
-        } else {
-            onScreenCTX.save();
-            onScreenCTX.globalAlpha = l.opacity;
-            //l.x, l.y need to be normalized to the pixel grid
-            onScreenCTX.drawImage(l.cvs, state.xOffset + l.x * ocWidth / offScreenCVS.width, state.yOffset + l.y * ocWidth / offScreenCVS.width, ocWidth, ocHeight);
-            onScreenCTX.restore();
+        if (!l.removed) {
+            if (l.type === "reference") {
+                onScreenCTX.save();
+                onScreenCTX.globalAlpha = l.opacity;
+                //l.x, l.y need to be normalized to the pixel grid
+                onScreenCTX.drawImage(l.img, state.xOffset + l.x * ocWidth / offScreenCVS.width, state.yOffset + l.y * ocWidth / offScreenCVS.width, l.img.width * l.scale, l.img.height * l.scale);
+                onScreenCTX.restore();
+            } else {
+                onScreenCTX.save();
+                onScreenCTX.globalAlpha = l.opacity;
+                //l.x, l.y need to be normalized to the pixel grid
+                onScreenCTX.drawImage(l.cvs, state.xOffset + l.x * ocWidth / offScreenCVS.width, state.yOffset + l.y * ocWidth / offScreenCVS.width, ocWidth, ocHeight);
+                onScreenCTX.restore();
+            }
         }
     });
 }
@@ -1454,11 +1471,9 @@ function layerInteract(e) {
     if (e.target.className.includes("hide")) {
         if (e.target.childNodes[0].className.includes("eyeopen")) {
             e.target.childNodes[0].className = "eyeclosed icon";
-            // layers[index].opacity = 0;
             layer.opacity = 0;
         } else if (e.target.childNodes[0].className.includes("eyeclosed")) {
             e.target.childNodes[0].className = "eyeopen icon";
-            // layers[index].opacity = 1;
             layer.opacity = 1;
         }
     } else {
@@ -1554,39 +1569,43 @@ function addReferenceLayer() {
     }
 }
 
-function removeLayer() {
+function removeLayer(e) {
     //set "removed" flag to true on selected layer
-    //rerender dom, only layers !removed get rendered and drawn
+    //add to timeline
+    let layer = e.target.closest(".layer").layerObj;
+    layer.removed = true;
 }
 
 function renderLayersToDOM() {
     layersCont.innerHTML="";
     let id = 0;
     layers.forEach(l => {
-        let layerElement = document.createElement("div");
-        layerElement.className = `layer ${l.type}`;
-        layerElement.id = id;
-        id+=1;
-        layerElement.textContent = l.title;
-        layerElement.draggable = true;
-        if (l === state.currentLayer) {
-            layerElement.style.background = "rgb(255, 255, 255)";
-            layerElement.style.color = "rgb(0, 0, 0)";
+        if (!l.removed) {
+            let layerElement = document.createElement("div");
+            layerElement.className = `layer ${l.type}`;
+            layerElement.id = id;
+            id+=1;
+            layerElement.textContent = l.title;
+            layerElement.draggable = true;
+            if (l === state.currentLayer) {
+                layerElement.style.background = "rgb(255, 255, 255)";
+                layerElement.style.color = "rgb(0, 0, 0)";
+            }
+            let hide = document.createElement("div");
+            hide.className = "hide btn";
+            let eye = document.createElement("span");
+            if (l.opacity === 0) {
+                eye.className = "eyeclosed icon";
+            } else {
+                eye.className = "eyeopen icon";
+            };
+            hide.appendChild(eye);
+            //add tooltip for toggle visibility
+            layerElement.appendChild(hide);
+            layersCont.appendChild(layerElement);
+            //associate object
+            layerElement.layerObj = l;
         }
-        let hide = document.createElement("div");
-        hide.className = "hide btn";
-        let eye = document.createElement("span");
-        if (l.opacity === 0) {
-            eye.className = "eyeclosed icon";
-        } else {
-            eye.className = "eyeopen icon";
-        };
-        hide.appendChild(eye);
-        //add tooltip for toggle visibility
-        layerElement.appendChild(hide);
-        layersCont.appendChild(layerElement);
-        //associate object
-        layerElement.layerObj = l;
     })
 }
 

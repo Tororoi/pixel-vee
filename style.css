@@ -677,6 +677,17 @@ h4 {
   background: rgb(131, 131, 131);
 }
 
+.warning {
+  background: rgb(239, 63, 57);
+  animation: flash 0.6s ease-in infinite alternate-reverse;
+}
+
+@keyframes flash {
+  0% {background: rgb(239, 63, 57);}
+  30% {background: rgb(239, 63, 57);}
+  100% {background: rgb(131, 131, 131);}
+}
+
 .eyeopen {
   opacity: 1;
   transform: translateX(-13px) translateY(-13px);
