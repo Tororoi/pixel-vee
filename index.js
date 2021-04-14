@@ -144,6 +144,8 @@ const state = {
         erase: false,
         contiguous: false
     },
+    //touchscreen?
+    touch: false,
     //active variables for canvas
     shortcuts: true,
     currentLayer: null,
@@ -1013,7 +1015,6 @@ function curveSteps() {
         case "mousedown":
             //solidify end points
             state.clickCounter += 1;
-            console.log(state.clickCounter)
             if (state.clickCounter > 3) state.clickCounter = 1;
             switch (state.clickCounter) {
                 case 1:
@@ -1053,6 +1054,10 @@ function curveSteps() {
             }
             break;
         case "mouseup" || "mouseout":
+            //For touchscreens
+            if (state.clickCounter === 2 && state.touch) {
+                state.clickCounter += 1;
+            }
             if (state.clickCounter === 3) {
                 //solidify control point
                 state.px3 = state.mouseX;
@@ -1639,7 +1644,7 @@ function getColor(x, y, colorLayer) {
 }
 
 //====================================//
-//==== * * * Mobile Devices * * * ====//
+//===== * * * Touchscreens * * * =====//
 //====================================//
 
 //Fit canvas and tools so no scrolling necessary
@@ -1655,6 +1660,7 @@ function getColor(x, y, colorLayer) {
 
 function handleTouchStart(e) {
     e.preventDefault();
+    state.touch = true;
     handleMouseDown(e);
 }
 
