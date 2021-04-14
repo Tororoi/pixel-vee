@@ -300,7 +300,7 @@ function handleKeyDown(e) {
                 modeBtn.style.background = "rgb(131, 131, 131)";
                 //set new button
                 modeBtn = document.querySelector("#draw");
-                modeBtn.style.background = "rgb(238, 206, 102)";
+                modeBtn.style.background = "rgb(255, 255, 255)";
                 state.mode = "draw";
                 break;
             case 'KeyE':
@@ -308,7 +308,7 @@ function handleKeyDown(e) {
                 modeBtn.style.background = "rgb(131, 131, 131)";
                 //set new button
                 modeBtn = document.querySelector("#erase");
-                modeBtn.style.background = "rgb(238, 206, 102)";
+                modeBtn.style.background = "rgb(255, 255, 255)";
                 state.mode = "erase";
                 break;
             case 'KeyP':
@@ -316,7 +316,7 @@ function handleKeyDown(e) {
                 modeBtn.style.background = "rgb(131, 131, 131)";
                 //set new button
                 modeBtn = document.querySelector("#perfect");
-                modeBtn.style.background = "rgb(238, 206, 102)";
+                modeBtn.style.background = "rgb(255, 255, 255)";
                 state.mode = "perfect";
                 break;
             case 'KeyB':
@@ -324,7 +324,7 @@ function handleKeyDown(e) {
                 toolBtn.style.background = "rgb(131, 131, 131)";
                 //set new button
                 toolBtn = document.querySelector("#pencil");
-                toolBtn.style.background = "rgb(238, 206, 102)";
+                toolBtn.style.background = "rgb(255, 255, 255)";
                 state.tool = tools["pencil"];
                 onScreenCVS.style.cursor = "crosshair";
                 break;
@@ -333,7 +333,7 @@ function handleKeyDown(e) {
                 toolBtn.style.background = "rgb(131, 131, 131)";
                 //set new button
                 toolBtn = document.querySelector("#replace");
-                toolBtn.style.background = "rgb(238, 206, 102)";
+                toolBtn.style.background = "rgb(255, 255, 255)";
                 state.tool = tools["replace"];
                 onScreenCVS.style.cursor = "crosshair";
                 break;
@@ -342,7 +342,7 @@ function handleKeyDown(e) {
                 toolBtn.style.background = "rgb(131, 131, 131)";
                 //set new button
                 toolBtn = document.querySelector("#line");
-                toolBtn.style.background = "rgb(238, 206, 102)";
+                toolBtn.style.background = "rgb(255, 255, 255)";
                 state.tool = tools["line"];
                 onScreenCVS.style.cursor = "none";
                 break;
@@ -351,7 +351,7 @@ function handleKeyDown(e) {
                 toolBtn.style.background = "rgb(131, 131, 131)";
                 //set new button
                 toolBtn = document.querySelector("#fill");
-                toolBtn.style.background = "rgb(238, 206, 102)";
+                toolBtn.style.background = "rgb(255, 255, 255)";
                 state.tool = tools["fill"];
                 onScreenCVS.style.cursor = "none";
                 break;
@@ -360,7 +360,7 @@ function handleKeyDown(e) {
                 toolBtn.style.background = "rgb(131, 131, 131)";
                 //set new button
                 toolBtn = document.querySelector("#curve");
-                toolBtn.style.background = "rgb(238, 206, 102)";
+                toolBtn.style.background = "rgb(255, 255, 255)";
                 state.tool = tools["curve"];
                 onScreenCVS.style.cursor = "none";
                 break;
