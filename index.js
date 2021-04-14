@@ -260,8 +260,8 @@ function handleKeyDown(e) {
         switch (e.code) {
             case 'KeyZ':
                 if (e.metaKey) {
-                    if (e.key === 'Ω') {
-                        //alt+meta+z
+                    if (e.shiftKey) {
+                        //shift+meta+z
                         handleRedo();
                     } else {
                         handleUndo();
@@ -536,6 +536,7 @@ function handleWheel(e) {
 function handleZoom(e) {
     //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
     //BUG: on mobile zoom causes cursor coords to desync with pixelgrid
+    //TRY: restrict zoom to fixed multiples, 125%, 150% etc
     //general zoom based on center
     if (e.target.closest(".zoombtn")) {
         let zoomBtn = e.target.closest(".zoombtn");
@@ -1011,6 +1012,9 @@ function actionFill(startX, startY, currentColor, ctx, currentMode) {
 }
 
 function curveSteps() {
+    //FIX: new routine, should be 1. mousedown, 2. drag to p2, 
+    //3. mouseup solidify p2, 4. mousedown/move to drag p3, 5. mouseup to solidify p3
+    //this routine would be better for touchscreens, and no worse with mouse
     switch (state.event) {
         case "mousedown":
             //solidify end points
@@ -1655,8 +1659,6 @@ function getColor(x, y, colorLayer) {
 //hub icon, can store all dialog boxes, can drag out and in dialog boxes which user wants for a customized toolset
 
 //zooming with pinch actions, prevent default device zoom
-
-//touchmove event for drawing
 
 function handleTouchStart(e) {
     e.preventDefault();
