@@ -533,6 +533,7 @@ function handleWheel(e) {
 
 function handleZoom(e) {
     //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
+    //BUG: on mobile zoom causes cursor coords to desync with pixelgrid
     //general zoom based on center
     if (e.target.closest(".zoombtn")) {
         let zoomBtn = e.target.closest(".zoombtn");
