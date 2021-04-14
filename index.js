@@ -212,6 +212,12 @@ onScreenCVS.addEventListener('mousedown', handleMouseDown);
 onScreenCVS.addEventListener('mouseup', handleMouseUp);
 onScreenCVS.addEventListener('mouseout', handleMouseOut);
 
+//Touch
+onScreenCVS.addEventListener('touchstart', handleTouchStart);
+onScreenCVS.addEventListener('touchmove', handleTouchMove);
+onScreenCVS.addEventListener('touchend', handleTouchEnd);
+onScreenCVS.addEventListener('touchcancel', handleTouchCancel);
+
 //Toolbox
 undoBtn.addEventListener('click', handleUndo);
 redoBtn.addEventListener('click', handleRedo);
@@ -384,10 +390,24 @@ function handleMouseDown(e) {
     state.event = "mousedown";
     state.clicked = true;
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
-    state.mox = Math.floor(e.offsetX / state.trueRatio);
-    state.moy = Math.floor(e.offsetY / state.trueRatio);
+    let x, y;
+    if (e.targetTouches) {
+        let rect = e.target.getBoundingClientRect();
+        x = e.targetTouches[0].pageX - rect.left;
+        y = e.targetTouches[0].pageY - rect.top;
+    } else {
+        x = e.offsetX;
+        y = e.offsetY;
+    }
+    state.mox = Math.floor(x / state.trueRatio);
+    state.moy = Math.floor(y / state.trueRatio);
     state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio * zoom));
     state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio * zoom));
+    //Reset Cursor for mobile
+    state.onX = state.mox * state.ratio / zoom;
+    state.onY = state.moy * state.ratio / zoom;
+    state.lastOnX = state.onX;
+    state.lastOnY = state.onY;
     //run selected tool step function
     state.tool.fn();
 }
@@ -398,8 +418,17 @@ function handleMouseMove(e) {
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
     state.ratio = ocWidth / offScreenCVS.width * zoom;
     //coords
-    state.mox = Math.floor(e.offsetX / state.trueRatio);
-    state.moy = Math.floor(e.offsetY / state.trueRatio);
+    let x, y;
+    if (e.targetTouches) {
+        let rect = e.target.getBoundingClientRect();
+        x = e.targetTouches[0].pageX - rect.left;
+        y = e.targetTouches[0].pageY - rect.top;
+    } else {
+        x = e.offsetX;
+        y = e.offsetY;
+    }
+    state.mox = Math.floor(x / state.trueRatio);
+    state.moy = Math.floor(y / state.trueRatio);
     state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio * zoom));
     state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio * zoom));
     //Hover brush
@@ -424,8 +453,17 @@ function handleMouseUp(e) {
     state.event = "mouseup";
     state.clicked = false;
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
-    state.mox = Math.floor(e.offsetX / state.trueRatio);
-    state.moy = Math.floor(e.offsetY / state.trueRatio);
+    let x, y;
+    if (e.targetTouches) {
+        let rect = e.target.getBoundingClientRect();
+        x = e.changedTouches[0].pageX - rect.left;
+        y = e.changedTouches[0].pageY - rect.top;
+    } else {
+        x = e.offsetX;
+        y = e.offsetY;
+    }
+    state.mox = Math.floor(x / state.trueRatio);
+    state.moy = Math.floor(y / state.trueRatio);
     state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio * zoom));
     state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio * zoom));
     //run selected tool step function
@@ -438,9 +476,9 @@ function handleMouseUp(e) {
     //Reset redostack
     state.redoStack = [];
     state.event = "none";
-    // img.onload = () => {
-    renderCursor();
-    // }
+    if (!e.targetTouches) {
+        renderCursor();
+    }
 }
 
 function handleMouseOut(e) {
@@ -974,6 +1012,7 @@ function curveSteps() {
         case "mousedown":
             //solidify end points
             state.clickCounter += 1;
+            console.log(state.clickCounter)
             if (state.clickCounter > 3) state.clickCounter = 1;
             switch (state.clickCounter) {
                 case 1:
@@ -1596,4 +1635,39 @@ function getColor(x, y, colorLayer) {
     canvasColor.a = colorLayer.data[startPos + 3];
     canvasColor.color = `rgba(${canvasColor.r},${canvasColor.g},${canvasColor.b},${canvasColor.a})`
     return canvasColor;
+}
+
+//====================================//
+//==== * * * Mobile Devices * * * ====//
+//====================================//
+
+//Fit canvas and tools so no scrolling necessary
+
+//Maximize drawing space:
+//Tools and other dialog boxes should be collapsed and 
+//accessible upon touching, which reveals list of options/tools
+//hub icon, can store all dialog boxes, can drag out and in dialog boxes which user wants for a customized toolset
+
+//zooming with pinch actions, prevent default device zoom
+
+//touchmove event for drawing
+
+function handleTouchStart(e) {
+    e.preventDefault();
+    handleMouseDown(e);
+}
+
+function handleTouchMove(e) {
+    e.preventDefault();
+    handleMouseMove(e);
+}
+
+function handleTouchEnd(e) {
+    e.preventDefault();
+    handleMouseUp(e);
+}
+
+function handleTouchCancel(e) {
+    e.preventDefault();
+    handleMouseOut(e);
 }
