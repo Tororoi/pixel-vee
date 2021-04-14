@@ -1467,7 +1467,6 @@ function consolidateLayers() {
 function layerInteract(e) {
     let layer = e.target.closest(".layer").layerObj;
     //toggle visibility
-    //TODO: add toggle, select to timeline
     if (e.target.className.includes("hide")) {
         if (e.target.childNodes[0].className.includes("eyeopen")) {
             e.target.childNodes[0].className = "eyeclosed icon";
