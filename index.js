@@ -136,7 +136,7 @@ const state = {
     //settings
     tool: { ...tools.pencil },
     mode: "draw",
-    brushColor: { color: "rgba(255,0,0,255)", r: 255, g: 0, b: 0, a: 255 },
+    brushColor: { color: "rgba(0,0,0,255)", r: 0, g: 0, b: 0, a: 255 },
     backColor: { color: "rgba(255,255,255,255)", r: 255, g: 255, b: 255, a: 255 },
     palette: {},
     options: {
@@ -389,6 +389,10 @@ function handleKeyUp(e) {
 //========================================//
 
 function handleMouseDown(e) {
+    //reset media type, chrome dev tools niche use or computers that have touchscreen capabilities
+    if (e.type === "mousedown") {
+        state.touch = false;
+    }
     state.event = "mousedown";
     state.clicked = true;
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
@@ -648,7 +652,7 @@ function renderCursor() {
     }
     function drawCursorBox() {
         //line offset to stroke offcenter;
-        let ol = 0;
+        let ol = 0.25;
         onScreenCTX.beginPath();
         onScreenCTX.lineWidth = 0.5;
         onScreenCTX.strokeStyle = "black";
@@ -1041,8 +1045,10 @@ function curveSteps() {
                     state.py1 = state.mouseY;
                     break;
                 case 2:
+                    if (!state.touch) {
                     state.px2 = state.mouseX;
                     state.py2 = state.mouseY;
+                    }
                     break;
                 default:
                 //do nothing
@@ -1074,9 +1080,16 @@ function curveSteps() {
             break;
         case "mouseup" || "mouseout":
             //For touchscreens
-            if (state.clickCounter === 2 && state.touch) {
-                state.clickCounter += 1;
+            if (state.touch) {
+                if (state.clickCounter === 1) {
+                    state.px2 = state.mouseX;
+                    state.py2 = state.mouseY;
+                }
+                if (state.clickCounter === 2) {
+                    state.clickCounter += 1;
+                }
             }
+            //Solidify curve
             if (state.clickCounter === 3) {
                 //solidify control point
                 state.px3 = state.mouseX;
@@ -1115,6 +1128,7 @@ function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, cu
 
     ctx.fillStyle = currentColor.color;
 
+    //BUG: On touchscreen, hits gradient sign error if first tool used
     function renderCurve(controlX, controlY) {
         function plot(x, y) {
             //rounded values
@@ -1557,7 +1571,7 @@ function addReferenceLayer() {
             img.onload = () => {
                 //constrain background image to canvas with scale
                 let scale = ocWidth / img.width > ocHeight / img.height ? ocHeight / img.height : ocWidth / img.width;
-                let layer = { type: "reference", title: `Layer ${layers.length + 1}`, img: img, x: 0, y: 0, scale: scale, opacity: 1, removed: false }
+                let layer = { type: "reference", title: `Ref ${layers.length + 1}`, img: img, x: 0, y: 0, scale: scale, opacity: 1, removed: false }
                 layers.unshift(layer)
                 renderLayersToDOM();
                 drawCanvas();
