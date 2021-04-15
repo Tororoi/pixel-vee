@@ -1473,6 +1473,10 @@ function updateBrush(e) {
     lineWeight.textContent = state.tool.brushSize;
     brushPreview.style.width = state.tool.brushSize * 2 + "px";
     brushPreview.style.height = state.tool.brushSize * 2 + "px";
+    // let roundBrush = brushPreview.querySelector(".round-brush");
+    // if (roundBrush) {
+    //     //draw circle
+    // }
 }
 
 //====================================//
@@ -1617,7 +1621,7 @@ function addReferenceLayer() {
             img.onload = () => {
                 //constrain background image to canvas with scale
                 let scale = ocWidth / img.width > ocHeight / img.height ? ocHeight / img.height : ocWidth / img.width;
-                let layer = { type: "reference", title: `Ref ${layers.length + 1}`, img: img, x: 0, y: 0, scale: scale, opacity: 1, removed: false }
+                let layer = { type: "reference", title: `Reference ${layers.length + 1}`, img: img, x: 0, y: 0, scale: scale, opacity: 1, removed: false }
                 layers.unshift(layer)
                 renderLayersToDOM();
                 drawCanvas();
