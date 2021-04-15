@@ -47,6 +47,11 @@ let modesCont = document.querySelector(".modes");
 let modeBtn = document.querySelector("#draw");
 modeBtn.style.background = "rgb(255, 255, 255)";
 
+//Options
+let lineWeight = document.querySelector("#line-weight");
+let brushPreview = document.querySelector("#brush-preview");
+let brushSlider = document.querySelector("#brush-size");
+
 //Export
 let exportBtn = document.querySelector(".export");
 
@@ -75,6 +80,7 @@ const tools = {
         name: "brush",
         fn: drawSteps,
         brushSize: 1,
+        disabled: false,
         options: ["perfect"]
     },
     //FIX: allow replace to use different brush sizes
@@ -82,6 +88,7 @@ const tools = {
         name: "replace",
         fn: replaceSteps,
         brushSize: 1,
+        disabled: true,
         options: ["perfect"]
     },
     // shading: {
@@ -91,12 +98,14 @@ const tools = {
         name: "line",
         fn: lineSteps,
         brushSize: 1,
+        disabled: false,
         options: []
     },
     fill: {
         name: "fill",
         fn: fillSteps,
         brushSize: 1,
+        disabled: true,
         options: ["contiguous"]
     },
     // gradient: {
@@ -106,6 +115,7 @@ const tools = {
         name: "curve",
         fn: curveSteps,
         brushSize: 1,
+        disabled: false,
         options: []
     },
     // shapes: {
@@ -115,12 +125,14 @@ const tools = {
         name: "picker",
         fn: pickerSteps,
         brushSize: 1,
+        disabled: true,
         options: []
     },
     grab: {
         name: "grab",
         fn: grabSteps,
         brushSize: 1,
+        disabled: true,
         options: []
     }
     // move: {
@@ -135,7 +147,7 @@ const state = {
     undoStack: [],
     redoStack: [],
     //settings
-    tool: { ...tools.brush },
+    tool: tools.brush,
     mode: "draw",
     brushColor: { color: "rgba(0,0,0,255)", r: 0, g: 0, b: 0, a: 255 },
     backColor: { color: "rgba(255,255,255,255)", r: 255, g: 255, b: 255, a: 255 },
@@ -237,6 +249,8 @@ colorSwitch.addEventListener('click', switchColors);
 toolsCont.addEventListener('click', handleTools);
 modesCont.addEventListener('click', handleModes);
 
+brushSlider.addEventListener("input", updateBrush);
+
 exportBtn.addEventListener('click', exportImage);
 
 uploadBtn.addEventListener("change", addReferenceLayer);
@@ -287,6 +301,7 @@ function handleKeyDown(e) {
             case 'ShiftRight':
                 if (toolBtn.id === "brush") {
                     state.tool = tools["line"];
+                    state.tool.brushSize = tools["brush"].brushSize;
                     onScreenCVS.style.cursor = "none";
                 }
                 break;
@@ -610,6 +625,13 @@ function handleTools(e) {
             toolBtn.style.background = "rgb(255, 255, 255)";
             // toolBtn.querySelector(".icon").style = "opacity: 1;"
             state.tool = tools[toolBtn.id];
+            //update options
+            lineWeight.textContent = state.tool.brushSize;
+            brushPreview.style.width = state.tool.brushSize * 2 + "px";
+            brushPreview.style.height = state.tool.brushSize * 2 + "px";
+            brushSlider.value = state.tool.brushSize;
+            brushSlider.disabled = state.tool.disabled;
+            //update cursor
             if (toolBtn.id === "grab") {
                 onScreenCVS.style.cursor = "move";
             } else if (toolBtn.id === "replace" || toolBtn.id === "brush" || toolBtn.id === "curve") {
@@ -753,14 +775,14 @@ function perfectPixels(currentX, currentY) {
     }
 }
 
-function actionDraw(coordX, coordY, currentColor, size, ctx, currentMode) {
+function actionDraw(coordX, coordY, currentColor, weight, ctx, currentMode) {
     ctx.fillStyle = currentColor.color;
     switch (currentMode) {
         case "erase":
-            ctx.clearRect(Math.ceil(coordX - size / 2), Math.ceil(coordY - size / 2), size, size);
+            ctx.clearRect(Math.ceil(coordX - weight / 2), Math.ceil(coordY - weight / 2), weight, weight);
             break;
         default:
-            ctx.fillRect(Math.ceil(coordX - size / 2), Math.ceil(coordY - size / 2), size, size);
+            ctx.fillRect(Math.ceil(coordX - weight / 2), Math.ceil(coordY - weight / 2), weight, weight);
     }
 }
 
@@ -793,7 +815,7 @@ function lineSteps() {
 function actionLine(sx, sy, tx, ty, currentColor, ctx, currentMode, weight, scale = 1) {
     ctx.fillStyle = currentColor.color;
     let drawPixel = (x, y, w, h) => { 
-        let brushOffset = Math.floor(state.tool.brushSize / 2) * scale;
+        let brushOffset = Math.floor(weight / 2) * scale;
         if (currentMode === "erase") {
             ctx.clearRect(x - brushOffset, y - brushOffset, w * weight, h * weight);
         } else {
@@ -1145,7 +1167,7 @@ function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, cu
             //rounded values
             let xt = Math.floor(x);
             let yt = Math.floor(y);
-            let brushOffset = Math.floor(state.tool.brushSize / 2) * scale;
+            let brushOffset = Math.floor(weight / 2) * scale;
             if (currentMode === "erase") {
                 ctx.clearRect(xt * scale - brushOffset, yt * scale - brushOffset, scale * weight, scale * weight);
             } else {
@@ -1428,6 +1450,29 @@ function drawCanvas() {
     onScreenCTX.lineWidth = 2;
     onScreenCTX.strokeStyle = "black";
     onScreenCTX.stroke();
+}
+
+//=====================================//
+//======== * * * Options * * * ========//
+//=====================================//
+
+function updateBrush(e) {
+    switch (state.tool.name) {
+        case "brush":
+            state.tool.brushSize = parseInt(e.target.value);
+            break;
+        case "line":
+            state.tool.brushSize = parseInt(e.target.value);
+            break;
+        case "curve":
+            state.tool.brushSize = parseInt(e.target.value);
+            break;
+        default:
+            //do nothing for other tools
+    }
+    lineWeight.textContent = state.tool.brushSize;
+    brushPreview.style.width = state.tool.brushSize * 2 + "px";
+    brushPreview.style.height = state.tool.brushSize * 2 + "px";
 }
 
 //====================================//
