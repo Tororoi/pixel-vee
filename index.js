@@ -77,6 +77,7 @@ const tools = {
         brushSize: 1,
         options: ["perfect"]
     },
+    //FIX: allow replace to use different brush sizes
     replace: {
         name: "replace",
         fn: replaceSteps,
@@ -648,7 +649,7 @@ function renderCursor() {
             break;
         default:
             drawCurrentPixel();
-            drawCursorBox();
+            // drawCursorBox();
     }
     function drawCursorBox() {
         //line offset to stroke offcenter;
@@ -679,7 +680,8 @@ function drawCurrentPixel() {
         onScreenCTX.clearRect(state.onX, state.onY, state.ratio / zoom, state.ratio / zoom);
     } else {
         onScreenCTX.fillStyle = state.brushColor.color;
-        onScreenCTX.fillRect(state.onX, state.onY, state.ratio / zoom, state.ratio / zoom);
+        let brushOffset = Math.floor(state.tool.brushSize / 2) * state.ratio / zoom;
+        onScreenCTX.fillRect(state.onX-brushOffset, state.onY-brushOffset, state.ratio / zoom * state.tool.brushSize, state.ratio / zoom * state.tool.brushSize);
     }
 }
 
@@ -709,7 +711,7 @@ function drawSteps() {
                 //draw between points when drawing fast
                 if (Math.abs(state.mouseX - state.lastX) > 1 || Math.abs(state.mouseY - state.lastY) > 1) {
                     //add to options, only execute if "continuous line" is on
-                    actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode);
+                    actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode, state.tool.brushSize);
                     addToTimeline("line", { x1: state.lastX, x2: state.mouseX }, { y1: state.lastY, y2: state.mouseY });
                 } else {
                     //perfect will be option, not mode
@@ -774,13 +776,13 @@ function lineSteps() {
             if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
                 onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
                 drawCanvas();
-                actionLine(state.lastX + (state.xOffset / state.ratio * zoom), state.lastY + (state.yOffset / state.ratio * zoom), state.mox, state.moy, state.brushColor, onScreenCTX, state.mode, state.ratio / zoom);
+                actionLine(state.lastX + (state.xOffset / state.ratio * zoom), state.lastY + (state.yOffset / state.ratio * zoom), state.mox, state.moy, state.brushColor, onScreenCTX, state.mode, state.tool.brushSize, state.ratio / zoom);
                 state.lastOnX = state.onX;
                 state.lastOnY = state.onY;
             }
             break;
         case "mouseup":
-            actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode);
+            actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode, state.tool.brushSize);
             addToTimeline(state.tool.name, { x1: state.lastX, x2: state.mouseX }, { y1: state.lastY, y2: state.mouseY });
             break;
         default:
@@ -788,9 +790,16 @@ function lineSteps() {
     }
 }
 
-function actionLine(sx, sy, tx, ty, currentColor, ctx, currentMode, scale = 1) {
+function actionLine(sx, sy, tx, ty, currentColor, ctx, currentMode, weight, scale = 1) {
     ctx.fillStyle = currentColor.color;
-    let drawPixel = (x, y, w, h) => { return currentMode === "erase" ? ctx.clearRect(x, y, w, h) : ctx.fillRect(x, y, w, h) };
+    let drawPixel = (x, y, w, h) => { 
+        let brushOffset = Math.floor(state.tool.brushSize / 2) * scale;
+        if (currentMode === "erase") {
+            ctx.clearRect(x - brushOffset, y - brushOffset, w * weight, h * weight);
+        } else {
+            ctx.fillRect(x - brushOffset, y - brushOffset, w * weight, h * weight);
+        }
+    };
     //create triangle object
     let tri = {}
     function getTriangle(x1, y1, x2, y2, ang) {
@@ -1072,6 +1081,7 @@ function curveSteps() {
                     state.brushColor,
                     onScreenCTX,
                     state.mode,
+                    state.tool.brushSize,
                     state.ratio / zoom
                 );
                 state.lastOnX = state.onX;
@@ -1104,7 +1114,8 @@ function curveSteps() {
                     state.clickCounter + 1,
                     state.brushColor,
                     state.currentLayer.ctx,
-                    state.mode
+                    state.mode,
+                    state.tool.brushSize
                 );
                 state.clickCounter = 0;
                 //store control points for timeline
@@ -1116,7 +1127,7 @@ function curveSteps() {
     }
 }
 
-function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, currentColor, ctx, currentMode, scale = 1) {
+function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, currentColor, ctx, currentMode, weight, scale = 1) {
 
     //force coords to int
     startx = Math.round(startx);
@@ -1134,20 +1145,11 @@ function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, cu
             //rounded values
             let xt = Math.floor(x);
             let yt = Math.floor(y);
-
-            //plot starting coordinates
-            if (stepNum === 2 || stepNum === 3) {
-                if (currentMode === "erase") {
-                    onScreenCTX.clearRect(xt * state.ratio / zoom, yt * state.ratio / zoom, scale, scale);
-                } else {
-                    onScreenCTX.fillRect(xt * state.ratio / zoom, yt * state.ratio / zoom, scale, scale);
-                }
-            } else if (stepNum === 4) {
-                if (currentMode === "erase") {
-                    ctx.clearRect(xt, yt, scale, scale)
-                } else {
-                    ctx.fillRect(xt, yt, scale, scale)
-                }
+            let brushOffset = Math.floor(state.tool.brushSize / 2) * scale;
+            if (currentMode === "erase") {
+                ctx.clearRect(xt * scale - brushOffset, yt * scale - brushOffset, scale * weight, scale * weight);
+            } else {
+                ctx.fillRect(xt * scale - brushOffset, yt * scale - brushOffset, scale * weight, scale * weight);
             }
         }
 
@@ -1250,14 +1252,14 @@ function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, cu
                 //fill endpoint
                 plot(x2, y2);
             } else if (stepNum === 4) {
-                actionLine(x0, y0, x2, y2, currentColor, ctx, currentMode);
+                actionLine(x0, y0, x2, y2, currentColor, ctx, currentMode, weight);
             }
         }
     }
 
     if (stepNum === 1) {
         //after defining x0y0
-        actionLine(startx, starty, state.mox, state.moy, currentColor, onScreenCTX, currentMode, scale);
+        actionLine(startx, starty, state.mox, state.moy, currentColor, onScreenCTX, currentMode, weight, scale);
     } else if (stepNum === 2 || stepNum === 3) {
         // after defining x2y2
         //onscreen preview curve
@@ -1361,7 +1363,7 @@ function addToTimeline(tool, x, y) {
         x: x,
         y: y,
         layer: state.currentLayer,
-        size: state.tool.brushSize,
+        weight: state.tool.brushSize,
         color: { ...state.brushColor },
         tool: tool,
         action: state.tool.fn,
@@ -1397,13 +1399,13 @@ function redrawPoints() {
                     actionFill(p.x, p.y, p.color, p.layer.ctx, p.mode);
                     break;
                 case "line":
-                    actionLine(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.color, p.layer.ctx, p.mode)
+                    actionLine(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.color, p.layer.ctx, p.mode, p.weight)
                     break;
                 case "curve":
-                    actionCurve(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.x.x3, p.y.y3, 4, p.color, p.layer.ctx, p.mode)
+                    actionCurve(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.x.x3, p.y.y3, 4, p.color, p.layer.ctx, p.mode, p.weight)
                     break;
                 default:
-                    actionDraw(p.x, p.y, p.color, p.size, p.layer.ctx, p.mode);
+                    actionDraw(p.x, p.y, p.color, p.weight, p.layer.ctx, p.mode);
             }
         })
     })
