@@ -40,7 +40,7 @@ let zoomCont = document.querySelector(".zoom");
 
 //Get tool buttons
 let toolsCont = document.querySelector(".tools");
-let toolBtn = document.querySelector("#pencil");
+let toolBtn = document.querySelector("#brush");
 toolBtn.style.background = "rgb(255, 255, 255)";
 
 let modesCont = document.querySelector(".modes");
@@ -71,8 +71,8 @@ offScreenCVS.height = 256;
 
 //Tools
 const tools = {
-    pencil: {
-        name: "pencil",
+    brush: {
+        name: "brush",
         fn: drawSteps,
         brushSize: 1,
         options: ["perfect"]
@@ -135,7 +135,7 @@ const state = {
     undoStack: [],
     redoStack: [],
     //settings
-    tool: { ...tools.pencil },
+    tool: { ...tools.brush },
     mode: "draw",
     brushColor: { color: "rgba(0,0,0,255)", r: 0, g: 0, b: 0, a: 255 },
     backColor: { color: "rgba(255,255,255,255)", r: 255, g: 255, b: 255, a: 255 },
@@ -285,7 +285,7 @@ function handleKeyDown(e) {
                 break;
             case 'ShiftLeft':
             case 'ShiftRight':
-                if (toolBtn.id === "pencil") {
+                if (toolBtn.id === "brush") {
                     state.tool = tools["line"];
                     onScreenCVS.style.cursor = "none";
                 }
@@ -324,9 +324,9 @@ function handleKeyDown(e) {
                 //reset old button
                 toolBtn.style.background = "rgb(131, 131, 131)";
                 //set new button
-                toolBtn = document.querySelector("#pencil");
+                toolBtn = document.querySelector("#brush");
                 toolBtn.style.background = "rgb(255, 255, 255)";
-                state.tool = tools["pencil"];
+                state.tool = tools["brush"];
                 onScreenCVS.style.cursor = "crosshair";
                 break;
             case 'KeyR':
@@ -378,7 +378,7 @@ function handleKeyUp(e) {
 
     if (toolBtn.id === "grab") {
         onScreenCVS.style.cursor = "move";
-    } else if (toolBtn.id === "replace" || toolBtn.id === "pencil" || toolBtn.id === "curve") {
+    } else if (toolBtn.id === "replace" || toolBtn.id === "brush" || toolBtn.id === "curve") {
         onScreenCVS.style.cursor = "crosshair";
     } else {
         onScreenCVS.style.cursor = "none";
@@ -612,7 +612,7 @@ function handleTools(e) {
             state.tool = tools[toolBtn.id];
             if (toolBtn.id === "grab") {
                 onScreenCVS.style.cursor = "move";
-            } else if (toolBtn.id === "replace" || toolBtn.id === "pencil" || toolBtn.id === "curve") {
+            } else if (toolBtn.id === "replace" || toolBtn.id === "brush" || toolBtn.id === "curve") {
                 onScreenCVS.style.cursor = "crosshair";
             } else {
                 onScreenCVS.style.cursor = "none";
@@ -1357,7 +1357,6 @@ function grabSteps() {
 //command pattern. (Look into saving app-state instead)
 function addToTimeline(tool, x, y) {
     //use current state for variables
-    //pencil, replace
     state.points.push({
         //x/y are sometimes objects with multiple values
         x: x,
