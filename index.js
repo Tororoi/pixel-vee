@@ -393,7 +393,7 @@ function handleKeyUp(e) {
 
     if (toolBtn.id === "grab") {
         onScreenCVS.style.cursor = "move";
-    } else if (toolBtn.id === "replace" || toolBtn.id === "brush" || toolBtn.id === "curve") {
+    } else if (toolBtn.id === "replace" || toolBtn.id === "brush" || toolBtn.id === "curve" || toolBtn.id === "fill" || toolBtn.id === "line") {
         onScreenCVS.style.cursor = "crosshair";
     } else {
         onScreenCVS.style.cursor = "none";
@@ -634,7 +634,7 @@ function handleTools(e) {
             //update cursor
             if (toolBtn.id === "grab") {
                 onScreenCVS.style.cursor = "move";
-            } else if (toolBtn.id === "replace" || toolBtn.id === "brush" || toolBtn.id === "curve") {
+            } else if (toolBtn.id === "replace" || toolBtn.id === "brush" || toolBtn.id === "curve" || toolBtn.id === "fill" || toolBtn.id === "line") {
                 onScreenCVS.style.cursor = "crosshair";
             } else {
                 onScreenCVS.style.cursor = "none";
@@ -861,6 +861,12 @@ function replaceSteps() {
         case "mousedown":
             //get global colorlayer data to use while mouse is down
             state.localColorLayer = state.currentLayer.ctx.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
+            //FIX: Pre-create mask for color here?
+            let xMin = Math.ceil(state.mouseX - state.tool.brushSize / 2);
+            let xMax = xMin + state.tool.brushSize;
+            let yMin = Math.ceil(state.mouseY - state.tool.brushSize / 2);
+            let yMax = yMin + state.tool.brushSize;
+            oldMask = { x0: xMin, y0: yMin, x1: xMax, y1: yMax };
             actionReplace(state.localColorLayer);
             state.lastX = state.mouseX;
             state.lastY = state.mouseY;
@@ -877,6 +883,7 @@ function replaceSteps() {
             //normalize mousemove to pixelgrid
             if (state.lastX !== state.mouseX || state.lastY !== state.mouseY) {
                 actionReplace(state.localColorLayer);
+                //FIX: Line replace too slow. Somehow only check pixels that weren't part of masked area at previous coords
                 if (Math.abs(state.mouseX - state.lastX) > 1 || Math.abs(state.mouseY - state.lastY) > 1) {
                     //add to options, only execute if "continuous line" is on
                     lineReplace(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode, state.localColorLayer);
@@ -933,6 +940,39 @@ function lineReplace(sx, sy, tx, ty, currentColor, ctx, currentMode, colorLayer)
             actionDraw(thispoint.x, thispoint.y, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, currentMode);
             addToTimeline(state.tool.name, thispoint.x, thispoint.y);
         }
+        //FIX: very slow, inefficient. Need better masking algorithm
+        //brush mask
+        // let xMin = Math.ceil(thispoint.x - state.tool.brushSize / 2);
+        // let xMax = xMin + state.tool.brushSize;
+        // let yMin = Math.ceil(thispoint.y - state.tool.brushSize / 2);
+        // let yMax = yMin + state.tool.brushSize;
+        // let newMask = { x0: xMin, y0: yMin, x1: xMax, y1: yMax };
+        // //pseudo: get newmask non-overlap area by taking away oldmask overlap area
+        // //for now just mask x
+        // let xd = newMask.x0 - oldMask.x0;
+        // if (Math.abs(xd) > state.tool.brushSize) {xd = state.tool.brushSize};
+        // if (xd > 0) {
+        //     xMin = xMax - xd; //if positive number, newmask is right of oldmask
+        // } else {
+        //     xMax = xMin - xd; //if negative number, newmask is right of oldmask
+        // }
+        // let yd = newMask.y0 - oldMask.y0;
+        // if (Math.abs(yd) > state.tool.brushSize) { yd = state.tool.brushSize };
+        // if (yd > 0) {
+        //     yMin = yMax - yd; //if positive number, newmask is right of oldmask
+        // } else {
+        //     yMax = yMin - yd; //if negative number, newmask is right of oldmask
+        // }
+        // for (let y = yMin; y < yMax; y++) {
+        //     for (let x = xMin; x < xMax; x++) {
+        //         let clickedColor = getColor(x, y, colorLayer);
+        //         if (clickedColor.color === state.backColor.color) {
+        //             actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
+        //             addToTimeline(state.tool.name, x, y);
+        //         }
+        //     }
+        // }
+        // oldMask = newMask;
     }
     //fill endpoint
     let clickedColor = getColor(Math.round(tx), Math.round(ty), colorLayer);
@@ -940,7 +980,19 @@ function lineReplace(sx, sy, tx, ty, currentColor, ctx, currentMode, colorLayer)
         actionDraw(Math.round(tx), Math.round(ty), state.brushColor, state.tool.brushSize, state.currentLayer.ctx, currentMode);
         addToTimeline(state.tool.name, Math.round(tx), Math.round(ty));
     }
+    // for (let y = Math.ceil(Math.round(ty) - state.tool.brushSize / 2); y < Math.ceil(Math.round(ty) - state.tool.brushSize / 2) + state.tool.brushSize; y++) {
+    //     for (let x = Math.ceil(Math.round(tx) - state.tool.brushSize / 2); x < Math.ceil(Math.round(tx) - state.tool.brushSize / 2) + state.tool.brushSize; x++) {
+    //         let clickedColor = getColor(x, y, colorLayer);
+    //         if (clickedColor.color === state.backColor.color) {
+    //             actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
+    //             addToTimeline(state.tool.name, x, y);
+    //         }
+    //     }
+    // }
 }
+
+//offscreen default mask
+let oldMask = { x0: -1, y0: -1, x1: 0, y1: 0 };
 
 function actionReplace(colorLayer) {
     //sample color and replace if match
@@ -949,6 +1001,39 @@ function actionReplace(colorLayer) {
         actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
         addToTimeline(state.tool.name, state.mouseX, state.mouseY);
     }
+    //brush mask
+    // let xMin = Math.ceil(state.mouseX - state.tool.brushSize / 2);
+    // let xMax = xMin + state.tool.brushSize;
+    // let yMin = Math.ceil(state.mouseY - state.tool.brushSize / 2);
+    // let yMax = yMin + state.tool.brushSize;
+    // let newMask = {x0: xMin, y0: yMin, x1: xMax, y1: yMax};
+    // let xline, yline; //if y goes past yline, adjust xmin/xmax to default, reverse ditto for x/xline
+    // //pseudo: get newmask non-overlap area by taking away oldmask overlap area
+    // //for now just mask x
+    // let xd = newMask.x0 - oldMask.x0;
+    // if (Math.abs(xd) > state.tool.brushSize) { xd = state.tool.brushSize };
+    // if (xd > 0) {
+    //     xMin = xMax - xd; //if positive number, newmask is right of oldmask
+    // } else {
+    //     xMax = xMin - xd; //if negative number, newmask is right of oldmask
+    // }
+    // let yd = newMask.y0 - oldMask.y0;
+    // if (Math.abs(yd) > state.tool.brushSize) { yd = state.tool.brushSize };
+    // if (yd > 0) {
+    //     yMin = yMax - yd; //if positive number, newmask is right of oldmask
+    // } else {
+    //     yMax = yMin - yd; //if negative number, newmask is right of oldmask
+    // }
+    // for (let y = yMin; y < yMax; y++) {
+    //     for (let x = xMin; x < xMax; x++) {
+    //         let clickedColor = getColor(x, y, colorLayer);
+    //         if (clickedColor.color === state.backColor.color) {
+    //             actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
+    //             addToTimeline(state.tool.name, x, y);
+    //         }
+    //     }
+    // }
+    // oldMask = newMask;
 }
 
 function fillSteps() {
@@ -1424,10 +1509,13 @@ function redrawPoints() {
                     actionFill(p.x, p.y, p.color, p.layer.ctx, p.mode);
                     break;
                 case "line":
-                    actionLine(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.color, p.layer.ctx, p.mode, p.weight)
+                    actionLine(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.color, p.layer.ctx, p.mode, p.weight);
                     break;
                 case "curve":
-                    actionCurve(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.x.x3, p.y.y3, 4, p.color, p.layer.ctx, p.mode, p.weight)
+                    actionCurve(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.x.x3, p.y.y3, 4, p.color, p.layer.ctx, p.mode, p.weight);
+                    break;
+                case "replace":
+                    actionDraw(p.x, p.y, p.color, 1, p.layer.ctx, p.mode);
                     break;
                 default:
                     actionDraw(p.x, p.y, p.color, p.weight, p.layer.ctx, p.mode);
@@ -1476,6 +1564,9 @@ function updateBrush(e) {
         case "brush":
             state.tool.brushSize = parseInt(e.target.value);
             break;
+        // case "replace":
+        //     state.tool.brushSize = parseInt(e.target.value);
+        //     break;
         case "line":
             state.tool.brushSize = parseInt(e.target.value);
             break;
