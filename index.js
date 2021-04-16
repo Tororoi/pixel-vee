@@ -602,7 +602,7 @@ function handleZoom(e) {
 }
 
 function handleUndo() {
-    if (state.undoStack.length > 0) {
+    if (state.undoStack.length > 1) { //length 1 prevents initial layer from being undone
         actionUndoRedo(state.redoStack, state.undoStack);
     }
 }
@@ -1377,13 +1377,13 @@ function grabSteps() {
 //====================================//
 
 //command pattern. (Look into saving app-state instead)
-function addToTimeline(tool, x, y) {
+function addToTimeline(tool, x, y, layer = state.currentLayer) {
     //use current state for variables
     state.points.push({
         //x/y are sometimes objects with multiple values
         x: x,
         y: y,
-        layer: state.currentLayer,
+        layer: layer,
         weight: state.tool.brushSize,
         color: { ...state.brushColor },
         tool: tool,
@@ -1413,6 +1413,10 @@ function redrawPoints() {
     state.undoStack.forEach(action => {
         action.forEach(p => {
             switch (p.tool) {
+                case "addlayer":
+                    p.layer.removed = false;
+                    renderLayersToDOM();
+                    break;
                 case "clear":
                     p.layer.ctx.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height);
                     break;
@@ -1427,6 +1431,17 @@ function redrawPoints() {
                     break;
                 default:
                     actionDraw(p.x, p.y, p.color, p.weight, p.layer.ctx, p.mode);
+            }
+        })
+    })
+    state.redoStack.forEach(action => {
+        action.forEach(p => {
+            if (p.tool === "addlayer") {
+                p.layer.removed = true;
+                if (p.layer === state.currentLayer) {
+                    state.currentLayer = layersCont.children[0].layerObj;
+                }
+                renderLayersToDOM();
             }
         })
     })
@@ -1550,7 +1565,6 @@ function layerInteract(e) {
 };
 
 function dragLayerStart(e) {
-    //FIX: this way of relating layersdom to layers object doesn't work if there are removed layers
     let layer = e.target.closest(".layer").layerObj;
     let index = layers.indexOf(layer);
     //pass index through event
@@ -1605,6 +1619,10 @@ function addRasterLayer() {
     layerCVS.height = offScreenCVS.height;
     let layer = { type: "raster", title: `Layer ${layers.length + 1}`, cvs: layerCVS, ctx: layerCTX, x: 0, y: 0, scale: 1, opacity: 1, removed: false }
     layers.push(layer);
+    addToTimeline("addlayer", 0, 0, layer);
+    state.undoStack.push(state.points);
+    state.points = [];
+    state.redoStack = [];
     renderLayersToDOM();
 }
 
@@ -1663,7 +1681,6 @@ function renderLayersToDOM() {
                 eye.className = "eyeopen icon";
             };
             hide.appendChild(eye);
-            //add tooltip for toggle visibility
             layerElement.appendChild(hide);
             layersCont.appendChild(layerElement);
             //associate object
