@@ -903,6 +903,7 @@ function replaceSteps() {
         case "mouseup":
             //only needed if perfect pixels option is on
             actionReplace(state.localColorLayer, state.mouseX, state.mouseY);
+            // state.currentLayer.ctx.putImageData(state.localColorLayer, 0, 0)
             //re-render image to allow onscreen cursor to render
             drawCanvas();
             break;
@@ -949,6 +950,12 @@ function actionReplace(colorLayer, xO, yO) {
     let yMin = Math.ceil(yO - state.tool.brushSize / 2);
     let yMax = yMin + state.tool.brushSize;
 
+    //constarin brush to canvas area to prevent rollover to ther side of canvas
+    if (xMin < 0) { xMin = 0 };
+    if (yMin < 0) { yMin = 0 };
+    if (xMax > colorLayer.width) { xMax = colorLayer.width };
+    if (yMax > colorLayer.height) { yMax = colorLayer.height };
+
     for (let y = yMin; y < yMax; y++) {
         for (let x = xMin; x < xMax; x++) {
             //sample color and replace if match
@@ -960,12 +967,12 @@ function actionReplace(colorLayer, xO, yO) {
                 colorLayer.data[pixelPos + 1] = state.brushColor.g;
                 colorLayer.data[pixelPos + 2] = state.brushColor.b;
                 colorLayer.data[pixelPos + 3] = state.brushColor.a;
-                // actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
+                actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
                 addToTimeline(state.tool.name, x, y);
             }
         }
     }
-    state.currentLayer.ctx.putImageData(state.localColorLayer, 0, 0)
+    // state.currentLayer.ctx.putImageData(state.localColorLayer, 0, 0)
     drawCanvas();
 }
 
