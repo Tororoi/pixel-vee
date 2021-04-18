@@ -942,12 +942,6 @@ function lineReplace(sx, sy, tx, ty, currentColor, ctx, currentMode, colorLayer)
 }
 
 function actionReplace(colorLayer, xO, yO) {
-    //sample color and replace if match
-    // state.clickedColor = getColor(state.mouseX, state.mouseY, colorLayer);
-    // if (state.clickedColor.color === state.backColor.color) {
-    //     actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
-    //     addToTimeline(state.tool.name, state.mouseX, state.mouseY);
-    // }
     //brush mask
     // FIX: somehow iterate over only new area of brush where not overlapping with last location.
     let xMin = Math.ceil(xO - state.tool.brushSize / 2);
@@ -955,26 +949,24 @@ function actionReplace(colorLayer, xO, yO) {
     let yMin = Math.ceil(yO - state.tool.brushSize / 2);
     let yMax = yMin + state.tool.brushSize;
 
-    let count = 0;
-
     for (let y = yMin; y < yMax; y++) {
         for (let x = xMin; x < xMax; x++) {
+            //sample color and replace if match
             let clickedColor = getColor(x, y, colorLayer);
             if (clickedColor.color === state.backColor.color) {
-                count += 1;
                 //update colorlayer data
-                let startPos = (y * offScreenCVS.width + x) * 4;
-                colorLayer[startPos] = state.brushColor.r;
-                colorLayer[startPos + 1] = state.brushColor.g;
-                colorLayer[startPos + 2] = state.brushColor.b;
-                colorLayer[startPos + 3] = state.brushColor.a;
-                actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
+                let pixelPos = (y * offScreenCVS.width + x) * 4;
+                colorLayer.data[pixelPos] = state.brushColor.r;
+                colorLayer.data[pixelPos + 1] = state.brushColor.g;
+                colorLayer.data[pixelPos + 2] = state.brushColor.b;
+                colorLayer.data[pixelPos + 3] = state.brushColor.a;
+                // actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
                 addToTimeline(state.tool.name, x, y);
             }
         }
     }
+    state.currentLayer.ctx.putImageData(state.localColorLayer, 0, 0)
     drawCanvas();
-    console.log(count)
 }
 
 function fillSteps() {
