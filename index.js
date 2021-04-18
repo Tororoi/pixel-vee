@@ -530,9 +530,8 @@ function handleMouseOut(e) {
         state.points = [];
         //Reset redostack
         state.redoStack = [];
-        onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
-        drawCanvas();
     }
+    drawCanvas();
     state.event = "none";
 }
 
@@ -1143,7 +1142,7 @@ function curveSteps() {
                 state.lastOnY = state.onY;
             }
             break;
-        case "mouseup" || "mouseout":
+        case "mouseup":
             //For touchscreens
             if (state.touch) {
                 if (state.clickCounter === 1) {
@@ -1178,6 +1177,10 @@ function curveSteps() {
                 drawCanvas();
             }
             break;
+        case "mouseout":
+            //cancel curve
+            state.clickCounter = 0;
+        break;
         default:
         //do nothing
     }
