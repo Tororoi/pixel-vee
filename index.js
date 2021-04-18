@@ -671,40 +671,48 @@ function renderCursor() {
             break;
         default:
             drawCurrentPixel();
-            // drawCursorBox();
-    }
-    function drawCursorBox() {
-        //line offset to stroke offcenter;
-        let ol = 0.25;
-        onScreenCTX.beginPath();
-        onScreenCTX.lineWidth = 0.5;
-        onScreenCTX.strokeStyle = "black";
-        //top
-        onScreenCTX.moveTo(state.onX, state.onY - ol);
-        onScreenCTX.lineTo(state.onX + state.ratio / zoom, state.onY - ol);
-        //right
-        onScreenCTX.moveTo(state.onX + ol + state.ratio / zoom, state.onY);
-        onScreenCTX.lineTo(state.onX + ol + state.ratio / zoom, state.onY + state.ratio / zoom);
-        //bottom
-        onScreenCTX.moveTo(state.onX, state.onY + ol + state.ratio / zoom);
-        onScreenCTX.lineTo(state.onX + state.ratio / zoom, state.onY + ol + state.ratio / zoom);
-        //left
-        onScreenCTX.moveTo(state.onX - ol, state.onY);
-        onScreenCTX.lineTo(state.onX - ol, state.onY + state.ratio / zoom);
-
-        onScreenCTX.stroke();
+        // drawCursorBox();
     }
 }
 
 function drawCurrentPixel() {
     //draw onscreen current pixel
     if (state.mode === "erase") {
-        onScreenCTX.clearRect(state.onX, state.onY, state.ratio / zoom, state.ratio / zoom);
+        // drawCursorBox();
+        let brushOffset = Math.floor(state.tool.brushSize / 2) * state.ratio / zoom;
+        onScreenCTX.clearRect(state.onX - brushOffset, state.onY - brushOffset, state.ratio / zoom * state.tool.brushSize, state.ratio / zoom * state.tool.brushSize);
     } else {
         onScreenCTX.fillStyle = state.brushColor.color;
         let brushOffset = Math.floor(state.tool.brushSize / 2) * state.ratio / zoom;
-        onScreenCTX.fillRect(state.onX-brushOffset, state.onY-brushOffset, state.ratio / zoom * state.tool.brushSize, state.ratio / zoom * state.tool.brushSize);
+        onScreenCTX.fillRect(state.onX - brushOffset, state.onY - brushOffset, state.ratio / zoom * state.tool.brushSize, state.ratio / zoom * state.tool.brushSize);
     }
+}
+
+function drawCursorBox() {
+    let brushOffset = Math.floor(state.tool.brushSize / 2) * state.ratio / zoom;
+    let x0 = state.onX - brushOffset;
+    let y0 = state.onY - brushOffset;
+    let x1 = x0 + state.ratio / zoom * state.tool.brushSize;
+    let y1 = y0 + state.ratio / zoom * state.tool.brushSize;
+    //line offset to stroke offcenter;
+    let ol = 0.25;
+    onScreenCTX.beginPath();
+    onScreenCTX.lineWidth = 0.5;
+    onScreenCTX.strokeStyle = "black";
+    //top
+    onScreenCTX.moveTo(x0, y0 - ol);
+    onScreenCTX.lineTo(x1, y0 - ol);
+    //right
+    onScreenCTX.moveTo(x1 + ol, y0);
+    onScreenCTX.lineTo(x1 + ol, y1);
+    //bottom
+    onScreenCTX.moveTo(x0, y1 + ol);
+    onScreenCTX.lineTo(x1, y1 + ol);
+    //left
+    onScreenCTX.moveTo(x0 - ol, y0);
+    onScreenCTX.lineTo(x0 - ol, y1);
+
+    onScreenCTX.stroke();
 }
 
 //====================================//
@@ -726,20 +734,20 @@ function drawSteps() {
             drawCanvas();
             break;
         case "mousemove":
-            drawCurrentPixel();
-            if (state.lastX !== state.mouseX || state.lastY !== state.mouseY) {
-                //necessary drawcanvas?
-                drawCanvas();
+            if (state.mode === "perfect") {
                 drawCurrentPixel();
+            }
+            if (state.lastX !== state.mouseX || state.lastY !== state.mouseY) {
                 //draw between points when drawing fast
                 if (Math.abs(state.mouseX - state.lastX) > 1 || Math.abs(state.mouseY - state.lastY) > 1) {
-                    //add to options, only execute if "continuous line" is on
                     actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode, state.tool.brushSize);
                     addToTimeline("line", { x1: state.lastX, x2: state.mouseX }, { y1: state.lastY, y2: state.mouseY });
                     drawCanvas();
                 } else {
-                    //perfect will be option, not mode
+                    //FIX: perfect will be option, not mode
                     if (state.mode === "perfect") {
+                        drawCanvas();
+                        drawCurrentPixel();
                         perfectPixels(state.mouseX, state.mouseY);
                     } else {
                         actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
@@ -820,7 +828,7 @@ function lineSteps() {
 
 function actionLine(sx, sy, tx, ty, currentColor, ctx, currentMode, weight, scale = 1) {
     ctx.fillStyle = currentColor.color;
-    let drawPixel = (x, y, w, h) => { 
+    let drawPixel = (x, y, w, h) => {
         let brushOffset = Math.floor(weight / 2) * scale;
         if (currentMode === "erase") {
             ctx.clearRect(x - brushOffset, y - brushOffset, w * weight, h * weight);
@@ -883,7 +891,6 @@ function replaceSteps() {
             //normalize mousemove to pixelgrid
             if (state.lastX !== state.mouseX || state.lastY !== state.mouseY) {
                 actionReplace(state.localColorLayer, state.mouseX, state.mouseY);
-                //FIX: Line replace too slow. Somehow only check pixels that weren't part of masked area at previous coords
                 if (Math.abs(state.mouseX - state.lastX) > 1 || Math.abs(state.mouseY - state.lastY) > 1) {
                     //add to options, only execute if "continuous line" is on
                     lineReplace(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode, state.localColorLayer);
@@ -1103,8 +1110,8 @@ function curveSteps() {
                     break;
                 case 2:
                     if (!state.touch) {
-                    state.px2 = state.mouseX;
-                    state.py2 = state.mouseY;
+                        state.px2 = state.mouseX;
+                        state.py2 = state.mouseY;
                     }
                     break;
                 default:
@@ -1417,8 +1424,6 @@ function addToTimeline(tool, x, y, layer = state.currentLayer) {
         action: state.tool.fn,
         mode: state.mode
     });
-    //render action
-    // drawCanvas();
 }
 
 //Main pillar of the code structure
@@ -1516,7 +1521,7 @@ function updateBrush(e) {
             state.tool.brushSize = parseInt(e.target.value);
             break;
         default:
-            //do nothing for other tools
+        //do nothing for other tools
     }
     lineWeight.textContent = state.tool.brushSize;
     brushPreview.style.width = state.tool.brushSize * 2 + "px";
@@ -1691,14 +1696,14 @@ function removeLayer(e) {
 }
 
 function renderLayersToDOM() {
-    layersCont.innerHTML="";
+    layersCont.innerHTML = "";
     let id = 0;
     layers.forEach(l => {
         if (!l.removed) {
             let layerElement = document.createElement("div");
             layerElement.className = `layer ${l.type}`;
             layerElement.id = id;
-            id+=1;
+            id += 1;
             layerElement.textContent = l.title;
             layerElement.draggable = true;
             if (l === state.currentLayer) {
