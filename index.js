@@ -88,7 +88,7 @@ const tools = {
         name: "replace",
         fn: replaceSteps,
         brushSize: 1,
-        disabled: true,
+        disabled: false,
         options: ["perfect"]
     },
     // shading: {
@@ -723,6 +723,7 @@ function drawSteps() {
             state.waitingPixelX = state.mouseX;
             state.waitingPixelY = state.mouseY;
             addToTimeline(state.tool.name, state.mouseX, state.mouseY);
+            drawCanvas();
             break;
         case "mousemove":
             drawCurrentPixel();
@@ -735,6 +736,7 @@ function drawSteps() {
                     //add to options, only execute if "continuous line" is on
                     actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode, state.tool.brushSize);
                     addToTimeline("line", { x1: state.lastX, x2: state.mouseX }, { y1: state.lastY, y2: state.mouseY });
+                    drawCanvas();
                 } else {
                     //perfect will be option, not mode
                     if (state.mode === "perfect") {
@@ -742,6 +744,7 @@ function drawSteps() {
                     } else {
                         actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
                         addToTimeline(state.tool.name, state.mouseX, state.mouseY);
+                        drawCanvas();
                     }
                 }
             }
@@ -753,6 +756,7 @@ function drawSteps() {
             //only needed if perfect pixels option is on
             actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
             addToTimeline(state.tool.name, state.mouseX, state.mouseY);
+            drawCanvas();
             break;
         default:
         //do nothing
@@ -769,6 +773,7 @@ function perfectPixels(currentX, currentY) {
         state.waitingPixelX = currentX;
         state.waitingPixelY = currentY;
         addToTimeline(state.tool.name, state.lastDrawnX, state.lastDrawnY);
+        drawCanvas();
     } else {
         state.waitingPixelX = currentX;
         state.waitingPixelY = currentY;
@@ -806,6 +811,7 @@ function lineSteps() {
         case "mouseup":
             actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode, state.tool.brushSize);
             addToTimeline(state.tool.name, { x1: state.lastX, x2: state.mouseX }, { y1: state.lastY, y2: state.mouseY });
+            drawCanvas();
             break;
         default:
         //do nothing
@@ -861,13 +867,7 @@ function replaceSteps() {
         case "mousedown":
             //get global colorlayer data to use while mouse is down
             state.localColorLayer = state.currentLayer.ctx.getImageData(0, 0, offScreenCVS.width, offScreenCVS.height);
-            //FIX: Pre-create mask for color here?
-            let xMin = Math.ceil(state.mouseX - state.tool.brushSize / 2);
-            let xMax = xMin + state.tool.brushSize;
-            let yMin = Math.ceil(state.mouseY - state.tool.brushSize / 2);
-            let yMax = yMin + state.tool.brushSize;
-            oldMask = { x0: xMin, y0: yMin, x1: xMax, y1: yMax };
-            actionReplace(state.localColorLayer);
+            actionReplace(state.localColorLayer, state.mouseX, state.mouseY);
             state.lastX = state.mouseX;
             state.lastY = state.mouseY;
             //for perfect pixels
@@ -882,7 +882,7 @@ function replaceSteps() {
             //draw onscreen current pixel if match to backColor
             //normalize mousemove to pixelgrid
             if (state.lastX !== state.mouseX || state.lastY !== state.mouseY) {
-                actionReplace(state.localColorLayer);
+                actionReplace(state.localColorLayer, state.mouseX, state.mouseY);
                 //FIX: Line replace too slow. Somehow only check pixels that weren't part of masked area at previous coords
                 if (Math.abs(state.mouseX - state.lastX) > 1 || Math.abs(state.mouseY - state.lastY) > 1) {
                     //add to options, only execute if "continuous line" is on
@@ -892,7 +892,7 @@ function replaceSteps() {
                     // if (state.mode === "perfect") {
                     //     perfectPixels(state.mouseX, state.mouseY);
                     // } else {
-                    actionReplace(state.localColorLayer);
+                    actionReplace(state.localColorLayer, state.mouseX, state.mouseY);
                     // }
                 }
             }
@@ -902,7 +902,7 @@ function replaceSteps() {
             break;
         case "mouseup":
             //only needed if perfect pixels option is on
-            actionReplace(state.localColorLayer);
+            actionReplace(state.localColorLayer, state.mouseX, state.mouseY);
             //re-render image to allow onscreen cursor to render
             drawCanvas();
             break;
@@ -935,105 +935,46 @@ function lineReplace(sx, sy, tx, ty, currentColor, ctx, currentMode, colorLayer)
     for (let i = 0; i < tri.long; i++) {
         let thispoint = { x: Math.round(sx + tri.x * i), y: Math.round(sy + tri.y * i) };
         // for each point along the line
-        let clickedColor = getColor(thispoint.x, thispoint.y, colorLayer);
-        if (clickedColor.color === state.backColor.color) {
-            actionDraw(thispoint.x, thispoint.y, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, currentMode);
-            addToTimeline(state.tool.name, thispoint.x, thispoint.y);
-        }
-        //FIX: very slow, inefficient. Need better masking algorithm
-        //brush mask
-        // let xMin = Math.ceil(thispoint.x - state.tool.brushSize / 2);
-        // let xMax = xMin + state.tool.brushSize;
-        // let yMin = Math.ceil(thispoint.y - state.tool.brushSize / 2);
-        // let yMax = yMin + state.tool.brushSize;
-        // let newMask = { x0: xMin, y0: yMin, x1: xMax, y1: yMax };
-        // //pseudo: get newmask non-overlap area by taking away oldmask overlap area
-        // //for now just mask x
-        // let xd = newMask.x0 - oldMask.x0;
-        // if (Math.abs(xd) > state.tool.brushSize) {xd = state.tool.brushSize};
-        // if (xd > 0) {
-        //     xMin = xMax - xd; //if positive number, newmask is right of oldmask
-        // } else {
-        //     xMax = xMin - xd; //if negative number, newmask is right of oldmask
-        // }
-        // let yd = newMask.y0 - oldMask.y0;
-        // if (Math.abs(yd) > state.tool.brushSize) { yd = state.tool.brushSize };
-        // if (yd > 0) {
-        //     yMin = yMax - yd; //if positive number, newmask is right of oldmask
-        // } else {
-        //     yMax = yMin - yd; //if negative number, newmask is right of oldmask
-        // }
-        // for (let y = yMin; y < yMax; y++) {
-        //     for (let x = xMin; x < xMax; x++) {
-        //         let clickedColor = getColor(x, y, colorLayer);
-        //         if (clickedColor.color === state.backColor.color) {
-        //             actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
-        //             addToTimeline(state.tool.name, x, y);
-        //         }
-        //     }
-        // }
-        // oldMask = newMask;
+        actionReplace(colorLayer, thispoint.x, thispoint.y);
     }
     //fill endpoint
-    let clickedColor = getColor(Math.round(tx), Math.round(ty), colorLayer);
-    if (clickedColor.color === state.backColor.color) {
-        actionDraw(Math.round(tx), Math.round(ty), state.brushColor, state.tool.brushSize, state.currentLayer.ctx, currentMode);
-        addToTimeline(state.tool.name, Math.round(tx), Math.round(ty));
-    }
-    // for (let y = Math.ceil(Math.round(ty) - state.tool.brushSize / 2); y < Math.ceil(Math.round(ty) - state.tool.brushSize / 2) + state.tool.brushSize; y++) {
-    //     for (let x = Math.ceil(Math.round(tx) - state.tool.brushSize / 2); x < Math.ceil(Math.round(tx) - state.tool.brushSize / 2) + state.tool.brushSize; x++) {
-    //         let clickedColor = getColor(x, y, colorLayer);
-    //         if (clickedColor.color === state.backColor.color) {
-    //             actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
-    //             addToTimeline(state.tool.name, x, y);
-    //         }
-    //     }
-    // }
+    actionReplace(colorLayer, Math.round(tx), Math.round(ty));
 }
 
-//offscreen default mask
-let oldMask = { x0: -1, y0: -1, x1: 0, y1: 0 };
-
-function actionReplace(colorLayer) {
+function actionReplace(colorLayer, xO, yO) {
     //sample color and replace if match
-    state.clickedColor = getColor(state.mouseX, state.mouseY, colorLayer);
-    if (state.clickedColor.color === state.backColor.color) {
-        actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
-        addToTimeline(state.tool.name, state.mouseX, state.mouseY);
-    }
+    // state.clickedColor = getColor(state.mouseX, state.mouseY, colorLayer);
+    // if (state.clickedColor.color === state.backColor.color) {
+    //     actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
+    //     addToTimeline(state.tool.name, state.mouseX, state.mouseY);
+    // }
     //brush mask
-    // let xMin = Math.ceil(state.mouseX - state.tool.brushSize / 2);
-    // let xMax = xMin + state.tool.brushSize;
-    // let yMin = Math.ceil(state.mouseY - state.tool.brushSize / 2);
-    // let yMax = yMin + state.tool.brushSize;
-    // let newMask = {x0: xMin, y0: yMin, x1: xMax, y1: yMax};
-    // let xline, yline; //if y goes past yline, adjust xmin/xmax to default, reverse ditto for x/xline
-    // //pseudo: get newmask non-overlap area by taking away oldmask overlap area
-    // //for now just mask x
-    // let xd = newMask.x0 - oldMask.x0;
-    // if (Math.abs(xd) > state.tool.brushSize) { xd = state.tool.brushSize };
-    // if (xd > 0) {
-    //     xMin = xMax - xd; //if positive number, newmask is right of oldmask
-    // } else {
-    //     xMax = xMin - xd; //if negative number, newmask is right of oldmask
-    // }
-    // let yd = newMask.y0 - oldMask.y0;
-    // if (Math.abs(yd) > state.tool.brushSize) { yd = state.tool.brushSize };
-    // if (yd > 0) {
-    //     yMin = yMax - yd; //if positive number, newmask is right of oldmask
-    // } else {
-    //     yMax = yMin - yd; //if negative number, newmask is right of oldmask
-    // }
-    // for (let y = yMin; y < yMax; y++) {
-    //     for (let x = xMin; x < xMax; x++) {
-    //         let clickedColor = getColor(x, y, colorLayer);
-    //         if (clickedColor.color === state.backColor.color) {
-    //             actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
-    //             addToTimeline(state.tool.name, x, y);
-    //         }
-    //     }
-    // }
-    // oldMask = newMask;
+    // FIX: somehow iterate over only new area of brush where not overlapping with last location.
+    let xMin = Math.ceil(xO - state.tool.brushSize / 2);
+    let xMax = xMin + state.tool.brushSize;
+    let yMin = Math.ceil(yO - state.tool.brushSize / 2);
+    let yMax = yMin + state.tool.brushSize;
+
+    let count = 0;
+
+    for (let y = yMin; y < yMax; y++) {
+        for (let x = xMin; x < xMax; x++) {
+            let clickedColor = getColor(x, y, colorLayer);
+            if (clickedColor.color === state.backColor.color) {
+                count += 1;
+                //update colorlayer data
+                let startPos = (y * offScreenCVS.width + x) * 4;
+                colorLayer[startPos] = state.brushColor.r;
+                colorLayer[startPos + 1] = state.brushColor.g;
+                colorLayer[startPos + 2] = state.brushColor.b;
+                colorLayer[startPos + 3] = state.brushColor.a;
+                actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
+                addToTimeline(state.tool.name, x, y);
+            }
+        }
+    }
+    drawCanvas();
+    console.log(count)
 }
 
 function fillSteps() {
@@ -1042,6 +983,7 @@ function fillSteps() {
             actionFill(state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode);
             //For undo ability, store starting coords and settings and pass them into actionFill
             addToTimeline(state.tool.name, state.mouseX, state.mouseY);
+            drawCanvas();
             break;
         case "mouseup":
             //redraw canvas to allow onscreen cursor to render
@@ -1227,6 +1169,7 @@ function curveSteps() {
                 state.clickCounter = 0;
                 //store control points for timeline
                 addToTimeline(state.tool.name, { x1: state.px1, x2: state.px2, x3: state.px3 }, { y1: state.py1, y2: state.py2, y3: state.py3 });
+                drawCanvas();
             }
             break;
         default:
@@ -1476,7 +1419,7 @@ function addToTimeline(tool, x, y, layer = state.currentLayer) {
         mode: state.mode
     });
     //render action
-    drawCanvas();
+    // drawCanvas();
 }
 
 //Main pillar of the code structure
@@ -1564,9 +1507,9 @@ function updateBrush(e) {
         case "brush":
             state.tool.brushSize = parseInt(e.target.value);
             break;
-        // case "replace":
-        //     state.tool.brushSize = parseInt(e.target.value);
-        //     break;
+        case "replace":
+            state.tool.brushSize = parseInt(e.target.value);
+            break;
         case "line":
             state.tool.brushSize = parseInt(e.target.value);
             break;
