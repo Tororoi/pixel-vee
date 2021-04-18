@@ -958,16 +958,23 @@ function actionReplace(colorLayer, xO, yO) {
             if (clickedColor.color === state.backColor.color) {
                 //update colorlayer data
                 let pixelPos = (y * offScreenCVS.width + x) * 4;
-                colorLayer.data[pixelPos] = state.brushColor.r;
-                colorLayer.data[pixelPos + 1] = state.brushColor.g;
-                colorLayer.data[pixelPos + 2] = state.brushColor.b;
-                colorLayer.data[pixelPos + 3] = state.brushColor.a;
-                actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
+                if (state.mode === "erase") {
+                    colorLayer.data[pixelPos] = 0;
+                    colorLayer.data[pixelPos + 1] = 0;
+                    colorLayer.data[pixelPos + 2] = 0;
+                    colorLayer.data[pixelPos + 3] = 0;
+                } else {
+                    colorLayer.data[pixelPos] = state.brushColor.r;
+                    colorLayer.data[pixelPos + 1] = state.brushColor.g;
+                    colorLayer.data[pixelPos + 2] = state.brushColor.b;
+                    colorLayer.data[pixelPos + 3] = state.brushColor.a;
+                }
+                // actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
                 addToTimeline(state.tool.name, x, y);
             }
         }
     }
-    // state.currentLayer.ctx.putImageData(state.localColorLayer, 0, 0, xMin, yMin, xMax, yMax);
+    state.currentLayer.ctx.putImageData(state.localColorLayer, 0, 0, xMin, yMin, xMax, yMax); //fastest method, noticeable difference on Safari
     // state.currentLayer.ctx.putImageData(state.localColorLayer, 0, 0)
     drawCanvas();
 }
