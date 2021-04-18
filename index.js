@@ -945,7 +945,7 @@ function actionReplace(colorLayer, xO, yO) {
     let yMin = Math.ceil(yO - state.tool.brushSize / 2);
     let yMax = yMin + state.tool.brushSize;
 
-    //constarin brush to canvas area to prevent rollover to ther side of canvas
+    //constrain brush to canvas area to prevent rollover to other side of canvas
     if (xMin < 0) { xMin = 0 };
     if (yMin < 0) { yMin = 0 };
     if (xMax > colorLayer.width) { xMax = colorLayer.width };
@@ -962,11 +962,12 @@ function actionReplace(colorLayer, xO, yO) {
                 colorLayer.data[pixelPos + 1] = state.brushColor.g;
                 colorLayer.data[pixelPos + 2] = state.brushColor.b;
                 colorLayer.data[pixelPos + 3] = state.brushColor.a;
-                actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
+                // actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
                 addToTimeline(state.tool.name, x, y);
             }
         }
     }
+    state.currentLayer.ctx.putImageData(state.localColorLayer, 0, 0, xMin, yMin, xMax, yMax);
     // state.currentLayer.ctx.putImageData(state.localColorLayer, 0, 0)
     drawCanvas();
 }
