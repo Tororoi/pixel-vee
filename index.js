@@ -725,6 +725,7 @@ function drawSteps() {
             actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
             state.lastX = state.mouseX;
             state.lastY = state.mouseY;
+            //for perfect pixels
             state.lastDrawnX = state.mouseX;
             state.lastDrawnY = state.mouseY;
             state.waitingPixelX = state.mouseX;
@@ -877,29 +878,17 @@ function replaceSteps() {
             actionReplace(state.localColorLayer, state.mouseX, state.mouseY);
             state.lastX = state.mouseX;
             state.lastY = state.mouseY;
-            //for perfect pixels
-            // state.lastDrawnX = state.mouseX;
-            // state.lastDrawnY = state.mouseY;
-            // state.waitingPixelX = state.mouseX;
-            // state.waitingPixelY = state.mouseY;
             //get rid of onscreen cursor
             drawCanvas();
             break;
         case "mousemove":
-            //draw onscreen current pixel if match to backColor
-            //normalize mousemove to pixelgrid
             if (state.lastX !== state.mouseX || state.lastY !== state.mouseY) {
                 actionReplace(state.localColorLayer, state.mouseX, state.mouseY);
                 if (Math.abs(state.mouseX - state.lastX) > 1 || Math.abs(state.mouseY - state.lastY) > 1) {
                     //add to options, only execute if "continuous line" is on
                     lineReplace(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode, state.localColorLayer);
                 } else {
-                    //perfect will be option, not mode
-                    // if (state.mode === "perfect") {
-                    //     perfectPixels(state.mouseX, state.mouseY);
-                    // } else {
                     actionReplace(state.localColorLayer, state.mouseX, state.mouseY);
-                    // }
                 }
             }
             // save last point
@@ -950,7 +939,7 @@ function lineReplace(sx, sy, tx, ty, currentColor, ctx, currentMode, colorLayer)
 
 function actionReplace(colorLayer, xO, yO) {
     //brush mask
-    // FIX: somehow iterate over only new area of brush where not overlapping with last location.
+    // FIX: somehow iterate over only new area of brush where not overlapping with last location. Still slow on Safari.
     let xMin = Math.ceil(xO - state.tool.brushSize / 2);
     let xMax = xMin + state.tool.brushSize;
     let yMin = Math.ceil(yO - state.tool.brushSize / 2);
