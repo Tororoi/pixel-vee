@@ -962,12 +962,12 @@ function actionReplace(colorLayer, xO, yO) {
                 colorLayer.data[pixelPos + 1] = state.brushColor.g;
                 colorLayer.data[pixelPos + 2] = state.brushColor.b;
                 colorLayer.data[pixelPos + 3] = state.brushColor.a;
-                // actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
+                actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
                 addToTimeline(state.tool.name, x, y);
             }
         }
     }
-    state.currentLayer.ctx.putImageData(state.localColorLayer, 0, 0, xMin, yMin, xMax, yMax);
+    // state.currentLayer.ctx.putImageData(state.localColorLayer, 0, 0, xMin, yMin, xMax, yMax);
     // state.currentLayer.ctx.putImageData(state.localColorLayer, 0, 0)
     drawCanvas();
 }
