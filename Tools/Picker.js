@@ -180,21 +180,36 @@ class Picker {
 
     handleMouseDown(e) {
         this.clicked = true;
-        this.selectSL(e.offsetX, e.offsetY);
+        let x, y;
+        if (e.targetTouches) {
+            let rect = e.target.getBoundingClientRect();
+            x = Math.round(e.targetTouches[0].pageX - rect.left);
+            y = Math.round(e.targetTouches[0].pageY - rect.top);
+        } else {
+            x = e.offsetX;
+            y = e.offsetY;
+        }
+        this.selectSL(x, y);
     }
 
     handleMouseMove(e) {
         if (this.clicked) {
             let canvasXOffset = this.target.getBoundingClientRect().left - document.getElementsByTagName("html")[0].getBoundingClientRect().left;
             let canvasYOffset = this.target.getBoundingClientRect().top - document.getElementsByTagName("html")[0].getBoundingClientRect().top;
-            let canvasX = e.pageX - canvasXOffset;
-            let canvasY = e.pageY - canvasYOffset;
+            let x, y;
+            if (e.targetTouches) {
+                x = Math.round(e.targetTouches[0].pageX - canvasXOffset);
+                y = Math.round(e.targetTouches[0].pageY - canvasYOffset);
+            } else {
+                x = e.pageX - canvasXOffset;
+                y = e.pageY - canvasYOffset;
+            }
             //constrain coordinates
-            if (canvasX > this.width) { canvasX = this.width }
-            if (canvasX < 0) { canvasX = 0 }
-            if (canvasY > this.height) { canvasY = this.height }
-            if (canvasY < 0) { canvasY = 0 }
-            this.selectSL(canvasX, canvasY);
+            if (x > this.width) { x = this.width }
+            if (x < 0) { x = 0 }
+            if (y > this.height) { y = this.height }
+            if (y < 0) { y = 0 }
+            this.selectSL(x, y);
         }
     }
 
@@ -451,6 +466,19 @@ class Picker {
             this.handleMouseMove(e);
         });
         window.addEventListener("mouseup", (e) => {
+            this.handleMouseUp(e);
+        });
+        this.target.addEventListener('touchstart', (e) => {
+            this.handleMouseDown(e);
+        });
+        window.addEventListener('touchmove', (e) => {
+            window.scrollTo(0, 0);
+            this.handleMouseMove(e);
+        });
+        window.addEventListener('touchend', (e) => {
+            this.handleMouseUp(e);
+        });
+        window.addEventListener('touchcancel', (e) => {
             this.handleMouseUp(e);
         });
 

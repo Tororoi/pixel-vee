@@ -415,8 +415,8 @@ function handleMouseDown(e) {
     let x, y;
     if (e.targetTouches) {
         let rect = e.target.getBoundingClientRect();
-        x = e.targetTouches[0].pageX - rect.left;
-        y = e.targetTouches[0].pageY - rect.top;
+        x = Math.round(e.targetTouches[0].pageX - rect.left);
+        y = Math.round(e.targetTouches[0].pageY - rect.top);
     } else {
         x = e.offsetX;
         y = e.offsetY;
@@ -451,8 +451,8 @@ function handleMouseMove(e) {
     let x, y;
     if (e.targetTouches) {
         let rect = e.target.getBoundingClientRect();
-        x = e.targetTouches[0].pageX - rect.left;
-        y = e.targetTouches[0].pageY - rect.top;
+        x = Math.round(e.targetTouches[0].pageX - rect.left);
+        y = Math.round(e.targetTouches[0].pageY - rect.top);
     } else {
         x = e.offsetX;
         y = e.offsetY;
@@ -486,8 +486,8 @@ function handleMouseUp(e) {
     let x, y;
     if (e.targetTouches) {
         let rect = e.target.getBoundingClientRect();
-        x = e.changedTouches[0].pageX - rect.left;
-        y = e.changedTouches[0].pageY - rect.top;
+        x = Math.round(e.changedTouches[0].pageX - rect.left);
+        y = Math.round(e.changedTouches[0].pageY - rect.top);
     } else {
         x = e.offsetX;
         y = e.offsetY;
