@@ -773,7 +773,9 @@ function drawSteps() {
             state.lastDrawnY = state.mouseY;
             state.waitingPixelX = state.mouseX;
             state.waitingPixelY = state.mouseY;
-            addToTimeline(state.tool.name, state.mouseX, state.mouseY);
+            if (state.tool.name !== "replace") {
+                addToTimeline(state.tool.name, state.mouseX, state.mouseY);
+            }
             drawCanvas();
             break;
         case "mousemove":
@@ -784,7 +786,9 @@ function drawSteps() {
                 //draw between points when drawing fast
                 if (Math.abs(state.mouseX - state.lastX) > 1 || Math.abs(state.mouseY - state.lastY) > 1) {
                     actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode, state.tool.brushSize);
-                    addToTimeline("line", { x1: state.lastX, x2: state.mouseX }, { y1: state.lastY, y2: state.mouseY });
+                    if (state.tool.name !== "replace") {
+                        addToTimeline("line", { x1: state.lastX, x2: state.mouseX }, { y1: state.lastY, y2: state.mouseY });
+                    }
                     drawCanvas();
                 } else {
                     //FIX: perfect will be option, not mode
@@ -794,7 +798,9 @@ function drawSteps() {
                         perfectPixels(state.mouseX, state.mouseY);
                     } else {
                         actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
-                        addToTimeline(state.tool.name, state.mouseX, state.mouseY);
+                        if (state.tool.name !== "replace") {
+                            addToTimeline(state.tool.name, state.mouseX, state.mouseY);
+                        }
                         drawCanvas();
                     }
                 }
@@ -806,7 +812,9 @@ function drawSteps() {
         case "mouseup":
             //only needed if perfect pixels option is on
             actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
-            addToTimeline(state.tool.name, state.mouseX, state.mouseY);
+            if (state.tool.name !== "replace") {
+                addToTimeline(state.tool.name, state.mouseX, state.mouseY);
+            }
             drawCanvas();
             break;
         default:
@@ -823,7 +831,9 @@ function perfectPixels(currentX, currentY) {
         state.lastDrawnY = state.waitingPixelY;
         state.waitingPixelX = currentX;
         state.waitingPixelY = currentY;
-        addToTimeline(state.tool.name, state.lastDrawnX, state.lastDrawnY);
+        if (state.tool.name !== "replace") {
+            addToTimeline(state.tool.name, state.lastDrawnX, state.lastDrawnY);
+        }
         drawCanvas();
     } else {
         state.waitingPixelX = currentX;
@@ -924,9 +934,6 @@ function replaceSteps() {
             // state.currentLayer.ctx.strokeStyle = "red";
             // state.currentLayer.ctx.stroke(state.clipMask);
             state.currentLayer.ctx.clip(state.clipMask);
-            //save clipmask to history, x = clipMask
-            //can fix once undoredo stack items are objects not just arrays
-            addToTimeline(state.tool.name, state.clipMask, null)
             drawSteps();
             break;
         case "mousemove":
@@ -935,9 +942,15 @@ function replaceSteps() {
         case "mouseup":
             drawSteps();
             state.currentLayer.ctx.restore();
+            let upImage = new Image();
+            upImage.src = state.currentLayer.cvs.toDataURL();
+            addToTimeline(state.tool.name, upImage, null)
             break;
         case "mouseout":
             state.currentLayer.ctx.restore();
+            let outImage = new Image();
+            outImage.src = state.currentLayer.cvs.toDataURL();
+            addToTimeline(state.tool.name, outImage, null)
             break;
         default:
         //do nothing
@@ -947,7 +960,7 @@ function replaceSteps() {
 function createClipMask(colorLayer) {
     let mask = new Path2D();
 
-    // //create outline path
+    // //create outline path, path disconnected so can't be filled
     // let pixels = [];
     // for (let y = 0; y < colorLayer.height; y++) {
     //     pixels.push([]);
@@ -1545,11 +1558,6 @@ function actionUndoRedo(pushStack, popStack) {
 function redrawPoints() {
     //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
     state.undoStack.forEach(action => {
-        //clipping is expensive, maybe save an image instead
-        if (action[0].tool === "replace" && action[0].y === null) {
-            action[0].layer.ctx.save()
-            action[0].layer.ctx.clip(action[0].x)
-        }
         action.forEach(p => {
             switch (p.tool) {
                 case "addlayer":
@@ -1569,17 +1577,12 @@ function redrawPoints() {
                     actionCurve(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.x.x3, p.y.y3, 4, p.color, p.layer.ctx, p.mode, p.weight);
                     break;
                 case "replace":
-                    if (p.y !== null) {
-                        actionDraw(p.x, p.y, p.color, p.weight, p.layer.ctx, p.mode);
-                    }
+                    p.layer.ctx.drawImage(p.x, 0, 0, offScreenCVS.width, offScreenCVS.height);
                     break;
                 default:
                     actionDraw(p.x, p.y, p.color, p.weight, p.layer.ctx, p.mode);
             }
         })
-        if (action[0].tool === "replace" && action[0].y === null) {
-            action[0].layer.ctx.restore();
-        }
     })
     state.redoStack.forEach(action => {
         action.forEach(p => {
