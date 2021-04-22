@@ -49,8 +49,12 @@ modeBtn.style.background = "rgb(255, 255, 255)";
 
 //Options
 let lineWeight = document.querySelector("#line-weight");
+let brushBtn = document.querySelector(".brush-preview");
 let brushPreview = document.querySelector("#brush-preview");
 let brushSlider = document.querySelector("#brush-size");
+let brush = document.querySelector(".brush");
+// let brushCVS = document.createElement("canvas");
+// let brushCTX = brushCVS.getContext("2d");
 
 //Export
 let exportBtn = document.querySelector(".export");
@@ -151,6 +155,8 @@ const state = {
     mode: "draw",
     brushColor: { color: "rgba(0,0,0,255)", r: 0, g: 0, b: 0, a: 255 },
     backColor: { color: "rgba(255,255,255,255)", r: 255, g: 255, b: 255, a: 255 },
+    brushStamp: [{x: 0, y: 0, w: 1, h: 1}], //default 1 pixel
+    brushType: "circle",
     palette: {},
     options: {
         perfect: false,
@@ -164,6 +170,7 @@ const state = {
     currentLayer: null,
     clipMask: null,
     event: "none",
+    clickDisabled: false,
     clicked: false,
     clickedColor: null,
     mouseX: null,
@@ -250,6 +257,7 @@ colorSwitch.addEventListener('click', switchColors);
 toolsCont.addEventListener('click', handleTools);
 modesCont.addEventListener('click', handleModes);
 
+brushBtn.addEventListener('click', switchBrush)
 brushSlider.addEventListener("input", updateBrush);
 
 exportBtn.addEventListener('click', exportImage);
@@ -412,6 +420,9 @@ function handleMouseDown(e) {
     }
     state.event = "mousedown";
     state.clicked = true;
+    if (state.clickDisabled) {
+        return;
+    }
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
     let x, y;
     if (e.targetTouches) {
@@ -444,7 +455,11 @@ function handleMouseDown(e) {
 }
 
 function handleMouseMove(e) {
+    if (state.clickDisabled && state.clicked) {
+        return;
+    }
     state.event = "mousemove";
+    state.clickDisabled = false; 
     //currently only square dimensions work
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
     state.ratio = ocWidth / offScreenCVS.width * zoom;
@@ -483,6 +498,9 @@ function handleMouseMove(e) {
 function handleMouseUp(e) {
     state.event = "mouseup";
     state.clicked = false;
+    if (state.clickDisabled) {
+        return;
+    }
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
     let x, y;
     if (e.targetTouches) {
@@ -562,6 +580,7 @@ function handleWheel(e) {
     state.lastOffsetX = state.xOffset;
     state.lastOffsetY = state.yOffset;
     drawCanvas();
+    // state.clickDisabled = true;
 }
 
 //=========================================//
@@ -626,9 +645,7 @@ function handleTools(e) {
             // toolBtn.querySelector(".icon").style = "opacity: 1;"
             state.tool = tools[toolBtn.id];
             //update options
-            lineWeight.textContent = state.tool.brushSize;
-            brushPreview.style.width = state.tool.brushSize * 2 + "px";
-            brushPreview.style.height = state.tool.brushSize * 2 + "px";
+            updateStamp();
             brushSlider.value = state.tool.brushSize;
             brushSlider.disabled = state.tool.disabled;
             //update cursor
@@ -671,21 +688,23 @@ function renderCursor() {
             break;
         default:
             drawCurrentPixel();
+            // actionDraw(state.mouseX, state.onY, state.currentColor, state.brushStamp, state.tool.brushSize, onScreenCTX, state.currentMode, state.ratio / zoom)
         // drawCursorBox();
     }
 }
 
 function drawCurrentPixel() {
     //draw onscreen current pixel
-    if (state.mode === "erase") {
-        // drawCursorBox();
-        let brushOffset = Math.floor(state.tool.brushSize / 2) * state.ratio / zoom;
-        onScreenCTX.clearRect(state.onX - brushOffset, state.onY - brushOffset, state.ratio / zoom * state.tool.brushSize, state.ratio / zoom * state.tool.brushSize);
-    } else {
-        onScreenCTX.fillStyle = state.brushColor.color;
-        let brushOffset = Math.floor(state.tool.brushSize / 2) * state.ratio / zoom;
-        onScreenCTX.fillRect(state.onX - brushOffset, state.onY - brushOffset, state.ratio / zoom * state.tool.brushSize, state.ratio / zoom * state.tool.brushSize);
-    }
+    // if (state.mode === "erase") {
+    //     // drawCursorBox();
+    //     let brushOffset = Math.floor(state.tool.brushSize / 2) * state.ratio / zoom;
+    //     onScreenCTX.clearRect(state.onX - brushOffset, state.onY - brushOffset, state.ratio / zoom * state.tool.brushSize, state.ratio / zoom * state.tool.brushSize);
+    // } else {
+    //     onScreenCTX.fillStyle = state.brushColor.color;
+    //     let brushOffset = Math.floor(state.tool.brushSize / 2) * state.ratio / zoom;
+    //     onScreenCTX.fillRect(state.onX - brushOffset, state.onY - brushOffset, state.ratio / zoom * state.tool.brushSize, state.ratio / zoom * state.tool.brushSize);
+    // }
+    actionDraw(state.mox, state.moy, state.brushColor, state.brushStamp, state.tool.brushSize, onScreenCTX, state.currentMode, state.ratio / zoom)
 }
 
 function drawCursorBox() {
@@ -715,41 +734,94 @@ function drawCursorBox() {
     onScreenCTX.stroke();
 }
 
-function DrawCircle() {
-    let brushPoints = [];
-    let xO = 0, yO = 0;
+function drawRect() {
+    let brushRects = [];
+    brush.setAttribute("viewBox", `0 -0.5 ${state.tool.brushSize} ${state.tool.brushSize}`);
+    brush.style.width = state.tool.brushSize * 2;
+    brush.style.height = state.tool.brushSize * 2;
+    function makePathData(x, y, w) { return ('M' + x + ' ' + y + 'h' + w + ''); }
+    function makePath(color, data) { return '<path stroke="' + color + '" d="' + data + '" />\n'; }
+    let paths = [];
+
+    brushRects.push({ x: 0, y: 0, w: state.tool.brushSize, h: state.tool.brushSize })
+
+    brushRects.forEach(r => {
+        paths.push(makePathData(r.x, r.y, r.w))
+    })
+
+    brush.innerHTML = makePath("rgba(255,255,255,255)", paths.join(''));
+    brush.setAttribute("stroke-width", state.tool.brushSize * 2);
+    return brushRects;
+}
+
+function drawCircle() {
+    // let brushPoints = [];
+    let brushRects = [];
     let r = Math.floor(state.tool.brushSize / 2);
     let d = 3 - state.tool.brushSize;
     let x = 0, y = r;
+    let xO = r, yO = r;
+    // brushCVS.width = state.tool.brushSize;
+    // brushCVS.height = state.tool.brushSize;
+    brush.setAttribute("viewBox", `0 -0.5 ${state.tool.brushSize} ${state.tool.brushSize}`);
+    brush.style.width = state.tool.brushSize * 2;
+    brush.style.height = state.tool.brushSize * 2;
+    function makePathData(x, y, w) { return ('M' + x + ' ' + y + 'h' + w + ''); }
+    function makePath(color, data) { return '<path stroke="' + color + '" d="' + data + '" />\n'; }
+    let paths = [];
     eightfoldSym(xO, yO, x, y);
     while (x < y) {
         x++;
         if (d > 0) {
             y--;
-            d = d + 4 * (x - y) + 10;
+            d = d + 5 * (x - y) + 10;
         } else {
             d = d + 3 * x + 6;
         }
         eightfoldSym(xO, yO, x, y);
     }
-    function eightfoldSym(xc, yc, x, y) {
-        if (state.tool.brushSize % 2 === 0) { xc-- };
-        brushPoints.push({ x: xc + y, y: yc - x }); //oct 1
-        brushPoints.push({ x: xc + x, y: yc - y }); //oct 2
-        if (state.tool.brushSize % 2 === 0) { xc++ };
-        brushPoints.push({ x: xc - x, y: yc - y }); //oct 3
-        brushPoints.push({ x: xc - y, y: yc - x }); //oct 4
-        if (state.tool.brushSize % 2 === 0) { yc-- };
-        brushPoints.push({ x: xc - y, y: yc + x }); //oct 5
-        brushPoints.push({ x: xc - x, y: yc + y }); //oct 6
-        if (state.tool.brushSize % 2 === 0) { xc-- };
-        brushPoints.push({ x: xc + x, y: yc + y }); //oct 7
-        brushPoints.push({ x: xc + y, y: yc + x }); //oct 8
+
+    function eightfoldSym(xc, yc, x, y) { //solid circle
+        if (state.tool.brushSize % 2 === 0) {
+            //connect octant pairs to form solid shape
+            brushRects.push({ x: xc - x, y: yc - y, w: 2 * x, h: 1 }); //3, 2
+            brushRects.push({ x: xc - y, y: yc - x, w: 2 * y, h: 1 }); //4, 1
+            brushRects.push({ x: xc - y, y: yc + x - 1, w: 2 * y, h: 1 }); //5, 8
+            brushRects.push({ x: xc - x, y: yc + y - 1, w: 2 * x, h: 1 }); //6, 7
+        } else {
+            brushRects.push({ x: xc - x, y: yc - y, w: 2 * x + 1, h: 1 }); //3, 2
+            brushRects.push({ x: xc - y, y: yc - x, w: 2 * y + 1, h: 1 }); //4, 1
+            brushRects.push({ x: xc - y, y: yc + x, w: 2 * y + 1, h: 1 }); //5, 8
+            brushRects.push({ x: xc - x, y: yc + y, w: 2 * x + 1, h: 1 }); //6, 7
+        }
     }
 
-    brushPoints.forEach(p => {
-        actionDraw(p.x, p.y, state.brushColor, 1, state.currentLayer.ctx, state.mode)
+    brushRects.forEach(r => {
+        paths.push(makePathData(r.x, r.y, r.w))
     })
+
+    brush.innerHTML = makePath("rgba(255,255,255,255)", paths.join(''));
+    brush.setAttribute("stroke-width", 1);
+    return brushRects;
+
+    // function eightfoldSym(xc, yc, x, y) {
+    //     if (state.tool.brushSize % 2 === 0) { xc-- };
+    //     brushPoints.push({ x: xc + y, y: yc - x }); //oct 1
+    //     brushPoints.push({ x: xc + x, y: yc - y }); //oct 2
+    //     if (state.tool.brushSize % 2 === 0) { xc++ };
+    //     brushPoints.push({ x: xc - x, y: yc - y }); //oct 3
+    //     brushPoints.push({ x: xc - y, y: yc - x }); //oct 4
+    //     if (state.tool.brushSize % 2 === 0) { yc-- };
+    //     brushPoints.push({ x: xc - y, y: yc + x }); //oct 5
+    //     brushPoints.push({ x: xc - x, y: yc + y }); //oct 6
+    //     if (state.tool.brushSize % 2 === 0) { xc-- };
+    //     brushPoints.push({ x: xc + x, y: yc + y }); //oct 7
+    //     brushPoints.push({ x: xc + y, y: yc + x }); //oct 8
+    // }
+
+    // brushPoints.forEach(p => {
+    //     actionDraw(p.x, p.y, state.brushColor, 1, state.currentLayer.ctx, state.mode)
+    // })
 
     // state.tool.brushPoints = brushPoints;
     // actionFill(xO, yO, state.brushColor, state.currentLayer.ctx, state.mode);
@@ -765,7 +837,7 @@ function drawSteps() {
     switch (state.event) {
         case "mousedown":
             //set colorlayer, then for each brushpoint, alter colorlayer and add each to timeline
-            actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
+            actionDraw(state.mouseX, state.mouseY, state.brushColor, state.brushStamp, state.tool.brushSize, state.currentLayer.ctx, state.mode);
             state.lastX = state.mouseX;
             state.lastY = state.mouseY;
             //for perfect pixels
@@ -785,7 +857,7 @@ function drawSteps() {
             if (state.lastX !== state.mouseX || state.lastY !== state.mouseY) {
                 //draw between points when drawing fast
                 if (Math.abs(state.mouseX - state.lastX) > 1 || Math.abs(state.mouseY - state.lastY) > 1) {
-                    actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode, state.tool.brushSize);
+                    actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode, state.brushStamp, state.tool.brushSize);
                     if (state.tool.name !== "replace") {
                         addToTimeline("line", { x1: state.lastX, x2: state.mouseX }, { y1: state.lastY, y2: state.mouseY });
                     }
@@ -797,7 +869,7 @@ function drawSteps() {
                         drawCurrentPixel();
                         perfectPixels(state.mouseX, state.mouseY);
                     } else {
-                        actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
+                        actionDraw(state.mouseX, state.mouseY, state.brushColor, state.brushStamp, state.tool.brushSize, state.currentLayer.ctx, state.mode);
                         if (state.tool.name !== "replace") {
                             addToTimeline(state.tool.name, state.mouseX, state.mouseY);
                         }
@@ -811,7 +883,7 @@ function drawSteps() {
             break;
         case "mouseup":
             //only needed if perfect pixels option is on
-            actionDraw(state.mouseX, state.mouseY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
+            actionDraw(state.mouseX, state.mouseY, state.brushColor, state.brushStamp, state.tool.brushSize, state.currentLayer.ctx, state.mode);
             if (state.tool.name !== "replace") {
                 addToTimeline(state.tool.name, state.mouseX, state.mouseY);
             }
@@ -825,7 +897,7 @@ function drawSteps() {
 function perfectPixels(currentX, currentY) {
     //if currentPixel not neighbor to lastDrawn, draw waitingpixel
     if (Math.abs(currentX - state.lastDrawnX) > 1 || Math.abs(currentY - state.lastDrawnY) > 1) {
-        actionDraw(state.waitingPixelX, state.waitingPixelY, state.brushColor, state.tool.brushSize, state.currentLayer.ctx, state.mode);
+        actionDraw(state.waitingPixelX, state.waitingPixelY, state.brushColor, state.brushStamp, state.tool.brushSize, state.currentLayer.ctx, state.mode);
         //update queue
         state.lastDrawnX = state.waitingPixelX;
         state.lastDrawnY = state.waitingPixelY;
@@ -841,14 +913,20 @@ function perfectPixels(currentX, currentY) {
     }
 }
 
-function actionDraw(coordX, coordY, currentColor, weight, ctx, currentMode) {
+function actionDraw(coordX, coordY, currentColor, brushStamp, weight, ctx, currentMode, scale = 1) {
     ctx.fillStyle = currentColor.color;
     switch (currentMode) {
         case "erase":
-            ctx.clearRect(Math.ceil(coordX - weight / 2), Math.ceil(coordY - weight / 2), weight, weight);
+            brushStamp.forEach(r => {
+                ctx.clearRect((Math.ceil(coordX - weight / 2) + r.x) * scale, (Math.ceil(coordY - weight / 2) + r.y) * scale, r.w * scale, r.h * scale)
+            })
             break;
         default:
-            ctx.fillRect(Math.ceil(coordX - weight / 2), Math.ceil(coordY - weight / 2), weight, weight);
+            // ctx.fillRect(Math.ceil(coordX - weight / 2), Math.ceil(coordY - weight / 2), weight, weight);
+            brushStamp.forEach(r => {
+                ctx.fillRect((Math.ceil(coordX - weight / 2) + r.x) * scale, (Math.ceil(coordY - weight / 2) + r.y) * scale, r.w * scale, r.h * scale)
+            })
+            // ctx.drawImage(brushStamp, Math.ceil(coordX - weight / 2), Math.ceil(coordY - weight / 2), weight, weight);
     }
 }
 
@@ -864,13 +942,13 @@ function lineSteps() {
             if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
                 onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
                 drawCanvas();
-                actionLine(state.lastX + (state.xOffset / state.ratio * zoom), state.lastY + (state.yOffset / state.ratio * zoom), state.mox, state.moy, state.brushColor, onScreenCTX, state.mode, state.tool.brushSize, state.ratio / zoom);
+                actionLine(state.lastX + (state.xOffset / state.ratio * zoom), state.lastY + (state.yOffset / state.ratio * zoom), state.mox, state.moy, state.brushColor, onScreenCTX, state.mode, state.brushStamp, state.tool.brushSize, state.ratio / zoom);
                 state.lastOnX = state.onX;
                 state.lastOnY = state.onY;
             }
             break;
         case "mouseup":
-            actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode, state.tool.brushSize);
+            actionLine(state.lastX, state.lastY, state.mouseX, state.mouseY, state.brushColor, state.currentLayer.ctx, state.mode, state.brushStamp, state.tool.brushSize);
             addToTimeline(state.tool.name, { x1: state.lastX, x2: state.mouseX }, { y1: state.lastY, y2: state.mouseY });
             drawCanvas();
             break;
@@ -879,16 +957,20 @@ function lineSteps() {
     }
 }
 
-function actionLine(sx, sy, tx, ty, currentColor, ctx, currentMode, weight, scale = 1) {
+function actionLine(sx, sy, tx, ty, currentColor, ctx, currentMode, brushStamp, weight, scale = 1) {
     ctx.fillStyle = currentColor.color;
-    let drawPixel = (x, y, w, h) => {
-        let brushOffset = Math.floor(weight / 2) * scale;
-        if (currentMode === "erase") {
-            ctx.clearRect(x - brushOffset, y - brushOffset, w * weight, h * weight);
-        } else {
-            ctx.fillRect(x - brushOffset, y - brushOffset, w * weight, h * weight);
-        }
-    };
+    // let drawPixel = (x, y) => {
+    //     let brushOffset = Math.floor(weight / 2) * scale;
+    //     if (currentMode === "erase") {
+    //         brushStamp.forEach(r => {
+    //             ctx.clearRect(x - brushOffset + r.x * scale, y - brushOffset + r.y * scale, r.w * scale, r.h * scale)
+    //         })
+    //     } else {
+    //         brushStamp.forEach(r => {
+    //             ctx.fillRect(x - brushOffset + r.x * scale, y - brushOffset + r.y * scale, r.w * scale, r.h * scale)
+    //         })
+    //     }
+    // };
     //create triangle object
     let tri = {}
     function getTriangle(x1, y1, x2, y2, ang) {
@@ -912,15 +994,13 @@ function actionLine(sx, sy, tx, ty, currentColor, ctx, currentMode, weight, scal
     for (let i = 0; i < tri.long; i++) {
         let thispoint = { x: Math.round(sx + tri.x * i), y: Math.round(sy + tri.y * i) };
         // for each point along the line
-        drawPixel(thispoint.x * scale, // round for perfect pixels
-            thispoint.y * scale, // thus no aliasing
-            scale, scale); // fill in one pixel, 1x1
+        // drawPixel(thispoint.x * scale, thispoint.y * scale);
+        actionDraw(thispoint.x, thispoint.y, currentColor, brushStamp, weight, ctx, currentMode, scale)
 
     }
     //fill endpoint
-    drawPixel(Math.round(tx) * scale, // round for perfect pixels
-        Math.round(ty) * scale, // thus no aliasing
-        scale, scale); // fill in one pixel, 1x1
+    // drawPixel(Math.round(tx) * scale, Math.round(ty) * scale);
+    actionDraw(Math.round(tx), Math.round(ty), currentColor, brushStamp, weight, ctx, currentMode, scale)
 }
 
 function replaceSteps() {
@@ -1246,6 +1326,7 @@ function curveSteps() {
                     state.brushColor,
                     onScreenCTX,
                     state.mode,
+                    state.brushStamp,
                     state.tool.brushSize,
                     state.ratio / zoom
                 );
@@ -1280,6 +1361,7 @@ function curveSteps() {
                     state.brushColor,
                     state.currentLayer.ctx,
                     state.mode,
+                    state.brushStamp,
                     state.tool.brushSize
                 );
                 state.clickCounter = 0;
@@ -1297,7 +1379,7 @@ function curveSteps() {
     }
 }
 
-function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, currentColor, ctx, currentMode, weight, scale = 1) {
+function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, currentColor, ctx, currentMode, brushStamp, weight, scale = 1) {
 
     //force coords to int
     startx = Math.round(startx);
@@ -1315,12 +1397,13 @@ function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, cu
             //rounded values
             let xt = Math.floor(x);
             let yt = Math.floor(y);
-            let brushOffset = Math.floor(weight / 2) * scale;
-            if (currentMode === "erase") {
-                ctx.clearRect(xt * scale - brushOffset, yt * scale - brushOffset, scale * weight, scale * weight);
-            } else {
-                ctx.fillRect(xt * scale - brushOffset, yt * scale - brushOffset, scale * weight, scale * weight);
-            }
+            // let brushOffset = Math.floor(weight / 2) * scale;
+            actionDraw(xt, yt, currentColor, brushStamp, weight, ctx, currentMode, scale)
+            // if (currentMode === "erase") {
+            //     ctx.clearRect(xt * scale - brushOffset, yt * scale - brushOffset, scale * weight, scale * weight);
+            // } else {
+            //     ctx.fillRect(xt * scale - brushOffset, yt * scale - brushOffset, scale * weight, scale * weight);
+            // }
         }
 
         function assert(condition, message) {
@@ -1422,14 +1505,14 @@ function actionCurve(startx, starty, endx, endy, controlx, controly, stepNum, cu
                 //fill endpoint
                 plot(x2, y2);
             } else if (stepNum === 4) {
-                actionLine(x0, y0, x2, y2, currentColor, ctx, currentMode, weight);
+                actionLine(x0, y0, x2, y2, currentColor, ctx, currentMode, brushStamp, weight, scale);
             }
         }
     }
 
     if (stepNum === 1) {
         //after defining x0y0
-        actionLine(startx, starty, state.mox, state.moy, currentColor, onScreenCTX, currentMode, weight, scale);
+        actionLine(startx, starty, state.mox, state.moy, currentColor, onScreenCTX, currentMode, brushStamp, weight, scale);
     } else if (stepNum === 2 || stepNum === 3) {
         // after defining x2y2
         //onscreen preview curve
@@ -1533,6 +1616,7 @@ function addToTimeline(tool, x, y, layer = state.currentLayer) {
         x: x,
         y: y,
         layer: layer,
+        brush: state.brushStamp,
         weight: state.tool.brushSize,
         color: { ...state.brushColor },
         tool: tool,
@@ -1571,16 +1655,16 @@ function redrawPoints() {
                     actionFill(p.x, p.y, p.color, p.layer.ctx, p.mode);
                     break;
                 case "line":
-                    actionLine(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.color, p.layer.ctx, p.mode, p.weight);
+                    actionLine(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.color, p.layer.ctx, p.mode, p.brush, p.weight);
                     break;
                 case "curve":
-                    actionCurve(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.x.x3, p.y.y3, 4, p.color, p.layer.ctx, p.mode, p.weight);
+                    actionCurve(p.x.x1, p.y.y1, p.x.x2, p.y.y2, p.x.x3, p.y.y3, 4, p.color, p.layer.ctx, p.mode, p.brush, p.weight);
                     break;
                 case "replace":
                     p.layer.ctx.drawImage(p.x, 0, 0, offScreenCVS.width, offScreenCVS.height);
                     break;
                 default:
-                    actionDraw(p.x, p.y, p.color, p.weight, p.layer.ctx, p.mode);
+                    actionDraw(p.x, p.y, p.color, p.brush, p.weight, p.layer.ctx, p.mode);
             }
         })
     })
@@ -1621,6 +1705,15 @@ function drawCanvas() {
 //======== * * * Options * * * ========//
 //=====================================//
 
+function switchBrush(e) {
+    if (state.brushType === "square") {
+        state.brushType = "circle";
+    } else {
+        state.brushType = "square";
+    }
+    updateStamp();
+}
+
 function updateBrush(e) {
     switch (state.tool.name) {
         case "brush":
@@ -1638,13 +1731,27 @@ function updateBrush(e) {
         default:
         //do nothing for other tools
     }
-    lineWeight.textContent = state.tool.brushSize;
-    brushPreview.style.width = state.tool.brushSize * 2 + "px";
-    brushPreview.style.height = state.tool.brushSize * 2 + "px";
+    updateStamp();
+    // let img = new Image();
+    // img.src = brushCVS.toDataURL();
+    // console.log(img)
+    // roundBrush.style.backgroundImage = `url(${img.src})`;
+    // roundBrush.style.backgroundSize = "contain";
     // let roundBrush = brushPreview.querySelector(".round-brush");
     // if (roundBrush) {
     //     //draw circle
     // }
+}
+
+function updateStamp() {
+    lineWeight.textContent = state.tool.brushSize;
+    brushPreview.style.width = state.tool.brushSize * 2 + "px";
+    brushPreview.style.height = state.tool.brushSize * 2 + "px";
+    if (state.brushType === "circle") {
+        state.brushStamp = drawCircle(); //circle
+    } else {
+        state.brushStamp = drawRect();; //square
+    }
 }
 
 //====================================//

@@ -609,9 +609,16 @@ h4 {
   background: rgb(61, 61, 61);
 }
 
+.brush {
+
+}
+
 #brush-preview {
   width: 2px;
   height: 2px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   /* background: rgb(255, 255, 255); */
 }
 
