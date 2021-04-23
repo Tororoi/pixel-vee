@@ -53,8 +53,6 @@ let brushBtn = document.querySelector(".brush-preview");
 let brushPreview = document.querySelector("#brush-preview");
 let brushSlider = document.querySelector("#brush-size");
 let brush = document.querySelector(".brush");
-// let brushCVS = document.createElement("canvas");
-// let brushCTX = brushCVS.getContext("2d");
 
 //Export
 let exportBtn = document.querySelector(".export");
@@ -155,7 +153,7 @@ const state = {
     mode: "draw",
     brushColor: { color: "rgba(0,0,0,255)", r: 0, g: 0, b: 0, a: 255 },
     backColor: { color: "rgba(255,255,255,255)", r: 255, g: 255, b: 255, a: 255 },
-    brushStamp: [{x: 0, y: 0, w: 1, h: 1}], //default 1 pixel
+    brushStamp: [{ x: 0, y: 0, w: 1, h: 1 }], //default 1 pixel
     brushType: "circle",
     palette: {},
     options: {
@@ -459,7 +457,7 @@ function handleMouseMove(e) {
         return;
     }
     state.event = "mousemove";
-    state.clickDisabled = false; 
+    state.clickDisabled = false;
     //currently only square dimensions work
     state.trueRatio = onScreenCVS.offsetWidth / offScreenCVS.width * zoom;
     state.ratio = ocWidth / offScreenCVS.width * zoom;
@@ -688,7 +686,6 @@ function renderCursor() {
             break;
         default:
             drawCurrentPixel();
-            // actionDraw(state.mouseX, state.onY, state.currentColor, state.brushStamp, state.tool.brushSize, onScreenCTX, state.currentMode, state.ratio / zoom)
         // drawCursorBox();
     }
 }
@@ -704,7 +701,7 @@ function drawCurrentPixel() {
     //     let brushOffset = Math.floor(state.tool.brushSize / 2) * state.ratio / zoom;
     //     onScreenCTX.fillRect(state.onX - brushOffset, state.onY - brushOffset, state.ratio / zoom * state.tool.brushSize, state.ratio / zoom * state.tool.brushSize);
     // }
-    actionDraw(state.mox, state.moy, state.brushColor, state.brushStamp, state.tool.brushSize, onScreenCTX, state.currentMode, state.ratio / zoom)
+    actionDraw(state.mox, state.moy, state.brushColor, state.brushStamp, state.tool.brushSize, onScreenCTX, state.mode, state.ratio / zoom)
 }
 
 function drawCursorBox() {
@@ -758,25 +755,45 @@ function drawCircle() {
     // let brushPoints = [];
     let brushRects = [];
     let r = Math.floor(state.tool.brushSize / 2);
-    let d = 3 - state.tool.brushSize;
+    let d = 4 - 2*r; //decision parameter in bresenham's algorithm
+    d = (5 - 4 * r)/ 4;
     let x = 0, y = r;
     let xO = r, yO = r;
-    // brushCVS.width = state.tool.brushSize;
-    // brushCVS.height = state.tool.brushSize;
+
     brush.setAttribute("viewBox", `0 -0.5 ${state.tool.brushSize} ${state.tool.brushSize}`);
     brush.style.width = state.tool.brushSize * 2;
     brush.style.height = state.tool.brushSize * 2;
     function makePathData(x, y, w) { return ('M' + x + ' ' + y + 'h' + w + ''); }
     function makePath(color, data) { return '<path stroke="' + color + '" d="' + data + '" />\n'; }
     let paths = [];
+
+    //alternative method, iterate over every pixel, brute force bad symmetry
+    // let r = state.tool.brushSize / 2; //float
+    // let rr = r * r;
+    // for (let i = 0; i < state.tool.brushSize; i++) {
+    //     for (let j = 0; j < state.tool.brushSize; j++) {
+    //         let xd = j - r;
+    //         let yd = i - r;
+    //         let dd = xd * xd + yd * yd;
+    //         console.log(dd, rr)
+    //         if (dd <= rr) { //inside circle
+    //             brushRects.push({ x: j, y: i, w: 1, h: 1 });
+    //         }
+    //     }
+    // }
+
     eightfoldSym(xO, yO, x, y);
     while (x < y) {
         x++;
-        if (d > 0) {
+        if (d >= 0) {
             y--;
-            d = d + 5 * (x - y) + 10;
+            d += 2 * (x - y) + 1;
+            // d = d + 5 * (x - y) + 10;
+            // d = d + 4 * (x - y) + 10;
         } else {
-            d = d + 3 * x + 6;
+            d += 2 * x + 1;
+            // d = d + 3 * x + 6;
+            // d = d + 4 * x + 6;
         }
         eightfoldSym(xO, yO, x, y);
     }
@@ -804,19 +821,20 @@ function drawCircle() {
     brush.setAttribute("stroke-width", 1);
     return brushRects;
 
+    // //circle outline
     // function eightfoldSym(xc, yc, x, y) {
     //     if (state.tool.brushSize % 2 === 0) { xc-- };
-    //     brushPoints.push({ x: xc + y, y: yc - x }); //oct 1
-    //     brushPoints.push({ x: xc + x, y: yc - y }); //oct 2
+    //     brushRects.push({ x: xc + y, y: yc - x , w: 1, h: 1}); //oct 1
+    //     brushRects.push({ x: xc + x, y: yc - y , w: 1, h: 1}); //oct 2
     //     if (state.tool.brushSize % 2 === 0) { xc++ };
-    //     brushPoints.push({ x: xc - x, y: yc - y }); //oct 3
-    //     brushPoints.push({ x: xc - y, y: yc - x }); //oct 4
+    //     brushRects.push({ x: xc - x, y: yc - y , w: 1, h: 1}); //oct 3
+    //     brushRects.push({ x: xc - y, y: yc - x , w: 1, h: 1}); //oct 4
     //     if (state.tool.brushSize % 2 === 0) { yc-- };
-    //     brushPoints.push({ x: xc - y, y: yc + x }); //oct 5
-    //     brushPoints.push({ x: xc - x, y: yc + y }); //oct 6
+    //     brushRects.push({ x: xc - y, y: yc + x , w: 1, h: 1}); //oct 5
+    //     brushRects.push({ x: xc - x, y: yc + y , w: 1, h: 1}); //oct 6
     //     if (state.tool.brushSize % 2 === 0) { xc-- };
-    //     brushPoints.push({ x: xc + x, y: yc + y }); //oct 7
-    //     brushPoints.push({ x: xc + y, y: yc + x }); //oct 8
+    //     brushRects.push({ x: xc + x, y: yc + y , w: 1, h: 1}); //oct 7
+    //     brushRects.push({ x: xc + y, y: yc + x , w: 1, h: 1}); //oct 8
     // }
 
     // brushPoints.forEach(p => {
@@ -926,7 +944,7 @@ function actionDraw(coordX, coordY, currentColor, brushStamp, weight, ctx, curre
             brushStamp.forEach(r => {
                 ctx.fillRect((Math.ceil(coordX - weight / 2) + r.x) * scale, (Math.ceil(coordY - weight / 2) + r.y) * scale, r.w * scale, r.h * scale)
             })
-            // ctx.drawImage(brushStamp, Math.ceil(coordX - weight / 2), Math.ceil(coordY - weight / 2), weight, weight);
+        // ctx.drawImage(brushStamp, Math.ceil(coordX - weight / 2), Math.ceil(coordY - weight / 2), weight, weight);
     }
 }
 
@@ -959,20 +977,8 @@ function lineSteps() {
 
 function actionLine(sx, sy, tx, ty, currentColor, ctx, currentMode, brushStamp, weight, scale = 1) {
     ctx.fillStyle = currentColor.color;
-    // let drawPixel = (x, y) => {
-    //     let brushOffset = Math.floor(weight / 2) * scale;
-    //     if (currentMode === "erase") {
-    //         brushStamp.forEach(r => {
-    //             ctx.clearRect(x - brushOffset + r.x * scale, y - brushOffset + r.y * scale, r.w * scale, r.h * scale)
-    //         })
-    //     } else {
-    //         brushStamp.forEach(r => {
-    //             ctx.fillRect(x - brushOffset + r.x * scale, y - brushOffset + r.y * scale, r.w * scale, r.h * scale)
-    //         })
-    //     }
-    // };
     //create triangle object
-    let tri = {}
+    let tri = {};
     function getTriangle(x1, y1, x2, y2, ang) {
         if (Math.abs(x1 - x2) > Math.abs(y1 - y2)) {
             tri.x = Math.sign(Math.cos(ang));
@@ -994,13 +1000,11 @@ function actionLine(sx, sy, tx, ty, currentColor, ctx, currentMode, brushStamp, 
     for (let i = 0; i < tri.long; i++) {
         let thispoint = { x: Math.round(sx + tri.x * i), y: Math.round(sy + tri.y * i) };
         // for each point along the line
-        // drawPixel(thispoint.x * scale, thispoint.y * scale);
-        actionDraw(thispoint.x, thispoint.y, currentColor, brushStamp, weight, ctx, currentMode, scale)
+        actionDraw(thispoint.x, thispoint.y, currentColor, brushStamp, weight, ctx, currentMode, scale);
 
     }
     //fill endpoint
-    // drawPixel(Math.round(tx) * scale, Math.round(ty) * scale);
-    actionDraw(Math.round(tx), Math.round(ty), currentColor, brushStamp, weight, ctx, currentMode, scale)
+    actionDraw(Math.round(tx), Math.round(ty), currentColor, brushStamp, weight, ctx, currentMode, scale);
 }
 
 function replaceSteps() {
