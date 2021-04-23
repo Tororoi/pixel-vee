@@ -787,11 +787,11 @@ function drawCircle() {
         x++;
         if (d >= 0) {
             y--;
-            d += 2 * (x - y) + 1;
+            d += 2 * (x - y) + 1; //outside circle
             // d = d + 5 * (x - y) + 10;
             // d = d + 4 * (x - y) + 10;
         } else {
-            d += 2 * x + 1;
+            d += 2 * x + 1; //inside circle
             // d = d + 3 * x + 6;
             // d = d + 4 * x + 6;
         }
@@ -1025,20 +1025,21 @@ function replaceSteps() {
             break;
         case "mouseup":
             drawSteps();
-            state.currentLayer.ctx.restore();
-            let upImage = new Image();
-            upImage.src = state.currentLayer.cvs.toDataURL();
-            addToTimeline(state.tool.name, upImage, null)
+            finalReplaceStep();
             break;
         case "mouseout":
-            state.currentLayer.ctx.restore();
-            let outImage = new Image();
-            outImage.src = state.currentLayer.cvs.toDataURL();
-            addToTimeline(state.tool.name, outImage, null)
+            finalReplaceStep();
             break;
         default:
         //do nothing
     }
+}
+
+function finalReplaceStep() {
+    state.currentLayer.ctx.restore();
+    let image = new Image();
+    image.src = state.currentLayer.cvs.toDataURL();
+    addToTimeline(state.tool.name, image, null);
 }
 
 function createClipMask(colorLayer) {

@@ -89,7 +89,8 @@ svg {
 .sidebar {
   position: relative;
   background-color: rgb(61, 61, 61);
-  width: 440px;
+  width: 350px;
+  min-width: 350px;
   display: flex;
   flex-flow: row nowrap;
   align-items: flex-start;
