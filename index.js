@@ -93,6 +93,13 @@ const tools = {
         disabled: false,
         options: ["perfect"]
     },
+    select: {
+        name: "select",
+        // fn: selectSteps,
+        brushSize: 1,
+        disabled: false,
+        options: []
+    },
     // shading: {
     // user selects hsl shading color which mixes with colors that the user draws on to create dynamic shading
     // },

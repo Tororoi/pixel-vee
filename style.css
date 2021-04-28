@@ -610,8 +610,8 @@ h4 {
   background: rgb(61, 61, 61);
 }
 
-.brush {
-
+.brush-preview .tooltip {
+  transform: translateX(-94px) translateY(72px);
 }
 
 #brush-preview {
@@ -621,20 +621,6 @@ h4 {
   justify-content: center;
   align-items: center;
   /* background: rgb(255, 255, 255); */
-}
-
-.square-brush {
-  width: 100%;
-  height: 100%;
-  background: rgb(255, 255, 255);
-}
-
-.round-brush {
-  position: absolute;
-  width: 2px;
-  height: 2px;
-  background: red;
-  box-shadow: 0px 0px rgb(255, 255, 255);
 }
 
 .slider {
@@ -774,9 +760,15 @@ h4 {
 }
 
 @keyframes flash {
-  0% {background: rgb(239, 63, 57);}
-  30% {background: rgb(239, 63, 57);}
-  100% {background: rgb(131, 131, 131);}
+  0% {
+    background: rgb(239, 63, 57);
+  }
+  30% {
+    background: rgb(239, 63, 57);
+  }
+  100% {
+    background: rgb(131, 131, 131);
+  }
 }
 
 .eyeopen {
