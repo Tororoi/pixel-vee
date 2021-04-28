@@ -98,7 +98,7 @@ const tools = {
         // fn: selectSteps,
         brushSize: 1,
         disabled: false,
-        options: []
+        options: ["magic wand"]
     },
     // shading: {
     // user selects hsl shading color which mixes with colors that the user draws on to create dynamic shading
@@ -699,15 +699,6 @@ function renderCursor() {
 
 function drawCurrentPixel() {
     //draw onscreen current pixel
-    // if (state.mode === "erase") {
-    //     // drawCursorBox();
-    //     let brushOffset = Math.floor(state.tool.brushSize / 2) * state.ratio / zoom;
-    //     onScreenCTX.clearRect(state.onX - brushOffset, state.onY - brushOffset, state.ratio / zoom * state.tool.brushSize, state.ratio / zoom * state.tool.brushSize);
-    // } else {
-    //     onScreenCTX.fillStyle = state.brushColor.color;
-    //     let brushOffset = Math.floor(state.tool.brushSize / 2) * state.ratio / zoom;
-    //     onScreenCTX.fillRect(state.onX - brushOffset, state.onY - brushOffset, state.ratio / zoom * state.tool.brushSize, state.ratio / zoom * state.tool.brushSize);
-    // }
     actionDraw(state.mox, state.moy, state.brushColor, state.brushStamp, state.tool.brushSize, onScreenCTX, state.mode, state.ratio / zoom)
 }
 
@@ -1049,6 +1040,35 @@ function finalReplaceStep() {
     addToTimeline(state.tool.name, image, null);
 }
 
+function selectSteps() {
+    switch (state.event) {
+        case "mousedown":
+            //1. set drag origin
+            //2. save context
+            break;
+        case "mousemove":
+            //1. if state.clicked create strokeable path using drag origin and current x/y as opposite corners of rectangle
+            //2. stroke outline path with animated "marching ants".
+            break;
+        case "mouseup":
+            //1. create clip mask using drag origin and current x/y as opposite corners of rectangle
+            break;
+        case "mouseout":
+            //1. create clip mask using drag origin and last x/y as opposite corners of rectangle
+            break;
+        default:
+        //do nothing
+    }
+}
+
+function createRectMask(colorLayer) {
+    //
+}
+
+function createSelectOutline(path) {
+    //
+}
+
 function createClipMask(colorLayer) {
     let mask = new Path2D();
 
@@ -1112,78 +1132,6 @@ function createClipMask(colorLayer) {
     }
     return mask;
 }
-
-// //replace actions are odd as they add to timeline inside but are never called by redrawPoints.
-// function lineReplace(sx, sy, tx, ty, currentColor, ctx, currentMode, colorLayer) {
-//     ctx.fillStyle = currentColor.color;
-//     //create triangle object
-//     let tri = {}
-//     function getTriangle(x1, y1, x2, y2, ang) {
-//         if (Math.abs(x1 - x2) > Math.abs(y1 - y2)) {
-//             tri.x = Math.sign(Math.cos(ang));
-//             tri.y = Math.tan(ang) * Math.sign(Math.cos(ang));
-//             tri.long = Math.abs(x1 - x2);
-//         } else {
-//             tri.x = Math.tan((Math.PI / 2) - ang) * Math.sign(Math.cos((Math.PI / 2) - ang));
-//             tri.y = Math.sign(Math.cos((Math.PI / 2) - ang));
-//             tri.long = Math.abs(y1 - y2);
-//         }
-//     }
-//     // finds the angle of (x,y) on a plane from the origin
-//     function getAngle(x, y) { return Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0); }
-//     let angle = getAngle(tx - sx, ty - sy); // angle of line
-//     getTriangle(sx, sy, tx, ty, angle);
-
-//     for (let i = 0; i < tri.long; i++) {
-//         let thispoint = { x: Math.round(sx + tri.x * i), y: Math.round(sy + tri.y * i) };
-//         // for each point along the line
-//         actionReplace(colorLayer, thispoint.x, thispoint.y);
-//     }
-//     //fill endpoint
-//     actionReplace(colorLayer, Math.round(tx), Math.round(ty));
-// }
-
-// function actionReplace(colorLayer, xO, yO) {
-//     //brush mask
-//     // FIX: somehow iterate over only new area of brush where not overlapping with last location. Still slow on Safari.
-//     let xMin = Math.ceil(xO - state.tool.brushSize / 2);
-//     let xMax = xMin + state.tool.brushSize;
-//     let yMin = Math.ceil(yO - state.tool.brushSize / 2);
-//     let yMax = yMin + state.tool.brushSize;
-
-//     //constrain brush to canvas area to prevent rollover to other side of canvas
-//     if (xMin < 0) { xMin = 0 };
-//     if (yMin < 0) { yMin = 0 };
-//     if (xMax > colorLayer.width) { xMax = colorLayer.width };
-//     if (yMax > colorLayer.height) { yMax = colorLayer.height };
-
-//     for (let y = yMin; y < yMax; y++) {
-//         for (let x = xMin; x < xMax; x++) {
-//             //sample color and replace if match
-//             let clickedColor = getColor(x, y, colorLayer);
-//             if (clickedColor.color === state.backColor.color) {
-//                 //update colorlayer data
-//                 let pixelPos = (y * offScreenCVS.width + x) * 4;
-//                 if (state.mode === "erase") {
-//                     colorLayer.data[pixelPos] = 0;
-//                     colorLayer.data[pixelPos + 1] = 0;
-//                     colorLayer.data[pixelPos + 2] = 0;
-//                     colorLayer.data[pixelPos + 3] = 0;
-//                 } else {
-//                     colorLayer.data[pixelPos] = state.brushColor.r;
-//                     colorLayer.data[pixelPos + 1] = state.brushColor.g;
-//                     colorLayer.data[pixelPos + 2] = state.brushColor.b;
-//                     colorLayer.data[pixelPos + 3] = state.brushColor.a;
-//                 }
-//                 // actionDraw(x, y, state.brushColor, 1, state.currentLayer.ctx, state.mode);
-//                 addToTimeline(state.tool.name, x, y);
-//             }
-//         }
-//     }
-//     state.currentLayer.ctx.putImageData(state.localColorLayer, 0, 0, xMin, yMin, xMax, yMax); //fastest method, noticeable difference on Safari
-//     // state.currentLayer.ctx.putImageData(state.localColorLayer, 0, 0)
-//     drawCanvas();
-// }
 
 function fillSteps() {
     switch (state.event) {
