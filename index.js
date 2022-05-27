@@ -1,3 +1,5 @@
+import { Picker } from "../Tools/Picker.js"
+
 //===================================//
 //========= * * * DOM * * * =========//
 //===================================//
@@ -29,7 +31,10 @@ let swatch = document.querySelector(".swatch")
 let backSwatch = document.querySelector(".back-swatch")
 let colorSwitch = document.querySelector(".color-switch")
 
-let colorPicker = document.querySelector(".color-container")
+let colorPickerContainer = document.querySelector(".color-container")
+//color picker OK/Cancel
+let confirmBtn = document.getElementById("confirm-btn")
+let cancelBtn = document.getElementById("cancel-btn")
 
 //Get the reset buttons
 let recenterBtn = document.querySelector(".recenter")
@@ -280,6 +285,15 @@ layersCont.addEventListener("dragenter", dragLayerEnter, { passive: true })
 layersCont.addEventListener("dragleave", dragLayerLeave, { passive: true })
 layersCont.addEventListener("drop", dropLayer, { passive: true })
 layersCont.addEventListener("dragend", dragLayerEnd, { passive: true })
+
+//Color Picker
+//Interface listeners
+confirmBtn.addEventListener("click", (e) => {
+  handleConfirm(e)
+})
+cancelBtn.addEventListener("click", (e) => {
+  handleCancel(e)
+})
 
 //======================================//
 //=== * * * Key Event Handlers * * * ===//
@@ -2332,15 +2346,45 @@ function renderLayersToDOM() {
 
 function openColorPicker(e) {
   picker.swatch = e.target.className
-  picker.update()
+  const initialColorReference =
+    picker.swatch === "back-swatch btn" ? state.backColor : state.brushColor
+  picker.update(initialColorReference)
   //main page can't be interacted with
   fullPage.style.pointerEvents = "none"
   //disable shortcuts
   state.shortcuts = false
   //show colorpicker
-  colorPicker.style.display = "flex"
-  //allow colorPicker events
-  colorPicker.style.pointerEvents = "auto"
+  colorPickerContainer.style.display = "flex"
+  //allow colorPickerContainer events
+  colorPickerContainer.style.pointerEvents = "auto"
+}
+
+/**
+ * Close the picker window
+ */
+function closePickerWindow() {
+  // hide colorpicker
+  colorPickerContainer.style.display = "none"
+  //restore pointer events to page
+  fullPage.style.pointerEvents = "auto"
+  //enable keyboard shortcuts
+  state.shortcuts = true
+}
+
+/**
+ * This function sets the color according to the currently selected parameters and closes the picker window
+ * @param {event} e
+ */
+function handleConfirm(e) {
+  //set color to brush
+  setColor(picker.red, picker.green, picker.blue, picker.swatch)
+  //close window
+  closePickerWindow()
+}
+
+function handleCancel(e) {
+  //close window
+  closePickerWindow()
 }
 
 function switchColors(e) {
@@ -2420,3 +2464,16 @@ function handleTouchCancel(e) {
   e.preventDefault()
   handleMouseOut(e)
 }
+
+//Initialize Tools
+//Color Picker
+//Create an instance passing it the canvas, width and height
+let picker = new Picker(
+  document.getElementById("color-picker"),
+  250,
+  250,
+  setColor
+)
+
+//Draw
+picker.build(state.brushColor)

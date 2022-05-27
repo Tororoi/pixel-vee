@@ -113,3 +113,5 @@ Visit here: https://pixelvee.netlify.app/
 - Preview window
 - Shading Tool
 
+# Run locally
+This project uses modules. To run locally, start a server. For example, `php -S localhost:8000`
