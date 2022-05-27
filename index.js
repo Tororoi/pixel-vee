@@ -51,6 +51,9 @@ let exportBtn = document.querySelector(".export")
 
 //TODO: Add Palette that consists of a small canvas with basic paint, sample and fill erase tools.
 //TODO: Add color mixer that consists of a small canvas that can be painted upon and cleared. At any time the user can click "Mix" and the colors on the canvas will be used to generate a mixed color.
+//TODO: Add draggability to each interface. Each interface will have a top strip with a drag button and a title,
+//as well as a collapse/expand button. Interfaces cannot be dragged offscreen.
+//There should be a button to set interface layout to default.
 
 //========================================//
 //=== * * * Important References * * * ===//
@@ -249,10 +252,7 @@ function handleKeyDown(e) {
         }
         break
       case "KeyS":
-        let r = Math.floor(Math.random() * 256)
-        let g = Math.floor(Math.random() * 256)
-        let b = Math.floor(Math.random() * 256)
-        setColor(r, g, b, "swatch btn")
+        randomizeColor("swatch btn")
         break
       case "KeyD":
         //reset old button
@@ -2114,11 +2114,11 @@ function setColor(r, g, b, target) {
   }
 }
 
-function randomizeColor(e) {
+function randomizeColor(swatch) {
   let r = Math.floor(Math.random() * 256)
   let g = Math.floor(Math.random() * 256)
   let b = Math.floor(Math.random() * 256)
-  setColor(r, g, b, e.target.className)
+  setColor(r, g, b, swatch)
 }
 
 function getColor(x, y, colorLayer) {

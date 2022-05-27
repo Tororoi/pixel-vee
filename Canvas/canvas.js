@@ -4,8 +4,6 @@ import { state } from "../Context/state.js"
 //==== * * * DOM Interface * * * ====//
 //===================================//
 
-//Layers
-//Reference upload
 const uploadBtn = document.querySelector("#file-upload")
 const newLayerBtn = document.querySelector(".new-raster-layer")
 
