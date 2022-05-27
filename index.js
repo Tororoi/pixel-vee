@@ -1,5 +1,6 @@
 import { Picker } from "../Tools/Picker.js"
 import { state } from "../Context/state.js"
+import { canvas } from "../Canvas/canvas.js"
 
 //===================================//
 //========= * * * DOM * * * =========//
@@ -7,21 +8,6 @@ import { state } from "../Context/state.js"
 
 //Main
 let fullPage = document.querySelector(".full-page")
-
-//Set onscreen canvas and its context
-let onScreenCVS = document.getElementById("onScreen")
-let onScreenCTX = onScreenCVS.getContext("2d")
-//original canvas width/height
-let ocWidth = onScreenCVS.width
-let ocHeight = onScreenCVS.height
-//improve sharpness
-//BUG: sharpness (8+) greatly affects performance in browsers other than chrome (can safari and firefox not handle large canvases?)
-let sharpness = 4
-let zoom = 1
-//adjust canvas ratio here if needed
-onScreenCVS.width = ocWidth * sharpness
-onScreenCVS.height = ocHeight * sharpness
-onScreenCTX.scale(sharpness * zoom, sharpness * zoom)
 
 //Get the undo buttons
 let undoBtn = document.getElementById("undo")
@@ -69,14 +55,6 @@ let uploadBtn = document.querySelector("#file-upload")
 let newLayerBtn = document.querySelector(".new-raster-layer")
 
 let layersCont = document.querySelector(".layers")
-
-//Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
-let offScreenCVS = document.createElement("canvas")
-let offScreenCTX = offScreenCVS.getContext("2d")
-//Set the dimensions of the drawing canvas
-offScreenCVS.width = 256
-offScreenCVS.height = 256
-//for adjusting canvas size, adjust onscreen canvas dimensions in proportion to offscreen
 
 //========================================//
 //=== * * * Important References * * * ===//
@@ -160,7 +138,7 @@ state.tool = tools.brush
 
 //Initialize first layer
 addRasterLayer()
-state.currentLayer = state.layers[0]
+canvas.currentLayer = canvas.layers[0]
 renderLayersToDOM()
 
 //===================================//
@@ -171,19 +149,19 @@ renderLayersToDOM()
 document.addEventListener("keydown", handleKeyDown)
 document.addEventListener("keyup", handleKeyUp)
 
-onScreenCVS.addEventListener("wheel", handleWheel, { passive: true })
+canvas.onScreenCVS.addEventListener("wheel", handleWheel, { passive: true })
 
 //Mouse
-onScreenCVS.addEventListener("mousemove", handleMouseMove)
-onScreenCVS.addEventListener("mousedown", handleMouseDown)
-onScreenCVS.addEventListener("mouseup", handleMouseUp)
-onScreenCVS.addEventListener("mouseout", handleMouseOut)
+canvas.onScreenCVS.addEventListener("mousemove", handleMouseMove)
+canvas.onScreenCVS.addEventListener("mousedown", handleMouseDown)
+canvas.onScreenCVS.addEventListener("mouseup", handleMouseUp)
+canvas.onScreenCVS.addEventListener("mouseout", handleMouseOut)
 
 //Touch
-onScreenCVS.addEventListener("touchstart", handleTouchStart, { passive: true })
-onScreenCVS.addEventListener("touchmove", handleTouchMove, { passive: true })
-onScreenCVS.addEventListener("touchend", handleTouchEnd, { passive: true })
-onScreenCVS.addEventListener("touchcancel", handleTouchCancel, {
+canvas.onScreenCVS.addEventListener("touchstart", handleTouchStart, { passive: true })
+canvas.onScreenCVS.addEventListener("touchmove", handleTouchMove, { passive: true })
+canvas.onScreenCVS.addEventListener("touchend", handleTouchEnd, { passive: true })
+canvas.onScreenCVS.addEventListener("touchcancel", handleTouchCancel, {
   passive: true,
 })
 
@@ -253,20 +231,20 @@ function handleKeyDown(e) {
         break
       case "Space":
         state.tool = tools["grab"]
-        onScreenCVS.style.cursor = "move"
+        canvas.onScreenCVS.style.cursor = "move"
         break
       case "AltLeft":
       case "AltRight":
         //option key
         state.tool = tools["picker"]
-        onScreenCVS.style.cursor = "none"
+        canvas.onScreenCVS.style.cursor = "none"
         break
       case "ShiftLeft":
       case "ShiftRight":
         if (toolBtn.id === "brush") {
           state.tool = tools["line"]
           state.tool.brushSize = tools["brush"].brushSize
-          onScreenCVS.style.cursor = "none"
+          canvas.onScreenCVS.style.cursor = "none"
         }
         break
       case "KeyS":
@@ -306,7 +284,7 @@ function handleKeyDown(e) {
         toolBtn = document.querySelector("#brush")
         toolBtn.style.background = "rgb(255, 255, 255)"
         state.tool = tools["brush"]
-        onScreenCVS.style.cursor = "crosshair"
+        canvas.onScreenCVS.style.cursor = "crosshair"
         break
       case "KeyR":
         //reset old button
@@ -315,7 +293,7 @@ function handleKeyDown(e) {
         toolBtn = document.querySelector("#replace")
         toolBtn.style.background = "rgb(255, 255, 255)"
         state.tool = tools["replace"]
-        onScreenCVS.style.cursor = "crosshair"
+        canvas.onScreenCVS.style.cursor = "crosshair"
         break
       case "KeyL":
         //reset old button
@@ -324,7 +302,7 @@ function handleKeyDown(e) {
         toolBtn = document.querySelector("#line")
         toolBtn.style.background = "rgb(255, 255, 255)"
         state.tool = tools["line"]
-        onScreenCVS.style.cursor = "none"
+        canvas.onScreenCVS.style.cursor = "none"
         break
       case "KeyF":
         //reset old button
@@ -333,7 +311,7 @@ function handleKeyDown(e) {
         toolBtn = document.querySelector("#fill")
         toolBtn.style.background = "rgb(255, 255, 255)"
         state.tool = tools["fill"]
-        onScreenCVS.style.cursor = "none"
+        canvas.onScreenCVS.style.cursor = "none"
         break
       case "KeyC":
         //reset old button
@@ -342,7 +320,7 @@ function handleKeyDown(e) {
         toolBtn = document.querySelector("#curve")
         toolBtn.style.background = "rgb(255, 255, 255)"
         state.tool = tools["curve"]
-        onScreenCVS.style.cursor = "none"
+        canvas.onScreenCVS.style.cursor = "none"
         break
       default:
       //do nothing
@@ -362,7 +340,7 @@ function handleKeyUp(e) {
   }
 
   if (toolBtn.id === "grab") {
-    onScreenCVS.style.cursor = "move"
+    canvas.onScreenCVS.style.cursor = "move"
   } else if (
     toolBtn.id === "replace" ||
     toolBtn.id === "brush" ||
@@ -370,9 +348,9 @@ function handleKeyUp(e) {
     toolBtn.id === "fill" ||
     toolBtn.id === "line"
   ) {
-    onScreenCVS.style.cursor = "crosshair"
+    canvas.onScreenCVS.style.cursor = "crosshair"
   } else {
-    onScreenCVS.style.cursor = "none"
+    canvas.onScreenCVS.style.cursor = "none"
   }
 }
 
@@ -390,7 +368,7 @@ function handleMouseDown(e) {
   if (state.clickDisabled) {
     return
   }
-  state.trueRatio = (onScreenCVS.offsetWidth / offScreenCVS.width) * zoom
+  state.trueRatio = (canvas.onScreenCVS.offsetWidth / canvas.offScreenCVS.width) * canvas.zoom
   let x, y
   if (e.targetTouches) {
     let rect = e.target.getBoundingClientRect()
@@ -402,17 +380,17 @@ function handleMouseDown(e) {
   }
   state.mox = Math.floor(x / state.trueRatio)
   state.moy = Math.floor(y / state.trueRatio)
-  state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio) * zoom)
-  state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio) * zoom)
+  state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio) * canvas.zoom)
+  state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio) * canvas.zoom)
   //Reset Cursor for mobile
-  state.onX = (state.mox * state.ratio) / zoom
-  state.onY = (state.moy * state.ratio) / zoom
+  state.onX = (state.mox * state.ratio) / canvas.zoom
+  state.onY = (state.moy * state.ratio) / canvas.zoom
   state.lastOnX = state.onX
   state.lastOnY = state.onY
   //if drawing on hidden layer, flash hide btn
-  if (state.currentLayer.opacity === 0) {
+  if (canvas.currentLayer.opacity === 0) {
     for (let i = 0; i < layersCont.children.length; i += 1) {
-      if (layersCont.children[i].layerObj === state.currentLayer) {
+      if (layersCont.children[i].layerObj === canvas.currentLayer) {
         layersCont.children[i].querySelector(".hide").classList.add("warning")
       }
     }
@@ -428,8 +406,8 @@ function handleMouseMove(e) {
   state.event = "mousemove"
   state.clickDisabled = false
   //currently only square dimensions work
-  state.trueRatio = (onScreenCVS.offsetWidth / offScreenCVS.width) * zoom
-  state.ratio = (ocWidth / offScreenCVS.width) * zoom
+  state.trueRatio = (canvas.onScreenCVS.offsetWidth / canvas.offScreenCVS.width) * canvas.zoom
+  state.ratio = (canvas.unsharpenedWidth / canvas.offScreenCVS.width) * canvas.zoom
   //coords
   let x, y
   if (e.targetTouches) {
@@ -442,11 +420,11 @@ function handleMouseMove(e) {
   }
   state.mox = Math.floor(x / state.trueRatio)
   state.moy = Math.floor(y / state.trueRatio)
-  state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio) * zoom)
-  state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio) * zoom)
+  state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio) * canvas.zoom)
+  state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio) * canvas.zoom)
   //Hover brush
-  state.onX = (state.mox * state.ratio) / zoom
-  state.onY = (state.moy * state.ratio) / zoom
+  state.onX = (state.mox * state.ratio) / canvas.zoom
+  state.onY = (state.moy * state.ratio) / canvas.zoom
   if (
     state.clicked ||
     (state.tool.name === "curve" && state.clickCounter > 0)
@@ -456,8 +434,13 @@ function handleMouseMove(e) {
   } else {
     //normalize cursor render to pixelgrid
     if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
-      onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom)
-      drawCanvas()
+      canvas.onScreenCTX.clearRect(
+        0,
+        0,
+        canvas.unsharpenedWidth / canvas.zoom,
+        canvas.unsharpenedHeight / canvas.zoom
+      )
+      canvas.draw()
       renderCursor()
       state.lastOnX = state.onX
       state.lastOnY = state.onY
@@ -471,7 +454,7 @@ function handleMouseUp(e) {
   if (state.clickDisabled) {
     return
   }
-  state.trueRatio = (onScreenCVS.offsetWidth / offScreenCVS.width) * zoom
+  state.trueRatio = (canvas.onScreenCVS.offsetWidth / canvas.offScreenCVS.width) * canvas.zoom
   let x, y
   if (e.targetTouches) {
     let rect = e.target.getBoundingClientRect()
@@ -483,11 +466,11 @@ function handleMouseUp(e) {
   }
   state.mox = Math.floor(x / state.trueRatio)
   state.moy = Math.floor(y / state.trueRatio)
-  state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio) * zoom)
-  state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio) * zoom)
-  if (state.currentLayer.opacity === 0) {
+  state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio) * canvas.zoom)
+  state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio) * canvas.zoom)
+  if (canvas.currentLayer.opacity === 0) {
     for (let i = 0; i < layersCont.children.length; i += 1) {
-      if (layersCont.children[i].layerObj === state.currentLayer) {
+      if (layersCont.children[i].layerObj === canvas.currentLayer) {
         layersCont.children[i]
           .querySelector(".hide")
           .classList.remove("warning")
@@ -522,7 +505,7 @@ function handleMouseOut(e) {
     //Reset redostack
     state.redoStack = []
   }
-  drawCanvas()
+  canvas.draw()
   state.event = "none"
 }
 
@@ -531,27 +514,27 @@ function handleWheel(e) {
   //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
   //zoom based on mouse coords
   let z
-  let rw = ocWidth / offScreenCVS.width
-  let nox = Math.round((state.mox * state.ratio) / 5 / zoom / rw) * rw
-  let noy = Math.round((state.moy * state.ratio) / 5 / zoom / rw) * rw
-  let lox = Math.round((state.mox * state.ratio) / 4 / zoom / rw) * rw
-  let loy = Math.round((state.moy * state.ratio) / 4 / zoom / rw) * rw
+  let rw = canvas.unsharpenedWidth / canvas.offScreenCVS.width
+  let nox = Math.round((state.mox * state.ratio) / 5 / canvas.zoom / rw) * rw
+  let noy = Math.round((state.moy * state.ratio) / 5 / canvas.zoom / rw) * rw
+  let lox = Math.round((state.mox * state.ratio) / 4 / canvas.zoom / rw) * rw
+  let loy = Math.round((state.moy * state.ratio) / 4 / canvas.zoom / rw) * rw
   if (delta < 0) {
     z = 0.8
-    zoom *= z
+    canvas.zoom *= z
     state.xOffset += lox
     state.yOffset += loy
   } else if (delta > 0) {
     z = 1.25
     state.xOffset -= nox
     state.yOffset -= noy
-    zoom *= z
+    canvas.zoom *= z
   }
   //re scale canvas
-  onScreenCTX.scale(z, z)
+  canvas.onScreenCTX.scale(z, z)
   state.lastOffsetX = state.xOffset
   state.lastOffsetY = state.yOffset
-  drawCanvas()
+  canvas.draw()
   // state.clickDisabled = true;
 }
 
@@ -567,28 +550,28 @@ function handleZoom(e) {
   if (e.target.closest(".zoombtn")) {
     let zoomBtn = e.target.closest(".zoombtn")
     let z
-    let rw = ocWidth / offScreenCVS.width
+    let rw = canvas.unsharpenedWidth / canvas.offScreenCVS.width
     //next origin
-    let nox = Math.round(ocWidth / 10 / zoom / rw) * rw
-    let noy = Math.round(ocHeight / 10 / zoom / rw) * rw
-    let lox = Math.round(ocWidth / 8 / zoom / rw) * rw
-    let loy = Math.round(ocHeight / 8 / zoom / rw) * rw
+    let nox = Math.round(canvas.unsharpenedWidth / 10 / canvas.zoom / rw) * rw
+    let noy = Math.round(canvas.unsharpenedHeight / 10 / canvas.zoom / rw) * rw
+    let lox = Math.round(canvas.unsharpenedWidth / 8 / canvas.zoom / rw) * rw
+    let loy = Math.round(canvas.unsharpenedHeight / 8 / canvas.zoom / rw) * rw
     if (zoomBtn.id === "minus") {
       z = 0.8
-      zoom *= z
+      canvas.zoom *= z
       state.xOffset += lox
       state.yOffset += loy
     } else if (zoomBtn.id === "plus") {
       z = 1.25
-      zoom *= z
+      canvas.zoom *= z
       state.xOffset -= nox
       state.yOffset -= noy
     }
     //re scale canvas
-    onScreenCTX.scale(z, z)
+    canvas.onScreenCTX.scale(z, z)
     state.lastOffsetX = state.xOffset
     state.lastOffsetY = state.yOffset
-    drawCanvas()
+    canvas.draw()
   }
 }
 
@@ -623,7 +606,7 @@ function handleTools(e) {
       brushSlider.disabled = state.tool.disabled
       //update cursor
       if (toolBtn.id === "grab") {
-        onScreenCVS.style.cursor = "move"
+        canvas.onScreenCVS.style.cursor = "move"
       } else if (
         toolBtn.id === "replace" ||
         toolBtn.id === "brush" ||
@@ -631,9 +614,9 @@ function handleTools(e) {
         toolBtn.id === "fill" ||
         toolBtn.id === "line"
       ) {
-        onScreenCVS.style.cursor = "crosshair"
+        canvas.onScreenCVS.style.cursor = "crosshair"
       } else {
-        onScreenCVS.style.cursor = "none"
+        canvas.onScreenCVS.style.cursor = "none"
       }
     }
   }
@@ -679,37 +662,37 @@ function drawCurrentPixel() {
     state.brushColor,
     state.brushStamp,
     state.tool.brushSize,
-    onScreenCTX,
+    canvas.onScreenCTX,
     state.mode,
-    state.ratio / zoom
+    state.ratio / canvas.zoom
   )
 }
 
 function drawCursorBox() {
-  let brushOffset = (Math.floor(state.tool.brushSize / 2) * state.ratio) / zoom
+  let brushOffset = (Math.floor(state.tool.brushSize / 2) * state.ratio) / canvas.zoom
   let x0 = state.onX - brushOffset
   let y0 = state.onY - brushOffset
-  let x1 = x0 + (state.ratio / zoom) * state.tool.brushSize
-  let y1 = y0 + (state.ratio / zoom) * state.tool.brushSize
+  let x1 = x0 + (state.ratio / canvas.zoom) * state.tool.brushSize
+  let y1 = y0 + (state.ratio / canvas.zoom) * state.tool.brushSize
   //line offset to stroke offcenter;
   let ol = 0.25
-  onScreenCTX.beginPath()
-  onScreenCTX.lineWidth = 0.5
-  onScreenCTX.strokeStyle = "black"
+  canvas.onScreenCTX.beginPath()
+  canvas.onScreenCTX.lineWidth = 0.5
+  canvas.onScreenCTX.strokeStyle = "black"
   //top
-  onScreenCTX.moveTo(x0, y0 - ol)
-  onScreenCTX.lineTo(x1, y0 - ol)
+  canvas.onScreenCTX.moveTo(x0, y0 - ol)
+  canvas.onScreenCTX.lineTo(x1, y0 - ol)
   //right
-  onScreenCTX.moveTo(x1 + ol, y0)
-  onScreenCTX.lineTo(x1 + ol, y1)
+  canvas.onScreenCTX.moveTo(x1 + ol, y0)
+  canvas.onScreenCTX.lineTo(x1 + ol, y1)
   //bottom
-  onScreenCTX.moveTo(x0, y1 + ol)
-  onScreenCTX.lineTo(x1, y1 + ol)
+  canvas.onScreenCTX.moveTo(x0, y1 + ol)
+  canvas.onScreenCTX.lineTo(x1, y1 + ol)
   //left
-  onScreenCTX.moveTo(x0 - ol, y0)
-  onScreenCTX.lineTo(x0 - ol, y1)
+  canvas.onScreenCTX.moveTo(x0 - ol, y0)
+  canvas.onScreenCTX.lineTo(x0 - ol, y1)
 
-  onScreenCTX.stroke()
+  canvas.onScreenCTX.stroke()
 }
 
 function drawRect() {
@@ -841,12 +824,12 @@ function drawCircle() {
   // }
 
   // brushPoints.forEach(p => {
-  //     actionDraw(p.x, p.y, state.brushColor, 1, state.currentLayer.ctx, state.mode)
+  //     actionDraw(p.x, p.y, state.brushColor, 1, canvas.currentLayer.ctx, state.mode)
   // })
 
   // state.tool.brushPoints = brushPoints;
-  // actionFill(xO, yO, state.brushColor, state.currentLayer.ctx, state.mode);
-  // drawCanvas();
+  // actionFill(xO, yO, state.brushColor, canvas.currentLayer.ctx, state.mode);
+  // canvas.draw();
 }
 
 //====================================//
@@ -864,7 +847,7 @@ function drawSteps() {
         state.brushColor,
         state.brushStamp,
         state.tool.brushSize,
-        state.currentLayer.ctx,
+        canvas.currentLayer.ctx,
         state.mode
       )
       state.lastX = state.mouseX
@@ -877,7 +860,7 @@ function drawSteps() {
       if (state.tool.name !== "replace") {
         addToTimeline(state.tool.name, state.mouseX, state.mouseY)
       }
-      drawCanvas()
+      canvas.draw()
       break
     case "mousemove":
       if (state.mode === "perfect") {
@@ -895,7 +878,7 @@ function drawSteps() {
             state.mouseX,
             state.mouseY,
             state.brushColor,
-            state.currentLayer.ctx,
+            canvas.currentLayer.ctx,
             state.mode,
             state.brushStamp,
             state.tool.brushSize
@@ -907,11 +890,11 @@ function drawSteps() {
               { y1: state.lastY, y2: state.mouseY }
             )
           }
-          drawCanvas()
+          canvas.draw()
         } else {
           //FIX: perfect will be option, not mode
           if (state.mode === "perfect") {
-            drawCanvas()
+            canvas.draw()
             drawCurrentPixel()
             perfectPixels(state.mouseX, state.mouseY)
           } else {
@@ -921,13 +904,13 @@ function drawSteps() {
               state.brushColor,
               state.brushStamp,
               state.tool.brushSize,
-              state.currentLayer.ctx,
+              canvas.currentLayer.ctx,
               state.mode
             )
             if (state.tool.name !== "replace") {
               addToTimeline(state.tool.name, state.mouseX, state.mouseY)
             }
-            drawCanvas()
+            canvas.draw()
           }
         }
       }
@@ -943,13 +926,13 @@ function drawSteps() {
         state.brushColor,
         state.brushStamp,
         state.tool.brushSize,
-        state.currentLayer.ctx,
+        canvas.currentLayer.ctx,
         state.mode
       )
       if (state.tool.name !== "replace") {
         addToTimeline(state.tool.name, state.mouseX, state.mouseY)
       }
-      drawCanvas()
+      canvas.draw()
       break
     default:
     //do nothing
@@ -968,7 +951,7 @@ function perfectPixels(currentX, currentY) {
       state.brushColor,
       state.brushStamp,
       state.tool.brushSize,
-      state.currentLayer.ctx,
+      canvas.currentLayer.ctx,
       state.mode
     )
     //update queue
@@ -979,7 +962,7 @@ function perfectPixels(currentX, currentY) {
     if (state.tool.name !== "replace") {
       addToTimeline(state.tool.name, state.lastDrawnX, state.lastDrawnY)
     }
-    drawCanvas()
+    canvas.draw()
   } else {
     state.waitingPixelX = currentX
     state.waitingPixelY = currentY
@@ -1032,19 +1015,24 @@ function lineSteps() {
       //draw line from origin point to current point onscreen
       //only draw when necessary
       if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
-        onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom)
-        drawCanvas()
+        canvas.onScreenCTX.clearRect(
+          0,
+          0,
+          canvas.unsharpenedWidth / canvas.zoom,
+          canvas.unsharpenedHeight / canvas.zoom
+        )
+        canvas.draw()
         actionLine(
-          state.lastX + (state.xOffset / state.ratio) * zoom,
-          state.lastY + (state.yOffset / state.ratio) * zoom,
+          state.lastX + (state.xOffset / state.ratio) * canvas.zoom,
+          state.lastY + (state.yOffset / state.ratio) * canvas.zoom,
           state.mox,
           state.moy,
           state.brushColor,
-          onScreenCTX,
+          canvas.onScreenCTX,
           state.mode,
           state.brushStamp,
           state.tool.brushSize,
-          state.ratio / zoom
+          state.ratio / canvas.zoom
         )
         state.lastOnX = state.onX
         state.lastOnY = state.onY
@@ -1057,7 +1045,7 @@ function lineSteps() {
         state.mouseX,
         state.mouseY,
         state.brushColor,
-        state.currentLayer.ctx,
+        canvas.currentLayer.ctx,
         state.mode,
         state.brushStamp,
         state.tool.brushSize
@@ -1067,7 +1055,7 @@ function lineSteps() {
         { x1: state.lastX, x2: state.mouseX },
         { y1: state.lastY, y2: state.mouseY }
       )
-      drawCanvas()
+      canvas.draw()
       break
     default:
     //do nothing
@@ -1142,18 +1130,18 @@ function replaceSteps() {
   switch (state.event) {
     case "mousedown":
       //get global colorlayer data to use while mouse is down
-      state.localColorLayer = state.currentLayer.ctx.getImageData(
+      state.localColorLayer = canvas.currentLayer.ctx.getImageData(
         0,
         0,
-        offScreenCVS.width,
-        offScreenCVS.height
+        canvas.offScreenCVS.width,
+        canvas.offScreenCVS.height
       )
       //create clip mask
-      state.currentLayer.ctx.save()
+      canvas.currentLayer.ctx.save()
       state.clipMask = createClipMask(state.localColorLayer)
-      // state.currentLayer.ctx.strokeStyle = "red";
-      // state.currentLayer.ctx.stroke(state.clipMask);
-      state.currentLayer.ctx.clip(state.clipMask)
+      // canvas.currentLayer.ctx.strokeStyle = "red";
+      // canvas.currentLayer.ctx.stroke(state.clipMask);
+      canvas.currentLayer.ctx.clip(state.clipMask)
       drawSteps()
       break
     case "mousemove":
@@ -1172,9 +1160,9 @@ function replaceSteps() {
 }
 
 function finalReplaceStep() {
-  state.currentLayer.ctx.restore()
+  canvas.currentLayer.ctx.restore()
   let image = new Image()
-  image.src = state.currentLayer.cvs.toDataURL()
+  image.src = canvas.currentLayer.cvs.toDataURL()
   addToTimeline(state.tool.name, image, null)
 }
 
@@ -1278,16 +1266,16 @@ function fillSteps() {
         state.mouseX,
         state.mouseY,
         state.brushColor,
-        state.currentLayer.ctx,
+        canvas.currentLayer.ctx,
         state.mode
       )
       //For undo ability, store starting coords and settings and pass them into actionFill
       addToTimeline(state.tool.name, state.mouseX, state.mouseY)
-      drawCanvas()
+      canvas.draw()
       break
     case "mouseup":
       //redraw canvas to allow onscreen cursor to render
-      drawCanvas()
+      canvas.draw()
     default:
     //do nothing
   }
@@ -1297,9 +1285,9 @@ function actionFill(startX, startY, currentColor, ctx, currentMode) {
   //exit if outside borders
   if (
     startX < 0 ||
-    startX >= offScreenCVS.width ||
+    startX >= canvas.offScreenCVS.width ||
     startY < 0 ||
-    startY >= offScreenCVS.height
+    startY >= canvas.offScreenCVS.height
   ) {
     return
   }
@@ -1307,8 +1295,8 @@ function actionFill(startX, startY, currentColor, ctx, currentMode) {
   state.localColorLayer = ctx.getImageData(
     0,
     0,
-    offScreenCVS.width,
-    offScreenCVS.height
+    canvas.offScreenCVS.width,
+    canvas.offScreenCVS.height
   )
 
   state.clickedColor = getColor(startX, startY, state.localColorLayer)
@@ -1330,19 +1318,19 @@ function actionFill(startX, startY, currentColor, ctx, currentMode) {
     y = newPos[1]
 
     //get current pixel position
-    pixelPos = (y * offScreenCVS.width + x) * 4
+    pixelPos = (y * canvas.offScreenCVS.width + x) * 4
     // Go up as long as the color matches and are inside the canvas
     while (y >= 0 && matchStartColor(pixelPos)) {
       y--
-      pixelPos -= offScreenCVS.width * 4
+      pixelPos -= canvas.offScreenCVS.width * 4
     }
     //Don't overextend
-    pixelPos += offScreenCVS.width * 4
+    pixelPos += canvas.offScreenCVS.width * 4
     y++
     reachLeft = false
     reachRight = false
     // Go down as long as the color matches and in inside the canvas
-    while (y < offScreenCVS.height && matchStartColor(pixelPos)) {
+    while (y < canvas.offScreenCVS.height && matchStartColor(pixelPos)) {
       colorPixel(pixelPos)
 
       if (x > 0) {
@@ -1357,7 +1345,7 @@ function actionFill(startX, startY, currentColor, ctx, currentMode) {
         }
       }
 
-      if (x < offScreenCVS.width - 1) {
+      if (x < canvas.offScreenCVS.width - 1) {
         if (matchStartColor(pixelPos + 4)) {
           if (!reachRight) {
             //Add pixel to stack
@@ -1369,7 +1357,7 @@ function actionFill(startX, startY, currentColor, ctx, currentMode) {
         }
       }
       y++
-      pixelPos += offScreenCVS.width * 4
+      pixelPos += canvas.offScreenCVS.width * 4
     }
 
     if (pixelStack.length) {
@@ -1431,23 +1419,23 @@ function curveSteps() {
       //draw line from origin point to current point onscreen
       //normalize mousemove to pixelgrid
       if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
-        // onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom);
-        drawCanvas()
+        // canvas.onScreenCTX.clearRect(0, 0, canvas.unsharpenedWidth / canvas.zoom, canvas.unsharpenedHeight / canvas.zoom);
+        canvas.draw()
         //onscreen preview
         actionCurve(
-          state.px1 + (state.xOffset / state.ratio) * zoom,
-          state.py1 + (state.yOffset / state.ratio) * zoom,
-          state.px2 + (state.xOffset / state.ratio) * zoom,
-          state.py2 + (state.yOffset / state.ratio) * zoom,
-          state.px3 + (state.xOffset / state.ratio) * zoom,
-          state.py3 + (state.yOffset / state.ratio) * zoom,
+          state.px1 + (state.xOffset / state.ratio) * canvas.zoom,
+          state.py1 + (state.yOffset / state.ratio) * canvas.zoom,
+          state.px2 + (state.xOffset / state.ratio) * canvas.zoom,
+          state.py2 + (state.yOffset / state.ratio) * canvas.zoom,
+          state.px3 + (state.xOffset / state.ratio) * canvas.zoom,
+          state.py3 + (state.yOffset / state.ratio) * canvas.zoom,
           state.clickCounter,
           state.brushColor,
-          onScreenCTX,
+          canvas.onScreenCTX,
           state.mode,
           state.brushStamp,
           state.tool.brushSize,
-          state.ratio / zoom
+          state.ratio / canvas.zoom
         )
         state.lastOnX = state.onX
         state.lastOnY = state.onY
@@ -1478,7 +1466,7 @@ function curveSteps() {
           state.py3,
           state.clickCounter + 1,
           state.brushColor,
-          state.currentLayer.ctx,
+          canvas.currentLayer.ctx,
           state.mode,
           state.brushStamp,
           state.tool.brushSize
@@ -1490,7 +1478,7 @@ function curveSteps() {
           { x1: state.px1, x2: state.px2, x3: state.px3 },
           { y1: state.py1, y2: state.py2, y3: state.py3 }
         )
-        drawCanvas()
+        canvas.draw()
       }
       break
     case "mouseout":
@@ -1730,7 +1718,7 @@ function actionCurve(
       state.mox,
       state.moy,
       currentColor,
-      onScreenCTX,
+      canvas.onScreenCTX,
       currentMode,
       brushStamp,
       weight,
@@ -1753,13 +1741,13 @@ function handleClear() {
   state.undoStack.push(state.points)
   state.points = []
   state.redoStack = []
-  state.currentLayer.ctx.clearRect(
+  canvas.currentLayer.ctx.clearRect(
     0,
     0,
-    offScreenCVS.width,
-    offScreenCVS.height
+    canvas.offScreenCVS.width,
+    canvas.offScreenCVS.height
   )
-  drawCanvas()
+  canvas.draw()
 }
 
 //====================================//
@@ -1767,13 +1755,13 @@ function handleClear() {
 //====================================//
 
 function handleRecenter(e) {
-  onScreenCTX.scale(1 / zoom, 1 / zoom)
-  zoom = 1
+  canvas.onScreenCTX.scale(1 / canvas.zoom, 1 / canvas.zoom)
+  canvas.zoom = 1
   state.xOffset = 0
   state.yOffset = 0
   state.lastOffsetX = 0
   state.lastOffsetY = 0
-  drawCanvas()
+  canvas.draw()
 }
 
 function moveSteps() {
@@ -1786,12 +1774,12 @@ function pickerSteps() {
   switch (state.event) {
     case "mousedown":
       //get imageData
-      consolidateLayers()
-      state.colorLayerGlobal = offScreenCTX.getImageData(
+      canvas.consolidateLayers()
+      state.colorLayerGlobal = canvas.offScreenCTX.getImageData(
         0,
         0,
-        offScreenCVS.width,
-        offScreenCVS.height
+        canvas.offScreenCVS.width,
+        canvas.offScreenCVS.height
       )
       //set color
       sampleColor(state.mouseX, state.mouseY)
@@ -1802,7 +1790,7 @@ function pickerSteps() {
         //get color
         sampleColor(state.mouseX, state.mouseY)
         //draw square
-        drawCanvas()
+        canvas.draw()
         renderCursor()
         state.lastOnX = state.onX
         state.lastOnY = state.onY
@@ -1825,7 +1813,7 @@ function grabSteps() {
     case "mousemove":
       state.xOffset = state.onX - state.lastOnX + state.lastOffsetX
       state.yOffset = state.onY - state.lastOnY + state.lastOffsetY
-      drawCanvas()
+      canvas.draw()
       break
     case "mouseup":
       state.lastOffsetX = state.xOffset
@@ -1847,7 +1835,7 @@ function grabSteps() {
 //====================================//
 
 //command pattern. (Look into saving app-state instead)
-function addToTimeline(tool, x, y, layer = state.currentLayer) {
+function addToTimeline(tool, x, y, layer = canvas.currentLayer) {
   //use current state for variables
   state.points.push({
     //x/y are sometimes objects with multiple values
@@ -1868,13 +1856,13 @@ function actionUndoRedo(pushStack, popStack) {
   pushStack.push(popStack.pop())
   //clear all layers in preparation to redraw them.
   //DRY: do all layers and actions need to be rerendered for redo?
-  state.layers.forEach((l) => {
+  canvas.layers.forEach((l) => {
     if (l.type === "raster") {
-      l.ctx.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height)
+      l.ctx.clearRect(0, 0, canvas.offScreenCVS.width, canvas.offScreenCVS.height)
     }
   })
   redrawPoints()
-  drawCanvas()
+  canvas.draw()
 }
 
 function redrawPoints() {
@@ -1887,7 +1875,7 @@ function redrawPoints() {
           renderLayersToDOM()
           break
         case "clear":
-          p.layer.ctx.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height)
+          p.layer.ctx.clearRect(0, 0, canvas.offScreenCVS.width, canvas.offScreenCVS.height)
           break
         case "fill":
           actionFill(p.x, p.y, p.color, p.layer.ctx, p.mode)
@@ -1926,8 +1914,8 @@ function redrawPoints() {
             p.x,
             0,
             0,
-            offScreenCVS.width,
-            offScreenCVS.height
+            canvas.offScreenCVS.width,
+            canvas.offScreenCVS.height
           )
           break
         default:
@@ -1939,38 +1927,13 @@ function redrawPoints() {
     action.forEach((p) => {
       if (p.tool === "addlayer") {
         p.layer.removed = true
-        if (p.layer === state.currentLayer) {
-          state.currentLayer = layersCont.children[0].layerObj
+        if (p.layer === canvas.currentLayer) {
+          canvas.currentLayer = layersCont.children[0].layerObj
         }
         renderLayersToDOM()
       }
     })
   })
-}
-
-//FIX: Improve performance by keeping track of "redraw regions" instead of redrawing the whole thing.
-function drawCanvas() {
-  //clear canvas
-  onScreenCTX.clearRect(0, 0, ocWidth / zoom, ocHeight / zoom)
-  //Prevent blurring
-  onScreenCTX.imageSmoothingEnabled = false
-  //fill background
-  onScreenCTX.fillStyle = "gray"
-  onScreenCTX.fillRect(0, 0, ocWidth / zoom, ocHeight / zoom)
-  //BUG: How to mask outside drawing space?
-  onScreenCTX.clearRect(state.xOffset, state.yOffset, ocWidth, ocHeight)
-  drawLayers()
-  //draw border
-  onScreenCTX.beginPath()
-  onScreenCTX.rect(
-    state.xOffset - 1,
-    state.yOffset - 1,
-    ocWidth + 2,
-    ocHeight + 2
-  )
-  onScreenCTX.lineWidth = 2
-  onScreenCTX.strokeStyle = "black"
-  onScreenCTX.stroke()
 }
 
 //=====================================//
@@ -2031,10 +1994,10 @@ function updateStamp() {
 //====================================//
 
 function exportImage() {
-  consolidateLayers()
+  canvas.consolidateLayers()
   const a = document.createElement("a")
   a.style.display = "none"
-  a.href = offScreenCVS.toDataURL()
+  a.href = canvas.offScreenCVS.toDataURL()
   a.download = "pixelvee.png"
   document.body.appendChild(a)
   a.click()
@@ -2043,55 +2006,6 @@ function exportImage() {
 //====================================//
 //======== * * * Layers * * * ========//
 //====================================//
-
-function drawLayers() {
-  state.layers.forEach((l) => {
-    if (!l.removed) {
-      if (l.type === "reference") {
-        onScreenCTX.save()
-        onScreenCTX.globalAlpha = l.opacity
-        //l.x, l.y need to be normalized to the pixel grid
-        onScreenCTX.drawImage(
-          l.img,
-          state.xOffset + (l.x * ocWidth) / offScreenCVS.width,
-          state.yOffset + (l.y * ocWidth) / offScreenCVS.width,
-          l.img.width * l.scale,
-          l.img.height * l.scale
-        )
-        onScreenCTX.restore()
-      } else {
-        onScreenCTX.save()
-        onScreenCTX.globalAlpha = l.opacity
-        //l.x, l.y need to be normalized to the pixel grid
-        onScreenCTX.drawImage(
-          l.cvs,
-          state.xOffset + (l.x * ocWidth) / offScreenCVS.width,
-          state.yOffset + (l.y * ocWidth) / offScreenCVS.width,
-          ocWidth,
-          ocHeight
-        )
-        onScreenCTX.restore()
-      }
-    }
-  })
-}
-
-function consolidateLayers() {
-  state.layers.forEach((l) => {
-    if (l.type === "raster") {
-      offScreenCTX.save()
-      offScreenCTX.globalAlpha = l.opacity
-      offScreenCTX.drawImage(
-        l.cvs,
-        l.x,
-        l.y,
-        offScreenCVS.width,
-        offScreenCVS.height
-      )
-      offScreenCTX.restore()
-    }
-  })
-}
 
 function layerInteract(e) {
   let layer = e.target.closest(".layer").layerObj
@@ -2107,16 +2021,16 @@ function layerInteract(e) {
   } else {
     //select current layer
     if (layer.type === "raster") {
-      state.currentLayer = layer
+      canvas.currentLayer = layer
       renderLayersToDOM()
     }
   }
-  drawCanvas()
+  canvas.draw()
 }
 
 function dragLayerStart(e) {
   let layer = e.target.closest(".layer").layerObj
-  let index = state.layers.indexOf(layer)
+  let index = canvas.layers.indexOf(layer)
   //pass index through event
   e.dataTransfer.setData("text", index)
   e.target.style.boxShadow =
@@ -2144,18 +2058,18 @@ function dragLayerLeave(e) {
 function dropLayer(e) {
   let targetLayer = e.target.closest(".layer").layerObj
   let draggedIndex = parseInt(e.dataTransfer.getData("text"))
-  let heldLayer = state.layers[draggedIndex]
+  let heldLayer = canvas.layers[draggedIndex]
   //TODO: add layer change to timeline
   if (e.target.className.includes("layer") && targetLayer !== heldLayer) {
     for (let i = 0; i < layersCont.children.length; i += 1) {
       if (layersCont.children[i] === e.target) {
-        let newIndex = state.layers.indexOf(layersCont.children[i].layerObj)
-        state.layers.splice(draggedIndex, 1)
-        state.layers.splice(newIndex, 0, heldLayer)
+        let newIndex = canvas.layers.indexOf(layersCont.children[i].layerObj)
+        canvas.layers.splice(draggedIndex, 1)
+        canvas.layers.splice(newIndex, 0, heldLayer)
       }
     }
     renderLayersToDOM()
-    drawCanvas()
+    canvas.draw()
   }
 }
 
@@ -2168,11 +2082,11 @@ function addRasterLayer() {
   //once layer is added and drawn on, can no longer be deleted
   let layerCVS = document.createElement("canvas")
   let layerCTX = layerCVS.getContext("2d")
-  layerCVS.width = offScreenCVS.width
-  layerCVS.height = offScreenCVS.height
+  layerCVS.width = canvas.offScreenCVS.width
+  layerCVS.height = canvas.offScreenCVS.height
   let layer = {
     type: "raster",
-    title: `Layer ${state.layers.length + 1}`,
+    title: `Layer ${canvas.layers.length + 1}`,
     cvs: layerCVS,
     ctx: layerCTX,
     x: 0,
@@ -2181,7 +2095,7 @@ function addRasterLayer() {
     opacity: 1,
     removed: false,
   }
-  state.layers.push(layer)
+  canvas.layers.push(layer)
   addToTimeline("addlayer", 0, 0, layer)
   state.undoStack.push(state.points)
   state.points = []
@@ -2202,12 +2116,12 @@ function addReferenceLayer() {
       img.onload = () => {
         //constrain background image to canvas with scale
         let scale =
-          ocWidth / img.width > ocHeight / img.height
-            ? ocHeight / img.height
-            : ocWidth / img.width
+          canvas.unsharpenedWidth / img.width > canvas.unsharpenedHeight / img.height
+            ? canvas.unsharpenedHeight / img.height
+            : canvas.unsharpenedWidth / img.width
         let layer = {
           type: "reference",
-          title: `Reference ${state.layers.length + 1}`,
+          title: `Reference ${canvas.layers.length + 1}`,
           img: img,
           x: 0,
           y: 0,
@@ -2215,9 +2129,9 @@ function addReferenceLayer() {
           opacity: 1,
           removed: false,
         }
-        state.layers.unshift(layer)
+        canvas.layers.unshift(layer)
         renderLayersToDOM()
-        drawCanvas()
+        canvas.draw()
       }
     }
 
@@ -2235,7 +2149,7 @@ function removeLayer(e) {
 function renderLayersToDOM() {
   layersCont.innerHTML = ""
   let id = 0
-  state.layers.forEach((l) => {
+  canvas.layers.forEach((l) => {
     if (!l.removed) {
       let layerElement = document.createElement("div")
       layerElement.className = `layer ${l.type}`
@@ -2243,7 +2157,7 @@ function renderLayersToDOM() {
       id += 1
       layerElement.textContent = l.title
       layerElement.draggable = true
-      if (l === state.currentLayer) {
+      if (l === canvas.currentLayer) {
         layerElement.style.background = "rgb(255, 255, 255)"
         layerElement.style.color = "rgb(0, 0, 0)"
       }
@@ -2355,7 +2269,7 @@ function randomizeColor(e) {
 function getColor(x, y, colorLayer) {
   let canvasColor = {}
 
-  let startPos = (y * offScreenCVS.width + x) * 4
+  let startPos = (y * canvas.offScreenCVS.width + x) * 4
   //clicked color
   canvasColor.r = colorLayer.data[startPos]
   canvasColor.g = colorLayer.data[startPos + 1]
@@ -2379,23 +2293,23 @@ function getColor(x, y, colorLayer) {
 //zooming with pinch actions, prevent default device zoom
 
 function handleTouchStart(e) {
-//   e.preventDefault()
+  //   e.preventDefault()
   state.touch = true
   handleMouseDown(e)
 }
 
 function handleTouchMove(e) {
-//   e.preventDefault()
+  //   e.preventDefault()
   handleMouseMove(e)
 }
 
 function handleTouchEnd(e) {
-//   e.preventDefault()
+  //   e.preventDefault()
   handleMouseUp(e)
 }
 
 function handleTouchCancel(e) {
-//   e.preventDefault()
+  //   e.preventDefault()
   handleMouseOut(e)
 }
 

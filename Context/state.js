@@ -21,9 +21,6 @@ export const state = {
   touch: false,
   //active variables for canvas
   shortcuts: true,
-  //Layers
-  layers: [], //(types: raster, vector, reference)
-  currentLayer: null,
   clipMask: null,
   event: "none",
   clickDisabled: false,
