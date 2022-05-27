@@ -55,6 +55,9 @@ class Picker {
 
   //* Interface *//
 
+  /**
+   * Close the picker window
+   */
   closeWindow() {
     // hide colorpicker
     colorPicker.style.display = "none"
@@ -64,6 +67,10 @@ class Picker {
     state.shortcuts = true
   }
 
+  /**
+   * This function sets the color according to the currently selected parameters and closes the picker window
+   * @param {event} e
+   */
   handleConfirm(e) {
     //get rgb values
     const { r, g, b } = this.HSLToRGB(this.hue, this.saturation, this.lightness)
@@ -610,19 +617,35 @@ class Picker {
     window.addEventListener("mouseup", (e) => {
       this.handleMouseUp(e)
     })
-    this.target.addEventListener("touchstart", (e) => {
-      this.handleMouseDown(e)
-    })
-    window.addEventListener("touchmove", (e) => {
-      window.scrollTo(0, 0)
-      this.handleMouseMove(e)
-    })
-    window.addEventListener("touchend", (e) => {
-      this.handleMouseUp(e)
-    })
-    window.addEventListener("touchcancel", (e) => {
-      this.handleMouseUp(e)
-    })
+    this.target.addEventListener(
+      "touchstart",
+      (e) => {
+        this.handleMouseDown(e)
+      },
+      { passive: true }
+    )
+    window.addEventListener(
+      "touchmove",
+      (e) => {
+        window.scrollTo(0, 0)
+        this.handleMouseMove(e)
+      },
+      { passive: true }
+    )
+    window.addEventListener(
+      "touchend",
+      (e) => {
+        this.handleMouseUp(e)
+      },
+      { passive: true }
+    )
+    window.addEventListener(
+      "touchcancel",
+      (e) => {
+        this.handleMouseUp(e)
+      },
+      { passive: true }
+    )
 
     //Interface listeners
     this.confirmBtn.addEventListener("click", (e) => {
