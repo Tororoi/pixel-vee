@@ -62,4 +62,29 @@ export const state = {
   yOffset: 0,
   lastOffsetX: 0,
   lastOffsetY: 0,
+  //functions
+  addToTimeline,
+}
+
+/**
+ * command pattern. TODO: Look into saving app-state instead
+ * @param {string} tool - tool to be recorded for history. Not necessarily the same as state.tool.name
+ * @param {*} x
+ * @param {*} y
+ * @param {*} layer - layer that history should be applied to
+ */
+function addToTimeline(tool, x, y, layer) {
+  //use current state for variables
+  state.points.push({
+    //x/y are sometimes objects with multiple values
+    x: x,
+    y: y,
+    layer: layer,
+    brush: state.brushStamp,
+    weight: state.tool.brushSize,
+    color: { ...state.brushColor },
+    tool: tool,
+    action: state.tool.fn,
+    mode: state.mode,
+  })
 }

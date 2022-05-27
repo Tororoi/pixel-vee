@@ -49,13 +49,6 @@ let brush = document.querySelector(".brush")
 //Export
 let exportBtn = document.querySelector(".export")
 
-//Layers
-//Reference upload
-let uploadBtn = document.querySelector("#file-upload")
-let newLayerBtn = document.querySelector(".new-raster-layer")
-
-let layersCont = document.querySelector(".layers")
-
 //========================================//
 //=== * * * Important References * * * ===//
 //========================================//
@@ -137,9 +130,21 @@ const tools = {
 state.tool = tools.brush
 
 //Initialize first layer
-addRasterLayer()
+canvas.addRasterLayer()
 canvas.currentLayer = canvas.layers[0]
-renderLayersToDOM()
+canvas.renderLayersToDOM()
+
+//Initialize Color Picker
+//Create an instance passing it the canvas, width, height, and setColor fn
+let picker = new Picker(
+  document.getElementById("color-picker"),
+  250,
+  250,
+  setColor
+)
+
+//Draw
+picker.build(state.brushColor)
 
 //===================================//
 //=== * * * Event Listeners * * * ===//
@@ -148,7 +153,6 @@ renderLayersToDOM()
 //Shortcuts
 document.addEventListener("keydown", handleKeyDown)
 document.addEventListener("keyup", handleKeyUp)
-
 canvas.onScreenCVS.addEventListener("wheel", handleWheel, { passive: true })
 
 //Mouse
@@ -158,9 +162,15 @@ canvas.onScreenCVS.addEventListener("mouseup", handleMouseUp)
 canvas.onScreenCVS.addEventListener("mouseout", handleMouseOut)
 
 //Touch
-canvas.onScreenCVS.addEventListener("touchstart", handleTouchStart, { passive: true })
-canvas.onScreenCVS.addEventListener("touchmove", handleTouchMove, { passive: true })
-canvas.onScreenCVS.addEventListener("touchend", handleTouchEnd, { passive: true })
+canvas.onScreenCVS.addEventListener("touchstart", handleTouchStart, {
+  passive: true,
+})
+canvas.onScreenCVS.addEventListener("touchmove", handleTouchMove, {
+  passive: true,
+})
+canvas.onScreenCVS.addEventListener("touchend", handleTouchEnd, {
+  passive: true,
+})
 canvas.onScreenCVS.addEventListener("touchcancel", handleTouchCancel, {
   passive: true,
 })
@@ -185,18 +195,6 @@ brushBtn.addEventListener("click", switchBrush)
 brushSlider.addEventListener("input", updateBrush)
 
 exportBtn.addEventListener("click", exportImage)
-
-uploadBtn.addEventListener("change", addReferenceLayer)
-newLayerBtn.addEventListener("click", addRasterLayer)
-
-layersCont.addEventListener("click", layerInteract)
-
-layersCont.addEventListener("dragstart", dragLayerStart)
-layersCont.addEventListener("dragover", dragLayerOver)
-layersCont.addEventListener("dragenter", dragLayerEnter)
-layersCont.addEventListener("dragleave", dragLayerLeave)
-layersCont.addEventListener("drop", dropLayer)
-layersCont.addEventListener("dragend", dragLayerEnd)
 
 //Color Picker
 //Interface listeners
@@ -368,7 +366,8 @@ function handleMouseDown(e) {
   if (state.clickDisabled) {
     return
   }
-  state.trueRatio = (canvas.onScreenCVS.offsetWidth / canvas.offScreenCVS.width) * canvas.zoom
+  state.trueRatio =
+    (canvas.onScreenCVS.offsetWidth / canvas.offScreenCVS.width) * canvas.zoom
   let x, y
   if (e.targetTouches) {
     let rect = e.target.getBoundingClientRect()
@@ -380,8 +379,12 @@ function handleMouseDown(e) {
   }
   state.mox = Math.floor(x / state.trueRatio)
   state.moy = Math.floor(y / state.trueRatio)
-  state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio) * canvas.zoom)
-  state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio) * canvas.zoom)
+  state.mouseX = Math.round(
+    state.mox - (state.xOffset / state.ratio) * canvas.zoom
+  )
+  state.mouseY = Math.round(
+    state.moy - (state.yOffset / state.ratio) * canvas.zoom
+  )
   //Reset Cursor for mobile
   state.onX = (state.mox * state.ratio) / canvas.zoom
   state.onY = (state.moy * state.ratio) / canvas.zoom
@@ -406,8 +409,10 @@ function handleMouseMove(e) {
   state.event = "mousemove"
   state.clickDisabled = false
   //currently only square dimensions work
-  state.trueRatio = (canvas.onScreenCVS.offsetWidth / canvas.offScreenCVS.width) * canvas.zoom
-  state.ratio = (canvas.unsharpenedWidth / canvas.offScreenCVS.width) * canvas.zoom
+  state.trueRatio =
+    (canvas.onScreenCVS.offsetWidth / canvas.offScreenCVS.width) * canvas.zoom
+  state.ratio =
+    (canvas.unsharpenedWidth / canvas.offScreenCVS.width) * canvas.zoom
   //coords
   let x, y
   if (e.targetTouches) {
@@ -420,8 +425,12 @@ function handleMouseMove(e) {
   }
   state.mox = Math.floor(x / state.trueRatio)
   state.moy = Math.floor(y / state.trueRatio)
-  state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio) * canvas.zoom)
-  state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio) * canvas.zoom)
+  state.mouseX = Math.round(
+    state.mox - (state.xOffset / state.ratio) * canvas.zoom
+  )
+  state.mouseY = Math.round(
+    state.moy - (state.yOffset / state.ratio) * canvas.zoom
+  )
   //Hover brush
   state.onX = (state.mox * state.ratio) / canvas.zoom
   state.onY = (state.moy * state.ratio) / canvas.zoom
@@ -454,7 +463,8 @@ function handleMouseUp(e) {
   if (state.clickDisabled) {
     return
   }
-  state.trueRatio = (canvas.onScreenCVS.offsetWidth / canvas.offScreenCVS.width) * canvas.zoom
+  state.trueRatio =
+    (canvas.onScreenCVS.offsetWidth / canvas.offScreenCVS.width) * canvas.zoom
   let x, y
   if (e.targetTouches) {
     let rect = e.target.getBoundingClientRect()
@@ -466,8 +476,12 @@ function handleMouseUp(e) {
   }
   state.mox = Math.floor(x / state.trueRatio)
   state.moy = Math.floor(y / state.trueRatio)
-  state.mouseX = Math.round(state.mox - (state.xOffset / state.ratio) * canvas.zoom)
-  state.mouseY = Math.round(state.moy - (state.yOffset / state.ratio) * canvas.zoom)
+  state.mouseX = Math.round(
+    state.mox - (state.xOffset / state.ratio) * canvas.zoom
+  )
+  state.mouseY = Math.round(
+    state.moy - (state.yOffset / state.ratio) * canvas.zoom
+  )
   if (canvas.currentLayer.opacity === 0) {
     for (let i = 0; i < layersCont.children.length; i += 1) {
       if (layersCont.children[i].layerObj === canvas.currentLayer) {
@@ -669,7 +683,8 @@ function drawCurrentPixel() {
 }
 
 function drawCursorBox() {
-  let brushOffset = (Math.floor(state.tool.brushSize / 2) * state.ratio) / canvas.zoom
+  let brushOffset =
+    (Math.floor(state.tool.brushSize / 2) * state.ratio) / canvas.zoom
   let x0 = state.onX - brushOffset
   let y0 = state.onY - brushOffset
   let x1 = x0 + (state.ratio / canvas.zoom) * state.tool.brushSize
@@ -858,7 +873,12 @@ function drawSteps() {
       state.waitingPixelX = state.mouseX
       state.waitingPixelY = state.mouseY
       if (state.tool.name !== "replace") {
-        addToTimeline(state.tool.name, state.mouseX, state.mouseY)
+        state.addToTimeline(
+          state.tool.name,
+          state.mouseX,
+          state.mouseY,
+          canvas.currentLayer
+        )
       }
       canvas.draw()
       break
@@ -884,10 +904,11 @@ function drawSteps() {
             state.tool.brushSize
           )
           if (state.tool.name !== "replace") {
-            addToTimeline(
+            state.addToTimeline(
               "line",
               { x1: state.lastX, x2: state.mouseX },
-              { y1: state.lastY, y2: state.mouseY }
+              { y1: state.lastY, y2: state.mouseY },
+              canvas.currentLayer
             )
           }
           canvas.draw()
@@ -908,7 +929,12 @@ function drawSteps() {
               state.mode
             )
             if (state.tool.name !== "replace") {
-              addToTimeline(state.tool.name, state.mouseX, state.mouseY)
+              state.addToTimeline(
+                state.tool.name,
+                state.mouseX,
+                state.mouseY,
+                canvas.currentLayer
+              )
             }
             canvas.draw()
           }
@@ -930,7 +956,12 @@ function drawSteps() {
         state.mode
       )
       if (state.tool.name !== "replace") {
-        addToTimeline(state.tool.name, state.mouseX, state.mouseY)
+        state.addToTimeline(
+          state.tool.name,
+          state.mouseX,
+          state.mouseY,
+          canvas.currentLayer
+        )
       }
       canvas.draw()
       break
@@ -960,7 +991,12 @@ function perfectPixels(currentX, currentY) {
     state.waitingPixelX = currentX
     state.waitingPixelY = currentY
     if (state.tool.name !== "replace") {
-      addToTimeline(state.tool.name, state.lastDrawnX, state.lastDrawnY)
+      state.addToTimeline(
+        state.tool.name,
+        state.lastDrawnX,
+        state.lastDrawnY,
+        canvas.currentLayer
+      )
     }
     canvas.draw()
   } else {
@@ -1050,10 +1086,11 @@ function lineSteps() {
         state.brushStamp,
         state.tool.brushSize
       )
-      addToTimeline(
+      state.addToTimeline(
         state.tool.name,
         { x1: state.lastX, x2: state.mouseX },
-        { y1: state.lastY, y2: state.mouseY }
+        { y1: state.lastY, y2: state.mouseY },
+        canvas.currentLayer
       )
       canvas.draw()
       break
@@ -1163,7 +1200,7 @@ function finalReplaceStep() {
   canvas.currentLayer.ctx.restore()
   let image = new Image()
   image.src = canvas.currentLayer.cvs.toDataURL()
-  addToTimeline(state.tool.name, image, null)
+  state.addToTimeline(state.tool.name, image, null, canvas.currentLayer)
 }
 
 function selectSteps() {
@@ -1270,7 +1307,12 @@ function fillSteps() {
         state.mode
       )
       //For undo ability, store starting coords and settings and pass them into actionFill
-      addToTimeline(state.tool.name, state.mouseX, state.mouseY)
+      state.addToTimeline(
+        state.tool.name,
+        state.mouseX,
+        state.mouseY,
+        canvas.currentLayer
+      )
       canvas.draw()
       break
     case "mouseup":
@@ -1473,10 +1515,11 @@ function curveSteps() {
         )
         state.clickCounter = 0
         //store control points for timeline
-        addToTimeline(
+        state.addToTimeline(
           state.tool.name,
           { x1: state.px1, x2: state.px2, x3: state.px3 },
-          { y1: state.py1, y2: state.py2, y3: state.py3 }
+          { y1: state.py1, y2: state.py2, y3: state.py3 },
+          canvas.currentLayer
         )
         canvas.draw()
       }
@@ -1736,7 +1779,7 @@ function actionCurve(
 }
 
 function handleClear() {
-  addToTimeline("clear", 0, 0)
+  state.addToTimeline("clear", 0, 0, canvas.currentLayer)
   //FIX: restructure stacked items. Currently each is an array, but each should be an object with more info plus an array
   state.undoStack.push(state.points)
   state.points = []
@@ -1770,6 +1813,7 @@ function moveSteps() {
 }
 
 //Eyedropper
+//TODO: add magnifying glass view that shows zoomed in view of area being sampled
 function pickerSteps() {
   switch (state.event) {
     case "mousedown":
@@ -1834,23 +1878,6 @@ function grabSteps() {
 //========= * * * Core * * * =========//
 //====================================//
 
-//command pattern. (Look into saving app-state instead)
-function addToTimeline(tool, x, y, layer = canvas.currentLayer) {
-  //use current state for variables
-  state.points.push({
-    //x/y are sometimes objects with multiple values
-    x: x,
-    y: y,
-    layer: layer,
-    brush: state.brushStamp,
-    weight: state.tool.brushSize,
-    color: { ...state.brushColor },
-    tool: tool,
-    action: state.tool.fn,
-    mode: state.mode,
-  })
-}
-
 //Main pillar of the code structure
 function actionUndoRedo(pushStack, popStack) {
   pushStack.push(popStack.pop())
@@ -1858,7 +1885,12 @@ function actionUndoRedo(pushStack, popStack) {
   //DRY: do all layers and actions need to be rerendered for redo?
   canvas.layers.forEach((l) => {
     if (l.type === "raster") {
-      l.ctx.clearRect(0, 0, canvas.offScreenCVS.width, canvas.offScreenCVS.height)
+      l.ctx.clearRect(
+        0,
+        0,
+        canvas.offScreenCVS.width,
+        canvas.offScreenCVS.height
+      )
     }
   })
   redrawPoints()
@@ -1872,10 +1904,15 @@ function redrawPoints() {
       switch (p.tool) {
         case "addlayer":
           p.layer.removed = false
-          renderLayersToDOM()
+          canvas.renderLayersToDOM()
           break
         case "clear":
-          p.layer.ctx.clearRect(0, 0, canvas.offScreenCVS.width, canvas.offScreenCVS.height)
+          p.layer.ctx.clearRect(
+            0,
+            0,
+            canvas.offScreenCVS.width,
+            canvas.offScreenCVS.height
+          )
           break
         case "fill":
           actionFill(p.x, p.y, p.color, p.layer.ctx, p.mode)
@@ -1930,7 +1967,7 @@ function redrawPoints() {
         if (p.layer === canvas.currentLayer) {
           canvas.currentLayer = layersCont.children[0].layerObj
         }
-        renderLayersToDOM()
+        canvas.renderLayersToDOM()
       }
     })
   })
@@ -2002,191 +2039,6 @@ function exportImage() {
   document.body.appendChild(a)
   a.click()
 }
-
-//====================================//
-//======== * * * Layers * * * ========//
-//====================================//
-
-function layerInteract(e) {
-  let layer = e.target.closest(".layer").layerObj
-  //toggle visibility
-  if (e.target.className.includes("hide")) {
-    if (e.target.childNodes[0].className.includes("eyeopen")) {
-      e.target.childNodes[0].className = "eyeclosed icon"
-      layer.opacity = 0
-    } else if (e.target.childNodes[0].className.includes("eyeclosed")) {
-      e.target.childNodes[0].className = "eyeopen icon"
-      layer.opacity = 1
-    }
-  } else {
-    //select current layer
-    if (layer.type === "raster") {
-      canvas.currentLayer = layer
-      renderLayersToDOM()
-    }
-  }
-  canvas.draw()
-}
-
-function dragLayerStart(e) {
-  let layer = e.target.closest(".layer").layerObj
-  let index = canvas.layers.indexOf(layer)
-  //pass index through event
-  e.dataTransfer.setData("text", index)
-  e.target.style.boxShadow =
-    "inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131)"
-}
-
-function dragLayerOver(e) {
-  e.preventDefault()
-}
-
-function dragLayerEnter(e) {
-  if (e.target.className.includes("layer")) {
-    e.target.style.boxShadow =
-      "inset 2px 0px rgb(255, 255, 255), inset -2px 0px rgb(255, 255, 255), inset 0px -2px rgb(255, 255, 255), inset 0px 2px rgb(255, 255, 255)"
-  }
-}
-
-function dragLayerLeave(e) {
-  if (e.target.className.includes("layer")) {
-    e.target.style.boxShadow =
-      "inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131)"
-  }
-}
-
-function dropLayer(e) {
-  let targetLayer = e.target.closest(".layer").layerObj
-  let draggedIndex = parseInt(e.dataTransfer.getData("text"))
-  let heldLayer = canvas.layers[draggedIndex]
-  //TODO: add layer change to timeline
-  if (e.target.className.includes("layer") && targetLayer !== heldLayer) {
-    for (let i = 0; i < layersCont.children.length; i += 1) {
-      if (layersCont.children[i] === e.target) {
-        let newIndex = canvas.layers.indexOf(layersCont.children[i].layerObj)
-        canvas.layers.splice(draggedIndex, 1)
-        canvas.layers.splice(newIndex, 0, heldLayer)
-      }
-    }
-    renderLayersToDOM()
-    canvas.draw()
-  }
-}
-
-function dragLayerEnd(e) {
-  renderLayersToDOM()
-}
-
-function addRasterLayer() {
-  //TODO: add to timeline.
-  //once layer is added and drawn on, can no longer be deleted
-  let layerCVS = document.createElement("canvas")
-  let layerCTX = layerCVS.getContext("2d")
-  layerCVS.width = canvas.offScreenCVS.width
-  layerCVS.height = canvas.offScreenCVS.height
-  let layer = {
-    type: "raster",
-    title: `Layer ${canvas.layers.length + 1}`,
-    cvs: layerCVS,
-    ctx: layerCTX,
-    x: 0,
-    y: 0,
-    scale: 1,
-    opacity: 1,
-    removed: false,
-  }
-  canvas.layers.push(layer)
-  addToTimeline("addlayer", 0, 0, layer)
-  state.undoStack.push(state.points)
-  state.points = []
-  state.redoStack = []
-  renderLayersToDOM()
-}
-
-function addReferenceLayer() {
-  //TODO: add to timeline
-  let reader
-  let img = new Image()
-
-  if (this.files && this.files[0]) {
-    reader = new FileReader()
-
-    reader.onload = (e) => {
-      img.src = e.target.result
-      img.onload = () => {
-        //constrain background image to canvas with scale
-        let scale =
-          canvas.unsharpenedWidth / img.width > canvas.unsharpenedHeight / img.height
-            ? canvas.unsharpenedHeight / img.height
-            : canvas.unsharpenedWidth / img.width
-        let layer = {
-          type: "reference",
-          title: `Reference ${canvas.layers.length + 1}`,
-          img: img,
-          x: 0,
-          y: 0,
-          scale: scale,
-          opacity: 1,
-          removed: false,
-        }
-        canvas.layers.unshift(layer)
-        renderLayersToDOM()
-        canvas.draw()
-      }
-    }
-
-    reader.readAsDataURL(this.files[0])
-  }
-}
-
-function removeLayer(e) {
-  //set "removed" flag to true on selected layer
-  //add to timeline
-  let layer = e.target.closest(".layer").layerObj
-  layer.removed = true
-}
-
-function renderLayersToDOM() {
-  layersCont.innerHTML = ""
-  let id = 0
-  canvas.layers.forEach((l) => {
-    if (!l.removed) {
-      let layerElement = document.createElement("div")
-      layerElement.className = `layer ${l.type}`
-      layerElement.id = id
-      id += 1
-      layerElement.textContent = l.title
-      layerElement.draggable = true
-      if (l === canvas.currentLayer) {
-        layerElement.style.background = "rgb(255, 255, 255)"
-        layerElement.style.color = "rgb(0, 0, 0)"
-      }
-      let hide = document.createElement("div")
-      hide.className = "hide btn"
-      let eye = document.createElement("span")
-      if (l.opacity === 0) {
-        eye.className = "eyeclosed icon"
-      } else {
-        eye.className = "eyeopen icon"
-      }
-      hide.appendChild(eye)
-      layerElement.appendChild(hide)
-      layersCont.appendChild(layerElement)
-      //associate object
-      layerElement.layerObj = l
-    }
-  })
-}
-
-//add move tool and scale tool for reference layers
-
-// QUESTION: How to deal with undo/redo when deleting a layer?
-//If a layer is removed, actions associated with that layer will be removed
-//and can't easily be added back in the correct order.
-
-//vector layers have an option to create a raster copy layer
-
-//vector layers need movable control points, how to organize order of added control points?
 
 //====================================//
 //======== * * * Colors * * * ========//
@@ -2312,16 +2164,3 @@ function handleTouchCancel(e) {
   //   e.preventDefault()
   handleMouseOut(e)
 }
-
-//Initialize Tools
-//Color Picker
-//Create an instance passing it the canvas, width and height
-let picker = new Picker(
-  document.getElementById("color-picker"),
-  250,
-  250,
-  setColor
-)
-
-//Draw
-picker.build(state.brushColor)
