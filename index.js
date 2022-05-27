@@ -1,4 +1,5 @@
 import { Picker } from "../Tools/Picker.js"
+import { state } from "../Context/state.js"
 
 //===================================//
 //========= * * * DOM * * * =========//
@@ -154,79 +155,12 @@ const tools = {
   // }
 }
 
-//State (not yet a true state)
-const state = {
-  //timeline
-  points: [],
-  undoStack: [],
-  redoStack: [],
-  //settings
-  tool: tools.brush,
-  mode: "draw",
-  brushColor: { color: "rgba(0,0,0,255)", r: 0, g: 0, b: 0, a: 255 },
-  backColor: { color: "rgba(255,255,255,255)", r: 255, g: 255, b: 255, a: 255 },
-  brushStamp: [{ x: 0, y: 0, w: 1, h: 1 }], //default 1 pixel
-  brushType: "circle",
-  palette: {},
-  options: {
-    perfect: false,
-    erase: false,
-    contiguous: false,
-  },
-  //touchscreen?
-  touch: false,
-  //active variables for canvas
-  shortcuts: true,
-  currentLayer: null,
-  clipMask: null,
-  event: "none",
-  clickDisabled: false,
-  clicked: false,
-  clickedColor: null,
-  mouseX: null,
-  mouseY: null,
-  mox: null, //mouse coords with offset
-  moy: null,
-  ratio: null,
-  trueRatio: null,
-  onX: null,
-  onY: null,
-  lastOnX: null,
-  lastOnY: null,
-  lastX: null,
-  lastY: null,
-  //x2/y2 for line tool
-  lineX: null,
-  lineY: null,
-  //for curve tool
-  clickCounter: 0,
-  px1: null,
-  py1: null,
-  px2: null,
-  py2: null,
-  px3: null,
-  py3: null,
-  //for perfect pixels
-  lastDrawnX: null,
-  lastDrawnY: null,
-  waitingPixelX: null,
-  waitingPixelY: null,
-  //for replace
-  colorLayerGlobal: null,
-  localColorLayer: null,
-  //for moving canvas/ grab
-  xOffset: 0,
-  yOffset: 0,
-  lastOffsetX: 0,
-  lastOffsetY: 0,
-}
-
-//Layers (types: raster, vector, reference)
-const layers = []
+//Initialize default tool
+state.tool = tools.brush
 
 //Initialize first layer
 addRasterLayer()
-state.currentLayer = layers[0]
+state.currentLayer = state.layers[0]
 renderLayersToDOM()
 
 //===================================//
@@ -279,12 +213,12 @@ newLayerBtn.addEventListener("click", addRasterLayer)
 
 layersCont.addEventListener("click", layerInteract)
 
-layersCont.addEventListener("dragstart", dragLayerStart, { passive: true })
-layersCont.addEventListener("dragover", dragLayerOver, { passive: true })
-layersCont.addEventListener("dragenter", dragLayerEnter, { passive: true })
-layersCont.addEventListener("dragleave", dragLayerLeave, { passive: true })
-layersCont.addEventListener("drop", dropLayer, { passive: true })
-layersCont.addEventListener("dragend", dragLayerEnd, { passive: true })
+layersCont.addEventListener("dragstart", dragLayerStart)
+layersCont.addEventListener("dragover", dragLayerOver)
+layersCont.addEventListener("dragenter", dragLayerEnter)
+layersCont.addEventListener("dragleave", dragLayerLeave)
+layersCont.addEventListener("drop", dropLayer)
+layersCont.addEventListener("dragend", dragLayerEnd)
 
 //Color Picker
 //Interface listeners
@@ -1934,7 +1868,7 @@ function actionUndoRedo(pushStack, popStack) {
   pushStack.push(popStack.pop())
   //clear all layers in preparation to redraw them.
   //DRY: do all layers and actions need to be rerendered for redo?
-  layers.forEach((l) => {
+  state.layers.forEach((l) => {
     if (l.type === "raster") {
       l.ctx.clearRect(0, 0, offScreenCVS.width, offScreenCVS.height)
     }
@@ -2111,7 +2045,7 @@ function exportImage() {
 //====================================//
 
 function drawLayers() {
-  layers.forEach((l) => {
+  state.layers.forEach((l) => {
     if (!l.removed) {
       if (l.type === "reference") {
         onScreenCTX.save()
@@ -2143,7 +2077,7 @@ function drawLayers() {
 }
 
 function consolidateLayers() {
-  layers.forEach((l) => {
+  state.layers.forEach((l) => {
     if (l.type === "raster") {
       offScreenCTX.save()
       offScreenCTX.globalAlpha = l.opacity
@@ -2182,7 +2116,7 @@ function layerInteract(e) {
 
 function dragLayerStart(e) {
   let layer = e.target.closest(".layer").layerObj
-  let index = layers.indexOf(layer)
+  let index = state.layers.indexOf(layer)
   //pass index through event
   e.dataTransfer.setData("text", index)
   e.target.style.boxShadow =
@@ -2210,14 +2144,14 @@ function dragLayerLeave(e) {
 function dropLayer(e) {
   let targetLayer = e.target.closest(".layer").layerObj
   let draggedIndex = parseInt(e.dataTransfer.getData("text"))
-  let heldLayer = layers[draggedIndex]
+  let heldLayer = state.layers[draggedIndex]
   //TODO: add layer change to timeline
   if (e.target.className.includes("layer") && targetLayer !== heldLayer) {
     for (let i = 0; i < layersCont.children.length; i += 1) {
       if (layersCont.children[i] === e.target) {
-        let newIndex = layers.indexOf(layersCont.children[i].layerObj)
-        layers.splice(draggedIndex, 1)
-        layers.splice(newIndex, 0, heldLayer)
+        let newIndex = state.layers.indexOf(layersCont.children[i].layerObj)
+        state.layers.splice(draggedIndex, 1)
+        state.layers.splice(newIndex, 0, heldLayer)
       }
     }
     renderLayersToDOM()
@@ -2238,7 +2172,7 @@ function addRasterLayer() {
   layerCVS.height = offScreenCVS.height
   let layer = {
     type: "raster",
-    title: `Layer ${layers.length + 1}`,
+    title: `Layer ${state.layers.length + 1}`,
     cvs: layerCVS,
     ctx: layerCTX,
     x: 0,
@@ -2247,7 +2181,7 @@ function addRasterLayer() {
     opacity: 1,
     removed: false,
   }
-  layers.push(layer)
+  state.layers.push(layer)
   addToTimeline("addlayer", 0, 0, layer)
   state.undoStack.push(state.points)
   state.points = []
@@ -2273,7 +2207,7 @@ function addReferenceLayer() {
             : ocWidth / img.width
         let layer = {
           type: "reference",
-          title: `Reference ${layers.length + 1}`,
+          title: `Reference ${state.layers.length + 1}`,
           img: img,
           x: 0,
           y: 0,
@@ -2281,7 +2215,7 @@ function addReferenceLayer() {
           opacity: 1,
           removed: false,
         }
-        layers.unshift(layer)
+        state.layers.unshift(layer)
         renderLayersToDOM()
         drawCanvas()
       }
@@ -2301,7 +2235,7 @@ function removeLayer(e) {
 function renderLayersToDOM() {
   layersCont.innerHTML = ""
   let id = 0
-  layers.forEach((l) => {
+  state.layers.forEach((l) => {
     if (!l.removed) {
       let layerElement = document.createElement("div")
       layerElement.className = `layer ${l.type}`
@@ -2445,23 +2379,23 @@ function getColor(x, y, colorLayer) {
 //zooming with pinch actions, prevent default device zoom
 
 function handleTouchStart(e) {
-  e.preventDefault()
+//   e.preventDefault()
   state.touch = true
   handleMouseDown(e)
 }
 
 function handleTouchMove(e) {
-  e.preventDefault()
+//   e.preventDefault()
   handleMouseMove(e)
 }
 
 function handleTouchEnd(e) {
-  e.preventDefault()
+//   e.preventDefault()
   handleMouseUp(e)
 }
 
 function handleTouchCancel(e) {
-  e.preventDefault()
+//   e.preventDefault()
   handleMouseOut(e)
 }
 
