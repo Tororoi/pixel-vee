@@ -706,6 +706,7 @@ h4 {
 .export {
   height: 28px;
   width: 84px;
+  background: rgb(77, 77, 77);
 }
 
 .export .tooltip {
