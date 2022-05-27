@@ -458,6 +458,35 @@ input[type="number"]::-webkit-outer-spin-button {
     0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 
+/* Luminance Box */
+#lumi {
+  margin: 10px;
+  margin-left: 30px;
+}
+
+#luminance {
+  width: 26px;
+  font-family: "04Font";
+  font-size: 16px;
+  background-color: rgb(41, 41, 41);
+  color: white;
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+
+#luminance:hover {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+
+input:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
+    0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+
 /* Main Interface */
 
 .colors {
