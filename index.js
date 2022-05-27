@@ -49,6 +49,9 @@ let brush = document.querySelector(".brush")
 //Export
 let exportBtn = document.querySelector(".export")
 
+//TODO: Add Palette that consists of a small canvas with basic paint, sample and fill erase tools.
+//TODO: Add color mixer that consists of a small canvas that can be painted upon and cleared. At any time the user can click "Mix" and the colors on the canvas will be used to generate a mixed color.
+
 //========================================//
 //=== * * * Important References * * * ===//
 //========================================//
