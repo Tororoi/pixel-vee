@@ -1,27 +1,17 @@
-import { Picker } from "../Tools/Picker.js"
 import { state } from "../Context/state.js"
-import { canvas } from "../Canvas/canvas.js"
+import { canvas } from "../Context/canvas.js"
+import { swatches } from "../Context/swatch.js"
 
 //===================================//
 //========= * * * DOM * * * =========//
 //===================================//
 
-//Main
-let fullPage = document.querySelector(".full-page")
+// //Main
+// let fullPage = document.querySelector(".full-page")
 
 //Get the undo buttons
 let undoBtn = document.getElementById("undo")
 let redoBtn = document.getElementById("redo")
-
-//Get swatch
-let swatch = document.querySelector(".swatch")
-let backSwatch = document.querySelector(".back-swatch")
-let colorSwitch = document.querySelector(".color-switch")
-
-let colorPickerContainer = document.querySelector(".color-container")
-//color picker OK/Cancel
-let confirmBtn = document.getElementById("confirm-btn")
-let cancelBtn = document.getElementById("cancel-btn")
 
 //Get the reset buttons
 let recenterBtn = document.querySelector(".recenter")
@@ -140,19 +130,6 @@ canvas.addRasterLayer()
 canvas.currentLayer = canvas.layers[0]
 canvas.renderLayersToDOM()
 
-//Initialize Color Picker
-//Create an instance passing it the canvas, width, height, and setColor fn
-let picker = new Picker(
-  document.getElementById("color-picker"),
-  250,
-  250,
-  setColor,
-  state.brushColor
-)
-
-//Draw
-picker.build(state.brushColor)
-
 //===================================//
 //=== * * * Event Listeners * * * ===//
 //===================================//
@@ -191,10 +168,6 @@ clearBtn.addEventListener("click", handleClear)
 
 zoomCont.addEventListener("click", handleZoom)
 
-swatch.addEventListener("click", openColorPicker)
-backSwatch.addEventListener("click", openColorPicker)
-colorSwitch.addEventListener("click", switchColors)
-
 toolsCont.addEventListener("click", handleTools)
 modesCont.addEventListener("click", handleModes)
 
@@ -202,15 +175,6 @@ brushBtn.addEventListener("click", switchBrush)
 brushSlider.addEventListener("input", updateBrush)
 
 exportBtn.addEventListener("click", exportImage)
-
-//Color Picker
-//Interface listeners
-confirmBtn.addEventListener("click", (e) => {
-  handleConfirm(e)
-})
-cancelBtn.addEventListener("click", (e) => {
-  handleCancel(e)
-})
 
 //======================================//
 //=== * * * Key Event Handlers * * * ===//
@@ -253,7 +217,7 @@ function handleKeyDown(e) {
         }
         break
       case "KeyS":
-        randomizeColor("swatch btn")
+        swatches.randomizeColor("swatch btn")
         break
       case "KeyD":
         //reset old button
@@ -1302,7 +1266,7 @@ function createClipMask(colorLayer) {
   //     pixels.push([]);
   //     for (let x = 0; x < colorLayer.width; x++) {
   //         //sample color and add to path if match
-  //         let clickedColor = getColor(x, y, colorLayer);
+  //         let clickedColor = canvas.getColor(x, y, colorLayer);
   //         if (clickedColor.color === state.backColor.color) {
   //             //add pixel to clip path
   //             pixels[y].push(1);
@@ -1345,7 +1309,7 @@ function createClipMask(colorLayer) {
   for (let y = 0; y < colorLayer.height; y++) {
     for (let x = 0; x < colorLayer.width; x++) {
       //sample color and add to path if match
-      let clickedColor = getColor(x, y, colorLayer)
+      let clickedColor = canvas.getColor(x, y, colorLayer)
       if (clickedColor.color === state.backColor.color) {
         //add pixel to clip path
         let p = new Path2D()
@@ -1402,7 +1366,7 @@ function actionFill(startX, startY, currentColor, ctx, currentMode) {
     canvas.offScreenCVS.height
   )
 
-  state.clickedColor = getColor(startX, startY, state.localColorLayer)
+  state.clickedColor = canvas.getColor(startX, startY, state.localColorLayer)
 
   if (currentMode === "erase")
     currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
@@ -1926,9 +1890,9 @@ function eyedropperSteps() {
 
 //eyedropper helper function
 function sampleColor(x, y) {
-  let newColor = getColor(x, y, state.colorLayerGlobal)
+  let newColor = canvas.getColor(x, y, state.colorLayerGlobal)
   //not simply passing whole color in until random color function is refined
-  setColor(newColor.r, newColor.g, newColor.b, "swatch btn")
+  swatches.setColor(newColor.r, newColor.g, newColor.b, "swatch btn")
 }
 
 function grabSteps() {
@@ -2119,115 +2083,6 @@ function exportImage() {
   a.download = "pixelvee.png"
   document.body.appendChild(a)
   a.click()
-}
-
-//====================================//
-//======== * * * Colors * * * ========//
-//====================================//
-
-function openColorPicker(e) {
-  picker.swatch = e.target.className
-  const initialColorReference =
-    picker.swatch === "back-swatch btn" ? state.backColor : state.brushColor
-  picker.update(initialColorReference)
-  //main page can't be interacted with
-  fullPage.style.pointerEvents = "none"
-  //disable shortcuts
-  state.shortcuts = false
-  //show colorpicker
-  colorPickerContainer.style.display = "flex"
-  //allow colorPickerContainer events
-  colorPickerContainer.style.pointerEvents = "auto"
-}
-
-/**
- * Close the picker window
- */
-function closePickerWindow() {
-  // hide colorpicker
-  colorPickerContainer.style.display = "none"
-  //restore pointer events to page
-  fullPage.style.pointerEvents = "auto"
-  //enable keyboard shortcuts
-  state.shortcuts = true
-}
-
-/**
- * This function sets the color according to the currently selected parameters and closes the picker window
- * @param {event} e
- */
-function handleConfirm(e) {
-  //set color to brush
-  setColor(picker.rgb.red, picker.rgb.green, picker.rgb.blue, picker.swatch)
-  //close window
-  closePickerWindow()
-}
-
-function handleCancel(e) {
-  //close window
-  closePickerWindow()
-}
-
-function switchColors(e) {
-  let temp = { ...state.brushColor }
-  state.brushColor = state.backColor
-  swatch.style.background = state.brushColor.color
-  state.backColor = temp
-  backSwatch.style.background = state.backColor.color
-}
-
-/**
- * dependencies - state.brushColor, state.backColor, swatch, backSwatch
- * @param {integer} r
- * @param {integer} g
- * @param {integer} b
- * @param {integer} target - enum: ["swatch btn", "back-swatch btn"]
- */
-function setColor(r, g, b, target) {
-  if (target === "swatch btn") {
-    state.brushColor.color = `rgba(${r},${g},${b},255)`
-    state.brushColor.r = r
-    state.brushColor.g = g
-    state.brushColor.b = b
-    swatch.style.background = state.brushColor.color
-  } else {
-    state.backColor.color = `rgba(${r},${g},${b},255)`
-    state.backColor.r = r
-    state.backColor.g = g
-    state.backColor.b = b
-    backSwatch.style.background = state.backColor.color
-  }
-}
-
-/**
- * dependencies - setColor
- * @param {string} target - enum: ["swatch btn", "back-swatch btn"]
- */
-function randomizeColor(target) {
-  let r = Math.floor(Math.random() * 256)
-  let g = Math.floor(Math.random() * 256)
-  let b = Math.floor(Math.random() * 256)
-  setColor(r, g, b, target)
-}
-
-/**
- * dependencies - none
- * @param {integer} x
- * @param {integer} y
- * @param {ImageData} colorLayer
- * @returns {string} rgba color
- */
-function getColor(x, y, colorLayer) {
-  let canvasColor = {}
-
-  let startPos = (y * colorLayer.width + x) * 4
-  //clicked color
-  canvasColor.r = colorLayer.data[startPos]
-  canvasColor.g = colorLayer.data[startPos + 1]
-  canvasColor.b = colorLayer.data[startPos + 2]
-  canvasColor.a = colorLayer.data[startPos + 3]
-  canvasColor.color = `rgba(${canvasColor.r},${canvasColor.g},${canvasColor.b},${canvasColor.a})`
-  return canvasColor
 }
 
 //====================================//

@@ -1,4 +1,4 @@
-import { state } from "../Context/state.js"
+import { state } from "./state.js"
 
 //===================================//
 //==== * * * DOM Interface * * * ====//
@@ -80,6 +80,7 @@ export const canvas = {
   consolidateLayers,
   addRasterLayer,
   renderLayersToDOM,
+  getColor,
 }
 
 //FIX: Improve performance by keeping track of "redraw regions" instead of redrawing the whole thing.
@@ -352,6 +353,31 @@ function renderLayersToDOM() {
       layerElement.layerObj = l
     }
   })
+}
+
+//====================================//
+//======== * * * Colors * * * ========//
+//====================================//
+
+/**
+ * Get color of pixel at x/y coordinates
+ * @param {integer} x
+ * @param {integer} y
+ * @param {ImageData} colorLayer
+ * @returns {string} rgba color
+ * dependencies - none
+ */
+function getColor(x, y, colorLayer) {
+  let canvasColor = {}
+
+  let startPos = (y * colorLayer.width + x) * 4
+  //clicked color
+  canvasColor.r = colorLayer.data[startPos]
+  canvasColor.g = colorLayer.data[startPos + 1]
+  canvasColor.b = colorLayer.data[startPos + 2]
+  canvasColor.a = colorLayer.data[startPos + 3]
+  canvasColor.color = `rgba(${canvasColor.r},${canvasColor.g},${canvasColor.b},${canvasColor.a})`
+  return canvasColor
 }
 
 //add move tool and scale tool for reference layers
