@@ -54,6 +54,7 @@ offScreenCVS.height = 256
 
 //Export canvas state
 export const canvas = {
+  //Parameters
   onScreenCVS,
   onScreenCTX,
   unsharpenedWidth,
@@ -65,6 +66,14 @@ export const canvas = {
   //Layers
   layers: [], //(types: raster, vector, reference)
   currentLayer: null,
+  //Cursor
+  mouseEvent: "none",
+  //Coordinates
+  //for moving canvas/ grab
+  xOffset: 0,
+  yOffset: 0,
+  previousXOffset: 0,
+  previousYOffset: 0,
   //Functions
   draw,
   consolidateLayers,
@@ -94,8 +103,8 @@ function draw() {
   )
   //BUG: How to mask outside drawing space?
   canvas.onScreenCTX.clearRect(
-    state.xOffset,
-    state.yOffset,
+    canvas.xOffset,
+    canvas.yOffset,
     canvas.unsharpenedWidth,
     canvas.unsharpenedHeight
   )
@@ -103,8 +112,8 @@ function draw() {
   //draw border
   canvas.onScreenCTX.beginPath()
   canvas.onScreenCTX.rect(
-    state.xOffset - 1,
-    state.yOffset - 1,
+    canvas.xOffset - 1,
+    canvas.yOffset - 1,
     canvas.unsharpenedWidth + 2,
     canvas.unsharpenedHeight + 2
   )
@@ -126,9 +135,9 @@ function drawLayers() {
         //l.x, l.y need to be normalized to the pixel grid
         canvas.onScreenCTX.drawImage(
           l.img,
-          state.xOffset +
+          canvas.xOffset +
             (l.x * canvas.unsharpenedWidth) / canvas.offScreenCVS.width,
-          state.yOffset +
+          canvas.yOffset +
             (l.y * canvas.unsharpenedWidth) / canvas.offScreenCVS.width,
           l.img.width * l.scale,
           l.img.height * l.scale
@@ -140,9 +149,9 @@ function drawLayers() {
         //l.x, l.y need to be normalized to the pixel grid
         canvas.onScreenCTX.drawImage(
           l.cvs,
-          state.xOffset +
+          canvas.xOffset +
             (l.x * canvas.unsharpenedWidth) / canvas.offScreenCVS.width,
-          state.yOffset +
+          canvas.yOffset +
             (l.y * canvas.unsharpenedWidth) / canvas.offScreenCVS.width,
           canvas.unsharpenedWidth,
           canvas.unsharpenedHeight

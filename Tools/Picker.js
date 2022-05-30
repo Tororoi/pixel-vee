@@ -10,7 +10,7 @@ import {
 //where every value has the same luminance. The hue slider can be adjusted
 //to see the gradient for different hues at that same luminance.
 export class Picker {
-  constructor(target, width, height, setColor) {
+  constructor(target, width, height, setColor, initialColor) {
     this.target = target
     this.width = width
     this.height = height
@@ -26,25 +26,13 @@ export class Picker {
     this.clicked = false
     //hue slider
     this.hueRange = document.getElementById("hueslider")
-    //color
-    this.swatch = "swatch btn"
-    this.hue
-    this.saturation
-    this.lightness
-    this.red
-    this.green
-    this.blue
-    // this.alpha = 255;
-    this.hexcode
-    this.luminance
     //*interface*//
-    this.rgbahsl = document.getElementById("rgbahsl")
-    this.rgba = document.getElementById("rgba")
+    this.rgbaContainer = document.getElementById("rgba-container")
     this.r = document.getElementById("r")
     this.g = document.getElementById("g")
     this.b = document.getElementById("b")
     // this.a = document.getElementById("a");
-    this.hsl = document.getElementById("hsl")
+    this.hslContainer = document.getElementById("hsl-container")
     this.h = document.getElementById("h")
     this.s = document.getElementById("s")
     this.l = document.getElementById("l")
@@ -56,87 +44,99 @@ export class Picker {
     //OK/Cancel
     this.confirmBtn = document.getElementById("confirm-btn")
     this.cancelBtn = document.getElementById("cancel-btn")
+    //color
+    this.swatch = "swatch btn"
+    this.rgb
+    this.hsl
+    // this.alpha = 255;
+    this.hexcode
+    this.luminance
   }
 
   /**
    * update DOM to match updated values
    */
   updateColor() {
-    this.newcolor.style.backgroundColor =
-      "hsl(" + this.hue + "," + this.saturation + "%," + this.lightness + "%)"
+    this.drawHSLGrad(this.hsl.hue)
     //update interface values to match new color
-    this.r.value = this.red
-    this.g.value = this.green
-    this.b.value = this.blue
+    const { hue, saturation, lightness } = this.hsl
+    this.newcolor.style.backgroundColor =
+      "hsl(" + hue + "," + saturation + "%," + lightness + "%)"
+    //hsl
+    this.h.value = hue
+    this.s.value = saturation
+    this.l.value = lightness
+    //rgb
+    const { red, green, blue } = this.rgb
+    this.r.value = red
+    this.g.value = green
+    this.b.value = blue
     // this.a.value = this.alpha;
-    this.h.value = this.hue
-    this.s.value = this.saturation
-    this.l.value = this.lightness
     this.hex.value = this.hexcode
     this.lumi.value = this.luminance
     //update hue slider
-    this.hueRange.value = this.hue
+    this.hueRange.value = this.hsl.hue
+  }
+
+  /**
+   * update color spaces to match updated values
+   */
+
+  /**
+   * propogate rgb values to other color spaces
+   */
+  propogateRGBColorSpace() {
+    this.hsl = RGBToHSL(this.rgb)
+    this.hexcode = RGBToHex(this.rgb)
+    this.luminance = getLuminance(this.rgb)
+    this.updateColor()
+  }
+
+  /**
+   * propogate hsl values to other color spaces
+   */
+  propogateHSLColorSpace() {
+    this.rgb = HSLToRGB(this.hsl)
+    this.hexcode = RGBToHex(this.rgb)
+    this.luminance = getLuminance(this.rgb)
+    this.updateColor()
+  }
+
+  /**
+   * propogate hexcode value to other color spaces
+   */
+  propogateHexColorSpace() {
+    this.rgb = hexToRGB(this.hexcode)
+    this.hsl = RGBToHSL(this.rgb)
+    this.luminance = getLuminance(this.rgb)
+    this.updateColor()
   }
 
   updateHue(e) {
-    this.hue = e.target.value
-    //update rgb
-    const { r, g, b } = HSLToRGB(this.hue, this.saturation, this.lightness)
-    this.red = r
-    this.green = g
-    this.blue = b
-    this.hexcode = RGBToHex(this.red, this.green, this.blue)
-    this.luminance = getLuminance(this.red, this.green, this.blue)
-    this.drawHSLGrad()
-    this.updateColor()
+    this.hsl.hue = e.target.value
+    this.propogateHSLColorSpace()
   }
 
   updateRGB(e) {
-    this.red = +this.r.value
-    this.green = +this.g.value
-    this.blue = +this.b.value
+    const red = +this.r.value
+    const green = +this.g.value
+    const blue = +this.b.value
+    this.rgb = { red, green, blue }
     // this.alpha = this.a.value;
-    //update hsl
-    const { h, s, l } = RGBToHSL(this.red, this.green, this.blue)
-    this.hue = h
-    this.saturation = s
-    this.lightness = l
-    this.hexcode = RGBToHex(this.red, this.green, this.blue)
-    this.luminance = getLuminance(this.red, this.green, this.blue)
-    this.drawHSLGrad()
-    this.updateColor()
+    this.propogateRGBColorSpace()
   }
 
   updateHSL(e) {
-    this.hue = +this.h.value
-    this.saturation = +this.s.value
-    this.lightness = +this.l.value
-    //update rgb
-    const { r, g, b } = HSLToRGB(this.hue, this.saturation, this.lightness)
-    this.red = r
-    this.green = g
-    this.blue = b
-    this.hexcode = RGBToHex(this.red, this.green, this.blue)
-    this.luminance = getLuminance(this.red, this.green, this.blue)
-    this.drawHSLGrad()
-    this.updateColor()
+    const hue = +this.h.value
+    const saturation = +this.s.value
+    const lightness = +this.l.value
+    this.hsl = { hue, saturation, lightness }
+    this.propogateHSLColorSpace()
   }
 
   updateHex(e) {
     this.hexcode = this.hex.value
-    //update rgb
-    const { r, g, b } = hexToRGB(this.hexcode)
-    this.red = r
-    this.green = g
-    this.blue = b
-    //update hsl
-    const { h, s, l } = RGBToHSL(this.red, this.green, this.blue)
-    this.hue = h
-    this.saturation = s
-    this.lightness = l
-    this.luminance = getLuminance(this.red, this.green, this.blue)
-    this.drawHSLGrad()
-    this.updateColor()
+    this.propogateHexColorSpace()
   }
 
   handleIncrement(e) {
@@ -177,7 +177,7 @@ export class Picker {
     if (this.mouseState === "mousedown") {
       this.handleIncrement(e)
       this.updateRGB(e)
-      window.setTimeout(() => this.handleRGBIncrement(e), 100)
+      window.setTimeout(() => this.handleRGBIncrement(e), 150)
     }
   }
 
@@ -189,7 +189,7 @@ export class Picker {
     if (this.mouseState === "mousedown") {
       this.handleIncrement(e)
       this.updateHSL(e)
-      window.setTimeout(() => this.handleHSLIncrement(e), 100)
+      window.setTimeout(() => this.handleHSLIncrement(e), 150)
     }
   }
 
@@ -247,45 +247,42 @@ export class Picker {
   }
 
   selectSL(x, y) {
-    this.saturation = Math.round((x / this.width) * 100)
-    this.lightness = Math.round((y / this.height) * 100)
-    this.drawHSLGrad()
+    this.hsl.saturation = Math.round((x / this.width) * 100)
+    this.hsl.lightness = Math.round((y / this.height) * 100)
     //set newcolor
     //update rgb
-    const { r, g, b } = HSLToRGB(this.hue, this.saturation, this.lightness)
-    this.red = r
-    this.green = g
-    this.blue = b
-    this.hexcode = RGBToHex(this.red, this.green, this.blue)
-    this.luminance = getLuminance(this.red, this.green, this.blue)
+    this.rgb = HSLToRGB(this.hsl)
+    this.hexcode = RGBToHex(this.rgb)
+    this.luminance = getLuminance(this.rgb)
     this.updateColor()
   }
 
   //* Render Gradients Functions *//
 
   calcSelector() {
-    this.pickerCircle.x = Math.round((this.saturation * this.width) / 100) - 3
-    this.pickerCircle.y = Math.round((this.lightness * this.height) / 100) - 3
+    this.pickerCircle.x =
+      Math.round((this.hsl.saturation * this.width) / 100) - 3
+    this.pickerCircle.y =
+      Math.round((this.hsl.lightness * this.height) / 100) - 3
   }
 
-  drawHSLGrad() {
+  drawHSLGrad(hue) {
     //draw hsl gradient
     for (let row = 0; row < this.height; row++) {
       let grad = this.context.createLinearGradient(0, 0, this.width, 0)
       grad.addColorStop(
         0,
-        "hsl(" + this.hue + ", 0%, " + (row / this.height) * 100 + "%)"
+        "hsl(" + hue + ", 0%, " + (row / this.height) * 100 + "%)"
       )
       grad.addColorStop(
         1,
-        "hsl(" + this.hue + ", 100%, " + (row / this.height) * 100 + "%)"
+        "hsl(" + hue + ", 100%, " + (row / this.height) * 100 + "%)"
       )
       this.context.fillStyle = grad
       this.context.fillRect(0, row, this.width, 1)
     }
 
     this.calcSelector()
-
     //draw selector
     this.context.beginPath()
 
@@ -398,17 +395,13 @@ export class Picker {
   //* Update Picker *//
 
   update(reference) {
-    this.red = reference.r
-    this.green = reference.g
-    this.blue = reference.b
+    const red = reference.r
+    const green = reference.g
+    const blue = reference.b
+    this.rgb = { red, green, blue }
     //get current hsl
-    const { h, s, l } = RGBToHSL(this.red, this.green, this.blue)
-    this.hue = h
-    this.saturation = s
-    this.lightness = l
-    this.luminance = getLuminance(this.red, this.green, this.blue)
-    //draw gradient rectangle
-    this.drawHSLGrad()
+    this.hsl = RGBToHSL(this.rgb)
+    this.luminance = getLuminance(this.rgb)
     //set oldcolor
     this.oldcolor.style.backgroundColor = reference.color
     //set newcolor and interface
@@ -418,19 +411,17 @@ export class Picker {
   //* Initial Build *//
 
   build(reference) {
-    this.red = reference.r
-    this.green = reference.g
-    this.blue = reference.b
+    const red = reference.r
+    const green = reference.g
+    const blue = reference.b
+    this.rgb = { red, green, blue }
     //get current hsl
-    const { h, s, l } = RGBToHSL(this.red, this.green, this.blue)
-    this.hue = h
-    this.saturation = s
-    this.lightness = l
+    this.hsl = RGBToHSL(this.rgb)
     //get hex
-    this.hexcode = RGBToHex(this.red, this.green, this.blue)
-    this.luminance = getLuminance(this.red, this.green, this.blue)
+    this.hexcode = RGBToHex(this.rgb)
+    this.luminance = getLuminance(this.rgb)
     //draw gradient rectangle
-    this.drawHSLGrad()
+    this.drawHSLGrad(this.hsl.hue)
     //draw hue slider
     this.drawHueGrad()
     this.hueRange.addEventListener("input", (e) => {
@@ -484,34 +475,34 @@ export class Picker {
     )
 
     //channel listeners
-    this.rgba.addEventListener("mousedown", (e) => {
+    this.rgbaContainer.addEventListener("mousedown", (e) => {
       this.mouseState = e.type
       this.handleRGBIncrement(e)
     })
-    this.rgba.addEventListener("mouseup", (e) => {
+    this.rgbaContainer.addEventListener("mouseup", (e) => {
       this.mouseState = e.type
       // this.handleRGBIncrement(e);
     })
-    this.rgba.addEventListener("mouseout", (e) => {
+    this.rgbaContainer.addEventListener("mouseout", (e) => {
       this.mouseState = e.type
       // this.handleRGBIncrement(e);
     })
-    this.rgba.addEventListener("change", (e) => {
+    this.rgbaContainer.addEventListener("change", (e) => {
       this.updateRGB(e)
     })
-    this.hsl.addEventListener("mousedown", (e) => {
+    this.hslContainer.addEventListener("mousedown", (e) => {
       this.mouseState = e.type
       this.handleHSLIncrement(e)
     })
-    this.hsl.addEventListener("mouseup", (e) => {
+    this.hslContainer.addEventListener("mouseup", (e) => {
       this.mouseState = e.type
       // this.handleHSLIncrement(e);
     })
-    this.hsl.addEventListener("mouseout", (e) => {
+    this.hslContainer.addEventListener("mouseout", (e) => {
       this.mouseState = e.type
       // this.handleHSLIncrement(e);
     })
-    this.hsl.addEventListener("change", (e) => {
+    this.hslContainer.addEventListener("change", (e) => {
       this.updateHSL(e)
     })
     this.hex.addEventListener("change", (e) => {
@@ -519,7 +510,3 @@ export class Picker {
     })
   }
 }
-
-//Render color picker
-//Should there be multiple separate color pickers, for bg and fg?
-//Refactor to include html built into class, instead of being called by class?

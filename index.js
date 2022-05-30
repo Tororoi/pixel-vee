@@ -113,9 +113,9 @@ const tools = {
   // shapes: {
   // square, circle, and custom saved shape?
   // },
-  picker: {
-    name: "picker",
-    fn: pickerSteps,
+  eyedropper: {
+    name: "eyedropper",
+    fn: eyedropperSteps,
     brushSize: 1,
     disabled: true,
     options: [],
@@ -146,7 +146,8 @@ let picker = new Picker(
   document.getElementById("color-picker"),
   250,
   250,
-  setColor
+  setColor,
+  state.brushColor
 )
 
 //Draw
@@ -240,7 +241,7 @@ function handleKeyDown(e) {
       case "AltLeft":
       case "AltRight":
         //option key
-        state.tool = tools["picker"]
+        state.tool = tools["eyedropper"]
         canvas.onScreenCVS.style.cursor = "none"
         break
       case "ShiftLeft":
@@ -364,7 +365,7 @@ function handleMouseDown(e) {
   if (e.type === "mousedown") {
     state.touch = false
   }
-  state.event = "mousedown"
+  canvas.mouseEvent = "mousedown"
   state.clicked = true
   if (state.clickDisabled) {
     return
@@ -383,16 +384,16 @@ function handleMouseDown(e) {
   state.mox = Math.floor(x / state.trueRatio)
   state.moy = Math.floor(y / state.trueRatio)
   state.mouseX = Math.round(
-    state.mox - (state.xOffset / state.ratio) * canvas.zoom
+    state.mox - (canvas.xOffset / state.ratio) * canvas.zoom
   )
   state.mouseY = Math.round(
-    state.moy - (state.yOffset / state.ratio) * canvas.zoom
+    state.moy - (canvas.yOffset / state.ratio) * canvas.zoom
   )
   //Reset Cursor for mobile
-  state.onX = (state.mox * state.ratio) / canvas.zoom
-  state.onY = (state.moy * state.ratio) / canvas.zoom
-  state.lastOnX = state.onX
-  state.lastOnY = state.onY
+  state.onscreenX = (state.mox * state.ratio) / canvas.zoom
+  state.onscreenY = (state.moy * state.ratio) / canvas.zoom
+  state.previousOnscreenX = state.onscreenX
+  state.previousOnscreenY = state.onscreenY
   //if drawing on hidden layer, flash hide btn
   if (canvas.currentLayer.opacity === 0) {
     for (let i = 0; i < layersCont.children.length; i += 1) {
@@ -409,7 +410,7 @@ function handleMouseMove(e) {
   if (state.clickDisabled && state.clicked) {
     return
   }
-  state.event = "mousemove"
+  canvas.mouseEvent = "mousemove"
   state.clickDisabled = false
   //currently only square dimensions work
   state.trueRatio =
@@ -429,14 +430,14 @@ function handleMouseMove(e) {
   state.mox = Math.floor(x / state.trueRatio)
   state.moy = Math.floor(y / state.trueRatio)
   state.mouseX = Math.round(
-    state.mox - (state.xOffset / state.ratio) * canvas.zoom
+    state.mox - (canvas.xOffset / state.ratio) * canvas.zoom
   )
   state.mouseY = Math.round(
-    state.moy - (state.yOffset / state.ratio) * canvas.zoom
+    state.moy - (canvas.yOffset / state.ratio) * canvas.zoom
   )
   //Hover brush
-  state.onX = (state.mox * state.ratio) / canvas.zoom
-  state.onY = (state.moy * state.ratio) / canvas.zoom
+  state.onscreenX = (state.mox * state.ratio) / canvas.zoom
+  state.onscreenY = (state.moy * state.ratio) / canvas.zoom
   if (
     state.clicked ||
     (state.tool.name === "curve" && state.clickCounter > 0)
@@ -445,7 +446,10 @@ function handleMouseMove(e) {
     state.tool.fn()
   } else {
     //normalize cursor render to pixelgrid
-    if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
+    if (
+      state.onscreenX !== state.previousOnscreenX ||
+      state.onscreenY !== state.previousOnscreenY
+    ) {
       canvas.onScreenCTX.clearRect(
         0,
         0,
@@ -454,14 +458,14 @@ function handleMouseMove(e) {
       )
       canvas.draw()
       renderCursor()
-      state.lastOnX = state.onX
-      state.lastOnY = state.onY
+      state.previousOnscreenX = state.onscreenX
+      state.previousOnscreenY = state.onscreenY
     }
   }
 }
 
 function handleMouseUp(e) {
-  state.event = "mouseup"
+  canvas.mouseEvent = "mouseup"
   state.clicked = false
   if (state.clickDisabled) {
     return
@@ -480,10 +484,10 @@ function handleMouseUp(e) {
   state.mox = Math.floor(x / state.trueRatio)
   state.moy = Math.floor(y / state.trueRatio)
   state.mouseX = Math.round(
-    state.mox - (state.xOffset / state.ratio) * canvas.zoom
+    state.mox - (canvas.xOffset / state.ratio) * canvas.zoom
   )
   state.mouseY = Math.round(
-    state.moy - (state.yOffset / state.ratio) * canvas.zoom
+    state.moy - (canvas.yOffset / state.ratio) * canvas.zoom
   )
   if (canvas.currentLayer.opacity === 0) {
     for (let i = 0; i < layersCont.children.length; i += 1) {
@@ -503,7 +507,7 @@ function handleMouseUp(e) {
   state.points = []
   //Reset redostack
   state.redoStack = []
-  state.event = "none"
+  canvas.mouseEvent = "none"
   if (!e.targetTouches) {
     renderCursor()
   }
@@ -511,7 +515,7 @@ function handleMouseUp(e) {
 
 function handleMouseOut(e) {
   if (state.clicked) {
-    state.event = "mouseout"
+    canvas.mouseEvent = "mouseout"
     state.clicked = false
     state.tool.fn()
     //add to undo stack
@@ -523,7 +527,7 @@ function handleMouseOut(e) {
     state.redoStack = []
   }
   canvas.draw()
-  state.event = "none"
+  canvas.mouseEvent = "none"
 }
 
 function handleWheel(e) {
@@ -539,18 +543,18 @@ function handleWheel(e) {
   if (delta < 0) {
     z = 0.8
     canvas.zoom *= z
-    state.xOffset += lox
-    state.yOffset += loy
+    canvas.xOffset += lox
+    canvas.yOffset += loy
   } else if (delta > 0) {
     z = 1.25
-    state.xOffset -= nox
-    state.yOffset -= noy
+    canvas.xOffset -= nox
+    canvas.yOffset -= noy
     canvas.zoom *= z
   }
   //re scale canvas
   canvas.onScreenCTX.scale(z, z)
-  state.lastOffsetX = state.xOffset
-  state.lastOffsetY = state.yOffset
+  canvas.previousXOffset = canvas.xOffset
+  canvas.previousYOffset = canvas.yOffset
   canvas.draw()
   // state.clickDisabled = true;
 }
@@ -576,18 +580,18 @@ function handleZoom(e) {
     if (zoomBtn.id === "minus") {
       z = 0.8
       canvas.zoom *= z
-      state.xOffset += lox
-      state.yOffset += loy
+      canvas.xOffset += lox
+      canvas.yOffset += loy
     } else if (zoomBtn.id === "plus") {
       z = 1.25
       canvas.zoom *= z
-      state.xOffset -= nox
-      state.yOffset -= noy
+      canvas.xOffset -= nox
+      canvas.yOffset -= noy
     }
     //re scale canvas
     canvas.onScreenCTX.scale(z, z)
-    state.lastOffsetX = state.xOffset
-    state.lastOffsetY = state.yOffset
+    canvas.previousXOffset = canvas.xOffset
+    canvas.previousYOffset = canvas.yOffset
     canvas.draw()
   }
 }
@@ -661,7 +665,7 @@ function renderCursor() {
     case "grab":
       //show nothing
       break
-    case "picker":
+    case "eyedropper":
       //empty square
       drawCursorBox()
       break
@@ -688,8 +692,8 @@ function drawCurrentPixel() {
 function drawCursorBox() {
   let brushOffset =
     (Math.floor(state.tool.brushSize / 2) * state.ratio) / canvas.zoom
-  let x0 = state.onX - brushOffset
-  let y0 = state.onY - brushOffset
+  let x0 = state.onscreenX - brushOffset
+  let y0 = state.onscreenY - brushOffset
   let x1 = x0 + (state.ratio / canvas.zoom) * state.tool.brushSize
   let y1 = y0 + (state.ratio / canvas.zoom) * state.tool.brushSize
   //line offset to stroke offcenter;
@@ -856,7 +860,7 @@ function drawCircle() {
 
 //"Steps" functions are controllers for the process
 function drawSteps() {
-  switch (state.event) {
+  switch (canvas.mouseEvent) {
     case "mousedown":
       //set colorlayer, then for each brushpoint, alter colorlayer and add each to timeline
       actionDraw(
@@ -868,8 +872,8 @@ function drawSteps() {
         canvas.currentLayer.ctx,
         state.mode
       )
-      state.lastX = state.mouseX
-      state.lastY = state.mouseY
+      state.previousX = state.mouseX
+      state.previousY = state.mouseY
       //for perfect pixels
       state.lastDrawnX = state.mouseX
       state.lastDrawnY = state.mouseY
@@ -889,15 +893,18 @@ function drawSteps() {
       if (state.mode === "perfect") {
         drawCurrentPixel()
       }
-      if (state.lastX !== state.mouseX || state.lastY !== state.mouseY) {
+      if (
+        state.previousX !== state.mouseX ||
+        state.previousY !== state.mouseY
+      ) {
         //draw between points when drawing fast
         if (
-          Math.abs(state.mouseX - state.lastX) > 1 ||
-          Math.abs(state.mouseY - state.lastY) > 1
+          Math.abs(state.mouseX - state.previousX) > 1 ||
+          Math.abs(state.mouseY - state.previousY) > 1
         ) {
           actionLine(
-            state.lastX,
-            state.lastY,
+            state.previousX,
+            state.previousY,
             state.mouseX,
             state.mouseY,
             state.brushColor,
@@ -909,8 +916,8 @@ function drawSteps() {
           if (state.tool.name !== "replace") {
             state.addToTimeline(
               "line",
-              { x1: state.lastX, x2: state.mouseX },
-              { y1: state.lastY, y2: state.mouseY },
+              { x1: state.previousX, x2: state.mouseX },
+              { y1: state.previousY, y2: state.mouseY },
               canvas.currentLayer
             )
           }
@@ -944,8 +951,8 @@ function drawSteps() {
         }
       }
       // save last point
-      state.lastX = state.mouseX
-      state.lastY = state.mouseY
+      state.previousX = state.mouseX
+      state.previousY = state.mouseY
       break
     case "mouseup":
       //only needed if perfect pixels option is on
@@ -1045,15 +1052,18 @@ function actionDraw(
 }
 
 function lineSteps() {
-  switch (state.event) {
+  switch (canvas.mouseEvent) {
     case "mousedown":
-      state.lastX = state.mouseX
-      state.lastY = state.mouseY
+      state.previousX = state.mouseX
+      state.previousY = state.mouseY
       break
     case "mousemove":
       //draw line from origin point to current point onscreen
       //only draw when necessary
-      if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
+      if (
+        state.onscreenX !== state.previousOnscreenX ||
+        state.onscreenY !== state.previousOnscreenY
+      ) {
         canvas.onScreenCTX.clearRect(
           0,
           0,
@@ -1062,8 +1072,8 @@ function lineSteps() {
         )
         canvas.draw()
         actionLine(
-          state.lastX + (state.xOffset / state.ratio) * canvas.zoom,
-          state.lastY + (state.yOffset / state.ratio) * canvas.zoom,
+          state.previousX + (canvas.xOffset / state.ratio) * canvas.zoom,
+          state.previousY + (canvas.yOffset / state.ratio) * canvas.zoom,
           state.mox,
           state.moy,
           state.brushColor,
@@ -1073,14 +1083,14 @@ function lineSteps() {
           state.tool.brushSize,
           state.ratio / canvas.zoom
         )
-        state.lastOnX = state.onX
-        state.lastOnY = state.onY
+        state.previousOnscreenX = state.onscreenX
+        state.previousOnscreenY = state.onscreenY
       }
       break
     case "mouseup":
       actionLine(
-        state.lastX,
-        state.lastY,
+        state.previousX,
+        state.previousY,
         state.mouseX,
         state.mouseY,
         state.brushColor,
@@ -1091,8 +1101,8 @@ function lineSteps() {
       )
       state.addToTimeline(
         state.tool.name,
-        { x1: state.lastX, x2: state.mouseX },
-        { y1: state.lastY, y2: state.mouseY },
+        { x1: state.previousX, x2: state.mouseX },
+        { y1: state.previousY, y2: state.mouseY },
         canvas.currentLayer
       )
       canvas.draw()
@@ -1167,7 +1177,7 @@ function actionLine(
 }
 
 function replaceSteps() {
-  switch (state.event) {
+  switch (canvas.mouseEvent) {
     case "mousedown":
       //get global colorlayer data to use while mouse is down
       state.localColorLayer = canvas.currentLayer.ctx.getImageData(
@@ -1207,7 +1217,7 @@ function finalReplaceStep() {
 }
 
 function selectSteps() {
-  switch (state.event) {
+  switch (canvas.mouseEvent) {
     case "mousedown":
       //1. set drag origin
       //2. save context
@@ -1300,7 +1310,7 @@ function createClipMask(colorLayer) {
 }
 
 function fillSteps() {
-  switch (state.event) {
+  switch (canvas.mouseEvent) {
     case "mousedown":
       actionFill(
         state.mouseX,
@@ -1440,7 +1450,7 @@ function curveSteps() {
   //FIX: new routine, should be 1. mousedown, 2. drag to p2,
   //3. mouseup solidify p2, 4. mousedown/move to drag p3, 5. mouseup to solidify p3
   //this routine would be better for touchscreens, and no worse with mouse
-  switch (state.event) {
+  switch (canvas.mouseEvent) {
     case "mousedown":
       //solidify end points
       state.clickCounter += 1
@@ -1463,17 +1473,20 @@ function curveSteps() {
     case "mousemove":
       //draw line from origin point to current point onscreen
       //normalize mousemove to pixelgrid
-      if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
+      if (
+        state.onscreenX !== state.previousOnscreenX ||
+        state.onscreenY !== state.previousOnscreenY
+      ) {
         // canvas.onScreenCTX.clearRect(0, 0, canvas.unsharpenedWidth / canvas.zoom, canvas.unsharpenedHeight / canvas.zoom);
         canvas.draw()
         //onscreen preview
         actionCurve(
-          state.px1 + (state.xOffset / state.ratio) * canvas.zoom,
-          state.py1 + (state.yOffset / state.ratio) * canvas.zoom,
-          state.px2 + (state.xOffset / state.ratio) * canvas.zoom,
-          state.py2 + (state.yOffset / state.ratio) * canvas.zoom,
-          state.px3 + (state.xOffset / state.ratio) * canvas.zoom,
-          state.py3 + (state.yOffset / state.ratio) * canvas.zoom,
+          state.px1 + (canvas.xOffset / state.ratio) * canvas.zoom,
+          state.py1 + (canvas.yOffset / state.ratio) * canvas.zoom,
+          state.px2 + (canvas.xOffset / state.ratio) * canvas.zoom,
+          state.py2 + (canvas.yOffset / state.ratio) * canvas.zoom,
+          state.px3 + (canvas.xOffset / state.ratio) * canvas.zoom,
+          state.py3 + (canvas.yOffset / state.ratio) * canvas.zoom,
           state.clickCounter,
           state.brushColor,
           canvas.onScreenCTX,
@@ -1482,8 +1495,8 @@ function curveSteps() {
           state.tool.brushSize,
           state.ratio / canvas.zoom
         )
-        state.lastOnX = state.onX
-        state.lastOnY = state.onY
+        state.previousOnscreenX = state.onscreenX
+        state.previousOnscreenY = state.onscreenY
       }
       break
     case "mouseup":
@@ -1803,10 +1816,10 @@ function handleClear() {
 function handleRecenter(e) {
   canvas.onScreenCTX.scale(1 / canvas.zoom, 1 / canvas.zoom)
   canvas.zoom = 1
-  state.xOffset = 0
-  state.yOffset = 0
-  state.lastOffsetX = 0
-  state.lastOffsetY = 0
+  canvas.xOffset = 0
+  canvas.yOffset = 0
+  canvas.previousXOffset = 0
+  canvas.previousYOffset = 0
   canvas.draw()
 }
 
@@ -1817,8 +1830,8 @@ function moveSteps() {
 
 //Eyedropper
 //TODO: add magnifying glass view that shows zoomed in view of area being sampled
-function pickerSteps() {
-  switch (state.event) {
+function eyedropperSteps() {
+  switch (canvas.mouseEvent) {
     case "mousedown":
       //get imageData
       canvas.consolidateLayers()
@@ -1833,14 +1846,17 @@ function pickerSteps() {
       break
     case "mousemove":
       //normalize mousemove to pixelgrid, get color here too
-      if (state.onX !== state.lastOnX || state.onY !== state.lastOnY) {
+      if (
+        state.onscreenX !== state.previousOnscreenX ||
+        state.onscreenY !== state.previousOnscreenY
+      ) {
         //get color
         sampleColor(state.mouseX, state.mouseY)
         //draw square
         canvas.draw()
         renderCursor()
-        state.lastOnX = state.onX
-        state.lastOnY = state.onY
+        state.previousOnscreenX = state.onscreenX
+        state.previousOnscreenY = state.onscreenY
       }
       break
     default:
@@ -1848,7 +1864,7 @@ function pickerSteps() {
   }
 }
 
-//picker helper function
+//eyedropper helper function
 function sampleColor(x, y) {
   let newColor = getColor(x, y, state.colorLayerGlobal)
   //not simply passing whole color in until random color function is refined
@@ -1856,21 +1872,23 @@ function sampleColor(x, y) {
 }
 
 function grabSteps() {
-  switch (state.event) {
+  switch (canvas.mouseEvent) {
     case "mousemove":
-      state.xOffset = state.onX - state.lastOnX + state.lastOffsetX
-      state.yOffset = state.onY - state.lastOnY + state.lastOffsetY
+      canvas.xOffset =
+        state.onscreenX - state.previousOnscreenX + canvas.previousXOffset
+      canvas.yOffset =
+        state.onscreenY - state.previousOnscreenY + canvas.previousYOffset
       canvas.draw()
       break
     case "mouseup":
-      state.lastOffsetX = state.xOffset
-      state.lastOffsetY = state.yOffset
-      state.lastOnX = state.onX
-      state.lastOnY = state.onY
+      canvas.previousXOffset = canvas.xOffset
+      canvas.previousYOffset = canvas.yOffset
+      state.previousOnscreenX = state.onscreenX
+      state.previousOnscreenY = state.onscreenY
       break
     case "mouseout":
-      state.lastOffsetX = state.xOffset
-      state.lastOffsetY = state.yOffset
+      canvas.previousXOffset = canvas.xOffset
+      canvas.previousYOffset = canvas.yOffset
       break
     default:
     //do nothing
@@ -2080,7 +2098,7 @@ function closePickerWindow() {
  */
 function handleConfirm(e) {
   //set color to brush
-  setColor(picker.red, picker.green, picker.blue, picker.swatch)
+  setColor(picker.rgb.red, picker.rgb.green, picker.rgb.blue, picker.swatch)
   //close window
   closePickerWindow()
 }

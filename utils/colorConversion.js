@@ -5,7 +5,7 @@
  * @param {integer} blue - blue value (0-255)
  * @returns object with hsl values
  */
-export const RGBToHSL = (red, green, blue) => {
+export const RGBToHSL = ({red, green, blue}) => {
   // Make r, g, and b fractions of 1
   let r = red / 255
   let g = green / 255
@@ -44,7 +44,7 @@ export const RGBToHSL = (red, green, blue) => {
   s = +(s * 100).toFixed(1)
   l = +(l * 100).toFixed(1)
 
-  return { h, s, l }
+  return { hue: h, saturation: s, lightness: l }
 }
 
 /**
@@ -53,7 +53,7 @@ export const RGBToHSL = (red, green, blue) => {
  * @param {integer} lightness - lightness value (0-100)
  * @returns object with rgb values
  */
-export const HSLToRGB = (hue, saturation, lightness) => {
+export const HSLToRGB = ({hue, saturation, lightness}) => {
   let h = hue
   // Make saturation and lightness fractions of 1
   let s = saturation / 100
@@ -96,7 +96,7 @@ export const HSLToRGB = (hue, saturation, lightness) => {
   g = Math.round((g + m) * 255)
   b = Math.round((b + m) * 255)
 
-  return { r, g, b }
+  return { red: r, green: g, blue: b }
 }
 
 /**
@@ -120,7 +120,7 @@ export const hexToRGB = (hexcode) => {
   r = +r
   g = +g
   b = +b
-  return { r, g, b }
+  return { red: r, green: g, blue: b }
 }
 
 /**
@@ -129,7 +129,7 @@ export const hexToRGB = (hexcode) => {
  * @param {integer} blue - blue value (0-255)
  * @returns {string} hexcode
  */
-export const RGBToHex = (red, green, blue) => {
+export const RGBToHex = ({red, green, blue}) => {
   let r = red.toString(16)
   let g = green.toString(16)
   let b = blue.toString(16)
@@ -141,10 +141,15 @@ export const RGBToHex = (red, green, blue) => {
   return "#" + r + g + b
 }
 
-//* Get Luminance *//
-export const getLuminance = (r, g, b) => {
+/**
+ * @param {integer} red - red value (0-255)
+ * @param {integer} green - green value (0-255)
+ * @param {integer} blue - blue value (0-255)
+ * @returns {float} luminance
+ */
+export const getLuminance = ({ red, green, blue }) => {
   // Determine relation of luminance in color
-  const a = [r, g, b].map((v) => {
+  const a = [red, green, blue].map((v) => {
     v /= 255
     return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2
   })

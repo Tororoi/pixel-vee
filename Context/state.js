@@ -22,22 +22,21 @@ export const state = {
   //active variables for canvas
   shortcuts: true,
   clipMask: null,
-  event: "none",
   clickDisabled: false,
   clicked: false,
   clickedColor: null,
   mouseX: null,
   mouseY: null,
-  mox: null, //mouse coords with offset
+  mox: null, //mouse coords with offset relative from drawing area to edge of html canvas, not window
   moy: null,
   ratio: null,
   trueRatio: null,
-  onX: null,
-  onY: null,
-  lastOnX: null,
-  lastOnY: null,
-  lastX: null,
-  lastY: null,
+  onscreenX: null,
+  onscreenY: null,
+  previousOnscreenX: null,
+  previousOnscreenY: null,
+  previousX: null,
+  previousY: null,
   //x2/y2 for line tool
   lineX: null,
   lineY: null,
@@ -57,11 +56,6 @@ export const state = {
   //for replace
   colorLayerGlobal: null,
   localColorLayer: null,
-  //for moving canvas/ grab
-  xOffset: 0,
-  yOffset: 0,
-  lastOffsetX: 0,
-  lastOffsetY: 0,
   //functions
   addToTimeline,
 }

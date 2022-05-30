@@ -343,23 +343,23 @@ svg {
   width: 100%;
 }
 
-#rgba {
+#rgba-container {
   display: flex;
   flex-flow: column nowrap;
   margin-left: 20px;
 }
 
-#rgba label {
+#rgba-container label {
   margin: 10px;
 }
 
-#hsl {
+#hsl-container {
   display: flex;
   flex-flow: column nowrap;
   margin-left: 20px;
 }
 
-#hsl label {
+#hsl-container label {
   margin: 10px;
 }
 

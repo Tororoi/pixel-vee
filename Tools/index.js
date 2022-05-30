@@ -52,9 +52,9 @@ export const tools = {
   // shapes: {
   // square, circle, and custom saved shape?
   // },
-  picker: {
-    name: "picker",
-    fn: pickerSteps,
+  eyedropper: {
+    name: "eyedropper",
+    fn: eyedropperSteps,
     brushSize: 1,
     disabled: true,
     options: [],
