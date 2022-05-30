@@ -61,6 +61,7 @@ export const canvas = {
   unsharpenedHeight,
   sharpness,
   zoom,
+  zoomAtLastDraw: zoom,
   offScreenCVS,
   offScreenCTX,
   //Layers

@@ -25,18 +25,17 @@ export const state = {
   clickDisabled: false,
   clicked: false,
   clickedColor: null,
-  mouseX: null,
-  mouseY: null,
-  mox: null, //mouse coords with offset relative from drawing area to edge of html canvas, not window
-  moy: null,
-  ratio: null,
+  cursorX: null, //absolute cursor coordinates relative to drawing area
+  cursorY: null,
+  previousX: null,
+  previousY: null,
+  cursorWithCanvasOffsetX: null, //absolute cursor coords with offset relative to viewable canvas area
+  cursorWithCanvasOffsetY: null,
   trueRatio: null,
-  onscreenX: null,
+  onscreenX: null, //coordinates based on viewable canvas area relative to zoom (deprecated? always double cursorWithCanvasOffsetX)
   onscreenY: null,
   previousOnscreenX: null,
   previousOnscreenY: null,
-  previousX: null,
-  previousY: null,
   //x2/y2 for line tool
   lineX: null,
   lineY: null,
