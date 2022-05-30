@@ -24,12 +24,11 @@ swatch.addEventListener("click", openColorPicker)
 backSwatch.addEventListener("click", openColorPicker)
 colorSwitch.addEventListener("click", switchColors)
 //Color Picker
-confirmBtn.addEventListener("click", (e) => {
-  handleConfirm(e)
-})
-cancelBtn.addEventListener("click", (e) => {
-  handleCancel(e)
-})
+confirmBtn.addEventListener("click", handleConfirm)
+cancelBtn.addEventListener("click", closePickerWindow)
+// colorPickerContainer.addEventListener("click", (e) => {
+//   console.log(e.target)
+// })
 
 //====================================//
 //======== * * * State * * * ========//
@@ -37,13 +36,14 @@ cancelBtn.addEventListener("click", (e) => {
 
 export const swatches = {
   primary: {
-    ref: swatch,
-    color: { color: "rgba(0,0,0,255)", r: 0, g: 0, b: 0, a: 255 },
+    swatch: swatch,
+    color: { color: "rgba(0,0,0,255)", r: 0, g: 0, b: 0, a: 255 }, //default black. While drawing, always the color used
   },
   secondary: {
-    ref: backSwatch,
-    color: { color: "rgba(255,255,255,255)", r: 255, g: 255, b: 255, a: 255 },
+    swatch: backSwatch,
+    color: { color: "rgba(255,255,255,255)", r: 255, g: 255, b: 255, a: 255 }, //default white
   },
+  palette: {},
   //Functions
   randomizeColor,
   setColor,
@@ -55,14 +55,14 @@ export const swatches = {
 
 /**
  * Switch primary and secondary swatches
- * dependencies - state.brushColor, state.backColor, swatch, backSwatch
+ * dependencies - swatches
  */
 function switchColors() {
-  let temp = { ...state.brushColor }
-  state.brushColor = state.backColor
-  swatch.style.background = state.brushColor.color
-  state.backColor = temp
-  backSwatch.style.background = state.backColor.color
+  let temp = { ...swatches.primary.color }
+  swatches.primary.color = swatches.secondary.color
+  swatches.primary.swatch.style.background = swatches.primary.color.color
+  swatches.secondary.color = temp
+  swatches.secondary.swatch.style.background = swatches.secondary.color.color
 }
 
 /**
@@ -71,21 +71,21 @@ function switchColors() {
  * @param {integer} g
  * @param {integer} b
  * @param {integer} target - enum: ["swatch btn", "back-swatch btn"]
- * dependencies - state.brushColor, state.backColor, swatch, backSwatch
+ * dependencies - swatches
  */
 function setColor(r, g, b, target) {
   if (target === "swatch btn") {
-    state.brushColor.color = `rgba(${r},${g},${b},255)`
-    state.brushColor.r = r
-    state.brushColor.g = g
-    state.brushColor.b = b
-    swatch.style.background = state.brushColor.color
+    swatches.primary.color.color = `rgba(${r},${g},${b},255)`
+    swatches.primary.color.r = r
+    swatches.primary.color.g = g
+    swatches.primary.color.b = b
+    swatches.primary.swatch.style.background = swatches.primary.color.color
   } else {
-    state.backColor.color = `rgba(${r},${g},${b},255)`
-    state.backColor.r = r
-    state.backColor.g = g
-    state.backColor.b = b
-    backSwatch.style.background = state.backColor.color
+    swatches.secondary.color.color = `rgba(${r},${g},${b},255)`
+    swatches.secondary.color.r = r
+    swatches.secondary.color.g = g
+    swatches.secondary.color.b = b
+    swatches.secondary.swatch.style.background = swatches.secondary.color.color
   }
 }
 
@@ -112,16 +112,18 @@ let picker = new Picker(
   250,
   250,
   setColor,
-  state.brushColor
+  swatches.primary.color
 )
 
-//Draw
-picker.build(state.brushColor)
+//Construct picker
+picker.build()
 
 function openColorPicker(e) {
   picker.swatch = e.target.className
   const initialColorReference =
-    picker.swatch === "back-swatch btn" ? state.backColor : state.brushColor
+    picker.swatch === "back-swatch btn"
+      ? swatches.secondary.color
+      : swatches.primary.color
   picker.update(initialColorReference)
   //main page can't be interacted with
   fullPage.style.pointerEvents = "none"
@@ -147,16 +149,10 @@ function closePickerWindow() {
 
 /**
  * This function sets the color according to the currently selected parameters and closes the picker window
- * @param {event} e
  */
-function handleConfirm(e) {
+function handleConfirm() {
   //set color to brush
   setColor(picker.rgb.red, picker.rgb.green, picker.rgb.blue, picker.swatch)
-  //close window
-  closePickerWindow()
-}
-
-function handleCancel(e) {
   //close window
   closePickerWindow()
 }

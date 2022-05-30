@@ -1,17 +1,16 @@
+import { swatches } from "../Context/swatch.js"
+
 //State (not yet a true state)
 export const state = {
   //timeline
   points: [],
   undoStack: [],
   redoStack: [],
-  //settings
+  //tool settings
   tool: null, //needs to be initialized
   mode: "draw",
-  brushColor: { color: "rgba(0,0,0,255)", r: 0, g: 0, b: 0, a: 255 }, //default black
-  backColor: { color: "rgba(255,255,255,255)", r: 255, g: 255, b: 255, a: 255 }, //default white
   brushStamp: [{ x: 0, y: 0, w: 1, h: 1 }], //default 1 pixel
   brushType: "circle",
-  palette: {},
   options: {
     perfect: false,
     erase: false,
@@ -75,7 +74,7 @@ function addToTimeline(tool, x, y, layer) {
     layer: layer,
     brush: state.brushStamp,
     weight: state.tool.brushSize,
-    color: { ...state.brushColor },
+    color: { ...swatches.primary.color },
     tool: tool,
     action: state.tool.fn,
     mode: state.mode,

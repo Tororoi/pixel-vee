@@ -181,7 +181,6 @@ exportBtn.addEventListener("click", exportImage)
 //======================================//
 
 function handleKeyDown(e) {
-  // console.log(e.key)
   if (state.shortcuts) {
     switch (e.code) {
       case "KeyZ":
@@ -375,12 +374,6 @@ function handleMouseDown(e) {
   }
   //run selected tool step function
   state.tool.fn()
-  // console.log(
-  //   state.onscreenX,
-  //   state.cursorWithCanvasOffsetX,
-  //   canvas.zoom,
-  //   canvas.unsharpenedWidth / canvas.offScreenCVS.width
-  // )
 }
 
 function handleMouseMove(e) {
@@ -683,7 +676,7 @@ function drawCurrentPixel() {
   actionDraw(
     state.cursorWithCanvasOffsetX,
     state.cursorWithCanvasOffsetY,
-    state.brushColor,
+    swatches.primary.color,
     state.brushStamp,
     state.tool.brushSize,
     canvas.onScreenCTX,
@@ -854,11 +847,11 @@ function drawCircle() {
   // }
 
   // brushPoints.forEach(p => {
-  //     actionDraw(p.x, p.y, state.brushColor, 1, canvas.currentLayer.ctx, state.mode)
+  //     actionDraw(p.x, p.y, swatches.primary.color, 1, canvas.currentLayer.ctx, state.mode)
   // })
 
   // state.tool.brushPoints = brushPoints;
-  // actionFill(xO, yO, state.brushColor, canvas.currentLayer.ctx, state.mode);
+  // actionFill(xO, yO, swatches.primary.color, canvas.currentLayer.ctx, state.mode);
   // canvas.draw();
 }
 
@@ -874,7 +867,7 @@ function drawSteps() {
       actionDraw(
         state.cursorX,
         state.cursorY,
-        state.brushColor,
+        swatches.primary.color,
         state.brushStamp,
         state.tool.brushSize,
         canvas.currentLayer.ctx,
@@ -915,7 +908,7 @@ function drawSteps() {
             state.previousY,
             state.cursorX,
             state.cursorY,
-            state.brushColor,
+            swatches.primary.color,
             canvas.currentLayer.ctx,
             state.mode,
             state.brushStamp,
@@ -940,7 +933,7 @@ function drawSteps() {
             actionDraw(
               state.cursorX,
               state.cursorY,
-              state.brushColor,
+              swatches.primary.color,
               state.brushStamp,
               state.tool.brushSize,
               canvas.currentLayer.ctx,
@@ -967,7 +960,7 @@ function drawSteps() {
       actionDraw(
         state.cursorX,
         state.cursorY,
-        state.brushColor,
+        swatches.primary.color,
         state.brushStamp,
         state.tool.brushSize,
         canvas.currentLayer.ctx,
@@ -997,7 +990,7 @@ function perfectPixels(currentX, currentY) {
     actionDraw(
       state.waitingPixelX,
       state.waitingPixelY,
-      state.brushColor,
+      swatches.primary.color,
       state.brushStamp,
       state.tool.brushSize,
       canvas.currentLayer.ctx,
@@ -1088,7 +1081,7 @@ function lineSteps() {
               (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
           state.cursorWithCanvasOffsetX,
           state.cursorWithCanvasOffsetY,
-          state.brushColor,
+          swatches.primary.color,
           canvas.onScreenCTX,
           state.mode,
           state.brushStamp,
@@ -1105,7 +1098,7 @@ function lineSteps() {
         state.previousY,
         state.cursorX,
         state.cursorY,
-        state.brushColor,
+        swatches.primary.color,
         canvas.currentLayer.ctx,
         state.mode,
         state.brushStamp,
@@ -1267,7 +1260,7 @@ function createClipMask(colorLayer) {
   //     for (let x = 0; x < colorLayer.width; x++) {
   //         //sample color and add to path if match
   //         let clickedColor = canvas.getColor(x, y, colorLayer);
-  //         if (clickedColor.color === state.backColor.color) {
+  //         if (clickedColor.color === swatches.secondary.color.color) {
   //             //add pixel to clip path
   //             pixels[y].push(1);
   //         } else {
@@ -1310,7 +1303,7 @@ function createClipMask(colorLayer) {
     for (let x = 0; x < colorLayer.width; x++) {
       //sample color and add to path if match
       let clickedColor = canvas.getColor(x, y, colorLayer)
-      if (clickedColor.color === state.backColor.color) {
+      if (clickedColor.color === swatches.secondary.color.color) {
         //add pixel to clip path
         let p = new Path2D()
         p.rect(x, y, 1, 1)
@@ -1327,7 +1320,7 @@ function fillSteps() {
       actionFill(
         state.cursorX,
         state.cursorY,
-        state.brushColor,
+        swatches.primary.color,
         canvas.currentLayer.ctx,
         state.mode
       )
@@ -1512,7 +1505,7 @@ function curveSteps() {
             canvas.yOffset /
               (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
           state.clickCounter,
-          state.brushColor,
+          swatches.primary.color,
           canvas.onScreenCTX,
           state.mode,
           state.brushStamp,
@@ -1547,7 +1540,7 @@ function curveSteps() {
           state.px3,
           state.py3,
           state.clickCounter + 1,
-          state.brushColor,
+          swatches.primary.color,
           canvas.currentLayer.ctx,
           state.mode,
           state.brushStamp,
@@ -2049,15 +2042,6 @@ function updateBrush(e) {
     //do nothing for other tools
   }
   updateStamp()
-  // let img = new Image();
-  // img.src = brushCVS.toDataURL();
-  // console.log(img)
-  // roundBrush.style.backgroundImage = `url(${img.src})`;
-  // roundBrush.style.backgroundSize = "contain";
-  // let roundBrush = brushPreview.querySelector(".round-brush");
-  // if (roundBrush) {
-  //     //draw circle
-  // }
 }
 
 function updateStamp() {

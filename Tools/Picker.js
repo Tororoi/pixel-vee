@@ -23,7 +23,7 @@ export class Picker {
     this.mouseState = "none"
     //color selector circle
     this.pickerCircle = { x: 10, y: 10, width: 6, height: 6 }
-    this.clicked = false
+    this.clickedCanvas = false
     //hue slider
     this.hueRange = document.getElementById("hueslider")
     //*interface*//
@@ -46,41 +46,20 @@ export class Picker {
     this.cancelBtn = document.getElementById("cancel-btn")
     //color
     this.swatch = "swatch btn"
-    this.rgb
-    this.hsl
+    this.rgb = {
+      red: initialColor.r,
+      green: initialColor.g,
+      blue: initialColor.b,
+    }
+    this.hsl = RGBToHSL(this.rgb)
     // this.alpha = 255;
-    this.hexcode
-    this.luminance
+    this.hexcode = RGBToHex(this.rgb)
+    this.luminance = getLuminance(this.rgb)
   }
 
-  /**
-   * update DOM to match updated values
-   */
-  updateColor() {
-    this.drawHSLGrad(this.hsl.hue)
-    //update interface values to match new color
-    const { hue, saturation, lightness } = this.hsl
-    this.newcolor.style.backgroundColor =
-      "hsl(" + hue + "," + saturation + "%," + lightness + "%)"
-    //hsl
-    this.h.value = hue
-    this.s.value = saturation
-    this.l.value = lightness
-    //rgb
-    const { red, green, blue } = this.rgb
-    this.r.value = red
-    this.g.value = green
-    this.b.value = blue
-    // this.a.value = this.alpha;
-    this.hex.value = this.hexcode
-    this.lumi.value = this.luminance
-    //update hue slider
-    this.hueRange.value = this.hsl.hue
-  }
-
-  /**
-   * update color spaces to match updated values
-   */
+  //===================================//
+  //===== * * * Color Space * * * =====//
+  //===================================//
 
   /**
    * propogate rgb values to other color spaces
@@ -137,6 +116,35 @@ export class Picker {
   updateHex(e) {
     this.hexcode = this.hex.value
     this.propogateHexColorSpace()
+  }
+
+  //===================================//
+  //==== * * * DOM Interface * * * ====//
+  //===================================//
+
+  /**
+   * update DOM to match updated values
+   */
+  updateColor() {
+    this.drawHSLGrad(this.hsl.hue)
+    //update interface values to match new color
+    const { hue, saturation, lightness } = this.hsl
+    this.newcolor.style.backgroundColor =
+      "hsl(" + hue + "," + saturation + "%," + lightness + "%)"
+    //hsl
+    this.h.value = hue
+    this.s.value = saturation
+    this.l.value = lightness
+    //rgb
+    const { red, green, blue } = this.rgb
+    this.r.value = red
+    this.g.value = green
+    this.b.value = blue
+    // this.a.value = this.alpha;
+    this.hex.value = this.hexcode
+    this.lumi.value = this.luminance
+    //update hue slider
+    this.hueRange.value = this.hsl.hue
   }
 
   handleIncrement(e) {
@@ -196,7 +204,7 @@ export class Picker {
   //* Canvas Interaction *//
 
   handleMouseDown(e) {
-    this.clicked = true
+    this.clickedCanvas = true
     let x, y
     if (e.targetTouches) {
       let rect = e.target.getBoundingClientRect()
@@ -210,7 +218,7 @@ export class Picker {
   }
 
   handleMouseMove(e) {
-    if (this.clicked) {
+    if (this.clickedCanvas) {
       let canvasXOffset =
         this.target.getBoundingClientRect().left -
         document.getElementsByTagName("html")[0].getBoundingClientRect().left
@@ -243,21 +251,18 @@ export class Picker {
   }
 
   handleMouseUp(e) {
-    this.clicked = false
+    this.clickedCanvas = false
   }
 
   selectSL(x, y) {
     this.hsl.saturation = Math.round((x / this.width) * 100)
     this.hsl.lightness = Math.round((y / this.height) * 100)
-    //set newcolor
-    //update rgb
-    this.rgb = HSLToRGB(this.hsl)
-    this.hexcode = RGBToHex(this.rgb)
-    this.luminance = getLuminance(this.rgb)
-    this.updateColor()
+    this.propogateHSLColorSpace()
   }
 
-  //* Render Gradients Functions *//
+  //===================================//
+  //======= * * * Render * * * ========//
+  //===================================//
 
   calcSelector() {
     this.pickerCircle.x =
@@ -393,46 +398,22 @@ export class Picker {
   }
 
   //* Update Picker *//
-
+  //Called every time color picker is opened
   update(reference) {
-    const red = reference.r
-    const green = reference.g
-    const blue = reference.b
-    this.rgb = { red, green, blue }
-    //get current hsl
-    this.hsl = RGBToHSL(this.rgb)
-    this.luminance = getLuminance(this.rgb)
+    this.rgb = { red: reference.r, green: reference.g, blue: reference.b }
+    this.propogateRGBColorSpace()
     //set oldcolor
     this.oldcolor.style.backgroundColor = reference.color
-    //set newcolor and interface
-    this.updateColor()
   }
 
   //* Initial Build *//
 
-  build(reference) {
-    const red = reference.r
-    const green = reference.g
-    const blue = reference.b
-    this.rgb = { red, green, blue }
-    //get current hsl
-    this.hsl = RGBToHSL(this.rgb)
-    //get hex
-    this.hexcode = RGBToHex(this.rgb)
-    this.luminance = getLuminance(this.rgb)
-    //draw gradient rectangle
-    this.drawHSLGrad(this.hsl.hue)
+  build() {
     //draw hue slider
     this.drawHueGrad()
     this.hueRange.addEventListener("input", (e) => {
       this.updateHue(e)
     })
-
-    //set oldcolor
-    this.oldcolor.style.backgroundColor = reference.color
-
-    //set newcolor
-    this.newcolor.style.backgroundColor = reference.color
 
     //canvas listeners
     this.target.addEventListener("mousedown", (e) => {
@@ -481,11 +462,9 @@ export class Picker {
     })
     this.rgbaContainer.addEventListener("mouseup", (e) => {
       this.mouseState = e.type
-      // this.handleRGBIncrement(e);
     })
     this.rgbaContainer.addEventListener("mouseout", (e) => {
       this.mouseState = e.type
-      // this.handleRGBIncrement(e);
     })
     this.rgbaContainer.addEventListener("change", (e) => {
       this.updateRGB(e)
@@ -496,11 +475,9 @@ export class Picker {
     })
     this.hslContainer.addEventListener("mouseup", (e) => {
       this.mouseState = e.type
-      // this.handleHSLIncrement(e);
     })
     this.hslContainer.addEventListener("mouseout", (e) => {
       this.mouseState = e.type
-      // this.handleHSLIncrement(e);
     })
     this.hslContainer.addEventListener("change", (e) => {
       this.updateHSL(e)
