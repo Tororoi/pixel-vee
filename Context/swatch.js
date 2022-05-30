@@ -5,16 +5,15 @@ import { Picker } from "../Tools/Picker.js"
 //==== * * * DOM Interface * * * ====//
 //===================================//
 
-//Main
-const fullPage = document.querySelector(".full-page")
 //Swatches
 const swatch = document.querySelector(".swatch")
 const backSwatch = document.querySelector(".back-swatch")
 const colorSwitch = document.querySelector(".color-switch")
 //Color Picker
-const colorPickerContainer = document.querySelector(".color-container")
+const colorPickerContainer = document.querySelector(".picker-container")
 const confirmBtn = document.getElementById("confirm-btn")
 const cancelBtn = document.getElementById("cancel-btn")
+const dragBtn = colorPickerContainer.querySelector(".dragger")
 
 //===================================//
 //=== * * * Event Listeners * * * ===//
@@ -26,9 +25,42 @@ colorSwitch.addEventListener("click", switchColors)
 //Color Picker
 confirmBtn.addEventListener("click", handleConfirm)
 cancelBtn.addEventListener("click", closePickerWindow)
-// colorPickerContainer.addEventListener("click", (e) => {
-//   console.log(e.target)
-// })
+
+//Drag
+let dragging = false
+let x,
+  y,
+  target = null
+dragBtn.addEventListener("mousedown", (e) => {
+  dragging = true
+  target = colorPickerContainer
+  target.classList.add("dragging")
+  x = e.clientX - target.offsetLeft
+  y = e.clientY - target.offsetTop
+})
+document.addEventListener("mouseup", (e) => {
+  dragging = false
+  if (target) {
+    target.classList.remove("dragging")
+    target = null
+  }
+})
+document.addEventListener("mousemove", (e) => {
+  if (target) {
+    target.style.left = e.clientX - x + "px"
+    target.style.top = e.clientY - y + "px"
+    let pRect = target.parentElement.getBoundingClientRect()
+    let tgtRect = target.getBoundingClientRect()
+
+    //Contrain draggable element inside window, include box shadow border
+    if (tgtRect.left < pRect.left) target.style.left = 2 + "px"
+    if (tgtRect.top < pRect.top) target.style.top = 2 + "px"
+    if (tgtRect.right > pRect.right)
+      target.style.left = pRect.width - tgtRect.width - 2 + "px"
+    if (tgtRect.bottom > pRect.bottom)
+      target.style.top = pRect.height - tgtRect.height - 2 + "px"
+  }
+})
 
 //====================================//
 //======== * * * State * * * ========//
@@ -71,7 +103,7 @@ function switchColors() {
  * @param {integer} g
  * @param {integer} b
  * @param {integer} target - enum: ["swatch btn", "back-swatch btn"]
- * dependencies - swatches
+ * dependencies - swatches, picker
  */
 function setColor(r, g, b, target) {
   if (target === "swatch btn") {
@@ -80,6 +112,7 @@ function setColor(r, g, b, target) {
     swatches.primary.color.g = g
     swatches.primary.color.b = b
     swatches.primary.swatch.style.background = swatches.primary.color.color
+    picker.update(swatches.primary.color)
   } else {
     swatches.secondary.color.color = `rgba(${r},${g},${b},255)`
     swatches.secondary.color.r = r
@@ -125,10 +158,6 @@ function openColorPicker(e) {
       ? swatches.secondary.color
       : swatches.primary.color
   picker.update(initialColorReference)
-  //main page can't be interacted with
-  fullPage.style.pointerEvents = "none"
-  //disable shortcuts
-  state.shortcuts = false
   //show colorpicker
   colorPickerContainer.style.display = "flex"
   //allow colorPickerContainer events
@@ -141,10 +170,6 @@ function openColorPicker(e) {
 function closePickerWindow() {
   // hide colorpicker
   colorPickerContainer.style.display = "none"
-  //restore pointer events to page
-  fullPage.style.pointerEvents = "auto"
-  //enable keyboard shortcuts
-  state.shortcuts = true
 }
 
 /**
@@ -152,7 +177,15 @@ function closePickerWindow() {
  */
 function handleConfirm() {
   //set color to brush
+  picker.oldcolor.style.backgroundColor =
+    "hsl(" +
+    picker.hsl.hue +
+    "," +
+    picker.hsl.saturation +
+    "%," +
+    picker.hsl.lightness +
+    "%)"
   setColor(picker.rgb.red, picker.rgb.green, picker.rgb.blue, picker.swatch)
   //close window
-  closePickerWindow()
+  // closePickerWindow()
 }

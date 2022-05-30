@@ -1,3 +1,49 @@
+/* Reset styles */
+
+/* html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+} */
+/* HTML5 display-role reset for older browsers */
+/* article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+} */
+
 @font-face {
   font-family: "04Font";
   src: url("./public/04B_03__.ttf") format("truetype");
@@ -202,14 +248,14 @@ svg {
 
 /* Color Picker */
 
-.color-container {
+.picker-container {
   user-select: none;
   display: none;
   flex-flow: column nowrap;
   position: absolute;
   z-index: 3;
-  top: 50%;
-  left: 50%;
+  top: calc(50% - 235px);
+  left: calc(50% - 183px);
   color: white;
   background: rgb(61, 61, 61);
   text-align: center;
@@ -219,18 +265,42 @@ svg {
   font-size: 16px;
   padding: 0;
   align-self: center;
-  transform: translate(-50%, -50%);
-  transition: 0.3s all;
+  /* transform: translate(-50%, -50%); */
+  /* transition: 0.3s all; */
   opacity: 1;
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
     0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 
-.color-container h3 {
+#picker-header {
   background-color: rgb(41, 41, 41);
   justify-self: center;
   height: 20px;
   margin: 0px;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+#picker-header h3 {
+  justify-self: center;
+  height: 20px;
+  margin: 0px;
+}
+
+/* .dragger {
+  position: absolute;
+  left: 0;
+  background-color: rgb(189, 189, 189);
+  width: 36px;
+  height: 20px;
+  margin: 0px;
+} */
+
+.draggable.dragging {
+  user-select: none;
 }
 
 #interface {
