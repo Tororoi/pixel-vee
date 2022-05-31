@@ -178,6 +178,7 @@ svg {
 }
 
 .btn:hover {
+  cursor: pointer;
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
     0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
@@ -265,9 +266,12 @@ svg {
   font-size: 16px;
   padding: 0;
   align-self: center;
-  /* transform: translate(-50%, -50%); */
-  /* transition: 0.3s all; */
   opacity: 1;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
+    0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+
+.picker-container:hover {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
     0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
@@ -282,6 +286,7 @@ svg {
   justify-content: center;
   align-items: center;
   position: relative;
+  cursor: grab;
 }
 
 #picker-header h3 {
@@ -289,15 +294,6 @@ svg {
   height: 20px;
   margin: 0px;
 }
-
-/* .dragger {
-  position: absolute;
-  left: 0;
-  background-color: rgb(189, 189, 189);
-  width: 36px;
-  height: 20px;
-  margin: 0px;
-} */
 
 .draggable.dragging {
   user-select: none;
@@ -372,8 +368,8 @@ svg {
   height: 76px;
 }
 
-#buttons btn {
-  background-color: rgb(131, 131, 131);
+#buttons .btn {
+  background: rgb(77, 77, 77);
   font-size: 20px;
   padding: 8px;
   margin: 0px 20px 0px 20px;
@@ -381,7 +377,7 @@ svg {
     0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 
-#buttons btn:hover {
+#buttons .btn:hover {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
     0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
@@ -482,6 +478,7 @@ input[type="number"]::-webkit-outer-spin-button {
   height: 9px;
   left: 0;
   color: white;
+  cursor: pointer;
 }
 
 #inc {
