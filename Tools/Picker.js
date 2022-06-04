@@ -19,8 +19,8 @@ export class Picker {
     this.setColor = setColor
     //Get context
     this.context = this.target.getContext("2d")
-    //mouse
-    this.mouseState = "none"
+    //pointer
+    this.pointerState = "none"
     //color selector circle
     this.pickerCircle = { x: 10, y: 10, width: 6, height: 6 }
     this.clickedCanvas = false
@@ -182,7 +182,7 @@ export class Picker {
    * @param {event} e
    */
   handleRGBIncrement(e) {
-    if (this.mouseState === "mousedown") {
+    if (this.pointerState === "pointerdown") {
       this.handleIncrement(e)
       this.updateRGB(e)
       window.setTimeout(() => this.handleRGBIncrement(e), 150)
@@ -194,7 +194,7 @@ export class Picker {
    * @param {event} e
    */
   handleHSLIncrement(e) {
-    if (this.mouseState === "mousedown") {
+    if (this.pointerState === "pointerdown") {
       this.handleIncrement(e)
       this.updateHSL(e)
       window.setTimeout(() => this.handleHSLIncrement(e), 150)
@@ -416,68 +416,69 @@ export class Picker {
     })
 
     //canvas listeners
-    this.target.addEventListener("mousedown", (e) => {
+    this.target.addEventListener("pointerdown", (e) => {
+      e.target.setPointerCapture(e.pointerId)
       this.handleMouseDown(e)
     })
-    window.addEventListener("mousemove", (e) => {
+    this.target.addEventListener("pointermove", (e) => {
       this.handleMouseMove(e)
     })
-    window.addEventListener("mouseup", (e) => {
+    this.target.addEventListener("pointerup", (e) => {
       this.handleMouseUp(e)
     })
-    this.target.addEventListener(
-      "touchstart",
-      (e) => {
-        this.handleMouseDown(e)
-      },
-      { passive: true }
-    )
-    window.addEventListener(
-      "touchmove",
-      (e) => {
-        window.scrollTo(0, 0)
-        this.handleMouseMove(e)
-      },
-      { passive: true }
-    )
-    window.addEventListener(
-      "touchend",
-      (e) => {
-        this.handleMouseUp(e)
-      },
-      { passive: true }
-    )
-    window.addEventListener(
-      "touchcancel",
-      (e) => {
-        this.handleMouseUp(e)
-      },
-      { passive: true }
-    )
+    // this.target.addEventListener(
+    //   "touchstart",
+    //   (e) => {
+    //     this.handleMouseDown(e)
+    //   },
+    //   { passive: true }
+    // )
+    // window.addEventListener(
+    //   "touchmove",
+    //   (e) => {
+    //     window.scrollTo(0, 0)
+    //     this.handleMouseMove(e)
+    //   },
+    //   { passive: true }
+    // )
+    // window.addEventListener(
+    //   "touchend",
+    //   (e) => {
+    //     this.handleMouseUp(e)
+    //   },
+    //   { passive: true }
+    // )
+    // window.addEventListener(
+    //   "touchcancel",
+    //   (e) => {
+    //     this.handleMouseUp(e)
+    //   },
+    //   { passive: true }
+    // )
 
     //channel listeners
-    this.rgbaContainer.addEventListener("mousedown", (e) => {
-      this.mouseState = e.type
+    this.rgbaContainer.addEventListener("pointerdown", (e) => {
+      this.pointerState = e.type
       this.handleRGBIncrement(e)
     })
-    this.rgbaContainer.addEventListener("mouseup", (e) => {
-      this.mouseState = e.type
+    this.rgbaContainer.addEventListener("pointerup", (e) => {
+      this.pointerState = e.type
     })
-    this.rgbaContainer.addEventListener("mouseout", (e) => {
-      this.mouseState = e.type
+    this.rgbaContainer.addEventListener("pointerout", (e) => {
+      this.pointerState = e.type
     })
     this.rgbaContainer.addEventListener("change", (e) => {
       this.updateRGB(e)
     })
-    this.hslContainer.addEventListener("mousedown", (e) => {
-      this.mouseState = e.type
+    this.hslContainer.addEventListener("pointerdown", (e) => {
+      this.pointerState = e.type
       this.handleHSLIncrement(e)
     })
-    this.hslContainer.addEventListener("mouseup", (e) => {
-      this.mouseState = e.type
+    this.hslContainer.addEventListener("pointerup", (e) => {
+      this.pointerState = e.type
     })
-    this.hslContainer.addEventListener("mouseout", (e) => {
-      this.mouseState = e.type
+    this.hslContainer.addEventListener("pointerout", (e) => {
+      this.pointerState = e.type
     })
     this.hslContainer.addEventListener("change", (e) => {
       this.updateHSL(e)
