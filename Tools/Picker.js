@@ -426,35 +426,6 @@ export class Picker {
     this.target.addEventListener("pointerup", (e) => {
       this.handleMouseUp(e)
     })
-    // this.target.addEventListener(
-    //   "touchstart",
-    //   (e) => {
-    //     this.handleMouseDown(e)
-    //   },
-    //   { passive: true }
-    // )
-    // window.addEventListener(
-    //   "touchmove",
-    //   (e) => {
-    //     window.scrollTo(0, 0)
-    //     this.handleMouseMove(e)
-    //   },
-    //   { passive: true }
-    // )
-    // window.addEventListener(
-    //   "touchend",
-    //   (e) => {
-    //     this.handleMouseUp(e)
-    //   },
-    //   { passive: true }
-    // )
-    // window.addEventListener(
-    //   "touchcancel",
-    //   (e) => {
-    //     this.handleMouseUp(e)
-    //   },
-    //   { passive: true }
-    // )
 
     //channel listeners
     this.rgbaContainer.addEventListener("pointerdown", (e) => {

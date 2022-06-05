@@ -1,4 +1,5 @@
 import { state } from "./state.js"
+import { initializeDragger } from "../utils/drag.js"
 
 //===================================//
 //==== * * * DOM Interface * * * ====//
@@ -7,23 +8,28 @@ import { state } from "./state.js"
 const uploadBtn = document.querySelector("#file-upload")
 const newLayerBtn = document.querySelector(".new-raster-layer")
 
-const layersCont = document.querySelector(".layers")
+const layersContainer = document.querySelector(".layers")
+const layersInterfaceContainer = document.querySelector(".layers-interface")
+initializeDragger(layersInterfaceContainer)
 
 //===================================//
 //=== * * * Event Listeners * * * ===//
 //===================================//
 
+// * Canvas * //
+
+// * Layers * //
 uploadBtn.addEventListener("change", addReferenceLayer)
 newLayerBtn.addEventListener("click", addRasterLayer)
 
-layersCont.addEventListener("click", layerInteract)
+layersContainer.addEventListener("click", layerInteract)
 
-layersCont.addEventListener("dragstart", dragLayerStart)
-layersCont.addEventListener("dragover", dragLayerOver)
-layersCont.addEventListener("dragenter", dragLayerEnter)
-layersCont.addEventListener("dragleave", dragLayerLeave)
-layersCont.addEventListener("drop", dropLayer)
-layersCont.addEventListener("dragend", dragLayerEnd)
+layersContainer.addEventListener("dragstart", dragLayerStart)
+layersContainer.addEventListener("dragover", dragLayerOver)
+layersContainer.addEventListener("dragenter", dragLayerEnter)
+layersContainer.addEventListener("dragleave", dragLayerLeave)
+layersContainer.addEventListener("drop", dropLayer)
+layersContainer.addEventListener("dragend", dragLayerEnd)
 
 //===================================//
 //======= * * * Canvas * * * ========//
@@ -68,7 +74,7 @@ export const canvas = {
   layers: [], //(types: raster, vector, reference)
   currentLayer: null,
   //Cursor
-  mouseEvent: "none",
+  pointerEvent: "none",
   //Coordinates
   //for moving canvas/ grab
   xOffset: 0,
@@ -237,9 +243,11 @@ function dropLayer(e) {
   let heldLayer = canvas.layers[draggedIndex]
   //TODO: add layer change to timeline
   if (e.target.className.includes("layer") && targetLayer !== heldLayer) {
-    for (let i = 0; i < layersCont.children.length; i += 1) {
-      if (layersCont.children[i] === e.target) {
-        let newIndex = canvas.layers.indexOf(layersCont.children[i].layerObj)
+    for (let i = 0; i < layersContainer.children.length; i += 1) {
+      if (layersContainer.children[i] === e.target) {
+        let newIndex = canvas.layers.indexOf(
+          layersContainer.children[i].layerObj
+        )
         canvas.layers.splice(draggedIndex, 1)
         canvas.layers.splice(newIndex, 0, heldLayer)
       }
@@ -324,7 +332,7 @@ function removeLayer(e) {
 }
 
 function renderLayersToDOM() {
-  layersCont.innerHTML = ""
+  layersContainer.innerHTML = ""
   let id = 0
   canvas.layers.forEach((l) => {
     if (!l.removed) {
@@ -348,7 +356,7 @@ function renderLayersToDOM() {
       }
       hide.appendChild(eye)
       layerElement.appendChild(hide)
-      layersCont.appendChild(layerElement)
+      layersContainer.appendChild(layerElement)
       //associate object
       layerElement.layerObj = l
     }
