@@ -1,7 +1,7 @@
 import { swatches } from "../Context/swatch.js"
 import { toolbox } from "../Context/toolbox.js" //Must be imported for event listeners
 
-//State (not yet a true state)
+//State (TODO: not yet a true state)
 export const state = {
   //timeline
   points: [],

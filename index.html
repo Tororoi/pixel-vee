@@ -24,16 +24,13 @@
         >
       </div>
       <div class="nav-items">
-        <label id="tooltips-toggle">
-          <input type="checkbox" id="tooltips-toggle" />
+        <label for="tooltips-toggle" id="tooltips" data-tooltip="Toggle tooltips on or off">
+          <input type="checkbox" checked="true" id="tooltips-toggle" />
           <span class="checkmark"></span>
           Tooltips
         </label>
         <div class="export">
-          <div class="btn">
-            <span class="tooltip">Download as .png</span>
-            Export
-          </div>
+          <div class="btn" data-tooltip="Download as .png">Export</div>
         </div>
       </div>
     </div>
@@ -46,8 +43,7 @@
       <div class="layers-interface container draggable">
         <div id="layers-header" class="header dragger">Layers</div>
         <div class="layers-control">
-          <div class="new-raster-layer btn">
-            <span class="tooltip">New Layer</span>
+          <div class="new-raster-layer btn" data-tooltip="New Layer">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 -0.5 14 14"
@@ -63,8 +59,11 @@
               />
             </svg>
           </div>
-          <label for="file-upload" class="custom-file-upload btn">
-            <span class="tooltip">New Reference</span>
+          <label
+            for="file-upload"
+            class="custom-file-upload btn"
+            data-tooltip="New Reference"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 -0.5 14 14"
@@ -93,8 +92,7 @@
         <label for="brush-size"
           >Line Weight: <span id="line-weight">1</span>px</label
         >
-        <div class="brush-preview btn">
-          <span class="tooltip">Click to switch brush</span>
+        <div class="brush-preview btn" data-tooltip="Click to switch brush">
           <div id="brush-preview">
             <svg
               class="brush"
@@ -121,17 +119,20 @@
       <div class="toolbox container draggable">
         <div id="toolbox-header" class="header dragger">Toolbox</div>
         <div class="colors">
-          <div class="swatch btn"></div>
-          <div class="back-swatch btn">
-            <span class="tooltip"
-              >Swatch (S) to randomize <br /><br />
-              Click to open Color Picker</span
-            >
-          </div>
+          <div
+            class="swatch btn"
+            data-tooltip="Swatch (S) to randomize &#010;&#010;Click to open Color Picker"
+          ></div>
+          <div
+            class="back-swatch btn"
+            data-tooltip="Click to open Color Picker"
+          ></div>
           <!-- Add weighted randomizer to lean towards certain colors -->
         </div>
-        <div class="color-switch btn">
-          <span class="tooltip">Switch primary/ secondary colors</span>
+        <div
+          class="color-switch btn"
+          data-tooltip="Switch primary/ secondary colors"
+        >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 -0.5 20 20"
@@ -149,8 +150,7 @@
           </svg>
         </div>
         <div class="btn-pair">
-          <div class="recenter btn">
-            <span class="tooltip">Recenter Canvas</span>
+          <div class="recenter btn" data-tooltip="Recenter Canvas">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 -0.5 22 22"
@@ -175,8 +175,7 @@
               />
             </svg>
           </div>
-          <div class="clear btn">
-            <span class="tooltip">Clear Canvas</span>
+          <div class="clear btn" data-tooltip="Clear Canvas">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 -0.5 22 22"
@@ -203,8 +202,7 @@
           </div>
         </div>
         <div class="btn-pair">
-          <div class="undo-button btn" id="undo">
-            <span class="tooltip">Undo (Cmd + Z)</span>
+          <div class="undo-button btn" id="undo" data-tooltip="Undo (Cmd + Z)">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 -0.5 22 22"
@@ -229,8 +227,11 @@
               />
             </svg>
           </div>
-          <div class="redo-button btn" id="redo">
-            <span class="tooltip">Redo (Cmd + Shift + Z)</span>
+          <div
+            class="redo-button btn"
+            id="redo"
+            data-tooltip="Redo (Cmd + Shift + Z)"
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 -0.5 22 22"
@@ -259,8 +260,7 @@
         <div class="columns">
           <div class="tools column">
             <h4>Tools</h4>
-            <div class="tool btn" id="brush">
-              <span class="tooltip">Brush (B)</span>
+            <div class="tool btn" id="brush" data-tooltip="Brush (B)">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 -0.5 20 20"
@@ -281,11 +281,11 @@
                 <path stroke="#ffffff" d="M7 11h1" />
               </svg>
             </div>
-            <div class="tool btn" id="replace">
-              <span class="tooltip"
-                >Replace (R) <br /><br />
-                Replace secondary color with primary color</span
-              >
+            <div
+              class="tool btn"
+              id="replace"
+              data-tooltip="Replace (R) &#010;&#010;Replace secondary color with primary color"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 -0.5 20 20"
@@ -309,8 +309,11 @@
                 />
               </svg>
             </div>
-            <div class="tool btn" id="line">
-              <span class="tooltip">Line (L or Hold Shift & Brush)</span>
+            <div
+              class="tool btn"
+              id="line"
+              data-tooltip="Line (L or Hold Shift & Brush)"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 -0.5 20 20"
@@ -322,8 +325,7 @@
                 />
               </svg>
             </div>
-            <div class="tool btn" id="fill">
-              <span class="tooltip">Fill (F)</span>
+            <div class="tool btn" id="fill" data-tooltip="Fill (F)">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 -0.5 20 20"
@@ -343,8 +345,7 @@
                 />
               </svg>
             </div>
-            <div class="tool btn" id="curve">
-              <span class="tooltip">Curve (C)</span>
+            <div class="tool btn" id="curve" data-tooltip="Curve (C)">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 -0.5 20 20"
@@ -356,8 +357,11 @@
                 />
               </svg>
             </div>
-            <div class="tool btn" id="eyedropper">
-              <span class="tooltip">Eyedropper (Hold Alt)</span>
+            <div
+              class="tool btn"
+              id="eyedropper"
+              data-tooltip="Eyedropper (Hold Alt)"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 -0.5 20 20"
@@ -378,8 +382,7 @@
                 <path stroke="#ffffff" d="M10 8h1M9 9h1M8 10h1M7 11h1" />
               </svg>
             </div>
-            <div class="tool btn" id="grab">
-              <span class="tooltip">Grab (Hold Space)</span>
+            <div class="tool btn" id="grab" data-tooltip="Grab (Hold Space)">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 -0.5 20 20"
@@ -406,8 +409,7 @@
           </div>
           <div class="modes column">
             <h4>Modes</h4>
-            <div class="mode btn" id="draw">
-              <span class="tooltip">Draw (D)</span>
+            <div class="mode btn" id="draw" data-tooltip="Draw (D)">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 -0.5 20 20"
@@ -431,8 +433,7 @@
                 />
               </svg>
             </div>
-            <div class="mode btn" id="erase">
-              <span class="tooltip">Erase (E)</span>
+            <div class="mode btn" id="erase" data-tooltip="Erase (E)">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 -0.5 20 20"
@@ -454,8 +455,7 @@
               </svg>
             </div>
             <!-- Change to option instead -->
-            <div class="mode btn" id="perfect">
-              <span class="tooltip">Pixel Perfect (P)</span>
+            <div class="mode btn" id="perfect" data-tooltip="Pixel Perfect (P)">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 -0.5 20 20"
@@ -480,13 +480,20 @@
               </svg>
             </div>
             <div class="zoom">
-              <div class="tool btn">
-                <span class="tooltip">Zoom (Mouse Wheel)</span>
+              <div class="tool container">
                 <div class="plusminus">
-                  <div id="plus" class="zoombtn">
+                  <div
+                    id="plus"
+                    class="zoombtn"
+                    data-tooltip="Zoom In (Mouse Wheel)"
+                  >
                     <p>+</p>
                   </div>
-                  <div id="minus" class="zoombtn">
+                  <div
+                    id="minus"
+                    class="zoombtn"
+                    data-tooltip="Zoom Out (Mouse Wheel)"
+                  >
                     <p>-</p>
                   </div>
                 </div>
@@ -623,5 +630,6 @@
         </div>
       </div>
     </div>
+    <div id="tooltip"></div>
   </body>
 </html>

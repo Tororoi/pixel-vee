@@ -1,5 +1,5 @@
 import { state } from "./state.js"
-import { activateDragger } from "../utils/drag.js"
+import { initializeDragger } from "../utils/drag.js"
 
 //===================================//
 //==== * * * DOM Interface * * * ====//
@@ -10,7 +10,7 @@ const newLayerBtn = document.querySelector(".new-raster-layer")
 
 const layersContainer = document.querySelector(".layers")
 const layersInterfaceContainer = document.querySelector(".layers-interface")
-activateDragger(layersInterfaceContainer)
+initializeDragger(layersInterfaceContainer)
 
 //===================================//
 //=== * * * Event Listeners * * * ===//
@@ -245,7 +245,9 @@ function dropLayer(e) {
   if (e.target.className.includes("layer") && targetLayer !== heldLayer) {
     for (let i = 0; i < layersContainer.children.length; i += 1) {
       if (layersContainer.children[i] === e.target) {
-        let newIndex = canvas.layers.indexOf(layersContainer.children[i].layerObj)
+        let newIndex = canvas.layers.indexOf(
+          layersContainer.children[i].layerObj
+        )
         canvas.layers.splice(draggedIndex, 1)
         canvas.layers.splice(newIndex, 0, heldLayer)
       }

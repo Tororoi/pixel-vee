@@ -70,6 +70,47 @@ a:active {
   text-decoration: none;
   color: inherit; }
 
+#tooltip {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  max-width: 150px;
+  color: black;
+  background: #ffffc7;
+  text-align: center;
+  font-family: "04Font";
+  font-size: 16px;
+  padding: 5px;
+  align-self: flex-start;
+  transition: opacity 0.3s;
+  transition-delay: 0.5s;
+  z-index: 1000;
+  box-shadow: 2px 0px #ffffc7, -2px 0px #ffffc7, 0px -2px #ffffc7, 0px 2px #ffffc7; }
+  #tooltip:after {
+    content: "";
+    display: inline-block;
+    width: 2px;
+    height: 2px;
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    background: #ffffc7;
+    box-shadow: -2px -2px #ffffc7, 0px -2px #ffffc7, 0px -4px #ffffc7; }
+  #tooltip.visible {
+    visibility: visible;
+    opacity: 1; }
+  #tooltip.page-left:after {
+    content: "";
+    display: inline-block;
+    width: 2px;
+    height: 2px;
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    background: #ffffc7;
+    box-shadow: 2px -2px #ffffc7, 0px -2px #ffffc7, 0px -4px #ffffc7; }
+
 .nav {
   background-color: black;
   justify-self: center;
@@ -87,26 +128,27 @@ a:active {
     display: flex;
     flex-flow: row nowrap;
     align-items: center;
-    padding-left: 16px;
-    padding-right: 16px; }
-    .nav .nav-items #tooltips-toggle {
+    margin-left: 16px;
+    margin-right: 16px; }
+    .nav .nav-items #tooltips {
       padding-right: 16px;
       display: flex;
       flex-flow: row nowrap;
       align-items: center;
       cursor: pointer; }
-      .nav .nav-items #tooltips-toggle input {
+      .nav .nav-items #tooltips input {
+        position: absolute;
         opacity: 0;
         pointer-events: none; }
-      .nav .nav-items #tooltips-toggle .checkmark {
+      .nav .nav-items #tooltips .checkmark {
         height: 16px;
         width: 16px;
         background-color: white;
         margin-right: 8px;
         box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383, 0px 2px #838383; }
-      .nav .nav-items #tooltips-toggle:hover .checkmark {
+      .nav .nav-items #tooltips:hover .checkmark {
         box-shadow: 2px 0px white, -2px 0px white, 0px -2px white, 0px 2px white; }
-      .nav .nav-items #tooltips-toggle input:checked ~ .checkmark {
+      .nav .nav-items #tooltips input:checked ~ .checkmark {
         background-color: #4183fc; }
     .nav .nav-items .export .btn {
       height: 28px;
@@ -228,6 +270,8 @@ svg {
     .btn:hover .tooltip {
       visibility: visible;
       opacity: 1; }
+  .btn * {
+    pointer-events: none; }
 
 .tooltip {
   visibility: hidden;
@@ -531,6 +575,9 @@ input {
   justify-content: space-around;
   margin-top: 46px;
   width: 100%; }
+  .zoom .tool {
+    background: #838383;
+    cursor: pointer; }
 
 .plusminus {
   width: 40px;

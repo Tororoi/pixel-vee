@@ -26,6 +26,9 @@ let modesCont = document.querySelector(".modes")
 let modeBtn = document.querySelector("#draw")
 modeBtn.style.background = "rgb(255, 255, 255)"
 
+//Tooltip
+let tooltip = document.getElementById("tooltip")
+
 //Options
 let lineWeight = document.querySelector("#line-weight")
 let brushBtn = document.querySelector(".brush-preview")
@@ -33,6 +36,9 @@ let brushPreview = document.querySelector("#brush-preview")
 let brushSlider = document.querySelector("#brush-size")
 let brush = document.querySelector(".brush")
 
+//Menu
+//Toggle Tooltips
+let tooltipBtn = document.getElementById("tooltips-toggle")
 //Export
 let exportBtn = document.querySelector(".export")
 
@@ -131,6 +137,36 @@ canvas.renderLayersToDOM()
 //=== * * * Event Listeners * * * ===//
 //===================================//
 
+const showTooltip = (message, target) => {
+  if (message && target) {
+    const targetRect = target.getBoundingClientRect()
+    const targetCenter = targetRect.left + targetRect.width / 2
+    const pageSideRight = window.innerWidth / 2 < targetCenter
+    tooltip.innerText = message
+    const tooltipRect = tooltip.getBoundingClientRect()
+    const tooltipX = pageSideRight
+      ? targetRect.left - tooltipRect.width
+      : targetRect.left + targetRect.width
+    const tooltipY = targetRect.top + targetRect.height + 16
+    tooltip.classList.add("visible")
+    if (!pageSideRight) {
+      tooltip.classList.add("page-left")
+    }
+    tooltip.style.top = tooltipY + "px"
+    tooltip.style.left = tooltipX + "px"
+  } else {
+    tooltip.classList.remove("visible")
+    tooltip.classList.remove("page-left")
+  }
+}
+
+document.body.addEventListener("mouseover", (e) => {
+  if (tooltipBtn.checked) {
+    const tooltipMessage = e.target.dataset?.tooltip
+    showTooltip(tooltipMessage, e.target)
+  }
+})
+
 //Shortcuts
 document.addEventListener("keydown", handleKeyDown)
 document.addEventListener("keyup", handleKeyUp)
@@ -159,6 +195,14 @@ modesCont.addEventListener("click", handleModes)
 brushBtn.addEventListener("click", switchBrush)
 brushSlider.addEventListener("input", updateBrush)
 
+tooltipBtn.addEventListener("click", (e) => {
+  if (tooltipBtn.checked) {
+    const tooltipMessage = tooltipBtn.parentNode.dataset?.tooltip
+    showTooltip(tooltipMessage, tooltipBtn.parentNode)
+  } else {
+    tooltip.classList.remove("visible")
+  }
+})
 exportBtn.addEventListener("click", exportImage)
 
 //======================================//
@@ -536,7 +580,7 @@ function handleWheel(e) {
     ) * rw
   if (delta < 0) {
     z = 0.8
-    if (canvas.zoom > 0.125) {
+    if (canvas.zoom > 0.25) {
       zoom(z, lox, loy)
     }
   } else if (delta > 0) {
@@ -567,7 +611,7 @@ function handleZoom(e) {
     let loy = Math.round(canvas.unsharpenedHeight / 8 / canvas.zoom / rw) * rw
     if (zoomBtn.id === "minus") {
       z = 0.8
-      if (canvas.zoom > 0.125) {
+      if (canvas.zoom > 0.25) {
         zoom(z, lox, loy)
       }
     } else if (zoomBtn.id === "plus") {

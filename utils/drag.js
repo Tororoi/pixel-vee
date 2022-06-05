@@ -2,7 +2,7 @@ import { state } from "../Context/state.js"
 
 const fullPage = document.querySelector(".full-page")
 
-export const activateDragger = (dragTarget) => {
+export const initializeDragger = (dragTarget) => {
   const dragBtn = dragTarget.querySelector(".dragger")
   if (dragBtn) {
     dragBtn.addEventListener("pointerdown", (e) => dragStart(e, dragTarget))
@@ -39,14 +39,12 @@ export const dragMove = (e) => {
     let tgtRect = state.dragTarget.getBoundingClientRect()
     // console.log(pRect, tgtRect)
     //Constrain draggable element inside window, include box shadow border
-    if (tgtRect.left < pRect.left)
-      state.dragTarget.style.left = 0 + "px"
+    if (tgtRect.left < pRect.left) state.dragTarget.style.left = 0 + "px"
     if (tgtRect.top < pRect.top) state.dragTarget.style.top = 0 + "px"
     if (tgtRect.right > pRect.right)
       state.dragTarget.style.left = pRect.width - tgtRect.width - 4 + "px"
     if (tgtRect.bottom > pRect.bottom) {
-      state.dragTarget.style.top =
-        pRect.height - tgtRect.height - 4 + "px"
+      state.dragTarget.style.top = pRect.height - tgtRect.height - 4 + "px"
     }
   }
 }

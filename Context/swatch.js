@@ -1,6 +1,6 @@
 import { state } from "./state.js"
 import { Picker } from "../Tools/Picker.js"
-import { activateDragger } from "../utils/drag.js"
+import { initializeDragger } from "../utils/drag.js"
 
 //===================================//
 //==== * * * DOM Interface * * * ====//
@@ -12,7 +12,7 @@ const backSwatch = document.querySelector(".back-swatch")
 const colorSwitch = document.querySelector(".color-switch")
 //Color Picker
 const colorPickerContainer = document.querySelector(".picker-container")
-activateDragger(colorPickerContainer)
+initializeDragger(colorPickerContainer)
 const confirmBtn = document.getElementById("confirm-btn")
 const cancelBtn = document.getElementById("cancel-btn")
 

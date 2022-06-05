@@ -1,14 +1,14 @@
-import { activateDragger } from "../utils/drag.js"
+import { initializeDragger } from "../utils/drag.js"
 
 //===================================//
 //==== * * * DOM Interface * * * ====//
 //===================================//
 // * Toolbox * //
 const toolboxContainer = document.querySelector(".toolbox")
-activateDragger(toolboxContainer)
+initializeDragger(toolboxContainer)
 // * Brush * //
 const brushContainer = document.querySelector(".brush-container")
-activateDragger(brushContainer)
+initializeDragger(brushContainer)
 
 //===================================//
 //=== * * * Event Listeners * * * ===//
