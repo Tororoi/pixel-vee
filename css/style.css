@@ -154,8 +154,6 @@ a:active {
       height: 28px;
       width: 84px;
       background: #4d4d4d; }
-    .nav .nav-items .export .tooltip {
-      transform: translateX(-100px) translateY(36px); }
   .nav .btn {
     box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383, 0px 2px #838383; }
     .nav .btn:hover:not([disabled]), .nav .btn:focus {
@@ -267,40 +265,8 @@ svg {
     cursor: pointer; }
     .btn:hover .outline {
       stroke: white; }
-    .btn:hover .tooltip {
-      visibility: visible;
-      opacity: 1; }
   .btn * {
     pointer-events: none; }
-
-.tooltip {
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  color: black;
-  background: #ffffc7;
-  text-align: center;
-  width: 100px;
-  font-family: "04Font";
-  font-size: 16px;
-  padding: 5px;
-  align-self: flex-start;
-  transform: translateX(-80px) translateY(48px);
-  transition: opacity 0.3s;
-  transition-delay: 0.7s;
-  z-index: 1000;
-  box-shadow: 2px 0px #ffffc7, -2px 0px #ffffc7, 0px -2px #ffffc7, 0px 2px #ffffc7; }
-  .tooltip:after {
-    content: "";
-    display: inline-block;
-    width: 2px;
-    height: 2px;
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    background: #ffffc7;
-    box-shadow: -2px -2px #ffffc7, 0px -2px #ffffc7, 0px -4px #ffffc7; }
 
 .btn-pair {
   display: flex;
@@ -545,9 +511,6 @@ input {
     height: 72px;
     margin: 16px;
     z-index: 6; }
-    .colors .swatch:hover + .back-swatch .tooltip {
-      visibility: visible;
-      opacity: 1; }
   .colors .back-swatch {
     position: absolute;
     background: white;
@@ -556,8 +519,6 @@ input {
     margin: 16px;
     z-index: 5;
     transform: translateX(24px) translateY(24px); }
-    .colors .back-swatch .tooltip {
-      transform: translateX(-124px) translateY(56px); }
 
 .color-switch {
   width: 40px;
@@ -628,8 +589,6 @@ input {
     width: 64px;
     height: 64px;
     background: #1f1f1f; }
-    .brush-container .brush-preview .tooltip {
-      transform: translateX(-94px) translateY(72px); }
     .brush-container .brush-preview #brush-preview {
       width: 2px;
       height: 2px;
@@ -677,8 +636,6 @@ input {
     box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383, 0px 2px #838383; }
     .layers-interface .btn:hover:not([disabled]), .layers-interface .btn:focus {
       box-shadow: 2px 0px white, -2px 0px white, 0px -2px white, 0px 2px white; }
-  .layers-interface .tooltip {
-    transform: translateX(-74px) translateY(36px); }
   .layers-interface .layers-control {
     display: flex;
     flex-flow: row nowrap;

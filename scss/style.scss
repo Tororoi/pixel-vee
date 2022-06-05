@@ -186,9 +186,6 @@ a:active {
         width: 84px;
         background: rgb(77, 77, 77);
       }
-      .tooltip {
-        transform: translateX(-100px) translateY(36px);
-      }
     }
   }
   .btn {
@@ -319,47 +316,9 @@ svg {
     .outline {
       stroke: white; //for svgs
     }
-    .tooltip {
-      visibility: visible;
-      opacity: 1;
-    }
   }
   * {
     pointer-events: none; //btn children should not be interactable
-  }
-}
-
-.tooltip {
-  visibility: hidden;
-  opacity: 0;
-  pointer-events: none;
-  position: absolute;
-  color: black;
-  background: rgb(255, 255, 199);
-  text-align: center;
-  width: 100px;
-  font-family: "04Font";
-  font-size: 16px;
-  padding: 5px;
-  align-self: flex-start;
-  transform: translateX(-80px) translateY(48px);
-  transition: opacity 0.3s;
-  transition-delay: 0.7s;
-  z-index: 1000;
-  box-shadow: 2px 0px rgb(255, 255, 199), -2px 0px rgb(255, 255, 199),
-    0px -2px rgb(255, 255, 199), 0px 2px rgb(255, 255, 199);
-  &:after {
-    //Speech bubble pointer
-    content: "";
-    display: inline-block;
-    width: 2px;
-    height: 2px;
-    position: absolute;
-    top: -2px;
-    right: -2px;
-    background: rgb(255, 255, 199);
-    box-shadow: -2px -2px rgb(255, 255, 199), 0px -2px rgb(255, 255, 199),
-      0px -4px rgb(255, 255, 199);
   }
 }
 
@@ -632,10 +591,6 @@ input {
     height: 72px;
     margin: 16px;
     z-index: 6;
-    &:hover + .back-swatch .tooltip {
-      visibility: visible;
-      opacity: 1;
-    }
   }
   .back-swatch {
     position: absolute;
@@ -645,9 +600,6 @@ input {
     margin: 16px;
     z-index: 5;
     transform: translateX(24px) translateY(24px);
-    .tooltip {
-      transform: translateX(-124px) translateY(56px);
-    }
   }
 }
 
@@ -730,9 +682,6 @@ input {
     width: 64px;
     height: 64px;
     background: rgb(31, 31, 31);
-    .tooltip {
-      transform: translateX(-94px) translateY(72px);
-    }
     #brush-preview {
       width: 2px;
       height: 2px;
@@ -788,9 +737,6 @@ input {
   align-items: center;
   .btn {
     @include boxBorder;
-  }
-  .tooltip {
-    transform: translateX(-74px) translateY(36px);
   }
   .layers-control {
     display: flex;
