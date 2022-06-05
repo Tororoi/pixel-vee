@@ -1,4 +1,5 @@
 import { swatches } from "../Context/swatch.js"
+import { toolbox } from "../Context/toolbox.js" //Must be imported for event listeners
 
 //State (not yet a true state)
 export const state = {
@@ -18,6 +19,11 @@ export const state = {
   },
   //touchscreen?
   touch: false,
+  //dragging target
+  dragging: false,
+  dragX: null,
+  dragY: null,
+  dragTarget: null,
   //active variables for canvas
   shortcuts: true,
   clipMask: null,

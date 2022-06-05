@@ -6,9 +6,6 @@ import { swatches } from "../Context/swatch.js"
 //========= * * * DOM * * * =========//
 //===================================//
 
-// //Main
-// let fullPage = document.querySelector(".full-page")
-
 //Get the undo buttons
 let undoBtn = document.getElementById("undo")
 let redoBtn = document.getElementById("redo")
@@ -139,26 +136,14 @@ document.addEventListener("keydown", handleKeyDown)
 document.addEventListener("keyup", handleKeyUp)
 canvas.onScreenCVS.addEventListener("wheel", handleWheel, { passive: true })
 
-//Mouse
-canvas.onScreenCVS.addEventListener("mousemove", handleMouseMove)
+//Pointer
+canvas.onScreenCVS.addEventListener("pointermove", handlePointerMove)
+canvas.onScreenCVS.addEventListener("pointerdown", handlePointerDown)
+canvas.onScreenCVS.addEventListener("pointerup", handlePointerUp)
+canvas.onScreenCVS.addEventListener("pointerout", handlePointerOut) //NOTE: Deprecated? May need to rewrite just for multistep tools such as curve that can be in use while pointer is up
+
+canvas.onScreenCVS.addEventListener("touchstart", handleTouchStart)
 canvas.onScreenCVS.addEventListener("mousedown", handleMouseDown)
-canvas.onScreenCVS.addEventListener("mouseup", handleMouseUp)
-canvas.onScreenCVS.addEventListener("mouseout", handleMouseOut)
-
-//Touch
-canvas.onScreenCVS.addEventListener("touchstart", handleTouchStart, {
-  passive: true,
-})
-canvas.onScreenCVS.addEventListener("touchmove", handleTouchMove, {
-  passive: true,
-})
-canvas.onScreenCVS.addEventListener("touchend", handleTouchEnd, {
-  passive: true,
-})
-canvas.onScreenCVS.addEventListener("touchcancel", handleTouchCancel, {
-  passive: true,
-})
-
 //Toolbox
 undoBtn.addEventListener("click", handleUndo)
 redoBtn.addEventListener("click", handleRedo)
@@ -320,20 +305,18 @@ function handleKeyUp(e) {
 }
 
 //========================================//
-//=== * * * Mouse Event Handlers * * * ===//
+//==== * * Pointer Event Handlers * * ====//
 //========================================//
 
-function handleMouseDown(e) {
+function handlePointerDown(e) {
   //reset media type, chrome dev tools niche use or computers that have touchscreen capabilities
-  if (e.type === "mousedown") {
-    state.touch = false
-  }
-  canvas.mouseEvent = "mousedown"
+  e.target.setPointerCapture(e.pointerId)
+  canvas.pointerEvent = "pointerdown"
   state.clicked = true
   if (state.clickDisabled) {
     return
   }
-  //zoom can change without mouse moving, so set state.trueRatio
+  //zoom can change without pointer moving, so set state.trueRatio
   state.trueRatio =
     (canvas.onScreenCVS.offsetWidth / canvas.offScreenCVS.width) * canvas.zoom
   let x, y
@@ -376,11 +359,11 @@ function handleMouseDown(e) {
   state.tool.fn()
 }
 
-function handleMouseMove(e) {
+function handlePointerMove(e) {
   if (state.clickDisabled && state.clicked) {
     return
   }
-  canvas.mouseEvent = "mousemove"
+  canvas.pointerEvent = "pointermove"
   state.clickDisabled = false
   //currently only square dimensions work
   state.trueRatio =
@@ -439,13 +422,13 @@ function handleMouseMove(e) {
   }
 }
 
-function handleMouseUp(e) {
-  canvas.mouseEvent = "mouseup"
+function handlePointerUp(e) {
+  canvas.pointerEvent = "pointerup"
   state.clicked = false
   if (state.clickDisabled) {
     return
   }
-  //zoom can change without mouse moving, so set state.trueRatio
+  //zoom can change without pointer moving, so set state.trueRatio
   state.trueRatio =
     (canvas.onScreenCVS.offsetWidth / canvas.offScreenCVS.width) * canvas.zoom
   let x, y
@@ -485,27 +468,31 @@ function handleMouseUp(e) {
   state.points = []
   //Reset redostack
   state.redoStack = []
-  canvas.mouseEvent = "none"
+  canvas.pointerEvent = "none"
   if (!e.targetTouches) {
     renderCursor()
   }
 }
 
-function handleMouseOut(e) {
-  if (state.clicked) {
-    canvas.mouseEvent = "mouseout"
-    state.clicked = false
-    state.tool.fn()
-    //add to undo stack
-    if (state.points.length) {
-      state.undoStack.push(state.points)
-    }
-    state.points = []
-    //Reset redostack
-    state.redoStack = []
+function handlePointerOut(e) {
+  //TODO: if touchscreen, need to handle differently. Currently cannot reach next code since clicked will be false.
+  //Only purpose is to rerender with multi step tools such as curve when moving out or in the case of touch, lifting finger
+  // if (state.clicked) {
+  //   canvas.pointerEvent = "pointerout"
+  //   state.clicked = false
+  //   state.tool.fn()
+  //   //add to undo stack
+  //   if (state.points.length) {
+  //     state.undoStack.push(state.points)
+  //   }
+  //   state.points = []
+  //   //Reset redostack
+  //   state.redoStack = []
+  // }
+  if (!state.touch) {
+    canvas.draw()
+    canvas.pointerEvent = "none"
   }
-  canvas.draw()
-  canvas.mouseEvent = "none"
 }
 
 /**
@@ -528,7 +515,7 @@ function zoom(z, xOriginOffset, yOriginOffset) {
 function handleWheel(e) {
   let delta = Math.sign(e.deltaY)
   //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
-  //zoom based on mouse coords
+  //zoom based on pointer coords
   let z
   let rw = canvas.unsharpenedWidth / canvas.offScreenCVS.width
   let nox =
@@ -861,8 +848,8 @@ function drawCircle() {
 
 //"Steps" functions are controllers for the process
 function drawSteps() {
-  switch (canvas.mouseEvent) {
-    case "mousedown":
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
       //set colorlayer, then for each brushpoint, alter colorlayer and add each to timeline
       actionDraw(
         state.cursorX,
@@ -890,7 +877,7 @@ function drawSteps() {
       }
       canvas.draw()
       break
-    case "mousemove":
+    case "pointermove":
       if (state.mode === "perfect") {
         drawCurrentPixel()
       }
@@ -955,7 +942,7 @@ function drawSteps() {
       state.previousX = state.cursorX
       state.previousY = state.cursorY
       break
-    case "mouseup":
+    case "pointerup":
       //only needed if perfect pixels option is on
       actionDraw(
         state.cursorX,
@@ -1053,12 +1040,12 @@ function actionDraw(
 }
 
 function lineSteps() {
-  switch (canvas.mouseEvent) {
-    case "mousedown":
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
       state.previousX = state.cursorX
       state.previousY = state.cursorY
       break
-    case "mousemove":
+    case "pointermove":
       //draw line from origin point to current point onscreen
       //only draw when necessary
       if (
@@ -1092,7 +1079,7 @@ function lineSteps() {
         state.previousOnscreenY = state.onscreenY
       }
       break
-    case "mouseup":
+    case "pointerup":
       actionLine(
         state.previousX,
         state.previousY,
@@ -1182,9 +1169,9 @@ function actionLine(
 }
 
 function replaceSteps() {
-  switch (canvas.mouseEvent) {
-    case "mousedown":
-      //get global colorlayer data to use while mouse is down
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
+      //get global colorlayer data to use while pointer is down
       state.localColorLayer = canvas.currentLayer.ctx.getImageData(
         0,
         0,
@@ -1199,14 +1186,14 @@ function replaceSteps() {
       canvas.currentLayer.ctx.clip(state.clipMask)
       drawSteps()
       break
-    case "mousemove":
+    case "pointermove":
       drawSteps()
       break
-    case "mouseup":
+    case "pointerup":
       drawSteps()
       finalReplaceStep()
       break
-    case "mouseout":
+    case "pointerout":
       finalReplaceStep()
       break
     default:
@@ -1222,19 +1209,19 @@ function finalReplaceStep() {
 }
 
 function selectSteps() {
-  switch (canvas.mouseEvent) {
-    case "mousedown":
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
       //1. set drag origin
       //2. save context
       break
-    case "mousemove":
+    case "pointermove":
       //1. if state.clicked create strokeable path using drag origin and current x/y as opposite corners of rectangle
       //2. stroke outline path with animated "marching ants".
       break
-    case "mouseup":
+    case "pointerup":
       //1. create clip mask using drag origin and current x/y as opposite corners of rectangle
       break
-    case "mouseout":
+    case "pointerout":
       //1. create clip mask using drag origin and last x/y as opposite corners of rectangle
       break
     default:
@@ -1315,8 +1302,8 @@ function createClipMask(colorLayer) {
 }
 
 function fillSteps() {
-  switch (canvas.mouseEvent) {
-    case "mousedown":
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
       actionFill(
         state.cursorX,
         state.cursorY,
@@ -1333,7 +1320,7 @@ function fillSteps() {
       )
       canvas.draw()
       break
-    case "mouseup":
+    case "pointerup":
       //redraw canvas to allow onscreen cursor to render
       canvas.draw()
     default:
@@ -1452,11 +1439,11 @@ function actionFill(startX, startY, currentColor, ctx, currentMode) {
 }
 
 function curveSteps() {
-  //FIX: new routine, should be 1. mousedown, 2. drag to p2,
-  //3. mouseup solidify p2, 4. mousedown/move to drag p3, 5. mouseup to solidify p3
-  //this routine would be better for touchscreens, and no worse with mouse
-  switch (canvas.mouseEvent) {
-    case "mousedown":
+  //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
+  //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
+  //this routine would be better for touchscreens, and no worse with pointer
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
       //solidify end points
       state.clickCounter += 1
       if (state.clickCounter > 3) state.clickCounter = 1
@@ -1475,9 +1462,9 @@ function curveSteps() {
         //do nothing
       }
       break
-    case "mousemove":
+    case "pointermove":
       //draw line from origin point to current point onscreen
-      //normalize mousemove to pixelgrid
+      //normalize pointermove to pixelgrid
       if (
         state.onscreenX !== state.previousOnscreenX ||
         state.onscreenY !== state.previousOnscreenY
@@ -1516,7 +1503,7 @@ function curveSteps() {
         state.previousOnscreenY = state.onscreenY
       }
       break
-    case "mouseup":
+    case "pointerup":
       //For touchscreens
       if (state.touch) {
         if (state.clickCounter === 1) {
@@ -1557,7 +1544,7 @@ function curveSteps() {
         canvas.draw()
       }
       break
-    case "mouseout":
+    case "pointerout":
       //cancel curve
       state.clickCounter = 0
       break
@@ -1848,8 +1835,8 @@ function moveSteps() {
 //Eyedropper
 //TODO: add magnifying glass view that shows zoomed in view of area being sampled
 function eyedropperSteps() {
-  switch (canvas.mouseEvent) {
-    case "mousedown":
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
       //get imageData
       canvas.consolidateLayers()
       state.colorLayerGlobal = canvas.offScreenCTX.getImageData(
@@ -1861,8 +1848,8 @@ function eyedropperSteps() {
       //set color
       sampleColor(state.cursorX, state.cursorY)
       break
-    case "mousemove":
-      //normalize mousemove to pixelgrid, get color here too
+    case "pointermove":
+      //normalize pointermove to pixelgrid, get color here too
       if (
         state.onscreenX !== state.previousOnscreenX ||
         state.onscreenY !== state.previousOnscreenY
@@ -1889,21 +1876,21 @@ function sampleColor(x, y) {
 }
 
 function grabSteps() {
-  switch (canvas.mouseEvent) {
-    case "mousemove":
+  switch (canvas.pointerEvent) {
+    case "pointermove":
       canvas.xOffset =
         state.onscreenX - state.previousOnscreenX + canvas.previousXOffset
       canvas.yOffset =
         state.onscreenY - state.previousOnscreenY + canvas.previousYOffset
       canvas.draw()
       break
-    case "mouseup":
+    case "pointerup":
       canvas.previousXOffset = canvas.xOffset
       canvas.previousYOffset = canvas.yOffset
       state.previousOnscreenX = state.onscreenX
       state.previousOnscreenY = state.onscreenY
       break
-    case "mouseout":
+    case "pointerout":
       canvas.previousXOffset = canvas.xOffset
       canvas.previousYOffset = canvas.yOffset
       break
@@ -2080,25 +2067,13 @@ function exportImage() {
 //accessible upon touching, which reveals list of options/tools
 //hub icon, can store all dialog boxes, can drag out and in dialog boxes which user wants for a customized toolset
 
-//zooming with pinch actions, prevent default device zoom
-
+//Identify whether program is being used by touchscreen or mouse. Important for multi-step tools such as curve
 function handleTouchStart(e) {
-  //   e.preventDefault()
   state.touch = true
-  handleMouseDown(e)
 }
 
-function handleTouchMove(e) {
-  //   e.preventDefault()
-  handleMouseMove(e)
-}
-
-function handleTouchEnd(e) {
-  //   e.preventDefault()
-  handleMouseUp(e)
-}
-
-function handleTouchCancel(e) {
-  //   e.preventDefault()
-  handleMouseOut(e)
+function handleMouseDown(e) {
+  if (e.type === "mousedown") {
+    state.touch = false
+  }
 }

@@ -43,7 +43,7 @@ Visit here: https://pixelvee.netlify.app/
 
 > #### Pencil
 >
-> Draws a pixel where your mouse goes.
+> Draws a pixel where your pointer goes.
 
 > #### Replace
 >
