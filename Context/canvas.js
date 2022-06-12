@@ -38,25 +38,53 @@ layersContainer.addEventListener("dragend", dragLayerEnd)
 //Set onscreen canvas and its context
 const onScreenCVS = document.getElementById("onScreen")
 const onScreenCTX = onScreenCVS.getContext("2d")
-//original canvas width/height
-let unsharpenedWidth = onScreenCVS.width
-let unsharpenedHeight = onScreenCVS.height
-//improve sharpness
-//BUG: sharpness (8+) greatly affects performance in browsers other than chrome (can safari and firefox not handle large canvases?)
-let sharpness = 4
-let zoom = 1
-//adjust canvas ratio here if needed
-onScreenCVS.width = unsharpenedWidth * sharpness
-onScreenCVS.height = unsharpenedHeight * sharpness
-onScreenCTX.scale(sharpness * zoom, sharpness * zoom)
-
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
 let offScreenCVS = document.createElement("canvas")
 let offScreenCTX = offScreenCVS.getContext("2d")
 //Set the dimensions of the drawing canvas
 offScreenCVS.width = 256
 offScreenCVS.height = 256
+//improve sharpness
+//BUG: sharpness (8+) greatly affects performance in browsers other than chrome (can safari and firefox not handle large canvases?)
+let sharpness = window.devicePixelRatio
+//zoom
+let zoom = 1 //zoom level should be based on absolute pixel size, not window relative to canvas
+//original canvas width/height
+let unsharpenedWidth = offScreenCVS.width * zoom
+let unsharpenedHeight = offScreenCVS.height * zoom
+//adjust canvas ratio here if needed
+onScreenCVS.width = onScreenCVS.offsetWidth * sharpness
+onScreenCVS.height = onScreenCVS.offsetHeight * sharpness
+onScreenCTX.scale(sharpness * zoom, sharpness * zoom)
+
+//Initialize offset, must be integer
+const xOffset = Math.round(
+  (onScreenCVS.width / sharpness - offScreenCVS.width) / 2
+)
+const yOffset = Math.round(
+  (onScreenCVS.height / sharpness - offScreenCVS.height) / 2
+)
+
+// //original canvas width/height
+// let unsharpenedWidth = onScreenCVS.width
+// let unsharpenedHeight = onScreenCVS.height
+// //improve sharpness
+// //BUG: sharpness (8+) greatly affects performance in browsers other than chrome (can safari and firefox not handle large canvases?)
+// let sharpness = window.devicePixelRatio
+// let zoom = 1 //zoom level should be based on absolute pixel size, not window relative to canvas
+// let pixelSize = 1;
+// //adjust canvas ratio here if needed
+// onScreenCVS.width = unsharpenedWidth * sharpness
+// onScreenCVS.height = unsharpenedHeight * sharpness
+// // onScreenCVS.width = onScreenCVS.offsetWidth
+// // onScreenCVS.height = onScreenCVS.offsetHeight
+// onScreenCTX.scale(sharpness * zoom, sharpness * zoom)
+
 //for adjusting canvas size, adjust onscreen canvas dimensions in proportion to offscreen
+
+//====================================//
+//======== * * * State * * * =========//
+//====================================//
 
 //Export canvas state
 export const canvas = {
@@ -77,10 +105,14 @@ export const canvas = {
   pointerEvent: "none",
   //Coordinates
   //for moving canvas/ grab
-  xOffset: 0,
-  yOffset: 0,
-  previousXOffset: 0,
-  previousYOffset: 0,
+  xOffset: xOffset,
+  yOffset: yOffset,
+  previousXOffset: xOffset,
+  previousYOffset: yOffset,
+  subPixelX: null,
+  subPixelY: null,
+  zoomPixelX: null,
+  zoomPixelY: null,
   //Functions
   draw,
   consolidateLayers,
@@ -89,15 +121,72 @@ export const canvas = {
   getColor,
 }
 
+//====================================//
+//======== * * * Canvas * * * ========//
+//====================================//
+
+export const resizeCanvas = () => {
+  //Keep canvas dimensions at 100% (requires css style width/ height 100%)
+  canvas.onScreenCVS.width = canvas.onScreenCVS.offsetWidth * sharpness
+  canvas.onScreenCVS.height = canvas.onScreenCVS.offsetHeight * sharpness
+  canvas.onScreenCTX.setTransform(
+    sharpness * zoom,
+    0,
+    0,
+    sharpness * zoom,
+    0,
+    0
+  )
+  canvas.draw()
+}
+
+resizeCanvas()
+
 //FIX: Improve performance by keeping track of "redraw regions" instead of redrawing the whole thing.
 //Draw Canvas
 function draw() {
+  // //clear canvas
+  // canvas.onScreenCTX.clearRect(
+  //   0,
+  //   0,
+  //   canvas.unsharpenedWidth / canvas.zoom,
+  //   canvas.unsharpenedHeight / canvas.zoom
+  // )
+  // //Prevent blurring
+  // canvas.onScreenCTX.imageSmoothingEnabled = false
+  // //fill background
+  // canvas.onScreenCTX.fillStyle = "gray"
+  // canvas.onScreenCTX.fillRect(
+  //   0,
+  //   0,
+  //   canvas.unsharpenedWidth / canvas.zoom,
+  //   canvas.unsharpenedHeight / canvas.zoom
+  // )
+  // //BUG: How to mask outside drawing space?
+  // canvas.onScreenCTX.clearRect(
+  //   canvas.xOffset,
+  //   canvas.yOffset,
+  //   canvas.unsharpenedWidth,
+  //   canvas.unsharpenedHeight
+  // )
+  // drawLayers()
+  // //draw border
+  // canvas.onScreenCTX.beginPath()
+  // canvas.onScreenCTX.rect(
+  //   canvas.xOffset - 1,
+  //   canvas.yOffset - 1,
+  //   canvas.unsharpenedWidth + 2,
+  //   canvas.unsharpenedHeight + 2
+  // )
+  // canvas.onScreenCTX.lineWidth = 2
+  // canvas.onScreenCTX.strokeStyle = "black"
+  // canvas.onScreenCTX.stroke()
   //clear canvas
   canvas.onScreenCTX.clearRect(
     0,
     0,
-    canvas.unsharpenedWidth / canvas.zoom,
-    canvas.unsharpenedHeight / canvas.zoom
+    canvas.onScreenCVS.width / canvas.zoom,
+    canvas.onScreenCVS.height / canvas.zoom
   )
   //Prevent blurring
   canvas.onScreenCTX.imageSmoothingEnabled = false
@@ -106,10 +195,11 @@ function draw() {
   canvas.onScreenCTX.fillRect(
     0,
     0,
-    canvas.unsharpenedWidth / canvas.zoom,
-    canvas.unsharpenedHeight / canvas.zoom
+    canvas.onScreenCVS.width / canvas.zoom,
+    canvas.onScreenCVS.height / canvas.zoom
   )
   //BUG: How to mask outside drawing space?
+  //clear drawing space
   canvas.onScreenCTX.clearRect(
     canvas.xOffset,
     canvas.yOffset,

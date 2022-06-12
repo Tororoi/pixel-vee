@@ -236,12 +236,14 @@ canvas {
   );
   cursor: crosshair;
   // Keep canvas filling the screen
-  @media (orientation: landscape) {
-    width: 100%;
-  }
-  @media (orientation: portrait) {
-    height: 100%;
-  }
+  // @media (orientation: landscape) {
+  //   width: 100%;
+  // }
+  // @media (orientation: portrait) {
+  //   height: 100%;
+  // }
+  width: 100%;
+  height: 100%;
 }
 
 /* Toolbox */
@@ -623,7 +625,7 @@ input {
   margin-top: 46px;
   width: 100%;
   .tool {
-    background:rgb(131, 131, 131);
+    background: rgb(131, 131, 131);
     cursor: pointer;
   }
 }
