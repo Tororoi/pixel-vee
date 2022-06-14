@@ -9,6 +9,9 @@ initializeDragger(toolboxContainer)
 // * Brush * //
 const brushContainer = document.querySelector(".brush-container")
 initializeDragger(brushContainer)
+// * Canvas Size * //
+// const sizeContainer = document.querySelector(".size-container")
+// initializeDragger(sizeContainer)
 
 //===================================//
 //=== * * * Event Listeners * * * ===//

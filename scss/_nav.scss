@@ -1,0 +1,70 @@
+.nav {
+  background-color: rgb(0, 0, 0);
+  justify-self: center;
+  width: calc(100% - 4px);
+  height: 48px;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  .title {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .nav-items {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    margin-left: 16px;
+    margin-right: 16px;
+    #tooltips {
+      padding-right: 16px;
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+      cursor: pointer;
+      input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .checkmark {
+        height: 16px;
+        width: 16px;
+        background-color: rgb(255, 255, 255);
+        margin-right: 8px;
+        box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
+          0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+      }
+      &:hover {
+        .checkmark {
+          box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
+            0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+        }
+      }
+      input:checked ~ .checkmark {
+        background-color: rgb(65, 131, 252);
+      }
+    }
+    .canvas-size {
+      padding-right: 16px;
+      .btn {
+        height: 28px;
+        padding-left: 8px;
+        padding-right: 8px;
+        background: rgb(77, 77, 77);
+      }
+    }
+    .export {
+      .btn {
+        height: 28px;
+        width: 84px;
+        background: rgb(77, 77, 77);
+      }
+    }
+  }
+  .btn {
+    @include boxBorder;
+  }
+}

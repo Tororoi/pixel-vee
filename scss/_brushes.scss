@@ -1,17 +1,4 @@
-@import "keyframes";
-@import "mixins";
-@import "base-styles";
-@import "layout";
-@import "nav";
-@import "canvas";
-@import "toolbox";
-@import "layers";
-@import "brushes";
-@import "color-picker";
-
-/* Options */
-
-.size-container {
+.brush-container {
   background-color: rgb(51, 51, 51);
   user-select: none;
   position: absolute;
@@ -30,6 +17,18 @@
   }
   .btn {
     @include boxBorder;
+  }
+  .brush-preview {
+    width: 64px;
+    height: 64px;
+    background: rgb(31, 31, 31);
+    #brush-preview {
+      width: 2px;
+      height: 2px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
   }
   .slider {
     -webkit-appearance: none;

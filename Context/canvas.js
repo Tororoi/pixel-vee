@@ -39,30 +39,43 @@ layersContainer.addEventListener("dragend", dragLayerEnd)
 const onScreenCVS = document.getElementById("onScreen")
 const onScreenCTX = onScreenCVS.getContext("2d")
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
-let offScreenCVS = document.createElement("canvas")
-let offScreenCTX = offScreenCVS.getContext("2d")
+const offScreenCVS = document.createElement("canvas")
+const offScreenCTX = offScreenCVS.getContext("2d")
 //Set the dimensions of the drawing canvas
-offScreenCVS.width = 256
-offScreenCVS.height = 256
+offScreenCVS.width = 800
+offScreenCVS.height = 800
 //improve sharpness
 //BUG: sharpness (8+) greatly affects performance in browsers other than chrome (can safari and firefox not handle large canvases?)
-let sharpness = window.devicePixelRatio
-//zoom
-let zoom = 1 //zoom level should be based on absolute pixel size, not window relative to canvas
+const sharpness = window.devicePixelRatio
 //original canvas width/height
-let unsharpenedWidth = offScreenCVS.width * zoom
-let unsharpenedHeight = offScreenCVS.height * zoom
+const unsharpenedWidth = offScreenCVS.width
+const unsharpenedHeight = offScreenCVS.height
 //adjust canvas ratio here if needed
 onScreenCVS.width = onScreenCVS.offsetWidth * sharpness
 onScreenCVS.height = onScreenCVS.offsetHeight * sharpness
+//zoom
+const setInitialZoom = (width) => {
+  const ratio = 256 / width
+  switch (true) {
+    case ratio >= 8:
+      return 8
+    case ratio >= 4:
+      return 4
+    case ratio >= 2:
+      return 2
+    default:
+      return 1
+  }
+}
+const zoom = setInitialZoom(offScreenCVS.width) //zoom level should be based on absolute pixel size, not window relative to canvas
 onScreenCTX.scale(sharpness * zoom, sharpness * zoom)
 
 //Initialize offset, must be integer
 const xOffset = Math.round(
-  (onScreenCVS.width / sharpness - offScreenCVS.width) / 2
+  (onScreenCVS.width / sharpness / zoom - offScreenCVS.width) / 2
 )
 const yOffset = Math.round(
-  (onScreenCVS.height / sharpness - offScreenCVS.height) / 2
+  (onScreenCVS.height / sharpness / zoom - offScreenCVS.height) / 2
 )
 
 // //original canvas width/height

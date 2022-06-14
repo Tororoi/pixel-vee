@@ -24,7 +24,16 @@
         >
       </div>
       <div class="nav-items">
-        <label for="tooltips-toggle" id="tooltips" data-tooltip="Toggle tooltips on or off">
+        <div class="canvas-size">
+          <div class="btn" data-tooltip="Change canvas dimensions">
+            Canvas Size
+          </div>
+        </div>
+        <label
+          for="tooltips-toggle"
+          id="tooltips"
+          data-tooltip="Toggle tooltips on or off"
+        >
           <input type="checkbox" checked="true" id="tooltips-toggle" />
           <span class="checkmark"></span>
           Tooltips
@@ -34,10 +43,15 @@
         </div>
       </div>
     </div>
-    <div class="full-page">
+    <div class="page">
       <div class="canvas-container">
         <div class="bg-space">
-          <canvas id="onScreen" width="512px" height="512px"></canvas>
+          <canvas
+            class="onScreen"
+            id="onScreen"
+            width="512px"
+            height="512px"
+          ></canvas>
         </div>
       </div>
       <div class="layers-interface container draggable">
@@ -507,7 +521,7 @@
         <div id="picker-header" class="header dragger">
           <h3>Color Picker</h3>
         </div>
-        <div id="interface">
+        <div id="interface" class="picker-interface">
           <div id="left">
             <div id="picker">
               <canvas id="color-picker"></canvas>
@@ -538,7 +552,7 @@
               </h5>
             </div>
             <div id="rgbahsl">
-              <div id="rgba-container">
+              <div id="rgba-container" class="channel-container">
                 <label
                   >R:
                   <input type="number" id="r" min="0" max="255" />
@@ -579,7 +593,7 @@
                                 <input type="number" id="a" min="0" max="255">
                             </label> -->
               </div>
-              <div id="hsl-container">
+              <div id="hsl-container" class="channel-container">
                 <label
                   >H:
                   <input type="number" id="h" min="0" max="359" />
@@ -624,12 +638,27 @@
             </label>
             <label id="lumi"
               >Luminance:
-              <input type="string" id="luminance" />
+              <input type="number" id="luminance" />
             </label>
           </div>
         </div>
       </div>
+      <!-- <div class="size-container container draggable">
+        <div id="size-header" class="header dragger">Canvas Size</div>
+        <label
+          >Width:
+          <input type="number" id="canvas-width" min="8" max="800" />
+          <span class="sliderbox">
+            <span id="inc" class="channel-btn">
+              <p>+</p>
+            </span>
+            <span id="dec" class="channel-btn">
+              <p>-</p>
+            </span></span
+          >
+        </label>
+      </div> -->
     </div>
-    <div id="tooltip"></div>
+    <div id="tooltip" class="tooltip"></div>
   </body>
 </html>

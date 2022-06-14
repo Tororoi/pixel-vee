@@ -1907,7 +1907,6 @@ function grabSteps() {
         state.onscreenX - state.previousOnscreenX + canvas.previousXOffset
       canvas.yOffset =
         state.onscreenY - state.previousOnscreenY + canvas.previousYOffset
-      console.log(canvas.xOffset, canvas.yOffset)
       canvas.draw()
       break
     case "pointerup":
