@@ -1,5 +1,5 @@
 import { state } from "./state.js"
-import { initializeDragger } from "../utils/drag.js"
+import { initializeDialogBox } from "../utils/drag.js"
 
 //===================================//
 //==== * * * DOM Interface * * * ====//
@@ -10,7 +10,14 @@ const newLayerBtn = document.querySelector(".new-raster-layer")
 
 const layersContainer = document.querySelector(".layers")
 const layersInterfaceContainer = document.querySelector(".layers-interface")
-initializeDragger(layersInterfaceContainer)
+initializeDialogBox(layersInterfaceContainer)
+
+// * Canvas Size * //
+const sizeContainer = document.querySelector(".size-container")
+initializeDialogBox(sizeContainer)
+
+const canvasWidth = document.getElementById("canvas-width")
+const canvasHeight = document.getElementById("canvas-height")
 
 //===================================//
 //=== * * * Event Listeners * * * ===//
@@ -47,9 +54,6 @@ offScreenCVS.height = 800
 //improve sharpness
 //BUG: sharpness (8+) greatly affects performance in browsers other than chrome (can safari and firefox not handle large canvases?)
 const sharpness = window.devicePixelRatio
-//original canvas width/height
-const unsharpenedWidth = offScreenCVS.width
-const unsharpenedHeight = offScreenCVS.height
 //adjust canvas ratio here if needed
 onScreenCVS.width = onScreenCVS.offsetWidth * sharpness
 onScreenCVS.height = onScreenCVS.offsetHeight * sharpness
@@ -78,22 +82,10 @@ const yOffset = Math.round(
   (onScreenCVS.height / sharpness / zoom - offScreenCVS.height) / 2
 )
 
-// //original canvas width/height
-// let unsharpenedWidth = onScreenCVS.width
-// let unsharpenedHeight = onScreenCVS.height
-// //improve sharpness
-// //BUG: sharpness (8+) greatly affects performance in browsers other than chrome (can safari and firefox not handle large canvases?)
-// let sharpness = window.devicePixelRatio
-// let zoom = 1 //zoom level should be based on absolute pixel size, not window relative to canvas
-// let pixelSize = 1;
-// //adjust canvas ratio here if needed
-// onScreenCVS.width = unsharpenedWidth * sharpness
-// onScreenCVS.height = unsharpenedHeight * sharpness
-// // onScreenCVS.width = onScreenCVS.offsetWidth
-// // onScreenCVS.height = onScreenCVS.offsetHeight
-// onScreenCTX.scale(sharpness * zoom, sharpness * zoom)
-
 //for adjusting canvas size, adjust onscreen canvas dimensions in proportion to offscreen
+//Initialize size values
+canvasWidth.value = offScreenCVS.width
+canvasHeight.value = offScreenCVS.height
 
 //====================================//
 //======== * * * State * * * =========//
@@ -104,8 +96,6 @@ export const canvas = {
   //Parameters
   onScreenCVS,
   onScreenCTX,
-  unsharpenedWidth,
-  unsharpenedHeight,
   sharpness,
   zoom,
   zoomAtLastDraw: zoom,
@@ -162,8 +152,8 @@ function draw() {
   // canvas.onScreenCTX.clearRect(
   //   0,
   //   0,
-  //   canvas.unsharpenedWidth / canvas.zoom,
-  //   canvas.unsharpenedHeight / canvas.zoom
+  //   canvas.offScreenCVS.width / canvas.zoom,
+  //   canvas.offScreenCVS.height / canvas.zoom
   // )
   // //Prevent blurring
   // canvas.onScreenCTX.imageSmoothingEnabled = false
@@ -172,15 +162,15 @@ function draw() {
   // canvas.onScreenCTX.fillRect(
   //   0,
   //   0,
-  //   canvas.unsharpenedWidth / canvas.zoom,
-  //   canvas.unsharpenedHeight / canvas.zoom
+  //   canvas.offScreenCVS.width / canvas.zoom,
+  //   canvas.offScreenCVS.height / canvas.zoom
   // )
   // //BUG: How to mask outside drawing space?
   // canvas.onScreenCTX.clearRect(
   //   canvas.xOffset,
   //   canvas.yOffset,
-  //   canvas.unsharpenedWidth,
-  //   canvas.unsharpenedHeight
+  //   canvas.offScreenCVS.width,
+  //   canvas.offScreenCVS.height
   // )
   // drawLayers()
   // //draw border
@@ -188,8 +178,8 @@ function draw() {
   // canvas.onScreenCTX.rect(
   //   canvas.xOffset - 1,
   //   canvas.yOffset - 1,
-  //   canvas.unsharpenedWidth + 2,
-  //   canvas.unsharpenedHeight + 2
+  //   canvas.offScreenCVS.width + 2,
+  //   canvas.offScreenCVS.height + 2
   // )
   // canvas.onScreenCTX.lineWidth = 2
   // canvas.onScreenCTX.strokeStyle = "black"
@@ -203,8 +193,8 @@ function draw() {
   )
   //Prevent blurring
   canvas.onScreenCTX.imageSmoothingEnabled = false
-  //fill background
-  canvas.onScreenCTX.fillStyle = "gray"
+  //fill background with neutral gray
+  canvas.onScreenCTX.fillStyle = "rgb(131, 131, 131)"
   canvas.onScreenCTX.fillRect(
     0,
     0,
@@ -216,8 +206,8 @@ function draw() {
   canvas.onScreenCTX.clearRect(
     canvas.xOffset,
     canvas.yOffset,
-    canvas.unsharpenedWidth,
-    canvas.unsharpenedHeight
+    canvas.offScreenCVS.width,
+    canvas.offScreenCVS.height
   )
   drawLayers()
   //draw border
@@ -225,8 +215,8 @@ function draw() {
   canvas.onScreenCTX.rect(
     canvas.xOffset - 1,
     canvas.yOffset - 1,
-    canvas.unsharpenedWidth + 2,
-    canvas.unsharpenedHeight + 2
+    canvas.offScreenCVS.width + 2,
+    canvas.offScreenCVS.height + 2
   )
   canvas.onScreenCTX.lineWidth = 2
   canvas.onScreenCTX.strokeStyle = "black"
@@ -247,9 +237,9 @@ function drawLayers() {
         canvas.onScreenCTX.drawImage(
           l.img,
           canvas.xOffset +
-            (l.x * canvas.unsharpenedWidth) / canvas.offScreenCVS.width,
+            (l.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
           canvas.yOffset +
-            (l.y * canvas.unsharpenedWidth) / canvas.offScreenCVS.width,
+            (l.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
           l.img.width * l.scale,
           l.img.height * l.scale
         )
@@ -261,11 +251,11 @@ function drawLayers() {
         canvas.onScreenCTX.drawImage(
           l.cvs,
           canvas.xOffset +
-            (l.x * canvas.unsharpenedWidth) / canvas.offScreenCVS.width,
+            (l.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
           canvas.yOffset +
-            (l.y * canvas.unsharpenedWidth) / canvas.offScreenCVS.width,
-          canvas.unsharpenedWidth,
-          canvas.unsharpenedHeight
+            (l.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+          canvas.offScreenCVS.width,
+          canvas.offScreenCVS.height
         )
         canvas.onScreenCTX.restore()
       }
@@ -296,10 +286,12 @@ function layerInteract(e) {
   //toggle visibility
   if (e.target.className.includes("hide")) {
     if (e.target.childNodes[0].className.includes("eyeopen")) {
-      e.target.childNodes[0].className = "eyeclosed icon"
+      e.target.childNodes[0].classList.remove("eyeopen")
+      e.target.childNodes[0].classList.add("eyeclosed")
       layer.opacity = 0
     } else if (e.target.childNodes[0].className.includes("eyeclosed")) {
-      e.target.childNodes[0].className = "eyeopen icon"
+      e.target.childNodes[0].classList.remove("eyeclosed")
+      e.target.childNodes[0].classList.add("eyeopen")
       layer.opacity = 1
     }
   } else {
@@ -403,10 +395,10 @@ function addReferenceLayer() {
       img.onload = () => {
         //constrain background image to canvas with scale
         let scale =
-          canvas.unsharpenedWidth / img.width >
-          canvas.unsharpenedHeight / img.height
-            ? canvas.unsharpenedHeight / img.height
-            : canvas.unsharpenedWidth / img.width
+          canvas.offScreenCVS.width / img.width >
+          canvas.offScreenCVS.height / img.height
+            ? canvas.offScreenCVS.height / img.height
+            : canvas.offScreenCVS.width / img.width
         let layer = {
           type: "reference",
           title: `Reference ${canvas.layers.length + 1}`,
@@ -428,8 +420,8 @@ function addReferenceLayer() {
 }
 
 function removeLayer(e) {
-  //set "removed" flag to true on selected layer
-  //add to timeline
+  //set "removed" flag to true on selected layer. NOTE: Currently not implemented
+  //TODO: add to timeline
   let layer = e.target.closest(".layer").layerObj
   layer.removed = true
 }
@@ -452,10 +444,11 @@ function renderLayersToDOM() {
       let hide = document.createElement("div")
       hide.className = "hide btn"
       let eye = document.createElement("span")
+      eye.classList.add("eye")
       if (l.opacity === 0) {
-        eye.className = "eyeclosed icon"
+        eye.classList.add("eyeclosed")
       } else {
-        eye.className = "eyeopen icon"
+        eye.classList.add("eyeopen")
       }
       hide.appendChild(eye)
       layerElement.appendChild(hide)

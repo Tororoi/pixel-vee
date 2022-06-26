@@ -11,6 +11,25 @@ export const initializeDragger = (dragTarget) => {
   }
 }
 
+export const initializeCollapser = (collapseTarget) => {
+  const collapseBtn = collapseTarget.querySelector(".collapse-checkbox")
+  const collapsibleArea = collapseTarget.querySelector(".collapsible")
+  if (collapseBtn && collapsibleArea) {
+    collapseBtn.addEventListener("click", (e) => {
+      if (collapseBtn.checked) {
+        collapsibleArea.style.height = 0
+      } else {
+        collapsibleArea.style.height = "100%"
+      }
+    })
+  }
+}
+
+export const initializeDialogBox = (dialogBoxTarget) => {
+  initializeDragger(dialogBoxTarget)
+  initializeCollapser(dialogBoxTarget)
+}
+
 //Drag
 export const dragStart = (e, dragTarget) => {
   e.target.setPointerCapture(e.pointerId)

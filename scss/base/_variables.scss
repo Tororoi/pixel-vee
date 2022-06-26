@@ -1,0 +1,42 @@
+@use 'sass:math';
+/* Variables */
+
+/* Breakpoints */
+$bp-xs: "min-width: 375px" !default;
+$bp-sm: "min-width: 512px" !default;
+$bp-md: "min-width: 768px" !default;
+$bp-lg: "min-width: 1024px" !default;
+$bp-xl: "min-width: 1280px" !default;
+$bp-xxl: "min-width: 1440px" !default;
+$bp-vxs: "min-height: 375px" !default;
+$bp-vsm: "min-height: 512px" !default;
+$bp-vmd: "min-height: 768px" !default;
+$bp-landscape: "orientation: landscape" !default;
+$bp-portrait: "orientation: portrait" !default;
+
+/* Colors */
+$white: rgb(255, 255, 255) !default;
+$lighter-gray: rgb(216, 216, 216) !default;
+$light-gray: rgb(200, 200, 200) !default;
+$neutral-gray: rgb(131, 131, 131) !default;
+$mid-gray: rgb(95, 95, 95) !default;
+$gray: rgb(77, 77, 77) !default;
+$dark-gray: rgb(61, 61, 61) !default;
+$extra-dark-gray: rgb(51, 51, 51) !default;
+$darkest-gray: rgb(31, 31, 31) !default;
+$black: rgb(0, 0, 0) !default;
+$red: rgb(239, 63, 57) !default;
+$light-yellow: rgb(255, 255, 199) !default;
+$blue: rgb(65, 131, 252) !default;
+
+/* Color Assignments */
+$tooltip-color: $light-yellow !default;
+$border-color: $neutral-gray !default;
+$active-color: $white !default;
+$button-color: $neutral-gray !default;
+$warning-color: $red !default;
+
+:root {
+  //Define css vars after scss vars to have option to use scss vars as single source of truth
+  --border-color: $border-color;
+}

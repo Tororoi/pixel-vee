@@ -4,7 +4,7 @@
   user-select: none;
   position: absolute;
   z-index: 102;
-  background-color: rgb(51, 51, 51);
+  background-color: $extra-dark-gray;
   width: 136px;
   right: 0;
   display: flex;
@@ -16,12 +16,10 @@
   .colors {
     width: 128px;
     height: 128px;
-    .btn {
-      @include boxBorder;
-    }
+    position: relative;
     .swatch {
       position: absolute;
-      background: rgb(0, 0, 0);
+      background: $black;
       width: 72px;
       height: 72px;
       margin: 16px;
@@ -29,7 +27,7 @@
     }
     .back-swatch {
       position: absolute;
-      background: rgb(255, 255, 255);
+      background: $white;
       width: 72px;
       height: 72px;
       margin: 16px;
@@ -55,7 +53,9 @@
     margin-top: 46px;
     width: 100%;
     .tool {
-      background: rgb(131, 131, 131);
+      background: $button-color;
+      margin: 3px;
+      @include boxBorder;
       cursor: pointer;
       .plusminus {
         width: 40px;

@@ -1,5 +1,5 @@
 .brush-container {
-  background-color: rgb(51, 51, 51);
+  background-color: $extra-dark-gray;
   user-select: none;
   position: absolute;
   z-index: 100;
@@ -9,19 +9,16 @@
   justify-content: center;
   align-items: center;
   padding-bottom: 1px; //Remove after refactoring button without margin
-  .header {
-    margin-bottom: 4px;
-  }
   p {
     margin: 0px;
   }
-  .btn {
-    @include boxBorder;
+  .brush-size {
+    padding-top: 2px;
   }
   .brush-preview {
     width: 64px;
     height: 64px;
-    background: rgb(31, 31, 31);
+    background: $darkest-gray;
     #brush-preview {
       width: 2px;
       height: 2px;
@@ -34,7 +31,7 @@
     -webkit-appearance: none;
     width: 80%;
     height: 16px;
-    background: rgb(31, 31, 31);
+    background: $darkest-gray;
     outline: none;
     cursor: pointer;
     &::-webkit-slider-thumb {
@@ -51,7 +48,7 @@
     }
     &:disabled {
       cursor: not-allowed;
-      background: rgb(131, 131, 131);
+      background: $neutral-gray;
       &::-webkit-slider-thumb {
         background: rgb(200, 200, 200);
       }

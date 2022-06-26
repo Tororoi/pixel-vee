@@ -1,64 +1,16 @@
-@import "keyframes";
-@import "mixins";
-@import "base-styles";
-@import "layout";
-@import "nav";
-@import "canvas";
-@import "toolbox";
-@import "layers";
-@import "brushes";
-@import "color-picker";
-
-/* Options */
-
-.size-container {
-  background-color: rgb(51, 51, 51);
-  user-select: none;
-  position: absolute;
-  z-index: 100;
-  width: 206px;
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: center;
-  align-items: center;
-  padding-bottom: 1px; //Remove after refactoring button without margin
-  .header {
-    margin-bottom: 4px;
-  }
-  p {
-    margin: 0px;
-  }
-  .btn {
-    @include boxBorder;
-  }
-  .slider {
-    -webkit-appearance: none;
-    width: 80%;
-    height: 16px;
-    background: rgb(31, 31, 31);
-    outline: none;
-    cursor: pointer;
-    &::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      background: #ffffff;
-    }
-    &::-moz-range-thumb {
-      width: 16px;
-      height: 16px;
-      background: #ffffff;
-    }
-    &:disabled {
-      cursor: not-allowed;
-      background: rgb(131, 131, 131);
-      &::-webkit-slider-thumb {
-        background: rgb(200, 200, 200);
-      }
-      &::-moz-range-thumb {
-        background: rgb(200, 200, 200);
-      }
-    }
-  }
-}
+/* Import order is important */
+/* First base styles and mixins, keyframes, variables */
+@import "base/variables";
+@import "base/keyframes";
+@import "base/mixins";
+@import "base/base-styles";
+/* Next basic site layout components */
+@import "layout/layout";
+@import "layout/nav";
+/* Next override basic styles with specific styles when necessary */
+@import "components/canvas";
+@import "components/toolbox";
+@import "components/layers";
+@import "components/brushes";
+@import "components/color-picker";
+@import "components/size";

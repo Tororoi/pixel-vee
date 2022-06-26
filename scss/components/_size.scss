@@ -1,0 +1,66 @@
+.size-container {
+  background-color: $extra-dark-gray;
+  user-select: none;
+  position: absolute;
+  z-index: 100;
+  width: 206px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 1px; //Remove after refactoring button without margin
+  p {
+    margin: 0px;
+  }
+  .dimensions {
+    padding: 4px;
+    label {
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: space-between;
+      width: 100%;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      .input {
+        display: flex;
+        flex-flow: row nowrap;
+      }
+      input {
+        margin-left: 8px;
+      }
+    }
+  }
+  .sliderbox {
+    position: relative;
+    background-color: $darkest-gray;
+    width: 16px;
+    height: 18px;
+    margin-left: 6px;
+    overflow: hidden;
+    @include boxBorder;
+    .channel-btn {
+      position: absolute;
+      text-align: center;
+      width: 16px;
+      height: 9px;
+      left: 0;
+      color: white;
+      cursor: pointer;
+      &#inc {
+        top: 0;
+      }
+      &#dec {
+        bottom: 0;
+      }
+      p {
+        transform: translateX(1px) translateY(-2px);
+        margin: 0;
+        pointer-events: none;
+      }
+      &:hover {
+        background: white;
+        color: $darkest-gray;
+      }
+    }
+  }
+}

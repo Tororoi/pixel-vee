@@ -368,11 +368,11 @@ const setCoordinates = (e) => {
   state.cursorWithCanvasOffsetY = Math.floor(y / canvas.zoom)
   state.cursorX = Math.round(
     state.cursorWithCanvasOffsetX -
-      canvas.xOffset / (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
+      canvas.xOffset / (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
   )
   state.cursorY = Math.round(
     state.cursorWithCanvasOffsetY -
-      canvas.yOffset / (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
+      canvas.yOffset / (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
   )
 }
 
@@ -388,10 +388,10 @@ function handlePointerDown(e) {
   //Reset Cursor for mobile
   state.onscreenX =
     state.cursorWithCanvasOffsetX *
-    (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
+    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
   state.onscreenY =
     state.cursorWithCanvasOffsetY *
-    (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
+    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
   state.previousOnscreenX = state.onscreenX
   state.previousOnscreenY = state.onscreenY
   //if drawing on hidden layer, flash hide btn
@@ -420,10 +420,10 @@ function handlePointerMove(e) {
   //Hover brush
   state.onscreenX =
     state.cursorWithCanvasOffsetX *
-    (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
+    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
   state.onscreenY =
     state.cursorWithCanvasOffsetY *
-    (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
+    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
   if (
     state.clicked ||
     (state.tool.name === "curve" && state.clickCounter > 0)
@@ -439,8 +439,8 @@ function handlePointerMove(e) {
       canvas.onScreenCTX.clearRect(
         0,
         0,
-        canvas.unsharpenedWidth / canvas.zoom,
-        canvas.unsharpenedHeight / canvas.zoom
+        canvas.offScreenCVS.width / canvas.zoom,
+        canvas.offScreenCVS.height / canvas.zoom
       )
       canvas.draw()
       renderCursor()
@@ -616,11 +616,9 @@ function handleTools(e) {
     if (tools[e.target.closest(".tool").id]) {
       //reset old button
       toolBtn.style.background = "rgb(131, 131, 131)"
-      // toolBtn.querySelector(".icon").style = "opacity: 0.6;"
       //get new button and select it
       toolBtn = e.target.closest(".tool")
       toolBtn.style.background = "rgb(255, 255, 255)"
-      // toolBtn.querySelector(".icon").style = "opacity: 1;"
       state.tool = tools[toolBtn.id]
       //update options
       updateStamp()
@@ -648,10 +646,8 @@ function handleModes(e) {
   if (e.target.closest(".mode")) {
     //reset old button
     modeBtn.style.background = "rgb(131, 131, 131)"
-    // modeBtn.querySelector(".icon").style = "opacity: 0.6;"
     //get new button and select it
     modeBtn = e.target.closest(".mode")
-    // modeBtn.querySelector(".icon").style = "opacity: 1;"
     modeBtn.style.background = "rgb(255, 255, 255)"
     state.mode = modeBtn.id
   }
@@ -686,22 +682,24 @@ function drawCurrentPixel() {
     state.tool.brushSize,
     canvas.onScreenCTX,
     state.mode,
-    canvas.unsharpenedWidth / canvas.offScreenCVS.width
+    canvas.offScreenCVS.width / canvas.offScreenCVS.width
   )
 }
 
 function drawCursorBox() {
   let brushOffset =
     Math.floor(state.tool.brushSize / 2) *
-    (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
+    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
   let x0 = state.onscreenX - brushOffset
   let y0 = state.onscreenY - brushOffset
   let x1 =
     x0 +
-    (canvas.unsharpenedWidth / canvas.offScreenCVS.width) * state.tool.brushSize
+    (canvas.offScreenCVS.width / canvas.offScreenCVS.width) *
+      state.tool.brushSize
   let y1 =
     y0 +
-    (canvas.unsharpenedWidth / canvas.offScreenCVS.width) * state.tool.brushSize
+    (canvas.offScreenCVS.width / canvas.offScreenCVS.width) *
+      state.tool.brushSize
   //line offset to stroke offcenter;
   let ol = 0.25
   canvas.onScreenCTX.beginPath()
@@ -1073,17 +1071,17 @@ function lineSteps() {
         canvas.onScreenCTX.clearRect(
           0,
           0,
-          canvas.unsharpenedWidth / canvas.zoom,
-          canvas.unsharpenedHeight / canvas.zoom
+          canvas.offScreenCVS.width / canvas.zoom,
+          canvas.offScreenCVS.height / canvas.zoom
         )
         canvas.draw()
         actionLine(
           state.previousX +
             canvas.xOffset /
-              (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.previousY +
             canvas.yOffset /
-              (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.cursorWithCanvasOffsetX,
           state.cursorWithCanvasOffsetY,
           swatches.primary.color,
@@ -1091,7 +1089,7 @@ function lineSteps() {
           state.mode,
           state.brushStamp,
           state.tool.brushSize,
-          canvas.unsharpenedWidth / canvas.offScreenCVS.width
+          canvas.offScreenCVS.width / canvas.offScreenCVS.width
         )
         state.previousOnscreenX = state.onscreenX
         state.previousOnscreenY = state.onscreenY
@@ -1487,35 +1485,35 @@ function curveSteps() {
         state.onscreenX !== state.previousOnscreenX ||
         state.onscreenY !== state.previousOnscreenY
       ) {
-        // canvas.onScreenCTX.clearRect(0, 0, canvas.unsharpenedWidth / canvas.zoom, canvas.unsharpenedHeight / canvas.zoom);
+        // canvas.onScreenCTX.clearRect(0, 0, canvas.offScreenCVS.width / canvas.zoom, canvas.offScreenCVS.height / canvas.zoom);
         canvas.draw()
         //onscreen preview
         actionCurve(
           state.px1 +
             canvas.xOffset /
-              (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.py1 +
             canvas.yOffset /
-              (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.px2 +
             canvas.xOffset /
-              (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.py2 +
             canvas.yOffset /
-              (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.px3 +
             canvas.xOffset /
-              (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.py3 +
             canvas.yOffset /
-              (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.clickCounter,
           swatches.primary.color,
           canvas.onScreenCTX,
           state.mode,
           state.brushStamp,
           state.tool.brushSize,
-          canvas.unsharpenedWidth / canvas.offScreenCVS.width
+          canvas.offScreenCVS.width / canvas.offScreenCVS.width
         )
         state.previousOnscreenX = state.onscreenX
         state.previousOnscreenY = state.onscreenY

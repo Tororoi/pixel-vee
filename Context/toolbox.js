@@ -1,24 +1,23 @@
-import { initializeDragger } from "../utils/drag.js"
+import { initializeDialogBox } from "../utils/drag.js"
 
 //===================================//
 //==== * * * DOM Interface * * * ====//
 //===================================//
 // * Toolbox * //
 const toolboxContainer = document.querySelector(".toolbox")
-initializeDragger(toolboxContainer)
+initializeDialogBox(toolboxContainer)
 // * Brush * //
 const brushContainer = document.querySelector(".brush-container")
-initializeDragger(brushContainer)
-// * Canvas Size * //
-// const sizeContainer = document.querySelector(".size-container")
-// initializeDragger(sizeContainer)
+initializeDialogBox(brushContainer)
 
 //===================================//
 //=== * * * Event Listeners * * * ===//
 //===================================//
 
+
+
 //====================================//
-//======== * * * State * * * ========//
+//======== * * * State * * * =========//
 //====================================//
 
 //Tools
