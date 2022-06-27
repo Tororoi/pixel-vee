@@ -24,11 +24,11 @@
         >
       </div>
       <div class="nav-items">
-        <div class="canvas-size">
+        <!-- <div class="canvas-size">
           <div class="btn" data-tooltip="Change canvas dimensions">
             Canvas Size
           </div>
-        </div>
+        </div> -->
         <label
           for="tooltips-toggle"
           id="tooltips"
@@ -691,36 +691,39 @@
           </label>
         </div>
         <div class="collapsible">
-          <div class="dimensions">
-            <label
-              >Width:
-              <span class="input">
-                <input type="number" id="canvas-width" min="8" max="800" />
-                <span class="sliderbox">
-                  <span id="inc" class="channel-btn">
-                    <p>+</p>
-                  </span>
-                  <span id="dec" class="channel-btn">
-                    <p>-</p>
-                  </span>
-                </span>
-              </span>
-            </label>
-            <label
-              >Height:
-              <span class="input">
-                <input type="number" id="canvas-height" min="8" max="800" />
-                <span class="sliderbox">
-                  <span id="inc" class="channel-btn">
-                    <p>+</p>
-                  </span>
-                  <span id="dec" class="channel-btn">
-                    <p>-</p>
+          <form class="dimensions-form">
+            <div class="inputs">
+              <label
+                >Width:
+                <span class="input">
+                  <input type="number" id="canvas-width" min="8" max="800" />
+                  <span class="sliderbox">
+                    <span id="inc" class="channel-btn">
+                      <p>+</p>
+                    </span>
+                    <span id="dec" class="channel-btn">
+                      <p>-</p>
+                    </span>
                   </span>
                 </span>
-              </span>
-            </label>
-          </div>
+              </label>
+              <label
+                >Height:
+                <span class="input">
+                  <input type="number" id="canvas-height" min="8" max="800" />
+                  <span class="sliderbox">
+                    <span id="inc" class="channel-btn">
+                      <p>+</p>
+                    </span>
+                    <span id="dec" class="channel-btn">
+                      <p>-</p>
+                    </span>
+                  </span>
+                </span>
+              </label>
+            </div>
+            <button type="submit" id="update-size" class="update-size btn">Update Canvas Size</button>
+          </form>
         </div>
       </div>
     </div>

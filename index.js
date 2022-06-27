@@ -1,5 +1,5 @@
 import { state } from "../Context/state.js"
-import { canvas, resizeCanvas } from "../Context/canvas.js"
+import { canvas, resizeOnScreenCanvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 
 //===================================//
@@ -168,7 +168,7 @@ document.body.addEventListener("mouseover", (e) => {
 })
 
 //Window
-window.addEventListener("resize", resizeCanvas)
+window.addEventListener("resize", resizeOnScreenCanvas)
 
 //Shortcuts
 document.addEventListener("keydown", handleKeyDown)
@@ -1834,14 +1834,22 @@ function handleClear() {
 //====================================//
 
 function handleRecenter(e) {
-  canvas.onScreenCTX.scale(1 / canvas.zoom, 1 / canvas.zoom)
-  canvas.zoom = 1
+  canvas.zoom = canvas.setInitialZoom(canvas.offScreenCVS.width)
+  canvas.onScreenCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
   canvas.xOffset = Math.round(
-    (canvas.onScreenCVS.width / canvas.sharpness - canvas.offScreenCVS.width) /
+    (canvas.onScreenCVS.width / canvas.sharpness / canvas.zoom -
+      canvas.offScreenCVS.width) /
       2
   )
   canvas.yOffset = Math.round(
-    (canvas.onScreenCVS.height / canvas.sharpness -
+    (canvas.onScreenCVS.height / canvas.sharpness / canvas.zoom -
       canvas.offScreenCVS.height) /
       2
   )
@@ -1945,7 +1953,8 @@ function actionUndoRedo(pushStack, popStack) {
   canvas.draw()
 }
 
-function redrawPoints() {
+//TODO: move all tools to separate file so this isn't exported from index
+export function redrawPoints() {
   //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
   state.undoStack.forEach((action) => {
     action.forEach((p) => {

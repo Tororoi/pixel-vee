@@ -88,6 +88,12 @@ a:active {
   text-decoration: none;
   color: inherit; }
 
+button {
+  font-family: "04Font";
+  border: 0;
+  padding: 4px;
+  font-size: 16px; }
+
 input {
   font-family: "04Font";
   font-size: 16px;
@@ -445,7 +451,7 @@ canvas {
   background-color: #333333;
   width: 206px;
   height: auto;
-  top: 137px;
+  top: 135px;
   display: flex;
   flex-flow: column nowrap;
   align-items: center; }
@@ -728,6 +734,7 @@ canvas {
   position: absolute;
   z-index: 100;
   width: 206px;
+  top: 241px;
   display: flex;
   flex-flow: column nowrap;
   justify-content: center;
@@ -735,20 +742,25 @@ canvas {
   padding-bottom: 1px; }
   .size-container p {
     margin: 0px; }
-  .size-container .dimensions {
+  .size-container .dimensions-form {
     padding: 4px; }
-    .size-container .dimensions label {
+    .size-container .dimensions-form .inputs {
+      padding-right: 24px;
+      padding-left: 24px; }
+    .size-container .dimensions-form label {
       display: flex;
       flex-flow: row nowrap;
       justify-content: space-between;
       width: 100%;
       margin-top: 10px;
       margin-bottom: 10px; }
-      .size-container .dimensions label .input {
+      .size-container .dimensions-form label .input {
         display: flex;
         flex-flow: row nowrap; }
-      .size-container .dimensions label input {
+      .size-container .dimensions-form label input {
         margin-left: 8px; }
+    .size-container .dimensions-form .btn {
+      background: #4d4d4d; }
   .size-container .sliderbox {
     position: relative;
     background-color: #1f1f1f;

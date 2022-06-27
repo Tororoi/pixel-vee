@@ -54,9 +54,7 @@ export const dragMove = (e) => {
     state.dragTarget.style.top = e.clientY - state.dragY + "px"
     const parentElement = state.dragTarget.parentElement
     let pRect = parentElement.getBoundingClientRect()
-    // console.log(pRect)
     let tgtRect = state.dragTarget.getBoundingClientRect()
-    // console.log(pRect, tgtRect)
     //Constrain draggable element inside window, include box shadow border
     if (tgtRect.left < pRect.left) state.dragTarget.style.left = 0 + "px"
     if (tgtRect.top < pRect.top) state.dragTarget.style.top = 0 + "px"

@@ -1,5 +1,6 @@
 import { state } from "./state.js"
 import { initializeDialogBox } from "../utils/drag.js"
+import { redrawPoints } from "../index.js"
 
 //===================================//
 //==== * * * DOM Interface * * * ====//
@@ -16,27 +17,9 @@ initializeDialogBox(layersInterfaceContainer)
 const sizeContainer = document.querySelector(".size-container")
 initializeDialogBox(sizeContainer)
 
+const dimensionsForm = document.querySelector(".dimensions-form")
 const canvasWidth = document.getElementById("canvas-width")
 const canvasHeight = document.getElementById("canvas-height")
-
-//===================================//
-//=== * * * Event Listeners * * * ===//
-//===================================//
-
-// * Canvas * //
-
-// * Layers * //
-uploadBtn.addEventListener("change", addReferenceLayer)
-newLayerBtn.addEventListener("click", addRasterLayer)
-
-layersContainer.addEventListener("click", layerInteract)
-
-layersContainer.addEventListener("dragstart", dragLayerStart)
-layersContainer.addEventListener("dragover", dragLayerOver)
-layersContainer.addEventListener("dragenter", dragLayerEnter)
-layersContainer.addEventListener("dragleave", dragLayerLeave)
-layersContainer.addEventListener("drop", dropLayer)
-layersContainer.addEventListener("dragend", dragLayerEnd)
 
 //===================================//
 //======= * * * Canvas * * * ========//
@@ -62,10 +45,12 @@ const setInitialZoom = (width) => {
   const ratio = 256 / width
   switch (true) {
     case ratio >= 8:
-      return 8
+      return 16
     case ratio >= 4:
-      return 4
+      return 8
     case ratio >= 2:
+      return 4
+    case ratio >= 1:
       return 2
     default:
       return 1
@@ -106,6 +91,7 @@ export const canvas = {
   currentLayer: null,
   //Cursor
   pointerEvent: "none",
+  sizePointerState: "none",
   //Coordinates
   //for moving canvas/ grab
   xOffset: xOffset,
@@ -122,13 +108,100 @@ export const canvas = {
   addRasterLayer,
   renderLayersToDOM,
   getColor,
+  setInitialZoom,
 }
 
 //====================================//
 //======== * * * Canvas * * * ========//
 //====================================//
 
-export const resizeCanvas = () => {
+const handleIncrement = (e) => {
+  let dimension = e.target.parentNode.previousSibling.previousSibling
+  let max = 800
+  let min = 8
+  if (e.target.id === "inc") {
+    let newValue = Math.floor(+dimension.value)
+    if (newValue < max) {
+      dimension.value = newValue + 1
+    }
+  } else if (e.target.id === "dec") {
+    let newValue = Math.floor(+dimension.value)
+    if (newValue > min) {
+      dimension.value = newValue - 1
+    }
+  }
+}
+
+/**
+ * increment values while rgb button is held down
+ * @param {event} e
+ */
+const handleSizeIncrement = (e) => {
+  if (canvas.sizePointerState === "pointerdown") {
+    handleIncrement(e)
+    window.setTimeout(() => handleSizeIncrement(e), 150)
+  }
+}
+
+const restrictSize = (e) => {
+  const max = 800
+  const min = 8
+  if (e.target.value > max) {
+    e.target.value = max
+  } else if (e.target.value < min) {
+    e.target.value = min
+  }
+}
+
+const resizeOffScreenCanvas = (width, height) => {
+  canvas.offScreenCVS.width = width
+  canvas.offScreenCVS.height = height
+  //reset canvas state
+  canvas.zoom = setInitialZoom(canvas.offScreenCVS.width)
+  canvas.onScreenCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
+  canvas.xOffset = Math.round(
+    (canvas.onScreenCVS.width / canvas.sharpness / canvas.zoom -
+      canvas.offScreenCVS.width) /
+      2
+  )
+  canvas.yOffset = Math.round(
+    (canvas.onScreenCVS.height / canvas.sharpness / canvas.zoom -
+      canvas.offScreenCVS.height) /
+      2
+  )
+  canvas.previousXOffset = canvas.xOffset
+  canvas.previousYOffset = canvas.yOffset
+  canvas.subPixelX = null
+  canvas.subPixelY = null
+  canvas.zoomPixelX = null
+  canvas.zoomPixelY = null
+  //resize layers. Per function, it's cheaper to run this inside the existing iterator in drawLayers, but since drawLayers runs so often, it's preferable to only run this here where it's needed.
+  canvas.layers.forEach((l) => {
+    if (
+      l.cvs.width !== canvas.offScreenCVS.width ||
+      l.cvs.height !== canvas.offScreenCVS.height
+    ) {
+      l.cvs.width = canvas.offScreenCVS.width
+      l.cvs.height = canvas.offScreenCVS.height
+    }
+  })
+  redrawPoints() //TODO: import from file other than index
+  canvas.draw()
+}
+
+const handleDimensionsSubmit = (e) => {
+  e.preventDefault()
+  resizeOffScreenCanvas(canvasWidth.value, canvasHeight.value)
+}
+
+export const resizeOnScreenCanvas = () => {
   //Keep canvas dimensions at 100% (requires css style width/ height 100%)
   canvas.onScreenCVS.width = canvas.onScreenCVS.offsetWidth * sharpness
   canvas.onScreenCVS.height = canvas.onScreenCVS.offsetHeight * sharpness
@@ -143,47 +216,11 @@ export const resizeCanvas = () => {
   canvas.draw()
 }
 
-resizeCanvas()
+resizeOnScreenCanvas()
 
 //FIX: Improve performance by keeping track of "redraw regions" instead of redrawing the whole thing.
 //Draw Canvas
 function draw() {
-  // //clear canvas
-  // canvas.onScreenCTX.clearRect(
-  //   0,
-  //   0,
-  //   canvas.offScreenCVS.width / canvas.zoom,
-  //   canvas.offScreenCVS.height / canvas.zoom
-  // )
-  // //Prevent blurring
-  // canvas.onScreenCTX.imageSmoothingEnabled = false
-  // //fill background
-  // canvas.onScreenCTX.fillStyle = "gray"
-  // canvas.onScreenCTX.fillRect(
-  //   0,
-  //   0,
-  //   canvas.offScreenCVS.width / canvas.zoom,
-  //   canvas.offScreenCVS.height / canvas.zoom
-  // )
-  // //BUG: How to mask outside drawing space?
-  // canvas.onScreenCTX.clearRect(
-  //   canvas.xOffset,
-  //   canvas.yOffset,
-  //   canvas.offScreenCVS.width,
-  //   canvas.offScreenCVS.height
-  // )
-  // drawLayers()
-  // //draw border
-  // canvas.onScreenCTX.beginPath()
-  // canvas.onScreenCTX.rect(
-  //   canvas.xOffset - 1,
-  //   canvas.yOffset - 1,
-  //   canvas.offScreenCVS.width + 2,
-  //   canvas.offScreenCVS.height + 2
-  // )
-  // canvas.onScreenCTX.lineWidth = 2
-  // canvas.onScreenCTX.strokeStyle = "black"
-  // canvas.onScreenCTX.stroke()
   //clear canvas
   canvas.onScreenCTX.clearRect(
     0,
@@ -493,3 +530,35 @@ function getColor(x, y, colorLayer) {
 //vector layers have an option to create a raster copy layer
 
 //vector layers need movable control points, how to organize order of added control points?
+
+//===================================//
+//=== * * * Event Listeners * * * ===//
+//===================================//
+
+// * Canvas * //
+dimensionsForm.addEventListener("pointerdown", (e) => {
+  canvas.sizePointerState = e.type
+  handleSizeIncrement(e)
+})
+dimensionsForm.addEventListener("pointerup", (e) => {
+  canvas.sizePointerState = e.type
+})
+dimensionsForm.addEventListener("pointerout", (e) => {
+  canvas.sizePointerState = e.type
+})
+dimensionsForm.addEventListener("submit", handleDimensionsSubmit)
+canvasWidth.addEventListener("blur", restrictSize)
+canvasHeight.addEventListener("blur", restrictSize)
+
+// * Layers * //
+uploadBtn.addEventListener("change", addReferenceLayer)
+newLayerBtn.addEventListener("click", addRasterLayer)
+
+layersContainer.addEventListener("click", layerInteract)
+
+layersContainer.addEventListener("dragstart", dragLayerStart)
+layersContainer.addEventListener("dragover", dragLayerOver)
+layersContainer.addEventListener("dragenter", dragLayerEnter)
+layersContainer.addEventListener("dragleave", dragLayerLeave)
+layersContainer.addEventListener("drop", dropLayer)
+layersContainer.addEventListener("dragend", dragLayerEnd)
