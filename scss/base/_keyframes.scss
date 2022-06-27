@@ -1,0 +1,11 @@
+@keyframes flash {
+  0% {
+    background: $warning-color;
+  }
+  30% {
+    background: $warning-color;
+  }
+  100% {
+    background: $button-color;
+  }
+}

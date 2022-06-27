@@ -1,8 +1,0 @@
-@mixin boxBorder {
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131),
-    0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
-  &:hover:not([disabled]), &:focus {
-    box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255),
-      0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
-  }
-}

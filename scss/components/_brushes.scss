@@ -1,0 +1,60 @@
+.brush-container {
+  background-color: $extra-dark-gray;
+  user-select: none;
+  position: absolute;
+  z-index: 100;
+  width: 206px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 1px; //Remove after refactoring button without margin
+  p {
+    margin: 0px;
+  }
+  .brush-size {
+    padding-top: 2px;
+  }
+  .brush-preview {
+    width: 64px;
+    height: 64px;
+    background: $darkest-gray;
+    #brush-preview {
+      width: 2px;
+      height: 2px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+  .slider {
+    -webkit-appearance: none;
+    width: 80%;
+    height: 16px;
+    background: $darkest-gray;
+    outline: none;
+    cursor: pointer;
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      background: #ffffff;
+    }
+    &::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      background: #ffffff;
+    }
+    &:disabled {
+      cursor: not-allowed;
+      background: $neutral-gray;
+      &::-webkit-slider-thumb {
+        background: rgb(200, 200, 200);
+      }
+      &::-moz-range-thumb {
+        background: rgb(200, 200, 200);
+      }
+    }
+  }
+}

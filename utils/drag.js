@@ -1,6 +1,6 @@
 import { state } from "../Context/state.js"
 
-const fullPage = document.querySelector(".full-page")
+const fullPage = document.querySelector(".page")
 
 export const initializeDragger = (dragTarget) => {
   const dragBtn = dragTarget.querySelector(".dragger")
@@ -9,6 +9,25 @@ export const initializeDragger = (dragTarget) => {
     dragBtn.addEventListener("pointerup", dragStop)
     dragBtn.addEventListener("pointermove", dragMove)
   }
+}
+
+export const initializeCollapser = (collapseTarget) => {
+  const collapseBtn = collapseTarget.querySelector(".collapse-checkbox")
+  const collapsibleArea = collapseTarget.querySelector(".collapsible")
+  if (collapseBtn && collapsibleArea) {
+    collapseBtn.addEventListener("click", (e) => {
+      if (collapseBtn.checked) {
+        collapsibleArea.style.height = 0
+      } else {
+        collapsibleArea.style.height = "100%"
+      }
+    })
+  }
+}
+
+export const initializeDialogBox = (dialogBoxTarget) => {
+  initializeDragger(dialogBoxTarget)
+  initializeCollapser(dialogBoxTarget)
 }
 
 //Drag
@@ -35,9 +54,7 @@ export const dragMove = (e) => {
     state.dragTarget.style.top = e.clientY - state.dragY + "px"
     const parentElement = state.dragTarget.parentElement
     let pRect = parentElement.getBoundingClientRect()
-    // console.log(pRect)
     let tgtRect = state.dragTarget.getBoundingClientRect()
-    // console.log(pRect, tgtRect)
     //Constrain draggable element inside window, include box shadow border
     if (tgtRect.left < pRect.left) state.dragTarget.style.left = 0 + "px"
     if (tgtRect.top < pRect.top) state.dragTarget.style.top = 0 + "px"

@@ -1,0 +1,169 @@
+/* Color Picker */
+
+.picker-container {
+  user-select: none;
+  position: absolute;
+  z-index: 103;
+  top: calc(50% - 235px);
+  left: calc(50% - 183px);
+  display: none;
+  flex-flow: column nowrap;
+  color: white;
+  background: $extra-dark-gray;
+  text-align: center;
+  width: 570px;
+  font-family: "04Font";
+  font-size: 16px;
+  padding: 0;
+  align-self: center;
+  opacity: 1;
+  @include boxBorder;
+  .header {
+    h3 {
+      justify-self: center;
+      height: 20px;
+      margin: 0px;
+    }
+  }
+}
+
+.picker-interface {
+  display: flex;
+  flex-flow: row nowrap;
+  #left {
+    display: flex;
+    flex-flow: column nowrap;
+    height: 346px;
+    #picker {
+      display: flex;
+      flex-flow: row nowrap;
+      height: 290px;
+      width: 310px;
+      #color-picker {
+        background-color: white;
+        width: 250px;
+        height: 250px;
+        margin: 20px;
+        cursor: crosshair;
+        @include boxBorder;
+      }
+      #hueslider {
+        flex-shrink: 0;
+        -webkit-appearance: none;
+        appearance: none;
+        transform: rotate(90deg);
+        transform-origin: left;
+        width: 250px;
+        height: 20px;
+        margin: 10px;
+        background: white;
+        outline: none;
+        @include boxBorder;
+        &::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          height: 24px;
+          width: 5px;
+          outline: 2px solid $black;
+        }
+      }
+    }
+    #buttons {
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: center;
+      align-items: start;
+      height: 76px;
+      .btn {
+        background: $gray;
+        font-size: 20px;
+        padding: 8px;
+        margin: 0px 20px 0px 20px;
+      }
+    }
+  }
+  #right {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-start;
+    height: 346px;
+    width: 260px;
+    label {
+      display: flex;
+      flex-flow: row nowrap;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      input {
+        margin-left: 8px;
+      }
+    }
+    #colors {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      div {
+        background-color: white;
+        width: 80px;
+        height: 40px;
+        margin: 10px 10px 0px 10px;
+      }
+    }
+    #rgbahsl {
+      display: flex;
+      flex-flow: row nowrap;
+      width: 100%;
+      margin-left: 30px;
+      .channel-container {
+        display: flex;
+        flex-flow: column nowrap;
+      }
+      #hsl-container {
+        margin-left: 12px;
+      }
+      .sliderbox {
+        position: relative;
+        background-color: $darkest-gray;
+        width: 16px;
+        height: 18px;
+        margin-left: 6px;
+        overflow: hidden;
+        @include boxBorder;
+        .channel-btn {
+          position: absolute;
+          text-align: center;
+          width: 16px;
+          height: 9px;
+          left: 0;
+          color: white;
+          cursor: pointer;
+          &#inc {
+            top: 0;
+          }
+          &#dec {
+            bottom: 0;
+          }
+          p {
+            transform: translateX(1px) translateY(-2px);
+            margin: 0;
+            pointer-events: none;
+          }
+          &:hover {
+            background: white;
+            color: $darkest-gray;
+          }
+        }
+      }
+    }
+    #hex {
+      margin-left: 30px;
+      #hexcode {
+        width: 80px;
+      }
+    }
+    #lumi {
+      margin-left: 30px;
+      #luminance {
+        width: 26px;
+      }
+    }
+  }
+}

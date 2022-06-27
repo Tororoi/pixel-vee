@@ -1,5 +1,5 @@
 import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
+import { canvas, resizeOnScreenCanvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 
 //===================================//
@@ -166,6 +166,9 @@ document.body.addEventListener("mouseover", (e) => {
     showTooltip(tooltipMessage, e.target)
   }
 })
+
+//Window
+window.addEventListener("resize", resizeOnScreenCanvas)
 
 //Shortcuts
 document.addEventListener("keydown", handleKeyDown)
@@ -352,6 +355,27 @@ function handleKeyUp(e) {
 //==== * * Pointer Event Handlers * * ====//
 //========================================//
 
+const setCoordinates = (e) => {
+  const x = e.offsetX
+  const y = e.offsetY
+  canvas.subPixelX =
+    Math.floor(e.offsetX) -
+    Math.floor(Math.floor(e.offsetX) / canvas.zoom) * canvas.zoom
+  canvas.subPixelY =
+    Math.floor(e.offsetY) -
+    Math.floor(Math.floor(e.offsetY) / canvas.zoom) * canvas.zoom
+  state.cursorWithCanvasOffsetX = Math.floor(x / canvas.zoom)
+  state.cursorWithCanvasOffsetY = Math.floor(y / canvas.zoom)
+  state.cursorX = Math.round(
+    state.cursorWithCanvasOffsetX -
+      canvas.xOffset / (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
+  )
+  state.cursorY = Math.round(
+    state.cursorWithCanvasOffsetY -
+      canvas.yOffset / (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
+  )
+}
+
 function handlePointerDown(e) {
   //reset media type, chrome dev tools niche use or computers that have touchscreen capabilities
   e.target.setPointerCapture(e.pointerId)
@@ -360,35 +384,14 @@ function handlePointerDown(e) {
   if (state.clickDisabled) {
     return
   }
-  //zoom can change without pointer moving, so set state.trueRatio
-  state.trueRatio =
-    (canvas.onScreenCVS.offsetWidth / canvas.offScreenCVS.width) * canvas.zoom
-  let x, y
-  if (e.targetTouches) {
-    let rect = e.target.getBoundingClientRect()
-    x = Math.round(e.targetTouches[0].pageX - rect.left)
-    y = Math.round(e.targetTouches[0].pageY - rect.top)
-  } else {
-    x = e.offsetX
-    y = e.offsetY
-  }
-  state.cursorWithCanvasOffsetX = Math.floor(x / state.trueRatio)
-  state.cursorWithCanvasOffsetY = Math.floor(y / state.trueRatio)
-  state.cursorX = Math.round(
-    state.cursorWithCanvasOffsetX -
-      canvas.xOffset / (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
-  )
-  state.cursorY = Math.round(
-    state.cursorWithCanvasOffsetY -
-      canvas.yOffset / (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
-  )
+  setCoordinates(e)
   //Reset Cursor for mobile
   state.onscreenX =
     state.cursorWithCanvasOffsetX *
-    (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
+    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
   state.onscreenY =
     state.cursorWithCanvasOffsetY *
-    (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
+    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
   state.previousOnscreenX = state.onscreenX
   state.previousOnscreenY = state.onscreenY
   //if drawing on hidden layer, flash hide btn
@@ -410,36 +413,17 @@ function handlePointerMove(e) {
   canvas.pointerEvent = "pointermove"
   state.clickDisabled = false
   //currently only square dimensions work
-  state.trueRatio =
-    (canvas.onScreenCVS.offsetWidth / canvas.offScreenCVS.width) * canvas.zoom
   canvas.zoomAtLastDraw = canvas.zoom //* */
   //coords
-  let x, y
-  if (e.targetTouches) {
-    let rect = e.target.getBoundingClientRect()
-    x = Math.round(e.targetTouches[0].pageX - rect.left)
-    y = Math.round(e.targetTouches[0].pageY - rect.top)
-  } else {
-    x = e.offsetX
-    y = e.offsetY
-  }
-  state.cursorWithCanvasOffsetX = Math.floor(x / state.trueRatio)
-  state.cursorWithCanvasOffsetY = Math.floor(y / state.trueRatio)
-  state.cursorX = Math.round(
-    state.cursorWithCanvasOffsetX -
-      canvas.xOffset / (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
-  )
-  state.cursorY = Math.round(
-    state.cursorWithCanvasOffsetY -
-      canvas.yOffset / (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
-  )
+  setCoordinates(e)
+  // console.log(canvas.subPixelX, canvas.subPixelY)
   //Hover brush
   state.onscreenX =
     state.cursorWithCanvasOffsetX *
-    (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
+    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
   state.onscreenY =
     state.cursorWithCanvasOffsetY *
-    (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
+    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
   if (
     state.clicked ||
     (state.tool.name === "curve" && state.clickCounter > 0)
@@ -455,8 +439,8 @@ function handlePointerMove(e) {
       canvas.onScreenCTX.clearRect(
         0,
         0,
-        canvas.unsharpenedWidth / canvas.zoom,
-        canvas.unsharpenedHeight / canvas.zoom
+        canvas.offScreenCVS.width / canvas.zoom,
+        canvas.offScreenCVS.height / canvas.zoom
       )
       canvas.draw()
       renderCursor()
@@ -472,28 +456,7 @@ function handlePointerUp(e) {
   if (state.clickDisabled) {
     return
   }
-  //zoom can change without pointer moving, so set state.trueRatio
-  state.trueRatio =
-    (canvas.onScreenCVS.offsetWidth / canvas.offScreenCVS.width) * canvas.zoom
-  let x, y
-  if (e.targetTouches) {
-    let rect = e.target.getBoundingClientRect()
-    x = Math.round(e.changedTouches[0].pageX - rect.left)
-    y = Math.round(e.changedTouches[0].pageY - rect.top)
-  } else {
-    x = e.offsetX
-    y = e.offsetY
-  }
-  state.cursorWithCanvasOffsetX = Math.floor(x / state.trueRatio)
-  state.cursorWithCanvasOffsetY = Math.floor(y / state.trueRatio)
-  state.cursorX = Math.round(
-    state.cursorWithCanvasOffsetX -
-      canvas.xOffset / (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
-  )
-  state.cursorY = Math.round(
-    state.cursorWithCanvasOffsetY -
-      canvas.yOffset / (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
-  )
+  setCoordinates(e)
   if (canvas.currentLayer.opacity === 0) {
     for (let i = 0; i < layersCont.children.length; i += 1) {
       if (layersCont.children[i].layerObj === canvas.currentLayer) {
@@ -547,12 +510,19 @@ function handlePointerOut(e) {
  */
 function zoom(z, xOriginOffset, yOriginOffset) {
   canvas.zoom *= z
-  canvas.xOffset += xOriginOffset
-  canvas.yOffset += yOriginOffset
-  //re scale canvas
-  canvas.onScreenCTX.scale(z, z)
+  canvas.xOffset = Math.round(xOriginOffset)
+  canvas.yOffset = Math.round(yOriginOffset)
   canvas.previousXOffset = canvas.xOffset
   canvas.previousYOffset = canvas.yOffset
+  //re scale canvas
+  canvas.onScreenCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
   canvas.draw()
 }
 
@@ -561,31 +531,27 @@ function handleWheel(e) {
   //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
   //zoom based on pointer coords
   let z
-  let rw = canvas.unsharpenedWidth / canvas.offScreenCVS.width
-  let nox =
-    -Math.round(
-      (state.cursorWithCanvasOffsetX * canvas.zoomAtLastDraw) / 5 / canvas.zoom
-    ) * rw
-  let noy =
-    -Math.round(
-      (state.cursorWithCanvasOffsetY * canvas.zoomAtLastDraw) / 5 / canvas.zoom
-    ) * rw
-  let lox =
-    Math.round(
-      (state.cursorWithCanvasOffsetX * canvas.zoomAtLastDraw) / 4 / canvas.zoom
-    ) * rw
-  let loy =
-    Math.round(
-      (state.cursorWithCanvasOffsetY * canvas.zoomAtLastDraw) / 4 / canvas.zoom
-    ) * rw
+  setCoordinates(e)
   if (delta < 0) {
-    z = 0.8
-    if (canvas.zoom > 0.25) {
-      zoom(z, lox, loy)
+    z = 0.5
+    //get target coordinates
+    let zoomedX = state.cursorWithCanvasOffsetX / z
+    let zoomedY = state.cursorWithCanvasOffsetY / z
+    //offset by cursor coords
+    let nox = zoomedX - state.cursorX
+    let noy = zoomedY - state.cursorY
+    if (canvas.zoom > 0.5) {
+      zoom(z, nox, noy)
     }
   } else if (delta > 0) {
-    z = 1.25
-    if (canvas.zoom < 16) {
+    z = 2
+    //get target coordinates
+    let zoomedX = state.cursorWithCanvasOffsetX / z
+    let zoomedY = state.cursorWithCanvasOffsetY / z
+    //offset by half of canvas
+    let nox = zoomedX - state.cursorX
+    let noy = zoomedY - state.cursorY
+    if (canvas.zoom < 32) {
       zoom(z, nox, noy)
     }
   }
@@ -603,20 +569,28 @@ function handleZoom(e) {
   if (e.target.closest(".zoombtn")) {
     let zoomBtn = e.target.closest(".zoombtn")
     let z
-    let rw = canvas.unsharpenedWidth / canvas.offScreenCVS.width
-    //next origin
-    let nox = -Math.round(canvas.unsharpenedWidth / 10 / canvas.zoom / rw) * rw
-    let noy = -Math.round(canvas.unsharpenedHeight / 10 / canvas.zoom / rw) * rw
-    let lox = Math.round(canvas.unsharpenedWidth / 8 / canvas.zoom / rw) * rw
-    let loy = Math.round(canvas.unsharpenedHeight / 8 / canvas.zoom / rw) * rw
     if (zoomBtn.id === "minus") {
-      z = 0.8
-      if (canvas.zoom > 0.25) {
-        zoom(z, lox, loy)
+      z = 0.5
+      //get new expected centered offsets based on center of canvas
+      //get center coordinates
+      let zoomedX = (canvas.xOffset + canvas.offScreenCVS.width / 2) / z
+      let zoomedY = (canvas.yOffset + canvas.offScreenCVS.height / 2) / z
+      //offset by half of canvas
+      let nox = zoomedX - canvas.offScreenCVS.width / 2
+      let noy = zoomedY - canvas.offScreenCVS.height / 2
+      if (canvas.zoom > 0.5) {
+        zoom(z, nox, noy)
       }
     } else if (zoomBtn.id === "plus") {
-      z = 1.25
-      if (canvas.zoom < 16) {
+      z = 2
+      //get new expected centered offsets based on center of canvas
+      //get center coordinates
+      let zoomedX = (canvas.xOffset + canvas.offScreenCVS.width / 2) / z
+      let zoomedY = (canvas.yOffset + canvas.offScreenCVS.height / 2) / z
+      //offset by half of canvas
+      let nox = zoomedX - canvas.offScreenCVS.width / 2
+      let noy = zoomedY - canvas.offScreenCVS.height / 2
+      if (canvas.zoom < 32) {
         zoom(z, nox, noy)
       }
     }
@@ -642,11 +616,9 @@ function handleTools(e) {
     if (tools[e.target.closest(".tool").id]) {
       //reset old button
       toolBtn.style.background = "rgb(131, 131, 131)"
-      // toolBtn.querySelector(".icon").style = "opacity: 0.6;"
       //get new button and select it
       toolBtn = e.target.closest(".tool")
       toolBtn.style.background = "rgb(255, 255, 255)"
-      // toolBtn.querySelector(".icon").style = "opacity: 1;"
       state.tool = tools[toolBtn.id]
       //update options
       updateStamp()
@@ -674,10 +646,8 @@ function handleModes(e) {
   if (e.target.closest(".mode")) {
     //reset old button
     modeBtn.style.background = "rgb(131, 131, 131)"
-    // modeBtn.querySelector(".icon").style = "opacity: 0.6;"
     //get new button and select it
     modeBtn = e.target.closest(".mode")
-    // modeBtn.querySelector(".icon").style = "opacity: 1;"
     modeBtn.style.background = "rgb(255, 255, 255)"
     state.mode = modeBtn.id
   }
@@ -712,22 +682,24 @@ function drawCurrentPixel() {
     state.tool.brushSize,
     canvas.onScreenCTX,
     state.mode,
-    canvas.unsharpenedWidth / canvas.offScreenCVS.width
+    canvas.offScreenCVS.width / canvas.offScreenCVS.width
   )
 }
 
 function drawCursorBox() {
   let brushOffset =
     Math.floor(state.tool.brushSize / 2) *
-    (canvas.unsharpenedWidth / canvas.offScreenCVS.width)
+    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
   let x0 = state.onscreenX - brushOffset
   let y0 = state.onscreenY - brushOffset
   let x1 =
     x0 +
-    (canvas.unsharpenedWidth / canvas.offScreenCVS.width) * state.tool.brushSize
+    (canvas.offScreenCVS.width / canvas.offScreenCVS.width) *
+      state.tool.brushSize
   let y1 =
     y0 +
-    (canvas.unsharpenedWidth / canvas.offScreenCVS.width) * state.tool.brushSize
+    (canvas.offScreenCVS.width / canvas.offScreenCVS.width) *
+      state.tool.brushSize
   //line offset to stroke offcenter;
   let ol = 0.25
   canvas.onScreenCTX.beginPath()
@@ -1099,17 +1071,17 @@ function lineSteps() {
         canvas.onScreenCTX.clearRect(
           0,
           0,
-          canvas.unsharpenedWidth / canvas.zoom,
-          canvas.unsharpenedHeight / canvas.zoom
+          canvas.offScreenCVS.width / canvas.zoom,
+          canvas.offScreenCVS.height / canvas.zoom
         )
         canvas.draw()
         actionLine(
           state.previousX +
             canvas.xOffset /
-              (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.previousY +
             canvas.yOffset /
-              (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.cursorWithCanvasOffsetX,
           state.cursorWithCanvasOffsetY,
           swatches.primary.color,
@@ -1117,7 +1089,7 @@ function lineSteps() {
           state.mode,
           state.brushStamp,
           state.tool.brushSize,
-          canvas.unsharpenedWidth / canvas.offScreenCVS.width
+          canvas.offScreenCVS.width / canvas.offScreenCVS.width
         )
         state.previousOnscreenX = state.onscreenX
         state.previousOnscreenY = state.onscreenY
@@ -1513,35 +1485,35 @@ function curveSteps() {
         state.onscreenX !== state.previousOnscreenX ||
         state.onscreenY !== state.previousOnscreenY
       ) {
-        // canvas.onScreenCTX.clearRect(0, 0, canvas.unsharpenedWidth / canvas.zoom, canvas.unsharpenedHeight / canvas.zoom);
+        // canvas.onScreenCTX.clearRect(0, 0, canvas.offScreenCVS.width / canvas.zoom, canvas.offScreenCVS.height / canvas.zoom);
         canvas.draw()
         //onscreen preview
         actionCurve(
           state.px1 +
             canvas.xOffset /
-              (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.py1 +
             canvas.yOffset /
-              (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.px2 +
             canvas.xOffset /
-              (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.py2 +
             canvas.yOffset /
-              (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.px3 +
             canvas.xOffset /
-              (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.py3 +
             canvas.yOffset /
-              (canvas.unsharpenedWidth / canvas.offScreenCVS.width),
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.clickCounter,
           swatches.primary.color,
           canvas.onScreenCTX,
           state.mode,
           state.brushStamp,
           state.tool.brushSize,
-          canvas.unsharpenedWidth / canvas.offScreenCVS.width
+          canvas.offScreenCVS.width / canvas.offScreenCVS.width
         )
         state.previousOnscreenX = state.onscreenX
         state.previousOnscreenY = state.onscreenY
@@ -1862,12 +1834,27 @@ function handleClear() {
 //====================================//
 
 function handleRecenter(e) {
-  canvas.onScreenCTX.scale(1 / canvas.zoom, 1 / canvas.zoom)
-  canvas.zoom = 1
-  canvas.xOffset = 0
-  canvas.yOffset = 0
-  canvas.previousXOffset = 0
-  canvas.previousYOffset = 0
+  canvas.zoom = canvas.setInitialZoom(canvas.offScreenCVS.width)
+  canvas.onScreenCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
+  canvas.xOffset = Math.round(
+    (canvas.onScreenCVS.width / canvas.sharpness / canvas.zoom -
+      canvas.offScreenCVS.width) /
+      2
+  )
+  canvas.yOffset = Math.round(
+    (canvas.onScreenCVS.height / canvas.sharpness / canvas.zoom -
+      canvas.offScreenCVS.height) /
+      2
+  )
+  canvas.previousXOffset = canvas.xOffset
+  canvas.previousYOffset = canvas.yOffset
   canvas.draw()
 }
 
@@ -1966,7 +1953,8 @@ function actionUndoRedo(pushStack, popStack) {
   canvas.draw()
 }
 
-function redrawPoints() {
+//TODO: move all tools to separate file so this isn't exported from index
+export function redrawPoints() {
   //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
   state.undoStack.forEach((action) => {
     action.forEach((p) => {

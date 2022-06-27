@@ -1,0 +1,69 @@
+.nav {
+  background-color: $black;
+  justify-self: center;
+  width: calc(100% - 4px);
+  height: 48px;
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  margin: 2px;
+  @include boxBorder;
+  .title {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .nav-items {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    margin-left: 16px;
+    margin-right: 16px;
+    #tooltips {
+      padding-right: 16px;
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+      cursor: pointer;
+      input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .checkmark {
+        height: 16px;
+        width: 16px;
+        background-color: $white;
+        margin-right: 8px;
+        box-shadow: 2px 0px $border-color, -2px 0px $border-color,
+          0px -2px $border-color, 0px 2px $border-color;
+      }
+      &:hover {
+        .checkmark {
+          box-shadow: 2px 0px $white, -2px 0px $white,
+            0px -2px $white, 0px 2px $white;
+        }
+      }
+      input:checked ~ .checkmark {
+        background-color: $blue;
+      }
+    }
+    .canvas-size {
+      padding-right: 16px;
+      .btn {
+        height: 28px;
+        padding-left: 8px;
+        padding-right: 8px;
+        background: $gray;
+      }
+    }
+    .export {
+      .btn {
+        height: 28px;
+        width: 84px;
+        background: $gray;
+      }
+    }
+  }
+}
