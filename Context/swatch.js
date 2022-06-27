@@ -152,5 +152,5 @@ function handleConfirm() {
     "%)"
   setColor(picker.rgb.red, picker.rgb.green, picker.rgb.blue, picker.swatch)
   //close window
-  // closePickerWindow()
+  closePickerWindow()
 }
