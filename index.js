@@ -181,7 +181,9 @@ canvas.onScreenCVS.addEventListener("pointerdown", handlePointerDown)
 canvas.onScreenCVS.addEventListener("pointerup", handlePointerUp)
 canvas.onScreenCVS.addEventListener("pointerout", handlePointerOut) //NOTE: Deprecated? May need to rewrite just for multistep tools such as curve that can be in use while pointer is up
 
-canvas.onScreenCVS.addEventListener("touchstart", handleTouchStart)
+canvas.onScreenCVS.addEventListener("touchstart", handleTouchStart, {
+  passive: true,
+})
 canvas.onScreenCVS.addEventListener("mousedown", handleMouseDown)
 //Toolbox
 undoBtn.addEventListener("click", handleUndo)
