@@ -36,6 +36,7 @@ offScreenCVS.width = 800
 offScreenCVS.height = 800
 //improve sharpness
 //BUG: sharpness (8+) greatly affects performance in browsers other than chrome (can safari and firefox not handle large canvases?)
+//window.devicePixelRatio is typically 2
 const sharpness = window.devicePixelRatio
 //adjust canvas ratio here if needed
 onScreenCVS.width = onScreenCVS.offsetWidth * sharpness

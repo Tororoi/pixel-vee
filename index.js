@@ -780,33 +780,14 @@ function drawCircle() {
   }
   let paths = []
 
-  //alternative method, iterate over every pixel, brute force bad symmetry
-  // let r = state.tool.brushSize / 2; //float
-  // let rr = r * r;
-  // for (let i = 0; i < state.tool.brushSize; i++) {
-  //     for (let j = 0; j < state.tool.brushSize; j++) {
-  //         let xd = j - r;
-  //         let yd = i - r;
-  //         let dd = xd * xd + yd * yd;
-  //         console.log(dd, rr)
-  //         if (dd <= rr) { //inside circle
-  //             brushRects.push({ x: j, y: i, w: 1, h: 1 });
-  //         }
-  //     }
-  // }
-
   eightfoldSym(xO, yO, x, y)
   while (x < y) {
     x++
     if (d >= 0) {
       y--
       d += 2 * (x - y) + 1 //outside circle
-      // d = d + 5 * (x - y) + 10;
-      // d = d + 4 * (x - y) + 10;
     } else {
       d += 2 * x + 1 //inside circle
-      // d = d + 3 * x + 6;
-      // d = d + 4 * x + 6;
     }
     eightfoldSym(xO, yO, x, y)
   }
@@ -834,30 +815,6 @@ function drawCircle() {
   brush.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
   brush.setAttribute("stroke-width", 1)
   return brushRects
-
-  // //circle outline
-  // function eightfoldSym(xc, yc, x, y) {
-  //     if (state.tool.brushSize % 2 === 0) { xc-- };
-  //     brushRects.push({ x: xc + y, y: yc - x , w: 1, h: 1}); //oct 1
-  //     brushRects.push({ x: xc + x, y: yc - y , w: 1, h: 1}); //oct 2
-  //     if (state.tool.brushSize % 2 === 0) { xc++ };
-  //     brushRects.push({ x: xc - x, y: yc - y , w: 1, h: 1}); //oct 3
-  //     brushRects.push({ x: xc - y, y: yc - x , w: 1, h: 1}); //oct 4
-  //     if (state.tool.brushSize % 2 === 0) { yc-- };
-  //     brushRects.push({ x: xc - y, y: yc + x , w: 1, h: 1}); //oct 5
-  //     brushRects.push({ x: xc - x, y: yc + y , w: 1, h: 1}); //oct 6
-  //     if (state.tool.brushSize % 2 === 0) { xc-- };
-  //     brushRects.push({ x: xc + x, y: yc + y , w: 1, h: 1}); //oct 7
-  //     brushRects.push({ x: xc + y, y: yc + x , w: 1, h: 1}); //oct 8
-  // }
-
-  // brushPoints.forEach(p => {
-  //     actionDraw(p.x, p.y, swatches.primary.color, 1, canvas.currentLayer.ctx, state.mode)
-  // })
-
-  // state.tool.brushPoints = brushPoints;
-  // actionFill(xO, yO, swatches.primary.color, canvas.currentLayer.ctx, state.mode);
-  // canvas.draw();
 }
 
 //====================================//
