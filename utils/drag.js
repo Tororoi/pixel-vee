@@ -1,7 +1,5 @@
 import { state } from "../Context/state.js"
 
-const fullPage = document.querySelector(".page")
-
 export const initializeDragger = (dragTarget) => {
   const dragBtn = dragTarget.querySelector(".dragger")
   if (dragBtn) {
