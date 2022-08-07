@@ -69,13 +69,20 @@ export const state = {
  * @param {*} x
  * @param {*} y
  * @param {*} layer - layer that history should be applied to
+ * @param {*} image - only for replace tool
+ * @param {*} width - only for replace tool
+ * @param {*} height - only for replace tool
+ * @param
  */
-function addToTimeline(tool, x, y, layer) {
+function addToTimeline(tool, x, y, layer, image, width, height) {
   //use current state for variables
   state.points.push({
     //x/y are sometimes objects with multiple values
     x: x,
     y: y,
+    width: width,
+    height: height,
+    image: image,
     layer: layer,
     brush: state.brushStamp,
     weight: state.tool.brushSize,

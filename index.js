@@ -1223,7 +1223,15 @@ function finalReplaceStep() {
   canvas.currentLayer = canvas.tempLayer
   let image = new Image()
   image.src = canvas.currentLayer.cvs.toDataURL()
-  state.addToTimeline(state.tool.name, image, null, canvas.currentLayer)
+  state.addToTimeline(
+    state.tool.name,
+    0,
+    0,
+    canvas.currentLayer,
+    image,
+    canvas.currentLayer.cvs.width,
+    canvas.currentLayer.cvs.height
+  )
 }
 
 function selectSteps() {
@@ -2200,13 +2208,7 @@ export function redrawPoints() {
           )
           break
         case "replace":
-          p.layer.ctx.drawImage(
-            p.x,
-            0,
-            0,
-            canvas.offScreenCVS.width,
-            canvas.offScreenCVS.height
-          )
+          p.layer.ctx.drawImage(p.image, 0, 0, p.width, p.height)
           break
         default:
           actionDraw(p.x, p.y, p.color, p.brush, p.weight, p.layer.ctx, p.mode)
