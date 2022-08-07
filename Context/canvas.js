@@ -90,6 +90,9 @@ export const canvas = {
   //Layers
   layers: [], //(types: raster, vector, reference)
   currentLayer: null,
+  tempLayer: null,
+  bgColor: "rgb(131, 131, 131)",
+  borderColor: "black",
   //Cursor
   pointerEvent: "none",
   sizePointerState: "none",
@@ -106,6 +109,7 @@ export const canvas = {
   //Functions
   draw,
   consolidateLayers,
+  createNewRasterLayer,
   addRasterLayer,
   renderLayersToDOM,
   getColor,
@@ -232,7 +236,7 @@ function draw() {
   //Prevent blurring
   canvas.onScreenCTX.imageSmoothingEnabled = false
   //fill background with neutral gray
-  canvas.onScreenCTX.fillStyle = "rgb(131, 131, 131)"
+  canvas.onScreenCTX.fillStyle = canvas.bgColor
   canvas.onScreenCTX.fillRect(
     0,
     0,
@@ -257,7 +261,7 @@ function draw() {
     canvas.offScreenCVS.height + 2
   )
   canvas.onScreenCTX.lineWidth = 2
-  canvas.onScreenCTX.strokeStyle = "black"
+  canvas.onScreenCTX.strokeStyle = canvas.borderColor
   canvas.onScreenCTX.stroke()
 }
 
@@ -394,16 +398,14 @@ function dragLayerEnd(e) {
   renderLayersToDOM()
 }
 
-function addRasterLayer() {
-  //TODO: add to timeline.
-  //once layer is added and drawn on, can no longer be deleted
+function createNewRasterLayer(name) {
   let layerCVS = document.createElement("canvas")
   let layerCTX = layerCVS.getContext("2d")
   layerCVS.width = canvas.offScreenCVS.width
   layerCVS.height = canvas.offScreenCVS.height
   let layer = {
     type: "raster",
-    title: `Layer ${canvas.layers.length + 1}`,
+    title: name,
     cvs: layerCVS,
     ctx: layerCTX,
     x: 0,
@@ -412,6 +414,12 @@ function addRasterLayer() {
     opacity: 1,
     removed: false,
   }
+  return layer
+}
+
+function addRasterLayer() {
+  //once layer is added to timeline and drawn on, can no longer be deleted
+  const layer = createNewRasterLayer(`Layer ${canvas.layers.length + 1}`)
   canvas.layers.push(layer)
   state.addToTimeline("addlayer", 0, 0, layer)
   state.undoStack.push(state.points)
