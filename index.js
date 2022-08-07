@@ -1,3 +1,5 @@
+//Import order is important. 1. DOM initialization, 2. state managers
+import { initializeAllDialogBoxes } from "./DOM/dialogBox.js"
 import { state } from "../Context/state.js"
 import { canvas, resizeOnScreenCanvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
@@ -644,6 +646,8 @@ function handleTools(e) {
   }
 }
 
+//TODO: modes should allow multiple at once, not one at a time
+//TODO: add multi-touch mode for drawing with multiple fingers
 function handleModes(e) {
   if (e.target.closest(".mode")) {
     //reset old button
@@ -780,33 +784,14 @@ function drawCircle() {
   }
   let paths = []
 
-  //alternative method, iterate over every pixel, brute force bad symmetry
-  // let r = state.tool.brushSize / 2; //float
-  // let rr = r * r;
-  // for (let i = 0; i < state.tool.brushSize; i++) {
-  //     for (let j = 0; j < state.tool.brushSize; j++) {
-  //         let xd = j - r;
-  //         let yd = i - r;
-  //         let dd = xd * xd + yd * yd;
-  //         console.log(dd, rr)
-  //         if (dd <= rr) { //inside circle
-  //             brushRects.push({ x: j, y: i, w: 1, h: 1 });
-  //         }
-  //     }
-  // }
-
   eightfoldSym(xO, yO, x, y)
   while (x < y) {
     x++
     if (d >= 0) {
       y--
       d += 2 * (x - y) + 1 //outside circle
-      // d = d + 5 * (x - y) + 10;
-      // d = d + 4 * (x - y) + 10;
     } else {
       d += 2 * x + 1 //inside circle
-      // d = d + 3 * x + 6;
-      // d = d + 4 * x + 6;
     }
     eightfoldSym(xO, yO, x, y)
   }
@@ -834,30 +819,6 @@ function drawCircle() {
   brush.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
   brush.setAttribute("stroke-width", 1)
   return brushRects
-
-  // //circle outline
-  // function eightfoldSym(xc, yc, x, y) {
-  //     if (state.tool.brushSize % 2 === 0) { xc-- };
-  //     brushRects.push({ x: xc + y, y: yc - x , w: 1, h: 1}); //oct 1
-  //     brushRects.push({ x: xc + x, y: yc - y , w: 1, h: 1}); //oct 2
-  //     if (state.tool.brushSize % 2 === 0) { xc++ };
-  //     brushRects.push({ x: xc - x, y: yc - y , w: 1, h: 1}); //oct 3
-  //     brushRects.push({ x: xc - y, y: yc - x , w: 1, h: 1}); //oct 4
-  //     if (state.tool.brushSize % 2 === 0) { yc-- };
-  //     brushRects.push({ x: xc - y, y: yc + x , w: 1, h: 1}); //oct 5
-  //     brushRects.push({ x: xc - x, y: yc + y , w: 1, h: 1}); //oct 6
-  //     if (state.tool.brushSize % 2 === 0) { xc-- };
-  //     brushRects.push({ x: xc + x, y: yc + y , w: 1, h: 1}); //oct 7
-  //     brushRects.push({ x: xc + y, y: yc + x , w: 1, h: 1}); //oct 8
-  // }
-
-  // brushPoints.forEach(p => {
-  //     actionDraw(p.x, p.y, swatches.primary.color, 1, canvas.currentLayer.ctx, state.mode)
-  // })
-
-  // state.tool.brushPoints = brushPoints;
-  // actionFill(xO, yO, swatches.primary.color, canvas.currentLayer.ctx, state.mode);
-  // canvas.draw();
 }
 
 //====================================//
@@ -1189,19 +1150,21 @@ function actionLine(
 function replaceSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      //get global colorlayer data to use while pointer is down
-      state.localColorLayer = canvas.currentLayer.ctx.getImageData(
-        0,
-        0,
-        canvas.offScreenCVS.width,
-        canvas.offScreenCVS.height
-      )
-      //create clip mask
+      //1. create new canvas layer with only selected color pixels
+      //create new layer temporarily
+      const layer = canvas.createNewRasterLayer("Replacement Layer")
+      //create isolated color map for color replacement
+      const isolatedColorLayer = createMapForSpecificColor(canvas.currentLayer)
+      layer.ctx.putImageData(isolatedColorLayer, 0, 0)
+      //store reference to current layer
+      canvas.tempLayer = canvas.currentLayer
+      //layer must be in canvas.layers for draw to show in real time
+      canvas.layers.push(layer)
+      //set new layer to current layer so it can be drawn onto
+      canvas.currentLayer = layer
+      //Non-transparent pixels on color replacement layer will be drawn over by the new color by setting globalCompositeOperation = "source-atop"
       canvas.currentLayer.ctx.save()
-      state.clipMask = createClipMask(state.localColorLayer)
-      // canvas.currentLayer.ctx.strokeStyle = "red";
-      // canvas.currentLayer.ctx.stroke(state.clipMask);
-      canvas.currentLayer.ctx.clip(state.clipMask)
+      canvas.currentLayer.ctx.globalCompositeOperation = "source-atop"
       drawSteps()
       break
     case "pointermove":
@@ -1219,8 +1182,45 @@ function replaceSteps() {
   }
 }
 
+function createMapForSpecificColor(currentLayer) {
+  const colorLayer = currentLayer.ctx.getImageData(
+    0,
+    0,
+    canvas.offScreenCVS.width,
+    canvas.offScreenCVS.height
+  )
+  const matchColor = swatches.secondary.color
+  //iterate over pixel data and remove non-matching colors
+  for (let i = 0; i < colorLayer.data.length; i += 4) {
+    //sample color and remove if not match
+    if (colorLayer.data[i + 3] !== 0) {
+      if (
+        !(
+          colorLayer.data[i] === matchColor.r &&
+          colorLayer.data[i + 1] === matchColor.g &&
+          colorLayer.data[i + 2] === matchColor.b &&
+          colorLayer.data[i + 3] === matchColor.a
+        )
+      ) {
+        colorLayer.data[i] = 0
+        colorLayer.data[i + 1] = 0
+        colorLayer.data[i + 2] = 0
+        colorLayer.data[i + 3] = 0
+      }
+    }
+  }
+
+  return colorLayer
+}
+
 function finalReplaceStep() {
   canvas.currentLayer.ctx.restore()
+  //Merge the Replacement Layer onto the actual current layer being stored in canvas.tempLayer
+  canvas.tempLayer.ctx.drawImage(canvas.currentLayer.cvs, 0, 0)
+  //Remove the last layer in the array, which is the Replacement Layer
+  canvas.layers.pop()
+  //Set the current layer back to the correct layer
+  canvas.currentLayer = canvas.tempLayer
   let image = new Image()
   image.src = canvas.currentLayer.cvs.toDataURL()
   state.addToTimeline(state.tool.name, image, null, canvas.currentLayer)
@@ -1247,77 +1247,271 @@ function selectSteps() {
   }
 }
 
-function createRectMask(colorLayer) {
-  //
-}
+// q
 
-function createSelectOutline(path) {
-  //
-}
+// function mapColoredPixels(colorLayer) {
+//   //identify pixels of secondary color
+//   let pixels = []
+//   for (let y = 0; y < colorLayer.height; y++) {
+//     pixels.push([])
+//     for (let x = 0; x < colorLayer.width; x++) {
+//       //sample color and add to path if match
+//       let clickedColor = canvas.getColor(x, y, colorLayer)
+//       if (clickedColor.color === swatches.secondary.color.color) {
+//         //add pixel to clip path
+//         pixels[y].push(1)
+//       } else if (
+//         // tracing needs an additional pixel width to the right and down
+//         canvas.getColor(x - 1, y, colorLayer).color ===
+//           swatches.secondary.color.color ||
+//         canvas.getColor(x, y - 1, colorLayer).color ===
+//           swatches.secondary.color.color ||
+//         canvas.getColor(x - 1, y - 1, colorLayer).color ===
+//           swatches.secondary.color.color
+//       ) {
+//         //add pixel to clip path. This extends clipping area 1 pixel to the right and 1 down and 1 diagonal down-right
+//         pixels[y].push(1)
+//       } else {
+//         pixels[y].push(0)
+//       }
+//     }
+//   }
+//   return pixels
+// }
 
-function createClipMask(colorLayer) {
-  let mask = new Path2D()
+// function findStartPoint(pixels, colorLayer) {
+//   for (let y = 0; y < colorLayer.height; y++) {
+//     for (let x = 0; x < colorLayer.width; x++) {
+//       //sample color and add to path if match
+//       //check 4 directions
+//       if (pixels[y][x] === 1) {
+//         return { x: x, y: y, dir: 0 }
+//       }
+//     }
+//   }
+//   return null
+// }
 
-  // //create outline path, path disconnected so can't be filled
-  // let pixels = [];
-  // for (let y = 0; y < colorLayer.height; y++) {
-  //     pixels.push([]);
-  //     for (let x = 0; x < colorLayer.width; x++) {
-  //         //sample color and add to path if match
-  //         let clickedColor = canvas.getColor(x, y, colorLayer);
-  //         if (clickedColor.color === swatches.secondary.color.color) {
-  //             //add pixel to clip path
-  //             pixels[y].push(1);
-  //         } else {
-  //             pixels[y].push(0);
-  //         }
-  //     }
-  // }
-  // for (let y = 0; y < colorLayer.height; y++) {
-  //     for (let x = 0; x < colorLayer.width; x++) {
-  //         //check 4 directions
-  //         if (pixels[y][x] === 1) { continue; }
-  //         //right
-  //         if (pixels[y][x + 1] === 1) {
-  //             mask.moveTo(x + 1, y, 1, 1);
-  //             mask.lineTo(x + 1, y + 1, 1, 1);
-  //         }
-  //         //left
-  //         if (pixels[y][x - 1] === 1) {
-  //             mask.moveTo(x, y, 1, 1);
-  //             mask.lineTo(x, y + 1, 1, 1);
-  //         }
-  //         //down
-  //         if (pixels[y + 1]) {
-  //             if (pixels[y + 1][x] === 1) {
-  //                 mask.moveTo(x, y + 1, 1, 1);
-  //                 mask.lineTo(x + 1, y + 1, 1, 1);
-  //             }
-  //         }
-  //         //up
-  //         if (pixels[y - 1]) {
-  //             if (pixels[y - 1][x] === 1) {
-  //                 mask.moveTo(x, y, 1, 1);
-  //                 mask.lineTo(x + 1, y, 1, 1);
-  //             }
-  //         }
-  //     }
-  // }
+// function rotatePoint(dir, rotation) {
+//   if (rotation === "right") {
+//     //clockwise
+//     return dir === 0 ? 3 : dir - 1
+//   } else if (rotation === "left") {
+//     //counter clockwise
+//     return dir === 3 ? 0 : dir + 1
+//   } else {
+//     //no rotation
+//     return dir
+//   }
+// }
 
-  for (let y = 0; y < colorLayer.height; y++) {
-    for (let x = 0; x < colorLayer.width; x++) {
-      //sample color and add to path if match
-      let clickedColor = canvas.getColor(x, y, colorLayer)
-      if (clickedColor.color === swatches.secondary.color.color) {
-        //add pixel to clip path
-        let p = new Path2D()
-        p.rect(x, y, 1, 1)
-        mask.addPath(p)
-      }
-    }
-  }
-  return mask
-}
+// function walkPath(pixels, contour, point, iteration) {
+//   switch (point.dir) {
+//     case 0:
+//       //right
+//       //p1
+//       if (pixels[point.y - 1]) {
+//         if (pixels[point.y - 1][point.x + 1] === 1) {
+//           contour.lineTo(point.x + 1, point.y) //p2
+//           contour.lineTo(point.x + 1, point.y - 1) //p1
+//           //set point to p1 and rotate dir 90 degrees counter clockwise
+//           point.x += 1
+//           point.y -= 1
+//           point.dir = rotatePoint(point.dir, "left")
+//           break
+//         }
+//       }
+//       //p2
+//       if (pixels[point.y][point.x + 1] === 1) {
+//         contour.lineTo(point.x + 1, point.y) //p2
+//         //set point to p2
+//         point.x += 1
+//         break
+//       }
+//       //p3
+//       if (pixels[point.y + 1]) {
+//         if (pixels[point.y + 1][point.x + 1] === 1) {
+//           contour.lineTo(point.x, point.y + 1) //p4
+//           contour.lineTo(point.x + 1, point.y + 1) //p3
+//           //set point to p3
+//           point.x += 1
+//           point.y += 1
+//           break
+//         }
+//       }
+//       //chosenPoint does not have any colored points in front of it, rotate direction 90 degrees clockwise and try again
+//       //if iteration reaches 3, on isolated pixel
+//       point.dir = rotatePoint(point.dir, "right")
+//       // return walkPath(pixels, contour, p0, point, (iteration += 1))
+//       return { point: point, iteration: (iteration += 1) }
+//     case 1:
+//       //up
+//       //p1
+//       if (pixels[point.y - 1]) {
+//         if (pixels[point.y - 1][point.x - 1] === 1) {
+//           contour.lineTo(point.x, point.y - 1) //p2
+//           contour.lineTo(point.x - 1, point.y - 1) //p1
+//           //set point to p1 and rotate dir 90 degrees counter clockwise
+//           point.x -= 1
+//           point.y -= 1
+//           point.dir = rotatePoint(point.dir, "left")
+//           break
+//         }
+//         //p2
+//         if (pixels[point.y - 1][point.x] === 1) {
+//           contour.lineTo(point.x, point.y - 1) //p2
+//           //set point to p2
+//           point.y -= 1
+//           break
+//         }
+//         //p3
+//         if (pixels[point.y - 1][point.x + 1] === 1) {
+//           contour.lineTo(point.x + 1, point.y) //p4
+//           contour.lineTo(point.x + 1, point.y - 1) //p3
+//           //set point to p3
+//           point.x += 1
+//           point.y -= 1
+//           break
+//         }
+//       }
+//       //chosenPoint does not have any colored points in front of it, rotate direction 90 degrees clockwise and try again
+//       //if iteration reaches 3, on isolated pixel
+//       point.dir = rotatePoint(point.dir, "right")
+//       // return walkPath(pixels, contour, p0, point, (iteration += 1))
+//       return { point: point, iteration: (iteration += 1) }
+//     case 2:
+//       //left
+//       //p1
+//       if (pixels[point.y + 1]) {
+//         if (pixels[point.y + 1][point.x - 1] === 1) {
+//           contour.lineTo(point.x - 1, point.y) //p2
+//           contour.lineTo(point.x - 1, point.y + 1) //p1
+//           //set point to p1 and rotate dir 90 degrees counter clockwise
+//           point.x -= 1
+//           point.y += 1
+//           point.dir = rotatePoint(point.dir, "left")
+//           break
+//         }
+//       }
+//       //p2
+//       if (pixels[point.y][point.x - 1] === 1) {
+//         contour.lineTo(point.x - 1, point.y) //p2
+//         //set point to p2
+//         point.x -= 1
+//         break
+//       }
+//       //p3
+//       if (pixels[point.y - 1]) {
+//         if (pixels[point.y - 1][point.x - 1] === 1) {
+//           contour.lineTo(point.x, point.y - 1) //p4
+//           contour.lineTo(point.x - 1, point.y - 1) //p3
+//           //set point to p3
+//           point.x -= 1
+//           point.y -= 1
+//           break
+//         }
+//       }
+//       //chosenPoint does not have any colored points in front of it, rotate direction 90 degrees clockwise and try again
+//       //if iteration reaches 3, on isolated pixel
+//       point.dir = rotatePoint(point.dir, "right")
+//       // return walkPath(pixels, contour, p0, point, (iteration += 1))
+//       return { point: point, iteration: (iteration += 1) }
+//     case 3:
+//       //down
+//       //p1
+//       if (pixels[point.y + 1]) {
+//         if (pixels[point.y + 1][point.x + 1] === 1) {
+//           contour.lineTo(point.x, point.y + 1) //p2
+//           contour.lineTo(point.x + 1, point.y + 1) //p1
+//           //set point to p1 and rotate dir 90 degrees counter clockwise
+//           point.x += 1
+//           point.y += 1
+//           point.dir = rotatePoint(point.dir, "left")
+//           break
+//         }
+//         //p2
+//         if (pixels[point.y + 1][point.x] === 1) {
+//           contour.lineTo(point.x, point.y + 1) //p2
+//           //set point to p2
+//           point.y += 1
+//           break
+//         }
+//         //p3
+//         if (pixels[point.y + 1][point.x - 1] === 1) {
+//           contour.lineTo(point.x - 1, point.y) //p4
+//           contour.lineTo(point.x - 1, point.y + 1) //p3
+//           //set point to p3
+//           point.x -= 1
+//           point.y += 1
+//           break
+//         }
+//       }
+//       //chosenPoint does not have any colored points in front of it, rotate direction 90 degrees clockwise and try again
+//       //if iteration reaches 3, on isolated pixel
+//       point.dir = rotatePoint(point.dir, "right")
+//       // return walkPath(pixels, contour, p0, point, (iteration += 1))
+//       return { point: point, iteration: (iteration += 1) }
+//     default:
+//     //
+//   }
+//   return { point: point, iteration: 0 }
+// }
+
+// function pavlidisAlgorithm(colorLayer) {
+//   //TODO: can be reduced by directly checking color instead of mapping pixels first
+//   let pixels = mapColoredPixels(colorLayer)
+//   const contour = new Path2D()
+//   const p0 = findStartPoint(pixels, colorLayer)
+//   if (!p0) {
+//     return contour
+//   }
+//   contour.moveTo(p0.x, p0.y)
+//   let chosenPoint = { ...p0 }
+//   let walkingPath
+//   let currentIteration = 0
+//   while (walkingPath !== "finished") {
+//     const { point, iteration } = walkPath(
+//       pixels,
+//       contour,
+//       chosenPoint,
+//       currentIteration
+//     )
+//     //if returned to starting point or no available path left, finish
+//     if ((p0.x === point.x && p0.y === point.y) || iteration === 3) {
+//       walkingPath = "finished"
+//     } else {
+//       chosenPoint = point
+//       currentIteration = iteration
+//     }
+//   }
+//   contour.closePath()
+//   return contour
+// }
+
+// function createClipMask(colorLayer, context) {
+//   let mask = new Path2D()
+
+//   //TODO: hole searching algorithm
+//   //TODO: contour tracing algorithm on each hole
+//   const contour = pavlidisAlgorithm(colorLayer)
+//   return contour
+
+//   //REMOVE: old algorithm, not scalable for large canvases due to inefficient masking
+//   // for (let y = 0; y < colorLayer.height; y++) {
+//   //   for (let x = 0; x < colorLayer.width; x++) {
+//   //     //sample color and add to path if match
+//   //     let clickedColor = canvas.getColor(x, y, colorLayer)
+//   //     if (clickedColor.color === swatches.secondary.color.color) {
+//   //       //add pixel to clip path
+//   //       let p = new Path2D()
+//   //       p.rect(x, y, 1, 1)
+//   //       mask.addPath(p)
+//   //     }
+//   //   }
+//   // }
+//   // // mask.closePath()
+//   // return mask
+// }
 
 function fillSteps() {
   switch (canvas.pointerEvent) {

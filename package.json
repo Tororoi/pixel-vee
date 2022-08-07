@@ -18,6 +18,7 @@
   "homepage": "https://github.com/Tororoi/undo-button#readme",
   "dependencies": {
     "sass": "^1.52.2",
-    "sass-loader": "^13.0.0"
+    "sass-loader": "^13.0.0",
+    "serve": "^14.0.1"
   }
 }

@@ -114,4 +114,4 @@ Visit here: https://pixelvee.netlify.app/
 
 # Run locally
 1. Run `npm install`
-2. Start a local server. For example, `php -S localhost:8000`
+2. Start a local server. For example, `php -S localhost:8000` or `serve`
