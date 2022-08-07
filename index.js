@@ -1159,7 +1159,9 @@ function replaceSteps() {
       //store reference to current layer
       canvas.tempLayer = canvas.currentLayer
       //layer must be in canvas.layers for draw to show in real time
-      canvas.layers.push(layer)
+      const currentLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
+      //add layer at position just on top of current layer
+      canvas.layers.splice(currentLayerIndex + 1, 0, layer)
       //set new layer to current layer so it can be drawn onto
       canvas.currentLayer = layer
       //Non-transparent pixels on color replacement layer will be drawn over by the new color by setting globalCompositeOperation = "source-atop"
@@ -1217,8 +1219,9 @@ function finalReplaceStep() {
   canvas.currentLayer.ctx.restore()
   //Merge the Replacement Layer onto the actual current layer being stored in canvas.tempLayer
   canvas.tempLayer.ctx.drawImage(canvas.currentLayer.cvs, 0, 0)
-  //Remove the last layer in the array, which is the Replacement Layer
-  canvas.layers.pop()
+  //Remove the Replacement Layer from the array of layers
+  const replacementLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
+  canvas.layers.splice(replacementLayerIndex, 1)
   //Set the current layer back to the correct layer
   canvas.currentLayer = canvas.tempLayer
   let image = new Image()
