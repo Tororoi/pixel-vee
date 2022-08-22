@@ -93,11 +93,14 @@ Visit here: https://pixelvee.netlify.app/
 >
 > Drag a layer to change its position in the layer stack.
 
+> #### Change Canvas Size
+>
+> Change canvas dimensions to between 8 and 800 pixels.
+
 ### Key Features to be added
 
 - Vector mode
 - Palette
-- Ability to change canvas size
 - Alpha channel for colors
 - Selection Tool
 
@@ -111,6 +114,7 @@ Visit here: https://pixelvee.netlify.app/
 - 9-Grid Mode
 - Preview window
 - Shading Tool
+- Perspective Tool (Add vanishing points off the canvas)
 
 # Run locally
 1. Run `npm install`

@@ -1,6 +1,11 @@
 import { state } from "./state.js"
 import { initializeDialogBox } from "../utils/drag.js"
-import { redrawPoints } from "../index.js"
+import {
+  actionDraw,
+  actionLine,
+  actionFill,
+  actionCurve,
+} from "../Tools/actions.js"
 
 //===================================//
 //==== * * * DOM Interface * * * ====//
@@ -108,6 +113,7 @@ export const canvas = {
   zoomPixelY: null,
   //Functions
   draw,
+  redrawPoints,
   consolidateLayers,
   createNewRasterLayer,
   addRasterLayer,
@@ -197,7 +203,7 @@ const resizeOffScreenCanvas = (width, height) => {
       l.cvs.height = canvas.offScreenCVS.height
     }
   })
-  redrawPoints() //TODO: import from file other than index
+  canvas.redrawPoints()
   canvas.draw()
 }
 
@@ -263,6 +269,76 @@ function draw() {
   canvas.onScreenCTX.lineWidth = 2
   canvas.onScreenCTX.strokeStyle = canvas.borderColor
   canvas.onScreenCTX.stroke()
+}
+
+function redrawPoints() {
+  //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
+  state.undoStack.forEach((action) => {
+    action.forEach((p) => {
+      switch (p.tool) {
+        case "addlayer":
+          p.layer.removed = false
+          canvas.renderLayersToDOM()
+          break
+        case "clear":
+          p.layer.ctx.clearRect(
+            0,
+            0,
+            canvas.offScreenCVS.width,
+            canvas.offScreenCVS.height
+          )
+          break
+        case "fill":
+          actionFill(p.x, p.y, p.color, p.layer.ctx, p.mode)
+          break
+        case "line":
+          actionLine(
+            p.x.x1,
+            p.y.y1,
+            p.x.x2,
+            p.y.y2,
+            p.color,
+            p.layer.ctx,
+            p.mode,
+            p.brush,
+            p.weight
+          )
+          break
+        case "curve":
+          actionCurve(
+            p.x.x1,
+            p.y.y1,
+            p.x.x2,
+            p.y.y2,
+            p.x.x3,
+            p.y.y3,
+            4,
+            p.color,
+            p.layer.ctx,
+            p.mode,
+            p.brush,
+            p.weight
+          )
+          break
+        case "replace":
+          p.layer.ctx.drawImage(p.image, 0, 0, p.width, p.height)
+          break
+        default:
+          actionDraw(p.x, p.y, p.color, p.brush, p.weight, p.layer.ctx, p.mode)
+      }
+    })
+  })
+  state.redoStack.forEach((action) => {
+    action.forEach((p) => {
+      if (p.tool === "addlayer") {
+        p.layer.removed = true
+        if (p.layer === canvas.currentLayer) {
+          canvas.currentLayer = layersCont.children[0].layerObj
+        }
+        canvas.renderLayersToDOM()
+      }
+    })
+  })
 }
 
 //====================================//
