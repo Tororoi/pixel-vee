@@ -148,15 +148,13 @@ export class Picker {
   }
 
   handleIncrement(e) {
-    let channel = e.target.parentNode.previousSibling.previousSibling
+    const channel = e.target.parentNode.previousSibling.previousSibling
     let maxvalue
     switch (channel) {
       case this.h:
         maxvalue = 359
         break
       case this.s:
-        maxvalue = 100
-        break
       case this.l:
         maxvalue = 100
         break
@@ -164,16 +162,13 @@ export class Picker {
         //rgba
         maxvalue = 255
     }
-    if (e.target.id === "inc") {
-      let newValue = Math.floor(+channel.value)
-      if (newValue < maxvalue) {
-        channel.value = newValue + 1
-      }
-    } else if (e.target.id === "dec") {
-      let newValue = Math.floor(+channel.value)
-      if (newValue > 0) {
-        channel.value = newValue - 1
-      }
+
+    const newValue = Math.floor(+channel.value)
+
+    if (e.target.id === "inc" && newValue < maxvalue) {
+      channel.value = newValue + 1
+    } else if (e.target.id === "dec" && newValue > 0) {
+      channel.value = newValue - 1
     }
   }
 
@@ -203,54 +198,34 @@ export class Picker {
 
   //* Canvas Interaction *//
 
-  handleMouseDown(e) {
+  handlePointerDown(e) {
     this.clickedCanvas = true
-    let x, y
-    if (e.targetTouches) {
-      let rect = e.target.getBoundingClientRect()
-      x = Math.round(e.targetTouches[0].pageX - rect.left)
-      y = Math.round(e.targetTouches[0].pageY - rect.top)
-    } else {
-      x = e.offsetX
-      y = e.offsetY
-    }
-    this.selectSL(x, y)
+    const { offsetX, offsetY } = e
+    this.selectSL(offsetX, offsetY)
   }
 
-  handleMouseMove(e) {
-    if (this.clickedCanvas) {
-      let canvasXOffset =
-        this.target.getBoundingClientRect().left -
-        document.getElementsByTagName("html")[0].getBoundingClientRect().left
-      let canvasYOffset =
-        this.target.getBoundingClientRect().top -
-        document.getElementsByTagName("html")[0].getBoundingClientRect().top
-      let x, y
-      if (e.targetTouches) {
-        x = Math.round(e.targetTouches[0].pageX - canvasXOffset)
-        y = Math.round(e.targetTouches[0].pageY - canvasYOffset)
-      } else {
-        x = e.pageX - canvasXOffset
-        y = e.pageY - canvasYOffset
-      }
-      //constrain coordinates
-      if (x > this.width) {
-        x = this.width
-      }
-      if (x < 0) {
-        x = 0
-      }
-      if (y > this.height) {
-        y = this.height
-      }
-      if (y < 0) {
-        y = 0
-      }
-      this.selectSL(x, y)
+  handlePointerMove(e) {
+    if (!this.clickedCanvas) {
+      return
     }
+
+    const rect = this.target.getBoundingClientRect()
+    const canvasXOffset =
+      rect.left - document.documentElement.getBoundingClientRect().left
+    const canvasYOffset =
+      rect.top - document.documentElement.getBoundingClientRect().top
+    const { pageX, pageY } = e
+
+    const x = pageX - canvasXOffset
+    const y = pageY - canvasYOffset
+
+    this.selectSL(
+      Math.min(Math.max(x, 0), this.width),
+      Math.min(Math.max(y, 0), this.height)
+    )
   }
 
-  handleMouseUp(e) {
+  handlePointerUp(e) {
     this.clickedCanvas = false
   }
 
@@ -271,124 +246,59 @@ export class Picker {
       Math.round((this.hsl.lightness * this.height) / 100) - 3
   }
 
+  drawSelectorSides(context, pickerCircle, color, offset = 0) {
+    const { x, y, width, height } = pickerCircle
+    const lineCenterOffset = offset + 0.5
+    // draw selector
+    context.beginPath()
+    //top
+    context.moveTo(x, y - lineCenterOffset)
+    context.lineTo(x + width, y - lineCenterOffset)
+    //right
+    context.moveTo(x + width + lineCenterOffset, y)
+    context.lineTo(x + width + lineCenterOffset, y + height)
+    //bottom
+    context.moveTo(x, y + height + lineCenterOffset)
+    context.lineTo(x + width, y + height + lineCenterOffset)
+    //left
+    context.moveTo(x - lineCenterOffset, y)
+    context.lineTo(x - lineCenterOffset, y + height)
+    //stroke path
+    context.lineWidth = 1
+    context.strokeStyle = color
+    context.stroke()
+    context.closePath()
+  }
+
+  drawSelector(context, pickerCircle) {
+    const { x, y, width, height } = pickerCircle
+    // draw selector
+    this.drawSelectorSides(context, pickerCircle, "black")
+    //draw contrasting outline
+    this.drawSelectorSides(context, pickerCircle, "white", 1)
+    //corners
+    context.fillStyle = "white"
+    context.fillRect(x - 1, y - 1, 1, 1)
+    context.fillRect(x + width, y - 1, 1, 1)
+    context.fillRect(x - 1, y + height, 1, 1)
+    context.fillRect(x + width, y + height, 1, 1)
+  }
+
   drawHSLGrad(hue) {
-    //draw hsl gradient
-    for (let row = 0; row < this.height; row++) {
-      let grad = this.context.createLinearGradient(0, 0, this.width, 0)
-      grad.addColorStop(
-        0,
-        "hsl(" + hue + ", 0%, " + (row / this.height) * 100 + "%)"
-      )
-      grad.addColorStop(
-        1,
-        "hsl(" + hue + ", 100%, " + (row / this.height) * 100 + "%)"
-      )
-      this.context.fillStyle = grad
-      this.context.fillRect(0, row, this.width, 1)
+    const { context, height, width, pickerCircle } = this
+
+    // draw HSL gradient
+    for (let row = 0; row < height; row++) {
+      const saturation = (row / height) * 100
+      const grad = context.createLinearGradient(0, 0, width, 0)
+      grad.addColorStop(0, `hsl(${hue}, 0%, ${saturation}%)`)
+      grad.addColorStop(1, `hsl(${hue}, 100%, ${saturation}%)`)
+      context.fillStyle = grad
+      context.fillRect(0, row, width, 1)
     }
 
     this.calcSelector()
-    //draw selector
-    this.context.beginPath()
-
-    //top
-    this.context.moveTo(this.pickerCircle.x, this.pickerCircle.y - 0.5)
-    this.context.lineTo(
-      this.pickerCircle.x + this.pickerCircle.width,
-      this.pickerCircle.y - 0.5
-    )
-    //right
-    this.context.moveTo(
-      this.pickerCircle.x + this.pickerCircle.width + 0.5,
-      this.pickerCircle.y
-    )
-    this.context.lineTo(
-      this.pickerCircle.x + this.pickerCircle.width + 0.5,
-      this.pickerCircle.y + this.pickerCircle.height
-    )
-    //bottom
-    this.context.moveTo(
-      this.pickerCircle.x,
-      this.pickerCircle.y + this.pickerCircle.height + 0.5
-    )
-    this.context.lineTo(
-      this.pickerCircle.x + this.pickerCircle.width,
-      this.pickerCircle.y + this.pickerCircle.height + 0.5
-    )
-    //left
-    this.context.moveTo(this.pickerCircle.x - 0.5, this.pickerCircle.y)
-    this.context.lineTo(
-      this.pickerCircle.x - 0.5,
-      this.pickerCircle.y + this.pickerCircle.height
-    )
-
-    this.context.lineWidth = 1
-    this.context.strokeStyle = "black"
-    this.context.stroke()
-    this.context.closePath()
-
-    this.context.beginPath()
-
-    //top
-    this.context.moveTo(this.pickerCircle.x, this.pickerCircle.y - 1.5)
-    this.context.lineTo(
-      this.pickerCircle.x + this.pickerCircle.width,
-      this.pickerCircle.y - 1.5
-    )
-    //right
-    this.context.moveTo(
-      this.pickerCircle.x + this.pickerCircle.width + 1.5,
-      this.pickerCircle.y
-    )
-    this.context.lineTo(
-      this.pickerCircle.x + this.pickerCircle.width + 1.5,
-      this.pickerCircle.y + this.pickerCircle.height
-    )
-    //bottom
-    this.context.moveTo(
-      this.pickerCircle.x,
-      this.pickerCircle.y + this.pickerCircle.height + 1.5
-    )
-    this.context.lineTo(
-      this.pickerCircle.x + this.pickerCircle.width,
-      this.pickerCircle.y + this.pickerCircle.height + 1.5
-    )
-    //left
-    this.context.moveTo(this.pickerCircle.x - 1.5, this.pickerCircle.y)
-    this.context.lineTo(
-      this.pickerCircle.x - 1.5,
-      this.pickerCircle.y + this.pickerCircle.height
-    )
-    //corners
-    this.context.fillStyle = "white"
-    this.context.fillRect(
-      this.pickerCircle.x - 1,
-      this.pickerCircle.y - 1,
-      1,
-      1
-    )
-    this.context.fillRect(
-      this.pickerCircle.x + this.pickerCircle.width,
-      this.pickerCircle.y - 1,
-      1,
-      1
-    )
-    this.context.fillRect(
-      this.pickerCircle.x - 1,
-      this.pickerCircle.y + this.pickerCircle.height,
-      1,
-      1
-    )
-    this.context.fillRect(
-      this.pickerCircle.x + this.pickerCircle.width,
-      this.pickerCircle.y + this.pickerCircle.height,
-      1,
-      1
-    )
-
-    this.context.lineWidth = 1
-    this.context.strokeStyle = "white"
-    this.context.stroke()
+    this.drawSelector(context, pickerCircle)
   }
 
   drawHueGrad() {
@@ -407,7 +317,6 @@ export class Picker {
   }
 
   //* Initial Build *//
-
   build() {
     //draw hue slider
     this.drawHueGrad()
@@ -418,13 +327,13 @@ export class Picker {
     //canvas listeners
     this.target.addEventListener("pointerdown", (e) => {
       e.target.setPointerCapture(e.pointerId)
-      this.handleMouseDown(e)
+      this.handlePointerDown(e)
     })
     this.target.addEventListener("pointermove", (e) => {
-      this.handleMouseMove(e)
+      this.handlePointerMove(e)
     })
     this.target.addEventListener("pointerup", (e) => {
-      this.handleMouseUp(e)
+      this.handlePointerUp(e)
     })
 
     //channel listeners
