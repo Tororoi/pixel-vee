@@ -1,4 +1,7 @@
-//* Color Space Conversion *//
+//===================================//
+//==== * Color Space Conversion * ===//
+//===================================//
+
 /**
  * @param {integer} red - red value (0-255)
  * @param {integer} green - green value (0-255)

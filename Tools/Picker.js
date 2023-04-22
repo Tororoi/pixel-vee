@@ -5,18 +5,22 @@ import {
   RGBToHex,
   getLuminance,
 } from "../utils/colorConversion.js"
+import {
+  calcHSLSelectorCoordinates,
+  drawSelector,
+  drawHSLGradient,
+} from "../utils/pickerHelpers.js"
 //TODO: Add "lock" toggle to luminance field.
 //This will trigger the hsl grad to become a 2-dimensional gradient
 //where every value has the same luminance. The hue slider can be adjusted
 //to see the gradient for different hues at that same luminance.
 export class Picker {
-  constructor(target, width, height, setColor, initialColor) {
+  constructor(target, width, height, initialColor) {
     this.target = target
     this.width = width
     this.height = height
     this.target.width = width
     this.target.height = height
-    this.setColor = setColor
     //Get context
     this.context = this.target.getContext("2d")
     //pointer
@@ -60,6 +64,8 @@ export class Picker {
   //===================================//
   //===== * * * Color Space * * * =====//
   //===================================//
+
+  //* Keep color spaces in sync * //
 
   /**
    * propogate rgb values to other color spaces
@@ -126,7 +132,14 @@ export class Picker {
    * update DOM to match updated values
    */
   updateColor() {
-    this.drawHSLGrad(this.hsl.hue)
+    drawHSLGradient(this.context, this.width, this.height, this.hsl.hue)
+    this.pickerCircle = calcHSLSelectorCoordinates(
+      this.pickerCircle,
+      this.hsl,
+      this.width,
+      this.height
+    )
+    drawSelector(this.context, this.pickerCircle)
     //update interface values to match new color
     const { hue, saturation, lightness } = this.hsl
     this.newcolor.style.backgroundColor =
@@ -238,68 +251,6 @@ export class Picker {
   //===================================//
   //======= * * * Render * * * ========//
   //===================================//
-
-  calcSelector() {
-    this.pickerCircle.x =
-      Math.round((this.hsl.saturation * this.width) / 100) - 3
-    this.pickerCircle.y =
-      Math.round((this.hsl.lightness * this.height) / 100) - 3
-  }
-
-  drawSelectorSides(context, pickerCircle, color, offset = 0) {
-    const { x, y, width, height } = pickerCircle
-    const lineCenterOffset = offset + 0.5
-    // draw selector
-    context.beginPath()
-    //top
-    context.moveTo(x, y - lineCenterOffset)
-    context.lineTo(x + width, y - lineCenterOffset)
-    //right
-    context.moveTo(x + width + lineCenterOffset, y)
-    context.lineTo(x + width + lineCenterOffset, y + height)
-    //bottom
-    context.moveTo(x, y + height + lineCenterOffset)
-    context.lineTo(x + width, y + height + lineCenterOffset)
-    //left
-    context.moveTo(x - lineCenterOffset, y)
-    context.lineTo(x - lineCenterOffset, y + height)
-    //stroke path
-    context.lineWidth = 1
-    context.strokeStyle = color
-    context.stroke()
-    context.closePath()
-  }
-
-  drawSelector(context, pickerCircle) {
-    const { x, y, width, height } = pickerCircle
-    // draw selector
-    this.drawSelectorSides(context, pickerCircle, "black")
-    //draw contrasting outline
-    this.drawSelectorSides(context, pickerCircle, "white", 1)
-    //corners
-    context.fillStyle = "white"
-    context.fillRect(x - 1, y - 1, 1, 1)
-    context.fillRect(x + width, y - 1, 1, 1)
-    context.fillRect(x - 1, y + height, 1, 1)
-    context.fillRect(x + width, y + height, 1, 1)
-  }
-
-  drawHSLGrad(hue) {
-    const { context, height, width, pickerCircle } = this
-
-    // draw HSL gradient
-    for (let row = 0; row < height; row++) {
-      const saturation = (row / height) * 100
-      const grad = context.createLinearGradient(0, 0, width, 0)
-      grad.addColorStop(0, `hsl(${hue}, 0%, ${saturation}%)`)
-      grad.addColorStop(1, `hsl(${hue}, 100%, ${saturation}%)`)
-      context.fillStyle = grad
-      context.fillRect(0, row, width, 1)
-    }
-
-    this.calcSelector()
-    this.drawSelector(context, pickerCircle)
-  }
 
   drawHueGrad() {
     //hue slider gradient
