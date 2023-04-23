@@ -66,9 +66,8 @@
         flex-flow: row-reverse nowrap;
         justify-content: flex-end;
         align-items: center;
-        box-shadow: inset 2px 0px $border-color,
-          inset -2px 0px $border-color, inset 0px -2px $border-color,
-          inset 0px 2px $border-color;
+        box-shadow: inset 2px 0px $border-color, inset -2px 0px $border-color,
+          inset 0px -2px $border-color, inset 0px 2px $border-color;
         &.raster {
           background: $gray;
         }
@@ -76,9 +75,8 @@
           background: $mid-gray;
         }
         &:hover {
-          box-shadow: inset 2px 0px $white,
-            inset -2px 0px $white, inset 0px -2px $white,
-            inset 0px 2px $white;
+          box-shadow: inset 2px 0px $white, inset -2px 0px $white,
+            inset 0px -2px $white, inset 0px 2px $white;
         }
         .hide {
           width: 28px;

@@ -109,7 +109,6 @@ let picker = new Picker(
   document.getElementById("color-picker"),
   250,
   250,
-  setColor,
   swatches.primary.color
 )
 
