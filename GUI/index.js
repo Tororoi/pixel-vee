@@ -19,7 +19,7 @@ export function renderCursor(state, canvas, swatches) {
   }
 }
 
-function drawCurrentPixel(state, canvas, swatches) {
+export function drawCurrentPixel(state, canvas, swatches) {
   //draw onscreen current pixel
   actionDraw(
     state.cursorWithCanvasOffsetX,
