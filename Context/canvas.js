@@ -384,7 +384,7 @@ function drawLayers() {
 //Draw all layers onto offscreen canvas to prepare for sampling or export
 function consolidateLayers() {
   canvas.layers.forEach((l) => {
-    if (l.type === "raster") {
+    if (l.type === "raster" && l.opacity > 0) {
       canvas.offScreenCTX.save()
       canvas.offScreenCTX.globalAlpha = l.opacity
       canvas.offScreenCTX.drawImage(
