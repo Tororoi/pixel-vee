@@ -1,5 +1,5 @@
 import { state } from "../Context/state.js"
-import { canvas, resizeOnScreenCanvas } from "../Context/canvas.js"
+import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import {
   actionDraw,
@@ -9,7 +9,7 @@ import {
   actionFill,
   actionCurve,
 } from "./actions.js"
-import { renderCursor } from "../GUI/index.js"
+import { renderCursor, drawCurrentPixel } from "../GUI/index.js"
 
 //====================================//
 //=== * * * Tool Controllers * * * ===//
@@ -52,7 +52,7 @@ export function drawSteps() {
       break
     case "pointermove":
       if (state.mode === "perfect") {
-        drawCurrentPixel()
+        drawCurrentPixel(state, canvas, swatches)
       }
       if (
         state.previousX !== state.cursorX ||
@@ -87,7 +87,7 @@ export function drawSteps() {
           //FIX: perfect will be option, not mode
           if (state.mode === "perfect") {
             canvas.draw()
-            drawCurrentPixel()
+            drawCurrentPixel(state, canvas, swatches)
             actionPerfectPixels(state.cursorX, state.cursorY)
           } else {
             actionDraw(
