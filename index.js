@@ -250,6 +250,15 @@ function handleKeyDown(e) {
         state.tool = tools["curve"]
         canvas.onScreenCVS.style.cursor = "none"
         break
+      case "KeyJ":
+        //reset old button
+        toolBtn.style.background = "rgb(131, 131, 131)"
+        //set new button
+        toolBtn = document.querySelector("#cubicCurve")
+        toolBtn.style.background = "rgb(255, 255, 255)"
+        state.tool = tools["cubicCurve"]
+        canvas.onScreenCVS.style.cursor = "none"
+        break
       default:
       //do nothing
     }

@@ -4,7 +4,7 @@ import {
   actionDraw,
   actionLine,
   actionFill,
-  actionCurve,
+  actionQuadraticCurve,
 } from "../Tools/actions.js"
 
 //===================================//
@@ -305,7 +305,7 @@ function redrawPoints() {
           )
           break
         case "curve":
-          actionCurve(
+          actionQuadraticCurve(
             p.x.x1,
             p.y.y1,
             p.x.x2,
