@@ -353,7 +353,15 @@ export function actionFill(startX, startY, currentColor, ctx, currentMode) {
 
 /* Helper function. TODO: move to external helper file for rendering */
 //To render a pixel perfect curve, points are plotted instead of using t values, which are not equidistant.
-function renderPoints(points, brushStamp, weight, ctx, currentMode, scale) {
+function renderPoints(
+  points,
+  brushStamp,
+  currentColor,
+  weight,
+  ctx,
+  currentMode,
+  scale
+) {
   function plot(point) {
     //rounded values
     let xt = Math.floor(point.x)
@@ -418,7 +426,15 @@ export function actionQuadraticCurve(
       endx,
       endy
     )
-    renderPoints(plotPoints, brushStamp, weight, ctx, currentMode, scale)
+    renderPoints(
+      plotPoints,
+      brushStamp,
+      currentColor,
+      weight,
+      ctx,
+      currentMode,
+      scale
+    )
   } else if (stepNum === 4) {
     //curve after defining x3y3
     let plotPoints = plotQuadBezier(
@@ -429,7 +445,15 @@ export function actionQuadraticCurve(
       endx,
       endy
     )
-    renderPoints(plotPoints, brushStamp, weight, ctx, currentMode, scale)
+    renderPoints(
+      plotPoints,
+      brushStamp,
+      currentColor,
+      weight,
+      ctx,
+      currentMode,
+      scale
+    )
   }
 }
 
@@ -491,7 +515,15 @@ export function actionCubicCurve(
       endx,
       endy
     )
-    renderPoints(plotPoints, brushStamp, weight, ctx, currentMode, scale)
+    renderPoints(
+      plotPoints,
+      brushStamp,
+      currentColor,
+      weight,
+      ctx,
+      currentMode,
+      scale
+    )
   } else if (stepNum === 3) {
     //curve after defining x3y3
     //onscreen preview curve
@@ -505,7 +537,15 @@ export function actionCubicCurve(
       endx,
       endy
     )
-    renderPoints(plotPoints, brushStamp, weight, ctx, currentMode, scale)
+    renderPoints(
+      plotPoints,
+      brushStamp,
+      currentColor,
+      weight,
+      ctx,
+      currentMode,
+      scale
+    )
   } else if (stepNum === 4) {
     //curve after defining x4y4
     let plotPoints = plotCubicBezier(
@@ -518,6 +558,14 @@ export function actionCubicCurve(
       endx,
       endy
     )
-    renderPoints(plotPoints, brushStamp, weight, ctx, currentMode, scale)
+    renderPoints(
+      plotPoints,
+      brushStamp,
+      currentColor,
+      weight,
+      ctx,
+      currentMode,
+      scale
+    )
   }
 }

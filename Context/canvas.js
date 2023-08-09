@@ -38,8 +38,8 @@ const onScreenCTX = onScreenCVS.getContext("2d")
 const offScreenCVS = document.createElement("canvas")
 const offScreenCTX = offScreenCVS.getContext("2d")
 //Set the dimensions of the drawing canvas
-offScreenCVS.width = 800
-offScreenCVS.height = 800
+offScreenCVS.width = 256
+offScreenCVS.height = 256
 //improve sharpness
 //BUG: sharpness (8+) greatly affects performance in browsers other than chrome (can safari and firefox not handle large canvases?)
 //window.devicePixelRatio is typically 2
