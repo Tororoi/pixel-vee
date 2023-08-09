@@ -8,6 +8,7 @@ import {
   actionReplace,
   actionFill,
   actionQuadraticCurve,
+  actionCubicCurve,
 } from "./actions.js"
 import { renderCursor, drawCurrentPixel } from "../GUI/index.js"
 
@@ -420,7 +421,7 @@ export function cubicCurveSteps() {
     case "pointerdown":
       //solidify end points
       state.clickCounter += 1
-      if (state.clickCounter > 3) state.clickCounter = 1
+      if (state.clickCounter > 4) state.clickCounter = 1
       switch (state.clickCounter) {
         case 1:
           state.px1 = state.cursorX
@@ -430,6 +431,12 @@ export function cubicCurveSteps() {
           if (!state.touch) {
             state.px2 = state.cursorX
             state.py2 = state.cursorY
+          }
+          break
+        case 3:
+          if (!state.touch) {
+            state.px3 = state.cursorX
+            state.py3 = state.cursorY
           }
           break
         default:
@@ -446,7 +453,7 @@ export function cubicCurveSteps() {
         // canvas.onScreenCTX.clearRect(0, 0, canvas.offScreenCVS.width / canvas.zoom, canvas.offScreenCVS.height / canvas.zoom);
         canvas.draw()
         //onscreen preview
-        actionQuadraticCurve(
+        actionCubicCurve(
           state.px1 +
             canvas.xOffset /
               (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
@@ -463,6 +470,12 @@ export function cubicCurveSteps() {
             canvas.xOffset /
               (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.py3 +
+            canvas.yOffset /
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
+          state.px4 +
+            canvas.xOffset /
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
+          state.py4 +
             canvas.yOffset /
               (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
           state.clickCounter,
@@ -485,22 +498,28 @@ export function cubicCurveSteps() {
           state.py2 = state.cursorY
         }
         if (state.clickCounter === 2) {
+          state.px3 = state.cursorX
+          state.py3 = state.cursorY
+        }
+        if (state.clickCounter === 3) {
           state.clickCounter += 1
         }
       }
       //Solidify curve
-      if (state.clickCounter === 3) {
+      if (state.clickCounter === 4) {
         //solidify control point
-        state.px3 = state.cursorX
-        state.py3 = state.cursorY
-        actionQuadraticCurve(
+        state.px4 = state.cursorX
+        state.py4 = state.cursorY
+        actionCubicCurve(
           state.px1,
           state.py1,
           state.px2,
           state.py2,
           state.px3,
           state.py3,
-          state.clickCounter + 1,
+          state.px4,
+          state.py4,
+          state.clickCounter,
           swatches.primary.color,
           canvas.currentLayer.ctx,
           state.mode,
@@ -511,8 +530,8 @@ export function cubicCurveSteps() {
         //store control points for timeline
         state.addToTimeline(
           state.tool.name,
-          { x1: state.px1, x2: state.px2, x3: state.px3 },
-          { y1: state.py1, y2: state.py2, y3: state.py3 },
+          { x1: state.px1, x2: state.px2, x3: state.px3, x4: state.px4 },
+          { y1: state.py1, y2: state.py2, y3: state.py3, y4: state.py4 },
           canvas.currentLayer
         )
         canvas.draw()
@@ -658,7 +677,7 @@ export const tools = {
     options: [],
   },
   cubicCurve: {
-    name: "cubic curve",
+    name: "cubicCurve",
     fn: cubicCurveSteps,
     brushSize: 1,
     disabled: false,

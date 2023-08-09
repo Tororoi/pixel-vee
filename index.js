@@ -282,6 +282,7 @@ function handleKeyUp(e) {
     toolBtn.id === "replace" ||
     toolBtn.id === "brush" ||
     toolBtn.id === "curve" ||
+    toolBtn.id === "cubicCurve" ||
     toolBtn.id === "fill" ||
     toolBtn.id === "line"
   ) {
@@ -366,7 +367,8 @@ function handlePointerMove(e) {
     (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
   if (
     state.clicked ||
-    (state.tool.name === "curve" && state.clickCounter > 0)
+    ((state.tool.name === "curve" || state.tool.name === "cubicCurve") &&
+      state.clickCounter > 0)
   ) {
     //run selected tool step function
     state.tool.fn()
@@ -612,6 +614,7 @@ function handleTools(e) {
         toolBtn.id === "replace" ||
         toolBtn.id === "brush" ||
         toolBtn.id === "curve" ||
+        toolBtn.id === "cubicCurve" ||
         toolBtn.id === "fill" ||
         toolBtn.id === "line"
       ) {

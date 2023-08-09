@@ -2,7 +2,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
-import { plotQuadBezier } from "../utils/bezier.js"
+import { plotQuadBezier, plotCubicBezier } from "../utils/bezier.js"
 import { generateRandomRGB } from "../utils/colors.js"
 
 //====================================//
@@ -351,6 +351,21 @@ export function actionFill(startX, startY, currentColor, ctx, currentMode) {
   }
 }
 
+/* Helper function. TODO: move to external helper file for rendering */
+//To render a pixel perfect curve, points are plotted instead of using t values, which are not equidistant.
+function renderPoints(points, brushStamp, weight, ctx, currentMode, scale) {
+  function plot(point) {
+    //rounded values
+    let xt = Math.floor(point.x)
+    let yt = Math.floor(point.y)
+    // let brushOffset = Math.floor(weight / 2) * scale;
+    // let randomColor = generateRandomRGB()
+    //pass "point" instead of currentColor to visualize segments
+    actionDraw(xt, yt, point, brushStamp, weight, ctx, currentMode, scale)
+  }
+  points.forEach((point) => plot(point))
+}
+
 export function actionQuadraticCurve(
   startx,
   starty,
@@ -377,31 +392,6 @@ export function actionQuadraticCurve(
   ctx.fillStyle = currentColor.color
 
   //BUG: On touchscreen, hits gradient sign error if first tool used
-  function renderCurve(controlX, controlY) {
-    //To render a pixel perfect curve, points are plotted instead of using t values, which are not equidistant.
-    function plot(point) {
-      //rounded values
-      let xt = Math.floor(point.x)
-      let yt = Math.floor(point.y)
-      // let brushOffset = Math.floor(weight / 2) * scale;
-      // let randomColor = generateRandomRGB()
-      //pass "point" instead of currentColor to visualize segments
-      actionDraw(xt, yt, point, brushStamp, weight, ctx, currentMode, scale)
-    }
-
-    //p1, p2 are global endpoints
-    let plotPoints = plotQuadBezier(
-      startx,
-      starty,
-      controlX,
-      controlY,
-      endx,
-      endy
-    )
-
-    plotPoints.forEach((point) => plot(point))
-  }
-
   if (stepNum === 1) {
     //after defining x0y0
     actionLine(
@@ -420,9 +410,114 @@ export function actionQuadraticCurve(
     // after defining x2y2
     //onscreen preview curve
     //somehow use rendercurve2 for flatter curves
-    renderCurve(state.cursorWithCanvasOffsetX, state.cursorWithCanvasOffsetY)
+    let plotPoints = plotQuadBezier(
+      startx,
+      starty,
+      state.cursorWithCanvasOffsetX,
+      state.cursorWithCanvasOffsetY,
+      endx,
+      endy
+    )
+    renderPoints(plotPoints, brushStamp, weight, ctx, currentMode, scale)
   } else if (stepNum === 4) {
     //curve after defining x3y3
-    renderCurve(controlx, controly)
+    let plotPoints = plotQuadBezier(
+      startx,
+      starty,
+      controlx,
+      controly,
+      endx,
+      endy
+    )
+    renderPoints(plotPoints, brushStamp, weight, ctx, currentMode, scale)
+  }
+}
+
+export function actionCubicCurve(
+  startx,
+  starty,
+  endx,
+  endy,
+  controlx1,
+  controly1,
+  controlx2,
+  controly2,
+  stepNum,
+  currentColor,
+  ctx,
+  currentMode,
+  brushStamp,
+  weight,
+  scale = 1
+) {
+  //force coords to int
+  startx = Math.round(startx)
+  starty = Math.round(starty)
+  controlx1 = Math.round(controlx1)
+  controly1 = Math.round(controly1)
+  controlx2 = Math.round(controlx2)
+  controly2 = Math.round(controly2)
+  endx = Math.round(endx)
+  endy = Math.round(endy)
+
+  ctx.fillStyle = currentColor.color
+
+  //BUG: On touchscreen, hits gradient sign error if first tool used
+  if (stepNum === 1) {
+    //after defining x0y0
+    actionLine(
+      startx,
+      starty,
+      state.cursorWithCanvasOffsetX,
+      state.cursorWithCanvasOffsetY,
+      currentColor,
+      canvas.onScreenCTX,
+      currentMode,
+      brushStamp,
+      weight,
+      scale
+    )
+  } else if (stepNum === 2) {
+    // after defining x2y2
+    //onscreen preview curve
+    //somehow use rendercurve2 for flatter curves
+    let plotPoints = plotCubicBezier(
+      startx,
+      starty,
+      state.cursorWithCanvasOffsetX,
+      state.cursorWithCanvasOffsetY,
+      endx,
+      endy,
+      endx,
+      endy
+    )
+    renderPoints(plotPoints, brushStamp, weight, ctx, currentMode, scale)
+  } else if (stepNum === 3) {
+    //curve after defining x3y3
+    //onscreen preview curve
+    let plotPoints = plotCubicBezier(
+      startx,
+      starty,
+      controlx1,
+      controly1,
+      state.cursorWithCanvasOffsetX,
+      state.cursorWithCanvasOffsetY,
+      endx,
+      endy
+    )
+    renderPoints(plotPoints, brushStamp, weight, ctx, currentMode, scale)
+  } else if (stepNum === 4) {
+    //curve after defining x4y4
+    let plotPoints = plotCubicBezier(
+      startx,
+      starty,
+      controlx1,
+      controly1,
+      controlx2,
+      controly2,
+      endx,
+      endy
+    )
+    renderPoints(plotPoints, brushStamp, weight, ctx, currentMode, scale)
   }
 }

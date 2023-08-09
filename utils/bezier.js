@@ -56,7 +56,6 @@ export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
       err = dx + dy + xy /* error 1st step */
       while (dy < dx) {
         /* gradient negates -> algorithm fails */
-        // plot(x0, y0) /* plot curve */
         plotPoints.push({ x: x0, y: y0, color })
         if (x0 == x2 && y0 == y2) return /* last pixel -> curve finished */
         y1 = 2 * err < dx /* save value for test of y step */
@@ -72,7 +71,9 @@ export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
         } /* y step */
       }
     }
-    /* plot remaining part to end */
+    /* plot remaining part to end
+     * This is for the last segment, typically a straight or diagonal line
+     */
     let angle = getAngle(x2 - x0, y2 - y0) // angle of line
     let tri = getTriangle(x0, y0, x2, y2, angle)
 
@@ -82,7 +83,6 @@ export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
         y: Math.round(y0 + tri.y * i),
       }
       // for each point along the line
-      // plot(thispoint.x, thispoint.y)
       plotPoints.push({
         x: thispoint.x,
         y: thispoint.y,
@@ -90,7 +90,6 @@ export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
       })
     }
     //fill endpoint
-    // plot(x2, y2)
     plotPoints.push({ x: x2, y: y2, color })
   }
   /* plot any quadratic Bezier curve */
@@ -98,6 +97,7 @@ export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
     y = y0 - y1
   let t = x0 - 2 * x1 + x2,
     r
+  /* sign change in the x coordinates */
   if (x * (x2 - x1) > 0) {
     /* horizontal cut at P4? */
     if (y * (y2 - y1) > 0)
@@ -121,6 +121,7 @@ export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
     y0 = y
     y1 = Math.floor(r + 0.5) /* P0 = P4, P1 = P8 */
   }
+  /* sign change in the y coordinates */
   if ((y0 - y1) * (y2 - y1) > 0) {
     /* vertical cut at P6? */
     t = y0 - 2 * y1 + y2
@@ -136,7 +137,36 @@ export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
     x1 = Math.floor(r + 0.5)
     y0 = y1 = y /* P0 = P6, P1 = P7 */
   }
+  /* if no sign changes in x or y coordinates, only this segment will be generated */
   plotQuadBezierSeg(x0, y0, x1, y1, x2, y2, `rgba(0,0,255,255)`)
   /* remaining part */
   return plotPoints
+}
+
+//IN PROGRESS
+export function plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3) {
+  function calculateBezier(t, p0, p1, p2, p3) {
+    const u = 1 - t
+    const tt = t * t
+    const uu = u * u
+    const uuu = uu * u
+    const ttt = tt * t
+    return uuu * p0 + 3 * uu * t * p1 + 3 * u * tt * p2 + ttt * p3
+  }
+
+  function bezierPixels(x0, y0, x1, y1, x2, y2, x3, y3) {
+    const steps = 1000 // Adjust this for more or fewer points
+    const deltaT = 1 / steps
+    let points = []
+    for (let i = 0; i <= steps; i++) {
+      let t = deltaT * i
+      let x = Math.round(calculateBezier(t, x0, x1, x2, x3))
+      let y = Math.round(calculateBezier(t, y0, y1, y2, y3))
+      points.push({ x, y })
+    }
+    return points
+  }
+
+  // Test
+  return bezierPixels(x0, y0, x1, y1, x2, y2, x3, y3)
 }
