@@ -369,7 +369,16 @@ function renderPoints(
     // let brushOffset = Math.floor(weight / 2) * scale;
     // let randomColor = generateRandomRGB()
     //pass "point" instead of currentColor to visualize segments
-    actionDraw(xt, yt, point, brushStamp, weight, ctx, currentMode, scale)
+    actionDraw(
+      xt,
+      yt,
+      currentColor,
+      brushStamp,
+      weight,
+      ctx,
+      currentMode,
+      scale
+    )
   }
   points.forEach((point) => plot(point))
 }
