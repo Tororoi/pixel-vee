@@ -138,11 +138,11 @@ export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
       `rgba(255,0,0,255)`
     )
     //plot control point for segment
-    plotPoints.push({
-      x: deltaX,
-      y: Math.floor(r + 0.5),
-      color: `rgba(255,150,0,255)`,
-    })
+    // plotPoints.push({
+    //   x: deltaX,
+    //   y: Math.floor(r + 0.5),
+    //   color: `rgba(255,150,0,255)`,
+    // })
     r = ((y1 - y2) * (t - x2)) / (x1 - x2) + y2 /* intersect P4 | P1 P2 */
     x0 = x1 = deltaX
     y0 = deltaY
@@ -168,11 +168,11 @@ export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
       `rgba(0,255,0,255)`
     )
     //plot control point for segment
-    plotPoints.push({
-      x: Math.floor(r + 0.5),
-      y: deltaY,
-      color: `rgba(0,255,150,255)`,
-    })
+    // plotPoints.push({
+    //   x: Math.floor(r + 0.5),
+    //   y: deltaY,
+    //   color: `rgba(0,255,150,255)`,
+    // })
     r = ((x1 - x2) * (t - y2)) / (y1 - y2) + x2 /* intersect P7 | P1 P2 */
     x0 = deltaX
     x1 = Math.floor(r + 0.5)
@@ -181,11 +181,11 @@ export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
   /* if no sign changes in x or y coordinates, only this segment will be generated */
   plotQuadBezierSeg(x0, y0, x1, y1, x2, y2, `rgba(0,0,255,255)`)
   //plot control point for segment
-  plotPoints.push({
-    x: x1,
-    y: y1,
-    color: `rgba(150,0,255,255)`,
-  })
+  // plotPoints.push({
+  //   x: x1,
+  //   y: y1,
+  //   color: `rgba(150,0,255,255)`,
+  // })
   /* remaining part */
   return plotPoints
 }

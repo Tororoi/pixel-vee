@@ -764,6 +764,9 @@ function updateBrush(e) {
     case "curve":
       state.tool.brushSize = parseInt(e.target.value)
       break
+    case "cubicCurve":
+      state.tool.brushSize = parseInt(e.target.value)
+      break
     default:
     //do nothing for other tools
   }
