@@ -7,7 +7,8 @@ import {
   actionPerfectPixels,
   actionReplace,
   actionFill,
-  actionCurve,
+  actionQuadraticCurve,
+  actionCubicCurve,
 } from "./actions.js"
 import { renderCursor, drawCurrentPixel } from "../GUI/index.js"
 
@@ -327,7 +328,7 @@ export function curveSteps() {
         // canvas.onScreenCTX.clearRect(0, 0, canvas.offScreenCVS.width / canvas.zoom, canvas.offScreenCVS.height / canvas.zoom);
         canvas.draw()
         //onscreen preview
-        actionCurve(
+        actionQuadraticCurve(
           state.px1 +
             canvas.xOffset /
               (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
@@ -374,7 +375,7 @@ export function curveSteps() {
         //solidify control point
         state.px3 = state.cursorX
         state.py3 = state.cursorY
-        actionCurve(
+        actionQuadraticCurve(
           state.px1,
           state.py1,
           state.px2,
@@ -394,6 +395,143 @@ export function curveSteps() {
           state.tool.name,
           { x1: state.px1, x2: state.px2, x3: state.px3 },
           { y1: state.py1, y2: state.py2, y3: state.py3 },
+          canvas.currentLayer
+        )
+        canvas.draw()
+      }
+      break
+    case "pointerout":
+      //cancel curve
+      state.clickCounter = 0
+      break
+    default:
+    //do nothing
+  }
+}
+
+/**
+ * Draw cubic bezier curves
+ * Supported modes: "draw, erase",
+ */
+export function cubicCurveSteps() {
+  //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
+  //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
+  //this routine would be better for touchscreens, and no worse with pointer
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
+      //solidify end points
+      state.clickCounter += 1
+      if (state.clickCounter > 4) state.clickCounter = 1
+      switch (state.clickCounter) {
+        case 1:
+          state.px1 = state.cursorX
+          state.py1 = state.cursorY
+          break
+        case 2:
+          if (!state.touch) {
+            state.px2 = state.cursorX
+            state.py2 = state.cursorY
+          }
+          break
+        case 3:
+          if (!state.touch) {
+            state.px3 = state.cursorX
+            state.py3 = state.cursorY
+          }
+          break
+        default:
+        //do nothing
+      }
+      break
+    case "pointermove":
+      //draw line from origin point to current point onscreen
+      //normalize pointermove to pixelgrid
+      if (
+        state.onscreenX !== state.previousOnscreenX ||
+        state.onscreenY !== state.previousOnscreenY
+      ) {
+        // canvas.onScreenCTX.clearRect(0, 0, canvas.offScreenCVS.width / canvas.zoom, canvas.offScreenCVS.height / canvas.zoom);
+        canvas.draw()
+        //onscreen preview
+        actionCubicCurve(
+          state.px1 +
+            canvas.xOffset /
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
+          state.py1 +
+            canvas.yOffset /
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
+          state.px2 +
+            canvas.xOffset /
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
+          state.py2 +
+            canvas.yOffset /
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
+          state.px3 +
+            canvas.xOffset /
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
+          state.py3 +
+            canvas.yOffset /
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
+          state.px4 +
+            canvas.xOffset /
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
+          state.py4 +
+            canvas.yOffset /
+              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
+          state.clickCounter,
+          swatches.primary.color,
+          canvas.onScreenCTX,
+          state.mode,
+          state.brushStamp,
+          state.tool.brushSize,
+          canvas.offScreenCVS.width / canvas.offScreenCVS.width
+        )
+        state.previousOnscreenX = state.onscreenX
+        state.previousOnscreenY = state.onscreenY
+      }
+      break
+    case "pointerup":
+      //For touchscreens
+      if (state.touch) {
+        if (state.clickCounter === 1) {
+          state.px2 = state.cursorX
+          state.py2 = state.cursorY
+        }
+        if (state.clickCounter === 2) {
+          state.px3 = state.cursorX
+          state.py3 = state.cursorY
+        }
+        if (state.clickCounter === 3) {
+          state.clickCounter += 1
+        }
+      }
+      //Solidify curve
+      if (state.clickCounter === 4) {
+        //solidify control point
+        state.px4 = state.cursorX
+        state.py4 = state.cursorY
+        actionCubicCurve(
+          state.px1,
+          state.py1,
+          state.px2,
+          state.py2,
+          state.px3,
+          state.py3,
+          state.px4,
+          state.py4,
+          state.clickCounter,
+          swatches.primary.color,
+          canvas.currentLayer.ctx,
+          state.mode,
+          state.brushStamp,
+          state.tool.brushSize
+        )
+        state.clickCounter = 0
+        //store control points for timeline
+        state.addToTimeline(
+          state.tool.name,
+          { x1: state.px1, x2: state.px2, x3: state.px3, x4: state.px4 },
+          { y1: state.py1, y2: state.py2, y3: state.py3, y4: state.py4 },
           canvas.currentLayer
         )
         canvas.draw()
@@ -534,6 +672,13 @@ export const tools = {
   curve: {
     name: "curve",
     fn: curveSteps,
+    brushSize: 1,
+    disabled: false,
+    options: [],
+  },
+  cubicCurve: {
+    name: "cubicCurve",
+    fn: cubicCurveSteps,
     brushSize: 1,
     disabled: false,
     options: [],

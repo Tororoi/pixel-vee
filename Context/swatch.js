@@ -1,6 +1,7 @@
 import { state } from "./state.js"
 import { Picker } from "../Tools/Picker.js"
 import { initializeDialogBox } from "../utils/drag.js"
+import { generateRandomRGB } from "../utils/colors.js"
 
 //===================================//
 //==== * * * DOM Interface * * * ====//
@@ -93,10 +94,8 @@ function setColor(r, g, b, target) {
  * dependencies - setColor
  */
 function randomizeColor(target) {
-  let r = Math.floor(Math.random() * 256)
-  let g = Math.floor(Math.random() * 256)
-  let b = Math.floor(Math.random() * 256)
-  setColor(r, g, b, target)
+  let color = generateRandomRGB()
+  setColor(color.r, color.g, color.b, target)
 }
 
 //====================================//
