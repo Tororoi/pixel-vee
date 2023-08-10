@@ -34,9 +34,11 @@ const canvasHeight = document.getElementById("canvas-height")
 //Set onscreen canvas and its context
 const onScreenCVS = document.getElementById("onScreen")
 const onScreenCTX = onScreenCVS.getContext("2d")
+onScreenCTX.willReadFrequently = true
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
 const offScreenCVS = document.createElement("canvas")
 const offScreenCTX = offScreenCVS.getContext("2d")
+offScreenCTX.willReadFrequently = true
 //Set the dimensions of the drawing canvas
 offScreenCVS.width = 256
 offScreenCVS.height = 256
@@ -496,6 +498,7 @@ function dragLayerEnd(e) {
 function createNewRasterLayer(name) {
   let layerCVS = document.createElement("canvas")
   let layerCTX = layerCVS.getContext("2d")
+  layerCTX.willReadFrequently = true
   layerCVS.width = canvas.offScreenCVS.width
   layerCVS.height = canvas.offScreenCVS.height
   let layer = {
