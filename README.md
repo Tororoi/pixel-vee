@@ -49,17 +49,21 @@ Visit here: https://pixelvee.netlify.app/
 >
 > Drawing will only put color down on top of the selected background color (eg. If the background color swatch is red, it will only draw on top of red pixels).
 
-> #### Line
->
-> Draw straight, pixel perfect lines. Click and hold to draw lines.
-
 > #### Fill
 >
 > Fill in contiguous spaces of color.
 
-> #### Curve
+> #### Line
+>
+> Draw straight, pixel perfect lines. Click and hold to draw lines.
+
+> #### Quadratic Bezier Curve
 >
 > Draws a quadratic bezier curve (3 control points). Click for each control point of the bezier curve. Control points currently cannot be altered after clicking.
+
+> #### Cubic Bezier Curve
+>
+> Draws a cubic bezier curve (4 control points). Click for each control point of the bezier curve. Control points currently cannot be altered after clicking.
 
 > #### Picker
 >
@@ -109,7 +113,6 @@ Visit here: https://pixelvee.netlify.app/
 - Ability to import a custom background image (_in progress_)
 - Dithered Gradient Tool
 - Ability to toggle gridlines
-- Increase functionality of curve tool to include more points
 - Shapes Tool
 - 9-Grid Mode
 - Preview window
