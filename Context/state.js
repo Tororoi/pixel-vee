@@ -51,6 +51,8 @@ export const state = {
   py2: null,
   px3: null,
   py3: null,
+  px4: null,
+  py4: null,
   //for perfect pixels
   lastDrawnX: null,
   lastDrawnY: null,

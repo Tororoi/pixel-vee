@@ -250,6 +250,15 @@ function handleKeyDown(e) {
         state.tool = tools["curve"]
         canvas.onScreenCVS.style.cursor = "none"
         break
+      case "KeyJ":
+        //reset old button
+        toolBtn.style.background = "rgb(131, 131, 131)"
+        //set new button
+        toolBtn = document.querySelector("#cubicCurve")
+        toolBtn.style.background = "rgb(255, 255, 255)"
+        state.tool = tools["cubicCurve"]
+        canvas.onScreenCVS.style.cursor = "none"
+        break
       default:
       //do nothing
     }
@@ -273,6 +282,7 @@ function handleKeyUp(e) {
     toolBtn.id === "replace" ||
     toolBtn.id === "brush" ||
     toolBtn.id === "curve" ||
+    toolBtn.id === "cubicCurve" ||
     toolBtn.id === "fill" ||
     toolBtn.id === "line"
   ) {
@@ -357,7 +367,8 @@ function handlePointerMove(e) {
     (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
   if (
     state.clicked ||
-    (state.tool.name === "curve" && state.clickCounter > 0)
+    ((state.tool.name === "curve" || state.tool.name === "cubicCurve") &&
+      state.clickCounter > 0)
   ) {
     //run selected tool step function
     state.tool.fn()
@@ -603,6 +614,7 @@ function handleTools(e) {
         toolBtn.id === "replace" ||
         toolBtn.id === "brush" ||
         toolBtn.id === "curve" ||
+        toolBtn.id === "cubicCurve" ||
         toolBtn.id === "fill" ||
         toolBtn.id === "line"
       ) {
@@ -750,6 +762,9 @@ function updateBrush(e) {
       state.tool.brushSize = parseInt(e.target.value)
       break
     case "curve":
+      state.tool.brushSize = parseInt(e.target.value)
+      break
+    case "cubicCurve":
       state.tool.brushSize = parseInt(e.target.value)
       break
     default:
