@@ -369,16 +369,7 @@ function renderPoints(
     // let brushOffset = Math.floor(weight / 2) * scale;
     // let randomColor = generateRandomRGB()
     //pass "point" instead of currentColor to visualize segments
-    actionDraw(
-      xt,
-      yt,
-      currentColor,
-      brushStamp,
-      weight,
-      ctx,
-      currentMode,
-      scale
-    )
+    actionDraw(xt, yt, point, brushStamp, weight, ctx, currentMode, scale)
   }
   points.forEach((point) => plot(point))
 }
@@ -557,6 +548,7 @@ export function actionCubicCurve(
     )
   } else if (stepNum === 4) {
     //curve after defining x4y4
+    //TODO: To debug plotting errors, create method to plot final render slowly within the math function.
     let plotPoints = plotCubicBezier(
       startx,
       starty,

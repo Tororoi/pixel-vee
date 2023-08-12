@@ -236,284 +236,7 @@ export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
  */
 export function plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3) {
   let plotPoints = []
-  //Bresenham's algorithm for bezier limited to gradients without sign change.
-  function plotQuadBezierSeg(x0, y0, x1, y1, x2, y2, color) {
-    //difference between endpoint and control point
-    let sx = x2 - x1,
-      sy = y2 - y1
-    //difference between start point and control point
-    let xx = x0 - x1,
-      yy = y0 - y1,
-      xy /* relative values for checks */
-    let dx,
-      dy,
-      err,
-      cur = xx * sy - yy * sx /* curvature */
 
-    assert(
-      xx * sx <= 0 && yy * sy <= 0,
-      "sign of gradient must not change"
-    ) /* sign of gradient must not change */
-
-    if (sx * sx + sy * sy > xx * xx + yy * yy) {
-      /* begin with longer part */
-      x2 = x0
-      x0 = sx + x1
-      y2 = y0
-      y0 = sy + y1
-      cur = -cur /* swap P0 P2 */
-    }
-    if (cur != 0) {
-      /* no straight line */
-      xx += sx
-      xx *= sx = x0 < x2 ? 1 : -1 /* x step direction */
-      yy += sy
-      yy *= sy = y0 < y2 ? 1 : -1 /* y step direction */
-      xy = 2 * xx * yy
-      xx *= xx
-      yy *= yy /* differences 2nd degree */
-      if (cur * sx * sy < 0) {
-        /* negated curvature? */
-        xx = -xx
-        yy = -yy
-        xy = -xy
-        cur = -cur
-      }
-      dx = 4.0 * sy * cur * (x1 - x0) + xx - xy /* differences 1st degree */
-      dy = 4.0 * sx * cur * (y0 - y1) + yy - xy
-      xx += xx
-      yy += yy
-      err = dx + dy + xy /* error 1st step */
-      while (dy < dx) {
-        /* gradient negates -> algorithm fails */
-        plotPoints.push({ x: x0, y: y0, color })
-        if (x0 == x2 && y0 == y2) return /* last pixel -> curve finished */
-        y1 = 2 * err < dx /* save value for test of y step */
-        if (2 * err > dy) {
-          x0 += sx
-          dx -= xy
-          err += dy += yy
-        } /* x step */
-        if (y1) {
-          y0 += sy
-          dy -= xy
-          err += dx += xx
-        } /* y step */
-      }
-    }
-    /* plot remaining part to end
-     * This is for the last segment, typically a straight or diagonal line
-     */
-    let angle = getAngle(x2 - x0, y2 - y0) // angle of line
-    let tri = getTriangle(x0, y0, x2, y2, angle)
-
-    for (let i = 0; i < tri.long; i++) {
-      let thispoint = {
-        x: Math.round(x0 + tri.x * i),
-        y: Math.round(y0 + tri.y * i),
-      }
-      // for each point along the line
-      plotPoints.push({
-        x: thispoint.x,
-        y: thispoint.y,
-        color,
-      })
-    }
-    //fill endpoint
-    plotPoints.push({ x: x2, y: y2, color })
-  }
-  //Bresenham's algorithm for bezier limited to gradients without sign change.
-  function plotCubicBezierSeg(x0, y0, x1, y1, x2, y2, x3, y3, color) {
-    let f,
-      fx,
-      fy,
-      leg = 1
-    let sx = x0 < x3 ? 1 : -1,
-      sy = y0 < y3 ? 1 : -1 // step direction
-    let xc = -Math.abs(x0 + x1 - x2 - x3)
-    let xa = xc - 4 * sx * (x1 - x2)
-    let xb = sx * (x0 - x1 - x2 + x3)
-    let yc = -Math.abs(y0 + y1 - y2 - y3)
-    let ya = yc - 4 * sy * (y1 - y2)
-    let yb = sy * (y0 - y1 - y2 + y3)
-    let ab,
-      ac,
-      bc,
-      cb,
-      xx,
-      xy,
-      yy,
-      dx,
-      dy,
-      ex,
-      pxy,
-      EP = 0.01
-
-    // check for curve restrains
-    if (
-      !(
-        (x1 - x0) * (x2 - x3) < EP &&
-        ((x3 - x0) * (x1 - x2) < EP || xb * xb < xa * xc + EP)
-      )
-    ) {
-      throw new Error("Curve constraint violation")
-    }
-
-    if (
-      !(
-        (y1 - y0) * (y2 - y3) < EP &&
-        ((y3 - y0) * (y1 - y2) < EP || yb * yb < ya * yc + EP)
-      )
-    ) {
-      throw new Error("Curve constraint violation")
-    }
-
-    if (xa === 0 && ya === 0) {
-      // quadratic Bezier
-      sx = Math.floor((3 * x1 - x0 + 1) / 2)
-      sy = Math.floor((3 * y1 - y0 + 1) / 2)
-      return plotQuadBezierSeg(x0, y0, sx, sy, x3, y3, color)
-    }
-
-    x1 = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0) + 1
-    x2 = (x2 - x3) * (x2 - x3) + (y2 - y3) * (y2 - y3) + 1
-
-    do {
-      ab = xa * yb - xb * ya
-      ac = xa * yc - xc * ya
-      bc = xb * yc - xc * yb
-      ex = ab * (ab + ac - 3 * bc) + ac * ac
-      f = ex > 0 ? 1 : Math.sqrt(1 + 1024 / x1)
-
-      ab *= f
-      ac *= f
-      bc *= f
-      ex *= f * f
-      xy = (9 * (ab + ac + bc)) / 8
-      cb = 8 * (xa - ya)
-      dx =
-        (27 * (8 * ab * (yb * yb - ya * yc) + ex * (ya + 2 * yb + yc))) / 64 -
-        ya * ya * (xy - ya)
-      dy =
-        (27 * (8 * ab * (xb * xb - xa * xc) - ex * (xa + 2 * xb + xc))) / 64 -
-        xa * xa * (xy + xa)
-      xx =
-        (3 *
-          (3 * ab * (3 * yb * yb - ya * ya - 2 * ya * yc) -
-            ya * (3 * ac * (ya + yb) + ya * cb))) /
-        4
-      yy =
-        (3 *
-          (3 * ab * (3 * xb * xb - xa * xa - 2 * xa * xc) -
-            xa * (3 * ac * (xa + xb) + xa * cb))) /
-        4
-
-      xy = xa * ya * (6 * ab + 6 * ac - 3 * bc + cb)
-      ac = ya * ya
-      cb = xa * xa
-
-      xy =
-        (3 * (xy + 9 * f * (cb * yb * yc - xb * xc * ac) - 18 * xb * yb * ab)) /
-        8
-
-      if (ex < 0) {
-        dx = -dx
-        dy = -dy
-        xx = -xx
-        yy = -yy
-        xy = -xy
-        ac = -ac
-        cb = -cb
-      }
-
-      ab = 6 * ya * ac
-      ac = -6 * xa * ac
-      bc = 6 * ya * cb
-      cb = -6 * xa * cb
-
-      dx += xy
-      ex = dx + dy
-      dy += xy
-
-      for (pxy = xy, fx = fy = f; x0 !== x3 && y0 !== y3; ) {
-        plotPoints.push({
-          x: x0,
-          y: y0,
-          color,
-        })
-
-        do {
-          if (dx > pxy || dy < pxy) break
-
-          y1 = 2 * ex - dy
-          if (2 * ex >= dx) {
-            fx--
-            ex += dx += xx
-            dy += xy += ac
-            yy += bc
-            xx += ab
-          }
-
-          if (y1 <= 0) {
-            fy--
-            ex += dy += yy
-            dx += xy += bc
-            xx += ac
-            yy += cb
-          }
-        } while (fx > 0 && fy > 0)
-
-        if (!(2 * fx <= f) && !(2 * fy <= f)) {
-          break
-        }
-
-        if (2 * fx <= f) {
-          x0 += sx
-          fx += f
-        }
-
-        if (2 * fy <= f) {
-          y0 += sy
-          fy += f
-        }
-
-        if (pxy === xy && dx < 0 && dy > 0) pxy = EP
-      }
-
-      xx = x0
-      x0 = x3
-      x3 = xx
-      sx = -sx
-      xb = -xb
-      yy = y0
-      y0 = y3
-      y3 = yy
-      sy = -sy
-      yb = -yb
-      x1 = x2
-    } while (leg--)
-
-    /* plot remaining part to end
-     * This is for the last segment, typically a straight or diagonal line
-     */
-    let angle = getAngle(x3 - x0, y3 - y0) // angle of line
-    let tri = getTriangle(x0, y0, x3, y3, angle)
-
-    for (let i = 0; i < tri.long; i++) {
-      let thispoint = {
-        x: Math.round(x0 + tri.x * i),
-        y: Math.round(y0 + tri.y * i),
-      }
-      // for each point along the line
-      plotPoints.push({
-        x: thispoint.x,
-        y: thispoint.y,
-        color,
-      })
-    }
-    //fill endpoint
-    plotPoints.push({ x: x3, y: y3, color })
-  }
   let n = 0,
     i = 0
   let xc = x0 + x1 - x2 - x3,
@@ -568,6 +291,14 @@ export function plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3) {
   t1 = -1.0
   t[n] = 1.0
 
+  let colorShifts = [
+    `rgba(255,0,0,255)`,
+    `rgba(0,255,0,255)`,
+    `rgba(0,0,255,255)`,
+    `rgba(0,0,0,255)`,
+    `rgba(255,255,255,255)`,
+  ]
+
   for (i = 0; i <= n; i++) {
     t2 = t[i]
     fx1 =
@@ -595,19 +326,22 @@ export function plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3) {
       fy2 *= fy0
     }
     if (x0 !== x3 || y0 !== y3) {
-      let color = `rgba(0,255,0,255)`
+      // let color = `rgba(0,255,0,255)`
       // let color = generateRandomRGB().color
-      plotCubicBezierSeg(
-        x0,
-        y0,
-        x0 + fx1,
-        y0 + fy1,
-        x0 + fx2,
-        y0 + fy2,
-        x3,
-        y3,
-        color
-      )
+      plotPoints = [
+        ...plotPoints,
+        ...plotCubicBezierSeg(
+          x0,
+          y0,
+          x0 + fx1,
+          y0 + fy1,
+          x0 + fx2,
+          y0 + fy2,
+          x3,
+          y3,
+          colorShifts[i]
+        ),
+      ]
     }
     x0 = x3
     y0 = y3
@@ -615,6 +349,320 @@ export function plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3) {
     fy0 = fy3
     t1 = t2
   }
-  /* remaining part */
+
+  return plotPoints
+}
+
+//Bresenham's algorithm for bezier limited to gradients without sign change.
+function plotQuadBezierSeg(x0, y0, x1, y1, x2, y2, color) {
+  let plotPoints = []
+  //difference between endpoint and control point
+  let sx = x2 - x1,
+    sy = y2 - y1
+  //difference between start point and control point
+  let xx = x0 - x1,
+    yy = y0 - y1,
+    xy /* relative values for checks */
+  let dx,
+    dy,
+    err,
+    cur = xx * sy - yy * sx /* curvature */
+
+  assert(
+    xx * sx <= 0 && yy * sy <= 0,
+    "sign of gradient must not change"
+  ) /* sign of gradient must not change */
+
+  if (sx * sx + sy * sy > xx * xx + yy * yy) {
+    /* begin with longer part */
+    x2 = x0
+    x0 = sx + x1
+    y2 = y0
+    y0 = sy + y1
+    cur = -cur /* swap P0 P2 */
+  }
+  if (cur != 0) {
+    /* no straight line */
+    xx += sx
+    xx *= sx = x0 < x2 ? 1 : -1 /* x step direction */
+    yy += sy
+    yy *= sy = y0 < y2 ? 1 : -1 /* y step direction */
+    xy = 2 * xx * yy
+    xx *= xx
+    yy *= yy /* differences 2nd degree */
+    if (cur * sx * sy < 0) {
+      /* negated curvature? */
+      xx = -xx
+      yy = -yy
+      xy = -xy
+      cur = -cur
+    }
+    dx = 4.0 * sy * cur * (x1 - x0) + xx - xy /* differences 1st degree */
+    dy = 4.0 * sx * cur * (y0 - y1) + yy - xy
+    xx += xx
+    yy += yy
+    err = dx + dy + xy /* error 1st step */
+    while (dy < dx) {
+      /* gradient negates -> algorithm fails */
+      plotPoints.push({ x: x0, y: y0, color })
+      if (x0 == x2 && y0 == y2) return /* last pixel -> curve finished */
+      y1 = 2 * err < dx /* save value for test of y step */
+      if (2 * err > dy) {
+        x0 += sx
+        dx -= xy
+        err += dy += yy
+      } /* x step */
+      if (y1) {
+        y0 += sy
+        dy -= xy
+        err += dx += xx
+      } /* y step */
+    }
+  }
+  /* plot remaining part to end
+   * This is for the last segment, typically a straight or diagonal line
+   */
+  let angle = getAngle(x2 - x0, y2 - y0) // angle of line
+  let tri = getTriangle(x0, y0, x2, y2, angle)
+
+  for (let i = 0; i < tri.long; i++) {
+    let thispoint = {
+      x: Math.round(x0 + tri.x * i),
+      y: Math.round(y0 + tri.y * i),
+    }
+    // for each point along the line
+    plotPoints.push({
+      x: thispoint.x,
+      y: thispoint.y,
+      color,
+    })
+  }
+  //fill endpoint
+  plotPoints.push({ x: x2, y: y2, color })
+  return plotPoints
+}
+//Bresenham's algorithm for bezier limited to gradients without sign change.
+function plotCubicBezierSeg(x0, y0, x1, y1, x2, y2, x3, y3, color) {
+  let plotPoints = []
+  let f,
+    fx,
+    fy,
+    leg = 1
+  let sx = x0 < x3 ? 1 : -1,
+    sy = y0 < y3 ? 1 : -1 // step direction
+  let xc = -Math.abs(x0 + x1 - x2 - x3)
+  let xa = xc - 4 * sx * (x1 - x2)
+  let xb = sx * (x0 - x1 - x2 + x3)
+  let yc = -Math.abs(y0 + y1 - y2 - y3)
+  let ya = yc - 4 * sy * (y1 - y2)
+  let yb = sy * (y0 - y1 - y2 + y3)
+  let ab,
+    ac,
+    bc,
+    cb,
+    xx,
+    xy,
+    yy,
+    dx,
+    dy,
+    ex,
+    pxy,
+    EP = 0.01
+
+  // check for curve restrains
+  if (
+    !(
+      (x1 - x0) * (x2 - x3) < EP &&
+      ((x3 - x0) * (x1 - x2) < EP || xb * xb < xa * xc + EP)
+    )
+  ) {
+    throw new Error("Curve constraint violation")
+  }
+
+  if (
+    !(
+      (y1 - y0) * (y2 - y3) < EP &&
+      ((y3 - y0) * (y1 - y2) < EP || yb * yb < ya * yc + EP)
+    )
+  ) {
+    throw new Error("Curve constraint violation")
+  }
+
+  if (xa === 0 && ya === 0) {
+    // quadratic Bezier
+    sx = Math.floor((3 * x1 - x0 + 1) / 2)
+    sy = Math.floor((3 * y1 - y0 + 1) / 2)
+    return plotQuadBezierSeg(x0, y0, sx, sy, x3, y3, color)
+  }
+
+  x1 = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0) + 1
+  x2 = (x2 - x3) * (x2 - x3) + (y2 - y3) * (y2 - y3) + 1
+
+  do {
+    ab = xa * yb - xb * ya
+    ac = xa * yc - xc * ya
+    bc = xb * yc - xc * yb
+    ex = ab * (ab + ac - 3 * bc) + ac * ac
+    f = Math.floor(ex > 0 ? 1 : Math.sqrt(1 + 1024 / x1))
+
+    ab *= f
+    ac *= f
+    bc *= f
+    ex *= f * f
+    xy = (9 * (ab + ac + bc)) / 8
+    cb = 8 * (xa - ya)
+    dx =
+      (27 * (8 * ab * (yb * yb - ya * yc) + ex * (ya + 2 * yb + yc))) / 64 -
+      ya * ya * (xy - ya)
+    dy =
+      (27 * (8 * ab * (xb * xb - xa * xc) - ex * (xa + 2 * xb + xc))) / 64 -
+      xa * xa * (xy + xa)
+    xx =
+      (3 *
+        (3 * ab * (3 * yb * yb - ya * ya - 2 * ya * yc) -
+          ya * (3 * ac * (ya + yb) + ya * cb))) /
+      4
+    yy =
+      (3 *
+        (3 * ab * (3 * xb * xb - xa * xa - 2 * xa * xc) -
+          xa * (3 * ac * (xa + xb) + xa * cb))) /
+      4
+
+    xy = xa * ya * (6 * ab + 6 * ac - 3 * bc + cb)
+    ac = ya * ya
+    cb = xa * xa
+
+    xy =
+      (3 * (xy + 9 * f * (cb * yb * yc - xb * xc * ac) - 18 * xb * yb * ab)) / 8
+
+    if (ex < 0) {
+      dx = -dx
+      dy = -dy
+      xx = -xx
+      yy = -yy
+      xy = -xy
+      ac = -ac
+      cb = -cb
+    }
+
+    ab = 6 * ya * ac
+    ac = -6 * xa * ac
+    bc = 6 * ya * cb
+    cb = -6 * xa * cb
+
+    dx += xy
+    ex = dx + dy
+    dy += xy
+    // let gradColor = 0
+    let count = 0
+    for (pxy = xy, fx = fy = f; x0 !== x3 && y0 !== y3; ) {
+      // gradColor += 5
+      count++
+      plotPoints.push({
+        x: x0,
+        y: y0,
+        color,
+      })
+
+      do {
+        if (dx > pxy || dy < pxy) break
+
+        y1 = 2 * ex - dy
+        if (!(2 * ex >= dx) && !(y1 <= 0)) {
+          console.log("something wrong in inner do while loop", {
+            fx,
+            fy,
+          })
+        }
+        if (2 * ex >= dx) {
+          fx--
+          ex += dx += xx
+          dy += xy += ac
+          yy += bc
+          xx += ab
+        }
+
+        if (y1 <= 0) {
+          fy--
+          ex += dy += yy
+          dx += xy += bc
+          xx += ac
+          yy += cb
+        }
+      } while (fx > 0 && fy > 0)
+
+      // if (!(2 * fx <= f) && !(2 * fy <= f)) {
+      //   console.log({ count, fx, fy, f })
+      //   break
+      // }
+      if (fx === 1 && fy === 1 && f === 1) {
+        console.log({
+          count,
+          fx,
+          fy,
+          f,
+          condition: !(2 * fx <= f) && !(2 * fy <= f),
+        })
+        break
+      }
+
+      if (2 * fx <= f) {
+        x0 += sx
+        fx += f
+      }
+
+      if (2 * fy <= f) {
+        y0 += sy
+        fy += f
+      }
+
+      if (pxy === xy && dx < 0 && dy > 0) pxy = EP
+      if (count > 1000) {
+        console.log("Would have been infinite", {
+          count,
+          fx,
+          fy,
+          f,
+          condition: !(2 * fx <= f) && !(2 * fy <= f),
+        })
+        break
+      }
+    }
+
+    xx = x0
+    x0 = x3
+    x3 = xx
+    sx = -sx
+    xb = -xb
+    yy = y0
+    y0 = y3
+    y3 = yy
+    sy = -sy
+    yb = -yb
+    x1 = x2
+    if (color === `rgba(255,255,255,255)`) {
+      console.log(leg, { x0, y0, x3, y3 })
+    }
+  } while (leg--)
+
+  /* plot remaining part to end
+   * This is for the last segment, typically a straight or diagonal line
+   */
+  let angle = getAngle(x3 - x0, y3 - y0) // angle of line
+  let tri = getTriangle(x0, y0, x3, y3, angle)
+  for (let i = 0; i < tri.long; i++) {
+    let thispoint = {
+      x: Math.round(x0 + tri.x * i),
+      y: Math.round(y0 + tri.y * i),
+    }
+    // for each point along the line
+    plotPoints.push({
+      x: thispoint.x,
+      y: thispoint.y,
+      color: `rgba(150,150,0,255)`,
+    })
+  }
+  //fill endpoint
+  plotPoints.push({ x: x3, y: y3, color })
   return plotPoints
 }
