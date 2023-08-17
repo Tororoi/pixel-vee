@@ -2,7 +2,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
-import { plotQuadBezier, plotCubicBezier } from "../utils/bezier.js"
+import { plotCubicBezier, stepPlotCubicBezier } from "../utils/bezier.js"
 import { generateRandomRGB } from "../utils/colors.js"
 
 //====================================//
@@ -415,14 +415,16 @@ export function actionQuadraticCurve(
       scale
     )
   } else if (stepNum === 2 || stepNum === 3) {
-    // after defining x2y2
+    // after defining x2y2, plot quad bezier with x3 and y3 arguments matching x2 and y2
     //onscreen preview curve
     //somehow use rendercurve2 for flatter curves
-    let plotPoints = plotQuadBezier(
+    let plotPoints = plotCubicBezier(
       startx,
       starty,
       state.cursorWithCanvasOffsetX,
       state.cursorWithCanvasOffsetY,
+      endx,
+      endy,
       endx,
       endy
     )
@@ -436,12 +438,14 @@ export function actionQuadraticCurve(
       scale
     )
   } else if (stepNum === 4) {
-    //curve after defining x3y3
-    let plotPoints = plotQuadBezier(
+    //curve after defining x3y3, plot quad bezier with x3 and y3 arguments matching x2 and y2
+    let plotPoints = plotCubicBezier(
       startx,
       starty,
       controlx,
       controly,
+      endx,
+      endy,
       endx,
       endy
     )
@@ -549,7 +553,26 @@ export function actionCubicCurve(
   } else if (stepNum === 4) {
     //curve after defining x4y4
     //TODO: To debug plotting errors, create method to plot final render slowly within the math function.
-    let plotPoints = plotCubicBezier(
+    // let plotPoints = plotCubicBezier(
+    //   startx,
+    //   starty,
+    //   controlx1,
+    //   controly1,
+    //   controlx2,
+    //   controly2,
+    //   endx,
+    //   endy
+    // )
+    // renderPoints(
+    //   plotPoints,
+    //   brushStamp,
+    //   currentColor,
+    //   weight,
+    //   ctx,
+    //   currentMode,
+    //   scale
+    // )
+    slowPlotCubicBezier(
       startx,
       starty,
       controlx1,
@@ -557,7 +580,44 @@ export function actionCubicCurve(
       controlx2,
       controly2,
       endx,
-      endy
+      endy,
+      brushStamp,
+      currentColor,
+      weight,
+      ctx,
+      currentMode,
+      scale
+    )
+  }
+}
+
+function slowPlotCubicBezier(
+  x0,
+  y0,
+  x1,
+  y1,
+  x2,
+  y2,
+  x3,
+  y3,
+  brushStamp,
+  currentColor,
+  weight,
+  ctx,
+  currentMode,
+  scale
+) {
+  function recursivePlotBezier(maxSteps) {
+    let plotPoints = stepPlotCubicBezier(
+      x0,
+      y0,
+      x1,
+      y1,
+      x2,
+      y2,
+      x3,
+      y3,
+      maxSteps
     )
     renderPoints(
       plotPoints,
@@ -568,5 +628,14 @@ export function actionCubicCurve(
       currentMode,
       scale
     )
+    canvas.draw()
+    console.log(`plot ${maxSteps} steps at ${plotPoints.length} length`)
+
+    if (maxSteps < 300) {
+      setTimeout(function () {
+        recursivePlotBezier(maxSteps + 1)
+      }, 1000)
+    }
   }
+  recursivePlotBezier(10)
 }
