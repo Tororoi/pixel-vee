@@ -552,42 +552,44 @@ export function actionCubicCurve(
     )
   } else if (stepNum === 4) {
     //curve after defining x4y4
-    //TODO: To debug plotting errors, create method to plot final render slowly within the math function.
-    // let plotPoints = plotCubicBezier(
-    //   startx,
-    //   starty,
-    //   controlx1,
-    //   controly1,
-    //   controlx2,
-    //   controly2,
-    //   endx,
-    //   endy
-    // )
-    // renderPoints(
-    //   plotPoints,
-    //   brushStamp,
-    //   currentColor,
-    //   weight,
-    //   ctx,
-    //   currentMode,
-    //   scale
-    // )
-    slowPlotCubicBezier(
-      startx,
-      starty,
-      controlx1,
-      controly1,
-      controlx2,
-      controly2,
-      endx,
-      endy,
-      brushStamp,
-      currentColor,
-      weight,
-      ctx,
-      currentMode,
-      scale
-    )
+    if (state.debugger) {
+      slowPlotCubicBezier(
+        startx,
+        starty,
+        controlx1,
+        controly1,
+        controlx2,
+        controly2,
+        endx,
+        endy,
+        brushStamp,
+        currentColor,
+        weight,
+        ctx,
+        currentMode,
+        scale
+      )
+    } else {
+      let plotPoints = plotCubicBezier(
+        startx,
+        starty,
+        controlx1,
+        controly1,
+        controlx2,
+        controly2,
+        endx,
+        endy
+      )
+      renderPoints(
+        plotPoints,
+        brushStamp,
+        currentColor,
+        weight,
+        ctx,
+        currentMode,
+        scale
+      )
+    }
   }
 }
 
@@ -652,51 +654,22 @@ function slowPlotCubicBezier(
       }, ${plotPoints[plotPoints.length - 1].y}`
     )
   }
-  function recursivePlotBezier(maxSteps) {
-    stepPlotCubicBezier({
-      x0,
-      y0,
-      x1,
-      y1,
-      x2,
-      y2,
-      x3,
-      y3,
-      brushStamp,
-      currentColor,
-      weight,
-      ctx,
-      currentMode,
-      scale,
-      maxSteps,
-    })
-
-    if (maxSteps < 300) {
-      setTimeout(function () {
-        recursivePlotBezier(maxSteps + 1)
-      }, 1000)
-    }
+  state.debugObject = {
+    x0,
+    y0,
+    x1,
+    y1,
+    x2,
+    y2,
+    x3,
+    y3,
+    brushStamp,
+    currentColor,
+    weight,
+    ctx,
+    currentMode,
+    scale,
+    maxSteps: 1,
   }
-  if (state.debugger) {
-    state.debugObject = {
-      x0,
-      y0,
-      x1,
-      y1,
-      x2,
-      y2,
-      x3,
-      y3,
-      brushStamp,
-      currentColor,
-      weight,
-      ctx,
-      currentMode,
-      scale,
-      maxSteps: 1,
-    }
-    state.debugFn = stepPlotCubicBezier
-  } else {
-    recursivePlotBezier(10)
-  }
+  state.debugFn = stepPlotCubicBezier
 }

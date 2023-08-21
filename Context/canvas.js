@@ -324,6 +324,7 @@ function redrawPoints() {
           )
           break
         case "cubicCurve":
+          //TODO: pass source on history objects to avoid debugging actions from the timeline unless desired
           actionCubicCurve(
             p.x.x1,
             p.y.y1,
