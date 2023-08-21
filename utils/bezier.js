@@ -208,10 +208,8 @@ function plotCubicBezierSeg(x0, y0, x1, y1, x2, y2, x3, y3, color) {
     ex = dx + dy
     dy += xy
     // let gradColor = 0
-    let count = 0
-    for (pxy = xy, fx = fy = f; x0 !== x3 && y0 !== y3; ) {
+    outerLoop: for (pxy = xy, fx = fy = f; x0 !== x3 && y0 !== y3; ) {
       // gradColor += 5
-      count++
       plotPoints.push({
         x: x0,
         y: y0,
@@ -219,15 +217,10 @@ function plotCubicBezierSeg(x0, y0, x1, y1, x2, y2, x3, y3, color) {
       })
 
       do {
-        if (dx > pxy || dy < pxy) break
+        if (dx > pxy || dy < pxy) break outerLoop
 
         y1 = 2 * ex - dy
-        if (!(2 * ex >= dx) && !(y1 <= 0)) {
-          console.log("something wrong in inner do while loop", {
-            fx,
-            fy,
-          })
-        }
+
         if (2 * ex >= dx) {
           fx--
           ex += dx += xx
@@ -244,11 +237,6 @@ function plotCubicBezierSeg(x0, y0, x1, y1, x2, y2, x3, y3, color) {
           yy += cb
         }
       } while (fx > 0 && fy > 0)
-
-      //This line does not exist in paper, added to prevent infinite loop
-      if (!(2 * fx <= f) && !(2 * fy <= f)) {
-        break
-      }
 
       if (2 * fx <= f) {
         x0 += sx
@@ -464,7 +452,7 @@ export function plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3) {
   return plotPoints
 }
 
-export function stepPlotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3, maxSteps) {
+export function debugPlotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3, maxSteps) {
   let plotPoints = []
   let steps = 0
   //Bresenham's algorithm for bezier limited to gradients without sign change.
@@ -672,10 +660,8 @@ export function stepPlotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3, maxSteps) {
       ex = dx + dy
       dy += xy
       // let gradColor = 0
-      let count = 0
-      for (pxy = xy, fx = fy = f; x0 !== x3 && y0 !== y3; ) {
+      outerLoop: for (pxy = xy, fx = fy = f; x0 !== x3 && y0 !== y3; ) {
         // gradColor += 5
-        count++
         plotPoints.push({
           x: x0,
           y: y0,
@@ -685,7 +671,7 @@ export function stepPlotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3, maxSteps) {
         if (steps >= maxSteps) return
 
         do {
-          if (dx > pxy || dy < pxy) break
+          if (dx > pxy || dy < pxy) break outerLoop
 
           y1 = 2 * ex - dy
 
@@ -706,9 +692,29 @@ export function stepPlotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3, maxSteps) {
           }
         } while (fx > 0 && fy > 0)
 
-        //This line does not exist in paper, added to prevent infinite loop
-        if (!(2 * fx <= f) && !(2 * fy <= f)) {
-          break
+        if (steps === maxSteps - 1) {
+          console.log(steps, leg, {
+            pxy,
+            EP,
+            dx,
+            dy,
+            xy,
+            x1,
+            x2,
+            xx,
+            yy,
+            x0,
+            y0,
+            x3,
+            y3,
+            fx,
+            fy,
+            f,
+            sx,
+            sy,
+            xb,
+            yb,
+          })
         }
 
         if (2 * fx <= f) {
@@ -723,7 +729,12 @@ export function stepPlotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3, maxSteps) {
 
         if (pxy === xy && dx < 0 && dy > 0) pxy = EP
         if (steps === maxSteps - 1) {
-          console.log(leg, {
+          console.log(steps, leg, {
+            pxy,
+            EP,
+            dx,
+            dy,
+            xy,
             x1,
             x2,
             xx,

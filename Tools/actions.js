@@ -2,7 +2,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
-import { plotCubicBezier, stepPlotCubicBezier } from "../utils/bezier.js"
+import { plotCubicBezier, debugPlotCubicBezier } from "../utils/bezier.js"
 import { generateRandomRGB } from "../utils/colors.js"
 
 //====================================//
@@ -607,8 +607,25 @@ function slowPlotCubicBezier(
   currentMode,
   scale
 ) {
-  function recursivePlotBezier(maxSteps) {
-    let plotPoints = stepPlotCubicBezier(
+  function stepPlotCubicBezier(instructionsObject) {
+    const {
+      x0,
+      y0,
+      x1,
+      y1,
+      x2,
+      y2,
+      x3,
+      y3,
+      brushStamp,
+      currentColor,
+      weight,
+      ctx,
+      currentMode,
+      scale,
+      maxSteps,
+    } = instructionsObject
+    let plotPoints = debugPlotCubicBezier(
       x0,
       y0,
       x1,
@@ -629,7 +646,30 @@ function slowPlotCubicBezier(
       scale
     )
     canvas.draw()
-    console.log(`plot ${maxSteps} steps at ${plotPoints.length} length`)
+    console.log(
+      `plot ${maxSteps} steps at ${plotPoints.length} length, final point at ${
+        plotPoints[plotPoints.length - 1].x
+      }, ${plotPoints[plotPoints.length - 1].y}`
+    )
+  }
+  function recursivePlotBezier(maxSteps) {
+    stepPlotCubicBezier({
+      x0,
+      y0,
+      x1,
+      y1,
+      x2,
+      y2,
+      x3,
+      y3,
+      brushStamp,
+      currentColor,
+      weight,
+      ctx,
+      currentMode,
+      scale,
+      maxSteps,
+    })
 
     if (maxSteps < 300) {
       setTimeout(function () {
@@ -637,5 +677,26 @@ function slowPlotCubicBezier(
       }, 1000)
     }
   }
-  recursivePlotBezier(10)
+  if (state.debugger) {
+    state.debugObject = {
+      x0,
+      y0,
+      x1,
+      y1,
+      x2,
+      y2,
+      x3,
+      y3,
+      brushStamp,
+      currentColor,
+      weight,
+      ctx,
+      currentMode,
+      scale,
+      maxSteps: 1,
+    }
+    state.debugFn = stepPlotCubicBezier
+  } else {
+    recursivePlotBezier(10)
+  }
 }
