@@ -24,14 +24,20 @@
         >
       </div>
       <div class="nav-items">
-        <!-- <div class="canvas-size">
-          <div class="btn" data-tooltip="Change canvas dimensions">
-            Canvas Size
-          </div>
-        </div> -->
+        <label
+          for="debugger-toggle"
+          id="debugger"
+          class="toggle"
+          data-tooltip="Toggle debugger on or off"
+        >
+          <input type="checkbox" id="debugger-toggle" />
+          <span class="checkmark"></span>
+          Debugger
+        </label>
         <label
           for="tooltips-toggle"
           id="tooltips"
+          class="toggle"
           data-tooltip="Toggle tooltips on or off"
         >
           <input type="checkbox" checked="true" id="tooltips-toggle" />

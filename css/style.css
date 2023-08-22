@@ -1,6 +1,5 @@
 /* Import order is important */
 /* First base styles and mixins, keyframes, variables */
-@use "sass:math";
 /* Variables */
 /* Breakpoints */
 /* Colors */
@@ -11,16 +10,15 @@
 
 @keyframes flash {
   0% {
-    background: #ef3f39;
+    background: rgb(239, 63, 57);
   }
   30% {
-    background: #ef3f39;
+    background: rgb(239, 63, 57);
   }
   100% {
-    background: #838383;
+    background: rgb(131, 131, 131);
   }
 }
-
 /* Reset styles */
 /* html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
@@ -70,7 +68,6 @@ table {
   src: url("../../public/04B_03__.ttf") format("truetype");
   font-display: swap;
 }
-
 html,
 body {
   width: 100%;
@@ -81,7 +78,7 @@ body {
 body {
   margin: 0px;
   color: white;
-  background: #3d3d3d;
+  background: rgb(61, 61, 61);
   font-family: "04Font";
   user-select: none;
   display: flex;
@@ -109,24 +106,21 @@ button {
 input {
   font-family: "04Font";
   font-size: 16px;
-  background-color: #1f1f1f;
+  background-color: rgb(31, 31, 31);
   color: white;
   -webkit-appearance: none;
   border: none;
   outline: none;
-  box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383,
-    0px 2px #838383;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-input:hover:not([disabled]),
-input:focus {
-  box-shadow: 2px 0px white, -2px 0px white, 0px -2px white, 0px 2px white;
+input:hover:not([disabled]), input:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 
-input[type="number"] {
+input[type=number] {
   width: 40px;
 }
-input[type="number"]::-webkit-inner-spin-button,
-input[type="number"]::-webkit-outer-spin-button {
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
@@ -135,8 +129,7 @@ input[type="number"]::-webkit-outer-spin-button {
 svg {
   width: 100px;
   height: 100px;
-  pointer-events: none;
-  /* Keep from interfering with pointer interaction */
+  pointer-events: none; /* Keep from interfering with pointer interaction */
 }
 
 /* Next basic site layout components */
@@ -150,18 +143,16 @@ svg {
 
 .draggable {
   margin: 2px;
-  box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383,
-    0px 2px #838383;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.draggable:hover:not([disabled]),
-.draggable:focus {
-  box-shadow: 2px 0px white, -2px 0px white, 0px -2px white, 0px 2px white;
+.draggable:hover:not([disabled]), .draggable:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .draggable .dragging {
   user-select: none;
 }
 .draggable .header {
-  background-color: black;
+  background-color: rgb(0, 0, 0);
   justify-self: center;
   width: 100%;
   height: 20px;
@@ -180,15 +171,12 @@ svg {
   width: 2px;
   height: 2px;
   margin: 5px;
-  background: #838383;
-  box-shadow: 0px 0px #838383, 4px 0px #838383, 0px 4px #838383, 4px 4px #838383,
-    0px 8px #838383, 4px 8px #838383;
+  background: rgb(131, 131, 131);
+  box-shadow: 0px 0px rgb(131, 131, 131), 4px 0px rgb(131, 131, 131), 0px 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 0px 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131);
 }
-.draggable .header:hover:not([disabled]) .drag-btn,
-.draggable .header:focus .drag-btn {
-  background: white;
-  box-shadow: 0px 0px white, 4px 0px white, 0px 4px white, 4px 4px white,
-    0px 8px white, 4px 8px white;
+.draggable .header:hover:not([disabled]) .drag-btn, .draggable .header:focus .drag-btn {
+  background: rgb(255, 255, 255);
+  box-shadow: 0px 0px rgb(255, 255, 255), 4px 0px rgb(255, 255, 255), 0px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 0px 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255);
 }
 .draggable .header .collapse-btn {
   position: absolute;
@@ -208,24 +196,16 @@ svg {
 .draggable .header .collapse-btn .arrow {
   height: 2px;
   width: 2px;
-  box-shadow: 9px 5px #838383, 7px 7px #838383, 9px 7px #838383,
-    11px 7px #838383, 5px 9px #838383, 7px 9px #838383, 9px 9px #838383,
-    11px 9px #838383, 13px 9px #838383, 9px 11px #838383, 9px 13px #838383;
+  box-shadow: 9px 5px rgb(131, 131, 131), 7px 7px rgb(131, 131, 131), 9px 7px rgb(131, 131, 131), 11px 7px rgb(131, 131, 131), 5px 9px rgb(131, 131, 131), 7px 9px rgb(131, 131, 131), 9px 9px rgb(131, 131, 131), 11px 9px rgb(131, 131, 131), 13px 9px rgb(131, 131, 131), 9px 11px rgb(131, 131, 131), 9px 13px rgb(131, 131, 131);
 }
 .draggable .header .collapse-btn input:checked ~ .arrow {
-  box-shadow: 9px 5px #838383, 9px 7px #838383, 5px 9px #838383, 7px 9px #838383,
-    9px 9px #838383, 11px 9px #838383, 13px 9px #838383, 7px 11px #838383,
-    9px 11px #838383, 11px 11px #838383, 9px 13px #838383;
+  box-shadow: 9px 5px rgb(131, 131, 131), 9px 7px rgb(131, 131, 131), 5px 9px rgb(131, 131, 131), 7px 9px rgb(131, 131, 131), 9px 9px rgb(131, 131, 131), 11px 9px rgb(131, 131, 131), 13px 9px rgb(131, 131, 131), 7px 11px rgb(131, 131, 131), 9px 11px rgb(131, 131, 131), 11px 11px rgb(131, 131, 131), 9px 13px rgb(131, 131, 131);
 }
 .draggable .header .collapse-btn:hover .arrow {
-  box-shadow: 9px 5px white, 7px 7px white, 9px 7px white, 11px 7px white,
-    5px 9px white, 7px 9px white, 9px 9px white, 11px 9px white, 13px 9px white,
-    9px 11px white, 9px 13px white;
+  box-shadow: 9px 5px rgb(255, 255, 255), 7px 7px rgb(255, 255, 255), 9px 7px rgb(255, 255, 255), 11px 7px rgb(255, 255, 255), 5px 9px rgb(255, 255, 255), 7px 9px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 11px 9px rgb(255, 255, 255), 13px 9px rgb(255, 255, 255), 9px 11px rgb(255, 255, 255), 9px 13px rgb(255, 255, 255);
 }
 .draggable .header .collapse-btn:hover input:checked ~ .arrow {
-  box-shadow: 9px 5px white, 9px 7px white, 5px 9px white, 7px 9px white,
-    9px 9px white, 11px 9px white, 13px 9px white, 7px 11px white,
-    9px 11px white, 11px 11px white, 9px 13px white;
+  box-shadow: 9px 5px rgb(255, 255, 255), 9px 7px rgb(255, 255, 255), 5px 9px rgb(255, 255, 255), 7px 9px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 11px 9px rgb(255, 255, 255), 13px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 9px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 9px 13px rgb(255, 255, 255);
 }
 .draggable .collapsible {
   width: 100%;
@@ -244,7 +224,7 @@ svg {
   position: absolute;
   max-width: 150px;
   color: black;
-  background: #ffffc7;
+  background: rgb(255, 255, 199);
   text-align: center;
   font-family: "04Font";
   font-size: 16px;
@@ -253,8 +233,7 @@ svg {
   transition: opacity 0.3s;
   transition-delay: 0.5s;
   z-index: 1000;
-  box-shadow: 2px 0px #ffffc7, -2px 0px #ffffc7, 0px -2px #ffffc7,
-    0px 2px #ffffc7;
+  box-shadow: 2px 0px rgb(255, 255, 199), -2px 0px rgb(255, 255, 199), 0px -2px rgb(255, 255, 199), 0px 2px rgb(255, 255, 199);
 }
 .tooltip:after {
   content: "";
@@ -264,8 +243,8 @@ svg {
   position: absolute;
   top: -2px;
   right: -2px;
-  background: #ffffc7;
-  box-shadow: -2px -2px #ffffc7, 0px -2px #ffffc7, 0px -4px #ffffc7;
+  background: rgb(255, 255, 199);
+  box-shadow: -2px -2px rgb(255, 255, 199), 0px -2px rgb(255, 255, 199), 0px -4px rgb(255, 255, 199);
 }
 .tooltip.visible {
   visibility: visible;
@@ -279,8 +258,8 @@ svg {
   position: absolute;
   top: -2px;
   left: -2px;
-  background: #ffffc7;
-  box-shadow: 2px -2px #ffffc7, 0px -2px #ffffc7, 0px -4px #ffffc7;
+  background: rgb(255, 255, 199);
+  box-shadow: 2px -2px rgb(255, 255, 199), 0px -2px rgb(255, 255, 199), 0px -4px rgb(255, 255, 199);
 }
 
 /* Buttons */
@@ -288,18 +267,16 @@ svg {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #838383;
+  background: rgb(131, 131, 131);
   user-select: none;
   text-align: center;
   color: white;
   margin: 3px;
   opacity: 1;
-  box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383,
-    0px 2px #838383;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.btn:hover:not([disabled]),
-.btn:focus {
-  box-shadow: 2px 0px white, -2px 0px white, 0px -2px white, 0px 2px white;
+.btn:hover:not([disabled]), .btn:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .btn.custom-shape {
   background: transparent;
@@ -352,7 +329,7 @@ svg {
 }
 
 .nav {
-  background-color: black;
+  background-color: rgb(0, 0, 0);
   justify-self: center;
   width: calc(100% - 4px);
   height: 48px;
@@ -362,12 +339,10 @@ svg {
   align-items: center;
   position: relative;
   margin: 2px;
-  box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383,
-    0px 2px #838383;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.nav:hover:not([disabled]),
-.nav:focus {
-  box-shadow: 2px 0px white, -2px 0px white, 0px -2px white, 0px 2px white;
+.nav:hover:not([disabled]), .nav:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .nav .title {
   padding-left: 16px;
@@ -380,31 +355,33 @@ svg {
   margin-left: 16px;
   margin-right: 16px;
 }
-.nav .nav-items #tooltips {
+.nav .nav-items .toggle {
   padding-right: 16px;
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
   cursor: pointer;
 }
-.nav .nav-items #tooltips input {
+.nav .nav-items .toggle input {
   position: absolute;
   opacity: 0;
   pointer-events: none;
 }
-.nav .nav-items #tooltips .checkmark {
+.nav .nav-items .toggle .checkmark {
   height: 16px;
   width: 16px;
-  background-color: white;
+  background-color: rgb(255, 255, 255);
   margin-right: 8px;
-  box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383,
-    0px 2px #838383;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.nav .nav-items #tooltips:hover .checkmark {
-  box-shadow: 2px 0px white, -2px 0px white, 0px -2px white, 0px 2px white;
+.nav .nav-items .toggle:hover .checkmark {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
-.nav .nav-items #tooltips input:checked ~ .checkmark {
-  background-color: #4183fc;
+.nav .nav-items .toggle input:checked ~ .checkmark {
+  background-color: rgb(65, 131, 252);
+}
+.nav .nav-items #debugger {
+  display: none;
 }
 .nav .nav-items .canvas-size {
   padding-right: 16px;
@@ -413,12 +390,12 @@ svg {
   height: 28px;
   padding-left: 8px;
   padding-right: 8px;
-  background: #4d4d4d;
+  background: rgb(77, 77, 77);
 }
 .nav .nav-items .export .btn {
   height: 28px;
   width: 84px;
-  background: #4d4d4d;
+  background: rgb(77, 77, 77);
 }
 
 /* Next override basic styles with specific styles when necessary */
@@ -440,23 +417,15 @@ canvas {
   height: calc(100% - 4px);
   margin: 2px;
   overflow: hidden;
-  box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383,
-    0px 2px #838383;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.bg-space:hover:not([disabled]),
-.bg-space:focus {
-  box-shadow: 2px 0px white, -2px 0px white, 0px -2px white, 0px 2px white;
+.bg-space:hover:not([disabled]), .bg-space:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 
 .onScreen {
   position: relative;
-  background-image: repeating-linear-gradient(
-    -45deg,
-    white,
-    white 5px,
-    #d8d8d8 5px,
-    #d8d8d8 10px
-  );
+  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   cursor: crosshair;
   width: 100%;
   height: 100%;
@@ -467,21 +436,19 @@ canvas {
   user-select: none;
   position: absolute;
   z-index: 102;
-  background-color: #333333;
+  background-color: rgb(51, 51, 51);
   width: 136px;
   right: 0;
   display: flex;
   flex-flow: column nowrap;
   justify-content: center;
   align-items: center;
-  box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383,
-    0px 2px #838383;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
   /* Color Swatches */
   /* Zoom */
 }
-.toolbox:hover:not([disabled]),
-.toolbox:focus {
-  box-shadow: 2px 0px white, -2px 0px white, 0px -2px white, 0px 2px white;
+.toolbox:hover:not([disabled]), .toolbox:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .toolbox .colors {
   width: 128px;
@@ -490,7 +457,7 @@ canvas {
 }
 .toolbox .colors .swatch {
   position: absolute;
-  background: black;
+  background: rgb(0, 0, 0);
   width: 72px;
   height: 72px;
   margin: 16px;
@@ -498,7 +465,7 @@ canvas {
 }
 .toolbox .colors .back-swatch {
   position: absolute;
-  background: white;
+  background: rgb(255, 255, 255);
   width: 72px;
   height: 72px;
   margin: 16px;
@@ -523,15 +490,13 @@ canvas {
   width: 100%;
 }
 .toolbox .zoom .tool {
-  background: #838383;
+  background: rgb(131, 131, 131);
   margin: 3px;
-  box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383,
-    0px 2px #838383;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
   cursor: pointer;
 }
-.toolbox .zoom .tool:hover:not([disabled]),
-.toolbox .zoom .tool:focus {
-  box-shadow: 2px 0px white, -2px 0px white, 0px -2px white, 0px 2px white;
+.toolbox .zoom .tool:hover:not([disabled]), .toolbox .zoom .tool:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .toolbox .zoom .tool .plusminus {
   width: 40px;
@@ -561,7 +526,7 @@ canvas {
   user-select: none;
   position: absolute;
   z-index: 101;
-  background-color: #333333;
+  background-color: rgb(51, 51, 51);
   width: 206px;
   height: auto;
   top: 135px;
@@ -574,18 +539,18 @@ canvas {
   flex-flow: row nowrap;
   margin: 2px;
 }
-.layers-interface .layers-control input[type="file"] {
+.layers-interface .layers-control input[type=file] {
   display: none;
 }
 .layers-interface .layers-control .custom-file-upload {
   width: 28px;
   height: 28px;
-  background: #838383;
+  background: rgb(131, 131, 131);
 }
 .layers-interface .layers-control .new-raster-layer {
   width: 28px;
   height: 28px;
-  background: #838383;
+  background: rgb(131, 131, 131);
 }
 .layers-interface .layers-container {
   width: calc(100% - 4px);
@@ -593,12 +558,10 @@ canvas {
   max-height: 481px;
   overflow-y: auto;
   margin: 2px;
-  box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383,
-    0px 2px #838383;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.layers-interface .layers-container:hover:not([disabled]),
-.layers-interface .layers-container:focus {
-  box-shadow: 2px 0px white, -2px 0px white, 0px -2px white, 0px 2px white;
+.layers-interface .layers-container:hover:not([disabled]), .layers-interface .layers-container:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .layers-interface .layers-container::-webkit-scrollbar {
   width: 10px;
@@ -607,7 +570,7 @@ canvas {
   background: transparent;
 }
 .layers-interface .layers-container::-webkit-scrollbar-thumb {
-  background: #838383;
+  background: rgb(131, 131, 131);
   background-clip: content-box;
   border: 2px solid transparent;
 }
@@ -631,24 +594,22 @@ canvas {
   flex-flow: row-reverse nowrap;
   justify-content: flex-end;
   align-items: center;
-  box-shadow: inset 2px 0px #838383, inset -2px 0px #838383,
-    inset 0px -2px #838383, inset 0px 2px #838383;
+  box-shadow: inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131);
 }
 .layers-interface .layers-container .layers .layer.raster {
-  background: #4d4d4d;
+  background: rgb(77, 77, 77);
 }
 .layers-interface .layers-container .layers .layer.reference {
-  background: #5f5f5f;
+  background: rgb(95, 95, 95);
 }
 .layers-interface .layers-container .layers .layer:hover {
-  box-shadow: inset 2px 0px white, inset -2px 0px white, inset 0px -2px white,
-    inset 0px 2px white;
+  box-shadow: inset 2px 0px rgb(255, 255, 255), inset -2px 0px rgb(255, 255, 255), inset 0px -2px rgb(255, 255, 255), inset 0px 2px rgb(255, 255, 255);
 }
 .layers-interface .layers-container .layers .layer .hide {
   width: 28px;
   height: 28px;
   margin: 6px;
-  background: #838383;
+  background: rgb(131, 131, 131);
 }
 .layers-interface .layers-container .layers .layer .hide .eye {
   height: 2px;
@@ -657,52 +618,20 @@ canvas {
 .layers-interface .layers-container .layers .layer .hide .eye.eyeopen {
   opacity: 1;
   transform: translateX(-13px) translateY(-13px);
-  box-shadow: 10px 6px black, 12px 6px black, 14px 6px black, 16px 6px black,
-    6px 8px black, 8px 8px #575757, 10px 8px #acacac, 12px 8px #acacac,
-    14px 8px #acacac, 16px 8px #acacac, 18px 8px #575757, 20px 8px black,
-    4px 10px black, 6px 10px #575757, 8px 10px white, 10px 10px white,
-    12px 10px black, 14px 10px black, 16px 10px white, 18px 10px #acacac,
-    20px 10px #575757, 22px 10px black, 2px 12px black, 4px 12px #575757,
-    6px 12px white, 8px 12px white, 10px 12px black, 12px 12px white,
-    14px 12px black, 16px 12px black, 18px 12px white, 20px 12px #acacac,
-    22px 12px #acacac, 24px 12px black, 4px 14px #acacac, 6px 14px white,
-    8px 14px white, 10px 14px black, 12px 14px black, 14px 14px black,
-    16px 14px black, 18px 14px white, 20px 14px #acacac, 22px 14px #acacac,
-    4px 16px black, 6px 16px #acacac, 8px 16px white, 10px 16px white,
-    12px 16px black, 14px 16px black, 16px 16px white, 18px 16px #acacac,
-    20px 16px #acacac, 22px 16px black, 6px 18px black, 8px 18px #575757,
-    10px 18px #acacac, 12px 18px #acacac, 14px 18px #acacac, 16px 18px #acacac,
-    18px 18px #575757, 20px 18px black, 10px 20px black, 12px 20px black,
-    14px 20px black, 16px 20px black;
+  box-shadow: 10px 6px rgb(0, 0, 0), 12px 6px rgb(0, 0, 0), 14px 6px rgb(0, 0, 0), 16px 6px rgb(0, 0, 0), 6px 8px rgb(0, 0, 0), 8px 8px rgb(87, 87, 87), 10px 8px rgb(172, 172, 172), 12px 8px rgb(172, 172, 172), 14px 8px rgb(172, 172, 172), 16px 8px rgb(172, 172, 172), 18px 8px rgb(87, 87, 87), 20px 8px rgb(0, 0, 0), 4px 10px rgb(0, 0, 0), 6px 10px rgb(87, 87, 87), 8px 10px rgb(255, 255, 255), 10px 10px rgb(255, 255, 255), 12px 10px rgb(0, 0, 0), 14px 10px rgb(0, 0, 0), 16px 10px rgb(255, 255, 255), 18px 10px rgb(172, 172, 172), 20px 10px rgb(87, 87, 87), 22px 10px rgb(0, 0, 0), 2px 12px rgb(0, 0, 0), 4px 12px rgb(87, 87, 87), 6px 12px rgb(255, 255, 255), 8px 12px rgb(255, 255, 255), 10px 12px rgb(0, 0, 0), 12px 12px rgb(255, 255, 255), 14px 12px rgb(0, 0, 0), 16px 12px rgb(0, 0, 0), 18px 12px rgb(255, 255, 255), 20px 12px rgb(172, 172, 172), 22px 12px rgb(172, 172, 172), 24px 12px rgb(0, 0, 0), 4px 14px rgb(172, 172, 172), 6px 14px rgb(255, 255, 255), 8px 14px rgb(255, 255, 255), 10px 14px rgb(0, 0, 0), 12px 14px rgb(0, 0, 0), 14px 14px rgb(0, 0, 0), 16px 14px rgb(0, 0, 0), 18px 14px rgb(255, 255, 255), 20px 14px rgb(172, 172, 172), 22px 14px rgb(172, 172, 172), 4px 16px rgb(0, 0, 0), 6px 16px rgb(172, 172, 172), 8px 16px rgb(255, 255, 255), 10px 16px rgb(255, 255, 255), 12px 16px rgb(0, 0, 0), 14px 16px rgb(0, 0, 0), 16px 16px rgb(255, 255, 255), 18px 16px rgb(172, 172, 172), 20px 16px rgb(172, 172, 172), 22px 16px rgb(0, 0, 0), 6px 18px rgb(0, 0, 0), 8px 18px rgb(87, 87, 87), 10px 18px rgb(172, 172, 172), 12px 18px rgb(172, 172, 172), 14px 18px rgb(172, 172, 172), 16px 18px rgb(172, 172, 172), 18px 18px rgb(87, 87, 87), 20px 18px rgb(0, 0, 0), 10px 20px rgb(0, 0, 0), 12px 20px rgb(0, 0, 0), 14px 20px rgb(0, 0, 0), 16px 20px rgb(0, 0, 0);
 }
 .layers-interface .layers-container .layers .layer .hide .eye.eyeclosed {
   opacity: 1;
   transform: translateX(-13px) translateY(-13px);
-  box-shadow: 10px 6px black, 12px 6px black, 14px 6px black, 16px 6px black,
-    6px 8px black, 8px 8px #575757, 10px 8px #acacac, 12px 8px #acacac,
-    14px 8px #acacac, 16px 8px #575757, 18px 8px #575757, 20px 8px black,
-    4px 10px black, 6px 10px #575757, 8px 10px #acacac, 10px 10px #acacac,
-    12px 10px #acacac, 14px 10px #acacac, 16px 10px #acacac, 18px 10px #575757,
-    20px 10px #575757, 22px 10px black, 4px 12px #575757, 6px 12px #acacac,
-    8px 12px #acacac, 10px 12px #acacac, 12px 12px #acacac, 14px 12px #acacac,
-    16px 12px #acacac, 18px 12px #575757, 20px 12px #575757, 22px 12px #575757,
-    2px 14px black, 4px 14px #acacac, 6px 14px #acacac, 8px 14px #acacac,
-    10px 14px #acacac, 12px 14px #acacac, 14px 14px #acacac, 16px 14px #acacac,
-    18px 14px #575757, 20px 14px #575757, 22px 14px #575757, 24px 14px black,
-    4px 16px black, 6px 16px #acacac, 8px 16px #acacac, 10px 16px #acacac,
-    12px 16px #acacac, 14px 16px #acacac, 16px 16px #575757, 18px 16px #575757,
-    20px 16px #575757, 22px 16px black, 6px 18px black, 8px 18px #575757,
-    10px 18px #575757, 12px 18px #575757, 14px 18px #575757, 16px 18px #575757,
-    18px 18px #575757, 20px 18px black, 10px 20px black, 12px 20px black,
-    14px 20px black, 16px 20px black;
+  box-shadow: 10px 6px rgb(0, 0, 0), 12px 6px rgb(0, 0, 0), 14px 6px rgb(0, 0, 0), 16px 6px rgb(0, 0, 0), 6px 8px rgb(0, 0, 0), 8px 8px rgb(87, 87, 87), 10px 8px rgb(172, 172, 172), 12px 8px rgb(172, 172, 172), 14px 8px rgb(172, 172, 172), 16px 8px rgb(87, 87, 87), 18px 8px rgb(87, 87, 87), 20px 8px rgb(0, 0, 0), 4px 10px rgb(0, 0, 0), 6px 10px rgb(87, 87, 87), 8px 10px rgb(172, 172, 172), 10px 10px rgb(172, 172, 172), 12px 10px rgb(172, 172, 172), 14px 10px rgb(172, 172, 172), 16px 10px rgb(172, 172, 172), 18px 10px rgb(87, 87, 87), 20px 10px rgb(87, 87, 87), 22px 10px rgb(0, 0, 0), 4px 12px rgb(87, 87, 87), 6px 12px rgb(172, 172, 172), 8px 12px rgb(172, 172, 172), 10px 12px rgb(172, 172, 172), 12px 12px rgb(172, 172, 172), 14px 12px rgb(172, 172, 172), 16px 12px rgb(172, 172, 172), 18px 12px rgb(87, 87, 87), 20px 12px rgb(87, 87, 87), 22px 12px rgb(87, 87, 87), 2px 14px rgb(0, 0, 0), 4px 14px rgb(172, 172, 172), 6px 14px rgb(172, 172, 172), 8px 14px rgb(172, 172, 172), 10px 14px rgb(172, 172, 172), 12px 14px rgb(172, 172, 172), 14px 14px rgb(172, 172, 172), 16px 14px rgb(172, 172, 172), 18px 14px rgb(87, 87, 87), 20px 14px rgb(87, 87, 87), 22px 14px rgb(87, 87, 87), 24px 14px rgb(0, 0, 0), 4px 16px rgb(0, 0, 0), 6px 16px rgb(172, 172, 172), 8px 16px rgb(172, 172, 172), 10px 16px rgb(172, 172, 172), 12px 16px rgb(172, 172, 172), 14px 16px rgb(172, 172, 172), 16px 16px rgb(87, 87, 87), 18px 16px rgb(87, 87, 87), 20px 16px rgb(87, 87, 87), 22px 16px rgb(0, 0, 0), 6px 18px rgb(0, 0, 0), 8px 18px rgb(87, 87, 87), 10px 18px rgb(87, 87, 87), 12px 18px rgb(87, 87, 87), 14px 18px rgb(87, 87, 87), 16px 18px rgb(87, 87, 87), 18px 18px rgb(87, 87, 87), 20px 18px rgb(0, 0, 0), 10px 20px rgb(0, 0, 0), 12px 20px rgb(0, 0, 0), 14px 20px rgb(0, 0, 0), 16px 20px rgb(0, 0, 0);
 }
 .layers-interface .layers-container .layers .layer .warning {
-  background: #ef3f39;
+  background: rgb(239, 63, 57);
   animation: flash 0.6s ease-in infinite alternate-reverse;
 }
 
 .brush-container {
-  background-color: #333333;
+  background-color: rgb(51, 51, 51);
   user-select: none;
   position: absolute;
   z-index: 100;
@@ -722,7 +651,7 @@ canvas {
 .brush-container .brush-preview {
   width: 64px;
   height: 64px;
-  background: #1f1f1f;
+  background: rgb(31, 31, 31);
 }
 .brush-container .brush-preview #brush-preview {
   width: 2px;
@@ -735,7 +664,7 @@ canvas {
   -webkit-appearance: none;
   width: 80%;
   height: 16px;
-  background: #1f1f1f;
+  background: rgb(31, 31, 31);
   outline: none;
   cursor: pointer;
 }
@@ -753,13 +682,13 @@ canvas {
 }
 .brush-container .slider:disabled {
   cursor: not-allowed;
-  background: #838383;
+  background: rgb(131, 131, 131);
 }
 .brush-container .slider:disabled::-webkit-slider-thumb {
-  background: #c8c8c8;
+  background: rgb(200, 200, 200);
 }
 .brush-container .slider:disabled::-moz-range-thumb {
-  background: #c8c8c8;
+  background: rgb(200, 200, 200);
 }
 
 /* Color Picker */
@@ -772,7 +701,7 @@ canvas {
   display: none;
   flex-flow: column nowrap;
   color: white;
-  background: #333333;
+  background: rgb(51, 51, 51);
   text-align: center;
   width: 570px;
   font-family: "04Font";
@@ -780,12 +709,10 @@ canvas {
   padding: 0;
   align-self: center;
   opacity: 1;
-  box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383,
-    0px 2px #838383;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.picker-container:hover:not([disabled]),
-.picker-container:focus {
-  box-shadow: 2px 0px white, -2px 0px white, 0px -2px white, 0px 2px white;
+.picker-container:hover:not([disabled]), .picker-container:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .picker-container .header h3 {
   justify-self: center;
@@ -814,12 +741,10 @@ canvas {
   height: 250px;
   margin: 20px;
   cursor: crosshair;
-  box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383,
-    0px 2px #838383;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.picker-interface #left #picker #color-picker:hover:not([disabled]),
-.picker-interface #left #picker #color-picker:focus {
-  box-shadow: 2px 0px white, -2px 0px white, 0px -2px white, 0px 2px white;
+.picker-interface #left #picker #color-picker:hover:not([disabled]), .picker-interface #left #picker #color-picker:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .picker-interface #left #picker #hueslider {
   flex-shrink: 0;
@@ -832,18 +757,16 @@ canvas {
   margin: 10px;
   background: white;
   outline: none;
-  box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383,
-    0px 2px #838383;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.picker-interface #left #picker #hueslider:hover:not([disabled]),
-.picker-interface #left #picker #hueslider:focus {
-  box-shadow: 2px 0px white, -2px 0px white, 0px -2px white, 0px 2px white;
+.picker-interface #left #picker #hueslider:hover:not([disabled]), .picker-interface #left #picker #hueslider:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .picker-interface #left #picker #hueslider::-webkit-slider-thumb {
   -webkit-appearance: none;
   height: 24px;
   width: 5px;
-  outline: 2px solid black;
+  outline: 2px solid rgb(0, 0, 0);
 }
 .picker-interface #left #buttons {
   display: flex;
@@ -853,7 +776,7 @@ canvas {
   height: 76px;
 }
 .picker-interface #left #buttons .btn {
-  background: #4d4d4d;
+  background: rgb(77, 77, 77);
   font-size: 20px;
   padding: 8px;
   margin: 0px 20px 0px 20px;
@@ -900,17 +823,15 @@ canvas {
 }
 .picker-interface #right #rgbahsl .sliderbox {
   position: relative;
-  background-color: #1f1f1f;
+  background-color: rgb(31, 31, 31);
   width: 16px;
   height: 18px;
   margin-left: 6px;
   overflow: hidden;
-  box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383,
-    0px 2px #838383;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.picker-interface #right #rgbahsl .sliderbox:hover:not([disabled]),
-.picker-interface #right #rgbahsl .sliderbox:focus {
-  box-shadow: 2px 0px white, -2px 0px white, 0px -2px white, 0px 2px white;
+.picker-interface #right #rgbahsl .sliderbox:hover:not([disabled]), .picker-interface #right #rgbahsl .sliderbox:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .picker-interface #right #rgbahsl .sliderbox .channel-btn {
   position: absolute;
@@ -934,7 +855,7 @@ canvas {
 }
 .picker-interface #right #rgbahsl .sliderbox .channel-btn:hover {
   background: white;
-  color: #1f1f1f;
+  color: rgb(31, 31, 31);
 }
 .picker-interface #right #hex {
   margin-left: 30px;
@@ -950,7 +871,7 @@ canvas {
 }
 
 .size-container {
-  background-color: #333333;
+  background-color: rgb(51, 51, 51);
   user-select: none;
   position: absolute;
   z-index: 100;
@@ -988,21 +909,19 @@ canvas {
   margin-left: 8px;
 }
 .size-container .dimensions-form .btn {
-  background: #4d4d4d;
+  background: rgb(77, 77, 77);
 }
 .size-container .sliderbox {
   position: relative;
-  background-color: #1f1f1f;
+  background-color: rgb(31, 31, 31);
   width: 16px;
   height: 18px;
   margin-left: 6px;
   overflow: hidden;
-  box-shadow: 2px 0px #838383, -2px 0px #838383, 0px -2px #838383,
-    0px 2px #838383;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.size-container .sliderbox:hover:not([disabled]),
-.size-container .sliderbox:focus {
-  box-shadow: 2px 0px white, -2px 0px white, 0px -2px white, 0px 2px white;
+.size-container .sliderbox:hover:not([disabled]), .size-container .sliderbox:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .size-container .sliderbox .channel-btn {
   position: absolute;
@@ -1026,5 +945,7 @@ canvas {
 }
 .size-container .sliderbox .channel-btn:hover {
   background: white;
-  color: #1f1f1f;
+  color: rgb(31, 31, 31);
 }
+
+/*# sourceMappingURL=style.css.map */

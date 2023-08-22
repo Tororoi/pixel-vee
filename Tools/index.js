@@ -528,12 +528,14 @@ export function cubicCurveSteps() {
         )
         state.clickCounter = 0
         //store control points for timeline
-        state.addToTimeline(
-          state.tool.name,
-          { x1: state.px1, x2: state.px2, x3: state.px3, x4: state.px4 },
-          { y1: state.py1, y2: state.py2, y3: state.py3, y4: state.py4 },
-          canvas.currentLayer
-        )
+        if (!state.debugger) {
+          state.addToTimeline(
+            state.tool.name,
+            { x1: state.px1, x2: state.px2, x3: state.px3, x4: state.px4 },
+            { y1: state.py1, y2: state.py2, y3: state.py3, y4: state.py4 },
+            canvas.currentLayer
+          )
+        }
         canvas.draw()
       }
       break

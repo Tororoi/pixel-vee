@@ -20,7 +20,7 @@
     align-items: center;
     margin-left: 16px;
     margin-right: 16px;
-    #tooltips {
+    .toggle {
       padding-right: 16px;
       display: flex;
       flex-flow: row nowrap;
@@ -41,13 +41,16 @@
       }
       &:hover {
         .checkmark {
-          box-shadow: 2px 0px $white, -2px 0px $white,
-            0px -2px $white, 0px 2px $white;
+          box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white,
+            0px 2px $white;
         }
       }
       input:checked ~ .checkmark {
         background-color: $blue;
       }
+    }
+    #debugger {
+      display: none; //Uncomment for production
     }
     .canvas-size {
       padding-right: 16px;
