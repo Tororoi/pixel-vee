@@ -3,6 +3,10 @@ import { toolbox } from "../Context/toolbox.js" //Must be imported for event lis
 
 //State (TODO: not yet a true state)
 export const state = {
+  //debugger *HOW TO USE: set the debugObject and debugFn in the place you want to debug, and comment the addToTimeline for the corresponding tool
+  debugger: false,
+  debugObject: {},
+  debugFn: null,
   //timeline
   points: [],
   undoStack: [],

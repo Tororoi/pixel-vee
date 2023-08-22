@@ -4,7 +4,7 @@
   "description": "### Drawing application for pixel art",
   "main": "index.js",
   "scripts": {
-    "sass": "node-sass -w scss/ -o css/ --recursive"
+    "sass": "sass --watch scss/style.scss:css/style.css"
   },
   "repository": {
     "type": "git",
@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/Tororoi/undo-button#readme",
   "dependencies": {
-    "sass": "^1.52.2",
+    "sass": "^1.66.1",
     "sass-loader": "^13.0.0",
     "serve": "^14.0.1"
   }

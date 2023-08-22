@@ -42,6 +42,8 @@ let brushSlider = document.querySelector("#brush-size")
 let brush = document.querySelector(".brush")
 
 //Menu
+//Toggle Debugger
+let debuggerBtn = document.getElementById("debugger-toggle")
 //Toggle Tooltips
 let tooltipBtn = document.getElementById("tooltips-toggle")
 //Export
@@ -129,6 +131,13 @@ modesCont.addEventListener("click", handleModes)
 brushBtn.addEventListener("click", switchBrush)
 brushSlider.addEventListener("input", updateBrush)
 
+debuggerBtn.addEventListener("click", (e) => {
+  if (debuggerBtn.checked) {
+    state.debugger = true
+  } else {
+    state.debugger = false
+  }
+})
 tooltipBtn.addEventListener("click", (e) => {
   if (tooltipBtn.checked) {
     const tooltipMessage = tooltipBtn.parentNode.dataset?.tooltip
@@ -146,6 +155,30 @@ exportBtn.addEventListener("click", exportImage)
 function handleKeyDown(e) {
   if (state.shortcuts) {
     switch (e.code) {
+      case "ArrowLeft":
+        if (state.debugger) {
+          canvas.layers.forEach((l) => {
+            if (l.type === "raster") {
+              l.ctx.clearRect(
+                0,
+                0,
+                canvas.offScreenCVS.width,
+                canvas.offScreenCVS.height
+              )
+            }
+          })
+          canvas.redrawPoints()
+          canvas.draw()
+          state.debugObject.maxSteps -= 1
+          state.debugFn(state.debugObject)
+        }
+        break
+      case "ArrowRight":
+        if (state.debugger) {
+          state.debugObject.maxSteps += 1
+          state.debugFn(state.debugObject)
+        }
+        break
       case "KeyZ":
         if (e.metaKey) {
           if (e.shiftKey) {
