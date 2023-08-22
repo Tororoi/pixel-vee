@@ -137,7 +137,6 @@ debuggerBtn.addEventListener("click", (e) => {
   } else {
     state.debugger = false
   }
-  console.log(state.debugger)
 })
 tooltipBtn.addEventListener("click", (e) => {
   if (tooltipBtn.checked) {
