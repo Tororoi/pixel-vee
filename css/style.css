@@ -380,6 +380,9 @@ svg {
 .nav .nav-items .toggle input:checked ~ .checkmark {
   background-color: rgb(65, 131, 252);
 }
+.nav .nav-items #debugger {
+  display: none;
+}
 .nav .nav-items .canvas-size {
   padding-right: 16px;
 }

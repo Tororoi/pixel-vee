@@ -120,6 +120,11 @@ export function actionLine(
   )
 }
 
+/**
+ * User action for process to draw without staircasing artifacts
+ * @param {*} currentX
+ * @param {*} currentY
+ */
 export function actionPerfectPixels(currentX, currentY) {
   //if currentPixel not neighbor to lastDrawn, draw waitingpixel
   if (
@@ -156,6 +161,9 @@ export function actionPerfectPixels(currentX, currentY) {
   }
 }
 
+/**
+ * User action for process to replace a specific color where the user's brush moves
+ */
 export function actionReplace() {
   /**
    * Used for replace tool
@@ -241,6 +249,15 @@ export function actionReplace() {
   }
 }
 
+/**
+ * User action for process to fill a contiguous color
+ * @param {*} startX
+ * @param {*} startY
+ * @param {*} currentColor
+ * @param {*} ctx
+ * @param {*} currentMode
+ * @returns
+ */
 export function actionFill(startX, startY, currentColor, ctx, currentMode) {
   //exit if outside borders
   if (
@@ -351,8 +368,17 @@ export function actionFill(startX, startY, currentColor, ctx, currentMode) {
   }
 }
 
-/* Helper function. TODO: move to external helper file for rendering */
-//To render a pixel perfect curve, points are plotted instead of using t values, which are not equidistant.
+/**
+ * Helper function. TODO: move to external helper file for rendering
+ * To render a pixel perfect curve, points are plotted instead of using t values, which are not equidistant.
+ * @param {*} points
+ * @param {*} brushStamp
+ * @param {*} currentColor
+ * @param {*} weight
+ * @param {*} ctx
+ * @param {*} currentMode
+ * @param {*} scale
+ */
 function renderPoints(
   points,
   brushStamp,
@@ -383,6 +409,22 @@ function renderPoints(
   points.forEach((point) => plot(point))
 }
 
+/**
+ * User action for process to set control points for quadratic bezier
+ * @param {*} startx
+ * @param {*} starty
+ * @param {*} endx
+ * @param {*} endy
+ * @param {*} controlx
+ * @param {*} controly
+ * @param {*} stepNum
+ * @param {*} currentColor
+ * @param {*} ctx
+ * @param {*} currentMode
+ * @param {*} brushStamp
+ * @param {*} weight
+ * @param {*} scale
+ */
 export function actionQuadraticCurve(
   startx,
   starty,
@@ -470,6 +512,24 @@ export function actionQuadraticCurve(
   }
 }
 
+/**
+ * User action for process to set control points for cubic bezier
+ * @param {*} startx
+ * @param {*} starty
+ * @param {*} endx
+ * @param {*} endy
+ * @param {*} controlx1
+ * @param {*} controly1
+ * @param {*} controlx2
+ * @param {*} controly2
+ * @param {*} stepNum
+ * @param {*} currentColor
+ * @param {*} ctx
+ * @param {*} currentMode
+ * @param {*} brushStamp
+ * @param {*} weight
+ * @param {*} scale
+ */
 export function actionCubicCurve(
   startx,
   starty,
@@ -602,6 +662,23 @@ export function actionCubicCurve(
   }
 }
 
+/**
+ * Step through cubic bezier in debug mode, sets debug function and debug object
+ * @param {*} x0
+ * @param {*} y0
+ * @param {*} x1
+ * @param {*} y1
+ * @param {*} x2
+ * @param {*} y2
+ * @param {*} x3
+ * @param {*} y3
+ * @param {*} brushStamp
+ * @param {*} currentColor
+ * @param {*} weight
+ * @param {*} ctx
+ * @param {*} currentMode
+ * @param {*} scale
+ */
 function slowPlotCubicBezier(
   x0,
   y0,
