@@ -10,7 +10,7 @@ import {
   actionQuadraticCurve,
   actionCubicCurve,
 } from "./actions.js"
-import { renderCursor, drawCurrentPixel } from "../GUI/index.js"
+import { renderGUI, renderCursor, drawCurrentPixel } from "../GUI/index.js"
 
 //====================================//
 //=== * * * Tool Controllers * * * ===//
@@ -307,6 +307,13 @@ export function curveSteps() {
         case 1:
           state.px1 = state.cursorX
           state.py1 = state.cursorY
+          //reset control points
+          state.px2 = null
+          state.py2 = null
+          state.px3 = null
+          state.py3 = null
+          state.px4 = null
+          state.py4 = null
           break
         case 2:
           if (!state.touch) {
@@ -426,6 +433,13 @@ export function cubicCurveSteps() {
         case 1:
           state.px1 = state.cursorX
           state.py1 = state.cursorY
+          //reset control points
+          state.px2 = null
+          state.py2 = null
+          state.px3 = null
+          state.py3 = null
+          state.px4 = null
+          state.py4 = null
           break
         case 2:
           if (!state.touch) {
@@ -538,23 +552,30 @@ export function cubicCurveSteps() {
         }
         canvas.draw()
         //IN PROGRESS: draw control points at higher resolution only on onScreenCVS
-        actionDraw(
-          (canvas.xOffset + state.px3) * 2,
-          (canvas.yOffset + state.py3) * 2,
-          { color: `rgba(255,0,0,255)` },
-          state.brushStamp,
-          state.tool.brushSize,
-          canvas.onScreenCTX,
-          "draw",
-          0.5
-        )
-        // canvas.onScreenCTX.fillStyle = `rgba(255,0,0,255)`
-        // canvas.onScreenCTX.fillRect(
-        //   canvas.xOffset + state.px3,
-        //   canvas.yOffset + state.py3,
-        //   0.5,
+        // actionDraw(
+        //   (canvas.xOffset + state.px3) * 2,
+        //   (canvas.yOffset + state.py3) * 2,
+        //   { color: `rgba(255,0,0,255)` },
+        //   state.brushStamp,
+        //   state.tool.brushSize,
+        //   canvas.guiCTX,
+        //   "draw",
         //   0.5
         // )
+        // canvas.guiCTX.clearRect(
+        //   0,
+        //   0,
+        //   canvas.guiCVS.width / canvas.zoom,
+        //   canvas.guiCVS.height / canvas.zoom
+        // )
+        // canvas.guiCTX.fillStyle = `rgba(255,0,0,255)`
+        // canvas.guiCTX.fillRect(
+        //   canvas.xOffset + state.px3,
+        //   canvas.yOffset + state.py3,
+        //   1,
+        //   1
+        // )
+        renderGUI(state, canvas, swatches)
       }
       break
     case "pointerout":

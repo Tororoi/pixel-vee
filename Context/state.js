@@ -7,6 +7,7 @@ export const state = {
   debugger: false,
   debugObject: {},
   debugFn: null,
+  vectorMode: true,
   //timeline
   points: [],
   undoStack: [],

@@ -3,14 +3,57 @@ import { actionDraw } from "../Tools/actions.js"
 //===========================================//
 //=== * * * Graphics User Interface * * * ===//
 //===========================================//
-
-export function renderCursor(state, canvas, swatches) {
+//TODO: create gui state to store active elements so gui can be rerendered easily
+export function renderGUI(state, canvas, swatches) {
   canvas.guiCTX.clearRect(
     0,
     0,
     canvas.guiCVS.width / canvas.zoom,
     canvas.guiCVS.height / canvas.zoom
   )
+  if (state.vectorMode) {
+    renderVector(state, canvas)
+  }
+}
+
+function renderVector(state, canvas) {
+  canvas.guiCTX.beginPath()
+  canvas.guiCTX.moveTo(
+    canvas.xOffset + state.px1 + 0.5,
+    canvas.yOffset + state.py1 + 0.5
+  )
+  if (state.px4) {
+    //render cubic
+    canvas.guiCTX.bezierCurveTo(
+      canvas.xOffset + state.px3 + 0.5,
+      canvas.yOffset + state.py3 + 0.5,
+      canvas.xOffset + state.px4 + 0.5,
+      canvas.yOffset + state.py4 + 0.5,
+      canvas.xOffset + state.px2 + 0.5,
+      canvas.yOffset + state.py2 + 0.5
+    )
+  } else if (state.px3) {
+    //render quadratic
+    canvas.guiCTX.quadraticCurveTo(
+      canvas.xOffset + state.px3 + 0.5,
+      canvas.yOffset + state.py3 + 0.5,
+      canvas.xOffset + state.px2 + 0.5,
+      canvas.yOffset + state.py2 + 0.5
+    )
+  } else if (state.px2) {
+    //render line
+    canvas.guiCTX.lineTo(
+      canvas.xOffset + state.px2 + 0.5,
+      canvas.yOffset + state.py2 + 0.5
+    )
+  }
+  canvas.guiCTX.lineWidth = 0.25
+  canvas.guiCTX.strokeStyle = `rgba(255,0,0,255)`
+  canvas.guiCTX.stroke()
+}
+
+export function renderCursor(state, canvas, swatches) {
+  renderGUI(state, canvas, swatches)
   switch (state.tool.name) {
     case "grab":
       //show nothing

@@ -5,7 +5,7 @@ import { canvas, resizeOnScreenCanvas } from "../Context/canvas.js"
 import { swatches } from "./Context/swatch.js"
 import { tools } from "./Tools/index.js"
 import { actionUndoRedo } from "./Tools/undoRedo.js"
-import { renderCursor } from "./GUI/index.js"
+import { renderGUI, renderCursor } from "./GUI/index.js"
 
 //===================================//
 //========= * * * DOM * * * =========//
@@ -359,13 +359,8 @@ function handlePointerDown(e) {
     return
   }
   setCoordinates(e)
-  //Clear GUI
-  canvas.guiCTX.clearRect(
-    0,
-    0,
-    canvas.guiCVS.width / canvas.zoom,
-    canvas.guiCVS.height / canvas.zoom
-  )
+  //Re-render GUI
+  renderGUI(state, canvas, swatches)
   //Reset Cursor for mobile
   state.onscreenX =
     state.cursorWithCanvasOffsetX *
@@ -455,7 +450,6 @@ function handlePointerUp(e) {
     renderCursor(state, canvas, swatches)
   }
 }
-
 function handlePointerOut(e) {
   //TODO: if touchscreen, need to handle differently. Currently cannot reach next code since clicked will be false.
   //Only purpose is to rerender with multi step tools such as curve when moving out or in the case of touch, lifting finger
@@ -472,12 +466,7 @@ function handlePointerOut(e) {
   //   state.redoStack = []
   // }
   if (!state.touch) {
-    canvas.guiCTX.clearRect(
-      0,
-      0,
-      canvas.guiCVS.width / canvas.zoom,
-      canvas.guiCVS.height / canvas.zoom
-    )
+    renderGUI(state, canvas, swatches)
     canvas.draw()
     canvas.pointerEvent = "none"
   }
@@ -489,13 +478,21 @@ function handlePointerOut(e) {
  * @param {integer} xOriginOffset - additional offset needed to keep zoom centered around cursor
  * @param {integer} yOriginOffset - additional offset needed to keep zoom centered around cursor
  */
-function zoom(z, xOriginOffset, yOriginOffset) {
+function zoomCanvas(z, xOriginOffset, yOriginOffset) {
   canvas.zoom *= z
   canvas.xOffset = Math.round(xOriginOffset)
   canvas.yOffset = Math.round(yOriginOffset)
   canvas.previousXOffset = canvas.xOffset
   canvas.previousYOffset = canvas.yOffset
   //re scale canvas
+  canvas.guiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
   canvas.onScreenCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
@@ -504,6 +501,7 @@ function zoom(z, xOriginOffset, yOriginOffset) {
     0,
     0
   )
+  renderGUI(state, canvas, swatches)
   canvas.draw()
 }
 
@@ -522,7 +520,7 @@ function handleWheel(e) {
     let nox = zoomedX - state.cursorX
     let noy = zoomedY - state.cursorY
     if (canvas.zoom > 0.5) {
-      zoom(z, nox, noy)
+      zoomCanvas(z, nox, noy)
     }
   } else if (delta > 0) {
     z = 2
@@ -533,7 +531,7 @@ function handleWheel(e) {
     let nox = zoomedX - state.cursorX
     let noy = zoomedY - state.cursorY
     if (canvas.zoom < 32) {
-      zoom(z, nox, noy)
+      zoomCanvas(z, nox, noy)
     }
   }
 }
@@ -560,7 +558,7 @@ function handleZoom(e) {
       let nox = zoomedX - canvas.offScreenCVS.width / 2
       let noy = zoomedY - canvas.offScreenCVS.height / 2
       if (canvas.zoom > 0.5) {
-        zoom(z, nox, noy)
+        zoomCanvas(z, nox, noy)
       }
     } else if (zoomBtn.id === "plus") {
       z = 2
@@ -572,7 +570,7 @@ function handleZoom(e) {
       let nox = zoomedX - canvas.offScreenCVS.width / 2
       let noy = zoomedY - canvas.offScreenCVS.height / 2
       if (canvas.zoom < 32) {
-        zoom(z, nox, noy)
+        zoomCanvas(z, nox, noy)
       }
     }
   }
