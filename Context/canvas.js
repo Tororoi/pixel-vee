@@ -31,6 +31,10 @@ const canvasHeight = document.getElementById("canvas-height")
 //======= * * * Canvas * * * ========//
 //===================================//
 
+//Set gui canvas and its context
+const guiCVS = document.getElementById("gui")
+const guiCTX = guiCVS.getContext("2d")
+guiCTX.willReadFrequently = true
 //Set onscreen canvas and its context
 const onScreenCVS = document.getElementById("onScreen")
 const onScreenCTX = onScreenCVS.getContext("2d")
@@ -47,6 +51,8 @@ offScreenCVS.height = 256
 //window.devicePixelRatio is typically 2
 const sharpness = window.devicePixelRatio
 //adjust canvas ratio here if needed
+guiCVS.width = guiCVS.offsetWidth * sharpness
+guiCVS.height = guiCVS.offsetHeight * sharpness
 onScreenCVS.width = onScreenCVS.offsetWidth * sharpness
 onScreenCVS.height = onScreenCVS.offsetHeight * sharpness
 //zoom
@@ -66,6 +72,7 @@ const setInitialZoom = (width) => {
   }
 }
 const zoom = setInitialZoom(offScreenCVS.width) //zoom level should be based on absolute pixel size, not window relative to canvas
+guiCTX.scale(sharpness * zoom, sharpness * zoom)
 onScreenCTX.scale(sharpness * zoom, sharpness * zoom)
 
 //Initialize offset, must be integer
@@ -88,6 +95,8 @@ canvasHeight.value = offScreenCVS.height
 //Export canvas state
 export const canvas = {
   //Parameters
+  guiCVS,
+  guiCTX,
   onScreenCVS,
   onScreenCTX,
   sharpness,
@@ -172,6 +181,14 @@ const resizeOffScreenCanvas = (width, height) => {
   canvas.offScreenCVS.height = height
   //reset canvas state
   canvas.zoom = setInitialZoom(canvas.offScreenCVS.width)
+  canvas.guiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
   canvas.onScreenCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
@@ -217,6 +234,9 @@ const handleDimensionsSubmit = (e) => {
 
 export const resizeOnScreenCanvas = () => {
   //Keep canvas dimensions at 100% (requires css style width/ height 100%)
+  canvas.guiCVS.width = canvas.guiCVS.offsetWidth * sharpness
+  canvas.guiCVS.height = canvas.guiCVS.offsetHeight * sharpness
+  canvas.guiCTX.setTransform(sharpness * zoom, 0, 0, sharpness * zoom, 0, 0)
   canvas.onScreenCVS.width = canvas.onScreenCVS.offsetWidth * sharpness
   canvas.onScreenCVS.height = canvas.onScreenCVS.offsetHeight * sharpness
   canvas.onScreenCTX.setTransform(

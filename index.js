@@ -104,18 +104,18 @@ window.addEventListener("resize", resizeOnScreenCanvas)
 //Shortcuts
 document.addEventListener("keydown", handleKeyDown)
 document.addEventListener("keyup", handleKeyUp)
-canvas.onScreenCVS.addEventListener("wheel", handleWheel, { passive: true })
+canvas.guiCVS.addEventListener("wheel", handleWheel, { passive: true })
 
 //Pointer
-canvas.onScreenCVS.addEventListener("pointermove", handlePointerMove)
-canvas.onScreenCVS.addEventListener("pointerdown", handlePointerDown)
-canvas.onScreenCVS.addEventListener("pointerup", handlePointerUp)
-canvas.onScreenCVS.addEventListener("pointerout", handlePointerOut) //NOTE: Deprecated? May need to rewrite just for multistep tools such as curve that can be in use while pointer is up
+canvas.guiCVS.addEventListener("pointermove", handlePointerMove)
+canvas.guiCVS.addEventListener("pointerdown", handlePointerDown)
+canvas.guiCVS.addEventListener("pointerup", handlePointerUp)
+canvas.guiCVS.addEventListener("pointerout", handlePointerOut) //NOTE: Deprecated? May need to rewrite just for multistep tools such as curve that can be in use while pointer is up
 
-canvas.onScreenCVS.addEventListener("touchstart", handleTouchStart, {
+canvas.guiCVS.addEventListener("touchstart", handleTouchStart, {
   passive: true,
 })
-canvas.onScreenCVS.addEventListener("mousedown", handleMouseDown)
+canvas.guiCVS.addEventListener("mousedown", handleMouseDown)
 //Toolbox
 undoBtn.addEventListener("click", handleUndo)
 redoBtn.addEventListener("click", handleRedo)
@@ -195,20 +195,20 @@ function handleKeyDown(e) {
         break
       case "Space":
         state.tool = tools["grab"]
-        canvas.onScreenCVS.style.cursor = "move"
+        canvas.guiCVS.style.cursor = "move"
         break
       case "AltLeft":
       case "AltRight":
         //option key
         state.tool = tools["eyedropper"]
-        canvas.onScreenCVS.style.cursor = "none"
+        canvas.guiCVS.style.cursor = "none"
         break
       case "ShiftLeft":
       case "ShiftRight":
         if (toolBtn.id === "brush") {
           state.tool = tools["line"]
           state.tool.brushSize = tools["brush"].brushSize
-          canvas.onScreenCVS.style.cursor = "none"
+          canvas.guiCVS.style.cursor = "none"
         }
         break
       case "KeyS":
@@ -245,7 +245,7 @@ function handleKeyDown(e) {
         toolBtn = document.querySelector("#brush")
         toolBtn.style.background = "rgb(255, 255, 255)"
         state.tool = tools["brush"]
-        canvas.onScreenCVS.style.cursor = "crosshair"
+        canvas.guiCVS.style.cursor = "crosshair"
         break
       case "KeyR":
         //reset old button
@@ -254,7 +254,7 @@ function handleKeyDown(e) {
         toolBtn = document.querySelector("#replace")
         toolBtn.style.background = "rgb(255, 255, 255)"
         state.tool = tools["replace"]
-        canvas.onScreenCVS.style.cursor = "crosshair"
+        canvas.guiCVS.style.cursor = "crosshair"
         break
       case "KeyL":
         //reset old button
@@ -263,7 +263,7 @@ function handleKeyDown(e) {
         toolBtn = document.querySelector("#line")
         toolBtn.style.background = "rgb(255, 255, 255)"
         state.tool = tools["line"]
-        canvas.onScreenCVS.style.cursor = "none"
+        canvas.guiCVS.style.cursor = "none"
         break
       case "KeyF":
         //reset old button
@@ -272,7 +272,7 @@ function handleKeyDown(e) {
         toolBtn = document.querySelector("#fill")
         toolBtn.style.background = "rgb(255, 255, 255)"
         state.tool = tools["fill"]
-        canvas.onScreenCVS.style.cursor = "none"
+        canvas.guiCVS.style.cursor = "none"
         break
       case "KeyC":
         //reset old button
@@ -281,7 +281,7 @@ function handleKeyDown(e) {
         toolBtn = document.querySelector("#curve")
         toolBtn.style.background = "rgb(255, 255, 255)"
         state.tool = tools["curve"]
-        canvas.onScreenCVS.style.cursor = "none"
+        canvas.guiCVS.style.cursor = "none"
         break
       case "KeyJ":
         //reset old button
@@ -290,7 +290,7 @@ function handleKeyDown(e) {
         toolBtn = document.querySelector("#cubicCurve")
         toolBtn.style.background = "rgb(255, 255, 255)"
         state.tool = tools["cubicCurve"]
-        canvas.onScreenCVS.style.cursor = "none"
+        canvas.guiCVS.style.cursor = "none"
         break
       default:
       //do nothing
@@ -310,7 +310,7 @@ function handleKeyUp(e) {
   }
 
   if (toolBtn.id === "grab") {
-    canvas.onScreenCVS.style.cursor = "move"
+    canvas.guiCVS.style.cursor = "move"
   } else if (
     toolBtn.id === "replace" ||
     toolBtn.id === "brush" ||
@@ -319,9 +319,9 @@ function handleKeyUp(e) {
     toolBtn.id === "fill" ||
     toolBtn.id === "line"
   ) {
-    canvas.onScreenCVS.style.cursor = "crosshair"
+    canvas.guiCVS.style.cursor = "crosshair"
   } else {
-    canvas.onScreenCVS.style.cursor = "none"
+    canvas.guiCVS.style.cursor = "none"
   }
 }
 
@@ -359,6 +359,13 @@ function handlePointerDown(e) {
     return
   }
   setCoordinates(e)
+  //Clear GUI
+  canvas.guiCTX.clearRect(
+    0,
+    0,
+    canvas.guiCVS.width / canvas.zoom,
+    canvas.guiCVS.height / canvas.zoom
+  )
   //Reset Cursor for mobile
   state.onscreenX =
     state.cursorWithCanvasOffsetX *
@@ -398,6 +405,7 @@ function handlePointerMove(e) {
   state.onscreenY =
     state.cursorWithCanvasOffsetY *
     (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
+  renderCursor(state, canvas, swatches)
   if (
     state.clicked ||
     ((state.tool.name === "curve" || state.tool.name === "cubicCurve") &&
@@ -411,14 +419,6 @@ function handlePointerMove(e) {
       state.onscreenX !== state.previousOnscreenX ||
       state.onscreenY !== state.previousOnscreenY
     ) {
-      canvas.onScreenCTX.clearRect(
-        0,
-        0,
-        canvas.offScreenCVS.width / canvas.zoom,
-        canvas.offScreenCVS.height / canvas.zoom
-      )
-      canvas.draw()
-      renderCursor(state, canvas, swatches)
       state.previousOnscreenX = state.onscreenX
       state.previousOnscreenY = state.onscreenY
     }
@@ -472,6 +472,12 @@ function handlePointerOut(e) {
   //   state.redoStack = []
   // }
   if (!state.touch) {
+    canvas.guiCTX.clearRect(
+      0,
+      0,
+      canvas.guiCVS.width / canvas.zoom,
+      canvas.guiCVS.height / canvas.zoom
+    )
     canvas.draw()
     canvas.pointerEvent = "none"
   }
@@ -603,6 +609,14 @@ export function handleClear() {
 
 export function handleRecenter(e) {
   canvas.zoom = canvas.setInitialZoom(canvas.offScreenCVS.width)
+  canvas.guiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
   canvas.onScreenCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
@@ -642,7 +656,7 @@ function handleTools(e) {
       brushSlider.disabled = state.tool.disabled
       //update cursor
       if (toolBtn.id === "grab") {
-        canvas.onScreenCVS.style.cursor = "move"
+        canvas.guiCVS.style.cursor = "move"
       } else if (
         toolBtn.id === "replace" ||
         toolBtn.id === "brush" ||
@@ -651,9 +665,9 @@ function handleTools(e) {
         toolBtn.id === "fill" ||
         toolBtn.id === "line"
       ) {
-        canvas.onScreenCVS.style.cursor = "crosshair"
+        canvas.guiCVS.style.cursor = "crosshair"
       } else {
-        canvas.onScreenCVS.style.cursor = "none"
+        canvas.guiCVS.style.cursor = "none"
       }
     }
   }

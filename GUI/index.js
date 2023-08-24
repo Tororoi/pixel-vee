@@ -5,6 +5,12 @@ import { actionDraw } from "../Tools/actions.js"
 //===========================================//
 
 export function renderCursor(state, canvas, swatches) {
+  canvas.guiCTX.clearRect(
+    0,
+    0,
+    canvas.guiCVS.width / canvas.zoom,
+    canvas.guiCVS.height / canvas.zoom
+  )
   switch (state.tool.name) {
     case "grab":
       //show nothing
@@ -27,7 +33,7 @@ export function drawCurrentPixel(state, canvas, swatches) {
     swatches.primary.color,
     state.brushStamp,
     state.tool.brushSize,
-    canvas.onScreenCTX,
+    canvas.guiCTX,
     state.mode,
     canvas.offScreenCVS.width / canvas.offScreenCVS.width
   )
@@ -49,21 +55,21 @@ function drawCursorBox(state, canvas, lineWidth) {
       state.tool.brushSize
   //line offset to stroke offcenter;
   let ol = lineWidth / 2
-  canvas.onScreenCTX.beginPath()
-  canvas.onScreenCTX.lineWidth = lineWidth
-  canvas.onScreenCTX.strokeStyle = "black"
+  canvas.guiCTX.beginPath()
+  canvas.guiCTX.lineWidth = lineWidth
+  canvas.guiCTX.strokeStyle = "black"
   //top
-  canvas.onScreenCTX.moveTo(x0, y0 - ol)
-  canvas.onScreenCTX.lineTo(x1, y0 - ol)
+  canvas.guiCTX.moveTo(x0, y0 - ol)
+  canvas.guiCTX.lineTo(x1, y0 - ol)
   //right
-  canvas.onScreenCTX.moveTo(x1 + ol, y0)
-  canvas.onScreenCTX.lineTo(x1 + ol, y1)
+  canvas.guiCTX.moveTo(x1 + ol, y0)
+  canvas.guiCTX.lineTo(x1 + ol, y1)
   //bottom
-  canvas.onScreenCTX.moveTo(x0, y1 + ol)
-  canvas.onScreenCTX.lineTo(x1, y1 + ol)
+  canvas.guiCTX.moveTo(x0, y1 + ol)
+  canvas.guiCTX.lineTo(x1, y1 + ol)
   //left
-  canvas.onScreenCTX.moveTo(x0 - ol, y0)
-  canvas.onScreenCTX.lineTo(x0 - ol, y1)
+  canvas.guiCTX.moveTo(x0 - ol, y0)
+  canvas.guiCTX.lineTo(x0 - ol, y1)
 
-  canvas.onScreenCTX.stroke()
+  canvas.guiCTX.stroke()
 }

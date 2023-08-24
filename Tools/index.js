@@ -606,7 +606,6 @@ export function eyedropperSteps() {
         //get color
         sampleColor(state.cursorX, state.cursorY)
         //draw square
-        canvas.draw()
         renderCursor(state, canvas, swatches)
         state.previousOnscreenX = state.onscreenX
         state.previousOnscreenY = state.onscreenY
