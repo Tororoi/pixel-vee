@@ -537,6 +537,24 @@ export function cubicCurveSteps() {
           )
         }
         canvas.draw()
+        //IN PROGRESS: draw control points at higher resolution only on onScreenCVS
+        actionDraw(
+          (canvas.xOffset + state.px3) * 2,
+          (canvas.yOffset + state.py3) * 2,
+          { color: `rgba(255,0,0,255)` },
+          state.brushStamp,
+          state.tool.brushSize,
+          canvas.onScreenCTX,
+          "draw",
+          0.5
+        )
+        // canvas.onScreenCTX.fillStyle = `rgba(255,0,0,255)`
+        // canvas.onScreenCTX.fillRect(
+        //   canvas.xOffset + state.px3,
+        //   canvas.yOffset + state.py3,
+        //   0.5,
+        //   0.5
+        // )
       }
       break
     case "pointerout":
