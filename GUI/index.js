@@ -3,6 +3,29 @@ import { actionDraw } from "../Tools/actions.js"
 //===========================================//
 //=== * * * Graphics User Interface * * * ===//
 //===========================================//
+
+export const guiState = {
+  px1: null,
+  py1: null,
+  px2: null,
+  py2: null,
+  px3: null,
+  py3: null,
+  px4: null,
+  py4: null,
+}
+//helper function. TODO: move to graphics helper file
+function drawCirclePath(canvas, x, y, r) {
+  canvas.guiCTX.moveTo(canvas.xOffset + x + 0.5 + r, canvas.yOffset + y + 0.5)
+  canvas.guiCTX.arc(
+    canvas.xOffset + x + 0.5,
+    canvas.yOffset + y + 0.5,
+    r,
+    0,
+    2 * Math.PI
+  )
+}
+
 //TODO: create gui state to store active elements so gui can be rerendered easily
 export function renderGUI(state, canvas, swatches) {
   canvas.guiCTX.clearRect(
@@ -12,44 +35,73 @@ export function renderGUI(state, canvas, swatches) {
     canvas.guiCVS.height / canvas.zoom
   )
   if (state.vectorMode) {
-    renderVector(state, canvas)
+    renderVector(state, canvas, guiState)
   }
 }
 
-function renderVector(state, canvas) {
+function renderVector(state, canvas, guiState) {
+  canvas.guiCTX.lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  canvas.guiCTX.strokeStyle = `rgba(255,0,0,0.75)`
+  canvas.guiCTX.fillStyle = `rgba(255,0,0,1)`
   canvas.guiCTX.beginPath()
   canvas.guiCTX.moveTo(
-    canvas.xOffset + state.px1 + 0.5,
-    canvas.yOffset + state.py1 + 0.5
+    canvas.xOffset + guiState.px1 + 0.5,
+    canvas.yOffset + guiState.py1 + 0.5
   )
-  if (state.px4) {
+  if (guiState.px4) {
     //render cubic
     canvas.guiCTX.bezierCurveTo(
-      canvas.xOffset + state.px3 + 0.5,
-      canvas.yOffset + state.py3 + 0.5,
-      canvas.xOffset + state.px4 + 0.5,
-      canvas.yOffset + state.py4 + 0.5,
-      canvas.xOffset + state.px2 + 0.5,
-      canvas.yOffset + state.py2 + 0.5
+      canvas.xOffset + guiState.px3 + 0.5,
+      canvas.yOffset + guiState.py3 + 0.5,
+      canvas.xOffset + guiState.px4 + 0.5,
+      canvas.yOffset + guiState.py4 + 0.5,
+      canvas.xOffset + guiState.px2 + 0.5,
+      canvas.yOffset + guiState.py2 + 0.5
     )
-  } else if (state.px3) {
+    //render control points outline
+    // move to center of control point offset by radius of point in x direction
+    // P1
+    let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
+    drawCirclePath(canvas, guiState.px1, guiState.py1, circleRadius)
+    // P2
+    drawCirclePath(canvas, guiState.px3, guiState.py3, circleRadius)
+    // P3
+    drawCirclePath(canvas, guiState.px4, guiState.py4, circleRadius)
+    // P4
+    drawCirclePath(canvas, guiState.px2, guiState.py2, circleRadius)
+    //stroke non-filled lines
+    canvas.guiCTX.stroke()
+    // render filled points
+    canvas.guiCTX.beginPath()
+    // P1
+    drawCirclePath(canvas, guiState.px1, guiState.py1, circleRadius / 2)
+    // P2
+    drawCirclePath(canvas, guiState.px3, guiState.py3, circleRadius / 2)
+    // P3
+    drawCirclePath(canvas, guiState.px4, guiState.py4, circleRadius / 2)
+    // P4
+    drawCirclePath(canvas, guiState.px2, guiState.py2, circleRadius / 2)
+    //fill with gradient
+    canvas.guiCTX.fill()
+  } else if (guiState.px3) {
     //render quadratic
     canvas.guiCTX.quadraticCurveTo(
-      canvas.xOffset + state.px3 + 0.5,
-      canvas.yOffset + state.py3 + 0.5,
-      canvas.xOffset + state.px2 + 0.5,
-      canvas.yOffset + state.py2 + 0.5
+      canvas.xOffset + guiState.px3 + 0.5,
+      canvas.yOffset + guiState.py3 + 0.5,
+      canvas.xOffset + guiState.px2 + 0.5,
+      canvas.yOffset + guiState.py2 + 0.5
     )
-  } else if (state.px2) {
+    //stroke
+    canvas.guiCTX.stroke()
+  } else if (guiState.px2) {
     //render line
     canvas.guiCTX.lineTo(
-      canvas.xOffset + state.px2 + 0.5,
-      canvas.yOffset + state.py2 + 0.5
+      canvas.xOffset + guiState.px2 + 0.5,
+      canvas.yOffset + guiState.py2 + 0.5
     )
+    //stroke
+    canvas.guiCTX.stroke()
   }
-  canvas.guiCTX.lineWidth = 0.25
-  canvas.guiCTX.strokeStyle = `rgba(255,0,0,255)`
-  canvas.guiCTX.stroke()
 }
 
 export function renderCursor(state, canvas, swatches) {
@@ -83,19 +135,11 @@ export function drawCurrentPixel(state, canvas, swatches) {
 }
 
 function drawCursorBox(state, canvas, lineWidth) {
-  let brushOffset =
-    Math.floor(state.tool.brushSize / 2) *
-    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
+  let brushOffset = Math.floor(state.tool.brushSize / 2)
   let x0 = state.onscreenX - brushOffset
   let y0 = state.onscreenY - brushOffset
-  let x1 =
-    x0 +
-    (canvas.offScreenCVS.width / canvas.offScreenCVS.width) *
-      state.tool.brushSize
-  let y1 =
-    y0 +
-    (canvas.offScreenCVS.width / canvas.offScreenCVS.width) *
-      state.tool.brushSize
+  let x1 = x0 + state.tool.brushSize
+  let y1 = y0 + state.tool.brushSize
   //line offset to stroke offcenter;
   let ol = lineWidth / 2
   canvas.guiCTX.beginPath()

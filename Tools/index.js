@@ -10,7 +10,12 @@ import {
   actionQuadraticCurve,
   actionCubicCurve,
 } from "./actions.js"
-import { renderGUI, renderCursor, drawCurrentPixel } from "../GUI/index.js"
+import {
+  guiState,
+  renderGUI,
+  renderCursor,
+  drawCurrentPixel,
+} from "../GUI/index.js"
 
 //====================================//
 //=== * * * Tool Controllers * * * ===//
@@ -215,12 +220,8 @@ export function lineSteps() {
         )
         canvas.draw()
         actionLine(
-          state.previousX +
-            canvas.xOffset /
-              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
-          state.previousY +
-            canvas.yOffset /
-              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
+          state.previousX + canvas.xOffset,
+          state.previousY + canvas.yOffset,
           state.cursorWithCanvasOffsetX,
           state.cursorWithCanvasOffsetY,
           swatches.primary.color,
@@ -314,11 +315,22 @@ export function curveSteps() {
           state.py3 = null
           state.px4 = null
           state.py4 = null
+          guiState.px1 = state.px1
+          guiState.py1 = state.py1
+          //reset control points
+          guiState.px2 = null
+          guiState.py2 = null
+          guiState.px3 = null
+          guiState.py3 = null
+          guiState.px4 = null
+          guiState.py4 = null
           break
         case 2:
           if (!state.touch) {
             state.px2 = state.cursorX
             state.py2 = state.cursorY
+            guiState.px2 = state.px2
+            guiState.py2 = state.py2
           }
           break
         default:
@@ -336,24 +348,12 @@ export function curveSteps() {
         canvas.draw()
         //onscreen preview
         actionQuadraticCurve(
-          state.px1 +
-            canvas.xOffset /
-              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
-          state.py1 +
-            canvas.yOffset /
-              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
-          state.px2 +
-            canvas.xOffset /
-              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
-          state.py2 +
-            canvas.yOffset /
-              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
-          state.px3 +
-            canvas.xOffset /
-              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
-          state.py3 +
-            canvas.yOffset /
-              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
+          state.px1 + canvas.xOffset,
+          state.py1 + canvas.yOffset,
+          state.px2 + canvas.xOffset,
+          state.py2 + canvas.yOffset,
+          state.px3 + canvas.xOffset,
+          state.py3 + canvas.yOffset,
           state.clickCounter,
           swatches.primary.color,
           canvas.onScreenCTX,
@@ -372,6 +372,8 @@ export function curveSteps() {
         if (state.clickCounter === 1) {
           state.px2 = state.cursorX
           state.py2 = state.cursorY
+          guiState.px2 = state.px2
+          guiState.py2 = state.py2
         }
         if (state.clickCounter === 2) {
           state.clickCounter += 1
@@ -382,6 +384,8 @@ export function curveSteps() {
         //solidify control point
         state.px3 = state.cursorX
         state.py3 = state.cursorY
+        guiState.px3 = state.px3
+        guiState.py3 = state.py3
         actionQuadraticCurve(
           state.px1,
           state.py1,
@@ -440,17 +444,30 @@ export function cubicCurveSteps() {
           state.py3 = null
           state.px4 = null
           state.py4 = null
+          guiState.px1 = state.px1
+          guiState.py1 = state.py1
+          //reset control points
+          guiState.px2 = null
+          guiState.py2 = null
+          guiState.px3 = null
+          guiState.py3 = null
+          guiState.px4 = null
+          guiState.py4 = null
           break
         case 2:
           if (!state.touch) {
             state.px2 = state.cursorX
             state.py2 = state.cursorY
+            guiState.px2 = state.px2
+            guiState.py2 = state.py2
           }
           break
         case 3:
           if (!state.touch) {
             state.px3 = state.cursorX
             state.py3 = state.cursorY
+            guiState.px3 = state.px3
+            guiState.py3 = state.py3
           }
           break
         default:
@@ -468,30 +485,14 @@ export function cubicCurveSteps() {
         canvas.draw()
         //onscreen preview
         actionCubicCurve(
-          state.px1 +
-            canvas.xOffset /
-              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
-          state.py1 +
-            canvas.yOffset /
-              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
-          state.px2 +
-            canvas.xOffset /
-              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
-          state.py2 +
-            canvas.yOffset /
-              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
-          state.px3 +
-            canvas.xOffset /
-              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
-          state.py3 +
-            canvas.yOffset /
-              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
-          state.px4 +
-            canvas.xOffset /
-              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
-          state.py4 +
-            canvas.yOffset /
-              (canvas.offScreenCVS.width / canvas.offScreenCVS.width),
+          state.px1 + canvas.xOffset,
+          state.py1 + canvas.yOffset,
+          state.px2 + canvas.xOffset,
+          state.py2 + canvas.yOffset,
+          state.px3 + canvas.xOffset,
+          state.py3 + canvas.yOffset,
+          state.px4 + canvas.xOffset,
+          state.py4 + canvas.yOffset,
           state.clickCounter,
           swatches.primary.color,
           canvas.onScreenCTX,
@@ -510,10 +511,14 @@ export function cubicCurveSteps() {
         if (state.clickCounter === 1) {
           state.px2 = state.cursorX
           state.py2 = state.cursorY
+          guiState.px2 = state.px2
+          guiState.py2 = state.py2
         }
         if (state.clickCounter === 2) {
           state.px3 = state.cursorX
           state.py3 = state.cursorY
+          guiState.px3 = state.px3
+          guiState.py3 = state.py3
         }
         if (state.clickCounter === 3) {
           state.clickCounter += 1
@@ -524,6 +529,8 @@ export function cubicCurveSteps() {
         //solidify control point
         state.px4 = state.cursorX
         state.py4 = state.cursorY
+        guiState.px4 = state.px4
+        guiState.py4 = state.py4
         actionCubicCurve(
           state.px1,
           state.py1,

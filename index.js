@@ -340,14 +340,8 @@ const setCoordinates = (e) => {
     Math.floor(Math.floor(e.offsetY) / canvas.zoom) * canvas.zoom
   state.cursorWithCanvasOffsetX = Math.floor(x / canvas.zoom)
   state.cursorWithCanvasOffsetY = Math.floor(y / canvas.zoom)
-  state.cursorX = Math.round(
-    state.cursorWithCanvasOffsetX -
-      canvas.xOffset / (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
-  )
-  state.cursorY = Math.round(
-    state.cursorWithCanvasOffsetY -
-      canvas.yOffset / (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
-  )
+  state.cursorX = Math.round(state.cursorWithCanvasOffsetX - canvas.xOffset)
+  state.cursorY = Math.round(state.cursorWithCanvasOffsetY - canvas.yOffset)
 }
 
 function handlePointerDown(e) {
@@ -362,12 +356,8 @@ function handlePointerDown(e) {
   //Re-render GUI
   renderGUI(state, canvas, swatches)
   //Reset Cursor for mobile
-  state.onscreenX =
-    state.cursorWithCanvasOffsetX *
-    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
-  state.onscreenY =
-    state.cursorWithCanvasOffsetY *
-    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
+  state.onscreenX = state.cursorWithCanvasOffsetX
+  state.onscreenY = state.cursorWithCanvasOffsetY
   state.previousOnscreenX = state.onscreenX
   state.previousOnscreenY = state.onscreenY
   //if drawing on hidden layer, flash hide btn
@@ -394,12 +384,8 @@ function handlePointerMove(e) {
   setCoordinates(e)
   // console.log(canvas.subPixelX, canvas.subPixelY)
   //Hover brush
-  state.onscreenX =
-    state.cursorWithCanvasOffsetX *
-    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
-  state.onscreenY =
-    state.cursorWithCanvasOffsetY *
-    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
+  state.onscreenX = state.cursorWithCanvasOffsetX
+  state.onscreenY = state.cursorWithCanvasOffsetY
   renderCursor(state, canvas, swatches)
   if (
     state.clicked ||
