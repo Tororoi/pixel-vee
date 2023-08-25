@@ -487,8 +487,8 @@ function zoomCanvas(z, xOriginOffset, yOriginOffset) {
     0,
     0
   )
-  renderGUI(state, canvas, swatches)
   canvas.draw()
+  renderGUI(state, canvas, swatches)
 }
 
 function handleWheel(e) {

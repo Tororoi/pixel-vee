@@ -125,6 +125,7 @@ export const canvas = {
   zoomPixelY: null,
   //Functions
   draw,
+  drawLayers,
   redrawPoints,
   consolidateLayers,
   createNewRasterLayer,
@@ -280,7 +281,7 @@ function draw() {
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
-  drawLayers()
+  drawLayers(canvas.onScreenCTX)
   //draw border
   canvas.onScreenCTX.beginPath()
   canvas.onScreenCTX.rect(
@@ -387,14 +388,14 @@ function redrawPoints() {
 //======== * * * Layers * * * ========//
 //====================================//
 
-function drawLayers() {
+function drawLayers(ctx) {
   canvas.layers.forEach((l) => {
     if (!l.removed) {
       if (l.type === "reference") {
-        canvas.onScreenCTX.save()
-        canvas.onScreenCTX.globalAlpha = l.opacity
+        ctx.save()
+        ctx.globalAlpha = l.opacity
         //l.x, l.y need to be normalized to the pixel grid
-        canvas.onScreenCTX.drawImage(
+        ctx.drawImage(
           l.img,
           canvas.xOffset +
             (l.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
@@ -403,12 +404,12 @@ function drawLayers() {
           l.img.width * l.scale,
           l.img.height * l.scale
         )
-        canvas.onScreenCTX.restore()
+        ctx.restore()
       } else {
-        canvas.onScreenCTX.save()
-        canvas.onScreenCTX.globalAlpha = l.opacity
+        ctx.save()
+        ctx.globalAlpha = l.opacity
         //l.x, l.y need to be normalized to the pixel grid
-        canvas.onScreenCTX.drawImage(
+        ctx.drawImage(
           l.cvs,
           canvas.xOffset +
             (l.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
@@ -417,7 +418,7 @@ function drawLayers() {
           canvas.offScreenCVS.width,
           canvas.offScreenCVS.height
         )
-        canvas.onScreenCTX.restore()
+        ctx.restore()
       }
     }
   })
