@@ -439,6 +439,10 @@ canvas {
   height: 100%;
 }
 
+#vectorGui {
+  mix-blend-mode: exclusion;
+}
+
 /* Toolbox */
 .toolbox {
   user-select: none;

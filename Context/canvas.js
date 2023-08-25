@@ -32,9 +32,12 @@ const canvasHeight = document.getElementById("canvas-height")
 //===================================//
 
 //Set gui canvas and its context
-const guiCVS = document.getElementById("gui")
-const guiCTX = guiCVS.getContext("2d")
-guiCTX.willReadFrequently = true
+const vectorGuiCVS = document.getElementById("vectorGui")
+const vectorGuiCTX = vectorGuiCVS.getContext("2d")
+vectorGuiCTX.willReadFrequently = true
+const rasterGuiCVS = document.getElementById("rasterGui")
+const rasterGuiCTX = rasterGuiCVS.getContext("2d")
+rasterGuiCTX.willReadFrequently = true
 //Set onscreen canvas and its context
 const onScreenCVS = document.getElementById("onScreen")
 const onScreenCTX = onScreenCVS.getContext("2d")
@@ -51,8 +54,10 @@ offScreenCVS.height = 256
 //window.devicePixelRatio is typically 2
 const sharpness = window.devicePixelRatio
 //adjust canvas ratio here if needed
-guiCVS.width = guiCVS.offsetWidth * sharpness
-guiCVS.height = guiCVS.offsetHeight * sharpness
+vectorGuiCVS.width = vectorGuiCVS.offsetWidth * sharpness
+vectorGuiCVS.height = vectorGuiCVS.offsetHeight * sharpness
+rasterGuiCVS.width = rasterGuiCVS.offsetWidth * sharpness
+rasterGuiCVS.height = rasterGuiCVS.offsetHeight * sharpness
 onScreenCVS.width = onScreenCVS.offsetWidth * sharpness
 onScreenCVS.height = onScreenCVS.offsetHeight * sharpness
 //zoom
@@ -72,7 +77,8 @@ const setInitialZoom = (width) => {
   }
 }
 const zoom = setInitialZoom(offScreenCVS.width) //zoom level should be based on absolute pixel size, not window relative to canvas
-guiCTX.scale(sharpness * zoom, sharpness * zoom)
+vectorGuiCTX.scale(sharpness * zoom, sharpness * zoom)
+rasterGuiCTX.scale(sharpness * zoom, sharpness * zoom)
 onScreenCTX.scale(sharpness * zoom, sharpness * zoom)
 
 //Initialize offset, must be integer
@@ -95,8 +101,10 @@ canvasHeight.value = offScreenCVS.height
 //Export canvas state
 export const canvas = {
   //Parameters
-  guiCVS,
-  guiCTX,
+  vectorGuiCVS,
+  vectorGuiCTX,
+  rasterGuiCVS,
+  rasterGuiCTX,
   onScreenCVS,
   onScreenCTX,
   sharpness,
@@ -182,7 +190,15 @@ const resizeOffScreenCanvas = (width, height) => {
   canvas.offScreenCVS.height = height
   //reset canvas state
   canvas.zoom = setInitialZoom(canvas.offScreenCVS.width)
-  canvas.guiCTX.setTransform(
+  canvas.vectorGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
+  canvas.rasterGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,
@@ -235,9 +251,26 @@ const handleDimensionsSubmit = (e) => {
 
 export const resizeOnScreenCanvas = () => {
   //Keep canvas dimensions at 100% (requires css style width/ height 100%)
-  canvas.guiCVS.width = canvas.guiCVS.offsetWidth * sharpness
-  canvas.guiCVS.height = canvas.guiCVS.offsetHeight * sharpness
-  canvas.guiCTX.setTransform(sharpness * zoom, 0, 0, sharpness * zoom, 0, 0)
+  canvas.vectorGuiCVS.width = canvas.vectorGuiCVS.offsetWidth * sharpness
+  canvas.vectorGuiCVS.height = canvas.vectorGuiCVS.offsetHeight * sharpness
+  canvas.vectorGuiCTX.setTransform(
+    sharpness * zoom,
+    0,
+    0,
+    sharpness * zoom,
+    0,
+    0
+  )
+  canvas.rasterGuiCVS.width = canvas.rasterGuiCVS.offsetWidth * sharpness
+  canvas.rasterGuiCVS.height = canvas.rasterGuiCVS.offsetHeight * sharpness
+  canvas.rasterGuiCTX.setTransform(
+    sharpness * zoom,
+    0,
+    0,
+    sharpness * zoom,
+    0,
+    0
+  )
   canvas.onScreenCVS.width = canvas.onScreenCVS.offsetWidth * sharpness
   canvas.onScreenCVS.height = canvas.onScreenCVS.offsetHeight * sharpness
   canvas.onScreenCTX.setTransform(

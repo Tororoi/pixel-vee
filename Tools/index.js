@@ -10,12 +10,12 @@ import {
   actionQuadraticCurve,
   actionCubicCurve,
 } from "./actions.js"
+import { vectorGuiState, renderVectorGUI } from "../GUI/vector.js"
 import {
-  guiState,
-  renderGUI,
   renderCursor,
   drawCurrentPixel,
-} from "../GUI/index.js"
+  renderRasterGUI,
+} from "../GUI/raster.js"
 
 //====================================//
 //=== * * * Tool Controllers * * * ===//
@@ -315,22 +315,22 @@ export function curveSteps() {
           state.py3 = null
           state.px4 = null
           state.py4 = null
-          guiState.px1 = state.px1
-          guiState.py1 = state.py1
+          vectorGuiState.px1 = state.px1
+          vectorGuiState.py1 = state.py1
           //reset control points
-          guiState.px2 = null
-          guiState.py2 = null
-          guiState.px3 = null
-          guiState.py3 = null
-          guiState.px4 = null
-          guiState.py4 = null
+          vectorGuiState.px2 = null
+          vectorGuiState.py2 = null
+          vectorGuiState.px3 = null
+          vectorGuiState.py3 = null
+          vectorGuiState.px4 = null
+          vectorGuiState.py4 = null
           break
         case 2:
           if (!state.touch) {
             state.px2 = state.cursorX
             state.py2 = state.cursorY
-            guiState.px2 = state.px2
-            guiState.py2 = state.py2
+            vectorGuiState.px2 = state.px2
+            vectorGuiState.py2 = state.py2
           }
           break
         default:
@@ -372,8 +372,8 @@ export function curveSteps() {
         if (state.clickCounter === 1) {
           state.px2 = state.cursorX
           state.py2 = state.cursorY
-          guiState.px2 = state.px2
-          guiState.py2 = state.py2
+          vectorGuiState.px2 = state.px2
+          vectorGuiState.py2 = state.py2
         }
         if (state.clickCounter === 2) {
           state.clickCounter += 1
@@ -384,8 +384,8 @@ export function curveSteps() {
         //solidify control point
         state.px3 = state.cursorX
         state.py3 = state.cursorY
-        guiState.px3 = state.px3
-        guiState.py3 = state.py3
+        vectorGuiState.px3 = state.px3
+        vectorGuiState.py3 = state.py3
         actionQuadraticCurve(
           state.px1,
           state.py1,
@@ -444,30 +444,30 @@ export function cubicCurveSteps() {
           state.py3 = null
           state.px4 = null
           state.py4 = null
-          guiState.px1 = state.px1
-          guiState.py1 = state.py1
+          vectorGuiState.px1 = state.px1
+          vectorGuiState.py1 = state.py1
           //reset control points
-          guiState.px2 = null
-          guiState.py2 = null
-          guiState.px3 = null
-          guiState.py3 = null
-          guiState.px4 = null
-          guiState.py4 = null
+          vectorGuiState.px2 = null
+          vectorGuiState.py2 = null
+          vectorGuiState.px3 = null
+          vectorGuiState.py3 = null
+          vectorGuiState.px4 = null
+          vectorGuiState.py4 = null
           break
         case 2:
           if (!state.touch) {
             state.px2 = state.cursorX
             state.py2 = state.cursorY
-            guiState.px2 = state.px2
-            guiState.py2 = state.py2
+            vectorGuiState.px2 = state.px2
+            vectorGuiState.py2 = state.py2
           }
           break
         case 3:
           if (!state.touch) {
             state.px3 = state.cursorX
             state.py3 = state.cursorY
-            guiState.px3 = state.px3
-            guiState.py3 = state.py3
+            vectorGuiState.px3 = state.px3
+            vectorGuiState.py3 = state.py3
           }
           break
         default:
@@ -511,14 +511,14 @@ export function cubicCurveSteps() {
         if (state.clickCounter === 1) {
           state.px2 = state.cursorX
           state.py2 = state.cursorY
-          guiState.px2 = state.px2
-          guiState.py2 = state.py2
+          vectorGuiState.px2 = state.px2
+          vectorGuiState.py2 = state.py2
         }
         if (state.clickCounter === 2) {
           state.px3 = state.cursorX
           state.py3 = state.cursorY
-          guiState.px3 = state.px3
-          guiState.py3 = state.py3
+          vectorGuiState.px3 = state.px3
+          vectorGuiState.py3 = state.py3
         }
         if (state.clickCounter === 3) {
           state.clickCounter += 1
@@ -529,8 +529,8 @@ export function cubicCurveSteps() {
         //solidify control point
         state.px4 = state.cursorX
         state.py4 = state.cursorY
-        guiState.px4 = state.px4
-        guiState.py4 = state.py4
+        vectorGuiState.px4 = state.px4
+        vectorGuiState.py4 = state.py4
         actionCubicCurve(
           state.px1,
           state.py1,
@@ -565,24 +565,25 @@ export function cubicCurveSteps() {
         //   { color: `rgba(255,0,0,255)` },
         //   state.brushStamp,
         //   state.tool.brushSize,
-        //   canvas.guiCTX,
+        //   canvas.vectorGuiCTX,
         //   "draw",
         //   0.5
         // )
-        // canvas.guiCTX.clearRect(
+        // canvas.vectorGuiCTX.clearRect(
         //   0,
         //   0,
-        //   canvas.guiCVS.width / canvas.zoom,
-        //   canvas.guiCVS.height / canvas.zoom
+        //   canvas.vectorGuiCVS.width / canvas.zoom,
+        //   canvas.vectorGuiCVS.height / canvas.zoom
         // )
-        // canvas.guiCTX.fillStyle = `rgba(255,0,0,255)`
-        // canvas.guiCTX.fillRect(
+        // canvas.vectorGuiCTX.fillStyle = `rgba(255,0,0,255)`
+        // canvas.vectorGuiCTX.fillRect(
         //   canvas.xOffset + state.px3,
         //   canvas.yOffset + state.py3,
         //   1,
         //   1
         // )
-        renderGUI(state, canvas, swatches)
+        renderRasterGUI(state, canvas, swatches)
+        renderVectorGUI(state, canvas, swatches)
       }
       break
     case "pointerout":

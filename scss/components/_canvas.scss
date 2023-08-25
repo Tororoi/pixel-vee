@@ -53,3 +53,11 @@ canvas {
   width: 100%;
   height: 100%;
 }
+
+#vectorGui {
+  mix-blend-mode: exclusion;
+}
+
+#rasterGui {
+  // background: rgba(103, 176, 255, 0.5);
+}

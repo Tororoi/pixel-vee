@@ -1,6 +1,6 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { resetVectorGUI } from "../GUI/index.js"
+import { resetVectorGUI } from "../GUI/vector.js"
 
 //====================================//
 //========= * * * Core * * * =========//
