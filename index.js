@@ -5,7 +5,7 @@ import { canvas, resizeOnScreenCanvas } from "../Context/canvas.js"
 import { swatches } from "./Context/swatch.js"
 import { tools } from "./Tools/index.js"
 import { actionUndoRedo } from "./Tools/undoRedo.js"
-import { renderGUI, renderCursor } from "./GUI/index.js"
+import { resetVectorGUI, renderGUI, renderCursor } from "./GUI/index.js"
 
 //===================================//
 //========= * * * DOM * * * =========//
@@ -453,7 +453,7 @@ function handlePointerOut(e) {
   // }
   if (!state.touch) {
     renderGUI(state, canvas, swatches)
-    canvas.draw()
+    // canvas.draw()
     canvas.pointerEvent = "none"
   }
 }
@@ -589,6 +589,8 @@ export function handleClear() {
     canvas.offScreenCVS.height
   )
   canvas.draw()
+  resetVectorGUI(canvas)
+  state.reset()
 }
 
 export function handleRecenter(e) {
@@ -622,6 +624,7 @@ export function handleRecenter(e) {
   canvas.previousXOffset = canvas.xOffset
   canvas.previousYOffset = canvas.yOffset
   canvas.draw()
+  renderGUI(state, canvas, swatches)
 }
 
 function handleTools(e) {
@@ -634,6 +637,7 @@ function handleTools(e) {
       toolBtn = e.target.closest(".tool")
       toolBtn.style.background = "rgb(255, 255, 255)"
       state.tool = tools[toolBtn.id]
+      canvas.draw()
       //update options
       updateStamp()
       brushSlider.value = state.tool.brushSize
@@ -650,6 +654,8 @@ function handleTools(e) {
         toolBtn.id === "line"
       ) {
         canvas.guiCVS.style.cursor = "crosshair"
+        resetVectorGUI(canvas)
+        state.reset()
       } else {
         canvas.guiCVS.style.cursor = "none"
       }

@@ -26,6 +26,29 @@ function drawCirclePath(canvas, x, y, r) {
   )
 }
 
+//helper function. TODO: move to graphics helper file
+function drawControlPointHandle(canvas, x1, y1, x2, y2) {
+  canvas.guiCTX.moveTo(canvas.xOffset + x1 + 0.5, canvas.yOffset + y1 + 0.5)
+  canvas.guiCTX.lineTo(canvas.xOffset + x2 + 0.5, canvas.yOffset + y2 + 0.5)
+}
+
+export function resetVectorGUI(canvas) {
+  guiState.px1 = null
+  guiState.py1 = null
+  guiState.px2 = null
+  guiState.py2 = null
+  guiState.px3 = null
+  guiState.py3 = null
+  guiState.px4 = null
+  guiState.py4 = null
+  canvas.guiCTX.clearRect(
+    0,
+    0,
+    canvas.guiCVS.width / canvas.zoom,
+    canvas.guiCVS.height / canvas.zoom
+  )
+}
+
 //TODO: create gui state to store active elements so gui can be rerendered easily
 export function renderGUI(state, canvas, swatches) {
   canvas.guiCTX.clearRect(
@@ -40,16 +63,17 @@ export function renderGUI(state, canvas, swatches) {
 }
 
 function renderVector(state, canvas, guiState) {
+  // Setting of context attributes.
   canvas.guiCTX.lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
-  canvas.guiCTX.strokeStyle = `rgba(255,0,0,0.75)`
+  canvas.guiCTX.strokeStyle = `rgba(255,0,0,1)`
   canvas.guiCTX.fillStyle = `rgba(255,0,0,1)`
   canvas.guiCTX.beginPath()
   canvas.guiCTX.moveTo(
     canvas.xOffset + guiState.px1 + 0.5,
     canvas.yOffset + guiState.py1 + 0.5
   )
+
   if (guiState.px4) {
-    //render cubic
     canvas.guiCTX.bezierCurveTo(
       canvas.xOffset + guiState.px3 + 0.5,
       canvas.yOffset + guiState.py3 + 0.5,
@@ -58,50 +82,67 @@ function renderVector(state, canvas, guiState) {
       canvas.xOffset + guiState.px2 + 0.5,
       canvas.yOffset + guiState.py2 + 0.5
     )
-    //render control points outline
-    // move to center of control point offset by radius of point in x direction
-    // P1
-    let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
-    drawCirclePath(canvas, guiState.px1, guiState.py1, circleRadius)
-    // P2
-    drawCirclePath(canvas, guiState.px3, guiState.py3, circleRadius)
-    // P3
-    drawCirclePath(canvas, guiState.px4, guiState.py4, circleRadius)
-    // P4
-    drawCirclePath(canvas, guiState.px2, guiState.py2, circleRadius)
-    //stroke non-filled lines
-    canvas.guiCTX.stroke()
-    // render filled points
-    canvas.guiCTX.beginPath()
-    // P1
-    drawCirclePath(canvas, guiState.px1, guiState.py1, circleRadius / 2)
-    // P2
-    drawCirclePath(canvas, guiState.px3, guiState.py3, circleRadius / 2)
-    // P3
-    drawCirclePath(canvas, guiState.px4, guiState.py4, circleRadius / 2)
-    // P4
-    drawCirclePath(canvas, guiState.px2, guiState.py2, circleRadius / 2)
-    //fill with gradient
-    canvas.guiCTX.fill()
+    drawControlPointHandle(
+      canvas,
+      guiState.px1,
+      guiState.py1,
+      guiState.px3,
+      guiState.py3
+    )
+    drawControlPointHandle(
+      canvas,
+      guiState.px2,
+      guiState.py2,
+      guiState.px4,
+      guiState.py4
+    )
   } else if (guiState.px3) {
-    //render quadratic
     canvas.guiCTX.quadraticCurveTo(
       canvas.xOffset + guiState.px3 + 0.5,
       canvas.yOffset + guiState.py3 + 0.5,
       canvas.xOffset + guiState.px2 + 0.5,
       canvas.yOffset + guiState.py2 + 0.5
     )
-    //stroke
-    canvas.guiCTX.stroke()
+    drawControlPointHandle(
+      canvas,
+      guiState.px1,
+      guiState.py1,
+      guiState.px3,
+      guiState.py3
+    )
   } else if (guiState.px2) {
-    //render line
     canvas.guiCTX.lineTo(
       canvas.xOffset + guiState.px2 + 0.5,
       canvas.yOffset + guiState.py2 + 0.5
     )
-    //stroke
-    canvas.guiCTX.stroke()
   }
+  let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
+  let points = [
+    { x: guiState.px1, y: guiState.py1 },
+    { x: guiState.px2, y: guiState.py2 },
+    { x: guiState.px3, y: guiState.py3 },
+    { x: guiState.px4, y: guiState.py4 },
+  ]
+
+  drawControlPoints(points, canvas, circleRadius)
+
+  // Stroke non-filled lines
+  canvas.guiCTX.stroke()
+
+  // Render filled points
+  canvas.guiCTX.beginPath()
+  drawControlPoints(points, canvas, circleRadius / 2)
+
+  // Fill points
+  canvas.guiCTX.fill()
+}
+
+function drawControlPoints(points, canvas, radius) {
+  points.forEach((point) => {
+    if (point.x && point.y) {
+      drawCirclePath(canvas, point.x, point.y, radius)
+    }
+  })
 }
 
 export function renderCursor(state, canvas, swatches) {
