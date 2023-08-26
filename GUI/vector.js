@@ -145,6 +145,118 @@ function renderVector(state, canvas, vectorGuiState) {
   drawControlPoints(points, canvas, circleRadius / 2)
   // Fill points
   canvas.vectorGuiCTX.fill()
+  convertCanvasTo1BitWebGL(canvas.vectorGuiCVS)
+}
+
+function convertCanvasTo1BitWebGL(canvas, threshold = 128.0) {
+  const gl = canvas.getContext("webgl", {
+    failIfMajorPerformanceCaveat: true,
+    contextCreationError: function (info) {
+      console.log("Could not create WebGL context: " + info.statusMessage)
+    },
+  })
+
+  if (!gl) {
+    console.log(
+      "WebGL not supported or failed to get WebGL context.",
+      window.WebGLRenderingContext
+    )
+    return
+  }
+
+  // Vertex Shader
+  const vsSource = `
+        attribute vec4 aVertexPosition;
+        attribute vec2 aTextureCoord;
+        varying highp vec2 vTextureCoord;
+        void main(void) {
+            gl_Position = aVertexPosition;
+            vTextureCoord = aTextureCoord;
+        }
+    `
+
+  // Fragment Shader for 1-bit conversion
+  const fsSource = `
+        varying highp vec2 vTextureCoord;
+        uniform sampler2D uSampler;
+        uniform float uThreshold;
+        void main(void) {
+            highp vec4 texel = texture2D(uSampler, vTextureCoord);
+            float grayscale = dot(texel.rgb, vec3(0.299, 0.587, 0.114));
+            float binaryColor = grayscale < uThreshold / 255.0 ? 0.0 : 1.0;
+            gl_FragColor = vec4(vec3(binaryColor), 1.0);
+        }
+    `
+
+  // Compile shader utility
+  function compileShader(source, type) {
+    const shader = gl.createShader(type)
+    gl.shaderSource(shader, source)
+    gl.compileShader(shader)
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error(
+        `An error occurred compiling the shaders: ${gl.getShaderInfoLog(
+          shader
+        )}`
+      )
+      gl.deleteShader(shader)
+      return null
+    }
+    return shader
+  }
+
+  const vertexShader = compileShader(vsSource, gl.VERTEX_SHADER)
+  const fragmentShader = compileShader(fsSource, gl.FRAGMENT_SHADER)
+  const shaderProgram = gl.createProgram()
+  gl.attachShader(shaderProgram, vertexShader)
+  gl.attachShader(shaderProgram, fragmentShader)
+  gl.linkProgram(shaderProgram)
+  if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+    console.error(
+      `Unable to initialize the shader program: ${gl.getProgramInfoLog(
+        shaderProgram
+      )}`
+    )
+  }
+
+  gl.useProgram(shaderProgram)
+
+  // Define the vertices for a rectangle (two triangles)
+  const vertexBuffer = gl.createBuffer()
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer)
+  const vertices = new Float32Array([
+    -1.0, 1.0, 1.0, 1.0, -1.0, -1.0, 1.0, -1.0,
+  ])
+  gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW)
+  const vertexPosition = gl.getAttribLocation(shaderProgram, "aVertexPosition")
+  gl.enableVertexAttribArray(vertexPosition)
+  gl.vertexAttribPointer(vertexPosition, 2, gl.FLOAT, false, 0, 0)
+
+  // Texture coordinates
+  const texCoordBuffer = gl.createBuffer()
+  gl.bindBuffer(gl.ARRAY_BUFFER, texCoordBuffer)
+  const textureCoords = new Float32Array([
+    0.0, 1.0, 1.0, 1.0, 0.0, 0.0, 1.0, 0.0,
+  ])
+  gl.bufferData(gl.ARRAY_BUFFER, textureCoords, gl.STATIC_DRAW)
+  const textureCoord = gl.getAttribLocation(shaderProgram, "aTextureCoord")
+  gl.enableVertexAttribArray(textureCoord)
+  gl.vertexAttribPointer(textureCoord, 2, gl.FLOAT, false, 0, 0)
+
+  // Create texture
+  const texture = gl.createTexture()
+  gl.bindTexture(gl.TEXTURE_2D, texture)
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, canvas)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+
+  // Set the threshold uniform
+  const thresholdUniform = gl.getUniformLocation(shaderProgram, "uThreshold")
+  gl.uniform1f(thresholdUniform, threshold)
+
+  // Draw
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4)
 }
 
 function drawControlPoints(points, canvas, radius) {
