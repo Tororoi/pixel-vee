@@ -5,7 +5,11 @@ import { canvas, resizeOnScreenCanvas } from "../Context/canvas.js"
 import { swatches } from "./Context/swatch.js"
 import { tools } from "./Tools/index.js"
 import { actionUndoRedo } from "./Tools/undoRedo.js"
-import { resetVectorGUI, renderVectorGUI } from "./GUI/vector.js"
+import {
+  vectorGuiState,
+  resetVectorGUI,
+  renderVectorGUI,
+} from "./GUI/vector.js"
 import { renderCursor, renderRasterGUI } from "./GUI/raster.js"
 
 //===================================//
