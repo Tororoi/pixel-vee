@@ -11,7 +11,7 @@ import { generateRandomRGB } from "../utils/colors.js"
 //====================================//
 
 /**
- * 
+ *
  * @param {*} condition
  * @param {*} message
  */
@@ -83,7 +83,8 @@ function plotQuadBezierSeg(x0, y0, x1, y1, x2, y2, color) {
     while (dy < dx) {
       /* gradient negates -> algorithm fails */
       plotPoints.push({ x: x0, y: y0, color })
-      if (x0 == x2 && y0 == y2) return /* last pixel -> curve finished */
+      if (x0 == x2 && y0 == y2)
+        return plotPoints /* last pixel -> curve finished */
       y1 = 2 * err < dx /* save value for test of y step */
       if (2 * err > dy) {
         x0 += sx
@@ -320,6 +321,93 @@ function plotCubicBezierSeg(x0, y0, x1, y1, x2, y2, x3, y3, color) {
  * @param {*} y0 - startY
  * @param {*} x1 - ctrlX1
  * @param {*} y1 - ctrlY1
+ * @param {*} x2 - endX
+ * @param {*} y2 - endY
+ * @returns
+ */
+export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
+  let plotPoints = []
+  /* plot any quadratic Bezier curve */
+  let deltaX = x0 - x1,
+    deltaY = y0 - y1
+  let t = x0 - 2 * x1 + x2,
+    r
+  /* sign change in the x coordinates */
+  if (deltaX * (x2 - x1) > 0) {
+    /* horizontal cut at P4? */
+    if (deltaY * (y2 - y1) > 0)
+      if (Math.abs(((y0 - 2 * y1 + y2) * deltaX) / t) > Math.abs(deltaY)) {
+        /* vertical cut at P6 too? */
+        /* which first? */
+        x0 = x2
+        x2 = deltaX + x1
+        y0 = y2
+        y2 = deltaY + y1 /* swap points */
+      } /* now horizontal cut at P4 comes first */
+    t = (x0 - x1) / t
+    r = (1 - t) * ((1 - t) * y0 + 2.0 * t * y1) + t * t * y2 /* By(t=P4) */
+    t = ((x0 * x2 - x1 * x1) * t) / (x0 - x1) /* gradient dP4/dx=0 */
+    deltaX = Math.floor(t + 0.5)
+    deltaY = Math.floor(r + 0.5)
+    r = ((y1 - y0) * (t - x0)) / (x1 - x0) + y0 /* intersect P3 | P0 P1 */
+    plotPoints = [
+      ...plotPoints,
+      ...plotQuadBezierSeg(
+        x0,
+        y0,
+        deltaX,
+        Math.floor(r + 0.5),
+        deltaX,
+        deltaY,
+        `rgba(255,0,0,255)`
+      ),
+    ]
+    r = ((y1 - y2) * (t - x2)) / (x1 - x2) + y2 /* intersect P4 | P1 P2 */
+    x0 = x1 = deltaX
+    y0 = deltaY
+    y1 = Math.floor(r + 0.5) /* P0 = P4, P1 = P8 */
+  }
+  /* sign change in the y coordinates */
+  if ((y0 - y1) * (y2 - y1) > 0) {
+    /* vertical cut at P6? */
+    t = y0 - 2 * y1 + y2
+    t = (y0 - y1) / t
+    r = (1 - t) * ((1 - t) * x0 + 2.0 * t * x1) + t * t * x2 /* Bx(t=P6) */
+    t = ((y0 * y2 - y1 * y1) * t) / (y0 - y1) /* gradient dP6/dy=0 */
+    deltaX = Math.floor(r + 0.5)
+    deltaY = Math.floor(t + 0.5)
+    r = ((x1 - x0) * (t - y0)) / (y1 - y0) + x0 /* intersect P6 | P0 P1 */
+    plotPoints = [
+      ...plotPoints,
+      ...plotQuadBezierSeg(
+        x0,
+        y0,
+        Math.floor(r + 0.5),
+        deltaY,
+        deltaX,
+        deltaY,
+        `rgba(0,255,0,255)`
+      ),
+    ]
+    r = ((x1 - x2) * (t - y2)) / (y1 - y2) + x2 /* intersect P7 | P1 P2 */
+    x0 = deltaX
+    x1 = Math.floor(r + 0.5)
+    y0 = y1 = deltaY /* P0 = P6, P1 = P7 */
+  }
+  plotPoints = [
+    ...plotPoints,
+    ...plotQuadBezierSeg(x0, y0, x1, y1, x2, y2, `rgba(0,0,255,255)`),
+  ]
+
+  return plotPoints
+}
+
+/**
+ * Rasterize any cubic bezier
+ * @param {*} x0 - startX
+ * @param {*} y0 - startY
+ * @param {*} x1 - ctrlX1
+ * @param {*} y1 - ctrlY1
  * @param {*} x2 - ctrlX2
  * @param {*} y2 - ctrlY2
  * @param {*} x3 - endX
@@ -443,6 +531,33 @@ export function plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3) {
   }
 
   return plotPoints
+  // function plotCubicBezierBasic(x0, y0, x1, y1, x2, y2, x3, y3) {
+  //   function calculateBezier(t, p0, p1, p2, p3) {
+  //     const u = 1 - t
+  //     const tt = t * t
+  //     const uu = u * u
+  //     const uuu = uu * u
+  //     const ttt = tt * t
+  //     return uuu * p0 + 3 * uu * t * p1 + 3 * u * tt * p2 + ttt * p3
+  //   }
+
+  //   function bezierPixels(x0, y0, x1, y1, x2, y2, x3, y3) {
+  //     const steps = 25 // Adjust this for more or fewer points
+  //     const deltaT = 1 / steps
+  //     let points = []
+  //     for (let i = 0; i <= steps; i++) {
+  //       let t = deltaT * i
+  //       let x = Math.round(calculateBezier(t, x0, x1, x2, x3))
+  //       let y = Math.round(calculateBezier(t, y0, y1, y2, y3))
+  //       points.push({ x, y })
+  //     }
+  //     return points
+  //   }
+
+  //   // Test
+  //   return bezierPixels(x0, y0, x1, y1, x2, y2, x3, y3)
+  // }
+  // return plotCubicBezierBasic(x0, y0, x1, y1, x2, y2, x3, y3)
 }
 
 /**
