@@ -476,11 +476,13 @@ export function actionQuadraticCurve(
     // after defining x2y2, plot quad bezier with x3 and y3 arguments matching x2 and y2
     //onscreen preview curve
     //somehow use rendercurve2 for flatter curves
-    let plotPoints = plotQuadBezier(
+    let plotPoints = plotCubicBezier(
       startx,
       starty,
       state.cursorWithCanvasOffsetX,
       state.cursorWithCanvasOffsetY,
+      endx,
+      endy,
       endx,
       endy
     )
@@ -502,6 +504,8 @@ export function actionQuadraticCurve(
       starty,
       controlx,
       controly,
+      endx,
+      endy,
       endx,
       endy
     )
