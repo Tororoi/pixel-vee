@@ -56,6 +56,7 @@ canvas {
 
 #vectorGui {
   mix-blend-mode: difference;
+  //TODO: Draw gray background on onScreenCVS or else lines from vector won't show up utside canvas box
 }
 
 #rasterGui {
