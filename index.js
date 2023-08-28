@@ -433,6 +433,8 @@ function handlePointerUp(e) {
   //add to undo stack
   if (state.points.length) {
     state.undoStack.push(state.points)
+
+    // TODO: if state.tool is a vector tool like curve, push index of instruction on undoStack and state.points to vector instruction stack
   }
   state.points = []
   //Reset redostack

@@ -14,7 +14,10 @@ export const vectorGuiState = {
   py3: null,
   px4: null,
   py4: null,
+  collidedKeys: { xKey: null, yKey: null },
+  selectedPoint: { xKey: null, yKey: null },
   pointRadius: 4,
+  checkPointCollision,
 }
 //helper function. TODO: move to graphics helper file
 function drawCirclePath(canvas, x, y, r) {
@@ -134,30 +137,36 @@ function renderVector(state, canvas, vectorGuiState) {
   let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
   //set point radius for detection in state
   vectorGuiState.pointRadius = circleRadius
-  let points = [
-    { x: vectorGuiState.px1, y: vectorGuiState.py1 },
-    { x: vectorGuiState.px2, y: vectorGuiState.py2 },
-    { x: vectorGuiState.px3, y: vectorGuiState.py3 },
-    { x: vectorGuiState.px4, y: vectorGuiState.py4 },
+  let pointsKeys = [
+    { x: "px1", y: "py1" },
+    { x: "px2", y: "py2" },
+    { x: "px3", y: "py3" },
+    { x: "px4", y: "py4" },
   ]
 
-  drawControlPoints(points, canvas, circleRadius)
+  drawControlPoints(pointsKeys, canvas, vectorGuiState.pointRadius)
 
   // Stroke non-filled lines
   canvas.vectorGuiCTX.stroke()
 
   canvas.vectorGuiCTX.beginPath()
-  drawControlPoints(points, canvas, circleRadius / 2, true)
+  drawControlPoints(pointsKeys, canvas, vectorGuiState.pointRadius / 2, true)
   // Fill points
   canvas.vectorGuiCTX.fill()
 }
 
-function drawControlPoints(points, canvas, radius, modify = false) {
-  let collisionPresent = false
-  points.forEach((point) => {
+function drawControlPoints(pointsKeys, canvas, radius, modify = false) {
+  //reset collision
+  vectorGuiState.collisionPresent = false
+  vectorGuiState.collidedKeys = { xKey: null, yKey: null }
+  for (let data of pointsKeys) {
+    let point = { x: vectorGuiState[data.x], y: vectorGuiState[data.y] }
     if (point.x && point.y) {
       let r = radius
-      if (
+      if (modify && vectorGuiState.selectedPoint.xKey) {
+        r = radius * 2
+        vectorGuiState.collisionPresent = true
+      } else if (
         modify &&
         checkPointCollision(
           state.cursorX,
@@ -168,12 +177,14 @@ function drawControlPoints(points, canvas, radius, modify = false) {
         )
       ) {
         r = radius * 2
-        collisionPresent = true
+        vectorGuiState.collisionPresent = true
+        vectorGuiState.collidedKeys.xKey = data.x
+        vectorGuiState.collidedKeys.yKey = data.y
       }
       drawCirclePath(canvas, point.x, point.y, r)
     }
-  })
-  if (collisionPresent) {
+  }
+  if (vectorGuiState.collisionPresent) {
     canvas.vectorGuiCVS.style.cursor = "move"
   } else {
     canvas.vectorGuiCVS.style.cursor = "crosshair"
