@@ -2,8 +2,13 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
-import { plotCubicBezier, debugPlotCubicBezier } from "../utils/bezier.js"
+import {
+  plotCubicBezier,
+  plotQuadBezier,
+  debugPlotCubicBezier,
+} from "../utils/bezier.js"
 import { generateRandomRGB } from "../utils/colors.js"
+import { vectorGuiState } from "../GUI/vector.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -465,17 +470,17 @@ export function actionQuadraticCurve(
       weight,
       scale
     )
-  } else if (stepNum === 2 || stepNum === 3) {
+    vectorGuiState.px2 = state.cursorX
+    vectorGuiState.py2 = state.cursorY
+  } else if (stepNum === 2) {
     // after defining x2y2, plot quad bezier with x3 and y3 arguments matching x2 and y2
     //onscreen preview curve
     //somehow use rendercurve2 for flatter curves
-    let plotPoints = plotCubicBezier(
+    let plotPoints = plotQuadBezier(
       startx,
       starty,
       state.cursorWithCanvasOffsetX,
       state.cursorWithCanvasOffsetY,
-      endx,
-      endy,
       endx,
       endy
     )
@@ -488,15 +493,15 @@ export function actionQuadraticCurve(
       currentMode,
       scale
     )
-  } else if (stepNum === 4) {
+    vectorGuiState.px3 = state.cursorX
+    vectorGuiState.py3 = state.cursorY
+  } else if (stepNum === 3) {
     //curve after defining x3y3, plot quad bezier with x3 and y3 arguments matching x2 and y2
-    let plotPoints = plotCubicBezier(
+    let plotPoints = plotQuadBezier(
       startx,
       starty,
       controlx,
       controly,
-      endx,
-      endy,
       endx,
       endy
     )
@@ -574,17 +579,17 @@ export function actionCubicCurve(
       weight,
       scale
     )
+    vectorGuiState.px2 = state.cursorX
+    vectorGuiState.py2 = state.cursorY
   } else if (stepNum === 2) {
     // after defining x2y2
     //onscreen preview curve
     //somehow use rendercurve2 for flatter curves
-    let plotPoints = plotCubicBezier(
+    let plotPoints = plotQuadBezier(
       startx,
       starty,
       state.cursorWithCanvasOffsetX,
       state.cursorWithCanvasOffsetY,
-      endx,
-      endy,
       endx,
       endy
     )
@@ -597,6 +602,8 @@ export function actionCubicCurve(
       currentMode,
       scale
     )
+    vectorGuiState.px3 = state.cursorX
+    vectorGuiState.py3 = state.cursorY
   } else if (stepNum === 3) {
     //curve after defining x3y3
     //onscreen preview curve
@@ -619,6 +626,8 @@ export function actionCubicCurve(
       currentMode,
       scale
     )
+    vectorGuiState.px4 = state.cursorX
+    vectorGuiState.py4 = state.cursorY
   } else if (stepNum === 4) {
     //curve after defining x4y4
     if (state.debugger) {

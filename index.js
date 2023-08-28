@@ -5,7 +5,12 @@ import { canvas, resizeOnScreenCanvas } from "../Context/canvas.js"
 import { swatches } from "./Context/swatch.js"
 import { tools } from "./Tools/index.js"
 import { actionUndoRedo } from "./Tools/undoRedo.js"
-import { renderCursor } from "./GUI/index.js"
+import {
+  vectorGuiState,
+  resetVectorGUI,
+  renderVectorGUI,
+} from "./GUI/vector.js"
+import { renderCursor, renderRasterGUI } from "./GUI/raster.js"
 
 //===================================//
 //========= * * * DOM * * * =========//
@@ -104,18 +109,18 @@ window.addEventListener("resize", resizeOnScreenCanvas)
 //Shortcuts
 document.addEventListener("keydown", handleKeyDown)
 document.addEventListener("keyup", handleKeyUp)
-canvas.onScreenCVS.addEventListener("wheel", handleWheel, { passive: true })
+canvas.vectorGuiCVS.addEventListener("wheel", handleWheel, { passive: true })
 
 //Pointer
-canvas.onScreenCVS.addEventListener("pointermove", handlePointerMove)
-canvas.onScreenCVS.addEventListener("pointerdown", handlePointerDown)
-canvas.onScreenCVS.addEventListener("pointerup", handlePointerUp)
-canvas.onScreenCVS.addEventListener("pointerout", handlePointerOut) //NOTE: Deprecated? May need to rewrite just for multistep tools such as curve that can be in use while pointer is up
+canvas.vectorGuiCVS.addEventListener("pointermove", handlePointerMove)
+canvas.vectorGuiCVS.addEventListener("pointerdown", handlePointerDown)
+canvas.vectorGuiCVS.addEventListener("pointerup", handlePointerUp)
+canvas.vectorGuiCVS.addEventListener("pointerout", handlePointerOut) //NOTE: Deprecated? May need to rewrite just for multistep tools such as curve that can be in use while pointer is up
 
-canvas.onScreenCVS.addEventListener("touchstart", handleTouchStart, {
+canvas.vectorGuiCVS.addEventListener("touchstart", handleTouchStart, {
   passive: true,
 })
-canvas.onScreenCVS.addEventListener("mousedown", handleMouseDown)
+canvas.vectorGuiCVS.addEventListener("mousedown", handleMouseDown)
 //Toolbox
 undoBtn.addEventListener("click", handleUndo)
 redoBtn.addEventListener("click", handleRedo)
@@ -195,20 +200,20 @@ function handleKeyDown(e) {
         break
       case "Space":
         state.tool = tools["grab"]
-        canvas.onScreenCVS.style.cursor = "move"
+        canvas.vectorGuiCVS.style.cursor = "move"
         break
       case "AltLeft":
       case "AltRight":
         //option key
         state.tool = tools["eyedropper"]
-        canvas.onScreenCVS.style.cursor = "none"
+        canvas.vectorGuiCVS.style.cursor = "none"
         break
       case "ShiftLeft":
       case "ShiftRight":
         if (toolBtn.id === "brush") {
           state.tool = tools["line"]
           state.tool.brushSize = tools["brush"].brushSize
-          canvas.onScreenCVS.style.cursor = "none"
+          canvas.vectorGuiCVS.style.cursor = "none"
         }
         break
       case "KeyS":
@@ -245,7 +250,7 @@ function handleKeyDown(e) {
         toolBtn = document.querySelector("#brush")
         toolBtn.style.background = "rgb(255, 255, 255)"
         state.tool = tools["brush"]
-        canvas.onScreenCVS.style.cursor = "crosshair"
+        canvas.vectorGuiCVS.style.cursor = "crosshair"
         break
       case "KeyR":
         //reset old button
@@ -254,7 +259,7 @@ function handleKeyDown(e) {
         toolBtn = document.querySelector("#replace")
         toolBtn.style.background = "rgb(255, 255, 255)"
         state.tool = tools["replace"]
-        canvas.onScreenCVS.style.cursor = "crosshair"
+        canvas.vectorGuiCVS.style.cursor = "crosshair"
         break
       case "KeyL":
         //reset old button
@@ -263,7 +268,7 @@ function handleKeyDown(e) {
         toolBtn = document.querySelector("#line")
         toolBtn.style.background = "rgb(255, 255, 255)"
         state.tool = tools["line"]
-        canvas.onScreenCVS.style.cursor = "none"
+        canvas.vectorGuiCVS.style.cursor = "none"
         break
       case "KeyF":
         //reset old button
@@ -272,7 +277,7 @@ function handleKeyDown(e) {
         toolBtn = document.querySelector("#fill")
         toolBtn.style.background = "rgb(255, 255, 255)"
         state.tool = tools["fill"]
-        canvas.onScreenCVS.style.cursor = "none"
+        canvas.vectorGuiCVS.style.cursor = "none"
         break
       case "KeyC":
         //reset old button
@@ -280,8 +285,8 @@ function handleKeyDown(e) {
         //set new button
         toolBtn = document.querySelector("#curve")
         toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["curve"]
-        canvas.onScreenCVS.style.cursor = "none"
+        state.tool = tools["quadCurve"]
+        canvas.vectorGuiCVS.style.cursor = "none"
         break
       case "KeyJ":
         //reset old button
@@ -290,7 +295,7 @@ function handleKeyDown(e) {
         toolBtn = document.querySelector("#cubicCurve")
         toolBtn.style.background = "rgb(255, 255, 255)"
         state.tool = tools["cubicCurve"]
-        canvas.onScreenCVS.style.cursor = "none"
+        canvas.vectorGuiCVS.style.cursor = "none"
         break
       default:
       //do nothing
@@ -310,18 +315,18 @@ function handleKeyUp(e) {
   }
 
   if (toolBtn.id === "grab") {
-    canvas.onScreenCVS.style.cursor = "move"
+    canvas.vectorGuiCVS.style.cursor = "move"
   } else if (
     toolBtn.id === "replace" ||
     toolBtn.id === "brush" ||
-    toolBtn.id === "curve" ||
+    toolBtn.id === "quadCurve" ||
     toolBtn.id === "cubicCurve" ||
     toolBtn.id === "fill" ||
     toolBtn.id === "line"
   ) {
-    canvas.onScreenCVS.style.cursor = "crosshair"
+    canvas.vectorGuiCVS.style.cursor = "crosshair"
   } else {
-    canvas.onScreenCVS.style.cursor = "none"
+    canvas.vectorGuiCVS.style.cursor = "none"
   }
 }
 
@@ -340,14 +345,8 @@ const setCoordinates = (e) => {
     Math.floor(Math.floor(e.offsetY) / canvas.zoom) * canvas.zoom
   state.cursorWithCanvasOffsetX = Math.floor(x / canvas.zoom)
   state.cursorWithCanvasOffsetY = Math.floor(y / canvas.zoom)
-  state.cursorX = Math.round(
-    state.cursorWithCanvasOffsetX -
-      canvas.xOffset / (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
-  )
-  state.cursorY = Math.round(
-    state.cursorWithCanvasOffsetY -
-      canvas.yOffset / (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
-  )
+  state.cursorX = Math.round(state.cursorWithCanvasOffsetX - canvas.xOffset)
+  state.cursorY = Math.round(state.cursorWithCanvasOffsetY - canvas.yOffset)
 }
 
 function handlePointerDown(e) {
@@ -359,13 +358,12 @@ function handlePointerDown(e) {
     return
   }
   setCoordinates(e)
+  //Re-render GUI
+  renderRasterGUI(state, canvas, swatches)
+  renderVectorGUI(state, canvas, swatches)
   //Reset Cursor for mobile
-  state.onscreenX =
-    state.cursorWithCanvasOffsetX *
-    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
-  state.onscreenY =
-    state.cursorWithCanvasOffsetY *
-    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
+  state.onscreenX = state.cursorWithCanvasOffsetX
+  state.onscreenY = state.cursorWithCanvasOffsetY
   state.previousOnscreenX = state.onscreenX
   state.previousOnscreenY = state.onscreenY
   //if drawing on hidden layer, flash hide btn
@@ -392,15 +390,12 @@ function handlePointerMove(e) {
   setCoordinates(e)
   // console.log(canvas.subPixelX, canvas.subPixelY)
   //Hover brush
-  state.onscreenX =
-    state.cursorWithCanvasOffsetX *
-    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
-  state.onscreenY =
-    state.cursorWithCanvasOffsetY *
-    (canvas.offScreenCVS.width / canvas.offScreenCVS.width)
+  state.onscreenX = state.cursorWithCanvasOffsetX
+  state.onscreenY = state.cursorWithCanvasOffsetY
+  renderCursor(state, canvas, swatches)
   if (
     state.clicked ||
-    ((state.tool.name === "curve" || state.tool.name === "cubicCurve") &&
+    ((state.tool.name === "quadCurve" || state.tool.name === "cubicCurve") &&
       state.clickCounter > 0)
   ) {
     //run selected tool step function
@@ -411,14 +406,6 @@ function handlePointerMove(e) {
       state.onscreenX !== state.previousOnscreenX ||
       state.onscreenY !== state.previousOnscreenY
     ) {
-      canvas.onScreenCTX.clearRect(
-        0,
-        0,
-        canvas.offScreenCVS.width / canvas.zoom,
-        canvas.offScreenCVS.height / canvas.zoom
-      )
-      canvas.draw()
-      renderCursor(state, canvas, swatches)
       state.previousOnscreenX = state.onscreenX
       state.previousOnscreenY = state.onscreenY
     }
@@ -446,6 +433,8 @@ function handlePointerUp(e) {
   //add to undo stack
   if (state.points.length) {
     state.undoStack.push(state.points)
+
+    // TODO: if state.tool is a vector tool like curve, push index of instruction on undoStack and state.points to vector instruction stack
   }
   state.points = []
   //Reset redostack
@@ -455,7 +444,6 @@ function handlePointerUp(e) {
     renderCursor(state, canvas, swatches)
   }
 }
-
 function handlePointerOut(e) {
   //TODO: if touchscreen, need to handle differently. Currently cannot reach next code since clicked will be false.
   //Only purpose is to rerender with multi step tools such as curve when moving out or in the case of touch, lifting finger
@@ -472,7 +460,9 @@ function handlePointerOut(e) {
   //   state.redoStack = []
   // }
   if (!state.touch) {
-    canvas.draw()
+    renderRasterGUI(state, canvas, swatches)
+    renderVectorGUI(state, canvas, swatches)
+    // canvas.draw()
     canvas.pointerEvent = "none"
   }
 }
@@ -483,13 +473,29 @@ function handlePointerOut(e) {
  * @param {integer} xOriginOffset - additional offset needed to keep zoom centered around cursor
  * @param {integer} yOriginOffset - additional offset needed to keep zoom centered around cursor
  */
-function zoom(z, xOriginOffset, yOriginOffset) {
+function zoomCanvas(z, xOriginOffset, yOriginOffset) {
   canvas.zoom *= z
   canvas.xOffset = Math.round(xOriginOffset)
   canvas.yOffset = Math.round(yOriginOffset)
   canvas.previousXOffset = canvas.xOffset
   canvas.previousYOffset = canvas.yOffset
   //re scale canvas
+  canvas.vectorGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
+  canvas.rasterGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
   canvas.onScreenCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
@@ -499,6 +505,8 @@ function zoom(z, xOriginOffset, yOriginOffset) {
     0
   )
   canvas.draw()
+  renderRasterGUI(state, canvas, swatches)
+  renderVectorGUI(state, canvas, swatches)
 }
 
 function handleWheel(e) {
@@ -516,7 +524,7 @@ function handleWheel(e) {
     let nox = zoomedX - state.cursorX
     let noy = zoomedY - state.cursorY
     if (canvas.zoom > 0.5) {
-      zoom(z, nox, noy)
+      zoomCanvas(z, nox, noy)
     }
   } else if (delta > 0) {
     z = 2
@@ -527,7 +535,7 @@ function handleWheel(e) {
     let nox = zoomedX - state.cursorX
     let noy = zoomedY - state.cursorY
     if (canvas.zoom < 32) {
-      zoom(z, nox, noy)
+      zoomCanvas(z, nox, noy)
     }
   }
 }
@@ -554,7 +562,7 @@ function handleZoom(e) {
       let nox = zoomedX - canvas.offScreenCVS.width / 2
       let noy = zoomedY - canvas.offScreenCVS.height / 2
       if (canvas.zoom > 0.5) {
-        zoom(z, nox, noy)
+        zoomCanvas(z, nox, noy)
       }
     } else if (zoomBtn.id === "plus") {
       z = 2
@@ -566,7 +574,7 @@ function handleZoom(e) {
       let nox = zoomedX - canvas.offScreenCVS.width / 2
       let noy = zoomedY - canvas.offScreenCVS.height / 2
       if (canvas.zoom < 32) {
-        zoom(z, nox, noy)
+        zoomCanvas(z, nox, noy)
       }
     }
   }
@@ -599,10 +607,28 @@ export function handleClear() {
     canvas.offScreenCVS.height
   )
   canvas.draw()
+  resetVectorGUI(canvas)
+  state.reset()
 }
 
 export function handleRecenter(e) {
   canvas.zoom = canvas.setInitialZoom(canvas.offScreenCVS.width)
+  canvas.vectorGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
+  canvas.rasterGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
   canvas.onScreenCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
@@ -624,6 +650,8 @@ export function handleRecenter(e) {
   canvas.previousXOffset = canvas.xOffset
   canvas.previousYOffset = canvas.yOffset
   canvas.draw()
+  renderRasterGUI(state, canvas, swatches)
+  renderVectorGUI(state, canvas, swatches)
 }
 
 function handleTools(e) {
@@ -636,24 +664,27 @@ function handleTools(e) {
       toolBtn = e.target.closest(".tool")
       toolBtn.style.background = "rgb(255, 255, 255)"
       state.tool = tools[toolBtn.id]
+      canvas.draw()
       //update options
       updateStamp()
       brushSlider.value = state.tool.brushSize
       brushSlider.disabled = state.tool.disabled
       //update cursor
       if (toolBtn.id === "grab") {
-        canvas.onScreenCVS.style.cursor = "move"
+        canvas.vectorGuiCVS.style.cursor = "move"
       } else if (
         toolBtn.id === "replace" ||
         toolBtn.id === "brush" ||
-        toolBtn.id === "curve" ||
+        toolBtn.id === "quadCurve" ||
         toolBtn.id === "cubicCurve" ||
         toolBtn.id === "fill" ||
         toolBtn.id === "line"
       ) {
-        canvas.onScreenCVS.style.cursor = "crosshair"
+        canvas.vectorGuiCVS.style.cursor = "crosshair"
+        resetVectorGUI(canvas)
+        state.reset()
       } else {
-        canvas.onScreenCVS.style.cursor = "none"
+        canvas.vectorGuiCVS.style.cursor = "none"
       }
     }
   }
@@ -794,7 +825,7 @@ function updateBrush(e) {
     case "line":
       state.tool.brushSize = parseInt(e.target.value)
       break
-    case "curve":
+    case "quadCurve":
       state.tool.brushSize = parseInt(e.target.value)
       break
     case "cubicCurve":

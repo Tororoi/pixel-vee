@@ -7,6 +7,7 @@ export const state = {
   debugger: false,
   debugObject: {},
   debugFn: null,
+  vectorMode: true,
   //timeline
   points: [],
   undoStack: [],
@@ -67,10 +68,12 @@ export const state = {
   localColorLayer: null,
   //functions
   addToTimeline,
+  reset,
 }
 
 /**
  * command pattern. TODO: Look into saving app-state instead
+ * This sets to state.points and at the end of an action, state.points is pushed to the undo stack
  * @param {string} tool - tool to be recorded for history. Not necessarily the same as state.tool.name
  * @param {*} x
  * @param {*} y
@@ -97,4 +100,16 @@ function addToTimeline(tool, x, y, layer, image, width, height) {
     action: state.tool.fn,
     mode: state.mode,
   })
+}
+
+function reset() {
+  state.px1 = null
+  state.py1 = null
+  state.px2 = null
+  state.py2 = null
+  state.px3 = null
+  state.py3 = null
+  state.px4 = null
+  state.py4 = null
+  state.clickCounter = 0
 }

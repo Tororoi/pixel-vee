@@ -31,6 +31,13 @@ const canvasHeight = document.getElementById("canvas-height")
 //======= * * * Canvas * * * ========//
 //===================================//
 
+//Set gui canvas and its context
+const vectorGuiCVS = document.getElementById("vectorGui")
+const vectorGuiCTX = vectorGuiCVS.getContext("2d")
+vectorGuiCTX.willReadFrequently = true
+const rasterGuiCVS = document.getElementById("rasterGui")
+const rasterGuiCTX = rasterGuiCVS.getContext("2d")
+rasterGuiCTX.willReadFrequently = true
 //Set onscreen canvas and its context
 const onScreenCVS = document.getElementById("onScreen")
 const onScreenCTX = onScreenCVS.getContext("2d")
@@ -47,6 +54,10 @@ offScreenCVS.height = 256
 //window.devicePixelRatio is typically 2
 const sharpness = window.devicePixelRatio
 //adjust canvas ratio here if needed
+vectorGuiCVS.width = vectorGuiCVS.offsetWidth * sharpness
+vectorGuiCVS.height = vectorGuiCVS.offsetHeight * sharpness
+rasterGuiCVS.width = rasterGuiCVS.offsetWidth * sharpness
+rasterGuiCVS.height = rasterGuiCVS.offsetHeight * sharpness
 onScreenCVS.width = onScreenCVS.offsetWidth * sharpness
 onScreenCVS.height = onScreenCVS.offsetHeight * sharpness
 //zoom
@@ -66,6 +77,8 @@ const setInitialZoom = (width) => {
   }
 }
 const zoom = setInitialZoom(offScreenCVS.width) //zoom level should be based on absolute pixel size, not window relative to canvas
+vectorGuiCTX.scale(sharpness * zoom, sharpness * zoom)
+rasterGuiCTX.scale(sharpness * zoom, sharpness * zoom)
 onScreenCTX.scale(sharpness * zoom, sharpness * zoom)
 
 //Initialize offset, must be integer
@@ -88,6 +101,10 @@ canvasHeight.value = offScreenCVS.height
 //Export canvas state
 export const canvas = {
   //Parameters
+  vectorGuiCVS,
+  vectorGuiCTX,
+  rasterGuiCVS,
+  rasterGuiCTX,
   onScreenCVS,
   onScreenCTX,
   sharpness,
@@ -99,7 +116,7 @@ export const canvas = {
   layers: [], //(types: raster, vector, reference)
   currentLayer: null,
   tempLayer: null,
-  bgColor: "rgb(131, 131, 131)",
+  bgColor: "rgba(131, 131, 131, 0.5)",
   borderColor: "black",
   //Cursor
   pointerEvent: "none",
@@ -116,6 +133,7 @@ export const canvas = {
   zoomPixelY: null,
   //Functions
   draw,
+  drawLayers,
   redrawPoints,
   consolidateLayers,
   createNewRasterLayer,
@@ -172,6 +190,22 @@ const resizeOffScreenCanvas = (width, height) => {
   canvas.offScreenCVS.height = height
   //reset canvas state
   canvas.zoom = setInitialZoom(canvas.offScreenCVS.width)
+  canvas.vectorGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
+  canvas.rasterGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
   canvas.onScreenCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
@@ -217,6 +251,26 @@ const handleDimensionsSubmit = (e) => {
 
 export const resizeOnScreenCanvas = () => {
   //Keep canvas dimensions at 100% (requires css style width/ height 100%)
+  canvas.vectorGuiCVS.width = canvas.vectorGuiCVS.offsetWidth * sharpness
+  canvas.vectorGuiCVS.height = canvas.vectorGuiCVS.offsetHeight * sharpness
+  canvas.vectorGuiCTX.setTransform(
+    sharpness * zoom,
+    0,
+    0,
+    sharpness * zoom,
+    0,
+    0
+  )
+  canvas.rasterGuiCVS.width = canvas.rasterGuiCVS.offsetWidth * sharpness
+  canvas.rasterGuiCVS.height = canvas.rasterGuiCVS.offsetHeight * sharpness
+  canvas.rasterGuiCTX.setTransform(
+    sharpness * zoom,
+    0,
+    0,
+    sharpness * zoom,
+    0,
+    0
+  )
   canvas.onScreenCVS.width = canvas.onScreenCVS.offsetWidth * sharpness
   canvas.onScreenCVS.height = canvas.onScreenCVS.offsetHeight * sharpness
   canvas.onScreenCTX.setTransform(
@@ -260,7 +314,7 @@ function draw() {
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
-  drawLayers()
+  drawLayers(canvas.onScreenCTX)
   //draw border
   canvas.onScreenCTX.beginPath()
   canvas.onScreenCTX.rect(
@@ -296,10 +350,10 @@ function redrawPoints() {
           break
         case "line":
           actionLine(
-            p.x.x1,
-            p.y.y1,
-            p.x.x2,
-            p.y.y2,
+            p.x.px1,
+            p.y.py1,
+            p.x.px2,
+            p.y.py2,
             p.color,
             p.layer.ctx,
             p.mode,
@@ -307,16 +361,18 @@ function redrawPoints() {
             p.weight
           )
           break
-        case "curve":
+        case "quadCurve":
           actionQuadraticCurve(
-            p.x.x1,
-            p.y.y1,
-            p.x.x2,
-            p.y.y2,
-            p.x.x3,
-            p.y.y3,
-            4,
-            p.color,
+            p.x.px1,
+            p.y.py1,
+            p.x.px2,
+            p.y.py2,
+            p.x.px3,
+            p.y.py3,
+            3,
+            p.opacity === 0
+              ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
+              : p.color,
             p.layer.ctx,
             p.mode,
             p.brush,
@@ -326,16 +382,18 @@ function redrawPoints() {
         case "cubicCurve":
           //TODO: pass source on history objects to avoid debugging actions from the timeline unless desired
           actionCubicCurve(
-            p.x.x1,
-            p.y.y1,
-            p.x.x2,
-            p.y.y2,
-            p.x.x3,
-            p.y.y3,
-            p.x.x4,
-            p.y.y4,
+            p.x.px1,
+            p.y.py1,
+            p.x.px2,
+            p.y.py2,
+            p.x.px3,
+            p.y.py3,
+            p.x.px4,
+            p.y.py4,
             4,
-            p.color,
+            p.opacity === 0
+              ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
+              : p.color,
             p.layer.ctx,
             p.mode,
             p.brush,
@@ -367,14 +425,14 @@ function redrawPoints() {
 //======== * * * Layers * * * ========//
 //====================================//
 
-function drawLayers() {
+function drawLayers(ctx) {
   canvas.layers.forEach((l) => {
     if (!l.removed) {
       if (l.type === "reference") {
-        canvas.onScreenCTX.save()
-        canvas.onScreenCTX.globalAlpha = l.opacity
+        ctx.save()
+        ctx.globalAlpha = l.opacity
         //l.x, l.y need to be normalized to the pixel grid
-        canvas.onScreenCTX.drawImage(
+        ctx.drawImage(
           l.img,
           canvas.xOffset +
             (l.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
@@ -383,12 +441,12 @@ function drawLayers() {
           l.img.width * l.scale,
           l.img.height * l.scale
         )
-        canvas.onScreenCTX.restore()
+        ctx.restore()
       } else {
-        canvas.onScreenCTX.save()
-        canvas.onScreenCTX.globalAlpha = l.opacity
+        ctx.save()
+        ctx.globalAlpha = l.opacity
         //l.x, l.y need to be normalized to the pixel grid
-        canvas.onScreenCTX.drawImage(
+        ctx.drawImage(
           l.cvs,
           canvas.xOffset +
             (l.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
@@ -397,7 +455,7 @@ function drawLayers() {
           canvas.offScreenCVS.width,
           canvas.offScreenCVS.height
         )
-        canvas.onScreenCTX.restore()
+        ctx.restore()
       }
     }
   })

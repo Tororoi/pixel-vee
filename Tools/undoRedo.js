@@ -1,4 +1,6 @@
+import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { resetVectorGUI } from "../GUI/vector.js"
 
 //====================================//
 //========= * * * Core * * * =========//
@@ -21,4 +23,6 @@ export function actionUndoRedo(pushStack, popStack) {
   })
   canvas.redrawPoints()
   canvas.draw()
+  resetVectorGUI(canvas)
+  state.reset()
 }
