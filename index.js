@@ -5,7 +5,11 @@ import { canvas, resizeOnScreenCanvas } from "../Context/canvas.js"
 import { swatches } from "./Context/swatch.js"
 import { tools } from "./Tools/index.js"
 import { actionUndoRedo } from "./Tools/undoRedo.js"
-import { resetVectorGUI, renderVectorGUI } from "./GUI/vector.js"
+import {
+  vectorGuiState,
+  resetVectorGUI,
+  renderVectorGUI,
+} from "./GUI/vector.js"
 import { renderCursor, renderRasterGUI } from "./GUI/raster.js"
 
 //===================================//
@@ -281,7 +285,7 @@ function handleKeyDown(e) {
         //set new button
         toolBtn = document.querySelector("#curve")
         toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["curve"]
+        state.tool = tools["quadCurve"]
         canvas.vectorGuiCVS.style.cursor = "none"
         break
       case "KeyJ":
@@ -315,7 +319,7 @@ function handleKeyUp(e) {
   } else if (
     toolBtn.id === "replace" ||
     toolBtn.id === "brush" ||
-    toolBtn.id === "curve" ||
+    toolBtn.id === "quadCurve" ||
     toolBtn.id === "cubicCurve" ||
     toolBtn.id === "fill" ||
     toolBtn.id === "line"
@@ -391,7 +395,7 @@ function handlePointerMove(e) {
   renderCursor(state, canvas, swatches)
   if (
     state.clicked ||
-    ((state.tool.name === "curve" || state.tool.name === "cubicCurve") &&
+    ((state.tool.name === "quadCurve" || state.tool.name === "cubicCurve") &&
       state.clickCounter > 0)
   ) {
     //run selected tool step function
@@ -429,6 +433,8 @@ function handlePointerUp(e) {
   //add to undo stack
   if (state.points.length) {
     state.undoStack.push(state.points)
+
+    // TODO: if state.tool is a vector tool like curve, push index of instruction on undoStack and state.points to vector instruction stack
   }
   state.points = []
   //Reset redostack
@@ -669,7 +675,7 @@ function handleTools(e) {
       } else if (
         toolBtn.id === "replace" ||
         toolBtn.id === "brush" ||
-        toolBtn.id === "curve" ||
+        toolBtn.id === "quadCurve" ||
         toolBtn.id === "cubicCurve" ||
         toolBtn.id === "fill" ||
         toolBtn.id === "line"
@@ -819,7 +825,7 @@ function updateBrush(e) {
     case "line":
       state.tool.brushSize = parseInt(e.target.value)
       break
-    case "curve":
+    case "quadCurve":
       state.tool.brushSize = parseInt(e.target.value)
       break
     case "cubicCurve":

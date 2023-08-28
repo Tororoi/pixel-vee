@@ -472,17 +472,15 @@ export function actionQuadraticCurve(
     )
     vectorGuiState.px2 = state.cursorX
     vectorGuiState.py2 = state.cursorY
-  } else if (stepNum === 2 || stepNum === 3) {
+  } else if (stepNum === 2) {
     // after defining x2y2, plot quad bezier with x3 and y3 arguments matching x2 and y2
     //onscreen preview curve
     //somehow use rendercurve2 for flatter curves
-    let plotPoints = plotCubicBezier(
+    let plotPoints = plotQuadBezier(
       startx,
       starty,
       state.cursorWithCanvasOffsetX,
       state.cursorWithCanvasOffsetY,
-      endx,
-      endy,
       endx,
       endy
     )
@@ -497,15 +495,13 @@ export function actionQuadraticCurve(
     )
     vectorGuiState.px3 = state.cursorX
     vectorGuiState.py3 = state.cursorY
-  } else if (stepNum === 4) {
+  } else if (stepNum === 3) {
     //curve after defining x3y3, plot quad bezier with x3 and y3 arguments matching x2 and y2
     let plotPoints = plotQuadBezier(
       startx,
       starty,
       controlx,
       controly,
-      endx,
-      endy,
       endx,
       endy
     )

@@ -73,6 +73,7 @@ export const state = {
 
 /**
  * command pattern. TODO: Look into saving app-state instead
+ * This sets to state.points and at the end of an action, state.points is pushed to the undo stack
  * @param {string} tool - tool to be recorded for history. Not necessarily the same as state.tool.name
  * @param {*} x
  * @param {*} y

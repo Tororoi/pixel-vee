@@ -116,7 +116,7 @@ export const canvas = {
   layers: [], //(types: raster, vector, reference)
   currentLayer: null,
   tempLayer: null,
-  bgColor: "rgb(131, 131, 131)",
+  bgColor: "rgba(131, 131, 131, 0.5)",
   borderColor: "black",
   //Cursor
   pointerEvent: "none",
@@ -350,10 +350,10 @@ function redrawPoints() {
           break
         case "line":
           actionLine(
-            p.x.x1,
-            p.y.y1,
-            p.x.x2,
-            p.y.y2,
+            p.x.px1,
+            p.y.py1,
+            p.x.px2,
+            p.y.py2,
             p.color,
             p.layer.ctx,
             p.mode,
@@ -361,16 +361,18 @@ function redrawPoints() {
             p.weight
           )
           break
-        case "curve":
+        case "quadCurve":
           actionQuadraticCurve(
-            p.x.x1,
-            p.y.y1,
-            p.x.x2,
-            p.y.y2,
-            p.x.x3,
-            p.y.y3,
-            4,
-            p.color,
+            p.x.px1,
+            p.y.py1,
+            p.x.px2,
+            p.y.py2,
+            p.x.px3,
+            p.y.py3,
+            3,
+            p.opacity === 0
+              ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
+              : p.color,
             p.layer.ctx,
             p.mode,
             p.brush,
@@ -380,16 +382,18 @@ function redrawPoints() {
         case "cubicCurve":
           //TODO: pass source on history objects to avoid debugging actions from the timeline unless desired
           actionCubicCurve(
-            p.x.x1,
-            p.y.y1,
-            p.x.x2,
-            p.y.y2,
-            p.x.x3,
-            p.y.y3,
-            p.x.x4,
-            p.y.y4,
+            p.x.px1,
+            p.y.py1,
+            p.x.px2,
+            p.y.py2,
+            p.x.px3,
+            p.y.py3,
+            p.x.px4,
+            p.y.py4,
             4,
-            p.color,
+            p.opacity === 0
+              ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
+              : p.color,
             p.layer.ctx,
             p.mode,
             p.brush,
