@@ -14,8 +14,6 @@ initializeDialogBox(brushContainer)
 //=== * * * Event Listeners * * * ===//
 //===================================//
 
-
-
 //====================================//
 //======== * * * State * * * =========//
 //====================================//
@@ -65,8 +63,8 @@ export const toolbox = {
   // // Create a dithered gradient
   // // },
   // curve: {
-  //   name: "curve",
-  //   fn: curveSteps,
+  //   name: "quadCurve",
+  //   fn: quadCurveSteps,
   //   brushSize: 1,
   //   disabled: false,
   //   options: [],

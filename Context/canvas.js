@@ -116,7 +116,7 @@ export const canvas = {
   layers: [], //(types: raster, vector, reference)
   currentLayer: null,
   tempLayer: null,
-  bgColor: "rgb(131, 131, 131)",
+  bgColor: "rgba(131, 131, 131, 0.5)",
   borderColor: "black",
   //Cursor
   pointerEvent: "none",
@@ -361,7 +361,7 @@ function redrawPoints() {
             p.weight
           )
           break
-        case "curve":
+        case "quadCurve":
           actionQuadraticCurve(
             p.x.px1,
             p.y.py1,
@@ -369,8 +369,10 @@ function redrawPoints() {
             p.y.py2,
             p.x.px3,
             p.y.py3,
-            4,
-            p.color,
+            3,
+            p.opacity === 0
+              ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
+              : p.color,
             p.layer.ctx,
             p.mode,
             p.brush,

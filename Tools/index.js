@@ -295,123 +295,138 @@ export function fillSteps() {
  * Draw bezier curves
  * Supported modes: "draw, erase",
  */
-export function curveSteps() {
+export function quadCurveSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      //solidify end points
-      state.clickCounter += 1
-      if (state.clickCounter > 3) state.clickCounter = 1
-      switch (state.clickCounter) {
-        case 1:
-          state.px1 = state.cursorX
-          state.py1 = state.cursorY
-          //reset control points
-          state.px2 = null
-          state.py2 = null
-          state.px3 = null
-          state.py3 = null
-          state.px4 = null
-          state.py4 = null
-          vectorGuiState.px1 = state.px1
-          vectorGuiState.py1 = state.py1
-          //reset control points
-          vectorGuiState.px2 = null
-          vectorGuiState.py2 = null
-          vectorGuiState.px3 = null
-          vectorGuiState.py3 = null
-          vectorGuiState.px4 = null
-          vectorGuiState.py4 = null
-          break
-        case 2:
-          if (!state.touch) {
+      if (vectorGuiState.collisionPresent && state.clickCounter === 0) {
+        adjustCurveSteps(3)
+      } else {
+        //solidify end points
+        state.clickCounter += 1
+        if (state.clickCounter > 3) state.clickCounter = 1
+        switch (state.clickCounter) {
+          case 1:
+            state.px1 = state.cursorX
+            state.py1 = state.cursorY
+            //reset control points
+            state.px2 = null
+            state.py2 = null
+            state.px3 = null
+            state.py3 = null
+            state.px4 = null
+            state.py4 = null
+            vectorGuiState.px1 = state.px1
+            vectorGuiState.py1 = state.py1
+            //reset control points
+            vectorGuiState.px2 = null
+            vectorGuiState.py2 = null
+            vectorGuiState.px3 = null
+            vectorGuiState.py3 = null
+            vectorGuiState.px4 = null
+            vectorGuiState.py4 = null
+            break
+          case 2:
+            if (!state.touch) {
+              state.px2 = state.cursorX
+              state.py2 = state.cursorY
+              vectorGuiState.px2 = state.px2
+              vectorGuiState.py2 = state.py2
+            }
+            break
+          default:
+          //do nothing
+        }
+      }
+      break
+    case "pointermove":
+      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+        adjustCurveSteps(3)
+      } else {
+        //draw line from origin point to current point onscreen
+        //normalize pointermove to pixelgrid
+        if (
+          state.onscreenX !== state.previousOnscreenX ||
+          state.onscreenY !== state.previousOnscreenY
+        ) {
+          // canvas.onScreenCTX.clearRect(0, 0, canvas.offScreenCVS.width / canvas.zoom, canvas.offScreenCVS.height / canvas.zoom);
+          canvas.draw()
+          //onscreen preview
+          actionQuadraticCurve(
+            state.px1 + canvas.xOffset,
+            state.py1 + canvas.yOffset,
+            state.px2 + canvas.xOffset,
+            state.py2 + canvas.yOffset,
+            state.px3 + canvas.xOffset,
+            state.py3 + canvas.yOffset,
+            state.clickCounter,
+            swatches.primary.color,
+            canvas.onScreenCTX,
+            state.mode,
+            state.brushStamp,
+            state.tool.brushSize,
+            canvas.offScreenCVS.width / canvas.offScreenCVS.width
+          )
+          state.previousOnscreenX = state.onscreenX
+          state.previousOnscreenY = state.onscreenY
+        }
+      }
+      break
+    case "pointerup":
+      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+        adjustCurveSteps(3)
+      } else {
+        //For touchscreens
+        if (state.touch) {
+          if (state.clickCounter === 1) {
             state.px2 = state.cursorX
             state.py2 = state.cursorY
             vectorGuiState.px2 = state.px2
             vectorGuiState.py2 = state.py2
           }
-          break
-        default:
-        //do nothing
-      }
-      break
-    case "pointermove":
-      //draw line from origin point to current point onscreen
-      //normalize pointermove to pixelgrid
-      if (
-        state.onscreenX !== state.previousOnscreenX ||
-        state.onscreenY !== state.previousOnscreenY
-      ) {
-        // canvas.onScreenCTX.clearRect(0, 0, canvas.offScreenCVS.width / canvas.zoom, canvas.offScreenCVS.height / canvas.zoom);
-        canvas.draw()
-        //onscreen preview
-        actionQuadraticCurve(
-          state.px1 + canvas.xOffset,
-          state.py1 + canvas.yOffset,
-          state.px2 + canvas.xOffset,
-          state.py2 + canvas.yOffset,
-          state.px3 + canvas.xOffset,
-          state.py3 + canvas.yOffset,
-          state.clickCounter,
-          swatches.primary.color,
-          canvas.onScreenCTX,
-          state.mode,
-          state.brushStamp,
-          state.tool.brushSize,
-          canvas.offScreenCVS.width / canvas.offScreenCVS.width
-        )
-        state.previousOnscreenX = state.onscreenX
-        state.previousOnscreenY = state.onscreenY
-      }
-      break
-    case "pointerup":
-      //For touchscreens
-      if (state.touch) {
-        if (state.clickCounter === 1) {
-          state.px2 = state.cursorX
-          state.py2 = state.cursorY
-          vectorGuiState.px2 = state.px2
-          vectorGuiState.py2 = state.py2
+          if (state.clickCounter === 2) {
+            state.clickCounter += 1
+          }
         }
-        if (state.clickCounter === 2) {
-          state.clickCounter += 1
+        //Solidify curve
+        if (state.clickCounter === 3) {
+          //solidify control point
+          state.px3 = state.cursorX
+          state.py3 = state.cursorY
+          vectorGuiState.px3 = state.px3
+          vectorGuiState.py3 = state.py3
+          actionQuadraticCurve(
+            state.px1,
+            state.py1,
+            state.px2,
+            state.py2,
+            state.px3,
+            state.py3,
+            state.clickCounter,
+            swatches.primary.color,
+            canvas.currentLayer.ctx,
+            state.mode,
+            state.brushStamp,
+            state.tool.brushSize
+          )
+          state.clickCounter = 0
+          //store control points for timeline
+          state.addToTimeline(
+            state.tool.name,
+            { px1: state.px1, px2: state.px2, px3: state.px3 },
+            { py1: state.py1, py2: state.py2, py3: state.py3 },
+            canvas.currentLayer
+          )
+          canvas.draw()
         }
-      }
-      //Solidify curve
-      if (state.clickCounter === 3) {
-        //solidify control point
-        state.px3 = state.cursorX
-        state.py3 = state.cursorY
-        vectorGuiState.px3 = state.px3
-        vectorGuiState.py3 = state.py3
-        actionQuadraticCurve(
-          state.px1,
-          state.py1,
-          state.px2,
-          state.py2,
-          state.px3,
-          state.py3,
-          state.clickCounter + 1,
-          swatches.primary.color,
-          canvas.currentLayer.ctx,
-          state.mode,
-          state.brushStamp,
-          state.tool.brushSize
-        )
-        state.clickCounter = 0
-        //store control points for timeline
-        state.addToTimeline(
-          state.tool.name,
-          { px1: state.px1, px2: state.px2, px3: state.px3 },
-          { py1: state.py1, py2: state.py2, py3: state.py3 },
-          canvas.currentLayer
-        )
-        canvas.draw()
       }
       break
     case "pointerout":
+      if (vectorGuiState.selectedPoint.xKey) {
+        adjustCurveSteps(3)
+      }
       //cancel curve
       state.clickCounter = 0
       break
@@ -431,41 +446,7 @@ export function cubicCurveSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGuiState.collisionPresent && state.clickCounter === 0) {
-        vectorGuiState[vectorGuiState.collidedKeys.xKey] = state.cursorX
-        vectorGuiState[vectorGuiState.collidedKeys.yKey] = state.cursorY
-        vectorGuiState.selectedPoint = {
-          xKey: vectorGuiState.collidedKeys.xKey,
-          yKey: vectorGuiState.collidedKeys.yKey,
-        }
-        state.undoStack[state.undoStack.length - 1][0].opacity = 0
-        canvas.layers.forEach((l) => {
-          if (l.type === "raster") {
-            l.ctx.clearRect(
-              0,
-              0,
-              canvas.offScreenCVS.width,
-              canvas.offScreenCVS.height
-            )
-          }
-        })
-        canvas.redrawPoints()
-        canvas.draw()
-        actionCubicCurve(
-          vectorGuiState.px1 + canvas.xOffset,
-          vectorGuiState.py1 + canvas.yOffset,
-          vectorGuiState.px2 + canvas.xOffset,
-          vectorGuiState.py2 + canvas.yOffset,
-          vectorGuiState.px3 + canvas.xOffset,
-          vectorGuiState.py3 + canvas.yOffset,
-          vectorGuiState.px4 + canvas.xOffset,
-          vectorGuiState.py4 + canvas.yOffset,
-          4,
-          state.undoStack[state.undoStack.length - 1][0].color,
-          canvas.onScreenCTX,
-          state.undoStack[state.undoStack.length - 1][0].mode,
-          state.undoStack[state.undoStack.length - 1][0].brush,
-          state.undoStack[state.undoStack.length - 1][0].weight
-        )
+        adjustCurveSteps()
       } else {
         //solidify end points
         state.clickCounter += 1
@@ -514,25 +495,7 @@ export function cubicCurveSteps() {
       break
     case "pointermove":
       if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
-        vectorGuiState[vectorGuiState.selectedPoint.xKey] = state.cursorX
-        vectorGuiState[vectorGuiState.selectedPoint.yKey] = state.cursorY
-        canvas.draw()
-        actionCubicCurve(
-          vectorGuiState.px1 + canvas.xOffset,
-          vectorGuiState.py1 + canvas.yOffset,
-          vectorGuiState.px2 + canvas.xOffset,
-          vectorGuiState.py2 + canvas.yOffset,
-          vectorGuiState.px3 + canvas.xOffset,
-          vectorGuiState.py3 + canvas.yOffset,
-          vectorGuiState.px4 + canvas.xOffset,
-          vectorGuiState.py4 + canvas.yOffset,
-          4,
-          state.undoStack[state.undoStack.length - 1][0].color,
-          canvas.onScreenCTX,
-          state.undoStack[state.undoStack.length - 1][0].mode,
-          state.undoStack[state.undoStack.length - 1][0].brush,
-          state.undoStack[state.undoStack.length - 1][0].weight
-        )
+        adjustCurveSteps()
       } else {
         //draw line from origin point to current point onscreen
         //normalize pointermove to pixelgrid
@@ -567,33 +530,7 @@ export function cubicCurveSteps() {
       break
     case "pointerup":
       if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
-        vectorGuiState[vectorGuiState.selectedPoint.xKey] = state.cursorX
-        vectorGuiState[vectorGuiState.selectedPoint.yKey] = state.cursorY
-        //TODO: Modify point in vector timeline and push new curve set on pointer up to timeline as new type of push called "modify vector"
-        //Currently this modifies the history directly which is a big no no, just done for testing
-        state.undoStack[state.undoStack.length - 1][0].x[
-          vectorGuiState.selectedPoint.xKey
-        ] = state.cursorX
-        state.undoStack[state.undoStack.length - 1][0].y[
-          vectorGuiState.selectedPoint.yKey
-        ] = state.cursorY
-        state.undoStack[state.undoStack.length - 1][0].opacity = 1
-        vectorGuiState.selectedPoint = {
-          xKey: null,
-          yKey: null,
-        }
-        canvas.layers.forEach((l) => {
-          if (l.type === "raster") {
-            l.ctx.clearRect(
-              0,
-              0,
-              canvas.offScreenCVS.width,
-              canvas.offScreenCVS.height
-            )
-          }
-        })
-        canvas.redrawPoints()
-        canvas.draw()
+        adjustCurveSteps()
       } else {
         //For touchscreens
         if (state.touch) {
@@ -688,13 +625,161 @@ export function cubicCurveSteps() {
       break
     case "pointerout":
       if (vectorGuiState.selectedPoint.xKey) {
+        adjustCurveSteps()
+      }
+      //cancel curve
+      state.clickCounter = 0
+      break
+    default:
+    //do nothing
+  }
+}
+
+/**
+ * Used automatically by curve tools after curve is completed.
+ * TODO: create distinct tool for adjusting that won't create a new curve when clicking.
+ * Ideally a user should be able to click on a curve and render it's vector UI that way.
+ * TODO: Modify point in vector timeline and push new curve set on pointer up to timeline as new type of push called "modify vector"
+ * Currently this modifies the history directly which is a big no no, just done for testing, only ok for now since it just modifies the curve that was just created
+ * @param {*} numPoints
+ */
+export function adjustCurveSteps(numPoints = 4) {
+  //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
+  //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
+  //this routine would be better for touchscreens, and no worse with pointer
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
+      if (vectorGuiState.collisionPresent && state.clickCounter === 0) {
+        vectorGuiState[vectorGuiState.collidedKeys.xKey] = state.cursorX
+        vectorGuiState[vectorGuiState.collidedKeys.yKey] = state.cursorY
+        vectorGuiState.selectedPoint = {
+          xKey: vectorGuiState.collidedKeys.xKey,
+          yKey: vectorGuiState.collidedKeys.yKey,
+        }
+        state.undoStack[state.undoStack.length - 1][0].opacity = 0
+        canvas.layers.forEach((l) => {
+          if (l.type === "raster") {
+            l.ctx.clearRect(
+              0,
+              0,
+              canvas.offScreenCVS.width,
+              canvas.offScreenCVS.height
+            )
+          }
+        })
+        canvas.redrawPoints()
+        canvas.draw()
+        if (numPoints === 3) {
+          actionQuadraticCurve(
+            vectorGuiState.px1 + canvas.xOffset,
+            vectorGuiState.py1 + canvas.yOffset,
+            vectorGuiState.px2 + canvas.xOffset,
+            vectorGuiState.py2 + canvas.yOffset,
+            vectorGuiState.px3 + canvas.xOffset,
+            vectorGuiState.py3 + canvas.yOffset,
+            3,
+            state.undoStack[state.undoStack.length - 1][0].color,
+            canvas.onScreenCTX,
+            state.undoStack[state.undoStack.length - 1][0].mode,
+            state.undoStack[state.undoStack.length - 1][0].brush,
+            state.undoStack[state.undoStack.length - 1][0].weight
+          )
+        } else {
+          actionCubicCurve(
+            vectorGuiState.px1 + canvas.xOffset,
+            vectorGuiState.py1 + canvas.yOffset,
+            vectorGuiState.px2 + canvas.xOffset,
+            vectorGuiState.py2 + canvas.yOffset,
+            vectorGuiState.px3 + canvas.xOffset,
+            vectorGuiState.py3 + canvas.yOffset,
+            vectorGuiState.px4 + canvas.xOffset,
+            vectorGuiState.py4 + canvas.yOffset,
+            4,
+            state.undoStack[state.undoStack.length - 1][0].color,
+            canvas.onScreenCTX,
+            state.undoStack[state.undoStack.length - 1][0].mode,
+            state.undoStack[state.undoStack.length - 1][0].brush,
+            state.undoStack[state.undoStack.length - 1][0].weight
+          )
+        }
+      }
+      break
+    case "pointermove":
+      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+        vectorGuiState[vectorGuiState.selectedPoint.xKey] = state.cursorX
+        vectorGuiState[vectorGuiState.selectedPoint.yKey] = state.cursorY
+        canvas.draw()
+        if (numPoints === 3) {
+          actionQuadraticCurve(
+            vectorGuiState.px1 + canvas.xOffset,
+            vectorGuiState.py1 + canvas.yOffset,
+            vectorGuiState.px2 + canvas.xOffset,
+            vectorGuiState.py2 + canvas.yOffset,
+            vectorGuiState.px3 + canvas.xOffset,
+            vectorGuiState.py3 + canvas.yOffset,
+            3,
+            state.undoStack[state.undoStack.length - 1][0].color,
+            canvas.onScreenCTX,
+            state.undoStack[state.undoStack.length - 1][0].mode,
+            state.undoStack[state.undoStack.length - 1][0].brush,
+            state.undoStack[state.undoStack.length - 1][0].weight
+          )
+        } else {
+          actionCubicCurve(
+            vectorGuiState.px1 + canvas.xOffset,
+            vectorGuiState.py1 + canvas.yOffset,
+            vectorGuiState.px2 + canvas.xOffset,
+            vectorGuiState.py2 + canvas.yOffset,
+            vectorGuiState.px3 + canvas.xOffset,
+            vectorGuiState.py3 + canvas.yOffset,
+            vectorGuiState.px4 + canvas.xOffset,
+            vectorGuiState.py4 + canvas.yOffset,
+            4,
+            state.undoStack[state.undoStack.length - 1][0].color,
+            canvas.onScreenCTX,
+            state.undoStack[state.undoStack.length - 1][0].mode,
+            state.undoStack[state.undoStack.length - 1][0].brush,
+            state.undoStack[state.undoStack.length - 1][0].weight
+          )
+        }
+      }
+      break
+    case "pointerup":
+      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+        vectorGuiState[vectorGuiState.selectedPoint.xKey] = state.cursorX
+        vectorGuiState[vectorGuiState.selectedPoint.yKey] = state.cursorY
+        state.undoStack[state.undoStack.length - 1][0].x[
+          vectorGuiState.selectedPoint.xKey
+        ] = state.cursorX
+        state.undoStack[state.undoStack.length - 1][0].y[
+          vectorGuiState.selectedPoint.yKey
+        ] = state.cursorY
+        state.undoStack[state.undoStack.length - 1][0].opacity = 1
+        vectorGuiState.selectedPoint = {
+          xKey: null,
+          yKey: null,
+        }
+        canvas.layers.forEach((l) => {
+          if (l.type === "raster") {
+            l.ctx.clearRect(
+              0,
+              0,
+              canvas.offScreenCVS.width,
+              canvas.offScreenCVS.height
+            )
+          }
+        })
+        canvas.redrawPoints()
+        canvas.draw()
+      }
+      break
+    case "pointerout":
+      if (vectorGuiState.selectedPoint.xKey) {
         vectorGuiState.selectedPoint = {
           xKey: null,
           yKey: null,
         }
       }
-      //cancel curve
-      state.clickCounter = 0
       break
     default:
     //do nothing
@@ -823,9 +908,9 @@ export const tools = {
   // gradient: {
   // Create a dithered gradient
   // },
-  curve: {
-    name: "curve",
-    fn: curveSteps,
+  quadCurve: {
+    name: "quadCurve",
+    fn: quadCurveSteps,
     brushSize: 1,
     disabled: false,
     options: [],

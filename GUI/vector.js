@@ -163,7 +163,7 @@ function drawControlPoints(pointsKeys, canvas, radius, modify = false) {
     let point = { x: vectorGuiState[data.x], y: vectorGuiState[data.y] }
     if (point.x && point.y) {
       let r = radius
-      if (modify && vectorGuiState.selectedPoint.xKey) {
+      if (modify && vectorGuiState.selectedPoint.xKey === data.x) {
         r = radius * 2
         vectorGuiState.collisionPresent = true
       } else if (
