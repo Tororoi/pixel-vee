@@ -353,6 +353,12 @@ export function quadCurveSteps() {
         ) {
           // canvas.onScreenCTX.clearRect(0, 0, canvas.offScreenCVS.width / canvas.zoom, canvas.offScreenCVS.height / canvas.zoom);
           canvas.draw()
+          if (state.clickCounter === 3) {
+            state.px3 = state.cursorX
+            state.py3 = state.cursorY
+            vectorGuiState.px3 = state.px3
+            vectorGuiState.py3 = state.py3
+          }
           //onscreen preview
           actionQuadraticCurve(
             state.px1 + canvas.xOffset,
@@ -503,8 +509,13 @@ export function cubicCurveSteps() {
           state.onscreenX !== state.previousOnscreenX ||
           state.onscreenY !== state.previousOnscreenY
         ) {
-          // canvas.onScreenCTX.clearRect(0, 0, canvas.offScreenCVS.width / canvas.zoom, canvas.offScreenCVS.height / canvas.zoom);
           canvas.draw()
+          if (state.clickCounter === 4) {
+            state.px4 = state.cursorX
+            state.py4 = state.cursorY
+            vectorGuiState.px4 = state.px4
+            vectorGuiState.py4 = state.py4
+          }
           //onscreen preview
           actionCubicCurve(
             state.px1 + canvas.xOffset,
