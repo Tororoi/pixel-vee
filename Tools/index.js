@@ -503,8 +503,13 @@ export function cubicCurveSteps() {
           state.onscreenX !== state.previousOnscreenX ||
           state.onscreenY !== state.previousOnscreenY
         ) {
-          // canvas.onScreenCTX.clearRect(0, 0, canvas.offScreenCVS.width / canvas.zoom, canvas.offScreenCVS.height / canvas.zoom);
           canvas.draw()
+          if (state.clickCounter === 4) {
+            state.px4 = state.cursorX
+            state.py4 = state.cursorY
+            vectorGuiState.px4 = state.px4
+            vectorGuiState.py4 = state.py4
+          }
           //onscreen preview
           actionCubicCurve(
             state.px1 + canvas.xOffset,
