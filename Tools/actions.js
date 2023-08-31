@@ -5,7 +5,7 @@ import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { generateRandomRGB } from "../utils/colors.js"
 import { vectorGuiState } from "../GUI/vector.js"
-import { plotCircle } from "../utils/ellipse.js"
+import { plotCircle, plotEllipseRect } from "../utils/ellipse.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -710,6 +710,7 @@ export function actionCircle(
   let dx = endx - startx
   let dy = endy - starty
   let r = Math.floor(Math.sqrt(dx * dx + dy * dy))
+  // let plotPoints = plotEllipseRect(startx, starty, endx, endy)
   let plotPoints = plotCircle(startx, starty, r)
   renderPoints(
     plotPoints,
