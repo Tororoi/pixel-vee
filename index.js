@@ -297,6 +297,15 @@ function handleKeyDown(e) {
         state.tool = tools["cubicCurve"]
         canvas.vectorGuiCVS.style.cursor = "none"
         break
+      case "KeyO":
+        //reset old button
+        toolBtn.style.background = "rgb(131, 131, 131)"
+        //set new button
+        toolBtn = document.querySelector("#circle")
+        toolBtn.style.background = "rgb(255, 255, 255)"
+        state.tool = tools["circle"]
+        canvas.vectorGuiCVS.style.cursor = "none"
+        break
       default:
       //do nothing
     }
@@ -321,6 +330,7 @@ function handleKeyUp(e) {
     toolBtn.id === "brush" ||
     toolBtn.id === "quadCurve" ||
     toolBtn.id === "cubicCurve" ||
+    toolBtn.id === "circle" ||
     toolBtn.id === "fill" ||
     toolBtn.id === "line"
   ) {
@@ -395,7 +405,9 @@ function handlePointerMove(e) {
   renderCursor(state, canvas, swatches)
   if (
     state.clicked ||
-    ((state.tool.name === "quadCurve" || state.tool.name === "cubicCurve") &&
+    ((state.tool.name === "quadCurve" ||
+      state.tool.name === "cubicCurve" ||
+      state.tool.name === "circle") &&
       state.clickCounter > 0)
   ) {
     //run selected tool step function
@@ -677,6 +689,7 @@ function handleTools(e) {
         toolBtn.id === "brush" ||
         toolBtn.id === "quadCurve" ||
         toolBtn.id === "cubicCurve" ||
+        toolBtn.id === "circle" ||
         toolBtn.id === "fill" ||
         toolBtn.id === "line"
       ) {
@@ -829,6 +842,9 @@ function updateBrush(e) {
       state.tool.brushSize = parseInt(e.target.value)
       break
     case "cubicCurve":
+      state.tool.brushSize = parseInt(e.target.value)
+      break
+    case "circle":
       state.tool.brushSize = parseInt(e.target.value)
       break
     default:

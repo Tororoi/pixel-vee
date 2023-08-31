@@ -9,6 +9,7 @@ import {
   actionFill,
   actionQuadraticCurve,
   actionCubicCurve,
+  actionCircle,
 } from "./actions.js"
 import { vectorGuiState, renderVectorGUI } from "../GUI/vector.js"
 import {
@@ -797,6 +798,174 @@ export function adjustCurveSteps(numPoints = 4) {
   }
 }
 
+/**
+ * Draw circle
+ * Supported modes: "draw, erase",
+ */
+export function circleSteps() {
+  //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
+  //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
+  //this routine would be better for touchscreens, and no worse with pointer
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
+      if (vectorGuiState.collisionPresent && state.clickCounter === 0) {
+        // adjustCurveSteps()
+      } else {
+        //solidify end points
+        state.clickCounter += 1
+        if (state.clickCounter > 2) state.clickCounter = 1
+        switch (state.clickCounter) {
+          case 1:
+            state.px1 = state.cursorX
+            state.py1 = state.cursorY
+            //reset control points
+            state.px2 = null
+            state.py2 = null
+            state.px3 = null
+            state.py3 = null
+            state.px4 = null
+            state.py4 = null
+            vectorGuiState.px1 = null
+            vectorGuiState.py1 = null
+            //reset control points
+            vectorGuiState.px2 = null
+            vectorGuiState.py2 = null
+            vectorGuiState.px3 = null
+            vectorGuiState.py3 = null
+            vectorGuiState.px4 = null
+            vectorGuiState.py4 = null
+            break
+          default:
+          //do nothing
+        }
+      }
+      break
+    case "pointermove":
+      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+        // adjustCurveSteps()
+      } else {
+        //draw line from origin point to current point onscreen
+        //normalize pointermove to pixelgrid
+        if (
+          state.onscreenX !== state.previousOnscreenX ||
+          state.onscreenY !== state.previousOnscreenY
+        ) {
+          canvas.draw()
+          // if (state.clickCounter === 2) {
+          state.px2 = state.cursorX
+          state.py2 = state.cursorY
+          // vectorGuiState.px2 = state.px2
+          // vectorGuiState.py2 = state.py2
+          // }
+          //onscreen preview
+          actionCircle(
+            state.px1 + canvas.xOffset,
+            state.py1 + canvas.yOffset,
+            state.px2 + canvas.xOffset,
+            state.py2 + canvas.yOffset,
+            state.clickCounter,
+            swatches.primary.color,
+            canvas.onScreenCTX,
+            state.mode,
+            state.brushStamp,
+            state.tool.brushSize,
+            canvas.offScreenCVS.width / canvas.offScreenCVS.width
+          )
+          state.previousOnscreenX = state.onscreenX
+          state.previousOnscreenY = state.onscreenY
+        }
+      }
+      break
+    case "pointerup":
+      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+        // adjustCurveSteps()
+      } else {
+        //For touchscreens
+        if (state.touch) {
+          // if (state.clickCounter === 1) {
+          state.px2 = state.cursorX
+          state.py2 = state.cursorY
+          // vectorGuiState.px2 = state.px2
+          // vectorGuiState.py2 = state.py2
+          // }
+        }
+        //Solidify curve
+        // if (state.clickCounter === 2) {
+        //solidify control point
+        state.px2 = state.cursorX
+        state.py2 = state.cursorY
+        // vectorGuiState.px2 = state.px2
+        // vectorGuiState.py2 = state.py2
+        actionCircle(
+          state.px1,
+          state.py1,
+          state.px2,
+          state.py2,
+          state.clickCounter,
+          swatches.primary.color,
+          canvas.currentLayer.ctx,
+          state.mode,
+          state.brushStamp,
+          state.tool.brushSize
+        )
+        state.clickCounter = 0
+        //store control points for timeline
+        if (!state.debugger) {
+          state.addToTimeline(
+            state.tool.name,
+            {
+              px1: state.px1,
+              px2: state.px2,
+            },
+            {
+              py1: state.py1,
+              py2: state.py2,
+            },
+            canvas.currentLayer
+          )
+        }
+        canvas.draw()
+        //IN PROGRESS: draw control points at higher resolution only on onScreenCVS
+        // actionDraw(
+        //   (canvas.xOffset + state.px3) * 2,
+        //   (canvas.yOffset + state.py3) * 2,
+        //   { color: `rgba(255,0,0,255)` },
+        //   state.brushStamp,
+        //   state.tool.brushSize,
+        //   canvas.vectorGuiCTX,
+        //   "draw",
+        //   0.5
+        // )
+        // canvas.vectorGuiCTX.clearRect(
+        //   0,
+        //   0,
+        //   canvas.vectorGuiCVS.width / canvas.zoom,
+        //   canvas.vectorGuiCVS.height / canvas.zoom
+        // )
+        // canvas.vectorGuiCTX.fillStyle = `rgba(255,0,0,255)`
+        // canvas.vectorGuiCTX.fillRect(
+        //   canvas.xOffset + state.px3,
+        //   canvas.yOffset + state.py3,
+        //   1,
+        //   1
+        // )
+        renderRasterGUI(state, canvas, swatches)
+        renderVectorGUI(state, canvas, swatches)
+        // }
+      }
+      break
+    case "pointerout":
+      if (vectorGuiState.selectedPoint.xKey) {
+        // adjustCurveSteps()
+      }
+      //cancel curve
+      state.clickCounter = 0
+      break
+    default:
+    //do nothing
+  }
+}
+
 //====================================//
 //=== * * * Non-Action Tools * * * ===//
 //====================================//
@@ -929,6 +1098,13 @@ export const tools = {
   cubicCurve: {
     name: "cubicCurve",
     fn: cubicCurveSteps,
+    brushSize: 1,
+    disabled: false,
+    options: [],
+  },
+  circle: {
+    name: "circle",
+    fn: circleSteps,
     brushSize: 1,
     disabled: false,
     options: [],

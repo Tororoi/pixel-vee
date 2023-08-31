@@ -2,13 +2,10 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
-import {
-  plotCubicBezier,
-  plotQuadBezier,
-  debugPlotCubicBezier,
-} from "../utils/bezier.js"
+import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { generateRandomRGB } from "../utils/colors.js"
 import { vectorGuiState } from "../GUI/vector.js"
+import { plotCircle } from "../utils/ellipse.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -672,6 +669,60 @@ export function actionCubicCurve(
 }
 
 /**
+ * User action for process to set control points for cubic bezier
+ * @param {*} startx
+ * @param {*} starty
+ * @param {*} endx
+ * @param {*} endy
+ * @param {*} controlx1
+ * @param {*} controly1
+ * @param {*} controlx2
+ * @param {*} controly2
+ * @param {*} stepNum
+ * @param {*} currentColor
+ * @param {*} ctx
+ * @param {*} currentMode
+ * @param {*} brushStamp
+ * @param {*} weight
+ * @param {*} scale
+ */
+export function actionCircle(
+  startx,
+  starty,
+  endx,
+  endy,
+  stepNum,
+  currentColor,
+  ctx,
+  currentMode,
+  brushStamp,
+  weight,
+  scale = 1
+) {
+  //force coords to int
+  startx = Math.round(startx)
+  starty = Math.round(starty)
+  endx = Math.round(endx)
+  endy = Math.round(endy)
+
+  ctx.fillStyle = currentColor.color
+
+  let dx = endx - startx
+  let dy = endy - starty
+  let r = Math.floor(Math.sqrt(dx * dx + dy * dy))
+  let plotPoints = plotCircle(startx, starty, r)
+  renderPoints(
+    plotPoints,
+    brushStamp,
+    currentColor,
+    weight,
+    ctx,
+    currentMode,
+    scale
+  )
+}
+
+/**
  * Step through cubic bezier in debug mode, sets debug function and debug object
  * @param {*} x0
  * @param {*} y0
@@ -722,17 +773,7 @@ function slowPlotCubicBezier(
       scale,
       maxSteps,
     } = instructionsObject
-    let plotPoints = debugPlotCubicBezier(
-      x0,
-      y0,
-      x1,
-      y1,
-      x2,
-      y2,
-      x3,
-      y3,
-      maxSteps
-    )
+    let plotPoints = plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3, maxSteps)
     renderPoints(
       plotPoints,
       brushStamp,
