@@ -920,9 +920,6 @@ export function ellipseSteps() {
             vectorGuiState.px2 = state.px2
             vectorGuiState.py2 = state.py2
           }
-          if (state.clickCounter === 2) {
-            state.clickCounter += 1
-          }
         }
         if (state.clickCounter === 1) {
           let dxa = state.px2 - state.px1

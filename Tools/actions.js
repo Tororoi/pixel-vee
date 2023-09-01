@@ -716,9 +716,6 @@ export function actionEllipse(
   ctx.fillStyle = currentColor.color
 
   if (stepNum === 1) {
-    // let dx = xa - centerx
-    // let dy = ya - centery
-    // let r = Math.floor(Math.sqrt(dx * dx + dy * dy))
     let plotPoints = plotCircle(centerx, centery, ra)
     renderPoints(
       plotPoints,
@@ -729,15 +726,7 @@ export function actionEllipse(
       currentMode,
       scale
     )
-    // vectorGuiState.px2 = state.cursorX
-    // vectorGuiState.py2 = state.cursorY
   } else if (stepNum === 2) {
-    // let dxa = xa - centerx
-    // let dya = ya - centery
-    // let ra = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
-    // let dxb = xb - centerx
-    // let dyb = yb - centery
-    // let rb = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
     let angle = getAngle(xa - centerx, ya - centery)
     let plotPoints = plotRotatedEllipse(centerx, centery, ra, rb, angle)
     renderPoints(
@@ -749,8 +738,6 @@ export function actionEllipse(
       currentMode,
       scale
     )
-    // vectorGuiState.px3 = state.cursorX
-    // vectorGuiState.py3 = state.cursorY
   }
 }
 
