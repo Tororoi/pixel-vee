@@ -921,13 +921,8 @@ export function ellipseSteps() {
           state.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
           vectorGuiState.radB = state.radB
         }
-        //Solidify curve
+        //Solidify ellipse
         if (state.clickCounter === 2) {
-          //solidify control point
-          state.px3 = state.cursorX
-          state.py3 = state.cursorY
-          vectorGuiState.px3 = state.px3
-          vectorGuiState.py3 = state.py3
           actionEllipse(
             state.px1,
             state.py1,
