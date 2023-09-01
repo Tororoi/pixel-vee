@@ -58,10 +58,6 @@ export const state = {
   py3: null,
   px4: null,
   py4: null,
-  dxa: null,
-  dya: null,
-  dxb: null,
-  dyb: null,
   radA: null,
   radB: null,
   //for perfect pixels
@@ -84,20 +80,16 @@ export const state = {
  * @param {*} x
  * @param {*} y
  * @param {*} layer - layer that history should be applied to
- * @param {*} image - only for replace tool
- * @param {*} width - only for replace tool
- * @param {*} height - only for replace tool
+ * @param {*} properties - custom properties for specific tool
  * @param
  */
-function addToTimeline(tool, x, y, layer, image, width, height) {
+function addToTimeline(actionObject) {
+  const { tool, x, y, layer, properties, modifications = [] } = actionObject
   //use current state for variables
   state.points.push({
     //x/y are sometimes objects with multiple values
     x: x,
     y: y,
-    width: width,
-    height: height,
-    image: image,
     layer: layer,
     brush: state.brushStamp,
     weight: state.tool.brushSize,
@@ -105,6 +97,8 @@ function addToTimeline(tool, x, y, layer, image, width, height) {
     tool: tool,
     action: state.tool.fn,
     mode: state.mode,
+    properties,
+    modifications,
   })
 }
 

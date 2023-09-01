@@ -6,7 +6,6 @@ import {
   actionFill,
   actionQuadraticCurve,
   actionCubicCurve,
-  actionCircle,
   actionEllipse,
 } from "../Tools/actions.js"
 
@@ -402,25 +401,7 @@ function redrawPoints() {
             p.weight
           )
           break
-        case "circle":
-          //actionCircle
-          actionCircle(
-            p.x.px1,
-            p.y.py1,
-            p.x.px2,
-            p.y.py2,
-            2,
-            p.opacity === 0
-              ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
-              : p.color,
-            p.layer.ctx,
-            p.mode,
-            p.brush,
-            p.weight
-          )
-          break
         case "ellipse":
-          //actionCircle
           actionEllipse(
             p.x.px1,
             p.y.py1,
@@ -428,8 +409,8 @@ function redrawPoints() {
             p.y.py2,
             p.x.px3,
             p.y.py3,
-            p.x.radA,
-            p.x.radB,
+            p.properties.radA,
+            p.properties.radB,
             2,
             p.opacity === 0
               ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
@@ -441,7 +422,13 @@ function redrawPoints() {
           )
           break
         case "replace":
-          p.layer.ctx.drawImage(p.image, 0, 0, p.width, p.height)
+          p.layer.ctx.drawImage(
+            p.properties.image,
+            0,
+            0,
+            p.properties.width,
+            p.properties.height
+          )
           break
         default:
           actionDraw(p.x, p.y, p.color, p.brush, p.weight, p.layer.ctx, p.mode)
@@ -618,7 +605,7 @@ function addRasterLayer() {
   //once layer is added to timeline and drawn on, can no longer be deleted
   const layer = createNewRasterLayer(`Layer ${canvas.layers.length + 1}`)
   canvas.layers.push(layer)
-  state.addToTimeline("addlayer", 0, 0, layer)
+  state.addToTimeline({ tool: "addlayer", layer })
   state.undoStack.push(state.points)
   state.points = []
   state.redoStack = []

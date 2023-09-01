@@ -153,12 +153,12 @@ export function actionPerfectPixels(currentX, currentY) {
     state.waitingPixelY = currentY
     if (state.tool.name !== "replace") {
       //TODO: refactor so adding to timeline is performed by controller function
-      state.addToTimeline(
-        state.tool.name,
-        state.lastDrawnX,
-        state.lastDrawnY,
-        canvas.currentLayer
-      )
+      state.addToTimeline({
+        tool: state.tool.name,
+        x: state.lastDrawnX,
+        y: state.lastDrawnY,
+        layer: canvas.currentLayer,
+      })
     }
     canvas.draw()
   } else {
@@ -240,15 +240,15 @@ export function actionReplace() {
       let image = new Image()
       image.src = canvas.currentLayer.cvs.toDataURL()
       //TODO: refactor so adding to timeline is performed by controller function
-      state.addToTimeline(
-        state.tool.name,
-        0,
-        0,
-        canvas.currentLayer,
-        image,
-        canvas.currentLayer.cvs.width,
-        canvas.currentLayer.cvs.height
-      )
+      state.addToTimeline({
+        tool: state.tool.name,
+        layer: canvas.currentLayer,
+        properties: {
+          image,
+          width: canvas.currentLayer.cvs.width,
+          height: canvas.currentLayer.cvs.height,
+        },
+      })
     default:
       //No default
       break
@@ -670,56 +670,6 @@ export function actionCubicCurve(
       )
     }
   }
-}
-
-/**
- * User action for process to set control points for cubic bezier
- * @param {*} startx
- * @param {*} starty
- * @param {*} endx
- * @param {*} endy
- * @param {*} stepNum
- * @param {*} currentColor
- * @param {*} ctx
- * @param {*} currentMode
- * @param {*} brushStamp
- * @param {*} weight
- * @param {*} scale
- */
-export function actionCircle(
-  startx,
-  starty,
-  endx,
-  endy,
-  stepNum,
-  currentColor,
-  ctx,
-  currentMode,
-  brushStamp,
-  weight,
-  scale = 1
-) {
-  //force coords to int
-  startx = Math.round(startx)
-  starty = Math.round(starty)
-  endx = Math.round(endx)
-  endy = Math.round(endy)
-
-  ctx.fillStyle = currentColor.color
-
-  let dx = endx - startx
-  let dy = endy - starty
-  let r = Math.floor(Math.sqrt(dx * dx + dy * dy))
-  let plotPoints = plotCircle(startx, starty, r)
-  renderPoints(
-    plotPoints,
-    brushStamp,
-    currentColor,
-    weight,
-    ctx,
-    currentMode,
-    scale
-  )
 }
 
 /**

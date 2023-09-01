@@ -330,7 +330,7 @@ function handleKeyUp(e) {
     toolBtn.id === "brush" ||
     toolBtn.id === "quadCurve" ||
     toolBtn.id === "cubicCurve" ||
-    toolBtn.id === "circle" ||
+    toolBtn.id === "ellipse" ||
     toolBtn.id === "fill" ||
     toolBtn.id === "line"
   ) {
@@ -405,9 +405,7 @@ function handlePointerMove(e) {
   renderCursor(state, canvas, swatches)
   if (
     state.clicked ||
-    ((state.tool.name === "quadCurve" ||
-      state.tool.name === "cubicCurve" ||
-      state.tool.name === "circle") &&
+    ((state.tool.name === "quadCurve" || state.tool.name === "cubicCurve") &&
       state.clickCounter > 0)
   ) {
     //run selected tool step function
@@ -607,7 +605,7 @@ function handleRedo() {
 
 //Non-tool action.
 export function handleClear() {
-  state.addToTimeline("clear", 0, 0, canvas.currentLayer)
+  state.addToTimeline({ tool: "clear", layer: canvas.currentLayer })
   //FIX: restructure stacked items. Currently each is an array, but each should be an object with more info plus an array
   state.undoStack.push(state.points)
   state.points = []
@@ -689,7 +687,7 @@ function handleTools(e) {
         toolBtn.id === "brush" ||
         toolBtn.id === "quadCurve" ||
         toolBtn.id === "cubicCurve" ||
-        toolBtn.id === "circle" ||
+        toolBtn.id === "ellipse" ||
         toolBtn.id === "fill" ||
         toolBtn.id === "line"
       ) {
@@ -844,7 +842,7 @@ function updateBrush(e) {
     case "cubicCurve":
       state.tool.brushSize = parseInt(e.target.value)
       break
-    case "circle":
+    case "ellipse":
       state.tool.brushSize = parseInt(e.target.value)
       break
     default:
