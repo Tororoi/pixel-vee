@@ -14,6 +14,12 @@ export const vectorGuiState = {
   py3: null,
   px4: null,
   py4: null,
+  dxa: null,
+  dya: null,
+  dxb: null,
+  dyb: null,
+  radA: null,
+  radB: null,
   collidedKeys: { xKey: null, yKey: null },
   selectedPoint: { xKey: null, yKey: null },
   pointRadius: 4,
@@ -145,6 +151,11 @@ function renderEllipseVector(state, canvas, vectorGuiState) {
 
   canvas.vectorGuiCTX.beginPath()
   drawControlPoints(pointsKeys, canvas, vectorGuiState.pointRadius / 2, true)
+  canvas.vectorGuiCTX.fillText(
+    `${vectorGuiState.radA}, ${vectorGuiState.radB}`,
+    vectorGuiState.px1 + 30,
+    vectorGuiState.py1
+  )
   // Fill points
   canvas.vectorGuiCTX.fill()
 }

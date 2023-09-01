@@ -745,6 +745,8 @@ export function actionEllipse(
   ya,
   xb,
   yb,
+  ra,
+  rb,
   stepNum,
   currentColor,
   ctx,
@@ -754,20 +756,20 @@ export function actionEllipse(
   scale = 1
 ) {
   //force coords to int
-  centerx = Math.round(centerx)
-  centery = Math.round(centery)
-  xa = Math.round(xa)
-  ya = Math.round(ya)
-  xb = Math.round(xb)
-  yb = Math.round(yb)
+  centerx = Math.floor(centerx)
+  centery = Math.floor(centery)
+  xa = Math.floor(xa)
+  ya = Math.floor(ya)
+  xb = Math.floor(xb)
+  yb = Math.floor(yb)
 
   ctx.fillStyle = currentColor.color
 
   if (stepNum === 1) {
-    let dx = xa - centerx
-    let dy = ya - centery
-    let r = Math.floor(Math.sqrt(dx * dx + dy * dy))
-    let plotPoints = plotCircle(centerx, centery, r)
+    // let dx = xa - centerx
+    // let dy = ya - centery
+    // let r = Math.floor(Math.sqrt(dx * dx + dy * dy))
+    let plotPoints = plotCircle(centerx, centery, ra)
     renderPoints(
       plotPoints,
       brushStamp,
@@ -780,12 +782,12 @@ export function actionEllipse(
     // vectorGuiState.px2 = state.cursorX
     // vectorGuiState.py2 = state.cursorY
   } else if (stepNum === 2) {
-    let dxa = xa - centerx
-    let dya = ya - centery
-    let ra = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
-    let dxb = xb - centerx
-    let dyb = yb - centery
-    let rb = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
+    // let dxa = xa - centerx
+    // let dya = ya - centery
+    // let ra = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
+    // let dxb = xb - centerx
+    // let dyb = yb - centery
+    // let rb = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
     let angle = getAngle(xa - centerx, ya - centery)
     let plotPoints = plotRotatedEllipse(centerx, centery, ra, rb, angle)
     renderPoints(

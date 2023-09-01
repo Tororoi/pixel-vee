@@ -428,6 +428,8 @@ function redrawPoints() {
             p.y.py2,
             p.x.px3,
             p.y.py3,
+            p.x.radA,
+            p.x.radB,
             2,
             p.opacity === 0
               ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
