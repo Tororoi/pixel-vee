@@ -7,6 +7,7 @@ import {
   actionQuadraticCurve,
   actionCubicCurve,
   actionCircle,
+  actionEllipse,
 } from "../Tools/actions.js"
 
 //===================================//
@@ -408,6 +409,25 @@ function redrawPoints() {
             p.y.py1,
             p.x.px2,
             p.y.py2,
+            2,
+            p.opacity === 0
+              ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
+              : p.color,
+            p.layer.ctx,
+            p.mode,
+            p.brush,
+            p.weight
+          )
+          break
+        case "ellipse":
+          //actionCircle
+          actionEllipse(
+            p.x.px1,
+            p.y.py1,
+            p.x.px2,
+            p.y.py2,
+            p.x.px3,
+            p.y.py3,
             2,
             p.opacity === 0
               ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }

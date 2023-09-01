@@ -10,6 +10,7 @@ import {
   actionQuadraticCurve,
   actionCubicCurve,
   actionCircle,
+  actionEllipse,
 } from "./actions.js"
 import { vectorGuiState, renderVectorGUI } from "../GUI/vector.js"
 import {
@@ -17,6 +18,7 @@ import {
   drawCurrentPixel,
   renderRasterGUI,
 } from "../GUI/raster.js"
+import { getAngle } from "../utils/trig.js"
 
 //====================================//
 //=== * * * Tool Controllers * * * ===//
@@ -966,6 +968,220 @@ export function circleSteps() {
   }
 }
 
+/**
+ * Draw ellipse
+ * Supported modes: "draw, erase",
+ */
+export function ellipseSteps() {
+  //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
+  //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
+  //this routine would be better for touchscreens, and no worse with pointer
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
+      if (vectorGuiState.collisionPresent && state.clickCounter === 0) {
+        // adjustCurveSteps()
+      } else {
+        //solidify end points
+        state.clickCounter += 1
+        if (state.clickCounter > 2) state.clickCounter = 1
+        switch (state.clickCounter) {
+          case 1:
+            state.px1 = state.cursorX
+            state.py1 = state.cursorY
+            //reset control points
+            state.px2 = null
+            state.py2 = null
+            state.px3 = null
+            state.py3 = null
+            state.px4 = null
+            state.py4 = null
+            vectorGuiState.px1 = state.px1
+            vectorGuiState.py1 = state.py1
+            //reset control points
+            vectorGuiState.px2 = null
+            vectorGuiState.py2 = null
+            vectorGuiState.px3 = null
+            vectorGuiState.py3 = null
+            vectorGuiState.px4 = null
+            vectorGuiState.py4 = null
+            break
+          default:
+          //do nothing
+        }
+      }
+      break
+    case "pointermove":
+      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+        // adjustCurveSteps()
+      } else {
+        //draw line from origin point to current point onscreen
+        //normalize pointermove to pixelgrid
+        if (
+          state.onscreenX !== state.previousOnscreenX ||
+          state.onscreenY !== state.previousOnscreenY
+        ) {
+          canvas.draw()
+          if (state.clickCounter === 1) {
+            state.px2 = state.cursorX
+            state.py2 = state.cursorY
+            vectorGuiState.px2 = state.px2
+            vectorGuiState.py2 = state.py2
+          } else if (state.clickCounter === 2) {
+            state.px3 = state.cursorX
+            state.py3 = state.cursorY
+            vectorGuiState.px3 = state.px3
+            vectorGuiState.py3 = state.py3
+            //change p2 to rotate based on new angle
+            let angle = getAngle(state.px3 - state.px1, state.py3 - state.py1)
+            let p2Coords = pointOnCircle(
+              state.px1,
+              state.py1,
+              state.ellipseRadiusA,
+              angle + Math.PI / 2
+            )
+            state.px2 = p2Coords.x
+            state.py2 = p2Coords.y
+            vectorGuiState.px2 = state.px2
+            vectorGuiState.py2 = state.py2
+          }
+          //onscreen preview
+          actionEllipse(
+            state.px1 + canvas.xOffset,
+            state.py1 + canvas.yOffset,
+            state.px2 + canvas.xOffset,
+            state.py2 + canvas.yOffset,
+            state.px3 + canvas.xOffset,
+            state.py3 + canvas.yOffset,
+            state.clickCounter,
+            swatches.primary.color,
+            canvas.onScreenCTX,
+            state.mode,
+            state.brushStamp,
+            state.tool.brushSize,
+            canvas.offScreenCVS.width / canvas.offScreenCVS.width
+          )
+          state.previousOnscreenX = state.onscreenX
+          state.previousOnscreenY = state.onscreenY
+        }
+      }
+      break
+    case "pointerup":
+      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+        // adjustCurveSteps()
+      } else {
+        //For touchscreens
+        if (state.touch) {
+          if (state.clickCounter === 1) {
+            state.px2 = state.cursorX
+            state.py2 = state.cursorY
+            vectorGuiState.px2 = state.px2
+            vectorGuiState.py2 = state.py2
+          }
+          if (state.clickCounter === 2) {
+            state.clickCounter += 1
+          }
+        }
+        if (state.clickCounter === 1) {
+          //set px3 at right angle on the circle
+          let dx = state.px2 - state.px1
+          let dy = state.py2 - state.py1
+          let r = Math.floor(Math.sqrt(dx * dx + dy * dy))
+          state.ellipseRadiusA = r
+          let angle = getAngle(state.px2 - state.px1, state.py2 - state.py1)
+          let p3Coords = pointOnCircle(
+            state.px1,
+            state.py1,
+            r,
+            angle - Math.PI / 2
+          )
+          state.px3 = p3Coords.x
+          state.py3 = p3Coords.y
+          vectorGuiState.px3 = state.px3
+          vectorGuiState.py3 = state.py3
+        }
+        //Solidify curve
+        if (state.clickCounter === 2) {
+          //solidify control point
+          state.px3 = state.cursorX
+          state.py3 = state.cursorY
+          vectorGuiState.px3 = state.px3
+          vectorGuiState.py3 = state.py3
+          actionEllipse(
+            state.px1,
+            state.py1,
+            state.px2,
+            state.py2,
+            state.px3,
+            state.py3,
+            state.clickCounter,
+            swatches.primary.color,
+            canvas.currentLayer.ctx,
+            state.mode,
+            state.brushStamp,
+            state.tool.brushSize
+          )
+          state.clickCounter = 0
+          //store control points for timeline
+          state.addToTimeline(
+            state.tool.name,
+            { px1: state.px1, px2: state.px2, px3: state.px3 },
+            { py1: state.py1, py2: state.py2, py3: state.py3 },
+            canvas.currentLayer
+          )
+          canvas.draw()
+          //IN PROGRESS: draw control points at higher resolution only on onScreenCVS
+          // actionDraw(
+          //   (canvas.xOffset + state.px3) * 2,
+          //   (canvas.yOffset + state.py3) * 2,
+          //   { color: `rgba(255,0,0,255)` },
+          //   state.brushStamp,
+          //   state.tool.brushSize,
+          //   canvas.vectorGuiCTX,
+          //   "draw",
+          //   0.5
+          // )
+          // canvas.vectorGuiCTX.clearRect(
+          //   0,
+          //   0,
+          //   canvas.vectorGuiCVS.width / canvas.zoom,
+          //   canvas.vectorGuiCVS.height / canvas.zoom
+          // )
+          // canvas.vectorGuiCTX.fillStyle = `rgba(255,0,0,255)`
+          // canvas.vectorGuiCTX.fillRect(
+          //   canvas.xOffset + state.px3,
+          //   canvas.yOffset + state.py3,
+          //   1,
+          //   1
+          // )
+          renderRasterGUI(state, canvas, swatches)
+          renderVectorGUI(state, canvas, swatches)
+        }
+      }
+      break
+    case "pointerout":
+      if (vectorGuiState.selectedPoint.xKey) {
+        // adjustCurveSteps()
+      }
+      //cancel curve
+      state.clickCounter = 0
+      break
+    default:
+    //do nothing
+  }
+}
+
+function rotatePointAroundCenter(x0, y0, x1, y1, a) {
+  let x2 = x0 + (x1 - x0) * Math.cos(a) - (y1 - y0) * Math.sin(a)
+  let y2 = y0 + (x1 - x0) * Math.sin(a) + (y1 - y0) * Math.cos(a)
+  return { x: x2, y: y2 }
+}
+
+function pointOnCircle(cx, cy, r, a) {
+  let x = cx + r * Math.cos(a)
+  let y = cy + r * Math.sin(a)
+  return { x: x, y: y }
+}
+
 //====================================//
 //=== * * * Non-Action Tools * * * ===//
 //====================================//
@@ -1105,6 +1321,13 @@ export const tools = {
   circle: {
     name: "circle",
     fn: circleSteps,
+    brushSize: 1,
+    disabled: false,
+    options: [],
+  },
+  ellipse: {
+    name: "ellipse",
+    fn: ellipseSteps,
     brushSize: 1,
     disabled: false,
     options: [],

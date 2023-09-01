@@ -301,9 +301,9 @@ function handleKeyDown(e) {
         //reset old button
         toolBtn.style.background = "rgb(131, 131, 131)"
         //set new button
-        toolBtn = document.querySelector("#circle")
+        toolBtn = document.querySelector("#ellipse")
         toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["circle"]
+        state.tool = tools["ellipse"]
         canvas.vectorGuiCVS.style.cursor = "none"
         break
       default:

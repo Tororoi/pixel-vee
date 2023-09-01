@@ -58,6 +58,8 @@ export const state = {
   py3: null,
   px4: null,
   py4: null,
+  ellipseRadiusA: null,
+  ellipseRadiusB: null,
   //for perfect pixels
   lastDrawnX: null,
   lastDrawnY: null,

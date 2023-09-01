@@ -5,7 +5,11 @@ import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { generateRandomRGB } from "../utils/colors.js"
 import { vectorGuiState } from "../GUI/vector.js"
-import { plotCircle, plotEllipseRect } from "../utils/ellipse.js"
+import {
+  plotCircle,
+  plotRotatedEllipse,
+  plotEllipseRect,
+} from "../utils/ellipse.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -674,10 +678,6 @@ export function actionCubicCurve(
  * @param {*} starty
  * @param {*} endx
  * @param {*} endy
- * @param {*} controlx1
- * @param {*} controly1
- * @param {*} controlx2
- * @param {*} controly2
  * @param {*} stepNum
  * @param {*} currentColor
  * @param {*} ctx
@@ -710,7 +710,6 @@ export function actionCircle(
   let dx = endx - startx
   let dy = endy - starty
   let r = Math.floor(Math.sqrt(dx * dx + dy * dy))
-  // let plotPoints = plotEllipseRect(startx, starty, endx, endy)
   let plotPoints = plotCircle(startx, starty, r)
   renderPoints(
     plotPoints,
@@ -721,6 +720,86 @@ export function actionCircle(
     currentMode,
     scale
   )
+}
+
+/**
+ * User action for process to set control points for cubic bezier
+ * @param {*} centerx
+ * @param {*} centery
+ * @param {*} xa
+ * @param {*} ya
+ * @param {*} xb
+ * @param {*} yb
+ * @param {*} stepNum
+ * @param {*} currentColor
+ * @param {*} ctx
+ * @param {*} currentMode
+ * @param {*} brushStamp
+ * @param {*} weight
+ * @param {*} scale
+ */
+export function actionEllipse(
+  centerx,
+  centery,
+  xa,
+  ya,
+  xb,
+  yb,
+  stepNum,
+  currentColor,
+  ctx,
+  currentMode,
+  brushStamp,
+  weight,
+  scale = 1
+) {
+  //force coords to int
+  centerx = Math.round(centerx)
+  centery = Math.round(centery)
+  xa = Math.round(xa)
+  ya = Math.round(ya)
+  xb = Math.round(xb)
+  yb = Math.round(yb)
+
+  ctx.fillStyle = currentColor.color
+
+  if (stepNum === 1) {
+    let dx = xa - centerx
+    let dy = ya - centery
+    let r = Math.floor(Math.sqrt(dx * dx + dy * dy))
+    let plotPoints = plotCircle(centerx, centery, r)
+    renderPoints(
+      plotPoints,
+      brushStamp,
+      currentColor,
+      weight,
+      ctx,
+      currentMode,
+      scale
+    )
+    // vectorGuiState.px2 = state.cursorX
+    // vectorGuiState.py2 = state.cursorY
+  } else if (stepNum === 2) {
+    let dxa = xa - centerx
+    let dya = ya - centery
+    let ra = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
+    let dxb = xb - centerx
+    let dyb = yb - centery
+    let rb = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
+    let angle = getAngle(xa - centerx, ya - centery)
+    let plotPoints = plotRotatedEllipse(centerx, centery, ra, rb, angle)
+    renderPoints(
+      plotPoints,
+      brushStamp,
+      currentColor,
+      weight,
+      ctx,
+      currentMode,
+      scale
+    )
+    // vectorGuiState.px3 = state.cursorX
+    // vectorGuiState.py3 = state.cursorY
+  }
 }
 
 /**
