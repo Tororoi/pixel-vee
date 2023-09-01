@@ -159,3 +159,41 @@ function plotRotatedEllipseRect(x0, y0, x1, y1, zd) {
   ]
   return plotPoints
 }
+
+//helper functions
+/**
+ *
+ * @param {*} cx
+ * @param {*} cy
+ * @param {*} r
+ * @param {*} a
+ * @returns
+ */
+function pointOnCircle(cx, cy, r, a) {
+  let x = Math.round(cx + r * Math.cos(a))
+  let y = Math.round(cy + r * Math.sin(a))
+  return { x, y }
+}
+
+/**
+ *
+ * @param {*} px1
+ * @param {*} py1
+ * @param {*} px2
+ * @param {*} py2
+ * @param {*} radians
+ * @param {*} opposingRadius
+ * @returns
+ */
+export function updateEllipseVertex(
+  px1,
+  py1,
+  px2,
+  py2,
+  radians,
+  opposingRadius
+) {
+  let angle = getAngle(px2 - px1, py2 - py1)
+  let newVertex = pointOnCircle(px1, py1, opposingRadius, angle + radians)
+  return newVertex
+}

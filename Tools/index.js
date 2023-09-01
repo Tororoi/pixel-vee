@@ -17,7 +17,7 @@ import {
   drawCurrentPixel,
   renderRasterGUI,
 } from "../GUI/raster.js"
-import { getAngle } from "../utils/trig.js"
+import { updateEllipseVertex } from "../utils/ellipse.js"
 
 //====================================//
 //=== * * * Tool Controllers * * * ===//
@@ -607,30 +607,6 @@ export function cubicCurveSteps() {
             })
           }
           canvas.draw()
-          //IN PROGRESS: draw control points at higher resolution only on onScreenCVS
-          // actionDraw(
-          //   (canvas.xOffset + state.px3) * 2,
-          //   (canvas.yOffset + state.py3) * 2,
-          //   { color: `rgba(255,0,0,255)` },
-          //   state.brushStamp,
-          //   state.tool.brushSize,
-          //   canvas.vectorGuiCTX,
-          //   "draw",
-          //   0.5
-          // )
-          // canvas.vectorGuiCTX.clearRect(
-          //   0,
-          //   0,
-          //   canvas.vectorGuiCVS.width / canvas.zoom,
-          //   canvas.vectorGuiCVS.height / canvas.zoom
-          // )
-          // canvas.vectorGuiCTX.fillStyle = `rgba(255,0,0,255)`
-          // canvas.vectorGuiCTX.fillRect(
-          //   canvas.xOffset + state.px3,
-          //   canvas.yOffset + state.py3,
-          //   1,
-          //   1
-          // )
           renderRasterGUI(state, canvas, swatches)
           renderVectorGUI(state, canvas, swatches)
         }
@@ -1036,7 +1012,6 @@ export function ellipseSteps() {
  * Ideally a user should be able to click on a curve and render it's vector UI that way.
  * TODO: Modify point in vector timeline and push new curve set on pointer up to timeline as new type of push called "modify vector"
  * Currently this modifies the history directly which is a big no no, just done for testing, only ok for now since it just modifies the curve that was just created
- * @param {*} numPoints
  */
 export function adjustEllipseSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
@@ -1233,25 +1208,6 @@ export function adjustEllipseSteps() {
     default:
     //do nothing
   }
-}
-
-function pointOnCircle(cx, cy, r, a) {
-  let x = Math.round(cx + r * Math.cos(a))
-  let y = Math.round(cy + r * Math.sin(a))
-  return { x, y }
-}
-
-/**
- *
- * @param {*} px1
- * @param {*} py1
- * @param {*} pN - 2 or 3, representing point number of perpendicular vertex to point currently being modified
- * @param {*} opposingRadius
- */
-function updateEllipseVertex(px1, py1, px2, py2, radians, opposingRadius) {
-  let angle = getAngle(px2 - px1, py2 - py1)
-  let newVertex = pointOnCircle(px1, py1, opposingRadius, angle + radians)
-  return newVertex
 }
 
 //====================================//
