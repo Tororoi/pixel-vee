@@ -297,6 +297,15 @@ function handleKeyDown(e) {
         state.tool = tools["cubicCurve"]
         canvas.vectorGuiCVS.style.cursor = "none"
         break
+      case "KeyO":
+        //reset old button
+        toolBtn.style.background = "rgb(131, 131, 131)"
+        //set new button
+        toolBtn = document.querySelector("#ellipse")
+        toolBtn.style.background = "rgb(255, 255, 255)"
+        state.tool = tools["ellipse"]
+        canvas.vectorGuiCVS.style.cursor = "none"
+        break
       default:
       //do nothing
     }
@@ -321,6 +330,7 @@ function handleKeyUp(e) {
     toolBtn.id === "brush" ||
     toolBtn.id === "quadCurve" ||
     toolBtn.id === "cubicCurve" ||
+    toolBtn.id === "ellipse" ||
     toolBtn.id === "fill" ||
     toolBtn.id === "line"
   ) {
@@ -595,7 +605,7 @@ function handleRedo() {
 
 //Non-tool action.
 export function handleClear() {
-  state.addToTimeline("clear", 0, 0, canvas.currentLayer)
+  state.addToTimeline({ tool: "clear", layer: canvas.currentLayer })
   //FIX: restructure stacked items. Currently each is an array, but each should be an object with more info plus an array
   state.undoStack.push(state.points)
   state.points = []
@@ -677,6 +687,7 @@ function handleTools(e) {
         toolBtn.id === "brush" ||
         toolBtn.id === "quadCurve" ||
         toolBtn.id === "cubicCurve" ||
+        toolBtn.id === "ellipse" ||
         toolBtn.id === "fill" ||
         toolBtn.id === "line"
       ) {
@@ -829,6 +840,9 @@ function updateBrush(e) {
       state.tool.brushSize = parseInt(e.target.value)
       break
     case "cubicCurve":
+      state.tool.brushSize = parseInt(e.target.value)
+      break
+    case "ellipse":
       state.tool.brushSize = parseInt(e.target.value)
       break
     default:
