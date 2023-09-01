@@ -2,13 +2,14 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
-import {
-  plotCubicBezier,
-  plotQuadBezier,
-  debugPlotCubicBezier,
-} from "../utils/bezier.js"
+import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { generateRandomRGB } from "../utils/colors.js"
 import { vectorGuiState } from "../GUI/vector.js"
+import {
+  plotCircle,
+  plotRotatedEllipse,
+  plotEllipseRect,
+} from "../utils/ellipse.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -152,12 +153,12 @@ export function actionPerfectPixels(currentX, currentY) {
     state.waitingPixelY = currentY
     if (state.tool.name !== "replace") {
       //TODO: refactor so adding to timeline is performed by controller function
-      state.addToTimeline(
-        state.tool.name,
-        state.lastDrawnX,
-        state.lastDrawnY,
-        canvas.currentLayer
-      )
+      state.addToTimeline({
+        tool: state.tool.name,
+        x: state.lastDrawnX,
+        y: state.lastDrawnY,
+        layer: canvas.currentLayer,
+      })
     }
     canvas.draw()
   } else {
@@ -239,15 +240,15 @@ export function actionReplace() {
       let image = new Image()
       image.src = canvas.currentLayer.cvs.toDataURL()
       //TODO: refactor so adding to timeline is performed by controller function
-      state.addToTimeline(
-        state.tool.name,
-        0,
-        0,
-        canvas.currentLayer,
-        image,
-        canvas.currentLayer.cvs.width,
-        canvas.currentLayer.cvs.height
-      )
+      state.addToTimeline({
+        tool: state.tool.name,
+        layer: canvas.currentLayer,
+        properties: {
+          image,
+          width: canvas.currentLayer.cvs.width,
+          height: canvas.currentLayer.cvs.height,
+        },
+      })
     default:
       //No default
       break
@@ -672,6 +673,75 @@ export function actionCubicCurve(
 }
 
 /**
+ * User action for process to set control points for cubic bezier
+ * @param {*} centerx
+ * @param {*} centery
+ * @param {*} xa
+ * @param {*} ya
+ * @param {*} xb
+ * @param {*} yb
+ * @param {*} stepNum
+ * @param {*} currentColor
+ * @param {*} ctx
+ * @param {*} currentMode
+ * @param {*} brushStamp
+ * @param {*} weight
+ * @param {*} scale
+ */
+export function actionEllipse(
+  centerx,
+  centery,
+  xa,
+  ya,
+  xb,
+  yb,
+  ra,
+  rb,
+  stepNum,
+  currentColor,
+  ctx,
+  currentMode,
+  brushStamp,
+  weight,
+  scale = 1
+) {
+  //force coords to int
+  centerx = Math.floor(centerx)
+  centery = Math.floor(centery)
+  xa = Math.floor(xa)
+  ya = Math.floor(ya)
+  xb = Math.floor(xb)
+  yb = Math.floor(yb)
+
+  ctx.fillStyle = currentColor.color
+
+  if (stepNum === 1) {
+    let plotPoints = plotCircle(centerx, centery, ra)
+    renderPoints(
+      plotPoints,
+      brushStamp,
+      currentColor,
+      weight,
+      ctx,
+      currentMode,
+      scale
+    )
+  } else if (stepNum === 2) {
+    let angle = getAngle(xa - centerx, ya - centery)
+    let plotPoints = plotRotatedEllipse(centerx, centery, ra, rb, angle)
+    renderPoints(
+      plotPoints,
+      brushStamp,
+      currentColor,
+      weight,
+      ctx,
+      currentMode,
+      scale
+    )
+  }
+}
+
+/**
  * Step through cubic bezier in debug mode, sets debug function and debug object
  * @param {*} x0
  * @param {*} y0
@@ -722,17 +792,7 @@ function slowPlotCubicBezier(
       scale,
       maxSteps,
     } = instructionsObject
-    let plotPoints = debugPlotCubicBezier(
-      x0,
-      y0,
-      x1,
-      y1,
-      x2,
-      y2,
-      x3,
-      y3,
-      maxSteps
-    )
+    let plotPoints = plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3, maxSteps)
     renderPoints(
       plotPoints,
       brushStamp,
