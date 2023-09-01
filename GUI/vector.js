@@ -147,11 +147,11 @@ function renderEllipseVector(state, canvas, vectorGuiState) {
 
   canvas.vectorGuiCTX.beginPath()
   drawControlPoints(pointsKeys, canvas, vectorGuiState.pointRadius / 2, true)
-  canvas.vectorGuiCTX.fillText(
-    `${vectorGuiState.radA}, ${vectorGuiState.radB}`,
-    vectorGuiState.px1 + 30,
-    vectorGuiState.py1
-  )
+  // canvas.vectorGuiCTX.fillText(
+  //   `${vectorGuiState.radA}, ${vectorGuiState.radB}`,
+  //   vectorGuiState.px1 + 30,
+  //   vectorGuiState.py1
+  // )
   // Fill points
   canvas.vectorGuiCTX.fill()
 }
