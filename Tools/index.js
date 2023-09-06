@@ -837,30 +837,33 @@ export function ellipseSteps() {
             let dya = state.py2 - state.py1
             state.radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
             vectorGuiState.radA = state.radA
-          } else if (state.clickCounter === 2) {
-            state.px3 = state.cursorX
-            state.py3 = state.cursorY
-            vectorGuiState.px3 = state.px3
-            vectorGuiState.py3 = state.py3
-            let dxb = state.px3 - state.px1
-            let dyb = state.py3 - state.py1
-            state.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
-            vectorGuiState.radB = state.radB
-            //change p2 to rotate based on new angle
-            let newVertex = updateEllipseVertex(
-              state.px1,
-              state.py1,
-              state.px3,
-              state.py3,
-              Math.PI / 2,
-              state.radA
-            )
-            state.px2 = newVertex.x
-            state.py2 = newVertex.y
-            vectorGuiState.px2 = state.px2
-            vectorGuiState.py2 = state.py2
-            //Do not update radB here
           }
+          //NOTE: This code is commented out for now. It forces the cursor's position to be p3 which makes it easier to make an ellipse,
+          //but it isn't really needed since one can just adjust the control points of a circle and this code makes making a circle less intuitive.
+          // else if (state.clickCounter === 2) {
+          //   state.px3 = state.cursorX
+          //   state.py3 = state.cursorY
+          //   vectorGuiState.px3 = state.px3
+          //   vectorGuiState.py3 = state.py3
+          //   let dxb = state.px3 - state.px1
+          //   let dyb = state.py3 - state.py1
+          //   state.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
+          //   vectorGuiState.radB = state.radB
+          //   //change p2 to rotate based on new angle
+          //   let newVertex = updateEllipseVertex(
+          //     state.px1,
+          //     state.py1,
+          //     state.px3,
+          //     state.py3,
+          //     Math.PI / 2,
+          //     state.radA
+          //   )
+          //   state.px2 = newVertex.x
+          //   state.py2 = newVertex.y
+          //   vectorGuiState.px2 = state.px2
+          //   vectorGuiState.py2 = state.py2
+          //   //Do not update radB here
+          // }
           //onscreen preview
           actionEllipse(
             state.px1 + canvas.xOffset,
@@ -920,9 +923,6 @@ export function ellipseSteps() {
           let dyb = state.py3 - state.py1
           state.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
           vectorGuiState.radB = state.radB
-        }
-        //Solidify ellipse
-        if (state.clickCounter === 2) {
           actionEllipse(
             state.px1,
             state.py1,
@@ -960,33 +960,53 @@ export function ellipseSteps() {
             },
           })
           canvas.draw()
-          //IN PROGRESS: draw control points at higher resolution only on onScreenCVS
-          // actionDraw(
-          //   (canvas.xOffset + state.px3) * 2,
-          //   (canvas.yOffset + state.py3) * 2,
-          //   { color: `rgba(255,0,0,255)` },
-          //   state.brushStamp,
-          //   state.tool.brushSize,
-          //   canvas.vectorGuiCTX,
-          //   "draw",
-          //   0.5
-          // )
-          // canvas.vectorGuiCTX.clearRect(
-          //   0,
-          //   0,
-          //   canvas.vectorGuiCVS.width / canvas.zoom,
-          //   canvas.vectorGuiCVS.height / canvas.zoom
-          // )
-          // canvas.vectorGuiCTX.fillStyle = `rgba(255,0,0,255)`
-          // canvas.vectorGuiCTX.fillRect(
-          //   canvas.xOffset + state.px3,
-          //   canvas.yOffset + state.py3,
-          //   1,
-          //   1
-          // )
           renderRasterGUI(state, canvas, swatches)
           renderVectorGUI(state, canvas, swatches)
         }
+        //Solidify ellipse
+        //NOTE: This code is commented out for now. It forces the cursor's position to be p3 which makes it easier to make an ellipse,
+        //but it isn't really needed since one can just adjust the control points of a circle and this code makes making a circle less intuitive.
+        // if (state.clickCounter === 2) {
+        //   actionEllipse(
+        //     state.px1,
+        //     state.py1,
+        //     state.px2,
+        //     state.py2,
+        //     state.px3,
+        //     state.py3,
+        //     state.radA,
+        //     state.radB,
+        //     state.clickCounter,
+        //     swatches.primary.color,
+        //     canvas.currentLayer.ctx,
+        //     state.mode,
+        //     state.brushStamp,
+        //     state.tool.brushSize
+        //   )
+        //   state.clickCounter = 0
+        //   //store control points for timeline
+        //   state.addToTimeline({
+        //     tool: state.tool.name,
+        //     x: {
+        //       px1: state.px1,
+        //       px2: state.px2,
+        //       px3: state.px3,
+        //     },
+        //     y: {
+        //       py1: state.py1,
+        //       py2: state.py2,
+        //       py3: state.py3,
+        //     },
+        //     layer: canvas.currentLayer,
+        //     properties: {
+        //       radA: state.radA,
+        //       radB: state.radB,
+        //     },
+        //   })
+        //   canvas.draw()
+        //   renderRasterGUI(state, canvas, swatches)
+        //   renderVectorGUI(state, canvas, swatches)
+        // }
       }
       break
     case "pointerout":
