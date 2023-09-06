@@ -133,6 +133,14 @@ svg {
 }
 
 /* Next basic site layout components */
+.sidebar {
+  position: relative;
+  min-width: 206px;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+
 .page {
   position: relative;
   display: flex;
@@ -406,7 +414,6 @@ canvas {
 
 .canvas-container {
   user-select: none;
-  position: absolute;
   z-index: 1;
   width: 100%;
   height: 100%;

@@ -1,3 +1,11 @@
+.sidebar {
+  position: relative;
+  min-width: 206px;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+
 .page {
   position: relative;
   display: flex;

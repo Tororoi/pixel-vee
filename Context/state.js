@@ -81,7 +81,7 @@ export const state = {
  * @param {*} y
  * @param {*} layer - layer that history should be applied to
  * @param {*} properties - custom properties for specific tool
- * @param
+ * @param {*} modifications - used for vector actions that can be changed after the fact, eg, line, curve, fill
  */
 function addToTimeline(actionObject) {
   const { tool, x, y, layer, properties, modifications = [] } = actionObject
@@ -111,5 +111,7 @@ function reset() {
   state.py3 = null
   state.px4 = null
   state.py4 = null
+  state.radA = null
+  state.radB = null
   state.clickCounter = 0
 }

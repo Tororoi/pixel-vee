@@ -5,11 +5,7 @@ import { canvas, resizeOnScreenCanvas } from "../Context/canvas.js"
 import { swatches } from "./Context/swatch.js"
 import { tools } from "./Tools/index.js"
 import { actionUndoRedo } from "./Tools/undoRedo.js"
-import {
-  vectorGuiState,
-  resetVectorGUI,
-  renderVectorGUI,
-} from "./GUI/vector.js"
+import { vectorGuiState, renderVectorGUI } from "./GUI/vector.js"
 import { renderCursor, renderRasterGUI } from "./GUI/raster.js"
 
 //===================================//
@@ -617,7 +613,7 @@ export function handleClear() {
     canvas.offScreenCVS.height
   )
   canvas.draw()
-  resetVectorGUI(canvas)
+  vectorGuiState.reset(canvas)
   state.reset()
 }
 
@@ -692,7 +688,7 @@ function handleTools(e) {
         toolBtn.id === "line"
       ) {
         canvas.vectorGuiCVS.style.cursor = "crosshair"
-        resetVectorGUI(canvas)
+        vectorGuiState.reset(canvas)
         state.reset()
       } else {
         canvas.vectorGuiCVS.style.cursor = "none"
