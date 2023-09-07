@@ -43,23 +43,33 @@ export const dragStop = (e) => {
   state.dragging = false
   if (state.dragTarget) {
     state.dragTarget.classList.remove("dragging")
+    state.dragTarget.style.position = "relative"
+    state.dragTarget.style.top = "unset"
+    state.dragTarget.style.zIndex = "100"
     state.dragTarget = null
   }
 }
 export const dragMove = (e) => {
+  //TODO: when moving over sibling elements, change the sibling elements to position absolute and set it's x and y values to match its position while it was relative. Move all elements after current hovered element to make space for dragged element
   if (state.dragTarget) {
-    state.dragTarget.style.left = e.clientX - state.dragX + "px"
-    state.dragTarget.style.top = e.clientY - state.dragY + "px"
+    state.dragTarget.style.zIndex = "101"
+    if (state.dragTarget.className.includes("h-drag")) {
+      state.dragTarget.style.left = e.clientX - state.dragX + "px"
+    }
+    if (state.dragTarget.className.includes("v-drag")) {
+      state.dragTarget.style.top = e.clientY - state.dragY + "px"
+    }
+    state.dragTarget.style.position = "absolute"
     const parentElement = state.dragTarget.parentElement
     let pRect = parentElement.getBoundingClientRect()
     let tgtRect = state.dragTarget.getBoundingClientRect()
     //Constrain draggable element inside window, include box shadow border
     if (tgtRect.left < pRect.left) state.dragTarget.style.left = 0 + "px"
-    if (tgtRect.top < pRect.top) state.dragTarget.style.top = 0 + "px"
+    if (tgtRect.top < pRect.top + 2) state.dragTarget.style.top = 20 + "px"
     if (tgtRect.right > pRect.right)
       state.dragTarget.style.left = pRect.width - tgtRect.width - 4 + "px"
     if (tgtRect.bottom > pRect.bottom) {
-      state.dragTarget.style.top = pRect.height - tgtRect.height - 4 + "px"
+      state.dragTarget.style.top = pRect.height - tgtRect.height - 4 + 22 + "px"
     }
   }
 }

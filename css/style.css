@@ -151,9 +151,17 @@ svg {
 
 .draggable {
   margin: 2px;
+}
+.draggable.v-drag {
+  box-shadow: 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+.draggable.v-drag:hover:not([disabled]), .draggable.v-drag:focus {
+  box-shadow: 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+.draggable.h-drag {
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.draggable:hover:not([disabled]), .draggable:focus {
+.draggable.h-drag:hover:not([disabled]), .draggable.h-drag:focus {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .draggable .dragging {
@@ -163,7 +171,7 @@ svg {
   background-color: rgb(0, 0, 0);
   justify-self: center;
   width: 100%;
-  height: 20px;
+  min-height: 20px;
   margin: 0px;
   display: flex;
   flex-flow: row nowrap;
@@ -176,13 +184,17 @@ svg {
   position: absolute;
   left: 0;
   top: 0;
-  width: 2px;
-  height: 2px;
+  width: 20px;
+  height: 20px;
+}
+.draggable .header .drag-btn .grip {
   margin: 5px;
+  height: 2px;
+  width: 2px;
   background: rgb(131, 131, 131);
   box-shadow: 0px 0px rgb(131, 131, 131), 4px 0px rgb(131, 131, 131), 0px 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 0px 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131);
 }
-.draggable .header:hover:not([disabled]) .drag-btn, .draggable .header:focus .drag-btn {
+.draggable .header:hover:not([disabled]) .drag-btn .grip, .draggable .header:focus .drag-btn .grip {
   background: rgb(255, 255, 255);
   box-shadow: 0px 0px rgb(255, 255, 255), 4px 0px rgb(255, 255, 255), 0px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 0px 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255);
 }
@@ -355,6 +367,19 @@ svg {
 .nav .title {
   padding-left: 16px;
   padding-right: 16px;
+}
+.nav .title a {
+  display: flex;
+  align-items: center;
+}
+.nav .title a img {
+  width: 32px;
+  height: 32px;
+  image-rendering: -moz-crisp-edges; /* Firefox */
+  image-rendering: -webkit-optimize-contrast; /* Webkit (Safari now, Chrome and Opera up to v12.0) */
+  image-rendering: -o-crisp-edges; /* Opera */
+  image-rendering: pixelated; /* Webkit (Chrome from v41, Opera from v26) */
+  -ms-interpolation-mode: nearest-neighbor;
 }
 .nav .nav-items {
   display: flex;
@@ -543,12 +568,11 @@ canvas {
 /* Layers */
 .layers-interface {
   user-select: none;
-  position: absolute;
-  z-index: 101;
+  position: relative;
+  z-index: 100;
   background-color: rgb(51, 51, 51);
   width: 206px;
   height: auto;
-  top: 135px;
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
@@ -652,7 +676,7 @@ canvas {
 .brush-container {
   background-color: rgb(51, 51, 51);
   user-select: none;
-  position: absolute;
+  position: relative;
   z-index: 100;
   width: 206px;
   display: flex;
@@ -892,10 +916,9 @@ canvas {
 .size-container {
   background-color: rgb(51, 51, 51);
   user-select: none;
-  position: absolute;
+  position: relative;
   z-index: 100;
   width: 206px;
-  top: 241px;
   display: flex;
   flex-flow: column nowrap;
   justify-content: center;

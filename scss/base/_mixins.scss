@@ -7,6 +7,14 @@
   }
 }
 
+@mixin sandwichBorder {
+  box-shadow: 0px -2px $border-color, 0px 2px $border-color;
+  &:hover:not([disabled]),
+  &:focus {
+    box-shadow: 0px -2px $white, 0px 2px $white;
+  }
+}
+
 @mixin cancelBorder {
   box-shadow: none;
   &:hover {
@@ -19,20 +27,26 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: 2px;
-    height: 2px;
-    margin: 5px;
-    background: $border-color;
-    box-shadow: 0px 0px $border-color, 4px 0px $border-color,
-      0px 4px $border-color, 4px 4px $border-color, 0px 8px $border-color,
-      4px 8px $border-color;
+    width: 20px;
+    height: 20px;
+    .grip {
+      margin: 5px;
+      height: 2px;
+      width: 2px;
+      background: $border-color;
+      box-shadow: 0px 0px $border-color, 4px 0px $border-color,
+        0px 4px $border-color, 4px 4px $border-color, 0px 8px $border-color,
+        4px 8px $border-color;
+    }
   }
   &:hover:not([disabled]),
   &:focus {
     .drag-btn {
-      background: $white;
-      box-shadow: 0px 0px $white, 4px 0px $white, 0px 4px $white, 4px 4px $white,
-        0px 8px $white, 4px 8px $white;
+      .grip {
+        background: $white;
+        box-shadow: 0px 0px $white, 4px 0px $white, 0px 4px $white,
+          4px 4px $white, 0px 8px $white, 4px 8px $white;
+      }
     }
   }
 }

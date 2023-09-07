@@ -13,6 +13,19 @@
   .title {
     padding-left: 16px;
     padding-right: 16px;
+    a {
+      display: flex;
+      align-items: center;
+      img {
+        width: 32px;
+        height: 32px;
+        image-rendering: -moz-crisp-edges; /* Firefox */
+        image-rendering: -webkit-optimize-contrast; /* Webkit (Safari now, Chrome and Opera up to v12.0) */
+        image-rendering: -o-crisp-edges; /* Opera */
+        image-rendering: pixelated; /* Webkit (Chrome from v41, Opera from v26) */
+        -ms-interpolation-mode: nearest-neighbor;
+      }
+    }
   }
   .nav-items {
     display: flex;

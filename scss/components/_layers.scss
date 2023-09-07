@@ -2,12 +2,13 @@
 
 .layers-interface {
   user-select: none;
-  position: absolute;
-  z-index: 101;
+  // position: absolute;
+  position: relative;
+  z-index: 100;
   background-color: $extra-dark-gray;
   width: 206px;
   height: auto;
-  top: 135px;
+  // top: 281px;
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
