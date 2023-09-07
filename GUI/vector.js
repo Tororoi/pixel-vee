@@ -215,7 +215,7 @@ function drawControlPoints(pointsKeys, canvas, radius, modify = false) {
           state.cursorY,
           point.x,
           point.y,
-          radius + 1
+          r + 1
         )
       ) {
         r = radius * 2
