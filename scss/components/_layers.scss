@@ -12,6 +12,7 @@
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
+  order: 3;
   .layers-control {
     display: flex;
     flex-flow: row nowrap;
@@ -37,21 +38,7 @@
     overflow-y: auto;
     margin: 2px;
     @include boxBorder;
-    &::-webkit-scrollbar {
-      width: 10px;
-    }
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: $border-color;
-      background-clip: content-box;
-      border: 2px solid transparent;
-      &:hover {
-        background: white;
-        background-clip: content-box;
-      }
-    }
+    @include scrollBar;
     .layers {
       display: flex;
       flex-flow: column-reverse nowrap;

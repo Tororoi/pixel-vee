@@ -10,7 +10,7 @@
   flex-flow: column nowrap;
   justify-content: center;
   align-items: center;
-  padding-bottom: 1px; //Remove after refactoring button without margin
+  order: 2;
   p {
     margin: 0px;
   }

@@ -140,6 +140,25 @@ svg {
   flex-flow: column nowrap;
   align-items: center;
 }
+.sidebar .content {
+  height: auto;
+  overflow-y: scroll;
+}
+.sidebar .content::-webkit-scrollbar {
+  width: 10px;
+}
+.sidebar .content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar .content::-webkit-scrollbar-thumb {
+  background: rgb(131, 131, 131);
+  background-clip: content-box;
+  border: 2px solid transparent;
+}
+.sidebar .content::-webkit-scrollbar-thumb:hover {
+  background: white;
+  background-clip: content-box;
+}
 
 .page {
   position: relative;
@@ -151,6 +170,10 @@ svg {
 
 .draggable {
   margin: 2px;
+  z-index: 100;
+}
+.draggable:hover {
+  z-index: 102;
 }
 .draggable.v-drag {
   box-shadow: 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
@@ -179,6 +202,10 @@ svg {
   align-items: center;
   position: relative;
   cursor: grab;
+  box-shadow: 0px 2px rgb(131, 131, 131);
+}
+.draggable .header:hover:not([disabled]), .draggable .header:focus {
+  box-shadow: 0px 2px rgb(255, 255, 255);
 }
 .draggable .header .drag-btn {
   position: absolute;
@@ -234,6 +261,10 @@ svg {
   flex-direction: column;
   align-items: center;
   overflow: hidden;
+  position: relative;
+  padding-top: 2px;
+  padding-bottom: 1px;
+  transition: all 1s;
 }
 
 /* Misc */
@@ -576,6 +607,7 @@ canvas {
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
+  order: 3;
 }
 .layers-interface .layers-control {
   display: flex;
@@ -683,7 +715,7 @@ canvas {
   flex-flow: column nowrap;
   justify-content: center;
   align-items: center;
-  padding-bottom: 1px;
+  order: 1;
 }
 .brush-container p {
   margin: 0px;
@@ -923,7 +955,7 @@ canvas {
   flex-flow: column nowrap;
   justify-content: center;
   align-items: center;
-  padding-bottom: 1px;
+  order: 2;
 }
 .size-container p {
   margin: 0px;
