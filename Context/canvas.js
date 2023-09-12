@@ -146,6 +146,7 @@ export const canvas = {
   createNewRasterLayer,
   addRasterLayer,
   renderLayersToDOM,
+  renderVectorsToDOM,
   getColor,
   setInitialZoom,
 }
@@ -343,6 +344,7 @@ function redrawPoints() {
         case "addlayer":
           p.layer.removed = false
           canvas.renderLayersToDOM()
+          canvas.renderVectorsToDOM()
           break
         case "clear":
           p.layer.ctx.clearRect(
@@ -449,6 +451,7 @@ function redrawPoints() {
           canvas.currentLayer = layersCont.children[0].layerObj
         }
         canvas.renderLayersToDOM()
+        canvas.renderVectorsToDOM()
       }
     })
   })
@@ -691,6 +694,63 @@ function renderLayersToDOM() {
       layersContainer.appendChild(layerElement)
       //associate object
       layerElement.layerObj = l
+    }
+  })
+}
+
+function renderVectorsToDOM() {
+  vectorsContainer.innerHTML = ""
+  let id = 0
+  state.undoStack.forEach((action) => {
+    let p = action[0]
+    if (
+      p.tool === "quadCurve" ||
+      p.tool === "cubicCurve" ||
+      p.tool === "ellipse"
+    ) {
+      let vectorElement = document.createElement("div")
+      vectorElement.className = `vector ${id}`
+      vectorElement.id = id
+      id += 1
+      vectorElement.textContent = id
+      vectorElement.draggable = true
+      let thumbnailCVS = document.createElement("canvas")
+      let thumbnailCTX = thumbnailCVS.getContext("2d")
+      thumbnailCTX.willReadFrequently = true
+      thumbnailCVS.className = "thumbnail"
+      vectorElement.appendChild(thumbnailCVS)
+      // let hide = document.createElement("div")
+      // hide.className = "hide btn"
+      // let eye = document.createElement("span")
+      // eye.classList.add("eye")
+      // if (p.opacity === 0) {
+      //   eye.classList.add("eyeclosed")
+      // } else {
+      //   eye.classList.add("eyeopen")
+      // }
+      // hide.appendChild(eye)
+      // vectorElement.appendChild(hide)
+      vectorsContainer.appendChild(vectorElement)
+      thumbnailCVS.width = thumbnailCVS.offsetWidth * sharpness
+      thumbnailCVS.height = thumbnailCVS.offsetHeight * sharpness
+      thumbnailCTX.scale(sharpness * 1, sharpness * 1)
+      //TODO: find a way to constrain coordinates to fit canvas viewing area for maximum size of vector without changing the size of the canvas for each vector thumbnail
+      thumbnailCTX.lineWidth = 1
+      console.log(p)
+      thumbnailCTX.strokeStyle = p.color
+      thumbnailCTX.beginPath()
+      thumbnailCTX.moveTo(p.x.px1 + 0.5, p.y.py1 + 0.5)
+      thumbnailCTX.bezierCurveTo(
+        p.x.px3 + 0.5,
+        p.y.py3 + 0.5,
+        p.x.px4 + 0.5,
+        p.y.py4 + 0.5,
+        p.x.px2 + 0.5,
+        p.y.py2 + 0.5
+      )
+      thumbnailCTX.stroke()
+      //associate object
+      vectorElement.vectorObj = p
     }
   })
 }

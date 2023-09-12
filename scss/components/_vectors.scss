@@ -27,7 +27,7 @@
       justify-content: flex-end;
       .vector {
         cursor: grab;
-        height: 40px;
+        height: 80px;
         width: 100%;
         text-align: center;
         line-height: 40px;
@@ -38,6 +38,17 @@
         align-items: center;
         box-shadow: inset 2px 0px $border-color, inset -2px 0px $border-color,
           inset 0px -2px $border-color, inset 0px 2px $border-color;
+        canvas {
+          background-image: repeating-linear-gradient(
+            -45deg,
+            white,
+            white 5px,
+            rgb(216, 216, 216) 5px,
+            rgb(216, 216, 216) 10px
+          );
+          width: 60%;
+          height: 100%;
+        }
         &.selected {
           background: $gray;
         }

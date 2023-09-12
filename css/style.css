@@ -751,7 +751,7 @@ canvas {
 }
 .vectors-interface .vectors-container .vectors .vector {
   cursor: grab;
-  height: 40px;
+  height: 80px;
   width: 100%;
   text-align: center;
   line-height: 40px;
@@ -761,6 +761,11 @@ canvas {
   justify-content: flex-end;
   align-items: center;
   box-shadow: inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131);
+}
+.vectors-interface .vectors-container .vectors .vector canvas {
+  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  width: 60%;
+  height: 100%;
 }
 .vectors-interface .vectors-container .vectors .vector.selected {
   background: rgb(77, 77, 77);
