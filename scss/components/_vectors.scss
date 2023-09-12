@@ -1,0 +1,72 @@
+/* Vectors, interface provides access to select any vector existing in the timeline */
+
+.vectors-interface {
+  user-select: none;
+  // position: absolute;
+  position: relative;
+  z-index: 100;
+  background-color: $extra-dark-gray;
+  width: 206px;
+  height: auto;
+  // top: 281px;
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  order: 3;
+  .vectors-container {
+    width: calc(100% - 4px);
+    height: auto;
+    max-height: 481px;
+    overflow-y: auto;
+    margin: 2px;
+    @include boxBorder;
+    @include scrollBar;
+    .vectors {
+      display: flex;
+      flex-flow: column-reverse nowrap;
+      justify-content: flex-end;
+      .vector {
+        cursor: grab;
+        height: 40px;
+        width: 100%;
+        text-align: center;
+        line-height: 40px;
+        font-size: 16px;
+        display: flex;
+        flex-flow: row-reverse nowrap;
+        justify-content: flex-end;
+        align-items: center;
+        box-shadow: inset 2px 0px $border-color, inset -2px 0px $border-color,
+          inset 0px -2px $border-color, inset 0px 2px $border-color;
+        &.selected {
+          background: $gray;
+        }
+        &:hover {
+          box-shadow: inset 2px 0px $white, inset -2px 0px $white,
+            inset 0px -2px $white, inset 0px 2px $white;
+        }
+        .hide {
+          width: 28px;
+          height: 28px;
+          margin: 6px;
+          background: $button-color;
+          .eye {
+            //define height and width for one pixel since icons are created with box shadow
+            height: 2px;
+            width: 2px;
+            &.eyeopen {
+              @include eyeOpen;
+            }
+            &.eyeclosed {
+              @include eyeClosed;
+            }
+          }
+        }
+        .warning {
+          background: $warning-color;
+          animation: flash 0.6s ease-in infinite alternate-reverse;
+        }
+      }
+    }
+  }
+}

@@ -13,12 +13,18 @@ import {
 //==== * * * DOM Interface * * * ====//
 //===================================//
 
+// * Layers Interface * //
 const uploadBtn = document.querySelector("#file-upload")
 const newLayerBtn = document.querySelector(".new-raster-layer")
 
 const layersContainer = document.querySelector(".layers")
 const layersInterfaceContainer = document.querySelector(".layers-interface")
 initializeDialogBox(layersInterfaceContainer)
+
+// * Vectors Interface * //
+const vectorsContainer = document.querySelector(".vectors")
+const vectorsInterfaceContainer = document.querySelector(".vectors-interface")
+initializeDialogBox(vectorsInterfaceContainer)
 
 // * Canvas Size * //
 const sizeContainer = document.querySelector(".size-container")
