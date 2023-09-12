@@ -366,7 +366,7 @@ function handlePointerDown(e) {
   setCoordinates(e)
   //Re-render GUI
   renderRasterGUI(state, canvas, swatches)
-  renderVectorGUI(state, canvas, swatches)
+  renderVectorGUI(state, canvas)
   //Reset Cursor for mobile
   state.onscreenX = state.cursorWithCanvasOffsetX
   state.onscreenY = state.cursorWithCanvasOffsetY
@@ -441,6 +441,13 @@ function handlePointerUp(e) {
     state.undoStack.push(state.points)
 
     // TODO: if state.tool is a vector tool like curve, push index of instruction on undoStack and state.points to vector instruction stack
+    if (
+      state.tool.name === "quadCurve" ||
+      state.tool.name === "cubicCurve" ||
+      state.tool.name === "ellipse"
+    ) {
+      canvas.renderVectorsToDOM()
+    }
   }
   state.points = []
   //Reset redostack
@@ -467,7 +474,7 @@ function handlePointerOut(e) {
   // }
   if (!state.touch) {
     renderRasterGUI(state, canvas, swatches)
-    renderVectorGUI(state, canvas, swatches)
+    renderVectorGUI(state, canvas)
     // canvas.draw()
     canvas.pointerEvent = "none"
   }
@@ -512,7 +519,7 @@ function zoomCanvas(z, xOriginOffset, yOriginOffset) {
   )
   canvas.draw()
   renderRasterGUI(state, canvas, swatches)
-  renderVectorGUI(state, canvas, swatches)
+  renderVectorGUI(state, canvas)
 }
 
 function handleWheel(e) {
@@ -657,7 +664,7 @@ export function handleRecenter(e) {
   canvas.previousYOffset = canvas.yOffset
   canvas.draw()
   renderRasterGUI(state, canvas, swatches)
-  renderVectorGUI(state, canvas, swatches)
+  renderVectorGUI(state, canvas)
 }
 
 function handleTools(e) {

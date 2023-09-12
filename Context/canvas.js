@@ -8,6 +8,8 @@ import {
   actionCubicCurve,
   actionEllipse,
 } from "../Tools/actions.js"
+import { getAngle } from "../utils/trig.js"
+import { vectorGuiState, renderVectorGUI } from "../GUI/vector.js"
 
 //===================================//
 //==== * * * DOM Interface * * * ====//
@@ -250,6 +252,7 @@ const resizeOffScreenCanvas = (width, height) => {
   })
   canvas.redrawPoints()
   canvas.draw()
+  renderVectorGUI(state, canvas)
 }
 
 const handleDimensionsSubmit = (e) => {
@@ -712,7 +715,7 @@ function renderVectorsToDOM() {
       vectorElement.className = `vector ${id}`
       vectorElement.id = id
       id += 1
-      vectorElement.textContent = id
+      // vectorElement.textContent = id
       vectorElement.draggable = true
       let thumbnailCVS = document.createElement("canvas")
       let thumbnailCTX = thumbnailCVS.getContext("2d")
@@ -735,20 +738,58 @@ function renderVectorsToDOM() {
       thumbnailCVS.height = thumbnailCVS.offsetHeight * sharpness
       thumbnailCTX.scale(sharpness * 1, sharpness * 1)
       //TODO: find a way to constrain coordinates to fit canvas viewing area for maximum size of vector without changing the size of the canvas for each vector thumbnail
-      thumbnailCTX.lineWidth = 1
-      console.log(p)
-      thumbnailCTX.strokeStyle = p.color
+      // Save minima and maxima for x and y plotted coordinates to get the bounding box when plotting the curve. Then, here we can constrain the coords to fit a maximal bounding box in the thumbnail canvas
+      thumbnailCTX.lineWidth = 2
+      let wr = thumbnailCVS.width / sharpness / canvas.offScreenCVS.width
+      let hr = thumbnailCVS.height / sharpness / canvas.offScreenCVS.height
+      let minD = Math.min(wr, hr)
+      // thumbnailCTX.strokeStyle = p.color.color
+      thumbnailCTX.strokeStyle = "black"
       thumbnailCTX.beginPath()
-      thumbnailCTX.moveTo(p.x.px1 + 0.5, p.y.py1 + 0.5)
-      thumbnailCTX.bezierCurveTo(
-        p.x.px3 + 0.5,
-        p.y.py3 + 0.5,
-        p.x.px4 + 0.5,
-        p.y.py4 + 0.5,
-        p.x.px2 + 0.5,
-        p.y.py2 + 0.5
-      )
+      if (p.tool === "cubicCurve") {
+        thumbnailCTX.moveTo(minD * p.x.px1 + 0.5, minD * p.y.py1 + 0.5)
+        thumbnailCTX.bezierCurveTo(
+          minD * p.x.px3 + 0.5,
+          minD * p.y.py3 + 0.5,
+          minD * p.x.px4 + 0.5,
+          minD * p.y.py4 + 0.5,
+          minD * p.x.px2 + 0.5,
+          minD * p.y.py2 + 0.5
+        )
+      } else if (p.tool === "quadCurve") {
+        thumbnailCTX.moveTo(minD * p.x.px1 + 0.5, minD * p.y.py1 + 0.5)
+        thumbnailCTX.quadraticCurveTo(
+          minD * p.x.px3 + 0.5,
+          minD * p.y.py3 + 0.5,
+          minD * p.x.px2 + 0.5,
+          minD * p.y.py2 + 0.5
+        )
+      } else if (p.tool === "ellipse") {
+        let angle = getAngle(p.x.px2 - p.x.px1, p.y.py2 - p.y.py1)
+        thumbnailCTX.ellipse(
+          minD * p.x.px1,
+          minD * p.y.py1,
+          minD * p.properties.radA,
+          minD * p.properties.radB,
+          angle,
+          0,
+          2 * Math.PI
+        )
+      }
       thumbnailCTX.stroke()
+      thumbnailCTX.fillStyle = "rgb(51, 51, 51)"
+      thumbnailCTX.fillRect(
+        minD * canvas.offScreenCVS.width,
+        0,
+        thumbnailCVS.width,
+        thumbnailCVS.height
+      )
+      thumbnailCTX.fillRect(
+        0,
+        minD * canvas.offScreenCVS.height,
+        thumbnailCVS.width,
+        thumbnailCVS.height
+      )
       //associate object
       vectorElement.vectorObj = p
     }

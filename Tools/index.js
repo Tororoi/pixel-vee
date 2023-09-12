@@ -608,7 +608,7 @@ export function cubicCurveSteps() {
           }
           canvas.draw()
           renderRasterGUI(state, canvas, swatches)
-          renderVectorGUI(state, canvas, swatches)
+          renderVectorGUI(state, canvas)
         }
       }
       break
@@ -957,11 +957,12 @@ export function ellipseSteps() {
             properties: {
               radA: state.radA,
               radB: state.radB,
+              //add angle, bounding box minima maxima x and y
             },
           })
           canvas.draw()
           renderRasterGUI(state, canvas, swatches)
-          renderVectorGUI(state, canvas, swatches)
+          renderVectorGUI(state, canvas)
         }
         //Solidify ellipse
         //NOTE: This code is commented out for now. It forces the cursor's position to be p3 which makes it easier to make an ellipse,
@@ -1005,7 +1006,7 @@ export function ellipseSteps() {
         //   })
         //   canvas.draw()
         //   renderRasterGUI(state, canvas, swatches)
-        //   renderVectorGUI(state, canvas, swatches)
+        //   renderVectorGUI(state, canvas)
         // }
       }
       break

@@ -270,9 +270,8 @@ export function reset(canvas) {
  * Render vector graphical interface
  * @param {*} state
  * @param {*} canvas
- * @param {*} swatches
  */
-export function renderVectorGUI(state, canvas, swatches) {
+export function renderVectorGUI(state, canvas) {
   canvas.vectorGuiCTX.clearRect(
     0,
     0,

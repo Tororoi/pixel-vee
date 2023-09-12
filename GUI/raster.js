@@ -16,7 +16,7 @@ export function renderRasterGUI(state, canvas, swatches) {
 
 export function renderCursor(state, canvas, swatches) {
   renderRasterGUI(state, canvas, swatches)
-  renderVectorGUI(state, canvas, swatches)
+  renderVectorGUI(state, canvas)
   switch (state.tool.name) {
     case "grab":
       //show nothing

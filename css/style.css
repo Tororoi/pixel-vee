@@ -263,7 +263,6 @@ svg {
   overflow: hidden;
   position: relative;
   padding-top: 2px;
-  padding-bottom: 1px;
   transition: all 1s;
 }
 
@@ -719,15 +718,15 @@ canvas {
   order: 3;
 }
 .vectors-interface .vectors-container {
-  width: calc(100% - 4px);
+  width: 100%;
   height: auto;
   max-height: 481px;
   overflow-y: auto;
   margin: 2px;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container:hover:not([disabled]), .vectors-interface .vectors-container:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container::-webkit-scrollbar {
   width: 10px;
@@ -750,22 +749,23 @@ canvas {
   justify-content: flex-end;
 }
 .vectors-interface .vectors-container .vectors .vector {
+  position: relative;
   cursor: grab;
-  height: 80px;
+  height: 100px;
   width: 100%;
   text-align: center;
   line-height: 40px;
   font-size: 16px;
   display: flex;
-  flex-flow: row-reverse nowrap;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   box-shadow: inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container .vectors .vector canvas {
+  position: absolute;
   background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
-  width: 60%;
-  height: 100%;
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
 }
 .vectors-interface .vectors-container .vectors .vector.selected {
   background: rgb(77, 77, 77);
@@ -834,6 +834,7 @@ canvas {
   height: 16px;
   background: rgb(31, 31, 31);
   outline: none;
+  margin-bottom: 4px;
   cursor: pointer;
 }
 .brush-container .slider::-webkit-slider-thumb {
