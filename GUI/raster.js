@@ -26,7 +26,8 @@ export function renderCursor(state, canvas, swatches) {
       drawCursorBox(state, canvas)
       break
     default:
-      if (state.mode === "erase") {
+      //TODO: erase mode is somewhat buggy with rendering. Find way to have it render without calling draw() more than needed.
+      if (state.mode === "erase" && state.tool.name === "draw") {
         canvas.draw()
         actionDraw(
           state.cursorWithCanvasOffsetX,

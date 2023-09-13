@@ -1052,6 +1052,7 @@ export function adjustEllipseSteps() {
           vectorGuiState.px3 = vectorGuiState.px1 + dxb
           vectorGuiState.py3 = vectorGuiState.py1 + dyb
         }
+        //TODO: changing opacity isn't enough since erase mode will be unaffected
         state.undoStack[state.undoStack.length - 1][0].opacity = 0
         canvas.layers.forEach((l) => {
           if (l.type === "raster") {
