@@ -625,7 +625,9 @@ export function handleClear() {
 }
 
 export function handleRecenter(e) {
-  canvas.zoom = canvas.setInitialZoom(canvas.offScreenCVS.width)
+  canvas.zoom = canvas.setInitialZoom(
+    Math.max(canvas.offScreenCVS.width, canvas.offScreenCVS.height)
+  )
   canvas.vectorGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,

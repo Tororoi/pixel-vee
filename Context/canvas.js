@@ -211,7 +211,9 @@ const resizeOffScreenCanvas = (width, height) => {
   canvas.offScreenCVS.width = width
   canvas.offScreenCVS.height = height
   //reset canvas state
-  canvas.zoom = setInitialZoom(canvas.offScreenCVS.width)
+  canvas.zoom = setInitialZoom(
+    Math.max(canvas.offScreenCVS.width, canvas.offScreenCVS.height)
+  )
   canvas.vectorGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
