@@ -38,6 +38,7 @@ export function renderCursor(state, canvas, swatches) {
           state.mode,
           canvas.offScreenCVS.width / canvas.offScreenCVS.width
         )
+        drawCursorBox(state, canvas)
       } else {
         drawCurrentPixel(state, canvas, swatches)
       }
