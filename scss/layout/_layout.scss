@@ -4,6 +4,7 @@
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
+  @include boxBorder;
   .content {
     //class does not exist currently
     // opacity: 0.25;

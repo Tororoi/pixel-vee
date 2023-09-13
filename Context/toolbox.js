@@ -3,12 +3,12 @@ import { initializeDialogBox } from "../utils/drag.js"
 //===================================//
 //==== * * * DOM Interface * * * ====//
 //===================================//
-// * Toolbox * //
-const toolboxContainer = document.querySelector(".toolbox")
-initializeDialogBox(toolboxContainer)
-// * Brush * //
-const brushContainer = document.querySelector(".brush-container")
-initializeDialogBox(brushContainer)
+// // * Toolbox * //
+// const toolboxContainer = document.querySelector(".toolbox")
+// initializeDialogBox(toolboxContainer)
+// // * Brush * //
+// const brushContainer = document.querySelector(".brush-container")
+// initializeDialogBox(brushContainer)
 
 //===================================//
 //=== * * * Event Listeners * * * ===//

@@ -15,6 +15,18 @@ import { vectorGuiState, renderVectorGUI } from "../GUI/vector.js"
 //==== * * * DOM Interface * * * ====//
 //===================================//
 
+// * Sidebar Menu * //
+const sidebarContainer = document.querySelector(".sidebar")
+initializeDialogBox(sidebarContainer)
+
+// * Toolbox * //
+const toolboxContainer = document.querySelector(".toolbox")
+initializeDialogBox(toolboxContainer)
+
+// * Brush * //
+const brushContainer = document.querySelector(".brush-container")
+initializeDialogBox(brushContainer)
+
 // * Layers Interface * //
 const uploadBtn = document.querySelector("#file-upload")
 const newLayerBtn = document.querySelector(".new-raster-layer")

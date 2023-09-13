@@ -12,8 +12,32 @@
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
-  order: 3;
+  order: 4;
+  .vectors-control {
+    display: flex;
+    flex-flow: row nowrap;
+    margin: 2px;
+    .thumbnail-style {
+      width: 28px;
+      height: 28px;
+      background: $button-color;
+      .icon {
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+        background-image: url("../public/pixelv-fit.png");
+        background-size: 28px;
+      }
+      input[type="checkbox"] {
+        display: none;
+        &:checked + .icon {
+          background-image: url("../public/pixelv-expand.png");
+        }
+      }
+    }
+  }
   .vectors-container {
+    position: relative;
     // width: calc(100% - 4px);
     width: 100%;
     height: auto;

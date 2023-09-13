@@ -46,6 +46,20 @@
         0px 4px $border-color, 4px 4px $border-color, 0px 8px $border-color,
         4px 8px $border-color;
     }
+    &.locked {
+      .grip {
+        box-shadow: 2px -2px $border-color, 4px -2px $border-color,
+          0px 0px $border-color, 6px 0px $border-color, 0px 2px $border-color,
+          6px 2px $border-color, -2px 4px $border-color, 0px 4px $border-color,
+          2px 4px $border-color, 4px 4px $border-color, 6px 4px $border-color,
+          8px 4px $border-color, -2px 6px $border-color, 0px 6px $border-color,
+          4px 6px $border-color, 6px 6px $border-color, 8px 6px $border-color,
+          -2px 8px $border-color, 0px 8px $border-color, 4px 8px $border-color,
+          6px 8px $border-color, 8px 8px $border-color, -2px 10px $border-color,
+          0px 10px $border-color, 2px 10px $border-color, 4px 10px $border-color,
+          6px 10px $border-color, 8px 10px $border-color;
+      }
+    }
   }
   &:hover:not([disabled]),
   &:focus {
@@ -54,6 +68,18 @@
         background: $white;
         box-shadow: 0px 0px $white, 4px 0px $white, 0px 4px $white,
           4px 4px $white, 0px 8px $white, 4px 8px $white;
+      }
+      &.locked {
+        .grip {
+          box-shadow: 2px -2px $white, 4px -2px $white, 0px 0px $white,
+            6px 0px $white, 0px 2px $white, 6px 2px $white, -2px 4px $white,
+            0px 4px $white, 2px 4px $white, 4px 4px $white, 6px 4px $white,
+            8px 4px $white, -2px 6px $white, 0px 6px $white, 4px 6px $white,
+            6px 6px $white, 8px 6px $white, -2px 8px $white, 0px 8px $white,
+            4px 8px $white, 6px 8px $white, 8px 8px $white, -2px 10px $white,
+            0px 10px $white, 2px 10px $white, 4px 10px $white, 6px 10px $white,
+            8px 10px $white;
+        }
       }
     }
   }

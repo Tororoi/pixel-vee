@@ -32,15 +32,18 @@ export const initializeDialogBox = (dialogBoxTarget) => {
 
 //Drag
 export const dragStart = (e, dragTarget) => {
-  e.target.setPointerCapture(e.pointerId)
-  state.dragging = true
-  state.dragTarget = dragTarget
-  if (state.dragTarget) {
-    state.dragTarget.classList.add("dragging")
-    state.dragX = e.clientX - state.dragTarget.offsetLeft
-    state.dragY = e.clientY - state.dragTarget.offsetTop
+  if (!dragTarget.className.includes("locked")) {
+    e.target.setPointerCapture(e.pointerId)
+    state.dragging = true
+    state.dragTarget = dragTarget
+    if (state.dragTarget) {
+      state.dragTarget.classList.add("dragging")
+      state.dragX = e.clientX - state.dragTarget.offsetLeft
+      state.dragY = e.clientY - state.dragTarget.offsetTop
+    }
   }
 }
+
 export const dragStop = (e) => {
   state.dragging = false
   if (state.dragTarget) {
