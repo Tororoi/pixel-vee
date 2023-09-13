@@ -156,6 +156,7 @@ export const canvas = {
   draw,
   drawLayers,
   redrawPoints,
+  render,
   consolidateLayers,
   createNewRasterLayer,
   addRasterLayer,
@@ -480,6 +481,21 @@ function redrawPoints() {
       }
     })
   })
+}
+
+function render() {
+  canvas.layers.forEach((l) => {
+    if (l.type === "raster") {
+      l.ctx.clearRect(
+        0,
+        0,
+        canvas.offScreenCVS.width,
+        canvas.offScreenCVS.height
+      )
+    }
+  })
+  canvas.redrawPoints()
+  canvas.draw()
 }
 
 //====================================//

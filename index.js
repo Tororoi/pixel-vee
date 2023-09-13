@@ -158,18 +158,7 @@ function handleKeyDown(e) {
     switch (e.code) {
       case "ArrowLeft":
         if (state.debugger) {
-          canvas.layers.forEach((l) => {
-            if (l.type === "raster") {
-              l.ctx.clearRect(
-                0,
-                0,
-                canvas.offScreenCVS.width,
-                canvas.offScreenCVS.height
-              )
-            }
-          })
-          canvas.redrawPoints()
-          canvas.draw()
+          canvas.render()
           state.debugObject.maxSteps -= 1
           state.debugFn(state.debugObject)
         }

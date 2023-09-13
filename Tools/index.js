@@ -646,18 +646,7 @@ export function adjustCurveSteps(numPoints = 4) {
           yKey: vectorGuiState.collidedKeys.yKey,
         }
         state.undoStack[state.undoStack.length - 1][0].opacity = 0
-        canvas.layers.forEach((l) => {
-          if (l.type === "raster") {
-            l.ctx.clearRect(
-              0,
-              0,
-              canvas.offScreenCVS.width,
-              canvas.offScreenCVS.height
-            )
-          }
-        })
-        canvas.redrawPoints()
-        canvas.draw()
+        canvas.render()
         if (numPoints === 3) {
           actionQuadraticCurve(
             vectorGuiState.px1 + canvas.xOffset,
@@ -748,18 +737,7 @@ export function adjustCurveSteps(numPoints = 4) {
           xKey: null,
           yKey: null,
         }
-        canvas.layers.forEach((l) => {
-          if (l.type === "raster") {
-            l.ctx.clearRect(
-              0,
-              0,
-              canvas.offScreenCVS.width,
-              canvas.offScreenCVS.height
-            )
-          }
-        })
-        canvas.redrawPoints()
-        canvas.draw()
+        canvas.render()
       }
       break
     case "pointerout":
@@ -1054,18 +1032,7 @@ export function adjustEllipseSteps() {
         }
         //TODO: changing opacity isn't enough since erase mode will be unaffected
         state.undoStack[state.undoStack.length - 1][0].opacity = 0
-        canvas.layers.forEach((l) => {
-          if (l.type === "raster") {
-            l.ctx.clearRect(
-              0,
-              0,
-              canvas.offScreenCVS.width,
-              canvas.offScreenCVS.height
-            )
-          }
-        })
-        canvas.redrawPoints()
-        canvas.draw()
+        canvas.render()
         actionEllipse(
           vectorGuiState.px1 + canvas.xOffset,
           vectorGuiState.py1 + canvas.yOffset,
@@ -1200,18 +1167,7 @@ export function adjustEllipseSteps() {
           xKey: null,
           yKey: null,
         }
-        canvas.layers.forEach((l) => {
-          if (l.type === "raster") {
-            l.ctx.clearRect(
-              0,
-              0,
-              canvas.offScreenCVS.width,
-              canvas.offScreenCVS.height
-            )
-          }
-        })
-        canvas.redrawPoints()
-        canvas.draw()
+        canvas.render()
       }
       break
     case "pointerout":
