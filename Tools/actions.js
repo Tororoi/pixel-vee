@@ -256,6 +256,7 @@ export function actionReplace() {
 }
 
 /**
+ * TODO: BUG: if canvas is resized and fill point exists outside canvas area, fill will not render when timeline is redrawn
  * User action for process to fill a contiguous color
  * @param {*} startX
  * @param {*} startY
