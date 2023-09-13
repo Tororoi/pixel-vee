@@ -365,6 +365,7 @@ function handlePointerDown(e) {
   }
   setCoordinates(e)
   //Re-render GUI
+  canvas.draw()
   renderRasterGUI(state, canvas, swatches)
   renderVectorGUI(state, canvas)
   //Reset Cursor for mobile
@@ -473,6 +474,7 @@ function handlePointerOut(e) {
   //   state.redoStack = []
   // }
   if (!state.touch) {
+    canvas.draw()
     renderRasterGUI(state, canvas, swatches)
     renderVectorGUI(state, canvas)
     // canvas.draw()

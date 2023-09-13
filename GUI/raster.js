@@ -26,7 +26,21 @@ export function renderCursor(state, canvas, swatches) {
       drawCursorBox(state, canvas)
       break
     default:
-      drawCurrentPixel(state, canvas, swatches)
+      if (state.mode === "erase") {
+        canvas.draw()
+        actionDraw(
+          state.cursorWithCanvasOffsetX,
+          state.cursorWithCanvasOffsetY,
+          swatches.primary.color,
+          state.brushStamp,
+          state.tool.brushSize,
+          canvas.onScreenCTX, //must be onScreen to work with eraser
+          state.mode,
+          canvas.offScreenCVS.width / canvas.offScreenCVS.width
+        )
+      } else {
+        drawCurrentPixel(state, canvas, swatches)
+      }
     // drawCursorBox(state, canvas, 0.5)
   }
 }
