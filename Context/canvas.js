@@ -8,6 +8,7 @@ import {
   actionCubicCurve,
   actionEllipse,
 } from "../Tools/actions.js"
+import { tools } from "../Tools/index.js"
 import { getAngle } from "../utils/trig.js"
 import { vectorGuiState, renderVectorGUI } from "../GUI/vector.js"
 
@@ -358,8 +359,8 @@ function redrawPoints() {
   //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
   state.undoStack.forEach((action) => {
     action.forEach((p) => {
-      switch (p.tool) {
-        case "addlayer":
+      switch (p.tool.name) {
+        case "addLayer":
           p.layer.removed = false
           canvas.renderLayersToDOM()
           canvas.renderVectorsToDOM()
@@ -373,7 +374,7 @@ function redrawPoints() {
           )
           break
         case "fill":
-          actionFill(p.x, p.y, p.color, p.layer.ctx, p.mode)
+          actionFill(p.x.px1, p.y.py1, p.color, p.layer.ctx, p.mode)
           break
         case "line":
           actionLine(
@@ -471,7 +472,7 @@ function redrawPoints() {
   })
   state.redoStack.forEach((action) => {
     action.forEach((p) => {
-      if (p.tool === "addlayer") {
+      if (p.tool.name === "addLayer") {
         p.layer.removed = true
         if (p.layer === canvas.currentLayer) {
           canvas.currentLayer = layersCont.children[0].layerObj
@@ -655,7 +656,7 @@ function addRasterLayer() {
   //once layer is added to timeline and drawn on, can no longer be deleted
   const layer = createNewRasterLayer(`Layer ${canvas.layers.length + 1}`)
   canvas.layers.push(layer)
-  state.addToTimeline({ tool: "addlayer", layer })
+  state.addToTimeline({ tool: tools.addLayer, layer })
   state.undoStack.push(state.points)
   state.points = []
   state.redoStack = []
@@ -744,11 +745,7 @@ function renderVectorsToDOM() {
   let id = 0
   state.undoStack.forEach((action) => {
     let p = action[0]
-    if (
-      p.tool === "quadCurve" ||
-      p.tool === "cubicCurve" ||
-      p.tool === "ellipse"
-    ) {
+    if (p.tool.type === "vector") {
       let vectorElement = document.createElement("div")
       vectorElement.className = `vector ${id}`
       vectorElement.id = id
@@ -760,17 +757,11 @@ function renderVectorsToDOM() {
       thumbnailCTX.willReadFrequently = true
       thumbnailCVS.className = "thumbnail"
       vectorElement.appendChild(thumbnailCVS)
-      // let hide = document.createElement("div")
-      // hide.className = "hide btn"
-      // let eye = document.createElement("span")
-      // eye.classList.add("eye")
-      // if (p.opacity === 0) {
-      //   eye.classList.add("eyeclosed")
-      // } else {
-      //   eye.classList.add("eyeopen")
-      // }
-      // hide.appendChild(eye)
-      // vectorElement.appendChild(hide)
+      let tool = document.createElement("div")
+      tool.className = "tool btn"
+      let icon = document.createElement("svg")
+      tool.appendChild(icon)
+      vectorElement.appendChild(tool)
       vectorsContainer.appendChild(vectorElement)
       thumbnailCVS.width = thumbnailCVS.offsetWidth * sharpness
       thumbnailCVS.height = thumbnailCVS.offsetHeight * sharpness
@@ -778,14 +769,32 @@ function renderVectorsToDOM() {
       //TODO: find a way to constrain coordinates to fit canvas viewing area for maximum size of vector without changing the size of the canvas for each vector thumbnail
       // Save minima and maxima for x and y plotted coordinates to get the bounding box when plotting the curve. Then, here we can constrain the coords to fit a maximal bounding box in the thumbnail canvas
       thumbnailCTX.lineWidth = 2
-      let wr = thumbnailCVS.width / sharpness / canvas.offScreenCVS.width
-      let hr = thumbnailCVS.height / sharpness / canvas.offScreenCVS.height
-      let minD = Math.min(wr, hr)
+      let wd = thumbnailCVS.width / sharpness / canvas.offScreenCVS.width
+      let hd = thumbnailCVS.height / sharpness / canvas.offScreenCVS.height
+      //get the minimum dimension
+      let minD = Math.min(wd, hd)
       // thumbnailCTX.strokeStyle = p.color.color
       thumbnailCTX.strokeStyle = "black"
       thumbnailCTX.beginPath()
       //TODO: line tool and fill tool to be added as vectors. Behavior of replace tool is like a mask, so the replaced pixels are static coordinates.
-      if (p.tool === "cubicCurve") {
+      if (p.tool.name === "fill") {
+        thumbnailCTX.arc(
+          minD * p.x.px1 + 0.5,
+          minD * p.y.py1 + 0.5,
+          1,
+          0,
+          2 * Math.PI,
+          true
+        )
+      } else if (p.tool.name === "quadCurve") {
+        thumbnailCTX.moveTo(minD * p.x.px1 + 0.5, minD * p.y.py1 + 0.5)
+        thumbnailCTX.quadraticCurveTo(
+          minD * p.x.px3 + 0.5,
+          minD * p.y.py3 + 0.5,
+          minD * p.x.px2 + 0.5,
+          minD * p.y.py2 + 0.5
+        )
+      } else if (p.tool.name === "cubicCurve") {
         thumbnailCTX.moveTo(minD * p.x.px1 + 0.5, minD * p.y.py1 + 0.5)
         thumbnailCTX.bezierCurveTo(
           minD * p.x.px3 + 0.5,
@@ -795,15 +804,7 @@ function renderVectorsToDOM() {
           minD * p.x.px2 + 0.5,
           minD * p.y.py2 + 0.5
         )
-      } else if (p.tool === "quadCurve") {
-        thumbnailCTX.moveTo(minD * p.x.px1 + 0.5, minD * p.y.py1 + 0.5)
-        thumbnailCTX.quadraticCurveTo(
-          minD * p.x.px3 + 0.5,
-          minD * p.y.py3 + 0.5,
-          minD * p.x.px2 + 0.5,
-          minD * p.y.py2 + 0.5
-        )
-      } else if (p.tool === "ellipse") {
+      } else if (p.tool.name === "ellipse") {
         let angle = getAngle(p.x.px2 - p.x.px1, p.y.py2 - p.y.py1)
         thumbnailCTX.ellipse(
           minD * p.x.px1,

@@ -50,7 +50,7 @@ export function drawSteps() {
       state.waitingPixelY = state.cursorY
       if (state.tool.name !== "replace") {
         state.addToTimeline({
-          tool: state.tool.name,
+          tool: state.tool,
           x: state.cursorX,
           y: state.cursorY,
           layer: canvas.currentLayer,
@@ -84,7 +84,7 @@ export function drawSteps() {
           )
           if (state.tool.name !== "replace") {
             state.addToTimeline({
-              tool: "line",
+              tool: tools.line,
               x: { px1: state.previousX, px2: state.cursorX },
               y: { py1: state.previousY, py2: state.cursorY },
               layer: canvas.currentLayer,
@@ -109,7 +109,7 @@ export function drawSteps() {
             )
             if (state.tool.name !== "replace") {
               state.addToTimeline({
-                tool: state.tool.name,
+                tool: state.tool,
                 x: state.cursorX,
                 y: state.cursorY,
                 layer: canvas.currentLayer,
@@ -136,7 +136,7 @@ export function drawSteps() {
       )
       if (state.tool.name !== "replace") {
         state.addToTimeline({
-          tool: state.tool.name,
+          tool: state.tool,
           x: state.cursorX,
           y: state.cursorY,
           layer: canvas.currentLayer,
@@ -250,7 +250,7 @@ export function lineSteps() {
         state.tool.brushSize
       )
       state.addToTimeline({
-        tool: state.tool.name,
+        tool: state.tool,
         x: { px1: state.previousX, px2: state.cursorX },
         y: { py1: state.previousY, py2: state.cursorY },
         layer: canvas.currentLayer,
@@ -278,9 +278,9 @@ export function fillSteps() {
       )
       //For undo ability, store starting coords and settings and pass them into actionFill
       state.addToTimeline({
-        tool: state.tool.name,
-        x: state.cursorX,
-        y: state.cursorY,
+        tool: state.tool,
+        x: { px1: state.cursorX },
+        y: { py1: state.cursorY },
         layer: canvas.currentLayer,
       })
       canvas.draw()
@@ -422,7 +422,7 @@ export function quadCurveSteps() {
           state.clickCounter = 0
           //store control points for timeline
           state.addToTimeline({
-            tool: state.tool.name,
+            tool: state.tool,
             x: { px1: state.px1, px2: state.px2, px3: state.px3 },
             y: { py1: state.py1, py2: state.py2, py3: state.py3 },
             layer: canvas.currentLayer,
@@ -590,7 +590,7 @@ export function cubicCurveSteps() {
           //store control points for timeline
           if (!state.debugger) {
             state.addToTimeline({
-              tool: state.tool.name,
+              tool: state.tool,
               x: {
                 px1: state.px1,
                 px2: state.px2,
@@ -920,7 +920,7 @@ export function ellipseSteps() {
           state.clickCounter = 0
           //store control points for timeline
           state.addToTimeline({
-            tool: state.tool.name,
+            tool: state.tool,
             x: {
               px1: state.px1,
               px2: state.px2,
@@ -965,7 +965,7 @@ export function ellipseSteps() {
         //   state.clickCounter = 0
         //   //store control points for timeline
         //   state.addToTimeline({
-        //     tool: state.tool.name,
+        //     tool: state.tool,
         //     x: {
         //       px1: state.px1,
         //       px2: state.px2,
@@ -1263,20 +1263,33 @@ export function grabSteps() {
 
 //Tools
 export const tools = {
+  //Raster Tools
   brush: {
     name: "brush",
     fn: drawSteps,
     brushSize: 1,
     disabled: false,
     options: ["perfect"],
+    type: "raster",
   },
-  //FIX: allow replace to use different brush sizes
+  line: {
+    name: "line",
+    fn: lineSteps,
+    brushSize: 1,
+    disabled: false,
+    options: [],
+    type: "raster",
+  },
+  // shading: {
+  // user selects hsl shading color which mixes with colors that the user draws on to create dynamic shading
+  // },
   replace: {
     name: "replace",
     fn: replaceSteps,
     brushSize: 1,
     disabled: false,
     options: ["perfect"],
+    type: "raster",
   },
   select: {
     name: "select",
@@ -1284,33 +1297,43 @@ export const tools = {
     brushSize: 1,
     disabled: false,
     options: ["magic wand"],
+    type: "raster",
   },
-  // shading: {
-  // user selects hsl shading color which mixes with colors that the user draws on to create dynamic shading
+  // gradient: {
+  // Create a dithered gradient
   // },
-  line: {
-    name: "line",
-    fn: lineSteps,
-    brushSize: 1,
+  addLayer: {
+    name: "addLayer",
+    fn: null,
+    brushSize: null,
     disabled: false,
     options: [],
+    type: "raster",
   },
+  clear: {
+    name: "clear",
+    fn: null,
+    brushSize: null,
+    disabled: false,
+    options: [],
+    type: "raster",
+  },
+  //Vector Tools
   fill: {
     name: "fill",
     fn: fillSteps,
     brushSize: 1,
     disabled: true,
     options: ["contiguous"],
+    type: "vector",
   },
-  // gradient: {
-  // Create a dithered gradient
-  // },
   quadCurve: {
     name: "quadCurve",
     fn: quadCurveSteps,
     brushSize: 1,
     disabled: false,
     options: [],
+    type: "vector",
   },
   cubicCurve: {
     name: "cubicCurve",
@@ -1318,6 +1341,7 @@ export const tools = {
     brushSize: 1,
     disabled: false,
     options: [],
+    type: "vector",
   },
   ellipse: {
     name: "ellipse",
@@ -1325,16 +1349,16 @@ export const tools = {
     brushSize: 1,
     disabled: false,
     options: [],
+    type: "vector",
   },
-  // shapes: {
-  // square, circle, and custom saved shape?
-  // },
+  //Utility Tools (does not affect timeline)
   eyedropper: {
     name: "eyedropper",
     fn: eyedropperSteps,
     brushSize: 1,
     disabled: true,
     options: [],
+    type: "utility",
   },
   grab: {
     name: "grab",
@@ -1342,6 +1366,7 @@ export const tools = {
     brushSize: 1,
     disabled: true,
     options: [],
+    type: "utility",
   },
   /** move: {
     * Move a layer's coordinates independent of other layers

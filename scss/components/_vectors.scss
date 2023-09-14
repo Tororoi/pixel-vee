@@ -78,12 +78,27 @@
           width: calc(100% - 4px);
           height: calc(100% - 4px);
         }
+        .tool {
+          position: absolute;
+          right: 0;
+          top: 0;
+          cursor: grab;
+          width: 20px;
+          height: 20px;
+          background: $button-color;
+          z-index: 104;
+          margin: 2px;
+        }
         &.selected {
           background: $gray;
         }
         &:hover {
           box-shadow: inset 2px 0px $white, inset -2px 0px $white,
             inset 0px -2px $white, inset 0px 2px $white;
+          .tool {
+            box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white,
+              0px 2px $white;
+          }
         }
         .hide {
           width: 28px;

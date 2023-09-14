@@ -154,7 +154,7 @@ export function actionPerfectPixels(currentX, currentY) {
     if (state.tool.name !== "replace") {
       //TODO: refactor so adding to timeline is performed by controller function
       state.addToTimeline({
-        tool: state.tool.name,
+        tool: state.tool,
         x: state.lastDrawnX,
         y: state.lastDrawnY,
         layer: canvas.currentLayer,
@@ -241,7 +241,7 @@ export function actionReplace() {
       image.src = canvas.currentLayer.cvs.toDataURL()
       //TODO: refactor so adding to timeline is performed by controller function
       state.addToTimeline({
-        tool: state.tool.name,
+        tool: state.tool,
         layer: canvas.currentLayer,
         properties: {
           image,
