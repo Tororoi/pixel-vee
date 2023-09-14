@@ -759,7 +759,8 @@ function renderVectorsToDOM() {
       vectorElement.appendChild(thumbnailCVS)
       let tool = document.createElement("div")
       tool.className = "tool btn"
-      let icon = document.createElement("svg")
+      let icon = document.createElement("div")
+      icon.className = p.tool.name
       tool.appendChild(icon)
       vectorElement.appendChild(tool)
       vectorsContainer.appendChild(vectorElement)

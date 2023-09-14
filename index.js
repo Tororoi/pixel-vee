@@ -598,6 +598,7 @@ function handleRedo() {
 }
 
 //Non-tool action.
+//TODO: must also update all vectors to be "removed" in a non destructive way, think about what that means for the timeline
 export function handleClear() {
   state.addToTimeline({ tool: tools.clear, layer: canvas.currentLayer })
   //FIX: restructure stacked items. Currently each is an array, but each should be an object with more info plus an array
