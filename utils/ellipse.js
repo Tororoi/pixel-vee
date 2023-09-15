@@ -44,16 +44,21 @@ export function plotEllipse(xm, ym, a, b) {
   return plotPoints
 }
 
-export function plotCircle(xm, ym, r) {
+export function plotCircle(xm, ym, r, offset) {
   let plotPoints = []
   var x = -r,
     y = 0,
     err = 2 - 2 * r /* bottom left to top right */
+  //offset when subpixel is nearer to center
+  // offset = 1
   do {
-    plotPoints.push({ x: xm - x, y: ym + y }) /*   I. Quadrant +x +y */
-    plotPoints.push({ x: xm - y, y: ym - x }) /*  II. Quadrant -x +y */
+    plotPoints.push({
+      x: xm - x - offset,
+      y: ym + y - offset,
+    }) /*   I. Quadrant +x +y */
+    plotPoints.push({ x: xm - y, y: ym - x - offset }) /*  II. Quadrant -x +y */
     plotPoints.push({ x: xm + x, y: ym - y }) /* III. Quadrant -x -y */
-    plotPoints.push({ x: xm + y, y: ym + x }) /*  IV. Quadrant +x -y */
+    plotPoints.push({ x: xm + y - offset, y: ym + x }) /*  IV. Quadrant +x -y */
     r = err
     if (r <= y) err += ++y * 2 + 1 /* y step */
     if (r > x || err > y) err += ++x * 2 + 1 /* x step */
@@ -61,7 +66,7 @@ export function plotCircle(xm, ym, r) {
   return plotPoints
 }
 
-export function plotEllipseRect(x0, y0, x1, y1) {
+export function plotEllipseRect(x0, y0, x1, y1, offset) {
   let plotPoints = []
   /* rectangular parameter enclosing the ellipse */
   var a = Math.abs(x1 - x0),
@@ -81,12 +86,11 @@ export function plotEllipseRect(x0, y0, x1, y1) {
   y1 = y0 - b1 /* starting pixel */
   a = 8 * a * a
   b1 = 8 * b * b
-
   do {
-    plotPoints.push({ x: x1, y: y0 }) /*   I. Quadrant */
-    plotPoints.push({ x: x0, y: y0 }) /*  II. Quadrant */
+    plotPoints.push({ x: x1 - offset, y: y0 - offset }) /*   I. Quadrant */
+    plotPoints.push({ x: x0, y: y0 - offset }) /*  II. Quadrant */
     plotPoints.push({ x: x0, y: y1 }) /* III. Quadrant */
-    plotPoints.push({ x: x1, y: y1 }) /*  IV. Quadrant */
+    plotPoints.push({ x: x1 - offset, y: y1 }) /*  IV. Quadrant */
     e2 = 2 * err
     if (e2 <= dy) {
       y0++
@@ -102,15 +106,18 @@ export function plotEllipseRect(x0, y0, x1, y1) {
 
   while (y0 - y1 <= b) {
     /* too early stop of flat ellipses a=1 */
-    plotPoints.push({ x: x0 - 1, y: y0 }) /* -> finish tip of ellipse */
-    plotPoints.push({ x: x1 + 1, y: y0++ })
+    plotPoints.push({
+      x: x0 - 1 - offset,
+      y: y0 - offset,
+    }) /* -> finish tip of ellipse */
+    plotPoints.push({ x: x1 + 1, y: y0++ - offset })
     plotPoints.push({ x: x0 - 1, y: y1 })
-    plotPoints.push({ x: x1 + 1, y: y1-- })
+    plotPoints.push({ x: x1 + 1 - offset, y: y1-- })
   }
   return plotPoints
 }
 
-export function plotRotatedEllipse(x, y, a, b, angle) {
+export function plotRotatedEllipse(x, y, a, b, angle, offset) {
   /* plot ellipse rotated by angle (radian) */
   var xd = a * a,
     yd = b * b
@@ -126,17 +133,21 @@ export function plotRotatedEllipse(x, y, a, b, angle) {
     y - b,
     x + a,
     y + b,
-    4 * zd * Math.cos(angle)
+    4 * zd * Math.cos(angle),
+    offset
   )
 }
 
-function plotRotatedEllipseRect(x0, y0, x1, y1, zd) {
+function plotRotatedEllipseRect(x0, y0, x1, y1, zd, offset) {
   let plotPoints = []
   /* rectangle enclosing the ellipse, integer rotation angle */
   var xd = x1 - x0,
     yd = y1 - y0,
     w = xd * yd
-  if (zd == 0) return plotEllipseRect(x0, y0, x1, y1) /* looks nicer */
+  if (zd == 0) return plotEllipseRect(x0, y0, x1, y1, offset) /* looks nicer */
+  //depending on control point, plus or minus
+  x1 += offset
+  y1 += offset
   if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
   assert(w <= 1.0 && w >= 0.0) /* limit angle to |zd|<=xd*yd */
   xd = Math.floor(xd * w + 0.5)
@@ -196,4 +207,31 @@ export function updateEllipseVertex(
   let angle = getAngle(px2 - px1, py2 - py1)
   let newVertex = pointOnCircle(px1, py1, opposingRadius, angle + radians)
   return newVertex
+}
+
+/**
+ * Find half of pixel that current subpixel exists in given an angle of a vector to the current pixel
+ * @param {*} x - subpixel coordinate
+ * @param {*} y - subpixel coordinate
+ * @param {*} angle - radians
+ * @param {boolean} inverse - inverse result
+ * @param {boolean} perpendicular - rotate angle 90 degrees
+ * @returns
+ */
+export function findHalf(x, y, angle, inverse, perpendicular) {
+  // Convert angle in degrees to slope m using tan function
+  const mGiven = Math.tan(angle)
+  // Calculate the perpendicular slope
+  const m = mGiven !== 0 ? -1 / mGiven : 90000000
+  // Calculate y-intercept b using midpoint (4, 4)
+  const b = 7 - m * 7
+  // Calculate the y-value of the line at the given x-coordinate
+  const yOnLine = m * x + b
+
+  //0 = far, 1 = close
+  if (y > yOnLine) {
+    return angle <= Math.PI && angle > 0 && !inverse ? 0 : 1
+  } else {
+    return angle <= Math.PI && angle > 0 && !inverse ? 1 : 0
+  }
 }

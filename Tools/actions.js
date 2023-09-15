@@ -9,6 +9,7 @@ import {
   plotCircle,
   plotRotatedEllipse,
   plotEllipseRect,
+  findHalf,
 } from "../utils/ellipse.js"
 
 //====================================//
@@ -704,7 +705,9 @@ export function actionEllipse(
   currentMode,
   brushStamp,
   weight,
-  scale = 1
+  scale = 1,
+  subPixelX = 0,
+  subPixelY = 0
 ) {
   //force coords to int
   centerx = Math.floor(centerx)
@@ -717,7 +720,10 @@ export function actionEllipse(
   ctx.fillStyle = currentColor.color
 
   if (stepNum === 1) {
-    let plotPoints = plotCircle(centerx, centery, ra)
+    let angle = getAngle(xa - centerx, ya - centery)
+    const offset = findHalf(subPixelX, subPixelY, angle)
+    //determine subpixel close or far from origin based on angle. Close is determined by subpixel 0, 7 at angle
+    let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, offset)
     renderPoints(
       plotPoints,
       brushStamp,
@@ -729,7 +735,8 @@ export function actionEllipse(
     )
   } else if (stepNum === 2) {
     let angle = getAngle(xa - centerx, ya - centery)
-    let plotPoints = plotRotatedEllipse(centerx, centery, ra, rb, angle)
+    const offset = findHalf(subPixelX, subPixelY, angle, true)
+    let plotPoints = plotRotatedEllipse(centerx, centery, ra, rb, angle, offset)
     renderPoints(
       plotPoints,
       brushStamp,

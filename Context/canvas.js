@@ -151,6 +151,8 @@ export const canvas = {
   previousYOffset: yOffset,
   subPixelX: null,
   subPixelY: null,
+  previousSubPixelX: null,
+  previousSubPixelY: null,
   zoomPixelX: null,
   zoomPixelY: null,
   //Functions
@@ -445,7 +447,8 @@ function redrawPoints() {
             p.layer.ctx,
             p.mode,
             p.brush,
-            p.weight
+            p.weight,
+            1
           )
           break
         case "replace":

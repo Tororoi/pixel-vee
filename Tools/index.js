@@ -341,6 +341,28 @@ export function quadCurveSteps() {
           default:
           //do nothing
         }
+        if (state.clickCounter === 3) {
+          state.px3 = state.cursorX
+          state.py3 = state.cursorY
+          vectorGuiState.px3 = state.px3
+          vectorGuiState.py3 = state.py3
+        }
+        //onscreen preview
+        actionQuadraticCurve(
+          state.px1 + canvas.xOffset,
+          state.py1 + canvas.yOffset,
+          state.px2 + canvas.xOffset,
+          state.py2 + canvas.yOffset,
+          state.px3 + canvas.xOffset,
+          state.py3 + canvas.yOffset,
+          state.clickCounter,
+          swatches.primary.color,
+          canvas.onScreenCTX,
+          state.mode,
+          state.brushStamp,
+          state.tool.brushSize,
+          canvas.offScreenCVS.width / canvas.offScreenCVS.width
+        )
       }
       break
     case "pointermove":
@@ -499,6 +521,30 @@ export function cubicCurveSteps() {
           default:
           //do nothing
         }
+        if (state.clickCounter === 4) {
+          state.px4 = state.cursorX
+          state.py4 = state.cursorY
+          vectorGuiState.px4 = state.px4
+          vectorGuiState.py4 = state.py4
+        }
+        //onscreen preview
+        actionCubicCurve(
+          state.px1 + canvas.xOffset,
+          state.py1 + canvas.yOffset,
+          state.px2 + canvas.xOffset,
+          state.py2 + canvas.yOffset,
+          state.px3 + canvas.xOffset,
+          state.py3 + canvas.yOffset,
+          state.px4 + canvas.xOffset,
+          state.py4 + canvas.yOffset,
+          state.clickCounter,
+          swatches.primary.color,
+          canvas.onScreenCTX,
+          state.mode,
+          state.brushStamp,
+          state.tool.brushSize,
+          canvas.offScreenCVS.width / canvas.offScreenCVS.width
+        )
       }
       break
     case "pointermove":
@@ -756,6 +802,7 @@ export function adjustCurveSteps(numPoints = 4) {
 /**
  * Draw ellipse
  * Supported modes: "draw, erase",
+ * TODO: Due to method of modifying radius on a pixel grid, only odd diameter circles are created. Eg. 15px radius creates a 31px diameter circle. To fix this, allow half pixel increments.
  */
 export function ellipseSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
@@ -793,6 +840,35 @@ export function ellipseSteps() {
           default:
           //do nothing
         }
+        if (state.clickCounter === 1) {
+          //initialize circle with radius 15 by default.
+          state.px2 = state.cursorX
+          state.py2 = state.cursorY
+          vectorGuiState.px2 = state.px2
+          vectorGuiState.py2 = state.py2
+          let dxa = state.px2 - state.px1
+          let dya = state.py2 - state.py1
+          state.radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
+          vectorGuiState.radA = state.radA
+        }
+        //onscreen preview
+        actionEllipse(
+          state.px1 + canvas.xOffset,
+          state.py1 + canvas.yOffset,
+          state.px2 + canvas.xOffset,
+          state.py2 + canvas.yOffset,
+          state.px3 + canvas.xOffset,
+          state.py3 + canvas.yOffset,
+          state.radA,
+          state.radB,
+          state.clickCounter,
+          swatches.primary.color,
+          canvas.onScreenCTX,
+          state.mode,
+          state.brushStamp,
+          state.tool.brushSize,
+          canvas.offScreenCVS.width / canvas.offScreenCVS.width
+        )
       }
       break
     case "pointermove":
@@ -802,8 +878,10 @@ export function ellipseSteps() {
         //draw line from origin point to current point onscreen
         //normalize pointermove to pixelgrid
         if (
-          state.onscreenX !== state.previousOnscreenX ||
-          state.onscreenY !== state.previousOnscreenY
+          state.onscreenX + canvas.subPixelX !==
+            state.previousOnscreenX + canvas.previousSubPixelX ||
+          state.onscreenY + canvas.subPixelY !==
+            state.previousOnscreenY + canvas.previousSubPixelY
         ) {
           canvas.draw()
           if (state.clickCounter === 1) {
@@ -858,10 +936,14 @@ export function ellipseSteps() {
             state.mode,
             state.brushStamp,
             state.tool.brushSize,
-            canvas.offScreenCVS.width / canvas.offScreenCVS.width
+            canvas.offScreenCVS.width / canvas.offScreenCVS.width,
+            canvas.subPixelX,
+            canvas.subPixelY
           )
           state.previousOnscreenX = state.onscreenX
           state.previousOnscreenY = state.onscreenY
+          canvas.previousSubPixelX = canvas.subPixelX
+          canvas.previousSubPixelY = canvas.subPixelY
         }
       }
       break
@@ -915,7 +997,8 @@ export function ellipseSteps() {
             canvas.currentLayer.ctx,
             state.mode,
             state.brushStamp,
-            state.tool.brushSize
+            state.tool.brushSize,
+            1
           )
           state.clickCounter = 0
           //store control points for timeline
@@ -1047,7 +1130,8 @@ export function adjustEllipseSteps() {
           canvas.onScreenCTX,
           state.undoStack[state.undoStack.length - 1][0].mode,
           state.undoStack[state.undoStack.length - 1][0].brush,
-          state.undoStack[state.undoStack.length - 1][0].weight
+          state.undoStack[state.undoStack.length - 1][0].weight,
+          1
         )
       }
       break
@@ -1104,7 +1188,10 @@ export function adjustEllipseSteps() {
           canvas.onScreenCTX,
           state.undoStack[state.undoStack.length - 1][0].mode,
           state.undoStack[state.undoStack.length - 1][0].brush,
-          state.undoStack[state.undoStack.length - 1][0].weight
+          state.undoStack[state.undoStack.length - 1][0].weight,
+          1,
+          canvas.subPixelX,
+          canvas.subPixelY
         )
       }
       break
@@ -1223,6 +1310,8 @@ export function eyedropperSteps() {
         //get color
         sampleColor(state.cursorX, state.cursorY)
         //draw square
+        renderRasterGUI(state, canvas, swatches)
+        renderVectorGUI(state, canvas)
         renderCursor(state, canvas, swatches)
         state.previousOnscreenX = state.onscreenX
         state.previousOnscreenY = state.onscreenY

@@ -332,12 +332,17 @@ function handleKeyUp(e) {
 const setCoordinates = (e) => {
   const x = e.offsetX
   const y = e.offsetY
-  canvas.subPixelX =
-    Math.floor(e.offsetX) -
-    Math.floor(Math.floor(e.offsetX) / canvas.zoom) * canvas.zoom
-  canvas.subPixelY =
-    Math.floor(e.offsetY) -
-    Math.floor(Math.floor(e.offsetY) / canvas.zoom) * canvas.zoom
+  const fidelity = canvas.zoom / 16
+  canvas.subPixelX = Math.floor(
+    (Math.floor(e.offsetX) -
+      Math.floor(Math.floor(e.offsetX) / canvas.zoom) * canvas.zoom) /
+      fidelity
+  )
+  canvas.subPixelY = Math.floor(
+    (Math.floor(e.offsetY) -
+      Math.floor(Math.floor(e.offsetY) / canvas.zoom) * canvas.zoom) /
+      fidelity
+  )
   state.cursorWithCanvasOffsetX = Math.floor(x / canvas.zoom)
   state.cursorWithCanvasOffsetY = Math.floor(y / canvas.zoom)
   state.cursorX = Math.round(state.cursorWithCanvasOffsetX - canvas.xOffset)
@@ -353,10 +358,7 @@ function handlePointerDown(e) {
     return
   }
   setCoordinates(e)
-  //Re-render GUI
   canvas.draw()
-  renderRasterGUI(state, canvas, swatches)
-  renderVectorGUI(state, canvas)
   //Reset Cursor for mobile
   state.onscreenX = state.cursorWithCanvasOffsetX
   state.onscreenY = state.cursorWithCanvasOffsetY
@@ -372,6 +374,9 @@ function handlePointerDown(e) {
   }
   //run selected tool step function
   state.tool.fn()
+  //Re-render GUI
+  renderRasterGUI(state, canvas, swatches)
+  renderVectorGUI(state, canvas)
 }
 
 function handlePointerMove(e) {
@@ -388,7 +393,8 @@ function handlePointerMove(e) {
   //Hover brush
   state.onscreenX = state.cursorWithCanvasOffsetX
   state.onscreenY = state.cursorWithCanvasOffsetY
-  renderCursor(state, canvas, swatches)
+  renderRasterGUI(state, canvas, swatches)
+  renderVectorGUI(state, canvas)
   if (
     state.clicked ||
     ((state.tool.name === "quadCurve" || state.tool.name === "cubicCurve") &&
@@ -397,6 +403,7 @@ function handlePointerMove(e) {
     //run selected tool step function
     state.tool.fn()
   } else {
+    renderCursor(state, canvas, swatches)
     //normalize cursor render to pixelgrid
     if (
       state.onscreenX !== state.previousOnscreenX ||
@@ -444,6 +451,8 @@ function handlePointerUp(e) {
   state.redoStack = []
   canvas.pointerEvent = "none"
   if (!e.targetTouches) {
+    renderRasterGUI(state, canvas, swatches)
+    renderVectorGUI(state, canvas)
     renderCursor(state, canvas, swatches)
   }
 }
@@ -577,7 +586,7 @@ function handleZoom(e) {
       //offset by half of canvas
       let nox = zoomedX - canvas.offScreenCVS.width / 2
       let noy = zoomedY - canvas.offScreenCVS.height / 2
-      if (canvas.zoom < 32) {
+      if (canvas.zoom < 64) {
         zoomCanvas(z, nox, noy)
       }
     }

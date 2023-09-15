@@ -15,8 +15,6 @@ export function renderRasterGUI(state, canvas, swatches) {
 }
 
 export function renderCursor(state, canvas, swatches) {
-  renderRasterGUI(state, canvas, swatches)
-  renderVectorGUI(state, canvas)
   switch (state.tool.name) {
     case "grab":
       //show nothing
@@ -27,7 +25,7 @@ export function renderCursor(state, canvas, swatches) {
       break
     default:
       //TODO: erase mode is somewhat buggy with rendering. Find way to have it render without calling draw() more than needed.
-      if (state.mode === "erase" && state.tool.name === "draw") {
+      if (state.mode === "erase") {
         canvas.draw()
         actionDraw(
           state.cursorWithCanvasOffsetX,
@@ -39,7 +37,7 @@ export function renderCursor(state, canvas, swatches) {
           state.mode,
           canvas.offScreenCVS.width / canvas.offScreenCVS.width
         )
-        drawCursorBox(state, canvas)
+        // drawCursorBox(state, canvas)
       } else {
         drawCurrentPixel(state, canvas, swatches)
       }

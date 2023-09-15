@@ -61,7 +61,7 @@ function renderEllipseVector(canvas, vectorGuiState) {
     canvas.yOffset + vectorGuiState.py1 + 0.5
   )
 
-  if (vectorGuiState.px3) {
+  if (vectorGuiState.px3 !== null) {
     // canvas.vectorGuiCTX.quadraticCurveTo(
     //   canvas.xOffset + vectorGuiState.px3 + 0.5,
     //   canvas.yOffset + vectorGuiState.py3 + 0.5,
@@ -82,7 +82,7 @@ function renderEllipseVector(canvas, vectorGuiState) {
       vectorGuiState.px2,
       vectorGuiState.py2
     )
-  } else if (vectorGuiState.px2) {
+  } else if (vectorGuiState.px2 !== null) {
     // canvas.vectorGuiCTX.lineTo(
     //   canvas.xOffset + vectorGuiState.px2 + 0.5,
     //   canvas.yOffset + vectorGuiState.py2 + 0.5
@@ -133,7 +133,7 @@ function renderCurveVector(canvas, vectorGuiState) {
     canvas.yOffset + vectorGuiState.py1 + 0.5
   )
 
-  if (vectorGuiState.px4) {
+  if (vectorGuiState.px4 !== null) {
     // canvas.vectorGuiCTX.bezierCurveTo(
     //   canvas.xOffset + vectorGuiState.px3 + 0.5,
     //   canvas.yOffset + vectorGuiState.py3 + 0.5,
@@ -156,7 +156,7 @@ function renderCurveVector(canvas, vectorGuiState) {
       vectorGuiState.px4,
       vectorGuiState.py4
     )
-  } else if (vectorGuiState.px3) {
+  } else if (vectorGuiState.px3 !== null) {
     // canvas.vectorGuiCTX.quadraticCurveTo(
     //   canvas.xOffset + vectorGuiState.px3 + 0.5,
     //   canvas.yOffset + vectorGuiState.py3 + 0.5,
@@ -170,7 +170,7 @@ function renderCurveVector(canvas, vectorGuiState) {
       vectorGuiState.px3,
       vectorGuiState.py3
     )
-  } else if (vectorGuiState.px2) {
+  } else if (vectorGuiState.px2 !== null) {
     // canvas.vectorGuiCTX.lineTo(
     //   canvas.xOffset + vectorGuiState.px2 + 0.5,
     //   canvas.yOffset + vectorGuiState.py2 + 0.5
@@ -203,7 +203,7 @@ function drawControlPoints(pointsKeys, canvas, radius, modify = false) {
   vectorGuiState.collidedKeys = { xKey: null, yKey: null }
   for (let data of pointsKeys) {
     let point = { x: vectorGuiState[data.x], y: vectorGuiState[data.y] }
-    if (point.x && point.y) {
+    if (point.x !== null && point.y !== null) {
       let r = state.touch ? radius * 2 : radius
       if (modify && vectorGuiState.selectedPoint.xKey === data.x) {
         r = radius * 2
