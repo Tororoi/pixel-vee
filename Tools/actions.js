@@ -735,8 +735,24 @@ export function actionEllipse(
     )
   } else if (stepNum === 2) {
     let angle = getAngle(xa - centerx, ya - centery)
-    const offset = findHalf(subPixelX, subPixelY, angle, true)
-    let plotPoints = plotRotatedEllipse(centerx, centery, ra, rb, angle, offset)
+    //adjusting p3 should make findHalf on a perpendicular angle rotated -90 degrees, adjusting p1 should maintain offset, no subpixels
+    let quadrant = Math.ceil((angle + Math.PI / 2) / (Math.PI / 2))
+    // quadrant = [4, 1, 2, 3][quadrant - 1] // adjust p3
+    // let calcAngle = angle - Math.PI / 2 // adjust p3
+    let calcAngle = angle
+    const offset = findHalf(subPixelX, subPixelY, calcAngle)
+    // const offset = 1; //instead of subpixels, use manually selected option, would not need quadrant
+    // option could be described as "exclude center point from radius", toggle odd or even, odd being excluding center point and offset = 0
+    //for ellipse, passing the quadrant is also important to make offset go in the right direction
+    let plotPoints = plotRotatedEllipse(
+      centerx,
+      centery,
+      ra,
+      rb,
+      angle,
+      1 - offset,
+      quadrant
+    )
     renderPoints(
       plotPoints,
       brushStamp,

@@ -873,7 +873,18 @@ export function ellipseSteps() {
       break
     case "pointermove":
       if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
-        adjustEllipseSteps()
+        if (
+          state.onscreenX + canvas.subPixelX !==
+            state.previousOnscreenX + canvas.previousSubPixelX ||
+          state.onscreenY + canvas.subPixelY !==
+            state.previousOnscreenY + canvas.previousSubPixelY
+        ) {
+          adjustEllipseSteps()
+          state.previousOnscreenX = state.onscreenX
+          state.previousOnscreenY = state.onscreenY
+          canvas.previousSubPixelX = canvas.subPixelX
+          canvas.previousSubPixelY = canvas.subPixelY
+        }
       } else {
         //draw line from origin point to current point onscreen
         //normalize pointermove to pixelgrid
@@ -998,7 +1009,9 @@ export function ellipseSteps() {
             state.mode,
             state.brushStamp,
             state.tool.brushSize,
-            1
+            1,
+            canvas.subPixelX,
+            canvas.subPixelY
           )
           state.clickCounter = 0
           //store control points for timeline
@@ -1018,6 +1031,8 @@ export function ellipseSteps() {
             properties: {
               radA: state.radA,
               radB: state.radB,
+              subPixelX: canvas.subPixelX,
+              subPixelY: canvas.subPixelY,
               //add angle, bounding box minima maxima x and y
             },
           })
@@ -1131,7 +1146,9 @@ export function adjustEllipseSteps() {
           state.undoStack[state.undoStack.length - 1][0].mode,
           state.undoStack[state.undoStack.length - 1][0].brush,
           state.undoStack[state.undoStack.length - 1][0].weight,
-          1
+          1,
+          canvas.subPixelX,
+          canvas.subPixelY
         )
       }
       break
@@ -1249,6 +1266,10 @@ export function adjustEllipseSteps() {
           vectorGuiState.radA
         state.undoStack[state.undoStack.length - 1][0].properties.radB =
           vectorGuiState.radB
+        state.undoStack[state.undoStack.length - 1][0].properties.subPixelX =
+          canvas.subPixelX
+        state.undoStack[state.undoStack.length - 1][0].properties.subPixelY =
+          canvas.subPixelY
         state.undoStack[state.undoStack.length - 1][0].opacity = 1
         vectorGuiState.selectedPoint = {
           xKey: null,
@@ -1437,7 +1458,7 @@ export const tools = {
     fn: ellipseSteps,
     brushSize: 1,
     disabled: false,
-    options: [],
+    options: ["radiusExcludesCenter"], // rename to something shorter
     type: "vector",
   },
   //Utility Tools (does not affect timeline)

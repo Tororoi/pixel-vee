@@ -117,7 +117,7 @@ export function plotEllipseRect(x0, y0, x1, y1, offset) {
   return plotPoints
 }
 
-export function plotRotatedEllipse(x, y, a, b, angle, offset) {
+export function plotRotatedEllipse(x, y, a, b, angle, offset, quadrant) {
   /* plot ellipse rotated by angle (radian) */
   var xd = a * a,
     yd = b * b
@@ -134,20 +134,39 @@ export function plotRotatedEllipse(x, y, a, b, angle, offset) {
     x + a,
     y + b,
     4 * zd * Math.cos(angle),
-    offset
+    offset,
+    quadrant
   )
 }
 
-function plotRotatedEllipseRect(x0, y0, x1, y1, zd, offset) {
+function plotRotatedEllipseRect(x0, y0, x1, y1, zd, offset, quadrant) {
   let plotPoints = []
   /* rectangle enclosing the ellipse, integer rotation angle */
   var xd = x1 - x0,
     yd = y1 - y0,
     w = xd * yd
   if (zd == 0) return plotEllipseRect(x0, y0, x1, y1, offset) /* looks nicer */
-  //depending on control point, plus or minus
-  x1 += offset
-  y1 += offset
+  // based on quadrant is not enough, only feels right at diagonals. Vertical or horizontal angles distort the ellipse. eightfold quadrants would be better, only offset one coord in cardinal directions.
+  switch (quadrant) {
+    case 1:
+      x1 += offset
+      y0 -= offset
+      break
+    case 2:
+      x1 += offset
+      y1 += offset
+      break
+    case 3:
+      x0 -= offset
+      y1 += offset
+      break
+    case 4:
+      x0 -= offset
+      y0 -= offset
+      break
+    default:
+    //none
+  }
   if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
   assert(w <= 1.0 && w >= 0.0) /* limit angle to |zd|<=xd*yd */
   xd = Math.floor(xd * w + 0.5)
@@ -218,7 +237,7 @@ export function updateEllipseVertex(
  * @param {boolean} perpendicular - rotate angle 90 degrees
  * @returns
  */
-export function findHalf(x, y, angle, inverse, perpendicular) {
+export function findHalf(x, y, angle) {
   // Convert angle in degrees to slope m using tan function
   const mGiven = Math.tan(angle)
   // Calculate the perpendicular slope
@@ -230,8 +249,8 @@ export function findHalf(x, y, angle, inverse, perpendicular) {
 
   //0 = far, 1 = close
   if (y > yOnLine) {
-    return angle <= Math.PI && angle > 0 && !inverse ? 0 : 1
+    return angle <= Math.PI && angle > 0 ? 0 : 1
   } else {
-    return angle <= Math.PI && angle > 0 && !inverse ? 1 : 0
+    return angle <= Math.PI && angle > 0 ? 1 : 0
   }
 }
