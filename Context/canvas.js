@@ -449,8 +449,9 @@ function redrawPoints() {
             p.brush,
             p.weight,
             1,
-            p.properties.subPixelX,
-            p.properties.subPixelY
+            p.properties.angle,
+            p.properties.offset,
+            p.properties.angleOffset
           )
           break
         case "replace":

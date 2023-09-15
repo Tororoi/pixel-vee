@@ -5,12 +5,7 @@ import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { generateRandomRGB } from "../utils/colors.js"
 import { vectorGuiState } from "../GUI/vector.js"
-import {
-  plotCircle,
-  plotRotatedEllipse,
-  plotEllipseRect,
-  findHalf,
-} from "../utils/ellipse.js"
+import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -706,8 +701,9 @@ export function actionEllipse(
   brushStamp,
   weight,
   scale = 1,
-  subPixelX = 0,
-  subPixelY = 0
+  angle,
+  offset,
+  angleOffset = 0
 ) {
   //force coords to int
   centerx = Math.floor(centerx)
@@ -719,10 +715,19 @@ export function actionEllipse(
 
   ctx.fillStyle = currentColor.color
 
+  const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+  while (angle < 0) {
+    angle += 2 * Math.PI
+  }
+  // Determine the slice in which the angle exists
+  let index =
+    Math.floor(
+      (angle + angleOffset + Math.PI / 2 + Math.PI / 8) / (Math.PI / 4)
+    ) % 8
+  let compassDir = directions[index]
+  console.log(compassDir)
+
   if (stepNum === 1) {
-    let angle = getAngle(xa - centerx, ya - centery)
-    const offset = findHalf(subPixelX, subPixelY, angle)
-    //determine subpixel close or far from origin based on angle. Close is determined by subpixel 0, 7 at angle
     let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, offset)
     renderPoints(
       plotPoints,
@@ -734,24 +739,14 @@ export function actionEllipse(
       scale
     )
   } else if (stepNum === 2) {
-    let angle = getAngle(xa - centerx, ya - centery)
-    //adjusting p3 should make findHalf on a perpendicular angle rotated -90 degrees, adjusting p1 should maintain offset, no subpixels
-    let quadrant = Math.ceil((angle + Math.PI / 2) / (Math.PI / 2))
-    // quadrant = [4, 1, 2, 3][quadrant - 1] // adjust p3
-    // let calcAngle = angle - Math.PI / 2 // adjust p3
-    let calcAngle = angle
-    const offset = findHalf(subPixelX, subPixelY, calcAngle)
-    // const offset = 1; //instead of subpixels, use manually selected option, would not need quadrant
-    // option could be described as "exclude center point from radius", toggle odd or even, odd being excluding center point and offset = 0
-    //for ellipse, passing the quadrant is also important to make offset go in the right direction
     let plotPoints = plotRotatedEllipse(
       centerx,
       centery,
       ra,
       rb,
       angle,
-      1 - offset,
-      quadrant
+      offset,
+      compassDir
     )
     renderPoints(
       plotPoints,

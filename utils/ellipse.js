@@ -117,7 +117,7 @@ export function plotEllipseRect(x0, y0, x1, y1, offset) {
   return plotPoints
 }
 
-export function plotRotatedEllipse(x, y, a, b, angle, offset, quadrant) {
+export function plotRotatedEllipse(x, y, a, b, angle, offset, compassDir) {
   /* plot ellipse rotated by angle (radian) */
   var xd = a * a,
     yd = b * b
@@ -135,11 +135,11 @@ export function plotRotatedEllipse(x, y, a, b, angle, offset, quadrant) {
     y + b,
     4 * zd * Math.cos(angle),
     offset,
-    quadrant
+    compassDir
   )
 }
 
-function plotRotatedEllipseRect(x0, y0, x1, y1, zd, offset, quadrant) {
+function plotRotatedEllipseRect(x0, y0, x1, y1, zd, offset, compassDir) {
   let plotPoints = []
   /* rectangle enclosing the ellipse, integer rotation angle */
   var xd = x1 - x0,
@@ -147,22 +147,37 @@ function plotRotatedEllipseRect(x0, y0, x1, y1, zd, offset, quadrant) {
     w = xd * yd
   if (zd == 0) return plotEllipseRect(x0, y0, x1, y1, offset) /* looks nicer */
   // based on quadrant is not enough, only feels right at diagonals. Vertical or horizontal angles distort the ellipse. eightfold quadrants would be better, only offset one coord in cardinal directions.
-  switch (quadrant) {
-    case 1:
-      x1 += offset
-      y0 -= offset
+  //TODO: keep offset consistent during radius adjustment and use another gui element to control the way radius is handled, drawn as a compass, 8 options plus default center which is no offset
+  //Direction shrinks opposite side. eg. radius 7 goes from diameter 15 to diameter 14
+  //gui element could 2 sliders, vertical and horizontal with 3 values each, offset -1, 0, 1 (right, none, left)
+  switch (compassDir) {
+    case "N":
+      y1 -= offset
       break
-    case 2:
-      x1 += offset
-      y1 += offset
+    case "NE":
+      x0 += offset
+      y1 -= offset
       break
-    case 3:
-      x0 -= offset
-      y1 += offset
+    case "E":
+      x0 += offset
       break
-    case 4:
-      x0 -= offset
-      y0 -= offset
+    case "SE":
+      x0 += offset
+      y0 += offset
+      break
+    case "S":
+      y0 += offset
+      break
+    case "SW":
+      x1 -= offset
+      y0 += offset
+      break
+    case "W":
+      x1 -= offset
+      break
+    case "NW":
+      x1 -= offset
+      y1 -= offset
       break
     default:
     //none
@@ -230,6 +245,7 @@ export function updateEllipseVertex(
 
 /**
  * Find half of pixel that current subpixel exists in given an angle of a vector to the current pixel
+ * determine subpixel close or far from origin based on angle.
  * @param {*} x - subpixel coordinate
  * @param {*} y - subpixel coordinate
  * @param {*} angle - radians
@@ -248,6 +264,7 @@ export function findHalf(x, y, angle) {
   const yOnLine = m * x + b
 
   //0 = far, 1 = close
+  angle = angle % (2 * Math.PI)
   if (y > yOnLine) {
     return angle <= Math.PI && angle > 0 ? 0 : 1
   } else {

@@ -60,6 +60,9 @@ export const state = {
   py4: null,
   radA: null,
   radB: null,
+  angle: null,
+  angleOffset: 0,
+  offset: null, //rename to something more specific
   //for perfect pixels
   lastDrawnX: null,
   lastDrawnY: null,
