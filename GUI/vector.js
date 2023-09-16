@@ -55,10 +55,10 @@ function renderEllipseVector(canvas, vectorGuiState) {
   canvas.vectorGuiCTX.strokeStyle = "white"
   canvas.vectorGuiCTX.fillStyle = "white"
 
-  // let x1Offset = 0 //state.x1Offset / 2
-  // let y1Offset = 0 //state.y1Offset / 2
-  let x1Offset = state.x1Offset / 2
-  let y1Offset = state.y1Offset / 2
+  let x1Offset = 0 //state.x1Offset / 2
+  let y1Offset = 0 //state.y1Offset / 2
+  // let x1Offset = state.x1Offset / 2
+  // let y1Offset = state.y1Offset / 2
 
   canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.moveTo(
