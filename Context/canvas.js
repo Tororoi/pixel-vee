@@ -140,6 +140,8 @@ export const canvas = {
   tempLayer: null,
   bgColor: "rgba(131, 131, 131, 0.5)",
   borderColor: "black",
+  //Vectors
+  currentVectorIndex: null,
   //Cursor
   pointerEvent: "none",
   sizePointerState: "none",
@@ -747,16 +749,66 @@ function renderLayersToDOM() {
   })
 }
 
+//Vectors
+function vectorInteract(e) {
+  let vector = e.target.closest(".vector").vectorObj
+  //toggle visibility
+  if (e.target.className.includes("hide")) {
+    if (e.target.childNodes[0].className.includes("eyeopen")) {
+      e.target.childNodes[0].classList.remove("eyeopen")
+      e.target.childNodes[0].classList.add("eyeclosed")
+      vector.opacity = 0
+    } else if (e.target.childNodes[0].className.includes("eyeclosed")) {
+      e.target.childNodes[0].classList.remove("eyeclosed")
+      e.target.childNodes[0].classList.add("eyeopen")
+      vector.opacity = 1
+    }
+  } else {
+    //switch tool
+    //reset old button
+    let oldToolBtn = document.querySelector(`#${state.tool.name}`)
+    oldToolBtn.style.background = "rgb(131, 131, 131)"
+    //set new button
+    let toolBtn = document.querySelector(`#${vector.tool.name}`)
+    toolBtn.style.background = "rgb(255, 255, 255)"
+    state.tool = tools[vector.tool.name]
+    // canvas.vectorGuiCVS.style.cursor = "none"
+    //select current vector
+    console.log(vector)
+    vectorGuiState.reset(canvas)
+    vectorGuiState.px1 = vector.x.px1
+    vectorGuiState.py1 = vector.y.py1
+    vectorGuiState.px2 = vector.x.px2
+    vectorGuiState.py2 = vector.y.py2
+    vectorGuiState.px3 = vector.x.px3
+    vectorGuiState.py3 = vector.y.py3
+    vectorGuiState.px4 = vector.x.px4
+    vectorGuiState.py4 = vector.y.py4
+    vectorGuiState.radA = vector.properties?.radA
+    vectorGuiState.radB = vector.properties?.radB
+    // if (vector.type === "raster") {
+    canvas.currentVectorIndex = vector.index
+    state.angle = vector.properties?.angle
+    state.angleOffset = 0
+    state.x1Offset = vector.properties?.x1Offset
+    state.y1Offset = vector.properties?.y1Offset
+    state.offset = vector.properties?.offset
+    // renderVectorsToDOM()
+    renderVectorGUI(state, canvas)
+    // }
+  }
+  // canvas.draw()
+}
+
 function renderVectorsToDOM() {
   vectorsContainer.innerHTML = ""
-  let id = 0
   state.undoStack.forEach((action) => {
     let p = action[0]
     if (p.tool.type === "vector") {
+      p.index = state.undoStack.indexOf(action)
       let vectorElement = document.createElement("div")
-      vectorElement.className = `vector ${id}`
-      vectorElement.id = id
-      id += 1
+      vectorElement.className = `vector ${p.index}`
+      vectorElement.id = p.index
       // vectorElement.textContent = id
       vectorElement.draggable = true
       let thumbnailCVS = document.createElement("canvas")
@@ -903,10 +955,11 @@ uploadBtn.addEventListener("change", addReferenceLayer)
 newLayerBtn.addEventListener("click", addRasterLayer)
 
 layersContainer.addEventListener("click", layerInteract)
-
 layersContainer.addEventListener("dragstart", dragLayerStart)
 layersContainer.addEventListener("dragover", dragLayerOver)
 layersContainer.addEventListener("dragenter", dragLayerEnter)
 layersContainer.addEventListener("dragleave", dragLayerLeave)
 layersContainer.addEventListener("drop", dropLayer)
 layersContainer.addEventListener("dragend", dragLayerEnd)
+
+vectorsContainer.addEventListener("click", vectorInteract)

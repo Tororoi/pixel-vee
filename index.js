@@ -443,6 +443,7 @@ function handlePointerUp(e) {
       state.tool.name === "cubicCurve" ||
       state.tool.name === "ellipse"
     ) {
+      canvas.currentVectorIndex = state.undoStack.indexOf(state.points)
       canvas.renderVectorsToDOM()
     }
   }

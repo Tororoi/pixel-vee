@@ -310,6 +310,12 @@ export function reset(canvas) {
   vectorGuiState.py4 = null
   vectorGuiState.radA = null
   vectorGuiState.radB = null
+  canvas.currentVectorIndex = null
+  state.angle = null
+  state.angleOffset = 0
+  state.x1Offset = 0
+  state.y1Offset = 0
+  state.offset = null
   canvas.vectorGuiCTX.clearRect(
     0,
     0,

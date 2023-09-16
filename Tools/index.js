@@ -696,7 +696,7 @@ export function adjustCurveSteps(numPoints = 4) {
           xKey: vectorGuiState.collidedKeys.xKey,
           yKey: vectorGuiState.collidedKeys.yKey,
         }
-        state.undoStack[state.undoStack.length - 1][0].opacity = 0
+        state.undoStack[canvas.currentVectorIndex][0].opacity = 0
         canvas.render()
         if (numPoints === 3) {
           actionQuadraticCurve(
@@ -707,11 +707,11 @@ export function adjustCurveSteps(numPoints = 4) {
             vectorGuiState.px3 + canvas.xOffset,
             vectorGuiState.py3 + canvas.yOffset,
             3,
-            state.undoStack[state.undoStack.length - 1][0].color,
+            state.undoStack[canvas.currentVectorIndex][0].color,
             canvas.onScreenCTX,
-            state.undoStack[state.undoStack.length - 1][0].mode,
-            state.undoStack[state.undoStack.length - 1][0].brush,
-            state.undoStack[state.undoStack.length - 1][0].weight
+            state.undoStack[canvas.currentVectorIndex][0].mode,
+            state.undoStack[canvas.currentVectorIndex][0].brush,
+            state.undoStack[canvas.currentVectorIndex][0].weight
           )
         } else {
           actionCubicCurve(
@@ -724,11 +724,11 @@ export function adjustCurveSteps(numPoints = 4) {
             vectorGuiState.px4 + canvas.xOffset,
             vectorGuiState.py4 + canvas.yOffset,
             4,
-            state.undoStack[state.undoStack.length - 1][0].color,
+            state.undoStack[canvas.currentVectorIndex][0].color,
             canvas.onScreenCTX,
-            state.undoStack[state.undoStack.length - 1][0].mode,
-            state.undoStack[state.undoStack.length - 1][0].brush,
-            state.undoStack[state.undoStack.length - 1][0].weight
+            state.undoStack[canvas.currentVectorIndex][0].mode,
+            state.undoStack[canvas.currentVectorIndex][0].brush,
+            state.undoStack[canvas.currentVectorIndex][0].weight
           )
         }
       }
@@ -747,11 +747,11 @@ export function adjustCurveSteps(numPoints = 4) {
             vectorGuiState.px3 + canvas.xOffset,
             vectorGuiState.py3 + canvas.yOffset,
             3,
-            state.undoStack[state.undoStack.length - 1][0].color,
+            state.undoStack[canvas.currentVectorIndex][0].color,
             canvas.onScreenCTX,
-            state.undoStack[state.undoStack.length - 1][0].mode,
-            state.undoStack[state.undoStack.length - 1][0].brush,
-            state.undoStack[state.undoStack.length - 1][0].weight
+            state.undoStack[canvas.currentVectorIndex][0].mode,
+            state.undoStack[canvas.currentVectorIndex][0].brush,
+            state.undoStack[canvas.currentVectorIndex][0].weight
           )
         } else {
           actionCubicCurve(
@@ -764,11 +764,11 @@ export function adjustCurveSteps(numPoints = 4) {
             vectorGuiState.px4 + canvas.xOffset,
             vectorGuiState.py4 + canvas.yOffset,
             4,
-            state.undoStack[state.undoStack.length - 1][0].color,
+            state.undoStack[canvas.currentVectorIndex][0].color,
             canvas.onScreenCTX,
-            state.undoStack[state.undoStack.length - 1][0].mode,
-            state.undoStack[state.undoStack.length - 1][0].brush,
-            state.undoStack[state.undoStack.length - 1][0].weight
+            state.undoStack[canvas.currentVectorIndex][0].mode,
+            state.undoStack[canvas.currentVectorIndex][0].brush,
+            state.undoStack[canvas.currentVectorIndex][0].weight
           )
         }
       }
@@ -777,13 +777,13 @@ export function adjustCurveSteps(numPoints = 4) {
       if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
         vectorGuiState[vectorGuiState.selectedPoint.xKey] = state.cursorX
         vectorGuiState[vectorGuiState.selectedPoint.yKey] = state.cursorY
-        state.undoStack[state.undoStack.length - 1][0].x[
+        state.undoStack[canvas.currentVectorIndex][0].x[
           vectorGuiState.selectedPoint.xKey
         ] = state.cursorX
-        state.undoStack[state.undoStack.length - 1][0].y[
+        state.undoStack[canvas.currentVectorIndex][0].y[
           vectorGuiState.selectedPoint.yKey
         ] = state.cursorY
-        state.undoStack[state.undoStack.length - 1][0].opacity = 1
+        state.undoStack[canvas.currentVectorIndex][0].opacity = 1
         vectorGuiState.selectedPoint = {
           xKey: null,
           yKey: null,
@@ -1196,7 +1196,8 @@ export function adjustEllipseSteps() {
           )
         }
         //TODO: changing opacity isn't enough since erase mode will be unaffected
-        state.undoStack[state.undoStack.length - 1][0].opacity = 0
+        // let action = state.undoStack[canvas.currentVectorIndex]
+        state.undoStack[canvas.currentVectorIndex][0].opacity = 0
         canvas.render()
         //angle and offset passed should consider which point is being adjusted. For p1, use current state.offset instead of recalculating. For p3, add 1.5 * Math.PI to angle
         actionEllipse(
@@ -1209,11 +1210,11 @@ export function adjustEllipseSteps() {
           vectorGuiState.radA,
           vectorGuiState.radB,
           2,
-          state.undoStack[state.undoStack.length - 1][0].color,
+          state.undoStack[canvas.currentVectorIndex][0].color,
           canvas.onScreenCTX,
-          state.undoStack[state.undoStack.length - 1][0].mode,
-          state.undoStack[state.undoStack.length - 1][0].brush,
-          state.undoStack[state.undoStack.length - 1][0].weight,
+          state.undoStack[canvas.currentVectorIndex][0].mode,
+          state.undoStack[canvas.currentVectorIndex][0].brush,
+          state.undoStack[canvas.currentVectorIndex][0].weight,
           1,
           state.angle,
           state.offset,
@@ -1291,11 +1292,11 @@ export function adjustEllipseSteps() {
           vectorGuiState.radA,
           vectorGuiState.radB,
           2,
-          state.undoStack[state.undoStack.length - 1][0].color,
+          state.undoStack[canvas.currentVectorIndex][0].color,
           canvas.onScreenCTX,
-          state.undoStack[state.undoStack.length - 1][0].mode,
-          state.undoStack[state.undoStack.length - 1][0].brush,
-          state.undoStack[state.undoStack.length - 1][0].weight,
+          state.undoStack[canvas.currentVectorIndex][0].mode,
+          state.undoStack[canvas.currentVectorIndex][0].brush,
+          state.undoStack[canvas.currentVectorIndex][0].weight,
           1,
           state.angle,
           state.offset,
@@ -1362,31 +1363,25 @@ export function adjustEllipseSteps() {
             state.angleOffset
           )
         }
-        state.undoStack[state.undoStack.length - 1][0].x.px1 =
-          vectorGuiState.px1
-        state.undoStack[state.undoStack.length - 1][0].y.py1 =
-          vectorGuiState.py1
-        state.undoStack[state.undoStack.length - 1][0].x.px2 =
-          vectorGuiState.px2
-        state.undoStack[state.undoStack.length - 1][0].y.py2 =
-          vectorGuiState.py2
-        state.undoStack[state.undoStack.length - 1][0].x.px3 =
-          vectorGuiState.px3
-        state.undoStack[state.undoStack.length - 1][0].y.py3 =
-          vectorGuiState.py3
-        state.undoStack[state.undoStack.length - 1][0].properties.radA =
+        state.undoStack[canvas.currentVectorIndex][0].x.px1 = vectorGuiState.px1
+        state.undoStack[canvas.currentVectorIndex][0].y.py1 = vectorGuiState.py1
+        state.undoStack[canvas.currentVectorIndex][0].x.px2 = vectorGuiState.px2
+        state.undoStack[canvas.currentVectorIndex][0].y.py2 = vectorGuiState.py2
+        state.undoStack[canvas.currentVectorIndex][0].x.px3 = vectorGuiState.px3
+        state.undoStack[canvas.currentVectorIndex][0].y.py3 = vectorGuiState.py3
+        state.undoStack[canvas.currentVectorIndex][0].properties.radA =
           vectorGuiState.radA
-        state.undoStack[state.undoStack.length - 1][0].properties.radB =
+        state.undoStack[canvas.currentVectorIndex][0].properties.radB =
           vectorGuiState.radB
-        state.undoStack[state.undoStack.length - 1][0].properties.angle =
+        state.undoStack[canvas.currentVectorIndex][0].properties.angle =
           state.angle
-        state.undoStack[state.undoStack.length - 1][0].properties.offset =
+        state.undoStack[canvas.currentVectorIndex][0].properties.offset =
           state.offset
-        state.undoStack[state.undoStack.length - 1][0].properties.x1Offset =
+        state.undoStack[canvas.currentVectorIndex][0].properties.x1Offset =
           state.x1Offset
-        state.undoStack[state.undoStack.length - 1][0].properties.y1Offset =
+        state.undoStack[canvas.currentVectorIndex][0].properties.y1Offset =
           state.y1Offset
-        state.undoStack[state.undoStack.length - 1][0].opacity = 1
+        state.undoStack[canvas.currentVectorIndex][0].opacity = 1
         vectorGuiState.selectedPoint = {
           xKey: null,
           yKey: null,
