@@ -339,6 +339,7 @@ export function renderVectorGUI(state, canvas) {
   if (state.vectorMode) {
     //Prevent blurring
     canvas.vectorGuiCTX.imageSmoothingEnabled = false
+    //TODO: render grid if grid on
     if (state.tool.name === "quadCurve" || state.tool.name === "cubicCurve") {
       renderCurveVector(canvas, vectorGuiState)
     } else if (state.tool.name === "ellipse") {
