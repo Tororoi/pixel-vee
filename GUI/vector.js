@@ -48,15 +48,21 @@ function drawControlPointHandle(canvas, x1, y1, x2, y2) {
   )
 }
 
-function renderEllipseVector(canvas, vectorGuiState) {
+function renderEllipseVector(
+  canvas,
+  vectorGuiState,
+  x1Offset = 0,
+  y1Offset = 0,
+  color = "white"
+) {
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
   canvas.vectorGuiCTX.lineWidth = lineWidth
-  canvas.vectorGuiCTX.strokeStyle = "white"
-  canvas.vectorGuiCTX.fillStyle = "white"
+  canvas.vectorGuiCTX.strokeStyle = color
+  canvas.vectorGuiCTX.fillStyle = color
 
-  let x1Offset = 0 //state.x1Offset / 2
-  let y1Offset = 0 //state.y1Offset / 2
+  // let x1Offset = 0 //state.x1Offset / 2
+  // let y1Offset = 0 //state.y1Offset / 2
   // let x1Offset = state.x1Offset / 2
   // let y1Offset = state.y1Offset / 2
 
@@ -307,6 +313,15 @@ export function renderVectorGUI(state, canvas) {
       renderCurveVector(canvas, vectorGuiState)
     } else if (state.tool.name === "ellipse") {
       renderEllipseVector(canvas, vectorGuiState)
+      if (state.x1Offset || state.y1Offset) {
+        renderEllipseVector(
+          canvas,
+          vectorGuiState,
+          state.x1Offset,
+          state.y1Offset,
+          "red"
+        )
+      }
     }
   }
 }
