@@ -451,7 +451,8 @@ function redrawPoints() {
             1,
             p.properties.angle,
             p.properties.offset,
-            p.properties.angleOffset
+            p.properties.x1Offset,
+            p.properties.y1Offset
           )
           break
         case "replace":

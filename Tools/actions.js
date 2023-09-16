@@ -703,7 +703,8 @@ export function actionEllipse(
   scale = 1,
   angle,
   offset,
-  angleOffset = 0
+  x1Offset,
+  y1Offset
 ) {
   //force coords to int
   centerx = Math.floor(centerx)
@@ -714,18 +715,6 @@ export function actionEllipse(
   yb = Math.floor(yb)
 
   ctx.fillStyle = currentColor.color
-
-  const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
-  while (angle < 0) {
-    angle += 2 * Math.PI
-  }
-  // Determine the slice in which the angle exists
-  let index =
-    Math.floor(
-      (angle + angleOffset + Math.PI / 2 + Math.PI / 8) / (Math.PI / 4)
-    ) % 8
-  let compassDir = directions[index]
-  console.log(compassDir)
 
   if (stepNum === 1) {
     let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, offset)
@@ -745,8 +734,10 @@ export function actionEllipse(
       ra,
       rb,
       angle,
-      offset,
-      compassDir
+      xa,
+      ya,
+      x1Offset,
+      y1Offset
     )
     renderPoints(
       plotPoints,

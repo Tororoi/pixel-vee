@@ -62,6 +62,8 @@ export const state = {
   radB: null,
   angle: null,
   angleOffset: 0,
+  x1Offset: 0,
+  y1Offset: 0,
   offset: null, //rename to something more specific
   //for perfect pixels
   lastDrawnX: null,

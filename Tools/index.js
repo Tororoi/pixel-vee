@@ -18,7 +18,11 @@ import {
   drawCurrentPixel,
   renderRasterGUI,
 } from "../GUI/raster.js"
-import { updateEllipseVertex, findHalf } from "../utils/ellipse.js"
+import {
+  updateEllipseVertex,
+  findHalf,
+  updateEllipseOffsets,
+} from "../utils/ellipse.js"
 
 //====================================//
 //=== * * * Tool Controllers * * * ===//
@@ -852,8 +856,14 @@ export function ellipseSteps() {
           state.radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
           vectorGuiState.radA = state.radA
         }
-        state.angle = getAngle(state.px2 - state.px1, state.py2 - state.py1)
-        state.offset = findHalf(canvas.subPixelX, canvas.subPixelY, state.angle)
+        updateEllipseOffsets(
+          state,
+          canvas,
+          state.px1,
+          state.py1,
+          state.px2,
+          state.py2
+        )
         //adjusting p3 should make findHalf on a perpendicular angle rotated -90 degrees, adjusting p1 should maintain offset, no subpixels
         // let calcAngle = angle - Math.PI / 2 // adjust p3
 
@@ -878,7 +888,9 @@ export function ellipseSteps() {
           state.tool.brushSize,
           canvas.offScreenCVS.width / canvas.offScreenCVS.width,
           state.angle,
-          state.offset
+          state.offset,
+          state.x1Offset,
+          state.y1Offset
         )
       }
       break
@@ -942,11 +954,13 @@ export function ellipseSteps() {
           //   vectorGuiState.py2 = state.py2
           //   //Do not update radB here
           // }
-          state.angle = getAngle(state.px2 - state.px1, state.py2 - state.py1)
-          state.offset = findHalf(
-            canvas.subPixelX,
-            canvas.subPixelY,
-            state.angle
+          updateEllipseOffsets(
+            state,
+            canvas,
+            state.px1,
+            state.py1,
+            state.px2,
+            state.py2
           )
           //onscreen preview
           actionEllipse(
@@ -966,7 +980,9 @@ export function ellipseSteps() {
             state.tool.brushSize,
             canvas.offScreenCVS.width / canvas.offScreenCVS.width,
             state.angle,
-            state.offset
+            state.offset,
+            state.x1Offset,
+            state.y1Offset
           )
           state.previousOnscreenX = state.onscreenX
           state.previousOnscreenY = state.onscreenY
@@ -1011,11 +1027,13 @@ export function ellipseSteps() {
           let dyb = state.py3 - state.py1
           state.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
           vectorGuiState.radB = state.radB
-          state.angle = getAngle(state.px2 - state.px1, state.py2 - state.py1)
-          state.offset = findHalf(
-            canvas.subPixelX,
-            canvas.subPixelY,
-            state.angle
+          updateEllipseOffsets(
+            state,
+            canvas,
+            state.px1,
+            state.py1,
+            state.px2,
+            state.py2
           )
           actionEllipse(
             state.px1,
@@ -1034,7 +1052,9 @@ export function ellipseSteps() {
             state.tool.brushSize,
             1,
             state.angle,
-            state.offset
+            state.offset,
+            state.x1Offset,
+            state.y1Offset
           )
           state.clickCounter = 0
           //store control points for timeline
@@ -1056,7 +1076,8 @@ export function ellipseSteps() {
               radB: state.radB,
               angle: state.angle,
               offset: state.offset,
-              angleOffset: state.angleOffset,
+              x1Offset: state.x1Offset,
+              y1Offset: state.y1Offset,
               //add bounding box minima maxima x and y?
             },
           })
@@ -1152,26 +1173,25 @@ export function adjustEllipseSteps() {
           vectorGuiState.px3 = vectorGuiState.px1 + dxb
           vectorGuiState.py3 = vectorGuiState.py1 + dyb
         } else if (vectorGuiState.selectedPoint.xKey === "px2") {
-          state.angle = getAngle(
-            vectorGuiState.px2 - vectorGuiState.px1,
-            vectorGuiState.py2 - vectorGuiState.py1
-          )
           state.angleOffset = 0
-          state.offset = findHalf(
-            canvas.subPixelX,
-            canvas.subPixelY,
-            state.angle
+          updateEllipseOffsets(
+            state,
+            canvas,
+            vectorGuiState.px1,
+            vectorGuiState.py1,
+            vectorGuiState.px2,
+            vectorGuiState.py2
           )
         } else if (vectorGuiState.selectedPoint.xKey === "px3") {
-          state.angle = getAngle(
-            vectorGuiState.px2 - vectorGuiState.px1,
-            vectorGuiState.py2 - vectorGuiState.py1
-          )
           state.angleOffset = 1.5 * Math.PI
-          state.offset = findHalf(
-            canvas.subPixelX,
-            canvas.subPixelY,
-            state.angle + state.angleOffset
+          updateEllipseOffsets(
+            state,
+            canvas,
+            vectorGuiState.px1,
+            vectorGuiState.py1,
+            vectorGuiState.px2,
+            vectorGuiState.py2,
+            state.angleOffset
           )
         }
         //TODO: changing opacity isn't enough since erase mode will be unaffected
@@ -1196,7 +1216,8 @@ export function adjustEllipseSteps() {
           1,
           state.angle,
           state.offset,
-          state.angleOffset
+          state.x1Offset,
+          state.y1Offset
         )
       }
       break
@@ -1225,15 +1246,14 @@ export function adjustEllipseSteps() {
           )
           vectorGuiState.px3 = newVertex.x
           vectorGuiState.py3 = newVertex.y
-          state.angle = getAngle(
-            vectorGuiState.px2 - vectorGuiState.px1,
-            vectorGuiState.py2 - vectorGuiState.py1
-          )
           state.angleOffset = 0
-          state.offset = findHalf(
-            canvas.subPixelX,
-            canvas.subPixelY,
-            state.angle
+          updateEllipseOffsets(
+            state,
+            canvas,
+            vectorGuiState.px1,
+            vectorGuiState.py1,
+            vectorGuiState.px2,
+            vectorGuiState.py2
           )
         } else if (vectorGuiState.selectedPoint.xKey === "px3") {
           vectorGuiState.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
@@ -1247,15 +1267,15 @@ export function adjustEllipseSteps() {
           )
           vectorGuiState.px2 = newVertex.x
           vectorGuiState.py2 = newVertex.y
-          state.angle = getAngle(
-            vectorGuiState.px2 - vectorGuiState.px1,
-            vectorGuiState.py2 - vectorGuiState.py1
-          )
           state.angleOffset = 1.5 * Math.PI
-          state.offset = findHalf(
-            canvas.subPixelX,
-            canvas.subPixelY,
-            state.angle + state.angleOffset
+          updateEllipseOffsets(
+            state,
+            canvas,
+            vectorGuiState.px1,
+            vectorGuiState.py1,
+            vectorGuiState.px2,
+            vectorGuiState.py2,
+            state.angleOffset
           )
         }
         canvas.draw()
@@ -1277,7 +1297,8 @@ export function adjustEllipseSteps() {
           1,
           state.angle,
           state.offset,
-          state.angleOffset
+          state.x1Offset,
+          state.y1Offset
         )
       }
       break
@@ -1306,15 +1327,14 @@ export function adjustEllipseSteps() {
           )
           vectorGuiState.px3 = newVertex.x
           vectorGuiState.py3 = newVertex.y
-          state.angle = getAngle(
-            vectorGuiState.px2 - vectorGuiState.px1,
-            vectorGuiState.py2 - vectorGuiState.py1
-          )
           state.angleOffset = 0
-          state.offset = findHalf(
-            canvas.subPixelX,
-            canvas.subPixelY,
-            state.angle
+          updateEllipseOffsets(
+            state,
+            canvas,
+            vectorGuiState.px1,
+            vectorGuiState.py1,
+            vectorGuiState.px2,
+            vectorGuiState.py2
           )
         } else if (vectorGuiState.selectedPoint.xKey === "px3") {
           vectorGuiState.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
@@ -1328,15 +1348,15 @@ export function adjustEllipseSteps() {
           )
           vectorGuiState.px2 = newVertex.x
           vectorGuiState.py2 = newVertex.y
-          state.angle = getAngle(
-            vectorGuiState.px2 - vectorGuiState.px1,
-            vectorGuiState.py2 - vectorGuiState.py1
-          )
           state.angleOffset = 1.5 * Math.PI
-          state.offset = findHalf(
-            canvas.subPixelX,
-            canvas.subPixelY,
-            state.angle + state.angleOffset
+          updateEllipseOffsets(
+            state,
+            canvas,
+            vectorGuiState.px1,
+            vectorGuiState.py1,
+            vectorGuiState.px2,
+            vectorGuiState.py2,
+            state.angleOffset
           )
         }
         state.undoStack[state.undoStack.length - 1][0].x.px1 =
@@ -1359,8 +1379,10 @@ export function adjustEllipseSteps() {
           state.angle
         state.undoStack[state.undoStack.length - 1][0].properties.offset =
           state.offset
-        state.undoStack[state.undoStack.length - 1][0].properties.angleOffset =
-          state.angleOffset
+        state.undoStack[state.undoStack.length - 1][0].properties.x1Offset =
+          state.x1Offset
+        state.undoStack[state.undoStack.length - 1][0].properties.y1Offset =
+          state.y1Offset
         state.undoStack[state.undoStack.length - 1][0].opacity = 1
         vectorGuiState.selectedPoint = {
           xKey: null,

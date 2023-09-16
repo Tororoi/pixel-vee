@@ -66,7 +66,7 @@ export function plotCircle(xm, ym, r, offset) {
   return plotPoints
 }
 
-export function plotEllipseRect(x0, y0, x1, y1, offset) {
+export function plotEllipseRect(x0, y0, x1, y1) {
   let plotPoints = []
   /* rectangular parameter enclosing the ellipse */
   var a = Math.abs(x1 - x0),
@@ -87,10 +87,10 @@ export function plotEllipseRect(x0, y0, x1, y1, offset) {
   a = 8 * a * a
   b1 = 8 * b * b
   do {
-    plotPoints.push({ x: x1 - offset, y: y0 - offset }) /*   I. Quadrant */
-    plotPoints.push({ x: x0, y: y0 - offset }) /*  II. Quadrant */
+    plotPoints.push({ x: x1, y: y0 }) /*   I. Quadrant */
+    plotPoints.push({ x: x0, y: y0 }) /*  II. Quadrant */
     plotPoints.push({ x: x0, y: y1 }) /* III. Quadrant */
-    plotPoints.push({ x: x1 - offset, y: y1 }) /*  IV. Quadrant */
+    plotPoints.push({ x: x1, y: y1 }) /*  IV. Quadrant */
     e2 = 2 * err
     if (e2 <= dy) {
       y0++
@@ -107,17 +107,27 @@ export function plotEllipseRect(x0, y0, x1, y1, offset) {
   while (y0 - y1 <= b) {
     /* too early stop of flat ellipses a=1 */
     plotPoints.push({
-      x: x0 - 1 - offset,
-      y: y0 - offset,
+      x: x0 - 1,
+      y: y0,
     }) /* -> finish tip of ellipse */
-    plotPoints.push({ x: x1 + 1, y: y0++ - offset })
+    plotPoints.push({ x: x1 + 1, y: y0++ })
     plotPoints.push({ x: x0 - 1, y: y1 })
-    plotPoints.push({ x: x1 + 1 - offset, y: y1-- })
+    plotPoints.push({ x: x1 + 1, y: y1-- })
   }
   return plotPoints
 }
 
-export function plotRotatedEllipse(x, y, a, b, angle, offset, compassDir) {
+export function plotRotatedEllipse(
+  x,
+  y,
+  a,
+  b,
+  angle,
+  xa,
+  ya,
+  x1Offset,
+  y1Offset
+) {
   /* plot ellipse rotated by angle (radian) */
   var xd = a * a,
     yd = b * b
@@ -131,58 +141,23 @@ export function plotRotatedEllipse(x, y, a, b, angle, offset, compassDir) {
   return plotRotatedEllipseRect(
     x - a,
     y - b,
-    x + a,
-    y + b,
+    x + a + x1Offset,
+    y + b + y1Offset,
     4 * zd * Math.cos(angle),
-    offset,
-    compassDir
+    x === xa || y === ya
   )
 }
 
-function plotRotatedEllipseRect(x0, y0, x1, y1, zd, offset, compassDir) {
+function plotRotatedEllipseRect(x0, y0, x1, y1, zd, isRightAngle) {
   let plotPoints = []
   /* rectangle enclosing the ellipse, integer rotation angle */
   var xd = x1 - x0,
     yd = y1 - y0,
     w = xd * yd
-  if (zd == 0) return plotEllipseRect(x0, y0, x1, y1, offset) /* looks nicer */
-  // based on quadrant is not enough, only feels right at diagonals. Vertical or horizontal angles distort the ellipse. eightfold quadrants would be better, only offset one coord in cardinal directions.
-  //TODO: keep offset consistent during radius adjustment and use another gui element to control the way radius is handled, drawn as a compass, 8 options plus default center which is no offset
-  //Direction shrinks opposite side. eg. radius 7 goes from diameter 15 to diameter 14
-  //gui element could 2 sliders, vertical and horizontal with 3 values each, offset -1, 0, 1 (right, none, left)
-  switch (compassDir) {
-    case "N":
-      y1 -= offset
-      break
-    case "NE":
-      x0 += offset
-      y1 -= offset
-      break
-    case "E":
-      x0 += offset
-      break
-    case "SE":
-      x0 += offset
-      y0 += offset
-      break
-    case "S":
-      y0 += offset
-      break
-    case "SW":
-      x1 -= offset
-      y0 += offset
-      break
-    case "W":
-      x1 -= offset
-      break
-    case "NW":
-      x1 -= offset
-      y1 -= offset
-      break
-    default:
-    //none
-  }
+  // if (Math.abs(zd) == 0) //original algorithm, only works for radius at 0 degrees
+  if (isRightAngle) return plotEllipseRect(x0, y0, x1, y1) /* looks nicer */
   if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
+  //TODO: Breaks down at smaller radii, need enforced minimum where offset is not applied? if assertion fails, try again after w is calculated without offset
   assert(w <= 1.0 && w >= 0.0) /* limit angle to |zd|<=xd*yd */
   xd = Math.floor(xd * w + 0.5)
   yd = Math.floor(yd * w + 0.5) /* snap to int */
@@ -269,5 +244,69 @@ export function findHalf(x, y, angle) {
     return angle <= Math.PI && angle > 0 ? 0 : 1
   } else {
     return angle <= Math.PI && angle > 0 ? 1 : 0
+  }
+}
+
+export function updateEllipseOffsets(
+  state,
+  canvas,
+  px1,
+  py1,
+  px2,
+  py2,
+  angleOffset = 0
+) {
+  state.angle = getAngle(px2 - px1, py2 - py1)
+  state.offset = findHalf(
+    canvas.subPixelX,
+    canvas.subPixelY,
+    state.angle + angleOffset
+  )
+  const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+  while (state.angle < 0) {
+    state.angle += 2 * Math.PI
+  }
+  // Determine the slice in which the angle exists
+  let index =
+    Math.floor(
+      (state.angle + angleOffset + Math.PI / 2 + Math.PI / 8) / (Math.PI / 4)
+    ) % 8
+  let compassDir = directions[index]
+  //based on direction update x and y offsets in state
+  //TODO: keep offset consistent during radius adjustment and use another gui element to control the way radius is handled, drawn as a compass, 8 options plus default center which is no offset
+  //Direction shrinks opposite side. eg. radius 7 goes from diameter 15 to diameter 14
+  //gui element could 2 sliders, vertical and horizontal with 3 values each, offset -1, 0, 1 (right, none, left)
+  //should only x1 and y1 offsets be available since they represent the center point being part of radius or not?
+  switch (compassDir) {
+    case "N":
+      state.y1Offset = -state.offset
+      break
+    case "NE":
+      state.x1Offset = -state.offset
+      state.y1Offset = -state.offset
+      break
+    case "E":
+      state.x1Offset = -state.offset
+      break
+    case "SE":
+      state.x1Offset = -state.offset
+      state.y1Offset = -state.offset
+      break
+    case "S":
+      state.y1Offset = -state.offset
+      break
+    case "SW":
+      state.x1Offset = -state.offset
+      state.y1Offset = -state.offset
+      break
+    case "W":
+      state.x1Offset = -state.offset
+      break
+    case "NW":
+      state.x1Offset = -state.offset
+      state.y1Offset = -state.offset
+      break
+    default:
+    //none
   }
 }
