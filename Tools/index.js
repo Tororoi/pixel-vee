@@ -1180,7 +1180,8 @@ export function adjustEllipseSteps() {
             vectorGuiState.px1,
             vectorGuiState.py1,
             vectorGuiState.px2,
-            vectorGuiState.py2
+            vectorGuiState.py2,
+            state.angleOffset
           )
         } else if (vectorGuiState.selectedPoint.xKey === "px3") {
           state.angleOffset = 1.5 * Math.PI
@@ -1253,7 +1254,8 @@ export function adjustEllipseSteps() {
             vectorGuiState.px1,
             vectorGuiState.py1,
             vectorGuiState.px2,
-            vectorGuiState.py2
+            vectorGuiState.py2,
+            state.angleOffset
           )
         } else if (vectorGuiState.selectedPoint.xKey === "px3") {
           vectorGuiState.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
@@ -1334,7 +1336,8 @@ export function adjustEllipseSteps() {
             vectorGuiState.px1,
             vectorGuiState.py1,
             vectorGuiState.px2,
-            vectorGuiState.py2
+            vectorGuiState.py2,
+            state.angleOffset
           )
         } else if (vectorGuiState.selectedPoint.xKey === "px3") {
           vectorGuiState.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))

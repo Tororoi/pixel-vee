@@ -141,14 +141,27 @@ export function plotRotatedEllipse(
   return plotRotatedEllipseRect(
     x - a,
     y - b,
-    x + a + x1Offset,
-    y + b + y1Offset,
+    x + a,
+    y + b,
     4 * zd * Math.cos(angle),
-    x === xa || y === ya
+    x === xa || y === ya,
+    x1Offset,
+    y1Offset
   )
 }
 
-function plotRotatedEllipseRect(x0, y0, x1, y1, zd, isRightAngle) {
+function plotRotatedEllipseRect(
+  x0,
+  y0,
+  x1,
+  y1,
+  zd,
+  isRightAngle,
+  x1Offset,
+  y1Offset
+) {
+  x1 = x1 + x1Offset
+  y1 = y1 + y1Offset
   let plotPoints = []
   /* rectangle enclosing the ellipse, integer rotation angle */
   var xd = x1 - x0,
@@ -157,7 +170,16 @@ function plotRotatedEllipseRect(x0, y0, x1, y1, zd, isRightAngle) {
   // if (Math.abs(zd) == 0) //original algorithm, only works for radius at 0 degrees
   if (isRightAngle) return plotEllipseRect(x0, y0, x1, y1) /* looks nicer */
   if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
-  //TODO: Breaks down at smaller radii, need enforced minimum where offset is not applied? if assertion fails, try again after w is calculated without offset
+  //Breaks down at smaller radii, need enforced minimum where offset is not applied? if assertion fails, try again after w is calculated without offset
+  if (!(w <= 1.0 && w >= 0.0)) {
+    //if assertion expected to fail with offsets, remove offsets and reset vars before trying assert
+    x1 = x1 - x1Offset
+    y1 = y1 - y1Offset
+    xd = x1 - x0
+    yd = y1 - y0
+    w = xd * yd
+    if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
+  }
   assert(w <= 1.0 && w >= 0.0) /* limit angle to |zd|<=xd*yd */
   xd = Math.floor(xd * w + 0.5)
   yd = Math.floor(yd * w + 0.5) /* snap to int */
@@ -277,36 +299,41 @@ export function updateEllipseOffsets(
   //Direction shrinks opposite side. eg. radius 7 goes from diameter 15 to diameter 14
   //gui element could 2 sliders, vertical and horizontal with 3 values each, offset -1, 0, 1 (right, none, left)
   //should only x1 and y1 offsets be available since they represent the center point being part of radius or not?
-  switch (compassDir) {
-    case "N":
-      state.y1Offset = -state.offset
-      break
-    case "NE":
-      state.x1Offset = -state.offset
-      state.y1Offset = -state.offset
-      break
-    case "E":
-      state.x1Offset = -state.offset
-      break
-    case "SE":
-      state.x1Offset = -state.offset
-      state.y1Offset = -state.offset
-      break
-    case "S":
-      state.y1Offset = -state.offset
-      break
-    case "SW":
-      state.x1Offset = -state.offset
-      state.y1Offset = -state.offset
-      break
-    case "W":
-      state.x1Offset = -state.offset
-      break
-    case "NW":
-      state.x1Offset = -state.offset
-      state.y1Offset = -state.offset
-      break
-    default:
-    //none
+  if (state.clickCounter === 1) {
+    state.x1Offset = -state.offset
+    state.y1Offset = -state.offset
+  } else {
+    switch (compassDir) {
+      case "N":
+        state.y1Offset = -state.offset
+        break
+      case "NE":
+        state.x1Offset = -state.offset
+        state.y1Offset = -state.offset
+        break
+      case "E":
+        state.x1Offset = -state.offset
+        break
+      case "SE":
+        state.x1Offset = -state.offset
+        state.y1Offset = -state.offset
+        break
+      case "S":
+        state.y1Offset = -state.offset
+        break
+      case "SW":
+        state.x1Offset = -state.offset
+        state.y1Offset = -state.offset
+        break
+      case "W":
+        state.x1Offset = -state.offset
+        break
+      case "NW":
+        state.x1Offset = -state.offset
+        state.y1Offset = -state.offset
+        break
+      default:
+      //none
+    }
   }
 }
