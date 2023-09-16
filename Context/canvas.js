@@ -1,3 +1,4 @@
+import { handleTools } from "../index.js"
 import { state } from "./state.js"
 import { initializeDialogBox } from "../utils/drag.js"
 import {
@@ -765,16 +766,9 @@ function vectorInteract(e) {
     }
   } else {
     //switch tool
-    //reset old button
-    let oldToolBtn = document.querySelector(`#${state.tool.name}`)
-    oldToolBtn.style.background = "rgb(131, 131, 131)"
-    //set new button
-    let toolBtn = document.querySelector(`#${vector.tool.name}`)
-    toolBtn.style.background = "rgb(255, 255, 255)"
-    state.tool = tools[vector.tool.name]
-    // canvas.vectorGuiCVS.style.cursor = "none"
+    handleTools(null, vector.tool.name)
     //select current vector
-    console.log(vector)
+    //TODO: modify object structure of states to match object in undoStack to make assignment simpler like vectorGuiState.x = {...vector.x}
     vectorGuiState.reset(canvas)
     vectorGuiState.px1 = vector.x.px1
     vectorGuiState.py1 = vector.y.py1
@@ -793,8 +787,8 @@ function vectorInteract(e) {
     state.x1Offset = vector.properties?.x1Offset
     state.y1Offset = vector.properties?.y1Offset
     state.offset = vector.properties?.offset
-    // renderVectorsToDOM()
     renderVectorGUI(state, canvas)
+    renderVectorsToDOM()
     // }
   }
   // canvas.draw()
@@ -820,6 +814,9 @@ function renderVectorsToDOM() {
       tool.className = "tool btn"
       let icon = document.createElement("div")
       icon.className = p.tool.name
+      if (p.index === canvas.currentVectorIndex) {
+        tool.style.background = "rgb(255, 255, 255)"
+      }
       tool.appendChild(icon)
       vectorElement.appendChild(tool)
       vectorsContainer.appendChild(vectorElement)
@@ -877,7 +874,11 @@ function renderVectorsToDOM() {
         )
       }
       thumbnailCTX.stroke()
-      thumbnailCTX.fillStyle = "rgb(51, 51, 51)"
+      if (p.index === canvas.currentVectorIndex) {
+        thumbnailCTX.fillStyle = "rgb(0, 0, 0)"
+      } else {
+        thumbnailCTX.fillStyle = "rgb(51, 51, 51)"
+      }
       thumbnailCTX.fillRect(
         minD * canvas.offScreenCVS.width,
         0,

@@ -271,6 +271,7 @@ export function actionFill(startX, startY, currentColor, ctx, currentMode) {
   ) {
     return
   }
+  //TODO: actions should not use state directly to maintain timeline integrity
   //get imageData
   state.localColorLayer = ctx.getImageData(
     0,

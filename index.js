@@ -671,14 +671,19 @@ export function handleRecenter(e) {
   renderVectorGUI(state, canvas)
 }
 
-function handleTools(e) {
-  if (e.target.closest(".tool")) {
+export function handleTools(e, manualToolName = null) {
+  const targetTool = e?.target.closest(".tool")
+  if (targetTool || manualToolName) {
     //failsafe for hacking tool ids
-    if (tools[e.target.closest(".tool").id]) {
+    if (tools[targetTool?.id || manualToolName]) {
       //reset old button
       toolBtn.style.background = "rgb(131, 131, 131)"
       //get new button and select it
-      toolBtn = e.target.closest(".tool")
+      if (manualToolName) {
+        toolBtn = document.querySelector(`#${manualToolName}`)
+      } else {
+        toolBtn = targetTool
+      }
       toolBtn.style.background = "rgb(255, 255, 255)"
       state.tool = tools[toolBtn.id]
       canvas.draw()
