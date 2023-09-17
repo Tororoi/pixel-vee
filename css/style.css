@@ -879,6 +879,10 @@ canvas {
   align-items: center;
   box-shadow: inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131);
 }
+.vectors-interface .vectors-container .vectors .vector img {
+  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  height: calc(100% - 4px);
+}
 .vectors-interface .vectors-container .vectors .vector canvas {
   position: absolute;
   background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);

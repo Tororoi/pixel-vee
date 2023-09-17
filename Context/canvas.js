@@ -72,6 +72,12 @@ offScreenCTX.willReadFrequently = true
 //Set the dimensions of the drawing canvas
 offScreenCVS.width = 256
 offScreenCVS.height = 256
+//thumbnail canvas for making images from canvas actions
+const thumbnailCVS = document.createElement("canvas")
+const thumbnailCTX = thumbnailCVS.getContext("2d")
+thumbnailCTX.willReadFrequently = true
+thumbnailCVS.width = 256
+thumbnailCVS.height = 256
 //improve sharpness
 //BUG: sharpness (8+) greatly affects performance in browsers other than chrome (can safari and firefox not handle large canvases?)
 //window.devicePixelRatio is typically 2
@@ -83,6 +89,7 @@ rasterGuiCVS.width = rasterGuiCVS.offsetWidth * sharpness
 rasterGuiCVS.height = rasterGuiCVS.offsetHeight * sharpness
 onScreenCVS.width = onScreenCVS.offsetWidth * sharpness
 onScreenCVS.height = onScreenCVS.offsetHeight * sharpness
+
 //zoom
 const setInitialZoom = (width) => {
   const ratio = 256 / width
@@ -103,6 +110,7 @@ const zoom = setInitialZoom(offScreenCVS.width) //zoom level should be based on 
 vectorGuiCTX.scale(sharpness * zoom, sharpness * zoom)
 rasterGuiCTX.scale(sharpness * zoom, sharpness * zoom)
 onScreenCTX.scale(sharpness * zoom, sharpness * zoom)
+thumbnailCTX.scale(sharpness, sharpness)
 
 //Initialize offset, must be integer
 const xOffset = Math.round(
@@ -135,6 +143,8 @@ export const canvas = {
   zoomAtLastDraw: zoom,
   offScreenCVS,
   offScreenCTX,
+  thumbnailCVS,
+  thumbnailCTX,
   //Layers
   layers: [], //(types: raster, vector, reference)
   currentLayer: null,
@@ -217,6 +227,8 @@ const restrictSize = (e) => {
 const resizeOffScreenCanvas = (width, height) => {
   canvas.offScreenCVS.width = width
   canvas.offScreenCVS.height = height
+  // canvas.thumbnailCVS.width = canvas.offScreenCVS.width
+  // canvas.thumbnailCVS.height = canvas.offScreenCVS.height
   //reset canvas state
   canvas.zoom = setInitialZoom(
     Math.max(canvas.offScreenCVS.width, canvas.offScreenCVS.height)
@@ -788,6 +800,7 @@ function vectorInteract(e) {
     state.y1Offset = vector.properties?.y1Offset
     state.offset = vector.properties?.offset
     renderVectorGUI(state, canvas)
+    //BUG: renderVectorsToDOM resets scroll, so figure out way to only modify existing DOM. Layers doesn't do this, why?
     renderVectorsToDOM()
     // }
   }
@@ -803,39 +816,28 @@ function renderVectorsToDOM() {
       let vectorElement = document.createElement("div")
       vectorElement.className = `vector ${p.index}`
       vectorElement.id = p.index
-      // vectorElement.textContent = id
-      vectorElement.draggable = true
-      let thumbnailCVS = document.createElement("canvas")
-      let thumbnailCTX = thumbnailCVS.getContext("2d")
-      thumbnailCTX.willReadFrequently = true
-      thumbnailCVS.className = "thumbnail"
-      vectorElement.appendChild(thumbnailCVS)
-      let tool = document.createElement("div")
-      tool.className = "tool btn"
-      let icon = document.createElement("div")
-      icon.className = p.tool.name
-      if (p.index === canvas.currentVectorIndex) {
-        tool.style.background = "rgb(255, 255, 255)"
-      }
-      tool.appendChild(icon)
-      vectorElement.appendChild(tool)
       vectorsContainer.appendChild(vectorElement)
-      thumbnailCVS.width = thumbnailCVS.offsetWidth * sharpness
-      thumbnailCVS.height = thumbnailCVS.offsetHeight * sharpness
-      thumbnailCTX.scale(sharpness * 1, sharpness * 1)
+      vectorElement.draggable = true
+      canvas.thumbnailCTX.clearRect(
+        0,
+        0,
+        canvas.thumbnailCVS.width,
+        canvas.thumbnailCVS.height
+      )
       //TODO: find a way to constrain coordinates to fit canvas viewing area for maximum size of vector without changing the size of the canvas for each vector thumbnail
       // Save minima and maxima for x and y plotted coordinates to get the bounding box when plotting the curve. Then, here we can constrain the coords to fit a maximal bounding box in the thumbnail canvas
       thumbnailCTX.lineWidth = 2
-      let wd = thumbnailCVS.width / sharpness / canvas.offScreenCVS.width
-      let hd = thumbnailCVS.height / sharpness / canvas.offScreenCVS.height
-      //get the minimum dimension
+      let wd = canvas.thumbnailCVS.width / sharpness / canvas.offScreenCVS.width
+      let hd =
+        canvas.thumbnailCVS.height / sharpness / canvas.offScreenCVS.height
+      //get the minimum dimension ratio
       let minD = Math.min(wd, hd)
       // thumbnailCTX.strokeStyle = p.color.color
-      thumbnailCTX.strokeStyle = "black"
-      thumbnailCTX.beginPath()
+      canvas.thumbnailCTX.strokeStyle = "black"
+      canvas.thumbnailCTX.beginPath()
       //TODO: line tool and fill tool to be added as vectors. Behavior of replace tool is like a mask, so the replaced pixels are static coordinates.
       if (p.tool.name === "fill") {
-        thumbnailCTX.arc(
+        canvas.thumbnailCTX.arc(
           minD * p.x.px1 + 0.5,
           minD * p.y.py1 + 0.5,
           1,
@@ -844,16 +846,16 @@ function renderVectorsToDOM() {
           true
         )
       } else if (p.tool.name === "quadCurve") {
-        thumbnailCTX.moveTo(minD * p.x.px1 + 0.5, minD * p.y.py1 + 0.5)
-        thumbnailCTX.quadraticCurveTo(
+        canvas.thumbnailCTX.moveTo(minD * p.x.px1 + 0.5, minD * p.y.py1 + 0.5)
+        canvas.thumbnailCTX.quadraticCurveTo(
           minD * p.x.px3 + 0.5,
           minD * p.y.py3 + 0.5,
           minD * p.x.px2 + 0.5,
           minD * p.y.py2 + 0.5
         )
       } else if (p.tool.name === "cubicCurve") {
-        thumbnailCTX.moveTo(minD * p.x.px1 + 0.5, minD * p.y.py1 + 0.5)
-        thumbnailCTX.bezierCurveTo(
+        canvas.thumbnailCTX.moveTo(minD * p.x.px1 + 0.5, minD * p.y.py1 + 0.5)
+        canvas.thumbnailCTX.bezierCurveTo(
           minD * p.x.px3 + 0.5,
           minD * p.y.py3 + 0.5,
           minD * p.x.px4 + 0.5,
@@ -863,7 +865,7 @@ function renderVectorsToDOM() {
         )
       } else if (p.tool.name === "ellipse") {
         let angle = getAngle(p.x.px2 - p.x.px1, p.y.py2 - p.y.py1)
-        thumbnailCTX.ellipse(
+        canvas.thumbnailCTX.ellipse(
           minD * p.x.px1,
           minD * p.y.py1,
           minD * p.properties.radA,
@@ -873,24 +875,44 @@ function renderVectorsToDOM() {
           2 * Math.PI
         )
       }
-      thumbnailCTX.stroke()
+      canvas.thumbnailCTX.stroke()
       if (p.index === canvas.currentVectorIndex) {
-        thumbnailCTX.fillStyle = "rgb(0, 0, 0)"
+        canvas.thumbnailCTX.fillStyle = "rgb(0, 0, 0)"
       } else {
-        thumbnailCTX.fillStyle = "rgb(51, 51, 51)"
+        canvas.thumbnailCTX.fillStyle = "rgb(51, 51, 51)"
       }
-      thumbnailCTX.fillRect(
+      canvas.thumbnailCTX.fillRect(
         minD * canvas.offScreenCVS.width,
         0,
         thumbnailCVS.width,
         thumbnailCVS.height
       )
-      thumbnailCTX.fillRect(
+      canvas.thumbnailCTX.fillRect(
         0,
         minD * canvas.offScreenCVS.height,
         thumbnailCVS.width,
         thumbnailCVS.height
       )
+      let thumb = new Image()
+      thumb.src = canvas.thumbnailCVS.toDataURL()
+      // vectorElement.appendChild(thumbnailCVS)
+      vectorElement.appendChild(thumb)
+      let tool = document.createElement("div")
+      tool.className = "tool btn"
+      let icon = document.createElement("div")
+      icon.className = p.tool.name
+      if (p.index === canvas.currentVectorIndex) {
+        tool.style.background = "rgb(255, 255, 255)"
+        vectorElement.style.background = "rgb(0, 0, 0)"
+      } else {
+        vectorElement.style.background = "rgb(51, 51, 51)"
+      }
+      tool.appendChild(icon)
+      vectorElement.appendChild(tool)
+      // thumbnailCVS.width = thumbnailCVS.offsetWidth * sharpness
+      // thumbnailCVS.height = thumbnailCVS.offsetHeight * sharpness
+      // thumbnailCTX.scale(sharpness * 1, sharpness * 1)
+
       //associate object
       vectorElement.vectorObj = p
     }

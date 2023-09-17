@@ -439,6 +439,7 @@ function handlePointerUp(e) {
 
     // TODO: if state.tool is a vector tool like curve, push index of instruction on undoStack and state.points to vector instruction stack
     if (
+      state.tool.name === "fill" ||
       state.tool.name === "quadCurve" ||
       state.tool.name === "cubicCurve" ||
       state.tool.name === "ellipse"

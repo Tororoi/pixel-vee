@@ -64,6 +64,20 @@
         align-items: center;
         box-shadow: inset 2px 0px $border-color, inset -2px 0px $border-color,
           inset 0px -2px $border-color, inset 0px 2px $border-color;
+        img {
+          // position: absolute;
+          // left: 2px;
+          background-image: repeating-linear-gradient(
+            -45deg,
+            white,
+            white 5px,
+            rgb(216, 216, 216) 5px,
+            rgb(216, 216, 216) 10px
+          );
+          // background: rgba(255, 0, 0, 0.469);
+          // width: calc(100% - 4px);
+          height: calc(100% - 4px);
+        }
         canvas {
           position: absolute;
           // left: 2px;

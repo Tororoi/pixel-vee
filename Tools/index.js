@@ -299,6 +299,76 @@ export function fillSteps() {
 }
 
 /**
+ * Used automatically by curve tools after curve is completed.
+ * TODO: create distinct tool for adjusting that won't create a new curve when clicking.
+ * Ideally a user should be able to click on a curve and render it's vector UI that way.
+ * TODO: Modify point in vector timeline and push new curve set on pointer up to timeline as new type of push called "modify vector"
+ * Currently this modifies the history directly which is a big no no, just done for testing, only ok for now since it just modifies the curve that was just created
+ */
+export function adjustFillSteps() {
+  //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
+  //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
+  //this routine would be better for touchscreens, and no worse with pointer
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
+      if (vectorGuiState.collisionPresent && state.clickCounter === 0) {
+        vectorGuiState[vectorGuiState.collidedKeys.xKey] = state.cursorX
+        vectorGuiState[vectorGuiState.collidedKeys.yKey] = state.cursorY
+        vectorGuiState.selectedPoint = {
+          xKey: vectorGuiState.collidedKeys.xKey,
+          yKey: vectorGuiState.collidedKeys.yKey,
+        }
+        // state.undoStack[canvas.currentVectorIndex][0].opacity = 0
+        console.log(state.undoStack[canvas.currentVectorIndex][0])
+        canvas.render()
+        actionFill(
+          vectorGuiState.px1 + canvas.xOffset,
+          vectorGuiState.py1 + canvas.yOffset,
+          state.undoStack[canvas.currentVectorIndex][0].color,
+          state.undoStack[canvas.currentVectorIndex][0].layer.ctx,
+          state.undoStack[canvas.currentVectorIndex][0].mode
+        )
+      }
+      break
+    case "pointermove":
+      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+        vectorGuiState[vectorGuiState.selectedPoint.xKey] = state.cursorX
+        vectorGuiState[vectorGuiState.selectedPoint.yKey] = state.cursorY
+        canvas.draw()
+      }
+      break
+    case "pointerup":
+      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+        vectorGuiState[vectorGuiState.selectedPoint.xKey] = state.cursorX
+        vectorGuiState[vectorGuiState.selectedPoint.yKey] = state.cursorY
+        state.undoStack[canvas.currentVectorIndex][0].x[
+          vectorGuiState.selectedPoint.xKey
+        ] = state.cursorX
+        state.undoStack[canvas.currentVectorIndex][0].y[
+          vectorGuiState.selectedPoint.yKey
+        ] = state.cursorY
+        // state.undoStack[canvas.currentVectorIndex][0].opacity = 1
+        vectorGuiState.selectedPoint = {
+          xKey: null,
+          yKey: null,
+        }
+        canvas.render()
+      }
+      break
+    case "pointerout":
+      if (vectorGuiState.selectedPoint.xKey) {
+        vectorGuiState.selectedPoint = {
+          xKey: null,
+          yKey: null,
+        }
+      }
+      break
+    default:
+    //do nothing
+  }
+}
+
+/**
  * Draw bezier curves
  * Supported modes: "draw, erase",
  */
