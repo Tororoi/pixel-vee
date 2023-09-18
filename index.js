@@ -45,6 +45,8 @@ let brush = document.querySelector(".brush")
 //Menu
 //Toggle Debugger
 let debuggerBtn = document.getElementById("debugger-toggle")
+//Toggle Grid
+let gridBtn = document.getElementById("grid-toggle")
 //Toggle Tooltips
 let tooltipBtn = document.getElementById("tooltips-toggle")
 //Export
@@ -138,6 +140,14 @@ debuggerBtn.addEventListener("click", (e) => {
   } else {
     state.debugger = false
   }
+})
+gridBtn.addEventListener("click", (e) => {
+  if (gridBtn.checked) {
+    state.grid = true
+  } else {
+    state.grid = false
+  }
+  renderVectorGUI(state, canvas)
 })
 tooltipBtn.addEventListener("click", (e) => {
   if (tooltipBtn.checked) {

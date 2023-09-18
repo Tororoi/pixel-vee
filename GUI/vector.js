@@ -48,6 +48,31 @@ function drawControlPointHandle(canvas, x1, y1, x2, y2) {
   )
 }
 
+function renderGrid(canvas) {
+  let lineWidth = 0.5 / canvas.zoom
+  canvas.vectorGuiCTX.lineWidth = lineWidth
+  canvas.vectorGuiCTX.strokeStyle = "rgba(255,255,255,0.5)"
+  canvas.vectorGuiCTX.beginPath()
+  canvas.vectorGuiCTX.moveTo(canvas.xOffset, canvas.yOffset)
+  for (let i = 0; i < canvas.offScreenCVS.width; i++) {
+    //draw vertical grid lines
+    canvas.vectorGuiCTX.moveTo(canvas.xOffset + i, canvas.yOffset)
+    canvas.vectorGuiCTX.lineTo(
+      canvas.xOffset + i,
+      canvas.yOffset + canvas.offScreenCVS.height
+    )
+  }
+  for (let j = 0; j < canvas.offScreenCVS.height; j++) {
+    //draw vertical grid lines
+    canvas.vectorGuiCTX.moveTo(canvas.xOffset, canvas.yOffset + j)
+    canvas.vectorGuiCTX.lineTo(
+      canvas.xOffset + canvas.offScreenCVS.width,
+      canvas.yOffset + j
+    )
+  }
+  canvas.vectorGuiCTX.stroke()
+}
+
 function renderEllipseVector(canvas, vectorGuiState, color = "white") {
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
@@ -316,12 +341,7 @@ export function reset(canvas) {
   state.x1Offset = 0
   state.y1Offset = 0
   state.offset = null
-  canvas.vectorGuiCTX.clearRect(
-    0,
-    0,
-    canvas.vectorGuiCVS.width / canvas.zoom,
-    canvas.vectorGuiCVS.height / canvas.zoom
-  )
+  renderVectorGUI(state, canvas)
 }
 
 /**
@@ -339,32 +359,28 @@ export function renderVectorGUI(state, canvas) {
   if (state.vectorMode) {
     //Prevent blurring
     canvas.vectorGuiCTX.imageSmoothingEnabled = false
-    //TODO: render grid if grid on
-    if (canvas.zoom >= 8) {
-      let lineWidth = 0.5 / canvas.zoom
-      canvas.vectorGuiCTX.lineWidth = lineWidth
-      canvas.vectorGuiCTX.strokeStyle = "rgba(255,255,255,0.5)"
-      canvas.vectorGuiCTX.beginPath()
-      canvas.vectorGuiCTX.moveTo(canvas.xOffset, canvas.yOffset)
-      for (let i = 0; i < canvas.offScreenCVS.width; i++) {
-        //draw vertical grid lines
-        canvas.vectorGuiCTX.moveTo(canvas.xOffset + i, canvas.yOffset)
-        canvas.vectorGuiCTX.lineTo(
-          canvas.xOffset + i,
-          canvas.yOffset + canvas.offScreenCVS.height
-        )
-      }
-      for (let j = 0; j < canvas.offScreenCVS.height; j++) {
-        //draw vertical grid lines
-        canvas.vectorGuiCTX.moveTo(canvas.xOffset, canvas.yOffset + j)
-        canvas.vectorGuiCTX.lineTo(
-          canvas.xOffset + canvas.offScreenCVS.width,
-          canvas.yOffset + j
-        )
-      }
-      canvas.vectorGuiCTX.stroke()
+    //Render grid
+    if (canvas.zoom >= 4 && state.grid) {
+      renderGrid(canvas)
     }
-    if (state.tool.name === "quadCurve" || state.tool.name === "cubicCurve") {
+    if (state.tool.name === "fill") {
+      let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
+      let pointsKeys = [{ x: "px1", y: "py1" }]
+      canvas.vectorGuiCTX.strokeStyle = "white"
+      canvas.vectorGuiCTX.fillStyle = "white"
+      canvas.vectorGuiCTX.beginPath()
+      drawControlPoints(pointsKeys, canvas, circleRadius, false)
+      // Stroke non-filled lines
+      canvas.vectorGuiCTX.stroke()
+
+      canvas.vectorGuiCTX.beginPath()
+      drawControlPoints(pointsKeys, canvas, circleRadius / 2, true)
+      // Fill points
+      canvas.vectorGuiCTX.fill()
+    } else if (
+      state.tool.name === "quadCurve" ||
+      state.tool.name === "cubicCurve"
+    ) {
       renderCurveVector(canvas, vectorGuiState)
     } else if (state.tool.name === "ellipse") {
       renderEllipseVector(canvas, vectorGuiState)

@@ -1126,7 +1126,6 @@ export function ellipseSteps() {
             state.x1Offset,
             state.y1Offset
           )
-          state.clickCounter = 0
           //store control points for timeline
           state.addToTimeline({
             tool: state.tool,
@@ -1148,9 +1147,11 @@ export function ellipseSteps() {
               offset: state.offset,
               x1Offset: state.x1Offset,
               y1Offset: state.y1Offset,
+              stepNum: state.clickCounter, //(probably 1)
               //add bounding box minima maxima x and y?
             },
           })
+          state.clickCounter = 0
           canvas.draw()
           renderRasterGUI(state, canvas, swatches)
           renderVectorGUI(state, canvas)
