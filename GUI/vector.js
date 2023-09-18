@@ -73,6 +73,24 @@ function renderGrid(canvas) {
   canvas.vectorGuiCTX.stroke()
 }
 
+function renderFillVector(canvas) {
+  let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
+  let pointsKeys = [{ x: "px1", y: "py1" }]
+  let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  canvas.vectorGuiCTX.lineWidth = lineWidth
+  canvas.vectorGuiCTX.strokeStyle = "white"
+  canvas.vectorGuiCTX.fillStyle = "white"
+  canvas.vectorGuiCTX.beginPath()
+  drawControlPoints(pointsKeys, canvas, circleRadius, false)
+  // Stroke non-filled lines
+  canvas.vectorGuiCTX.stroke()
+
+  canvas.vectorGuiCTX.beginPath()
+  drawControlPoints(pointsKeys, canvas, circleRadius / 2, true)
+  // Fill points
+  canvas.vectorGuiCTX.fill()
+}
+
 function renderEllipseVector(canvas, vectorGuiState, color = "white") {
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
@@ -364,19 +382,7 @@ export function renderVectorGUI(state, canvas) {
       renderGrid(canvas)
     }
     if (state.tool.name === "fill") {
-      let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
-      let pointsKeys = [{ x: "px1", y: "py1" }]
-      canvas.vectorGuiCTX.strokeStyle = "white"
-      canvas.vectorGuiCTX.fillStyle = "white"
-      canvas.vectorGuiCTX.beginPath()
-      drawControlPoints(pointsKeys, canvas, circleRadius, false)
-      // Stroke non-filled lines
-      canvas.vectorGuiCTX.stroke()
-
-      canvas.vectorGuiCTX.beginPath()
-      drawControlPoints(pointsKeys, canvas, circleRadius / 2, true)
-      // Fill points
-      canvas.vectorGuiCTX.fill()
+      renderFillVector(canvas)
     } else if (
       state.tool.name === "quadCurve" ||
       state.tool.name === "cubicCurve"

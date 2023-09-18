@@ -391,7 +391,15 @@ function redrawPoints() {
           )
           break
         case "fill":
-          actionFill(p.x.px1, p.y.py1, p.color, p.layer.ctx, p.mode)
+          actionFill(
+            p.x.px1,
+            p.y.py1,
+            p.opacity === 0
+              ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
+              : p.color,
+            p.layer.ctx,
+            p.mode
+          )
           break
         case "line":
           actionLine(
@@ -455,7 +463,7 @@ function redrawPoints() {
             p.y.py3,
             p.properties.radA,
             p.properties.radB,
-            2,
+            p.properties.stepNum,
             p.opacity === 0
               ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
               : p.color,

@@ -274,23 +274,34 @@ export function lineSteps() {
 export function fillSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      actionFill(
-        state.cursorX,
-        state.cursorY,
-        swatches.primary.color,
-        canvas.currentLayer.ctx,
-        state.mode
-      )
-      //For undo ability, store starting coords and settings and pass them into actionFill
-      state.addToTimeline({
-        tool: state.tool,
-        x: { px1: state.cursorX },
-        y: { py1: state.cursorY },
-        layer: canvas.currentLayer,
-      })
-      canvas.draw()
+      if (vectorGuiState.collisionPresent) {
+        adjustFillSteps()
+      } else {
+        actionFill(
+          state.cursorX,
+          state.cursorY,
+          swatches.primary.color,
+          canvas.currentLayer.ctx,
+          state.mode
+        )
+        //For undo ability, store starting coords and settings and pass them into actionFill
+        state.addToTimeline({
+          tool: state.tool,
+          x: { px1: state.cursorX },
+          y: { py1: state.cursorY },
+          layer: canvas.currentLayer,
+        })
+        canvas.draw()
+      }
       break
+    case "pointermove":
+      if (vectorGuiState.selectedPoint.xKey) {
+        adjustFillSteps()
+      }
     case "pointerup":
+      if (vectorGuiState.selectedPoint.xKey) {
+        adjustFillSteps()
+      }
       //redraw canvas to allow onscreen cursor to render
       canvas.draw()
     default:
@@ -311,34 +322,32 @@ export function adjustFillSteps() {
   //this routine would be better for touchscreens, and no worse with pointer
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (vectorGuiState.collisionPresent && state.clickCounter === 0) {
+      if (vectorGuiState.collisionPresent) {
         vectorGuiState[vectorGuiState.collidedKeys.xKey] = state.cursorX
         vectorGuiState[vectorGuiState.collidedKeys.yKey] = state.cursorY
         vectorGuiState.selectedPoint = {
           xKey: vectorGuiState.collidedKeys.xKey,
           yKey: vectorGuiState.collidedKeys.yKey,
         }
-        // state.undoStack[canvas.currentVectorIndex][0].opacity = 0
-        console.log(state.undoStack[canvas.currentVectorIndex][0])
+        state.undoStack[canvas.currentVectorIndex][0].opacity = 0
+        //TODO: possible behavior: only render canvas up to timeline where fill action exists while adjusting fill
         canvas.render()
-        actionFill(
-          vectorGuiState.px1 + canvas.xOffset,
-          vectorGuiState.py1 + canvas.yOffset,
-          state.undoStack[canvas.currentVectorIndex][0].color,
-          state.undoStack[canvas.currentVectorIndex][0].layer.ctx,
-          state.undoStack[canvas.currentVectorIndex][0].mode
-        )
       }
       break
     case "pointermove":
-      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
-        vectorGuiState[vectorGuiState.selectedPoint.xKey] = state.cursorX
-        vectorGuiState[vectorGuiState.selectedPoint.yKey] = state.cursorY
-        canvas.draw()
+      if (vectorGuiState.selectedPoint.xKey) {
+        if (
+          state.onscreenX !== state.previousOnscreenX ||
+          state.onscreenY !== state.previousOnscreenY
+        ) {
+          //code gets past check twice here so figure out where tool fn is being called again
+          vectorGuiState[vectorGuiState.selectedPoint.xKey] = state.cursorX
+          vectorGuiState[vectorGuiState.selectedPoint.yKey] = state.cursorY
+        }
       }
       break
     case "pointerup":
-      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+      if (vectorGuiState.selectedPoint.xKey) {
         vectorGuiState[vectorGuiState.selectedPoint.xKey] = state.cursorX
         vectorGuiState[vectorGuiState.selectedPoint.yKey] = state.cursorY
         state.undoStack[canvas.currentVectorIndex][0].x[
@@ -347,7 +356,7 @@ export function adjustFillSteps() {
         state.undoStack[canvas.currentVectorIndex][0].y[
           vectorGuiState.selectedPoint.yKey
         ] = state.cursorY
-        // state.undoStack[canvas.currentVectorIndex][0].opacity = 1
+        state.undoStack[canvas.currentVectorIndex][0].opacity = 1
         vectorGuiState.selectedPoint = {
           xKey: null,
           yKey: null,
@@ -1452,6 +1461,8 @@ export function adjustEllipseSteps() {
           state.x1Offset
         state.undoStack[canvas.currentVectorIndex][0].properties.y1Offset =
           state.y1Offset
+        state.undoStack[canvas.currentVectorIndex][0].properties.stepNum =
+          vectorGuiState.radA !== vectorGuiState.radB ? 2 : 1 // 2 for ellipse, 1 for circle
         state.undoStack[canvas.currentVectorIndex][0].opacity = 1
         vectorGuiState.selectedPoint = {
           xKey: null,

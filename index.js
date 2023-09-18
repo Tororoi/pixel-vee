@@ -407,11 +407,22 @@ function handlePointerMove(e) {
   renderVectorGUI(state, canvas)
   if (
     state.clicked ||
-    ((state.tool.name === "quadCurve" || state.tool.name === "cubicCurve") &&
+    ((state.tool.name === "quadCurve" ||
+      state.tool.name === "cubicCurve" ||
+      state.tool.name === "fill") &&
       state.clickCounter > 0)
   ) {
     //run selected tool step function
     state.tool.fn()
+    if (state.tool.name !== "grab") {
+      if (
+        state.onscreenX !== state.previousOnscreenX ||
+        state.onscreenY !== state.previousOnscreenY
+      ) {
+        state.previousOnscreenX = state.onscreenX
+        state.previousOnscreenY = state.onscreenY
+      }
+    }
   } else {
     renderCursor(state, canvas, swatches)
     //normalize cursor render to pixelgrid
