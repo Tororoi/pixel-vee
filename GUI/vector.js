@@ -340,6 +340,30 @@ export function renderVectorGUI(state, canvas) {
     //Prevent blurring
     canvas.vectorGuiCTX.imageSmoothingEnabled = false
     //TODO: render grid if grid on
+    if (canvas.zoom >= 8) {
+      let lineWidth = 0.5 / canvas.zoom
+      canvas.vectorGuiCTX.lineWidth = lineWidth
+      canvas.vectorGuiCTX.strokeStyle = "rgba(255,255,255,0.5)"
+      canvas.vectorGuiCTX.beginPath()
+      canvas.vectorGuiCTX.moveTo(canvas.xOffset, canvas.yOffset)
+      for (let i = 0; i < canvas.offScreenCVS.width; i++) {
+        //draw vertical grid lines
+        canvas.vectorGuiCTX.moveTo(canvas.xOffset + i, canvas.yOffset)
+        canvas.vectorGuiCTX.lineTo(
+          canvas.xOffset + i,
+          canvas.yOffset + canvas.offScreenCVS.height
+        )
+      }
+      for (let j = 0; j < canvas.offScreenCVS.height; j++) {
+        //draw vertical grid lines
+        canvas.vectorGuiCTX.moveTo(canvas.xOffset, canvas.yOffset + j)
+        canvas.vectorGuiCTX.lineTo(
+          canvas.xOffset + canvas.offScreenCVS.width,
+          canvas.yOffset + j
+        )
+      }
+      canvas.vectorGuiCTX.stroke()
+    }
     if (state.tool.name === "quadCurve" || state.tool.name === "cubicCurve") {
       renderCurveVector(canvas, vectorGuiState)
     } else if (state.tool.name === "ellipse") {
