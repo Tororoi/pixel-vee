@@ -330,8 +330,8 @@ export function adjustFillSteps() {
           yKey: vectorGuiState.collidedKeys.yKey,
         }
         state.undoStack[canvas.currentVectorIndex][0].opacity = 0
-        //TODO: possible behavior: only render canvas up to timeline where fill action exists while adjusting fill
-        canvas.render()
+        //Only render canvas up to timeline where fill action exists while adjusting fill
+        canvas.render(canvas.currentVectorIndex) // render to canvas.currentVectorIndex
       }
       break
     case "pointermove":

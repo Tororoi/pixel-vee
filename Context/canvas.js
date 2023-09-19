@@ -372,9 +372,18 @@ function draw() {
   canvas.onScreenCTX.stroke()
 }
 
-function redrawPoints() {
+/**
+ *
+ * @param {*} index - optional parameter to limit render up to a specific action
+ */
+function redrawPoints(index = null) {
+  let i = 0
   //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
   state.undoStack.forEach((action) => {
+    if (index && i > index) {
+      return
+    }
+    i++
     action.forEach((p) => {
       switch (p.tool.name) {
         case "addLayer":
@@ -514,7 +523,11 @@ function redrawPoints() {
   })
 }
 
-function render() {
+/**
+ *
+ * @param {*} index - optional parameter to limit render up to a specific action
+ */
+function render(index) {
   canvas.layers.forEach((l) => {
     if (l.type === "raster") {
       l.ctx.clearRect(
@@ -525,7 +538,7 @@ function render() {
       )
     }
   })
-  canvas.redrawPoints()
+  canvas.redrawPoints(index)
   canvas.draw()
 }
 
@@ -917,6 +930,10 @@ function renderVectorsToDOM() {
       }
       tool.appendChild(icon)
       vectorElement.appendChild(tool)
+      let color = document.createElement("div")
+      color.className = "actionColor btn"
+      color.style.background = p.color.color
+      vectorElement.appendChild(color)
       // thumbnailCVS.width = thumbnailCVS.offsetWidth * sharpness
       // thumbnailCVS.height = thumbnailCVS.offsetHeight * sharpness
       // thumbnailCTX.scale(sharpness * 1, sharpness * 1)
