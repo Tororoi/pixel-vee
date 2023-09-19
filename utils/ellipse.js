@@ -299,7 +299,7 @@ export function updateEllipseOffsets(
   //Direction shrinks opposite side. eg. radius 7 goes from diameter 15 to diameter 14
   //gui element could 2 sliders, vertical and horizontal with 3 values each, offset -1, 0, 1 (right, none, left)
   //should only x1 and y1 offsets be available since they represent the center point being part of radius or not?
-  if (state.clickCounter === 1) {
+  if (state.clickCounter === 1 || state.forceCircle) {
     state.x1Offset = -state.offset
     state.y1Offset = -state.offset
   } else {

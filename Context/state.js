@@ -66,6 +66,7 @@ export const state = {
   x1Offset: 0,
   y1Offset: 0,
   offset: null, //rename to something more specific
+  forceCircle: false,
   //for perfect pixels
   lastDrawnX: null,
   lastDrawnY: null,

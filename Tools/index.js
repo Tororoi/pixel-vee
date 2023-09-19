@@ -959,7 +959,7 @@ export function ellipseSteps() {
           state.py3 + canvas.yOffset,
           state.radA,
           state.radB,
-          state.clickCounter,
+          true, //force circle initially
           swatches.primary.color,
           canvas.onScreenCTX,
           state.mode,
@@ -1051,7 +1051,7 @@ export function ellipseSteps() {
             state.py3 + canvas.yOffset,
             state.radA,
             state.radB,
-            state.clickCounter,
+            true, //force circle initially
             swatches.primary.color,
             canvas.onScreenCTX,
             state.mode,
@@ -1123,7 +1123,7 @@ export function ellipseSteps() {
             state.py3,
             state.radA,
             state.radB,
-            state.clickCounter,
+            true, //force circle initially
             swatches.primary.color,
             canvas.currentLayer.ctx,
             state.mode,
@@ -1156,7 +1156,7 @@ export function ellipseSteps() {
               offset: state.offset,
               x1Offset: state.x1Offset,
               y1Offset: state.y1Offset,
-              stepNum: state.clickCounter, //(probably 1)
+              forceCircle: true,
               //add bounding box minima maxima x and y?
             },
           })
@@ -1253,6 +1253,20 @@ export function adjustEllipseSteps() {
           vectorGuiState.px3 = vectorGuiState.px1 + dxb
           vectorGuiState.py3 = vectorGuiState.py1 + dyb
         } else if (vectorGuiState.selectedPoint.xKey === "px2") {
+          vectorGuiState.radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
+          if (state.forceCircle) {
+            vectorGuiState.radB = vectorGuiState.radA
+          }
+          let newVertex = updateEllipseVertex(
+            vectorGuiState.px1,
+            vectorGuiState.py1,
+            vectorGuiState.px2,
+            vectorGuiState.py2,
+            -Math.PI / 2,
+            vectorGuiState.radB
+          )
+          vectorGuiState.px3 = newVertex.x
+          vectorGuiState.py3 = newVertex.y
           state.angleOffset = 0
           updateEllipseOffsets(
             state,
@@ -1264,6 +1278,20 @@ export function adjustEllipseSteps() {
             state.angleOffset
           )
         } else if (vectorGuiState.selectedPoint.xKey === "px3") {
+          vectorGuiState.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
+          if (state.forceCircle) {
+            vectorGuiState.radA = vectorGuiState.radB
+          }
+          let newVertex = updateEllipseVertex(
+            vectorGuiState.px1,
+            vectorGuiState.py1,
+            vectorGuiState.px3,
+            vectorGuiState.py3,
+            Math.PI / 2,
+            vectorGuiState.radA
+          )
+          vectorGuiState.px2 = newVertex.x
+          vectorGuiState.py2 = newVertex.y
           state.angleOffset = 1.5 * Math.PI
           updateEllipseOffsets(
             state,
@@ -1289,7 +1317,10 @@ export function adjustEllipseSteps() {
           vectorGuiState.py3 + canvas.yOffset,
           vectorGuiState.radA,
           vectorGuiState.radB,
-          2,
+          vectorGuiState.selectedPoint.xKey === "px1"
+            ? state.undoStack[canvas.currentVectorIndex][0].properties
+                .forceCircle
+            : state.forceCircle,
           state.undoStack[canvas.currentVectorIndex][0].color,
           canvas.onScreenCTX,
           state.undoStack[canvas.currentVectorIndex][0].mode,
@@ -1318,6 +1349,9 @@ export function adjustEllipseSteps() {
           vectorGuiState.py3 = vectorGuiState.py1 + dyb
         } else if (vectorGuiState.selectedPoint.xKey === "px2") {
           vectorGuiState.radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
+          if (state.forceCircle) {
+            vectorGuiState.radB = vectorGuiState.radA
+          }
           let newVertex = updateEllipseVertex(
             vectorGuiState.px1,
             vectorGuiState.py1,
@@ -1340,6 +1374,9 @@ export function adjustEllipseSteps() {
           )
         } else if (vectorGuiState.selectedPoint.xKey === "px3") {
           vectorGuiState.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
+          if (state.forceCircle) {
+            vectorGuiState.radA = vectorGuiState.radB
+          }
           let newVertex = updateEllipseVertex(
             vectorGuiState.px1,
             vectorGuiState.py1,
@@ -1371,7 +1408,10 @@ export function adjustEllipseSteps() {
           vectorGuiState.py3 + canvas.yOffset,
           vectorGuiState.radA,
           vectorGuiState.radB,
-          2,
+          vectorGuiState.selectedPoint.xKey === "px1"
+            ? state.undoStack[canvas.currentVectorIndex][0].properties
+                .forceCircle
+            : state.forceCircle,
           state.undoStack[canvas.currentVectorIndex][0].color,
           canvas.onScreenCTX,
           state.undoStack[canvas.currentVectorIndex][0].mode,
@@ -1400,6 +1440,9 @@ export function adjustEllipseSteps() {
           vectorGuiState.py3 = vectorGuiState.py1 + dyb
         } else if (vectorGuiState.selectedPoint.xKey === "px2") {
           vectorGuiState.radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
+          if (state.forceCircle) {
+            vectorGuiState.radB = vectorGuiState.radA
+          }
           let newVertex = updateEllipseVertex(
             vectorGuiState.px1,
             vectorGuiState.py1,
@@ -1422,6 +1465,9 @@ export function adjustEllipseSteps() {
           )
         } else if (vectorGuiState.selectedPoint.xKey === "px3") {
           vectorGuiState.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
+          if (state.forceCircle) {
+            vectorGuiState.radA = vectorGuiState.radB
+          }
           let newVertex = updateEllipseVertex(
             vectorGuiState.px1,
             vectorGuiState.py1,
@@ -1461,8 +1507,11 @@ export function adjustEllipseSteps() {
           state.x1Offset
         state.undoStack[canvas.currentVectorIndex][0].properties.y1Offset =
           state.y1Offset
-        state.undoStack[canvas.currentVectorIndex][0].properties.stepNum =
-          vectorGuiState.radA !== vectorGuiState.radB ? 2 : 1 // 2 for ellipse, 1 for circle
+        state.undoStack[canvas.currentVectorIndex][0].properties.forceCircle =
+          vectorGuiState.selectedPoint.xKey === "px1"
+            ? state.undoStack[canvas.currentVectorIndex][0].properties
+                .forceCircle
+            : state.forceCircle
         state.undoStack[canvas.currentVectorIndex][0].opacity = 1
         vectorGuiState.selectedPoint = {
           xKey: null,

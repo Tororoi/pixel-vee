@@ -472,7 +472,7 @@ function redrawPoints(index = null) {
             p.y.py3,
             p.properties.radA,
             p.properties.radB,
-            p.properties.stepNum,
+            p.properties.forceCircle,
             p.opacity === 0
               ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
               : p.color,
@@ -930,7 +930,7 @@ function renderVectorsToDOM() {
       }
       tool.appendChild(icon)
       vectorElement.appendChild(tool)
-      let color = document.createElement("div")
+      let color = document.createElement("div") //TODO: make clickable and color can be rechosen via colorpicker
       color.className = "actionColor btn"
       color.style.background = p.color.color
       vectorElement.appendChild(color)

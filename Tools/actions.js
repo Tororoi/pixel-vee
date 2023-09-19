@@ -695,7 +695,7 @@ export function actionEllipse(
   yb,
   ra,
   rb,
-  stepNum,
+  forceCircle,
   currentColor,
   ctx,
   currentMode,
@@ -717,7 +717,7 @@ export function actionEllipse(
 
   ctx.fillStyle = currentColor.color
 
-  if (stepNum === 1) {
+  if (forceCircle) {
     let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, offset)
     renderPoints(
       plotPoints,
@@ -728,7 +728,7 @@ export function actionEllipse(
       currentMode,
       scale
     )
-  } else if (stepNum === 2) {
+  } else {
     let plotPoints = plotRotatedEllipse(
       centerx,
       centery,

@@ -3,7 +3,7 @@
 import { state } from "./Context/state.js"
 import { canvas, resizeOnScreenCanvas } from "../Context/canvas.js"
 import { swatches } from "./Context/swatch.js"
-import { tools } from "./Tools/index.js"
+import { tools, adjustEllipseSteps } from "./Tools/index.js"
 import { actionUndoRedo } from "./Tools/undoRedo.js"
 import { vectorGuiState, renderVectorGUI } from "./GUI/vector.js"
 import { renderCursor, renderRasterGUI } from "./GUI/raster.js"
@@ -209,6 +209,12 @@ function handleKeyDown(e) {
           state.tool = tools["line"]
           state.tool.brushSize = tools["brush"].brushSize
           canvas.vectorGuiCVS.style.cursor = "none"
+        } else if (toolBtn.id === "ellipse") {
+          state.forceCircle = true
+          if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+            adjustEllipseSteps()
+            renderVectorGUI(state, canvas)
+          }
         }
         break
       case "KeyS":
@@ -316,6 +322,7 @@ function handleKeyUp(e) {
     e.code === "ShiftRight"
   ) {
     state.tool = tools[toolBtn.id]
+    state.forceCircle = false
   }
 
   if (toolBtn.id === "grab") {
