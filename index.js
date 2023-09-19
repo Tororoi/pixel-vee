@@ -212,6 +212,8 @@ function handleKeyDown(e) {
         } else if (toolBtn.id === "ellipse") {
           state.forceCircle = true
           if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+            //while holding control point, readjust ellipse without having to move cursor.
+            //TODO: update this functionality to have other radii go back to previous radii when releasing shift
             adjustEllipseSteps()
             renderVectorGUI(state, canvas)
           }
@@ -463,6 +465,7 @@ function handlePointerUp(e) {
   state.tool.fn()
   //add to undo stack
   if (state.points.length) {
+    //TODO: for modification actions, set "to" values on moddedActionIndex before pushing
     state.undoStack.push(state.points)
 
     // TODO: if state.tool is a vector tool like curve, push index of instruction on undoStack and state.points to vector instruction stack
@@ -623,6 +626,8 @@ function handleZoom(e) {
   }
 }
 
+//TODO: to allow modifications of past actions, check last action in undoStack. If it is a modification action, reverse it.
+//This means setting the modded action's values back. Normally they are structured as {moddedActionIndex, from:, to:}, so set them back to the "from" values
 function handleUndo() {
   if (state.undoStack.length > 1) {
     //length 1 prevents initial layer from being undone

@@ -1489,6 +1489,7 @@ export function adjustEllipseSteps() {
             state.angleOffset
           )
         }
+        //TODO: instead of directly changing the undoStack here, set the values to a copy of the action, then store that as "to", the old action as "from" and the moddedActionIndex on an object pushed to state.points
         state.undoStack[canvas.currentVectorIndex][0].x.px1 = vectorGuiState.px1
         state.undoStack[canvas.currentVectorIndex][0].y.py1 = vectorGuiState.py1
         state.undoStack[canvas.currentVectorIndex][0].x.px2 = vectorGuiState.px2

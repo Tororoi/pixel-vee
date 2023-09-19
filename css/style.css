@@ -375,7 +375,6 @@ svg {
 .columns .btn {
   width: 40px;
   height: 40px;
-  margin: 1px;
 }
 .columns .btn:hover {
   z-index: 104;
