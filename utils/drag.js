@@ -5,6 +5,7 @@ export const initializeDragger = (dragTarget) => {
   if (dragBtn) {
     dragBtn.addEventListener("pointerdown", (e) => dragStart(e, dragTarget))
     dragBtn.addEventListener("pointerup", dragStop)
+    dragBtn.addEventListener("pointerout", dragStop)
     dragBtn.addEventListener("pointermove", dragMove)
   }
 }
@@ -16,9 +17,11 @@ export const initializeCollapser = (collapseTarget) => {
     collapseBtn.addEventListener("click", (e) => {
       if (collapseBtn.checked) {
         // collapsibleArea.style.height = 0
+        collapseTarget.style.minHeight = "20px"
         collapsibleArea.style.display = "none"
       } else {
         // collapsibleArea.style.height = "100%"
+        collapseTarget.style.minHeight = "" //reset to default value
         collapsibleArea.style.display = "flex"
       }
     })
@@ -49,7 +52,19 @@ export const dragStop = (e) => {
   if (state.dragTarget) {
     state.dragTarget.classList.remove("dragging")
     if (!state.dragTarget.className.includes("free")) {
+      const parentElement = state.dragTarget.parentElement
+      const siblingElements = parentElement.children
+      for (let i = siblingElements.length - 1; i >= 0; i--) {
+        if (siblingElements[i] !== state.dragTarget) {
+          // siblingElements[i].style.left = 0
+          siblingElements[i].style.maxHeight = ""
+          siblingElements[i].style.position = "relative"
+          siblingElements[i].style.top = "unset"
+        }
+      }
+      state.dragTarget.style.maxHeight = "" //reset to default
       state.dragTarget.style.position = "relative"
+      parentElement.style.height = "" //reset to default
       state.dragTarget.style.top = "unset"
     }
     state.dragTarget = null
@@ -71,15 +86,25 @@ export const dragMove = (e) => {
      * 6. update the order of all children to reflect new physical positions
      * 7. When stop dragging, set all children style.position to relative and style.top = unset
      */
-    // siblingElements[0].style.order = "4"
-    // siblingElement.style.position = "absolute"
+    parentElement.style.height = parentElement.offsetHeight + "px"
+    for (let i = siblingElements.length - 1; i >= 0; i--) {
+      if (siblingElements[i] !== state.dragTarget) {
+        siblingElements[i].style.top = siblingElements[i].offsetTop - 2 + "px"
+        // siblingElements[i].style.left = 0
+        siblingElements[i].style.maxHeight =
+          siblingElements[i].offsetHeight + "px"
+        siblingElements[i].style.position = "absolute"
+      }
+    }
+    // state.dragTarget.style.order = --
+    state.dragTarget.style.maxHeight = state.dragTarget.offsetHeight + "px"
+    state.dragTarget.style.position = "absolute"
     if (state.dragTarget.className.includes("h-drag")) {
       state.dragTarget.style.left = e.clientX - state.dragX + "px"
     }
     if (state.dragTarget.className.includes("v-drag")) {
       state.dragTarget.style.top = e.clientY - state.dragY + "px"
     }
-    state.dragTarget.style.position = "absolute"
     let pRect = parentElement.getBoundingClientRect()
     let tgtRect = state.dragTarget.getBoundingClientRect()
     //Constrain draggable element inside window, include box shadow border

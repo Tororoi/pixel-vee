@@ -8,6 +8,7 @@
   left: calc(50% - 183px);
   display: none;
   flex-flow: column nowrap;
+  justify-content: flex-start;
   color: white;
   background: $extra-dark-gray;
   text-align: center;
@@ -24,6 +25,9 @@
       height: 20px;
       margin: 0px;
     }
+  }
+  .collapsible {
+    padding-top: 2px;
   }
 }
 

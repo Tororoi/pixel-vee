@@ -38,7 +38,8 @@ const layersInterfaceContainer = document.querySelector(".layers-interface")
 initializeDialogBox(layersInterfaceContainer)
 
 // * Vectors Interface * //
-const vectorsContainer = document.querySelector(".vectors")
+const vectorsThumbnails = document.querySelector(".vectors")
+const vectorsContainer = document.querySelector(".vectors-container") //dynamically set max height based on height of page minus other menu boxes heights
 const vectorsInterfaceContainer = document.querySelector(".vectors-interface")
 initializeDialogBox(vectorsInterfaceContainer)
 
@@ -829,7 +830,7 @@ function vectorInteract(e) {
 }
 
 function renderVectorsToDOM() {
-  vectorsContainer.innerHTML = ""
+  vectorsThumbnails.innerHTML = ""
   state.undoStack.forEach((action) => {
     let p = action[0]
     if (p.tool.type === "vector") {
@@ -837,7 +838,7 @@ function renderVectorsToDOM() {
       let vectorElement = document.createElement("div")
       vectorElement.className = `vector ${p.index}`
       vectorElement.id = p.index
-      vectorsContainer.appendChild(vectorElement)
+      vectorsThumbnails.appendChild(vectorElement)
       vectorElement.draggable = true
       canvas.thumbnailCTX.clearRect(
         0,
@@ -1010,4 +1011,5 @@ layersContainer.addEventListener("dragleave", dragLayerLeave)
 layersContainer.addEventListener("drop", dropLayer)
 layersContainer.addEventListener("dragend", dragLayerEnd)
 
-vectorsContainer.addEventListener("click", vectorInteract)
+// * Vectors * //
+vectorsThumbnails.addEventListener("click", vectorInteract)

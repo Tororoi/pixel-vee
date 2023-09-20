@@ -7,10 +7,12 @@
   z-index: 100;
   background-color: $extra-dark-gray;
   width: 206px;
-  height: auto;
-  // top: 281px;
+  flex: 1; /* Allows the child to shrink if there's no space */
+  flex: 1 1 auto;
+  min-height: 264px; //header and vectors-control plus 2 vectors.
   display: flex;
   flex-flow: column nowrap;
+  justify-content: flex-start;
   align-items: center;
   order: 4;
   .vectors-control {
@@ -36,12 +38,17 @@
       }
     }
   }
+  .collapsible {
+    padding-top: 2px;
+  }
   .vectors-container {
+    display: flex;
+    flex-direction: column;
     position: relative;
     // width: calc(100% - 4px);
     width: 100%;
-    height: auto;
-    max-height: 481px;
+    flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     margin: 2px;
     @include sandwichBorder;

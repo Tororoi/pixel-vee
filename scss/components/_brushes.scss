@@ -1,16 +1,17 @@
 .brush-container {
   background-color: $extra-dark-gray;
   user-select: none;
-  // position: absolute;
   position: relative;
   z-index: 100;
   width: 206px;
-  // top: 20px;
   display: flex;
   flex-flow: column nowrap;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   order: 1;
+  .collapsible {
+    padding-top: 2px;
+  }
   p {
     margin: 0px;
   }

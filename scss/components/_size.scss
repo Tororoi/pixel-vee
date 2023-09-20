@@ -8,9 +8,12 @@
   // top: 155px;
   display: flex;
   flex-flow: column nowrap;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   order: 2;
+  .collapsible {
+    padding-top: 2px;
+  }
   p {
     margin: 0px;
   }

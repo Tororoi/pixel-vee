@@ -2,18 +2,23 @@
 
 .layers-interface {
   user-select: none;
-  // position: absolute;
   position: relative;
   z-index: 100;
   background-color: $extra-dark-gray;
   width: 206px;
-  height: auto;
-  // top: 281px;
+  flex: 1 1 auto;
+  min-height: 184px; //header and layers-control plus 3 layers.
   display: flex;
   flex-flow: column nowrap;
+  justify-content: flex-start;
   align-items: center;
   order: 3;
+  .collapsible {
+    padding-top: 2px;
+  }
   .layers-control {
+    flex-shrink: 0; /* Prevents the child from shrinking below its content size */
+    flex-grow: 0;
     display: flex;
     flex-flow: row nowrap;
     margin: 2px;
@@ -32,9 +37,14 @@
     }
   }
   .layers-container {
+    display: flex;
+    flex-direction: column;
+    position: relative;
     width: calc(100% - 4px);
     height: auto;
-    max-height: 481px;
+    // max-height: 481px;
+    flex: 1 1 auto;
+    min-height: 40px;
     overflow-y: auto;
     margin: 2px;
     @include boxBorder;

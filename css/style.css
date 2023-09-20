@@ -136,9 +136,11 @@ svg {
 .sidebar {
   position: relative;
   min-width: 206px;
+  height: calc(100% - 4px);
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
+  overflow-y: scroll;
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 .sidebar:hover:not([disabled]), .sidebar:focus {
@@ -265,15 +267,13 @@ svg {
   box-shadow: 9px 5px rgb(255, 255, 255), 9px 7px rgb(255, 255, 255), 5px 9px rgb(255, 255, 255), 7px 9px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 11px 9px rgb(255, 255, 255), 13px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 9px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 9px 13px rgb(255, 255, 255);
 }
 .draggable .collapsible {
+  flex: 0 1 auto;
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   overflow: hidden;
   position: relative;
-  padding-top: 2px;
-  transition: all 1s;
 }
 
 /* Misc */
@@ -537,6 +537,9 @@ canvas {
 .toolbox:hover:not([disabled]), .toolbox:focus {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
+.toolbox .collapsible {
+  padding-top: 2px;
+}
 .toolbox .colors {
   width: 128px;
   height: 128px;
@@ -699,13 +702,20 @@ canvas {
   z-index: 100;
   background-color: rgb(51, 51, 51);
   width: 206px;
-  height: auto;
+  flex: 1 1 auto;
+  min-height: 184px;
   display: flex;
   flex-flow: column nowrap;
+  justify-content: flex-start;
   align-items: center;
   order: 3;
 }
+.layers-interface .collapsible {
+  padding-top: 2px;
+}
 .layers-interface .layers-control {
+  flex-shrink: 0; /* Prevents the child from shrinking below its content size */
+  flex-grow: 0;
   display: flex;
   flex-flow: row nowrap;
   margin: 2px;
@@ -724,9 +734,13 @@ canvas {
   background: rgb(131, 131, 131);
 }
 .layers-interface .layers-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
   width: calc(100% - 4px);
   height: auto;
-  max-height: 481px;
+  flex: 1 1 auto;
+  min-height: 40px;
   overflow-y: auto;
   margin: 2px;
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
@@ -808,9 +822,12 @@ canvas {
   z-index: 100;
   background-color: rgb(51, 51, 51);
   width: 206px;
-  height: auto;
+  flex: 1; /* Allows the child to shrink if there's no space */
+  flex: 1 1 auto;
+  min-height: 264px;
   display: flex;
   flex-flow: column nowrap;
+  justify-content: flex-start;
   align-items: center;
   order: 4;
 }
@@ -837,11 +854,16 @@ canvas {
 .vectors-interface .vectors-control .thumbnail-style input[type=checkbox]:checked + .icon {
   background-image: url("../public/pixelv-expand.png");
 }
+.vectors-interface .collapsible {
+  padding-top: 2px;
+}
 .vectors-interface .vectors-container {
+  display: flex;
+  flex-direction: column;
   position: relative;
   width: 100%;
-  height: auto;
-  max-height: 481px;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
   margin: 2px;
   box-shadow: 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
@@ -956,9 +978,12 @@ canvas {
   width: 206px;
   display: flex;
   flex-flow: column nowrap;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   order: 1;
+}
+.brush-container .collapsible {
+  padding-top: 2px;
 }
 .brush-container p {
   margin: 0px;
@@ -1019,6 +1044,7 @@ canvas {
   left: calc(50% - 183px);
   display: none;
   flex-flow: column nowrap;
+  justify-content: flex-start;
   color: white;
   background: rgb(51, 51, 51);
   text-align: center;
@@ -1037,6 +1063,9 @@ canvas {
   justify-self: center;
   height: 20px;
   margin: 0px;
+}
+.picker-container .collapsible {
+  padding-top: 2px;
 }
 
 .picker-interface {
@@ -1197,9 +1226,12 @@ canvas {
   width: 206px;
   display: flex;
   flex-flow: column nowrap;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: center;
   order: 2;
+}
+.size-container .collapsible {
+  padding-top: 2px;
 }
 .size-container p {
   margin: 0px;
