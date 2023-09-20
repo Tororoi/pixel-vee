@@ -269,6 +269,18 @@ export function findHalf(x, y, angle) {
   }
 }
 
+//Helper functions that affect state
+
+/**
+ *
+ * @param {*} state
+ * @param {*} canvas
+ * @param {*} px1
+ * @param {*} py1
+ * @param {*} px2
+ * @param {*} py2
+ * @param {*} angleOffset
+ */
 export function updateEllipseOffsets(
   state,
   canvas,
@@ -335,5 +347,70 @@ export function updateEllipseOffsets(
       default:
       //none
     }
+  }
+}
+
+export function updateEllipseControlPoints(state, canvas, vectorGuiState) {
+   let dxa = vectorGuiState.px2 - vectorGuiState.px1
+   let dya = vectorGuiState.py2 - vectorGuiState.py1
+   let dxb = vectorGuiState.px3 - vectorGuiState.px1
+   let dyb = vectorGuiState.py3 - vectorGuiState.py1
+   vectorGuiState[vectorGuiState.selectedPoint.xKey] = state.cursorX
+   vectorGuiState[vectorGuiState.selectedPoint.yKey] = state.cursorY
+  if (vectorGuiState.selectedPoint.xKey === "px1") {
+    vectorGuiState.px2 = vectorGuiState.px1 + dxa
+    vectorGuiState.py2 = vectorGuiState.py1 + dya
+    vectorGuiState.px3 = vectorGuiState.px1 + dxb
+    vectorGuiState.py3 = vectorGuiState.py1 + dyb
+  } else if (vectorGuiState.selectedPoint.xKey === "px2") {
+    vectorGuiState.radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
+    if (state.forceCircle) {
+      vectorGuiState.radB = vectorGuiState.radA
+    }
+    let newVertex = updateEllipseVertex(
+      vectorGuiState.px1,
+      vectorGuiState.py1,
+      vectorGuiState.px2,
+      vectorGuiState.py2,
+      -Math.PI / 2,
+      vectorGuiState.radB
+    )
+    vectorGuiState.px3 = newVertex.x
+    vectorGuiState.py3 = newVertex.y
+    state.angleOffset = 0
+    updateEllipseOffsets(
+      state,
+      canvas,
+      vectorGuiState.px1,
+      vectorGuiState.py1,
+      vectorGuiState.px2,
+      vectorGuiState.py2,
+      state.angleOffset
+    )
+  } else if (vectorGuiState.selectedPoint.xKey === "px3") {
+    vectorGuiState.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
+    if (state.forceCircle) {
+      vectorGuiState.radA = vectorGuiState.radB
+    }
+    let newVertex = updateEllipseVertex(
+      vectorGuiState.px1,
+      vectorGuiState.py1,
+      vectorGuiState.px3,
+      vectorGuiState.py3,
+      Math.PI / 2,
+      vectorGuiState.radA
+    )
+    vectorGuiState.px2 = newVertex.x
+    vectorGuiState.py2 = newVertex.y
+    state.angleOffset = 1.5 * Math.PI
+    updateEllipseOffsets(
+      state,
+      canvas,
+      vectorGuiState.px1,
+      vectorGuiState.py1,
+      vectorGuiState.px2,
+      vectorGuiState.py2,
+      state.angleOffset
+    )
   }
 }
