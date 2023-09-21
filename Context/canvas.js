@@ -82,7 +82,8 @@ thumbnailCVS.width = 256
 thumbnailCVS.height = 256
 //improve sharpness
 //BUG: sharpness (8+) greatly affects performance in browsers other than chrome (can safari and firefox not handle large canvases?)
-//window.devicePixelRatio is typically 2
+//window.devicePixelRatio is typically 2.
+//Other than performance issues, any sharpness greater than the devicePixelRatio can actually look bad because the device cannot render the fidelity expected by the canvas.
 const sharpness = window.devicePixelRatio
 //adjust canvas ratio here if needed
 vectorGuiCVS.width = vectorGuiCVS.offsetWidth * sharpness
@@ -104,8 +105,10 @@ const setInitialZoom = (width) => {
       return 4
     case ratio >= 1:
       return 2
-    default:
+    case ratio >= 0.5:
       return 1
+    default:
+      return 0.5
   }
 }
 const zoom = setInitialZoom(offScreenCVS.width) //zoom level should be based on absolute pixel size, not window relative to canvas
@@ -190,7 +193,7 @@ export const canvas = {
 
 const handleIncrement = (e) => {
   let dimension = e.target.parentNode.previousSibling.previousSibling
-  let max = 800
+  let max = 1024
   let min = 8
   if (e.target.id === "inc") {
     let newValue = Math.floor(+dimension.value)
@@ -217,7 +220,7 @@ const handleSizeIncrement = (e) => {
 }
 
 const restrictSize = (e) => {
-  const max = 800
+  const max = 1024
   const min = 8
   if (e.target.value > max) {
     e.target.value = max
