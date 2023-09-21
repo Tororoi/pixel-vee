@@ -48,6 +48,7 @@ function drawControlPointHandle(canvas, x1, y1, x2, y2) {
   )
 }
 
+//TODO: this is quite slow, consider putting it on its own canvas 
 function renderGrid(canvas) {
   let lineWidth = 0.5 / canvas.zoom
   canvas.vectorGuiCTX.lineWidth = lineWidth
