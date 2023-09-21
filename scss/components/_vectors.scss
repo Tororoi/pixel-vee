@@ -1,20 +1,9 @@
 /* Vectors, interface provides access to select any vector existing in the timeline */
 
 .vectors-interface {
-  user-select: none;
-  // position: absolute;
-  position: relative;
-  z-index: 100;
-  background-color: $extra-dark-gray;
-  width: 206px;
-  flex: 1; /* Allows the child to shrink if there's no space */
+  order: 4;
   flex: 1 1 auto;
   min-height: 264px; //header and vectors-control plus 2 vectors.
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  align-items: center;
-  order: 4;
   .vectors-control {
     display: flex;
     flex-flow: row nowrap;

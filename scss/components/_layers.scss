@@ -1,18 +1,9 @@
 /* Layers */
 
 .layers-interface {
-  user-select: none;
-  position: relative;
-  z-index: 100;
-  background-color: $extra-dark-gray;
-  width: 206px;
+  order: 3;
   flex: 1 1 auto;
   min-height: 184px; //header and layers-control plus 3 layers.
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  align-items: center;
-  order: 3;
   .collapsible {
     padding-top: 2px;
   }

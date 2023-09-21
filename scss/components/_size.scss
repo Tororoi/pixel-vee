@@ -1,15 +1,6 @@
+/* Canvas Size settings */
+
 .size-container {
-  background-color: $extra-dark-gray;
-  user-select: none;
-  // position: absolute;
-  position: relative;
-  z-index: 100;
-  width: 206px;
-  // top: 155px;
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  align-items: center;
   order: 2;
   .collapsible {
     padding-top: 2px;

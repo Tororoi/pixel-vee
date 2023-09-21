@@ -27,9 +27,9 @@
 .draggable {
   margin: 2px;
   z-index: 100;
-  &:hover {
-    z-index: 102;
-  }
+  // &:hover {
+  //   z-index: 102;
+  // }
   &.v-drag {
     @include sandwichBorder;
   }
@@ -38,6 +38,7 @@
   }
   .dragging {
     user-select: none;
+    z-index: 150;
   }
   .header {
     background-color: $black;
@@ -77,8 +78,23 @@
   }
 }
 
-.setting-box {
-  // margin-top: 0px;
+.settings-box {
+  background-color: $extra-dark-gray;
+  user-select: none;
+  position: relative;
+  z-index: 100;
+  width: 206px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.smooth-shift {
+  transition: top 0.1s;
+  &.dragging {
+    transition: none;
+  }
 }
 
 /* Misc */

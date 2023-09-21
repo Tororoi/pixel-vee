@@ -30,6 +30,7 @@ export const state = {
   dragX: null,
   dragY: null,
   dragTarget: null,
+  dragSiblings: [],
   //active variables for canvas
   shortcuts: true,
   clipMask: null,
