@@ -42,6 +42,19 @@ function setDragSiblings() {
   // Convert the NodeList or HTMLCollection to an array
   let siblingArray = Array.from(siblingElements)
 
+  // Sort the array based on the order property
+  siblingArray.sort((a, b) => {
+    // Get computed styles
+    let styleA = window.getComputedStyle(a)
+    let styleB = window.getComputedStyle(b)
+
+    // Parse the order properties as integers (default to 0 if not set)
+    let orderA = parseInt(styleA.order, 10) || 0
+    let orderB = parseInt(styleB.order, 10) || 0
+
+    return orderA - orderB // This will sort in ascending order
+  })
+
   for (let i = 0; i < siblingArray.length; i++) {
     let newSiblingProperties = {}
     let bounds = siblingArray[i].getBoundingClientRect()
@@ -104,20 +117,20 @@ function reorderElements(e) {
 
 //Drag
 export const dragStart = (e, dragTarget) => {
-  if (!dragTarget.className.includes("locked")) {
-    e.target.setPointerCapture(e.pointerId)
-    state.dragging = true
-    state.dragTarget = dragTarget
-    if (state.dragTarget) {
-      state.dragTarget.classList.add("dragging")
-      state.dragX = e.clientX - state.dragTarget.offsetLeft
-      state.dragY = e.clientY - state.dragTarget.offsetTop
-      //push each element to state.dragSiblings with bounding box
-      if (!state.dragTarget.className.includes("h-drag")) {
-        setDragSiblings()
-      }
+  // if (!dragTarget.className.includes("locked")) {
+  e.target.setPointerCapture(e.pointerId)
+  state.dragging = true
+  state.dragTarget = dragTarget
+  if (state.dragTarget) {
+    state.dragTarget.classList.add("dragging")
+    state.dragX = e.clientX - state.dragTarget.offsetLeft
+    state.dragY = e.clientY - state.dragTarget.offsetTop
+    //push each element to state.dragSiblings with bounding box
+    if (!state.dragTarget.className.includes("h-drag")) {
+      setDragSiblings()
     }
   }
+  //}
 }
 
 export const dragStop = (e) => {
@@ -125,6 +138,7 @@ export const dragStop = (e) => {
   if (state.dragTarget) {
     state.dragTarget.classList.remove("dragging")
     if (!state.dragTarget.className.includes("free")) {
+      //NOTE: currently only works for vertical dragging of horizontally locked elements
       const parentElement = state.dragTarget.parentElement
       if (!state.dragTarget.className.includes("h-drag")) {
         const siblingElements = parentElement.children

@@ -12,6 +12,7 @@ import {
 import { tools } from "../Tools/index.js"
 import { getAngle } from "../utils/trig.js"
 import { vectorGuiState, renderVectorGUI } from "../GUI/vector.js"
+import { colorPickerContainer } from "./swatch.js"
 
 //===================================//
 //==== * * * DOM Interface * * * ====//
@@ -327,6 +328,13 @@ export const resizeOnScreenCanvas = () => {
     0
   )
   canvas.draw()
+  // reset positioning styles for free moving dialog boxes
+  toolboxContainer.style.left = ""
+  toolboxContainer.style.top = ""
+  sidebarContainer.style.left = ""
+  sidebarContainer.style.top = ""
+  colorPickerContainer.style.left = ""
+  colorPickerContainer.style.top = ""
 }
 
 resizeOnScreenCanvas()

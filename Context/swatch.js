@@ -12,7 +12,7 @@ const swatch = document.querySelector(".swatch")
 const backSwatch = document.querySelector(".back-swatch")
 const colorSwitch = document.querySelector(".color-switch")
 //Color Picker
-const colorPickerContainer = document.querySelector(".picker-container")
+export const colorPickerContainer = document.querySelector(".picker-container")
 initializeDialogBox(colorPickerContainer)
 const confirmBtn = document.getElementById("confirm-btn")
 const cancelBtn = document.getElementById("cancel-btn")

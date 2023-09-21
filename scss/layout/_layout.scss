@@ -8,7 +8,8 @@
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
-  overflow-y: scroll;
+  // overflow-y: scroll;
+  z-index: 103;
   @include boxBorder;
   .content {
     //class does not exist currently
@@ -94,7 +95,7 @@
 }
 
 .smooth-shift {
-  transition: top 0.1s;
+  transition: top 0.05s;
   &.dragging {
     transition: none;
   }
