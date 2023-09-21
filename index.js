@@ -467,7 +467,7 @@ function handlePointerUp(e) {
   state.tool.fn()
   //add to undo stack
   if (state.points.length) {
-    console.log(state.points.length) //TODO: for modification actions, set "to" values on moddedActionIndex before pushing
+    //TODO: for modification actions, set "to" values on moddedActionIndex before pushing
     state.undoStack.push(state.points)
 
     // TODO: if state.tool is a vector tool like curve, push index of instruction on undoStack and state.points to vector instruction stack
