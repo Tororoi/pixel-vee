@@ -1,3 +1,4 @@
+import { handleTools } from "../index.js"
 import { state } from "./state.js"
 import { initializeDialogBox } from "../utils/drag.js"
 import {
@@ -8,17 +9,40 @@ import {
   actionCubicCurve,
   actionEllipse,
 } from "../Tools/actions.js"
+import { tools } from "../Tools/index.js"
+import { getAngle } from "../utils/trig.js"
+import { vectorGuiState, renderVectorGUI } from "../GUI/vector.js"
+import { colorPickerContainer } from "./swatch.js"
 
 //===================================//
 //==== * * * DOM Interface * * * ====//
 //===================================//
 
+// * Sidebar Menu * //
+const sidebarContainer = document.querySelector(".sidebar")
+initializeDialogBox(sidebarContainer)
+
+// * Toolbox * //
+const toolboxContainer = document.querySelector(".toolbox")
+initializeDialogBox(toolboxContainer)
+
+// * Brush * //
+const brushContainer = document.querySelector(".brush-container")
+initializeDialogBox(brushContainer)
+
+// * Layers Interface * //
 const uploadBtn = document.querySelector("#file-upload")
 const newLayerBtn = document.querySelector(".new-raster-layer")
 
 const layersContainer = document.querySelector(".layers")
 const layersInterfaceContainer = document.querySelector(".layers-interface")
 initializeDialogBox(layersInterfaceContainer)
+
+// * Vectors Interface * //
+const vectorsThumbnails = document.querySelector(".vectors")
+const vectorsContainer = document.querySelector(".vectors-container") //dynamically set max height based on height of page minus other menu boxes heights
+const vectorsInterfaceContainer = document.querySelector(".vectors-interface")
+initializeDialogBox(vectorsInterfaceContainer)
 
 // * Canvas Size * //
 const sizeContainer = document.querySelector(".size-container")
@@ -50,6 +74,12 @@ offScreenCTX.willReadFrequently = true
 //Set the dimensions of the drawing canvas
 offScreenCVS.width = 256
 offScreenCVS.height = 256
+//thumbnail canvas for making images from canvas actions
+const thumbnailCVS = document.createElement("canvas")
+const thumbnailCTX = thumbnailCVS.getContext("2d")
+thumbnailCTX.willReadFrequently = true
+thumbnailCVS.width = 256
+thumbnailCVS.height = 256
 //improve sharpness
 //BUG: sharpness (8+) greatly affects performance in browsers other than chrome (can safari and firefox not handle large canvases?)
 //window.devicePixelRatio is typically 2
@@ -61,6 +91,7 @@ rasterGuiCVS.width = rasterGuiCVS.offsetWidth * sharpness
 rasterGuiCVS.height = rasterGuiCVS.offsetHeight * sharpness
 onScreenCVS.width = onScreenCVS.offsetWidth * sharpness
 onScreenCVS.height = onScreenCVS.offsetHeight * sharpness
+
 //zoom
 const setInitialZoom = (width) => {
   const ratio = 256 / width
@@ -81,6 +112,7 @@ const zoom = setInitialZoom(offScreenCVS.width) //zoom level should be based on 
 vectorGuiCTX.scale(sharpness * zoom, sharpness * zoom)
 rasterGuiCTX.scale(sharpness * zoom, sharpness * zoom)
 onScreenCTX.scale(sharpness * zoom, sharpness * zoom)
+thumbnailCTX.scale(sharpness, sharpness)
 
 //Initialize offset, must be integer
 const xOffset = Math.round(
@@ -113,12 +145,16 @@ export const canvas = {
   zoomAtLastDraw: zoom,
   offScreenCVS,
   offScreenCTX,
+  thumbnailCVS,
+  thumbnailCTX,
   //Layers
   layers: [], //(types: raster, vector, reference)
   currentLayer: null,
   tempLayer: null,
   bgColor: "rgba(131, 131, 131, 0.5)",
   borderColor: "black",
+  //Vectors
+  currentVectorIndex: null,
   //Cursor
   pointerEvent: "none",
   sizePointerState: "none",
@@ -130,16 +166,20 @@ export const canvas = {
   previousYOffset: yOffset,
   subPixelX: null,
   subPixelY: null,
+  previousSubPixelX: null,
+  previousSubPixelY: null,
   zoomPixelX: null,
   zoomPixelY: null,
   //Functions
   draw,
   drawLayers,
   redrawPoints,
+  render,
   consolidateLayers,
   createNewRasterLayer,
   addRasterLayer,
   renderLayersToDOM,
+  renderVectorsToDOM,
   getColor,
   setInitialZoom,
 }
@@ -189,8 +229,12 @@ const restrictSize = (e) => {
 const resizeOffScreenCanvas = (width, height) => {
   canvas.offScreenCVS.width = width
   canvas.offScreenCVS.height = height
+  // canvas.thumbnailCVS.width = canvas.offScreenCVS.width
+  // canvas.thumbnailCVS.height = canvas.offScreenCVS.height
   //reset canvas state
-  canvas.zoom = setInitialZoom(canvas.offScreenCVS.width)
+  canvas.zoom = setInitialZoom(
+    Math.max(canvas.offScreenCVS.width, canvas.offScreenCVS.height)
+  )
   canvas.vectorGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
@@ -243,6 +287,7 @@ const resizeOffScreenCanvas = (width, height) => {
   })
   canvas.redrawPoints()
   canvas.draw()
+  renderVectorGUI(state, canvas)
 }
 
 const handleDimensionsSubmit = (e) => {
@@ -283,6 +328,13 @@ export const resizeOnScreenCanvas = () => {
     0
   )
   canvas.draw()
+  // reset positioning styles for free moving dialog boxes
+  toolboxContainer.style.left = ""
+  toolboxContainer.style.top = ""
+  sidebarContainer.style.left = ""
+  sidebarContainer.style.top = ""
+  colorPickerContainer.style.left = ""
+  colorPickerContainer.style.top = ""
 }
 
 resizeOnScreenCanvas()
@@ -329,14 +381,24 @@ function draw() {
   canvas.onScreenCTX.stroke()
 }
 
-function redrawPoints() {
+/**
+ *
+ * @param {*} index - optional parameter to limit render up to a specific action
+ */
+function redrawPoints(index = null) {
+  let i = 0
   //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
   state.undoStack.forEach((action) => {
+    if (index && i > index) {
+      return
+    }
+    i++
     action.forEach((p) => {
-      switch (p.tool) {
-        case "addlayer":
+      switch (p.tool.name) {
+        case "addLayer":
           p.layer.removed = false
           canvas.renderLayersToDOM()
+          canvas.renderVectorsToDOM()
           break
         case "clear":
           p.layer.ctx.clearRect(
@@ -347,7 +409,10 @@ function redrawPoints() {
           )
           break
         case "fill":
-          actionFill(p.x, p.y, p.color, p.layer.ctx, p.mode)
+          if (p.hidden) {
+            break
+          }
+          actionFill(p.x.px1, p.y.py1, p.color, p.layer.ctx, p.mode)
           break
         case "line":
           actionLine(
@@ -363,6 +428,9 @@ function redrawPoints() {
           )
           break
         case "quadCurve":
+          if (p.hidden) {
+            break
+          }
           actionQuadraticCurve(
             p.x.px1,
             p.y.py1,
@@ -371,9 +439,7 @@ function redrawPoints() {
             p.x.px3,
             p.y.py3,
             3,
-            p.opacity === 0
-              ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
-              : p.color,
+            p.color,
             p.layer.ctx,
             p.mode,
             p.brush,
@@ -381,6 +447,9 @@ function redrawPoints() {
           )
           break
         case "cubicCurve":
+          if (p.hidden) {
+            break
+          }
           //TODO: pass source on history objects to avoid debugging actions from the timeline unless desired
           actionCubicCurve(
             p.x.px1,
@@ -392,9 +461,7 @@ function redrawPoints() {
             p.x.px4,
             p.y.py4,
             4,
-            p.opacity === 0
-              ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
-              : p.color,
+            p.color,
             p.layer.ctx,
             p.mode,
             p.brush,
@@ -402,6 +469,9 @@ function redrawPoints() {
           )
           break
         case "ellipse":
+          if (p.hidden) {
+            break
+          }
           actionEllipse(
             p.x.px1,
             p.y.py1,
@@ -411,17 +481,28 @@ function redrawPoints() {
             p.y.py3,
             p.properties.radA,
             p.properties.radB,
-            2,
-            p.opacity === 0
-              ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
-              : p.color,
+            p.properties.forceCircle,
+            p.color,
             p.layer.ctx,
             p.mode,
             p.brush,
-            p.weight
+            p.weight,
+            1,
+            p.properties.angle,
+            p.properties.offset,
+            p.properties.x1Offset,
+            p.properties.y1Offset
           )
           break
         case "replace":
+          //TODO IMPORTANT: drawing an image is not compatible with vector concept.
+          //Any previous vectors would be fully rasterized.
+          //Even if image only depicts replaced pixels, those that were replaced cannot be moved.
+          //Tool needs to be reworked for only raster and force users to convert vectors to raster before using replace tool on them.
+          // For example, the program would assemble the canvas without vector renders and replacing black with teal would succeed on raster pixels.
+          //Then, any vector pixels on top of replaced pixels would be still rendered in black.
+          //maybe a separate tool could exist for replacing vector pixels as a modification of one vector, as if the vector's render acts as a mask.
+          //maybe collision detection could be used somehow? probably expensive.
           p.layer.ctx.drawImage(
             p.properties.image,
             0,
@@ -437,15 +518,35 @@ function redrawPoints() {
   })
   state.redoStack.forEach((action) => {
     action.forEach((p) => {
-      if (p.tool === "addlayer") {
+      if (p.tool.name === "addLayer") {
         p.layer.removed = true
         if (p.layer === canvas.currentLayer) {
           canvas.currentLayer = layersCont.children[0].layerObj
         }
         canvas.renderLayersToDOM()
+        canvas.renderVectorsToDOM()
       }
     })
   })
+}
+
+/**
+ *
+ * @param {*} index - optional parameter to limit render up to a specific action
+ */
+function render(index) {
+  canvas.layers.forEach((l) => {
+    if (l.type === "raster") {
+      l.ctx.clearRect(
+        0,
+        0,
+        canvas.offScreenCVS.width,
+        canvas.offScreenCVS.height
+      )
+    }
+  })
+  canvas.redrawPoints(index)
+  canvas.draw()
 }
 
 //====================================//
@@ -605,7 +706,7 @@ function addRasterLayer() {
   //once layer is added to timeline and drawn on, can no longer be deleted
   const layer = createNewRasterLayer(`Layer ${canvas.layers.length + 1}`)
   canvas.layers.push(layer)
-  state.addToTimeline({ tool: "addlayer", layer })
+  state.addToTimeline({ tool: tools.addLayer, layer })
   state.undoStack.push(state.points)
   state.points = []
   state.redoStack = []
@@ -689,6 +790,167 @@ function renderLayersToDOM() {
   })
 }
 
+//Vectors
+function vectorInteract(e) {
+  let vector = e.target.closest(".vector").vectorObj
+  //toggle visibility
+  if (e.target.className.includes("hide")) {
+    if (e.target.childNodes[0].className.includes("eyeopen")) {
+      e.target.childNodes[0].classList.remove("eyeopen")
+      e.target.childNodes[0].classList.add("eyeclosed")
+      vector.opacity = 0
+    } else if (e.target.childNodes[0].className.includes("eyeclosed")) {
+      e.target.childNodes[0].classList.remove("eyeclosed")
+      e.target.childNodes[0].classList.add("eyeopen")
+      vector.opacity = 1
+    }
+  } else {
+    //switch tool
+    handleTools(null, vector.tool.name)
+    //select current vector
+    //TODO: modify object structure of states to match object in undoStack to make assignment simpler like vectorGuiState.x = {...vector.x}
+    vectorGuiState.reset(canvas)
+    vectorGuiState.px1 = vector.x.px1
+    vectorGuiState.py1 = vector.y.py1
+    vectorGuiState.px2 = vector.x.px2
+    vectorGuiState.py2 = vector.y.py2
+    vectorGuiState.px3 = vector.x.px3
+    vectorGuiState.py3 = vector.y.py3
+    vectorGuiState.px4 = vector.x.px4
+    vectorGuiState.py4 = vector.y.py4
+    vectorGuiState.radA = vector.properties?.radA
+    vectorGuiState.radB = vector.properties?.radB
+    // if (vector.type === "raster") {
+    canvas.currentVectorIndex = vector.index
+    state.angle = vector.properties?.angle
+    state.angleOffset = 0
+    state.x1Offset = vector.properties?.x1Offset
+    state.y1Offset = vector.properties?.y1Offset
+    state.offset = vector.properties?.offset
+    renderVectorGUI(state, canvas)
+    //BUG: renderVectorsToDOM resets scroll, so figure out way to only modify existing DOM. Layers doesn't do this, why?
+    renderVectorsToDOM()
+    // }
+  }
+  // canvas.draw()
+}
+
+function renderVectorsToDOM() {
+  vectorsThumbnails.innerHTML = ""
+  state.undoStack.forEach((action) => {
+    let p = action[0]
+    if (p.tool.type === "vector") {
+      p.index = state.undoStack.indexOf(action)
+      let vectorElement = document.createElement("div")
+      vectorElement.className = `vector ${p.index}`
+      vectorElement.id = p.index
+      vectorsThumbnails.appendChild(vectorElement)
+      vectorElement.draggable = true
+      canvas.thumbnailCTX.clearRect(
+        0,
+        0,
+        canvas.thumbnailCVS.width,
+        canvas.thumbnailCVS.height
+      )
+      //TODO: find a way to constrain coordinates to fit canvas viewing area for maximum size of vector without changing the size of the canvas for each vector thumbnail
+      // Save minima and maxima for x and y plotted coordinates to get the bounding box when plotting the curve. Then, here we can constrain the coords to fit a maximal bounding box in the thumbnail canvas
+      thumbnailCTX.lineWidth = 2
+      let wd = canvas.thumbnailCVS.width / sharpness / canvas.offScreenCVS.width
+      let hd =
+        canvas.thumbnailCVS.height / sharpness / canvas.offScreenCVS.height
+      //get the minimum dimension ratio
+      let minD = Math.min(wd, hd)
+      // thumbnailCTX.strokeStyle = p.color.color
+      canvas.thumbnailCTX.strokeStyle = "black"
+      canvas.thumbnailCTX.beginPath()
+      //TODO: line tool and fill tool to be added as vectors. Behavior of replace tool is like a mask, so the replaced pixels are static coordinates.
+      if (p.tool.name === "fill") {
+        canvas.thumbnailCTX.arc(
+          minD * p.x.px1 + 0.5,
+          minD * p.y.py1 + 0.5,
+          1,
+          0,
+          2 * Math.PI,
+          true
+        )
+      } else if (p.tool.name === "quadCurve") {
+        canvas.thumbnailCTX.moveTo(minD * p.x.px1 + 0.5, minD * p.y.py1 + 0.5)
+        canvas.thumbnailCTX.quadraticCurveTo(
+          minD * p.x.px3 + 0.5,
+          minD * p.y.py3 + 0.5,
+          minD * p.x.px2 + 0.5,
+          minD * p.y.py2 + 0.5
+        )
+      } else if (p.tool.name === "cubicCurve") {
+        canvas.thumbnailCTX.moveTo(minD * p.x.px1 + 0.5, minD * p.y.py1 + 0.5)
+        canvas.thumbnailCTX.bezierCurveTo(
+          minD * p.x.px3 + 0.5,
+          minD * p.y.py3 + 0.5,
+          minD * p.x.px4 + 0.5,
+          minD * p.y.py4 + 0.5,
+          minD * p.x.px2 + 0.5,
+          minD * p.y.py2 + 0.5
+        )
+      } else if (p.tool.name === "ellipse") {
+        let angle = getAngle(p.x.px2 - p.x.px1, p.y.py2 - p.y.py1)
+        canvas.thumbnailCTX.ellipse(
+          minD * p.x.px1,
+          minD * p.y.py1,
+          minD * p.properties.radA,
+          minD * p.properties.radB,
+          angle,
+          0,
+          2 * Math.PI
+        )
+      }
+      canvas.thumbnailCTX.stroke()
+      if (p.index === canvas.currentVectorIndex) {
+        canvas.thumbnailCTX.fillStyle = "rgb(0, 0, 0)"
+      } else {
+        canvas.thumbnailCTX.fillStyle = "rgb(51, 51, 51)"
+      }
+      canvas.thumbnailCTX.fillRect(
+        minD * canvas.offScreenCVS.width,
+        0,
+        thumbnailCVS.width,
+        thumbnailCVS.height
+      )
+      canvas.thumbnailCTX.fillRect(
+        0,
+        minD * canvas.offScreenCVS.height,
+        thumbnailCVS.width,
+        thumbnailCVS.height
+      )
+      let thumb = new Image()
+      thumb.src = canvas.thumbnailCVS.toDataURL()
+      // vectorElement.appendChild(thumbnailCVS)
+      vectorElement.appendChild(thumb)
+      let tool = document.createElement("div")
+      tool.className = "tool btn"
+      let icon = document.createElement("div")
+      icon.className = p.tool.name
+      if (p.index === canvas.currentVectorIndex) {
+        tool.style.background = "rgb(255, 255, 255)"
+        vectorElement.style.background = "rgb(0, 0, 0)"
+      } else {
+        vectorElement.style.background = "rgb(51, 51, 51)"
+      }
+      tool.appendChild(icon)
+      vectorElement.appendChild(tool)
+      let color = document.createElement("div") //TODO: make clickable and color can be rechosen via colorpicker
+      color.className = "actionColor btn"
+      color.style.background = p.color.color
+      vectorElement.appendChild(color)
+      // thumbnailCVS.width = thumbnailCVS.offsetWidth * sharpness
+      // thumbnailCVS.height = thumbnailCVS.offsetHeight * sharpness
+      // thumbnailCTX.scale(sharpness * 1, sharpness * 1)
+
+      //associate object
+      vectorElement.vectorObj = p
+    }
+  })
+}
+
 //====================================//
 //======== * * * Colors * * * ========//
 //====================================//
@@ -748,10 +1010,12 @@ uploadBtn.addEventListener("change", addReferenceLayer)
 newLayerBtn.addEventListener("click", addRasterLayer)
 
 layersContainer.addEventListener("click", layerInteract)
-
 layersContainer.addEventListener("dragstart", dragLayerStart)
 layersContainer.addEventListener("dragover", dragLayerOver)
 layersContainer.addEventListener("dragenter", dragLayerEnter)
 layersContainer.addEventListener("dragleave", dragLayerLeave)
 layersContainer.addEventListener("drop", dropLayer)
 layersContainer.addEventListener("dragend", dragLayerEnd)
+
+// * Vectors * //
+vectorsThumbnails.addEventListener("click", vectorInteract)

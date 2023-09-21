@@ -5,11 +5,7 @@ import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { generateRandomRGB } from "../utils/colors.js"
 import { vectorGuiState } from "../GUI/vector.js"
-import {
-  plotCircle,
-  plotRotatedEllipse,
-  plotEllipseRect,
-} from "../utils/ellipse.js"
+import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -154,7 +150,7 @@ export function actionPerfectPixels(currentX, currentY) {
     if (state.tool.name !== "replace") {
       //TODO: refactor so adding to timeline is performed by controller function
       state.addToTimeline({
-        tool: state.tool.name,
+        tool: state.tool,
         x: state.lastDrawnX,
         y: state.lastDrawnY,
         layer: canvas.currentLayer,
@@ -231,24 +227,32 @@ export function actionReplace() {
       //Final step
       canvas.currentLayer.ctx.restore()
       //Merge the Replacement Layer onto the actual current layer being stored in canvas.tempLayer
-      canvas.tempLayer.ctx.drawImage(canvas.currentLayer.cvs, 0, 0)
+      //TODO: instead of drawing the image here, iterate through currentlayer and save points to timeline for every pixel that matches current color
+      // can use similar code to createMapForSpecificColor except if it matches color push x and y to an array similar to how the draw action works
+      canvas.tempLayer.ctx.drawImage(canvas.currentLayer.cvs, 0, 0) //SOON TO BE DEPRECATED
       //Remove the Replacement Layer from the array of layers
       const replacementLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
       canvas.layers.splice(replacementLayerIndex, 1)
       //Set the current layer back to the correct layer
       canvas.currentLayer = canvas.tempLayer
-      let image = new Image()
-      image.src = canvas.currentLayer.cvs.toDataURL()
+      let image = new Image() //SOON TO BE DEPRECATED
+      image.src = canvas.currentLayer.cvs.toDataURL() //SOON TO BE DEPRECATED
       //TODO: refactor so adding to timeline is performed by controller function
       state.addToTimeline({
-        tool: state.tool.name,
+        tool: state.tool,
         layer: canvas.currentLayer,
         properties: {
           image,
           width: canvas.currentLayer.cvs.width,
           height: canvas.currentLayer.cvs.height,
         },
-      })
+      }) //SOON TO BE DEPRECATED - replace with
+    //state.addToTimeline({
+    //   tool: state.tool,
+    //   x: state.cursorX,
+    //   y: state.cursorY,
+    //   layer: canvas.currentLayer,
+    // }) on each pixel of color matched map
     default:
       //No default
       break
@@ -256,6 +260,7 @@ export function actionReplace() {
 }
 
 /**
+ * TODO: BUG: if canvas is resized and fill point exists outside canvas area, fill will not render when timeline is redrawn
  * User action for process to fill a contiguous color
  * @param {*} startX
  * @param {*} startY
@@ -274,6 +279,7 @@ export function actionFill(startX, startY, currentColor, ctx, currentMode) {
   ) {
     return
   }
+  //TODO: actions should not use state directly to maintain timeline integrity
   //get imageData
   state.localColorLayer = ctx.getImageData(
     0,
@@ -697,13 +703,17 @@ export function actionEllipse(
   yb,
   ra,
   rb,
-  stepNum,
+  forceCircle,
   currentColor,
   ctx,
   currentMode,
   brushStamp,
   weight,
-  scale = 1
+  scale = 1,
+  angle,
+  offset,
+  x1Offset,
+  y1Offset
 ) {
   //force coords to int
   centerx = Math.floor(centerx)
@@ -715,8 +725,8 @@ export function actionEllipse(
 
   ctx.fillStyle = currentColor.color
 
-  if (stepNum === 1) {
-    let plotPoints = plotCircle(centerx, centery, ra)
+  if (forceCircle) {
+    let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, offset)
     renderPoints(
       plotPoints,
       brushStamp,
@@ -726,9 +736,18 @@ export function actionEllipse(
       currentMode,
       scale
     )
-  } else if (stepNum === 2) {
-    let angle = getAngle(xa - centerx, ya - centery)
-    let plotPoints = plotRotatedEllipse(centerx, centery, ra, rb, angle)
+  } else {
+    let plotPoints = plotRotatedEllipse(
+      centerx,
+      centery,
+      ra,
+      rb,
+      angle,
+      xa,
+      ya,
+      x1Offset,
+      y1Offset
+    )
     renderPoints(
       plotPoints,
       brushStamp,

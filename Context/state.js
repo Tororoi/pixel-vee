@@ -7,6 +7,7 @@ export const state = {
   debugger: false,
   debugObject: {},
   debugFn: null,
+  grid: false,
   vectorMode: true,
   //timeline
   points: [],
@@ -29,6 +30,7 @@ export const state = {
   dragX: null,
   dragY: null,
   dragTarget: null,
+  dragSiblings: [],
   //active variables for canvas
   shortcuts: true,
   clipMask: null,
@@ -60,6 +62,12 @@ export const state = {
   py4: null,
   radA: null,
   radB: null,
+  angle: null,
+  angleOffset: 0,
+  x1Offset: 0,
+  y1Offset: 0,
+  offset: null, //rename to something more specific
+  forceCircle: false,
   //for perfect pixels
   lastDrawnX: null,
   lastDrawnY: null,
@@ -81,7 +89,7 @@ export const state = {
  * @param {*} y
  * @param {*} layer - layer that history should be applied to
  * @param {*} properties - custom properties for specific tool
- * @param
+ * @param {*} modifications - used for vector actions that can be changed after the fact, eg, line, curve, fill
  */
 function addToTimeline(actionObject) {
   const { tool, x, y, layer, properties, modifications = [] } = actionObject
@@ -111,5 +119,7 @@ function reset() {
   state.py3 = null
   state.px4 = null
   state.py4 = null
+  state.radA = null
+  state.radB = null
   state.clickCounter = 0
 }

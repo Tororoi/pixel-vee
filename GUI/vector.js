@@ -18,8 +18,8 @@ export const vectorGuiState = {
   radB: null,
   collidedKeys: { xKey: null, yKey: null },
   selectedPoint: { xKey: null, yKey: null },
-  pointRadius: 4,
   checkPointCollision,
+  reset,
 }
 //helper function. TODO: move to graphics helper file
 function drawCirclePath(canvas, x, y, r) {
@@ -48,47 +48,63 @@ function drawControlPointHandle(canvas, x1, y1, x2, y2) {
   )
 }
 
-export function resetVectorGUI(canvas) {
-  vectorGuiState.px1 = null
-  vectorGuiState.py1 = null
-  vectorGuiState.px2 = null
-  vectorGuiState.py2 = null
-  vectorGuiState.px3 = null
-  vectorGuiState.py3 = null
-  vectorGuiState.px4 = null
-  vectorGuiState.py4 = null
-  canvas.vectorGuiCTX.clearRect(
-    0,
-    0,
-    canvas.vectorGuiCVS.width / canvas.zoom,
-    canvas.vectorGuiCVS.height / canvas.zoom
-  )
-}
-
-export function renderVectorGUI(state, canvas, swatches) {
-  canvas.vectorGuiCTX.clearRect(
-    0,
-    0,
-    canvas.vectorGuiCVS.width / canvas.zoom,
-    canvas.vectorGuiCVS.height / canvas.zoom
-  )
-  if (state.vectorMode) {
-    //Prevent blurring
-    canvas.vectorGuiCTX.imageSmoothingEnabled = false
-    if (state.tool.name === "quadCurve" || state.tool.name === "cubicCurve") {
-      renderCurveVector(state, canvas, vectorGuiState)
-    } else if (state.tool.name === "ellipse") {
-      renderEllipseVector(state, canvas, vectorGuiState)
-    }
+//TODO: this is quite slow, consider putting it on its own canvas 
+function renderGrid(canvas) {
+  let lineWidth = 0.5 / canvas.zoom
+  canvas.vectorGuiCTX.lineWidth = lineWidth
+  canvas.vectorGuiCTX.strokeStyle = "rgba(255,255,255,0.5)"
+  canvas.vectorGuiCTX.beginPath()
+  canvas.vectorGuiCTX.moveTo(canvas.xOffset, canvas.yOffset)
+  for (let i = 0; i < canvas.offScreenCVS.width; i++) {
+    //draw vertical grid lines
+    canvas.vectorGuiCTX.moveTo(canvas.xOffset + i, canvas.yOffset)
+    canvas.vectorGuiCTX.lineTo(
+      canvas.xOffset + i,
+      canvas.yOffset + canvas.offScreenCVS.height
+    )
   }
+  for (let j = 0; j < canvas.offScreenCVS.height; j++) {
+    //draw vertical grid lines
+    canvas.vectorGuiCTX.moveTo(canvas.xOffset, canvas.yOffset + j)
+    canvas.vectorGuiCTX.lineTo(
+      canvas.xOffset + canvas.offScreenCVS.width,
+      canvas.yOffset + j
+    )
+  }
+  canvas.vectorGuiCTX.stroke()
 }
 
-function renderEllipseVector(state, canvas, vectorGuiState) {
-  // Setting of context attributes.
+function renderFillVector(canvas) {
+  let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
+  let pointsKeys = [{ x: "px1", y: "py1" }]
   let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
   canvas.vectorGuiCTX.fillStyle = "white"
+  canvas.vectorGuiCTX.beginPath()
+  drawControlPoints(pointsKeys, canvas, circleRadius, false)
+  // Stroke non-filled lines
+  canvas.vectorGuiCTX.stroke()
+
+  canvas.vectorGuiCTX.beginPath()
+  drawControlPoints(pointsKeys, canvas, circleRadius / 2, true)
+  // Fill points
+  canvas.vectorGuiCTX.fill()
+}
+
+function renderEllipseVector(canvas, vectorGuiState, color = "white") {
+  // Setting of context attributes.
+  let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  canvas.vectorGuiCTX.lineWidth = lineWidth
+  canvas.vectorGuiCTX.strokeStyle = color
+  canvas.vectorGuiCTX.fillStyle = color
+
+  let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
+  let pointsKeys = [
+    { x: "px1", y: "py1" },
+    { x: "px2", y: "py2" },
+    { x: "px3", y: "py3" },
+  ]
 
   canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.moveTo(
@@ -96,13 +112,7 @@ function renderEllipseVector(state, canvas, vectorGuiState) {
     canvas.yOffset + vectorGuiState.py1 + 0.5
   )
 
-  if (vectorGuiState.px3) {
-    // canvas.vectorGuiCTX.quadraticCurveTo(
-    //   canvas.xOffset + vectorGuiState.px3 + 0.5,
-    //   canvas.yOffset + vectorGuiState.py3 + 0.5,
-    //   canvas.xOffset + vectorGuiState.px2 + 0.5,
-    //   canvas.yOffset + vectorGuiState.py2 + 0.5
-    // )
+  if (vectorGuiState.px3 !== null) {
     drawControlPointHandle(
       canvas,
       vectorGuiState.px1,
@@ -117,11 +127,7 @@ function renderEllipseVector(state, canvas, vectorGuiState) {
       vectorGuiState.px2,
       vectorGuiState.py2
     )
-  } else if (vectorGuiState.px2) {
-    // canvas.vectorGuiCTX.lineTo(
-    //   canvas.xOffset + vectorGuiState.px2 + 0.5,
-    //   canvas.yOffset + vectorGuiState.py2 + 0.5
-    // )
+  } else if (vectorGuiState.px2 !== null) {
     drawControlPointHandle(
       canvas,
       vectorGuiState.px1,
@@ -131,22 +137,13 @@ function renderEllipseVector(state, canvas, vectorGuiState) {
     )
   }
 
-  let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
-  //set point radius for detection in state
-  vectorGuiState.pointRadius = circleRadius
-  let pointsKeys = [
-    { x: "px1", y: "py1" },
-    { x: "px2", y: "py2" },
-    { x: "px3", y: "py3" },
-  ]
-
-  drawControlPoints(pointsKeys, canvas, vectorGuiState.pointRadius)
+  drawControlPoints(pointsKeys, canvas, circleRadius, false)
 
   // Stroke non-filled lines
   canvas.vectorGuiCTX.stroke()
 
   canvas.vectorGuiCTX.beginPath()
-  drawControlPoints(pointsKeys, canvas, vectorGuiState.pointRadius / 2, true)
+  drawControlPoints(pointsKeys, canvas, circleRadius / 2, true)
   // canvas.vectorGuiCTX.fillText(
   //   `${vectorGuiState.radA}, ${vectorGuiState.radB}`,
   //   vectorGuiState.px1 + 30,
@@ -156,7 +153,67 @@ function renderEllipseVector(state, canvas, vectorGuiState) {
   canvas.vectorGuiCTX.fill()
 }
 
-function renderCurveVector(state, canvas, vectorGuiState) {
+function renderOffsetEllipseVector(
+  state,
+  canvas,
+  vectorGuiState,
+  color = "red"
+) {
+  let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
+  canvas.vectorGuiCTX.strokeStyle = color
+  canvas.vectorGuiCTX.fillStyle = color
+  canvas.vectorGuiCTX.beginPath()
+  if (vectorGuiState.px2 !== null) {
+    drawCirclePath(
+      canvas,
+      vectorGuiState.px1 + state.x1Offset / 2,
+      vectorGuiState.py1 + state.y1Offset / 2,
+      circleRadius / 2
+    )
+    drawCirclePath(
+      canvas,
+      vectorGuiState.px2 + state.x1Offset / 2,
+      vectorGuiState.py2 + state.y1Offset / 2,
+      circleRadius / 2
+    )
+  }
+  if (vectorGuiState.px3 !== null) {
+    drawCirclePath(
+      canvas,
+      vectorGuiState.px3 + state.x1Offset / 2,
+      vectorGuiState.py3 + state.y1Offset / 2,
+      circleRadius / 2
+    )
+  }
+  canvas.vectorGuiCTX.fill()
+  canvas.vectorGuiCTX.beginPath()
+  canvas.vectorGuiCTX.setLineDash([1, 1])
+  if (vectorGuiState.px2 !== null) {
+    canvas.vectorGuiCTX.moveTo(
+      canvas.xOffset + vectorGuiState.px1 + 0.5 + state.x1Offset / 2,
+      canvas.yOffset + vectorGuiState.py1 + 0.5 + state.y1Offset / 2
+    )
+    canvas.vectorGuiCTX.lineTo(
+      canvas.xOffset + vectorGuiState.px2 + 0.5 + state.x1Offset / 2,
+      canvas.yOffset + vectorGuiState.py2 + 0.5 + state.y1Offset / 2
+    )
+  }
+  if (vectorGuiState.px3 !== null) {
+    canvas.vectorGuiCTX.moveTo(
+      canvas.xOffset + vectorGuiState.px1 + 0.5 + state.x1Offset / 2,
+      canvas.yOffset + vectorGuiState.py1 + 0.5 + state.y1Offset / 2
+    )
+    canvas.vectorGuiCTX.lineTo(
+      canvas.xOffset + vectorGuiState.px3 + 0.5 + state.x1Offset / 2,
+      canvas.yOffset + vectorGuiState.py3 + 0.5 + state.y1Offset / 2
+    )
+  }
+
+  canvas.vectorGuiCTX.stroke()
+  canvas.vectorGuiCTX.setLineDash([])
+}
+
+function renderCurveVector(canvas, vectorGuiState) {
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
   canvas.vectorGuiCTX.lineWidth = lineWidth
@@ -169,7 +226,7 @@ function renderCurveVector(state, canvas, vectorGuiState) {
     canvas.yOffset + vectorGuiState.py1 + 0.5
   )
 
-  if (vectorGuiState.px4) {
+  if (vectorGuiState.px4 !== null) {
     // canvas.vectorGuiCTX.bezierCurveTo(
     //   canvas.xOffset + vectorGuiState.px3 + 0.5,
     //   canvas.yOffset + vectorGuiState.py3 + 0.5,
@@ -192,7 +249,7 @@ function renderCurveVector(state, canvas, vectorGuiState) {
       vectorGuiState.px4,
       vectorGuiState.py4
     )
-  } else if (vectorGuiState.px3) {
+  } else if (vectorGuiState.px3 !== null) {
     // canvas.vectorGuiCTX.quadraticCurveTo(
     //   canvas.xOffset + vectorGuiState.px3 + 0.5,
     //   canvas.yOffset + vectorGuiState.py3 + 0.5,
@@ -206,7 +263,7 @@ function renderCurveVector(state, canvas, vectorGuiState) {
       vectorGuiState.px3,
       vectorGuiState.py3
     )
-  } else if (vectorGuiState.px2) {
+  } else if (vectorGuiState.px2 !== null) {
     // canvas.vectorGuiCTX.lineTo(
     //   canvas.xOffset + vectorGuiState.px2 + 0.5,
     //   canvas.yOffset + vectorGuiState.py2 + 0.5
@@ -215,7 +272,6 @@ function renderCurveVector(state, canvas, vectorGuiState) {
 
   let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
   //set point radius for detection in state
-  vectorGuiState.pointRadius = circleRadius
   let pointsKeys = [
     { x: "px1", y: "py1" },
     { x: "px2", y: "py2" },
@@ -223,13 +279,13 @@ function renderCurveVector(state, canvas, vectorGuiState) {
     { x: "px4", y: "py4" },
   ]
 
-  drawControlPoints(pointsKeys, canvas, vectorGuiState.pointRadius)
+  drawControlPoints(pointsKeys, canvas, circleRadius, false)
 
   // Stroke non-filled lines
   canvas.vectorGuiCTX.stroke()
 
   canvas.vectorGuiCTX.beginPath()
-  drawControlPoints(pointsKeys, canvas, vectorGuiState.pointRadius / 2, true)
+  drawControlPoints(pointsKeys, canvas, circleRadius / 2, true)
   // Fill points
   canvas.vectorGuiCTX.fill()
 }
@@ -239,8 +295,11 @@ function drawControlPoints(pointsKeys, canvas, radius, modify = false) {
   vectorGuiState.collisionPresent = false
   vectorGuiState.collidedKeys = { xKey: null, yKey: null }
   for (let data of pointsKeys) {
-    let point = { x: vectorGuiState[data.x], y: vectorGuiState[data.y] }
-    if (point.x && point.y) {
+    let point = {
+      x: vectorGuiState[data.x],
+      y: vectorGuiState[data.y],
+    }
+    if (point.x !== null && point.y !== null) {
       let r = state.touch ? radius * 2 : radius
       if (modify && vectorGuiState.selectedPoint.xKey === data.x) {
         r = radius * 2
@@ -252,7 +311,7 @@ function drawControlPoints(pointsKeys, canvas, radius, modify = false) {
           state.cursorY,
           point.x,
           point.y,
-          radius + 1
+          r + 1
         )
       ) {
         r = radius * 2
@@ -278,6 +337,66 @@ function checkPointCollision(pointerX, pointerY, px, py, r) {
     pointerY >= py - r &&
     pointerY <= py + r
   )
+}
+
+/**
+ * Reset vector state
+ * @param {*} canvas
+ */
+export function reset(canvas) {
+  vectorGuiState.px1 = null
+  vectorGuiState.py1 = null
+  vectorGuiState.px2 = null
+  vectorGuiState.py2 = null
+  vectorGuiState.px3 = null
+  vectorGuiState.py3 = null
+  vectorGuiState.px4 = null
+  vectorGuiState.py4 = null
+  vectorGuiState.radA = null
+  vectorGuiState.radB = null
+  canvas.currentVectorIndex = null
+  state.angle = null
+  state.angleOffset = 0
+  state.x1Offset = 0
+  state.y1Offset = 0
+  state.offset = null
+  renderVectorGUI(state, canvas)
+}
+
+/**
+ * Render vector graphical interface
+ * @param {*} state
+ * @param {*} canvas
+ */
+export function renderVectorGUI(state, canvas) {
+  canvas.vectorGuiCTX.clearRect(
+    0,
+    0,
+    canvas.vectorGuiCVS.width / canvas.zoom,
+    canvas.vectorGuiCVS.height / canvas.zoom
+  )
+  if (state.vectorMode) {
+    //Prevent blurring
+    canvas.vectorGuiCTX.imageSmoothingEnabled = false
+    //Render grid
+    if (canvas.zoom >= 4 && state.grid) {
+      renderGrid(canvas)
+    }
+    if (state.tool.name === "fill") {
+      renderFillVector(canvas)
+    } else if (
+      state.tool.name === "quadCurve" ||
+      state.tool.name === "cubicCurve"
+    ) {
+      renderCurveVector(canvas, vectorGuiState)
+    } else if (state.tool.name === "ellipse") {
+      renderEllipseVector(canvas, vectorGuiState)
+      if (state.x1Offset || state.y1Offset) {
+        let color = !state.x1Offset && !state.y1Offset ? "white" : "red"
+        renderOffsetEllipseVector(state, canvas, vectorGuiState, color)
+      }
+    }
+  }
 }
 
 /**

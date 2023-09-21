@@ -1,22 +1,54 @@
+.sidebar {
+  // position: relative;
+  position: absolute;
+  min-width: 206px;
+  width: 206px;
+  // height: calc(100% - 4px);
+  max-height: calc(100% - 4px);
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  // overflow-y: scroll;
+  z-index: 103;
+  @include boxBorder;
+  .content {
+    //class does not exist currently
+    // opacity: 0.25;
+    height: auto;
+    overflow-y: scroll;
+    @include scrollBar;
+  }
+}
+
 .page {
   position: relative;
   display: flex;
   width: 100%;
-  height: calc(100% - 48px);
+  height: calc(100% - 52px);
   user-select: none;
 }
 
 .draggable {
   margin: 2px;
-  @include boxBorder;
+  z-index: 100;
+  // &:hover {
+  //   z-index: 102;
+  // }
+  &.v-drag {
+    @include sandwichBorder;
+  }
+  &.h-drag {
+    @include boxBorder;
+  }
   .dragging {
     user-select: none;
+    z-index: 150;
   }
   .header {
     background-color: $black;
     justify-self: center;
     width: 100%;
-    height: 20px;
+    min-height: 20px;
     margin: 0px;
     display: flex;
     flex-flow: row nowrap;
@@ -24,18 +56,48 @@
     align-items: center;
     position: relative;
     cursor: grab;
+    // margin-bottom: 2px !important;
+    // box-shadow: 0px 2px $border-color;
+    // &:hover:not([disabled]),
+    // &:focus {
+    //   box-shadow: 0px 2px $white;
+    // }
+    @include bottomBorder;
     @include dragger;
     .collapse-btn {
       @include collapseArrow;
     }
   }
   .collapsible {
+    flex: 0 1 auto;
     width: 100%;
-    height: 100%;
+    // height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     overflow: hidden;
+    position: relative;
+    // padding-top: 2px;
+    // padding-bottom: 1px;
+  }
+}
+
+.settings-box {
+  background-color: $extra-dark-gray;
+  user-select: none;
+  position: relative;
+  z-index: 100;
+  width: 206px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.smooth-shift {
+  transition: top 0.05s;
+  &.dragging {
+    transition: none;
   }
 }
 
@@ -142,6 +204,11 @@
   .btn {
     width: 40px;
     height: 40px;
+    // background: rgb(77, 77, 77);
+    // margin: 1px;
+    &:hover {
+      z-index: 104;
+    }
   }
   .column {
     display: flex;

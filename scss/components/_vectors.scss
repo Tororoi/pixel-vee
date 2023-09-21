@@ -1,0 +1,148 @@
+/* Vectors, interface provides access to select any vector existing in the timeline */
+
+.vectors-interface {
+  order: 4;
+  flex: 1 1 auto;
+  min-height: 264px; //header and vectors-control plus 2 vectors.
+  .vectors-control {
+    display: flex;
+    flex-flow: row nowrap;
+    margin: 2px;
+    .thumbnail-style {
+      width: 28px;
+      height: 28px;
+      background: $button-color;
+      .icon {
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+        background-image: url("../public/pixelv-fit.png");
+        background-size: 28px;
+      }
+      input[type="checkbox"] {
+        display: none;
+        &:checked + .icon {
+          background-image: url("../public/pixelv-expand.png");
+        }
+      }
+    }
+  }
+  .collapsible {
+    padding-top: 2px;
+  }
+  .vectors-container {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    // width: calc(100% - 4px);
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    margin: 2px;
+    @include sandwichBorder;
+    @include scrollBar;
+    .vectors {
+      display: flex;
+      flex-flow: column-reverse nowrap;
+      justify-content: flex-end;
+      .vector {
+        position: relative;
+        cursor: grab;
+        height: 100px;
+        width: 100%;
+        text-align: center;
+        line-height: 40px;
+        font-size: 16px;
+        display: flex;
+        // flex-flow: row-reverse nowrap;
+        justify-content: center;
+        align-items: center;
+        box-shadow: inset 2px 0px $border-color, inset -2px 0px $border-color,
+          inset 0px -2px $border-color, inset 0px 2px $border-color;
+        img {
+          // position: absolute;
+          // left: 2px;
+          background-image: repeating-linear-gradient(
+            -45deg,
+            white,
+            white 5px,
+            rgb(216, 216, 216) 5px,
+            rgb(216, 216, 216) 10px
+          );
+          // background: rgba(255, 0, 0, 0.469);
+          // width: calc(100% - 4px);
+          height: calc(100% - 4px);
+        }
+        canvas {
+          position: absolute;
+          // left: 2px;
+          background-image: repeating-linear-gradient(
+            -45deg,
+            white,
+            white 5px,
+            rgb(216, 216, 216) 5px,
+            rgb(216, 216, 216) 10px
+          );
+          // background: rgba(255, 0, 0, 0.469);
+          width: calc(100% - 4px);
+          height: calc(100% - 4px);
+        }
+        .tool {
+          position: absolute;
+          right: 0;
+          top: 0;
+          cursor: grab;
+          width: 20px;
+          height: 20px;
+          background: $button-color;
+          z-index: 104;
+          margin: 2px;
+        }
+        .actionColor {
+          position: absolute;
+          right: 0;
+          top: 22px;
+          cursor: grab;
+          width: 20px;
+          height: 20px;
+          background: $button-color;
+          z-index: 104;
+          margin: 2px;
+        }
+        &.selected {
+          background: $gray;
+        }
+        &:hover {
+          box-shadow: inset 2px 0px $white, inset -2px 0px $white,
+            inset 0px -2px $white, inset 0px 2px $white;
+          .btn {
+            box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white,
+              0px 2px $white;
+          }
+        }
+        .hide {
+          width: 28px;
+          height: 28px;
+          margin: 6px;
+          background: $button-color;
+          .eye {
+            //define height and width for one pixel since icons are created with box shadow
+            height: 2px;
+            width: 2px;
+            &.eyeopen {
+              @include eyeOpen;
+            }
+            &.eyeclosed {
+              @include eyeClosed;
+            }
+          }
+        }
+        .warning {
+          background: $warning-color;
+          animation: flash 0.6s ease-in infinite alternate-reverse;
+        }
+      }
+    }
+  }
+}

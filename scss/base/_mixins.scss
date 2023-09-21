@@ -7,6 +7,31 @@
   }
 }
 
+@mixin sandwichBorder {
+  box-shadow: 0px -2px $border-color, 0px 2px $border-color;
+  &:hover:not([disabled]),
+  &:focus {
+    box-shadow: 0px -2px $white, 0px 2px $white;
+  }
+}
+
+@mixin bottomBorder {
+  box-shadow: 0px 2px $border-color;
+  &:hover:not([disabled]),
+  &:focus {
+    box-shadow: 0px 2px $white;
+  }
+}
+
+@mixin internalBorder {
+  box-shadow: inset 2px 0px $border-color, -2px 0px $border-color,
+    0px -2px $border-color, 0px 2px $border-color;
+  &:hover:not([disabled]),
+  &:focus {
+    box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white, 0px 2px $white;
+  }
+}
+
 @mixin cancelBorder {
   box-shadow: none;
   &:hover {
@@ -19,20 +44,52 @@
     position: absolute;
     left: 0;
     top: 0;
-    width: 2px;
-    height: 2px;
-    margin: 5px;
-    background: $border-color;
-    box-shadow: 0px 0px $border-color, 4px 0px $border-color,
-      0px 4px $border-color, 4px 4px $border-color, 0px 8px $border-color,
-      4px 8px $border-color;
+    width: 20px;
+    height: 20px;
+    .grip {
+      margin: 5px;
+      height: 2px;
+      width: 2px;
+      background: $border-color;
+      box-shadow: 0px 0px $border-color, 4px 0px $border-color,
+        0px 4px $border-color, 4px 4px $border-color, 0px 8px $border-color,
+        4px 8px $border-color;
+    }
+    &.locked {
+      .grip {
+        box-shadow: 2px -2px $border-color, 4px -2px $border-color,
+          0px 0px $border-color, 6px 0px $border-color, 0px 2px $border-color,
+          6px 2px $border-color, -2px 4px $border-color, 0px 4px $border-color,
+          2px 4px $border-color, 4px 4px $border-color, 6px 4px $border-color,
+          8px 4px $border-color, -2px 6px $border-color, 0px 6px $border-color,
+          4px 6px $border-color, 6px 6px $border-color, 8px 6px $border-color,
+          -2px 8px $border-color, 0px 8px $border-color, 4px 8px $border-color,
+          6px 8px $border-color, 8px 8px $border-color, -2px 10px $border-color,
+          0px 10px $border-color, 2px 10px $border-color, 4px 10px $border-color,
+          6px 10px $border-color, 8px 10px $border-color;
+      }
+    }
   }
   &:hover:not([disabled]),
   &:focus {
     .drag-btn {
-      background: $white;
-      box-shadow: 0px 0px $white, 4px 0px $white, 0px 4px $white, 4px 4px $white,
-        0px 8px $white, 4px 8px $white;
+      .grip {
+        background: $white;
+        box-shadow: 0px 0px $white, 4px 0px $white, 0px 4px $white,
+          4px 4px $white, 0px 8px $white, 4px 8px $white;
+      }
+      &.locked {
+        .grip {
+          box-shadow: 2px -2px $white, 4px -2px $white, 0px 0px $white,
+            6px 0px $white, 0px 2px $white, 6px 2px $white, -2px 4px $white,
+            0px 4px $white, 2px 4px $white, 4px 4px $white, 6px 4px $white,
+            8px 4px $white, -2px 6px $white, 0px 6px $white, 4px 6px $white,
+            6px 6px $white, 8px 6px $white, -2px 8px $white, 0px 8px $white,
+            4px 8px $white, 6px 8px $white, 8px 8px $white, -2px 10px $white,
+            0px 10px $white, 2px 10px $white, 4px 10px $white, 6px 10px $white,
+            8px 10px $white;
+        }
+      }
     }
   }
 }
@@ -75,6 +132,24 @@
       box-shadow: 9px 5px $white, 9px 7px $white, 5px 9px $white, 7px 9px $white,
         9px 9px $white, 11px 9px $white, 13px 9px $white, 7px 11px $white,
         9px 11px $white, 11px 11px $white, 9px 13px $white;
+    }
+  }
+}
+
+@mixin scrollBar {
+  &::-webkit-scrollbar {
+    width: 10px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: $border-color;
+    background-clip: content-box;
+    border: 2px solid transparent;
+    &:hover {
+      background: white;
+      background-clip: content-box;
     }
   }
 }
