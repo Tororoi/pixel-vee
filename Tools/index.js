@@ -1230,6 +1230,7 @@ export function ellipseSteps() {
  * Ideally a user should be able to click on a curve and render it's vector UI that way.
  * TODO: Modify point in vector timeline and push new curve set on pointer up to timeline as new type of push called "modify vector"
  * Currently this modifies the history directly which is a big no no, just done for testing, only ok for now since it just modifies the curve that was just created
+ * BUG: On tablets, pointer is forced into dragging P2 no matter where a user clicks
  */
 export function adjustEllipseSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
