@@ -3,6 +3,7 @@
   justify-self: center;
   width: calc(100% - 4px);
   height: 48px;
+  min-height: 48px;
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;

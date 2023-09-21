@@ -170,7 +170,7 @@ svg {
   position: relative;
   display: flex;
   width: 100%;
-  height: calc(100% - 48px);
+  height: calc(100% - 52px);
   user-select: none;
 }
 
@@ -413,6 +413,7 @@ svg {
   justify-self: center;
   width: calc(100% - 4px);
   height: 48px;
+  min-height: 48px;
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;

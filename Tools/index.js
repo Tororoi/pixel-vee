@@ -278,6 +278,10 @@ export function fillSteps() {
       if (vectorGuiState.collisionPresent) {
         adjustFillSteps()
       } else {
+        state.px1 = state.cursorX
+        state.py1 = state.cursorY
+        vectorGuiState.px1 = state.px1
+        vectorGuiState.py1 = state.py1
         actionFill(
           state.cursorX,
           state.cursorY,
@@ -330,7 +334,7 @@ export function adjustFillSteps() {
           xKey: vectorGuiState.collidedKeys.xKey,
           yKey: vectorGuiState.collidedKeys.yKey,
         }
-        state.undoStack[canvas.currentVectorIndex][0].opacity = 0
+        state.undoStack[canvas.currentVectorIndex][0].hidden = true
         //Only render canvas up to timeline where fill action exists while adjusting fill
         canvas.render(canvas.currentVectorIndex) // render to canvas.currentVectorIndex
       }
@@ -357,7 +361,7 @@ export function adjustFillSteps() {
         state.undoStack[canvas.currentVectorIndex][0].y[
           vectorGuiState.selectedPoint.yKey
         ] = state.cursorY
-        state.undoStack[canvas.currentVectorIndex][0].opacity = 1
+        state.undoStack[canvas.currentVectorIndex][0].hidden = false
         vectorGuiState.selectedPoint = {
           xKey: null,
           yKey: null,
@@ -776,7 +780,7 @@ export function adjustCurveSteps(numPoints = 4) {
           xKey: vectorGuiState.collidedKeys.xKey,
           yKey: vectorGuiState.collidedKeys.yKey,
         }
-        state.undoStack[canvas.currentVectorIndex][0].opacity = 0
+        state.undoStack[canvas.currentVectorIndex][0].hidden = true
         canvas.render()
         if (numPoints === 3) {
           actionQuadraticCurve(
@@ -863,7 +867,7 @@ export function adjustCurveSteps(numPoints = 4) {
         state.undoStack[canvas.currentVectorIndex][0].y[
           vectorGuiState.selectedPoint.yKey
         ] = state.cursorY
-        state.undoStack[canvas.currentVectorIndex][0].opacity = 1
+        state.undoStack[canvas.currentVectorIndex][0].hidden = false
         vectorGuiState.selectedPoint = {
           xKey: null,
           yKey: null,
@@ -1076,14 +1080,14 @@ export function ellipseSteps() {
         adjustEllipseSteps()
       } else {
         //For touchscreens
-        if (state.touch) {
-          if (state.clickCounter === 1) {
-            state.px2 = state.cursorX
-            state.py2 = state.cursorY
-            vectorGuiState.px2 = state.px2
-            vectorGuiState.py2 = state.py2
-          }
-        }
+        // if (state.touch) {
+        //   if (state.clickCounter === 1) {
+        //     state.px2 = state.cursorX
+        //     state.py2 = state.cursorY
+        //     vectorGuiState.px2 = state.px2
+        //     vectorGuiState.py2 = state.py2
+        //   }
+        // }
         if (state.clickCounter === 1) {
           let dxa = state.px2 - state.px1
           let dya = state.py2 - state.py1
@@ -1246,7 +1250,7 @@ export function adjustEllipseSteps() {
         updateEllipseControlPoints(state, canvas, vectorGuiState)
         //TODO: changing opacity isn't enough since erase mode will be unaffected
         // let action = state.undoStack[canvas.currentVectorIndex]
-        state.undoStack[canvas.currentVectorIndex][0].opacity = 0
+        state.undoStack[canvas.currentVectorIndex][0].hidden = true
         canvas.render()
         //angle and offset passed should consider which point is being adjusted. For p1, use current state.offset instead of recalculating. For p3, add 1.5 * Math.PI to angle
         actionEllipse(
@@ -1332,7 +1336,7 @@ export function adjustEllipseSteps() {
             ? state.undoStack[canvas.currentVectorIndex][0].properties
                 .forceCircle
             : state.forceCircle
-        state.undoStack[canvas.currentVectorIndex][0].opacity = 1
+        state.undoStack[canvas.currentVectorIndex][0].hidden = false
         vectorGuiState.selectedPoint = {
           xKey: null,
           yKey: null,

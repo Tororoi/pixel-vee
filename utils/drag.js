@@ -18,10 +18,13 @@ export const initializeCollapser = (collapseTarget) => {
       if (collapseBtn.checked) {
         // collapsibleArea.style.height = 0
         collapseTarget.style.minHeight = "20px"
+        // collapseTarget.style.minWidth = "20px"
+        // NOTE: to perform horizontal shrinking, resizeOnScreenCanvas must be called any time the canvas container size changes
         collapsibleArea.style.display = "none"
       } else {
         // collapsibleArea.style.height = "100%"
         collapseTarget.style.minHeight = "" //reset to default value
+        // collapseTarget.style.minWidth = ""
         collapsibleArea.style.display = "flex"
       }
     })

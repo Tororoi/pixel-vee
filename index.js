@@ -377,6 +377,9 @@ function handlePointerDown(e) {
     return
   }
   setCoordinates(e)
+  // if (state.touch) {
+  renderVectorGUI(state, canvas) // For tablets, vectors must be rendered before running state.tool.fn in order to check control points collision logic
+  // }
   canvas.draw()
   //Reset Cursor for mobile
   state.onscreenX = state.cursorWithCanvasOffsetX
@@ -940,6 +943,6 @@ function handleTouchStart(e) {
 
 function handleMouseDown(e) {
   if (e.type === "mousedown") {
-    state.touch = false
+    state.touch = false // NOTE: this also triggers when in tablet mode in chrome. Comment this out while testing
   }
 }

@@ -401,15 +401,10 @@ function redrawPoints(index = null) {
           )
           break
         case "fill":
-          actionFill(
-            p.x.px1,
-            p.y.py1,
-            p.opacity === 0
-              ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
-              : p.color,
-            p.layer.ctx,
-            p.mode
-          )
+          if (p.hidden) {
+            break
+          }
+          actionFill(p.x.px1, p.y.py1, p.color, p.layer.ctx, p.mode)
           break
         case "line":
           actionLine(
@@ -425,6 +420,9 @@ function redrawPoints(index = null) {
           )
           break
         case "quadCurve":
+          if (p.hidden) {
+            break
+          }
           actionQuadraticCurve(
             p.x.px1,
             p.y.py1,
@@ -433,9 +431,7 @@ function redrawPoints(index = null) {
             p.x.px3,
             p.y.py3,
             3,
-            p.opacity === 0
-              ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
-              : p.color,
+            p.color,
             p.layer.ctx,
             p.mode,
             p.brush,
@@ -443,6 +439,9 @@ function redrawPoints(index = null) {
           )
           break
         case "cubicCurve":
+          if (p.hidden) {
+            break
+          }
           //TODO: pass source on history objects to avoid debugging actions from the timeline unless desired
           actionCubicCurve(
             p.x.px1,
@@ -454,9 +453,7 @@ function redrawPoints(index = null) {
             p.x.px4,
             p.y.py4,
             4,
-            p.opacity === 0
-              ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
-              : p.color,
+            p.color,
             p.layer.ctx,
             p.mode,
             p.brush,
@@ -464,6 +461,9 @@ function redrawPoints(index = null) {
           )
           break
         case "ellipse":
+          if (p.hidden) {
+            break
+          }
           actionEllipse(
             p.x.px1,
             p.y.py1,
@@ -474,9 +474,7 @@ function redrawPoints(index = null) {
             p.properties.radA,
             p.properties.radB,
             p.properties.forceCircle,
-            p.opacity === 0
-              ? { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
-              : p.color,
+            p.color,
             p.layer.ctx,
             p.mode,
             p.brush,
