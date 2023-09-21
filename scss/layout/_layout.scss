@@ -1,7 +1,10 @@
 .sidebar {
-  position: relative;
+  // position: relative;
+  position: absolute;
   min-width: 206px;
-  height: calc(100% - 4px);
+  width: 206px;
+  // height: calc(100% - 4px);
+  max-height: calc(100% - 4px);
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
