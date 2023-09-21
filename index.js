@@ -411,7 +411,6 @@ function handlePointerMove(e) {
   canvas.zoomAtLastDraw = canvas.zoom //* */
   //coords
   setCoordinates(e)
-  // console.log(canvas.subPixelX, canvas.subPixelY)
   //Hover brush
   state.onscreenX = state.cursorWithCanvasOffsetX
   state.onscreenY = state.cursorWithCanvasOffsetY

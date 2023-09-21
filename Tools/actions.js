@@ -227,14 +227,16 @@ export function actionReplace() {
       //Final step
       canvas.currentLayer.ctx.restore()
       //Merge the Replacement Layer onto the actual current layer being stored in canvas.tempLayer
-      canvas.tempLayer.ctx.drawImage(canvas.currentLayer.cvs, 0, 0)
+      //TODO: instead of drawing the image here, iterate through currentlayer and save points to timeline for every pixel that matches current color
+      // can use similar code to createMapForSpecificColor except if it matches color push x and y to an array similar to how the draw action works
+      canvas.tempLayer.ctx.drawImage(canvas.currentLayer.cvs, 0, 0) //SOON TO BE DEPRECATED
       //Remove the Replacement Layer from the array of layers
       const replacementLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
       canvas.layers.splice(replacementLayerIndex, 1)
       //Set the current layer back to the correct layer
       canvas.currentLayer = canvas.tempLayer
-      let image = new Image()
-      image.src = canvas.currentLayer.cvs.toDataURL()
+      let image = new Image() //SOON TO BE DEPRECATED
+      image.src = canvas.currentLayer.cvs.toDataURL() //SOON TO BE DEPRECATED
       //TODO: refactor so adding to timeline is performed by controller function
       state.addToTimeline({
         tool: state.tool,
@@ -244,7 +246,13 @@ export function actionReplace() {
           width: canvas.currentLayer.cvs.width,
           height: canvas.currentLayer.cvs.height,
         },
-      })
+      }) //SOON TO BE DEPRECATED - replace with
+    //state.addToTimeline({
+    //   tool: state.tool,
+    //   x: state.cursorX,
+    //   y: state.cursorY,
+    //   layer: canvas.currentLayer,
+    // }) on each pixel of color matched map
     default:
       //No default
       break
