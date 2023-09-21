@@ -506,13 +506,14 @@ function redrawPoints(index = null) {
           //Then, any vector pixels on top of replaced pixels would be still rendered in black.
           //maybe a separate tool could exist for replacing vector pixels as a modification of one vector, as if the vector's render acts as a mask.
           //maybe collision detection could be used somehow? probably expensive.
-          p.layer.ctx.drawImage(
-            p.properties.image,
-            0,
-            0,
-            p.properties.width,
-            p.properties.height
-          )
+          // p.layer.ctx.drawImage(
+          //   p.properties.image,
+          //   0,
+          //   0,
+          //   p.properties.width,
+          //   p.properties.height
+          // )
+          //DEPRECATED 9/21/23 - TODO: Document non render tools such as replace and others
           break
         default:
           actionDraw(p.x, p.y, p.color, p.brush, p.weight, p.layer.ctx, p.mode)
