@@ -7,6 +7,7 @@ import { tools, adjustEllipseSteps } from "./Tools/index.js"
 import { actionUndoRedo } from "./Tools/undoRedo.js"
 import { vectorGuiState, renderVectorGUI } from "./GUI/vector.js"
 import { renderCursor, renderRasterGUI } from "./GUI/raster.js"
+import { drawRect, drawCircle } from "./utils/brushHelpers.js"
 
 //===================================//
 //========= * * * DOM * * * =========//
@@ -40,7 +41,6 @@ let lineWeight = document.querySelector("#line-weight")
 let brushBtn = document.querySelector(".brush-preview")
 let brushPreview = document.querySelector("#brush-preview")
 let brushSlider = document.querySelector("#brush-size")
-let brush = document.querySelector(".brush")
 
 //Menu
 //Toggle Debugger
@@ -766,100 +766,6 @@ function handleModes(e) {
 //=== * * * Graphics User Interface * * * ===//
 //===========================================//
 
-function drawRect() {
-  let brushRects = []
-  brush.setAttribute(
-    "viewBox",
-    `0 -0.5 ${state.tool.brushSize} ${state.tool.brushSize}`
-  )
-  brush.style.width = state.tool.brushSize * 2
-  brush.style.height = state.tool.brushSize * 2
-  function makePathData(x, y, w) {
-    return "M" + x + " " + y + "h" + w + ""
-  }
-  function makePath(color, data) {
-    return '<path stroke="' + color + '" d="' + data + '" />\n'
-  }
-  let paths = []
-
-  brushRects.push({
-    x: 0,
-    y: 0,
-    w: state.tool.brushSize,
-    h: state.tool.brushSize,
-  })
-
-  brushRects.forEach((r) => {
-    paths.push(makePathData(r.x, r.y, r.w))
-  })
-
-  brush.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
-  brush.setAttribute("stroke-width", state.tool.brushSize * 2)
-  return brushRects
-}
-
-function drawCircle() {
-  // let brushPoints = [];
-  let brushRects = []
-  let r = Math.floor(state.tool.brushSize / 2)
-  let d = 4 - 2 * r //decision parameter in bresenham's algorithm
-  d = (5 - 4 * r) / 4
-  let x = 0,
-    y = r
-  let xO = r,
-    yO = r
-
-  brush.setAttribute(
-    "viewBox",
-    `0 -0.5 ${state.tool.brushSize} ${state.tool.brushSize}`
-  )
-  brush.style.width = state.tool.brushSize * 2
-  brush.style.height = state.tool.brushSize * 2
-  function makePathData(x, y, w) {
-    return "M" + x + " " + y + "h" + w + ""
-  }
-  function makePath(color, data) {
-    return '<path stroke="' + color + '" d="' + data + '" />\n'
-  }
-  let paths = []
-
-  eightfoldSym(xO, yO, x, y)
-  while (x < y) {
-    x++
-    if (d >= 0) {
-      y--
-      d += 2 * (x - y) + 1 //outside circle
-    } else {
-      d += 2 * x + 1 //inside circle
-    }
-    eightfoldSym(xO, yO, x, y)
-  }
-
-  function eightfoldSym(xc, yc, x, y) {
-    //solid circle
-    if (state.tool.brushSize % 2 === 0) {
-      //connect octant pairs to form solid shape
-      brushRects.push({ x: xc - x, y: yc - y, w: 2 * x, h: 1 }) //3, 2
-      brushRects.push({ x: xc - y, y: yc - x, w: 2 * y, h: 1 }) //4, 1
-      brushRects.push({ x: xc - y, y: yc + x - 1, w: 2 * y, h: 1 }) //5, 8
-      brushRects.push({ x: xc - x, y: yc + y - 1, w: 2 * x, h: 1 }) //6, 7
-    } else {
-      brushRects.push({ x: xc - x, y: yc - y, w: 2 * x + 1, h: 1 }) //3, 2
-      brushRects.push({ x: xc - y, y: yc - x, w: 2 * y + 1, h: 1 }) //4, 1
-      brushRects.push({ x: xc - y, y: yc + x, w: 2 * y + 1, h: 1 }) //5, 8
-      brushRects.push({ x: xc - x, y: yc + y, w: 2 * x + 1, h: 1 }) //6, 7
-    }
-  }
-
-  brushRects.forEach((r) => {
-    paths.push(makePathData(r.x, r.y, r.w))
-  })
-
-  brush.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
-  brush.setAttribute("stroke-width", 1)
-  return brushRects
-}
-
 //=====================================//
 //======== * * * Options * * * ========//
 //=====================================//
@@ -904,9 +810,9 @@ function updateStamp() {
   brushPreview.style.width = state.tool.brushSize * 2 + "px"
   brushPreview.style.height = state.tool.brushSize * 2 + "px"
   if (state.brushType === "circle") {
-    state.brushStamp = drawCircle() //circle
+    state.brushStamp = drawCircle(state.tool.brushSize) //circle
   } else {
-    state.brushStamp = drawRect() //square
+    state.brushStamp = drawRect(state.tool.brushSize) //square
   }
 }
 

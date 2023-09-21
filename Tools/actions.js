@@ -1,11 +1,13 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
+import { tools } from "./index.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { generateRandomRGB } from "../utils/colors.js"
 import { vectorGuiState } from "../GUI/vector.js"
 import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
+import { drawRect, drawCircle } from "../utils/brushHelpers.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -202,6 +204,70 @@ export function actionReplace() {
 
     return colorLayer
   }
+  //creates a weird bubble effect if brushSize is passed larger
+  function savePointsForSpecificColor(
+    currentLayer,
+    tempLayer,
+    brushSize = 1, //For accurate render, brushSize should be 1. Larger numbers will create bubble effect
+    invert = false
+  ) {
+    const colorLayer = currentLayer.ctx.getImageData(
+      0,
+      0,
+      canvas.offScreenCVS.width,
+      canvas.offScreenCVS.height
+    )
+    const matchColor = swatches.secondary.color
+    const width = canvas.offScreenCVS.width
+    const brushStamp = drawCircle(brushSize)
+    //iterate over pixel data and remove non-matching colors
+    for (let i = 0; i < colorLayer.data.length; i += 4) {
+      //sample color and remove if not match
+      if (colorLayer.data[i + 3] !== 0) {
+        let matchedPrimary = !(
+          colorLayer.data[i] === matchColor.r &&
+          colorLayer.data[i + 1] === matchColor.g &&
+          colorLayer.data[i + 2] === matchColor.b &&
+          colorLayer.data[i + 3] === matchColor.a
+        )
+        if (invert) {
+          matchedPrimary = !matchedPrimary
+        }
+        if (matchedPrimary) {
+          // calculate x and y
+          const x = (i / 4) % width
+          const y = Math.floor(i / 4 / width)
+          const color = {
+            color: `rgba(${colorLayer.data[i]},${colorLayer.data[i + 1]},${
+              colorLayer.data[i + 2]
+            },${colorLayer.data[i + 3]})`,
+            r: colorLayer.data[i],
+            g: colorLayer.data[i + 1],
+            b: colorLayer.data[i + 2],
+            a: colorLayer.data[i + 3],
+          }
+          actionDraw(
+            x,
+            y,
+            color,
+            brushStamp,
+            brushSize,
+            tempLayer.ctx,
+            state.mode
+          )
+          state.addToTimeline({
+            tool: tools.brush,
+            x,
+            y,
+            color,
+            brushStamp,
+            brushSize,
+            layer: tempLayer,
+          })
+        }
+      }
+    }
+  }
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //Initial step
@@ -225,34 +291,17 @@ export function actionReplace() {
     case "pointerup":
     case "pointerout":
       //Final step
-      canvas.currentLayer.ctx.restore()
-      //Merge the Replacement Layer onto the actual current layer being stored in canvas.tempLayer
-      //TODO: instead of drawing the image here, iterate through currentlayer and save points to timeline for every pixel that matches current color
-      // can use similar code to createMapForSpecificColor except if it matches color push x and y to an array similar to how the draw action works
-      canvas.tempLayer.ctx.drawImage(canvas.currentLayer.cvs, 0, 0) //SOON TO BE DEPRECATED
-      //Remove the Replacement Layer from the array of layers
-      const replacementLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
-      canvas.layers.splice(replacementLayerIndex, 1)
-      //Set the current layer back to the correct layer
-      canvas.currentLayer = canvas.tempLayer
-      let image = new Image() //SOON TO BE DEPRECATED
-      image.src = canvas.currentLayer.cvs.toDataURL() //SOON TO BE DEPRECATED
-      //TODO: refactor so adding to timeline is performed by controller function
-      state.addToTimeline({
-        tool: state.tool,
-        layer: canvas.currentLayer,
-        properties: {
-          image,
-          width: canvas.currentLayer.cvs.width,
-          height: canvas.currentLayer.cvs.height,
-        },
-      }) //SOON TO BE DEPRECATED - replace with
-    //state.addToTimeline({
-    //   tool: state.tool,
-    //   x: state.cursorX,
-    //   y: state.cursorY,
-    //   layer: canvas.currentLayer,
-    // }) on each pixel of color matched map
+      if (canvas.tempLayer) {
+        canvas.currentLayer.ctx.restore()
+        //Merge the Replacement Layer onto the actual current layer being stored in canvas.tempLayer
+        savePointsForSpecificColor(canvas.currentLayer, canvas.tempLayer)
+        //Remove the Replacement Layer from the array of layers
+        const replacementLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
+        canvas.layers.splice(replacementLayerIndex, 1)
+        //Set the current layer back to the correct layer
+        canvas.currentLayer = canvas.tempLayer
+        canvas.tempLayer = null
+      }
     default:
       //No default
       break
