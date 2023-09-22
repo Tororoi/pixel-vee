@@ -810,9 +810,9 @@ function updateStamp() {
   brushPreview.style.width = state.tool.brushSize * 2 + "px"
   brushPreview.style.height = state.tool.brushSize * 2 + "px"
   if (state.brushType === "circle") {
-    state.brushStamp = drawCircle(state.tool.brushSize) //circle
+    state.brushStamp = drawCircle(state.tool.brushSize, true) //circle
   } else {
-    state.brushStamp = drawRect(state.tool.brushSize) //square
+    state.brushStamp = drawRect(state.tool.brushSize, true) //square
   }
 }
 

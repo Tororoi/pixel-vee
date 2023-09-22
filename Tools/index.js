@@ -156,7 +156,10 @@ export function drawSteps() {
 }
 
 /**
- * Supported modes: "draw, erase, perfect",
+ * Supported modes: "draw, perfect"
+ * TODO: support "erase"
+ * creates a copy of the canvas with just the secondary color parts. This is used as a mask so the user can draw normally.
+ * When the user finishes drawing, the changed pixels are saved as points and will be rerendered in the timeline as single pixel brush points
  */
 export function replaceSteps() {
   switch (canvas.pointerEvent) {

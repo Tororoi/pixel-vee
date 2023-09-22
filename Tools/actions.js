@@ -204,11 +204,11 @@ export function actionReplace() {
 
     return colorLayer
   }
-  //creates a weird bubble effect if brushSize is passed larger
+  //creates a weird bubble effect if brushSize is larger than 1
   function savePointsForSpecificColor(
     currentLayer,
     tempLayer,
-    brushSize = 1, //For accurate render, brushSize should be 1. Larger numbers will create bubble effect
+    bubble = false, //For accurate render, brushSize should be 1. Larger numbers will create bubble effect
     invert = false
   ) {
     const colorLayer = currentLayer.ctx.getImageData(
@@ -219,6 +219,7 @@ export function actionReplace() {
     )
     const matchColor = swatches.secondary.color
     const width = canvas.offScreenCVS.width
+    const brushSize = bubble ? state.tool.brushSize : 1
     const brushStamp = drawCircle(brushSize)
     //iterate over pixel data and remove non-matching colors
     for (let i = 0; i < colorLayer.data.length; i += 4) {
@@ -237,7 +238,7 @@ export function actionReplace() {
           // calculate x and y
           const x = (i / 4) % width
           const y = Math.floor(i / 4 / width)
-          const color = {
+          let color = {
             color: `rgba(${colorLayer.data[i]},${colorLayer.data[i + 1]},${
               colorLayer.data[i + 2]
             },${colorLayer.data[i + 3]})`,
@@ -245,6 +246,9 @@ export function actionReplace() {
             g: colorLayer.data[i + 1],
             b: colorLayer.data[i + 2],
             a: colorLayer.data[i + 3],
+          }
+          if (invert) {
+            color = swatches.primary.color
           }
           actionDraw(
             x,
@@ -294,6 +298,7 @@ export function actionReplace() {
       if (canvas.tempLayer) {
         canvas.currentLayer.ctx.restore()
         //Merge the Replacement Layer onto the actual current layer being stored in canvas.tempLayer
+        //TODO: Another way is to remove the secondary color from the canvas and save the image of just the replaced pixels. This will be faster when rerendering the timeline.
         savePointsForSpecificColor(canvas.currentLayer, canvas.tempLayer)
         //Remove the Replacement Layer from the array of layers
         const replacementLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
