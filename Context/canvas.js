@@ -819,29 +819,11 @@ function vectorInteract(e) {
     //select current vector
     //TODO: modify object structure of states to match object in undoStack to make assignment simpler like vectorGuiState.x = {...vector.x}
     vectorGuiState.reset(canvas)
-    vectorGuiState.px1 = vector.properties.px1
-    vectorGuiState.py1 = vector.properties.py1
-    vectorGuiState.px2 = vector.properties.px2
-    vectorGuiState.py2 = vector.properties.py2
-    vectorGuiState.px3 = vector.properties.px3
-    vectorGuiState.py3 = vector.properties.py3
-    vectorGuiState.px4 = vector.properties.px4
-    vectorGuiState.py4 = vector.properties.py4
-    vectorGuiState.radA = vector.properties?.radA
-    vectorGuiState.radB = vector.properties?.radB
-    // if (vector.type === "raster") {
+    state.vectorProperties = { ...vector.properties }
     canvas.currentVectorIndex = vector.index
-    state.angle = vector.properties?.angle
-    state.angleOffset = 0
-    state.x1Offset = vector.properties?.x1Offset
-    state.y1Offset = vector.properties?.y1Offset
-    state.offset = vector.properties?.offset
     renderVectorGUI(state, canvas)
-    //BUG: renderVectorsToDOM resets scroll, so figure out way to only modify existing DOM. Layers doesn't do this, why?
     renderVectorsToDOM()
-    // }
   }
-  // canvas.draw()
 }
 
 function renderVectorsToDOM() {

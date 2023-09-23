@@ -207,7 +207,7 @@ function handleKeyDown(e) {
           state.tool.brushSize = tools["brush"].brushSize
           canvas.vectorGuiCVS.style.cursor = "none"
         } else if (toolBtn.id === "ellipse") {
-          state.forceCircle = true
+          state.vectorProperties.forceCircle = true
           if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
             //while holding control point, readjust ellipse without having to move cursor.
             //TODO: update this functionality to have other radii go back to previous radii when releasing shift
@@ -321,7 +321,7 @@ function handleKeyUp(e) {
     e.code === "ShiftRight"
   ) {
     state.tool = tools[toolBtn.id]
-    state.forceCircle = false
+    state.vectorProperties.forceCircle = false
   }
 
   if (toolBtn.id === "grab") {

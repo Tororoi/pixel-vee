@@ -50,24 +50,25 @@ export const state = {
   //x2/y2 for line tool
   lineX: null,
   lineY: null,
-  //for curve tool
+  //for vector tools
   clickCounter: 0,
-  px1: null,
-  py1: null,
-  px2: null,
-  py2: null,
-  px3: null,
-  py3: null,
-  px4: null,
-  py4: null,
-  radA: null,
-  radB: null,
-  angle: null,
-  angleOffset: 0,
-  x1Offset: 0,
-  y1Offset: 0,
-  offset: null, //rename to something more specific
-  forceCircle: false,
+  vectorProperties: {
+    px1: null,
+    py1: null,
+    px2: null,
+    py2: null,
+    px3: null,
+    py3: null,
+    px4: null,
+    py4: null,
+    radA: null,
+    radB: null,
+    angle: null,
+    offset: null, //rename to something more specific
+    x1Offset: 0,
+    y1Offset: 0,
+    forceCircle: false,
+  },
   //for perfect pixels
   lastDrawnX: null,
   lastDrawnY: null,
@@ -121,15 +122,15 @@ function addToTimeline(actionObject) {
 }
 
 function reset() {
-  state.px1 = null
-  state.py1 = null
-  state.px2 = null
-  state.py2 = null
-  state.px3 = null
-  state.py3 = null
-  state.px4 = null
-  state.py4 = null
-  state.radA = null
-  state.radB = null
+  state.vectorProperties.px1 = null
+  state.vectorProperties.py1 = null
+  state.vectorProperties.px2 = null
+  state.vectorProperties.py2 = null
+  state.vectorProperties.px3 = null
+  state.vectorProperties.py3 = null
+  state.vectorProperties.px4 = null
+  state.vectorProperties.py4 = null
+  state.vectorProperties.radA = null
+  state.vectorProperties.radB = null
   state.clickCounter = 0
 }

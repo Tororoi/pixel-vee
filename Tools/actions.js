@@ -563,8 +563,8 @@ export function actionQuadraticCurve(
       weight,
       scale
     )
-    vectorGuiState.px2 = state.cursorX
-    vectorGuiState.py2 = state.cursorY
+    state.vectorProperties.px2 = state.cursorX
+    state.vectorProperties.py2 = state.cursorY
   } else if (stepNum === 2) {
     // after defining x2y2, plot quad bezier with x3 and y3 arguments matching x2 and y2
     //onscreen preview curve
@@ -586,8 +586,8 @@ export function actionQuadraticCurve(
       currentMode,
       scale
     )
-    vectorGuiState.px3 = state.cursorX
-    vectorGuiState.py3 = state.cursorY
+    state.vectorProperties.px3 = state.cursorX
+    state.vectorProperties.py3 = state.cursorY
   } else if (stepNum === 3) {
     //curve after defining x3y3, plot quad bezier with x3 and y3 arguments matching x2 and y2
     let plotPoints = plotQuadBezier(
@@ -672,8 +672,9 @@ export function actionCubicCurve(
       weight,
       scale
     )
-    vectorGuiState.px2 = state.cursorX
-    vectorGuiState.py2 = state.cursorY
+    //TODO: can setting state be moved to steps function?
+    state.vectorProperties.px2 = state.cursorX
+    state.vectorProperties.py2 = state.cursorY
   } else if (stepNum === 2) {
     // after defining x2y2
     //onscreen preview curve
@@ -695,8 +696,8 @@ export function actionCubicCurve(
       currentMode,
       scale
     )
-    vectorGuiState.px3 = state.cursorX
-    vectorGuiState.py3 = state.cursorY
+    state.vectorProperties.px3 = state.cursorX
+    state.vectorProperties.py3 = state.cursorY
   } else if (stepNum === 3) {
     //curve after defining x3y3
     //onscreen preview curve
@@ -719,8 +720,8 @@ export function actionCubicCurve(
       currentMode,
       scale
     )
-    vectorGuiState.px4 = state.cursorX
-    vectorGuiState.py4 = state.cursorY
+    state.vectorProperties.px4 = state.cursorX
+    state.vectorProperties.py4 = state.cursorY
   } else if (stepNum === 4) {
     //curve after defining x4y4
     if (state.debugger) {
