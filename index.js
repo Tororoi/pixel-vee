@@ -631,6 +631,11 @@ function handleUndo() {
   if (state.undoStack.length > 1) {
     //1. check (undoneAction) state.undoStack[state.undoStack.length][0].tool.name === "modify"
     //2. if true, set state.undoStack[undoneAction.properties.moddedActionIndex][0] = undoneAction.properties.from
+    let undoneAction = state.undoStack[state.undoStack.length - 1][0]
+    if (undoneAction.tool.name === "modify") {
+      state.undoStack[undoneAction.properties.moddedActionIndex][0] =
+        undoneAction.properties.from
+    }
     actionUndoRedo(state.redoStack, state.undoStack)
   }
 }
@@ -639,6 +644,11 @@ function handleRedo() {
   if (state.redoStack.length >= 1) {
     //1. check (redoneAction) state.redoStack[state.redoStack.length][0].tool.name === "modify"
     //2. if true, set state.undoStack[redoneAction.properties.moddedActionIndex][0] = redoneAction.properties.to
+    let redoneAction = state.undoStack[state.undoStack.length - 1][0]
+    if (redoneAction.tool.name === "modify") {
+      state.undoStack[redoneAction.properties.moddedActionIndex][0] =
+        redoneAction.properties.to
+    }
     actionUndoRedo(state.undoStack, state.redoStack)
   }
 }

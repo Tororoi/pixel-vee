@@ -398,6 +398,9 @@ function redrawPoints(index = null) {
     i++
     action.forEach((p) => {
       switch (p.tool.name) {
+        case "modify":
+          //do nothing
+          break
         case "addLayer":
           p.layer.removed = false
           canvas.renderLayersToDOM()

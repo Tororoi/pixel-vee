@@ -1316,7 +1316,11 @@ export function adjustEllipseSteps() {
     case "pointerup":
       if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
         updateEllipseControlPoints(state, canvas, vectorGuiState)
-        let modifiedAction = state.undoStack[canvas.currentVectorIndex][0]
+        state.undoStack[canvas.currentVectorIndex][0].hidden = false
+        let oldAction = { ...state.undoStack[canvas.currentVectorIndex][0] } //shallow copy, must make deep copy
+        let modifiedAction = {
+          ...state.undoStack[canvas.currentVectorIndex][0],
+        } //shallow copy, must make deep copy, at least for x, y and properties
         modifiedAction.x.px1 = vectorGuiState.px1
         modifiedAction.y.py1 = vectorGuiState.py1
         modifiedAction.x.px2 = vectorGuiState.px2
@@ -1333,18 +1337,22 @@ export function adjustEllipseSteps() {
           vectorGuiState.selectedPoint.xKey === "px1"
             ? modifiedAction.properties.forceCircle
             : state.forceCircle
+        console.log({
+          moddedActionIndex: canvas.currentVectorIndex,
+          from: oldAction,
+          to: modifiedAction,
+        })
         state.addToTimeline({
           tool: tools.modify,
           layer: canvas.currentLayer,
           properties: {
             moddedActionIndex: canvas.currentVectorIndex,
-            from: state.undoStack[canvas.currentVectorIndex][0],
+            from: oldAction,
             to: modifiedAction,
           },
         })
         //TODO: instead of directly changing the undoStack here, set the values to a copy of the action, then store that as "to", the old action as "from" and the moddedActionIndex on an object pushed to state.points
         state.undoStack[canvas.currentVectorIndex][0] = modifiedAction
-        state.undoStack[canvas.currentVectorIndex][0].hidden = false
         vectorGuiState.selectedPoint = {
           xKey: null,
           yKey: null,
