@@ -627,14 +627,18 @@ function handleZoom(e) {
 //TODO: to allow modifications of past actions, check last action in undoStack. If it is a modification action, reverse it.
 //This means setting the modded action's values back. Normally they are structured as {moddedActionIndex, from:, to:}, so set them back to the "from" values
 function handleUndo() {
+  //length 1 prevents initial layer from being undone
   if (state.undoStack.length > 1) {
-    //length 1 prevents initial layer from being undone
+    //1. check (undoneAction) state.undoStack[state.undoStack.length][0].tool.name === "modify"
+    //2. if true, set state.undoStack[undoneAction.properties.moddedActionIndex][0] = undoneAction.properties.from
     actionUndoRedo(state.redoStack, state.undoStack)
   }
 }
 
 function handleRedo() {
   if (state.redoStack.length >= 1) {
+    //1. check (redoneAction) state.redoStack[state.redoStack.length][0].tool.name === "modify"
+    //2. if true, set state.undoStack[redoneAction.properties.moddedActionIndex][0] = redoneAction.properties.to
     actionUndoRedo(state.undoStack, state.redoStack)
   }
 }

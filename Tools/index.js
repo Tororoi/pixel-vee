@@ -185,6 +185,7 @@ export function replaceSteps() {
 /**
  * TODO: Work in progress
  * GOAL: create a dynamic selectable area, allowing the user to restrict the areas of the canvas that accept changes
+ * Should use a mask layer that only draws black for selected area
  */
 export function selectSteps() {
   switch (canvas.pointerEvent) {
@@ -319,7 +320,7 @@ export function fillSteps() {
 
 /**
  * Used automatically by curve tools after curve is completed.
- * TODO: create distinct tool for adjusting that won't create a new curve when clicking.
+ * TODO: create distinct mode for adjusting
  * Ideally a user should be able to click on a curve and render it's vector UI that way.
  * TODO: Modify point in vector timeline and push new curve set on pointer up to timeline as new type of push called "modify vector"
  * Currently this modifies the history directly which is a big no no, just done for testing, only ok for now since it just modifies the curve that was just created
@@ -1315,30 +1316,34 @@ export function adjustEllipseSteps() {
     case "pointerup":
       if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
         updateEllipseControlPoints(state, canvas, vectorGuiState)
-        //TODO: instead of directly changing the undoStack here, set the values to a copy of the action, then store that as "to", the old action as "from" and the moddedActionIndex on an object pushed to state.points
-        state.undoStack[canvas.currentVectorIndex][0].x.px1 = vectorGuiState.px1
-        state.undoStack[canvas.currentVectorIndex][0].y.py1 = vectorGuiState.py1
-        state.undoStack[canvas.currentVectorIndex][0].x.px2 = vectorGuiState.px2
-        state.undoStack[canvas.currentVectorIndex][0].y.py2 = vectorGuiState.py2
-        state.undoStack[canvas.currentVectorIndex][0].x.px3 = vectorGuiState.px3
-        state.undoStack[canvas.currentVectorIndex][0].y.py3 = vectorGuiState.py3
-        state.undoStack[canvas.currentVectorIndex][0].properties.radA =
-          vectorGuiState.radA
-        state.undoStack[canvas.currentVectorIndex][0].properties.radB =
-          vectorGuiState.radB
-        state.undoStack[canvas.currentVectorIndex][0].properties.angle =
-          state.angle
-        state.undoStack[canvas.currentVectorIndex][0].properties.offset =
-          state.offset
-        state.undoStack[canvas.currentVectorIndex][0].properties.x1Offset =
-          state.x1Offset
-        state.undoStack[canvas.currentVectorIndex][0].properties.y1Offset =
-          state.y1Offset
-        state.undoStack[canvas.currentVectorIndex][0].properties.forceCircle =
+        let modifiedAction = state.undoStack[canvas.currentVectorIndex][0]
+        modifiedAction.x.px1 = vectorGuiState.px1
+        modifiedAction.y.py1 = vectorGuiState.py1
+        modifiedAction.x.px2 = vectorGuiState.px2
+        modifiedAction.y.py2 = vectorGuiState.py2
+        modifiedAction.x.px3 = vectorGuiState.px3
+        modifiedAction.y.py3 = vectorGuiState.py3
+        modifiedAction.properties.radA = vectorGuiState.radA
+        modifiedAction.properties.radB = vectorGuiState.radB
+        modifiedAction.properties.angle = state.angle
+        modifiedAction.properties.offset = state.offset
+        modifiedAction.properties.x1Offset = state.x1Offset
+        modifiedAction.properties.y1Offset = state.y1Offset
+        modifiedAction.properties.forceCircle =
           vectorGuiState.selectedPoint.xKey === "px1"
-            ? state.undoStack[canvas.currentVectorIndex][0].properties
-                .forceCircle
+            ? modifiedAction.properties.forceCircle
             : state.forceCircle
+        state.addToTimeline({
+          tool: tools.modify,
+          layer: canvas.currentLayer,
+          properties: {
+            moddedActionIndex: canvas.currentVectorIndex,
+            from: state.undoStack[canvas.currentVectorIndex][0],
+            to: modifiedAction,
+          },
+        })
+        //TODO: instead of directly changing the undoStack here, set the values to a copy of the action, then store that as "to", the old action as "from" and the moddedActionIndex on an object pushed to state.points
+        state.undoStack[canvas.currentVectorIndex][0] = modifiedAction
         state.undoStack[canvas.currentVectorIndex][0].hidden = false
         vectorGuiState.selectedPoint = {
           xKey: null,
@@ -1442,6 +1447,15 @@ export function grabSteps() {
 
 //Tools
 export const tools = {
+  //Modify history Tool
+  modify: {
+    name: "modify",
+    fn: null,
+    brushSize: null,
+    disabled: false,
+    options: [],
+    type: "modify",
+  },
   //Raster Tools
   brush: {
     name: "brush",
@@ -1481,22 +1495,6 @@ export const tools = {
   // gradient: {
   // Create a dithered gradient
   // },
-  addLayer: {
-    name: "addLayer",
-    fn: null,
-    brushSize: null,
-    disabled: false,
-    options: [],
-    type: "raster",
-  },
-  clear: {
-    name: "clear",
-    fn: null,
-    brushSize: null,
-    disabled: false,
-    options: [],
-    type: "raster",
-  },
   //Vector Tools
   fill: {
     name: "fill",
@@ -1529,6 +1527,23 @@ export const tools = {
     disabled: false,
     options: ["radiusExcludesCenter"], // rename to something shorter
     type: "vector",
+  },
+  //Non-cursor tools
+  addLayer: {
+    name: "addLayer",
+    fn: null,
+    brushSize: null,
+    disabled: false,
+    options: [],
+    type: "raster",
+  },
+  clear: {
+    name: "clear",
+    fn: null,
+    brushSize: null,
+    disabled: false,
+    options: [],
+    type: "raster",
   },
   //Utility Tools (does not affect timeline)
   eyedropper: {

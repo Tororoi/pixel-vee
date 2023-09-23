@@ -14,11 +14,11 @@ import { drawRect, drawCircle } from "../utils/brushHelpers.js"
 //====================================//
 
 //"Actions" are user-initiated events that are reversible through the undo button. This file holds the functions used for reversible actions.
-//TODO: Not all reversible actions are held here currently. Clear canvas and addLayer are not present
+//TODO: Not all reversible actions are held here currently. Clear canvas and addLayer are not present, but those don't interact with the cursor.
 
 /**
  * Render a stamp from the brush to the canvas
- * TODO: Find more efficient way to draw any brush shape without drawing each pixel separately
+ * TODO: Find more efficient way to draw any brush shape without drawing each pixel separately. Could either be image stamp or made with rectangles
  * @param {*} coordX
  * @param {*} coordY
  * @param {*} currentColor
@@ -346,7 +346,7 @@ export function actionReplace() {
 }
 
 /**
- * TODO: BUG: if canvas is resized and fill point exists outside canvas area, fill will not render when timeline is redrawn
+ * NOTE: if canvas is resized and fill point exists outside canvas area, fill will not render when timeline is redrawn
  * User action for process to fill a contiguous color
  * @param {*} startX
  * @param {*} startY
