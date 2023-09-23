@@ -15,7 +15,7 @@ export const state = {
   redoStack: [],
   //tool settings
   tool: null, //needs to be initialized
-  mode: "draw", //TODO: modes should allow multiple modes at once
+  mode: "draw", //TODO: modes should allow multiple modes at once {erase: false, perfect: false}
   brushStamp: [{ x: 0, y: 0, w: 1, h: 1 }], //default 1 pixel
   brushType: "circle",
   options: {

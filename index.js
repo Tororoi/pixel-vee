@@ -54,9 +54,6 @@ let exportBtn = document.querySelector(".export")
 
 //TODO: Add Palette that consists of a small canvas with basic paint, sample and fill erase tools.
 //TODO: Add color mixer that consists of a small canvas that can be painted upon and cleared. At any time the user can click "Mix" and the colors on the canvas will be used to generate a mixed color.
-//TODO: Add draggability to each interface. Each interface will have a top strip with a drag button and a title,
-//as well as a collapse/expand button. Interfaces cannot be dragged offscreen.
-//There should be a button to set interface layout to default.
 
 //===================================//
 //=== * * * Initialization * * * ====//
@@ -470,7 +467,6 @@ function handlePointerUp(e) {
     //TODO: for modification actions, set "to" values on moddedActionIndex before pushing
     state.undoStack.push(state.points)
 
-    // TODO: if state.tool is a vector tool like curve, push index of instruction on undoStack and state.points to vector instruction stack
     if (
       state.tool.name === "fill" ||
       state.tool.name === "quadCurve" ||

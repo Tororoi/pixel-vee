@@ -498,22 +498,18 @@ function redrawPoints(index = null) {
           )
           break
         case "replace":
-          //TODO IMPORTANT: drawing an image is not compatible with vector concept.
-          //Any previous vectors would be fully rasterized.
-          //Even if image only depicts replaced pixels, those that were replaced cannot be moved.
-          //Tool needs to be reworked for only raster and force users to convert vectors to raster before using replace tool on them.
-          // For example, the program would assemble the canvas without vector renders and replacing black with teal would succeed on raster pixels.
-          //Then, any vector pixels on top of replaced pixels would be still rendered in black.
+          //IMPORTANT:
+          //Any replaced pixels over previous vectors would be fully rasterized.
+          //Even if image only depicts replaced pixels, those that were replaced cannot be moved if they were part of a vector.
           //maybe a separate tool could exist for replacing vector pixels as a modification of one vector, as if the vector's render acts as a mask.
           //maybe collision detection could be used somehow? probably expensive.
-          // p.layer.ctx.drawImage(
-          //   p.properties.image,
-          //   0,
-          //   0,
-          //   p.properties.width,
-          //   p.properties.height
-          // )
-          //DEPRECATED 9/21/23 - TODO: Document non render tools such as replace and others
+          p.layer.ctx.drawImage(
+            p.properties.image,
+            0,
+            0,
+            p.properties.width,
+            p.properties.height
+          )
           break
         default:
           actionDraw(p.x, p.y, p.color, p.brush, p.weight, p.layer.ctx, p.mode)
@@ -867,7 +863,7 @@ function renderVectorsToDOM() {
       // thumbnailCTX.strokeStyle = p.color.color
       canvas.thumbnailCTX.strokeStyle = "black"
       canvas.thumbnailCTX.beginPath()
-      //TODO: line tool and fill tool to be added as vectors. Behavior of replace tool is like a mask, so the replaced pixels are static coordinates.
+      //TODO: line tool to be added as vectors. Behavior of replace tool is like a mask, so the replaced pixels are static coordinates.
       if (p.tool.name === "fill") {
         canvas.thumbnailCTX.arc(
           minD * p.x.px1 + 0.5,
