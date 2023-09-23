@@ -99,7 +99,7 @@ Visit here: https://pixelvee.netlify.app/
 
 > #### Change Canvas Size
 >
-> Change canvas dimensions to between 8 and 800 pixels.
+> Change canvas dimensions to between 8 and 1024 pixels.
 
 ### Key Features to be added
 

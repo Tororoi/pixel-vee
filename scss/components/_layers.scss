@@ -1,17 +1,15 @@
 /* Layers */
 
 .layers-interface {
-  user-select: none;
-  position: absolute;
-  z-index: 101;
-  background-color: $extra-dark-gray;
-  width: 206px;
-  height: auto;
-  top: 135px;
-  display: flex;
-  flex-flow: column nowrap;
-  align-items: center;
+  order: 3;
+  flex: 1 1 auto;
+  min-height: 184px; //header and layers-control plus 3 layers.
+  .collapsible {
+    padding-top: 2px;
+  }
   .layers-control {
+    flex-shrink: 0; /* Prevents the child from shrinking below its content size */
+    flex-grow: 0;
     display: flex;
     flex-flow: row nowrap;
     margin: 2px;
@@ -30,27 +28,18 @@
     }
   }
   .layers-container {
+    display: flex;
+    flex-direction: column;
+    position: relative;
     width: calc(100% - 4px);
     height: auto;
-    max-height: 481px;
+    // max-height: 481px;
+    flex: 1 1 auto;
+    min-height: 40px;
     overflow-y: auto;
     margin: 2px;
     @include boxBorder;
-    &::-webkit-scrollbar {
-      width: 10px;
-    }
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    &::-webkit-scrollbar-thumb {
-      background: $border-color;
-      background-clip: content-box;
-      border: 2px solid transparent;
-      &:hover {
-        background: white;
-        background-clip: content-box;
-      }
-    }
+    @include scrollBar;
     .layers {
       display: flex;
       flex-flow: column-reverse nowrap;

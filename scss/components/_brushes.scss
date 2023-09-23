@@ -1,14 +1,10 @@
+/* Brush settings */
+
 .brush-container {
-  background-color: $extra-dark-gray;
-  user-select: none;
-  position: absolute;
-  z-index: 100;
-  width: 206px;
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: center;
-  align-items: center;
-  padding-bottom: 1px; //Remove after refactoring button without margin
+  order: 1;
+  .collapsible {
+    padding-top: 2px;
+  }
   p {
     margin: 0px;
   }
@@ -33,6 +29,7 @@
     height: 16px;
     background: $darkest-gray;
     outline: none;
+    margin-bottom: 4px;
     cursor: pointer;
     &::-webkit-slider-thumb {
       -webkit-appearance: none;

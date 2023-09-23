@@ -7,6 +7,7 @@ export const state = {
   debugger: false,
   debugObject: {},
   debugFn: null,
+  grid: false,
   vectorMode: true,
   //timeline
   points: [],
@@ -14,7 +15,7 @@ export const state = {
   redoStack: [],
   //tool settings
   tool: null, //needs to be initialized
-  mode: "draw", //TODO: modes should allow multiple modes at once
+  mode: "draw", //TODO: modes should allow multiple modes at once {erase: false, perfect: false}
   brushStamp: [{ x: 0, y: 0, w: 1, h: 1 }], //default 1 pixel
   brushType: "circle",
   options: {
@@ -29,6 +30,7 @@ export const state = {
   dragX: null,
   dragY: null,
   dragTarget: null,
+  dragSiblings: [],
   //active variables for canvas
   shortcuts: true,
   clipMask: null,
@@ -48,18 +50,25 @@ export const state = {
   //x2/y2 for line tool
   lineX: null,
   lineY: null,
-  //for curve tool
+  //for vector tools
   clickCounter: 0,
-  px1: null,
-  py1: null,
-  px2: null,
-  py2: null,
-  px3: null,
-  py3: null,
-  px4: null,
-  py4: null,
-  radA: null,
-  radB: null,
+  vectorProperties: {
+    px1: null,
+    py1: null,
+    px2: null,
+    py2: null,
+    px3: null,
+    py3: null,
+    px4: null,
+    py4: null,
+    radA: null,
+    radB: null,
+    angle: null,
+    offset: null, //rename to something more specific
+    x1Offset: 0,
+    y1Offset: 0,
+    forceCircle: false,
+  },
   //for perfect pixels
   lastDrawnX: null,
   lastDrawnY: null,
@@ -81,21 +90,31 @@ export const state = {
  * @param {*} y
  * @param {*} layer - layer that history should be applied to
  * @param {*} properties - custom properties for specific tool
- * @param
+ * @param {*} modifications - used for vector actions that can be changed after the fact, eg, line, curve, fill
  */
 function addToTimeline(actionObject) {
-  const { tool, x, y, layer, properties, modifications = [] } = actionObject
+  const {
+    tool,
+    x,
+    y,
+    color,
+    brushStamp,
+    brushSize,
+    layer,
+    properties,
+    modifications = [],
+  } = actionObject
   //use current state for variables
   state.points.push({
     //x/y are sometimes objects with multiple values
     x: x,
     y: y,
     layer: layer,
-    brush: state.brushStamp,
-    weight: state.tool.brushSize,
-    color: { ...swatches.primary.color },
+    brush: brushStamp || state.brushStamp,
+    weight: brushSize || state.tool.brushSize,
+    color: color || { ...swatches.primary.color },
     tool: tool,
-    action: state.tool.fn,
+    // action: state.tool.fn, //should be passed as props, may not match state.tool.fn
     mode: state.mode,
     properties,
     modifications,
@@ -103,13 +122,6 @@ function addToTimeline(actionObject) {
 }
 
 function reset() {
-  state.px1 = null
-  state.py1 = null
-  state.px2 = null
-  state.py2 = null
-  state.px3 = null
-  state.py3 = null
-  state.px4 = null
-  state.py4 = null
   state.clickCounter = 0
+  state.vectorProperties.forceCircle = false
 }

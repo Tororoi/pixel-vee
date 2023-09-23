@@ -133,29 +133,73 @@ svg {
 }
 
 /* Next basic site layout components */
+.sidebar {
+  position: absolute;
+  min-width: 206px;
+  width: 206px;
+  max-height: calc(100% - 4px);
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  z-index: 103;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+.sidebar:hover:not([disabled]), .sidebar:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+.sidebar .content {
+  height: auto;
+  overflow-y: scroll;
+}
+.sidebar .content::-webkit-scrollbar {
+  width: 10px;
+}
+.sidebar .content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar .content::-webkit-scrollbar-thumb {
+  background: rgb(131, 131, 131);
+  background-clip: content-box;
+  border: 2px solid transparent;
+}
+.sidebar .content::-webkit-scrollbar-thumb:hover {
+  background: white;
+  background-clip: content-box;
+}
+
 .page {
   position: relative;
   display: flex;
   width: 100%;
-  height: calc(100% - 48px);
+  height: calc(100% - 52px);
   user-select: none;
 }
 
 .draggable {
   margin: 2px;
+  z-index: 100;
+}
+.draggable.v-drag {
+  box-shadow: 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+.draggable.v-drag:hover:not([disabled]), .draggable.v-drag:focus {
+  box-shadow: 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+.draggable.h-drag {
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.draggable:hover:not([disabled]), .draggable:focus {
+.draggable.h-drag:hover:not([disabled]), .draggable.h-drag:focus {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .draggable .dragging {
   user-select: none;
+  z-index: 150;
 }
 .draggable .header {
   background-color: rgb(0, 0, 0);
   justify-self: center;
   width: 100%;
-  height: 20px;
+  min-height: 20px;
   margin: 0px;
   display: flex;
   flex-flow: row nowrap;
@@ -163,20 +207,34 @@ svg {
   align-items: center;
   position: relative;
   cursor: grab;
+  box-shadow: 0px 2px rgb(131, 131, 131);
+}
+.draggable .header:hover:not([disabled]), .draggable .header:focus {
+  box-shadow: 0px 2px rgb(255, 255, 255);
 }
 .draggable .header .drag-btn {
   position: absolute;
   left: 0;
   top: 0;
-  width: 2px;
-  height: 2px;
+  width: 20px;
+  height: 20px;
+}
+.draggable .header .drag-btn .grip {
   margin: 5px;
+  height: 2px;
+  width: 2px;
   background: rgb(131, 131, 131);
   box-shadow: 0px 0px rgb(131, 131, 131), 4px 0px rgb(131, 131, 131), 0px 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 0px 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131);
 }
-.draggable .header:hover:not([disabled]) .drag-btn, .draggable .header:focus .drag-btn {
+.draggable .header .drag-btn.locked .grip {
+  box-shadow: 2px -2px rgb(131, 131, 131), 4px -2px rgb(131, 131, 131), 0px 0px rgb(131, 131, 131), 6px 0px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131), 6px 2px rgb(131, 131, 131), -2px 4px rgb(131, 131, 131), 0px 4px rgb(131, 131, 131), 2px 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 6px 4px rgb(131, 131, 131), 8px 4px rgb(131, 131, 131), -2px 6px rgb(131, 131, 131), 0px 6px rgb(131, 131, 131), 4px 6px rgb(131, 131, 131), 6px 6px rgb(131, 131, 131), 8px 6px rgb(131, 131, 131), -2px 8px rgb(131, 131, 131), 0px 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131), 6px 8px rgb(131, 131, 131), 8px 8px rgb(131, 131, 131), -2px 10px rgb(131, 131, 131), 0px 10px rgb(131, 131, 131), 2px 10px rgb(131, 131, 131), 4px 10px rgb(131, 131, 131), 6px 10px rgb(131, 131, 131), 8px 10px rgb(131, 131, 131);
+}
+.draggable .header:hover:not([disabled]) .drag-btn .grip, .draggable .header:focus .drag-btn .grip {
   background: rgb(255, 255, 255);
   box-shadow: 0px 0px rgb(255, 255, 255), 4px 0px rgb(255, 255, 255), 0px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 0px 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255);
+}
+.draggable .header:hover:not([disabled]) .drag-btn.locked .grip, .draggable .header:focus .drag-btn.locked .grip {
+  box-shadow: 2px -2px rgb(255, 255, 255), 4px -2px rgb(255, 255, 255), 0px 0px rgb(255, 255, 255), 6px 0px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255), 6px 2px rgb(255, 255, 255), -2px 4px rgb(255, 255, 255), 0px 4px rgb(255, 255, 255), 2px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 6px 4px rgb(255, 255, 255), 8px 4px rgb(255, 255, 255), -2px 6px rgb(255, 255, 255), 0px 6px rgb(255, 255, 255), 4px 6px rgb(255, 255, 255), 6px 6px rgb(255, 255, 255), 8px 6px rgb(255, 255, 255), -2px 8px rgb(255, 255, 255), 0px 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255), 6px 8px rgb(255, 255, 255), 8px 8px rgb(255, 255, 255), -2px 10px rgb(255, 255, 255), 0px 10px rgb(255, 255, 255), 2px 10px rgb(255, 255, 255), 4px 10px rgb(255, 255, 255), 6px 10px rgb(255, 255, 255), 8px 10px rgb(255, 255, 255);
 }
 .draggable .header .collapse-btn {
   position: absolute;
@@ -208,12 +266,32 @@ svg {
   box-shadow: 9px 5px rgb(255, 255, 255), 9px 7px rgb(255, 255, 255), 5px 9px rgb(255, 255, 255), 7px 9px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 11px 9px rgb(255, 255, 255), 13px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 9px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 9px 13px rgb(255, 255, 255);
 }
 .draggable .collapsible {
+  flex: 0 1 auto;
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   overflow: hidden;
+  position: relative;
+}
+
+.settings-box {
+  background-color: rgb(51, 51, 51);
+  user-select: none;
+  position: relative;
+  z-index: 100;
+  width: 206px;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.smooth-shift {
+  transition: top 0.05s;
+}
+.smooth-shift.dragging {
+  transition: none;
 }
 
 /* Misc */
@@ -316,6 +394,9 @@ svg {
   width: 40px;
   height: 40px;
 }
+.columns .btn:hover {
+  z-index: 104;
+}
 .columns .column {
   display: flex;
   justify-content: flex-start;
@@ -333,6 +414,7 @@ svg {
   justify-self: center;
   width: calc(100% - 4px);
   height: 48px;
+  min-height: 48px;
   display: flex;
   flex-flow: row nowrap;
   justify-content: space-between;
@@ -347,6 +429,19 @@ svg {
 .nav .title {
   padding-left: 16px;
   padding-right: 16px;
+}
+.nav .title a {
+  display: flex;
+  align-items: center;
+}
+.nav .title a img {
+  width: 32px;
+  height: 32px;
+  image-rendering: -moz-crisp-edges; /* Firefox */
+  image-rendering: -webkit-optimize-contrast; /* Webkit (Safari now, Chrome and Opera up to v12.0) */
+  image-rendering: -o-crisp-edges; /* Opera */
+  image-rendering: pixelated; /* Webkit (Chrome from v41, Opera from v26) */
+  -ms-interpolation-mode: nearest-neighbor;
 }
 .nav .nav-items {
   display: flex;
@@ -406,7 +501,6 @@ canvas {
 
 .canvas-container {
   user-select: none;
-  position: absolute;
   z-index: 1;
   width: 100%;
   height: 100%;
@@ -461,6 +555,9 @@ canvas {
 }
 .toolbox:hover:not([disabled]), .toolbox:focus {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+.toolbox .collapsible {
+  padding-top: 2px;
 }
 .toolbox .colors {
   width: 128px;
@@ -533,20 +630,102 @@ canvas {
   color: black;
 }
 
+.fill {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-fill.png");
+  background-size: 100%;
+}
+
+.quadCurve {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-quad.png");
+  background-size: 100%;
+}
+
+.cubicCurve {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-cubic.png");
+  background-size: 100%;
+}
+
+.ellipse {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-ellipse.png");
+  background-size: 100%;
+}
+
+.line {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-line.png");
+  background-size: 100%;
+}
+
+.brush {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-brush.png");
+  background-size: 100%;
+}
+
+.eyedropper {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-eyedropper.png");
+  background-size: 100%;
+}
+
+.eraser {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-eraser.png");
+  background-size: 100%;
+}
+
+.grab {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-grab.png");
+  background-size: 100%;
+}
+
+.pencil {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-pencil.png");
+  background-size: 100%;
+}
+
+.mechanical {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-mechanical.png");
+  background-size: 100%;
+}
+
+.replace {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-replace.png");
+  background-size: 100%;
+}
+
 /* Layers */
 .layers-interface {
-  user-select: none;
-  position: absolute;
-  z-index: 101;
-  background-color: rgb(51, 51, 51);
-  width: 206px;
-  height: auto;
-  top: 135px;
-  display: flex;
-  flex-flow: column nowrap;
-  align-items: center;
+  order: 3;
+  flex: 1 1 auto;
+  min-height: 184px;
+}
+.layers-interface .collapsible {
+  padding-top: 2px;
 }
 .layers-interface .layers-control {
+  flex-shrink: 0; /* Prevents the child from shrinking below its content size */
+  flex-grow: 0;
   display: flex;
   flex-flow: row nowrap;
   margin: 2px;
@@ -565,9 +744,13 @@ canvas {
   background: rgb(131, 131, 131);
 }
 .layers-interface .layers-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
   width: calc(100% - 4px);
   height: auto;
-  max-height: 481px;
+  flex: 1 1 auto;
+  min-height: 40px;
   overflow-y: auto;
   margin: 2px;
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
@@ -642,17 +825,157 @@ canvas {
   animation: flash 0.6s ease-in infinite alternate-reverse;
 }
 
-.brush-container {
-  background-color: rgb(51, 51, 51);
-  user-select: none;
-  position: absolute;
-  z-index: 100;
-  width: 206px;
+/* Vectors, interface provides access to select any vector existing in the timeline */
+.vectors-interface {
+  order: 4;
+  flex: 1 1 auto;
+  min-height: 264px;
+}
+.vectors-interface .vectors-control {
   display: flex;
-  flex-flow: column nowrap;
+  flex-flow: row nowrap;
+  margin: 2px;
+}
+.vectors-interface .vectors-control .thumbnail-style {
+  width: 28px;
+  height: 28px;
+  background: rgb(131, 131, 131);
+}
+.vectors-interface .vectors-control .thumbnail-style .icon {
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-fit.png");
+  background-size: 28px;
+}
+.vectors-interface .vectors-control .thumbnail-style input[type=checkbox] {
+  display: none;
+}
+.vectors-interface .vectors-control .thumbnail-style input[type=checkbox]:checked + .icon {
+  background-image: url("../public/pixelv-expand.png");
+}
+.vectors-interface .collapsible {
+  padding-top: 2px;
+}
+.vectors-interface .vectors-container {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  margin: 2px;
+  box-shadow: 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+.vectors-interface .vectors-container:hover:not([disabled]), .vectors-interface .vectors-container:focus {
+  box-shadow: 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+.vectors-interface .vectors-container::-webkit-scrollbar {
+  width: 10px;
+}
+.vectors-interface .vectors-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.vectors-interface .vectors-container::-webkit-scrollbar-thumb {
+  background: rgb(131, 131, 131);
+  background-clip: content-box;
+  border: 2px solid transparent;
+}
+.vectors-interface .vectors-container::-webkit-scrollbar-thumb:hover {
+  background: white;
+  background-clip: content-box;
+}
+.vectors-interface .vectors-container .vectors {
+  display: flex;
+  flex-flow: column-reverse nowrap;
+  justify-content: flex-end;
+}
+.vectors-interface .vectors-container .vectors .vector {
+  position: relative;
+  cursor: grab;
+  height: 100px;
+  width: 100%;
+  text-align: center;
+  line-height: 40px;
+  font-size: 16px;
+  display: flex;
   justify-content: center;
   align-items: center;
-  padding-bottom: 1px;
+  box-shadow: inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131);
+}
+.vectors-interface .vectors-container .vectors .vector img {
+  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  height: calc(100% - 4px);
+}
+.vectors-interface .vectors-container .vectors .vector canvas {
+  position: absolute;
+  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  width: calc(100% - 4px);
+  height: calc(100% - 4px);
+}
+.vectors-interface .vectors-container .vectors .vector .tool {
+  position: absolute;
+  right: 0;
+  top: 0;
+  cursor: grab;
+  width: 20px;
+  height: 20px;
+  background: rgb(131, 131, 131);
+  z-index: 104;
+  margin: 2px;
+}
+.vectors-interface .vectors-container .vectors .vector .actionColor {
+  position: absolute;
+  right: 0;
+  top: 22px;
+  cursor: grab;
+  width: 20px;
+  height: 20px;
+  background: rgb(131, 131, 131);
+  z-index: 104;
+  margin: 2px;
+}
+.vectors-interface .vectors-container .vectors .vector.selected {
+  background: rgb(77, 77, 77);
+}
+.vectors-interface .vectors-container .vectors .vector:hover {
+  box-shadow: inset 2px 0px rgb(255, 255, 255), inset -2px 0px rgb(255, 255, 255), inset 0px -2px rgb(255, 255, 255), inset 0px 2px rgb(255, 255, 255);
+}
+.vectors-interface .vectors-container .vectors .vector:hover .btn {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+.vectors-interface .vectors-container .vectors .vector .hide {
+  width: 28px;
+  height: 28px;
+  margin: 6px;
+  background: rgb(131, 131, 131);
+}
+.vectors-interface .vectors-container .vectors .vector .hide .eye {
+  height: 2px;
+  width: 2px;
+}
+.vectors-interface .vectors-container .vectors .vector .hide .eye.eyeopen {
+  opacity: 1;
+  transform: translateX(-13px) translateY(-13px);
+  box-shadow: 10px 6px rgb(0, 0, 0), 12px 6px rgb(0, 0, 0), 14px 6px rgb(0, 0, 0), 16px 6px rgb(0, 0, 0), 6px 8px rgb(0, 0, 0), 8px 8px rgb(87, 87, 87), 10px 8px rgb(172, 172, 172), 12px 8px rgb(172, 172, 172), 14px 8px rgb(172, 172, 172), 16px 8px rgb(172, 172, 172), 18px 8px rgb(87, 87, 87), 20px 8px rgb(0, 0, 0), 4px 10px rgb(0, 0, 0), 6px 10px rgb(87, 87, 87), 8px 10px rgb(255, 255, 255), 10px 10px rgb(255, 255, 255), 12px 10px rgb(0, 0, 0), 14px 10px rgb(0, 0, 0), 16px 10px rgb(255, 255, 255), 18px 10px rgb(172, 172, 172), 20px 10px rgb(87, 87, 87), 22px 10px rgb(0, 0, 0), 2px 12px rgb(0, 0, 0), 4px 12px rgb(87, 87, 87), 6px 12px rgb(255, 255, 255), 8px 12px rgb(255, 255, 255), 10px 12px rgb(0, 0, 0), 12px 12px rgb(255, 255, 255), 14px 12px rgb(0, 0, 0), 16px 12px rgb(0, 0, 0), 18px 12px rgb(255, 255, 255), 20px 12px rgb(172, 172, 172), 22px 12px rgb(172, 172, 172), 24px 12px rgb(0, 0, 0), 4px 14px rgb(172, 172, 172), 6px 14px rgb(255, 255, 255), 8px 14px rgb(255, 255, 255), 10px 14px rgb(0, 0, 0), 12px 14px rgb(0, 0, 0), 14px 14px rgb(0, 0, 0), 16px 14px rgb(0, 0, 0), 18px 14px rgb(255, 255, 255), 20px 14px rgb(172, 172, 172), 22px 14px rgb(172, 172, 172), 4px 16px rgb(0, 0, 0), 6px 16px rgb(172, 172, 172), 8px 16px rgb(255, 255, 255), 10px 16px rgb(255, 255, 255), 12px 16px rgb(0, 0, 0), 14px 16px rgb(0, 0, 0), 16px 16px rgb(255, 255, 255), 18px 16px rgb(172, 172, 172), 20px 16px rgb(172, 172, 172), 22px 16px rgb(0, 0, 0), 6px 18px rgb(0, 0, 0), 8px 18px rgb(87, 87, 87), 10px 18px rgb(172, 172, 172), 12px 18px rgb(172, 172, 172), 14px 18px rgb(172, 172, 172), 16px 18px rgb(172, 172, 172), 18px 18px rgb(87, 87, 87), 20px 18px rgb(0, 0, 0), 10px 20px rgb(0, 0, 0), 12px 20px rgb(0, 0, 0), 14px 20px rgb(0, 0, 0), 16px 20px rgb(0, 0, 0);
+}
+.vectors-interface .vectors-container .vectors .vector .hide .eye.eyeclosed {
+  opacity: 1;
+  transform: translateX(-13px) translateY(-13px);
+  box-shadow: 10px 6px rgb(0, 0, 0), 12px 6px rgb(0, 0, 0), 14px 6px rgb(0, 0, 0), 16px 6px rgb(0, 0, 0), 6px 8px rgb(0, 0, 0), 8px 8px rgb(87, 87, 87), 10px 8px rgb(172, 172, 172), 12px 8px rgb(172, 172, 172), 14px 8px rgb(172, 172, 172), 16px 8px rgb(87, 87, 87), 18px 8px rgb(87, 87, 87), 20px 8px rgb(0, 0, 0), 4px 10px rgb(0, 0, 0), 6px 10px rgb(87, 87, 87), 8px 10px rgb(172, 172, 172), 10px 10px rgb(172, 172, 172), 12px 10px rgb(172, 172, 172), 14px 10px rgb(172, 172, 172), 16px 10px rgb(172, 172, 172), 18px 10px rgb(87, 87, 87), 20px 10px rgb(87, 87, 87), 22px 10px rgb(0, 0, 0), 4px 12px rgb(87, 87, 87), 6px 12px rgb(172, 172, 172), 8px 12px rgb(172, 172, 172), 10px 12px rgb(172, 172, 172), 12px 12px rgb(172, 172, 172), 14px 12px rgb(172, 172, 172), 16px 12px rgb(172, 172, 172), 18px 12px rgb(87, 87, 87), 20px 12px rgb(87, 87, 87), 22px 12px rgb(87, 87, 87), 2px 14px rgb(0, 0, 0), 4px 14px rgb(172, 172, 172), 6px 14px rgb(172, 172, 172), 8px 14px rgb(172, 172, 172), 10px 14px rgb(172, 172, 172), 12px 14px rgb(172, 172, 172), 14px 14px rgb(172, 172, 172), 16px 14px rgb(172, 172, 172), 18px 14px rgb(87, 87, 87), 20px 14px rgb(87, 87, 87), 22px 14px rgb(87, 87, 87), 24px 14px rgb(0, 0, 0), 4px 16px rgb(0, 0, 0), 6px 16px rgb(172, 172, 172), 8px 16px rgb(172, 172, 172), 10px 16px rgb(172, 172, 172), 12px 16px rgb(172, 172, 172), 14px 16px rgb(172, 172, 172), 16px 16px rgb(87, 87, 87), 18px 16px rgb(87, 87, 87), 20px 16px rgb(87, 87, 87), 22px 16px rgb(0, 0, 0), 6px 18px rgb(0, 0, 0), 8px 18px rgb(87, 87, 87), 10px 18px rgb(87, 87, 87), 12px 18px rgb(87, 87, 87), 14px 18px rgb(87, 87, 87), 16px 18px rgb(87, 87, 87), 18px 18px rgb(87, 87, 87), 20px 18px rgb(0, 0, 0), 10px 20px rgb(0, 0, 0), 12px 20px rgb(0, 0, 0), 14px 20px rgb(0, 0, 0), 16px 20px rgb(0, 0, 0);
+}
+.vectors-interface .vectors-container .vectors .vector .warning {
+  background: rgb(239, 63, 57);
+  animation: flash 0.6s ease-in infinite alternate-reverse;
+}
+
+/* Brush settings */
+.brush-container {
+  order: 1;
+}
+.brush-container .collapsible {
+  padding-top: 2px;
 }
 .brush-container p {
   margin: 0px;
@@ -678,6 +1001,7 @@ canvas {
   height: 16px;
   background: rgb(31, 31, 31);
   outline: none;
+  margin-bottom: 4px;
   cursor: pointer;
 }
 .brush-container .slider::-webkit-slider-thumb {
@@ -712,6 +1036,7 @@ canvas {
   left: calc(50% - 183px);
   display: none;
   flex-flow: column nowrap;
+  justify-content: flex-start;
   color: white;
   background: rgb(51, 51, 51);
   text-align: center;
@@ -730,6 +1055,9 @@ canvas {
   justify-self: center;
   height: 20px;
   margin: 0px;
+}
+.picker-container .collapsible {
+  padding-top: 2px;
 }
 
 .picker-interface {
@@ -882,18 +1210,12 @@ canvas {
   width: 26px;
 }
 
+/* Canvas Size settings */
 .size-container {
-  background-color: rgb(51, 51, 51);
-  user-select: none;
-  position: absolute;
-  z-index: 100;
-  width: 206px;
-  top: 241px;
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: center;
-  align-items: center;
-  padding-bottom: 1px;
+  order: 2;
+}
+.size-container .collapsible {
+  padding-top: 2px;
 }
 .size-container p {
   margin: 0px;

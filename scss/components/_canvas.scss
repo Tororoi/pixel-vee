@@ -6,7 +6,7 @@ canvas {
 
 .canvas-container {
   user-select: none;
-  position: absolute;
+  // position: absolute;
   z-index: 1;
   width: 100%;
   height: 100%;
@@ -56,7 +56,7 @@ canvas {
 
 #vectorGui {
   mix-blend-mode: difference;
-  //TODO: Draw gray background on onScreenCVS or else lines from vector won't show up utside canvas box
+  //TODO: Draw gray background on onScreenCVS or else lines from vector won't show up outside canvas box
 }
 
 #rasterGui {

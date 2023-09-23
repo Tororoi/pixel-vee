@@ -1,15 +1,10 @@
+/* Canvas Size settings */
+
 .size-container {
-  background-color: $extra-dark-gray;
-  user-select: none;
-  position: absolute;
-  z-index: 100;
-  width: 206px;
-  top: 241px;
-  display: flex;
-  flex-flow: column nowrap;
-  justify-content: center;
-  align-items: center;
-  padding-bottom: 1px; //Remove after refactoring button without margin
+  order: 2;
+  .collapsible {
+    padding-top: 2px;
+  }
   p {
     margin: 0px;
   }
