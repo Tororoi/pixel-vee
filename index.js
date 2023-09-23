@@ -473,7 +473,11 @@ function handlePointerUp(e) {
       state.tool.name === "cubicCurve" ||
       state.tool.name === "ellipse"
     ) {
-      canvas.currentVectorIndex = state.undoStack.indexOf(state.points)
+      if (state.points[0].tool.type === "vector") {
+        canvas.currentVectorIndex = state.undoStack.indexOf(state.points)
+      } else if (state.points[0].tool.type === "modify") {
+        canvas.currentVectorIndex = state.points[0].properties.moddedActionIndex
+      }
       canvas.renderVectorsToDOM()
     }
   }
@@ -633,8 +637,8 @@ function handleUndo() {
     //2. if true, set state.undoStack[undoneAction.properties.moddedActionIndex][0] = undoneAction.properties.from
     let undoneAction = state.undoStack[state.undoStack.length - 1][0]
     if (undoneAction.tool.name === "modify") {
-      state.undoStack[undoneAction.properties.moddedActionIndex][0] =
-        undoneAction.properties.from
+      state.undoStack[undoneAction.properties.moddedActionIndex][0].properties =
+        { ...undoneAction.properties.from }
     }
     actionUndoRedo(state.redoStack, state.undoStack)
   }
@@ -644,10 +648,10 @@ function handleRedo() {
   if (state.redoStack.length >= 1) {
     //1. check (redoneAction) state.redoStack[state.redoStack.length][0].tool.name === "modify"
     //2. if true, set state.undoStack[redoneAction.properties.moddedActionIndex][0] = redoneAction.properties.to
-    let redoneAction = state.undoStack[state.undoStack.length - 1][0]
+    let redoneAction = state.redoStack[state.redoStack.length - 1][0]
     if (redoneAction.tool.name === "modify") {
-      state.undoStack[redoneAction.properties.moddedActionIndex][0] =
-        redoneAction.properties.to
+      state.undoStack[redoneAction.properties.moddedActionIndex][0].properties =
+        { ...redoneAction.properties.to }
     }
     actionUndoRedo(state.undoStack, state.redoStack)
   }

@@ -418,14 +418,20 @@ function redrawPoints(index = null) {
           if (p.hidden) {
             break
           }
-          actionFill(p.x.px1, p.y.py1, p.color, p.layer.ctx, p.mode)
+          actionFill(
+            p.properties.px1,
+            p.properties.py1,
+            p.color,
+            p.layer.ctx,
+            p.mode
+          )
           break
         case "line":
           actionLine(
-            p.x.px1,
-            p.y.py1,
-            p.x.px2,
-            p.y.py2,
+            p.properties.px1,
+            p.properties.py1,
+            p.properties.px2,
+            p.properties.py2,
             p.color,
             p.layer.ctx,
             p.mode,
@@ -438,12 +444,12 @@ function redrawPoints(index = null) {
             break
           }
           actionQuadraticCurve(
-            p.x.px1,
-            p.y.py1,
-            p.x.px2,
-            p.y.py2,
-            p.x.px3,
-            p.y.py3,
+            p.properties.px1,
+            p.properties.py1,
+            p.properties.px2,
+            p.properties.py2,
+            p.properties.px3,
+            p.properties.py3,
             3,
             p.color,
             p.layer.ctx,
@@ -458,14 +464,14 @@ function redrawPoints(index = null) {
           }
           //TODO: pass source on history objects to avoid debugging actions from the timeline unless desired
           actionCubicCurve(
-            p.x.px1,
-            p.y.py1,
-            p.x.px2,
-            p.y.py2,
-            p.x.px3,
-            p.y.py3,
-            p.x.px4,
-            p.y.py4,
+            p.properties.px1,
+            p.properties.py1,
+            p.properties.px2,
+            p.properties.py2,
+            p.properties.px3,
+            p.properties.py3,
+            p.properties.px4,
+            p.properties.py4,
             4,
             p.color,
             p.layer.ctx,
@@ -479,12 +485,12 @@ function redrawPoints(index = null) {
             break
           }
           actionEllipse(
-            p.x.px1,
-            p.y.py1,
-            p.x.px2,
-            p.y.py2,
-            p.x.px3,
-            p.y.py3,
+            p.properties.px1,
+            p.properties.py1,
+            p.properties.px2,
+            p.properties.py2,
+            p.properties.px3,
+            p.properties.py3,
             p.properties.radA,
             p.properties.radB,
             p.properties.forceCircle,
@@ -813,14 +819,14 @@ function vectorInteract(e) {
     //select current vector
     //TODO: modify object structure of states to match object in undoStack to make assignment simpler like vectorGuiState.x = {...vector.x}
     vectorGuiState.reset(canvas)
-    vectorGuiState.px1 = vector.x.px1
-    vectorGuiState.py1 = vector.y.py1
-    vectorGuiState.px2 = vector.x.px2
-    vectorGuiState.py2 = vector.y.py2
-    vectorGuiState.px3 = vector.x.px3
-    vectorGuiState.py3 = vector.y.py3
-    vectorGuiState.px4 = vector.x.px4
-    vectorGuiState.py4 = vector.y.py4
+    vectorGuiState.px1 = vector.properties.px1
+    vectorGuiState.py1 = vector.properties.py1
+    vectorGuiState.px2 = vector.properties.px2
+    vectorGuiState.py2 = vector.properties.py2
+    vectorGuiState.px3 = vector.properties.px3
+    vectorGuiState.py3 = vector.properties.py3
+    vectorGuiState.px4 = vector.properties.px4
+    vectorGuiState.py4 = vector.properties.py4
     vectorGuiState.radA = vector.properties?.radA
     vectorGuiState.radB = vector.properties?.radB
     // if (vector.type === "raster") {
@@ -869,36 +875,45 @@ function renderVectorsToDOM() {
       //TODO: line tool to be added as vectors. Behavior of replace tool is like a mask, so the replaced pixels are static coordinates.
       if (p.tool.name === "fill") {
         canvas.thumbnailCTX.arc(
-          minD * p.x.px1 + 0.5,
-          minD * p.y.py1 + 0.5,
+          minD * p.properties.px1 + 0.5,
+          minD * p.properties.py1 + 0.5,
           1,
           0,
           2 * Math.PI,
           true
         )
       } else if (p.tool.name === "quadCurve") {
-        canvas.thumbnailCTX.moveTo(minD * p.x.px1 + 0.5, minD * p.y.py1 + 0.5)
+        canvas.thumbnailCTX.moveTo(
+          minD * p.properties.px1 + 0.5,
+          minD * p.properties.py1 + 0.5
+        )
         canvas.thumbnailCTX.quadraticCurveTo(
-          minD * p.x.px3 + 0.5,
-          minD * p.y.py3 + 0.5,
-          minD * p.x.px2 + 0.5,
-          minD * p.y.py2 + 0.5
+          minD * p.properties.px3 + 0.5,
+          minD * p.properties.py3 + 0.5,
+          minD * p.properties.px2 + 0.5,
+          minD * p.properties.py2 + 0.5
         )
       } else if (p.tool.name === "cubicCurve") {
-        canvas.thumbnailCTX.moveTo(minD * p.x.px1 + 0.5, minD * p.y.py1 + 0.5)
+        canvas.thumbnailCTX.moveTo(
+          minD * p.properties.px1 + 0.5,
+          minD * p.properties.py1 + 0.5
+        )
         canvas.thumbnailCTX.bezierCurveTo(
-          minD * p.x.px3 + 0.5,
-          minD * p.y.py3 + 0.5,
-          minD * p.x.px4 + 0.5,
-          minD * p.y.py4 + 0.5,
-          minD * p.x.px2 + 0.5,
-          minD * p.y.py2 + 0.5
+          minD * p.properties.px3 + 0.5,
+          minD * p.properties.py3 + 0.5,
+          minD * p.properties.px4 + 0.5,
+          minD * p.properties.py4 + 0.5,
+          minD * p.properties.px2 + 0.5,
+          minD * p.properties.py2 + 0.5
         )
       } else if (p.tool.name === "ellipse") {
-        let angle = getAngle(p.x.px2 - p.x.px1, p.y.py2 - p.y.py1)
+        let angle = getAngle(
+          p.properties.px2 - p.properties.px1,
+          p.properties.py2 - p.properties.py1
+        )
         canvas.thumbnailCTX.ellipse(
-          minD * p.x.px1,
-          minD * p.y.py1,
+          minD * p.properties.px1,
+          minD * p.properties.py1,
           minD * p.properties.radA,
           minD * p.properties.radB,
           angle,

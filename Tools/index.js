@@ -91,9 +91,13 @@ export function drawSteps() {
           if (state.tool.name !== "replace") {
             state.addToTimeline({
               tool: tools.line,
-              x: { px1: state.previousX, px2: state.cursorX },
-              y: { py1: state.previousY, py2: state.cursorY },
               layer: canvas.currentLayer,
+              properties: {
+                px1: state.previousX,
+                py1: state.previousY,
+                px2: state.cursorX,
+                py2: state.cursorY,
+              },
             })
           }
           canvas.draw()
@@ -261,9 +265,13 @@ export function lineSteps() {
       )
       state.addToTimeline({
         tool: state.tool,
-        x: { px1: state.previousX, px2: state.cursorX },
-        y: { py1: state.previousY, py2: state.cursorY },
         layer: canvas.currentLayer,
+        properties: {
+          px1: state.previousX,
+          py1: state.previousY,
+          px2: state.cursorX,
+          py2: state.cursorY,
+        },
       })
       canvas.draw()
       break
@@ -287,8 +295,8 @@ export function fillSteps() {
         vectorGuiState.px1 = state.px1
         vectorGuiState.py1 = state.py1
         actionFill(
-          state.cursorX,
-          state.cursorY,
+          state.px1,
+          state.py1,
           swatches.primary.color,
           canvas.currentLayer.ctx,
           state.mode
@@ -296,9 +304,11 @@ export function fillSteps() {
         //For undo ability, store starting coords and settings and pass them into actionFill
         state.addToTimeline({
           tool: state.tool,
-          x: { px1: state.cursorX },
-          y: { py1: state.cursorY },
           layer: canvas.currentLayer,
+          properties: {
+            px1: state.px1,
+            py1: state.py1,
+          },
         })
         canvas.draw()
       }
@@ -359,10 +369,10 @@ export function adjustFillSteps() {
       if (vectorGuiState.selectedPoint.xKey) {
         vectorGuiState[vectorGuiState.selectedPoint.xKey] = state.cursorX
         vectorGuiState[vectorGuiState.selectedPoint.yKey] = state.cursorY
-        state.undoStack[canvas.currentVectorIndex][0].x[
+        state.undoStack[canvas.currentVectorIndex][0].properties[
           vectorGuiState.selectedPoint.xKey
         ] = state.cursorX
-        state.undoStack[canvas.currentVectorIndex][0].y[
+        state.undoStack[canvas.currentVectorIndex][0].properties[
           vectorGuiState.selectedPoint.yKey
         ] = state.cursorY
         state.undoStack[canvas.currentVectorIndex][0].hidden = false
@@ -538,9 +548,15 @@ export function quadCurveSteps() {
           //store control points for timeline
           state.addToTimeline({
             tool: state.tool,
-            x: { px1: state.px1, px2: state.px2, px3: state.px3 },
-            y: { py1: state.py1, py2: state.py2, py3: state.py3 },
             layer: canvas.currentLayer,
+            properties: {
+              px1: state.px1,
+              py1: state.py1,
+              px2: state.px2,
+              py2: state.py2,
+              px3: state.px3,
+              py3: state.py3,
+            },
           })
           canvas.draw()
         }
@@ -730,19 +746,17 @@ export function cubicCurveSteps() {
           if (!state.debugger) {
             state.addToTimeline({
               tool: state.tool,
-              x: {
+              layer: canvas.currentLayer,
+              properties: {
                 px1: state.px1,
-                px2: state.px2,
-                px3: state.px3,
-                px4: state.px4,
-              },
-              y: {
                 py1: state.py1,
+                px2: state.px2,
                 py2: state.py2,
+                px3: state.px3,
                 py3: state.py3,
+                px4: state.px4,
                 py4: state.py4,
               },
-              layer: canvas.currentLayer,
             })
           }
           canvas.draw()
@@ -865,10 +879,10 @@ export function adjustCurveSteps(numPoints = 4) {
       if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
         vectorGuiState[vectorGuiState.selectedPoint.xKey] = state.cursorX
         vectorGuiState[vectorGuiState.selectedPoint.yKey] = state.cursorY
-        state.undoStack[canvas.currentVectorIndex][0].x[
+        state.undoStack[canvas.currentVectorIndex][0].properties[
           vectorGuiState.selectedPoint.xKey
         ] = state.cursorX
-        state.undoStack[canvas.currentVectorIndex][0].y[
+        state.undoStack[canvas.currentVectorIndex][0].properties[
           vectorGuiState.selectedPoint.yKey
         ] = state.cursorY
         state.undoStack[canvas.currentVectorIndex][0].hidden = false
@@ -1147,18 +1161,14 @@ export function ellipseSteps() {
           //store control points for timeline
           state.addToTimeline({
             tool: state.tool,
-            x: {
-              px1: state.px1,
-              px2: state.px2,
-              px3: state.px3,
-            },
-            y: {
-              py1: state.py1,
-              py2: state.py2,
-              py3: state.py3,
-            },
             layer: canvas.currentLayer,
             properties: {
+              px1: state.px1,
+              py1: state.py1,
+              px2: state.px2,
+              py2: state.py2,
+              px3: state.px3,
+              py3: state.py3,
               radA: state.radA,
               radB: state.radB,
               angle: state.angle,
@@ -1174,50 +1184,6 @@ export function ellipseSteps() {
           renderRasterGUI(state, canvas, swatches)
           renderVectorGUI(state, canvas)
         }
-        //Solidify ellipse
-        //NOTE: This code is commented out for now. It forces the cursor's position to be p3 which makes it easier to make an ellipse,
-        //but it isn't really needed since one can just adjust the control points of a circle and this code makes making a circle less intuitive.
-        // if (state.clickCounter === 2) {
-        //   actionEllipse(
-        //     state.px1,
-        //     state.py1,
-        //     state.px2,
-        //     state.py2,
-        //     state.px3,
-        //     state.py3,
-        //     state.radA,
-        //     state.radB,
-        //     state.clickCounter,
-        //     swatches.primary.color,
-        //     canvas.currentLayer.ctx,
-        //     state.mode,
-        //     state.brushStamp,
-        //     state.tool.brushSize
-        //   )
-        //   state.clickCounter = 0
-        //   //store control points for timeline
-        //   state.addToTimeline({
-        //     tool: state.tool,
-        //     x: {
-        //       px1: state.px1,
-        //       px2: state.px2,
-        //       px3: state.px3,
-        //     },
-        //     y: {
-        //       py1: state.py1,
-        //       py2: state.py2,
-        //       py3: state.py3,
-        //     },
-        //     layer: canvas.currentLayer,
-        //     properties: {
-        //       radA: state.radA,
-        //       radB: state.radB,
-        //     },
-        //   })
-        //   canvas.draw()
-        //   renderRasterGUI(state, canvas, swatches)
-        //   renderVectorGUI(state, canvas)
-        // }
       }
       break
     case "pointerout":
@@ -1317,42 +1283,41 @@ export function adjustEllipseSteps() {
       if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
         updateEllipseControlPoints(state, canvas, vectorGuiState)
         state.undoStack[canvas.currentVectorIndex][0].hidden = false
-        let oldAction = { ...state.undoStack[canvas.currentVectorIndex][0] } //shallow copy, must make deep copy
-        let modifiedAction = {
-          ...state.undoStack[canvas.currentVectorIndex][0],
+        let oldProperties = {
+          ...state.undoStack[canvas.currentVectorIndex][0].properties,
+        } //shallow copy, properties must not contain any objects or references as values
+        let modifiedProperties = {
+          ...state.undoStack[canvas.currentVectorIndex][0].properties,
         } //shallow copy, must make deep copy, at least for x, y and properties
-        modifiedAction.x.px1 = vectorGuiState.px1
-        modifiedAction.y.py1 = vectorGuiState.py1
-        modifiedAction.x.px2 = vectorGuiState.px2
-        modifiedAction.y.py2 = vectorGuiState.py2
-        modifiedAction.x.px3 = vectorGuiState.px3
-        modifiedAction.y.py3 = vectorGuiState.py3
-        modifiedAction.properties.radA = vectorGuiState.radA
-        modifiedAction.properties.radB = vectorGuiState.radB
-        modifiedAction.properties.angle = state.angle
-        modifiedAction.properties.offset = state.offset
-        modifiedAction.properties.x1Offset = state.x1Offset
-        modifiedAction.properties.y1Offset = state.y1Offset
-        modifiedAction.properties.forceCircle =
+        modifiedProperties.px1 = vectorGuiState.px1
+        modifiedProperties.py1 = vectorGuiState.py1
+        modifiedProperties.px2 = vectorGuiState.px2
+        modifiedProperties.py2 = vectorGuiState.py2
+        modifiedProperties.px3 = vectorGuiState.px3
+        modifiedProperties.py3 = vectorGuiState.py3
+        modifiedProperties.radA = vectorGuiState.radA
+        modifiedProperties.radB = vectorGuiState.radB
+        modifiedProperties.angle = state.angle
+        modifiedProperties.offset = state.offset
+        modifiedProperties.x1Offset = state.x1Offset
+        modifiedProperties.y1Offset = state.y1Offset
+        modifiedProperties.forceCircle =
           vectorGuiState.selectedPoint.xKey === "px1"
-            ? modifiedAction.properties.forceCircle
+            ? modifiedProperties.forceCircle
             : state.forceCircle
-        console.log({
-          moddedActionIndex: canvas.currentVectorIndex,
-          from: oldAction,
-          to: modifiedAction,
-        })
         state.addToTimeline({
           tool: tools.modify,
           layer: canvas.currentLayer,
           properties: {
+            //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
             moddedActionIndex: canvas.currentVectorIndex,
-            from: oldAction,
-            to: modifiedAction,
+            from: oldProperties,
+            to: modifiedProperties,
           },
         })
-        //TODO: instead of directly changing the undoStack here, set the values to a copy of the action, then store that as "to", the old action as "from" and the moddedActionIndex on an object pushed to state.points
-        state.undoStack[canvas.currentVectorIndex][0] = modifiedAction
+        state.undoStack[canvas.currentVectorIndex][0].properties = {
+          ...modifiedProperties,
+        }
         vectorGuiState.selectedPoint = {
           xKey: null,
           yKey: null,
