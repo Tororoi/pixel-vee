@@ -5,7 +5,7 @@ import { tools } from "./index.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { generateRandomRGB } from "../utils/colors.js"
-import { vectorGuiState } from "../GUI/vector.js"
+import { vectorGui } from "../GUI/vector.js"
 import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
 import { drawRect, drawCircle } from "../utils/brushHelpers.js"
 
@@ -14,11 +14,11 @@ import { drawRect, drawCircle } from "../utils/brushHelpers.js"
 //====================================//
 
 //"Actions" are user-initiated events that are reversible through the undo button. This file holds the functions used for reversible actions.
-//TODO: Not all reversible actions are held here currently. Clear canvas and addLayer are not present
+//TODO: Not all reversible actions are held here currently. Clear canvas and addLayer are not present, but those don't interact with the cursor.
 
 /**
  * Render a stamp from the brush to the canvas
- * TODO: Find more efficient way to draw any brush shape without drawing each pixel separately
+ * TODO: Find more efficient way to draw any brush shape without drawing each pixel separately. Could either be image stamp or made with rectangles
  * @param {*} coordX
  * @param {*} coordY
  * @param {*} currentColor
@@ -172,28 +172,34 @@ export function actionReplace() {
   /**
    * Used for replace tool
    * @param {*} currentLayer
+   * @param {*} matchColor - color to isolate
+   * @param {boolean} removeColor - if true, this function will remove only the matched color instead of removing everything else
    * @returns
    */
-  function createMapForSpecificColor(currentLayer) {
+  function createMapForSpecificColor(
+    currentLayer,
+    matchColor,
+    removeColor = false
+  ) {
     const colorLayer = currentLayer.ctx.getImageData(
       0,
       0,
       canvas.offScreenCVS.width,
       canvas.offScreenCVS.height
     )
-    const matchColor = swatches.secondary.color
     //iterate over pixel data and remove non-matching colors
     for (let i = 0; i < colorLayer.data.length; i += 4) {
-      //sample color and remove if not match
+      //sample color and by default, color will be removed if not a match. If removeColor is true, color will be removed if it is a match.
       if (colorLayer.data[i + 3] !== 0) {
-        if (
-          !(
-            colorLayer.data[i] === matchColor.r &&
-            colorLayer.data[i + 1] === matchColor.g &&
-            colorLayer.data[i + 2] === matchColor.b &&
-            colorLayer.data[i + 3] === matchColor.a
-          )
-        ) {
+        let matchedColor =
+          colorLayer.data[i] === matchColor.r &&
+          colorLayer.data[i + 1] === matchColor.g &&
+          colorLayer.data[i + 2] === matchColor.b &&
+          colorLayer.data[i + 3] === matchColor.a
+        if (removeColor) {
+          matchedColor = !matchedColor
+        }
+        if (!matchedColor) {
           colorLayer.data[i] = 0
           colorLayer.data[i + 1] = 0
           colorLayer.data[i + 2] = 0
@@ -204,77 +210,85 @@ export function actionReplace() {
 
     return colorLayer
   }
-  //creates a weird bubble effect if brushSize is passed larger
-  function savePointsForSpecificColor(
-    currentLayer,
-    tempLayer,
-    brushSize = 1, //For accurate render, brushSize should be 1. Larger numbers will create bubble effect
-    invert = false
-  ) {
-    const colorLayer = currentLayer.ctx.getImageData(
-      0,
-      0,
-      canvas.offScreenCVS.width,
-      canvas.offScreenCVS.height
-    )
-    const matchColor = swatches.secondary.color
-    const width = canvas.offScreenCVS.width
-    const brushStamp = drawCircle(brushSize)
-    //iterate over pixel data and remove non-matching colors
-    for (let i = 0; i < colorLayer.data.length; i += 4) {
-      //sample color and remove if not match
-      if (colorLayer.data[i + 3] !== 0) {
-        let matchedPrimary = !(
-          colorLayer.data[i] === matchColor.r &&
-          colorLayer.data[i + 1] === matchColor.g &&
-          colorLayer.data[i + 2] === matchColor.b &&
-          colorLayer.data[i + 3] === matchColor.a
-        )
-        if (invert) {
-          matchedPrimary = !matchedPrimary
-        }
-        if (matchedPrimary) {
-          // calculate x and y
-          const x = (i / 4) % width
-          const y = Math.floor(i / 4 / width)
-          const color = {
-            color: `rgba(${colorLayer.data[i]},${colorLayer.data[i + 1]},${
-              colorLayer.data[i + 2]
-            },${colorLayer.data[i + 3]})`,
-            r: colorLayer.data[i],
-            g: colorLayer.data[i + 1],
-            b: colorLayer.data[i + 2],
-            a: colorLayer.data[i + 3],
-          }
-          actionDraw(
-            x,
-            y,
-            color,
-            brushStamp,
-            brushSize,
-            tempLayer.ctx,
-            state.mode
-          )
-          state.addToTimeline({
-            tool: tools.brush,
-            x,
-            y,
-            color,
-            brushStamp,
-            brushSize,
-            layer: tempLayer,
-          })
-        }
-      }
-    }
-  }
+  //creates a weird bubble effect if brushSize is larger than 1.
+  //This function is inefficient due to saving thousands of points at larger canvas sizes, but parts may be useful later for implementing some kind of special "growth" feature for the bubble effect.
+  // function savePointsForSpecificColor(
+  //   currentLayer,
+  //   tempLayer,
+  //   bubble = false, //For accurate render, brushSize should be 1. Larger numbers will create bubble effect
+  //   invert = false
+  // ) {
+  //   const colorLayer = currentLayer.ctx.getImageData(
+  //     0,
+  //     0,
+  //     canvas.offScreenCVS.width,
+  //     canvas.offScreenCVS.height
+  //   )
+  //   const matchColor = swatches.secondary.color
+  //   const width = canvas.offScreenCVS.width
+  //   const brushSize = bubble ? state.tool.brushSize : 1
+  //   const brushStamp = drawCircle(brushSize)
+  //   //iterate over pixel data and remove non-matching colors
+  //   for (let i = 0; i < colorLayer.data.length; i += 4) {
+  //     //sample color and remove if not match
+  //     if (colorLayer.data[i + 3] !== 0) {
+  //       let matchedPrimary = !(
+  //         colorLayer.data[i] === matchColor.r &&
+  //         colorLayer.data[i + 1] === matchColor.g &&
+  //         colorLayer.data[i + 2] === matchColor.b &&
+  //         colorLayer.data[i + 3] === matchColor.a
+  //       )
+  //       if (invert) {
+  //         matchedPrimary = !matchedPrimary
+  //       }
+  //       if (matchedPrimary) {
+  //         // calculate x and y
+  //         const x = (i / 4) % width
+  //         const y = Math.floor(i / 4 / width)
+  //         let color = {
+  //           color: `rgba(${colorLayer.data[i]},${colorLayer.data[i + 1]},${
+  //             colorLayer.data[i + 2]
+  //           },${colorLayer.data[i + 3]})`,
+  //           r: colorLayer.data[i],
+  //           g: colorLayer.data[i + 1],
+  //           b: colorLayer.data[i + 2],
+  //           a: colorLayer.data[i + 3],
+  //         }
+  //         if (invert) {
+  //           color = swatches.primary.color
+  //         }
+  //         actionDraw(
+  //           x,
+  //           y,
+  //           color,
+  //           brushStamp,
+  //           brushSize,
+  //           tempLayer.ctx,
+  //           state.mode
+  //         )
+  //         state.addToTimeline({
+  //           tool: tools.brush,
+  //           x,
+  //           y,
+  //           color,
+  //           brushStamp,
+  //           brushSize,
+  //           layer: tempLayer,
+  //         })
+  //       }
+  //     }
+  //   }
+  // }
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //Initial step
       //create new layer temporarily
       const layer = canvas.createNewRasterLayer("Replacement Layer")
       //create isolated color map for color replacement
-      const isolatedColorLayer = createMapForSpecificColor(canvas.currentLayer)
+      const isolatedColorLayer = createMapForSpecificColor(
+        canvas.currentLayer,
+        swatches.secondary.color
+      )
       layer.ctx.putImageData(isolatedColorLayer, 0, 0)
       //store reference to current layer
       canvas.tempLayer = canvas.currentLayer
@@ -293,14 +307,37 @@ export function actionReplace() {
       //Final step
       if (canvas.tempLayer) {
         canvas.currentLayer.ctx.restore()
+        //save only the drawn pixels to the temporary current canvas
+        const isolatedDrawnColorLayer = createMapForSpecificColor(
+          canvas.currentLayer,
+          swatches.secondary.color,
+          true
+        )
+        canvas.currentLayer.ctx.putImageData(isolatedDrawnColorLayer, 0, 0)
         //Merge the Replacement Layer onto the actual current layer being stored in canvas.tempLayer
-        savePointsForSpecificColor(canvas.currentLayer, canvas.tempLayer)
+        canvas.tempLayer.ctx.drawImage(canvas.currentLayer.cvs, 0, 0)
+        //save only the changed pixels to image
+        let image = new Image()
+        image.src = canvas.currentLayer.cvs.toDataURL()
+        // savePointsForSpecificColor(canvas.currentLayer, canvas.tempLayer)
         //Remove the Replacement Layer from the array of layers
         const replacementLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
         canvas.layers.splice(replacementLayerIndex, 1)
         //Set the current layer back to the correct layer
         canvas.currentLayer = canvas.tempLayer
         canvas.tempLayer = null
+        //TODO: One potential optimization is to save the bounding box coordinates
+        //and add them to the properties so when rendering in the timeline it only
+        //draws in the bounding box area instead of the whole canvas area
+        state.addToTimeline({
+          tool: state.tool,
+          layer: canvas.currentLayer,
+          properties: {
+            image,
+            width: canvas.currentLayer.cvs.width,
+            height: canvas.currentLayer.cvs.height,
+          },
+        })
       }
     default:
       //No default
@@ -309,7 +346,7 @@ export function actionReplace() {
 }
 
 /**
- * TODO: BUG: if canvas is resized and fill point exists outside canvas area, fill will not render when timeline is redrawn
+ * NOTE: if canvas is resized and fill point exists outside canvas area, fill will not render when timeline is redrawn
  * User action for process to fill a contiguous color
  * @param {*} startX
  * @param {*} startY
@@ -526,8 +563,8 @@ export function actionQuadraticCurve(
       weight,
       scale
     )
-    vectorGuiState.px2 = state.cursorX
-    vectorGuiState.py2 = state.cursorY
+    state.vectorProperties.px2 = state.cursorX
+    state.vectorProperties.py2 = state.cursorY
   } else if (stepNum === 2) {
     // after defining x2y2, plot quad bezier with x3 and y3 arguments matching x2 and y2
     //onscreen preview curve
@@ -549,8 +586,8 @@ export function actionQuadraticCurve(
       currentMode,
       scale
     )
-    vectorGuiState.px3 = state.cursorX
-    vectorGuiState.py3 = state.cursorY
+    state.vectorProperties.px3 = state.cursorX
+    state.vectorProperties.py3 = state.cursorY
   } else if (stepNum === 3) {
     //curve after defining x3y3, plot quad bezier with x3 and y3 arguments matching x2 and y2
     let plotPoints = plotQuadBezier(
@@ -635,8 +672,9 @@ export function actionCubicCurve(
       weight,
       scale
     )
-    vectorGuiState.px2 = state.cursorX
-    vectorGuiState.py2 = state.cursorY
+    //TODO: can setting state be moved to steps function?
+    state.vectorProperties.px2 = state.cursorX
+    state.vectorProperties.py2 = state.cursorY
   } else if (stepNum === 2) {
     // after defining x2y2
     //onscreen preview curve
@@ -658,8 +696,8 @@ export function actionCubicCurve(
       currentMode,
       scale
     )
-    vectorGuiState.px3 = state.cursorX
-    vectorGuiState.py3 = state.cursorY
+    state.vectorProperties.px3 = state.cursorX
+    state.vectorProperties.py3 = state.cursorY
   } else if (stepNum === 3) {
     //curve after defining x3y3
     //onscreen preview curve
@@ -682,8 +720,8 @@ export function actionCubicCurve(
       currentMode,
       scale
     )
-    vectorGuiState.px4 = state.cursorX
-    vectorGuiState.py4 = state.cursorY
+    state.vectorProperties.px4 = state.cursorX
+    state.vectorProperties.py4 = state.cursorY
   } else if (stepNum === 4) {
     //curve after defining x4y4
     if (state.debugger) {

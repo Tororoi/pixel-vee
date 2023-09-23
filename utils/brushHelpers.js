@@ -1,10 +1,12 @@
 let brush = document.querySelector(".brush")
 
-export function drawRect(brushSize) {
+export function drawRect(brushSize, updateBrush = false) {
   let brushRects = []
-  brush.setAttribute("viewBox", `0 -0.5 ${brushSize} ${brushSize}`)
-  brush.style.width = brushSize * 2
-  brush.style.height = brushSize * 2
+  if (updateBrush) {
+    brush.setAttribute("viewBox", `0 -0.5 ${brushSize} ${brushSize}`)
+    brush.style.width = brushSize * 2
+    brush.style.height = brushSize * 2
+  }
   function makePathData(x, y, w) {
     return "M" + x + " " + y + "h" + w + ""
   }
@@ -24,12 +26,14 @@ export function drawRect(brushSize) {
     paths.push(makePathData(r.x, r.y, r.w))
   })
 
-  brush.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
-  brush.setAttribute("stroke-width", brushSize * 2)
+  if (updateBrush) {
+    brush.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
+    brush.setAttribute("stroke-width", brushSize * 2)
+  }
   return brushRects
 }
 
-export function drawCircle(brushSize) {
+export function drawCircle(brushSize, updateBrush = false) {
   // let brushPoints = [];
   let brushRects = []
   let r = Math.floor(brushSize / 2)
@@ -40,9 +44,11 @@ export function drawCircle(brushSize) {
   let xO = r,
     yO = r
 
-  brush.setAttribute("viewBox", `0 -0.5 ${brushSize} ${brushSize}`)
-  brush.style.width = brushSize * 2
-  brush.style.height = brushSize * 2
+  if (updateBrush) {
+    brush.setAttribute("viewBox", `0 -0.5 ${brushSize} ${brushSize}`)
+    brush.style.width = brushSize * 2
+    brush.style.height = brushSize * 2
+  }
   function makePathData(x, y, w) {
     return "M" + x + " " + y + "h" + w + ""
   }
@@ -83,7 +89,9 @@ export function drawCircle(brushSize) {
     paths.push(makePathData(r.x, r.y, r.w))
   })
 
-  brush.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
-  brush.setAttribute("stroke-width", 1)
+  if (updateBrush) {
+    brush.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
+    brush.setAttribute("stroke-width", 1)
+  }
   return brushRects
 }

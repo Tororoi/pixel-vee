@@ -117,20 +117,20 @@ function reorderElements(e) {
 
 //Drag
 export const dragStart = (e, dragTarget) => {
-  // if (!dragTarget.className.includes("locked")) {
-  e.target.setPointerCapture(e.pointerId)
-  state.dragging = true
-  state.dragTarget = dragTarget
-  if (state.dragTarget) {
-    state.dragTarget.classList.add("dragging")
-    state.dragX = e.clientX - state.dragTarget.offsetLeft
-    state.dragY = e.clientY - state.dragTarget.offsetTop
-    //push each element to state.dragSiblings with bounding box
-    if (!state.dragTarget.className.includes("h-drag")) {
-      setDragSiblings()
+  if (!dragTarget.className.includes("locked")) {
+    e.target.setPointerCapture(e.pointerId)
+    state.dragging = true
+    state.dragTarget = dragTarget
+    if (state.dragTarget) {
+      state.dragTarget.classList.add("dragging")
+      state.dragX = e.clientX - state.dragTarget.offsetLeft
+      state.dragY = e.clientY - state.dragTarget.offsetTop
+      //push each element to state.dragSiblings with bounding box
+      if (!state.dragTarget.className.includes("h-drag")) {
+        setDragSiblings()
+      }
     }
   }
-  //}
 }
 
 export const dragStop = (e) => {

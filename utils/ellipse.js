@@ -288,22 +288,24 @@ export function updateEllipseOffsets(
   py1,
   px2,
   py2,
+  forceCircle,
   angleOffset = 0
 ) {
-  state.angle = getAngle(px2 - px1, py2 - py1)
-  state.offset = findHalf(
+  state.vectorProperties.angle = getAngle(px2 - px1, py2 - py1)
+  state.vectorProperties.offset = findHalf(
     canvas.subPixelX,
     canvas.subPixelY,
-    state.angle + angleOffset
+    state.vectorProperties.angle + angleOffset
   )
   const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
-  while (state.angle < 0) {
-    state.angle += 2 * Math.PI
+  while (state.vectorProperties.angle < 0) {
+    state.vectorProperties.angle += 2 * Math.PI
   }
   // Determine the slice in which the angle exists
   let index =
     Math.floor(
-      (state.angle + angleOffset + Math.PI / 2 + Math.PI / 8) / (Math.PI / 4)
+      (state.vectorProperties.angle + angleOffset + Math.PI / 2 + Math.PI / 8) /
+        (Math.PI / 4)
     ) % 8
   let compassDir = directions[index]
   //based on direction update x and y offsets in state
@@ -311,38 +313,38 @@ export function updateEllipseOffsets(
   //Direction shrinks opposite side. eg. radius 7 goes from diameter 15 to diameter 14
   //gui element could 2 sliders, vertical and horizontal with 3 values each, offset -1, 0, 1 (right, none, left)
   //should only x1 and y1 offsets be available since they represent the center point being part of radius or not?
-  if (state.clickCounter === 1 || state.forceCircle) {
-    state.x1Offset = -state.offset
-    state.y1Offset = -state.offset
+  if (state.clickCounter === 1 || forceCircle) {
+    state.vectorProperties.x1Offset = -state.vectorProperties.offset
+    state.vectorProperties.y1Offset = -state.vectorProperties.offset
   } else {
     switch (compassDir) {
       case "N":
-        state.y1Offset = -state.offset
+        state.vectorProperties.y1Offset = -state.vectorProperties.offset
         break
       case "NE":
-        state.x1Offset = -state.offset
-        state.y1Offset = -state.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.offset
+        state.vectorProperties.y1Offset = -state.vectorProperties.offset
         break
       case "E":
-        state.x1Offset = -state.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.offset
         break
       case "SE":
-        state.x1Offset = -state.offset
-        state.y1Offset = -state.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.offset
+        state.vectorProperties.y1Offset = -state.vectorProperties.offset
         break
       case "S":
-        state.y1Offset = -state.offset
+        state.vectorProperties.y1Offset = -state.vectorProperties.offset
         break
       case "SW":
-        state.x1Offset = -state.offset
-        state.y1Offset = -state.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.offset
+        state.vectorProperties.y1Offset = -state.vectorProperties.offset
         break
       case "W":
-        state.x1Offset = -state.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.offset
         break
       case "NW":
-        state.x1Offset = -state.offset
-        state.y1Offset = -state.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.offset
+        state.vectorProperties.y1Offset = -state.vectorProperties.offset
         break
       default:
       //none
@@ -350,67 +352,67 @@ export function updateEllipseOffsets(
   }
 }
 
-export function updateEllipseControlPoints(state, canvas, vectorGuiState) {
-   let dxa = vectorGuiState.px2 - vectorGuiState.px1
-   let dya = vectorGuiState.py2 - vectorGuiState.py1
-   let dxb = vectorGuiState.px3 - vectorGuiState.px1
-   let dyb = vectorGuiState.py3 - vectorGuiState.py1
-   vectorGuiState[vectorGuiState.selectedPoint.xKey] = state.cursorX
-   vectorGuiState[vectorGuiState.selectedPoint.yKey] = state.cursorY
-  if (vectorGuiState.selectedPoint.xKey === "px1") {
-    vectorGuiState.px2 = vectorGuiState.px1 + dxa
-    vectorGuiState.py2 = vectorGuiState.py1 + dya
-    vectorGuiState.px3 = vectorGuiState.px1 + dxb
-    vectorGuiState.py3 = vectorGuiState.py1 + dyb
-  } else if (vectorGuiState.selectedPoint.xKey === "px2") {
-    vectorGuiState.radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
-    if (state.forceCircle) {
-      vectorGuiState.radB = vectorGuiState.radA
+export function updateEllipseControlPoints(state, canvas, vectorGui) {
+  let dxa = state.vectorProperties.px2 - state.vectorProperties.px1
+  let dya = state.vectorProperties.py2 - state.vectorProperties.py1
+  let dxb = state.vectorProperties.px3 - state.vectorProperties.px1
+  let dyb = state.vectorProperties.py3 - state.vectorProperties.py1
+  state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
+  state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
+  if (vectorGui.selectedPoint.xKey === "px1") {
+    state.vectorProperties.px2 = state.vectorProperties.px1 + dxa
+    state.vectorProperties.py2 = state.vectorProperties.py1 + dya
+    state.vectorProperties.px3 = state.vectorProperties.px1 + dxb
+    state.vectorProperties.py3 = state.vectorProperties.py1 + dyb
+  } else if (vectorGui.selectedPoint.xKey === "px2") {
+    state.vectorProperties.radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
+    if (state.vectorProperties.forceCircle) {
+      state.vectorProperties.radB = state.vectorProperties.radA
     }
     let newVertex = updateEllipseVertex(
-      vectorGuiState.px1,
-      vectorGuiState.py1,
-      vectorGuiState.px2,
-      vectorGuiState.py2,
+      state.vectorProperties.px1,
+      state.vectorProperties.py1,
+      state.vectorProperties.px2,
+      state.vectorProperties.py2,
       -Math.PI / 2,
-      vectorGuiState.radB
+      state.vectorProperties.radB
     )
-    vectorGuiState.px3 = newVertex.x
-    vectorGuiState.py3 = newVertex.y
-    state.angleOffset = 0
+    state.vectorProperties.px3 = newVertex.x
+    state.vectorProperties.py3 = newVertex.y
     updateEllipseOffsets(
       state,
       canvas,
-      vectorGuiState.px1,
-      vectorGuiState.py1,
-      vectorGuiState.px2,
-      vectorGuiState.py2,
-      state.angleOffset
+      state.vectorProperties.px1,
+      state.vectorProperties.py1,
+      state.vectorProperties.px2,
+      state.vectorProperties.py2,
+      state.vectorProperties.forceCircle,
+      0
     )
-  } else if (vectorGuiState.selectedPoint.xKey === "px3") {
-    vectorGuiState.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
-    if (state.forceCircle) {
-      vectorGuiState.radA = vectorGuiState.radB
+  } else if (vectorGui.selectedPoint.xKey === "px3") {
+    state.vectorProperties.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
+    if (state.vectorProperties.forceCircle) {
+      state.vectorProperties.radA = state.vectorProperties.radB
     }
     let newVertex = updateEllipseVertex(
-      vectorGuiState.px1,
-      vectorGuiState.py1,
-      vectorGuiState.px3,
-      vectorGuiState.py3,
+      state.vectorProperties.px1,
+      state.vectorProperties.py1,
+      state.vectorProperties.px3,
+      state.vectorProperties.py3,
       Math.PI / 2,
-      vectorGuiState.radA
+      state.vectorProperties.radA
     )
-    vectorGuiState.px2 = newVertex.x
-    vectorGuiState.py2 = newVertex.y
-    state.angleOffset = 1.5 * Math.PI
+    state.vectorProperties.px2 = newVertex.x
+    state.vectorProperties.py2 = newVertex.y
     updateEllipseOffsets(
       state,
       canvas,
-      vectorGuiState.px1,
-      vectorGuiState.py1,
-      vectorGuiState.px2,
-      vectorGuiState.py2,
-      state.angleOffset
+      state.vectorProperties.px1,
+      state.vectorProperties.py1,
+      state.vectorProperties.px2,
+      state.vectorProperties.py2,
+      state.vectorProperties.forceCircle,
+      1.5 * Math.PI
     )
   }
 }

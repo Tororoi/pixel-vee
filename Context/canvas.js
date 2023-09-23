@@ -11,7 +11,7 @@ import {
 } from "../Tools/actions.js"
 import { tools } from "../Tools/index.js"
 import { getAngle } from "../utils/trig.js"
-import { vectorGuiState, renderVectorGUI } from "../GUI/vector.js"
+import { vectorGui } from "../GUI/vector.js"
 import { colorPickerContainer } from "./swatch.js"
 
 //===================================//
@@ -290,7 +290,7 @@ const resizeOffScreenCanvas = (width, height) => {
   })
   canvas.redrawPoints()
   canvas.draw()
-  renderVectorGUI(state, canvas)
+  vectorGui.render(state, canvas)
 }
 
 const handleDimensionsSubmit = (e) => {
@@ -398,6 +398,9 @@ function redrawPoints(index = null) {
     i++
     action.forEach((p) => {
       switch (p.tool.name) {
+        case "modify":
+          //do nothing
+          break
         case "addLayer":
           p.layer.removed = false
           canvas.renderLayersToDOM()
@@ -415,14 +418,20 @@ function redrawPoints(index = null) {
           if (p.hidden) {
             break
           }
-          actionFill(p.x.px1, p.y.py1, p.color, p.layer.ctx, p.mode)
+          actionFill(
+            p.properties.px1,
+            p.properties.py1,
+            p.color,
+            p.layer.ctx,
+            p.mode
+          )
           break
         case "line":
           actionLine(
-            p.x.px1,
-            p.y.py1,
-            p.x.px2,
-            p.y.py2,
+            p.properties.px1,
+            p.properties.py1,
+            p.properties.px2,
+            p.properties.py2,
             p.color,
             p.layer.ctx,
             p.mode,
@@ -435,12 +444,12 @@ function redrawPoints(index = null) {
             break
           }
           actionQuadraticCurve(
-            p.x.px1,
-            p.y.py1,
-            p.x.px2,
-            p.y.py2,
-            p.x.px3,
-            p.y.py3,
+            p.properties.px1,
+            p.properties.py1,
+            p.properties.px2,
+            p.properties.py2,
+            p.properties.px3,
+            p.properties.py3,
             3,
             p.color,
             p.layer.ctx,
@@ -455,14 +464,14 @@ function redrawPoints(index = null) {
           }
           //TODO: pass source on history objects to avoid debugging actions from the timeline unless desired
           actionCubicCurve(
-            p.x.px1,
-            p.y.py1,
-            p.x.px2,
-            p.y.py2,
-            p.x.px3,
-            p.y.py3,
-            p.x.px4,
-            p.y.py4,
+            p.properties.px1,
+            p.properties.py1,
+            p.properties.px2,
+            p.properties.py2,
+            p.properties.px3,
+            p.properties.py3,
+            p.properties.px4,
+            p.properties.py4,
             4,
             p.color,
             p.layer.ctx,
@@ -476,12 +485,12 @@ function redrawPoints(index = null) {
             break
           }
           actionEllipse(
-            p.x.px1,
-            p.y.py1,
-            p.x.px2,
-            p.y.py2,
-            p.x.px3,
-            p.y.py3,
+            p.properties.px1,
+            p.properties.py1,
+            p.properties.px2,
+            p.properties.py2,
+            p.properties.px3,
+            p.properties.py3,
             p.properties.radA,
             p.properties.radB,
             p.properties.forceCircle,
@@ -498,22 +507,18 @@ function redrawPoints(index = null) {
           )
           break
         case "replace":
-          //TODO IMPORTANT: drawing an image is not compatible with vector concept.
-          //Any previous vectors would be fully rasterized.
-          //Even if image only depicts replaced pixels, those that were replaced cannot be moved.
-          //Tool needs to be reworked for only raster and force users to convert vectors to raster before using replace tool on them.
-          // For example, the program would assemble the canvas without vector renders and replacing black with teal would succeed on raster pixels.
-          //Then, any vector pixels on top of replaced pixels would be still rendered in black.
+          //IMPORTANT:
+          //Any replaced pixels over previous vectors would be fully rasterized.
+          //Even if image only depicts replaced pixels, those that were replaced cannot be moved if they were part of a vector.
           //maybe a separate tool could exist for replacing vector pixels as a modification of one vector, as if the vector's render acts as a mask.
           //maybe collision detection could be used somehow? probably expensive.
-          // p.layer.ctx.drawImage(
-          //   p.properties.image,
-          //   0,
-          //   0,
-          //   p.properties.width,
-          //   p.properties.height
-          // )
-          //DEPRECATED 9/21/23 - TODO: Document non render tools such as replace and others
+          p.layer.ctx.drawImage(
+            p.properties.image,
+            0,
+            0,
+            p.properties.width,
+            p.properties.height
+          )
           break
         default:
           actionDraw(p.x, p.y, p.color, p.brush, p.weight, p.layer.ctx, p.mode)
@@ -812,31 +817,13 @@ function vectorInteract(e) {
     //switch tool
     handleTools(null, vector.tool.name)
     //select current vector
-    //TODO: modify object structure of states to match object in undoStack to make assignment simpler like vectorGuiState.x = {...vector.x}
-    vectorGuiState.reset(canvas)
-    vectorGuiState.px1 = vector.x.px1
-    vectorGuiState.py1 = vector.y.py1
-    vectorGuiState.px2 = vector.x.px2
-    vectorGuiState.py2 = vector.y.py2
-    vectorGuiState.px3 = vector.x.px3
-    vectorGuiState.py3 = vector.y.py3
-    vectorGuiState.px4 = vector.x.px4
-    vectorGuiState.py4 = vector.y.py4
-    vectorGuiState.radA = vector.properties?.radA
-    vectorGuiState.radB = vector.properties?.radB
-    // if (vector.type === "raster") {
+    //TODO: modify object structure of states to match object in undoStack to make assignment simpler like vectorGui.x = {...vector.x}
+    vectorGui.reset(canvas)
+    state.vectorProperties = { ...vector.properties }
     canvas.currentVectorIndex = vector.index
-    state.angle = vector.properties?.angle
-    state.angleOffset = 0
-    state.x1Offset = vector.properties?.x1Offset
-    state.y1Offset = vector.properties?.y1Offset
-    state.offset = vector.properties?.offset
-    renderVectorGUI(state, canvas)
-    //BUG: renderVectorsToDOM resets scroll, so figure out way to only modify existing DOM. Layers doesn't do this, why?
+    vectorGui.render(state, canvas)
     renderVectorsToDOM()
-    // }
   }
-  // canvas.draw()
 }
 
 function renderVectorsToDOM() {
@@ -867,39 +854,48 @@ function renderVectorsToDOM() {
       // thumbnailCTX.strokeStyle = p.color.color
       canvas.thumbnailCTX.strokeStyle = "black"
       canvas.thumbnailCTX.beginPath()
-      //TODO: line tool and fill tool to be added as vectors. Behavior of replace tool is like a mask, so the replaced pixels are static coordinates.
+      //TODO: line tool to be added as vectors. Behavior of replace tool is like a mask, so the replaced pixels are static coordinates.
       if (p.tool.name === "fill") {
         canvas.thumbnailCTX.arc(
-          minD * p.x.px1 + 0.5,
-          minD * p.y.py1 + 0.5,
+          minD * p.properties.px1 + 0.5,
+          minD * p.properties.py1 + 0.5,
           1,
           0,
           2 * Math.PI,
           true
         )
       } else if (p.tool.name === "quadCurve") {
-        canvas.thumbnailCTX.moveTo(minD * p.x.px1 + 0.5, minD * p.y.py1 + 0.5)
+        canvas.thumbnailCTX.moveTo(
+          minD * p.properties.px1 + 0.5,
+          minD * p.properties.py1 + 0.5
+        )
         canvas.thumbnailCTX.quadraticCurveTo(
-          minD * p.x.px3 + 0.5,
-          minD * p.y.py3 + 0.5,
-          minD * p.x.px2 + 0.5,
-          minD * p.y.py2 + 0.5
+          minD * p.properties.px3 + 0.5,
+          minD * p.properties.py3 + 0.5,
+          minD * p.properties.px2 + 0.5,
+          minD * p.properties.py2 + 0.5
         )
       } else if (p.tool.name === "cubicCurve") {
-        canvas.thumbnailCTX.moveTo(minD * p.x.px1 + 0.5, minD * p.y.py1 + 0.5)
+        canvas.thumbnailCTX.moveTo(
+          minD * p.properties.px1 + 0.5,
+          minD * p.properties.py1 + 0.5
+        )
         canvas.thumbnailCTX.bezierCurveTo(
-          minD * p.x.px3 + 0.5,
-          minD * p.y.py3 + 0.5,
-          minD * p.x.px4 + 0.5,
-          minD * p.y.py4 + 0.5,
-          minD * p.x.px2 + 0.5,
-          minD * p.y.py2 + 0.5
+          minD * p.properties.px3 + 0.5,
+          minD * p.properties.py3 + 0.5,
+          minD * p.properties.px4 + 0.5,
+          minD * p.properties.py4 + 0.5,
+          minD * p.properties.px2 + 0.5,
+          minD * p.properties.py2 + 0.5
         )
       } else if (p.tool.name === "ellipse") {
-        let angle = getAngle(p.x.px2 - p.x.px1, p.y.py2 - p.y.py1)
+        let angle = getAngle(
+          p.properties.px2 - p.properties.px1,
+          p.properties.py2 - p.properties.py1
+        )
         canvas.thumbnailCTX.ellipse(
-          minD * p.x.px1,
-          minD * p.y.py1,
+          minD * p.properties.px1,
+          minD * p.properties.py1,
           minD * p.properties.radA,
           minD * p.properties.radB,
           angle,
