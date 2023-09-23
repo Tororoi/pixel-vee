@@ -122,15 +122,6 @@ function addToTimeline(actionObject) {
 }
 
 function reset() {
-  state.vectorProperties.px1 = null
-  state.vectorProperties.py1 = null
-  state.vectorProperties.px2 = null
-  state.vectorProperties.py2 = null
-  state.vectorProperties.px3 = null
-  state.vectorProperties.py3 = null
-  state.vectorProperties.px4 = null
-  state.vectorProperties.py4 = null
-  state.vectorProperties.radA = null
-  state.vectorProperties.radB = null
   state.clickCounter = 0
+  state.vectorProperties.forceCircle = false
 }

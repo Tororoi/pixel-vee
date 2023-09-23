@@ -633,12 +633,20 @@ function handleZoom(e) {
 function handleUndo() {
   //length 1 prevents initial layer from being undone
   if (state.undoStack.length > 1) {
-    //1. check (undoneAction) state.undoStack[state.undoStack.length][0].tool.name === "modify"
-    //2. if true, set state.undoStack[undoneAction.properties.moddedActionIndex][0] = undoneAction.properties.from
+    vectorGuiState.reset(canvas)
     let undoneAction = state.undoStack[state.undoStack.length - 1][0]
     if (undoneAction.tool.name === "modify") {
       state.undoStack[undoneAction.properties.moddedActionIndex][0].properties =
         { ...undoneAction.properties.from }
+      if (
+        state.tool.name ===
+        state.undoStack[undoneAction.properties.moddedActionIndex][0].tool.name
+      ) {
+        state.vectorProperties = { ...undoneAction.properties.from }
+        canvas.currentVectorIndex =
+          state.undoStack[undoneAction.properties.moddedActionIndex][0].index
+        renderVectorGUI(state, canvas)
+      }
     }
     actionUndoRedo(state.redoStack, state.undoStack)
   }
@@ -646,12 +654,20 @@ function handleUndo() {
 
 function handleRedo() {
   if (state.redoStack.length >= 1) {
-    //1. check (redoneAction) state.redoStack[state.redoStack.length][0].tool.name === "modify"
-    //2. if true, set state.undoStack[redoneAction.properties.moddedActionIndex][0] = redoneAction.properties.to
+    vectorGuiState.reset(canvas)
     let redoneAction = state.redoStack[state.redoStack.length - 1][0]
     if (redoneAction.tool.name === "modify") {
       state.undoStack[redoneAction.properties.moddedActionIndex][0].properties =
         { ...redoneAction.properties.to }
+      if (
+        state.tool.name ===
+        state.undoStack[redoneAction.properties.moddedActionIndex][0].tool.name
+      ) {
+        state.vectorProperties = { ...redoneAction.properties.to }
+        canvas.currentVectorIndex =
+          state.undoStack[redoneAction.properties.moddedActionIndex][0].index
+        renderVectorGUI(state, canvas)
+      }
     }
     actionUndoRedo(state.undoStack, state.redoStack)
   }

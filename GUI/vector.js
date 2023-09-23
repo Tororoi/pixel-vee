@@ -89,7 +89,7 @@ function renderFillVector(canvas) {
   canvas.vectorGuiCTX.fill()
 }
 
-function renderEllipseVector(canvas, vectorGuiState, color = "white") {
+function renderEllipseVector(canvas, color = "white") {
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
   canvas.vectorGuiCTX.lineWidth = lineWidth
@@ -150,12 +150,7 @@ function renderEllipseVector(canvas, vectorGuiState, color = "white") {
   canvas.vectorGuiCTX.fill()
 }
 
-function renderOffsetEllipseVector(
-  state,
-  canvas,
-  vectorGuiState,
-  color = "red"
-) {
+function renderOffsetEllipseVector(state, canvas, color = "red") {
   let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
   canvas.vectorGuiCTX.strokeStyle = color
   canvas.vectorGuiCTX.fillStyle = color
@@ -234,7 +229,7 @@ function renderOffsetEllipseVector(
   canvas.vectorGuiCTX.setLineDash([])
 }
 
-function renderCurveVector(canvas, vectorGuiState) {
+function renderCurveVector(canvas) {
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
   canvas.vectorGuiCTX.lineWidth = lineWidth
@@ -414,12 +409,15 @@ export function renderVectorGUI(state, canvas) {
       state.tool.name === "quadCurve" ||
       state.tool.name === "cubicCurve"
     ) {
-      renderCurveVector(canvas, vectorGuiState)
+      renderCurveVector(canvas)
     } else if (state.tool.name === "ellipse") {
-      renderEllipseVector(canvas, vectorGuiState)
+      renderEllipseVector(canvas)
       if (state.vectorProperties.x1Offset || state.vectorProperties.y1Offset) {
-        let color = !state.x1Offset && !state.y1Offset ? "white" : "red"
-        renderOffsetEllipseVector(state, canvas, vectorGuiState, color)
+        let color =
+          !state.vectorProperties.x1Offset && !state.vectorProperties.y1Offset
+            ? "white"
+            : "red"
+        renderOffsetEllipseVector(state, canvas, color)
       }
     }
   }

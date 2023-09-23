@@ -371,13 +371,27 @@ export function adjustFillSteps() {
           state.cursorX
         state.vectorProperties[vectorGuiState.selectedPoint.yKey] =
           state.cursorY
-        state.undoStack[canvas.currentVectorIndex][0].properties[
-          vectorGuiState.selectedPoint.xKey
-        ] = state.cursorX
-        state.undoStack[canvas.currentVectorIndex][0].properties[
-          vectorGuiState.selectedPoint.yKey
-        ] = state.cursorY
         state.undoStack[canvas.currentVectorIndex][0].hidden = false
+        let oldProperties = {
+          ...state.undoStack[canvas.currentVectorIndex][0].properties,
+        } //shallow copy, properties must not contain any objects or references as values
+        let modifiedProperties = {
+          ...state.undoStack[canvas.currentVectorIndex][0].properties,
+        } //shallow copy, must make deep copy, at least for x, y and properties
+        modifiedProperties = { ...state.vectorProperties }
+        state.addToTimeline({
+          tool: tools.modify,
+          layer: canvas.currentLayer,
+          properties: {
+            //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
+            moddedActionIndex: canvas.currentVectorIndex,
+            from: oldProperties,
+            to: modifiedProperties,
+          },
+        })
+        state.undoStack[canvas.currentVectorIndex][0].properties = {
+          ...modifiedProperties,
+        }
         vectorGuiState.selectedPoint = {
           xKey: null,
           yKey: null,
@@ -843,13 +857,27 @@ export function adjustCurveSteps(numPoints = 4) {
           state.cursorX
         state.vectorProperties[vectorGuiState.selectedPoint.yKey] =
           state.cursorY
-        state.undoStack[canvas.currentVectorIndex][0].properties[
-          vectorGuiState.selectedPoint.xKey
-        ] = state.cursorX
-        state.undoStack[canvas.currentVectorIndex][0].properties[
-          vectorGuiState.selectedPoint.yKey
-        ] = state.cursorY
         state.undoStack[canvas.currentVectorIndex][0].hidden = false
+        let oldProperties = {
+          ...state.undoStack[canvas.currentVectorIndex][0].properties,
+        } //shallow copy, properties must not contain any objects or references as values
+        let modifiedProperties = {
+          ...state.undoStack[canvas.currentVectorIndex][0].properties,
+        } //shallow copy, must make deep copy, at least for x, y and properties
+        modifiedProperties = { ...state.vectorProperties }
+        state.addToTimeline({
+          tool: tools.modify,
+          layer: canvas.currentLayer,
+          properties: {
+            //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
+            moddedActionIndex: canvas.currentVectorIndex,
+            from: oldProperties,
+            to: modifiedProperties,
+          },
+        })
+        state.undoStack[canvas.currentVectorIndex][0].properties = {
+          ...modifiedProperties,
+        }
         vectorGuiState.selectedPoint = {
           xKey: null,
           yKey: null,
@@ -1104,7 +1132,8 @@ export function ellipseSteps() {
             },
           })
           state.clickCounter = 0
-          //reset vector state
+          //reset vector state TODO: forceCircle needs to be reset
+          state.vectorProperties.forceCircle = false
           canvas.draw()
           renderRasterGUI(state, canvas, swatches)
           renderVectorGUI(state, canvas)
@@ -1147,7 +1176,7 @@ export function adjustEllipseSteps() {
         // let action = state.undoStack[canvas.currentVectorIndex]
         state.undoStack[canvas.currentVectorIndex][0].hidden = true
         canvas.render()
-        //angle and offset passed should consider which point is being adjusted. For p1, use current state.offset instead of recalculating. For p3, add 1.5 * Math.PI to angle
+        //angle and offset passed should consider which point is being adjusted. For p1, use current state.vectorProperties.offset instead of recalculating. For p3, add 1.5 * Math.PI to angle
         actionEllipse(
           state.vectorProperties.px1 + canvas.xOffset,
           state.vectorProperties.py1 + canvas.yOffset,
