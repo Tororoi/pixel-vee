@@ -11,7 +11,7 @@ import {
 } from "../Tools/actions.js"
 import { tools } from "../Tools/index.js"
 import { getAngle } from "../utils/trig.js"
-import { vectorGuiState, renderVectorGUI } from "../GUI/vector.js"
+import { vectorGui } from "../GUI/vector.js"
 import { colorPickerContainer } from "./swatch.js"
 
 //===================================//
@@ -290,7 +290,7 @@ const resizeOffScreenCanvas = (width, height) => {
   })
   canvas.redrawPoints()
   canvas.draw()
-  renderVectorGUI(state, canvas)
+  vectorGui.render(state, canvas)
 }
 
 const handleDimensionsSubmit = (e) => {
@@ -817,11 +817,11 @@ function vectorInteract(e) {
     //switch tool
     handleTools(null, vector.tool.name)
     //select current vector
-    //TODO: modify object structure of states to match object in undoStack to make assignment simpler like vectorGuiState.x = {...vector.x}
-    vectorGuiState.reset(canvas)
+    //TODO: modify object structure of states to match object in undoStack to make assignment simpler like vectorGui.x = {...vector.x}
+    vectorGui.reset(canvas)
     state.vectorProperties = { ...vector.properties }
     canvas.currentVectorIndex = vector.index
-    renderVectorGUI(state, canvas)
+    vectorGui.render(state, canvas)
     renderVectorsToDOM()
   }
 }

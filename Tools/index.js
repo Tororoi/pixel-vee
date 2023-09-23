@@ -12,7 +12,7 @@ import {
   actionEllipse,
 } from "./actions.js"
 import { getAngle } from "../utils/trig.js"
-import { vectorGuiState, renderVectorGUI } from "../GUI/vector.js"
+import { vectorGui } from "../GUI/vector.js"
 import {
   renderCursor,
   drawCurrentPixel,
@@ -287,7 +287,7 @@ export function lineSteps() {
 export function fillSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (vectorGuiState.collisionPresent) {
+      if (vectorGui.collisionPresent) {
         adjustFillSteps()
       } else {
         state.vectorProperties.px1 = state.cursorX
@@ -312,11 +312,11 @@ export function fillSteps() {
       }
       break
     case "pointermove":
-      if (vectorGuiState.selectedPoint.xKey) {
+      if (vectorGui.selectedPoint.xKey) {
         adjustFillSteps()
       }
     case "pointerup":
-      if (vectorGuiState.selectedPoint.xKey) {
+      if (vectorGui.selectedPoint.xKey) {
         adjustFillSteps()
       }
       //redraw canvas to allow onscreen cursor to render
@@ -339,12 +339,12 @@ export function adjustFillSteps() {
   //this routine would be better for touchscreens, and no worse with pointer
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (vectorGuiState.collisionPresent) {
-        state.vectorProperties[vectorGuiState.collidedKeys.xKey] = state.cursorX
-        state.vectorProperties[vectorGuiState.collidedKeys.yKey] = state.cursorY
-        vectorGuiState.selectedPoint = {
-          xKey: vectorGuiState.collidedKeys.xKey,
-          yKey: vectorGuiState.collidedKeys.yKey,
+      if (vectorGui.collisionPresent) {
+        state.vectorProperties[vectorGui.collidedKeys.xKey] = state.cursorX
+        state.vectorProperties[vectorGui.collidedKeys.yKey] = state.cursorY
+        vectorGui.selectedPoint = {
+          xKey: vectorGui.collidedKeys.xKey,
+          yKey: vectorGui.collidedKeys.yKey,
         }
         state.undoStack[canvas.currentVectorIndex][0].hidden = true
         //Only render canvas up to timeline where fill action exists while adjusting fill
@@ -352,25 +352,21 @@ export function adjustFillSteps() {
       }
       break
     case "pointermove":
-      if (vectorGuiState.selectedPoint.xKey) {
+      if (vectorGui.selectedPoint.xKey) {
         if (
           state.onscreenX !== state.previousOnscreenX ||
           state.onscreenY !== state.previousOnscreenY
         ) {
           //code gets past check twice here so figure out where tool fn is being called again
-          state.vectorProperties[vectorGuiState.selectedPoint.xKey] =
-            state.cursorX
-          state.vectorProperties[vectorGuiState.selectedPoint.yKey] =
-            state.cursorY
+          state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
+          state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         }
       }
       break
     case "pointerup":
-      if (vectorGuiState.selectedPoint.xKey) {
-        state.vectorProperties[vectorGuiState.selectedPoint.xKey] =
-          state.cursorX
-        state.vectorProperties[vectorGuiState.selectedPoint.yKey] =
-          state.cursorY
+      if (vectorGui.selectedPoint.xKey) {
+        state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
+        state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         state.undoStack[canvas.currentVectorIndex][0].hidden = false
         let oldProperties = {
           ...state.undoStack[canvas.currentVectorIndex][0].properties,
@@ -392,7 +388,7 @@ export function adjustFillSteps() {
         state.undoStack[canvas.currentVectorIndex][0].properties = {
           ...modifiedProperties,
         }
-        vectorGuiState.selectedPoint = {
+        vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
@@ -400,8 +396,8 @@ export function adjustFillSteps() {
       }
       break
     case "pointerout":
-      if (vectorGuiState.selectedPoint.xKey) {
-        vectorGuiState.selectedPoint = {
+      if (vectorGui.selectedPoint.xKey) {
+        vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
@@ -422,7 +418,7 @@ export function quadCurveSteps() {
   //this routine would be better for touchscreens, and no worse with pointer
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (vectorGuiState.collisionPresent && state.clickCounter === 0) {
+      if (vectorGui.collisionPresent && state.clickCounter === 0) {
         adjustCurveSteps(3)
       } else {
         //solidify end points
@@ -472,7 +468,7 @@ export function quadCurveSteps() {
       }
       break
     case "pointermove":
-      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+      if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         adjustCurveSteps(3)
       } else {
         //draw line from origin point to current point onscreen
@@ -509,7 +505,7 @@ export function quadCurveSteps() {
       }
       break
     case "pointerup":
-      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+      if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         adjustCurveSteps(3)
       } else {
         //For touchscreens
@@ -560,7 +556,7 @@ export function quadCurveSteps() {
       }
       break
     case "pointerout":
-      if (vectorGuiState.selectedPoint.xKey) {
+      if (vectorGui.selectedPoint.xKey) {
         adjustCurveSteps(3)
       }
       //cancel curve
@@ -581,7 +577,7 @@ export function cubicCurveSteps() {
   //this routine would be better for touchscreens, and no worse with pointer
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (vectorGuiState.collisionPresent && state.clickCounter === 0) {
+      if (vectorGui.collisionPresent && state.clickCounter === 0) {
         adjustCurveSteps()
       } else {
         //solidify end points
@@ -639,7 +635,7 @@ export function cubicCurveSteps() {
       }
       break
     case "pointermove":
-      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+      if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         adjustCurveSteps()
       } else {
         //draw line from origin point to current point onscreen
@@ -677,7 +673,7 @@ export function cubicCurveSteps() {
       }
       break
     case "pointerup":
-      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+      if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         adjustCurveSteps()
       } else {
         //For touchscreens
@@ -735,12 +731,12 @@ export function cubicCurveSteps() {
           }
           canvas.draw()
           renderRasterGUI(state, canvas, swatches)
-          renderVectorGUI(state, canvas)
+          vectorGui.render(state, canvas)
         }
       }
       break
     case "pointerout":
-      if (vectorGuiState.selectedPoint.xKey) {
+      if (vectorGui.selectedPoint.xKey) {
         adjustCurveSteps()
       }
       //cancel curve
@@ -765,12 +761,12 @@ export function adjustCurveSteps(numPoints = 4) {
   //this routine would be better for touchscreens, and no worse with pointer
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (vectorGuiState.collisionPresent && state.clickCounter === 0) {
-        state.vectorProperties[vectorGuiState.collidedKeys.xKey] = state.cursorX
-        state.vectorProperties[vectorGuiState.collidedKeys.yKey] = state.cursorY
-        vectorGuiState.selectedPoint = {
-          xKey: vectorGuiState.collidedKeys.xKey,
-          yKey: vectorGuiState.collidedKeys.yKey,
+      if (vectorGui.collisionPresent && state.clickCounter === 0) {
+        state.vectorProperties[vectorGui.collidedKeys.xKey] = state.cursorX
+        state.vectorProperties[vectorGui.collidedKeys.yKey] = state.cursorY
+        vectorGui.selectedPoint = {
+          xKey: vectorGui.collidedKeys.xKey,
+          yKey: vectorGui.collidedKeys.yKey,
         }
         state.undoStack[canvas.currentVectorIndex][0].hidden = true
         canvas.render()
@@ -810,11 +806,9 @@ export function adjustCurveSteps(numPoints = 4) {
       }
       break
     case "pointermove":
-      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
-        state.vectorProperties[vectorGuiState.selectedPoint.xKey] =
-          state.cursorX
-        state.vectorProperties[vectorGuiState.selectedPoint.yKey] =
-          state.cursorY
+      if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
+        state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
+        state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         canvas.draw()
         if (numPoints === 3) {
           actionQuadraticCurve(
@@ -852,11 +846,9 @@ export function adjustCurveSteps(numPoints = 4) {
       }
       break
     case "pointerup":
-      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
-        state.vectorProperties[vectorGuiState.selectedPoint.xKey] =
-          state.cursorX
-        state.vectorProperties[vectorGuiState.selectedPoint.yKey] =
-          state.cursorY
+      if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
+        state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
+        state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         state.undoStack[canvas.currentVectorIndex][0].hidden = false
         let oldProperties = {
           ...state.undoStack[canvas.currentVectorIndex][0].properties,
@@ -878,7 +870,7 @@ export function adjustCurveSteps(numPoints = 4) {
         state.undoStack[canvas.currentVectorIndex][0].properties = {
           ...modifiedProperties,
         }
-        vectorGuiState.selectedPoint = {
+        vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
@@ -886,8 +878,8 @@ export function adjustCurveSteps(numPoints = 4) {
       }
       break
     case "pointerout":
-      if (vectorGuiState.selectedPoint.xKey) {
-        vectorGuiState.selectedPoint = {
+      if (vectorGui.selectedPoint.xKey) {
+        vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
@@ -909,7 +901,7 @@ export function ellipseSteps() {
   //this routine would be better for touchscreens, and no worse with pointer
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (vectorGuiState.collisionPresent && state.clickCounter === 0) {
+      if (vectorGui.collisionPresent && state.clickCounter === 0) {
         adjustEllipseSteps()
       } else {
         //solidify end points
@@ -943,7 +935,6 @@ export function ellipseSteps() {
           state.vectorProperties.radA = state.vectorProperties.radA
         }
         updateEllipseOffsets(
-          vectorGuiState,
           state,
           canvas,
           state.vectorProperties.px1,
@@ -982,7 +973,7 @@ export function ellipseSteps() {
       }
       break
     case "pointermove":
-      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+      if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         if (
           state.onscreenX + canvas.subPixelX !==
             state.previousOnscreenX + canvas.previousSubPixelX ||
@@ -1016,7 +1007,6 @@ export function ellipseSteps() {
             state.vectorProperties.radA = state.vectorProperties.radA
           }
           updateEllipseOffsets(
-            vectorGuiState,
             state,
             canvas,
             state.vectorProperties.px1,
@@ -1054,7 +1044,7 @@ export function ellipseSteps() {
       }
       break
     case "pointerup":
-      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+      if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         adjustEllipseSteps()
       } else {
         if (state.clickCounter === 1) {
@@ -1081,7 +1071,6 @@ export function ellipseSteps() {
             Math.sqrt(dxb * dxb + dyb * dyb)
           )
           updateEllipseOffsets(
-            vectorGuiState,
             state,
             canvas,
             state.vectorProperties.px1,
@@ -1136,12 +1125,12 @@ export function ellipseSteps() {
           state.vectorProperties.forceCircle = false
           canvas.draw()
           renderRasterGUI(state, canvas, swatches)
-          renderVectorGUI(state, canvas)
+          vectorGui.render(state, canvas)
         }
       }
       break
     case "pointerout":
-      if (vectorGuiState.selectedPoint.xKey) {
+      if (vectorGui.selectedPoint.xKey) {
         // adjustCurveSteps()
       }
       //cancel curve
@@ -1166,12 +1155,12 @@ export function adjustEllipseSteps() {
   //this routine would be better for touchscreens, and no worse with pointer
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (vectorGuiState.collisionPresent && state.clickCounter === 0) {
-        vectorGuiState.selectedPoint = {
-          xKey: vectorGuiState.collidedKeys.xKey,
-          yKey: vectorGuiState.collidedKeys.yKey,
+      if (vectorGui.collisionPresent && state.clickCounter === 0) {
+        vectorGui.selectedPoint = {
+          xKey: vectorGui.collidedKeys.xKey,
+          yKey: vectorGui.collidedKeys.yKey,
         }
-        updateEllipseControlPoints(state, canvas, vectorGuiState)
+        updateEllipseControlPoints(state, canvas, vectorGui)
         //TODO: changing opacity isn't enough since erase mode will be unaffected
         // let action = state.undoStack[canvas.currentVectorIndex]
         state.undoStack[canvas.currentVectorIndex][0].hidden = true
@@ -1186,7 +1175,7 @@ export function adjustEllipseSteps() {
           state.vectorProperties.py3 + canvas.yOffset,
           state.vectorProperties.radA,
           state.vectorProperties.radB,
-          vectorGuiState.selectedPoint.xKey === "px1"
+          vectorGui.selectedPoint.xKey === "px1"
             ? state.undoStack[canvas.currentVectorIndex][0].properties
                 .forceCircle
             : state.vectorProperties.forceCircle,
@@ -1204,8 +1193,8 @@ export function adjustEllipseSteps() {
       }
       break
     case "pointermove":
-      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
-        updateEllipseControlPoints(state, canvas, vectorGuiState)
+      if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
+        updateEllipseControlPoints(state, canvas, vectorGui)
         canvas.draw()
         actionEllipse(
           state.vectorProperties.px1 + canvas.xOffset,
@@ -1216,7 +1205,7 @@ export function adjustEllipseSteps() {
           state.vectorProperties.py3 + canvas.yOffset,
           state.vectorProperties.radA,
           state.vectorProperties.radB,
-          vectorGuiState.selectedPoint.xKey === "px1"
+          vectorGui.selectedPoint.xKey === "px1"
             ? state.undoStack[canvas.currentVectorIndex][0].properties
                 .forceCircle
             : state.vectorProperties.forceCircle,
@@ -1234,8 +1223,8 @@ export function adjustEllipseSteps() {
       }
       break
     case "pointerup":
-      if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
-        updateEllipseControlPoints(state, canvas, vectorGuiState)
+      if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
+        updateEllipseControlPoints(state, canvas, vectorGui)
         state.undoStack[canvas.currentVectorIndex][0].hidden = false
         let oldProperties = {
           ...state.undoStack[canvas.currentVectorIndex][0].properties,
@@ -1245,7 +1234,7 @@ export function adjustEllipseSteps() {
         } //shallow copy, must make deep copy, at least for x, y and properties
         modifiedProperties = { ...state.vectorProperties }
         modifiedProperties.forceCircle =
-          vectorGuiState.selectedPoint.xKey === "px1"
+          vectorGui.selectedPoint.xKey === "px1"
             ? modifiedProperties.forceCircle
             : state.vectorProperties.forceCircle
         state.addToTimeline({
@@ -1261,7 +1250,7 @@ export function adjustEllipseSteps() {
         state.undoStack[canvas.currentVectorIndex][0].properties = {
           ...modifiedProperties,
         }
-        vectorGuiState.selectedPoint = {
+        vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
@@ -1269,8 +1258,8 @@ export function adjustEllipseSteps() {
       }
       break
     case "pointerout":
-      if (vectorGuiState.selectedPoint.xKey) {
-        vectorGuiState.selectedPoint = {
+      if (vectorGui.selectedPoint.xKey) {
+        vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
@@ -1322,7 +1311,7 @@ export function eyedropperSteps() {
         sampleColor(state.cursorX, state.cursorY)
         //draw square
         renderRasterGUI(state, canvas, swatches)
-        renderVectorGUI(state, canvas)
+        vectorGui.render(state, canvas)
         renderCursor(state, canvas, swatches)
         state.previousOnscreenX = state.onscreenX
         state.previousOnscreenY = state.onscreenY

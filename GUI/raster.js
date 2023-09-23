@@ -1,5 +1,5 @@
 import { actionDraw } from "../Tools/actions.js"
-import { renderVectorGUI, drawCursorBox } from "./vector.js"
+import { vectorGui, drawCursorBox } from "./vector.js"
 
 //===========================================//
 //=== * * * Graphics User Interface * * * ===//

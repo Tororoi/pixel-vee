@@ -5,7 +5,7 @@ import { canvas, resizeOnScreenCanvas } from "../Context/canvas.js"
 import { swatches } from "./Context/swatch.js"
 import { tools, adjustEllipseSteps } from "./Tools/index.js"
 import { actionUndoRedo } from "./Tools/undoRedo.js"
-import { vectorGuiState, renderVectorGUI } from "./GUI/vector.js"
+import { vectorGui } from "./GUI/vector.js"
 import { renderCursor, renderRasterGUI } from "./GUI/raster.js"
 import { drawRect, drawCircle } from "./utils/brushHelpers.js"
 
@@ -144,7 +144,7 @@ gridBtn.addEventListener("click", (e) => {
   } else {
     state.grid = false
   }
-  renderVectorGUI(state, canvas)
+  vectorGui.render(state, canvas)
 })
 tooltipBtn.addEventListener("click", (e) => {
   if (tooltipBtn.checked) {
@@ -208,11 +208,11 @@ function handleKeyDown(e) {
           canvas.vectorGuiCVS.style.cursor = "none"
         } else if (toolBtn.id === "ellipse") {
           state.vectorProperties.forceCircle = true
-          if (vectorGuiState.selectedPoint.xKey && state.clickCounter === 0) {
+          if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
             //while holding control point, readjust ellipse without having to move cursor.
             //TODO: update this functionality to have other radii go back to previous radii when releasing shift
             adjustEllipseSteps()
-            renderVectorGUI(state, canvas)
+            vectorGui.render(state, canvas)
           }
         }
         break
@@ -375,7 +375,7 @@ function handlePointerDown(e) {
   }
   setCoordinates(e)
   // if (state.touch) {
-  renderVectorGUI(state, canvas) // For tablets, vectors must be rendered before running state.tool.fn in order to check control points collision logic
+  vectorGui.render(state, canvas) // For tablets, vectors must be rendered before running state.tool.fn in order to check control points collision logic
   // }
   canvas.draw()
   //Reset Cursor for mobile
@@ -395,7 +395,7 @@ function handlePointerDown(e) {
   state.tool.fn()
   //Re-render GUI
   renderRasterGUI(state, canvas, swatches)
-  renderVectorGUI(state, canvas)
+  vectorGui.render(state, canvas)
 }
 
 function handlePointerMove(e) {
@@ -412,7 +412,7 @@ function handlePointerMove(e) {
   state.onscreenX = state.cursorWithCanvasOffsetX
   state.onscreenY = state.cursorWithCanvasOffsetY
   renderRasterGUI(state, canvas, swatches)
-  renderVectorGUI(state, canvas)
+  vectorGui.render(state, canvas)
   if (
     state.clicked ||
     ((state.tool.name === "quadCurve" ||
@@ -487,7 +487,7 @@ function handlePointerUp(e) {
   canvas.pointerEvent = "none"
   if (!e.targetTouches) {
     renderRasterGUI(state, canvas, swatches)
-    renderVectorGUI(state, canvas)
+    vectorGui.render(state, canvas)
     renderCursor(state, canvas, swatches)
   }
 }
@@ -509,7 +509,7 @@ function handlePointerOut(e) {
   if (!state.touch) {
     canvas.draw()
     renderRasterGUI(state, canvas, swatches)
-    renderVectorGUI(state, canvas)
+    vectorGui.render(state, canvas)
     // canvas.draw()
     canvas.pointerEvent = "none"
   }
@@ -554,7 +554,7 @@ function zoomCanvas(z, xOriginOffset, yOriginOffset) {
   )
   canvas.draw()
   renderRasterGUI(state, canvas, swatches)
-  renderVectorGUI(state, canvas)
+  vectorGui.render(state, canvas)
 }
 
 function handleWheel(e) {
@@ -633,43 +633,13 @@ function handleZoom(e) {
 function handleUndo() {
   //length 1 prevents initial layer from being undone
   if (state.undoStack.length > 1) {
-    vectorGuiState.reset(canvas)
-    let undoneAction = state.undoStack[state.undoStack.length - 1][0]
-    if (undoneAction.tool.name === "modify") {
-      state.undoStack[undoneAction.properties.moddedActionIndex][0].properties =
-        { ...undoneAction.properties.from }
-      if (
-        state.tool.name ===
-        state.undoStack[undoneAction.properties.moddedActionIndex][0].tool.name
-      ) {
-        state.vectorProperties = { ...undoneAction.properties.from }
-        canvas.currentVectorIndex =
-          state.undoStack[undoneAction.properties.moddedActionIndex][0].index
-        renderVectorGUI(state, canvas)
-      }
-    }
-    actionUndoRedo(state.redoStack, state.undoStack)
+    actionUndoRedo(state.redoStack, state.undoStack, "from")
   }
 }
 
 function handleRedo() {
   if (state.redoStack.length >= 1) {
-    vectorGuiState.reset(canvas)
-    let redoneAction = state.redoStack[state.redoStack.length - 1][0]
-    if (redoneAction.tool.name === "modify") {
-      state.undoStack[redoneAction.properties.moddedActionIndex][0].properties =
-        { ...redoneAction.properties.to }
-      if (
-        state.tool.name ===
-        state.undoStack[redoneAction.properties.moddedActionIndex][0].tool.name
-      ) {
-        state.vectorProperties = { ...redoneAction.properties.to }
-        canvas.currentVectorIndex =
-          state.undoStack[redoneAction.properties.moddedActionIndex][0].index
-        renderVectorGUI(state, canvas)
-      }
-    }
-    actionUndoRedo(state.undoStack, state.redoStack)
+    actionUndoRedo(state.undoStack, state.redoStack, "to")
   }
 }
 
@@ -688,7 +658,7 @@ export function handleClear() {
     canvas.offScreenCVS.height
   )
   canvas.draw()
-  vectorGuiState.reset(canvas)
+  vectorGui.reset(canvas)
   state.reset()
 }
 
@@ -734,7 +704,7 @@ export function handleRecenter(e) {
   canvas.previousYOffset = canvas.yOffset
   canvas.draw()
   renderRasterGUI(state, canvas, swatches)
-  renderVectorGUI(state, canvas)
+  vectorGui.render(state, canvas)
 }
 
 export function handleTools(e, manualToolName = null) {
@@ -770,7 +740,7 @@ export function handleTools(e, manualToolName = null) {
         toolBtn.id === "line"
       ) {
         canvas.vectorGuiCVS.style.cursor = "crosshair"
-        vectorGuiState.reset(canvas)
+        vectorGui.reset(canvas)
         state.reset()
       } else {
         canvas.vectorGuiCVS.style.cursor = "none"

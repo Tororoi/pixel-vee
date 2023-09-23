@@ -5,7 +5,7 @@ import { tools } from "./index.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { generateRandomRGB } from "../utils/colors.js"
-import { vectorGuiState } from "../GUI/vector.js"
+import { vectorGui } from "../GUI/vector.js"
 import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
 import { drawRect, drawCircle } from "../utils/brushHelpers.js"
 

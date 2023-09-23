@@ -5,10 +5,11 @@ import { state } from "../Context/state.js"
 //==================================================//
 
 //Note: The Vector Graphics canvas has a mix-blend-mode: difference applied to it
-export const vectorGuiState = {
+export const vectorGui = {
   collidedKeys: { xKey: null, yKey: null },
   selectedPoint: { xKey: null, yKey: null },
   checkPointCollision,
+  render,
   reset,
 }
 //helper function. TODO: move to graphics helper file
@@ -308,8 +309,8 @@ function renderCurveVector(canvas) {
 
 function drawControlPoints(pointsKeys, canvas, radius, modify = false) {
   //reset collision
-  vectorGuiState.collisionPresent = false
-  vectorGuiState.collidedKeys = { xKey: null, yKey: null }
+  vectorGui.collisionPresent = false
+  vectorGui.collidedKeys = { xKey: null, yKey: null }
   for (let data of pointsKeys) {
     let point = {
       x: state.vectorProperties[data.x],
@@ -317,9 +318,9 @@ function drawControlPoints(pointsKeys, canvas, radius, modify = false) {
     }
     if (point.x !== null && point.y !== null) {
       let r = state.touch ? radius * 2 : radius
-      if (modify && vectorGuiState.selectedPoint.xKey === data.x) {
+      if (modify && vectorGui.selectedPoint.xKey === data.x) {
         r = radius * 2
-        vectorGuiState.collisionPresent = true
+        vectorGui.collisionPresent = true
       } else if (
         modify &&
         checkPointCollision(
@@ -331,14 +332,14 @@ function drawControlPoints(pointsKeys, canvas, radius, modify = false) {
         )
       ) {
         r = radius * 2
-        vectorGuiState.collisionPresent = true
-        vectorGuiState.collidedKeys.xKey = data.x
-        vectorGuiState.collidedKeys.yKey = data.y
+        vectorGui.collisionPresent = true
+        vectorGui.collidedKeys.xKey = data.x
+        vectorGui.collidedKeys.yKey = data.y
       }
       drawCirclePath(canvas, point.x, point.y, r)
     }
   }
-  if (vectorGuiState.collisionPresent) {
+  if (vectorGui.collisionPresent) {
     canvas.vectorGuiCVS.style.cursor = "move"
   } else {
     canvas.vectorGuiCVS.style.cursor = "crosshair"
@@ -381,7 +382,7 @@ export function reset(canvas) {
   }
   //reset selectedpoint and collided keys
   canvas.currentVectorIndex = null
-  renderVectorGUI(state, canvas)
+  vectorGui.render(state, canvas)
 }
 
 /**
@@ -389,7 +390,7 @@ export function reset(canvas) {
  * @param {*} state
  * @param {*} canvas
  */
-export function renderVectorGUI(state, canvas) {
+export function render(state, canvas) {
   canvas.vectorGuiCTX.clearRect(
     0,
     0,
