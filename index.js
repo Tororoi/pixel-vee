@@ -648,6 +648,7 @@ function handleRedo() {
 export function handleClear() {
   state.addToTimeline({ tool: tools.clear, layer: canvas.currentLayer })
   //FIX: restructure stacked items. Currently each is an array, but each should be an object with more info plus an array
+  //TODO: set all actions to hidden 
   state.undoStack.push(state.points)
   state.points = []
   state.redoStack = []
