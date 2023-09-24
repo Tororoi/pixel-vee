@@ -2,6 +2,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import {
+  modifyAction,
   actionDraw,
   actionLine,
   actionPerfectPixels,
@@ -244,8 +245,7 @@ export function lineSteps() {
           canvas.onScreenCTX,
           state.mode,
           state.brushStamp,
-          state.tool.brushSize,
-          canvas.offScreenCVS.width / canvas.offScreenCVS.width
+          state.tool.brushSize
         )
         state.previousOnscreenX = state.onscreenX
         state.previousOnscreenY = state.onscreenY
@@ -290,6 +290,8 @@ export function fillSteps() {
       if (vectorGui.collisionPresent) {
         adjustFillSteps()
       } else {
+        // //reset control points
+        // vectorGui.reset(canvas) - not really needed currently since fill only uses P1
         state.vectorProperties.px1 = state.cursorX
         state.vectorProperties.py1 = state.cursorY
         actionFill(
@@ -368,26 +370,7 @@ export function adjustFillSteps() {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         state.undoStack[canvas.currentVectorIndex][0].hidden = false
-        let oldProperties = {
-          ...state.undoStack[canvas.currentVectorIndex][0].properties,
-        } //shallow copy, properties must not contain any objects or references as values
-        let modifiedProperties = {
-          ...state.undoStack[canvas.currentVectorIndex][0].properties,
-        } //shallow copy, must make deep copy, at least for x, y and properties
-        modifiedProperties = { ...state.vectorProperties }
-        state.addToTimeline({
-          tool: tools.modify,
-          layer: canvas.currentLayer,
-          properties: {
-            //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-            moddedActionIndex: canvas.currentVectorIndex,
-            from: oldProperties,
-            to: modifiedProperties,
-          },
-        })
-        state.undoStack[canvas.currentVectorIndex][0].properties = {
-          ...modifiedProperties,
-        }
+        modifyAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
@@ -426,15 +409,10 @@ export function quadCurveSteps() {
         if (state.clickCounter > 3) state.clickCounter = 1
         switch (state.clickCounter) {
           case 1:
+            //reset control points
+            vectorGui.reset(canvas)
             state.vectorProperties.px1 = state.cursorX
             state.vectorProperties.py1 = state.cursorY
-            //reset control points
-            state.vectorProperties.px2 = null
-            state.vectorProperties.py2 = null
-            state.vectorProperties.px3 = null
-            state.vectorProperties.py3 = null
-            state.vectorProperties.px4 = null
-            state.vectorProperties.py4 = null
             break
           case 2:
             if (!state.touch) {
@@ -462,8 +440,7 @@ export function quadCurveSteps() {
           canvas.onScreenCTX,
           state.mode,
           state.brushStamp,
-          state.tool.brushSize,
-          canvas.offScreenCVS.width / canvas.offScreenCVS.width
+          state.tool.brushSize
         )
       }
       break
@@ -496,8 +473,7 @@ export function quadCurveSteps() {
             canvas.onScreenCTX,
             state.mode,
             state.brushStamp,
-            state.tool.brushSize,
-            canvas.offScreenCVS.width / canvas.offScreenCVS.width
+            state.tool.brushSize
           )
           state.previousOnscreenX = state.onscreenX
           state.previousOnscreenY = state.onscreenY
@@ -585,15 +561,10 @@ export function cubicCurveSteps() {
         if (state.clickCounter > 4) state.clickCounter = 1
         switch (state.clickCounter) {
           case 1:
+            //reset control points
+            vectorGui.reset(canvas)
             state.vectorProperties.px1 = state.cursorX
             state.vectorProperties.py1 = state.cursorY
-            //reset control points
-            state.vectorProperties.px2 = null
-            state.vectorProperties.py2 = null
-            state.vectorProperties.px3 = null
-            state.vectorProperties.py3 = null
-            state.vectorProperties.px4 = null
-            state.vectorProperties.py4 = null
             break
           case 2:
             if (!state.touch) {
@@ -629,8 +600,7 @@ export function cubicCurveSteps() {
           canvas.onScreenCTX,
           state.mode,
           state.brushStamp,
-          state.tool.brushSize,
-          canvas.offScreenCVS.width / canvas.offScreenCVS.width
+          state.tool.brushSize
         )
       }
       break
@@ -664,8 +634,7 @@ export function cubicCurveSteps() {
             canvas.onScreenCTX,
             state.mode,
             state.brushStamp,
-            state.tool.brushSize,
-            canvas.offScreenCVS.width / canvas.offScreenCVS.width
+            state.tool.brushSize
           )
           state.previousOnscreenX = state.onscreenX
           state.previousOnscreenY = state.onscreenY
@@ -850,26 +819,7 @@ export function adjustCurveSteps(numPoints = 4) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         state.undoStack[canvas.currentVectorIndex][0].hidden = false
-        let oldProperties = {
-          ...state.undoStack[canvas.currentVectorIndex][0].properties,
-        } //shallow copy, properties must not contain any objects or references as values
-        let modifiedProperties = {
-          ...state.undoStack[canvas.currentVectorIndex][0].properties,
-        } //shallow copy, must make deep copy, at least for x, y and properties
-        modifiedProperties = { ...state.vectorProperties }
-        state.addToTimeline({
-          tool: tools.modify,
-          layer: canvas.currentLayer,
-          properties: {
-            //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-            moddedActionIndex: canvas.currentVectorIndex,
-            from: oldProperties,
-            to: modifiedProperties,
-          },
-        })
-        state.undoStack[canvas.currentVectorIndex][0].properties = {
-          ...modifiedProperties,
-        }
+        modifyAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
@@ -893,7 +843,7 @@ export function adjustCurveSteps(numPoints = 4) {
 /**
  * Draw ellipse
  * Supported modes: "draw, erase",
- * TODO: Due to method of modifying radius on a pixel grid, only odd diameter circles are created. Eg. 15px radius creates a 31px diameter circle. To fix this, allow half pixel increments.
+ * Due to method of modifying radius on a pixel grid, only odd diameter circles are created. Eg. 15px radius creates a 31px diameter circle. To fix this, allow half pixel increments.
  */
 export function ellipseSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
@@ -909,15 +859,10 @@ export function ellipseSteps() {
         if (state.clickCounter > 2) state.clickCounter = 1
         switch (state.clickCounter) {
           case 1:
+            //reset control points
+            vectorGui.reset(canvas)
             state.vectorProperties.px1 = state.cursorX
             state.vectorProperties.py1 = state.cursorY
-            //reset control points
-            state.vectorProperties.px2 = null
-            state.vectorProperties.py2 = null
-            state.vectorProperties.px3 = null
-            state.vectorProperties.py3 = null
-            state.vectorProperties.px4 = null
-            state.vectorProperties.py4 = null
             state.vectorProperties.forceCircle = true //force circle initially
             break
           default:
@@ -964,7 +909,6 @@ export function ellipseSteps() {
           state.mode,
           state.brushStamp,
           state.tool.brushSize,
-          canvas.offScreenCVS.width / canvas.offScreenCVS.width,
           state.vectorProperties.angle,
           state.vectorProperties.offset,
           state.vectorProperties.x1Offset,
@@ -1030,7 +974,6 @@ export function ellipseSteps() {
             state.mode,
             state.brushStamp,
             state.tool.brushSize,
-            canvas.offScreenCVS.width / canvas.offScreenCVS.width,
             state.vectorProperties.angle,
             state.vectorProperties.offset,
             state.vectorProperties.x1Offset,
@@ -1093,7 +1036,6 @@ export function ellipseSteps() {
             state.mode,
             state.brushStamp,
             state.tool.brushSize,
-            1,
             state.vectorProperties.angle,
             state.vectorProperties.offset,
             state.vectorProperties.x1Offset,
@@ -1184,7 +1126,6 @@ export function adjustEllipseSteps() {
           state.undoStack[canvas.currentVectorIndex][0].mode,
           state.undoStack[canvas.currentVectorIndex][0].brush,
           state.undoStack[canvas.currentVectorIndex][0].weight,
-          1,
           state.vectorProperties.angle,
           state.vectorProperties.offset,
           state.vectorProperties.x1Offset,
@@ -1214,7 +1155,6 @@ export function adjustEllipseSteps() {
           state.undoStack[canvas.currentVectorIndex][0].mode,
           state.undoStack[canvas.currentVectorIndex][0].brush,
           state.undoStack[canvas.currentVectorIndex][0].weight,
-          1,
           state.vectorProperties.angle,
           state.vectorProperties.offset,
           state.vectorProperties.x1Offset,
@@ -1226,30 +1166,7 @@ export function adjustEllipseSteps() {
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         updateEllipseControlPoints(state, canvas, vectorGui)
         state.undoStack[canvas.currentVectorIndex][0].hidden = false
-        let oldProperties = {
-          ...state.undoStack[canvas.currentVectorIndex][0].properties,
-        } //shallow copy, properties must not contain any objects or references as values
-        let modifiedProperties = {
-          ...state.undoStack[canvas.currentVectorIndex][0].properties,
-        } //shallow copy, must make deep copy, at least for x, y and properties
-        modifiedProperties = { ...state.vectorProperties }
-        modifiedProperties.forceCircle =
-          vectorGui.selectedPoint.xKey === "px1"
-            ? modifiedProperties.forceCircle
-            : state.vectorProperties.forceCircle
-        state.addToTimeline({
-          tool: tools.modify,
-          layer: canvas.currentLayer,
-          properties: {
-            //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-            moddedActionIndex: canvas.currentVectorIndex,
-            from: oldProperties,
-            to: modifiedProperties,
-          },
-        })
-        state.undoStack[canvas.currentVectorIndex][0].properties = {
-          ...modifiedProperties,
-        }
+        modifyAction(canvas.currentVectorIndex, true)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,

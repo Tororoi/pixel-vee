@@ -34,8 +34,7 @@ export function renderCursor(state, canvas, swatches) {
           state.brushStamp,
           state.tool.brushSize,
           canvas.onScreenCTX, //must be onScreen to work with eraser
-          state.mode,
-          canvas.offScreenCVS.width / canvas.offScreenCVS.width
+          state.mode
         )
         // drawCursorBox(state, canvas)
       } else {
@@ -54,7 +53,6 @@ export function drawCurrentPixel(state, canvas, swatches) {
     state.brushStamp,
     state.tool.brushSize,
     canvas.rasterGuiCTX,
-    state.mode,
-    canvas.offScreenCVS.width / canvas.offScreenCVS.width
+    state.mode
   )
 }

@@ -499,7 +499,6 @@ function redrawPoints(index = null) {
             p.mode,
             p.brush,
             p.weight,
-            1,
             p.properties.angle,
             p.properties.offset,
             p.properties.x1Offset,
