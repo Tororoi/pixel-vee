@@ -630,13 +630,6 @@ canvas {
   color: black;
 }
 
-.trash {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-trash.png");
-  background-size: 100%;
-}
-
 .fill {
   width: 100%;
   height: 100%;
@@ -831,6 +824,30 @@ canvas {
   background: rgb(239, 63, 57);
   animation: flash 0.6s ease-in infinite alternate-reverse;
 }
+.layers-interface .layers-container .layers .layer .trash {
+  position: absolute;
+  right: 7px;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  background: rgb(200, 200, 200);
+  z-index: 104;
+  margin: 2px;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+.layers-interface .layers-container .layers .layer .trash:hover:not([disabled]), .layers-interface .layers-container .layers .layer .trash:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+.layers-interface .layers-container .layers .layer .trash .icon {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-trash.png");
+  background-size: 100%;
+}
+.layers-interface .layers-container .layers .layer .trash.disabled .icon {
+  opacity: 0.5;
+  cursor: no-drop;
+}
 
 /* Vectors, interface provides access to select any vector existing in the timeline */
 .vectors-interface {
@@ -912,6 +929,7 @@ canvas {
   box-shadow: inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container .vectors .vector img {
+  pointer-events: none;
   background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   height: calc(100% - 4px);
 }
@@ -931,17 +949,52 @@ canvas {
   background: rgb(131, 131, 131);
   z-index: 104;
   margin: 2px;
+  box-shadow: -2px 0px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+.vectors-interface .vectors-container .vectors .vector .tool:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .tool:focus {
+  box-shadow: -2px 0px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .actionColor {
   position: absolute;
   right: 0;
   top: 22px;
-  cursor: grab;
+  cursor: pointer;
   width: 20px;
   height: 20px;
   background: rgb(131, 131, 131);
   z-index: 104;
   margin: 2px;
+  box-shadow: -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+.vectors-interface .vectors-container .vectors .vector .actionColor:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .actionColor:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+.vectors-interface .vectors-container .vectors .vector .actionColor:hover {
+  z-index: 106;
+}
+.vectors-interface .vectors-container .vectors .vector .trash {
+  position: absolute;
+  right: 0;
+  top: 44px;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  background: rgb(200, 200, 200);
+  z-index: 104;
+  margin: 2px;
+  box-shadow: -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+.vectors-interface .vectors-container .vectors .vector .trash:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .trash:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+.vectors-interface .vectors-container .vectors .vector .trash:hover {
+  z-index: 106;
+}
+.vectors-interface .vectors-container .vectors .vector .trash .icon {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-trash.png");
+  background-size: 100%;
 }
 .vectors-interface .vectors-container .vectors .vector.selected {
   background: rgb(77, 77, 77);
@@ -949,8 +1002,9 @@ canvas {
 .vectors-interface .vectors-container .vectors .vector:hover {
   box-shadow: inset 2px 0px rgb(255, 255, 255), inset -2px 0px rgb(255, 255, 255), inset 0px -2px rgb(255, 255, 255), inset 0px 2px rgb(255, 255, 255);
 }
-.vectors-interface .vectors-container .vectors .vector:hover .btn {
+.vectors-interface .vectors-container .vectors .vector:hover .tool {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  z-index: 105;
 }
 .vectors-interface .vectors-container .vectors .vector .hide {
   width: 28px;

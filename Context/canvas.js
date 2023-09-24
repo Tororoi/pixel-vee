@@ -791,6 +791,12 @@ function renderLayersToDOM() {
       }
       hide.appendChild(eye)
       layerElement.appendChild(hide)
+      let trash = document.createElement("div") //TODO: make clickable and sets vector action as hidden
+      trash.className = "trash"
+      let trashIcon = document.createElement("div")
+      trashIcon.className = "icon"
+      trash.appendChild(trashIcon)
+      layerElement.appendChild(trash)
       layersContainer.appendChild(layerElement)
       //associate object
       layerElement.layerObj = l
@@ -925,7 +931,7 @@ function renderVectorsToDOM() {
       // vectorElement.appendChild(thumbnailCVS)
       vectorElement.appendChild(thumb)
       let tool = document.createElement("div")
-      tool.className = "tool btn"
+      tool.className = "tool"
       let icon = document.createElement("div")
       icon.className = p.tool.name
       if (p.index === canvas.currentVectorIndex) {
@@ -937,9 +943,15 @@ function renderVectorsToDOM() {
       tool.appendChild(icon)
       vectorElement.appendChild(tool)
       let color = document.createElement("div") //TODO: make clickable and color can be rechosen via colorpicker
-      color.className = "actionColor btn"
+      color.className = "actionColor"
       color.style.background = p.color.color
       vectorElement.appendChild(color)
+      let trash = document.createElement("div") //TODO: make clickable and sets vector action as hidden
+      trash.className = "trash"
+      let trashIcon = document.createElement("div")
+      trashIcon.className = "icon"
+      trash.appendChild(trashIcon)
+      vectorElement.appendChild(trash)
       // thumbnailCVS.width = thumbnailCVS.offsetWidth * sharpness
       // thumbnailCVS.height = thumbnailCVS.offsetHeight * sharpness
       // thumbnailCTX.scale(sharpness * 1, sharpness * 1)

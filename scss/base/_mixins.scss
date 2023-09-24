@@ -7,6 +7,23 @@
   }
 }
 
+@mixin leftDownUpBorder {
+  box-shadow: -2px 0px $border-color, 0px -2px $border-color,
+    0px 2px $border-color;
+  &:hover:not([disabled]),
+  &:focus {
+    box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white, 0px 2px $white;
+  }
+}
+
+@mixin leftDownBorder {
+  box-shadow: -2px 0px $border-color, 0px 2px $border-color;
+  &:hover:not([disabled]),
+  &:focus {
+    box-shadow: -2px 0px $white, 0px 2px $white;
+  }
+}
+
 @mixin sandwichBorder {
   box-shadow: 0px -2px $border-color, 0px 2px $border-color;
   &:hover:not([disabled]),
