@@ -619,13 +619,13 @@ function layerInteract(e) {
   let layer = e.target.closest(".layer").layerObj
   //toggle visibility
   if (e.target.className.includes("hide")) {
-    if (e.target.childNodes[0].className.includes("eyeopen")) {
-      e.target.childNodes[0].classList.remove("eyeopen")
-      e.target.childNodes[0].classList.add("eyeclosed")
+    if (e.target.className.includes("eyeopen")) {
+      e.target.classList.remove("eyeopen")
+      e.target.classList.add("eyeclosed")
       layer.opacity = 0
-    } else if (e.target.childNodes[0].className.includes("eyeclosed")) {
-      e.target.childNodes[0].classList.remove("eyeclosed")
-      e.target.childNodes[0].classList.add("eyeopen")
+    } else if (e.target.className.includes("eyeclosed")) {
+      e.target.classList.remove("eyeclosed")
+      e.target.classList.add("eyeopen")
       layer.opacity = 1
     }
   } else {
@@ -777,19 +777,15 @@ function renderLayersToDOM() {
       layerElement.textContent = l.title
       layerElement.draggable = true
       if (l === canvas.currentLayer) {
-        layerElement.style.background = "rgb(255, 255, 255)"
-        layerElement.style.color = "rgb(0, 0, 0)"
+        layerElement.classList.add("selected")
       }
       let hide = document.createElement("div")
-      hide.className = "hide btn"
-      let eye = document.createElement("span")
-      eye.classList.add("eye")
+      hide.className = "hide"
       if (l.opacity === 0) {
-        eye.classList.add("eyeclosed")
+        hide.classList.add("eyeclosed")
       } else {
-        eye.classList.add("eyeopen")
+        hide.classList.add("eyeopen")
       }
-      hide.appendChild(eye)
       layerElement.appendChild(hide)
       let trash = document.createElement("div") //TODO: make clickable and sets vector action as hidden
       trash.className = "trash"

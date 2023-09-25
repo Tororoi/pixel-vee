@@ -734,14 +734,24 @@ canvas {
   display: none;
 }
 .layers-interface .layers-control .custom-file-upload {
-  width: 28px;
-  height: 28px;
-  background: rgb(131, 131, 131);
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  background-image: url("../public/pixelv-reference.png");
+  background-size: 100%;
+}
+.layers-interface .layers-control .custom-file-upload:hover {
+  background-image: url("../public/pixelv-reference-hover.png");
 }
 .layers-interface .layers-control .new-raster-layer {
-  width: 28px;
-  height: 28px;
-  background: rgb(131, 131, 131);
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  background-image: url("../public/pixelv-addlayer.png");
+  background-size: 100%;
+}
+.layers-interface .layers-control .new-raster-layer:hover {
+  background-image: url("../public/pixelv-addlayer-hover.png");
 }
 .layers-interface .layers-container {
   display: flex;
@@ -780,7 +790,7 @@ canvas {
 }
 .layers-interface .layers-container .layers .layer {
   cursor: grab;
-  height: 40px;
+  height: 60px;
   width: 100%;
   text-align: center;
   line-height: 40px;
@@ -792,33 +802,36 @@ canvas {
   box-shadow: inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131);
 }
 .layers-interface .layers-container .layers .layer.raster {
-  background: rgb(77, 77, 77);
+  background: rgb(61, 61, 61);
 }
 .layers-interface .layers-container .layers .layer.reference {
   background: rgb(95, 95, 95);
+}
+.layers-interface .layers-container .layers .layer.selected {
+  background: black;
 }
 .layers-interface .layers-container .layers .layer:hover {
   box-shadow: inset 2px 0px rgb(255, 255, 255), inset -2px 0px rgb(255, 255, 255), inset 0px -2px rgb(255, 255, 255), inset 0px 2px rgb(255, 255, 255);
 }
 .layers-interface .layers-container .layers .layer .hide {
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   margin: 6px;
-  background: rgb(131, 131, 131);
+  cursor: pointer;
 }
-.layers-interface .layers-container .layers .layer .hide .eye {
-  height: 2px;
-  width: 2px;
+.layers-interface .layers-container .layers .layer .hide.eyeopen {
+  background-image: url("../public/pixelv-eyeopen.png");
+  background-size: 100%;
 }
-.layers-interface .layers-container .layers .layer .hide .eye.eyeopen {
-  opacity: 1;
-  transform: translateX(-13px) translateY(-13px);
-  box-shadow: 10px 6px rgb(0, 0, 0), 12px 6px rgb(0, 0, 0), 14px 6px rgb(0, 0, 0), 16px 6px rgb(0, 0, 0), 6px 8px rgb(0, 0, 0), 8px 8px rgb(87, 87, 87), 10px 8px rgb(172, 172, 172), 12px 8px rgb(172, 172, 172), 14px 8px rgb(172, 172, 172), 16px 8px rgb(172, 172, 172), 18px 8px rgb(87, 87, 87), 20px 8px rgb(0, 0, 0), 4px 10px rgb(0, 0, 0), 6px 10px rgb(87, 87, 87), 8px 10px rgb(255, 255, 255), 10px 10px rgb(255, 255, 255), 12px 10px rgb(0, 0, 0), 14px 10px rgb(0, 0, 0), 16px 10px rgb(255, 255, 255), 18px 10px rgb(172, 172, 172), 20px 10px rgb(87, 87, 87), 22px 10px rgb(0, 0, 0), 2px 12px rgb(0, 0, 0), 4px 12px rgb(87, 87, 87), 6px 12px rgb(255, 255, 255), 8px 12px rgb(255, 255, 255), 10px 12px rgb(0, 0, 0), 12px 12px rgb(255, 255, 255), 14px 12px rgb(0, 0, 0), 16px 12px rgb(0, 0, 0), 18px 12px rgb(255, 255, 255), 20px 12px rgb(172, 172, 172), 22px 12px rgb(172, 172, 172), 24px 12px rgb(0, 0, 0), 4px 14px rgb(172, 172, 172), 6px 14px rgb(255, 255, 255), 8px 14px rgb(255, 255, 255), 10px 14px rgb(0, 0, 0), 12px 14px rgb(0, 0, 0), 14px 14px rgb(0, 0, 0), 16px 14px rgb(0, 0, 0), 18px 14px rgb(255, 255, 255), 20px 14px rgb(172, 172, 172), 22px 14px rgb(172, 172, 172), 4px 16px rgb(0, 0, 0), 6px 16px rgb(172, 172, 172), 8px 16px rgb(255, 255, 255), 10px 16px rgb(255, 255, 255), 12px 16px rgb(0, 0, 0), 14px 16px rgb(0, 0, 0), 16px 16px rgb(255, 255, 255), 18px 16px rgb(172, 172, 172), 20px 16px rgb(172, 172, 172), 22px 16px rgb(0, 0, 0), 6px 18px rgb(0, 0, 0), 8px 18px rgb(87, 87, 87), 10px 18px rgb(172, 172, 172), 12px 18px rgb(172, 172, 172), 14px 18px rgb(172, 172, 172), 16px 18px rgb(172, 172, 172), 18px 18px rgb(87, 87, 87), 20px 18px rgb(0, 0, 0), 10px 20px rgb(0, 0, 0), 12px 20px rgb(0, 0, 0), 14px 20px rgb(0, 0, 0), 16px 20px rgb(0, 0, 0);
+.layers-interface .layers-container .layers .layer .hide.eyeopen:hover {
+  background-image: url("../public/pixelv-eyeopen-hover.png");
 }
-.layers-interface .layers-container .layers .layer .hide .eye.eyeclosed {
-  opacity: 1;
-  transform: translateX(-13px) translateY(-13px);
-  box-shadow: 10px 6px rgb(0, 0, 0), 12px 6px rgb(0, 0, 0), 14px 6px rgb(0, 0, 0), 16px 6px rgb(0, 0, 0), 6px 8px rgb(0, 0, 0), 8px 8px rgb(87, 87, 87), 10px 8px rgb(172, 172, 172), 12px 8px rgb(172, 172, 172), 14px 8px rgb(172, 172, 172), 16px 8px rgb(87, 87, 87), 18px 8px rgb(87, 87, 87), 20px 8px rgb(0, 0, 0), 4px 10px rgb(0, 0, 0), 6px 10px rgb(87, 87, 87), 8px 10px rgb(172, 172, 172), 10px 10px rgb(172, 172, 172), 12px 10px rgb(172, 172, 172), 14px 10px rgb(172, 172, 172), 16px 10px rgb(172, 172, 172), 18px 10px rgb(87, 87, 87), 20px 10px rgb(87, 87, 87), 22px 10px rgb(0, 0, 0), 4px 12px rgb(87, 87, 87), 6px 12px rgb(172, 172, 172), 8px 12px rgb(172, 172, 172), 10px 12px rgb(172, 172, 172), 12px 12px rgb(172, 172, 172), 14px 12px rgb(172, 172, 172), 16px 12px rgb(172, 172, 172), 18px 12px rgb(87, 87, 87), 20px 12px rgb(87, 87, 87), 22px 12px rgb(87, 87, 87), 2px 14px rgb(0, 0, 0), 4px 14px rgb(172, 172, 172), 6px 14px rgb(172, 172, 172), 8px 14px rgb(172, 172, 172), 10px 14px rgb(172, 172, 172), 12px 14px rgb(172, 172, 172), 14px 14px rgb(172, 172, 172), 16px 14px rgb(172, 172, 172), 18px 14px rgb(87, 87, 87), 20px 14px rgb(87, 87, 87), 22px 14px rgb(87, 87, 87), 24px 14px rgb(0, 0, 0), 4px 16px rgb(0, 0, 0), 6px 16px rgb(172, 172, 172), 8px 16px rgb(172, 172, 172), 10px 16px rgb(172, 172, 172), 12px 16px rgb(172, 172, 172), 14px 16px rgb(172, 172, 172), 16px 16px rgb(87, 87, 87), 18px 16px rgb(87, 87, 87), 20px 16px rgb(87, 87, 87), 22px 16px rgb(0, 0, 0), 6px 18px rgb(0, 0, 0), 8px 18px rgb(87, 87, 87), 10px 18px rgb(87, 87, 87), 12px 18px rgb(87, 87, 87), 14px 18px rgb(87, 87, 87), 16px 18px rgb(87, 87, 87), 18px 18px rgb(87, 87, 87), 20px 18px rgb(0, 0, 0), 10px 20px rgb(0, 0, 0), 12px 20px rgb(0, 0, 0), 14px 20px rgb(0, 0, 0), 16px 20px rgb(0, 0, 0);
+.layers-interface .layers-container .layers .layer .hide.eyeclosed {
+  background-image: url("../public/pixelv-eyeclosed.png");
+  background-size: 100%;
+}
+.layers-interface .layers-container .layers .layer .hide.eyeclosed:hover {
+  background-image: url("../public/pixelv-eyeclosed-hover.png");
 }
 .layers-interface .layers-container .layers .layer .warning {
   background: rgb(239, 63, 57);
@@ -826,25 +839,19 @@ canvas {
 }
 .layers-interface .layers-container .layers .layer .trash {
   position: absolute;
-  right: 7px;
+  right: 0;
   cursor: pointer;
-  width: 20px;
-  height: 20px;
-  background: rgb(200, 200, 200);
+  width: 40px;
+  height: 40px;
   z-index: 104;
-  margin: 2px;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
-}
-.layers-interface .layers-container .layers .layer .trash:hover:not([disabled]), .layers-interface .layers-container .layers .layer .trash:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
-}
-.layers-interface .layers-container .layers .layer .trash .icon {
-  width: 100%;
-  height: 100%;
+  margin: 6px;
   background-image: url("../public/pixelv-trash.png");
   background-size: 100%;
 }
-.layers-interface .layers-container .layers .layer .trash.disabled .icon {
+.layers-interface .layers-container .layers .layer .trash:hover {
+  background-image: url("../public/pixelv-trash-hover.png");
+}
+.layers-interface .layers-container .layers .layer .trash.disabled {
   opacity: 0.5;
   cursor: no-drop;
 }
@@ -1017,14 +1024,18 @@ canvas {
   width: 2px;
 }
 .vectors-interface .vectors-container .vectors .vector .hide .eye.eyeopen {
-  opacity: 1;
-  transform: translateX(-13px) translateY(-13px);
-  box-shadow: 10px 6px rgb(0, 0, 0), 12px 6px rgb(0, 0, 0), 14px 6px rgb(0, 0, 0), 16px 6px rgb(0, 0, 0), 6px 8px rgb(0, 0, 0), 8px 8px rgb(87, 87, 87), 10px 8px rgb(172, 172, 172), 12px 8px rgb(172, 172, 172), 14px 8px rgb(172, 172, 172), 16px 8px rgb(172, 172, 172), 18px 8px rgb(87, 87, 87), 20px 8px rgb(0, 0, 0), 4px 10px rgb(0, 0, 0), 6px 10px rgb(87, 87, 87), 8px 10px rgb(255, 255, 255), 10px 10px rgb(255, 255, 255), 12px 10px rgb(0, 0, 0), 14px 10px rgb(0, 0, 0), 16px 10px rgb(255, 255, 255), 18px 10px rgb(172, 172, 172), 20px 10px rgb(87, 87, 87), 22px 10px rgb(0, 0, 0), 2px 12px rgb(0, 0, 0), 4px 12px rgb(87, 87, 87), 6px 12px rgb(255, 255, 255), 8px 12px rgb(255, 255, 255), 10px 12px rgb(0, 0, 0), 12px 12px rgb(255, 255, 255), 14px 12px rgb(0, 0, 0), 16px 12px rgb(0, 0, 0), 18px 12px rgb(255, 255, 255), 20px 12px rgb(172, 172, 172), 22px 12px rgb(172, 172, 172), 24px 12px rgb(0, 0, 0), 4px 14px rgb(172, 172, 172), 6px 14px rgb(255, 255, 255), 8px 14px rgb(255, 255, 255), 10px 14px rgb(0, 0, 0), 12px 14px rgb(0, 0, 0), 14px 14px rgb(0, 0, 0), 16px 14px rgb(0, 0, 0), 18px 14px rgb(255, 255, 255), 20px 14px rgb(172, 172, 172), 22px 14px rgb(172, 172, 172), 4px 16px rgb(0, 0, 0), 6px 16px rgb(172, 172, 172), 8px 16px rgb(255, 255, 255), 10px 16px rgb(255, 255, 255), 12px 16px rgb(0, 0, 0), 14px 16px rgb(0, 0, 0), 16px 16px rgb(255, 255, 255), 18px 16px rgb(172, 172, 172), 20px 16px rgb(172, 172, 172), 22px 16px rgb(0, 0, 0), 6px 18px rgb(0, 0, 0), 8px 18px rgb(87, 87, 87), 10px 18px rgb(172, 172, 172), 12px 18px rgb(172, 172, 172), 14px 18px rgb(172, 172, 172), 16px 18px rgb(172, 172, 172), 18px 18px rgb(87, 87, 87), 20px 18px rgb(0, 0, 0), 10px 20px rgb(0, 0, 0), 12px 20px rgb(0, 0, 0), 14px 20px rgb(0, 0, 0), 16px 20px rgb(0, 0, 0);
+  background-image: url("../public/pixelv-eyeopen.png");
+  background-size: 100%;
+}
+.vectors-interface .vectors-container .vectors .vector .hide .eye.eyeopen:hover {
+  background-image: url("../public/pixelv-eyeopen-hover.png");
 }
 .vectors-interface .vectors-container .vectors .vector .hide .eye.eyeclosed {
-  opacity: 1;
-  transform: translateX(-13px) translateY(-13px);
-  box-shadow: 10px 6px rgb(0, 0, 0), 12px 6px rgb(0, 0, 0), 14px 6px rgb(0, 0, 0), 16px 6px rgb(0, 0, 0), 6px 8px rgb(0, 0, 0), 8px 8px rgb(87, 87, 87), 10px 8px rgb(172, 172, 172), 12px 8px rgb(172, 172, 172), 14px 8px rgb(172, 172, 172), 16px 8px rgb(87, 87, 87), 18px 8px rgb(87, 87, 87), 20px 8px rgb(0, 0, 0), 4px 10px rgb(0, 0, 0), 6px 10px rgb(87, 87, 87), 8px 10px rgb(172, 172, 172), 10px 10px rgb(172, 172, 172), 12px 10px rgb(172, 172, 172), 14px 10px rgb(172, 172, 172), 16px 10px rgb(172, 172, 172), 18px 10px rgb(87, 87, 87), 20px 10px rgb(87, 87, 87), 22px 10px rgb(0, 0, 0), 4px 12px rgb(87, 87, 87), 6px 12px rgb(172, 172, 172), 8px 12px rgb(172, 172, 172), 10px 12px rgb(172, 172, 172), 12px 12px rgb(172, 172, 172), 14px 12px rgb(172, 172, 172), 16px 12px rgb(172, 172, 172), 18px 12px rgb(87, 87, 87), 20px 12px rgb(87, 87, 87), 22px 12px rgb(87, 87, 87), 2px 14px rgb(0, 0, 0), 4px 14px rgb(172, 172, 172), 6px 14px rgb(172, 172, 172), 8px 14px rgb(172, 172, 172), 10px 14px rgb(172, 172, 172), 12px 14px rgb(172, 172, 172), 14px 14px rgb(172, 172, 172), 16px 14px rgb(172, 172, 172), 18px 14px rgb(87, 87, 87), 20px 14px rgb(87, 87, 87), 22px 14px rgb(87, 87, 87), 24px 14px rgb(0, 0, 0), 4px 16px rgb(0, 0, 0), 6px 16px rgb(172, 172, 172), 8px 16px rgb(172, 172, 172), 10px 16px rgb(172, 172, 172), 12px 16px rgb(172, 172, 172), 14px 16px rgb(172, 172, 172), 16px 16px rgb(87, 87, 87), 18px 16px rgb(87, 87, 87), 20px 16px rgb(87, 87, 87), 22px 16px rgb(0, 0, 0), 6px 18px rgb(0, 0, 0), 8px 18px rgb(87, 87, 87), 10px 18px rgb(87, 87, 87), 12px 18px rgb(87, 87, 87), 14px 18px rgb(87, 87, 87), 16px 18px rgb(87, 87, 87), 18px 18px rgb(87, 87, 87), 20px 18px rgb(0, 0, 0), 10px 20px rgb(0, 0, 0), 12px 20px rgb(0, 0, 0), 14px 20px rgb(0, 0, 0), 16px 20px rgb(0, 0, 0);
+  background-image: url("../public/pixelv-eyeclosed.png");
+  background-size: 100%;
+}
+.vectors-interface .vectors-container .vectors .vector .hide .eye.eyeclosed:hover {
+  background-image: url("../public/pixelv-eyeclosed-hover.png");
 }
 .vectors-interface .vectors-container .vectors .vector .warning {
   background: rgb(239, 63, 57);
