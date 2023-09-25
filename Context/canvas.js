@@ -828,15 +828,21 @@ function vectorInteract(e) {
   let vector = e.target.closest(".vector").vectorObj
   //toggle visibility
   if (e.target.className.includes("hide")) {
-    if (e.target.childNodes[0].className.includes("eyeopen")) {
-      e.target.childNodes[0].classList.remove("eyeopen")
-      e.target.childNodes[0].classList.add("eyeclosed")
-      vector.opacity = 0
-    } else if (e.target.childNodes[0].className.includes("eyeclosed")) {
-      e.target.childNodes[0].classList.remove("eyeclosed")
-      e.target.childNodes[0].classList.add("eyeopen")
-      vector.opacity = 1
+    if (e.target.className.includes("eyeopen")) {
+      e.target.classList.remove("eyeopen")
+      e.target.classList.add("eyeclosed")
+      layer.opacity = 0
+    } else if (e.target.className.includes("eyeclosed")) {
+      e.target.classList.remove("eyeclosed")
+      e.target.classList.add("eyeopen")
+      layer.opacity = 1
     }
+  } else if (e.target.className.includes("actionColor")) {
+    //selectColor() pass in color, open up color picker which will set the color of the vector, not the global color
+    console.log("color")
+  } else if (e.target.className.includes("trash")) {
+    //removeVector(vector)
+    console.log("trash")
   } else {
     //switch tool
     handleTools(null, vector.tool.name)

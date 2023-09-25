@@ -44,3 +44,16 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   canvas.render()
   state.reset()
 }
+
+export function handleUndo() {
+  //length 1 prevents initial layer from being undone
+  if (state.undoStack.length > 1) {
+    actionUndoRedo(state.redoStack, state.undoStack, "from")
+  }
+}
+
+export function handleRedo() {
+  if (state.redoStack.length >= 1) {
+    actionUndoRedo(state.undoStack, state.redoStack, "to")
+  }
+}

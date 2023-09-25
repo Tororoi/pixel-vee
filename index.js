@@ -1,13 +1,15 @@
 //Import order is important. 1. DOM initialization, 2. state managers
 // import { initializeAllDialogBoxes } from "./DOM/dialogBox.js"
+import { keys } from "./Context/keys.js"
 import { state } from "./Context/state.js"
 import { canvas, resizeOnScreenCanvas } from "../Context/canvas.js"
 import { swatches } from "./Context/swatch.js"
 import { tools, adjustEllipseSteps } from "./Tools/index.js"
-import { actionUndoRedo } from "./Tools/undoRedo.js"
+import { handleUndo, handleRedo } from "./Tools/undoRedo.js"
 import { vectorGui } from "./GUI/vector.js"
 import { renderCursor, renderRasterGUI } from "./GUI/raster.js"
 import { drawRect, drawCircle } from "./utils/brushHelpers.js"
+import { activateShortcut } from "./Tools/shortcuts.js"
 
 //===================================//
 //========= * * * DOM * * * =========//
@@ -162,157 +164,13 @@ exportBtn.addEventListener("click", exportImage)
 
 function handleKeyDown(e) {
   if (state.shortcuts) {
-    switch (e.code) {
-      case "ArrowLeft":
-        if (state.debugger) {
-          canvas.render()
-          state.debugObject.maxSteps -= 1
-          state.debugFn(state.debugObject)
-        }
-        break
-      case "ArrowRight":
-        if (state.debugger) {
-          state.debugObject.maxSteps += 1
-          state.debugFn(state.debugObject)
-        }
-        break
-      case "KeyZ":
-        if (e.metaKey) {
-          if (e.shiftKey) {
-            //shift+meta+z
-            handleRedo()
-          } else {
-            handleUndo()
-          }
-        }
-        break
-      case "MetaLeft":
-      case "MetaRight":
-        //command key
-        break
-      case "Space":
-        state.tool = tools["grab"]
-        canvas.vectorGuiCVS.style.cursor = "move"
-        break
-      case "AltLeft":
-      case "AltRight":
-        //option key
-        state.tool = tools["eyedropper"]
-        canvas.vectorGuiCVS.style.cursor = "none"
-        break
-      case "ShiftLeft":
-      case "ShiftRight":
-        if (toolBtn.id === "brush") {
-          state.tool = tools["line"]
-          state.tool.brushSize = tools["brush"].brushSize
-          canvas.vectorGuiCVS.style.cursor = "none"
-        } else if (toolBtn.id === "ellipse") {
-          state.vectorProperties.forceCircle = true
-          if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
-            //while holding control point, readjust ellipse without having to move cursor.
-            //TODO: update this functionality to have other radii go back to previous radii when releasing shift
-            adjustEllipseSteps()
-            vectorGui.render(state, canvas)
-          }
-        }
-        break
-      case "KeyS":
-        swatches.randomizeColor("swatch btn")
-        break
-      case "KeyD":
-        //reset old button
-        modeBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        modeBtn = document.querySelector("#draw")
-        modeBtn.style.background = "rgb(255, 255, 255)"
-        state.mode = "draw"
-        break
-      case "KeyE":
-        //reset old button
-        modeBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        modeBtn = document.querySelector("#erase")
-        modeBtn.style.background = "rgb(255, 255, 255)"
-        state.mode = "erase"
-        break
-      case "KeyP":
-        //reset old button
-        modeBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        modeBtn = document.querySelector("#perfect")
-        modeBtn.style.background = "rgb(255, 255, 255)"
-        state.mode = "perfect"
-        break
-      case "KeyB":
-        //reset old button
-        toolBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        toolBtn = document.querySelector("#brush")
-        toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["brush"]
-        canvas.vectorGuiCVS.style.cursor = "crosshair"
-        break
-      case "KeyR":
-        //reset old button
-        toolBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        toolBtn = document.querySelector("#replace")
-        toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["replace"]
-        canvas.vectorGuiCVS.style.cursor = "crosshair"
-        break
-      case "KeyL":
-        //reset old button
-        toolBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        toolBtn = document.querySelector("#line")
-        toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["line"]
-        canvas.vectorGuiCVS.style.cursor = "none"
-        break
-      case "KeyF":
-        //reset old button
-        toolBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        toolBtn = document.querySelector("#fill")
-        toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["fill"]
-        canvas.vectorGuiCVS.style.cursor = "none"
-        break
-      case "KeyC":
-        //reset old button
-        toolBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        toolBtn = document.querySelector("#curve")
-        toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["quadCurve"]
-        canvas.vectorGuiCVS.style.cursor = "none"
-        break
-      case "KeyJ":
-        //reset old button
-        toolBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        toolBtn = document.querySelector("#cubicCurve")
-        toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["cubicCurve"]
-        canvas.vectorGuiCVS.style.cursor = "none"
-        break
-      case "KeyO":
-        //reset old button
-        toolBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        toolBtn = document.querySelector("#ellipse")
-        toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["ellipse"]
-        canvas.vectorGuiCVS.style.cursor = "none"
-        break
-      default:
-      //do nothing
-    }
+    keys[e.code] = true
+    activateShortcut(e.code, modeBtn, toolBtn)
   }
 }
 
 function handleKeyUp(e) {
+  keys[e.code] = false
   if (
     e.code === "Space" ||
     e.code === "AltLeft" ||
@@ -628,27 +486,12 @@ function handleZoom(e) {
   }
 }
 
-//TODO: to allow modifications of past actions, check last action in undoStack. If it is a modification action, reverse it.
-//This means setting the modded action's values back. Normally they are structured as {moddedActionIndex, from:, to:}, so set them back to the "from" values
-function handleUndo() {
-  //length 1 prevents initial layer from being undone
-  if (state.undoStack.length > 1) {
-    actionUndoRedo(state.redoStack, state.undoStack, "from")
-  }
-}
-
-function handleRedo() {
-  if (state.redoStack.length >= 1) {
-    actionUndoRedo(state.undoStack, state.redoStack, "to")
-  }
-}
-
 //Non-tool action.
 //TODO: must also update all vectors to be "removed" in a non destructive way, think about what that means for the timeline
 export function handleClear() {
   state.addToTimeline({ tool: tools.clear, layer: canvas.currentLayer })
   //FIX: restructure stacked items. Currently each is an array, but each should be an object with more info plus an array
-  //TODO: set all actions to hidden 
+  //TODO: set all actions to hidden
   state.undoStack.push(state.points)
   state.points = []
   state.redoStack = []
@@ -783,20 +626,10 @@ function switchBrush(e) {
 function updateBrush(e) {
   switch (state.tool.name) {
     case "brush":
-      state.tool.brushSize = parseInt(e.target.value)
-      break
     case "replace":
-      state.tool.brushSize = parseInt(e.target.value)
-      break
     case "line":
-      state.tool.brushSize = parseInt(e.target.value)
-      break
     case "quadCurve":
-      state.tool.brushSize = parseInt(e.target.value)
-      break
     case "cubicCurve":
-      state.tool.brushSize = parseInt(e.target.value)
-      break
     case "ellipse":
       state.tool.brushSize = parseInt(e.target.value)
       break

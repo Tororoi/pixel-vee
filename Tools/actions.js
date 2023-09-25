@@ -7,7 +7,6 @@ import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { generateRandomRGB } from "../utils/colors.js"
 import { vectorGui } from "../GUI/vector.js"
 import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
-import { drawRect, drawCircle } from "../utils/brushHelpers.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//

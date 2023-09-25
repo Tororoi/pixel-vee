@@ -1,3 +1,4 @@
+import { keys } from "../Context/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
@@ -1101,6 +1102,10 @@ export function adjustEllipseSteps() {
         vectorGui.selectedPoint = {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
+        }
+        if (!keys.ShiftLeft && !keys.ShiftRight) {
+          //if shift key is not being held, reset forceCircle
+          state.vectorProperties.forceCircle = false
         }
         updateEllipseControlPoints(state, canvas, vectorGui)
         //TODO: changing opacity isn't enough since erase mode will be unaffected
