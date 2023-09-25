@@ -94,7 +94,8 @@
           }
         }
         .warning {
-          background: $warning-color;
+          // background-color: $warning-color;
+          // background-blend-mode: multiply;
           animation: flash 0.6s ease-in infinite alternate-reverse;
         }
         .trash {

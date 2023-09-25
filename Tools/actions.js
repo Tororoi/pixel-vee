@@ -18,17 +18,17 @@ import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
 /**
  * Modify action in the timeline
  * @param {*} actionIndex
- * @param {*} isEllipse
  */
-export function modifyAction(actionIndex, isEllipse = false) {
+export function modifyAction(actionIndex) {
+  let action = state.undoStack[actionIndex][0]
   let oldProperties = {
-    ...state.undoStack[actionIndex][0].properties,
+    ...action.properties,
   } //shallow copy, properties must not contain any objects or references as values
   let modifiedProperties = {
-    ...state.undoStack[actionIndex][0].properties,
+    ...action.properties,
   } //shallow copy, must make deep copy, at least for x, y and properties
   modifiedProperties = { ...state.vectorProperties }
-  if (isEllipse) {
+  if (action.tool.name === "ellipse") {
     modifiedProperties.forceCircle =
       vectorGui.selectedPoint.xKey === "px1"
         ? modifiedProperties.forceCircle
@@ -43,9 +43,56 @@ export function modifyAction(actionIndex, isEllipse = false) {
       to: modifiedProperties,
     },
   })
-  state.undoStack[actionIndex][0].properties = {
+  action.properties = {
     ...modifiedProperties,
   }
+}
+
+/**
+ * Modify action in the timeline
+ * @param {*} actionIndex
+ */
+export function removeAction(actionIndex) {
+  let action = state.undoStack[actionIndex][0]
+  state.addToTimeline({
+    tool: tools.remove,
+    properties: {
+      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
+      moddedActionIndex: actionIndex,
+      from: false,
+      to: true,
+    },
+  })
+  action.removed = true
+}
+
+/**
+ * Modify actions in the timeline
+ * Sets all actions before it except for action index 0 to removed = true
+ */
+export function actionClear() {
+  let upToIndex = state.undoStack.length - 1
+  state.addToTimeline({
+    tool: tools.clear,
+    layer: canvas.currentLayer,
+    properties: {
+      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
+      upToIndex,
+    },
+  })
+  let i = 0
+  //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
+  state.undoStack.forEach((action) => {
+    if (i > upToIndex) {
+      return
+    }
+    i++
+    action.forEach((p) => {
+      if (p.layer === canvas.currentLayer) {
+        p.removed = true
+      }
+    })
+  })
 }
 
 /**

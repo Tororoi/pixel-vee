@@ -2,6 +2,8 @@ import { handleTools } from "../index.js"
 import { state } from "./state.js"
 import { initializeDialogBox } from "../utils/drag.js"
 import {
+  modifyAction,
+  removeAction,
   actionDraw,
   actionLine,
   actionFill,
@@ -398,135 +400,137 @@ function redrawPoints(index = null) {
     }
     i++
     action.forEach((p) => {
-      switch (p.tool.name) {
-        case "modify":
-          //do nothing
-          break
-        case "addLayer":
-          p.layer.removed = false
-          canvas.renderLayersToDOM()
-          canvas.renderVectorsToDOM()
-          break
-        case "removeLayer":
-          p.layer.removed = true
-          canvas.renderLayersToDOM()
-          canvas.renderVectorsToDOM()
-          break
-        case "clear":
-          p.layer.ctx.clearRect(
-            0,
-            0,
-            canvas.offScreenCVS.width,
-            canvas.offScreenCVS.height
-          )
-          break
-        case "fill":
-          if (p.hidden) {
+      if (!p.hidden && !p.removed) {
+        switch (p.tool.name) {
+          case "modify":
+            //do nothing
             break
-          }
-          actionFill(
-            p.properties.px1,
-            p.properties.py1,
-            p.color,
-            p.layer.ctx,
-            p.mode
-          )
-          break
-        case "line":
-          actionLine(
-            p.properties.px1,
-            p.properties.py1,
-            p.properties.px2,
-            p.properties.py2,
-            p.color,
-            p.layer.ctx,
-            p.mode,
-            p.brush,
-            p.weight
-          )
-          break
-        case "quadCurve":
-          if (p.hidden) {
+          case "remove":
+            //do nothing
             break
-          }
-          actionQuadraticCurve(
-            p.properties.px1,
-            p.properties.py1,
-            p.properties.px2,
-            p.properties.py2,
-            p.properties.px3,
-            p.properties.py3,
-            3,
-            p.color,
-            p.layer.ctx,
-            p.mode,
-            p.brush,
-            p.weight
-          )
-          break
-        case "cubicCurve":
-          if (p.hidden) {
+          case "addLayer":
+            p.layer.removed = false
+            canvas.renderLayersToDOM()
+            canvas.renderVectorsToDOM()
             break
-          }
-          //TODO: pass source on history objects to avoid debugging actions from the timeline unless desired
-          actionCubicCurve(
-            p.properties.px1,
-            p.properties.py1,
-            p.properties.px2,
-            p.properties.py2,
-            p.properties.px3,
-            p.properties.py3,
-            p.properties.px4,
-            p.properties.py4,
-            4,
-            p.color,
-            p.layer.ctx,
-            p.mode,
-            p.brush,
-            p.weight
-          )
-          break
-        case "ellipse":
-          if (p.hidden) {
+          case "removeLayer":
+            p.layer.removed = true
+            canvas.renderLayersToDOM()
+            canvas.renderVectorsToDOM()
             break
-          }
-          actionEllipse(
-            p.properties.px1,
-            p.properties.py1,
-            p.properties.px2,
-            p.properties.py2,
-            p.properties.px3,
-            p.properties.py3,
-            p.properties.radA,
-            p.properties.radB,
-            p.properties.forceCircle,
-            p.color,
-            p.layer.ctx,
-            p.mode,
-            p.brush,
-            p.weight,
-            p.properties.angle,
-            p.properties.offset,
-            p.properties.x1Offset,
-            p.properties.y1Offset
-          )
-          break
-        case "replace":
-          //IMPORTANT:
-          //Any replaced pixels over previous vectors would be fully rasterized.
-          //Even if image only depicts replaced pixels, those that were replaced cannot be moved if they were part of a vector.
-          //maybe a separate tool could exist for replacing vector pixels as a modification of one vector, as if the vector's render acts as a mask.
-          //maybe collision detection could be used somehow? probably expensive.
-          p.layer.ctx.drawImage(
-            p.properties.image,
-            0,
-            0,
-            p.properties.width,
-            p.properties.height
-          )
-          break
-        default:
-          actionDraw(p.x, p.y, p.color, p.brush, p.weight, p.layer.ctx, p.mode)
+          case "clear":
+            //Since this action marks all actions on its layer as removed, no need to clear the canvas here anymore
+            // p.layer.ctx.clearRect(
+            //   0,
+            //   0,
+            //   canvas.offScreenCVS.width,
+            //   canvas.offScreenCVS.height
+            // )
+            break
+          case "fill":
+            actionFill(
+              p.properties.px1,
+              p.properties.py1,
+              p.color,
+              p.layer.ctx,
+              p.mode
+            )
+            break
+          case "line":
+            actionLine(
+              p.properties.px1,
+              p.properties.py1,
+              p.properties.px2,
+              p.properties.py2,
+              p.color,
+              p.layer.ctx,
+              p.mode,
+              p.brush,
+              p.weight
+            )
+            break
+          case "quadCurve":
+            actionQuadraticCurve(
+              p.properties.px1,
+              p.properties.py1,
+              p.properties.px2,
+              p.properties.py2,
+              p.properties.px3,
+              p.properties.py3,
+              3,
+              p.color,
+              p.layer.ctx,
+              p.mode,
+              p.brush,
+              p.weight
+            )
+            break
+          case "cubicCurve":
+            //TODO: pass source on history objects to avoid debugging actions from the timeline unless desired
+            actionCubicCurve(
+              p.properties.px1,
+              p.properties.py1,
+              p.properties.px2,
+              p.properties.py2,
+              p.properties.px3,
+              p.properties.py3,
+              p.properties.px4,
+              p.properties.py4,
+              4,
+              p.color,
+              p.layer.ctx,
+              p.mode,
+              p.brush,
+              p.weight
+            )
+            break
+          case "ellipse":
+            actionEllipse(
+              p.properties.px1,
+              p.properties.py1,
+              p.properties.px2,
+              p.properties.py2,
+              p.properties.px3,
+              p.properties.py3,
+              p.properties.radA,
+              p.properties.radB,
+              p.properties.forceCircle,
+              p.color,
+              p.layer.ctx,
+              p.mode,
+              p.brush,
+              p.weight,
+              p.properties.angle,
+              p.properties.offset,
+              p.properties.x1Offset,
+              p.properties.y1Offset
+            )
+            break
+          case "replace":
+            //IMPORTANT:
+            //Any replaced pixels over previous vectors would be fully rasterized.
+            //Even if image only depicts replaced pixels, those that were replaced cannot be moved if they were part of a vector.
+            //maybe a separate tool could exist for replacing vector pixels as a modification of one vector, as if the vector's render acts as a mask.
+            //maybe collision detection could be used somehow? probably expensive.
+            p.layer.ctx.drawImage(
+              p.properties.image,
+              0,
+              0,
+              p.properties.width,
+              p.properties.height
+            )
+            break
+          default:
+            actionDraw(
+              p.x,
+              p.y,
+              p.color,
+              p.brush,
+              p.weight,
+              p.layer.ctx,
+              p.mode
+            )
+        }
       }
     })
   })
@@ -637,11 +641,14 @@ function layerInteract(e) {
   } else if (e.target.className.includes("trash")) {
     removeLayer(layer)
   } else {
-    //TODO: insert removeLayer functionality here if trash btn selected
     //select current layer
     if (layer.type === "raster") {
-      canvas.currentLayer = layer
-      renderLayersToDOM()
+      if (layer !== canvas.currentLayer) {
+        vectorGui.reset(canvas)
+        canvas.currentLayer = layer
+        renderLayersToDOM()
+        renderVectorsToDOM()
+      }
     }
   }
   canvas.draw()
@@ -841,148 +848,168 @@ function vectorInteract(e) {
     //selectColor() pass in color, open up color picker which will set the color of the vector, not the global color
     console.log("color")
   } else if (e.target.className.includes("trash")) {
-    //removeVector(vector)
-    console.log("trash")
+    removeVector(vector)
   } else {
+    let currentIndex = canvas.currentVectorIndex
     //switch tool
     handleTools(null, vector.tool.name)
     //select current vector
     //TODO: modify object structure of states to match object in undoStack to make assignment simpler like vectorGui.x = {...vector.x}
     vectorGui.reset(canvas)
-    state.vectorProperties = { ...vector.properties }
-    canvas.currentVectorIndex = vector.index
+    if (vector.index !== currentIndex) {
+      state.vectorProperties = { ...vector.properties }
+      canvas.currentVectorIndex = vector.index
+      canvas.currentLayer = vector.layer
+    }
     vectorGui.render(state, canvas)
+    renderLayersToDOM()
     renderVectorsToDOM()
   }
+}
+
+function removeVector(vector) {
+  //set "removed" flag to true on selected layer.
+  removeAction(vector.index)
+  state.undoStack.push(state.points)
+  state.points = []
+  state.redoStack = []
+  if (canvas.currentVectorIndex === vector.index) {
+    vectorGui.reset(canvas)
+  }
+  renderVectorsToDOM()
+  canvas.render()
 }
 
 function renderVectorsToDOM() {
   vectorsThumbnails.innerHTML = ""
   state.undoStack.forEach((action) => {
     let p = action[0]
-    if (p.tool.type === "vector") {
-      p.index = state.undoStack.indexOf(action)
-      let vectorElement = document.createElement("div")
-      vectorElement.className = `vector ${p.index}`
-      vectorElement.id = p.index
-      vectorsThumbnails.appendChild(vectorElement)
-      vectorElement.draggable = true
-      canvas.thumbnailCTX.clearRect(
-        0,
-        0,
-        canvas.thumbnailCVS.width,
-        canvas.thumbnailCVS.height
-      )
-      //TODO: find a way to constrain coordinates to fit canvas viewing area for maximum size of vector without changing the size of the canvas for each vector thumbnail
-      // Save minima and maxima for x and y plotted coordinates to get the bounding box when plotting the curve. Then, here we can constrain the coords to fit a maximal bounding box in the thumbnail canvas
-      thumbnailCTX.lineWidth = 2
-      let wd = canvas.thumbnailCVS.width / sharpness / canvas.offScreenCVS.width
-      let hd =
-        canvas.thumbnailCVS.height / sharpness / canvas.offScreenCVS.height
-      //get the minimum dimension ratio
-      let minD = Math.min(wd, hd)
-      // thumbnailCTX.strokeStyle = p.color.color
-      canvas.thumbnailCTX.strokeStyle = "black"
-      canvas.thumbnailCTX.beginPath()
-      //TODO: line tool to be added as vectors. Behavior of replace tool is like a mask, so the replaced pixels are static coordinates.
-      if (p.tool.name === "fill") {
-        canvas.thumbnailCTX.arc(
-          minD * p.properties.px1 + 0.5,
-          minD * p.properties.py1 + 0.5,
-          1,
+    if (!p.removed) {
+      if (p.tool.type === "vector") {
+        p.index = state.undoStack.indexOf(action)
+        let vectorElement = document.createElement("div")
+        vectorElement.className = `vector ${p.index}`
+        vectorElement.id = p.index
+        vectorsThumbnails.appendChild(vectorElement)
+        vectorElement.draggable = true
+        canvas.thumbnailCTX.clearRect(
           0,
-          2 * Math.PI,
-          true
-        )
-      } else if (p.tool.name === "quadCurve") {
-        canvas.thumbnailCTX.moveTo(
-          minD * p.properties.px1 + 0.5,
-          minD * p.properties.py1 + 0.5
-        )
-        canvas.thumbnailCTX.quadraticCurveTo(
-          minD * p.properties.px3 + 0.5,
-          minD * p.properties.py3 + 0.5,
-          minD * p.properties.px2 + 0.5,
-          minD * p.properties.py2 + 0.5
-        )
-      } else if (p.tool.name === "cubicCurve") {
-        canvas.thumbnailCTX.moveTo(
-          minD * p.properties.px1 + 0.5,
-          minD * p.properties.py1 + 0.5
-        )
-        canvas.thumbnailCTX.bezierCurveTo(
-          minD * p.properties.px3 + 0.5,
-          minD * p.properties.py3 + 0.5,
-          minD * p.properties.px4 + 0.5,
-          minD * p.properties.py4 + 0.5,
-          minD * p.properties.px2 + 0.5,
-          minD * p.properties.py2 + 0.5
-        )
-      } else if (p.tool.name === "ellipse") {
-        let angle = getAngle(
-          p.properties.px2 - p.properties.px1,
-          p.properties.py2 - p.properties.py1
-        )
-        canvas.thumbnailCTX.ellipse(
-          minD * p.properties.px1,
-          minD * p.properties.py1,
-          minD * p.properties.radA,
-          minD * p.properties.radB,
-          angle,
           0,
-          2 * Math.PI
+          canvas.thumbnailCVS.width,
+          canvas.thumbnailCVS.height
         )
-      }
-      canvas.thumbnailCTX.stroke()
-      if (p.index === canvas.currentVectorIndex) {
-        canvas.thumbnailCTX.fillStyle = "rgb(0, 0, 0)"
-      } else {
-        canvas.thumbnailCTX.fillStyle = "rgb(51, 51, 51)"
-      }
-      canvas.thumbnailCTX.fillRect(
-        minD * canvas.offScreenCVS.width,
-        0,
-        thumbnailCVS.width,
-        thumbnailCVS.height
-      )
-      canvas.thumbnailCTX.fillRect(
-        0,
-        minD * canvas.offScreenCVS.height,
-        thumbnailCVS.width,
-        thumbnailCVS.height
-      )
-      let thumb = new Image()
-      thumb.src = canvas.thumbnailCVS.toDataURL()
-      // vectorElement.appendChild(thumbnailCVS)
-      vectorElement.appendChild(thumb)
-      let tool = document.createElement("div")
-      tool.className = "tool"
-      let icon = document.createElement("div")
-      icon.className = p.tool.name
-      if (p.index === canvas.currentVectorIndex) {
-        tool.style.background = "rgb(255, 255, 255)"
-        vectorElement.style.background = "rgb(0, 0, 0)"
-      } else {
-        vectorElement.style.background = "rgb(51, 51, 51)"
-      }
-      tool.appendChild(icon)
-      vectorElement.appendChild(tool)
-      let color = document.createElement("div") //TODO: make clickable and color can be rechosen via colorpicker
-      color.className = "actionColor"
-      color.style.background = p.color.color
-      vectorElement.appendChild(color)
-      let trash = document.createElement("div") //TODO: make clickable and sets vector action as hidden
-      trash.className = "trash"
-      let trashIcon = document.createElement("div")
-      trashIcon.className = "icon"
-      trash.appendChild(trashIcon)
-      vectorElement.appendChild(trash)
-      // thumbnailCVS.width = thumbnailCVS.offsetWidth * sharpness
-      // thumbnailCVS.height = thumbnailCVS.offsetHeight * sharpness
-      // thumbnailCTX.scale(sharpness * 1, sharpness * 1)
+        //TODO: find a way to constrain coordinates to fit canvas viewing area for maximum size of vector without changing the size of the canvas for each vector thumbnail
+        // Save minima and maxima for x and y plotted coordinates to get the bounding box when plotting the curve. Then, here we can constrain the coords to fit a maximal bounding box in the thumbnail canvas
+        thumbnailCTX.lineWidth = 2
+        let wd =
+          canvas.thumbnailCVS.width / sharpness / canvas.offScreenCVS.width
+        let hd =
+          canvas.thumbnailCVS.height / sharpness / canvas.offScreenCVS.height
+        //get the minimum dimension ratio
+        let minD = Math.min(wd, hd)
+        // thumbnailCTX.strokeStyle = p.color.color
+        canvas.thumbnailCTX.strokeStyle = "black"
+        canvas.thumbnailCTX.beginPath()
+        //TODO: line tool to be added as vectors. Behavior of replace tool is like a mask, so the replaced pixels are static coordinates.
+        if (p.tool.name === "fill") {
+          canvas.thumbnailCTX.arc(
+            minD * p.properties.px1 + 0.5,
+            minD * p.properties.py1 + 0.5,
+            1,
+            0,
+            2 * Math.PI,
+            true
+          )
+        } else if (p.tool.name === "quadCurve") {
+          canvas.thumbnailCTX.moveTo(
+            minD * p.properties.px1 + 0.5,
+            minD * p.properties.py1 + 0.5
+          )
+          canvas.thumbnailCTX.quadraticCurveTo(
+            minD * p.properties.px3 + 0.5,
+            minD * p.properties.py3 + 0.5,
+            minD * p.properties.px2 + 0.5,
+            minD * p.properties.py2 + 0.5
+          )
+        } else if (p.tool.name === "cubicCurve") {
+          canvas.thumbnailCTX.moveTo(
+            minD * p.properties.px1 + 0.5,
+            minD * p.properties.py1 + 0.5
+          )
+          canvas.thumbnailCTX.bezierCurveTo(
+            minD * p.properties.px3 + 0.5,
+            minD * p.properties.py3 + 0.5,
+            minD * p.properties.px4 + 0.5,
+            minD * p.properties.py4 + 0.5,
+            minD * p.properties.px2 + 0.5,
+            minD * p.properties.py2 + 0.5
+          )
+        } else if (p.tool.name === "ellipse") {
+          let angle = getAngle(
+            p.properties.px2 - p.properties.px1,
+            p.properties.py2 - p.properties.py1
+          )
+          canvas.thumbnailCTX.ellipse(
+            minD * p.properties.px1,
+            minD * p.properties.py1,
+            minD * p.properties.radA,
+            minD * p.properties.radB,
+            angle,
+            0,
+            2 * Math.PI
+          )
+        }
+        canvas.thumbnailCTX.stroke()
+        if (p.index === canvas.currentVectorIndex) {
+          canvas.thumbnailCTX.fillStyle = "rgb(0, 0, 0)"
+        } else {
+          canvas.thumbnailCTX.fillStyle = "rgb(51, 51, 51)"
+        }
+        canvas.thumbnailCTX.fillRect(
+          minD * canvas.offScreenCVS.width,
+          0,
+          thumbnailCVS.width,
+          thumbnailCVS.height
+        )
+        canvas.thumbnailCTX.fillRect(
+          0,
+          minD * canvas.offScreenCVS.height,
+          thumbnailCVS.width,
+          thumbnailCVS.height
+        )
+        let thumb = new Image()
+        thumb.src = canvas.thumbnailCVS.toDataURL()
+        // vectorElement.appendChild(thumbnailCVS)
+        vectorElement.appendChild(thumb)
+        let tool = document.createElement("div")
+        tool.className = "tool"
+        let icon = document.createElement("div")
+        icon.className = p.tool.name
+        if (p.index === canvas.currentVectorIndex) {
+          tool.style.background = "rgb(255, 255, 255)"
+          vectorElement.style.background = "rgb(0, 0, 0)"
+        } else {
+          vectorElement.style.background = "rgb(51, 51, 51)"
+        }
+        tool.appendChild(icon)
+        vectorElement.appendChild(tool)
+        let color = document.createElement("div") //TODO: make clickable and color can be rechosen via colorpicker
+        color.className = "actionColor"
+        color.style.background = p.color.color
+        vectorElement.appendChild(color)
+        let trash = document.createElement("div") //TODO: make clickable and sets vector action as hidden
+        trash.className = "trash"
+        let trashIcon = document.createElement("div")
+        trashIcon.className = "icon"
+        trash.appendChild(trashIcon)
+        vectorElement.appendChild(trash)
+        // thumbnailCVS.width = thumbnailCVS.offsetWidth * sharpness
+        // thumbnailCVS.height = thumbnailCVS.offsetHeight * sharpness
+        // thumbnailCTX.scale(sharpness * 1, sharpness * 1)
 
-      //associate object
-      vectorElement.vectorObj = p
+        //associate object
+        vectorElement.vectorObj = p
+      }
     }
   })
 }

@@ -10,6 +10,7 @@ import { vectorGui } from "./GUI/vector.js"
 import { renderCursor, renderRasterGUI } from "./GUI/raster.js"
 import { drawRect, drawCircle } from "./utils/brushHelpers.js"
 import { activateShortcut } from "./Tools/shortcuts.js"
+import { actionClear } from "./Tools/actions.js"
 
 //===================================//
 //========= * * * DOM * * * =========//
@@ -34,6 +35,8 @@ toolBtn.style.background = "rgb(255, 255, 255)"
 let modesCont = document.querySelector(".modes")
 let modeBtn = document.querySelector("#draw")
 modeBtn.style.background = "rgb(255, 255, 255)"
+
+let layersCont = document.querySelector(".layers")
 
 //Tooltip
 let tooltip = document.getElementById("tooltip")
@@ -489,7 +492,8 @@ function handleZoom(e) {
 //Non-tool action.
 //TODO: must also update all vectors to be "removed" in a non destructive way, think about what that means for the timeline
 export function handleClear() {
-  state.addToTimeline({ tool: tools.clear, layer: canvas.currentLayer })
+  // state.addToTimeline({ tool: tools.clear, layer: canvas.currentLayer })
+  actionClear()
   //FIX: restructure stacked items. Currently each is an array, but each should be an object with more info plus an array
   //TODO: set all actions to hidden
   state.undoStack.push(state.points)
@@ -504,6 +508,7 @@ export function handleClear() {
   canvas.draw()
   vectorGui.reset(canvas)
   state.reset()
+  canvas.renderVectorsToDOM()
 }
 
 export function handleRecenter(e) {

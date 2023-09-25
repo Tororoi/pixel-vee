@@ -10,13 +10,13 @@
 
 @keyframes flash {
   0% {
-    background: rgb(239, 63, 57);
+    opacity: 1;
   }
   30% {
-    background: rgb(239, 63, 57);
+    opacity: 1;
   }
   100% {
-    background: rgb(131, 131, 131);
+    opacity: 0;
   }
 }
 /* Reset styles */
@@ -834,7 +834,6 @@ canvas {
   background-image: url("../public/pixelv-eyeclosed-hover.png");
 }
 .layers-interface .layers-container .layers .layer .warning {
-  background: rgb(239, 63, 57);
   animation: flash 0.6s ease-in infinite alternate-reverse;
 }
 .layers-interface .layers-container .layers .layer .trash {

@@ -108,6 +108,8 @@ function addToTimeline(actionObject) {
     // action: state.tool.fn, //should be passed as props, may not match state.tool.fn
     mode: state.mode,
     properties,
+    hidden: false,
+    removed: false,
   })
 }
 

@@ -1171,7 +1171,7 @@ export function adjustEllipseSteps() {
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         updateEllipseControlPoints(state, canvas, vectorGui)
         state.undoStack[canvas.currentVectorIndex][0].hidden = false
-        modifyAction(canvas.currentVectorIndex, true)
+        modifyAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
@@ -1283,6 +1283,22 @@ export const tools = {
     options: [],
     type: "modify",
   },
+  remove: {
+    name: "remove",
+    fn: null,
+    brushSize: null,
+    disabled: false,
+    options: [],
+    type: "modify",
+  },
+  clear: {
+    name: "clear",
+    fn: null,
+    brushSize: null,
+    disabled: false,
+    options: [],
+    type: "modify",
+  },
   //Raster Tools
   brush: {
     name: "brush",
@@ -1362,7 +1378,7 @@ export const tools = {
     brushSize: null,
     disabled: false,
     options: [],
-    type: "raster",
+    type: "settings",
   },
   removeLayer: {
     name: "removeLayer",
@@ -1370,15 +1386,7 @@ export const tools = {
     brushSize: null,
     disabled: false,
     options: [],
-    type: "raster",
-  },
-  clear: {
-    name: "clear",
-    fn: null,
-    brushSize: null,
-    disabled: false,
-    options: [],
-    type: "raster",
+    type: "settings",
   },
   //Utility Tools (does not affect timeline)
   eyedropper: {
