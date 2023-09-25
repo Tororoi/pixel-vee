@@ -93,17 +93,8 @@ export const state = {
  * @param {*} modifications - used for vector actions that can be changed after the fact, eg, line, curve, fill
  */
 function addToTimeline(actionObject) {
-  const {
-    tool,
-    x,
-    y,
-    color,
-    brushStamp,
-    brushSize,
-    layer,
-    properties,
-    modifications = [],
-  } = actionObject
+  const { tool, x, y, color, brushStamp, brushSize, layer, properties } =
+    actionObject
   //use current state for variables
   state.points.push({
     //x/y are sometimes objects with multiple values
@@ -117,7 +108,6 @@ function addToTimeline(actionObject) {
     // action: state.tool.fn, //should be passed as props, may not match state.tool.fn
     mode: state.mode,
     properties,
-    modifications,
   })
 }
 

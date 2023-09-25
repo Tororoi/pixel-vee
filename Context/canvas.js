@@ -152,6 +152,7 @@ export const canvas = {
   thumbnailCTX,
   //Layers
   layers: [], //(types: raster, vector, reference)
+  activeLayerCount: 0,
   currentLayer: null,
   tempLayer: null,
   bgColor: "rgba(131, 131, 131, 0.5)",
@@ -406,6 +407,11 @@ function redrawPoints(index = null) {
           canvas.renderLayersToDOM()
           canvas.renderVectorsToDOM()
           break
+        case "removeLayer":
+          p.layer.removed = true
+          canvas.renderLayersToDOM()
+          canvas.renderVectorsToDOM()
+          break
         case "clear":
           p.layer.ctx.clearRect(
             0,
@@ -628,7 +634,10 @@ function layerInteract(e) {
       e.target.classList.add("eyeopen")
       layer.opacity = 1
     }
+  } else if (e.target.className.includes("trash")) {
+    removeLayer(layer)
   } else {
+    //TODO: insert removeLayer functionality here if trash btn selected
     //select current layer
     if (layer.type === "raster") {
       canvas.currentLayer = layer
@@ -646,6 +655,7 @@ function dragLayerStart(e) {
   e.dataTransfer.setData("text", index)
   e.target.style.boxShadow =
     "inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131)"
+  //TODO: implement fancier dragging like dialog boxes
 }
 
 function dragLayerOver(e) {
@@ -714,7 +724,10 @@ function addRasterLayer() {
   //once layer is added to timeline and drawn on, can no longer be deleted
   const layer = createNewRasterLayer(`Layer ${canvas.layers.length + 1}`)
   canvas.layers.push(layer)
-  state.addToTimeline({ tool: tools.addLayer, layer })
+  state.addToTimeline({
+    tool: tools.addLayer,
+    layer,
+  })
   state.undoStack.push(state.points)
   state.points = []
   state.redoStack = []
@@ -758,18 +771,28 @@ function addReferenceLayer() {
   }
 }
 
-function removeLayer(e) {
-  //set "removed" flag to true on selected layer. NOTE: Currently not implemented
-  //TODO: add to timeline
-  let layer = e.target.closest(".layer").layerObj
-  layer.removed = true
+function removeLayer(layer) {
+  //set "removed" flag to true on selected layer.
+  if (canvas.activeLayerCount > 1) {
+    layer.removed = true
+    state.addToTimeline({
+      tool: tools.removeLayer,
+      layer,
+    })
+    state.undoStack.push(state.points)
+    state.points = []
+    state.redoStack = []
+    renderLayersToDOM()
+  }
 }
 
 function renderLayersToDOM() {
   layersContainer.innerHTML = ""
   let id = 0
+  canvas.activeLayerCount = 0
   canvas.layers.forEach((l) => {
     if (!l.removed) {
+      canvas.activeLayerCount++
       let layerElement = document.createElement("div")
       layerElement.className = `layer ${l.type}`
       layerElement.id = id

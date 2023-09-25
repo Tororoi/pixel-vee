@@ -3,7 +3,7 @@
 .layers-interface {
   order: 3;
   flex: 1 1 auto;
-  min-height: 184px; //header and layers-control plus 3 layers.
+  min-height: 196px; //header and layers-control plus 3 layers.
   .collapsible {
     padding-top: 2px;
   }
@@ -56,11 +56,11 @@
       justify-content: flex-end;
       .layer {
         cursor: grab;
-        height: 60px;
+        height: 50px;
         width: 100%;
         text-align: center;
         line-height: 40px;
-        font-size: 16px;
+        font-size: 12px;
         display: flex;
         flex-flow: row-reverse nowrap;
         justify-content: flex-end;
@@ -104,7 +104,7 @@
           width: 40px;
           height: 40px;
           z-index: 104;
-          margin: 6px;
+          margin: 3px;
           background-image: url("../public/pixelv-trash.png");
           background-size: 100%;
           &:hover {

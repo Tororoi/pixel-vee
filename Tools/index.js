@@ -1359,6 +1359,14 @@ export const tools = {
     options: [],
     type: "raster",
   },
+  removeLayer: {
+    name: "removeLayer",
+    fn: null,
+    brushSize: null,
+    disabled: false,
+    options: [],
+    type: "raster",
+  },
   clear: {
     name: "clear",
     fn: null,

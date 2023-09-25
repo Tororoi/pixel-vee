@@ -718,7 +718,7 @@ canvas {
 .layers-interface {
   order: 3;
   flex: 1 1 auto;
-  min-height: 184px;
+  min-height: 196px;
 }
 .layers-interface .collapsible {
   padding-top: 2px;
@@ -790,11 +790,11 @@ canvas {
 }
 .layers-interface .layers-container .layers .layer {
   cursor: grab;
-  height: 60px;
+  height: 50px;
   width: 100%;
   text-align: center;
   line-height: 40px;
-  font-size: 16px;
+  font-size: 12px;
   display: flex;
   flex-flow: row-reverse nowrap;
   justify-content: flex-end;
@@ -844,7 +844,7 @@ canvas {
   width: 40px;
   height: 40px;
   z-index: 104;
-  margin: 6px;
+  margin: 3px;
   background-image: url("../public/pixelv-trash.png");
   background-size: 100%;
 }
