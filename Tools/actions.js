@@ -7,6 +7,9 @@ import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { generateRandomRGB } from "../utils/colors.js"
 import { vectorGui } from "../GUI/vector.js"
 import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
+import { renderCanvas } from "../Canvas/render.js"
+import { createNewRasterLayer } from "../Canvas/layers.js"
+import { getColor } from "../utils/canvasHelpers.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -17,6 +20,7 @@ import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
 
 /**
  * Modify action in the timeline
+ * Only good for vector parameters
  * @param {*} actionIndex
  */
 export function modifyAction(actionIndex) {
@@ -45,6 +49,34 @@ export function modifyAction(actionIndex) {
   })
   action.properties = {
     ...modifiedProperties,
+  }
+}
+
+/**
+ * Modify action in the timeline
+ * Only good for vector parameters
+ * @param {*} actionIndex
+ * @param {*} newColor - color object {color, r, g, b, a}
+ */
+export function changeActionColor(actionIndex, newColor) {
+  let action = state.undoStack[actionIndex][0]
+  let oldColor = {
+    ...action.color,
+  } //shallow copy, color must not contain any objects or references as values
+  let modifiedColor = {
+    ...newColor,
+  } //shallow copy, must make deep copy, at least for x, y and properties
+  state.addToTimeline({
+    tool: tools.changeColor,
+    properties: {
+      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
+      moddedActionIndex: actionIndex,
+      from: oldColor,
+      to: modifiedColor,
+    },
+  })
+  action.color = {
+    ...modifiedColor,
   }
 }
 
@@ -231,7 +263,7 @@ export function actionPerfectPixels(currentX, currentY) {
         layer: canvas.currentLayer,
       })
     }
-    canvas.draw()
+    renderCanvas()
   } else {
     state.waitingPixelX = currentX
     state.waitingPixelY = currentY
@@ -356,7 +388,7 @@ export function actionReplace() {
     case "pointerdown":
       //Initial step
       //create new layer temporarily
-      const layer = canvas.createNewRasterLayer("Replacement Layer")
+      const layer = createNewRasterLayer("Replacement Layer")
       //create isolated color map for color replacement
       const isolatedColorLayer = createMapForSpecificColor(
         canvas.currentLayer,
@@ -447,7 +479,7 @@ export function actionFill(startX, startY, currentColor, ctx, currentMode) {
     canvas.offScreenCVS.height
   )
 
-  state.clickedColor = canvas.getColor(startX, startY, state.localColorLayer)
+  state.clickedColor = getColor(startX, startY, state.localColorLayer)
 
   if (currentMode === "erase")
     currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
@@ -904,7 +936,7 @@ function slowPlotCubicBezier(
     } = instructionsObject
     let plotPoints = plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3, maxSteps)
     renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
-    canvas.draw()
+    renderCanvas()
   }
   state.debugObject = {
     x0,

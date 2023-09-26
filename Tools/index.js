@@ -1,4 +1,4 @@
-import { keys } from "../Context/keys.js"
+import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
@@ -26,6 +26,10 @@ import {
   updateEllipseOffsets,
   updateEllipseControlPoints,
 } from "../utils/ellipse.js"
+import { renderCanvas } from "../Canvas/render.js"
+import { consolidateLayers } from "../Canvas/layers.js"
+import { getColor } from "../utils/canvasHelpers.js"
+import { setColor } from "../Swatch/events.js"
 
 //====================================//
 //=== * * * Tool Controllers * * * ===//
@@ -64,7 +68,7 @@ export function drawSteps() {
           layer: canvas.currentLayer,
         })
       }
-      canvas.draw()
+      renderCanvas()
       break
     case "pointermove":
       if (state.mode === "perfect") {
@@ -102,11 +106,11 @@ export function drawSteps() {
               },
             })
           }
-          canvas.draw()
+          renderCanvas()
         } else {
           //FIX: perfect will be option, not mode
           if (state.mode === "perfect") {
-            canvas.draw()
+            renderCanvas()
             drawCurrentPixel(state, canvas, swatches)
             actionPerfectPixels(state.cursorX, state.cursorY)
           } else {
@@ -127,7 +131,7 @@ export function drawSteps() {
                 layer: canvas.currentLayer,
               })
             }
-            canvas.draw()
+            renderCanvas()
           }
         }
       }
@@ -154,7 +158,7 @@ export function drawSteps() {
           layer: canvas.currentLayer,
         })
       }
-      canvas.draw()
+      renderCanvas()
       break
     default:
     //do nothing
@@ -236,7 +240,7 @@ export function lineSteps() {
           canvas.offScreenCVS.width / canvas.zoom,
           canvas.offScreenCVS.height / canvas.zoom
         )
-        canvas.draw()
+        renderCanvas()
         actionLine(
           state.previousX + canvas.xOffset,
           state.previousY + canvas.yOffset,
@@ -274,7 +278,7 @@ export function lineSteps() {
           py2: state.cursorY,
         },
       })
-      canvas.draw()
+      renderCanvas()
       break
     default:
     //do nothing
@@ -311,7 +315,7 @@ export function fillSteps() {
             py1: state.vectorProperties.py1,
           },
         })
-        canvas.draw()
+        renderCanvas()
       }
       break
     case "pointermove":
@@ -323,7 +327,7 @@ export function fillSteps() {
         adjustFillSteps()
       }
       //redraw canvas to allow onscreen cursor to render
-      canvas.draw()
+      renderCanvas()
     default:
     //do nothing
   }
@@ -351,7 +355,7 @@ export function adjustFillSteps() {
         }
         state.undoStack[canvas.currentVectorIndex][0].hidden = true
         //Only render canvas up to timeline where fill action exists while adjusting fill
-        canvas.render(canvas.currentVectorIndex) // render to canvas.currentVectorIndex
+        renderCanvas(true, true, canvas.currentVectorIndex) // render to canvas.currentVectorIndex
       }
       break
     case "pointermove":
@@ -376,7 +380,7 @@ export function adjustFillSteps() {
           xKey: null,
           yKey: null,
         }
-        canvas.render()
+        renderCanvas(true, true)
       }
       break
     case "pointerout":
@@ -455,8 +459,7 @@ export function quadCurveSteps() {
           state.onscreenX !== state.previousOnscreenX ||
           state.onscreenY !== state.previousOnscreenY
         ) {
-          // canvas.onScreenCTX.clearRect(0, 0, canvas.offScreenCVS.width / canvas.zoom, canvas.offScreenCVS.height / canvas.zoom);
-          canvas.draw()
+          renderCanvas()
           if (state.clickCounter === 3) {
             state.vectorProperties.px3 = state.cursorX
             state.vectorProperties.py3 = state.cursorY
@@ -528,7 +531,7 @@ export function quadCurveSteps() {
               py3: state.vectorProperties.py3,
             },
           })
-          canvas.draw()
+          renderCanvas()
         }
       }
       break
@@ -615,7 +618,7 @@ export function cubicCurveSteps() {
           state.onscreenX !== state.previousOnscreenX ||
           state.onscreenY !== state.previousOnscreenY
         ) {
-          canvas.draw()
+          renderCanvas()
           if (state.clickCounter === 4) {
             state.vectorProperties.px4 = state.cursorX
             state.vectorProperties.py4 = state.cursorY
@@ -699,7 +702,7 @@ export function cubicCurveSteps() {
               },
             })
           }
-          canvas.draw()
+          renderCanvas()
           renderRasterGUI(state, canvas, swatches)
           vectorGui.render(state, canvas)
         }
@@ -739,7 +742,7 @@ export function adjustCurveSteps(numPoints = 4) {
           yKey: vectorGui.collidedKeys.yKey,
         }
         state.undoStack[canvas.currentVectorIndex][0].hidden = true
-        canvas.render()
+        renderCanvas(true, true)
         if (numPoints === 3) {
           actionQuadraticCurve(
             state.vectorProperties.px1 + canvas.xOffset,
@@ -779,7 +782,7 @@ export function adjustCurveSteps(numPoints = 4) {
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        canvas.draw()
+        renderCanvas()
         if (numPoints === 3) {
           actionQuadraticCurve(
             state.vectorProperties.px1 + canvas.xOffset,
@@ -825,7 +828,7 @@ export function adjustCurveSteps(numPoints = 4) {
           xKey: null,
           yKey: null,
         }
-        canvas.render()
+        renderCanvas(true, true)
       }
       break
     case "pointerout":
@@ -940,7 +943,7 @@ export function ellipseSteps() {
           state.onscreenY + canvas.subPixelY !==
             state.previousOnscreenY + canvas.previousSubPixelY
         ) {
-          canvas.draw()
+          renderCanvas()
           if (state.clickCounter === 1) {
             state.vectorProperties.px2 = state.cursorX
             state.vectorProperties.py2 = state.cursorY
@@ -1066,7 +1069,7 @@ export function ellipseSteps() {
           state.clickCounter = 0
           //reset vector state TODO: forceCircle needs to be reset
           state.vectorProperties.forceCircle = false
-          canvas.draw()
+          renderCanvas()
           renderRasterGUI(state, canvas, swatches)
           vectorGui.render(state, canvas)
         }
@@ -1111,7 +1114,7 @@ export function adjustEllipseSteps() {
         //TODO: changing opacity isn't enough since erase mode will be unaffected
         // let action = state.undoStack[canvas.currentVectorIndex]
         state.undoStack[canvas.currentVectorIndex][0].hidden = true
-        canvas.render()
+        renderCanvas(true, true)
         //angle and offset passed should consider which point is being adjusted. For p1, use current state.vectorProperties.offset instead of recalculating. For p3, add 1.5 * Math.PI to angle
         actionEllipse(
           state.vectorProperties.px1 + canvas.xOffset,
@@ -1141,7 +1144,7 @@ export function adjustEllipseSteps() {
     case "pointermove":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         updateEllipseControlPoints(state, canvas, vectorGui)
-        canvas.draw()
+        renderCanvas()
         actionEllipse(
           state.vectorProperties.px1 + canvas.xOffset,
           state.vectorProperties.py1 + canvas.yOffset,
@@ -1176,7 +1179,7 @@ export function adjustEllipseSteps() {
           xKey: null,
           yKey: null,
         }
-        canvas.render()
+        renderCanvas(true, true)
       }
       break
     case "pointerout":
@@ -1206,14 +1209,14 @@ function moveSteps() {
 export function eyedropperSteps() {
   //eyedropper helper function
   function sampleColor(x, y) {
-    let newColor = canvas.getColor(x, y, state.colorLayerGlobal)
+    let newColor = getColor(x, y, state.colorLayerGlobal)
     //not simply passing whole color in until random color function is refined
-    swatches.setColor(newColor.r, newColor.g, newColor.b, "swatch btn")
+    setColor(newColor.r, newColor.g, newColor.b, swatches.primary.swatch)
   }
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //get imageData
-      canvas.consolidateLayers()
+      consolidateLayers()
       state.colorLayerGlobal = canvas.offScreenCTX.getImageData(
         0,
         0,
@@ -1251,7 +1254,7 @@ export function grabSteps() {
         state.onscreenX - state.previousOnscreenX + canvas.previousXOffset
       canvas.yOffset =
         state.onscreenY - state.previousOnscreenY + canvas.previousYOffset
-      canvas.draw()
+      renderCanvas()
       break
     case "pointerup":
       canvas.previousXOffset = canvas.xOffset
@@ -1278,6 +1281,16 @@ export const tools = {
   modify: {
     name: "modify",
     fn: null,
+    action: null,
+    brushSize: null,
+    disabled: false,
+    options: [],
+    type: "modify",
+  },
+  changeColor: {
+    name: "changeColor",
+    fn: null,
+    action: null,
     brushSize: null,
     disabled: false,
     options: [],
@@ -1286,6 +1299,7 @@ export const tools = {
   remove: {
     name: "remove",
     fn: null,
+    action: null,
     brushSize: null,
     disabled: false,
     options: [],
@@ -1294,6 +1308,7 @@ export const tools = {
   clear: {
     name: "clear",
     fn: null,
+    action: null,
     brushSize: null,
     disabled: false,
     options: [],
@@ -1303,6 +1318,7 @@ export const tools = {
   brush: {
     name: "brush",
     fn: drawSteps,
+    action: actionDraw,
     brushSize: 1,
     disabled: false,
     options: ["perfect"],
@@ -1311,6 +1327,7 @@ export const tools = {
   line: {
     name: "line",
     fn: lineSteps,
+    action: actionLine,
     brushSize: 1,
     disabled: false,
     options: [],
@@ -1322,6 +1339,7 @@ export const tools = {
   replace: {
     name: "replace",
     fn: replaceSteps,
+    action: null,
     brushSize: 1,
     disabled: false,
     options: ["perfect"],
@@ -1330,6 +1348,7 @@ export const tools = {
   select: {
     name: "select",
     fn: selectSteps,
+    action: null,
     brushSize: 1,
     disabled: false,
     options: ["magic wand"],
@@ -1342,6 +1361,7 @@ export const tools = {
   fill: {
     name: "fill",
     fn: fillSteps,
+    action: actionFill,
     brushSize: 1,
     disabled: true,
     options: ["contiguous"],
@@ -1350,6 +1370,7 @@ export const tools = {
   quadCurve: {
     name: "quadCurve",
     fn: quadCurveSteps,
+    action: actionQuadraticCurve,
     brushSize: 1,
     disabled: false,
     options: [],
@@ -1358,6 +1379,7 @@ export const tools = {
   cubicCurve: {
     name: "cubicCurve",
     fn: cubicCurveSteps,
+    action: actionCubicCurve,
     brushSize: 1,
     disabled: false,
     options: [],
@@ -1366,6 +1388,7 @@ export const tools = {
   ellipse: {
     name: "ellipse",
     fn: ellipseSteps,
+    action: actionEllipse,
     brushSize: 1,
     disabled: false,
     options: ["radiusExcludesCenter"], // rename to something shorter
@@ -1375,6 +1398,7 @@ export const tools = {
   addLayer: {
     name: "addLayer",
     fn: null,
+    action: null,
     brushSize: null,
     disabled: false,
     options: [],
@@ -1383,6 +1407,7 @@ export const tools = {
   removeLayer: {
     name: "removeLayer",
     fn: null,
+    action: null,
     brushSize: null,
     disabled: false,
     options: [],
@@ -1392,6 +1417,7 @@ export const tools = {
   eyedropper: {
     name: "eyedropper",
     fn: eyedropperSteps,
+    action: null,
     brushSize: 1,
     disabled: true,
     options: [],
@@ -1400,6 +1426,7 @@ export const tools = {
   grab: {
     name: "grab",
     fn: grabSteps,
+    action: null,
     brushSize: 1,
     disabled: true,
     options: [],

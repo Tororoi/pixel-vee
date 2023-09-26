@@ -1,10 +1,12 @@
-import { keys } from "../Context/keys.js"
+import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
 import { handleUndo, handleRedo } from "./undoRedo.js"
 import { tools, adjustEllipseSteps } from "./index.js"
+import { renderCanvas } from "../Canvas/render.js"
+import { randomizeColor } from "../Swatch/events.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
@@ -17,7 +19,7 @@ export function activateShortcut(keyCode, modeBtn, toolBtn) {
   switch (keyCode) {
     case "ArrowLeft":
       if (state.debugger) {
-        canvas.render()
+        renderCanvas(true, true)
         state.debugObject.maxSteps -= 1
         state.debugFn(state.debugObject)
       }
@@ -69,7 +71,7 @@ export function activateShortcut(keyCode, modeBtn, toolBtn) {
       }
       break
     case "KeyS":
-      swatches.randomizeColor("swatch btn")
+      randomizeColor(swatches.primary.swatch)
       break
     case "KeyD":
       //reset old button

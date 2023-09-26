@@ -1,8 +1,9 @@
 //Import order is important. 1. DOM initialization, 2. state managers
 // import { initializeAllDialogBoxes } from "./DOM/dialogBox.js"
-import { keys } from "./Context/keys.js"
+import { dom } from "./DOM/dom.js"
+import { keys } from "./Shortcuts/keys.js"
 import { state } from "./Context/state.js"
-import { canvas, resizeOnScreenCanvas } from "../Context/canvas.js"
+import { canvas } from "../Context/canvas.js"
 import { swatches } from "./Context/swatch.js"
 import { tools, adjustEllipseSteps } from "./Tools/index.js"
 import { handleUndo, handleRedo } from "./Tools/undoRedo.js"
@@ -11,6 +12,11 @@ import { renderCursor, renderRasterGUI } from "./GUI/raster.js"
 import { drawRect, drawCircle } from "./utils/brushHelpers.js"
 import { activateShortcut } from "./Tools/shortcuts.js"
 import { actionClear } from "./Tools/actions.js"
+import { setInitialZoom } from "./utils/canvasHelpers.js"
+import { renderCanvas, renderVectorsToDOM } from "./Canvas/render.js"
+import { consolidateLayers } from "./Canvas/layers.js"
+import "./Swatch/events.js"
+import "./Canvas/events.js"
 
 //===================================//
 //========= * * * DOM * * * =========//
@@ -36,8 +42,6 @@ let modesCont = document.querySelector(".modes")
 let modeBtn = document.querySelector("#draw")
 modeBtn.style.background = "rgb(255, 255, 255)"
 
-let layersCont = document.querySelector(".layers")
-
 //Tooltip
 let tooltip = document.getElementById("tooltip")
 
@@ -59,15 +63,6 @@ let exportBtn = document.querySelector(".export")
 
 //TODO: Add Palette that consists of a small canvas with basic paint, sample and fill erase tools.
 //TODO: Add color mixer that consists of a small canvas that can be painted upon and cleared. At any time the user can click "Mix" and the colors on the canvas will be used to generate a mixed color.
-
-//===================================//
-//=== * * * Initialization * * * ====//
-//===================================//
-
-//Initialize first layer
-canvas.addRasterLayer()
-canvas.currentLayer = canvas.layers[0]
-canvas.renderLayersToDOM()
 
 //===================================//
 //=== * * * Event Listeners * * * ===//
@@ -102,9 +97,6 @@ document.body.addEventListener("mouseover", (e) => {
     showTooltip(tooltipMessage, e.target)
   }
 })
-
-//Window
-window.addEventListener("resize", resizeOnScreenCanvas)
 
 //Shortcuts
 document.addEventListener("keydown", handleKeyDown)
@@ -238,7 +230,7 @@ function handlePointerDown(e) {
   // if (state.touch) {
   vectorGui.render(state, canvas) // For tablets, vectors must be rendered before running state.tool.fn in order to check control points collision logic
   // }
-  canvas.draw()
+  renderCanvas()
   //Reset Cursor for mobile
   state.onscreenX = state.cursorWithCanvasOffsetX
   state.onscreenY = state.cursorWithCanvasOffsetY
@@ -246,9 +238,11 @@ function handlePointerDown(e) {
   state.previousOnscreenY = state.onscreenY
   //if drawing on hidden layer, flash hide btn
   if (canvas.currentLayer.opacity === 0) {
-    for (let i = 0; i < layersCont.children.length; i += 1) {
-      if (layersCont.children[i].layerObj === canvas.currentLayer) {
-        layersCont.children[i].querySelector(".hide").classList.add("warning")
+    for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
+      if (dom.layersContainer.children[i].layerObj === canvas.currentLayer) {
+        dom.layersContainer.children[i]
+          .querySelector(".hide")
+          .classList.add("warning")
       }
     }
   }
@@ -313,9 +307,9 @@ function handlePointerUp(e) {
   }
   setCoordinates(e)
   if (canvas.currentLayer.opacity === 0) {
-    for (let i = 0; i < layersCont.children.length; i += 1) {
-      if (layersCont.children[i].layerObj === canvas.currentLayer) {
-        layersCont.children[i]
+    for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
+      if (dom.layersContainer.children[i].layerObj === canvas.currentLayer) {
+        dom.layersContainer.children[i]
           .querySelector(".hide")
           .classList.remove("warning")
       }
@@ -339,7 +333,7 @@ function handlePointerUp(e) {
       } else if (state.points[0].tool.type === "modify") {
         canvas.currentVectorIndex = state.points[0].properties.moddedActionIndex
       }
-      canvas.renderVectorsToDOM()
+      renderVectorsToDOM()
     }
   }
   state.points = []
@@ -368,10 +362,9 @@ function handlePointerOut(e) {
   //   state.redoStack = []
   // }
   if (!state.touch) {
-    canvas.draw()
+    renderCanvas()
     renderRasterGUI(state, canvas, swatches)
     vectorGui.render(state, canvas)
-    // canvas.draw()
     canvas.pointerEvent = "none"
   }
 }
@@ -413,7 +406,7 @@ function zoomCanvas(z, xOriginOffset, yOriginOffset) {
     0,
     0
   )
-  canvas.draw()
+  renderCanvas()
   renderRasterGUI(state, canvas, swatches)
   vectorGui.render(state, canvas)
 }
@@ -505,14 +498,14 @@ export function handleClear() {
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
-  canvas.draw()
+  renderCanvas()
   vectorGui.reset(canvas)
   state.reset()
-  canvas.renderVectorsToDOM()
+  renderVectorsToDOM()
 }
 
 export function handleRecenter(e) {
-  canvas.zoom = canvas.setInitialZoom(
+  canvas.zoom = setInitialZoom(
     Math.max(canvas.offScreenCVS.width, canvas.offScreenCVS.height)
   )
   canvas.vectorGuiCTX.setTransform(
@@ -551,7 +544,7 @@ export function handleRecenter(e) {
   )
   canvas.previousXOffset = canvas.xOffset
   canvas.previousYOffset = canvas.yOffset
-  canvas.draw()
+  renderCanvas()
   renderRasterGUI(state, canvas, swatches)
   vectorGui.render(state, canvas)
 }
@@ -571,7 +564,7 @@ export function handleTools(e, manualToolName = null) {
       }
       toolBtn.style.background = "rgb(255, 255, 255)"
       state.tool = tools[toolBtn.id]
-      canvas.draw()
+      renderCanvas()
       //update options
       updateStamp()
       brushSlider.value = state.tool.brushSize
@@ -660,7 +653,7 @@ function updateStamp() {
 //====================================//
 
 function exportImage() {
-  canvas.consolidateLayers()
+  consolidateLayers()
   const a = document.createElement("a")
   a.style.display = "none"
   a.href = canvas.offScreenCVS.toDataURL()
