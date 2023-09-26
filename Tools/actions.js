@@ -7,7 +7,9 @@ import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { generateRandomRGB } from "../utils/colors.js"
 import { vectorGui } from "../GUI/vector.js"
 import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
-import { drawRect, drawCircle } from "../utils/brushHelpers.js"
+import { renderCanvas } from "../Canvas/render.js"
+import { createNewRasterLayer } from "../Canvas/layers.js"
+import { getColor } from "../utils/canvasHelpers.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -15,6 +17,115 @@ import { drawRect, drawCircle } from "../utils/brushHelpers.js"
 
 //"Actions" are user-initiated events that are reversible through the undo button. This file holds the functions used for reversible actions.
 //TODO: Not all reversible actions are held here currently. Clear canvas and addLayer are not present, but those don't interact with the cursor.
+
+/**
+ * Modify action in the timeline
+ * Only good for vector parameters
+ * @param {*} actionIndex
+ */
+export function modifyAction(actionIndex) {
+  let action = state.undoStack[actionIndex][0]
+  let oldProperties = {
+    ...action.properties,
+  } //shallow copy, properties must not contain any objects or references as values
+  let modifiedProperties = {
+    ...action.properties,
+  } //shallow copy, must make deep copy, at least for x, y and properties
+  modifiedProperties = { ...state.vectorProperties }
+  if (action.tool.name === "ellipse") {
+    modifiedProperties.forceCircle =
+      vectorGui.selectedPoint.xKey === "px1"
+        ? modifiedProperties.forceCircle
+        : state.vectorProperties.forceCircle
+  }
+  state.addToTimeline({
+    tool: tools.modify,
+    properties: {
+      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
+      moddedActionIndex: actionIndex,
+      from: oldProperties,
+      to: modifiedProperties,
+    },
+  })
+  action.properties = {
+    ...modifiedProperties,
+  }
+}
+
+/**
+ * Modify action in the timeline
+ * Only good for vector parameters
+ * @param {*} actionIndex
+ * @param {*} newColor - color object {color, r, g, b, a}
+ */
+export function changeActionColor(actionIndex, newColor) {
+  let action = state.undoStack[actionIndex][0]
+  let oldColor = {
+    ...action.color,
+  } //shallow copy, color must not contain any objects or references as values
+  let modifiedColor = {
+    ...newColor,
+  } //shallow copy, must make deep copy, at least for x, y and properties
+  state.addToTimeline({
+    tool: tools.changeColor,
+    properties: {
+      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
+      moddedActionIndex: actionIndex,
+      from: oldColor,
+      to: modifiedColor,
+    },
+  })
+  action.color = {
+    ...modifiedColor,
+  }
+}
+
+/**
+ * Modify action in the timeline
+ * @param {*} actionIndex
+ */
+export function removeAction(actionIndex) {
+  let action = state.undoStack[actionIndex][0]
+  state.addToTimeline({
+    tool: tools.remove,
+    properties: {
+      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
+      moddedActionIndex: actionIndex,
+      from: false,
+      to: true,
+    },
+  })
+  action.removed = true
+}
+
+/**
+ * Modify actions in the timeline
+ * Sets all actions before it except for action index 0 to removed = true
+ */
+export function actionClear() {
+  let upToIndex = state.undoStack.length - 1
+  state.addToTimeline({
+    tool: tools.clear,
+    layer: canvas.currentLayer,
+    properties: {
+      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
+      upToIndex,
+    },
+  })
+  let i = 0
+  //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
+  state.undoStack.forEach((action) => {
+    if (i > upToIndex) {
+      return
+    }
+    i++
+    action.forEach((p) => {
+      if (p.layer === canvas.currentLayer) {
+        p.removed = true
+      }
+    })
+  })
+}
 
 /**
  * Render a stamp from the brush to the canvas
@@ -26,7 +137,6 @@ import { drawRect, drawCircle } from "../utils/brushHelpers.js"
  * @param {*} weight
  * @param {*} ctx
  * @param {*} currentMode
- * @param {*} scale
  */
 export function actionDraw(
   coordX,
@@ -35,18 +145,17 @@ export function actionDraw(
   brushStamp,
   weight,
   ctx,
-  currentMode,
-  scale = 1
+  currentMode
 ) {
   ctx.fillStyle = currentColor.color
   switch (currentMode) {
     case "erase":
       brushStamp.forEach((r) => {
         ctx.clearRect(
-          (Math.ceil(coordX - weight / 2) + r.x) * scale,
-          (Math.ceil(coordY - weight / 2) + r.y) * scale,
-          r.w * scale,
-          r.h * scale
+          Math.ceil(coordX - weight / 2) + r.x,
+          Math.ceil(coordY - weight / 2) + r.y,
+          r.w,
+          r.h
         )
       })
       break
@@ -54,10 +163,10 @@ export function actionDraw(
       // ctx.fillRect(Math.ceil(coordX - weight / 2), Math.ceil(coordY - weight / 2), weight, weight);
       brushStamp.forEach((r) => {
         ctx.fillRect(
-          (Math.ceil(coordX - weight / 2) + r.x) * scale,
-          (Math.ceil(coordY - weight / 2) + r.y) * scale,
-          r.w * scale,
-          r.h * scale
+          Math.ceil(coordX - weight / 2) + r.x,
+          Math.ceil(coordY - weight / 2) + r.y,
+          r.w,
+          r.h
         )
       })
     // ctx.drawImage(brushStamp, Math.ceil(coordX - weight / 2), Math.ceil(coordY - weight / 2), weight, weight);
@@ -75,7 +184,6 @@ export function actionDraw(
  * @param {*} currentMode
  * @param {*} brushStamp
  * @param {*} weight
- * @param {*} scale
  */
 export function actionLine(
   sx,
@@ -86,8 +194,7 @@ export function actionLine(
   ctx,
   currentMode,
   brushStamp,
-  weight,
-  scale = 1
+  weight
 ) {
   ctx.fillStyle = currentColor.color
 
@@ -107,8 +214,7 @@ export function actionLine(
       brushStamp,
       weight,
       ctx,
-      currentMode,
-      scale
+      currentMode
     )
   }
   //fill endpoint
@@ -119,8 +225,7 @@ export function actionLine(
     brushStamp,
     weight,
     ctx,
-    currentMode,
-    scale
+    currentMode
   )
 }
 
@@ -158,7 +263,7 @@ export function actionPerfectPixels(currentX, currentY) {
         layer: canvas.currentLayer,
       })
     }
-    canvas.draw()
+    renderCanvas()
   } else {
     state.waitingPixelX = currentX
     state.waitingPixelY = currentY
@@ -283,7 +388,7 @@ export function actionReplace() {
     case "pointerdown":
       //Initial step
       //create new layer temporarily
-      const layer = canvas.createNewRasterLayer("Replacement Layer")
+      const layer = createNewRasterLayer("Replacement Layer")
       //create isolated color map for color replacement
       const isolatedColorLayer = createMapForSpecificColor(
         canvas.currentLayer,
@@ -374,7 +479,7 @@ export function actionFill(startX, startY, currentColor, ctx, currentMode) {
     canvas.offScreenCVS.height
   )
 
-  state.clickedColor = canvas.getColor(startX, startY, state.localColorLayer)
+  state.clickedColor = getColor(startX, startY, state.localColorLayer)
 
   if (currentMode === "erase")
     currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
@@ -475,7 +580,6 @@ export function actionFill(startX, startY, currentColor, ctx, currentMode) {
  * @param {*} weight
  * @param {*} ctx
  * @param {*} currentMode
- * @param {*} scale
  */
 function renderPoints(
   points,
@@ -483,26 +587,15 @@ function renderPoints(
   currentColor,
   weight,
   ctx,
-  currentMode,
-  scale
+  currentMode
 ) {
   function plot(point) {
     //rounded values
     let xt = Math.floor(point.x)
     let yt = Math.floor(point.y)
-    // let brushOffset = Math.floor(weight / 2) * scale;
     // let randomColor = generateRandomRGB()
     //pass "point" instead of currentColor to visualize segments
-    actionDraw(
-      xt,
-      yt,
-      currentColor,
-      brushStamp,
-      weight,
-      ctx,
-      currentMode,
-      scale
-    )
+    actionDraw(xt, yt, currentColor, brushStamp, weight, ctx, currentMode)
   }
   points.forEach((point) => plot(point))
 }
@@ -521,7 +614,6 @@ function renderPoints(
  * @param {*} currentMode
  * @param {*} brushStamp
  * @param {*} weight
- * @param {*} scale
  */
 export function actionQuadraticCurve(
   startx,
@@ -535,8 +627,7 @@ export function actionQuadraticCurve(
   ctx,
   currentMode,
   brushStamp,
-  weight,
-  scale = 1
+  weight
 ) {
   //force coords to int
   startx = Math.round(startx)
@@ -560,8 +651,7 @@ export function actionQuadraticCurve(
       canvas.onScreenCTX,
       currentMode,
       brushStamp,
-      weight,
-      scale
+      weight
     )
     state.vectorProperties.px2 = state.cursorX
     state.vectorProperties.py2 = state.cursorY
@@ -577,15 +667,7 @@ export function actionQuadraticCurve(
       endx,
       endy
     )
-    renderPoints(
-      plotPoints,
-      brushStamp,
-      currentColor,
-      weight,
-      ctx,
-      currentMode,
-      scale
-    )
+    renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
     state.vectorProperties.px3 = state.cursorX
     state.vectorProperties.py3 = state.cursorY
   } else if (stepNum === 3) {
@@ -598,15 +680,7 @@ export function actionQuadraticCurve(
       endx,
       endy
     )
-    renderPoints(
-      plotPoints,
-      brushStamp,
-      currentColor,
-      weight,
-      ctx,
-      currentMode,
-      scale
-    )
+    renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
   }
 }
 
@@ -626,7 +700,6 @@ export function actionQuadraticCurve(
  * @param {*} currentMode
  * @param {*} brushStamp
  * @param {*} weight
- * @param {*} scale
  */
 export function actionCubicCurve(
   startx,
@@ -642,8 +715,7 @@ export function actionCubicCurve(
   ctx,
   currentMode,
   brushStamp,
-  weight,
-  scale = 1
+  weight
 ) {
   //force coords to int
   startx = Math.round(startx)
@@ -669,8 +741,7 @@ export function actionCubicCurve(
       canvas.onScreenCTX,
       currentMode,
       brushStamp,
-      weight,
-      scale
+      weight
     )
     //TODO: can setting state be moved to steps function?
     state.vectorProperties.px2 = state.cursorX
@@ -687,15 +758,7 @@ export function actionCubicCurve(
       endx,
       endy
     )
-    renderPoints(
-      plotPoints,
-      brushStamp,
-      currentColor,
-      weight,
-      ctx,
-      currentMode,
-      scale
-    )
+    renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
     state.vectorProperties.px3 = state.cursorX
     state.vectorProperties.py3 = state.cursorY
   } else if (stepNum === 3) {
@@ -711,15 +774,7 @@ export function actionCubicCurve(
       endx,
       endy
     )
-    renderPoints(
-      plotPoints,
-      brushStamp,
-      currentColor,
-      weight,
-      ctx,
-      currentMode,
-      scale
-    )
+    renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
     state.vectorProperties.px4 = state.cursorX
     state.vectorProperties.py4 = state.cursorY
   } else if (stepNum === 4) {
@@ -738,8 +793,7 @@ export function actionCubicCurve(
         currentColor,
         weight,
         ctx,
-        currentMode,
-        scale
+        currentMode
       )
     } else {
       let plotPoints = plotCubicBezier(
@@ -758,8 +812,7 @@ export function actionCubicCurve(
         currentColor,
         weight,
         ctx,
-        currentMode,
-        scale
+        currentMode
       )
     }
   }
@@ -779,7 +832,10 @@ export function actionCubicCurve(
  * @param {*} currentMode
  * @param {*} brushStamp
  * @param {*} weight
- * @param {*} scale
+ * @param {*} angle
+ * @param {*} offset
+ * @param {*} x1Offset
+ * @param {*} y1Offset
  */
 export function actionEllipse(
   centerx,
@@ -796,7 +852,6 @@ export function actionEllipse(
   currentMode,
   brushStamp,
   weight,
-  scale = 1,
   angle,
   offset,
   x1Offset,
@@ -814,15 +869,7 @@ export function actionEllipse(
 
   if (forceCircle) {
     let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, offset)
-    renderPoints(
-      plotPoints,
-      brushStamp,
-      currentColor,
-      weight,
-      ctx,
-      currentMode,
-      scale
-    )
+    renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
   } else {
     let plotPoints = plotRotatedEllipse(
       centerx,
@@ -835,15 +882,7 @@ export function actionEllipse(
       x1Offset,
       y1Offset
     )
-    renderPoints(
-      plotPoints,
-      brushStamp,
-      currentColor,
-      weight,
-      ctx,
-      currentMode,
-      scale
-    )
+    renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
   }
 }
 
@@ -862,7 +901,6 @@ export function actionEllipse(
  * @param {*} weight
  * @param {*} ctx
  * @param {*} currentMode
- * @param {*} scale
  */
 function slowPlotCubicBezier(
   x0,
@@ -877,8 +915,7 @@ function slowPlotCubicBezier(
   currentColor,
   weight,
   ctx,
-  currentMode,
-  scale
+  currentMode
 ) {
   function stepPlotCubicBezier(instructionsObject) {
     const {
@@ -895,20 +932,11 @@ function slowPlotCubicBezier(
       weight,
       ctx,
       currentMode,
-      scale,
       maxSteps,
     } = instructionsObject
     let plotPoints = plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3, maxSteps)
-    renderPoints(
-      plotPoints,
-      brushStamp,
-      currentColor,
-      weight,
-      ctx,
-      currentMode,
-      scale
-    )
-    canvas.draw()
+    renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
+    renderCanvas()
   }
   state.debugObject = {
     x0,
@@ -924,7 +952,6 @@ function slowPlotCubicBezier(
     weight,
     ctx,
     currentMode,
-    scale,
     maxSteps: 1,
   }
   state.debugFn = stepPlotCubicBezier

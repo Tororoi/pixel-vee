@@ -1,13 +1,22 @@
 //Import order is important. 1. DOM initialization, 2. state managers
 // import { initializeAllDialogBoxes } from "./DOM/dialogBox.js"
+import { dom } from "./DOM/dom.js"
+import { keys } from "./Shortcuts/keys.js"
 import { state } from "./Context/state.js"
-import { canvas, resizeOnScreenCanvas } from "../Context/canvas.js"
+import { canvas } from "../Context/canvas.js"
 import { swatches } from "./Context/swatch.js"
 import { tools, adjustEllipseSteps } from "./Tools/index.js"
-import { actionUndoRedo } from "./Tools/undoRedo.js"
+import { handleUndo, handleRedo } from "./Tools/undoRedo.js"
 import { vectorGui } from "./GUI/vector.js"
 import { renderCursor, renderRasterGUI } from "./GUI/raster.js"
 import { drawRect, drawCircle } from "./utils/brushHelpers.js"
+import { activateShortcut } from "./Tools/shortcuts.js"
+import { actionClear } from "./Tools/actions.js"
+import { setInitialZoom } from "./utils/canvasHelpers.js"
+import { renderCanvas, renderVectorsToDOM } from "./Canvas/render.js"
+import { consolidateLayers } from "./Canvas/layers.js"
+import "./Swatch/events.js"
+import "./Canvas/events.js"
 
 //===================================//
 //========= * * * DOM * * * =========//
@@ -56,15 +65,6 @@ let exportBtn = document.querySelector(".export")
 //TODO: Add color mixer that consists of a small canvas that can be painted upon and cleared. At any time the user can click "Mix" and the colors on the canvas will be used to generate a mixed color.
 
 //===================================//
-//=== * * * Initialization * * * ====//
-//===================================//
-
-//Initialize first layer
-canvas.addRasterLayer()
-canvas.currentLayer = canvas.layers[0]
-canvas.renderLayersToDOM()
-
-//===================================//
 //=== * * * Event Listeners * * * ===//
 //===================================//
 
@@ -97,9 +97,6 @@ document.body.addEventListener("mouseover", (e) => {
     showTooltip(tooltipMessage, e.target)
   }
 })
-
-//Window
-window.addEventListener("resize", resizeOnScreenCanvas)
 
 //Shortcuts
 document.addEventListener("keydown", handleKeyDown)
@@ -162,157 +159,13 @@ exportBtn.addEventListener("click", exportImage)
 
 function handleKeyDown(e) {
   if (state.shortcuts) {
-    switch (e.code) {
-      case "ArrowLeft":
-        if (state.debugger) {
-          canvas.render()
-          state.debugObject.maxSteps -= 1
-          state.debugFn(state.debugObject)
-        }
-        break
-      case "ArrowRight":
-        if (state.debugger) {
-          state.debugObject.maxSteps += 1
-          state.debugFn(state.debugObject)
-        }
-        break
-      case "KeyZ":
-        if (e.metaKey) {
-          if (e.shiftKey) {
-            //shift+meta+z
-            handleRedo()
-          } else {
-            handleUndo()
-          }
-        }
-        break
-      case "MetaLeft":
-      case "MetaRight":
-        //command key
-        break
-      case "Space":
-        state.tool = tools["grab"]
-        canvas.vectorGuiCVS.style.cursor = "move"
-        break
-      case "AltLeft":
-      case "AltRight":
-        //option key
-        state.tool = tools["eyedropper"]
-        canvas.vectorGuiCVS.style.cursor = "none"
-        break
-      case "ShiftLeft":
-      case "ShiftRight":
-        if (toolBtn.id === "brush") {
-          state.tool = tools["line"]
-          state.tool.brushSize = tools["brush"].brushSize
-          canvas.vectorGuiCVS.style.cursor = "none"
-        } else if (toolBtn.id === "ellipse") {
-          state.vectorProperties.forceCircle = true
-          if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
-            //while holding control point, readjust ellipse without having to move cursor.
-            //TODO: update this functionality to have other radii go back to previous radii when releasing shift
-            adjustEllipseSteps()
-            vectorGui.render(state, canvas)
-          }
-        }
-        break
-      case "KeyS":
-        swatches.randomizeColor("swatch btn")
-        break
-      case "KeyD":
-        //reset old button
-        modeBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        modeBtn = document.querySelector("#draw")
-        modeBtn.style.background = "rgb(255, 255, 255)"
-        state.mode = "draw"
-        break
-      case "KeyE":
-        //reset old button
-        modeBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        modeBtn = document.querySelector("#erase")
-        modeBtn.style.background = "rgb(255, 255, 255)"
-        state.mode = "erase"
-        break
-      case "KeyP":
-        //reset old button
-        modeBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        modeBtn = document.querySelector("#perfect")
-        modeBtn.style.background = "rgb(255, 255, 255)"
-        state.mode = "perfect"
-        break
-      case "KeyB":
-        //reset old button
-        toolBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        toolBtn = document.querySelector("#brush")
-        toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["brush"]
-        canvas.vectorGuiCVS.style.cursor = "crosshair"
-        break
-      case "KeyR":
-        //reset old button
-        toolBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        toolBtn = document.querySelector("#replace")
-        toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["replace"]
-        canvas.vectorGuiCVS.style.cursor = "crosshair"
-        break
-      case "KeyL":
-        //reset old button
-        toolBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        toolBtn = document.querySelector("#line")
-        toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["line"]
-        canvas.vectorGuiCVS.style.cursor = "none"
-        break
-      case "KeyF":
-        //reset old button
-        toolBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        toolBtn = document.querySelector("#fill")
-        toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["fill"]
-        canvas.vectorGuiCVS.style.cursor = "none"
-        break
-      case "KeyC":
-        //reset old button
-        toolBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        toolBtn = document.querySelector("#curve")
-        toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["quadCurve"]
-        canvas.vectorGuiCVS.style.cursor = "none"
-        break
-      case "KeyJ":
-        //reset old button
-        toolBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        toolBtn = document.querySelector("#cubicCurve")
-        toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["cubicCurve"]
-        canvas.vectorGuiCVS.style.cursor = "none"
-        break
-      case "KeyO":
-        //reset old button
-        toolBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        toolBtn = document.querySelector("#ellipse")
-        toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["ellipse"]
-        canvas.vectorGuiCVS.style.cursor = "none"
-        break
-      default:
-      //do nothing
-    }
+    keys[e.code] = true
+    activateShortcut(e.code, modeBtn, toolBtn)
   }
 }
 
 function handleKeyUp(e) {
+  keys[e.code] = false
   if (
     e.code === "Space" ||
     e.code === "AltLeft" ||
@@ -377,7 +230,7 @@ function handlePointerDown(e) {
   // if (state.touch) {
   vectorGui.render(state, canvas) // For tablets, vectors must be rendered before running state.tool.fn in order to check control points collision logic
   // }
-  canvas.draw()
+  renderCanvas()
   //Reset Cursor for mobile
   state.onscreenX = state.cursorWithCanvasOffsetX
   state.onscreenY = state.cursorWithCanvasOffsetY
@@ -385,9 +238,11 @@ function handlePointerDown(e) {
   state.previousOnscreenY = state.onscreenY
   //if drawing on hidden layer, flash hide btn
   if (canvas.currentLayer.opacity === 0) {
-    for (let i = 0; i < layersCont.children.length; i += 1) {
-      if (layersCont.children[i].layerObj === canvas.currentLayer) {
-        layersCont.children[i].querySelector(".hide").classList.add("warning")
+    for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
+      if (dom.layersContainer.children[i].layerObj === canvas.currentLayer) {
+        dom.layersContainer.children[i]
+          .querySelector(".hide")
+          .classList.add("warning")
       }
     }
   }
@@ -452,9 +307,9 @@ function handlePointerUp(e) {
   }
   setCoordinates(e)
   if (canvas.currentLayer.opacity === 0) {
-    for (let i = 0; i < layersCont.children.length; i += 1) {
-      if (layersCont.children[i].layerObj === canvas.currentLayer) {
-        layersCont.children[i]
+    for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
+      if (dom.layersContainer.children[i].layerObj === canvas.currentLayer) {
+        dom.layersContainer.children[i]
           .querySelector(".hide")
           .classList.remove("warning")
       }
@@ -478,7 +333,7 @@ function handlePointerUp(e) {
       } else if (state.points[0].tool.type === "modify") {
         canvas.currentVectorIndex = state.points[0].properties.moddedActionIndex
       }
-      canvas.renderVectorsToDOM()
+      renderVectorsToDOM()
     }
   }
   state.points = []
@@ -507,10 +362,9 @@ function handlePointerOut(e) {
   //   state.redoStack = []
   // }
   if (!state.touch) {
-    canvas.draw()
+    renderCanvas()
     renderRasterGUI(state, canvas, swatches)
     vectorGui.render(state, canvas)
-    // canvas.draw()
     canvas.pointerEvent = "none"
   }
 }
@@ -552,7 +406,7 @@ function zoomCanvas(z, xOriginOffset, yOriginOffset) {
     0,
     0
   )
-  canvas.draw()
+  renderCanvas()
   renderRasterGUI(state, canvas, swatches)
   vectorGui.render(state, canvas)
 }
@@ -628,26 +482,13 @@ function handleZoom(e) {
   }
 }
 
-//TODO: to allow modifications of past actions, check last action in undoStack. If it is a modification action, reverse it.
-//This means setting the modded action's values back. Normally they are structured as {moddedActionIndex, from:, to:}, so set them back to the "from" values
-function handleUndo() {
-  //length 1 prevents initial layer from being undone
-  if (state.undoStack.length > 1) {
-    actionUndoRedo(state.redoStack, state.undoStack, "from")
-  }
-}
-
-function handleRedo() {
-  if (state.redoStack.length >= 1) {
-    actionUndoRedo(state.undoStack, state.redoStack, "to")
-  }
-}
-
 //Non-tool action.
 //TODO: must also update all vectors to be "removed" in a non destructive way, think about what that means for the timeline
 export function handleClear() {
-  state.addToTimeline({ tool: tools.clear, layer: canvas.currentLayer })
+  // state.addToTimeline({ tool: tools.clear, layer: canvas.currentLayer })
+  actionClear()
   //FIX: restructure stacked items. Currently each is an array, but each should be an object with more info plus an array
+  //TODO: set all actions to hidden
   state.undoStack.push(state.points)
   state.points = []
   state.redoStack = []
@@ -657,13 +498,14 @@ export function handleClear() {
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
-  canvas.draw()
+  renderCanvas()
   vectorGui.reset(canvas)
   state.reset()
+  renderVectorsToDOM()
 }
 
 export function handleRecenter(e) {
-  canvas.zoom = canvas.setInitialZoom(
+  canvas.zoom = setInitialZoom(
     Math.max(canvas.offScreenCVS.width, canvas.offScreenCVS.height)
   )
   canvas.vectorGuiCTX.setTransform(
@@ -702,7 +544,7 @@ export function handleRecenter(e) {
   )
   canvas.previousXOffset = canvas.xOffset
   canvas.previousYOffset = canvas.yOffset
-  canvas.draw()
+  renderCanvas()
   renderRasterGUI(state, canvas, swatches)
   vectorGui.render(state, canvas)
 }
@@ -722,7 +564,7 @@ export function handleTools(e, manualToolName = null) {
       }
       toolBtn.style.background = "rgb(255, 255, 255)"
       state.tool = tools[toolBtn.id]
-      canvas.draw()
+      renderCanvas()
       //update options
       updateStamp()
       brushSlider.value = state.tool.brushSize
@@ -782,20 +624,10 @@ function switchBrush(e) {
 function updateBrush(e) {
   switch (state.tool.name) {
     case "brush":
-      state.tool.brushSize = parseInt(e.target.value)
-      break
     case "replace":
-      state.tool.brushSize = parseInt(e.target.value)
-      break
     case "line":
-      state.tool.brushSize = parseInt(e.target.value)
-      break
     case "quadCurve":
-      state.tool.brushSize = parseInt(e.target.value)
-      break
     case "cubicCurve":
-      state.tool.brushSize = parseInt(e.target.value)
-      break
     case "ellipse":
       state.tool.brushSize = parseInt(e.target.value)
       break
@@ -821,7 +653,7 @@ function updateStamp() {
 //====================================//
 
 function exportImage() {
-  canvas.consolidateLayers()
+  consolidateLayers()
   const a = document.createElement("a")
   a.style.display = "none"
   a.href = canvas.offScreenCVS.toDataURL()

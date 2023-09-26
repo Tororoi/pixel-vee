@@ -9,6 +9,7 @@ export const vectorGui = {
   collidedKeys: { xKey: null, yKey: null },
   selectedPoint: { xKey: null, yKey: null },
   checkPointCollision,
+  drawCursorBox,
   render,
   reset,
 }
@@ -360,7 +361,7 @@ function checkPointCollision(pointerX, pointerY, px, py, r) {
  * Reset vector state
  * @param {*} canvas
  */
-export function reset(canvas) {
+function reset(canvas) {
   state.vectorProperties = {
     ...{
       px1: null,
@@ -390,7 +391,7 @@ export function reset(canvas) {
  * @param {*} state
  * @param {*} canvas
  */
-export function render(state, canvas) {
+function render(state, canvas) {
   canvas.vectorGuiCTX.clearRect(
     0,
     0,
@@ -429,7 +430,7 @@ export function render(state, canvas) {
  * @param {*} state
  * @param {*} canvas
  */
-export function drawCursorBox(state, canvas) {
+function drawCursorBox(state, canvas) {
   let lineWidth = canvas.zoom <= 8 ? 2 / canvas.zoom : 0.25
   let brushOffset = Math.floor(state.tool.brushSize / 2)
   let x0 = state.onscreenX - brushOffset

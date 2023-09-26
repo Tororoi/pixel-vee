@@ -3,7 +3,7 @@
 .layers-interface {
   order: 3;
   flex: 1 1 auto;
-  min-height: 184px; //header and layers-control plus 3 layers.
+  min-height: 196px; //header and layers-control plus 3 layers.
   .collapsible {
     padding-top: 2px;
   }
@@ -17,14 +17,24 @@
       display: none;
     }
     .custom-file-upload {
-      width: 28px;
-      height: 28px;
-      background: $button-color;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      background-image: url("../public/pixelv-reference.png");
+      background-size: 100%;
+      &:hover {
+        background-image: url("../public/pixelv-reference-hover.png");
+      }
     }
     .new-raster-layer {
-      width: 28px;
-      height: 28px;
-      background: $button-color;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      background-image: url("../public/pixelv-addlayer.png");
+      background-size: 100%;
+      &:hover {
+        background-image: url("../public/pixelv-addlayer-hover.png");
+      }
     }
   }
   .layers-container {
@@ -46,11 +56,11 @@
       justify-content: flex-end;
       .layer {
         cursor: grab;
-        height: 40px;
+        height: 50px;
         width: 100%;
         text-align: center;
         line-height: 40px;
-        font-size: 16px;
+        font-size: 12px;
         display: flex;
         flex-flow: row-reverse nowrap;
         justify-content: flex-end;
@@ -58,35 +68,53 @@
         box-shadow: inset 2px 0px $border-color, inset -2px 0px $border-color,
           inset 0px -2px $border-color, inset 0px 2px $border-color;
         &.raster {
-          background: $gray;
+          background: $dark-gray;
         }
         &.reference {
           background: $mid-gray;
+        }
+        &.selected {
+          background: black;
         }
         &:hover {
           box-shadow: inset 2px 0px $white, inset -2px 0px $white,
             inset 0px -2px $white, inset 0px 2px $white;
         }
         .hide {
-          width: 28px;
-          height: 28px;
+          width: 40px;
+          height: 40px;
           margin: 6px;
-          background: $button-color;
-          .eye {
-            //define height and width for one pixel since icons are created with box shadow
-            height: 2px;
-            width: 2px;
-            &.eyeopen {
-              @include eyeOpen;
-            }
-            &.eyeclosed {
-              @include eyeClosed;
-            }
+          // background: $button-color;
+          cursor: pointer;
+          &.eyeopen {
+            @include eyeOpen;
+          }
+          &.eyeclosed {
+            @include eyeClosed;
           }
         }
         .warning {
-          background: $warning-color;
+          // background-color: $warning-color;
+          // background-blend-mode: multiply;
           animation: flash 0.6s ease-in infinite alternate-reverse;
+        }
+        .trash {
+          position: absolute;
+          right: 0;
+          cursor: pointer;
+          width: 40px;
+          height: 40px;
+          z-index: 104;
+          margin: 3px;
+          background-image: url("../public/pixelv-trash.png");
+          background-size: 100%;
+          &:hover {
+            background-image: url("../public/pixelv-trash-hover.png");
+          }
+          &.disabled {
+            opacity: 0.5;
+            cursor: no-drop;
+          }
         }
       }
     }
