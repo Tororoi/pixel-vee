@@ -1,6 +1,7 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "../GUI/vector.js"
+import { renderCanvas, renderVectorsToDOM } from "../Canvas/render.js"
 
 //====================================//
 //========= * * * Core * * * =========//
@@ -47,7 +48,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       })
     })
     vectorGui.reset(canvas)
-    canvas.renderVectorsToDOM()
+    renderVectorsToDOM()
   } else if (
     latestAction.tool.name === state.tool.name &&
     latestAction.tool.type === "vector"
@@ -63,7 +64,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   pushStack.push(popStack.pop())
   //clear all layers in preparation to redraw them.
   //DRY: do all layers and actions need to be rerendered for redo?
-  canvas.render(state, canvas)
+  renderCanvas(true, true)
   state.reset()
 }
 

@@ -5,6 +5,7 @@ import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
 import { handleUndo, handleRedo } from "./undoRedo.js"
 import { tools, adjustEllipseSteps } from "./index.js"
+import { renderCanvas } from "../Canvas/render.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
@@ -17,7 +18,7 @@ export function activateShortcut(keyCode, modeBtn, toolBtn) {
   switch (keyCode) {
     case "ArrowLeft":
       if (state.debugger) {
-        canvas.render(state, canvas)
+        renderCanvas(true, true)
         state.debugObject.maxSteps -= 1
         state.debugFn(state.debugObject)
       }

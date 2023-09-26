@@ -1,5 +1,6 @@
 import { actionDraw } from "../Tools/actions.js"
 import { vectorGui, drawCursorBox } from "./vector.js"
+import { renderCanvas } from "../Canvas/render.js"
 
 //===========================================//
 //=== * * * Graphics User Interface * * * ===//
@@ -26,7 +27,7 @@ export function renderCursor(state, canvas, swatches) {
     default:
       //TODO: erase mode is somewhat buggy with rendering. Find way to have it render without calling draw() more than needed.
       if (state.mode === "erase") {
-        canvas.draw(canvas)
+        renderCanvas()
         actionDraw(
           state.cursorWithCanvasOffsetX,
           state.cursorWithCanvasOffsetY,

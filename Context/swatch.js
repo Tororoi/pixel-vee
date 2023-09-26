@@ -3,6 +3,7 @@ import { state } from "./state.js"
 import { Picker } from "../Tools/Picker.js"
 import { initializeDialogBox } from "../utils/drag.js"
 import { generateRandomRGB } from "../utils/colors.js"
+import { renderCanvas, renderVectorsToDOM } from "../Canvas/render.js"
 // import { changeActionColor } from "../Tools/actions.js"
 
 //===================================//
@@ -100,8 +101,8 @@ function setColor(r, g, b, target) {
       // state.undoStack.push(state.points)
       // state.points = []
       // state.redoStack = []
-      // canvas.renderVectorsToDOM()
-      // canvas.render(state, canvas)
+      // renderVectorsToDOM()
+      // renderCanvas(true, true)
     }
   }
 }
