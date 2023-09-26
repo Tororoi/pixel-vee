@@ -58,6 +58,9 @@ function redrawTimelineActions(index = null) {
           case "modify":
             //do nothing
             break
+          case "changeColor":
+            //do nothing
+            break
           case "remove":
             //do nothing
             break
@@ -79,6 +82,17 @@ function redrawTimelineActions(index = null) {
             //   canvas.offScreenCVS.width,
             //   canvas.offScreenCVS.height
             // )
+            break
+          case "brush":
+            p.tool.action(
+              p.x,
+              p.y,
+              p.color,
+              p.brush,
+              p.weight,
+              p.layer.ctx,
+              p.mode
+            )
             break
           case "fill":
             //actionFill
@@ -179,16 +193,7 @@ function redrawTimelineActions(index = null) {
             )
             break
           default:
-            //actionDraw
-            p.tool.action(
-              p.x,
-              p.y,
-              p.color,
-              p.brush,
-              p.weight,
-              p.layer.ctx,
-              p.mode
-            )
+          //do nothing
         }
       }
     })
@@ -198,7 +203,7 @@ function redrawTimelineActions(index = null) {
       if (p.tool.name === "addLayer") {
         p.layer.removed = true
         if (p.layer === canvas.currentLayer) {
-          canvas.currentLayer = layersCont.children[0].layerObj
+          canvas.currentLayer = dom.layersContainer.children[0].layerObj
         }
         renderLayersToDOM()
         renderVectorsToDOM()

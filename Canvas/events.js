@@ -12,8 +12,9 @@ import { initializeDialogBox } from "../utils/drag.js"
 import { removeAction } from "../Tools/actions.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
-import { swatches, colorPickerContainer } from "../Context/swatch.js"
+import { swatches } from "../Context/swatch.js"
 import { setInitialZoom } from "../utils/canvasHelpers.js"
+import { initializeColorPicker } from "../Swatch/events.js"
 
 //===================================//
 //==== * * * DOM Interface * * * ====//
@@ -187,8 +188,8 @@ const resizeOnScreenCanvas = () => {
   dom.toolboxContainer.style.top = ""
   dom.sidebarContainer.style.left = ""
   dom.sidebarContainer.style.top = ""
-  colorPickerContainer.style.left = ""
-  colorPickerContainer.style.top = ""
+  dom.colorPickerContainer.style.left = ""
+  dom.colorPickerContainer.style.top = ""
 }
 
 resizeOnScreenCanvas()
@@ -365,7 +366,7 @@ function vectorInteract(e) {
   } else if (e.target.className.includes("actionColor")) {
     e.target.color = vector.color
     e.target.vector = vector
-    swatches.initializeColorPicker(e.target)
+    initializeColorPicker(e.target)
   } else if (e.target.className.includes("trash")) {
     removeVector(vector)
   } else {

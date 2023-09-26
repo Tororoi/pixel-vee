@@ -29,6 +29,10 @@ export function actionUndoRedo(pushStack, popStack, modType) {
         state.undoStack[latestAction.properties.moddedActionIndex][0].index
       vectorGui.render(state, canvas)
     }
+  } else if (latestAction.tool.name === "changeColor") {
+    state.undoStack[latestAction.properties.moddedActionIndex][0].color = {
+      ...latestAction.properties[modType],
+    }
   } else if (latestAction.tool.name === "remove") {
     state.undoStack[latestAction.properties.moddedActionIndex][0].removed =
       latestAction.properties[modType]

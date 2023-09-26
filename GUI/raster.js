@@ -1,5 +1,5 @@
 import { actionDraw } from "../Tools/actions.js"
-import { vectorGui, drawCursorBox } from "./vector.js"
+import { vectorGui } from "./vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 
 //===========================================//
@@ -22,7 +22,7 @@ export function renderCursor(state, canvas, swatches) {
       break
     case "eyedropper":
       //empty square
-      drawCursorBox(state, canvas)
+      vectorGui.drawCursorBox(state, canvas)
       break
     default:
       //TODO: erase mode is somewhat buggy with rendering. Find way to have it render without calling draw() more than needed.
@@ -37,11 +37,11 @@ export function renderCursor(state, canvas, swatches) {
           canvas.onScreenCTX, //must be onScreen to work with eraser
           state.mode
         )
-        // drawCursorBox(state, canvas)
+        // vectorGui.drawCursorBox(state, canvas)
       } else {
         drawCurrentPixel(state, canvas, swatches)
       }
-    // drawCursorBox(state, canvas, 0.5)
+    // vectorGui.drawCursorBox(state, canvas, 0.5)
   }
 }
 

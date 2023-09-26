@@ -15,6 +15,7 @@ import { actionClear } from "./Tools/actions.js"
 import { setInitialZoom } from "./utils/canvasHelpers.js"
 import { renderCanvas, renderVectorsToDOM } from "./Canvas/render.js"
 import { consolidateLayers } from "./Canvas/layers.js"
+import "./Swatch/events.js"
 import "./Canvas/events.js"
 
 //===================================//
@@ -40,8 +41,6 @@ toolBtn.style.background = "rgb(255, 255, 255)"
 let modesCont = document.querySelector(".modes")
 let modeBtn = document.querySelector("#draw")
 modeBtn.style.background = "rgb(255, 255, 255)"
-
-let layersCont = document.querySelector(".layers")
 
 //Tooltip
 let tooltip = document.getElementById("tooltip")
@@ -239,9 +238,11 @@ function handlePointerDown(e) {
   state.previousOnscreenY = state.onscreenY
   //if drawing on hidden layer, flash hide btn
   if (canvas.currentLayer.opacity === 0) {
-    for (let i = 0; i < layersCont.children.length; i += 1) {
-      if (layersCont.children[i].layerObj === canvas.currentLayer) {
-        layersCont.children[i].querySelector(".hide").classList.add("warning")
+    for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
+      if (dom.layersContainer.children[i].layerObj === canvas.currentLayer) {
+        dom.layersContainer.children[i]
+          .querySelector(".hide")
+          .classList.add("warning")
       }
     }
   }
@@ -306,9 +307,9 @@ function handlePointerUp(e) {
   }
   setCoordinates(e)
   if (canvas.currentLayer.opacity === 0) {
-    for (let i = 0; i < layersCont.children.length; i += 1) {
-      if (layersCont.children[i].layerObj === canvas.currentLayer) {
-        layersCont.children[i]
+    for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
+      if (dom.layersContainer.children[i].layerObj === canvas.currentLayer) {
+        dom.layersContainer.children[i]
           .querySelector(".hide")
           .classList.remove("warning")
       }

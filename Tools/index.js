@@ -29,6 +29,7 @@ import {
 import { renderCanvas } from "../Canvas/render.js"
 import { consolidateLayers } from "../Canvas/layers.js"
 import { getColor } from "../utils/canvasHelpers.js"
+import { setColor } from "../Swatch/events.js"
 
 //====================================//
 //=== * * * Tool Controllers * * * ===//
@@ -458,7 +459,6 @@ export function quadCurveSteps() {
           state.onscreenX !== state.previousOnscreenX ||
           state.onscreenY !== state.previousOnscreenY
         ) {
-          // canvas.onScreenCTX.clearRect(0, 0, canvas.offScreenCVS.width / canvas.zoom, canvas.offScreenCVS.height / canvas.zoom);
           renderCanvas()
           if (state.clickCounter === 3) {
             state.vectorProperties.px3 = state.cursorX
@@ -1211,12 +1211,7 @@ export function eyedropperSteps() {
   function sampleColor(x, y) {
     let newColor = getColor(x, y, state.colorLayerGlobal)
     //not simply passing whole color in until random color function is refined
-    swatches.setColor(
-      newColor.r,
-      newColor.g,
-      newColor.b,
-      swatches.primary.swatch
-    )
+    setColor(newColor.r, newColor.g, newColor.b, swatches.primary.swatch)
   }
   switch (canvas.pointerEvent) {
     case "pointerdown":

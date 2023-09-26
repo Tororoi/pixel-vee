@@ -1,5 +1,4 @@
 import { swatches } from "./swatch.js"
-import { toolbox } from "../Context/toolbox.js" //Must be imported for event listeners
 
 //State (TODO: not yet a true state)
 export const state = {

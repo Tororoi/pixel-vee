@@ -6,6 +6,7 @@ import { vectorGui } from "../GUI/vector.js"
 import { handleUndo, handleRedo } from "./undoRedo.js"
 import { tools, adjustEllipseSteps } from "./index.js"
 import { renderCanvas } from "../Canvas/render.js"
+import { randomizeColor } from "../Swatch/events.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
@@ -70,7 +71,7 @@ export function activateShortcut(keyCode, modeBtn, toolBtn) {
       }
       break
     case "KeyS":
-      swatches.randomizeColor(swatches.primary.swatch)
+      randomizeColor(swatches.primary.swatch)
       break
     case "KeyD":
       //reset old button
