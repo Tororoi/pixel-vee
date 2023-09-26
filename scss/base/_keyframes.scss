@@ -1,11 +1,14 @@
 @keyframes flash {
   0% {
-    background: $warning-color;
+    // background-color: $warning-color;
+    opacity: 1;
   }
   30% {
-    background: $warning-color;
+    // background-color: $warning-color;
+    opacity: 1;
   }
   100% {
-    background: $button-color;
+    // background-color: white;
+    opacity: 0;
   }
 }

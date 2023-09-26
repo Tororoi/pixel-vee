@@ -1,3 +1,4 @@
+import { keys } from "../Context/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
@@ -1102,6 +1103,10 @@ export function adjustEllipseSteps() {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
         }
+        if (!keys.ShiftLeft && !keys.ShiftRight) {
+          //if shift key is not being held, reset forceCircle
+          state.vectorProperties.forceCircle = false
+        }
         updateEllipseControlPoints(state, canvas, vectorGui)
         //TODO: changing opacity isn't enough since erase mode will be unaffected
         // let action = state.undoStack[canvas.currentVectorIndex]
@@ -1166,7 +1171,7 @@ export function adjustEllipseSteps() {
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         updateEllipseControlPoints(state, canvas, vectorGui)
         state.undoStack[canvas.currentVectorIndex][0].hidden = false
-        modifyAction(canvas.currentVectorIndex, true)
+        modifyAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
@@ -1278,6 +1283,22 @@ export const tools = {
     options: [],
     type: "modify",
   },
+  remove: {
+    name: "remove",
+    fn: null,
+    brushSize: null,
+    disabled: false,
+    options: [],
+    type: "modify",
+  },
+  clear: {
+    name: "clear",
+    fn: null,
+    brushSize: null,
+    disabled: false,
+    options: [],
+    type: "modify",
+  },
   //Raster Tools
   brush: {
     name: "brush",
@@ -1357,15 +1378,15 @@ export const tools = {
     brushSize: null,
     disabled: false,
     options: [],
-    type: "raster",
+    type: "settings",
   },
-  clear: {
-    name: "clear",
+  removeLayer: {
+    name: "removeLayer",
     fn: null,
     brushSize: null,
     disabled: false,
     options: [],
-    type: "raster",
+    type: "settings",
   },
   //Utility Tools (does not affect timeline)
   eyedropper: {
