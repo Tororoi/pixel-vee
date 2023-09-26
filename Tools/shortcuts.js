@@ -1,4 +1,4 @@
-import { keys } from "../Context/keys.js"
+import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
@@ -17,7 +17,7 @@ export function activateShortcut(keyCode, modeBtn, toolBtn) {
   switch (keyCode) {
     case "ArrowLeft":
       if (state.debugger) {
-        canvas.render()
+        canvas.render(state, canvas)
         state.debugObject.maxSteps -= 1
         state.debugFn(state.debugObject)
       }
@@ -69,7 +69,7 @@ export function activateShortcut(keyCode, modeBtn, toolBtn) {
       }
       break
     case "KeyS":
-      swatches.randomizeColor("swatch btn")
+      swatches.randomizeColor(swatches.primary.swatch)
       break
     case "KeyD":
       //reset old button

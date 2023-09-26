@@ -1,7 +1,9 @@
 import { state } from "./state.js"
+// import { canvas } from "./canvas.js"
 import { Picker } from "../Tools/Picker.js"
 import { initializeDialogBox } from "../utils/drag.js"
 import { generateRandomRGB } from "../utils/colors.js"
+// import { changeActionColor } from "../Tools/actions.js"
 
 //===================================//
 //==== * * * DOM Interface * * * ====//
@@ -45,7 +47,11 @@ export const swatches = {
   //Functions
   randomizeColor,
   setColor,
+  initializeColorPicker,
 }
+
+swatch.color = swatches.primary.color
+backSwatch.color = swatches.secondary.color
 
 //====================================//
 //======= * * * Swatches * * * =======//
@@ -72,19 +78,31 @@ function switchColors() {
  * dependencies - swatches, picker
  */
 function setColor(r, g, b, target) {
-  if (target === "swatch btn") {
+  if (target === swatches.primary.swatch) {
     swatches.primary.color.color = `rgba(${r},${g},${b},255)`
     swatches.primary.color.r = r
     swatches.primary.color.g = g
     swatches.primary.color.b = b
     swatches.primary.swatch.style.background = swatches.primary.color.color
     picker.update(swatches.primary.color)
-  } else {
+  } else if (target === swatches.secondary.swatch) {
     swatches.secondary.color.color = `rgba(${r},${g},${b},255)`
     swatches.secondary.color.r = r
     swatches.secondary.color.g = g
     swatches.secondary.color.b = b
     swatches.secondary.swatch.style.background = swatches.secondary.color.color
+  } else {
+    let color = { color: `rgba(${r},${g},${b},1)`, r, g, b, a: 255 }
+    target.color = color
+    target.style.background = color.color
+    if (target.vector) {
+      // changeActionColor(target.vector.index, color)
+      // state.undoStack.push(state.points)
+      // state.points = []
+      // state.redoStack = []
+      // canvas.renderVectorsToDOM()
+      // canvas.render(state, canvas)
+    }
   }
 }
 
@@ -115,11 +133,12 @@ let picker = new Picker(
 picker.build()
 
 function openColorPicker(e) {
-  picker.swatch = e.target.className
-  const initialColorReference =
-    picker.swatch === "back-swatch btn"
-      ? swatches.secondary.color
-      : swatches.primary.color
+  initializeColorPicker(e.target)
+}
+
+function initializeColorPicker(target) {
+  picker.swatch = target
+  const initialColorReference = target.color
   picker.update(initialColorReference)
   //show colorpicker
   colorPickerContainer.style.display = "flex"

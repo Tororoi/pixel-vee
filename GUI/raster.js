@@ -26,7 +26,7 @@ export function renderCursor(state, canvas, swatches) {
     default:
       //TODO: erase mode is somewhat buggy with rendering. Find way to have it render without calling draw() more than needed.
       if (state.mode === "erase") {
-        canvas.draw()
+        canvas.draw(canvas)
         actionDraw(
           state.cursorWithCanvasOffsetX,
           state.cursorWithCanvasOffsetY,

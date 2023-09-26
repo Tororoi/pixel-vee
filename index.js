@@ -1,6 +1,6 @@
 //Import order is important. 1. DOM initialization, 2. state managers
 // import { initializeAllDialogBoxes } from "./DOM/dialogBox.js"
-import { keys } from "./Context/keys.js"
+import { keys } from "./Shortcuts/keys.js"
 import { state } from "./Context/state.js"
 import { canvas, resizeOnScreenCanvas } from "../Context/canvas.js"
 import { swatches } from "./Context/swatch.js"
@@ -238,7 +238,7 @@ function handlePointerDown(e) {
   // if (state.touch) {
   vectorGui.render(state, canvas) // For tablets, vectors must be rendered before running state.tool.fn in order to check control points collision logic
   // }
-  canvas.draw()
+  canvas.draw(canvas)
   //Reset Cursor for mobile
   state.onscreenX = state.cursorWithCanvasOffsetX
   state.onscreenY = state.cursorWithCanvasOffsetY
@@ -368,10 +368,10 @@ function handlePointerOut(e) {
   //   state.redoStack = []
   // }
   if (!state.touch) {
-    canvas.draw()
+    canvas.draw(canvas)
     renderRasterGUI(state, canvas, swatches)
     vectorGui.render(state, canvas)
-    // canvas.draw()
+    // canvas.draw(canvas)
     canvas.pointerEvent = "none"
   }
 }
@@ -413,7 +413,7 @@ function zoomCanvas(z, xOriginOffset, yOriginOffset) {
     0,
     0
   )
-  canvas.draw()
+  canvas.draw(canvas)
   renderRasterGUI(state, canvas, swatches)
   vectorGui.render(state, canvas)
 }
@@ -505,7 +505,7 @@ export function handleClear() {
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
-  canvas.draw()
+  canvas.draw(canvas)
   vectorGui.reset(canvas)
   state.reset()
   canvas.renderVectorsToDOM()
@@ -551,7 +551,7 @@ export function handleRecenter(e) {
   )
   canvas.previousXOffset = canvas.xOffset
   canvas.previousYOffset = canvas.yOffset
-  canvas.draw()
+  canvas.draw(canvas)
   renderRasterGUI(state, canvas, swatches)
   vectorGui.render(state, canvas)
 }
@@ -571,7 +571,7 @@ export function handleTools(e, manualToolName = null) {
       }
       toolBtn.style.background = "rgb(255, 255, 255)"
       state.tool = tools[toolBtn.id]
-      canvas.draw()
+      canvas.draw(canvas)
       //update options
       updateStamp()
       brushSlider.value = state.tool.brushSize
