@@ -111,7 +111,7 @@ Visit here: https://pixelvee.netlify.app/
 
 <table>
   <tr>
-    <td colspan="2"> Add Raster Layer </td>
+    <td colspan="2"> <h4>Add Raster Layer</h4> </td>
   </tr>
   <tr>
     <td width="66" height="52"> <img src="public/pixelv-addlayer.png" alt="Add Raster Layer" width="40"/> </td>
