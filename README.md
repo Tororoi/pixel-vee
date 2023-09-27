@@ -127,7 +127,7 @@ Visit here: https://pixelvee.netlify.app/
     <td colspan="2"> Grab (Hold Space) </td>
   </tr>
   <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-eyedropper.png" alt="Grab" width="40"/> </td>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-grab.png" alt="Grab" width="40"/> </td>
     <td> Move the canvas position freely. </td>
   </tr>
 </table>
