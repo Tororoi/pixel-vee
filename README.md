@@ -110,7 +110,7 @@ Visit here: https://pixelvee.netlify.app/
 ## Layers
 
 > #### Add Raster Layer
-> ![image](public/pixelv-addlayer.png)
+> ![image](public/pixelv-addlayer.png){width=80px height=80px}
 > Add a new layer for drawing
 
 > #### Add Reference Layer
