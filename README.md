@@ -109,13 +109,24 @@ Visit here: https://pixelvee.netlify.app/
 
 ## Layers
 
-> #### Add Raster Layer
-> ![image](public/pixelv-addlayer.png){width=80px height=80px}
-> Add a new layer for drawing
-
-> #### Add Reference Layer
->
-> Add a new layer to be used for a background reference, such as for tracing. Reference layers cannot be drawn on.
+<table>
+  <tr>
+    <td colspan="2"> Add Raster Layer </td>
+  </tr>
+  <tr>
+    <td width="40" height="56"> <img src="public/pixelv-addlayer.png" alt="Add Raster Layer" width="40"/> </td>
+    <td> Add a new layer for drawing </td>
+  </tr>
+</table>
+<table>
+  <tr>
+    <td colspan="2"> Add Reference Layer </td>
+  </tr>
+  <tr>
+    <td width="40" height="56" valign="middle"> <img src="public/pixelv-reference.png" alt="Add Reference Layer" width="40"/> </td>
+    <td> Add a new layer to be used for a background reference, such as for tracing. Reference layers cannot be drawn on. </td>
+  </tr>
+</table>
 
 > #### Toggle Visibility
 >
