@@ -112,3 +112,7 @@ svg {
   height: 100px;
   pointer-events: none; /* Keep from interfering with pointer interaction */
 }
+
+#preload-container {
+  display: none;
+}
