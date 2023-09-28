@@ -1,19 +1,11 @@
-import { dom } from "../DOM/dom.js"
+import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { Picker } from "../Tools/Picker.js"
-import { initializeDialogBox } from "../utils/drag.js"
 import { generateRandomRGB } from "../utils/colors.js"
 import { renderCanvas, renderVectorsToDOM } from "../Canvas/render.js"
 import { changeActionColor } from "../Tools/actions.js"
-
-//===================================//
-//==== * * * DOM Interface * * * ====//
-//===================================//
-
-// * Color Picker * //
-initializeDialogBox(dom.colorPickerContainer)
 
 //====================================//
 //===== * * * Color Picker * * * =====//

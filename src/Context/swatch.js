@@ -1,4 +1,4 @@
-import { dom } from "../DOM/dom.js"
+import { dom } from "./dom.js"
 
 //====================================//
 //======== * * * State * * * =========//
