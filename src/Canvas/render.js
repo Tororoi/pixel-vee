@@ -1,4 +1,4 @@
-import { dom } from "../DOM/dom.js"
+import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { getAngle } from "../utils/trig.js"

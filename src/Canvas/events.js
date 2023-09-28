@@ -1,4 +1,4 @@
-import { dom } from "../DOM/dom.js"
+import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import {
@@ -7,36 +7,13 @@ import {
   renderVectorsToDOM,
 } from "../Canvas/render.js"
 import { createNewRasterLayer } from "./layers.js"
-import { handleTools } from "../index.js"
-import { initializeDialogBox } from "../utils/drag.js"
+import { handleTools } from "../Tools/events.js"
 import { removeAction } from "../Tools/actions.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { swatches } from "../Context/swatch.js"
 import { setInitialZoom } from "../utils/canvasHelpers.js"
 import { initializeColorPicker } from "../Swatch/events.js"
-
-//===================================//
-//==== * * * DOM Interface * * * ====//
-//===================================//
-
-// * Sidebar Menu * //
-initializeDialogBox(dom.sidebarContainer)
-
-// * Toolbox * //
-initializeDialogBox(dom.toolboxContainer)
-
-// * Brush * //
-initializeDialogBox(dom.brushContainer)
-
-// * Layers Interface * //
-initializeDialogBox(dom.layersInterfaceContainer)
-
-// * Vectors Interface * //
-initializeDialogBox(dom.vectorsInterfaceContainer)
-
-// * Canvas Size * //
-initializeDialogBox(dom.sizeContainer)
 
 //====================================//
 //==== * * * Canvas Resize * * * =====//

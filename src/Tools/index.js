@@ -686,22 +686,20 @@ export function cubicCurveSteps() {
           )
           state.clickCounter = 0
           //store control points for timeline
-          if (!state.debugger) {
-            state.addToTimeline({
-              tool: state.tool,
-              layer: canvas.currentLayer,
-              properties: {
-                px1: state.vectorProperties.px1,
-                py1: state.vectorProperties.py1,
-                px2: state.vectorProperties.px2,
-                py2: state.vectorProperties.py2,
-                px3: state.vectorProperties.px3,
-                py3: state.vectorProperties.py3,
-                px4: state.vectorProperties.px4,
-                py4: state.vectorProperties.py4,
-              },
-            })
-          }
+          state.addToTimeline({
+            tool: state.tool,
+            layer: canvas.currentLayer,
+            properties: {
+              px1: state.vectorProperties.px1,
+              py1: state.vectorProperties.py1,
+              px2: state.vectorProperties.px2,
+              py2: state.vectorProperties.py2,
+              px3: state.vectorProperties.px3,
+              py3: state.vectorProperties.py3,
+              px4: state.vectorProperties.px4,
+              py4: state.vectorProperties.py4,
+            },
+          })
           renderCanvas()
           renderRasterGUI(state, canvas, swatches)
           vectorGui.render(state, canvas)
@@ -1249,6 +1247,10 @@ export function eyedropperSteps() {
 
 export function grabSteps() {
   switch (canvas.pointerEvent) {
+    case "pointerdown":
+      canvas.previousXOffset = canvas.xOffset
+      canvas.previousYOffset = canvas.yOffset
+      break
     case "pointermove":
       canvas.xOffset =
         state.onscreenX - state.previousOnscreenX + canvas.previousXOffset
