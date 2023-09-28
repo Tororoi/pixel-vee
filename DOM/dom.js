@@ -46,6 +46,22 @@ const colorPickerContainer = document.querySelector(".picker-container")
 const confirmBtn = document.getElementById("confirm-btn")
 const cancelBtn = document.getElementById("cancel-btn")
 
+//Preload images that don't show up on initial load
+const preloadContainer = document.getElementById("preload-container")
+const images = [
+  "public/pixelv-addlayer-hover.png",
+  "public/pixelv-eyeopen-hover.png",
+  "public/pixelv-eyeclosed-hover.png",
+  "public/pixelv-eyeclosed.png",
+  "public/pixelv-reference-hover.png",
+  "public/pixelv-trash-hover.png",
+]
+images.forEach((url) => {
+  let img = new Image()
+  img.src = url
+  preloadContainer.appendChild(img)
+})
+
 export const dom = {
   //sidebar
   sidebarContainer,
