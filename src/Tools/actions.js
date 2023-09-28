@@ -779,42 +779,17 @@ export function actionCubicCurve(
     state.vectorProperties.py4 = state.cursorY
   } else if (stepNum === 4) {
     //curve after defining x4y4
-    if (state.debugger) {
-      slowPlotCubicBezier(
-        startx,
-        starty,
-        controlx1,
-        controly1,
-        controlx2,
-        controly2,
-        endx,
-        endy,
-        brushStamp,
-        currentColor,
-        weight,
-        ctx,
-        currentMode
-      )
-    } else {
-      let plotPoints = plotCubicBezier(
-        startx,
-        starty,
-        controlx1,
-        controly1,
-        controlx2,
-        controly2,
-        endx,
-        endy
-      )
-      renderPoints(
-        plotPoints,
-        brushStamp,
-        currentColor,
-        weight,
-        ctx,
-        currentMode
-      )
-    }
+    let plotPoints = plotCubicBezier(
+      startx,
+      starty,
+      controlx1,
+      controly1,
+      controlx2,
+      controly2,
+      endx,
+      endy
+    )
+    renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
   }
 }
 
@@ -884,75 +859,4 @@ export function actionEllipse(
     )
     renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
   }
-}
-
-/**
- * Step through cubic bezier in debug mode, sets debug function and debug object
- * @param {*} x0
- * @param {*} y0
- * @param {*} x1
- * @param {*} y1
- * @param {*} x2
- * @param {*} y2
- * @param {*} x3
- * @param {*} y3
- * @param {*} brushStamp
- * @param {*} currentColor
- * @param {*} weight
- * @param {*} ctx
- * @param {*} currentMode
- */
-function slowPlotCubicBezier(
-  x0,
-  y0,
-  x1,
-  y1,
-  x2,
-  y2,
-  x3,
-  y3,
-  brushStamp,
-  currentColor,
-  weight,
-  ctx,
-  currentMode
-) {
-  function stepPlotCubicBezier(instructionsObject) {
-    const {
-      x0,
-      y0,
-      x1,
-      y1,
-      x2,
-      y2,
-      x3,
-      y3,
-      brushStamp,
-      currentColor,
-      weight,
-      ctx,
-      currentMode,
-      maxSteps,
-    } = instructionsObject
-    let plotPoints = plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3, maxSteps)
-    renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
-    renderCanvas()
-  }
-  state.debugObject = {
-    x0,
-    y0,
-    x1,
-    y1,
-    x2,
-    y2,
-    x3,
-    y3,
-    brushStamp,
-    currentColor,
-    weight,
-    ctx,
-    currentMode,
-    maxSteps: 1,
-  }
-  state.debugFn = stepPlotCubicBezier
 }
