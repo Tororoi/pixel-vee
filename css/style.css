@@ -132,6 +132,10 @@ svg {
   pointer-events: none; /* Keep from interfering with pointer interaction */
 }
 
+#preload-container {
+  display: none;
+}
+
 /* Next basic site layout components */
 .sidebar {
   position: absolute;
