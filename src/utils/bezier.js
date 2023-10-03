@@ -113,7 +113,7 @@ function plotQuadBezierSeg(x0, y0, x1, y1, x2, y2, color) {
     plotPoints.push({
       x: thispoint.x,
       y: thispoint.y,
-      color: `rgba(0,255,30,255)`,
+      color: `rgba(0,255,30,1)`,
     })
   }
   //fill endpoint
@@ -307,7 +307,7 @@ function plotCubicBezierSeg(x0, y0, x1, y1, x2, y2, x3, y3, color) {
     plotPoints.push({
       x: thispoint.x,
       y: thispoint.y,
-      color: `rgba(0,255,30,255)`,
+      color: `rgba(0,255,30,1)`,
     })
   }
   //fill endpoint

@@ -230,47 +230,6 @@ export function actionLine(
 }
 
 /**
- * User action for process to draw without staircasing artifacts
- * @param {*} currentX
- * @param {*} currentY
- */
-export function actionPerfectPixels(currentX, currentY) {
-  //if currentPixel not neighbor to lastDrawn, draw waitingpixel
-  if (
-    Math.abs(currentX - state.lastDrawnX) > 1 ||
-    Math.abs(currentY - state.lastDrawnY) > 1
-  ) {
-    actionDraw(
-      state.waitingPixelX,
-      state.waitingPixelY,
-      swatches.primary.color,
-      state.brushStamp,
-      state.tool.brushSize,
-      canvas.currentLayer.ctx,
-      state.mode
-    )
-    //update queue
-    state.lastDrawnX = state.waitingPixelX
-    state.lastDrawnY = state.waitingPixelY
-    state.waitingPixelX = currentX
-    state.waitingPixelY = currentY
-    if (state.tool.name !== "replace") {
-      //TODO: refactor so adding to timeline is performed by controller function
-      state.addToTimeline({
-        tool: state.tool,
-        x: state.lastDrawnX,
-        y: state.lastDrawnY,
-        layer: canvas.currentLayer,
-      })
-    }
-    renderCanvas()
-  } else {
-    state.waitingPixelX = currentX
-    state.waitingPixelY = currentY
-  }
-}
-
-/**
  * User action for process to replace a specific color where the user's brush moves
  */
 export function actionReplace() {
@@ -296,6 +255,7 @@ export function actionReplace() {
     for (let i = 0; i < colorLayer.data.length; i += 4) {
       //sample color and by default, color will be removed if not a match. If removeColor is true, color will be removed if it is a match.
       if (colorLayer.data[i + 3] !== 0) {
+        //color layer data alpha channel goes from 0 to 255, not 0 to 1
         let matchedColor =
           colorLayer.data[i] === matchColor.r &&
           colorLayer.data[i + 1] === matchColor.g &&

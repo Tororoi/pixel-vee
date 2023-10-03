@@ -21,14 +21,14 @@ import { changeActionColor } from "../Tools/actions.js"
  */
 export function setColor(r, g, b, target) {
   if (target === swatches.primary.swatch) {
-    swatches.primary.color.color = `rgba(${r},${g},${b},255)`
+    swatches.primary.color.color = `rgba(${r},${g},${b},1)`
     swatches.primary.color.r = r
     swatches.primary.color.g = g
     swatches.primary.color.b = b
     swatches.primary.swatch.style.background = swatches.primary.color.color
     picker.update(swatches.primary.color)
   } else if (target === swatches.secondary.swatch) {
-    swatches.secondary.color.color = `rgba(${r},${g},${b},255)`
+    swatches.secondary.color.color = `rgba(${r},${g},${b},1)`
     swatches.secondary.color.r = r
     swatches.secondary.color.g = g
     swatches.secondary.color.b = b
