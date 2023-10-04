@@ -30,12 +30,14 @@ export class Picker {
     this.clickedCanvas = false
     //hue slider
     this.hueRange = document.getElementById("hueslider")
+    //alpha slider
+    this.alphaRange = document.getElementById("alphaslider")
     //*interface*//
     this.rgbaContainer = document.getElementById("rgba-container")
     this.r = document.getElementById("r")
     this.g = document.getElementById("g")
     this.b = document.getElementById("b")
-    // this.a = document.getElementById("a");
+    this.a = document.getElementById("a")
     this.hslContainer = document.getElementById("hsl-container")
     this.h = document.getElementById("h")
     this.s = document.getElementById("s")
@@ -56,7 +58,7 @@ export class Picker {
       blue: initialColor.b,
     }
     this.hsl = RGBToHSL(this.rgb)
-    // this.alpha = 255;
+    this.alpha = initialColor.a
     this.hexcode = RGBToHex(this.rgb)
     this.luminance = getLuminance(this.rgb)
   }
@@ -102,12 +104,18 @@ export class Picker {
     this.propogateHSLColorSpace()
   }
 
-  updateRGB(e) {
+  updateAlpha(e) {
+    this.alpha = e.target.value
+    this.a.value = e.target.value
+    this.hexcode = this.hex.value = this.hexcode
+  }
+
+  updateRGBA(e) {
     const red = +this.r.value
     const green = +this.g.value
     const blue = +this.b.value
     this.rgb = { red, green, blue }
-    // this.alpha = this.a.value;
+    this.alpha = +this.a.value
     this.propogateRGBColorSpace()
   }
 
@@ -153,11 +161,12 @@ export class Picker {
     this.r.value = red
     this.g.value = green
     this.b.value = blue
-    // this.a.value = this.alpha;
+    this.a.value = this.alpha
     this.hex.value = this.hexcode
     this.lumi.value = this.luminance
     //update hue slider
     this.hueRange.value = this.hsl.hue
+    this.alphaRange.value = this.alpha
   }
 
   handleIncrement(e) {
@@ -192,7 +201,7 @@ export class Picker {
   handleRGBIncrement(e) {
     if (this.pointerState === "pointerdown") {
       this.handleIncrement(e)
-      this.updateRGB(e)
+      this.updateRGBA(e)
       window.setTimeout(() => this.handleRGBIncrement(e), 150)
     }
   }
@@ -262,6 +271,7 @@ export class Picker {
   //Called every time color picker is opened
   update(reference) {
     this.rgb = { red: reference.r, green: reference.g, blue: reference.b }
+    this.alpha = reference.a
     this.propogateRGBColorSpace()
     //set oldcolor
     this.oldcolor.style.backgroundColor = reference.color
@@ -273,6 +283,9 @@ export class Picker {
     this.drawHueGrad()
     this.hueRange.addEventListener("input", (e) => {
       this.updateHue(e)
+    })
+    this.alphaRange.addEventListener("input", (e) => {
+      this.updateAlpha(e)
     })
 
     //canvas listeners
@@ -299,7 +312,7 @@ export class Picker {
       this.pointerState = e.type
     })
     this.rgbaContainer.addEventListener("change", (e) => {
-      this.updateRGB(e)
+      this.updateRGBA(e)
     })
     this.hslContainer.addEventListener("pointerdown", (e) => {
       this.pointerState = e.type

@@ -39,6 +39,8 @@ export function getColor(x, y, colorLayer) {
   canvasColor.g = colorLayer.data[startPos + 1]
   canvasColor.b = colorLayer.data[startPos + 2]
   canvasColor.a = colorLayer.data[startPos + 3]
-  canvasColor.color = `rgba(${canvasColor.r},${canvasColor.g},${canvasColor.b},${canvasColor.a})`
+  canvasColor.color = `rgba(${canvasColor.r},${canvasColor.g},${
+    canvasColor.b
+  },${canvasColor.a / 255})`
   return canvasColor
 }

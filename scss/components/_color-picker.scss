@@ -12,7 +12,7 @@
   color: white;
   background: $extra-dark-gray;
   text-align: center;
-  width: 570px;
+  // width: 570px;
   font-family: "04Font";
   font-size: 16px;
   padding: 0;
@@ -37,25 +37,60 @@
   #left {
     display: flex;
     flex-flow: column nowrap;
-    height: 346px;
+    margin: 10px;
+    margin-right: 0;
+    // height: 346px;
     #picker {
       display: flex;
       flex-flow: row nowrap;
-      height: 290px;
-      width: 310px;
+      // height: 290px;
+      // width: 310px;
+      position: relative;
       #color-picker {
         background-color: white;
         width: 250px;
         height: 250px;
-        margin: 20px;
+        margin: 10px;
         cursor: crosshair;
         @include boxBorder;
       }
+      .slider-container {
+        position: relative;
+        display: flex;
+        flex-flow: row nowrap;
+        width: 80px;
+      }
       #hueslider {
+        position: absolute;
         flex-shrink: 0;
         -webkit-appearance: none;
         appearance: none;
+        top: -10px;
+        left: 10px;
         transform: rotate(90deg);
+        transform-origin: left;
+        width: 250px;
+        height: 20px;
+        margin: 10px;
+        background: white;
+        outline: none;
+        @include boxBorder;
+        &::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          height: 24px;
+          width: 5px;
+          outline: 2px solid $black;
+        }
+      }
+      #alphaslider {
+        position: absolute;
+        left: 40px;
+        flex-shrink: 0;
+        -webkit-appearance: none;
+        appearance: none;
+        top: 240px;
+        left: 50px;
+        transform: rotate(270deg);
         transform-origin: left;
         width: 250px;
         height: 20px;
@@ -76,7 +111,7 @@
       flex-flow: row nowrap;
       justify-content: center;
       align-items: start;
-      height: 76px;
+      margin: 10px;
       .btn {
         background: $gray;
         font-size: 20px;
@@ -89,8 +124,10 @@
     display: flex;
     flex-flow: column nowrap;
     align-items: flex-start;
-    height: 346px;
-    width: 260px;
+    // height: 346px;
+    // width: 260px;
+    margin: 10px;
+    margin-left: 0;
     label {
       display: flex;
       flex-flow: row nowrap;
@@ -115,7 +152,7 @@
       display: flex;
       flex-flow: row nowrap;
       width: 100%;
-      margin-left: 30px;
+      margin-left: 10px;
       .channel-container {
         display: flex;
         flex-flow: column nowrap;
@@ -158,13 +195,13 @@
       }
     }
     #hex {
-      margin-left: 30px;
+      margin-left: 10px;
       #hexcode {
         width: 80px;
       }
     }
     #lumi {
-      margin-left: 30px;
+      margin-left: 10px;
       #luminance {
         width: 26px;
       }

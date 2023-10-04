@@ -1119,7 +1119,6 @@ canvas {
   color: white;
   background: rgb(51, 51, 51);
   text-align: center;
-  width: 570px;
   font-family: "04Font";
   font-size: 16px;
   padding: 0;
@@ -1146,29 +1145,38 @@ canvas {
 .picker-interface #left {
   display: flex;
   flex-flow: column nowrap;
-  height: 346px;
+  margin: 10px;
+  margin-right: 0;
 }
 .picker-interface #left #picker {
   display: flex;
   flex-flow: row nowrap;
-  height: 290px;
-  width: 310px;
+  position: relative;
 }
 .picker-interface #left #picker #color-picker {
   background-color: white;
   width: 250px;
   height: 250px;
-  margin: 20px;
+  margin: 10px;
   cursor: crosshair;
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 .picker-interface #left #picker #color-picker:hover:not([disabled]), .picker-interface #left #picker #color-picker:focus {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
+.picker-interface #left #picker .slider-container {
+  position: relative;
+  display: flex;
+  flex-flow: row nowrap;
+  width: 80px;
+}
 .picker-interface #left #picker #hueslider {
+  position: absolute;
   flex-shrink: 0;
   -webkit-appearance: none;
   appearance: none;
+  top: -10px;
+  left: 10px;
   transform: rotate(90deg);
   transform-origin: left;
   width: 250px;
@@ -1187,12 +1195,38 @@ canvas {
   width: 5px;
   outline: 2px solid rgb(0, 0, 0);
 }
+.picker-interface #left #picker #alphaslider {
+  position: absolute;
+  left: 40px;
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  top: 240px;
+  left: 50px;
+  transform: rotate(270deg);
+  transform-origin: left;
+  width: 250px;
+  height: 20px;
+  margin: 10px;
+  background: white;
+  outline: none;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+.picker-interface #left #picker #alphaslider:hover:not([disabled]), .picker-interface #left #picker #alphaslider:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+.picker-interface #left #picker #alphaslider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 24px;
+  width: 5px;
+  outline: 2px solid rgb(0, 0, 0);
+}
 .picker-interface #left #buttons {
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
   align-items: start;
-  height: 76px;
+  margin: 10px;
 }
 .picker-interface #left #buttons .btn {
   background: rgb(77, 77, 77);
@@ -1204,8 +1238,8 @@ canvas {
   display: flex;
   flex-flow: column nowrap;
   align-items: flex-start;
-  height: 346px;
-  width: 260px;
+  margin: 10px;
+  margin-left: 0;
 }
 .picker-interface #right label {
   display: flex;
@@ -1231,7 +1265,7 @@ canvas {
   display: flex;
   flex-flow: row nowrap;
   width: 100%;
-  margin-left: 30px;
+  margin-left: 10px;
 }
 .picker-interface #right #rgbahsl .channel-container {
   display: flex;
@@ -1277,13 +1311,13 @@ canvas {
   color: rgb(31, 31, 31);
 }
 .picker-interface #right #hex {
-  margin-left: 30px;
+  margin-left: 10px;
 }
 .picker-interface #right #hex #hexcode {
   width: 80px;
 }
 .picker-interface #right #lumi {
-  margin-left: 30px;
+  margin-left: 10px;
 }
 .picker-interface #right #lumi #luminance {
   width: 26px;

@@ -35,7 +35,7 @@ export function modifyAction(actionIndex) {
   if (action.tool.name === "ellipse") {
     modifiedProperties.forceCircle =
       vectorGui.selectedPoint.xKey === "px1"
-        ? modifiedProperties.forceCircle
+        ? oldProperties.forceCircle
         : state.vectorProperties.forceCircle
   }
   state.addToTimeline({

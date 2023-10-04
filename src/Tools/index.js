@@ -41,6 +41,8 @@ import { checkPixelAlreadyDrawn } from "../utils/drawHelpers.js"
  * Supported modes: "draw, erase, perfect",
  */
 export function drawSteps() {
+  //right now, checking if pixel is already drawn, but there are alternatives which may be more reliable.
+  //alternative 1. draw on a separate canvas with an opacity set for the canvas, then save the image of that drawing and use that in history. Won't work for eraser.
   let pixelAlreadyDrawn = false
   switch (canvas.pointerEvent) {
     case "pointerdown":
@@ -1145,6 +1147,7 @@ export function ellipseSteps() {
           state.vectorProperties.radB = Math.floor(
             Math.sqrt(dxb * dxb + dyb * dyb)
           )
+          //BUG: ellipse steps being called when it shouldn't be
           updateEllipseOffsets(
             state,
             canvas,
@@ -1234,7 +1237,11 @@ export function adjustEllipseSteps() {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
         }
-        if (!keys.ShiftLeft && !keys.ShiftRight) {
+        if (
+          !keys.ShiftLeft &&
+          !keys.ShiftRight &&
+          vectorGui.selectedPoint.xKey !== "px1"
+        ) {
           //if shift key is not being held, reset forceCircle
           state.vectorProperties.forceCircle = false
         }
@@ -1339,7 +1346,13 @@ export function eyedropperSteps() {
   function sampleColor(x, y) {
     let newColor = getColor(x, y, state.colorLayerGlobal)
     //not simply passing whole color in until random color function is refined
-    setColor(newColor.r, newColor.g, newColor.b, swatches.primary.swatch)
+    setColor(
+      newColor.r,
+      newColor.g,
+      newColor.b,
+      newColor.a,
+      swatches.primary.swatch
+    )
   }
   switch (canvas.pointerEvent) {
     case "pointerdown":

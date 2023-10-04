@@ -85,6 +85,52 @@ export function drawCircle(brushSize, updateBrush = false) {
     }
   }
 
+  //sanitize brushRects
+  function removeDuplicates(rects) {
+    const seen = new Set()
+
+    return rects.filter((rect) => {
+      if (!rect.w) {
+        return false
+      }
+      const key = `${rect.x}-${rect.y}-${rect.w}-${rect.h}`
+      if (seen.has(key)) {
+        return false
+      } else {
+        seen.add(key)
+        return true
+      }
+    })
+  }
+
+  brushRects = removeDuplicates(brushRects)
+
+  function adjustOverlap(rects) {
+    let i = 0
+    while (i < rects.length) {
+      let overlapFound = false
+      for (let j = i + 1; j < rects.length; j++) {
+        const rectA = rects[i]
+        const rectB = rects[j]
+
+        if (rectA.y === rectB.y) {
+          if (rectB.x < rectA.x + rectA.w && rectB.x + rectB.w >= rectA.x) {
+            if (rectA.x + rectA.w < rectB.x + rectB.w) {
+              rects.splice(i, 1) // Remove rectA from the array
+              overlapFound = true
+              break
+            }
+          }
+        }
+      }
+      if (!overlapFound) {
+        i++
+      }
+    }
+  }
+
+  adjustOverlap(brushRects)
+
   brushRects.forEach((r) => {
     paths.push(makePathData(r.x, r.y, r.w))
   })

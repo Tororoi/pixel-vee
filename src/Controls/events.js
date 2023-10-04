@@ -11,6 +11,7 @@ import { renderCursor, renderRasterGUI } from "../GUI/raster.js"
 import { activateShortcut } from "../Tools/shortcuts.js"
 import { renderCanvas, renderVectorsToDOM } from "../Canvas/render.js"
 import { actionZoom } from "../Tools/untrackedActions.js"
+import { adjustEllipseSteps } from "../Tools/index.js"
 
 //TODO: Add Palette that consists of a small canvas with basic paint, sample and fill erase tools.
 //TODO: Add color mixer that consists of a small canvas that can be painted upon and cleared. At any time the user can click "Mix" and the colors on the canvas will be used to generate a mixed color.
@@ -56,7 +57,25 @@ function handleKeyUp(e) {
     e.code === "ShiftRight"
   ) {
     state.tool = tools[dom.toolBtn.id]
+  }
+
+  if (e.code === "ShiftLeft" || e.code === "ShiftRight") {
     state.vectorProperties.forceCircle = false
+    console.log(
+      canvas.pointerEvent,
+      vectorGui.selectedPoint.xKey,
+      vectorGui.collidedKeys.xKey,
+      vectorGui.collisionPresent
+    )
+    if (
+      (vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey) &&
+      vectorGui.selectedPoint.xKey !== "px1"
+    ) {
+      //while holding control point, readjust ellipse without having to move cursor.
+      //TODO: update this functionality to have other radii go back to previous radii when releasing shift
+      adjustEllipseSteps()
+      vectorGui.render(state, canvas)
+    }
   }
 
   if (dom.toolBtn.id === "grab") {
