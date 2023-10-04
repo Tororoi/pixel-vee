@@ -322,6 +322,8 @@ function drawControlPoints(pointsKeys, canvas, radius, modify = false) {
       if (modify && vectorGui.selectedPoint.xKey === data.x) {
         r = radius * 2
         vectorGui.collisionPresent = true
+        vectorGui.collidedKeys.xKey = data.x
+        vectorGui.collidedKeys.yKey = data.y
       } else if (
         modify &&
         checkPointCollision(

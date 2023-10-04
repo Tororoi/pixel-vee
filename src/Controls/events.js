@@ -61,12 +61,12 @@ function handleKeyUp(e) {
 
   if (e.code === "ShiftLeft" || e.code === "ShiftRight") {
     state.vectorProperties.forceCircle = false
-    console.log(
-      canvas.pointerEvent,
-      vectorGui.selectedPoint.xKey,
-      vectorGui.collidedKeys.xKey,
-      vectorGui.collisionPresent
-    )
+    // console.log(
+    //   canvas.pointerEvent,
+    //   vectorGui.selectedPoint.xKey,
+    //   vectorGui.collidedKeys.xKey,
+    //   vectorGui.collisionPresent
+    // )
     if (
       (vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey) &&
       vectorGui.selectedPoint.xKey !== "px1"
