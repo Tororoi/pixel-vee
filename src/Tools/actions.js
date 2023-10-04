@@ -4,10 +4,8 @@ import { swatches } from "../Context/swatch.js"
 import { tools } from "./index.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
-import { generateRandomRGB } from "../utils/colors.js"
 import { vectorGui } from "../GUI/vector.js"
 import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
-import { renderCanvas } from "../Canvas/render.js"
 import { createNewRasterLayer } from "../Canvas/layers.js"
 import { getColor } from "../utils/canvasHelpers.js"
 
@@ -160,7 +158,11 @@ export function actionDraw(
       })
       break
     default:
-      // ctx.fillRect(Math.ceil(coordX - weight / 2), Math.ceil(coordY - weight / 2), weight, weight);
+      //on raster preview canvas
+      //get image data bounding box of brush stamp
+      //modify pixel
+      //put image data at x, y
+      //upon pointer up, save raster canvas as image and add image to timeline like with the replace tool
       brushStamp.forEach((r) => {
         ctx.fillRect(
           Math.ceil(coordX - weight / 2) + r.x,
@@ -416,36 +418,35 @@ export function actionReplace() {
  * @param {*} startX
  * @param {*} startY
  * @param {*} currentColor
- * @param {*} ctx
+ * @param {*} layer
  * @param {*} currentMode
  * @returns
  */
-export function actionFill(startX, startY, currentColor, ctx, currentMode) {
+export function actionFill(startX, startY, currentColor, layer, currentMode) {
   //exit if outside borders
   if (
     startX < 0 ||
-    startX >= canvas.offScreenCVS.width ||
+    startX >= layer.cvs.width ||
     startY < 0 ||
-    startY >= canvas.offScreenCVS.height
+    startY >= layer.cvs.height
   ) {
     return
   }
-  //TODO: actions should not use state directly to maintain timeline integrity
   //get imageData
-  state.localColorLayer = ctx.getImageData(
+  let localColorLayer = layer.ctx.getImageData(
     0,
     0,
-    canvas.offScreenCVS.width,
-    canvas.offScreenCVS.height
+    layer.cvs.width,
+    layer.cvs.height
   )
 
-  state.clickedColor = getColor(startX, startY, state.localColorLayer)
+  let clickedColor = getColor(startX, startY, localColorLayer)
 
   if (currentMode === "erase")
     currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
 
   //exit if color is the same
-  if (currentColor.color === state.clickedColor.color) {
+  if (currentColor.color === clickedColor.color) {
     return
   }
   //Start with click coords
@@ -453,28 +454,28 @@ export function actionFill(startX, startY, currentColor, ctx, currentMode) {
   let newPos, x, y, pixelPos, reachLeft, reachRight
   floodFill()
   //render floodFill result
-  ctx.putImageData(state.localColorLayer, 0, 0)
+  layer.ctx.putImageData(localColorLayer, 0, 0)
 
   //helpers
   function matchStartColor(pixelPos) {
-    let r = state.localColorLayer.data[pixelPos]
-    let g = state.localColorLayer.data[pixelPos + 1]
-    let b = state.localColorLayer.data[pixelPos + 2]
-    let a = state.localColorLayer.data[pixelPos + 3]
+    let r = localColorLayer.data[pixelPos]
+    let g = localColorLayer.data[pixelPos + 1]
+    let b = localColorLayer.data[pixelPos + 2]
+    let a = localColorLayer.data[pixelPos + 3]
     return (
-      r === state.clickedColor.r &&
-      g === state.clickedColor.g &&
-      b === state.clickedColor.b &&
-      a === state.clickedColor.a
+      r === clickedColor.r &&
+      g === clickedColor.g &&
+      b === clickedColor.b &&
+      a === clickedColor.a
     )
   }
 
   function colorPixel(pixelPos) {
-    state.localColorLayer.data[pixelPos] = currentColor.r
-    state.localColorLayer.data[pixelPos + 1] = currentColor.g
-    state.localColorLayer.data[pixelPos + 2] = currentColor.b
+    localColorLayer.data[pixelPos] = currentColor.r
+    localColorLayer.data[pixelPos + 1] = currentColor.g
+    localColorLayer.data[pixelPos + 2] = currentColor.b
     //not ideal
-    state.localColorLayer.data[pixelPos + 3] = currentColor.a
+    localColorLayer.data[pixelPos + 3] = currentColor.a
   }
 
   function floodFill() {
@@ -483,19 +484,19 @@ export function actionFill(startX, startY, currentColor, ctx, currentMode) {
     y = newPos[1]
 
     //get current pixel position
-    pixelPos = (y * canvas.offScreenCVS.width + x) * 4
+    pixelPos = (y * layer.cvs.width + x) * 4
     // Go up as long as the color matches and are inside the canvas
     while (y >= 0 && matchStartColor(pixelPos)) {
       y--
-      pixelPos -= canvas.offScreenCVS.width * 4
+      pixelPos -= layer.cvs.width * 4
     }
     //Don't overextend
-    pixelPos += canvas.offScreenCVS.width * 4
+    pixelPos += layer.cvs.width * 4
     y++
     reachLeft = false
     reachRight = false
     // Go down as long as the color matches and in inside the canvas
-    while (y < canvas.offScreenCVS.height && matchStartColor(pixelPos)) {
+    while (y < layer.cvs.height && matchStartColor(pixelPos)) {
       colorPixel(pixelPos)
 
       if (x > 0) {
@@ -510,7 +511,7 @@ export function actionFill(startX, startY, currentColor, ctx, currentMode) {
         }
       }
 
-      if (x < canvas.offScreenCVS.width - 1) {
+      if (x < layer.cvs.width - 1) {
         if (matchStartColor(pixelPos + 4)) {
           if (!reachRight) {
             //Add pixel to stack
@@ -522,7 +523,7 @@ export function actionFill(startX, startY, currentColor, ctx, currentMode) {
         }
       }
       y++
-      pixelPos += canvas.offScreenCVS.width * 4
+      pixelPos += layer.cvs.width * 4
     }
 
     if (pixelStack.length) {

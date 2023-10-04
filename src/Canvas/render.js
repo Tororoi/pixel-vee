@@ -100,7 +100,7 @@ function redrawTimelineActions(index = null) {
               p.properties.px1,
               p.properties.py1,
               p.color,
-              p.layer.ctx,
+              p.layer,
               p.mode
             )
             break

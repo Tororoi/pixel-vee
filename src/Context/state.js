@@ -35,7 +35,6 @@ export const state = {
   clipMask: null,
   clickDisabled: false,
   clicked: false,
-  clickedColor: null,
   cursorX: null, //absolute cursor coordinates relative to drawing area
   cursorY: null,
   previousX: null,

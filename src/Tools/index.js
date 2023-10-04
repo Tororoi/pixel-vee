@@ -435,7 +435,7 @@ export function fillSteps() {
           state.vectorProperties.px1,
           state.vectorProperties.py1,
           swatches.primary.color,
-          canvas.currentLayer.ctx,
+          canvas.currentLayer,
           state.mode
         )
         //For undo ability, store starting coords and settings and pass them into actionFill
