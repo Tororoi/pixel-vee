@@ -442,7 +442,11 @@ export function renderVectorsToDOM() {
         vectorElement.appendChild(tool)
         let color = document.createElement("div") //TODO: make clickable and color can be rechosen via colorpicker
         color.className = "actionColor"
-        color.style.background = p.color.color
+        // color.style.background = p.color.color
+        let colorSwatch = document.createElement("div")
+        colorSwatch.className = "swatch"
+        colorSwatch.style.background = p.color.color
+        color.appendChild(colorSwatch)
         vectorElement.appendChild(color)
         let trash = document.createElement("div") //TODO: make clickable and sets vector action as hidden
         trash.className = "trash"

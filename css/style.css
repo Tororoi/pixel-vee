@@ -10,6 +10,10 @@
   --primary-swatch-alpha: 1;
   --secondary-swatch-color: 255, 255, 255;
   --secondary-swatch-alpha: 1;
+  --old-swatch-color: 0, 0, 0;
+  --old-swatch-alpha: 1;
+  --new-swatch-color: 0, 0, 0;
+  --new-swatch-alpha: 1;
 }
 
 @keyframes flash {
@@ -584,6 +588,7 @@ canvas {
   background-image: radial-gradient(rgba(var(--primary-swatch-color), var(--primary-swatch-alpha)) 50%, rgba(var(--primary-swatch-color), 1) 110%);
   width: 100%;
   height: 100%;
+  pointer-events: none;
 }
 .toolbox .colors .back-swatch {
   position: absolute;
@@ -598,6 +603,7 @@ canvas {
   background-image: radial-gradient(rgba(var(--secondary-swatch-color), var(--secondary-swatch-alpha)) 50%, rgba(var(--secondary-swatch-color), 1) 110%);
   width: 100%;
   height: 100%;
+  pointer-events: none;
 }
 .toolbox .color-switch {
   width: 40px;
@@ -978,6 +984,9 @@ canvas {
 .vectors-interface .vectors-container .vectors .vector .tool:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .tool:focus {
   box-shadow: -2px 0px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
+.vectors-interface .vectors-container .vectors .vector .actionColor-container {
+  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+}
 .vectors-interface .vectors-container .vectors .vector .actionColor {
   position: absolute;
   right: 0;
@@ -985,7 +994,7 @@ canvas {
   cursor: pointer;
   width: 20px;
   height: 20px;
-  background: rgb(131, 131, 131);
+  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   z-index: 104;
   margin: 2px;
   box-shadow: -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
@@ -995,6 +1004,11 @@ canvas {
 }
 .vectors-interface .vectors-container .vectors .vector .actionColor:hover {
   z-index: 106;
+}
+.vectors-interface .vectors-container .vectors .vector .actionColor .swatch {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 .vectors-interface .vectors-container .vectors .vector .trash {
   position: absolute;
@@ -1269,11 +1283,31 @@ canvas {
   justify-content: center;
   width: 100%;
 }
-.picker-interface #right #colors div {
-  background-color: white;
-  width: 80px;
+.picker-interface #right #colors .color {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  margin: 10px;
+}
+.picker-interface #right #colors .color h5 {
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+.picker-interface #right #colors .color .swatch {
+  width: 72px;
   height: 40px;
-  margin: 10px 10px 0px 10px;
+  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  margin: 0;
+}
+.picker-interface #right #colors .color .swatch .swatch-color {
+  width: 100%;
+  height: 100%;
+}
+.picker-interface #right #colors .color .swatch #newcolor {
+  background-image: radial-gradient(rgba(var(--new-swatch-color), var(--new-swatch-alpha)) 50%, rgba(var(--new-swatch-color), 1) 110%);
+}
+.picker-interface #right #colors .color .swatch #oldcolor {
+  background-image: radial-gradient(rgba(var(--old-swatch-color), var(--old-swatch-alpha)) 50%, rgba(var(--old-swatch-color), 1) 110%);
 }
 .picker-interface #right #rgbahsl {
   display: flex;

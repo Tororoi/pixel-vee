@@ -16,6 +16,7 @@ import {
 //to see the gradient for different hues at that same luminance.
 export class Picker {
   constructor(target, width, height, initialColor) {
+    this.initialColor = initialColor
     this.target = target
     this.width = width
     this.height = height
@@ -45,8 +46,8 @@ export class Picker {
     this.hex = document.getElementById("hexcode")
     this.lumi = document.getElementById("luminance")
     //Colors
-    this.oldcolor = document.getElementById("oldcolor")
-    this.newcolor = document.getElementById("newcolor")
+    this.oldcolor = document.getElementById("oldcolor-btn")
+    this.newcolor = document.getElementById("newcolor-btn")
     //OK/Cancel
     this.confirmBtn = document.getElementById("confirm-btn")
     this.cancelBtn = document.getElementById("cancel-btn")
@@ -108,6 +109,7 @@ export class Picker {
     this.alpha = e.target.value
     this.a.value = e.target.value
     this.hexcode = this.hex.value = this.hexcode
+    this.updateColor()
   }
 
   updateRGBA(e) {
@@ -150,14 +152,20 @@ export class Picker {
     drawSelector(this.context, this.pickerCircle)
     //update interface values to match new color
     const { hue, saturation, lightness } = this.hsl
-    this.newcolor.style.backgroundColor =
-      "hsl(" + hue + "," + saturation + "%," + lightness + "%)"
+    const { red, green, blue } = this.rgb
+    document.documentElement.style.setProperty(
+      "--new-swatch-color",
+      `${red},${green},${blue}`
+    )
+    document.documentElement.style.setProperty(
+      "--new-swatch-alpha",
+      `${this.alpha / 255}`
+    )
     //hsl
     this.h.value = hue
     this.s.value = saturation
     this.l.value = lightness
     //rgb
-    const { red, green, blue } = this.rgb
     this.r.value = red
     this.g.value = green
     this.b.value = blue
@@ -270,11 +278,20 @@ export class Picker {
   //* Update Picker *//
   //Called every time color picker is opened
   update(reference) {
+    this.initialColor = reference
     this.rgb = { red: reference.r, green: reference.g, blue: reference.b }
     this.alpha = reference.a
     this.propogateRGBColorSpace()
     //set oldcolor
-    this.oldcolor.style.backgroundColor = reference.color
+    // this.oldcolor.style.backgroundColor = reference.color
+    document.documentElement.style.setProperty(
+      "--old-swatch-color",
+      `${reference.r},${reference.g},${reference.b}`
+    )
+    document.documentElement.style.setProperty(
+      "--old-swatch-alpha",
+      `${reference.a / 255}`
+    )
   }
 
   //* Initial Build *//
@@ -329,6 +346,15 @@ export class Picker {
     })
     this.hex.addEventListener("change", (e) => {
       this.updateHex(e)
+    })
+    this.oldcolor.addEventListener("pointerdown", (e) => {
+      this.rgb = {
+        red: this.initialColor.r,
+        green: this.initialColor.g,
+        blue: this.initialColor.b,
+      }
+      this.alpha = this.initialColor.a
+      this.propogateRGBColorSpace()
     })
   }
 }

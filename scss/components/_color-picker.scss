@@ -141,11 +141,43 @@
       display: flex;
       justify-content: center;
       width: 100%;
-      div {
-        background-color: white;
-        width: 80px;
-        height: 40px;
-        margin: 10px 10px 0px 10px;
+      .color {
+        display: flex;
+        flex-flow: column nowrap;
+        justify-content: center;
+        margin: 10px;
+        h5 {
+          margin-top: 0;
+          margin-bottom: 10px;
+        }
+        .swatch {
+          width: 72px;
+          height: 40px;
+          background-image: repeating-linear-gradient(
+            -45deg,
+            white,
+            white 5px,
+            rgb(216, 216, 216) 5px,
+            rgb(216, 216, 216) 10px
+          );
+          margin: 0;
+          .swatch-color {
+            width: 100%;
+            height: 100%;
+          }
+          #newcolor {
+            background-image: radial-gradient(
+              rgba(var(--new-swatch-color), var(--new-swatch-alpha)) 50%,
+              rgba(var(--new-swatch-color), 1) 110%
+            );
+          }
+          #oldcolor {
+            background-image: radial-gradient(
+              rgba(var(--old-swatch-color), var(--old-swatch-alpha)) 50%,
+              rgba(var(--old-swatch-color), 1) 110%
+            );
+          }
+        }
       }
     }
     #rgbahsl {

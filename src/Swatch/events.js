@@ -129,14 +129,22 @@ function closePickerWindow() {
  */
 function handleConfirm() {
   //set color to brush
-  picker.oldcolor.style.backgroundColor =
-    "hsl(" +
-    picker.hsl.hue +
-    "," +
-    picker.hsl.saturation +
-    "%," +
-    picker.hsl.lightness +
-    "%)"
+  document.documentElement.style.setProperty(
+    "--old-swatch-color",
+    `${picker.rgb.red},${picker.rgb.green},${picker.rgb.blue}`
+  )
+  document.documentElement.style.setProperty(
+    "--old-swatch-alpha",
+    `${picker.alpha / 255}`
+  )
+  // picker.oldcolor.style.backgroundColor =
+  //   "hsl(" +
+  //   picker.hsl.hue +
+  //   "," +
+  //   picker.hsl.saturation +
+  //   "%," +
+  //   picker.hsl.lightness +
+  //   "%)"
   setColor(
     picker.rgb.red,
     picker.rgb.green,
