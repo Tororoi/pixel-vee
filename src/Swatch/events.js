@@ -28,7 +28,14 @@ export function setColor(r, g, b, a, target) {
     swatches.primary.color.g = g
     swatches.primary.color.b = b
     swatches.primary.color.a = a
-    swatches.primary.swatch.style.background = swatches.primary.color.color
+    document.documentElement.style.setProperty(
+      "--primary-swatch-color",
+      `${r},${g},${b}`
+    )
+    document.documentElement.style.setProperty(
+      "--primary-swatch-alpha",
+      `${a / 255}`
+    )
     picker.update(swatches.primary.color)
   } else if (target === swatches.secondary.swatch) {
     swatches.secondary.color.color = `rgba(${r},${g},${b},${a / 255})`
@@ -36,7 +43,14 @@ export function setColor(r, g, b, a, target) {
     swatches.secondary.color.g = g
     swatches.secondary.color.b = b
     swatches.secondary.color.a = a
-    swatches.secondary.swatch.style.background = swatches.secondary.color.color
+    document.documentElement.style.setProperty(
+      "--secondary-swatch-color",
+      `${r},${g},${b}`
+    )
+    document.documentElement.style.setProperty(
+      "--secondary-swatch-alpha",
+      `${a / 255}`
+    )
   } else {
     let color = { color: `rgba(${r},${g},${b},${a / 255})`, r, g, b, a }
     target.color = color
@@ -83,9 +97,23 @@ function openColorPicker(e) {
 function switchColors() {
   let temp = { ...swatches.primary.color }
   swatches.primary.color = swatches.secondary.color
-  swatches.primary.swatch.style.background = swatches.primary.color.color
+  document.documentElement.style.setProperty(
+    "--primary-swatch-color",
+    `${swatches.primary.color.r},${swatches.primary.color.g},${swatches.primary.color.b}`
+  )
+  document.documentElement.style.setProperty(
+    "--primary-swatch-alpha",
+    `${swatches.primary.color.a / 255}`
+  )
   swatches.secondary.color = temp
-  swatches.secondary.swatch.style.background = swatches.secondary.color.color
+  document.documentElement.style.setProperty(
+    "--secondary-swatch-color",
+    `${temp.r},${temp.g},${temp.b}`
+  )
+  document.documentElement.style.setProperty(
+    "--secondary-swatch-alpha",
+    `${temp.a / 255}`
+  )
 }
 
 /**

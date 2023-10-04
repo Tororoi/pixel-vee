@@ -6,6 +6,10 @@
 /* Color Assignments */
 :root {
   --border-color: $border-color;
+  --primary-swatch-color: 0, 0, 0;
+  --primary-swatch-alpha: 1;
+  --secondary-swatch-color: 255, 255, 255;
+  --secondary-swatch-alpha: 1;
 }
 
 @keyframes flash {
@@ -570,20 +574,30 @@ canvas {
 }
 .toolbox .colors .swatch {
   position: absolute;
-  background: rgb(0, 0, 0);
+  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   width: 72px;
   height: 72px;
   margin: 16px;
   z-index: 6;
 }
+.toolbox .colors .swatch .swatch-color {
+  background-image: radial-gradient(rgba(var(--primary-swatch-color), var(--primary-swatch-alpha)) 50%, rgba(var(--primary-swatch-color), 1) 110%);
+  width: 100%;
+  height: 100%;
+}
 .toolbox .colors .back-swatch {
   position: absolute;
-  background: rgb(255, 255, 255);
+  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   width: 72px;
   height: 72px;
   margin: 16px;
   z-index: 5;
   transform: translateX(24px) translateY(24px);
+}
+.toolbox .colors .back-swatch .swatch-color {
+  background-image: radial-gradient(rgba(var(--secondary-swatch-color), var(--secondary-swatch-alpha)) 50%, rgba(var(--secondary-swatch-color), 1) 110%);
+  width: 100%;
+  height: 100%;
 }
 .toolbox .color-switch {
   width: 40px;
