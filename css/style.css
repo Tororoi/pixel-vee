@@ -1236,7 +1236,7 @@ canvas {
   width: 250px;
   height: 20px;
   margin: 10px;
-  background: white;
+  background-image: repeating-linear-gradient(225deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   outline: none;
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
@@ -1248,6 +1248,18 @@ canvas {
   height: 24px;
   width: 5px;
   outline: 2px solid rgb(0, 0, 0);
+}
+.picker-interface #left #picker #alphaslider::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: linear-gradient(90deg, rgba(var(--new-swatch-color), 0), rgba(var(--new-swatch-color), 1));
+  pointer-events: none;
+  z-index: 1;
 }
 .picker-interface #left #buttons {
   display: flex;
