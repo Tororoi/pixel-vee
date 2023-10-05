@@ -8,6 +8,7 @@ import { vectorGui } from "../GUI/vector.js"
 import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
 import { createNewRasterLayer } from "../Canvas/layers.js"
 import { getColor } from "../utils/canvasHelpers.js"
+import { colorPixel, matchStartColor } from "../utils/imageDataHelpers.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -173,6 +174,46 @@ export function actionDraw(
       })
     // ctx.drawImage(brushStamp, Math.ceil(coordX - weight / 2), Math.ceil(coordY - weight / 2), weight, weight);
   }
+}
+
+/**
+ * Render a stamp from the brush to the canvas
+ * TODO: Find more efficient way to draw any brush shape without drawing each pixel separately. Could either be image stamp or made with rectangles
+ * @param {*} coordX
+ * @param {*} coordY
+ * @param {*} currentColor
+ * @param {*} brushStamp
+ * @param {*} weight
+ * @param {*} ctx
+ * @param {*} currentMode
+ */
+export function actionPut(
+  coordX,
+  coordY,
+  currentColor,
+  brushStamp,
+  weight,
+  ctx,
+  currentMode,
+  cvs,
+  imageData
+) {
+  //on raster preview canvas
+  //get image data bounding box of brush stamp
+  //modify pixel
+  //put image data at x, y
+  //upon pointer up, save raster canvas as image and add image to timeline like with the replace tool
+  //get current pixel position
+  brushStamp.forEach((r) => {
+    //for each rectangle, given the center point of the overall brush at coordX and coordY, find the pixel's position
+    let x = Math.ceil(coordX - weight / 2) + r.x
+    let y = Math.ceil(coordY - weight / 2) + r.y
+    for (let i = 0; i < r.w; i++) {
+      let pixelPos = (y * cvs.width + x + i) * 4
+      colorPixel(imageData, pixelPos, currentColor)
+    }
+  })
+  ctx.putImageData(imageData, 0, 0)
 }
 
 /**
@@ -433,14 +474,14 @@ export function actionFill(startX, startY, currentColor, layer, currentMode) {
     return
   }
   //get imageData
-  let localColorLayer = layer.ctx.getImageData(
+  let layerImageData = layer.ctx.getImageData(
     0,
     0,
     layer.cvs.width,
     layer.cvs.height
   )
 
-  let clickedColor = getColor(startX, startY, localColorLayer)
+  let clickedColor = getColor(startX, startY, layerImageData)
 
   if (currentMode === "erase")
     currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
@@ -454,30 +495,9 @@ export function actionFill(startX, startY, currentColor, layer, currentMode) {
   let newPos, x, y, pixelPos, reachLeft, reachRight
   floodFill()
   //render floodFill result
-  layer.ctx.putImageData(localColorLayer, 0, 0)
+  layer.ctx.putImageData(layerImageData, 0, 0)
 
   //helpers
-  function matchStartColor(pixelPos) {
-    let r = localColorLayer.data[pixelPos]
-    let g = localColorLayer.data[pixelPos + 1]
-    let b = localColorLayer.data[pixelPos + 2]
-    let a = localColorLayer.data[pixelPos + 3]
-    return (
-      r === clickedColor.r &&
-      g === clickedColor.g &&
-      b === clickedColor.b &&
-      a === clickedColor.a
-    )
-  }
-
-  function colorPixel(pixelPos) {
-    localColorLayer.data[pixelPos] = currentColor.r
-    localColorLayer.data[pixelPos + 1] = currentColor.g
-    localColorLayer.data[pixelPos + 2] = currentColor.b
-    //not ideal
-    localColorLayer.data[pixelPos + 3] = currentColor.a
-  }
-
   function floodFill() {
     newPos = pixelStack.pop()
     x = newPos[0]
@@ -486,7 +506,7 @@ export function actionFill(startX, startY, currentColor, layer, currentMode) {
     //get current pixel position
     pixelPos = (y * layer.cvs.width + x) * 4
     // Go up as long as the color matches and are inside the canvas
-    while (y >= 0 && matchStartColor(pixelPos)) {
+    while (y >= 0 && matchStartColor(layerImageData, pixelPos, clickedColor)) {
       y--
       pixelPos -= layer.cvs.width * 4
     }
@@ -496,11 +516,14 @@ export function actionFill(startX, startY, currentColor, layer, currentMode) {
     reachLeft = false
     reachRight = false
     // Go down as long as the color matches and in inside the canvas
-    while (y < layer.cvs.height && matchStartColor(pixelPos)) {
-      colorPixel(pixelPos)
+    while (
+      y < layer.cvs.height &&
+      matchStartColor(layerImageData, pixelPos, clickedColor)
+    ) {
+      colorPixel(layerImageData, pixelPos, currentColor)
 
       if (x > 0) {
-        if (matchStartColor(pixelPos - 4)) {
+        if (matchStartColor(layerImageData, pixelPos - 4, clickedColor)) {
           if (!reachLeft) {
             //Add pixel to stack
             pixelStack.push([x - 1, y])
@@ -512,7 +535,7 @@ export function actionFill(startX, startY, currentColor, layer, currentMode) {
       }
 
       if (x < layer.cvs.width - 1) {
-        if (matchStartColor(pixelPos + 4)) {
+        if (matchStartColor(layerImageData, pixelPos + 4, clickedColor)) {
           if (!reachRight) {
             //Add pixel to stack
             pixelStack.push([x + 1, y])

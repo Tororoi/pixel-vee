@@ -5,6 +5,7 @@ import { swatches } from "../Context/swatch.js"
 import {
   modifyAction,
   actionDraw,
+  actionPut,
   actionLine,
   actionReplace,
   actionFill,
@@ -47,14 +48,32 @@ export function drawSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //set colorlayer, then for each brushpoint, alter colorlayer and add each to timeline
-      actionDraw(
+      // actionDraw(
+      //   state.cursorX,
+      //   state.cursorY,
+      //   swatches.primary.color,
+      //   state.brushStamp,
+      //   state.tool.brushSize,
+      //   canvas.currentLayer.ctx,
+      //   state.mode
+      // )
+      //get imageData
+      state.localColorLayer = canvas.currentLayer.ctx.getImageData(
+        0,
+        0,
+        canvas.currentLayer.cvs.width,
+        canvas.currentLayer.cvs.height
+      )
+      actionPut(
         state.cursorX,
         state.cursorY,
         swatches.primary.color,
         state.brushStamp,
         state.tool.brushSize,
         canvas.currentLayer.ctx,
-        state.mode
+        state.mode,
+        canvas.currentLayer.cvs,
+        state.localColorLayer
       )
       state.previousX = state.cursorX
       state.previousY = state.cursorY
@@ -121,14 +140,25 @@ export function drawSteps() {
             if (
               !checkPixelAlreadyDrawn(state.points, thispoint.x, thispoint.y)
             ) {
-              actionDraw(
+              // actionDraw(
+              //   thispoint.x,
+              //   thispoint.y,
+              //   swatches.primary.color,
+              //   state.brushStamp,
+              //   state.tool.brushSize,
+              //   canvas.currentLayer.ctx,
+              //   state.mode
+              // )
+              actionPut(
                 thispoint.x,
                 thispoint.y,
                 swatches.primary.color,
                 state.brushStamp,
                 state.tool.brushSize,
                 canvas.currentLayer.ctx,
-                state.mode
+                state.mode,
+                canvas.currentLayer.cvs,
+                state.localColorLayer
               )
               if (state.tool.name !== "replace") {
                 state.addToTimeline({
@@ -144,14 +174,25 @@ export function drawSteps() {
           if (
             !checkPixelAlreadyDrawn(state.points, state.cursorX, state.cursorY)
           ) {
-            actionDraw(
+            // actionDraw(
+            //   state.cursorX,
+            //   state.cursorY,
+            //   swatches.primary.color,
+            //   state.brushStamp,
+            //   state.tool.brushSize,
+            //   canvas.currentLayer.ctx,
+            //   state.mode
+            // )
+            actionPut(
               state.cursorX,
               state.cursorY,
               swatches.primary.color,
               state.brushStamp,
               state.tool.brushSize,
               canvas.currentLayer.ctx,
-              state.mode
+              state.mode,
+              canvas.currentLayer.cvs,
+              state.localColorLayer
             )
             if (state.tool.name !== "replace") {
               state.addToTimeline({
@@ -199,14 +240,25 @@ export function drawSteps() {
                 Math.abs(state.cursorY - state.lastDrawnY) > 1) &&
               !pixelAlreadyDrawn
             ) {
-              actionDraw(
+              // actionDraw(
+              //   state.waitingPixelX,
+              //   state.waitingPixelY,
+              //   swatches.primary.color,
+              //   state.brushStamp,
+              //   state.tool.brushSize,
+              //   canvas.currentLayer.ctx,
+              //   state.mode
+              // )
+              actionPut(
                 state.waitingPixelX,
                 state.waitingPixelY,
                 swatches.primary.color,
                 state.brushStamp,
                 state.tool.brushSize,
                 canvas.currentLayer.ctx,
-                state.mode
+                state.mode,
+                canvas.currentLayer.cvs,
+                state.localColorLayer
               )
               if (state.tool.name !== "replace") {
                 //TODO: refactor so adding to timeline is performed by controller function
@@ -229,14 +281,25 @@ export function drawSteps() {
             }
           } else {
             if (!pixelAlreadyDrawn) {
-              actionDraw(
+              // actionDraw(
+              //   state.cursorX,
+              //   state.cursorY,
+              //   swatches.primary.color,
+              //   state.brushStamp,
+              //   state.tool.brushSize,
+              //   canvas.currentLayer.ctx,
+              //   state.mode
+              // )
+              actionPut(
                 state.cursorX,
                 state.cursorY,
                 swatches.primary.color,
                 state.brushStamp,
                 state.tool.brushSize,
                 canvas.currentLayer.ctx,
-                state.mode
+                state.mode,
+                canvas.currentLayer.cvs,
+                state.localColorLayer
               )
               if (state.tool.name !== "replace") {
                 state.addToTimeline({
@@ -272,14 +335,25 @@ export function drawSteps() {
       }
       if (!pixelAlreadyDrawn) {
         //only needed if perfect pixels option is on
-        actionDraw(
+        // actionDraw(
+        //   state.cursorX,
+        //   state.cursorY,
+        //   swatches.primary.color,
+        //   state.brushStamp,
+        //   state.tool.brushSize,
+        //   canvas.currentLayer.ctx,
+        //   state.mode
+        // )
+        actionPut(
           state.cursorX,
           state.cursorY,
           swatches.primary.color,
           state.brushStamp,
           state.tool.brushSize,
           canvas.currentLayer.ctx,
-          state.mode
+          state.mode,
+          canvas.currentLayer.cvs,
+          state.localColorLayer
         )
         if (state.tool.name !== "replace") {
           state.addToTimeline({
