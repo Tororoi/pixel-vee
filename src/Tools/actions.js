@@ -198,12 +198,6 @@ export function actionPut(
   currentMode,
   imageData
 ) {
-  //on raster preview canvas
-  //get image data bounding box of brush stamp
-  //modify pixel
-  //put image data at x, y
-  //upon pointer up, save raster canvas as image and add image to timeline like with the replace tool
-  //get current pixel position
   if (currentMode === "erase")
     currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
   brushStamp.forEach((r) => {
@@ -211,8 +205,11 @@ export function actionPut(
     let x = Math.ceil(coordX - weight / 2) + r.x
     let y = Math.ceil(coordY - weight / 2) + r.y
     for (let i = 0; i < r.w; i++) {
-      let pixelPos = (y * cvs.width + x + i) * 4
-      colorPixel(imageData, pixelPos, currentColor)
+      // check that pixel is inside canvas area or else it will roll over on image data
+      if (x + i < cvs.width && x + i >= 0 && y < cvs.height && y >= 0) {
+        let pixelPos = (y * cvs.width + x + i) * 4
+        colorPixel(imageData, pixelPos, currentColor)
+      }
     }
   })
   // console.log({ cvs, ctx, imageData })
