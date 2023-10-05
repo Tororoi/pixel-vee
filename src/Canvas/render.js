@@ -84,31 +84,34 @@ function redrawTimelineActions(index = null) {
             // )
             break
           case "brush":
-            if (p.mode === "erase" || p.mode === "inject") {
+            if (p.mode === "inject") {
               //TODO IN PROGRESS: actionPut requires image data, but we don't want to store a snapshot of the entire canvas (p.imageData) at the time of first render.
               //Instead, we want a snapshot of the canvas during this redraw right before this action
               //Instead of actions being arrays, they should have some properties and one of those properties can be an array of points
-              p.tool.action(
-                p.x,
-                p.y,
-                p.color,
-                p.brush,
-                p.weight,
-                p.layer.cvs,
-                p.layer.ctx,
-                p.mode,
-                p.imageData
-              )
-            } else {
+              //actionPut
               // p.tool.action(
               //   p.x,
               //   p.y,
               //   p.color,
               //   p.brush,
               //   p.weight,
+              //   p.layer.cvs,
               //   p.layer.ctx,
-              //   p.mode
+              //   p.mode,
+              //   p.imageData
               // )
+            } else if (p.mode === "erase") {
+              //actionDraw
+              p.tool.secondaryAction(
+                p.x,
+                p.y,
+                p.color,
+                p.brush,
+                p.weight,
+                p.layer.ctx,
+                p.mode
+              )
+            } else {
               p.layer.ctx.drawImage(
                 p.properties.image,
                 0,
