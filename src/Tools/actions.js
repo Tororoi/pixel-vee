@@ -178,7 +178,7 @@ export function actionDraw(
 
 /**
  * Render a stamp from the brush to the canvas
- * TODO: Find more efficient way to draw any brush shape without drawing each pixel separately. Could either be image stamp or made with rectangles
+ * Depending on a special option, color could be put directly to canvas or rendered to an offscreen canvas first (rasterGuiCVS)
  * @param {*} coordX
  * @param {*} coordY
  * @param {*} currentColor
@@ -193,9 +193,9 @@ export function actionPut(
   currentColor,
   brushStamp,
   weight,
+  cvs,
   ctx,
   currentMode,
-  cvs,
   imageData
 ) {
   //on raster preview canvas
@@ -204,6 +204,8 @@ export function actionPut(
   //put image data at x, y
   //upon pointer up, save raster canvas as image and add image to timeline like with the replace tool
   //get current pixel position
+  if (currentMode === "erase")
+    currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
   brushStamp.forEach((r) => {
     //for each rectangle, given the center point of the overall brush at coordX and coordY, find the pixel's position
     let x = Math.ceil(coordX - weight / 2) + r.x
@@ -213,6 +215,7 @@ export function actionPut(
       colorPixel(imageData, pixelPos, currentColor)
     }
   })
+  // console.log({ cvs, ctx, imageData })
   ctx.putImageData(imageData, 0, 0)
 }
 

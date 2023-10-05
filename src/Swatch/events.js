@@ -97,6 +97,7 @@ function openColorPicker(e) {
 function switchColors() {
   let temp = { ...swatches.primary.color }
   swatches.primary.color = swatches.secondary.color
+  swatches.primary.swatch.color = swatches.secondary.color
   document.documentElement.style.setProperty(
     "--primary-swatch-color",
     `${swatches.primary.color.r},${swatches.primary.color.g},${swatches.primary.color.b}`
@@ -106,6 +107,7 @@ function switchColors() {
     `${swatches.primary.color.a / 255}`
   )
   swatches.secondary.color = temp
+  swatches.secondary.swatch.color = temp
   document.documentElement.style.setProperty(
     "--secondary-swatch-color",
     `${temp.r},${temp.g},${temp.b}`

@@ -27,7 +27,7 @@ import {
   updateEllipseControlPoints,
 } from "../utils/ellipse.js"
 import { renderCanvas } from "../Canvas/render.js"
-import { consolidateLayers } from "../Canvas/layers.js"
+import { consolidateLayers, createNewRasterLayer } from "../Canvas/layers.js"
 import { getColor } from "../utils/canvasHelpers.js"
 import { setColor } from "../Swatch/events.js"
 import { checkPixelAlreadyDrawn } from "../utils/drawHelpers.js"
@@ -41,6 +41,294 @@ import { checkPixelAlreadyDrawn } from "../utils/drawHelpers.js"
 /**
  * Supported modes: "draw, erase, perfect",
  */
+export function putSteps() {
+  //right now, checking if pixel is already drawn, but there are alternatives which may be more reliable.
+  //alternative 1. draw on a separate canvas with an opacity set for the canvas, then save the image of that drawing and use that in history. Won't work for eraser.
+  let pixelAlreadyDrawn = false
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
+      if (state.mode !== "erase" && state.mode !== "inject") {
+        //create new layer temporarily
+        const layer = createNewRasterLayer("Temporary Drawing Layer")
+        //get imageData
+        state.localColorLayer = layer.ctx.createImageData(
+          canvas.currentLayer.cvs.width,
+          canvas.currentLayer.cvs.height
+        )
+        //store reference to current layer
+        canvas.tempLayer = canvas.currentLayer
+        //layer must be in canvas.layers for draw to show in real time
+        const currentLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
+        //add layer at position just on top of current layer
+        canvas.layers.splice(currentLayerIndex + 1, 0, layer)
+        //set new layer to current layer so it can be drawn onto
+        canvas.currentLayer = layer
+      }
+      actionPut(
+        state.cursorX,
+        state.cursorY,
+        swatches.primary.color,
+        state.brushStamp,
+        state.tool.brushSize,
+        canvas.currentLayer.cvs,
+        canvas.currentLayer.ctx,
+        state.mode,
+        state.localColorLayer
+      )
+      if (state.mode === "erase" || state.mode === "inject") {
+        state.addToTimeline({
+          tool: state.tool,
+          x: state.cursorX,
+          y: state.cursorY,
+          layer: canvas.currentLayer,
+        })
+      }
+      state.previousX = state.cursorX
+      state.previousY = state.cursorY
+      //for perfect pixels
+      state.lastDrawnX = state.cursorX
+      state.lastDrawnY = state.cursorY
+      state.waitingPixelX = state.cursorX
+      state.waitingPixelY = state.cursorY
+      renderCanvas()
+      break
+    case "pointermove":
+      //check if pixel already drawn in current action. Reduces cost of subsequent renders and prevents colors with opacity from stacking on eachother.
+      if (state.mode === "perfect") {
+        //TODO: use a new function that checks if imagedata pixel position is not 0,0,0,0
+        pixelAlreadyDrawn = checkPixelAlreadyDrawn(
+          state.points,
+          state.waitingPixelX,
+          state.waitingPixelY
+        )
+      } else {
+        pixelAlreadyDrawn = checkPixelAlreadyDrawn(
+          state.points,
+          state.cursorX,
+          state.cursorY
+        )
+      }
+      if (state.mode === "perfect" && !pixelAlreadyDrawn) {
+        drawCurrentPixel(state, canvas, swatches)
+      }
+      if (
+        state.previousX !== state.cursorX ||
+        state.previousY !== state.cursorY
+      ) {
+        //draw between points when drawing fast
+        if (
+          Math.abs(state.cursorX - state.previousX) > 1 ||
+          Math.abs(state.cursorY - state.previousY) > 1
+        ) {
+          let angle = getAngle(
+            state.cursorX - state.previousX,
+            state.cursorY - state.previousY
+          ) // angle of line
+          let tri = getTriangle(
+            state.previousX,
+            state.previousY,
+            state.cursorX,
+            state.cursorY,
+            angle
+          )
+
+          for (let i = 0; i < tri.long; i++) {
+            let thispoint = {
+              x: Math.round(state.previousX + tri.x * i),
+              y: Math.round(state.previousY + tri.y * i),
+            }
+            // for each point along the line
+            if (
+              !checkPixelAlreadyDrawn(state.points, thispoint.x, thispoint.y)
+            ) {
+              actionPut(
+                thispoint.x,
+                thispoint.y,
+                swatches.primary.color,
+                state.brushStamp,
+                state.tool.brushSize,
+                canvas.currentLayer.cvs,
+                canvas.currentLayer.ctx,
+                state.mode,
+                state.localColorLayer
+              )
+              if (state.mode === "erase" || state.mode === "inject") {
+                state.addToTimeline({
+                  tool: state.tool,
+                  x: thispoint.x,
+                  y: thispoint.y,
+                  layer: canvas.currentLayer,
+                })
+              }
+            }
+          }
+          //fill endpoint
+          if (
+            !checkPixelAlreadyDrawn(state.points, state.cursorX, state.cursorY)
+          ) {
+            actionPut(
+              state.cursorX,
+              state.cursorY,
+              swatches.primary.color,
+              state.brushStamp,
+              state.tool.brushSize,
+              canvas.currentLayer.cvs,
+              canvas.currentLayer.ctx,
+              state.mode,
+              state.localColorLayer
+            )
+            if (state.mode === "erase" || state.mode === "inject") {
+              state.addToTimeline({
+                tool: state.tool,
+                x: state.cursorX,
+                y: state.cursorY,
+                layer: canvas.currentLayer,
+              })
+            }
+          }
+          renderCanvas()
+        } else {
+          //FIX: perfect will be option, not mode
+          if (state.mode === "perfect") {
+            if (!pixelAlreadyDrawn) {
+              renderCanvas()
+              drawCurrentPixel(state, canvas, swatches)
+            }
+            //if currentPixel not neighbor to lastDrawn and has not already been drawn, draw waitingpixel
+            if (
+              (Math.abs(state.cursorX - state.lastDrawnX) > 1 ||
+                Math.abs(state.cursorY - state.lastDrawnY) > 1) &&
+              !pixelAlreadyDrawn
+            ) {
+              actionPut(
+                state.waitingPixelX,
+                state.waitingPixelY,
+                swatches.primary.color,
+                state.brushStamp,
+                state.tool.brushSize,
+                canvas.currentLayer.cvs,
+                canvas.currentLayer.ctx,
+                state.mode,
+                state.localColorLayer
+              )
+              if (state.mode === "erase" || state.mode === "inject") {
+                state.addToTimeline({
+                  tool: state.tool,
+                  x: state.waitingPixelX,
+                  y: state.waitingPixelY,
+                  layer: canvas.currentLayer,
+                })
+              }
+              //update queue
+              state.lastDrawnX = state.waitingPixelX
+              state.lastDrawnY = state.waitingPixelY
+              state.waitingPixelX = state.cursorX
+              state.waitingPixelY = state.cursorY
+              renderCanvas()
+            } else {
+              state.waitingPixelX = state.cursorX
+              state.waitingPixelY = state.cursorY
+            }
+          } else {
+            if (!pixelAlreadyDrawn) {
+              actionPut(
+                state.cursorX,
+                state.cursorY,
+                swatches.primary.color,
+                state.brushStamp,
+                state.tool.brushSize,
+                canvas.currentLayer.cvs,
+                canvas.currentLayer.ctx,
+                state.mode,
+                state.localColorLayer
+              )
+              if (state.mode === "erase" || state.mode === "inject") {
+                state.addToTimeline({
+                  tool: state.tool,
+                  x: state.cursorX,
+                  y: state.cursorY,
+                  layer: canvas.currentLayer,
+                })
+              }
+              renderCanvas()
+            }
+          }
+        }
+      }
+      // save last point
+      state.previousX = state.cursorX
+      state.previousY = state.cursorY
+      break
+    case "pointerup":
+      //check if pixel already drawn in current action. Reduces cost of subsequent renders and prevents colors with opacity from stacking on eachother.
+      if (state.mode === "perfect") {
+        pixelAlreadyDrawn = checkPixelAlreadyDrawn(
+          state.points,
+          state.waitingPixelX,
+          state.waitingPixelY
+        )
+      } else {
+        pixelAlreadyDrawn = checkPixelAlreadyDrawn(
+          state.points,
+          state.cursorX,
+          state.cursorY
+        )
+      }
+      if (!pixelAlreadyDrawn) {
+        //only needed if perfect pixels option is on
+        actionPut(
+          state.cursorX,
+          state.cursorY,
+          swatches.primary.color,
+          state.brushStamp,
+          state.tool.brushSize,
+          canvas.currentLayer.cvs,
+          canvas.currentLayer.ctx,
+          state.mode,
+          state.localColorLayer
+        )
+        if (state.mode === "erase" || state.mode === "inject") {
+          state.addToTimeline({
+            tool: state.tool,
+            x: state.cursorX,
+            y: state.cursorY,
+            layer: canvas.currentLayer,
+          })
+        }
+        if (state.mode !== "erase" && state.mode !== "inject") {
+          canvas.tempLayer.ctx.drawImage(canvas.currentLayer.cvs, 0, 0)
+          //save only the changed pixels to image
+          let image = new Image()
+          image.src = canvas.currentLayer.cvs.toDataURL()
+          // savePointsForSpecificColor(canvas.currentLayer, canvas.tempLayer)
+          //Remove the Replacement Layer from the array of layers
+          const drawnLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
+          canvas.layers.splice(drawnLayerIndex, 1)
+          //Set the current layer back to the correct layer
+          canvas.currentLayer = canvas.tempLayer
+          canvas.tempLayer = null
+          state.addToTimeline({
+            tool: state.tool,
+            layer: canvas.currentLayer,
+            properties: {
+              image,
+              width: canvas.currentLayer.cvs.width,
+              height: canvas.currentLayer.cvs.height,
+            },
+          })
+        }
+        renderCanvas()
+      }
+      state.localColorLayer = null
+      break
+    default:
+    //do nothing
+  }
+}
+
+/**
+ * Supported modes: "draw, erase, perfect",
+ */
 export function drawSteps() {
   //right now, checking if pixel is already drawn, but there are alternatives which may be more reliable.
   //alternative 1. draw on a separate canvas with an opacity set for the canvas, then save the image of that drawing and use that in history. Won't work for eraser.
@@ -48,32 +336,14 @@ export function drawSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //set colorlayer, then for each brushpoint, alter colorlayer and add each to timeline
-      // actionDraw(
-      //   state.cursorX,
-      //   state.cursorY,
-      //   swatches.primary.color,
-      //   state.brushStamp,
-      //   state.tool.brushSize,
-      //   canvas.currentLayer.ctx,
-      //   state.mode
-      // )
-      //get imageData
-      state.localColorLayer = canvas.currentLayer.ctx.getImageData(
-        0,
-        0,
-        canvas.currentLayer.cvs.width,
-        canvas.currentLayer.cvs.height
-      )
-      actionPut(
+      actionDraw(
         state.cursorX,
         state.cursorY,
         swatches.primary.color,
         state.brushStamp,
         state.tool.brushSize,
         canvas.currentLayer.ctx,
-        state.mode,
-        canvas.currentLayer.cvs,
-        state.localColorLayer
+        state.mode
       )
       state.previousX = state.cursorX
       state.previousY = state.cursorY
@@ -140,25 +410,14 @@ export function drawSteps() {
             if (
               !checkPixelAlreadyDrawn(state.points, thispoint.x, thispoint.y)
             ) {
-              // actionDraw(
-              //   thispoint.x,
-              //   thispoint.y,
-              //   swatches.primary.color,
-              //   state.brushStamp,
-              //   state.tool.brushSize,
-              //   canvas.currentLayer.ctx,
-              //   state.mode
-              // )
-              actionPut(
+              actionDraw(
                 thispoint.x,
                 thispoint.y,
                 swatches.primary.color,
                 state.brushStamp,
                 state.tool.brushSize,
                 canvas.currentLayer.ctx,
-                state.mode,
-                canvas.currentLayer.cvs,
-                state.localColorLayer
+                state.mode
               )
               if (state.tool.name !== "replace") {
                 state.addToTimeline({
@@ -174,25 +433,14 @@ export function drawSteps() {
           if (
             !checkPixelAlreadyDrawn(state.points, state.cursorX, state.cursorY)
           ) {
-            // actionDraw(
-            //   state.cursorX,
-            //   state.cursorY,
-            //   swatches.primary.color,
-            //   state.brushStamp,
-            //   state.tool.brushSize,
-            //   canvas.currentLayer.ctx,
-            //   state.mode
-            // )
-            actionPut(
+            actionDraw(
               state.cursorX,
               state.cursorY,
               swatches.primary.color,
               state.brushStamp,
               state.tool.brushSize,
               canvas.currentLayer.ctx,
-              state.mode,
-              canvas.currentLayer.cvs,
-              state.localColorLayer
+              state.mode
             )
             if (state.tool.name !== "replace") {
               state.addToTimeline({
@@ -203,29 +451,6 @@ export function drawSteps() {
               })
             }
           }
-          // actionLine(
-          //   state.previousX,
-          //   state.previousY,
-          //   state.cursorX,
-          //   state.cursorY,
-          //   swatches.primary.color,
-          //   canvas.currentLayer.ctx,
-          //   state.mode,
-          //   state.brushStamp,
-          //   state.tool.brushSize
-          // )
-          // if (state.tool.name !== "replace") {
-          //   state.addToTimeline({
-          //     tool: tools.line,
-          //     layer: canvas.currentLayer,
-          //     properties: {
-          //       px1: state.previousX,
-          //       py1: state.previousY,
-          //       px2: state.cursorX,
-          //       py2: state.cursorY,
-          //     },
-          //   })
-          // }
           renderCanvas()
         } else {
           //FIX: perfect will be option, not mode
@@ -240,25 +465,14 @@ export function drawSteps() {
                 Math.abs(state.cursorY - state.lastDrawnY) > 1) &&
               !pixelAlreadyDrawn
             ) {
-              // actionDraw(
-              //   state.waitingPixelX,
-              //   state.waitingPixelY,
-              //   swatches.primary.color,
-              //   state.brushStamp,
-              //   state.tool.brushSize,
-              //   canvas.currentLayer.ctx,
-              //   state.mode
-              // )
-              actionPut(
+              actionDraw(
                 state.waitingPixelX,
                 state.waitingPixelY,
                 swatches.primary.color,
                 state.brushStamp,
                 state.tool.brushSize,
                 canvas.currentLayer.ctx,
-                state.mode,
-                canvas.currentLayer.cvs,
-                state.localColorLayer
+                state.mode
               )
               if (state.tool.name !== "replace") {
                 //TODO: refactor so adding to timeline is performed by controller function
@@ -281,25 +495,14 @@ export function drawSteps() {
             }
           } else {
             if (!pixelAlreadyDrawn) {
-              // actionDraw(
-              //   state.cursorX,
-              //   state.cursorY,
-              //   swatches.primary.color,
-              //   state.brushStamp,
-              //   state.tool.brushSize,
-              //   canvas.currentLayer.ctx,
-              //   state.mode
-              // )
-              actionPut(
+              actionDraw(
                 state.cursorX,
                 state.cursorY,
                 swatches.primary.color,
                 state.brushStamp,
                 state.tool.brushSize,
                 canvas.currentLayer.ctx,
-                state.mode,
-                canvas.currentLayer.cvs,
-                state.localColorLayer
+                state.mode
               )
               if (state.tool.name !== "replace") {
                 state.addToTimeline({
@@ -335,25 +538,14 @@ export function drawSteps() {
       }
       if (!pixelAlreadyDrawn) {
         //only needed if perfect pixels option is on
-        // actionDraw(
-        //   state.cursorX,
-        //   state.cursorY,
-        //   swatches.primary.color,
-        //   state.brushStamp,
-        //   state.tool.brushSize,
-        //   canvas.currentLayer.ctx,
-        //   state.mode
-        // )
-        actionPut(
+        actionDraw(
           state.cursorX,
           state.cursorY,
           swatches.primary.color,
           state.brushStamp,
           state.tool.brushSize,
           canvas.currentLayer.ctx,
-          state.mode,
-          canvas.currentLayer.cvs,
-          state.localColorLayer
+          state.mode
         )
         if (state.tool.name !== "replace") {
           state.addToTimeline({
@@ -1536,8 +1728,8 @@ export const tools = {
   //Raster Tools
   brush: {
     name: "brush",
-    fn: drawSteps,
-    action: actionDraw,
+    fn: putSteps,
+    action: actionPut,
     brushSize: 1,
     disabled: false,
     options: ["perfect"],
