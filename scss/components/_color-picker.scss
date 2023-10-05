@@ -207,6 +207,7 @@
       flex-flow: row nowrap;
       width: 100%;
       margin-left: 10px;
+      margin-right: 10px;
       .channel-container {
         display: flex;
         flex-flow: column nowrap;
@@ -250,12 +251,14 @@
     }
     #hex {
       margin-left: 10px;
+      margin-right: 10px;
       #hexcode {
         width: 80px;
       }
     }
     #lumi {
       margin-left: 10px;
+      margin-right: 10px;
       #luminance {
         width: 26px;
       }

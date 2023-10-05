@@ -1326,6 +1326,7 @@ canvas {
   flex-flow: row nowrap;
   width: 100%;
   margin-left: 10px;
+  margin-right: 10px;
 }
 .picker-interface #right #rgbahsl .channel-container {
   display: flex;
@@ -1372,12 +1373,14 @@ canvas {
 }
 .picker-interface #right #hex {
   margin-left: 10px;
+  margin-right: 10px;
 }
 .picker-interface #right #hex #hexcode {
   width: 80px;
 }
 .picker-interface #right #lumi {
   margin-left: 10px;
+  margin-right: 10px;
 }
 .picker-interface #right #lumi #luminance {
   width: 26px;
