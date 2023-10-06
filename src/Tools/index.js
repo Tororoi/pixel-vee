@@ -455,28 +455,7 @@ export function drawSteps() {
               }
             }
           }
-          //fill endpoint
-          if (
-            !checkPixelAlreadyDrawn(state.points, state.cursorX, state.cursorY)
-          ) {
-            actionDraw(
-              state.cursorX,
-              state.cursorY,
-              swatches.primary.color,
-              state.brushStamp,
-              state.tool.brushSize,
-              canvas.currentLayer.ctx,
-              state.mode
-            )
-            if (state.tool.name !== "replace") {
-              state.addToTimeline({
-                tool: state.tool,
-                x: state.cursorX,
-                y: state.cursorY,
-                layer: canvas.currentLayer,
-              })
-            }
-          }
+          //don't need to fill endpoint
           renderCanvas()
         } else {
           //FIX: perfect will be option, not mode
@@ -599,7 +578,7 @@ export function replaceSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       actionReplace()
-      //only use inefficient putSteps if necessary due to presence of alpha channel
+      //only use inefficient putSteps if necessary due to presence of transparency in alpha channel
       if (swatches.primary.color.a !== 255) {
         putSteps(true)
       } else {
