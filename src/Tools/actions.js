@@ -196,7 +196,8 @@ export function actionPut(
   cvs,
   ctx,
   currentMode,
-  imageData
+  imageData,
+  ignoreInvisible = false
 ) {
   if (currentMode === "erase")
     currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
@@ -208,7 +209,10 @@ export function actionPut(
       // check that pixel is inside canvas area or else it will roll over on image data
       if (x + i < cvs.width && x + i >= 0 && y < cvs.height && y >= 0) {
         let pixelPos = (y * cvs.width + x + i) * 4
-        colorPixel(imageData, pixelPos, currentColor)
+        //ignore pixels that are already 0 opacity unless !ignoreInvisible
+        if (imageData.data[pixelPos + 3] !== 0 || !ignoreInvisible) {
+          colorPixel(imageData, pixelPos, currentColor)
+        }
       }
     }
   })
@@ -281,7 +285,7 @@ export function actionReplace() {
    * @param {*} currentLayer
    * @param {*} matchColor - color to isolate
    * @param {boolean} removeColor - if true, this function will remove only the matched color instead of removing everything else
-   * @returns
+   * @returns imageData
    */
   function createMapForSpecificColor(
     currentLayer,
@@ -297,6 +301,7 @@ export function actionReplace() {
     //iterate over pixel data and remove non-matching colors
     for (let i = 0; i < colorLayer.data.length; i += 4) {
       //sample color and by default, color will be removed if not a match. If removeColor is true, color will be removed if it is a match.
+      //ignore pixels that are already 0 opacity
       if (colorLayer.data[i + 3] !== 0) {
         //color layer data alpha channel goes from 0 to 255, not 0 to 1
         let matchedColor =
@@ -305,6 +310,8 @@ export function actionReplace() {
           colorLayer.data[i + 2] === matchColor.b &&
           colorLayer.data[i + 3] === matchColor.a
         if (removeColor) {
+          //by default, returns a map of the same color,
+          //TODO: this won't work for colors with opacity, so an additional step to draw the secondary color and use the sampled measurements will be required
           matchedColor = !matchedColor
         }
         if (!matchedColor) {
@@ -393,11 +400,18 @@ export function actionReplace() {
       //create new layer temporarily
       const layer = createNewRasterLayer("Replacement Layer")
       //create isolated color map for color replacement
-      const isolatedColorLayer = createMapForSpecificColor(
+      state.localColorLayer = createMapForSpecificColor(
         canvas.currentLayer,
         swatches.secondary.color
       )
-      layer.ctx.putImageData(isolatedColorLayer, 0, 0)
+      layer.ctx.putImageData(state.localColorLayer, 0, 0)
+      // actionFill(
+      //   state.cursorX,
+      //   state.cursorY,
+      //   swatches.primary.color,
+      //   canvas.currentLayer,
+      //   "erase"
+      // )
       //store reference to current layer
       canvas.tempLayer = canvas.currentLayer
       //layer must be in canvas.layers for draw to show in real time
@@ -437,6 +451,7 @@ export function actionReplace() {
         //TODO: One potential optimization is to save the bounding box coordinates
         //and add them to the properties so when rendering in the timeline it only
         //draws in the bounding box area instead of the whole canvas area
+        //TODO: ultimately we should save an array of coordinates and iterate the putAction on each coordinate for redraws?
         state.addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,

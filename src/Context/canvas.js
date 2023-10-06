@@ -46,6 +46,7 @@ export const canvas = {
   activeLayerCount: 0,
   currentLayer: null,
   tempLayer: null,
+  hiddenLayer: null,
   bgColor: "rgba(131, 131, 131, 0.5)",
   borderColor: "black",
   //Vectors

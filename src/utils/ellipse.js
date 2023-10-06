@@ -41,6 +41,16 @@ export function plotEllipse(xm, ym, a, b) {
     plotPoints.push({ x: xm, y: ym + y }) /* -> finish tip of ellipse */
     plotPoints.push({ x: xm, y: ym - y })
   }
+  //remove duplicate coordinates
+  const seen = new Set()
+  plotPoints = plotPoints.filter((point) => {
+    let key = `${point.x},${point.y}`
+    if (seen.has(key)) {
+      return false // skip this item
+    }
+    seen.add(key)
+    return true // keep this item
+  })
   return plotPoints
 }
 
@@ -63,6 +73,16 @@ export function plotCircle(xm, ym, r, offset) {
     if (r <= y) err += ++y * 2 + 1 /* y step */
     if (r > x || err > y) err += ++x * 2 + 1 /* x step */
   } while (x < 0)
+  //remove duplicate coordinates
+  const seen = new Set()
+  plotPoints = plotPoints.filter((point) => {
+    let key = `${point.x},${point.y}`
+    if (seen.has(key)) {
+      return false // skip this item
+    }
+    seen.add(key)
+    return true // keep this item
+  })
   return plotPoints
 }
 
@@ -114,6 +134,16 @@ export function plotEllipseRect(x0, y0, x1, y1) {
     plotPoints.push({ x: x0 - 1, y: y1 })
     plotPoints.push({ x: x1 + 1, y: y1-- })
   }
+  //remove duplicate coordinates
+  const seen = new Set()
+  plotPoints = plotPoints.filter((point) => {
+    let key = `${point.x},${point.y}`
+    if (seen.has(key)) {
+      return false // skip this item
+    }
+    seen.add(key)
+    return true // keep this item
+  })
   return plotPoints
 }
 
@@ -199,6 +229,16 @@ function plotRotatedEllipseRect(
     ...plotPoints,
     ...plotConicBezierSeg(x1, y1 - yd, x1, y0, x0 + xd, y0, w),
   ]
+  //remove duplicate coordinates
+  const seen = new Set()
+  plotPoints = plotPoints.filter((point) => {
+    let key = `${point.x},${point.y}`
+    if (seen.has(key)) {
+      return false // skip this item
+    }
+    seen.add(key)
+    return true // keep this item
+  })
   return plotPoints
 }
 

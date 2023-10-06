@@ -521,6 +521,16 @@ export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
     ...plotQuadBezierSeg(x0, y0, x1, y1, x2, y2, `rgba(0,0,255,255)`),
   ]
 
+  //remove duplicate coordinates
+  const seen = new Set()
+  plotPoints = plotPoints.filter((point) => {
+    let key = `${point.x},${point.y}`
+    if (seen.has(key)) {
+      return false // skip this item
+    }
+    seen.add(key)
+    return true // keep this item
+  })
   return plotPoints
 }
 
@@ -652,6 +662,16 @@ export function plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3) {
     t1 = t2
   }
 
+  //remove duplicate coordinates
+  const seen = new Set()
+  plotPoints = plotPoints.filter((point) => {
+    let key = `${point.x},${point.y}`
+    if (seen.has(key)) {
+      return false // skip this item
+    }
+    seen.add(key)
+    return true // keep this item
+  })
   return plotPoints
   // function plotCubicBezierBasic(x0, y0, x1, y1, x2, y2, x3, y3) {
   //   function calculateBezier(t, p0, p1, p2, p3) {
@@ -781,5 +801,15 @@ export function plotConicBezier(x0, y0, x1, y1, x2, y2, w) {
     ...plotPoints,
     ...plotConicBezierSeg(x0, y0, x1, y1, x2, y2, w * w),
   ] /* remaining */
+  //remove duplicate coordinates
+  const seen = new Set()
+  plotPoints = plotPoints.filter((point) => {
+    let key = `${point.x},${point.y}`
+    if (seen.has(key)) {
+      return false // skip this item
+    }
+    seen.add(key)
+    return true // keep this item
+  })
   return plotPoints
 }

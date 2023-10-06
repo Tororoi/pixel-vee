@@ -41,7 +41,7 @@ import { checkPixelAlreadyDrawn } from "../utils/drawHelpers.js"
 /**
  * Supported modes: "draw, erase, perfect",
  */
-export function putSteps() {
+export function putSteps(ignoreInvisible = false) {
   //right now, checking if pixel is already drawn, but there are alternatives which may be more reliable.
   //alternative 1. draw on a separate canvas with an opacity set for the canvas, then save the image of that drawing and use that in history. Won't work for eraser.
   let pixelAlreadyDrawn = false
@@ -50,21 +50,23 @@ export function putSteps() {
       if (state.mode === "erase") {
         drawSteps()
       } else {
-        //create new layer temporarily
-        const layer = createNewRasterLayer("Temporary Drawing Layer")
-        //get imageData
-        state.localColorLayer = layer.ctx.createImageData(
-          canvas.currentLayer.cvs.width,
-          canvas.currentLayer.cvs.height
-        )
-        //store reference to current layer
-        canvas.tempLayer = canvas.currentLayer
-        //layer must be in canvas.layers for draw to show in real time
-        const currentLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
-        //add layer at position just on top of current layer
-        canvas.layers.splice(currentLayerIndex + 1, 0, layer)
-        //set new layer to current layer so it can be drawn onto
-        canvas.currentLayer = layer
+        if (state.tool.name !== "replace") {
+          //create new layer temporarily
+          const layer = createNewRasterLayer("Temporary Drawing Layer")
+          //get imageData
+          state.localColorLayer = layer.ctx.createImageData(
+            canvas.currentLayer.cvs.width,
+            canvas.currentLayer.cvs.height
+          )
+          //store reference to current layer
+          canvas.tempLayer = canvas.currentLayer
+          //layer must be in canvas.layers for draw to show in real time
+          const currentLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
+          //add layer at position just on top of current layer
+          canvas.layers.splice(currentLayerIndex + 1, 0, layer)
+          //set new layer to current layer so it can be drawn onto
+          canvas.currentLayer = layer
+        }
         actionPut(
           state.cursorX,
           state.cursorY,
@@ -74,7 +76,8 @@ export function putSteps() {
           canvas.currentLayer.cvs,
           canvas.currentLayer.ctx,
           state.mode,
-          state.localColorLayer
+          state.localColorLayer,
+          ignoreInvisible
         )
         if (state.mode === "inject") {
           state.addToTimeline({
@@ -155,7 +158,8 @@ export function putSteps() {
                   canvas.currentLayer.cvs,
                   canvas.currentLayer.ctx,
                   state.mode,
-                  state.localColorLayer
+                  state.localColorLayer,
+                  ignoreInvisible
                 )
                 if (state.mode === "inject") {
                   state.addToTimeline({
@@ -184,7 +188,8 @@ export function putSteps() {
                 canvas.currentLayer.cvs,
                 canvas.currentLayer.ctx,
                 state.mode,
-                state.localColorLayer
+                state.localColorLayer,
+                ignoreInvisible
               )
               if (state.mode === "inject") {
                 state.addToTimeline({
@@ -218,7 +223,8 @@ export function putSteps() {
                   canvas.currentLayer.cvs,
                   canvas.currentLayer.ctx,
                   state.mode,
-                  state.localColorLayer
+                  state.localColorLayer,
+                  ignoreInvisible
                 )
                 if (state.mode === "inject") {
                   state.addToTimeline({
@@ -249,7 +255,8 @@ export function putSteps() {
                   canvas.currentLayer.cvs,
                   canvas.currentLayer.ctx,
                   state.mode,
-                  state.localColorLayer
+                  state.localColorLayer,
+                  ignoreInvisible
                 )
                 if (state.mode === "inject") {
                   state.addToTimeline({
@@ -298,7 +305,8 @@ export function putSteps() {
             canvas.currentLayer.cvs,
             canvas.currentLayer.ctx,
             state.mode,
-            state.localColorLayer
+            state.localColorLayer,
+            ignoreInvisible
           )
           if (state.mode === "inject") {
             state.addToTimeline({
@@ -308,7 +316,11 @@ export function putSteps() {
               layer: canvas.currentLayer,
             })
           }
-          if (state.mode !== "erase" && state.mode !== "inject") {
+          if (
+            state.mode !== "erase" &&
+            state.mode !== "inject" &&
+            state.tool.name !== "replace"
+          ) {
             canvas.tempLayer.ctx.drawImage(canvas.currentLayer.cvs, 0, 0)
             //save only the changed pixels to image
             let image = new Image()
@@ -587,13 +599,26 @@ export function replaceSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       actionReplace()
-      drawSteps()
+      //only use inefficient putSteps if necessary due to presence of alpha channel
+      if (swatches.primary.color.a !== 255) {
+        putSteps(true)
+      } else {
+        drawSteps()
+      }
       break
     case "pointermove":
-      drawSteps()
+      if (swatches.primary.color.a !== 255) {
+        putSteps(true)
+      } else {
+        drawSteps()
+      }
       break
     case "pointerup":
-      drawSteps()
+      if (swatches.primary.color.a !== 255) {
+        putSteps(true)
+      } else {
+        drawSteps()
+      }
       actionReplace()
       break
     case "pointerout":
