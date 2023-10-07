@@ -108,23 +108,16 @@
           -webkit-appearance: none;
           height: 24px;
           width: 5px;
+          margin-top: -2px;
           outline: 2px solid $black;
         }
-        &::before {
-          content: "";
-          display: block;
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
+        &::-webkit-slider-runnable-track {
+          height: 20px;
           background-image: linear-gradient(
             90deg,
             rgba(var(--new-swatch-color), 0),
             rgba(var(--new-swatch-color), 1)
-          ); // Replace this gradient with your desired gradient
-          pointer-events: none; // This ensures that the pseudo-element does not interfere with the slider's functionality
-          z-index: 1; // Ensure it overlays on top
+          );
         }
       }
     }
