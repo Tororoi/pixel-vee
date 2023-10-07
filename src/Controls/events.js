@@ -213,10 +213,10 @@ function handlePointerMove(e) {
 
 function handlePointerUp(e) {
   canvas.pointerEvent = "pointerup"
-  state.clicked = false
-  if (state.clickDisabled) {
+  if (state.clickDisabled || !state.clicked) {
     return
   }
+  state.clicked = false
   setCoordinates(e)
   if (canvas.currentLayer.opacity === 0) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
@@ -231,7 +231,6 @@ function handlePointerUp(e) {
   state.tool.fn()
   //add to undo stack
   if (state.points.length) {
-    //TODO: for modification actions, set "to" values on moddedActionIndex before pushing
     state.undoStack.push(state.points)
 
     if (

@@ -15,6 +15,14 @@ import { renderCanvas, renderVectorsToDOM } from "../Canvas/render.js"
  */
 export function actionUndoRedo(pushStack, popStack, modType) {
   let latestAction = popStack[popStack.length - 1][0]
+  let newLatestAction
+  if (modType === "from" && popStack.length > 1) {
+    newLatestAction = popStack[popStack.length - 2][0]
+    if (newLatestAction.tool.name === "modify") {
+      newLatestAction =
+        popStack[newLatestAction.properties.moddedActionIndex][0]
+    }
+  }
   if (latestAction.tool.name === "modify") {
     state.undoStack[latestAction.properties.moddedActionIndex][0].properties = {
       ...latestAction.properties[modType],
@@ -62,6 +70,19 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     if (modType === "to") {
       state.vectorProperties = { ...latestAction.properties }
       canvas.currentVectorIndex = latestAction.index //currently only vectors have an index property, set during renderVectorsToDOM
+      vectorGui.render(state, canvas)
+    }
+  }
+  //For undo, if new latest action or new latest modded action will be a vector and its tool is currently selected, set vector properties to match
+  if (newLatestAction) {
+    if (
+      newLatestAction.tool.name === state.tool.name &&
+      newLatestAction.tool.type === "vector"
+    ) {
+      //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
+      vectorGui.reset(canvas)
+      state.vectorProperties = { ...newLatestAction.properties }
+      canvas.currentVectorIndex = newLatestAction.index //currently only vectors have an index property, set during renderVectorsToDOM
       vectorGui.render(state, canvas)
     }
   }

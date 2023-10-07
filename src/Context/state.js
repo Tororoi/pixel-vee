@@ -10,6 +10,7 @@ export const state = {
   vectorMode: true,
   //timeline
   points: [],
+  action: null, //object with tool, mode, properties, layer, hidden, removed, points. points will have x, y, color, brush info
   undoStack: [],
   redoStack: [],
   //tool settings

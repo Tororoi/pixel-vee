@@ -51,6 +51,7 @@ function redrawTimelineActions(index = null) {
       return
     }
     i++
+    let imageData = null //for inject actions getImageData of currently assembled layer canvas
     action.forEach((p) => {
       if (!p.hidden && !p.removed) {
         //TODO: add action function to p in addToTimeline
@@ -139,10 +140,12 @@ function redrawTimelineActions(index = null) {
               p.properties.px2,
               p.properties.py2,
               p.color,
+              p.layer.cvs,
               p.layer.ctx,
               p.mode,
               p.brush,
-              p.weight
+              p.weight,
+              imageData
             )
             break
           case "quadCurve":

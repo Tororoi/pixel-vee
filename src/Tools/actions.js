@@ -222,15 +222,18 @@ export function actionPut(
 
 /**
  * Draws a pixel perfect line from point a to point b
+ * TODO: use actionPut but also create a tempLayer so pixels aren't replaced
  * @param {*} sx
  * @param {*} sy
  * @param {*} tx
  * @param {*} ty
  * @param {*} currentColor
+ * @param {*} cvs
  * @param {*} ctx
  * @param {*} currentMode
  * @param {*} brushStamp
  * @param {*} weight
+ * @param {*} imageData
  */
 export function actionLine(
   sx,
@@ -238,10 +241,12 @@ export function actionLine(
   tx,
   ty,
   currentColor,
+  cvs,
   ctx,
   currentMode,
   brushStamp,
-  weight
+  weight,
+  imageData
 ) {
   ctx.fillStyle = currentColor.color
 
@@ -263,6 +268,17 @@ export function actionLine(
       ctx,
       currentMode
     )
+    // actionPut(
+    //   thispoint.x,
+    //   thispoint.y,
+    //   currentColor,
+    //   brushStamp,
+    //   weight,
+    //   cvs,
+    //   ctx,
+    //   currentMode,
+    //   imageData
+    // )
   }
   //fill endpoint
   actionDraw(
@@ -647,10 +663,12 @@ export function actionQuadraticCurve(
       state.cursorWithCanvasOffsetX,
       state.cursorWithCanvasOffsetY,
       currentColor,
+      canvas.onScreenCVS,
       canvas.onScreenCTX,
       currentMode,
       brushStamp,
-      weight
+      weight,
+      state.localColorLayer
     )
     state.vectorProperties.px2 = state.cursorX
     state.vectorProperties.py2 = state.cursorY
@@ -737,10 +755,12 @@ export function actionCubicCurve(
       state.cursorWithCanvasOffsetX,
       state.cursorWithCanvasOffsetY,
       currentColor,
+      canvas.onScreenCVS,
       canvas.onScreenCTX,
       currentMode,
       brushStamp,
-      weight
+      weight,
+      state.localColorLayer
     )
     //TODO: can setting state be moved to steps function?
     state.vectorProperties.px2 = state.cursorX

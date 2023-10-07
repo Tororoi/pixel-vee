@@ -663,10 +663,12 @@ export function lineSteps() {
           state.cursorWithCanvasOffsetX,
           state.cursorWithCanvasOffsetY,
           swatches.primary.color,
+          canvas.onScreenCVS,
           canvas.onScreenCTX,
           state.mode,
           state.brushStamp,
-          state.tool.brushSize
+          state.tool.brushSize,
+          state.localColorLayer
         )
         state.previousOnscreenX = state.onscreenX
         state.previousOnscreenY = state.onscreenY
@@ -679,10 +681,12 @@ export function lineSteps() {
         state.cursorX,
         state.cursorY,
         swatches.primary.color,
+        canvas.currentLayer.cvs,
         canvas.currentLayer.ctx,
         state.mode,
         state.brushStamp,
-        state.tool.brushSize
+        state.tool.brushSize,
+        state.localColorLayer
       )
       state.addToTimeline({
         tool: state.tool,
