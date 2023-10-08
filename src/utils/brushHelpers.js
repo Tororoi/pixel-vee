@@ -1,7 +1,7 @@
 let brush = document.querySelector(".brush")
 
 export function drawRect(brushSize, updateBrush = false) {
-  let brushRects = []
+  const brushPixels = []
   if (updateBrush) {
     brush.setAttribute("viewBox", `0 -0.5 ${brushSize} ${brushSize}`)
     brush.style.width = brushSize * 2
@@ -15,27 +15,26 @@ export function drawRect(brushSize, updateBrush = false) {
   }
   let paths = []
 
-  brushRects.push({
-    x: 0,
-    y: 0,
-    w: brushSize,
-    h: brushSize,
-  })
+  for (let i = 0; i < brushSize; i++) {
+    for (let j = 0; j < brushSize; j++) {
+      brushPixels.push({ x: i, y: j })
+    }
+  }
 
-  brushRects.forEach((r) => {
-    paths.push(makePathData(r.x, r.y, r.w))
+  brushPixels.forEach((r) => {
+    paths.push(makePathData(r.x, r.y, 1))
   })
 
   if (updateBrush) {
     brush.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
     brush.setAttribute("stroke-width", brushSize * 2)
   }
-  return brushRects
+  return brushPixels
 }
 
 export function drawCircle(brushSize, updateBrush = false) {
-  // let brushPoints = [];
-  let brushRects = []
+  const brushPixels = []
+  const seen = new Set()
   let r = Math.floor(brushSize / 2)
   let d = 4 - 2 * r //decision parameter in bresenham's algorithm
   d = (5 - 4 * r) / 4
@@ -70,74 +69,47 @@ export function drawCircle(brushSize, updateBrush = false) {
   }
 
   function eightfoldSym(xc, yc, x, y) {
-    //solid circle
-    if (brushSize % 2 === 0) {
-      //connect octant pairs to form solid shape
-      brushRects.push({ x: xc - x, y: yc - y, w: 2 * x, h: 1 }) //3, 2
-      brushRects.push({ x: xc - y, y: yc - x, w: 2 * y, h: 1 }) //4, 1
-      brushRects.push({ x: xc - y, y: yc + x - 1, w: 2 * y, h: 1 }) //5, 8
-      brushRects.push({ x: xc - x, y: yc + y - 1, w: 2 * x, h: 1 }) //6, 7
-    } else {
-      brushRects.push({ x: xc - x, y: yc - y, w: 2 * x + 1, h: 1 }) //3, 2
-      brushRects.push({ x: xc - y, y: yc - x, w: 2 * y + 1, h: 1 }) //4, 1
-      brushRects.push({ x: xc - y, y: yc + x, w: 2 * y + 1, h: 1 }) //5, 8
-      brushRects.push({ x: xc - x, y: yc + y, w: 2 * x + 1, h: 1 }) //6, 7
-    }
-  }
-
-  //sanitize brushRects
-  function removeDuplicates(rects) {
-    const seen = new Set()
-
-    return rects.filter((rect) => {
-      if (!rect.w) {
-        return false
-      }
-      const key = `${rect.x}-${rect.y}-${rect.w}-${rect.h}`
+    // Helper function to add a pixel to the list
+    function addPixel(px, py) {
+      const key = `${px},${py}`
       if (seen.has(key)) {
-        return false
+        return
       } else {
         seen.add(key)
-        return true
+        brushPixels.push({ x: px, y: py })
       }
-    })
-  }
+    }
 
-  brushRects = removeDuplicates(brushRects)
+    const xLoopEnd = brushSize % 2 === 0 ? 2 * x : 2 * x + 1
+    const yLoopEnd = brushSize % 2 === 0 ? 2 * y : 2 * y + 1
+    const offset = brushSize % 2 === 0 ? 1 : 0
+    // Octant 2 & 3
+    for (let i = 0; i < xLoopEnd; i++) {
+      addPixel(xc - x + i, yc - y)
+    }
 
-  function adjustOverlap(rects) {
-    let i = 0
-    while (i < rects.length) {
-      let overlapFound = false
-      for (let j = i + 1; j < rects.length; j++) {
-        const rectA = rects[i]
-        const rectB = rects[j]
+    // Octant 1 & 4
+    for (let i = 0; i < yLoopEnd; i++) {
+      addPixel(xc - y + i, yc - x)
+    }
+    // Octant 5 & 8
+    for (let i = 0; i < yLoopEnd; i++) {
+      addPixel(xc - y + i, yc + x - offset)
+    }
 
-        if (rectA.y === rectB.y) {
-          if (rectB.x < rectA.x + rectA.w && rectB.x + rectB.w >= rectA.x) {
-            if (rectA.x + rectA.w < rectB.x + rectB.w) {
-              rects.splice(i, 1) // Remove rectA from the array
-              overlapFound = true
-              break
-            }
-          }
-        }
-      }
-      if (!overlapFound) {
-        i++
-      }
+    // Octant 6 & 7
+    for (let i = 0; i < xLoopEnd; i++) {
+      addPixel(xc - x + i, yc + y - offset)
     }
   }
 
-  adjustOverlap(brushRects)
-
-  brushRects.forEach((r) => {
-    paths.push(makePathData(r.x, r.y, r.w))
+  brushPixels.forEach((r) => {
+    paths.push(makePathData(r.x, r.y, 1))
   })
 
   if (updateBrush) {
     brush.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
     brush.setAttribute("stroke-width", 1)
   }
-  return brushRects
+  return brushPixels
 }

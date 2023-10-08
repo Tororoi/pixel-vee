@@ -175,21 +175,33 @@ function handlePointerMove(e) {
   canvas.zoomAtLastDraw = canvas.zoom //* */
   //coords
   setCoordinates(e)
-  //Hover brush
-  state.onscreenX = state.cursorWithCanvasOffsetX
-  state.onscreenY = state.cursorWithCanvasOffsetY
-  renderRasterGUI(state, canvas, swatches)
-  vectorGui.render(state, canvas)
-  if (
-    state.clicked ||
-    ((state.tool.name === "quadCurve" ||
-      state.tool.name === "cubicCurve" ||
-      state.tool.name === "fill") &&
-      state.clickCounter > 0)
-  ) {
-    //run selected tool step function
-    state.tool.fn()
-    if (state.tool.name !== "grab") {
+  if (state.previousX !== state.cursorX || state.previousY !== state.cursorY) {
+    //Hover brush
+    state.onscreenX = state.cursorWithCanvasOffsetX
+    state.onscreenY = state.cursorWithCanvasOffsetY
+    renderRasterGUI(state, canvas, swatches)
+    vectorGui.render(state, canvas)
+    if (
+      state.clicked ||
+      ((state.tool.name === "quadCurve" ||
+        state.tool.name === "cubicCurve" ||
+        state.tool.name === "fill") &&
+        state.clickCounter > 0)
+    ) {
+      //run selected tool step function
+      state.tool.fn()
+      if (state.tool.name !== "grab") {
+        if (
+          state.onscreenX !== state.previousOnscreenX ||
+          state.onscreenY !== state.previousOnscreenY
+        ) {
+          state.previousOnscreenX = state.onscreenX
+          state.previousOnscreenY = state.onscreenY
+        }
+      }
+    } else {
+      renderCursor(state, canvas, swatches)
+      //normalize cursor render to pixelgrid
       if (
         state.onscreenX !== state.previousOnscreenX ||
         state.onscreenY !== state.previousOnscreenY
@@ -197,16 +209,6 @@ function handlePointerMove(e) {
         state.previousOnscreenX = state.onscreenX
         state.previousOnscreenY = state.onscreenY
       }
-    }
-  } else {
-    renderCursor(state, canvas, swatches)
-    //normalize cursor render to pixelgrid
-    if (
-      state.onscreenX !== state.previousOnscreenX ||
-      state.onscreenY !== state.previousOnscreenY
-    ) {
-      state.previousOnscreenX = state.onscreenX
-      state.previousOnscreenY = state.onscreenY
     }
   }
 }
@@ -230,8 +232,8 @@ function handlePointerUp(e) {
   //run selected tool step function
   state.tool.fn()
   //add to undo stack
-  if (state.points.length) {
-    state.undoStack.push(state.points)
+  if (state.action) {
+    state.undoStack.push(state.action)
 
     if (
       state.tool.name === "fill" ||
@@ -239,14 +241,16 @@ function handlePointerUp(e) {
       state.tool.name === "cubicCurve" ||
       state.tool.name === "ellipse"
     ) {
-      if (state.points[0].tool.type === "vector") {
-        canvas.currentVectorIndex = state.undoStack.indexOf(state.points)
-      } else if (state.points[0].tool.type === "modify") {
-        canvas.currentVectorIndex = state.points[0].properties.moddedActionIndex
+      if (state.action.tool.type === "vector") {
+        canvas.currentVectorIndex = state.undoStack.indexOf(state.action)
+      } else if (state.action.tool.type === "modify") {
+        canvas.currentVectorIndex = state.action.properties.moddedActionIndex
       }
       renderVectorsToDOM()
     }
   }
+  state.action = null
+  state.pointsSet = null
   state.points = []
   //Reset redostack
   state.redoStack = []
@@ -266,9 +270,10 @@ function handlePointerOut(e) {
   //   state.clicked = false
   //   state.tool.fn()
   //   //add to undo stack
-  //   if (state.points.length) {
-  //     state.undoStack.push(state.points)
+  //   if (state.action) {
+  //     state.undoStack.push(state.action)
   //   }
+  //   state.action = null
   //   state.points = []
   //   //Reset redostack
   //   state.redoStack = []

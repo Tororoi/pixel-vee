@@ -42,9 +42,6 @@ import { checkPixelAlreadyDrawn } from "../utils/drawHelpers.js"
  * Supported modes: "draw, erase, perfect",
  */
 export function putSteps(ignoreInvisible = false) {
-  //right now, checking if pixel is already drawn, but there are alternatives which may be more reliable.
-  //alternative 1. draw on a separate canvas with an opacity set for the canvas, then save the image of that drawing and use that in history. Won't work for eraser.
-  let pixelAlreadyDrawn = false
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (state.mode === "erase") {
@@ -67,6 +64,7 @@ export function putSteps(ignoreInvisible = false) {
           //set new layer to current layer so it can be drawn onto
           canvas.currentLayer = layer
         }
+        state.pointsSet = new Set()
         actionPut(
           state.cursorX,
           state.cursorY,
@@ -77,16 +75,10 @@ export function putSteps(ignoreInvisible = false) {
           canvas.currentLayer.ctx,
           state.mode,
           state.localColorLayer,
-          ignoreInvisible
+          ignoreInvisible,
+          state.pointsSet,
+          state.points
         )
-        if (state.mode === "inject") {
-          state.addToTimeline({
-            tool: state.tool,
-            x: state.cursorX,
-            y: state.cursorY,
-            layer: canvas.currentLayer,
-          })
-        }
         state.previousX = state.cursorX
         state.previousY = state.cursorY
         //for perfect pixels
@@ -101,22 +93,7 @@ export function putSteps(ignoreInvisible = false) {
       if (state.mode === "erase") {
         drawSteps()
       } else {
-        //check if pixel already drawn in current action. Reduces cost of subsequent renders and prevents colors with opacity from stacking on eachother.
         if (state.mode === "perfect") {
-          //TODO: use a new function that checks if imagedata pixel position is not 0,0,0,0
-          pixelAlreadyDrawn = checkPixelAlreadyDrawn(
-            state.points,
-            state.waitingPixelX,
-            state.waitingPixelY
-          )
-        } else {
-          pixelAlreadyDrawn = checkPixelAlreadyDrawn(
-            state.points,
-            state.cursorX,
-            state.cursorY
-          )
-        }
-        if (state.mode === "perfect" && !pixelAlreadyDrawn) {
           drawCurrentPixel(state, canvas, swatches)
         }
         if (
@@ -146,42 +123,9 @@ export function putSteps(ignoreInvisible = false) {
                 y: Math.round(state.previousY + tri.y * i),
               }
               // for each point along the line
-              if (
-                !checkPixelAlreadyDrawn(state.points, thispoint.x, thispoint.y)
-              ) {
-                actionPut(
-                  thispoint.x,
-                  thispoint.y,
-                  swatches.primary.color,
-                  state.brushStamp,
-                  state.tool.brushSize,
-                  canvas.currentLayer.cvs,
-                  canvas.currentLayer.ctx,
-                  state.mode,
-                  state.localColorLayer,
-                  ignoreInvisible
-                )
-                if (state.mode === "inject") {
-                  state.addToTimeline({
-                    tool: state.tool,
-                    x: thispoint.x,
-                    y: thispoint.y,
-                    layer: canvas.currentLayer,
-                  })
-                }
-              }
-            }
-            //fill endpoint
-            if (
-              !checkPixelAlreadyDrawn(
-                state.points,
-                state.cursorX,
-                state.cursorY
-              )
-            ) {
               actionPut(
-                state.cursorX,
-                state.cursorY,
+                thispoint.x,
+                thispoint.y,
                 swatches.primary.color,
                 state.brushStamp,
                 state.tool.brushSize,
@@ -189,30 +133,36 @@ export function putSteps(ignoreInvisible = false) {
                 canvas.currentLayer.ctx,
                 state.mode,
                 state.localColorLayer,
-                ignoreInvisible
+                ignoreInvisible,
+                state.pointsSet,
+                state.points
               )
-              if (state.mode === "inject") {
-                state.addToTimeline({
-                  tool: state.tool,
-                  x: state.cursorX,
-                  y: state.cursorY,
-                  layer: canvas.currentLayer,
-                })
-              }
             }
+            //fill endpoint
+            actionPut(
+              state.cursorX,
+              state.cursorY,
+              swatches.primary.color,
+              state.brushStamp,
+              state.tool.brushSize,
+              canvas.currentLayer.cvs,
+              canvas.currentLayer.ctx,
+              state.mode,
+              state.localColorLayer,
+              ignoreInvisible,
+              state.pointsSet,
+              state.points
+            )
             renderCanvas()
           } else {
             //FIX: perfect will be option, not mode
             if (state.mode === "perfect") {
-              if (!pixelAlreadyDrawn) {
-                renderCanvas()
-                drawCurrentPixel(state, canvas, swatches)
-              }
+              renderCanvas()
+              drawCurrentPixel(state, canvas, swatches)
               //if currentPixel not neighbor to lastDrawn and has not already been drawn, draw waitingpixel
               if (
-                (Math.abs(state.cursorX - state.lastDrawnX) > 1 ||
-                  Math.abs(state.cursorY - state.lastDrawnY) > 1) &&
-                !pixelAlreadyDrawn
+                Math.abs(state.cursorX - state.lastDrawnX) > 1 ||
+                Math.abs(state.cursorY - state.lastDrawnY) > 1
               ) {
                 actionPut(
                   state.waitingPixelX,
@@ -224,16 +174,10 @@ export function putSteps(ignoreInvisible = false) {
                   canvas.currentLayer.ctx,
                   state.mode,
                   state.localColorLayer,
-                  ignoreInvisible
+                  ignoreInvisible,
+                  state.pointsSet,
+                  state.points
                 )
-                if (state.mode === "inject") {
-                  state.addToTimeline({
-                    tool: state.tool,
-                    x: state.waitingPixelX,
-                    y: state.waitingPixelY,
-                    layer: canvas.currentLayer,
-                  })
-                }
                 //update queue
                 state.lastDrawnX = state.waitingPixelX
                 state.lastDrawnY = state.waitingPixelY
@@ -245,29 +189,21 @@ export function putSteps(ignoreInvisible = false) {
                 state.waitingPixelY = state.cursorY
               }
             } else {
-              if (!pixelAlreadyDrawn) {
-                actionPut(
-                  state.cursorX,
-                  state.cursorY,
-                  swatches.primary.color,
-                  state.brushStamp,
-                  state.tool.brushSize,
-                  canvas.currentLayer.cvs,
-                  canvas.currentLayer.ctx,
-                  state.mode,
-                  state.localColorLayer,
-                  ignoreInvisible
-                )
-                if (state.mode === "inject") {
-                  state.addToTimeline({
-                    tool: state.tool,
-                    x: state.cursorX,
-                    y: state.cursorY,
-                    layer: canvas.currentLayer,
-                  })
-                }
-                renderCanvas()
-              }
+              actionPut(
+                state.cursorX,
+                state.cursorY,
+                swatches.primary.color,
+                state.brushStamp,
+                state.tool.brushSize,
+                canvas.currentLayer.cvs,
+                canvas.currentLayer.ctx,
+                state.mode,
+                state.localColorLayer,
+                ignoreInvisible,
+                state.pointsSet,
+                state.points
+              )
+              renderCanvas()
             }
           }
         }
@@ -280,70 +216,44 @@ export function putSteps(ignoreInvisible = false) {
       if (state.mode === "erase") {
         drawSteps()
       } else {
-        //check if pixel already drawn in current action. Reduces cost of subsequent renders and prevents colors with opacity from stacking on eachother.
-        if (state.mode === "perfect") {
-          pixelAlreadyDrawn = checkPixelAlreadyDrawn(
-            state.points,
-            state.waitingPixelX,
-            state.waitingPixelY
-          )
-        } else {
-          pixelAlreadyDrawn = checkPixelAlreadyDrawn(
-            state.points,
-            state.cursorX,
-            state.cursorY
-          )
+        //only needed if perfect pixels option is on
+        actionPut(
+          state.cursorX,
+          state.cursorY,
+          swatches.primary.color,
+          state.brushStamp,
+          state.tool.brushSize,
+          canvas.currentLayer.cvs,
+          canvas.currentLayer.ctx,
+          state.mode,
+          state.localColorLayer,
+          ignoreInvisible,
+          state.pointsSet,
+          state.points
+        )
+        if (state.mode !== "inject" && state.tool.name !== "replace") {
+          canvas.tempLayer.ctx.drawImage(canvas.currentLayer.cvs, 0, 0)
+          //save only the changed pixels to image
+          let image = new Image()
+          image.src = canvas.currentLayer.cvs.toDataURL()
+          // savePointsForSpecificColor(canvas.currentLayer, canvas.tempLayer)
+          //Remove the Replacement Layer from the array of layers
+          const drawnLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
+          canvas.layers.splice(drawnLayerIndex, 1)
+          //Set the current layer back to the correct layer
+          canvas.currentLayer = canvas.tempLayer
+          canvas.tempLayer = null
+          state.addToTimeline({
+            tool: state.tool,
+            layer: canvas.currentLayer,
+            properties: {
+              image,
+              width: canvas.currentLayer.cvs.width,
+              height: canvas.currentLayer.cvs.height,
+            },
+          })
         }
-        if (!pixelAlreadyDrawn) {
-          //only needed if perfect pixels option is on
-          actionPut(
-            state.cursorX,
-            state.cursorY,
-            swatches.primary.color,
-            state.brushStamp,
-            state.tool.brushSize,
-            canvas.currentLayer.cvs,
-            canvas.currentLayer.ctx,
-            state.mode,
-            state.localColorLayer,
-            ignoreInvisible
-          )
-          if (state.mode === "inject") {
-            state.addToTimeline({
-              tool: state.tool,
-              x: state.cursorX,
-              y: state.cursorY,
-              layer: canvas.currentLayer,
-            })
-          }
-          if (
-            state.mode !== "erase" &&
-            state.mode !== "inject" &&
-            state.tool.name !== "replace"
-          ) {
-            canvas.tempLayer.ctx.drawImage(canvas.currentLayer.cvs, 0, 0)
-            //save only the changed pixels to image
-            let image = new Image()
-            image.src = canvas.currentLayer.cvs.toDataURL()
-            // savePointsForSpecificColor(canvas.currentLayer, canvas.tempLayer)
-            //Remove the Replacement Layer from the array of layers
-            const drawnLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
-            canvas.layers.splice(drawnLayerIndex, 1)
-            //Set the current layer back to the correct layer
-            canvas.currentLayer = canvas.tempLayer
-            canvas.tempLayer = null
-            state.addToTimeline({
-              tool: state.tool,
-              layer: canvas.currentLayer,
-              properties: {
-                image,
-                width: canvas.currentLayer.cvs.width,
-                height: canvas.currentLayer.cvs.height,
-              },
-            })
-          }
-          renderCanvas()
-        }
+        renderCanvas()
         state.localColorLayer = null
       }
       break
@@ -356,11 +266,9 @@ export function putSteps(ignoreInvisible = false) {
  * Supported modes: "draw, erase, perfect",
  */
 export function drawSteps() {
-  //right now, checking if pixel is already drawn, but there are alternatives which may be more reliable.
-  //alternative 1. draw on a separate canvas with an opacity set for the canvas, then save the image of that drawing and use that in history. Won't work for eraser.
-  let pixelAlreadyDrawn = false
   switch (canvas.pointerEvent) {
     case "pointerdown":
+      state.pointsSet = new Set()
       //set colorlayer, then for each brushpoint, alter colorlayer and add each to timeline
       actionDraw(
         state.cursorX,
@@ -369,7 +277,9 @@ export function drawSteps() {
         state.brushStamp,
         state.tool.brushSize,
         canvas.currentLayer.ctx,
-        state.mode
+        state.mode,
+        state.pointsSet,
+        state.points
       )
       state.previousX = state.cursorX
       state.previousY = state.cursorY
@@ -378,34 +288,9 @@ export function drawSteps() {
       state.lastDrawnY = state.cursorY
       state.waitingPixelX = state.cursorX
       state.waitingPixelY = state.cursorY
-      if (state.tool.name !== "replace") {
-        state.addToTimeline({
-          tool: state.tool,
-          x: state.cursorX,
-          y: state.cursorY,
-          layer: canvas.currentLayer,
-        })
-      }
       renderCanvas()
       break
     case "pointermove":
-      //check if pixel already drawn in current action. Reduces cost of subsequent renders and prevents colors with opacity from stacking on eachother.
-      if (state.mode === "perfect") {
-        pixelAlreadyDrawn = checkPixelAlreadyDrawn(
-          state.points,
-          state.waitingPixelX,
-          state.waitingPixelY
-        )
-      } else {
-        pixelAlreadyDrawn = checkPixelAlreadyDrawn(
-          state.points,
-          state.cursorX,
-          state.cursorY
-        )
-      }
-      if (state.mode === "perfect" && !pixelAlreadyDrawn) {
-        drawCurrentPixel(state, canvas, swatches)
-      }
       if (
         state.previousX !== state.cursorX ||
         state.previousY !== state.cursorY
@@ -433,42 +318,41 @@ export function drawSteps() {
               y: Math.round(state.previousY + tri.y * i),
             }
             // for each point along the line
-            if (
-              !checkPixelAlreadyDrawn(state.points, thispoint.x, thispoint.y)
-            ) {
-              actionDraw(
-                thispoint.x,
-                thispoint.y,
-                swatches.primary.color,
-                state.brushStamp,
-                state.tool.brushSize,
-                canvas.currentLayer.ctx,
-                state.mode
-              )
-              if (state.tool.name !== "replace") {
-                state.addToTimeline({
-                  tool: state.tool,
-                  x: thispoint.x,
-                  y: thispoint.y,
-                  layer: canvas.currentLayer,
-                })
-              }
-            }
+            actionDraw(
+              thispoint.x,
+              thispoint.y,
+              swatches.primary.color,
+              state.brushStamp,
+              state.tool.brushSize,
+              canvas.currentLayer.ctx,
+              state.mode,
+              state.pointsSet,
+              state.points
+            )
           }
-          //don't need to fill endpoint
+          //fill endpoint
+          actionDraw(
+            state.cursorX,
+            state.cursorY,
+            swatches.primary.color,
+            state.brushStamp,
+            state.tool.brushSize,
+            canvas.currentLayer.ctx,
+            state.mode,
+            state.pointsSet,
+            state.points
+          )
+          if (state.mode === "perfect") {
+            drawCurrentPixel(state, canvas, swatches)
+          }
           renderCanvas()
         } else {
           //FIX: perfect will be option, not mode
           if (state.mode === "perfect") {
-            if (!pixelAlreadyDrawn) {
-              renderCanvas()
-              drawCurrentPixel(state, canvas, swatches)
-            }
             //if currentPixel not neighbor to lastDrawn and has not already been drawn, draw waitingpixel
             if (
-              (Math.abs(state.cursorX - state.lastDrawnX) > 1 ||
-                Math.abs(state.cursorY - state.lastDrawnY) > 1) &&
-              !pixelAlreadyDrawn
+              Math.abs(state.cursorX - state.lastDrawnX) > 1 ||
+              Math.abs(state.cursorY - state.lastDrawnY) > 1
             ) {
               actionDraw(
                 state.waitingPixelX,
@@ -477,48 +361,35 @@ export function drawSteps() {
                 state.brushStamp,
                 state.tool.brushSize,
                 canvas.currentLayer.ctx,
-                state.mode
+                state.mode,
+                state.pointsSet,
+                state.points
               )
-              if (state.tool.name !== "replace") {
-                //TODO: refactor so adding to timeline is performed by controller function
-                state.addToTimeline({
-                  tool: state.tool,
-                  x: state.waitingPixelX,
-                  y: state.waitingPixelY,
-                  layer: canvas.currentLayer,
-                })
-              }
               //update queue
               state.lastDrawnX = state.waitingPixelX
               state.lastDrawnY = state.waitingPixelY
               state.waitingPixelX = state.cursorX
               state.waitingPixelY = state.cursorY
               renderCanvas()
+              drawCurrentPixel(state, canvas, swatches)
             } else {
               state.waitingPixelX = state.cursorX
               state.waitingPixelY = state.cursorY
+              drawCurrentPixel(state, canvas, swatches)
             }
           } else {
-            if (!pixelAlreadyDrawn) {
-              actionDraw(
-                state.cursorX,
-                state.cursorY,
-                swatches.primary.color,
-                state.brushStamp,
-                state.tool.brushSize,
-                canvas.currentLayer.ctx,
-                state.mode
-              )
-              if (state.tool.name !== "replace") {
-                state.addToTimeline({
-                  tool: state.tool,
-                  x: state.cursorX,
-                  y: state.cursorY,
-                  layer: canvas.currentLayer,
-                })
-              }
-              renderCanvas()
-            }
+            actionDraw(
+              state.cursorX,
+              state.cursorY,
+              swatches.primary.color,
+              state.brushStamp,
+              state.tool.brushSize,
+              canvas.currentLayer.ctx,
+              state.mode,
+              state.pointsSet,
+              state.points
+            )
+            renderCanvas()
           }
         }
       }
@@ -527,41 +398,27 @@ export function drawSteps() {
       state.previousY = state.cursorY
       break
     case "pointerup":
-      //check if pixel already drawn in current action. Reduces cost of subsequent renders and prevents colors with opacity from stacking on eachother.
-      if (state.mode === "perfect") {
-        pixelAlreadyDrawn = checkPixelAlreadyDrawn(
-          state.points,
-          state.waitingPixelX,
-          state.waitingPixelY
-        )
-      } else {
-        pixelAlreadyDrawn = checkPixelAlreadyDrawn(
-          state.points,
-          state.cursorX,
-          state.cursorY
-        )
+      //only needed if perfect pixels option is on
+      actionDraw(
+        state.cursorX,
+        state.cursorY,
+        swatches.primary.color,
+        state.brushStamp,
+        state.tool.brushSize,
+        canvas.currentLayer.ctx,
+        state.mode,
+        state.pointsSet,
+        state.points
+      )
+
+      if (state.tool.name !== "replace") {
+        state.addToTimeline({
+          tool: state.tool,
+          layer: canvas.currentLayer,
+          properties: { points: state.points },
+        })
       }
-      if (!pixelAlreadyDrawn) {
-        //only needed if perfect pixels option is on
-        actionDraw(
-          state.cursorX,
-          state.cursorY,
-          swatches.primary.color,
-          state.brushStamp,
-          state.tool.brushSize,
-          canvas.currentLayer.ctx,
-          state.mode
-        )
-        if (state.tool.name !== "replace") {
-          state.addToTimeline({
-            tool: state.tool,
-            x: state.cursorX,
-            y: state.cursorY,
-            layer: canvas.currentLayer,
-          })
-        }
-        renderCanvas()
-      }
+      renderCanvas()
       break
     default:
     //do nothing
@@ -642,6 +499,19 @@ export function lineSteps() {
     case "pointerdown":
       state.previousX = state.cursorX
       state.previousY = state.cursorY
+      actionLine(
+        state.previousX + canvas.xOffset,
+        state.previousY + canvas.yOffset,
+        state.cursorWithCanvasOffsetX,
+        state.cursorWithCanvasOffsetY,
+        swatches.primary.color,
+        canvas.onScreenCVS,
+        canvas.onScreenCTX,
+        state.mode,
+        state.brushStamp,
+        state.tool.brushSize,
+        state.localColorLayer
+      )
       break
     case "pointermove":
       //draw line from origin point to current point onscreen
@@ -773,7 +643,7 @@ export function adjustFillSteps() {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
         }
-        state.undoStack[canvas.currentVectorIndex][0].hidden = true
+        state.undoStack[canvas.currentVectorIndex].hidden = true
         //Only render canvas up to timeline where fill action exists while adjusting fill
         renderCanvas(true, true, canvas.currentVectorIndex) // render to canvas.currentVectorIndex
       }
@@ -794,7 +664,7 @@ export function adjustFillSteps() {
       if (vectorGui.selectedPoint.xKey) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        state.undoStack[canvas.currentVectorIndex][0].hidden = false
+        state.undoStack[canvas.currentVectorIndex].hidden = false
         modifyAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
           xKey: null,
@@ -1159,7 +1029,7 @@ export function adjustCurveSteps(numPoints = 4) {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
         }
-        state.undoStack[canvas.currentVectorIndex][0].hidden = true
+        state.undoStack[canvas.currentVectorIndex].hidden = true
         renderCanvas(true, true)
         if (numPoints === 3) {
           actionQuadraticCurve(
@@ -1170,11 +1040,11 @@ export function adjustCurveSteps(numPoints = 4) {
             state.vectorProperties.px3 + canvas.xOffset,
             state.vectorProperties.py3 + canvas.yOffset,
             3,
-            state.undoStack[canvas.currentVectorIndex][0].color,
+            state.undoStack[canvas.currentVectorIndex].color,
             canvas.onScreenCTX,
-            state.undoStack[canvas.currentVectorIndex][0].mode,
-            state.undoStack[canvas.currentVectorIndex][0].brush,
-            state.undoStack[canvas.currentVectorIndex][0].weight
+            state.undoStack[canvas.currentVectorIndex].mode,
+            state.undoStack[canvas.currentVectorIndex].brushStamp,
+            state.undoStack[canvas.currentVectorIndex].brushSize
           )
         } else {
           actionCubicCurve(
@@ -1187,11 +1057,11 @@ export function adjustCurveSteps(numPoints = 4) {
             state.vectorProperties.px4 + canvas.xOffset,
             state.vectorProperties.py4 + canvas.yOffset,
             4,
-            state.undoStack[canvas.currentVectorIndex][0].color,
+            state.undoStack[canvas.currentVectorIndex].color,
             canvas.onScreenCTX,
-            state.undoStack[canvas.currentVectorIndex][0].mode,
-            state.undoStack[canvas.currentVectorIndex][0].brush,
-            state.undoStack[canvas.currentVectorIndex][0].weight
+            state.undoStack[canvas.currentVectorIndex].mode,
+            state.undoStack[canvas.currentVectorIndex].brushStamp,
+            state.undoStack[canvas.currentVectorIndex].brushSize
           )
         }
       }
@@ -1210,11 +1080,11 @@ export function adjustCurveSteps(numPoints = 4) {
             state.vectorProperties.px3 + canvas.xOffset,
             state.vectorProperties.py3 + canvas.yOffset,
             3,
-            state.undoStack[canvas.currentVectorIndex][0].color,
+            state.undoStack[canvas.currentVectorIndex].color,
             canvas.onScreenCTX,
-            state.undoStack[canvas.currentVectorIndex][0].mode,
-            state.undoStack[canvas.currentVectorIndex][0].brush,
-            state.undoStack[canvas.currentVectorIndex][0].weight
+            state.undoStack[canvas.currentVectorIndex].mode,
+            state.undoStack[canvas.currentVectorIndex].brushStamp,
+            state.undoStack[canvas.currentVectorIndex].brushSize
           )
         } else {
           actionCubicCurve(
@@ -1227,11 +1097,11 @@ export function adjustCurveSteps(numPoints = 4) {
             state.vectorProperties.px4 + canvas.xOffset,
             state.vectorProperties.py4 + canvas.yOffset,
             4,
-            state.undoStack[canvas.currentVectorIndex][0].color,
+            state.undoStack[canvas.currentVectorIndex].color,
             canvas.onScreenCTX,
-            state.undoStack[canvas.currentVectorIndex][0].mode,
-            state.undoStack[canvas.currentVectorIndex][0].brush,
-            state.undoStack[canvas.currentVectorIndex][0].weight
+            state.undoStack[canvas.currentVectorIndex].mode,
+            state.undoStack[canvas.currentVectorIndex].brushStamp,
+            state.undoStack[canvas.currentVectorIndex].brushSize
           )
         }
       }
@@ -1240,7 +1110,7 @@ export function adjustCurveSteps(numPoints = 4) {
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        state.undoStack[canvas.currentVectorIndex][0].hidden = false
+        state.undoStack[canvas.currentVectorIndex].hidden = false
         modifyAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
           xKey: null,
@@ -1536,7 +1406,7 @@ export function adjustEllipseSteps() {
         updateEllipseControlPoints(state, canvas, vectorGui)
         //TODO: changing opacity isn't enough since erase mode will be unaffected
         // let action = state.undoStack[canvas.currentVectorIndex]
-        state.undoStack[canvas.currentVectorIndex][0].hidden = true
+        state.undoStack[canvas.currentVectorIndex].hidden = true
         renderCanvas(true, true)
         //angle and offset passed should consider which point is being adjusted. For p1, use current state.vectorProperties.offset instead of recalculating. For p3, add 1.5 * Math.PI to angle
         actionEllipse(
@@ -1549,14 +1419,13 @@ export function adjustEllipseSteps() {
           state.vectorProperties.radA,
           state.vectorProperties.radB,
           vectorGui.selectedPoint.xKey === "px1"
-            ? state.undoStack[canvas.currentVectorIndex][0].properties
-                .forceCircle
+            ? state.undoStack[canvas.currentVectorIndex].properties.forceCircle
             : state.vectorProperties.forceCircle,
-          state.undoStack[canvas.currentVectorIndex][0].color,
+          state.undoStack[canvas.currentVectorIndex].color,
           canvas.onScreenCTX,
-          state.undoStack[canvas.currentVectorIndex][0].mode,
-          state.undoStack[canvas.currentVectorIndex][0].brush,
-          state.undoStack[canvas.currentVectorIndex][0].weight,
+          state.undoStack[canvas.currentVectorIndex].mode,
+          state.undoStack[canvas.currentVectorIndex].brushStamp,
+          state.undoStack[canvas.currentVectorIndex].brushSize,
           state.vectorProperties.angle,
           state.vectorProperties.offset,
           state.vectorProperties.x1Offset,
@@ -1578,14 +1447,13 @@ export function adjustEllipseSteps() {
           state.vectorProperties.radA,
           state.vectorProperties.radB,
           vectorGui.selectedPoint.xKey === "px1"
-            ? state.undoStack[canvas.currentVectorIndex][0].properties
-                .forceCircle
+            ? state.undoStack[canvas.currentVectorIndex].properties.forceCircle
             : state.vectorProperties.forceCircle,
-          state.undoStack[canvas.currentVectorIndex][0].color,
+          state.undoStack[canvas.currentVectorIndex].color,
           canvas.onScreenCTX,
-          state.undoStack[canvas.currentVectorIndex][0].mode,
-          state.undoStack[canvas.currentVectorIndex][0].brush,
-          state.undoStack[canvas.currentVectorIndex][0].weight,
+          state.undoStack[canvas.currentVectorIndex].mode,
+          state.undoStack[canvas.currentVectorIndex].brushStamp,
+          state.undoStack[canvas.currentVectorIndex].brushSize,
           state.vectorProperties.angle,
           state.vectorProperties.offset,
           state.vectorProperties.x1Offset,
@@ -1596,7 +1464,7 @@ export function adjustEllipseSteps() {
     case "pointerup":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         updateEllipseControlPoints(state, canvas, vectorGui)
-        state.undoStack[canvas.currentVectorIndex][0].hidden = false
+        state.undoStack[canvas.currentVectorIndex].hidden = false
         modifyAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
           xKey: null,
@@ -1750,9 +1618,12 @@ export const tools = {
   //Raster Tools
   brush: {
     name: "brush",
-    fn: putSteps,
-    action: actionPut,
-    secondaryAction: actionDraw,
+    // fn: putSteps,
+    // action: actionPut,
+    // secondaryAction: actionDraw,
+    fn: drawSteps,
+    action: actionDraw,
+    secondaryAction: actionPut,
     brushSize: 1,
     disabled: false,
     options: { perfect: false, erase: false, inject: false },

@@ -14,35 +14,34 @@ import { renderCanvas, renderVectorsToDOM } from "../Canvas/render.js"
  * @param {*} modType - "from" or "to", used for modify actions
  */
 export function actionUndoRedo(pushStack, popStack, modType) {
-  let latestAction = popStack[popStack.length - 1][0]
+  let latestAction = popStack[popStack.length - 1]
   let newLatestAction
   if (modType === "from" && popStack.length > 1) {
-    newLatestAction = popStack[popStack.length - 2][0]
+    newLatestAction = popStack[popStack.length - 2]
     if (newLatestAction.tool.name === "modify") {
-      newLatestAction =
-        popStack[newLatestAction.properties.moddedActionIndex][0]
+      newLatestAction = popStack[newLatestAction.properties.moddedActionIndex]
     }
   }
   if (latestAction.tool.name === "modify") {
-    state.undoStack[latestAction.properties.moddedActionIndex][0].properties = {
+    state.undoStack[latestAction.properties.moddedActionIndex].properties = {
       ...latestAction.properties[modType],
     }
     if (
       state.tool.name ===
-      state.undoStack[latestAction.properties.moddedActionIndex][0].tool.name
+      state.undoStack[latestAction.properties.moddedActionIndex].tool.name
     ) {
       vectorGui.reset(canvas)
       state.vectorProperties = { ...latestAction.properties[modType] }
       canvas.currentVectorIndex =
-        state.undoStack[latestAction.properties.moddedActionIndex][0].index
+        state.undoStack[latestAction.properties.moddedActionIndex].index
       vectorGui.render(state, canvas)
     }
   } else if (latestAction.tool.name === "changeColor") {
-    state.undoStack[latestAction.properties.moddedActionIndex][0].color = {
+    state.undoStack[latestAction.properties.moddedActionIndex].color = {
       ...latestAction.properties[modType],
     }
   } else if (latestAction.tool.name === "remove") {
-    state.undoStack[latestAction.properties.moddedActionIndex][0].removed =
+    state.undoStack[latestAction.properties.moddedActionIndex].removed =
       latestAction.properties[modType]
   } else if (latestAction.tool.name === "clear") {
     let upToIndex = latestAction.properties.upToIndex
@@ -53,11 +52,9 @@ export function actionUndoRedo(pushStack, popStack, modType) {
         return
       }
       i++
-      action.forEach((p) => {
-        if (p.layer === canvas.currentLayer) {
-          p.removed = !p.removed
-        }
-      })
+      if (action.layer === canvas.currentLayer) {
+        action.removed = !action.removed
+      }
     })
     vectorGui.reset(canvas)
     renderVectorsToDOM()

@@ -57,8 +57,8 @@ export function setColor(r, g, b, a, target) {
     target.style.background = color.color
     if (target.vector) {
       changeActionColor(target.vector.index, color)
-      state.undoStack.push(state.points)
-      state.points = []
+      state.undoStack.push(state.action)
+      state.action = null
       state.redoStack = []
       renderVectorsToDOM()
       renderCanvas(true, true)

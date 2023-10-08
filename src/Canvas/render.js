@@ -52,193 +52,203 @@ function redrawTimelineActions(index = null) {
     }
     i++
     let imageData = null //for inject actions getImageData of currently assembled layer canvas
-    action.forEach((p) => {
-      if (!p.hidden && !p.removed) {
-        //TODO: add action function to p in addToTimeline
-        switch (p.tool.name) {
-          case "modify":
-            //do nothing
-            break
-          case "changeColor":
-            //do nothing
-            break
-          case "remove":
-            //do nothing
-            break
-          case "addLayer":
-            p.layer.removed = false
-            renderLayersToDOM()
-            renderVectorsToDOM()
-            break
-          case "removeLayer":
-            p.layer.removed = true
-            renderLayersToDOM()
-            renderVectorsToDOM()
-            break
-          case "clear":
-            //Since this action marks all actions on its layer as removed, no need to clear the canvas here anymore
-            // p.layer.ctx.clearRect(
-            //   0,
-            //   0,
-            //   canvas.offScreenCVS.width,
-            //   canvas.offScreenCVS.height
-            // )
-            break
-          case "brush":
-            if (p.mode === "inject") {
-              //TODO IN PROGRESS: actionPut requires image data, but we don't want to store a snapshot of the entire canvas (p.imageData) at the time of first render.
-              //Instead, we want a snapshot of the canvas during this redraw right before this action
-              //Instead of actions being arrays, they should have some properties and one of those properties can be an array of points
-              //actionPut
-              // p.tool.action(
-              //   p.x,
-              //   p.y,
-              //   p.color,
-              //   p.brush,
-              //   p.weight,
-              //   p.layer.cvs,
-              //   p.layer.ctx,
-              //   p.mode,
-              //   p.imageData
-              // )
-            } else if (p.mode === "erase") {
-              //actionDraw
-              p.tool.secondaryAction(
-                p.x,
-                p.y,
-                p.color,
-                p.brush,
-                p.weight,
-                p.layer.ctx,
-                p.mode
-              )
-            } else {
-              p.layer.ctx.drawImage(
-                p.properties.image,
-                0,
-                0,
-                p.properties.width,
-                p.properties.height
-              )
-            }
-            break
-          case "fill":
-            //actionFill
-            p.tool.action(
-              p.properties.px1,
-              p.properties.py1,
-              p.color,
-              p.layer,
-              p.mode
-            )
-            break
-          case "line":
-            //actionLine
-            p.tool.action(
-              p.properties.px1,
-              p.properties.py1,
-              p.properties.px2,
-              p.properties.py2,
-              p.color,
-              p.layer.cvs,
-              p.layer.ctx,
-              p.mode,
-              p.brush,
-              p.weight,
-              imageData
-            )
-            break
-          case "quadCurve":
-            //actionQuadraticCurve
-            p.tool.action(
-              p.properties.px1,
-              p.properties.py1,
-              p.properties.px2,
-              p.properties.py2,
-              p.properties.px3,
-              p.properties.py3,
-              3,
-              p.color,
-              p.layer.ctx,
-              p.mode,
-              p.brush,
-              p.weight
-            )
-            break
-          case "cubicCurve":
-            //TODO: pass source on history objects to avoid debugging actions from the timeline unless desired
-            //actionCubicCurve
-            p.tool.action(
-              p.properties.px1,
-              p.properties.py1,
-              p.properties.px2,
-              p.properties.py2,
-              p.properties.px3,
-              p.properties.py3,
-              p.properties.px4,
-              p.properties.py4,
-              4,
-              p.color,
-              p.layer.ctx,
-              p.mode,
-              p.brush,
-              p.weight
-            )
-            break
-          case "ellipse":
-            //actionEllipse
-            p.tool.action(
-              p.properties.px1,
-              p.properties.py1,
-              p.properties.px2,
-              p.properties.py2,
-              p.properties.px3,
-              p.properties.py3,
-              p.properties.radA,
-              p.properties.radB,
-              p.properties.forceCircle,
-              p.color,
-              p.layer.ctx,
-              p.mode,
-              p.brush,
-              p.weight,
-              p.properties.angle,
-              p.properties.offset,
-              p.properties.x1Offset,
-              p.properties.y1Offset
-            )
-            break
-          case "replace":
-            //IMPORTANT:
-            //Any replaced pixels over previous vectors would be fully rasterized.
-            //Even if image only depicts replaced pixels, those that were replaced cannot be moved if they were part of a vector.
-            //maybe a separate tool could exist for replacing vector pixels as a modification of one vector, as if the vector's render acts as a mask.
-            //maybe collision detection could be used somehow? probably expensive.
-            p.layer.ctx.drawImage(
-              p.properties.image,
-              0,
-              0,
-              p.properties.width,
-              p.properties.height
-            )
-            break
-          default:
+    if (!action.hidden && !action.removed) {
+      switch (action.tool.name) {
+        case "modify":
           //do nothing
-        }
+          break
+        case "changeColor":
+          //do nothing
+          break
+        case "remove":
+          //do nothing
+          break
+        case "addLayer":
+          // p.layer.removed = false
+          action.layer.removed = false
+          renderLayersToDOM()
+          renderVectorsToDOM()
+          break
+        case "removeLayer":
+          action.layer.removed = true
+          renderLayersToDOM()
+          renderVectorsToDOM()
+          break
+        case "clear":
+          //Since this action marks all actions on its layer as removed, no need to clear the canvas here anymore
+          // p.layer.ctx.clearRect(
+          //   0,
+          //   0,
+          //   canvas.offScreenCVS.width,
+          //   canvas.offScreenCVS.height
+          // )
+          break
+        case "brush":
+          //actionDraw
+          const seen = new Set()
+          action.properties.points.forEach((p) => {
+            action.tool.action(
+              p.x,
+              p.y,
+              p.color,
+              p.brushStamp,
+              p.brushSize,
+              action.layer.ctx,
+              action.mode,
+              seen
+            )
+          })
+          // if (p.mode === "inject") {
+          //TODO IN PROGRESS: actionPut requires image data, but we don't want to store a snapshot of the entire canvas (p.imageData) at the time of first render.
+          //Instead, we want a snapshot of the canvas during this redraw right before this action
+          //Instead of actions being arrays, they should have some properties and one of those properties can be an array of points
+          //actionPut
+          // p.tool.action(
+          //   p.x,
+          //   p.y,
+          //   p.color,
+          //   p.brush,
+          //   p.weight,
+          //   p.layer.cvs,
+          //   p.layer.ctx,
+          //   p.mode,
+          //   p.imageData
+          // )
+          // } else if (p.mode === "erase") {
+          //   //actionDraw
+          //   p.tool.secondaryAction(
+          //     p.x,
+          //     p.y,
+          //     p.color,
+          //     p.brush,
+          //     p.weight,
+          //     p.layer.ctx,
+          //     p.mode
+          //   )
+          // } else {
+          //   p.layer.ctx.drawImage(
+          //     p.properties.image,
+          //     0,
+          //     0,
+          //     p.properties.width,
+          //     p.properties.height
+          //   )
+          // }
+          break
+        case "fill":
+          //actionFill
+          action.tool.action(
+            action.properties.px1,
+            action.properties.py1,
+            action.color,
+            action.layer,
+            action.mode
+          )
+          break
+        case "line":
+          //actionLine
+          action.tool.action(
+            action.properties.px1,
+            action.properties.py1,
+            action.properties.px2,
+            action.properties.py2,
+            action.color,
+            action.layer.cvs,
+            action.layer.ctx,
+            action.mode,
+            action.brushStamp,
+            action.brushSize,
+            imageData
+          )
+          break
+        case "quadCurve":
+          //actionQuadraticCurve
+          action.tool.action(
+            action.properties.px1,
+            action.properties.py1,
+            action.properties.px2,
+            action.properties.py2,
+            action.properties.px3,
+            action.properties.py3,
+            3,
+            action.color,
+            action.layer.ctx,
+            action.mode,
+            action.brushStamp,
+            action.brushSize
+          )
+          break
+        case "cubicCurve":
+          //TODO: pass source on history objects to avoid debugging actions from the timeline unless desired
+          //actionCubicCurve
+          action.tool.action(
+            action.properties.px1,
+            action.properties.py1,
+            action.properties.px2,
+            action.properties.py2,
+            action.properties.px3,
+            action.properties.py3,
+            action.properties.px4,
+            action.properties.py4,
+            4,
+            action.color,
+            action.layer.ctx,
+            action.mode,
+            action.brushStamp,
+            action.brushSize
+          )
+          break
+        case "ellipse":
+          //actionEllipse
+          action.tool.action(
+            action.properties.px1,
+            action.properties.py1,
+            action.properties.px2,
+            action.properties.py2,
+            action.properties.px3,
+            action.properties.py3,
+            action.properties.radA,
+            action.properties.radB,
+            action.properties.forceCircle,
+            action.color,
+            action.layer.ctx,
+            action.mode,
+            action.brushStamp,
+            action.brushSize,
+            action.properties.angle,
+            action.properties.offset,
+            action.properties.x1Offset,
+            action.properties.y1Offset
+          )
+          break
+        case "replace":
+          //IMPORTANT:
+          //Any replaced pixels over previous vectors would be fully rasterized.
+          //Even if image only depicts replaced pixels, those that were replaced cannot be moved if they were part of a vector.
+          //maybe a separate tool could exist for replacing vector pixels as a modification of one vector, as if the vector's render acts as a mask.
+          //maybe collision detection could be used somehow? probably expensive.
+          action.layer.ctx.drawImage(
+            action.properties.image,
+            0,
+            0,
+            action.properties.width,
+            action.properties.height
+          )
+          break
+        default:
+        //do nothing
       }
-    })
+    }
   })
   state.redoStack.forEach((action) => {
-    action.forEach((p) => {
-      if (p.tool.name === "addLayer") {
-        p.layer.removed = true
-        if (p.layer === canvas.currentLayer) {
-          canvas.currentLayer = dom.layersContainer.children[0].layerObj
-        }
-        renderLayersToDOM()
-        renderVectorsToDOM()
+    if (action.tool.name === "addLayer") {
+      action.layer.removed = true
+      if (action.layer === canvas.currentLayer) {
+        canvas.currentLayer = dom.layersContainer.children[0].layerObj
       }
-    })
+      renderLayersToDOM()
+      renderVectorsToDOM()
+    }
   })
 }
 
@@ -356,7 +366,8 @@ export function renderLayersToDOM() {
 export function renderVectorsToDOM() {
   dom.vectorsThumbnails.innerHTML = ""
   state.undoStack.forEach((action) => {
-    let p = action[0]
+    // let p = action[0]
+    let p = action
     if (!p.removed) {
       if (p.tool.type === "vector") {
         p.index = state.undoStack.indexOf(action)

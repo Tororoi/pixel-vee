@@ -9,6 +9,7 @@ export const state = {
   grid: false,
   vectorMode: true,
   //timeline
+  pointsSet: null,
   points: [],
   action: null, //object with tool, mode, properties, layer, hidden, removed, points. points will have x, y, color, brush info
   undoStack: [],
@@ -16,7 +17,7 @@ export const state = {
   //tool settings
   tool: null, //needs to be initialized
   mode: "draw", //TODO: modes should allow multiple modes at once {erase: false, perfect: false, inject: false}
-  brushStamp: [{ x: 0, y: 0, w: 1, h: 1 }], //default 1 pixel
+  brushStamp: [{ x: 0, y: 0 }], //default 1 pixel
   brushType: "circle",
   options: {
     perfect: false,
@@ -95,13 +96,13 @@ function addToTimeline(actionObject) {
   const { tool, x, y, color, brushStamp, brushSize, layer, properties } =
     actionObject
   //use current state for variables
-  state.points.push({
+  state.action = {
     //x/y are sometimes objects with multiple values
     x: x,
     y: y,
     layer: layer,
-    brush: brushStamp || state.brushStamp,
-    weight: brushSize || state.tool.brushSize,
+    brushStamp: brushStamp || state.brushStamp,
+    brushSize: brushSize || state.tool.brushSize,
     color: color || { ...swatches.primary.color },
     tool: tool,
     // action: state.tool.fn, //should be passed as props, may not match state.tool.fn
@@ -109,7 +110,7 @@ function addToTimeline(actionObject) {
     properties,
     hidden: false,
     removed: false,
-  })
+  }
 }
 
 function reset() {

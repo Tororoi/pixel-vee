@@ -47,14 +47,40 @@ export function renderCursor(state, canvas, swatches) {
 
 export function drawCurrentPixel(state, canvas, swatches) {
   //draw onscreen current pixel
-  //how will this work with actionPut? store imageData in stae as state.localColorLayer
-  actionDraw(
-    state.cursorWithCanvasOffsetX,
-    state.cursorWithCanvasOffsetY,
-    swatches.primary.color,
-    state.brushStamp,
-    state.tool.brushSize,
-    canvas.rasterGuiCTX,
-    state.mode
-  )
+  //how will this work with actionPut? store imageData in state as state.localColorLayer
+  renderRasterGUI(state, canvas, swatches)
+  canvas.rasterGuiCTX.fillStyle = swatches.primary.color.color
+  const processBrushStamp = (action, pixel) => {
+    const x = Math.ceil(state.cursorX - state.tool.brushSize / 2) + pixel.x
+    const y = Math.ceil(state.cursorY - state.tool.brushSize / 2) + pixel.y
+    const drawX =
+      Math.ceil(state.cursorWithCanvasOffsetX - state.tool.brushSize / 2) +
+      pixel.x
+    const drawY =
+      Math.ceil(state.cursorWithCanvasOffsetY - state.tool.brushSize / 2) +
+      pixel.y
+
+    if (state.pointsSet) {
+      const key = `${x},${y}`
+      if (state.pointsSet.has(key)) {
+        return // skip this point
+      }
+    }
+
+    action(drawX, drawY)
+  }
+  switch (state.mode) {
+    case "erase":
+      state.brushStamp.forEach((p) => {
+        processBrushStamp(
+          (x, y) => canvas.rasterGuiCTX.clearRect(x, y, 1, 1),
+          p
+        )
+      })
+      break
+    default:
+      state.brushStamp.forEach((p) => {
+        processBrushStamp((x, y) => canvas.rasterGuiCTX.fillRect(x, y, 1, 1), p)
+      })
+  }
 }
