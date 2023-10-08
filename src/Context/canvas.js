@@ -46,6 +46,7 @@ export const canvas = {
   activeLayerCount: 0,
   currentLayer: null,
   tempLayer: null,
+  hiddenLayer: null,
   bgColor: "rgba(131, 131, 131, 0.5)",
   borderColor: "black",
   //Vectors
@@ -77,7 +78,7 @@ canvas.thumbnailCTX.willReadFrequently = true
 canvas.offScreenCVS.width = 256
 canvas.offScreenCVS.height = 256
 //set the dimensions of the thumbnail canvas
-canvas.thumbnailCVS.width = canvas.offScreenCVS.width
+canvas.thumbnailCVS.width = canvas.offScreenCVS.width + 344
 canvas.thumbnailCVS.height = canvas.offScreenCVS.height
 //improve sharpness
 //BUG: sharpness (8+) greatly affects performance in browsers other than chrome (can safari and firefox not handle large canvases?)

@@ -4,12 +4,11 @@ import { swatches } from "../Context/swatch.js"
 import { tools } from "./index.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
-import { generateRandomRGB } from "../utils/colors.js"
 import { vectorGui } from "../GUI/vector.js"
 import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
-import { renderCanvas } from "../Canvas/render.js"
 import { createNewRasterLayer } from "../Canvas/layers.js"
 import { getColor } from "../utils/canvasHelpers.js"
+import { colorPixel, matchStartColor } from "../utils/imageDataHelpers.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -24,7 +23,7 @@ import { getColor } from "../utils/canvasHelpers.js"
  * @param {*} actionIndex
  */
 export function modifyAction(actionIndex) {
-  let action = state.undoStack[actionIndex][0]
+  let action = state.undoStack[actionIndex]
   let oldProperties = {
     ...action.properties,
   } //shallow copy, properties must not contain any objects or references as values
@@ -35,7 +34,7 @@ export function modifyAction(actionIndex) {
   if (action.tool.name === "ellipse") {
     modifiedProperties.forceCircle =
       vectorGui.selectedPoint.xKey === "px1"
-        ? modifiedProperties.forceCircle
+        ? oldProperties.forceCircle
         : state.vectorProperties.forceCircle
   }
   state.addToTimeline({
@@ -59,7 +58,7 @@ export function modifyAction(actionIndex) {
  * @param {*} newColor - color object {color, r, g, b, a}
  */
 export function changeActionColor(actionIndex, newColor) {
-  let action = state.undoStack[actionIndex][0]
+  let action = state.undoStack[actionIndex]
   let oldColor = {
     ...action.color,
   } //shallow copy, color must not contain any objects or references as values
@@ -85,7 +84,7 @@ export function changeActionColor(actionIndex, newColor) {
  * @param {*} actionIndex
  */
 export function removeAction(actionIndex) {
-  let action = state.undoStack[actionIndex][0]
+  let action = state.undoStack[actionIndex]
   state.addToTimeline({
     tool: tools.remove,
     properties: {
@@ -119,11 +118,9 @@ export function actionClear() {
       return
     }
     i++
-    action.forEach((p) => {
-      if (p.layer === canvas.currentLayer) {
-        p.removed = true
-      }
-    })
+    if (action.layer === canvas.currentLayer) {
+      action.removed = true
+    }
   })
 }
 
@@ -134,56 +131,138 @@ export function actionClear() {
  * @param {*} coordY
  * @param {*} currentColor
  * @param {*} brushStamp
- * @param {*} weight
+ * @param {*} brushSize
  * @param {*} ctx
  * @param {*} currentMode
+ * @param {Set} seenPointsSet
+ * @param {Array} points
  */
 export function actionDraw(
   coordX,
   coordY,
   currentColor,
   brushStamp,
-  weight,
+  brushSize,
   ctx,
-  currentMode
+  currentMode,
+  seenPointsSet = null,
+  points = null
 ) {
   ctx.fillStyle = currentColor.color
+  if (points) {
+    points.push({
+      x: coordX,
+      y: coordY,
+      color: { ...currentColor },
+      brushStamp,
+      brushSize,
+    })
+  }
+  const processBrushStamp = (action, pixel) => {
+    const x = Math.ceil(coordX - brushSize / 2) + pixel.x
+    const y = Math.ceil(coordY - brushSize / 2) + pixel.y
+
+    if (seenPointsSet) {
+      const key = `${x},${y}`
+      if (seenPointsSet.has(key)) {
+        return // skip this point
+      }
+      seenPointsSet.add(key)
+    }
+
+    action(x, y)
+  }
   switch (currentMode) {
     case "erase":
-      brushStamp.forEach((r) => {
-        ctx.clearRect(
-          Math.ceil(coordX - weight / 2) + r.x,
-          Math.ceil(coordY - weight / 2) + r.y,
-          r.w,
-          r.h
-        )
+      brushStamp.forEach((p) => {
+        processBrushStamp((x, y) => ctx.clearRect(x, y, 1, 1), p)
       })
       break
     default:
-      // ctx.fillRect(Math.ceil(coordX - weight / 2), Math.ceil(coordY - weight / 2), weight, weight);
-      brushStamp.forEach((r) => {
-        ctx.fillRect(
-          Math.ceil(coordX - weight / 2) + r.x,
-          Math.ceil(coordY - weight / 2) + r.y,
-          r.w,
-          r.h
-        )
+      brushStamp.forEach((p) => {
+        processBrushStamp((x, y) => ctx.fillRect(x, y, 1, 1), p)
       })
-    // ctx.drawImage(brushStamp, Math.ceil(coordX - weight / 2), Math.ceil(coordY - weight / 2), weight, weight);
   }
 }
 
 /**
+ * Render a stamp from the brush to the canvas
+ * Depending on a special option, color could be put directly to canvas or rendered to an offscreen canvas first (rasterGuiCVS)
+ * @param {*} coordX
+ * @param {*} coordY
+ * @param {*} currentColor
+ * @param {*} brushStamp
+ * @param {*} brushSize
+ * @param {*} cvs
+ * @param {*} ctx
+ * @param {*} currentMode
+ * @param {*} imageData
+ * @param {*} ignoreInvisible
+ * @param {Set} seenPointsSet
+ * @param {Array} points
+ */
+export function actionPut(
+  coordX,
+  coordY,
+  currentColor,
+  brushStamp,
+  brushSize,
+  cvs,
+  ctx,
+  currentMode,
+  imageData,
+  ignoreInvisible = false,
+  seenPointsSet = null,
+  points = null
+) {
+  if (points) {
+    points.push({
+      x: coordX,
+      y: coordY,
+      color: { ...currentColor },
+      brushStamp,
+      brushSize,
+    })
+  }
+  if (currentMode === "erase")
+    currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
+  brushStamp.forEach((p) => {
+    //for each rectangle, given the center point of the overall brush at coordX and coordY, find the pixel's position
+    let x = Math.ceil(coordX - brushSize / 2) + p.x
+    let y = Math.ceil(coordY - brushSize / 2) + p.y
+    // check that pixel is inside canvas area or else it will roll over on image data
+    if (x < cvs.width && x >= 0 && y < cvs.height && y >= 0) {
+      if (seenPointsSet) {
+        const key = `${x},${y}`
+        if (seenPointsSet.has(key)) {
+          return // skip this point
+        }
+        seenPointsSet.add(key)
+      }
+      let pixelPos = (y * cvs.width + x) * 4
+      //ignore pixels that are already 0 opacity unless !ignoreInvisible
+      if (imageData.data[pixelPos + 3] !== 0 || !ignoreInvisible) {
+        colorPixel(imageData, pixelPos, currentColor)
+      }
+    }
+  })
+  ctx.putImageData(imageData, 0, 0)
+}
+
+/**
  * Draws a pixel perfect line from point a to point b
+ * TODO: use actionPut but also create a tempLayer so pixels aren't replaced
  * @param {*} sx
  * @param {*} sy
  * @param {*} tx
  * @param {*} ty
  * @param {*} currentColor
+ * @param {*} cvs
  * @param {*} ctx
  * @param {*} currentMode
  * @param {*} brushStamp
- * @param {*} weight
+ * @param {*} brushSize
+ * @param {*} imageData
  */
 export function actionLine(
   sx,
@@ -191,16 +270,18 @@ export function actionLine(
   tx,
   ty,
   currentColor,
+  cvs,
   ctx,
   currentMode,
   brushStamp,
-  weight
+  brushSize,
+  imageData = null
 ) {
   ctx.fillStyle = currentColor.color
 
   let angle = getAngle(tx - sx, ty - sy) // angle of line
   let tri = getTriangle(sx, sy, tx, ty, angle)
-
+  const seen = new Set()
   for (let i = 0; i < tri.long; i++) {
     let thispoint = {
       x: Math.round(sx + tri.x * i),
@@ -212,9 +293,10 @@ export function actionLine(
       thispoint.y,
       currentColor,
       brushStamp,
-      weight,
+      brushSize,
       ctx,
-      currentMode
+      currentMode,
+      seen
     )
   }
   //fill endpoint
@@ -223,51 +305,11 @@ export function actionLine(
     Math.round(ty),
     currentColor,
     brushStamp,
-    weight,
+    brushSize,
     ctx,
-    currentMode
+    currentMode,
+    seen
   )
-}
-
-/**
- * User action for process to draw without staircasing artifacts
- * @param {*} currentX
- * @param {*} currentY
- */
-export function actionPerfectPixels(currentX, currentY) {
-  //if currentPixel not neighbor to lastDrawn, draw waitingpixel
-  if (
-    Math.abs(currentX - state.lastDrawnX) > 1 ||
-    Math.abs(currentY - state.lastDrawnY) > 1
-  ) {
-    actionDraw(
-      state.waitingPixelX,
-      state.waitingPixelY,
-      swatches.primary.color,
-      state.brushStamp,
-      state.tool.brushSize,
-      canvas.currentLayer.ctx,
-      state.mode
-    )
-    //update queue
-    state.lastDrawnX = state.waitingPixelX
-    state.lastDrawnY = state.waitingPixelY
-    state.waitingPixelX = currentX
-    state.waitingPixelY = currentY
-    if (state.tool.name !== "replace") {
-      //TODO: refactor so adding to timeline is performed by controller function
-      state.addToTimeline({
-        tool: state.tool,
-        x: state.lastDrawnX,
-        y: state.lastDrawnY,
-        layer: canvas.currentLayer,
-      })
-    }
-    renderCanvas()
-  } else {
-    state.waitingPixelX = currentX
-    state.waitingPixelY = currentY
-  }
 }
 
 /**
@@ -279,7 +321,7 @@ export function actionReplace() {
    * @param {*} currentLayer
    * @param {*} matchColor - color to isolate
    * @param {boolean} removeColor - if true, this function will remove only the matched color instead of removing everything else
-   * @returns
+   * @returns imageData
    */
   function createMapForSpecificColor(
     currentLayer,
@@ -295,13 +337,17 @@ export function actionReplace() {
     //iterate over pixel data and remove non-matching colors
     for (let i = 0; i < colorLayer.data.length; i += 4) {
       //sample color and by default, color will be removed if not a match. If removeColor is true, color will be removed if it is a match.
+      //ignore pixels that are already 0 opacity
       if (colorLayer.data[i + 3] !== 0) {
+        //color layer data alpha channel goes from 0 to 255, not 0 to 1
         let matchedColor =
           colorLayer.data[i] === matchColor.r &&
           colorLayer.data[i + 1] === matchColor.g &&
           colorLayer.data[i + 2] === matchColor.b &&
           colorLayer.data[i + 3] === matchColor.a
         if (removeColor) {
+          //by default, returns a map of the same color,
+          //TODO: this won't work for colors with opacity, so an additional step to draw the secondary color and use the sampled measurements will be required
           matchedColor = !matchedColor
         }
         if (!matchedColor) {
@@ -390,11 +436,18 @@ export function actionReplace() {
       //create new layer temporarily
       const layer = createNewRasterLayer("Replacement Layer")
       //create isolated color map for color replacement
-      const isolatedColorLayer = createMapForSpecificColor(
+      state.localColorLayer = createMapForSpecificColor(
         canvas.currentLayer,
         swatches.secondary.color
       )
-      layer.ctx.putImageData(isolatedColorLayer, 0, 0)
+      layer.ctx.putImageData(state.localColorLayer, 0, 0)
+      // actionFill(
+      //   state.cursorX,
+      //   state.cursorY,
+      //   swatches.primary.color,
+      //   canvas.currentLayer,
+      //   "erase"
+      // )
       //store reference to current layer
       canvas.tempLayer = canvas.currentLayer
       //layer must be in canvas.layers for draw to show in real time
@@ -434,6 +487,7 @@ export function actionReplace() {
         //TODO: One potential optimization is to save the bounding box coordinates
         //and add them to the properties so when rendering in the timeline it only
         //draws in the bounding box area instead of the whole canvas area
+        //TODO: ultimately we should save an array of coordinates and iterate the putAction on each coordinate for redraws?
         state.addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
@@ -456,36 +510,35 @@ export function actionReplace() {
  * @param {*} startX
  * @param {*} startY
  * @param {*} currentColor
- * @param {*} ctx
+ * @param {*} layer
  * @param {*} currentMode
  * @returns
  */
-export function actionFill(startX, startY, currentColor, ctx, currentMode) {
+export function actionFill(startX, startY, currentColor, layer, currentMode) {
   //exit if outside borders
   if (
     startX < 0 ||
-    startX >= canvas.offScreenCVS.width ||
+    startX >= layer.cvs.width ||
     startY < 0 ||
-    startY >= canvas.offScreenCVS.height
+    startY >= layer.cvs.height
   ) {
     return
   }
-  //TODO: actions should not use state directly to maintain timeline integrity
   //get imageData
-  state.localColorLayer = ctx.getImageData(
+  let layerImageData = layer.ctx.getImageData(
     0,
     0,
-    canvas.offScreenCVS.width,
-    canvas.offScreenCVS.height
+    layer.cvs.width,
+    layer.cvs.height
   )
 
-  state.clickedColor = getColor(startX, startY, state.localColorLayer)
+  let clickedColor = getColor(startX, startY, layerImageData)
 
   if (currentMode === "erase")
     currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
 
   //exit if color is the same
-  if (currentColor.color === state.clickedColor.color) {
+  if (currentColor.color === clickedColor.color) {
     return
   }
   //Start with click coords
@@ -493,53 +546,35 @@ export function actionFill(startX, startY, currentColor, ctx, currentMode) {
   let newPos, x, y, pixelPos, reachLeft, reachRight
   floodFill()
   //render floodFill result
-  ctx.putImageData(state.localColorLayer, 0, 0)
+  layer.ctx.putImageData(layerImageData, 0, 0)
 
   //helpers
-  function matchStartColor(pixelPos) {
-    let r = state.localColorLayer.data[pixelPos]
-    let g = state.localColorLayer.data[pixelPos + 1]
-    let b = state.localColorLayer.data[pixelPos + 2]
-    let a = state.localColorLayer.data[pixelPos + 3]
-    return (
-      r === state.clickedColor.r &&
-      g === state.clickedColor.g &&
-      b === state.clickedColor.b &&
-      a === state.clickedColor.a
-    )
-  }
-
-  function colorPixel(pixelPos) {
-    state.localColorLayer.data[pixelPos] = currentColor.r
-    state.localColorLayer.data[pixelPos + 1] = currentColor.g
-    state.localColorLayer.data[pixelPos + 2] = currentColor.b
-    //not ideal
-    state.localColorLayer.data[pixelPos + 3] = currentColor.a
-  }
-
   function floodFill() {
     newPos = pixelStack.pop()
     x = newPos[0]
     y = newPos[1]
 
     //get current pixel position
-    pixelPos = (y * canvas.offScreenCVS.width + x) * 4
+    pixelPos = (y * layer.cvs.width + x) * 4
     // Go up as long as the color matches and are inside the canvas
-    while (y >= 0 && matchStartColor(pixelPos)) {
+    while (y >= 0 && matchStartColor(layerImageData, pixelPos, clickedColor)) {
       y--
-      pixelPos -= canvas.offScreenCVS.width * 4
+      pixelPos -= layer.cvs.width * 4
     }
     //Don't overextend
-    pixelPos += canvas.offScreenCVS.width * 4
+    pixelPos += layer.cvs.width * 4
     y++
     reachLeft = false
     reachRight = false
     // Go down as long as the color matches and in inside the canvas
-    while (y < canvas.offScreenCVS.height && matchStartColor(pixelPos)) {
-      colorPixel(pixelPos)
+    while (
+      y < layer.cvs.height &&
+      matchStartColor(layerImageData, pixelPos, clickedColor)
+    ) {
+      colorPixel(layerImageData, pixelPos, currentColor)
 
       if (x > 0) {
-        if (matchStartColor(pixelPos - 4)) {
+        if (matchStartColor(layerImageData, pixelPos - 4, clickedColor)) {
           if (!reachLeft) {
             //Add pixel to stack
             pixelStack.push([x - 1, y])
@@ -550,8 +585,8 @@ export function actionFill(startX, startY, currentColor, ctx, currentMode) {
         }
       }
 
-      if (x < canvas.offScreenCVS.width - 1) {
-        if (matchStartColor(pixelPos + 4)) {
+      if (x < layer.cvs.width - 1) {
+        if (matchStartColor(layerImageData, pixelPos + 4, clickedColor)) {
           if (!reachRight) {
             //Add pixel to stack
             pixelStack.push([x + 1, y])
@@ -562,7 +597,7 @@ export function actionFill(startX, startY, currentColor, ctx, currentMode) {
         }
       }
       y++
-      pixelPos += canvas.offScreenCVS.width * 4
+      pixelPos += layer.cvs.width * 4
     }
 
     if (pixelStack.length) {
@@ -577,7 +612,7 @@ export function actionFill(startX, startY, currentColor, ctx, currentMode) {
  * @param {*} points
  * @param {*} brushStamp
  * @param {*} currentColor
- * @param {*} weight
+ * @param {*} brushSize
  * @param {*} ctx
  * @param {*} currentMode
  */
@@ -585,17 +620,27 @@ function renderPoints(
   points,
   brushStamp,
   currentColor,
-  weight,
+  brushSize,
   ctx,
   currentMode
 ) {
+  const seen = new Set()
   function plot(point) {
     //rounded values
     let xt = Math.floor(point.x)
     let yt = Math.floor(point.y)
     // let randomColor = generateRandomRGB()
     //pass "point" instead of currentColor to visualize segments
-    actionDraw(xt, yt, currentColor, brushStamp, weight, ctx, currentMode)
+    actionDraw(
+      xt,
+      yt,
+      currentColor,
+      brushStamp,
+      brushSize,
+      ctx,
+      currentMode,
+      seen
+    )
   }
   points.forEach((point) => plot(point))
 }
@@ -613,7 +658,7 @@ function renderPoints(
  * @param {*} ctx
  * @param {*} currentMode
  * @param {*} brushStamp
- * @param {*} weight
+ * @param {*} brushSize
  */
 export function actionQuadraticCurve(
   startx,
@@ -627,7 +672,7 @@ export function actionQuadraticCurve(
   ctx,
   currentMode,
   brushStamp,
-  weight
+  brushSize
 ) {
   //force coords to int
   startx = Math.round(startx)
@@ -648,10 +693,12 @@ export function actionQuadraticCurve(
       state.cursorWithCanvasOffsetX,
       state.cursorWithCanvasOffsetY,
       currentColor,
+      canvas.onScreenCVS,
       canvas.onScreenCTX,
       currentMode,
       brushStamp,
-      weight
+      brushSize,
+      state.localColorLayer
     )
     state.vectorProperties.px2 = state.cursorX
     state.vectorProperties.py2 = state.cursorY
@@ -667,7 +714,14 @@ export function actionQuadraticCurve(
       endx,
       endy
     )
-    renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
+    renderPoints(
+      plotPoints,
+      brushStamp,
+      currentColor,
+      brushSize,
+      ctx,
+      currentMode
+    )
     state.vectorProperties.px3 = state.cursorX
     state.vectorProperties.py3 = state.cursorY
   } else if (stepNum === 3) {
@@ -680,7 +734,14 @@ export function actionQuadraticCurve(
       endx,
       endy
     )
-    renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
+    renderPoints(
+      plotPoints,
+      brushStamp,
+      currentColor,
+      brushSize,
+      ctx,
+      currentMode
+    )
   }
 }
 
@@ -699,7 +760,7 @@ export function actionQuadraticCurve(
  * @param {*} ctx
  * @param {*} currentMode
  * @param {*} brushStamp
- * @param {*} weight
+ * @param {*} brushSize
  */
 export function actionCubicCurve(
   startx,
@@ -715,7 +776,7 @@ export function actionCubicCurve(
   ctx,
   currentMode,
   brushStamp,
-  weight
+  brushSize
 ) {
   //force coords to int
   startx = Math.round(startx)
@@ -738,10 +799,12 @@ export function actionCubicCurve(
       state.cursorWithCanvasOffsetX,
       state.cursorWithCanvasOffsetY,
       currentColor,
+      canvas.onScreenCVS,
       canvas.onScreenCTX,
       currentMode,
       brushStamp,
-      weight
+      brushSize,
+      state.localColorLayer
     )
     //TODO: can setting state be moved to steps function?
     state.vectorProperties.px2 = state.cursorX
@@ -758,7 +821,14 @@ export function actionCubicCurve(
       endx,
       endy
     )
-    renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
+    renderPoints(
+      plotPoints,
+      brushStamp,
+      currentColor,
+      brushSize,
+      ctx,
+      currentMode
+    )
     state.vectorProperties.px3 = state.cursorX
     state.vectorProperties.py3 = state.cursorY
   } else if (stepNum === 3) {
@@ -774,7 +844,14 @@ export function actionCubicCurve(
       endx,
       endy
     )
-    renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
+    renderPoints(
+      plotPoints,
+      brushStamp,
+      currentColor,
+      brushSize,
+      ctx,
+      currentMode
+    )
     state.vectorProperties.px4 = state.cursorX
     state.vectorProperties.py4 = state.cursorY
   } else if (stepNum === 4) {
@@ -789,7 +866,14 @@ export function actionCubicCurve(
       endx,
       endy
     )
-    renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
+    renderPoints(
+      plotPoints,
+      brushStamp,
+      currentColor,
+      brushSize,
+      ctx,
+      currentMode
+    )
   }
 }
 
@@ -806,7 +890,7 @@ export function actionCubicCurve(
  * @param {*} ctx
  * @param {*} currentMode
  * @param {*} brushStamp
- * @param {*} weight
+ * @param {*} brushSize
  * @param {*} angle
  * @param {*} offset
  * @param {*} x1Offset
@@ -826,7 +910,7 @@ export function actionEllipse(
   ctx,
   currentMode,
   brushStamp,
-  weight,
+  brushSize,
   angle,
   offset,
   x1Offset,
@@ -844,7 +928,14 @@ export function actionEllipse(
 
   if (forceCircle) {
     let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, offset)
-    renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
+    renderPoints(
+      plotPoints,
+      brushStamp,
+      currentColor,
+      brushSize,
+      ctx,
+      currentMode
+    )
   } else {
     let plotPoints = plotRotatedEllipse(
       centerx,
@@ -857,6 +948,13 @@ export function actionEllipse(
       x1Offset,
       y1Offset
     )
-    renderPoints(plotPoints, brushStamp, currentColor, weight, ctx, currentMode)
+    renderPoints(
+      plotPoints,
+      brushStamp,
+      currentColor,
+      brushSize,
+      ctx,
+      currentMode
+    )
   }
 }

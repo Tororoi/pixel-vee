@@ -101,6 +101,15 @@
           margin: 2px;
           @include leftDownBorder;
         }
+        .actionColor-container {
+          background-image: repeating-linear-gradient(
+            -45deg,
+            white,
+            white 5px,
+            rgb(216, 216, 216) 5px,
+            rgb(216, 216, 216) 10px
+          );
+        }
         .actionColor {
           position: absolute;
           right: 0;
@@ -108,12 +117,23 @@
           cursor: pointer;
           width: 20px;
           height: 20px;
-          background: $button-color;
+          background-image: repeating-linear-gradient(
+            -45deg,
+            white,
+            white 5px,
+            rgb(216, 216, 216) 5px,
+            rgb(216, 216, 216) 10px
+          );
           z-index: 104;
           margin: 2px;
           @include leftDownUpBorder;
           &:hover {
             z-index: 106;
+          }
+          .swatch {
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
           }
         }
         .trash {
