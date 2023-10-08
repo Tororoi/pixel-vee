@@ -443,9 +443,6 @@ function render(state, canvas) {
     //Prevent blurring
     canvas.vectorGuiCTX.imageSmoothingEnabled = false
     //Render grid
-    if (canvas.zoom >= 4 && state.grid) {
-      renderGrid(canvas)
-    }
     if (state.tool.name === "fill") {
       renderFillVector(canvas)
     } else if (
@@ -462,6 +459,9 @@ function render(state, canvas) {
             : "red"
         renderOffsetEllipseVector(state, canvas, color)
       }
+    }
+    if (canvas.zoom >= 4 && state.grid) {
+      renderGrid(canvas)
     }
   }
 }
