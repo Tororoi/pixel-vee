@@ -414,7 +414,6 @@ function render(state, canvas) {
       state.tool.name === "cubicCurve"
     ) {
       renderCurveVector(canvas)
-      console.log(vectorGui.collidedKeys.xKey)
     } else if (state.tool.name === "ellipse") {
       renderEllipseVector(canvas)
       if (state.vectorProperties.x1Offset || state.vectorProperties.y1Offset) {

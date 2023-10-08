@@ -98,42 +98,6 @@ function redrawTimelineActions(index = null) {
               seen
             )
           })
-          // if (p.mode === "inject") {
-          //TODO IN PROGRESS: actionPut requires image data, but we don't want to store a snapshot of the entire canvas (p.imageData) at the time of first render.
-          //Instead, we want a snapshot of the canvas during this redraw right before this action
-          //Instead of actions being arrays, they should have some properties and one of those properties can be an array of points
-          //actionPut
-          // p.tool.action(
-          //   p.x,
-          //   p.y,
-          //   p.color,
-          //   p.brush,
-          //   p.weight,
-          //   p.layer.cvs,
-          //   p.layer.ctx,
-          //   p.mode,
-          //   p.imageData
-          // )
-          // } else if (p.mode === "erase") {
-          //   //actionDraw
-          //   p.tool.secondaryAction(
-          //     p.x,
-          //     p.y,
-          //     p.color,
-          //     p.brush,
-          //     p.weight,
-          //     p.layer.ctx,
-          //     p.mode
-          //   )
-          // } else {
-          //   p.layer.ctx.drawImage(
-          //     p.properties.image,
-          //     0,
-          //     0,
-          //     p.properties.width,
-          //     p.properties.height
-          //   )
-          // }
           break
         case "fill":
           //actionFill
@@ -366,14 +330,12 @@ export function renderLayersToDOM() {
 export function renderVectorsToDOM() {
   dom.vectorsThumbnails.innerHTML = ""
   state.undoStack.forEach((action) => {
-    // let p = action[0]
-    let p = action
-    if (!p.removed) {
-      if (p.tool.type === "vector") {
-        p.index = state.undoStack.indexOf(action)
+    if (!action.removed) {
+      if (action.tool.type === "vector") {
+        action.index = state.undoStack.indexOf(action)
         let vectorElement = document.createElement("div")
-        vectorElement.className = `vector ${p.index}`
-        vectorElement.id = p.index
+        vectorElement.className = `vector ${action.index}`
+        vectorElement.id = action.index
         dom.vectorsThumbnails.appendChild(vectorElement)
         vectorElement.draggable = true
         canvas.thumbnailCTX.clearRect(
@@ -395,64 +357,65 @@ export function renderVectorsToDOM() {
           canvas.offScreenCVS.height
         //get the minimum dimension ratio
         let minD = Math.min(wd, hd)
-        // thumbnailCTX.strokeStyle = p.color.color
+        // thumbnailCTX.strokeStyle = action.color.color
         canvas.thumbnailCTX.strokeStyle = "black"
         canvas.thumbnailCTX.beginPath()
         //TODO: line tool to be added as vectors. Behavior of replace tool is like a mask, so the replaced pixels are static coordinates.
-        if (p.tool.name === "fill") {
+        if (action.tool.name === "fill") {
           canvas.thumbnailCTX.arc(
-            minD * p.properties.px1 + 0.5,
-            minD * p.properties.py1 + 0.5,
+            minD * action.properties.px1 + 0.5,
+            minD * action.properties.py1 + 0.5,
             1,
             0,
             2 * Math.PI,
             true
           )
-        } else if (p.tool.name === "quadCurve") {
+        } else if (action.tool.name === "quadCurve") {
           canvas.thumbnailCTX.moveTo(
-            minD * p.properties.px1 + 0.5,
-            minD * p.properties.py1 + 0.5
+            minD * action.properties.px1 + 0.5,
+            minD * action.properties.py1 + 0.5
           )
           canvas.thumbnailCTX.quadraticCurveTo(
-            minD * p.properties.px3 + 0.5,
-            minD * p.properties.py3 + 0.5,
-            minD * p.properties.px2 + 0.5,
-            minD * p.properties.py2 + 0.5
+            minD * action.properties.px3 + 0.5,
+            minD * action.properties.py3 + 0.5,
+            minD * action.properties.px2 + 0.5,
+            minD * action.properties.py2 + 0.5
           )
-        } else if (p.tool.name === "cubicCurve") {
+        } else if (action.tool.name === "cubicCurve") {
           canvas.thumbnailCTX.moveTo(
-            minD * p.properties.px1 + 0.5,
-            minD * p.properties.py1 + 0.5
+            minD * action.properties.px1 + 0.5,
+            minD * action.properties.py1 + 0.5
           )
           canvas.thumbnailCTX.bezierCurveTo(
-            minD * p.properties.px3 + 0.5,
-            minD * p.properties.py3 + 0.5,
-            minD * p.properties.px4 + 0.5,
-            minD * p.properties.py4 + 0.5,
-            minD * p.properties.px2 + 0.5,
-            minD * p.properties.py2 + 0.5
+            minD * action.properties.px3 + 0.5,
+            minD * action.properties.py3 + 0.5,
+            minD * action.properties.px4 + 0.5,
+            minD * action.properties.py4 + 0.5,
+            minD * action.properties.px2 + 0.5,
+            minD * action.properties.py2 + 0.5
           )
-        } else if (p.tool.name === "ellipse") {
+        } else if (action.tool.name === "ellipse") {
           let angle = getAngle(
-            p.properties.px2 - p.properties.px1,
-            p.properties.py2 - p.properties.py1
+            action.properties.px2 - action.properties.px1,
+            action.properties.py2 - action.properties.py1
           )
           canvas.thumbnailCTX.ellipse(
-            minD * p.properties.px1,
-            minD * p.properties.py1,
-            minD * p.properties.radA,
-            minD * p.properties.radB,
+            minD * action.properties.px1,
+            minD * action.properties.py1,
+            minD * action.properties.radA,
+            minD * action.properties.radB,
             angle,
             0,
             2 * Math.PI
           )
         }
         canvas.thumbnailCTX.stroke()
-        if (p.index === canvas.currentVectorIndex) {
+        if (action.index === canvas.currentVectorIndex) {
           canvas.thumbnailCTX.fillStyle = "rgb(0, 0, 0)"
         } else {
           canvas.thumbnailCTX.fillStyle = "rgb(51, 51, 51)"
         }
+        canvas.thumbnailCTX.globalCompositeOperation = "xor"
         canvas.thumbnailCTX.fillRect(
           minD * canvas.offScreenCVS.width,
           0,
@@ -467,13 +430,14 @@ export function renderVectorsToDOM() {
         )
         let thumb = new Image()
         thumb.src = canvas.thumbnailCVS.toDataURL()
+        thumb.alt = `thumb ${action.index}`
         // vectorElement.appendChild(thumbnailCVS)
         vectorElement.appendChild(thumb)
         let tool = document.createElement("div")
         tool.className = "tool"
         let icon = document.createElement("div")
-        icon.className = p.tool.name
-        if (p.index === canvas.currentVectorIndex) {
+        icon.className = action.tool.name
+        if (action.index === canvas.currentVectorIndex) {
           tool.style.background = "rgb(255, 255, 255)"
           vectorElement.style.background = "rgb(0, 0, 0)"
         } else {
@@ -483,10 +447,10 @@ export function renderVectorsToDOM() {
         vectorElement.appendChild(tool)
         let color = document.createElement("div") //TODO: make clickable and color can be rechosen via colorpicker
         color.className = "actionColor"
-        // color.style.background = p.color.color
+        // color.style.background = action.color.color
         let colorSwatch = document.createElement("div")
         colorSwatch.className = "swatch"
-        colorSwatch.style.background = p.color.color
+        colorSwatch.style.background = action.color.color
         color.appendChild(colorSwatch)
         vectorElement.appendChild(color)
         let trash = document.createElement("div") //TODO: make clickable and sets vector action as hidden
@@ -500,7 +464,7 @@ export function renderVectorsToDOM() {
         // thumbnailCTX.scale(canvas.sharpness * 1, canvas.sharpness * 1)
 
         //associate object
-        vectorElement.vectorObj = p
+        vectorElement.vectorObj = action
       }
     }
   })

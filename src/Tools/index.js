@@ -79,8 +79,6 @@ export function putSteps(ignoreInvisible = false) {
           state.pointsSet,
           state.points
         )
-        state.previousX = state.cursorX
-        state.previousY = state.cursorY
         //for perfect pixels
         state.lastDrawnX = state.cursorX
         state.lastDrawnY = state.cursorY
@@ -207,9 +205,6 @@ export function putSteps(ignoreInvisible = false) {
             }
           }
         }
-        // save last point
-        state.previousX = state.cursorX
-        state.previousY = state.cursorY
       }
       break
     case "pointerup":
@@ -281,8 +276,6 @@ export function drawSteps() {
         state.pointsSet,
         state.points
       )
-      state.previousX = state.cursorX
-      state.previousY = state.cursorY
       //for perfect pixels
       state.lastDrawnX = state.cursorX
       state.lastDrawnY = state.cursorY
@@ -393,9 +386,6 @@ export function drawSteps() {
           }
         }
       }
-      // save last point
-      state.previousX = state.cursorX
-      state.previousY = state.cursorY
       break
     case "pointerup":
       //only needed if perfect pixels option is on
@@ -435,26 +425,13 @@ export function replaceSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       actionReplace()
-      //only use inefficient putSteps if necessary due to presence of transparency in alpha channel
-      if (swatches.primary.color.a !== 255) {
-        putSteps(true)
-      } else {
-        drawSteps()
-      }
+      drawSteps()
       break
     case "pointermove":
-      if (swatches.primary.color.a !== 255) {
-        putSteps(true)
-      } else {
-        drawSteps()
-      }
+      drawSteps()
       break
     case "pointerup":
-      if (swatches.primary.color.a !== 255) {
-        putSteps(true)
-      } else {
-        drawSteps()
-      }
+      drawSteps()
       actionReplace()
       break
     case "pointerout":
@@ -497,11 +474,9 @@ export function selectSteps() {
 export function lineSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      state.previousX = state.cursorX
-      state.previousY = state.cursorY
       actionLine(
-        state.previousX + canvas.xOffset,
-        state.previousY + canvas.yOffset,
+        state.cursorX + canvas.xOffset,
+        state.cursorY + canvas.yOffset,
         state.cursorWithCanvasOffsetX,
         state.cursorWithCanvasOffsetY,
         swatches.primary.color,
@@ -607,17 +582,11 @@ export function fillSteps() {
         })
         renderCanvas()
       }
-      // save last point
-      state.previousX = state.cursorX
-      state.previousY = state.cursorY
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey) {
         adjustFillSteps()
       }
-      // save last point
-      state.previousX = state.cursorX
-      state.previousY = state.cursorY
     case "pointerup":
       if (vectorGui.selectedPoint.xKey) {
         adjustFillSteps()
@@ -744,9 +713,6 @@ export function quadCurveSteps() {
           state.tool.brushSize
         )
       }
-      // save last point
-      state.previousX = state.cursorX
-      state.previousY = state.cursorY
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
@@ -782,9 +748,6 @@ export function quadCurveSteps() {
           state.previousOnscreenY = state.onscreenY
         }
       }
-      // save last point
-      state.previousX = state.cursorX
-      state.previousY = state.cursorY
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
@@ -909,9 +872,6 @@ export function cubicCurveSteps() {
           state.tool.brushSize
         )
       }
-      // save last point
-      state.previousX = state.cursorX
-      state.previousY = state.cursorY
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
@@ -949,9 +909,6 @@ export function cubicCurveSteps() {
           state.previousOnscreenY = state.onscreenY
         }
       }
-      // save last point
-      state.previousX = state.cursorX
-      state.previousY = state.cursorY
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
@@ -1225,9 +1182,6 @@ export function ellipseSteps() {
           state.vectorProperties.y1Offset
         )
       }
-      // save last point
-      state.previousX = state.cursorX
-      state.previousY = state.cursorY
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
@@ -1240,8 +1194,6 @@ export function ellipseSteps() {
           adjustEllipseSteps()
           state.previousOnscreenX = state.onscreenX
           state.previousOnscreenY = state.onscreenY
-          canvas.previousSubPixelX = canvas.subPixelX
-          canvas.previousSubPixelY = canvas.subPixelY
         }
       } else {
         //draw line from origin point to current point onscreen
@@ -1294,13 +1246,8 @@ export function ellipseSteps() {
           )
           state.previousOnscreenX = state.onscreenX
           state.previousOnscreenY = state.onscreenY
-          canvas.previousSubPixelX = canvas.subPixelX
-          canvas.previousSubPixelY = canvas.subPixelY
         }
       }
-      // save last point
-      state.previousX = state.cursorX
-      state.previousY = state.cursorY
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
@@ -1546,28 +1493,13 @@ export function eyedropperSteps() {
       )
       //set color
       sampleColor(state.cursorX, state.cursorY)
-      // save last point
-      state.previousX = state.cursorX
-      state.previousY = state.cursorY
       break
     case "pointermove":
       //normalize pointermove to pixelgrid, get color here too
-      // if (
-      //   state.onscreenX !== state.previousOnscreenX ||
-      //   state.onscreenY !== state.previousOnscreenY
-      // ) {
       //get color
       sampleColor(state.cursorX, state.cursorY)
       //draw square
       renderRasterGUI(state, canvas, swatches)
-      vectorGui.render(state, canvas)
-      renderCursor(state, canvas, swatches)
-      // state.previousOnscreenX = state.onscreenX
-      // state.previousOnscreenY = state.onscreenY
-      // }
-      // save last point
-      state.previousX = state.cursorX
-      state.previousY = state.cursorY
       break
     default:
     //do nothing
@@ -1579,9 +1511,6 @@ export function grabSteps() {
     case "pointerdown":
       canvas.previousXOffset = canvas.xOffset
       canvas.previousYOffset = canvas.yOffset
-      // save last point
-      state.previousX = state.cursorX
-      state.previousY = state.cursorY
       break
     case "pointermove":
       canvas.xOffset =
@@ -1589,9 +1518,6 @@ export function grabSteps() {
       canvas.yOffset =
         state.onscreenY - state.previousOnscreenY + canvas.previousYOffset
       renderCanvas()
-      // save last point
-      state.previousX = state.cursorX
-      state.previousY = state.cursorY
       break
     case "pointerup":
       canvas.previousXOffset = canvas.xOffset
@@ -1654,12 +1580,8 @@ export const tools = {
   //Raster Tools
   brush: {
     name: "brush",
-    // fn: putSteps,
-    // action: actionPut,
-    // secondaryAction: actionDraw,
     fn: drawSteps,
     action: actionDraw,
-    secondaryAction: actionPut,
     brushSize: 1,
     disabled: false,
     options: { perfect: false, erase: false, inject: false },
@@ -1732,7 +1654,12 @@ export const tools = {
     action: actionEllipse,
     brushSize: 1,
     disabled: false,
-    options: { radiusExcludesCenter: false, erase: false, inject: false }, // need to expand radiusExcludesCenter to cover multiple scenarios, centerx = 0 or 1 and centery = 0 or 1
+    options: {
+      useSubPixels: true,
+      radiusExcludesCenter: false,
+      erase: false,
+      inject: false,
+    }, // need to expand radiusExcludesCenter to cover multiple scenarios, centerx = 0 or 1 and centery = 0 or 1
     type: "vector",
   },
   //Non-cursor tools
@@ -1742,7 +1669,7 @@ export const tools = {
     action: null,
     brushSize: null,
     disabled: false,
-    options: [],
+    options: {},
     type: "settings",
   },
   removeLayer: {
@@ -1751,7 +1678,7 @@ export const tools = {
     action: null,
     brushSize: null,
     disabled: false,
-    options: [],
+    options: {},
     type: "settings",
   },
   //Utility Tools (does not affect timeline)
@@ -1761,7 +1688,7 @@ export const tools = {
     action: null,
     brushSize: 1,
     disabled: true,
-    options: [],
+    options: {},
     type: "utility",
   },
   grab: {
@@ -1770,7 +1697,7 @@ export const tools = {
     action: null,
     brushSize: 1,
     disabled: true,
-    options: [],
+    options: {},
     type: "utility",
   },
   /** move: {

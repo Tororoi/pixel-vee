@@ -61,12 +61,6 @@ function handleKeyUp(e) {
 
   if (e.code === "ShiftLeft" || e.code === "ShiftRight") {
     state.vectorProperties.forceCircle = false
-    // console.log(
-    //   canvas.pointerEvent,
-    //   vectorGui.selectedPoint.xKey,
-    //   vectorGui.collidedKeys.xKey,
-    //   vectorGui.collisionPresent
-    // )
     if (
       (vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey) &&
       vectorGui.selectedPoint.xKey !== "px1"
@@ -139,9 +133,9 @@ function handlePointerDown(e) {
     return
   }
   setCoordinates(e)
-  // if (state.touch) {
-  vectorGui.render(state, canvas) // For tablets, vectors must be rendered before running state.tool.fn in order to check control points collision logic
-  // }
+  if (state.touch) {
+    vectorGui.render(state, canvas) // For tablets, vectors must be rendered before running state.tool.fn in order to check control points collision logic
+  }
   renderCanvas()
   //Reset Cursor for mobile
   state.onscreenX = state.cursorWithCanvasOffsetX
@@ -160,9 +154,15 @@ function handlePointerDown(e) {
   }
   //run selected tool step function
   state.tool.fn()
+  // save last point
+  state.previousX = state.cursorX
+  state.previousY = state.cursorY
   //Re-render GUI
   renderRasterGUI(state, canvas, swatches)
   vectorGui.render(state, canvas)
+  if (state.tool.name === "eyedropper") {
+    renderCursor(state, canvas, swatches)
+  }
 }
 
 function handlePointerMove(e) {
@@ -175,7 +175,14 @@ function handlePointerMove(e) {
   canvas.zoomAtLastDraw = canvas.zoom //* */
   //coords
   setCoordinates(e)
-  if (state.previousX !== state.cursorX || state.previousY !== state.cursorY) {
+  let cursorMoved =
+    state.previousX !== state.cursorX || state.previousY !== state.cursorY
+  if (state.tool.options.useSubPixels && !cursorMoved) {
+    cursorMoved =
+      canvas.previousSubPixelX !== canvas.subPixelX ||
+      canvas.previousSubPixelY !== canvas.subPixelY
+  }
+  if (cursorMoved) {
     //Hover brush
     state.onscreenX = state.cursorWithCanvasOffsetX
     state.onscreenY = state.cursorWithCanvasOffsetY
@@ -191,6 +198,14 @@ function handlePointerMove(e) {
       //run selected tool step function
       state.tool.fn()
       vectorGui.render(state, canvas)
+      if (state.tool.name !== "line") {
+        // save last point
+        state.previousX = state.cursorX
+        state.previousY = state.cursorY
+      }
+      if (state.tool.name === "eyedropper") {
+        renderCursor(state, canvas, swatches)
+      }
       if (state.tool.name !== "grab") {
         if (
           state.onscreenX !== state.previousOnscreenX ||
@@ -201,6 +216,8 @@ function handlePointerMove(e) {
         }
       }
     } else {
+      //no active tool
+      vectorGui.render(state, canvas)
       renderCursor(state, canvas, swatches)
       //normalize cursor render to pixelgrid
       if (
@@ -212,6 +229,8 @@ function handlePointerMove(e) {
       }
     }
   }
+  canvas.previousSubPixelX = canvas.subPixelX
+  canvas.previousSubPixelY = canvas.subPixelY
 }
 
 function handlePointerUp(e) {
@@ -259,7 +278,9 @@ function handlePointerUp(e) {
   if (!e.targetTouches) {
     renderRasterGUI(state, canvas, swatches)
     vectorGui.render(state, canvas)
-    // renderCursor(state, canvas, swatches)
+    if (state.tool.name === "eyedropper") {
+      renderCursor(state, canvas, swatches)
+    }
   }
 }
 

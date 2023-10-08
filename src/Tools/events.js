@@ -110,6 +110,12 @@ export function handleTools(e, manualToolName = null) {
         canvas.vectorGuiCVS.style.cursor = "crosshair"
         vectorGui.reset(canvas)
         state.reset()
+        renderVectorsToDOM()
+      } else if (dom.toolBtn.id === "eyedropper") {
+        canvas.vectorGuiCVS.style.cursor = "none"
+        vectorGui.reset(canvas)
+        state.reset()
+        renderVectorsToDOM()
       } else {
         canvas.vectorGuiCVS.style.cursor = "none"
       }

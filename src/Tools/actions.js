@@ -131,9 +131,11 @@ export function actionClear() {
  * @param {*} coordY
  * @param {*} currentColor
  * @param {*} brushStamp
- * @param {*} weight
+ * @param {*} brushSize
  * @param {*} ctx
  * @param {*} currentMode
+ * @param {Set} seenPointsSet
+ * @param {Array} points
  */
 export function actionDraw(
   coordX,
@@ -190,9 +192,14 @@ export function actionDraw(
  * @param {*} coordY
  * @param {*} currentColor
  * @param {*} brushStamp
- * @param {*} weight
+ * @param {*} brushSize
+ * @param {*} cvs
  * @param {*} ctx
  * @param {*} currentMode
+ * @param {*} imageData
+ * @param {*} ignoreInvisible
+ * @param {Set} seenPointsSet
+ * @param {Array} points
  */
 export function actionPut(
   coordX,
@@ -219,10 +226,10 @@ export function actionPut(
   }
   if (currentMode === "erase")
     currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
-  brushStamp.forEach((r) => {
+  brushStamp.forEach((p) => {
     //for each rectangle, given the center point of the overall brush at coordX and coordY, find the pixel's position
-    let x = Math.ceil(coordX - brushSize / 2) + r.x
-    let y = Math.ceil(coordY - brushSize / 2) + r.y
+    let x = Math.ceil(coordX - brushSize / 2) + p.x
+    let y = Math.ceil(coordY - brushSize / 2) + p.y
     // check that pixel is inside canvas area or else it will roll over on image data
     if (x < cvs.width && x >= 0 && y < cvs.height && y >= 0) {
       if (seenPointsSet) {
@@ -239,7 +246,6 @@ export function actionPut(
       }
     }
   })
-  // console.log({ cvs, ctx, imageData })
   ctx.putImageData(imageData, 0, 0)
 }
 
@@ -255,7 +261,7 @@ export function actionPut(
  * @param {*} ctx
  * @param {*} currentMode
  * @param {*} brushStamp
- * @param {*} weight
+ * @param {*} brushSize
  * @param {*} imageData
  */
 export function actionLine(
@@ -606,7 +612,7 @@ export function actionFill(startX, startY, currentColor, layer, currentMode) {
  * @param {*} points
  * @param {*} brushStamp
  * @param {*} currentColor
- * @param {*} weight
+ * @param {*} brushSize
  * @param {*} ctx
  * @param {*} currentMode
  */
@@ -652,7 +658,7 @@ function renderPoints(
  * @param {*} ctx
  * @param {*} currentMode
  * @param {*} brushStamp
- * @param {*} weight
+ * @param {*} brushSize
  */
 export function actionQuadraticCurve(
   startx,
@@ -754,7 +760,7 @@ export function actionQuadraticCurve(
  * @param {*} ctx
  * @param {*} currentMode
  * @param {*} brushStamp
- * @param {*} weight
+ * @param {*} brushSize
  */
 export function actionCubicCurve(
   startx,
@@ -884,7 +890,7 @@ export function actionCubicCurve(
  * @param {*} ctx
  * @param {*} currentMode
  * @param {*} brushStamp
- * @param {*} weight
+ * @param {*} brushSize
  * @param {*} angle
  * @param {*} offset
  * @param {*} x1Offset

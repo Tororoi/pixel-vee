@@ -47,7 +47,6 @@ export function renderCursor(state, canvas, swatches) {
 
 export function drawCurrentPixel(state, canvas, swatches) {
   //draw onscreen current pixel
-  //how will this work with actionPut? store imageData in state as state.localColorLayer
   renderRasterGUI(state, canvas, swatches)
   canvas.rasterGuiCTX.fillStyle = swatches.primary.color.color
   const processBrushStamp = (action, pixel) => {
