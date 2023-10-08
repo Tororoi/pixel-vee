@@ -607,11 +607,17 @@ export function fillSteps() {
         })
         renderCanvas()
       }
+      // save last point
+      state.previousX = state.cursorX
+      state.previousY = state.cursorY
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey) {
         adjustFillSteps()
       }
+      // save last point
+      state.previousX = state.cursorX
+      state.previousY = state.cursorY
     case "pointerup":
       if (vectorGui.selectedPoint.xKey) {
         adjustFillSteps()
@@ -650,14 +656,14 @@ export function adjustFillSteps() {
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey) {
-        if (
-          state.onscreenX !== state.previousOnscreenX ||
-          state.onscreenY !== state.previousOnscreenY
-        ) {
-          //code gets past check twice here so figure out where tool fn is being called again
-          state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
-          state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        }
+        // if (
+        //   state.onscreenX !== state.previousOnscreenX ||
+        //   state.onscreenY !== state.previousOnscreenY
+        // ) {
+        //code gets past check twice here so figure out where tool fn is being called again
+        state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
+        state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
+        // }
       }
       break
     case "pointerup":
@@ -738,6 +744,9 @@ export function quadCurveSteps() {
           state.tool.brushSize
         )
       }
+      // save last point
+      state.previousX = state.cursorX
+      state.previousY = state.cursorY
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
@@ -773,6 +782,9 @@ export function quadCurveSteps() {
           state.previousOnscreenY = state.onscreenY
         }
       }
+      // save last point
+      state.previousX = state.cursorX
+      state.previousY = state.cursorY
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
@@ -897,6 +909,9 @@ export function cubicCurveSteps() {
           state.tool.brushSize
         )
       }
+      // save last point
+      state.previousX = state.cursorX
+      state.previousY = state.cursorY
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
@@ -934,6 +949,9 @@ export function cubicCurveSteps() {
           state.previousOnscreenY = state.onscreenY
         }
       }
+      // save last point
+      state.previousX = state.cursorX
+      state.previousY = state.cursorY
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
@@ -1207,6 +1225,9 @@ export function ellipseSteps() {
           state.vectorProperties.y1Offset
         )
       }
+      // save last point
+      state.previousX = state.cursorX
+      state.previousY = state.cursorY
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
@@ -1277,6 +1298,9 @@ export function ellipseSteps() {
           canvas.previousSubPixelY = canvas.subPixelY
         }
       }
+      // save last point
+      state.previousX = state.cursorX
+      state.previousY = state.cursorY
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
@@ -1522,22 +1546,28 @@ export function eyedropperSteps() {
       )
       //set color
       sampleColor(state.cursorX, state.cursorY)
+      // save last point
+      state.previousX = state.cursorX
+      state.previousY = state.cursorY
       break
     case "pointermove":
       //normalize pointermove to pixelgrid, get color here too
-      if (
-        state.onscreenX !== state.previousOnscreenX ||
-        state.onscreenY !== state.previousOnscreenY
-      ) {
-        //get color
-        sampleColor(state.cursorX, state.cursorY)
-        //draw square
-        renderRasterGUI(state, canvas, swatches)
-        vectorGui.render(state, canvas)
-        renderCursor(state, canvas, swatches)
-        state.previousOnscreenX = state.onscreenX
-        state.previousOnscreenY = state.onscreenY
-      }
+      // if (
+      //   state.onscreenX !== state.previousOnscreenX ||
+      //   state.onscreenY !== state.previousOnscreenY
+      // ) {
+      //get color
+      sampleColor(state.cursorX, state.cursorY)
+      //draw square
+      renderRasterGUI(state, canvas, swatches)
+      vectorGui.render(state, canvas)
+      renderCursor(state, canvas, swatches)
+      // state.previousOnscreenX = state.onscreenX
+      // state.previousOnscreenY = state.onscreenY
+      // }
+      // save last point
+      state.previousX = state.cursorX
+      state.previousY = state.cursorY
       break
     default:
     //do nothing
@@ -1549,6 +1579,9 @@ export function grabSteps() {
     case "pointerdown":
       canvas.previousXOffset = canvas.xOffset
       canvas.previousYOffset = canvas.yOffset
+      // save last point
+      state.previousX = state.cursorX
+      state.previousY = state.cursorY
       break
     case "pointermove":
       canvas.xOffset =
@@ -1556,6 +1589,9 @@ export function grabSteps() {
       canvas.yOffset =
         state.onscreenY - state.previousOnscreenY + canvas.previousYOffset
       renderCanvas()
+      // save last point
+      state.previousX = state.cursorX
+      state.previousY = state.cursorY
       break
     case "pointerup":
       canvas.previousXOffset = canvas.xOffset

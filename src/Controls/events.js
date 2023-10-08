@@ -180,7 +180,7 @@ function handlePointerMove(e) {
     state.onscreenX = state.cursorWithCanvasOffsetX
     state.onscreenY = state.cursorWithCanvasOffsetY
     renderRasterGUI(state, canvas, swatches)
-    vectorGui.render(state, canvas)
+    // vectorGui.render(state, canvas)
     if (
       state.clicked ||
       ((state.tool.name === "quadCurve" ||
@@ -190,6 +190,7 @@ function handlePointerMove(e) {
     ) {
       //run selected tool step function
       state.tool.fn()
+      vectorGui.render(state, canvas)
       if (state.tool.name !== "grab") {
         if (
           state.onscreenX !== state.previousOnscreenX ||
@@ -258,7 +259,7 @@ function handlePointerUp(e) {
   if (!e.targetTouches) {
     renderRasterGUI(state, canvas, swatches)
     vectorGui.render(state, canvas)
-    renderCursor(state, canvas, swatches)
+    // renderCursor(state, canvas, swatches)
   }
 }
 

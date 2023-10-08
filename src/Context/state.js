@@ -39,8 +39,8 @@ export const state = {
   clicked: false,
   cursorX: null, //absolute cursor coordinates relative to drawing area
   cursorY: null,
-  previousX: null,
-  previousY: null,
+  previousX: 0,
+  previousY: 0,
   cursorWithCanvasOffsetX: null, //absolute cursor coords with offset relative to viewable canvas area
   cursorWithCanvasOffsetY: null,
   onscreenX: null, //coordinates based on viewable canvas area relative to zoom (deprecated? always double cursorWithCanvasOffsetX)
