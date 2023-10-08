@@ -60,7 +60,11 @@ export function activateShortcut(keyCode) {
         canvas.vectorGuiCVS.style.cursor = "none"
       } else if (dom.toolBtn.id === "ellipse") {
         state.vectorProperties.forceCircle = true
-        if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
+        if (
+          vectorGui.selectedPoint.xKey &&
+          state.clickCounter === 0 &&
+          vectorGui.selectedPoint.xKey !== "px1"
+        ) {
           //while holding control point, readjust ellipse without having to move cursor.
           //TODO: update this functionality to have other radii go back to previous radii when releasing shift
           adjustEllipseSteps()

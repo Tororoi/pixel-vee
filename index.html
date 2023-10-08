@@ -251,11 +251,15 @@
             <div
               class="primary swatch btn"
               data-tooltip="Swatch (S) to randomize &#010;&#010;Click to open Color Picker"
-            ></div>
+            >
+              <div class="swatch-color"></div>
+            </div>
             <div
               class="secondary back-swatch btn"
               data-tooltip="Click to open Color Picker"
-            ></div>
+            >
+              <div class="swatch-color"></div>
+            </div>
             <!-- Add weighted randomizer to lean towards certain colors -->
           </div>
           <div
@@ -549,15 +553,26 @@
             <div id="left">
               <div id="picker">
                 <canvas id="color-picker"></canvas>
-                <input
-                  class="btn"
-                  type="range"
-                  id="hueslider"
-                  name="hue"
-                  value="0"
-                  min="0"
-                  max="359"
-                />
+                <div class="slider-container">
+                  <input
+                    class="btn"
+                    type="range"
+                    id="hueslider"
+                    name="hue"
+                    value="0"
+                    min="0"
+                    max="359"
+                  />
+                  <input
+                    class="btn"
+                    type="range"
+                    id="alphaslider"
+                    name="opacity"
+                    value="255"
+                    min="0"
+                    max="255"
+                  />
+                </div>
               </div>
               <div id="buttons">
                 <div class="btn" id="confirm-btn">OK</div>
@@ -566,14 +581,18 @@
             </div>
             <div id="right">
               <div id="colors">
-                <h5>
-                  New
-                  <div id="newcolor"></div>
-                </h5>
-                <h5>
-                  Old
-                  <div id="oldcolor"></div>
-                </h5>
+                <div class="color">
+                  <h5>
+                    New
+                  </h5>
+                  <div class="swatch btn" id="newcolor-btn"><div class="swatch-color" id="newcolor"></div></div>
+                </div>
+                <div class="color">
+                  <h5>
+                    Old
+                  </h5>
+                  <div class="swatch btn" id="oldcolor-btn"><div class="swatch-color" id="oldcolor"></div></div>
+                </div>
               </div>
               <div id="rgbahsl">
                 <div id="rgba-container" class="channel-container">
@@ -613,9 +632,18 @@
                       </span></span
                     >
                   </label>
-                  <!-- <label>A:
-                                  <input type="number" id="a" min="0" max="255">
-                              </label> -->
+                  <label
+                    >A:
+                    <input type="number" id="a" min="0" max="255" />
+                    <span class="sliderbox">
+                      <span id="inc" class="channel-btn">
+                        <p>+</p>
+                      </span>
+                      <span id="dec" class="channel-btn">
+                        <p>-</p>
+                      </span></span
+                    >
+                  </label>
                 </div>
                 <div id="hsl-container" class="channel-container">
                   <label

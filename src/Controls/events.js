@@ -11,6 +11,7 @@ import { renderCursor, renderRasterGUI } from "../GUI/raster.js"
 import { activateShortcut } from "../Tools/shortcuts.js"
 import { renderCanvas, renderVectorsToDOM } from "../Canvas/render.js"
 import { actionZoom } from "../Tools/untrackedActions.js"
+import { adjustEllipseSteps } from "../Tools/index.js"
 
 //TODO: Add Palette that consists of a small canvas with basic paint, sample and fill erase tools.
 //TODO: Add color mixer that consists of a small canvas that can be painted upon and cleared. At any time the user can click "Mix" and the colors on the canvas will be used to generate a mixed color.
@@ -56,7 +57,19 @@ function handleKeyUp(e) {
     e.code === "ShiftRight"
   ) {
     state.tool = tools[dom.toolBtn.id]
+  }
+
+  if (e.code === "ShiftLeft" || e.code === "ShiftRight") {
     state.vectorProperties.forceCircle = false
+    if (
+      (vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey) &&
+      vectorGui.selectedPoint.xKey !== "px1"
+    ) {
+      //while holding control point, readjust ellipse without having to move cursor.
+      //TODO: update this functionality to have other radii go back to previous radii when releasing shift
+      adjustEllipseSteps()
+      vectorGui.render(state, canvas)
+    }
   }
 
   if (dom.toolBtn.id === "grab") {
@@ -120,9 +133,9 @@ function handlePointerDown(e) {
     return
   }
   setCoordinates(e)
-  // if (state.touch) {
-  vectorGui.render(state, canvas) // For tablets, vectors must be rendered before running state.tool.fn in order to check control points collision logic
-  // }
+  if (state.touch) {
+    vectorGui.render(state, canvas) // For tablets, vectors must be rendered before running state.tool.fn in order to check control points collision logic
+  }
   renderCanvas()
   //Reset Cursor for mobile
   state.onscreenX = state.cursorWithCanvasOffsetX
@@ -141,9 +154,15 @@ function handlePointerDown(e) {
   }
   //run selected tool step function
   state.tool.fn()
+  // save last point
+  state.previousX = state.cursorX
+  state.previousY = state.cursorY
   //Re-render GUI
   renderRasterGUI(state, canvas, swatches)
   vectorGui.render(state, canvas)
+  if (state.tool.name === "eyedropper") {
+    renderCursor(state, canvas, swatches)
+  }
 }
 
 function handlePointerMove(e) {
@@ -156,21 +175,51 @@ function handlePointerMove(e) {
   canvas.zoomAtLastDraw = canvas.zoom //* */
   //coords
   setCoordinates(e)
-  //Hover brush
-  state.onscreenX = state.cursorWithCanvasOffsetX
-  state.onscreenY = state.cursorWithCanvasOffsetY
-  renderRasterGUI(state, canvas, swatches)
-  vectorGui.render(state, canvas)
-  if (
-    state.clicked ||
-    ((state.tool.name === "quadCurve" ||
-      state.tool.name === "cubicCurve" ||
-      state.tool.name === "fill") &&
-      state.clickCounter > 0)
-  ) {
-    //run selected tool step function
-    state.tool.fn()
-    if (state.tool.name !== "grab") {
+  let cursorMoved =
+    state.previousX !== state.cursorX || state.previousY !== state.cursorY
+  if (state.tool.options.useSubPixels && !cursorMoved) {
+    cursorMoved =
+      canvas.previousSubPixelX !== canvas.subPixelX ||
+      canvas.previousSubPixelY !== canvas.subPixelY
+  }
+  if (cursorMoved) {
+    //Hover brush
+    state.onscreenX = state.cursorWithCanvasOffsetX
+    state.onscreenY = state.cursorWithCanvasOffsetY
+    renderRasterGUI(state, canvas, swatches)
+    // vectorGui.render(state, canvas)
+    if (
+      state.clicked ||
+      ((state.tool.name === "quadCurve" ||
+        state.tool.name === "cubicCurve" ||
+        state.tool.name === "fill") &&
+        state.clickCounter > 0)
+    ) {
+      //run selected tool step function
+      state.tool.fn()
+      vectorGui.render(state, canvas)
+      if (state.tool.name !== "line") {
+        // save last point
+        state.previousX = state.cursorX
+        state.previousY = state.cursorY
+      }
+      if (state.tool.name === "eyedropper") {
+        renderCursor(state, canvas, swatches)
+      }
+      if (state.tool.name !== "grab") {
+        if (
+          state.onscreenX !== state.previousOnscreenX ||
+          state.onscreenY !== state.previousOnscreenY
+        ) {
+          state.previousOnscreenX = state.onscreenX
+          state.previousOnscreenY = state.onscreenY
+        }
+      }
+    } else {
+      //no active tool
+      vectorGui.render(state, canvas)
+      renderCursor(state, canvas, swatches)
+      //normalize cursor render to pixelgrid
       if (
         state.onscreenX !== state.previousOnscreenX ||
         state.onscreenY !== state.previousOnscreenY
@@ -179,25 +228,17 @@ function handlePointerMove(e) {
         state.previousOnscreenY = state.onscreenY
       }
     }
-  } else {
-    renderCursor(state, canvas, swatches)
-    //normalize cursor render to pixelgrid
-    if (
-      state.onscreenX !== state.previousOnscreenX ||
-      state.onscreenY !== state.previousOnscreenY
-    ) {
-      state.previousOnscreenX = state.onscreenX
-      state.previousOnscreenY = state.onscreenY
-    }
   }
+  canvas.previousSubPixelX = canvas.subPixelX
+  canvas.previousSubPixelY = canvas.subPixelY
 }
 
 function handlePointerUp(e) {
   canvas.pointerEvent = "pointerup"
-  state.clicked = false
-  if (state.clickDisabled) {
+  if (state.clickDisabled || !state.clicked) {
     return
   }
+  state.clicked = false
   setCoordinates(e)
   if (canvas.currentLayer.opacity === 0) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
@@ -211,9 +252,8 @@ function handlePointerUp(e) {
   //run selected tool step function
   state.tool.fn()
   //add to undo stack
-  if (state.points.length) {
-    //TODO: for modification actions, set "to" values on moddedActionIndex before pushing
-    state.undoStack.push(state.points)
+  if (state.action) {
+    state.undoStack.push(state.action)
 
     if (
       state.tool.name === "fill" ||
@@ -221,14 +261,16 @@ function handlePointerUp(e) {
       state.tool.name === "cubicCurve" ||
       state.tool.name === "ellipse"
     ) {
-      if (state.points[0].tool.type === "vector") {
-        canvas.currentVectorIndex = state.undoStack.indexOf(state.points)
-      } else if (state.points[0].tool.type === "modify") {
-        canvas.currentVectorIndex = state.points[0].properties.moddedActionIndex
+      if (state.action.tool.type === "vector") {
+        canvas.currentVectorIndex = state.undoStack.indexOf(state.action)
+      } else if (state.action.tool.type === "modify") {
+        canvas.currentVectorIndex = state.action.properties.moddedActionIndex
       }
       renderVectorsToDOM()
     }
   }
+  state.action = null
+  state.pointsSet = null
   state.points = []
   //Reset redostack
   state.redoStack = []
@@ -236,7 +278,9 @@ function handlePointerUp(e) {
   if (!e.targetTouches) {
     renderRasterGUI(state, canvas, swatches)
     vectorGui.render(state, canvas)
-    renderCursor(state, canvas, swatches)
+    if (state.tool.name === "eyedropper") {
+      renderCursor(state, canvas, swatches)
+    }
   }
 }
 
@@ -248,9 +292,10 @@ function handlePointerOut(e) {
   //   state.clicked = false
   //   state.tool.fn()
   //   //add to undo stack
-  //   if (state.points.length) {
-  //     state.undoStack.push(state.points)
+  //   if (state.action) {
+  //     state.undoStack.push(state.action)
   //   }
+  //   state.action = null
   //   state.points = []
   //   //Reset redostack
   //   state.redoStack = []

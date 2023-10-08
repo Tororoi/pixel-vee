@@ -16,31 +16,49 @@ import { changeActionColor } from "../Tools/actions.js"
  * @param {integer} r
  * @param {integer} g
  * @param {integer} b
+ * @param {integer} a
  * @param {integer} target - enum: ["swatch btn", "back-swatch btn"]
  * dependencies - swatches, picker
  */
-export function setColor(r, g, b, target) {
+export function setColor(r, g, b, a, target) {
+  a = parseInt(a)
   if (target === swatches.primary.swatch) {
-    swatches.primary.color.color = `rgba(${r},${g},${b},255)`
+    swatches.primary.color.color = `rgba(${r},${g},${b},${a / 255})`
     swatches.primary.color.r = r
     swatches.primary.color.g = g
     swatches.primary.color.b = b
-    swatches.primary.swatch.style.background = swatches.primary.color.color
+    swatches.primary.color.a = a
+    document.documentElement.style.setProperty(
+      "--primary-swatch-color",
+      `${r},${g},${b}`
+    )
+    document.documentElement.style.setProperty(
+      "--primary-swatch-alpha",
+      `${a / 255}`
+    )
     picker.update(swatches.primary.color)
   } else if (target === swatches.secondary.swatch) {
-    swatches.secondary.color.color = `rgba(${r},${g},${b},255)`
+    swatches.secondary.color.color = `rgba(${r},${g},${b},${a / 255})`
     swatches.secondary.color.r = r
     swatches.secondary.color.g = g
     swatches.secondary.color.b = b
-    swatches.secondary.swatch.style.background = swatches.secondary.color.color
+    swatches.secondary.color.a = a
+    document.documentElement.style.setProperty(
+      "--secondary-swatch-color",
+      `${r},${g},${b}`
+    )
+    document.documentElement.style.setProperty(
+      "--secondary-swatch-alpha",
+      `${a / 255}`
+    )
   } else {
-    let color = { color: `rgba(${r},${g},${b},1)`, r, g, b, a: 255 }
+    let color = { color: `rgba(${r},${g},${b},${a / 255})`, r, g, b, a }
     target.color = color
     target.style.background = color.color
     if (target.vector) {
       changeActionColor(target.vector.index, color)
-      state.undoStack.push(state.points)
-      state.points = []
+      state.undoStack.push(state.action)
+      state.action = null
       state.redoStack = []
       renderVectorsToDOM()
       renderCanvas(true, true)
@@ -55,7 +73,7 @@ export function setColor(r, g, b, target) {
  */
 export function randomizeColor(target) {
   let color = generateRandomRGB()
-  setColor(color.r, color.g, color.b, target)
+  setColor(color.r, color.g, color.b, 255, target)
 }
 
 export function initializeColorPicker(target) {
@@ -79,9 +97,25 @@ function openColorPicker(e) {
 function switchColors() {
   let temp = { ...swatches.primary.color }
   swatches.primary.color = swatches.secondary.color
-  swatches.primary.swatch.style.background = swatches.primary.color.color
+  swatches.primary.swatch.color = swatches.secondary.color
+  document.documentElement.style.setProperty(
+    "--primary-swatch-color",
+    `${swatches.primary.color.r},${swatches.primary.color.g},${swatches.primary.color.b}`
+  )
+  document.documentElement.style.setProperty(
+    "--primary-swatch-alpha",
+    `${swatches.primary.color.a / 255}`
+  )
   swatches.secondary.color = temp
-  swatches.secondary.swatch.style.background = swatches.secondary.color.color
+  swatches.secondary.swatch.color = temp
+  document.documentElement.style.setProperty(
+    "--secondary-swatch-color",
+    `${temp.r},${temp.g},${temp.b}`
+  )
+  document.documentElement.style.setProperty(
+    "--secondary-swatch-alpha",
+    `${temp.a / 255}`
+  )
 }
 
 /**
@@ -97,15 +131,29 @@ function closePickerWindow() {
  */
 function handleConfirm() {
   //set color to brush
-  picker.oldcolor.style.backgroundColor =
-    "hsl(" +
-    picker.hsl.hue +
-    "," +
-    picker.hsl.saturation +
-    "%," +
-    picker.hsl.lightness +
-    "%)"
-  setColor(picker.rgb.red, picker.rgb.green, picker.rgb.blue, picker.swatch)
+  document.documentElement.style.setProperty(
+    "--old-swatch-color",
+    `${picker.rgb.red},${picker.rgb.green},${picker.rgb.blue}`
+  )
+  document.documentElement.style.setProperty(
+    "--old-swatch-alpha",
+    `${picker.alpha / 255}`
+  )
+  // picker.oldcolor.style.backgroundColor =
+  //   "hsl(" +
+  //   picker.hsl.hue +
+  //   "," +
+  //   picker.hsl.saturation +
+  //   "%," +
+  //   picker.hsl.lightness +
+  //   "%)"
+  setColor(
+    picker.rgb.red,
+    picker.rgb.green,
+    picker.rgb.blue,
+    picker.alpha,
+    picker.swatch
+  )
   //close window
   closePickerWindow()
 }

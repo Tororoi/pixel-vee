@@ -54,12 +54,13 @@ function handleRecenter() {
 }
 
 //Non-tool action.
-function handleClear() {
-  // state.addToTimeline({ tool: tools.clear, layer: canvas.currentLayer })
+function handleClearCanvas() {
   actionClear()
   //FIX: restructure stacked items. Currently each is an array, but each should be an object with more info plus an array
   //TODO: set all actions to hidden
-  state.undoStack.push(state.points)
+  state.undoStack.push(state.action)
+  state.action = null
+  state.pointsSet = null
   state.points = []
   state.redoStack = []
   canvas.currentLayer.ctx.clearRect(
@@ -109,6 +110,12 @@ export function handleTools(e, manualToolName = null) {
         canvas.vectorGuiCVS.style.cursor = "crosshair"
         vectorGui.reset(canvas)
         state.reset()
+        renderVectorsToDOM()
+      } else if (dom.toolBtn.id === "eyedropper") {
+        canvas.vectorGuiCVS.style.cursor = "none"
+        vectorGui.reset(canvas)
+        state.reset()
+        renderVectorsToDOM()
       } else {
         canvas.vectorGuiCVS.style.cursor = "none"
       }
@@ -177,7 +184,7 @@ dom.undoBtn.addEventListener("click", handleUndo)
 dom.redoBtn.addEventListener("click", handleRedo)
 
 dom.recenterBtn.addEventListener("click", handleRecenter)
-dom.clearBtn.addEventListener("click", handleClear)
+dom.clearBtn.addEventListener("click", handleClearCanvas)
 
 dom.zoomContainer.addEventListener("click", handleZoom)
 

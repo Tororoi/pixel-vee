@@ -8,6 +8,12 @@ import { canvas } from "../Context/canvas.js"
 
 //Draw all layers onto offscreen canvas to prepare for sampling or export
 export function consolidateLayers() {
+  canvas.offScreenCTX.clearRect(
+    0,
+    0,
+    canvas.offScreenCVS.width,
+    canvas.offScreenCVS.height
+  )
   canvas.layers.forEach((l) => {
     if (l.type === "raster" && l.opacity > 0) {
       canvas.offScreenCTX.save()
