@@ -557,6 +557,7 @@ export function lineSteps() {
 export function fillSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
+      vectorGui.render(state, canvas)
       if (vectorGui.collisionPresent) {
         adjustFillSteps()
       } else {

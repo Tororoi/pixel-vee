@@ -57,7 +57,6 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       }
     })
     vectorGui.reset(canvas)
-    renderVectorsToDOM()
   } else if (
     latestAction.tool.name === state.tool.name &&
     latestAction.tool.type === "vector"
@@ -87,6 +86,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   //clear all layers in preparation to redraw them.
   //DRY: do all layers and actions need to be rerendered for redo?
   renderCanvas(true, true)
+  renderVectorsToDOM()
   state.reset()
 }
 
