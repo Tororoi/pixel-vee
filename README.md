@@ -255,21 +255,31 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
 ### Key Features to be added
 
 - Palette
-- Alpha channel for colors
 - Selection Tool
+- Move Tool: move selection
+- Dedicated Mobile/ Tablet UI
+- Link Tool: Link vectors end to end to make unified adjustable curves. All cubic curve vectors on selected layer will have control points interactable.
+- Menu dropdown for functionality that is used less frequently. Windows for canvas size for example do not need to be on screen at all times.
 
 ### Stretch Features to be added
 
-- Ability to import a custom background image (_in progress_)
+- Ability to import a custom background image for reference (_in progress_): resize and move image freely
 - Dithered Gradient Tool
-- Dithered brush tool
+- Dithered Brush tool
 - Custom stamp brush
 - Rectangle Tool
-- 9-Grid Mode
+- Mask Tool
+- 9-Grid Mode: Make repeating patterns for selected tile area. Also offer options for brick repeat and half-drop repeat
 - Preview window
+- Toggle magnify pointer area for precise placement of pixels: move magnifier on canvas and then work in magnified window to place pixels. Useful for any tools that use subpixels, and for precise placement of vectors.
 - Editable properties display for vectors
-- Shading Tool
-- Perspective Tool (Add vanishing points off the canvas)
+- Layer Settings: Adjust layer opacity, blend-mode, duplicate layer
+- Choose from set of default color palettes
+- Perspective Tool: Acts as a custom overlay on the canvas with user defined vanishing points and adjustable lines. 1-point, 2-point, 3-point, multipoint, 4-point curvilinear, 5-point curvilinear, isometric
+- Smooth curves mode for brush. When drawing quickly, curves can look choppy and angular. Calculates curvature between points. Bonus: convert entire brush stroke into a series of linked vectors.
+- Spritesheet options: custom grid to subdivide canvas
+- Animation options: preview spritesheet animation, onion skins as sublayers, preview animation of layers with onion skins individually and simultaneously, set framerate for animation layer, export animation
+- Dye Tool: Propogate colors through all animation frames. Adjust color in one frame and color changes in all selected frames.
 
 # Run locally
 1. Run `npm install`
