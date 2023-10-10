@@ -107,7 +107,11 @@ export function handleTools(e, manualToolName = null) {
         dom.toolBtn.id === "fill" ||
         dom.toolBtn.id === "line"
       ) {
-        canvas.vectorGuiCVS.style.cursor = "crosshair"
+        if (dom.modeBtn.id === "erase") {
+          canvas.vectorGuiCVS.style.cursor = "none"
+        } else {
+          canvas.vectorGuiCVS.style.cursor = "crosshair"
+        }
         vectorGui.reset(canvas)
         state.reset()
         renderVectorsToDOM()
@@ -133,6 +137,11 @@ function handleModes(e) {
     dom.modeBtn = e.target.closest(".mode")
     dom.modeBtn.style.background = "rgb(255, 255, 255)"
     state.mode = dom.modeBtn.id
+    if (dom.modeBtn.id === "erase") {
+      canvas.vectorGuiCVS.style.cursor = "none"
+    } else {
+      canvas.vectorGuiCVS.style.cursor = "crosshair"
+    }
   }
 }
 

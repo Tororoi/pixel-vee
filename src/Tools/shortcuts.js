@@ -90,6 +90,7 @@ export function activateShortcut(keyCode) {
       dom.modeBtn = document.querySelector("#erase")
       dom.modeBtn.style.background = "rgb(255, 255, 255)"
       state.mode = "erase"
+      canvas.vectorGuiCVS.style.cursor = "none"
       break
     case "KeyP":
       //reset old button
@@ -99,6 +100,14 @@ export function activateShortcut(keyCode) {
       dom.modeBtn.style.background = "rgb(255, 255, 255)"
       state.mode = "perfect"
       break
+    case "KeyI":
+      //reset old button
+      dom.modeBtn.style.background = "rgb(131, 131, 131)"
+      //set new button
+      dom.modeBtn = document.querySelector("#inject")
+      dom.modeBtn.style.background = "rgb(255, 255, 255)"
+      state.mode = "inject"
+      break
     case "KeyB":
       //reset old button
       dom.toolBtn.style.background = "rgb(131, 131, 131)"
@@ -106,7 +115,11 @@ export function activateShortcut(keyCode) {
       dom.toolBtn = document.querySelector("#brush")
       dom.toolBtn.style.background = "rgb(255, 255, 255)"
       state.tool = tools["brush"]
-      canvas.vectorGuiCVS.style.cursor = "crosshair"
+      if (dom.modeBtn.id === "erase") {
+        canvas.vectorGuiCVS.style.cursor = "none"
+      } else {
+        canvas.vectorGuiCVS.style.cursor = "crosshair"
+      }
       break
     case "KeyR":
       //reset old button
@@ -115,7 +128,11 @@ export function activateShortcut(keyCode) {
       dom.toolBtn = document.querySelector("#replace")
       dom.toolBtn.style.background = "rgb(255, 255, 255)"
       state.tool = tools["replace"]
-      canvas.vectorGuiCVS.style.cursor = "crosshair"
+      if (dom.modeBtn.id === "erase") {
+        canvas.vectorGuiCVS.style.cursor = "none"
+      } else {
+        canvas.vectorGuiCVS.style.cursor = "crosshair"
+      }
       break
     case "KeyL":
       //reset old button

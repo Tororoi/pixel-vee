@@ -158,7 +158,7 @@ export function actionDraw(
       brushSize,
     })
   }
-  const processBrushStamp = (action, pixel) => {
+  brushStamp.forEach((pixel) => {
     const x = Math.ceil(coordX - brushSize / 2) + pixel.x
     const y = Math.ceil(coordY - brushSize / 2) + pixel.y
 
@@ -169,20 +169,18 @@ export function actionDraw(
       }
       seenPointsSet.add(key)
     }
-
-    action(x, y)
-  }
-  switch (currentMode) {
-    case "erase":
-      brushStamp.forEach((p) => {
-        processBrushStamp((x, y) => ctx.clearRect(x, y, 1, 1), p)
-      })
-      break
-    default:
-      brushStamp.forEach((p) => {
-        processBrushStamp((x, y) => ctx.fillRect(x, y, 1, 1), p)
-      })
-  }
+    switch (currentMode) {
+      case "erase":
+        ctx.clearRect(x, y, 1, 1)
+        break
+      case "inject":
+        ctx.clearRect(x, y, 1, 1)
+        ctx.fillRect(x, y, 1, 1)
+        break
+      default:
+        ctx.fillRect(x, y, 1, 1)
+    }
+  })
 }
 
 /**
@@ -310,198 +308,6 @@ export function actionLine(
     currentMode,
     seen
   )
-}
-
-/**
- * User action for process to replace a specific color where the user's brush moves
- */
-export function actionReplace() {
-  /**
-   * Used for replace tool
-   * @param {*} currentLayer
-   * @param {*} matchColor - color to isolate
-   * @param {boolean} removeColor - if true, this function will remove only the matched color instead of removing everything else
-   * @returns imageData
-   */
-  function createMapForSpecificColor(
-    currentLayer,
-    matchColor,
-    removeColor = false
-  ) {
-    const colorLayer = currentLayer.ctx.getImageData(
-      0,
-      0,
-      canvas.offScreenCVS.width,
-      canvas.offScreenCVS.height
-    )
-    //iterate over pixel data and remove non-matching colors
-    for (let i = 0; i < colorLayer.data.length; i += 4) {
-      //sample color and by default, color will be removed if not a match. If removeColor is true, color will be removed if it is a match.
-      //ignore pixels that are already 0 opacity
-      if (colorLayer.data[i + 3] !== 0) {
-        //color layer data alpha channel goes from 0 to 255, not 0 to 1
-        let matchedColor =
-          colorLayer.data[i] === matchColor.r &&
-          colorLayer.data[i + 1] === matchColor.g &&
-          colorLayer.data[i + 2] === matchColor.b &&
-          colorLayer.data[i + 3] === matchColor.a
-        if (removeColor) {
-          //by default, returns a map of the same color,
-          //TODO: this won't work for colors with opacity, so an additional step to draw the secondary color and use the sampled measurements will be required
-          matchedColor = !matchedColor
-        }
-        if (!matchedColor) {
-          colorLayer.data[i] = 0
-          colorLayer.data[i + 1] = 0
-          colorLayer.data[i + 2] = 0
-          colorLayer.data[i + 3] = 0
-        }
-      }
-    }
-
-    return colorLayer
-  }
-  //creates a weird bubble effect if brushSize is larger than 1.
-  //This function is inefficient due to saving thousands of points at larger canvas sizes, but parts may be useful later for implementing some kind of special "growth" feature for the bubble effect.
-  // function savePointsForSpecificColor(
-  //   currentLayer,
-  //   tempLayer,
-  //   bubble = false, //For accurate render, brushSize should be 1. Larger numbers will create bubble effect
-  //   invert = false
-  // ) {
-  //   const colorLayer = currentLayer.ctx.getImageData(
-  //     0,
-  //     0,
-  //     canvas.offScreenCVS.width,
-  //     canvas.offScreenCVS.height
-  //   )
-  //   const matchColor = swatches.secondary.color
-  //   const width = canvas.offScreenCVS.width
-  //   const brushSize = bubble ? state.tool.brushSize : 1
-  //   const brushStamp = drawCircle(brushSize)
-  //   //iterate over pixel data and remove non-matching colors
-  //   for (let i = 0; i < colorLayer.data.length; i += 4) {
-  //     //sample color and remove if not match
-  //     if (colorLayer.data[i + 3] !== 0) {
-  //       let matchedPrimary = !(
-  //         colorLayer.data[i] === matchColor.r &&
-  //         colorLayer.data[i + 1] === matchColor.g &&
-  //         colorLayer.data[i + 2] === matchColor.b &&
-  //         colorLayer.data[i + 3] === matchColor.a
-  //       )
-  //       if (invert) {
-  //         matchedPrimary = !matchedPrimary
-  //       }
-  //       if (matchedPrimary) {
-  //         // calculate x and y
-  //         const x = (i / 4) % width
-  //         const y = Math.floor(i / 4 / width)
-  //         let color = {
-  //           color: `rgba(${colorLayer.data[i]},${colorLayer.data[i + 1]},${
-  //             colorLayer.data[i + 2]
-  //           },${colorLayer.data[i + 3]})`,
-  //           r: colorLayer.data[i],
-  //           g: colorLayer.data[i + 1],
-  //           b: colorLayer.data[i + 2],
-  //           a: colorLayer.data[i + 3],
-  //         }
-  //         if (invert) {
-  //           color = swatches.primary.color
-  //         }
-  //         actionDraw(
-  //           x,
-  //           y,
-  //           color,
-  //           brushStamp,
-  //           brushSize,
-  //           tempLayer.ctx,
-  //           state.mode
-  //         )
-  //         state.addToTimeline({
-  //           tool: tools.brush,
-  //           x,
-  //           y,
-  //           color,
-  //           brushStamp,
-  //           brushSize,
-  //           layer: tempLayer,
-  //         })
-  //       }
-  //     }
-  //   }
-  // }
-  switch (canvas.pointerEvent) {
-    case "pointerdown":
-      //Initial step
-      //create new layer temporarily
-      const layer = createNewRasterLayer("Replacement Layer")
-      //create isolated color map for color replacement
-      state.localColorLayer = createMapForSpecificColor(
-        canvas.currentLayer,
-        swatches.secondary.color
-      )
-      layer.ctx.putImageData(state.localColorLayer, 0, 0)
-      // actionFill(
-      //   state.cursorX,
-      //   state.cursorY,
-      //   swatches.primary.color,
-      //   canvas.currentLayer,
-      //   "erase"
-      // )
-      //store reference to current layer
-      canvas.tempLayer = canvas.currentLayer
-      //layer must be in canvas.layers for draw to show in real time
-      const currentLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
-      //add layer at position just on top of current layer
-      canvas.layers.splice(currentLayerIndex + 1, 0, layer)
-      //set new layer to current layer so it can be drawn onto
-      canvas.currentLayer = layer
-      //Non-transparent pixels on color replacement layer will be drawn over by the new color by setting globalCompositeOperation = "source-atop"
-      canvas.currentLayer.ctx.save()
-      canvas.currentLayer.ctx.globalCompositeOperation = "source-atop"
-      break
-    case "pointerup":
-    case "pointerout":
-      //Final step
-      if (canvas.tempLayer) {
-        canvas.currentLayer.ctx.restore()
-        //save only the drawn pixels to the temporary current canvas
-        const isolatedDrawnColorLayer = createMapForSpecificColor(
-          canvas.currentLayer,
-          swatches.secondary.color,
-          true
-        )
-        canvas.currentLayer.ctx.putImageData(isolatedDrawnColorLayer, 0, 0)
-        //Merge the Replacement Layer onto the actual current layer being stored in canvas.tempLayer
-        canvas.tempLayer.ctx.drawImage(canvas.currentLayer.cvs, 0, 0)
-        //save only the changed pixels to image
-        let image = new Image()
-        image.src = canvas.currentLayer.cvs.toDataURL()
-        // savePointsForSpecificColor(canvas.currentLayer, canvas.tempLayer)
-        //Remove the Replacement Layer from the array of layers
-        const replacementLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
-        canvas.layers.splice(replacementLayerIndex, 1)
-        //Set the current layer back to the correct layer
-        canvas.currentLayer = canvas.tempLayer
-        canvas.tempLayer = null
-        //TODO: One potential optimization is to save the bounding box coordinates
-        //and add them to the properties so when rendering in the timeline it only
-        //draws in the bounding box area instead of the whole canvas area
-        //TODO: ultimately we should save an array of coordinates and iterate the putAction on each coordinate for redraws?
-        state.addToTimeline({
-          tool: state.tool,
-          layer: canvas.currentLayer,
-          properties: {
-            image,
-            width: canvas.currentLayer.cvs.width,
-            height: canvas.currentLayer.cvs.height,
-          },
-        })
-      }
-    default:
-      //No default
-      break
-  }
 }
 
 /**
