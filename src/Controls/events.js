@@ -83,7 +83,11 @@ function handleKeyUp(e) {
     dom.toolBtn.id === "fill" ||
     dom.toolBtn.id === "line"
   ) {
-    canvas.vectorGuiCVS.style.cursor = "crosshair"
+    if (dom.modeBtn.id === "erase") {
+      canvas.vectorGuiCVS.style.cursor = "none"
+    } else {
+      canvas.vectorGuiCVS.style.cursor = "crosshair"
+    }
   } else {
     canvas.vectorGuiCVS.style.cursor = "none"
   }
@@ -163,6 +167,12 @@ function handlePointerDown(e) {
   if (state.tool.name === "eyedropper") {
     renderCursor(state, canvas, swatches)
   }
+  if (
+    (state.tool.name === "brush" || state.tool.name === "replace") &&
+    state.mode === "erase"
+  ) {
+    vectorGui.drawCursorBox(state, canvas, 1)
+  }
 }
 
 function handlePointerMove(e) {
@@ -198,6 +208,12 @@ function handlePointerMove(e) {
       //run selected tool step function
       state.tool.fn()
       vectorGui.render(state, canvas)
+      if (
+        (state.tool.name === "brush" || state.tool.name === "replace") &&
+        state.mode === "erase"
+      ) {
+        vectorGui.drawCursorBox(state, canvas, 1)
+      }
       if (state.tool.name !== "line") {
         // save last point
         state.previousX = state.cursorX
@@ -280,6 +296,12 @@ function handlePointerUp(e) {
     vectorGui.render(state, canvas)
     if (state.tool.name === "eyedropper") {
       renderCursor(state, canvas, swatches)
+    }
+    if (
+      (state.tool.name === "brush" || state.tool.name === "replace") &&
+      state.mode === "erase"
+    ) {
+      vectorGui.drawCursorBox(state, canvas, 1)
     }
   }
 }
