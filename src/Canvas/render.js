@@ -188,16 +188,20 @@ function redrawTimelineActions(index = null) {
         case "replace":
           //IMPORTANT:
           //Any replaced pixels over previous vectors would be fully rasterized.
-          //Even if image only depicts replaced pixels, those that were replaced cannot be moved if they were part of a vector.
-          //maybe a separate tool could exist for replacing vector pixels as a modification of one vector, as if the vector's render acts as a mask.
-          //maybe collision detection could be used somehow? probably expensive.
-          action.layer.ctx.drawImage(
-            action.properties.image,
-            0,
-            0,
-            action.properties.width,
-            action.properties.height
-          )
+          //actionDraw
+          const replaceSeen = new Set(action.properties.maskSet)
+          action.properties.points.forEach((p) => {
+            action.tool.action(
+              p.x,
+              p.y,
+              p.color,
+              p.brushStamp,
+              p.brushSize,
+              action.layer.ctx,
+              action.mode,
+              replaceSeen
+            )
+          })
           break
         default:
         //do nothing

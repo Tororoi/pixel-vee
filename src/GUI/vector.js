@@ -1,4 +1,5 @@
 import { state } from "../Context/state.js"
+import { dom } from "../Context/dom.js"
 
 //==================================================//
 //=== * * * Vector Graphics User Interface * * * ===//
@@ -384,7 +385,11 @@ function drawControlPoints(pointsKeys, canvas, radius, modify = false) {
   if (vectorGui.collisionPresent) {
     canvas.vectorGuiCVS.style.cursor = "move"
   } else {
-    canvas.vectorGuiCVS.style.cursor = "crosshair"
+    if (dom.modeBtn.id === "erase") {
+      canvas.vectorGuiCVS.style.cursor = "none"
+    } else {
+      canvas.vectorGuiCVS.style.cursor = "crosshair"
+    }
   }
 }
 
@@ -467,34 +472,52 @@ function render(state, canvas) {
 }
 
 /**
- * Used to render eyedropper cursor
+ * Used to render eyedropper cursor and eraser
  * @param {*} state
  * @param {*} canvas
+ * @param {*} lineWeight
  */
-function drawCursorBox(state, canvas) {
-  let lineWidth = canvas.zoom <= 8 ? 2 / canvas.zoom : 0.25
+function drawCursorBox(state, canvas, lineWeight) {
+  let lineWidth =
+    canvas.zoom <= 8 ? lineWeight / canvas.zoom : 0.125 * lineWeight
   let brushOffset = Math.floor(state.tool.brushSize / 2)
-  let x0 = state.onscreenX - brushOffset
-  let y0 = state.onscreenY - brushOffset
-  let x1 = x0 + state.tool.brushSize
-  let y1 = y0 + state.tool.brushSize
-  //line offset to stroke offcenter;
-  let ol = lineWidth / 2
+  let ol = lineWidth / 2 // line offset to stroke off-center
+
+  // Create a Set from state.brushStamp
+  const pixelSet = new Set(state.brushStamp.map((p) => `${p.x},${p.y}`))
+
   canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
-  //top
-  canvas.vectorGuiCTX.moveTo(x0, y0 - ol)
-  canvas.vectorGuiCTX.lineTo(x1, y0 - ol)
-  //right
-  canvas.vectorGuiCTX.moveTo(x1 + ol, y0)
-  canvas.vectorGuiCTX.lineTo(x1 + ol, y1)
-  //bottom
-  canvas.vectorGuiCTX.moveTo(x0, y1 + ol)
-  canvas.vectorGuiCTX.lineTo(x1, y1 + ol)
-  //left
-  canvas.vectorGuiCTX.moveTo(x0 - ol, y0)
-  canvas.vectorGuiCTX.lineTo(x0 - ol, y1)
+
+  for (const pixel of state.brushStamp) {
+    const x = state.onscreenX + pixel.x - brushOffset
+    const y = state.onscreenY + pixel.y - brushOffset
+
+    // Check for neighboring pixels using the Set
+    const hasTopNeighbor = pixelSet.has(`${pixel.x},${pixel.y - 1}`)
+    const hasRightNeighbor = pixelSet.has(`${pixel.x + 1},${pixel.y}`)
+    const hasBottomNeighbor = pixelSet.has(`${pixel.x},${pixel.y + 1}`)
+    const hasLeftNeighbor = pixelSet.has(`${pixel.x - 1},${pixel.y}`)
+
+    // Draw lines only for sides that don't have neighboring pixels
+    if (!hasTopNeighbor) {
+      canvas.vectorGuiCTX.moveTo(x, y - ol)
+      canvas.vectorGuiCTX.lineTo(x + 1, y - ol)
+    }
+    if (!hasRightNeighbor) {
+      canvas.vectorGuiCTX.moveTo(x + 1 + ol, y)
+      canvas.vectorGuiCTX.lineTo(x + 1 + ol, y + 1)
+    }
+    if (!hasBottomNeighbor) {
+      canvas.vectorGuiCTX.moveTo(x, y + 1 + ol)
+      canvas.vectorGuiCTX.lineTo(x + 1, y + 1 + ol)
+    }
+    if (!hasLeftNeighbor) {
+      canvas.vectorGuiCTX.moveTo(x - ol, y)
+      canvas.vectorGuiCTX.lineTo(x - ol, y + 1)
+    }
+  }
 
   canvas.vectorGuiCTX.stroke()
 }

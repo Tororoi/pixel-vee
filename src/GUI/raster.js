@@ -22,34 +22,26 @@ export function renderCursor(state, canvas, swatches) {
       break
     case "eyedropper":
       //empty square
-      vectorGui.drawCursorBox(state, canvas)
+      vectorGui.drawCursorBox(state, canvas, 2)
       break
     default:
       //TODO: erase mode is somewhat buggy with rendering. Find way to have it render without calling draw() more than needed.
-      if (state.mode === "erase") {
-        renderCanvas()
-        actionDraw(
-          state.cursorWithCanvasOffsetX,
-          state.cursorWithCanvasOffsetY,
-          swatches.primary.color,
-          state.brushStamp,
-          state.tool.brushSize,
-          canvas.onScreenCTX, //must be onScreen to work with eraser
-          state.mode
-        )
-        // vectorGui.drawCursorBox(state, canvas)
-      } else {
+      if (!vectorGui.collisionPresent) {
         drawCurrentPixel(state, canvas, swatches)
+        if (state.mode === "erase") {
+          vectorGui.drawCursorBox(state, canvas, 1)
+        }
+      } else {
+        renderCanvas()
       }
-    // vectorGui.drawCursorBox(state, canvas, 0.5)
   }
 }
 
 export function drawCurrentPixel(state, canvas, swatches) {
   //draw onscreen current pixel
-  renderRasterGUI(state, canvas, swatches)
-  canvas.rasterGuiCTX.fillStyle = swatches.primary.color.color
-  const processBrushStamp = (action, pixel) => {
+  renderCanvas()
+  canvas.onScreenCTX.fillStyle = swatches.primary.color.color
+  state.brushStamp.forEach((pixel) => {
     const x = Math.ceil(state.cursorX - state.tool.brushSize / 2) + pixel.x
     const y = Math.ceil(state.cursorY - state.tool.brushSize / 2) + pixel.y
     const drawX =
@@ -65,21 +57,16 @@ export function drawCurrentPixel(state, canvas, swatches) {
         return // skip this point
       }
     }
-
-    action(drawX, drawY)
-  }
-  switch (state.mode) {
-    case "erase":
-      state.brushStamp.forEach((p) => {
-        processBrushStamp(
-          (x, y) => canvas.rasterGuiCTX.clearRect(x, y, 1, 1),
-          p
-        )
-      })
-      break
-    default:
-      state.brushStamp.forEach((p) => {
-        processBrushStamp((x, y) => canvas.rasterGuiCTX.fillRect(x, y, 1, 1), p)
-      })
-  }
+    switch (state.mode) {
+      case "erase":
+        canvas.onScreenCTX.clearRect(drawX, drawY, 1, 1)
+        break
+      case "inject":
+        canvas.onScreenCTX.clearRect(drawX, drawY, 1, 1)
+        canvas.onScreenCTX.fillRect(drawX, drawY, 1, 1)
+        break
+      default:
+        canvas.onScreenCTX.fillRect(drawX, drawY, 1, 1)
+    }
+  })
 }

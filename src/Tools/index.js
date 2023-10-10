@@ -7,7 +7,6 @@ import {
   actionDraw,
   actionPut,
   actionLine,
-  actionReplace,
   actionFill,
   actionQuadraticCurve,
   actionCubicCurve,
@@ -263,7 +262,9 @@ export function putSteps(ignoreInvisible = false) {
 export function drawSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      state.pointsSet = new Set()
+      if (state.tool.name !== "replace") {
+        state.pointsSet = new Set()
+      }
       //set colorlayer, then for each brushpoint, alter colorlayer and add each to timeline
       actionDraw(
         state.cursorX,
@@ -424,7 +425,53 @@ export function drawSteps() {
 export function replaceSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      actionReplace()
+      state.pointsSet = new Set()
+      //create mask set
+      state.colorLayerGlobal = canvas.currentLayer.ctx.getImageData(
+        0,
+        0,
+        canvas.currentLayer.cvs.width,
+        canvas.currentLayer.cvs.height
+      )
+      let matchColor = swatches.secondary.color
+      if (matchColor.a < 255) {
+        //draw then sample color to math premultiplied alpha version of color
+        const tempCanvas = document.createElement("canvas")
+        tempCanvas.width = 1
+        tempCanvas.height = 1
+        const tempCtx = tempCanvas.getContext("2d")
+
+        tempCtx.fillStyle = `rgba(${matchColor.r}, ${matchColor.g}, ${
+          matchColor.b
+        }, ${matchColor.a / 255})`
+        tempCtx.fillRect(0, 0, 1, 1)
+
+        const sampledColor = tempCtx.getImageData(0, 0, 1, 1).data
+        matchColor = {
+          color: `rgba(${sampledColor[0]}, ${sampledColor[1]}, ${
+            sampledColor[2]
+          }, ${sampledColor[3] / 255})`,
+          r: sampledColor[0],
+          g: sampledColor[1],
+          b: sampledColor[2],
+          a: sampledColor[3],
+        }
+      }
+      for (let x = 0; x < canvas.currentLayer.cvs.width; x++) {
+        for (let y = 0; y < canvas.currentLayer.cvs.height; y++) {
+          let color = getColor(x, y, state.colorLayerGlobal)
+          if (
+            color.r !== matchColor.r ||
+            color.g !== matchColor.g ||
+            color.b !== matchColor.b ||
+            color.a !== matchColor.a
+          ) {
+            const key = `${x},${y}`
+            state.pointsSet.add(key)
+          }
+        }
+      }
+      state.maskSet = new Set(state.pointsSet)
       drawSteps()
       break
     case "pointermove":
@@ -432,10 +479,15 @@ export function replaceSteps() {
       break
     case "pointerup":
       drawSteps()
-      actionReplace()
+      state.addToTimeline({
+        tool: state.tool,
+        layer: canvas.currentLayer,
+        properties: { points: state.points, maskSet: state.maskSet },
+      })
+      state.maskSet = null
       break
     case "pointerout":
-      actionReplace()
+      //
       break
     default:
     //do nothing
@@ -1603,7 +1655,7 @@ export const tools = {
   replace: {
     name: "replace",
     fn: replaceSteps,
-    action: null,
+    action: actionDraw,
     brushSize: 1,
     disabled: false,
     options: { perfect: false, erase: false, inject: false }, //erase and inject not available right now. Inject will be default mode
