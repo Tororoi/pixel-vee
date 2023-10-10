@@ -257,7 +257,7 @@ export function putSteps(ignoreInvisible = false) {
 }
 
 /**
- * Supported modes: "draw, erase, perfect",
+ * Supported modes: "draw, erase, perfect, inject",
  */
 export function drawSteps() {
   switch (canvas.pointerEvent) {
@@ -417,8 +417,7 @@ export function drawSteps() {
 }
 
 /**
- * Supported modes: "draw, perfect"
- * TODO: support "erase"
+ * Supported modes: "draw, erase, perfect, inject"
  * creates a copy of the canvas with just the secondary color parts. This is used as a mask so the user can draw normally.
  * When the user finishes drawing, the changed pixels are saved as points and will be rerendered in the timeline as single pixel brush points
  */
@@ -521,7 +520,7 @@ export function selectSteps() {
 }
 
 /**
- * Supported modes: "draw, erase",
+ * Supported modes: "draw, erase, inject",
  */
 export function lineSteps() {
   switch (canvas.pointerEvent) {
@@ -604,7 +603,7 @@ export function lineSteps() {
 
 /**
  * Fill an area with the specified color
- * Supported modes: "draw, erase",
+ * Supported modes: "draw, erase"
  */
 export function fillSteps() {
   switch (canvas.pointerEvent) {
