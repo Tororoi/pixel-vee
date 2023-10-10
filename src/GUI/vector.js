@@ -61,12 +61,12 @@ function renderGrid(canvas) {
   canvas.vectorGuiCTX.beginPath()
   //limit render to viewable area
   canvas.vectorGuiCTX.moveTo(canvas.xOffset, canvas.yOffset)
-  for (let i = xMin; i < xMax; i++) {
+  for (let i = xMin; i <= xMax; i++) {
     //draw vertical grid lines
     canvas.vectorGuiCTX.moveTo(canvas.xOffset + i, canvas.yOffset + yMin)
     canvas.vectorGuiCTX.lineTo(canvas.xOffset + i, canvas.yOffset + yMax)
   }
-  for (let j = yMin; j < yMax; j++) {
+  for (let j = yMin; j <= yMax; j++) {
     //draw horizontal grid lines
     canvas.vectorGuiCTX.moveTo(canvas.xOffset + xMin, canvas.yOffset + j)
     canvas.vectorGuiCTX.lineTo(canvas.xOffset + xMax, canvas.yOffset + j)
