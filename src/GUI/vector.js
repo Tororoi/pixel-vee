@@ -524,7 +524,9 @@ function drawCursorBox(state, canvas, lineWeight) {
 }
 
 //TODO: currently only good for solid shapes. Must also draw outline for holes in shape. Need hole searching algorithm, then run tracing on each hole
-function drawSelectOutline(state, canvas) {
+//pass set to function instead of recalculating it every time
+//pass dashOffset for animating marching ants
+function drawSelectOutline(state, canvas, lineDashOffset) {
   let lineWidth = canvas.zoom <= 8 ? 2 / canvas.zoom : 0.25
   let brushOffset = Math.floor(state.tool.brushSize / 2)
 
@@ -555,9 +557,12 @@ function drawSelectOutline(state, canvas) {
   canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
-  canvas.vectorGuiCTX.setLineDash([0.5, 0.5])
+  canvas.vectorGuiCTX.setLineDash([1, 1])
+  canvas.vectorGuiCTX.lineDashOffset = lineDashOffset
 
   // Define a clipping region that's the entire canvas so the inside of the shape will be cut when clipped
+  //Depending on whether selection is inversed, draw or don't draw this rect.
+  //Drawing it will put the selection line on the outside of the shape. Not drawing it puts the line on the inside of the shape.
   canvas.vectorGuiCTX.rect(
     -1,
     -1,

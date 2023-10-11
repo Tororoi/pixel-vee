@@ -496,7 +496,12 @@ export function replaceSteps() {
 /**
  * TODO: Work in progress
  * GOAL: create a dynamic selectable area, allowing the user to restrict the areas of the canvas that accept changes
- * Should use a mask layer that only draws black for selected area
+ * Should use a mask set that keeps track of selected or unselected pixels
+ * use vectorGui.drawSelectOutline for visual rendering of masked pixels
+ * Select tools: rectangle, free form, magic wand (auto select color)
+ * Hold shift to add to selection with magic wand
+ * Hold option to minus from selection with magic wand/ free form
+ * Command + I to invert selection
  */
 export function selectSteps() {
   switch (canvas.pointerEvent) {
