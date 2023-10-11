@@ -471,12 +471,12 @@ function render(state, canvas) {
   }
 }
 
-/**
- * Used to render eyedropper cursor and eraser
- * @param {*} state
- * @param {*} canvas
- * @param {*} lineWeight
- */
+// /**
+//  * Used to render eyedropper cursor and eraser
+//  * @param {*} state
+//  * @param {*} canvas
+//  * @param {*} lineWeight
+//  */
 function drawCursorBox(state, canvas, lineWeight) {
   let lineWidth =
     canvas.zoom <= 8 ? lineWeight / canvas.zoom : 0.125 * lineWeight
@@ -520,4 +520,80 @@ function drawCursorBox(state, canvas, lineWeight) {
   }
 
   canvas.vectorGuiCTX.stroke()
+}
+
+function drawSelectOutline(state, canvas) {
+  let lineWidth = canvas.zoom <= 8 ? 2 / canvas.zoom : 0.25
+  let brushOffset = Math.floor(state.tool.brushSize / 2)
+
+  const pixelSet = new Set()
+  for (const pixel of state.brushStamp) {
+    pixelSet.add(`${pixel.x},${pixel.y}`)
+    pixelSet.add(`${pixel.x + 1},${pixel.y}`)
+    pixelSet.add(`${pixel.x},${pixel.y + 1}`)
+    pixelSet.add(`${pixel.x + 1},${pixel.y + 1}`)
+  }
+
+  let initialPoint = state.brushStamp.reduce((acc, cur) => {
+    return cur.y < acc.y || (cur.y === acc.y && cur.x < acc.x) ? cur : acc
+  })
+
+  const directions = [
+    [0, -1], // Up
+    [1, 0], // Right
+    [0, 1], // Down
+    [-1, 0], // Left
+  ]
+
+  let currentPoint = initialPoint
+  let previousDirection = 0
+
+  // Save the context state before defining a clipping region
+  canvas.vectorGuiCTX.save()
+  canvas.vectorGuiCTX.beginPath()
+  canvas.vectorGuiCTX.lineWidth = lineWidth
+  canvas.vectorGuiCTX.strokeStyle = "white"
+  canvas.vectorGuiCTX.setLineDash([0.5, 0.5])
+
+  // Define a clipping region that's the entire canvas so the inside of the shape will be cut when clipped
+  canvas.vectorGuiCTX.rect(
+    -1,
+    -1,
+    canvas.vectorGuiCVS.width + 1,
+    canvas.vectorGuiCVS.height + 1
+  )
+
+  // Set the starting point
+  canvas.vectorGuiCTX.moveTo(
+    state.onscreenX + initialPoint.x - brushOffset,
+    state.onscreenY + initialPoint.y - brushOffset
+  )
+
+  do {
+    for (let i = 0; i < 4; i++) {
+      const newDirection = (previousDirection + i) % 4
+      const [dx, dy] = directions[newDirection]
+
+      if (pixelSet.has(`${currentPoint.x + dx},${currentPoint.y + dy}`)) {
+        const x = state.onscreenX + currentPoint.x + dx - brushOffset
+        const y = state.onscreenY + currentPoint.y + dy - brushOffset
+
+        canvas.vectorGuiCTX.lineTo(x, y)
+        currentPoint = { x: currentPoint.x + dx, y: currentPoint.y + dy }
+        previousDirection = (newDirection + 3) % 4
+        break
+      }
+    }
+  } while (
+    currentPoint.x !== initialPoint.x ||
+    currentPoint.y !== initialPoint.y
+  )
+
+  canvas.vectorGuiCTX.clip("evenodd")
+
+  // Stroke the path. Only the part outside of the shape will be visible.
+  canvas.vectorGuiCTX.stroke()
+
+  // Restore the context state to remove the clipping region
+  canvas.vectorGuiCTX.restore()
 }

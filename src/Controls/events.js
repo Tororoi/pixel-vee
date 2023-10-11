@@ -214,11 +214,6 @@ function handlePointerMove(e) {
       ) {
         vectorGui.drawCursorBox(state, canvas, 1)
       }
-      if (state.tool.name !== "line") {
-        // save last point
-        state.previousX = state.cursorX
-        state.previousY = state.cursorY
-      }
       if (state.tool.name === "eyedropper") {
         renderCursor(state, canvas, swatches)
       }
@@ -244,6 +239,11 @@ function handlePointerMove(e) {
         state.previousOnscreenY = state.onscreenY
       }
     }
+  }
+  if (state.tool.name !== "line") {
+    // save last point
+    state.previousX = state.cursorX
+    state.previousY = state.cursorY
   }
   canvas.previousSubPixelX = canvas.subPixelX
   canvas.previousSubPixelY = canvas.subPixelY
