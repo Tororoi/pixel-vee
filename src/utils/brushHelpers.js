@@ -71,6 +71,11 @@ export function drawCircle(brushSize, updateBrush = false) {
   function eightfoldSym(xc, yc, x, y) {
     // Helper function to add a pixel to the list
     function addPixel(px, py) {
+      //put hole
+      // if (px === 8 && py === 8) {
+      //   return
+      // }
+      //
       const key = `${px},${py}`
       if (seen.has(key)) {
         return
