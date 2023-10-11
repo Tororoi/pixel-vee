@@ -38,6 +38,10 @@ export function renderCursor(state, canvas, swatches) {
   }
 }
 
+//TODO: Need to render on a preview canvas with up to 3 layers.
+//Bottom is any layers below the current layer.
+//Middle layer is the current layer plus the current pixel.
+//Top layer is any layers that are above the current layer. Drawn on top after current pixel rendered. Part of middle layer canvas.
 export function drawCurrentPixel(state, canvas, swatches) {
   //draw onscreen current pixel
   renderCanvas()

@@ -39,6 +39,43 @@ function drawLayers(ctx) {
   })
 }
 
+function drawPreviewLayers(ctx, renderPreview) {
+  canvas.layers.forEach((l) => {
+    if (!l.removed) {
+      if (l.type === "reference") {
+        ctx.save()
+        ctx.globalAlpha = l.opacity
+        //l.x, l.y need to be normalized to the pixel grid
+        ctx.drawImage(
+          l.img,
+          canvas.xOffset +
+            (l.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+          canvas.yOffset +
+            (l.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+          l.img.width * l.scale,
+          l.img.height * l.scale
+        )
+        ctx.restore()
+      } else {
+        ctx.save()
+        ctx.globalAlpha = l.opacity
+        //l.x, l.y need to be normalized to the pixel grid
+        ctx.drawImage(
+          l.cvs,
+          canvas.xOffset +
+            (l.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+          canvas.yOffset +
+            (l.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+          canvas.offScreenCVS.width,
+          canvas.offScreenCVS.height
+        )
+        ctx.restore()
+      }
+      //if l === canvas.currentLayer, renderPreview
+    }
+  })
+}
+
 /**
  *
  * @param {*} index - optional parameter to limit render up to a specific action
