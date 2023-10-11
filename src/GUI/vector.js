@@ -11,6 +11,7 @@ export const vectorGui = {
   selectedPoint: { xKey: null, yKey: null },
   checkPointCollision,
   drawCursorBox,
+  drawSelectOutline,
   render,
   reset,
 }
@@ -483,7 +484,7 @@ function drawCursorBox(state, canvas, lineWeight) {
   let brushOffset = Math.floor(state.tool.brushSize / 2)
   let ol = lineWidth / 2 // line offset to stroke off-center
 
-  // Create a Set from state.brushStamp
+  // Create a Set from state.brushStamp //TODO: make set when creating brush stamp so it does not need to be defined here.
   const pixelSet = new Set(state.brushStamp.map((p) => `${p.x},${p.y}`))
 
   canvas.vectorGuiCTX.beginPath()
@@ -522,6 +523,7 @@ function drawCursorBox(state, canvas, lineWeight) {
   canvas.vectorGuiCTX.stroke()
 }
 
+//TODO: currently only good for solid shapes. Must also draw outline for holes in shape.
 function drawSelectOutline(state, canvas) {
   let lineWidth = canvas.zoom <= 8 ? 2 / canvas.zoom : 0.25
   let brushOffset = Math.floor(state.tool.brushSize / 2)
@@ -597,3 +599,88 @@ function drawSelectOutline(state, canvas) {
   // Restore the context state to remove the clipping region
   canvas.vectorGuiCTX.restore()
 }
+
+// function drawSelectOutline(state, canvas) {
+//   let lineWidth = canvas.zoom <= 8 ? 2 / canvas.zoom : 0.25
+//   let brushOffset = Math.floor(state.tool.brushSize / 2)
+
+//   const pixelSet = new Set()
+//   const visited = new Set()
+
+//   for (const pixel of state.brushStamp) {
+//     const coords = [
+//       `${pixel.x},${pixel.y}`,
+//       `${pixel.x + 1},${pixel.y}`,
+//       `${pixel.x},${pixel.y + 1}`,
+//       `${pixel.x + 1},${pixel.y + 1}`,
+//     ]
+//     coords.forEach((c) => pixelSet.add(c))
+//   }
+
+//   const directions = [
+//     [0, -1],
+//     [1, 0],
+//     [0, 1],
+//     [-1, 0],
+//   ]
+
+//   canvas.vectorGuiCTX.save()
+//   canvas.vectorGuiCTX.beginPath()
+//   canvas.vectorGuiCTX.lineWidth = lineWidth
+//   canvas.vectorGuiCTX.strokeStyle = "white"
+//   canvas.vectorGuiCTX.setLineDash([0.5, 0.5])
+
+//   canvas.vectorGuiCTX.rect(
+//     -1,
+//     -1,
+//     canvas.vectorGuiCVS.width + 1,
+//     canvas.vectorGuiCVS.height + 1
+//   )
+
+//   function traceBoundary(initialPoint) {
+//     let currentPoint = initialPoint
+//     let previousDirection = 0
+
+//     canvas.vectorGuiCTX.moveTo(
+//       state.onscreenX + initialPoint.x - brushOffset,
+//       state.onscreenY + initialPoint.y - brushOffset
+//     )
+
+//     do {
+//       for (let i = 0; i < 4; i++) {
+//         const newDirection = (previousDirection + i) % 4
+//         const [dx, dy] = directions[newDirection]
+
+//         const newCoord = `${currentPoint.x + dx},${currentPoint.y + dy}`
+
+//         if (pixelSet.has(newCoord) && !visited.has(newCoord)) {
+//           const x = state.onscreenX + currentPoint.x + dx - brushOffset
+//           const y = state.onscreenY + currentPoint.y + dy - brushOffset
+
+//           canvas.vectorGuiCTX.lineTo(x, y)
+//           currentPoint = { x: currentPoint.x + dx, y: currentPoint.y + dy }
+//           previousDirection = (newDirection + 3) % 4
+
+//           visited.add(newCoord)
+//           break
+//         }
+//       }
+//     } while (
+//       currentPoint.x !== initialPoint.x ||
+//       currentPoint.y !== initialPoint.y
+//     )
+//   }
+
+//   for (const pixel of pixelSet) {
+//     if (!visited.has(pixel)) {
+//       traceBoundary({
+//         x: parseInt(pixel.split(",")[0], 10),
+//         y: parseInt(pixel.split(",")[1], 10),
+//       })
+//     }
+//   }
+
+//   canvas.vectorGuiCTX.clip("evenodd")
+//   canvas.vectorGuiCTX.stroke()
+//   canvas.vectorGuiCTX.restore()
+// }

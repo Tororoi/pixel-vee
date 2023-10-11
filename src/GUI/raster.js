@@ -29,7 +29,8 @@ export function renderCursor(state, canvas, swatches) {
       if (!vectorGui.collisionPresent) {
         drawCurrentPixel(state, canvas, swatches)
         if (state.mode === "erase") {
-          vectorGui.drawCursorBox(state, canvas, 1)
+          // vectorGui.drawCursorBox(state, canvas, 1)
+          vectorGui.drawSelectOutline(state, canvas)
         }
       } else {
         renderCanvas()
