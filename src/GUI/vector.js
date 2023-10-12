@@ -492,8 +492,8 @@ function drawCursorBox(state, canvas, lineWeight) {
   canvas.vectorGuiCTX.strokeStyle = "white"
 
   for (const pixel of state.brushStamp) {
-    const x = state.onscreenX + pixel.x - brushOffset
-    const y = state.onscreenY + pixel.y - brushOffset
+    const x = state.cursorX + canvas.xOffset + pixel.x - brushOffset
+    const y = state.cursorY + canvas.yOffset + pixel.y - brushOffset
 
     // Check for neighboring pixels using the Set
     const hasTopNeighbor = pixelSet.has(`${pixel.x},${pixel.y - 1}`)
@@ -572,8 +572,8 @@ function drawSelectOutline(state, canvas, lineDashOffset) {
 
   // Set the starting point
   canvas.vectorGuiCTX.moveTo(
-    state.onscreenX + initialPoint.x - brushOffset,
-    state.onscreenY + initialPoint.y - brushOffset
+    state.cursorX + canvas.xOffset + initialPoint.x - brushOffset,
+    state.cursorY + canvas.yOffset + initialPoint.y - brushOffset
   )
 
   do {
@@ -582,8 +582,10 @@ function drawSelectOutline(state, canvas, lineDashOffset) {
       const [dx, dy] = directions[newDirection]
 
       if (pixelSet.has(`${currentPoint.x + dx},${currentPoint.y + dy}`)) {
-        const x = state.onscreenX + currentPoint.x + dx - brushOffset
-        const y = state.onscreenY + currentPoint.y + dy - brushOffset
+        const x =
+          state.cursorX + canvas.xOffset + currentPoint.x + dx - brushOffset
+        const y =
+          state.cursorY + canvas.yOffset + currentPoint.y + dy - brushOffset
 
         canvas.vectorGuiCTX.lineTo(x, y)
         currentPoint = { x: currentPoint.x + dx, y: currentPoint.y + dy }

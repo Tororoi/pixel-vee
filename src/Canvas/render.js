@@ -1,9 +1,10 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { swatches } from "../Context/swatch.js"
 import { getAngle } from "../utils/trig.js"
 
-function drawLayers(ctx) {
+function drawLayers(ctx, renderPreview) {
   canvas.layers.forEach((l) => {
     if (!l.removed) {
       if (l.type === "reference") {
@@ -23,9 +24,22 @@ function drawLayers(ctx) {
       } else {
         ctx.save()
         ctx.globalAlpha = l.opacity
+        let drawCVS = l.cvs
+        if (l === canvas.currentLayer && renderPreview) {
+          //render preview of action
+          canvas.previewCTX.clearRect(
+            0,
+            0,
+            canvas.previewCVS.width,
+            canvas.previewCVS.height
+          )
+          canvas.previewCTX.drawImage(l.cvs, 0, 0, l.cvs.width, l.cvs.height)
+          renderPreview(canvas.previewCTX) //Pass function through to here so it can be actionLine or other actions with multiple points
+          drawCVS = canvas.previewCVS
+        }
         //l.x, l.y need to be normalized to the pixel grid
         ctx.drawImage(
-          l.cvs,
+          drawCVS,
           canvas.xOffset +
             (l.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
           canvas.yOffset +
@@ -35,43 +49,6 @@ function drawLayers(ctx) {
         )
         ctx.restore()
       }
-    }
-  })
-}
-
-function drawPreviewLayers(ctx, renderPreview) {
-  canvas.layers.forEach((l) => {
-    if (!l.removed) {
-      if (l.type === "reference") {
-        ctx.save()
-        ctx.globalAlpha = l.opacity
-        //l.x, l.y need to be normalized to the pixel grid
-        ctx.drawImage(
-          l.img,
-          canvas.xOffset +
-            (l.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
-          canvas.yOffset +
-            (l.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
-          l.img.width * l.scale,
-          l.img.height * l.scale
-        )
-        ctx.restore()
-      } else {
-        ctx.save()
-        ctx.globalAlpha = l.opacity
-        //l.x, l.y need to be normalized to the pixel grid
-        ctx.drawImage(
-          l.cvs,
-          canvas.xOffset +
-            (l.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
-          canvas.yOffset +
-            (l.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
-          canvas.offScreenCVS.width,
-          canvas.offScreenCVS.height
-        )
-        ctx.restore()
-      }
-      //if l === canvas.currentLayer, renderPreview
     }
   })
 }
@@ -259,7 +236,7 @@ function redrawTimelineActions(index = null) {
 
 //FIX: Improve performance by keeping track of "redraw regions" instead of redrawing the whole thing.
 //Draw Canvas
-function drawCanvasLayers() {
+function drawCanvasLayers(renderPreview) {
   //clear canvas
   canvas.onScreenCTX.clearRect(
     0,
@@ -285,7 +262,7 @@ function drawCanvasLayers() {
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
-  drawLayers(canvas.onScreenCTX)
+  drawLayers(canvas.onScreenCTX, renderPreview)
   //draw border
   canvas.onScreenCTX.beginPath()
   canvas.onScreenCTX.rect(
@@ -306,6 +283,7 @@ function drawCanvasLayers() {
  * @param {*} index - optional parameter to limit render up to a specific action
  */
 export function renderCanvas(
+  renderPreview = null,
   clearCanvas = false,
   redrawTimeline = false,
   index = null
@@ -328,7 +306,7 @@ export function renderCanvas(
     redrawTimelineActions(index)
   }
   //draw onto onscreen canvas
-  drawCanvasLayers()
+  drawCanvasLayers(renderPreview)
 }
 
 export function renderLayersToDOM() {

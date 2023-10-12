@@ -36,8 +36,12 @@ const setCoordinates = (e) => {
   )
   state.cursorWithCanvasOffsetX = Math.floor(x / canvas.zoom)
   state.cursorWithCanvasOffsetY = Math.floor(y / canvas.zoom)
-  state.cursorX = Math.round(state.cursorWithCanvasOffsetX - canvas.xOffset)
-  state.cursorY = Math.round(state.cursorWithCanvasOffsetY - canvas.yOffset)
+  state.cursorX = Math.round(
+    state.cursorWithCanvasOffsetX - canvas.previousXOffset
+  )
+  state.cursorY = Math.round(
+    state.cursorWithCanvasOffsetY - canvas.previousYOffset
+  )
 }
 
 function handleKeyDown(e) {
@@ -60,6 +64,7 @@ function handleKeyUp(e) {
   }
 
   if (e.code === "ShiftLeft" || e.code === "ShiftRight") {
+    tools.brush.options.line = false
     state.vectorProperties.forceCircle = false
     if (
       (vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey) &&
@@ -141,11 +146,6 @@ function handlePointerDown(e) {
     vectorGui.render(state, canvas) // For tablets, vectors must be rendered before running state.tool.fn in order to check control points collision logic
   }
   renderCanvas()
-  //Reset Cursor for mobile
-  state.onscreenX = state.cursorWithCanvasOffsetX
-  state.onscreenY = state.cursorWithCanvasOffsetY
-  state.previousOnscreenX = state.onscreenX
-  state.previousOnscreenY = state.onscreenY
   //if drawing on hidden layer, flash hide btn
   if (canvas.currentLayer.opacity === 0) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
@@ -194,8 +194,6 @@ function handlePointerMove(e) {
   }
   if (cursorMoved) {
     //Hover brush
-    state.onscreenX = state.cursorWithCanvasOffsetX
-    state.onscreenY = state.cursorWithCanvasOffsetY
     renderRasterGUI(state, canvas, swatches)
     // vectorGui.render(state, canvas)
     if (
@@ -217,30 +215,13 @@ function handlePointerMove(e) {
       if (state.tool.name === "eyedropper") {
         renderCursor(state, canvas, swatches)
       }
-      if (state.tool.name !== "grab") {
-        if (
-          state.onscreenX !== state.previousOnscreenX ||
-          state.onscreenY !== state.previousOnscreenY
-        ) {
-          state.previousOnscreenX = state.onscreenX
-          state.previousOnscreenY = state.onscreenY
-        }
-      }
     } else {
       //no active tool
       vectorGui.render(state, canvas)
       renderCursor(state, canvas, swatches)
-      //normalize cursor render to pixelgrid
-      if (
-        state.onscreenX !== state.previousOnscreenX ||
-        state.onscreenY !== state.previousOnscreenY
-      ) {
-        state.previousOnscreenX = state.onscreenX
-        state.previousOnscreenY = state.onscreenY
-      }
     }
   }
-  if (state.tool.name !== "line") {
+  if (!state.tool.options.line) {
     // save last point
     state.previousX = state.cursorX
     state.previousY = state.cursorY

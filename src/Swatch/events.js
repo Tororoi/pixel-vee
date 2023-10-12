@@ -61,7 +61,7 @@ export function setColor(r, g, b, a, target) {
       state.action = null
       state.redoStack = []
       renderVectorsToDOM()
-      renderCanvas(true, true)
+      renderCanvas(null, true, true)
     }
   }
 }

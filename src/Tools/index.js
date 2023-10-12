@@ -14,11 +14,7 @@ import {
 } from "./actions.js"
 import { getAngle, getTriangle } from "../utils/trig.js"
 import { vectorGui } from "../GUI/vector.js"
-import {
-  renderCursor,
-  drawCurrentPixel,
-  renderRasterGUI,
-} from "../GUI/raster.js"
+import { renderCursor, renderRasterGUI } from "../GUI/raster.js"
 import {
   updateEllipseVertex,
   findHalf,
@@ -91,7 +87,20 @@ export function putSteps(ignoreInvisible = false) {
         drawSteps()
       } else {
         if (state.mode === "perfect") {
-          drawCurrentPixel(state, canvas, swatches)
+          renderCanvas((ctx) => {
+            actionDraw(
+              state.cursorX,
+              state.cursorY,
+              swatches.primary.color,
+              state.brushStamp,
+              state.tool.brushSize,
+              ctx,
+              state.mode,
+              state.pointsSet,
+              null,
+              true //excludeFromSet
+            )
+          })
         }
         if (
           state.previousX !== state.cursorX ||
@@ -154,8 +163,20 @@ export function putSteps(ignoreInvisible = false) {
           } else {
             //FIX: perfect will be option, not mode
             if (state.mode === "perfect") {
-              renderCanvas()
-              drawCurrentPixel(state, canvas, swatches)
+              renderCanvas((ctx) => {
+                actionDraw(
+                  state.cursorX,
+                  state.cursorY,
+                  swatches.primary.color,
+                  state.brushStamp,
+                  state.tool.brushSize,
+                  ctx,
+                  state.mode,
+                  state.pointsSet,
+                  null,
+                  true
+                )
+              })
               //if currentPixel not neighbor to lastDrawn and has not already been drawn, draw waitingpixel
               if (
                 Math.abs(state.cursorX - state.lastDrawnX) > 1 ||
@@ -265,6 +286,9 @@ export function drawSteps() {
       if (state.tool.name !== "replace") {
         state.pointsSet = new Set()
       }
+      //For line
+      state.lineStartX = state.cursorX
+      state.lineStartY = state.cursorY
       //set colorlayer, then for each brushpoint, alter colorlayer and add each to timeline
       actionDraw(
         state.cursorX,
@@ -285,36 +309,97 @@ export function drawSteps() {
       renderCanvas()
       break
     case "pointermove":
-      if (
-        state.previousX !== state.cursorX ||
-        state.previousY !== state.cursorY
-      ) {
-        //draw between points when drawing fast
-        if (
-          Math.abs(state.cursorX - state.previousX) > 1 ||
-          Math.abs(state.cursorY - state.previousY) > 1
-        ) {
-          let angle = getAngle(
-            state.cursorX - state.previousX,
-            state.cursorY - state.previousY
-          ) // angle of line
-          let tri = getTriangle(
+      //draw line connecting points that don't touch or if shift is held
+      if (state.tool.options.line) {
+        renderCanvas((ctx) => {
+          actionLine(
             state.previousX,
             state.previousY,
             state.cursorX,
             state.cursorY,
-            angle
+            swatches.primary.color,
+            ctx,
+            state.mode,
+            state.brushStamp,
+            state.tool.brushSize,
+            state.pointsSet
           )
+        })
+      } else if (
+        Math.abs(state.cursorX - state.previousX) > 1 ||
+        Math.abs(state.cursorY - state.previousY) > 1
+      ) {
+        let angle = getAngle(
+          state.cursorX - state.previousX,
+          state.cursorY - state.previousY
+        ) // angle of line
+        let tri = getTriangle(
+          state.previousX,
+          state.previousY,
+          state.cursorX,
+          state.cursorY,
+          angle
+        )
 
-          for (let i = 0; i < tri.long; i++) {
-            let thispoint = {
-              x: Math.round(state.previousX + tri.x * i),
-              y: Math.round(state.previousY + tri.y * i),
-            }
-            // for each point along the line
+        for (let i = 0; i < tri.long; i++) {
+          let thispoint = {
+            x: Math.round(state.previousX + tri.x * i),
+            y: Math.round(state.previousY + tri.y * i),
+          }
+          // for each point along the line
+          actionDraw(
+            thispoint.x,
+            thispoint.y,
+            swatches.primary.color,
+            state.brushStamp,
+            state.tool.brushSize,
+            canvas.currentLayer.ctx,
+            state.mode,
+            state.pointsSet,
+            state.points
+          )
+        }
+        //fill endpoint
+        actionDraw(
+          state.cursorX,
+          state.cursorY,
+          swatches.primary.color,
+          state.brushStamp,
+          state.tool.brushSize,
+          canvas.currentLayer.ctx,
+          state.mode,
+          state.pointsSet,
+          state.points
+        )
+        if (state.mode === "perfect") {
+          renderCanvas((ctx) => {
             actionDraw(
-              thispoint.x,
-              thispoint.y,
+              state.cursorX,
+              state.cursorY,
+              swatches.primary.color,
+              state.brushStamp,
+              state.tool.brushSize,
+              ctx,
+              state.mode,
+              state.pointsSet,
+              null,
+              true
+            )
+          })
+        }
+        renderCanvas()
+      } else {
+        //FIX: perfect will be option, not mode
+        if (state.mode === "perfect") {
+          //if currentPixel not neighbor to lastDrawn and has not already been drawn, draw waitingpixel
+          if (
+            Math.abs(state.cursorX - state.lastDrawnX) > 1 ||
+            Math.abs(state.cursorY - state.lastDrawnY) > 1
+          ) {
+            //Draw the previous waiting pixel
+            actionDraw(
+              state.waitingPixelX,
+              state.waitingPixelY,
               swatches.primary.color,
               state.brushStamp,
               state.tool.brushSize,
@@ -323,8 +408,44 @@ export function drawSteps() {
               state.pointsSet,
               state.points
             )
+            //update queue
+            state.lastDrawnX = state.waitingPixelX
+            state.lastDrawnY = state.waitingPixelY
+            state.waitingPixelX = state.cursorX
+            state.waitingPixelY = state.cursorY
+            renderCanvas((ctx) => {
+              actionDraw(
+                state.cursorX,
+                state.cursorY,
+                swatches.primary.color,
+                state.brushStamp,
+                state.tool.brushSize,
+                ctx,
+                state.mode,
+                state.pointsSet,
+                null,
+                true
+              )
+            })
+          } else {
+            state.waitingPixelX = state.cursorX
+            state.waitingPixelY = state.cursorY
+            renderCanvas((ctx) => {
+              actionDraw(
+                state.cursorX,
+                state.cursorY,
+                swatches.primary.color,
+                state.brushStamp,
+                state.tool.brushSize,
+                ctx,
+                state.mode,
+                state.pointsSet,
+                null,
+                true
+              )
+            })
           }
-          //fill endpoint
+        } else {
           actionDraw(
             state.cursorX,
             state.cursorY,
@@ -336,59 +457,58 @@ export function drawSteps() {
             state.pointsSet,
             state.points
           )
-          if (state.mode === "perfect") {
-            drawCurrentPixel(state, canvas, swatches)
-          }
           renderCanvas()
-        } else {
-          //FIX: perfect will be option, not mode
-          if (state.mode === "perfect") {
-            //if currentPixel not neighbor to lastDrawn and has not already been drawn, draw waitingpixel
-            if (
-              Math.abs(state.cursorX - state.lastDrawnX) > 1 ||
-              Math.abs(state.cursorY - state.lastDrawnY) > 1
-            ) {
-              actionDraw(
-                state.waitingPixelX,
-                state.waitingPixelY,
-                swatches.primary.color,
-                state.brushStamp,
-                state.tool.brushSize,
-                canvas.currentLayer.ctx,
-                state.mode,
-                state.pointsSet,
-                state.points
-              )
-              //update queue
-              state.lastDrawnX = state.waitingPixelX
-              state.lastDrawnY = state.waitingPixelY
-              state.waitingPixelX = state.cursorX
-              state.waitingPixelY = state.cursorY
-              renderCanvas()
-              drawCurrentPixel(state, canvas, swatches)
-            } else {
-              state.waitingPixelX = state.cursorX
-              state.waitingPixelY = state.cursorY
-              drawCurrentPixel(state, canvas, swatches)
-            }
-          } else {
-            actionDraw(
-              state.cursorX,
-              state.cursorY,
-              swatches.primary.color,
-              state.brushStamp,
-              state.tool.brushSize,
-              canvas.currentLayer.ctx,
-              state.mode,
-              state.pointsSet,
-              state.points
-            )
-            renderCanvas()
-          }
         }
       }
       break
     case "pointerup":
+      if (
+        Math.abs(state.cursorX - state.previousX) > 1 ||
+        Math.abs(state.cursorY - state.previousY) > 1
+      ) {
+        let angle = getAngle(
+          state.cursorX - state.previousX,
+          state.cursorY - state.previousY
+        ) // angle of line
+        let tri = getTriangle(
+          state.previousX,
+          state.previousY,
+          state.cursorX,
+          state.cursorY,
+          angle
+        )
+
+        for (let i = 0; i < tri.long; i++) {
+          let thispoint = {
+            x: Math.round(state.previousX + tri.x * i),
+            y: Math.round(state.previousY + tri.y * i),
+          }
+          // for each point along the line
+          actionDraw(
+            thispoint.x,
+            thispoint.y,
+            swatches.primary.color,
+            state.brushStamp,
+            state.tool.brushSize,
+            canvas.currentLayer.ctx,
+            state.mode,
+            state.pointsSet,
+            state.points
+          )
+        }
+        //fill endpoint
+        actionDraw(
+          state.cursorX,
+          state.cursorY,
+          swatches.primary.color,
+          state.brushStamp,
+          state.tool.brushSize,
+          canvas.currentLayer.ctx,
+          state.mode,
+          state.pointsSet,
+          state.points
+        )
+      }
       //only needed if perfect pixels option is on
       actionDraw(
         state.cursorX,
@@ -530,71 +650,57 @@ export function selectSteps() {
 export function lineSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      actionLine(
-        state.cursorX + canvas.xOffset,
-        state.cursorY + canvas.yOffset,
-        state.cursorWithCanvasOffsetX,
-        state.cursorWithCanvasOffsetY,
-        swatches.primary.color,
-        canvas.onScreenCVS,
-        canvas.onScreenCTX,
-        state.mode,
-        state.brushStamp,
-        state.tool.brushSize,
-        state.localColorLayer
-      )
+      state.lineStartX = state.cursorX
+      state.lineStartY = state.cursorY
+      renderCanvas((ctx) => {
+        actionLine(
+          state.cursorX,
+          state.cursorY,
+          state.cursorX,
+          state.cursorY,
+          swatches.primary.color,
+          ctx,
+          state.mode,
+          state.brushStamp,
+          state.tool.brushSize
+        )
+      })
       break
     case "pointermove":
       //draw line from origin point to current point onscreen
       //only draw when necessary
-      if (
-        state.onscreenX !== state.previousOnscreenX ||
-        state.onscreenY !== state.previousOnscreenY
-      ) {
-        canvas.onScreenCTX.clearRect(
-          0,
-          0,
-          canvas.offScreenCVS.width / canvas.zoom,
-          canvas.offScreenCVS.height / canvas.zoom
-        )
-        renderCanvas()
+      renderCanvas((ctx) => {
         actionLine(
-          state.previousX + canvas.xOffset,
-          state.previousY + canvas.yOffset,
-          state.cursorWithCanvasOffsetX,
-          state.cursorWithCanvasOffsetY,
+          state.lineStartX,
+          state.lineStartY,
+          state.cursorX,
+          state.cursorY,
           swatches.primary.color,
-          canvas.onScreenCVS,
-          canvas.onScreenCTX,
+          ctx,
           state.mode,
           state.brushStamp,
-          state.tool.brushSize,
-          state.localColorLayer
+          state.tool.brushSize
         )
-        state.previousOnscreenX = state.onscreenX
-        state.previousOnscreenY = state.onscreenY
-      }
+      })
       break
     case "pointerup":
       actionLine(
-        state.previousX,
-        state.previousY,
+        state.lineStartX,
+        state.lineStartY,
         state.cursorX,
         state.cursorY,
         swatches.primary.color,
-        canvas.currentLayer.cvs,
         canvas.currentLayer.ctx,
         state.mode,
         state.brushStamp,
-        state.tool.brushSize,
-        state.localColorLayer
+        state.tool.brushSize
       )
       state.addToTimeline({
         tool: state.tool,
         layer: canvas.currentLayer,
         properties: {
-          px1: state.previousX,
-          py1: state.previousY,
+          px1: state.lineStartX,
+          py1: state.lineStartY,
           px2: state.cursorX,
           py2: state.cursorY,
         },
@@ -677,19 +783,14 @@ export function adjustFillSteps() {
         }
         state.undoStack[canvas.currentVectorIndex].hidden = true
         //Only render canvas up to timeline where fill action exists while adjusting fill
-        renderCanvas(true, true, canvas.currentVectorIndex) // render to canvas.currentVectorIndex
+        renderCanvas(null, true, true, canvas.currentVectorIndex) // render to canvas.currentVectorIndex
       }
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey) {
-        // if (
-        //   state.onscreenX !== state.previousOnscreenX ||
-        //   state.onscreenY !== state.previousOnscreenY
-        // ) {
         //code gets past check twice here so figure out where tool fn is being called again
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        // }
       }
       break
     case "pointerup":
@@ -702,7 +803,7 @@ export function adjustFillSteps() {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(true, true)
+        renderCanvas(null, true, true)
       }
       break
     case "pointerout":
@@ -755,20 +856,22 @@ export function quadCurveSteps() {
           state.vectorProperties.py3 = state.cursorY
         }
         //onscreen preview
-        actionQuadraticCurve(
-          state.vectorProperties.px1 + canvas.xOffset,
-          state.vectorProperties.py1 + canvas.yOffset,
-          state.vectorProperties.px2 + canvas.xOffset,
-          state.vectorProperties.py2 + canvas.yOffset,
-          state.vectorProperties.px3 + canvas.xOffset,
-          state.vectorProperties.py3 + canvas.yOffset,
-          state.clickCounter,
-          swatches.primary.color,
-          canvas.onScreenCTX,
-          state.mode,
-          state.brushStamp,
-          state.tool.brushSize
-        )
+        renderCanvas((ctx) => {
+          actionQuadraticCurve(
+            state.vectorProperties.px1,
+            state.vectorProperties.py1,
+            state.vectorProperties.px2,
+            state.vectorProperties.py2,
+            state.vectorProperties.px3,
+            state.vectorProperties.py3,
+            state.clickCounter,
+            swatches.primary.color,
+            ctx,
+            state.mode,
+            state.brushStamp,
+            state.tool.brushSize
+          )
+        })
       }
       break
     case "pointermove":
@@ -777,33 +880,27 @@ export function quadCurveSteps() {
       } else {
         //draw line from origin point to current point onscreen
         //normalize pointermove to pixelgrid
-        if (
-          state.onscreenX !== state.previousOnscreenX ||
-          state.onscreenY !== state.previousOnscreenY
-        ) {
-          renderCanvas()
-          if (state.clickCounter === 3) {
-            state.vectorProperties.px3 = state.cursorX
-            state.vectorProperties.py3 = state.cursorY
-          }
-          //onscreen preview
+        if (state.clickCounter === 3) {
+          state.vectorProperties.px3 = state.cursorX
+          state.vectorProperties.py3 = state.cursorY
+        }
+        //onscreen preview
+        renderCanvas((ctx) => {
           actionQuadraticCurve(
-            state.vectorProperties.px1 + canvas.xOffset,
-            state.vectorProperties.py1 + canvas.yOffset,
-            state.vectorProperties.px2 + canvas.xOffset,
-            state.vectorProperties.py2 + canvas.yOffset,
-            state.vectorProperties.px3 + canvas.xOffset,
-            state.vectorProperties.py3 + canvas.yOffset,
+            state.vectorProperties.px1,
+            state.vectorProperties.py1,
+            state.vectorProperties.px2,
+            state.vectorProperties.py2,
+            state.vectorProperties.px3,
+            state.vectorProperties.py3,
             state.clickCounter,
             swatches.primary.color,
-            canvas.onScreenCTX,
+            ctx,
             state.mode,
             state.brushStamp,
             state.tool.brushSize
           )
-          state.previousOnscreenX = state.onscreenX
-          state.previousOnscreenY = state.onscreenY
-        }
+        })
       }
       break
     case "pointerup":
@@ -912,22 +1009,24 @@ export function cubicCurveSteps() {
           state.vectorProperties.py4 = state.cursorY
         }
         //onscreen preview
-        actionCubicCurve(
-          state.vectorProperties.px1 + canvas.xOffset,
-          state.vectorProperties.py1 + canvas.yOffset,
-          state.vectorProperties.px2 + canvas.xOffset,
-          state.vectorProperties.py2 + canvas.yOffset,
-          state.vectorProperties.px3 + canvas.xOffset,
-          state.vectorProperties.py3 + canvas.yOffset,
-          state.vectorProperties.px4 + canvas.xOffset,
-          state.vectorProperties.py4 + canvas.yOffset,
-          state.clickCounter,
-          swatches.primary.color,
-          canvas.onScreenCTX,
-          state.mode,
-          state.brushStamp,
-          state.tool.brushSize
-        )
+        renderCanvas((ctx) => {
+          actionCubicCurve(
+            state.vectorProperties.px1,
+            state.vectorProperties.py1,
+            state.vectorProperties.px2,
+            state.vectorProperties.py2,
+            state.vectorProperties.px3,
+            state.vectorProperties.py3,
+            state.vectorProperties.px4,
+            state.vectorProperties.py4,
+            state.clickCounter,
+            swatches.primary.color,
+            ctx,
+            state.mode,
+            state.brushStamp,
+            state.tool.brushSize
+          )
+        })
       }
       break
     case "pointermove":
@@ -936,35 +1035,29 @@ export function cubicCurveSteps() {
       } else {
         //draw line from origin point to current point onscreen
         //normalize pointermove to pixelgrid
-        if (
-          state.onscreenX !== state.previousOnscreenX ||
-          state.onscreenY !== state.previousOnscreenY
-        ) {
-          renderCanvas()
-          if (state.clickCounter === 4) {
-            state.vectorProperties.px4 = state.cursorX
-            state.vectorProperties.py4 = state.cursorY
-          }
-          //onscreen preview
+        if (state.clickCounter === 4) {
+          state.vectorProperties.px4 = state.cursorX
+          state.vectorProperties.py4 = state.cursorY
+        }
+        //onscreen preview
+        renderCanvas((ctx) => {
           actionCubicCurve(
-            state.vectorProperties.px1 + canvas.xOffset,
-            state.vectorProperties.py1 + canvas.yOffset,
-            state.vectorProperties.px2 + canvas.xOffset,
-            state.vectorProperties.py2 + canvas.yOffset,
-            state.vectorProperties.px3 + canvas.xOffset,
-            state.vectorProperties.py3 + canvas.yOffset,
-            state.vectorProperties.px4 + canvas.xOffset,
-            state.vectorProperties.py4 + canvas.yOffset,
+            state.vectorProperties.px1,
+            state.vectorProperties.py1,
+            state.vectorProperties.px2,
+            state.vectorProperties.py2,
+            state.vectorProperties.px3,
+            state.vectorProperties.py3,
+            state.vectorProperties.px4,
+            state.vectorProperties.py4,
             state.clickCounter,
             swatches.primary.color,
-            canvas.onScreenCTX,
+            ctx,
             state.mode,
             state.brushStamp,
             state.tool.brushSize
           )
-          state.previousOnscreenX = state.onscreenX
-          state.previousOnscreenY = state.onscreenY
-        }
+        })
       }
       break
     case "pointerup":
@@ -1062,38 +1155,50 @@ export function adjustCurveSteps(numPoints = 4) {
           yKey: vectorGui.collidedKeys.yKey,
         }
         state.undoStack[canvas.currentVectorIndex].hidden = true
-        renderCanvas(true, true)
+        // renderCanvas(null, true, true)
         if (numPoints === 3) {
-          actionQuadraticCurve(
-            state.vectorProperties.px1 + canvas.xOffset,
-            state.vectorProperties.py1 + canvas.yOffset,
-            state.vectorProperties.px2 + canvas.xOffset,
-            state.vectorProperties.py2 + canvas.yOffset,
-            state.vectorProperties.px3 + canvas.xOffset,
-            state.vectorProperties.py3 + canvas.yOffset,
-            3,
-            state.undoStack[canvas.currentVectorIndex].color,
-            canvas.onScreenCTX,
-            state.undoStack[canvas.currentVectorIndex].mode,
-            state.undoStack[canvas.currentVectorIndex].brushStamp,
-            state.undoStack[canvas.currentVectorIndex].brushSize
+          renderCanvas(
+            (ctx) => {
+              actionQuadraticCurve(
+                state.vectorProperties.px1,
+                state.vectorProperties.py1,
+                state.vectorProperties.px2,
+                state.vectorProperties.py2,
+                state.vectorProperties.px3,
+                state.vectorProperties.py3,
+                3,
+                state.undoStack[canvas.currentVectorIndex].color,
+                ctx,
+                state.undoStack[canvas.currentVectorIndex].mode,
+                state.undoStack[canvas.currentVectorIndex].brushStamp,
+                state.undoStack[canvas.currentVectorIndex].brushSize
+              )
+            },
+            true,
+            true
           )
         } else {
-          actionCubicCurve(
-            state.vectorProperties.px1 + canvas.xOffset,
-            state.vectorProperties.py1 + canvas.yOffset,
-            state.vectorProperties.px2 + canvas.xOffset,
-            state.vectorProperties.py2 + canvas.yOffset,
-            state.vectorProperties.px3 + canvas.xOffset,
-            state.vectorProperties.py3 + canvas.yOffset,
-            state.vectorProperties.px4 + canvas.xOffset,
-            state.vectorProperties.py4 + canvas.yOffset,
-            4,
-            state.undoStack[canvas.currentVectorIndex].color,
-            canvas.onScreenCTX,
-            state.undoStack[canvas.currentVectorIndex].mode,
-            state.undoStack[canvas.currentVectorIndex].brushStamp,
-            state.undoStack[canvas.currentVectorIndex].brushSize
+          renderCanvas(
+            (ctx) => {
+              actionCubicCurve(
+                state.vectorProperties.px1,
+                state.vectorProperties.py1,
+                state.vectorProperties.px2,
+                state.vectorProperties.py2,
+                state.vectorProperties.px3,
+                state.vectorProperties.py3,
+                state.vectorProperties.px4,
+                state.vectorProperties.py4,
+                4,
+                state.undoStack[canvas.currentVectorIndex].color,
+                ctx,
+                state.undoStack[canvas.currentVectorIndex].mode,
+                state.undoStack[canvas.currentVectorIndex].brushStamp,
+                state.undoStack[canvas.currentVectorIndex].brushSize
+              )
+            },
+            true,
+            true
           )
         }
       }
@@ -1102,38 +1207,49 @@ export function adjustCurveSteps(numPoints = 4) {
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        renderCanvas()
         if (numPoints === 3) {
-          actionQuadraticCurve(
-            state.vectorProperties.px1 + canvas.xOffset,
-            state.vectorProperties.py1 + canvas.yOffset,
-            state.vectorProperties.px2 + canvas.xOffset,
-            state.vectorProperties.py2 + canvas.yOffset,
-            state.vectorProperties.px3 + canvas.xOffset,
-            state.vectorProperties.py3 + canvas.yOffset,
-            3,
-            state.undoStack[canvas.currentVectorIndex].color,
-            canvas.onScreenCTX,
-            state.undoStack[canvas.currentVectorIndex].mode,
-            state.undoStack[canvas.currentVectorIndex].brushStamp,
-            state.undoStack[canvas.currentVectorIndex].brushSize
+          renderCanvas(
+            (ctx) => {
+              actionQuadraticCurve(
+                state.vectorProperties.px1,
+                state.vectorProperties.py1,
+                state.vectorProperties.px2,
+                state.vectorProperties.py2,
+                state.vectorProperties.px3,
+                state.vectorProperties.py3,
+                3,
+                state.undoStack[canvas.currentVectorIndex].color,
+                ctx,
+                state.undoStack[canvas.currentVectorIndex].mode,
+                state.undoStack[canvas.currentVectorIndex].brushStamp,
+                state.undoStack[canvas.currentVectorIndex].brushSize
+              )
+            },
+            true,
+            true
           )
         } else {
-          actionCubicCurve(
-            state.vectorProperties.px1 + canvas.xOffset,
-            state.vectorProperties.py1 + canvas.yOffset,
-            state.vectorProperties.px2 + canvas.xOffset,
-            state.vectorProperties.py2 + canvas.yOffset,
-            state.vectorProperties.px3 + canvas.xOffset,
-            state.vectorProperties.py3 + canvas.yOffset,
-            state.vectorProperties.px4 + canvas.xOffset,
-            state.vectorProperties.py4 + canvas.yOffset,
-            4,
-            state.undoStack[canvas.currentVectorIndex].color,
-            canvas.onScreenCTX,
-            state.undoStack[canvas.currentVectorIndex].mode,
-            state.undoStack[canvas.currentVectorIndex].brushStamp,
-            state.undoStack[canvas.currentVectorIndex].brushSize
+          renderCanvas(
+            (ctx) => {
+              actionCubicCurve(
+                state.vectorProperties.px1,
+                state.vectorProperties.py1,
+                state.vectorProperties.px2,
+                state.vectorProperties.py2,
+                state.vectorProperties.px3,
+                state.vectorProperties.py3,
+                state.vectorProperties.px4,
+                state.vectorProperties.py4,
+                4,
+                state.undoStack[canvas.currentVectorIndex].color,
+                ctx,
+                state.undoStack[canvas.currentVectorIndex].mode,
+                state.undoStack[canvas.currentVectorIndex].brushStamp,
+                state.undoStack[canvas.currentVectorIndex].brushSize
+              )
+            },
+            true,
+            true
           )
         }
       }
@@ -1148,7 +1264,7 @@ export function adjustCurveSteps(numPoints = 4) {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(true, true)
+        renderCanvas(null, true, true)
       }
       break
     case "pointerout":
@@ -1218,50 +1334,49 @@ export function ellipseSteps() {
         // option could be described as "exclude center point from radius", toggle odd or even, odd being excluding center point and offset = 0
         //for ellipse, passing the quadrant is also important to make offset go in the right direction
         //onscreen preview
-        actionEllipse(
-          state.vectorProperties.px1 + canvas.xOffset,
-          state.vectorProperties.py1 + canvas.yOffset,
-          state.vectorProperties.px2 + canvas.xOffset,
-          state.vectorProperties.py2 + canvas.yOffset,
-          state.vectorProperties.px3 + canvas.xOffset,
-          state.vectorProperties.py3 + canvas.yOffset,
-          state.vectorProperties.radA,
-          state.vectorProperties.radB,
-          state.vectorProperties.forceCircle, //force circle initially
-          swatches.primary.color,
-          canvas.onScreenCTX,
-          state.mode,
-          state.brushStamp,
-          state.tool.brushSize,
-          state.vectorProperties.angle,
-          state.vectorProperties.offset,
-          state.vectorProperties.x1Offset,
-          state.vectorProperties.y1Offset
-        )
+        renderCanvas((ctx) => {
+          actionEllipse(
+            state.vectorProperties.px1,
+            state.vectorProperties.py1,
+            state.vectorProperties.px2,
+            state.vectorProperties.py2,
+            state.vectorProperties.px3,
+            state.vectorProperties.py3,
+            state.vectorProperties.radA,
+            state.vectorProperties.radB,
+            state.vectorProperties.forceCircle, //force circle initially
+            swatches.primary.color,
+            ctx,
+            state.mode,
+            state.brushStamp,
+            state.tool.brushSize,
+            state.vectorProperties.angle,
+            state.vectorProperties.offset,
+            state.vectorProperties.x1Offset,
+            state.vectorProperties.y1Offset
+          )
+        })
       }
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         if (
-          state.onscreenX + canvas.subPixelX !==
-            state.previousOnscreenX + canvas.previousSubPixelX ||
-          state.onscreenY + canvas.subPixelY !==
-            state.previousOnscreenY + canvas.previousSubPixelY
+          state.cursorX + canvas.subPixelX !==
+            state.previousX + canvas.previousSubPixelX ||
+          state.cursorY + canvas.subPixelY !==
+            state.previousY + canvas.previousSubPixelY
         ) {
           adjustEllipseSteps()
-          state.previousOnscreenX = state.onscreenX
-          state.previousOnscreenY = state.onscreenY
         }
       } else {
         //draw line from origin point to current point onscreen
         //normalize pointermove to pixelgrid
         if (
-          state.onscreenX + canvas.subPixelX !==
-            state.previousOnscreenX + canvas.previousSubPixelX ||
-          state.onscreenY + canvas.subPixelY !==
-            state.previousOnscreenY + canvas.previousSubPixelY
+          state.cursorX + canvas.subPixelX !==
+            state.previousX + canvas.previousSubPixelX ||
+          state.cursorY + canvas.subPixelY !==
+            state.previousY + canvas.previousSubPixelY
         ) {
-          renderCanvas()
           if (state.clickCounter === 1) {
             state.vectorProperties.px2 = state.cursorX
             state.vectorProperties.py2 = state.cursorY
@@ -1281,28 +1396,28 @@ export function ellipseSteps() {
             state.vectorProperties.py2
           )
           //onscreen preview
-          actionEllipse(
-            state.vectorProperties.px1 + canvas.xOffset,
-            state.vectorProperties.py1 + canvas.yOffset,
-            state.vectorProperties.px2 + canvas.xOffset,
-            state.vectorProperties.py2 + canvas.yOffset,
-            state.vectorProperties.px3 + canvas.xOffset,
-            state.vectorProperties.py3 + canvas.yOffset,
-            state.vectorProperties.radA,
-            state.vectorProperties.radB,
-            state.vectorProperties.forceCircle, //force circle initially
-            swatches.primary.color,
-            canvas.onScreenCTX,
-            state.mode,
-            state.brushStamp,
-            state.tool.brushSize,
-            state.vectorProperties.angle,
-            state.vectorProperties.offset,
-            state.vectorProperties.x1Offset,
-            state.vectorProperties.y1Offset
-          )
-          state.previousOnscreenX = state.onscreenX
-          state.previousOnscreenY = state.onscreenY
+          renderCanvas((ctx) => {
+            actionEllipse(
+              state.vectorProperties.px1,
+              state.vectorProperties.py1,
+              state.vectorProperties.px2,
+              state.vectorProperties.py2,
+              state.vectorProperties.px3,
+              state.vectorProperties.py3,
+              state.vectorProperties.radA,
+              state.vectorProperties.radB,
+              state.vectorProperties.forceCircle, //force circle initially
+              swatches.primary.color,
+              ctx,
+              state.mode,
+              state.brushStamp,
+              state.tool.brushSize,
+              state.vectorProperties.angle,
+              state.vectorProperties.offset,
+              state.vectorProperties.x1Offset,
+              state.vectorProperties.y1Offset
+            )
+          })
         }
       }
       break
@@ -1435,58 +1550,66 @@ export function adjustEllipseSteps() {
         //TODO: changing opacity isn't enough since erase mode will be unaffected
         // let action = state.undoStack[canvas.currentVectorIndex]
         state.undoStack[canvas.currentVectorIndex].hidden = true
-        renderCanvas(true, true)
         //angle and offset passed should consider which point is being adjusted. For p1, use current state.vectorProperties.offset instead of recalculating. For p3, add 1.5 * Math.PI to angle
-        actionEllipse(
-          state.vectorProperties.px1 + canvas.xOffset,
-          state.vectorProperties.py1 + canvas.yOffset,
-          state.vectorProperties.px2 + canvas.xOffset,
-          state.vectorProperties.py2 + canvas.yOffset,
-          state.vectorProperties.px3 + canvas.xOffset,
-          state.vectorProperties.py3 + canvas.yOffset,
-          state.vectorProperties.radA,
-          state.vectorProperties.radB,
-          vectorGui.selectedPoint.xKey === "px1"
-            ? state.undoStack[canvas.currentVectorIndex].properties.forceCircle
-            : state.vectorProperties.forceCircle,
-          state.undoStack[canvas.currentVectorIndex].color,
-          canvas.onScreenCTX,
-          state.undoStack[canvas.currentVectorIndex].mode,
-          state.undoStack[canvas.currentVectorIndex].brushStamp,
-          state.undoStack[canvas.currentVectorIndex].brushSize,
-          state.vectorProperties.angle,
-          state.vectorProperties.offset,
-          state.vectorProperties.x1Offset,
-          state.vectorProperties.y1Offset
+        renderCanvas(
+          (ctx) => {
+            actionEllipse(
+              state.vectorProperties.px1,
+              state.vectorProperties.py1,
+              state.vectorProperties.px2,
+              state.vectorProperties.py2,
+              state.vectorProperties.px3,
+              state.vectorProperties.py3,
+              state.vectorProperties.radA,
+              state.vectorProperties.radB,
+              vectorGui.selectedPoint.xKey === "px1"
+                ? state.undoStack[canvas.currentVectorIndex].properties
+                    .forceCircle
+                : state.vectorProperties.forceCircle,
+              state.undoStack[canvas.currentVectorIndex].color,
+              ctx,
+              state.undoStack[canvas.currentVectorIndex].mode,
+              state.undoStack[canvas.currentVectorIndex].brushStamp,
+              state.undoStack[canvas.currentVectorIndex].brushSize,
+              state.vectorProperties.angle,
+              state.vectorProperties.offset,
+              state.vectorProperties.x1Offset,
+              state.vectorProperties.y1Offset
+            )
+          },
+          true,
+          true
         )
       }
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         updateEllipseControlPoints(state, canvas, vectorGui)
-        renderCanvas()
-        actionEllipse(
-          state.vectorProperties.px1 + canvas.xOffset,
-          state.vectorProperties.py1 + canvas.yOffset,
-          state.vectorProperties.px2 + canvas.xOffset,
-          state.vectorProperties.py2 + canvas.yOffset,
-          state.vectorProperties.px3 + canvas.xOffset,
-          state.vectorProperties.py3 + canvas.yOffset,
-          state.vectorProperties.radA,
-          state.vectorProperties.radB,
-          vectorGui.selectedPoint.xKey === "px1"
-            ? state.undoStack[canvas.currentVectorIndex].properties.forceCircle
-            : state.vectorProperties.forceCircle,
-          state.undoStack[canvas.currentVectorIndex].color,
-          canvas.onScreenCTX,
-          state.undoStack[canvas.currentVectorIndex].mode,
-          state.undoStack[canvas.currentVectorIndex].brushStamp,
-          state.undoStack[canvas.currentVectorIndex].brushSize,
-          state.vectorProperties.angle,
-          state.vectorProperties.offset,
-          state.vectorProperties.x1Offset,
-          state.vectorProperties.y1Offset
-        )
+        renderCanvas((ctx) => {
+          actionEllipse(
+            state.vectorProperties.px1,
+            state.vectorProperties.py1,
+            state.vectorProperties.px2,
+            state.vectorProperties.py2,
+            state.vectorProperties.px3,
+            state.vectorProperties.py3,
+            state.vectorProperties.radA,
+            state.vectorProperties.radB,
+            vectorGui.selectedPoint.xKey === "px1"
+              ? state.undoStack[canvas.currentVectorIndex].properties
+                  .forceCircle
+              : state.vectorProperties.forceCircle,
+            state.undoStack[canvas.currentVectorIndex].color,
+            ctx,
+            state.undoStack[canvas.currentVectorIndex].mode,
+            state.undoStack[canvas.currentVectorIndex].brushStamp,
+            state.undoStack[canvas.currentVectorIndex].brushSize,
+            state.vectorProperties.angle,
+            state.vectorProperties.offset,
+            state.vectorProperties.x1Offset,
+            state.vectorProperties.y1Offset
+          )
+        })
       }
       break
     case "pointerup":
@@ -1498,7 +1621,7 @@ export function adjustEllipseSteps() {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(true, true)
+        renderCanvas(null, true, true)
       }
       break
     case "pointerout":
@@ -1568,19 +1691,17 @@ export function grabSteps() {
     case "pointerdown":
       canvas.previousXOffset = canvas.xOffset
       canvas.previousYOffset = canvas.yOffset
+      state.grabStartX = state.cursorX
+      state.grabStartY = state.cursorY
       break
     case "pointermove":
-      canvas.xOffset =
-        state.onscreenX - state.previousOnscreenX + canvas.previousXOffset
-      canvas.yOffset =
-        state.onscreenY - state.previousOnscreenY + canvas.previousYOffset
+      canvas.xOffset = state.cursorX - state.grabStartX + canvas.previousXOffset
+      canvas.yOffset = state.cursorY - state.grabStartY + canvas.previousYOffset
       renderCanvas()
       break
     case "pointerup":
       canvas.previousXOffset = canvas.xOffset
       canvas.previousYOffset = canvas.yOffset
-      state.previousOnscreenX = state.onscreenX
-      state.previousOnscreenY = state.onscreenY
       break
     case "pointerout":
       canvas.previousXOffset = canvas.xOffset
@@ -1641,7 +1762,7 @@ export const tools = {
     action: actionDraw,
     brushSize: 1,
     disabled: false,
-    options: { perfect: false, erase: false, inject: false },
+    options: { perfect: false, erase: false, inject: false, line: false },
     type: "raster",
   },
   line: {

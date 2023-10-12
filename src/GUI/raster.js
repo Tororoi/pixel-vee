@@ -27,51 +27,26 @@ export function renderCursor(state, canvas, swatches) {
     default:
       //TODO: erase mode is somewhat buggy with rendering. Find way to have it render without calling draw() more than needed.
       if (!vectorGui.collisionPresent) {
-        drawCurrentPixel(state, canvas, swatches)
+        renderCanvas((ctx) => {
+          actionDraw(
+            state.cursorX,
+            state.cursorY,
+            swatches.primary.color,
+            state.brushStamp,
+            state.tool.brushSize,
+            ctx,
+            state.mode,
+            state.pointsSet,
+            null,
+            true
+          )
+        })
         if (state.mode === "erase") {
-          // vectorGui.drawCursorBox(state, canvas, 1)
-          vectorGui.drawSelectOutline(state, canvas, 0.5)
+          vectorGui.drawCursorBox(state, canvas, 1)
+          // vectorGui.drawSelectOutline(state, canvas, 0.5)
         }
       } else {
         renderCanvas()
       }
   }
-}
-
-//TODO: Need to render on a preview canvas with up to 3 layers.
-//Bottom is any layers below the current layer.
-//Middle layer is the current layer plus the current pixel.
-//Top layer is any layers that are above the current layer. Drawn on top after current pixel rendered. Part of middle layer canvas.
-export function drawCurrentPixel(state, canvas, swatches) {
-  //draw onscreen current pixel
-  renderCanvas()
-  canvas.onScreenCTX.fillStyle = swatches.primary.color.color
-  state.brushStamp.forEach((pixel) => {
-    const x = Math.ceil(state.cursorX - state.tool.brushSize / 2) + pixel.x
-    const y = Math.ceil(state.cursorY - state.tool.brushSize / 2) + pixel.y
-    const drawX =
-      Math.ceil(state.cursorWithCanvasOffsetX - state.tool.brushSize / 2) +
-      pixel.x
-    const drawY =
-      Math.ceil(state.cursorWithCanvasOffsetY - state.tool.brushSize / 2) +
-      pixel.y
-
-    if (state.pointsSet) {
-      const key = `${x},${y}`
-      if (state.pointsSet.has(key)) {
-        return // skip this point
-      }
-    }
-    switch (state.mode) {
-      case "erase":
-        canvas.onScreenCTX.clearRect(drawX, drawY, 1, 1)
-        break
-      case "inject":
-        canvas.onScreenCTX.clearRect(drawX, drawY, 1, 1)
-        canvas.onScreenCTX.fillRect(drawX, drawY, 1, 1)
-        break
-      default:
-        canvas.onScreenCTX.fillRect(drawX, drawY, 1, 1)
-    }
-  })
 }

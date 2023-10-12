@@ -44,13 +44,11 @@ export const state = {
   previousY: 0,
   cursorWithCanvasOffsetX: null, //absolute cursor coords with offset relative to viewable canvas area
   cursorWithCanvasOffsetY: null,
-  onscreenX: null, //coordinates based on viewable canvas area relative to zoom (deprecated? always double cursorWithCanvasOffsetX)
-  onscreenY: null,
-  previousOnscreenX: null,
-  previousOnscreenY: null,
-  //x2/y2 for line tool
-  lineX: null,
-  lineY: null,
+  //x1/y1 for line tool
+  lineStartX: null,
+  lineStartY: null,
+  grabStartX: null,
+  grabStartY: null,
   //for vector tools
   clickCounter: 0,
   vectorProperties: {

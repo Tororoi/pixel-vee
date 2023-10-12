@@ -60,6 +60,8 @@ const restrictSize = (e) => {
 const resizeOffScreenCanvas = (width, height) => {
   canvas.offScreenCVS.width = width
   canvas.offScreenCVS.height = height
+  canvas.previewCVS.width = width
+  canvas.previewCVS.height = height
   // canvas.thumbnailCVS.width = canvas.offScreenCVS.width
   // canvas.thumbnailCVS.height = canvas.offScreenCVS.height
   //reset canvas state
@@ -116,7 +118,7 @@ const resizeOffScreenCanvas = (width, height) => {
       l.cvs.height = canvas.offScreenCVS.height
     }
   })
-  renderCanvas(false, true)
+  renderCanvas(null, false, true)
   vectorGui.render(state, canvas)
 }
 
@@ -374,7 +376,7 @@ function removeVector(vector) {
     vectorGui.reset(canvas)
   }
   renderVectorsToDOM()
-  renderCanvas(true, true)
+  renderCanvas(null, true, true)
 }
 
 //add move tool and scale tool for reference layers

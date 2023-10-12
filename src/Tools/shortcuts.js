@@ -17,7 +17,7 @@ export function activateShortcut(keyCode) {
   switch (keyCode) {
     case "ArrowLeft":
       if (state.debugger) {
-        renderCanvas(true, true)
+        renderCanvas(null, true, true)
         state.debugObject.maxSteps -= 1
         state.debugFn(state.debugObject)
       }
@@ -55,9 +55,7 @@ export function activateShortcut(keyCode) {
     case "ShiftLeft":
     case "ShiftRight":
       if (dom.toolBtn.id === "brush") {
-        state.tool = tools["line"]
-        state.tool.brushSize = tools["brush"].brushSize
-        canvas.vectorGuiCVS.style.cursor = "none"
+        state.tool.options.line = true
       } else if (dom.toolBtn.id === "ellipse") {
         state.vectorProperties.forceCircle = true
         if (

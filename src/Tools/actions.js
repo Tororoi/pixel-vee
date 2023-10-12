@@ -136,6 +136,7 @@ export function actionClear() {
  * @param {*} currentMode
  * @param {Set} seenPointsSet
  * @param {Array} points
+ * @param {boolean} excludeFromSet - even if new point, don't add to seenPointsSet if true
  */
 export function actionDraw(
   coordX,
@@ -146,7 +147,8 @@ export function actionDraw(
   ctx,
   currentMode,
   seenPointsSet = null,
-  points = null
+  points = null,
+  excludeFromSet = false
 ) {
   ctx.fillStyle = currentColor.color
   if (points) {
@@ -167,7 +169,9 @@ export function actionDraw(
       if (seenPointsSet.has(key)) {
         return // skip this point
       }
-      seenPointsSet.add(key)
+      if (!excludeFromSet) {
+        seenPointsSet.add(key)
+      }
     }
     switch (currentMode) {
       case "erase":
@@ -255,12 +259,10 @@ export function actionPut(
  * @param {*} tx
  * @param {*} ty
  * @param {*} currentColor
- * @param {*} cvs
  * @param {*} ctx
  * @param {*} currentMode
  * @param {*} brushStamp
  * @param {*} brushSize
- * @param {*} imageData
  */
 export function actionLine(
   sx,
@@ -268,18 +270,17 @@ export function actionLine(
   tx,
   ty,
   currentColor,
-  cvs,
   ctx,
   currentMode,
   brushStamp,
   brushSize,
-  imageData = null
+  seenPointsSet = null
 ) {
   ctx.fillStyle = currentColor.color
 
   let angle = getAngle(tx - sx, ty - sy) // angle of line
   let tri = getTriangle(sx, sy, tx, ty, angle)
-  const seen = new Set()
+  const seen = seenPointsSet ? new Set(seenPointsSet) : new Set()
   for (let i = 0; i < tri.long; i++) {
     let thispoint = {
       x: Math.round(sx + tri.x * i),
@@ -496,15 +497,13 @@ export function actionQuadraticCurve(
     actionLine(
       startx,
       starty,
-      state.cursorWithCanvasOffsetX,
-      state.cursorWithCanvasOffsetY,
+      state.cursorX,
+      state.cursorY,
       currentColor,
-      canvas.onScreenCVS,
-      canvas.onScreenCTX,
+      ctx,
       currentMode,
       brushStamp,
-      brushSize,
-      state.localColorLayer
+      brushSize
     )
     state.vectorProperties.px2 = state.cursorX
     state.vectorProperties.py2 = state.cursorY
@@ -515,8 +514,8 @@ export function actionQuadraticCurve(
     let plotPoints = plotQuadBezier(
       startx,
       starty,
-      state.cursorWithCanvasOffsetX,
-      state.cursorWithCanvasOffsetY,
+      state.cursorX,
+      state.cursorY,
       endx,
       endy
     )
@@ -602,15 +601,13 @@ export function actionCubicCurve(
     actionLine(
       startx,
       starty,
-      state.cursorWithCanvasOffsetX,
-      state.cursorWithCanvasOffsetY,
+      state.cursorX,
+      state.cursorY,
       currentColor,
-      canvas.onScreenCVS,
-      canvas.onScreenCTX,
+      ctx,
       currentMode,
       brushStamp,
-      brushSize,
-      state.localColorLayer
+      brushSize
     )
     //TODO: can setting state be moved to steps function?
     state.vectorProperties.px2 = state.cursorX
@@ -622,8 +619,8 @@ export function actionCubicCurve(
     let plotPoints = plotQuadBezier(
       startx,
       starty,
-      state.cursorWithCanvasOffsetX,
-      state.cursorWithCanvasOffsetY,
+      state.cursorX,
+      state.cursorY,
       endx,
       endy
     )
@@ -645,8 +642,8 @@ export function actionCubicCurve(
       starty,
       controlx1,
       controly1,
-      state.cursorWithCanvasOffsetX,
-      state.cursorWithCanvasOffsetY,
+      state.cursorX,
+      state.cursorY,
       endx,
       endy
     )
