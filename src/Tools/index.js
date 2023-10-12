@@ -399,6 +399,20 @@ export function selectSteps() {
     case "pointerdown":
       //1. set drag origin
       //2. save context
+      state.selectPixelPoints = []
+      for (const pixel of state.brushStamp) {
+        state.selectPixelPoints[`${pixel.x},${pixel.y}`] = {
+          x: pixel.x,
+          y: pixel.y,
+        }
+      }
+      state.selectCornersSet = new Set()
+      for (const pixel of state.brushStamp) {
+        state.selectCornersSet.add(`${pixel.x},${pixel.y}`)
+        state.selectCornersSet.add(`${pixel.x + 1},${pixel.y}`)
+        state.selectCornersSet.add(`${pixel.x},${pixel.y + 1}`)
+        state.selectCornersSet.add(`${pixel.x + 1},${pixel.y + 1}`)
+      }
       break
     case "pointermove":
       //1. if state.clicked create strokeable path using drag origin and current x/y as opposite corners of rectangle

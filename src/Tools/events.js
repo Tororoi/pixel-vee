@@ -166,6 +166,7 @@ function updateBrush(e) {
     case "quadCurve":
     case "cubicCurve":
     case "ellipse":
+    case "select":
       state.tool.brushSize = parseInt(e.target.value)
       break
     default:

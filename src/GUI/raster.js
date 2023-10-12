@@ -43,7 +43,7 @@ export function renderCursor(state, canvas, swatches) {
         })
         if (state.mode === "erase") {
           vectorGui.drawCursorBox(state, canvas, 1)
-          // vectorGui.drawSelectOutline(state, canvas, 0.5)
+          // vectorGui.drawSelectOutline(state, canvas, state.selectPixelSet, 0.5)
         }
       } else {
         renderCanvas()

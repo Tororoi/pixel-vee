@@ -11,6 +11,8 @@ export const state = {
   //timeline
   pointsSet: null,
   maskSet: null,
+  selectPixelPoints: null,
+  selectCornersSet: null,
   points: [],
   action: null, //object with tool, mode, properties, layer, hidden, removed, points. points will have x, y, color, brush info
   undoStack: [],
