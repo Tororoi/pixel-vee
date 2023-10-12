@@ -347,7 +347,7 @@ export function renderLayersToDOM() {
 export function renderVectorsToDOM() {
   dom.vectorsThumbnails.innerHTML = ""
   state.undoStack.forEach((action) => {
-    if (!action.removed && !action.layer.removed) {
+    if (!action.removed && !action.layer?.removed) {
       if (action.tool.type === "vector") {
         action.index = state.undoStack.indexOf(action)
         let vectorElement = document.createElement("div")
