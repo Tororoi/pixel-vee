@@ -454,29 +454,6 @@ export function renderVectorsToDOM() {
         }
         canvas.thumbnailCTX.globalCompositeOperation = "xor"
         canvas.thumbnailCTX.stroke()
-        // //fill top
-        // canvas.thumbnailCTX.fillRect(0, 0, canvas.thumbnailCVS.width, yOffset)
-        // //fill left
-        // canvas.thumbnailCTX.fillRect(
-        //   0,
-        //   0,
-        //   xOffset,
-        //   minD * canvas.offScreenCVS.height
-        // )
-        // //fill right
-        // canvas.thumbnailCTX.fillRect(
-        //   minD * canvas.offScreenCVS.width + xOffset,
-        //   0,
-        //   canvas.thumbnailCVS.width,
-        //   minD * canvas.offScreenCVS.height
-        // )
-        // //fill bottom
-        // canvas.thumbnailCTX.fillRect(
-        //   0,
-        //   minD * canvas.offScreenCVS.height,
-        //   canvas.thumbnailCVS.width,
-        //   canvas.thumbnailCVS.height
-        // )
         let thumb = new Image()
         thumb.src = canvas.thumbnailCVS.toDataURL()
         thumb.alt = `thumb ${action.index}`
