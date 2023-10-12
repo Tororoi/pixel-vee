@@ -300,6 +300,12 @@ function removeLayer(layer) {
   //set "removed" flag to true on selected layer.
   if (canvas.activeLayerCount > 1) {
     layer.removed = true
+    if (layer === canvas.currentLayer) {
+      canvas.currentLayer = canvas.layers.find(
+        (l) => l.type === "raster" && !l.removed
+      )
+      vectorGui.reset(canvas)
+    }
     state.addToTimeline({
       tool: tools.removeLayer,
       layer,
@@ -308,6 +314,7 @@ function removeLayer(layer) {
     state.action = null
     state.redoStack = []
     renderLayersToDOM()
+    renderVectorsToDOM()
   }
 }
 

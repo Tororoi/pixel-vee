@@ -56,6 +56,8 @@ export function activateShortcut(keyCode) {
     case "ShiftRight":
       if (dom.toolBtn.id === "brush") {
         state.tool.options.line = true
+        state.lineStartX = state.cursorX
+        state.lineStartY = state.cursorY
       } else if (dom.toolBtn.id === "ellipse") {
         state.vectorProperties.forceCircle = true
         if (

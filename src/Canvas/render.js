@@ -131,12 +131,10 @@ function redrawTimelineActions(index = null) {
             action.properties.px2,
             action.properties.py2,
             action.color,
-            action.layer.cvs,
             action.layer.ctx,
             action.mode,
             action.brushStamp,
-            action.brushSize,
-            imageData
+            action.brushSize
           )
           break
         case "quadCurve":
@@ -349,7 +347,7 @@ export function renderLayersToDOM() {
 export function renderVectorsToDOM() {
   dom.vectorsThumbnails.innerHTML = ""
   state.undoStack.forEach((action) => {
-    if (!action.removed) {
+    if (!action.removed && !action.layer.removed) {
       if (action.tool.type === "vector") {
         action.index = state.undoStack.indexOf(action)
         let vectorElement = document.createElement("div")

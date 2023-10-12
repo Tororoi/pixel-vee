@@ -65,6 +65,9 @@ function handleKeyUp(e) {
 
   if (e.code === "ShiftLeft" || e.code === "ShiftRight") {
     tools.brush.options.line = false
+    if (state.tool.name === "brush" && state.clicked) {
+      state.tool.fn()
+    }
     state.vectorProperties.forceCircle = false
     if (
       (vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey) &&
@@ -221,11 +224,11 @@ function handlePointerMove(e) {
       renderCursor(state, canvas, swatches)
     }
   }
-  if (!state.tool.options.line) {
-    // save last point
-    state.previousX = state.cursorX
-    state.previousY = state.cursorY
-  }
+  // if (!state.tool.options.line) {
+  // save last point
+  state.previousX = state.cursorX
+  state.previousY = state.cursorY
+  // }
   canvas.previousSubPixelX = canvas.subPixelX
   canvas.previousSubPixelY = canvas.subPixelY
 }

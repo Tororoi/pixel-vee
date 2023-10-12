@@ -55,7 +55,7 @@ function handleRecenter() {
 
 //Non-tool action.
 function handleClearCanvas() {
-  actionClear()
+  actionClear(canvas.currentLayer)
   //FIX: restructure stacked items. Currently each is an array, but each should be an object with more info plus an array
   //TODO: set all actions to hidden
   state.undoStack.push(state.action)

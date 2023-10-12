@@ -101,11 +101,11 @@ export function removeAction(actionIndex) {
  * Modify actions in the timeline
  * Sets all actions before it except for action index 0 to removed = true
  */
-export function actionClear() {
+export function actionClear(layer) {
   let upToIndex = state.undoStack.length - 1
   state.addToTimeline({
     tool: tools.clear,
-    layer: canvas.currentLayer,
+    layer: layer,
     properties: {
       //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
       upToIndex,
@@ -118,7 +118,7 @@ export function actionClear() {
       return
     }
     i++
-    if (action.layer === canvas.currentLayer) {
+    if (action.layer === layer) {
       action.removed = true
     }
   })

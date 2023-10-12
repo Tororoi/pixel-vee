@@ -32,251 +32,6 @@ import { checkPixelAlreadyDrawn } from "../utils/drawHelpers.js"
 //====================================//
 
 //"Steps" functions are controllers for the process
-
-/**
- * Supported modes: "draw, erase, perfect",
- */
-export function putSteps(ignoreInvisible = false) {
-  switch (canvas.pointerEvent) {
-    case "pointerdown":
-      if (state.mode === "erase") {
-        drawSteps()
-      } else {
-        if (state.tool.name !== "replace") {
-          //create new layer temporarily
-          const layer = createNewRasterLayer("Temporary Drawing Layer")
-          //get imageData
-          state.localColorLayer = layer.ctx.createImageData(
-            canvas.currentLayer.cvs.width,
-            canvas.currentLayer.cvs.height
-          )
-          //store reference to current layer
-          canvas.tempLayer = canvas.currentLayer
-          //layer must be in canvas.layers for draw to show in real time
-          const currentLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
-          //add layer at position just on top of current layer
-          canvas.layers.splice(currentLayerIndex + 1, 0, layer)
-          //set new layer to current layer so it can be drawn onto
-          canvas.currentLayer = layer
-        }
-        state.pointsSet = new Set()
-        actionPut(
-          state.cursorX,
-          state.cursorY,
-          swatches.primary.color,
-          state.brushStamp,
-          state.tool.brushSize,
-          canvas.currentLayer.cvs,
-          canvas.currentLayer.ctx,
-          state.mode,
-          state.localColorLayer,
-          ignoreInvisible,
-          state.pointsSet,
-          state.points
-        )
-        //for perfect pixels
-        state.lastDrawnX = state.cursorX
-        state.lastDrawnY = state.cursorY
-        state.waitingPixelX = state.cursorX
-        state.waitingPixelY = state.cursorY
-        renderCanvas()
-      }
-      break
-    case "pointermove":
-      if (state.mode === "erase") {
-        drawSteps()
-      } else {
-        if (state.mode === "perfect") {
-          renderCanvas((ctx) => {
-            actionDraw(
-              state.cursorX,
-              state.cursorY,
-              swatches.primary.color,
-              state.brushStamp,
-              state.tool.brushSize,
-              ctx,
-              state.mode,
-              state.pointsSet,
-              null,
-              true //excludeFromSet
-            )
-          })
-        }
-        if (
-          state.previousX !== state.cursorX ||
-          state.previousY !== state.cursorY
-        ) {
-          //draw between points when drawing fast
-          if (
-            Math.abs(state.cursorX - state.previousX) > 1 ||
-            Math.abs(state.cursorY - state.previousY) > 1
-          ) {
-            let angle = getAngle(
-              state.cursorX - state.previousX,
-              state.cursorY - state.previousY
-            ) // angle of line
-            let tri = getTriangle(
-              state.previousX,
-              state.previousY,
-              state.cursorX,
-              state.cursorY,
-              angle
-            )
-
-            for (let i = 0; i < tri.long; i++) {
-              let thispoint = {
-                x: Math.round(state.previousX + tri.x * i),
-                y: Math.round(state.previousY + tri.y * i),
-              }
-              // for each point along the line
-              actionPut(
-                thispoint.x,
-                thispoint.y,
-                swatches.primary.color,
-                state.brushStamp,
-                state.tool.brushSize,
-                canvas.currentLayer.cvs,
-                canvas.currentLayer.ctx,
-                state.mode,
-                state.localColorLayer,
-                ignoreInvisible,
-                state.pointsSet,
-                state.points
-              )
-            }
-            //fill endpoint
-            actionPut(
-              state.cursorX,
-              state.cursorY,
-              swatches.primary.color,
-              state.brushStamp,
-              state.tool.brushSize,
-              canvas.currentLayer.cvs,
-              canvas.currentLayer.ctx,
-              state.mode,
-              state.localColorLayer,
-              ignoreInvisible,
-              state.pointsSet,
-              state.points
-            )
-            renderCanvas()
-          } else {
-            //FIX: perfect will be option, not mode
-            if (state.mode === "perfect") {
-              renderCanvas((ctx) => {
-                actionDraw(
-                  state.cursorX,
-                  state.cursorY,
-                  swatches.primary.color,
-                  state.brushStamp,
-                  state.tool.brushSize,
-                  ctx,
-                  state.mode,
-                  state.pointsSet,
-                  null,
-                  true
-                )
-              })
-              //if currentPixel not neighbor to lastDrawn and has not already been drawn, draw waitingpixel
-              if (
-                Math.abs(state.cursorX - state.lastDrawnX) > 1 ||
-                Math.abs(state.cursorY - state.lastDrawnY) > 1
-              ) {
-                actionPut(
-                  state.waitingPixelX,
-                  state.waitingPixelY,
-                  swatches.primary.color,
-                  state.brushStamp,
-                  state.tool.brushSize,
-                  canvas.currentLayer.cvs,
-                  canvas.currentLayer.ctx,
-                  state.mode,
-                  state.localColorLayer,
-                  ignoreInvisible,
-                  state.pointsSet,
-                  state.points
-                )
-                //update queue
-                state.lastDrawnX = state.waitingPixelX
-                state.lastDrawnY = state.waitingPixelY
-                state.waitingPixelX = state.cursorX
-                state.waitingPixelY = state.cursorY
-                renderCanvas()
-              } else {
-                state.waitingPixelX = state.cursorX
-                state.waitingPixelY = state.cursorY
-              }
-            } else {
-              actionPut(
-                state.cursorX,
-                state.cursorY,
-                swatches.primary.color,
-                state.brushStamp,
-                state.tool.brushSize,
-                canvas.currentLayer.cvs,
-                canvas.currentLayer.ctx,
-                state.mode,
-                state.localColorLayer,
-                ignoreInvisible,
-                state.pointsSet,
-                state.points
-              )
-              renderCanvas()
-            }
-          }
-        }
-      }
-      break
-    case "pointerup":
-      if (state.mode === "erase") {
-        drawSteps()
-      } else {
-        //only needed if perfect pixels option is on
-        actionPut(
-          state.cursorX,
-          state.cursorY,
-          swatches.primary.color,
-          state.brushStamp,
-          state.tool.brushSize,
-          canvas.currentLayer.cvs,
-          canvas.currentLayer.ctx,
-          state.mode,
-          state.localColorLayer,
-          ignoreInvisible,
-          state.pointsSet,
-          state.points
-        )
-        if (state.mode !== "inject" && state.tool.name !== "replace") {
-          canvas.tempLayer.ctx.drawImage(canvas.currentLayer.cvs, 0, 0)
-          //save only the changed pixels to image
-          let image = new Image()
-          image.src = canvas.currentLayer.cvs.toDataURL()
-          // savePointsForSpecificColor(canvas.currentLayer, canvas.tempLayer)
-          //Remove the Replacement Layer from the array of layers
-          const drawnLayerIndex = canvas.layers.indexOf(canvas.currentLayer)
-          canvas.layers.splice(drawnLayerIndex, 1)
-          //Set the current layer back to the correct layer
-          canvas.currentLayer = canvas.tempLayer
-          canvas.tempLayer = null
-          state.addToTimeline({
-            tool: state.tool,
-            layer: canvas.currentLayer,
-            properties: {
-              image,
-              width: canvas.currentLayer.cvs.width,
-              height: canvas.currentLayer.cvs.height,
-            },
-          })
-        }
-        renderCanvas()
-        state.localColorLayer = null
-      }
-      break
-    default:
-    //do nothing
-  }
-}
-
 /**
  * Supported modes: "draw, erase, perfect, inject",
  */
@@ -313,8 +68,8 @@ export function drawSteps() {
       if (state.tool.options.line) {
         renderCanvas((ctx) => {
           actionLine(
-            state.previousX,
-            state.previousY,
+            state.lineStartX,
+            state.lineStartY,
             state.cursorX,
             state.cursorY,
             swatches.primary.color,
@@ -327,15 +82,20 @@ export function drawSteps() {
         })
       } else if (
         Math.abs(state.cursorX - state.previousX) > 1 ||
-        Math.abs(state.cursorY - state.previousY) > 1
+        Math.abs(state.cursorY - state.previousY) > 1 ||
+        (state.lineStartX !== null && state.lineStartY !== null)
       ) {
+        let lineStartX =
+          state.lineStartX !== null ? state.lineStartX : state.previousX
+        let lineStartY =
+          state.lineStartY !== null ? state.lineStartY : state.previousY
         let angle = getAngle(
-          state.cursorX - state.previousX,
-          state.cursorY - state.previousY
+          state.cursorX - lineStartX,
+          state.cursorY - lineStartY
         ) // angle of line
         let tri = getTriangle(
-          state.previousX,
-          state.previousY,
+          lineStartX,
+          lineStartY,
           state.cursorX,
           state.cursorY,
           angle
@@ -343,8 +103,8 @@ export function drawSteps() {
 
         for (let i = 0; i < tri.long; i++) {
           let thispoint = {
-            x: Math.round(state.previousX + tri.x * i),
-            y: Math.round(state.previousY + tri.y * i),
+            x: Math.round(lineStartX + tri.x * i),
+            y: Math.round(lineStartY + tri.y * i),
           }
           // for each point along the line
           actionDraw(
@@ -359,6 +119,9 @@ export function drawSteps() {
             state.points
           )
         }
+        //Reset lineStart Coords
+        state.lineStartX = null
+        state.lineStartY = null
         //fill endpoint
         actionDraw(
           state.cursorX,
@@ -464,15 +227,20 @@ export function drawSteps() {
     case "pointerup":
       if (
         Math.abs(state.cursorX - state.previousX) > 1 ||
-        Math.abs(state.cursorY - state.previousY) > 1
+        Math.abs(state.cursorY - state.previousY) > 1 ||
+        (state.lineStartX !== null && state.lineStartY !== null)
       ) {
+        let lineStartX =
+          state.lineStartX !== null ? state.lineStartX : state.previousX
+        let lineStartY =
+          state.lineStartY !== null ? state.lineStartY : state.previousY
         let angle = getAngle(
-          state.cursorX - state.previousX,
-          state.cursorY - state.previousY
+          state.cursorX - lineStartX,
+          state.cursorY - lineStartY
         ) // angle of line
         let tri = getTriangle(
-          state.previousX,
-          state.previousY,
+          lineStartX,
+          lineStartY,
           state.cursorX,
           state.cursorY,
           angle
@@ -480,8 +248,8 @@ export function drawSteps() {
 
         for (let i = 0; i < tri.long; i++) {
           let thispoint = {
-            x: Math.round(state.previousX + tri.x * i),
-            y: Math.round(state.previousY + tri.y * i),
+            x: Math.round(lineStartX + tri.x * i),
+            y: Math.round(lineStartY + tri.y * i),
           }
           // for each point along the line
           actionDraw(
@@ -496,6 +264,9 @@ export function drawSteps() {
             state.points
           )
         }
+        //Reset lineStart Coords
+        state.lineStartX = null
+        state.lineStartY = null
         //fill endpoint
         actionDraw(
           state.cursorX,
