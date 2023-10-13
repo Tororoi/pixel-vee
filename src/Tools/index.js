@@ -5,7 +5,6 @@ import { swatches } from "../Context/swatch.js"
 import {
   modifyAction,
   actionDraw,
-  actionPut,
   actionLine,
   actionFill,
   actionQuadraticCurve,
@@ -940,7 +939,6 @@ export function adjustCurveSteps(numPoints = 4) {
           yKey: vectorGui.collidedKeys.yKey,
         }
         state.undoStack[canvas.currentVectorIndex].hidden = true
-        // renderCanvas(null, true, true)
         if (numPoints === 3) {
           renderCanvas(
             (ctx) => {
@@ -993,49 +991,41 @@ export function adjustCurveSteps(numPoints = 4) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         if (numPoints === 3) {
-          renderCanvas(
-            (ctx) => {
-              actionQuadraticCurve(
-                state.vectorProperties.px1,
-                state.vectorProperties.py1,
-                state.vectorProperties.px2,
-                state.vectorProperties.py2,
-                state.vectorProperties.px3,
-                state.vectorProperties.py3,
-                3,
-                state.undoStack[canvas.currentVectorIndex].color,
-                ctx,
-                state.undoStack[canvas.currentVectorIndex].mode,
-                state.undoStack[canvas.currentVectorIndex].brushStamp,
-                state.undoStack[canvas.currentVectorIndex].brushSize
-              )
-            },
-            true,
-            true
-          )
+          renderCanvas((ctx) => {
+            actionQuadraticCurve(
+              state.vectorProperties.px1,
+              state.vectorProperties.py1,
+              state.vectorProperties.px2,
+              state.vectorProperties.py2,
+              state.vectorProperties.px3,
+              state.vectorProperties.py3,
+              3,
+              state.undoStack[canvas.currentVectorIndex].color,
+              ctx,
+              state.undoStack[canvas.currentVectorIndex].mode,
+              state.undoStack[canvas.currentVectorIndex].brushStamp,
+              state.undoStack[canvas.currentVectorIndex].brushSize
+            )
+          })
         } else {
-          renderCanvas(
-            (ctx) => {
-              actionCubicCurve(
-                state.vectorProperties.px1,
-                state.vectorProperties.py1,
-                state.vectorProperties.px2,
-                state.vectorProperties.py2,
-                state.vectorProperties.px3,
-                state.vectorProperties.py3,
-                state.vectorProperties.px4,
-                state.vectorProperties.py4,
-                4,
-                state.undoStack[canvas.currentVectorIndex].color,
-                ctx,
-                state.undoStack[canvas.currentVectorIndex].mode,
-                state.undoStack[canvas.currentVectorIndex].brushStamp,
-                state.undoStack[canvas.currentVectorIndex].brushSize
-              )
-            },
-            true,
-            true
-          )
+          renderCanvas((ctx) => {
+            actionCubicCurve(
+              state.vectorProperties.px1,
+              state.vectorProperties.py1,
+              state.vectorProperties.px2,
+              state.vectorProperties.py2,
+              state.vectorProperties.px3,
+              state.vectorProperties.py3,
+              state.vectorProperties.px4,
+              state.vectorProperties.py4,
+              4,
+              state.undoStack[canvas.currentVectorIndex].color,
+              ctx,
+              state.undoStack[canvas.currentVectorIndex].mode,
+              state.undoStack[canvas.currentVectorIndex].brushStamp,
+              state.undoStack[canvas.currentVectorIndex].brushSize
+            )
+          })
         }
       }
       break

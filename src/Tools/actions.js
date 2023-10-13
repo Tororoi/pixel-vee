@@ -160,14 +160,16 @@ export function actionDraw(
       brushSize,
     })
   }
-  brushStamp.forEach((pixel) => {
-    const x = Math.ceil(coordX - brushSize / 2) + pixel.x
-    const y = Math.ceil(coordY - brushSize / 2) + pixel.y
+  const baseX = Math.ceil(coordX - brushSize / 2)
+  const baseY = Math.ceil(coordY - brushSize / 2)
+  for (const pixel of brushStamp) {
+    const x = baseX + pixel.x
+    const y = baseY + pixel.y
 
     if (seenPointsSet) {
       const key = `${x},${y}`
       if (seenPointsSet.has(key)) {
-        return // skip this point
+        continue // skip this point
       }
       if (!excludeFromSet) {
         seenPointsSet.add(key)
@@ -184,76 +186,11 @@ export function actionDraw(
       default:
         ctx.fillRect(x, y, 1, 1)
     }
-  })
-}
-
-/**
- * Render a stamp from the brush to the canvas
- * Depending on a special option, color could be put directly to canvas or rendered to an offscreen canvas first (rasterGuiCVS)
- * @param {*} coordX
- * @param {*} coordY
- * @param {*} currentColor
- * @param {*} brushStamp
- * @param {*} brushSize
- * @param {*} cvs
- * @param {*} ctx
- * @param {*} currentMode
- * @param {*} imageData
- * @param {*} ignoreInvisible
- * @param {Set} seenPointsSet
- * @param {Array} points
- */
-export function actionPut(
-  coordX,
-  coordY,
-  currentColor,
-  brushStamp,
-  brushSize,
-  cvs,
-  ctx,
-  currentMode,
-  imageData,
-  ignoreInvisible = false,
-  seenPointsSet = null,
-  points = null
-) {
-  if (points) {
-    points.push({
-      x: coordX,
-      y: coordY,
-      color: { ...currentColor },
-      brushStamp,
-      brushSize,
-    })
   }
-  if (currentMode === "erase")
-    currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
-  brushStamp.forEach((p) => {
-    //for each rectangle, given the center point of the overall brush at coordX and coordY, find the pixel's position
-    let x = Math.ceil(coordX - brushSize / 2) + p.x
-    let y = Math.ceil(coordY - brushSize / 2) + p.y
-    // check that pixel is inside canvas area or else it will roll over on image data
-    if (x < cvs.width && x >= 0 && y < cvs.height && y >= 0) {
-      if (seenPointsSet) {
-        const key = `${x},${y}`
-        if (seenPointsSet.has(key)) {
-          return // skip this point
-        }
-        seenPointsSet.add(key)
-      }
-      let pixelPos = (y * cvs.width + x) * 4
-      //ignore pixels that are already 0 opacity unless !ignoreInvisible
-      if (imageData.data[pixelPos + 3] !== 0 || !ignoreInvisible) {
-        colorPixel(imageData, pixelPos, currentColor)
-      }
-    }
-  })
-  ctx.putImageData(imageData, 0, 0)
 }
 
 /**
  * Draws a pixel perfect line from point a to point b
- * TODO: use actionPut but also create a tempLayer so pixels aren't replaced
  * @param {*} sx
  * @param {*} sy
  * @param {*} tx
@@ -432,12 +369,11 @@ function renderPoints(
   currentMode
 ) {
   const seen = new Set()
-  function plot(point) {
+  for (const { x, y } of points) {
     //rounded values
-    let xt = Math.floor(point.x)
-    let yt = Math.floor(point.y)
-    // let randomColor = generateRandomRGB()
-    //pass "point" instead of currentColor to visualize segments
+    let xt = Math.floor(x)
+    let yt = Math.floor(y)
+
     actionDraw(
       xt,
       yt,
@@ -449,7 +385,6 @@ function renderPoints(
       seen
     )
   }
-  points.forEach((point) => plot(point))
 }
 
 /**
@@ -728,7 +663,6 @@ export function actionEllipse(
   yb = Math.floor(yb)
 
   ctx.fillStyle = currentColor.color
-
   if (forceCircle) {
     let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, offset)
     renderPoints(
