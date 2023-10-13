@@ -39,6 +39,7 @@ export function drawSteps() {
     case "pointerdown":
       if (state.tool.name !== "replace") {
         state.pointsSet = new Set()
+        state.drawnPointsSet = new Set()
       }
       //For line
       state.lineStartX = state.cursorX
@@ -52,7 +53,7 @@ export function drawSteps() {
         state.tool.brushSize,
         canvas.currentLayer.ctx,
         state.mode,
-        state.pointsSet,
+        state.drawnPointsSet,
         state.points
       )
       //for perfect pixels
@@ -76,7 +77,7 @@ export function drawSteps() {
             state.mode,
             state.brushStamp,
             state.tool.brushSize,
-            state.pointsSet
+            state.drawnPointsSet
           )
         })
       } else if (
@@ -114,7 +115,7 @@ export function drawSteps() {
             state.tool.brushSize,
             canvas.currentLayer.ctx,
             state.mode,
-            state.pointsSet,
+            state.drawnPointsSet,
             state.points
           )
         }
@@ -130,7 +131,7 @@ export function drawSteps() {
           state.tool.brushSize,
           canvas.currentLayer.ctx,
           state.mode,
-          state.pointsSet,
+          state.drawnPointsSet,
           state.points
         )
         if (state.mode === "perfect") {
@@ -143,7 +144,7 @@ export function drawSteps() {
               state.tool.brushSize,
               ctx,
               state.mode,
-              state.pointsSet,
+              state.drawnPointsSet,
               null,
               true
             )
@@ -167,7 +168,7 @@ export function drawSteps() {
               state.tool.brushSize,
               canvas.currentLayer.ctx,
               state.mode,
-              state.pointsSet,
+              state.drawnPointsSet,
               state.points
             )
             //update queue
@@ -184,7 +185,7 @@ export function drawSteps() {
                 state.tool.brushSize,
                 ctx,
                 state.mode,
-                state.pointsSet,
+                state.drawnPointsSet,
                 null,
                 true
               )
@@ -201,7 +202,7 @@ export function drawSteps() {
                 state.tool.brushSize,
                 ctx,
                 state.mode,
-                state.pointsSet,
+                state.drawnPointsSet,
                 null,
                 true
               )
@@ -216,7 +217,7 @@ export function drawSteps() {
             state.tool.brushSize,
             canvas.currentLayer.ctx,
             state.mode,
-            state.pointsSet,
+            state.drawnPointsSet,
             state.points
           )
           renderCanvas()
@@ -259,7 +260,7 @@ export function drawSteps() {
             state.tool.brushSize,
             canvas.currentLayer.ctx,
             state.mode,
-            state.pointsSet,
+            state.drawnPointsSet,
             state.points
           )
         }
@@ -275,7 +276,7 @@ export function drawSteps() {
           state.tool.brushSize,
           canvas.currentLayer.ctx,
           state.mode,
-          state.pointsSet,
+          state.drawnPointsSet,
           state.points
         )
       }
@@ -288,7 +289,7 @@ export function drawSteps() {
         state.tool.brushSize,
         canvas.currentLayer.ctx,
         state.mode,
-        state.pointsSet,
+        state.drawnPointsSet,
         state.points
       )
 
@@ -315,6 +316,7 @@ export function replaceSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       state.pointsSet = new Set()
+      state.drawnPointsSet = new Set()
       //create mask set
       state.colorLayerGlobal = canvas.currentLayer.ctx.getImageData(
         0,
@@ -356,11 +358,11 @@ export function replaceSteps() {
             color.a !== matchColor.a
           ) {
             const key = `${x},${y}`
-            state.pointsSet.add(key)
+            state.drawnPointsSet.add(key)
           }
         }
       }
-      state.maskSet = new Set(state.pointsSet)
+      state.maskSet = new Set(state.drawnPointsSet)
       drawSteps()
       break
     case "pointermove":

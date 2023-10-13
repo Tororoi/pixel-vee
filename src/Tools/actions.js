@@ -152,13 +152,16 @@ export function actionDraw(
 ) {
   ctx.fillStyle = currentColor.color
   if (points) {
-    points.push({
-      x: coordX,
-      y: coordY,
-      color: { ...currentColor },
-      brushStamp,
-      brushSize,
-    })
+    if (!state.pointsSet.has(`${coordX},${coordY}`)) {
+      points.push({
+        x: coordX,
+        y: coordY,
+        color: { ...currentColor },
+        brushStamp,
+        brushSize,
+      })
+      state.pointsSet.add(`${coordX},${coordY}`)
+    }
   }
   const baseX = Math.ceil(coordX - brushSize / 2)
   const baseY = Math.ceil(coordY - brushSize / 2)

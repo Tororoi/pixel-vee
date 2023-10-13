@@ -99,8 +99,9 @@ function redrawTimelineActions(index = null) {
           break
         case "brush":
           //actionDraw
+          let begin = performance.now()
           const seen = new Set()
-          action.properties.points.forEach((p) => {
+          for (const p of action.properties.points) {
             action.tool.action(
               p.x,
               p.y,
@@ -111,7 +112,28 @@ function redrawTimelineActions(index = null) {
               action.mode,
               seen
             )
-          })
+            //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster:
+            // action.layer.ctx.fillStyle = p.color
+            // let x = p.x
+            // let y = p.y
+            // const key = `${x},${y}`
+            // if (!seen.has(key)) {
+            //   seen.add(key)
+            //   switch (action.mode) {
+            //     case "erase":
+            //       action.layer.ctx.clearRect(x, y, 1, 1)
+            //       break
+            //     case "inject":
+            //       action.layer.ctx.clearRect(x, y, 1, 1)
+            //       action.layer.ctx.fillRect(x, y, 1, 1)
+            //       break
+            //     default:
+            //       action.layer.ctx.fillRect(x, y, 1, 1)
+            //   }
+            // }
+          }
+          let end = performance.now()
+          console.log(end - begin, action.properties.points.length)
           break
         case "fill":
           //actionFill

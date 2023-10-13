@@ -36,7 +36,7 @@ export function renderCursor(state, canvas, swatches) {
             state.tool.brushSize,
             ctx,
             state.mode,
-            state.pointsSet,
+            state.drawnPointsSet,
             null,
             true
           )

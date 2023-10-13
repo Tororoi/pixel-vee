@@ -10,6 +10,7 @@ export const state = {
   vectorMode: true,
   //timeline
   pointsSet: null,
+  drawnPointsSet: null,
   maskSet: null,
   selectPixelPoints: null,
   selectCornersSet: null,

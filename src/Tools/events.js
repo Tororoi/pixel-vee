@@ -61,6 +61,7 @@ function handleClearCanvas() {
   state.undoStack.push(state.action)
   state.action = null
   state.pointsSet = null
+  state.drawnPointsSet = null
   state.points = []
   state.redoStack = []
   canvas.currentLayer.ctx.clearRect(
