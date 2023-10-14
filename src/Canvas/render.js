@@ -99,7 +99,6 @@ function redrawTimelineActions(index = null) {
           break
         case "brush":
           //actionDraw
-          let begin = performance.now()
           const seen = new Set()
           for (const p of action.properties.points) {
             action.tool.action(
@@ -132,8 +131,6 @@ function redrawTimelineActions(index = null) {
             //   }
             // }
           }
-          let end = performance.now()
-          console.log(end - begin, action.properties.points.length)
           break
         case "fill":
           //actionFill
@@ -308,25 +305,27 @@ export function renderCanvas(
   redrawTimeline = false,
   index = null
 ) {
-  if (clearCanvas) {
-    //clear offscreen layers
-    canvas.layers.forEach((l) => {
-      if (l.type === "raster") {
-        l.ctx.clearRect(
-          0,
-          0,
-          canvas.offScreenCVS.width,
-          canvas.offScreenCVS.height
-        )
-      }
-    })
-  }
-  if (redrawTimeline) {
-    //render all previous actions
-    redrawTimelineActions(index)
-  }
-  //draw onto onscreen canvas
-  drawCanvasLayers(renderPreview)
+  window.requestAnimationFrame(() => {
+    if (clearCanvas) {
+      //clear offscreen layers
+      canvas.layers.forEach((l) => {
+        if (l.type === "raster") {
+          l.ctx.clearRect(
+            0,
+            0,
+            canvas.offScreenCVS.width,
+            canvas.offScreenCVS.height
+          )
+        }
+      })
+    }
+    if (redrawTimeline) {
+      //render all previous actions
+      redrawTimelineActions(index)
+    }
+    //draw onto onscreen canvas
+    drawCanvasLayers(renderPreview)
+  })
 }
 
 export function renderLayersToDOM() {
