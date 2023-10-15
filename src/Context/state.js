@@ -71,6 +71,13 @@ export const state = {
     y1Offset: 0,
     forceCircle: false,
   },
+  //for select tool
+  selectProperties: {
+    px1: null,
+    py1: null,
+    px2: null,
+    py2: null,
+  },
   //for perfect pixels
   lastDrawnX: null,
   lastDrawnY: null,

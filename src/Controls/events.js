@@ -89,7 +89,8 @@ function handleKeyUp(e) {
     dom.toolBtn.id === "cubicCurve" ||
     dom.toolBtn.id === "ellipse" ||
     dom.toolBtn.id === "fill" ||
-    dom.toolBtn.id === "line"
+    dom.toolBtn.id === "line" ||
+    dom.toolBtn.id === "select"
   ) {
     if (dom.modeBtn.id === "erase") {
       canvas.vectorGuiCVS.style.cursor = "none"

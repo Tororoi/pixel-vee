@@ -24,6 +24,9 @@ export function renderCursor(state, canvas, swatches) {
       //empty square
       vectorGui.drawCursorBox(state, canvas, 2)
       break
+    case "select":
+      //show nothing
+      break
     default:
       //TODO: erase mode is somewhat buggy with rendering. Find way to have it render without calling draw() more than needed.
       if (!vectorGui.collisionPresent) {

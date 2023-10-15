@@ -99,7 +99,10 @@ function redrawTimelineActions(index = null) {
           break
         case "brush":
           //actionDraw
-          const seen = new Set()
+          // const seen = new Set()
+          const seen = action.properties.maskSet
+            ? new Set(action.properties.maskSet)
+            : new Set()
           for (const p of action.properties.points) {
             action.tool.action(
               p.x,
@@ -306,6 +309,7 @@ export function renderCanvas(
   index = null
 ) {
   window.requestAnimationFrame(() => {
+    // let begin = performance.now()
     if (clearCanvas) {
       //clear offscreen layers
       canvas.layers.forEach((l) => {
@@ -325,6 +329,8 @@ export function renderCanvas(
     }
     //draw onto onscreen canvas
     drawCanvasLayers(renderPreview)
+    // let end = performance.now()
+    // console.log(end - begin)
   })
 }
 

@@ -37,10 +37,14 @@ import { checkPixelAlreadyDrawn } from "../utils/drawHelpers.js"
 export function drawSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (state.tool.name !== "replace") {
-        state.pointsSet = new Set()
+      // if (state.tool.name !== "replace") {
+      state.pointsSet = new Set()
+      if (state.maskSet) {
+        state.drawnPointsSet = new Set(state.maskSet)
+      } else {
         state.drawnPointsSet = new Set()
       }
+      // }
       //For line
       state.lineStartX = state.cursorX
       state.lineStartY = state.cursorY
@@ -293,13 +297,11 @@ export function drawSteps() {
         state.points
       )
 
-      if (state.tool.name !== "replace") {
-        state.addToTimeline({
-          tool: state.tool,
-          layer: canvas.currentLayer,
-          properties: { points: state.points },
-        })
-      }
+      state.addToTimeline({
+        tool: state.tool,
+        layer: canvas.currentLayer,
+        properties: { points: state.points, maskSet: state.maskSet },
+      })
       renderCanvas()
       break
     default:
@@ -315,8 +317,8 @@ export function drawSteps() {
 export function replaceSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      state.pointsSet = new Set()
-      state.drawnPointsSet = new Set()
+      // state.pointsSet = new Set()
+      state.maskSet = new Set()
       //create mask set
       state.colorLayerGlobal = canvas.currentLayer.ctx.getImageData(
         0,
@@ -358,11 +360,10 @@ export function replaceSteps() {
             color.a !== matchColor.a
           ) {
             const key = `${x},${y}`
-            state.drawnPointsSet.add(key)
+            state.maskSet.add(key)
           }
         }
       }
-      state.maskSet = new Set(state.drawnPointsSet)
       drawSteps()
       break
     case "pointermove":
@@ -370,11 +371,6 @@ export function replaceSteps() {
       break
     case "pointerup":
       drawSteps()
-      state.addToTimeline({
-        tool: state.tool,
-        layer: canvas.currentLayer,
-        properties: { points: state.points, maskSet: state.maskSet },
-      })
       state.maskSet = null
       break
     case "pointerout":
@@ -400,27 +396,64 @@ export function selectSteps() {
     case "pointerdown":
       //1. set drag origin
       //2. save context
-      state.selectPixelPoints = []
-      for (const pixel of state.brushStamp) {
-        state.selectPixelPoints[`${pixel.x},${pixel.y}`] = {
-          x: pixel.x,
-          y: pixel.y,
-        }
-      }
-      state.selectCornersSet = new Set()
-      for (const pixel of state.brushStamp) {
-        state.selectCornersSet.add(`${pixel.x},${pixel.y}`)
-        state.selectCornersSet.add(`${pixel.x + 1},${pixel.y}`)
-        state.selectCornersSet.add(`${pixel.x},${pixel.y + 1}`)
-        state.selectCornersSet.add(`${pixel.x + 1},${pixel.y + 1}`)
-      }
+      // state.selectPixelPoints = []
+      // for (const pixel of state.brushStamp) {
+      //   state.selectPixelPoints[`${pixel.x},${pixel.y}`] = {
+      //     x: pixel.x,
+      //     y: pixel.y,
+      //   }
+      // }
+      // state.selectCornersSet = new Set()
+      // for (const pixel of state.brushStamp) {
+      //   state.selectCornersSet.add(`${pixel.x},${pixel.y}`)
+      //   state.selectCornersSet.add(`${pixel.x + 1},${pixel.y}`)
+      //   state.selectCornersSet.add(`${pixel.x},${pixel.y + 1}`)
+      //   state.selectCornersSet.add(`${pixel.x + 1},${pixel.y + 1}`)
+      // }
+      // state.maskSet = new Set()
+      state.maskSet = null
+      //reset properties
+      state.selectProperties.px1 = null
+      state.selectProperties.py1 = null
+      state.selectProperties.px2 = null
+      state.selectProperties.py2 = null
+      //set top left corner
+      state.selectProperties.px1 = state.cursorX
+      state.selectProperties.py1 = state.cursorY
       break
     case "pointermove":
       //1. if state.clicked create strokeable path using drag origin and current x/y as opposite corners of rectangle
       //2. stroke outline path with animated "marching ants".
+      state.selectProperties.px2 = state.cursorX
+      state.selectProperties.py2 = state.cursorY
       break
     case "pointerup":
       //1. create clip mask using drag origin and current x/y as opposite corners of rectangle
+      //create maskset
+      state.maskSet = new Set()
+      const { px1, px2, py1, py2 } = state.selectProperties
+      const xMin = Math.min(px1, px2)
+      const xMax = Math.max(px1, px2)
+      const yMin = Math.min(py1, py2)
+      const yMax = Math.max(py1, py2)
+      const width = canvas.currentLayer.cvs.width
+      const height = canvas.currentLayer.cvs.height
+
+      const addMask = (xRange, yRange) => {
+        for (let x = xRange[0]; x < xRange[1]; x++) {
+          for (let y = yRange[0]; y < yRange[1]; y++) {
+            const key = `${x},${y}`
+            state.maskSet.add(key)
+          }
+        }
+      }
+
+      // Add masks for regions outside the rectangular area
+      addMask([0, xMin], [0, height]) // Left region
+      addMask([xMax, width], [0, height]) // Right region
+      addMask([xMin, xMax], [0, yMin]) // Top region between xMin and xMax
+      addMask([xMin, xMax], [yMax, height]) // Bottom region between xMin and xMax
+      //add to timeline the maskSet, p1, p2. undo will unset from state, redo will set to state
       break
     case "pointerout":
       //1. create clip mask using drag origin and last x/y as opposite corners of rectangle

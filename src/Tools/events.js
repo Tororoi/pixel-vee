@@ -106,7 +106,8 @@ export function handleTools(e, manualToolName = null) {
         dom.toolBtn.id === "cubicCurve" ||
         dom.toolBtn.id === "ellipse" ||
         dom.toolBtn.id === "fill" ||
-        dom.toolBtn.id === "line"
+        dom.toolBtn.id === "line" ||
+        dom.toolBtn.id === "select"
       ) {
         if (dom.modeBtn.id === "erase") {
           canvas.vectorGuiCVS.style.cursor = "none"
