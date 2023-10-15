@@ -28,16 +28,6 @@ export function activateShortcut(keyCode) {
         state.debugFn(state.debugObject)
       }
       break
-    case "KeyZ":
-      if (keys.MetaLeft || keys.MetaRight) {
-        if (keys.ShiftLeft || keys.ShiftRight) {
-          //shift+meta+z
-          handleRedo()
-        } else {
-          handleUndo()
-        }
-      }
-      break
     case "MetaLeft":
     case "MetaRight":
       //command key
@@ -72,42 +62,6 @@ export function activateShortcut(keyCode) {
         }
       }
       break
-    case "KeyS":
-      randomizeColor(swatches.primary.swatch)
-      break
-    case "KeyD":
-      //reset old button
-      dom.modeBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.modeBtn = document.querySelector("#draw")
-      dom.modeBtn.style.background = "rgb(255, 255, 255)"
-      state.mode = "draw"
-      break
-    case "KeyE":
-      //reset old button
-      dom.modeBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.modeBtn = document.querySelector("#erase")
-      dom.modeBtn.style.background = "rgb(255, 255, 255)"
-      state.mode = "erase"
-      canvas.vectorGuiCVS.style.cursor = "none"
-      break
-    case "KeyP":
-      //reset old button
-      dom.modeBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.modeBtn = document.querySelector("#perfect")
-      dom.modeBtn.style.background = "rgb(255, 255, 255)"
-      state.mode = "perfect"
-      break
-    case "KeyI":
-      //reset old button
-      dom.modeBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.modeBtn = document.querySelector("#inject")
-      dom.modeBtn.style.background = "rgb(255, 255, 255)"
-      state.mode = "inject"
-      break
     case "KeyB":
       //reset old button
       dom.toolBtn.style.background = "rgb(131, 131, 131)"
@@ -120,6 +74,98 @@ export function activateShortcut(keyCode) {
       } else {
         canvas.vectorGuiCVS.style.cursor = "crosshair"
       }
+      break
+    case "KeyC":
+      if (keys.MetaLeft || keys.MetaRight) {
+        console.log("copy")
+        //copy function should make an image from the currently selected area defined by
+        //state.selectProperties and store it in state.copiedRaster.image and store x, y in
+        //state.copiedRaster.x, state.copiedRaster.y, along with width and height.
+        //Advanced method would be to save an image from imageData defined by maskSet.
+        // Do not add to timeline
+      } else {
+        //reset old button
+        dom.toolBtn.style.background = "rgb(131, 131, 131)"
+        //set new button
+        dom.toolBtn = document.querySelector("#quadCurve")
+        dom.toolBtn.style.background = "rgb(255, 255, 255)"
+        state.tool = tools["quadCurve"]
+        canvas.vectorGuiCVS.style.cursor = "none"
+      }
+      break
+    case "KeyD":
+      if (keys.MetaLeft || keys.MetaRight) {
+        console.log("deselect")
+        //reset selectProperties in state. Add to and from to timeline and push to undoStack
+      } else {
+        //reset old button
+        dom.modeBtn.style.background = "rgb(131, 131, 131)"
+        //set new button
+        dom.modeBtn = document.querySelector("#draw")
+        dom.modeBtn.style.background = "rgb(255, 255, 255)"
+        state.mode = "draw"
+      }
+      break
+    case "KeyE":
+      //reset old button
+      dom.modeBtn.style.background = "rgb(131, 131, 131)"
+      //set new button
+      dom.modeBtn = document.querySelector("#erase")
+      dom.modeBtn.style.background = "rgb(255, 255, 255)"
+      state.mode = "erase"
+      canvas.vectorGuiCVS.style.cursor = "none"
+      break
+    case "KeyF":
+      //reset old button
+      dom.toolBtn.style.background = "rgb(131, 131, 131)"
+      //set new button
+      dom.toolBtn = document.querySelector("#fill")
+      dom.toolBtn.style.background = "rgb(255, 255, 255)"
+      state.tool = tools["fill"]
+      canvas.vectorGuiCVS.style.cursor = "none"
+      break
+    case "KeyI":
+      //reset old button
+      dom.modeBtn.style.background = "rgb(131, 131, 131)"
+      //set new button
+      dom.modeBtn = document.querySelector("#inject")
+      dom.modeBtn.style.background = "rgb(255, 255, 255)"
+      state.mode = "inject"
+      break
+    case "KeyJ":
+      //reset old button
+      dom.toolBtn.style.background = "rgb(131, 131, 131)"
+      //set new button
+      dom.toolBtn = document.querySelector("#cubicCurve")
+      dom.toolBtn.style.background = "rgb(255, 255, 255)"
+      state.tool = tools["cubicCurve"]
+      canvas.vectorGuiCVS.style.cursor = "none"
+      break
+    case "KeyL":
+      //reset old button
+      dom.toolBtn.style.background = "rgb(131, 131, 131)"
+      //set new button
+      dom.toolBtn = document.querySelector("#line")
+      dom.toolBtn.style.background = "rgb(255, 255, 255)"
+      state.tool = tools["line"]
+      canvas.vectorGuiCVS.style.cursor = "none"
+      break
+    case "KeyO":
+      //reset old button
+      dom.toolBtn.style.background = "rgb(131, 131, 131)"
+      //set new button
+      dom.toolBtn = document.querySelector("#ellipse")
+      dom.toolBtn.style.background = "rgb(255, 255, 255)"
+      state.tool = tools["ellipse"]
+      canvas.vectorGuiCVS.style.cursor = "none"
+      break
+    case "KeyP":
+      //reset old button
+      dom.modeBtn.style.background = "rgb(131, 131, 131)"
+      //set new button
+      dom.modeBtn = document.querySelector("#perfect")
+      dom.modeBtn.style.background = "rgb(255, 255, 255)"
+      state.mode = "perfect"
       break
     case "KeyR":
       //reset old button
@@ -134,50 +180,33 @@ export function activateShortcut(keyCode) {
         canvas.vectorGuiCVS.style.cursor = "crosshair"
       }
       break
-    case "KeyL":
-      //reset old button
-      dom.toolBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.toolBtn = document.querySelector("#line")
-      dom.toolBtn.style.background = "rgb(255, 255, 255)"
-      state.tool = tools["line"]
-      canvas.vectorGuiCVS.style.cursor = "none"
+    case "KeyS":
+      randomizeColor(swatches.primary.swatch)
       break
-    case "KeyF":
-      //reset old button
-      dom.toolBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.toolBtn = document.querySelector("#fill")
-      dom.toolBtn.style.background = "rgb(255, 255, 255)"
-      state.tool = tools["fill"]
-      canvas.vectorGuiCVS.style.cursor = "none"
+    case "KeyV":
+      if (keys.MetaLeft || keys.MetaRight) {
+        console.log("paste")
+        //paste function should create a new raster layer and draw the image from state.copiedRaster.image at state.copiedRaster.x, etc.
+        //activate select tool for area pasted
+        // add image, coordinates and new layer to timeline as "paste" action
+      }
       break
-    case "KeyC":
-      //reset old button
-      dom.toolBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.toolBtn = document.querySelector("#curve")
-      dom.toolBtn.style.background = "rgb(255, 255, 255)"
-      state.tool = tools["quadCurve"]
-      canvas.vectorGuiCVS.style.cursor = "none"
+    case "KeyX":
+      if (keys.MetaLeft || keys.MetaRight) {
+        console.log("cut")
+        //clear selected area, add image to state.copiedRaster, etc.
+        //add to timeline as "eraser" tool for points in selection
+      }
       break
-    case "KeyJ":
-      //reset old button
-      dom.toolBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.toolBtn = document.querySelector("#cubicCurve")
-      dom.toolBtn.style.background = "rgb(255, 255, 255)"
-      state.tool = tools["cubicCurve"]
-      canvas.vectorGuiCVS.style.cursor = "none"
-      break
-    case "KeyO":
-      //reset old button
-      dom.toolBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.toolBtn = document.querySelector("#ellipse")
-      dom.toolBtn.style.background = "rgb(255, 255, 255)"
-      state.tool = tools["ellipse"]
-      canvas.vectorGuiCVS.style.cursor = "none"
+    case "KeyZ":
+      if (keys.MetaLeft || keys.MetaRight) {
+        if (keys.ShiftLeft || keys.ShiftRight) {
+          //shift+meta+z
+          handleRedo()
+        } else {
+          handleUndo()
+        }
+      }
       break
     default:
     //do nothing

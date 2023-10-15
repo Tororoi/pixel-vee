@@ -693,7 +693,8 @@ function renderSelectVector(state, canvas, lineDashOffset) {
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
   canvas.vectorGuiCTX.fillStyle = "white"
-  canvas.vectorGuiCTX.setLineDash([1, 1])
+  canvas.vectorGuiCTX.lineCap = "round"
+  canvas.vectorGuiCTX.setLineDash([lineWidth * 4, lineWidth * 4])
   canvas.vectorGuiCTX.lineDashOffset = lineDashOffset
 
   canvas.vectorGuiCTX.beginPath()
