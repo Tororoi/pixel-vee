@@ -1,9 +1,10 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { swatches } from "../Context/swatch.js"
 import { getAngle } from "../utils/trig.js"
 
-function drawLayers(ctx) {
+function drawLayers(ctx, renderPreview) {
   canvas.layers.forEach((l) => {
     if (!l.removed) {
       if (l.type === "reference") {
@@ -23,9 +24,22 @@ function drawLayers(ctx) {
       } else {
         ctx.save()
         ctx.globalAlpha = l.opacity
+        let drawCVS = l.cvs
+        if (l === canvas.currentLayer && renderPreview) {
+          //render preview of action
+          canvas.previewCTX.clearRect(
+            0,
+            0,
+            canvas.previewCVS.width,
+            canvas.previewCVS.height
+          )
+          canvas.previewCTX.drawImage(l.cvs, 0, 0, l.cvs.width, l.cvs.height)
+          renderPreview(canvas.previewCTX) //Pass function through to here so it can be actionLine or other actions with multiple points
+          drawCVS = canvas.previewCVS
+        }
         //l.x, l.y need to be normalized to the pixel grid
         ctx.drawImage(
-          l.cvs,
+          drawCVS,
           canvas.xOffset +
             (l.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
           canvas.yOffset +
@@ -85,8 +99,11 @@ function redrawTimelineActions(index = null) {
           break
         case "brush":
           //actionDraw
-          const seen = new Set()
-          action.properties.points.forEach((p) => {
+          // const seen = new Set()
+          const seen = action.properties.maskSet
+            ? new Set(action.properties.maskSet)
+            : new Set()
+          for (const p of action.properties.points) {
             action.tool.action(
               p.x,
               p.y,
@@ -97,16 +114,37 @@ function redrawTimelineActions(index = null) {
               action.mode,
               seen
             )
-          })
+            //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster:
+            // action.layer.ctx.fillStyle = p.color
+            // let x = p.x
+            // let y = p.y
+            // const key = `${x},${y}`
+            // if (!seen.has(key)) {
+            //   seen.add(key)
+            //   switch (action.mode) {
+            //     case "erase":
+            //       action.layer.ctx.clearRect(x, y, 1, 1)
+            //       break
+            //     case "inject":
+            //       action.layer.ctx.clearRect(x, y, 1, 1)
+            //       action.layer.ctx.fillRect(x, y, 1, 1)
+            //       break
+            //     default:
+            //       action.layer.ctx.fillRect(x, y, 1, 1)
+            //   }
+            // }
+          }
           break
         case "fill":
           //actionFill
           action.tool.action(
-            action.properties.px1,
-            action.properties.py1,
+            action.properties.vectorProperties.px1,
+            action.properties.vectorProperties.py1,
             action.color,
             action.layer,
-            action.mode
+            action.mode,
+            action.properties.selectProperties,
+            action.properties.maskSet
           )
           break
         case "line":
@@ -117,23 +155,21 @@ function redrawTimelineActions(index = null) {
             action.properties.px2,
             action.properties.py2,
             action.color,
-            action.layer.cvs,
             action.layer.ctx,
             action.mode,
             action.brushStamp,
-            action.brushSize,
-            imageData
+            action.brushSize
           )
           break
         case "quadCurve":
           //actionQuadraticCurve
           action.tool.action(
-            action.properties.px1,
-            action.properties.py1,
-            action.properties.px2,
-            action.properties.py2,
-            action.properties.px3,
-            action.properties.py3,
+            action.properties.vectorProperties.px1,
+            action.properties.vectorProperties.py1,
+            action.properties.vectorProperties.px2,
+            action.properties.vectorProperties.py2,
+            action.properties.vectorProperties.px3,
+            action.properties.vectorProperties.py3,
             3,
             action.color,
             action.layer.ctx,
@@ -146,14 +182,14 @@ function redrawTimelineActions(index = null) {
           //TODO: pass source on history objects to avoid debugging actions from the timeline unless desired
           //actionCubicCurve
           action.tool.action(
-            action.properties.px1,
-            action.properties.py1,
-            action.properties.px2,
-            action.properties.py2,
-            action.properties.px3,
-            action.properties.py3,
-            action.properties.px4,
-            action.properties.py4,
+            action.properties.vectorProperties.px1,
+            action.properties.vectorProperties.py1,
+            action.properties.vectorProperties.px2,
+            action.properties.vectorProperties.py2,
+            action.properties.vectorProperties.px3,
+            action.properties.vectorProperties.py3,
+            action.properties.vectorProperties.px4,
+            action.properties.vectorProperties.py4,
             4,
             action.color,
             action.layer.ctx,
@@ -165,24 +201,24 @@ function redrawTimelineActions(index = null) {
         case "ellipse":
           //actionEllipse
           action.tool.action(
-            action.properties.px1,
-            action.properties.py1,
-            action.properties.px2,
-            action.properties.py2,
-            action.properties.px3,
-            action.properties.py3,
-            action.properties.radA,
-            action.properties.radB,
-            action.properties.forceCircle,
+            action.properties.vectorProperties.px1,
+            action.properties.vectorProperties.py1,
+            action.properties.vectorProperties.px2,
+            action.properties.vectorProperties.py2,
+            action.properties.vectorProperties.px3,
+            action.properties.vectorProperties.py3,
+            action.properties.vectorProperties.radA,
+            action.properties.vectorProperties.radB,
+            action.properties.vectorProperties.forceCircle,
             action.color,
             action.layer.ctx,
             action.mode,
             action.brushStamp,
             action.brushSize,
-            action.properties.angle,
-            action.properties.offset,
-            action.properties.x1Offset,
-            action.properties.y1Offset
+            action.properties.vectorProperties.angle,
+            action.properties.vectorProperties.offset,
+            action.properties.vectorProperties.x1Offset,
+            action.properties.vectorProperties.y1Offset
           )
           break
         case "replace":
@@ -222,7 +258,7 @@ function redrawTimelineActions(index = null) {
 
 //FIX: Improve performance by keeping track of "redraw regions" instead of redrawing the whole thing.
 //Draw Canvas
-function drawCanvasLayers() {
+function drawCanvasLayers(renderPreview) {
   //clear canvas
   canvas.onScreenCTX.clearRect(
     0,
@@ -248,7 +284,7 @@ function drawCanvasLayers() {
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
-  drawLayers(canvas.onScreenCTX)
+  drawLayers(canvas.onScreenCTX, renderPreview)
   //draw border
   canvas.onScreenCTX.beginPath()
   canvas.onScreenCTX.rect(
@@ -269,29 +305,35 @@ function drawCanvasLayers() {
  * @param {*} index - optional parameter to limit render up to a specific action
  */
 export function renderCanvas(
+  renderPreview = null,
   clearCanvas = false,
   redrawTimeline = false,
   index = null
 ) {
-  if (clearCanvas) {
-    //clear offscreen layers
-    canvas.layers.forEach((l) => {
-      if (l.type === "raster") {
-        l.ctx.clearRect(
-          0,
-          0,
-          canvas.offScreenCVS.width,
-          canvas.offScreenCVS.height
-        )
-      }
-    })
-  }
-  if (redrawTimeline) {
-    //render all previous actions
-    redrawTimelineActions(index)
-  }
-  //draw onto onscreen canvas
-  drawCanvasLayers()
+  window.requestAnimationFrame(() => {
+    // let begin = performance.now()
+    if (clearCanvas) {
+      //clear offscreen layers
+      canvas.layers.forEach((l) => {
+        if (l.type === "raster") {
+          l.ctx.clearRect(
+            0,
+            0,
+            canvas.offScreenCVS.width,
+            canvas.offScreenCVS.height
+          )
+        }
+      })
+    }
+    if (redrawTimeline) {
+      //render all previous actions
+      redrawTimelineActions(index)
+    }
+    //draw onto onscreen canvas
+    drawCanvasLayers(renderPreview)
+    // let end = performance.now()
+    // console.log(end - begin)
+  })
 }
 
 export function renderLayersToDOM() {
@@ -334,7 +376,7 @@ export function renderLayersToDOM() {
 export function renderVectorsToDOM() {
   dom.vectorsThumbnails.innerHTML = ""
   state.undoStack.forEach((action) => {
-    if (!action.removed) {
+    if (!action.removed && !action.layer?.removed) {
       if (action.tool.type === "vector") {
         action.index = state.undoStack.indexOf(action)
         let vectorElement = document.createElement("div")
@@ -393,8 +435,8 @@ export function renderVectorsToDOM() {
         //TODO: line tool to be added as vectors. Behavior of replace tool is like a mask, so the replaced pixels are static coordinates.
         if (action.tool.name === "fill") {
           canvas.thumbnailCTX.arc(
-            minD * action.properties.px1 + 0.5 + xOffset,
-            minD * action.properties.py1 + 0.5 + yOffset,
+            minD * action.properties.vectorProperties.px1 + 0.5 + xOffset,
+            minD * action.properties.vectorProperties.py1 + 0.5 + yOffset,
             1,
             0,
             2 * Math.PI,
@@ -402,38 +444,40 @@ export function renderVectorsToDOM() {
           )
         } else if (action.tool.name === "quadCurve") {
           canvas.thumbnailCTX.moveTo(
-            minD * action.properties.px1 + 0.5 + xOffset,
-            minD * action.properties.py1 + 0.5 + yOffset
+            minD * action.properties.vectorProperties.px1 + 0.5 + xOffset,
+            minD * action.properties.vectorProperties.py1 + 0.5 + yOffset
           )
           canvas.thumbnailCTX.quadraticCurveTo(
-            minD * action.properties.px3 + 0.5 + xOffset,
-            minD * action.properties.py3 + 0.5 + yOffset,
-            minD * action.properties.px2 + 0.5 + xOffset,
-            minD * action.properties.py2 + 0.5 + yOffset
+            minD * action.properties.vectorProperties.px3 + 0.5 + xOffset,
+            minD * action.properties.vectorProperties.py3 + 0.5 + yOffset,
+            minD * action.properties.vectorProperties.px2 + 0.5 + xOffset,
+            minD * action.properties.vectorProperties.py2 + 0.5 + yOffset
           )
         } else if (action.tool.name === "cubicCurve") {
           canvas.thumbnailCTX.moveTo(
-            minD * action.properties.px1 + 0.5 + xOffset,
-            minD * action.properties.py1 + 0.5 + yOffset
+            minD * action.properties.vectorProperties.px1 + 0.5 + xOffset,
+            minD * action.properties.vectorProperties.py1 + 0.5 + yOffset
           )
           canvas.thumbnailCTX.bezierCurveTo(
-            minD * action.properties.px3 + 0.5 + xOffset,
-            minD * action.properties.py3 + 0.5 + yOffset,
-            minD * action.properties.px4 + 0.5 + xOffset,
-            minD * action.properties.py4 + 0.5 + yOffset,
-            minD * action.properties.px2 + 0.5 + xOffset,
-            minD * action.properties.py2 + 0.5 + yOffset
+            minD * action.properties.vectorProperties.px3 + 0.5 + xOffset,
+            minD * action.properties.vectorProperties.py3 + 0.5 + yOffset,
+            minD * action.properties.vectorProperties.px4 + 0.5 + xOffset,
+            minD * action.properties.vectorProperties.py4 + 0.5 + yOffset,
+            minD * action.properties.vectorProperties.px2 + 0.5 + xOffset,
+            minD * action.properties.vectorProperties.py2 + 0.5 + yOffset
           )
         } else if (action.tool.name === "ellipse") {
           let angle = getAngle(
-            action.properties.px2 - action.properties.px1,
-            action.properties.py2 - action.properties.py1
+            action.properties.vectorProperties.px2 -
+              action.properties.vectorProperties.px1,
+            action.properties.vectorProperties.py2 -
+              action.properties.vectorProperties.py1
           )
           canvas.thumbnailCTX.ellipse(
-            minD * action.properties.px1 + xOffset,
-            minD * action.properties.py1 + yOffset,
-            minD * action.properties.radA,
-            minD * action.properties.radB,
+            minD * action.properties.vectorProperties.px1 + xOffset,
+            minD * action.properties.vectorProperties.py1 + yOffset,
+            minD * action.properties.vectorProperties.radA,
+            minD * action.properties.vectorProperties.radB,
             angle,
             0,
             2 * Math.PI
@@ -441,29 +485,6 @@ export function renderVectorsToDOM() {
         }
         canvas.thumbnailCTX.globalCompositeOperation = "xor"
         canvas.thumbnailCTX.stroke()
-        // //fill top
-        // canvas.thumbnailCTX.fillRect(0, 0, canvas.thumbnailCVS.width, yOffset)
-        // //fill left
-        // canvas.thumbnailCTX.fillRect(
-        //   0,
-        //   0,
-        //   xOffset,
-        //   minD * canvas.offScreenCVS.height
-        // )
-        // //fill right
-        // canvas.thumbnailCTX.fillRect(
-        //   minD * canvas.offScreenCVS.width + xOffset,
-        //   0,
-        //   canvas.thumbnailCVS.width,
-        //   minD * canvas.offScreenCVS.height
-        // )
-        // //fill bottom
-        // canvas.thumbnailCTX.fillRect(
-        //   0,
-        //   minD * canvas.offScreenCVS.height,
-        //   canvas.thumbnailCVS.width,
-        //   canvas.thumbnailCVS.height
-        // )
         let thumb = new Image()
         thumb.src = canvas.thumbnailCVS.toDataURL()
         thumb.alt = `thumb ${action.index}`
@@ -489,6 +510,7 @@ export function renderVectorsToDOM() {
         colorSwatch.style.background = action.color.color
         color.appendChild(colorSwatch)
         vectorElement.appendChild(color)
+        //TODO: add mask toggle for turning on/off the mask that existed when starting the fill action
         let trash = document.createElement("div") //TODO: make clickable and sets vector action as hidden
         trash.className = "trash"
         let trashIcon = document.createElement("div")

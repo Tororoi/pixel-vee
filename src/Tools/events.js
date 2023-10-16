@@ -55,12 +55,13 @@ function handleRecenter() {
 
 //Non-tool action.
 function handleClearCanvas() {
-  actionClear()
+  actionClear(canvas.currentLayer)
   //FIX: restructure stacked items. Currently each is an array, but each should be an object with more info plus an array
   //TODO: set all actions to hidden
   state.undoStack.push(state.action)
   state.action = null
   state.pointsSet = null
+  state.drawnPointsSet = null
   state.points = []
   state.redoStack = []
   canvas.currentLayer.ctx.clearRect(
@@ -105,7 +106,8 @@ export function handleTools(e, manualToolName = null) {
         dom.toolBtn.id === "cubicCurve" ||
         dom.toolBtn.id === "ellipse" ||
         dom.toolBtn.id === "fill" ||
-        dom.toolBtn.id === "line"
+        dom.toolBtn.id === "line" ||
+        dom.toolBtn.id === "select"
       ) {
         if (dom.modeBtn.id === "erase") {
           canvas.vectorGuiCVS.style.cursor = "none"
@@ -129,12 +131,19 @@ export function handleTools(e, manualToolName = null) {
 
 //TODO: modes should allow multiple at once, not one at a time
 //TODO: add multi-touch mode for drawing with multiple fingers
-function handleModes(e) {
-  if (e.target.closest(".mode")) {
+export function handleModes(e, manualModeName = null) {
+  const targetMode = e?.target.closest(".mode")
+  if (targetMode || manualModeName) {
+    // //failsafe for hacking mode ids
+    // if (modes[targetMode?.id || manualModeName]) {
     //reset old button
     dom.modeBtn.style.background = "rgb(131, 131, 131)"
     //get new button and select it
-    dom.modeBtn = e.target.closest(".mode")
+    if (manualModeName) {
+      dom.modeBtn = document.querySelector(`#${manualModeName}`)
+    } else {
+      dom.modeBtn = targetMode
+    }
     dom.modeBtn.style.background = "rgb(255, 255, 255)"
     state.mode = dom.modeBtn.id
     if (dom.modeBtn.id === "erase") {
@@ -142,6 +151,7 @@ function handleModes(e) {
     } else {
       canvas.vectorGuiCVS.style.cursor = "crosshair"
     }
+    // }
   }
 }
 
@@ -166,6 +176,7 @@ function updateBrush(e) {
     case "quadCurve":
     case "cubicCurve":
     case "ellipse":
+    case "select":
       state.tool.brushSize = parseInt(e.target.value)
       break
     default:

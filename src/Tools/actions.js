@@ -22,13 +22,13 @@ import { colorPixel, matchStartColor } from "../utils/imageDataHelpers.js"
  * Only good for vector parameters
  * @param {*} actionIndex
  */
-export function modifyAction(actionIndex) {
+export function modifyVectorAction(actionIndex) {
   let action = state.undoStack[actionIndex]
   let oldProperties = {
-    ...action.properties,
+    ...action.properties.vectorProperties,
   } //shallow copy, properties must not contain any objects or references as values
   let modifiedProperties = {
-    ...action.properties,
+    ...action.properties.vectorProperties,
   } //shallow copy, must make deep copy, at least for x, y and properties
   modifiedProperties = { ...state.vectorProperties }
   if (action.tool.name === "ellipse") {
@@ -46,7 +46,7 @@ export function modifyAction(actionIndex) {
       to: modifiedProperties,
     },
   })
-  action.properties = {
+  action.properties.vectorProperties = {
     ...modifiedProperties,
   }
 }
@@ -101,11 +101,11 @@ export function removeAction(actionIndex) {
  * Modify actions in the timeline
  * Sets all actions before it except for action index 0 to removed = true
  */
-export function actionClear() {
+export function actionClear(layer) {
   let upToIndex = state.undoStack.length - 1
   state.addToTimeline({
     tool: tools.clear,
-    layer: canvas.currentLayer,
+    layer: layer,
     properties: {
       //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
       upToIndex,
@@ -118,7 +118,7 @@ export function actionClear() {
       return
     }
     i++
-    if (action.layer === canvas.currentLayer) {
+    if (action.layer === layer) {
       action.removed = true
     }
   })
@@ -136,6 +136,7 @@ export function actionClear() {
  * @param {*} currentMode
  * @param {Set} seenPointsSet
  * @param {Array} points
+ * @param {boolean} excludeFromSet - even if new point, don't add to seenPointsSet if true
  */
 export function actionDraw(
   coordX,
@@ -146,28 +147,36 @@ export function actionDraw(
   ctx,
   currentMode,
   seenPointsSet = null,
-  points = null
+  points = null,
+  excludeFromSet = false
 ) {
   ctx.fillStyle = currentColor.color
   if (points) {
-    points.push({
-      x: coordX,
-      y: coordY,
-      color: { ...currentColor },
-      brushStamp,
-      brushSize,
-    })
+    if (!state.pointsSet.has(`${coordX},${coordY}`)) {
+      points.push({
+        x: coordX,
+        y: coordY,
+        color: { ...currentColor },
+        brushStamp,
+        brushSize,
+      })
+      state.pointsSet.add(`${coordX},${coordY}`)
+    }
   }
-  brushStamp.forEach((pixel) => {
-    const x = Math.ceil(coordX - brushSize / 2) + pixel.x
-    const y = Math.ceil(coordY - brushSize / 2) + pixel.y
+  const baseX = Math.ceil(coordX - brushSize / 2)
+  const baseY = Math.ceil(coordY - brushSize / 2)
+  for (const pixel of brushStamp) {
+    const x = baseX + pixel.x
+    const y = baseY + pixel.y
 
     if (seenPointsSet) {
       const key = `${x},${y}`
       if (seenPointsSet.has(key)) {
-        return // skip this point
+        continue // skip this point
       }
-      seenPointsSet.add(key)
+      if (!excludeFromSet) {
+        seenPointsSet.add(key)
+      }
     }
     switch (currentMode) {
       case "erase":
@@ -180,87 +189,20 @@ export function actionDraw(
       default:
         ctx.fillRect(x, y, 1, 1)
     }
-  })
-}
-
-/**
- * Render a stamp from the brush to the canvas
- * Depending on a special option, color could be put directly to canvas or rendered to an offscreen canvas first (rasterGuiCVS)
- * @param {*} coordX
- * @param {*} coordY
- * @param {*} currentColor
- * @param {*} brushStamp
- * @param {*} brushSize
- * @param {*} cvs
- * @param {*} ctx
- * @param {*} currentMode
- * @param {*} imageData
- * @param {*} ignoreInvisible
- * @param {Set} seenPointsSet
- * @param {Array} points
- */
-export function actionPut(
-  coordX,
-  coordY,
-  currentColor,
-  brushStamp,
-  brushSize,
-  cvs,
-  ctx,
-  currentMode,
-  imageData,
-  ignoreInvisible = false,
-  seenPointsSet = null,
-  points = null
-) {
-  if (points) {
-    points.push({
-      x: coordX,
-      y: coordY,
-      color: { ...currentColor },
-      brushStamp,
-      brushSize,
-    })
   }
-  if (currentMode === "erase")
-    currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
-  brushStamp.forEach((p) => {
-    //for each rectangle, given the center point of the overall brush at coordX and coordY, find the pixel's position
-    let x = Math.ceil(coordX - brushSize / 2) + p.x
-    let y = Math.ceil(coordY - brushSize / 2) + p.y
-    // check that pixel is inside canvas area or else it will roll over on image data
-    if (x < cvs.width && x >= 0 && y < cvs.height && y >= 0) {
-      if (seenPointsSet) {
-        const key = `${x},${y}`
-        if (seenPointsSet.has(key)) {
-          return // skip this point
-        }
-        seenPointsSet.add(key)
-      }
-      let pixelPos = (y * cvs.width + x) * 4
-      //ignore pixels that are already 0 opacity unless !ignoreInvisible
-      if (imageData.data[pixelPos + 3] !== 0 || !ignoreInvisible) {
-        colorPixel(imageData, pixelPos, currentColor)
-      }
-    }
-  })
-  ctx.putImageData(imageData, 0, 0)
 }
 
 /**
  * Draws a pixel perfect line from point a to point b
- * TODO: use actionPut but also create a tempLayer so pixels aren't replaced
  * @param {*} sx
  * @param {*} sy
  * @param {*} tx
  * @param {*} ty
  * @param {*} currentColor
- * @param {*} cvs
  * @param {*} ctx
  * @param {*} currentMode
  * @param {*} brushStamp
  * @param {*} brushSize
- * @param {*} imageData
  */
 export function actionLine(
   sx,
@@ -268,18 +210,17 @@ export function actionLine(
   tx,
   ty,
   currentColor,
-  cvs,
   ctx,
   currentMode,
   brushStamp,
   brushSize,
-  imageData = null
+  seenPointsSet = null
 ) {
   ctx.fillStyle = currentColor.color
 
   let angle = getAngle(tx - sx, ty - sy) // angle of line
   let tri = getTriangle(sx, sy, tx, ty, angle)
-  const seen = new Set()
+  const seen = seenPointsSet ? new Set(seenPointsSet) : new Set()
   for (let i = 0; i < tri.long; i++) {
     let thispoint = {
       x: Math.round(sx + tri.x * i),
@@ -318,63 +259,79 @@ export function actionLine(
  * @param {*} currentColor
  * @param {*} layer
  * @param {*} currentMode
+ * @param {*} selectProperties
+ * @param {*} maskSet
  * @returns
  */
-export function actionFill(startX, startY, currentColor, layer, currentMode) {
+export function actionFill(
+  startX,
+  startY,
+  currentColor,
+  layer,
+  currentMode,
+  selectProperties,
+  maskSet
+) {
+  let xMin = 0
+  let xMax = layer.cvs.width
+  let yMin = 0
+  let yMax = layer.cvs.height
+  if (selectProperties?.px1) {
+    const { px1, py1, px2, py2 } = selectProperties
+    xMin = Math.max(0, Math.min(px1, px2))
+    xMax = Math.min(layer.cvs.width, Math.max(px1, px2))
+    yMin = Math.max(0, Math.min(py1, py2))
+    yMax = Math.min(layer.cvs.height, Math.max(py1, py2))
+  }
   //exit if outside borders
-  if (
-    startX < 0 ||
-    startX >= layer.cvs.width ||
-    startY < 0 ||
-    startY >= layer.cvs.height
-  ) {
+  if (startX < xMin || startX >= xMax || startY < yMin || startY >= yMax) {
     return
   }
   //get imageData
   let layerImageData = layer.ctx.getImageData(
-    0,
-    0,
-    layer.cvs.width,
-    layer.cvs.height
+    xMin,
+    yMin,
+    xMax - xMin,
+    yMax - yMin
   )
 
-  let clickedColor = getColor(startX, startY, layerImageData)
+  let clickedColor = getColor(startX - xMin, startY - yMin, layerImageData)
 
-  if (currentMode === "erase")
+  if (currentMode === "erase") {
     currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
+  }
 
   //exit if color is the same
   if (currentColor.color === clickedColor.color) {
     return
   }
   //Start with click coords
-  let pixelStack = [[startX, startY]]
+  let pixelStack = [[startX - xMin, startY - yMin]]
   let newPos, x, y, pixelPos, reachLeft, reachRight
   floodFill()
   //render floodFill result
-  layer.ctx.putImageData(layerImageData, 0, 0)
+  layer.ctx.putImageData(layerImageData, xMin, yMin)
 
   //helpers
   function floodFill() {
     newPos = pixelStack.pop()
     x = newPos[0]
     y = newPos[1]
-
     //get current pixel position
-    pixelPos = (y * layer.cvs.width + x) * 4
+    pixelPos = (y * (xMax - xMin) + x) * 4
     // Go up as long as the color matches and are inside the canvas
     while (y >= 0 && matchStartColor(layerImageData, pixelPos, clickedColor)) {
       y--
-      pixelPos -= layer.cvs.width * 4
+      pixelPos -= (xMax - xMin) * 4
     }
     //Don't overextend
-    pixelPos += layer.cvs.width * 4
+    pixelPos += (xMax - xMin) * 4
     y++
     reachLeft = false
     reachRight = false
     // Go down as long as the color matches and in inside the canvas
     while (
-      y < layer.cvs.height &&
+      y < yMax - yMin &&
       matchStartColor(layerImageData, pixelPos, clickedColor)
     ) {
       colorPixel(layerImageData, pixelPos, currentColor)
@@ -391,7 +348,7 @@ export function actionFill(startX, startY, currentColor, layer, currentMode) {
         }
       }
 
-      if (x < layer.cvs.width - 1) {
+      if (x < xMax - xMin - 1) {
         if (matchStartColor(layerImageData, pixelPos + 4, clickedColor)) {
           if (!reachRight) {
             //Add pixel to stack
@@ -403,7 +360,7 @@ export function actionFill(startX, startY, currentColor, layer, currentMode) {
         }
       }
       y++
-      pixelPos += layer.cvs.width * 4
+      pixelPos += (xMax - xMin) * 4
     }
 
     if (pixelStack.length) {
@@ -431,12 +388,11 @@ function renderPoints(
   currentMode
 ) {
   const seen = new Set()
-  function plot(point) {
+  for (const { x, y } of points) {
     //rounded values
-    let xt = Math.floor(point.x)
-    let yt = Math.floor(point.y)
-    // let randomColor = generateRandomRGB()
-    //pass "point" instead of currentColor to visualize segments
+    let xt = Math.floor(x)
+    let yt = Math.floor(y)
+
     actionDraw(
       xt,
       yt,
@@ -448,7 +404,6 @@ function renderPoints(
       seen
     )
   }
-  points.forEach((point) => plot(point))
 }
 
 /**
@@ -496,15 +451,13 @@ export function actionQuadraticCurve(
     actionLine(
       startx,
       starty,
-      state.cursorWithCanvasOffsetX,
-      state.cursorWithCanvasOffsetY,
+      state.cursorX,
+      state.cursorY,
       currentColor,
-      canvas.onScreenCVS,
-      canvas.onScreenCTX,
+      ctx,
       currentMode,
       brushStamp,
-      brushSize,
-      state.localColorLayer
+      brushSize
     )
     state.vectorProperties.px2 = state.cursorX
     state.vectorProperties.py2 = state.cursorY
@@ -515,8 +468,8 @@ export function actionQuadraticCurve(
     let plotPoints = plotQuadBezier(
       startx,
       starty,
-      state.cursorWithCanvasOffsetX,
-      state.cursorWithCanvasOffsetY,
+      state.cursorX,
+      state.cursorY,
       endx,
       endy
     )
@@ -602,15 +555,13 @@ export function actionCubicCurve(
     actionLine(
       startx,
       starty,
-      state.cursorWithCanvasOffsetX,
-      state.cursorWithCanvasOffsetY,
+      state.cursorX,
+      state.cursorY,
       currentColor,
-      canvas.onScreenCVS,
-      canvas.onScreenCTX,
+      ctx,
       currentMode,
       brushStamp,
-      brushSize,
-      state.localColorLayer
+      brushSize
     )
     //TODO: can setting state be moved to steps function?
     state.vectorProperties.px2 = state.cursorX
@@ -622,8 +573,8 @@ export function actionCubicCurve(
     let plotPoints = plotQuadBezier(
       startx,
       starty,
-      state.cursorWithCanvasOffsetX,
-      state.cursorWithCanvasOffsetY,
+      state.cursorX,
+      state.cursorY,
       endx,
       endy
     )
@@ -645,8 +596,8 @@ export function actionCubicCurve(
       starty,
       controlx1,
       controly1,
-      state.cursorWithCanvasOffsetX,
-      state.cursorWithCanvasOffsetY,
+      state.cursorX,
+      state.cursorY,
       endx,
       endy
     )
@@ -731,7 +682,6 @@ export function actionEllipse(
   yb = Math.floor(yb)
 
   ctx.fillStyle = currentColor.color
-
   if (forceCircle) {
     let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, offset)
     renderPoints(

@@ -43,7 +43,7 @@ function drawControlPointHandle(canvas, x1, y1, x2, y2) {
 }
 
 //TODO: this is quite slow due to the large path created, consider putting it on its own canvas to avoid rerender unless necessary
-function renderGrid(canvas) {
+function renderGrid(canvas, subGridSpacing = null) {
   //get viewable boundaries - TODO: consider making these global properties as they may be useful for limiting other rendering functions or anything that iterates over the canvas while drawing
   let xLarge = Math.ceil(
     canvas.onScreenCVS.width / canvas.sharpness / canvas.zoom
@@ -73,6 +73,24 @@ function renderGrid(canvas) {
     canvas.vectorGuiCTX.lineTo(canvas.xOffset + xMax, canvas.yOffset + j)
   }
   canvas.vectorGuiCTX.stroke()
+  if (subGridSpacing) {
+    //render subgrid every _ pixels
+    xMin -= xMin % subGridSpacing
+    yMin -= yMin % subGridSpacing
+    canvas.vectorGuiCTX.lineWidth = lineWidth * 2
+    canvas.vectorGuiCTX.beginPath()
+    for (let i = xMin; i <= xMax; i += subGridSpacing) {
+      //draw vertical grid lines
+      canvas.vectorGuiCTX.moveTo(canvas.xOffset + i, canvas.yOffset + yMin)
+      canvas.vectorGuiCTX.lineTo(canvas.xOffset + i, canvas.yOffset + yMax)
+    }
+    for (let j = yMin; j <= yMax; j += subGridSpacing) {
+      //draw horizontal grid lines
+      canvas.vectorGuiCTX.moveTo(canvas.xOffset + xMin, canvas.yOffset + j)
+      canvas.vectorGuiCTX.lineTo(canvas.xOffset + xMax, canvas.yOffset + j)
+    }
+    canvas.vectorGuiCTX.stroke()
+  }
 }
 
 function renderFillVector(canvas) {
@@ -83,12 +101,24 @@ function renderFillVector(canvas) {
   canvas.vectorGuiCTX.strokeStyle = "white"
   canvas.vectorGuiCTX.fillStyle = "white"
   canvas.vectorGuiCTX.beginPath()
-  drawControlPoints(pointsKeys, canvas, circleRadius, false)
+  drawControlPoints(
+    state.vectorProperties,
+    pointsKeys,
+    canvas,
+    circleRadius,
+    false
+  )
   // Stroke non-filled lines
   canvas.vectorGuiCTX.stroke()
 
   canvas.vectorGuiCTX.beginPath()
-  drawControlPoints(pointsKeys, canvas, circleRadius / 2, true)
+  drawControlPoints(
+    state.vectorProperties,
+    pointsKeys,
+    canvas,
+    circleRadius / 2,
+    true
+  )
   // Fill points
   canvas.vectorGuiCTX.fill()
 }
@@ -114,6 +144,24 @@ function renderEllipseVector(canvas, color = "white") {
   )
 
   if (state.vectorProperties.px3 !== null) {
+    canvas.vectorGuiCTX.ellipse(
+      canvas.xOffset + state.vectorProperties.px1 + 0.5,
+      canvas.yOffset + state.vectorProperties.py1 + 0.5,
+      state.vectorProperties.radA,
+      state.vectorProperties.radB,
+      state.vectorProperties.angle + 4 * Math.PI,
+      0,
+      state.vectorProperties.angle + 2 * Math.PI
+    )
+    // Stroke non-filled lines
+    canvas.vectorGuiCTX.stroke()
+    canvas.vectorGuiCTX.clearRect(
+      canvas.xOffset,
+      canvas.yOffset,
+      canvas.offScreenCVS.width,
+      canvas.offScreenCVS.height
+    )
+    canvas.vectorGuiCTX.beginPath()
     drawControlPointHandle(
       canvas,
       state.vectorProperties.px1,
@@ -129,6 +177,21 @@ function renderEllipseVector(canvas, color = "white") {
       state.vectorProperties.py2
     )
   } else if (state.vectorProperties.px2 !== null) {
+    drawCirclePath(
+      canvas,
+      state.vectorProperties.px1 + state.vectorProperties.x1Offset / 2,
+      state.vectorProperties.py1 + state.vectorProperties.y1Offset / 2,
+      state.vectorProperties.radA
+    )
+    // Stroke non-filled lines
+    canvas.vectorGuiCTX.stroke()
+    canvas.vectorGuiCTX.clearRect(
+      canvas.xOffset,
+      canvas.yOffset,
+      canvas.offScreenCVS.width,
+      canvas.offScreenCVS.height
+    )
+    canvas.vectorGuiCTX.beginPath()
     drawControlPointHandle(
       canvas,
       state.vectorProperties.px1,
@@ -138,13 +201,25 @@ function renderEllipseVector(canvas, color = "white") {
     )
   }
 
-  drawControlPoints(pointsKeys, canvas, circleRadius, false)
+  drawControlPoints(
+    state.vectorProperties,
+    pointsKeys,
+    canvas,
+    circleRadius,
+    false
+  )
 
   // Stroke non-filled lines
   canvas.vectorGuiCTX.stroke()
 
   canvas.vectorGuiCTX.beginPath()
-  drawControlPoints(pointsKeys, canvas, circleRadius / 2, true)
+  drawControlPoints(
+    state.vectorProperties,
+    pointsKeys,
+    canvas,
+    circleRadius / 2,
+    true
+  )
   // canvas.vectorGuiCTX.fillText(
   //   `${state.vectorProperties.radA}, ${state.vectorProperties.radB}`,
   //   state.vectorProperties.px1 + 30,
@@ -174,15 +249,6 @@ function renderOffsetEllipseVector(state, canvas, color = "red") {
     )
   }
   if (state.vectorProperties.px3 !== null) {
-    // canvas.vectorGuiCTX.ellipse(
-    //   canvas.xOffset + state.vectorProperties.px1 + 0.5,
-    //   canvas.yOffset + state.vectorProperties.py1 + 0.5,
-    //   state.vectorProperties.radA,
-    //   state.vectorProperties.radB,
-    //   state.vectorProperties.angle + 4 * Math.PI,
-    //   0,
-    //   state.vectorProperties.angle
-    // )
     drawCirclePath(
       canvas,
       state.vectorProperties.px3 + state.vectorProperties.x1Offset / 2,
@@ -256,29 +322,27 @@ function renderCurveVector(canvas) {
   )
 
   if (state.vectorProperties.px4 !== null) {
-    if (vectorGui.selectedPoint.xKey === null && state.clickCounter === 0) {
-      canvas.vectorGuiCTX.bezierCurveTo(
-        canvas.xOffset + state.vectorProperties.px3 + 0.5,
-        canvas.yOffset + state.vectorProperties.py3 + 0.5,
-        canvas.xOffset + state.vectorProperties.px4 + 0.5,
-        canvas.yOffset + state.vectorProperties.py4 + 0.5,
-        canvas.xOffset + state.vectorProperties.px2 + 0.5,
-        canvas.yOffset + state.vectorProperties.py2 + 0.5
-      )
-      // Stroke non-filled lines
-      canvas.vectorGuiCTX.stroke()
-      canvas.vectorGuiCTX.clearRect(
-        canvas.xOffset,
-        canvas.yOffset,
-        canvas.offScreenCVS.width,
-        canvas.offScreenCVS.height
-      )
-      canvas.vectorGuiCTX.beginPath()
-      canvas.vectorGuiCTX.moveTo(
-        canvas.xOffset + state.vectorProperties.px1 + 0.5,
-        canvas.yOffset + state.vectorProperties.py1 + 0.5
-      )
-    }
+    canvas.vectorGuiCTX.bezierCurveTo(
+      canvas.xOffset + state.vectorProperties.px3 + 0.5,
+      canvas.yOffset + state.vectorProperties.py3 + 0.5,
+      canvas.xOffset + state.vectorProperties.px4 + 0.5,
+      canvas.yOffset + state.vectorProperties.py4 + 0.5,
+      canvas.xOffset + state.vectorProperties.px2 + 0.5,
+      canvas.yOffset + state.vectorProperties.py2 + 0.5
+    )
+    // Stroke non-filled lines
+    canvas.vectorGuiCTX.stroke()
+    canvas.vectorGuiCTX.clearRect(
+      canvas.xOffset,
+      canvas.yOffset,
+      canvas.offScreenCVS.width,
+      canvas.offScreenCVS.height
+    )
+    canvas.vectorGuiCTX.beginPath()
+    canvas.vectorGuiCTX.moveTo(
+      canvas.xOffset + state.vectorProperties.px1 + 0.5,
+      canvas.yOffset + state.vectorProperties.py1 + 0.5
+    )
     drawControlPointHandle(
       canvas,
       state.vectorProperties.px1,
@@ -294,27 +358,25 @@ function renderCurveVector(canvas) {
       state.vectorProperties.py4
     )
   } else if (state.vectorProperties.px3 !== null) {
-    if (vectorGui.selectedPoint.xKey === null && state.clickCounter === 0) {
-      canvas.vectorGuiCTX.quadraticCurveTo(
-        canvas.xOffset + state.vectorProperties.px3 + 0.5,
-        canvas.yOffset + state.vectorProperties.py3 + 0.5,
-        canvas.xOffset + state.vectorProperties.px2 + 0.5,
-        canvas.yOffset + state.vectorProperties.py2 + 0.5
-      )
-      // Stroke non-filled lines
-      canvas.vectorGuiCTX.stroke()
-      canvas.vectorGuiCTX.clearRect(
-        canvas.xOffset,
-        canvas.yOffset,
-        canvas.offScreenCVS.width,
-        canvas.offScreenCVS.height
-      )
-      canvas.vectorGuiCTX.beginPath()
-      canvas.vectorGuiCTX.moveTo(
-        canvas.xOffset + state.vectorProperties.px1 + 0.5,
-        canvas.yOffset + state.vectorProperties.py1 + 0.5
-      )
-    }
+    canvas.vectorGuiCTX.quadraticCurveTo(
+      canvas.xOffset + state.vectorProperties.px3 + 0.5,
+      canvas.yOffset + state.vectorProperties.py3 + 0.5,
+      canvas.xOffset + state.vectorProperties.px2 + 0.5,
+      canvas.yOffset + state.vectorProperties.py2 + 0.5
+    )
+    // Stroke non-filled lines
+    canvas.vectorGuiCTX.stroke()
+    canvas.vectorGuiCTX.clearRect(
+      canvas.xOffset,
+      canvas.yOffset,
+      canvas.offScreenCVS.width,
+      canvas.offScreenCVS.height
+    )
+    canvas.vectorGuiCTX.beginPath()
+    canvas.vectorGuiCTX.moveTo(
+      canvas.xOffset + state.vectorProperties.px1 + 0.5,
+      canvas.yOffset + state.vectorProperties.py1 + 0.5
+    )
     drawControlPointHandle(
       canvas,
       state.vectorProperties.px1,
@@ -323,10 +385,18 @@ function renderCurveVector(canvas) {
       state.vectorProperties.py3
     )
   } else if (state.vectorProperties.px2 !== null) {
-    // canvas.vectorGuiCTX.lineTo(
-    //   canvas.xOffset + state.vectorProperties.px2 + 0.5,
-    //   canvas.yOffset + state.vectorProperties.py2 + 0.5
-    // )
+    canvas.vectorGuiCTX.lineTo(
+      canvas.xOffset + state.vectorProperties.px2 + 0.5,
+      canvas.yOffset + state.vectorProperties.py2 + 0.5
+    )
+    // Stroke non-filled lines
+    canvas.vectorGuiCTX.stroke()
+    canvas.vectorGuiCTX.clearRect(
+      canvas.xOffset,
+      canvas.yOffset,
+      canvas.offScreenCVS.width,
+      canvas.offScreenCVS.height
+    )
   }
 
   let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
@@ -338,25 +408,44 @@ function renderCurveVector(canvas) {
     { x: "px4", y: "py4" },
   ]
 
-  drawControlPoints(pointsKeys, canvas, circleRadius, false)
+  drawControlPoints(
+    state.vectorProperties,
+    pointsKeys,
+    canvas,
+    circleRadius,
+    false
+  )
 
   // Stroke non-filled lines
   canvas.vectorGuiCTX.stroke()
 
   canvas.vectorGuiCTX.beginPath()
-  drawControlPoints(pointsKeys, canvas, circleRadius / 2, true)
+  drawControlPoints(
+    state.vectorProperties,
+    pointsKeys,
+    canvas,
+    circleRadius / 2,
+    true
+  )
   // Fill points
   canvas.vectorGuiCTX.fill()
 }
 
-function drawControlPoints(pointsKeys, canvas, radius, modify = false) {
+function drawControlPoints(
+  vectorProperties,
+  pointsKeys,
+  canvas,
+  radius,
+  modify = false,
+  offset = 0
+) {
   //reset collision
   vectorGui.collisionPresent = false
   vectorGui.collidedKeys = { xKey: null, yKey: null }
   for (let data of pointsKeys) {
     let point = {
-      x: state.vectorProperties[data.x],
-      y: state.vectorProperties[data.y],
+      x: vectorProperties[data.x],
+      y: vectorProperties[data.y],
     }
     if (point.x !== null && point.y !== null) {
       let r = state.touch ? radius * 2 : radius
@@ -370,8 +459,8 @@ function drawControlPoints(pointsKeys, canvas, radius, modify = false) {
         checkPointCollision(
           state.cursorX,
           state.cursorY,
-          point.x,
-          point.y,
+          point.x - offset,
+          point.y - offset,
           r + 1
         )
       ) {
@@ -380,7 +469,7 @@ function drawControlPoints(pointsKeys, canvas, radius, modify = false) {
         vectorGui.collidedKeys.xKey = data.x
         vectorGui.collidedKeys.yKey = data.y
       }
-      drawCirclePath(canvas, point.x, point.y, r)
+      drawCirclePath(canvas, point.x - offset, point.y - offset, r)
     }
   }
   if (vectorGui.collisionPresent) {
@@ -438,7 +527,7 @@ function reset(canvas) {
  * @param {*} state
  * @param {*} canvas
  */
-function render(state, canvas) {
+function render(state, canvas, lineDashOffset = 0.5) {
   canvas.vectorGuiCTX.clearRect(
     0,
     0,
@@ -466,10 +555,23 @@ function render(state, canvas) {
         renderOffsetEllipseVector(state, canvas, color)
       }
     }
+    if (state.selectProperties.px1 !== null) {
+      renderSelectVector(
+        state,
+        canvas,
+        lineDashOffset,
+        state.tool.name === "select"
+      )
+    }
     if (canvas.zoom >= 4 && state.grid) {
-      renderGrid(canvas)
+      renderGrid(canvas, 8)
     }
   }
+  // if (state.tool.name !== "select" || !state.clicked) {
+  //   window.requestAnimationFrame(() => {
+  //     render(state, canvas, lineDashOffset < 2 ? lineDashOffset + 0.1 : 0)
+  //   })
+  // }
 }
 
 /**
@@ -492,8 +594,8 @@ function drawCursorBox(state, canvas, lineWeight) {
   canvas.vectorGuiCTX.strokeStyle = "white"
 
   for (const pixel of state.brushStamp) {
-    const x = state.onscreenX + pixel.x - brushOffset
-    const y = state.onscreenY + pixel.y - brushOffset
+    const x = state.cursorX + canvas.xOffset + pixel.x - brushOffset
+    const y = state.cursorY + canvas.yOffset + pixel.y - brushOffset
 
     // Check for neighboring pixels using the Set
     const hasTopNeighbor = pixelSet.has(`${pixel.x},${pixel.y - 1}`)
@@ -524,21 +626,160 @@ function drawCursorBox(state, canvas, lineWeight) {
 }
 
 //TODO: currently only good for solid shapes. Must also draw outline for holes in shape. Need hole searching algorithm, then run tracing on each hole
-function drawSelectOutline(state, canvas) {
-  let lineWidth = canvas.zoom <= 8 ? 2 / canvas.zoom : 0.25
-  let brushOffset = Math.floor(state.tool.brushSize / 2)
+//pass set to function instead of recalculating it every time
+//pass dashOffset for animating marching ants
+// function drawSelectOutline(state, canvas, lineDashOffset) {
+//   let lineWidth = canvas.zoom <= 8 ? 2 / canvas.zoom : 0.25
+//   let brushOffset = Math.floor(state.tool.brushSize / 2)
 
-  const pixelSet = new Set()
-  for (const pixel of state.brushStamp) {
-    pixelSet.add(`${pixel.x},${pixel.y}`)
-    pixelSet.add(`${pixel.x + 1},${pixel.y}`)
-    pixelSet.add(`${pixel.x},${pixel.y + 1}`)
-    pixelSet.add(`${pixel.x + 1},${pixel.y + 1}`)
+//   const pixelSet = new Set()
+//   for (const pixel of state.brushStamp) {
+//     pixelSet.add(`${pixel.x},${pixel.y}`)
+//     pixelSet.add(`${pixel.x + 1},${pixel.y}`)
+//     pixelSet.add(`${pixel.x},${pixel.y + 1}`)
+//     pixelSet.add(`${pixel.x + 1},${pixel.y + 1}`)
+//   }
+
+//   let initialPoint = state.brushStamp.reduce((acc, cur) => {
+//     return cur.y < acc.y || (cur.y === acc.y && cur.x < acc.x) ? cur : acc
+//   })
+
+//   const directions = [
+//     [0, -1], // Up
+//     [1, 0], // Right
+//     [0, 1], // Down
+//     [-1, 0], // Left
+//   ]
+
+//   let currentPoint = initialPoint
+//   let previousDirection = 0
+
+//   // Save the context state before defining a clipping region
+//   canvas.vectorGuiCTX.save()
+//   canvas.vectorGuiCTX.beginPath()
+//   canvas.vectorGuiCTX.lineWidth = lineWidth
+//   canvas.vectorGuiCTX.strokeStyle = "white"
+//   canvas.vectorGuiCTX.setLineDash([1, 1])
+//   canvas.vectorGuiCTX.lineDashOffset = lineDashOffset
+
+//   // Define a clipping region that's the entire canvas so the inside of the shape will be cut when clipped
+//   //Depending on whether selection is inversed, draw or don't draw this rect.
+//   //Drawing it will put the selection line on the outside of the shape. Not drawing it puts the line on the inside of the shape.
+//   canvas.vectorGuiCTX.rect(
+//     -1,
+//     -1,
+//     canvas.vectorGuiCVS.width + 1,
+//     canvas.vectorGuiCVS.height + 1
+//   )
+
+//   // Set the starting point
+//   canvas.vectorGuiCTX.moveTo(
+//     state.cursorX + canvas.xOffset + initialPoint.x - brushOffset,
+//     state.cursorY + canvas.yOffset + initialPoint.y - brushOffset
+//   )
+
+//   do {
+//     for (let i = 0; i < 4; i++) {
+//       const newDirection = (previousDirection + i) % 4
+//       const [dx, dy] = directions[newDirection]
+
+//       if (pixelSet.has(`${currentPoint.x + dx},${currentPoint.y + dy}`)) {
+//         const x =
+//           state.cursorX + canvas.xOffset + currentPoint.x + dx - brushOffset
+//         const y =
+//           state.cursorY + canvas.yOffset + currentPoint.y + dy - brushOffset
+
+//         canvas.vectorGuiCTX.lineTo(x, y)
+//         currentPoint = { x: currentPoint.x + dx, y: currentPoint.y + dy }
+//         previousDirection = (newDirection + 3) % 4
+//         break
+//       }
+//     }
+//   } while (
+//     currentPoint.x !== initialPoint.x ||
+//     currentPoint.y !== initialPoint.y
+//   )
+
+//   canvas.vectorGuiCTX.clip("evenodd")
+
+//   // Stroke the path. Only the part outside of the shape will be visible.
+//   canvas.vectorGuiCTX.stroke()
+
+//   // Restore the context state to remove the clipping region
+//   canvas.vectorGuiCTX.restore()
+// }
+
+function renderSelectVector(state, canvas, lineDashOffset, drawPoints) {
+  // Setting of context attributes.
+  let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  canvas.vectorGuiCTX.save()
+  canvas.vectorGuiCTX.lineWidth = lineWidth
+  canvas.vectorGuiCTX.strokeStyle = "white"
+  canvas.vectorGuiCTX.fillStyle = "white"
+  canvas.vectorGuiCTX.lineCap = "round"
+  canvas.vectorGuiCTX.setLineDash([lineWidth * 4, lineWidth * 4])
+  canvas.vectorGuiCTX.lineDashOffset = lineDashOffset
+
+  canvas.vectorGuiCTX.beginPath()
+  if (state.selectProperties.px2) {
+    canvas.vectorGuiCTX.rect(
+      canvas.xOffset + state.selectProperties.px1,
+      canvas.yOffset + state.selectProperties.py1,
+      state.selectProperties.px2 - state.selectProperties.px1,
+      state.selectProperties.py2 - state.selectProperties.py1
+    )
+    // Stroke non-filled lines
+    canvas.vectorGuiCTX.stroke()
+    canvas.vectorGuiCTX.setLineDash([])
+    canvas.vectorGuiCTX.beginPath()
   }
 
-  let initialPoint = state.brushStamp.reduce((acc, cur) => {
-    return cur.y < acc.y || (cur.y === acc.y && cur.x < acc.x) ? cur : acc
-  })
+  if (drawPoints) {
+    let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
+    let pointsKeys = [
+      { x: "px1", y: "py1" },
+      { x: "px2", y: "py2" },
+    ]
+    drawControlPoints(
+      state.selectProperties,
+      pointsKeys,
+      canvas,
+      circleRadius,
+      false,
+      0.5
+    )
+    // Stroke non-filled lines
+    canvas.vectorGuiCTX.stroke()
+
+    canvas.vectorGuiCTX.beginPath()
+    drawControlPoints(
+      state.selectProperties,
+      pointsKeys,
+      canvas,
+      circleRadius / 2,
+      true,
+      0.5
+    )
+    // Fill points
+    canvas.vectorGuiCTX.fill()
+  }
+
+  canvas.vectorGuiCTX.restore()
+}
+
+function drawSelectOutline(state, canvas, lineDashOffset) {
+  let begin = performance.now()
+  let lineWidth = canvas.zoom <= 8 ? 2 / canvas.zoom : 0.25
+  let initialPoint
+
+  outerLoop: for (let x = 0; x < canvas.offScreenCVS.width; x++) {
+    for (let y = 0; y < canvas.offScreenCVS.height; y++) {
+      if (state.selectPixelPoints[`${x},${y}`]) {
+        initialPoint = state.selectPixelPoints[`${x},${y}`]
+        break outerLoop
+      }
+    }
+  }
 
   const directions = [
     [0, -1], // Up
@@ -555,9 +796,12 @@ function drawSelectOutline(state, canvas) {
   canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
-  canvas.vectorGuiCTX.setLineDash([0.5, 0.5])
+  canvas.vectorGuiCTX.setLineDash([1, 1])
+  canvas.vectorGuiCTX.lineDashOffset = lineDashOffset
 
   // Define a clipping region that's the entire canvas so the inside of the shape will be cut when clipped
+  //Depending on whether selection is inversed, draw or don't draw this rect.
+  //Drawing it will put the selection line on the outside of the shape. Not drawing it puts the line on the inside of the shape.
   canvas.vectorGuiCTX.rect(
     -1,
     -1,
@@ -567,8 +811,8 @@ function drawSelectOutline(state, canvas) {
 
   // Set the starting point
   canvas.vectorGuiCTX.moveTo(
-    state.onscreenX + initialPoint.x - brushOffset,
-    state.onscreenY + initialPoint.y - brushOffset
+    canvas.xOffset + initialPoint.x,
+    canvas.yOffset + initialPoint.y
   )
 
   do {
@@ -576,9 +820,13 @@ function drawSelectOutline(state, canvas) {
       const newDirection = (previousDirection + i) % 4
       const [dx, dy] = directions[newDirection]
 
-      if (pixelSet.has(`${currentPoint.x + dx},${currentPoint.y + dy}`)) {
-        const x = state.onscreenX + currentPoint.x + dx - brushOffset
-        const y = state.onscreenY + currentPoint.y + dy - brushOffset
+      if (
+        state.selectCornersSet.has(
+          `${currentPoint.x + dx},${currentPoint.y + dy}`
+        )
+      ) {
+        const x = canvas.xOffset + currentPoint.x + dx
+        const y = canvas.yOffset + currentPoint.y + dy
 
         canvas.vectorGuiCTX.lineTo(x, y)
         currentPoint = { x: currentPoint.x + dx, y: currentPoint.y + dy }
@@ -598,4 +846,8 @@ function drawSelectOutline(state, canvas) {
 
   // Restore the context state to remove the clipping region
   canvas.vectorGuiCTX.restore()
+  let end = performance.now()
+  // lineDashOffset = lineDashOffset + 0.05 >= 2 ? 0 : lineDashOffset + 0.05
+  // window.requestAnimationFrame(() => render(state, canvas, lineDashOffset))
+  // console.warn("drawSelectOutline: " + (end - begin) + " milliseconds")
 }

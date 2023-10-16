@@ -24,50 +24,32 @@ export function renderCursor(state, canvas, swatches) {
       //empty square
       vectorGui.drawCursorBox(state, canvas, 2)
       break
+    case "select":
+      //show nothing
+      break
     default:
       //TODO: erase mode is somewhat buggy with rendering. Find way to have it render without calling draw() more than needed.
       if (!vectorGui.collisionPresent) {
-        drawCurrentPixel(state, canvas, swatches)
+        renderCanvas((ctx) => {
+          actionDraw(
+            state.cursorX,
+            state.cursorY,
+            swatches.primary.color,
+            state.brushStamp,
+            state.tool.brushSize,
+            ctx,
+            state.mode,
+            state.drawnPointsSet,
+            null,
+            true
+          )
+        })
         if (state.mode === "erase") {
           vectorGui.drawCursorBox(state, canvas, 1)
-          // vectorGui.drawSelectOutline(state, canvas)
+          // vectorGui.drawSelectOutline(state, canvas, state.selectPixelSet, 0.5)
         }
       } else {
         renderCanvas()
       }
   }
-}
-
-export function drawCurrentPixel(state, canvas, swatches) {
-  //draw onscreen current pixel
-  renderCanvas()
-  canvas.onScreenCTX.fillStyle = swatches.primary.color.color
-  state.brushStamp.forEach((pixel) => {
-    const x = Math.ceil(state.cursorX - state.tool.brushSize / 2) + pixel.x
-    const y = Math.ceil(state.cursorY - state.tool.brushSize / 2) + pixel.y
-    const drawX =
-      Math.ceil(state.cursorWithCanvasOffsetX - state.tool.brushSize / 2) +
-      pixel.x
-    const drawY =
-      Math.ceil(state.cursorWithCanvasOffsetY - state.tool.brushSize / 2) +
-      pixel.y
-
-    if (state.pointsSet) {
-      const key = `${x},${y}`
-      if (state.pointsSet.has(key)) {
-        return // skip this point
-      }
-    }
-    switch (state.mode) {
-      case "erase":
-        canvas.onScreenCTX.clearRect(drawX, drawY, 1, 1)
-        break
-      case "inject":
-        canvas.onScreenCTX.clearRect(drawX, drawY, 1, 1)
-        canvas.onScreenCTX.fillRect(drawX, drawY, 1, 1)
-        break
-      default:
-        canvas.onScreenCTX.fillRect(drawX, drawY, 1, 1)
-    }
-  })
 }
