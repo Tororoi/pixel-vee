@@ -3,7 +3,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import {
-  modifyAction,
+  modifyVectorAction,
   actionDraw,
   actionLine,
   actionFill,
@@ -560,15 +560,21 @@ export function fillSteps() {
           state.vectorProperties.py1,
           swatches.primary.color,
           canvas.currentLayer,
-          state.mode
+          state.mode,
+          state.selectProperties,
+          state.maskSet
         )
         //For undo ability, store starting coords and settings and pass them into actionFill
         state.addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {
-            px1: state.vectorProperties.px1,
-            py1: state.vectorProperties.py1,
+            vectorProperties: {
+              px1: state.vectorProperties.px1,
+              py1: state.vectorProperties.py1,
+            },
+            selectProperties: { ...state.selectProperties },
+            maskSet: state.maskSet,
           },
         })
         renderCanvas()
@@ -626,7 +632,7 @@ export function adjustFillSteps() {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         state.undoStack[canvas.currentVectorIndex].hidden = false
-        modifyAction(canvas.currentVectorIndex)
+        modifyVectorAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
@@ -770,12 +776,14 @@ export function quadCurveSteps() {
             tool: state.tool,
             layer: canvas.currentLayer,
             properties: {
-              px1: state.vectorProperties.px1,
-              py1: state.vectorProperties.py1,
-              px2: state.vectorProperties.px2,
-              py2: state.vectorProperties.py2,
-              px3: state.vectorProperties.px3,
-              py3: state.vectorProperties.py3,
+              vectorProperties: {
+                px1: state.vectorProperties.px1,
+                py1: state.vectorProperties.py1,
+                px2: state.vectorProperties.px2,
+                py2: state.vectorProperties.py2,
+                px3: state.vectorProperties.px3,
+                py3: state.vectorProperties.py3,
+              },
             },
           })
           renderCanvas()
@@ -933,14 +941,16 @@ export function cubicCurveSteps() {
             tool: state.tool,
             layer: canvas.currentLayer,
             properties: {
-              px1: state.vectorProperties.px1,
-              py1: state.vectorProperties.py1,
-              px2: state.vectorProperties.px2,
-              py2: state.vectorProperties.py2,
-              px3: state.vectorProperties.px3,
-              py3: state.vectorProperties.py3,
-              px4: state.vectorProperties.px4,
-              py4: state.vectorProperties.py4,
+              vectorProperties: {
+                px1: state.vectorProperties.px1,
+                py1: state.vectorProperties.py1,
+                px2: state.vectorProperties.px2,
+                py2: state.vectorProperties.py2,
+                px3: state.vectorProperties.px3,
+                py3: state.vectorProperties.py3,
+                px4: state.vectorProperties.px4,
+                py4: state.vectorProperties.py4,
+              },
             },
           })
           renderCanvas()
@@ -1078,7 +1088,7 @@ export function adjustCurveSteps(numPoints = 4) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         state.undoStack[canvas.currentVectorIndex].hidden = false
-        modifyAction(canvas.currentVectorIndex)
+        modifyVectorAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
@@ -1301,20 +1311,22 @@ export function ellipseSteps() {
             tool: state.tool,
             layer: canvas.currentLayer,
             properties: {
-              px1: state.vectorProperties.px1,
-              py1: state.vectorProperties.py1,
-              px2: state.vectorProperties.px2,
-              py2: state.vectorProperties.py2,
-              px3: state.vectorProperties.px3,
-              py3: state.vectorProperties.py3,
-              radA: state.vectorProperties.radA,
-              radB: state.vectorProperties.radB,
-              angle: state.vectorProperties.angle,
-              offset: state.vectorProperties.offset,
-              x1Offset: state.vectorProperties.x1Offset,
-              y1Offset: state.vectorProperties.y1Offset,
-              forceCircle: state.vectorProperties.forceCircle,
-              //add bounding box minima maxima x and y?
+              vectorProperties: {
+                px1: state.vectorProperties.px1,
+                py1: state.vectorProperties.py1,
+                px2: state.vectorProperties.px2,
+                py2: state.vectorProperties.py2,
+                px3: state.vectorProperties.px3,
+                py3: state.vectorProperties.py3,
+                radA: state.vectorProperties.radA,
+                radB: state.vectorProperties.radB,
+                angle: state.vectorProperties.angle,
+                offset: state.vectorProperties.offset,
+                x1Offset: state.vectorProperties.x1Offset,
+                y1Offset: state.vectorProperties.y1Offset,
+                forceCircle: state.vectorProperties.forceCircle,
+                //add bounding box minima maxima x and y?
+              },
             },
           })
           state.clickCounter = 0
@@ -1383,7 +1395,7 @@ export function adjustEllipseSteps() {
               state.vectorProperties.radB,
               vectorGui.selectedPoint.xKey === "px1"
                 ? state.undoStack[canvas.currentVectorIndex].properties
-                    .forceCircle
+                    .vectorProperties.forceCircle
                 : state.vectorProperties.forceCircle,
               state.undoStack[canvas.currentVectorIndex].color,
               ctx,
@@ -1416,7 +1428,7 @@ export function adjustEllipseSteps() {
             state.vectorProperties.radB,
             vectorGui.selectedPoint.xKey === "px1"
               ? state.undoStack[canvas.currentVectorIndex].properties
-                  .forceCircle
+                  .vectorProperties.forceCircle
               : state.vectorProperties.forceCircle,
             state.undoStack[canvas.currentVectorIndex].color,
             ctx,
@@ -1435,7 +1447,7 @@ export function adjustEllipseSteps() {
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         updateEllipseControlPoints(state, canvas, vectorGui)
         state.undoStack[canvas.currentVectorIndex].hidden = false
-        modifyAction(canvas.currentVectorIndex)
+        modifyVectorAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,

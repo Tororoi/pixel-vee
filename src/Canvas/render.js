@@ -138,11 +138,13 @@ function redrawTimelineActions(index = null) {
         case "fill":
           //actionFill
           action.tool.action(
-            action.properties.px1,
-            action.properties.py1,
+            action.properties.vectorProperties.px1,
+            action.properties.vectorProperties.py1,
             action.color,
             action.layer,
-            action.mode
+            action.mode,
+            action.properties.selectProperties,
+            action.properties.maskSet
           )
           break
         case "line":
@@ -162,12 +164,12 @@ function redrawTimelineActions(index = null) {
         case "quadCurve":
           //actionQuadraticCurve
           action.tool.action(
-            action.properties.px1,
-            action.properties.py1,
-            action.properties.px2,
-            action.properties.py2,
-            action.properties.px3,
-            action.properties.py3,
+            action.properties.vectorProperties.px1,
+            action.properties.vectorProperties.py1,
+            action.properties.vectorProperties.px2,
+            action.properties.vectorProperties.py2,
+            action.properties.vectorProperties.px3,
+            action.properties.vectorProperties.py3,
             3,
             action.color,
             action.layer.ctx,
@@ -180,14 +182,14 @@ function redrawTimelineActions(index = null) {
           //TODO: pass source on history objects to avoid debugging actions from the timeline unless desired
           //actionCubicCurve
           action.tool.action(
-            action.properties.px1,
-            action.properties.py1,
-            action.properties.px2,
-            action.properties.py2,
-            action.properties.px3,
-            action.properties.py3,
-            action.properties.px4,
-            action.properties.py4,
+            action.properties.vectorProperties.px1,
+            action.properties.vectorProperties.py1,
+            action.properties.vectorProperties.px2,
+            action.properties.vectorProperties.py2,
+            action.properties.vectorProperties.px3,
+            action.properties.vectorProperties.py3,
+            action.properties.vectorProperties.px4,
+            action.properties.vectorProperties.py4,
             4,
             action.color,
             action.layer.ctx,
@@ -199,24 +201,24 @@ function redrawTimelineActions(index = null) {
         case "ellipse":
           //actionEllipse
           action.tool.action(
-            action.properties.px1,
-            action.properties.py1,
-            action.properties.px2,
-            action.properties.py2,
-            action.properties.px3,
-            action.properties.py3,
-            action.properties.radA,
-            action.properties.radB,
-            action.properties.forceCircle,
+            action.properties.vectorProperties.px1,
+            action.properties.vectorProperties.py1,
+            action.properties.vectorProperties.px2,
+            action.properties.vectorProperties.py2,
+            action.properties.vectorProperties.px3,
+            action.properties.vectorProperties.py3,
+            action.properties.vectorProperties.radA,
+            action.properties.vectorProperties.radB,
+            action.properties.vectorProperties.forceCircle,
             action.color,
             action.layer.ctx,
             action.mode,
             action.brushStamp,
             action.brushSize,
-            action.properties.angle,
-            action.properties.offset,
-            action.properties.x1Offset,
-            action.properties.y1Offset
+            action.properties.vectorProperties.angle,
+            action.properties.vectorProperties.offset,
+            action.properties.vectorProperties.x1Offset,
+            action.properties.vectorProperties.y1Offset
           )
           break
         case "replace":
@@ -433,8 +435,8 @@ export function renderVectorsToDOM() {
         //TODO: line tool to be added as vectors. Behavior of replace tool is like a mask, so the replaced pixels are static coordinates.
         if (action.tool.name === "fill") {
           canvas.thumbnailCTX.arc(
-            minD * action.properties.px1 + 0.5 + xOffset,
-            minD * action.properties.py1 + 0.5 + yOffset,
+            minD * action.properties.vectorProperties.px1 + 0.5 + xOffset,
+            minD * action.properties.vectorProperties.py1 + 0.5 + yOffset,
             1,
             0,
             2 * Math.PI,
@@ -442,38 +444,40 @@ export function renderVectorsToDOM() {
           )
         } else if (action.tool.name === "quadCurve") {
           canvas.thumbnailCTX.moveTo(
-            minD * action.properties.px1 + 0.5 + xOffset,
-            minD * action.properties.py1 + 0.5 + yOffset
+            minD * action.properties.vectorProperties.px1 + 0.5 + xOffset,
+            minD * action.properties.vectorProperties.py1 + 0.5 + yOffset
           )
           canvas.thumbnailCTX.quadraticCurveTo(
-            minD * action.properties.px3 + 0.5 + xOffset,
-            minD * action.properties.py3 + 0.5 + yOffset,
-            minD * action.properties.px2 + 0.5 + xOffset,
-            minD * action.properties.py2 + 0.5 + yOffset
+            minD * action.properties.vectorProperties.px3 + 0.5 + xOffset,
+            minD * action.properties.vectorProperties.py3 + 0.5 + yOffset,
+            minD * action.properties.vectorProperties.px2 + 0.5 + xOffset,
+            minD * action.properties.vectorProperties.py2 + 0.5 + yOffset
           )
         } else if (action.tool.name === "cubicCurve") {
           canvas.thumbnailCTX.moveTo(
-            minD * action.properties.px1 + 0.5 + xOffset,
-            minD * action.properties.py1 + 0.5 + yOffset
+            minD * action.properties.vectorProperties.px1 + 0.5 + xOffset,
+            minD * action.properties.vectorProperties.py1 + 0.5 + yOffset
           )
           canvas.thumbnailCTX.bezierCurveTo(
-            minD * action.properties.px3 + 0.5 + xOffset,
-            minD * action.properties.py3 + 0.5 + yOffset,
-            minD * action.properties.px4 + 0.5 + xOffset,
-            minD * action.properties.py4 + 0.5 + yOffset,
-            minD * action.properties.px2 + 0.5 + xOffset,
-            minD * action.properties.py2 + 0.5 + yOffset
+            minD * action.properties.vectorProperties.px3 + 0.5 + xOffset,
+            minD * action.properties.vectorProperties.py3 + 0.5 + yOffset,
+            minD * action.properties.vectorProperties.px4 + 0.5 + xOffset,
+            minD * action.properties.vectorProperties.py4 + 0.5 + yOffset,
+            minD * action.properties.vectorProperties.px2 + 0.5 + xOffset,
+            minD * action.properties.vectorProperties.py2 + 0.5 + yOffset
           )
         } else if (action.tool.name === "ellipse") {
           let angle = getAngle(
-            action.properties.px2 - action.properties.px1,
-            action.properties.py2 - action.properties.py1
+            action.properties.vectorProperties.px2 -
+              action.properties.vectorProperties.px1,
+            action.properties.vectorProperties.py2 -
+              action.properties.vectorProperties.py1
           )
           canvas.thumbnailCTX.ellipse(
-            minD * action.properties.px1 + xOffset,
-            minD * action.properties.py1 + yOffset,
-            minD * action.properties.radA,
-            minD * action.properties.radB,
+            minD * action.properties.vectorProperties.px1 + xOffset,
+            minD * action.properties.vectorProperties.py1 + yOffset,
+            minD * action.properties.vectorProperties.radA,
+            minD * action.properties.vectorProperties.radB,
             angle,
             0,
             2 * Math.PI
@@ -506,6 +510,7 @@ export function renderVectorsToDOM() {
         colorSwatch.style.background = action.color.color
         color.appendChild(colorSwatch)
         vectorElement.appendChild(color)
+        //TODO: add mask toggle for turning on/off the mask that existed when starting the fill action
         let trash = document.createElement("div") //TODO: make clickable and sets vector action as hidden
         trash.className = "trash"
         let trashIcon = document.createElement("div")

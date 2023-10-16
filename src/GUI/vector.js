@@ -556,7 +556,12 @@ function render(state, canvas, lineDashOffset = 0.5) {
       }
     }
     if (state.selectProperties.px1 !== null) {
-      renderSelectVector(state, canvas, lineDashOffset)
+      renderSelectVector(
+        state,
+        canvas,
+        lineDashOffset,
+        state.tool.name === "select"
+      )
     }
     if (canvas.zoom >= 4 && state.grid) {
       renderGrid(canvas, 8)
@@ -704,7 +709,7 @@ function drawCursorBox(state, canvas, lineWeight) {
 //   canvas.vectorGuiCTX.restore()
 // }
 
-function renderSelectVector(state, canvas, lineDashOffset) {
+function renderSelectVector(state, canvas, lineDashOffset, drawPoints) {
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
   canvas.vectorGuiCTX.save()
@@ -729,33 +734,35 @@ function renderSelectVector(state, canvas, lineDashOffset) {
     canvas.vectorGuiCTX.beginPath()
   }
 
-  let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
-  let pointsKeys = [
-    { x: "px1", y: "py1" },
-    { x: "px2", y: "py2" },
-  ]
-  drawControlPoints(
-    state.selectProperties,
-    pointsKeys,
-    canvas,
-    circleRadius,
-    false,
-    0.5
-  )
-  // Stroke non-filled lines
-  canvas.vectorGuiCTX.stroke()
+  if (drawPoints) {
+    let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
+    let pointsKeys = [
+      { x: "px1", y: "py1" },
+      { x: "px2", y: "py2" },
+    ]
+    drawControlPoints(
+      state.selectProperties,
+      pointsKeys,
+      canvas,
+      circleRadius,
+      false,
+      0.5
+    )
+    // Stroke non-filled lines
+    canvas.vectorGuiCTX.stroke()
 
-  canvas.vectorGuiCTX.beginPath()
-  drawControlPoints(
-    state.selectProperties,
-    pointsKeys,
-    canvas,
-    circleRadius / 2,
-    true,
-    0.5
-  )
-  // Fill points
-  canvas.vectorGuiCTX.fill()
+    canvas.vectorGuiCTX.beginPath()
+    drawControlPoints(
+      state.selectProperties,
+      pointsKeys,
+      canvas,
+      circleRadius / 2,
+      true,
+      0.5
+    )
+    // Fill points
+    canvas.vectorGuiCTX.fill()
+  }
 
   canvas.vectorGuiCTX.restore()
 }

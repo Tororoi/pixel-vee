@@ -22,13 +22,13 @@ import { colorPixel, matchStartColor } from "../utils/imageDataHelpers.js"
  * Only good for vector parameters
  * @param {*} actionIndex
  */
-export function modifyAction(actionIndex) {
+export function modifyVectorAction(actionIndex) {
   let action = state.undoStack[actionIndex]
   let oldProperties = {
-    ...action.properties,
+    ...action.properties.vectorProperties,
   } //shallow copy, properties must not contain any objects or references as values
   let modifiedProperties = {
-    ...action.properties,
+    ...action.properties.vectorProperties,
   } //shallow copy, must make deep copy, at least for x, y and properties
   modifiedProperties = { ...state.vectorProperties }
   if (action.tool.name === "ellipse") {
@@ -46,7 +46,7 @@ export function modifyAction(actionIndex) {
       to: modifiedProperties,
     },
   })
-  action.properties = {
+  action.properties.vectorProperties = {
     ...modifiedProperties,
   }
 }
@@ -259,63 +259,79 @@ export function actionLine(
  * @param {*} currentColor
  * @param {*} layer
  * @param {*} currentMode
+ * @param {*} selectProperties
+ * @param {*} maskSet
  * @returns
  */
-export function actionFill(startX, startY, currentColor, layer, currentMode) {
+export function actionFill(
+  startX,
+  startY,
+  currentColor,
+  layer,
+  currentMode,
+  selectProperties,
+  maskSet
+) {
+  let xMin = 0
+  let xMax = layer.cvs.width
+  let yMin = 0
+  let yMax = layer.cvs.height
+  if (selectProperties?.px1) {
+    const { px1, py1, px2, py2 } = selectProperties
+    xMin = Math.max(0, Math.min(px1, px2))
+    xMax = Math.min(layer.cvs.width, Math.max(px1, px2))
+    yMin = Math.max(0, Math.min(py1, py2))
+    yMax = Math.min(layer.cvs.height, Math.max(py1, py2))
+  }
   //exit if outside borders
-  if (
-    startX < 0 ||
-    startX >= layer.cvs.width ||
-    startY < 0 ||
-    startY >= layer.cvs.height
-  ) {
+  if (startX < xMin || startX >= xMax || startY < yMin || startY >= yMax) {
     return
   }
   //get imageData
   let layerImageData = layer.ctx.getImageData(
-    0,
-    0,
-    layer.cvs.width,
-    layer.cvs.height
+    xMin,
+    yMin,
+    xMax - xMin,
+    yMax - yMin
   )
 
-  let clickedColor = getColor(startX, startY, layerImageData)
+  let clickedColor = getColor(startX - xMin, startY - yMin, layerImageData)
 
-  if (currentMode === "erase")
+  if (currentMode === "erase") {
     currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
+  }
 
   //exit if color is the same
   if (currentColor.color === clickedColor.color) {
     return
   }
   //Start with click coords
-  let pixelStack = [[startX, startY]]
+  let pixelStack = [[startX - xMin, startY - yMin]]
   let newPos, x, y, pixelPos, reachLeft, reachRight
   floodFill()
   //render floodFill result
-  layer.ctx.putImageData(layerImageData, 0, 0)
+  layer.ctx.putImageData(layerImageData, xMin, yMin)
 
   //helpers
   function floodFill() {
     newPos = pixelStack.pop()
     x = newPos[0]
     y = newPos[1]
-
     //get current pixel position
-    pixelPos = (y * layer.cvs.width + x) * 4
+    pixelPos = (y * (xMax - xMin) + x) * 4
     // Go up as long as the color matches and are inside the canvas
     while (y >= 0 && matchStartColor(layerImageData, pixelPos, clickedColor)) {
       y--
-      pixelPos -= layer.cvs.width * 4
+      pixelPos -= (xMax - xMin) * 4
     }
     //Don't overextend
-    pixelPos += layer.cvs.width * 4
+    pixelPos += (xMax - xMin) * 4
     y++
     reachLeft = false
     reachRight = false
     // Go down as long as the color matches and in inside the canvas
     while (
-      y < layer.cvs.height &&
+      y < yMax - yMin &&
       matchStartColor(layerImageData, pixelPos, clickedColor)
     ) {
       colorPixel(layerImageData, pixelPos, currentColor)
@@ -332,7 +348,7 @@ export function actionFill(startX, startY, currentColor, layer, currentMode) {
         }
       }
 
-      if (x < layer.cvs.width - 1) {
+      if (x < xMax - xMin - 1) {
         if (matchStartColor(layerImageData, pixelPos + 4, clickedColor)) {
           if (!reachRight) {
             //Add pixel to stack
@@ -344,7 +360,7 @@ export function actionFill(startX, startY, currentColor, layer, currentMode) {
         }
       }
       y++
-      pixelPos += layer.cvs.width * 4
+      pixelPos += (xMax - xMin) * 4
     }
 
     if (pixelStack.length) {

@@ -8,6 +8,7 @@ import { handleUndo, handleRedo } from "./undoRedo.js"
 import { tools, adjustEllipseSteps } from "./index.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { randomizeColor } from "../Swatch/events.js"
+import { handleTools, handleModes } from "./events.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
@@ -63,17 +64,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyB":
-      //reset old button
-      dom.toolBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.toolBtn = document.querySelector("#brush")
-      dom.toolBtn.style.background = "rgb(255, 255, 255)"
-      state.tool = tools["brush"]
-      if (dom.modeBtn.id === "erase") {
-        canvas.vectorGuiCVS.style.cursor = "none"
-      } else {
-        canvas.vectorGuiCVS.style.cursor = "crosshair"
-      }
+      handleTools(null, "brush")
       break
     case "KeyC":
       if (keys.MetaLeft || keys.MetaRight) {
@@ -84,13 +75,7 @@ export function activateShortcut(keyCode) {
         //Advanced method would be to save an image from imageData defined by maskSet.
         // Do not add to timeline
       } else {
-        //reset old button
-        dom.toolBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        dom.toolBtn = document.querySelector("#quadCurve")
-        dom.toolBtn.style.background = "rgb(255, 255, 255)"
-        state.tool = tools["quadCurve"]
-        canvas.vectorGuiCVS.style.cursor = "none"
+        handleTools(null, "quadCurve")
       }
       break
     case "KeyD":
@@ -113,87 +98,32 @@ export function activateShortcut(keyCode) {
           vectorGui.render(state, canvas)
         }
       } else {
-        //reset old button
-        dom.modeBtn.style.background = "rgb(131, 131, 131)"
-        //set new button
-        dom.modeBtn = document.querySelector("#draw")
-        dom.modeBtn.style.background = "rgb(255, 255, 255)"
-        state.mode = "draw"
+        handleModes(null, "draw")
       }
       break
     case "KeyE":
-      //reset old button
-      dom.modeBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.modeBtn = document.querySelector("#erase")
-      dom.modeBtn.style.background = "rgb(255, 255, 255)"
-      state.mode = "erase"
-      canvas.vectorGuiCVS.style.cursor = "none"
+      handleModes(null, "erase")
       break
     case "KeyF":
-      //reset old button
-      dom.toolBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.toolBtn = document.querySelector("#fill")
-      dom.toolBtn.style.background = "rgb(255, 255, 255)"
-      state.tool = tools["fill"]
-      canvas.vectorGuiCVS.style.cursor = "none"
+      handleTools(null, "fill")
       break
     case "KeyI":
-      //reset old button
-      dom.modeBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.modeBtn = document.querySelector("#inject")
-      dom.modeBtn.style.background = "rgb(255, 255, 255)"
-      state.mode = "inject"
+      handleModes(null, "inject")
       break
     case "KeyJ":
-      //reset old button
-      dom.toolBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.toolBtn = document.querySelector("#cubicCurve")
-      dom.toolBtn.style.background = "rgb(255, 255, 255)"
-      state.tool = tools["cubicCurve"]
-      canvas.vectorGuiCVS.style.cursor = "none"
+      handleTools(null, "cubicCurve")
       break
     case "KeyL":
-      //reset old button
-      dom.toolBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.toolBtn = document.querySelector("#line")
-      dom.toolBtn.style.background = "rgb(255, 255, 255)"
-      state.tool = tools["line"]
-      canvas.vectorGuiCVS.style.cursor = "none"
+      handleTools(null, "line")
       break
     case "KeyO":
-      //reset old button
-      dom.toolBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.toolBtn = document.querySelector("#ellipse")
-      dom.toolBtn.style.background = "rgb(255, 255, 255)"
-      state.tool = tools["ellipse"]
-      canvas.vectorGuiCVS.style.cursor = "none"
+      handleTools(null, "ellipse")
       break
     case "KeyP":
-      //reset old button
-      dom.modeBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.modeBtn = document.querySelector("#perfect")
-      dom.modeBtn.style.background = "rgb(255, 255, 255)"
-      state.mode = "perfect"
+      handleModes(null, "perfect")
       break
     case "KeyR":
-      //reset old button
-      dom.toolBtn.style.background = "rgb(131, 131, 131)"
-      //set new button
-      dom.toolBtn = document.querySelector("#replace")
-      dom.toolBtn.style.background = "rgb(255, 255, 255)"
-      state.tool = tools["replace"]
-      if (dom.modeBtn.id === "erase") {
-        canvas.vectorGuiCVS.style.cursor = "none"
-      } else {
-        canvas.vectorGuiCVS.style.cursor = "crosshair"
-      }
+      handleTools(null, "replace")
       break
     case "KeyS":
       randomizeColor(swatches.primary.swatch)

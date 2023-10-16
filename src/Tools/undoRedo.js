@@ -28,7 +28,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     }
   }
   if (latestAction.tool.name === "modify") {
-    handleModifyAction(latestAction)
+    handleModifyAction(latestAction, modType)
   } else if (latestAction.tool.name === "changeColor") {
     state.undoStack[latestAction.properties.moddedActionIndex].color = {
       ...latestAction.properties[modType],
@@ -47,7 +47,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
     vectorGui.reset(canvas)
     if (modType === "to") {
-      state.vectorProperties = { ...latestAction.properties }
+      state.vectorProperties = { ...latestAction.properties.vectorProperties }
       canvas.currentVectorIndex = latestAction.index //currently only vectors have an index property, set during renderVectorsToDOM
       vectorGui.render(state, canvas)
     }
@@ -60,7 +60,9 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     ) {
       //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
       vectorGui.reset(canvas)
-      state.vectorProperties = { ...newLatestAction.properties }
+      state.vectorProperties = {
+        ...newLatestAction.properties.vectorProperties,
+      }
       canvas.currentVectorIndex = newLatestAction.index //currently only vectors have an index property, set during renderVectorsToDOM
       vectorGui.render(state, canvas)
     }
@@ -87,8 +89,10 @@ export function handleRedo() {
   }
 }
 
-function handleModifyAction(latestAction) {
-  state.undoStack[latestAction.properties.moddedActionIndex].properties = {
+function handleModifyAction(latestAction, modType) {
+  state.undoStack[
+    latestAction.properties.moddedActionIndex
+  ].properties.vectorProperties = {
     ...latestAction.properties[modType],
   }
   if (

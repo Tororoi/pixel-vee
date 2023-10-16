@@ -363,7 +363,7 @@ function vectorInteract(e) {
     //TODO: modify object structure of states to match object in undoStack to make assignment simpler like vectorGui.x = {...vector.x}
     vectorGui.reset(canvas)
     if (vector.index !== currentIndex) {
-      state.vectorProperties = { ...vector.properties }
+      state.vectorProperties = { ...vector.properties.vectorProperties }
       canvas.currentVectorIndex = vector.index
       canvas.currentLayer = vector.layer
     }
