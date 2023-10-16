@@ -10,7 +10,10 @@ export const state = {
   vectorMode: true,
   //timeline
   pointsSet: null,
+  drawnPointsSet: null,
   maskSet: null,
+  selectPixelPoints: null,
+  selectCornersSet: null,
   points: [],
   action: null, //object with tool, mode, properties, layer, hidden, removed, points. points will have x, y, color, brush info
   undoStack: [],
@@ -44,13 +47,11 @@ export const state = {
   previousY: 0,
   cursorWithCanvasOffsetX: null, //absolute cursor coords with offset relative to viewable canvas area
   cursorWithCanvasOffsetY: null,
-  onscreenX: null, //coordinates based on viewable canvas area relative to zoom (deprecated? always double cursorWithCanvasOffsetX)
-  onscreenY: null,
-  previousOnscreenX: null,
-  previousOnscreenY: null,
-  //x2/y2 for line tool
-  lineX: null,
-  lineY: null,
+  //x1/y1 for line tool
+  lineStartX: null,
+  lineStartY: null,
+  grabStartX: null,
+  grabStartY: null,
   //for vector tools
   clickCounter: 0,
   vectorProperties: {
@@ -70,6 +71,13 @@ export const state = {
     y1Offset: 0,
     forceCircle: false,
   },
+  //for select tool
+  selectProperties: {
+    px1: null,
+    py1: null,
+    px2: null,
+    py2: null,
+  },
   //for perfect pixels
   lastDrawnX: null,
   lastDrawnY: null,
@@ -81,6 +89,7 @@ export const state = {
   //functions
   addToTimeline,
   reset,
+  resetSelectProperties,
 }
 
 /**
@@ -117,4 +126,14 @@ function addToTimeline(actionObject) {
 function reset() {
   state.clickCounter = 0
   state.vectorProperties.forceCircle = false
+}
+
+function resetSelectProperties() {
+  state.selectProperties = {
+    px1: null,
+    py1: null,
+    px2: null,
+    py2: null,
+  }
+  state.maskSet = null
 }
