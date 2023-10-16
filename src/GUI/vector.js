@@ -43,7 +43,7 @@ function drawControlPointHandle(canvas, x1, y1, x2, y2) {
 }
 
 //TODO: this is quite slow due to the large path created, consider putting it on its own canvas to avoid rerender unless necessary
-function renderGrid(canvas) {
+function renderGrid(canvas, subGridSpacing = null) {
   //get viewable boundaries - TODO: consider making these global properties as they may be useful for limiting other rendering functions or anything that iterates over the canvas while drawing
   let xLarge = Math.ceil(
     canvas.onScreenCVS.width / canvas.sharpness / canvas.zoom
@@ -73,6 +73,24 @@ function renderGrid(canvas) {
     canvas.vectorGuiCTX.lineTo(canvas.xOffset + xMax, canvas.yOffset + j)
   }
   canvas.vectorGuiCTX.stroke()
+  if (subGridSpacing) {
+    //render subgrid every _ pixels
+    xMin -= xMin % subGridSpacing
+    yMin -= yMin % subGridSpacing
+    canvas.vectorGuiCTX.lineWidth = lineWidth * 2
+    canvas.vectorGuiCTX.beginPath()
+    for (let i = xMin; i <= xMax; i += subGridSpacing) {
+      //draw vertical grid lines
+      canvas.vectorGuiCTX.moveTo(canvas.xOffset + i, canvas.yOffset + yMin)
+      canvas.vectorGuiCTX.lineTo(canvas.xOffset + i, canvas.yOffset + yMax)
+    }
+    for (let j = yMin; j <= yMax; j += subGridSpacing) {
+      //draw horizontal grid lines
+      canvas.vectorGuiCTX.moveTo(canvas.xOffset + xMin, canvas.yOffset + j)
+      canvas.vectorGuiCTX.lineTo(canvas.xOffset + xMax, canvas.yOffset + j)
+    }
+    canvas.vectorGuiCTX.stroke()
+  }
 }
 
 function renderFillVector(canvas) {
@@ -541,7 +559,7 @@ function render(state, canvas, lineDashOffset = 0.5) {
       renderSelectVector(state, canvas, lineDashOffset)
     }
     if (canvas.zoom >= 4 && state.grid) {
-      renderGrid(canvas)
+      renderGrid(canvas, 8)
     }
   }
   // if (state.tool.name !== "select" || !state.clicked) {

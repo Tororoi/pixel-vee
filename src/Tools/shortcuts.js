@@ -95,8 +95,23 @@ export function activateShortcut(keyCode) {
       break
     case "KeyD":
       if (keys.MetaLeft || keys.MetaRight) {
-        console.log("deselect")
-        //reset selectProperties in state. Add to and from to timeline and push to undoStack
+        //deselect
+        if (state.selectProperties.px1) {
+          state.addToTimeline({
+            tool: tools.select,
+            layer: canvas.currentLayer,
+            properties: {
+              deselect: true,
+              selectProperties: { ...state.selectProperties },
+              maskSet: state.maskSet,
+            },
+          })
+          state.undoStack.push(state.action)
+          state.action = null
+          state.redoStack = []
+          state.resetSelectProperties()
+          vectorGui.render(state, canvas)
+        }
       } else {
         //reset old button
         dom.modeBtn.style.background = "rgb(131, 131, 131)"

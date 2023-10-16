@@ -45,6 +45,7 @@ const setCoordinates = (e) => {
 }
 
 function handleKeyDown(e) {
+  e.preventDefault()
   if (state.shortcuts) {
     keys[e.code] = true
     activateShortcut(e.code)

@@ -37,14 +37,13 @@ import { checkPixelAlreadyDrawn } from "../utils/drawHelpers.js"
 export function drawSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      // if (state.tool.name !== "replace") {
       state.pointsSet = new Set()
       if (state.maskSet) {
+        //if some set of pixels is masked off, initialize drawnpoints including the masked pixels
         state.drawnPointsSet = new Set(state.maskSet)
       } else {
         state.drawnPointsSet = new Set()
       }
-      // }
       //For line
       state.lineStartX = state.cursorX
       state.lineStartY = state.cursorY
@@ -431,7 +430,7 @@ export function selectSteps() {
       //1. create clip mask using drag origin and current x/y as opposite corners of rectangle
       //create maskset
       state.maskSet = new Set()
-      const { px1, px2, py1, py2 } = state.selectProperties
+      const { px1, py1, px2, py2 } = state.selectProperties
       const xMin = Math.min(px1, px2)
       const xMax = Math.max(px1, px2)
       const yMin = Math.min(py1, py2)
@@ -454,6 +453,16 @@ export function selectSteps() {
       addMask([xMin, xMax], [0, yMin]) // Top region between xMin and xMax
       addMask([xMin, xMax], [yMax, height]) // Bottom region between xMin and xMax
       //add to timeline the maskSet, p1, p2. undo will unset from state, redo will set to state
+      state.addToTimeline({
+        tool: state.tool,
+        layer: canvas.currentLayer,
+        properties: {
+          deselect: false,
+          selectProperties: { ...state.selectProperties },
+          maskSet: state.maskSet,
+        },
+      })
+      //TODO: constrain fill tool and vector tools to mask
       break
     case "pointerout":
       //1. create clip mask using drag origin and last x/y as opposite corners of rectangle

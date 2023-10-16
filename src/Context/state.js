@@ -89,6 +89,7 @@ export const state = {
   //functions
   addToTimeline,
   reset,
+  resetSelectProperties,
 }
 
 /**
@@ -125,4 +126,14 @@ function addToTimeline(actionObject) {
 function reset() {
   state.clickCounter = 0
   state.vectorProperties.forceCircle = false
+}
+
+function resetSelectProperties() {
+  state.selectProperties = {
+    px1: null,
+    py1: null,
+    px2: null,
+    py2: null,
+  }
+  state.maskSet = null
 }
