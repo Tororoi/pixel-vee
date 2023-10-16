@@ -68,7 +68,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyC":
       if (keys.MetaLeft || keys.MetaRight) {
-        console.log("copy")
+        // console.log("copy")
         //copy function should make an image from the currently selected area defined by
         //state.selectProperties and store it in state.copiedRaster.image and store x, y in
         //state.copiedRaster.x, state.copiedRaster.y, along with width and height.
@@ -130,7 +130,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyV":
       if (keys.MetaLeft || keys.MetaRight) {
-        console.log("paste")
+        // console.log("paste")
         //paste function should create a new raster layer and draw the image from state.copiedRaster.image at state.copiedRaster.x, etc.
         //activate select tool for area pasted
         // add image, coordinates and new layer to timeline as "paste" action
@@ -138,7 +138,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyX":
       if (keys.MetaLeft || keys.MetaRight) {
-        console.log("cut")
+        // console.log("cut")
         //clear selected area, add image to state.copiedRaster, etc.
         //add to timeline as "eraser" tool for points in selection
       }

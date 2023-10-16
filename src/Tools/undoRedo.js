@@ -39,7 +39,10 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   } else if (latestAction.tool.name === "clear") {
     handleClearAction(latestAction)
   } else if (latestAction.tool.name === "select") {
-    handleSelectAction(latestAction, newLatestAction)
+    //TODO: maybe selection should just be a modification on every action instead of separate select actions.
+    //Right now, undoing a select action when the newLatestAction isn't also a select tool means the earlier select action won't be rendered even if it should be
+    //By saving it as a modded action with from and to we can set the selectProperties to the "from" values on undo and "to" on redo
+    handleSelectAction(latestAction, newLatestAction, modType)
   } else if (
     latestAction.tool.name === state.tool.name &&
     latestAction.tool.type === "vector"
@@ -123,7 +126,7 @@ function handleClearAction(latestAction) {
   vectorGui.reset(canvas)
 }
 
-function handleSelectAction(latestAction, newLatestAction) {
+function handleSelectAction(latestAction, newLatestAction, modType) {
   if (modType === "to") {
     if (latestAction.properties.deselect) {
       state.resetSelectProperties()
