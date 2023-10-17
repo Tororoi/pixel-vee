@@ -429,6 +429,7 @@ dom.canvasHeight.addEventListener("blur", restrictSize)
 dom.uploadBtn.addEventListener("change", addReferenceLayer)
 dom.newLayerBtn.addEventListener("click", addRasterLayer)
 
+//TODO: make dragging work with tablets. Make similar to functionality of dragging dialog boxes.
 dom.layersContainer.addEventListener("click", layerInteract)
 dom.layersContainer.addEventListener("dragstart", dragLayerStart)
 dom.layersContainer.addEventListener("dragover", dragLayerOver)

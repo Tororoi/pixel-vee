@@ -92,7 +92,7 @@ body {
   display: flex;
   flex-direction: column;
 }
-body * {
+body canvas {
   touch-action: none;
 }
 
@@ -155,6 +155,7 @@ svg {
   align-items: center;
   z-index: 103;
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  touch-action: none;
 }
 .sidebar:hover:not([disabled]), .sidebar:focus {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
@@ -954,7 +955,7 @@ canvas {
 }
 .vectors-interface .vectors-container .vectors .vector {
   position: relative;
-  cursor: grab;
+  cursor: pointer;
   height: 90px;
   width: 100%;
   text-align: center;
@@ -963,18 +964,21 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  box-shadow: inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131);
+  box-sizing: border-box;
+  border: 2px solid rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container .vectors .vector img {
   pointer-events: none;
   background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
-  height: calc(100% - 4px);
+  height: 100%;
+  overflow: hidden;
+  object-fit: cover;
 }
 .vectors-interface .vectors-container .vectors .vector canvas {
   position: absolute;
   background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
-  width: calc(100% - 4px);
-  height: calc(100% - 4px);
+  width: 100%;
+  height: 100%;
 }
 .vectors-interface .vectors-container .vectors .vector .tool {
   position: absolute;
@@ -985,7 +989,7 @@ canvas {
   height: 20px;
   background: rgb(131, 131, 131);
   z-index: 104;
-  margin: 2px;
+  margin-bottom: 2px;
   box-shadow: -2px 0px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container .vectors .vector .tool:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .tool:focus {
@@ -1003,7 +1007,7 @@ canvas {
   height: 20px;
   background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   z-index: 104;
-  margin: 2px;
+  margin-bottom: 2px;
   box-shadow: -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container .vectors .vector .actionColor:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .actionColor:focus {
@@ -1026,7 +1030,7 @@ canvas {
   height: 20px;
   background: rgb(61, 61, 61);
   z-index: 104;
-  margin: 2px;
+  margin-bottom: 2px;
   box-shadow: -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container .vectors .vector .trash:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .trash:focus {
@@ -1049,7 +1053,7 @@ canvas {
   background: rgb(77, 77, 77);
 }
 .vectors-interface .vectors-container .vectors .vector:hover {
-  box-shadow: inset 2px 0px rgb(255, 255, 255), inset -2px 0px rgb(255, 255, 255), inset 0px -2px rgb(255, 255, 255), inset 0px 2px rgb(255, 255, 255);
+  border: 2px solid rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector:hover .tool {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);

@@ -11,6 +11,7 @@
   // overflow-y: scroll;
   z-index: 103;
   @include boxBorder;
+  touch-action: none;
   .content {
     //class does not exist currently
     // opacity: 0.25;

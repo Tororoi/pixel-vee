@@ -65,7 +65,7 @@ body {
   user-select: none;
   display: flex;
   flex-direction: column;
-  * {
+  canvas {
     touch-action: none;
   }
 }
