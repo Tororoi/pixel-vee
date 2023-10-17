@@ -310,30 +310,30 @@ export function renderCanvas(
   redrawTimeline = false,
   index = null
 ) {
-  window.requestAnimationFrame(() => {
-    // let begin = performance.now()
-    if (clearCanvas) {
-      //clear offscreen layers
-      canvas.layers.forEach((l) => {
-        if (l.type === "raster") {
-          l.ctx.clearRect(
-            0,
-            0,
-            canvas.offScreenCVS.width,
-            canvas.offScreenCVS.height
-          )
-        }
-      })
-    }
-    if (redrawTimeline) {
-      //render all previous actions
-      redrawTimelineActions(index)
-    }
-    //draw onto onscreen canvas
-    drawCanvasLayers(renderPreview)
-    // let end = performance.now()
-    // console.log(end - begin)
-  })
+  // window.requestAnimationFrame(() => {
+  // let begin = performance.now()
+  if (clearCanvas) {
+    //clear offscreen layers
+    canvas.layers.forEach((l) => {
+      if (l.type === "raster") {
+        l.ctx.clearRect(
+          0,
+          0,
+          canvas.offScreenCVS.width,
+          canvas.offScreenCVS.height
+        )
+      }
+    })
+  }
+  if (redrawTimeline) {
+    //render all previous actions
+    redrawTimelineActions(index)
+  }
+  //draw onto onscreen canvas
+  drawCanvasLayers(renderPreview)
+  // let end = performance.now()
+  // console.log(end - begin)
+  // })
 }
 
 export function renderLayersToDOM() {
@@ -510,6 +510,17 @@ export function renderVectorsToDOM() {
         color.appendChild(colorSwatch)
         vectorElement.appendChild(color)
         //TODO: add mask toggle for turning on/off the mask that existed when starting the fill action
+        let hide = document.createElement("div")
+        hide.className = "hide"
+        let hideIcon = document.createElement("div")
+        hideIcon.className = "eye"
+        hide.appendChild(hideIcon)
+        if (action.hidden) {
+          hideIcon.classList.add("eyeclosed")
+        } else {
+          hideIcon.classList.add("eyeopen")
+        }
+        vectorElement.appendChild(hide)
         let trash = document.createElement("div") //TODO: make clickable and sets vector action as hidden
         trash.className = "trash"
         let trashIcon = document.createElement("div")

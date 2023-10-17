@@ -1021,7 +1021,7 @@ canvas {
   height: 100%;
   pointer-events: none;
 }
-.vectors-interface .vectors-container .vectors .vector .trash {
+.vectors-interface .vectors-container .vectors .vector .hide {
   position: absolute;
   right: 0;
   top: 44px;
@@ -1033,8 +1033,44 @@ canvas {
   margin-bottom: 2px;
   box-shadow: -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.vectors-interface .vectors-container .vectors .vector .trash:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .trash:focus {
+.vectors-interface .vectors-container .vectors .vector .hide:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .hide:focus {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+.vectors-interface .vectors-container .vectors .vector .hide:hover {
+  z-index: 106;
+}
+.vectors-interface .vectors-container .vectors .vector .hide .eye {
+  width: 100%;
+  height: 100%;
+}
+.vectors-interface .vectors-container .vectors .vector .hide .eye.eyeopen {
+  background-image: url("../public/pixelv-eyeopen.png");
+  background-size: 100%;
+}
+.vectors-interface .vectors-container .vectors .vector .hide .eye.eyeopen:hover {
+  background-image: url("../public/pixelv-eyeopen-hover.png");
+}
+.vectors-interface .vectors-container .vectors .vector .hide .eye.eyeclosed {
+  background-image: url("../public/pixelv-eyeclosed.png");
+  background-size: 100%;
+}
+.vectors-interface .vectors-container .vectors .vector .hide .eye.eyeclosed:hover {
+  background-image: url("../public/pixelv-eyeclosed-hover.png");
+}
+.vectors-interface .vectors-container .vectors .vector .trash {
+  position: absolute;
+  right: 0;
+  top: 66px;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  background: rgb(61, 61, 61);
+  z-index: 104;
+  margin-bottom: 2px;
+  box-shadow: -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131);
+}
+.vectors-interface .vectors-container .vectors .vector .trash:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .trash:focus {
+  box-shadow: -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .trash .icon {
   pointer-events: none;
@@ -1058,30 +1094,6 @@ canvas {
 .vectors-interface .vectors-container .vectors .vector:hover .tool {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
   z-index: 105;
-}
-.vectors-interface .vectors-container .vectors .vector .hide {
-  width: 28px;
-  height: 28px;
-  margin: 6px;
-  background: rgb(131, 131, 131);
-}
-.vectors-interface .vectors-container .vectors .vector .hide .eye {
-  height: 2px;
-  width: 2px;
-}
-.vectors-interface .vectors-container .vectors .vector .hide .eye.eyeopen {
-  background-image: url("../public/pixelv-eyeopen.png");
-  background-size: 100%;
-}
-.vectors-interface .vectors-container .vectors .vector .hide .eye.eyeopen:hover {
-  background-image: url("../public/pixelv-eyeopen-hover.png");
-}
-.vectors-interface .vectors-container .vectors .vector .hide .eye.eyeclosed {
-  background-image: url("../public/pixelv-eyeclosed.png");
-  background-size: 100%;
-}
-.vectors-interface .vectors-container .vectors .vector .hide .eye.eyeclosed:hover {
-  background-image: url("../public/pixelv-eyeclosed-hover.png");
 }
 .vectors-interface .vectors-container .vectors .vector .warning {
   background: rgb(239, 63, 57);
