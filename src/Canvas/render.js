@@ -383,7 +383,6 @@ export function renderVectorsToDOM() {
         vectorElement.className = `vector ${action.index}`
         vectorElement.id = action.index
         dom.vectorsThumbnails.appendChild(vectorElement)
-        vectorElement.draggable = true
         canvas.thumbnailCTX.clearRect(
           0,
           0,
