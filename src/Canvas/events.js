@@ -339,16 +339,17 @@ function addRasterLayer() {
 function vectorInteract(e) {
   let vector = e.target.closest(".vector").vectorObj
   //toggle visibility
-  if (e.target.className.includes("hide")) {
+  if (e.target.className.includes("eye")) {
     if (e.target.className.includes("eyeopen")) {
       e.target.classList.remove("eyeopen")
       e.target.classList.add("eyeclosed")
-      layer.opacity = 0
+      vector.hidden = true
     } else if (e.target.className.includes("eyeclosed")) {
       e.target.classList.remove("eyeclosed")
       e.target.classList.add("eyeopen")
-      layer.opacity = 1
+      vector.hidden = false
     }
+    renderCanvas(null, true, true)
   } else if (e.target.className.includes("actionColor")) {
     e.target.color = vector.color
     e.target.vector = vector
