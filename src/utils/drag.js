@@ -10,7 +10,7 @@ export const initializeDragger = (dragTarget) => {
   }
 }
 
-export const initializeCollapser = (collapseTarget) => {
+export const initializeCollapser = (collapseTarget, startCollapsed) => {
   const collapseBtn = collapseTarget.querySelector(".collapse-checkbox")
   const collapsibleArea = collapseTarget.querySelector(".collapsible")
   if (collapseBtn && collapsibleArea) {
@@ -28,12 +28,18 @@ export const initializeCollapser = (collapseTarget) => {
         collapsibleArea.style.display = "flex"
       }
     })
+    if (startCollapsed) {
+      collapseBtn.click()
+    }
   }
 }
 
-export const initializeDialogBox = (dialogBoxTarget) => {
+export const initializeDialogBox = (
+  dialogBoxTarget,
+  startCollapsed = false
+) => {
   initializeDragger(dialogBoxTarget)
-  initializeCollapser(dialogBoxTarget)
+  initializeCollapser(dialogBoxTarget, startCollapsed)
 }
 
 function setDragSiblings() {

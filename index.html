@@ -73,6 +73,28 @@
       </div>
     </div>
     <div class="page">
+      <div class="canvas-container">
+        <div class="bg-space">
+          <canvas
+            class="onScreen"
+            id="onScreen"
+            width="512px"
+            height="512px"
+          ></canvas>
+          <canvas
+            class="gui"
+            id="rasterGui"
+            width="512px"
+            height="512px"
+          ></canvas>
+          <canvas
+            class="gui"
+            id="vectorGui"
+            width="512px"
+            height="512px"
+          ></canvas>
+        </div>
+      </div>
       <div class="sidebar draggable h-drag free locked">
         <div class="header dragger">
           <div class="drag-btn locked"><div class="grip"></div></div>
@@ -120,6 +142,60 @@
                 id="brush-size"
                 data-tooltip="Adjust brush size"
               />
+            </div>
+          </div>
+          <div class="palette-interface draggable v-drag settings-box smooth-shift">
+            <div id="palette-header" class="header dragger"><div class="drag-btn"><div class="grip"></div></div>
+            Palette
+              <label for="palette-collapse-btn" id="palette-collapser" class="collapse-btn" data-tooltip="Collapse/ Expand">
+                <input type="checkbox" aria-label="Collapse or Expand" class="collapse-checkbox" id="palette-collapse-btn"></input>
+                <span class="arrow"></span>
+              </label>
+            </div>
+            <div class="collapsible">
+              <div class="colors">
+                <div
+                  class="primary swatch btn"
+                  data-tooltip="Swatch (S) to randomize &#010;&#010;Click to open Color Picker"
+                >
+                  <div class="swatch-color"></div>
+                </div>
+                <div
+                  class="secondary back-swatch btn"
+                  data-tooltip="Click to open Color Picker"
+                >
+                  <div class="swatch-color"></div>
+                </div>
+                <!-- Add weighted randomizer to lean towards certain colors -->
+              </div>
+              <div
+                class="color-switch custom-shape btn"
+                data-tooltip="Switch primary/ secondary colors"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 -0.5 20 20"
+                  shape-rendering="crispEdges"
+                >
+                  <path
+                    class="outline"
+                    stroke="#8d8d8d"
+                    d="M6 2h1M5 3h1M7 3h1M4 4h1M8 4h1M3 5h1M9 5h1M2 6h1M10 6h1M3 7h2M8 7h2M4 8h1M8 8h1M4 9h1M8 9h1M13 9h1M5 10h1M9 10h1M12 10h1M14 10h1M5 11h1M10 11h3M15 11h1M6 12h1M16 12h1M7 13h1M17 13h1M8 14h2M16 14h1M10 15h3M15 15h1M12 16h1M14 16h1M13 17h1"
+                  />
+                  <path
+                    stroke="#000000"
+                    d="M6 3h1M5 4h3M4 5h5M3 6h7M5 7h3M5 8h3M5 9h3M6 10h3M13 10h1M6 11h4M13 11h2M7 12h9M8 13h9M10 14h6M13 15h2M13 16h1"
+                  />
+                </svg>
+              </div>
+              <div class="palette-container">
+                <div class="palette-color">
+                  <div class="swatch"></div>
+                </div>
+                <div class="palette-color">
+                  <div class="swatch"></div>
+                </div>
+              </div>
             </div>
           </div>
           <div class="size-container draggable v-drag settings-box smooth-shift">
@@ -215,28 +291,6 @@
           </div>
         </div>
       </div>
-      <div class="canvas-container">
-        <div class="bg-space">
-          <canvas
-            class="onScreen"
-            id="onScreen"
-            width="512px"
-            height="512px"
-          ></canvas>
-          <canvas
-            class="gui"
-            id="rasterGui"
-            width="512px"
-            height="512px"
-          ></canvas>
-          <canvas
-            class="gui"
-            id="vectorGui"
-            width="512px"
-            height="512px"
-          ></canvas>
-        </div>
-      </div>
       <div class="toolbox draggable h-drag free locked">
         <div id="toolbox-header" class="header dragger">
           <div class="drag-btn locked"><div class="grip"></div></div>
@@ -247,7 +301,7 @@
           </label>
         </div>
         <div class="collapsible">
-          <div class="colors">
+          <!-- <div class="colors">
             <div
               class="primary swatch btn"
               data-tooltip="Swatch (S) to randomize &#010;&#010;Click to open Color Picker"
@@ -260,9 +314,8 @@
             >
               <div class="swatch-color"></div>
             </div>
-            <!-- Add weighted randomizer to lean towards certain colors -->
-          </div>
-          <div
+          </div> -->
+          <!-- <div
             class="color-switch custom-shape btn"
             data-tooltip="Switch primary/ secondary colors"
           >
@@ -281,7 +334,7 @@
                 d="M6 3h1M5 4h3M4 5h5M3 6h7M5 7h3M5 8h3M5 9h3M6 10h3M13 10h1M6 11h4M13 11h2M7 12h9M8 13h9M10 14h6M13 15h2M13 16h1"
               />
             </svg>
-          </div>
+          </div> -->
           <div class="btn-pair">
             <div class="recenter custom-shape btn" data-tooltip="Recenter Canvas">
               <svg

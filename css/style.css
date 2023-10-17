@@ -389,7 +389,8 @@ svg {
 .btn-pair {
   display: flex;
   justify-content: space-around;
-  margin-bottom: 12px;
+  margin-top: 6px;
+  margin-bottom: 6px;
   width: 100%;
 }
 .btn-pair .custom-shape {
@@ -748,7 +749,7 @@ canvas {
 
 /* Layers */
 .layers-interface {
-  order: 3;
+  order: 4;
   flex: 1 1 auto;
   min-height: 196px;
 }
@@ -889,7 +890,7 @@ canvas {
 
 /* Vectors, interface provides access to select any vector existing in the timeline */
 .vectors-interface {
-  order: 4;
+  order: 5;
   flex: 1 1 auto;
   min-height: 264px;
 }
@@ -1106,6 +1107,7 @@ canvas {
 }
 .brush-container .collapsible {
   padding-top: 2px;
+  display: none;
 }
 .brush-container p {
   margin: 0px;
@@ -1155,6 +1157,89 @@ canvas {
 }
 .brush-container .slider:disabled::-moz-range-thumb {
   background: rgb(200, 200, 200);
+}
+
+/* Palette */
+.palette-interface {
+  order: 2;
+  /* Color Swatches */
+}
+.palette-interface .collapsible {
+  padding-top: 2px;
+}
+.palette-interface p {
+  margin: 0px;
+}
+.palette-interface .colors {
+  width: 112px;
+  height: 112px;
+  position: relative;
+  margin-bottom: 16px;
+}
+.palette-interface .colors .swatch {
+  position: absolute;
+  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  width: 72px;
+  height: 72px;
+  margin: 8px;
+  z-index: 6;
+}
+.palette-interface .colors .swatch .swatch-color {
+  background-image: radial-gradient(rgba(var(--primary-swatch-color), var(--primary-swatch-alpha)) 50%, rgba(var(--primary-swatch-color), 1) 110%);
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.palette-interface .colors .back-swatch {
+  position: absolute;
+  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  width: 72px;
+  height: 72px;
+  margin: 8px;
+  z-index: 5;
+  transform: translateX(24px) translateY(24px);
+}
+.palette-interface .colors .back-swatch .swatch-color {
+  background-image: radial-gradient(rgba(var(--secondary-swatch-color), var(--secondary-swatch-alpha)) 50%, rgba(var(--secondary-swatch-color), 1) 110%);
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.palette-interface .color-switch {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  box-shadow: none;
+  margin: 0;
+  top: 84px;
+  left: 37px;
+}
+.palette-interface .color-switch:hover {
+  box-shadow: none;
+}
+.palette-interface .palette-container {
+  display: flex;
+  margin: 4px;
+}
+.palette-interface .palette-container .palette-color {
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  margin: 1px;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+.palette-interface .palette-container .palette-color:hover:not([disabled]), .palette-interface .palette-container .palette-color:focus {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+.palette-interface .palette-container .palette-color:hover {
+  z-index: 106;
+}
+.palette-interface .palette-container .palette-color .swatch {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
 /* Color Picker */
@@ -1404,10 +1489,11 @@ canvas {
 
 /* Canvas Size settings */
 .size-container {
-  order: 2;
+  order: 3;
 }
 .size-container .collapsible {
   padding-top: 2px;
+  display: none;
 }
 .size-container p {
   margin: 0px;

@@ -73,6 +73,11 @@ const brushBtn = document.querySelector(".brush-preview")
 const brushPreview = document.querySelector("#brush-preview")
 const brushSlider = document.querySelector("#brush-size")
 
+// * Palette Interface * //
+const paletteInterfaceContainer = document.querySelector(".palette-interface")
+//TODO: Add color button, edit colors button, remove color button, move main swatches to here. Clicking a palette swatch should change primary color to that color
+// button to create palette from canvas
+
 // * Layers Interface * //
 const uploadBtn = document.querySelector("#file-upload")
 const newLayerBtn = document.querySelector(".new-raster-layer")
@@ -146,6 +151,7 @@ export const dom = {
   brushBtn,
   brushPreview,
   brushSlider,
+  paletteInterfaceContainer,
   uploadBtn,
   newLayerBtn,
   layersContainer,

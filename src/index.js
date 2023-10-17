@@ -22,7 +22,10 @@ initializeDialogBox(dom.sidebarContainer)
 initializeDialogBox(dom.toolboxContainer)
 
 // * Brush * //
-initializeDialogBox(dom.brushContainer)
+initializeDialogBox(dom.brushContainer, true)
+
+// * Palette * //
+initializeDialogBox(dom.paletteInterfaceContainer)
 
 // * Layers Interface * //
 initializeDialogBox(dom.layersInterfaceContainer)
@@ -31,7 +34,7 @@ initializeDialogBox(dom.layersInterfaceContainer)
 initializeDialogBox(dom.vectorsInterfaceContainer)
 
 // * Canvas Size * //
-initializeDialogBox(dom.sizeContainer)
+initializeDialogBox(dom.sizeContainer, true)
 
 // * Color Picker * //
 initializeDialogBox(dom.colorPickerContainer)
