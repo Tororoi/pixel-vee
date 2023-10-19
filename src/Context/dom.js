@@ -110,6 +110,7 @@ const images = [
   "public/pixelv-eyeclosed.png",
   "public/pixelv-reference-hover.png",
   "public/pixelv-trash-hover.png",
+  "public/pixelv-plus-hover.png",
 ]
 images.forEach((url) => {
   let img = new Image()

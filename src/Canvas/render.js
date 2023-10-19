@@ -538,11 +538,16 @@ export function renderVectorsToDOM() {
   })
 }
 
+//TODO: need edit mode, generate palette from canvas, remove mode
 export function renderPaletteToDOM() {
   dom.paletteColors.innerHTML = ""
   for (let i = 0; i < swatches.palette.length; i++) {
     let paletteColor = document.createElement("div")
     paletteColor.className = "palette-color"
+    if (swatches.palette[i].color === swatches.primary.color.color) {
+      paletteColor.classList.add("selected")
+      swatches.selectedPaletteIndex = i
+    }
     let swatch = document.createElement("div")
     swatch.className = "swatch"
     swatch.style.background = swatches.palette[i].color

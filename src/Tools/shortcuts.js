@@ -128,6 +128,9 @@ export function activateShortcut(keyCode) {
     case "KeyS":
       randomizeColor(swatches.primary.swatch)
       break
+    case "KeyU":
+      swatches.paletteMode = "edit"
+      break
     case "KeyV":
       if (keys.MetaLeft || keys.MetaRight) {
         // console.log("paste")
@@ -141,6 +144,8 @@ export function activateShortcut(keyCode) {
         // console.log("cut")
         //clear selected area, add image to state.copiedRaster, etc.
         //add to timeline as "eraser" tool for points in selection
+      } else {
+        swatches.paletteMode = "remove"
       }
       break
     case "KeyZ":
