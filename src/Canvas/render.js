@@ -552,4 +552,5 @@ export function renderPaletteToDOM() {
     //associate object
     paletteColor.colorObj = swatches.palette[i]
   }
+  //Create add color button
 }

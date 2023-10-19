@@ -118,6 +118,13 @@ function switchColors() {
   )
 }
 
+function handlePalette(e) {
+  console.log(e.target.colorObj)
+  //if palette-color, set primary color to colorObj
+  //if palette-color and edit mode, open color picker
+  //if add-color, open color picker
+}
+
 /**
  * Close the picker window
  */
@@ -181,6 +188,8 @@ picker.build()
 dom.swatch.addEventListener("click", openColorPicker)
 dom.backSwatch.addEventListener("click", openColorPicker)
 dom.colorSwitch.addEventListener("click", switchColors)
+//Palette
+dom.paletteContainer.addEventListener("click", handlePalette)
 //Color Picker
 dom.confirmBtn.addEventListener("click", handleConfirm)
 dom.cancelBtn.addEventListener("click", closePickerWindow)
