@@ -378,7 +378,7 @@ export function renderVectorsToDOM() {
   state.undoStack.forEach((action) => {
     if (!action.removed && !action.layer?.removed) {
       if (action.tool.type === "vector") {
-        action.index = state.undoStack.indexOf(action)
+        action.index = state.undoStack.indexOf(action) //change forEach to use i so this indexOf won't be needed
         let vectorElement = document.createElement("div")
         vectorElement.className = `vector ${action.index}`
         vectorElement.id = action.index
@@ -536,4 +536,20 @@ export function renderVectorsToDOM() {
       }
     }
   })
+}
+
+export function renderPaletteToDOM() {
+  dom.paletteContainer.innerHTML = ""
+  for (let i = 0; i < swatches.palette.length; i++) {
+    let paletteColor = document.createElement("div")
+    paletteColor.className = "palette-color"
+    let swatch = document.createElement("div")
+    swatch.className = "swatch"
+    swatch.style.background = swatches.palette[i].color
+    paletteColor.appendChild(swatch)
+    dom.paletteContainer.appendChild(paletteColor)
+
+    //associate object
+    paletteColor.colorObj = swatches.palette[i]
+  }
 }
