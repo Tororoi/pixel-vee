@@ -76,6 +76,7 @@ const brushSlider = document.querySelector("#brush-size")
 // * Palette Interface * //
 const paletteInterfaceContainer = document.querySelector(".palette-interface")
 const paletteContainer = document.querySelector(".palette-container")
+const paletteColors = document.querySelector(".palette-colors")
 //TODO: Add color button, edit colors button, remove color button, move main swatches to here. Clicking a palette swatch should change primary color to that color
 // button to create palette from canvas
 
@@ -154,6 +155,7 @@ export const dom = {
   brushSlider,
   paletteInterfaceContainer,
   paletteContainer,
+  paletteColors,
   uploadBtn,
   newLayerBtn,
   layersContainer,

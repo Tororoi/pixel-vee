@@ -539,7 +539,7 @@ export function renderVectorsToDOM() {
 }
 
 export function renderPaletteToDOM() {
-  dom.paletteContainer.innerHTML = ""
+  dom.paletteColors.innerHTML = ""
   for (let i = 0; i < swatches.palette.length; i++) {
     let paletteColor = document.createElement("div")
     paletteColor.className = "palette-color"
@@ -547,10 +547,16 @@ export function renderPaletteToDOM() {
     swatch.className = "swatch"
     swatch.style.background = swatches.palette[i].color
     paletteColor.appendChild(swatch)
-    dom.paletteContainer.appendChild(paletteColor)
+    dom.paletteColors.appendChild(paletteColor)
 
     //associate object
-    paletteColor.colorObj = swatches.palette[i]
+    swatch.color = swatches.palette[i]
   }
-  //Create add color button
+  // Create add color button
+  let addColorBtn = document.createElement("div")
+  addColorBtn.className = "add-color"
+  let icon = document.createElement("div")
+  icon.className = "icon"
+  addColorBtn.appendChild(icon)
+  dom.paletteColors.appendChild(addColorBtn)
 }

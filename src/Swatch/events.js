@@ -63,6 +63,20 @@ export function setColor(r, g, b, a, target) {
       renderVectorsToDOM()
       renderCanvas(null, true, true)
     }
+    if (swatches.selectedPaletteIndex) {
+      if (swatches.selectedPaletteIndex > swatches.palette.length - 1) {
+        swatches.palette.push(color)
+        let paletteColor = document.createElement("div")
+        paletteColor.className = "palette-color"
+        paletteColor.appendChild(target)
+
+        let lastChild = dom.paletteColors.lastElementChild
+        dom.paletteColors.insertBefore(paletteColor, lastChild)
+      } else {
+        swatches.palette[swatches.selectedPaletteIndex] = target.color
+      }
+      swatches.selectedPaletteIndex = null
+    }
   }
 }
 
@@ -119,10 +133,26 @@ function switchColors() {
 }
 
 function handlePalette(e) {
-  console.log(e.target.colorObj)
-  //if palette-color, set primary color to colorObj
-  //if palette-color and edit mode, open color picker
-  //if add-color, open color picker
+  if (e.target.className.includes("swatch")) {
+    //if palette-color and edit mode, open color picker, else
+    if (swatches.editPalette) {
+      swatches.selectedPaletteIndex = swatches.palette.indexOf(e.target.color)
+      initializeColorPicker(e.target)
+    } else {
+      const { r, g, b, a } = e.target.color
+      setColor(r, g, b, a, swatches.primary.swatch)
+    }
+  } else if (e.target.className.includes("icon")) {
+    //add new color to palette
+    let swatch = document.createElement("div")
+    swatch.className = "swatch"
+
+    //associate object
+    swatch.color = swatches.primary.color
+
+    swatches.selectedPaletteIndex = swatches.palette.length
+    initializeColorPicker(swatch)
+  }
 }
 
 /**
