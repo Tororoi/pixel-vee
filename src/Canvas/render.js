@@ -310,6 +310,7 @@ export function renderCanvas(
   redrawTimeline = false,
   index = null
 ) {
+  // console.warn("render")
   // window.requestAnimationFrame(() => {
   // let begin = performance.now()
   if (clearCanvas) {
@@ -378,7 +379,7 @@ export function renderVectorsToDOM() {
   state.undoStack.forEach((action) => {
     if (!action.removed && !action.layer?.removed) {
       if (action.tool.type === "vector") {
-        action.index = state.undoStack.indexOf(action)
+        action.index = state.undoStack.indexOf(action) //change forEach to use i so this indexOf won't be needed
         let vectorElement = document.createElement("div")
         vectorElement.className = `vector ${action.index}`
         vectorElement.id = action.index
@@ -536,4 +537,49 @@ export function renderVectorsToDOM() {
       }
     }
   })
+}
+
+//TODO: need edit mode, generate palette from canvas, remove mode
+export function renderPaletteToDOM() {
+  if (swatches.paletteMode === "edit") {
+    dom.paletteEditBtn.classList.add("selected")
+    dom.paletteColors.classList.add("edit-mode")
+    dom.paletteRemoveBtn.classList.remove("selected")
+    dom.paletteColors.classList.remove("remove-mode")
+  } else if (swatches.paletteMode === "remove") {
+    dom.paletteEditBtn.classList.remove("selected")
+    dom.paletteColors.classList.remove("edit-mode")
+    dom.paletteRemoveBtn.classList.add("selected")
+    dom.paletteColors.classList.add("remove-mode")
+  } else {
+    dom.paletteEditBtn.classList.remove("selected")
+    dom.paletteColors.classList.remove("edit-mode")
+    dom.paletteRemoveBtn.classList.remove("selected")
+    dom.paletteColors.classList.remove("remove-mode")
+  }
+  dom.paletteColors.innerHTML = ""
+  swatches.selectedPaletteIndex = null
+  for (let i = 0; i < swatches.palette.length; i++) {
+    let paletteColor = document.createElement("div")
+    paletteColor.className = "palette-color"
+    if (swatches.palette[i].color === swatches.primary.color.color) {
+      paletteColor.classList.add("selected")
+      swatches.selectedPaletteIndex = i
+    }
+    let swatch = document.createElement("div")
+    swatch.className = "swatch"
+    swatch.style.background = swatches.palette[i].color
+    paletteColor.appendChild(swatch)
+    dom.paletteColors.appendChild(paletteColor)
+
+    //associate object
+    swatch.color = swatches.palette[i]
+  }
+  // Create add color button
+  let addColorBtn = document.createElement("div")
+  addColorBtn.className = "add-color"
+  let icon = document.createElement("div")
+  icon.className = "icon"
+  addColorBtn.appendChild(icon)
+  dom.paletteColors.appendChild(addColorBtn)
 }

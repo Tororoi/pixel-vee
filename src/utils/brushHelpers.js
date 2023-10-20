@@ -32,6 +32,7 @@ export function drawRect(brushSize, updateBrush = false) {
   return brushPixels
 }
 
+//TODO: create 9 brush arrays, 1 for normal brush and 8 which contain only the offset pixels for each direction. Use the directional brush to reduce cost of rendering large brushes.
 export function drawCircle(brushSize, updateBrush = false) {
   const brushPixels = []
   const seen = new Set()

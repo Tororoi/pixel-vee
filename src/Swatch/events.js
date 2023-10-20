@@ -1,10 +1,15 @@
 import { dom } from "../Context/dom.js"
+import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { Picker } from "../Tools/Picker.js"
 import { generateRandomRGB } from "../utils/colors.js"
-import { renderCanvas, renderVectorsToDOM } from "../Canvas/render.js"
+import {
+  renderCanvas,
+  renderVectorsToDOM,
+  renderPaletteToDOM,
+} from "../Canvas/render.js"
 import { changeActionColor } from "../Tools/actions.js"
 
 //====================================//
@@ -63,6 +68,26 @@ export function setColor(r, g, b, a, target) {
       renderVectorsToDOM()
       renderCanvas(null, true, true)
     }
+    if (swatches.activePaletteIndex !== null) {
+      if (swatches.activePaletteIndex > swatches.palette.length - 1) {
+        swatches.palette.push(color)
+        let paletteColor = document.createElement("div")
+        paletteColor.className = "palette-color"
+        paletteColor.appendChild(target)
+
+        let lastChild = dom.paletteColors.lastElementChild
+        dom.paletteColors.insertBefore(paletteColor, lastChild)
+      } else {
+        swatches.palette[swatches.activePaletteIndex] = target.color
+      }
+      swatches.activePaletteIndex = null
+    }
+  }
+  //reset selected index before render method calculates it
+  swatches.selectedPaletteIndex = null
+  //only render when s key (randomize color) is not being pressed
+  if (!keys.KeyS) {
+    renderPaletteToDOM()
   }
 }
 
@@ -116,6 +141,64 @@ function switchColors() {
     "--secondary-swatch-alpha",
     `${temp.a / 255}`
   )
+}
+
+function handlePalette(e) {
+  if (e.target.className.includes("swatch")) {
+    //if palette-color and edit mode, open color picker, else
+    if (swatches.paletteMode === "edit") {
+      swatches.activePaletteIndex = swatches.palette.indexOf(e.target.color)
+      initializeColorPicker(e.target)
+    } else if (swatches.paletteMode === "remove") {
+      let activePaletteIndex = swatches.palette.indexOf(e.target.color)
+      if (activePaletteIndex !== -1) {
+        // Ensure the color is found in the palette
+        swatches.palette.splice(activePaletteIndex, 1)
+        if (!keys["KeyX"]) {
+          //reset paletteMode unless holding x
+          swatches.paletteMode = "select"
+        }
+        renderPaletteToDOM()
+      }
+    } else {
+      //select mode
+      if (
+        swatches.palette.indexOf(e.target.color) ===
+        swatches.selectedPaletteIndex
+      ) {
+        //selecting color that's already selected opens color picker
+        swatches.activePaletteIndex = swatches.selectedPaletteIndex
+        initializeColorPicker(e.target)
+      } else {
+        const { r, g, b, a } = e.target.color
+        setColor(r, g, b, a, swatches.primary.swatch)
+      }
+    }
+  } else if (e.target.className.includes("icon")) {
+    //add new color to palette
+    let swatch = document.createElement("div")
+    swatch.className = "swatch"
+
+    //associate object
+    swatch.color = swatches.primary.color
+
+    swatches.activePaletteIndex = swatches.palette.length
+    initializeColorPicker(swatch)
+  } else if (e.target.className.includes("palette-remove")) {
+    if (swatches.paletteMode !== "remove") {
+      swatches.paletteMode = "remove"
+    } else {
+      swatches.paletteMode = "select"
+    }
+    renderPaletteToDOM()
+  } else if (e.target.className.includes("palette-edit")) {
+    if (swatches.paletteMode !== "edit") {
+      swatches.paletteMode = "edit"
+    } else {
+      swatches.paletteMode = "select"
+    }
+    renderPaletteToDOM()
+  }
 }
 
 /**
@@ -181,6 +264,8 @@ picker.build()
 dom.swatch.addEventListener("click", openColorPicker)
 dom.backSwatch.addEventListener("click", openColorPicker)
 dom.colorSwitch.addEventListener("click", switchColors)
+//Palette
+dom.paletteContainer.addEventListener("click", handlePalette)
 //Color Picker
 dom.confirmBtn.addEventListener("click", handleConfirm)
 dom.cancelBtn.addEventListener("click", closePickerWindow)

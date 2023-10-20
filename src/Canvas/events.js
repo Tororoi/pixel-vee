@@ -5,6 +5,7 @@ import {
   renderCanvas,
   renderLayersToDOM,
   renderVectorsToDOM,
+  renderPaletteToDOM,
 } from "../Canvas/render.js"
 import { createNewRasterLayer } from "./layers.js"
 import { handleTools } from "../Tools/events.js"
@@ -259,6 +260,7 @@ function dragLayerEnd(e) {
   renderLayersToDOM()
 }
 
+//TODO: allow user to set pixel scale between 0.125 and 8
 function addReferenceLayer() {
   //TODO: add to timeline
   let reader
@@ -405,6 +407,7 @@ function removeVector(vector) {
 addRasterLayer()
 canvas.currentLayer = canvas.layers[0]
 renderLayersToDOM()
+renderPaletteToDOM()
 
 //===================================//
 //=== * * * Event Listeners * * * ===//
