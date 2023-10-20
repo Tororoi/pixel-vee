@@ -9,7 +9,11 @@ import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCursor, renderRasterGUI } from "../GUI/raster.js"
 import { activateShortcut } from "../Tools/shortcuts.js"
-import { renderCanvas, renderVectorsToDOM } from "../Canvas/render.js"
+import {
+  renderCanvas,
+  renderVectorsToDOM,
+  renderPaletteToDOM,
+} from "../Canvas/render.js"
 import { actionZoom } from "../Tools/untrackedActions.js"
 import { adjustEllipseSteps } from "../Tools/index.js"
 
@@ -45,6 +49,9 @@ const setCoordinates = (e) => {
 }
 
 function handleKeyDown(e) {
+  if (e.repeat) {
+    return
+  }
   // e.preventDefault()
   if (state.shortcuts) {
     keys[e.code] = true
@@ -80,7 +87,16 @@ function handleKeyUp(e) {
       vectorGui.render(state, canvas)
     }
   }
+  //Palette
+  if (e.code === "KeyX" || e.code === "KeyK") {
+    swatches.paletteMode = "select"
+    renderPaletteToDOM()
+  }
+  if (e.code === "KeyS") {
+    renderPaletteToDOM()
+  }
 
+  //
   if (dom.toolBtn.id === "grab") {
     canvas.vectorGuiCVS.style.cursor = "move"
   } else if (

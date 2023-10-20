@@ -1,0 +1,209 @@
+/* Palette */
+
+.palette-interface {
+  order: 2;
+  .collapsible {
+    padding-top: 2px;
+  }
+  p {
+    margin: 0px;
+  }
+  /* Color Swatches */
+  .colors {
+    width: 112px;
+    height: 112px;
+    position: relative;
+    margin-bottom: 16px;
+    .swatch {
+      position: absolute;
+      background-image: repeating-linear-gradient(
+        -45deg,
+        white,
+        white 5px,
+        rgb(216, 216, 216) 5px,
+        rgb(216, 216, 216) 10px
+      );
+      width: 72px;
+      height: 72px;
+      margin: 8px;
+      z-index: 6;
+      .swatch-color {
+        background-image: radial-gradient(
+          rgba(var(--primary-swatch-color), var(--primary-swatch-alpha)) 50%,
+          rgba(var(--primary-swatch-color), 1) 110%
+        );
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+    }
+    .back-swatch {
+      position: absolute;
+      background-image: repeating-linear-gradient(
+        -45deg,
+        white,
+        white 5px,
+        rgb(216, 216, 216) 5px,
+        rgb(216, 216, 216) 10px
+      );
+      width: 72px;
+      height: 72px;
+      margin: 8px;
+      z-index: 5;
+      transform: translateX(24px) translateY(24px);
+      .swatch-color {
+        background-image: radial-gradient(
+          rgba(var(--secondary-swatch-color), var(--secondary-swatch-alpha)) 50%,
+          rgba(var(--secondary-swatch-color), 1) 110%
+        );
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+    }
+  }
+  .color-switch {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    box-shadow: none;
+    margin: 0;
+    // transform: translateX(-48px) translateY(-36px);
+    top: 84px;
+    left: 37px;
+    &:hover {
+      box-shadow: none;
+    }
+  }
+  .palette-container {
+    display: flex;
+    flex-flow: column nowrap;
+    margin: 4px;
+    margin-bottom: 8px;
+    max-width: 176px; //limit rows to 8 swatches
+    .palette-tools {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: center;
+      margin-bottom: 8px;
+      .palette-edit {
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        .icon {
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          background-image: url("../public/pixelv-palette-knife.png");
+          background-size: 100%;
+          transition: transform 0.1s;
+        }
+        &:hover {
+          .icon {
+            // background-image: url("../public/pixelv-palette-knife-hover.png");
+            // transform: translateY(-2px);
+          }
+        }
+        &.selected {
+          .icon {
+            background-image: url("../public/pixelv-palette-knife-hover.png");
+          }
+        }
+      }
+      .palette-remove {
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        .icon {
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          background-image: url("../public/pixelv-palette-scraper.png");
+          background-size: 100%;
+          transition: transform 0.1s;
+        }
+        &:hover {
+          .icon {
+            // background-image: url("../public/pixelv-palette-scraper-hover.png");
+            // transform: translateY(-2px);
+          }
+        }
+        &.selected {
+          .icon {
+            background-image: url("../public/pixelv-palette-scraper-hover.png");
+          }
+        }
+      }
+    }
+    .palette-colors {
+      display: flex;
+      flex-flow: row wrap;
+      .palette-color {
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+        background-image: repeating-linear-gradient(
+          -45deg,
+          white,
+          white 5px,
+          rgb(216, 216, 216) 5px,
+          rgb(216, 216, 216) 10px
+        );
+        margin: 1px;
+        @include boxBorder;
+        &.selected {
+          z-index: 105;
+          @include activeBoxBorder;
+          &:hover {
+            @include editBoxBorder;
+          }
+        }
+        &:hover {
+          z-index: 106;
+        }
+        .swatch {
+          width: 100%;
+          height: 100%;
+        }
+      }
+      &.edit-mode {
+        .palette-color {
+          @include editBoxBorder;
+        }
+      }
+      &.remove-mode {
+        .palette-color {
+          @include removeBoxBorder;
+          &.selected {
+            @include removeBoxBorder;
+          }
+          &:hover {
+            .swatch {
+              background-image: url("../public/pixelv-trash-hover.png") !important;
+              background-size: 100% !important;
+            }
+          }
+        }
+      }
+    }
+    .add-color {
+      cursor: pointer;
+      width: 20px;
+      height: 20px;
+      margin: 1px;
+      &:hover {
+        z-index: 106;
+      }
+      .icon {
+        background-image: url("../public/pixelv-plus.png");
+        background-size: 100%;
+        width: 100%;
+        height: 100%;
+        &:hover {
+          background-image: url("../public/pixelv-plus-hover.png");
+        }
+      }
+    }
+  }
+}

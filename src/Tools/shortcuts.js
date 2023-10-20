@@ -6,7 +6,7 @@ import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
 import { handleUndo, handleRedo } from "./undoRedo.js"
 import { tools, adjustEllipseSteps } from "./index.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { renderCanvas, renderPaletteToDOM } from "../Canvas/render.js"
 import { randomizeColor } from "../Swatch/events.js"
 import { handleTools, handleModes } from "./events.js"
 
@@ -113,6 +113,10 @@ export function activateShortcut(keyCode) {
     case "KeyJ":
       handleTools(null, "cubicCurve")
       break
+    case "KeyK":
+      swatches.paletteMode = "edit"
+      renderPaletteToDOM()
+      break
     case "KeyL":
       handleTools(null, "line")
       break
@@ -128,6 +132,9 @@ export function activateShortcut(keyCode) {
     case "KeyS":
       randomizeColor(swatches.primary.swatch)
       break
+    case "KeyU":
+      //
+      break
     case "KeyV":
       if (keys.MetaLeft || keys.MetaRight) {
         // console.log("paste")
@@ -141,6 +148,9 @@ export function activateShortcut(keyCode) {
         // console.log("cut")
         //clear selected area, add image to state.copiedRaster, etc.
         //add to timeline as "eraser" tool for points in selection
+      } else {
+        swatches.paletteMode = "remove"
+        renderPaletteToDOM()
       }
       break
     case "KeyZ":
