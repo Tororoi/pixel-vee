@@ -77,6 +77,8 @@ const brushSlider = document.querySelector("#brush-size")
 const paletteInterfaceContainer = document.querySelector(".palette-interface")
 const paletteContainer = document.querySelector(".palette-container")
 const paletteColors = document.querySelector(".palette-colors")
+const paletteEditBtn = document.querySelector(".palette-edit")
+const paletteRemoveBtn = document.querySelector(".palette-remove")
 //TODO: Add color button, edit colors button, remove color button, move main swatches to here. Clicking a palette swatch should change primary color to that color
 // button to create palette from canvas
 
@@ -111,6 +113,8 @@ const images = [
   "public/pixelv-reference-hover.png",
   "public/pixelv-trash-hover.png",
   "public/pixelv-plus-hover.png",
+  "public/pixelv-palette-knife-hover.png",
+  "public/pixelv-palette-scraper-hover.png",
 ]
 images.forEach((url) => {
   let img = new Image()
@@ -157,6 +161,8 @@ export const dom = {
   paletteInterfaceContainer,
   paletteContainer,
   paletteColors,
+  paletteEditBtn,
+  paletteRemoveBtn,
   uploadBtn,
   newLayerBtn,
   layersContainer,

@@ -78,35 +78,101 @@
   }
   .palette-container {
     display: flex;
+    flex-flow: column nowrap;
     margin: 4px;
+    margin-bottom: 8px;
     max-width: 176px; //limit rows to 8 swatches
+    .palette-tools {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: center;
+      margin-bottom: 8px;
+      .palette-edit {
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        .icon {
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          background-image: url("../public/pixelv-palette-knife.png");
+          background-size: 100%;
+          transition: transform 0.1s;
+        }
+        &:hover {
+          .icon {
+            // background-image: url("../public/pixelv-palette-knife-hover.png");
+            // transform: translateY(-2px);
+          }
+        }
+        &.selected {
+          .icon {
+            background-image: url("../public/pixelv-palette-knife-hover.png");
+          }
+        }
+      }
+      .palette-remove {
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        .icon {
+          width: 100%;
+          height: 100%;
+          pointer-events: none;
+          background-image: url("../public/pixelv-palette-scraper.png");
+          background-size: 100%;
+          transition: transform 0.1s;
+        }
+        &:hover {
+          .icon {
+            // background-image: url("../public/pixelv-palette-scraper-hover.png");
+            // transform: translateY(-2px);
+          }
+        }
+        &.selected {
+          .icon {
+            background-image: url("../public/pixelv-palette-scraper-hover.png");
+          }
+        }
+      }
+    }
     .palette-colors {
       display: flex;
       flex-flow: row wrap;
-    }
-    .palette-color {
-      cursor: pointer;
-      width: 20px;
-      height: 20px;
-      background-image: repeating-linear-gradient(
-        -45deg,
-        white,
-        white 5px,
-        rgb(216, 216, 216) 5px,
-        rgb(216, 216, 216) 10px
-      );
-      margin: 1px;
-      @include boxBorder;
-      &.selected {
-        z-index: 107;
-        @include activeBoxBorder;
+      .palette-color {
+        cursor: pointer;
+        width: 20px;
+        height: 20px;
+        background-image: repeating-linear-gradient(
+          -45deg,
+          white,
+          white 5px,
+          rgb(216, 216, 216) 5px,
+          rgb(216, 216, 216) 10px
+        );
+        margin: 1px;
+        @include boxBorder;
+        &.selected {
+          z-index: 105;
+          @include activeBoxBorder;
+        }
+        &:hover {
+          z-index: 106;
+        }
+        .swatch {
+          width: 100%;
+          height: 100%;
+        }
       }
-      &:hover {
-        z-index: 106;
+      &.edit-mode {
+        .palette-color {
+          @include editBoxBorder;
+        }
       }
-      .swatch {
-        width: 100%;
-        height: 100%;
+      &.remove-mode {
+        .palette-color {
+          @include removeBoxBorder;
+        }
       }
     }
     .add-color {

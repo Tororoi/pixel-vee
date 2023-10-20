@@ -27,6 +27,14 @@
     opacity: 0;
   }
 }
+@keyframes smallFloat {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-2px);
+  }
+}
 /* Reset styles */
 /* html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
@@ -1220,14 +1228,54 @@ canvas {
 }
 .palette-interface .palette-container {
   display: flex;
+  flex-flow: column nowrap;
   margin: 4px;
+  margin-bottom: 8px;
   max-width: 176px;
+}
+.palette-interface .palette-container .palette-tools {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  margin-bottom: 8px;
+}
+.palette-interface .palette-container .palette-tools .palette-edit {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+}
+.palette-interface .palette-container .palette-tools .palette-edit .icon {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-image: url("../public/pixelv-palette-knife.png");
+  background-size: 100%;
+  transition: transform 0.1s;
+}
+.palette-interface .palette-container .palette-tools .palette-edit.selected .icon {
+  background-image: url("../public/pixelv-palette-knife-hover.png");
+}
+.palette-interface .palette-container .palette-tools .palette-remove {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+}
+.palette-interface .palette-container .palette-tools .palette-remove .icon {
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  background-image: url("../public/pixelv-palette-scraper.png");
+  background-size: 100%;
+  transition: transform 0.1s;
+}
+.palette-interface .palette-container .palette-tools .palette-remove.selected .icon {
+  background-image: url("../public/pixelv-palette-scraper-hover.png");
 }
 .palette-interface .palette-container .palette-colors {
   display: flex;
   flex-flow: row wrap;
 }
-.palette-interface .palette-container .palette-color {
+.palette-interface .palette-container .palette-colors .palette-color {
   cursor: pointer;
   width: 20px;
   height: 20px;
@@ -1235,19 +1283,25 @@ canvas {
   margin: 1px;
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.palette-interface .palette-container .palette-color:hover:not([disabled]), .palette-interface .palette-container .palette-color:focus {
+.palette-interface .palette-container .palette-colors .palette-color:hover:not([disabled]), .palette-interface .palette-container .palette-colors .palette-color:focus {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
-.palette-interface .palette-container .palette-color.selected {
-  z-index: 107;
+.palette-interface .palette-container .palette-colors .palette-color.selected {
+  z-index: 105;
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
-.palette-interface .palette-container .palette-color:hover {
+.palette-interface .palette-container .palette-colors .palette-color:hover {
   z-index: 106;
 }
-.palette-interface .palette-container .palette-color .swatch {
+.palette-interface .palette-container .palette-colors .palette-color .swatch {
   width: 100%;
   height: 100%;
+}
+.palette-interface .palette-container .palette-colors.edit-mode .palette-color:hover:not([disabled]), .palette-interface .palette-container .palette-colors.edit-mode .palette-color:focus {
+  box-shadow: 2px 0px rgb(71, 255, 47), -2px 0px rgb(71, 255, 47), 0px -2px rgb(71, 255, 47), 0px 2px rgb(71, 255, 47);
+}
+.palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color:focus {
+  box-shadow: 2px 0px red, -2px 0px red, 0px -2px red, 0px 2px red;
 }
 .palette-interface .palette-container .add-color {
   cursor: pointer;

@@ -260,6 +260,7 @@ function dragLayerEnd(e) {
   renderLayersToDOM()
 }
 
+//TODO: allow user to set pixel scale between 0.125 and 8
 function addReferenceLayer() {
   //TODO: add to timeline
   let reader

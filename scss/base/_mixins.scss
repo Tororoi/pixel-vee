@@ -11,6 +11,21 @@
   box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white, 0px 2px $white;
 }
 
+@mixin editBoxBorder {
+  &:hover:not([disabled]),
+  &:focus {
+    box-shadow: 2px 0px rgb(71, 255, 47), -2px 0px rgb(71, 255, 47),
+      0px -2px rgb(71, 255, 47), 0px 2px rgb(71, 255, 47);
+  }
+}
+
+@mixin removeBoxBorder {
+  &:hover:not([disabled]),
+  &:focus {
+    box-shadow: 2px 0px red, -2px 0px red, 0px -2px red, 0px 2px red;
+  }
+}
+
 @mixin leftDownUpBorder {
   box-shadow: -2px 0px $border-color, 0px -2px $border-color,
     0px 2px $border-color;

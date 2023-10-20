@@ -49,6 +49,9 @@ const setCoordinates = (e) => {
 }
 
 function handleKeyDown(e) {
+  if (e.repeat) {
+    return
+  }
   // e.preventDefault()
   if (state.shortcuts) {
     keys[e.code] = true
@@ -85,7 +88,10 @@ function handleKeyUp(e) {
     }
   }
   //Palette
-  swatches.paletteMode = "select"
+  if (e.code === "KeyX" || e.code === "KeyU") {
+    swatches.paletteMode = "select"
+    renderPaletteToDOM()
+  }
   if (e.code === "KeyS") {
     renderPaletteToDOM()
   }

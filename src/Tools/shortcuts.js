@@ -6,7 +6,7 @@ import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
 import { handleUndo, handleRedo } from "./undoRedo.js"
 import { tools, adjustEllipseSteps } from "./index.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { renderCanvas, renderPaletteToDOM } from "../Canvas/render.js"
 import { randomizeColor } from "../Swatch/events.js"
 import { handleTools, handleModes } from "./events.js"
 
@@ -130,6 +130,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyU":
       swatches.paletteMode = "edit"
+      renderPaletteToDOM()
       break
     case "KeyV":
       if (keys.MetaLeft || keys.MetaRight) {
@@ -146,6 +147,7 @@ export function activateShortcut(keyCode) {
         //add to timeline as "eraser" tool for points in selection
       } else {
         swatches.paletteMode = "remove"
+        renderPaletteToDOM()
       }
       break
     case "KeyZ":

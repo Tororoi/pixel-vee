@@ -540,6 +540,22 @@ export function renderVectorsToDOM() {
 
 //TODO: need edit mode, generate palette from canvas, remove mode
 export function renderPaletteToDOM() {
+  if (swatches.paletteMode === "edit") {
+    dom.paletteEditBtn.classList.add("selected")
+    dom.paletteColors.classList.add("edit-mode")
+    dom.paletteRemoveBtn.classList.remove("selected")
+    dom.paletteColors.classList.remove("remove-mode")
+  } else if (swatches.paletteMode === "remove") {
+    dom.paletteEditBtn.classList.remove("selected")
+    dom.paletteColors.classList.remove("edit-mode")
+    dom.paletteRemoveBtn.classList.add("selected")
+    dom.paletteColors.classList.add("remove-mode")
+  } else {
+    dom.paletteEditBtn.classList.remove("selected")
+    dom.paletteColors.classList.remove("edit-mode")
+    dom.paletteRemoveBtn.classList.remove("selected")
+    dom.paletteColors.classList.remove("remove-mode")
+  }
   dom.paletteColors.innerHTML = ""
   for (let i = 0; i < swatches.palette.length; i++) {
     let paletteColor = document.createElement("div")

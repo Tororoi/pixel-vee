@@ -184,17 +184,20 @@ function handlePalette(e) {
 
     swatches.activePaletteIndex = swatches.palette.length
     initializeColorPicker(swatch)
-  } else if (e.target.className.includes("trash")) {
-    //remove selected color from palette
-    if (
-      swatches.selectedPaletteIndex !== -1 &&
-      swatches.selectedPaletteIndex !== null
-    ) {
-      // Ensure the color is found in the palette
-      swatches.palette.splice(swatches.selectedPaletteIndex, 1)
-      swatches.selectedPaletteIndex = null
-      renderPaletteToDOM()
+  } else if (e.target.className.includes("palette-remove")) {
+    if (swatches.paletteMode !== "remove") {
+      swatches.paletteMode = "remove"
+    } else {
+      swatches.paletteMode = "select"
     }
+    renderPaletteToDOM()
+  } else if (e.target.className.includes("palette-edit")) {
+    if (swatches.paletteMode !== "edit") {
+      swatches.paletteMode = "edit"
+    } else {
+      swatches.paletteMode = "select"
+    }
+    renderPaletteToDOM()
   }
 }
 
