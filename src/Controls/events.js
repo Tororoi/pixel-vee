@@ -88,7 +88,7 @@ function handleKeyUp(e) {
     }
   }
   //Palette
-  if (e.code === "KeyX" || e.code === "KeyU") {
+  if (e.code === "KeyX" || e.code === "KeyK") {
     swatches.paletteMode = "select"
     renderPaletteToDOM()
   }

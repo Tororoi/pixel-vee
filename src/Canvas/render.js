@@ -310,6 +310,7 @@ export function renderCanvas(
   redrawTimeline = false,
   index = null
 ) {
+  // console.warn("render")
   // window.requestAnimationFrame(() => {
   // let begin = performance.now()
   if (clearCanvas) {
@@ -557,6 +558,7 @@ export function renderPaletteToDOM() {
     dom.paletteColors.classList.remove("remove-mode")
   }
   dom.paletteColors.innerHTML = ""
+  swatches.selectedPaletteIndex = null
   for (let i = 0; i < swatches.palette.length; i++) {
     let paletteColor = document.createElement("div")
     paletteColor.className = "palette-color"

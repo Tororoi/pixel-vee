@@ -1290,6 +1290,9 @@ canvas {
   z-index: 105;
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
+.palette-interface .palette-container .palette-colors .palette-color.selected:hover:hover:not([disabled]), .palette-interface .palette-container .palette-colors .palette-color.selected:hover:focus {
+  box-shadow: 2px 0px rgb(71, 255, 47), -2px 0px rgb(71, 255, 47), 0px -2px rgb(71, 255, 47), 0px 2px rgb(71, 255, 47);
+}
 .palette-interface .palette-container .palette-colors .palette-color:hover {
   z-index: 106;
 }
@@ -1302,6 +1305,13 @@ canvas {
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color:focus {
   box-shadow: 2px 0px red, -2px 0px red, 0px -2px red, 0px 2px red;
+}
+.palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:focus {
+  box-shadow: 2px 0px red, -2px 0px red, 0px -2px red, 0px 2px red;
+}
+.palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover .swatch {
+  background-image: url("../public/pixelv-trash-hover.png") !important;
+  background-size: 100% !important;
 }
 .palette-interface .palette-container .add-color {
   cursor: pointer;

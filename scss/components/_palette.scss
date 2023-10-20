@@ -155,6 +155,9 @@
         &.selected {
           z-index: 105;
           @include activeBoxBorder;
+          &:hover {
+            @include editBoxBorder;
+          }
         }
         &:hover {
           z-index: 106;
@@ -172,6 +175,15 @@
       &.remove-mode {
         .palette-color {
           @include removeBoxBorder;
+          &.selected {
+            @include removeBoxBorder;
+          }
+          &:hover {
+            .swatch {
+              background-image: url("../public/pixelv-trash-hover.png") !important;
+              background-size: 100% !important;
+            }
+          }
         }
       }
     }

@@ -113,6 +113,10 @@ export function activateShortcut(keyCode) {
     case "KeyJ":
       handleTools(null, "cubicCurve")
       break
+    case "KeyK":
+      swatches.paletteMode = "edit"
+      renderPaletteToDOM()
+      break
     case "KeyL":
       handleTools(null, "line")
       break
@@ -129,8 +133,7 @@ export function activateShortcut(keyCode) {
       randomizeColor(swatches.primary.swatch)
       break
     case "KeyU":
-      swatches.paletteMode = "edit"
-      renderPaletteToDOM()
+      //
       break
     case "KeyV":
       if (keys.MetaLeft || keys.MetaRight) {
