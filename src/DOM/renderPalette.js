@@ -23,7 +23,6 @@ export const renderPaletteToolsToDOM = () => {
 }
 
 export const renderPaletteToDOM = () => {
-  renderPaletteToolsToDOM()
   dom.paletteColors.innerHTML = ""
   swatches.selectedPaletteIndex = null
   for (let i = 0; i < swatches.palette.length; i++) {

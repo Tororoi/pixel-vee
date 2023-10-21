@@ -2,8 +2,7 @@ import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { renderLayersToDOM } from "../DOM/renderLayers.js"
-import { renderVectorsToDOM } from "../DOM/renderVectors.js"
+import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
 
 function drawLayers(ctx, renderPreview) {
   canvas.layers.forEach((l) => {

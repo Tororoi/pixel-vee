@@ -10,8 +10,11 @@ import { vectorGui } from "../GUI/vector.js"
 import { renderCursor, renderRasterGUI } from "../GUI/raster.js"
 import { activateShortcut } from "../Tools/shortcuts.js"
 import { renderCanvas } from "../Canvas/render.js"
-import { renderVectorsToDOM } from "../DOM/renderVectors.js"
-import { renderPaletteToDOM } from "../DOM/renderPalette.js"
+import {
+  renderVectorsToDOM,
+  renderPaletteToolsToDOM,
+  renderPaletteToDOM,
+} from "../DOM/render.js"
 import { actionZoom } from "../Tools/untrackedActions.js"
 import { adjustEllipseSteps } from "../Tools/index.js"
 
@@ -88,6 +91,7 @@ function handleKeyUp(e) {
   //Palette
   if (e.code === "KeyX" || e.code === "KeyK") {
     swatches.paletteMode = "select"
+    renderPaletteToolsToDOM()
     renderPaletteToDOM()
   }
   if (e.code === "KeyS") {

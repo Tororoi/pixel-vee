@@ -8,7 +8,7 @@ import { drawRect, drawCircle } from "../utils/brushHelpers.js"
 import { actionClear } from "../Tools/actions.js"
 import { actionZoom, actionRecenter } from "./untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
-import { renderVectorsToDOM } from "../DOM/renderVectors.js"
+import { renderVectorsToDOM } from "../DOM/render.js"
 
 //=========================================//
 //=== * * * Button Event Handlers * * * ===//

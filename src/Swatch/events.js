@@ -6,8 +6,11 @@ import { swatches } from "../Context/swatch.js"
 import { Picker } from "../Tools/Picker.js"
 import { generateRandomRGB } from "../utils/colors.js"
 import { renderCanvas } from "../Canvas/render.js"
-import { renderVectorsToDOM } from "../DOM/renderVectors.js"
-import { renderPaletteToDOM } from "../DOM/renderPalette.js"
+import {
+  renderVectorsToDOM,
+  renderPaletteToolsToDOM,
+  renderPaletteToDOM,
+} from "../DOM/render.js"
 import { changeActionColor } from "../Tools/actions.js"
 
 //====================================//
@@ -155,6 +158,7 @@ function handlePalette(e) {
         if (!keys["KeyX"]) {
           //reset paletteMode unless holding x
           swatches.paletteMode = "select"
+          renderPaletteToolsToDOM()
         }
         renderPaletteToDOM()
       }
@@ -188,14 +192,14 @@ function handlePalette(e) {
     } else {
       swatches.paletteMode = "select"
     }
-    renderPaletteToDOM()
+    renderPaletteToolsToDOM()
   } else if (e.target.className.includes("palette-edit")) {
     if (swatches.paletteMode !== "edit") {
       swatches.paletteMode = "edit"
     } else {
       swatches.paletteMode = "select"
     }
-    renderPaletteToDOM()
+    renderPaletteToolsToDOM()
   }
 }
 

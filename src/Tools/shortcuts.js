@@ -7,7 +7,7 @@ import { vectorGui } from "../GUI/vector.js"
 import { handleUndo, handleRedo } from "./undoRedo.js"
 import { tools, adjustEllipseSteps } from "./index.js"
 import { renderCanvas } from "../Canvas/render.js"
-import { renderPaletteToDOM } from "../DOM/renderPalette.js"
+import { renderPaletteToolsToDOM, renderPaletteToDOM } from "../DOM/render.js"
 import { randomizeColor } from "../Swatch/events.js"
 import { handleTools, handleModes } from "./events.js"
 
@@ -116,6 +116,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyK":
       swatches.paletteMode = "edit"
+      renderPaletteToolsToDOM()
       renderPaletteToDOM()
       break
     case "KeyL":
@@ -151,6 +152,7 @@ export function activateShortcut(keyCode) {
         //add to timeline as "eraser" tool for points in selection
       } else {
         swatches.paletteMode = "remove"
+        renderPaletteToolsToDOM()
         renderPaletteToDOM()
       }
       break
