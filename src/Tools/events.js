@@ -7,7 +7,8 @@ import { vectorGui } from "../GUI/vector.js"
 import { drawRect, drawCircle } from "../utils/brushHelpers.js"
 import { actionClear } from "../Tools/actions.js"
 import { actionZoom, actionRecenter } from "./untrackedActions.js"
-import { renderCanvas, renderVectorsToDOM } from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render.js"
+import { renderVectorsToDOM } from "../DOM/renderVectors.js"
 
 //=========================================//
 //=== * * * Button Event Handlers * * * ===//

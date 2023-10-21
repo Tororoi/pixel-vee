@@ -9,11 +9,9 @@ import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCursor, renderRasterGUI } from "../GUI/raster.js"
 import { activateShortcut } from "../Tools/shortcuts.js"
-import {
-  renderCanvas,
-  renderVectorsToDOM,
-  renderPaletteToDOM,
-} from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render.js"
+import { renderVectorsToDOM } from "../DOM/renderVectors.js"
+import { renderPaletteToDOM } from "../DOM/renderPalette.js"
 import { actionZoom } from "../Tools/untrackedActions.js"
 import { adjustEllipseSteps } from "../Tools/index.js"
 

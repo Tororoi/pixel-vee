@@ -1,12 +1,10 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import {
-  renderCanvas,
-  renderLayersToDOM,
-  renderVectorsToDOM,
-  renderPaletteToDOM,
-} from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render.js"
+import { renderLayersToDOM } from "../DOM/renderLayers.js"
+import { renderVectorsToDOM } from "../DOM/renderVectors.js"
+import { renderPaletteToDOM } from "../DOM/renderPalette.js"
 import { createNewRasterLayer } from "./layers.js"
 import { handleTools } from "../Tools/events.js"
 import { removeAction } from "../Tools/actions.js"

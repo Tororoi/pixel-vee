@@ -5,11 +5,9 @@ import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { Picker } from "../Tools/Picker.js"
 import { generateRandomRGB } from "../utils/colors.js"
-import {
-  renderCanvas,
-  renderVectorsToDOM,
-  renderPaletteToDOM,
-} from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render.js"
+import { renderVectorsToDOM } from "../DOM/renderVectors.js"
+import { renderPaletteToDOM } from "../DOM/renderPalette.js"
 import { changeActionColor } from "../Tools/actions.js"
 
 //====================================//

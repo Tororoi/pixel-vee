@@ -1,7 +1,8 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "../GUI/vector.js"
-import { renderCanvas, renderVectorsToDOM } from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render.js"
+import { renderVectorsToDOM } from "../DOM/renderVectors.js"
 
 //====================================//
 //========= * * * Core * * * =========//
