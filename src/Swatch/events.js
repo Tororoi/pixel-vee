@@ -3,7 +3,7 @@ import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { Picker } from "../Tools/Picker.js"
+import { Picker } from "./Picker.js"
 import { generateRandomRGB } from "../utils/colors.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
@@ -11,7 +11,7 @@ import {
   renderPaletteToolsToDOM,
   renderPaletteToDOM,
 } from "../DOM/render.js"
-import { changeActionColor } from "../Tools/actions.js"
+import { changeActionColor } from "../Actions/actions.js"
 
 //====================================//
 //===== * * * Color Picker * * * =====//

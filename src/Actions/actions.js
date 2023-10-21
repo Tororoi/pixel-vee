@@ -1,7 +1,7 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { tools } from "./index.js"
+import { tools } from "../Tools/index.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { vectorGui } from "../GUI/vector.js"

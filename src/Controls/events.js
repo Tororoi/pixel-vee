@@ -8,15 +8,15 @@ import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCursor, renderRasterGUI } from "../GUI/raster.js"
-import { activateShortcut } from "../Tools/shortcuts.js"
+import { activateShortcut } from "./shortcuts.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
   renderVectorsToDOM,
   renderPaletteToolsToDOM,
   renderPaletteToDOM,
 } from "../DOM/render.js"
-import { actionZoom } from "../Tools/untrackedActions.js"
-import { adjustEllipseSteps } from "../Tools/index.js"
+import { actionZoom } from "../Actions/untrackedActions.js"
+import { adjustEllipseSteps } from "../Tools/ellipse.js"
 
 //TODO: Add Palette that consists of a small canvas with basic paint, sample and fill erase tools.
 //TODO: Add color mixer that consists of a small canvas that can be painted upon and cleared. At any time the user can click "Mix" and the colors on the canvas will be used to generate a mixed color.

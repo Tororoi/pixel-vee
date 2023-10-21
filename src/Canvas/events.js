@@ -9,7 +9,7 @@ import {
 } from "../DOM/render.js"
 import { createNewRasterLayer } from "./layers.js"
 import { handleTools } from "../Tools/events.js"
-import { removeAction } from "../Tools/actions.js"
+import { removeAction } from "../Actions/actions.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { swatches } from "../Context/swatch.js"

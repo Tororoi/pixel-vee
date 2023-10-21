@@ -1,4 +1,4 @@
-import { actionDraw } from "../Tools/actions.js"
+import { actionDraw } from "../Actions/actions.js"
 import { vectorGui } from "./vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 
