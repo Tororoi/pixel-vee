@@ -14,7 +14,7 @@ import { renderCanvas } from "../Canvas/render.js"
  * Fill an area with the specified color
  * Supported modes: "draw, erase"
  */
-export function fillSteps() {
+function fillSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       vectorGui.render(state, canvas)

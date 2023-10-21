@@ -16,7 +16,7 @@ import { canvas } from "../Context/canvas.js"
  * Hold option to minus from selection with magic wand/ free form
  * Command + I to invert selection
  */
-export function selectSteps() {
+function selectSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //1. set drag origin

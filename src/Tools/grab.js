@@ -2,7 +2,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { renderCanvas } from "../Canvas/render.js"
 
-export function grabSteps() {
+function grabSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       canvas.previousXOffset = canvas.xOffset

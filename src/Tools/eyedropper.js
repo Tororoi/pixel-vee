@@ -9,7 +9,7 @@ import { setColor } from "../Swatch/events.js"
 
 //Eyedropper
 //TODO: add magnifying glass view that shows zoomed in view of area being sampled
-export function eyedropperSteps() {
+function eyedropperSteps() {
   //eyedropper helper function
   function sampleColor(x, y) {
     let newColor = getColor(x, y, state.colorLayerGlobal)

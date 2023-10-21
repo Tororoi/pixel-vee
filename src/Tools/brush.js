@@ -14,7 +14,7 @@ import { getColor } from "../utils/canvasHelpers.js"
 /**
  * Supported modes: "draw, erase, perfect, inject",
  */
-export function brushSteps() {
+function brushSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       state.pointsSet = new Set()
@@ -290,10 +290,11 @@ export function brushSteps() {
 
 /**
  * Supported modes: "draw, erase, perfect, inject"
+ * //TODO: change replace function to be a mode instead of tool, called "colorMask"
  * creates a copy of the canvas with just the secondary color parts. This is used as a mask so the user can draw normally.
  * When the user finishes drawing, the changed pixels are saved as points and will be rerendered in the timeline as single pixel brush points
  */
-export function replaceSteps() {
+function replaceSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       // state.pointsSet = new Set()

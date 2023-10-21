@@ -19,7 +19,7 @@ import { renderCanvas } from "../Canvas/render.js"
  * Draw bezier curves
  * Supported modes: "draw, erase",
  */
-export function quadCurveSteps() {
+function quadCurveSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
@@ -168,7 +168,7 @@ export function quadCurveSteps() {
  * Draw cubic bezier curves
  * Supported modes: "draw, erase",
  */
-export function cubicCurveSteps() {
+function cubicCurveSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
@@ -341,7 +341,7 @@ export function cubicCurveSteps() {
  * Currently this modifies the history directly which is a big no no, just done for testing, only ok for now since it just modifies the curve that was just created
  * @param {*} numPoints
  */
-export function adjustCurveSteps(numPoints = 4) {
+function adjustCurveSteps(numPoints = 4) {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer

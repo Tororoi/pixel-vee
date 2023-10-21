@@ -12,7 +12,7 @@ import { renderCanvas } from "../Canvas/render.js"
 /**
  * Supported modes: "draw, erase, inject",
  */
-export function lineSteps() {
+function lineSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       state.lineStartX = state.cursorX
