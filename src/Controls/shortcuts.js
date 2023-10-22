@@ -134,6 +134,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyS":
       randomizeColor(swatches.primary.swatch)
+      renderPaletteToDOM()
       break
     case "KeyU":
       //

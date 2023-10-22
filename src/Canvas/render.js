@@ -4,6 +4,11 @@ import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
 
+/**
+ * Draw the canvas layers
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Function} renderPreview
+ */
 function drawLayers(ctx, renderPreview) {
   canvas.layers.forEach((l) => {
     if (!l.removed) {
@@ -54,8 +59,9 @@ function drawLayers(ctx, renderPreview) {
 }
 
 /**
- *
- * @param {*} index - optional parameter to limit render up to a specific action
+ * Redraw all timeline actions
+ * Critical function for the timeline to work
+ * @param {Integer} index - optional parameter to limit render up to a specific action
  */
 function redrawTimelineActions(index = null) {
   let i = 0
@@ -65,7 +71,6 @@ function redrawTimelineActions(index = null) {
       return
     }
     i++
-    let imageData = null //for inject actions getImageData of currently assembled layer canvas
     if (!action.hidden && !action.removed) {
       switch (action.tool.name) {
         case "modify":
@@ -78,7 +83,6 @@ function redrawTimelineActions(index = null) {
           //do nothing
           break
         case "addLayer":
-          // p.layer.removed = false
           action.layer.removed = false
           renderLayersToDOM()
           renderVectorsToDOM()
@@ -89,17 +93,10 @@ function redrawTimelineActions(index = null) {
           renderVectorsToDOM()
           break
         case "clear":
-          //Since this action marks all actions on its layer as removed, no need to clear the canvas here anymore
-          // p.layer.ctx.clearRect(
-          //   0,
-          //   0,
-          //   canvas.offScreenCVS.width,
-          //   canvas.offScreenCVS.height
-          // )
+          //Since this action marks all actions on its layer as removed, no need to clear the canvas here or do anything else related to rendering
           break
         case "brush":
           //actionDraw
-          // const seen = new Set()
           const seen = action.properties.maskSet
             ? new Set(action.properties.maskSet)
             : new Set()
@@ -222,25 +219,6 @@ function redrawTimelineActions(index = null) {
             action.properties.vectorProperties.y1Offset
           )
           break
-        case "replace":
-          //IMPORTANT:
-          //Any replaced pixels over previous vectors would be fully rasterized.
-          //actionDraw
-          const replaceSeen = new Set(action.properties.maskSet)
-          action.properties.points.forEach((p) => {
-            action.tool.action(
-              p.x,
-              p.y,
-              p.color,
-              p.brushStamp,
-              "0,0",
-              p.brushSize,
-              action.layer.ctx,
-              action.mode,
-              replaceSeen
-            )
-          })
-          break
         default:
         //do nothing
       }
@@ -258,8 +236,11 @@ function redrawTimelineActions(index = null) {
   })
 }
 
-//FIX: Improve performance by keeping track of "redraw regions" instead of redrawing the whole thing.
-//Draw Canvas
+/**
+ * Draw canvas layers onto onscreen canvas
+ * TODO: Improve performance by keeping track of "redraw regions" instead of redrawing the whole thing.
+ * @param {Function} renderPreview
+ */
 function drawCanvasLayers(renderPreview) {
   //clear canvas
   canvas.onScreenCTX.clearRect(
@@ -302,9 +283,10 @@ function drawCanvasLayers(renderPreview) {
 
 /**
  * Render canvas entirely including all actions in timeline
- * @param {boolean} clearCanvas - pass true if the canvas needs to be cleared before rendering
- * @param {boolean} redrawTimeline - pass true to redraw all previous actions
- * @param {*} index - optional parameter to limit render up to a specific action
+ * @param {Function} renderPreview
+ * @param {Boolean} clearCanvas - pass true if the canvas needs to be cleared before rendering
+ * @param {Boolean} redrawTimeline - pass true to redraw all previous actions
+ * @param {Integer} index - optional parameter to limit render up to a specific action
  */
 export function renderCanvas(
   renderPreview = null,
@@ -312,7 +294,6 @@ export function renderCanvas(
   redrawTimeline = false,
   index = null
 ) {
-  // console.warn("render")
   // window.requestAnimationFrame(() => {
   // let begin = performance.now()
   if (clearCanvas) {

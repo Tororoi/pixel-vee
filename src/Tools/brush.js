@@ -2,6 +2,7 @@ import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
+import { tools } from "./index.js"
 import { actionDraw, actionLine } from "../Actions/actions.js"
 import { getAngle, getTriangle } from "../utils/trig.js"
 import { renderCanvas } from "../Canvas/render.js"
@@ -288,7 +289,7 @@ function brushSteps() {
       )
 
       state.addToTimeline({
-        tool: state.tool,
+        tool: brush,
         layer: canvas.currentLayer,
         properties: { points: state.points, maskSet: state.maskSet },
       })

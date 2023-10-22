@@ -134,7 +134,7 @@ export function actionClear(layer) {
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {CanvasRenderingContext2D} ctx
- * @param {*} currentMode
+ * @param {String} currentMode
  * @param {Set} seenPointsSet
  * @param {Array} points
  * @param {Boolean} excludeFromSet - even if new point, don't add to seenPointsSet if true
@@ -205,13 +205,13 @@ export function actionDraw(
 
 /**
  * Draws a pixel perfect line from point a to point b
- * @param {*} sx
- * @param {*} sy
- * @param {*} tx
- * @param {*} ty
+ * @param {Integer} sx
+ * @param {Integer} sy
+ * @param {Integer} tx
+ * @param {Integer} ty
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {CanvasRenderingContext2D} ctx
- * @param {*} currentMode
+ * @param {String} currentMode
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  */
@@ -267,13 +267,13 @@ export function actionLine(
 /**
  * NOTE: if canvas is resized and fill point exists outside canvas area, fill will not render when timeline is redrawn
  * User action for process to fill a contiguous color
- * @param {*} startX
- * @param {*} startY
+ * @param {Integer} startX
+ * @param {Integer} startY
  * @param {Object} currentColor - {color, r, g, b, a}
- * @param {*} layer
- * @param {*} currentMode
- * @param {*} selectProperties
- * @param {*} maskSet
+ * @param {Object} layer
+ * @param {String} currentMode
+ * @param {Object} selectProperties
+ * @param {Set} maskSet
  * @returns
  */
 export function actionFill(
@@ -385,12 +385,12 @@ export function actionFill(
 /**
  * Helper function. TODO: move to external helper file for rendering
  * To render a pixel perfect curve, points are plotted instead of using t values, which are not equidistant.
- * @param {*} points
+ * @param {Array} points
  * @param {Object} brushStamp
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Integer} brushSize
  * @param {CanvasRenderingContext2D} ctx
- * @param {*} currentMode
+ * @param {String} currentMode
  */
 function renderPoints(
   points,
@@ -432,16 +432,16 @@ function renderPoints(
 
 /**
  * User action for process to set control points for quadratic bezier
- * @param {*} startx
- * @param {*} starty
- * @param {*} endx
- * @param {*} endy
- * @param {*} controlx
- * @param {*} controly
- * @param {*} stepNum
+ * @param {Integer} startx
+ * @param {Integer} starty
+ * @param {Integer} endx
+ * @param {Integer} endy
+ * @param {Integer} controlx
+ * @param {Integer} controly
+ * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {CanvasRenderingContext2D} ctx
- * @param {*} currentMode
+ * @param {String} currentMode
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  */
@@ -530,18 +530,18 @@ export function actionQuadraticCurve(
 
 /**
  * User action for process to set control points for cubic bezier
- * @param {*} startx
- * @param {*} starty
- * @param {*} endx
- * @param {*} endy
- * @param {*} controlx1
- * @param {*} controly1
- * @param {*} controlx2
- * @param {*} controly2
- * @param {*} stepNum
+ * @param {Integer} startx
+ * @param {Integer} starty
+ * @param {Integer} endx
+ * @param {Integer} endy
+ * @param {Integer} controlx1
+ * @param {Integer} controly1
+ * @param {Integer} controlx2
+ * @param {Integer} controly2
+ * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {CanvasRenderingContext2D} ctx
- * @param {*} currentMode
+ * @param {String} currentMode
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  */
@@ -660,22 +660,22 @@ export function actionCubicCurve(
 
 /**
  * User action for process to set control points for cubic bezier
- * @param {*} centerx
- * @param {*} centery
- * @param {*} xa
- * @param {*} ya
- * @param {*} xb
- * @param {*} yb
- * @param {*} stepNum
+ * @param {Integer} centerx
+ * @param {Integer} centery
+ * @param {Integer} xa
+ * @param {Integer} ya
+ * @param {Integer} xb
+ * @param {Integer} yb
+ * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {CanvasRenderingContext2D} ctx
- * @param {*} currentMode
+ * @param {String} currentMode
  * @param {Object} brushStamp
  * @param {Integer} brushSize
- * @param {*} angle
- * @param {*} offset
- * @param {*} x1Offset
- * @param {*} y1Offset
+ * @param {Float} angle - Radians
+ * @param {Integer} offset
+ * @param {Integer} x1Offset
+ * @param {Integer} y1Offset
  */
 export function actionEllipse(
   centerx,
