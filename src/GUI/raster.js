@@ -36,6 +36,7 @@ export function renderCursor(state, canvas, swatches) {
             state.cursorY,
             swatches.primary.color,
             state.brushStamp,
+            "0,0",
             state.tool.brushSize,
             ctx,
             state.mode,

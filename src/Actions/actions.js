@@ -6,9 +6,9 @@ import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { vectorGui } from "../GUI/vector.js"
 import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
-import { createNewRasterLayer } from "../Canvas/layers.js"
 import { getColor } from "../utils/canvasHelpers.js"
 import { colorPixel, matchStartColor } from "../utils/imageDataHelpers.js"
+import { renderCanvas } from "../Canvas/render.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -143,6 +143,7 @@ export function actionDraw(
   coordY,
   currentColor,
   brushStamp,
+  brushStampDir,
   brushSize,
   ctx,
   currentMode,
@@ -163,9 +164,18 @@ export function actionDraw(
       state.pointsSet.add(`${coordX},${coordY}`)
     }
   }
+  if (
+    coordX >= ctx.canvas.width + brushSize / 2 ||
+    coordX <= -brushSize / 2 ||
+    coordY >= ctx.canvas.height + brushSize / 2 ||
+    coordY <= -brushSize / 2
+  ) {
+    //don't draw outside bounds to reduce time cost of render
+    return
+  }
   const baseX = Math.ceil(coordX - brushSize / 2)
   const baseY = Math.ceil(coordY - brushSize / 2)
-  for (const pixel of brushStamp) {
+  for (const pixel of brushStamp[brushStampDir]) {
     const x = baseX + pixel.x
     const y = baseY + pixel.y
 
@@ -232,6 +242,7 @@ export function actionLine(
       thispoint.y,
       currentColor,
       brushStamp,
+      "0,0",
       brushSize,
       ctx,
       currentMode,
@@ -244,6 +255,7 @@ export function actionLine(
     Math.round(ty),
     currentColor,
     brushStamp,
+    "0,0",
     brushSize,
     ctx,
     currentMode,
@@ -387,23 +399,75 @@ function renderPoints(
   ctx,
   currentMode
 ) {
+  let begin = performance.now()
   const seen = new Set()
+  let previousX = Math.floor(points[0].x)
+  let previousY = Math.floor(points[0].y)
+  //performance: with a 360px radius and a 32px brush, using the brush direction decreases render time from 148ms to 22ms
   for (const { x, y } of points) {
     //rounded values
     let xt = Math.floor(x)
     let yt = Math.floor(y)
-
+    let xDir = xt - previousX
+    if (xDir < -1 || xDir > 1) {
+      xDir = 0
+    }
+    let yDir = yt - previousY
+    if (yDir < -1 || yDir > 1) {
+      yDir = 0
+    }
     actionDraw(
       xt,
       yt,
       currentColor,
       brushStamp,
+      `${xDir},${yDir}`,
       brushSize,
       ctx,
       currentMode,
       seen
     )
+    previousX = xt
+    previousY = yt
   }
+  //TODO: still a bug with curves where line is drawn
+  // function processPoints(i) {
+  //   const { x, y } = points[i]
+  //   //rounded values
+  //   let xt = Math.floor(x)
+  //   let yt = Math.floor(y)
+  //   let xDir = xt - previousX
+  //   if (xDir < -1 || xDir > 1) {
+  //     xDir = 0
+  //   }
+
+  //   let yDir = yt - previousY
+  //   if (yDir < -1 || yDir > 1) {
+  //     yDir = 0
+  //   }
+  //   actionDraw(
+  //     xt,
+  //     yt,
+  //     currentColor,
+  //     brushStamp,
+  //     `${xDir},${yDir}`,
+  //     brushSize,
+  //     ctx,
+  //     currentMode,
+  //     seen
+  //   )
+  //   previousX = xt
+  //   previousY = yt
+  //   let j = i + 1
+  //   renderCanvas()
+  //   if (j < points.length) {
+  //     window.setTimeout(() => processPoints(j), 10) // Delay of 1 second
+  //   }
+  // }
+
+  // processPoints(0)
+  let end = performance.now()
+  console.log(end - begin)
 }
 
 /**

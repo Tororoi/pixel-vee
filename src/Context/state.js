@@ -21,7 +21,17 @@ export const state = {
   //tool settings
   tool: null, //needs to be initialized
   mode: "draw", //TODO: modes should allow multiple modes at once {erase: false, perfect: false, inject: false}
-  brushStamp: [{ x: 0, y: 0 }], //default 1 pixel
+  brushStamp: {
+    "0,0": [{ x: 0, y: 0 }],
+    "1,0": [{ x: 0, y: 0 }],
+    "1,1": [{ x: 0, y: 0 }],
+    "0,1": [{ x: 0, y: 0 }],
+    "-1,1": [{ x: 0, y: 0 }],
+    "-1,0": [{ x: 0, y: 0 }],
+    "-1,-1": [{ x: 0, y: 0 }],
+    "0,-1": [{ x: 0, y: 0 }],
+    "1,-1": [{ x: 0, y: 0 }],
+  }, //default 1 pixel
   brushType: "circle",
   options: {
     perfect: false,

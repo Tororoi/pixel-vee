@@ -72,6 +72,7 @@ const lineWeight = document.querySelector("#line-weight")
 const brushBtn = document.querySelector(".brush-preview")
 const brushPreview = document.querySelector("#brush-preview")
 const brushSlider = document.querySelector("#brush-size")
+const brush = document.querySelector(".brush-stamp")
 
 // * Palette Interface * //
 const paletteInterfaceContainer = document.querySelector(".palette-interface")
@@ -158,6 +159,7 @@ export const dom = {
   brushBtn,
   brushPreview,
   brushSlider,
+  brush,
   paletteInterfaceContainer,
   paletteContainer,
   paletteColors,
