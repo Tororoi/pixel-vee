@@ -4,7 +4,7 @@ import { canvas } from "../Context/canvas.js"
 import { tools } from "../Tools/index.js"
 import { handleUndo, handleRedo } from "../Actions/undoRedo.js"
 import { vectorGui } from "../GUI/vector.js"
-import { drawRect, drawCircle } from "../utils/brushHelpers.js"
+import { createSquareBrush, createCircleBrush } from "../utils/brushHelpers.js"
 import { actionClear } from "../Actions/actions.js"
 import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
@@ -191,9 +191,9 @@ function updateStamp() {
   dom.brushPreview.style.width = state.tool.brushSize * 2 + "px"
   dom.brushPreview.style.height = state.tool.brushSize * 2 + "px"
   if (state.brushType === "circle") {
-    state.brushStamp = drawCircle(state.tool.brushSize, true) //circle
+    state.brushStamp = createCircleBrush(state.tool.brushSize, true) //circle
   } else {
-    state.brushStamp = drawRect(state.tool.brushSize, true) //square
+    state.brushStamp = createSquareBrush(state.tool.brushSize, true) //square
   }
 }
 

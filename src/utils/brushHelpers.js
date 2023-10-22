@@ -1,12 +1,12 @@
 import { dom } from "../Context/dom.js"
 
-export function drawRect(brushSize, updateBrush = false) {
-  const brushPixels = []
+function updateBrushPreview(brushPixels, brushSize, updateBrush) {
   if (updateBrush) {
     dom.brush.setAttribute("viewBox", `0 -0.5 ${brushSize} ${brushSize}`)
     dom.brush.style.width = brushSize * 2
     dom.brush.style.height = brushSize * 2
   }
+
   function makePathData(x, y, w) {
     return "M" + x + " " + y + "h" + w + ""
   }
@@ -15,25 +15,18 @@ export function drawRect(brushSize, updateBrush = false) {
   }
   let paths = []
 
-  for (let i = 0; i < brushSize; i++) {
-    for (let j = 0; j < brushSize; j++) {
-      brushPixels.push({ x: i, y: j })
-    }
-  }
-
   brushPixels.forEach((r) => {
     paths.push(makePathData(r.x, r.y, 1))
   })
 
   if (updateBrush) {
     dom.brush.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
-    dom.brush.setAttribute("stroke-width", brushSize * 2)
+    dom.brush.setAttribute("stroke-width", 1)
   }
-  return brushPixels
 }
 
 //TODO: create 9 brush arrays, 1 for normal brush and 8 which contain only the offset pixels for each direction. Use the directional brush to reduce cost of rendering large brushes.
-export function generateCircleBrush(brushSize, xOffset, yOffset, seen) {
+function generateCircleBrush(brushSize, offsetX, offsetY, seen) {
   const brushPixels = []
   let r = Math.floor(brushSize / 2)
   let d = 4 - 2 * r //decision parameter in bresenham's algorithm
@@ -63,8 +56,8 @@ export function generateCircleBrush(brushSize, xOffset, yOffset, seen) {
       //   return
       // }
       //
-      let x = px + xOffset
-      let y = py + yOffset
+      let x = px + offsetX
+      let y = py + offsetY
       const key = `${x},${y}`
       if (seen.has(key)) {
         return
@@ -102,59 +95,77 @@ export function generateCircleBrush(brushSize, xOffset, yOffset, seen) {
   return brushPixels
 }
 
-//TODO: create 9 brush arrays, 1 for normal brush and 8 which contain only the offset pixels for each direction. Use the directional brush to reduce cost of rendering large brushes.
-export function drawCircle(brushSize, updateBrush = false) {
+function generateSquareBrush(brushSize, offsetX, offsetY, seen) {
+  const brush = []
+
+  for (let y = 0; y < brushSize; y++) {
+    for (let x = 0; x < brushSize; x++) {
+      const coord = `${x + offsetX},${y + offsetY}`
+      if (!seen.has(coord)) {
+        brush.push({ x, y })
+        seen.add(coord)
+      }
+    }
+  }
+
+  return brush
+}
+
+function generateOffsetBrush(brushPixels, offsetX, offsetY, seen) {
+  const brush = []
+
+  for (const { x, y } of brushPixels) {
+    const coord = `${x + offsetX},${y + offsetY}`
+    if (!seen.has(coord)) {
+      brush.push({ x, y })
+    }
+  }
+
+  return brush
+}
+
+/**
+ * Using 9 arrays for the brush directions reduces the time complexity of iterating through the brush from ~O(n^2) to ~O(n)
+ * @param {*} generatorFn
+ * @param {*} brushSize
+ * @param {*} updateBrush
+ * @returns brushStamp object with 1 base stamp and 8 direction edge stamps
+ */
+function createBrushStamp(generatorFn, brushSize, updateBrush = false) {
   const seen = new Set()
-  const base = generateCircleBrush(brushSize, 0, 0, seen)
-  let baseBrushSet = new Set(seen)
-  const east = generateCircleBrush(brushSize, 1, 0, baseBrushSet)
-  baseBrushSet = new Set(seen)
-  const southeast = generateCircleBrush(brushSize, 1, 1, baseBrushSet)
-  baseBrushSet = new Set(seen)
-  const south = generateCircleBrush(brushSize, 0, 1, baseBrushSet)
-  baseBrushSet = new Set(seen)
-  const southwest = generateCircleBrush(brushSize, -1, 1, baseBrushSet)
-  baseBrushSet = new Set(seen)
-  const west = generateCircleBrush(brushSize, -1, 0, baseBrushSet)
-  baseBrushSet = new Set(seen)
-  const northwest = generateCircleBrush(brushSize, -1, -1, baseBrushSet)
-  baseBrushSet = new Set(seen)
-  const north = generateCircleBrush(brushSize, 0, -1, baseBrushSet)
-  baseBrushSet = new Set(seen)
-  const northeast = generateCircleBrush(brushSize, 1, -1, baseBrushSet)
-
-  if (updateBrush) {
-    dom.brush.setAttribute("viewBox", `0 -0.5 ${brushSize} ${brushSize}`)
-    dom.brush.style.width = brushSize * 2
-    dom.brush.style.height = brushSize * 2
-  }
-
-  function makePathData(x, y, w) {
-    return "M" + x + " " + y + "h" + w + ""
-  }
-  function makePath(color, data) {
-    return '<path stroke="' + color + '" d="' + data + '" />\n'
-  }
-  let paths = []
-
-  base.forEach((r) => {
-    paths.push(makePathData(r.x, r.y, 1))
-  })
-
-  if (updateBrush) {
-    dom.brush.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
-    dom.brush.setAttribute("stroke-width", 1)
-  }
-
-  return {
+  const base = generatorFn(brushSize, 0, 0, seen)
+  const offsets = [
+    [1, 0],
+    [1, 1],
+    [0, 1],
+    [-1, 1],
+    [-1, 0],
+    [-1, -1],
+    [0, -1],
+    [1, -1],
+  ]
+  const directions = {
     "0,0": base,
-    "1,0": east,
-    "1,1": southeast,
-    "0,1": south,
-    "-1,1": southwest,
-    "-1,0": west,
-    "-1,-1": northwest,
-    "0,-1": north,
-    "1,-1": northeast,
   }
+  for (const [x, y] of offsets) {
+    directions[`${x},${y}`] = generateOffsetBrush(base, x, y, seen)
+  }
+
+  updateBrushPreview(base, brushSize, updateBrush)
+
+  return directions
+}
+
+/**
+ * draw circle brush
+ * @param {*} brushSize
+ * @param {*} updateBrush
+ * @returns
+ */
+export function createCircleBrush(brushSize, updateBrush = false) {
+  return createBrushStamp(generateCircleBrush, brushSize, updateBrush)
+}
+
+export function createSquareBrush(brushSize, updateBrush = false) {
+  return createBrushStamp(generateSquareBrush, brushSize, updateBrush)
 }
