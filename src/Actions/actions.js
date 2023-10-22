@@ -20,7 +20,7 @@ import { renderCanvas } from "../Canvas/render.js"
 /**
  * Modify action in the timeline
  * Only good for vector parameters
- * @param {*} actionIndex
+ * @param {Integer} actionIndex
  */
 export function modifyVectorAction(actionIndex) {
   let action = state.undoStack[actionIndex]
@@ -54,8 +54,8 @@ export function modifyVectorAction(actionIndex) {
 /**
  * Modify action in the timeline
  * Only good for vector parameters
- * @param {*} actionIndex
- * @param {*} newColor - color object {color, r, g, b, a}
+ * @param {Integer} actionIndex
+ * @param {Object} newColor - {color, r, g, b, a}
  */
 export function changeActionColor(actionIndex, newColor) {
   let action = state.undoStack[actionIndex]
@@ -81,7 +81,7 @@ export function changeActionColor(actionIndex, newColor) {
 
 /**
  * Modify action in the timeline
- * @param {*} actionIndex
+ * @param {Integer} actionIndex
  */
 export function removeAction(actionIndex) {
   let action = state.undoStack[actionIndex]
@@ -100,6 +100,7 @@ export function removeAction(actionIndex) {
 /**
  * Modify actions in the timeline
  * Sets all actions before it except for action index 0 to removed = true
+ * @param {Object} layer
  */
 export function actionClear(layer) {
   let upToIndex = state.undoStack.length - 1
@@ -127,16 +128,16 @@ export function actionClear(layer) {
 /**
  * Render a stamp from the brush to the canvas
  * TODO: Find more efficient way to draw any brush shape without drawing each pixel separately. Could either be image stamp or made with rectangles
- * @param {*} coordX
- * @param {*} coordY
- * @param {*} currentColor
- * @param {*} brushStamp
- * @param {*} brushSize
- * @param {*} ctx
+ * @param {Integer} coordX
+ * @param {Integer} coordY
+ * @param {Object} currentColor - {color, r, g, b, a}
+ * @param {Object} brushStamp
+ * @param {Integer} brushSize
+ * @param {CanvasRenderingContext2D} ctx
  * @param {*} currentMode
  * @param {Set} seenPointsSet
  * @param {Array} points
- * @param {boolean} excludeFromSet - even if new point, don't add to seenPointsSet if true
+ * @param {Boolean} excludeFromSet - even if new point, don't add to seenPointsSet if true
  */
 export function actionDraw(
   coordX,
@@ -208,11 +209,11 @@ export function actionDraw(
  * @param {*} sy
  * @param {*} tx
  * @param {*} ty
- * @param {*} currentColor
- * @param {*} ctx
+ * @param {Object} currentColor - {color, r, g, b, a}
+ * @param {CanvasRenderingContext2D} ctx
  * @param {*} currentMode
- * @param {*} brushStamp
- * @param {*} brushSize
+ * @param {Object} brushStamp
+ * @param {Integer} brushSize
  */
 export function actionLine(
   sx,
@@ -268,7 +269,7 @@ export function actionLine(
  * User action for process to fill a contiguous color
  * @param {*} startX
  * @param {*} startY
- * @param {*} currentColor
+ * @param {Object} currentColor - {color, r, g, b, a}
  * @param {*} layer
  * @param {*} currentMode
  * @param {*} selectProperties
@@ -385,10 +386,10 @@ export function actionFill(
  * Helper function. TODO: move to external helper file for rendering
  * To render a pixel perfect curve, points are plotted instead of using t values, which are not equidistant.
  * @param {*} points
- * @param {*} brushStamp
- * @param {*} currentColor
- * @param {*} brushSize
- * @param {*} ctx
+ * @param {Object} brushStamp
+ * @param {Object} currentColor - {color, r, g, b, a}
+ * @param {Integer} brushSize
+ * @param {CanvasRenderingContext2D} ctx
  * @param {*} currentMode
  */
 function renderPoints(
@@ -402,8 +403,7 @@ function renderPoints(
   const seen = new Set()
   let previousX = Math.floor(points[0].x)
   let previousY = Math.floor(points[0].y)
-  //performance: with a 360px radius and a 32px brush, using the brush direction decreases render time from 148ms to 22ms
-  // if (canvas.pointerEvent !== "pointerup") {
+  //performance: ellipse with a 360px radius and a 32px brush, using the brush direction decreases render time from 148ms to 22ms
   for (const { x, y } of points) {
     //rounded values
     let xt = Math.floor(x)
@@ -428,42 +428,6 @@ function renderPoints(
     previousX = xt
     previousY = yt
   }
-  // } else {
-  //   // TODO: maybe change all vector algorithms to render all pixels in order?
-  //   function processPoints(i) {
-  //     const { x, y } = points[i]
-  //     //rounded values
-  //     let xt = Math.floor(x)
-  //     let yt = Math.floor(y)
-  //     let xDir = xt - previousX
-  //     let yDir = yt - previousY
-  //     if (xDir < -1 || xDir > 1 || yDir < -1 || yDir > 1) {
-  //       xDir = 0
-  //       yDir = 0
-  //     }
-
-  //     actionDraw(
-  //       xt,
-  //       yt,
-  //       currentColor,
-  //       brushStamp,
-  //       `${xDir},${yDir}`,
-  //       brushSize,
-  //       ctx,
-  //       currentMode,
-  //       seen
-  //     )
-  //     previousX = xt
-  //     previousY = yt
-  //     let j = i + 1
-  //     renderCanvas()
-  //     if (j < points.length) {
-  //       window.setTimeout(() => processPoints(j), 100) // Delay of 1 second
-  //     }
-  //   }
-
-  //   processPoints(0)
-  // }
 }
 
 /**
@@ -475,11 +439,11 @@ function renderPoints(
  * @param {*} controlx
  * @param {*} controly
  * @param {*} stepNum
- * @param {*} currentColor
- * @param {*} ctx
+ * @param {Object} currentColor - {color, r, g, b, a}
+ * @param {CanvasRenderingContext2D} ctx
  * @param {*} currentMode
- * @param {*} brushStamp
- * @param {*} brushSize
+ * @param {Object} brushStamp
+ * @param {Integer} brushSize
  */
 export function actionQuadraticCurve(
   startx,
@@ -575,11 +539,11 @@ export function actionQuadraticCurve(
  * @param {*} controlx2
  * @param {*} controly2
  * @param {*} stepNum
- * @param {*} currentColor
- * @param {*} ctx
+ * @param {Object} currentColor - {color, r, g, b, a}
+ * @param {CanvasRenderingContext2D} ctx
  * @param {*} currentMode
- * @param {*} brushStamp
- * @param {*} brushSize
+ * @param {Object} brushStamp
+ * @param {Integer} brushSize
  */
 export function actionCubicCurve(
   startx,
@@ -703,11 +667,11 @@ export function actionCubicCurve(
  * @param {*} xb
  * @param {*} yb
  * @param {*} stepNum
- * @param {*} currentColor
- * @param {*} ctx
+ * @param {Object} currentColor - {color, r, g, b, a}
+ * @param {CanvasRenderingContext2D} ctx
  * @param {*} currentMode
- * @param {*} brushStamp
- * @param {*} brushSize
+ * @param {Object} brushStamp
+ * @param {Integer} brushSize
  * @param {*} angle
  * @param {*} offset
  * @param {*} x1Offset
