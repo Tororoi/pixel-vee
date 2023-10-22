@@ -1,6 +1,10 @@
 import { swatches } from "./swatch.js"
 
-//State (TODO: not yet a true state)
+//====================================//
+//======== * * * State * * * =========//
+//====================================//
+
+//Main state object to keep track of global vars
 export const state = {
   //debugger *HOW TO USE: set the debugObject and debugFn in the place you want to debug, and comment the addToTimeline for the corresponding tool
   debugger: false,
@@ -21,7 +25,17 @@ export const state = {
   //tool settings
   tool: null, //needs to be initialized
   mode: "draw", //TODO: modes should allow multiple modes at once {erase: false, perfect: false, inject: false}
-  brushStamp: [{ x: 0, y: 0 }], //default 1 pixel
+  brushStamp: {
+    "0,0": [{ x: 0, y: 0 }],
+    "1,0": [{ x: 0, y: 0 }],
+    "1,1": [{ x: 0, y: 0 }],
+    "0,1": [{ x: 0, y: 0 }],
+    "-1,1": [{ x: 0, y: 0 }],
+    "-1,0": [{ x: 0, y: 0 }],
+    "-1,-1": [{ x: 0, y: 0 }],
+    "0,-1": [{ x: 0, y: 0 }],
+    "1,-1": [{ x: 0, y: 0 }],
+  }, //default 1 pixel
   brushType: "circle",
   options: {
     perfect: false,
@@ -93,41 +107,37 @@ export const state = {
 }
 
 /**
- * command pattern. TODO: Look into saving app-state instead
- * This sets to state.points and at the end of an action, state.points is pushed to the undo stack
- * @param {string} tool - tool to be recorded for history. Not necessarily the same as state.tool.name
- * @param {*} x
- * @param {*} y
- * @param {*} layer - layer that history should be applied to
- * @param {*} properties - custom properties for specific tool
- * @param {*} modifications - used for vector actions that can be changed after the fact, eg, line, curve, fill
+ * This sets the action which is then pushed to the undoStack for the command pattern
+ * @param {Object} actionObject
  */
 function addToTimeline(actionObject) {
-  const { tool, x, y, color, brushStamp, brushSize, layer, properties } =
-    actionObject
+  const { tool, color, brushStamp, brushSize, layer, properties } = actionObject
   //use current state for variables
   state.action = {
-    //x/y are sometimes objects with multiple values
-    x: x,
-    y: y,
     layer: layer,
     brushStamp: brushStamp || state.brushStamp,
     brushSize: brushSize || state.tool.brushSize,
     color: color || { ...swatches.primary.color },
     tool: tool,
-    // action: state.tool.fn, //should be passed as props, may not match state.tool.fn
-    mode: state.mode,
+    mode: state.mode, //TODO: should be replaced by options to allow multi selection of modes
     properties,
     hidden: false,
     removed: false,
   }
 }
 
+/**
+ * Reset some state properties
+ * TODO: add other items to reset such as those reset after an action is pushed to undoStack
+ */
 function reset() {
   state.clickCounter = 0
   state.vectorProperties.forceCircle = false
 }
 
+/**
+ * Reset select properties
+ */
 function resetSelectProperties() {
   state.selectProperties = {
     px1: null,

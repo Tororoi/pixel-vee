@@ -587,13 +587,13 @@ function drawCursorBox(state, canvas, lineWeight) {
   let ol = lineWidth / 2 // line offset to stroke off-center
 
   // Create a Set from state.brushStamp //TODO: make set when creating brush stamp so it does not need to be defined here.
-  const pixelSet = new Set(state.brushStamp.map((p) => `${p.x},${p.y}`))
+  const pixelSet = new Set(state.brushStamp["0,0"].map((p) => `${p.x},${p.y}`))
 
   canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
 
-  for (const pixel of state.brushStamp) {
+  for (const pixel of state.brushStamp["0,0"]) {
     const x = state.cursorX + canvas.xOffset + pixel.x - brushOffset
     const y = state.cursorY + canvas.yOffset + pixel.y - brushOffset
 

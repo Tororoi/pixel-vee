@@ -1,5 +1,4 @@
 //Import order is important. 1. DOM initialization, 2. state managers
-// import { initializeAllDialogBoxes } from "../DOM/dialogBox.js"
 import { dom } from "../Context/dom.js"
 import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
@@ -8,22 +7,21 @@ import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCursor, renderRasterGUI } from "../GUI/raster.js"
-import { activateShortcut } from "../Tools/shortcuts.js"
+import { activateShortcut } from "./shortcuts.js"
+import { renderCanvas } from "../Canvas/render.js"
 import {
-  renderCanvas,
   renderVectorsToDOM,
+  renderPaletteToolsToDOM,
   renderPaletteToDOM,
-} from "../Canvas/render.js"
-import { actionZoom } from "../Tools/untrackedActions.js"
-import { adjustEllipseSteps } from "../Tools/index.js"
+} from "../DOM/render.js"
+import { actionZoom } from "../Actions/untrackedActions.js"
+import { adjustEllipseSteps } from "../Tools/ellipse.js"
 
-//TODO: Add Palette that consists of a small canvas with basic paint, sample and fill erase tools.
-//TODO: Add color mixer that consists of a small canvas that can be painted upon and cleared. At any time the user can click "Mix" and the colors on the canvas will be used to generate a mixed color.
-
-//======================================//
-//=== * * * Key Event Handlers * * * ===//
-//======================================//
-
+/**
+ * Set global coordinates
+ * TODO: move to separate file and import
+ * @param {UIEvent} e - PointerEvent, WheelEvent
+ */
 const setCoordinates = (e) => {
   const x = e.offsetX
   const y = e.offsetY
@@ -48,19 +46,30 @@ const setCoordinates = (e) => {
   )
 }
 
+//======================================//
+//=== * * * Key Event Handlers * * * ===//
+//======================================//
+
+/**
+ * @param {KeyboardEvent} e
+ */
 function handleKeyDown(e) {
+  //Prevent repeated activations while holding a key down
   if (e.repeat) {
     return
   }
-  // e.preventDefault()
+  // e.preventDefault() - May conditionally need this for certain shortcuts, but try to avoid doing so
   if (state.shortcuts) {
-    keys[e.code] = true
+    keys[e.code] = true //set active key globally
     activateShortcut(e.code)
   }
 }
 
+/**
+ * @param {KeyboardEvent} e
+ */
 function handleKeyUp(e) {
-  keys[e.code] = false
+  keys[e.code] = false //unset active key globally
   if (
     e.code === "Space" ||
     e.code === "AltLeft" ||
@@ -87,16 +96,15 @@ function handleKeyUp(e) {
       vectorGui.render(state, canvas)
     }
   }
+
   //Palette
   if (e.code === "KeyX" || e.code === "KeyK") {
     swatches.paletteMode = "select"
-    renderPaletteToDOM()
-  }
-  if (e.code === "KeyS") {
+    renderPaletteToolsToDOM()
     renderPaletteToDOM()
   }
 
-  //
+  //Tools
   if (dom.toolBtn.id === "grab") {
     canvas.vectorGuiCVS.style.cursor = "move"
   } else if (
@@ -119,12 +127,15 @@ function handleKeyUp(e) {
   }
 }
 
+/**
+ * @param {WheelEvent} e
+ */
 function handleWheel(e) {
   let delta = Math.sign(e.deltaY)
-  //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
+  //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?). To reproduce, quickly zoom in and out
   //zoom based on pointer coords
   let z
-  setCoordinates(e)
+  setCoordinates(e) //
   if (delta < 0) {
     z = 0.5
     //get target coordinates
@@ -154,6 +165,10 @@ function handleWheel(e) {
 //==== * * Pointer Event Handlers * * ====//
 //========================================//
 
+/**
+ *
+ * @param {PointerEvent} e
+ */
 function handlePointerDown(e) {
   //reset media type, chrome dev tools niche use or computers that have touchscreen capabilities
   e.target.setPointerCapture(e.pointerId)

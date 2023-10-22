@@ -1,17 +1,102 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "../GUI/vector.js"
-import { renderCanvas, renderVectorsToDOM } from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render.js"
+import { renderVectorsToDOM } from "../DOM/render.js"
 
 //====================================//
 //========= * * * Core * * * =========//
 //====================================//
 
 /**
- * Main pillar of the code structure
- * @param {*} pushStack
- * @param {*} popStack
- * @param {*} modType - "from" or "to", used for modify actions
+ * @param {Object} latestAction
+ * @param {String} modType
+ */
+function handleModifyAction(latestAction, modType) {
+  state.undoStack[
+    latestAction.properties.moddedActionIndex
+  ].properties.vectorProperties = {
+    ...latestAction.properties[modType],
+  }
+  if (
+    state.tool.name ===
+    state.undoStack[latestAction.properties.moddedActionIndex].tool.name
+  ) {
+    vectorGui.reset(canvas)
+    state.vectorProperties = { ...latestAction.properties[modType] }
+    canvas.currentVectorIndex =
+      state.undoStack[latestAction.properties.moddedActionIndex].index
+    vectorGui.render(state, canvas)
+  }
+}
+
+/**
+ * @param {Object} latestAction
+ */
+function handleClearAction(latestAction) {
+  let upToIndex = latestAction.properties.upToIndex
+  let i = 0
+  //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
+  state.undoStack.forEach((action) => {
+    if (i > upToIndex) {
+      return
+    }
+    i++
+    if (action.layer === canvas.currentLayer) {
+      action.removed = !action.removed
+    }
+  })
+  vectorGui.reset(canvas)
+}
+
+/**
+ * @param {Object} latestAction
+ * @param {Object} newLatestAction
+ * @param {String} modType
+ */
+function handleSelectAction(latestAction, newLatestAction, modType) {
+  if (modType === "to") {
+    if (latestAction.properties.deselect) {
+      state.resetSelectProperties()
+    } else {
+      //set select properties
+      state.selectProperties = {
+        ...latestAction.properties.selectProperties,
+      }
+      //set maskset
+      state.maskSet = latestAction.maskSet
+    }
+  } else if (modType === "from") {
+    if (latestAction.properties.deselect) {
+      //set select properties
+      state.selectProperties = {
+        ...latestAction.properties.selectProperties,
+      }
+      //set maskset
+      state.maskSet = latestAction.maskSet
+    } else if (
+      newLatestAction?.tool?.name === "select" &&
+      !newLatestAction?.properties?.deselect
+    ) {
+      //If the action before the one being undone is a select tool, set context - may need to separate this from latestAction also being the "select" tool
+      //set select properties
+      state.selectProperties = {
+        ...newLatestAction.properties.selectProperties,
+      }
+      //set maskset
+      state.maskSet = newLatestAction.maskSet
+    } else {
+      state.resetSelectProperties()
+    }
+  }
+  vectorGui.render(state, canvas)
+}
+
+/**
+ * Main pillar of the code structure - command pattern
+ * @param {Array} pushStack
+ * @param {Array} popStack
+ * @param {String} modType - "from" or "to", used for modify actions
  */
 export function actionUndoRedo(pushStack, popStack, modType) {
   //latest action is the action about to be undone or redone
@@ -79,6 +164,9 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   state.reset()
 }
 
+/**
+ * Undo an action
+ */
 export function handleUndo() {
   //length 1 prevents initial layer from being undone
   if (state.undoStack.length > 1) {
@@ -86,80 +174,11 @@ export function handleUndo() {
   }
 }
 
+/**
+ * Redo an action
+ */
 export function handleRedo() {
   if (state.redoStack.length >= 1) {
     actionUndoRedo(state.undoStack, state.redoStack, "to")
   }
-}
-
-function handleModifyAction(latestAction, modType) {
-  state.undoStack[
-    latestAction.properties.moddedActionIndex
-  ].properties.vectorProperties = {
-    ...latestAction.properties[modType],
-  }
-  if (
-    state.tool.name ===
-    state.undoStack[latestAction.properties.moddedActionIndex].tool.name
-  ) {
-    vectorGui.reset(canvas)
-    state.vectorProperties = { ...latestAction.properties[modType] }
-    canvas.currentVectorIndex =
-      state.undoStack[latestAction.properties.moddedActionIndex].index
-    vectorGui.render(state, canvas)
-  }
-}
-
-function handleClearAction(latestAction) {
-  let upToIndex = latestAction.properties.upToIndex
-  let i = 0
-  //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
-  state.undoStack.forEach((action) => {
-    if (i > upToIndex) {
-      return
-    }
-    i++
-    if (action.layer === canvas.currentLayer) {
-      action.removed = !action.removed
-    }
-  })
-  vectorGui.reset(canvas)
-}
-
-function handleSelectAction(latestAction, newLatestAction, modType) {
-  if (modType === "to") {
-    if (latestAction.properties.deselect) {
-      state.resetSelectProperties()
-    } else {
-      //set select properties
-      state.selectProperties = {
-        ...latestAction.properties.selectProperties,
-      }
-      //set maskset
-      state.maskSet = latestAction.maskSet
-    }
-  } else if (modType === "from") {
-    if (latestAction.properties.deselect) {
-      //set select properties
-      state.selectProperties = {
-        ...latestAction.properties.selectProperties,
-      }
-      //set maskset
-      state.maskSet = latestAction.maskSet
-    } else if (
-      newLatestAction?.tool?.name === "select" &&
-      !newLatestAction?.properties?.deselect
-    ) {
-      //If the action before the one being undone is a select tool, set context - may need to separate this from latestAction also being the "select" tool
-      //set select properties
-      state.selectProperties = {
-        ...newLatestAction.properties.selectProperties,
-      }
-      //set maskset
-      state.maskSet = newLatestAction.maskSet
-    } else {
-      state.resetSelectProperties()
-    }
-  }
-  vectorGui.render(state, canvas)
 }

@@ -6,7 +6,9 @@ import { canvas } from "../Context/canvas.js"
 //======== * * * Layers * * * ========//
 //====================================//
 
-//Draw all layers onto offscreen canvas to prepare for sampling or export
+/**
+ * Draw all layers onto offscreen canvas to prepare for sampling or export
+ */
 export function consolidateLayers() {
   canvas.offScreenCTX.clearRect(
     0,
@@ -30,6 +32,11 @@ export function consolidateLayers() {
   })
 }
 
+/**
+ * Create a new raster layer
+ * @param {String} name
+ * @returns {Object} layer
+ */
 export function createNewRasterLayer(name) {
   let layerCVS = document.createElement("canvas")
   let layerCTX = layerCVS.getContext("2d")

@@ -1,15 +1,15 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { renderCanvas } from "../Canvas/render.js"
 import {
-  renderCanvas,
   renderLayersToDOM,
   renderVectorsToDOM,
   renderPaletteToDOM,
-} from "../Canvas/render.js"
+} from "../DOM/render.js"
 import { createNewRasterLayer } from "./layers.js"
 import { handleTools } from "../Tools/events.js"
-import { removeAction } from "../Tools/actions.js"
+import { removeAction } from "../Actions/actions.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { swatches } from "../Context/swatch.js"
@@ -20,6 +20,10 @@ import { initializeColorPicker } from "../Swatch/events.js"
 //==== * * * Canvas Resize * * * =====//
 //====================================//
 
+/**
+ * Increment canvas dimensions values
+ * @param {PointerEvent} e
+ */
 const handleIncrement = (e) => {
   let dimension = e.target.parentNode.previousSibling.previousSibling
   let max = 1024
@@ -38,8 +42,8 @@ const handleIncrement = (e) => {
 }
 
 /**
- * increment values while rgb button is held down
- * @param {event} e
+ * Increment values while rgb button is held down
+ * @param {PointerEvent} e
  */
 const handleSizeIncrement = (e) => {
   if (canvas.sizePointerState === "pointerdown") {
@@ -48,6 +52,10 @@ const handleSizeIncrement = (e) => {
   }
 }
 
+/**
+ * Limit the min and max size of the canvas
+ * @param {FocusEvent} e
+ */
 const restrictSize = (e) => {
   const max = 1024
   const min = 8
@@ -58,6 +66,11 @@ const restrictSize = (e) => {
   }
 }
 
+/**
+ * Resize the offscreen canvas and all layers
+ * @param {Integer} width
+ * @param {Integer} height
+ */
 const resizeOffScreenCanvas = (width, height) => {
   canvas.offScreenCVS.width = width
   canvas.offScreenCVS.height = height
@@ -123,11 +136,19 @@ const resizeOffScreenCanvas = (width, height) => {
   vectorGui.render(state, canvas)
 }
 
+/**
+ * Submit new dimensions for the offscreen canvas
+ * @param {SubmitEvent} e
+ */
 const handleDimensionsSubmit = (e) => {
   e.preventDefault()
   resizeOffScreenCanvas(dom.canvasWidth.value, dom.canvasHeight.value)
 }
 
+/**
+ * Resize the onscreen canvas when adjusting the window size
+ * UIEvent listener
+ */
 const resizeOnScreenCanvas = () => {
   //Keep canvas dimensions at 100% (requires css style width/ height 100%)
   canvas.vectorGuiCVS.width = canvas.vectorGuiCVS.offsetWidth * canvas.sharpness
@@ -178,6 +199,10 @@ resizeOnScreenCanvas()
 //======== * * * Layers * * * ========//
 //====================================//
 
+/**
+ * Clicking on a layer in the layers interface
+ * @param {PointerEvent} e
+ */
 function layerInteract(e) {
   let layer = e.target.closest(".layer").layerObj
   //toggle visibility
@@ -207,7 +232,10 @@ function layerInteract(e) {
   renderCanvas()
 }
 
-//Drag layers
+/**
+ * Start dragging a layer in the layers interface
+ * @param {DragEvent} e
+ */
 function dragLayerStart(e) {
   let layer = e.target.closest(".layer").layerObj
   let index = canvas.layers.indexOf(layer)
@@ -218,10 +246,18 @@ function dragLayerStart(e) {
   //TODO: implement fancier dragging like dialog boxes
 }
 
+/**
+ * Prevent default behavior for drag over
+ * @param {DragEvent} e
+ */
 function dragLayerOver(e) {
   e.preventDefault()
 }
 
+/**
+ * Dragging a layer into another layer's space
+ * @param {DragEvent} e
+ */
 function dragLayerEnter(e) {
   if (e.target.className.includes("layer")) {
     e.target.style.boxShadow =
@@ -229,6 +265,10 @@ function dragLayerEnter(e) {
   }
 }
 
+/**
+ * Dragging a layer out of another layer's space
+ * @param {DragEvent} e
+ */
 function dragLayerLeave(e) {
   if (e.target.className.includes("layer")) {
     e.target.style.boxShadow =
@@ -236,6 +276,10 @@ function dragLayerLeave(e) {
   }
 }
 
+/**
+ * Drop a layer into another layer's space and reorder layers to match
+ * @param {DragEvent} e
+ */
 function dropLayer(e) {
   let targetLayer = e.target.closest(".layer").layerObj
   let draggedIndex = parseInt(e.dataTransfer.getData("text"))
@@ -256,11 +300,18 @@ function dropLayer(e) {
   }
 }
 
+/**
+ * Stop dragging a layer
+ * @param {DragEvent} e
+ */
 function dragLayerEnd(e) {
   renderLayersToDOM()
 }
 
-//TODO: allow user to set pixel scale between 0.125 and 8
+/**
+ * Upload an image and create a new reference layer
+ * TODO: allow user to set pixel scale between 0.125 and 8
+ */
 function addReferenceLayer() {
   //TODO: add to timeline
   let reader
@@ -298,6 +349,11 @@ function addReferenceLayer() {
   }
 }
 
+/**
+ * Mark a layer as removed
+ * TODO: This is a timeline action and should be moved to an actions file
+ * @param {Object} layer
+ */
 function removeLayer(layer) {
   //set "removed" flag to true on selected layer.
   if (canvas.activeLayerCount > 1) {
@@ -320,6 +376,10 @@ function removeLayer(layer) {
   }
 }
 
+/**
+ * Add a new raster layer
+ * TODO: This is a timeline action and should be moved to an actions file
+ */
 function addRasterLayer() {
   //once layer is added to timeline and drawn on, can no longer be deleted
   const layer = createNewRasterLayer(`Layer ${canvas.layers.length + 1}`)
@@ -338,6 +398,10 @@ function addRasterLayer() {
 //======= * * * Vectors * * * ========//
 //====================================//
 
+/**
+ * Clicking on a vector in the vectors interface
+ * @param {PointerEvent} e
+ */
 function vectorInteract(e) {
   let vector = e.target.closest(".vector").vectorObj
   //toggle visibility
@@ -376,6 +440,10 @@ function vectorInteract(e) {
   }
 }
 
+/**
+ * Mark a vector action as removed
+ * @param {Object} vector
+ */
 function removeVector(vector) {
   //set "removed" flag to true on selected layer.
   removeAction(vector.index)
@@ -389,15 +457,7 @@ function removeVector(vector) {
   renderCanvas(null, true, true)
 }
 
-//add move tool and scale tool for reference layers
-
-// QUESTION: How to deal with undo/redo when deleting a layer?
-//If a layer is removed, actions associated with that layer will be removed
-//and can't easily be added back in the correct order.
-
-//vector layers have an option to create a raster copy layer
-
-//vector layers need movable control points, how to organize order of added control points?
+//TODO: add move tool and scale tool for reference layers
 
 //===================================//
 //=== * * * Initialization * * * ====//
@@ -413,8 +473,10 @@ renderPaletteToDOM()
 //=== * * * Event Listeners * * * ===//
 //===================================//
 
+// UI Canvas * //
 window.addEventListener("resize", resizeOnScreenCanvas)
 
+// * Canvas Size * //
 dom.dimensionsForm.addEventListener("pointerdown", (e) => {
   canvas.sizePointerState = e.type
   handleSizeIncrement(e)
@@ -433,7 +495,7 @@ dom.canvasHeight.addEventListener("blur", restrictSize)
 dom.uploadBtn.addEventListener("change", addReferenceLayer)
 dom.newLayerBtn.addEventListener("click", addRasterLayer)
 
-//TODO: make dragging work with tablets. Make similar to functionality of dragging dialog boxes.
+//TODO: Make similar to functionality of dragging dialog boxes.
 dom.layersContainer.addEventListener("click", layerInteract)
 dom.layersContainer.addEventListener("dragstart", dragLayerStart)
 dom.layersContainer.addEventListener("dragover", dragLayerOver)
