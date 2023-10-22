@@ -4,11 +4,13 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
-import { handleUndo, handleRedo } from "./undoRedo.js"
-import { tools, adjustEllipseSteps } from "./index.js"
-import { renderCanvas, renderPaletteToDOM } from "../Canvas/render.js"
+import { handleUndo, handleRedo } from "../Actions/undoRedo.js"
+import { tools } from "../Tools/index.js"
+import { adjustEllipseSteps } from "../Tools/ellipse.js"
+import { renderCanvas } from "../Canvas/render.js"
+import { renderPaletteToolsToDOM, renderPaletteToDOM } from "../DOM/render.js"
 import { randomizeColor } from "../Swatch/events.js"
-import { handleTools, handleModes } from "./events.js"
+import { handleTools, handleModes } from "../Tools/events.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
@@ -115,6 +117,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyK":
       swatches.paletteMode = "edit"
+      renderPaletteToolsToDOM()
       renderPaletteToDOM()
       break
     case "KeyL":
@@ -131,6 +134,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyS":
       randomizeColor(swatches.primary.swatch)
+      renderPaletteToDOM()
       break
     case "KeyU":
       //
@@ -150,6 +154,7 @@ export function activateShortcut(keyCode) {
         //add to timeline as "eraser" tool for points in selection
       } else {
         swatches.paletteMode = "remove"
+        renderPaletteToolsToDOM()
         renderPaletteToDOM()
       }
       break

@@ -1,4 +1,4 @@
-import { actionDraw } from "../Tools/actions.js"
+import { actionDraw } from "../Actions/actions.js"
 import { vectorGui } from "./vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 
@@ -36,6 +36,7 @@ export function renderCursor(state, canvas, swatches) {
             state.cursorY,
             swatches.primary.color,
             state.brushStamp,
+            "0,0",
             state.tool.brushSize,
             ctx,
             state.mode,

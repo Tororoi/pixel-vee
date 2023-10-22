@@ -8,9 +8,9 @@ import { setInitialZoom } from "../utils/canvasHelpers.js"
 
 /**
  * Zoom the canvas
- * @param {float} z - ratio to multiply zoom by
- * @param {integer} xOriginOffset - additional offset needed to keep zoom centered around cursor
- * @param {integer} yOriginOffset - additional offset needed to keep zoom centered around cursor
+ * @param {Float} z - ratio to multiply zoom by
+ * @param {Integer} xOriginOffset - additional offset needed to keep zoom centered around cursor
+ * @param {Integer} yOriginOffset - additional offset needed to keep zoom centered around cursor
  */
 export function actionZoom(z, xOriginOffset, yOriginOffset) {
   canvas.zoom *= z
@@ -48,6 +48,9 @@ export function actionZoom(z, xOriginOffset, yOriginOffset) {
   vectorGui.render(state, canvas)
 }
 
+/**
+ * Recenter the canvas
+ */
 export function actionRecenter() {
   canvas.zoom = setInitialZoom(
     Math.max(canvas.offScreenCVS.width, canvas.offScreenCVS.height)

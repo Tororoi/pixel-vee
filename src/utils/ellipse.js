@@ -54,36 +54,90 @@ export function plotEllipse(xm, ym, a, b) {
   return plotPoints
 }
 
+// export function plotCircle(xm, ym, r, offset) {
+//   let plotPoints = []
+//   var x = -r,
+//     y = 0,
+//     err = 2 - 2 * r /* bottom left to top right */
+//   //offset when subpixel is nearer to center
+//   // offset = 1
+//   do {
+//     plotPoints.push({
+//       x: xm - x - offset,
+//       y: ym + y - offset,
+//     }) /*   I. Quadrant +x +y */
+//     plotPoints.push({ x: xm - y, y: ym - x - offset }) /*  II. Quadrant -x +y */
+//     plotPoints.push({ x: xm + x, y: ym - y }) /* III. Quadrant -x -y */
+//     plotPoints.push({ x: xm + y - offset, y: ym + x }) /*  IV. Quadrant +x -y */
+//     r = err
+//     if (r <= y) err += ++y * 2 + 1 /* y step */
+//     if (r > x || err > y) err += ++x * 2 + 1 /* x step */
+//   } while (x < 0)
+//   //remove duplicate coordinates
+//   const seen = new Set()
+//   plotPoints = plotPoints.filter((point) => {
+//     let key = `${point.x},${point.y}`
+//     if (seen.has(key)) {
+//       return false // skip this item
+//     }
+//     seen.add(key)
+//     return true // keep this item
+//   })
+//   return plotPoints
+// }
+
 export function plotCircle(xm, ym, r, offset) {
   let plotPoints = []
-  var x = -r,
-    y = 0,
-    err = 2 - 2 * r /* bottom left to top right */
-  //offset when subpixel is nearer to center
-  // offset = 1
-  do {
-    plotPoints.push({
-      x: xm - x - offset,
-      y: ym + y - offset,
-    }) /*   I. Quadrant +x +y */
-    plotPoints.push({ x: xm - y, y: ym - x - offset }) /*  II. Quadrant -x +y */
-    plotPoints.push({ x: xm + x, y: ym - y }) /* III. Quadrant -x -y */
-    plotPoints.push({ x: xm + y - offset, y: ym + x }) /*  IV. Quadrant +x -y */
-    r = err
-    if (r <= y) err += ++y * 2 + 1 /* y step */
-    if (r > x || err > y) err += ++x * 2 + 1 /* x step */
-  } while (x < 0)
-  //remove duplicate coordinates
+
+  // I. Quadrant (+x, +y)
+  plotQuadrant(xm, ym, r, offset, 1)
+
+  // II. Quadrant (-x, +y)
+  plotQuadrant(xm, ym, r, offset, 2)
+
+  // III. Quadrant (-x, -y)
+  plotQuadrant(xm, ym, r, offset, 3)
+
+  // IV. Quadrant (+x, -y)
+  plotQuadrant(xm, ym, r, offset, 4)
+
+  // Deduplicate coordinates
   const seen = new Set()
   plotPoints = plotPoints.filter((point) => {
     let key = `${point.x},${point.y}`
-    if (seen.has(key)) {
-      return false // skip this item
-    }
+    if (seen.has(key)) return false
     seen.add(key)
-    return true // keep this item
+    return true
   })
+
   return plotPoints
+
+  function plotQuadrant(xm, ym, r, offset, quadrant) {
+    var x = -r,
+      y = 0,
+      err = 2 - 2 * r
+
+    do {
+      switch (quadrant) {
+        case 1:
+          plotPoints.push({ x: xm - x - offset, y: ym + y - offset })
+          break
+        case 2:
+          plotPoints.push({ x: xm - y, y: ym - x - offset })
+          break
+        case 3:
+          plotPoints.push({ x: xm + x, y: ym - y })
+          break
+        case 4:
+          plotPoints.push({ x: xm + y - offset, y: ym + x })
+          break
+      }
+
+      r = err
+      if (r <= y) err += ++y * 2 + 1
+      if (r > x || err > y) err += ++x * 2 + 1
+    } while (x < 0)
+  }
 }
 
 export function plotEllipseRect(x0, y0, x1, y1) {
