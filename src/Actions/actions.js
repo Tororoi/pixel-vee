@@ -404,68 +404,68 @@ function renderPoints(
   let previousX = Math.floor(points[0].x)
   let previousY = Math.floor(points[0].y)
   //performance: with a 360px radius and a 32px brush, using the brush direction decreases render time from 148ms to 22ms
-  for (const { x, y } of points) {
-    //rounded values
-    let xt = Math.floor(x)
-    let yt = Math.floor(y)
-    let xDir = xt - previousX
-    if (xDir < -1 || xDir > 1) {
-      xDir = 0
+  console.log(canvas.pointerEvent)
+  if (canvas.pointerEvent !== "pointerup") {
+    for (const { x, y } of points) {
+      //rounded values
+      let xt = Math.floor(x)
+      let yt = Math.floor(y)
+      let xDir = xt - previousX
+      let yDir = yt - previousY
+      if (xDir < -1 || xDir > 1 || yDir < -1 || yDir > 1) {
+        xDir = 0
+        yDir = 0
+      }
+      actionDraw(
+        xt,
+        yt,
+        currentColor,
+        brushStamp,
+        `${xDir},${yDir}`,
+        brushSize,
+        ctx,
+        currentMode,
+        seen
+      )
+      previousX = xt
+      previousY = yt
     }
-    let yDir = yt - previousY
-    if (yDir < -1 || yDir > 1) {
-      yDir = 0
+  } else {
+    // TODO: still a bug with curves where line is drawn
+    function processPoints(i) {
+      const { x, y } = points[i]
+      //rounded values
+      let xt = Math.floor(x)
+      let yt = Math.floor(y)
+      let xDir = xt - previousX
+      let yDir = yt - previousY
+      if (xDir < -1 || xDir > 1 || yDir < -1 || yDir > 1) {
+        xDir = 0
+        yDir = 0
+      }
+
+      actionDraw(
+        xt,
+        yt,
+        currentColor,
+        brushStamp,
+        `${xDir},${yDir}`,
+        brushSize,
+        ctx,
+        currentMode,
+        seen
+      )
+      previousX = xt
+      previousY = yt
+      let j = i + 1
+      renderCanvas()
+      if (j < points.length) {
+        window.setTimeout(() => processPoints(j), 100) // Delay of 1 second
+      }
     }
-    actionDraw(
-      xt,
-      yt,
-      currentColor,
-      brushStamp,
-      `${xDir},${yDir}`,
-      brushSize,
-      ctx,
-      currentMode,
-      seen
-    )
-    previousX = xt
-    previousY = yt
+
+    processPoints(0)
   }
-  //TODO: still a bug with curves where line is drawn
-  // function processPoints(i) {
-  //   const { x, y } = points[i]
-  //   //rounded values
-  //   let xt = Math.floor(x)
-  //   let yt = Math.floor(y)
-  //   let xDir = xt - previousX
-  //   if (xDir < -1 || xDir > 1) {
-  //     xDir = 0
-  //   }
-
-  //   let yDir = yt - previousY
-  //   if (yDir < -1 || yDir > 1) {
-  //     yDir = 0
-  //   }
-  //   actionDraw(
-  //     xt,
-  //     yt,
-  //     currentColor,
-  //     brushStamp,
-  //     `${xDir},${yDir}`,
-  //     brushSize,
-  //     ctx,
-  //     currentMode,
-  //     seen
-  //   )
-  //   previousX = xt
-  //   previousY = yt
-  //   let j = i + 1
-  //   renderCanvas()
-  //   if (j < points.length) {
-  //     window.setTimeout(() => processPoints(j), 10) // Delay of 1 second
-  //   }
-  // }
-
-  // processPoints(0)
   let end = performance.now()
   console.log(end - begin)
 }
