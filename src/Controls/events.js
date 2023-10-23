@@ -78,6 +78,12 @@ function handleKeyUp(e) {
     e.code === "ShiftRight"
   ) {
     state.tool = tools[dom.toolBtn.id]
+    if (e.code === "Space") {
+      //TODO: refactor so grabSteps can be called instead with a manually supplied pointer event pointerup
+      state.clicked = false
+      canvas.previousXOffset = canvas.xOffset
+      canvas.previousYOffset = canvas.yOffset
+    }
   }
 
   if (e.code === "ShiftLeft" || e.code === "ShiftRight") {
