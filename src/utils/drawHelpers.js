@@ -14,3 +14,26 @@ export function checkPixelAlreadyDrawn(pointsDrawn, willDrawX, willDrawY) {
   }
   return false
 }
+
+/**
+ *
+ * @param {Integer} currentX
+ * @param {Integer} currentY
+ * @param {Integer} previousX
+ * @param {Integer} previousY
+ * @returns
+ */
+export function calculateBrushDirection(
+  currentX,
+  currentY,
+  previousX,
+  previousY
+) {
+  let xDir = currentX - previousX
+  let yDir = currentY - previousY
+  if (xDir < -1 || xDir > 1 || yDir < -1 || yDir > 1) {
+    xDir = 0
+    yDir = 0
+  }
+  return `${xDir},${yDir}`
+}

@@ -78,6 +78,12 @@ function handleKeyUp(e) {
     e.code === "ShiftRight"
   ) {
     state.tool = tools[dom.toolBtn.id]
+    if (e.code === "Space") {
+      //TODO: refactor so grabSteps can be called instead with a manually supplied pointer event pointerup
+      state.clicked = false
+      canvas.previousXOffset = canvas.xOffset
+      canvas.previousYOffset = canvas.yOffset
+    }
   }
 
   if (e.code === "ShiftLeft" || e.code === "ShiftRight") {
@@ -289,10 +295,7 @@ function handlePointerUp(e) {
     state.undoStack.push(state.action)
 
     if (
-      state.tool.name === "fill" ||
-      state.tool.name === "quadCurve" ||
-      state.tool.name === "cubicCurve" ||
-      state.tool.name === "ellipse"
+      ["fill", "quadCurve", "cubicCurve", "ellipse"].includes(state.tool.name)
     ) {
       if (state.action.tool.type === "vector") {
         canvas.currentVectorIndex = state.undoStack.indexOf(state.action)
@@ -312,7 +315,7 @@ function handlePointerUp(e) {
   if (!e.targetTouches) {
     renderRasterGUI(state, canvas, swatches)
     vectorGui.render(state, canvas)
-    if (state.tool.name === "eyedropper") {
+    if (["brush", "replace", "eyedropper"].includes(state.tool.name)) {
       renderCursor(state, canvas, swatches)
     }
     if (
