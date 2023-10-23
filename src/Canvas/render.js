@@ -3,6 +3,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
+import { calculateBrushDirection } from "../utils/drawHelpers.js"
 
 /**
  * Draw the canvas layers
@@ -100,18 +101,29 @@ function redrawTimelineActions(index = null) {
           const seen = action.properties.maskSet
             ? new Set(action.properties.maskSet)
             : new Set()
+          let previousX = action.properties.points[0].x
+          let previousY = action.properties.points[0].y
+          let brushDirection = "0,0"
           for (const p of action.properties.points) {
+            brushDirection = calculateBrushDirection(
+              p.x,
+              p.y,
+              previousX,
+              previousY
+            )
             action.tool.action(
               p.x,
               p.y,
               p.color,
               p.brushStamp,
-              "0,0",
+              brushDirection,
               p.brushSize,
               action.layer.ctx,
               action.mode,
               seen
             )
+            previousX = p.x
+            previousY = p.y
             //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster:
             // action.layer.ctx.fillStyle = p.color
             // let x = p.x

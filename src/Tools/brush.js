@@ -2,11 +2,11 @@ import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { tools } from "./index.js"
 import { actionDraw, actionLine } from "../Actions/actions.js"
 import { getAngle, getTriangle } from "../utils/trig.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { getColor } from "../utils/canvasHelpers.js"
+import { calculateBrushDirection } from "../utils/drawHelpers.js"
 
 //====================================//
 //=== * * * Brush Controller * * * ===//
@@ -86,58 +86,74 @@ function brushSteps() {
           angle
         )
 
+        let previousX = lineStartX
+        let previousY = lineStartY
         for (let i = 0; i < tri.long; i++) {
           let thispoint = {
             x: Math.round(lineStartX + tri.x * i),
             y: Math.round(lineStartY + tri.y * i),
           }
+          state.brushDirection = calculateBrushDirection(
+            thispoint.x,
+            thispoint.y,
+            previousX,
+            previousY
+          )
           // for each point along the line
           actionDraw(
             thispoint.x,
             thispoint.y,
             swatches.primary.color,
             state.brushStamp,
-            "0,0",
+            state.brushDirection,
             state.tool.brushSize,
             canvas.currentLayer.ctx,
             state.mode,
             state.drawnPointsSet,
             state.points
           )
+          previousX = thispoint.x
+          previousY = thispoint.y
         }
         //Reset lineStart Coords
         state.lineStartX = null
         state.lineStartY = null
+        state.brushDirection = calculateBrushDirection(
+          state.cursorX,
+          state.cursorY,
+          previousX,
+          previousY
+        )
         //fill endpoint
         actionDraw(
           state.cursorX,
           state.cursorY,
           swatches.primary.color,
           state.brushStamp,
-          "0,0",
+          state.brushDirection,
           state.tool.brushSize,
           canvas.currentLayer.ctx,
           state.mode,
           state.drawnPointsSet,
           state.points
         )
-        if (state.mode === "perfect") {
-          renderCanvas((ctx) => {
-            actionDraw(
-              state.cursorX,
-              state.cursorY,
-              swatches.primary.color,
-              state.brushStamp,
-              "0,0",
-              state.tool.brushSize,
-              ctx,
-              state.mode,
-              state.drawnPointsSet,
-              null,
-              true
-            )
-          })
-        }
+        // if (state.mode === "perfect") {
+        //   renderCanvas((ctx) => {
+        //     actionDraw(
+        //       state.cursorX,
+        //       state.cursorY,
+        //       swatches.primary.color,
+        //       state.brushStamp,
+        //       "0,0",
+        //       state.tool.brushSize,
+        //       ctx,
+        //       state.mode,
+        //       state.drawnPointsSet,
+        //       null,
+        //       true
+        //     )
+        //   })
+        // }
         renderCanvas()
       } else {
         //FIX: perfect will be option, not mode
@@ -238,35 +254,51 @@ function brushSteps() {
           angle
         )
 
+        let previousX = lineStartX
+        let previousY = lineStartY
         for (let i = 0; i < tri.long; i++) {
           let thispoint = {
             x: Math.round(lineStartX + tri.x * i),
             y: Math.round(lineStartY + tri.y * i),
           }
+          state.brushDirection = calculateBrushDirection(
+            thispoint.x,
+            thispoint.y,
+            previousX,
+            previousY
+          )
           // for each point along the line
           actionDraw(
             thispoint.x,
             thispoint.y,
             swatches.primary.color,
             state.brushStamp,
-            "0,0",
+            state.brushDirection,
             state.tool.brushSize,
             canvas.currentLayer.ctx,
             state.mode,
             state.drawnPointsSet,
             state.points
           )
+          previousX = thispoint.x
+          previousY = thispoint.y
         }
         //Reset lineStart Coords
         state.lineStartX = null
         state.lineStartY = null
         //fill endpoint
+        state.brushDirection = calculateBrushDirection(
+          state.cursorX,
+          state.cursorY,
+          previousX,
+          previousY
+        )
         actionDraw(
           state.cursorX,
           state.cursorY,
           swatches.primary.color,
           state.brushStamp,
-          "0,0",
+          state.brushDirection,
           state.tool.brushSize,
           canvas.currentLayer.ctx,
           state.mode,

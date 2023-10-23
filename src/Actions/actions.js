@@ -9,6 +9,7 @@ import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
 import { getColor } from "../utils/canvasHelpers.js"
 import { colorPixel, matchStartColor } from "../utils/imageDataHelpers.js"
 import { renderCanvas } from "../Canvas/render.js"
+import { calculateBrushDirection } from "../utils/drawHelpers.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -232,31 +233,43 @@ export function actionLine(
   let angle = getAngle(tx - sx, ty - sy) // angle of line
   let tri = getTriangle(sx, sy, tx, ty, angle)
   const seen = seenPointsSet ? new Set(seenPointsSet) : new Set()
+  let previousX = sx
+  let previousY = sy
+  let brushDirection = "0,0"
   for (let i = 0; i < tri.long; i++) {
     let thispoint = {
       x: Math.round(sx + tri.x * i),
       y: Math.round(sy + tri.y * i),
     }
+    brushDirection = calculateBrushDirection(
+      thispoint.x,
+      thispoint.y,
+      previousX,
+      previousY
+    )
     // for each point along the line
     actionDraw(
       thispoint.x,
       thispoint.y,
       currentColor,
       brushStamp,
-      "0,0",
+      brushDirection,
       brushSize,
       ctx,
       currentMode,
       seen
     )
+    previousX = thispoint.x
+    previousY = thispoint.y
   }
   //fill endpoint
+  brushDirection = calculateBrushDirection(tx, ty, previousX, previousY)
   actionDraw(
-    Math.round(tx),
-    Math.round(ty),
+    tx,
+    ty,
     currentColor,
     brushStamp,
-    "0,0",
+    brushDirection,
     brushSize,
     ctx,
     currentMode,
