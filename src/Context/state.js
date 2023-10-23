@@ -42,6 +42,7 @@ export const state = {
     erase: false,
     contiguous: false,
   },
+  brushDirection: "0,0",
   //touchscreen?
   touch: false,
   //dragging target
