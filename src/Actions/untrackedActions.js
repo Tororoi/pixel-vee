@@ -2,7 +2,6 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
-import { renderRasterGUI } from "../GUI/raster.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { setInitialZoom } from "../utils/canvasHelpers.js"
 
@@ -27,14 +26,6 @@ export function actionZoom(z, xOriginOffset, yOriginOffset) {
     0,
     0
   )
-  canvas.rasterGuiCTX.setTransform(
-    canvas.sharpness * canvas.zoom,
-    0,
-    0,
-    canvas.sharpness * canvas.zoom,
-    0,
-    0
-  )
   canvas.onScreenCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
@@ -44,7 +35,6 @@ export function actionZoom(z, xOriginOffset, yOriginOffset) {
     0
   )
   renderCanvas()
-  renderRasterGUI(state, canvas, swatches)
   vectorGui.render(state, canvas)
 }
 
@@ -56,14 +46,6 @@ export function actionRecenter() {
     Math.max(canvas.offScreenCVS.width, canvas.offScreenCVS.height)
   )
   canvas.vectorGuiCTX.setTransform(
-    canvas.sharpness * canvas.zoom,
-    0,
-    0,
-    canvas.sharpness * canvas.zoom,
-    0,
-    0
-  )
-  canvas.rasterGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,
@@ -92,6 +74,5 @@ export function actionRecenter() {
   canvas.previousXOffset = canvas.xOffset
   canvas.previousYOffset = canvas.yOffset
   renderCanvas()
-  renderRasterGUI(state, canvas, swatches)
   vectorGui.render(state, canvas)
 }
