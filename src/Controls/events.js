@@ -6,7 +6,7 @@ import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
-import { renderCursor, renderRasterGUI } from "../GUI/raster.js"
+import { renderCursor } from "../GUI/raster.js"
 import { activateShortcut } from "./shortcuts.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
@@ -172,7 +172,6 @@ function handleWheel(e) {
 //========================================//
 
 /**
- *
  * @param {PointerEvent} e
  */
 function handlePointerDown(e) {
@@ -189,7 +188,7 @@ function handlePointerDown(e) {
   }
   renderCanvas()
   //if drawing on hidden layer, flash hide btn
-  if (canvas.currentLayer.opacity === 0) {
+  if (canvas.currentLayer.hidden) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
       if (dom.layersContainer.children[i].layerObj === canvas.currentLayer) {
         dom.layersContainer.children[i]
@@ -204,7 +203,6 @@ function handlePointerDown(e) {
   state.previousX = state.cursorX
   state.previousY = state.cursorY
   //Re-render GUI
-  renderRasterGUI(state, canvas, swatches)
   vectorGui.render(state, canvas)
   if (state.tool.name === "eyedropper") {
     renderCursor(state, canvas, swatches)
@@ -217,6 +215,9 @@ function handlePointerDown(e) {
   }
 }
 
+/**
+ * @param {PointerEvent} e
+ */
 function handlePointerMove(e) {
   if (state.clickDisabled && state.clicked) {
     return
@@ -236,7 +237,6 @@ function handlePointerMove(e) {
   }
   if (cursorMoved) {
     //Hover brush
-    renderRasterGUI(state, canvas, swatches)
     // vectorGui.render(state, canvas)
     if (
       state.clicked ||
@@ -272,6 +272,9 @@ function handlePointerMove(e) {
   canvas.previousSubPixelY = canvas.subPixelY
 }
 
+/**
+ * @param {PointerEvent} e
+ */
 function handlePointerUp(e) {
   canvas.pointerEvent = "pointerup"
   if (state.clickDisabled || !state.clicked) {
@@ -279,7 +282,7 @@ function handlePointerUp(e) {
   }
   state.clicked = false
   setCoordinates(e)
-  if (canvas.currentLayer.opacity === 0) {
+  if (canvas.currentLayer.hidden) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
       if (dom.layersContainer.children[i].layerObj === canvas.currentLayer) {
         dom.layersContainer.children[i]
@@ -313,7 +316,6 @@ function handlePointerUp(e) {
   state.redoStack = []
   canvas.pointerEvent = "none"
   if (!e.targetTouches) {
-    renderRasterGUI(state, canvas, swatches)
     vectorGui.render(state, canvas)
     if (["brush", "replace", "eyedropper"].includes(state.tool.name)) {
       renderCursor(state, canvas, swatches)
@@ -327,6 +329,9 @@ function handlePointerUp(e) {
   }
 }
 
+/**
+ * @param {PointerEvent} e
+ */
 function handlePointerOut(e) {
   //TODO: if touchscreen, need to handle differently. Currently cannot reach next code since clicked will be false.
   //Only purpose is to rerender with multi step tools such as curve when moving out or in the case of touch, lifting finger
@@ -345,7 +350,6 @@ function handlePointerOut(e) {
   // }
   if (!state.touch) {
     renderCanvas()
-    renderRasterGUI(state, canvas, swatches)
     vectorGui.render(state, canvas)
     canvas.pointerEvent = "none"
   }
@@ -362,11 +366,18 @@ function handlePointerOut(e) {
 //accessible upon touching, which reveals list of options/tools
 //hub icon, can store all dialog boxes, can drag out and in dialog boxes which user wants for a customized toolset
 
-//Identify whether program is being used by touchscreen or mouse. Important for multi-step tools such as curve
+/**
+ * Identify whether program is being used by touchscreen or mouse. Important for multi-step tools such as curve
+ * @param {TouchEvent} e
+ */
 function handleTouchStart(e) {
   state.touch = true
 }
 
+/**
+ * Identify whether program is being used by touchscreen or mouse. Important for multi-step tools such as curve
+ * @param {MouseEvent} e
+ */
 function handleMouseDown(e) {
   if (e.type === "mousedown") {
     state.touch = false // NOTE: this also triggers when in tablet mode in chrome. Comment this out while testing

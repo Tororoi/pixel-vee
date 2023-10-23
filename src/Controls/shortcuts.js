@@ -14,7 +14,7 @@ import { handleTools, handleModes } from "../Tools/events.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
- * @param {*} keyCode - eg. KeyC, Space, ArrowRight, etc.
+ * @param {String} keyCode
  */
 export function activateShortcut(keyCode) {
   switch (keyCode) {
@@ -65,6 +65,9 @@ export function activateShortcut(keyCode) {
         }
       }
       break
+    case "KeyA":
+      //
+      break
     case "KeyB":
       handleTools(null, "brush")
       break
@@ -109,6 +112,12 @@ export function activateShortcut(keyCode) {
     case "KeyF":
       handleTools(null, "fill")
       break
+    case "KeyG":
+      //
+      break
+    case "KeyH":
+      //
+      break
     case "KeyI":
       handleModes(null, "inject")
       break
@@ -123,11 +132,20 @@ export function activateShortcut(keyCode) {
     case "KeyL":
       handleTools(null, "line")
       break
+    case "KeyM":
+      //
+      break
+    case "KeyN":
+      //
+      break
     case "KeyO":
       handleTools(null, "ellipse")
       break
     case "KeyP":
       handleModes(null, "perfect")
+      break
+    case "KeyQ":
+      //
       break
     case "KeyR":
       handleTools(null, "replace")
@@ -135,6 +153,9 @@ export function activateShortcut(keyCode) {
     case "KeyS":
       randomizeColor(swatches.primary.swatch)
       renderPaletteToDOM()
+      break
+    case "KeyT":
+      //
       break
     case "KeyU":
       //
@@ -147,6 +168,9 @@ export function activateShortcut(keyCode) {
         // add image, coordinates and new layer to timeline as "paste" action
       }
       break
+    case "KeyW":
+      //
+      break
     case "KeyX":
       if (keys.MetaLeft || keys.MetaRight) {
         // console.log("cut")
@@ -157,6 +181,9 @@ export function activateShortcut(keyCode) {
         renderPaletteToolsToDOM()
         renderPaletteToDOM()
       }
+      break
+    case "KeyY":
+      //
       break
     case "KeyZ":
       if (keys.MetaLeft || keys.MetaRight) {

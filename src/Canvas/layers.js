@@ -17,7 +17,7 @@ export function consolidateLayers() {
     canvas.offScreenCVS.height
   )
   canvas.layers.forEach((l) => {
-    if (l.type === "raster" && l.opacity > 0) {
+    if (l.type === "raster" && !l.hidden && !l.removed && l.opacity > 0) {
       canvas.offScreenCTX.save()
       canvas.offScreenCTX.globalAlpha = l.opacity
       canvas.offScreenCTX.drawImage(
@@ -38,6 +38,7 @@ export function consolidateLayers() {
  * @returns {Object} layer
  */
 export function createNewRasterLayer(name) {
+  //TODO: create onscreen canvas for the layer as well as the offscreen one
   let layerCVS = document.createElement("canvas")
   let layerCTX = layerCVS.getContext("2d")
   layerCTX.willReadFrequently = true
@@ -52,6 +53,7 @@ export function createNewRasterLayer(name) {
     y: 0,
     scale: 1,
     opacity: 1,
+    hidden: false,
     removed: false,
   }
   return layer

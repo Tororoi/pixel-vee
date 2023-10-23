@@ -8,7 +8,6 @@ import {
   actionCubicCurve,
 } from "../Actions/actions.js"
 import { vectorGui } from "../GUI/vector.js"
-import { renderRasterGUI } from "../GUI/raster.js"
 import { renderCanvas } from "../Canvas/render.js"
 
 //=====================================//
@@ -316,7 +315,6 @@ function cubicCurveSteps() {
             },
           })
           renderCanvas()
-          renderRasterGUI(state, canvas, swatches)
           vectorGui.render(state, canvas)
         }
       }

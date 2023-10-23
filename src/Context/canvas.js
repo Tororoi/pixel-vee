@@ -8,8 +8,6 @@ import { setInitialZoom } from "../utils/canvasHelpers.js"
 //Set gui canvas and its context
 const vectorGuiCVS = document.getElementById("vectorGui")
 const vectorGuiCTX = vectorGuiCVS.getContext("2d")
-const rasterGuiCVS = document.getElementById("rasterGui")
-const rasterGuiCTX = rasterGuiCVS.getContext("2d")
 //Set onscreen canvas and its context
 const onScreenCVS = document.getElementById("onScreen")
 const onScreenCTX = onScreenCVS.getContext("2d")
@@ -32,8 +30,6 @@ export const canvas = {
   //Parameters
   vectorGuiCVS,
   vectorGuiCTX,
-  rasterGuiCVS,
-  rasterGuiCTX,
   onScreenCVS,
   onScreenCTX,
   offScreenCVS,
@@ -75,7 +71,6 @@ export const canvas = {
 
 //Initialize state
 canvas.vectorGuiCTX.willReadFrequently = true
-canvas.rasterGuiCTX.willReadFrequently = true
 canvas.onScreenCTX.willReadFrequently = true
 canvas.offScreenCTX.willReadFrequently = true
 canvas.previewCTX.willReadFrequently = true
@@ -96,18 +91,12 @@ canvas.sharpness = window.devicePixelRatio
 //adjust canvas ratio here if needed
 canvas.vectorGuiCVS.width = canvas.vectorGuiCVS.offsetWidth * canvas.sharpness
 canvas.vectorGuiCVS.height = canvas.vectorGuiCVS.offsetHeight * canvas.sharpness
-canvas.rasterGuiCVS.width = canvas.rasterGuiCVS.offsetWidth * canvas.sharpness
-canvas.rasterGuiCVS.height = canvas.rasterGuiCVS.offsetHeight * canvas.sharpness
 canvas.onScreenCVS.width = canvas.onScreenCVS.offsetWidth * canvas.sharpness
 canvas.onScreenCVS.height = canvas.onScreenCVS.offsetHeight * canvas.sharpness
 
 canvas.zoom = setInitialZoom(canvas.offScreenCVS.width) //zoom level should be based on absolute pixel size, not window relative to canvas
 canvas.zoomAtLastDraw = canvas.zoom
 vectorGuiCTX.scale(
-  canvas.sharpness * canvas.zoom,
-  canvas.sharpness * canvas.zoom
-)
-canvas.rasterGuiCTX.scale(
   canvas.sharpness * canvas.zoom,
   canvas.sharpness * canvas.zoom
 )
