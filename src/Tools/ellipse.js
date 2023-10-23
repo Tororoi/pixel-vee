@@ -4,7 +4,6 @@ import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { modifyVectorAction, actionEllipse } from "../Actions/actions.js"
 import { vectorGui } from "../GUI/vector.js"
-import { renderRasterGUI } from "../GUI/raster.js"
 import {
   updateEllipseVertex,
   updateEllipseOffsets,
@@ -240,7 +239,6 @@ function ellipseSteps() {
           //reset vector state TODO: forceCircle needs to be reset
           state.vectorProperties.forceCircle = false
           renderCanvas()
-          renderRasterGUI(state, canvas, swatches)
           vectorGui.render(state, canvas)
         }
       }

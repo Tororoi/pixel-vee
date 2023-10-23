@@ -6,15 +6,12 @@ import { renderCanvas } from "../Canvas/render.js"
 //=== * * * Graphics User Interface * * * ===//
 //===========================================//
 
-export function renderRasterGUI(state, canvas, swatches) {
-  canvas.rasterGuiCTX.clearRect(
-    0,
-    0,
-    canvas.rasterGuiCVS.width / canvas.zoom,
-    canvas.rasterGuiCVS.height / canvas.zoom
-  )
-}
-
+/**
+ * Render cursor based on active tool
+ * @param {Object} state
+ * @param {Object} canvas
+ * @param {Object} swatches
+ */
 export function renderCursor(state, canvas, swatches) {
   switch (state.tool.name) {
     case "grab":

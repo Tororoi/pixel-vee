@@ -2,7 +2,6 @@ import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { renderRasterGUI } from "../GUI/raster.js"
 import { consolidateLayers } from "../Canvas/layers.js"
 import { getColor } from "../utils/canvasHelpers.js"
 import { setColor } from "../Swatch/events.js"
@@ -39,8 +38,6 @@ function eyedropperSteps() {
       //normalize pointermove to pixelgrid, get color here too
       //get color
       sampleColor(state.cursorX, state.cursorY)
-      //draw square
-      renderRasterGUI(state, canvas, swatches)
       break
     default:
     //do nothing

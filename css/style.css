@@ -860,18 +860,22 @@ canvas {
   margin: 6px;
   cursor: pointer;
 }
-.layers-interface .layers-container .layers .layer .hide.eyeopen {
+.layers-interface .layers-container .layers .layer .hide .eye {
+  width: 100%;
+  height: 100%;
+}
+.layers-interface .layers-container .layers .layer .hide .eye.eyeopen {
   background-image: url("../public/pixelv-eyeopen.png");
   background-size: 100%;
 }
-.layers-interface .layers-container .layers .layer .hide.eyeopen:hover {
+.layers-interface .layers-container .layers .layer .hide .eye.eyeopen:hover {
   background-image: url("../public/pixelv-eyeopen-hover.png");
 }
-.layers-interface .layers-container .layers .layer .hide.eyeclosed {
+.layers-interface .layers-container .layers .layer .hide .eye.eyeclosed {
   background-image: url("../public/pixelv-eyeclosed.png");
   background-size: 100%;
 }
-.layers-interface .layers-container .layers .layer .hide.eyeclosed:hover {
+.layers-interface .layers-container .layers .layer .hide .eye.eyeclosed:hover {
   background-image: url("../public/pixelv-eyeclosed-hover.png");
 }
 .layers-interface .layers-container .layers .layer .warning {

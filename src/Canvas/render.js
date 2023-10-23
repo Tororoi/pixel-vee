@@ -12,7 +12,7 @@ import { calculateBrushDirection } from "../utils/drawHelpers.js"
  */
 function drawLayers(ctx, renderPreview) {
   canvas.layers.forEach((l) => {
-    if (!l.removed) {
+    if (!l.removed && !l.hidden) {
       if (l.type === "reference") {
         ctx.save()
         ctx.globalAlpha = l.opacity

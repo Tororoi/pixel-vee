@@ -1,8 +1,9 @@
 import { dom } from "../Context/dom.js"
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 
+/**
+ * Render palette tools in DOM
+ */
 export const renderPaletteToolsToDOM = () => {
   if (swatches.paletteMode === "edit") {
     dom.paletteEditBtn.classList.add("selected")
@@ -22,30 +23,55 @@ export const renderPaletteToolsToDOM = () => {
   }
 }
 
+/**
+ * Render palette interface in DOM
+ */
 export const renderPaletteToDOM = () => {
   dom.paletteColors.innerHTML = ""
   swatches.selectedPaletteIndex = null
-  for (let i = 0; i < swatches.palette.length; i++) {
-    let paletteColor = document.createElement("div")
-    paletteColor.className = "palette-color"
-    if (swatches.palette[i].color === swatches.primary.color.color) {
-      paletteColor.classList.add("selected")
-      swatches.selectedPaletteIndex = i
-    }
-    let swatch = document.createElement("div")
-    swatch.className = "swatch"
-    swatch.style.background = swatches.palette[i].color
-    paletteColor.appendChild(swatch)
-    dom.paletteColors.appendChild(paletteColor)
 
-    //associate object
-    swatch.color = swatches.palette[i]
+  for (let i = 0; i < swatches.palette.length; i++) {
+    createPaletteSwatch(swatches.palette[i], i)
   }
-  // Create add color button
-  let addColorBtn = document.createElement("div")
+
+  createAddColorButton()
+}
+
+/**
+ * Create a swatch for a given palette color
+ * @param {Object} colorObj
+ * @param {Integer} index
+ */
+const createPaletteSwatch = (colorObj, index) => {
+  const paletteColor = document.createElement("div")
+  paletteColor.className = "palette-color"
+
+  if (colorObj.color === swatches.primary.color.color) {
+    paletteColor.classList.add("selected")
+    swatches.selectedPaletteIndex = index
+  }
+
+  const swatch = document.createElement("div")
+  swatch.className = "swatch"
+  swatch.style.background = colorObj.color
+
+  //associate object
+  swatch.color = colorObj
+
+  paletteColor.appendChild(swatch)
+  dom.paletteColors.appendChild(paletteColor)
+}
+
+/**
+ * Create the button for adding a color to the palette
+ */
+const createAddColorButton = () => {
+  const addColorBtn = document.createElement("div")
   addColorBtn.className = "add-color"
-  let icon = document.createElement("div")
+
+  const icon = document.createElement("div")
   icon.className = "icon"
+
   addColorBtn.appendChild(icon)
   dom.paletteColors.appendChild(addColorBtn)
 }

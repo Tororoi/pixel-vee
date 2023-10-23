@@ -90,14 +90,6 @@ const resizeOffScreenCanvas = (width, height) => {
     0,
     0
   )
-  canvas.rasterGuiCTX.setTransform(
-    canvas.sharpness * canvas.zoom,
-    0,
-    0,
-    canvas.sharpness * canvas.zoom,
-    0,
-    0
-  )
   canvas.onScreenCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
@@ -162,17 +154,6 @@ const resizeOnScreenCanvas = () => {
     0,
     0
   )
-  canvas.rasterGuiCVS.width = canvas.rasterGuiCVS.offsetWidth * canvas.sharpness
-  canvas.rasterGuiCVS.height =
-    canvas.rasterGuiCVS.offsetHeight * canvas.sharpness
-  canvas.rasterGuiCTX.setTransform(
-    canvas.sharpness * canvas.zoom,
-    0,
-    0,
-    canvas.sharpness * canvas.zoom,
-    0,
-    0
-  )
   canvas.onScreenCVS.width = canvas.onScreenCVS.offsetWidth * canvas.sharpness
   canvas.onScreenCVS.height = canvas.onScreenCVS.offsetHeight * canvas.sharpness
   canvas.onScreenCTX.setTransform(
@@ -206,15 +187,15 @@ resizeOnScreenCanvas()
 function layerInteract(e) {
   let layer = e.target.closest(".layer").layerObj
   //toggle visibility
-  if (e.target.className.includes("hide")) {
+  if (e.target.className.includes("eye")) {
     if (e.target.className.includes("eyeopen")) {
       e.target.classList.remove("eyeopen")
       e.target.classList.add("eyeclosed")
-      layer.opacity = 0
+      layer.hidden = true
     } else if (e.target.className.includes("eyeclosed")) {
       e.target.classList.remove("eyeclosed")
       e.target.classList.add("eyeopen")
-      layer.opacity = 1
+      layer.hidden = false
     }
   } else if (e.target.className.includes("trash")) {
     removeLayer(layer)
