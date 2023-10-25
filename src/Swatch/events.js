@@ -19,12 +19,11 @@ import { changeActionColor } from "../Actions/actions.js"
 
 /**
  * Set the color of the swatch
- * @param {integer} r
- * @param {integer} g
- * @param {integer} b
- * @param {integer} a
- * @param {integer} target - enum: ["swatch btn", "back-swatch btn"]
- * dependencies - swatches, picker
+ * @param {Integer} r
+ * @param {Integer} g
+ * @param {Integer} b
+ * @param {Integer} a
+ * @param {Element} target
  */
 export function setColor(r, g, b, a, target) {
   a = parseInt(a)
@@ -94,14 +93,16 @@ export function setColor(r, g, b, a, target) {
 
 /**
  * Randomize the color of the swatch
- * @param {string} target - enum: ["swatch btn", "back-swatch btn"]
- * dependencies - setColor
+ * @param {Element} target
  */
 export function randomizeColor(target) {
   let color = generateRandomRGB()
   setColor(color.r, color.g, color.b, 255, target)
 }
 
+/**
+ * @param {Element} target
+ */
 export function initializeColorPicker(target) {
   picker.swatch = target
   const initialColorReference = target.color
@@ -112,13 +113,15 @@ export function initializeColorPicker(target) {
   dom.colorPickerContainer.style.pointerEvents = "auto"
 }
 
+/**
+ * @param {PointerEvent} e
+ */
 function openColorPicker(e) {
   initializeColorPicker(e.target)
 }
 
 /**
  * Switch primary and secondary swatches
- * dependencies - swatches
  */
 function switchColors() {
   let temp = { ...swatches.primary.color }
@@ -144,6 +147,9 @@ function switchColors() {
   )
 }
 
+/**
+ * @param {PointerEvent} e
+ */
 function handlePalette(e) {
   if (e.target.className.includes("swatch")) {
     //if palette-color and edit mode, open color picker, else
