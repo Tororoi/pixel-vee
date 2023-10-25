@@ -9,6 +9,10 @@ import { consolidateLayers } from "../Canvas/layers.js"
 //======= * * * Tooltip * * * ========//
 //====================================//
 
+/**
+ * @param {String} message
+ * @param {Element} target
+ */
 const showTooltip = (message, target) => {
   if (message && target) {
     const targetRect = target.getBoundingClientRect()
