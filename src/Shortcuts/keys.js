@@ -1,5 +1,6 @@
-//Keep track of which keys are being pressed or held
-
+/**
+ * Globally keep track of which keys are being pressed or held
+ */
 export const keys = {
   ArrowLeft: false,
   ArrowRight: false,

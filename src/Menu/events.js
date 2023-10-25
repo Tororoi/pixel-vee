@@ -40,6 +40,10 @@ const showTooltip = (message, target) => {
 //======== * * * Export * * * ========//
 //====================================//
 
+/**
+ * Consolidate offscreen canvases and download image
+ * TODO: Open dialog box with more options such as pixel size, where to save it to, etc.
+ */
 function exportImage() {
   consolidateLayers()
   const a = document.createElement("a")
