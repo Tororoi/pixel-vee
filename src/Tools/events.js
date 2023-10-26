@@ -99,6 +99,8 @@ export function handleTools(e, manualToolName = null) {
       dom.brushSlider.disabled = state.tool.disabled
       //update cursor
       if (dom.toolBtn.id === "grab") {
+        canvas.vectorGuiCVS.style.cursor = "grab"
+      } else if (dom.toolBtn.id === "move") {
         canvas.vectorGuiCVS.style.cursor = "move"
       } else if (
         dom.toolBtn.id === "replace" ||
@@ -213,5 +215,5 @@ dom.toolsContainer.addEventListener("click", handleTools)
 dom.modesContainer.addEventListener("click", handleModes)
 
 // * Brush * //
-dom.brushBtn.addEventListener("click", switchBrush)
+dom.brushDisplay.addEventListener("click", switchBrush)
 dom.brushSlider.addEventListener("input", updateBrush)

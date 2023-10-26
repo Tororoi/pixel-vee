@@ -36,10 +36,12 @@ function brushSteps() {
         state.brushStamp,
         "0,0",
         state.tool.brushSize,
+        canvas.currentLayer,
         canvas.currentLayer.ctx,
         state.mode,
         state.drawnPointsSet,
-        state.points
+        state.points,
+        false
       )
       //for perfect pixels
       state.lastDrawnX = state.cursorX
@@ -58,6 +60,7 @@ function brushSteps() {
             state.cursorX,
             state.cursorY,
             swatches.primary.color,
+            canvas.currentLayer,
             ctx,
             state.mode,
             state.brushStamp,
@@ -107,10 +110,12 @@ function brushSteps() {
             state.brushStamp,
             state.brushDirection,
             state.tool.brushSize,
+            canvas.currentLayer,
             canvas.currentLayer.ctx,
             state.mode,
             state.drawnPointsSet,
-            state.points
+            state.points,
+            false
           )
           previousX = thispoint.x
           previousY = thispoint.y
@@ -132,10 +137,12 @@ function brushSteps() {
           state.brushStamp,
           state.brushDirection,
           state.tool.brushSize,
+          canvas.currentLayer,
           canvas.currentLayer.ctx,
           state.mode,
           state.drawnPointsSet,
-          state.points
+          state.points,
+          false
         )
         // if (state.mode === "perfect") {
         //   renderCanvas((ctx) => {
@@ -146,6 +153,7 @@ function brushSteps() {
         //       state.brushStamp,
         //       "0,0",
         //       state.tool.brushSize,
+        //       canvas.currentLayer,
         //       ctx,
         //       state.mode,
         //       state.drawnPointsSet,
@@ -171,10 +179,12 @@ function brushSteps() {
               state.brushStamp,
               "0,0",
               state.tool.brushSize,
+              canvas.currentLayer,
               canvas.currentLayer.ctx,
               state.mode,
               state.drawnPointsSet,
-              state.points
+              state.points,
+              false
             )
             //update queue
             state.lastDrawnX = state.waitingPixelX
@@ -189,6 +199,7 @@ function brushSteps() {
                 state.brushStamp,
                 "0,0",
                 state.tool.brushSize,
+                canvas.currentLayer,
                 ctx,
                 state.mode,
                 state.drawnPointsSet,
@@ -207,6 +218,7 @@ function brushSteps() {
                 state.brushStamp,
                 "0,0",
                 state.tool.brushSize,
+                canvas.currentLayer,
                 ctx,
                 state.mode,
                 state.drawnPointsSet,
@@ -223,10 +235,12 @@ function brushSteps() {
             state.brushStamp,
             "0,0",
             state.tool.brushSize,
+            canvas.currentLayer,
             canvas.currentLayer.ctx,
             state.mode,
             state.drawnPointsSet,
-            state.points
+            state.points,
+            false
           )
           renderCanvas()
         }
@@ -275,10 +289,12 @@ function brushSteps() {
             state.brushStamp,
             state.brushDirection,
             state.tool.brushSize,
+            canvas.currentLayer,
             canvas.currentLayer.ctx,
             state.mode,
             state.drawnPointsSet,
-            state.points
+            state.points,
+            false
           )
           previousX = thispoint.x
           previousY = thispoint.y
@@ -300,10 +316,12 @@ function brushSteps() {
           state.brushStamp,
           state.brushDirection,
           state.tool.brushSize,
+          canvas.currentLayer,
           canvas.currentLayer.ctx,
           state.mode,
           state.drawnPointsSet,
-          state.points
+          state.points,
+          false
         )
       }
       //only needed if perfect pixels option is on
@@ -314,10 +332,12 @@ function brushSteps() {
         state.brushStamp,
         "0,0",
         state.tool.brushSize,
+        canvas.currentLayer,
         canvas.currentLayer.ctx,
         state.mode,
         state.drawnPointsSet,
-        state.points
+        state.points,
+        false
       )
 
       state.addToTimeline({

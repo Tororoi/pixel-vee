@@ -201,14 +201,23 @@ function layerInteract(e) {
     removeLayer(layer)
   } else {
     //select current layer
-    if (layer.type === "raster") {
-      if (layer !== canvas.currentLayer) {
-        vectorGui.reset(canvas)
-        canvas.currentLayer = layer
-        renderLayersToDOM()
-        renderVectorsToDOM()
+    // if (layer.type === "raster") {
+    if (layer !== canvas.currentLayer) {
+      vectorGui.reset(canvas)
+      canvas.currentLayer.inactiveTools.forEach((tool) => {
+        dom[`${tool}Btn`].disabled = false
+      })
+      canvas.currentLayer = layer
+      layer.inactiveTools.forEach((tool) => {
+        dom[`${tool}Btn`].disabled = true
+      })
+      if (layer.type === "reference") {
+        handleTools(null, "move")
       }
+      renderLayersToDOM()
+      renderVectorsToDOM()
     }
+    // }
   }
   renderCanvas()
 }
@@ -318,6 +327,17 @@ function addReferenceLayer() {
           y: 0,
           scale: scale,
           opacity: 1,
+          inactiveTools: [
+            "brush",
+            "replace",
+            "fill",
+            "line",
+            "quadCurve",
+            "cubicCurve",
+            "ellipse",
+            // "select",
+          ],
+          hidden: false,
           removed: false,
         }
         canvas.layers.unshift(layer)

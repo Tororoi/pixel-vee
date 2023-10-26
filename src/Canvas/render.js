@@ -11,27 +11,33 @@ import { calculateBrushDirection } from "../utils/drawHelpers.js"
  * @param {Function} renderPreview
  */
 function drawLayers(ctx, renderPreview) {
-  canvas.layers.forEach((l) => {
-    if (!l.removed && !l.hidden) {
-      if (l.type === "reference") {
-        ctx.save()
-        ctx.globalAlpha = l.opacity
-        //l.x, l.y need to be normalized to the pixel grid
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(
+    canvas.xOffset,
+    canvas.yOffset,
+    canvas.offScreenCVS.width,
+    canvas.offScreenCVS.height
+  )
+  ctx.clip()
+  canvas.layers.forEach((layer) => {
+    if (!layer.removed && !layer.hidden) {
+      if (layer.type === "reference") {
+        ctx.globalAlpha = layer.opacity
+        //layer.x, layer.y need to be normalized to the pixel grid
         ctx.drawImage(
-          l.img,
+          layer.img,
           canvas.xOffset +
-            (l.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+            (layer.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
           canvas.yOffset +
-            (l.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
-          l.img.width * l.scale,
-          l.img.height * l.scale
+            (layer.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+          layer.img.width * layer.scale,
+          layer.img.height * layer.scale
         )
-        ctx.restore()
       } else {
-        ctx.save()
-        ctx.globalAlpha = l.opacity
-        let drawCVS = l.cvs
-        if (l === canvas.currentLayer && renderPreview) {
+        ctx.globalAlpha = layer.opacity
+        let drawCVS = layer.cvs
+        if (layer === canvas.currentLayer && renderPreview) {
           //render preview of action
           canvas.previewCTX.clearRect(
             0,
@@ -39,24 +45,30 @@ function drawLayers(ctx, renderPreview) {
             canvas.previewCVS.width,
             canvas.previewCVS.height
           )
-          canvas.previewCTX.drawImage(l.cvs, 0, 0, l.cvs.width, l.cvs.height)
+          canvas.previewCTX.drawImage(
+            layer.cvs,
+            0,
+            0,
+            layer.cvs.width,
+            layer.cvs.height
+          )
           renderPreview(canvas.previewCTX) //Pass function through to here so it can be actionLine or other actions with multiple points
           drawCVS = canvas.previewCVS
         }
-        //l.x, l.y need to be normalized to the pixel grid
+        //layer.x, layer.y need to be normalized to the pixel grid
         ctx.drawImage(
           drawCVS,
-          canvas.xOffset +
-            (l.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
-          canvas.yOffset +
-            (l.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+          canvas.xOffset,
+          // + (layer.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+          canvas.yOffset,
+          // + (layer.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
           canvas.offScreenCVS.width,
           canvas.offScreenCVS.height
         )
-        ctx.restore()
       }
     }
   })
+  ctx.restore()
 }
 
 /**
@@ -118,9 +130,12 @@ function redrawTimelineActions(index = null) {
               p.brushStamp,
               brushDirection,
               p.brushSize,
+              action.layer,
               action.layer.ctx,
               action.mode,
-              seen
+              seen,
+              null,
+              false
             )
             previousX = p.x
             previousY = p.y
@@ -165,6 +180,7 @@ function redrawTimelineActions(index = null) {
             action.properties.px2,
             action.properties.py2,
             action.color,
+            action.layer,
             action.layer.ctx,
             action.mode,
             action.brushStamp,
@@ -182,6 +198,7 @@ function redrawTimelineActions(index = null) {
             action.properties.vectorProperties.py3,
             3,
             action.color,
+            action.layer,
             action.layer.ctx,
             action.mode,
             action.brushStamp,
@@ -202,6 +219,7 @@ function redrawTimelineActions(index = null) {
             action.properties.vectorProperties.py4,
             4,
             action.color,
+            action.layer,
             action.layer.ctx,
             action.mode,
             action.brushStamp,
@@ -221,6 +239,7 @@ function redrawTimelineActions(index = null) {
             action.properties.vectorProperties.radB,
             action.properties.vectorProperties.forceCircle,
             action.color,
+            action.layer,
             action.layer.ctx,
             action.mode,
             action.brushStamp,

@@ -16,14 +16,19 @@ export function consolidateLayers() {
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
-  canvas.layers.forEach((l) => {
-    if (l.type === "raster" && !l.hidden && !l.removed && l.opacity > 0) {
+  canvas.layers.forEach((layer) => {
+    if (
+      layer.type === "raster" &&
+      !layer.hidden &&
+      !layer.removed &&
+      layer.opacity > 0
+    ) {
       canvas.offScreenCTX.save()
-      canvas.offScreenCTX.globalAlpha = l.opacity
+      canvas.offScreenCTX.globalAlpha = layer.opacity
       canvas.offScreenCTX.drawImage(
-        l.cvs,
-        l.x,
-        l.y,
+        layer.cvs,
+        layer.x,
+        layer.y,
         canvas.offScreenCVS.width,
         canvas.offScreenCVS.height
       )
@@ -53,6 +58,7 @@ export function createNewRasterLayer(name) {
     y: 0,
     scale: 1,
     opacity: 1,
+    inactiveTools: ["move"],
     hidden: false,
     removed: false,
   }

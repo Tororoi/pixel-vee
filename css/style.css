@@ -115,8 +115,12 @@ a:active {
 button {
   font-family: "04Font";
   border: 0;
-  padding: 4px;
+  padding: 0;
   font-size: 16px;
+}
+button:disabled {
+  cursor: not-allowed !important;
+  opacity: 0.5 !important;
 }
 
 input {
@@ -1593,6 +1597,9 @@ canvas {
   margin: 0px;
 }
 .size-container .dimensions-form {
+  padding: 4px;
+}
+.size-container .dimensions-form .update-size {
   padding: 4px;
 }
 .size-container .dimensions-form .inputs {

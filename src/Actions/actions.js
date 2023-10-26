@@ -134,6 +134,7 @@ export function actionClear(layer) {
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} brushStamp
  * @param {Integer} brushSize
+ * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
  * @param {String} currentMode
  * @param {Set} seenPointsSet
@@ -147,11 +148,12 @@ export function actionDraw(
   brushStamp,
   brushStampDir,
   brushSize,
+  layer,
   ctx,
   currentMode,
-  seenPointsSet = null,
-  points = null,
-  excludeFromSet = false
+  seenPointsSet,
+  points,
+  excludeFromSet
 ) {
   ctx.fillStyle = currentColor.color
   if (points) {
@@ -211,6 +213,7 @@ export function actionDraw(
  * @param {Integer} tx
  * @param {Integer} ty
  * @param {Object} currentColor - {color, r, g, b, a}
+ * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
  * @param {String} currentMode
  * @param {Object} brushStamp
@@ -222,14 +225,13 @@ export function actionLine(
   tx,
   ty,
   currentColor,
+  layer,
   ctx,
   currentMode,
   brushStamp,
   brushSize,
   seenPointsSet = null
 ) {
-  ctx.fillStyle = currentColor.color
-
   let angle = getAngle(tx - sx, ty - sy) // angle of line
   let tri = getTriangle(sx, sy, tx, ty, angle)
   const seen = seenPointsSet ? new Set(seenPointsSet) : new Set()
@@ -255,9 +257,12 @@ export function actionLine(
       brushStamp,
       brushDirection,
       brushSize,
+      layer,
       ctx,
       currentMode,
-      seen
+      seen,
+      null,
+      false
     )
     previousX = thispoint.x
     previousY = thispoint.y
@@ -271,9 +276,12 @@ export function actionLine(
     brushStamp,
     brushDirection,
     brushSize,
+    layer,
     ctx,
     currentMode,
-    seen
+    seen,
+    null,
+    false
   )
 }
 
@@ -402,6 +410,7 @@ export function actionFill(
  * @param {Object} brushStamp
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Integer} brushSize
+ * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
  * @param {String} currentMode
  */
@@ -410,6 +419,7 @@ function renderPoints(
   brushStamp,
   currentColor,
   brushSize,
+  layer,
   ctx,
   currentMode
 ) {
@@ -434,9 +444,12 @@ function renderPoints(
       brushStamp,
       `${xDir},${yDir}`,
       brushSize,
+      layer,
       ctx,
       currentMode,
-      seen
+      seen,
+      null,
+      false
     )
     previousX = xt
     previousY = yt
@@ -453,6 +466,7 @@ function renderPoints(
  * @param {Integer} controly
  * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
+ * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
  * @param {String} currentMode
  * @param {Object} brushStamp
@@ -467,6 +481,7 @@ export function actionQuadraticCurve(
   controly,
   stepNum,
   currentColor,
+  layer,
   ctx,
   currentMode,
   brushStamp,
@@ -479,9 +494,6 @@ export function actionQuadraticCurve(
   endy = Math.round(endy)
   controlx = Math.round(controlx)
   controly = Math.round(controly)
-
-  ctx.fillStyle = currentColor.color
-
   //BUG: On touchscreen, hits gradient sign error if first tool used
   if (stepNum === 1) {
     //after defining x0y0
@@ -491,6 +503,7 @@ export function actionQuadraticCurve(
       state.cursorX,
       state.cursorY,
       currentColor,
+      layer,
       ctx,
       currentMode,
       brushStamp,
@@ -515,6 +528,7 @@ export function actionQuadraticCurve(
       brushStamp,
       currentColor,
       brushSize,
+      layer,
       ctx,
       currentMode
     )
@@ -535,6 +549,7 @@ export function actionQuadraticCurve(
       brushStamp,
       currentColor,
       brushSize,
+      layer,
       ctx,
       currentMode
     )
@@ -553,6 +568,7 @@ export function actionQuadraticCurve(
  * @param {Integer} controly2
  * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
+ * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
  * @param {String} currentMode
  * @param {Object} brushStamp
@@ -569,6 +585,7 @@ export function actionCubicCurve(
   controly2,
   stepNum,
   currentColor,
+  layer,
   ctx,
   currentMode,
   brushStamp,
@@ -583,9 +600,6 @@ export function actionCubicCurve(
   controly2 = Math.round(controly2)
   endx = Math.round(endx)
   endy = Math.round(endy)
-
-  ctx.fillStyle = currentColor.color
-
   //BUG: On touchscreen, hits gradient sign error if first tool used
   if (stepNum === 1) {
     //after defining x0y0
@@ -595,6 +609,7 @@ export function actionCubicCurve(
       state.cursorX,
       state.cursorY,
       currentColor,
+      layer,
       ctx,
       currentMode,
       brushStamp,
@@ -620,6 +635,7 @@ export function actionCubicCurve(
       brushStamp,
       currentColor,
       brushSize,
+      layer,
       ctx,
       currentMode
     )
@@ -643,6 +659,7 @@ export function actionCubicCurve(
       brushStamp,
       currentColor,
       brushSize,
+      layer,
       ctx,
       currentMode
     )
@@ -665,6 +682,7 @@ export function actionCubicCurve(
       brushStamp,
       currentColor,
       brushSize,
+      layer,
       ctx,
       currentMode
     )
@@ -681,6 +699,7 @@ export function actionCubicCurve(
  * @param {Integer} yb
  * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
+ * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
  * @param {String} currentMode
  * @param {Object} brushStamp
@@ -701,6 +720,7 @@ export function actionEllipse(
   rb,
   forceCircle,
   currentColor,
+  layer,
   ctx,
   currentMode,
   brushStamp,
@@ -718,7 +738,6 @@ export function actionEllipse(
   xb = Math.floor(xb)
   yb = Math.floor(yb)
 
-  ctx.fillStyle = currentColor.color
   if (forceCircle) {
     let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, offset)
     renderPoints(
@@ -726,6 +745,7 @@ export function actionEllipse(
       brushStamp,
       currentColor,
       brushSize,
+      layer,
       ctx,
       currentMode
     )
@@ -746,6 +766,7 @@ export function actionEllipse(
       brushStamp,
       currentColor,
       brushSize,
+      layer,
       ctx,
       currentMode
     )

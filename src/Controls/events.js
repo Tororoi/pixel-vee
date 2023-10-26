@@ -112,6 +112,8 @@ function handleKeyUp(e) {
 
   //Tools
   if (dom.toolBtn.id === "grab") {
+    canvas.vectorGuiCVS.style.cursor = "grab"
+  } else if (dom.toolBtn.id === "move") {
     canvas.vectorGuiCVS.style.cursor = "move"
   } else if (
     dom.toolBtn.id === "replace" ||

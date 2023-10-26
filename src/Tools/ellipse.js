@@ -81,6 +81,7 @@ function ellipseSteps() {
             state.vectorProperties.radB,
             state.vectorProperties.forceCircle, //force circle initially
             swatches.primary.color,
+            canvas.currentLayer,
             ctx,
             state.mode,
             state.brushStamp,
@@ -143,6 +144,7 @@ function ellipseSteps() {
               state.vectorProperties.radB,
               state.vectorProperties.forceCircle, //force circle initially
               swatches.primary.color,
+              canvas.currentLayer,
               ctx,
               state.mode,
               state.brushStamp,
@@ -203,6 +205,7 @@ function ellipseSteps() {
             state.vectorProperties.radB,
             state.vectorProperties.forceCircle, //force circle initially
             swatches.primary.color,
+            canvas.currentLayer,
             canvas.currentLayer.ctx,
             state.mode,
             state.brushStamp,
@@ -303,6 +306,7 @@ export function adjustEllipseSteps() {
                     .vectorProperties.forceCircle
                 : state.vectorProperties.forceCircle,
               state.undoStack[canvas.currentVectorIndex].color,
+              state.undoStack[canvas.currentVectorIndex].layer,
               ctx,
               state.undoStack[canvas.currentVectorIndex].mode,
               state.undoStack[canvas.currentVectorIndex].brushStamp,
@@ -336,6 +340,7 @@ export function adjustEllipseSteps() {
                   .vectorProperties.forceCircle
               : state.vectorProperties.forceCircle,
             state.undoStack[canvas.currentVectorIndex].color,
+            state.undoStack[canvas.currentVectorIndex].layer,
             ctx,
             state.undoStack[canvas.currentVectorIndex].mode,
             state.undoStack[canvas.currentVectorIndex].brushStamp,

@@ -16,24 +16,26 @@
     />
   </head>
   <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XGKLFJH336"></script>
+  <script
+    async
+    src="https://www.googletagmanager.com/gtag/js?id=G-XGKLFJH336"
+  ></script>
   <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+    window.dataLayer = window.dataLayer || []
+    function gtag() {
+      dataLayer.push(arguments)
+    }
+    gtag("js", new Date())
 
-    gtag('config', 'G-XGKLFJH336');
+    gtag("config", "G-XGKLFJH336")
   </script>
 
   <body>
     <div id="preload-container"></div>
     <div id="options" class="nav">
       <div class="title">
-        <a
-          href="https://github.com/Tororoi/pixel-vee"
-          target="_blank"
-        >
-          <img src="./public/pixel-vee.png"/>
+        <a href="https://github.com/Tororoi/pixel-vee" target="_blank">
+          <img src="./public/pixel-vee.png" />
         </a>
       </div>
       <div class="nav-items">
@@ -94,17 +96,27 @@
           <div class="drag-btn locked"><div class="grip"></div></div>
           Menu
           <label class="collapse-btn" data-tooltip="Collapse/ Expand">
-            <input type="checkbox" aria-label="Collapse or Expand" class="collapse-checkbox"></input>
+            <input
+              type="checkbox"
+              aria-label="Collapse or Expand"
+              class="collapse-checkbox"
+            />
             <span class="arrow"></span>
           </label>
         </div>
         <div class="collapsible">
-          <div class="brush-container draggable v-drag settings-box smooth-shift">
+          <div
+            class="brush-container draggable v-drag settings-box smooth-shift"
+          >
             <div class="header dragger">
               <div class="drag-btn"><div class="grip"></div></div>
               Brush
               <label class="collapse-btn" data-tooltip="Collapse/ Expand">
-                <input type="checkbox" aria-label="Collapse or Expand" class="collapse-checkbox"></input>
+                <input
+                  type="checkbox"
+                  aria-label="Collapse or Expand"
+                  class="collapse-checkbox"
+                />
                 <span class="arrow"></span>
               </label>
             </div>
@@ -112,7 +124,10 @@
               <label for="brush-size" class="brush-size"
                 >Line Weight: <span id="line-weight">1</span>px
               </label>
-              <div class="brush-preview btn" data-tooltip="Click to switch brush">
+              <div
+                class="brush-preview btn"
+                data-tooltip="Click to switch brush"
+              >
                 <div id="brush-preview">
                   <svg
                     class="brush-stamp"
@@ -138,11 +153,24 @@
               />
             </div>
           </div>
-          <div class="palette-interface draggable v-drag settings-box smooth-shift">
-            <div id="palette-header" class="header dragger"><div class="drag-btn"><div class="grip"></div></div>
-            Palette
-              <label for="palette-collapse-btn" id="palette-collapser" class="collapse-btn" data-tooltip="Collapse/ Expand">
-                <input type="checkbox" aria-label="Collapse or Expand" class="collapse-checkbox" id="palette-collapse-btn"></input>
+          <div
+            class="palette-interface draggable v-drag settings-box smooth-shift"
+          >
+            <div id="palette-header" class="header dragger">
+              <div class="drag-btn"><div class="grip"></div></div>
+              Palette
+              <label
+                for="palette-collapse-btn"
+                id="palette-collapser"
+                class="collapse-btn"
+                data-tooltip="Collapse/ Expand"
+              >
+                <input
+                  type="checkbox"
+                  aria-label="Collapse or Expand"
+                  class="collapse-checkbox"
+                  id="palette-collapse-btn"
+                />
                 <span class="arrow"></span>
               </label>
             </div>
@@ -184,15 +212,21 @@
               </div>
               <div class="palette-container">
                 <div class="palette-tools">
-                  <div class="palette-edit" data-tooltip="Palette Knife (Hold K or click on the selected color) &#010;&#010;Click on a swatch to edit the color.">
+                  <div
+                    class="palette-edit"
+                    data-tooltip="Palette Knife (Hold K or click on the selected color) &#010;&#010;Click on a swatch to edit the color."
+                  >
                     <div class="icon"></div>
                   </div>
-                  <div class="palette-remove" data-tooltip="Palette Scraper (Hold X) &#010;&#010; Click on a swatch to remove it from the palette.">
+                  <div
+                    class="palette-remove"
+                    data-tooltip="Palette Scraper (Hold X) &#010;&#010; Click on a swatch to remove it from the palette."
+                  >
                     <div class="icon"></div>
                   </div>
                 </div>
                 <div class="palette-colors">
-                <!-- <div class="palette-color">
+                  <!-- <div class="palette-color">
                   <div class="swatch"></div>
                 </div>
                 <div class="palette-color">
@@ -206,11 +240,24 @@
               </div>
             </div>
           </div>
-          <div class="size-container draggable v-drag settings-box smooth-shift">
-            <div id="size-header" class="header dragger"><div class="drag-btn"><div class="grip"></div></div>
-            Canvas Size
-              <label for="size-collapse-btn" id="size-collapser" class="collapse-btn" data-tooltip="Collapse/ Expand">
-                <input type="checkbox" aria-label="Collapse or Expand" class="collapse-checkbox" id="size-collapse-btn"></input>
+          <div
+            class="size-container draggable v-drag settings-box smooth-shift"
+          >
+            <div id="size-header" class="header dragger">
+              <div class="drag-btn"><div class="grip"></div></div>
+              Canvas Size
+              <label
+                for="size-collapse-btn"
+                id="size-collapser"
+                class="collapse-btn"
+                data-tooltip="Collapse/ Expand"
+              >
+                <input
+                  type="checkbox"
+                  aria-label="Collapse or Expand"
+                  class="collapse-checkbox"
+                  id="size-collapse-btn"
+                />
                 <span class="arrow"></span>
               </label>
             </div>
@@ -220,7 +267,12 @@
                   <label for="canvas-width"
                     >Width:
                     <span class="input">
-                      <input type="number" id="canvas-width" min="8" max="1024" />
+                      <input
+                        type="number"
+                        id="canvas-width"
+                        min="8"
+                        max="1024"
+                      />
                       <span class="sliderbox">
                         <span id="inc" class="channel-btn">
                           <p>+</p>
@@ -234,7 +286,12 @@
                   <label for="canvas-height"
                     >Height:
                     <span class="input">
-                      <input type="number" id="canvas-height" min="8" max="1024" />
+                      <input
+                        type="number"
+                        id="canvas-height"
+                        min="8"
+                        max="1024"
+                      />
                       <span class="sliderbox">
                         <span id="inc" class="channel-btn">
                           <p>+</p>
@@ -246,23 +303,36 @@
                     </span>
                   </label>
                 </div>
-                <button type="submit" id="update-size" class="update-size btn">Update Canvas Size</button>
+                <button type="submit" id="update-size" class="update-size btn">
+                  Update Canvas Size
+                </button>
               </form>
             </div>
           </div>
-          <div class="layers-interface draggable v-drag settings-box smooth-shift">
+          <div
+            class="layers-interface draggable v-drag settings-box smooth-shift"
+          >
             <div id="layers-header" class="header dragger">
               <div class="drag-btn"><div class="grip"></div></div>
               Layers
-              <label for="layers-collapse-btn" id="layers-collapser" class="collapse-btn" data-tooltip="Collapse/ Expand">
-                <input type="checkbox" aria-label="Collapse or Expand" class="collapse-checkbox" id="layers-collapse-btn"></input>
+              <label
+                for="layers-collapse-btn"
+                id="layers-collapser"
+                class="collapse-btn"
+                data-tooltip="Collapse/ Expand"
+              >
+                <input
+                  type="checkbox"
+                  aria-label="Collapse or Expand"
+                  class="collapse-checkbox"
+                  id="layers-collapse-btn"
+                />
                 <span class="arrow"></span>
               </label>
             </div>
             <div class="collapsible">
               <div class="layers-control">
-                <div class="new-raster-layer" data-tooltip="New Layer">
-                </div>
+                <div class="new-raster-layer" data-tooltip="New Layer"></div>
                 <label
                   for="file-upload"
                   class="custom-file-upload"
@@ -276,12 +346,24 @@
               </div>
             </div>
           </div>
-          <div class="vectors-interface draggable v-drag settings-box smooth-shift">
+          <div
+            class="vectors-interface draggable v-drag settings-box smooth-shift"
+          >
             <div id="vectors-header" class="header dragger">
               <div class="drag-btn"><div class="grip"></div></div>
               Vectors
-              <label for="vectors-collapse-btn" id="vectors-collapser" class="collapse-btn" data-tooltip="Collapse/ Expand">
-                <input type="checkbox" aria-label="Collapse or Expand" class="collapse-checkbox" id="vectors-collapse-btn"></input>
+              <label
+                for="vectors-collapse-btn"
+                id="vectors-collapser"
+                class="collapse-btn"
+                data-tooltip="Collapse/ Expand"
+              >
+                <input
+                  type="checkbox"
+                  aria-label="Collapse or Expand"
+                  class="collapse-checkbox"
+                  id="vectors-collapse-btn"
+                />
                 <span class="arrow"></span>
               </label>
             </div>
@@ -303,8 +385,18 @@
         <div id="toolbox-header" class="header dragger">
           <div class="drag-btn locked"><div class="grip"></div></div>
           Toolbox
-          <label for="toolbox-collapse-btn" id="toolbox-collapser" class="collapse-btn" data-tooltip="Collapse/ Expand">
-            <input type="checkbox" aria-label="Collapse or Expand" class="collapse-checkbox" id="toolbox-collapse-btn"></input>
+          <label
+            for="toolbox-collapse-btn"
+            id="toolbox-collapser"
+            class="collapse-btn"
+            data-tooltip="Collapse/ Expand"
+          >
+            <input
+              type="checkbox"
+              aria-label="Collapse or Expand"
+              class="collapse-checkbox"
+              id="toolbox-collapse-btn"
+            />
             <span class="arrow"></span>
           </label>
         </div>
@@ -344,7 +436,10 @@
             </svg>
           </div> -->
           <div class="btn-pair">
-            <div class="recenter custom-shape btn" data-tooltip="Recenter Canvas">
+            <div
+              class="recenter custom-shape btn"
+              data-tooltip="Recenter Canvas"
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 -0.5 22 22"
@@ -458,72 +553,130 @@
           <div class="columns">
             <div class="tools column">
               <h4>Tools</h4>
-              <div class="tool btn" id="brush" data-tooltip="Brush (B)">
+              <button
+                type="button"
+                class="tool btn"
+                id="brush"
+                data-tooltip="Brush (B)"
+              >
                 <div class="brush"></div>
-              </div>
-              <div
+              </button>
+              <button
+                type="button"
                 class="tool btn"
                 id="replace"
-                data-tooltip="Replace (R) &#010;&#010;Replace secondary color with primary color"
+                data-tooltip="Replace (M) &#010;&#010;Replace secondary color with primary color"
               >
                 <div class="replace"></div>
-              </div>
-              <div class="tool btn" id="fill" data-tooltip="Fill (F)">
+              </button>
+              <button
+                type="button"
+                class="tool btn"
+                id="fill"
+                data-tooltip="Fill (F)"
+              >
                 <div class="fill"></div>
-              </div>
-              <div
+              </button>
+              <button
+                type="button"
                 class="tool btn"
                 id="line"
                 data-tooltip="Line (L or Hold Shift & Brush)"
               >
                 <div class="line"></div>
-              </div>
-              <div class="tool btn" id="quadCurve" data-tooltip="Quadratic Curve (C)">
+              </button>
+              <button
+                type="button"
+                class="tool btn"
+                id="quadCurve"
+                data-tooltip="Quadratic Curve (C)"
+              >
                 <div class="quadCurve"></div>
-              </div>
-              <div class="tool btn" id="cubicCurve" data-tooltip="Cubic Curve (J)">
+              </button>
+              <button
+                type="button"
+                class="tool btn"
+                id="cubicCurve"
+                data-tooltip="Cubic Curve (J)"
+              >
                 <div class="cubicCurve"></div>
-              </div>
-              <div
+              </button>
+              <button
+                type="button"
                 class="tool btn"
                 id="ellipse"
                 data-tooltip="Ellipse (O) &#010;&#010;Hold Shift to maintain circle"
               >
                 <div class="ellipse"></div>
-              </div>
-              <!-- <div
+              </button>
+              <!-- <button
+                type="button"
                 class="tool btn"
                 id="select"
                 data-tooltip="Select (M)"
               >
                 <div class="select"></div>
-              </div> -->
-              <div
+              </button> -->
+              <button
+                type="button"
                 class="tool btn"
                 id="eyedropper"
                 data-tooltip="Eyedropper (Hold Alt)"
               >
                 <div class="eyedropper"></div>
-              </div>
-              <div class="tool btn" id="grab" data-tooltip="Grab (Hold Space)">
+              </button>
+              <button
+                type="button"
+                class="tool btn"
+                id="grab"
+                data-tooltip="Grab (Hold Space)"
+              >
                 <div class="grab"></div>
-              </div>
+              </button>
+              <button
+                type="button"
+                class="tool btn"
+                id="move"
+                data-tooltip="Move"
+              >
+                <div class="move"></div>
+              </button>
             </div>
             <div class="modes column">
               <h4>Modes</h4>
-              <div class="mode btn" id="draw" data-tooltip="Draw (D)">
+              <button
+                type="button"
+                class="mode btn"
+                id="draw"
+                data-tooltip="Draw (D)"
+              >
                 <div class="pencil"></div>
-              </div>
-              <div class="mode btn" id="erase" data-tooltip="Erase (E)">
+              </button>
+              <button
+                type="button"
+                class="mode btn"
+                id="erase"
+                data-tooltip="Erase (E)"
+              >
                 <div class="eraser"></div>
-              </div>
+              </button>
               <!-- Change to option instead -->
-              <div class="mode btn" id="perfect" data-tooltip="Pixel Perfect (P)">
+              <button
+                type="button"
+                class="mode btn"
+                id="perfect"
+                data-tooltip="Pixel Perfect (P)"
+              >
                 <div class="mechanical"></div>
-              </div>
-              <div class="mode btn" id="inject" data-tooltip="Inject (I) &#010;&#010;Translucent colors will be applied directly">
+              </button>
+              <button
+                type="button"
+                class="mode btn"
+                id="inject"
+                data-tooltip="Inject (I) &#010;&#010;Translucent colors will be applied directly"
+              >
                 <div class="inject"></div>
-              </div>
+              </button>
               <div class="zoom">
                 <div class="tool">
                   <div class="plusminus">
@@ -554,8 +707,18 @@
           <div class="drag-btn"><div class="grip"></div></div>
           <!-- <h3>Color Picker</h3> -->
           Color Picker
-          <label for="picker-collapse-btn" id="picker-collapser" class="collapse-btn" data-tooltip="Collapse/ Expand">
-            <input type="checkbox" aria-label="Collapse or Expand" class="collapse-checkbox" id="picker-collapse-btn"></input>
+          <label
+            for="picker-collapse-btn"
+            id="picker-collapser"
+            class="collapse-btn"
+            data-tooltip="Collapse/ Expand"
+          >
+            <input
+              type="checkbox"
+              aria-label="Collapse or Expand"
+              class="collapse-checkbox"
+              id="picker-collapse-btn"
+            />
             <span class="arrow"></span>
           </label>
         </div>
@@ -593,16 +756,16 @@
             <div id="right">
               <div id="colors">
                 <div class="color">
-                  <h5>
-                    New
-                  </h5>
-                  <div class="swatch btn" id="newcolor-btn"><div class="swatch-color" id="newcolor"></div></div>
+                  <h5>New</h5>
+                  <div class="swatch btn" id="newcolor-btn">
+                    <div class="swatch-color" id="newcolor"></div>
+                  </div>
                 </div>
                 <div class="color">
-                  <h5>
-                    Old
-                  </h5>
-                  <div class="swatch btn" id="oldcolor-btn"><div class="swatch-color" id="oldcolor"></div></div>
+                  <h5>Old</h5>
+                  <div class="swatch btn" id="oldcolor-btn">
+                    <div class="swatch-color" id="oldcolor"></div>
+                  </div>
                 </div>
               </div>
               <div id="rgbahsl">
@@ -707,7 +870,6 @@
           </div>
         </div>
       </div>
-
     </div>
     <div id="tooltip" class="tooltip"></div>
   </body>
