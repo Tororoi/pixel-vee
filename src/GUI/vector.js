@@ -412,8 +412,8 @@ function drawControlPoints(
         checkPointCollision(
           state.cursorX,
           state.cursorY,
-          point.x - offset,
-          point.y - offset,
+          point.x - offset + canvas.currentLayer.x,
+          point.y - offset + canvas.currentLayer.y,
           r + 1
         )
       ) {
@@ -422,7 +422,12 @@ function drawControlPoints(
         vectorGui.collidedKeys.xKey = data.x
         vectorGui.collidedKeys.yKey = data.y
       }
-      drawCirclePath(canvas, point.x - offset, point.y - offset, r)
+      drawCirclePath(
+        canvas,
+        point.x - offset + canvas.currentLayer.x,
+        point.y - offset + canvas.currentLayer.y,
+        r
+      )
     }
   }
   if (vectorGui.collisionPresent) {

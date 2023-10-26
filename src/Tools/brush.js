@@ -7,6 +7,7 @@ import { getAngle, getTriangle } from "../utils/trig.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { getColor } from "../utils/canvasHelpers.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
+import { coordArrayFromSet } from "../utils/maskHelpers.js"
 
 //====================================//
 //=== * * * Brush Controller * * * ===//
@@ -19,12 +20,12 @@ function brushSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       state.pointsSet = new Set()
-      if (state.maskSet) {
-        //if some set of pixels is masked off, initialize drawnpoints including the masked pixels
-        state.drawnPointsSet = new Set(state.maskSet)
-      } else {
-        state.drawnPointsSet = new Set()
-      }
+      // if (state.maskSet) {
+      //if some set of pixels is masked off, initialize drawnpoints including the masked pixels
+      // state.drawnPointsSet = new Set(state.maskSet)
+      // } else {
+      state.drawnPointsSet = new Set()
+      // }
       //For line
       state.lineStartX = state.cursorX
       state.lineStartY = state.cursorY
@@ -39,6 +40,7 @@ function brushSteps() {
         canvas.currentLayer,
         canvas.currentLayer.ctx,
         state.mode,
+        state.maskSet,
         state.drawnPointsSet,
         state.points,
         false
@@ -65,6 +67,7 @@ function brushSteps() {
             state.mode,
             state.brushStamp,
             state.tool.brushSize,
+            state.maskSet,
             state.drawnPointsSet
           )
         })
@@ -113,6 +116,7 @@ function brushSteps() {
             canvas.currentLayer,
             canvas.currentLayer.ctx,
             state.mode,
+            state.maskSet,
             state.drawnPointsSet,
             state.points,
             false
@@ -140,6 +144,7 @@ function brushSteps() {
           canvas.currentLayer,
           canvas.currentLayer.ctx,
           state.mode,
+          state.maskSet,
           state.drawnPointsSet,
           state.points,
           false
@@ -182,6 +187,7 @@ function brushSteps() {
               canvas.currentLayer,
               canvas.currentLayer.ctx,
               state.mode,
+              state.maskSet,
               state.drawnPointsSet,
               state.points,
               false
@@ -202,6 +208,7 @@ function brushSteps() {
                 canvas.currentLayer,
                 ctx,
                 state.mode,
+                state.maskSet,
                 state.drawnPointsSet,
                 null,
                 true
@@ -221,6 +228,7 @@ function brushSteps() {
                 canvas.currentLayer,
                 ctx,
                 state.mode,
+                state.maskSet,
                 state.drawnPointsSet,
                 null,
                 true
@@ -238,6 +246,7 @@ function brushSteps() {
             canvas.currentLayer,
             canvas.currentLayer.ctx,
             state.mode,
+            state.maskSet,
             state.drawnPointsSet,
             state.points,
             false
@@ -292,6 +301,7 @@ function brushSteps() {
             canvas.currentLayer,
             canvas.currentLayer.ctx,
             state.mode,
+            state.maskSet,
             state.drawnPointsSet,
             state.points,
             false
@@ -319,6 +329,7 @@ function brushSteps() {
           canvas.currentLayer,
           canvas.currentLayer.ctx,
           state.mode,
+          state.maskSet,
           state.drawnPointsSet,
           state.points,
           false
@@ -335,15 +346,18 @@ function brushSteps() {
         canvas.currentLayer,
         canvas.currentLayer.ctx,
         state.mode,
+        state.maskSet,
         state.drawnPointsSet,
         state.points,
         false
       )
 
+      let maskArray = coordArrayFromSet(state.maskSet)
+
       state.addToTimeline({
         tool: brush,
         layer: canvas.currentLayer,
-        properties: { points: state.points, maskSet: state.maskSet },
+        properties: { points: state.points, maskSet: state.maskSet, maskArray },
       })
       renderCanvas()
       break
@@ -398,10 +412,10 @@ function replaceSteps() {
         for (let y = 0; y < canvas.currentLayer.cvs.height; y++) {
           let color = getColor(x, y, state.colorLayerGlobal)
           if (
-            color.r !== matchColor.r ||
-            color.g !== matchColor.g ||
-            color.b !== matchColor.b ||
-            color.a !== matchColor.a
+            color.r === matchColor.r &&
+            color.g === matchColor.g &&
+            color.b === matchColor.b &&
+            color.a === matchColor.a
           ) {
             const key = `${x},${y}`
             state.maskSet.add(key)

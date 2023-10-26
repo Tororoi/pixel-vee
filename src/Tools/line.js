@@ -4,6 +4,7 @@ import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { actionLine } from "../Actions/actions.js"
 import { renderCanvas } from "../Canvas/render.js"
+import { coordArrayFromSet } from "../utils/maskHelpers.js"
 
 //===================================//
 //=== * * * Line Controller * * * ===//
@@ -28,7 +29,9 @@ function lineSteps() {
           ctx,
           state.mode,
           state.brushStamp,
-          state.tool.brushSize
+          state.tool.brushSize,
+          state.maskSet,
+          null
         )
       })
       break
@@ -46,7 +49,9 @@ function lineSteps() {
           ctx,
           state.mode,
           state.brushStamp,
-          state.tool.brushSize
+          state.tool.brushSize,
+          state.maskSet,
+          null
         )
       })
       break
@@ -61,8 +66,11 @@ function lineSteps() {
         canvas.currentLayer.ctx,
         state.mode,
         state.brushStamp,
-        state.tool.brushSize
+        state.tool.brushSize,
+        state.maskSet,
+        null
       )
+      let maskArray = coordArrayFromSet(state.maskSet)
       state.addToTimeline({
         tool: state.tool,
         layer: canvas.currentLayer,
@@ -71,6 +79,8 @@ function lineSteps() {
           py1: state.lineStartY,
           px2: state.cursorX,
           py2: state.cursorY,
+          maskSet: state.maskSet,
+          maskArray,
         },
       })
       renderCanvas()

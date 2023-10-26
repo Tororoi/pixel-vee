@@ -110,22 +110,38 @@ function redrawTimelineActions(index = null) {
           break
         case "brush":
           //actionDraw
-          const seen = action.properties.maskSet
-            ? new Set(action.properties.maskSet)
-            : new Set()
-          let previousX = action.properties.points[0].x
-          let previousY = action.properties.points[0].y
+          // let begin = performance.now()
+
+          const offsetX = action.layer.x
+          const offsetY = action.layer.y
+
+          let seen = new Set()
+          let mask = null
+          // console.log(action.properties.maskSet)
+          if (action.properties.maskSet) {
+            if (offsetX !== 0 || offsetY !== 0) {
+              mask = new Set(
+                action.properties.maskArray.map(
+                  (coord) => `${coord.x + offsetX},${coord.y + offsetY}`
+                )
+              )
+            } else {
+              mask = new Set(action.properties.maskSet)
+            }
+          }
+          let previousX = action.properties.points[0].x + offsetX
+          let previousY = action.properties.points[0].y + offsetY
           let brushDirection = "0,0"
           for (const p of action.properties.points) {
             brushDirection = calculateBrushDirection(
-              p.x,
-              p.y,
+              p.x + offsetX,
+              p.y + offsetY,
               previousX,
               previousY
             )
             action.tool.action(
-              p.x,
-              p.y,
+              p.x + offsetX,
+              p.y + offsetY,
               p.color,
               p.brushStamp,
               brushDirection,
@@ -133,12 +149,13 @@ function redrawTimelineActions(index = null) {
               action.layer,
               action.layer.ctx,
               action.mode,
+              mask,
               seen,
               null,
               false
             )
-            previousX = p.x
-            previousY = p.y
+            previousX = p.x + offsetX
+            previousY = p.y + offsetY
             //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster:
             // action.layer.ctx.fillStyle = p.color
             // let x = p.x
@@ -159,32 +176,37 @@ function redrawTimelineActions(index = null) {
             //   }
             // }
           }
+          // let end = performance.now()
+          // if (action.properties.maskSet) {
+          //   console.log(end - begin)
+          // }
           break
         case "fill":
           //actionFill
           action.tool.action(
-            action.properties.vectorProperties.px1,
-            action.properties.vectorProperties.py1,
+            action.properties.vectorProperties.px1 + action.layer.x,
+            action.properties.vectorProperties.py1 + action.layer.y,
             action.color,
             action.layer,
             action.mode,
-            action.properties.selectProperties,
+            action.properties.selectProperties, //currently all null
             action.properties.maskSet
           )
           break
         case "line":
           //actionLine
           action.tool.action(
-            action.properties.px1,
-            action.properties.py1,
-            action.properties.px2,
-            action.properties.py2,
+            action.properties.px1 + action.layer.x,
+            action.properties.py1 + action.layer.y,
+            action.properties.px2 + action.layer.x,
+            action.properties.py2 + action.layer.y,
             action.color,
             action.layer,
             action.layer.ctx,
             action.mode,
             action.brushStamp,
-            action.brushSize
+            action.brushSize,
+            action.properties.maskSet
           )
           break
         case "quadCurve":
@@ -202,7 +224,8 @@ function redrawTimelineActions(index = null) {
             action.layer.ctx,
             action.mode,
             action.brushStamp,
-            action.brushSize
+            action.brushSize,
+            action.properties.maskSet
           )
           break
         case "cubicCurve":
@@ -223,7 +246,8 @@ function redrawTimelineActions(index = null) {
             action.layer.ctx,
             action.mode,
             action.brushStamp,
-            action.brushSize
+            action.brushSize,
+            action.properties.maskSet
           )
           break
         case "ellipse":
@@ -247,7 +271,8 @@ function redrawTimelineActions(index = null) {
             action.properties.vectorProperties.angle,
             action.properties.vectorProperties.offset,
             action.properties.vectorProperties.x1Offset,
-            action.properties.vectorProperties.y1Offset
+            action.properties.vectorProperties.y1Offset,
+            action.properties.maskSet
           )
           break
         default:

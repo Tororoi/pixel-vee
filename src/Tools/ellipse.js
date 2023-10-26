@@ -89,7 +89,8 @@ function ellipseSteps() {
             state.vectorProperties.angle,
             state.vectorProperties.offset,
             state.vectorProperties.x1Offset,
-            state.vectorProperties.y1Offset
+            state.vectorProperties.y1Offset,
+            state.maskSet
           )
         })
       }
@@ -152,7 +153,8 @@ function ellipseSteps() {
               state.vectorProperties.angle,
               state.vectorProperties.offset,
               state.vectorProperties.x1Offset,
-              state.vectorProperties.y1Offset
+              state.vectorProperties.y1Offset,
+              state.maskSet
             )
           })
         }
@@ -213,8 +215,10 @@ function ellipseSteps() {
             state.vectorProperties.angle,
             state.vectorProperties.offset,
             state.vectorProperties.x1Offset,
-            state.vectorProperties.y1Offset
+            state.vectorProperties.y1Offset,
+            state.maskSet
           )
+          let maskArray = coordArrayFromSet(state.maskSet)
           //store control points for timeline
           state.addToTimeline({
             tool: state.tool,
@@ -236,6 +240,8 @@ function ellipseSteps() {
                 forceCircle: state.vectorProperties.forceCircle,
                 //add bounding box minima maxima x and y?
               },
+              maskSet: state.maskSet,
+              maskArray,
             },
           })
           state.clickCounter = 0
@@ -314,7 +320,8 @@ export function adjustEllipseSteps() {
               state.vectorProperties.angle,
               state.vectorProperties.offset,
               state.vectorProperties.x1Offset,
-              state.vectorProperties.y1Offset
+              state.vectorProperties.y1Offset,
+              state.undoStack[canvas.currentVectorIndex].maskSet
             )
           },
           true,
@@ -348,7 +355,8 @@ export function adjustEllipseSteps() {
             state.vectorProperties.angle,
             state.vectorProperties.offset,
             state.vectorProperties.x1Offset,
-            state.vectorProperties.y1Offset
+            state.vectorProperties.y1Offset,
+            state.undoStack[canvas.currentVectorIndex].maskSet
           )
         })
       }

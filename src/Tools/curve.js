@@ -9,6 +9,7 @@ import {
 } from "../Actions/actions.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
+import { coordArrayFromSet } from "../utils/maskHelpers.js"
 
 //=====================================//
 //=== * * * Curve Controllers * * * ===//
@@ -65,7 +66,8 @@ function quadCurveSteps() {
             ctx,
             state.mode,
             state.brushStamp,
-            state.tool.brushSize
+            state.tool.brushSize,
+            state.maskSet
           )
         })
       }
@@ -95,7 +97,8 @@ function quadCurveSteps() {
             ctx,
             state.mode,
             state.brushStamp,
-            state.tool.brushSize
+            state.tool.brushSize,
+            state.maskSet
           )
         })
       }
@@ -132,9 +135,11 @@ function quadCurveSteps() {
             canvas.currentLayer.ctx,
             state.mode,
             state.brushStamp,
-            state.tool.brushSize
+            state.tool.brushSize,
+            state.maskSet
           )
           state.clickCounter = 0
+          let maskArray = coordArrayFromSet(state.maskSet)
           //store control points for timeline
           state.addToTimeline({
             tool: state.tool,
@@ -148,6 +153,8 @@ function quadCurveSteps() {
                 px3: state.vectorProperties.px3,
                 py3: state.vectorProperties.py3,
               },
+              maskSet: state.maskSet,
+              maskArray,
             },
           })
           renderCanvas()
@@ -225,7 +232,8 @@ function cubicCurveSteps() {
             ctx,
             state.mode,
             state.brushStamp,
-            state.tool.brushSize
+            state.tool.brushSize,
+            state.maskSet
           )
         })
       }
@@ -257,7 +265,8 @@ function cubicCurveSteps() {
             ctx,
             state.mode,
             state.brushStamp,
-            state.tool.brushSize
+            state.tool.brushSize,
+            state.maskSet
           )
         })
       }
@@ -300,9 +309,11 @@ function cubicCurveSteps() {
             canvas.currentLayer.ctx,
             state.mode,
             state.brushStamp,
-            state.tool.brushSize
+            state.tool.brushSize,
+            state.maskSet
           )
           state.clickCounter = 0
+          let maskArray = coordArrayFromSet(state.maskSet)
           //store control points for timeline
           state.addToTimeline({
             tool: state.tool,
@@ -318,6 +329,8 @@ function cubicCurveSteps() {
                 px4: state.vectorProperties.px4,
                 py4: state.vectorProperties.py4,
               },
+              maskSet: state.maskSet,
+              maskArray,
             },
           })
           renderCanvas()
@@ -375,7 +388,8 @@ function adjustCurveSteps(numPoints = 4) {
                 ctx,
                 state.undoStack[canvas.currentVectorIndex].mode,
                 state.undoStack[canvas.currentVectorIndex].brushStamp,
-                state.undoStack[canvas.currentVectorIndex].brushSize
+                state.undoStack[canvas.currentVectorIndex].brushSize,
+                state.undoStack[canvas.currentVectorIndex].maskSet
               )
             },
             true,
@@ -399,7 +413,8 @@ function adjustCurveSteps(numPoints = 4) {
                 ctx,
                 state.undoStack[canvas.currentVectorIndex].mode,
                 state.undoStack[canvas.currentVectorIndex].brushStamp,
-                state.undoStack[canvas.currentVectorIndex].brushSize
+                state.undoStack[canvas.currentVectorIndex].brushSize,
+                state.undoStack[canvas.currentVectorIndex].maskSet
               )
             },
             true,
@@ -427,7 +442,8 @@ function adjustCurveSteps(numPoints = 4) {
               ctx,
               state.undoStack[canvas.currentVectorIndex].mode,
               state.undoStack[canvas.currentVectorIndex].brushStamp,
-              state.undoStack[canvas.currentVectorIndex].brushSize
+              state.undoStack[canvas.currentVectorIndex].brushSize,
+              state.undoStack[canvas.currentVectorIndex].maskSet
             )
           })
         } else {
@@ -447,7 +463,8 @@ function adjustCurveSteps(numPoints = 4) {
               ctx,
               state.undoStack[canvas.currentVectorIndex].mode,
               state.undoStack[canvas.currentVectorIndex].brushStamp,
-              state.undoStack[canvas.currentVectorIndex].brushSize
+              state.undoStack[canvas.currentVectorIndex].brushSize,
+              state.undoStack[canvas.currentVectorIndex].maskSet
             )
           })
         }

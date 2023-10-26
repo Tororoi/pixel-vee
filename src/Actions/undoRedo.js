@@ -92,6 +92,8 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
   vectorGui.render(state, canvas)
 }
 
+//TODO: handleMoveAction
+
 /**
  * Main pillar of the code structure - command pattern
  * @param {Array} pushStack

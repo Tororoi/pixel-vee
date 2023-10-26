@@ -38,6 +38,7 @@ export function renderCursor(state, canvas, swatches) {
             canvas.currentLayer,
             ctx,
             state.mode,
+            state.maskSet,
             state.drawnPointsSet,
             null,
             true

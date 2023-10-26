@@ -126,6 +126,10 @@ export function actionClear(layer) {
   })
 }
 
+// export function actionMove() {
+
+// }
+
 /**
  * Render a stamp from the brush to the canvas
  * TODO: Find more efficient way to draw any brush shape without drawing each pixel separately. Could either be image stamp or made with rectangles
@@ -137,6 +141,7 @@ export function actionClear(layer) {
  * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
  * @param {String} currentMode
+ * @param {Set} maskSet
  * @param {Set} seenPointsSet
  * @param {Array} points
  * @param {Boolean} excludeFromSet - even if new point, don't add to seenPointsSet if true
@@ -151,6 +156,7 @@ export function actionDraw(
   layer,
   ctx,
   currentMode,
+  maskSet,
   seenPointsSet,
   points,
   excludeFromSet
@@ -159,8 +165,8 @@ export function actionDraw(
   if (points) {
     if (!state.pointsSet.has(`${coordX},${coordY}`)) {
       points.push({
-        x: coordX,
-        y: coordY,
+        x: coordX - layer.x,
+        y: coordY - layer.y,
         color: { ...currentColor },
         brushStamp,
         brushSize,
@@ -182,9 +188,14 @@ export function actionDraw(
   for (const pixel of brushStamp[brushStampDir]) {
     const x = baseX + pixel.x
     const y = baseY + pixel.y
-
+    const key = `${x},${y}`
+    //if maskSet exists, only draw if it contains coordinates
+    if (maskSet) {
+      if (!maskSet.has(key)) {
+        continue
+      }
+    }
     if (seenPointsSet) {
-      const key = `${x},${y}`
       if (seenPointsSet.has(key)) {
         continue // skip this point
       }
@@ -218,6 +229,8 @@ export function actionDraw(
  * @param {String} currentMode
  * @param {Object} brushStamp
  * @param {Integer} brushSize
+ * @param {Set} maskSet
+ * @param {Set} seenPointsSet
  */
 export function actionLine(
   sx,
@@ -230,6 +243,7 @@ export function actionLine(
   currentMode,
   brushStamp,
   brushSize,
+  maskSet,
   seenPointsSet = null
 ) {
   let angle = getAngle(tx - sx, ty - sy) // angle of line
@@ -260,6 +274,7 @@ export function actionLine(
       layer,
       ctx,
       currentMode,
+      maskSet,
       seen,
       null,
       false
@@ -279,6 +294,7 @@ export function actionLine(
     layer,
     ctx,
     currentMode,
+    maskSet,
     seen,
     null,
     false
@@ -413,6 +429,7 @@ export function actionFill(
  * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
  * @param {String} currentMode
+ * @param {Set} maskSet
  */
 function renderPoints(
   points,
@@ -421,7 +438,8 @@ function renderPoints(
   brushSize,
   layer,
   ctx,
-  currentMode
+  currentMode,
+  maskSet
 ) {
   const seen = new Set()
   let previousX = Math.floor(points[0].x)
@@ -447,6 +465,7 @@ function renderPoints(
       layer,
       ctx,
       currentMode,
+      maskSet,
       seen,
       null,
       false
@@ -471,6 +490,7 @@ function renderPoints(
  * @param {String} currentMode
  * @param {Object} brushStamp
  * @param {Integer} brushSize
+ * @param {Set} maskSet
  */
 export function actionQuadraticCurve(
   startx,
@@ -485,7 +505,8 @@ export function actionQuadraticCurve(
   ctx,
   currentMode,
   brushStamp,
-  brushSize
+  brushSize,
+  maskSet
 ) {
   //force coords to int
   startx = Math.round(startx)
@@ -507,7 +528,9 @@ export function actionQuadraticCurve(
       ctx,
       currentMode,
       brushStamp,
-      brushSize
+      brushSize,
+      maskSet,
+      null
     )
     state.vectorProperties.px2 = state.cursorX
     state.vectorProperties.py2 = state.cursorY
@@ -530,7 +553,8 @@ export function actionQuadraticCurve(
       brushSize,
       layer,
       ctx,
-      currentMode
+      currentMode,
+      maskSet
     )
     state.vectorProperties.px3 = state.cursorX
     state.vectorProperties.py3 = state.cursorY
@@ -551,7 +575,8 @@ export function actionQuadraticCurve(
       brushSize,
       layer,
       ctx,
-      currentMode
+      currentMode,
+      maskSet
     )
   }
 }
@@ -573,6 +598,7 @@ export function actionQuadraticCurve(
  * @param {String} currentMode
  * @param {Object} brushStamp
  * @param {Integer} brushSize
+ * @param {Set} maskSet
  */
 export function actionCubicCurve(
   startx,
@@ -589,7 +615,8 @@ export function actionCubicCurve(
   ctx,
   currentMode,
   brushStamp,
-  brushSize
+  brushSize,
+  maskSet
 ) {
   //force coords to int
   startx = Math.round(startx)
@@ -613,7 +640,9 @@ export function actionCubicCurve(
       ctx,
       currentMode,
       brushStamp,
-      brushSize
+      brushSize,
+      maskSet,
+      null
     )
     //TODO: can setting state be moved to steps function?
     state.vectorProperties.px2 = state.cursorX
@@ -637,7 +666,8 @@ export function actionCubicCurve(
       brushSize,
       layer,
       ctx,
-      currentMode
+      currentMode,
+      maskSet
     )
     state.vectorProperties.px3 = state.cursorX
     state.vectorProperties.py3 = state.cursorY
@@ -661,7 +691,8 @@ export function actionCubicCurve(
       brushSize,
       layer,
       ctx,
-      currentMode
+      currentMode,
+      maskSet
     )
     state.vectorProperties.px4 = state.cursorX
     state.vectorProperties.py4 = state.cursorY
@@ -684,7 +715,8 @@ export function actionCubicCurve(
       brushSize,
       layer,
       ctx,
-      currentMode
+      currentMode,
+      maskSet
     )
   }
 }
@@ -728,7 +760,8 @@ export function actionEllipse(
   angle,
   offset,
   x1Offset,
-  y1Offset
+  y1Offset,
+  maskSet
 ) {
   //force coords to int
   centerx = Math.floor(centerx)
@@ -747,7 +780,8 @@ export function actionEllipse(
       brushSize,
       layer,
       ctx,
-      currentMode
+      currentMode,
+      maskSet
     )
   } else {
     let plotPoints = plotRotatedEllipse(
@@ -768,7 +802,8 @@ export function actionEllipse(
       brushSize,
       layer,
       ctx,
-      currentMode
+      currentMode,
+      maskSet
     )
   }
 }
