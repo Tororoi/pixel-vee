@@ -32,6 +32,26 @@ export function modifyVectorAction(actionIndex) {
     ...action.properties.vectorProperties,
   } //shallow copy, must make deep copy, at least for x, y and properties
   modifiedProperties = { ...state.vectorProperties }
+  //Keep properties relative to layer offset
+  modifiedProperties.px1 -= action.layer.x
+  modifiedProperties.py1 -= action.layer.y
+  if (
+    action.tool.name === "quadCurve" ||
+    action.tool.name === "cubicCurve" ||
+    action.tool.name === "ellipse"
+  ) {
+    modifiedProperties.px2 -= action.layer.x
+    modifiedProperties.py2 -= action.layer.y
+
+    modifiedProperties.px3 -= action.layer.x
+    modifiedProperties.py3 -= action.layer.y
+  }
+
+  if (action.tool.name === "cubicCurve") {
+    modifiedProperties.px4 -= action.layer.x
+    modifiedProperties.py4 -= action.layer.y
+  }
+  //maintain forceCircle property if point being adjusted is p1
   if (action.tool.name === "ellipse") {
     modifiedProperties.forceCircle =
       vectorGui.selectedPoint.xKey === "px1"

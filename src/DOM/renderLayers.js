@@ -15,7 +15,9 @@ export const renderLayersToDOM = () => {
 
   canvas.layers.forEach((l) => {
     if (!l.removed) {
-      canvas.activeLayerCount++
+      if (l.type === "raster") {
+        canvas.activeLayerCount++
+      }
 
       const layerElement = document.createElement("div")
       layerElement.className = `layer ${l.type}`

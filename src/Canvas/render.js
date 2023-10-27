@@ -212,12 +212,12 @@ function redrawTimelineActions(index = null) {
         case "quadCurve":
           //actionQuadraticCurve
           action.tool.action(
-            action.properties.vectorProperties.px1,
-            action.properties.vectorProperties.py1,
-            action.properties.vectorProperties.px2,
-            action.properties.vectorProperties.py2,
-            action.properties.vectorProperties.px3,
-            action.properties.vectorProperties.py3,
+            action.properties.vectorProperties.px1 + action.layer.x,
+            action.properties.vectorProperties.py1 + action.layer.y,
+            action.properties.vectorProperties.px2 + action.layer.x,
+            action.properties.vectorProperties.py2 + action.layer.y,
+            action.properties.vectorProperties.px3 + action.layer.x,
+            action.properties.vectorProperties.py3 + action.layer.y,
             3,
             action.color,
             action.layer,
@@ -232,14 +232,14 @@ function redrawTimelineActions(index = null) {
           //TODO: pass source on history objects to avoid debugging actions from the timeline unless desired
           //actionCubicCurve
           action.tool.action(
-            action.properties.vectorProperties.px1,
-            action.properties.vectorProperties.py1,
-            action.properties.vectorProperties.px2,
-            action.properties.vectorProperties.py2,
-            action.properties.vectorProperties.px3,
-            action.properties.vectorProperties.py3,
-            action.properties.vectorProperties.px4,
-            action.properties.vectorProperties.py4,
+            action.properties.vectorProperties.px1 + action.layer.x,
+            action.properties.vectorProperties.py1 + action.layer.y,
+            action.properties.vectorProperties.px2 + action.layer.x,
+            action.properties.vectorProperties.py2 + action.layer.y,
+            action.properties.vectorProperties.px3 + action.layer.x,
+            action.properties.vectorProperties.py3 + action.layer.y,
+            action.properties.vectorProperties.px4 + action.layer.x,
+            action.properties.vectorProperties.py4 + action.layer.y,
             4,
             action.color,
             action.layer,
@@ -253,12 +253,12 @@ function redrawTimelineActions(index = null) {
         case "ellipse":
           //actionEllipse
           action.tool.action(
-            action.properties.vectorProperties.px1,
-            action.properties.vectorProperties.py1,
-            action.properties.vectorProperties.px2,
-            action.properties.vectorProperties.py2,
-            action.properties.vectorProperties.px3,
-            action.properties.vectorProperties.py3,
+            action.properties.vectorProperties.px1 + action.layer.x,
+            action.properties.vectorProperties.py1 + action.layer.y,
+            action.properties.vectorProperties.px2 + action.layer.x,
+            action.properties.vectorProperties.py2 + action.layer.y,
+            action.properties.vectorProperties.px3 + action.layer.x,
+            action.properties.vectorProperties.py3 + action.layer.y,
             action.properties.vectorProperties.radA,
             action.properties.vectorProperties.radB,
             action.properties.vectorProperties.forceCircle,
@@ -284,7 +284,15 @@ function redrawTimelineActions(index = null) {
     if (action.tool.name === "addLayer") {
       action.layer.removed = true
       if (action.layer === canvas.currentLayer) {
-        canvas.currentLayer = dom.layersContainer.children[0].layerObj
+        canvas.currentLayer.inactiveTools.forEach((tool) => {
+          dom[`${tool}Btn`].disabled = false
+        })
+        canvas.currentLayer = canvas.layers.find(
+          (layer) => layer.type === "raster" && layer.removed === false
+        )
+        canvas.currentLayer.inactiveTools.forEach((tool) => {
+          dom[`${tool}Btn`].disabled = true
+        })
       }
       renderLayersToDOM()
       renderVectorsToDOM()

@@ -86,7 +86,7 @@ export function setColor(r, g, b, a, target) {
   //reset selected index before render method calculates it
   swatches.selectedPaletteIndex = null
   //only render when s key (randomize color) is not being pressed
-  if (!keys.KeyS) {
+  if (!keys.KeyR) {
     renderPaletteToDOM()
   }
 }

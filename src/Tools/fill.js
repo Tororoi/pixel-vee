@@ -40,8 +40,8 @@ function fillSteps() {
           layer: canvas.currentLayer,
           properties: {
             vectorProperties: {
-              px1: state.vectorProperties.px1,
-              py1: state.vectorProperties.py1,
+              px1: state.vectorProperties.px1 - canvas.currentLayer.x,
+              py1: state.vectorProperties.py1 - canvas.currentLayer.y,
             },
             selectProperties: { ...state.selectProperties },
             maskSet: state.maskSet,
@@ -78,10 +78,8 @@ export function adjustFillSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.collisionPresent) {
-        state.vectorProperties[vectorGui.collidedKeys.xKey] =
-          state.cursorX - canvas.currentLayer.x
-        state.vectorProperties[vectorGui.collidedKeys.yKey] =
-          state.cursorY - canvas.currentLayer.y
+        state.vectorProperties[vectorGui.collidedKeys.xKey] = state.cursorX
+        state.vectorProperties[vectorGui.collidedKeys.yKey] = state.cursorY
         vectorGui.selectedPoint = {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
@@ -94,18 +92,14 @@ export function adjustFillSteps() {
     case "pointermove":
       if (vectorGui.selectedPoint.xKey) {
         //code gets past check twice here so figure out where tool fn is being called again
-        state.vectorProperties[vectorGui.selectedPoint.xKey] =
-          state.cursorX - canvas.currentLayer.x
-        state.vectorProperties[vectorGui.selectedPoint.yKey] =
-          state.cursorY - canvas.currentLayer.y
+        state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
+        state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
       }
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey) {
-        state.vectorProperties[vectorGui.selectedPoint.xKey] =
-          state.cursorX - canvas.currentLayer.x
-        state.vectorProperties[vectorGui.selectedPoint.yKey] =
-          state.cursorY - canvas.currentLayer.y
+        state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
+        state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         state.undoStack[canvas.currentVectorIndex].hidden = false
         modifyVectorAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {

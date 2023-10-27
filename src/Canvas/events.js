@@ -204,11 +204,12 @@ function layerInteract(e) {
     // if (layer.type === "raster") {
     if (layer !== canvas.currentLayer) {
       vectorGui.reset(canvas)
+      //TODO: handle modes, use icon
       canvas.currentLayer.inactiveTools.forEach((tool) => {
         dom[`${tool}Btn`].disabled = false
       })
       canvas.currentLayer = layer
-      layer.inactiveTools.forEach((tool) => {
+      canvas.currentLayer.inactiveTools.forEach((tool) => {
         dom[`${tool}Btn`].disabled = true
       })
       if (layer.type === "reference") {
@@ -357,7 +358,7 @@ function addReferenceLayer() {
  */
 function removeLayer(layer) {
   //set "removed" flag to true on selected layer.
-  if (canvas.activeLayerCount > 1) {
+  if (canvas.activeLayerCount > 1 || layer.type !== "raster") {
     layer.removed = true
     if (layer === canvas.currentLayer) {
       canvas.currentLayer = canvas.layers.find(
@@ -432,8 +433,33 @@ function vectorInteract(e) {
     vectorGui.reset(canvas)
     if (vector.index !== currentIndex) {
       state.vectorProperties = { ...vector.properties.vectorProperties }
+      //Keep properties relative to layer offset
+      state.vectorProperties.px1 += vector.layer.x
+      state.vectorProperties.py1 += vector.layer.y
+      if (
+        vector.tool.name === "quadCurve" ||
+        vector.tool.name === "cubicCurve" ||
+        vector.tool.name === "ellipse"
+      ) {
+        state.vectorProperties.px2 += vector.layer.x
+        state.vectorProperties.py2 += vector.layer.y
+
+        state.vectorProperties.px3 += vector.layer.x
+        state.vectorProperties.py3 += vector.layer.y
+      }
+
+      if (vector.tool.name === "cubicCurve") {
+        state.vectorProperties.px4 += vector.layer.x
+        state.vectorProperties.py4 += vector.layer.y
+      }
       canvas.currentVectorIndex = vector.index
+      canvas.currentLayer.inactiveTools.forEach((tool) => {
+        dom[`${tool}Btn`].disabled = false
+      })
       canvas.currentLayer = vector.layer
+      canvas.currentLayer.inactiveTools.forEach((tool) => {
+        dom[`${tool}Btn`].disabled = true
+      })
     }
     vectorGui.render(state, canvas)
     renderLayersToDOM()

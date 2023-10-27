@@ -10,6 +10,7 @@ import {
   updateEllipseControlPoints,
 } from "../utils/ellipse.js"
 import { renderCanvas } from "../Canvas/render.js"
+import { coordArrayFromSet } from "../utils/maskHelpers.js"
 
 //======================================//
 //=== * * * Ellipse Controller * * * ===//
@@ -225,12 +226,12 @@ function ellipseSteps() {
             layer: canvas.currentLayer,
             properties: {
               vectorProperties: {
-                px1: state.vectorProperties.px1,
-                py1: state.vectorProperties.py1,
-                px2: state.vectorProperties.px2,
-                py2: state.vectorProperties.py2,
-                px3: state.vectorProperties.px3,
-                py3: state.vectorProperties.py3,
+                px1: state.vectorProperties.px1 - canvas.currentLayer.x,
+                py1: state.vectorProperties.py1 - canvas.currentLayer.y,
+                px2: state.vectorProperties.px2 - canvas.currentLayer.x,
+                py2: state.vectorProperties.py2 - canvas.currentLayer.y,
+                px3: state.vectorProperties.px3 - canvas.currentLayer.x,
+                py3: state.vectorProperties.py3 - canvas.currentLayer.y,
                 radA: state.vectorProperties.radA,
                 radB: state.vectorProperties.radB,
                 angle: state.vectorProperties.angle,
