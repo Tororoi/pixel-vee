@@ -58,7 +58,7 @@ export function createNewRasterLayer(name) {
     y: 0,
     scale: 1,
     opacity: 1,
-    inactiveTools: ["move"],
+    inactiveTools: [],
     hidden: false,
     removed: false,
   }

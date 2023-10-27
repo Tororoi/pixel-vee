@@ -117,7 +117,6 @@ function redrawTimelineActions(index = null) {
 
           let seen = new Set()
           let mask = null
-          // console.log(action.properties.maskSet)
           if (action.properties.maskSet) {
             if (offsetX !== 0 || offsetY !== 0) {
               mask = new Set(

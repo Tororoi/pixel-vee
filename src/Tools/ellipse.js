@@ -219,7 +219,11 @@ function ellipseSteps() {
             state.vectorProperties.y1Offset,
             state.maskSet
           )
-          let maskArray = coordArrayFromSet(state.maskSet)
+          let maskArray = coordArrayFromSet(
+            state.maskSet,
+            canvas.currentLayer.x,
+            canvas.currentLayer.y
+          )
           //store control points for timeline
           state.addToTimeline({
             tool: state.tool,

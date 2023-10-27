@@ -139,7 +139,11 @@ function quadCurveSteps() {
             state.maskSet
           )
           state.clickCounter = 0
-          let maskArray = coordArrayFromSet(state.maskSet)
+          let maskArray = coordArrayFromSet(
+            state.maskSet,
+            canvas.currentLayer.x,
+            canvas.currentLayer.y
+          )
           //store control points for timeline
           state.addToTimeline({
             tool: state.tool,
@@ -313,7 +317,11 @@ function cubicCurveSteps() {
             state.maskSet
           )
           state.clickCounter = 0
-          let maskArray = coordArrayFromSet(state.maskSet)
+          let maskArray = coordArrayFromSet(
+            state.maskSet,
+            canvas.currentLayer.x,
+            canvas.currentLayer.y
+          )
           //store control points for timeline
           state.addToTimeline({
             tool: state.tool,

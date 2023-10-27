@@ -1,6 +1,4 @@
 import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
@@ -8,7 +6,6 @@ import { vectorGui } from "../GUI/vector.js"
 import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
 import { getColor } from "../utils/canvasHelpers.js"
 import { colorPixel, matchStartColor } from "../utils/imageDataHelpers.js"
-import { renderCanvas } from "../Canvas/render.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 
 //====================================//

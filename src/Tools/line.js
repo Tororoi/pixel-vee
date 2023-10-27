@@ -70,7 +70,11 @@ function lineSteps() {
         state.maskSet,
         null
       )
-      let maskArray = coordArrayFromSet(state.maskSet)
+      let maskArray = coordArrayFromSet(
+        state.maskSet,
+        canvas.currentLayer.x,
+        canvas.currentLayer.y
+      )
       state.addToTimeline({
         tool: state.tool,
         layer: canvas.currentLayer,
