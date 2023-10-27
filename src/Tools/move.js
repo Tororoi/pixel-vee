@@ -27,7 +27,7 @@ function moveSteps() {
         canvas.currentLayer.x += state.cursorX - state.previousX
         canvas.currentLayer.y += state.cursorY - state.previousY
       }
-      renderCanvas(canvas.currentLayer, null, true, true) // expensive to run on pointermove. TODO: give each layer its own onscreen canvas to reduce overall render cost.
+      renderCanvas(canvas.currentLayer, null, true, true)
       break
     case "pointerup":
       renderCanvas(canvas.currentLayer, null, true, true)
