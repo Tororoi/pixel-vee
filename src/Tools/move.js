@@ -27,10 +27,9 @@ function moveSteps() {
         canvas.currentLayer.x += state.cursorX - state.previousX
         canvas.currentLayer.y += state.cursorY - state.previousY
       }
-      renderCanvas(null, true, true)
+      renderCanvas(null, true, true) // expensive to run on pointermove. TODO: give each layer its own onscreen canvas to reduce overall render cost.
       break
     case "pointerup":
-      //TODO: must update vectors
       renderCanvas(null, true, true)
       //save start and end coordinates
       state.addToTimeline({
