@@ -40,14 +40,14 @@ function fillSteps() {
           layer: canvas.currentLayer,
           properties: {
             vectorProperties: {
-              px1: state.vectorProperties.px1,
-              py1: state.vectorProperties.py1,
+              px1: state.vectorProperties.px1 - canvas.currentLayer.x,
+              py1: state.vectorProperties.py1 - canvas.currentLayer.y,
             },
             selectProperties: { ...state.selectProperties },
             maskSet: state.maskSet,
           },
         })
-        renderCanvas()
+        renderCanvas(canvas.currentLayer)
       }
       break
     case "pointermove":
@@ -59,7 +59,7 @@ function fillSteps() {
         adjustFillSteps()
       }
       //redraw canvas to allow onscreen cursor to render
-      renderCanvas()
+      renderCanvas(canvas.currentLayer)
     default:
     //do nothing
   }
@@ -86,7 +86,7 @@ export function adjustFillSteps() {
         }
         state.undoStack[canvas.currentVectorIndex].hidden = true
         //Only render canvas up to timeline where fill action exists while adjusting fill
-        renderCanvas(null, true, true, canvas.currentVectorIndex) // render to canvas.currentVectorIndex
+        renderCanvas(null, null, true, true, canvas.currentVectorIndex) // render to canvas.currentVectorIndex TODO: handle redraw timeline per layer
       }
       break
     case "pointermove":
@@ -106,7 +106,7 @@ export function adjustFillSteps() {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(null, true, true)
+        renderCanvas(null, null, true, true)
       }
       break
     case "pointerout":

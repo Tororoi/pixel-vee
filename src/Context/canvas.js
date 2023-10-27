@@ -5,12 +5,11 @@ import { setInitialZoom } from "../utils/canvasHelpers.js"
 //======= * * * Canvas * * * ========//
 //===================================//
 
+const backgroundCVS = document.querySelector(".bg-canvas")
+const backgroundCTX = backgroundCVS.getContext("2d")
 //Set gui canvas and its context
 const vectorGuiCVS = document.getElementById("vectorGui")
 const vectorGuiCTX = vectorGuiCVS.getContext("2d")
-//Set onscreen canvas and its context
-const onScreenCVS = document.getElementById("onScreen")
-const onScreenCTX = onScreenCVS.getContext("2d")
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
 const offScreenCVS = document.createElement("canvas")
 const offScreenCTX = offScreenCVS.getContext("2d")
@@ -30,8 +29,8 @@ export const canvas = {
   //Parameters
   vectorGuiCVS,
   vectorGuiCTX,
-  onScreenCVS,
-  onScreenCTX,
+  backgroundCVS,
+  backgroundCTX,
   offScreenCVS,
   offScreenCTX,
   previewCVS,
@@ -71,7 +70,7 @@ export const canvas = {
 
 //Initialize state
 canvas.vectorGuiCTX.willReadFrequently = true
-canvas.onScreenCTX.willReadFrequently = true
+canvas.backgroundCTX.willReadFrequently = true
 canvas.offScreenCTX.willReadFrequently = true
 canvas.previewCTX.willReadFrequently = true
 canvas.thumbnailCTX.willReadFrequently = true
@@ -91,8 +90,9 @@ canvas.sharpness = window.devicePixelRatio
 //adjust canvas ratio here if needed
 canvas.vectorGuiCVS.width = canvas.vectorGuiCVS.offsetWidth * canvas.sharpness
 canvas.vectorGuiCVS.height = canvas.vectorGuiCVS.offsetHeight * canvas.sharpness
-canvas.onScreenCVS.width = canvas.onScreenCVS.offsetWidth * canvas.sharpness
-canvas.onScreenCVS.height = canvas.onScreenCVS.offsetHeight * canvas.sharpness
+canvas.backgroundCVS.width = canvas.backgroundCVS.offsetWidth * canvas.sharpness
+canvas.backgroundCVS.height =
+  canvas.backgroundCVS.offsetHeight * canvas.sharpness
 
 canvas.zoom = setInitialZoom(canvas.offScreenCVS.width) //zoom level should be based on absolute pixel size, not window relative to canvas
 canvas.zoomAtLastDraw = canvas.zoom
@@ -100,25 +100,11 @@ vectorGuiCTX.scale(
   canvas.sharpness * canvas.zoom,
   canvas.sharpness * canvas.zoom
 )
-canvas.onScreenCTX.scale(
+canvas.backgroundCTX.scale(
   canvas.sharpness * canvas.zoom,
   canvas.sharpness * canvas.zoom
 )
 canvas.thumbnailCTX.scale(canvas.sharpness, canvas.sharpness)
-
-//Initialize offset, must be integer
-canvas.xOffset = Math.round(
-  (canvas.onScreenCVS.width / canvas.sharpness / canvas.zoom -
-    canvas.offScreenCVS.width) /
-    2
-)
-canvas.yOffset = Math.round(
-  (canvas.onScreenCVS.height / canvas.sharpness / canvas.zoom -
-    canvas.offScreenCVS.height) /
-    2
-)
-canvas.previousXOffset = canvas.xOffset
-canvas.previousYOffset = canvas.yOffset
 
 //for adjusting canvas size, adjust onscreen canvas dimensions in proportion to offscreen
 //Initialize size values

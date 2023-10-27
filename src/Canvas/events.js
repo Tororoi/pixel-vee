@@ -90,7 +90,17 @@ const resizeOffScreenCanvas = (width, height) => {
     0,
     0
   )
-  canvas.onScreenCTX.setTransform(
+  canvas.layers.forEach((layer) => {
+    layer.onscreenCtx.setTransform(
+      canvas.sharpness * canvas.zoom,
+      0,
+      0,
+      canvas.sharpness * canvas.zoom,
+      0,
+      0
+    )
+  })
+  canvas.backgroundCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,
@@ -99,12 +109,12 @@ const resizeOffScreenCanvas = (width, height) => {
     0
   )
   canvas.xOffset = Math.round(
-    (canvas.onScreenCVS.width / canvas.sharpness / canvas.zoom -
+    (canvas.currentLayer.onscreenCvs.width / canvas.sharpness / canvas.zoom -
       canvas.offScreenCVS.width) /
       2
   )
   canvas.yOffset = Math.round(
-    (canvas.onScreenCVS.height / canvas.sharpness / canvas.zoom -
+    (canvas.currentLayer.onscreenCvs.height / canvas.sharpness / canvas.zoom -
       canvas.offScreenCVS.height) /
       2
   )
@@ -115,16 +125,18 @@ const resizeOffScreenCanvas = (width, height) => {
   canvas.zoomPixelX = null
   canvas.zoomPixelY = null
   //resize layers. Per function, it's cheaper to run this inside the existing iterator in drawLayers, but since drawLayers runs so often, it's preferable to only run this here where it's needed.
-  canvas.layers.forEach((l) => {
-    if (
-      l.cvs.width !== canvas.offScreenCVS.width ||
-      l.cvs.height !== canvas.offScreenCVS.height
-    ) {
-      l.cvs.width = canvas.offScreenCVS.width
-      l.cvs.height = canvas.offScreenCVS.height
+  canvas.layers.forEach((layer) => {
+    if (layer.type === "raster") {
+      if (
+        layer.cvs.width !== canvas.offScreenCVS.width ||
+        layer.cvs.height !== canvas.offScreenCVS.height
+      ) {
+        layer.cvs.width = canvas.offScreenCVS.width
+        layer.cvs.height = canvas.offScreenCVS.height
+      }
     }
   })
-  renderCanvas(null, false, true)
+  renderCanvas(null, null, false, true) //render all layers
   vectorGui.render(state, canvas)
 }
 
@@ -154,9 +166,23 @@ const resizeOnScreenCanvas = () => {
     0,
     0
   )
-  canvas.onScreenCVS.width = canvas.onScreenCVS.offsetWidth * canvas.sharpness
-  canvas.onScreenCVS.height = canvas.onScreenCVS.offsetHeight * canvas.sharpness
-  canvas.onScreenCTX.setTransform(
+  canvas.layers.forEach((layer) => {
+    layer.onscreenCvs.width = layer.onscreenCvs.offsetWidth * canvas.sharpness
+    layer.onscreenCvs.height = layer.onscreenCvs.offsetHeight * canvas.sharpness
+    layer.onscreenCtx.setTransform(
+      canvas.sharpness * canvas.zoom,
+      0,
+      0,
+      canvas.sharpness * canvas.zoom,
+      0,
+      0
+    )
+  })
+  canvas.backgroundCVS.width =
+    canvas.backgroundCVS.offsetWidth * canvas.sharpness
+  canvas.backgroundCVS.height =
+    canvas.backgroundCVS.offsetHeight * canvas.sharpness
+  canvas.backgroundCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,
@@ -164,7 +190,7 @@ const resizeOnScreenCanvas = () => {
     0,
     0
   )
-  renderCanvas()
+  renderCanvas(null) // render all layers
   // reset positioning styles for free moving dialog boxes
   dom.toolboxContainer.style.left = ""
   dom.toolboxContainer.style.top = ""
@@ -201,16 +227,25 @@ function layerInteract(e) {
     removeLayer(layer)
   } else {
     //select current layer
-    if (layer.type === "raster") {
-      if (layer !== canvas.currentLayer) {
-        vectorGui.reset(canvas)
-        canvas.currentLayer = layer
-        renderLayersToDOM()
-        renderVectorsToDOM()
+    if (layer !== canvas.currentLayer) {
+      //TODO: handle modes, use icon
+      canvas.currentLayer.inactiveTools.forEach((tool) => {
+        dom[`${tool}Btn`].disabled = false
+      })
+      canvas.currentLayer = layer
+      canvas.currentLayer.inactiveTools.forEach((tool) => {
+        dom[`${tool}Btn`].disabled = true
+      })
+      vectorGui.reset(canvas)
+      vectorGui.render(state, canvas)
+      if (layer.type === "reference") {
+        handleTools(null, "move")
       }
+      renderLayersToDOM()
+      renderVectorsToDOM()
     }
   }
-  renderCanvas()
+  renderCanvas(layer)
 }
 
 /**
@@ -274,10 +309,22 @@ function dropLayer(e) {
         )
         canvas.layers.splice(draggedIndex, 1)
         canvas.layers.splice(newIndex, 0, heldLayer)
+
+        // reorder layer canvases in DOM
+        dom.canvasLayers.removeChild(heldLayer.onscreenCvs) // remove the dragged canvas
+        if (newIndex >= dom.canvasLayers.children.length) {
+          // if newIndex is at or beyond the end, append
+          dom.canvasLayers.appendChild(heldLayer.onscreenCvs)
+        } else {
+          // otherwise, insert before the canvas at the new index
+          dom.canvasLayers.insertBefore(
+            heldLayer.onscreenCvs,
+            dom.canvasLayers.children[newIndex]
+          )
+        }
       }
     }
     renderLayersToDOM()
-    renderCanvas()
   }
 }
 
@@ -304,25 +351,62 @@ function addReferenceLayer() {
     reader.onload = (e) => {
       img.src = e.target.result
       img.onload = () => {
+        let onscreenLayerCVS = document.createElement("canvas")
+        let onscreenLayerCTX = onscreenLayerCVS.getContext("2d")
+        onscreenLayerCTX.willReadFrequently = true
+        onscreenLayerCTX.scale(
+          canvas.sharpness * canvas.zoom,
+          canvas.sharpness * canvas.zoom
+        )
+        onscreenLayerCVS.className = "onscreen-layer"
+        // dom.canvasLayers.appendChild(onscreenLayerCVS)
+        dom.canvasLayers.insertBefore(
+          onscreenLayerCVS,
+          dom.canvasLayers.children[0]
+        )
+        onscreenLayerCVS.width = onscreenLayerCVS.offsetWidth * canvas.sharpness
+        onscreenLayerCVS.height =
+          onscreenLayerCVS.offsetHeight * canvas.sharpness
+        onscreenLayerCTX.setTransform(
+          canvas.sharpness * canvas.zoom,
+          0,
+          0,
+          canvas.sharpness * canvas.zoom,
+          0,
+          0
+        )
         //constrain background image to canvas with scale
         let scale =
           canvas.offScreenCVS.width / img.width >
           canvas.offScreenCVS.height / img.height
             ? canvas.offScreenCVS.height / img.height
-            : canvas.offScreenCVS.width / img.width
+            : canvas.offScreenCVS.width / img.width //TODO: should be method, not var so width and height can be adjusted without having to set scale again
         let layer = {
           type: "reference",
           title: `Reference ${canvas.layers.length + 1}`,
           img: img,
+          onscreenCvs: onscreenLayerCVS,
+          onscreenCtx: onscreenLayerCTX,
           x: 0,
           y: 0,
           scale: scale,
           opacity: 1,
+          inactiveTools: [
+            "brush",
+            "replace",
+            "fill",
+            "line",
+            "quadCurve",
+            "cubicCurve",
+            "ellipse",
+            // "select",
+          ],
+          hidden: false,
           removed: false,
         }
         canvas.layers.unshift(layer)
         renderLayersToDOM()
-        renderCanvas()
+        renderCanvas(null)
       }
     }
 
@@ -337,7 +421,7 @@ function addReferenceLayer() {
  */
 function removeLayer(layer) {
   //set "removed" flag to true on selected layer.
-  if (canvas.activeLayerCount > 1) {
+  if (canvas.activeLayerCount > 1 || layer.type !== "raster") {
     layer.removed = true
     if (layer === canvas.currentLayer) {
       canvas.currentLayer = canvas.layers.find(
@@ -396,7 +480,7 @@ function vectorInteract(e) {
       e.target.classList.add("eyeopen")
       vector.hidden = false
     }
-    renderCanvas(null, true, true)
+    renderCanvas(vector.layer, null, true, true)
   } else if (e.target.className.includes("actionColor")) {
     e.target.color = vector.color
     e.target.vector = vector
@@ -412,8 +496,33 @@ function vectorInteract(e) {
     vectorGui.reset(canvas)
     if (vector.index !== currentIndex) {
       state.vectorProperties = { ...vector.properties.vectorProperties }
+      //Keep properties relative to layer offset
+      state.vectorProperties.px1 += vector.layer.x
+      state.vectorProperties.py1 += vector.layer.y
+      if (
+        vector.tool.name === "quadCurve" ||
+        vector.tool.name === "cubicCurve" ||
+        vector.tool.name === "ellipse"
+      ) {
+        state.vectorProperties.px2 += vector.layer.x
+        state.vectorProperties.py2 += vector.layer.y
+
+        state.vectorProperties.px3 += vector.layer.x
+        state.vectorProperties.py3 += vector.layer.y
+      }
+
+      if (vector.tool.name === "cubicCurve") {
+        state.vectorProperties.px4 += vector.layer.x
+        state.vectorProperties.py4 += vector.layer.y
+      }
       canvas.currentVectorIndex = vector.index
+      canvas.currentLayer.inactiveTools.forEach((tool) => {
+        dom[`${tool}Btn`].disabled = false
+      })
       canvas.currentLayer = vector.layer
+      canvas.currentLayer.inactiveTools.forEach((tool) => {
+        dom[`${tool}Btn`].disabled = true
+      })
     }
     vectorGui.render(state, canvas)
     renderLayersToDOM()
@@ -435,7 +544,7 @@ function removeVector(vector) {
     vectorGui.reset(canvas)
   }
   renderVectorsToDOM()
-  renderCanvas(null, true, true)
+  renderCanvas(vector.layer, null, true, true)
 }
 
 //TODO: add move tool and scale tool for reference layers
@@ -447,6 +556,20 @@ function removeVector(vector) {
 //Initialize first layer
 addRasterLayer()
 canvas.currentLayer = canvas.layers[0]
+//Initialize offset, must be integer
+canvas.xOffset = Math.round(
+  (canvas.currentLayer.onscreenCvs.width / canvas.sharpness / canvas.zoom -
+    canvas.offScreenCVS.width) /
+    2
+)
+canvas.yOffset = Math.round(
+  (canvas.currentLayer.onscreenCvs.height / canvas.sharpness / canvas.zoom -
+    canvas.offScreenCVS.height) /
+    2
+)
+canvas.previousXOffset = canvas.xOffset
+canvas.previousYOffset = canvas.yOffset
+renderCanvas(canvas.currentLayer)
 renderLayersToDOM()
 renderPaletteToDOM()
 

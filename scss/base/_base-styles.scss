@@ -81,8 +81,12 @@ a:active {
 button {
   font-family: "04Font";
   border: 0;
-  padding: 4px;
+  padding: 0;
   font-size: 16px;
+  &:disabled {
+    cursor: not-allowed !important;
+    opacity: 0.5 !important;
+  }
 }
 
 input {

@@ -27,7 +27,7 @@ export function renderCursor(state, canvas, swatches) {
     default:
       //TODO: erase mode is somewhat buggy with rendering. Find way to have it render without calling draw() more than needed.
       if (!vectorGui.collisionPresent) {
-        renderCanvas((ctx) => {
+        renderCanvas(canvas.currentLayer, (ctx) => {
           actionDraw(
             state.cursorX,
             state.cursorY,
@@ -35,8 +35,10 @@ export function renderCursor(state, canvas, swatches) {
             state.brushStamp,
             "0,0",
             state.tool.brushSize,
+            canvas.currentLayer,
             ctx,
             state.mode,
+            state.maskSet,
             state.drawnPointsSet,
             null,
             true
@@ -47,7 +49,7 @@ export function renderCursor(state, canvas, swatches) {
           // vectorGui.drawSelectOutline(state, canvas, state.selectPixelSet, 0.5)
         }
       } else {
-        renderCanvas()
+        renderCanvas(canvas.currentLayer) //hides existing cursor if one is drawn
       }
   }
 }

@@ -71,7 +71,7 @@ function handleClearCanvas() {
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
-  renderCanvas()
+  renderCanvas(null) //render all layers
   vectorGui.reset(canvas)
   state.reset()
   renderVectorsToDOM()
@@ -92,13 +92,15 @@ export function handleTools(e, manualToolName = null) {
       }
       dom.toolBtn.style.background = "rgb(255, 255, 255)"
       state.tool = tools[dom.toolBtn.id]
-      renderCanvas()
+      renderCanvas(canvas.currentLayer)
       //update options
       updateStamp()
       dom.brushSlider.value = state.tool.brushSize
       dom.brushSlider.disabled = state.tool.disabled
       //update cursor
       if (dom.toolBtn.id === "grab") {
+        canvas.vectorGuiCVS.style.cursor = "grab"
+      } else if (dom.toolBtn.id === "move") {
         canvas.vectorGuiCVS.style.cursor = "move"
       } else if (
         dom.toolBtn.id === "replace" ||
@@ -115,17 +117,14 @@ export function handleTools(e, manualToolName = null) {
         } else {
           canvas.vectorGuiCVS.style.cursor = "crosshair"
         }
-        vectorGui.reset(canvas)
-        state.reset()
-        renderVectorsToDOM()
       } else if (dom.toolBtn.id === "eyedropper") {
         canvas.vectorGuiCVS.style.cursor = "none"
-        vectorGui.reset(canvas)
-        state.reset()
-        renderVectorsToDOM()
       } else {
         canvas.vectorGuiCVS.style.cursor = "none"
       }
+      vectorGui.reset(canvas)
+      state.reset()
+      renderVectorsToDOM()
     }
   }
 }
@@ -213,5 +212,5 @@ dom.toolsContainer.addEventListener("click", handleTools)
 dom.modesContainer.addEventListener("click", handleModes)
 
 // * Brush * //
-dom.brushBtn.addEventListener("click", switchBrush)
+dom.brushDisplay.addEventListener("click", switchBrush)
 dom.brushSlider.addEventListener("input", updateBrush)

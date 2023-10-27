@@ -66,7 +66,7 @@ export function setColor(r, g, b, a, target) {
       state.action = null
       state.redoStack = []
       renderVectorsToDOM()
-      renderCanvas(null, true, true)
+      renderCanvas(target.vector.layer, null, true, true)
     }
     if (swatches.activePaletteIndex !== null) {
       if (swatches.activePaletteIndex > swatches.palette.length - 1) {
@@ -86,7 +86,7 @@ export function setColor(r, g, b, a, target) {
   //reset selected index before render method calculates it
   swatches.selectedPaletteIndex = null
   //only render when s key (randomize color) is not being pressed
-  if (!keys.KeyS) {
+  if (!keys.KeyR) {
     renderPaletteToDOM()
   }
 }

@@ -2,6 +2,9 @@
 //==== * * * DOM Interface * * * ====//
 //===================================//
 
+// * Raster Layers Container * //
+const canvasLayers = document.querySelector(".canvas-layers")
+
 // * Tooltip * //
 const tooltip = document.getElementById("tooltip")
 
@@ -38,6 +41,27 @@ const zoomContainer = document.querySelector(".zoom")
 
 // * Tool buttons * //
 const toolsContainer = document.querySelector(".tools")
+
+const tools = [
+  "brush",
+  "replace",
+  "fill",
+  "line",
+  "quadCurve",
+  "cubicCurve",
+  "ellipse",
+  // "select",
+  "eyedropper",
+  "grab",
+  "move",
+]
+
+const toolButtons = {}
+
+tools.forEach((tool) => {
+  toolButtons[`${tool}Btn`] = toolsContainer.querySelector(`#${tool}`)
+})
+
 const toolBtn = document.querySelector("#brush")
 toolBtn.style.background = "rgb(255, 255, 255)"
 
@@ -69,10 +93,10 @@ const sidebarContainer = document.querySelector(".sidebar")
 // * Brush Interface * //
 const brushContainer = document.querySelector(".brush-container")
 const lineWeight = document.querySelector("#line-weight")
-const brushBtn = document.querySelector(".brush-preview")
+const brushDisplay = document.querySelector(".brush-preview")
 const brushPreview = document.querySelector("#brush-preview")
 const brushSlider = document.querySelector("#brush-size")
-const brush = document.querySelector(".brush-stamp")
+const brushStamp = document.querySelector(".brush-stamp")
 
 // * Palette Interface * //
 const paletteInterfaceContainer = document.querySelector(".palette-interface")
@@ -128,6 +152,7 @@ images.forEach((url) => {
 //====================================//
 
 export const dom = {
+  canvasLayers,
   tooltip,
   //menu
   debuggerBtn,
@@ -142,6 +167,7 @@ export const dom = {
   clearBtn,
   zoomContainer,
   toolsContainer,
+  ...toolButtons,
   toolBtn,
   modesContainer,
   modeBtn,
@@ -156,10 +182,10 @@ export const dom = {
   sidebarContainer,
   brushContainer,
   lineWeight,
-  brushBtn,
+  brushDisplay,
   brushPreview,
   brushSlider,
-  brush,
+  brushStamp,
   paletteInterfaceContainer,
   paletteContainer,
   paletteColors,
