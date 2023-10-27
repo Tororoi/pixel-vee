@@ -27,10 +27,10 @@ function moveSteps() {
         canvas.currentLayer.x += state.cursorX - state.previousX
         canvas.currentLayer.y += state.cursorY - state.previousY
       }
-      renderCanvas(null, true, true) // expensive to run on pointermove. TODO: give each layer its own onscreen canvas to reduce overall render cost.
+      renderCanvas(canvas.currentLayer, null, true, true) // expensive to run on pointermove. TODO: give each layer its own onscreen canvas to reduce overall render cost.
       break
     case "pointerup":
-      renderCanvas(null, true, true)
+      renderCanvas(canvas.currentLayer, null, true, true)
       //save start and end coordinates
       state.addToTimeline({
         tool: state.tool,
@@ -51,7 +51,7 @@ export const move = {
   fn: moveSteps,
   action: null, //actionMove
   brushSize: 1,
-  disabled: false,
-  options: { magicWand: false },
+  disabled: true,
+  options: {},
   type: "raster",
 }

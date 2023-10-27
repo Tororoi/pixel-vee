@@ -2,6 +2,9 @@
 //==== * * * DOM Interface * * * ====//
 //===================================//
 
+// * Raster Layers Container * //
+const canvasLayers = document.querySelector(".canvas-layers")
+
 // * Tooltip * //
 const tooltip = document.getElementById("tooltip")
 
@@ -149,6 +152,7 @@ images.forEach((url) => {
 //====================================//
 
 export const dom = {
+  canvasLayers,
   tooltip,
   //menu
   debuggerBtn,

@@ -20,7 +20,7 @@ export function activateShortcut(keyCode) {
   switch (keyCode) {
     case "ArrowLeft":
       if (state.debugger) {
-        renderCanvas(null, true, true)
+        renderCanvas(null, null, true, true)
         state.debugObject.maxSteps -= 1
         state.debugFn(state.debugObject)
       }

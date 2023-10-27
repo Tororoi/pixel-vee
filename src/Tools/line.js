@@ -18,7 +18,7 @@ function lineSteps() {
     case "pointerdown":
       state.lineStartX = state.cursorX
       state.lineStartY = state.cursorY
-      renderCanvas((ctx) => {
+      renderCanvas(canvas.currentLayer, (ctx) => {
         actionLine(
           state.cursorX,
           state.cursorY,
@@ -38,7 +38,7 @@ function lineSteps() {
     case "pointermove":
       //draw line from origin point to current point onscreen
       //only draw when necessary
-      renderCanvas((ctx) => {
+      renderCanvas(canvas.currentLayer, (ctx) => {
         actionLine(
           state.lineStartX,
           state.lineStartY,
@@ -87,7 +87,7 @@ function lineSteps() {
           maskArray,
         },
       })
-      renderCanvas()
+      renderCanvas(canvas.currentLayer)
       break
     default:
     //do nothing

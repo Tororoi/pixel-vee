@@ -71,7 +71,7 @@ function handleClearCanvas() {
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
-  renderCanvas()
+  renderCanvas(null) //render all layers
   vectorGui.reset(canvas)
   state.reset()
   renderVectorsToDOM()
@@ -92,7 +92,7 @@ export function handleTools(e, manualToolName = null) {
       }
       dom.toolBtn.style.background = "rgb(255, 255, 255)"
       state.tool = tools[dom.toolBtn.id]
-      renderCanvas()
+      renderCanvas(canvas.currentLayer)
       //update options
       updateStamp()
       dom.brushSlider.value = state.tool.brushSize

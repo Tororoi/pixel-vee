@@ -49,12 +49,12 @@ function brushSteps() {
       state.lastDrawnY = state.cursorY
       state.waitingPixelX = state.cursorX
       state.waitingPixelY = state.cursorY
-      renderCanvas()
+      renderCanvas(canvas.currentLayer)
       break
     case "pointermove":
       //draw line connecting points that don't touch or if shift is held
       if (state.tool.options.line) {
-        renderCanvas((ctx) => {
+        renderCanvas(canvas.currentLayer, (ctx) => {
           actionLine(
             state.lineStartX,
             state.lineStartY,
@@ -149,7 +149,7 @@ function brushSteps() {
           false
         )
         // if (state.mode === "perfect") {
-        //   renderCanvas((ctx) => {
+        //   renderCanvas(null, (ctx) => {
         //     actionDraw(
         //       state.cursorX,
         //       state.cursorY,
@@ -166,7 +166,7 @@ function brushSteps() {
         //     )
         //   })
         // }
-        renderCanvas()
+        renderCanvas(canvas.currentLayer)
       } else {
         //FIX: perfect will be option, not mode
         if (state.mode === "perfect") {
@@ -196,7 +196,7 @@ function brushSteps() {
             state.lastDrawnY = state.waitingPixelY
             state.waitingPixelX = state.cursorX
             state.waitingPixelY = state.cursorY
-            renderCanvas((ctx) => {
+            renderCanvas(canvas.currentLayer, (ctx) => {
               actionDraw(
                 state.cursorX,
                 state.cursorY,
@@ -216,7 +216,7 @@ function brushSteps() {
           } else {
             state.waitingPixelX = state.cursorX
             state.waitingPixelY = state.cursorY
-            renderCanvas((ctx) => {
+            renderCanvas(canvas.currentLayer, (ctx) => {
               actionDraw(
                 state.cursorX,
                 state.cursorY,
@@ -250,7 +250,7 @@ function brushSteps() {
             state.points,
             false
           )
-          renderCanvas()
+          renderCanvas(canvas.currentLayer)
         }
       }
       break
@@ -362,7 +362,7 @@ function brushSteps() {
         layer: canvas.currentLayer,
         properties: { points: state.points, maskSet: state.maskSet, maskArray },
       })
-      renderCanvas()
+      renderCanvas(canvas.currentLayer)
       break
     default:
     //do nothing
