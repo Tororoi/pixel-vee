@@ -17,7 +17,7 @@ export const renderVectorsToDOM = () => {
   state.undoStack.forEach((action, index) => {
     if (isValidAction(action)) {
       action.index = index
-      renderVector(action)
+      renderVectorElement(action)
     }
   })
 }
@@ -34,7 +34,7 @@ const isValidAction = (action) =>
  * Render a vector element
  * @param {Object} action
  */
-const renderVector = (action) => {
+const renderVectorElement = (action) => {
   const vectorElement = createVectorElement(action)
 
   const thumb = createThumbnailImage(action)
@@ -138,11 +138,19 @@ const drawOnThumbnailContext = (action) => {
   canvas.thumbnailCTX.strokeStyle = "black" // This can be adjusted based on your requirements.
   canvas.thumbnailCTX.beginPath()
 
+  let px1 = minD * (action.properties.vectorProperties.px1 + action.layer.x)
+  let py1 = minD * (action.properties.vectorProperties.py1 + action.layer.y)
+  let px2 = minD * (action.properties.vectorProperties.px2 + action.layer.x)
+  let py2 = minD * (action.properties.vectorProperties.py2 + action.layer.y)
+  let px3 = minD * (action.properties.vectorProperties.px3 + action.layer.x)
+  let py3 = minD * (action.properties.vectorProperties.py3 + action.layer.y)
+  let px4 = minD * (action.properties.vectorProperties.px4 + action.layer.x)
+  let py4 = minD * (action.properties.vectorProperties.py4 + action.layer.y)
   switch (action.tool.name) {
     case "fill":
       canvas.thumbnailCTX.arc(
-        minD * action.properties.vectorProperties.px1 + 0.5 + xOffset,
-        minD * action.properties.vectorProperties.py1 + 0.5 + yOffset,
+        px1 + 0.5 + xOffset,
+        py1 + 0.5 + yOffset,
         1,
         0,
         2 * Math.PI,
@@ -150,29 +158,23 @@ const drawOnThumbnailContext = (action) => {
       )
       break
     case "quadCurve":
-      canvas.thumbnailCTX.moveTo(
-        minD * action.properties.vectorProperties.px1 + 0.5 + xOffset,
-        minD * action.properties.vectorProperties.py1 + 0.5 + yOffset
-      )
+      canvas.thumbnailCTX.moveTo(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset)
       canvas.thumbnailCTX.quadraticCurveTo(
-        minD * action.properties.vectorProperties.px3 + 0.5 + xOffset,
-        minD * action.properties.vectorProperties.py3 + 0.5 + yOffset,
-        minD * action.properties.vectorProperties.px2 + 0.5 + xOffset,
-        minD * action.properties.vectorProperties.py2 + 0.5 + yOffset
+        px3 + 0.5 + xOffset,
+        py3 + 0.5 + yOffset,
+        px2 + 0.5 + xOffset,
+        py2 + 0.5 + yOffset
       )
       break
     case "cubicCurve":
-      canvas.thumbnailCTX.moveTo(
-        minD * action.properties.vectorProperties.px1 + 0.5 + xOffset,
-        minD * action.properties.vectorProperties.py1 + 0.5 + yOffset
-      )
+      canvas.thumbnailCTX.moveTo(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset)
       canvas.thumbnailCTX.bezierCurveTo(
-        minD * action.properties.vectorProperties.px3 + 0.5 + xOffset,
-        minD * action.properties.vectorProperties.py3 + 0.5 + yOffset,
-        minD * action.properties.vectorProperties.px4 + 0.5 + xOffset,
-        minD * action.properties.vectorProperties.py4 + 0.5 + yOffset,
-        minD * action.properties.vectorProperties.px2 + 0.5 + xOffset,
-        minD * action.properties.vectorProperties.py2 + 0.5 + yOffset
+        px3 + 0.5 + xOffset,
+        py3 + 0.5 + yOffset,
+        px4 + 0.5 + xOffset,
+        py4 + 0.5 + yOffset,
+        px2 + 0.5 + xOffset,
+        py2 + 0.5 + yOffset
       )
       break
     case "ellipse":
@@ -183,8 +185,8 @@ const drawOnThumbnailContext = (action) => {
           action.properties.vectorProperties.py1
       )
       canvas.thumbnailCTX.ellipse(
-        minD * action.properties.vectorProperties.px1 + xOffset,
-        minD * action.properties.vectorProperties.py1 + yOffset,
+        px1 + xOffset,
+        py1 + yOffset,
         minD * action.properties.vectorProperties.radA,
         minD * action.properties.vectorProperties.radB,
         angle,

@@ -20,7 +20,7 @@ export function activateShortcut(keyCode) {
   switch (keyCode) {
     case "ArrowLeft":
       if (state.debugger) {
-        renderCanvas(null, true, true)
+        renderCanvas(null, null, true, true)
         state.debugObject.maxSteps -= 1
         state.debugFn(state.debugObject)
       }
@@ -37,7 +37,7 @@ export function activateShortcut(keyCode) {
       break
     case "Space":
       state.tool = tools["grab"]
-      canvas.vectorGuiCVS.style.cursor = "move"
+      canvas.vectorGuiCVS.style.cursor = "grab"
       break
     case "AltLeft":
     case "AltRight":
@@ -133,7 +133,7 @@ export function activateShortcut(keyCode) {
       handleTools(null, "line")
       break
     case "KeyM":
-      //
+      handleTools(null, "replace")
       break
     case "KeyN":
       //
@@ -148,11 +148,11 @@ export function activateShortcut(keyCode) {
       //
       break
     case "KeyR":
-      handleTools(null, "replace")
-      break
-    case "KeyS":
       randomizeColor(swatches.primary.swatch)
       renderPaletteToDOM()
+      break
+    case "KeyS":
+      //
       break
     case "KeyT":
       //

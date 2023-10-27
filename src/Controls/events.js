@@ -112,6 +112,8 @@ function handleKeyUp(e) {
 
   //Tools
   if (dom.toolBtn.id === "grab") {
+    canvas.vectorGuiCVS.style.cursor = "grab"
+  } else if (dom.toolBtn.id === "move") {
     canvas.vectorGuiCVS.style.cursor = "move"
   } else if (
     dom.toolBtn.id === "replace" ||
@@ -186,7 +188,7 @@ function handlePointerDown(e) {
   if (state.touch) {
     vectorGui.render(state, canvas) // For tablets, vectors must be rendered before running state.tool.fn in order to check control points collision logic
   }
-  renderCanvas()
+  renderCanvas(canvas.currentLayer)
   //if drawing on hidden layer, flash hide btn
   if (canvas.currentLayer.hidden) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
@@ -349,7 +351,7 @@ function handlePointerOut(e) {
   //   state.redoStack = []
   // }
   if (!state.touch) {
-    renderCanvas()
+    renderCanvas(canvas.currentLayer)
     vectorGui.render(state, canvas)
     canvas.pointerEvent = "none"
   }

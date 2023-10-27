@@ -529,6 +529,20 @@ function render(state, canvas, lineDashOffset = 0.5) {
     if (canvas.zoom >= 4 && state.grid) {
       renderGrid(canvas, 8)
     }
+    if (canvas.currentLayer.type === "reference") {
+      let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+      canvas.vectorGuiCTX.lineWidth = lineWidth
+      canvas.vectorGuiCTX.strokeStyle = "rgba(255,255,255,1)"
+      // canvas.vectorGuiCTX.setLineDash([lineWidth * 4, lineWidth * 4])
+      canvas.vectorGuiCTX.beginPath()
+      canvas.vectorGuiCTX.rect(
+        canvas.currentLayer.x + canvas.xOffset - lineWidth / 2,
+        canvas.currentLayer.y + canvas.yOffset - lineWidth / 2,
+        canvas.currentLayer.img.width * canvas.currentLayer.scale + lineWidth,
+        canvas.currentLayer.img.height * canvas.currentLayer.scale + lineWidth
+      )
+      canvas.vectorGuiCTX.stroke()
+    }
   }
   // if (state.tool.name !== "select" || !state.clicked) {
   //   window.requestAnimationFrame(() => {

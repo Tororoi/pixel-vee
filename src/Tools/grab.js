@@ -13,7 +13,7 @@ function grabSteps() {
     case "pointermove":
       canvas.xOffset = state.cursorX - state.grabStartX + canvas.previousXOffset
       canvas.yOffset = state.cursorY - state.grabStartY + canvas.previousYOffset
-      renderCanvas()
+      renderCanvas(null) //affect all layers
       break
     case "pointerup":
       canvas.previousXOffset = canvas.xOffset

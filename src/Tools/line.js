@@ -4,6 +4,7 @@ import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { actionLine } from "../Actions/actions.js"
 import { renderCanvas } from "../Canvas/render.js"
+import { coordArrayFromSet } from "../utils/maskHelpers.js"
 
 //===================================//
 //=== * * * Line Controller * * * ===//
@@ -17,34 +18,40 @@ function lineSteps() {
     case "pointerdown":
       state.lineStartX = state.cursorX
       state.lineStartY = state.cursorY
-      renderCanvas((ctx) => {
+      renderCanvas(canvas.currentLayer, (ctx) => {
         actionLine(
           state.cursorX,
           state.cursorY,
           state.cursorX,
           state.cursorY,
           swatches.primary.color,
+          canvas.currentLayer,
           ctx,
           state.mode,
           state.brushStamp,
-          state.tool.brushSize
+          state.tool.brushSize,
+          state.maskSet,
+          null
         )
       })
       break
     case "pointermove":
       //draw line from origin point to current point onscreen
       //only draw when necessary
-      renderCanvas((ctx) => {
+      renderCanvas(canvas.currentLayer, (ctx) => {
         actionLine(
           state.lineStartX,
           state.lineStartY,
           state.cursorX,
           state.cursorY,
           swatches.primary.color,
+          canvas.currentLayer,
           ctx,
           state.mode,
           state.brushStamp,
-          state.tool.brushSize
+          state.tool.brushSize,
+          state.maskSet,
+          null
         )
       })
       break
@@ -55,22 +62,32 @@ function lineSteps() {
         state.cursorX,
         state.cursorY,
         swatches.primary.color,
+        canvas.currentLayer,
         canvas.currentLayer.ctx,
         state.mode,
         state.brushStamp,
-        state.tool.brushSize
+        state.tool.brushSize,
+        state.maskSet,
+        null
+      )
+      let maskArray = coordArrayFromSet(
+        state.maskSet,
+        canvas.currentLayer.x,
+        canvas.currentLayer.y
       )
       state.addToTimeline({
         tool: state.tool,
         layer: canvas.currentLayer,
         properties: {
-          px1: state.lineStartX,
-          py1: state.lineStartY,
-          px2: state.cursorX,
-          py2: state.cursorY,
+          px1: state.lineStartX - canvas.currentLayer.x,
+          py1: state.lineStartY - canvas.currentLayer.y,
+          px2: state.cursorX - canvas.currentLayer.x,
+          py2: state.cursorY - canvas.currentLayer.y,
+          maskSet: state.maskSet,
+          maskArray,
         },
       })
-      renderCanvas()
+      renderCanvas(canvas.currentLayer)
       break
     default:
     //do nothing

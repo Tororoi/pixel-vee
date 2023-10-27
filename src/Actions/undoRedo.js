@@ -13,19 +13,34 @@ import { renderVectorsToDOM } from "../DOM/render.js"
  * @param {String} modType
  */
 function handleModifyAction(latestAction, modType) {
-  state.undoStack[
-    latestAction.properties.moddedActionIndex
-  ].properties.vectorProperties = {
+  const moddedAction =
+    state.undoStack[latestAction.properties.moddedActionIndex]
+  moddedAction.properties.vectorProperties = {
     ...latestAction.properties[modType],
   }
-  if (
-    state.tool.name ===
-    state.undoStack[latestAction.properties.moddedActionIndex].tool.name
-  ) {
+  if (state.tool.name === moddedAction.tool.name) {
     vectorGui.reset(canvas)
     state.vectorProperties = { ...latestAction.properties[modType] }
-    canvas.currentVectorIndex =
-      state.undoStack[latestAction.properties.moddedActionIndex].index
+    //Keep properties relative to layer offset
+    state.vectorProperties.px1 += moddedAction.layer.x
+    state.vectorProperties.py1 += moddedAction.layer.y
+    if (
+      moddedAction.tool.name === "quadCurve" ||
+      moddedAction.tool.name === "cubicCurve" ||
+      moddedAction.tool.name === "ellipse"
+    ) {
+      state.vectorProperties.px2 += moddedAction.layer.x
+      state.vectorProperties.py2 += moddedAction.layer.y
+
+      state.vectorProperties.px3 += moddedAction.layer.x
+      state.vectorProperties.py3 += moddedAction.layer.y
+    }
+
+    if (moddedAction.tool.name === "cubicCurve") {
+      state.vectorProperties.px4 += moddedAction.layer.x
+      state.vectorProperties.py4 += moddedAction.layer.y
+    }
+    canvas.currentVectorIndex = moddedAction.index
     vectorGui.render(state, canvas)
   }
 }
@@ -92,6 +107,33 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
   vectorGui.render(state, canvas)
 }
 
+//TODO: handleMoveAction
+function handleMoveAction(latestAction, modType) {
+  let deltaX = latestAction.properties[modType].x - latestAction.layer.x
+  let deltaY = latestAction.properties[modType].y - latestAction.layer.y
+  //set layer x and y to modType
+  latestAction.layer.x = latestAction.properties[modType].x
+  latestAction.layer.y = latestAction.properties[modType].y
+  //Keep properties relative to layer offset
+  if (state.vectorProperties.px1) {
+    state.vectorProperties.px1 += deltaX
+    state.vectorProperties.py1 += deltaY
+  }
+  if (state.vectorProperties.px2) {
+    state.vectorProperties.px2 += deltaX
+    state.vectorProperties.py2 += deltaY
+  }
+  if (state.vectorProperties.px3) {
+    state.vectorProperties.px3 += deltaX
+    state.vectorProperties.py3 += deltaY
+  }
+  if (state.vectorProperties.px4) {
+    state.vectorProperties.px4 += deltaX
+    state.vectorProperties.py4 += deltaY
+  }
+  vectorGui.render(state, canvas)
+}
+
 /**
  * Main pillar of the code structure - command pattern
  * @param {Array} pushStack
@@ -128,6 +170,8 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     //Right now, undoing a select action when the newLatestAction isn't also a select tool means the earlier select action won't be rendered even if it should be
     //By saving it as a modded action with from and to we can set the selectProperties to the "from" values on undo and "to" on redo
     handleSelectAction(latestAction, newLatestAction, modType)
+  } else if (latestAction.tool.name === "move") {
+    handleMoveAction(latestAction, modType)
   } else if (
     latestAction.tool.name === state.tool.name &&
     latestAction.tool.type === "vector"
@@ -136,6 +180,25 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     vectorGui.reset(canvas)
     if (modType === "to") {
       state.vectorProperties = { ...latestAction.properties.vectorProperties }
+      //Keep properties relative to layer offset
+      state.vectorProperties.px1 += latestAction.layer.x
+      state.vectorProperties.py1 += latestAction.layer.y
+      if (
+        latestAction.tool.name === "quadCurve" ||
+        latestAction.tool.name === "cubicCurve" ||
+        latestAction.tool.name === "ellipse"
+      ) {
+        state.vectorProperties.px2 += latestAction.layer.x
+        state.vectorProperties.py2 += latestAction.layer.y
+
+        state.vectorProperties.px3 += latestAction.layer.x
+        state.vectorProperties.py3 += latestAction.layer.y
+      }
+
+      if (latestAction.tool.name === "cubicCurve") {
+        state.vectorProperties.px4 += latestAction.layer.x
+        state.vectorProperties.py4 += latestAction.layer.y
+      }
       canvas.currentVectorIndex = latestAction.index //currently only vectors have an index property, set during renderVectorsToDOM
       vectorGui.render(state, canvas)
     }
@@ -151,6 +214,25 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       state.vectorProperties = {
         ...newLatestAction.properties.vectorProperties,
       }
+      //Keep properties relative to layer offset
+      state.vectorProperties.px1 += newLatestAction.layer.x
+      state.vectorProperties.py1 += newLatestAction.layer.y
+      if (
+        newLatestAction.tool.name === "quadCurve" ||
+        newLatestAction.tool.name === "cubicCurve" ||
+        newLatestAction.tool.name === "ellipse"
+      ) {
+        state.vectorProperties.px2 += newLatestAction.layer.x
+        state.vectorProperties.py2 += newLatestAction.layer.y
+
+        state.vectorProperties.px3 += newLatestAction.layer.x
+        state.vectorProperties.py3 += newLatestAction.layer.y
+      }
+
+      if (newLatestAction.tool.name === "cubicCurve") {
+        state.vectorProperties.px4 += newLatestAction.layer.x
+        state.vectorProperties.py4 += newLatestAction.layer.y
+      }
       canvas.currentVectorIndex = newLatestAction.index //currently only vectors have an index property, set during renderVectorsToDOM
       vectorGui.render(state, canvas)
     }
@@ -159,7 +241,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   pushStack.push(popStack.pop())
   //clear all layers in preparation to redraw them.
   //DRY: do all layers and actions need to be rerendered for redo?
-  renderCanvas(null, true, true)
+  renderCanvas(latestAction.layer, null, true, true) //should be based on layer of affected action
   renderVectorsToDOM()
   state.reset()
 }

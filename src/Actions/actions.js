@@ -1,6 +1,4 @@
 import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
@@ -8,7 +6,6 @@ import { vectorGui } from "../GUI/vector.js"
 import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
 import { getColor } from "../utils/canvasHelpers.js"
 import { colorPixel, matchStartColor } from "../utils/imageDataHelpers.js"
-import { renderCanvas } from "../Canvas/render.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 
 //====================================//
@@ -32,6 +29,26 @@ export function modifyVectorAction(actionIndex) {
     ...action.properties.vectorProperties,
   } //shallow copy, must make deep copy, at least for x, y and properties
   modifiedProperties = { ...state.vectorProperties }
+  //Keep properties relative to layer offset
+  modifiedProperties.px1 -= action.layer.x
+  modifiedProperties.py1 -= action.layer.y
+  if (
+    action.tool.name === "quadCurve" ||
+    action.tool.name === "cubicCurve" ||
+    action.tool.name === "ellipse"
+  ) {
+    modifiedProperties.px2 -= action.layer.x
+    modifiedProperties.py2 -= action.layer.y
+
+    modifiedProperties.px3 -= action.layer.x
+    modifiedProperties.py3 -= action.layer.y
+  }
+
+  if (action.tool.name === "cubicCurve") {
+    modifiedProperties.px4 -= action.layer.x
+    modifiedProperties.py4 -= action.layer.y
+  }
+  //maintain forceCircle property if point being adjusted is p1
   if (action.tool.name === "ellipse") {
     modifiedProperties.forceCircle =
       vectorGui.selectedPoint.xKey === "px1"
@@ -126,6 +143,10 @@ export function actionClear(layer) {
   })
 }
 
+// export function actionMove() {
+
+// }
+
 /**
  * Render a stamp from the brush to the canvas
  * TODO: Find more efficient way to draw any brush shape without drawing each pixel separately. Could either be image stamp or made with rectangles
@@ -134,8 +155,10 @@ export function actionClear(layer) {
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} brushStamp
  * @param {Integer} brushSize
+ * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
  * @param {String} currentMode
+ * @param {Set} maskSet
  * @param {Set} seenPointsSet
  * @param {Array} points
  * @param {Boolean} excludeFromSet - even if new point, don't add to seenPointsSet if true
@@ -147,18 +170,20 @@ export function actionDraw(
   brushStamp,
   brushStampDir,
   brushSize,
+  layer,
   ctx,
   currentMode,
-  seenPointsSet = null,
-  points = null,
-  excludeFromSet = false
+  maskSet,
+  seenPointsSet,
+  points,
+  excludeFromSet
 ) {
   ctx.fillStyle = currentColor.color
   if (points) {
     if (!state.pointsSet.has(`${coordX},${coordY}`)) {
       points.push({
-        x: coordX,
-        y: coordY,
+        x: coordX - layer.x,
+        y: coordY - layer.y,
         color: { ...currentColor },
         brushStamp,
         brushSize,
@@ -180,9 +205,14 @@ export function actionDraw(
   for (const pixel of brushStamp[brushStampDir]) {
     const x = baseX + pixel.x
     const y = baseY + pixel.y
-
+    const key = `${x},${y}`
+    //if maskSet exists, only draw if it contains coordinates
+    if (maskSet) {
+      if (!maskSet.has(key)) {
+        continue
+      }
+    }
     if (seenPointsSet) {
-      const key = `${x},${y}`
       if (seenPointsSet.has(key)) {
         continue // skip this point
       }
@@ -211,10 +241,13 @@ export function actionDraw(
  * @param {Integer} tx
  * @param {Integer} ty
  * @param {Object} currentColor - {color, r, g, b, a}
+ * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
  * @param {String} currentMode
  * @param {Object} brushStamp
  * @param {Integer} brushSize
+ * @param {Set} maskSet
+ * @param {Set} seenPointsSet
  */
 export function actionLine(
   sx,
@@ -222,14 +255,14 @@ export function actionLine(
   tx,
   ty,
   currentColor,
+  layer,
   ctx,
   currentMode,
   brushStamp,
   brushSize,
+  maskSet,
   seenPointsSet = null
 ) {
-  ctx.fillStyle = currentColor.color
-
   let angle = getAngle(tx - sx, ty - sy) // angle of line
   let tri = getTriangle(sx, sy, tx, ty, angle)
   const seen = seenPointsSet ? new Set(seenPointsSet) : new Set()
@@ -255,9 +288,13 @@ export function actionLine(
       brushStamp,
       brushDirection,
       brushSize,
+      layer,
       ctx,
       currentMode,
-      seen
+      maskSet,
+      seen,
+      null,
+      false
     )
     previousX = thispoint.x
     previousY = thispoint.y
@@ -271,9 +308,13 @@ export function actionLine(
     brushStamp,
     brushDirection,
     brushSize,
+    layer,
     ctx,
     currentMode,
-    seen
+    maskSet,
+    seen,
+    null,
+    false
   )
 }
 
@@ -402,16 +443,20 @@ export function actionFill(
  * @param {Object} brushStamp
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Integer} brushSize
+ * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
  * @param {String} currentMode
+ * @param {Set} maskSet
  */
 function renderPoints(
   points,
   brushStamp,
   currentColor,
   brushSize,
+  layer,
   ctx,
-  currentMode
+  currentMode,
+  maskSet
 ) {
   const seen = new Set()
   let previousX = Math.floor(points[0].x)
@@ -434,9 +479,13 @@ function renderPoints(
       brushStamp,
       `${xDir},${yDir}`,
       brushSize,
+      layer,
       ctx,
       currentMode,
-      seen
+      maskSet,
+      seen,
+      null,
+      false
     )
     previousX = xt
     previousY = yt
@@ -453,10 +502,12 @@ function renderPoints(
  * @param {Integer} controly
  * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
+ * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
  * @param {String} currentMode
  * @param {Object} brushStamp
  * @param {Integer} brushSize
+ * @param {Set} maskSet
  */
 export function actionQuadraticCurve(
   startx,
@@ -467,10 +518,12 @@ export function actionQuadraticCurve(
   controly,
   stepNum,
   currentColor,
+  layer,
   ctx,
   currentMode,
   brushStamp,
-  brushSize
+  brushSize,
+  maskSet
 ) {
   //force coords to int
   startx = Math.round(startx)
@@ -479,9 +532,6 @@ export function actionQuadraticCurve(
   endy = Math.round(endy)
   controlx = Math.round(controlx)
   controly = Math.round(controly)
-
-  ctx.fillStyle = currentColor.color
-
   //BUG: On touchscreen, hits gradient sign error if first tool used
   if (stepNum === 1) {
     //after defining x0y0
@@ -491,10 +541,13 @@ export function actionQuadraticCurve(
       state.cursorX,
       state.cursorY,
       currentColor,
+      layer,
       ctx,
       currentMode,
       brushStamp,
-      brushSize
+      brushSize,
+      maskSet,
+      null
     )
     state.vectorProperties.px2 = state.cursorX
     state.vectorProperties.py2 = state.cursorY
@@ -515,8 +568,10 @@ export function actionQuadraticCurve(
       brushStamp,
       currentColor,
       brushSize,
+      layer,
       ctx,
-      currentMode
+      currentMode,
+      maskSet
     )
     state.vectorProperties.px3 = state.cursorX
     state.vectorProperties.py3 = state.cursorY
@@ -535,8 +590,10 @@ export function actionQuadraticCurve(
       brushStamp,
       currentColor,
       brushSize,
+      layer,
       ctx,
-      currentMode
+      currentMode,
+      maskSet
     )
   }
 }
@@ -553,10 +610,12 @@ export function actionQuadraticCurve(
  * @param {Integer} controly2
  * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
+ * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
  * @param {String} currentMode
  * @param {Object} brushStamp
  * @param {Integer} brushSize
+ * @param {Set} maskSet
  */
 export function actionCubicCurve(
   startx,
@@ -569,10 +628,12 @@ export function actionCubicCurve(
   controly2,
   stepNum,
   currentColor,
+  layer,
   ctx,
   currentMode,
   brushStamp,
-  brushSize
+  brushSize,
+  maskSet
 ) {
   //force coords to int
   startx = Math.round(startx)
@@ -583,9 +644,6 @@ export function actionCubicCurve(
   controly2 = Math.round(controly2)
   endx = Math.round(endx)
   endy = Math.round(endy)
-
-  ctx.fillStyle = currentColor.color
-
   //BUG: On touchscreen, hits gradient sign error if first tool used
   if (stepNum === 1) {
     //after defining x0y0
@@ -595,10 +653,13 @@ export function actionCubicCurve(
       state.cursorX,
       state.cursorY,
       currentColor,
+      layer,
       ctx,
       currentMode,
       brushStamp,
-      brushSize
+      brushSize,
+      maskSet,
+      null
     )
     //TODO: can setting state be moved to steps function?
     state.vectorProperties.px2 = state.cursorX
@@ -620,8 +681,10 @@ export function actionCubicCurve(
       brushStamp,
       currentColor,
       brushSize,
+      layer,
       ctx,
-      currentMode
+      currentMode,
+      maskSet
     )
     state.vectorProperties.px3 = state.cursorX
     state.vectorProperties.py3 = state.cursorY
@@ -643,8 +706,10 @@ export function actionCubicCurve(
       brushStamp,
       currentColor,
       brushSize,
+      layer,
       ctx,
-      currentMode
+      currentMode,
+      maskSet
     )
     state.vectorProperties.px4 = state.cursorX
     state.vectorProperties.py4 = state.cursorY
@@ -665,8 +730,10 @@ export function actionCubicCurve(
       brushStamp,
       currentColor,
       brushSize,
+      layer,
       ctx,
-      currentMode
+      currentMode,
+      maskSet
     )
   }
 }
@@ -681,6 +748,7 @@ export function actionCubicCurve(
  * @param {Integer} yb
  * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
+ * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
  * @param {String} currentMode
  * @param {Object} brushStamp
@@ -701,6 +769,7 @@ export function actionEllipse(
   rb,
   forceCircle,
   currentColor,
+  layer,
   ctx,
   currentMode,
   brushStamp,
@@ -708,7 +777,8 @@ export function actionEllipse(
   angle,
   offset,
   x1Offset,
-  y1Offset
+  y1Offset,
+  maskSet
 ) {
   //force coords to int
   centerx = Math.floor(centerx)
@@ -718,7 +788,6 @@ export function actionEllipse(
   xb = Math.floor(xb)
   yb = Math.floor(yb)
 
-  ctx.fillStyle = currentColor.color
   if (forceCircle) {
     let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, offset)
     renderPoints(
@@ -726,8 +795,10 @@ export function actionEllipse(
       brushStamp,
       currentColor,
       brushSize,
+      layer,
       ctx,
-      currentMode
+      currentMode,
+      maskSet
     )
   } else {
     let plotPoints = plotRotatedEllipse(
@@ -746,8 +817,10 @@ export function actionEllipse(
       brushStamp,
       currentColor,
       brushSize,
+      layer,
       ctx,
-      currentMode
+      currentMode,
+      maskSet
     )
   }
 }

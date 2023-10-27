@@ -11,27 +11,33 @@ import { calculateBrushDirection } from "../utils/drawHelpers.js"
  * @param {Function} renderPreview
  */
 function drawLayers(ctx, renderPreview) {
-  canvas.layers.forEach((l) => {
-    if (!l.removed && !l.hidden) {
-      if (l.type === "reference") {
-        ctx.save()
-        ctx.globalAlpha = l.opacity
-        //l.x, l.y need to be normalized to the pixel grid
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(
+    canvas.xOffset,
+    canvas.yOffset,
+    canvas.offScreenCVS.width,
+    canvas.offScreenCVS.height
+  )
+  ctx.clip()
+  canvas.layers.forEach((layer) => {
+    if (!layer.removed && !layer.hidden) {
+      if (layer.type === "reference") {
+        ctx.globalAlpha = layer.opacity
+        //layer.x, layer.y need to be normalized to the pixel grid
         ctx.drawImage(
-          l.img,
+          layer.img,
           canvas.xOffset +
-            (l.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+            (layer.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
           canvas.yOffset +
-            (l.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
-          l.img.width * l.scale,
-          l.img.height * l.scale
+            (layer.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+          layer.img.width * layer.scale,
+          layer.img.height * layer.scale
         )
-        ctx.restore()
       } else {
-        ctx.save()
-        ctx.globalAlpha = l.opacity
-        let drawCVS = l.cvs
-        if (l === canvas.currentLayer && renderPreview) {
+        ctx.globalAlpha = layer.opacity
+        let drawCVS = layer.cvs
+        if (layer === canvas.currentLayer && renderPreview) {
           //render preview of action
           canvas.previewCTX.clearRect(
             0,
@@ -39,24 +45,95 @@ function drawLayers(ctx, renderPreview) {
             canvas.previewCVS.width,
             canvas.previewCVS.height
           )
-          canvas.previewCTX.drawImage(l.cvs, 0, 0, l.cvs.width, l.cvs.height)
+          canvas.previewCTX.drawImage(
+            layer.cvs,
+            0,
+            0,
+            layer.cvs.width,
+            layer.cvs.height
+          )
           renderPreview(canvas.previewCTX) //Pass function through to here so it can be actionLine or other actions with multiple points
           drawCVS = canvas.previewCVS
         }
-        //l.x, l.y need to be normalized to the pixel grid
+        //layer.x, layer.y need to be normalized to the pixel grid
         ctx.drawImage(
           drawCVS,
-          canvas.xOffset +
-            (l.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
-          canvas.yOffset +
-            (l.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+          canvas.xOffset,
+          // + (layer.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+          canvas.yOffset,
+          // + (layer.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
           canvas.offScreenCVS.width,
           canvas.offScreenCVS.height
         )
-        ctx.restore()
       }
     }
   })
+  ctx.restore()
+}
+
+/**
+ * Draw the canvas layers
+ * @param {Object} layer
+ * @param {Function} renderPreview
+ */
+function drawLayer(layer, renderPreview) {
+  layer.onscreenCtx.save()
+
+  if (!layer.removed && !layer.hidden) {
+    if (layer.type === "reference") {
+      layer.onscreenCtx.globalAlpha = layer.opacity
+      //layer.x, layer.y need to be normalized to the pixel grid
+      layer.onscreenCtx.drawImage(
+        layer.img,
+        canvas.xOffset +
+          (layer.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+        canvas.yOffset +
+          (layer.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+        layer.img.width * layer.scale,
+        layer.img.height * layer.scale
+      )
+    } else {
+      layer.onscreenCtx.beginPath()
+      layer.onscreenCtx.rect(
+        canvas.xOffset,
+        canvas.yOffset,
+        canvas.offScreenCVS.width,
+        canvas.offScreenCVS.height
+      )
+      layer.onscreenCtx.clip()
+      layer.onscreenCtx.globalAlpha = layer.opacity
+      let drawCVS = layer.cvs
+      if (layer === canvas.currentLayer && renderPreview) {
+        //render preview of action
+        canvas.previewCTX.clearRect(
+          0,
+          0,
+          canvas.previewCVS.width,
+          canvas.previewCVS.height
+        )
+        canvas.previewCTX.drawImage(
+          layer.cvs,
+          0,
+          0,
+          layer.cvs.width,
+          layer.cvs.height
+        )
+        renderPreview(canvas.previewCTX) //Pass function through to here so it can be actionLine or other actions with multiple points
+        drawCVS = canvas.previewCVS
+      }
+      //layer.x, layer.y need to be normalized to the pixel grid
+      layer.onscreenCtx.drawImage(
+        drawCVS,
+        canvas.xOffset,
+        // + (layer.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+        canvas.yOffset,
+        // + (layer.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+        canvas.offScreenCVS.width,
+        canvas.offScreenCVS.height
+      )
+    }
+  }
+  layer.onscreenCtx.restore()
 }
 
 /**
@@ -64,7 +141,7 @@ function drawLayers(ctx, renderPreview) {
  * Critical function for the timeline to work
  * @param {Integer} index - optional parameter to limit render up to a specific action
  */
-function redrawTimelineActions(index = null) {
+function redrawTimelineActions(layer, index = null) {
   let i = 0
   //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
   state.undoStack.forEach((action) => {
@@ -72,6 +149,10 @@ function redrawTimelineActions(index = null) {
       return
     }
     i++
+    //if layer is passed in, only redraw for that layer
+    if (layer) {
+      if (action.layer !== layer) return
+    }
     if (!action.hidden && !action.removed) {
       switch (action.tool.name) {
         case "modify":
@@ -98,32 +179,51 @@ function redrawTimelineActions(index = null) {
           break
         case "brush":
           //actionDraw
-          const seen = action.properties.maskSet
-            ? new Set(action.properties.maskSet)
-            : new Set()
-          let previousX = action.properties.points[0].x
-          let previousY = action.properties.points[0].y
+          // let begin = performance.now()
+
+          const offsetX = action.layer.x
+          const offsetY = action.layer.y
+
+          let seen = new Set()
+          let mask = null
+          if (action.properties.maskSet) {
+            if (offsetX !== 0 || offsetY !== 0) {
+              mask = new Set(
+                action.properties.maskArray.map(
+                  (coord) => `${coord.x + offsetX},${coord.y + offsetY}`
+                )
+              )
+            } else {
+              mask = new Set(action.properties.maskSet)
+            }
+          }
+          let previousX = action.properties.points[0].x + offsetX
+          let previousY = action.properties.points[0].y + offsetY
           let brushDirection = "0,0"
           for (const p of action.properties.points) {
             brushDirection = calculateBrushDirection(
-              p.x,
-              p.y,
+              p.x + offsetX,
+              p.y + offsetY,
               previousX,
               previousY
             )
             action.tool.action(
-              p.x,
-              p.y,
+              p.x + offsetX,
+              p.y + offsetY,
               p.color,
               p.brushStamp,
               brushDirection,
               p.brushSize,
+              action.layer,
               action.layer.ctx,
               action.mode,
-              seen
+              mask,
+              seen,
+              null,
+              false
             )
-            previousX = p.x
-            previousY = p.y
+            previousX = p.x + offsetX
+            previousY = p.y + offsetY
             //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster:
             // action.layer.ctx.fillStyle = p.color
             // let x = p.x
@@ -144,83 +244,94 @@ function redrawTimelineActions(index = null) {
             //   }
             // }
           }
+          // let end = performance.now()
+          // if (action.properties.maskSet) {
+          //   console.log(end - begin)
+          // }
           break
         case "fill":
           //actionFill
           action.tool.action(
-            action.properties.vectorProperties.px1,
-            action.properties.vectorProperties.py1,
+            action.properties.vectorProperties.px1 + action.layer.x,
+            action.properties.vectorProperties.py1 + action.layer.y,
             action.color,
             action.layer,
             action.mode,
-            action.properties.selectProperties,
+            action.properties.selectProperties, //currently all null
             action.properties.maskSet
           )
           break
         case "line":
           //actionLine
           action.tool.action(
-            action.properties.px1,
-            action.properties.py1,
-            action.properties.px2,
-            action.properties.py2,
+            action.properties.px1 + action.layer.x,
+            action.properties.py1 + action.layer.y,
+            action.properties.px2 + action.layer.x,
+            action.properties.py2 + action.layer.y,
             action.color,
+            action.layer,
             action.layer.ctx,
             action.mode,
             action.brushStamp,
-            action.brushSize
+            action.brushSize,
+            action.properties.maskSet
           )
           break
         case "quadCurve":
           //actionQuadraticCurve
           action.tool.action(
-            action.properties.vectorProperties.px1,
-            action.properties.vectorProperties.py1,
-            action.properties.vectorProperties.px2,
-            action.properties.vectorProperties.py2,
-            action.properties.vectorProperties.px3,
-            action.properties.vectorProperties.py3,
+            action.properties.vectorProperties.px1 + action.layer.x,
+            action.properties.vectorProperties.py1 + action.layer.y,
+            action.properties.vectorProperties.px2 + action.layer.x,
+            action.properties.vectorProperties.py2 + action.layer.y,
+            action.properties.vectorProperties.px3 + action.layer.x,
+            action.properties.vectorProperties.py3 + action.layer.y,
             3,
             action.color,
+            action.layer,
             action.layer.ctx,
             action.mode,
             action.brushStamp,
-            action.brushSize
+            action.brushSize,
+            action.properties.maskSet
           )
           break
         case "cubicCurve":
           //TODO: pass source on history objects to avoid debugging actions from the timeline unless desired
           //actionCubicCurve
           action.tool.action(
-            action.properties.vectorProperties.px1,
-            action.properties.vectorProperties.py1,
-            action.properties.vectorProperties.px2,
-            action.properties.vectorProperties.py2,
-            action.properties.vectorProperties.px3,
-            action.properties.vectorProperties.py3,
-            action.properties.vectorProperties.px4,
-            action.properties.vectorProperties.py4,
+            action.properties.vectorProperties.px1 + action.layer.x,
+            action.properties.vectorProperties.py1 + action.layer.y,
+            action.properties.vectorProperties.px2 + action.layer.x,
+            action.properties.vectorProperties.py2 + action.layer.y,
+            action.properties.vectorProperties.px3 + action.layer.x,
+            action.properties.vectorProperties.py3 + action.layer.y,
+            action.properties.vectorProperties.px4 + action.layer.x,
+            action.properties.vectorProperties.py4 + action.layer.y,
             4,
             action.color,
+            action.layer,
             action.layer.ctx,
             action.mode,
             action.brushStamp,
-            action.brushSize
+            action.brushSize,
+            action.properties.maskSet
           )
           break
         case "ellipse":
           //actionEllipse
           action.tool.action(
-            action.properties.vectorProperties.px1,
-            action.properties.vectorProperties.py1,
-            action.properties.vectorProperties.px2,
-            action.properties.vectorProperties.py2,
-            action.properties.vectorProperties.px3,
-            action.properties.vectorProperties.py3,
+            action.properties.vectorProperties.px1 + action.layer.x,
+            action.properties.vectorProperties.py1 + action.layer.y,
+            action.properties.vectorProperties.px2 + action.layer.x,
+            action.properties.vectorProperties.py2 + action.layer.y,
+            action.properties.vectorProperties.px3 + action.layer.x,
+            action.properties.vectorProperties.py3 + action.layer.y,
             action.properties.vectorProperties.radA,
             action.properties.vectorProperties.radB,
             action.properties.vectorProperties.forceCircle,
             action.color,
+            action.layer,
             action.layer.ctx,
             action.mode,
             action.brushStamp,
@@ -228,7 +339,8 @@ function redrawTimelineActions(index = null) {
             action.properties.vectorProperties.angle,
             action.properties.vectorProperties.offset,
             action.properties.vectorProperties.x1Offset,
-            action.properties.vectorProperties.y1Offset
+            action.properties.vectorProperties.y1Offset,
+            action.properties.maskSet
           )
           break
         default:
@@ -240,7 +352,15 @@ function redrawTimelineActions(index = null) {
     if (action.tool.name === "addLayer") {
       action.layer.removed = true
       if (action.layer === canvas.currentLayer) {
-        canvas.currentLayer = dom.layersContainer.children[0].layerObj
+        canvas.currentLayer.inactiveTools.forEach((tool) => {
+          dom[`${tool}Btn`].disabled = false
+        })
+        canvas.currentLayer = canvas.layers.find(
+          (layer) => layer.type === "raster" && layer.removed === false
+        )
+        canvas.currentLayer.inactiveTools.forEach((tool) => {
+          dom[`${tool}Btn`].disabled = true
+        })
       }
       renderLayersToDOM()
       renderVectorsToDOM()
@@ -249,48 +369,32 @@ function redrawTimelineActions(index = null) {
 }
 
 /**
- * Draw canvas layers onto onscreen canvas
- * TODO: Improve performance by keeping track of "redraw regions" instead of redrawing the whole thing.
+ * Draw canvas layer onto its onscreen canvas
+ * @param {Object} layer
  * @param {Function} renderPreview
  */
-function drawCanvasLayers(renderPreview) {
-  //clear canvas
-  canvas.onScreenCTX.clearRect(
-    0,
-    0,
-    canvas.onScreenCVS.width / canvas.zoom,
-    canvas.onScreenCVS.height / canvas.zoom
-  )
+function drawCanvasLayer(layer, renderPreview) {
   //Prevent blurring
-  canvas.onScreenCTX.imageSmoothingEnabled = false
-  //fill background with neutral gray
-  canvas.onScreenCTX.fillStyle = canvas.bgColor
-  canvas.onScreenCTX.fillRect(
+  layer.onscreenCtx.imageSmoothingEnabled = false
+  //clear onscreen canvas
+  layer.onscreenCtx.clearRect(
     0,
     0,
-    canvas.onScreenCVS.width / canvas.zoom,
-    canvas.onScreenCVS.height / canvas.zoom
+    layer.onscreenCvs.width / canvas.zoom,
+    layer.onscreenCvs.height / canvas.zoom
   )
-  //BUG: How to mask outside drawing space?
-  //clear drawing space
-  canvas.onScreenCTX.clearRect(
-    canvas.xOffset,
-    canvas.yOffset,
-    canvas.offScreenCVS.width,
-    canvas.offScreenCVS.height
-  )
-  drawLayers(canvas.onScreenCTX, renderPreview)
+  drawLayer(layer, renderPreview)
   //draw border
-  canvas.onScreenCTX.beginPath()
-  canvas.onScreenCTX.rect(
+  layer.onscreenCtx.beginPath()
+  layer.onscreenCtx.rect(
     canvas.xOffset - 1,
     canvas.yOffset - 1,
     canvas.offScreenCVS.width + 2,
     canvas.offScreenCVS.height + 2
   )
-  canvas.onScreenCTX.lineWidth = 2
-  canvas.onScreenCTX.strokeStyle = canvas.borderColor
-  canvas.onScreenCTX.stroke()
+  layer.onscreenCtx.lineWidth = 2
+  layer.onscreenCtx.strokeStyle = canvas.borderColor
+  layer.onscreenCtx.stroke()
 }
 
 /**
@@ -301,6 +405,7 @@ function drawCanvasLayers(renderPreview) {
  * @param {Integer} index - optional parameter to limit render up to a specific action
  */
 export function renderCanvas(
+  layer = null,
   renderPreview = null,
   clearCanvas = false,
   redrawTimeline = false,
@@ -310,23 +415,63 @@ export function renderCanvas(
   // let begin = performance.now()
   if (clearCanvas) {
     //clear offscreen layers
-    canvas.layers.forEach((l) => {
-      if (l.type === "raster") {
-        l.ctx.clearRect(
+    if (layer) {
+      if (layer.type === "raster") {
+        layer.ctx.clearRect(
           0,
           0,
           canvas.offScreenCVS.width,
           canvas.offScreenCVS.height
         )
       }
-    })
+    } else {
+      canvas.layers.forEach((l) => {
+        if (l.type === "raster") {
+          l.ctx.clearRect(
+            0,
+            0,
+            canvas.offScreenCVS.width,
+            canvas.offScreenCVS.height
+          )
+        }
+      })
+    }
   }
   if (redrawTimeline) {
     //render all previous actions
-    redrawTimelineActions(index)
+    redrawTimelineActions(layer, index)
   }
   //draw onto onscreen canvas
-  drawCanvasLayers(renderPreview)
+  //clear canvas
+  canvas.backgroundCTX.clearRect(
+    0,
+    0,
+    canvas.backgroundCVS.width / canvas.zoom,
+    canvas.backgroundCVS.height / canvas.zoom
+  )
+  //fill background with neutral gray
+  canvas.backgroundCTX.fillStyle = canvas.bgColor
+  canvas.backgroundCTX.fillRect(
+    0,
+    0,
+    canvas.backgroundCVS.width / canvas.zoom,
+    canvas.backgroundCVS.height / canvas.zoom
+  )
+  //clear drawing space
+  canvas.backgroundCTX.clearRect(
+    canvas.xOffset,
+    canvas.yOffset,
+    canvas.offScreenCVS.width,
+    canvas.offScreenCVS.height
+  )
+  // drawCanvasLayers(renderPreview)
+  if (layer) {
+    drawCanvasLayer(layer, renderPreview)
+  } else {
+    canvas.layers.forEach((layer) => {
+      drawCanvasLayer(layer, null)
+    })
+  }
   // let end = performance.now()
   // console.log(end - begin)
   // })

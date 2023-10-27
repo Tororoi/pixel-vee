@@ -44,10 +44,10 @@ export function drawControlPointHandle(canvas, x1, y1, x2, y2) {
 export function renderGrid(canvas, subGridSpacing = null) {
   //get viewable boundaries - TODO: consider making these global properties as they may be useful for limiting other rendering functions or anything that iterates over the canvas while drawing
   let xLarge = Math.ceil(
-    canvas.onScreenCVS.width / canvas.sharpness / canvas.zoom
+    canvas.layers[0].onscreenCvs.width / canvas.sharpness / canvas.zoom
   )
   let yLarge = Math.ceil(
-    canvas.onScreenCVS.height / canvas.sharpness / canvas.zoom
+    canvas.layers[0].onscreenCvs.height / canvas.sharpness / canvas.zoom
   )
   let xMin = canvas.xOffset < 0 ? -canvas.xOffset : 0
   let xMax = Math.min(xMin + xLarge, canvas.offScreenCVS.width)

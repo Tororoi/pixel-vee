@@ -8,9 +8,9 @@ import { dom } from "../Context/dom.js"
  */
 function updateBrushPreview(brushPixels, brushSize, updateBrush) {
   if (updateBrush) {
-    dom.brush.setAttribute("viewBox", `0 -0.5 ${brushSize} ${brushSize}`)
-    dom.brush.style.width = brushSize * 2
-    dom.brush.style.height = brushSize * 2
+    dom.brushStamp.setAttribute("viewBox", `0 -0.5 ${brushSize} ${brushSize}`)
+    dom.brushStamp.style.width = brushSize * 2
+    dom.brushStamp.style.height = brushSize * 2
   }
 
   function makePathData(x, y, w) {
@@ -26,8 +26,8 @@ function updateBrushPreview(brushPixels, brushSize, updateBrush) {
   })
 
   if (updateBrush) {
-    dom.brush.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
-    dom.brush.setAttribute("stroke-width", 1)
+    dom.brushStamp.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
+    dom.brushStamp.setAttribute("stroke-width", 1)
   }
 }
 

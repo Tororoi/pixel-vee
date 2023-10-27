@@ -1,12 +1,12 @@
-import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { actionDraw, actionLine } from "../Actions/actions.js"
 import { getAngle, getTriangle } from "../utils/trig.js"
 import { renderCanvas } from "../Canvas/render.js"
-import { getColor } from "../utils/canvasHelpers.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
+import { coordArrayFromSet } from "../utils/maskHelpers.js"
+import { createColorMaskSet } from "../Canvas/masks.js"
 
 //====================================//
 //=== * * * Brush Controller * * * ===//
@@ -19,12 +19,12 @@ function brushSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       state.pointsSet = new Set()
-      if (state.maskSet) {
-        //if some set of pixels is masked off, initialize drawnpoints including the masked pixels
-        state.drawnPointsSet = new Set(state.maskSet)
-      } else {
-        state.drawnPointsSet = new Set()
-      }
+      // if (state.maskSet) {
+      //if some set of pixels is masked off, initialize drawnpoints including the masked pixels
+      // state.drawnPointsSet = new Set(state.maskSet)
+      // } else {
+      state.drawnPointsSet = new Set()
+      // }
       //For line
       state.lineStartX = state.cursorX
       state.lineStartY = state.cursorY
@@ -36,32 +36,37 @@ function brushSteps() {
         state.brushStamp,
         "0,0",
         state.tool.brushSize,
+        canvas.currentLayer,
         canvas.currentLayer.ctx,
         state.mode,
+        state.maskSet,
         state.drawnPointsSet,
-        state.points
+        state.points,
+        false
       )
       //for perfect pixels
       state.lastDrawnX = state.cursorX
       state.lastDrawnY = state.cursorY
       state.waitingPixelX = state.cursorX
       state.waitingPixelY = state.cursorY
-      renderCanvas()
+      renderCanvas(canvas.currentLayer)
       break
     case "pointermove":
       //draw line connecting points that don't touch or if shift is held
       if (state.tool.options.line) {
-        renderCanvas((ctx) => {
+        renderCanvas(canvas.currentLayer, (ctx) => {
           actionLine(
             state.lineStartX,
             state.lineStartY,
             state.cursorX,
             state.cursorY,
             swatches.primary.color,
+            canvas.currentLayer,
             ctx,
             state.mode,
             state.brushStamp,
             state.tool.brushSize,
+            state.maskSet,
             state.drawnPointsSet
           )
         })
@@ -107,10 +112,13 @@ function brushSteps() {
             state.brushStamp,
             state.brushDirection,
             state.tool.brushSize,
+            canvas.currentLayer,
             canvas.currentLayer.ctx,
             state.mode,
+            state.maskSet,
             state.drawnPointsSet,
-            state.points
+            state.points,
+            false
           )
           previousX = thispoint.x
           previousY = thispoint.y
@@ -132,13 +140,16 @@ function brushSteps() {
           state.brushStamp,
           state.brushDirection,
           state.tool.brushSize,
+          canvas.currentLayer,
           canvas.currentLayer.ctx,
           state.mode,
+          state.maskSet,
           state.drawnPointsSet,
-          state.points
+          state.points,
+          false
         )
         // if (state.mode === "perfect") {
-        //   renderCanvas((ctx) => {
+        //   renderCanvas(null, (ctx) => {
         //     actionDraw(
         //       state.cursorX,
         //       state.cursorY,
@@ -146,6 +157,7 @@ function brushSteps() {
         //       state.brushStamp,
         //       "0,0",
         //       state.tool.brushSize,
+        //       canvas.currentLayer,
         //       ctx,
         //       state.mode,
         //       state.drawnPointsSet,
@@ -154,7 +166,7 @@ function brushSteps() {
         //     )
         //   })
         // }
-        renderCanvas()
+        renderCanvas(canvas.currentLayer)
       } else {
         //FIX: perfect will be option, not mode
         if (state.mode === "perfect") {
@@ -171,17 +183,20 @@ function brushSteps() {
               state.brushStamp,
               "0,0",
               state.tool.brushSize,
+              canvas.currentLayer,
               canvas.currentLayer.ctx,
               state.mode,
+              state.maskSet,
               state.drawnPointsSet,
-              state.points
+              state.points,
+              false
             )
             //update queue
             state.lastDrawnX = state.waitingPixelX
             state.lastDrawnY = state.waitingPixelY
             state.waitingPixelX = state.cursorX
             state.waitingPixelY = state.cursorY
-            renderCanvas((ctx) => {
+            renderCanvas(canvas.currentLayer, (ctx) => {
               actionDraw(
                 state.cursorX,
                 state.cursorY,
@@ -189,8 +204,10 @@ function brushSteps() {
                 state.brushStamp,
                 "0,0",
                 state.tool.brushSize,
+                canvas.currentLayer,
                 ctx,
                 state.mode,
+                state.maskSet,
                 state.drawnPointsSet,
                 null,
                 true
@@ -199,7 +216,7 @@ function brushSteps() {
           } else {
             state.waitingPixelX = state.cursorX
             state.waitingPixelY = state.cursorY
-            renderCanvas((ctx) => {
+            renderCanvas(canvas.currentLayer, (ctx) => {
               actionDraw(
                 state.cursorX,
                 state.cursorY,
@@ -207,8 +224,10 @@ function brushSteps() {
                 state.brushStamp,
                 "0,0",
                 state.tool.brushSize,
+                canvas.currentLayer,
                 ctx,
                 state.mode,
+                state.maskSet,
                 state.drawnPointsSet,
                 null,
                 true
@@ -223,12 +242,15 @@ function brushSteps() {
             state.brushStamp,
             "0,0",
             state.tool.brushSize,
+            canvas.currentLayer,
             canvas.currentLayer.ctx,
             state.mode,
+            state.maskSet,
             state.drawnPointsSet,
-            state.points
+            state.points,
+            false
           )
-          renderCanvas()
+          renderCanvas(canvas.currentLayer)
         }
       }
       break
@@ -275,10 +297,13 @@ function brushSteps() {
             state.brushStamp,
             state.brushDirection,
             state.tool.brushSize,
+            canvas.currentLayer,
             canvas.currentLayer.ctx,
             state.mode,
+            state.maskSet,
             state.drawnPointsSet,
-            state.points
+            state.points,
+            false
           )
           previousX = thispoint.x
           previousY = thispoint.y
@@ -300,10 +325,13 @@ function brushSteps() {
           state.brushStamp,
           state.brushDirection,
           state.tool.brushSize,
+          canvas.currentLayer,
           canvas.currentLayer.ctx,
           state.mode,
+          state.maskSet,
           state.drawnPointsSet,
-          state.points
+          state.points,
+          false
         )
       }
       //only needed if perfect pixels option is on
@@ -314,18 +342,27 @@ function brushSteps() {
         state.brushStamp,
         "0,0",
         state.tool.brushSize,
+        canvas.currentLayer,
         canvas.currentLayer.ctx,
         state.mode,
+        state.maskSet,
         state.drawnPointsSet,
-        state.points
+        state.points,
+        false
+      )
+
+      let maskArray = coordArrayFromSet(
+        state.maskSet,
+        canvas.currentLayer.x,
+        canvas.currentLayer.y
       )
 
       state.addToTimeline({
         tool: brush,
         layer: canvas.currentLayer,
-        properties: { points: state.points, maskSet: state.maskSet },
+        properties: { points: state.points, maskSet: state.maskSet, maskArray },
       })
-      renderCanvas()
+      renderCanvas(canvas.currentLayer)
       break
     default:
     //do nothing
@@ -335,59 +372,18 @@ function brushSteps() {
 /**
  * Supported modes: "draw, erase, perfect, inject"
  * //TODO: change replace function to be a mode instead of tool, called "colorMask"
- * creates a copy of the canvas with just the secondary color parts. This is used as a mask so the user can draw normally.
+ * Old method: creates a copy of the canvas with just the secondary color parts. This is used as a mask so the user can draw normally.
  * When the user finishes drawing, the changed pixels are saved as points and will be rerendered in the timeline as single pixel brush points
+ * New method: Create a set of marked coordinates that can be checked before drawing
+ * Old method is more efficient, but incompatible with subtractive modes (inject, erase). May want to revisit old method conditionally for additive modes.
  */
 function replaceSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      // state.pointsSet = new Set()
-      state.maskSet = new Set()
-      //create mask set
-      state.colorLayerGlobal = canvas.currentLayer.ctx.getImageData(
-        0,
-        0,
-        canvas.currentLayer.cvs.width,
-        canvas.currentLayer.cvs.height
+      state.maskSet = createColorMaskSet(
+        swatches.secondary.color,
+        canvas.currentLayer
       )
-      let matchColor = swatches.secondary.color
-      if (matchColor.a < 255) {
-        //draw then sample color to math premultiplied alpha version of color
-        const tempCanvas = document.createElement("canvas")
-        tempCanvas.width = 1
-        tempCanvas.height = 1
-        const tempCtx = tempCanvas.getContext("2d")
-
-        tempCtx.fillStyle = `rgba(${matchColor.r}, ${matchColor.g}, ${
-          matchColor.b
-        }, ${matchColor.a / 255})`
-        tempCtx.fillRect(0, 0, 1, 1)
-
-        const sampledColor = tempCtx.getImageData(0, 0, 1, 1).data
-        matchColor = {
-          color: `rgba(${sampledColor[0]}, ${sampledColor[1]}, ${
-            sampledColor[2]
-          }, ${sampledColor[3] / 255})`,
-          r: sampledColor[0],
-          g: sampledColor[1],
-          b: sampledColor[2],
-          a: sampledColor[3],
-        }
-      }
-      for (let x = 0; x < canvas.currentLayer.cvs.width; x++) {
-        for (let y = 0; y < canvas.currentLayer.cvs.height; y++) {
-          let color = getColor(x, y, state.colorLayerGlobal)
-          if (
-            color.r !== matchColor.r ||
-            color.g !== matchColor.g ||
-            color.b !== matchColor.b ||
-            color.a !== matchColor.a
-          ) {
-            const key = `${x},${y}`
-            state.maskSet.add(key)
-          }
-        }
-      }
       brushSteps()
       break
     case "pointermove":

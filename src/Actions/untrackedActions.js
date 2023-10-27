@@ -26,7 +26,17 @@ export function actionZoom(z, xOriginOffset, yOriginOffset) {
     0,
     0
   )
-  canvas.onScreenCTX.setTransform(
+  canvas.layers.forEach((layer) => {
+    layer.onscreenCtx.setTransform(
+      canvas.sharpness * canvas.zoom,
+      0,
+      0,
+      canvas.sharpness * canvas.zoom,
+      0,
+      0
+    )
+  })
+  canvas.backgroundCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,
@@ -34,7 +44,7 @@ export function actionZoom(z, xOriginOffset, yOriginOffset) {
     0,
     0
   )
-  renderCanvas()
+  renderCanvas(null) //render all layers
   vectorGui.render(state, canvas)
 }
 
@@ -53,7 +63,17 @@ export function actionRecenter() {
     0,
     0
   )
-  canvas.onScreenCTX.setTransform(
+  canvas.layers.forEach((layer) => {
+    layer.onscreenCtx.setTransform(
+      canvas.sharpness * canvas.zoom,
+      0,
+      0,
+      canvas.sharpness * canvas.zoom,
+      0,
+      0
+    )
+  })
+  canvas.backgroundCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,
@@ -62,17 +82,17 @@ export function actionRecenter() {
     0
   )
   canvas.xOffset = Math.round(
-    (canvas.onScreenCVS.width / canvas.sharpness / canvas.zoom -
+    (canvas.currentLayer.onscreenCvs.width / canvas.sharpness / canvas.zoom -
       canvas.offScreenCVS.width) /
       2
   )
   canvas.yOffset = Math.round(
-    (canvas.onScreenCVS.height / canvas.sharpness / canvas.zoom -
+    (canvas.currentLayer.onscreenCvs.height / canvas.sharpness / canvas.zoom -
       canvas.offScreenCVS.height) /
       2
   )
   canvas.previousXOffset = canvas.xOffset
   canvas.previousYOffset = canvas.yOffset
-  renderCanvas()
+  renderCanvas(null) //render all layers
   vectorGui.render(state, canvas)
 }
