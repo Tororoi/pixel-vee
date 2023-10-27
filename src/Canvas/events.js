@@ -125,13 +125,15 @@ const resizeOffScreenCanvas = (width, height) => {
   canvas.zoomPixelX = null
   canvas.zoomPixelY = null
   //resize layers. Per function, it's cheaper to run this inside the existing iterator in drawLayers, but since drawLayers runs so often, it's preferable to only run this here where it's needed.
-  canvas.layers.forEach((l) => {
-    if (
-      l.cvs.width !== canvas.offScreenCVS.width ||
-      l.cvs.height !== canvas.offScreenCVS.height
-    ) {
-      l.cvs.width = canvas.offScreenCVS.width
-      l.cvs.height = canvas.offScreenCVS.height
+  canvas.layers.forEach((layer) => {
+    if (layer.type === "raster") {
+      if (
+        layer.cvs.width !== canvas.offScreenCVS.width ||
+        layer.cvs.height !== canvas.offScreenCVS.height
+      ) {
+        layer.cvs.width = canvas.offScreenCVS.width
+        layer.cvs.height = canvas.offScreenCVS.height
+      }
     }
   })
   renderCanvas(null, null, false, true) //render all layers
@@ -378,7 +380,7 @@ function addReferenceLayer() {
           canvas.offScreenCVS.width / img.width >
           canvas.offScreenCVS.height / img.height
             ? canvas.offScreenCVS.height / img.height
-            : canvas.offScreenCVS.width / img.width
+            : canvas.offScreenCVS.width / img.width //TODO: should be method, not var so width and height can be adjusted without having to set scale again
         let layer = {
           type: "reference",
           title: `Reference ${canvas.layers.length + 1}`,
