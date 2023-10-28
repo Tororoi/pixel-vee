@@ -16,6 +16,7 @@ import {
 } from "../DOM/render.js"
 import { actionZoom } from "../Actions/untrackedActions.js"
 import { adjustEllipseSteps } from "../Tools/ellipse.js"
+import { debounce, throttle } from "../utils/eventHelpers.js"
 
 /**
  * Set global coordinates
@@ -393,7 +394,10 @@ function handleMouseDown(e) {
 //Shortcuts
 document.addEventListener("keydown", handleKeyDown)
 document.addEventListener("keyup", handleKeyUp)
-canvas.vectorGuiCVS.addEventListener("wheel", handleWheel, { passive: true })
+const throttledHandleWheel = throttle(handleWheel, 100)
+canvas.vectorGuiCVS.addEventListener("wheel", throttledHandleWheel, {
+  passive: true,
+})
 
 //Pointer
 canvas.vectorGuiCVS.addEventListener("pointermove", handlePointerMove)
