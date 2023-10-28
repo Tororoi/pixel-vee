@@ -63,6 +63,13 @@ Visit here: https://pixelvee.netlify.app/
     <td width="66" height="52"> <img src="public/pixelv-mechanical.png" alt="Brush" width="40"/> </td>
     <td> Perfect pixel mode. Currently only works with pencil tool and enables smooth pixel perfect lines, even while drawing slowly. </td>
   </tr>
+    <tr>
+    <td colspan="2"> Inject (I) </td>
+  </tr>
+  <tr>
+    <td width="66" height="52"> <img src="public/pixelv-inject.png" alt="Brush" width="40"/> </td>
+    <td> Translucent colors will be applied directly instead of placed on top of other colors. </td>
+  </tr>
 </table>
 
 ## Tools
@@ -75,7 +82,7 @@ Visit here: https://pixelvee.netlify.app/
     <td> Draws a pixel where your pointer goes. </td>
   </tr>
   <tr>
-    <td colspan="2"> Replace (R) </td>
+    <td colspan="2"> Replace (M) </td>
   </tr>
   <tr>
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-replace.png" alt="Replace" width="40"/> </td>
@@ -130,6 +137,13 @@ Visit here: https://pixelvee.netlify.app/
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-grab.png" alt="Grab" width="40"/> </td>
     <td> Move the canvas position freely. </td>
   </tr>
+    <tr>
+    <td colspan="2"> Move </td>
+  </tr>
+  <tr>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-move.png" alt="Grab" width="40"/> </td>
+    <td> Move a layer relative to other layers. </td>
+  </tr>
 </table>
 
 ## Top Menu
@@ -169,6 +183,31 @@ Visit here: https://pixelvee.netlify.app/
   </tr>
   <tr>
     <td colspan="2"> Change brush size by moving the slider between 1 and 32 pixels diameter. </td>
+  </tr>
+</table>
+
+## Palette
+
+<table>
+  <tr>
+    <td colspan="2"> Primary/ Secondary Swatches </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Primary and secondary swatch. Click a swatch to open the color picker or press (R) to randomize the primary swatch color. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Palette Knife (Hold K or click on the selected color)</td>
+  </tr>
+  <tr>
+    <td width="66" height="52"> <img src="public/pixelv-palette-knife.png" alt="Palette Knife" width="40"/> </td>
+    <td> Edit a palette swatch. Click the palette knife then click the color swatch you want to edit to open the color picker. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Palette Scraper (Hold X)</td>
+  </tr>
+  <tr>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-palette-scraper.png" alt="Palette Scraper" width="40"/> </td>
+    <td> Remove a palette swatch. Click the palette scraper then click the color swatch you want to remove from the color palette. </td>
   </tr>
 </table>
 
@@ -232,8 +271,7 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
     <td colspan="2"> Select Vector </td>
   </tr>
   <tr>
-    <td width="66" height="52"> <img src="public/pixelv-cubic.png" alt="Select Vector" width="40"/> </td>
-    <td> Click on a vector to select or deselect it. Selecting a vector changes the active tool to match the vector. </td>
+    <td colspan="2"> Click on a vector to select or deselect it. Selecting a vector changes the active tool to match the vector. </td>
   </tr>
   <tr>
     <td colspan="2"> Change Color </td>
@@ -254,16 +292,14 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
 
 ### Key Features to be added
 
-- Palette
 - Selection Tool
-- Move Tool: move selection
 - Dedicated Mobile/ Tablet UI
 - Link Tool: Link vectors end to end to make unified adjustable curves. All cubic curve vectors on selected layer will have control points interactable.
 - Menu dropdown for functionality that is used less frequently. Windows for canvas size for example do not need to be on screen at all times.
 
 ### Stretch Features to be added
 
-- Ability to import a custom background image for reference (_in progress_): resize and move image freely
+- Ability to resize background image
 - Dithered Gradient Tool
 - Dithered Brush tool
 - Custom stamp brush
