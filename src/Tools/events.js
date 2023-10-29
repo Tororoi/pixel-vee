@@ -98,7 +98,9 @@ export function handleTools(e, manualToolName = null) {
       dom.brushSlider.value = state.tool.brushSize
       dom.brushSlider.disabled = state.tool.disabled
       //update cursor
-      if (dom.toolBtn.id === "grab") {
+      if (dom.toolBtn.id === "scale") {
+        canvas.vectorGuiCVS.style.cursor = "pointer"
+      } else if (dom.toolBtn.id === "grab") {
         canvas.vectorGuiCVS.style.cursor = "grab"
       } else if (dom.toolBtn.id === "move") {
         canvas.vectorGuiCVS.style.cursor = "move"

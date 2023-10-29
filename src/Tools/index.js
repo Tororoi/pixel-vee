@@ -3,6 +3,7 @@ import { brush, replace } from "./brush.js"
 import { line } from "./line.js"
 import { select } from "./select.js"
 import { move } from "./move.js"
+import { scale } from "./scale.js"
 import { fill } from "./fill.js"
 import { quadCurve, cubicCurve } from "./curve.js"
 import { ellipse } from "./ellipse.js"
@@ -61,6 +62,7 @@ export const tools = {
   replace,
   select,
   move,
+  scale,
   // gradient: {
   // Create a dithered gradient
   // },
