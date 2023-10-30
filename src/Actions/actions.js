@@ -7,6 +7,7 @@ import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
 import { getColor } from "../utils/canvasHelpers.js"
 import { colorPixel, matchStartColor } from "../utils/imageDataHelpers.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
+import { mixColors } from "../utils/colorMixing.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -401,7 +402,24 @@ export function actionFill(
       y < yMax - yMin &&
       matchStartColor(layerImageData, pixelPos, clickedColor)
     ) {
-      colorPixel(layerImageData, pixelPos, currentColor)
+      const rgb1 = [
+        layerImageData.data[pixelPos],
+        layerImageData.data[pixelPos + 1],
+        layerImageData.data[pixelPos + 2],
+        layerImageData.data[pixelPos + 3],
+      ]
+      const rgb2 = [
+        currentColor.r,
+        currentColor.g,
+        currentColor.b,
+        currentColor.a,
+      ]
+      const t = 0.5 // mixing ratio
+
+      const mixed = mixColors(rgb1, rgb2, t)
+      let mixedColor = { r: mixed[0], g: mixed[1], b: mixed[2], a: mixed[3] }
+      // colorPixel(layerImageData, pixelPos, currentColor)
+      colorPixel(layerImageData, pixelPos, mixedColor)
 
       if (x > 0) {
         if (matchStartColor(layerImageData, pixelPos - 4, clickedColor)) {

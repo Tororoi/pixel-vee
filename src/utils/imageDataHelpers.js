@@ -5,6 +5,20 @@
  * @param {*} currentColor - {color,r,g,b,a}
  */
 export function colorPixel(imageData, pixelPos, currentColor) {
+  // const rgb1 = [
+  //   imageData.data[pixelPos],
+  //   imageData.data[pixelPos + 1],
+  //   imageData.data[pixelPos + 2],
+  //   imageData.data[pixelPos + 3],
+  // ]
+  // const rgb2 = [currentColor.r, currentColor.g, currentColor.b, currentColor.a]
+  // const t = 0.5 // mixing ratio
+
+  // const mixed = mixColors(rgb1, rgb2, t)
+  // imageData.data[pixelPos] = mixed[0]
+  // imageData.data[pixelPos + 1] = mixed[1]
+  // imageData.data[pixelPos + 2] = mixed[2]
+  // imageData.data[pixelPos + 3] = mixed[3]
   imageData.data[pixelPos] = currentColor.r
   imageData.data[pixelPos + 1] = currentColor.g
   imageData.data[pixelPos + 2] = currentColor.b
