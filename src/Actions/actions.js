@@ -7,7 +7,7 @@ import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
 import { getColor } from "../utils/canvasHelpers.js"
 import { colorPixel, matchStartColor } from "../utils/imageDataHelpers.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
-import { mixColors } from "../utils/colorMixing.js"
+import * as spectral from "../utils/spectral.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -376,24 +376,23 @@ export function actionFill(
   //Start with click coords
   let pixelStack = [[startX - xMin, startY - yMin]]
   let newPos, x, y, pixelPos, reachLeft, reachRight
-  //
-  newPos = pixelStack[0]
-  x = newPos[0]
-  y = newPos[1]
-  //get current pixel position
-  pixelPos = (y * (xMax - xMin) + x) * 4
-  const rgb1 = [
-    layerImageData.data[pixelPos],
-    layerImageData.data[pixelPos + 1],
-    layerImageData.data[pixelPos + 2],
-    layerImageData.data[pixelPos + 3],
-  ]
-  const rgb2 = [currentColor.r, currentColor.g, currentColor.b, currentColor.a]
-  const t = 0.5 // mixing ratio
+  //FOR TESTING MIXING
+  // newPos = pixelStack[0]
+  // x = newPos[0]
+  // y = newPos[1]
+  // //get current pixel position
+  // pixelPos = (y * (xMax - xMin) + x) * 4
+  // const rgb1 = [
+  //   layerImageData.data[pixelPos],
+  //   layerImageData.data[pixelPos + 1],
+  //   layerImageData.data[pixelPos + 2],
+  //   layerImageData.data[pixelPos + 3],
+  // ]
+  // const rgb2 = [currentColor.r, currentColor.g, currentColor.b, currentColor.a]
+  // const t = 0.5 // mixing ratio
 
-  const mixed = mixColors(rgb1, rgb2, t)
-  console.log(mixed)
-  let mixedColor = { r: mixed[0], g: mixed[1], b: mixed[2], a: mixed[3] }
+  // const mixed = spectral.mix(rgb1, rgb2, t, spectral.RGBARRAY)
+  // let mixedColor = { r: mixed[0], g: mixed[1], b: mixed[2], a: mixed[3] }
   //
   floodFill()
   //render floodFill result
@@ -421,8 +420,9 @@ export function actionFill(
       y < yMax - yMin &&
       matchStartColor(layerImageData, pixelPos, clickedColor)
     ) {
-      // colorPixel(layerImageData, pixelPos, currentColor)
-      colorPixel(layerImageData, pixelPos, mixedColor)
+      colorPixel(layerImageData, pixelPos, currentColor)
+      //FOR TESTING MIXING
+      // colorPixel(layerImageData, pixelPos, mixedColor)
 
       if (x > 0) {
         if (matchStartColor(layerImageData, pixelPos - 4, clickedColor)) {
