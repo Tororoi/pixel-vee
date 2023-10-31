@@ -7,7 +7,8 @@ import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
 import { getColor } from "../utils/canvasHelpers.js"
 import { colorPixel, matchStartColor } from "../utils/imageDataHelpers.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
-import * as spectral from "../utils/spectral.js"
+// import * as spectral from "../utils/spectral.js"
+import { mixColorsFromCanvas } from "../utils/colors.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//

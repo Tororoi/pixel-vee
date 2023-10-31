@@ -19,12 +19,11 @@ function brushSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       state.pointsSet = new Set()
-      // if (state.maskSet) {
-      //if some set of pixels is masked off, initialize drawnpoints including the masked pixels
-      // state.drawnPointsSet = new Set(state.maskSet)
-      // } else {
       state.drawnPointsSet = new Set()
-      // }
+      //Pseudo-code for color mixing mode:
+      //get image data and set to property on current layer object
+      //in actiondraw, if mode is "mix", check current pixel's color from layer.imageData and mix with currentColor before applying to canvas
+
       //For line
       state.lineStartX = state.cursorX
       state.lineStartY = state.cursorY
