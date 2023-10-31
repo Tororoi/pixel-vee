@@ -159,7 +159,7 @@ export function actionClear(layer) {
  * @param {Integer} brushSize
  * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
- * @param {String} currentMode
+ * @param {String} mode
  * @param {Set} maskSet
  * @param {Set} seenPointsSet
  * @param {Array} points
@@ -174,13 +174,12 @@ export function actionDraw(
   brushSize,
   layer,
   ctx,
-  currentMode,
+  mode,
   maskSet,
   seenPointsSet,
   points,
   excludeFromSet
 ) {
-  ctx.fillStyle = currentColor.color
   if (points) {
     if (!state.pointsSet.has(`${coordX},${coordY}`)) {
       points.push({
@@ -222,7 +221,19 @@ export function actionDraw(
         seenPointsSet.add(key)
       }
     }
-    switch (currentMode) {
+    ctx.fillStyle = currentColor.color
+    // if (mode === "mix" && layer.imageData) {
+    //   let mixedColor = mixColorsFromCanvas(
+    //     x,
+    //     y,
+    //     0,
+    //     layer.cvs.width,
+    //     layer.imageData,
+    //     currentColor
+    //   )
+    //   ctx.fillStyle = mixedColor.color
+    // }
+    switch (mode) {
       case "erase":
         ctx.clearRect(x, y, 1, 1)
         break

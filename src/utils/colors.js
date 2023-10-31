@@ -9,6 +9,9 @@ export function generateRandomRGB() {
 
 export function mixColorsFromCanvas(x, y, xMin, xMax, imageData, activeColor) {
   let pixelPos = (y * (xMax - xMin) + x) * 4
+  if (imageData.data[pixelPos + 3] === 0) {
+    return activeColor
+  }
   const rgb1 = [
     imageData.data[pixelPos],
     imageData.data[pixelPos + 1],
@@ -18,5 +21,11 @@ export function mixColorsFromCanvas(x, y, xMin, xMax, imageData, activeColor) {
   const rgb2 = [activeColor.r, activeColor.g, activeColor.b, activeColor.a]
   const t = 0.5 // mixing ratio
   const mixed = spectral.mix(rgb1, rgb2, t, spectral.RGBARRAY)
-  return { r: mixed[0], g: mixed[1], b: mixed[2], a: mixed[3] }
+  return {
+    color: `rgba(${mixed[0]}, ${mixed[1]}, ${mixed[2]}, ${mixed[3]})`,
+    r: mixed[0],
+    g: mixed[1],
+    b: mixed[2],
+    a: mixed[3],
+  }
 }
