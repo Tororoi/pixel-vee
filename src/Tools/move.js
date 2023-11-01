@@ -10,12 +10,12 @@ function moveSteps() {
   //move raster layer or reference layer
   switch (canvas.pointerEvent) {
     case "pointerdown":
+      state.grabStartX = canvas.currentLayer.x
+      state.grabStartY = canvas.currentLayer.y
+      state.startScale = canvas.currentLayer.scale
       vectorGui.render(state, canvas)
       if (vectorGui.collisionPresent) {
         scaleSteps()
-      } else {
-        state.grabStartX = canvas.currentLayer.x
-        state.grabStartY = canvas.currentLayer.y
       }
       break
     case "pointermove":
@@ -49,8 +49,16 @@ function moveSteps() {
         tool: state.tool,
         layer: canvas.currentLayer,
         properties: {
-          from: { x: state.grabStartX, y: state.grabStartY },
-          to: { x: canvas.currentLayer.x, y: canvas.currentLayer.y },
+          from: {
+            x: state.grabStartX,
+            y: state.grabStartY,
+            scale: state.startScale,
+          },
+          to: {
+            x: canvas.currentLayer.x,
+            y: canvas.currentLayer.y,
+            scale: canvas.currentLayer.scale,
+          },
         },
       })
       break
