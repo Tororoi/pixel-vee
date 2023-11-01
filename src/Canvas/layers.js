@@ -81,6 +81,7 @@ export function createNewRasterLayer(name) {
     ctx: offscreenLayerCTX,
     onscreenCvs: onscreenLayerCVS,
     onscreenCtx: onscreenLayerCTX,
+    imageData: null,
     x: 0,
     y: 0,
     scale: 1,

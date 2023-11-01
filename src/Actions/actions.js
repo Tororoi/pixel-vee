@@ -7,6 +7,8 @@ import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
 import { getColor } from "../utils/canvasHelpers.js"
 import { colorPixel, matchStartColor } from "../utils/imageDataHelpers.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
+// import * as spectral from "../utils/spectral.js"
+import { mixColorsFromCanvas } from "../utils/colors.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -157,7 +159,7 @@ export function actionClear(layer) {
  * @param {Integer} brushSize
  * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
- * @param {String} currentMode
+ * @param {String} mode
  * @param {Set} maskSet
  * @param {Set} seenPointsSet
  * @param {Array} points
@@ -172,13 +174,12 @@ export function actionDraw(
   brushSize,
   layer,
   ctx,
-  currentMode,
+  mode,
   maskSet,
   seenPointsSet,
   points,
   excludeFromSet
 ) {
-  ctx.fillStyle = currentColor.color
   if (points) {
     if (!state.pointsSet.has(`${coordX},${coordY}`)) {
       points.push({
@@ -220,7 +221,19 @@ export function actionDraw(
         seenPointsSet.add(key)
       }
     }
-    switch (currentMode) {
+    ctx.fillStyle = currentColor.color
+    // if (mode === "mix" && layer.imageData) {
+    //   let mixedColor = mixColorsFromCanvas(
+    //     x,
+    //     y,
+    //     0,
+    //     layer.cvs.width,
+    //     layer.imageData,
+    //     currentColor
+    //   )
+    //   ctx.fillStyle = mixedColor.color
+    // }
+    switch (mode) {
       case "erase":
         ctx.clearRect(x, y, 1, 1)
         break
@@ -375,6 +388,24 @@ export function actionFill(
   //Start with click coords
   let pixelStack = [[startX - xMin, startY - yMin]]
   let newPos, x, y, pixelPos, reachLeft, reachRight
+  //FOR TESTING MIXING
+  // newPos = pixelStack[0]
+  // x = newPos[0]
+  // y = newPos[1]
+  // //get current pixel position
+  // pixelPos = (y * (xMax - xMin) + x) * 4
+  // const rgb1 = [
+  //   layerImageData.data[pixelPos],
+  //   layerImageData.data[pixelPos + 1],
+  //   layerImageData.data[pixelPos + 2],
+  //   layerImageData.data[pixelPos + 3],
+  // ]
+  // const rgb2 = [currentColor.r, currentColor.g, currentColor.b, currentColor.a]
+  // const t = 0.5 // mixing ratio
+
+  // const mixed = spectral.mix(rgb1, rgb2, t, spectral.RGBARRAY)
+  // let mixedColor = { r: mixed[0], g: mixed[1], b: mixed[2], a: mixed[3] }
+  //
   floodFill()
   //render floodFill result
   layer.ctx.putImageData(layerImageData, xMin, yMin)
@@ -402,6 +433,8 @@ export function actionFill(
       matchStartColor(layerImageData, pixelPos, clickedColor)
     ) {
       colorPixel(layerImageData, pixelPos, currentColor)
+      //FOR TESTING MIXING
+      // colorPixel(layerImageData, pixelPos, mixedColor)
 
       if (x > 0) {
         if (matchStartColor(layerImageData, pixelPos - 4, clickedColor)) {
