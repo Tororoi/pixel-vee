@@ -1,3 +1,6 @@
+// import { state } from "../Context/state.js"
+// import { canvas } from "../Context/canvas.js"
+// import { swatches } from "../Context/swatch.js"
 import { actionDraw } from "../Actions/actions.js"
 import { vectorGui } from "./vector.js"
 import { renderCanvas } from "../Canvas/render.js"

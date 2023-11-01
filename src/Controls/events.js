@@ -7,7 +7,7 @@ import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCursor } from "../GUI/raster.js"
-import { activateShortcut } from "./shortcuts.js"
+import { activateShortcut, deactivateShortcut } from "./shortcuts.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
   renderVectorsToDOM,
@@ -17,6 +17,7 @@ import {
 import { actionZoom } from "../Actions/untrackedActions.js"
 import { adjustEllipseSteps } from "../Tools/ellipse.js"
 import { debounce, throttle } from "../utils/eventHelpers.js"
+import { updateStamp } from "../Tools/events.js"
 
 /**
  * Set global coordinates
@@ -71,71 +72,7 @@ function handleKeyDown(e) {
  */
 function handleKeyUp(e) {
   keys[e.code] = false //unset active key globally
-  if (
-    e.code === "Space" ||
-    e.code === "AltLeft" ||
-    e.code === "AltRight" ||
-    e.code === "ShiftLeft" ||
-    e.code === "ShiftRight"
-  ) {
-    state.tool = tools[dom.toolBtn.id]
-    if (e.code === "Space") {
-      //TODO: refactor so grabSteps can be called instead with a manually supplied pointer event pointerup
-      state.clicked = false
-      canvas.previousXOffset = canvas.xOffset
-      canvas.previousYOffset = canvas.yOffset
-    }
-  }
-
-  if (e.code === "ShiftLeft" || e.code === "ShiftRight") {
-    tools.brush.options.line = false
-    if (state.tool.name === "brush" && state.clicked) {
-      state.tool.fn()
-    }
-    state.vectorProperties.forceCircle = false
-    if (
-      (vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey) &&
-      vectorGui.selectedPoint.xKey !== "px1"
-    ) {
-      //while holding control point, readjust ellipse without having to move cursor.
-      //TODO: update this functionality to have other radii go back to previous radii when releasing shift
-      adjustEllipseSteps()
-      vectorGui.render(state, canvas)
-    }
-  }
-
-  //Palette
-  if (e.code === "KeyX" || e.code === "KeyK") {
-    swatches.paletteMode = "select"
-    renderPaletteToolsToDOM()
-    renderPaletteToDOM()
-  }
-
-  //Tools
-  if (dom.toolBtn.id === "scale") {
-    canvas.vectorGuiCVS.style.cursor = "pointer"
-  } else if (dom.toolBtn.id === "grab") {
-    canvas.vectorGuiCVS.style.cursor = "grab"
-  } else if (dom.toolBtn.id === "move") {
-    canvas.vectorGuiCVS.style.cursor = "move"
-  } else if (
-    dom.toolBtn.id === "replace" ||
-    dom.toolBtn.id === "brush" ||
-    dom.toolBtn.id === "quadCurve" ||
-    dom.toolBtn.id === "cubicCurve" ||
-    dom.toolBtn.id === "ellipse" ||
-    dom.toolBtn.id === "fill" ||
-    dom.toolBtn.id === "line" ||
-    dom.toolBtn.id === "select"
-  ) {
-    if (dom.modeBtn.id === "erase") {
-      canvas.vectorGuiCVS.style.cursor = "none"
-    } else {
-      canvas.vectorGuiCVS.style.cursor = "crosshair"
-    }
-  } else {
-    canvas.vectorGuiCVS.style.cursor = "none"
-  }
+  deactivateShortcut(e.code)
 }
 
 /**
@@ -296,6 +233,7 @@ function handlePointerUp(e) {
       }
     }
   }
+
   //run selected tool step function
   state.tool.fn()
   //add to undo stack
@@ -311,6 +249,15 @@ function handlePointerUp(e) {
         canvas.currentVectorIndex = state.action.properties.moddedActionIndex
       }
       renderVectorsToDOM()
+    }
+  }
+  //Deactivate pending shortcuts TODO: set active shortcut with key code to allow cleaner logic like if (state.shortcut.active) {deactivateShortcut(state.shortcut.keyCode)}
+  if (state.tool.name !== dom.toolBtn.id) {
+    if (!keys.AltLeft && !keys.AltRight && state.tool.name === "eyedropper") {
+      deactivateShortcut("AltLeft")
+    }
+    if (!keys.Space && state.tool.name === "grab") {
+      deactivateShortcut("Space")
     }
   }
   state.action = null
