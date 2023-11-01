@@ -39,7 +39,7 @@ export function activateShortcut(keyCode) {
     case "Space":
       if (!state.clicked) {
         state.tool = tools["grab"]
-        canvas.vectorGuiCVS.style.cursor = "grab"
+        canvas.vectorGuiCVS.style.cursor = state.tool.cursor
         updateStamp()
         renderCanvas(canvas.currentLayer)
         renderCursor(state, canvas, swatches)
@@ -50,7 +50,7 @@ export function activateShortcut(keyCode) {
       //option key
       if (!state.clicked) {
         state.tool = tools["eyedropper"]
-        canvas.vectorGuiCVS.style.cursor = "none"
+        canvas.vectorGuiCVS.style.cursor = state.tool.cursor
         updateStamp()
         renderCanvas(canvas.currentLayer)
         renderCursor(state, canvas, swatches)
@@ -354,26 +354,9 @@ export function deactivateShortcut(keyCode) {
 }
 
 function setToolCssCursor() {
-  if (dom.toolBtn.id === "grab") {
-    canvas.vectorGuiCVS.style.cursor = "grab"
-  } else if (dom.toolBtn.id === "move") {
-    canvas.vectorGuiCVS.style.cursor = "move"
-  } else if (
-    dom.toolBtn.id === "replace" ||
-    dom.toolBtn.id === "brush" ||
-    dom.toolBtn.id === "quadCurve" ||
-    dom.toolBtn.id === "cubicCurve" ||
-    dom.toolBtn.id === "ellipse" ||
-    dom.toolBtn.id === "fill" ||
-    dom.toolBtn.id === "line" ||
-    dom.toolBtn.id === "select"
-  ) {
-    if (dom.modeBtn.id === "erase") {
-      canvas.vectorGuiCVS.style.cursor = "none"
-    } else {
-      canvas.vectorGuiCVS.style.cursor = "crosshair"
-    }
-  } else {
+  if (dom.modeBtn.id === "erase") {
     canvas.vectorGuiCVS.style.cursor = "none"
+  } else {
+    canvas.vectorGuiCVS.style.cursor = state.tool.cursor
   }
 }

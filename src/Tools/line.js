@@ -102,4 +102,5 @@ export const line = {
   disabled: false,
   options: { erase: false, inject: false },
   type: "raster",
+  cursor: "crosshair",
 }
