@@ -374,7 +374,7 @@ export function renderCanvas(
   }
   if (redrawTimeline) {
     //render all previous actions
-    redrawTimelineActions(layer, index)
+    redrawTimelineActions(currentLayer, index)
   }
   //draw onto onscreen canvas
   //clear canvas
