@@ -17,12 +17,12 @@ import { renderCanvas } from "../Canvas/render.js"
 function fillSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      vectorGui.render(state, canvas)
+      vectorGui.render()
       if (vectorGui.collisionPresent) {
         adjustFillSteps()
       } else {
         // //reset control points
-        // vectorGui.reset(canvas) - not really needed currently since fill only uses P1
+        // vectorGui.reset() - not really needed currently since fill only uses P1
         state.vectorProperties.px1 = state.cursorX
         state.vectorProperties.py1 = state.cursorY
         actionFill(

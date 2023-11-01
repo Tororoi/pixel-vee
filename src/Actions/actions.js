@@ -4,8 +4,11 @@ import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { vectorGui } from "../GUI/vector.js"
 import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
-import { getColor } from "../utils/canvasHelpers.js"
-import { colorPixel, matchStartColor } from "../utils/imageDataHelpers.js"
+import {
+  colorPixel,
+  matchStartColor,
+  getColor,
+} from "../utils/imageDataHelpers.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 
 //====================================//
@@ -362,7 +365,7 @@ export function actionFill(
     yMax - yMin
   )
 
-  let clickedColor = getColor(startX - xMin, startY - yMin, layerImageData)
+  let clickedColor = getColor(layerImageData, startX - xMin, startY - yMin)
 
   if (currentMode === "erase") {
     currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }

@@ -4,10 +4,10 @@
 
 /**
  *
- * @param {object} pickerCircle - { x, y, width, height }
- * @param {object} hsl - { hue, saturation, lightness }
- * @param {integer} width
- * @param {integer} height
+ * @param {Object} pickerCircle - { x, y, width, height }
+ * @param {Object} hsl - { hue, saturation, lightness }
+ * @param {Integer} width
+ * @param {Integer} height
  * @returns
  */
 export const calcHSLSelectorCoordinates = (
@@ -27,52 +27,71 @@ export const calcHSLSelectorCoordinates = (
 //==== * * * Picker Renders * * * ===//
 //===================================//
 
-const drawSelectorSides = (context, pickerCircle, color, offset = 0) => {
+/**
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Object} pickerCircle
+ * @param {String} color
+ * @param {Integer} offset
+ */
+const drawSelectorSides = (ctx, pickerCircle, color, offset = 0) => {
   const { x, y, width, height } = pickerCircle
   const lineCenterOffset = offset + 0.5
   // draw selector
-  context.beginPath()
+  ctx.beginPath()
   //top
-  context.moveTo(x, y - lineCenterOffset)
-  context.lineTo(x + width, y - lineCenterOffset)
+  ctx.moveTo(x, y - lineCenterOffset)
+  ctx.lineTo(x + width, y - lineCenterOffset)
   //right
-  context.moveTo(x + width + lineCenterOffset, y)
-  context.lineTo(x + width + lineCenterOffset, y + height)
+  ctx.moveTo(x + width + lineCenterOffset, y)
+  ctx.lineTo(x + width + lineCenterOffset, y + height)
   //bottom
-  context.moveTo(x, y + height + lineCenterOffset)
-  context.lineTo(x + width, y + height + lineCenterOffset)
+  ctx.moveTo(x, y + height + lineCenterOffset)
+  ctx.lineTo(x + width, y + height + lineCenterOffset)
   //left
-  context.moveTo(x - lineCenterOffset, y)
-  context.lineTo(x - lineCenterOffset, y + height)
+  ctx.moveTo(x - lineCenterOffset, y)
+  ctx.lineTo(x - lineCenterOffset, y + height)
   //stroke path
-  context.lineWidth = 1
-  context.strokeStyle = color
-  context.stroke()
-  context.closePath()
+  ctx.lineWidth = 1
+  ctx.strokeStyle = color
+  ctx.stroke()
+  ctx.closePath()
 }
 
-export const drawSelector = (context, pickerCircle) => {
+/**
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Object} pickerCircle
+ */
+export const drawSelector = (ctx, pickerCircle) => {
   const { x, y, width, height } = pickerCircle
   // draw selector
-  drawSelectorSides(context, pickerCircle, "black")
+  drawSelectorSides(ctx, pickerCircle, "black")
   //draw contrasting outline
-  drawSelectorSides(context, pickerCircle, "white", 1)
+  drawSelectorSides(ctx, pickerCircle, "white", 1)
   //corners
-  context.fillStyle = "white"
-  context.fillRect(x - 1, y - 1, 1, 1)
-  context.fillRect(x + width, y - 1, 1, 1)
-  context.fillRect(x - 1, y + height, 1, 1)
-  context.fillRect(x + width, y + height, 1, 1)
+  ctx.fillStyle = "white"
+  ctx.fillRect(x - 1, y - 1, 1, 1)
+  ctx.fillRect(x + width, y - 1, 1, 1)
+  ctx.fillRect(x - 1, y + height, 1, 1)
+  ctx.fillRect(x + width, y + height, 1, 1)
 }
 
-export const drawHSLGradient = (context, width, height, hue) => {
+/**
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Integer} width
+ * @param {Integer} height
+ * @param {Integer} hue
+ */
+export const drawHSLGradient = (ctx, width, height, hue) => {
   // draw HSL gradient
   for (let row = 0; row < height; row++) {
     const saturation = (row / height) * 100
-    const grad = context.createLinearGradient(0, 0, width, 0)
+    const grad = ctx.createLinearGradient(0, 0, width, 0)
     grad.addColorStop(0, `hsl(${hue}, 0%, ${saturation}%)`)
     grad.addColorStop(1, `hsl(${hue}, 100%, ${saturation}%)`)
-    context.fillStyle = grad
-    context.fillRect(0, row, width, 1)
+    ctx.fillStyle = grad
+    ctx.fillRect(0, row, width, 1)
   }
 }

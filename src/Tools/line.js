@@ -12,6 +12,7 @@ import { coordArrayFromSet } from "../utils/maskHelpers.js"
 
 /**
  * Supported modes: "draw, erase, inject",
+ * TODO: add vector line tool
  */
 function lineSteps() {
   switch (canvas.pointerEvent) {

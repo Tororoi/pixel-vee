@@ -1,10 +1,10 @@
 /**
  * create triangle object
- * @param {*} x1
- * @param {*} y1
- * @param {*} x2
- * @param {*} y2
- * @param {*} ang
+ * @param {Number} x1
+ * @param {Number} y1
+ * @param {Number} x2
+ * @param {Number} y2
+ * @param {Number} ang
  * @returns
  */
 export function getTriangle(x1, y1, x2, y2, ang) {
@@ -23,8 +23,8 @@ export function getTriangle(x1, y1, x2, y2, ang) {
 
 /**
  * Finds the angle of (x,y) on a plane from the origin
- * @param {*} x
- * @param {*} y
+ * @param {Number} x
+ * @param {Number} y
  * @returns
  */
 export function getAngle(x, y) {

@@ -137,7 +137,7 @@ const resizeOffScreenCanvas = (width, height) => {
     }
   })
   renderCanvas(null, null, false, true) //render all layers
-  vectorGui.render(state, canvas)
+  vectorGui.render()
 }
 
 /**
@@ -236,8 +236,8 @@ function layerInteract(e) {
       canvas.currentLayer.inactiveTools.forEach((tool) => {
         dom[`${tool}Btn`].disabled = true
       })
-      vectorGui.reset(canvas)
-      vectorGui.render(state, canvas)
+      vectorGui.reset()
+      vectorGui.render()
       if (layer.type === "reference") {
         handleTools(null, "move")
       }
@@ -427,7 +427,7 @@ function removeLayer(layer) {
       canvas.currentLayer = canvas.layers.find(
         (l) => l.type === "raster" && !l.removed
       )
-      vectorGui.reset(canvas)
+      vectorGui.reset()
     }
     state.addToTimeline({
       tool: tools.removeLayer,
@@ -493,7 +493,7 @@ function vectorInteract(e) {
     handleTools(null, vector.tool.name)
     //select current vector
     //TODO: modify object structure of states to match object in undoStack to make assignment simpler like vectorGui.x = {...vector.x}
-    vectorGui.reset(canvas)
+    vectorGui.reset()
     if (vector.index !== currentIndex) {
       state.vectorProperties = { ...vector.properties.vectorProperties }
       //Keep properties relative to layer offset
@@ -524,7 +524,7 @@ function vectorInteract(e) {
         dom[`${tool}Btn`].disabled = true
       })
     }
-    vectorGui.render(state, canvas)
+    vectorGui.render()
     renderLayersToDOM()
     renderVectorsToDOM()
   }
@@ -541,7 +541,7 @@ function removeVector(vector) {
   state.action = null
   state.redoStack = []
   if (canvas.currentVectorIndex === vector.index) {
-    vectorGui.reset(canvas)
+    vectorGui.reset()
   }
   renderVectorsToDOM()
   renderCanvas(vector.layer, null, true, true)

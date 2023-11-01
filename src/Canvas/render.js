@@ -37,6 +37,7 @@ function drawLayer(layer, renderPreview) {
       layer.onscreenCtx.clip()
       layer.onscreenCtx.globalAlpha = layer.opacity
       let drawCVS = layer.cvs
+      //TODO: refactor so preview is drawn directly onto onscreenCtx
       if (layer === canvas.currentLayer && renderPreview) {
         //render preview of action
         canvas.previewCTX.clearRect(
@@ -231,7 +232,6 @@ function redrawTimelineActions(layer, index = null) {
           )
           break
         case "cubicCurve":
-          //TODO: pass source on history objects to avoid debugging actions from the timeline unless desired
           //actionCubicCurve
           action.tool.action(
             action.properties.vectorProperties.px1 + action.layer.x,
@@ -333,13 +333,14 @@ function drawCanvasLayer(layer, renderPreview) {
 
 /**
  * Render canvas entirely including all actions in timeline
+ * @param {Object} currentLayer
  * @param {Function} renderPreview
  * @param {Boolean} clearCanvas - pass true if the canvas needs to be cleared before rendering
  * @param {Boolean} redrawTimeline - pass true to redraw all previous actions
  * @param {Integer} index - optional parameter to limit render up to a specific action
  */
 export function renderCanvas(
-  layer = null,
+  currentLayer = null,
   renderPreview = null,
   clearCanvas = false,
   redrawTimeline = false,
@@ -349,9 +350,9 @@ export function renderCanvas(
   // let begin = performance.now()
   if (clearCanvas) {
     //clear offscreen layers
-    if (layer) {
-      if (layer.type === "raster") {
-        layer.ctx.clearRect(
+    if (currentLayer) {
+      if (currentLayer.type === "raster") {
+        currentLayer.ctx.clearRect(
           0,
           0,
           canvas.offScreenCVS.width,
@@ -359,9 +360,9 @@ export function renderCanvas(
         )
       }
     } else {
-      canvas.layers.forEach((l) => {
-        if (l.type === "raster") {
-          l.ctx.clearRect(
+      canvas.layers.forEach((layer) => {
+        if (layer.type === "raster") {
+          layer.ctx.clearRect(
             0,
             0,
             canvas.offScreenCVS.width,
@@ -398,9 +399,8 @@ export function renderCanvas(
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
-  // drawCanvasLayers(renderPreview)
-  if (layer) {
-    drawCanvasLayer(layer, renderPreview)
+  if (currentLayer) {
+    drawCanvasLayer(currentLayer, renderPreview)
   } else {
     canvas.layers.forEach((layer) => {
       drawCanvasLayer(layer, null)

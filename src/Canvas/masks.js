@@ -1,6 +1,6 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { getColor } from "../utils/canvasHelpers.js"
+import { getColor } from "../utils/imageDataHelpers.js"
 
 /**
  * Create a mask set for a given color
@@ -42,7 +42,7 @@ export function createColorMaskSet(matchColor) {
   }
   for (let x = 0; x < canvas.currentLayer.cvs.width; x++) {
     for (let y = 0; y < canvas.currentLayer.cvs.height; y++) {
-      let color = getColor(x, y, layerImageData)
+      let color = getColor(layerImageData, x, y)
       if (
         color.r === matchColor.r &&
         color.g === matchColor.g &&

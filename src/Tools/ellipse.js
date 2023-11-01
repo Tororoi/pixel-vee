@@ -36,7 +36,7 @@ function ellipseSteps() {
         switch (state.clickCounter) {
           case 1:
             //reset control points
-            vectorGui.reset(canvas)
+            vectorGui.reset()
             state.vectorProperties.px1 = state.cursorX
             state.vectorProperties.py1 = state.cursorY
             state.vectorProperties.forceCircle = true //force circle initially
@@ -253,7 +253,7 @@ function ellipseSteps() {
           //reset vector state TODO: forceCircle needs to be reset
           state.vectorProperties.forceCircle = false
           renderCanvas(canvas.currentLayer)
-          vectorGui.render(state, canvas)
+          vectorGui.render()
         }
       }
       break
