@@ -10,7 +10,8 @@ import { adjustEllipseSteps } from "../Tools/ellipse.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { renderPaletteToolsToDOM, renderPaletteToDOM } from "../DOM/render.js"
 import { randomizeColor } from "../Swatch/events.js"
-import { handleTools, handleModes } from "../Tools/events.js"
+import { handleTools, handleModes, updateStamp } from "../Tools/events.js"
+import { renderCursor } from "../GUI/raster.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
@@ -36,14 +37,24 @@ export function activateShortcut(keyCode) {
       //command key
       break
     case "Space":
-      state.tool = tools["grab"]
-      canvas.vectorGuiCVS.style.cursor = "grab"
+      if (!state.clicked) {
+        state.tool = tools["grab"]
+        canvas.vectorGuiCVS.style.cursor = state.tool.cursor
+        updateStamp()
+        renderCanvas(canvas.currentLayer)
+        renderCursor(state, canvas, swatches)
+      }
       break
     case "AltLeft":
     case "AltRight":
       //option key
-      state.tool = tools["eyedropper"]
-      canvas.vectorGuiCVS.style.cursor = "none"
+      if (!state.clicked) {
+        state.tool = tools["eyedropper"]
+        canvas.vectorGuiCVS.style.cursor = state.tool.cursor
+        updateStamp()
+        renderCanvas(canvas.currentLayer)
+        renderCursor(state, canvas, swatches)
+      }
       break
     case "ShiftLeft":
     case "ShiftRight":
@@ -197,5 +208,155 @@ export function activateShortcut(keyCode) {
       break
     default:
     //do nothing
+  }
+}
+
+export function deactivateShortcut(keyCode) {
+  switch (keyCode) {
+    case "MetaLeft":
+    case "MetaRight":
+      //command key
+      break
+    case "Space":
+      //only deactivate while not clicked
+      if (!state.clicked) {
+        state.tool = tools[dom.toolBtn.id]
+        updateStamp()
+        canvas.previousXOffset = canvas.xOffset
+        canvas.previousYOffset = canvas.yOffset
+        renderCursor(state, canvas, swatches)
+        setToolCssCursor()
+        //TODO: refactor so grabSteps can be called instead with a manually supplied pointer event pointerup
+      }
+      break
+    case "AltLeft":
+    case "AltRight":
+      //option key
+      //only deactivate while not clicked
+      if (!state.clicked) {
+        state.tool = tools[dom.toolBtn.id]
+        updateStamp()
+        vectorGui.render(state, canvas)
+        renderCursor(state, canvas, swatches)
+        setToolCssCursor()
+      }
+      break
+    case "ShiftLeft":
+    case "ShiftRight":
+      state.tool = tools[dom.toolBtn.id]
+      tools.brush.options.line = false
+      if (state.tool.name === "brush" && state.clicked) {
+        state.tool.fn()
+      }
+      state.vectorProperties.forceCircle = false
+      if (
+        (vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey) &&
+        vectorGui.selectedPoint.xKey !== "px1"
+      ) {
+        //while holding control point, readjust ellipse without having to move cursor.
+        //TODO: update this functionality to have other radii go back to previous radii when releasing shift
+        adjustEllipseSteps()
+        vectorGui.render(state, canvas)
+      }
+      break
+    case "KeyA":
+      //
+      break
+    case "KeyB":
+      //
+      break
+    case "KeyC":
+      //
+      break
+    case "KeyD":
+      //
+      break
+    case "KeyE":
+      //
+      break
+    case "KeyF":
+      //
+      break
+    case "KeyG":
+      //
+      break
+    case "KeyH":
+      //
+      break
+    case "KeyI":
+      //
+      break
+    case "KeyJ":
+      //
+      break
+    case "KeyK":
+      swatches.paletteMode = "select"
+      renderPaletteToolsToDOM()
+      renderPaletteToDOM()
+      break
+    case "KeyL":
+      //
+      break
+    case "KeyM":
+      //
+      break
+    case "KeyN":
+      //
+      break
+    case "KeyO":
+      //
+      break
+    case "KeyP":
+      //
+      break
+    case "KeyQ":
+      //
+      break
+    case "KeyR":
+      //
+      break
+    case "KeyS":
+      //
+      break
+    case "KeyT":
+      //
+      break
+    case "KeyU":
+      //
+      break
+    case "KeyV":
+      //
+      break
+    case "KeyW":
+      //
+      break
+    case "KeyX":
+      swatches.paletteMode = "select"
+      renderPaletteToolsToDOM()
+      renderPaletteToDOM()
+      break
+    case "KeyY":
+      //
+      break
+    case "KeyZ":
+      if (keys.MetaLeft || keys.MetaRight) {
+        if (keys.ShiftLeft || keys.ShiftRight) {
+          //shift+meta+z
+          handleRedo()
+        } else {
+          handleUndo()
+        }
+      }
+      break
+    default:
+    //do nothing
+  }
+}
+
+function setToolCssCursor() {
+  if (dom.modeBtn.id === "erase") {
+    canvas.vectorGuiCVS.style.cursor = "none"
+  } else {
+    canvas.vectorGuiCVS.style.cursor = state.tool.cursor
   }
 }

@@ -525,6 +525,7 @@ export const quadCurve = {
   disabled: false,
   options: { erase: false, inject: false },
   type: "vector",
+  cursor: "crosshair",
 }
 
 export const cubicCurve = {
@@ -535,4 +536,5 @@ export const cubicCurve = {
   disabled: false,
   options: { erase: false, inject: false },
   type: "vector",
+  cursor: "crosshair",
 }

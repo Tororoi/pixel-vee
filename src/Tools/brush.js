@@ -417,6 +417,7 @@ export const brush = {
   disabled: false,
   options: { perfect: false, erase: false, inject: false, line: false },
   type: "raster",
+  cursor: "crosshair",
 }
 
 export const replace = {
@@ -427,4 +428,5 @@ export const replace = {
   disabled: false,
   options: { perfect: false, erase: false, inject: false }, //erase and inject not available right now. Inject will be default mode
   type: "raster",
+  cursor: "crosshair",
 }

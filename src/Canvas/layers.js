@@ -8,8 +8,9 @@ import { canvas } from "../Context/canvas.js"
 
 /**
  * Draw all layers onto offscreen canvas to prepare for sampling or export
+ * @param {Boolean} includeReference - whether to include reference layers as part of consolidated canvas
  */
-export function consolidateLayers() {
+export function consolidateLayers(includeReference = false) {
   canvas.offScreenCTX.clearRect(
     0,
     0,
@@ -17,21 +18,26 @@ export function consolidateLayers() {
     canvas.offScreenCVS.height
   )
   canvas.layers.forEach((layer) => {
-    if (
-      layer.type === "raster" &&
-      !layer.hidden &&
-      !layer.removed &&
-      layer.opacity > 0
-    ) {
+    if (!layer.hidden && !layer.removed && layer.opacity > 0) {
       canvas.offScreenCTX.save()
       canvas.offScreenCTX.globalAlpha = layer.opacity
-      canvas.offScreenCTX.drawImage(
-        layer.cvs,
-        layer.x,
-        layer.y,
-        canvas.offScreenCVS.width,
-        canvas.offScreenCVS.height
-      )
+      if (layer.type === "raster") {
+        canvas.offScreenCTX.drawImage(
+          layer.cvs,
+          layer.x,
+          layer.y,
+          canvas.offScreenCVS.width,
+          canvas.offScreenCVS.height
+        )
+      } else if (includeReference && layer.type === "reference") {
+        canvas.offScreenCTX.drawImage(
+          layer.img,
+          layer.x,
+          layer.y,
+          layer.img.width * layer.scale,
+          layer.img.height * layer.scale
+        )
+      }
       canvas.offScreenCTX.restore()
     }
   })

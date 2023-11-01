@@ -36,4 +36,5 @@ export const grab = {
   disabled: true,
   options: {},
   type: "utility",
+  cursor: "grab",
 }
