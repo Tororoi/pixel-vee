@@ -65,8 +65,10 @@ export const state = {
   //x1/y1 for line tool
   lineStartX: null,
   lineStartY: null,
+  //transforms
   grabStartX: null,
   grabStartY: null,
+  startScale: null,
   //for vector tools
   clickCounter: 0,
   vectorProperties: {

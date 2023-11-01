@@ -114,6 +114,7 @@ function handleMoveAction(latestAction, modType) {
   //set layer x and y to modType
   latestAction.layer.x = latestAction.properties[modType].x
   latestAction.layer.y = latestAction.properties[modType].y
+  latestAction.layer.scale = latestAction.properties[modType].scale
   //Keep properties relative to layer offset
   if (state.vectorProperties.px1) {
     state.vectorProperties.px1 += deltaX

@@ -106,4 +106,5 @@ export const select = {
   disabled: false,
   options: { magicWand: false },
   type: "raster",
+  cursor: "default",
 }

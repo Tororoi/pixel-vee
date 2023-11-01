@@ -426,12 +426,27 @@ function drawControlPoints(
     }
   }
   if (vectorGui.collisionPresent) {
-    canvas.vectorGuiCVS.style.cursor = "move"
+    //For transforms, set resize cursor. Otherwise, use move cursor
+    if (state.tool.name === "move") {
+      if (
+        vectorGui.collidedKeys.xKey === "px1" ||
+        vectorGui.collidedKeys.xKey === "px4"
+      ) {
+        canvas.vectorGuiCVS.style.cursor = "nwse-resize"
+      } else if (
+        vectorGui.collidedKeys.xKey === "px2" ||
+        vectorGui.collidedKeys.xKey === "px3"
+      ) {
+        canvas.vectorGuiCVS.style.cursor = "nesw-resize"
+      }
+    } else {
+      canvas.vectorGuiCVS.style.cursor = "move"
+    }
   } else {
     if (dom.modeBtn.id === "erase") {
       canvas.vectorGuiCVS.style.cursor = "none"
     } else {
-      canvas.vectorGuiCVS.style.cursor = "crosshair"
+      canvas.vectorGuiCVS.style.cursor = state.tool.cursor
     }
   }
 }
@@ -529,19 +544,11 @@ function render(state, canvas, lineDashOffset = 0.5) {
     if (canvas.zoom >= 4 && state.grid) {
       renderGrid(canvas, 8)
     }
-    if (canvas.currentLayer.type === "reference") {
-      let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
-      canvas.vectorGuiCTX.lineWidth = lineWidth
-      canvas.vectorGuiCTX.strokeStyle = "rgba(255,255,255,1)"
-      // canvas.vectorGuiCTX.setLineDash([lineWidth * 4, lineWidth * 4])
-      canvas.vectorGuiCTX.beginPath()
-      canvas.vectorGuiCTX.rect(
-        canvas.currentLayer.x + canvas.xOffset - lineWidth / 2,
-        canvas.currentLayer.y + canvas.yOffset - lineWidth / 2,
-        canvas.currentLayer.img.width * canvas.currentLayer.scale + lineWidth,
-        canvas.currentLayer.img.height * canvas.currentLayer.scale + lineWidth
-      )
-      canvas.vectorGuiCTX.stroke()
+    if (
+      canvas.currentLayer.type === "reference" &&
+      state.tool.name === "move"
+    ) {
+      renderTransformBox(canvas)
     }
   }
   // if (state.tool.name !== "select" || !state.clicked) {
@@ -549,6 +556,64 @@ function render(state, canvas, lineDashOffset = 0.5) {
   //     render(state, canvas, lineDashOffset < 2 ? lineDashOffset + 0.1 : 0)
   //   })
   // }
+}
+
+function renderTransformBox(canvas) {
+  let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
+  let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  canvas.vectorGuiCTX.lineWidth = lineWidth
+  canvas.vectorGuiCTX.strokeStyle = "white"
+  canvas.vectorGuiCTX.fillStyle = "white"
+  let pointsKeys = [
+    { x: "px1", y: "py1" },
+    { x: "px2", y: "py2" },
+    { x: "px3", y: "py3" },
+    { x: "px4", y: "py4" },
+  ]
+  let transformPoints = {
+    px1: canvas.currentLayer.x - lineWidth / 2 - 0.5,
+    py1: canvas.currentLayer.y - lineWidth / 2 - 0.5,
+    px2:
+      canvas.currentLayer.x +
+      canvas.currentLayer.img.width * canvas.currentLayer.scale +
+      lineWidth / 2 -
+      0.5,
+    py2: canvas.currentLayer.y - lineWidth / 2 - 0.5,
+    px3: canvas.currentLayer.x - lineWidth / 2 - 0.5,
+    py3:
+      canvas.currentLayer.y +
+      canvas.currentLayer.img.height * canvas.currentLayer.scale +
+      lineWidth / 2 -
+      0.5,
+    px4:
+      canvas.currentLayer.x +
+      canvas.currentLayer.img.width * canvas.currentLayer.scale +
+      lineWidth / 2 -
+      0.5,
+    py4:
+      canvas.currentLayer.y +
+      canvas.currentLayer.img.height * canvas.currentLayer.scale +
+      lineWidth / 2 -
+      0.5,
+  }
+  // canvas.vectorGuiCTX.setLineDash([lineWidth * 4, lineWidth * 4])
+  canvas.vectorGuiCTX.beginPath()
+  canvas.vectorGuiCTX.rect(
+    canvas.currentLayer.x + canvas.xOffset - lineWidth / 2,
+    canvas.currentLayer.y + canvas.yOffset - lineWidth / 2,
+    canvas.currentLayer.img.width * canvas.currentLayer.scale + lineWidth,
+    canvas.currentLayer.img.height * canvas.currentLayer.scale + lineWidth
+  )
+  canvas.vectorGuiCTX.stroke()
+  canvas.vectorGuiCTX.beginPath()
+  drawControlPoints(transformPoints, pointsKeys, canvas, circleRadius, false)
+  // Stroke non-filled lines
+  canvas.vectorGuiCTX.stroke()
+
+  canvas.vectorGuiCTX.beginPath()
+  drawControlPoints(transformPoints, pointsKeys, canvas, circleRadius / 2, true)
+  // Fill points
+  canvas.vectorGuiCTX.fill()
 }
 
 /**
