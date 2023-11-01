@@ -24,7 +24,7 @@ function eyedropperSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //get imageData
-      consolidateLayers()
+      consolidateLayers(true)
       state.colorLayerGlobal = canvas.offScreenCTX.getImageData(
         0,
         0,
@@ -52,4 +52,5 @@ export const eyedropper = {
   disabled: true,
   options: {},
   type: "utility",
+  cursor: "none",
 }

@@ -98,31 +98,10 @@ export function handleTools(e, manualToolName = null) {
       dom.brushSlider.value = state.tool.brushSize
       dom.brushSlider.disabled = state.tool.disabled
       //update cursor
-      if (dom.toolBtn.id === "scale") {
-        canvas.vectorGuiCVS.style.cursor = "pointer"
-      } else if (dom.toolBtn.id === "grab") {
-        canvas.vectorGuiCVS.style.cursor = "grab"
-      } else if (dom.toolBtn.id === "move") {
-        canvas.vectorGuiCVS.style.cursor = "move"
-      } else if (
-        dom.toolBtn.id === "replace" ||
-        dom.toolBtn.id === "brush" ||
-        dom.toolBtn.id === "quadCurve" ||
-        dom.toolBtn.id === "cubicCurve" ||
-        dom.toolBtn.id === "ellipse" ||
-        dom.toolBtn.id === "fill" ||
-        dom.toolBtn.id === "line" ||
-        dom.toolBtn.id === "select"
-      ) {
-        if (dom.modeBtn.id === "erase") {
-          canvas.vectorGuiCVS.style.cursor = "none"
-        } else {
-          canvas.vectorGuiCVS.style.cursor = "crosshair"
-        }
-      } else if (dom.toolBtn.id === "eyedropper") {
+      if (dom.modeBtn.id === "erase") {
         canvas.vectorGuiCVS.style.cursor = "none"
       } else {
-        canvas.vectorGuiCVS.style.cursor = "none"
+        canvas.vectorGuiCVS.style.cursor = state.tool.cursor
       }
       vectorGui.reset(canvas)
       state.reset()
