@@ -185,7 +185,7 @@ function updateBrush(e) {
   updateStamp()
 }
 
-function updateStamp() {
+export function updateStamp() {
   dom.lineWeight.textContent = state.tool.brushSize
   dom.brushPreview.style.width = state.tool.brushSize * 2 + "px"
   dom.brushPreview.style.height = state.tool.brushSize * 2 + "px"
