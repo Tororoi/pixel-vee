@@ -6,7 +6,7 @@ import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
-import { renderCursor } from "../GUI/raster.js"
+import { renderCursor } from "../GUI/cursor.js"
 import { activateShortcut, deactivateShortcut } from "./shortcuts.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
@@ -126,7 +126,7 @@ function handlePointerDown(e) {
   }
   setCoordinates(e)
   if (state.touch) {
-    vectorGui.render(state, canvas) // For tablets, vectors must be rendered before running state.tool.fn in order to check control points collision logic
+    vectorGui.render() // For tablets, vectors must be rendered before running state.tool.fn in order to check control points collision logic
   }
   renderCanvas(canvas.currentLayer)
   //if drawing on hidden layer, flash hide btn
@@ -145,15 +145,13 @@ function handlePointerDown(e) {
   state.previousX = state.cursorX
   state.previousY = state.cursorY
   //Re-render GUI
-  vectorGui.render(state, canvas)
-  if (state.tool.name === "eyedropper") {
-    renderCursor(state, canvas, swatches)
-  }
+  vectorGui.render()
   if (
-    (state.tool.name === "brush" || state.tool.name === "replace") &&
-    state.mode === "erase"
+    ((state.tool.name === "brush" || state.tool.name === "replace") &&
+      state.mode === "erase") ||
+    state.tool.name === "eyedropper"
   ) {
-    vectorGui.drawCursorBox(state, canvas, 1)
+    renderCursor(state, canvas, swatches)
   }
 }
 
@@ -179,7 +177,7 @@ function handlePointerMove(e) {
   }
   if (cursorMoved) {
     //Hover brush
-    // vectorGui.render(state, canvas)
+    // vectorGui.render()
     if (
       state.clicked ||
       ((state.tool.name === "quadCurve" ||
@@ -189,19 +187,17 @@ function handlePointerMove(e) {
     ) {
       //run selected tool step function
       state.tool.fn()
-      vectorGui.render(state, canvas)
+      vectorGui.render()
       if (
-        (state.tool.name === "brush" || state.tool.name === "replace") &&
-        state.mode === "erase"
+        ((state.tool.name === "brush" || state.tool.name === "replace") &&
+          state.mode === "erase") ||
+        state.tool.name === "eyedropper"
       ) {
-        vectorGui.drawCursorBox(state, canvas, 1)
-      }
-      if (state.tool.name === "eyedropper") {
         renderCursor(state, canvas, swatches)
       }
     } else {
       //no active tool
-      vectorGui.render(state, canvas)
+      vectorGui.render()
       renderCursor(state, canvas, swatches)
     }
   }
@@ -268,15 +264,9 @@ function handlePointerUp(e) {
   state.redoStack = []
   canvas.pointerEvent = "none"
   if (!e.targetTouches) {
-    vectorGui.render(state, canvas)
+    vectorGui.render()
     if (["brush", "replace", "eyedropper"].includes(state.tool.name)) {
       renderCursor(state, canvas, swatches)
-    }
-    if (
-      (state.tool.name === "brush" || state.tool.name === "replace") &&
-      state.mode === "erase"
-    ) {
-      vectorGui.drawCursorBox(state, canvas, 1)
     }
   }
 }
@@ -302,7 +292,7 @@ function handlePointerOut(e) {
   // }
   if (!state.touch) {
     renderCanvas(canvas.currentLayer)
-    vectorGui.render(state, canvas)
+    vectorGui.render()
     canvas.pointerEvent = "none"
   }
 }

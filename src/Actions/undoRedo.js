@@ -19,7 +19,7 @@ function handleModifyAction(latestAction, modType) {
     ...latestAction.properties[modType],
   }
   if (state.tool.name === moddedAction.tool.name) {
-    vectorGui.reset(canvas)
+    vectorGui.reset()
     state.vectorProperties = { ...latestAction.properties[modType] }
     //Keep properties relative to layer offset
     state.vectorProperties.px1 += moddedAction.layer.x
@@ -41,7 +41,7 @@ function handleModifyAction(latestAction, modType) {
       state.vectorProperties.py4 += moddedAction.layer.y
     }
     canvas.currentVectorIndex = moddedAction.index
-    vectorGui.render(state, canvas)
+    vectorGui.render()
   }
 }
 
@@ -61,7 +61,7 @@ function handleClearAction(latestAction) {
       action.removed = !action.removed
     }
   })
-  vectorGui.reset(canvas)
+  vectorGui.reset()
 }
 
 /**
@@ -104,7 +104,7 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       state.resetSelectProperties()
     }
   }
-  vectorGui.render(state, canvas)
+  vectorGui.render()
 }
 
 //TODO: handleMoveAction
@@ -132,7 +132,7 @@ function handleMoveAction(latestAction, modType) {
     state.vectorProperties.px4 += deltaX
     state.vectorProperties.py4 += deltaY
   }
-  vectorGui.render(state, canvas)
+  vectorGui.render()
 }
 
 /**
@@ -178,7 +178,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     latestAction.tool.type === "vector"
   ) {
     //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
-    vectorGui.reset(canvas)
+    vectorGui.reset()
     if (modType === "to") {
       state.vectorProperties = { ...latestAction.properties.vectorProperties }
       //Keep properties relative to layer offset
@@ -201,7 +201,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
         state.vectorProperties.py4 += latestAction.layer.y
       }
       canvas.currentVectorIndex = latestAction.index //currently only vectors have an index property, set during renderVectorsToDOM
-      vectorGui.render(state, canvas)
+      vectorGui.render()
     }
   }
   //For undo, if new latest action or new latest modded action will be a vector and its tool is currently selected, set vector properties to match
@@ -211,7 +211,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       newLatestAction.tool.type === "vector"
     ) {
       //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
-      vectorGui.reset(canvas)
+      vectorGui.reset()
       state.vectorProperties = {
         ...newLatestAction.properties.vectorProperties,
       }
@@ -235,7 +235,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
         state.vectorProperties.py4 += newLatestAction.layer.y
       }
       canvas.currentVectorIndex = newLatestAction.index //currently only vectors have an index property, set during renderVectorsToDOM
-      vectorGui.render(state, canvas)
+      vectorGui.render()
     }
   }
 

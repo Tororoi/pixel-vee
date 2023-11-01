@@ -1,5 +1,4 @@
 import { getTriangle, getAngle } from "../utils/trig.js"
-import { generateRandomRGB } from "../utils/colors.js"
 
 //================================================================//
 //== * Thanks to Alois Zingl for curve rasterizing algorithms * ==//
@@ -638,8 +637,6 @@ export function plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3) {
       fy2 *= fy0
     }
     if (x0 !== x3 || y0 !== y3) {
-      // let color = `rgba(0,255,0,255)`
-      // let color = generateRandomRGB().color
       plotPoints = [
         ...plotPoints,
         ...plotCubicBezierSeg(
@@ -673,34 +670,34 @@ export function plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3) {
     return true // keep this item
   })
   return plotPoints
-  // function plotCubicBezierBasic(x0, y0, x1, y1, x2, y2, x3, y3) {
-  //   function calculateBezier(t, p0, p1, p2, p3) {
-  //     const u = 1 - t
-  //     const tt = t * t
-  //     const uu = u * u
-  //     const uuu = uu * u
-  //     const ttt = tt * t
-  //     return uuu * p0 + 3 * uu * t * p1 + 3 * u * tt * p2 + ttt * p3
-  //   }
-
-  //   function bezierPixels(x0, y0, x1, y1, x2, y2, x3, y3) {
-  //     const steps = 25 // Adjust this for more or fewer points
-  //     const deltaT = 1 / steps
-  //     let points = []
-  //     for (let i = 0; i <= steps; i++) {
-  //       let t = deltaT * i
-  //       let x = Math.round(calculateBezier(t, x0, x1, x2, x3))
-  //       let y = Math.round(calculateBezier(t, y0, y1, y2, y3))
-  //       points.push({ x, y })
-  //     }
-  //     return points
-  //   }
-
-  //   // Test
-  //   return bezierPixels(x0, y0, x1, y1, x2, y2, x3, y3)
-  // }
-  // return plotCubicBezierBasic(x0, y0, x1, y1, x2, y2, x3, y3)
 }
+
+// function plotCubicBezierBasic(x0, y0, x1, y1, x2, y2, x3, y3) {
+//   function calculateBezier(t, p0, p1, p2, p3) {
+//     const u = 1 - t
+//     const tt = t * t
+//     const uu = u * u
+//     const uuu = uu * u
+//     const ttt = tt * t
+//     return uuu * p0 + 3 * uu * t * p1 + 3 * u * tt * p2 + ttt * p3
+//   }
+
+//   function bezierPixels(x0, y0, x1, y1, x2, y2, x3, y3) {
+//     const steps = 25 // Adjust this for more or fewer points
+//     const deltaT = 1 / steps
+//     let points = []
+//     for (let i = 0; i <= steps; i++) {
+//       let t = deltaT * i
+//       let x = Math.round(calculateBezier(t, x0, x1, x2, x3))
+//       let y = Math.round(calculateBezier(t, y0, y1, y2, y3))
+//       points.push({ x, y })
+//     }
+//     return points
+//   }
+
+//   // Test
+//   return bezierPixels(x0, y0, x1, y1, x2, y2, x3, y3)
+// }
 
 /**
  * Plot any rational quadratic bezier

@@ -1,5 +1,4 @@
 import { dom } from "./Context/dom.js"
-import { canvas } from "./Context/canvas.js"
 import { initializeDialogBox } from "./utils/drag.js"
 import "./Menu/events.js"
 import "./Swatch/events.js"
