@@ -34,7 +34,7 @@ function quadCurveSteps() {
         switch (state.clickCounter) {
           case 1:
             //reset control points
-            vectorGui.reset(canvas)
+            vectorGui.reset()
             state.vectorProperties.px1 = state.cursorX
             state.vectorProperties.py1 = state.cursorY
             break
@@ -196,7 +196,7 @@ function cubicCurveSteps() {
         switch (state.clickCounter) {
           case 1:
             //reset control points
-            vectorGui.reset(canvas)
+            vectorGui.reset()
             state.vectorProperties.px1 = state.cursorX
             state.vectorProperties.py1 = state.cursorY
             break
@@ -342,7 +342,7 @@ function cubicCurveSteps() {
             },
           })
           renderCanvas(canvas.currentLayer)
-          vectorGui.render(state, canvas)
+          vectorGui.render()
         }
       }
       break

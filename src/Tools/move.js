@@ -4,6 +4,10 @@ import { renderCanvas } from "../Canvas/render.js"
 import { translateAndWrap, translateWithoutWrap } from "../utils/moveHelpers.js"
 import { vectorGui } from "../GUI/vector.js"
 
+/**
+ * Move the contents of a layer relative to other layers
+ * TODO: When select tool is implemented fully, handle moving selected area
+ */
 function moveSteps() {
   // move contents of selection around canvas
   // default selection is entire canvas contents
@@ -13,7 +17,7 @@ function moveSteps() {
       state.grabStartX = canvas.currentLayer.x
       state.grabStartY = canvas.currentLayer.y
       state.startScale = canvas.currentLayer.scale
-      vectorGui.render(state, canvas)
+      vectorGui.render()
       if (vectorGui.collisionPresent) {
         scaleSteps()
       }
@@ -67,6 +71,9 @@ function moveSteps() {
   }
 }
 
+/**
+ * Scale selection. Currently only for resizing reference images
+ */
 function scaleSteps() {
   // move contents of selection around canvas
   // default selection is entire canvas contents

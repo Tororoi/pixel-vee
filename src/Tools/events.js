@@ -14,6 +14,10 @@ import { renderVectorsToDOM } from "../DOM/render.js"
 //=== * * * Button Event Handlers * * * ===//
 //=========================================//
 
+/**
+ * Handle zoom buttons
+ * @param {PointerEvent} e
+ */
 function handleZoom(e) {
   //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
   //BUG: on mobile zoom causes cursor coords to desync with pixelgrid
@@ -50,15 +54,18 @@ function handleZoom(e) {
   }
 }
 
+/**
+ * Recenter canvas. Does not affect timeline
+ */
 function handleRecenter() {
   actionRecenter()
 }
 
-//Non-tool action.
+/**
+ * Non-cursor action that affects the timeline
+ */
 function handleClearCanvas() {
   actionClear(canvas.currentLayer)
-  //FIX: restructure stacked items. Currently each is an array, but each should be an object with more info plus an array
-  //TODO: set all actions to hidden
   state.undoStack.push(state.action)
   state.action = null
   state.pointsSet = null
@@ -72,11 +79,16 @@ function handleClearCanvas() {
     canvas.offScreenCVS.height
   )
   renderCanvas(null) //render all layers
-  vectorGui.reset(canvas)
+  vectorGui.reset()
   state.reset()
   renderVectorsToDOM()
 }
 
+/**
+ * Switch tools
+ * @param {PointerEvent} e
+ * @param {String} manualToolName
+ */
 export function handleTools(e, manualToolName = null) {
   const targetTool = e?.target.closest(".tool")
   if (targetTool || manualToolName) {
@@ -103,20 +115,22 @@ export function handleTools(e, manualToolName = null) {
       } else {
         canvas.vectorGuiCVS.style.cursor = state.tool.cursor
       }
-      vectorGui.reset(canvas)
+      vectorGui.reset()
       state.reset()
       renderVectorsToDOM()
     }
   }
 }
 
-//TODO: modes should allow multiple at once, not one at a time
-//TODO: add multi-touch mode for drawing with multiple fingers
+/**
+ * TODO: modes should allow multiple at once, not one at a time
+ * TODO: add multi-touch mode for drawing with multiple fingers
+ * @param {PointerEvent} e
+ * @param {String} manualModeName
+ */
 export function handleModes(e, manualModeName = null) {
   const targetMode = e?.target.closest(".mode")
   if (targetMode || manualModeName) {
-    // //failsafe for hacking mode ids
-    // if (modes[targetMode?.id || manualModeName]) {
     //reset old button
     dom.modeBtn.style.background = "rgb(131, 131, 131)"
     //get new button and select it
@@ -132,7 +146,6 @@ export function handleModes(e, manualModeName = null) {
     } else {
       canvas.vectorGuiCVS.style.cursor = "crosshair"
     }
-    // }
   }
 }
 
@@ -140,6 +153,10 @@ export function handleModes(e, manualModeName = null) {
 //======== * * * Options * * * ========//
 //=====================================//
 
+/**
+ *
+ * @param {PointerEvent} e
+ */
 function switchBrush(e) {
   if (state.brushType === "square") {
     state.brushType = "circle"
@@ -149,6 +166,10 @@ function switchBrush(e) {
   updateStamp()
 }
 
+/**
+ *
+ * @param {InputEvent} e
+ */
 function updateBrush(e) {
   switch (state.tool.name) {
     case "brush":
@@ -166,6 +187,9 @@ function updateBrush(e) {
   updateStamp()
 }
 
+/**
+ * update brush stamp
+ */
 export function updateStamp() {
   dom.lineWeight.textContent = state.tool.brushSize
   dom.brushPreview.style.width = state.tool.brushSize * 2 + "px"

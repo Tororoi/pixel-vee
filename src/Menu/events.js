@@ -64,21 +64,13 @@ document.body.addEventListener("mouseover", (e) => {
     showTooltip(tooltipMessage, e.target)
   }
 })
-
-dom.debuggerBtn.addEventListener("click", (e) => {
-  if (dom.debuggerBtn.checked) {
-    state.debugger = true
-  } else {
-    state.debugger = false
-  }
-})
 dom.gridBtn.addEventListener("click", (e) => {
   if (dom.gridBtn.checked) {
     state.grid = true
   } else {
     state.grid = false
   }
-  vectorGui.render(state, canvas)
+  vectorGui.render()
 })
 dom.tooltipBtn.addEventListener("click", (e) => {
   if (dom.tooltipBtn.checked) {

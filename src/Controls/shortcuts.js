@@ -11,7 +11,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { renderPaletteToolsToDOM, renderPaletteToDOM } from "../DOM/render.js"
 import { randomizeColor } from "../Swatch/events.js"
 import { handleTools, handleModes, updateStamp } from "../Tools/events.js"
-import { renderCursor } from "../GUI/raster.js"
+import { renderCursor } from "../GUI/cursor.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
@@ -19,19 +19,6 @@ import { renderCursor } from "../GUI/raster.js"
  */
 export function activateShortcut(keyCode) {
   switch (keyCode) {
-    case "ArrowLeft":
-      if (state.debugger) {
-        renderCanvas(null, null, true, true)
-        state.debugObject.maxSteps -= 1
-        state.debugFn(state.debugObject)
-      }
-      break
-    case "ArrowRight":
-      if (state.debugger) {
-        state.debugObject.maxSteps += 1
-        state.debugFn(state.debugObject)
-      }
-      break
     case "MetaLeft":
     case "MetaRight":
       //command key
@@ -72,7 +59,7 @@ export function activateShortcut(keyCode) {
           //while holding control point, readjust ellipse without having to move cursor.
           //TODO: update this functionality to have other radii go back to previous radii when releasing shift
           adjustEllipseSteps()
-          vectorGui.render(state, canvas)
+          vectorGui.render()
         }
       }
       break
@@ -111,7 +98,7 @@ export function activateShortcut(keyCode) {
           state.action = null
           state.redoStack = []
           state.resetSelectProperties()
-          vectorGui.render(state, canvas)
+          vectorGui.render()
         }
       } else {
         handleModes(null, "draw")
@@ -211,6 +198,12 @@ export function activateShortcut(keyCode) {
   }
 }
 
+/**
+ * Deactivate Shortcut for any key.
+ * Some shortcuts are active while a key is held.
+ * This can be called on keyUp or on pointerUp so it is not directly tied to the keyUp event.
+ * @param {String} keyCode
+ */
 export function deactivateShortcut(keyCode) {
   switch (keyCode) {
     case "MetaLeft":
@@ -236,7 +229,7 @@ export function deactivateShortcut(keyCode) {
       if (!state.clicked) {
         state.tool = tools[dom.toolBtn.id]
         updateStamp()
-        vectorGui.render(state, canvas)
+        vectorGui.render()
         renderCursor(state, canvas, swatches)
         setToolCssCursor()
       }
@@ -256,7 +249,7 @@ export function deactivateShortcut(keyCode) {
         //while holding control point, readjust ellipse without having to move cursor.
         //TODO: update this functionality to have other radii go back to previous radii when releasing shift
         adjustEllipseSteps()
-        vectorGui.render(state, canvas)
+        vectorGui.render()
       }
       break
     case "KeyA":
@@ -353,6 +346,9 @@ export function deactivateShortcut(keyCode) {
   }
 }
 
+/**
+ * Set tool cursor. TODO: move to utils file
+ */
 function setToolCssCursor() {
   if (dom.modeBtn.id === "erase") {
     canvas.vectorGuiCVS.style.cursor = "none"

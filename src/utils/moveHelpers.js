@@ -1,3 +1,9 @@
+/**
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Integer} dx
+ * @param {Integer} dy
+ */
 export function translateAndWrap(ctx, dx, dy) {
   const width = ctx.canvas.width
   const height = ctx.canvas.height
@@ -31,6 +37,12 @@ export function translateAndWrap(ctx, dx, dy) {
   ctx.putImageData(destData, 0, 0)
 }
 
+/**
+ *
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {Integer} dx
+ * @param {Integer} dy
+ */
 export function translateWithoutWrap(ctx, dx, dy) {
   const width = ctx.canvas.width
   const height = ctx.canvas.height

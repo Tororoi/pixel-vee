@@ -6,12 +6,7 @@ import { swatches } from "./swatch.js"
 
 //Main state object to keep track of global vars
 export const state = {
-  //debugger *HOW TO USE: set the debugObject and debugFn in the place you want to debug, and comment the addToTimeline for the corresponding tool
-  debugger: false,
-  debugObject: {},
-  debugFn: null,
   grid: false,
-  vectorMode: true,
   //timeline
   pointsSet: null,
   drawnPointsSet: null,

@@ -45,7 +45,7 @@ export function actionZoom(z, xOriginOffset, yOriginOffset) {
     0
   )
   renderCanvas(null) //render all layers
-  vectorGui.render(state, canvas)
+  vectorGui.render()
 }
 
 /**
@@ -94,5 +94,5 @@ export function actionRecenter() {
   canvas.previousXOffset = canvas.xOffset
   canvas.previousYOffset = canvas.yOffset
   renderCanvas(null) //render all layers
-  vectorGui.render(state, canvas)
+  vectorGui.render()
 }

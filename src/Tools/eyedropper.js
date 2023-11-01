@@ -3,15 +3,17 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { consolidateLayers } from "../Canvas/layers.js"
-import { getColor } from "../utils/canvasHelpers.js"
+import { getColor } from "../utils/imageDataHelpers.js"
 import { setColor } from "../Swatch/events.js"
 
-//Eyedropper
-//TODO: add magnifying glass view that shows zoomed in view of area being sampled
+/**
+ * Eyedropper
+ * TODO: add magnifying glass view that shows zoomed in view of area being sampled
+ */
 function eyedropperSteps() {
   //eyedropper helper function
   function sampleColor(x, y) {
-    let newColor = getColor(x, y, state.colorLayerGlobal)
+    let newColor = getColor(state.colorLayerGlobal, x, y)
     //not simply passing whole color in until random color function is refined
     setColor(
       newColor.r,
