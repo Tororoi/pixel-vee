@@ -6,13 +6,13 @@
   z-index: 103;
   top: calc(50% - 235px);
   left: calc(50% - 183px);
+  width: 578px;
   display: none;
   flex-flow: column nowrap;
   justify-content: flex-start;
   color: white;
   background: $extra-dark-gray;
   text-align: center;
-  // width: 570px;
   font-family: "04Font";
   font-size: 16px;
   padding: 0;
@@ -28,232 +28,237 @@
   }
   .collapsible {
     padding-top: 2px;
-  }
-}
-
-.picker-interface {
-  display: flex;
-  flex-flow: row nowrap;
-  #left {
-    display: flex;
-    flex-flow: column nowrap;
-    margin: 10px;
-    margin-right: 0;
-    // height: 346px;
-    #picker {
+    .picker-interface {
       display: flex;
       flex-flow: row nowrap;
-      // height: 290px;
-      // width: 310px;
-      position: relative;
-      #color-picker {
-        background-color: white;
-        width: 250px;
-        height: 250px;
-        margin: 10px;
-        cursor: crosshair;
-        @include boxBorder;
-      }
-      .slider-container {
-        position: relative;
-        display: flex;
-        flex-flow: row nowrap;
-        width: 80px;
-      }
-      #hueslider {
-        position: absolute;
-        flex-shrink: 0;
-        -webkit-appearance: none;
-        appearance: none;
-        top: -10px;
-        left: 10px;
-        transform: rotate(90deg);
-        transform-origin: left;
-        width: 250px;
-        height: 20px;
-        margin: 10px;
-        background: white;
-        outline: none;
-        @include boxBorder;
-        &::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          height: 24px;
-          width: 5px;
-          outline: 2px solid $black;
-        }
-      }
-      #alphaslider {
-        position: absolute;
-        left: 40px;
-        flex-shrink: 0;
-        -webkit-appearance: none;
-        appearance: none;
-        top: 240px;
-        left: 50px;
-        transform: rotate(270deg);
-        transform-origin: left;
-        width: 250px;
-        height: 20px;
-        margin: 10px;
-        background-image: repeating-linear-gradient(
-          225deg,
-          white,
-          white 5px,
-          rgb(216, 216, 216) 5px,
-          rgb(216, 216, 216) 10px
-        );
-        outline: none;
-        @include boxBorder;
-        &::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          height: 24px;
-          width: 5px;
-          margin-top: -2px;
-          outline: 2px solid $black;
-        }
-        &::-webkit-slider-runnable-track {
-          height: 20px;
-          background-image: linear-gradient(
-            90deg,
-            rgba(var(--new-swatch-color), 0),
-            rgba(var(--new-swatch-color), 1)
-          );
-        }
-      }
-    }
-    #buttons {
-      display: flex;
-      flex-flow: row nowrap;
-      justify-content: center;
-      align-items: start;
       margin: 10px;
-      .btn {
-        background: $gray;
-        font-size: 20px;
-        padding: 8px;
-        margin: 0px 20px 0px 20px;
+      #left {
+        display: flex;
+        flex-flow: column nowrap;
+        #picker {
+          display: flex;
+          flex-flow: row nowrap;
+          position: relative;
+          #color-picker {
+            background-color: white;
+            width: 250px;
+            height: 250px;
+            margin: 10px;
+            cursor: crosshair;
+            @include boxBorder;
+          }
+          .slider-container {
+            position: relative;
+            display: flex;
+            flex-flow: row nowrap;
+            width: 80px;
+          }
+          #hueslider {
+            position: absolute;
+            flex-shrink: 0;
+            -webkit-appearance: none;
+            appearance: none;
+            top: -10px;
+            left: 10px;
+            transform: rotate(90deg);
+            transform-origin: left;
+            width: 250px;
+            height: 20px;
+            margin: 10px;
+            background: white;
+            outline: none;
+            @include boxBorder;
+            &::-webkit-slider-thumb {
+              -webkit-appearance: none;
+              height: 24px;
+              width: 5px;
+              outline: 2px solid $black;
+            }
+          }
+          #alphaslider {
+            position: absolute;
+            left: 40px;
+            flex-shrink: 0;
+            -webkit-appearance: none;
+            appearance: none;
+            top: 240px;
+            left: 50px;
+            transform: rotate(270deg);
+            transform-origin: left;
+            width: 250px;
+            height: 20px;
+            margin: 10px;
+            background-image: repeating-linear-gradient(
+              225deg,
+              white,
+              white 5px,
+              rgb(216, 216, 216) 5px,
+              rgb(216, 216, 216) 10px
+            );
+            outline: none;
+            @include boxBorder;
+            &::-webkit-slider-thumb {
+              -webkit-appearance: none;
+              height: 24px;
+              width: 5px;
+              margin-top: -2px;
+              outline: 2px solid $black;
+            }
+            &::-webkit-slider-runnable-track {
+              height: 20px;
+              background-image: linear-gradient(
+                90deg,
+                rgba(var(--new-swatch-color), 0),
+                rgba(var(--new-swatch-color), 1)
+              );
+            }
+          }
+        }
+        #buttons {
+          display: flex;
+          flex-flow: row nowrap;
+          justify-content: center;
+          align-items: start;
+          margin: 10px;
+          .btn {
+            background: $gray;
+            font-size: 20px;
+            padding: 8px;
+            margin: 0px 20px 0px 20px;
+          }
+        }
+      }
+      #right {
+        display: flex;
+        flex-flow: column nowrap;
+        align-items: flex-start;
+        label {
+          display: flex;
+          flex-flow: row nowrap;
+          margin-top: 10px;
+          margin-bottom: 10px;
+          input {
+            margin-left: 8px;
+          }
+        }
+        #colors {
+          display: flex;
+          justify-content: center;
+          width: 100%;
+          .color {
+            display: flex;
+            flex-flow: column nowrap;
+            justify-content: center;
+            margin: 10px;
+            h5 {
+              margin-top: 0;
+              margin-bottom: 10px;
+            }
+            .swatch {
+              width: 40px;
+              height: 40px;
+              background-image: repeating-linear-gradient(
+                -45deg,
+                white,
+                white 5px,
+                rgb(216, 216, 216) 5px,
+                rgb(216, 216, 216) 10px
+              );
+              margin: 0;
+              .swatch-color {
+                width: 100%;
+                height: 100%;
+              }
+              #newcolor {
+                background-image: radial-gradient(
+                  rgba(var(--new-swatch-color), var(--new-swatch-alpha)) 50%,
+                  rgba(var(--new-swatch-color), 1) 110%
+                );
+              }
+              #oldcolor {
+                background-image: radial-gradient(
+                  rgba(var(--old-swatch-color), var(--old-swatch-alpha)) 50%,
+                  rgba(var(--old-swatch-color), 1) 110%
+                );
+              }
+            }
+          }
+        }
+        #rgbahsl {
+          display: flex;
+          flex-flow: row nowrap;
+          width: 100%;
+          margin-left: 10px;
+          margin-right: 10px;
+          .channel-container {
+            display: flex;
+            flex-flow: column nowrap;
+          }
+          #hsl-container {
+            margin-left: 12px;
+          }
+          .sliderbox {
+            position: relative;
+            background-color: $darkest-gray;
+            width: 16px;
+            height: 18px;
+            margin-left: 6px;
+            overflow: hidden;
+            @include boxBorder;
+            .channel-btn {
+              position: absolute;
+              text-align: center;
+              width: 16px;
+              height: 9px;
+              left: 0;
+              color: white;
+              cursor: pointer;
+              &#inc {
+                top: 0;
+              }
+              &#dec {
+                bottom: 0;
+              }
+              p {
+                transform: translateX(1px) translateY(-2px);
+                margin: 0;
+                pointer-events: none;
+              }
+              &:hover {
+                background: white;
+                color: $darkest-gray;
+              }
+            }
+          }
+        }
+        #hex {
+          margin-left: 10px;
+          margin-right: 10px;
+          #hexcode {
+            width: 80px;
+          }
+        }
+        #lumi {
+          margin-left: 10px;
+          margin-right: 10px;
+          #luminance {
+            width: 26px;
+          }
+        }
       }
     }
   }
-  #right {
-    display: flex;
-    flex-flow: column nowrap;
-    align-items: flex-start;
-    // height: 346px;
-    // width: 260px;
-    margin: 10px;
-    margin-left: 0;
-    label {
-      display: flex;
-      flex-flow: row nowrap;
-      margin-top: 10px;
-      margin-bottom: 10px;
-      input {
-        margin-left: 8px;
-      }
-    }
-    #colors {
-      display: flex;
-      justify-content: center;
-      width: 100%;
-      .color {
-        display: flex;
+
+  @media (max-width: 600px) {
+    top: 0;
+    left: 0;
+    width: calc(100% - 4px);
+    max-width: calc(100% - 4px);
+    max-height: calc(100% - 4px);
+    .collapsible {
+      .picker-interface {
         flex-flow: column nowrap;
-        justify-content: center;
-        margin: 10px;
-        h5 {
-          margin-top: 0;
-          margin-bottom: 10px;
-        }
-        .swatch {
-          width: 72px;
-          height: 40px;
-          background-image: repeating-linear-gradient(
-            -45deg,
-            white,
-            white 5px,
-            rgb(216, 216, 216) 5px,
-            rgb(216, 216, 216) 10px
-          );
-          margin: 0;
-          .swatch-color {
-            width: 100%;
-            height: 100%;
-          }
-          #newcolor {
-            background-image: radial-gradient(
-              rgba(var(--new-swatch-color), var(--new-swatch-alpha)) 50%,
-              rgba(var(--new-swatch-color), 1) 110%
-            );
-          }
-          #oldcolor {
-            background-image: radial-gradient(
-              rgba(var(--old-swatch-color), var(--old-swatch-alpha)) 50%,
-              rgba(var(--old-swatch-color), 1) 110%
-            );
-          }
-        }
-      }
-    }
-    #rgbahsl {
-      display: flex;
-      flex-flow: row nowrap;
-      width: 100%;
-      margin-left: 10px;
-      margin-right: 10px;
-      .channel-container {
-        display: flex;
-        flex-flow: column nowrap;
-      }
-      #hsl-container {
-        margin-left: 12px;
-      }
-      .sliderbox {
-        position: relative;
-        background-color: $darkest-gray;
-        width: 16px;
-        height: 18px;
-        margin-left: 6px;
-        overflow: hidden;
-        @include boxBorder;
-        .channel-btn {
-          position: absolute;
-          text-align: center;
-          width: 16px;
-          height: 9px;
-          left: 0;
-          color: white;
-          cursor: pointer;
-          &#inc {
-            top: 0;
-          }
-          &#dec {
-            bottom: 0;
-          }
-          p {
-            transform: translateX(1px) translateY(-2px);
-            margin: 0;
-            pointer-events: none;
-          }
-          &:hover {
-            background: white;
-            color: $darkest-gray;
-          }
-        }
-      }
-    }
-    #hex {
-      margin-left: 10px;
-      margin-right: 10px;
-      #hexcode {
-        width: 80px;
-      }
-    }
-    #lumi {
-      margin-left: 10px;
-      margin-right: 10px;
-      #luminance {
-        width: 26px;
+        align-items: center;
       }
     }
   }
