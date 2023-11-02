@@ -1370,6 +1370,7 @@ canvas {
   z-index: 103;
   top: calc(50% - 235px);
   left: calc(50% - 183px);
+  width: 578px;
   display: none;
   flex-flow: column nowrap;
   justify-content: flex-start;
@@ -1394,23 +1395,21 @@ canvas {
 .picker-container .collapsible {
   padding-top: 2px;
 }
-
-.picker-interface {
+.picker-container .collapsible .picker-interface {
   display: flex;
   flex-flow: row nowrap;
+  margin: 10px;
 }
-.picker-interface #left {
+.picker-container .collapsible .picker-interface #left {
   display: flex;
   flex-flow: column nowrap;
-  margin: 10px;
-  margin-right: 0;
 }
-.picker-interface #left #picker {
+.picker-container .collapsible .picker-interface #left #picker {
   display: flex;
   flex-flow: row nowrap;
   position: relative;
 }
-.picker-interface #left #picker #color-picker {
+.picker-container .collapsible .picker-interface #left #picker #color-picker {
   background-color: white;
   width: 250px;
   height: 250px;
@@ -1418,16 +1417,16 @@ canvas {
   cursor: crosshair;
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.picker-interface #left #picker #color-picker:hover:not([disabled]), .picker-interface #left #picker #color-picker:focus {
+.picker-container .collapsible .picker-interface #left #picker #color-picker:hover:not([disabled]), .picker-container .collapsible .picker-interface #left #picker #color-picker:focus {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
-.picker-interface #left #picker .slider-container {
+.picker-container .collapsible .picker-interface #left #picker .slider-container {
   position: relative;
   display: flex;
   flex-flow: row nowrap;
   width: 80px;
 }
-.picker-interface #left #picker #hueslider {
+.picker-container .collapsible .picker-interface #left #picker #hueslider {
   position: absolute;
   flex-shrink: 0;
   -webkit-appearance: none;
@@ -1443,16 +1442,16 @@ canvas {
   outline: none;
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.picker-interface #left #picker #hueslider:hover:not([disabled]), .picker-interface #left #picker #hueslider:focus {
+.picker-container .collapsible .picker-interface #left #picker #hueslider:hover:not([disabled]), .picker-container .collapsible .picker-interface #left #picker #hueslider:focus {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
-.picker-interface #left #picker #hueslider::-webkit-slider-thumb {
+.picker-container .collapsible .picker-interface #left #picker #hueslider::-webkit-slider-thumb {
   -webkit-appearance: none;
   height: 24px;
   width: 5px;
   outline: 2px solid rgb(0, 0, 0);
 }
-.picker-interface #left #picker #alphaslider {
+.picker-container .collapsible .picker-interface #left #picker #alphaslider {
   position: absolute;
   left: 40px;
   flex-shrink: 0;
@@ -1469,95 +1468,93 @@ canvas {
   outline: none;
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.picker-interface #left #picker #alphaslider:hover:not([disabled]), .picker-interface #left #picker #alphaslider:focus {
+.picker-container .collapsible .picker-interface #left #picker #alphaslider:hover:not([disabled]), .picker-container .collapsible .picker-interface #left #picker #alphaslider:focus {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
-.picker-interface #left #picker #alphaslider::-webkit-slider-thumb {
+.picker-container .collapsible .picker-interface #left #picker #alphaslider::-webkit-slider-thumb {
   -webkit-appearance: none;
   height: 24px;
   width: 5px;
   margin-top: -2px;
   outline: 2px solid rgb(0, 0, 0);
 }
-.picker-interface #left #picker #alphaslider::-webkit-slider-runnable-track {
+.picker-container .collapsible .picker-interface #left #picker #alphaslider::-webkit-slider-runnable-track {
   height: 20px;
   background-image: linear-gradient(90deg, rgba(var(--new-swatch-color), 0), rgba(var(--new-swatch-color), 1));
 }
-.picker-interface #left #buttons {
+.picker-container .collapsible .picker-interface #left #buttons {
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
   align-items: start;
   margin: 10px;
 }
-.picker-interface #left #buttons .btn {
+.picker-container .collapsible .picker-interface #left #buttons .btn {
   background: rgb(77, 77, 77);
   font-size: 20px;
   padding: 8px;
   margin: 0px 20px 0px 20px;
 }
-.picker-interface #right {
+.picker-container .collapsible .picker-interface #right {
   display: flex;
   flex-flow: column nowrap;
   align-items: flex-start;
-  margin: 10px;
-  margin-left: 0;
 }
-.picker-interface #right label {
+.picker-container .collapsible .picker-interface #right label {
   display: flex;
   flex-flow: row nowrap;
   margin-top: 10px;
   margin-bottom: 10px;
 }
-.picker-interface #right label input {
+.picker-container .collapsible .picker-interface #right label input {
   margin-left: 8px;
 }
-.picker-interface #right #colors {
+.picker-container .collapsible .picker-interface #right #colors {
   display: flex;
   justify-content: center;
   width: 100%;
 }
-.picker-interface #right #colors .color {
+.picker-container .collapsible .picker-interface #right #colors .color {
   display: flex;
   flex-flow: column nowrap;
   justify-content: center;
   margin: 10px;
 }
-.picker-interface #right #colors .color h5 {
+.picker-container .collapsible .picker-interface #right #colors .color h5 {
   margin-top: 0;
   margin-bottom: 10px;
 }
-.picker-interface #right #colors .color .swatch {
-  width: 72px;
+.picker-container .collapsible .picker-interface #right #colors .color .swatch {
+  width: 40px;
   height: 40px;
   background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   margin: 0;
 }
-.picker-interface #right #colors .color .swatch .swatch-color {
+.picker-container .collapsible .picker-interface #right #colors .color .swatch .swatch-color {
   width: 100%;
   height: 100%;
 }
-.picker-interface #right #colors .color .swatch #newcolor {
+.picker-container .collapsible .picker-interface #right #colors .color .swatch #newcolor {
   background-image: radial-gradient(rgba(var(--new-swatch-color), var(--new-swatch-alpha)) 50%, rgba(var(--new-swatch-color), 1) 110%);
 }
-.picker-interface #right #colors .color .swatch #oldcolor {
+.picker-container .collapsible .picker-interface #right #colors .color .swatch #oldcolor {
   background-image: radial-gradient(rgba(var(--old-swatch-color), var(--old-swatch-alpha)) 50%, rgba(var(--old-swatch-color), 1) 110%);
 }
-.picker-interface #right #rgbahsl {
+.picker-container .collapsible .picker-interface #right #rgbahsl {
   display: flex;
   flex-flow: row nowrap;
   width: 100%;
   margin-left: 10px;
   margin-right: 10px;
 }
-.picker-interface #right #rgbahsl .channel-container {
+.picker-container .collapsible .picker-interface #right #rgbahsl .channel-container {
   display: flex;
   flex-flow: column nowrap;
 }
-.picker-interface #right #rgbahsl #hsl-container {
+.picker-container .collapsible .picker-interface #right #rgbahsl #hsl-container {
   margin-left: 12px;
 }
-.picker-interface #right #rgbahsl .sliderbox {
+.picker-container .collapsible .picker-interface #right #rgbahsl .sliderbox {
   position: relative;
   background-color: rgb(31, 31, 31);
   width: 16px;
@@ -1566,10 +1563,10 @@ canvas {
   overflow: hidden;
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.picker-interface #right #rgbahsl .sliderbox:hover:not([disabled]), .picker-interface #right #rgbahsl .sliderbox:focus {
+.picker-container .collapsible .picker-interface #right #rgbahsl .sliderbox:hover:not([disabled]), .picker-container .collapsible .picker-interface #right #rgbahsl .sliderbox:focus {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
-.picker-interface #right #rgbahsl .sliderbox .channel-btn {
+.picker-container .collapsible .picker-interface #right #rgbahsl .sliderbox .channel-btn {
   position: absolute;
   text-align: center;
   width: 16px;
@@ -1578,34 +1575,47 @@ canvas {
   color: white;
   cursor: pointer;
 }
-.picker-interface #right #rgbahsl .sliderbox .channel-btn#inc {
+.picker-container .collapsible .picker-interface #right #rgbahsl .sliderbox .channel-btn#inc {
   top: 0;
 }
-.picker-interface #right #rgbahsl .sliderbox .channel-btn#dec {
+.picker-container .collapsible .picker-interface #right #rgbahsl .sliderbox .channel-btn#dec {
   bottom: 0;
 }
-.picker-interface #right #rgbahsl .sliderbox .channel-btn p {
+.picker-container .collapsible .picker-interface #right #rgbahsl .sliderbox .channel-btn p {
   transform: translateX(1px) translateY(-2px);
   margin: 0;
   pointer-events: none;
 }
-.picker-interface #right #rgbahsl .sliderbox .channel-btn:hover {
+.picker-container .collapsible .picker-interface #right #rgbahsl .sliderbox .channel-btn:hover {
   background: white;
   color: rgb(31, 31, 31);
 }
-.picker-interface #right #hex {
+.picker-container .collapsible .picker-interface #right #hex {
   margin-left: 10px;
   margin-right: 10px;
 }
-.picker-interface #right #hex #hexcode {
+.picker-container .collapsible .picker-interface #right #hex #hexcode {
   width: 80px;
 }
-.picker-interface #right #lumi {
+.picker-container .collapsible .picker-interface #right #lumi {
   margin-left: 10px;
   margin-right: 10px;
 }
-.picker-interface #right #lumi #luminance {
+.picker-container .collapsible .picker-interface #right #lumi #luminance {
   width: 26px;
+}
+@media (max-width: 600px) {
+  .picker-container {
+    top: 0;
+    left: 0;
+    width: calc(100% - 4px);
+    max-width: calc(100% - 4px);
+    max-height: calc(100% - 4px);
+  }
+  .picker-container .collapsible .picker-interface {
+    flex-flow: column nowrap;
+    align-items: center;
+  }
 }
 
 /* Canvas Size settings */
