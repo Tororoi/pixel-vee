@@ -94,7 +94,10 @@ input {
   font-size: 16px;
   background-color: $darkest-gray;
   color: white;
+  border-radius: 0;
   -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   border: none;
   outline: none;
   @include boxBorder;
