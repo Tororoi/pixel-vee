@@ -151,6 +151,7 @@ function switchColors() {
     "--secondary-swatch-alpha",
     `${temp.a / 255}`
   )
+  renderPaletteToDOM()
 }
 
 /**
