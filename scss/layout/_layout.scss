@@ -46,9 +46,13 @@
   &.h-drag {
     @include boxBorder;
   }
-  .dragging {
+  &.dragging {
+    cursor: grabbing;
     user-select: none;
     z-index: 150;
+    > * {
+      cursor: grabbing !important;
+    }
   }
   .header {
     background-color: $black;

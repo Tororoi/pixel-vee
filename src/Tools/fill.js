@@ -131,4 +131,5 @@ export const fill = {
   options: { contiguous: true, erase: false, inject: true },
   type: "vector",
   cursor: "crosshair",
+  activeCursor: "crosshair",
 }

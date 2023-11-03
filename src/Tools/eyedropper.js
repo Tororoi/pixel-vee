@@ -55,4 +55,5 @@ export const eyedropper = {
   options: {},
   type: "utility",
   cursor: "none",
+  activeCursor: "none",
 }

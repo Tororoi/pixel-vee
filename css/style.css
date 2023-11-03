@@ -124,8 +124,13 @@ button:disabled {
 }
 
 input {
+  box-sizing: border-box;
   font-family: "04Font";
   font-size: 16px;
+  padding-block: 0px;
+  padding-inline: 0px;
+  padding: 0px;
+  text-indent: 2px;
   background-color: rgb(31, 31, 31);
   color: white;
   border-radius: 0;
@@ -145,6 +150,8 @@ input[type=number] {
 }
 input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {
   -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
   margin: 0;
 }
 
@@ -224,9 +231,13 @@ svg {
 .draggable.h-drag:hover:not([disabled]), .draggable.h-drag:focus {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
-.draggable .dragging {
+.draggable.dragging {
+  cursor: grabbing;
   user-select: none;
   z-index: 150;
+}
+.draggable.dragging > * {
+  cursor: grabbing !important;
 }
 .draggable .header {
   background-color: rgb(0, 0, 0);
@@ -1033,7 +1044,7 @@ canvas {
   position: absolute;
   right: 0;
   top: 0;
-  cursor: grab;
+  cursor: pointer;
   width: 20px;
   height: 20px;
   background: rgb(131, 131, 131);
@@ -1377,7 +1388,7 @@ canvas {
   user-select: none;
   position: absolute;
   z-index: 103;
-  width: 578px;
+  width: 570px;
   display: none;
   flex-flow: column nowrap;
   justify-content: flex-start;
@@ -1433,57 +1444,47 @@ canvas {
   flex-flow: row nowrap;
   width: 80px;
 }
-.picker-container .collapsible .picker-interface #left #picker #hueslider {
-  position: absolute;
-  flex-shrink: 0;
+.picker-container .collapsible .picker-interface #left #picker .picker-slider {
   -webkit-appearance: none;
   appearance: none;
-  top: -10px;
-  left: 10px;
-  transform: rotate(90deg);
-  transform-origin: left;
+  cursor: pointer;
+  position: absolute;
+  flex-shrink: 0;
+  background-image: repeating-linear-gradient(225deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   width: 250px;
   height: 20px;
   margin: 10px;
-  background: white;
   outline: none;
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
-.picker-container .collapsible .picker-interface #left #picker #hueslider:hover:not([disabled]), .picker-container .collapsible .picker-interface #left #picker #hueslider:focus {
+.picker-container .collapsible .picker-interface #left #picker .picker-slider:hover:not([disabled]), .picker-container .collapsible .picker-interface #left #picker .picker-slider:focus {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
-.picker-container .collapsible .picker-interface #left #picker #hueslider::-webkit-slider-thumb {
+.picker-container .collapsible .picker-interface #left #picker .picker-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
+  background: transparent;
   height: 24px;
-  width: 5px;
-  outline: 2px solid rgb(0, 0, 0);
+  width: 9px;
+  border: 2px solid black;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+.picker-container .collapsible .picker-interface #left #picker .picker-slider:hover::-webkit-slider-thumb, .picker-container .collapsible .picker-interface #left #picker .picker-slider:focus::-webkit-slider-thumb {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+.picker-container .collapsible .picker-interface #left #picker #hueslider {
+  top: 240px;
+  left: 10px;
+  transform: rotate(270deg);
+  transform-origin: left;
 }
 .picker-container .collapsible .picker-interface #left #picker #alphaslider {
-  position: absolute;
-  left: 40px;
-  flex-shrink: 0;
-  -webkit-appearance: none;
-  appearance: none;
   top: 240px;
   left: 50px;
   transform: rotate(270deg);
   transform-origin: left;
-  width: 250px;
-  height: 20px;
-  margin: 10px;
-  background-image: repeating-linear-gradient(225deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
-  outline: none;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
-}
-.picker-container .collapsible .picker-interface #left #picker #alphaslider:hover:not([disabled]), .picker-container .collapsible .picker-interface #left #picker #alphaslider:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .picker-container .collapsible .picker-interface #left #picker #alphaslider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  height: 24px;
-  width: 5px;
   margin-top: -2px;
-  outline: 2px solid rgb(0, 0, 0);
 }
 .picker-container .collapsible .picker-interface #left #picker #alphaslider::-webkit-slider-runnable-track {
   height: 20px;

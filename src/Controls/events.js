@@ -124,6 +124,7 @@ function handlePointerDown(e) {
   if (state.clickDisabled) {
     return
   }
+  canvas.vectorGuiCVS.style.cursor = state.tool.activeCursor
   setCoordinates(e)
   if (state.touch) {
     vectorGui.render() // For tablets, vectors must be rendered before running state.tool.fn in order to check control points collision logic
@@ -219,6 +220,7 @@ function handlePointerUp(e) {
     return
   }
   state.clicked = false
+  canvas.vectorGuiCVS.style.cursor = state.tool.cursor
   setCoordinates(e)
   if (canvas.currentLayer.hidden) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
