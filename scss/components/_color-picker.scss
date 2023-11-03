@@ -4,9 +4,7 @@
   user-select: none;
   position: absolute;
   z-index: 103;
-  top: calc(50% - 235px);
-  left: calc(50% - 183px);
-  width: 578px;
+  width: 578px; //important to be fixed for collapsed state
   display: none;
   flex-flow: column nowrap;
   justify-content: flex-start;
@@ -249,10 +247,8 @@
     }
   }
 
-  @media (max-width: 600px) {
-    top: 0;
-    left: 0;
-    width: calc(100% - 4px);
+  @media (max-width: 700px) {
+    width: 370px;
     max-width: calc(100% - 4px);
     max-height: calc(100% - 4px);
     .collapsible {
