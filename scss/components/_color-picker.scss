@@ -4,7 +4,7 @@
   user-select: none;
   position: absolute;
   z-index: 103;
-  width: 578px; //important to be fixed for collapsed state
+  width: 570px; //important to be fixed for collapsed state
   display: none;
   flex-flow: column nowrap;
   justify-content: flex-start;
@@ -51,41 +51,12 @@
             flex-flow: row nowrap;
             width: 80px;
           }
-          #hueslider {
-            position: absolute;
-            flex-shrink: 0;
+          .picker-slider {
             -webkit-appearance: none;
             appearance: none;
-            top: -10px;
-            left: 10px;
-            transform: rotate(90deg);
-            transform-origin: left;
-            width: 250px;
-            height: 20px;
-            margin: 10px;
-            background: white;
-            outline: none;
-            @include boxBorder;
-            &::-webkit-slider-thumb {
-              -webkit-appearance: none;
-              height: 24px;
-              width: 5px;
-              outline: 2px solid $black;
-            }
-          }
-          #alphaslider {
+            cursor: pointer;
             position: absolute;
-            left: 40px;
             flex-shrink: 0;
-            -webkit-appearance: none;
-            appearance: none;
-            top: 240px;
-            left: 50px;
-            transform: rotate(270deg);
-            transform-origin: left;
-            width: 250px;
-            height: 20px;
-            margin: 10px;
             background-image: repeating-linear-gradient(
               225deg,
               white,
@@ -93,14 +64,39 @@
               rgb(216, 216, 216) 5px,
               rgb(216, 216, 216) 10px
             );
+            width: 250px;
+            height: 20px;
+            margin: 10px;
             outline: none;
             @include boxBorder;
             &::-webkit-slider-thumb {
               -webkit-appearance: none;
+              background: transparent;
               height: 24px;
-              width: 5px;
+              width: 9px;
+              border: 2px solid black;
+              @include inactiveBoxBorder;
+            }
+            &:hover,
+            &:focus {
+              &::-webkit-slider-thumb {
+                @include activeBoxBorder;
+              }
+            }
+          }
+          #hueslider {
+            top: 240px;
+            left: 10px;
+            transform: rotate(270deg);
+            transform-origin: left;
+          }
+          #alphaslider {
+            top: 240px;
+            left: 50px;
+            transform: rotate(270deg);
+            transform-origin: left;
+            &::-webkit-slider-thumb {
               margin-top: -2px;
-              outline: 2px solid $black;
             }
             &::-webkit-slider-runnable-track {
               height: 20px;

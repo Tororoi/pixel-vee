@@ -29,6 +29,7 @@ export function activateShortcut(keyCode) {
         canvas.vectorGuiCVS.style.cursor = state.tool.cursor
         updateStamp()
         renderCanvas(canvas.currentLayer)
+        vectorGui.render()
         renderCursor(state, canvas, swatches)
       }
       break
@@ -40,6 +41,7 @@ export function activateShortcut(keyCode) {
         canvas.vectorGuiCVS.style.cursor = state.tool.cursor
         updateStamp()
         renderCanvas(canvas.currentLayer)
+        vectorGui.render()
         renderCursor(state, canvas, swatches)
       }
       break
@@ -67,48 +69,58 @@ export function activateShortcut(keyCode) {
       //
       break
     case "KeyB":
-      handleTools(null, "brush")
+      if (!state.clicked) {
+        handleTools(null, "brush")
+      }
       break
     case "KeyC":
-      if (keys.MetaLeft || keys.MetaRight) {
-        // console.log("copy")
-        //copy function should make an image from the currently selected area defined by
-        //state.selectProperties and store it in state.copiedRaster.image and store x, y in
-        //state.copiedRaster.x, state.copiedRaster.y, along with width and height.
-        //Advanced method would be to save an image from imageData defined by maskSet.
-        // Do not add to timeline
-      } else {
-        handleTools(null, "quadCurve")
+      if (!state.clicked) {
+        if (keys.MetaLeft || keys.MetaRight) {
+          // console.log("copy")
+          //copy function should make an image from the currently selected area defined by
+          //state.selectProperties and store it in state.copiedRaster.image and store x, y in
+          //state.copiedRaster.x, state.copiedRaster.y, along with width and height.
+          //Advanced method would be to save an image from imageData defined by maskSet.
+          // Do not add to timeline
+        } else {
+          handleTools(null, "quadCurve")
+        }
       }
       break
     case "KeyD":
-      if (keys.MetaLeft || keys.MetaRight) {
-        //deselect
-        if (state.selectProperties.px1) {
-          state.addToTimeline({
-            tool: tools.select,
-            layer: canvas.currentLayer,
-            properties: {
-              deselect: true,
-              selectProperties: { ...state.selectProperties },
-              maskSet: state.maskSet,
-            },
-          })
-          state.undoStack.push(state.action)
-          state.action = null
-          state.redoStack = []
-          state.resetSelectProperties()
-          vectorGui.render()
+      if (!state.clicked) {
+        if (keys.MetaLeft || keys.MetaRight) {
+          //deselect
+          if (state.selectProperties.px1) {
+            state.addToTimeline({
+              tool: tools.select,
+              layer: canvas.currentLayer,
+              properties: {
+                deselect: true,
+                selectProperties: { ...state.selectProperties },
+                maskSet: state.maskSet,
+              },
+            })
+            state.undoStack.push(state.action)
+            state.action = null
+            state.redoStack = []
+            state.resetSelectProperties()
+            vectorGui.render()
+          }
+        } else {
+          handleModes(null, "draw")
         }
-      } else {
-        handleModes(null, "draw")
       }
       break
     case "KeyE":
-      handleModes(null, "erase")
+      if (!state.clicked) {
+        handleModes(null, "erase")
+      }
       break
     case "KeyF":
-      handleTools(null, "fill")
+      if (!state.clicked) {
+        handleTools(null, "fill")
+      }
       break
     case "KeyG":
       //
@@ -117,30 +129,44 @@ export function activateShortcut(keyCode) {
       //
       break
     case "KeyI":
-      handleModes(null, "inject")
+      if (!state.clicked) {
+        handleModes(null, "inject")
+      }
       break
     case "KeyJ":
-      handleTools(null, "cubicCurve")
+      if (!state.clicked) {
+        handleTools(null, "cubicCurve")
+      }
       break
     case "KeyK":
-      swatches.paletteMode = "edit"
-      renderPaletteToolsToDOM()
-      renderPaletteToDOM()
+      if (!state.clicked) {
+        swatches.paletteMode = "edit"
+        renderPaletteToolsToDOM()
+        renderPaletteToDOM()
+      }
       break
     case "KeyL":
-      handleTools(null, "line")
+      if (!state.clicked) {
+        handleTools(null, "line")
+      }
       break
     case "KeyM":
-      handleTools(null, "replace")
+      if (!state.clicked) {
+        handleTools(null, "replace")
+      }
       break
     case "KeyN":
       //
       break
     case "KeyO":
-      handleTools(null, "ellipse")
+      if (!state.clicked) {
+        handleTools(null, "ellipse")
+      }
       break
     case "KeyP":
-      handleModes(null, "perfect")
+      if (!state.clicked) {
+        handleModes(null, "perfect")
+      }
       break
     case "KeyQ":
       //
@@ -159,37 +185,43 @@ export function activateShortcut(keyCode) {
       //
       break
     case "KeyV":
-      if (keys.MetaLeft || keys.MetaRight) {
-        // console.log("paste")
-        //paste function should create a new raster layer and draw the image from state.copiedRaster.image at state.copiedRaster.x, etc.
-        //activate select tool for area pasted
-        // add image, coordinates and new layer to timeline as "paste" action
+      if (!state.clicked) {
+        if (keys.MetaLeft || keys.MetaRight) {
+          // console.log("paste")
+          //paste function should create a new raster layer and draw the image from state.copiedRaster.image at state.copiedRaster.x, etc.
+          //activate select tool for area pasted
+          // add image, coordinates and new layer to timeline as "paste" action
+        }
       }
       break
     case "KeyW":
       //
       break
     case "KeyX":
-      if (keys.MetaLeft || keys.MetaRight) {
-        // console.log("cut")
-        //clear selected area, add image to state.copiedRaster, etc.
-        //add to timeline as "eraser" tool for points in selection
-      } else {
-        swatches.paletteMode = "remove"
-        renderPaletteToolsToDOM()
-        renderPaletteToDOM()
+      if (!state.clicked) {
+        if (keys.MetaLeft || keys.MetaRight) {
+          // console.log("cut")
+          //clear selected area, add image to state.copiedRaster, etc.
+          //add to timeline as "eraser" tool for points in selection
+        } else {
+          swatches.paletteMode = "remove"
+          renderPaletteToolsToDOM()
+          renderPaletteToDOM()
+        }
       }
       break
     case "KeyY":
       //
       break
     case "KeyZ":
-      if (keys.MetaLeft || keys.MetaRight) {
-        if (keys.ShiftLeft || keys.ShiftRight) {
-          //shift+meta+z
-          handleRedo()
-        } else {
-          handleUndo()
+      if (!state.clicked) {
+        if (keys.MetaLeft || keys.MetaRight) {
+          if (keys.ShiftLeft || keys.ShiftRight) {
+            //shift+meta+z
+            handleRedo()
+          } else {
+            handleUndo()
+          }
         }
       }
       break
@@ -217,6 +249,7 @@ export function deactivateShortcut(keyCode) {
         updateStamp()
         canvas.previousXOffset = canvas.xOffset
         canvas.previousYOffset = canvas.yOffset
+        vectorGui.render()
         renderCursor(state, canvas, swatches)
         setToolCssCursor()
         //TODO: refactor so grabSteps can be called instead with a manually supplied pointer event pointerup
@@ -283,9 +316,11 @@ export function deactivateShortcut(keyCode) {
       //
       break
     case "KeyK":
-      swatches.paletteMode = "select"
-      renderPaletteToolsToDOM()
-      renderPaletteToDOM()
+      if (!state.clicked) {
+        swatches.paletteMode = "select"
+        renderPaletteToolsToDOM()
+        renderPaletteToDOM()
+      }
       break
     case "KeyL":
       //
@@ -324,22 +359,17 @@ export function deactivateShortcut(keyCode) {
       //
       break
     case "KeyX":
-      swatches.paletteMode = "select"
-      renderPaletteToolsToDOM()
-      renderPaletteToDOM()
+      if (!state.clicked) {
+        swatches.paletteMode = "select"
+        renderPaletteToolsToDOM()
+        renderPaletteToDOM()
+      }
       break
     case "KeyY":
       //
       break
     case "KeyZ":
-      if (keys.MetaLeft || keys.MetaRight) {
-        if (keys.ShiftLeft || keys.ShiftRight) {
-          //shift+meta+z
-          handleRedo()
-        } else {
-          handleUndo()
-        }
-      }
+      //
       break
     default:
     //do nothing
