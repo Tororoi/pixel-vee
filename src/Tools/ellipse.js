@@ -414,4 +414,5 @@ export const ellipse = {
   }, // need to expand radiusExcludesCenter to cover multiple scenarios, centerx = 0 or 1 and centery = 0 or 1
   type: "vector",
   cursor: "crosshair",
+  activeCursor: "crosshair",
 }

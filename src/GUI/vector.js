@@ -108,7 +108,7 @@ function setCursorStyle() {
 
   //If pointer is colliding with a vector control point:
   if (state.tool.name !== "move") {
-    canvas.vectorGuiCVS.style.cursor = "move"
+    canvas.vectorGuiCVS.style.cursor = "move" //TODO: maybe use grab/ grabbing
   } else {
     //Handle cursor for transform
     const xKey = vectorGui.collidedKeys.xKey

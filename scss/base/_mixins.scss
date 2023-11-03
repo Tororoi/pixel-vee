@@ -1,14 +1,18 @@
-@mixin boxBorder {
+@mixin inactiveBoxBorder {
   box-shadow: 2px 0px $border-color, -2px 0px $border-color,
     0px -2px $border-color, 0px 2px $border-color;
-  &:hover:not([disabled]),
-  &:focus {
-    box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white, 0px 2px $white;
-  }
 }
 
 @mixin activeBoxBorder {
   box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white, 0px 2px $white;
+}
+
+@mixin boxBorder {
+  @include inactiveBoxBorder;
+  &:hover:not([disabled]),
+  &:focus {
+    @include activeBoxBorder;
+  }
 }
 
 @mixin editBoxBorder {
@@ -74,6 +78,12 @@
   &:focus {
     box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white, 0px 2px $white;
   }
+}
+
+@mixin doubleThinActiveBorder {
+  box-shadow: 1px 0px $black, -1px 0px $black, 0px -1px $black, 0px 1px $black,
+    0 0 0 1px $white, 2px 0px $white, -2px 0px $white, 0px -2px $white,
+    0px 2px $white;
 }
 
 @mixin cancelBorder {

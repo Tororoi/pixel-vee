@@ -179,4 +179,5 @@ export const move = {
   options: {},
   type: "raster",
   cursor: "move",
+  activeCursor: "move",
 }

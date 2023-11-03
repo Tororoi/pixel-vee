@@ -40,4 +40,5 @@ export const grab = {
   options: {},
   type: "utility",
   cursor: "grab",
+  activeCursor: "grabbing",
 }

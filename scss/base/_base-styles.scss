@@ -90,8 +90,13 @@ button {
 }
 
 input {
+  box-sizing: border-box;
   font-family: "04Font";
   font-size: 16px;
+  padding-block: 0px;
+  padding-inline: 0px;
+  padding: 0px;
+  text-indent: 2px;
   background-color: $darkest-gray;
   color: white;
   border-radius: 0;
@@ -108,6 +113,8 @@ input[type="number"] {
   &::-webkit-inner-spin-button,
   &::-webkit-outer-spin-button {
     -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
     margin: 0;
   }
 }
