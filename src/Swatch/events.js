@@ -12,6 +12,7 @@ import {
   renderPaletteToDOM,
 } from "../DOM/render.js"
 import { changeActionColor } from "../Actions/actions.js"
+import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
 
 //====================================//
 //===== * * * Color Picker * * * =====//
@@ -109,8 +110,13 @@ export function initializeColorPicker(target) {
   picker.update(initialColorReference)
   //show colorpicker
   dom.colorPickerContainer.style.display = "flex"
+  dom.colorPickerContainer.style.top =
+    dom.colorPickerContainer.offsetTop - 2 + "px"
   //allow colorPickerContainer events
   dom.colorPickerContainer.style.pointerEvents = "auto"
+  if (dom.colorPickerContainer.offsetHeight !== 0) {
+    constrainElementOffsets(dom.colorPickerContainer)
+  }
 }
 
 /**

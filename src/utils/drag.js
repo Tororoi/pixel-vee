@@ -1,4 +1,5 @@
 import { state } from "../Context/state.js"
+import { constrainElementOffsets } from "./constrainElementOffsets.js"
 
 export const initializeDragger = (dragTarget) => {
   const dragBtn = dragTarget.querySelector(".dragger")
@@ -204,12 +205,16 @@ export const dragMove = (e) => {
     let pRect = parentElement.getBoundingClientRect()
     let tgtRect = state.dragTarget.getBoundingClientRect()
     //Constrain draggable element inside window, include box shadow border
-    if (tgtRect.left < pRect.left) state.dragTarget.style.left = 0 + "px"
-    if (tgtRect.top < pRect.top + 2) state.dragTarget.style.top = 0 + "px"
-    if (tgtRect.right > pRect.right)
-      state.dragTarget.style.left = pRect.width - tgtRect.width - 4 + "px"
-    if (tgtRect.bottom > pRect.bottom - 2) {
-      state.dragTarget.style.top = pRect.height - tgtRect.height - 4 + "px"
+    if (state.dragTarget.className.includes("h-drag")) {
+      if (tgtRect.left - 2 < pRect.left) state.dragTarget.style.left = 0 + "px"
+      if (tgtRect.right + 2 > pRect.right)
+        state.dragTarget.style.left = pRect.width - tgtRect.width - 4 + "px"
+    }
+    if (state.dragTarget.className.includes("v-drag")) {
+      if (tgtRect.top - 2 < pRect.top) state.dragTarget.style.top = 0 + "px"
+      if (tgtRect.bottom + 2 > pRect.bottom) {
+        state.dragTarget.style.top = pRect.height - tgtRect.height - 4 + "px"
+      }
     }
   }
 }
