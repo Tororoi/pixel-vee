@@ -4,8 +4,6 @@
   user-select: none;
   position: absolute;
   z-index: 103;
-  // top: calc(50% - 235px);
-  // left: calc(50% - 183px);
   width: 578px; //important to be fixed for collapsed state
   display: none;
   flex-flow: column nowrap;
@@ -250,9 +248,6 @@
   }
 
   @media (max-width: 700px) {
-    // top: 0;
-    // left: 0;
-    // width: calc(100% - 4px);
     width: 370px;
     max-width: calc(100% - 4px);
     max-height: calc(100% - 4px);
