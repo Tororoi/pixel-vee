@@ -15,6 +15,7 @@ import { vectorGui } from "../GUI/vector.js"
 import { swatches } from "../Context/swatch.js"
 import { setInitialZoom } from "../utils/canvasHelpers.js"
 import { initializeColorPicker } from "../Swatch/events.js"
+import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
 
 //====================================//
 //==== * * * Canvas Resize * * * =====//
@@ -196,11 +197,10 @@ const resizeOnScreenCanvas = () => {
   dom.toolboxContainer.style.top = ""
   dom.sidebarContainer.style.left = ""
   dom.sidebarContainer.style.top = ""
-  dom.colorPickerContainer.style.left = ""
-  dom.colorPickerContainer.style.top = ""
+  if (dom.colorPickerContainer.offsetHeight !== 0) {
+    constrainElementOffsets(dom.colorPickerContainer)
+  }
 }
-
-resizeOnScreenCanvas()
 
 //====================================//
 //======== * * * Layers * * * ========//
