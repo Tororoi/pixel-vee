@@ -587,7 +587,6 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgb(131, 131, 131);
   user-select: none;
   text-align: center;
   color: white;
@@ -595,6 +594,7 @@ canvas {
   height: 40px;
   margin: 3px;
   opacity: 1;
+  background-color: rgb(131, 131, 131);
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .toolbox .collapsible .tool:hover:not([disabled]), .toolbox .collapsible .tool:focus,
@@ -632,13 +632,14 @@ canvas {
   justify-content: space-around;
 }
 .toolbox .collapsible .btn-pair button {
-  margin: 6px;
+  margin: 8px;
 }
 .toolbox .collapsible .columns {
   display: flex;
   justify-content: center;
   width: 100%;
   margin: 2px;
+  margin-bottom: 10px;
 }
 .toolbox .collapsible .columns .tool:hover,
 .toolbox .collapsible .columns .mode:hover {
@@ -649,7 +650,7 @@ canvas {
   justify-content: flex-start;
   align-items: center;
   flex-flow: column wrap;
-  margin: 2px;
+  margin: 4px;
 }
 .toolbox .collapsible .columns .column h4 {
   text-align: center;
