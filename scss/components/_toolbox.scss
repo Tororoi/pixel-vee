@@ -95,7 +95,7 @@ $tools: brush replace fill line quadCurve cubicCurve ellipse eyedropper grab
   }
 }
 
-$one-time-tools: recenter clear undo redo plus minus;
+$one-time-tools: recenter clear undo redo plus minus switch;
 
 @each $tool in $one-time-tools {
   .#{$tool} {
