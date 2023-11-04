@@ -2,13 +2,20 @@
 //================ * * * Tools * * * ===============//
 //==================================================//
 
-@mixin tool-style($tool-name) {
+@mixin tool-style($tool-name, $hover: false) {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-#{$tool-name}.png");
+  background: url("../public/pixelv-#{$tool-name}.png") no-repeat;
   background-size: 100%;
+  &:hover {
+    @if $hover {
+      background: url("../public/pixelv-#{$tool-name}-hover.png") no-repeat;
+      background-size: 100%;
+    }
+  }
   &.selected {
-    background-image: url("../public/pixelv-#{$tool-name}-hover.png");
+    background: url("../public/pixelv-#{$tool-name}-hover.png") no-repeat;
+    background-size: 100%;
   }
 }
 

@@ -166,59 +166,10 @@
   margin: 3px;
   opacity: 1;
   @include boxBorder;
-  &.custom-shape {
-    background: transparent;
-    @include cancelBorder;
-    &:hover {
-      .outline {
-        stroke: white; //for svgs
-      }
-    }
-  }
   &:hover {
     cursor: pointer;
   }
   * {
     pointer-events: none; //btn children should not be interactable
-  }
-}
-
-.btn-pair {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 6px;
-  margin-bottom: 6px;
-  width: 100%;
-  .custom-shape {
-    width: 44px;
-    height: 44px;
-  }
-}
-
-.columns {
-  display: flex;
-  justify-content: space-evenly;
-  width: 100%;
-  margin-bottom: 12px;
-  margin-top: 6px;
-  .btn,
-  .tool,
-  .mode {
-    // background: rgb(77, 77, 77);
-    // margin: 1px;
-    &:hover {
-      z-index: 104;
-    }
-  }
-  .column {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    flex-flow: column wrap;
-    width: 50%;
-    h4 {
-      text-align: center;
-      margin: 0px;
-    }
   }
 }

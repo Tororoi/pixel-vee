@@ -405,57 +405,11 @@ svg {
 .btn:hover:not([disabled]), .btn:focus {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
-.btn.custom-shape {
-  background: transparent;
-  box-shadow: none;
-}
-.btn.custom-shape:hover:not([disabled]), .btn.custom-shape:focus {
-  box-shadow: none;
-}
-.btn.custom-shape:hover .outline {
-  stroke: white;
-}
 .btn:hover {
   cursor: pointer;
 }
 .btn * {
   pointer-events: none;
-}
-
-.btn-pair {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 6px;
-  margin-bottom: 6px;
-  width: 100%;
-}
-.btn-pair .custom-shape {
-  width: 44px;
-  height: 44px;
-}
-
-.columns {
-  display: flex;
-  justify-content: space-evenly;
-  width: 100%;
-  margin-bottom: 12px;
-  margin-top: 6px;
-}
-.columns .btn:hover,
-.columns .tool:hover,
-.columns .mode:hover {
-  z-index: 104;
-}
-.columns .column {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  flex-flow: column wrap;
-  width: 50%;
-}
-.columns .column h4 {
-  text-align: center;
-  margin: 0px;
 }
 
 .nav {
@@ -608,7 +562,7 @@ canvas {
   position: absolute;
   z-index: 102;
   background-color: rgb(51, 51, 51);
-  width: 136px;
+  width: 120px;
   right: 0;
   top: 0;
   display: flex;
@@ -622,6 +576,9 @@ canvas {
 }
 .toolbox .collapsible {
   padding-top: 2px;
+}
+.toolbox .collapsible :first-child {
+  margin-top: 6px;
 }
 .toolbox .collapsible .tool,
 .toolbox .collapsible .mode {
@@ -655,7 +612,7 @@ canvas {
 }
 .toolbox .collapsible .tool.custom-shape,
 .toolbox .collapsible .mode.custom-shape {
-  background: transparent;
+  background-color: transparent;
   box-shadow: none;
 }
 .toolbox .collapsible .tool.custom-shape:hover:not([disabled]), .toolbox .collapsible .tool.custom-shape:focus,
@@ -663,173 +620,283 @@ canvas {
 .toolbox .collapsible .mode.custom-shape:focus {
   box-shadow: none;
 }
-.toolbox .collapsible .tool.custom-shape:hover .outline,
-.toolbox .collapsible .mode.custom-shape:hover .outline {
-  stroke: white;
-}
 .toolbox .collapsible .zoom .zoombtn {
-  height: 20px;
-  width: 20px;
+  height: 40px;
+  width: 40px;
+  padding: 10px;
+  background-origin: content-box;
+}
+.toolbox .collapsible .btn-pair {
+  display: flex;
+  justify-content: space-around;
+}
+.toolbox .collapsible .btn-pair button {
+  margin: 6px;
+}
+.toolbox .collapsible .columns {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 2px;
+}
+.toolbox .collapsible .columns .tool:hover,
+.toolbox .collapsible .columns .mode:hover {
+  z-index: 104;
+}
+.toolbox .collapsible .columns .column {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-flow: column wrap;
+  margin: 2px;
+}
+.toolbox .collapsible .columns .column h4 {
+  text-align: center;
+  margin: 0px;
 }
 
 .brush {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-brush.png");
+  background: url("../public/pixelv-brush.png") no-repeat;
   background-size: 100%;
 }
 .brush.selected {
-  background-image: url("../public/pixelv-brush-hover.png");
+  background: url("../public/pixelv-brush-hover.png") no-repeat;
+  background-size: 100%;
 }
 
 .replace {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-replace.png");
+  background: url("../public/pixelv-replace.png") no-repeat;
   background-size: 100%;
 }
 .replace.selected {
-  background-image: url("../public/pixelv-replace-hover.png");
+  background: url("../public/pixelv-replace-hover.png") no-repeat;
+  background-size: 100%;
 }
 
 .fill {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-fill.png");
+  background: url("../public/pixelv-fill.png") no-repeat;
   background-size: 100%;
 }
 .fill.selected {
-  background-image: url("../public/pixelv-fill-hover.png");
+  background: url("../public/pixelv-fill-hover.png") no-repeat;
+  background-size: 100%;
 }
 
 .line {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-line.png");
+  background: url("../public/pixelv-line.png") no-repeat;
   background-size: 100%;
 }
 .line.selected {
-  background-image: url("../public/pixelv-line-hover.png");
+  background: url("../public/pixelv-line-hover.png") no-repeat;
+  background-size: 100%;
 }
 
 .quadCurve {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-quadCurve.png");
+  background: url("../public/pixelv-quadCurve.png") no-repeat;
   background-size: 100%;
 }
 .quadCurve.selected {
-  background-image: url("../public/pixelv-quadCurve-hover.png");
+  background: url("../public/pixelv-quadCurve-hover.png") no-repeat;
+  background-size: 100%;
 }
 
 .cubicCurve {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-cubicCurve.png");
+  background: url("../public/pixelv-cubicCurve.png") no-repeat;
   background-size: 100%;
 }
 .cubicCurve.selected {
-  background-image: url("../public/pixelv-cubicCurve-hover.png");
+  background: url("../public/pixelv-cubicCurve-hover.png") no-repeat;
+  background-size: 100%;
 }
 
 .ellipse {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-ellipse.png");
+  background: url("../public/pixelv-ellipse.png") no-repeat;
   background-size: 100%;
 }
 .ellipse.selected {
-  background-image: url("../public/pixelv-ellipse-hover.png");
+  background: url("../public/pixelv-ellipse-hover.png") no-repeat;
+  background-size: 100%;
 }
 
 .eyedropper {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-eyedropper.png");
+  background: url("../public/pixelv-eyedropper.png") no-repeat;
   background-size: 100%;
 }
 .eyedropper.selected {
-  background-image: url("../public/pixelv-eyedropper-hover.png");
+  background: url("../public/pixelv-eyedropper-hover.png") no-repeat;
+  background-size: 100%;
 }
 
 .grab {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-grab.png");
+  background: url("../public/pixelv-grab.png") no-repeat;
   background-size: 100%;
 }
 .grab.selected {
-  background-image: url("../public/pixelv-grab-hover.png");
+  background: url("../public/pixelv-grab-hover.png") no-repeat;
+  background-size: 100%;
 }
 
 .move {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-move.png");
+  background: url("../public/pixelv-move.png") no-repeat;
   background-size: 100%;
 }
 .move.selected {
-  background-image: url("../public/pixelv-move-hover.png");
+  background: url("../public/pixelv-move-hover.png") no-repeat;
+  background-size: 100%;
 }
 
 .pencil {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-pencil.png");
+  background: url("../public/pixelv-pencil.png") no-repeat;
   background-size: 100%;
 }
 .pencil.selected {
-  background-image: url("../public/pixelv-pencil-hover.png");
+  background: url("../public/pixelv-pencil-hover.png") no-repeat;
+  background-size: 100%;
 }
 
 .eraser {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-eraser.png");
+  background: url("../public/pixelv-eraser.png") no-repeat;
   background-size: 100%;
 }
 .eraser.selected {
-  background-image: url("../public/pixelv-eraser-hover.png");
+  background: url("../public/pixelv-eraser-hover.png") no-repeat;
+  background-size: 100%;
 }
 
 .mechanical {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-mechanical.png");
+  background: url("../public/pixelv-mechanical.png") no-repeat;
   background-size: 100%;
 }
 .mechanical.selected {
-  background-image: url("../public/pixelv-mechanical-hover.png");
+  background: url("../public/pixelv-mechanical-hover.png") no-repeat;
+  background-size: 100%;
 }
 
 .inject {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-inject.png");
+  background: url("../public/pixelv-inject.png") no-repeat;
   background-size: 100%;
 }
 .inject.selected {
-  background-image: url("../public/pixelv-inject-hover.png");
+  background: url("../public/pixelv-inject-hover.png") no-repeat;
+  background-size: 100%;
+}
+
+.recenter {
+  width: 100%;
+  height: 100%;
+  background: url("../public/pixelv-recenter.png") no-repeat;
+  background-size: 100%;
+}
+.recenter:hover {
+  background: url("../public/pixelv-recenter-hover.png") no-repeat;
+  background-size: 100%;
+}
+.recenter.selected {
+  background: url("../public/pixelv-recenter-hover.png") no-repeat;
+  background-size: 100%;
+}
+
+.clear {
+  width: 100%;
+  height: 100%;
+  background: url("../public/pixelv-clear.png") no-repeat;
+  background-size: 100%;
+}
+.clear:hover {
+  background: url("../public/pixelv-clear-hover.png") no-repeat;
+  background-size: 100%;
+}
+.clear.selected {
+  background: url("../public/pixelv-clear-hover.png") no-repeat;
+  background-size: 100%;
+}
+
+.undo {
+  width: 100%;
+  height: 100%;
+  background: url("../public/pixelv-undo.png") no-repeat;
+  background-size: 100%;
+}
+.undo:hover {
+  background: url("../public/pixelv-undo-hover.png") no-repeat;
+  background-size: 100%;
+}
+.undo.selected {
+  background: url("../public/pixelv-undo-hover.png") no-repeat;
+  background-size: 100%;
+}
+
+.redo {
+  width: 100%;
+  height: 100%;
+  background: url("../public/pixelv-redo.png") no-repeat;
+  background-size: 100%;
+}
+.redo:hover {
+  background: url("../public/pixelv-redo-hover.png") no-repeat;
+  background-size: 100%;
+}
+.redo.selected {
+  background: url("../public/pixelv-redo-hover.png") no-repeat;
+  background-size: 100%;
 }
 
 .plus {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-plus.png");
+  background: url("../public/pixelv-plus.png") no-repeat;
+  background-size: 100%;
+}
+.plus:hover {
+  background: url("../public/pixelv-plus-hover.png") no-repeat;
   background-size: 100%;
 }
 .plus.selected {
-  background-image: url("../public/pixelv-plus-hover.png");
+  background: url("../public/pixelv-plus-hover.png") no-repeat;
+  background-size: 100%;
 }
 
 .minus {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-minus.png");
+  background: url("../public/pixelv-minus.png") no-repeat;
+  background-size: 100%;
+}
+.minus:hover {
+  background: url("../public/pixelv-minus-hover.png") no-repeat;
   background-size: 100%;
 }
 .minus.selected {
-  background-image: url("../public/pixelv-minus-hover.png");
+  background: url("../public/pixelv-minus-hover.png") no-repeat;
+  background-size: 100%;
 }
 
 /* Layers */

@@ -5,7 +5,7 @@
   position: absolute;
   z-index: 102;
   background-color: $extra-dark-gray;
-  width: 136px;
+  width: 120px;
   right: 0;
   top: 0;
   display: flex;
@@ -15,6 +15,9 @@
   @include boxBorder;
   .collapsible {
     padding-top: 2px;
+    :first-child {
+      margin-top: 6px;
+    }
     .tool,
     .mode {
       cursor: pointer;
@@ -38,29 +41,64 @@
         z-index: 105;
       }
       &.custom-shape {
-        background: transparent;
+        background-color: transparent;
         @include cancelBorder;
-        &:hover {
-          .outline {
-            stroke: white; //for svgs
-          }
-        }
       }
     }
     .zoom {
       .zoombtn {
-        height: 20px;
-        width: 20px;
+        height: 40px;
+        width: 40px;
+        padding: 10px;
+        background-origin: content-box;
+      }
+    }
+    .btn-pair {
+      display: flex;
+      justify-content: space-around;
+      button {
+        margin: 6px;
+      }
+    }
+    .columns {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      margin: 2px;
+      .tool,
+      .mode {
+        &:hover {
+          z-index: 104;
+        }
+      }
+      .column {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        flex-flow: column wrap;
+        margin: 2px;
+        h4 {
+          text-align: center;
+          margin: 0px;
+        }
       }
     }
   }
 }
 
 $tools: brush replace fill line quadCurve cubicCurve ellipse eyedropper grab
-  move pencil eraser mechanical inject plus minus;
+  move pencil eraser mechanical inject;
 
 @each $tool in $tools {
   .#{$tool} {
     @include tool-style($tool);
+  }
+}
+
+$one-time-tools: recenter clear undo redo plus minus;
+
+@each $tool in $one-time-tools {
+  .#{$tool} {
+    @include tool-style($tool, true);
   }
 }
