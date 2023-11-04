@@ -164,8 +164,9 @@ svg {
   pointer-events: none; /* Keep from interfering with pointer interaction */
 }
 
-#preload-container {
-  display: none;
+#preload-container img {
+  width: 0;
+  height: 0;
 }
 
 /* Next basic site layout components */

@@ -130,5 +130,9 @@ svg {
 }
 
 #preload-container {
-  display: none;
+  // display: none;
+  img {
+    width: 0;
+    height: 0;
+  }
 }

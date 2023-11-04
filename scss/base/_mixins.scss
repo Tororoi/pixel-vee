@@ -1,8 +1,14 @@
+@mixin loadImage($image-name, $hover: false) {
+  width: 0;
+  height: 0;
+  background: url("../public/pixelv-#{$image-name}.png");
+}
+
 //==================================================//
 //================ * * * Tools * * * ===============//
 //==================================================//
 
-@mixin tool-style($tool-name, $hover: false) {
+@mixin toolStyle($tool-name, $hover: false) {
   width: 100%;
   height: 100%;
   background: url("../public/pixelv-#{$tool-name}.png") no-repeat;

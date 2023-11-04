@@ -91,7 +91,7 @@ $tools: brush replace fill line quadCurve cubicCurve ellipse eyedropper grab
 
 @each $tool in $tools {
   .#{$tool} {
-    @include tool-style($tool);
+    @include toolStyle($tool);
   }
 }
 
@@ -99,6 +99,6 @@ $one-time-tools: recenter clear undo redo plus minus;
 
 @each $tool in $one-time-tools {
   .#{$tool} {
-    @include tool-style($tool, true);
+    @include toolStyle($tool, true);
   }
 }

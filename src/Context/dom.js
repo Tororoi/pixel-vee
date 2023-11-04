@@ -138,10 +138,10 @@ const images = [
   "public/pixelv-fill.png",
   "public/pixelv-line-hover.png",
   "public/pixelv-line.png",
-  "public/pixelv-quad-hover.png",
-  "public/pixelv-quad.png",
-  "public/pixelv-cubic-hover.png",
-  "public/pixelv-cubic.png",
+  "public/pixelv-quadCurve-hover.png",
+  "public/pixelv-quadCurve.png",
+  "public/pixelv-cubicCurve-hover.png",
+  "public/pixelv-cubicCurve.png",
   "public/pixelv-ellipse-hover.png",
   "public/pixelv-ellipse.png",
   "public/pixelv-eyedropper-hover.png",
@@ -170,6 +170,10 @@ const images = [
   "public/pixelv-clear.png",
   "public/pixelv-switch-hover.png",
   "public/pixelv-switch.png",
+  "public/pixelv-plus-hover.png",
+  "public/pixelv-plus.png",
+  "public/pixelv-minus-hover.png",
+  "public/pixelv-minus.png",
   //layer icons
   "public/pixelv-eyeopen-hover.png",
   "public/pixelv-eyeopen.png",
@@ -186,8 +190,6 @@ const images = [
   "public/pixelv-palette-knife.png",
   "public/pixelv-palette-scraper-hover.png",
   "public/pixelv-palette-scraper.png",
-  "public/pixelv-plus-hover.png",
-  "public/pixelv-plus.png",
 ]
 images.forEach((url) => {
   let img = new Image()
