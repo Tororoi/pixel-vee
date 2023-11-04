@@ -117,6 +117,8 @@ button {
   border: 0;
   padding: 0;
   font-size: 16px;
+  background: transparent;
+  cursor: pointer;
 }
 button:disabled {
   cursor: not-allowed !important;
@@ -139,10 +141,10 @@ input {
   appearance: none;
   border: none;
   outline: none;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 input:hover:not([disabled]), input:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 
 input[type=number] {
@@ -178,11 +180,11 @@ svg {
   flex-flow: column nowrap;
   align-items: center;
   z-index: 103;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
   touch-action: none;
 }
 .sidebar:hover:not([disabled]), .sidebar:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .sidebar .content {
   height: auto;
@@ -203,6 +205,9 @@ svg {
   background: white;
   background-clip: content-box;
 }
+.sidebar > .collapsible {
+  margin-top: 2px;
+}
 
 .page {
   position: relative;
@@ -220,16 +225,16 @@ svg {
   touch-action: none;
 }
 .draggable.v-drag {
-  box-shadow: 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .draggable.v-drag:hover:not([disabled]), .draggable.v-drag:focus {
-  box-shadow: 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .draggable.h-drag {
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .draggable.h-drag:hover:not([disabled]), .draggable.h-drag:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .draggable.dragging {
   cursor: grabbing;
@@ -251,10 +256,10 @@ svg {
   align-items: center;
   position: relative;
   cursor: grab;
-  box-shadow: 0px 2px rgb(131, 131, 131);
+  box-shadow: 0 2px 0 0 rgb(131, 131, 131);
 }
 .draggable .header:hover:not([disabled]), .draggable .header:focus {
-  box-shadow: 0px 2px rgb(255, 255, 255);
+  box-shadow: 0 2px 0 0 rgb(255, 255, 255);
 }
 .draggable .header .drag-btn {
   position: absolute;
@@ -395,16 +400,16 @@ svg {
   color: white;
   margin: 3px;
   opacity: 1;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .btn:hover:not([disabled]), .btn:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .btn.custom-shape {
   background: transparent;
   box-shadow: none;
 }
-.btn.custom-shape:hover {
+.btn.custom-shape:hover:not([disabled]), .btn.custom-shape:focus {
   box-shadow: none;
 }
 .btn.custom-shape:hover .outline {
@@ -433,13 +438,12 @@ svg {
   display: flex;
   justify-content: space-evenly;
   width: 100%;
-  margin-bottom: 18px;
+  margin-bottom: 12px;
+  margin-top: 6px;
 }
-.columns .btn {
-  width: 40px;
-  height: 40px;
-}
-.columns .btn:hover {
+.columns .btn:hover,
+.columns .tool:hover,
+.columns .mode:hover {
   z-index: 104;
 }
 .columns .column {
@@ -466,10 +470,10 @@ svg {
   align-items: center;
   position: relative;
   margin: 2px;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .nav:hover:not([disabled]), .nav:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .nav .title {
   padding-left: 16px;
@@ -554,10 +558,10 @@ canvas {
   height: calc(100% - 4px);
   margin: 2px;
   overflow: hidden;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .bg-space:hover:not([disabled]), .bg-space:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 
 .canvas-layers {
@@ -611,132 +615,61 @@ canvas {
   flex-flow: column nowrap;
   justify-content: center;
   align-items: center;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
-  /* Color Swatches */
-  /* Zoom */
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .toolbox:hover:not([disabled]), .toolbox:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .toolbox .collapsible {
   padding-top: 2px;
 }
-.toolbox .colors {
-  width: 128px;
-  height: 128px;
-  position: relative;
-}
-.toolbox .colors .swatch {
-  position: absolute;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
-  width: 72px;
-  height: 72px;
-  margin: 16px;
-  z-index: 6;
-}
-.toolbox .colors .swatch .swatch-color {
-  background-image: radial-gradient(rgba(var(--primary-swatch-color), var(--primary-swatch-alpha)) 50%, rgba(var(--primary-swatch-color), 1) 110%);
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-.toolbox .colors .back-swatch {
-  position: absolute;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
-  width: 72px;
-  height: 72px;
-  margin: 16px;
-  z-index: 5;
-  transform: translateX(24px) translateY(24px);
-}
-.toolbox .colors .back-swatch .swatch-color {
-  background-image: radial-gradient(rgba(var(--secondary-swatch-color), var(--secondary-swatch-alpha)) 50%, rgba(var(--secondary-swatch-color), 1) 110%);
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-.toolbox .color-switch {
+.toolbox .collapsible .tool,
+.toolbox .collapsible .mode {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgb(131, 131, 131);
+  user-select: none;
+  text-align: center;
+  color: white;
   width: 40px;
   height: 40px;
+  margin: 3px;
+  opacity: 1;
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.toolbox .collapsible .tool:hover:not([disabled]), .toolbox .collapsible .tool:focus,
+.toolbox .collapsible .mode:hover:not([disabled]),
+.toolbox .collapsible .mode:focus {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.toolbox .collapsible .tool:hover,
+.toolbox .collapsible .mode:hover {
+  z-index: 104;
+}
+.toolbox .collapsible .tool.selected,
+.toolbox .collapsible .mode.selected {
+  background-color: rgb(255, 255, 255);
+  z-index: 105;
+}
+.toolbox .collapsible .tool.custom-shape,
+.toolbox .collapsible .mode.custom-shape {
   background: transparent;
   box-shadow: none;
-  margin-bottom: -24px;
-  transform: translateX(-48px) translateY(-36px);
 }
-.toolbox .color-switch:hover {
+.toolbox .collapsible .tool.custom-shape:hover:not([disabled]), .toolbox .collapsible .tool.custom-shape:focus,
+.toolbox .collapsible .mode.custom-shape:hover:not([disabled]),
+.toolbox .collapsible .mode.custom-shape:focus {
   box-shadow: none;
 }
-.toolbox .zoom {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 46px;
-  width: 100%;
+.toolbox .collapsible .tool.custom-shape:hover .outline,
+.toolbox .collapsible .mode.custom-shape:hover .outline {
+  stroke: white;
 }
-.toolbox .zoom .tool {
-  background: rgb(131, 131, 131);
-  margin: 3px;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
-  cursor: pointer;
-}
-.toolbox .zoom .tool:hover:not([disabled]), .toolbox .zoom .tool:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
-}
-.toolbox .zoom .tool .plusminus {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  flex-flow: column nowrap;
-}
-.toolbox .zoom .tool .plusminus div {
-  height: 50%;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px;
-}
-.toolbox .zoom .tool .plusminus div p {
-  pointer-events: none;
-  transform: translateX(2px) translateY(2px);
-}
-.toolbox .zoom .tool .plusminus div:hover {
-  background: white;
-  color: black;
-}
-
-.fill {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-fill.png");
-  background-size: 100%;
-}
-
-.quadCurve {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-quad.png");
-  background-size: 100%;
-}
-
-.cubicCurve {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-cubic.png");
-  background-size: 100%;
-}
-
-.ellipse {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-ellipse.png");
-  background-size: 100%;
-}
-
-.line {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-line.png");
-  background-size: 100%;
+.toolbox .collapsible .zoom .zoombtn {
+  height: 20px;
+  width: 20px;
 }
 
 .brush {
@@ -745,6 +678,69 @@ canvas {
   background-image: url("../public/pixelv-brush.png");
   background-size: 100%;
 }
+.brush.selected {
+  background-image: url("../public/pixelv-brush-hover.png");
+}
+
+.replace {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-replace.png");
+  background-size: 100%;
+}
+.replace.selected {
+  background-image: url("../public/pixelv-replace-hover.png");
+}
+
+.fill {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-fill.png");
+  background-size: 100%;
+}
+.fill.selected {
+  background-image: url("../public/pixelv-fill-hover.png");
+}
+
+.line {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-line.png");
+  background-size: 100%;
+}
+.line.selected {
+  background-image: url("../public/pixelv-line-hover.png");
+}
+
+.quadCurve {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-quadCurve.png");
+  background-size: 100%;
+}
+.quadCurve.selected {
+  background-image: url("../public/pixelv-quadCurve-hover.png");
+}
+
+.cubicCurve {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-cubicCurve.png");
+  background-size: 100%;
+}
+.cubicCurve.selected {
+  background-image: url("../public/pixelv-cubicCurve-hover.png");
+}
+
+.ellipse {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-ellipse.png");
+  background-size: 100%;
+}
+.ellipse.selected {
+  background-image: url("../public/pixelv-ellipse-hover.png");
+}
 
 .eyedropper {
   width: 100%;
@@ -752,12 +748,8 @@ canvas {
   background-image: url("../public/pixelv-eyedropper.png");
   background-size: 100%;
 }
-
-.eraser {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-eraser.png");
-  background-size: 100%;
+.eyedropper.selected {
+  background-image: url("../public/pixelv-eyedropper-hover.png");
 }
 
 .grab {
@@ -766,12 +758,18 @@ canvas {
   background-image: url("../public/pixelv-grab.png");
   background-size: 100%;
 }
+.grab.selected {
+  background-image: url("../public/pixelv-grab-hover.png");
+}
 
 .move {
   width: 100%;
   height: 100%;
   background-image: url("../public/pixelv-move.png");
   background-size: 100%;
+}
+.move.selected {
+  background-image: url("../public/pixelv-move-hover.png");
 }
 
 .pencil {
@@ -780,12 +778,28 @@ canvas {
   background-image: url("../public/pixelv-pencil.png");
   background-size: 100%;
 }
+.pencil.selected {
+  background-image: url("../public/pixelv-pencil-hover.png");
+}
+
+.eraser {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-eraser.png");
+  background-size: 100%;
+}
+.eraser.selected {
+  background-image: url("../public/pixelv-eraser-hover.png");
+}
 
 .mechanical {
   width: 100%;
   height: 100%;
   background-image: url("../public/pixelv-mechanical.png");
   background-size: 100%;
+}
+.mechanical.selected {
+  background-image: url("../public/pixelv-mechanical-hover.png");
 }
 
 .inject {
@@ -794,12 +808,28 @@ canvas {
   background-image: url("../public/pixelv-inject.png");
   background-size: 100%;
 }
+.inject.selected {
+  background-image: url("../public/pixelv-inject-hover.png");
+}
 
-.replace {
+.plus {
   width: 100%;
   height: 100%;
-  background-image: url("../public/pixelv-replace.png");
+  background-image: url("../public/pixelv-plus.png");
   background-size: 100%;
+}
+.plus.selected {
+  background-image: url("../public/pixelv-plus-hover.png");
+}
+
+.minus {
+  width: 100%;
+  height: 100%;
+  background-image: url("../public/pixelv-minus.png");
+  background-size: 100%;
+}
+.minus.selected {
+  background-image: url("../public/pixelv-minus-hover.png");
 }
 
 /* Layers */
@@ -851,10 +881,10 @@ canvas {
   min-height: 40px;
   overflow-y: auto;
   margin: 2px;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .layers-interface .layers-container:hover:not([disabled]), .layers-interface .layers-container:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .layers-interface .layers-container::-webkit-scrollbar {
   width: 10px;
@@ -887,7 +917,10 @@ canvas {
   flex-flow: row-reverse nowrap;
   justify-content: flex-end;
   align-items: center;
-  box-shadow: inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131);
+  box-shadow: inset -2px 0 0 0 rgb(131, 131, 131), inset 2px 0 0 0 rgb(131, 131, 131), inset 0 -2px 0 0 rgb(131, 131, 131), inset 0 2px 0 0 rgb(131, 131, 131);
+}
+.layers-interface .layers-container .layers .layer:hover:not([disabled]), .layers-interface .layers-container .layers .layer:focus {
+  box-shadow: inset -2px 0 0 0 rgb(255, 255, 255), inset 2px 0 0 0 rgb(255, 255, 255), inset 0 -2px 0 0 rgb(255, 255, 255), inset 0 2px 0 0 rgb(255, 255, 255);
 }
 .layers-interface .layers-container .layers .layer.raster {
   background: rgb(61, 61, 61);
@@ -897,9 +930,6 @@ canvas {
 }
 .layers-interface .layers-container .layers .layer.selected {
   background: black;
-}
-.layers-interface .layers-container .layers .layer:hover {
-  box-shadow: inset 2px 0px rgb(255, 255, 255), inset -2px 0px rgb(255, 255, 255), inset 0px -2px rgb(255, 255, 255), inset 0px 2px rgb(255, 255, 255);
 }
 .layers-interface .layers-container .layers .layer .hide {
   width: 40px;
@@ -988,10 +1018,10 @@ canvas {
   min-height: 0;
   overflow-y: auto;
   margin: 2px;
-  box-shadow: 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container:hover:not([disabled]), .vectors-interface .vectors-container:focus {
-  box-shadow: 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container::-webkit-scrollbar {
   width: 10px;
@@ -1050,10 +1080,10 @@ canvas {
   background: rgb(131, 131, 131);
   z-index: 104;
   margin-bottom: 2px;
-  box-shadow: -2px 0px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container .vectors .vector .tool:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .tool:focus {
-  box-shadow: -2px 0px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .actionColor-container {
   background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
@@ -1068,10 +1098,10 @@ canvas {
   background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   z-index: 104;
   margin-bottom: 2px;
-  box-shadow: -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container .vectors .vector .actionColor:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .actionColor:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .actionColor:hover {
   z-index: 106;
@@ -1091,10 +1121,10 @@ canvas {
   background: rgb(61, 61, 61);
   z-index: 104;
   margin-bottom: 2px;
-  box-shadow: -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container .vectors .vector .hide:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .hide:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .hide:hover {
   z-index: 106;
@@ -1127,10 +1157,10 @@ canvas {
   background: rgb(61, 61, 61);
   z-index: 104;
   margin-bottom: 2px;
-  box-shadow: -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container .vectors .vector .trash:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .trash:focus {
-  box-shadow: -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .trash .icon {
   pointer-events: none;
@@ -1303,6 +1333,9 @@ canvas {
   background-size: 100%;
   transition: transform 0.1s;
 }
+.palette-interface .palette-container .palette-tools .palette-edit:hover .icon {
+  background-image: url("../public/pixelv-palette-knife-hover.png");
+}
 .palette-interface .palette-container .palette-tools .palette-edit.selected .icon {
   background-image: url("../public/pixelv-palette-knife-hover.png");
 }
@@ -1319,6 +1352,9 @@ canvas {
   background-size: 100%;
   transition: transform 0.1s;
 }
+.palette-interface .palette-container .palette-tools .palette-remove:hover .icon {
+  background-image: url("../public/pixelv-palette-scraper-hover.png");
+}
 .palette-interface .palette-container .palette-tools .palette-remove.selected .icon {
   background-image: url("../public/pixelv-palette-scraper-hover.png");
 }
@@ -1332,17 +1368,20 @@ canvas {
   height: 20px;
   background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   margin: 1px;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .palette-interface .palette-container .palette-colors .palette-color:hover:not([disabled]), .palette-interface .palette-container .palette-colors .palette-color:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .palette-interface .palette-container .palette-colors .palette-color.selected {
   z-index: 105;
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .palette-interface .palette-container .palette-colors .palette-color.selected:hover:hover:not([disabled]), .palette-interface .palette-container .palette-colors .palette-color.selected:hover:focus {
-  box-shadow: 2px 0px rgb(71, 255, 47), -2px 0px rgb(71, 255, 47), 0px -2px rgb(71, 255, 47), 0px 2px rgb(71, 255, 47);
+  box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
+}
+.palette-interface .palette-container .palette-colors .palette-color.selected:hover:hover:not([disabled]):hover:not([disabled]), .palette-interface .palette-container .palette-colors .palette-color.selected:hover:hover:not([disabled]):focus, .palette-interface .palette-container .palette-colors .palette-color.selected:hover:focus:hover:not([disabled]), .palette-interface .palette-container .palette-colors .palette-color.selected:hover:focus:focus {
+  box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
 }
 .palette-interface .palette-container .palette-colors .palette-color:hover {
   z-index: 106;
@@ -1352,13 +1391,22 @@ canvas {
   height: 100%;
 }
 .palette-interface .palette-container .palette-colors.edit-mode .palette-color:hover:not([disabled]), .palette-interface .palette-container .palette-colors.edit-mode .palette-color:focus {
-  box-shadow: 2px 0px rgb(71, 255, 47), -2px 0px rgb(71, 255, 47), 0px -2px rgb(71, 255, 47), 0px 2px rgb(71, 255, 47);
+  box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
+}
+.palette-interface .palette-container .palette-colors.edit-mode .palette-color:hover:not([disabled]):hover:not([disabled]), .palette-interface .palette-container .palette-colors.edit-mode .palette-color:hover:not([disabled]):focus, .palette-interface .palette-container .palette-colors.edit-mode .palette-color:focus:hover:not([disabled]), .palette-interface .palette-container .palette-colors.edit-mode .palette-color:focus:focus {
+  box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color:focus {
-  box-shadow: 2px 0px red, -2px 0px red, 0px -2px red, 0px 2px red;
+  box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
+}
+.palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]):hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]):focus, .palette-interface .palette-container .palette-colors.remove-mode .palette-color:focus:hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color:focus:focus {
+  box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:focus {
-  box-shadow: 2px 0px red, -2px 0px red, 0px -2px red, 0px 2px red;
+  box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
+}
+.palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]):hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]):focus, .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:focus:hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:focus:focus {
+  box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover .swatch {
   background-image: url("../public/pixelv-trash-hover.png") !important;
@@ -1388,7 +1436,9 @@ canvas {
   user-select: none;
   position: absolute;
   z-index: 103;
-  width: 570px;
+  width: 370px;
+  max-width: calc(100% - 4px);
+  max-height: calc(100% - 4px);
   display: none;
   flex-flow: column nowrap;
   justify-content: flex-start;
@@ -1400,10 +1450,10 @@ canvas {
   padding: 0;
   align-self: center;
   opacity: 1;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .picker-container:hover:not([disabled]), .picker-container:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .picker-container .header h3 {
   justify-self: center;
@@ -1415,7 +1465,8 @@ canvas {
 }
 .picker-container .collapsible .picker-interface {
   display: flex;
-  flex-flow: row nowrap;
+  flex-flow: column nowrap;
+  align-items: center;
   margin: 10px;
 }
 .picker-container .collapsible .picker-interface #left {
@@ -1433,10 +1484,10 @@ canvas {
   height: 250px;
   margin: 10px;
   cursor: crosshair;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .picker-container .collapsible .picker-interface #left #picker #color-picker:hover:not([disabled]), .picker-container .collapsible .picker-interface #left #picker #color-picker:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .picker-container .collapsible .picker-interface #left #picker .slider-container {
   position: relative;
@@ -1455,10 +1506,10 @@ canvas {
   height: 20px;
   margin: 10px;
   outline: none;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .picker-container .collapsible .picker-interface #left #picker .picker-slider:hover:not([disabled]), .picker-container .collapsible .picker-interface #left #picker .picker-slider:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .picker-container .collapsible .picker-interface #left #picker .picker-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -1569,10 +1620,10 @@ canvas {
   height: 18px;
   margin-left: 6px;
   overflow: hidden;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .picker-container .collapsible .picker-interface #right #rgbahsl .sliderbox:hover:not([disabled]), .picker-container .collapsible .picker-interface #right #rgbahsl .sliderbox:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .picker-container .collapsible .picker-interface #right #rgbahsl .sliderbox .channel-btn {
   position: absolute;
@@ -1612,15 +1663,12 @@ canvas {
 .picker-container .collapsible .picker-interface #right #lumi #luminance {
   width: 26px;
 }
-@media (max-width: 700px) {
+@media (min-width: 768px) {
   .picker-container {
-    width: 370px;
-    max-width: calc(100% - 4px);
-    max-height: calc(100% - 4px);
+    width: 570px;
   }
   .picker-container .collapsible .picker-interface {
-    flex-flow: column nowrap;
-    align-items: center;
+    flex-flow: row nowrap;
   }
 }
 
@@ -1670,10 +1718,10 @@ canvas {
   height: 18px;
   margin-left: 6px;
   overflow: hidden;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .size-container .sliderbox:hover:not([disabled]), .size-container .sliderbox:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .size-container .sliderbox .channel-btn {
   position: absolute;

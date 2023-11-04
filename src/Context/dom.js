@@ -61,11 +61,11 @@ tools.forEach((tool) => {
 })
 
 const toolBtn = document.querySelector("#brush")
-toolBtn.style.background = "rgb(255, 255, 255)"
+toolBtn.classList.add("selected")
 
 const modesContainer = document.querySelector(".modes")
 const modeBtn = document.querySelector("#draw")
-modeBtn.style.background = "rgb(255, 255, 255)"
+modeBtn.classList.add("selected")
 
 //====================================//
 //===== * * * Color Picker * * * =====//
@@ -129,15 +129,65 @@ const canvasHeight = document.getElementById("canvas-height")
 // * Preload images that don't show up on initial load * //
 const preloadContainer = document.getElementById("preload-container")
 const images = [
-  "public/pixelv-addlayer-hover.png",
+  //tools icons
+  "public/pixelv-brush-hover.png",
+  "public/pixelv-brush.png",
+  "public/pixelv-replace-hover.png",
+  "public/pixelv-replace.png",
+  "public/pixelv-fill-hover.png",
+  "public/pixelv-fill.png",
+  "public/pixelv-line-hover.png",
+  "public/pixelv-line.png",
+  "public/pixelv-quad-hover.png",
+  "public/pixelv-quad.png",
+  "public/pixelv-cubic-hover.png",
+  "public/pixelv-cubic.png",
+  "public/pixelv-ellipse-hover.png",
+  "public/pixelv-ellipse.png",
+  "public/pixelv-eyedropper-hover.png",
+  "public/pixelv-eyedropper.png",
+  "public/pixelv-grab-hover.png",
+  "public/pixelv-grab.png",
+  "public/pixelv-move-hover.png",
+  "public/pixelv-move.png",
+  //modes icons
+  "public/pixelv-pencil-hover.png",
+  "public/pixelv-pencil.png",
+  "public/pixelv-eraser-hover.png",
+  "public/pixelv-eraser.png",
+  "public/pixelv-mechanical-hover.png",
+  "public/pixelv-mechanical.png",
+  "public/pixelv-inject-hover.png",
+  "public/pixelv-inject.png",
+  //one-off actions icons
+  "public/pixelv-undo-hover.png",
+  "public/pixelv-undo.png",
+  "public/pixelv-redo-hover.png",
+  "public/pixelv-redo.png",
+  "public/pixelv-recenter-hover.png",
+  "public/pixelv-recenter.png",
+  "public/pixelv-clear-hover.png",
+  "public/pixelv-clear.png",
+  "public/pixelv-switch-hover.png",
+  "public/pixelv-switch.png",
+  //layer icons
   "public/pixelv-eyeopen-hover.png",
+  "public/pixelv-eyeopen.png",
   "public/pixelv-eyeclosed-hover.png",
   "public/pixelv-eyeclosed.png",
-  "public/pixelv-reference-hover.png",
   "public/pixelv-trash-hover.png",
-  "public/pixelv-plus-hover.png",
+  "public/pixelv-trash.png",
+  "public/pixelv-addlayer-hover.png",
+  "public/pixelv-addlayer.png",
+  "public/pixelv-reference-hover.png",
+  "public/pixelv-reference.png",
+  //palette icons
   "public/pixelv-palette-knife-hover.png",
+  "public/pixelv-palette-knife.png",
   "public/pixelv-palette-scraper-hover.png",
+  "public/pixelv-palette-scraper.png",
+  "public/pixelv-plus-hover.png",
+  "public/pixelv-plus.png",
 ]
 images.forEach((url) => {
   let img = new Image()

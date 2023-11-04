@@ -2,13 +2,17 @@
 
 /**
  * @param {Object} action
+ * @param {Boolean} isSelected
  * @returns {Element}
  */
-export const createToolElement = (action) => {
+export const createToolElement = (action, isSelected) => {
   let tool = document.createElement("div")
   tool.className = "tool"
   let icon = document.createElement("div")
-  icon.className = action.tool.name
+  icon.classList.add(action.tool.name)
+  if (isSelected) {
+    icon.classList.add("selected")
+  }
   tool.appendChild(icon)
   return tool
 }

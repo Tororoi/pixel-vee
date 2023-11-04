@@ -41,7 +41,7 @@
     overflow-y: auto;
     // -webkit-overflow-scrolling: touch;
     margin: 2px;
-    @include sandwichBorder;
+    @include boxBorder($border-color, $white, false, top bottom);
     @include scrollBar;
     .vectors {
       display: flex;
@@ -59,7 +59,6 @@
         // flex-flow: row-reverse nowrap;
         justify-content: center;
         align-items: center;
-        // box-shadow: inset 2px 2px $border-color, inset -2px -2px $border-color;
         box-sizing: border-box;
         border: 2px solid $border-color;
         img {
@@ -97,7 +96,7 @@
           background: $button-color;
           z-index: 104;
           margin-bottom: 2px;
-          @include leftDownBorder;
+          @include boxBorder($border-color, $white, false, left bottom);
         }
         .actionColor-container {
           background-image: repeating-linear-gradient(
@@ -124,7 +123,7 @@
           );
           z-index: 104;
           margin-bottom: 2px;
-          @include leftDownUpBorder;
+          @include boxBorder($border-color, $white, false, left top bottom);
           &:hover {
             z-index: 106;
           }
@@ -144,7 +143,7 @@
           background: $dark-gray;
           z-index: 104;
           margin-bottom: 2px;
-          @include leftDownUpBorder;
+          @include boxBorder($border-color, $white, false, left top bottom);
           &:hover {
             z-index: 106;
           }
@@ -170,7 +169,7 @@
           background: $dark-gray;
           z-index: 104;
           margin-bottom: 2px;
-          @include leftUpBorder;
+          @include boxBorder($border-color, $white, false, left top);
           .icon {
             pointer-events: none;
             width: 100%;
@@ -189,12 +188,9 @@
           background: $gray;
         }
         &:hover {
-          // box-shadow: inset 2px 0px $white, inset -2px 0px $white,
-          //   inset 0px -2px $white, inset 0px 2px $white;
           border: 2px solid $white;
           .tool {
-            box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white,
-              0px 2px $white;
+            @include activeBoxBorder;
             z-index: 105;
           }
         }

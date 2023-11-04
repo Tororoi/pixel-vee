@@ -65,8 +65,7 @@
         flex-flow: row-reverse nowrap;
         justify-content: flex-end;
         align-items: center;
-        box-shadow: inset 2px 0px $border-color, inset -2px 0px $border-color,
-          inset 0px -2px $border-color, inset 0px 2px $border-color;
+        @include boxBorder($border-color, $white, true);
         &.raster {
           background: $dark-gray;
         }
@@ -75,10 +74,6 @@
         }
         &.selected {
           background: black;
-        }
-        &:hover {
-          box-shadow: inset 2px 0px $white, inset -2px 0px $white,
-            inset 0px -2px $white, inset 0px 2px $white;
         }
         .hide {
           width: 40px;

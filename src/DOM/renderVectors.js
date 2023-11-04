@@ -35,12 +35,13 @@ const isValidAction = (action) =>
  * @param {Object} action
  */
 const renderVectorElement = (action) => {
+  const isSelected = action.index === canvas.currentVectorIndex
   const vectorElement = createVectorElement(action)
 
   const thumb = createThumbnailImage(action)
   vectorElement.appendChild(thumb)
 
-  const tool = createToolElement(action)
+  const tool = createToolElement(action, isSelected)
   vectorElement.appendChild(tool)
 
   const color = createColorElement(action)
@@ -52,7 +53,7 @@ const renderVectorElement = (action) => {
   const trash = createTrashElement()
   vectorElement.appendChild(trash)
 
-  if (action.index === canvas.currentVectorIndex) {
+  if (isSelected) {
     tool.style.background = "rgb(255, 255, 255)"
     vectorElement.style.background = "rgb(0, 0, 0)"
   } else {

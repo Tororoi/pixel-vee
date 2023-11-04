@@ -95,14 +95,14 @@ export function handleTools(e, manualToolName = null) {
     //failsafe for hacking tool ids
     if (tools[targetTool?.id || manualToolName]) {
       //reset old button
-      dom.toolBtn.style.background = "rgb(131, 131, 131)"
+      dom.toolBtn.classList.remove("selected")
       //get new button and select it
       if (manualToolName) {
         dom.toolBtn = document.querySelector(`#${manualToolName}`)
       } else {
         dom.toolBtn = targetTool
       }
-      dom.toolBtn.style.background = "rgb(255, 255, 255)"
+      dom.toolBtn.classList.add("selected")
       state.tool = tools[dom.toolBtn.id]
       renderCanvas(canvas.currentLayer)
       //update options
@@ -132,14 +132,14 @@ export function handleModes(e, manualModeName = null) {
   const targetMode = e?.target.closest(".mode")
   if (targetMode || manualModeName) {
     //reset old button
-    dom.modeBtn.style.background = "rgb(131, 131, 131)"
+    dom.modeBtn.classList.remove("selected")
     //get new button and select it
     if (manualModeName) {
       dom.modeBtn = document.querySelector(`#${manualModeName}`)
     } else {
       dom.modeBtn = targetMode
     }
-    dom.modeBtn.style.background = "rgb(255, 255, 255)"
+    dom.modeBtn.classList.add("selected")
     state.mode = dom.modeBtn.id
     if (dom.modeBtn.id === "erase") {
       canvas.vectorGuiCVS.style.cursor = "none"

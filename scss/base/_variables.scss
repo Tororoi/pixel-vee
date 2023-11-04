@@ -35,6 +35,8 @@ $border-color: $neutral-gray !default;
 $active-color: $white !default;
 $button-color: $neutral-gray !default;
 $warning-color: $red !default;
+$edit-color: rgb(71, 255, 47) !default;
+$remove-color: red !default;
 
 :root {
   //Define css vars after scss vars to have option to use scss vars as single source of truth

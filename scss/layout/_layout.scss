@@ -1,16 +1,13 @@
 .sidebar {
-  // position: relative;
   position: absolute;
   left: 0;
   top: 0;
   min-width: 206px;
   width: 206px;
-  // height: calc(100% - 4px);
   max-height: calc(100% - 4px);
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
-  // overflow-y: scroll;
   z-index: 103;
   @include boxBorder;
   touch-action: none;
@@ -20,6 +17,9 @@
     height: auto;
     overflow-y: scroll;
     @include scrollBar;
+  }
+  > .collapsible {
+    margin-top: 2px;
   }
 }
 
@@ -37,11 +37,8 @@
   margin: 2px;
   z-index: 100;
   touch-action: none;
-  // &:hover {
-  //   z-index: 102;
-  // }
   &.v-drag {
-    @include sandwichBorder;
+    @include boxBorder($border-color, $white, false, top bottom);
   }
   &.h-drag {
     @include boxBorder;
@@ -66,13 +63,7 @@
     align-items: center;
     position: relative;
     cursor: grab;
-    // margin-bottom: 2px !important;
-    // box-shadow: 0px 2px $border-color;
-    // &:hover:not([disabled]),
-    // &:focus {
-    //   box-shadow: 0px 2px $white;
-    // }
-    @include bottomBorder;
+    @include boxBorder($border-color, $white, false, bottom);
     @include dragger;
     .collapse-btn {
       @include collapseArrow;
@@ -81,14 +72,11 @@
   .collapsible {
     flex: 0 1 auto;
     width: 100%;
-    // height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     overflow: hidden;
     position: relative;
-    // padding-top: 2px;
-    // padding-bottom: 1px;
   }
 }
 
@@ -211,10 +199,11 @@
   display: flex;
   justify-content: space-evenly;
   width: 100%;
-  margin-bottom: 18px;
-  .btn {
-    width: 40px;
-    height: 40px;
+  margin-bottom: 12px;
+  margin-top: 6px;
+  .btn,
+  .tool,
+  .mode {
     // background: rgb(77, 77, 77);
     // margin: 1px;
     &:hover {

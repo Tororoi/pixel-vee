@@ -1,5 +1,6 @@
 /* Import order is important */
 /* First base styles and mixins, keyframes, variables */
+//TODO: create a _normalize.scss file
 @import "base/variables";
 @import "base/keyframes";
 @import "base/mixins";
