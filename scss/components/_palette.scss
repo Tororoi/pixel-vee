@@ -93,13 +93,16 @@
           width: 100%;
           height: 100%;
           pointer-events: none;
-          background-image: url("../public/pixelv-palette-knife.png");
+          // background-image: url("../public/pixelv-palette-knife.png");
+          // background-image: $palette-knife-svg;
+          @include paletteKnife($border-color);
           background-size: 100%;
           transition: transform 0.1s;
         }
         &:hover {
           .icon {
-            background-image: url("../public/pixelv-palette-knife-hover.png");
+            // background-image: url("../public/pixelv-palette-knife-hover.png");
+            @include paletteKnife($white);
             // transform: translateY(-2px);
           }
         }
