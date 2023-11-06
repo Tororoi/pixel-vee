@@ -148,7 +148,7 @@ function handlePointerDown(e) {
   //Re-render GUI
   vectorGui.render()
   if (
-    ((state.tool.name === "brush" || state.tool.name === "replace") &&
+    ((state.tool.name === "brush" || state.tool.name === "colorMask") &&
       state.mode === "erase") ||
     state.tool.name === "eyedropper"
   ) {
@@ -190,7 +190,7 @@ function handlePointerMove(e) {
       state.tool.fn()
       vectorGui.render()
       if (
-        ((state.tool.name === "brush" || state.tool.name === "replace") &&
+        ((state.tool.name === "brush" || state.tool.name === "colorMask") &&
           state.mode === "erase") ||
         state.tool.name === "eyedropper"
       ) {
@@ -267,7 +267,7 @@ function handlePointerUp(e) {
   canvas.pointerEvent = "none"
   if (!e.targetTouches) {
     vectorGui.render()
-    if (["brush", "replace", "eyedropper"].includes(state.tool.name)) {
+    if (["brush", "colorMask", "eyedropper"].includes(state.tool.name)) {
       renderCursor(state, canvas, swatches)
     }
   }

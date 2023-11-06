@@ -87,8 +87,20 @@
   }
 }
 
-$tools: brush replace fill line quadCurve cubicCurve ellipse eyedropper grab
-  move pencil eraser mechanical inject;
+.brush {
+  @include brushIcon;
+}
+
+.colorMask {
+  @include colorMaskIcon;
+}
+
+.fill {
+  @include fillIcon;
+}
+
+$tools: line quadCurve cubicCurve ellipse eyedropper grab move pencil eraser
+  mechanical inject;
 
 @each $tool in $tools {
   .#{$tool} {

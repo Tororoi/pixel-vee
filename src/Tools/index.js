@@ -1,5 +1,5 @@
 import { state } from "../Context/state.js"
-import { brush, replace } from "./brush.js"
+import { brush, colorMask } from "./brush.js"
 import { line } from "./line.js"
 import { select } from "./select.js"
 import { move } from "./move.js"
@@ -58,7 +58,7 @@ export const tools = {
   // shading: {
   // user selects hsl shading color which mixes with colors that the user draws on to create dynamic shading
   // },
-  replace,
+  colorMask,
   select,
   move,
   // gradient: {

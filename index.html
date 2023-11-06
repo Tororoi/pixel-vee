@@ -169,13 +169,13 @@
               <div class="colors">
                 <div
                   class="primary swatch btn"
-                  data-tooltip="Swatch (R) to randomize &#010;&#010;Click to open Color Picker"
+                  data-tooltip="Primary Swatch &#010;&#010;(R) to randomize &#010;&#010;Click to open Color Picker"
                 >
                   <div class="swatch-color"></div>
                 </div>
                 <div
                   class="secondary back-swatch btn"
-                  data-tooltip="Click to open Color Picker"
+                  data-tooltip="Secondary Swatch &#010;&#010;Click to open Color Picker"
                 >
                   <div class="swatch-color"></div>
                 </div>
@@ -203,18 +203,18 @@
               </div>
               <div class="palette-container">
                 <div class="palette-tools">
-                  <div
+                  <button
+                    type="button"
                     class="palette-edit"
-                    data-tooltip="Palette Knife (Hold K or click on the selected color) &#010;&#010;Click on a swatch to edit the color."
-                  >
-                    <!-- <div class="icon"></div> -->
-                  </div>
-                  <div
+                    data-tooltip="Palette Knife (Hold K or click on the selected color) &#010;&#010;While active, click on a swatch to edit the color."
+                    aria-label="Palette Knife. While active, click on a swatch to edit the color."
+                  ></button>
+                  <button
+                    type="button"
                     class="palette-remove"
-                    data-tooltip="Palette Scraper (Hold X) &#010;&#010; Click on a swatch to remove it from the palette."
-                  >
-                    <!-- <div class="icon"></div> -->
-                  </div>
+                    data-tooltip="Palette Scraper (Hold X) &#010;&#010;While active, click on a swatch to remove it from the palette."
+                    aria-label="Palette Scraper. While active, click on a swatch to remove it from the palette."
+                  ></button>
                 </div>
                 <div class="palette-colors">
                   <!-- <div class="palette-color">
@@ -443,9 +443,9 @@
               />
               <button
                 type="button"
-                class="tool replace"
-                id="replace"
-                data-tooltip="Replace (M) &#010;&#010;Replace secondary color with primary color"
+                class="tool colorMask"
+                id="colorMask"
+                data-tooltip="Color Mask (M) &#010;&#010;Only draw over selected secondary swatch color"
               />
               <button
                 type="button"

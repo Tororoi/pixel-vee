@@ -42,7 +42,7 @@ const toolsContainer = document.querySelector(".tools")
 
 const tools = [
   "brush",
-  "replace",
+  "colorMask",
   "fill",
   "line",
   "quadCurve",
@@ -130,12 +130,6 @@ const canvasHeight = document.getElementById("canvas-height")
 const preloadContainer = document.getElementById("preload-container")
 const images = [
   //tools icons
-  "public/pixelv-brush-hover.png",
-  "public/pixelv-brush.png",
-  "public/pixelv-replace-hover.png",
-  "public/pixelv-replace.png",
-  "public/pixelv-fill-hover.png",
-  "public/pixelv-fill.png",
   "public/pixelv-line-hover.png",
   "public/pixelv-line.png",
   "public/pixelv-quadCurve-hover.png",
@@ -185,11 +179,6 @@ const images = [
   "public/pixelv-addlayer.png",
   "public/pixelv-reference-hover.png",
   "public/pixelv-reference.png",
-  //palette icons
-  "public/pixelv-palette-knife-hover.png",
-  "public/pixelv-palette-knife.png",
-  "public/pixelv-palette-scraper-hover.png",
-  "public/pixelv-palette-scraper.png",
 ]
 images.forEach((url) => {
   let img = new Image()

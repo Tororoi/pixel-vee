@@ -173,7 +173,7 @@ function switchBrush(e) {
 function updateBrush(e) {
   switch (state.tool.name) {
     case "brush":
-    case "replace":
+    case "colorMask":
     case "line":
     case "quadCurve":
     case "cubicCurve":

@@ -371,13 +371,13 @@ function brushSteps() {
 
 /**
  * Supported modes: "draw, erase, perfect, inject"
- * //TODO: change replace function to be a mode instead of tool, called "colorMask"
+ * //TODO: change colorMask function to be a mode instead of tool
  * Old method: creates a copy of the canvas with just the secondary color parts. This is used as a mask so the user can draw normally.
  * When the user finishes drawing, the changed pixels are saved as points and will be rerendered in the timeline as single pixel brush points
  * New method: Create a set of marked coordinates that can be checked before drawing
  * Old method is more efficient, but incompatible with subtractive modes (inject, erase). May want to revisit old method conditionally for additive modes.
  */
-function replaceSteps() {
+function colorMaskSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       state.maskSet = createColorMaskSet(
@@ -413,9 +413,9 @@ export const brush = {
   activeCursor: "crosshair",
 }
 
-export const replace = {
-  name: "replace",
-  fn: replaceSteps,
+export const colorMask = {
+  name: "colorMask",
+  fn: colorMaskSteps,
   action: actionDraw,
   brushSize: 1,
   disabled: false,

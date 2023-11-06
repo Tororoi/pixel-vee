@@ -152,7 +152,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyM":
       if (!state.clicked) {
-        handleTools(null, "replace")
+        handleTools(null, "colorMask")
       }
       break
     case "KeyN":

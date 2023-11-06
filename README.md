@@ -78,21 +78,21 @@ Visit here: https://pixelvee.netlify.app/
     <td colspan="2"> Brush (B) </td>
   </tr>
   <tr>
-    <td width="66" height="52"> <img src="public/pixelv-brush.png" alt="Brush" width="40"/> </td>
+    <td width="66" height="52"> <img src="public/pixelv-brush.svg" alt="Brush" width="40"/> </td>
     <td> Draws a pixel where your pointer goes. </td>
   </tr>
   <tr>
-    <td colspan="2"> Replace (M) </td>
+    <td colspan="2"> Color Mask (M) </td>
   </tr>
   <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-replace.png" alt="Replace" width="40"/> </td>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-colorMask.svg" alt="Color Mask" width="40"/> </td>
     <td> Drawing will only put color down on top of the selected background color (eg. If the background color swatch is red, it will only draw on top of red pixels). </td>
   </tr>
   <tr>
     <td colspan="2"> Fill (F) </td>
   </tr>
   <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-fill.png" alt="Fill" width="40"/> </td>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-fill.svg" alt="Fill" width="40"/> </td>
     <td> Fill in contiguous spaces of color. This tool is a vector type tool so the position and color can be adjusted at any time. Adjusting the position will hide any actions that came after the fill action until you are done making adjustments. </td>
   </tr>
   <tr>
@@ -199,14 +199,14 @@ Visit here: https://pixelvee.netlify.app/
     <td colspan="2"> Palette Knife (Hold K or click on the selected color)</td>
   </tr>
   <tr>
-    <td width="66" height="52"> <img src="public/pixelv-palette-knife.png" alt="Palette Knife" width="40"/> </td>
+    <td width="66" height="52"> <img src="public/pixelv-palette-knife.svg" alt="Palette Knife" width="40"/> </td>
     <td> Edit a palette swatch. Click the palette knife then click the color swatch you want to edit to open the color picker. </td>
   </tr>
   <tr>
     <td colspan="2"> Palette Scraper (Hold X)</td>
   </tr>
   <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-palette-scraper.png" alt="Palette Scraper" width="40"/> </td>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-palette-scraper.svg" alt="Palette Scraper" width="40"/> </td>
     <td> Remove a palette swatch. Click the palette scraper then click the color swatch you want to remove from the color palette. </td>
   </tr>
 </table>

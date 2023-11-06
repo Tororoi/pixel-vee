@@ -95,7 +95,7 @@ export const state = {
   lastDrawnY: null,
   waitingPixelX: null,
   waitingPixelY: null,
-  //for replace
+  //for colorMask
   colorLayerGlobal: null,
   localColorLayer: null,
   //functions
