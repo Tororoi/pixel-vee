@@ -25,8 +25,8 @@ export function consolidateLayers(includeReference = false) {
       if (layer.type === "raster") {
         canvas.offScreenCTX.drawImage(
           layer.cvs,
-          layer.x,
-          layer.y,
+          0,
+          0,
           canvas.offScreenCVS.width,
           canvas.offScreenCVS.height
         )
