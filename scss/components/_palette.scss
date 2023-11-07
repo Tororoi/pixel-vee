@@ -142,8 +142,7 @@
           }
           &:hover {
             .swatch {
-              background-image: url("../public/pixelv-trash-hover.png") !important;
-              background-size: 100% !important;
+              @include trashIcon;
             }
           }
         }
