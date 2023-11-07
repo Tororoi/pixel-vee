@@ -25,7 +25,7 @@ Visit here: https://pixelvee.netlify.app/
     <td colspan="2"> Zoom </td>
   </tr>
   <tr>
-    <td width="106" height="52"> <img src="public/pixelv-minus.png" alt="Minus" width="20" hspace="10" /><img src="public/pixelv-plus.png" alt="Plus" width="20" hspace="10"/> </td>
+    <td width="106" height="52"> <img src="public/pixelv-minus.svg" alt="Minus" width="20" hspace="10" /><img src="public/pixelv-plus.svg" alt="Plus" width="20" hspace="10"/> </td>
     <td> Zoom with buttons or with the mouse's scrollwheel.  </td>
   </tr>
   <tr>
@@ -111,6 +111,23 @@ Visit here: https://pixelvee.netlify.app/
   </tr>
 </table>
 
+## Brush
+
+<table>
+  <tr>
+    <td colspan="2"> Change Brush Type </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Click the brush preview to toggle between circle and square brushes. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Change Brush Size </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Change brush size by moving the slider between 1 and 32 pixels diameter. </td>
+  </tr>
+</table>
+
 ## Brush Modes
 
 <table>
@@ -144,23 +161,6 @@ Visit here: https://pixelvee.netlify.app/
   </tr>
 </table>
 
-## Brush Size
-
-<table>
-  <tr>
-    <td colspan="2"> Change Brush Type </td>
-  </tr>
-  <tr>
-    <td colspan="2"> Click the brush preview to toggle between circle and square brushes. </td>
-  </tr>
-  <tr>
-    <td colspan="2"> Change Brush Size </td>
-  </tr>
-  <tr>
-    <td colspan="2"> Change brush size by moving the slider between 1 and 32 pixels diameter. </td>
-  </tr>
-</table>
-
 ## Palette
 
 <table>
@@ -168,7 +168,15 @@ Visit here: https://pixelvee.netlify.app/
     <td colspan="2"> Primary/ Secondary Swatches </td>
   </tr>
   <tr>
-    <td colspan="2"> Primary and secondary swatch. Click a swatch to open the color picker or press (R) to randomize the primary swatch color. </td>
+    <td width="66" height="52"> <img src="public/pixelv-swatches.svg" alt="Swatches" width="40"/> </td>
+    <td > Primary and secondary swatch. Click a swatch to open the color picker or press (R) to randomize the primary swatch color. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Switch Primary/ Secondary Swatches </td>
+  </tr>
+  <tr>
+    <td width="66" height="52"> <img src="public/pixelv-switch.svg" alt="Color Switch" width="40"/> </td>
+    <td > Click to switch primary and secondary swatch colors. </td>
   </tr>
   <tr>
     <td colspan="2"> Palette Knife (Hold K or click on the selected color)</td>
@@ -183,6 +191,13 @@ Visit here: https://pixelvee.netlify.app/
   <tr>
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-palette-scraper.svg" alt="Palette Scraper" width="40"/> </td>
     <td> Remove a palette swatch. Click the palette scraper then click the color swatch you want to remove from the color palette. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Add Color to Palette</td>
+  </tr>
+  <tr>
+    <td width="66" height="52"> <img src="public/pixelv-plus.svg" alt="Plus" width="20" hspace="10"/> </td>
+    <td> Click to open the color picker and add the selected color to the palette.  </td>
   </tr>
 </table>
 
@@ -253,6 +268,13 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
   </tr>
   <tr>
     <td colspan="2"> Click on the color to open the color picker and change the vector's color. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Toggle Vector Visibility </td>
+  </tr>
+  <tr>
+    <td width="66" height="52"> <img src="public/pixelv-eyeopen.svg" alt="Toggle Visibility" width="40"/> </td>
+    <td> Click the eye icon to hide/show the vector. </td>
   </tr>
   <tr>
     <td colspan="2"> Remove Vector </td>

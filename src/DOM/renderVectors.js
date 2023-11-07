@@ -3,6 +3,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { getAngle } from "../utils/trig.js"
 import {
+  createModeElement,
   createToolElement,
   createColorElement,
   createHideElement,
@@ -41,6 +42,16 @@ const renderVectorElement = (action) => {
   const thumb = createThumbnailImage(action)
   vectorElement.appendChild(thumb)
 
+  //left side icons
+  const left = document.createElement("div")
+  left.className = "left"
+  Object.keys(action.modes).forEach((modeKey) => {
+    const mode = createModeElement(modeKey, action.modes[modeKey])
+    left.appendChild(mode)
+  })
+  vectorElement.appendChild(left)
+
+  //right side icons
   const tool = createToolElement(action, isSelected)
   vectorElement.appendChild(tool)
 

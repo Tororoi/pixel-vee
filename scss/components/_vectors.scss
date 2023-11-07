@@ -3,7 +3,7 @@
 .vectors-interface {
   order: 5;
   flex: 1 1 auto;
-  min-height: 264px; //header and vectors-control plus 2 vectors.
+  min-height: 116px; //header and vectors-control plus 1 vector.
   .vectors-control {
     display: flex;
     flex-flow: row nowrap;
@@ -86,37 +86,57 @@
           width: 100%;
           height: 100%;
         }
-        .tool {
+        button {
           position: absolute;
-          right: 0;
-          top: 0;
           cursor: pointer;
           width: 20px;
           height: 20px;
-          background-color: $button-color;
           z-index: 104;
           margin-bottom: 2px;
+          &:hover {
+            z-index: 106;
+          }
+        }
+        .left {
+          > :nth-child(1) {
+            left: 0;
+            top: 0;
+            @include boxBorder($border-color, $white, false, right bottom);
+          }
+          > :nth-child(2) {
+            left: 0;
+            top: 22px;
+            @include boxBorder($border-color, $white, false, right top bottom);
+          }
+          > :nth-child(3) {
+            left: 0;
+            top: 44px;
+            @include boxBorder($border-color, $white, false, right top bottom);
+          }
+          > :nth-child(4) {
+            left: 0;
+            top: 66px;
+            @include boxBorder($border-color, $white, false, right top);
+          }
+        }
+        .mode {
+          background-color: $button-color;
+          &.selected {
+            background-color: $white;
+          }
+        }
+        .tool {
+          right: 0;
+          top: 0;
+          background-color: $button-color;
           @include boxBorder($border-color, $white, false, left bottom);
           &.selected {
             background-color: $white;
           }
         }
-        .actionColor-container {
-          background-image: repeating-linear-gradient(
-            -45deg,
-            white,
-            white 5px,
-            rgb(216, 216, 216) 5px,
-            rgb(216, 216, 216) 10px
-          );
-        }
         .actionColor {
-          position: absolute;
           right: 0;
           top: 22px;
-          cursor: pointer;
-          width: 20px;
-          height: 20px;
           background-image: repeating-linear-gradient(
             -45deg,
             white,
@@ -124,12 +144,7 @@
             rgb(216, 216, 216) 5px,
             rgb(216, 216, 216) 10px
           );
-          z-index: 104;
-          margin-bottom: 2px;
           @include boxBorder($border-color, $white, false, left top bottom);
-          &:hover {
-            z-index: 106;
-          }
           .swatch {
             width: 100%;
             height: 100%;
@@ -137,39 +152,16 @@
           }
         }
         .hide {
-          position: absolute;
           right: 0;
           top: 44px;
-          cursor: pointer;
-          width: 20px;
-          height: 20px;
-          background: $dark-gray;
-          z-index: 104;
-          margin-bottom: 2px;
+          background-color: $dark-gray;
           @include boxBorder($border-color, $white, false, left top bottom);
-          &:hover {
-            z-index: 106;
-          }
-          .eye {
-            // pointer-events: none;
-            width: 100%;
-            height: 100%;
-          }
         }
         .trash {
-          position: absolute;
           right: 0;
           top: 66px;
-          cursor: pointer;
-          width: 20px;
-          height: 20px;
           background-color: $dark-gray;
-          z-index: 104;
-          margin-bottom: 2px;
           @include boxBorder($border-color, $white, false, left top);
-          &:hover {
-            z-index: 106;
-          }
         }
         &.selected {
           background: $gray;

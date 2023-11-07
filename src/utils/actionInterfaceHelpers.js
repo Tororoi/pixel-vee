@@ -1,12 +1,30 @@
 // * Buttons * //
 
 /**
+ *
+ * @param {String} modeKey
+ * @param {Boolean} isSelected
+ * @returns {Element}
+ */
+export const createModeElement = (modeKey, isSelected) => {
+  let mode = document.createElement("button")
+  mode.type = "button"
+  mode.className = "mode"
+  mode.classList.add(modeKey)
+  if (isSelected) {
+    mode.classList.add("selected")
+  }
+  return mode
+}
+
+/**
  * @param {Object} action
  * @param {Boolean} isSelected
  * @returns {Element}
  */
 export const createToolElement = (action, isSelected) => {
-  let tool = document.createElement("div")
+  let tool = document.createElement("button")
+  tool.type = "button"
   tool.className = "tool"
   tool.classList.add(action.tool.name)
   if (isSelected) {
@@ -20,7 +38,8 @@ export const createToolElement = (action, isSelected) => {
  * @returns {Element}
  */
 export const createColorElement = (action) => {
-  let color = document.createElement("div")
+  let color = document.createElement("button")
+  color.type = "button"
   color.className = "actionColor"
   let colorSwatch = document.createElement("div")
   colorSwatch.className = "swatch"
@@ -34,14 +53,10 @@ export const createColorElement = (action) => {
  * @returns {Element}
  */
 export const createHideElement = (hidden = false) => {
-  let hide = document.createElement("div")
+  let hide = document.createElement("button")
+  hide.type = "button"
   hide.className = "hide"
-  let hideIcon = document.createElement("div")
-  hideIcon.className = "eye"
-  hidden
-    ? hideIcon.classList.add("eyeclosed")
-    : hideIcon.classList.add("eyeopen")
-  hide.appendChild(hideIcon)
+  hidden ? hide.classList.add("eyeclosed") : hide.classList.add("eyeopen")
   return hide
 }
 

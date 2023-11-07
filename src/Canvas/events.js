@@ -10,7 +10,7 @@ import {
 } from "../DOM/render.js"
 import { createNewRasterLayer } from "./layers.js"
 import { handleTools } from "../Tools/events.js"
-import { removeAction } from "../Actions/actions.js"
+import { removeAction, changeActionMode } from "../Actions/actions.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { swatches } from "../Context/swatch.js"
@@ -214,16 +214,14 @@ const resizeOnScreenCanvas = () => {
 function layerInteract(e) {
   let layer = e.target.closest(".layer").layerObj
   //toggle visibility
-  if (e.target.className.includes("eye")) {
-    if (e.target.className.includes("eyeopen")) {
-      e.target.classList.remove("eyeopen")
-      e.target.classList.add("eyeclosed")
-      layer.hidden = true
-    } else if (e.target.className.includes("eyeclosed")) {
-      e.target.classList.remove("eyeclosed")
-      e.target.classList.add("eyeopen")
-      layer.hidden = false
-    }
+  if (e.target.className.includes("eyeopen")) {
+    e.target.classList.remove("eyeopen")
+    e.target.classList.add("eyeclosed")
+    layer.hidden = true
+  } else if (e.target.className.includes("eyeclosed")) {
+    e.target.classList.remove("eyeclosed")
+    e.target.classList.add("eyeopen")
+    layer.hidden = false
   } else if (e.target.className.includes("trash")) {
     removeLayer(layer)
   } else {
@@ -469,23 +467,31 @@ function addRasterLayer() {
  */
 function vectorInteract(e) {
   let vector = e.target.closest(".vector").vectorObj
-  //toggle visibility
-  if (e.target.className.includes("eye")) {
-    if (e.target.className.includes("eyeopen")) {
-      e.target.classList.remove("eyeopen")
-      e.target.classList.add("eyeclosed")
-      vector.hidden = true
-    } else if (e.target.className.includes("eyeclosed")) {
-      e.target.classList.remove("eyeclosed")
-      e.target.classList.add("eyeopen")
-      vector.hidden = false
-    }
-    renderCanvas(vector.layer, null, true, true)
+  if (e.target.className.includes("eraser")) {
+    //change mode
+    toggleVectorMode(vector, "eraser")
+  } else if (e.target.className.includes("inject")) {
+    //change mode
+    toggleVectorMode(vector, "inject")
   } else if (e.target.className.includes("actionColor")) {
+    //change color
     e.target.color = vector.color
     e.target.vector = vector
     initializeColorPicker(e.target)
+  } else if (e.target.className.includes("eyeopen")) {
+    //toggle visibility
+    e.target.classList.remove("eyeopen")
+    e.target.classList.add("eyeclosed")
+    vector.hidden = true
+    renderCanvas(vector.layer, null, true, true)
+  } else if (e.target.className.includes("eyeclosed")) {
+    //toggle visibility
+    e.target.classList.remove("eyeclosed")
+    e.target.classList.add("eyeopen")
+    vector.hidden = false
+    renderCanvas(vector.layer, null, true, true)
   } else if (e.target.className.includes("trash")) {
+    //remove vector
     removeVector(vector)
   } else {
     let currentIndex = canvas.currentVectorIndex
@@ -547,7 +553,19 @@ function removeVector(vector) {
   renderCanvas(vector.layer, null, true, true)
 }
 
-//TODO: add move tool and scale tool for reference layers
+/**
+ * Change a vector action's modes
+ * @param {Object} vector
+ * @param {String} modeKey
+ */
+function toggleVectorMode(vector, modeKey) {
+  changeActionMode(vector.index, modeKey)
+  state.undoStack.push(state.action)
+  state.action = null
+  state.redoStack = []
+  renderVectorsToDOM()
+  renderCanvas(vector.layer, null, true, true)
+}
 
 //===================================//
 //=== * * * Initialization * * * ====//

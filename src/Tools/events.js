@@ -143,9 +143,9 @@ export function handleModes(e, manualModeName = null) {
       state.tool.modes[targetMode.id] = false
     } else {
       state.tool.modes[targetMode.id] = true
-      if (targetMode.id === "eraser") {
+      if (targetMode.id === "eraser" && state.tool.modes?.inject) {
         state.tool.modes.inject = false
-      } else if (targetMode.id === "inject") {
+      } else if (targetMode.id === "inject" && state.tool.modes?.eraser) {
         state.tool.modes.eraser = false
       }
     }

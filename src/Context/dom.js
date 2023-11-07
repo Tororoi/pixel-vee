@@ -120,26 +120,6 @@ const canvasWidth = document.getElementById("canvas-width")
 const canvasHeight = document.getElementById("canvas-height")
 
 //====================================//
-//======= * * * Preload * * * ========//
-//====================================//
-
-// * Preload images that don't show up on initial load * //
-const preloadContainer = document.getElementById("preload-container")
-const images = [
-  //modes icons
-  //one-off actions icons
-  "public/pixelv-plus-hover.png",
-  "public/pixelv-plus.png",
-  "public/pixelv-minus-hover.png",
-  "public/pixelv-minus.png",
-]
-images.forEach((url) => {
-  let img = new Image()
-  img.src = url
-  preloadContainer.appendChild(img)
-})
-
-//====================================//
 //========= * * * State * * * ========//
 //====================================//
 

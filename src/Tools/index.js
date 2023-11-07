@@ -26,6 +26,16 @@ export const tools = {
     modes: {},
     type: "modify",
   },
+  changeMode: {
+    name: "changeMode",
+    fn: null,
+    action: null,
+    brushSize: null,
+    disabled: false,
+    options: {},
+    modes: {},
+    type: "modify",
+  },
   changeColor: {
     name: "changeColor",
     fn: null,

@@ -154,14 +154,6 @@
   @include colorMaskIcon;
 }
 
-$one-time-tools: plus minus;
-
-@each $tool in $one-time-tools {
-  .#{$tool} {
-    @include toolStyle($tool, true);
-  }
-}
-
 //========================================================//
 //============= * * * One-click Icons * * * ==============//
 //========================================================//
@@ -204,4 +196,12 @@ $one-time-tools: plus minus;
 
 .recenter {
   @include recenterIcon;
+}
+
+.minus {
+  @include minusIcon;
+}
+
+.plus {
+  @include plusIcon;
 }

@@ -93,6 +93,9 @@ function redrawTimelineActions(layer, index = null) {
         case "modify":
           //do nothing
           break
+        case "changeMode":
+          //do nothing
+          break
         case "changeColor":
           //do nothing
           break

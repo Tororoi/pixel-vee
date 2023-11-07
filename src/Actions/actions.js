@@ -119,6 +119,35 @@ export function removeAction(actionIndex) {
 }
 
 /**
+ * Modify action in the timeline
+ * @param {Integer} actionIndex
+ * @param {String} modeKey
+ */
+export function changeActionMode(actionIndex, modeKey) {
+  let action = state.undoStack[actionIndex]
+  let oldModes = { ...action.modes }
+  action.modes[modeKey] = !action.modes[modeKey]
+  //resolve conflicting modes
+  if (action.modes[modeKey]) {
+    if (modeKey === "eraser" && action.modes.inject) {
+      action.modes.inject = false
+    } else if (modeKey === "inject" && action.modes.eraser) {
+      action.modes.eraser = false
+    }
+  }
+  let newModes = { ...action.modes }
+  state.addToTimeline({
+    tool: tools.changeMode,
+    properties: {
+      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
+      moddedActionIndex: actionIndex,
+      from: oldModes,
+      to: newModes,
+    },
+  })
+}
+
+/**
  * Modify actions in the timeline
  * Sets all actions before it except for action index 0 to removed = true
  * @param {Object} layer
