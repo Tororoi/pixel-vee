@@ -189,7 +189,7 @@ function handlePalette(e) {
         setColor(r, g, b, a, swatches.primary.swatch)
       }
     }
-  } else if (e.target.className.includes("icon")) {
+  } else if (e.target.className.includes("add-color")) {
     //add new color to palette
     let swatch = document.createElement("div")
     swatch.className = "swatch"

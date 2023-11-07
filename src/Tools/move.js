@@ -177,6 +177,7 @@ export const move = {
   brushSize: 1,
   disabled: true,
   options: {},
+  modes: {},
   type: "raster",
   cursor: "move",
   activeCursor: "move",

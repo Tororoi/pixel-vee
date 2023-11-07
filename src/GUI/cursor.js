@@ -43,14 +43,14 @@ export function renderCursor(state, canvas, swatches) {
             state.tool.brushSize,
             canvas.currentLayer,
             ctx,
-            state.mode,
+            state.tool.modes,
             state.maskSet,
             state.drawnPointsSet,
             null,
             true
           )
         })
-        if (state.mode === "erase") {
+        if (state.tool.modes?.eraser) {
           drawCursorBox(state, canvas, 1)
           // vectorGui.drawSelectOutline(state, canvas, state.selectPixelSet, 0.5)
         }

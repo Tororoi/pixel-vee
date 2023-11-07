@@ -67,11 +67,6 @@ const createPaletteSwatch = (colorObj, index) => {
  */
 const createAddColorButton = () => {
   const addColorBtn = document.createElement("div")
-  addColorBtn.className = "add-color"
-
-  const icon = document.createElement("div")
-  icon.className = "icon"
-
-  addColorBtn.appendChild(icon)
+  addColorBtn.className = "add-color plus"
   dom.paletteColors.appendChild(addColorBtn)
 }

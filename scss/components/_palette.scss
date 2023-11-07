@@ -66,10 +66,8 @@
     position: absolute;
     width: 40px;
     height: 40px;
-    background: transparent;
     box-shadow: none;
     margin: 0;
-    // transform: translateX(-48px) translateY(-36px);
     top: 84px;
     left: 37px;
     &:hover {
@@ -91,49 +89,13 @@
         width: 40px;
         height: 40px;
         cursor: pointer;
-        .icon {
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-          background-image: url("../public/pixelv-palette-knife.png");
-          background-size: 100%;
-          transition: transform 0.1s;
-        }
-        &:hover {
-          .icon {
-            // background-image: url("../public/pixelv-palette-knife-hover.png");
-            // transform: translateY(-2px);
-          }
-        }
-        &.selected {
-          .icon {
-            background-image: url("../public/pixelv-palette-knife-hover.png");
-          }
-        }
+        @include paletteKnifeIcon;
       }
       .palette-remove {
         width: 40px;
         height: 40px;
         cursor: pointer;
-        .icon {
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-          background-image: url("../public/pixelv-palette-scraper.png");
-          background-size: 100%;
-          transition: transform 0.1s;
-        }
-        &:hover {
-          .icon {
-            // background-image: url("../public/pixelv-palette-scraper-hover.png");
-            // transform: translateY(-2px);
-          }
-        }
-        &.selected {
-          .icon {
-            background-image: url("../public/pixelv-palette-scraper-hover.png");
-          }
-        }
+        @include paletteScraperIcon;
       }
     }
     .palette-colors {
@@ -194,15 +156,6 @@
       margin: 1px;
       &:hover {
         z-index: 106;
-      }
-      .icon {
-        background-image: url("../public/pixelv-plus.png");
-        background-size: 100%;
-        width: 100%;
-        height: 100%;
-        &:hover {
-          background-image: url("../public/pixelv-plus-hover.png");
-        }
       }
     }
   }

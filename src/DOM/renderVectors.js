@@ -3,6 +3,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { getAngle } from "../utils/trig.js"
 import {
+  createModeElement,
   createToolElement,
   createColorElement,
   createHideElement,
@@ -35,12 +36,23 @@ const isValidAction = (action) =>
  * @param {Object} action
  */
 const renderVectorElement = (action) => {
+  const isSelected = action.index === canvas.currentVectorIndex
   const vectorElement = createVectorElement(action)
 
   const thumb = createThumbnailImage(action)
   vectorElement.appendChild(thumb)
 
-  const tool = createToolElement(action)
+  //left side icons
+  const left = document.createElement("div")
+  left.className = "left"
+  Object.keys(action.modes).forEach((modeKey) => {
+    const mode = createModeElement(modeKey, action.modes[modeKey])
+    left.appendChild(mode)
+  })
+  vectorElement.appendChild(left)
+
+  //right side icons
+  const tool = createToolElement(action, isSelected)
   vectorElement.appendChild(tool)
 
   const color = createColorElement(action)
@@ -52,8 +64,8 @@ const renderVectorElement = (action) => {
   const trash = createTrashElement()
   vectorElement.appendChild(trash)
 
-  if (action.index === canvas.currentVectorIndex) {
-    tool.style.background = "rgb(255, 255, 255)"
+  if (isSelected) {
+    // tool.style.background = "rgb(255, 255, 255)"
     vectorElement.style.background = "rgb(0, 0, 0)"
   } else {
     vectorElement.style.background = "rgb(51, 51, 51)"

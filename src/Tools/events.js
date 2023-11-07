@@ -1,6 +1,7 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { handleUndo, handleRedo } from "../Actions/undoRedo.js"
 import { vectorGui } from "../GUI/vector.js"
@@ -8,7 +9,8 @@ import { createSquareBrush, createCircleBrush } from "../utils/brushHelpers.js"
 import { actionClear } from "../Actions/actions.js"
 import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
-import { renderVectorsToDOM } from "../DOM/render.js"
+import { renderVectorsToDOM, renderBrushModesToDOM } from "../DOM/render.js"
+import { renderCursor } from "../GUI/cursor.js"
 
 //=========================================//
 //=== * * * Button Event Handlers * * * ===//
@@ -95,14 +97,14 @@ export function handleTools(e, manualToolName = null) {
     //failsafe for hacking tool ids
     if (tools[targetTool?.id || manualToolName]) {
       //reset old button
-      dom.toolBtn.style.background = "rgb(131, 131, 131)"
+      dom.toolBtn.classList.remove("selected")
       //get new button and select it
       if (manualToolName) {
         dom.toolBtn = document.querySelector(`#${manualToolName}`)
       } else {
         dom.toolBtn = targetTool
       }
-      dom.toolBtn.style.background = "rgb(255, 255, 255)"
+      dom.toolBtn.classList.add("selected")
       state.tool = tools[dom.toolBtn.id]
       renderCanvas(canvas.currentLayer)
       //update options
@@ -110,7 +112,8 @@ export function handleTools(e, manualToolName = null) {
       dom.brushSlider.value = state.tool.brushSize
       dom.brushSlider.disabled = state.tool.disabled
       //update cursor
-      if (dom.modeBtn.id === "erase") {
+      // if (dom.modeBtn.id === "erase") {
+      if (state.tool.modes?.eraser) {
         canvas.vectorGuiCVS.style.cursor = "none"
       } else {
         canvas.vectorGuiCVS.style.cursor = state.tool.cursor
@@ -118,6 +121,8 @@ export function handleTools(e, manualToolName = null) {
       vectorGui.reset()
       state.reset()
       renderVectorsToDOM()
+      renderBrushModesToDOM()
+      renderCursor(state, canvas, swatches)
     }
   }
 }
@@ -129,23 +134,29 @@ export function handleTools(e, manualToolName = null) {
  * @param {String} manualModeName
  */
 export function handleModes(e, manualModeName = null) {
-  const targetMode = e?.target.closest(".mode")
+  let targetMode = e?.target.closest(".mode")
   if (targetMode || manualModeName) {
-    //reset old button
-    dom.modeBtn.style.background = "rgb(131, 131, 131)"
-    //get new button and select it
     if (manualModeName) {
-      dom.modeBtn = document.querySelector(`#${manualModeName}`)
-    } else {
-      dom.modeBtn = targetMode
+      targetMode = document.querySelector(`#${manualModeName}`)
     }
-    dom.modeBtn.style.background = "rgb(255, 255, 255)"
-    state.mode = dom.modeBtn.id
-    if (dom.modeBtn.id === "erase") {
+    if (targetMode.classList.contains("selected")) {
+      state.tool.modes[targetMode.id] = false
+    } else {
+      state.tool.modes[targetMode.id] = true
+      if (targetMode.id === "eraser" && state.tool.modes?.inject) {
+        state.tool.modes.inject = false
+      } else if (targetMode.id === "inject" && state.tool.modes?.eraser) {
+        state.tool.modes.eraser = false
+      }
+    }
+    if (state.tool.modes?.eraser) {
       canvas.vectorGuiCVS.style.cursor = "none"
     } else {
       canvas.vectorGuiCVS.style.cursor = "crosshair"
     }
+    vectorGui.reset()
+    renderBrushModesToDOM()
+    renderCursor(state, canvas, swatches)
   }
 }
 
@@ -173,7 +184,7 @@ function switchBrush(e) {
 function updateBrush(e) {
   switch (state.tool.name) {
     case "brush":
-    case "replace":
+    case "colorMask":
     case "line":
     case "quadCurve":
     case "cubicCurve":

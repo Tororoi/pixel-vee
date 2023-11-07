@@ -19,7 +19,6 @@ export const state = {
   redoStack: [],
   //tool settings
   tool: null, //needs to be initialized
-  mode: "draw", //TODO: modes should allow multiple modes at once {erase: false, perfect: false, inject: false}
   brushStamp: {
     "0,0": [{ x: 0, y: 0 }],
     "1,0": [{ x: 0, y: 0 }],
@@ -32,11 +31,6 @@ export const state = {
     "1,-1": [{ x: 0, y: 0 }],
   }, //default 1 pixel
   brushType: "circle",
-  options: {
-    perfect: false,
-    erase: false,
-    contiguous: false,
-  },
   brushDirection: "0,0",
   //touchscreen?
   touch: false,
@@ -95,7 +89,7 @@ export const state = {
   lastDrawnY: null,
   waitingPixelX: null,
   waitingPixelY: null,
-  //for replace
+  //for colorMask
   colorLayerGlobal: null,
   localColorLayer: null,
   //functions
@@ -117,7 +111,7 @@ function addToTimeline(actionObject) {
     brushSize: brushSize || state.tool.brushSize,
     color: color || { ...swatches.primary.color },
     tool: tool,
-    mode: state.mode, //TODO: should be replaced by options to allow multi selection of modes
+    modes: { ...tool.modes }, //TODO: should be replaced by options to allow multi selection of modes
     properties,
     hidden: false,
     removed: false,

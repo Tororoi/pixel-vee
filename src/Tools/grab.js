@@ -38,6 +38,7 @@ export const grab = {
   brushSize: 1,
   disabled: true,
   options: {},
+  modes: {},
   type: "utility",
   cursor: "grab",
   activeCursor: "grabbing",

@@ -42,7 +42,7 @@ const toolsContainer = document.querySelector(".tools")
 
 const tools = [
   "brush",
-  "replace",
+  "colorMask",
   "fill",
   "line",
   "quadCurve",
@@ -61,11 +61,7 @@ tools.forEach((tool) => {
 })
 
 const toolBtn = document.querySelector("#brush")
-toolBtn.style.background = "rgb(255, 255, 255)"
-
-const modesContainer = document.querySelector(".modes")
-const modeBtn = document.querySelector("#draw")
-modeBtn.style.background = "rgb(255, 255, 255)"
+toolBtn.classList.add("selected")
 
 //====================================//
 //===== * * * Color Picker * * * =====//
@@ -95,6 +91,7 @@ const brushDisplay = document.querySelector(".brush-preview")
 const brushPreview = document.querySelector("#brush-preview")
 const brushSlider = document.querySelector("#brush-size")
 const brushStamp = document.querySelector(".brush-stamp")
+const modesContainer = document.querySelector(".modes-container")
 
 // * Palette Interface * //
 const paletteInterfaceContainer = document.querySelector(".palette-interface")
@@ -107,7 +104,7 @@ const paletteRemoveBtn = document.querySelector(".palette-remove")
 
 // * Layers Interface * //
 const uploadBtn = document.querySelector("#file-upload")
-const newLayerBtn = document.querySelector(".new-raster-layer")
+const newLayerBtn = document.querySelector(".add-layer")
 const layersContainer = document.querySelector(".layers")
 const layersInterfaceContainer = document.querySelector(".layers-interface")
 
@@ -121,29 +118,6 @@ const sizeContainer = document.querySelector(".size-container")
 const dimensionsForm = document.querySelector(".dimensions-form")
 const canvasWidth = document.getElementById("canvas-width")
 const canvasHeight = document.getElementById("canvas-height")
-
-//====================================//
-//======= * * * Preload * * * ========//
-//====================================//
-
-// * Preload images that don't show up on initial load * //
-const preloadContainer = document.getElementById("preload-container")
-const images = [
-  "public/pixelv-addlayer-hover.png",
-  "public/pixelv-eyeopen-hover.png",
-  "public/pixelv-eyeclosed-hover.png",
-  "public/pixelv-eyeclosed.png",
-  "public/pixelv-reference-hover.png",
-  "public/pixelv-trash-hover.png",
-  "public/pixelv-plus-hover.png",
-  "public/pixelv-palette-knife-hover.png",
-  "public/pixelv-palette-scraper-hover.png",
-]
-images.forEach((url) => {
-  let img = new Image()
-  img.src = url
-  preloadContainer.appendChild(img)
-})
 
 //====================================//
 //========= * * * State * * * ========//
@@ -166,8 +140,6 @@ export const dom = {
   toolsContainer,
   ...toolButtons,
   toolBtn,
-  modesContainer,
-  modeBtn,
   //color picker
   swatch,
   backSwatch,
@@ -183,6 +155,7 @@ export const dom = {
   brushPreview,
   brushSlider,
   brushStamp,
+  modesContainer,
   paletteInterfaceContainer,
   paletteContainer,
   paletteColors,

@@ -4,7 +4,9 @@
   user-select: none;
   position: absolute;
   z-index: 103;
-  width: 570px; //important to be fixed for collapsed state
+  width: 370px;
+  max-width: calc(100% - 4px);
+  max-height: calc(100% - 4px);
   display: none;
   flex-flow: column nowrap;
   justify-content: flex-start;
@@ -28,7 +30,8 @@
     padding-top: 2px;
     .picker-interface {
       display: flex;
-      flex-flow: row nowrap;
+      flex-flow: column nowrap;
+      align-items: center;
       margin: 10px;
       #left {
         display: flex;
@@ -243,14 +246,11 @@
     }
   }
 
-  @media (max-width: 700px) {
-    width: 370px;
-    max-width: calc(100% - 4px);
-    max-height: calc(100% - 4px);
+  @media ($bp-md) {
+    width: 570px; //important to be fixed for collapsed state
     .collapsible {
       .picker-interface {
-        flex-flow: column nowrap;
-        align-items: center;
+        flex-flow: row nowrap;
       }
     }
   }

@@ -18,6 +18,12 @@ import { createColorMaskSet } from "../Canvas/masks.js"
 function brushSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
+      if (state.tool.modes?.colorMask) {
+        state.maskSet = createColorMaskSet(
+          swatches.secondary.color,
+          canvas.currentLayer
+        )
+      }
       state.pointsSet = new Set()
       // if (state.maskSet) {
       //if some set of pixels is masked off, initialize drawnpoints including the masked pixels
@@ -38,7 +44,7 @@ function brushSteps() {
         state.tool.brushSize,
         canvas.currentLayer,
         canvas.currentLayer.ctx,
-        state.mode,
+        state.tool.modes,
         state.maskSet,
         state.drawnPointsSet,
         state.points,
@@ -63,7 +69,7 @@ function brushSteps() {
             swatches.primary.color,
             canvas.currentLayer,
             ctx,
-            state.mode,
+            state.tool.modes,
             state.brushStamp,
             state.tool.brushSize,
             state.maskSet,
@@ -114,7 +120,7 @@ function brushSteps() {
             state.tool.brushSize,
             canvas.currentLayer,
             canvas.currentLayer.ctx,
-            state.mode,
+            state.tool.modes,
             state.maskSet,
             state.drawnPointsSet,
             state.points,
@@ -142,34 +148,16 @@ function brushSteps() {
           state.tool.brushSize,
           canvas.currentLayer,
           canvas.currentLayer.ctx,
-          state.mode,
+          state.tool.modes,
           state.maskSet,
           state.drawnPointsSet,
           state.points,
           false
         )
-        // if (state.mode === "perfect") {
-        //   renderCanvas(null, (ctx) => {
-        //     actionDraw(
-        //       state.cursorX,
-        //       state.cursorY,
-        //       swatches.primary.color,
-        //       state.brushStamp,
-        //       "0,0",
-        //       state.tool.brushSize,
-        //       canvas.currentLayer,
-        //       ctx,
-        //       state.mode,
-        //       state.drawnPointsSet,
-        //       null,
-        //       true
-        //     )
-        //   })
-        // }
         renderCanvas(canvas.currentLayer)
       } else {
         //FIX: perfect will be option, not mode
-        if (state.mode === "perfect") {
+        if (state.tool.modes?.perfect) {
           //if currentPixel not neighbor to lastDrawn and has not already been drawn, draw waitingpixel
           if (
             Math.abs(state.cursorX - state.lastDrawnX) > 1 ||
@@ -185,7 +173,7 @@ function brushSteps() {
               state.tool.brushSize,
               canvas.currentLayer,
               canvas.currentLayer.ctx,
-              state.mode,
+              state.tool.modes,
               state.maskSet,
               state.drawnPointsSet,
               state.points,
@@ -206,7 +194,7 @@ function brushSteps() {
                 state.tool.brushSize,
                 canvas.currentLayer,
                 ctx,
-                state.mode,
+                state.tool.modes,
                 state.maskSet,
                 state.drawnPointsSet,
                 null,
@@ -226,7 +214,7 @@ function brushSteps() {
                 state.tool.brushSize,
                 canvas.currentLayer,
                 ctx,
-                state.mode,
+                state.tool.modes,
                 state.maskSet,
                 state.drawnPointsSet,
                 null,
@@ -244,7 +232,7 @@ function brushSteps() {
             state.tool.brushSize,
             canvas.currentLayer,
             canvas.currentLayer.ctx,
-            state.mode,
+            state.tool.modes,
             state.maskSet,
             state.drawnPointsSet,
             state.points,
@@ -299,7 +287,7 @@ function brushSteps() {
             state.tool.brushSize,
             canvas.currentLayer,
             canvas.currentLayer.ctx,
-            state.mode,
+            state.tool.modes,
             state.maskSet,
             state.drawnPointsSet,
             state.points,
@@ -327,7 +315,7 @@ function brushSteps() {
           state.tool.brushSize,
           canvas.currentLayer,
           canvas.currentLayer.ctx,
-          state.mode,
+          state.tool.modes,
           state.maskSet,
           state.drawnPointsSet,
           state.points,
@@ -344,7 +332,7 @@ function brushSteps() {
         state.tool.brushSize,
         canvas.currentLayer,
         canvas.currentLayer.ctx,
-        state.mode,
+        state.tool.modes,
         state.maskSet,
         state.drawnPointsSet,
         state.points,
@@ -363,6 +351,9 @@ function brushSteps() {
         properties: { points: state.points, maskSet: state.maskSet, maskArray },
       })
       renderCanvas(canvas.currentLayer)
+      if (state.tool.modes?.colorMask) {
+        state.maskSet = null
+      }
       break
     default:
     //do nothing
@@ -371,13 +362,13 @@ function brushSteps() {
 
 /**
  * Supported modes: "draw, erase, perfect, inject"
- * //TODO: change replace function to be a mode instead of tool, called "colorMask"
+ * //TODO: change colorMask function to be a mode instead of tool
  * Old method: creates a copy of the canvas with just the secondary color parts. This is used as a mask so the user can draw normally.
  * When the user finishes drawing, the changed pixels are saved as points and will be rerendered in the timeline as single pixel brush points
  * New method: Create a set of marked coordinates that can be checked before drawing
  * Old method is more efficient, but incompatible with subtractive modes (inject, erase). May want to revisit old method conditionally for additive modes.
  */
-function replaceSteps() {
+function colorMaskSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       state.maskSet = createColorMaskSet(
@@ -407,19 +398,20 @@ export const brush = {
   action: actionDraw,
   brushSize: 1,
   disabled: false,
-  options: { perfect: false, erase: false, inject: false, line: false },
+  options: { line: false },
+  modes: { eraser: false, inject: false, perfect: false, colorMask: false },
   type: "raster",
   cursor: "crosshair",
   activeCursor: "crosshair",
 }
 
-export const replace = {
-  name: "replace",
-  fn: replaceSteps,
+export const colorMask = {
+  name: "colorMask",
+  fn: colorMaskSteps,
   action: actionDraw,
   brushSize: 1,
   disabled: false,
-  options: { perfect: false, erase: false, inject: false }, //erase and inject not available right now. Inject will be default mode
+  options: {}, //erase and inject not available right now. Inject will be default mode
   type: "raster",
   cursor: "crosshair",
   activeCursor: "crosshair",
