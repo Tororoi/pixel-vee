@@ -154,10 +154,14 @@ $tools: pencil;
   }
 }
 
-$one-time-tools: recenter clear undo redo plus minus switch;
+$one-time-tools: recenter clear undo redo plus minus;
 
 @each $tool in $one-time-tools {
   .#{$tool} {
     @include toolStyle($tool, true);
   }
+}
+
+.switch {
+  @include switchIcon;
 }

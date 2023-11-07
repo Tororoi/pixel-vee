@@ -142,8 +142,6 @@ const images = [
   "public/pixelv-recenter.png",
   "public/pixelv-clear-hover.png",
   "public/pixelv-clear.png",
-  "public/pixelv-switch-hover.png",
-  "public/pixelv-switch.png",
   "public/pixelv-plus-hover.png",
   "public/pixelv-plus.png",
   "public/pixelv-minus-hover.png",
