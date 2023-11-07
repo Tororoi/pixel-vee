@@ -11,31 +11,36 @@ Visit here: https://pixelvee.netlify.app/
     <td colspan="2"> Undo/Redo </td>
   </tr>
   <tr>
-    <td colspan="2"> Any action that makes a change to the canvas can be undone. </td>
+    <td width="106" height="52"> <img src="public/pixelv-undo.svg" alt="Undo" width="40"/><img src="public/pixelv-redo.svg" alt="Redo" width="40"/> </td>
+    <td> Any action that makes a change to the canvas can be undone. </td>
   </tr>
   <tr>
     <td colspan="2"> Color Picker </td>
   </tr>
   <tr>
-    <td colspan="2"> Foreground and background color swatches can be clicked to open a color picker. Color picker uses an HSL gradient selector for intuitive color changing. Ability to adjust individual color channels or type in a hexcode. </td>
+    <td width="66" height="52"> <img src="public/pixelv-swatches.svg" alt="Swatches" width="40"/> </td>
+    <td> Foreground and background color swatches can be clicked to open a color picker. Color picker uses an HSL gradient selector for intuitive color changing. Ability to adjust individual color channels or type in a hexcode. </td>
   </tr>
   <tr>
     <td colspan="2"> Zoom </td>
   </tr>
   <tr>
-    <td colspan="2"> Zoom with buttons or with the mouse's scrollwheel.  </td>
+    <td width="106" height="52"> <img src="public/pixelv-minus.png" alt="Minus" width="20" hspace="10" /><img src="public/pixelv-plus.png" alt="Plus" width="20" hspace="10"/> </td>
+    <td> Zoom with buttons or with the mouse's scrollwheel.  </td>
   </tr>
   <tr>
     <td colspan="2"> Recenter </td>
   </tr>
   <tr>
+    <td width="66" height="52"> <img src="public/pixelv-recenter.svg" alt="Recenter" width="40"/> </td>
     <td colspan="2"> Sometimes zooming can get out of hand. Press Recenter to bring the canvas back to normal size and starting position. </td>
   </tr>
   <tr>
     <td colspan="2"> Clear </td>
   </tr>
   <tr>
-    <td colspan="2"> Clears canvas layer and removes any vectors that were on that layer. </td>
+    <td width="66" height="52"> <img src="public/pixelv-clear.svg" alt="Clear" width="40"/> </td>
+    <td> Clears canvas layer and removes any vectors that were on that layer. </td>
   </tr>
 </table>
 
@@ -199,14 +204,14 @@ Visit here: https://pixelvee.netlify.app/
     <td colspan="2"> Add Raster Layer </td>
   </tr>
   <tr>
-    <td width="66" height="52"> <img src="public/pixelv-addlayer.png" alt="Add Raster Layer" width="40"/> </td>
+    <td width="66" height="52"> <img src="public/pixelv-addlayer.svg" alt="Add Raster Layer" width="40"/> </td>
     <td> Add a new layer for drawing. </td>
   </tr>
   <tr>
     <td colspan="2"> Add Reference Layer </td>
   </tr>
   <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-reference.png" alt="Add Reference Layer" width="40"/> </td>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-reference.svg" alt="Add Reference Layer" width="40"/> </td>
     <td> Add a new layer to be used for a background reference, such as for tracing. Reference layers cannot be drawn on. </td>
   </tr>
 </table>
@@ -215,14 +220,14 @@ Visit here: https://pixelvee.netlify.app/
     <td colspan="2"> Toggle Layer Visibility </td>
   </tr>
   <tr>
-    <td width="66" height="52"> <img src="public/pixelv-eyeopen.png" alt="Toggle Visibility" width="40"/> </td>
+    <td width="66" height="52"> <img src="public/pixelv-eyeopen.svg" alt="Toggle Visibility" width="40"/> </td>
     <td> Click the eye icon to hide/show the layer. </td>
   </tr>
   <tr>
     <td colspan="2"> Remove Layer </td>
   </tr>
   <tr>
-    <td width="66" height="52"> <img src="public/pixelv-trash.png" alt="Remove Layer" width="40"/> </td>
+    <td width="66" height="52"> <img src="public/pixelv-trash.svg" alt="Remove Layer" width="40"/> </td>
     <td> Click the trash icon to remove the layer. </td>
   </tr>
   <tr>
@@ -253,7 +258,7 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
     <td colspan="2"> Remove Vector </td>
   </tr>
   <tr>
-    <td width="66" height="52"> <img src="public/pixelv-trash.png" alt="Remove Vector" width="40"/> </td>
+    <td width="66" height="52"> <img src="public/pixelv-trash.svg" alt="Remove Vector" width="40"/> </td>
     <td> Click the trash icon to remove the vector. </td>
   </tr>
 </table>

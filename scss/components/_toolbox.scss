@@ -94,12 +94,12 @@
   }
 }
 
+//========================================================//
+//================ * * * Tool Icons * * * ================//
+//========================================================//
+
 .brush {
   @include brushIcon;
-}
-
-.colorMask {
-  @include colorMaskIcon;
 }
 
 .fill {
@@ -134,27 +134,27 @@
   @include moveIcon;
 }
 
+//========================================================//
+//================ * * * Mode Icons * * * ================//
+//========================================================//
+
 .eraser {
   @include eraserIcon;
-}
-
-.perfect {
-  @include mechanicalPencilIcon;
 }
 
 .inject {
   @include injectIcon;
 }
 
-$tools: pencil;
-
-@each $tool in $tools {
-  .#{$tool} {
-    @include toolStyle($tool);
-  }
+.perfect {
+  @include mechanicalPencilIcon;
 }
 
-$one-time-tools: recenter clear undo redo plus minus;
+.colorMask {
+  @include colorMaskIcon;
+}
+
+$one-time-tools: plus minus;
 
 @each $tool in $one-time-tools {
   .#{$tool} {
@@ -162,6 +162,46 @@ $one-time-tools: recenter clear undo redo plus minus;
   }
 }
 
+//========================================================//
+//============= * * * One-click Icons * * * ==============//
+//========================================================//
+
 .switch {
   @include switchIcon;
+}
+
+.eyeopen {
+  @include eyeOpenIcon;
+}
+
+.eyeclosed {
+  @include eyeClosedIcon;
+}
+
+.trash {
+  @include trashIcon;
+}
+
+.reference {
+  @include referenceIcon;
+}
+
+.add-layer {
+  @include addLayerIcon;
+}
+
+.undo {
+  @include undoIcon;
+}
+
+.redo {
+  @include redoIcon;
+}
+
+.clear {
+  @include clearIcon;
+}
+
+.recenter {
+  @include recenterIcon;
 }

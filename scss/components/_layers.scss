@@ -16,25 +16,15 @@
     input[type="file"] {
       display: none;
     }
-    .custom-file-upload {
+    .reference {
       width: 40px;
       height: 40px;
       cursor: pointer;
-      background-image: url("../public/pixelv-reference.png");
-      background-size: 100%;
-      &:hover {
-        background-image: url("../public/pixelv-reference-hover.png");
-      }
     }
-    .new-raster-layer {
+    .add-layer {
       width: 40px;
       height: 40px;
       cursor: pointer;
-      background-image: url("../public/pixelv-addlayer.png");
-      background-size: 100%;
-      &:hover {
-        background-image: url("../public/pixelv-addlayer-hover.png");
-      }
     }
   }
   .layers-container {
@@ -84,12 +74,6 @@
           .eye {
             width: 100%;
             height: 100%;
-            &.eyeopen {
-              @include eyeOpen;
-            }
-            &.eyeclosed {
-              @include eyeClosed;
-            }
           }
         }
         .warning {
@@ -105,11 +89,6 @@
           height: 40px;
           z-index: 104;
           margin: 3px;
-          background-image: url("../public/pixelv-trash.png");
-          background-size: 100%;
-          &:hover {
-            background-image: url("../public/pixelv-trash-hover.png");
-          }
           &.disabled {
             opacity: 0.5;
             cursor: no-drop;

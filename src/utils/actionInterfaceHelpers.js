@@ -50,10 +50,8 @@ export const createHideElement = (hidden = false) => {
  * @returns {Element}
  */
 export const createTrashElement = () => {
-  let trash = document.createElement("div")
+  let trash = document.createElement("button")
+  trash.type = "button"
   trash.className = "trash"
-  let trashIcon = document.createElement("div")
-  trashIcon.className = "icon"
-  trash.appendChild(trashIcon)
   return trash
 }

@@ -394,7 +394,6 @@ function addReferenceLayer() {
           opacity: 1,
           inactiveTools: [
             "brush",
-            "colorMask",
             "fill",
             "line",
             "quadCurve",

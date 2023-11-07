@@ -140,7 +140,7 @@ export const fill = {
   brushSize: 1,
   disabled: true,
   options: { contiguous: true },
-  modes: { eraser: false, inject: false },
+  modes: { eraser: false },
   type: "vector",
   cursor: "crosshair",
   activeCursor: "crosshair",

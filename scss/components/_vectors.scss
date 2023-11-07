@@ -154,12 +154,6 @@
             // pointer-events: none;
             width: 100%;
             height: 100%;
-            &.eyeopen {
-              @include eyeOpen;
-            }
-            &.eyeclosed {
-              @include eyeClosed;
-            }
           }
         }
         .trash {
@@ -169,22 +163,12 @@
           cursor: pointer;
           width: 20px;
           height: 20px;
-          background: $dark-gray;
+          background-color: $dark-gray;
           z-index: 104;
           margin-bottom: 2px;
           @include boxBorder($border-color, $white, false, left top);
-          .icon {
-            pointer-events: none;
-            width: 100%;
-            height: 100%;
-            background-image: url("../public/pixelv-trash.png");
-            background-size: 100%;
-          }
           &:hover {
             z-index: 106;
-            .icon {
-              background-image: url("../public/pixelv-trash-hover.png");
-            }
           }
         }
         &.selected {
