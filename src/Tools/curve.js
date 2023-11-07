@@ -64,7 +64,7 @@ function quadCurveSteps() {
             swatches.primary.color,
             canvas.currentLayer,
             ctx,
-            state.mode,
+            state.tool.modes,
             state.brushStamp,
             state.tool.brushSize,
             state.maskSet
@@ -95,7 +95,7 @@ function quadCurveSteps() {
             swatches.primary.color,
             canvas.currentLayer,
             ctx,
-            state.mode,
+            state.tool.modes,
             state.brushStamp,
             state.tool.brushSize,
             state.maskSet
@@ -133,7 +133,7 @@ function quadCurveSteps() {
             swatches.primary.color,
             canvas.currentLayer,
             canvas.currentLayer.ctx,
-            state.mode,
+            state.tool.modes,
             state.brushStamp,
             state.tool.brushSize,
             state.maskSet
@@ -234,7 +234,7 @@ function cubicCurveSteps() {
             swatches.primary.color,
             canvas.currentLayer,
             ctx,
-            state.mode,
+            state.tool.modes,
             state.brushStamp,
             state.tool.brushSize,
             state.maskSet
@@ -267,7 +267,7 @@ function cubicCurveSteps() {
             swatches.primary.color,
             canvas.currentLayer,
             ctx,
-            state.mode,
+            state.tool.modes,
             state.brushStamp,
             state.tool.brushSize,
             state.maskSet
@@ -311,7 +311,7 @@ function cubicCurveSteps() {
             swatches.primary.color,
             canvas.currentLayer,
             canvas.currentLayer.ctx,
-            state.mode,
+            state.tool.modes,
             state.brushStamp,
             state.tool.brushSize,
             state.maskSet
@@ -395,7 +395,7 @@ function adjustCurveSteps(numPoints = 4) {
                 state.undoStack[canvas.currentVectorIndex].color,
                 state.undoStack[canvas.currentVectorIndex].layer,
                 ctx,
-                state.undoStack[canvas.currentVectorIndex].mode,
+                state.undoStack[canvas.currentVectorIndex].modes,
                 state.undoStack[canvas.currentVectorIndex].brushStamp,
                 state.undoStack[canvas.currentVectorIndex].brushSize,
                 state.undoStack[canvas.currentVectorIndex].maskSet
@@ -421,7 +421,7 @@ function adjustCurveSteps(numPoints = 4) {
                 state.undoStack[canvas.currentVectorIndex].color,
                 state.undoStack[canvas.currentVectorIndex].layer,
                 ctx,
-                state.undoStack[canvas.currentVectorIndex].mode,
+                state.undoStack[canvas.currentVectorIndex].modes,
                 state.undoStack[canvas.currentVectorIndex].brushStamp,
                 state.undoStack[canvas.currentVectorIndex].brushSize,
                 state.undoStack[canvas.currentVectorIndex].maskSet
@@ -452,7 +452,7 @@ function adjustCurveSteps(numPoints = 4) {
                 state.undoStack[canvas.currentVectorIndex].color,
                 state.undoStack[canvas.currentVectorIndex].layer,
                 ctx,
-                state.undoStack[canvas.currentVectorIndex].mode,
+                state.undoStack[canvas.currentVectorIndex].modes,
                 state.undoStack[canvas.currentVectorIndex].brushStamp,
                 state.undoStack[canvas.currentVectorIndex].brushSize,
                 state.undoStack[canvas.currentVectorIndex].maskSet
@@ -476,7 +476,7 @@ function adjustCurveSteps(numPoints = 4) {
                 state.undoStack[canvas.currentVectorIndex].color,
                 state.undoStack[canvas.currentVectorIndex].layer,
                 ctx,
-                state.undoStack[canvas.currentVectorIndex].mode,
+                state.undoStack[canvas.currentVectorIndex].modes,
                 state.undoStack[canvas.currentVectorIndex].brushStamp,
                 state.undoStack[canvas.currentVectorIndex].brushSize,
                 state.undoStack[canvas.currentVectorIndex].maskSet
@@ -523,7 +523,8 @@ export const quadCurve = {
   action: actionQuadraticCurve,
   brushSize: 1,
   disabled: false,
-  options: { erase: false, inject: false },
+  options: {},
+  modes: { eraser: false, inject: false },
   type: "vector",
   cursor: "crosshair",
   activeCursor: "crosshair",
@@ -535,7 +536,8 @@ export const cubicCurve = {
   action: actionCubicCurve,
   brushSize: 1,
   disabled: false,
-  options: { erase: false, inject: false },
+  options: {},
+  modes: { eraser: false, inject: false },
   type: "vector",
   cursor: "crosshair",
   activeCursor: "crosshair",

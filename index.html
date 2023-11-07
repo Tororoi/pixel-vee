@@ -31,7 +31,6 @@
   </script>
 
   <body>
-    <div id="preload-container"></div>
     <div id="options" class="nav">
       <div class="title">
         <a href="https://github.com/Tororoi/pixel-vee" target="_blank">
@@ -73,14 +72,7 @@
             width="512px"
             height="512px"
           ></canvas>
-          <div class="canvas-layers">
-            <!-- <canvas
-              class="onScreen"
-              id="onScreen"
-              width="512px"
-              height="512px"
-            ></canvas> -->
-          </div>
+          <div class="canvas-layers"></div>
           <canvas
             class="gui"
             id="vectorGui"
@@ -119,9 +111,6 @@
               </label>
             </div>
             <div class="collapsible">
-              <label for="brush-size" class="brush-size"
-                >Line Weight: <span id="line-weight">1</span>px
-              </label>
               <div
                 class="brush-preview btn"
                 data-tooltip="Click to switch brush"
@@ -140,6 +129,9 @@
                   </svg>
                 </div>
               </div>
+              <label for="brush-size" class="brush-size"
+                >Line Weight: <span id="line-weight">1</span>px
+              </label>
               <input
                 type="range"
                 min="1"
@@ -149,6 +141,33 @@
                 id="brush-size"
                 data-tooltip="Adjust brush size"
               />
+              <span class="modes-title">Modes</span>
+              <div class="modes-container">
+                <button
+                  type="button"
+                  class="mode eraser"
+                  id="eraser"
+                  data-tooltip="Erase (E)"
+                ></button
+                ><button
+                  type="button"
+                  class="mode inject"
+                  id="inject"
+                  data-tooltip="Inject (I) &#010;&#010;Translucent colors will be applied directly"
+                ></button
+                ><button
+                  type="button"
+                  class="mode perfect"
+                  id="perfect"
+                  data-tooltip="Pixel Perfect (P)"
+                ></button
+                ><button
+                  type="button"
+                  class="mode colorMask"
+                  id="colorMask"
+                  data-tooltip="Color Mask (M) &#010;&#010;Only draw over selected secondary swatch color"
+                ></button>
+              </div>
             </div>
           </div>
           <div
@@ -176,23 +195,24 @@
               <div class="colors">
                 <div
                   class="primary swatch btn"
-                  data-tooltip="Swatch (R) to randomize &#010;&#010;Click to open Color Picker"
+                  data-tooltip="Primary Swatch &#010;&#010;(R) to randomize &#010;&#010;Click to open Color Picker"
                 >
                   <div class="swatch-color"></div>
                 </div>
                 <div
                   class="secondary back-swatch btn"
-                  data-tooltip="Click to open Color Picker"
+                  data-tooltip="Secondary Swatch &#010;&#010;Click to open Color Picker"
                 >
                   <div class="swatch-color"></div>
                 </div>
                 <!-- Add weighted randomizer to lean towards certain colors -->
               </div>
-              <div
-                class="color-switch custom-shape btn"
+              <button
+                type="button"
+                class="switch color-switch custom-shape"
                 data-tooltip="Switch primary/ secondary colors"
               >
-                <svg
+                <!-- <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 -0.5 20 20"
                   shape-rendering="crispEdges"
@@ -206,35 +226,35 @@
                     stroke="#000000"
                     d="M6 3h1M5 4h3M4 5h5M3 6h7M5 7h3M5 8h3M5 9h3M6 10h3M13 10h1M6 11h4M13 11h2M7 12h9M8 13h9M10 14h6M13 15h2M13 16h1"
                   />
-                </svg>
-              </div>
+                </svg> -->
+              </button>
               <div class="palette-container">
                 <div class="palette-tools">
-                  <div
+                  <button
+                    type="button"
                     class="palette-edit"
-                    data-tooltip="Palette Knife (Hold K or click on the selected color) &#010;&#010;Click on a swatch to edit the color."
-                  >
-                    <div class="icon"></div>
-                  </div>
-                  <div
+                    data-tooltip="Palette Knife (Hold K or click on the selected color) &#010;&#010;While active, click on a swatch to edit the color."
+                    aria-label="Palette Knife. While active, click on a swatch to edit the color."
+                  ></button>
+                  <button
+                    type="button"
                     class="palette-remove"
-                    data-tooltip="Palette Scraper (Hold X) &#010;&#010; Click on a swatch to remove it from the palette."
-                  >
-                    <div class="icon"></div>
-                  </div>
+                    data-tooltip="Palette Scraper (Hold X) &#010;&#010;While active, click on a swatch to remove it from the palette."
+                    aria-label="Palette Scraper. While active, click on a swatch to remove it from the palette."
+                  ></button>
                 </div>
                 <div class="palette-colors">
-                  <!-- <div class="palette-color">
-                  <div class="swatch"></div>
-                </div>
-                <div class="palette-color">
-                  <div class="swatch"></div>
-                </div> -->
-                </div>
-                <!-- <div class="add-color">
-                  <div class="icon">
+                  <div class="palette-color selected">
+                    <div class="swatch" style="background: rgb(0, 0, 0)"></div>
                   </div>
-                </div> -->
+                  <div class="palette-color">
+                    <div
+                      class="swatch"
+                      style="background: rgb(255, 255, 255)"
+                    ></div>
+                  </div>
+                  <div class="add-color plus"></div>
+                </div>
               </div>
             </div>
           </div>
@@ -330,17 +350,23 @@
             </div>
             <div class="collapsible">
               <div class="layers-control">
-                <div class="new-raster-layer" data-tooltip="New Layer"></div>
+                <div class="add-layer" data-tooltip="New Layer"></div>
                 <label
                   for="file-upload"
-                  class="custom-file-upload"
+                  class="reference"
                   data-tooltip="New Reference"
                 >
                 </label>
                 <input type="file" id="file-upload" />
               </div>
               <div class="layers-container">
-                <div class="layers"></div>
+                <div class="layers">
+                  <div class="layer raster selected" id="0" draggable="true">
+                    Layer 1
+                    <div class="hide"><div class="eyeopen"></div></div>
+                    <div class="trash"><div class="icon"></div></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -399,215 +425,87 @@
           </label>
         </div>
         <div class="collapsible">
-          <!-- <div class="colors">
-            <div
-              class="primary swatch btn"
-              data-tooltip="Swatch (S) to randomize &#010;&#010;Click to open Color Picker"
-            >
-              <div class="swatch-color"></div>
-            </div>
-            <div
-              class="secondary back-swatch btn"
-              data-tooltip="Click to open Color Picker"
-            >
-              <div class="swatch-color"></div>
-            </div>
-          </div> -->
-          <!-- <div
-            class="color-switch custom-shape btn"
-            data-tooltip="Switch primary/ secondary colors"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 -0.5 20 20"
-              shape-rendering="crispEdges"
-            >
-              <path
-                class="outline"
-                stroke="#8d8d8d"
-                d="M6 2h1M5 3h1M7 3h1M4 4h1M8 4h1M3 5h1M9 5h1M2 6h1M10 6h1M3 7h2M8 7h2M4 8h1M8 8h1M4 9h1M8 9h1M13 9h1M5 10h1M9 10h1M12 10h1M14 10h1M5 11h1M10 11h3M15 11h1M6 12h1M16 12h1M7 13h1M17 13h1M8 14h2M16 14h1M10 15h3M15 15h1M12 16h1M14 16h1M13 17h1"
-              />
-              <path
-                stroke="#000000"
-                d="M6 3h1M5 4h3M4 5h5M3 6h7M5 7h3M5 8h3M5 9h3M6 10h3M13 10h1M6 11h4M13 11h2M7 12h9M8 13h9M10 14h6M13 15h2M13 16h1"
-              />
-            </svg>
-          </div> -->
           <div class="btn-pair">
-            <div
-              class="recenter custom-shape btn"
-              data-tooltip="Recenter Canvas"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 -0.5 22 22"
-                shape-rendering="crispEdges"
-              >
-                <path
-                  class="outline"
-                  stroke="#8d8d8d"
-                  d="M7 0h8M6 1h1M15 1h1M5 2h1M16 2h1M5 3h1M16 3h1M6 4h1M15 4h1M2 5h2M7 5h1M14 5h1M18 5h2M1 6h1M4 6h1M8 6h1M13 6h1M17 6h1M20 6h1M0 7h1M5 7h1M9 7h1M12 7h1M16 7h1M21 7h1M0 8h1M6 8h1M10 8h2M15 8h1M21 8h1M0 9h1M7 9h1M14 9h1M21 9h1M0 10h1M8 10h1M13 10h1M21 10h1M0 11h1M8 11h1M13 11h1M21 11h1M0 12h1M7 12h1M14 12h1M21 12h1M0 13h1M6 13h1M10 13h2M15 13h1M21 13h1M0 14h1M5 14h1M9 14h1M12 14h1M16 14h1M21 14h1M1 15h1M4 15h1M8 15h1M13 15h1M17 15h1M20 15h1M2 16h2M7 16h1M14 16h1M18 16h2M6 17h1M15 17h1M5 18h1M16 18h1M5 19h1M16 19h1M6 20h1M15 20h1M7 21h8"
-                />
-                <path
-                  stroke="#44891a"
-                  d="M7 1h5M6 2h1M11 2h4M6 3h1M11 3h4M7 4h1M11 4h3M8 5h1M11 5h2M2 6h2M11 6h1M18 6h2M1 7h1M4 7h1M17 7h1M1 8h1M5 8h1M16 8h1M1 9h1M15 9h1M1 10h1M14 10h1M1 11h6M15 11h5M1 12h5M16 12h4M2 13h3M17 13h3M2 14h2M10 14h1M18 14h2M9 15h1M11 15h1M8 16h1M11 16h2M7 17h1M11 17h3M6 18h1M11 18h4M6 19h1M11 19h4M7 20h3"
-                />
-                <path
-                  stroke="#0c580a"
-                  d="M12 1h3M15 2h1M15 3h1M14 4h1M13 5h1M9 6h1M12 6h1M10 7h2M20 7h1M20 8h1M6 9h1M20 9h1M7 10h1M20 10h1M7 11h1M14 11h1M20 11h1M6 12h1M15 12h1M20 12h1M1 13h1M5 13h1M16 13h1M20 13h1M1 14h1M4 14h1M11 14h1M17 14h1M20 14h1M2 15h2M12 15h1M18 15h2M13 16h1M14 17h1M15 18h1M15 19h1M10 20h5"
-                />
-                <path
-                  stroke="#86c31e"
-                  d="M7 2h4M7 3h4M8 4h3M9 5h2M10 6h1M2 7h2M18 7h2M2 8h3M17 8h3M2 9h4M16 9h4M2 10h5M15 10h5M10 15h1M9 16h2M8 17h3M7 18h4M7 19h4"
-                />
-              </svg>
-            </div>
-            <div class="clear custom-shape btn" data-tooltip="Clear Canvas">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 -0.5 22 22"
-                shape-rendering="crispEdges"
-              >
-                <path
-                  class="outline"
-                  stroke="#8d8d8d"
-                  d="M1 0h20M0 1h1M21 1h1M0 2h1M21 2h1M0 3h1M21 3h1M0 4h1M21 4h1M0 5h1M21 5h1M0 6h1M21 6h1M0 7h1M21 7h1M0 8h1M21 8h1M0 9h1M21 9h1M0 10h1M21 10h1M0 11h1M21 11h1M0 12h1M21 12h1M0 13h1M21 13h1M0 14h1M21 14h1M0 15h1M21 15h1M0 16h1M21 16h1M0 17h1M21 17h1M0 18h1M21 18h1M0 19h1M21 19h1M0 20h1M21 20h1M1 21h20"
-                />
-                <path
-                  stroke="#000000"
-                  d="M1 1h20M1 2h20M1 3h2M19 3h2M1 4h2M19 4h2M1 5h2M19 5h2M1 6h2M19 6h2M1 7h2M19 7h2M1 8h2M19 8h2M1 9h2M19 9h2M1 10h2M19 10h2M1 11h2M19 11h2M1 12h2M19 12h2M1 13h2M19 13h2M1 14h2M19 14h2M1 15h2M19 15h2M1 16h2M19 16h2M1 17h2M19 17h2M1 18h2M19 18h2M1 19h20M1 20h20"
-                />
-                <path
-                  stroke="#ffffff"
-                  d="M3 3h1M6 3h2M10 3h2M14 3h2M18 3h1M5 4h2M9 4h2M13 4h2M17 4h2M4 5h2M8 5h2M12 5h2M16 5h2M3 6h2M7 6h2M11 6h2M15 6h2M3 7h1M6 7h2M10 7h2M14 7h2M18 7h1M5 8h2M9 8h2M13 8h2M17 8h2M4 9h2M8 9h2M12 9h2M16 9h2M3 10h2M7 10h2M11 10h2M15 10h2M3 11h1M6 11h2M10 11h2M14 11h2M18 11h1M5 12h2M9 12h2M13 12h2M17 12h2M4 13h2M8 13h2M12 13h2M16 13h2M3 14h2M7 14h2M11 14h2M15 14h2M3 15h1M6 15h2M10 15h2M14 15h2M18 15h1M5 16h2M9 16h2M13 16h2M17 16h2M4 17h2M8 17h2M12 17h2M16 17h2M3 18h2M7 18h2M11 18h2M15 18h2"
-                />
-                <path
-                  stroke="#acacac"
-                  d="M4 3h2M8 3h2M12 3h2M16 3h2M3 4h2M7 4h2M11 4h2M15 4h2M3 5h1M6 5h2M10 5h2M14 5h2M18 5h1M5 6h2M9 6h2M13 6h2M17 6h2M4 7h2M8 7h2M12 7h2M16 7h2M3 8h2M7 8h2M11 8h2M15 8h2M3 9h1M6 9h2M10 9h2M14 9h2M18 9h1M5 10h2M9 10h2M13 10h2M17 10h2M4 11h2M8 11h2M12 11h2M16 11h2M3 12h2M7 12h2M11 12h2M15 12h2M3 13h1M6 13h2M10 13h2M14 13h2M18 13h1M5 14h2M9 14h2M13 14h2M17 14h2M4 15h2M8 15h2M12 15h2M16 15h2M3 16h2M7 16h2M11 16h2M15 16h2M3 17h1M6 17h2M10 17h2M14 17h2M18 17h1M5 18h2M9 18h2M13 18h2M17 18h2"
-                />
-              </svg>
-            </div>
-          </div>
-          <div class="btn-pair">
-            <div
-              class="undo-button custom-shape btn"
+            <button
+              type="button"
+              class="tool undo custom-shape"
               id="undo"
               data-tooltip="Undo (Cmd + Z)"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 -0.5 22 22"
-                shape-rendering="crispEdges"
-              >
-                <path
-                  class="outline"
-                  stroke="#8d8d8d"
-                  d="M10 0h4M9 1h1M14 1h1M8 2h1M15 2h1M7 3h1M15 3h1M6 4h1M15 4h1M5 5h1M15 5h1M4 6h1M15 6h5M3 7h1M20 7h1M2 8h1M21 8h1M1 9h1M21 9h1M0 10h1M21 10h1M0 11h1M21 11h1M1 12h1M21 12h1M2 13h1M21 13h1M3 14h1M20 14h1M4 15h1M15 15h5M5 16h1M15 16h1M6 17h1M15 17h1M7 18h1M15 18h1M8 19h1M15 19h1M9 20h1M14 20h1M10 21h4"
-                />
-                <path
-                  stroke="#b00707"
-                  d="M10 1h4M9 2h1M14 2h1M8 3h1M14 3h1M7 4h1M6 5h1M5 6h1M4 7h1M3 8h1M2 9h1M1 10h1M1 11h19M3 12h17M4 13h16M5 14h10M6 15h8M7 16h7M8 17h6M9 18h5M10 19h4"
-                />
-                <path
-                  stroke="#ef3f39"
-                  d="M10 2h4M9 3h5M8 4h6M7 5h7M6 6h8M5 7h10M4 8h16M3 9h17M2 10h18"
-                />
-                <path
-                  stroke="#640000"
-                  d="M14 4h1M14 5h1M14 6h1M15 7h5M20 8h1M20 9h1M20 10h1M20 11h1M2 12h1M20 12h1M3 13h1M20 13h1M4 14h1M15 14h5M5 15h1M14 15h1M6 16h1M14 16h1M7 17h1M14 17h1M8 18h1M14 18h1M9 19h1M14 19h1M10 20h4"
-                />
-              </svg>
-            </div>
-            <div
-              class="redo-button custom-shape btn"
+            />
+            <button
+              type="button"
+              class="tool redo custom-shape"
               id="redo"
               data-tooltip="Redo (Cmd + Shift + Z)"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 -0.5 22 22"
-                shape-rendering="crispEdges"
-              >
-                <path
-                  class="outline"
-                  stroke="#8d8d8d"
-                  d="M8 0h4M7 1h1M12 1h1M6 2h1M13 2h1M6 3h1M14 3h1M6 4h1M15 4h1M6 5h1M16 5h1M2 6h5M17 6h1M1 7h1M18 7h1M0 8h1M19 8h1M0 9h1M20 9h1M0 10h1M21 10h1M0 11h1M21 11h1M0 12h1M20 12h1M0 13h1M19 13h1M1 14h1M18 14h1M2 15h5M17 15h1M6 16h1M16 16h1M6 17h1M15 17h1M6 18h1M14 18h1M6 19h1M13 19h1M7 20h1M12 20h1M8 21h4"
-                />
-                <path
-                  stroke="#0449c9"
-                  d="M8 1h4M7 2h1M12 2h1M7 3h1M13 3h1M7 4h1M14 4h1M7 5h1M15 5h1M7 6h1M16 6h1M2 7h5M1 8h1M1 9h1M1 10h1M2 11h18M2 12h17M2 13h16M7 14h10M8 15h8M8 16h7M8 17h6M8 18h5M8 19h4"
-                />
-                <path
-                  stroke="#4183fc"
-                  d="M8 2h4M8 3h5M8 4h6M8 5h7M8 6h8M7 7h10M2 8h16M2 9h17M2 10h18"
-                />
-                <path
-                  stroke="#002764"
-                  d="M17 7h1M18 8h1M19 9h1M20 10h1M1 11h1M20 11h1M1 12h1M19 12h1M1 13h1M18 13h1M2 14h5M17 14h1M7 15h1M16 15h1M7 16h1M15 16h1M7 17h1M14 17h1M7 18h1M13 18h1M7 19h1M12 19h1M8 20h4"
-                />
-              </svg>
-            </div>
+            />
           </div>
-          <div class="columns">
-            <div class="tools column">
-              <h4>Tools</h4>
-              <button
-                type="button"
-                class="tool btn"
-                id="brush"
-                data-tooltip="Brush (B)"
-              >
-                <div class="brush"></div>
-              </button>
-              <button
-                type="button"
-                class="tool btn"
-                id="replace"
-                data-tooltip="Replace (M) &#010;&#010;Replace secondary color with primary color"
-              >
-                <div class="replace"></div>
-              </button>
-              <button
-                type="button"
-                class="tool btn"
-                id="fill"
-                data-tooltip="Fill (F)"
-              >
-                <div class="fill"></div>
-              </button>
-              <button
-                type="button"
-                class="tool btn"
-                id="line"
-                data-tooltip="Line (L or Hold Shift & Brush)"
-              >
-                <div class="line"></div>
-              </button>
-              <button
-                type="button"
-                class="tool btn"
-                id="quadCurve"
-                data-tooltip="Quadratic Curve (C)"
-              >
-                <div class="quadCurve"></div>
-              </button>
-              <button
-                type="button"
-                class="tool btn"
-                id="cubicCurve"
-                data-tooltip="Cubic Curve (J)"
-              >
-                <div class="cubicCurve"></div>
-              </button>
-              <button
-                type="button"
-                class="tool btn"
-                id="ellipse"
-                data-tooltip="Ellipse (O) &#010;&#010;Hold Shift to maintain circle"
-              >
-                <div class="ellipse"></div>
-              </button>
-              <!-- <button
+          <div class="btn-pair">
+            <button
+              type="button"
+              class="tool recenter custom-shape"
+              data-tooltip="Recenter Canvas"
+            />
+            <button
+              type="button"
+              class="tool clear custom-shape"
+              data-tooltip="Clear Canvas"
+            />
+          </div>
+          <div class="zoom btn-pair">
+            <button
+              type="button"
+              id="minus"
+              class="zoombtn minus"
+              data-tooltip="Zoom Out (Mouse Wheel)"
+            />
+            <button
+              type="button"
+              id="plus"
+              class="zoombtn plus"
+              data-tooltip="Zoom In (Mouse Wheel)"
+            />
+          </div>
+          <div class="tools">
+            <h4>Tools</h4>
+            <div class="columns">
+              <div class="column">
+                <button
+                  type="button"
+                  class="tool brush selected"
+                  id="brush"
+                  data-tooltip="Brush (B)"
+                ></button>
+                <button
+                  type="button"
+                  class="tool fill"
+                  id="fill"
+                  data-tooltip="Fill (F)"
+                />
+                <button
+                  type="button"
+                  class="tool line"
+                  id="line"
+                  data-tooltip="Line (L or Hold Shift & Brush)"
+                />
+                <button
+                  type="button"
+                  class="tool quadCurve"
+                  id="quadCurve"
+                  data-tooltip="Quadratic Curve (C)"
+                />
+                <button
+                  type="button"
+                  class="tool cubicCurve"
+                  id="cubicCurve"
+                  data-tooltip="Cubic Curve (J)"
+                />
+                <button
+                  type="button"
+                  class="tool ellipse"
+                  id="ellipse"
+                  data-tooltip="Ellipse (O) &#010;&#010;Hold Shift to maintain circle"
+                />
+                <!-- <button
                 type="button"
                 class="tool btn"
                 id="select"
@@ -615,96 +513,35 @@
               >
                 <div class="select"></div>
               </button> -->
-              <button
-                type="button"
-                class="tool btn"
-                id="eyedropper"
-                data-tooltip="Eyedropper (Hold Alt)"
-              >
-                <div class="eyedropper"></div>
-              </button>
-              <button
-                type="button"
-                class="tool btn"
-                id="grab"
-                data-tooltip="Grab (Hold Space)"
-              >
-                <div class="grab"></div>
-              </button>
-              <button
-                type="button"
-                class="tool btn"
-                id="move"
-                data-tooltip="Move"
-              >
-                <div class="move"></div>
-              </button>
-            </div>
-            <div class="modes column">
-              <h4>Modes</h4>
-              <button
-                type="button"
-                class="mode btn"
-                id="draw"
-                data-tooltip="Draw (D)"
-              >
-                <div class="pencil"></div>
-              </button>
-              <button
-                type="button"
-                class="mode btn"
-                id="erase"
-                data-tooltip="Erase (E)"
-              >
-                <div class="eraser"></div>
-              </button>
-              <!-- Change to option instead -->
-              <button
-                type="button"
-                class="mode btn"
-                id="perfect"
-                data-tooltip="Pixel Perfect (P)"
-              >
-                <div class="mechanical"></div>
-              </button>
-              <button
-                type="button"
-                class="mode btn"
-                id="inject"
-                data-tooltip="Inject (I) &#010;&#010;Translucent colors will be applied directly"
-              >
-                <div class="inject"></div>
-              </button>
-              <div class="zoom">
-                <div class="tool">
-                  <div class="plusminus">
-                    <div
-                      id="plus"
-                      class="zoombtn"
-                      data-tooltip="Zoom In (Mouse Wheel)"
-                    >
-                      <p>+</p>
-                    </div>
-                    <div
-                      id="minus"
-                      class="zoombtn"
-                      data-tooltip="Zoom Out (Mouse Wheel)"
-                    >
-                      <p>-</p>
-                    </div>
-                  </div>
-                </div>
+              </div>
+              <div class="column">
+                <button
+                  type="button"
+                  class="tool eyedropper"
+                  id="eyedropper"
+                  data-tooltip="Eyedropper (Hold Alt)"
+                />
+                <button
+                  type="button"
+                  class="tool grab"
+                  id="grab"
+                  data-tooltip="Grab (Hold Space)"
+                />
+                <button
+                  type="button"
+                  class="tool move"
+                  id="move"
+                  data-tooltip="Move"
+                />
               </div>
             </div>
           </div>
         </div>
       </div>
       <div class="picker-container draggable v-drag h-drag free">
-        <!-- Layout needs fixing on Safari -->
         <div id="picker-header" class="header dragger">
           <div class="drag-btn"><div class="grip"></div></div>
-          <!-- <h3>Color Picker</h3> -->
-          Color Picker
+          <span>Color Picker</span>
           <label
             for="picker-collapse-btn"
             id="picker-collapser"

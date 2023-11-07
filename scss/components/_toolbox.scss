@@ -5,7 +5,7 @@
   position: absolute;
   z-index: 102;
   background-color: $extra-dark-gray;
-  width: 136px;
+  width: 120px;
   right: 0;
   top: 0;
   display: flex;
@@ -15,202 +15,193 @@
   @include boxBorder;
   .collapsible {
     padding-top: 2px;
-  }
-  /* Color Swatches */
-  .colors {
-    width: 128px;
-    height: 128px;
-    position: relative;
-    .swatch {
-      position: absolute;
-      background-image: repeating-linear-gradient(
-        -45deg,
-        white,
-        white 5px,
-        rgb(216, 216, 216) 5px,
-        rgb(216, 216, 216) 10px
-      );
-      width: 72px;
-      height: 72px;
-      margin: 16px;
-      z-index: 6;
-      .swatch-color {
-        background-image: radial-gradient(
-          rgba(var(--primary-swatch-color), var(--primary-swatch-alpha)) 50%,
-          rgba(var(--primary-swatch-color), 1) 110%
-        );
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-      }
+    :first-child {
+      margin-top: 6px;
     }
-    .back-swatch {
-      position: absolute;
-      background-image: repeating-linear-gradient(
-        -45deg,
-        white,
-        white 5px,
-        rgb(216, 216, 216) 5px,
-        rgb(216, 216, 216) 10px
-      );
-      width: 72px;
-      height: 72px;
-      margin: 16px;
-      z-index: 5;
-      transform: translateX(24px) translateY(24px);
-      .swatch-color {
-        background-image: radial-gradient(
-          rgba(var(--secondary-swatch-color), var(--secondary-swatch-alpha)) 50%,
-          rgba(var(--secondary-swatch-color), 1) 110%
-        );
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-      }
-    }
-  }
-  .color-switch {
-    width: 40px;
-    height: 40px;
-    background: transparent;
-    box-shadow: none;
-    margin-bottom: -24px;
-    transform: translateX(-48px) translateY(-36px);
-    &:hover {
-      box-shadow: none;
-    }
-  }
-  /* Zoom */
-  .zoom {
-    display: flex;
-    justify-content: space-around;
-    margin-top: 46px;
-    width: 100%;
     .tool {
-      background: $button-color;
-      margin: 3px;
-      @include boxBorder;
       cursor: pointer;
-      .plusminus {
-        width: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+      text-align: center;
+      color: white;
+      width: 40px;
+      height: 40px;
+      margin: 3px;
+      opacity: 1;
+      background-color: $button-color;
+      @include boxBorder;
+      &:hover {
+        z-index: 104;
+      }
+      &.selected {
+        background-color: $white;
+        z-index: 105;
+      }
+      &.custom-shape {
+        background-color: transparent;
+        @include cancelBorder;
+      }
+    }
+    .zoom {
+      .zoombtn {
         height: 40px;
+        width: 40px;
+        padding: 10px;
+        background-origin: content-box;
+      }
+    }
+    .btn-pair {
+      display: flex;
+      justify-content: space-around;
+      button {
+        margin: 8px;
+      }
+    }
+    .tools {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-flow: column wrap;
+      width: 100%;
+      margin: 2px;
+      margin-bottom: 4px;
+      h4 {
+        text-align: center;
+        margin: 0px;
+      }
+      .columns {
         display: flex;
-        flex-flow: column nowrap;
-        div {
-          height: 50%;
-          width: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 32px;
-          p {
-            pointer-events: none;
-            transform: translateX(2px) translateY(2px);
-          }
+        justify-content: center;
+        flex-flow: row wrap;
+        // width: 100%;
+        // margin: 2px;
+        .tool {
           &:hover {
-            background: white;
-            color: black;
+            z-index: 104;
           }
+        }
+        .column {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          flex-flow: column wrap;
+          margin: 5px;
         }
       }
     }
   }
 }
 
+//========================================================//
+//================ * * * Tool Icons * * * ================//
+//========================================================//
+
+.brush {
+  @include brushIcon;
+}
+
 .fill {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-fill.png");
-  background-size: 100%;
-}
-
-.quadCurve {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-quad.png");
-  background-size: 100%;
-}
-
-.cubicCurve {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-cubic.png");
-  background-size: 100%;
-}
-
-.ellipse {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-ellipse.png");
-  background-size: 100%;
+  @include fillIcon;
 }
 
 .line {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-line.png");
-  background-size: 100%;
+  @include lineIcon;
 }
 
-.brush {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-brush.png");
-  background-size: 100%;
+.quadCurve {
+  @include quadCurveIcon;
+}
+
+.cubicCurve {
+  @include cubicCurveIcon;
+}
+
+.ellipse {
+  @include ellipseIcon;
 }
 
 .eyedropper {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-eyedropper.png");
-  background-size: 100%;
-}
-
-.eraser {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-eraser.png");
-  background-size: 100%;
+  @include eyedropperIcon;
 }
 
 .grab {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-grab.png");
-  background-size: 100%;
+  @include grabIcon;
 }
 
 .move {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-move.png");
-  background-size: 100%;
+  @include moveIcon;
 }
 
-.pencil {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-pencil.png");
-  background-size: 100%;
-}
+//========================================================//
+//================ * * * Mode Icons * * * ================//
+//========================================================//
 
-.mechanical {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-mechanical.png");
-  background-size: 100%;
+.eraser {
+  @include eraserIcon;
 }
 
 .inject {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-inject.png");
-  background-size: 100%;
+  @include injectIcon;
 }
 
-.replace {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-replace.png");
-  background-size: 100%;
+.perfect {
+  @include mechanicalPencilIcon;
+}
+
+.colorMask {
+  @include colorMaskIcon;
+}
+
+//========================================================//
+//============= * * * One-click Icons * * * ==============//
+//========================================================//
+
+.switch {
+  @include switchIcon;
+}
+
+.eyeopen {
+  @include eyeOpenIcon;
+}
+
+.eyeclosed {
+  @include eyeClosedIcon;
+}
+
+.trash {
+  @include trashIcon;
+}
+
+.reference {
+  @include referenceIcon;
+}
+
+.add-layer {
+  @include addLayerIcon;
+}
+
+.undo {
+  @include undoIcon;
+}
+
+.redo {
+  @include redoIcon;
+}
+
+.clear {
+  @include clearIcon;
+}
+
+.recenter {
+  @include recenterIcon;
+}
+
+.minus {
+  @include minusIcon;
+}
+
+.plus {
+  @include plusIcon;
 }

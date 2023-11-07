@@ -3,7 +3,7 @@
 .layers-interface {
   order: 4;
   flex: 1 1 auto;
-  min-height: 196px; //header and layers-control plus 3 layers.
+  min-height: 120px; //header and layers-control plus 1 layer.
   .collapsible {
     padding-top: 2px;
   }
@@ -16,25 +16,15 @@
     input[type="file"] {
       display: none;
     }
-    .custom-file-upload {
+    .reference {
       width: 40px;
       height: 40px;
       cursor: pointer;
-      background-image: url("../public/pixelv-reference.png");
-      background-size: 100%;
-      &:hover {
-        background-image: url("../public/pixelv-reference-hover.png");
-      }
     }
-    .new-raster-layer {
+    .add-layer {
       width: 40px;
       height: 40px;
       cursor: pointer;
-      background-image: url("../public/pixelv-addlayer.png");
-      background-size: 100%;
-      &:hover {
-        background-image: url("../public/pixelv-addlayer-hover.png");
-      }
     }
   }
   .layers-container {
@@ -65,8 +55,7 @@
         flex-flow: row-reverse nowrap;
         justify-content: flex-end;
         align-items: center;
-        box-shadow: inset 2px 0px $border-color, inset -2px 0px $border-color,
-          inset 0px -2px $border-color, inset 0px 2px $border-color;
+        @include boxBorder($border-color, $white, true);
         &.raster {
           background: $dark-gray;
         }
@@ -76,26 +65,11 @@
         &.selected {
           background: black;
         }
-        &:hover {
-          box-shadow: inset 2px 0px $white, inset -2px 0px $white,
-            inset 0px -2px $white, inset 0px 2px $white;
-        }
         .hide {
           width: 40px;
           height: 40px;
           margin: 6px;
-          // background: $button-color;
           cursor: pointer;
-          .eye {
-            width: 100%;
-            height: 100%;
-            &.eyeopen {
-              @include eyeOpen;
-            }
-            &.eyeclosed {
-              @include eyeClosed;
-            }
-          }
         }
         .warning {
           // background-color: $warning-color;
@@ -110,11 +84,6 @@
           height: 40px;
           z-index: 104;
           margin: 3px;
-          background-image: url("../public/pixelv-trash.png");
-          background-size: 100%;
-          &:hover {
-            background-image: url("../public/pixelv-trash-hover.png");
-          }
           &.disabled {
             opacity: 0.5;
             cursor: no-drop;

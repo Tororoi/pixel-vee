@@ -107,14 +107,12 @@ export function activateShortcut(keyCode) {
             state.resetSelectProperties()
             vectorGui.render()
           }
-        } else {
-          handleModes(null, "draw")
         }
       }
       break
     case "KeyE":
       if (!state.clicked) {
-        handleModes(null, "erase")
+        handleModes(null, "eraser")
       }
       break
     case "KeyF":
@@ -152,7 +150,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyM":
       if (!state.clicked) {
-        handleTools(null, "replace")
+        handleModes(null, "colorMask")
       }
       break
     case "KeyN":
@@ -380,7 +378,8 @@ export function deactivateShortcut(keyCode) {
  * Set tool cursor. TODO: move to utils file
  */
 function setToolCssCursor() {
-  if (dom.modeBtn.id === "erase") {
+  // if (dom.modeBtn.id === "erase") {
+  if (state.tool.modes?.eraser) {
     canvas.vectorGuiCVS.style.cursor = "none"
   } else {
     canvas.vectorGuiCVS.style.cursor = state.tool.cursor

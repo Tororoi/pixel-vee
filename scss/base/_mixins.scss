@@ -1,3 +1,100 @@
+@mixin loadImage($image-name, $hover: false) {
+  width: 0;
+  height: 0;
+  background: url("../public/pixelv-#{$image-name}.png");
+}
+
+//==================================================//
+//================ * * * Tools * * * ===============//
+//==================================================//
+
+@mixin toolStyle($tool-name, $hover: false) {
+  width: 100%;
+  height: 100%;
+  background: url("../public/pixelv-#{$tool-name}.png") no-repeat;
+  background-size: 100%;
+  &:hover {
+    @if $hover {
+      background: url("../public/pixelv-#{$tool-name}-hover.png") no-repeat;
+      background-size: 100%;
+    }
+  }
+  &.selected {
+    background: url("../public/pixelv-#{$tool-name}-hover.png") no-repeat;
+    background-size: 100%;
+  }
+}
+
+//==================================================//
+//============= * * * Box Shadow * * * =============//
+//==================================================//
+
+// Utility function to generate individual shadow properties
+@function side-shadow($side, $color, $inset: false) {
+  $x: 0;
+  $y: 0;
+  $inset-str: "";
+
+  // Determine the side for the shadow offset
+  @if $side == "left" {
+    $x: -2px;
+  } @else if $side == "right" {
+    $x: 2px;
+  } @else if $side == "top" {
+    $y: -2px;
+  } @else if $side == "bottom" {
+    $y: 2px;
+  }
+
+  @if $inset {
+    $inset-str: "inset";
+  }
+
+  @return #{$inset-str} #{$x} #{$y} 0 0 $color;
+}
+
+// Mixin with parameters for color, active color, inset, and sides
+@mixin boxBorder(
+  $color: $border-color,
+  $activeColor: $active-color,
+  $inset: false,
+  $sides: left right top bottom
+) {
+  $shadows: ();
+  @each $side in $sides {
+    $shadows: append($shadows, side-shadow($side, $color, $inset), comma);
+  }
+
+  box-shadow: $shadows;
+
+  &:hover:not([disabled]),
+  &:focus {
+    $active-shadows: ();
+    @each $side in $sides {
+      $active-shadows: append(
+        $active-shadows,
+        side-shadow($side, $activeColor, $inset),
+        comma
+      );
+    }
+    box-shadow: $active-shadows;
+  }
+}
+
+@mixin editBoxBorder {
+  &:hover:not([disabled]),
+  &:focus {
+    @include boxBorder($edit-color, $edit-color);
+  }
+}
+
+@mixin removeBoxBorder {
+  &:hover:not([disabled]),
+  &:focus {
+    @include boxBorder($remove-color, $remove-color);
+  }
+}
+
 @mixin inactiveBoxBorder {
   box-shadow: 2px 0px $border-color, -2px 0px $border-color,
     0px -2px $border-color, 0px 2px $border-color;
@@ -7,76 +104,11 @@
   box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white, 0px 2px $white;
 }
 
-@mixin boxBorder {
-  @include inactiveBoxBorder;
+@mixin cancelBorder {
+  box-shadow: none;
   &:hover:not([disabled]),
   &:focus {
-    @include activeBoxBorder;
-  }
-}
-
-@mixin editBoxBorder {
-  &:hover:not([disabled]),
-  &:focus {
-    box-shadow: 2px 0px rgb(71, 255, 47), -2px 0px rgb(71, 255, 47),
-      0px -2px rgb(71, 255, 47), 0px 2px rgb(71, 255, 47);
-  }
-}
-
-@mixin removeBoxBorder {
-  &:hover:not([disabled]),
-  &:focus {
-    box-shadow: 2px 0px red, -2px 0px red, 0px -2px red, 0px 2px red;
-  }
-}
-
-@mixin leftDownUpBorder {
-  box-shadow: -2px 0px $border-color, 0px -2px $border-color,
-    0px 2px $border-color;
-  &:hover:not([disabled]),
-  &:focus {
-    box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white, 0px 2px $white;
-  }
-}
-
-@mixin leftUpBorder {
-  box-shadow: -2px 0px $border-color, 0px -2px $border-color;
-  &:hover:not([disabled]),
-  &:focus {
-    box-shadow: -2px 0px $white, 0px -2px $white;
-  }
-}
-
-@mixin leftDownBorder {
-  box-shadow: -2px 0px $border-color, 0px 2px $border-color;
-  &:hover:not([disabled]),
-  &:focus {
-    box-shadow: -2px 0px $white, 0px 2px $white;
-  }
-}
-
-@mixin sandwichBorder {
-  box-shadow: 0px -2px $border-color, 0px 2px $border-color;
-  &:hover:not([disabled]),
-  &:focus {
-    box-shadow: 0px -2px $white, 0px 2px $white;
-  }
-}
-
-@mixin bottomBorder {
-  box-shadow: 0px 2px $border-color;
-  &:hover:not([disabled]),
-  &:focus {
-    box-shadow: 0px 2px $white;
-  }
-}
-
-@mixin internalBorder {
-  box-shadow: inset 2px 0px $border-color, -2px 0px $border-color,
-    0px -2px $border-color, 0px 2px $border-color;
-  &:hover:not([disabled]),
-  &:focus {
-    box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white, 0px 2px $white;
+    box-shadow: none;
   }
 }
 
@@ -86,12 +118,9 @@
     0px 2px $white;
 }
 
-@mixin cancelBorder {
-  box-shadow: none;
-  &:hover {
-    box-shadow: none;
-  }
-}
+//==================================================//
+//============= * * * Dialog Box * * * =============//
+//==================================================//
 
 @mixin dragger {
   .drag-btn {
@@ -190,6 +219,10 @@
   }
 }
 
+//==================================================//
+//================ * * * Misc * * * ================//
+//==================================================//
+
 @mixin scrollBar {
   &::-webkit-scrollbar {
     width: 10px;
@@ -205,21 +238,5 @@
       background: white;
       background-clip: content-box;
     }
-  }
-}
-
-@mixin eyeOpen {
-  background-image: url("../public/pixelv-eyeopen.png");
-  background-size: 100%;
-  &:hover {
-    background-image: url("../public/pixelv-eyeopen-hover.png");
-  }
-}
-
-@mixin eyeClosed {
-  background-image: url("../public/pixelv-eyeclosed.png");
-  background-size: 100%;
-  &:hover {
-    background-image: url("../public/pixelv-eyeclosed-hover.png");
   }
 }

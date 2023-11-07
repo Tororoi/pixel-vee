@@ -17,6 +17,7 @@ export function consolidateLayers(includeReference = false) {
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
+  canvas.offScreenCTX.imageSmoothingEnabled = false
   canvas.layers.forEach((layer) => {
     if (!layer.hidden && !layer.removed && layer.opacity > 0) {
       canvas.offScreenCTX.save()

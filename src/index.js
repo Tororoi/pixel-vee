@@ -21,7 +21,7 @@ initializeDialogBox(dom.sidebarContainer)
 initializeDialogBox(dom.toolboxContainer)
 
 // * Brush * //
-initializeDialogBox(dom.brushContainer, true)
+initializeDialogBox(dom.brushContainer)
 
 // * Palette * //
 initializeDialogBox(dom.paletteInterfaceContainer)

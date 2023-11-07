@@ -1,5 +1,5 @@
 import { state } from "../Context/state.js"
-import { brush, replace } from "./brush.js"
+import { brush, colorMask } from "./brush.js"
 import { line } from "./line.js"
 import { select } from "./select.js"
 import { move } from "./move.js"
@@ -22,7 +22,18 @@ export const tools = {
     action: null,
     brushSize: null,
     disabled: false,
-    options: [],
+    options: {},
+    modes: {},
+    type: "modify",
+  },
+  changeMode: {
+    name: "changeMode",
+    fn: null,
+    action: null,
+    brushSize: null,
+    disabled: false,
+    options: {},
+    modes: {},
     type: "modify",
   },
   changeColor: {
@@ -31,7 +42,8 @@ export const tools = {
     action: null,
     brushSize: null,
     disabled: false,
-    options: [],
+    options: {},
+    modes: {},
     type: "modify",
   },
   remove: {
@@ -40,7 +52,8 @@ export const tools = {
     action: null,
     brushSize: null,
     disabled: false,
-    options: [],
+    options: {},
+    modes: {},
     type: "modify",
   },
   clear: {
@@ -49,7 +62,8 @@ export const tools = {
     action: null,
     brushSize: null,
     disabled: false,
-    options: [],
+    options: {},
+    modes: {},
     type: "modify",
   },
   //Raster Tools
@@ -58,7 +72,7 @@ export const tools = {
   // shading: {
   // user selects hsl shading color which mixes with colors that the user draws on to create dynamic shading
   // },
-  replace,
+  colorMask,
   select,
   move,
   // gradient: {
@@ -77,6 +91,7 @@ export const tools = {
     brushSize: null,
     disabled: false,
     options: {},
+    modes: {},
     type: "settings",
   },
   removeLayer: {
@@ -86,14 +101,12 @@ export const tools = {
     brushSize: null,
     disabled: false,
     options: {},
+    modes: {},
     type: "settings",
   },
   //Utility Tools (does not affect timeline)
   eyedropper,
   grab,
-  /** move: {
-    * Move a layer's coordinates independent of other layers
-  } */
   /** perspective: {
    * set vanishing points.
    * Click to create a vanishing point with visible radius r.

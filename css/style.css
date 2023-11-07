@@ -117,6 +117,11 @@ button {
   border: 0;
   padding: 0;
   font-size: 16px;
+  background: transparent;
+  cursor: pointer;
+}
+button:focus {
+  outline: none;
 }
 button:disabled {
   cursor: not-allowed !important;
@@ -139,10 +144,10 @@ input {
   appearance: none;
   border: none;
   outline: none;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 input:hover:not([disabled]), input:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 
 input[type=number] {
@@ -165,6 +170,10 @@ svg {
 #preload-container {
   display: none;
 }
+#preload-container img {
+  width: 0;
+  height: 0;
+}
 
 /* Next basic site layout components */
 .sidebar {
@@ -178,11 +187,11 @@ svg {
   flex-flow: column nowrap;
   align-items: center;
   z-index: 103;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
   touch-action: none;
 }
 .sidebar:hover:not([disabled]), .sidebar:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .sidebar .content {
   height: auto;
@@ -203,6 +212,9 @@ svg {
   background: white;
   background-clip: content-box;
 }
+.sidebar > .collapsible {
+  margin-top: 2px;
+}
 
 .page {
   position: relative;
@@ -220,16 +232,16 @@ svg {
   touch-action: none;
 }
 .draggable.v-drag {
-  box-shadow: 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .draggable.v-drag:hover:not([disabled]), .draggable.v-drag:focus {
-  box-shadow: 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .draggable.h-drag {
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .draggable.h-drag:hover:not([disabled]), .draggable.h-drag:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .draggable.dragging {
   cursor: grabbing;
@@ -251,10 +263,10 @@ svg {
   align-items: center;
   position: relative;
   cursor: grab;
-  box-shadow: 0px 2px rgb(131, 131, 131);
+  box-shadow: 0 2px 0 0 rgb(131, 131, 131);
 }
 .draggable .header:hover:not([disabled]), .draggable .header:focus {
-  box-shadow: 0px 2px rgb(255, 255, 255);
+  box-shadow: 0 2px 0 0 rgb(255, 255, 255);
 }
 .draggable .header .drag-btn {
   position: absolute;
@@ -395,63 +407,16 @@ svg {
   color: white;
   margin: 3px;
   opacity: 1;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .btn:hover:not([disabled]), .btn:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
-}
-.btn.custom-shape {
-  background: transparent;
-  box-shadow: none;
-}
-.btn.custom-shape:hover {
-  box-shadow: none;
-}
-.btn.custom-shape:hover .outline {
-  stroke: white;
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .btn:hover {
   cursor: pointer;
 }
 .btn * {
   pointer-events: none;
-}
-
-.btn-pair {
-  display: flex;
-  justify-content: space-around;
-  margin-top: 6px;
-  margin-bottom: 6px;
-  width: 100%;
-}
-.btn-pair .custom-shape {
-  width: 44px;
-  height: 44px;
-}
-
-.columns {
-  display: flex;
-  justify-content: space-evenly;
-  width: 100%;
-  margin-bottom: 18px;
-}
-.columns .btn {
-  width: 40px;
-  height: 40px;
-}
-.columns .btn:hover {
-  z-index: 104;
-}
-.columns .column {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  flex-flow: column wrap;
-  width: 50%;
-}
-.columns .column h4 {
-  text-align: center;
-  margin: 0px;
 }
 
 .nav {
@@ -466,10 +431,10 @@ svg {
   align-items: center;
   position: relative;
   margin: 2px;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .nav:hover:not([disabled]), .nav:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .nav .title {
   padding-left: 16px;
@@ -554,10 +519,10 @@ canvas {
   height: calc(100% - 4px);
   margin: 2px;
   overflow: hidden;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .bg-space:hover:not([disabled]), .bg-space:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 
 .canvas-layers {
@@ -604,209 +569,306 @@ canvas {
   position: absolute;
   z-index: 102;
   background-color: rgb(51, 51, 51);
-  width: 136px;
+  width: 120px;
   right: 0;
   top: 0;
   display: flex;
   flex-flow: column nowrap;
   justify-content: center;
   align-items: center;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
-  /* Color Swatches */
-  /* Zoom */
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .toolbox:hover:not([disabled]), .toolbox:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .toolbox .collapsible {
   padding-top: 2px;
 }
-.toolbox .colors {
-  width: 128px;
-  height: 128px;
-  position: relative;
+.toolbox .collapsible :first-child {
+  margin-top: 6px;
 }
-.toolbox .colors .swatch {
-  position: absolute;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
-  width: 72px;
-  height: 72px;
-  margin: 16px;
-  z-index: 6;
-}
-.toolbox .colors .swatch .swatch-color {
-  background-image: radial-gradient(rgba(var(--primary-swatch-color), var(--primary-swatch-alpha)) 50%, rgba(var(--primary-swatch-color), 1) 110%);
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-.toolbox .colors .back-swatch {
-  position: absolute;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
-  width: 72px;
-  height: 72px;
-  margin: 16px;
-  z-index: 5;
-  transform: translateX(24px) translateY(24px);
-}
-.toolbox .colors .back-swatch .swatch-color {
-  background-image: radial-gradient(rgba(var(--secondary-swatch-color), var(--secondary-swatch-alpha)) 50%, rgba(var(--secondary-swatch-color), 1) 110%);
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-}
-.toolbox .color-switch {
+.toolbox .collapsible .tool {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  text-align: center;
+  color: white;
   width: 40px;
   height: 40px;
-  background: transparent;
-  box-shadow: none;
-  margin-bottom: -24px;
-  transform: translateX(-48px) translateY(-36px);
+  margin: 3px;
+  opacity: 1;
+  background-color: rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.toolbox .color-switch:hover {
+.toolbox .collapsible .tool:hover:not([disabled]), .toolbox .collapsible .tool:focus {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.toolbox .collapsible .tool:hover {
+  z-index: 104;
+}
+.toolbox .collapsible .tool.selected {
+  background-color: rgb(255, 255, 255);
+  z-index: 105;
+}
+.toolbox .collapsible .tool.custom-shape {
+  background-color: transparent;
   box-shadow: none;
 }
-.toolbox .zoom {
+.toolbox .collapsible .tool.custom-shape:hover:not([disabled]), .toolbox .collapsible .tool.custom-shape:focus {
+  box-shadow: none;
+}
+.toolbox .collapsible .zoom .zoombtn {
+  height: 40px;
+  width: 40px;
+  padding: 10px;
+  background-origin: content-box;
+}
+.toolbox .collapsible .btn-pair {
   display: flex;
   justify-content: space-around;
-  margin-top: 46px;
-  width: 100%;
 }
-.toolbox .zoom .tool {
-  background: rgb(131, 131, 131);
-  margin: 3px;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
-  cursor: pointer;
+.toolbox .collapsible .btn-pair button {
+  margin: 8px;
 }
-.toolbox .zoom .tool:hover:not([disabled]), .toolbox .zoom .tool:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
-}
-.toolbox .zoom .tool .plusminus {
-  width: 40px;
-  height: 40px;
+.toolbox .collapsible .tools {
   display: flex;
-  flex-flow: column nowrap;
-}
-.toolbox .zoom .tool .plusminus div {
-  height: 50%;
-  width: 100%;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  font-size: 32px;
-}
-.toolbox .zoom .tool .plusminus div p {
-  pointer-events: none;
-  transform: translateX(2px) translateY(2px);
-}
-.toolbox .zoom .tool .plusminus div:hover {
-  background: white;
-  color: black;
-}
-
-.fill {
+  align-items: center;
+  flex-flow: column wrap;
   width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-fill.png");
-  background-size: 100%;
+  margin: 2px;
+  margin-bottom: 4px;
 }
-
-.quadCurve {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-quad.png");
-  background-size: 100%;
+.toolbox .collapsible .tools h4 {
+  text-align: center;
+  margin: 0px;
 }
-
-.cubicCurve {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-cubic.png");
-  background-size: 100%;
+.toolbox .collapsible .tools .columns {
+  display: flex;
+  justify-content: center;
+  flex-flow: row wrap;
 }
-
-.ellipse {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-ellipse.png");
-  background-size: 100%;
+.toolbox .collapsible .tools .columns .tool:hover {
+  z-index: 104;
 }
-
-.line {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-line.png");
-  background-size: 100%;
+.toolbox .collapsible .tools .columns .column {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-flow: column wrap;
+  margin: 5px;
 }
 
 .brush {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-brush.png");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M15 1h2M14 2h1M17 2h1M13 3h1M18 3h1M12 4h1M18 4h1M11 5h1M17 5h1M10 6h1M16 6h1M9 7h1M15 7h1M8 8h1M14 8h1M7 9h1M13 9h1M6 10h1M12 10h1M5 11h1M11 11h1M4 12h1M10 12h1M3 13h1M9 13h1M3 14h1M8 14h1M3 15h1M8 15h1M2 16h1M8 16h1M1 17h1M7 17h1M2 18h5' /%3E%3Cpath stroke='%23575757' d='M15 2h2M14 3h1M13 4h1M16 4h1M12 5h1M15 5h1M11 6h1M14 6h1M10 7h1M13 7h1M9 8h1M12 8h1M8 9h1M11 9h1M7 10h1M10 10h1M8 11h2M5 13h1M5 14h1M5 15h1M4 16h1' /%3E%3Cpath stroke='%23acacac' d='M15 3h2M14 4h2M13 5h2M12 6h2M11 7h2M10 8h2M9 9h2M8 10h2M6 11h1M7 12h2' /%3E%3Cpath stroke='%23000000' d='M17 3h1M17 4h1M16 5h1M15 6h1M14 7h1M13 8h1M12 9h1M11 10h1M10 11h1M5 12h2M9 12h1M4 13h1M6 13h3M4 14h1M6 14h2M4 15h1M6 15h2M3 16h1M5 16h3M2 17h5' /%3E%3Cpath stroke='%23ffffff' d='M7 11h1' /%3E%3C/svg%3E");
   background-size: 100%;
+}
+.brush.selected {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M15 1h2M14 2h1M17 2h1M13 3h1M18 3h1M12 4h1M18 4h1M11 5h1M17 5h1M10 6h1M16 6h1M9 7h1M15 7h1M8 8h1M14 8h1M7 9h1M13 9h1M6 10h1M12 10h1M5 11h1M11 11h1M4 12h1M10 12h1M3 13h1M9 13h1M3 14h1M8 14h1M3 15h1M8 15h1M2 16h1M8 16h1M1 17h1M7 17h1M2 18h5' /%3E%3Cpath stroke='%23575757' d='M15 2h2M14 3h1M13 4h1M16 4h1M12 5h1M15 5h1M11 6h1M14 6h1M10 7h1M13 7h1M9 8h1M12 8h1M8 9h1M11 9h1M7 10h1M10 10h1M8 11h2M5 13h1M5 14h1M5 15h1M4 16h1' /%3E%3Cpath stroke='%23acacac' d='M15 3h2M14 4h2M13 5h2M12 6h2M11 7h2M10 8h2M9 9h2M8 10h2M6 11h1M7 12h2' /%3E%3Cpath stroke='%23000000' d='M17 3h1M17 4h1M16 5h1M15 6h1M14 7h1M13 8h1M12 9h1M11 10h1M10 11h1M5 12h2M9 12h1M4 13h1M6 13h3M4 14h1M6 14h2M4 15h1M6 15h2M3 16h1M5 16h3M2 17h5' /%3E%3Cpath stroke='%23ffffff' d='M7 11h1' /%3E%3C/svg%3E");
+}
+
+.fill {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h1M8 2h1M10 2h1M8 3h1M10 3h1M8 4h1M11 4h1M7 5h1M11 5h1M7 6h1M11 6h1M7 7h1M12 7h1M6 8h1M12 8h1M6 9h1M13 9h1M5 10h1M14 10h1M4 11h1M15 11h1M3 12h1M16 12h1M3 13h1M16 13h1M3 14h1M16 14h1M3 15h1M16 15h1M4 16h1M15 16h1M5 17h2M13 17h2M7 18h6' /%3E%3Cpath stroke='%23000000' d='M9 2h1M9 3h1M9 4h2M8 5h3M8 6h3M8 7h4M7 8h2M10 8h2M7 9h2M10 9h3M6 10h2M10 10h4M5 11h2M9 11h6M4 12h2M9 12h5M15 12h1M4 13h2M8 13h6M15 13h1M4 14h9M15 14h1M4 15h7M15 15h1M5 16h2M13 16h2M7 17h6' /%3E%3Cpath stroke='%23ffffff' d='M9 8h1M9 9h1M8 10h2M7 11h2M6 12h3M6 13h2' /%3E%3Cpath stroke='%23575757' d='M14 12h1M14 13h1M13 14h2M11 15h4M7 16h6' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.fill.selected {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M9 1h1M8 2h1M10 2h1M8 3h1M10 3h1M8 4h1M11 4h1M7 5h1M11 5h1M7 6h1M11 6h1M7 7h1M12 7h1M6 8h1M12 8h1M6 9h1M13 9h1M5 10h1M14 10h1M4 11h1M15 11h1M3 12h1M16 12h1M3 13h1M16 13h1M3 14h1M16 14h1M3 15h1M16 15h1M4 16h1M15 16h1M5 17h2M13 17h2M7 18h6' /%3E%3Cpath stroke='%23000000' d='M9 2h1M9 3h1M9 4h2M8 5h3M8 6h3M8 7h4M7 8h2M10 8h2M7 9h2M10 9h3M6 10h2M10 10h4M5 11h2M9 11h6M4 12h2M9 12h5M15 12h1M4 13h2M8 13h6M15 13h1M4 14h9M15 14h1M4 15h7M15 15h1M5 16h2M13 16h2M7 17h6' /%3E%3Cpath stroke='%23ffffff' d='M9 8h1M9 9h1M8 10h2M7 11h2M6 12h3M6 13h2' /%3E%3Cpath stroke='%23575757' d='M14 12h1M14 13h1M13 14h2M11 15h4M7 16h6' /%3E%3C/svg%3E");
+}
+
+.line {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M17 1h1M16 2h1M18 2h1M15 3h1M17 3h1M14 4h1M16 4h1M13 5h1M15 5h1M12 6h1M14 6h1M11 7h1M13 7h1M10 8h1M12 8h1M9 9h1M11 9h1M8 10h1M10 10h1M7 11h1M9 11h1M6 12h1M8 12h1M5 13h1M7 13h1M4 14h1M6 14h1M3 15h1M5 15h1M2 16h1M4 16h1M1 17h1M3 17h1M2 18h1' /%3E%3Cpath stroke='%23000000' d='M17 2h1M16 3h1M15 4h1M14 5h1M13 6h1M12 7h1M11 8h1M10 9h1M9 10h1M8 11h1M7 12h1M6 13h1M5 14h1M4 15h1M3 16h1M2 17h1' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.line.selected {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M17 1h1M16 2h1M18 2h1M15 3h1M17 3h1M14 4h1M16 4h1M13 5h1M15 5h1M12 6h1M14 6h1M11 7h1M13 7h1M10 8h1M12 8h1M9 9h1M11 9h1M8 10h1M10 10h1M7 11h1M9 11h1M6 12h1M8 12h1M5 13h1M7 13h1M4 14h1M6 14h1M3 15h1M5 15h1M2 16h1M4 16h1M1 17h1M3 17h1M2 18h1' /%3E%3Cpath stroke='%23000000' d='M17 2h1M16 3h1M15 4h1M14 5h1M13 6h1M12 7h1M11 8h1M10 9h1M9 10h1M8 11h1M7 12h1M6 13h1M5 14h1M4 15h1M3 16h1M2 17h1' /%3E%3C/svg%3E");
+}
+
+.quadCurve {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M12 1h6M9 2h3M18 2h1M7 3h2M12 3h6M6 4h1M9 4h3M5 5h1M7 5h2M4 6h1M6 6h1M3 7h1M5 7h1M3 8h1M5 8h1M2 9h1M4 9h1M2 10h1M4 10h1M2 11h1M4 11h1M1 12h1M3 12h1M1 13h1M3 13h1M1 14h1M3 14h1M1 15h1M3 15h1M1 16h1M3 16h1M1 17h1M3 17h1M2 18h1' /%3E%3Cpath stroke='%23000000' d='M12 2h6M9 3h3M7 4h2M6 5h1M5 6h1M4 7h1M4 8h1M3 9h1M3 10h1M3 11h1M2 12h1M2 13h1M2 14h1M2 15h1M2 16h1M2 17h1' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.quadCurve.selected {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M12 1h6M9 2h3M18 2h1M7 3h2M12 3h6M6 4h1M9 4h3M5 5h1M7 5h2M4 6h1M6 6h1M3 7h1M5 7h1M3 8h1M5 8h1M2 9h1M4 9h1M2 10h1M4 10h1M2 11h1M4 11h1M1 12h1M3 12h1M1 13h1M3 13h1M1 14h1M3 14h1M1 15h1M3 15h1M1 16h1M3 16h1M1 17h1M3 17h1M2 18h1' /%3E%3Cpath stroke='%23000000' d='M12 2h6M9 3h3M7 4h2M6 5h1M5 6h1M4 7h1M4 8h1M3 9h1M3 10h1M3 11h1M2 12h1M2 13h1M2 14h1M2 15h1M2 16h1M2 17h1' /%3E%3C/svg%3E");
+}
+
+.cubicCurve {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M17 1h1M16 2h1M18 2h1M16 3h1M18 3h1M16 4h1M18 4h1M6 5h3M15 5h1M17 5h1M5 6h1M9 6h1M15 6h1M17 6h1M4 7h1M6 7h3M10 7h1M15 7h1M17 7h1M3 8h1M5 8h1M9 8h1M11 8h1M14 8h1M16 8h1M3 9h1M5 9h1M9 9h1M11 9h1M14 9h1M16 9h1M2 10h1M4 10h1M10 10h1M12 10h2M15 10h1M2 11h1M4 11h1M11 11h1M14 11h1M2 12h1M4 12h1M12 12h2M1 13h1M3 13h1M1 14h1M3 14h1M1 15h1M3 15h1M1 16h1M3 16h1M1 17h1M3 17h1M2 18h1' /%3E%3Cpath stroke='%23000000' d='M17 2h1M17 3h1M17 4h1M16 5h1M6 6h3M16 6h1M5 7h1M9 7h1M16 7h1M4 8h1M10 8h1M15 8h1M4 9h1M10 9h1M15 9h1M3 10h1M11 10h1M14 10h1M3 11h1M12 11h2M3 12h1M2 13h1M2 14h1M2 15h1M2 16h1M2 17h1' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.cubicCurve.selected {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M17 1h1M16 2h1M18 2h1M16 3h1M18 3h1M16 4h1M18 4h1M6 5h3M15 5h1M17 5h1M5 6h1M9 6h1M15 6h1M17 6h1M4 7h1M6 7h3M10 7h1M15 7h1M17 7h1M3 8h1M5 8h1M9 8h1M11 8h1M14 8h1M16 8h1M3 9h1M5 9h1M9 9h1M11 9h1M14 9h1M16 9h1M2 10h1M4 10h1M10 10h1M12 10h2M15 10h1M2 11h1M4 11h1M11 11h1M14 11h1M2 12h1M4 12h1M12 12h2M1 13h1M3 13h1M1 14h1M3 14h1M1 15h1M3 15h1M1 16h1M3 16h1M1 17h1M3 17h1M2 18h1' /%3E%3Cpath stroke='%23000000' d='M17 2h1M17 3h1M17 4h1M16 5h1M6 6h3M16 6h1M5 7h1M9 7h1M16 7h1M4 8h1M10 8h1M15 8h1M4 9h1M10 9h1M15 9h1M3 10h1M11 10h1M14 10h1M3 11h1M12 11h2M3 12h1M2 13h1M2 14h1M2 15h1M2 16h1M2 17h1' /%3E%3C/svg%3E");
+}
+
+.ellipse {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M12 1h4M10 2h2M16 2h1M8 3h2M12 3h4M17 3h1M7 4h1M10 4h2M16 4h1M18 4h1M6 5h1M8 5h2M16 5h1M18 5h1M5 6h1M7 6h1M16 6h1M18 6h1M4 7h1M6 7h1M16 7h1M18 7h1M3 8h1M5 8h1M15 8h1M17 8h1M3 9h1M5 9h1M15 9h1M17 9h1M2 10h1M4 10h1M14 10h1M16 10h1M2 11h1M4 11h1M14 11h1M16 11h1M1 12h1M3 12h1M13 12h1M15 12h1M1 13h1M3 13h1M12 13h1M14 13h1M1 14h1M3 14h1M10 14h2M13 14h1M1 15h1M3 15h1M8 15h2M12 15h1M2 16h1M4 16h4M10 16h2M3 17h1M8 17h2M4 18h4' /%3E%3Cpath stroke='%23000000' d='M12 2h4M10 3h2M16 3h1M8 4h2M17 4h1M7 5h1M17 5h1M6 6h1M17 6h1M5 7h1M17 7h1M4 8h1M16 8h1M4 9h1M16 9h1M3 10h1M15 10h1M3 11h1M15 11h1M2 12h1M14 12h1M2 13h1M13 13h1M2 14h1M12 14h1M2 15h1M10 15h2M3 16h1M8 16h2M4 17h4' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.ellipse.selected {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M12 1h4M10 2h2M16 2h1M8 3h2M12 3h4M17 3h1M7 4h1M10 4h2M16 4h1M18 4h1M6 5h1M8 5h2M16 5h1M18 5h1M5 6h1M7 6h1M16 6h1M18 6h1M4 7h1M6 7h1M16 7h1M18 7h1M3 8h1M5 8h1M15 8h1M17 8h1M3 9h1M5 9h1M15 9h1M17 9h1M2 10h1M4 10h1M14 10h1M16 10h1M2 11h1M4 11h1M14 11h1M16 11h1M1 12h1M3 12h1M13 12h1M15 12h1M1 13h1M3 13h1M12 13h1M14 13h1M1 14h1M3 14h1M10 14h2M13 14h1M1 15h1M3 15h1M8 15h2M12 15h1M2 16h1M4 16h4M10 16h2M3 17h1M8 17h2M4 18h4' /%3E%3Cpath stroke='%23000000' d='M12 2h4M10 3h2M16 3h1M8 4h2M17 4h1M7 5h1M17 5h1M6 6h1M17 6h1M5 7h1M17 7h1M4 8h1M16 8h1M4 9h1M16 9h1M3 10h1M15 10h1M3 11h1M15 11h1M2 12h1M14 12h1M2 13h1M13 13h1M2 14h1M12 14h1M2 15h1M10 15h2M3 16h1M8 16h2M4 17h4' /%3E%3C/svg%3E");
 }
 
 .eyedropper {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-eyedropper.png");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M15 1h3M10 2h2M14 2h1M18 2h1M9 3h1M12 3h2M18 3h1M8 4h1M18 4h1M9 5h1M17 5h1M9 6h1M16 6h1M8 7h1M16 7h1M7 8h1M17 8h1M6 9h1M17 9h1M5 10h1M13 10h2M16 10h1M4 11h1M12 11h1M15 11h1M4 12h1M11 12h1M3 13h1M10 13h1M3 14h1M9 14h1M2 15h1M7 15h2M2 16h1M5 16h2M2 17h1M5 17h1M3 18h2' /%3E%3Cpath stroke='%23000000' d='M15 2h3M10 3h2M14 3h4M9 4h9M10 5h7M12 6h4M13 7h3M14 8h3M13 9h4M12 10h1M15 10h1M11 11h1M5 12h1M7 12h4M4 13h1M9 13h1M4 14h1M7 14h2M3 15h4M3 16h2M3 17h2' /%3E%3Cpath stroke='%23575757' d='M10 6h2M9 7h1M12 7h1M8 8h1M13 8h1M7 9h1M6 10h1M5 11h1M5 13h4M5 14h2' /%3E%3Cpath stroke='%23acacac' d='M10 7h2M9 8h1M11 8h2M8 9h1M10 9h3M7 10h1M9 10h3M6 11h1M8 11h3M6 12h1' /%3E%3Cpath stroke='%23ffffff' d='M10 8h1M9 9h1M8 10h1M7 11h1' /%3E%3C/svg%3E");
   background-size: 100%;
 }
-
-.eraser {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-eraser.png");
-  background-size: 100%;
+.eyedropper.selected {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M15 1h3M10 2h2M14 2h1M18 2h1M9 3h1M12 3h2M18 3h1M8 4h1M18 4h1M9 5h1M17 5h1M9 6h1M16 6h1M8 7h1M16 7h1M7 8h1M17 8h1M6 9h1M17 9h1M5 10h1M13 10h2M16 10h1M4 11h1M12 11h1M15 11h1M4 12h1M11 12h1M3 13h1M10 13h1M3 14h1M9 14h1M2 15h1M7 15h2M2 16h1M5 16h2M2 17h1M5 17h1M3 18h2' /%3E%3Cpath stroke='%23000000' d='M15 2h3M10 3h2M14 3h4M9 4h9M10 5h7M12 6h4M13 7h3M14 8h3M13 9h4M12 10h1M15 10h1M11 11h1M5 12h1M7 12h4M4 13h1M9 13h1M4 14h1M7 14h2M3 15h4M3 16h2M3 17h2' /%3E%3Cpath stroke='%23575757' d='M10 6h2M9 7h1M12 7h1M8 8h1M13 8h1M7 9h1M6 10h1M5 11h1M5 13h4M5 14h2' /%3E%3Cpath stroke='%23acacac' d='M10 7h2M9 8h1M11 8h2M8 9h1M10 9h3M7 10h1M9 10h3M6 11h1M8 11h3M6 12h1' /%3E%3Cpath stroke='%23ffffff' d='M10 8h1M9 9h1M8 10h1M7 11h1' /%3E%3C/svg%3E");
 }
 
 .grab {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-grab.png");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h2M8 2h1M11 2h3M5 3h3M14 3h1M4 4h1M7 4h1M15 4h2M3 5h1M17 5h1M3 6h1M18 6h1M4 7h1M18 7h1M4 8h1M18 8h1M4 9h2M18 9h1M3 10h1M17 10h1M2 11h1M17 11h1M2 12h1M17 12h1M3 13h1M16 13h1M4 14h1M16 14h1M5 15h1M16 15h1M6 16h1M15 16h1M7 17h1M14 17h1M8 18h6' /%3E%3Cpath stroke='%23575757' d='M9 2h2M8 3h1M12 3h2M5 4h2M8 4h1M4 5h1M16 5h1M4 6h1M7 6h1M11 6h1M15 6h1M5 7h1M11 7h1M14 7h2M5 8h1M8 8h1M11 8h1M14 8h1M6 9h1M14 9h1M16 9h1M4 10h2M3 11h1M6 11h2M13 11h1M3 12h1M13 12h1M15 12h1M14 15h1M13 16h1' /%3E%3Cpath stroke='%23ffffff' d='M9 3h2M9 4h1M12 4h2M5 5h2M9 5h1M12 5h1M5 6h2M9 6h1M12 6h1M6 7h1M9 7h1M12 7h1M6 8h2M9 8h1M12 8h1M7 9h1M9 9h1M12 9h1M7 10h4M12 10h1M4 11h2M8 11h1M10 11h1M12 11h1M4 12h3M8 12h1M10 12h1M12 12h1M6 13h7M7 14h6M8 15h4' /%3E%3Cpath stroke='%23000000' d='M11 3h1M11 4h1M14 4h1M7 5h2M11 5h1M14 5h2M8 6h1M14 6h1M17 6h1M8 7h1M17 7h1M17 8h1M17 9h1M6 10h1M16 10h1M16 11h1M16 12h1M4 13h1M15 13h1M5 14h1M15 14h1M6 15h1M15 15h1M7 16h1M14 16h1M8 17h6' /%3E%3Cpath stroke='%23acacac' d='M10 4h1M10 5h1M13 5h1M10 6h1M13 6h1M16 6h1M7 7h1M10 7h1M13 7h1M16 7h1M10 8h1M13 8h1M15 8h2M8 9h1M10 9h2M13 9h1M15 9h1M11 10h1M13 10h3M9 11h1M11 11h1M14 11h2M7 12h1M9 12h1M11 12h1M14 12h1M5 13h1M13 13h2M6 14h1M13 14h2M7 15h1M12 15h2M8 16h5' /%3E%3C/svg%3E");
   background-size: 100%;
+}
+.grab.selected {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M9 1h2M8 2h1M11 2h3M5 3h3M14 3h1M4 4h1M7 4h1M15 4h2M3 5h1M17 5h1M3 6h1M18 6h1M4 7h1M18 7h1M4 8h1M18 8h1M4 9h2M18 9h1M3 10h1M17 10h1M2 11h1M17 11h1M2 12h1M17 12h1M3 13h1M16 13h1M4 14h1M16 14h1M5 15h1M16 15h1M6 16h1M15 16h1M7 17h1M14 17h1M8 18h6' /%3E%3Cpath stroke='%23575757' d='M9 2h2M8 3h1M12 3h2M5 4h2M8 4h1M4 5h1M16 5h1M4 6h1M7 6h1M11 6h1M15 6h1M5 7h1M11 7h1M14 7h2M5 8h1M8 8h1M11 8h1M14 8h1M6 9h1M14 9h1M16 9h1M4 10h2M3 11h1M6 11h2M13 11h1M3 12h1M13 12h1M15 12h1M14 15h1M13 16h1' /%3E%3Cpath stroke='%23ffffff' d='M9 3h2M9 4h1M12 4h2M5 5h2M9 5h1M12 5h1M5 6h2M9 6h1M12 6h1M6 7h1M9 7h1M12 7h1M6 8h2M9 8h1M12 8h1M7 9h1M9 9h1M12 9h1M7 10h4M12 10h1M4 11h2M8 11h1M10 11h1M12 11h1M4 12h3M8 12h1M10 12h1M12 12h1M6 13h7M7 14h6M8 15h4' /%3E%3Cpath stroke='%23000000' d='M11 3h1M11 4h1M14 4h1M7 5h2M11 5h1M14 5h2M8 6h1M14 6h1M17 6h1M8 7h1M17 7h1M17 8h1M17 9h1M6 10h1M16 10h1M16 11h1M16 12h1M4 13h1M15 13h1M5 14h1M15 14h1M6 15h1M15 15h1M7 16h1M14 16h1M8 17h6' /%3E%3Cpath stroke='%23acacac' d='M10 4h1M10 5h1M13 5h1M10 6h1M13 6h1M16 6h1M7 7h1M10 7h1M13 7h1M16 7h1M10 8h1M13 8h1M15 8h2M8 9h1M10 9h2M13 9h1M15 9h1M11 10h1M13 10h3M9 11h1M11 11h1M14 11h2M7 12h1M9 12h1M11 12h1M14 12h1M5 13h1M13 13h2M6 14h1M13 14h2M7 15h1M12 15h2M8 16h5' /%3E%3C/svg%3E");
 }
 
 .move {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-move.png");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h2M8 2h1M11 2h1M7 3h1M12 3h1M6 4h1M13 4h1M7 5h2M11 5h2M4 6h1M8 6h1M11 6h1M15 6h1M3 7h1M5 7h1M8 7h1M11 7h1M14 7h1M16 7h1M2 8h1M5 8h4M11 8h4M17 8h1M1 9h1M18 9h1M1 10h1M18 10h1M2 11h1M5 11h4M11 11h4M17 11h1M3 12h1M5 12h1M8 12h1M11 12h1M14 12h1M16 12h1M4 13h1M8 13h1M11 13h1M15 13h1M7 14h2M11 14h2M6 15h1M13 15h1M7 16h1M12 16h1M8 17h1M11 17h1M9 18h2' /%3E%3Cpath stroke='%23000000' d='M9 2h2M8 3h4M7 4h6M9 5h2M9 6h2M4 7h1M9 7h2M15 7h1M3 8h2M9 8h2M15 8h2M2 9h16M2 10h16M3 11h2M9 11h2M15 11h2M4 12h1M9 12h2M15 12h1M9 13h2M9 14h2M7 15h6M8 16h4M9 17h2' /%3E%3C/svg%3E");
   background-size: 100%;
 }
-
-.pencil {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-pencil.png");
-  background-size: 100%;
+.move.selected {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M9 1h2M8 2h1M11 2h1M7 3h1M12 3h1M6 4h1M13 4h1M7 5h2M11 5h2M4 6h1M8 6h1M11 6h1M15 6h1M3 7h1M5 7h1M8 7h1M11 7h1M14 7h1M16 7h1M2 8h1M5 8h4M11 8h4M17 8h1M1 9h1M18 9h1M1 10h1M18 10h1M2 11h1M5 11h4M11 11h4M17 11h1M3 12h1M5 12h1M8 12h1M11 12h1M14 12h1M16 12h1M4 13h1M8 13h1M11 13h1M15 13h1M7 14h2M11 14h2M6 15h1M13 15h1M7 16h1M12 16h1M8 17h1M11 17h1M9 18h2' /%3E%3Cpath stroke='%23000000' d='M9 2h2M8 3h4M7 4h6M9 5h2M9 6h2M4 7h1M9 7h2M15 7h1M3 8h2M9 8h2M15 8h2M2 9h16M2 10h16M3 11h2M9 11h2M15 11h2M4 12h1M9 12h2M15 12h1M9 13h2M9 14h2M7 15h6M8 16h4M9 17h2' /%3E%3C/svg%3E");
 }
 
-.mechanical {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-mechanical.png");
+.eraser {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 3h8M8 4h1M17 4h1M7 5h1M18 5h1M6 6h1M18 6h1M5 7h1M18 7h1M4 8h1M18 8h1M3 9h1M18 9h1M2 10h1M17 10h1M1 11h1M16 11h1M1 12h1M15 12h1M1 13h1M14 13h1M1 14h1M13 14h1M2 15h1M12 15h1M3 16h9' /%3E%3Cpath stroke='%23575757' d='M9 4h8M8 5h1M7 6h1M16 6h1M6 7h1M15 7h2M5 8h1M14 8h3M4 9h1M13 9h4M3 10h1M12 10h4M11 11h4M11 12h3M11 13h2M11 14h1M3 15h8' /%3E%3Cpath stroke='%23acacac' d='M9 5h8M8 6h8M7 7h8M6 8h8M5 9h8M4 10h8M2 11h1M2 12h1M2 13h1M2 14h1' /%3E%3Cpath stroke='%23000000' d='M17 5h1M17 6h1M17 7h1M17 8h1M17 9h1M16 10h1M15 11h1M14 12h1M13 13h1M12 14h1M11 15h1' /%3E%3Cpath stroke='%23ffffff' d='M3 11h8M3 12h8M3 13h8M3 14h8' /%3E%3C/svg%3E");
   background-size: 100%;
+}
+.eraser:hover, .eraser.selected {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M9 3h8M8 4h1M17 4h1M7 5h1M18 5h1M6 6h1M18 6h1M5 7h1M18 7h1M4 8h1M18 8h1M3 9h1M18 9h1M2 10h1M17 10h1M1 11h1M16 11h1M1 12h1M15 12h1M1 13h1M14 13h1M1 14h1M13 14h1M2 15h1M12 15h1M3 16h9' /%3E%3Cpath stroke='%23575757' d='M9 4h8M8 5h1M7 6h1M16 6h1M6 7h1M15 7h2M5 8h1M14 8h3M4 9h1M13 9h4M3 10h1M12 10h4M11 11h4M11 12h3M11 13h2M11 14h1M3 15h8' /%3E%3Cpath stroke='%23acacac' d='M9 5h8M8 6h8M7 7h8M6 8h8M5 9h8M4 10h8M2 11h1M2 12h1M2 13h1M2 14h1' /%3E%3Cpath stroke='%23000000' d='M17 5h1M17 6h1M17 7h1M17 8h1M17 9h1M16 10h1M15 11h1M14 12h1M13 13h1M12 14h1M11 15h1' /%3E%3Cpath stroke='%23ffffff' d='M3 11h8M3 12h8M3 13h8M3 14h8' /%3E%3C/svg%3E");
 }
 
 .inject {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-inject.png");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M15 1h2M14 2h1M17 2h1M10 3h2M14 3h1M18 3h1M9 4h1M12 4h2M18 4h1M8 5h1M10 5h2M16 5h2M8 6h1M10 6h1M15 6h1M9 7h1M15 7h1M8 8h1M14 8h1M16 8h1M7 9h1M13 9h2M16 9h1M6 10h1M12 10h1M15 10h1M5 11h1M11 11h1M13 11h2M4 12h1M10 12h1M4 13h1M9 13h1M4 14h1M8 14h1M3 15h1M5 15h3M2 16h1M4 16h1M1 17h1M3 17h1M2 18h1' /%3E%3Cpath stroke='%23000000' d='M15 2h2M15 3h1M17 3h1M10 4h2M14 4h4M9 5h1M12 5h2M15 5h1M9 6h1M11 6h1M14 6h1M10 7h1M14 7h1M9 8h1M13 8h1M15 8h1M8 9h1M10 9h1M12 9h1M15 9h1M7 10h1M11 10h1M13 10h2M6 11h1M10 11h1M5 12h1M9 12h1M5 13h1M8 13h1M5 14h3M4 15h1M3 16h1M2 17h1' /%3E%3Cpath stroke='%23acacac' d='M16 3h1M14 5h1M13 6h1M12 7h1M11 8h1M7 11h1' /%3E%3Cpath stroke='%23ffffff' d='M12 6h1M11 7h1M10 8h1M9 9h1M8 10h1' /%3E%3Cpath stroke='%23575757' d='M13 7h1M12 8h1M11 9h1M9 10h2M8 11h2M6 12h3M6 13h2' /%3E%3C/svg%3E");
   background-size: 100%;
 }
+.inject:hover, .inject.selected {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M15 1h2M14 2h1M17 2h1M10 3h2M14 3h1M18 3h1M9 4h1M12 4h2M18 4h1M8 5h1M10 5h2M16 5h2M8 6h1M10 6h1M15 6h1M9 7h1M15 7h1M8 8h1M14 8h1M16 8h1M7 9h1M13 9h2M16 9h1M6 10h1M12 10h1M15 10h1M5 11h1M11 11h1M13 11h2M4 12h1M10 12h1M4 13h1M9 13h1M4 14h1M8 14h1M3 15h1M5 15h3M2 16h1M4 16h1M1 17h1M3 17h1M2 18h1' /%3E%3Cpath stroke='%23000000' d='M15 2h2M15 3h1M17 3h1M10 4h2M14 4h4M9 5h1M12 5h2M15 5h1M9 6h1M11 6h1M14 6h1M10 7h1M14 7h1M9 8h1M13 8h1M15 8h1M8 9h1M10 9h1M12 9h1M15 9h1M7 10h1M11 10h1M13 10h2M6 11h1M10 11h1M5 12h1M9 12h1M5 13h1M8 13h1M5 14h3M4 15h1M3 16h1M2 17h1' /%3E%3Cpath stroke='%23acacac' d='M16 3h1M14 5h1M13 6h1M12 7h1M11 8h1M7 11h1' /%3E%3Cpath stroke='%23ffffff' d='M12 6h1M11 7h1M10 8h1M9 9h1M8 10h1' /%3E%3Cpath stroke='%23575757' d='M13 7h1M12 8h1M11 9h1M9 10h2M8 11h2M6 12h3M6 13h2' /%3E%3C/svg%3E");
+}
+.inject:disabled {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M15 1h2M14 2h1M17 2h1M10 3h2M14 3h1M18 3h1M9 4h1M12 4h2M18 4h1M8 5h1M10 5h2M16 5h2M8 6h1M10 6h1M15 6h1M9 7h1M15 7h1M8 8h1M14 8h1M16 8h1M7 9h1M13 9h2M16 9h1M6 10h1M12 10h1M15 10h1M5 11h1M11 11h1M13 11h2M4 12h1M10 12h1M4 13h1M9 13h1M4 14h1M8 14h1M3 15h1M5 15h3M2 16h1M4 16h1M1 17h1M3 17h1M2 18h1' /%3E%3Cpath stroke='rgb(131, 131, 131)' d='M15 2h2M15 3h1M17 3h1M10 4h2M14 4h4M9 5h1M12 5h2M15 5h1M9 6h1M11 6h1M14 6h1M10 7h1M14 7h1M9 8h1M13 8h1M15 8h1M8 9h1M10 9h1M12 9h1M15 9h1M7 10h1M11 10h1M13 10h2M6 11h1M10 11h1M5 12h1M9 12h1M5 13h1M8 13h1M5 14h3M4 15h1M3 16h1M2 17h1' /%3E%3Cpath stroke='rgb(131, 131, 131)' d='M16 3h1M14 5h1M13 6h1M12 7h1M11 8h1M7 11h1' /%3E%3Cpath stroke='rgb(131, 131, 131)' d='M12 6h1M11 7h1M10 8h1M9 9h1M8 10h1' /%3E%3Cpath stroke='rgb(131, 131, 131)' d='M13 7h1M12 8h1M11 9h1M9 10h2M8 11h2M6 12h3M6 13h2' /%3E%3C/svg%3E");
+}
 
-.replace {
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-replace.png");
+.perfect {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M15 1h2M14 2h1M17 2h1M11 3h3M18 3h1M10 4h1M18 4h1M9 5h1M17 5h1M8 6h1M16 6h1M8 7h1M16 7h1M7 8h1M15 8h1M6 9h1M14 9h1M5 10h1M13 10h1M4 11h1M12 11h1M3 12h1M11 12h1M3 13h1M10 13h1M2 14h1M9 14h1M2 15h1M8 15h1M2 16h1M6 16h2M1 17h1M3 17h3M2 18h1' /%3E%3Cpath stroke='%23000000' d='M15 2h2M14 3h1M17 3h1M13 4h1M17 4h1M12 5h1M14 5h1M16 5h1M11 6h1M15 6h1M9 7h2M13 7h1M15 7h1M8 8h1M12 8h1M14 8h1M7 9h1M11 9h1M13 9h1M6 10h1M10 10h1M12 10h1M5 11h1M9 11h1M11 11h1M4 12h1M9 12h2M9 13h1M3 14h1M6 14h1M8 14h1M3 15h1M6 15h2M3 16h3M2 17h1' /%3E%3Cpath stroke='%23ffffff' d='M15 3h1M9 8h1M8 9h1M7 11h1M6 12h1M4 14h1' /%3E%3Cpath stroke='%23acacac' d='M16 3h1M14 4h2M11 5h1M10 6h1M13 6h1M12 7h1M11 8h1M10 9h1M9 10h1M6 11h1M5 12h1M7 12h2M6 13h2M5 14h1M4 15h1' /%3E%3Cpath stroke='%23575757' d='M11 4h2M16 4h1M10 5h1M13 5h1M15 5h1M9 6h1M12 6h1M14 6h1M11 7h1M14 7h1M10 8h1M13 8h1M9 9h1M12 9h1M7 10h2M11 10h1M8 11h1M10 11h1M4 13h2M8 13h1M7 14h1M5 15h1' /%3E%3C/svg%3E");
   background-size: 100%;
+}
+.perfect:hover, .perfect.selected {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M15 1h2M14 2h1M17 2h1M11 3h3M18 3h1M10 4h1M18 4h1M9 5h1M17 5h1M8 6h1M16 6h1M8 7h1M16 7h1M7 8h1M15 8h1M6 9h1M14 9h1M5 10h1M13 10h1M4 11h1M12 11h1M3 12h1M11 12h1M3 13h1M10 13h1M2 14h1M9 14h1M2 15h1M8 15h1M2 16h1M6 16h2M1 17h1M3 17h3M2 18h1' /%3E%3Cpath stroke='%23000000' d='M15 2h2M14 3h1M17 3h1M13 4h1M17 4h1M12 5h1M14 5h1M16 5h1M11 6h1M15 6h1M9 7h2M13 7h1M15 7h1M8 8h1M12 8h1M14 8h1M7 9h1M11 9h1M13 9h1M6 10h1M10 10h1M12 10h1M5 11h1M9 11h1M11 11h1M4 12h1M9 12h2M9 13h1M3 14h1M6 14h1M8 14h1M3 15h1M6 15h2M3 16h3M2 17h1' /%3E%3Cpath stroke='%23ffffff' d='M15 3h1M9 8h1M8 9h1M7 11h1M6 12h1M4 14h1' /%3E%3Cpath stroke='%23acacac' d='M16 3h1M14 4h2M11 5h1M10 6h1M13 6h1M12 7h1M11 8h1M10 9h1M9 10h1M6 11h1M5 12h1M7 12h2M6 13h2M5 14h1M4 15h1' /%3E%3Cpath stroke='%23575757' d='M11 4h2M16 4h1M10 5h1M13 5h1M15 5h1M9 6h1M12 6h1M14 6h1M11 7h1M14 7h1M10 8h1M13 8h1M9 9h1M12 9h1M7 10h2M11 10h1M8 11h1M10 11h1M4 13h2M8 13h1M7 14h1M5 15h1' /%3E%3C/svg%3E");
+}
+
+.colorMask {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h1M13 1h1M8 2h1M10 2h3M14 2h1M6 3h3M10 3h1M13 3h1M5 4h1M11 4h2M4 5h1M6 5h2M9 5h6M4 6h1M6 6h2M9 6h3M15 6h1M3 7h1M5 7h4M16 7h1M2 8h1M4 8h3M16 8h1M1 9h1M3 9h2M13 9h2M17 9h1M1 10h1M3 10h1M12 10h4M17 10h1M1 11h1M7 11h3M18 11h1M1 12h1M6 12h1M8 12h1M18 12h1M1 13h1M5 13h3M12 13h2M18 13h1M1 14h1M11 14h1M14 14h1M17 14h1M2 15h1M11 15h1M15 15h2M3 16h1M10 16h1M4 17h1M8 17h2M5 18h3' /%3E%3Cpath stroke='%23000000' d='M9 2h1M13 2h1M9 3h1M11 3h2M6 4h5M5 5h1M8 5h1M5 6h1M8 6h1M12 6h3M4 7h1M9 7h3M15 7h1M3 8h1M7 8h3M13 8h3M2 9h1M5 9h2M12 9h1M15 9h2M2 10h1M4 10h1M7 10h3M11 10h1M16 10h1M2 11h2M6 11h1M10 11h1M12 11h4M17 11h1M2 12h2M5 12h1M9 12h1M12 12h2M17 12h1M2 13h1M4 13h1M8 13h1M11 13h1M14 13h1M17 13h1M2 14h1M5 14h3M10 14h1M15 14h2M3 15h1M10 15h1M4 16h1M8 16h2M5 17h3' /%3E%3Cpath stroke='%23acacac' d='M12 7h1M12 8h1M7 9h1M10 10h1M5 11h1M16 11h1M11 12h1M16 12h1M9 13h1M9 14h1M6 15h1M9 15h1M7 16h1' /%3E%3Cpath stroke='%23575757' d='M13 7h2M10 8h2M8 9h4M4 11h1M11 11h1M4 12h1M10 12h1M14 12h2M3 13h1M10 13h1M15 13h2M3 14h2M4 15h2M5 16h2' /%3E%3Cpath stroke='%23ffffff' d='M5 10h2M8 14h1M7 15h2' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.colorMask:hover, .colorMask.selected {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M9 1h1M13 1h1M8 2h1M10 2h3M14 2h1M6 3h3M10 3h1M13 3h1M5 4h1M11 4h2M4 5h1M6 5h2M9 5h6M4 6h1M6 6h2M9 6h3M15 6h1M3 7h1M5 7h4M16 7h1M2 8h1M4 8h3M16 8h1M1 9h1M3 9h2M13 9h2M17 9h1M1 10h1M3 10h1M12 10h4M17 10h1M1 11h1M7 11h3M18 11h1M1 12h1M6 12h1M8 12h1M18 12h1M1 13h1M5 13h3M12 13h2M18 13h1M1 14h1M11 14h1M14 14h1M17 14h1M2 15h1M11 15h1M15 15h2M3 16h1M10 16h1M4 17h1M8 17h2M5 18h3' /%3E%3Cpath stroke='%23000000' d='M9 2h1M13 2h1M9 3h1M11 3h2M6 4h5M5 5h1M8 5h1M5 6h1M8 6h1M12 6h3M4 7h1M9 7h3M15 7h1M3 8h1M7 8h3M13 8h3M2 9h1M5 9h2M12 9h1M15 9h2M2 10h1M4 10h1M7 10h3M11 10h1M16 10h1M2 11h2M6 11h1M10 11h1M12 11h4M17 11h1M2 12h2M5 12h1M9 12h1M12 12h2M17 12h1M2 13h1M4 13h1M8 13h1M11 13h1M14 13h1M17 13h1M2 14h1M5 14h3M10 14h1M15 14h2M3 15h1M10 15h1M4 16h1M8 16h2M5 17h3' /%3E%3Cpath stroke='%23acacac' d='M12 7h1M12 8h1M7 9h1M10 10h1M5 11h1M16 11h1M11 12h1M16 12h1M9 13h1M9 14h1M6 15h1M9 15h1M7 16h1' /%3E%3Cpath stroke='%23575757' d='M13 7h2M10 8h2M8 9h4M4 11h1M11 11h1M4 12h1M10 12h1M14 12h2M3 13h1M10 13h1M15 13h2M3 14h2M4 15h2M5 16h2' /%3E%3Cpath stroke='%23ffffff' d='M5 10h2M8 14h1M7 15h2' /%3E%3C/svg%3E");
+}
+
+.switch {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M6 2h1M5 3h1M7 3h1M4 4h1M8 4h1M3 5h1M9 5h1M2 6h1M10 6h1M3 7h2M8 7h2M4 8h1M8 8h1M4 9h1M8 9h1M13 9h1M5 10h1M9 10h1M12 10h1M14 10h1M5 11h1M10 11h3M15 11h1M6 12h1M16 12h1M7 13h1M17 13h1M8 14h2M16 14h1M10 15h3M15 15h1M12 16h1M14 16h1M13 17h1' /%3E%3Cpath stroke='%23000000' d='M6 3h1M5 4h3M4 5h5M3 6h7M5 7h3M5 8h3M5 9h3M6 10h3M13 10h1M6 11h4M13 11h2M7 12h9M8 13h9M10 14h6M13 15h2M13 16h1' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.switch:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M6 2h1M5 3h1M7 3h1M4 4h1M8 4h1M3 5h1M9 5h1M2 6h1M10 6h1M3 7h2M8 7h2M4 8h1M8 8h1M4 9h1M8 9h1M13 9h1M5 10h1M9 10h1M12 10h1M14 10h1M5 11h1M10 11h3M15 11h1M6 12h1M16 12h1M7 13h1M17 13h1M8 14h2M16 14h1M10 15h3M15 15h1M12 16h1M14 16h1M13 17h1' /%3E%3Cpath stroke='%23000000' d='M6 3h1M5 4h3M4 5h5M3 6h7M5 7h3M5 8h3M5 9h3M6 10h3M13 10h1M6 11h4M13 11h2M7 12h9M8 13h9M10 14h6M13 15h2M13 16h1' /%3E%3C/svg%3E");
+}
+
+.eyeopen {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M8 3h4M6 4h2M12 4h2M5 5h1M14 5h1M4 6h1M15 6h1M3 7h1M16 7h1M2 8h1M17 8h1M1 9h1M18 9h1M1 10h1M18 10h1M2 11h1M17 11h1M3 12h1M16 12h1M4 13h1M15 13h1M5 14h1M14 14h1M6 15h2M12 15h2M8 16h4' /%3E%3Cpath stroke='%23000000' d='M8 4h4M6 5h2M12 5h2M5 6h1M14 6h1M4 7h1M8 7h4M15 7h1M3 8h1M7 8h1M10 8h1M12 8h1M15 8h2M2 9h2M7 9h1M10 9h1M12 9h1M16 9h2M2 10h2M7 10h4M12 10h1M16 10h2M3 11h1M7 11h1M12 11h1M16 11h1M4 12h1M8 12h4M15 12h1M5 13h1M14 13h1M6 14h2M12 14h2M8 15h4' /%3E%3Cpath stroke='%23575757' d='M8 5h4M6 6h1M13 6h1M5 7h1M14 7h1M4 8h1M11 8h1M11 9h1M8 11h1M11 11h1' /%3E%3Cpath stroke='%23ffffff' d='M7 6h5M6 7h2M12 7h1M5 8h2M8 8h2M13 8h1M5 9h2M8 9h2M13 9h1M5 10h2M13 10h1M5 11h2M13 11h1M6 12h2M12 12h1M8 13h4' /%3E%3Cpath stroke='%23acacac' d='M12 6h1M13 7h1M14 8h1M4 9h1M14 9h2M4 10h1M11 10h1M14 10h2M4 11h1M9 11h2M14 11h2M5 12h1M13 12h2M6 13h2M12 13h2M8 14h4' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.eyeopen:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M8 3h4M6 4h2M12 4h2M5 5h1M14 5h1M4 6h1M15 6h1M3 7h1M16 7h1M2 8h1M17 8h1M1 9h1M18 9h1M1 10h1M18 10h1M2 11h1M17 11h1M3 12h1M16 12h1M4 13h1M15 13h1M5 14h1M14 14h1M6 15h2M12 15h2M8 16h4' /%3E%3Cpath stroke='%23000000' d='M8 4h4M6 5h2M12 5h2M5 6h1M14 6h1M4 7h1M8 7h4M15 7h1M3 8h1M7 8h1M10 8h1M12 8h1M15 8h2M2 9h2M7 9h1M10 9h1M12 9h1M16 9h2M2 10h2M7 10h4M12 10h1M16 10h2M3 11h1M7 11h1M12 11h1M16 11h1M4 12h1M8 12h4M15 12h1M5 13h1M14 13h1M6 14h2M12 14h2M8 15h4' /%3E%3Cpath stroke='%23575757' d='M8 5h4M6 6h1M13 6h1M5 7h1M14 7h1M4 8h1M11 8h1M11 9h1M8 11h1M11 11h1' /%3E%3Cpath stroke='%23ffffff' d='M7 6h5M6 7h2M12 7h1M5 8h2M8 8h2M13 8h1M5 9h2M8 9h2M13 9h1M5 10h2M13 10h1M5 11h2M13 11h1M6 12h2M12 12h1M8 13h4' /%3E%3Cpath stroke='%23acacac' d='M12 6h1M13 7h1M14 8h1M4 9h1M14 9h2M4 10h1M11 10h1M14 10h2M4 11h1M9 11h2M14 11h2M5 12h1M13 12h2M6 13h2M12 13h2M8 14h4' /%3E%3C/svg%3E");
+}
+
+.eyeclosed {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M8 3h4M6 4h2M12 4h2M5 5h1M14 5h1M4 6h1M15 6h1M3 7h1M16 7h1M2 8h1M17 8h1M1 9h1M18 9h1M1 10h1M18 10h1M2 11h1M17 11h1M3 12h1M16 12h1M4 13h1M15 13h1M5 14h1M14 14h1M6 15h2M12 15h2M8 16h4' /%3E%3Cpath stroke='%23000000' d='M8 4h4M6 5h2M12 5h2M5 6h1M14 6h1M4 7h1M15 7h1M3 8h1M15 8h2M2 9h2M16 9h2M2 10h2M16 10h2M3 11h2M15 11h2M4 12h3M13 12h3M5 13h10M6 14h8M8 15h4' /%3E%3Cpath stroke='%23acacac' d='M8 5h4M6 6h7M6 7h8M5 8h9M4 9h10M5 10h8M7 11h5' /%3E%3Cpath stroke='%23575757' d='M13 6h1M5 7h1M14 7h1M4 8h1M14 8h1M14 9h2M4 10h1M13 10h3M5 11h2M12 11h3M7 12h6' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.eyeclosed:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M8 3h4M6 4h2M12 4h2M5 5h1M14 5h1M4 6h1M15 6h1M3 7h1M16 7h1M2 8h1M17 8h1M1 9h1M18 9h1M1 10h1M18 10h1M2 11h1M17 11h1M3 12h1M16 12h1M4 13h1M15 13h1M5 14h1M14 14h1M6 15h2M12 15h2M8 16h4' /%3E%3Cpath stroke='%23000000' d='M8 4h4M6 5h2M12 5h2M5 6h1M14 6h1M4 7h1M15 7h1M3 8h1M15 8h2M2 9h2M16 9h2M2 10h2M16 10h2M3 11h2M15 11h2M4 12h3M13 12h3M5 13h10M6 14h8M8 15h4' /%3E%3Cpath stroke='%23acacac' d='M8 5h4M6 6h7M6 7h8M5 8h9M4 9h10M5 10h8M7 11h5' /%3E%3Cpath stroke='%23575757' d='M13 6h1M5 7h1M14 7h1M4 8h1M14 8h1M14 9h2M4 10h1M13 10h3M5 11h2M12 11h3M7 12h6' /%3E%3C/svg%3E");
+}
+
+.trash {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h2M8 2h1M11 2h1M6 3h2M9 3h2M12 3h2M4 4h2M14 4h2M3 5h1M16 5h1M2 6h1M17 6h1M2 7h1M17 7h1M2 8h1M17 8h1M3 9h1M16 9h1M3 10h1M16 10h1M3 11h1M16 11h1M3 12h1M16 12h1M3 13h1M16 13h1M3 14h1M16 14h1M3 15h1M16 15h1M3 16h1M16 16h1M4 17h1M15 17h1M5 18h10' /%3E%3Cpath stroke='%23575757' d='M9 2h2M8 3h1M6 4h8M4 5h2M13 5h3M3 6h1M10 6h5M3 7h1M12 7h4M3 8h1M8 9h1M11 9h1M4 10h1M6 10h1M9 10h3M14 10h1M4 11h1M6 11h1M9 11h2M14 11h1M4 12h1M6 12h1M9 12h2M14 12h1M4 13h1M6 13h1M9 13h2M14 13h1M4 14h1M6 14h1M9 14h2M14 14h1M4 15h1M9 15h1M13 15h2M4 16h1M11 16h4M5 17h1' /%3E%3Cpath stroke='%23000000' d='M11 3h1M15 6h2M16 7h1M4 8h13M4 9h1M6 9h2M9 9h2M12 9h4M12 10h2M15 10h1M12 11h2M15 11h1M12 12h2M15 12h1M12 13h2M15 13h1M12 14h2M15 14h1M12 15h1M15 15h1M15 16h1M6 17h9' /%3E%3Cpath stroke='%23acacac' d='M6 5h1M8 5h5M4 6h2M7 6h3M4 7h2M8 7h4M5 9h1M5 10h1M8 10h1M5 11h1M8 11h1M11 11h1M5 12h1M8 12h1M11 12h1M5 13h1M8 13h1M11 13h1M5 14h1M8 14h1M11 14h1M5 15h1M8 15h1M10 15h2M5 16h6' /%3E%3Cpath stroke='%23ffffff' d='M7 5h1M6 6h1M6 7h2M7 10h1M7 11h1M7 12h1M7 13h1M7 14h1M6 15h2' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.trash:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M9 1h2M8 2h1M11 2h1M6 3h2M9 3h2M12 3h2M4 4h2M14 4h2M3 5h1M16 5h1M2 6h1M17 6h1M2 7h1M17 7h1M2 8h1M17 8h1M3 9h1M16 9h1M3 10h1M16 10h1M3 11h1M16 11h1M3 12h1M16 12h1M3 13h1M16 13h1M3 14h1M16 14h1M3 15h1M16 15h1M3 16h1M16 16h1M4 17h1M15 17h1M5 18h10' /%3E%3Cpath stroke='%23575757' d='M9 2h2M8 3h1M6 4h8M4 5h2M13 5h3M3 6h1M10 6h5M3 7h1M12 7h4M3 8h1M8 9h1M11 9h1M4 10h1M6 10h1M9 10h3M14 10h1M4 11h1M6 11h1M9 11h2M14 11h1M4 12h1M6 12h1M9 12h2M14 12h1M4 13h1M6 13h1M9 13h2M14 13h1M4 14h1M6 14h1M9 14h2M14 14h1M4 15h1M9 15h1M13 15h2M4 16h1M11 16h4M5 17h1' /%3E%3Cpath stroke='%23000000' d='M11 3h1M15 6h2M16 7h1M4 8h13M4 9h1M6 9h2M9 9h2M12 9h4M12 10h2M15 10h1M12 11h2M15 11h1M12 12h2M15 12h1M12 13h2M15 13h1M12 14h2M15 14h1M12 15h1M15 15h1M15 16h1M6 17h9' /%3E%3Cpath stroke='%23acacac' d='M6 5h1M8 5h5M4 6h2M7 6h3M4 7h2M8 7h4M5 9h1M5 10h1M8 10h1M5 11h1M8 11h1M11 11h1M5 12h1M8 12h1M11 12h1M5 13h1M8 13h1M11 13h1M5 14h1M8 14h1M11 14h1M5 15h1M8 15h1M10 15h2M5 16h6' /%3E%3Cpath stroke='%23ffffff' d='M7 5h1M6 6h1M6 7h2M7 10h1M7 11h1M7 12h1M7 13h1M7 14h1M6 15h2' /%3E%3C/svg%3E");
+}
+
+.reference {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M3 1h14M2 2h1M17 2h1M1 3h1M18 3h1M1 4h1M18 4h1M1 5h1M18 5h1M1 6h1M18 6h1M1 7h1M18 7h1M1 8h1M18 8h1M1 9h1M18 9h1M1 10h1M18 10h1M1 11h1M18 11h1M1 12h1M18 12h1M1 13h1M18 13h1M1 14h1M18 14h1M1 15h1M18 15h1M1 16h1M18 16h1M2 17h1M17 17h1M3 18h14' /%3E%3Cpath stroke='%23000000' d='M3 2h14M2 3h1M17 3h1M2 4h1M4 4h6M11 4h5M17 4h1M2 5h1M4 5h2M11 5h5M17 5h1M2 6h1M4 6h1M14 6h2M17 6h1M2 7h1M4 7h1M14 7h2M17 7h1M2 8h1M4 8h1M8 8h1M13 8h3M17 8h1M2 9h1M4 9h2M12 9h4M17 9h1M2 10h1M4 10h2M13 10h3M17 10h1M2 11h1M4 11h2M13 11h3M17 11h1M2 12h1M4 12h4M10 12h1M12 12h4M17 12h1M2 13h1M4 13h4M9 13h1M11 13h5M17 13h1M2 14h1M4 14h2M7 14h3M11 14h5M17 14h1M2 15h1M4 15h3M8 15h2M11 15h1M13 15h3M17 15h1M2 16h1M17 16h1M3 17h14' /%3E%3Cpath stroke='%23575757' d='M3 3h14M3 4h1M3 5h1M3 6h1M11 6h1M3 7h1M7 7h2M10 7h1M3 8h1M7 8h1M10 8h1M3 9h1M9 9h3M3 10h1M10 10h3M3 11h1M10 11h2M3 12h1M11 12h1M3 13h1M10 13h1M3 14h1M10 14h1M3 15h1' /%3E%3Cpath stroke='%23acacac' d='M10 4h1M16 4h1M9 5h2M16 5h1M6 6h3M10 6h1M12 6h1M16 6h1M6 7h1M16 7h1M6 8h1M11 8h2M16 8h1M16 9h1M8 10h1M16 10h1M7 11h3M12 11h1M16 11h1M9 12h1M16 12h1M16 13h1M6 14h1M16 14h1M7 15h1M10 15h1M12 15h1M16 15h1M3 16h14' /%3E%3Cpath stroke='%23ffffff' d='M6 5h3M5 6h1M9 6h1M13 6h1M5 7h1M9 7h1M11 7h3M5 8h1M9 8h1M6 9h3M6 10h2M9 10h1M6 11h1M8 12h1M8 13h1' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.reference:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M3 1h14M2 2h1M17 2h1M1 3h1M18 3h1M1 4h1M18 4h1M1 5h1M18 5h1M1 6h1M18 6h1M1 7h1M18 7h1M1 8h1M18 8h1M1 9h1M18 9h1M1 10h1M18 10h1M1 11h1M18 11h1M1 12h1M18 12h1M1 13h1M18 13h1M1 14h1M18 14h1M1 15h1M18 15h1M1 16h1M18 16h1M2 17h1M17 17h1M3 18h14' /%3E%3Cpath stroke='%23000000' d='M3 2h14M2 3h1M17 3h1M2 4h1M4 4h6M11 4h5M17 4h1M2 5h1M4 5h2M11 5h5M17 5h1M2 6h1M4 6h1M14 6h2M17 6h1M2 7h1M4 7h1M14 7h2M17 7h1M2 8h1M4 8h1M8 8h1M13 8h3M17 8h1M2 9h1M4 9h2M12 9h4M17 9h1M2 10h1M4 10h2M13 10h3M17 10h1M2 11h1M4 11h2M13 11h3M17 11h1M2 12h1M4 12h4M10 12h1M12 12h4M17 12h1M2 13h1M4 13h4M9 13h1M11 13h5M17 13h1M2 14h1M4 14h2M7 14h3M11 14h5M17 14h1M2 15h1M4 15h3M8 15h2M11 15h1M13 15h3M17 15h1M2 16h1M17 16h1M3 17h14' /%3E%3Cpath stroke='%23575757' d='M3 3h14M3 4h1M3 5h1M3 6h1M11 6h1M3 7h1M7 7h2M10 7h1M3 8h1M7 8h1M10 8h1M3 9h1M9 9h3M3 10h1M10 10h3M3 11h1M10 11h2M3 12h1M11 12h1M3 13h1M10 13h1M3 14h1M10 14h1M3 15h1' /%3E%3Cpath stroke='%23acacac' d='M10 4h1M16 4h1M9 5h2M16 5h1M6 6h3M10 6h1M12 6h1M16 6h1M6 7h1M16 7h1M6 8h1M11 8h2M16 8h1M16 9h1M8 10h1M16 10h1M7 11h3M12 11h1M16 11h1M9 12h1M16 12h1M16 13h1M6 14h1M16 14h1M7 15h1M10 15h1M12 15h1M16 15h1M3 16h14' /%3E%3Cpath stroke='%23ffffff' d='M6 5h3M5 6h1M9 6h1M13 6h1M5 7h1M9 7h1M11 7h3M5 8h1M9 8h1M6 9h3M6 10h2M9 10h1M6 11h1M8 12h1M8 13h1' /%3E%3C/svg%3E");
+}
+
+.add-layer {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 2h2M8 3h1M11 3h1M7 4h2M11 4h2M6 5h1M13 5h1M6 6h1M13 6h1M7 7h2M11 7h2M8 8h1M11 8h1M6 9h12M5 10h1M18 10h1M4 11h1M17 11h1M3 12h1M16 12h2M2 13h1M18 13h1M1 14h1M17 14h1M2 15h2M16 15h1M2 16h1M15 16h1M1 17h1M14 17h1M2 18h12' /%3E%3Cpath stroke='%23000000' d='M9 3h2M9 4h2M7 5h6M7 6h6M9 7h2M9 8h2M6 10h12M5 11h1M16 11h1M4 12h1M15 12h1M3 13h1M14 13h4M2 14h12M16 14h1M4 15h1M15 15h1M3 16h1M14 16h1M2 17h12' /%3E%3Cpath stroke='%23ffffff' d='M6 11h3M14 11h2M5 12h5M12 12h3M4 13h10M4 16h10' /%3E%3Cpath stroke='%23acacac' d='M9 11h5M10 12h2M5 15h8' /%3E%3Cpath stroke='%23575757' d='M14 14h2M13 15h2' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.add-layer:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M9 2h2M8 3h1M11 3h1M7 4h2M11 4h2M6 5h1M13 5h1M6 6h1M13 6h1M7 7h2M11 7h2M8 8h1M11 8h1M6 9h12M5 10h1M18 10h1M4 11h1M17 11h1M3 12h1M16 12h2M2 13h1M18 13h1M1 14h1M17 14h1M2 15h2M16 15h1M2 16h1M15 16h1M1 17h1M14 17h1M2 18h12' /%3E%3Cpath stroke='%23000000' d='M9 3h2M9 4h2M7 5h6M7 6h6M9 7h2M9 8h2M6 10h12M5 11h1M16 11h1M4 12h1M15 12h1M3 13h1M14 13h4M2 14h12M16 14h1M4 15h1M15 15h1M3 16h1M14 16h1M2 17h12' /%3E%3Cpath stroke='%23ffffff' d='M6 11h3M14 11h2M5 12h5M12 12h3M4 13h10M4 16h10' /%3E%3Cpath stroke='%23acacac' d='M9 11h5M10 12h2M5 15h8' /%3E%3Cpath stroke='%23575757' d='M14 14h2M13 15h2' /%3E%3C/svg%3E");
+}
+
+.undo {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h3M8 2h1M12 2h1M7 3h1M13 3h1M6 4h1M13 4h1M5 5h1M13 5h1M4 6h1M13 6h4M3 7h1M17 7h1M2 8h1M18 8h1M1 9h1M18 9h1M1 10h1M18 10h1M2 11h1M18 11h1M3 12h1M17 12h1M4 13h1M13 13h4M5 14h1M13 14h1M6 15h1M13 15h1M7 16h1M13 16h1M8 17h1M12 17h1M9 18h3' /%3E%3Cpath stroke='%23b00707' d='M9 2h3M8 3h1M12 3h1M7 4h1M6 5h1M5 6h1M4 7h1M3 8h1M2 9h1M2 10h15M4 11h13M5 12h8M6 13h6M7 14h5M8 15h4M9 16h3' /%3E%3Cpath stroke='%23ef3f39' d='M9 3h3M8 4h4M7 5h5M6 6h6M5 7h8M4 8h13M3 9h14' /%3E%3Cpath stroke='%23640000' d='M12 4h1M12 5h1M12 6h1M13 7h4M17 8h1M17 9h1M17 10h1M3 11h1M17 11h1M4 12h1M13 12h4M5 13h1M12 13h1M6 14h1M12 14h1M7 15h1M12 15h1M8 16h1M12 16h1M9 17h3' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.undo:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M9 1h3M8 2h1M12 2h1M7 3h1M13 3h1M6 4h1M13 4h1M5 5h1M13 5h1M4 6h1M13 6h4M3 7h1M17 7h1M2 8h1M18 8h1M1 9h1M18 9h1M1 10h1M18 10h1M2 11h1M18 11h1M3 12h1M17 12h1M4 13h1M13 13h4M5 14h1M13 14h1M6 15h1M13 15h1M7 16h1M13 16h1M8 17h1M12 17h1M9 18h3' /%3E%3Cpath stroke='%23b00707' d='M9 2h3M8 3h1M12 3h1M7 4h1M6 5h1M5 6h1M4 7h1M3 8h1M2 9h1M2 10h15M4 11h13M5 12h8M6 13h6M7 14h5M8 15h4M9 16h3' /%3E%3Cpath stroke='%23ef3f39' d='M9 3h3M8 4h4M7 5h5M6 6h6M5 7h8M4 8h13M3 9h14' /%3E%3Cpath stroke='%23640000' d='M12 4h1M12 5h1M12 6h1M13 7h4M17 8h1M17 9h1M17 10h1M3 11h1M17 11h1M4 12h1M13 12h4M5 13h1M12 13h1M6 14h1M12 14h1M7 15h1M12 15h1M8 16h1M12 16h1M9 17h3' /%3E%3C/svg%3E");
+}
+
+.redo {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M8 1h3M7 2h1M11 2h1M6 3h1M12 3h1M6 4h1M13 4h1M6 5h1M14 5h1M3 6h4M15 6h1M2 7h1M16 7h1M1 8h1M17 8h1M1 9h1M18 9h1M1 10h1M18 10h1M1 11h1M17 11h1M2 12h1M16 12h1M3 13h4M15 13h1M6 14h1M14 14h1M6 15h1M13 15h1M6 16h1M12 16h1M7 17h1M11 17h1M8 18h3' /%3E%3Cpath stroke='%230449c9' d='M8 2h3M7 3h1M11 3h1M7 4h1M12 4h1M7 5h1M13 5h1M7 6h1M14 6h1M3 7h4M2 8h1M2 9h1M3 10h14M3 11h13M7 12h8M8 13h6M8 14h5M8 15h4M8 16h3' /%3E%3Cpath stroke='%234183fc' d='M8 3h3M8 4h4M8 5h5M8 6h6M7 7h8M3 8h13M3 9h14' /%3E%3Cpath stroke='%23002764' d='M15 7h1M16 8h1M17 9h1M2 10h1M17 10h1M2 11h1M16 11h1M3 12h4M15 12h1M7 13h1M14 13h1M7 14h1M13 14h1M7 15h1M12 15h1M7 16h1M11 16h1M8 17h3' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.redo:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M8 1h3M7 2h1M11 2h1M6 3h1M12 3h1M6 4h1M13 4h1M6 5h1M14 5h1M3 6h4M15 6h1M2 7h1M16 7h1M1 8h1M17 8h1M1 9h1M18 9h1M1 10h1M18 10h1M1 11h1M17 11h1M2 12h1M16 12h1M3 13h4M15 13h1M6 14h1M14 14h1M6 15h1M13 15h1M6 16h1M12 16h1M7 17h1M11 17h1M8 18h3' /%3E%3Cpath stroke='%230449c9' d='M8 2h3M7 3h1M11 3h1M7 4h1M12 4h1M7 5h1M13 5h1M7 6h1M14 6h1M3 7h4M2 8h1M2 9h1M3 10h14M3 11h13M7 12h8M8 13h6M8 14h5M8 15h4M8 16h3' /%3E%3Cpath stroke='%234183fc' d='M8 3h3M8 4h4M8 5h5M8 6h6M7 7h8M3 8h13M3 9h14' /%3E%3Cpath stroke='%23002764' d='M15 7h1M16 8h1M17 9h1M2 10h1M17 10h1M2 11h1M16 11h1M3 12h4M15 12h1M7 13h1M14 13h1M7 14h1M13 14h1M7 15h1M12 15h1M7 16h1M11 16h1M8 17h3' /%3E%3C/svg%3E");
+}
+
+.clear {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M2 1h16M1 2h1M18 2h1M1 3h1M18 3h1M1 4h1M18 4h1M1 5h1M18 5h1M1 6h1M18 6h1M1 7h1M18 7h1M1 8h1M18 8h1M1 9h1M18 9h1M1 10h1M18 10h1M1 11h1M18 11h1M1 12h1M18 12h1M1 13h1M18 13h1M1 14h1M18 14h1M1 15h1M18 15h1M1 16h1M18 16h1M1 17h1M18 17h1M2 18h16' /%3E%3Cpath stroke='%23000000' d='M2 2h16M2 3h16M2 4h2M16 4h2M2 5h2M16 5h2M2 6h2M16 6h2M2 7h2M16 7h2M2 8h2M16 8h2M2 9h2M16 9h2M2 10h2M16 10h2M2 11h2M16 11h2M2 12h2M16 12h2M2 13h2M16 13h2M2 14h2M16 14h2M2 15h2M16 15h2M2 16h16M2 17h16' /%3E%3Cpath stroke='%23ffffff' d='M4 4h1M7 4h2M11 4h2M15 4h1M6 5h2M10 5h2M14 5h2M5 6h2M9 6h2M13 6h2M4 7h2M8 7h2M12 7h2M4 8h1M7 8h2M11 8h2M15 8h1M6 9h2M10 9h2M14 9h2M5 10h2M9 10h2M13 10h2M4 11h2M8 11h2M12 11h2M4 12h1M7 12h2M11 12h2M15 12h1M6 13h2M10 13h2M14 13h2M5 14h2M9 14h2M13 14h2M4 15h2M8 15h2M12 15h2' /%3E%3Cpath stroke='%23acacac' d='M5 4h2M9 4h2M13 4h2M4 5h2M8 5h2M12 5h2M4 6h1M7 6h2M11 6h2M15 6h1M6 7h2M10 7h2M14 7h2M5 8h2M9 8h2M13 8h2M4 9h2M8 9h2M12 9h2M4 10h1M7 10h2M11 10h2M15 10h1M6 11h2M10 11h2M14 11h2M5 12h2M9 12h2M13 12h2M4 13h2M8 13h2M12 13h2M4 14h1M7 14h2M11 14h2M15 14h1M6 15h2M10 15h2M14 15h2' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.clear:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M2 1h16M1 2h1M18 2h1M1 3h1M18 3h1M1 4h1M18 4h1M1 5h1M18 5h1M1 6h1M18 6h1M1 7h1M18 7h1M1 8h1M18 8h1M1 9h1M18 9h1M1 10h1M18 10h1M1 11h1M18 11h1M1 12h1M18 12h1M1 13h1M18 13h1M1 14h1M18 14h1M1 15h1M18 15h1M1 16h1M18 16h1M1 17h1M18 17h1M2 18h16' /%3E%3Cpath stroke='%23000000' d='M2 2h16M2 3h16M2 4h2M16 4h2M2 5h2M16 5h2M2 6h2M16 6h2M2 7h2M16 7h2M2 8h2M16 8h2M2 9h2M16 9h2M2 10h2M16 10h2M2 11h2M16 11h2M2 12h2M16 12h2M2 13h2M16 13h2M2 14h2M16 14h2M2 15h2M16 15h2M2 16h16M2 17h16' /%3E%3Cpath stroke='%23ffffff' d='M4 4h1M7 4h2M11 4h2M15 4h1M6 5h2M10 5h2M14 5h2M5 6h2M9 6h2M13 6h2M4 7h2M8 7h2M12 7h2M4 8h1M7 8h2M11 8h2M15 8h1M6 9h2M10 9h2M14 9h2M5 10h2M9 10h2M13 10h2M4 11h2M8 11h2M12 11h2M4 12h1M7 12h2M11 12h2M15 12h1M6 13h2M10 13h2M14 13h2M5 14h2M9 14h2M13 14h2M4 15h2M8 15h2M12 15h2' /%3E%3Cpath stroke='%23acacac' d='M5 4h2M9 4h2M13 4h2M4 5h2M8 5h2M12 5h2M4 6h1M7 6h2M11 6h2M15 6h1M6 7h2M10 7h2M14 7h2M5 8h2M9 8h2M13 8h2M4 9h2M8 9h2M12 9h2M4 10h1M7 10h2M11 10h2M15 10h1M6 11h2M10 11h2M14 11h2M5 12h2M9 12h2M13 12h2M4 13h2M8 13h2M12 13h2M4 14h1M7 14h2M11 14h2M15 14h1M6 15h2M10 15h2M14 15h2' /%3E%3C/svg%3E");
+}
+
+.recenter {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M7 1h6M6 2h1M13 2h1M5 3h1M14 3h1M5 4h1M14 4h1M3 5h2M6 5h1M13 5h1M15 5h2M2 6h1M5 6h1M7 6h1M12 6h1M14 6h1M17 6h1M1 7h1M6 7h1M8 7h1M11 7h1M13 7h1M18 7h1M1 8h1M7 8h1M9 8h2M12 8h1M18 8h1M1 9h1M8 9h1M11 9h1M18 9h1M1 10h1M8 10h1M11 10h1M18 10h1M1 11h1M7 11h1M9 11h2M12 11h1M18 11h1M1 12h1M6 12h1M8 12h1M11 12h1M13 12h1M18 12h1M2 13h1M5 13h1M7 13h1M12 13h1M14 13h1M17 13h1M3 14h2M6 14h1M13 14h1M15 14h2M5 15h1M14 15h1M5 16h1M14 16h1M6 17h1M13 17h1M7 18h6' /%3E%3Cpath stroke='%2344891a' d='M7 2h5M6 3h1M10 3h3M6 4h1M10 4h3M10 5h2M3 6h2M10 6h1M15 6h2M2 7h1M5 7h1M14 7h1M17 7h1M2 8h1M6 8h1M13 8h1M17 8h1M2 9h1M12 9h1M2 10h5M13 10h4M3 11h3M14 11h3M3 12h2M9 12h1M15 12h2M8 13h1M10 13h1M7 14h1M10 14h2M6 15h1M10 15h3M6 16h1M10 16h3M7 17h2' /%3E%3Cpath stroke='%230c580a' d='M12 2h1M13 3h1M13 4h1M7 5h1M12 5h1M8 6h1M11 6h1M9 7h2M7 9h1M17 9h1M7 10h1M12 10h1M17 10h1M2 11h1M6 11h1M13 11h1M17 11h1M2 12h1M5 12h1M10 12h1M14 12h1M17 12h1M3 13h2M11 13h1M15 13h2M12 14h1M13 15h1M13 16h1M9 17h4' /%3E%3Cpath stroke='%23a3ce27' d='M7 3h3M7 4h3M8 5h2M9 6h1M3 7h2M15 7h2M3 8h3M14 8h3M3 9h4M13 9h4M9 13h1M8 14h2M7 15h3M7 16h3' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.recenter:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M7 1h6M6 2h1M13 2h1M5 3h1M14 3h1M5 4h1M14 4h1M3 5h2M6 5h1M13 5h1M15 5h2M2 6h1M5 6h1M7 6h1M12 6h1M14 6h1M17 6h1M1 7h1M6 7h1M8 7h1M11 7h1M13 7h1M18 7h1M1 8h1M7 8h1M9 8h2M12 8h1M18 8h1M1 9h1M8 9h1M11 9h1M18 9h1M1 10h1M8 10h1M11 10h1M18 10h1M1 11h1M7 11h1M9 11h2M12 11h1M18 11h1M1 12h1M6 12h1M8 12h1M11 12h1M13 12h1M18 12h1M2 13h1M5 13h1M7 13h1M12 13h1M14 13h1M17 13h1M3 14h2M6 14h1M13 14h1M15 14h2M5 15h1M14 15h1M5 16h1M14 16h1M6 17h1M13 17h1M7 18h6' /%3E%3Cpath stroke='%2344891a' d='M7 2h5M6 3h1M10 3h3M6 4h1M10 4h3M10 5h2M3 6h2M10 6h1M15 6h2M2 7h1M5 7h1M14 7h1M17 7h1M2 8h1M6 8h1M13 8h1M17 8h1M2 9h1M12 9h1M2 10h5M13 10h4M3 11h3M14 11h3M3 12h2M9 12h1M15 12h2M8 13h1M10 13h1M7 14h1M10 14h2M6 15h1M10 15h3M6 16h1M10 16h3M7 17h2' /%3E%3Cpath stroke='%230c580a' d='M12 2h1M13 3h1M13 4h1M7 5h1M12 5h1M8 6h1M11 6h1M9 7h2M7 9h1M17 9h1M7 10h1M12 10h1M17 10h1M2 11h1M6 11h1M13 11h1M17 11h1M2 12h1M5 12h1M10 12h1M14 12h1M17 12h1M3 13h2M11 13h1M15 13h2M12 14h1M13 15h1M13 16h1M9 17h4' /%3E%3Cpath stroke='%23a3ce27' d='M7 3h3M7 4h3M8 5h2M9 6h1M3 7h2M15 7h2M3 8h3M14 8h3M3 9h4M13 9h4M9 13h1M8 14h2M7 15h3M7 16h3' /%3E%3C/svg%3E");
+}
+
+.minus {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 10 10' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M2 3h6M1 4h1M8 4h1M1 5h1M8 5h1M2 6h6' /%3E%3Cpath stroke='%23000000' d='M2 4h6M2 5h6' /%3E%3C/svg%3E") no-repeat;
+  background-size: 100%;
+}
+.minus:hover {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 10 10' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M2 3h6M1 4h1M8 4h1M1 5h1M8 5h1M2 6h6' /%3E%3Cpath stroke='%23000000' d='M2 4h6M2 5h6' /%3E%3C/svg%3E") no-repeat;
+}
+
+.plus {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 10 10' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M4 1h2M3 2h1M6 2h1M2 3h2M6 3h2M1 4h1M8 4h1M1 5h1M8 5h1M2 6h2M6 6h2M3 7h1M6 7h1M4 8h2' /%3E%3Cpath stroke='%23000000' d='M4 2h2M4 3h2M2 4h6M2 5h6M4 6h2M4 7h2' /%3E%3C/svg%3E") no-repeat;
+  background-size: 100%;
+}
+.plus:hover {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 10 10' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M4 1h2M3 2h1M6 2h1M2 3h2M6 3h2M1 4h1M8 4h1M1 5h1M8 5h1M2 6h2M6 6h2M3 7h1M6 7h1M4 8h2' /%3E%3Cpath stroke='%23000000' d='M4 2h2M4 3h2M2 4h6M2 5h6M4 6h2M4 7h2' /%3E%3C/svg%3E") no-repeat;
 }
 
 /* Layers */
 .layers-interface {
   order: 4;
   flex: 1 1 auto;
-  min-height: 196px;
+  min-height: 120px;
 }
 .layers-interface .collapsible {
   padding-top: 2px;
@@ -821,25 +883,15 @@ canvas {
 .layers-interface .layers-control input[type=file] {
   display: none;
 }
-.layers-interface .layers-control .custom-file-upload {
+.layers-interface .layers-control .reference {
   width: 40px;
   height: 40px;
   cursor: pointer;
-  background-image: url("../public/pixelv-reference.png");
-  background-size: 100%;
 }
-.layers-interface .layers-control .custom-file-upload:hover {
-  background-image: url("../public/pixelv-reference-hover.png");
-}
-.layers-interface .layers-control .new-raster-layer {
+.layers-interface .layers-control .add-layer {
   width: 40px;
   height: 40px;
   cursor: pointer;
-  background-image: url("../public/pixelv-addlayer.png");
-  background-size: 100%;
-}
-.layers-interface .layers-control .new-raster-layer:hover {
-  background-image: url("../public/pixelv-addlayer-hover.png");
 }
 .layers-interface .layers-container {
   display: flex;
@@ -851,10 +903,10 @@ canvas {
   min-height: 40px;
   overflow-y: auto;
   margin: 2px;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .layers-interface .layers-container:hover:not([disabled]), .layers-interface .layers-container:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .layers-interface .layers-container::-webkit-scrollbar {
   width: 10px;
@@ -887,7 +939,10 @@ canvas {
   flex-flow: row-reverse nowrap;
   justify-content: flex-end;
   align-items: center;
-  box-shadow: inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131);
+  box-shadow: inset -2px 0 0 0 rgb(131, 131, 131), inset 2px 0 0 0 rgb(131, 131, 131), inset 0 -2px 0 0 rgb(131, 131, 131), inset 0 2px 0 0 rgb(131, 131, 131);
+}
+.layers-interface .layers-container .layers .layer:hover:not([disabled]), .layers-interface .layers-container .layers .layer:focus {
+  box-shadow: inset -2px 0 0 0 rgb(255, 255, 255), inset 2px 0 0 0 rgb(255, 255, 255), inset 0 -2px 0 0 rgb(255, 255, 255), inset 0 2px 0 0 rgb(255, 255, 255);
 }
 .layers-interface .layers-container .layers .layer.raster {
   background: rgb(61, 61, 61);
@@ -898,32 +953,11 @@ canvas {
 .layers-interface .layers-container .layers .layer.selected {
   background: black;
 }
-.layers-interface .layers-container .layers .layer:hover {
-  box-shadow: inset 2px 0px rgb(255, 255, 255), inset -2px 0px rgb(255, 255, 255), inset 0px -2px rgb(255, 255, 255), inset 0px 2px rgb(255, 255, 255);
-}
 .layers-interface .layers-container .layers .layer .hide {
   width: 40px;
   height: 40px;
   margin: 6px;
   cursor: pointer;
-}
-.layers-interface .layers-container .layers .layer .hide .eye {
-  width: 100%;
-  height: 100%;
-}
-.layers-interface .layers-container .layers .layer .hide .eye.eyeopen {
-  background-image: url("../public/pixelv-eyeopen.png");
-  background-size: 100%;
-}
-.layers-interface .layers-container .layers .layer .hide .eye.eyeopen:hover {
-  background-image: url("../public/pixelv-eyeopen-hover.png");
-}
-.layers-interface .layers-container .layers .layer .hide .eye.eyeclosed {
-  background-image: url("../public/pixelv-eyeclosed.png");
-  background-size: 100%;
-}
-.layers-interface .layers-container .layers .layer .hide .eye.eyeclosed:hover {
-  background-image: url("../public/pixelv-eyeclosed-hover.png");
 }
 .layers-interface .layers-container .layers .layer .warning {
   animation: flash 0.6s ease-in infinite alternate-reverse;
@@ -936,11 +970,6 @@ canvas {
   height: 40px;
   z-index: 104;
   margin: 3px;
-  background-image: url("../public/pixelv-trash.png");
-  background-size: 100%;
-}
-.layers-interface .layers-container .layers .layer .trash:hover {
-  background-image: url("../public/pixelv-trash-hover.png");
 }
 .layers-interface .layers-container .layers .layer .trash.disabled {
   opacity: 0.5;
@@ -951,7 +980,7 @@ canvas {
 .vectors-interface {
   order: 5;
   flex: 1 1 auto;
-  min-height: 264px;
+  min-height: 116px;
 }
 .vectors-interface .vectors-control {
   display: flex;
@@ -988,10 +1017,10 @@ canvas {
   min-height: 0;
   overflow-y: auto;
   margin: 2px;
-  box-shadow: 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container:hover:not([disabled]), .vectors-interface .vectors-container:focus {
-  box-shadow: 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container::-webkit-scrollbar {
   width: 10px;
@@ -1040,41 +1069,75 @@ canvas {
   width: 100%;
   height: 100%;
 }
-.vectors-interface .vectors-container .vectors .vector .tool {
+.vectors-interface .vectors-container .vectors .vector button {
   position: absolute;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  z-index: 104;
+  margin-bottom: 2px;
+}
+.vectors-interface .vectors-container .vectors .vector button:hover {
+  z-index: 106;
+}
+.vectors-interface .vectors-container .vectors .vector .left > :nth-child(1) {
+  left: 0;
+  top: 0;
+  box-shadow: 2px 0 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.vectors-interface .vectors-container .vectors .vector .left > :nth-child(1):hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .left > :nth-child(1):focus {
+  box-shadow: 2px 0 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.vectors-interface .vectors-container .vectors .vector .left > :nth-child(2) {
+  left: 0;
+  top: 22px;
+  box-shadow: 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.vectors-interface .vectors-container .vectors .vector .left > :nth-child(2):hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .left > :nth-child(2):focus {
+  box-shadow: 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.vectors-interface .vectors-container .vectors .vector .left > :nth-child(3) {
+  left: 0;
+  top: 44px;
+  box-shadow: 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.vectors-interface .vectors-container .vectors .vector .left > :nth-child(3):hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .left > :nth-child(3):focus {
+  box-shadow: 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.vectors-interface .vectors-container .vectors .vector .left > :nth-child(4) {
+  left: 0;
+  top: 66px;
+  box-shadow: 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131);
+}
+.vectors-interface .vectors-container .vectors .vector .left > :nth-child(4):hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .left > :nth-child(4):focus {
+  box-shadow: 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255);
+}
+.vectors-interface .vectors-container .vectors .vector .mode {
+  background-color: rgb(131, 131, 131);
+}
+.vectors-interface .vectors-container .vectors .vector .mode.selected {
+  background-color: rgb(255, 255, 255);
+}
+.vectors-interface .vectors-container .vectors .vector .tool {
   right: 0;
   top: 0;
-  cursor: pointer;
-  width: 20px;
-  height: 20px;
-  background: rgb(131, 131, 131);
-  z-index: 104;
-  margin-bottom: 2px;
-  box-shadow: -2px 0px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  background-color: rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container .vectors .vector .tool:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .tool:focus {
-  box-shadow: -2px 0px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
-.vectors-interface .vectors-container .vectors .vector .actionColor-container {
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+.vectors-interface .vectors-container .vectors .vector .tool.selected {
+  background-color: rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .actionColor {
-  position: absolute;
   right: 0;
   top: 22px;
-  cursor: pointer;
-  width: 20px;
-  height: 20px;
   background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
-  z-index: 104;
-  margin-bottom: 2px;
-  box-shadow: -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container .vectors .vector .actionColor:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .actionColor:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
-}
-.vectors-interface .vectors-container .vectors .vector .actionColor:hover {
-  z-index: 106;
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .actionColor .swatch {
   width: 100%;
@@ -1082,68 +1145,22 @@ canvas {
   pointer-events: none;
 }
 .vectors-interface .vectors-container .vectors .vector .hide {
-  position: absolute;
   right: 0;
   top: 44px;
-  cursor: pointer;
-  width: 20px;
-  height: 20px;
-  background: rgb(61, 61, 61);
-  z-index: 104;
-  margin-bottom: 2px;
-  box-shadow: -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  background-color: rgb(61, 61, 61);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container .vectors .vector .hide:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .hide:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
-}
-.vectors-interface .vectors-container .vectors .vector .hide:hover {
-  z-index: 106;
-}
-.vectors-interface .vectors-container .vectors .vector .hide .eye {
-  width: 100%;
-  height: 100%;
-}
-.vectors-interface .vectors-container .vectors .vector .hide .eye.eyeopen {
-  background-image: url("../public/pixelv-eyeopen.png");
-  background-size: 100%;
-}
-.vectors-interface .vectors-container .vectors .vector .hide .eye.eyeopen:hover {
-  background-image: url("../public/pixelv-eyeopen-hover.png");
-}
-.vectors-interface .vectors-container .vectors .vector .hide .eye.eyeclosed {
-  background-image: url("../public/pixelv-eyeclosed.png");
-  background-size: 100%;
-}
-.vectors-interface .vectors-container .vectors .vector .hide .eye.eyeclosed:hover {
-  background-image: url("../public/pixelv-eyeclosed-hover.png");
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .trash {
-  position: absolute;
   right: 0;
   top: 66px;
-  cursor: pointer;
-  width: 20px;
-  height: 20px;
-  background: rgb(61, 61, 61);
-  z-index: 104;
-  margin-bottom: 2px;
-  box-shadow: -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131);
+  background-color: rgb(61, 61, 61);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container .vectors .vector .trash:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .trash:focus {
-  box-shadow: -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255);
-}
-.vectors-interface .vectors-container .vectors .vector .trash .icon {
-  pointer-events: none;
-  width: 100%;
-  height: 100%;
-  background-image: url("../public/pixelv-trash.png");
-  background-size: 100%;
-}
-.vectors-interface .vectors-container .vectors .vector .trash:hover {
-  z-index: 106;
-}
-.vectors-interface .vectors-container .vectors .vector .trash:hover .icon {
-  background-image: url("../public/pixelv-trash-hover.png");
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector.selected {
   background: rgb(77, 77, 77);
@@ -1166,13 +1183,17 @@ canvas {
 }
 .brush-container .collapsible {
   padding-top: 2px;
-  display: none;
+}
+.brush-container .collapsible > :first-child {
+  margin-top: 8px;
 }
 .brush-container p {
   margin: 0px;
 }
 .brush-container .brush-size {
   padding-top: 2px;
+  margin-bottom: 3px;
+  font-size: 12px;
 }
 .brush-container .brush-preview {
   width: 64px;
@@ -1192,7 +1213,7 @@ canvas {
   height: 16px;
   background: rgb(31, 31, 31);
   outline: none;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
   cursor: pointer;
 }
 .brush-container .slider::-webkit-slider-thumb {
@@ -1216,6 +1237,28 @@ canvas {
 }
 .brush-container .slider:disabled::-moz-range-thumb {
   background: rgb(200, 200, 200);
+}
+.brush-container .modes-title {
+  margin-bottom: 4px;
+}
+.brush-container .modes-container {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  min-height: 40px;
+  margin-bottom: 8px;
+}
+.brush-container .modes-container .mode {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  text-align: center;
+  color: white;
+  width: 40px;
+  height: 40px;
+  opacity: 1;
 }
 
 /* Palette */
@@ -1268,7 +1311,6 @@ canvas {
   position: absolute;
   width: 40px;
   height: 40px;
-  background: transparent;
   box-shadow: none;
   margin: 0;
   top: 84px;
@@ -1294,33 +1336,21 @@ canvas {
   width: 40px;
   height: 40px;
   cursor: pointer;
-}
-.palette-interface .palette-container .palette-tools .palette-edit .icon {
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  background-image: url("../public/pixelv-palette-knife.png");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M2 1h2M1 2h1M4 2h1M1 3h1M5 3h1M1 4h1M6 4h1M2 5h1M7 5h1M2 6h1M8 6h1M3 7h1M9 7h2M3 8h1M11 8h1M4 9h1M12 9h1M4 10h1M13 10h2M5 11h6M15 11h1M11 12h1M16 12h1M11 13h1M17 13h1M11 14h1M18 14h1M12 15h1M18 15h1M12 16h1M18 16h1M13 17h1M17 17h1M14 18h3' /%3E%3Cpath stroke='%23575757' d='M2 2h2M2 3h1M2 4h1M3 5h1M3 6h1M4 7h1M4 8h1M7 8h1M5 9h2M5 10h1M10 10h1M11 11h2M12 12h1M14 12h1M13 13h1M15 13h1M14 15h1M16 15h1M15 16h1' /%3E%3Cpath stroke='%23ffffff' d='M3 3h1M3 4h2M5 5h1M8 8h1M7 9h3' /%3E%3Cpath stroke='%23000000' d='M4 3h1M5 4h1M6 5h1M7 6h1M8 7h1M9 8h2M11 9h1M6 10h4M12 10h1M13 11h2M15 12h1M12 13h1M16 13h1M12 14h2M16 14h2M13 15h1M17 15h1M13 16h2M16 16h2M14 17h3' /%3E%3Cpath stroke='%23acacac' d='M4 5h1M4 6h3M5 7h3M5 8h2M10 9h1M11 10h1M13 12h1M14 13h1M14 14h2M15 15h1' /%3E%3C/svg%3E");
   background-size: 100%;
-  transition: transform 0.1s;
 }
-.palette-interface .palette-container .palette-tools .palette-edit.selected .icon {
-  background-image: url("../public/pixelv-palette-knife-hover.png");
+.palette-interface .palette-container .palette-tools .palette-edit:hover, .palette-interface .palette-container .palette-tools .palette-edit.selected {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M2 1h2M1 2h1M4 2h1M1 3h1M5 3h1M1 4h1M6 4h1M2 5h1M7 5h1M2 6h1M8 6h1M3 7h1M9 7h2M3 8h1M11 8h1M4 9h1M12 9h1M4 10h1M13 10h2M5 11h6M15 11h1M11 12h1M16 12h1M11 13h1M17 13h1M11 14h1M18 14h1M12 15h1M18 15h1M12 16h1M18 16h1M13 17h1M17 17h1M14 18h3' /%3E%3Cpath stroke='%23575757' d='M2 2h2M2 3h1M2 4h1M3 5h1M3 6h1M4 7h1M4 8h1M7 8h1M5 9h2M5 10h1M10 10h1M11 11h2M12 12h1M14 12h1M13 13h1M15 13h1M14 15h1M16 15h1M15 16h1' /%3E%3Cpath stroke='%23ffffff' d='M3 3h1M3 4h2M5 5h1M8 8h1M7 9h3' /%3E%3Cpath stroke='%23000000' d='M4 3h1M5 4h1M6 5h1M7 6h1M8 7h1M9 8h2M11 9h1M6 10h4M12 10h1M13 11h2M15 12h1M12 13h1M16 13h1M12 14h2M16 14h2M13 15h1M17 15h1M13 16h2M16 16h2M14 17h3' /%3E%3Cpath stroke='%23acacac' d='M4 5h1M4 6h3M5 7h3M5 8h2M10 9h1M11 10h1M13 12h1M14 13h1M14 14h2M15 15h1' /%3E%3C/svg%3E");
 }
 .palette-interface .palette-container .palette-tools .palette-remove {
   width: 40px;
   height: 40px;
   cursor: pointer;
-}
-.palette-interface .palette-container .palette-tools .palette-remove .icon {
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  background-image: url("../public/pixelv-palette-scraper.png");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M8 1h1M7 2h1M9 2h2M6 3h1M11 3h1M5 4h1M12 4h1M4 5h1M13 5h1M3 6h1M14 6h1M2 7h1M14 7h1M1 8h1M15 8h2M2 9h1M17 9h1M2 10h1M18 10h1M3 11h1M18 11h1M4 12h1M18 12h1M5 13h1M17 13h1M6 14h2M16 14h1M8 15h1M15 15h1M8 16h1M14 16h1M9 17h1M13 17h1M10 18h3' /%3E%3Cpath stroke='%23575757' d='M8 2h1M7 3h1M6 4h1M5 5h1M10 5h2M4 6h1M9 6h1M11 6h2M3 7h1M8 7h1M12 7h1M2 8h1M7 8h1M11 8h2M6 9h1M10 9h2M13 9h2M5 10h1M8 10h3M12 10h1M14 10h1M6 11h1M8 11h2M11 11h3M16 11h1M7 12h2M10 12h7M9 13h1M11 13h2M15 13h1M10 14h1M12 14h1M14 14h1M12 15h2M12 16h1' /%3E%3Cpath stroke='%23acacac' d='M8 3h1M8 4h1M10 4h1M6 5h1M9 5h1M6 6h1M8 6h1M7 7h1M11 7h1M3 8h1M6 8h1M10 8h1M5 9h1M9 9h1M4 10h1M15 10h2M5 11h1M6 12h1M9 14h1M10 15h1M10 16h2' /%3E%3Cpath stroke='%23000000' d='M9 3h2M9 4h1M11 4h1M8 5h1M12 5h1M7 6h1M10 6h1M13 6h1M6 7h1M9 7h2M13 7h1M5 8h1M8 8h2M13 8h2M3 9h2M7 9h2M12 9h1M15 9h2M3 10h1M6 10h2M11 10h1M13 10h1M17 10h1M4 11h1M7 11h1M10 11h1M14 11h2M17 11h1M5 12h1M9 12h1M17 12h1M6 13h3M10 13h1M13 13h2M16 13h1M8 14h1M11 14h1M13 14h1M15 14h1M9 15h1M11 15h1M14 15h1M9 16h1M13 16h1M10 17h3' /%3E%3Cpath stroke='%23ffffff' d='M7 4h1M7 5h1M5 6h1M4 7h2M4 8h1' /%3E%3C/svg%3E");
   background-size: 100%;
-  transition: transform 0.1s;
 }
-.palette-interface .palette-container .palette-tools .palette-remove.selected .icon {
-  background-image: url("../public/pixelv-palette-scraper-hover.png");
+.palette-interface .palette-container .palette-tools .palette-remove:hover, .palette-interface .palette-container .palette-tools .palette-remove.selected {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M8 1h1M7 2h1M9 2h2M6 3h1M11 3h1M5 4h1M12 4h1M4 5h1M13 5h1M3 6h1M14 6h1M2 7h1M14 7h1M1 8h1M15 8h2M2 9h1M17 9h1M2 10h1M18 10h1M3 11h1M18 11h1M4 12h1M18 12h1M5 13h1M17 13h1M6 14h2M16 14h1M8 15h1M15 15h1M8 16h1M14 16h1M9 17h1M13 17h1M10 18h3' /%3E%3Cpath stroke='%23575757' d='M8 2h1M7 3h1M6 4h1M5 5h1M10 5h2M4 6h1M9 6h1M11 6h2M3 7h1M8 7h1M12 7h1M2 8h1M7 8h1M11 8h2M6 9h1M10 9h2M13 9h2M5 10h1M8 10h3M12 10h1M14 10h1M6 11h1M8 11h2M11 11h3M16 11h1M7 12h2M10 12h7M9 13h1M11 13h2M15 13h1M10 14h1M12 14h1M14 14h1M12 15h2M12 16h1' /%3E%3Cpath stroke='%23acacac' d='M8 3h1M8 4h1M10 4h1M6 5h1M9 5h1M6 6h1M8 6h1M7 7h1M11 7h1M3 8h1M6 8h1M10 8h1M5 9h1M9 9h1M4 10h1M15 10h2M5 11h1M6 12h1M9 14h1M10 15h1M10 16h2' /%3E%3Cpath stroke='%23000000' d='M9 3h2M9 4h1M11 4h1M8 5h1M12 5h1M7 6h1M10 6h1M13 6h1M6 7h1M9 7h2M13 7h1M5 8h1M8 8h2M13 8h2M3 9h2M7 9h2M12 9h1M15 9h2M3 10h1M6 10h2M11 10h1M13 10h1M17 10h1M4 11h1M7 11h1M10 11h1M14 11h2M17 11h1M5 12h1M9 12h1M17 12h1M6 13h3M10 13h1M13 13h2M16 13h1M8 14h1M11 14h1M13 14h1M15 14h1M9 15h1M11 15h1M14 15h1M9 16h1M13 16h1M10 17h3' /%3E%3Cpath stroke='%23ffffff' d='M7 4h1M7 5h1M5 6h1M4 7h2M4 8h1' /%3E%3C/svg%3E");
 }
 .palette-interface .palette-container .palette-colors {
   display: flex;
@@ -1332,17 +1362,20 @@ canvas {
   height: 20px;
   background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   margin: 1px;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .palette-interface .palette-container .palette-colors .palette-color:hover:not([disabled]), .palette-interface .palette-container .palette-colors .palette-color:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .palette-interface .palette-container .palette-colors .palette-color.selected {
   z-index: 105;
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .palette-interface .palette-container .palette-colors .palette-color.selected:hover:hover:not([disabled]), .palette-interface .palette-container .palette-colors .palette-color.selected:hover:focus {
-  box-shadow: 2px 0px rgb(71, 255, 47), -2px 0px rgb(71, 255, 47), 0px -2px rgb(71, 255, 47), 0px 2px rgb(71, 255, 47);
+  box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
+}
+.palette-interface .palette-container .palette-colors .palette-color.selected:hover:hover:not([disabled]):hover:not([disabled]), .palette-interface .palette-container .palette-colors .palette-color.selected:hover:hover:not([disabled]):focus, .palette-interface .palette-container .palette-colors .palette-color.selected:hover:focus:hover:not([disabled]), .palette-interface .palette-container .palette-colors .palette-color.selected:hover:focus:focus {
+  box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
 }
 .palette-interface .palette-container .palette-colors .palette-color:hover {
   z-index: 106;
@@ -1352,13 +1385,22 @@ canvas {
   height: 100%;
 }
 .palette-interface .palette-container .palette-colors.edit-mode .palette-color:hover:not([disabled]), .palette-interface .palette-container .palette-colors.edit-mode .palette-color:focus {
-  box-shadow: 2px 0px rgb(71, 255, 47), -2px 0px rgb(71, 255, 47), 0px -2px rgb(71, 255, 47), 0px 2px rgb(71, 255, 47);
+  box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
+}
+.palette-interface .palette-container .palette-colors.edit-mode .palette-color:hover:not([disabled]):hover:not([disabled]), .palette-interface .palette-container .palette-colors.edit-mode .palette-color:hover:not([disabled]):focus, .palette-interface .palette-container .palette-colors.edit-mode .palette-color:focus:hover:not([disabled]), .palette-interface .palette-container .palette-colors.edit-mode .palette-color:focus:focus {
+  box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color:focus {
-  box-shadow: 2px 0px red, -2px 0px red, 0px -2px red, 0px 2px red;
+  box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
+}
+.palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]):hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]):focus, .palette-interface .palette-container .palette-colors.remove-mode .palette-color:focus:hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color:focus:focus {
+  box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:focus {
-  box-shadow: 2px 0px red, -2px 0px red, 0px -2px red, 0px 2px red;
+  box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
+}
+.palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]):hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]):focus, .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:focus:hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:focus:focus {
+  box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover .swatch {
   background-image: url("../public/pixelv-trash-hover.png") !important;
@@ -1373,22 +1415,15 @@ canvas {
 .palette-interface .palette-container .add-color:hover {
   z-index: 106;
 }
-.palette-interface .palette-container .add-color .icon {
-  background-image: url("../public/pixelv-plus.png");
-  background-size: 100%;
-  width: 100%;
-  height: 100%;
-}
-.palette-interface .palette-container .add-color .icon:hover {
-  background-image: url("../public/pixelv-plus-hover.png");
-}
 
 /* Color Picker */
 .picker-container {
   user-select: none;
   position: absolute;
   z-index: 103;
-  width: 570px;
+  width: 370px;
+  max-width: calc(100% - 4px);
+  max-height: calc(100% - 4px);
   display: none;
   flex-flow: column nowrap;
   justify-content: flex-start;
@@ -1400,10 +1435,10 @@ canvas {
   padding: 0;
   align-self: center;
   opacity: 1;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .picker-container:hover:not([disabled]), .picker-container:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .picker-container .header h3 {
   justify-self: center;
@@ -1415,7 +1450,8 @@ canvas {
 }
 .picker-container .collapsible .picker-interface {
   display: flex;
-  flex-flow: row nowrap;
+  flex-flow: column nowrap;
+  align-items: center;
   margin: 10px;
 }
 .picker-container .collapsible .picker-interface #left {
@@ -1433,10 +1469,10 @@ canvas {
   height: 250px;
   margin: 10px;
   cursor: crosshair;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .picker-container .collapsible .picker-interface #left #picker #color-picker:hover:not([disabled]), .picker-container .collapsible .picker-interface #left #picker #color-picker:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .picker-container .collapsible .picker-interface #left #picker .slider-container {
   position: relative;
@@ -1455,10 +1491,10 @@ canvas {
   height: 20px;
   margin: 10px;
   outline: none;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .picker-container .collapsible .picker-interface #left #picker .picker-slider:hover:not([disabled]), .picker-container .collapsible .picker-interface #left #picker .picker-slider:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .picker-container .collapsible .picker-interface #left #picker .picker-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
@@ -1569,10 +1605,10 @@ canvas {
   height: 18px;
   margin-left: 6px;
   overflow: hidden;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .picker-container .collapsible .picker-interface #right #rgbahsl .sliderbox:hover:not([disabled]), .picker-container .collapsible .picker-interface #right #rgbahsl .sliderbox:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .picker-container .collapsible .picker-interface #right #rgbahsl .sliderbox .channel-btn {
   position: absolute;
@@ -1612,15 +1648,12 @@ canvas {
 .picker-container .collapsible .picker-interface #right #lumi #luminance {
   width: 26px;
 }
-@media (max-width: 700px) {
+@media (min-width: 768px) {
   .picker-container {
-    width: 370px;
-    max-width: calc(100% - 4px);
-    max-height: calc(100% - 4px);
+    width: 570px;
   }
   .picker-container .collapsible .picker-interface {
-    flex-flow: column nowrap;
-    align-items: center;
+    flex-flow: row nowrap;
   }
 }
 
@@ -1670,10 +1703,10 @@ canvas {
   height: 18px;
   margin-left: 6px;
   overflow: hidden;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .size-container .sliderbox:hover:not([disabled]), .size-container .sliderbox:focus {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .size-container .sliderbox .channel-btn {
   position: absolute;
