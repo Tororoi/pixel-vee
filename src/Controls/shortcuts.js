@@ -107,8 +107,6 @@ export function activateShortcut(keyCode) {
             state.resetSelectProperties()
             vectorGui.render()
           }
-        } else {
-          handleModes(null, "draw")
         }
       }
       break

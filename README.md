@@ -39,39 +39,6 @@ Visit here: https://pixelvee.netlify.app/
   </tr>
 </table>
 
-## Modes
-
-<table>
-  <tr>
-    <td colspan="2"> Draw (D) </td>
-  </tr>
-  <tr>
-    <td width="66" height="52"> <img src="public/pixelv-pencil.png" alt="Brush" width="40"/> </td>
-    <td> Standard drawing mode that puts color to canvas. </td>
-  </tr>
-  <tr>
-    <td colspan="2"> Erase (E) </td>
-  </tr>
-  <tr>
-    <td width="66" height="52"> <img src="public/pixelv-eraser.svg" alt="Brush" width="40"/> </td>
-    <td> Chosen as a mode and not a tool in order to allow use with multiple tools (eg. Erase/Fill, Erase/Line). </td>
-  </tr>
-  <tr>
-    <td colspan="2"> Perfect (P) </td>
-  </tr>
-  <tr>
-    <td width="66" height="52"> <img src="public/pixelv-mechanical-pencil.svg" alt="Brush" width="40"/> </td>
-    <td> Perfect pixel mode. Currently only works with pencil tool and enables smooth pixel perfect lines, even while drawing slowly. </td>
-  </tr>
-    <tr>
-    <td colspan="2"> Inject (I) </td>
-  </tr>
-  <tr>
-    <td width="66" height="52"> <img src="public/pixelv-inject.svg" alt="Brush" width="40"/> </td>
-    <td> Translucent colors will be applied directly instead of placed on top of other colors. </td>
-  </tr>
-</table>
-
 ## Tools
 <table>
   <tr>
@@ -80,13 +47,6 @@ Visit here: https://pixelvee.netlify.app/
   <tr>
     <td width="66" height="52"> <img src="public/pixelv-brush.svg" alt="Brush" width="40"/> </td>
     <td> Draws a pixel where your pointer goes. </td>
-  </tr>
-  <tr>
-    <td colspan="2"> Color Mask (M) </td>
-  </tr>
-  <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-color-mask.svg" alt="Color Mask" width="40"/> </td>
-    <td> Drawing will only put color down on top of the selected background color (eg. If the background color swatch is red, it will only draw on top of red pixels). </td>
   </tr>
   <tr>
     <td colspan="2"> Fill (F) </td>
@@ -146,26 +106,36 @@ Visit here: https://pixelvee.netlify.app/
   </tr>
 </table>
 
-## Top Menu
+## Brush Modes
 
 <table>
   <tr>
-    <td colspan="2"> Grid </td>
+    <td colspan="2"> Erase (E) </td>
   </tr>
   <tr>
-    <td colspan="2"> Toggle the grid on or off. Only displays at higher zoom levels. </td>
+    <td width="66" height="52"> <img src="public/pixelv-eraser.svg" alt="Brush" width="40"/> </td>
+    <td> Chosen as a mode and not a tool in order to allow use with multiple tools (eg. Erase/Fill, Erase/Line). </td>
   </tr>
   <tr>
-    <td colspan="2"> Tooltips </td>
+    <td colspan="2"> Perfect (P) </td>
   </tr>
   <tr>
-    <td colspan="2"> Toggle tooltips on or off. Hover to see a tooltip. </td>
+    <td width="66" height="52"> <img src="public/pixelv-mechanical-pencil.svg" alt="Brush" width="40"/> </td>
+    <td> Perfect pixel mode. Currently only works with pencil tool and enables smooth pixel perfect lines, even while drawing slowly. </td>
+  </tr>
+    <tr>
+    <td colspan="2"> Inject (I) </td>
   </tr>
   <tr>
-    <td colspan="2"> Export </td>
+    <td width="66" height="52"> <img src="public/pixelv-inject.svg" alt="Brush" width="40"/> </td>
+    <td> Translucent colors will be applied directly instead of placed on top of other colors. </td>
+  </tr>
+    <tr>
+    <td colspan="2"> Color Mask (M) </td>
   </tr>
   <tr>
-    <td colspan="2"> Download the image as .png. </td>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-color-mask.svg" alt="Color Mask" width="40"/> </td>
+    <td> Drawing will only put color down on top of the selected background color (eg. If the background color swatch is red, it will only draw on top of red pixels). </td>
   </tr>
 </table>
 
@@ -288,6 +258,28 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
   </tr>
 </table>
 
+## Top Menu
+
+<table>
+  <tr>
+    <td colspan="2"> Grid </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Toggle the grid on or off. Only displays at higher zoom levels. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Tooltips </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Toggle tooltips on or off. Hover to see a tooltip. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Export </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Download the image as .png. </td>
+  </tr>
+</table>
 
 
 ### Key Features to be added
