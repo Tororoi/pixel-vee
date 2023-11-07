@@ -60,7 +60,7 @@ export function setColor(r, g, b, a, target) {
   } else {
     let color = { color: `rgba(${r},${g},${b},${a / 255})`, r, g, b, a }
     target.color = color
-    target.style.background = color.color
+    target.style.backgroundColor = color.color
     if (target.vector) {
       changeActionColor(target.vector.index, color)
       state.undoStack.push(state.action)

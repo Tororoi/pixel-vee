@@ -43,7 +43,7 @@ export const createColorElement = (action) => {
   color.className = "actionColor"
   let colorSwatch = document.createElement("div")
   colorSwatch.className = "swatch"
-  colorSwatch.style.background = action.color.color
+  colorSwatch.style.backgroundColor = action.color.color
   color.appendChild(colorSwatch)
   return color
 }
