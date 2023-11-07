@@ -53,7 +53,7 @@ const createPaletteSwatch = (colorObj, index) => {
 
   const swatch = document.createElement("div")
   swatch.className = "swatch"
-  swatch.style.background = colorObj.color
+  swatch.style.backgroundColor = colorObj.color
 
   //associate object
   swatch.color = colorObj
