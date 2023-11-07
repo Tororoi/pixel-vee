@@ -11,7 +11,7 @@ Visit here: https://pixelvee.netlify.app/
     <td colspan="2"> Undo/Redo </td>
   </tr>
   <tr>
-    <td width="106" height="52"> <img src="public/pixelv-undo.svg" alt="Undo" width="40"/><img src="public/pixelv-redo.svg" alt="Redo" width="40"/> </td>
+    <td width="66" height="52"> <img src="public/pixelv-undo.svg" alt="Undo" width="40"/><img src="public/pixelv-redo.svg" alt="Redo" width="40"/> </td>
     <td> Any action that makes a change to the canvas can be undone. </td>
   </tr>
   <tr>
@@ -25,7 +25,7 @@ Visit here: https://pixelvee.netlify.app/
     <td colspan="2"> Zoom </td>
   </tr>
   <tr>
-    <td width="106" height="52"> <img src="public/pixelv-minus.svg" alt="Minus" width="20" hspace="10" /><img src="public/pixelv-plus.svg" alt="Plus" width="20" hspace="10"/> </td>
+    <td width="66" height="52"> <img src="public/pixelv-plus.svg" alt="Plus" width="20" hspace="10"/> <img src="public/pixelv-minus.svg" alt="Minus" width="20" hspace="10" /> </td>
     <td> Zoom with buttons or with the mouse's scrollwheel.  </td>
   </tr>
   <tr>
@@ -318,7 +318,7 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
 
 ### Stretch Features to be added
 
-- Ability to resize background image
+- Rasterize vectors and remove them from the vectors interface
 - Dithered Gradient Tool
 - Dithered Brush tool
 - Custom stamp brush
