@@ -93,10 +93,13 @@
           cursor: pointer;
           width: 20px;
           height: 20px;
-          background: $button-color;
+          background-color: $button-color;
           z-index: 104;
           margin-bottom: 2px;
           @include boxBorder($border-color, $white, false, left bottom);
+          &.selected {
+            background-color: $white;
+          }
         }
         .actionColor-container {
           background-image: repeating-linear-gradient(

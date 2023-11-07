@@ -160,7 +160,7 @@ export function actionClear(layer) {
  * @param {Integer} brushSize
  * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
- * @param {String} currentMode
+ * @param {Object} currentModes
  * @param {Set} maskSet
  * @param {Set} seenPointsSet
  * @param {Array} points
@@ -175,7 +175,7 @@ export function actionDraw(
   brushSize,
   layer,
   ctx,
-  currentMode,
+  currentModes,
   maskSet,
   seenPointsSet,
   points,
@@ -223,16 +223,11 @@ export function actionDraw(
         seenPointsSet.add(key)
       }
     }
-    switch (currentMode) {
-      case "erase":
-        ctx.clearRect(x, y, 1, 1)
-        break
-      case "inject":
-        ctx.clearRect(x, y, 1, 1)
-        ctx.fillRect(x, y, 1, 1)
-        break
-      default:
-        ctx.fillRect(x, y, 1, 1)
+    if (currentModes?.eraser || currentModes?.inject) {
+      ctx.clearRect(x, y, 1, 1)
+    }
+    if (!currentModes?.eraser) {
+      ctx.fillRect(x, y, 1, 1)
     }
   }
 }
@@ -246,7 +241,7 @@ export function actionDraw(
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
- * @param {String} currentMode
+ * @param {Object} currentModes
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {Set} maskSet
@@ -260,7 +255,7 @@ export function actionLine(
   currentColor,
   layer,
   ctx,
-  currentMode,
+  currentModes,
   brushStamp,
   brushSize,
   maskSet,
@@ -293,7 +288,7 @@ export function actionLine(
       brushSize,
       layer,
       ctx,
-      currentMode,
+      currentModes,
       maskSet,
       seen,
       null,
@@ -313,7 +308,7 @@ export function actionLine(
     brushSize,
     layer,
     ctx,
-    currentMode,
+    currentModes,
     maskSet,
     seen,
     null,
@@ -328,7 +323,7 @@ export function actionLine(
  * @param {Integer} startY
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
- * @param {String} currentMode
+ * @param {Object} currentModes
  * @param {Object} selectProperties
  * @param {Set} maskSet
  * @returns
@@ -338,7 +333,7 @@ export function actionFill(
   startY,
   currentColor,
   layer,
-  currentMode,
+  currentModes,
   selectProperties,
   maskSet
 ) {
@@ -367,7 +362,7 @@ export function actionFill(
 
   let clickedColor = getColor(layerImageData, startX - xMin, startY - yMin)
 
-  if (currentMode === "erase") {
+  if (currentModes?.eraser) {
     currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
   }
 
@@ -448,7 +443,7 @@ export function actionFill(
  * @param {Integer} brushSize
  * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
- * @param {String} currentMode
+ * @param {Object} currentModes
  * @param {Set} maskSet
  */
 function renderPoints(
@@ -458,7 +453,7 @@ function renderPoints(
   brushSize,
   layer,
   ctx,
-  currentMode,
+  currentModes,
   maskSet
 ) {
   const seen = new Set()
@@ -484,7 +479,7 @@ function renderPoints(
       brushSize,
       layer,
       ctx,
-      currentMode,
+      currentModes,
       maskSet,
       seen,
       null,
@@ -507,7 +502,7 @@ function renderPoints(
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
- * @param {String} currentMode
+ * @param {Object} currentModes
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {Set} maskSet
@@ -523,7 +518,7 @@ export function actionQuadraticCurve(
   currentColor,
   layer,
   ctx,
-  currentMode,
+  currentModes,
   brushStamp,
   brushSize,
   maskSet
@@ -546,7 +541,7 @@ export function actionQuadraticCurve(
       currentColor,
       layer,
       ctx,
-      currentMode,
+      currentModes,
       brushStamp,
       brushSize,
       maskSet,
@@ -573,7 +568,7 @@ export function actionQuadraticCurve(
       brushSize,
       layer,
       ctx,
-      currentMode,
+      currentModes,
       maskSet
     )
     state.vectorProperties.px3 = state.cursorX
@@ -595,7 +590,7 @@ export function actionQuadraticCurve(
       brushSize,
       layer,
       ctx,
-      currentMode,
+      currentModes,
       maskSet
     )
   }
@@ -615,7 +610,7 @@ export function actionQuadraticCurve(
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
- * @param {String} currentMode
+ * @param {Object} currentModes
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {Set} maskSet
@@ -633,7 +628,7 @@ export function actionCubicCurve(
   currentColor,
   layer,
   ctx,
-  currentMode,
+  currentModes,
   brushStamp,
   brushSize,
   maskSet
@@ -658,7 +653,7 @@ export function actionCubicCurve(
       currentColor,
       layer,
       ctx,
-      currentMode,
+      currentModes,
       brushStamp,
       brushSize,
       maskSet,
@@ -686,7 +681,7 @@ export function actionCubicCurve(
       brushSize,
       layer,
       ctx,
-      currentMode,
+      currentModes,
       maskSet
     )
     state.vectorProperties.px3 = state.cursorX
@@ -711,7 +706,7 @@ export function actionCubicCurve(
       brushSize,
       layer,
       ctx,
-      currentMode,
+      currentModes,
       maskSet
     )
     state.vectorProperties.px4 = state.cursorX
@@ -735,7 +730,7 @@ export function actionCubicCurve(
       brushSize,
       layer,
       ctx,
-      currentMode,
+      currentModes,
       maskSet
     )
   }
@@ -753,7 +748,7 @@ export function actionCubicCurve(
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
- * @param {String} currentMode
+ * @param {Object} currentModes
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {Float} angle - Radians
@@ -774,7 +769,7 @@ export function actionEllipse(
   currentColor,
   layer,
   ctx,
-  currentMode,
+  currentModes,
   brushStamp,
   brushSize,
   angle,
@@ -800,7 +795,7 @@ export function actionEllipse(
       brushSize,
       layer,
       ctx,
-      currentMode,
+      currentModes,
       maskSet
     )
   } else {
@@ -822,7 +817,7 @@ export function actionEllipse(
       brushSize,
       layer,
       ctx,
-      currentMode,
+      currentModes,
       maskSet
     )
   }

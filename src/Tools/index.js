@@ -22,7 +22,8 @@ export const tools = {
     action: null,
     brushSize: null,
     disabled: false,
-    options: [],
+    options: {},
+    modes: {},
     type: "modify",
   },
   changeColor: {
@@ -31,7 +32,8 @@ export const tools = {
     action: null,
     brushSize: null,
     disabled: false,
-    options: [],
+    options: {},
+    modes: {},
     type: "modify",
   },
   remove: {
@@ -40,7 +42,8 @@ export const tools = {
     action: null,
     brushSize: null,
     disabled: false,
-    options: [],
+    options: {},
+    modes: {},
     type: "modify",
   },
   clear: {
@@ -49,7 +52,8 @@ export const tools = {
     action: null,
     brushSize: null,
     disabled: false,
-    options: [],
+    options: {},
+    modes: {},
     type: "modify",
   },
   //Raster Tools
@@ -77,6 +81,7 @@ export const tools = {
     brushSize: null,
     disabled: false,
     options: {},
+    modes: {},
     type: "settings",
   },
   removeLayer: {
@@ -86,14 +91,12 @@ export const tools = {
     brushSize: null,
     disabled: false,
     options: {},
+    modes: {},
     type: "settings",
   },
   //Utility Tools (does not affect timeline)
   eyedropper,
   grab,
-  /** move: {
-    * Move a layer's coordinates independent of other layers
-  } */
   /** perspective: {
    * set vanishing points.
    * Click to create a vanishing point with visible radius r.

@@ -18,7 +18,7 @@ import { createColorMaskSet } from "../Canvas/masks.js"
 function brushSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (state.tool.modes.colorMask) {
+      if (state.tool.modes?.colorMask) {
         state.maskSet = createColorMaskSet(
           swatches.secondary.color,
           canvas.currentLayer
@@ -44,7 +44,7 @@ function brushSteps() {
         state.tool.brushSize,
         canvas.currentLayer,
         canvas.currentLayer.ctx,
-        state.mode,
+        state.tool.modes,
         state.maskSet,
         state.drawnPointsSet,
         state.points,
@@ -69,7 +69,7 @@ function brushSteps() {
             swatches.primary.color,
             canvas.currentLayer,
             ctx,
-            state.mode,
+            state.tool.modes,
             state.brushStamp,
             state.tool.brushSize,
             state.maskSet,
@@ -120,7 +120,7 @@ function brushSteps() {
             state.tool.brushSize,
             canvas.currentLayer,
             canvas.currentLayer.ctx,
-            state.mode,
+            state.tool.modes,
             state.maskSet,
             state.drawnPointsSet,
             state.points,
@@ -148,34 +148,16 @@ function brushSteps() {
           state.tool.brushSize,
           canvas.currentLayer,
           canvas.currentLayer.ctx,
-          state.mode,
+          state.tool.modes,
           state.maskSet,
           state.drawnPointsSet,
           state.points,
           false
         )
-        // if (state.mode === "perfect") {
-        //   renderCanvas(null, (ctx) => {
-        //     actionDraw(
-        //       state.cursorX,
-        //       state.cursorY,
-        //       swatches.primary.color,
-        //       state.brushStamp,
-        //       "0,0",
-        //       state.tool.brushSize,
-        //       canvas.currentLayer,
-        //       ctx,
-        //       state.mode,
-        //       state.drawnPointsSet,
-        //       null,
-        //       true
-        //     )
-        //   })
-        // }
         renderCanvas(canvas.currentLayer)
       } else {
         //FIX: perfect will be option, not mode
-        if (state.mode === "perfect") {
+        if (state.tool.modes?.perfect) {
           //if currentPixel not neighbor to lastDrawn and has not already been drawn, draw waitingpixel
           if (
             Math.abs(state.cursorX - state.lastDrawnX) > 1 ||
@@ -191,7 +173,7 @@ function brushSteps() {
               state.tool.brushSize,
               canvas.currentLayer,
               canvas.currentLayer.ctx,
-              state.mode,
+              state.tool.modes,
               state.maskSet,
               state.drawnPointsSet,
               state.points,
@@ -212,7 +194,7 @@ function brushSteps() {
                 state.tool.brushSize,
                 canvas.currentLayer,
                 ctx,
-                state.mode,
+                state.tool.modes,
                 state.maskSet,
                 state.drawnPointsSet,
                 null,
@@ -232,7 +214,7 @@ function brushSteps() {
                 state.tool.brushSize,
                 canvas.currentLayer,
                 ctx,
-                state.mode,
+                state.tool.modes,
                 state.maskSet,
                 state.drawnPointsSet,
                 null,
@@ -250,7 +232,7 @@ function brushSteps() {
             state.tool.brushSize,
             canvas.currentLayer,
             canvas.currentLayer.ctx,
-            state.mode,
+            state.tool.modes,
             state.maskSet,
             state.drawnPointsSet,
             state.points,
@@ -305,7 +287,7 @@ function brushSteps() {
             state.tool.brushSize,
             canvas.currentLayer,
             canvas.currentLayer.ctx,
-            state.mode,
+            state.tool.modes,
             state.maskSet,
             state.drawnPointsSet,
             state.points,
@@ -333,7 +315,7 @@ function brushSteps() {
           state.tool.brushSize,
           canvas.currentLayer,
           canvas.currentLayer.ctx,
-          state.mode,
+          state.tool.modes,
           state.maskSet,
           state.drawnPointsSet,
           state.points,
@@ -350,7 +332,7 @@ function brushSteps() {
         state.tool.brushSize,
         canvas.currentLayer,
         canvas.currentLayer.ctx,
-        state.mode,
+        state.tool.modes,
         state.maskSet,
         state.drawnPointsSet,
         state.points,
@@ -369,7 +351,7 @@ function brushSteps() {
         properties: { points: state.points, maskSet: state.maskSet, maskArray },
       })
       renderCanvas(canvas.currentLayer)
-      if (state.tool.modes.colorMask) {
+      if (state.tool.modes?.colorMask) {
         state.maskSet = null
       }
       break
@@ -417,7 +399,7 @@ export const brush = {
   brushSize: 1,
   disabled: false,
   options: { line: false },
-  modes: { eraser: false, perfect: false, inject: false, colorMask: false },
+  modes: { eraser: false, inject: false, perfect: false, colorMask: false },
   type: "raster",
   cursor: "crosshair",
   activeCursor: "crosshair",

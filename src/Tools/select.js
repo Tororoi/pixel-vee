@@ -105,6 +105,7 @@ export const select = {
   brushSize: 1,
   disabled: false,
   options: { magicWand: false },
+  modes: {},
   type: "raster",
   cursor: "default",
   activeCursor: "default",

@@ -143,7 +143,32 @@
                 data-tooltip="Adjust brush size"
               />
               <span class="modes-title">Modes</span>
-              <div class="modes-container"></div>
+              <div class="modes-container">
+                <button
+                  type="button"
+                  class="mode eraser"
+                  id="eraser"
+                  data-tooltip="Erase (E)"
+                ></button
+                ><button
+                  type="button"
+                  class="mode inject"
+                  id="inject"
+                  data-tooltip="Inject (I) &#010;&#010;Translucent colors will be applied directly"
+                ></button
+                ><button
+                  type="button"
+                  class="mode perfect"
+                  id="perfect"
+                  data-tooltip="Pixel Perfect (P)"
+                ></button
+                ><button
+                  type="button"
+                  class="mode colorMask"
+                  id="colorMask"
+                  data-tooltip="Color Mask (M) &#010;&#010;Only draw over selected secondary swatch color"
+                ></button>
+              </div>
             </div>
           </div>
           <div
@@ -219,17 +244,17 @@
                   ></button>
                 </div>
                 <div class="palette-colors">
-                  <!-- <div class="palette-color">
-                  <div class="swatch"></div>
-                </div>
-                <div class="palette-color">
-                  <div class="swatch"></div>
-                </div> -->
-                </div>
-                <!-- <div class="add-color">
-                  <div class="icon">
+                  <div class="palette-color selected">
+                    <div class="swatch" style="background: rgb(0, 0, 0)"></div>
                   </div>
-                </div> -->
+                  <div class="palette-color">
+                    <div
+                      class="swatch"
+                      style="background: rgb(255, 255, 255)"
+                    ></div>
+                  </div>
+                  <div class="add-color"><div class="icon"></div></div>
+                </div>
               </div>
             </div>
           </div>
@@ -335,7 +360,13 @@
                 <input type="file" id="file-upload" />
               </div>
               <div class="layers-container">
-                <div class="layers"></div>
+                <div class="layers">
+                  <div class="layer raster selected" id="0" draggable="true">
+                    Layer 1
+                    <div class="hide"><div class="eye eyeopen"></div></div>
+                    <div class="trash"><div class="icon"></div></div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -434,52 +465,47 @@
               data-tooltip="Zoom In (Mouse Wheel)"
             />
           </div>
-          <div class="columns">
-            <div class="tools column">
-              <h4>Tool</h4>
-              <button
-                type="button"
-                class="tool brush"
-                id="brush"
-                data-tooltip="Brush (B)"
-              />
-              <!-- <button
-                type="button"
-                class="tool colorMask"
-                id="colorMask"
-                data-tooltip="Color Mask (M) &#010;&#010;Only draw over selected secondary swatch color"
-              /> -->
-              <button
-                type="button"
-                class="tool fill"
-                id="fill"
-                data-tooltip="Fill (F)"
-              />
-              <button
-                type="button"
-                class="tool line"
-                id="line"
-                data-tooltip="Line (L or Hold Shift & Brush)"
-              />
-              <button
-                type="button"
-                class="tool quadCurve"
-                id="quadCurve"
-                data-tooltip="Quadratic Curve (C)"
-              />
-              <button
-                type="button"
-                class="tool cubicCurve"
-                id="cubicCurve"
-                data-tooltip="Cubic Curve (J)"
-              />
-              <button
-                type="button"
-                class="tool ellipse"
-                id="ellipse"
-                data-tooltip="Ellipse (O) &#010;&#010;Hold Shift to maintain circle"
-              />
-              <!-- <button
+          <div class="tools">
+            <h4>Tools</h4>
+            <div class="columns">
+              <div class="column">
+                <button
+                  type="button"
+                  class="tool brush selected"
+                  id="brush"
+                  data-tooltip="Brush (B)"
+                ></button>
+                <button
+                  type="button"
+                  class="tool fill"
+                  id="fill"
+                  data-tooltip="Fill (F)"
+                />
+                <button
+                  type="button"
+                  class="tool line"
+                  id="line"
+                  data-tooltip="Line (L or Hold Shift & Brush)"
+                />
+                <button
+                  type="button"
+                  class="tool quadCurve"
+                  id="quadCurve"
+                  data-tooltip="Quadratic Curve (C)"
+                />
+                <button
+                  type="button"
+                  class="tool cubicCurve"
+                  id="cubicCurve"
+                  data-tooltip="Cubic Curve (J)"
+                />
+                <button
+                  type="button"
+                  class="tool ellipse"
+                  id="ellipse"
+                  data-tooltip="Ellipse (O) &#010;&#010;Hold Shift to maintain circle"
+                />
+                <!-- <button
                 type="button"
                 class="tool btn"
                 id="select"
@@ -487,52 +513,27 @@
               >
                 <div class="select"></div>
               </button> -->
-              <button
-                type="button"
-                class="tool eyedropper"
-                id="eyedropper"
-                data-tooltip="Eyedropper (Hold Alt)"
-              />
-              <button
-                type="button"
-                class="tool grab"
-                id="grab"
-                data-tooltip="Grab (Hold Space)"
-              />
-              <button
-                type="button"
-                class="tool move"
-                id="move"
-                data-tooltip="Move"
-              />
-            </div>
-            <div class="modes column">
-              <h4>Mode</h4>
-              <!-- <button
-                type="button"
-                class="mode pencil"
-                id="draw"
-                data-tooltip="Draw (D)"
-              /> -->
-              <button
-                type="button"
-                class="mode eraser"
-                id="erase"
-                data-tooltip="Erase (E)"
-              />
-              <!-- Change to option instead -->
-              <button
-                type="button"
-                class="mode perfect"
-                id="perfect"
-                data-tooltip="Pixel Perfect (P)"
-              />
-              <button
-                type="button"
-                class="mode inject"
-                id="inject"
-                data-tooltip="Inject (I) &#010;&#010;Translucent colors will be applied directly"
-              />
+              </div>
+              <div class="column">
+                <button
+                  type="button"
+                  class="tool eyedropper"
+                  id="eyedropper"
+                  data-tooltip="Eyedropper (Hold Alt)"
+                />
+                <button
+                  type="button"
+                  class="tool grab"
+                  id="grab"
+                  data-tooltip="Grab (Hold Space)"
+                />
+                <button
+                  type="button"
+                  class="tool move"
+                  id="move"
+                  data-tooltip="Move"
+                />
+              </div>
             </div>
           </div>
         </div>

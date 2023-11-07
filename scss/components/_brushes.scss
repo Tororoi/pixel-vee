@@ -65,6 +65,7 @@
     display: flex;
     flex-flow: row wrap;
     justify-content: center;
+    min-height: 40px;
     margin-bottom: 8px;
     .mode {
       cursor: pointer;

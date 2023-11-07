@@ -85,6 +85,9 @@ button {
   font-size: 16px;
   background: transparent;
   cursor: pointer;
+  &:focus {
+    outline: none;
+  }
   &:disabled {
     cursor: not-allowed !important;
     opacity: 0.5 !important;
@@ -130,7 +133,7 @@ svg {
 }
 
 #preload-container {
-  // display: none;
+  display: none;
   img {
     width: 0;
     height: 0;

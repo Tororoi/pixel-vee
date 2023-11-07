@@ -103,7 +103,7 @@ function setCursorStyle() {
   if (!vectorGui.collisionPresent) {
     // canvas.vectorGuiCVS.style.cursor =
     //   dom.modeBtn.id === "erase" ? "none" : state.tool.cursor
-    canvas.vectorGuiCVS.style.cursor = state.tool.modes?.erase
+    canvas.vectorGuiCVS.style.cursor = state.tool.modes?.eraser
       ? "none"
       : state.tool.cursor
     return

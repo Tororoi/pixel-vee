@@ -30,7 +30,7 @@ function fillSteps() {
           state.vectorProperties.py1,
           swatches.primary.color,
           canvas.currentLayer,
-          state.mode,
+          state.tool.modes,
           state.selectProperties,
           state.maskSet
         )
@@ -86,7 +86,13 @@ export function adjustFillSteps() {
         }
         state.undoStack[canvas.currentVectorIndex].hidden = true
         //Only render canvas up to timeline where fill action exists while adjusting fill
-        renderCanvas(null, null, true, true, canvas.currentVectorIndex) // render to canvas.currentVectorIndex TODO: handle redraw timeline per layer
+        renderCanvas(
+          state.undoStack[canvas.currentVectorIndex].layer,
+          null,
+          true,
+          true,
+          canvas.currentVectorIndex
+        ) // render to canvas.currentVectorIndex
       }
       break
     case "pointermove":
@@ -106,7 +112,12 @@ export function adjustFillSteps() {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(null, null, true, true)
+        renderCanvas(
+          state.undoStack[canvas.currentVectorIndex].layer,
+          null,
+          true,
+          true
+        )
       }
       break
     case "pointerout":
@@ -128,7 +139,8 @@ export const fill = {
   action: actionFill,
   brushSize: 1,
   disabled: true,
-  options: { contiguous: true, erase: false, inject: true },
+  options: { contiguous: true },
+  modes: { eraser: false, inject: false },
   type: "vector",
   cursor: "crosshair",
   activeCursor: "crosshair",

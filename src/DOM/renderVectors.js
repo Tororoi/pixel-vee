@@ -54,7 +54,7 @@ const renderVectorElement = (action) => {
   vectorElement.appendChild(trash)
 
   if (isSelected) {
-    tool.style.background = "rgb(255, 255, 255)"
+    // tool.style.background = "rgb(255, 255, 255)"
     vectorElement.style.background = "rgb(0, 0, 0)"
   } else {
     vectorElement.style.background = "rgb(51, 51, 51)"

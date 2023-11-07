@@ -53,6 +53,7 @@ export const eyedropper = {
   brushSize: 1,
   disabled: true,
   options: {},
+  modes: {},
   type: "utility",
   cursor: "none",
   activeCursor: "none",

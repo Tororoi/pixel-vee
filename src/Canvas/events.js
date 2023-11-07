@@ -6,6 +6,7 @@ import {
   renderLayersToDOM,
   renderVectorsToDOM,
   renderPaletteToDOM,
+  renderBrushModesToDOM,
 } from "../DOM/render.js"
 import { createNewRasterLayer } from "./layers.js"
 import { handleTools } from "../Tools/events.js"
@@ -572,6 +573,7 @@ canvas.previousYOffset = canvas.yOffset
 renderCanvas(canvas.currentLayer)
 renderLayersToDOM()
 renderPaletteToDOM()
+// renderBrushModesToDOM()
 
 //===================================//
 //=== * * * Event Listeners * * * ===//

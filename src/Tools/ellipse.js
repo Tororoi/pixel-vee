@@ -84,7 +84,7 @@ function ellipseSteps() {
             swatches.primary.color,
             canvas.currentLayer,
             ctx,
-            state.mode,
+            state.tool.modes,
             state.brushStamp,
             state.tool.brushSize,
             state.vectorProperties.angle,
@@ -148,7 +148,7 @@ function ellipseSteps() {
               swatches.primary.color,
               canvas.currentLayer,
               ctx,
-              state.mode,
+              state.tool.modes,
               state.brushStamp,
               state.tool.brushSize,
               state.vectorProperties.angle,
@@ -210,7 +210,7 @@ function ellipseSteps() {
             swatches.primary.color,
             canvas.currentLayer,
             canvas.currentLayer.ctx,
-            state.mode,
+            state.tool.modes,
             state.brushStamp,
             state.tool.brushSize,
             state.vectorProperties.angle,
@@ -320,7 +320,7 @@ export function adjustEllipseSteps() {
               state.undoStack[canvas.currentVectorIndex].color,
               state.undoStack[canvas.currentVectorIndex].layer,
               ctx,
-              state.undoStack[canvas.currentVectorIndex].mode,
+              state.undoStack[canvas.currentVectorIndex].modes,
               state.undoStack[canvas.currentVectorIndex].brushStamp,
               state.undoStack[canvas.currentVectorIndex].brushSize,
               state.vectorProperties.angle,
@@ -331,7 +331,8 @@ export function adjustEllipseSteps() {
             )
           },
           true,
-          true
+          true,
+          canvas.currentVectorIndex
         )
       }
       break
@@ -357,7 +358,7 @@ export function adjustEllipseSteps() {
               state.undoStack[canvas.currentVectorIndex].color,
               state.undoStack[canvas.currentVectorIndex].layer,
               ctx,
-              state.undoStack[canvas.currentVectorIndex].mode,
+              state.undoStack[canvas.currentVectorIndex].modes,
               state.undoStack[canvas.currentVectorIndex].brushStamp,
               state.undoStack[canvas.currentVectorIndex].brushSize,
               state.vectorProperties.angle,
@@ -366,7 +367,10 @@ export function adjustEllipseSteps() {
               state.vectorProperties.y1Offset,
               state.undoStack[canvas.currentVectorIndex].maskSet
             )
-          }
+          },
+          false,
+          false,
+          canvas.currentVectorIndex
         )
       }
       break
@@ -409,9 +413,8 @@ export const ellipse = {
   options: {
     useSubPixels: true,
     radiusExcludesCenter: false,
-    erase: false,
-    inject: false,
   }, // need to expand radiusExcludesCenter to cover multiple scenarios, centerx = 0 or 1 and centery = 0 or 1
+  modes: { eraser: false, inject: false },
   type: "vector",
   cursor: "crosshair",
   activeCursor: "crosshair",

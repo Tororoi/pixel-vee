@@ -114,7 +114,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyE":
       if (!state.clicked) {
-        handleModes(null, "erase")
+        handleModes(null, "eraser")
       }
       break
     case "KeyF":
@@ -152,7 +152,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyM":
       if (!state.clicked) {
-        handleTools(null, "colorMask")
+        handleModes(null, "colorMask")
       }
       break
     case "KeyN":
@@ -381,7 +381,7 @@ export function deactivateShortcut(keyCode) {
  */
 function setToolCssCursor() {
   // if (dom.modeBtn.id === "erase") {
-  if (state.tool.modes?.erase) {
+  if (state.tool.modes?.eraser) {
     canvas.vectorGuiCVS.style.cursor = "none"
   } else {
     canvas.vectorGuiCVS.style.cursor = state.tool.cursor

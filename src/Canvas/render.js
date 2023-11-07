@@ -151,7 +151,7 @@ function redrawTimelineActions(layer, index = null) {
               p.brushSize,
               action.layer,
               action.layer.ctx,
-              action.mode,
+              action.modes,
               mask,
               seen,
               null,
@@ -191,7 +191,7 @@ function redrawTimelineActions(layer, index = null) {
             action.properties.vectorProperties.py1 + action.layer.y,
             action.color,
             action.layer,
-            action.mode,
+            action.modes,
             action.properties.selectProperties, //currently all null
             action.properties.maskSet
           )
@@ -206,7 +206,7 @@ function redrawTimelineActions(layer, index = null) {
             action.color,
             action.layer,
             action.layer.ctx,
-            action.mode,
+            action.modes,
             action.brushStamp,
             action.brushSize,
             action.properties.maskSet
@@ -225,7 +225,7 @@ function redrawTimelineActions(layer, index = null) {
             action.color,
             action.layer,
             action.layer.ctx,
-            action.mode,
+            action.modes,
             action.brushStamp,
             action.brushSize,
             action.properties.maskSet
@@ -246,7 +246,7 @@ function redrawTimelineActions(layer, index = null) {
             action.color,
             action.layer,
             action.layer.ctx,
-            action.mode,
+            action.modes,
             action.brushStamp,
             action.brushSize,
             action.properties.maskSet
@@ -267,7 +267,7 @@ function redrawTimelineActions(layer, index = null) {
             action.color,
             action.layer,
             action.layer.ctx,
-            action.mode,
+            action.modes,
             action.brushStamp,
             action.brushSize,
             action.properties.vectorProperties.angle,

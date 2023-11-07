@@ -117,7 +117,7 @@ function addToTimeline(actionObject) {
     brushSize: brushSize || state.tool.brushSize,
     color: color || { ...swatches.primary.color },
     tool: tool,
-    mode: state.mode, //TODO: should be replaced by options to allow multi selection of modes
+    modes: { ...tool.modes }, //TODO: should be replaced by options to allow multi selection of modes
     properties,
     hidden: false,
     removed: false,

@@ -8,12 +8,10 @@
 export const createToolElement = (action, isSelected) => {
   let tool = document.createElement("div")
   tool.className = "tool"
-  let icon = document.createElement("div")
-  icon.classList.add(action.tool.name)
+  tool.classList.add(action.tool.name)
   if (isSelected) {
-    icon.classList.add("selected")
+    tool.classList.add("selected")
   }
-  tool.appendChild(icon)
   return tool
 }
 
