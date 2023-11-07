@@ -4,13 +4,16 @@
   order: 1;
   .collapsible {
     padding-top: 2px;
-    display: none;
+    > :first-child {
+      margin-top: 8px;
+    }
   }
   p {
     margin: 0px;
   }
   .brush-size {
     padding-top: 2px;
+    margin-bottom: 3px;
   }
   .brush-preview {
     width: 64px;
@@ -30,7 +33,7 @@
     height: 16px;
     background: $darkest-gray;
     outline: none;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
     cursor: pointer;
     &::-webkit-slider-thumb {
       -webkit-appearance: none;
@@ -53,6 +56,28 @@
       &::-moz-range-thumb {
         background: rgb(200, 200, 200);
       }
+    }
+  }
+  .modes-title {
+    margin-bottom: 4px;
+  }
+  .modes-container {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    margin-bottom: 8px;
+    .mode {
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+      text-align: center;
+      color: white;
+      width: 40px;
+      height: 40px;
+      // margin: 3px;
+      opacity: 1;
     }
   }
 }

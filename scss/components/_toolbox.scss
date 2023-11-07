@@ -18,8 +18,7 @@
     :first-child {
       margin-top: 6px;
     }
-    .tool,
-    .mode {
+    .tool {
       cursor: pointer;
       display: flex;
       justify-content: center;
@@ -45,6 +44,32 @@
         @include cancelBorder;
       }
     }
+    // .mode {
+    //   cursor: pointer;
+    //   display: flex;
+    //   justify-content: center;
+    //   align-items: center;
+    //   user-select: none;
+    //   text-align: center;
+    //   color: white;
+    //   width: 40px;
+    //   height: 40px;
+    //   margin: 3px;
+    //   opacity: 1;
+    //   // background-color: $button-color;
+    //   // @include boxBorder;
+    //   &:hover {
+    //     z-index: 104;
+    //   }
+    //   &.selected {
+    //     // background-color: $white;
+    //     z-index: 105;
+    //   }
+    //   &.custom-shape {
+    //     // background-color: transparent;
+    //     // @include cancelBorder;
+    //   }
+    // }
     .zoom {
       .zoombtn {
         height: 40px;
@@ -99,8 +124,47 @@
   @include fillIcon;
 }
 
-$tools: line quadCurve cubicCurve ellipse eyedropper grab move pencil eraser
-  mechanical inject;
+.line {
+  @include lineIcon;
+}
+
+.quadCurve {
+  @include quadCurveIcon;
+}
+
+.cubicCurve {
+  @include cubicCurveIcon;
+}
+
+.ellipse {
+  @include ellipseIcon;
+}
+
+.eyedropper {
+  @include eyedropperIcon;
+}
+
+.grab {
+  @include grabIcon;
+}
+
+.move {
+  @include moveIcon;
+}
+
+.eraser {
+  @include eraserIcon;
+}
+
+.perfect {
+  @include mechanicalPencilIcon;
+}
+
+.inject {
+  @include injectIcon;
+}
+
+$tools: pencil;
 
 @each $tool in $tools {
   .#{$tool} {

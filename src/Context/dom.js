@@ -63,9 +63,9 @@ tools.forEach((tool) => {
 const toolBtn = document.querySelector("#brush")
 toolBtn.classList.add("selected")
 
-const modesContainer = document.querySelector(".modes")
-const modeBtn = document.querySelector("#draw")
-modeBtn.classList.add("selected")
+// const modesContainer = document.querySelector(".modes")
+// const modeBtn = document.querySelector("#draw")
+// modeBtn.classList.add("selected")
 
 //====================================//
 //===== * * * Color Picker * * * =====//
@@ -95,6 +95,7 @@ const brushDisplay = document.querySelector(".brush-preview")
 const brushPreview = document.querySelector("#brush-preview")
 const brushSlider = document.querySelector("#brush-size")
 const brushStamp = document.querySelector(".brush-stamp")
+const modesContainer = document.querySelector(".modes-container")
 
 // * Palette Interface * //
 const paletteInterfaceContainer = document.querySelector(".palette-interface")
@@ -129,30 +130,9 @@ const canvasHeight = document.getElementById("canvas-height")
 // * Preload images that don't show up on initial load * //
 const preloadContainer = document.getElementById("preload-container")
 const images = [
-  //tools icons
-  "public/pixelv-line-hover.png",
-  "public/pixelv-line.png",
-  "public/pixelv-quadCurve-hover.png",
-  "public/pixelv-quadCurve.png",
-  "public/pixelv-cubicCurve-hover.png",
-  "public/pixelv-cubicCurve.png",
-  "public/pixelv-ellipse-hover.png",
-  "public/pixelv-ellipse.png",
-  "public/pixelv-eyedropper-hover.png",
-  "public/pixelv-eyedropper.png",
-  "public/pixelv-grab-hover.png",
-  "public/pixelv-grab.png",
-  "public/pixelv-move-hover.png",
-  "public/pixelv-move.png",
   //modes icons
-  "public/pixelv-pencil-hover.png",
-  "public/pixelv-pencil.png",
-  "public/pixelv-eraser-hover.png",
-  "public/pixelv-eraser.png",
-  "public/pixelv-mechanical-hover.png",
-  "public/pixelv-mechanical.png",
-  "public/pixelv-inject-hover.png",
-  "public/pixelv-inject.png",
+  // "public/pixelv-pencil-hover.png",
+  // "public/pixelv-pencil.png",
   //one-off actions icons
   "public/pixelv-undo-hover.png",
   "public/pixelv-undo.png",
@@ -208,7 +188,7 @@ export const dom = {
   ...toolButtons,
   toolBtn,
   modesContainer,
-  modeBtn,
+  // modeBtn,
   //color picker
   swatch,
   backSwatch,

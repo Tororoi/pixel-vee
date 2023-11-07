@@ -112,9 +112,6 @@
               </label>
             </div>
             <div class="collapsible">
-              <label for="brush-size" class="brush-size"
-                >Line Weight: <span id="line-weight">1</span>px
-              </label>
               <div
                 class="brush-preview btn"
                 data-tooltip="Click to switch brush"
@@ -133,6 +130,9 @@
                   </svg>
                 </div>
               </div>
+              <label for="brush-size" class="brush-size"
+                >Line Weight: <span id="line-weight">1</span>px
+              </label>
               <input
                 type="range"
                 min="1"
@@ -142,6 +142,8 @@
                 id="brush-size"
                 data-tooltip="Adjust brush size"
               />
+              <span class="modes-title">Modes</span>
+              <div class="modes-container"></div>
             </div>
           </div>
           <div
@@ -441,12 +443,12 @@
                 id="brush"
                 data-tooltip="Brush (B)"
               />
-              <button
+              <!-- <button
                 type="button"
                 class="tool colorMask"
                 id="colorMask"
                 data-tooltip="Color Mask (M) &#010;&#010;Only draw over selected secondary swatch color"
-              />
+              /> -->
               <button
                 type="button"
                 class="tool fill"
@@ -506,12 +508,12 @@
             </div>
             <div class="modes column">
               <h4>Mode</h4>
-              <button
+              <!-- <button
                 type="button"
                 class="mode pencil"
                 id="draw"
                 data-tooltip="Draw (D)"
-              />
+              /> -->
               <button
                 type="button"
                 class="mode eraser"
@@ -521,7 +523,7 @@
               <!-- Change to option instead -->
               <button
                 type="button"
-                class="mode mechanical"
+                class="mode perfect"
                 id="perfect"
                 data-tooltip="Pixel Perfect (P)"
               />

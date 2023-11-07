@@ -9,6 +9,7 @@ import { actionClear } from "../Actions/actions.js"
 import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM } from "../DOM/render.js"
+import { renderBrushModesToDOM } from "../DOM/renderModes.js"
 
 //=========================================//
 //=== * * * Button Event Handlers * * * ===//
@@ -105,12 +106,14 @@ export function handleTools(e, manualToolName = null) {
       dom.toolBtn.classList.add("selected")
       state.tool = tools[dom.toolBtn.id]
       renderCanvas(canvas.currentLayer)
+      renderBrushModesToDOM()
       //update options
       updateStamp()
       dom.brushSlider.value = state.tool.brushSize
       dom.brushSlider.disabled = state.tool.disabled
       //update cursor
-      if (dom.modeBtn.id === "erase") {
+      // if (dom.modeBtn.id === "erase") {
+      if (state.tool.modes?.erase) {
         canvas.vectorGuiCVS.style.cursor = "none"
       } else {
         canvas.vectorGuiCVS.style.cursor = state.tool.cursor
@@ -129,19 +132,28 @@ export function handleTools(e, manualToolName = null) {
  * @param {String} manualModeName
  */
 export function handleModes(e, manualModeName = null) {
-  const targetMode = e?.target.closest(".mode")
+  let targetMode = e?.target.closest(".mode")
   if (targetMode || manualModeName) {
-    //reset old button
-    dom.modeBtn.classList.remove("selected")
-    //get new button and select it
+    // //reset old button
+    // dom.modeBtn.classList.remove("selected")
+    // //get new button and select it
     if (manualModeName) {
-      dom.modeBtn = document.querySelector(`#${manualModeName}`)
-    } else {
-      dom.modeBtn = targetMode
+      targetMode = document.querySelector(`#${manualModeName}`)
     }
-    dom.modeBtn.classList.add("selected")
-    state.mode = dom.modeBtn.id
-    if (dom.modeBtn.id === "erase") {
+    // else {
+    //   dom.modeBtn = targetMode
+    // }
+    if (targetMode.classList.contains("selected")) {
+      targetMode.classList.remove("selected")
+      state.tool.options[targetMode.id] = false
+    } else {
+      targetMode.classList.add("selected")
+      state.tool.options[targetMode.id] = true
+    }
+    // state.mode = dom.modeBtn.id
+    state.tool.options[targetMode.id] = true
+    // if (dom.modeBtn.id === "erase") {
+    if (state.tool.modes?.erase) {
       canvas.vectorGuiCVS.style.cursor = "none"
     } else {
       canvas.vectorGuiCVS.style.cursor = "crosshair"

@@ -380,7 +380,8 @@ export function deactivateShortcut(keyCode) {
  * Set tool cursor. TODO: move to utils file
  */
 function setToolCssCursor() {
-  if (dom.modeBtn.id === "erase") {
+  // if (dom.modeBtn.id === "erase") {
+  if (state.tool.modes?.erase) {
     canvas.vectorGuiCVS.style.cursor = "none"
   } else {
     canvas.vectorGuiCVS.style.cursor = state.tool.cursor

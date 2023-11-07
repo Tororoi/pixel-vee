@@ -101,8 +101,11 @@ function handleCollisionAndDraw(keys, point, radius, modify, offset) {
  */
 function setCursorStyle() {
   if (!vectorGui.collisionPresent) {
-    canvas.vectorGuiCVS.style.cursor =
-      dom.modeBtn.id === "erase" ? "none" : state.tool.cursor
+    // canvas.vectorGuiCVS.style.cursor =
+    //   dom.modeBtn.id === "erase" ? "none" : state.tool.cursor
+    canvas.vectorGuiCVS.style.cursor = state.tool.modes?.erase
+      ? "none"
+      : state.tool.cursor
     return
   }
 

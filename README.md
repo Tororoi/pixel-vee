@@ -53,21 +53,21 @@ Visit here: https://pixelvee.netlify.app/
     <td colspan="2"> Erase (E) </td>
   </tr>
   <tr>
-    <td width="66" height="52"> <img src="public/pixelv-eraser.png" alt="Brush" width="40"/> </td>
+    <td width="66" height="52"> <img src="public/pixelv-eraser.svg" alt="Brush" width="40"/> </td>
     <td> Chosen as a mode and not a tool in order to allow use with multiple tools (eg. Erase/Fill, Erase/Line). </td>
   </tr>
   <tr>
     <td colspan="2"> Perfect (P) </td>
   </tr>
   <tr>
-    <td width="66" height="52"> <img src="public/pixelv-mechanical.png" alt="Brush" width="40"/> </td>
+    <td width="66" height="52"> <img src="public/pixelv-mechanical-pencil.svg" alt="Brush" width="40"/> </td>
     <td> Perfect pixel mode. Currently only works with pencil tool and enables smooth pixel perfect lines, even while drawing slowly. </td>
   </tr>
     <tr>
     <td colspan="2"> Inject (I) </td>
   </tr>
   <tr>
-    <td width="66" height="52"> <img src="public/pixelv-inject.png" alt="Brush" width="40"/> </td>
+    <td width="66" height="52"> <img src="public/pixelv-inject.svg" alt="Brush" width="40"/> </td>
     <td> Translucent colors will be applied directly instead of placed on top of other colors. </td>
   </tr>
 </table>
@@ -85,7 +85,7 @@ Visit here: https://pixelvee.netlify.app/
     <td colspan="2"> Color Mask (M) </td>
   </tr>
   <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-colorMask.svg" alt="Color Mask" width="40"/> </td>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-color-mask.svg" alt="Color Mask" width="40"/> </td>
     <td> Drawing will only put color down on top of the selected background color (eg. If the background color swatch is red, it will only draw on top of red pixels). </td>
   </tr>
   <tr>
@@ -99,49 +99,49 @@ Visit here: https://pixelvee.netlify.app/
     <td colspan="2"> Line (L or Hold Shift with Brush) </td>
   </tr>
   <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-line.png" alt="Line" width="40"/> </td>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-line.svg" alt="Line" width="40"/> </td>
     <td> Draw straight, pixel perfect lines. Click and hold to draw lines. </td>
   </tr>
   <tr>
     <td colspan="2"> Quadratic Bezier Curve (C) </td>
   </tr>
   <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-quad.png" alt="Quadratic Bezier Curve" width="40"/> </td>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-quadratic-curve.svg" alt="Quadratic Bezier Curve" width="40"/> </td>
     <td> Draws a quadratic bezier curve (3 control points). Click for each control point of the bezier curve, starting with the two endpoints. This tool is a vector type tool so the control points and color can be adjusted at any time. </td>
   </tr>
   <tr>
     <td colspan="2"> Cubic Bezier Curve (J) </td>
   </tr>
   <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-cubic.png" alt="Cubic Bezier Curve" width="40"/> </td>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-cubic-curve.svg" alt="Cubic Bezier Curve" width="40"/> </td>
     <td> Draws a cubic bezier curve (4 control points). Click for each control point of the bezier curve, starting with the two endpoints. This tool is a vector type tool so the control points and color can be adjusted at any time. </td>
   </tr>
   <tr>
     <td colspan="2"> Ellipse (O) </td>
   </tr>
   <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-ellipse.png" alt="Ellipse" width="40"/> </td>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-ellipse.svg" alt="Ellipse" width="40"/> </td>
     <td> Draws an ellipse. Click down to place the center point and then drag to set the first radius. Initially this tool will draw a circle. Afterwards both radii can be adjusted separately to create an ellipse at any angle. By moving the cursor at the subpixel level you can adjust the way the center point behaves. For example, if the center is considered the center of the center pixel, a circle with a radius of 15 pixels will have a diameter of 31 pixels, but if the center is considered the top left corner of the center pixel, that circle will have a diameter of 30 pixels. Both the x and y components of this can be adjusted. This tool is a vector type tool so the control points and color can be adjusted at any time. Hold shift to force a circle. </td>
   </tr>
   <tr>
     <td colspan="2"> Eyedropper (Hold Alt) </td>
   </tr>
   <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-eyedropper.png" alt="Eyedropper" width="40"/> </td>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-eyedropper.svg" alt="Eyedropper" width="40"/> </td>
     <td> Select a color that already exists on the canvas. </td>
   </tr>
   <tr>
     <td colspan="2"> Grab (Hold Space) </td>
   </tr>
   <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-grab.png" alt="Grab" width="40"/> </td>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-grab.svg" alt="Grab" width="40"/> </td>
     <td> Move the canvas position freely. </td>
   </tr>
     <tr>
     <td colspan="2"> Move </td>
   </tr>
   <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-move.png" alt="Grab" width="40"/> </td>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-move.svg" alt="Grab" width="40"/> </td>
     <td> Move a layer relative to other layers. </td>
   </tr>
 </table>

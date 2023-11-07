@@ -18,6 +18,12 @@ import { createColorMaskSet } from "../Canvas/masks.js"
 function brushSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
+      if (state.tool.modes.colorMask) {
+        state.maskSet = createColorMaskSet(
+          swatches.secondary.color,
+          canvas.currentLayer
+        )
+      }
       state.pointsSet = new Set()
       // if (state.maskSet) {
       //if some set of pixels is masked off, initialize drawnpoints including the masked pixels
@@ -363,6 +369,9 @@ function brushSteps() {
         properties: { points: state.points, maskSet: state.maskSet, maskArray },
       })
       renderCanvas(canvas.currentLayer)
+      if (state.tool.modes.colorMask) {
+        state.maskSet = null
+      }
       break
     default:
     //do nothing
@@ -407,7 +416,8 @@ export const brush = {
   action: actionDraw,
   brushSize: 1,
   disabled: false,
-  options: { perfect: false, erase: false, inject: false, line: false },
+  options: { line: false },
+  modes: { eraser: false, perfect: false, inject: false, colorMask: false },
   type: "raster",
   cursor: "crosshair",
   activeCursor: "crosshair",
@@ -419,7 +429,7 @@ export const colorMask = {
   action: actionDraw,
   brushSize: 1,
   disabled: false,
-  options: { perfect: false, erase: false, inject: false }, //erase and inject not available right now. Inject will be default mode
+  options: {}, //erase and inject not available right now. Inject will be default mode
   type: "raster",
   cursor: "crosshair",
   activeCursor: "crosshair",
