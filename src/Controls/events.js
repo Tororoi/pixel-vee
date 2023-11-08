@@ -25,18 +25,14 @@ import { updateStamp } from "../Tools/events.js"
  * @param {UIEvent} e - PointerEvent, WheelEvent
  */
 const setCoordinates = (e) => {
-  const x = e.offsetX
-  const y = e.offsetY
+  const x = Math.floor(e.layerX)
+  const y = Math.floor(e.layerY)
   const fidelity = canvas.zoom / 16
   canvas.subPixelX = Math.floor(
-    (Math.floor(e.offsetX) -
-      Math.floor(Math.floor(e.offsetX) / canvas.zoom) * canvas.zoom) /
-      fidelity
+    (x - Math.floor(x / canvas.zoom) * canvas.zoom) / fidelity
   )
   canvas.subPixelY = Math.floor(
-    (Math.floor(e.offsetY) -
-      Math.floor(Math.floor(e.offsetY) / canvas.zoom) * canvas.zoom) /
-      fidelity
+    (y - Math.floor(y / canvas.zoom) * canvas.zoom) / fidelity
   )
   state.cursorWithCanvasOffsetX = Math.floor(x / canvas.zoom)
   state.cursorWithCanvasOffsetY = Math.floor(y / canvas.zoom)

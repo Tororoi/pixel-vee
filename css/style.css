@@ -152,12 +152,25 @@ input:hover:not([disabled]), input:focus {
 
 input[type=number] {
   width: 40px;
+  -moz-appearance: textfield;
 }
-input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button {
+input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button, input[type=number]::-moz-inner-spin-button {
   -webkit-appearance: none;
   -moz-appearance: none;
   appearance: none;
   margin: 0;
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+}
+input[type=range]::-moz-range-thumb {
+  border-radius: 0;
+  border: none;
 }
 
 /* width/height allows safari to render inline svg, sets hoverable size */
@@ -1190,7 +1203,6 @@ canvas {
   align-items: center;
 }
 .brush-container .slider {
-  -webkit-appearance: none;
   width: 80%;
   height: 16px;
   background: rgb(31, 31, 31);
@@ -1199,8 +1211,6 @@ canvas {
   cursor: pointer;
 }
 .brush-container .slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
   width: 16px;
   height: 16px;
   background: #ffffff;
@@ -1482,7 +1492,14 @@ canvas {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .picker-container .collapsible .picker-interface #left #picker .picker-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
+  background: transparent;
+  height: 24px;
+  width: 9px;
+  border: 2px solid black;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+.picker-container .collapsible .picker-interface #left #picker .picker-slider::-moz-range-thumb {
+  box-sizing: border-box;
   background: transparent;
   height: 24px;
   width: 9px;
@@ -1490,6 +1507,9 @@ canvas {
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 .picker-container .collapsible .picker-interface #left #picker .picker-slider:hover::-webkit-slider-thumb, .picker-container .collapsible .picker-interface #left #picker .picker-slider:focus::-webkit-slider-thumb {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+.picker-container .collapsible .picker-interface #left #picker .picker-slider:hover::-moz-range-thumb, .picker-container .collapsible .picker-interface #left #picker .picker-slider:focus::-moz-range-thumb {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
 .picker-container .collapsible .picker-interface #left #picker #hueslider {
