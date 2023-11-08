@@ -115,12 +115,26 @@ input {
 
 input[type="number"] {
   width: 40px;
+  -moz-appearance: textfield;
   &::-webkit-inner-spin-button,
-  &::-webkit-outer-spin-button {
+  &::-webkit-outer-spin-button,
+  &::-moz-inner-spin-button {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
     margin: 0;
+  }
+}
+
+input[type="range"] {
+  -webkit-appearance: none;
+  &::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  &::-moz-range-thumb {
+    border-radius: 0;
+    border: none;
   }
 }
 

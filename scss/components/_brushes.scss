@@ -29,7 +29,6 @@
     }
   }
   .slider {
-    -webkit-appearance: none;
     width: 80%;
     height: 16px;
     background: $darkest-gray;
@@ -37,8 +36,6 @@
     margin-bottom: 8px;
     cursor: pointer;
     &::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
       width: 16px;
       height: 16px;
       background: #ffffff;
