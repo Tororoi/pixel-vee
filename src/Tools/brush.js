@@ -241,6 +241,9 @@ function brushSteps() {
           renderCanvas(canvas.currentLayer)
         }
       }
+      if (state.points.length === 1000 && state.captureTesting) {
+        saveAsTest()
+      }
       break
     case "pointerup":
       if (
@@ -360,36 +363,35 @@ function brushSteps() {
   }
 }
 
-/**
- * Supported modes: "draw, erase, perfect, inject"
- * //TODO: change colorMask function to be a mode instead of tool
- * Old method: creates a copy of the canvas with just the secondary color parts. This is used as a mask so the user can draw normally.
- * When the user finishes drawing, the changed pixels are saved as points and will be rerendered in the timeline as single pixel brush points
- * New method: Create a set of marked coordinates that can be checked before drawing
- * Old method is more efficient, but incompatible with subtractive modes (inject, erase). May want to revisit old method conditionally for additive modes.
- */
-function colorMaskSteps() {
-  switch (canvas.pointerEvent) {
-    case "pointerdown":
-      state.maskSet = createColorMaskSet(
-        swatches.secondary.color,
-        canvas.currentLayer
-      )
-      brushSteps()
-      break
-    case "pointermove":
-      brushSteps()
-      break
-    case "pointerup":
-      brushSteps()
-      state.maskSet = null
-      break
-    case "pointerout":
-      //
-      break
-    default:
-    //do nothing
-  }
+function saveAsTest() {
+  let maskArray = coordArrayFromSet(
+    state.maskSet,
+    canvas.currentLayer.x,
+    canvas.currentLayer.y
+  )
+  // Save data
+  let jsonString = JSON.stringify(
+    {
+      tool: brush,
+      layer: canvas.currentLayer,
+      properties: {
+        points: state.points,
+        maskSet: state.maskSet,
+        maskArray,
+      },
+    },
+    null,
+    2
+  )
+  //TODO: instead of opening in a new window, save to special testing object
+  // Create a new Blob with the JSON data and the correct MIME type
+  const blob = new Blob([jsonString], { type: "application/json" })
+
+  // Create a URL for the Blob
+  const blobUrl = URL.createObjectURL(blob)
+
+  // Open the URL in a new tab/window
+  window.open(blobUrl)
 }
 
 export const brush = {
@@ -400,18 +402,6 @@ export const brush = {
   disabled: false,
   options: { line: false },
   modes: { eraser: false, inject: false, perfect: false, colorMask: false },
-  type: "raster",
-  cursor: "crosshair",
-  activeCursor: "crosshair",
-}
-
-export const colorMask = {
-  name: "colorMask",
-  fn: colorMaskSteps,
-  action: actionDraw,
-  brushSize: 1,
-  disabled: false,
-  options: {}, //erase and inject not available right now. Inject will be default mode
   type: "raster",
   cursor: "crosshair",
   activeCursor: "crosshair",

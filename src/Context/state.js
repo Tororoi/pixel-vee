@@ -6,6 +6,8 @@ import { swatches } from "./swatch.js"
 
 //Main state object to keep track of global vars
 export const state = {
+  captureTesting: false,
+  testing: false,
   grid: false,
   //timeline
   pointsSet: null,

@@ -18,6 +18,7 @@ import { actionZoom } from "../Actions/untrackedActions.js"
 import { adjustEllipseSteps } from "../Tools/ellipse.js"
 import { debounce, throttle } from "../utils/eventHelpers.js"
 import { updateStamp } from "../Tools/events.js"
+import { testBrushAction } from "../Testing/brushTest.js"
 
 /**
  * Set global coordinates
@@ -113,6 +114,9 @@ function handleWheel(e) {
  * @param {PointerEvent} e
  */
 function handlePointerDown(e) {
+  if (state.testing) {
+    return
+  }
   //reset media type, chrome dev tools niche use or computers that have touchscreen capabilities
   e.target.setPointerCapture(e.pointerId)
   canvas.pointerEvent = "pointerdown"
@@ -155,6 +159,9 @@ function handlePointerDown(e) {
  * @param {PointerEvent} e
  */
 function handlePointerMove(e) {
+  if (state.testing) {
+    return
+  }
   if (state.clickDisabled && state.clicked) {
     return
   }
@@ -209,6 +216,10 @@ function handlePointerMove(e) {
  * @param {PointerEvent} e
  */
 function handlePointerUp(e) {
+  if (state.testing) {
+    testBrushAction()
+    return
+  }
   canvas.pointerEvent = "pointerup"
   if (state.clickDisabled || !state.clicked) {
     return
@@ -271,6 +282,9 @@ function handlePointerUp(e) {
  * @param {PointerEvent} e
  */
 function handlePointerOut(e) {
+  if (state.testing) {
+    return
+  }
   //TODO: if touchscreen, need to handle differently. Currently cannot reach next code since clicked will be false.
   //Only purpose is to rerender with multi step tools such as curve when moving out or in the case of touch, lifting finger
   // if (state.clicked) {
