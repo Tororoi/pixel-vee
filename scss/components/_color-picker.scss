@@ -73,7 +73,14 @@
             outline: none;
             @include boxBorder;
             &::-webkit-slider-thumb {
-              -webkit-appearance: none;
+              background: transparent;
+              height: 24px;
+              width: 9px;
+              border: 2px solid black;
+              @include inactiveBoxBorder;
+            }
+            &::-moz-range-thumb {
+              box-sizing: border-box;
               background: transparent;
               height: 24px;
               width: 9px;
@@ -83,6 +90,9 @@
             &:hover,
             &:focus {
               &::-webkit-slider-thumb {
+                @include activeBoxBorder;
+              }
+              &::-moz-range-thumb {
                 @include activeBoxBorder;
               }
             }
