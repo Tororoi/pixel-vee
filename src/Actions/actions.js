@@ -208,7 +208,9 @@ export function actionDraw(
   maskSet,
   seenPointsSet,
   points,
-  excludeFromSet
+  excludeFromSet,
+  offsetX = 0,
+  offsetY = 0
 ) {
   ctx.fillStyle = currentColor.color
   if (points) {
@@ -253,10 +255,10 @@ export function actionDraw(
       }
     }
     if (currentModes?.eraser || currentModes?.inject) {
-      ctx.clearRect(x, y, 1, 1)
+      ctx.clearRect(x + offsetX, y + offsetY, 1, 1)
     }
     if (!currentModes?.eraser) {
-      ctx.fillRect(x, y, 1, 1)
+      ctx.fillRect(x + offsetX, y + offsetY, 1, 1)
     }
   }
 }

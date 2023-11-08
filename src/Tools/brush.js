@@ -223,6 +223,23 @@ function brushSteps() {
             })
           }
         } else {
+          // actionDraw(
+          //   state.cursorX,
+          //   state.cursorY,
+          //   swatches.primary.color,
+          //   state.brushStamp,
+          //   "0,0",
+          //   state.tool.brushSize,
+          //   canvas.currentLayer,
+          //   canvas.currentLayer.ctx,
+          //   state.tool.modes,
+          //   state.maskSet,
+          //   state.drawnPointsSet,
+          //   state.points,
+          //   false
+          // )
+          // renderCanvas(canvas.currentLayer)
+          //Draw directly onscreen
           actionDraw(
             state.cursorX,
             state.cursorY,
@@ -231,14 +248,15 @@ function brushSteps() {
             "0,0",
             state.tool.brushSize,
             canvas.currentLayer,
-            canvas.currentLayer.ctx,
+            canvas.currentLayer.onscreenCtx,
             state.tool.modes,
             state.maskSet,
             state.drawnPointsSet,
             state.points,
-            false
+            false,
+            canvas.xOffset,
+            canvas.yOffset
           )
-          renderCanvas(canvas.currentLayer)
         }
       }
       if (state.points.length === 1000 && state.captureTesting) {

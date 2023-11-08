@@ -206,6 +206,7 @@ export function updateStamp() {
   dom.brushPreview.style.width = state.tool.brushSize * 2 + "px"
   dom.brushPreview.style.height = state.tool.brushSize * 2 + "px"
   if (state.brushType === "circle") {
+    //TODO: Instead of generating this dynamically, store the result of each brush size in a lookup table for ease of testing and to avoid storing the entire brush stamp on each drawn point.
     state.brushStamp = createCircleBrush(state.tool.brushSize, true) //circle
   } else {
     state.brushStamp = createSquareBrush(state.tool.brushSize, true) //square
