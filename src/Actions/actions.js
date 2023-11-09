@@ -10,6 +10,7 @@ import {
   getColor,
 } from "../utils/imageDataHelpers.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
+import { canvas } from "../Context/canvas.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -188,12 +189,12 @@ export function actionClear(layer) {
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {Object} layer
- * @param {CanvasRenderingContext2D} ctx
  * @param {Object} currentModes
  * @param {Set} maskSet
  * @param {Set} seenPointsSet
  * @param {Array} points
- * @param {Boolean} excludeFromSet - even if new point, don't add to seenPointsSet if true
+ * @param {Boolean} isPreview
+ * @param {Boolean} excludeFromSet - don't add to seenPointsSet if true
  */
 export function actionDraw(
   coordX,
@@ -203,15 +204,21 @@ export function actionDraw(
   brushStampDir,
   brushSize,
   layer,
-  ctx,
   currentModes,
   maskSet,
   seenPointsSet,
   points,
-  excludeFromSet,
-  offsetX = 0,
-  offsetY = 0
+  isPreview,
+  excludeFromSet = false
 ) {
+  let offsetX = 0
+  let offsetY = 0
+  let ctx = layer.ctx
+  if (isPreview) {
+    ctx = layer.onscreenCtx
+    offsetX = canvas.xOffset
+    offsetY = canvas.yOffset
+  }
   ctx.fillStyle = currentColor.color
   if (points) {
     if (!state.pointsSet.has(`${coordX},${coordY}`)) {
@@ -226,9 +233,9 @@ export function actionDraw(
     }
   }
   if (
-    coordX >= ctx.canvas.width + brushSize / 2 ||
+    coordX >= layer.cvs.width + brushSize / 2 ||
     coordX <= -brushSize / 2 ||
-    coordY >= ctx.canvas.height + brushSize / 2 ||
+    coordY >= layer.cvs.height + brushSize / 2 ||
     coordY <= -brushSize / 2
   ) {
     //don't draw outside bounds to reduce time cost of render
@@ -277,6 +284,7 @@ export function actionDraw(
  * @param {Integer} brushSize
  * @param {Set} maskSet
  * @param {Set} seenPointsSet
+ * @param {Boolean} isPreview
  */
 export function actionLine(
   sx,
@@ -285,12 +293,12 @@ export function actionLine(
   ty,
   currentColor,
   layer,
-  ctx,
   currentModes,
   brushStamp,
   brushSize,
   maskSet,
-  seenPointsSet = null
+  seenPointsSet = null,
+  isPreview = false
 ) {
   let angle = getAngle(tx - sx, ty - sy) // angle of line
   let tri = getTriangle(sx, sy, tx, ty, angle)
@@ -318,12 +326,11 @@ export function actionLine(
       brushDirection,
       brushSize,
       layer,
-      ctx,
       currentModes,
       maskSet,
       seen,
       null,
-      false
+      isPreview
     )
     previousX = thispoint.x
     previousY = thispoint.y
@@ -338,12 +345,11 @@ export function actionLine(
     brushDirection,
     brushSize,
     layer,
-    ctx,
     currentModes,
     maskSet,
     seen,
     null,
-    false
+    isPreview
   )
 }
 
@@ -509,7 +515,6 @@ function renderPoints(
       `${xDir},${yDir}`,
       brushSize,
       layer,
-      ctx,
       currentModes,
       maskSet,
       seen,

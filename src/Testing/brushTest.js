@@ -41,7 +41,6 @@ export function testBrushAction() {
       brushDirection,
       p.brushSize,
       action.layer,
-      canvas.currentLayer.ctx,
       action.modes,
       mask,
       seen,

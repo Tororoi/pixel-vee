@@ -19,42 +19,42 @@ function lineSteps() {
     case "pointerdown":
       state.lineStartX = state.cursorX
       state.lineStartY = state.cursorY
-      renderCanvas(canvas.currentLayer, (ctx) => {
-        actionLine(
-          state.cursorX,
-          state.cursorY,
-          state.cursorX,
-          state.cursorY,
-          swatches.primary.color,
-          canvas.currentLayer,
-          ctx,
-          state.tool.modes,
-          state.brushStamp,
-          state.tool.brushSize,
-          state.maskSet,
-          null
-        )
-      })
+      renderCanvas(canvas.currentLayer)
+      //preview line
+      actionLine(
+        state.cursorX,
+        state.cursorY,
+        state.cursorX,
+        state.cursorY,
+        swatches.primary.color,
+        canvas.currentLayer,
+        state.tool.modes,
+        state.brushStamp,
+        state.tool.brushSize,
+        state.maskSet,
+        null,
+        true
+      )
       break
     case "pointermove":
       //draw line from origin point to current point onscreen
       //only draw when necessary
-      renderCanvas(canvas.currentLayer, (ctx) => {
-        actionLine(
-          state.lineStartX,
-          state.lineStartY,
-          state.cursorX,
-          state.cursorY,
-          swatches.primary.color,
-          canvas.currentLayer,
-          ctx,
-          state.tool.modes,
-          state.brushStamp,
-          state.tool.brushSize,
-          state.maskSet,
-          null
-        )
-      })
+      renderCanvas(canvas.currentLayer)
+      //preview line
+      actionLine(
+        state.lineStartX,
+        state.lineStartY,
+        state.cursorX,
+        state.cursorY,
+        swatches.primary.color,
+        canvas.currentLayer,
+        state.tool.modes,
+        state.brushStamp,
+        state.tool.brushSize,
+        state.maskSet,
+        null,
+        true
+      )
       break
     case "pointerup":
       actionLine(
@@ -64,7 +64,6 @@ function lineSteps() {
         state.cursorY,
         swatches.primary.color,
         canvas.currentLayer,
-        canvas.currentLayer.ctx,
         state.tool.modes,
         state.brushStamp,
         state.tool.brushSize,

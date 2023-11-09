@@ -43,7 +43,6 @@ function brushSteps() {
         "0,0",
         state.tool.brushSize,
         canvas.currentLayer,
-        canvas.currentLayer.ctx,
         state.tool.modes,
         state.maskSet,
         state.drawnPointsSet,
@@ -60,22 +59,22 @@ function brushSteps() {
     case "pointermove":
       //draw line connecting points that don't touch or if shift is held
       if (state.tool.options.line) {
-        renderCanvas(canvas.currentLayer, (ctx) => {
-          actionLine(
-            state.lineStartX,
-            state.lineStartY,
-            state.cursorX,
-            state.cursorY,
-            swatches.primary.color,
-            canvas.currentLayer,
-            ctx,
-            state.tool.modes,
-            state.brushStamp,
-            state.tool.brushSize,
-            state.maskSet,
-            state.drawnPointsSet
-          )
-        })
+        renderCanvas(canvas.currentLayer)
+        //preview the line
+        actionLine(
+          state.lineStartX,
+          state.lineStartY,
+          state.cursorX,
+          state.cursorY,
+          swatches.primary.color,
+          canvas.currentLayer,
+          state.tool.modes,
+          state.brushStamp,
+          state.tool.brushSize,
+          state.maskSet,
+          state.drawnPointsSet,
+          true
+        )
       } else if (
         Math.abs(state.cursorX - state.previousX) > 1 ||
         Math.abs(state.cursorY - state.previousY) > 1 ||
@@ -119,7 +118,6 @@ function brushSteps() {
             state.brushDirection,
             state.tool.brushSize,
             canvas.currentLayer,
-            canvas.currentLayer.ctx,
             state.tool.modes,
             state.maskSet,
             state.drawnPointsSet,
@@ -147,7 +145,6 @@ function brushSteps() {
           state.brushDirection,
           state.tool.brushSize,
           canvas.currentLayer,
-          canvas.currentLayer.ctx,
           state.tool.modes,
           state.maskSet,
           state.drawnPointsSet,
@@ -172,7 +169,6 @@ function brushSteps() {
               "0,0",
               state.tool.brushSize,
               canvas.currentLayer,
-              canvas.currentLayer.ctx,
               state.tool.modes,
               state.maskSet,
               state.drawnPointsSet,
@@ -184,62 +180,45 @@ function brushSteps() {
             state.lastDrawnY = state.waitingPixelY
             state.waitingPixelX = state.cursorX
             state.waitingPixelY = state.cursorY
-            renderCanvas(canvas.currentLayer, (ctx) => {
-              actionDraw(
-                state.cursorX,
-                state.cursorY,
-                swatches.primary.color,
-                state.brushStamp,
-                "0,0",
-                state.tool.brushSize,
-                canvas.currentLayer,
-                ctx,
-                state.tool.modes,
-                state.maskSet,
-                state.drawnPointsSet,
-                null,
-                true
-              )
-            })
+            renderCanvas(canvas.currentLayer)
+            //preview the next pixel
+            actionDraw(
+              state.cursorX,
+              state.cursorY,
+              swatches.primary.color,
+              state.brushStamp,
+              "0,0",
+              state.tool.brushSize,
+              canvas.currentLayer,
+              state.tool.modes,
+              state.maskSet,
+              state.drawnPointsSet,
+              null,
+              true,
+              true
+            )
           } else {
             state.waitingPixelX = state.cursorX
             state.waitingPixelY = state.cursorY
-            renderCanvas(canvas.currentLayer, (ctx) => {
-              actionDraw(
-                state.cursorX,
-                state.cursorY,
-                swatches.primary.color,
-                state.brushStamp,
-                "0,0",
-                state.tool.brushSize,
-                canvas.currentLayer,
-                ctx,
-                state.tool.modes,
-                state.maskSet,
-                state.drawnPointsSet,
-                null,
-                true
-              )
-            })
+            renderCanvas(canvas.currentLayer)
+            //preview the next pixel
+            actionDraw(
+              state.cursorX,
+              state.cursorY,
+              swatches.primary.color,
+              state.brushStamp,
+              "0,0",
+              state.tool.brushSize,
+              canvas.currentLayer,
+              state.tool.modes,
+              state.maskSet,
+              state.drawnPointsSet,
+              null,
+              true,
+              true
+            )
           }
         } else {
-          // actionDraw(
-          //   state.cursorX,
-          //   state.cursorY,
-          //   swatches.primary.color,
-          //   state.brushStamp,
-          //   "0,0",
-          //   state.tool.brushSize,
-          //   canvas.currentLayer,
-          //   canvas.currentLayer.ctx,
-          //   state.tool.modes,
-          //   state.maskSet,
-          //   state.drawnPointsSet,
-          //   state.points,
-          //   false
-          // )
-          // renderCanvas(canvas.currentLayer)
-          //Draw directly onscreen
           actionDraw(
             state.cursorX,
             state.cursorY,
@@ -248,15 +227,13 @@ function brushSteps() {
             "0,0",
             state.tool.brushSize,
             canvas.currentLayer,
-            canvas.currentLayer.onscreenCtx,
             state.tool.modes,
             state.maskSet,
             state.drawnPointsSet,
             state.points,
-            false,
-            canvas.xOffset,
-            canvas.yOffset
+            false
           )
+          renderCanvas(canvas.currentLayer)
         }
       }
       if (state.points.length === 1000 && state.captureTesting) {
@@ -307,7 +284,6 @@ function brushSteps() {
             state.brushDirection,
             state.tool.brushSize,
             canvas.currentLayer,
-            canvas.currentLayer.ctx,
             state.tool.modes,
             state.maskSet,
             state.drawnPointsSet,
@@ -335,7 +311,6 @@ function brushSteps() {
           state.brushDirection,
           state.tool.brushSize,
           canvas.currentLayer,
-          canvas.currentLayer.ctx,
           state.tool.modes,
           state.maskSet,
           state.drawnPointsSet,
@@ -352,7 +327,6 @@ function brushSteps() {
         "0,0",
         state.tool.brushSize,
         canvas.currentLayer,
-        canvas.currentLayer.ctx,
         state.tool.modes,
         state.maskSet,
         state.drawnPointsSet,

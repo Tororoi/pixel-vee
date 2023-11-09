@@ -36,29 +36,9 @@ function drawLayer(layer, renderPreview) {
       )
       layer.onscreenCtx.clip()
       layer.onscreenCtx.globalAlpha = layer.opacity
-      let drawCVS = layer.cvs
-      //TODO: refactor so preview is drawn directly onto onscreenCtx
-      if (layer === canvas.currentLayer && renderPreview) {
-        //render preview of action
-        canvas.previewCTX.clearRect(
-          0,
-          0,
-          canvas.previewCVS.width,
-          canvas.previewCVS.height
-        )
-        canvas.previewCTX.drawImage(
-          layer.cvs,
-          0,
-          0,
-          layer.cvs.width,
-          layer.cvs.height
-        )
-        renderPreview(canvas.previewCTX) //Pass function through to here so it can be actionLine or other actions with multiple points
-        drawCVS = canvas.previewCVS
-      }
-      //layer.x, layer.y need to be normalized to the pixel grid
+      // let drawCVS = layer.cvs
       layer.onscreenCtx.drawImage(
-        drawCVS,
+        layer.cvs,
         canvas.xOffset,
         // + (layer.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
         canvas.yOffset,
@@ -66,6 +46,36 @@ function drawLayer(layer, renderPreview) {
         canvas.offScreenCVS.width,
         canvas.offScreenCVS.height
       )
+      //TODO: refactor so preview is drawn directly onto onscreenCtx
+      if (layer === canvas.currentLayer && renderPreview) {
+        //render preview of action
+        // canvas.previewCTX.clearRect(
+        //   0,
+        //   0,
+        //   canvas.previewCVS.width,
+        //   canvas.previewCVS.height
+        // )
+        // canvas.previewCTX.drawImage(
+        //   layer.cvs,
+        //   0,
+        //   0,
+        //   layer.cvs.width,
+        //   layer.cvs.height
+        // )
+        // renderPreview(canvas.previewCTX) //Pass function through to here so it can be actionLine or other actions with multiple points
+        // drawCVS = canvas.previewCVS
+        renderPreview(layer.onscreenCtx)
+      }
+      // //layer.x, layer.y need to be normalized to the pixel grid
+      // layer.onscreenCtx.drawImage(
+      //   drawCVS,
+      //   canvas.xOffset,
+      //   // + (layer.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+      //   canvas.yOffset,
+      //   // + (layer.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
+      //   canvas.offScreenCVS.width,
+      //   canvas.offScreenCVS.height
+      // )
     }
   }
   layer.onscreenCtx.restore()
@@ -153,7 +163,6 @@ function redrawTimelineActions(layer, index = null) {
               brushDirection,
               p.brushSize,
               action.layer,
-              action.layer.ctx,
               action.modes,
               mask,
               seen,
@@ -208,7 +217,6 @@ function redrawTimelineActions(layer, index = null) {
             action.properties.py2 + action.layer.y,
             action.color,
             action.layer,
-            action.layer.ctx,
             action.modes,
             action.brushStamp,
             action.brushSize,
