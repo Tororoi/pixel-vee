@@ -5,7 +5,11 @@ import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { handleUndo, handleRedo } from "../Actions/undoRedo.js"
 import { vectorGui } from "../GUI/vector.js"
-import { createSquareBrush, createCircleBrush } from "../utils/brushHelpers.js"
+import {
+  createSquareBrush,
+  createCircleBrush,
+  updateBrushPreview,
+} from "../utils/brushHelpers.js"
 import { actionClear } from "../Actions/actions.js"
 import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
@@ -169,6 +173,7 @@ export function handleModes(e, manualModeName = null) {
  * @param {PointerEvent} e
  */
 function switchBrush(e) {
+  //TODO: when selecting a default brush, generate all stamps fom 1-32px and store them in a lookup table for ease of testing and to avoid storing the entire brush stamp on each drawn point.
   if (state.brushType === "square") {
     state.brushType = "circle"
   } else {
@@ -205,12 +210,13 @@ export function updateStamp() {
   dom.lineWeight.textContent = state.tool.brushSize
   dom.brushPreview.style.width = state.tool.brushSize * 2 + "px"
   dom.brushPreview.style.height = state.tool.brushSize * 2 + "px"
-  if (state.brushType === "circle") {
-    //TODO: Instead of generating this dynamically, store the result of each brush size in a lookup table for ease of testing and to avoid storing the entire brush stamp on each drawn point.
-    state.brushStamp = createCircleBrush(state.tool.brushSize, true) //circle
-  } else {
-    state.brushStamp = createSquareBrush(state.tool.brushSize, true) //square
-  }
+  updateBrushPreview(state.brushStamps[state.tool.brushStamp][state.tool.brushSize]["0,0"], state.tool.brushSize)
+  // if (state.brushType === "circle") {
+  //TODO: Instead of generating this dynamically, store the result of each brush size in a lookup table for ease of testing and to avoid storing the entire brush stamp on each drawn point.
+  // state.brushStamp = createCircleBrush(state.tool.brushSize) //circle
+  // } else {
+  // state.brushStamp = createSquareBrush(state.tool.brushSize) //square
+  // }
 }
 
 //===================================//

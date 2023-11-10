@@ -483,13 +483,13 @@ function vectorInteract(e) {
     e.target.classList.remove("eyeopen")
     e.target.classList.add("eyeclosed")
     vector.hidden = true
-    renderCanvas(vector.layer, null, true, true)
+    renderCanvas(vector.layer, true)
   } else if (e.target.className.includes("eyeclosed")) {
     //toggle visibility
     e.target.classList.remove("eyeclosed")
     e.target.classList.add("eyeopen")
     vector.hidden = false
-    renderCanvas(vector.layer, null, true, true)
+    renderCanvas(vector.layer, true)
   } else if (e.target.className.includes("trash")) {
     //remove vector
     removeVector(vector)
@@ -550,7 +550,7 @@ function removeVector(vector) {
     vectorGui.reset()
   }
   renderVectorsToDOM()
-  renderCanvas(vector.layer, null, true, true)
+  renderCanvas(vector.layer, true)
 }
 
 /**
@@ -564,7 +564,7 @@ function toggleVectorMode(vector, modeKey) {
   state.action = null
   state.redoStack = []
   renderVectorsToDOM()
-  renderCanvas(vector.layer, null, true, true)
+  renderCanvas(vector.layer, true)
 }
 
 //===================================//

@@ -391,6 +391,7 @@ export const brush = {
   fn: brushSteps,
   action: actionDraw,
   brushSize: 1,
+  brushStamp: "circle",
   disabled: false,
   options: { line: false },
   modes: { eraser: false, inject: false, perfect: false, colorMask: false },

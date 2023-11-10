@@ -70,30 +70,29 @@ function ellipseSteps() {
         // option could be described as "exclude center point from radius", toggle odd or even, odd being excluding center point and offset = 0
         //for ellipse, passing the quadrant is also important to make offset go in the right direction
         //onscreen preview
-        renderCanvas(canvas.currentLayer, (ctx) => {
-          actionEllipse(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.px2,
-            state.vectorProperties.py2,
-            state.vectorProperties.px3,
-            state.vectorProperties.py3,
-            state.vectorProperties.radA,
-            state.vectorProperties.radB,
-            state.vectorProperties.forceCircle, //force circle initially
-            swatches.primary.color,
-            canvas.currentLayer,
-            ctx,
-            state.tool.modes,
-            state.brushStamp,
-            state.tool.brushSize,
-            state.vectorProperties.angle,
-            state.vectorProperties.offset,
-            state.vectorProperties.x1Offset,
-            state.vectorProperties.y1Offset,
-            state.maskSet
-          )
-        })
+        renderCanvas(canvas.currentLayer)
+        actionEllipse(
+          state.vectorProperties.px1,
+          state.vectorProperties.py1,
+          state.vectorProperties.px2,
+          state.vectorProperties.py2,
+          state.vectorProperties.px3,
+          state.vectorProperties.py3,
+          state.vectorProperties.radA,
+          state.vectorProperties.radB,
+          state.vectorProperties.forceCircle, //force circle initially
+          swatches.primary.color,
+          canvas.currentLayer,
+          state.tool.modes,
+          state.brushStamp,
+          state.tool.brushSize,
+          state.vectorProperties.angle,
+          state.vectorProperties.offset,
+          state.vectorProperties.x1Offset,
+          state.vectorProperties.y1Offset,
+          state.maskSet,
+          true
+        )
       }
       break
     case "pointermove":
@@ -134,30 +133,29 @@ function ellipseSteps() {
             state.vectorProperties.py2
           )
           //onscreen preview
-          renderCanvas(canvas.currentLayer, (ctx) => {
-            actionEllipse(
-              state.vectorProperties.px1,
-              state.vectorProperties.py1,
-              state.vectorProperties.px2,
-              state.vectorProperties.py2,
-              state.vectorProperties.px3,
-              state.vectorProperties.py3,
-              state.vectorProperties.radA,
-              state.vectorProperties.radB,
-              state.vectorProperties.forceCircle, //force circle initially
-              swatches.primary.color,
-              canvas.currentLayer,
-              ctx,
-              state.tool.modes,
-              state.brushStamp,
-              state.tool.brushSize,
-              state.vectorProperties.angle,
-              state.vectorProperties.offset,
-              state.vectorProperties.x1Offset,
-              state.vectorProperties.y1Offset,
-              state.maskSet
-            )
-          })
+          renderCanvas(canvas.currentLayer)
+          actionEllipse(
+            state.vectorProperties.px1,
+            state.vectorProperties.py1,
+            state.vectorProperties.px2,
+            state.vectorProperties.py2,
+            state.vectorProperties.px3,
+            state.vectorProperties.py3,
+            state.vectorProperties.radA,
+            state.vectorProperties.radB,
+            state.vectorProperties.forceCircle, //force circle initially
+            swatches.primary.color,
+            canvas.currentLayer,
+            state.tool.modes,
+            state.brushStamp,
+            state.tool.brushSize,
+            state.vectorProperties.angle,
+            state.vectorProperties.offset,
+            state.vectorProperties.x1Offset,
+            state.vectorProperties.y1Offset,
+            state.maskSet,
+            true
+          )
         }
       }
       break
@@ -209,7 +207,6 @@ function ellipseSteps() {
             state.vectorProperties.forceCircle, //force circle initially
             swatches.primary.color,
             canvas.currentLayer,
-            canvas.currentLayer.ctx,
             state.tool.modes,
             state.brushStamp,
             state.tool.brushSize,
@@ -303,37 +300,35 @@ export function adjustEllipseSteps() {
         //angle and offset passed should consider which point is being adjusted. For p1, use current state.vectorProperties.offset instead of recalculating. For p3, add 1.5 * Math.PI to angle
         renderCanvas(
           state.undoStack[canvas.currentVectorIndex].layer,
-          (ctx) => {
-            actionEllipse(
-              state.vectorProperties.px1,
-              state.vectorProperties.py1,
-              state.vectorProperties.px2,
-              state.vectorProperties.py2,
-              state.vectorProperties.px3,
-              state.vectorProperties.py3,
-              state.vectorProperties.radA,
-              state.vectorProperties.radB,
-              vectorGui.selectedPoint.xKey === "px1"
-                ? state.undoStack[canvas.currentVectorIndex].properties
-                    .vectorProperties.forceCircle
-                : state.vectorProperties.forceCircle,
-              state.undoStack[canvas.currentVectorIndex].color,
-              state.undoStack[canvas.currentVectorIndex].layer,
-              ctx,
-              state.undoStack[canvas.currentVectorIndex].modes,
-              state.undoStack[canvas.currentVectorIndex].brushStamp,
-              state.undoStack[canvas.currentVectorIndex].brushSize,
-              state.vectorProperties.angle,
-              state.vectorProperties.offset,
-              state.vectorProperties.x1Offset,
-              state.vectorProperties.y1Offset,
-              state.undoStack[canvas.currentVectorIndex].maskSet
-            )
-          },
-          true,
           true,
           canvas.currentVectorIndex
         )
+        actionEllipse(
+          state.vectorProperties.px1,
+          state.vectorProperties.py1,
+          state.vectorProperties.px2,
+          state.vectorProperties.py2,
+          state.vectorProperties.px3,
+          state.vectorProperties.py3,
+          state.vectorProperties.radA,
+          state.vectorProperties.radB,
+          vectorGui.selectedPoint.xKey === "px1"
+            ? state.undoStack[canvas.currentVectorIndex].properties
+                .vectorProperties.forceCircle
+            : state.vectorProperties.forceCircle,
+          state.undoStack[canvas.currentVectorIndex].color,
+          state.undoStack[canvas.currentVectorIndex].layer,
+          state.undoStack[canvas.currentVectorIndex].modes,
+          state.undoStack[canvas.currentVectorIndex].brushStamp,
+          state.undoStack[canvas.currentVectorIndex].brushSize,
+          state.vectorProperties.angle,
+          state.vectorProperties.offset,
+          state.vectorProperties.x1Offset,
+          state.vectorProperties.y1Offset,
+          state.undoStack[canvas.currentVectorIndex].maskSet,
+          true
+        )
+        //TODO: render canvas actions after current index onto a canvas that is overlaid on top of the current layer canvas. Then remove it on pointerup
       }
       break
     case "pointermove":
@@ -341,36 +336,33 @@ export function adjustEllipseSteps() {
         updateEllipseControlPoints(state, canvas, vectorGui)
         renderCanvas(
           state.undoStack[canvas.currentVectorIndex].layer,
-          (ctx) => {
-            actionEllipse(
-              state.vectorProperties.px1,
-              state.vectorProperties.py1,
-              state.vectorProperties.px2,
-              state.vectorProperties.py2,
-              state.vectorProperties.px3,
-              state.vectorProperties.py3,
-              state.vectorProperties.radA,
-              state.vectorProperties.radB,
-              vectorGui.selectedPoint.xKey === "px1"
-                ? state.undoStack[canvas.currentVectorIndex].properties
-                    .vectorProperties.forceCircle
-                : state.vectorProperties.forceCircle,
-              state.undoStack[canvas.currentVectorIndex].color,
-              state.undoStack[canvas.currentVectorIndex].layer,
-              ctx,
-              state.undoStack[canvas.currentVectorIndex].modes,
-              state.undoStack[canvas.currentVectorIndex].brushStamp,
-              state.undoStack[canvas.currentVectorIndex].brushSize,
-              state.vectorProperties.angle,
-              state.vectorProperties.offset,
-              state.vectorProperties.x1Offset,
-              state.vectorProperties.y1Offset,
-              state.undoStack[canvas.currentVectorIndex].maskSet
-            )
-          },
-          false,
           false,
           canvas.currentVectorIndex
+        )
+        actionEllipse(
+          state.vectorProperties.px1,
+          state.vectorProperties.py1,
+          state.vectorProperties.px2,
+          state.vectorProperties.py2,
+          state.vectorProperties.px3,
+          state.vectorProperties.py3,
+          state.vectorProperties.radA,
+          state.vectorProperties.radB,
+          vectorGui.selectedPoint.xKey === "px1"
+            ? state.undoStack[canvas.currentVectorIndex].properties
+                .vectorProperties.forceCircle
+            : state.vectorProperties.forceCircle,
+          state.undoStack[canvas.currentVectorIndex].color,
+          state.undoStack[canvas.currentVectorIndex].layer,
+          state.undoStack[canvas.currentVectorIndex].modes,
+          state.undoStack[canvas.currentVectorIndex].brushStamp,
+          state.undoStack[canvas.currentVectorIndex].brushSize,
+          state.vectorProperties.angle,
+          state.vectorProperties.offset,
+          state.vectorProperties.x1Offset,
+          state.vectorProperties.y1Offset,
+          state.undoStack[canvas.currentVectorIndex].maskSet,
+          true
         )
       }
       break
@@ -383,12 +375,7 @@ export function adjustEllipseSteps() {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(
-          state.undoStack[canvas.currentVectorIndex].layer,
-          null,
-          true,
-          true
-        )
+        renderCanvas(state.undoStack[canvas.currentVectorIndex].layer, true)
       }
       break
     case "pointerout":

@@ -246,7 +246,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   pushStack.push(popStack.pop())
   //clear all layers in preparation to redraw them.
   //DRY: do all layers and actions need to be rerendered for redo?
-  renderCanvas(latestAction.layer, null, true, true) //should be based on layer of affected action
+  renderCanvas(latestAction.layer, true) //should be based on layer of affected action
   renderVectorsToDOM()
   state.reset()
 }

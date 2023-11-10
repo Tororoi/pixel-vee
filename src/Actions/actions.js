@@ -59,6 +59,9 @@ export function modifyVectorAction(actionIndex) {
         ? oldProperties.forceCircle
         : state.vectorProperties.forceCircle
   }
+  action.properties.vectorProperties = {
+    ...modifiedProperties,
+  }
   state.addToTimeline({
     tool: tools.modify,
     properties: {
@@ -68,9 +71,6 @@ export function modifyVectorAction(actionIndex) {
       to: modifiedProperties,
     },
   })
-  action.properties.vectorProperties = {
-    ...modifiedProperties,
-  }
 }
 
 /**
@@ -238,7 +238,7 @@ export function actionDraw(
     coordY >= layer.cvs.height + brushSize / 2 ||
     coordY <= -brushSize / 2
   ) {
-    //don't draw outside bounds to reduce time cost of render
+    //don't iterate brush outside bounds to reduce time cost of render
     return
   }
   const baseX = Math.ceil(coordX - brushSize / 2)
@@ -246,6 +246,10 @@ export function actionDraw(
   for (const pixel of brushStamp[brushStampDir]) {
     const x = baseX + pixel.x
     const y = baseY + pixel.y
+    if (x >= layer.cvs.width || x < 0 || y >= layer.cvs.height || y < 0) {
+      //don't draw outside bounds to reduce time cost of render
+      continue
+    }
     const key = `${x},${y}`
     //if maskSet exists, only draw if it contains coordinates
     if (maskSet) {
@@ -482,6 +486,7 @@ export function actionFill(
  * @param {CanvasRenderingContext2D} ctx
  * @param {Object} currentModes
  * @param {Set} maskSet
+ * @param {Boolean} isPreview
  */
 function renderPoints(
   points,
@@ -489,9 +494,9 @@ function renderPoints(
   currentColor,
   brushSize,
   layer,
-  ctx,
   currentModes,
-  maskSet
+  maskSet,
+  isPreview = false
 ) {
   const seen = new Set()
   let previousX = Math.floor(points[0].x)
@@ -519,7 +524,7 @@ function renderPoints(
       maskSet,
       seen,
       null,
-      false
+      isPreview
     )
     previousX = xt
     previousY = yt
@@ -537,11 +542,11 @@ function renderPoints(
  * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
- * @param {CanvasRenderingContext2D} ctx
  * @param {Object} currentModes
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {Set} maskSet
+ * @param {Boolean} isPreview
  */
 export function actionQuadraticCurve(
   startx,
@@ -553,11 +558,11 @@ export function actionQuadraticCurve(
   stepNum,
   currentColor,
   layer,
-  ctx,
   currentModes,
   brushStamp,
   brushSize,
-  maskSet
+  maskSet,
+  isPreview = false
 ) {
   //force coords to int
   startx = Math.round(startx)
@@ -576,12 +581,12 @@ export function actionQuadraticCurve(
       state.cursorY,
       currentColor,
       layer,
-      ctx,
       currentModes,
       brushStamp,
       brushSize,
       maskSet,
-      null
+      null,
+      isPreview
     )
     state.vectorProperties.px2 = state.cursorX
     state.vectorProperties.py2 = state.cursorY
@@ -603,9 +608,9 @@ export function actionQuadraticCurve(
       currentColor,
       brushSize,
       layer,
-      ctx,
       currentModes,
-      maskSet
+      maskSet,
+      isPreview
     )
     state.vectorProperties.px3 = state.cursorX
     state.vectorProperties.py3 = state.cursorY
@@ -625,9 +630,9 @@ export function actionQuadraticCurve(
       currentColor,
       brushSize,
       layer,
-      ctx,
       currentModes,
-      maskSet
+      maskSet,
+      isPreview
     )
   }
 }
@@ -645,11 +650,11 @@ export function actionQuadraticCurve(
  * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
- * @param {CanvasRenderingContext2D} ctx
  * @param {Object} currentModes
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {Set} maskSet
+ * @param {Boolean} isPreview
  */
 export function actionCubicCurve(
   startx,
@@ -663,11 +668,11 @@ export function actionCubicCurve(
   stepNum,
   currentColor,
   layer,
-  ctx,
   currentModes,
   brushStamp,
   brushSize,
-  maskSet
+  maskSet,
+  isPreview = false
 ) {
   //force coords to int
   startx = Math.round(startx)
@@ -688,12 +693,12 @@ export function actionCubicCurve(
       state.cursorY,
       currentColor,
       layer,
-      ctx,
       currentModes,
       brushStamp,
       brushSize,
       maskSet,
-      null
+      null,
+      isPreview
     )
     //TODO: can setting state be moved to steps function?
     state.vectorProperties.px2 = state.cursorX
@@ -716,9 +721,9 @@ export function actionCubicCurve(
       currentColor,
       brushSize,
       layer,
-      ctx,
       currentModes,
-      maskSet
+      maskSet,
+      isPreview
     )
     state.vectorProperties.px3 = state.cursorX
     state.vectorProperties.py3 = state.cursorY
@@ -741,9 +746,9 @@ export function actionCubicCurve(
       currentColor,
       brushSize,
       layer,
-      ctx,
       currentModes,
-      maskSet
+      maskSet,
+      isPreview
     )
     state.vectorProperties.px4 = state.cursorX
     state.vectorProperties.py4 = state.cursorY
@@ -765,9 +770,9 @@ export function actionCubicCurve(
       currentColor,
       brushSize,
       layer,
-      ctx,
       currentModes,
-      maskSet
+      maskSet,
+      isPreview
     )
   }
 }
@@ -783,7 +788,6 @@ export function actionCubicCurve(
  * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
- * @param {CanvasRenderingContext2D} ctx
  * @param {Object} currentModes
  * @param {Object} brushStamp
  * @param {Integer} brushSize
@@ -791,6 +795,8 @@ export function actionCubicCurve(
  * @param {Integer} offset
  * @param {Integer} x1Offset
  * @param {Integer} y1Offset
+ * @param {Set} maskSet
+ * @param {Boolean} isPreview
  */
 export function actionEllipse(
   centerx,
@@ -804,7 +810,6 @@ export function actionEllipse(
   forceCircle,
   currentColor,
   layer,
-  ctx,
   currentModes,
   brushStamp,
   brushSize,
@@ -812,7 +817,8 @@ export function actionEllipse(
   offset,
   x1Offset,
   y1Offset,
-  maskSet
+  maskSet,
+  isPreview = false
 ) {
   //force coords to int
   centerx = Math.floor(centerx)
@@ -830,9 +836,9 @@ export function actionEllipse(
       currentColor,
       brushSize,
       layer,
-      ctx,
       currentModes,
-      maskSet
+      maskSet,
+      isPreview
     )
   } else {
     let plotPoints = plotRotatedEllipse(
@@ -852,9 +858,9 @@ export function actionEllipse(
       currentColor,
       brushSize,
       layer,
-      ctx,
       currentModes,
-      maskSet
+      maskSet,
+      isPreview
     )
   }
 }

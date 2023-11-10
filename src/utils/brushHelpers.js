@@ -4,14 +4,11 @@ import { dom } from "../Context/dom.js"
  * update the brush preview in the dom
  * @param {Array} brushPixels
  * @param {Integer} brushSize
- * @param {Boolean} updateBrush
  */
-function updateBrushPreview(brushPixels, brushSize, updateBrush) {
-  if (updateBrush) {
-    dom.brushStamp.setAttribute("viewBox", `0 -0.5 ${brushSize} ${brushSize}`)
-    dom.brushStamp.style.width = brushSize * 2
-    dom.brushStamp.style.height = brushSize * 2
-  }
+export function updateBrushPreview(brushPixels, brushSize) {
+  dom.brushStamp.setAttribute("viewBox", `0 -0.5 ${brushSize} ${brushSize}`)
+  dom.brushStamp.style.width = brushSize * 2
+  dom.brushStamp.style.height = brushSize * 2
 
   function makePathData(x, y, w) {
     return "M" + x + " " + y + "h" + w + ""
@@ -25,10 +22,8 @@ function updateBrushPreview(brushPixels, brushSize, updateBrush) {
     paths.push(makePathData(r.x, r.y, 1))
   })
 
-  if (updateBrush) {
-    dom.brushStamp.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
-    dom.brushStamp.setAttribute("stroke-width", 1)
-  }
+  dom.brushStamp.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
+  dom.brushStamp.setAttribute("stroke-width", 1)
 }
 
 /**
@@ -154,10 +149,9 @@ function generateOffsetBrush(brushPixels, offsetX, offsetY, seen) {
  * Using 9 arrays for the brush directions reduces the time complexity of iterating through the brush from ~O(n^2) to ~O(n)
  * @param {Function} generatorFn
  * @param {Integer} brushSize
- * @param {Boolean} updateBrush
  * @returns brushStamp object with 1 base stamp and 8 direction edge stamps
  */
-function createBrushStamp(generatorFn, brushSize, updateBrush = false) {
+function createBrushStamp(generatorFn, brushSize) {
   const seen = new Set()
   const base = generatorFn(brushSize, 0, 0, seen)
   const offsets = [
@@ -177,27 +171,23 @@ function createBrushStamp(generatorFn, brushSize, updateBrush = false) {
     directions[`${x},${y}`] = generateOffsetBrush(base, x, y, seen)
   }
 
-  updateBrushPreview(base, brushSize, updateBrush)
-
   return directions
 }
 
 /**
  * draw circle brush
  * @param {Integer} brushSize
- * @param {Boolean} updateBrush
  * @returns brushStamp object with 1 base stamp and 8 direction edge stamps
  */
-export function createCircleBrush(brushSize, updateBrush = false) {
+export function createCircleBrush(brushSize) {
   return createBrushStamp(generateCircleBrush, brushSize, updateBrush)
 }
 
 /**
  * draw square brush
  * @param {Integer} brushSize
- * @param {Boolean} updateBrush
  * @returns brushStamp object with 1 base stamp and 8 direction edge stamps
  */
-export function createSquareBrush(brushSize, updateBrush = false) {
+export function createSquareBrush(brushSize) {
   return createBrushStamp(generateSquareBrush, brushSize, updateBrush)
 }

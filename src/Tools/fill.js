@@ -88,8 +88,6 @@ export function adjustFillSteps() {
         //Only render canvas up to timeline where fill action exists while adjusting fill
         renderCanvas(
           state.undoStack[canvas.currentVectorIndex].layer,
-          null,
-          true,
           true,
           canvas.currentVectorIndex
         ) // render to canvas.currentVectorIndex
@@ -112,12 +110,7 @@ export function adjustFillSteps() {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(
-          state.undoStack[canvas.currentVectorIndex].layer,
-          null,
-          true,
-          true
-        )
+        renderCanvas(state.undoStack[canvas.currentVectorIndex].layer, true)
       }
       break
     case "pointerout":
