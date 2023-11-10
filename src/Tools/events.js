@@ -112,7 +112,7 @@ export function handleTools(e, manualToolName = null) {
       state.tool = tools[dom.toolBtn.id]
       renderCanvas(canvas.currentLayer)
       //update options
-      updateStamp()
+      renderBrushStampToDOM()
       dom.brushSlider.value = state.tool.brushSize
       dom.brushSlider.disabled = state.tool.disabled
       //update cursor
@@ -174,12 +174,12 @@ export function handleModes(e, manualModeName = null) {
  */
 function switchBrush(e) {
   //TODO: when selecting a default brush, generate all stamps fom 1-32px and store them in a lookup table for ease of testing and to avoid storing the entire brush stamp on each drawn point.
-  if (state.brushType === "square") {
-    state.brushType = "circle"
+  if (state.tool.brushType === "square") {
+    state.tool.brushType = "circle"
   } else {
-    state.brushType = "square"
+    state.tool.brushType = "square"
   }
-  updateStamp()
+  renderBrushStampToDOM()
 }
 
 /**
@@ -200,23 +200,39 @@ function updateBrush(e) {
     default:
     //do nothing for other tools
   }
-  updateStamp()
+  renderBrushStampToDOM()
 }
 
 /**
- * update brush stamp
+ * update brush stamp in dom
  */
-export function updateStamp() {
+export function renderBrushStampToDOM() {
   dom.lineWeight.textContent = state.tool.brushSize
   dom.brushPreview.style.width = state.tool.brushSize * 2 + "px"
   dom.brushPreview.style.height = state.tool.brushSize * 2 + "px"
-  updateBrushPreview(state.brushStamps[state.tool.brushStamp][state.tool.brushSize]["0,0"], state.tool.brushSize)
+  updateBrushPreview(
+    state.brushStamps[state.tool.brushStamp][state.tool.brushSize]["0,0"],
+    state.tool.brushSize
+  )
   // if (state.brushType === "circle") {
   //TODO: Instead of generating this dynamically, store the result of each brush size in a lookup table for ease of testing and to avoid storing the entire brush stamp on each drawn point.
   // state.brushStamp = createCircleBrush(state.tool.brushSize) //circle
   // } else {
   // state.brushStamp = createSquareBrush(state.tool.brushSize) //square
   // }
+}
+
+//===================================//
+//==== * * * Initialization * * * ===//
+//===================================//
+
+//generate circle brush for each size from 1 to 32 and save them in state.brushStamps.circle such that they can be accessed by state.brushStamps["circle"][brushSize]["0,0"]
+for (let i = 1; i <= 32; i++) {
+  state.brushStamps.circle[i] = createCircleBrush(i)
+}
+//generate square brush for each size from 1 to 32 and save them in state.brushStamps.square such that they can be accessed by state.brushStamps["square"][brushSize]["0,0"]
+for (let i = 1; i <= 32; i++) {
+  state.brushStamps.square[i] = createSquareBrush(i)
 }
 
 //===================================//

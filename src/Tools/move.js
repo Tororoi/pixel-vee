@@ -165,6 +165,7 @@ export const move = {
   fn: moveSteps,
   action: null, //actionMove
   brushSize: 1,
+  brushType: "circle",
   disabled: true,
   options: {},
   modes: {},

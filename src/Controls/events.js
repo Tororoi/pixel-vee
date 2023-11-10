@@ -4,20 +4,13 @@ import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCursor } from "../GUI/cursor.js"
 import { activateShortcut, deactivateShortcut } from "./shortcuts.js"
 import { renderCanvas } from "../Canvas/render.js"
-import {
-  renderVectorsToDOM,
-  renderPaletteToolsToDOM,
-  renderPaletteToDOM,
-} from "../DOM/render.js"
+import { renderVectorsToDOM } from "../DOM/render.js"
 import { actionZoom } from "../Actions/untrackedActions.js"
-import { adjustEllipseSteps } from "../Tools/ellipse.js"
-import { debounce, throttle } from "../utils/eventHelpers.js"
-import { updateStamp } from "../Tools/events.js"
+import { throttle } from "../utils/eventHelpers.js"
 import { testBrushAction } from "../Testing/brushTest.js"
 
 /**

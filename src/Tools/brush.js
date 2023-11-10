@@ -35,11 +35,12 @@ function brushSteps() {
       state.lineStartX = state.cursorX
       state.lineStartY = state.cursorY
       //set colorlayer, then for each brushpoint, alter colorlayer and add each to timeline
+      //IN PROGRESS: provide brush stamps from state and pass state.tool. When saving to timeline, add the brushStamp to the action object
       actionDraw(
         state.cursorX,
         state.cursorY,
         swatches.primary.color,
-        state.brushStamp,
+        state.tool.brushType,
         "0,0",
         state.tool.brushSize,
         canvas.currentLayer,
@@ -391,7 +392,7 @@ export const brush = {
   fn: brushSteps,
   action: actionDraw,
   brushSize: 1,
-  brushStamp: "circle",
+  brushType: "circle",
   disabled: false,
   options: { line: false },
   modes: { eraser: false, inject: false, perfect: false, colorMask: false },

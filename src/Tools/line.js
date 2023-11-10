@@ -99,6 +99,7 @@ export const line = {
   fn: lineSteps,
   action: actionLine,
   brushSize: 1,
+  brushType: "circle",
   disabled: false,
   options: {},
   modes: { eraser: false, inject: false },

@@ -131,6 +131,7 @@ export const fill = {
   fn: fillSteps,
   action: actionFill,
   brushSize: 1,
+  brushType: "circle",
   disabled: true,
   options: { contiguous: true },
   modes: { eraser: false },

@@ -32,7 +32,7 @@ export const state = {
     "0,-1": [{ x: 0, y: 0 }],
     "1,-1": [{ x: 0, y: 0 }],
   }, //default 1 pixel
-  brushStamps: {},
+  brushStamps: { circle: {}, square: {} },
   brushType: "circle",
   brushDirection: "0,0",
   //touchscreen?

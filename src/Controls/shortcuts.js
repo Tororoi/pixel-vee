@@ -10,7 +10,11 @@ import { adjustEllipseSteps } from "../Tools/ellipse.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { renderPaletteToolsToDOM, renderPaletteToDOM } from "../DOM/render.js"
 import { randomizeColor } from "../Swatch/events.js"
-import { handleTools, handleModes, updateStamp } from "../Tools/events.js"
+import {
+  handleTools,
+  handleModes,
+  renderBrushStampToDOM,
+} from "../Tools/events.js"
 import { renderCursor } from "../GUI/cursor.js"
 
 /**
@@ -27,7 +31,7 @@ export function activateShortcut(keyCode) {
       if (!state.clicked) {
         state.tool = tools["grab"]
         canvas.vectorGuiCVS.style.cursor = state.tool.cursor
-        updateStamp()
+        renderBrushStampToDOM()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
         renderCursor(state, canvas, swatches)
@@ -39,7 +43,7 @@ export function activateShortcut(keyCode) {
       if (!state.clicked) {
         state.tool = tools["eyedropper"]
         canvas.vectorGuiCVS.style.cursor = state.tool.cursor
-        updateStamp()
+        renderBrushStampToDOM()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
         renderCursor(state, canvas, swatches)
@@ -244,7 +248,7 @@ export function deactivateShortcut(keyCode) {
       //only deactivate while not clicked
       if (!state.clicked) {
         state.tool = tools[dom.toolBtn.id]
-        updateStamp()
+        renderBrushStampToDOM()
         canvas.previousXOffset = canvas.xOffset
         canvas.previousYOffset = canvas.yOffset
         vectorGui.render()
@@ -259,7 +263,7 @@ export function deactivateShortcut(keyCode) {
       //only deactivate while not clicked
       if (!state.clicked) {
         state.tool = tools[dom.toolBtn.id]
-        updateStamp()
+        renderBrushStampToDOM()
         vectorGui.render()
         renderCursor(state, canvas, swatches)
         setToolCssCursor()
