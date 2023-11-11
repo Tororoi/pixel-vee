@@ -1,4 +1,5 @@
 import { keys } from "../Shortcuts/keys.js"
+import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
@@ -29,7 +30,7 @@ function lineSteps() {
         swatches.primary.color,
         canvas.currentLayer,
         state.tool.modes,
-        state.brushStamp,
+        brushStamps[state.tool.brushType][state.tool.brushSize],
         state.tool.brushSize,
         state.maskSet,
         null,
@@ -49,7 +50,7 @@ function lineSteps() {
         swatches.primary.color,
         canvas.currentLayer,
         state.tool.modes,
-        state.brushStamp,
+        brushStamps[state.tool.brushType][state.tool.brushSize],
         state.tool.brushSize,
         state.maskSet,
         null,
@@ -65,7 +66,7 @@ function lineSteps() {
         swatches.primary.color,
         canvas.currentLayer,
         state.tool.modes,
-        state.brushStamp,
+        brushStamps[state.tool.brushType][state.tool.brushSize],
         state.tool.brushSize,
         state.maskSet,
         null

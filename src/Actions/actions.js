@@ -186,7 +186,7 @@ export function actionClear(layer) {
  * @param {Integer} coordX
  * @param {Integer} coordY
  * @param {Object} currentColor - {color, r, g, b, a}
- * @param {Object} brushType
+ * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {Object} layer
  * @param {Object} currentModes
@@ -200,7 +200,7 @@ export function actionDraw(
   coordX,
   coordY,
   currentColor,
-  brushType,
+  brushStamp,
   brushStampDir,
   brushSize,
   layer,
@@ -226,7 +226,6 @@ export function actionDraw(
         x: coordX - layer.x,
         y: coordY - layer.y,
         color: { ...currentColor },
-        brushType,
         brushSize,
       })
       state.pointsSet.add(`${coordX},${coordY}`)
@@ -243,7 +242,7 @@ export function actionDraw(
   }
   const baseX = Math.ceil(coordX - brushSize / 2)
   const baseY = Math.ceil(coordY - brushSize / 2)
-  for (const pixel of brushType[brushStampDir]) {
+  for (const pixel of brushStamp[brushStampDir]) {
     const x = baseX + pixel.x
     const y = baseY + pixel.y
     if (x >= layer.cvs.width || x < 0 || y >= layer.cvs.height || y < 0) {

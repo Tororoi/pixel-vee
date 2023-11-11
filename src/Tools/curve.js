@@ -1,4 +1,5 @@
 import { keys } from "../Shortcuts/keys.js"
+import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
@@ -64,7 +65,7 @@ function quadCurveSteps() {
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
-          state.brushStamp,
+          brushStamps[state.tool.brushType][state.tool.brushSize],
           state.tool.brushSize,
           state.maskSet,
           true
@@ -94,7 +95,7 @@ function quadCurveSteps() {
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
-          state.brushStamp,
+          brushStamps[state.tool.brushType][state.tool.brushSize],
           state.tool.brushSize,
           state.maskSet,
           true
@@ -131,7 +132,7 @@ function quadCurveSteps() {
             swatches.primary.color,
             canvas.currentLayer,
             state.tool.modes,
-            state.brushStamp,
+            brushStamps[state.tool.brushType][state.tool.brushSize],
             state.tool.brushSize,
             state.maskSet
           )
@@ -231,7 +232,7 @@ function cubicCurveSteps() {
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
-          state.brushStamp,
+          brushStamps[state.tool.brushType][state.tool.brushSize],
           state.tool.brushSize,
           state.maskSet,
           true
@@ -263,7 +264,7 @@ function cubicCurveSteps() {
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
-          state.brushStamp,
+          brushStamps[state.tool.brushType][state.tool.brushSize],
           state.tool.brushSize,
           state.maskSet,
           true
@@ -306,7 +307,7 @@ function cubicCurveSteps() {
             swatches.primary.color,
             canvas.currentLayer,
             state.tool.modes,
-            state.brushStamp,
+            brushStamps[state.tool.brushType][state.tool.brushSize],
             state.tool.brushSize,
             state.maskSet
           )
@@ -364,6 +365,7 @@ function adjustCurveSteps(numPoints = 4) {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
+  let action = state.undoStack[canvas.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.collisionPresent && state.clickCounter === 0) {
@@ -373,9 +375,9 @@ function adjustCurveSteps(numPoints = 4) {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
         }
-        state.undoStack[canvas.currentVectorIndex].hidden = true
+        action.hidden = true
         if (numPoints === 3) {
-          renderCanvas(state.undoStack[canvas.currentVectorIndex].layer, true)
+          renderCanvas(action.layer, true)
           actionQuadraticCurve(
             state.vectorProperties.px1,
             state.vectorProperties.py1,
@@ -384,16 +386,16 @@ function adjustCurveSteps(numPoints = 4) {
             state.vectorProperties.px3,
             state.vectorProperties.py3,
             3,
-            state.undoStack[canvas.currentVectorIndex].color,
-            state.undoStack[canvas.currentVectorIndex].layer,
-            state.undoStack[canvas.currentVectorIndex].modes,
-            state.undoStack[canvas.currentVectorIndex].brushStamp,
-            state.undoStack[canvas.currentVectorIndex].brushSize,
-            state.undoStack[canvas.currentVectorIndex].maskSet,
+            action.color,
+            action.layer,
+            action.modes,
+            brushStamps[action.tool.brushType][action.brushSize],
+            action.brushSize,
+            action.maskSet,
             true
           )
         } else {
-          renderCanvas(state.undoStack[canvas.currentVectorIndex].layer, true)
+          renderCanvas(action.layer, true)
           actionCubicCurve(
             state.vectorProperties.px1,
             state.vectorProperties.py1,
@@ -404,12 +406,12 @@ function adjustCurveSteps(numPoints = 4) {
             state.vectorProperties.px4,
             state.vectorProperties.py4,
             4,
-            state.undoStack[canvas.currentVectorIndex].color,
-            state.undoStack[canvas.currentVectorIndex].layer,
-            state.undoStack[canvas.currentVectorIndex].modes,
-            state.undoStack[canvas.currentVectorIndex].brushStamp,
-            state.undoStack[canvas.currentVectorIndex].brushSize,
-            state.undoStack[canvas.currentVectorIndex].maskSet,
+            action.color,
+            action.layer,
+            action.modes,
+            brushStamps[action.tool.brushType][action.brushSize],
+            action.brushSize,
+            action.maskSet,
             true
           )
         }
@@ -420,7 +422,7 @@ function adjustCurveSteps(numPoints = 4) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         if (numPoints === 3) {
-          renderCanvas(state.undoStack[canvas.currentVectorIndex].layer)
+          renderCanvas(action.layer)
           actionQuadraticCurve(
             state.vectorProperties.px1,
             state.vectorProperties.py1,
@@ -429,16 +431,16 @@ function adjustCurveSteps(numPoints = 4) {
             state.vectorProperties.px3,
             state.vectorProperties.py3,
             3,
-            state.undoStack[canvas.currentVectorIndex].color,
-            state.undoStack[canvas.currentVectorIndex].layer,
-            state.undoStack[canvas.currentVectorIndex].modes,
-            state.undoStack[canvas.currentVectorIndex].brushStamp,
-            state.undoStack[canvas.currentVectorIndex].brushSize,
-            state.undoStack[canvas.currentVectorIndex].maskSet,
+            action.color,
+            action.layer,
+            action.modes,
+            brushStamps[action.tool.brushType][action.brushSize],
+            action.brushSize,
+            action.maskSet,
             true
           )
         } else {
-          renderCanvas(state.undoStack[canvas.currentVectorIndex].layer)
+          renderCanvas(action.layer)
           actionCubicCurve(
             state.vectorProperties.px1,
             state.vectorProperties.py1,
@@ -449,12 +451,12 @@ function adjustCurveSteps(numPoints = 4) {
             state.vectorProperties.px4,
             state.vectorProperties.py4,
             4,
-            state.undoStack[canvas.currentVectorIndex].color,
-            state.undoStack[canvas.currentVectorIndex].layer,
-            state.undoStack[canvas.currentVectorIndex].modes,
-            state.undoStack[canvas.currentVectorIndex].brushStamp,
-            state.undoStack[canvas.currentVectorIndex].brushSize,
-            state.undoStack[canvas.currentVectorIndex].maskSet,
+            action.color,
+            action.layer,
+            action.modes,
+            brushStamps[action.tool.brushType][action.brushSize],
+            action.brushSize,
+            action.maskSet,
             true
           )
         }
@@ -464,13 +466,13 @@ function adjustCurveSteps(numPoints = 4) {
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        state.undoStack[canvas.currentVectorIndex].hidden = false
+        action.hidden = false
         modifyVectorAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(state.undoStack[canvas.currentVectorIndex].layer, true)
+        renderCanvas(action.layer, true)
       }
       break
     case "pointerout":

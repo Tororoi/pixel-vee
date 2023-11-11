@@ -1,4 +1,5 @@
 import { dom } from "../Context/dom.js"
+import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
@@ -126,7 +127,7 @@ function redrawTimelineActions(layer, index = null) {
               p.x + offsetX,
               p.y + offsetY,
               p.color,
-              p.brushStamp,
+              brushStamps[action.tool.brushType][p.brushSize],
               brushDirection,
               p.brushSize,
               action.layer,
@@ -185,7 +186,7 @@ function redrawTimelineActions(layer, index = null) {
             action.color,
             action.layer,
             action.modes,
-            action.brushStamp,
+            brushStamps[action.tool.brushType][action.brushSize],
             action.brushSize,
             action.properties.maskSet
           )
@@ -203,7 +204,7 @@ function redrawTimelineActions(layer, index = null) {
             action.color,
             action.layer,
             action.modes,
-            action.brushStamp,
+            brushStamps[action.tool.brushType][action.brushSize],
             action.brushSize,
             action.properties.maskSet
           )
@@ -223,7 +224,7 @@ function redrawTimelineActions(layer, index = null) {
             action.color,
             action.layer,
             action.modes,
-            action.brushStamp,
+            brushStamps[action.tool.brushType][action.brushSize],
             action.brushSize,
             action.properties.maskSet
           )
@@ -243,7 +244,7 @@ function redrawTimelineActions(layer, index = null) {
             action.color,
             action.layer,
             action.modes,
-            action.brushStamp,
+            brushStamps[action.tool.brushType][action.brushSize],
             action.brushSize,
             action.properties.vectorProperties.angle,
             action.properties.vectorProperties.offset,

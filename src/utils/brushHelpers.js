@@ -180,7 +180,7 @@ function createBrushStamp(generatorFn, brushSize) {
  * @returns brushStamp object with 1 base stamp and 8 direction edge stamps
  */
 export function createCircleBrush(brushSize) {
-  return createBrushStamp(generateCircleBrush, brushSize, updateBrush)
+  return createBrushStamp(generateCircleBrush, brushSize)
 }
 
 /**
@@ -189,5 +189,23 @@ export function createCircleBrush(brushSize) {
  * @returns brushStamp object with 1 base stamp and 8 direction edge stamps
  */
 export function createSquareBrush(brushSize) {
-  return createBrushStamp(generateSquareBrush, brushSize, updateBrush)
+  return createBrushStamp(generateSquareBrush, brushSize)
+}
+
+/**
+ *
+ * @param {String} brushType
+ */
+export function generateBrushStamps(brushType) {
+  let brushStamp = {}
+  if (brushType === "circle") {
+    for (let i = 1; i <= 32; i++) {
+      brushStamp[i] = createCircleBrush(i)
+    }
+  } else if (brushType === "square") {
+    for (let i = 1; i <= 32; i++) {
+      brushStamp[i] = createSquareBrush(i)
+    }
+  }
+  return brushStamp
 }

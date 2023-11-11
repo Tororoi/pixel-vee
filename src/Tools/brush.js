@@ -1,3 +1,4 @@
+import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
@@ -35,12 +36,11 @@ function brushSteps() {
       state.lineStartX = state.cursorX
       state.lineStartY = state.cursorY
       //set colorlayer, then for each brushpoint, alter colorlayer and add each to timeline
-      //IN PROGRESS: provide brush stamps from state and pass state.tool. When saving to timeline, add the brushStamp to the action object
       actionDraw(
         state.cursorX,
         state.cursorY,
         swatches.primary.color,
-        state.tool.brushType,
+        brushStamps[state.tool.brushType][state.tool.brushSize],
         "0,0",
         state.tool.brushSize,
         canvas.currentLayer,
@@ -70,7 +70,7 @@ function brushSteps() {
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
-          state.brushStamp,
+          brushStamps[state.tool.brushType][state.tool.brushSize],
           state.tool.brushSize,
           state.maskSet,
           state.drawnPointsSet,
@@ -115,7 +115,7 @@ function brushSteps() {
             thispoint.x,
             thispoint.y,
             swatches.primary.color,
-            state.brushStamp,
+            brushStamps[state.tool.brushType][state.tool.brushSize],
             state.brushDirection,
             state.tool.brushSize,
             canvas.currentLayer,
@@ -142,7 +142,7 @@ function brushSteps() {
           state.cursorX,
           state.cursorY,
           swatches.primary.color,
-          state.brushStamp,
+          brushStamps[state.tool.brushType][state.tool.brushSize],
           state.brushDirection,
           state.tool.brushSize,
           canvas.currentLayer,
@@ -166,7 +166,7 @@ function brushSteps() {
               state.waitingPixelX,
               state.waitingPixelY,
               swatches.primary.color,
-              state.brushStamp,
+              brushStamps[state.tool.brushType][state.tool.brushSize],
               "0,0",
               state.tool.brushSize,
               canvas.currentLayer,
@@ -187,7 +187,7 @@ function brushSteps() {
               state.cursorX,
               state.cursorY,
               swatches.primary.color,
-              state.brushStamp,
+              brushStamps[state.tool.brushType][state.tool.brushSize],
               "0,0",
               state.tool.brushSize,
               canvas.currentLayer,
@@ -207,7 +207,7 @@ function brushSteps() {
               state.cursorX,
               state.cursorY,
               swatches.primary.color,
-              state.brushStamp,
+              brushStamps[state.tool.brushType][state.tool.brushSize],
               "0,0",
               state.tool.brushSize,
               canvas.currentLayer,
@@ -224,7 +224,7 @@ function brushSteps() {
             state.cursorX,
             state.cursorY,
             swatches.primary.color,
-            state.brushStamp,
+            brushStamps[state.tool.brushType][state.tool.brushSize],
             "0,0",
             state.tool.brushSize,
             canvas.currentLayer,
@@ -237,7 +237,7 @@ function brushSteps() {
           renderCanvas(canvas.currentLayer)
         }
       }
-      if (state.points.length === 1000 && state.captureTesting) {
+      if (state.points.length >= 1000 && state.captureTesting) {
         saveAsTest()
       }
       break
@@ -281,7 +281,7 @@ function brushSteps() {
             thispoint.x,
             thispoint.y,
             swatches.primary.color,
-            state.brushStamp,
+            brushStamps[state.tool.brushType][state.tool.brushSize],
             state.brushDirection,
             state.tool.brushSize,
             canvas.currentLayer,
@@ -308,7 +308,7 @@ function brushSteps() {
           state.cursorX,
           state.cursorY,
           swatches.primary.color,
-          state.brushStamp,
+          brushStamps[state.tool.brushType][state.tool.brushSize],
           state.brushDirection,
           state.tool.brushSize,
           canvas.currentLayer,
@@ -324,7 +324,7 @@ function brushSteps() {
         state.cursorX,
         state.cursorY,
         swatches.primary.color,
-        state.brushStamp,
+        brushStamps[state.tool.brushType][state.tool.brushSize],
         "0,0",
         state.tool.brushSize,
         canvas.currentLayer,

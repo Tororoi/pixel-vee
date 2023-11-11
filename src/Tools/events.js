@@ -1,4 +1,5 @@
 import { dom } from "../Context/dom.js"
+import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
@@ -211,28 +212,9 @@ export function renderBrushStampToDOM() {
   dom.brushPreview.style.width = state.tool.brushSize * 2 + "px"
   dom.brushPreview.style.height = state.tool.brushSize * 2 + "px"
   updateBrushPreview(
-    state.brushStamps[state.tool.brushStamp][state.tool.brushSize]["0,0"],
+    brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
     state.tool.brushSize
   )
-  // if (state.brushType === "circle") {
-  //TODO: Instead of generating this dynamically, store the result of each brush size in a lookup table for ease of testing and to avoid storing the entire brush stamp on each drawn point.
-  // state.brushStamp = createCircleBrush(state.tool.brushSize) //circle
-  // } else {
-  // state.brushStamp = createSquareBrush(state.tool.brushSize) //square
-  // }
-}
-
-//===================================//
-//==== * * * Initialization * * * ===//
-//===================================//
-
-//generate circle brush for each size from 1 to 32 and save them in state.brushStamps.circle such that they can be accessed by state.brushStamps["circle"][brushSize]["0,0"]
-for (let i = 1; i <= 32; i++) {
-  state.brushStamps.circle[i] = createCircleBrush(i)
-}
-//generate square brush for each size from 1 to 32 and save them in state.brushStamps.square such that they can be accessed by state.brushStamps["square"][brushSize]["0,0"]
-for (let i = 1; i <= 32; i++) {
-  state.brushStamps.square[i] = createSquareBrush(i)
 }
 
 //===================================//

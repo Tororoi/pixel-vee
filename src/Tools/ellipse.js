@@ -1,4 +1,5 @@
 import { keys } from "../Shortcuts/keys.js"
+import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
@@ -84,7 +85,7 @@ function ellipseSteps() {
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
-          state.brushStamp,
+          brushStamps[state.tool.brushType][state.tool.brushSize],
           state.tool.brushSize,
           state.vectorProperties.angle,
           state.vectorProperties.offset,
@@ -147,7 +148,7 @@ function ellipseSteps() {
             swatches.primary.color,
             canvas.currentLayer,
             state.tool.modes,
-            state.brushStamp,
+            brushStamps[state.tool.brushType][state.tool.brushSize],
             state.tool.brushSize,
             state.vectorProperties.angle,
             state.vectorProperties.offset,
@@ -208,7 +209,7 @@ function ellipseSteps() {
             swatches.primary.color,
             canvas.currentLayer,
             state.tool.modes,
-            state.brushStamp,
+            brushStamps[state.tool.brushType][state.tool.brushSize],
             state.tool.brushSize,
             state.vectorProperties.angle,
             state.vectorProperties.offset,
@@ -278,6 +279,7 @@ export function adjustEllipseSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
+  let action = state.undoStack[canvas.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.collisionPresent && state.clickCounter === 0) {
@@ -294,15 +296,9 @@ export function adjustEllipseSteps() {
           state.vectorProperties.forceCircle = false
         }
         updateEllipseControlPoints(state, canvas, vectorGui)
-        //TODO: changing opacity isn't enough since erase mode will be unaffected
-        // let action = state.undoStack[canvas.currentVectorIndex]
-        state.undoStack[canvas.currentVectorIndex].hidden = true
+        action.hidden = true
         //angle and offset passed should consider which point is being adjusted. For p1, use current state.vectorProperties.offset instead of recalculating. For p3, add 1.5 * Math.PI to angle
-        renderCanvas(
-          state.undoStack[canvas.currentVectorIndex].layer,
-          true,
-          canvas.currentVectorIndex
-        )
+        renderCanvas(action.layer, true, canvas.currentVectorIndex)
         actionEllipse(
           state.vectorProperties.px1,
           state.vectorProperties.py1,
@@ -313,19 +309,18 @@ export function adjustEllipseSteps() {
           state.vectorProperties.radA,
           state.vectorProperties.radB,
           vectorGui.selectedPoint.xKey === "px1"
-            ? state.undoStack[canvas.currentVectorIndex].properties
-                .vectorProperties.forceCircle
+            ? action.properties.vectorProperties.forceCircle
             : state.vectorProperties.forceCircle,
-          state.undoStack[canvas.currentVectorIndex].color,
-          state.undoStack[canvas.currentVectorIndex].layer,
-          state.undoStack[canvas.currentVectorIndex].modes,
-          state.undoStack[canvas.currentVectorIndex].brushStamp,
-          state.undoStack[canvas.currentVectorIndex].brushSize,
+          action.color,
+          action.layer,
+          action.modes,
+          brushStamps[action.tool.brushType][action.brushSize],
+          action.brushSize,
           state.vectorProperties.angle,
           state.vectorProperties.offset,
           state.vectorProperties.x1Offset,
           state.vectorProperties.y1Offset,
-          state.undoStack[canvas.currentVectorIndex].maskSet,
+          action.maskSet,
           true
         )
         //TODO: render canvas actions after current index onto a canvas that is overlaid on top of the current layer canvas. Then remove it on pointerup
@@ -334,11 +329,7 @@ export function adjustEllipseSteps() {
     case "pointermove":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         updateEllipseControlPoints(state, canvas, vectorGui)
-        renderCanvas(
-          state.undoStack[canvas.currentVectorIndex].layer,
-          false,
-          canvas.currentVectorIndex
-        )
+        renderCanvas(action.layer, false, canvas.currentVectorIndex)
         actionEllipse(
           state.vectorProperties.px1,
           state.vectorProperties.py1,
@@ -349,19 +340,18 @@ export function adjustEllipseSteps() {
           state.vectorProperties.radA,
           state.vectorProperties.radB,
           vectorGui.selectedPoint.xKey === "px1"
-            ? state.undoStack[canvas.currentVectorIndex].properties
-                .vectorProperties.forceCircle
+            ? action.properties.vectorProperties.forceCircle
             : state.vectorProperties.forceCircle,
-          state.undoStack[canvas.currentVectorIndex].color,
-          state.undoStack[canvas.currentVectorIndex].layer,
-          state.undoStack[canvas.currentVectorIndex].modes,
-          state.undoStack[canvas.currentVectorIndex].brushStamp,
-          state.undoStack[canvas.currentVectorIndex].brushSize,
+          action.color,
+          action.layer,
+          action.modes,
+          brushStamps[action.tool.brushType][action.brushSize],
+          action.brushSize,
           state.vectorProperties.angle,
           state.vectorProperties.offset,
           state.vectorProperties.x1Offset,
           state.vectorProperties.y1Offset,
-          state.undoStack[canvas.currentVectorIndex].maskSet,
+          action.maskSet,
           true
         )
       }
@@ -369,13 +359,13 @@ export function adjustEllipseSteps() {
     case "pointerup":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         updateEllipseControlPoints(state, canvas, vectorGui)
-        state.undoStack[canvas.currentVectorIndex].hidden = false
+        action.hidden = false
         modifyVectorAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(state.undoStack[canvas.currentVectorIndex].layer, true)
+        renderCanvas(action.layer, true)
       }
       break
     case "pointerout":

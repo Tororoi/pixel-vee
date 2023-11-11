@@ -9,14 +9,14 @@ import { canvas } from "../Context/canvas.js"
 //   let brushOffset = Math.floor(state.tool.brushSize / 2)
 
 //   const pixelSet = new Set()
-//   for (const pixel of state.brushStamp) {
+//   for (const pixel of brushStamps[state.tool.brushType][state.tool.brushSize]) {
 //     pixelSet.add(`${pixel.x},${pixel.y}`)
 //     pixelSet.add(`${pixel.x + 1},${pixel.y}`)
 //     pixelSet.add(`${pixel.x},${pixel.y + 1}`)
 //     pixelSet.add(`${pixel.x + 1},${pixel.y + 1}`)
 //   }
 
-//   let initialPoint = state.brushStamp.reduce((acc, cur) => {
+//   let initialPoint = brushStamps[state.tool.brushType][state.tool.brushSize].reduce((acc, cur) => {
 //     return cur.y < acc.y || (cur.y === acc.y && cur.x < acc.x) ? cur : acc
 //   })
 
