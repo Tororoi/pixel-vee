@@ -39,14 +39,12 @@ export function renderCursor(state, canvas, swatches) {
           state.cursorX,
           state.cursorY,
           swatches.primary.color,
-          brushStamps[state.tool.brushType][state.tool.brushSize],
-          "0,0",
+          brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
           state.tool.brushSize,
           canvas.currentLayer,
           state.tool.modes,
           state.maskSet,
-          state.drawnPointsSet,
-          null,
+          state.seenPixelsSet,
           true,
           true
         )

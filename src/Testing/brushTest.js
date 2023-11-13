@@ -37,15 +37,12 @@ export function testBrushAction() {
       p.x + offsetX,
       p.y + offsetY,
       p.color,
-      p.brushStamp,
-      brushDirection,
+      p.brushStamp[brushDirection],
       p.brushSize,
       action.layer,
       action.modes,
       mask,
-      seen,
-      null,
-      false
+      seen
     )
     previousX = p.x + offsetX
     previousY = p.y + offsetY

@@ -127,15 +127,12 @@ function redrawTimelineActions(layer, index = null) {
               p.x + offsetX,
               p.y + offsetY,
               p.color,
-              brushStamps[action.tool.brushType][p.brushSize],
-              brushDirection,
+              brushStamps[action.tool.brushType][p.brushSize][brushDirection],
               p.brushSize,
               action.layer,
               action.modes,
               mask,
-              seen,
-              null,
-              false
+              seen
             )
             previousX = p.x + offsetX
             previousY = p.y + offsetY

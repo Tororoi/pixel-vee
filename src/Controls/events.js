@@ -258,7 +258,7 @@ function handlePointerUp(e) {
   }
   state.action = null
   state.pointsSet = null
-  state.drawnPointsSet = null
+  state.seenPixelsSet = null
   state.points = []
   //Reset redostack
   state.redoStack = []

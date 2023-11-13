@@ -186,29 +186,26 @@ export function actionClear(layer) {
  * @param {Integer} coordX
  * @param {Integer} coordY
  * @param {Object} currentColor - {color, r, g, b, a}
- * @param {Object} brushStamp
+ * @param {Object} directionalBrushStamp - brushStamp[brushDirection]
  * @param {Integer} brushSize
  * @param {Object} layer
  * @param {Object} currentModes
  * @param {Set} maskSet
- * @param {Set} seenPointsSet
- * @param {Array} points
+ * @param {Set} seenPixelsSet
  * @param {Boolean} isPreview
- * @param {Boolean} excludeFromSet - don't add to seenPointsSet if true
+ * @param {Boolean} excludeFromSet - don't add to seenPixelsSet if true
  */
 export function actionDraw(
   coordX,
   coordY,
   currentColor,
-  brushStamp,
-  brushStampDir,
+  directionalBrushStamp,
   brushSize,
   layer,
   currentModes,
   maskSet,
-  seenPointsSet,
-  points,
-  isPreview,
+  seenPixelsSet,
+  isPreview = false,
   excludeFromSet = false
 ) {
   let offsetX = 0
@@ -220,17 +217,6 @@ export function actionDraw(
     offsetY = canvas.yOffset
   }
   ctx.fillStyle = currentColor.color
-  if (points) {
-    if (!state.pointsSet.has(`${coordX},${coordY}`)) {
-      points.push({
-        x: coordX - layer.x,
-        y: coordY - layer.y,
-        color: { ...currentColor },
-        brushSize,
-      })
-      state.pointsSet.add(`${coordX},${coordY}`)
-    }
-  }
   if (
     coordX >= layer.cvs.width + brushSize / 2 ||
     coordX <= -brushSize / 2 ||
@@ -242,7 +228,7 @@ export function actionDraw(
   }
   const baseX = Math.ceil(coordX - brushSize / 2)
   const baseY = Math.ceil(coordY - brushSize / 2)
-  for (const pixel of brushStamp[brushStampDir]) {
+  for (const pixel of directionalBrushStamp) {
     const x = baseX + pixel.x
     const y = baseY + pixel.y
     if (x >= layer.cvs.width || x < 0 || y >= layer.cvs.height || y < 0) {
@@ -256,12 +242,12 @@ export function actionDraw(
         continue
       }
     }
-    if (seenPointsSet) {
-      if (seenPointsSet.has(key)) {
+    if (seenPixelsSet) {
+      if (seenPixelsSet.has(key)) {
         continue // skip this point
       }
       if (!excludeFromSet) {
-        seenPointsSet.add(key)
+        seenPixelsSet.add(key)
       }
     }
     if (currentModes?.eraser || currentModes?.inject) {
@@ -286,7 +272,7 @@ export function actionDraw(
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {Set} maskSet
- * @param {Set} seenPointsSet
+ * @param {Set} seenPixelsSet
  * @param {Boolean} isPreview
  */
 export function actionLine(
@@ -300,12 +286,12 @@ export function actionLine(
   brushStamp,
   brushSize,
   maskSet,
-  seenPointsSet = null,
+  seenPixelsSet = null,
   isPreview = false
 ) {
   let angle = getAngle(tx - sx, ty - sy) // angle of line
   let tri = getTriangle(sx, sy, tx, ty, angle)
-  const seen = seenPointsSet ? new Set(seenPointsSet) : new Set()
+  const seen = seenPixelsSet ? new Set(seenPixelsSet) : new Set()
   let previousX = sx
   let previousY = sy
   let brushDirection = "0,0"
@@ -325,14 +311,12 @@ export function actionLine(
       thispoint.x,
       thispoint.y,
       currentColor,
-      brushStamp,
-      brushDirection,
+      brushStamp[brushDirection],
       brushSize,
       layer,
       currentModes,
       maskSet,
       seen,
-      null,
       isPreview
     )
     previousX = thispoint.x
@@ -344,14 +328,12 @@ export function actionLine(
     tx,
     ty,
     currentColor,
-    brushStamp,
-    brushDirection,
+    brushStamp[brushDirection],
     brushSize,
     layer,
     currentModes,
     maskSet,
     seen,
-    null,
     isPreview
   )
 }
@@ -505,24 +487,17 @@ function renderPoints(
     //rounded values
     let xt = Math.floor(x)
     let yt = Math.floor(y)
-    let xDir = xt - previousX
-    let yDir = yt - previousY
-    if (xDir < -1 || xDir > 1 || yDir < -1 || yDir > 1) {
-      xDir = 0
-      yDir = 0
-    }
+    let brushDirection = calculateBrushDirection(xt, yt, previousX, previousY)
     actionDraw(
       xt,
       yt,
       currentColor,
-      brushStamp,
-      `${xDir},${yDir}`,
+      brushStamp[brushDirection],
       brushSize,
       layer,
       currentModes,
       maskSet,
       seen,
-      null,
       isPreview
     )
     previousX = xt

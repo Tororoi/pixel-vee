@@ -14,11 +14,30 @@ import { createColorMaskSet } from "../Canvas/masks.js"
 //====================================//
 
 /**
+ * Add point to state.points if it is not already there
+ * @param {Integer} x
+ * @param {Integer} y
+ */
+function addPointToAction(x, y) {
+  if (!state.pointsSet.has(`${x},${y}`)) {
+    state.points.push({
+      x: x - canvas.currentLayer.x,
+      y: y - canvas.currentLayer.y,
+      color: { ...swatches.primary.color },
+      brushSize: state.tool.brushSize,
+    })
+    state.pointsSet.add(`${x},${y}`)
+  }
+}
+
+/**
  * Supported modes: "draw, erase, perfect, inject",
  */
 function brushSteps() {
+  let brushDirection = "0,0"
   switch (canvas.pointerEvent) {
     case "pointerdown":
+      //initialize sets
       if (state.tool.modes?.colorMask) {
         state.maskSet = createColorMaskSet(
           swatches.secondary.color,
@@ -26,30 +45,23 @@ function brushSteps() {
         )
       }
       state.pointsSet = new Set()
-      // if (state.maskSet) {
-      //if some set of pixels is masked off, initialize drawnpoints including the masked pixels
-      // state.drawnPointsSet = new Set(state.maskSet)
-      // } else {
-      state.drawnPointsSet = new Set()
-      // }
-      //For line
-      state.lineStartX = state.cursorX
-      state.lineStartY = state.cursorY
-      //set colorlayer, then for each brushpoint, alter colorlayer and add each to timeline
+      state.seenPixelsSet = new Set()
+      //initial point
+      addPointToAction(state.cursorX, state.cursorY)
       actionDraw(
         state.cursorX,
         state.cursorY,
         swatches.primary.color,
-        brushStamps[state.tool.brushType][state.tool.brushSize],
-        "0,0",
+        brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
         state.tool.brushSize,
         canvas.currentLayer,
         state.tool.modes,
         state.maskSet,
-        state.drawnPointsSet,
-        state.points,
-        false
+        state.seenPixelsSet
       )
+      //For line
+      state.lineStartX = state.cursorX
+      state.lineStartY = state.cursorY
       //for perfect pixels
       state.lastDrawnX = state.cursorX
       state.lastDrawnY = state.cursorY
@@ -73,7 +85,7 @@ function brushSteps() {
           brushStamps[state.tool.brushType][state.tool.brushSize],
           state.tool.brushSize,
           state.maskSet,
-          state.drawnPointsSet,
+          state.seenPixelsSet,
           true
         )
       } else if (
@@ -104,26 +116,26 @@ function brushSteps() {
             x: Math.round(lineStartX + tri.x * i),
             y: Math.round(lineStartY + tri.y * i),
           }
-          state.brushDirection = calculateBrushDirection(
+          brushDirection = calculateBrushDirection(
             thispoint.x,
             thispoint.y,
             previousX,
             previousY
           )
           // for each point along the line
+          addPointToAction(thispoint.x, thispoint.y)
           actionDraw(
             thispoint.x,
             thispoint.y,
             swatches.primary.color,
-            brushStamps[state.tool.brushType][state.tool.brushSize],
-            state.brushDirection,
+            brushStamps[state.tool.brushType][state.tool.brushSize][
+              brushDirection
+            ],
             state.tool.brushSize,
             canvas.currentLayer,
             state.tool.modes,
             state.maskSet,
-            state.drawnPointsSet,
-            state.points,
-            false
+            state.seenPixelsSet
           )
           previousX = thispoint.x
           previousY = thispoint.y
@@ -131,26 +143,26 @@ function brushSteps() {
         //Reset lineStart Coords
         state.lineStartX = null
         state.lineStartY = null
-        state.brushDirection = calculateBrushDirection(
+        brushDirection = calculateBrushDirection(
           state.cursorX,
           state.cursorY,
           previousX,
           previousY
         )
         //fill endpoint
+        addPointToAction(state.cursorX, state.cursorY)
         actionDraw(
           state.cursorX,
           state.cursorY,
           swatches.primary.color,
-          brushStamps[state.tool.brushType][state.tool.brushSize],
-          state.brushDirection,
+          brushStamps[state.tool.brushType][state.tool.brushSize][
+            brushDirection
+          ],
           state.tool.brushSize,
           canvas.currentLayer,
           state.tool.modes,
           state.maskSet,
-          state.drawnPointsSet,
-          state.points,
-          false
+          state.seenPixelsSet
         )
         renderCanvas(canvas.currentLayer)
       } else {
@@ -162,19 +174,17 @@ function brushSteps() {
             Math.abs(state.cursorY - state.lastDrawnY) > 1
           ) {
             //Draw the previous waiting pixel
+            addPointToAction(state.waitingPixelX, state.waitingPixelY)
             actionDraw(
               state.waitingPixelX,
               state.waitingPixelY,
               swatches.primary.color,
-              brushStamps[state.tool.brushType][state.tool.brushSize],
-              "0,0",
+              brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
               state.tool.brushSize,
               canvas.currentLayer,
               state.tool.modes,
               state.maskSet,
-              state.drawnPointsSet,
-              state.points,
-              false
+              state.seenPixelsSet
             )
             //update queue
             state.lastDrawnX = state.waitingPixelX
@@ -187,14 +197,12 @@ function brushSteps() {
               state.cursorX,
               state.cursorY,
               swatches.primary.color,
-              brushStamps[state.tool.brushType][state.tool.brushSize],
-              "0,0",
+              brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
               state.tool.brushSize,
               canvas.currentLayer,
               state.tool.modes,
               state.maskSet,
-              state.drawnPointsSet,
-              null,
+              state.seenPixelsSet,
               true,
               true
             )
@@ -207,32 +215,29 @@ function brushSteps() {
               state.cursorX,
               state.cursorY,
               swatches.primary.color,
-              brushStamps[state.tool.brushType][state.tool.brushSize],
-              "0,0",
+              brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
               state.tool.brushSize,
               canvas.currentLayer,
               state.tool.modes,
               state.maskSet,
-              state.drawnPointsSet,
-              null,
+              state.seenPixelsSet,
               true,
               true
             )
           }
         } else {
+          //draw normally
+          addPointToAction(state.cursorX, state.cursorY)
           actionDraw(
             state.cursorX,
             state.cursorY,
             swatches.primary.color,
-            brushStamps[state.tool.brushType][state.tool.brushSize],
-            "0,0",
+            brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
             state.tool.brushSize,
             canvas.currentLayer,
             state.tool.modes,
             state.maskSet,
-            state.drawnPointsSet,
-            state.points,
-            false
+            state.seenPixelsSet
           )
           renderCanvas(canvas.currentLayer)
         }
@@ -270,26 +275,26 @@ function brushSteps() {
             x: Math.round(lineStartX + tri.x * i),
             y: Math.round(lineStartY + tri.y * i),
           }
-          state.brushDirection = calculateBrushDirection(
+          brushDirection = calculateBrushDirection(
             thispoint.x,
             thispoint.y,
             previousX,
             previousY
           )
           // for each point along the line
+          addPointToAction(thispoint.x, thispoint.y)
           actionDraw(
             thispoint.x,
             thispoint.y,
             swatches.primary.color,
-            brushStamps[state.tool.brushType][state.tool.brushSize],
-            state.brushDirection,
+            brushStamps[state.tool.brushType][state.tool.brushSize][
+              brushDirection
+            ],
             state.tool.brushSize,
             canvas.currentLayer,
             state.tool.modes,
             state.maskSet,
-            state.drawnPointsSet,
-            state.points,
-            false
+            state.seenPixelsSet
           )
           previousX = thispoint.x
           previousY = thispoint.y
@@ -298,41 +303,39 @@ function brushSteps() {
         state.lineStartX = null
         state.lineStartY = null
         //fill endpoint
-        state.brushDirection = calculateBrushDirection(
+        brushDirection = calculateBrushDirection(
           state.cursorX,
           state.cursorY,
           previousX,
           previousY
         )
+        addPointToAction(state.cursorX, state.cursorY)
         actionDraw(
           state.cursorX,
           state.cursorY,
           swatches.primary.color,
-          brushStamps[state.tool.brushType][state.tool.brushSize],
-          state.brushDirection,
+          brushStamps[state.tool.brushType][state.tool.brushSize][
+            brushDirection
+          ],
           state.tool.brushSize,
           canvas.currentLayer,
           state.tool.modes,
           state.maskSet,
-          state.drawnPointsSet,
-          state.points,
-          false
+          state.seenPixelsSet
         )
       }
       //only needed if perfect pixels option is on
+      addPointToAction(state.cursorX, state.cursorY)
       actionDraw(
         state.cursorX,
         state.cursorY,
         swatches.primary.color,
-        brushStamps[state.tool.brushType][state.tool.brushSize],
-        "0,0",
+        brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
         state.tool.brushSize,
         canvas.currentLayer,
         state.tool.modes,
         state.maskSet,
-        state.drawnPointsSet,
-        state.points,
-        false
+        state.seenPixelsSet
       )
 
       let maskArray = coordArrayFromSet(
