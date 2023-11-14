@@ -79,9 +79,6 @@ function brushSteps() {
           renderCanvas(canvas.currentLayer)
         }
       }
-      if (state.points.length >= 1000 && state.captureTesting) {
-        saveAsTest()
-      }
       break
     case "pointerup":
       if (shouldDrawLine()) {
@@ -150,6 +147,10 @@ function drawBrushPoint(x, y, brushDirection) {
     state.maskSet,
     state.seenPixelsSet
   )
+  if (state.points.length === 1000 && state.captureTesting) {
+    console.log(state.points.length)
+    saveAsTest()
+  }
 }
 
 function drawPreviewBrushPoint() {
@@ -307,13 +308,12 @@ function saveAsTest() {
     color: { ...swatches.primary.color },
     layer: canvas.currentLayer,
     properties: {
-      points: state.points,
+      points: [...state.points],
       maskSet: state.maskSet,
       maskArray,
     },
   }
   storedActions.brush = testAction
-  state.testing = true
   // // Save data
   // let jsonString = JSON.stringify(testAction, null, 2)
   // //TODO: instead of opening in a new window, save to special testing object

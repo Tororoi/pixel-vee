@@ -12,6 +12,7 @@ import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM, renderBrushModesToDOM } from "../DOM/render.js"
 import { renderCursor } from "../GUI/cursor.js"
+import { testAction } from "../Testing/index.js"
 
 //=========================================//
 //=== * * * Button Event Handlers * * * ===//
@@ -104,6 +105,9 @@ export function handleTools(e, manualToolName = null) {
         dom.toolBtn = document.querySelector(`#${manualToolName}`)
       } else {
         dom.toolBtn = targetTool
+      }
+      if (state.captureTesting) {
+        testAction(dom.toolBtn.id)
       }
       dom.toolBtn.classList.add("selected")
       state.tool = tools[dom.toolBtn.id]
