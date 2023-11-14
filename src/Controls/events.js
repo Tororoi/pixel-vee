@@ -210,7 +210,7 @@ function handlePointerMove(e) {
  */
 function handlePointerUp(e) {
   if (state.testing) {
-    testBrushAction()
+    testBrushAction(state.testBrushSize)
     return
   }
   canvas.pointerEvent = "pointerup"

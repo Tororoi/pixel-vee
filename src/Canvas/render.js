@@ -3,6 +3,7 @@ import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
+import { tools } from "../Tools/index.js"
 import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 
@@ -95,8 +96,6 @@ function redrawTimelineActions(layer, index = null) {
           break
         case "brush":
           //actionDraw
-          // let begin = performance.now()
-
           const offsetX = action.layer.x
           const offsetY = action.layer.y
 
@@ -123,7 +122,7 @@ function redrawTimelineActions(layer, index = null) {
               previousX,
               previousY
             )
-            action.tool.action(
+            tools[action.tool.name].action(
               p.x + offsetX,
               p.y + offsetY,
               p.color,
@@ -156,14 +155,10 @@ function redrawTimelineActions(layer, index = null) {
             //   }
             // }
           }
-          // let end = performance.now()
-          // if (action.properties.maskSet) {
-          //   console.log(end - begin)
-          // }
           break
         case "fill":
           //actionFill
-          action.tool.action(
+          tools[action.tool.name].action(
             action.properties.vectorProperties.px1 + action.layer.x,
             action.properties.vectorProperties.py1 + action.layer.y,
             action.color,
@@ -175,7 +170,7 @@ function redrawTimelineActions(layer, index = null) {
           break
         case "line":
           //actionLine
-          action.tool.action(
+          tools[action.tool.name].action(
             action.properties.px1 + action.layer.x,
             action.properties.py1 + action.layer.y,
             action.properties.px2 + action.layer.x,
@@ -183,14 +178,14 @@ function redrawTimelineActions(layer, index = null) {
             action.color,
             action.layer,
             action.modes,
-            brushStamps[action.tool.brushType][action.brushSize],
-            action.brushSize,
+            brushStamps[action.tool.brushType][action.tool.brushSize],
+            action.tool.brushSize,
             action.properties.maskSet
           )
           break
         case "quadCurve":
           //actionQuadraticCurve
-          action.tool.action(
+          tools[action.tool.name].action(
             action.properties.vectorProperties.px1 + action.layer.x,
             action.properties.vectorProperties.py1 + action.layer.y,
             action.properties.vectorProperties.px2 + action.layer.x,
@@ -201,14 +196,14 @@ function redrawTimelineActions(layer, index = null) {
             action.color,
             action.layer,
             action.modes,
-            brushStamps[action.tool.brushType][action.brushSize],
-            action.brushSize,
+            brushStamps[action.tool.brushType][action.tool.brushSize],
+            action.tool.brushSize,
             action.properties.maskSet
           )
           break
         case "cubicCurve":
           //actionCubicCurve
-          action.tool.action(
+          tools[action.tool.name].action(
             action.properties.vectorProperties.px1 + action.layer.x,
             action.properties.vectorProperties.py1 + action.layer.y,
             action.properties.vectorProperties.px2 + action.layer.x,
@@ -221,14 +216,14 @@ function redrawTimelineActions(layer, index = null) {
             action.color,
             action.layer,
             action.modes,
-            brushStamps[action.tool.brushType][action.brushSize],
-            action.brushSize,
+            brushStamps[action.tool.brushType][action.tool.brushSize],
+            action.tool.brushSize,
             action.properties.maskSet
           )
           break
         case "ellipse":
           //actionEllipse
-          action.tool.action(
+          tools[action.tool.name].action(
             action.properties.vectorProperties.px1 + action.layer.x,
             action.properties.vectorProperties.py1 + action.layer.y,
             action.properties.vectorProperties.px2 + action.layer.x,
@@ -241,8 +236,8 @@ function redrawTimelineActions(layer, index = null) {
             action.color,
             action.layer,
             action.modes,
-            brushStamps[action.tool.brushType][action.brushSize],
-            action.brushSize,
+            brushStamps[action.tool.brushType][action.tool.brushSize],
+            action.tool.brushSize,
             action.properties.vectorProperties.angle,
             action.properties.vectorProperties.offset,
             action.properties.vectorProperties.x1Offset,

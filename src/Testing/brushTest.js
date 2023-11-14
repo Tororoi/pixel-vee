@@ -3,9 +3,11 @@ import { brushAction } from "./brushAction.js"
 import { actionDraw } from "../Actions/actions.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 import { renderCanvas } from "../Canvas/render.js"
+import { brushStamps } from "../Context/brushStamps.js"
+import { storedActions } from "./context.js"
 
-export function testBrushAction() {
-  const action = brushAction
+export function testBrushAction(brushSize) {
+  const action = storedActions.brush
   let begin = performance.now()
   const offsetX = action.layer.x
   const offsetY = action.layer.y
@@ -37,8 +39,8 @@ export function testBrushAction() {
       p.x + offsetX,
       p.y + offsetY,
       p.color,
-      p.brushStamp[brushDirection],
-      p.brushSize,
+      brushStamps[action.tool.brushType][brushSize][brushDirection],
+      brushSize,
       action.layer,
       action.modes,
       mask,
@@ -68,5 +70,5 @@ export function testBrushAction() {
   }
   let end = performance.now()
   console.log(`Brush Action: ${Math.round((end - begin) * 10000) / 10000}ms`)
-  renderCanvas(canvas.currentLayer)
+  renderCanvas(action.layer)
 }

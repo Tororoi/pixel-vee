@@ -66,15 +66,9 @@ function fillSteps() {
 }
 
 /**
- * Used automatically by curve tools after curve is completed.
- * TODO: create distinct mode for adjusting
- * Ideally a user should be able to click on a curve and render it's vector UI that way.
- * Currently this modifies the history directly which is a big no no, just done for testing, only ok for now since it just modifies the curve that was just created
+ * Used automatically by fill tool after fill is completed.
  */
 export function adjustFillSteps() {
-  //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
-  //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
-  //this routine would be better for touchscreens, and no worse with pointer
   let action = state.undoStack[canvas.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":

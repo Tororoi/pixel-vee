@@ -271,14 +271,8 @@ function ellipseSteps() {
  * Used automatically by ellipse tool after curve is completed.
  * TODO: create distinct tool for adjusting that won't create a new curve when clicking.
  * Ideally a user should be able to click on a curve and render it's vector UI that way.
- * TODO: Modify point in vector timeline and push new curve set on pointer up to timeline as new type of push called "modify vector"
- * Currently this modifies the history directly which is a big no no, just done for testing, only ok for now since it just modifies the curve that was just created
- * BUG: On tablets, pointer is forced into dragging P2 no matter where a user clicks
  */
 export function adjustEllipseSteps() {
-  //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
-  //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
-  //this routine would be better for touchscreens, and no worse with pointer
   let action = state.undoStack[canvas.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
@@ -314,8 +308,8 @@ export function adjustEllipseSteps() {
           action.color,
           action.layer,
           action.modes,
-          brushStamps[action.tool.brushType][action.brushSize],
-          action.brushSize,
+          brushStamps[action.tool.brushType][action.tool.brushSize],
+          action.tool.brushSize,
           state.vectorProperties.angle,
           state.vectorProperties.offset,
           state.vectorProperties.x1Offset,
@@ -345,8 +339,8 @@ export function adjustEllipseSteps() {
           action.color,
           action.layer,
           action.modes,
-          brushStamps[action.tool.brushType][action.brushSize],
-          action.brushSize,
+          brushStamps[action.tool.brushType][action.tool.brushSize],
+          action.tool.brushSize,
           state.vectorProperties.angle,
           state.vectorProperties.offset,
           state.vectorProperties.x1Offset,

@@ -8,6 +8,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { createColorMaskSet } from "../Canvas/masks.js"
+import { storedActions } from "../Testing/context.js"
 
 //====================================//
 //=== * * * Brush Controller * * * ===//
@@ -107,44 +108,6 @@ function brushSteps() {
     default:
     //do nothing
   }
-}
-
-//====================================//
-//======= * * * Testing * * * ========//
-//====================================//
-
-/**
- * Save current action as a test that can be repeated exactly
- */
-function saveAsTest() {
-  let maskArray = coordArrayFromSet(
-    state.maskSet,
-    canvas.currentLayer.x,
-    canvas.currentLayer.y
-  )
-  // Save data
-  let jsonString = JSON.stringify(
-    {
-      tool: brush,
-      layer: canvas.currentLayer,
-      properties: {
-        points: state.points,
-        maskSet: state.maskSet,
-        maskArray,
-      },
-    },
-    null,
-    2
-  )
-  //TODO: instead of opening in a new window, save to special testing object
-  // Create a new Blob with the JSON data and the correct MIME type
-  const blob = new Blob([jsonString], { type: "application/json" })
-
-  // Create a URL for the Blob
-  const blobUrl = URL.createObjectURL(blob)
-
-  // Open the URL in a new tab/window
-  window.open(blobUrl)
 }
 
 //====================================//
@@ -323,4 +286,43 @@ export const brush = {
   type: "raster",
   cursor: "crosshair",
   activeCursor: "crosshair",
+}
+
+//====================================//
+//======= * * * Testing * * * ========//
+//====================================//
+
+/**
+ * Save current action as a test that can be repeated exactly
+ */
+function saveAsTest() {
+  let maskArray = coordArrayFromSet(
+    state.maskSet,
+    canvas.currentLayer.x,
+    canvas.currentLayer.y
+  )
+  let testAction = {
+    tool: { ...brush },
+    modes: { ...brush.modes },
+    color: { ...swatches.primary.color },
+    layer: canvas.currentLayer,
+    properties: {
+      points: state.points,
+      maskSet: state.maskSet,
+      maskArray,
+    },
+  }
+  storedActions.brush = testAction
+  state.testing = true
+  // // Save data
+  // let jsonString = JSON.stringify(testAction, null, 2)
+  // //TODO: instead of opening in a new window, save to special testing object
+  // // Create a new Blob with the JSON data and the correct MIME type
+  // const blob = new Blob([jsonString], { type: "application/json" })
+
+  // // Create a URL for the Blob
+  // const blobUrl = URL.createObjectURL(blob)
+
+  // // Open the URL in a new tab/window
+  // window.open(blobUrl)
 }

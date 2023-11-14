@@ -6,11 +6,7 @@ import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { handleUndo, handleRedo } from "../Actions/undoRedo.js"
 import { vectorGui } from "../GUI/vector.js"
-import {
-  createSquareBrush,
-  createCircleBrush,
-  updateBrushPreview,
-} from "../utils/brushHelpers.js"
+import { updateBrushPreview } from "../utils/brushHelpers.js"
 import { actionClear } from "../Actions/actions.js"
 import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
@@ -27,7 +23,7 @@ import { renderCursor } from "../GUI/cursor.js"
  */
 function handleZoom(e) {
   //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
-  //BUG: on mobile zoom causes cursor coords to desync with pixelgrid
+  //BUG: on mobile zoom causes cursor coords to sometimes desync with pixelgrid
   //TRY: restrict zoom to fixed multiples, 125%, 150% etc
   //general zoom based on center
   if (e.target.closest(".zoombtn")) {
@@ -39,7 +35,7 @@ function handleZoom(e) {
       //get center coordinates
       let zoomedX = (canvas.xOffset + canvas.offScreenCVS.width / 2) / z
       let zoomedY = (canvas.yOffset + canvas.offScreenCVS.height / 2) / z
-      //offset by half of canvas
+      // offset by half of canvas
       let nox = zoomedX - canvas.offScreenCVS.width / 2
       let noy = zoomedY - canvas.offScreenCVS.height / 2
       if (canvas.zoom > 0.5) {
@@ -133,8 +129,8 @@ export function handleTools(e, manualToolName = null) {
 }
 
 /**
- * TODO: modes should allow multiple at once, not one at a time
  * TODO: add multi-touch mode for drawing with multiple fingers
+ * TODO: add curve brush mode for freehand drawing splines
  * @param {PointerEvent} e
  * @param {String} manualModeName
  */
@@ -174,7 +170,6 @@ export function handleModes(e, manualModeName = null) {
  * @param {PointerEvent} e
  */
 function switchBrush(e) {
-  //TODO: when selecting a default brush, generate all stamps fom 1-32px and store them in a lookup table for ease of testing and to avoid storing the entire brush stamp on each drawn point.
   if (state.tool.brushType === "square") {
     state.tool.brushType = "circle"
   } else {

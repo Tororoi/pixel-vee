@@ -8,6 +8,7 @@ import { swatches } from "./swatch.js"
 export const state = {
   captureTesting: false,
   testing: false,
+  testBrushSize: 32,
   grid: false,
   //timeline
   pointsSet: null,
@@ -92,14 +93,13 @@ export const state = {
  * @param {Object} actionObject
  */
 function addToTimeline(actionObject) {
-  const { tool, color, brushSize, layer, properties } = actionObject
+  const { tool, color, layer, properties } = actionObject
   //use current state for variables
   state.action = {
-    layer: layer,
-    brushSize: brushSize || state.tool.brushSize,
-    color: color || { ...swatches.primary.color },
     tool: { ...tool },
-    modes: { ...tool.modes }, //TODO: should be replaced by options to allow multi selection of modes
+    modes: { ...tool.modes },
+    color: color || { ...swatches.primary.color },
+    layer: layer,
     properties,
     hidden: false,
     removed: false,
