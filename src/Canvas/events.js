@@ -227,7 +227,6 @@ function layerInteract(e) {
   } else {
     //select current layer
     if (layer !== canvas.currentLayer) {
-      //TODO: handle modes, use icon
       canvas.currentLayer.inactiveTools.forEach((tool) => {
         dom[`${tool}Btn`].disabled = false
       })
@@ -299,7 +298,7 @@ function dropLayer(e) {
   let targetLayer = e.target.closest(".layer").layerObj
   let draggedIndex = parseInt(e.dataTransfer.getData("text"))
   let heldLayer = canvas.layers[draggedIndex]
-  //TODO: add layer change to timeline
+  //TODO: should layer order change be added to timeline?
   if (e.target.className.includes("layer") && targetLayer !== heldLayer) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
       if (dom.layersContainer.children[i] === e.target) {
@@ -337,7 +336,6 @@ function dragLayerEnd(e) {
 
 /**
  * Upload an image and create a new reference layer
- * TODO: allow user to set pixel scale between 0.125 and 8
  */
 function addReferenceLayer() {
   //TODO: add to timeline
@@ -357,8 +355,7 @@ function addReferenceLayer() {
           canvas.sharpness * canvas.zoom,
           canvas.sharpness * canvas.zoom
         )
-        onscreenLayerCVS.className = "onscreen-layer"
-        // dom.canvasLayers.appendChild(onscreenLayerCVS)
+        onscreenLayerCVS.className = "onscreen-canvas"
         dom.canvasLayers.insertBefore(
           onscreenLayerCVS,
           dom.canvasLayers.children[0]
@@ -498,7 +495,6 @@ function vectorInteract(e) {
     //switch tool
     handleTools(null, vector.tool.name)
     //select current vector
-    //TODO: modify object structure of states to match object in undoStack to make assignment simpler like vectorGui.x = {...vector.x}
     vectorGui.reset()
     if (vector.index !== currentIndex) {
       state.vectorProperties = { ...vector.properties.vectorProperties }

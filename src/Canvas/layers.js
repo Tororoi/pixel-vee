@@ -50,7 +50,6 @@ export function consolidateLayers(includeReference = false) {
  * @returns {Object} layer
  */
 export function createNewRasterLayer(name) {
-  //TODO: create onscreen canvas for the layer as well as the offscreen one
   let offscreenLayerCVS = document.createElement("canvas")
   let offscreenLayerCTX = offscreenLayerCVS.getContext("2d")
   offscreenLayerCTX.willReadFrequently = true
@@ -63,7 +62,7 @@ export function createNewRasterLayer(name) {
     canvas.sharpness * canvas.zoom,
     canvas.sharpness * canvas.zoom
   )
-  onscreenLayerCVS.className = "onscreen-layer"
+  onscreenLayerCVS.className = "onscreen-canvas"
   dom.canvasLayers.appendChild(onscreenLayerCVS)
   onscreenLayerCVS.width = onscreenLayerCVS.offsetWidth * canvas.sharpness
   onscreenLayerCVS.height = onscreenLayerCVS.offsetHeight * canvas.sharpness

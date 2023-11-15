@@ -148,9 +148,9 @@ function drawBrushPoint(x, y, brushDirection) {
     state.seenPixelsSet
   )
   //Uncomment for performance testing
-  if (state.captureTesting) {
-    saveBrushAsTest()
-  }
+  // if (state.captureTesting) {
+  //   saveBrushAsTest()
+  // }
 }
 
 function drawPreviewBrushPoint() {

@@ -63,7 +63,6 @@ export function activateShortcut(keyCode) {
           vectorGui.selectedPoint.xKey !== "px1"
         ) {
           //while holding control point, readjust ellipse without having to move cursor.
-          //TODO: update this functionality to have other radii go back to previous radii when releasing shift
           adjustEllipseSteps()
           vectorGui.render()
         }
@@ -282,7 +281,7 @@ export function deactivateShortcut(keyCode) {
         vectorGui.selectedPoint.xKey !== "px1"
       ) {
         //while holding control point, readjust ellipse without having to move cursor.
-        //TODO: update this functionality to have other radii go back to previous radii when releasing shift
+        //TODO: update this functionality to have other radii go back to previous radius value when releasing shift
         adjustEllipseSteps()
         vectorGui.render()
       }
@@ -382,7 +381,6 @@ export function deactivateShortcut(keyCode) {
  * Set tool cursor. TODO: move to utils file
  */
 function setToolCssCursor() {
-  // if (dom.modeBtn.id === "erase") {
   if (state.tool.modes?.eraser) {
     canvas.vectorGuiCVS.style.cursor = "none"
   } else {

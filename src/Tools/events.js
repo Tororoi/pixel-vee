@@ -107,10 +107,10 @@ export function handleTools(e, manualToolName = null) {
       } else {
         dom.toolBtn = targetTool
       }
-      //Run performance test for selected tool if testing is enabled
-      if (state.captureTesting && storedActions[dom.toolBtn.id]) {
-        testAction(dom.toolBtn.id)
-      }
+      //Uncomment to run performance test for selected tool if testing is enabled
+      // if (state.captureTesting && storedActions[dom.toolBtn.id]) {
+      //   testAction(dom.toolBtn.id)
+      // }
       dom.toolBtn.classList.add("selected")
       state.tool = tools[dom.toolBtn.id]
       renderCanvas(canvas.currentLayer)
@@ -119,7 +119,6 @@ export function handleTools(e, manualToolName = null) {
       dom.brushSlider.value = state.tool.brushSize
       dom.brushSlider.disabled = state.tool.disabled
       //update cursor
-      // if (dom.modeBtn.id === "erase") {
       if (state.tool.modes?.eraser) {
         canvas.vectorGuiCVS.style.cursor = "none"
       } else {

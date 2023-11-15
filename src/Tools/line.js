@@ -13,7 +13,7 @@ import { coordArrayFromSet } from "../utils/maskHelpers.js"
 
 /**
  * Supported modes: "draw, erase, inject",
- * TODO: add vector line tool
+ * TODO: add vector line tool. A raster line tool would still be present for ease of use.
  */
 function lineSteps() {
   switch (canvas.pointerEvent) {

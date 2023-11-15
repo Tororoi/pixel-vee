@@ -38,4 +38,5 @@ initializeDialogBox(dom.sizeContainer, true)
 // * Color Picker * //
 initializeDialogBox(dom.colorPickerContainer)
 
-//TODO: create benchmark tests for actions performance at 1, 4, 8, 16, 32 brush sizes for 1000 points.
+// * Export * //
+// TODO: initializeDialogBox(dom.exportContainer)

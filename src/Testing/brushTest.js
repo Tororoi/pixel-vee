@@ -80,7 +80,7 @@ export function testBrushAction() {
  * Save current action as a test that can be repeated exactly
  */
 export function saveBrushAsTest() {
-  if (state.points.length === 1000) {
+  if (state.points.length === state.testNumPoints) {
     console.log("save brush as test")
     let maskArray = coordArrayFromSet(
       state.maskSet,

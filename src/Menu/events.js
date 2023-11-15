@@ -66,9 +66,9 @@ document.body.addEventListener("mouseover", (e) => {
 })
 dom.gridBtn.addEventListener("click", (e) => {
   if (dom.gridBtn.checked) {
-    state.grid = true
+    vectorGui.grid = true
   } else {
-    state.grid = false
+    vectorGui.grid = false
   }
   vectorGui.render()
 })

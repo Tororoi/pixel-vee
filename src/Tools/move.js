@@ -26,20 +26,10 @@ function moveSteps() {
       if (vectorGui.selectedPoint.xKey) {
         scaleSteps()
       } else {
-        if (canvas.currentLayer.type === "reference") {
-          //Physically move a reference layer
-          canvas.currentLayer.x += state.cursorX - state.previousX
-          canvas.currentLayer.y += state.cursorY - state.previousY
-        } else if (canvas.currentLayer.type === "raster") {
-          //move content
-          // translateWithoutWrap(
-          //   canvas.currentLayer.ctx,
-          //   state.cursorX - state.previousX,
-          //   state.cursorY - state.previousY
-          // )
-          canvas.currentLayer.x += state.cursorX - state.previousX
-          canvas.currentLayer.y += state.cursorY - state.previousY
-        }
+        //TODO: additional logic will be needed to handle moving a selected area here
+        //Move layer
+        canvas.currentLayer.x += state.cursorX - state.previousX
+        canvas.currentLayer.y += state.cursorY - state.previousY
         renderCanvas(canvas.currentLayer, true)
       }
       break

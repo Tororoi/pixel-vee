@@ -15,6 +15,7 @@ import { renderGrid } from "./grid.js"
 
 //Note: The Vector Graphics canvas has a mix-blend-mode: difference applied to it
 export const vectorGui = {
+  grid: false,
   collisionPresent: false,
   collidedKeys: { xKey: null, yKey: null },
   selectedPoint: { xKey: null, yKey: null },
@@ -101,8 +102,6 @@ function handleCollisionAndDraw(keys, point, radius, modify, offset) {
  */
 function setCursorStyle() {
   if (!vectorGui.collisionPresent) {
-    // canvas.vectorGuiCVS.style.cursor =
-    //   dom.modeBtn.id === "erase" ? "none" : state.tool.cursor
     canvas.vectorGuiCVS.style.cursor = state.tool.modes?.eraser
       ? "none"
       : state.tool.cursor
@@ -170,7 +169,7 @@ function render(lineDashOffset = 0.5) {
     renderSelectVector(vectorGui, lineDashOffset, state.tool.name === "select")
   }
   //Render grid
-  if (canvas.zoom >= 4 && state.grid) {
+  if (canvas.zoom >= 4 && vectorGui.grid) {
     renderGrid(8)
   }
   //Animate render

@@ -8,7 +8,7 @@ import { setInitialZoom } from "../utils/canvasHelpers.js"
 const backgroundCVS = document.querySelector(".bg-canvas")
 const backgroundCTX = backgroundCVS.getContext("2d")
 //Set gui canvas and its context
-const vectorGuiCVS = document.getElementById("vectorGui")
+const vectorGuiCVS = document.getElementById("vector-gui-canvas")
 const vectorGuiCTX = vectorGuiCVS.getContext("2d")
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
 const offScreenCVS = document.createElement("canvas")

@@ -107,7 +107,11 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
   vectorGui.render()
 }
 
-//TODO: handleMoveAction
+/**
+ *
+ * @param {Object} latestAction
+ * @param {String} modType
+ */
 function handleMoveAction(latestAction, modType) {
   let deltaX = latestAction.properties[modType].x - latestAction.layer.x
   let deltaY = latestAction.properties[modType].y - latestAction.layer.y

@@ -42,7 +42,10 @@ export function testEllipseAction() {
  */
 export function saveEllipseAsTest(points) {
   console.log("render points", points.length)
-  if (points.length === 1000 && canvas.pointerEvent === "pointermove") {
+  if (
+    points.length === state.testNumPoints &&
+    canvas.pointerEvent === "pointermove"
+  ) {
     console.log("save ellipse as test")
     let maskArray = coordArrayFromSet(
       state.maskSet,

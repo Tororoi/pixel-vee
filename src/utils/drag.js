@@ -187,7 +187,6 @@ export const dragStop = (e) => {
 }
 
 export const dragMove = (e) => {
-  //TODO: when moving over sibling elements, change the sibling elements to position absolute and set it's x and y values to match its position while it was relative. Move all elements after current hovered element to make space for dragged element
   if (state.dragTarget) {
     const parentElement = state.dragTarget.parentElement
     //For vertical drag and replace, fix siblings in place

@@ -18,7 +18,7 @@ import { saveEllipseAsTest } from "../Testing/ellipseTest.js"
 //====================================//
 
 //"Actions" are user-initiated events that are reversible through the undo button. This file holds the functions used for reversible actions.
-//TODO: Not all reversible actions are held here currently. Clear canvas and addLayer are not present, but those don't interact with the cursor.
+//Not all reversible actions are held here currently. Clear canvas and addLayer are not present, but those don't interact with the cursor.
 
 /**
  * Modify action in the timeline
@@ -177,13 +177,8 @@ export function actionClear(layer) {
   })
 }
 
-// export function actionMove() {
-
-// }
-
 /**
  * Render a stamp from the brush to the canvas
- * TODO: Find more efficient way to draw any brush shape without drawing each pixel separately. Could either be image stamp or made with rectangles
  * @param {Integer} coordX
  * @param {Integer} coordY
  * @param {Object} currentColor - {color, r, g, b, a}
@@ -679,7 +674,7 @@ export function actionCubicCurve(
       null,
       isPreview
     )
-    //TODO: can setting state be moved to steps function?
+    //TODO: move global vars handling to steps function
     state.vectorProperties.px2 = state.cursorX
     state.vectorProperties.py2 = state.cursorY
   } else if (stepNum === 2) {
