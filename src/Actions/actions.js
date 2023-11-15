@@ -11,6 +11,7 @@ import {
 } from "../utils/imageDataHelpers.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 import { canvas } from "../Context/canvas.js"
+import { saveEllipseAsTest } from "../Testing/ellipseTest.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -503,6 +504,10 @@ function renderPoints(
     previousX = xt
     previousY = yt
   }
+  //Uncomment for performance testing
+  // if (state.captureTesting) {
+  //   if (state.tool.name === "ellipse") saveEllipseAsTest(points)
+  // }
 }
 
 /**

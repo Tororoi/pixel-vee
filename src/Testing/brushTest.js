@@ -1,10 +1,12 @@
 import { state } from "../Context/state.js"
+import { canvas } from "../Context/canvas.js"
+import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
-import { actionDraw } from "../Actions/actions.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { brushStamps } from "../Context/brushStamps.js"
-import { storedActions } from "./context.js"
+import { storedActions } from "./storedActions.js"
+import { coordArrayFromSet } from "../utils/maskHelpers.js"
 
 export function testBrushAction() {
   let brushSize = tools.brush.brushSize
@@ -36,7 +38,7 @@ export function testBrushAction() {
       previousX,
       previousY
     )
-    actionDraw(
+    tools[action.tool.name].action(
       p.x + offsetX,
       p.y + offsetY,
       p.color,
@@ -72,4 +74,41 @@ export function testBrushAction() {
   let end = performance.now()
   console.log(`Brush Action: ${Math.round((end - begin) * 10000) / 10000}ms`)
   renderCanvas(action.layer)
+}
+
+/**
+ * Save current action as a test that can be repeated exactly
+ */
+export function saveBrushAsTest() {
+  if (state.points.length === 1000) {
+    console.log("save brush as test")
+    let maskArray = coordArrayFromSet(
+      state.maskSet,
+      canvas.currentLayer.x,
+      canvas.currentLayer.y
+    )
+    let testAction = {
+      tool: { ...tools.brush },
+      modes: { ...tools.brush.modes },
+      color: { ...swatches.primary.color },
+      layer: canvas.currentLayer,
+      properties: {
+        points: [...state.points],
+        maskSet: state.maskSet,
+        maskArray,
+      },
+    }
+    storedActions.brush = testAction
+    // // Save data
+    // let jsonString = JSON.stringify(testAction, null, 2)
+    // //TODO: instead of opening in a new window, save to special testing object
+    // // Create a new Blob with the JSON data and the correct MIME type
+    // const blob = new Blob([jsonString], { type: "application/json" })
+
+    // // Create a URL for the Blob
+    // const blobUrl = URL.createObjectURL(blob)
+
+    // // Open the URL in a new tab/window
+    // window.open(blobUrl)
+  }
 }

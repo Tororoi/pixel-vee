@@ -64,13 +64,6 @@ document.body.addEventListener("mouseover", (e) => {
     showTooltip(tooltipMessage, e.target)
   }
 })
-dom.testBtn.addEventListener("click", (e) => {
-  if (dom.testBtn.checked) {
-    state.captureTesting = true
-  } else {
-    state.captureTesting = false
-  }
-})
 dom.gridBtn.addEventListener("click", (e) => {
   if (dom.gridBtn.checked) {
     state.grid = true

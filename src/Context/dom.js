@@ -11,8 +11,7 @@ const tooltip = document.getElementById("tooltip")
 //====================================//
 //========= * * * Menu * * * =========//
 //====================================//
-// * Toggle Test Mode * //
-const testBtn = document.getElementById("testing-toggle")
+
 // * Toggle Grid * //
 const gridBtn = document.getElementById("grid-toggle")
 // * Toggle Tooltips * //
@@ -128,7 +127,6 @@ export const dom = {
   canvasLayers,
   tooltip,
   //menu
-  testBtn,
   gridBtn,
   tooltipBtn,
   exportBtn,

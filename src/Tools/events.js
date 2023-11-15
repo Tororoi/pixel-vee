@@ -12,7 +12,8 @@ import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM, renderBrushModesToDOM } from "../DOM/render.js"
 import { renderCursor } from "../GUI/cursor.js"
-import { testAction } from "../Testing/index.js"
+import { testAction } from "../Testing/performanceTesting.js"
+import { storedActions } from "../Testing/storedActions.js"
 
 //=========================================//
 //=== * * * Button Event Handlers * * * ===//
@@ -106,7 +107,8 @@ export function handleTools(e, manualToolName = null) {
       } else {
         dom.toolBtn = targetTool
       }
-      if (state.captureTesting) {
+      //Run performance test for selected tool if testing is enabled
+      if (state.captureTesting && storedActions[dom.toolBtn.id]) {
         testAction(dom.toolBtn.id)
       }
       dom.toolBtn.classList.add("selected")

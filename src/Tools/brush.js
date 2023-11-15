@@ -8,7 +8,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { createColorMaskSet } from "../Canvas/masks.js"
-import { storedActions } from "../Testing/context.js"
+import { saveBrushAsTest } from "../Testing/brushTest.js"
 
 //====================================//
 //=== * * * Brush Controller * * * ===//
@@ -147,9 +147,9 @@ function drawBrushPoint(x, y, brushDirection) {
     state.maskSet,
     state.seenPixelsSet
   )
-  if (state.points.length === 1000 && state.captureTesting) {
-    console.log(state.points.length)
-    saveAsTest()
+  //Uncomment for performance testing
+  if (state.captureTesting) {
+    saveBrushAsTest()
   }
 }
 
@@ -287,42 +287,4 @@ export const brush = {
   type: "raster",
   cursor: "crosshair",
   activeCursor: "crosshair",
-}
-
-//====================================//
-//======= * * * Testing * * * ========//
-//====================================//
-
-/**
- * Save current action as a test that can be repeated exactly
- */
-function saveAsTest() {
-  let maskArray = coordArrayFromSet(
-    state.maskSet,
-    canvas.currentLayer.x,
-    canvas.currentLayer.y
-  )
-  let testAction = {
-    tool: { ...brush },
-    modes: { ...brush.modes },
-    color: { ...swatches.primary.color },
-    layer: canvas.currentLayer,
-    properties: {
-      points: [...state.points],
-      maskSet: state.maskSet,
-      maskArray,
-    },
-  }
-  storedActions.brush = testAction
-  // // Save data
-  // let jsonString = JSON.stringify(testAction, null, 2)
-  // //TODO: instead of opening in a new window, save to special testing object
-  // // Create a new Blob with the JSON data and the correct MIME type
-  // const blob = new Blob([jsonString], { type: "application/json" })
-
-  // // Create a URL for the Blob
-  // const blobUrl = URL.createObjectURL(blob)
-
-  // // Open the URL in a new tab/window
-  // window.open(blobUrl)
 }
