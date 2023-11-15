@@ -538,21 +538,12 @@ export function actionQuadraticCurve(
   maskSet,
   isPreview = false
 ) {
-  //force coords to int
-  startx = Math.round(startx)
-  starty = Math.round(starty)
-  endx = Math.round(endx)
-  endy = Math.round(endy)
-  controlx = Math.round(controlx)
-  controly = Math.round(controly)
-  //BUG: On touchscreen, hits gradient sign error if first tool used
   if (stepNum === 1) {
-    //after defining x0y0
     actionLine(
       startx,
       starty,
-      state.cursorX,
-      state.cursorY,
+      endx,
+      endy,
       currentColor,
       layer,
       currentModes,
@@ -562,34 +553,7 @@ export function actionQuadraticCurve(
       null,
       isPreview
     )
-    state.vectorProperties.px2 = state.cursorX
-    state.vectorProperties.py2 = state.cursorY
-  } else if (stepNum === 2) {
-    // after defining x2y2, plot quad bezier with x3 and y3 arguments matching x2 and y2
-    //onscreen preview curve
-    //somehow use rendercurve2 for flatter curves
-    let plotPoints = plotQuadBezier(
-      startx,
-      starty,
-      state.cursorX,
-      state.cursorY,
-      endx,
-      endy
-    )
-    renderPoints(
-      plotPoints,
-      brushStamp,
-      currentColor,
-      brushSize,
-      layer,
-      currentModes,
-      maskSet,
-      isPreview
-    )
-    state.vectorProperties.px3 = state.cursorX
-    state.vectorProperties.py3 = state.cursorY
-  } else if (stepNum === 3) {
-    //curve after defining x3y3, plot quad bezier with x3 and y3 arguments matching x2 and y2
+  } else if (stepNum === 2 || stepNum === 3) {
     let plotPoints = plotQuadBezier(
       startx,
       starty,
@@ -648,18 +612,7 @@ export function actionCubicCurve(
   maskSet,
   isPreview = false
 ) {
-  //force coords to int
-  startx = Math.round(startx)
-  starty = Math.round(starty)
-  controlx1 = Math.round(controlx1)
-  controly1 = Math.round(controly1)
-  controlx2 = Math.round(controlx2)
-  controly2 = Math.round(controly2)
-  endx = Math.round(endx)
-  endy = Math.round(endy)
-  //BUG: On touchscreen, hits gradient sign error if first tool used
   if (stepNum === 1) {
-    //after defining p1, p2 will be cursor position
     actionLine(
       startx,
       starty,
@@ -675,8 +628,6 @@ export function actionCubicCurve(
       isPreview
     )
   } else if (stepNum === 2) {
-    // after defining p2, p3 will be cursor position
-    //onscreen preview curve
     let plotPoints = plotQuadBezier(
       startx,
       starty,
@@ -695,31 +646,7 @@ export function actionCubicCurve(
       maskSet,
       isPreview
     )
-  } else if (stepNum === 3) {
-    //curve after defining p3, p4 will be cursor position
-    //onscreen preview curve
-    let plotPoints = plotCubicBezier(
-      startx,
-      starty,
-      controlx1,
-      controly1,
-      controlx2,
-      controly2,
-      endx,
-      endy
-    )
-    renderPoints(
-      plotPoints,
-      brushStamp,
-      currentColor,
-      brushSize,
-      layer,
-      currentModes,
-      maskSet,
-      isPreview
-    )
-  } else if (stepNum === 4) {
-    //curve after defining p4
+  } else if (stepNum === 3 || stepNum === 4) {
     let plotPoints = plotCubicBezier(
       startx,
       starty,
