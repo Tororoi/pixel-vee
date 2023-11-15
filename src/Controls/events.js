@@ -235,6 +235,12 @@ function handlePointerUp(e) {
       }
       renderVectorsToDOM()
     }
+    state.action = null
+    state.pointsSet = null
+    state.seenPixelsSet = null
+    state.points = []
+    //Reset redostack
+    state.redoStack = []
   }
   //Deactivate pending shortcuts TODO: set active shortcut with key code to allow cleaner logic like if (state.shortcut.active) {deactivateShortcut(state.shortcut.keyCode)}
   if (state.tool.name !== dom.toolBtn.id) {
@@ -245,12 +251,6 @@ function handlePointerUp(e) {
       deactivateShortcut("Space")
     }
   }
-  state.action = null
-  state.pointsSet = null
-  state.seenPixelsSet = null
-  state.points = []
-  //Reset redostack
-  state.redoStack = []
   canvas.pointerEvent = "none"
   if (!e.targetTouches) {
     vectorGui.render()
@@ -279,7 +279,7 @@ function handlePointerOut(e) {
   //   //Reset redostack
   //   state.redoStack = []
   // }
-  if (!state.touch) {
+  if (!state.touch && state.clickCounter === 0) {
     renderCanvas(canvas.currentLayer)
     vectorGui.render()
     canvas.pointerEvent = "none"

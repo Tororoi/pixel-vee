@@ -191,25 +191,21 @@ function cubicCurveSteps() {
             vectorGui.reset()
             state.vectorProperties.px1 = state.cursorX
             state.vectorProperties.py1 = state.cursorY
+            //endpoint starts at same point as startpoint
+            state.vectorProperties.px2 = state.cursorX
+            state.vectorProperties.py2 = state.cursorY
             break
           case 2:
-            if (!state.touch) {
-              state.vectorProperties.px2 = state.cursorX
-              state.vectorProperties.py2 = state.cursorY
-            }
+            state.vectorProperties.px3 = state.cursorX
+            state.vectorProperties.py3 = state.cursorY
             break
           case 3:
-            if (!state.touch) {
-              state.vectorProperties.px3 = state.cursorX
-              state.vectorProperties.py3 = state.cursorY
-            }
+          case 4:
+            state.vectorProperties.px4 = state.cursorX
+            state.vectorProperties.py4 = state.cursorY
             break
           default:
           //do nothing
-        }
-        if (state.clickCounter === 4) {
-          state.vectorProperties.px4 = state.cursorX
-          state.vectorProperties.py4 = state.cursorY
         }
         //onscreen preview
         renderCanvas(canvas.currentLayer)
@@ -237,11 +233,22 @@ function cubicCurveSteps() {
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         adjustCurveSteps()
       } else {
-        //draw line from origin point to current point onscreen
-        //normalize pointermove to pixelgrid
-        if (state.clickCounter === 4) {
-          state.vectorProperties.px4 = state.cursorX
-          state.vectorProperties.py4 = state.cursorY
+        switch (state.clickCounter) {
+          case 1:
+            state.vectorProperties.px2 = state.cursorX
+            state.vectorProperties.py2 = state.cursorY
+            break
+          case 2:
+            state.vectorProperties.px3 = state.cursorX
+            state.vectorProperties.py3 = state.cursorY
+            break
+          case 3:
+          case 4:
+            state.vectorProperties.px4 = state.cursorX
+            state.vectorProperties.py4 = state.cursorY
+            break
+          default:
+          //do nothing
         }
         //onscreen preview
         renderCanvas(canvas.currentLayer)
@@ -269,25 +276,28 @@ function cubicCurveSteps() {
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         adjustCurveSteps()
       } else {
-        //For touchscreens
-        if (state.touch) {
-          if (state.clickCounter === 1) {
+        switch (state.clickCounter) {
+          case 1:
             state.vectorProperties.px2 = state.cursorX
             state.vectorProperties.py2 = state.cursorY
-          }
-          if (state.clickCounter === 2) {
+            break
+          case 2:
             state.vectorProperties.px3 = state.cursorX
             state.vectorProperties.py3 = state.cursorY
-          }
-          if (state.clickCounter === 3) {
-            state.clickCounter += 1
-          }
+            break
+          case 3:
+          case 4:
+            state.vectorProperties.px4 = state.cursorX
+            state.vectorProperties.py4 = state.cursorY
+            break
+          default:
+          //do nothing
+        }
+        if (state.touch) {
+          state.clickCounter += 1
         }
         //Solidify curve
         if (state.clickCounter === 4) {
-          //solidify control point
-          state.vectorProperties.px4 = state.cursorX
-          state.vectorProperties.py4 = state.cursorY
           actionCubicCurve(
             state.vectorProperties.px1,
             state.vectorProperties.py1,
@@ -334,13 +344,6 @@ function cubicCurveSteps() {
           vectorGui.render()
         }
       }
-      break
-    case "pointerout":
-      if (vectorGui.selectedPoint.xKey) {
-        adjustCurveSteps()
-      }
-      //cancel curve
-      state.clickCounter = 0
       break
     default:
     //do nothing
@@ -465,14 +468,6 @@ function adjustCurveSteps(numPoints = 4) {
           yKey: null,
         }
         renderCanvas(action.layer, true)
-      }
-      break
-    case "pointerout":
-      if (vectorGui.selectedPoint.xKey) {
-        vectorGui.selectedPoint = {
-          xKey: null,
-          yKey: null,
-        }
       }
       break
     default:

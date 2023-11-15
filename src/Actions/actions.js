@@ -659,12 +659,12 @@ export function actionCubicCurve(
   endy = Math.round(endy)
   //BUG: On touchscreen, hits gradient sign error if first tool used
   if (stepNum === 1) {
-    //after defining x0y0
+    //after defining p1, p2 will be cursor position
     actionLine(
       startx,
       starty,
-      state.cursorX,
-      state.cursorY,
+      endx,
+      endy,
       currentColor,
       layer,
       currentModes,
@@ -674,18 +674,14 @@ export function actionCubicCurve(
       null,
       isPreview
     )
-    //TODO: move global vars handling to steps function
-    state.vectorProperties.px2 = state.cursorX
-    state.vectorProperties.py2 = state.cursorY
   } else if (stepNum === 2) {
-    // after defining x2y2
+    // after defining p2, p3 will be cursor position
     //onscreen preview curve
-    //somehow use rendercurve2 for flatter curves
     let plotPoints = plotQuadBezier(
       startx,
       starty,
-      state.cursorX,
-      state.cursorY,
+      controlx1,
+      controly1,
       endx,
       endy
     )
@@ -699,18 +695,16 @@ export function actionCubicCurve(
       maskSet,
       isPreview
     )
-    state.vectorProperties.px3 = state.cursorX
-    state.vectorProperties.py3 = state.cursorY
   } else if (stepNum === 3) {
-    //curve after defining x3y3
+    //curve after defining p3, p4 will be cursor position
     //onscreen preview curve
     let plotPoints = plotCubicBezier(
       startx,
       starty,
       controlx1,
       controly1,
-      state.cursorX,
-      state.cursorY,
+      controlx2,
+      controly2,
       endx,
       endy
     )
@@ -724,10 +718,8 @@ export function actionCubicCurve(
       maskSet,
       isPreview
     )
-    state.vectorProperties.px4 = state.cursorX
-    state.vectorProperties.py4 = state.cursorY
   } else if (stepNum === 4) {
-    //curve after defining x4y4
+    //curve after defining p4
     let plotPoints = plotCubicBezier(
       startx,
       starty,

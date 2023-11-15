@@ -160,7 +160,8 @@ export function handleModes(e, manualModeName = null) {
     } else {
       canvas.vectorGuiCVS.style.cursor = "crosshair"
     }
-    vectorGui.reset()
+    // vectorGui.reset()
+    // state.reset()
     renderBrushModesToDOM()
     renderCursor(state, canvas, swatches)
   }
