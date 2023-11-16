@@ -71,7 +71,7 @@ function handleWheel(e) {
   let delta = Math.sign(e.deltaY)
   //zoom based on pointer coords
   let z
-  setCoordinates(e) //
+  setCoordinates(e)
   if (delta < 0) {
     z = 0.5
     //get target coordinates
