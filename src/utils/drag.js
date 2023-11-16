@@ -1,5 +1,4 @@
 import { state } from "../Context/state.js"
-import { constrainElementOffsets } from "./constrainElementOffsets.js"
 
 export const initializeDragger = (dragTarget) => {
   const dragBtn = dragTarget.querySelector(".dragger")
@@ -218,7 +217,8 @@ export const dragMove = (e) => {
       if (tgtRect.left - dragTargetMargin < pRect.left)
         state.dragTarget.style.left = 0 + "px"
       if (tgtRect.right + dragTargetMargin > pRect.right)
-        state.dragTarget.style.left = pRect.width - tgtRect.width - 4 + "px"
+        state.dragTarget.style.left =
+          pRect.width - tgtRect.width - 2 * dragTargetMargin + "px"
     }
     if (state.dragTarget.className.includes("v-drag")) {
       if (tgtRect.top - dragTargetMargin < pRect.top)
