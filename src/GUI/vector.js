@@ -163,6 +163,7 @@ function render(lineDashOffset = 0.5) {
   )
   //Prevent blurring
   canvas.vectorGuiCTX.imageSmoothingEnabled = false
+  renderLayerVectors(canvas.currentLayer)
   renderTool(state.tool.name)
   //Render select vector
   if (state.selectProperties.px1 !== null) {
@@ -187,25 +188,52 @@ function render(lineDashOffset = 0.5) {
 function renderTool(toolName) {
   switch (toolName) {
     case "fill":
-      renderFillVector(vectorGui)
+      renderFillVector(state.vectorProperties)
       break
     case "quadCurve":
     case "cubicCurve":
-      renderCurveVector(vectorGui)
+      renderCurveVector(state.vectorProperties)
       break
     case "ellipse":
-      renderEllipseVector(vectorGui)
+      renderEllipseVector(state.vectorProperties)
       const { x1Offset, y1Offset } = state.vectorProperties
       if (x1Offset || y1Offset) {
-        renderOffsetEllipseVector("red")
+        renderOffsetEllipseVector(state.vectorProperties, "red")
       }
       break
     case "move":
       if (canvas.currentLayer.type === "reference") {
-        renderTransformBox(vectorGui)
+        renderTransformBox()
       }
       break
     default:
     //
+  }
+}
+
+//For each vector action in the undoStack in a given layer, render it
+function renderLayerVectors(layer) {
+  for (let action of state.undoStack) {
+    if (
+      !action.hidden &&
+      !action.removed &&
+      action.layer === layer &&
+      action.tool.type === "vector"
+    ) {
+      switch (action.tool.name) {
+        case "fill":
+          renderFillVector(action.properties.vectorProperties)
+          break
+        case "quadCurve":
+        case "cubicCurve":
+          renderCurveVector(action.properties.vectorProperties)
+          break
+        case "ellipse":
+          renderEllipseVector(action.properties.vectorProperties)
+          break
+        default:
+        //
+      }
+    }
   }
 }

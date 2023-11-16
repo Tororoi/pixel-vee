@@ -122,7 +122,7 @@ function redrawTimelineActions(layer, index = null) {
               previousX,
               previousY
             )
-            tools[action.tool.name].action(
+            action.tool.action(
               p.x + offsetX,
               p.y + offsetY,
               p.color,
@@ -158,7 +158,7 @@ function redrawTimelineActions(layer, index = null) {
           break
         case "fill":
           //actionFill
-          tools[action.tool.name].action(
+          action.tool.action(
             action.properties.vectorProperties.px1 + action.layer.x,
             action.properties.vectorProperties.py1 + action.layer.y,
             action.color,
@@ -170,7 +170,7 @@ function redrawTimelineActions(layer, index = null) {
           break
         case "line":
           //actionLine
-          tools[action.tool.name].action(
+          action.tool.action(
             action.properties.px1 + action.layer.x,
             action.properties.py1 + action.layer.y,
             action.properties.px2 + action.layer.x,
@@ -185,7 +185,7 @@ function redrawTimelineActions(layer, index = null) {
           break
         case "quadCurve":
           //actionQuadraticCurve
-          tools[action.tool.name].action(
+          action.tool.action(
             action.properties.vectorProperties.px1 + action.layer.x,
             action.properties.vectorProperties.py1 + action.layer.y,
             action.properties.vectorProperties.px2 + action.layer.x,
@@ -203,7 +203,7 @@ function redrawTimelineActions(layer, index = null) {
           break
         case "cubicCurve":
           //actionCubicCurve
-          tools[action.tool.name].action(
+          action.tool.action(
             action.properties.vectorProperties.px1 + action.layer.x,
             action.properties.vectorProperties.py1 + action.layer.y,
             action.properties.vectorProperties.px2 + action.layer.x,
@@ -223,7 +223,7 @@ function redrawTimelineActions(layer, index = null) {
           break
         case "ellipse":
           //actionEllipse
-          tools[action.tool.name].action(
+          action.tool.action(
             action.properties.vectorProperties.px1 + action.layer.x,
             action.properties.vectorProperties.py1 + action.layer.y,
             action.properties.vectorProperties.px2 + action.layer.x,
