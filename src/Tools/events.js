@@ -24,8 +24,6 @@ import { storedActions } from "../Testing/storedActions.js"
  * @param {PointerEvent} e
  */
 function handleZoom(e) {
-  //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
-  //BUG: on mobile zoom causes cursor coords to sometimes desync with pixelgrid
   //TRY: restrict zoom to fixed multiples, 125%, 150% etc
   //general zoom based on center
   if (e.target.closest(".zoombtn")) {

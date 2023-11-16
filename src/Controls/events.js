@@ -69,7 +69,6 @@ function handleKeyUp(e) {
  */
 function handleWheel(e) {
   let delta = Math.sign(e.deltaY)
-  //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?). To reproduce, quickly zoom in and out
   //zoom based on pointer coords
   let z
   setCoordinates(e) //

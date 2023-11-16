@@ -478,7 +478,6 @@ function renderPoints(
   const seen = new Set()
   let previousX = Math.floor(points[0].x)
   let previousY = Math.floor(points[0].y)
-  //performance: ellipse with a 360px radius and a 32px brush, using the brush direction decreases render time from 148ms to 22ms
   for (const { x, y } of points) {
     //rounded values
     let xt = Math.floor(x)

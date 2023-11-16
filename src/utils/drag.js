@@ -61,12 +61,15 @@ function setDragSiblings() {
 
     return orderA - orderB // This will sort in ascending order
   })
-
+  let dragTargetMargin = 0
+  if (state.dragTarget.className.includes("dialog-box")) {
+    dragTargetMargin = 2
+  }
   for (let i = 0; i < siblingArray.length; i++) {
     let newSiblingProperties = {}
     let bounds = siblingArray[i].getBoundingClientRect()
     newSiblingProperties.height = bounds.height
-    newSiblingProperties.top = siblingArray[i].offsetTop - 2 //-2 is to account for 2px margin on .draggable
+    newSiblingProperties.top = siblingArray[i].offsetTop - dragTargetMargin
     newSiblingProperties.element = siblingArray[i]
     state.dragSiblings.push(newSiblingProperties)
   }
@@ -90,7 +93,10 @@ function reorderElements(e) {
       dragTargetIndex = i
     }
   }
-
+  let dragTargetMargin = 0
+  if (state.dragTarget.className.includes("dialog-box")) {
+    dragTargetMargin = 2
+  }
   //check location of drag target and reorder elements
   for (let i = 0; i < state.dragSiblings.length; i++) {
     if (state.dragSiblings[i].element !== state.dragTarget) {
@@ -114,7 +120,7 @@ function reorderElements(e) {
             state.dragSiblings[j].element.style.top = offset + "px"
             state.dragSiblings[j].top = offset
           }
-          offset += state.dragSiblings[j].height + 4
+          offset += state.dragSiblings[j].height + 2 * dragTargetMargin
         }
         break
       }
@@ -203,16 +209,23 @@ export const dragMove = (e) => {
     }
     let pRect = parentElement.getBoundingClientRect()
     let tgtRect = state.dragTarget.getBoundingClientRect()
+    let dragTargetMargin = 0
+    if (state.dragTarget.className.includes("dialog-box")) {
+      dragTargetMargin = 2
+    }
     //Constrain draggable element inside window, include box shadow border
     if (state.dragTarget.className.includes("h-drag")) {
-      if (tgtRect.left - 2 < pRect.left) state.dragTarget.style.left = 0 + "px"
-      if (tgtRect.right + 2 > pRect.right)
+      if (tgtRect.left - dragTargetMargin < pRect.left)
+        state.dragTarget.style.left = 0 + "px"
+      if (tgtRect.right + dragTargetMargin > pRect.right)
         state.dragTarget.style.left = pRect.width - tgtRect.width - 4 + "px"
     }
     if (state.dragTarget.className.includes("v-drag")) {
-      if (tgtRect.top - 2 < pRect.top) state.dragTarget.style.top = 0 + "px"
-      if (tgtRect.bottom + 2 > pRect.bottom) {
-        state.dragTarget.style.top = pRect.height - tgtRect.height - 4 + "px"
+      if (tgtRect.top - dragTargetMargin < pRect.top)
+        state.dragTarget.style.top = 0 + "px"
+      if (tgtRect.bottom + dragTargetMargin > pRect.bottom) {
+        state.dragTarget.style.top =
+          pRect.height - tgtRect.height - 2 * dragTargetMargin + "px"
       }
     }
   }

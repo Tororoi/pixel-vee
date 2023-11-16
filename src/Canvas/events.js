@@ -1,22 +1,21 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { tools } from "../Tools/index.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
   renderLayersToDOM,
   renderVectorsToDOM,
   renderPaletteToDOM,
-  renderBrushModesToDOM,
 } from "../DOM/render.js"
 import { createNewRasterLayer } from "./layers.js"
 import { handleTools } from "../Tools/events.js"
 import { removeAction, changeActionMode } from "../Actions/actions.js"
-import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
-import { swatches } from "../Context/swatch.js"
 import { setInitialZoom } from "../utils/canvasHelpers.js"
 import { initializeColorPicker } from "../Swatch/events.js"
 import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
+import { dragStart, dragMove, dragStop } from "../utils/drag.js"
 
 //====================================//
 //==== * * * Canvas Resize * * * =====//
@@ -437,6 +436,7 @@ function removeLayer(layer) {
 }
 
 /**
+ * Add layer
  * Add a new raster layer
  * TODO: This is a timeline action and should be moved to an actions file
  */
@@ -622,6 +622,13 @@ dom.layersContainer.addEventListener("dragenter", dragLayerEnter)
 dom.layersContainer.addEventListener("dragleave", dragLayerLeave)
 dom.layersContainer.addEventListener("drop", dropLayer)
 dom.layersContainer.addEventListener("dragend", dragLayerEnd)
+//TODO: To make fancier dragging work, must be made compatible with a scrolling container
+// dom.layersContainer.addEventListener("pointerdown", () =>
+//   dragStart(e, e.target.closest(".layer"))
+// )
+// dom.layersContainer.addEventListener("pointerup", dragStop)
+// dom.layersContainer.addEventListener("pointerout", dragStop)
+// dom.layersContainer.addEventListener("pointermove", dragMove)
 
 // * Vectors * //
 dom.vectorsThumbnails.addEventListener("click", vectorInteract)

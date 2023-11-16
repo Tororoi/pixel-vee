@@ -34,15 +34,8 @@
 }
 
 .draggable {
-  margin: 2px;
   z-index: 100;
   touch-action: none;
-  &.v-drag {
-    @include boxBorder($border-color, $white, false, top bottom);
-  }
-  &.h-drag {
-    @include boxBorder;
-  }
   &.dragging {
     cursor: grabbing;
     user-select: none;
@@ -51,32 +44,44 @@
       cursor: grabbing !important;
     }
   }
-  .header {
-    background-color: $black;
-    justify-self: center;
-    width: 100%;
-    min-height: 20px;
-    margin: 0px;
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    cursor: grab;
-    @include boxBorder($border-color, $white, false, bottom);
-    @include dragger;
-    .collapse-btn {
-      @include collapseArrow;
+}
+
+.dialog-box {
+  margin: 2px;
+  &.draggable {
+    &.v-drag {
+      @include boxBorder($border-color, $white, false, top bottom);
     }
-  }
-  .collapsible {
-    flex: 0 1 auto;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow: hidden;
-    position: relative;
+    &.h-drag {
+      @include boxBorder;
+    }
+    .header {
+      background-color: $black;
+      justify-self: center;
+      width: 100%;
+      min-height: 20px;
+      margin: 0px;
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      cursor: grab;
+      @include boxBorder($border-color, $white, false, bottom);
+      @include dragger;
+      .collapse-btn {
+        @include collapseArrow;
+      }
+    }
+    .collapsible {
+      flex: 0 1 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+      position: relative;
+    }
   }
 }
 

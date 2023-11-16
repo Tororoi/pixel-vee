@@ -83,7 +83,6 @@ canvas.previewCVS.height = canvas.offScreenCVS.height
 canvas.thumbnailCVS.width = canvas.offScreenCVS.width + 344
 canvas.thumbnailCVS.height = canvas.offScreenCVS.height
 //improve sharpness
-//BUG: sharpness (8+) greatly affects performance in browsers other than chrome (can safari and firefox not handle large canvases?)
 //window.devicePixelRatio is typically 2.
 //Other than performance issues, any sharpness greater than the devicePixelRatio can actually look bad because the device cannot render the fidelity expected by the canvas.
 canvas.sharpness = window.devicePixelRatio

@@ -174,7 +174,6 @@ function ellipseSteps() {
         state.vectorProperties.radB = Math.floor(
           Math.sqrt(dxb * dxb + dyb * dyb)
         )
-        //BUG: ellipse steps being called when it shouldn't be
         updateEllipseOffsets(
           state,
           canvas,

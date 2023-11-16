@@ -20,7 +20,7 @@ export const renderLayersToDOM = () => {
       }
 
       const layerElement = document.createElement("div")
-      layerElement.className = `layer ${l.type}`
+      layerElement.className = `layer ${l.type}` //draggable v-drag
       layerElement.id = id
       id += 1
       layerElement.textContent = l.title
