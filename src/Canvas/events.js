@@ -1,22 +1,21 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { tools } from "../Tools/index.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
   renderLayersToDOM,
   renderVectorsToDOM,
   renderPaletteToDOM,
-  renderBrushModesToDOM,
 } from "../DOM/render.js"
 import { createNewRasterLayer } from "./layers.js"
 import { handleTools } from "../Tools/events.js"
 import { removeAction, changeActionMode } from "../Actions/actions.js"
-import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
-import { swatches } from "../Context/swatch.js"
 import { setInitialZoom } from "../utils/canvasHelpers.js"
 import { initializeColorPicker } from "../Swatch/events.js"
 import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
+import { dragStart, dragMove, dragStop } from "../utils/drag.js"
 
 //====================================//
 //==== * * * Canvas Resize * * * =====//
@@ -227,7 +226,6 @@ function layerInteract(e) {
   } else {
     //select current layer
     if (layer !== canvas.currentLayer) {
-      //TODO: handle modes, use icon
       canvas.currentLayer.inactiveTools.forEach((tool) => {
         dom[`${tool}Btn`].disabled = false
       })
@@ -299,7 +297,7 @@ function dropLayer(e) {
   let targetLayer = e.target.closest(".layer").layerObj
   let draggedIndex = parseInt(e.dataTransfer.getData("text"))
   let heldLayer = canvas.layers[draggedIndex]
-  //TODO: add layer change to timeline
+  //TODO: should layer order change be added to timeline?
   if (e.target.className.includes("layer") && targetLayer !== heldLayer) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
       if (dom.layersContainer.children[i] === e.target) {
@@ -337,7 +335,6 @@ function dragLayerEnd(e) {
 
 /**
  * Upload an image and create a new reference layer
- * TODO: allow user to set pixel scale between 0.125 and 8
  */
 function addReferenceLayer() {
   //TODO: add to timeline
@@ -357,8 +354,7 @@ function addReferenceLayer() {
           canvas.sharpness * canvas.zoom,
           canvas.sharpness * canvas.zoom
         )
-        onscreenLayerCVS.className = "onscreen-layer"
-        // dom.canvasLayers.appendChild(onscreenLayerCVS)
+        onscreenLayerCVS.className = "onscreen-canvas"
         dom.canvasLayers.insertBefore(
           onscreenLayerCVS,
           dom.canvasLayers.children[0]
@@ -440,6 +436,7 @@ function removeLayer(layer) {
 }
 
 /**
+ * Add layer
  * Add a new raster layer
  * TODO: This is a timeline action and should be moved to an actions file
  */
@@ -483,13 +480,13 @@ function vectorInteract(e) {
     e.target.classList.remove("eyeopen")
     e.target.classList.add("eyeclosed")
     vector.hidden = true
-    renderCanvas(vector.layer, null, true, true)
+    renderCanvas(vector.layer, true)
   } else if (e.target.className.includes("eyeclosed")) {
     //toggle visibility
     e.target.classList.remove("eyeclosed")
     e.target.classList.add("eyeopen")
     vector.hidden = false
-    renderCanvas(vector.layer, null, true, true)
+    renderCanvas(vector.layer, true)
   } else if (e.target.className.includes("trash")) {
     //remove vector
     removeVector(vector)
@@ -498,7 +495,6 @@ function vectorInteract(e) {
     //switch tool
     handleTools(null, vector.tool.name)
     //select current vector
-    //TODO: modify object structure of states to match object in undoStack to make assignment simpler like vectorGui.x = {...vector.x}
     vectorGui.reset()
     if (vector.index !== currentIndex) {
       state.vectorProperties = { ...vector.properties.vectorProperties }
@@ -550,7 +546,7 @@ function removeVector(vector) {
     vectorGui.reset()
   }
   renderVectorsToDOM()
-  renderCanvas(vector.layer, null, true, true)
+  renderCanvas(vector.layer, true)
 }
 
 /**
@@ -564,7 +560,7 @@ function toggleVectorMode(vector, modeKey) {
   state.action = null
   state.redoStack = []
   renderVectorsToDOM()
-  renderCanvas(vector.layer, null, true, true)
+  renderCanvas(vector.layer, true)
 }
 
 //===================================//
@@ -626,6 +622,13 @@ dom.layersContainer.addEventListener("dragenter", dragLayerEnter)
 dom.layersContainer.addEventListener("dragleave", dragLayerLeave)
 dom.layersContainer.addEventListener("drop", dropLayer)
 dom.layersContainer.addEventListener("dragend", dragLayerEnd)
+//TODO: To make fancier dragging work, must be made compatible with a scrolling container
+// dom.layersContainer.addEventListener("pointerdown", () =>
+//   dragStart(e, e.target.closest(".layer"))
+// )
+// dom.layersContainer.addEventListener("pointerup", dragStop)
+// dom.layersContainer.addEventListener("pointerout", dragStop)
+// dom.layersContainer.addEventListener("pointermove", dragMove)
 
 // * Vectors * //
 dom.vectorsThumbnails.addEventListener("click", vectorInteract)

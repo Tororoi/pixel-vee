@@ -405,7 +405,7 @@ export function updateEllipseOffsets(
   //based on direction update x and y offsets in state
   //TODO: keep offset consistent during radius adjustment and use another gui element to control the way radius is handled, drawn as a compass, 8 options plus default center which is no offset
   //Direction shrinks opposite side. eg. radius 7 goes from diameter 15 to diameter 14
-  //gui element could 2 sliders, vertical and horizontal with 3 values each, offset -1, 0, 1 (right, none, left)
+  //gui element could have 2 sliders, vertical and horizontal with 3 values each, offset -1, 0, 1 (right, none, left)
   //should only x1 and y1 offsets be available since they represent the center point being part of radius or not?
   if (state.clickCounter === 1 || forceCircle) {
     state.vectorProperties.x1Offset = -state.vectorProperties.offset

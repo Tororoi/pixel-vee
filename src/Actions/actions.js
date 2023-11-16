@@ -10,13 +10,15 @@ import {
   getColor,
 } from "../utils/imageDataHelpers.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
+import { canvas } from "../Context/canvas.js"
+import { saveEllipseAsTest } from "../Testing/ellipseTest.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
 //====================================//
 
 //"Actions" are user-initiated events that are reversible through the undo button. This file holds the functions used for reversible actions.
-//TODO: Not all reversible actions are held here currently. Clear canvas and addLayer are not present, but those don't interact with the cursor.
+//Not all reversible actions are held here currently. Clear canvas and addLayer are not present, but those don't interact with the cursor.
 
 /**
  * Modify action in the timeline
@@ -58,6 +60,9 @@ export function modifyVectorAction(actionIndex) {
         ? oldProperties.forceCircle
         : state.vectorProperties.forceCircle
   }
+  action.properties.vectorProperties = {
+    ...modifiedProperties,
+  }
   state.addToTimeline({
     tool: tools.modify,
     properties: {
@@ -67,9 +72,6 @@ export function modifyVectorAction(actionIndex) {
       to: modifiedProperties,
     },
   })
-  action.properties.vectorProperties = {
-    ...modifiedProperties,
-  }
 }
 
 /**
@@ -175,68 +177,60 @@ export function actionClear(layer) {
   })
 }
 
-// export function actionMove() {
-
-// }
-
 /**
  * Render a stamp from the brush to the canvas
- * TODO: Find more efficient way to draw any brush shape without drawing each pixel separately. Could either be image stamp or made with rectangles
  * @param {Integer} coordX
  * @param {Integer} coordY
  * @param {Object} currentColor - {color, r, g, b, a}
- * @param {Object} brushStamp
+ * @param {Object} directionalBrushStamp - brushStamp[brushDirection]
  * @param {Integer} brushSize
  * @param {Object} layer
- * @param {CanvasRenderingContext2D} ctx
  * @param {Object} currentModes
  * @param {Set} maskSet
- * @param {Set} seenPointsSet
- * @param {Array} points
- * @param {Boolean} excludeFromSet - even if new point, don't add to seenPointsSet if true
+ * @param {Set} seenPixelsSet
+ * @param {Boolean} isPreview
+ * @param {Boolean} excludeFromSet - don't add to seenPixelsSet if true
  */
 export function actionDraw(
   coordX,
   coordY,
   currentColor,
-  brushStamp,
-  brushStampDir,
+  directionalBrushStamp,
   brushSize,
   layer,
-  ctx,
   currentModes,
   maskSet,
-  seenPointsSet,
-  points,
-  excludeFromSet
+  seenPixelsSet,
+  isPreview = false,
+  excludeFromSet = false
 ) {
-  ctx.fillStyle = currentColor.color
-  if (points) {
-    if (!state.pointsSet.has(`${coordX},${coordY}`)) {
-      points.push({
-        x: coordX - layer.x,
-        y: coordY - layer.y,
-        color: { ...currentColor },
-        brushStamp,
-        brushSize,
-      })
-      state.pointsSet.add(`${coordX},${coordY}`)
-    }
+  let offsetX = 0
+  let offsetY = 0
+  let ctx = layer.ctx
+  if (isPreview) {
+    ctx = layer.onscreenCtx
+    offsetX = canvas.xOffset
+    offsetY = canvas.yOffset
   }
+  ctx.fillStyle = currentColor.color
   if (
-    coordX >= ctx.canvas.width + brushSize / 2 ||
+    coordX >= layer.cvs.width + brushSize / 2 ||
     coordX <= -brushSize / 2 ||
-    coordY >= ctx.canvas.height + brushSize / 2 ||
+    coordY >= layer.cvs.height + brushSize / 2 ||
     coordY <= -brushSize / 2
   ) {
-    //don't draw outside bounds to reduce time cost of render
+    //don't iterate brush outside bounds to reduce time cost of render
     return
   }
   const baseX = Math.ceil(coordX - brushSize / 2)
   const baseY = Math.ceil(coordY - brushSize / 2)
-  for (const pixel of brushStamp[brushStampDir]) {
+  for (const pixel of directionalBrushStamp) {
     const x = baseX + pixel.x
     const y = baseY + pixel.y
+    if (x >= layer.cvs.width || x < 0 || y >= layer.cvs.height || y < 0) {
+      //don't draw outside bounds to reduce time cost of render
+      continue
+    }
     const key = `${x},${y}`
     //if maskSet exists, only draw if it contains coordinates
     if (maskSet) {
@@ -244,19 +238,19 @@ export function actionDraw(
         continue
       }
     }
-    if (seenPointsSet) {
-      if (seenPointsSet.has(key)) {
+    if (seenPixelsSet) {
+      if (seenPixelsSet.has(key)) {
         continue // skip this point
       }
       if (!excludeFromSet) {
-        seenPointsSet.add(key)
+        seenPixelsSet.add(key)
       }
     }
     if (currentModes?.eraser || currentModes?.inject) {
-      ctx.clearRect(x, y, 1, 1)
+      ctx.clearRect(x + offsetX, y + offsetY, 1, 1)
     }
     if (!currentModes?.eraser) {
-      ctx.fillRect(x, y, 1, 1)
+      ctx.fillRect(x + offsetX, y + offsetY, 1, 1)
     }
   }
 }
@@ -274,7 +268,8 @@ export function actionDraw(
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {Set} maskSet
- * @param {Set} seenPointsSet
+ * @param {Set} seenPixelsSet
+ * @param {Boolean} isPreview
  */
 export function actionLine(
   sx,
@@ -283,16 +278,16 @@ export function actionLine(
   ty,
   currentColor,
   layer,
-  ctx,
   currentModes,
   brushStamp,
   brushSize,
   maskSet,
-  seenPointsSet = null
+  seenPixelsSet = null,
+  isPreview = false
 ) {
   let angle = getAngle(tx - sx, ty - sy) // angle of line
   let tri = getTriangle(sx, sy, tx, ty, angle)
-  const seen = seenPointsSet ? new Set(seenPointsSet) : new Set()
+  const seen = seenPixelsSet ? new Set(seenPixelsSet) : new Set()
   let previousX = sx
   let previousY = sy
   let brushDirection = "0,0"
@@ -312,16 +307,13 @@ export function actionLine(
       thispoint.x,
       thispoint.y,
       currentColor,
-      brushStamp,
-      brushDirection,
+      brushStamp[brushDirection],
       brushSize,
       layer,
-      ctx,
       currentModes,
       maskSet,
       seen,
-      null,
-      false
+      isPreview
     )
     previousX = thispoint.x
     previousY = thispoint.y
@@ -332,16 +324,13 @@ export function actionLine(
     tx,
     ty,
     currentColor,
-    brushStamp,
-    brushDirection,
+    brushStamp[brushDirection],
     brushSize,
     layer,
-    ctx,
     currentModes,
     maskSet,
     seen,
-    null,
-    false
+    isPreview
   )
 }
 
@@ -474,6 +463,7 @@ export function actionFill(
  * @param {CanvasRenderingContext2D} ctx
  * @param {Object} currentModes
  * @param {Set} maskSet
+ * @param {Boolean} isPreview
  */
 function renderPoints(
   points,
@@ -481,42 +471,37 @@ function renderPoints(
   currentColor,
   brushSize,
   layer,
-  ctx,
   currentModes,
-  maskSet
+  maskSet,
+  isPreview = false
 ) {
   const seen = new Set()
   let previousX = Math.floor(points[0].x)
   let previousY = Math.floor(points[0].y)
-  //performance: ellipse with a 360px radius and a 32px brush, using the brush direction decreases render time from 148ms to 22ms
   for (const { x, y } of points) {
     //rounded values
     let xt = Math.floor(x)
     let yt = Math.floor(y)
-    let xDir = xt - previousX
-    let yDir = yt - previousY
-    if (xDir < -1 || xDir > 1 || yDir < -1 || yDir > 1) {
-      xDir = 0
-      yDir = 0
-    }
+    let brushDirection = calculateBrushDirection(xt, yt, previousX, previousY)
     actionDraw(
       xt,
       yt,
       currentColor,
-      brushStamp,
-      `${xDir},${yDir}`,
+      brushStamp[brushDirection],
       brushSize,
       layer,
-      ctx,
       currentModes,
       maskSet,
       seen,
-      null,
-      false
+      isPreview
     )
     previousX = xt
     previousY = yt
   }
+  //Uncomment for performance testing
+  // if (state.captureTesting) {
+  //   if (state.tool.name === "ellipse") saveEllipseAsTest(points)
+  // }
 }
 
 /**
@@ -530,11 +515,11 @@ function renderPoints(
  * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
- * @param {CanvasRenderingContext2D} ctx
  * @param {Object} currentModes
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {Set} maskSet
+ * @param {Boolean} isPreview
  */
 export function actionQuadraticCurve(
   startx,
@@ -546,64 +531,28 @@ export function actionQuadraticCurve(
   stepNum,
   currentColor,
   layer,
-  ctx,
   currentModes,
   brushStamp,
   brushSize,
-  maskSet
+  maskSet,
+  isPreview = false
 ) {
-  //force coords to int
-  startx = Math.round(startx)
-  starty = Math.round(starty)
-  endx = Math.round(endx)
-  endy = Math.round(endy)
-  controlx = Math.round(controlx)
-  controly = Math.round(controly)
-  //BUG: On touchscreen, hits gradient sign error if first tool used
   if (stepNum === 1) {
-    //after defining x0y0
     actionLine(
       startx,
       starty,
-      state.cursorX,
-      state.cursorY,
+      endx,
+      endy,
       currentColor,
       layer,
-      ctx,
       currentModes,
       brushStamp,
       brushSize,
       maskSet,
-      null
+      null,
+      isPreview
     )
-    state.vectorProperties.px2 = state.cursorX
-    state.vectorProperties.py2 = state.cursorY
-  } else if (stepNum === 2) {
-    // after defining x2y2, plot quad bezier with x3 and y3 arguments matching x2 and y2
-    //onscreen preview curve
-    //somehow use rendercurve2 for flatter curves
-    let plotPoints = plotQuadBezier(
-      startx,
-      starty,
-      state.cursorX,
-      state.cursorY,
-      endx,
-      endy
-    )
-    renderPoints(
-      plotPoints,
-      brushStamp,
-      currentColor,
-      brushSize,
-      layer,
-      ctx,
-      currentModes,
-      maskSet
-    )
-    state.vectorProperties.px3 = state.cursorX
-    state.vectorProperties.py3 = state.cursorY
-  } else if (stepNum === 3) {
-    //curve after defining x3y3, plot quad bezier with x3 and y3 arguments matching x2 and y2
+  } else if (stepNum === 2 || stepNum === 3) {
     let plotPoints = plotQuadBezier(
       startx,
       starty,
@@ -618,9 +567,9 @@ export function actionQuadraticCurve(
       currentColor,
       brushSize,
       layer,
-      ctx,
       currentModes,
-      maskSet
+      maskSet,
+      isPreview
     )
   }
 }
@@ -638,11 +587,11 @@ export function actionQuadraticCurve(
  * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
- * @param {CanvasRenderingContext2D} ctx
  * @param {Object} currentModes
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {Set} maskSet
+ * @param {Boolean} isPreview
  */
 export function actionCubicCurve(
   startx,
@@ -656,75 +605,33 @@ export function actionCubicCurve(
   stepNum,
   currentColor,
   layer,
-  ctx,
   currentModes,
   brushStamp,
   brushSize,
-  maskSet
+  maskSet,
+  isPreview = false
 ) {
-  //force coords to int
-  startx = Math.round(startx)
-  starty = Math.round(starty)
-  controlx1 = Math.round(controlx1)
-  controly1 = Math.round(controly1)
-  controlx2 = Math.round(controlx2)
-  controly2 = Math.round(controly2)
-  endx = Math.round(endx)
-  endy = Math.round(endy)
-  //BUG: On touchscreen, hits gradient sign error if first tool used
   if (stepNum === 1) {
-    //after defining x0y0
     actionLine(
       startx,
       starty,
-      state.cursorX,
-      state.cursorY,
+      endx,
+      endy,
       currentColor,
       layer,
-      ctx,
       currentModes,
       brushStamp,
       brushSize,
       maskSet,
-      null
+      null,
+      isPreview
     )
-    //TODO: can setting state be moved to steps function?
-    state.vectorProperties.px2 = state.cursorX
-    state.vectorProperties.py2 = state.cursorY
   } else if (stepNum === 2) {
-    // after defining x2y2
-    //onscreen preview curve
-    //somehow use rendercurve2 for flatter curves
     let plotPoints = plotQuadBezier(
-      startx,
-      starty,
-      state.cursorX,
-      state.cursorY,
-      endx,
-      endy
-    )
-    renderPoints(
-      plotPoints,
-      brushStamp,
-      currentColor,
-      brushSize,
-      layer,
-      ctx,
-      currentModes,
-      maskSet
-    )
-    state.vectorProperties.px3 = state.cursorX
-    state.vectorProperties.py3 = state.cursorY
-  } else if (stepNum === 3) {
-    //curve after defining x3y3
-    //onscreen preview curve
-    let plotPoints = plotCubicBezier(
       startx,
       starty,
       controlx1,
       controly1,
-      state.cursorX,
-      state.cursorY,
       endx,
       endy
     )
@@ -734,14 +641,11 @@ export function actionCubicCurve(
       currentColor,
       brushSize,
       layer,
-      ctx,
       currentModes,
-      maskSet
+      maskSet,
+      isPreview
     )
-    state.vectorProperties.px4 = state.cursorX
-    state.vectorProperties.py4 = state.cursorY
-  } else if (stepNum === 4) {
-    //curve after defining x4y4
+  } else if (stepNum === 3 || stepNum === 4) {
     let plotPoints = plotCubicBezier(
       startx,
       starty,
@@ -758,9 +662,9 @@ export function actionCubicCurve(
       currentColor,
       brushSize,
       layer,
-      ctx,
       currentModes,
-      maskSet
+      maskSet,
+      isPreview
     )
   }
 }
@@ -776,7 +680,6 @@ export function actionCubicCurve(
  * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
- * @param {CanvasRenderingContext2D} ctx
  * @param {Object} currentModes
  * @param {Object} brushStamp
  * @param {Integer} brushSize
@@ -784,6 +687,8 @@ export function actionCubicCurve(
  * @param {Integer} offset
  * @param {Integer} x1Offset
  * @param {Integer} y1Offset
+ * @param {Set} maskSet
+ * @param {Boolean} isPreview
  */
 export function actionEllipse(
   centerx,
@@ -797,7 +702,6 @@ export function actionEllipse(
   forceCircle,
   currentColor,
   layer,
-  ctx,
   currentModes,
   brushStamp,
   brushSize,
@@ -805,7 +709,8 @@ export function actionEllipse(
   offset,
   x1Offset,
   y1Offset,
-  maskSet
+  maskSet,
+  isPreview = false
 ) {
   //force coords to int
   centerx = Math.floor(centerx)
@@ -823,9 +728,9 @@ export function actionEllipse(
       currentColor,
       brushSize,
       layer,
-      ctx,
       currentModes,
-      maskSet
+      maskSet,
+      isPreview
     )
   } else {
     let plotPoints = plotRotatedEllipse(
@@ -845,9 +750,9 @@ export function actionEllipse(
       currentColor,
       brushSize,
       layer,
-      ctx,
       currentModes,
-      maskSet
+      maskSet,
+      isPreview
     )
   }
 }

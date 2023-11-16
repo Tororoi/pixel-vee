@@ -21,7 +21,7 @@ export function checkPixelAlreadyDrawn(pointsDrawn, willDrawX, willDrawY) {
  * @param {Integer} currentY
  * @param {Integer} previousX
  * @param {Integer} previousY
- * @returns
+ * @returns {String} brushDirection
  */
 export function calculateBrushDirection(
   currentX,
@@ -31,6 +31,7 @@ export function calculateBrushDirection(
 ) {
   let xDir = currentX - previousX
   let yDir = currentY - previousY
+  //If distance is more than 1 pixel in any direction, set direction to 0,0
   if (xDir < -1 || xDir > 1 || yDir < -1 || yDir > 1) {
     xDir = 0
     yDir = 0

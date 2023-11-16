@@ -6,10 +6,11 @@ import { swatches } from "./swatch.js"
 
 //Main state object to keep track of global vars
 export const state = {
-  grid: false,
+  captureTesting: false,
+  testNumPoints: 1000,
   //timeline
   pointsSet: null,
-  drawnPointsSet: null,
+  seenPixelsSet: null,
   maskSet: null,
   selectPixelPoints: null,
   selectCornersSet: null,
@@ -19,19 +20,6 @@ export const state = {
   redoStack: [],
   //tool settings
   tool: null, //needs to be initialized
-  brushStamp: {
-    "0,0": [{ x: 0, y: 0 }],
-    "1,0": [{ x: 0, y: 0 }],
-    "1,1": [{ x: 0, y: 0 }],
-    "0,1": [{ x: 0, y: 0 }],
-    "-1,1": [{ x: 0, y: 0 }],
-    "-1,0": [{ x: 0, y: 0 }],
-    "-1,-1": [{ x: 0, y: 0 }],
-    "0,-1": [{ x: 0, y: 0 }],
-    "1,-1": [{ x: 0, y: 0 }],
-  }, //default 1 pixel
-  brushType: "circle",
-  brushDirection: "0,0",
   //touchscreen?
   touch: false,
   //dragging target
@@ -103,15 +91,13 @@ export const state = {
  * @param {Object} actionObject
  */
 function addToTimeline(actionObject) {
-  const { tool, color, brushStamp, brushSize, layer, properties } = actionObject
+  const { tool, color, layer, properties } = actionObject
   //use current state for variables
   state.action = {
-    layer: layer,
-    brushStamp: brushStamp || state.brushStamp,
-    brushSize: brushSize || state.tool.brushSize,
+    tool: { ...tool },
+    modes: { ...tool.modes },
     color: color || { ...swatches.primary.color },
-    tool: tool,
-    modes: { ...tool.modes }, //TODO: should be replaced by options to allow multi selection of modes
+    layer: layer,
     properties,
     hidden: false,
     removed: false,
