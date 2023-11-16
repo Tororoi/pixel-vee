@@ -1,5 +1,5 @@
 import { state } from "../Context/state.js"
-import { brush, colorMask } from "./brush.js"
+import { brush } from "./brush.js"
 import { line } from "./line.js"
 import { select } from "./select.js"
 import { move } from "./move.js"
@@ -21,6 +21,7 @@ export const tools = {
     fn: null,
     action: null,
     brushSize: null,
+    brushType: null,
     disabled: false,
     options: {},
     modes: {},
@@ -31,6 +32,7 @@ export const tools = {
     fn: null,
     action: null,
     brushSize: null,
+    brushType: null,
     disabled: false,
     options: {},
     modes: {},
@@ -41,6 +43,7 @@ export const tools = {
     fn: null,
     action: null,
     brushSize: null,
+    brushType: null,
     disabled: false,
     options: {},
     modes: {},
@@ -51,6 +54,7 @@ export const tools = {
     fn: null,
     action: null,
     brushSize: null,
+    brushType: null,
     disabled: false,
     options: {},
     modes: {},
@@ -61,6 +65,7 @@ export const tools = {
     fn: null,
     action: null,
     brushSize: null,
+    brushType: null,
     disabled: false,
     options: {},
     modes: {},
@@ -72,7 +77,6 @@ export const tools = {
   // shading: {
   // user selects hsl shading color which mixes with colors that the user draws on to create dynamic shading
   // },
-  colorMask,
   select,
   move,
   // gradient: {
@@ -89,6 +93,7 @@ export const tools = {
     fn: null,
     action: null,
     brushSize: null,
+    brushType: null,
     disabled: false,
     options: {},
     modes: {},
@@ -99,6 +104,7 @@ export const tools = {
     fn: null,
     action: null,
     brushSize: null,
+    brushType: null,
     disabled: false,
     options: {},
     modes: {},

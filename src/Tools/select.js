@@ -22,14 +22,14 @@ function selectSteps() {
       //1. set drag origin
       //2. save context
       // state.selectPixelPoints = []
-      // for (const pixel of state.brushStamp) {
+      // for (const pixel of brushStamps[state.tool.brushType][state.tool.brushSize]) {
       //   state.selectPixelPoints[`${pixel.x},${pixel.y}`] = {
       //     x: pixel.x,
       //     y: pixel.y,
       //   }
       // }
       // state.selectCornersSet = new Set()
-      // for (const pixel of state.brushStamp) {
+      // for (const pixel of brushStamps[state.tool.brushType][state.tool.brushSize]) {
       //   state.selectCornersSet.add(`${pixel.x},${pixel.y}`)
       //   state.selectCornersSet.add(`${pixel.x + 1},${pixel.y}`)
       //   state.selectCornersSet.add(`${pixel.x},${pixel.y + 1}`)
@@ -103,6 +103,7 @@ export const select = {
   fn: selectSteps,
   action: null,
   brushSize: 1,
+  brushType: "circle",
   disabled: false,
   options: { magicWand: false },
   modes: {},

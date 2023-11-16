@@ -22,7 +22,7 @@ export const swatches = {
   paletteMode: "select", //select, edit, remove
   //Functions
 }
-//TODO: Add Mixing palette that consists of a small canvas with basic paint, sample and fill erase tools.
+//TODO: Add Mixing palette that consists of a small canvas with basic paint, sample, fill and erase tools.
 //TODO: Add color mixer that consists of a small canvas that can be painted upon and cleared. At any time the user can click "Mix" and the colors on the canvas will be used to generate a mixed color.
 
 dom.swatch.color = swatches.primary.color

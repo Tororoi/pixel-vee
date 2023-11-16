@@ -66,15 +66,10 @@ function fillSteps() {
 }
 
 /**
- * Used automatically by curve tools after curve is completed.
- * TODO: create distinct mode for adjusting
- * Ideally a user should be able to click on a curve and render it's vector UI that way.
- * Currently this modifies the history directly which is a big no no, just done for testing, only ok for now since it just modifies the curve that was just created
+ * Used automatically by fill tool after fill is completed.
  */
 export function adjustFillSteps() {
-  //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
-  //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
-  //this routine would be better for touchscreens, and no worse with pointer
+  let action = state.undoStack[canvas.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.collisionPresent) {
@@ -84,15 +79,9 @@ export function adjustFillSteps() {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
         }
-        state.undoStack[canvas.currentVectorIndex].hidden = true
+        action.hidden = true
         //Only render canvas up to timeline where fill action exists while adjusting fill
-        renderCanvas(
-          state.undoStack[canvas.currentVectorIndex].layer,
-          null,
-          true,
-          true,
-          canvas.currentVectorIndex
-        ) // render to canvas.currentVectorIndex
+        renderCanvas(action.layer, true, canvas.currentVectorIndex) // render to canvas.currentVectorIndex
       }
       break
     case "pointermove":
@@ -106,18 +95,13 @@ export function adjustFillSteps() {
       if (vectorGui.selectedPoint.xKey) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        state.undoStack[canvas.currentVectorIndex].hidden = false
+        action.hidden = false
         modifyVectorAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(
-          state.undoStack[canvas.currentVectorIndex].layer,
-          null,
-          true,
-          true
-        )
+        renderCanvas(action.layer, true)
       }
       break
     case "pointerout":
@@ -138,6 +122,7 @@ export const fill = {
   fn: fillSteps,
   action: actionFill,
   brushSize: 1,
+  brushType: "circle",
   disabled: true,
   options: { contiguous: true },
   modes: { eraser: false },

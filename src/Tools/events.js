@@ -1,16 +1,19 @@
 import { dom } from "../Context/dom.js"
+import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { handleUndo, handleRedo } from "../Actions/undoRedo.js"
 import { vectorGui } from "../GUI/vector.js"
-import { createSquareBrush, createCircleBrush } from "../utils/brushHelpers.js"
+import { updateBrushPreview } from "../utils/brushHelpers.js"
 import { actionClear } from "../Actions/actions.js"
 import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM, renderBrushModesToDOM } from "../DOM/render.js"
 import { renderCursor } from "../GUI/cursor.js"
+import { testAction } from "../Testing/performanceTesting.js"
+import { storedActions } from "../Testing/storedActions.js"
 
 //=========================================//
 //=== * * * Button Event Handlers * * * ===//
@@ -21,8 +24,6 @@ import { renderCursor } from "../GUI/cursor.js"
  * @param {PointerEvent} e
  */
 function handleZoom(e) {
-  //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?)
-  //BUG: on mobile zoom causes cursor coords to desync with pixelgrid
   //TRY: restrict zoom to fixed multiples, 125%, 150% etc
   //general zoom based on center
   if (e.target.closest(".zoombtn")) {
@@ -34,7 +35,7 @@ function handleZoom(e) {
       //get center coordinates
       let zoomedX = (canvas.xOffset + canvas.offScreenCVS.width / 2) / z
       let zoomedY = (canvas.yOffset + canvas.offScreenCVS.height / 2) / z
-      //offset by half of canvas
+      // offset by half of canvas
       let nox = zoomedX - canvas.offScreenCVS.width / 2
       let noy = zoomedY - canvas.offScreenCVS.height / 2
       if (canvas.zoom > 0.5) {
@@ -71,7 +72,7 @@ function handleClearCanvas() {
   state.undoStack.push(state.action)
   state.action = null
   state.pointsSet = null
-  state.drawnPointsSet = null
+  state.seenPixelsSet = null
   state.points = []
   state.redoStack = []
   canvas.currentLayer.ctx.clearRect(
@@ -104,15 +105,18 @@ export function handleTools(e, manualToolName = null) {
       } else {
         dom.toolBtn = targetTool
       }
+      //Uncomment to run performance test for selected tool if testing is enabled
+      // if (state.captureTesting && storedActions[dom.toolBtn.id]) {
+      //   testAction(dom.toolBtn.id)
+      // }
       dom.toolBtn.classList.add("selected")
       state.tool = tools[dom.toolBtn.id]
       renderCanvas(canvas.currentLayer)
       //update options
-      updateStamp()
+      renderBrushStampToDOM()
       dom.brushSlider.value = state.tool.brushSize
       dom.brushSlider.disabled = state.tool.disabled
       //update cursor
-      // if (dom.modeBtn.id === "erase") {
       if (state.tool.modes?.eraser) {
         canvas.vectorGuiCVS.style.cursor = "none"
       } else {
@@ -128,8 +132,8 @@ export function handleTools(e, manualToolName = null) {
 }
 
 /**
- * TODO: modes should allow multiple at once, not one at a time
  * TODO: add multi-touch mode for drawing with multiple fingers
+ * TODO: add curve brush mode for freehand drawing splines
  * @param {PointerEvent} e
  * @param {String} manualModeName
  */
@@ -154,7 +158,8 @@ export function handleModes(e, manualModeName = null) {
     } else {
       canvas.vectorGuiCVS.style.cursor = "crosshair"
     }
-    vectorGui.reset()
+    // vectorGui.reset()
+    // state.reset()
     renderBrushModesToDOM()
     renderCursor(state, canvas, swatches)
   }
@@ -169,12 +174,12 @@ export function handleModes(e, manualModeName = null) {
  * @param {PointerEvent} e
  */
 function switchBrush(e) {
-  if (state.brushType === "square") {
-    state.brushType = "circle"
+  if (state.tool.brushType === "square") {
+    state.tool.brushType = "circle"
   } else {
-    state.brushType = "square"
+    state.tool.brushType = "square"
   }
-  updateStamp()
+  renderBrushStampToDOM()
 }
 
 /**
@@ -195,21 +200,20 @@ function updateBrush(e) {
     default:
     //do nothing for other tools
   }
-  updateStamp()
+  renderBrushStampToDOM()
 }
 
 /**
- * update brush stamp
+ * update brush stamp in dom
  */
-export function updateStamp() {
+export function renderBrushStampToDOM() {
   dom.lineWeight.textContent = state.tool.brushSize
   dom.brushPreview.style.width = state.tool.brushSize * 2 + "px"
   dom.brushPreview.style.height = state.tool.brushSize * 2 + "px"
-  if (state.brushType === "circle") {
-    state.brushStamp = createCircleBrush(state.tool.brushSize, true) //circle
-  } else {
-    state.brushStamp = createSquareBrush(state.tool.brushSize, true) //square
-  }
+  updateBrushPreview(
+    brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
+    state.tool.brushSize
+  )
 }
 
 //===================================//

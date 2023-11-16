@@ -4,20 +4,13 @@ import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCursor } from "../GUI/cursor.js"
 import { activateShortcut, deactivateShortcut } from "./shortcuts.js"
 import { renderCanvas } from "../Canvas/render.js"
-import {
-  renderVectorsToDOM,
-  renderPaletteToolsToDOM,
-  renderPaletteToDOM,
-} from "../DOM/render.js"
+import { renderVectorsToDOM } from "../DOM/render.js"
 import { actionZoom } from "../Actions/untrackedActions.js"
-import { adjustEllipseSteps } from "../Tools/ellipse.js"
-import { debounce, throttle } from "../utils/eventHelpers.js"
-import { updateStamp } from "../Tools/events.js"
+import { throttle } from "../utils/eventHelpers.js"
 
 /**
  * Set global coordinates
@@ -76,7 +69,6 @@ function handleKeyUp(e) {
  */
 function handleWheel(e) {
   let delta = Math.sign(e.deltaY)
-  //BUG: zoom doesn't stay centered, wobbles slightly (due to forcing the normalization to the pixelgrid?). To reproduce, quickly zoom in and out
   //zoom based on pointer coords
   let z
   setCoordinates(e) //
@@ -242,6 +234,12 @@ function handlePointerUp(e) {
       }
       renderVectorsToDOM()
     }
+    state.action = null
+    state.pointsSet = null
+    state.seenPixelsSet = null
+    state.points = []
+    //Reset redostack
+    state.redoStack = []
   }
   //Deactivate pending shortcuts TODO: set active shortcut with key code to allow cleaner logic like if (state.shortcut.active) {deactivateShortcut(state.shortcut.keyCode)}
   if (state.tool.name !== dom.toolBtn.id) {
@@ -252,12 +250,6 @@ function handlePointerUp(e) {
       deactivateShortcut("Space")
     }
   }
-  state.action = null
-  state.pointsSet = null
-  state.drawnPointsSet = null
-  state.points = []
-  //Reset redostack
-  state.redoStack = []
   canvas.pointerEvent = "none"
   if (!e.targetTouches) {
     vectorGui.render()
@@ -286,7 +278,7 @@ function handlePointerOut(e) {
   //   //Reset redostack
   //   state.redoStack = []
   // }
-  if (!state.touch) {
+  if (!state.touch && state.clickCounter === 0) {
     renderCanvas(canvas.currentLayer)
     vectorGui.render()
     canvas.pointerEvent = "none"

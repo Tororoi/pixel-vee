@@ -1,16 +1,17 @@
 import { dom } from "../Context/dom.js"
+import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
+import { tools } from "../Tools/index.js"
 import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 
 /**
  * Draw the canvas layers
  * @param {Object} layer
- * @param {Function} renderPreview
  */
-function drawLayer(layer, renderPreview) {
+function drawLayer(layer) {
   layer.onscreenCtx.save()
 
   if (!layer.removed && !layer.hidden) {
@@ -36,33 +37,10 @@ function drawLayer(layer, renderPreview) {
       )
       layer.onscreenCtx.clip()
       layer.onscreenCtx.globalAlpha = layer.opacity
-      let drawCVS = layer.cvs
-      //TODO: refactor so preview is drawn directly onto onscreenCtx
-      if (layer === canvas.currentLayer && renderPreview) {
-        //render preview of action
-        canvas.previewCTX.clearRect(
-          0,
-          0,
-          canvas.previewCVS.width,
-          canvas.previewCVS.height
-        )
-        canvas.previewCTX.drawImage(
-          layer.cvs,
-          0,
-          0,
-          layer.cvs.width,
-          layer.cvs.height
-        )
-        renderPreview(canvas.previewCTX) //Pass function through to here so it can be actionLine or other actions with multiple points
-        drawCVS = canvas.previewCVS
-      }
-      //layer.x, layer.y need to be normalized to the pixel grid
       layer.onscreenCtx.drawImage(
-        drawCVS,
+        layer.cvs,
         canvas.xOffset,
-        // + (layer.x * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
         canvas.yOffset,
-        // + (layer.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
         canvas.offScreenCVS.width,
         canvas.offScreenCVS.height
       )
@@ -74,6 +52,7 @@ function drawLayer(layer, renderPreview) {
 /**
  * Redraw all timeline actions
  * Critical function for the timeline to work
+ * @param {Object} layer - optional parameter to limit render to a specific layer
  * @param {Integer} index - optional parameter to limit render up to a specific action
  */
 function redrawTimelineActions(layer, index = null) {
@@ -117,8 +96,6 @@ function redrawTimelineActions(layer, index = null) {
           break
         case "brush":
           //actionDraw
-          // let begin = performance.now()
-
           const offsetX = action.layer.x
           const offsetY = action.layer.y
 
@@ -145,20 +122,16 @@ function redrawTimelineActions(layer, index = null) {
               previousX,
               previousY
             )
-            action.tool.action(
+            tools[action.tool.name].action(
               p.x + offsetX,
               p.y + offsetY,
               p.color,
-              p.brushStamp,
-              brushDirection,
+              brushStamps[action.tool.brushType][p.brushSize][brushDirection],
               p.brushSize,
               action.layer,
-              action.layer.ctx,
               action.modes,
               mask,
-              seen,
-              null,
-              false
+              seen
             )
             previousX = p.x + offsetX
             previousY = p.y + offsetY
@@ -182,14 +155,10 @@ function redrawTimelineActions(layer, index = null) {
             //   }
             // }
           }
-          // let end = performance.now()
-          // if (action.properties.maskSet) {
-          //   console.log(end - begin)
-          // }
           break
         case "fill":
           //actionFill
-          action.tool.action(
+          tools[action.tool.name].action(
             action.properties.vectorProperties.px1 + action.layer.x,
             action.properties.vectorProperties.py1 + action.layer.y,
             action.color,
@@ -201,23 +170,22 @@ function redrawTimelineActions(layer, index = null) {
           break
         case "line":
           //actionLine
-          action.tool.action(
+          tools[action.tool.name].action(
             action.properties.px1 + action.layer.x,
             action.properties.py1 + action.layer.y,
             action.properties.px2 + action.layer.x,
             action.properties.py2 + action.layer.y,
             action.color,
             action.layer,
-            action.layer.ctx,
             action.modes,
-            action.brushStamp,
-            action.brushSize,
+            brushStamps[action.tool.brushType][action.tool.brushSize],
+            action.tool.brushSize,
             action.properties.maskSet
           )
           break
         case "quadCurve":
           //actionQuadraticCurve
-          action.tool.action(
+          tools[action.tool.name].action(
             action.properties.vectorProperties.px1 + action.layer.x,
             action.properties.vectorProperties.py1 + action.layer.y,
             action.properties.vectorProperties.px2 + action.layer.x,
@@ -227,16 +195,15 @@ function redrawTimelineActions(layer, index = null) {
             3,
             action.color,
             action.layer,
-            action.layer.ctx,
             action.modes,
-            action.brushStamp,
-            action.brushSize,
+            brushStamps[action.tool.brushType][action.tool.brushSize],
+            action.tool.brushSize,
             action.properties.maskSet
           )
           break
         case "cubicCurve":
           //actionCubicCurve
-          action.tool.action(
+          tools[action.tool.name].action(
             action.properties.vectorProperties.px1 + action.layer.x,
             action.properties.vectorProperties.py1 + action.layer.y,
             action.properties.vectorProperties.px2 + action.layer.x,
@@ -248,16 +215,15 @@ function redrawTimelineActions(layer, index = null) {
             4,
             action.color,
             action.layer,
-            action.layer.ctx,
             action.modes,
-            action.brushStamp,
-            action.brushSize,
+            brushStamps[action.tool.brushType][action.tool.brushSize],
+            action.tool.brushSize,
             action.properties.maskSet
           )
           break
         case "ellipse":
           //actionEllipse
-          action.tool.action(
+          tools[action.tool.name].action(
             action.properties.vectorProperties.px1 + action.layer.x,
             action.properties.vectorProperties.py1 + action.layer.y,
             action.properties.vectorProperties.px2 + action.layer.x,
@@ -269,10 +235,9 @@ function redrawTimelineActions(layer, index = null) {
             action.properties.vectorProperties.forceCircle,
             action.color,
             action.layer,
-            action.layer.ctx,
             action.modes,
-            action.brushStamp,
-            action.brushSize,
+            brushStamps[action.tool.brushType][action.tool.brushSize],
+            action.tool.brushSize,
             action.properties.vectorProperties.angle,
             action.properties.vectorProperties.offset,
             action.properties.vectorProperties.x1Offset,
@@ -308,9 +273,8 @@ function redrawTimelineActions(layer, index = null) {
 /**
  * Draw canvas layer onto its onscreen canvas
  * @param {Object} layer
- * @param {Function} renderPreview
  */
-function drawCanvasLayer(layer, renderPreview) {
+function drawCanvasLayer(layer) {
   //Prevent blurring
   layer.onscreenCtx.imageSmoothingEnabled = false
   //clear onscreen canvas
@@ -320,7 +284,7 @@ function drawCanvasLayer(layer, renderPreview) {
     layer.onscreenCvs.width / canvas.zoom,
     layer.onscreenCvs.height / canvas.zoom
   )
-  drawLayer(layer, renderPreview)
+  drawLayer(layer)
   //draw border
   layer.onscreenCtx.beginPath()
   layer.onscreenCtx.rect(
@@ -337,21 +301,17 @@ function drawCanvasLayer(layer, renderPreview) {
 /**
  * Render canvas entirely including all actions in timeline
  * @param {Object} currentLayer
- * @param {Function} renderPreview
- * @param {Boolean} clearCanvas - pass true if the canvas needs to be cleared before rendering
  * @param {Boolean} redrawTimeline - pass true to redraw all previous actions
  * @param {Integer} index - optional parameter to limit render up to a specific action
  */
 export function renderCanvas(
   currentLayer = null,
-  renderPreview = null,
-  clearCanvas = false,
   redrawTimeline = false,
   index = null
 ) {
   // window.requestAnimationFrame(() => {
   // let begin = performance.now()
-  if (clearCanvas) {
+  if (redrawTimeline) {
     //clear offscreen layers
     if (currentLayer) {
       if (currentLayer.type === "raster") {
@@ -374,8 +334,6 @@ export function renderCanvas(
         }
       })
     }
-  }
-  if (redrawTimeline) {
     //render all previous actions
     redrawTimelineActions(currentLayer, index)
   }
@@ -403,7 +361,7 @@ export function renderCanvas(
     canvas.offScreenCVS.height
   )
   if (currentLayer) {
-    drawCanvasLayer(currentLayer, renderPreview)
+    drawCanvasLayer(currentLayer)
   } else {
     canvas.layers.forEach((layer) => {
       drawCanvasLayer(layer, null)

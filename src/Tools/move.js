@@ -26,28 +26,18 @@ function moveSteps() {
       if (vectorGui.selectedPoint.xKey) {
         scaleSteps()
       } else {
-        if (canvas.currentLayer.type === "reference") {
-          //Physically move a reference layer
-          canvas.currentLayer.x += state.cursorX - state.previousX
-          canvas.currentLayer.y += state.cursorY - state.previousY
-        } else if (canvas.currentLayer.type === "raster") {
-          //move content
-          // translateWithoutWrap(
-          //   canvas.currentLayer.ctx,
-          //   state.cursorX - state.previousX,
-          //   state.cursorY - state.previousY
-          // )
-          canvas.currentLayer.x += state.cursorX - state.previousX
-          canvas.currentLayer.y += state.cursorY - state.previousY
-        }
-        renderCanvas(canvas.currentLayer, null, true, true)
+        //TODO: additional logic will be needed to handle moving a selected area here
+        //Move layer
+        canvas.currentLayer.x += state.cursorX - state.previousX
+        canvas.currentLayer.y += state.cursorY - state.previousY
+        renderCanvas(canvas.currentLayer, true)
       }
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey) {
         scaleSteps()
       }
-      renderCanvas(canvas.currentLayer, null, true, true)
+      renderCanvas(canvas.currentLayer, true)
       //save start and end coordinates
       state.addToTimeline({
         tool: state.tool,
@@ -144,7 +134,7 @@ function scaleSteps() {
         } else if (canvas.currentLayer.type === "raster") {
           //do nothing yet
         }
-        renderCanvas(canvas.currentLayer, null, true, true)
+        renderCanvas(canvas.currentLayer, true)
       }
       break
     case "pointerup":
@@ -154,16 +144,6 @@ function scaleSteps() {
           yKey: null,
         }
       }
-      // renderCanvas(canvas.currentLayer, null, true, true)
-      //save start and end coordinates
-      // state.addToTimeline({
-      //   tool: state.tool,
-      //   layer: canvas.currentLayer,
-      //   properties: {
-      //     from: { x: state.grabStartX, y: state.grabStartY },
-      //     to: { x: canvas.currentLayer.x, y: canvas.currentLayer.y },
-      //   },
-      // })
       break
     default:
     //do nothing
@@ -175,6 +155,7 @@ export const move = {
   fn: moveSteps,
   action: null, //actionMove
   brushSize: 1,
+  brushType: "circle",
   disabled: true,
   options: {},
   modes: {},

@@ -1,4 +1,5 @@
 import { keys } from "../Shortcuts/keys.js"
+import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
@@ -20,157 +21,146 @@ import { coordArrayFromSet } from "../utils/maskHelpers.js"
  * Supported modes: "draw, erase",
  */
 function quadCurveSteps() {
-  //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
-  //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
-  //this routine would be better for touchscreens, and no worse with pointer
+  if (vectorGui.collisionPresent && state.clickCounter === 0) {
+    adjustCurveSteps(3)
+    return
+  }
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (vectorGui.collisionPresent && state.clickCounter === 0) {
-        adjustCurveSteps(3)
-      } else {
-        //solidify end points
-        state.clickCounter += 1
-        if (state.clickCounter > 3) state.clickCounter = 1
-        switch (state.clickCounter) {
-          case 1:
-            //reset control points
-            vectorGui.reset()
-            state.vectorProperties.px1 = state.cursorX
-            state.vectorProperties.py1 = state.cursorY
-            break
-          case 2:
-            if (!state.touch) {
-              state.vectorProperties.px2 = state.cursorX
-              state.vectorProperties.py2 = state.cursorY
-            }
-            break
-          default:
-          //do nothing
-        }
-        if (state.clickCounter === 3) {
+      //solidify end points
+      state.clickCounter += 1
+      if (state.clickCounter > 3) state.clickCounter = 1
+      switch (state.clickCounter) {
+        case 1:
+          //reset control points
+          vectorGui.reset()
+          state.vectorProperties.px1 = state.cursorX
+          state.vectorProperties.py1 = state.cursorY
+          //endpoint starts at same point as startpoint
+          state.vectorProperties.px2 = state.cursorX
+          state.vectorProperties.py2 = state.cursorY
+          break
+        case 2:
+        case 3:
           state.vectorProperties.px3 = state.cursorX
           state.vectorProperties.py3 = state.cursorY
-        }
-        //onscreen preview
-        renderCanvas(canvas.currentLayer, (ctx) => {
-          actionQuadraticCurve(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.px2,
-            state.vectorProperties.py2,
-            state.vectorProperties.px3,
-            state.vectorProperties.py3,
-            state.clickCounter,
-            swatches.primary.color,
-            canvas.currentLayer,
-            ctx,
-            state.tool.modes,
-            state.brushStamp,
-            state.tool.brushSize,
-            state.maskSet
-          )
-        })
+          break
+        default:
+        //do nothing
       }
+      //onscreen preview
+      renderCanvas(canvas.currentLayer)
+      actionQuadraticCurve(
+        state.vectorProperties.px1,
+        state.vectorProperties.py1,
+        state.vectorProperties.px2,
+        state.vectorProperties.py2,
+        state.vectorProperties.px3,
+        state.vectorProperties.py3,
+        state.clickCounter,
+        swatches.primary.color,
+        canvas.currentLayer,
+        state.tool.modes,
+        brushStamps[state.tool.brushType][state.tool.brushSize],
+        state.tool.brushSize,
+        state.maskSet,
+        true
+      )
+
       break
     case "pointermove":
-      if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
-        adjustCurveSteps(3)
-      } else {
-        //draw line from origin point to current point onscreen
-        //normalize pointermove to pixelgrid
-        if (state.clickCounter === 3) {
+      switch (state.clickCounter) {
+        case 1:
+          state.vectorProperties.px2 = state.cursorX
+          state.vectorProperties.py2 = state.cursorY
+          break
+        case 2:
+        case 3:
           state.vectorProperties.px3 = state.cursorX
           state.vectorProperties.py3 = state.cursorY
-        }
-        //onscreen preview
-        renderCanvas(canvas.currentLayer, (ctx) => {
-          actionQuadraticCurve(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.px2,
-            state.vectorProperties.py2,
-            state.vectorProperties.px3,
-            state.vectorProperties.py3,
-            state.clickCounter,
-            swatches.primary.color,
-            canvas.currentLayer,
-            ctx,
-            state.tool.modes,
-            state.brushStamp,
-            state.tool.brushSize,
-            state.maskSet
-          )
-        })
+          break
+        default:
+        //do nothing
       }
+      //onscreen preview
+      renderCanvas(canvas.currentLayer)
+      actionQuadraticCurve(
+        state.vectorProperties.px1,
+        state.vectorProperties.py1,
+        state.vectorProperties.px2,
+        state.vectorProperties.py2,
+        state.vectorProperties.px3,
+        state.vectorProperties.py3,
+        state.clickCounter,
+        swatches.primary.color,
+        canvas.currentLayer,
+        state.tool.modes,
+        brushStamps[state.tool.brushType][state.tool.brushSize],
+        state.tool.brushSize,
+        state.maskSet,
+        true
+      )
+
       break
     case "pointerup":
-      if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
-        adjustCurveSteps(3)
-      } else {
-        //For touchscreens
-        if (state.touch) {
-          if (state.clickCounter === 1) {
-            state.vectorProperties.px2 = state.cursorX
-            state.vectorProperties.py2 = state.cursorY
-          }
-          if (state.clickCounter === 2) {
-            state.clickCounter += 1
-          }
-        }
-        //Solidify curve
-        if (state.clickCounter === 3) {
-          //solidify control point
+      if (state.touch && state.clickCounter === 2) {
+        state.clickCounter += 1
+      }
+      switch (state.clickCounter) {
+        case 1:
+          state.vectorProperties.px2 = state.cursorX
+          state.vectorProperties.py2 = state.cursorY
+          break
+        case 2:
+        case 3:
           state.vectorProperties.px3 = state.cursorX
           state.vectorProperties.py3 = state.cursorY
-          actionQuadraticCurve(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.px2,
-            state.vectorProperties.py2,
-            state.vectorProperties.px3,
-            state.vectorProperties.py3,
-            state.clickCounter,
-            swatches.primary.color,
-            canvas.currentLayer,
-            canvas.currentLayer.ctx,
-            state.tool.modes,
-            state.brushStamp,
-            state.tool.brushSize,
-            state.maskSet
-          )
-          state.clickCounter = 0
-          let maskArray = coordArrayFromSet(
-            state.maskSet,
-            canvas.currentLayer.x,
-            canvas.currentLayer.y
-          )
-          //store control points for timeline
-          state.addToTimeline({
-            tool: state.tool,
-            layer: canvas.currentLayer,
-            properties: {
-              vectorProperties: {
-                px1: state.vectorProperties.px1 - canvas.currentLayer.x,
-                py1: state.vectorProperties.py1 - canvas.currentLayer.y,
-                px2: state.vectorProperties.px2 - canvas.currentLayer.x,
-                py2: state.vectorProperties.py2 - canvas.currentLayer.y,
-                px3: state.vectorProperties.px3 - canvas.currentLayer.x,
-                py3: state.vectorProperties.py3 - canvas.currentLayer.y,
-              },
-              maskSet: state.maskSet,
-              maskArray,
+          break
+        default:
+        //do nothing
+      }
+      //Solidify curve
+      if (state.clickCounter === 3) {
+        actionQuadraticCurve(
+          state.vectorProperties.px1,
+          state.vectorProperties.py1,
+          state.vectorProperties.px2,
+          state.vectorProperties.py2,
+          state.vectorProperties.px3,
+          state.vectorProperties.py3,
+          state.clickCounter,
+          swatches.primary.color,
+          canvas.currentLayer,
+          state.tool.modes,
+          brushStamps[state.tool.brushType][state.tool.brushSize],
+          state.tool.brushSize,
+          state.maskSet
+        )
+        state.clickCounter = 0
+        let maskArray = coordArrayFromSet(
+          state.maskSet,
+          canvas.currentLayer.x,
+          canvas.currentLayer.y
+        )
+        //store control points for timeline
+        state.addToTimeline({
+          tool: state.tool,
+          layer: canvas.currentLayer,
+          properties: {
+            vectorProperties: {
+              px1: state.vectorProperties.px1 - canvas.currentLayer.x,
+              py1: state.vectorProperties.py1 - canvas.currentLayer.y,
+              px2: state.vectorProperties.px2 - canvas.currentLayer.x,
+              py2: state.vectorProperties.py2 - canvas.currentLayer.y,
+              px3: state.vectorProperties.px3 - canvas.currentLayer.x,
+              py3: state.vectorProperties.py3 - canvas.currentLayer.y,
             },
-          })
-          renderCanvas(canvas.currentLayer)
-        }
+            maskSet: state.maskSet,
+            maskArray,
+          },
+        })
+        renderCanvas(canvas.currentLayer)
       }
-      break
-    case "pointerout":
-      if (vectorGui.selectedPoint.xKey) {
-        adjustCurveSteps(3)
-      }
-      //cancel curve
-      state.clickCounter = 0
       break
     default:
     //do nothing
@@ -182,176 +172,165 @@ function quadCurveSteps() {
  * Supported modes: "draw, erase",
  */
 function cubicCurveSteps() {
-  //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
-  //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
-  //this routine would be better for touchscreens, and no worse with pointer
+  if (vectorGui.collisionPresent && state.clickCounter === 0) {
+    adjustCurveSteps()
+    return
+  }
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (vectorGui.collisionPresent && state.clickCounter === 0) {
-        adjustCurveSteps()
-      } else {
-        //solidify end points
-        state.clickCounter += 1
-        if (state.clickCounter > 4) state.clickCounter = 1
-        switch (state.clickCounter) {
-          case 1:
-            //reset control points
-            vectorGui.reset()
-            state.vectorProperties.px1 = state.cursorX
-            state.vectorProperties.py1 = state.cursorY
-            break
-          case 2:
-            if (!state.touch) {
-              state.vectorProperties.px2 = state.cursorX
-              state.vectorProperties.py2 = state.cursorY
-            }
-            break
-          case 3:
-            if (!state.touch) {
-              state.vectorProperties.px3 = state.cursorX
-              state.vectorProperties.py3 = state.cursorY
-            }
-            break
-          default:
-          //do nothing
-        }
-        if (state.clickCounter === 4) {
+      //solidify end points
+      state.clickCounter += 1
+      if (state.clickCounter > 4) state.clickCounter = 1
+      switch (state.clickCounter) {
+        case 1:
+          //reset control points
+          vectorGui.reset()
+          state.vectorProperties.px1 = state.cursorX
+          state.vectorProperties.py1 = state.cursorY
+          //endpoint starts at same point as startpoint
+          state.vectorProperties.px2 = state.cursorX
+          state.vectorProperties.py2 = state.cursorY
+          break
+        case 2:
+          state.vectorProperties.px3 = state.cursorX
+          state.vectorProperties.py3 = state.cursorY
+          break
+        case 3:
+        case 4:
           state.vectorProperties.px4 = state.cursorX
           state.vectorProperties.py4 = state.cursorY
-        }
-        //onscreen preview
-        renderCanvas(canvas.currentLayer, (ctx) => {
-          actionCubicCurve(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.px2,
-            state.vectorProperties.py2,
-            state.vectorProperties.px3,
-            state.vectorProperties.py3,
-            state.vectorProperties.px4,
-            state.vectorProperties.py4,
-            state.clickCounter,
-            swatches.primary.color,
-            canvas.currentLayer,
-            ctx,
-            state.tool.modes,
-            state.brushStamp,
-            state.tool.brushSize,
-            state.maskSet
-          )
-        })
+          break
+        default:
+        //do nothing
       }
+      //onscreen preview
+      renderCanvas(canvas.currentLayer)
+      actionCubicCurve(
+        state.vectorProperties.px1,
+        state.vectorProperties.py1,
+        state.vectorProperties.px2,
+        state.vectorProperties.py2,
+        state.vectorProperties.px3,
+        state.vectorProperties.py3,
+        state.vectorProperties.px4,
+        state.vectorProperties.py4,
+        state.clickCounter,
+        swatches.primary.color,
+        canvas.currentLayer,
+        state.tool.modes,
+        brushStamps[state.tool.brushType][state.tool.brushSize],
+        state.tool.brushSize,
+        state.maskSet,
+        true
+      )
       break
     case "pointermove":
-      if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
-        adjustCurveSteps()
-      } else {
-        //draw line from origin point to current point onscreen
-        //normalize pointermove to pixelgrid
-        if (state.clickCounter === 4) {
+      switch (state.clickCounter) {
+        case 1:
+          state.vectorProperties.px2 = state.cursorX
+          state.vectorProperties.py2 = state.cursorY
+          break
+        case 2:
+          state.vectorProperties.px3 = state.cursorX
+          state.vectorProperties.py3 = state.cursorY
+          break
+        case 3:
+        case 4:
           state.vectorProperties.px4 = state.cursorX
           state.vectorProperties.py4 = state.cursorY
-        }
-        //onscreen preview
-        renderCanvas(canvas.currentLayer, (ctx) => {
-          actionCubicCurve(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.px2,
-            state.vectorProperties.py2,
-            state.vectorProperties.px3,
-            state.vectorProperties.py3,
-            state.vectorProperties.px4,
-            state.vectorProperties.py4,
-            state.clickCounter,
-            swatches.primary.color,
-            canvas.currentLayer,
-            ctx,
-            state.tool.modes,
-            state.brushStamp,
-            state.tool.brushSize,
-            state.maskSet
-          )
-        })
+          break
+        default:
+        //do nothing
       }
+      //onscreen preview
+      renderCanvas(canvas.currentLayer)
+      actionCubicCurve(
+        state.vectorProperties.px1,
+        state.vectorProperties.py1,
+        state.vectorProperties.px2,
+        state.vectorProperties.py2,
+        state.vectorProperties.px3,
+        state.vectorProperties.py3,
+        state.vectorProperties.px4,
+        state.vectorProperties.py4,
+        state.clickCounter,
+        swatches.primary.color,
+        canvas.currentLayer,
+        state.tool.modes,
+        brushStamps[state.tool.brushType][state.tool.brushSize],
+        state.tool.brushSize,
+        state.maskSet,
+        true
+      )
       break
     case "pointerup":
-      if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
-        adjustCurveSteps()
-      } else {
-        //For touchscreens
-        if (state.touch) {
-          if (state.clickCounter === 1) {
-            state.vectorProperties.px2 = state.cursorX
-            state.vectorProperties.py2 = state.cursorY
-          }
-          if (state.clickCounter === 2) {
-            state.vectorProperties.px3 = state.cursorX
-            state.vectorProperties.py3 = state.cursorY
-          }
-          if (state.clickCounter === 3) {
-            state.clickCounter += 1
-          }
-        }
-        //Solidify curve
-        if (state.clickCounter === 4) {
-          //solidify control point
+      if (state.touch && state.clickCounter === 3) {
+        state.clickCounter += 1
+      }
+      switch (state.clickCounter) {
+        case 1:
+          state.vectorProperties.px2 = state.cursorX
+          state.vectorProperties.py2 = state.cursorY
+          break
+        case 2:
+          state.vectorProperties.px3 = state.cursorX
+          state.vectorProperties.py3 = state.cursorY
+          break
+        case 3:
+        case 4:
           state.vectorProperties.px4 = state.cursorX
           state.vectorProperties.py4 = state.cursorY
-          actionCubicCurve(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.px2,
-            state.vectorProperties.py2,
-            state.vectorProperties.px3,
-            state.vectorProperties.py3,
-            state.vectorProperties.px4,
-            state.vectorProperties.py4,
-            state.clickCounter,
-            swatches.primary.color,
-            canvas.currentLayer,
-            canvas.currentLayer.ctx,
-            state.tool.modes,
-            state.brushStamp,
-            state.tool.brushSize,
-            state.maskSet
-          )
-          state.clickCounter = 0
-          let maskArray = coordArrayFromSet(
-            state.maskSet,
-            canvas.currentLayer.x,
-            canvas.currentLayer.y
-          )
-          //store control points for timeline
-          state.addToTimeline({
-            tool: state.tool,
-            layer: canvas.currentLayer,
-            properties: {
-              vectorProperties: {
-                px1: state.vectorProperties.px1 - canvas.currentLayer.x,
-                py1: state.vectorProperties.py1 - canvas.currentLayer.y,
-                px2: state.vectorProperties.px2 - canvas.currentLayer.x,
-                py2: state.vectorProperties.py2 - canvas.currentLayer.y,
-                px3: state.vectorProperties.px3 - canvas.currentLayer.x,
-                py3: state.vectorProperties.py3 - canvas.currentLayer.y,
-                px4: state.vectorProperties.px4 - canvas.currentLayer.x,
-                py4: state.vectorProperties.py4 - canvas.currentLayer.y,
-              },
-              maskSet: state.maskSet,
-              maskArray,
+          break
+        default:
+        //do nothing
+      }
+      //Solidify curve
+      if (state.clickCounter === 4) {
+        actionCubicCurve(
+          state.vectorProperties.px1,
+          state.vectorProperties.py1,
+          state.vectorProperties.px2,
+          state.vectorProperties.py2,
+          state.vectorProperties.px3,
+          state.vectorProperties.py3,
+          state.vectorProperties.px4,
+          state.vectorProperties.py4,
+          state.clickCounter,
+          swatches.primary.color,
+          canvas.currentLayer,
+          state.tool.modes,
+          brushStamps[state.tool.brushType][state.tool.brushSize],
+          state.tool.brushSize,
+          state.maskSet
+        )
+        state.clickCounter = 0
+        let maskArray = coordArrayFromSet(
+          state.maskSet,
+          canvas.currentLayer.x,
+          canvas.currentLayer.y
+        )
+        //store control points for timeline
+        state.addToTimeline({
+          tool: state.tool,
+          layer: canvas.currentLayer,
+          properties: {
+            vectorProperties: {
+              px1: state.vectorProperties.px1 - canvas.currentLayer.x,
+              py1: state.vectorProperties.py1 - canvas.currentLayer.y,
+              px2: state.vectorProperties.px2 - canvas.currentLayer.x,
+              py2: state.vectorProperties.py2 - canvas.currentLayer.y,
+              px3: state.vectorProperties.px3 - canvas.currentLayer.x,
+              py3: state.vectorProperties.py3 - canvas.currentLayer.y,
+              px4: state.vectorProperties.px4 - canvas.currentLayer.x,
+              py4: state.vectorProperties.py4 - canvas.currentLayer.y,
             },
-          })
-          renderCanvas(canvas.currentLayer)
-          vectorGui.render()
-        }
+            maskSet: state.maskSet,
+            maskArray,
+          },
+        })
+        renderCanvas(canvas.currentLayer)
+        vectorGui.render()
       }
-      break
-    case "pointerout":
-      if (vectorGui.selectedPoint.xKey) {
-        adjustCurveSteps()
-      }
-      //cancel curve
-      state.clickCounter = 0
       break
     default:
     //do nothing
@@ -362,14 +341,13 @@ function cubicCurveSteps() {
  * Used automatically by curve tools after curve is completed.
  * TODO: create distinct tool for adjusting that won't create a new curve when clicking.
  * Ideally a user should be able to click on a curve and render it's vector UI that way.
- * TODO: Modify point in vector timeline and push new curve set on pointer up to timeline as new type of push called "modify vector"
- * Currently this modifies the history directly which is a big no no, just done for testing, only ok for now since it just modifies the curve that was just created
  * @param {*} numPoints
  */
 function adjustCurveSteps(numPoints = 4) {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
+  let action = state.undoStack[canvas.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.collisionPresent && state.clickCounter === 0) {
@@ -379,55 +357,43 @@ function adjustCurveSteps(numPoints = 4) {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
         }
-        state.undoStack[canvas.currentVectorIndex].hidden = true
+        action.hidden = true
         if (numPoints === 3) {
-          renderCanvas(
-            state.undoStack[canvas.currentVectorIndex].layer,
-            (ctx) => {
-              actionQuadraticCurve(
-                state.vectorProperties.px1,
-                state.vectorProperties.py1,
-                state.vectorProperties.px2,
-                state.vectorProperties.py2,
-                state.vectorProperties.px3,
-                state.vectorProperties.py3,
-                3,
-                state.undoStack[canvas.currentVectorIndex].color,
-                state.undoStack[canvas.currentVectorIndex].layer,
-                ctx,
-                state.undoStack[canvas.currentVectorIndex].modes,
-                state.undoStack[canvas.currentVectorIndex].brushStamp,
-                state.undoStack[canvas.currentVectorIndex].brushSize,
-                state.undoStack[canvas.currentVectorIndex].maskSet
-              )
-            },
-            true,
+          renderCanvas(action.layer, true)
+          actionQuadraticCurve(
+            state.vectorProperties.px1,
+            state.vectorProperties.py1,
+            state.vectorProperties.px2,
+            state.vectorProperties.py2,
+            state.vectorProperties.px3,
+            state.vectorProperties.py3,
+            3,
+            action.color,
+            action.layer,
+            action.modes,
+            brushStamps[action.tool.brushType][action.tool.brushSize],
+            action.tool.brushSize,
+            action.maskSet,
             true
           )
         } else {
-          renderCanvas(
-            state.undoStack[canvas.currentVectorIndex].layer,
-            (ctx) => {
-              actionCubicCurve(
-                state.vectorProperties.px1,
-                state.vectorProperties.py1,
-                state.vectorProperties.px2,
-                state.vectorProperties.py2,
-                state.vectorProperties.px3,
-                state.vectorProperties.py3,
-                state.vectorProperties.px4,
-                state.vectorProperties.py4,
-                4,
-                state.undoStack[canvas.currentVectorIndex].color,
-                state.undoStack[canvas.currentVectorIndex].layer,
-                ctx,
-                state.undoStack[canvas.currentVectorIndex].modes,
-                state.undoStack[canvas.currentVectorIndex].brushStamp,
-                state.undoStack[canvas.currentVectorIndex].brushSize,
-                state.undoStack[canvas.currentVectorIndex].maskSet
-              )
-            },
-            true,
+          renderCanvas(action.layer, true)
+          actionCubicCurve(
+            state.vectorProperties.px1,
+            state.vectorProperties.py1,
+            state.vectorProperties.px2,
+            state.vectorProperties.py2,
+            state.vectorProperties.px3,
+            state.vectorProperties.py3,
+            state.vectorProperties.px4,
+            state.vectorProperties.py4,
+            4,
+            action.color,
+            action.layer,
+            action.modes,
+            brushStamps[action.tool.brushType][action.tool.brushSize],
+            action.tool.brushSize,
+            action.maskSet,
             true
           )
         }
@@ -438,50 +404,42 @@ function adjustCurveSteps(numPoints = 4) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         if (numPoints === 3) {
-          renderCanvas(
-            state.undoStack[canvas.currentVectorIndex].layer,
-            (ctx) => {
-              actionQuadraticCurve(
-                state.vectorProperties.px1,
-                state.vectorProperties.py1,
-                state.vectorProperties.px2,
-                state.vectorProperties.py2,
-                state.vectorProperties.px3,
-                state.vectorProperties.py3,
-                3,
-                state.undoStack[canvas.currentVectorIndex].color,
-                state.undoStack[canvas.currentVectorIndex].layer,
-                ctx,
-                state.undoStack[canvas.currentVectorIndex].modes,
-                state.undoStack[canvas.currentVectorIndex].brushStamp,
-                state.undoStack[canvas.currentVectorIndex].brushSize,
-                state.undoStack[canvas.currentVectorIndex].maskSet
-              )
-            }
+          renderCanvas(action.layer)
+          actionQuadraticCurve(
+            state.vectorProperties.px1,
+            state.vectorProperties.py1,
+            state.vectorProperties.px2,
+            state.vectorProperties.py2,
+            state.vectorProperties.px3,
+            state.vectorProperties.py3,
+            3,
+            action.color,
+            action.layer,
+            action.modes,
+            brushStamps[action.tool.brushType][action.tool.brushSize],
+            action.tool.brushSize,
+            action.maskSet,
+            true
           )
         } else {
-          renderCanvas(
-            state.undoStack[canvas.currentVectorIndex].layer,
-            (ctx) => {
-              actionCubicCurve(
-                state.vectorProperties.px1,
-                state.vectorProperties.py1,
-                state.vectorProperties.px2,
-                state.vectorProperties.py2,
-                state.vectorProperties.px3,
-                state.vectorProperties.py3,
-                state.vectorProperties.px4,
-                state.vectorProperties.py4,
-                4,
-                state.undoStack[canvas.currentVectorIndex].color,
-                state.undoStack[canvas.currentVectorIndex].layer,
-                ctx,
-                state.undoStack[canvas.currentVectorIndex].modes,
-                state.undoStack[canvas.currentVectorIndex].brushStamp,
-                state.undoStack[canvas.currentVectorIndex].brushSize,
-                state.undoStack[canvas.currentVectorIndex].maskSet
-              )
-            }
+          renderCanvas(action.layer)
+          actionCubicCurve(
+            state.vectorProperties.px1,
+            state.vectorProperties.py1,
+            state.vectorProperties.px2,
+            state.vectorProperties.py2,
+            state.vectorProperties.px3,
+            state.vectorProperties.py3,
+            state.vectorProperties.px4,
+            state.vectorProperties.py4,
+            4,
+            action.color,
+            action.layer,
+            action.modes,
+            brushStamps[action.tool.brushType][action.tool.brushSize],
+            action.tool.brushSize,
+            action.maskSet,
+            true
           )
         }
       }
@@ -490,26 +448,13 @@ function adjustCurveSteps(numPoints = 4) {
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        state.undoStack[canvas.currentVectorIndex].hidden = false
+        action.hidden = false
         modifyVectorAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(
-          state.undoStack[canvas.currentVectorIndex].layer,
-          null,
-          true,
-          true
-        )
-      }
-      break
-    case "pointerout":
-      if (vectorGui.selectedPoint.xKey) {
-        vectorGui.selectedPoint = {
-          xKey: null,
-          yKey: null,
-        }
+        renderCanvas(action.layer, true)
       }
       break
     default:
@@ -522,6 +467,7 @@ export const quadCurve = {
   fn: quadCurveSteps,
   action: actionQuadraticCurve,
   brushSize: 1,
+  brushType: "circle",
   disabled: false,
   options: {},
   modes: { eraser: false, inject: false },
@@ -535,6 +481,7 @@ export const cubicCurve = {
   fn: cubicCurveSteps,
   action: actionCubicCurve,
   brushSize: 1,
+  brushType: "circle",
   disabled: false,
   options: {},
   modes: { eraser: false, inject: false },

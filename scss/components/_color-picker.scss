@@ -119,6 +119,14 @@
                 rgba(var(--new-swatch-color), 1)
               );
             }
+            &::-moz-range-track {
+              height: 20px;
+              background-image: linear-gradient(
+                90deg,
+                rgba(var(--new-swatch-color), 0),
+                rgba(var(--new-swatch-color), 1)
+              );
+            }
           }
         }
         #buttons {
@@ -203,39 +211,6 @@
           }
           #hsl-container {
             margin-left: 12px;
-          }
-          .sliderbox {
-            position: relative;
-            background-color: $darkest-gray;
-            width: 16px;
-            height: 18px;
-            margin-left: 6px;
-            overflow: hidden;
-            @include boxBorder;
-            .channel-btn {
-              position: absolute;
-              text-align: center;
-              width: 16px;
-              height: 9px;
-              left: 0;
-              color: white;
-              cursor: pointer;
-              &#inc {
-                top: 0;
-              }
-              &#dec {
-                bottom: 0;
-              }
-              p {
-                transform: translateX(1px) translateY(-2px);
-                margin: 0;
-                pointer-events: none;
-              }
-              &:hover {
-                background: white;
-                color: $darkest-gray;
-              }
-            }
           }
         }
         #hex {

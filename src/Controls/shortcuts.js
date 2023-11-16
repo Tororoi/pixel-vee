@@ -10,7 +10,11 @@ import { adjustEllipseSteps } from "../Tools/ellipse.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { renderPaletteToolsToDOM, renderPaletteToDOM } from "../DOM/render.js"
 import { randomizeColor } from "../Swatch/events.js"
-import { handleTools, handleModes, updateStamp } from "../Tools/events.js"
+import {
+  handleTools,
+  handleModes,
+  renderBrushStampToDOM,
+} from "../Tools/events.js"
 import { renderCursor } from "../GUI/cursor.js"
 
 /**
@@ -27,7 +31,7 @@ export function activateShortcut(keyCode) {
       if (!state.clicked) {
         state.tool = tools["grab"]
         canvas.vectorGuiCVS.style.cursor = state.tool.cursor
-        updateStamp()
+        renderBrushStampToDOM()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
         renderCursor(state, canvas, swatches)
@@ -39,7 +43,7 @@ export function activateShortcut(keyCode) {
       if (!state.clicked) {
         state.tool = tools["eyedropper"]
         canvas.vectorGuiCVS.style.cursor = state.tool.cursor
-        updateStamp()
+        renderBrushStampToDOM()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
         renderCursor(state, canvas, swatches)
@@ -59,7 +63,6 @@ export function activateShortcut(keyCode) {
           vectorGui.selectedPoint.xKey !== "px1"
         ) {
           //while holding control point, readjust ellipse without having to move cursor.
-          //TODO: update this functionality to have other radii go back to previous radii when releasing shift
           adjustEllipseSteps()
           vectorGui.render()
         }
@@ -244,7 +247,7 @@ export function deactivateShortcut(keyCode) {
       //only deactivate while not clicked
       if (!state.clicked) {
         state.tool = tools[dom.toolBtn.id]
-        updateStamp()
+        renderBrushStampToDOM()
         canvas.previousXOffset = canvas.xOffset
         canvas.previousYOffset = canvas.yOffset
         vectorGui.render()
@@ -259,7 +262,7 @@ export function deactivateShortcut(keyCode) {
       //only deactivate while not clicked
       if (!state.clicked) {
         state.tool = tools[dom.toolBtn.id]
-        updateStamp()
+        renderBrushStampToDOM()
         vectorGui.render()
         renderCursor(state, canvas, swatches)
         setToolCssCursor()
@@ -278,7 +281,7 @@ export function deactivateShortcut(keyCode) {
         vectorGui.selectedPoint.xKey !== "px1"
       ) {
         //while holding control point, readjust ellipse without having to move cursor.
-        //TODO: update this functionality to have other radii go back to previous radii when releasing shift
+        //TODO: update this functionality to have other radii go back to previous radius value when releasing shift
         adjustEllipseSteps()
         vectorGui.render()
       }
@@ -378,7 +381,6 @@ export function deactivateShortcut(keyCode) {
  * Set tool cursor. TODO: move to utils file
  */
 function setToolCssCursor() {
-  // if (dom.modeBtn.id === "erase") {
   if (state.tool.modes?.eraser) {
     canvas.vectorGuiCVS.style.cursor = "none"
   } else {

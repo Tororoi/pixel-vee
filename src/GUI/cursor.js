@@ -1,3 +1,4 @@
+import { brushStamps } from "../Context/brushStamps.js"
 // import { state } from "../Context/state.js"
 // import { canvas } from "../Context/canvas.js"
 // import { swatches } from "../Context/swatch.js"
@@ -33,23 +34,20 @@ export function renderCursor(state, canvas, swatches) {
     default:
       //TODO: erase mode is somewhat buggy with rendering. Find way to have it render without calling draw() more than needed.
       if (!vectorGui.collisionPresent) {
-        renderCanvas(canvas.currentLayer, (ctx) => {
-          actionDraw(
-            state.cursorX,
-            state.cursorY,
-            swatches.primary.color,
-            state.brushStamp,
-            "0,0",
-            state.tool.brushSize,
-            canvas.currentLayer,
-            ctx,
-            state.tool.modes,
-            state.maskSet,
-            state.drawnPointsSet,
-            null,
-            true
-          )
-        })
+        renderCanvas(canvas.currentLayer)
+        actionDraw(
+          state.cursorX,
+          state.cursorY,
+          swatches.primary.color,
+          brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
+          state.tool.brushSize,
+          canvas.currentLayer,
+          state.tool.modes,
+          state.maskSet,
+          state.seenPixelsSet,
+          true,
+          true
+        )
         if (state.tool.modes?.eraser) {
           drawCursorBox(state, canvas, 1)
           // vectorGui.drawSelectOutline(state, canvas, state.selectPixelSet, 0.5)
@@ -72,14 +70,20 @@ function drawCursorBox(state, canvas, lineWeight) {
   let brushOffset = Math.floor(state.tool.brushSize / 2)
   let ol = lineWidth / 2 // line offset to stroke off-center
 
-  // Create a Set from state.brushStamp //TODO: make set when creating brush stamp so it does not need to be defined here.
-  const pixelSet = new Set(state.brushStamp["0,0"].map((p) => `${p.x},${p.y}`))
+  // Create a Set from brushStamps[state.tool.brushType][state.tool.brushSize]//TODO: make set when creating brush stamp so it does not need to be defined here.
+  const pixelSet = new Set(
+    brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"].map(
+      (p) => `${p.x},${p.y}`
+    )
+  )
 
   canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
 
-  for (const pixel of state.brushStamp["0,0"]) {
+  for (const pixel of brushStamps[state.tool.brushType][state.tool.brushSize][
+    "0,0"
+  ]) {
     const x = state.cursorX + canvas.xOffset + pixel.x - brushOffset
     const y = state.cursorY + canvas.yOffset + pixel.y - brushOffset
 

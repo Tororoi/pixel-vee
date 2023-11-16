@@ -1,4 +1,5 @@
 import { keys } from "../Shortcuts/keys.js"
+import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
@@ -12,49 +13,49 @@ import { coordArrayFromSet } from "../utils/maskHelpers.js"
 
 /**
  * Supported modes: "draw, erase, inject",
- * TODO: add vector line tool
+ * TODO: add vector line tool. A raster line tool would still be present for ease of use.
  */
 function lineSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       state.lineStartX = state.cursorX
       state.lineStartY = state.cursorY
-      renderCanvas(canvas.currentLayer, (ctx) => {
-        actionLine(
-          state.cursorX,
-          state.cursorY,
-          state.cursorX,
-          state.cursorY,
-          swatches.primary.color,
-          canvas.currentLayer,
-          ctx,
-          state.tool.modes,
-          state.brushStamp,
-          state.tool.brushSize,
-          state.maskSet,
-          null
-        )
-      })
+      renderCanvas(canvas.currentLayer)
+      //preview line
+      actionLine(
+        state.cursorX,
+        state.cursorY,
+        state.cursorX,
+        state.cursorY,
+        swatches.primary.color,
+        canvas.currentLayer,
+        state.tool.modes,
+        brushStamps[state.tool.brushType][state.tool.brushSize],
+        state.tool.brushSize,
+        state.maskSet,
+        null,
+        true
+      )
       break
     case "pointermove":
       //draw line from origin point to current point onscreen
       //only draw when necessary
-      renderCanvas(canvas.currentLayer, (ctx) => {
-        actionLine(
-          state.lineStartX,
-          state.lineStartY,
-          state.cursorX,
-          state.cursorY,
-          swatches.primary.color,
-          canvas.currentLayer,
-          ctx,
-          state.tool.modes,
-          state.brushStamp,
-          state.tool.brushSize,
-          state.maskSet,
-          null
-        )
-      })
+      renderCanvas(canvas.currentLayer)
+      //preview line
+      actionLine(
+        state.lineStartX,
+        state.lineStartY,
+        state.cursorX,
+        state.cursorY,
+        swatches.primary.color,
+        canvas.currentLayer,
+        state.tool.modes,
+        brushStamps[state.tool.brushType][state.tool.brushSize],
+        state.tool.brushSize,
+        state.maskSet,
+        null,
+        true
+      )
       break
     case "pointerup":
       actionLine(
@@ -64,9 +65,8 @@ function lineSteps() {
         state.cursorY,
         swatches.primary.color,
         canvas.currentLayer,
-        canvas.currentLayer.ctx,
         state.tool.modes,
-        state.brushStamp,
+        brushStamps[state.tool.brushType][state.tool.brushSize],
         state.tool.brushSize,
         state.maskSet,
         null
@@ -100,6 +100,7 @@ export const line = {
   fn: lineSteps,
   action: actionLine,
   brushSize: 1,
+  brushType: "circle",
   disabled: false,
   options: {},
   modes: { eraser: false, inject: false },

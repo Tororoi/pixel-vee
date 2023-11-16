@@ -107,7 +107,11 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
   vectorGui.render()
 }
 
-//TODO: handleMoveAction
+/**
+ *
+ * @param {Object} latestAction
+ * @param {String} modType
+ */
 function handleMoveAction(latestAction, modType) {
   let deltaX = latestAction.properties[modType].x - latestAction.layer.x
   let deltaY = latestAction.properties[modType].y - latestAction.layer.y
@@ -142,6 +146,7 @@ function handleMoveAction(latestAction, modType) {
  * @param {String} modType - "from" or "to", used for modify actions
  */
 export function actionUndoRedo(pushStack, popStack, modType) {
+  vectorGui.reset()
   //latest action is the action about to be undone or redone
   let latestAction = popStack[popStack.length - 1]
   //newLatestAction is the action that's about to be the most recent action, if the function is "Undo" ("from")
@@ -182,7 +187,6 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     latestAction.tool.type === "vector"
   ) {
     //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
-    vectorGui.reset()
     if (modType === "to") {
       state.vectorProperties = { ...latestAction.properties.vectorProperties }
       //Keep properties relative to layer offset
@@ -246,7 +250,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   pushStack.push(popStack.pop())
   //clear all layers in preparation to redraw them.
   //DRY: do all layers and actions need to be rerendered for redo?
-  renderCanvas(latestAction.layer, null, true, true) //should be based on layer of affected action
+  renderCanvas(latestAction.layer, true) //should be based on layer of affected action
   renderVectorsToDOM()
   state.reset()
 }
