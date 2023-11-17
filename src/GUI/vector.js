@@ -3,7 +3,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { drawCirclePath, checkPointCollision } from "../utils/guiHelpers.js"
 import { renderFillVector } from "./fill.js"
-import { renderCurveVector } from "./curve.js"
+import { renderCurveVector, renderCurvePath } from "./curve.js"
 import { renderEllipseVector, renderOffsetEllipseVector } from "./ellipse.js"
 import { renderTransformBox } from "./transform.js"
 import { renderSelectVector, drawSelectOutline } from "./select.js"
@@ -164,7 +164,8 @@ function render(lineDashOffset = 0.5) {
   //Prevent blurring
   canvas.vectorGuiCTX.imageSmoothingEnabled = false
   renderLayerVectors(canvas.currentLayer)
-  renderTool(state.tool.name)
+  // renderPath(state.tool.name, state.vectorProperties) //all paths should be rendered before all control points
+  // renderTool(state.tool.name, state.vectorProperties)
   //Render select vector
   if (state.selectProperties.px1 !== null) {
     renderSelectVector(vectorGui, lineDashOffset, state.tool.name === "select")
@@ -185,20 +186,20 @@ function render(lineDashOffset = 0.5) {
  * Render based on the current tool.
  * @param {String} toolName
  */
-function renderTool(toolName) {
+function renderTool(toolName, vectorProperties) {
   switch (toolName) {
     case "fill":
-      renderFillVector(state.vectorProperties)
+      renderFillVector(vectorProperties)
       break
     case "quadCurve":
     case "cubicCurve":
-      renderCurveVector(state.vectorProperties)
+      renderCurveVector(vectorProperties)
       break
     case "ellipse":
-      renderEllipseVector(state.vectorProperties)
-      const { x1Offset, y1Offset } = state.vectorProperties
+      renderEllipseVector(vectorProperties)
+      const { x1Offset, y1Offset } = vectorProperties
       if (x1Offset || y1Offset) {
-        renderOffsetEllipseVector(state.vectorProperties, "red")
+        renderOffsetEllipseVector(vectorProperties, "red")
       }
       break
     case "move":
@@ -211,8 +212,31 @@ function renderTool(toolName) {
   }
 }
 
+function renderPath(toolName, vectorProperties) {
+  switch (toolName) {
+    case "fill":
+      // renderFillVector(state.vectorProperties)
+      break
+    case "quadCurve":
+    case "cubicCurve":
+      renderCurvePath(vectorProperties)
+      break
+    case "ellipse":
+      // renderEllipseVector(state.vectorProperties)
+      break
+    case "move":
+      // if (canvas.currentLayer.type === "reference") {
+      //   renderTransformBox()
+      // }
+      break
+    default:
+    //
+  }
+}
+
 //For each vector action in the undoStack in a given layer, render it
 function renderLayerVectors(layer) {
+  //render paths
   for (let action of state.undoStack) {
     if (
       !action.hidden &&
@@ -220,20 +244,20 @@ function renderLayerVectors(layer) {
       action.layer === layer &&
       action.tool.type === "vector"
     ) {
-      switch (action.tool.name) {
-        case "fill":
-          renderFillVector(action.properties.vectorProperties)
-          break
-        case "quadCurve":
-        case "cubicCurve":
-          renderCurveVector(action.properties.vectorProperties)
-          break
-        case "ellipse":
-          renderEllipseVector(action.properties.vectorProperties)
-          break
-        default:
-        //
-      }
+      renderPath(action.tool.name, action.properties.vectorProperties)
     }
   }
+  renderPath(state.tool.name, state.vectorProperties)
+  //render control points
+  for (let action of state.undoStack) {
+    if (
+      !action.hidden &&
+      !action.removed &&
+      action.layer === layer &&
+      action.tool.type === "vector"
+    ) {
+      renderTool(action.tool.name, action.properties.vectorProperties)
+    }
+  }
+  renderTool(state.tool.name, state.vectorProperties)
 }

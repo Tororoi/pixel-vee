@@ -39,7 +39,7 @@ export function renderEllipseVector(vectorProperties, color = "white") {
     canvas.yOffset + py1 + 0.5
   )
 
-  if (px3 !== null) {
+  if (Number.isInteger(px3)) {
     canvas.vectorGuiCTX.ellipse(
       canvas.xOffset + px1 + 0.5,
       canvas.yOffset + py1 + 0.5,
@@ -60,7 +60,7 @@ export function renderEllipseVector(vectorProperties, color = "white") {
     canvas.vectorGuiCTX.beginPath()
     drawControlPointHandle(canvas, px1, py1, px3, py3)
     drawControlPointHandle(canvas, px1, py1, px2, py2)
-  } else if (px2 !== null) {
+  } else if (Number.isInteger(px2)) {
     drawCirclePath(canvas, px1 + x1Offset / 2, py1 + y1Offset / 2, radA)
     // Stroke non-filled lines
     canvas.vectorGuiCTX.stroke()
@@ -124,7 +124,7 @@ export function renderOffsetEllipseVector(vectorProperties, color = "red") {
   canvas.vectorGuiCTX.strokeStyle = color
   canvas.vectorGuiCTX.fillStyle = color
   canvas.vectorGuiCTX.beginPath()
-  if (px2 !== null) {
+  if (Number.isInteger(px2)) {
     drawCirclePath(
       canvas,
       px1 + x1Offset / 2,
@@ -138,7 +138,7 @@ export function renderOffsetEllipseVector(vectorProperties, color = "red") {
       circleRadius / 2
     )
   }
-  if (px3 !== null) {
+  if (Number.isInteger(px3)) {
     drawCirclePath(
       canvas,
       px3 + x1Offset / 2,
@@ -149,7 +149,7 @@ export function renderOffsetEllipseVector(vectorProperties, color = "red") {
   canvas.vectorGuiCTX.fill()
   canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.setLineDash([1, 1])
-  if (px2 !== null) {
+  if (Number.isInteger(px2)) {
     canvas.vectorGuiCTX.moveTo(
       canvas.xOffset + px1 + 0.5 + x1Offset / 2,
       canvas.yOffset + py1 + 0.5 + y1Offset / 2
@@ -159,7 +159,7 @@ export function renderOffsetEllipseVector(vectorProperties, color = "red") {
       canvas.yOffset + py2 + 0.5 + y1Offset / 2
     )
   }
-  if (px3 !== null) {
+  if (Number.isInteger(px3)) {
     canvas.vectorGuiCTX.moveTo(
       canvas.xOffset + px1 + 0.5 + x1Offset / 2,
       canvas.yOffset + py1 + 0.5 + y1Offset / 2
