@@ -200,14 +200,12 @@ function render(lineDashOffset = 0.5) {
   )
   //Prevent blurring
   canvas.vectorGuiCTX.imageSmoothingEnabled = false
-  renderLayerVectors(canvas.currentLayer)
-  // console.log(
-  //   canvas.currentVectorIndex,
-  //   canvas.collidedVectorIndex,
-  //   vectorGui.collidedKeys
-  // )
-  // renderPath(state.tool.name, state.vectorProperties) //all paths should be rendered before all control points
-  // renderTool(state.tool.name, state.vectorProperties)
+  //if linking, render all vectors in the layer
+  // renderLayerVectors(canvas.currentLayer)
+  //else render only the current vector
+  renderPath(state.tool.name, state.vectorProperties) //all paths should be rendered before all control points
+  vectorGui.resetCollision()
+  renderTool(state.tool.name, state.vectorProperties, true)
   //Render select vector
   if (state.selectProperties.px1 !== null) {
     renderSelectVector(vectorGui, lineDashOffset, state.tool.name === "select")
