@@ -253,6 +253,11 @@ function handlePointerUp(e) {
   canvas.pointerEvent = "none"
   if (!e.targetTouches) {
     vectorGui.render()
+    // console.log(canvas.collidedVectorIndex, vectorGui.otherCollidedKeys)
+    //TODO: logic to perform the action to link vectors will go here.
+    //This means the regular tool function will be saved first and undoing the link will have the vector still moved into position.
+    //Only the linking will be undone, which includes a transformation of the control point handle.
+    //Undoing again will of course move the vector back as expected.
     if (["brush", "colorMask", "eyedropper"].includes(state.tool.name)) {
       renderCursor(state, canvas, swatches)
     }

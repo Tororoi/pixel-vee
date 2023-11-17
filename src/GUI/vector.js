@@ -19,6 +19,7 @@ export const vectorGui = {
   collisionPresent: false,
   collidedKeys: { xKey: null, yKey: null },
   selectedPoint: { xKey: null, yKey: null },
+  otherCollidedKeys: { xKey: null, yKey: null },
   drawControlPoints,
   resetCollision() {
     this.collisionPresent = false
@@ -28,6 +29,13 @@ export const vectorGui = {
     this.collisionPresent = true
     this.collidedKeys.xKey = keys.x
     this.collidedKeys.yKey = keys.y
+  },
+  resetOtherVectorCollision() {
+    this.otherCollidedKeys = { xKey: null, yKey: null }
+  },
+  setOtherVectorCollision(keys) {
+    this.otherCollidedKeys.xKey = keys.x
+    this.otherCollidedKeys.yKey = keys.y
   },
   drawSelectOutline,
   render,
@@ -51,7 +59,7 @@ function drawControlPoints(
   selected = false,
   action = null
 ) {
-  vectorGui.resetCollision()
+  // vectorGui.resetCollision()
 
   for (let keys of pointsKeys) {
     const point = {
@@ -76,7 +84,7 @@ function drawControlPoints(
 }
 
 /**
- *
+ * TODO: move drawing logic to separate function so modify param doesn't need to be used
  * @param {Object} keys
  * @param {Object} point
  * @param {Float} radius
@@ -109,11 +117,16 @@ function handleCollisionAndDraw(
       )
     ) {
       //if cursor is colliding with a control point not on the selected vector, set collided keys specifically for collided vector
-      if (action?.index) {
+      if (action?.index && action?.index !== canvas.currentVectorIndex) {
         canvas.collidedVectorIndex = action.index
+        if (keys.x === "px1" || keys.x === "px2") {
+          r = radius * 2.125
+          vectorGui.setOtherVectorCollision(keys)
+        }
+      } else {
+        r = radius * 2.125
+        vectorGui.setCollision(keys)
       }
-      r = radius * 2.125
-      vectorGui.setCollision(keys)
     }
   }
 
@@ -188,11 +201,11 @@ function render(lineDashOffset = 0.5) {
   //Prevent blurring
   canvas.vectorGuiCTX.imageSmoothingEnabled = false
   renderLayerVectors(canvas.currentLayer)
-  console.log(
-    canvas.currentVectorIndex,
-    canvas.collidedVectorIndex,
-    vectorGui.collidedKeys
-  )
+  // console.log(
+  //   canvas.currentVectorIndex,
+  //   canvas.collidedVectorIndex,
+  //   vectorGui.collidedKeys
+  // )
   // renderPath(state.tool.name, state.vectorProperties) //all paths should be rendered before all control points
   // renderTool(state.tool.name, state.vectorProperties)
   //Render select vector
@@ -291,6 +304,7 @@ function renderLayerVectors(layer) {
     selectedVector = state.undoStack[canvas.currentVectorIndex]
   }
   //render all vectors in the layer except the selected vector
+  vectorGui.resetOtherVectorCollision()
   for (let action of state.undoStack) {
     if (
       !action.hidden &&
@@ -309,5 +323,6 @@ function renderLayerVectors(layer) {
     }
   }
   //render selected vector
+  vectorGui.resetCollision()
   renderTool(state.tool.name, state.vectorProperties, true, selectedVector)
 }
