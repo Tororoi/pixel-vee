@@ -49,6 +49,7 @@ export const vectorGui = {
  * @param {Boolean} modify
  * @param {Integer} offset
  * @param {Boolean} selected
+ * @param {Object} action
  */
 function drawControlPoints(
   vectorProperties,
@@ -59,8 +60,6 @@ function drawControlPoints(
   selected = false,
   action = null
 ) {
-  // vectorGui.resetCollision()
-
   for (let keys of pointsKeys) {
     const point = {
       x: vectorProperties[keys.x],
@@ -91,6 +90,7 @@ function drawControlPoints(
  * @param {Boolean} modify - if true, check for collision with cursor and modify radius
  * @param {Float} offset
  * @param {Boolean} selected
+ * @param {Object} action
  */
 function handleCollisionAndDraw(
   keys,
@@ -203,9 +203,7 @@ function render(lineDashOffset = 0.5) {
   //if linking, render all vectors in the layer
   // renderLayerVectors(canvas.currentLayer)
   //else render only the current vector
-  renderPath(state.tool.name, state.vectorProperties) //all paths should be rendered before all control points
-  vectorGui.resetCollision()
-  renderTool(state.tool.name, state.vectorProperties, true)
+  renderCurrentVector()
   //Render select vector
   if (state.selectProperties.px1 !== null) {
     renderSelectVector(vectorGui, lineDashOffset, state.tool.name === "select")
@@ -229,7 +227,7 @@ function render(lineDashOffset = 0.5) {
  * @param {Boolean} selected
  * @param {Object} action
  */
-function renderTool(
+function renderControlPoints(
   toolName,
   vectorProperties,
   selected = false,
@@ -260,6 +258,10 @@ function renderTool(
   }
 }
 
+/**
+ * @param {String} toolName
+ * @param {Object} vectorProperties
+ */
 function renderPath(toolName, vectorProperties) {
   switch (toolName) {
     case "fill":
@@ -282,26 +284,38 @@ function renderPath(toolName, vectorProperties) {
   }
 }
 
-//For each vector action in the undoStack in a given layer, render it
+/**
+ * For each vector action in the undoStack in a given layer, render it
+ * @param {Object} layer
+ */
 function renderLayerVectors(layer) {
+  let selectedVector = null
+  if (canvas.currentVectorIndex) {
+    selectedVector = state.undoStack[canvas.currentVectorIndex]
+  }
+  //iterate through and render all vectors in the layer except the selected vector which will always be rendered last
   //render paths
   for (let action of state.undoStack) {
     if (
       !action.hidden &&
       !action.removed &&
       action.layer === layer &&
-      action.tool.type === "vector"
+      action.tool.type === "vector" &&
+      action !== selectedVector
     ) {
       renderPath(action.tool.name, action.properties.vectorProperties)
     }
   }
+  //render selected vector path
   renderPath(state.tool.name, state.vectorProperties)
+  // Clear strokes from drawing area
+  canvas.vectorGuiCTX.clearRect(
+    canvas.xOffset,
+    canvas.yOffset,
+    canvas.offScreenCVS.width,
+    canvas.offScreenCVS.height
+  )
   //render control points
-  let selectedVector = null
-  if (canvas.currentVectorIndex) {
-    selectedVector = state.undoStack[canvas.currentVectorIndex]
-  }
-  //render all vectors in the layer except the selected vector
   vectorGui.resetOtherVectorCollision()
   for (let action of state.undoStack) {
     if (
@@ -311,8 +325,7 @@ function renderLayerVectors(layer) {
       action.tool.type === "vector" &&
       action !== selectedVector
     ) {
-      // console.log(action === selectedVector)
-      renderTool(
+      renderControlPoints(
         action.tool.name,
         action.properties.vectorProperties,
         false,
@@ -320,7 +333,30 @@ function renderLayerVectors(layer) {
       )
     }
   }
-  //render selected vector
+  //render selected vector control points
   vectorGui.resetCollision()
-  renderTool(state.tool.name, state.vectorProperties, true, selectedVector)
+  renderControlPoints(
+    state.tool.name,
+    state.vectorProperties,
+    true,
+    selectedVector
+  )
+}
+
+/**
+ * Render the current vector
+ */
+function renderCurrentVector() {
+  //render paths
+  renderPath(state.tool.name, state.vectorProperties)
+  // Clear strokes from drawing area
+  canvas.vectorGuiCTX.clearRect(
+    canvas.xOffset,
+    canvas.yOffset,
+    canvas.offScreenCVS.width,
+    canvas.offScreenCVS.height
+  )
+  vectorGui.resetCollision()
+  //render control points
+  renderControlPoints(state.tool.name, state.vectorProperties, true)
 }

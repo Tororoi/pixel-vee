@@ -110,11 +110,4 @@ export function renderCurvePath(vectorProperties) {
   }
   // Stroke non-filled lines
   canvas.vectorGuiCTX.stroke()
-  // Clear strokes from drawing area
-  canvas.vectorGuiCTX.clearRect(
-    canvas.xOffset,
-    canvas.yOffset,
-    canvas.offScreenCVS.width,
-    canvas.offScreenCVS.height
-  )
 }
