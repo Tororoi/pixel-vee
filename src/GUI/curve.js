@@ -5,11 +5,13 @@ import { drawControlPointHandle } from "../utils/guiHelpers.js"
 
 /**
  * @param {Object} vectorProperties
+ * @param {Boolean} selected
  */
-export function renderCurveVector(vectorProperties) {
+export function renderCurveVector(vectorProperties, selected, action) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  let circleRadius = 8 * lineWidth
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
   canvas.vectorGuiCTX.fillStyle = "white"
@@ -37,7 +39,6 @@ export function renderCurveVector(vectorProperties) {
     drawControlPointHandle(canvas, px1, py1, px3, py3)
   }
 
-  let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
   //set point radius for detection in state
   let pointsKeys = [
     { x: "px1", y: "py1" },
@@ -46,7 +47,14 @@ export function renderCurveVector(vectorProperties) {
     { x: "px4", y: "py4" },
   ]
 
-  vectorGui.drawControlPoints(vectorProperties, pointsKeys, circleRadius, false)
+  if (selected) {
+    vectorGui.drawControlPoints(
+      vectorProperties,
+      pointsKeys,
+      circleRadius,
+      false
+    )
+  }
 
   // Stroke non-filled lines
   canvas.vectorGuiCTX.stroke()
@@ -56,7 +64,10 @@ export function renderCurveVector(vectorProperties) {
     vectorProperties,
     pointsKeys,
     circleRadius / 2,
-    true
+    true, // modify
+    0,
+    selected,
+    action
   )
   // Fill points
   canvas.vectorGuiCTX.fill()

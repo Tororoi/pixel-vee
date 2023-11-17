@@ -40,13 +40,16 @@ export const vectorGui = {
  * @param {Integer} radius
  * @param {Boolean} modify
  * @param {Integer} offset
+ * @param {Boolean} selected
  */
 function drawControlPoints(
   vectorProperties,
   pointsKeys,
   radius,
   modify = false,
-  offset = 0
+  offset = 0,
+  selected = false,
+  action = null
 ) {
   vectorGui.resetCollision()
 
@@ -58,7 +61,15 @@ function drawControlPoints(
 
     if (point.x === null || point.y === null) continue
 
-    handleCollisionAndDraw(keys, point, radius, modify, offset)
+    handleCollisionAndDraw(
+      keys,
+      point,
+      radius,
+      modify,
+      offset,
+      selected,
+      action
+    )
   }
 
   setCursorStyle()
@@ -69,15 +80,24 @@ function drawControlPoints(
  * @param {Object} keys
  * @param {Object} point
  * @param {Float} radius
- * @param {Boolean} modify
+ * @param {Boolean} modify - if true, check for collision with cursor and modify radius
  * @param {Float} offset
+ * @param {Boolean} selected
  */
-function handleCollisionAndDraw(keys, point, radius, modify, offset) {
+function handleCollisionAndDraw(
+  keys,
+  point,
+  radius,
+  modify,
+  offset,
+  selected,
+  action
+) {
   let r = state.touch ? radius * 2 : radius
 
   if (modify) {
-    if (vectorGui.selectedPoint.xKey === keys.x) {
-      r = radius * 2
+    if (vectorGui.selectedPoint.xKey === keys.x && selected) {
+      r = radius * 2.125 // increase  radius of fill to match stroked circle
       vectorGui.setCollision(keys)
     } else if (
       checkPointCollision(
@@ -85,10 +105,14 @@ function handleCollisionAndDraw(keys, point, radius, modify, offset) {
         state.cursorY,
         point.x - offset,
         point.y - offset,
-        r + 1
+        r * 2.125
       )
     ) {
-      r = radius * 2
+      //if cursor is colliding with a control point not on the selected vector, set collided keys specifically for collided vector
+      if (action?.index) {
+        canvas.collidedVectorIndex = action.index
+      }
+      r = radius * 2.125
       vectorGui.setCollision(keys)
     }
   }
@@ -164,6 +188,11 @@ function render(lineDashOffset = 0.5) {
   //Prevent blurring
   canvas.vectorGuiCTX.imageSmoothingEnabled = false
   renderLayerVectors(canvas.currentLayer)
+  console.log(
+    canvas.currentVectorIndex,
+    canvas.collidedVectorIndex,
+    vectorGui.collidedKeys
+  )
   // renderPath(state.tool.name, state.vectorProperties) //all paths should be rendered before all control points
   // renderTool(state.tool.name, state.vectorProperties)
   //Render select vector
@@ -185,15 +214,23 @@ function render(lineDashOffset = 0.5) {
 /**
  * Render based on the current tool.
  * @param {String} toolName
+ * @param {Object} vectorProperties
+ * @param {Boolean} selected
+ * @param {Object} action
  */
-function renderTool(toolName, vectorProperties) {
+function renderTool(
+  toolName,
+  vectorProperties,
+  selected = false,
+  action = null
+) {
   switch (toolName) {
     case "fill":
       renderFillVector(vectorProperties)
       break
     case "quadCurve":
     case "cubicCurve":
-      renderCurveVector(vectorProperties)
+      renderCurveVector(vectorProperties, selected, action)
       break
     case "ellipse":
       renderEllipseVector(vectorProperties)
@@ -249,15 +286,28 @@ function renderLayerVectors(layer) {
   }
   renderPath(state.tool.name, state.vectorProperties)
   //render control points
+  let selectedVector = null
+  if (canvas.currentVectorIndex) {
+    selectedVector = state.undoStack[canvas.currentVectorIndex]
+  }
+  //render all vectors in the layer except the selected vector
   for (let action of state.undoStack) {
     if (
       !action.hidden &&
       !action.removed &&
       action.layer === layer &&
-      action.tool.type === "vector"
+      action.tool.type === "vector" &&
+      action !== selectedVector
     ) {
-      renderTool(action.tool.name, action.properties.vectorProperties)
+      // console.log(action === selectedVector)
+      renderTool(
+        action.tool.name,
+        action.properties.vectorProperties,
+        false,
+        action
+      )
     }
   }
-  renderTool(state.tool.name, state.vectorProperties)
+  //render selected vector
+  renderTool(state.tool.name, state.vectorProperties, true, selectedVector)
 }

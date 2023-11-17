@@ -51,6 +51,7 @@ export const canvas = {
   borderColor: "black",
   //Vectors
   currentVectorIndex: null,
+  collidedVectorIndex: null,
   //Cursor
   pointerEvent: "none",
   sizePointerState: "none",

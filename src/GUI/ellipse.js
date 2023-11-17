@@ -23,10 +23,10 @@ export function renderEllipseVector(vectorProperties, color = "white") {
   } = vectorProperties
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  let circleRadius = 8 * lineWidth
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = color
   canvas.vectorGuiCTX.fillStyle = color
-  let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
   let pointsKeys = [
     { x: "px1", y: "py1" },
     { x: "px2", y: "py2" },
@@ -120,7 +120,8 @@ export function renderOffsetEllipseVector(vectorProperties, color = "red") {
     y1Offset,
   } = vectorProperties
   // Setting of context attributes.
-  let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
+  let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  let circleRadius = 8 * lineWidth
   canvas.vectorGuiCTX.strokeStyle = color
   canvas.vectorGuiCTX.fillStyle = color
   canvas.vectorGuiCTX.beginPath()
