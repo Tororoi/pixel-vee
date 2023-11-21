@@ -11,6 +11,7 @@ import {
 import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
+import { getAngle } from "../utils/trig.js"
 
 //=====================================//
 //=== * * * Curve Controllers * * * ===//
@@ -452,8 +453,7 @@ function adjustCurveSteps(numPoints = 4) {
         if (state.tool.options.link) {
           if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
             let collidedVector = state.undoStack[canvas.collidedVectorIndex]
-            console.log(vectorGui.selectedPoint, vectorGui.otherCollidedKeys)
-            //1. set currentVector's selectedPoint to collidedVector's otherCollidedKeys to snap selected point to collidedVector's control point
+            //snap selected point to collidedVector's control point
             state.vectorProperties[vectorGui.selectedPoint.xKey] =
               collidedVector.properties.vectorProperties[
                 vectorGui.otherCollidedKeys.xKey
@@ -462,13 +462,40 @@ function adjustCurveSteps(numPoints = 4) {
               collidedVector.properties.vectorProperties[
                 vectorGui.otherCollidedKeys.yKey
               ]
-            //2. calculate length and angle of collidedVector's control handle and set currentVector's control handle to that angle plus 180 degrees at the same length
+            //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
+            //align control handles
+            let deltaX, deltaY
+            if (vectorGui.otherCollidedKeys.xKey === "px1") {
+              deltaX =
+                collidedVector.properties.vectorProperties.px3 -
+                collidedVector.properties.vectorProperties.px1
+              deltaY =
+                collidedVector.properties.vectorProperties.py3 -
+                collidedVector.properties.vectorProperties.py1
+            } else if (vectorGui.otherCollidedKeys.xKey === "px2") {
+              deltaX =
+                collidedVector.properties.vectorProperties.px4 -
+                collidedVector.properties.vectorProperties.px2
+              deltaY =
+                collidedVector.properties.vectorProperties.py4 -
+                collidedVector.properties.vectorProperties.py2
+            }
+            if (vectorGui.selectedPoint.xKey === "px1") {
+              state.vectorProperties.px3 = state.vectorProperties.px1 - deltaX
+              state.vectorProperties.py3 = state.vectorProperties.py1 - deltaY
+            } else if (vectorGui.selectedPoint.xKey === "px2") {
+              state.vectorProperties.px4 = state.vectorProperties.px2 - deltaX
+              state.vectorProperties.py4 = state.vectorProperties.py2 - deltaY
+            }
           }
 
           //TODO: logic to perform the action to link vectors will go here.
           //This means the regular tool function will be saved first and undoing the link will have the vector still moved into position.
           //Only the linking will be undone, which includes a transformation of the control point handle.
           //Undoing again will of course move the vector back as expected.
+        }
+        if (state.tool.options.align) {
+          //TODO: if selected point is p3 or p4 and another vector is linked, maintain angle
         }
         modifyVectorAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
@@ -504,7 +531,7 @@ export const cubicCurve = {
   brushSize: 1,
   brushType: "circle",
   disabled: false,
-  options: { snap: false, link: false },
+  options: { snap: false, align: false, link: false }, //snap: C0/G0 positional continuity, align: G1 tangent continuity, link: C1 velocity continuity
   modes: { eraser: false, inject: false },
   type: "vector",
   cursor: "crosshair",
