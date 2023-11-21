@@ -497,27 +497,7 @@ function vectorInteract(e) {
     //select current vector
     vectorGui.reset()
     if (vector.index !== currentIndex) {
-      state.vectorProperties = { ...vector.properties.vectorProperties }
-      //Keep properties relative to layer offset
-      state.vectorProperties.px1 += vector.layer.x
-      state.vectorProperties.py1 += vector.layer.y
-      if (
-        vector.tool.name === "quadCurve" ||
-        vector.tool.name === "cubicCurve" ||
-        vector.tool.name === "ellipse"
-      ) {
-        state.vectorProperties.px2 += vector.layer.x
-        state.vectorProperties.py2 += vector.layer.y
-
-        state.vectorProperties.px3 += vector.layer.x
-        state.vectorProperties.py3 += vector.layer.y
-      }
-
-      if (vector.tool.name === "cubicCurve") {
-        state.vectorProperties.px4 += vector.layer.x
-        state.vectorProperties.py4 += vector.layer.y
-      }
-      canvas.currentVectorIndex = vector.index
+      vectorGui.setVectorProperties(vector)
       canvas.currentLayer.inactiveTools.forEach((tool) => {
         dom[`${tool}Btn`].disabled = false
       })

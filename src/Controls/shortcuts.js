@@ -66,6 +66,9 @@ export function activateShortcut(keyCode) {
           adjustEllipseSteps()
           vectorGui.render()
         }
+      } else if (dom.toolBtn.id === "cubicCurve") {
+        state.tool.options.link = true
+        vectorGui.render()
       }
       break
     case "KeyA":
@@ -276,13 +279,19 @@ export function deactivateShortcut(keyCode) {
         state.tool.fn()
       }
       state.vectorProperties.forceCircle = false
-      if (
-        (vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey) &&
-        vectorGui.selectedPoint.xKey !== "px1"
-      ) {
-        //while holding control point, readjust ellipse without having to move cursor.
-        //TODO: update this functionality to have other radii go back to previous radius value when releasing shift
-        adjustEllipseSteps()
+      if (state.tool.name === "ellipse") {
+        if (
+          (vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey) &&
+          vectorGui.selectedPoint.xKey !== "px1"
+        ) {
+          //while holding control point, readjust ellipse without having to move cursor.
+          //TODO: update this functionality to have other radii go back to previous radius value when releasing shift
+          adjustEllipseSteps()
+          vectorGui.render()
+        }
+      }
+      if (state.tool.name === "cubicCurve") {
+        state.tool.options.link = false
         vectorGui.render()
       }
       break

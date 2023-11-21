@@ -449,6 +449,27 @@ function adjustCurveSteps(numPoints = 4) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         action.hidden = false
+        if (state.tool.options.link) {
+          if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
+            let collidedVector = state.undoStack[canvas.collidedVectorIndex]
+            console.log(vectorGui.selectedPoint, vectorGui.otherCollidedKeys)
+            //1. set currentVector's selectedPoint to collidedVector's otherCollidedKeys to snap selected point to collidedVector's control point
+            state.vectorProperties[vectorGui.selectedPoint.xKey] =
+              collidedVector.properties.vectorProperties[
+                vectorGui.otherCollidedKeys.xKey
+              ]
+            state.vectorProperties[vectorGui.selectedPoint.yKey] =
+              collidedVector.properties.vectorProperties[
+                vectorGui.otherCollidedKeys.yKey
+              ]
+            //2. calculate length and angle of collidedVector's control handle and set currentVector's control handle to that angle plus 180 degrees at the same length
+          }
+
+          //TODO: logic to perform the action to link vectors will go here.
+          //This means the regular tool function will be saved first and undoing the link will have the vector still moved into position.
+          //Only the linking will be undone, which includes a transformation of the control point handle.
+          //Undoing again will of course move the vector back as expected.
+        }
         modifyVectorAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
           xKey: null,
@@ -483,7 +504,7 @@ export const cubicCurve = {
   brushSize: 1,
   brushType: "circle",
   disabled: false,
-  options: {},
+  options: { snap: false, link: false },
   modes: { eraser: false, inject: false },
   type: "vector",
   cursor: "crosshair",

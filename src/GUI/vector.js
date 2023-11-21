@@ -31,6 +31,7 @@ export const vectorGui = {
     this.collidedKeys.yKey = keys.y
   },
   resetOtherVectorCollision() {
+    canvas.collidedVectorIndex = null
     this.otherCollidedKeys = { xKey: null, yKey: null }
   },
   setOtherVectorCollision(keys) {
@@ -40,6 +41,7 @@ export const vectorGui = {
   drawSelectOutline,
   render,
   reset,
+  setVectorProperties,
 }
 
 /**
@@ -188,6 +190,34 @@ function reset() {
 }
 
 /**
+ * Normalize vector properties based on layer offset
+ * @param {Object} vectorAction
+ */
+function setVectorProperties(vectorAction) {
+  state.vectorProperties = { ...vectorAction.properties.vectorProperties }
+  //Keep properties relative to layer offset
+  state.vectorProperties.px1 += vectorAction.layer.x
+  state.vectorProperties.py1 += vectorAction.layer.y
+  if (
+    vectorAction.tool.name === "quadCurve" ||
+    vectorAction.tool.name === "cubicCurve" ||
+    vectorAction.tool.name === "ellipse"
+  ) {
+    state.vectorProperties.px2 += vectorAction.layer.x
+    state.vectorProperties.py2 += vectorAction.layer.y
+
+    state.vectorProperties.px3 += vectorAction.layer.x
+    state.vectorProperties.py3 += vectorAction.layer.y
+  }
+
+  if (vectorAction.tool.name === "cubicCurve") {
+    state.vectorProperties.px4 += vectorAction.layer.x
+    state.vectorProperties.py4 += vectorAction.layer.y
+  }
+  canvas.currentVectorIndex = vectorAction.index
+}
+
+/**
  * Render vector graphical interface
  * @param {Float} lineDashOffset
  */
@@ -201,9 +231,12 @@ function render(lineDashOffset = 0.5) {
   //Prevent blurring
   canvas.vectorGuiCTX.imageSmoothingEnabled = false
   //if linking, render all vectors in the layer
-  // renderLayerVectors(canvas.currentLayer)
-  //else render only the current vector
-  renderCurrentVector()
+  if (state.tool.options.link) {
+    renderLayerVectors(canvas.currentLayer)
+  } else {
+    //else render only the current vector
+    renderCurrentVector()
+  }
   //Render select vector
   if (state.selectProperties.px1 !== null) {
     renderSelectVector(vectorGui, lineDashOffset, state.tool.name === "select")

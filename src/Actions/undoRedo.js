@@ -20,27 +20,7 @@ function handleModifyAction(latestAction, modType) {
   }
   if (state.tool.name === moddedAction.tool.name) {
     vectorGui.reset()
-    state.vectorProperties = { ...latestAction.properties[modType] }
-    //Keep properties relative to layer offset
-    state.vectorProperties.px1 += moddedAction.layer.x
-    state.vectorProperties.py1 += moddedAction.layer.y
-    if (
-      moddedAction.tool.name === "quadCurve" ||
-      moddedAction.tool.name === "cubicCurve" ||
-      moddedAction.tool.name === "ellipse"
-    ) {
-      state.vectorProperties.px2 += moddedAction.layer.x
-      state.vectorProperties.py2 += moddedAction.layer.y
-
-      state.vectorProperties.px3 += moddedAction.layer.x
-      state.vectorProperties.py3 += moddedAction.layer.y
-    }
-
-    if (moddedAction.tool.name === "cubicCurve") {
-      state.vectorProperties.px4 += moddedAction.layer.x
-      state.vectorProperties.py4 += moddedAction.layer.y
-    }
-    canvas.currentVectorIndex = moddedAction.index
+    vectorGui.setVectorProperties(moddedAction)
     vectorGui.render()
   }
 }
@@ -188,27 +168,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   ) {
     //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
     if (modType === "to") {
-      state.vectorProperties = { ...latestAction.properties.vectorProperties }
-      //Keep properties relative to layer offset
-      state.vectorProperties.px1 += latestAction.layer.x
-      state.vectorProperties.py1 += latestAction.layer.y
-      if (
-        latestAction.tool.name === "quadCurve" ||
-        latestAction.tool.name === "cubicCurve" ||
-        latestAction.tool.name === "ellipse"
-      ) {
-        state.vectorProperties.px2 += latestAction.layer.x
-        state.vectorProperties.py2 += latestAction.layer.y
-
-        state.vectorProperties.px3 += latestAction.layer.x
-        state.vectorProperties.py3 += latestAction.layer.y
-      }
-
-      if (latestAction.tool.name === "cubicCurve") {
-        state.vectorProperties.px4 += latestAction.layer.x
-        state.vectorProperties.py4 += latestAction.layer.y
-      }
-      canvas.currentVectorIndex = latestAction.index //currently only vectors have an index property, set during renderVectorsToDOM
+      vectorGui.setVectorProperties(latestAction)
       vectorGui.render()
     }
   }
@@ -220,29 +180,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     ) {
       //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
       vectorGui.reset()
-      state.vectorProperties = {
-        ...newLatestAction.properties.vectorProperties,
-      }
-      //Keep properties relative to layer offset
-      state.vectorProperties.px1 += newLatestAction.layer.x
-      state.vectorProperties.py1 += newLatestAction.layer.y
-      if (
-        newLatestAction.tool.name === "quadCurve" ||
-        newLatestAction.tool.name === "cubicCurve" ||
-        newLatestAction.tool.name === "ellipse"
-      ) {
-        state.vectorProperties.px2 += newLatestAction.layer.x
-        state.vectorProperties.py2 += newLatestAction.layer.y
-
-        state.vectorProperties.px3 += newLatestAction.layer.x
-        state.vectorProperties.py3 += newLatestAction.layer.y
-      }
-
-      if (newLatestAction.tool.name === "cubicCurve") {
-        state.vectorProperties.px4 += newLatestAction.layer.x
-        state.vectorProperties.py4 += newLatestAction.layer.y
-      }
-      canvas.currentVectorIndex = newLatestAction.index //currently only vectors have an index property, set during renderVectorsToDOM
+      vectorGui.setVectorProperties(newLatestAction)
       vectorGui.render()
     }
   }
