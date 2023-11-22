@@ -68,6 +68,7 @@ export function activateShortcut(keyCode) {
         }
       } else if (dom.toolBtn.id === "cubicCurve") {
         state.tool.options.link = true
+        //if control point is p1 or p2, can link to ther vectors. TODO: If already linked, move all linked points and control handles together. If p3 or p4, maintain angle and velocity of opposing linked vector control handle
         vectorGui.render()
       }
       break

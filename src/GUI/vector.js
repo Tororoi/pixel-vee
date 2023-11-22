@@ -50,8 +50,7 @@ export const vectorGui = {
  * @param {Integer} radius
  * @param {Boolean} modify
  * @param {Integer} offset
- * @param {Boolean} selected
- * @param {Object} action
+ * @param {Object} vectorAction
  */
 function drawControlPoints(
   vectorProperties,
@@ -59,8 +58,7 @@ function drawControlPoints(
   radius,
   modify = false,
   offset = 0,
-  selected = false,
-  action = null
+  vectorAction = null
 ) {
   for (let keys of pointsKeys) {
     const point = {
@@ -70,15 +68,7 @@ function drawControlPoints(
 
     if (point.x === null || point.y === null) continue
 
-    handleCollisionAndDraw(
-      keys,
-      point,
-      radius,
-      modify,
-      offset,
-      selected,
-      action
-    )
+    handleCollisionAndDraw(keys, point, radius, modify, offset, vectorAction)
   }
 
   setCursorStyle()
@@ -91,8 +81,7 @@ function drawControlPoints(
  * @param {Float} radius
  * @param {Boolean} modify - if true, check for collision with cursor and modify radius
  * @param {Float} offset
- * @param {Boolean} selected
- * @param {Object} action
+ * @param {Object} vectorAction
  */
 function handleCollisionAndDraw(
   keys,
@@ -100,27 +89,28 @@ function handleCollisionAndDraw(
   radius,
   modify,
   offset,
-  selected,
-  action
+  vectorAction
 ) {
   let r = state.touch ? radius * 2 : radius
+  const xOffset = vectorAction ? vectorAction.layer.x : 0
+  const yOffset = vectorAction ? vectorAction.layer.y : 0
 
   if (modify) {
-    if (vectorGui.selectedPoint.xKey === keys.x && selected) {
+    if (vectorGui.selectedPoint.xKey === keys.x && !vectorAction) {
       r = radius * 2.125 // increase  radius of fill to match stroked circle
       vectorGui.setCollision(keys)
     } else if (
       checkPointCollision(
         state.cursorX,
         state.cursorY,
-        point.x - offset,
-        point.y - offset,
+        point.x - offset + xOffset,
+        point.y - offset + yOffset,
         r * 2.125
       )
     ) {
       //if cursor is colliding with a control point not on the selected vector, set collided keys specifically for collided vector
-      if (action?.index && action?.index !== canvas.currentVectorIndex) {
-        canvas.collidedVectorIndex = action.index
+      if (vectorAction) {
+        canvas.collidedVectorIndex = vectorAction.index
         if (keys.x === "px1" || keys.x === "px2") {
           r = radius * 2.125
           vectorGui.setOtherVectorCollision(keys)
@@ -132,7 +122,14 @@ function handleCollisionAndDraw(
     }
   }
 
-  drawCirclePath(canvas, point.x - offset, point.y - offset, r)
+  drawCirclePath(
+    canvas,
+    canvas.xOffset + xOffset,
+    canvas.yOffset + yOffset,
+    point.x - offset,
+    point.y - offset,
+    r
+  )
 }
 
 /**
@@ -258,21 +255,16 @@ function render(lineDashOffset = 0.5) {
  * @param {String} toolName
  * @param {Object} vectorProperties
  * @param {Boolean} selected
- * @param {Object} action
+ * @param {Object} vectorAction
  */
-function renderControlPoints(
-  toolName,
-  vectorProperties,
-  selected = false,
-  action = null
-) {
+function renderControlPoints(toolName, vectorProperties, vectorAction = null) {
   switch (toolName) {
     case "fill":
       renderFillVector(vectorProperties)
       break
     case "quadCurve":
     case "cubicCurve":
-      renderCurveVector(vectorProperties, selected, action)
+      renderCurveVector(vectorProperties, vectorAction)
       break
     case "ellipse":
       renderEllipseVector(vectorProperties)
@@ -294,15 +286,16 @@ function renderControlPoints(
 /**
  * @param {String} toolName
  * @param {Object} vectorProperties
+ * @param {Object} vectorAction
  */
-function renderPath(toolName, vectorProperties) {
+function renderPath(toolName, vectorProperties, vectorAction = null) {
   switch (toolName) {
     case "fill":
       // renderFillVector(state.vectorProperties)
       break
     case "quadCurve":
     case "cubicCurve":
-      renderCurvePath(vectorProperties)
+      renderCurvePath(vectorProperties, vectorAction)
       break
     case "ellipse":
       // renderEllipseVector(state.vectorProperties)
@@ -336,7 +329,7 @@ function renderLayerVectors(layer) {
       action.tool.type === "vector" &&
       action !== selectedVector
     ) {
-      renderPath(action.tool.name, action.properties.vectorProperties)
+      renderPath(action.tool.name, action.properties.vectorProperties, action)
     }
   }
   //render selected vector path
@@ -361,19 +354,13 @@ function renderLayerVectors(layer) {
       renderControlPoints(
         action.tool.name,
         action.properties.vectorProperties,
-        false,
         action
       )
     }
   }
   //render selected vector control points
   vectorGui.resetCollision()
-  renderControlPoints(
-    state.tool.name,
-    state.vectorProperties,
-    true,
-    selectedVector
-  )
+  renderControlPoints(state.tool.name, state.vectorProperties)
 }
 
 /**
@@ -391,5 +378,5 @@ function renderCurrentVector() {
   )
   vectorGui.resetCollision()
   //render control points
-  renderControlPoints(state.tool.name, state.vectorProperties, true)
+  renderControlPoints(state.tool.name, state.vectorProperties)
 }

@@ -51,7 +51,6 @@ function handleKeyDown(e) {
   }
   // e.preventDefault() - May conditionally need this for certain shortcuts, but try to avoid doing so
   if (state.shortcuts) {
-    console.log(e.code)
     keys[e.code] = true //set active key globally
     activateShortcut(e.code)
   }

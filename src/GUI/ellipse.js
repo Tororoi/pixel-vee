@@ -58,10 +58,33 @@ export function renderEllipseVector(vectorProperties, color = "white") {
       canvas.offScreenCVS.height
     )
     canvas.vectorGuiCTX.beginPath()
-    drawControlPointHandle(canvas, px1, py1, px3, py3)
-    drawControlPointHandle(canvas, px1, py1, px2, py2)
+    drawControlPointHandle(
+      canvas,
+      canvas.xOffset,
+      canvas.yOffset,
+      px1,
+      py1,
+      px3,
+      py3
+    )
+    drawControlPointHandle(
+      canvas,
+      canvas.xOffset,
+      canvas.yOffset,
+      px1,
+      py1,
+      px2,
+      py2
+    )
   } else if (Number.isInteger(px2)) {
-    drawCirclePath(canvas, px1 + x1Offset / 2, py1 + y1Offset / 2, radA)
+    drawCirclePath(
+      canvas,
+      canvas.xOffset,
+      canvas.yOffset,
+      px1 + x1Offset / 2,
+      py1 + y1Offset / 2,
+      radA
+    )
     // Stroke non-filled lines
     canvas.vectorGuiCTX.stroke()
     canvas.vectorGuiCTX.clearRect(
@@ -71,7 +94,15 @@ export function renderEllipseVector(vectorProperties, color = "white") {
       canvas.offScreenCVS.height
     )
     canvas.vectorGuiCTX.beginPath()
-    drawControlPointHandle(canvas, px1, py1, px2, py2)
+    drawControlPointHandle(
+      canvas,
+      canvas.xOffset,
+      canvas.yOffset,
+      px1,
+      py1,
+      px2,
+      py2
+    )
   }
 
   vectorGui.drawControlPoints(
@@ -128,12 +159,16 @@ export function renderOffsetEllipseVector(vectorProperties, color = "red") {
   if (Number.isInteger(px2)) {
     drawCirclePath(
       canvas,
+      canvas.xOffset,
+      canvas.yOffset,
       px1 + x1Offset / 2,
       py1 + y1Offset / 2,
       circleRadius / 2
     )
     drawCirclePath(
       canvas,
+      canvas.xOffset,
+      canvas.yOffset,
       px2 + x1Offset / 2,
       py2 + y1Offset / 2,
       circleRadius / 2
@@ -142,6 +177,8 @@ export function renderOffsetEllipseVector(vectorProperties, color = "red") {
   if (Number.isInteger(px3)) {
     drawCirclePath(
       canvas,
+      canvas.xOffset,
+      canvas.yOffset,
       px3 + x1Offset / 2,
       py3 + y1Offset / 2,
       circleRadius / 2

@@ -450,42 +450,44 @@ function adjustCurveSteps(numPoints = 4) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         action.hidden = false
-        if (state.tool.options.link) {
+        if (state.tool.options.link || state.tool.options.snap) {
           if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
             let collidedVector = state.undoStack[canvas.collidedVectorIndex]
             //snap selected point to collidedVector's control point
             state.vectorProperties[vectorGui.selectedPoint.xKey] =
               collidedVector.properties.vectorProperties[
                 vectorGui.otherCollidedKeys.xKey
-              ]
+              ] + collidedVector.layer.x
             state.vectorProperties[vectorGui.selectedPoint.yKey] =
               collidedVector.properties.vectorProperties[
                 vectorGui.otherCollidedKeys.yKey
-              ]
+              ] + collidedVector.layer.y
             //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
             //align control handles
-            let deltaX, deltaY
-            if (vectorGui.otherCollidedKeys.xKey === "px1") {
-              deltaX =
-                collidedVector.properties.vectorProperties.px3 -
-                collidedVector.properties.vectorProperties.px1
-              deltaY =
-                collidedVector.properties.vectorProperties.py3 -
-                collidedVector.properties.vectorProperties.py1
-            } else if (vectorGui.otherCollidedKeys.xKey === "px2") {
-              deltaX =
-                collidedVector.properties.vectorProperties.px4 -
-                collidedVector.properties.vectorProperties.px2
-              deltaY =
-                collidedVector.properties.vectorProperties.py4 -
-                collidedVector.properties.vectorProperties.py2
-            }
-            if (vectorGui.selectedPoint.xKey === "px1") {
-              state.vectorProperties.px3 = state.vectorProperties.px1 - deltaX
-              state.vectorProperties.py3 = state.vectorProperties.py1 - deltaY
-            } else if (vectorGui.selectedPoint.xKey === "px2") {
-              state.vectorProperties.px4 = state.vectorProperties.px2 - deltaX
-              state.vectorProperties.py4 = state.vectorProperties.py2 - deltaY
+            if (state.tool.options.link) {
+              let deltaX, deltaY
+              if (vectorGui.otherCollidedKeys.xKey === "px1") {
+                deltaX =
+                  collidedVector.properties.vectorProperties.px3 -
+                  collidedVector.properties.vectorProperties.px1
+                deltaY =
+                  collidedVector.properties.vectorProperties.py3 -
+                  collidedVector.properties.vectorProperties.py1
+              } else if (vectorGui.otherCollidedKeys.xKey === "px2") {
+                deltaX =
+                  collidedVector.properties.vectorProperties.px4 -
+                  collidedVector.properties.vectorProperties.px2
+                deltaY =
+                  collidedVector.properties.vectorProperties.py4 -
+                  collidedVector.properties.vectorProperties.py2
+              }
+              if (vectorGui.selectedPoint.xKey === "px1") {
+                state.vectorProperties.px3 = state.vectorProperties.px1 - deltaX
+                state.vectorProperties.py3 = state.vectorProperties.py1 - deltaY
+              } else if (vectorGui.selectedPoint.xKey === "px2") {
+                state.vectorProperties.px4 = state.vectorProperties.px2 - deltaX
+                state.vectorProperties.py4 = state.vectorProperties.py2 - deltaY
+              }
             }
           }
 
