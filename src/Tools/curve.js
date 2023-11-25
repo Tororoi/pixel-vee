@@ -348,7 +348,7 @@ function adjustCurveSteps(numPoints = 4) {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
-  let action = state.undoStack[canvas.currentVectorIndex]
+  let currentVector = state.undoStack[canvas.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.collisionPresent && state.clickCounter === 0) {
@@ -358,9 +358,52 @@ function adjustCurveSteps(numPoints = 4) {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
         }
-        action.hidden = true
+        currentVector.hidden = true
+        if (state.tool.options.link || state.tool.options.snap) {
+          if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
+            let collidedVector = state.undoStack[canvas.collidedVectorIndex]
+            console.log("vector linked to", collidedVector.index)
+            /**
+             * Steps:
+             * 1. set state.collidedVectorProperties to the collidedVector's properties
+             * 2. render preview curve for collidedVector as well as current vector
+             */
+            //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
+            //align control handles
+            if (state.tool.options.link) {
+              // let deltaX, deltaY
+              // if (vectorGui.otherCollidedKeys.xKey === "px1") {
+              //   deltaX =
+              //     collidedVector.properties.vectorProperties.px3 -
+              //     collidedVector.properties.vectorProperties.px1
+              //   deltaY =
+              //     collidedVector.properties.vectorProperties.py3 -
+              //     collidedVector.properties.vectorProperties.py1
+              // } else if (vectorGui.otherCollidedKeys.xKey === "px2") {
+              //   deltaX =
+              //     collidedVector.properties.vectorProperties.px4 -
+              //     collidedVector.properties.vectorProperties.px2
+              //   deltaY =
+              //     collidedVector.properties.vectorProperties.py4 -
+              //     collidedVector.properties.vectorProperties.py2
+              // }
+              // if (vectorGui.selectedPoint.xKey === "px1") {
+              //   state.vectorProperties.px3 = state.vectorProperties.px1 - deltaX
+              //   state.vectorProperties.py3 = state.vectorProperties.py1 - deltaY
+              // } else if (vectorGui.selectedPoint.xKey === "px2") {
+              //   state.vectorProperties.px4 = state.vectorProperties.px2 - deltaX
+              //   state.vectorProperties.py4 = state.vectorProperties.py2 - deltaY
+              // }
+            }
+          }
+
+          //TODO: logic to perform the action to link vectors will go here.
+          //This means the regular tool function will be saved first and undoing the link will have the vector still moved into position.
+          //Only the linking will be undone, which includes a transformation of the control point handle.
+          //Undoing again will of course move the vector back as expected.
+        }
         if (numPoints === 3) {
-          renderCanvas(action.layer, true)
+          renderCanvas(currentVector.layer, true)
           actionQuadraticCurve(
             state.vectorProperties.px1,
             state.vectorProperties.py1,
@@ -369,16 +412,18 @@ function adjustCurveSteps(numPoints = 4) {
             state.vectorProperties.px3,
             state.vectorProperties.py3,
             3,
-            action.color,
-            action.layer,
-            action.modes,
-            brushStamps[action.tool.brushType][action.tool.brushSize],
-            action.tool.brushSize,
-            action.maskSet,
+            currentVector.color,
+            currentVector.layer,
+            currentVector.modes,
+            brushStamps[currentVector.tool.brushType][
+              currentVector.tool.brushSize
+            ],
+            currentVector.tool.brushSize,
+            currentVector.maskSet,
             true
           )
         } else {
-          renderCanvas(action.layer, true)
+          renderCanvas(currentVector.layer, true)
           actionCubicCurve(
             state.vectorProperties.px1,
             state.vectorProperties.py1,
@@ -389,12 +434,14 @@ function adjustCurveSteps(numPoints = 4) {
             state.vectorProperties.px4,
             state.vectorProperties.py4,
             4,
-            action.color,
-            action.layer,
-            action.modes,
-            brushStamps[action.tool.brushType][action.tool.brushSize],
-            action.tool.brushSize,
-            action.maskSet,
+            currentVector.color,
+            currentVector.layer,
+            currentVector.modes,
+            brushStamps[currentVector.tool.brushType][
+              currentVector.tool.brushSize
+            ],
+            currentVector.tool.brushSize,
+            currentVector.maskSet,
             true
           )
         }
@@ -405,7 +452,7 @@ function adjustCurveSteps(numPoints = 4) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         if (numPoints === 3) {
-          renderCanvas(action.layer)
+          renderCanvas(currentVector.layer)
           actionQuadraticCurve(
             state.vectorProperties.px1,
             state.vectorProperties.py1,
@@ -414,16 +461,18 @@ function adjustCurveSteps(numPoints = 4) {
             state.vectorProperties.px3,
             state.vectorProperties.py3,
             3,
-            action.color,
-            action.layer,
-            action.modes,
-            brushStamps[action.tool.brushType][action.tool.brushSize],
-            action.tool.brushSize,
-            action.maskSet,
+            currentVector.color,
+            currentVector.layer,
+            currentVector.modes,
+            brushStamps[currentVector.tool.brushType][
+              currentVector.tool.brushSize
+            ],
+            currentVector.tool.brushSize,
+            currentVector.maskSet,
             true
           )
         } else {
-          renderCanvas(action.layer)
+          renderCanvas(currentVector.layer)
           actionCubicCurve(
             state.vectorProperties.px1,
             state.vectorProperties.py1,
@@ -434,12 +483,14 @@ function adjustCurveSteps(numPoints = 4) {
             state.vectorProperties.px4,
             state.vectorProperties.py4,
             4,
-            action.color,
-            action.layer,
-            action.modes,
-            brushStamps[action.tool.brushType][action.tool.brushSize],
-            action.tool.brushSize,
-            action.maskSet,
+            currentVector.color,
+            currentVector.layer,
+            currentVector.modes,
+            brushStamps[currentVector.tool.brushType][
+              currentVector.tool.brushSize
+            ],
+            currentVector.tool.brushSize,
+            currentVector.maskSet,
             true
           )
         }
@@ -449,7 +500,7 @@ function adjustCurveSteps(numPoints = 4) {
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        action.hidden = false
+        currentVector.hidden = false
         if (state.tool.options.link || state.tool.options.snap) {
           if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
             let collidedVector = state.undoStack[canvas.collidedVectorIndex]
@@ -504,7 +555,7 @@ function adjustCurveSteps(numPoints = 4) {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(action.layer, true)
+        renderCanvas(currentVector.layer, true)
       }
       break
     default:
