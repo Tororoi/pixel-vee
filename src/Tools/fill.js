@@ -54,12 +54,14 @@ function fillSteps() {
       if (vectorGui.selectedPoint.xKey) {
         adjustFillSteps()
       }
+      break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey) {
         adjustFillSteps()
       }
       //redraw canvas to allow onscreen cursor to render
       renderCanvas(canvas.currentLayer)
+      break
     default:
     //do nothing
   }
@@ -82,6 +84,34 @@ export function adjustFillSteps() {
         action.hidden = true
         //Only render canvas up to timeline where fill action exists while adjusting fill
         renderCanvas(action.layer, true, canvas.currentVectorIndex) // render to canvas.currentVectorIndex
+        //put offscreen layer canvas onto preview canvas
+        canvas.previewCTX.clearRect(
+          0,
+          0,
+          canvas.previewCVS.width,
+          canvas.previewCVS.height
+        )
+        canvas.previewCTX.drawImage(action.layer.cvs, 0, 0)
+        //render preview fill
+        actionFill(
+          state.vectorProperties.px1,
+          state.vectorProperties.py1,
+          swatches.primary.color,
+          canvas.currentLayer,
+          state.tool.modes,
+          state.selectProperties,
+          state.maskSet,
+          true
+        )
+        //render actions to preview canvas from currentVectorIndex to end of timeline
+        //
+        action.layer.onscreenCtx.drawImage(
+          canvas.previewCVS,
+          canvas.xOffset,
+          canvas.yOffset,
+          canvas.previewCVS.width,
+          canvas.previewCVS.height
+        )
       }
       break
     case "pointermove":
@@ -89,6 +119,35 @@ export function adjustFillSteps() {
         //code gets past check twice here so figure out where tool fn is being called again
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
+        renderCanvas(action.layer)
+        //put offscreen layer canvas onto preview canvas
+        canvas.previewCTX.clearRect(
+          0,
+          0,
+          canvas.previewCVS.width,
+          canvas.previewCVS.height
+        )
+        canvas.previewCTX.drawImage(action.layer.cvs, 0, 0)
+        //render preview fill
+        actionFill(
+          state.vectorProperties.px1,
+          state.vectorProperties.py1,
+          swatches.primary.color,
+          canvas.currentLayer,
+          state.tool.modes,
+          state.selectProperties,
+          state.maskSet,
+          true
+        )
+        //render actions to preview canvas from currentVectorIndex to end of timeline
+        //
+        action.layer.onscreenCtx.drawImage(
+          canvas.previewCVS,
+          canvas.xOffset,
+          canvas.yOffset,
+          canvas.previewCVS.width,
+          canvas.previewCVS.height
+        )
       }
       break
     case "pointerup":

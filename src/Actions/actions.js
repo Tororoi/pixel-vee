@@ -1,5 +1,6 @@
 import { state } from "../Context/state.js"
 import { tools } from "../Tools/index.js"
+import { brushStamps } from "../Context/brushStamps.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { vectorGui } from "../GUI/vector.js"
@@ -344,6 +345,7 @@ export function actionLine(
  * @param {Object} currentModes
  * @param {Object} selectProperties
  * @param {Set} maskSet
+ * @param {Boolean} isPreview
  * @returns
  */
 export function actionFill(
@@ -353,7 +355,8 @@ export function actionFill(
   layer,
   currentModes,
   selectProperties,
-  maskSet
+  maskSet,
+  isPreview = false
 ) {
   let xMin = 0
   let xMax = layer.cvs.width
@@ -371,13 +374,11 @@ export function actionFill(
     return
   }
   //get imageData
-  let layerImageData = layer.ctx.getImageData(
-    xMin,
-    yMin,
-    xMax - xMin,
-    yMax - yMin
-  )
-
+  let ctx = layer.ctx
+  if (isPreview) {
+    ctx = canvas.previewCTX
+  }
+  let layerImageData = ctx.getImageData(xMin, yMin, xMax - xMin, yMax - yMin)
   let clickedColor = getColor(layerImageData, startX - xMin, startY - yMin)
 
   if (currentModes?.eraser) {
@@ -393,7 +394,7 @@ export function actionFill(
   let newPos, x, y, pixelPos, reachLeft, reachRight
   floodFill()
   //render floodFill result
-  layer.ctx.putImageData(layerImageData, xMin, yMin)
+  ctx.putImageData(layerImageData, xMin, yMin)
 
   //helpers
   function floodFill() {
