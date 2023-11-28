@@ -228,7 +228,11 @@ function render(lineDashOffset = 0.5) {
   //Prevent blurring
   canvas.vectorGuiCTX.imageSmoothingEnabled = false
   //if linking, render all vectors in the layer
-  if (state.tool.options.link) {
+  if (
+    state.tool.options.snap ||
+    state.tool.options.align ||
+    state.tool.options.link
+  ) {
     renderLayerVectors(canvas.currentLayer)
   } else {
     //else render only the current vector

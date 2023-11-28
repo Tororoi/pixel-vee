@@ -14,6 +14,7 @@ import {
   handleTools,
   handleModes,
   renderBrushStampToDOM,
+  renderToolOptionsToDOM,
 } from "../Tools/events.js"
 import { renderCursor } from "../GUI/cursor.js"
 
@@ -67,7 +68,8 @@ export function activateShortcut(keyCode) {
           vectorGui.render()
         }
       } else if (dom.toolBtn.id === "cubicCurve") {
-        state.tool.options.link = true
+        state.tool.options.align = true
+        renderToolOptionsToDOM()
         //if control point is p1 or p2, can link to ther vectors. TODO: If already linked, move all linked points and control handles together. If p3 or p4, maintain angle and velocity of opposing linked vector control handle
         vectorGui.render()
       }
@@ -292,7 +294,8 @@ export function deactivateShortcut(keyCode) {
         }
       }
       if (state.tool.name === "cubicCurve") {
-        state.tool.options.link = false
+        state.tool.options.align = false
+        renderToolOptionsToDOM()
         vectorGui.render()
       }
       break

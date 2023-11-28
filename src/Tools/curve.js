@@ -319,6 +319,8 @@ function cubicCurveSteps() {
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {
+            p1LinkedVectors: {},
+            p2LinkedVectors: {},
             vectorProperties: {
               px1: state.vectorProperties.px1 - canvas.currentLayer.x,
               py1: state.vectorProperties.py1 - canvas.currentLayer.y,
@@ -363,10 +365,15 @@ function adjustCurveSteps(numPoints = 4) {
           yKey: vectorGui.collidedKeys.yKey,
         }
         currentVector.hidden = true
-        if (state.tool.options.link || state.tool.options.snap) {
+        if (
+          state.tool.options.snap ||
+          state.tool.options.align ||
+          state.tool.options.link
+        ) {
+          //Instead of collided vector, use linked vector
+          console.log(currentVector.properties.p1LinkedVectors)
           if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
             let collidedVector = state.undoStack[canvas.collidedVectorIndex]
-            console.log("vector linked to", collidedVector.index)
             /**
              * Steps:
              * 1. set state.collidedVectorProperties to the collidedVector's properties
@@ -374,7 +381,11 @@ function adjustCurveSteps(numPoints = 4) {
              */
             //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
             //align control handles
-            if (state.tool.options.link) {
+            if (
+              state.tool.options.align &&
+              state.tool.options.link &&
+              ["px3", "px4"].includes(vectorGui.selectedPoint.xKey)
+            ) {
               // let deltaX, deltaY
               // if (vectorGui.otherCollidedKeys.xKey === "px1") {
               //   deltaX =
@@ -408,6 +419,9 @@ function adjustCurveSteps(numPoints = 4) {
         }
         setHistoricalPreview(currentVector.layer)
         if (numPoints === 3) {
+          //TODO: to render linked curve, need to render preview for both vectors.
+          //May need to pass both indexes and actions to renderPreviewAction
+          //Then redrawTimeline will be called an additional time with endIndex to render both vectors as previews inside the rendered history.
           renderPreviewAction(currentVector.layer, () =>
             actionQuadraticCurve(
               state.vectorProperties.px1,
@@ -506,7 +520,11 @@ function adjustCurveSteps(numPoints = 4) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         currentVector.hidden = false
-        if (state.tool.options.link || state.tool.options.snap) {
+        if (
+          state.tool.options.snap ||
+          state.tool.options.align ||
+          state.tool.options.link
+        ) {
           if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
             let collidedVector = state.undoStack[canvas.collidedVectorIndex]
             //snap selected point to collidedVector's control point
@@ -520,7 +538,7 @@ function adjustCurveSteps(numPoints = 4) {
               ] + collidedVector.layer.y
             //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
             //align control handles
-            if (state.tool.options.link) {
+            if (state.tool.options.align) {
               let deltaX, deltaY
               if (vectorGui.otherCollidedKeys.xKey === "px1") {
                 deltaX =
@@ -545,15 +563,27 @@ function adjustCurveSteps(numPoints = 4) {
                 state.vectorProperties.py4 = state.vectorProperties.py2 - deltaY
               }
             }
+            //Link control points
+            if (state.tool.options.link) {
+              if (vectorGui.selectedPoint.xKey === "px1") {
+                currentVector.properties.p1LinkedVectors[
+                  canvas.collidedVectorIndex
+                ] = vectorGui.otherCollidedKeys.xKey
+              } else if (vectorGui.selectedPoint.xKey === "px2") {
+                linkedVectors = currentVector.properties.p2LinkedVectors[
+                  canvas.collidedVectorIndex
+                ] = vectorGui.otherCollidedKeys.xKey
+              }
+            }
           }
 
           //TODO: logic to perform the action to link vectors will go here.
           //This means the regular tool function will be saved first and undoing the link will have the vector still moved into position.
           //Only the linking will be undone, which includes a transformation of the control point handle.
           //Undoing again will of course move the vector back as expected.
-        }
-        if (state.tool.options.align) {
-          //TODO: if selected point is p3 or p4 and another vector is linked, maintain angle
+          if (state.tool.options.align) {
+            //TODO: if selected point is p3 or p4 and another vector is linked, maintain angle
+          }
         }
         modifyVectorAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
@@ -589,7 +619,7 @@ export const cubicCurve = {
   brushSize: 1,
   brushType: "circle",
   disabled: false,
-  options: { snap: false, align: false, link: false }, //snap: C0/G0 positional continuity, align: G1 tangent continuity, link: C1 velocity continuity
+  options: { snap: false, align: false, link: false }, //snap: C0/G0 positional continuity, align: G1 tangent continuity, default C1 velocity continuity, link: move connected vector control point with selected control point.
   modes: { eraser: false, inject: false },
   type: "vector",
   cursor: "crosshair",

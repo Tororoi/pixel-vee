@@ -147,7 +147,7 @@ input {
   outline: none;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-input:hover:not([disabled]), input:focus {
+input:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 
@@ -202,7 +202,7 @@ svg {
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
   touch-action: none;
 }
-.sidebar:hover:not([disabled]), .sidebar:focus {
+.sidebar:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .sidebar .content {
@@ -257,13 +257,13 @@ svg {
 .dialog-box.draggable.v-drag {
   box-shadow: 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.dialog-box.draggable.v-drag:hover:not([disabled]), .dialog-box.draggable.v-drag:focus {
+.dialog-box.draggable.v-drag:hover:not([disabled]) {
   box-shadow: 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .dialog-box.draggable.h-drag {
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.dialog-box.draggable.h-drag:hover:not([disabled]), .dialog-box.draggable.h-drag:focus {
+.dialog-box.draggable.h-drag:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .dialog-box .header {
@@ -280,7 +280,7 @@ svg {
   cursor: grab;
   box-shadow: 0 2px 0 0 rgb(131, 131, 131);
 }
-.dialog-box .header:hover:not([disabled]), .dialog-box .header:focus {
+.dialog-box .header:hover:not([disabled]) {
   box-shadow: 0 2px 0 0 rgb(255, 255, 255);
 }
 .dialog-box .header .drag-btn {
@@ -300,11 +300,11 @@ svg {
 .dialog-box .header .drag-btn.locked .grip {
   box-shadow: 2px -2px rgb(131, 131, 131), 4px -2px rgb(131, 131, 131), 0px 0px rgb(131, 131, 131), 6px 0px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131), 6px 2px rgb(131, 131, 131), -2px 4px rgb(131, 131, 131), 0px 4px rgb(131, 131, 131), 2px 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 6px 4px rgb(131, 131, 131), 8px 4px rgb(131, 131, 131), -2px 6px rgb(131, 131, 131), 0px 6px rgb(131, 131, 131), 4px 6px rgb(131, 131, 131), 6px 6px rgb(131, 131, 131), 8px 6px rgb(131, 131, 131), -2px 8px rgb(131, 131, 131), 0px 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131), 6px 8px rgb(131, 131, 131), 8px 8px rgb(131, 131, 131), -2px 10px rgb(131, 131, 131), 0px 10px rgb(131, 131, 131), 2px 10px rgb(131, 131, 131), 4px 10px rgb(131, 131, 131), 6px 10px rgb(131, 131, 131), 8px 10px rgb(131, 131, 131);
 }
-.dialog-box .header:hover:not([disabled]) .drag-btn .grip, .dialog-box .header:focus .drag-btn .grip {
+.dialog-box .header:hover:not([disabled]) .drag-btn .grip {
   background: rgb(255, 255, 255);
   box-shadow: 0px 0px rgb(255, 255, 255), 4px 0px rgb(255, 255, 255), 0px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 0px 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255);
 }
-.dialog-box .header:hover:not([disabled]) .drag-btn.locked .grip, .dialog-box .header:focus .drag-btn.locked .grip {
+.dialog-box .header:hover:not([disabled]) .drag-btn.locked .grip {
   box-shadow: 2px -2px rgb(255, 255, 255), 4px -2px rgb(255, 255, 255), 0px 0px rgb(255, 255, 255), 6px 0px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255), 6px 2px rgb(255, 255, 255), -2px 4px rgb(255, 255, 255), 0px 4px rgb(255, 255, 255), 2px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 6px 4px rgb(255, 255, 255), 8px 4px rgb(255, 255, 255), -2px 6px rgb(255, 255, 255), 0px 6px rgb(255, 255, 255), 4px 6px rgb(255, 255, 255), 6px 6px rgb(255, 255, 255), 8px 6px rgb(255, 255, 255), -2px 8px rgb(255, 255, 255), 0px 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255), 6px 8px rgb(255, 255, 255), 8px 8px rgb(255, 255, 255), -2px 10px rgb(255, 255, 255), 0px 10px rgb(255, 255, 255), 2px 10px rgb(255, 255, 255), 4px 10px rgb(255, 255, 255), 6px 10px rgb(255, 255, 255), 8px 10px rgb(255, 255, 255);
 }
 .dialog-box .header .collapse-btn {
@@ -424,7 +424,7 @@ svg {
   opacity: 1;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.btn:hover:not([disabled]), .btn:focus {
+.btn:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .btn:hover {
@@ -445,7 +445,7 @@ svg {
   flex-flow: column nowrap;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.spin-btn:hover:not([disabled]), .spin-btn:focus {
+.spin-btn:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .spin-btn .channel-btn {
@@ -484,7 +484,7 @@ svg {
   margin: 2px;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.nav:hover:not([disabled]), .nav:focus {
+.nav:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .nav .title {
@@ -511,6 +511,9 @@ svg {
   margin-left: 16px;
   margin-right: 16px;
 }
+.nav .nav-items .tool-options {
+  display: flex;
+}
 .nav .nav-items .toggle {
   padding-right: 16px;
   display: flex;
@@ -524,17 +527,24 @@ svg {
   pointer-events: none;
 }
 .nav .nav-items .toggle .checkmark {
+  position: relative;
   height: 16px;
   width: 16px;
-  background-color: rgb(255, 255, 255);
+  background-color: rgb(61, 61, 61);
   margin-right: 8px;
   box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
 }
 .nav .nav-items .toggle:hover .checkmark {
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
-.nav .nav-items .toggle input:checked ~ .checkmark {
-  background-color: rgb(65, 131, 252);
+.nav .nav-items .toggle input:checked ~ .checkmark::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: -2px;
+  left: -2px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 10 10' shape-rendering='crispEdges'%3E%3Cpath stroke='%23ffffff' d='M8 0h2M7 1h1M9 1h1M6 2h1M8 2h1M3 3h1M5 3h1M7 3h1M2 4h1M4 4h1M7 4h1M1 5h1M6 5h1M2 6h1M6 6h1M3 7h1M5 7h1M4 8h1' /%3E%3Cpath stroke='%23000000' d='M8 1h1M7 2h1M6 3h1M3 4h1M5 4h2M2 5h4M3 6h3M4 7h1' /%3E%3C/svg%3E");
 }
 .nav .nav-items .canvas-size {
   padding-right: 16px;
@@ -571,7 +581,7 @@ canvas {
   overflow: hidden;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.canvas-container .bg-space:hover:not([disabled]), .canvas-container .bg-space:focus {
+.canvas-container .bg-space:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .canvas-container .bg-space .canvas-layers {
@@ -610,7 +620,7 @@ canvas {
   align-items: center;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.toolbox:hover:not([disabled]), .toolbox:focus {
+.toolbox:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .toolbox .collapsible {
@@ -634,7 +644,7 @@ canvas {
   background-color: rgb(131, 131, 131);
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.toolbox .collapsible .tool:hover:not([disabled]), .toolbox .collapsible .tool:focus {
+.toolbox .collapsible .tool:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .toolbox .collapsible .tool:hover {
@@ -648,7 +658,7 @@ canvas {
   background-color: transparent;
   box-shadow: none;
 }
-.toolbox .collapsible .tool.custom-shape:hover:not([disabled]), .toolbox .collapsible .tool.custom-shape:focus {
+.toolbox .collapsible .tool.custom-shape:hover:not([disabled]) {
   box-shadow: none;
 }
 .toolbox .collapsible .zoom .zoombtn {
@@ -937,7 +947,7 @@ canvas {
   margin: 2px;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.layers-interface .layers-container:hover:not([disabled]), .layers-interface .layers-container:focus {
+.layers-interface .layers-container:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .layers-interface .layers-container::-webkit-scrollbar {
@@ -973,7 +983,7 @@ canvas {
   align-items: center;
   box-shadow: inset -2px 0 0 0 rgb(131, 131, 131), inset 2px 0 0 0 rgb(131, 131, 131), inset 0 -2px 0 0 rgb(131, 131, 131), inset 0 2px 0 0 rgb(131, 131, 131);
 }
-.layers-interface .layers-container .layers .layer:hover:not([disabled]), .layers-interface .layers-container .layers .layer:focus {
+.layers-interface .layers-container .layers .layer:hover:not([disabled]) {
   box-shadow: inset -2px 0 0 0 rgb(255, 255, 255), inset 2px 0 0 0 rgb(255, 255, 255), inset 0 -2px 0 0 rgb(255, 255, 255), inset 0 2px 0 0 rgb(255, 255, 255);
 }
 .layers-interface .layers-container .layers .layer.raster {
@@ -1033,7 +1043,7 @@ canvas {
   margin: 2px;
   box-shadow: 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.vectors-interface .vectors-container:hover:not([disabled]), .vectors-interface .vectors-container:focus {
+.vectors-interface .vectors-container:hover:not([disabled]) {
   box-shadow: 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container::-webkit-scrollbar {
@@ -1099,7 +1109,7 @@ canvas {
   top: 0;
   box-shadow: 2px 0 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.vectors-interface .vectors-container .vectors .vector .left > :nth-child(1):hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .left > :nth-child(1):focus {
+.vectors-interface .vectors-container .vectors .vector .left > :nth-child(1):hover:not([disabled]) {
   box-shadow: 2px 0 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .left > :nth-child(2) {
@@ -1107,7 +1117,7 @@ canvas {
   top: 22px;
   box-shadow: 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.vectors-interface .vectors-container .vectors .vector .left > :nth-child(2):hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .left > :nth-child(2):focus {
+.vectors-interface .vectors-container .vectors .vector .left > :nth-child(2):hover:not([disabled]) {
   box-shadow: 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .left > :nth-child(3) {
@@ -1115,7 +1125,7 @@ canvas {
   top: 44px;
   box-shadow: 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.vectors-interface .vectors-container .vectors .vector .left > :nth-child(3):hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .left > :nth-child(3):focus {
+.vectors-interface .vectors-container .vectors .vector .left > :nth-child(3):hover:not([disabled]) {
   box-shadow: 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .left > :nth-child(4) {
@@ -1123,7 +1133,7 @@ canvas {
   top: 66px;
   box-shadow: 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131);
 }
-.vectors-interface .vectors-container .vectors .vector .left > :nth-child(4):hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .left > :nth-child(4):focus {
+.vectors-interface .vectors-container .vectors .vector .left > :nth-child(4):hover:not([disabled]) {
   box-shadow: 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .mode {
@@ -1138,7 +1148,7 @@ canvas {
   background-color: rgb(131, 131, 131);
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.vectors-interface .vectors-container .vectors .vector .tool:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .tool:focus {
+.vectors-interface .vectors-container .vectors .vector .tool:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .tool.selected {
@@ -1150,7 +1160,7 @@ canvas {
   background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.vectors-interface .vectors-container .vectors .vector .actionColor:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .actionColor:focus {
+.vectors-interface .vectors-container .vectors .vector .actionColor:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .actionColor .swatch {
@@ -1164,7 +1174,7 @@ canvas {
   background-color: rgb(61, 61, 61);
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.vectors-interface .vectors-container .vectors .vector .hide:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .hide:focus {
+.vectors-interface .vectors-container .vectors .vector .hide:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .trash {
@@ -1173,7 +1183,7 @@ canvas {
   background-color: rgb(61, 61, 61);
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131);
 }
-.vectors-interface .vectors-container .vectors .vector .trash:hover:not([disabled]), .vectors-interface .vectors-container .vectors .vector .trash:focus {
+.vectors-interface .vectors-container .vectors .vector .trash:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector.selected {
@@ -1375,17 +1385,17 @@ canvas {
   margin: 1px;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.palette-interface .palette-container .palette-colors .palette-color:hover:not([disabled]), .palette-interface .palette-container .palette-colors .palette-color:focus {
+.palette-interface .palette-container .palette-colors .palette-color:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .palette-interface .palette-container .palette-colors .palette-color.selected {
   z-index: 105;
   box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
 }
-.palette-interface .palette-container .palette-colors .palette-color.selected:hover:hover:not([disabled]), .palette-interface .palette-container .palette-colors .palette-color.selected:hover:focus {
+.palette-interface .palette-container .palette-colors .palette-color.selected:hover:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
 }
-.palette-interface .palette-container .palette-colors .palette-color.selected:hover:hover:not([disabled]):hover:not([disabled]), .palette-interface .palette-container .palette-colors .palette-color.selected:hover:hover:not([disabled]):focus, .palette-interface .palette-container .palette-colors .palette-color.selected:hover:focus:hover:not([disabled]), .palette-interface .palette-container .palette-colors .palette-color.selected:hover:focus:focus {
+.palette-interface .palette-container .palette-colors .palette-color.selected:hover:hover:not([disabled]):hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
 }
 .palette-interface .palette-container .palette-colors .palette-color:hover {
@@ -1395,22 +1405,22 @@ canvas {
   width: 100%;
   height: 100%;
 }
-.palette-interface .palette-container .palette-colors.edit-mode .palette-color:hover:not([disabled]), .palette-interface .palette-container .palette-colors.edit-mode .palette-color:focus {
+.palette-interface .palette-container .palette-colors.edit-mode .palette-color:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
 }
-.palette-interface .palette-container .palette-colors.edit-mode .palette-color:hover:not([disabled]):hover:not([disabled]), .palette-interface .palette-container .palette-colors.edit-mode .palette-color:hover:not([disabled]):focus, .palette-interface .palette-container .palette-colors.edit-mode .palette-color:focus:hover:not([disabled]), .palette-interface .palette-container .palette-colors.edit-mode .palette-color:focus:focus {
+.palette-interface .palette-container .palette-colors.edit-mode .palette-color:hover:not([disabled]):hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
 }
-.palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color:focus {
+.palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
 }
-.palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]):hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]):focus, .palette-interface .palette-container .palette-colors.remove-mode .palette-color:focus:hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color:focus:focus {
+.palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]):hover:not([disabled]) {
   box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
 }
-.palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:focus {
+.palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
 }
-.palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]):hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]):focus, .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:focus:hover:not([disabled]), .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:focus:focus {
+.palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]):hover:not([disabled]) {
   box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover .swatch {
@@ -1451,7 +1461,7 @@ canvas {
   opacity: 1;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.picker-container:hover:not([disabled]), .picker-container:focus {
+.picker-container:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .picker-container .header h3 {
@@ -1485,7 +1495,7 @@ canvas {
   cursor: crosshair;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.picker-container .collapsible .picker-interface #left #picker #color-picker:hover:not([disabled]), .picker-container .collapsible .picker-interface #left #picker #color-picker:focus {
+.picker-container .collapsible .picker-interface #left #picker #color-picker:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .picker-container .collapsible .picker-interface #left #picker .slider-container {
@@ -1507,7 +1517,7 @@ canvas {
   outline: none;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.picker-container .collapsible .picker-interface #left #picker .picker-slider:hover:not([disabled]), .picker-container .collapsible .picker-interface #left #picker .picker-slider:focus {
+.picker-container .collapsible .picker-interface #left #picker .picker-slider:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .picker-container .collapsible .picker-interface #left #picker .picker-slider::-webkit-slider-thumb {

@@ -64,6 +64,17 @@ document.body.addEventListener("mouseover", (e) => {
     showTooltip(tooltipMessage, e.target)
   }
 })
+dom.toolOptions.addEventListener("click", (e) => {
+  if (e.target.type === "checkbox") {
+    const optionName = e.target.id.split("-")[0]
+    if (e.target.checked) {
+      state.tool.options[optionName] = true
+    } else {
+      state.tool.options[optionName] = false
+    }
+    vectorGui.render()
+  }
+})
 dom.gridBtn.addEventListener("click", (e) => {
   if (dom.gridBtn.checked) {
     vectorGui.grid = true

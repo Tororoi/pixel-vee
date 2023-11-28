@@ -12,6 +12,7 @@ import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM, renderBrushModesToDOM } from "../DOM/render.js"
 import { renderCursor } from "../GUI/cursor.js"
+import { createOptionToggle } from "../utils/optionsInterfaceHelpers.js"
 import { testAction } from "../Testing/performanceTesting.js"
 import { storedActions } from "../Testing/storedActions.js"
 
@@ -122,6 +123,8 @@ export function handleTools(e, manualToolName = null) {
       } else {
         canvas.vectorGuiCVS.style.cursor = state.tool.cursor
       }
+      //render menu options
+      renderToolOptionsToDOM()
       vectorGui.reset()
       state.reset()
       renderVectorsToDOM()
@@ -214,6 +217,24 @@ export function renderBrushStampToDOM() {
     brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
     state.tool.brushSize
   )
+}
+
+/**
+ *
+ */
+export function renderToolOptionsToDOM() {
+  dom.toolOptions.innerHTML = ""
+  if (state.tool.name === "cubicCurve") {
+    //render cubic curve options to menu
+    Object.entries(state.tool.options).forEach(([key, value]) => {
+      let optionToggle = createOptionToggle(
+        key,
+        value
+        // option.tooltip
+      )
+      dom.toolOptions.appendChild(optionToggle)
+    })
+  }
 }
 
 //===================================//
