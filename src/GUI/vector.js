@@ -20,6 +20,7 @@ export const vectorGui = {
   collidedKeys: { xKey: null, yKey: null },
   selectedPoint: { xKey: null, yKey: null },
   otherCollidedKeys: { xKey: null, yKey: null },
+  linkedVectors: {},
   drawControlPoints,
   resetCollision() {
     this.collisionPresent = false
@@ -37,6 +38,18 @@ export const vectorGui = {
   setOtherVectorCollision(keys) {
     this.otherCollidedKeys.xKey = keys.x
     this.otherCollidedKeys.yKey = keys.y
+  },
+  resetLinkedVectors() {
+    this.linkedVectors = {}
+  },
+  addLinkedVector(vectorAction, xKey) {
+    if (!this.linkedVectors[vectorAction.index]) {
+      this.linkedVectors[vectorAction.index] = {}
+    }
+    this.linkedVectors[vectorAction.index][xKey] = true
+  },
+  removeLinkedVector(vectorAction) {
+    delete this.linkedVectors[vectorAction.index]
   },
   drawSelectOutline,
   render,
@@ -112,6 +125,16 @@ function handleCollisionAndDraw(
       if (vectorAction) {
         canvas.collidedVectorIndex = vectorAction.index
         if (keys.x === "px1" || keys.x === "px2") {
+          console.log(
+            "collided with " +
+              keys.x +
+              " of vector " +
+              vectorAction.index +
+              " at " +
+              point.x +
+              ", " +
+              point.y
+          )
           r = radius * 2.125
           vectorGui.setOtherVectorCollision(keys)
         }
@@ -120,6 +143,7 @@ function handleCollisionAndDraw(
         vectorGui.setCollision(keys)
       }
     }
+    //else if selectedpoint is p3 or p4, setLinkedVector if vector's control point coords are the same as the selected point
   }
 
   drawCirclePath(
@@ -347,6 +371,7 @@ function renderLayerVectors(layer) {
   )
   //render control points
   vectorGui.resetOtherVectorCollision()
+  vectorGui.resetLinkedVectors()
   for (let action of state.undoStack) {
     if (
       !action.hidden &&

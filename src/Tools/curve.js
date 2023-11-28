@@ -319,8 +319,8 @@ function cubicCurveSteps() {
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {
-            p1LinkedVectors: {},
-            p2LinkedVectors: {},
+            // p1LinkedVectors: {},
+            // p2LinkedVectors: {},
             vectorProperties: {
               px1: state.vectorProperties.px1 - canvas.currentLayer.x,
               py1: state.vectorProperties.py1 - canvas.currentLayer.y,
@@ -565,16 +565,40 @@ function adjustCurveSteps(numPoints = 4) {
             }
             //Link control points
             if (state.tool.options.link) {
-              if (vectorGui.selectedPoint.xKey === "px1") {
-                currentVector.properties.p1LinkedVectors[
-                  canvas.collidedVectorIndex
-                ] = vectorGui.otherCollidedKeys.xKey
-              } else if (vectorGui.selectedPoint.xKey === "px2") {
-                linkedVectors = currentVector.properties.p2LinkedVectors[
-                  canvas.collidedVectorIndex
-                ] = vectorGui.otherCollidedKeys.xKey
-              }
+              // if (vectorGui.selectedPoint.xKey === "px1") {
+              //   // Initialize the key with an empty object if it doesn't exist
+              //   if (
+              //     !currentVector.properties.p1LinkedVectors.hasOwnProperty(
+              //       canvas.collidedVectorIndex
+              //     )
+              //   ) {
+              //     currentVector.properties.p1LinkedVectors[
+              //       canvas.collidedVectorIndex
+              //     ] = {}
+              //   }
+              //   currentVector.properties.p1LinkedVectors[
+              //     canvas.collidedVectorIndex
+              //   ][vectorGui.otherCollidedKeys.xKey] = true
+              // } else if (vectorGui.selectedPoint.xKey === "px2") {
+              //   // Initialize the key with an empty object if it doesn't exist
+              //   if (
+              //     !currentVector.properties.p2LinkedVectors.hasOwnProperty(
+              //       canvas.collidedVectorIndex
+              //     )
+              //   ) {
+              //     currentVector.properties.p2LinkedVectors[
+              //       canvas.collidedVectorIndex
+              //     ] = {}
+              //   }
+              //   currentVector.properties.p2LinkedVectors[
+              //     canvas.collidedVectorIndex
+              //   ][vectorGui.otherCollidedKeys.xKey] = true
+              // }
             }
+          }
+
+          if (state.tool.options.link && !canvas.collidedVectorIndex) {
+            //Unlink control points
           }
 
           //TODO: logic to perform the action to link vectors will go here.
