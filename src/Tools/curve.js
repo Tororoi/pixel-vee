@@ -9,7 +9,11 @@ import {
   actionCubicCurve,
 } from "../Actions/actions.js"
 import { vectorGui } from "../GUI/vector.js"
-import { renderCanvas } from "../Canvas/render.js"
+import {
+  renderCanvas,
+  renderPreviewAction,
+  setHistoricalPreview,
+} from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { getAngle } from "../utils/trig.js"
 
@@ -402,47 +406,48 @@ function adjustCurveSteps(numPoints = 4) {
           //Only the linking will be undone, which includes a transformation of the control point handle.
           //Undoing again will of course move the vector back as expected.
         }
+        setHistoricalPreview(currentVector.layer)
         if (numPoints === 3) {
-          renderCanvas(currentVector.layer, true)
-          actionQuadraticCurve(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.px2,
-            state.vectorProperties.py2,
-            state.vectorProperties.px3,
-            state.vectorProperties.py3,
-            3,
-            currentVector.color,
-            currentVector.layer,
-            currentVector.modes,
-            brushStamps[currentVector.tool.brushType][
-              currentVector.tool.brushSize
-            ],
-            currentVector.tool.brushSize,
-            currentVector.maskSet,
-            true
+          renderPreviewAction(currentVector.layer, () =>
+            actionQuadraticCurve(
+              state.vectorProperties.px1,
+              state.vectorProperties.py1,
+              state.vectorProperties.px2,
+              state.vectorProperties.py2,
+              state.vectorProperties.px3,
+              state.vectorProperties.py3,
+              3,
+              currentVector.color,
+              currentVector.layer,
+              currentVector.modes,
+              brushStamps[currentVector.tool.brushType][
+                currentVector.tool.brushSize
+              ],
+              currentVector.tool.brushSize,
+              currentVector.maskSet
+            )
           )
         } else {
-          renderCanvas(currentVector.layer, true)
-          actionCubicCurve(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.px2,
-            state.vectorProperties.py2,
-            state.vectorProperties.px3,
-            state.vectorProperties.py3,
-            state.vectorProperties.px4,
-            state.vectorProperties.py4,
-            4,
-            currentVector.color,
-            currentVector.layer,
-            currentVector.modes,
-            brushStamps[currentVector.tool.brushType][
-              currentVector.tool.brushSize
-            ],
-            currentVector.tool.brushSize,
-            currentVector.maskSet,
-            true
+          renderPreviewAction(currentVector.layer, () =>
+            actionCubicCurve(
+              state.vectorProperties.px1,
+              state.vectorProperties.py1,
+              state.vectorProperties.px2,
+              state.vectorProperties.py2,
+              state.vectorProperties.px3,
+              state.vectorProperties.py3,
+              state.vectorProperties.px4,
+              state.vectorProperties.py4,
+              4,
+              currentVector.color,
+              currentVector.layer,
+              currentVector.modes,
+              brushStamps[currentVector.tool.brushType][
+                currentVector.tool.brushSize
+              ],
+              currentVector.tool.brushSize,
+              currentVector.maskSet
+            )
           )
         }
       }
@@ -452,46 +457,46 @@ function adjustCurveSteps(numPoints = 4) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         if (numPoints === 3) {
-          renderCanvas(currentVector.layer)
-          actionQuadraticCurve(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.px2,
-            state.vectorProperties.py2,
-            state.vectorProperties.px3,
-            state.vectorProperties.py3,
-            3,
-            currentVector.color,
-            currentVector.layer,
-            currentVector.modes,
-            brushStamps[currentVector.tool.brushType][
-              currentVector.tool.brushSize
-            ],
-            currentVector.tool.brushSize,
-            currentVector.maskSet,
-            true
+          renderPreviewAction(currentVector.layer, () =>
+            actionQuadraticCurve(
+              state.vectorProperties.px1,
+              state.vectorProperties.py1,
+              state.vectorProperties.px2,
+              state.vectorProperties.py2,
+              state.vectorProperties.px3,
+              state.vectorProperties.py3,
+              3,
+              currentVector.color,
+              currentVector.layer,
+              currentVector.modes,
+              brushStamps[currentVector.tool.brushType][
+                currentVector.tool.brushSize
+              ],
+              currentVector.tool.brushSize,
+              currentVector.maskSet
+            )
           )
         } else {
-          renderCanvas(currentVector.layer)
-          actionCubicCurve(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.px2,
-            state.vectorProperties.py2,
-            state.vectorProperties.px3,
-            state.vectorProperties.py3,
-            state.vectorProperties.px4,
-            state.vectorProperties.py4,
-            4,
-            currentVector.color,
-            currentVector.layer,
-            currentVector.modes,
-            brushStamps[currentVector.tool.brushType][
-              currentVector.tool.brushSize
-            ],
-            currentVector.tool.brushSize,
-            currentVector.maskSet,
-            true
+          renderPreviewAction(currentVector.layer, () =>
+            actionCubicCurve(
+              state.vectorProperties.px1,
+              state.vectorProperties.py1,
+              state.vectorProperties.px2,
+              state.vectorProperties.py2,
+              state.vectorProperties.px3,
+              state.vectorProperties.py3,
+              state.vectorProperties.px4,
+              state.vectorProperties.py4,
+              4,
+              currentVector.color,
+              currentVector.layer,
+              currentVector.modes,
+              brushStamps[currentVector.tool.brushType][
+                currentVector.tool.brushSize
+              ],
+              currentVector.tool.brushSize,
+              currentVector.maskSet
+            )
           )
         }
       }

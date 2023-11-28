@@ -53,19 +53,20 @@ function drawLayer(layer) {
  * Redraw all timeline actions
  * Critical function for the timeline to work
  * @param {Object} layer - optional parameter to limit render to a specific layer
- * @param {Integer} index - optional parameter to limit render up to a specific action
+ * @param {Integer} endIndex - optional parameter to limit render up to a specific action
+ * @param {Integer} startIndex - optional parameter to limit render from a specific action
  */
-function redrawTimelineActions(layer, index = null) {
-  let i = 0
-  //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
-  state.undoStack.forEach((action) => {
-    if (index && i > index) {
+export function redrawTimelineActions(layer, endIndex = null, startIndex = 0) {
+  //follows stored instructions to reassemble drawing. Costly operation. Minimize usage as much as possible.
+  for (let i = startIndex + 1; i < state.undoStack.length; i++) {
+    if (endIndex && i >= endIndex) {
+      //render every action up to and not including the action at endIndex
       return
     }
-    i++
+    let action = state.undoStack[i]
     //if layer is passed in, only redraw for that layer
     if (layer) {
-      if (action.layer !== layer) return
+      if (action.layer !== layer) continue
     }
     if (!action.hidden && !action.removed) {
       switch (action.tool.name) {
@@ -249,7 +250,7 @@ function redrawTimelineActions(layer, index = null) {
         //do nothing
       }
     }
-  })
+  }
   state.redoStack.forEach((action) => {
     if (action.tool.name === "addLayer") {
       action.layer.removed = true
@@ -274,7 +275,7 @@ function redrawTimelineActions(layer, index = null) {
  * Draw canvas layer onto its onscreen canvas
  * @param {Object} layer
  */
-function drawCanvasLayer(layer) {
+export function drawCanvasLayer(layer) {
   //Prevent blurring
   layer.onscreenCtx.imageSmoothingEnabled = false
   //clear onscreen canvas
@@ -370,4 +371,44 @@ export function renderCanvas(
   // let end = performance.now()
   // console.log(end - begin)
   // })
+}
+
+/**
+ * Render previous actions to preview canvas
+ * @param {Object} layer
+ */
+export function setHistoricalPreview(layer) {
+  //render all previous actions
+  layer.ctx.clearRect(
+    0,
+    0,
+    canvas.offScreenCVS.width,
+    canvas.offScreenCVS.height
+  )
+  redrawTimelineActions(layer, canvas.currentVectorIndex)
+  canvas.previewCTX.clearRect(
+    0,
+    0,
+    canvas.previewCVS.width,
+    canvas.previewCVS.height
+  )
+  //image of previous actions saved to preview canvas to prevent unecessary rerendering
+  canvas.previewCTX.drawImage(layer.cvs, 0, 0)
+}
+
+/**
+ *
+ * @param {Object} layer
+ * @param {Function} previewAction
+ */
+export function renderPreviewAction(layer, previewAction) {
+  //put preview canvas onto offscreen canvas
+  layer.ctx.clearRect(0, 0, layer.cvs.width, layer.cvs.height)
+  layer.ctx.drawImage(canvas.previewCVS, 0, 0)
+  //render preview fill
+  previewAction()
+  //render actions from currentVectorIndex to end of timeline
+  redrawTimelineActions(layer, null, canvas.currentVectorIndex)
+  //render to onscreen canvas
+  drawCanvasLayer(layer)
 }

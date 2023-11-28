@@ -10,7 +10,11 @@ import {
   updateEllipseOffsets,
   updateEllipseControlPoints,
 } from "../utils/ellipse.js"
-import { renderCanvas } from "../Canvas/render.js"
+import {
+  renderCanvas,
+  renderPreviewAction,
+  setHistoricalPreview,
+} from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { storedActions } from "../Testing/storedActions.js"
 
@@ -272,59 +276,60 @@ export function adjustEllipseSteps() {
       updateEllipseControlPoints(state, canvas, vectorGui)
       action.hidden = true
       //angle and offset passed should consider which point is being adjusted. For p1, use current state.vectorProperties.offset instead of recalculating. For p3, add 1.5 * Math.PI to angle
-      renderCanvas(action.layer, true, canvas.currentVectorIndex)
-      actionEllipse(
-        state.vectorProperties.px1,
-        state.vectorProperties.py1,
-        state.vectorProperties.px2,
-        state.vectorProperties.py2,
-        state.vectorProperties.px3,
-        state.vectorProperties.py3,
-        state.vectorProperties.radA,
-        state.vectorProperties.radB,
-        vectorGui.selectedPoint.xKey === "px1"
-          ? action.properties.vectorProperties.forceCircle
-          : state.vectorProperties.forceCircle,
-        action.color,
-        action.layer,
-        action.modes,
-        brushStamps[action.tool.brushType][action.tool.brushSize],
-        action.tool.brushSize,
-        state.vectorProperties.angle,
-        state.vectorProperties.offset,
-        state.vectorProperties.x1Offset,
-        state.vectorProperties.y1Offset,
-        action.maskSet,
-        true
+      setHistoricalPreview(action.layer)
+      renderPreviewAction(action.layer, () =>
+        actionEllipse(
+          state.vectorProperties.px1,
+          state.vectorProperties.py1,
+          state.vectorProperties.px2,
+          state.vectorProperties.py2,
+          state.vectorProperties.px3,
+          state.vectorProperties.py3,
+          state.vectorProperties.radA,
+          state.vectorProperties.radB,
+          vectorGui.selectedPoint.xKey === "px1"
+            ? action.properties.vectorProperties.forceCircle
+            : state.vectorProperties.forceCircle,
+          action.color,
+          action.layer,
+          action.modes,
+          brushStamps[action.tool.brushType][action.tool.brushSize],
+          action.tool.brushSize,
+          state.vectorProperties.angle,
+          state.vectorProperties.offset,
+          state.vectorProperties.x1Offset,
+          state.vectorProperties.y1Offset,
+          action.maskSet
+        )
       )
       //TODO: render canvas actions after current index onto a canvas that is overlaid on top of the current layer canvas. Then remove it on pointerup
       break
     case "pointermove":
       updateEllipseControlPoints(state, canvas, vectorGui)
-      renderCanvas(action.layer, false, canvas.currentVectorIndex)
-      actionEllipse(
-        state.vectorProperties.px1,
-        state.vectorProperties.py1,
-        state.vectorProperties.px2,
-        state.vectorProperties.py2,
-        state.vectorProperties.px3,
-        state.vectorProperties.py3,
-        state.vectorProperties.radA,
-        state.vectorProperties.radB,
-        vectorGui.selectedPoint.xKey === "px1"
-          ? action.properties.vectorProperties.forceCircle
-          : state.vectorProperties.forceCircle,
-        action.color,
-        action.layer,
-        action.modes,
-        brushStamps[action.tool.brushType][action.tool.brushSize],
-        action.tool.brushSize,
-        state.vectorProperties.angle,
-        state.vectorProperties.offset,
-        state.vectorProperties.x1Offset,
-        state.vectorProperties.y1Offset,
-        action.maskSet,
-        true
+      renderPreviewAction(action.layer, () =>
+        actionEllipse(
+          state.vectorProperties.px1,
+          state.vectorProperties.py1,
+          state.vectorProperties.px2,
+          state.vectorProperties.py2,
+          state.vectorProperties.px3,
+          state.vectorProperties.py3,
+          state.vectorProperties.radA,
+          state.vectorProperties.radB,
+          vectorGui.selectedPoint.xKey === "px1"
+            ? action.properties.vectorProperties.forceCircle
+            : state.vectorProperties.forceCircle,
+          action.color,
+          action.layer,
+          action.modes,
+          brushStamps[action.tool.brushType][action.tool.brushSize],
+          action.tool.brushSize,
+          state.vectorProperties.angle,
+          state.vectorProperties.offset,
+          state.vectorProperties.x1Offset,
+          state.vectorProperties.y1Offset,
+          action.maskSet
+        )
       )
       break
     case "pointerup":

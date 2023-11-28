@@ -4,7 +4,11 @@ import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { modifyVectorAction, actionFill } from "../Actions/actions.js"
 import { vectorGui } from "../GUI/vector.js"
-import { renderCanvas } from "../Canvas/render.js"
+import {
+  renderCanvas,
+  renderPreviewAction,
+  setHistoricalPreview,
+} from "../Canvas/render.js"
 
 //===================================//
 //=== * * * Fill Controller * * * ===//
@@ -83,34 +87,18 @@ export function adjustFillSteps() {
         }
         action.hidden = true
         //Only render canvas up to timeline where fill action exists while adjusting fill
-        renderCanvas(action.layer, true, canvas.currentVectorIndex) // render to canvas.currentVectorIndex
-        //put offscreen layer canvas onto preview canvas
-        canvas.previewCTX.clearRect(
-          0,
-          0,
-          canvas.previewCVS.width,
-          canvas.previewCVS.height
-        )
-        canvas.previewCTX.drawImage(action.layer.cvs, 0, 0)
-        //render preview fill
-        actionFill(
-          state.vectorProperties.px1,
-          state.vectorProperties.py1,
-          swatches.primary.color,
-          canvas.currentLayer,
-          state.tool.modes,
-          state.selectProperties,
-          state.maskSet,
-          true
-        )
-        //render actions to preview canvas from currentVectorIndex to end of timeline
-        //
-        action.layer.onscreenCtx.drawImage(
-          canvas.previewCVS,
-          canvas.xOffset,
-          canvas.yOffset,
-          canvas.previewCVS.width,
-          canvas.previewCVS.height
+        // renderCanvas(action.layer, true, canvas.currentVectorIndex) // render to canvas.currentVectorIndex
+        setHistoricalPreview(action.layer)
+        renderPreviewAction(action.layer, () =>
+          actionFill(
+            state.vectorProperties.px1,
+            state.vectorProperties.py1,
+            action.color,
+            action.layer,
+            action.modes,
+            action.properties.selectProperties,
+            action.properties.maskSet
+          )
         )
       }
       break
@@ -119,34 +107,17 @@ export function adjustFillSteps() {
         //code gets past check twice here so figure out where tool fn is being called again
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        renderCanvas(action.layer)
-        //put offscreen layer canvas onto preview canvas
-        canvas.previewCTX.clearRect(
-          0,
-          0,
-          canvas.previewCVS.width,
-          canvas.previewCVS.height
-        )
-        canvas.previewCTX.drawImage(action.layer.cvs, 0, 0)
-        //render preview fill
-        actionFill(
-          state.vectorProperties.px1,
-          state.vectorProperties.py1,
-          swatches.primary.color,
-          canvas.currentLayer,
-          state.tool.modes,
-          state.selectProperties,
-          state.maskSet,
-          true
-        )
-        //render actions to preview canvas from currentVectorIndex to end of timeline
-        //
-        action.layer.onscreenCtx.drawImage(
-          canvas.previewCVS,
-          canvas.xOffset,
-          canvas.yOffset,
-          canvas.previewCVS.width,
-          canvas.previewCVS.height
+        // renderCanvas(action.layer)
+        renderPreviewAction(action.layer, () =>
+          actionFill(
+            state.vectorProperties.px1,
+            state.vectorProperties.py1,
+            action.color,
+            action.layer,
+            action.modes,
+            action.properties.selectProperties,
+            action.properties.maskSet
+          )
         )
       }
       break
