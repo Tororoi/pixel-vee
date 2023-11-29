@@ -344,6 +344,23 @@ function cubicCurveSteps() {
   }
 }
 
+//=======================================//
+//======== * * * Adjusters * * * ========//
+//=======================================//
+
+/**
+ * WARNING: This function directly manipulates the vector's properties in the history.
+ * @param {Object} vector
+ * @param {Integer} x
+ * @param {Integer} y
+ * @param {String} xKey
+ * @param {String} yKey
+ */
+function updateVectorProperties(vector, x, y, xKey, yKey) {
+  vector.properties.vectorProperties[xKey] = x - vector.layer.x
+  vector.properties.vectorProperties[yKey] = y - vector.layer.y
+}
+
 /**
  * Used automatically by curve tools after curve is completed.
  * TODO: create distinct tool for adjusting that won't create a new curve when clicking.
@@ -364,7 +381,16 @@ function adjustCurveSteps(numPoints = 4) {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
         }
-        currentVector.hidden = true
+        state.vectorsSavedProperties[canvas.currentVectorIndex] = {
+          ...currentVector.properties.vectorProperties,
+        }
+        updateVectorProperties(
+          currentVector,
+          state.cursorX,
+          state.cursorY,
+          vectorGui.selectedPoint.xKey,
+          vectorGui.selectedPoint.yKey
+        )
         if (
           state.tool.options.snap ||
           state.tool.options.align ||
@@ -417,109 +443,144 @@ function adjustCurveSteps(numPoints = 4) {
           //Only the linking will be undone, which includes a transformation of the control point handle.
           //Undoing again will of course move the vector back as expected.
         }
-        setHistoricalPreview(currentVector.layer)
-        if (numPoints === 3) {
-          //TODO: to render linked curve, need to render preview for both vectors.
-          //May need to pass both indexes and actions to renderPreviewAction
-          //Then redrawTimeline will be called an additional time with endIndex to render both vectors as previews inside the rendered history.
-          renderPreviewAction(currentVector.layer, () =>
-            actionQuadraticCurve(
-              state.vectorProperties.px1,
-              state.vectorProperties.py1,
-              state.vectorProperties.px2,
-              state.vectorProperties.py2,
-              state.vectorProperties.px3,
-              state.vectorProperties.py3,
-              3,
-              currentVector.color,
-              currentVector.layer,
-              currentVector.modes,
-              brushStamps[currentVector.tool.brushType][
-                currentVector.tool.brushSize
-              ],
-              currentVector.tool.brushSize,
-              currentVector.maskSet
-            )
-          )
-        } else {
-          renderPreviewAction(currentVector.layer, () =>
-            actionCubicCurve(
-              state.vectorProperties.px1,
-              state.vectorProperties.py1,
-              state.vectorProperties.px2,
-              state.vectorProperties.py2,
-              state.vectorProperties.px3,
-              state.vectorProperties.py3,
-              state.vectorProperties.px4,
-              state.vectorProperties.py4,
-              4,
-              currentVector.color,
-              currentVector.layer,
-              currentVector.modes,
-              brushStamps[currentVector.tool.brushType][
-                currentVector.tool.brushSize
-              ],
-              currentVector.tool.brushSize,
-              currentVector.maskSet
-            )
-          )
-        }
+        renderCanvas(currentVector.layer, true)
+        // setHistoricalPreview(currentVector.layer)
+        // if (numPoints === 3) {
+        //   //TODO: to render linked curve, need to render preview for both vectors.
+        //   //May need to pass both indexes and actions to renderPreviewAction
+        //   //Then redrawTimeline will be called an additional time with endIndex to render both vectors as previews inside the rendered history.
+        //   renderPreviewAction(currentVector.layer, () =>
+        //     actionQuadraticCurve(
+        //       state.vectorProperties.px1,
+        //       state.vectorProperties.py1,
+        //       state.vectorProperties.px2,
+        //       state.vectorProperties.py2,
+        //       state.vectorProperties.px3,
+        //       state.vectorProperties.py3,
+        //       3,
+        //       currentVector.color,
+        //       currentVector.layer,
+        //       currentVector.modes,
+        //       brushStamps[currentVector.tool.brushType][
+        //         currentVector.tool.brushSize
+        //       ],
+        //       currentVector.tool.brushSize,
+        //       currentVector.maskSet
+        //     )
+        //   )
+        // } else {
+        //   renderPreviewAction(currentVector.layer, () => {
+        //     actionCubicCurve(
+        //       state.vectorProperties.px1,
+        //       state.vectorProperties.py1,
+        //       state.vectorProperties.px2,
+        //       state.vectorProperties.py2,
+        //       state.vectorProperties.px3,
+        //       state.vectorProperties.py3,
+        //       state.vectorProperties.px4,
+        //       state.vectorProperties.py4,
+        //       4,
+        //       currentVector.color,
+        //       currentVector.layer,
+        //       currentVector.modes,
+        //       brushStamps[currentVector.tool.brushType][
+        //         currentVector.tool.brushSize
+        //       ],
+        //       currentVector.tool.brushSize,
+        //       currentVector.maskSet
+        //     )
+        //     //for each linked vector (vectorGui.linkedVectors)
+        //     //initial vectorProperties must be saved beforehand for each linked vector so modify action can be made properly on pointerup
+        //     //state.action.properties[linkedVectorIndex].vectorProperties = linkedVector.properties.vectorProperties
+        //     // actionCubicCurve(
+        //     //   action.properties.vectorProperties.px1 + action.layer.x,
+        //     //   action.properties.vectorProperties.py1 + action.layer.y,
+        //     //   action.properties.vectorProperties.px2 + action.layer.x,
+        //     //   action.properties.vectorProperties.py2 + action.layer.y,
+        //     //   action.properties.vectorProperties.px3 + action.layer.x,
+        //     //   action.properties.vectorProperties.py3 + action.layer.y,
+        //     //   action.properties.vectorProperties.px4 + action.layer.x,
+        //     //   action.properties.vectorProperties.py4 + action.layer.y,
+        //     //   4,
+        //     //   action.color,
+        //     //   action.layer,
+        //     //   action.modes,
+        //     //   brushStamps[action.tool.brushType][action.tool.brushSize],
+        //     //   action.tool.brushSize,
+        //     //   action.properties.maskSet
+        //     // )
+        //   })
+        // }
       }
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        if (numPoints === 3) {
-          renderPreviewAction(currentVector.layer, () =>
-            actionQuadraticCurve(
-              state.vectorProperties.px1,
-              state.vectorProperties.py1,
-              state.vectorProperties.px2,
-              state.vectorProperties.py2,
-              state.vectorProperties.px3,
-              state.vectorProperties.py3,
-              3,
-              currentVector.color,
-              currentVector.layer,
-              currentVector.modes,
-              brushStamps[currentVector.tool.brushType][
-                currentVector.tool.brushSize
-              ],
-              currentVector.tool.brushSize,
-              currentVector.maskSet
-            )
-          )
-        } else {
-          renderPreviewAction(currentVector.layer, () =>
-            actionCubicCurve(
-              state.vectorProperties.px1,
-              state.vectorProperties.py1,
-              state.vectorProperties.px2,
-              state.vectorProperties.py2,
-              state.vectorProperties.px3,
-              state.vectorProperties.py3,
-              state.vectorProperties.px4,
-              state.vectorProperties.py4,
-              4,
-              currentVector.color,
-              currentVector.layer,
-              currentVector.modes,
-              brushStamps[currentVector.tool.brushType][
-                currentVector.tool.brushSize
-              ],
-              currentVector.tool.brushSize,
-              currentVector.maskSet
-            )
-          )
-        }
+        updateVectorProperties(
+          currentVector,
+          state.cursorX,
+          state.cursorY,
+          vectorGui.selectedPoint.xKey,
+          vectorGui.selectedPoint.yKey
+        )
+        renderCanvas(currentVector.layer, true)
+        // if (numPoints === 3) {
+        //   renderPreviewAction(currentVector.layer, () =>
+        //     actionQuadraticCurve(
+        //       state.vectorProperties.px1,
+        //       state.vectorProperties.py1,
+        //       state.vectorProperties.px2,
+        //       state.vectorProperties.py2,
+        //       state.vectorProperties.px3,
+        //       state.vectorProperties.py3,
+        //       3,
+        //       currentVector.color,
+        //       currentVector.layer,
+        //       currentVector.modes,
+        //       brushStamps[currentVector.tool.brushType][
+        //         currentVector.tool.brushSize
+        //       ],
+        //       currentVector.tool.brushSize,
+        //       currentVector.maskSet
+        //     )
+        //   )
+        // } else {
+        //   renderPreviewAction(currentVector.layer, () =>
+        //     actionCubicCurve(
+        //       state.vectorProperties.px1,
+        //       state.vectorProperties.py1,
+        //       state.vectorProperties.px2,
+        //       state.vectorProperties.py2,
+        //       state.vectorProperties.px3,
+        //       state.vectorProperties.py3,
+        //       state.vectorProperties.px4,
+        //       state.vectorProperties.py4,
+        //       4,
+        //       currentVector.color,
+        //       currentVector.layer,
+        //       currentVector.modes,
+        //       brushStamps[currentVector.tool.brushType][
+        //         currentVector.tool.brushSize
+        //       ],
+        //       currentVector.tool.brushSize,
+        //       currentVector.maskSet
+        //     )
+        //   )
+        // }
       }
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        currentVector.hidden = false
+        updateVectorProperties(
+          currentVector,
+          state.cursorX,
+          state.cursorY,
+          vectorGui.selectedPoint.xKey,
+          vectorGui.selectedPoint.yKey
+        )
         if (
           state.tool.options.snap ||
           state.tool.options.align ||
@@ -528,14 +589,23 @@ function adjustCurveSteps(numPoints = 4) {
           if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
             let collidedVector = state.undoStack[canvas.collidedVectorIndex]
             //snap selected point to collidedVector's control point
-            state.vectorProperties[vectorGui.selectedPoint.xKey] =
+            let snappedToX =
               collidedVector.properties.vectorProperties[
                 vectorGui.otherCollidedKeys.xKey
               ] + collidedVector.layer.x
-            state.vectorProperties[vectorGui.selectedPoint.yKey] =
+            let snappedToY =
               collidedVector.properties.vectorProperties[
                 vectorGui.otherCollidedKeys.yKey
               ] + collidedVector.layer.y
+            state.vectorProperties[vectorGui.selectedPoint.xKey] = snappedToX
+            state.vectorProperties[vectorGui.selectedPoint.yKey] = snappedToY
+            updateVectorProperties(
+              currentVector,
+              snappedToX,
+              snappedToY,
+              vectorGui.selectedPoint.xKey,
+              vectorGui.selectedPoint.yKey
+            )
             //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
             //align control handles
             if (state.tool.options.align) {
@@ -558,9 +628,23 @@ function adjustCurveSteps(numPoints = 4) {
               if (vectorGui.selectedPoint.xKey === "px1") {
                 state.vectorProperties.px3 = state.vectorProperties.px1 - deltaX
                 state.vectorProperties.py3 = state.vectorProperties.py1 - deltaY
+                updateVectorProperties(
+                  currentVector,
+                  state.vectorProperties.px3,
+                  state.vectorProperties.py3,
+                  "px3",
+                  "py3"
+                )
               } else if (vectorGui.selectedPoint.xKey === "px2") {
                 state.vectorProperties.px4 = state.vectorProperties.px2 - deltaX
                 state.vectorProperties.py4 = state.vectorProperties.py2 - deltaY
+                updateVectorProperties(
+                  currentVector,
+                  state.vectorProperties.px4,
+                  state.vectorProperties.py4,
+                  "px4",
+                  "py4"
+                )
               }
             }
             //Link control points

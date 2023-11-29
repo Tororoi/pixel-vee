@@ -13,14 +13,23 @@ import { renderVectorsToDOM } from "../DOM/render.js"
  * @param {String} modType
  */
 function handleModifyAction(latestAction, modType) {
-  const moddedAction =
+  //for each processed action,
+  latestAction.properties.processedActions.forEach((mod) => {
+    //find the action in the undoStack
+    const moddedAction = state.undoStack[mod.moddedActionIndex]
+    //set the vectorProperties to the modded action's vectorProperties
+    moddedAction.properties.vectorProperties = {
+      ...mod[modType],
+    }
+  })
+  const primaryModdedAction =
     state.undoStack[latestAction.properties.moddedActionIndex]
-  moddedAction.properties.vectorProperties = {
-    ...latestAction.properties[modType],
-  }
-  if (state.tool.name === moddedAction.tool.name) {
+  // moddedAction.properties.vectorProperties = {
+  //   ...latestAction.properties[modType],
+  // }
+  if (state.tool.name === primaryModdedAction.tool.name) {
     vectorGui.reset()
-    vectorGui.setVectorProperties(moddedAction)
+    vectorGui.setVectorProperties(primaryModdedAction)
     vectorGui.render()
   }
 }

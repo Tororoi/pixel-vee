@@ -48,6 +48,7 @@ export const state = {
   startScale: null,
   //for vector tools
   clickCounter: 0,
+  vectorsSavedProperties: {},
   vectorProperties: {
     px1: null,
     py1: null,
