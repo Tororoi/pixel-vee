@@ -9,13 +9,10 @@ import {
   actionCubicCurve,
 } from "../Actions/actions.js"
 import { vectorGui } from "../GUI/vector.js"
-import {
-  renderCanvas,
-  renderPreviewAction,
-  setHistoricalPreview,
-} from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { getAngle } from "../utils/trig.js"
+import { updateVectorProperties } from "../utils/vectorHelpers.js"
 
 //=====================================//
 //=== * * * Curve Controllers * * * ===//
@@ -349,19 +346,6 @@ function cubicCurveSteps() {
 //=======================================//
 
 /**
- * WARNING: This function directly manipulates the vector's properties in the history.
- * @param {Object} vector
- * @param {Integer} x
- * @param {Integer} y
- * @param {String} xKey
- * @param {String} yKey
- */
-function updateVectorProperties(vector, x, y, xKey, yKey) {
-  vector.properties.vectorProperties[xKey] = x - vector.layer.x
-  vector.properties.vectorProperties[yKey] = y - vector.layer.y
-}
-
-/**
  * Used automatically by curve tools after curve is completed.
  * TODO: create distinct tool for adjusting that won't create a new curve when clicking.
  * Ideally a user should be able to click on a curve and render it's vector UI that way.
@@ -444,73 +428,6 @@ function adjustCurveSteps(numPoints = 4) {
           //Undoing again will of course move the vector back as expected.
         }
         renderCanvas(currentVector.layer, true)
-        // setHistoricalPreview(currentVector.layer)
-        // if (numPoints === 3) {
-        //   //TODO: to render linked curve, need to render preview for both vectors.
-        //   //May need to pass both indexes and actions to renderPreviewAction
-        //   //Then redrawTimeline will be called an additional time with endIndex to render both vectors as previews inside the rendered history.
-        //   renderPreviewAction(currentVector.layer, () =>
-        //     actionQuadraticCurve(
-        //       state.vectorProperties.px1,
-        //       state.vectorProperties.py1,
-        //       state.vectorProperties.px2,
-        //       state.vectorProperties.py2,
-        //       state.vectorProperties.px3,
-        //       state.vectorProperties.py3,
-        //       3,
-        //       currentVector.color,
-        //       currentVector.layer,
-        //       currentVector.modes,
-        //       brushStamps[currentVector.tool.brushType][
-        //         currentVector.tool.brushSize
-        //       ],
-        //       currentVector.tool.brushSize,
-        //       currentVector.maskSet
-        //     )
-        //   )
-        // } else {
-        //   renderPreviewAction(currentVector.layer, () => {
-        //     actionCubicCurve(
-        //       state.vectorProperties.px1,
-        //       state.vectorProperties.py1,
-        //       state.vectorProperties.px2,
-        //       state.vectorProperties.py2,
-        //       state.vectorProperties.px3,
-        //       state.vectorProperties.py3,
-        //       state.vectorProperties.px4,
-        //       state.vectorProperties.py4,
-        //       4,
-        //       currentVector.color,
-        //       currentVector.layer,
-        //       currentVector.modes,
-        //       brushStamps[currentVector.tool.brushType][
-        //         currentVector.tool.brushSize
-        //       ],
-        //       currentVector.tool.brushSize,
-        //       currentVector.maskSet
-        //     )
-        //     //for each linked vector (vectorGui.linkedVectors)
-        //     //initial vectorProperties must be saved beforehand for each linked vector so modify action can be made properly on pointerup
-        //     //state.action.properties[linkedVectorIndex].vectorProperties = linkedVector.properties.vectorProperties
-        //     // actionCubicCurve(
-        //     //   action.properties.vectorProperties.px1 + action.layer.x,
-        //     //   action.properties.vectorProperties.py1 + action.layer.y,
-        //     //   action.properties.vectorProperties.px2 + action.layer.x,
-        //     //   action.properties.vectorProperties.py2 + action.layer.y,
-        //     //   action.properties.vectorProperties.px3 + action.layer.x,
-        //     //   action.properties.vectorProperties.py3 + action.layer.y,
-        //     //   action.properties.vectorProperties.px4 + action.layer.x,
-        //     //   action.properties.vectorProperties.py4 + action.layer.y,
-        //     //   4,
-        //     //   action.color,
-        //     //   action.layer,
-        //     //   action.modes,
-        //     //   brushStamps[action.tool.brushType][action.tool.brushSize],
-        //     //   action.tool.brushSize,
-        //     //   action.properties.maskSet
-        //     // )
-        //   })
-        // }
       }
       break
     case "pointermove":
@@ -525,49 +442,6 @@ function adjustCurveSteps(numPoints = 4) {
           vectorGui.selectedPoint.yKey
         )
         renderCanvas(currentVector.layer, true)
-        // if (numPoints === 3) {
-        //   renderPreviewAction(currentVector.layer, () =>
-        //     actionQuadraticCurve(
-        //       state.vectorProperties.px1,
-        //       state.vectorProperties.py1,
-        //       state.vectorProperties.px2,
-        //       state.vectorProperties.py2,
-        //       state.vectorProperties.px3,
-        //       state.vectorProperties.py3,
-        //       3,
-        //       currentVector.color,
-        //       currentVector.layer,
-        //       currentVector.modes,
-        //       brushStamps[currentVector.tool.brushType][
-        //         currentVector.tool.brushSize
-        //       ],
-        //       currentVector.tool.brushSize,
-        //       currentVector.maskSet
-        //     )
-        //   )
-        // } else {
-        //   renderPreviewAction(currentVector.layer, () =>
-        //     actionCubicCurve(
-        //       state.vectorProperties.px1,
-        //       state.vectorProperties.py1,
-        //       state.vectorProperties.px2,
-        //       state.vectorProperties.py2,
-        //       state.vectorProperties.px3,
-        //       state.vectorProperties.py3,
-        //       state.vectorProperties.px4,
-        //       state.vectorProperties.py4,
-        //       4,
-        //       currentVector.color,
-        //       currentVector.layer,
-        //       currentVector.modes,
-        //       brushStamps[currentVector.tool.brushType][
-        //         currentVector.tool.brushSize
-        //       ],
-        //       currentVector.tool.brushSize,
-        //       currentVector.maskSet
-        //     )
-        //   )
-        // }
       }
       break
     case "pointerup":

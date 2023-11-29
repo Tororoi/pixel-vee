@@ -4,11 +4,8 @@ import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { modifyVectorAction, actionFill } from "../Actions/actions.js"
 import { vectorGui } from "../GUI/vector.js"
-import {
-  renderCanvas,
-  renderPreviewAction,
-  setHistoricalPreview,
-} from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render.js"
+import { updateVectorProperties } from "../utils/vectorHelpers.js"
 
 //===================================//
 //=== * * * Fill Controller * * * ===//
@@ -75,7 +72,7 @@ function fillSteps() {
  * Used automatically by fill tool after fill is completed.
  */
 export function adjustFillSteps() {
-  let action = state.undoStack[canvas.currentVectorIndex]
+  let currentVector = state.undoStack[canvas.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.collisionPresent) {
@@ -85,21 +82,17 @@ export function adjustFillSteps() {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
         }
-        action.hidden = true
-        //Only render canvas up to timeline where fill action exists while adjusting fill
-        // renderCanvas(action.layer, true, canvas.currentVectorIndex) // render to canvas.currentVectorIndex
-        setHistoricalPreview(action.layer)
-        renderPreviewAction(action.layer, () =>
-          actionFill(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            action.color,
-            action.layer,
-            action.modes,
-            action.properties.selectProperties,
-            action.properties.maskSet
-          )
+        state.vectorsSavedProperties[canvas.currentVectorIndex] = {
+          ...currentVector.properties.vectorProperties,
+        }
+        updateVectorProperties(
+          currentVector,
+          state.cursorX,
+          state.cursorY,
+          vectorGui.selectedPoint.xKey,
+          vectorGui.selectedPoint.yKey
         )
+        renderCanvas(currentVector.layer, true)
       }
       break
     case "pointermove":
@@ -107,31 +100,33 @@ export function adjustFillSteps() {
         //code gets past check twice here so figure out where tool fn is being called again
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        // renderCanvas(action.layer)
-        renderPreviewAction(action.layer, () =>
-          actionFill(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            action.color,
-            action.layer,
-            action.modes,
-            action.properties.selectProperties,
-            action.properties.maskSet
-          )
+        updateVectorProperties(
+          currentVector,
+          state.cursorX,
+          state.cursorY,
+          vectorGui.selectedPoint.xKey,
+          vectorGui.selectedPoint.yKey
         )
+        renderCanvas(currentVector.layer, true)
       }
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        action.hidden = false
+        updateVectorProperties(
+          currentVector,
+          state.cursorX,
+          state.cursorY,
+          vectorGui.selectedPoint.xKey,
+          vectorGui.selectedPoint.yKey
+        )
         modifyVectorAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(action.layer, true)
+        renderCanvas(currentVector.layer, true)
       }
       break
     case "pointerout":

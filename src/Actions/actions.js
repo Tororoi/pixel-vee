@@ -748,12 +748,12 @@ export function actionEllipse(
   isPreview = false
 ) {
   //force coords to int
-  centerx = Math.floor(centerx)
-  centery = Math.floor(centery)
-  xa = Math.floor(xa)
-  ya = Math.floor(ya)
-  xb = Math.floor(xb)
-  yb = Math.floor(yb)
+  // centerx = Math.floor(centerx)
+  // centery = Math.floor(centery)
+  // xa = Math.floor(xa)
+  // ya = Math.floor(ya)
+  // xb = Math.floor(xb)
+  // yb = Math.floor(yb)
 
   if (forceCircle) {
     let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, offset)

@@ -17,6 +17,7 @@ import {
 } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { storedActions } from "../Testing/storedActions.js"
+import { updateVectorProperties } from "../utils/vectorHelpers.js"
 
 //======================================//
 //=== * * * Ellipse Controller * * * ===//
@@ -60,16 +61,8 @@ function ellipseSteps() {
         state.vectorProperties.radA = Math.floor(
           Math.sqrt(dxa * dxa + dya * dya)
         )
-        state.vectorProperties.radA = state.vectorProperties.radA
       }
-      updateEllipseOffsets(
-        state,
-        canvas,
-        state.vectorProperties.px1,
-        state.vectorProperties.py1,
-        state.vectorProperties.px2,
-        state.vectorProperties.py2
-      )
+      updateEllipseOffsets(state, canvas)
       //adjusting p3 should make findHalf on a perpendicular angle rotated -90 degrees, adjusting p1 should maintain offset, no subpixels
       // let calcAngle = angle - Math.PI / 2 // adjust p3
 
@@ -118,16 +111,8 @@ function ellipseSteps() {
           state.vectorProperties.radA = Math.floor(
             Math.sqrt(dxa * dxa + dya * dya)
           )
-          state.vectorProperties.radA = state.vectorProperties.radA
         }
-        updateEllipseOffsets(
-          state,
-          canvas,
-          state.vectorProperties.px1,
-          state.vectorProperties.py1,
-          state.vectorProperties.px2,
-          state.vectorProperties.py2
-        )
+        updateEllipseOffsets(state, canvas)
         //onscreen preview
         renderCanvas(canvas.currentLayer)
         actionEllipse(
@@ -178,14 +163,7 @@ function ellipseSteps() {
         state.vectorProperties.radB = Math.floor(
           Math.sqrt(dxb * dxb + dyb * dyb)
         )
-        updateEllipseOffsets(
-          state,
-          canvas,
-          state.vectorProperties.px1,
-          state.vectorProperties.py1,
-          state.vectorProperties.px2,
-          state.vectorProperties.py2
-        )
+        updateEllipseOffsets(state, canvas)
         actionEllipse(
           state.vectorProperties.px1,
           state.vectorProperties.py1,
@@ -255,7 +233,7 @@ function ellipseSteps() {
  * Ideally a user should be able to click on a curve and render it's vector UI that way.
  */
 export function adjustEllipseSteps() {
-  let action = state.undoStack[canvas.currentVectorIndex]
+  let currentVector = state.undoStack[canvas.currentVectorIndex]
   if (!(vectorGui.collisionPresent && state.clickCounter === 0)) {
     return
   }
@@ -265,6 +243,9 @@ export function adjustEllipseSteps() {
         xKey: vectorGui.collidedKeys.xKey,
         yKey: vectorGui.collidedKeys.yKey,
       }
+      state.vectorsSavedProperties[canvas.currentVectorIndex] = {
+        ...currentVector.properties.vectorProperties,
+      }
       if (
         !keys.ShiftLeft &&
         !keys.ShiftRight &&
@@ -272,75 +253,48 @@ export function adjustEllipseSteps() {
       ) {
         //if shift key is not being held, reset forceCircle
         state.vectorProperties.forceCircle = false
+        currentVector.properties.vectorProperties.forceCircle = false
       }
       updateEllipseControlPoints(state, canvas, vectorGui)
-      action.hidden = true
-      //angle and offset passed should consider which point is being adjusted. For p1, use current state.vectorProperties.offset instead of recalculating. For p3, add 1.5 * Math.PI to angle
-      setHistoricalPreview(action.layer)
-      renderPreviewAction(action.layer, () =>
-        actionEllipse(
-          state.vectorProperties.px1,
-          state.vectorProperties.py1,
-          state.vectorProperties.px2,
-          state.vectorProperties.py2,
-          state.vectorProperties.px3,
-          state.vectorProperties.py3,
-          state.vectorProperties.radA,
-          state.vectorProperties.radB,
-          vectorGui.selectedPoint.xKey === "px1"
-            ? action.properties.vectorProperties.forceCircle
-            : state.vectorProperties.forceCircle,
-          action.color,
-          action.layer,
-          action.modes,
-          brushStamps[action.tool.brushType][action.tool.brushSize],
-          action.tool.brushSize,
-          state.vectorProperties.angle,
-          state.vectorProperties.offset,
-          state.vectorProperties.x1Offset,
-          state.vectorProperties.y1Offset,
-          action.maskSet
-        )
-      )
-      //TODO: render canvas actions after current index onto a canvas that is overlaid on top of the current layer canvas. Then remove it on pointerup
+      currentVector.properties.vectorProperties = { ...state.vectorProperties }
+      //Keep properties relative to layer offset
+      currentVector.properties.vectorProperties.px1 -= currentVector.layer.x
+      currentVector.properties.vectorProperties.py1 -= currentVector.layer.y
+      currentVector.properties.vectorProperties.px2 -= currentVector.layer.x
+      currentVector.properties.vectorProperties.py2 -= currentVector.layer.y
+      currentVector.properties.vectorProperties.px3 -= currentVector.layer.x
+      currentVector.properties.vectorProperties.py3 -= currentVector.layer.y
+      renderCanvas(currentVector.layer, true)
       break
     case "pointermove":
       updateEllipseControlPoints(state, canvas, vectorGui)
-      renderPreviewAction(action.layer, () =>
-        actionEllipse(
-          state.vectorProperties.px1,
-          state.vectorProperties.py1,
-          state.vectorProperties.px2,
-          state.vectorProperties.py2,
-          state.vectorProperties.px3,
-          state.vectorProperties.py3,
-          state.vectorProperties.radA,
-          state.vectorProperties.radB,
-          vectorGui.selectedPoint.xKey === "px1"
-            ? action.properties.vectorProperties.forceCircle
-            : state.vectorProperties.forceCircle,
-          action.color,
-          action.layer,
-          action.modes,
-          brushStamps[action.tool.brushType][action.tool.brushSize],
-          action.tool.brushSize,
-          state.vectorProperties.angle,
-          state.vectorProperties.offset,
-          state.vectorProperties.x1Offset,
-          state.vectorProperties.y1Offset,
-          action.maskSet
-        )
-      )
+      currentVector.properties.vectorProperties = { ...state.vectorProperties }
+      //Keep properties relative to layer offset
+      currentVector.properties.vectorProperties.px1 -= currentVector.layer.x
+      currentVector.properties.vectorProperties.py1 -= currentVector.layer.y
+      currentVector.properties.vectorProperties.px2 -= currentVector.layer.x
+      currentVector.properties.vectorProperties.py2 -= currentVector.layer.y
+      currentVector.properties.vectorProperties.px3 -= currentVector.layer.x
+      currentVector.properties.vectorProperties.py3 -= currentVector.layer.y
+      renderCanvas(currentVector.layer, true)
       break
     case "pointerup":
       updateEllipseControlPoints(state, canvas, vectorGui)
-      action.hidden = false
+      currentVector.properties.vectorProperties = { ...state.vectorProperties }
+      //Keep properties relative to layer offset
+      currentVector.properties.vectorProperties.px1 -= currentVector.layer.x
+      currentVector.properties.vectorProperties.py1 -= currentVector.layer.y
+      currentVector.properties.vectorProperties.px2 -= currentVector.layer.x
+      currentVector.properties.vectorProperties.py2 -= currentVector.layer.y
+      currentVector.properties.vectorProperties.px3 -= currentVector.layer.x
+      currentVector.properties.vectorProperties.py3 -= currentVector.layer.y
+
       modifyVectorAction(canvas.currentVectorIndex)
       vectorGui.selectedPoint = {
         xKey: null,
         yKey: null,
       }
-      renderCanvas(action.layer, true)
+      renderCanvas(currentVector.layer, true)
       break
     default:
     //do nothing
