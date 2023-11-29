@@ -8,6 +8,7 @@ import { renderEllipseVector, renderOffsetEllipseVector } from "./ellipse.js"
 import { renderTransformBox } from "./transform.js"
 import { renderSelectVector, drawSelectOutline } from "./select.js"
 import { renderGrid } from "./grid.js"
+import { updateVectorProperties } from "../utils/vectorHelpers.js"
 
 //==================================================//
 //=== * * * Vector Graphics User Interface * * * ===//
@@ -425,4 +426,66 @@ function renderCurrentVector() {
   vectorGui.resetCollision()
   //render control points
   renderControlPoints(state.tool.name, state.vectorProperties)
+}
+
+/**
+ *
+ * @param {Boolean} saveVectorProperties
+ */
+export function updateLinkedVectors(saveVectorProperties = false) {
+  if (
+    vectorGui.selectedPoint.xKey === "px1" ||
+    vectorGui.selectedPoint.xKey === "px2"
+  ) {
+    for (const [linkedVectorIndex, linkedPoints] of Object.entries(
+      vectorGui.linkedVectors
+    )) {
+      let x = state.cursorX
+      let y = state.cursorY
+      const linkedVector = state.undoStack[linkedVectorIndex]
+
+      if (saveVectorProperties) {
+        state.vectorsSavedProperties[linkedVectorIndex] = {
+          ...linkedVector.properties.vectorProperties,
+        }
+      } else if (!state.vectorsSavedProperties[linkedVectorIndex]) {
+        //prevent linking vectors during pointermove
+        continue
+      }
+      const savedProperties = state.vectorsSavedProperties[linkedVectorIndex]
+      // Check if px1 is linked
+      if (linkedPoints.px1) {
+        updateVectorProperties(linkedVector, x, y, "px1", "py1")
+        if (state.tool.options.align) {
+          //update px3 and py3
+          const xDiff = savedProperties.px1 - savedProperties.px3
+          const yDiff = savedProperties.py1 - savedProperties.py3
+          updateVectorProperties(
+            linkedVector,
+            x - xDiff,
+            y - yDiff,
+            "px3",
+            "py3"
+          )
+        }
+      }
+
+      // Check if px2 is linked
+      if (linkedPoints.px2) {
+        updateVectorProperties(linkedVector, x, y, "px2", "py2")
+        if (state.tool.options.align) {
+          //update px4 and py4
+          const xDiff = savedProperties.px2 - savedProperties.px4
+          const yDiff = savedProperties.py2 - savedProperties.py4
+          updateVectorProperties(
+            linkedVector,
+            x - xDiff,
+            y - yDiff,
+            "px4",
+            "py4"
+          )
+        }
+      }
+    }
+  }
 }
