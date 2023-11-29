@@ -380,8 +380,36 @@ function adjustCurveSteps(numPoints = 4) {
           state.tool.options.align ||
           state.tool.options.link
         ) {
+          console.log(vectorGui.linkedVectors)
+          if (state.tool.options.link) {
+            if (
+              vectorGui.selectedPoint.xKey === "px1" ||
+              vectorGui.selectedPoint.xKey === "px2"
+            ) {
+              for (const [linkedVectorIndex, linkedPoints] of Object.entries(
+                vectorGui.linkedVectors
+              )) {
+                let x, y
+                const linkedVector = state.undoStack[linkedVectorIndex]
+
+                // Check if px1 is linked
+                if (linkedPoints.px1) {
+                  x = state.cursorX
+                  y = state.cursorY
+                  updateVectorProperties(linkedVector, x, y, "px1", "py1")
+                }
+
+                // Check if px2 is linked
+                if (linkedPoints.px2) {
+                  x = state.cursorX
+                  y = state.cursorY
+                  updateVectorProperties(linkedVector, x, y, "px2", "py2")
+                }
+              }
+            }
+          }
+          //if selected point is p3 or p4, updateVectorProperties x and y values must be calculated to maintain opposite angle
           //Instead of collided vector, use linked vector
-          console.log(currentVector.properties.p1LinkedVectors)
           if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
             let collidedVector = state.undoStack[canvas.collidedVectorIndex]
             /**
@@ -441,6 +469,33 @@ function adjustCurveSteps(numPoints = 4) {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
+        if (state.tool.options.link) {
+          if (
+            vectorGui.selectedPoint.xKey === "px1" ||
+            vectorGui.selectedPoint.xKey === "px2"
+          ) {
+            for (const [linkedVectorIndex, linkedPoints] of Object.entries(
+              vectorGui.linkedVectors
+            )) {
+              let x, y
+              const linkedVector = state.undoStack[linkedVectorIndex]
+
+              // Check if px1 is linked
+              if (linkedPoints.px1) {
+                x = state.cursorX
+                y = state.cursorY
+                updateVectorProperties(linkedVector, x, y, "px1", "py1")
+              }
+
+              // Check if px2 is linked
+              if (linkedPoints.px2) {
+                x = state.cursorX
+                y = state.cursorY
+                updateVectorProperties(linkedVector, x, y, "px2", "py2")
+              }
+            }
+          }
+        }
         renderCanvas(currentVector.layer, true)
       }
       break

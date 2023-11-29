@@ -125,18 +125,19 @@ function handleCollisionAndDraw(
       if (vectorAction) {
         canvas.collidedVectorIndex = vectorAction.index
         if (keys.x === "px1" || keys.x === "px2") {
-          console.log(
-            "collided with " +
-              keys.x +
-              " of vector " +
-              vectorAction.index +
-              " at " +
-              point.x +
-              ", " +
-              point.y
-          )
+          // console.log(
+          //   "collided with " +
+          //     keys.x +
+          //     " of vector " +
+          //     vectorAction.index +
+          //     " at " +
+          //     point.x +
+          //     ", " +
+          //     point.y
+          // )
           r = radius * 2.125
           vectorGui.setOtherVectorCollision(keys)
+          vectorGui.addLinkedVector(vectorAction, keys.x)
         }
       } else {
         r = radius * 2.125
@@ -144,6 +145,22 @@ function handleCollisionAndDraw(
       }
     }
     //else if selectedpoint is p3 or p4, setLinkedVector if vector's control point coords are the same as the selected point
+    if (["px3"].includes(vectorGui.selectedPoint.xKey) && vectorAction) {
+      if (
+        point.x === state.vectorProperties.px1 &&
+        point.y === state.vectorProperties.py1
+      ) {
+        vectorGui.addLinkedVector(vectorAction, keys.x)
+      }
+    }
+    if (["px4"].includes(vectorGui.selectedPoint.xKey) && vectorAction) {
+      if (
+        point.x === state.vectorProperties.px2 &&
+        point.y === state.vectorProperties.py2
+      ) {
+        vectorGui.addLinkedVector(vectorAction, keys.x)
+      }
+    }
   }
 
   drawCirclePath(
