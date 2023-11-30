@@ -476,7 +476,10 @@ function adjustCurveSteps(numPoints = 4) {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        if (state.tool.options.link) {
+        if (
+          state.tool.options.link &&
+          Object.keys(state.vectorsSavedProperties).length > 1
+        ) {
           if (state.tool.options.align) {
             const savedProperties =
               state.vectorsSavedProperties[canvas.currentVectorIndex]
@@ -529,6 +532,43 @@ function adjustCurveSteps(numPoints = 4) {
           state.tool.options.align ||
           state.tool.options.link
         ) {
+          if (
+            state.tool.options.link &&
+            Object.keys(state.vectorsSavedProperties).length > 1
+          ) {
+            if (state.tool.options.align) {
+              const savedProperties =
+                state.vectorsSavedProperties[canvas.currentVectorIndex]
+              if (vectorGui.selectedPoint.xKey === "px1") {
+                //update px3 and py3
+                const xDiff = savedProperties.px1 - savedProperties.px3
+                const yDiff = savedProperties.py1 - savedProperties.py3
+                state.vectorProperties.px3 = state.cursorX - xDiff
+                state.vectorProperties.py3 = state.cursorY - yDiff
+                updateVectorProperties(
+                  currentVector,
+                  state.cursorX - xDiff,
+                  state.cursorY - yDiff,
+                  "px3",
+                  "py3"
+                )
+              } else if (vectorGui.selectedPoint.xKey === "px2") {
+                //update px4 and py4
+                const xDiff = savedProperties.px2 - savedProperties.px4
+                const yDiff = savedProperties.py2 - savedProperties.py4
+                state.vectorProperties.px4 = state.cursorX - xDiff
+                state.vectorProperties.py4 = state.cursorY - yDiff
+                updateVectorProperties(
+                  currentVector,
+                  state.cursorX - xDiff,
+                  state.cursorY - yDiff,
+                  "px4",
+                  "py4"
+                )
+              }
+            }
+            updateLinkedVectors()
+          }
           if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
             let collidedVector = state.undoStack[canvas.collidedVectorIndex]
             //snap selected point to collidedVector's control point
@@ -551,7 +591,10 @@ function adjustCurveSteps(numPoints = 4) {
             )
             //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
             //align control handles
-            if (state.tool.options.align) {
+            if (
+              state.tool.options.align &&
+              Object.keys(state.vectorsSavedProperties).length === 1
+            ) {
               let deltaX, deltaY
               if (vectorGui.otherCollidedKeys.xKey === "px1") {
                 deltaX =
@@ -631,40 +674,6 @@ function adjustCurveSteps(numPoints = 4) {
           if (state.tool.options.align) {
             //TODO: if selected point is p3 or p4 and another vector is linked, maintain angle
           }
-        }
-        if (state.tool.options.link) {
-          if (state.tool.options.align) {
-            const savedProperties =
-              state.vectorsSavedProperties[canvas.currentVectorIndex]
-            if (vectorGui.selectedPoint.xKey === "px1") {
-              //update px3 and py3
-              const xDiff = savedProperties.px1 - savedProperties.px3
-              const yDiff = savedProperties.py1 - savedProperties.py3
-              state.vectorProperties.px3 = state.cursorX - xDiff
-              state.vectorProperties.py3 = state.cursorY - yDiff
-              updateVectorProperties(
-                currentVector,
-                state.cursorX - xDiff,
-                state.cursorY - yDiff,
-                "px3",
-                "py3"
-              )
-            } else if (vectorGui.selectedPoint.xKey === "px2") {
-              //update px4 and py4
-              const xDiff = savedProperties.px2 - savedProperties.px4
-              const yDiff = savedProperties.py2 - savedProperties.py4
-              state.vectorProperties.px4 = state.cursorX - xDiff
-              state.vectorProperties.py4 = state.cursorY - yDiff
-              updateVectorProperties(
-                currentVector,
-                state.cursorX - xDiff,
-                state.cursorY - yDiff,
-                "px4",
-                "py4"
-              )
-            }
-          }
-          updateLinkedVectors()
         }
         modifyVectorAction(canvas.currentVectorIndex)
         vectorGui.selectedPoint = {

@@ -227,6 +227,18 @@ function ellipseSteps() {
   }
 }
 
+function updateEllipseVectorProperties(currentVector) {
+  updateEllipseControlPoints(state, canvas, vectorGui)
+  currentVector.properties.vectorProperties = { ...state.vectorProperties }
+  //Keep properties relative to layer offset
+  currentVector.properties.vectorProperties.px1 -= currentVector.layer.x
+  currentVector.properties.vectorProperties.py1 -= currentVector.layer.y
+  currentVector.properties.vectorProperties.px2 -= currentVector.layer.x
+  currentVector.properties.vectorProperties.py2 -= currentVector.layer.y
+  currentVector.properties.vectorProperties.px3 -= currentVector.layer.x
+  currentVector.properties.vectorProperties.py3 -= currentVector.layer.y
+}
+
 /**
  * Used automatically by ellipse tool after curve is completed.
  * TODO: create distinct tool for adjusting that won't create a new curve when clicking.
@@ -255,39 +267,15 @@ export function adjustEllipseSteps() {
         state.vectorProperties.forceCircle = false
         currentVector.properties.vectorProperties.forceCircle = false
       }
-      updateEllipseControlPoints(state, canvas, vectorGui)
-      currentVector.properties.vectorProperties = { ...state.vectorProperties }
-      //Keep properties relative to layer offset
-      currentVector.properties.vectorProperties.px1 -= currentVector.layer.x
-      currentVector.properties.vectorProperties.py1 -= currentVector.layer.y
-      currentVector.properties.vectorProperties.px2 -= currentVector.layer.x
-      currentVector.properties.vectorProperties.py2 -= currentVector.layer.y
-      currentVector.properties.vectorProperties.px3 -= currentVector.layer.x
-      currentVector.properties.vectorProperties.py3 -= currentVector.layer.y
+      updateEllipseVectorProperties(currentVector)
       renderCanvas(currentVector.layer, true)
       break
     case "pointermove":
-      updateEllipseControlPoints(state, canvas, vectorGui)
-      currentVector.properties.vectorProperties = { ...state.vectorProperties }
-      //Keep properties relative to layer offset
-      currentVector.properties.vectorProperties.px1 -= currentVector.layer.x
-      currentVector.properties.vectorProperties.py1 -= currentVector.layer.y
-      currentVector.properties.vectorProperties.px2 -= currentVector.layer.x
-      currentVector.properties.vectorProperties.py2 -= currentVector.layer.y
-      currentVector.properties.vectorProperties.px3 -= currentVector.layer.x
-      currentVector.properties.vectorProperties.py3 -= currentVector.layer.y
+      updateEllipseVectorProperties(currentVector)
       renderCanvas(currentVector.layer, true)
       break
     case "pointerup":
-      updateEllipseControlPoints(state, canvas, vectorGui)
-      currentVector.properties.vectorProperties = { ...state.vectorProperties }
-      //Keep properties relative to layer offset
-      currentVector.properties.vectorProperties.px1 -= currentVector.layer.x
-      currentVector.properties.vectorProperties.py1 -= currentVector.layer.y
-      currentVector.properties.vectorProperties.px2 -= currentVector.layer.x
-      currentVector.properties.vectorProperties.py2 -= currentVector.layer.y
-      currentVector.properties.vectorProperties.px3 -= currentVector.layer.x
-      currentVector.properties.vectorProperties.py3 -= currentVector.layer.y
+      updateEllipseVectorProperties(currentVector)
 
       modifyVectorAction(canvas.currentVectorIndex)
       vectorGui.selectedPoint = {

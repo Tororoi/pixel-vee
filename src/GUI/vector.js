@@ -373,6 +373,7 @@ function renderLayerVectors(layer) {
       !action.removed &&
       action.layer === layer &&
       action.tool.type === "vector" &&
+      action.tool.name === state.tool.name &&
       action !== selectedVector
     ) {
       renderPath(action.tool.name, action.properties.vectorProperties, action)
@@ -396,6 +397,7 @@ function renderLayerVectors(layer) {
       !action.removed &&
       action.layer === layer &&
       action.tool.type === "vector" &&
+      action.tool.name === state.tool.name &&
       action !== selectedVector
     ) {
       renderControlPoints(

@@ -446,19 +446,24 @@ export function updateEllipseOffsets(
 }
 
 export function updateEllipseControlPoints(state, canvas, vectorGui) {
-  state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
-  state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
+  if (vectorGui.selectedPoint.xKey !== "px1") {
+    state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
+    state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
+  }
   let dxa = state.vectorProperties.px2 - state.vectorProperties.px1
   let dya = state.vectorProperties.py2 - state.vectorProperties.py1
   let dxb = state.vectorProperties.px3 - state.vectorProperties.px1
   let dyb = state.vectorProperties.py3 - state.vectorProperties.py1
+  if (vectorGui.selectedPoint.xKey === "px1") {
+    state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
+    state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
+  }
   if (vectorGui.selectedPoint.xKey === "px1") {
     state.vectorProperties.px2 = state.vectorProperties.px1 + dxa
     state.vectorProperties.py2 = state.vectorProperties.py1 + dya
     state.vectorProperties.px3 = state.vectorProperties.px1 + dxb
     state.vectorProperties.py3 = state.vectorProperties.py1 + dyb
   } else if (vectorGui.selectedPoint.xKey === "px2") {
-    //TODO: BUG: radA calculation is inconsistent for some reason at edge of pixel
     state.vectorProperties.radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
     if (state.vectorProperties.forceCircle) {
       state.vectorProperties.radB = state.vectorProperties.radA
