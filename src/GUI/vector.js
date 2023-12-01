@@ -9,6 +9,7 @@ import { renderTransformBox } from "./transform.js"
 import { renderSelectVector, drawSelectOutline } from "./select.js"
 import { renderGrid } from "./grid.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
+import { getAngle } from "../utils/trig.js"
 
 //==================================================//
 //=== * * * Vector Graphics User Interface * * * ===//
@@ -126,18 +127,9 @@ function handleCollisionAndDraw(
       if (vectorAction) {
         canvas.collidedVectorIndex = vectorAction.index
         if (keys.x === "px1" || keys.x === "px2") {
-          // console.log(
-          //   "collided with " +
-          //     keys.x +
-          //     " of vector " +
-          //     vectorAction.index +
-          //     " at " +
-          //     point.x +
-          //     ", " +
-          //     point.y
-          // )
           r = radius * 2.125
           vectorGui.setOtherVectorCollision(keys)
+
           vectorGui.addLinkedVector(vectorAction, keys.x)
         }
       } else {
@@ -146,7 +138,7 @@ function handleCollisionAndDraw(
       }
     }
     //else if selectedpoint is p3 or p4, setLinkedVector if vector's control point coords are the same as the selected point
-    if (["px3"].includes(vectorGui.selectedPoint.xKey) && vectorAction) {
+    if (vectorGui.collidedKeys.xKey === "px3" && vectorAction) {
       if (
         point.x === state.vectorProperties.px1 &&
         point.y === state.vectorProperties.py1
@@ -154,7 +146,7 @@ function handleCollisionAndDraw(
         vectorGui.addLinkedVector(vectorAction, keys.x)
       }
     }
-    if (["px4"].includes(vectorGui.selectedPoint.xKey) && vectorAction) {
+    if (vectorGui.collidedKeys.xKey === "px4" && vectorAction) {
       if (
         point.x === state.vectorProperties.px2 &&
         point.y === state.vectorProperties.py2
@@ -432,31 +424,53 @@ function renderCurrentVector() {
 
 /**
  *
+ * @param {Object} currentVector
  * @param {Boolean} saveVectorProperties
  */
-export function updateLinkedVectors(saveVectorProperties = false) {
-  if (
-    vectorGui.selectedPoint.xKey === "px1" ||
-    vectorGui.selectedPoint.xKey === "px2"
-  ) {
-    for (const [linkedVectorIndex, linkedPoints] of Object.entries(
-      vectorGui.linkedVectors
-    )) {
-      let x = state.cursorX
-      let y = state.cursorY
-      const linkedVector = state.undoStack[linkedVectorIndex]
+export function updateLinkedVectors(
+  currentVector,
+  saveVectorProperties = false
+) {
+  for (const [linkedVectorIndex, linkedPoints] of Object.entries(
+    vectorGui.linkedVectors
+  )) {
+    let x = state.cursorX
+    let y = state.cursorY
+    const linkedVector = state.undoStack[linkedVectorIndex]
 
-      if (saveVectorProperties) {
-        state.vectorsSavedProperties[linkedVectorIndex] = {
-          ...linkedVector.properties.vectorProperties,
-        }
-      } else if (!state.vectorsSavedProperties[linkedVectorIndex]) {
-        //prevent linking vectors during pointermove
-        continue
+    if (saveVectorProperties) {
+      state.vectorsSavedProperties[linkedVectorIndex] = {
+        ...linkedVector.properties.vectorProperties,
       }
-      const savedProperties = state.vectorsSavedProperties[linkedVectorIndex]
-      // Check if px1 is linked
-      if (linkedPoints.px1) {
+    } else if (!state.vectorsSavedProperties[linkedVectorIndex]) {
+      //prevent linking vectors during pointermove
+      continue
+    }
+    const savedProperties = state.vectorsSavedProperties[linkedVectorIndex]
+    let deltaX, deltaY //for calculating angle when using px3, px4
+    if (vectorGui.selectedPoint.xKey === "px3") {
+      // get angle of control handle between currentVector p1 and p3
+      deltaX =
+        currentVector.properties.vectorProperties.px1 -
+        currentVector.properties.vectorProperties.px3
+      deltaY =
+        currentVector.properties.vectorProperties.py1 -
+        currentVector.properties.vectorProperties.py3
+    } else if (vectorGui.selectedPoint.xKey === "px4") {
+      // get angle of control handle between currentVector p2 and p4
+      deltaX =
+        currentVector.properties.vectorProperties.px2 -
+        currentVector.properties.vectorProperties.px4
+      deltaY =
+        currentVector.properties.vectorProperties.py2 -
+        currentVector.properties.vectorProperties.py4
+    }
+    // Check if px1 is linked
+    if (linkedPoints.px1) {
+      if (
+        vectorGui.selectedPoint.xKey === "px1" ||
+        vectorGui.selectedPoint.xKey === "px2"
+      ) {
         updateVectorProperties(linkedVector, x, y, "px1", "py1")
         if (state.tool.options.align) {
           //update px3 and py3
@@ -470,10 +484,35 @@ export function updateLinkedVectors(saveVectorProperties = false) {
             "py3"
           )
         }
+      } else if (
+        vectorGui.selectedPoint.xKey === "px3" ||
+        vectorGui.selectedPoint.xKey === "px4"
+      ) {
+        // let angle = getAngle(deltaX, deltaY)
+        // console.log(angle)
+        // //2. get euclidean distance of control handle between linkedVector p1 and p3
+        // let linkedDeltaX = savedProperties.px3 - savedProperties.px1
+        // let linkedDeltaY = savedProperties.py3 - savedProperties.py1
+        // let linkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
+        // let linkedDist = Math.sqrt(linkedDeltaX ** 2 + linkedDeltaY ** 2)
+        //3. as p3 or p4 of currentVector is adjusted, calculate angle and get difference between saved angle and changed angle
+        //4. apply difference to linkedVector p3 or p4 or if align option is selected, apply exact opposite angle to linkedVector p3 or p4
+        updateVectorProperties(
+          linkedVector,
+          x + deltaX * 2,
+          y + deltaY * 2,
+          "px3",
+          "py3"
+        )
       }
+    }
 
-      // Check if px2 is linked
-      if (linkedPoints.px2) {
+    // Check if px2 is linked
+    if (linkedPoints.px2) {
+      if (
+        vectorGui.selectedPoint.xKey === "px1" ||
+        vectorGui.selectedPoint.xKey === "px2"
+      ) {
         updateVectorProperties(linkedVector, x, y, "px2", "py2")
         if (state.tool.options.align) {
           //update px4 and py4
@@ -487,7 +526,50 @@ export function updateLinkedVectors(saveVectorProperties = false) {
             "py4"
           )
         }
+      } else if (
+        vectorGui.selectedPoint.xKey === "px3" ||
+        vectorGui.selectedPoint.xKey === "px4"
+      ) {
+        updateVectorProperties(
+          linkedVector,
+          x + deltaX * 2,
+          y + deltaY * 2,
+          "px4",
+          "py4"
+        )
       }
     }
+  }
+}
+
+export function updateLockedCurrentVectorControlHandle(currentVector) {
+  const savedProperties =
+    state.vectorsSavedProperties[canvas.currentVectorIndex]
+  if (vectorGui.selectedPoint.xKey === "px1") {
+    //update px3 and py3
+    const xDiff = savedProperties.px1 - savedProperties.px3
+    const yDiff = savedProperties.py1 - savedProperties.py3
+    state.vectorProperties.px3 = state.cursorX - xDiff
+    state.vectorProperties.py3 = state.cursorY - yDiff
+    updateVectorProperties(
+      currentVector,
+      state.cursorX - xDiff,
+      state.cursorY - yDiff,
+      "px3",
+      "py3"
+    )
+  } else if (vectorGui.selectedPoint.xKey === "px2") {
+    //update px4 and py4
+    const xDiff = savedProperties.px2 - savedProperties.px4
+    const yDiff = savedProperties.py2 - savedProperties.py4
+    state.vectorProperties.px4 = state.cursorX - xDiff
+    state.vectorProperties.py4 = state.cursorY - yDiff
+    updateVectorProperties(
+      currentVector,
+      state.cursorX - xDiff,
+      state.cursorY - yDiff,
+      "px4",
+      "py4"
+    )
   }
 }

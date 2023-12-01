@@ -8,7 +8,11 @@ import {
   actionQuadraticCurve,
   actionCubicCurve,
 } from "../Actions/actions.js"
-import { vectorGui, updateLinkedVectors } from "../GUI/vector.js"
+import {
+  vectorGui,
+  updateLinkedVectors,
+  updateLockedCurrentVectorControlHandle,
+} from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { getAngle } from "../utils/trig.js"
@@ -383,79 +387,33 @@ function adjustCurveSteps(numPoints = 4) {
         ) {
           if (state.tool.options.link) {
             if (state.tool.options.align) {
-              const savedProperties =
-                state.vectorsSavedProperties[canvas.currentVectorIndex]
-              if (vectorGui.selectedPoint.xKey === "px1") {
-                //update px3 and py3
-                const xDiff = savedProperties.px1 - savedProperties.px3
-                const yDiff = savedProperties.py1 - savedProperties.py3
-                state.vectorProperties.px3 = state.cursorX - xDiff
-                state.vectorProperties.py3 = state.cursorY - yDiff
-                updateVectorProperties(
-                  currentVector,
-                  state.cursorX - xDiff,
-                  state.cursorY - yDiff,
-                  "px3",
-                  "py3"
-                )
-              } else if (vectorGui.selectedPoint.xKey === "px2") {
-                //update px4 and py4
-                const xDiff = savedProperties.px2 - savedProperties.px4
-                const yDiff = savedProperties.py2 - savedProperties.py4
-                state.vectorProperties.px4 = state.cursorX - xDiff
-                state.vectorProperties.py4 = state.cursorY - yDiff
-                updateVectorProperties(
-                  currentVector,
-                  state.cursorX - xDiff,
-                  state.cursorY - yDiff,
-                  "px4",
-                  "py4"
-                )
-              }
+              updateLockedCurrentVectorControlHandle(currentVector)
             }
-            updateLinkedVectors(true)
+            updateLinkedVectors(currentVector, true)
           }
           //if selected point is p3 or p4, updateVectorProperties x and y values must be calculated to maintain opposite angle
           //Instead of collided vector, use linked vector
-          if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
-            let collidedVector = state.undoStack[canvas.collidedVectorIndex]
-            /**
-             * Steps:
-             * 1. set state.collidedVectorProperties to the collidedVector's properties
-             * 2. render preview curve for collidedVector as well as current vector
-             */
-            //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
-            //align control handles
-            if (
-              state.tool.options.align &&
-              state.tool.options.link &&
-              ["px3", "px4"].includes(vectorGui.selectedPoint.xKey)
-            ) {
-              // let deltaX, deltaY
-              // if (vectorGui.otherCollidedKeys.xKey === "px1") {
-              //   deltaX =
-              //     collidedVector.properties.vectorProperties.px3 -
-              //     collidedVector.properties.vectorProperties.px1
-              //   deltaY =
-              //     collidedVector.properties.vectorProperties.py3 -
-              //     collidedVector.properties.vectorProperties.py1
-              // } else if (vectorGui.otherCollidedKeys.xKey === "px2") {
-              //   deltaX =
-              //     collidedVector.properties.vectorProperties.px4 -
-              //     collidedVector.properties.vectorProperties.px2
-              //   deltaY =
-              //     collidedVector.properties.vectorProperties.py4 -
-              //     collidedVector.properties.vectorProperties.py2
-              // }
-              // if (vectorGui.selectedPoint.xKey === "px1") {
-              //   state.vectorProperties.px3 = state.vectorProperties.px1 - deltaX
-              //   state.vectorProperties.py3 = state.vectorProperties.py1 - deltaY
-              // } else if (vectorGui.selectedPoint.xKey === "px2") {
-              //   state.vectorProperties.px4 = state.vectorProperties.px2 - deltaX
-              //   state.vectorProperties.py4 = state.vectorProperties.py2 - deltaY
-              // }
-            }
-          }
+          // if (
+          //   state.tool.options.link &&
+          //   ["px3", "px4"].includes(vectorGui.selectedPoint.xKey)
+          // ) {
+          //   //1. get angle of control handle between currentVector p1 and p3 or p2 and p4
+          //   if (vectorGui.selectedPoint.xKey === "px3") {
+          //     //get angle of control handle between currentVector p1 and p3
+          //     let deltaX =
+          //       currentVector.properties.vectorProperties.px3 -
+          //       currentVector.properties.vectorProperties.px1
+          //     let deltaY =
+          //       currentVector.properties.vectorProperties.py3 -
+          //       currentVector.properties.vectorProperties.py1
+          //     let angle = getAngle(deltaX, deltaY)
+          //     console.log(angle)
+          //   } else if (vectorGui.selectedPoint.xKey === "px4") {
+          //   }
+          //   //2. get angle of control handle between linkedVector p1 and p3 or p2 and p4
+          //   //3. as p3 or p4 of currentVector is adjusted, calculate angle and get difference between saved angle and changed angle
+          //   //4. apply difference to linkedVector p3 or p4 or if align option is selected, apply exact opposite angle to linkedVector p3 or p4
+          // }
 
           //TODO: logic to perform the action to link vectors will go here.
           //This means the regular tool function will be saved first and undoing the link will have the vector still moved into position.
@@ -481,37 +439,9 @@ function adjustCurveSteps(numPoints = 4) {
           Object.keys(state.vectorsSavedProperties).length > 1
         ) {
           if (state.tool.options.align) {
-            const savedProperties =
-              state.vectorsSavedProperties[canvas.currentVectorIndex]
-            if (vectorGui.selectedPoint.xKey === "px1") {
-              //update px3 and py3
-              const xDiff = savedProperties.px1 - savedProperties.px3
-              const yDiff = savedProperties.py1 - savedProperties.py3
-              state.vectorProperties.px3 = state.cursorX - xDiff
-              state.vectorProperties.py3 = state.cursorY - yDiff
-              updateVectorProperties(
-                currentVector,
-                state.cursorX - xDiff,
-                state.cursorY - yDiff,
-                "px3",
-                "py3"
-              )
-            } else if (vectorGui.selectedPoint.xKey === "px2") {
-              //update px4 and py4
-              const xDiff = savedProperties.px2 - savedProperties.px4
-              const yDiff = savedProperties.py2 - savedProperties.py4
-              state.vectorProperties.px4 = state.cursorX - xDiff
-              state.vectorProperties.py4 = state.cursorY - yDiff
-              updateVectorProperties(
-                currentVector,
-                state.cursorX - xDiff,
-                state.cursorY - yDiff,
-                "px4",
-                "py4"
-              )
-            }
+            updateLockedCurrentVectorControlHandle(currentVector)
           }
-          updateLinkedVectors()
+          updateLinkedVectors(currentVector)
         }
         renderCanvas(currentVector.layer, true)
       }
@@ -537,37 +467,9 @@ function adjustCurveSteps(numPoints = 4) {
             Object.keys(state.vectorsSavedProperties).length > 1
           ) {
             if (state.tool.options.align) {
-              const savedProperties =
-                state.vectorsSavedProperties[canvas.currentVectorIndex]
-              if (vectorGui.selectedPoint.xKey === "px1") {
-                //update px3 and py3
-                const xDiff = savedProperties.px1 - savedProperties.px3
-                const yDiff = savedProperties.py1 - savedProperties.py3
-                state.vectorProperties.px3 = state.cursorX - xDiff
-                state.vectorProperties.py3 = state.cursorY - yDiff
-                updateVectorProperties(
-                  currentVector,
-                  state.cursorX - xDiff,
-                  state.cursorY - yDiff,
-                  "px3",
-                  "py3"
-                )
-              } else if (vectorGui.selectedPoint.xKey === "px2") {
-                //update px4 and py4
-                const xDiff = savedProperties.px2 - savedProperties.px4
-                const yDiff = savedProperties.py2 - savedProperties.py4
-                state.vectorProperties.px4 = state.cursorX - xDiff
-                state.vectorProperties.py4 = state.cursorY - yDiff
-                updateVectorProperties(
-                  currentVector,
-                  state.cursorX - xDiff,
-                  state.cursorY - yDiff,
-                  "px4",
-                  "py4"
-                )
-              }
+              updateLockedCurrentVectorControlHandle(currentVector)
             }
-            updateLinkedVectors()
+            updateLinkedVectors(currentVector)
           }
           if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
             let collidedVector = state.undoStack[canvas.collidedVectorIndex]
