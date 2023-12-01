@@ -380,11 +380,7 @@ function adjustCurveSteps(numPoints = 4) {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        if (
-          state.tool.options.snap ||
-          state.tool.options.align ||
-          state.tool.options.link
-        ) {
+        if (state.tool.options.align || state.tool.options.link) {
           if (state.tool.options.link) {
             if (state.tool.options.align) {
               updateLockedCurrentVectorControlHandle(currentVector)
@@ -457,11 +453,7 @@ function adjustCurveSteps(numPoints = 4) {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        if (
-          state.tool.options.snap ||
-          state.tool.options.align ||
-          state.tool.options.link
-        ) {
+        if (state.tool.options.align || state.tool.options.link) {
           if (
             state.tool.options.link &&
             Object.keys(state.vectorsSavedProperties).length > 1
@@ -611,7 +603,7 @@ export const cubicCurve = {
   brushSize: 1,
   brushType: "circle",
   disabled: false,
-  options: { snap: false, align: false, link: false }, //snap: C0/G0 positional continuity, align: G1 tangent continuity, default C1 velocity continuity, link: move connected vector control point with selected control point.
+  options: { align: false, link: false, displayVectors: false }, //align: G1 tangent continuity, default C1 velocity continuity, link: C0/G0 positional continuity and move connected vector control point with selected control point.
   modes: { eraser: false, inject: false },
   type: "vector",
   cursor: "crosshair",

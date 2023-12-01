@@ -18,6 +18,7 @@ import { getAngle } from "../utils/trig.js"
 //Note: The Vector Graphics canvas has a mix-blend-mode: difference applied to it
 export const vectorGui = {
   grid: false,
+  displayPaths: false,
   collisionPresent: false,
   collidedKeys: { xKey: null, yKey: null },
   selectedPoint: { xKey: null, yKey: null },
@@ -117,7 +118,6 @@ function handleCollisionAndDraw(
   const yOffset = vectorAction ? vectorAction.layer.y : 0
 
   if (modify) {
-    //TODO: while adjusting, points can be "picked up" and linked, but we should not allow this to happen mid adjustment. If a point is selected, we know it's mid adjustment, but we must also not reset collsion
     if (vectorGui.selectedPoint.xKey === keys.x && !vectorAction) {
       r = radius * 2.125 // increase  radius of fill to match stroked circle
       vectorGui.setCollision(keys)
@@ -136,7 +136,6 @@ function handleCollisionAndDraw(
         if (keys.x === "px1" || keys.x === "px2") {
           r = radius * 2.125
           vectorGui.setOtherVectorCollision(keys)
-
           vectorGui.addLinkedVector(vectorAction, keys.x)
         }
       } else {
@@ -270,7 +269,7 @@ function render(lineDashOffset = 0.5) {
   canvas.vectorGuiCTX.imageSmoothingEnabled = false
   //if linking, render all vectors in the layer
   if (
-    state.tool.options.snap ||
+    state.tool.options.displayVectors ||
     state.tool.options.align ||
     state.tool.options.link
   ) {
@@ -380,13 +379,15 @@ function renderLayerVectors(layer) {
   }
   //render selected vector path
   renderPath(state.tool.name, state.vectorProperties)
-  // Clear strokes from drawing area
-  canvas.vectorGuiCTX.clearRect(
-    canvas.xOffset,
-    canvas.yOffset,
-    canvas.offScreenCVS.width,
-    canvas.offScreenCVS.height
-  )
+  if (!vectorGui.displayPaths) {
+    // Clear strokes from drawing area
+    canvas.vectorGuiCTX.clearRect(
+      canvas.xOffset,
+      canvas.yOffset,
+      canvas.offScreenCVS.width,
+      canvas.offScreenCVS.height
+    )
+  }
   //render control points
   vectorGui.resetOtherVectorCollision()
   vectorGui.resetLinkedVectors()
