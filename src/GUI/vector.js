@@ -42,9 +42,15 @@ export const vectorGui = {
     this.otherCollidedKeys.yKey = keys.y
   },
   resetLinkedVectors() {
+    if (this.selectedPoint.xKey) {
+      return
+    }
     this.linkedVectors = {}
   },
   addLinkedVector(vectorAction, xKey) {
+    if (this.selectedPoint.xKey) {
+      return
+    }
     if (!this.linkedVectors[vectorAction.index]) {
       this.linkedVectors[vectorAction.index] = {}
     }
@@ -111,6 +117,7 @@ function handleCollisionAndDraw(
   const yOffset = vectorAction ? vectorAction.layer.y : 0
 
   if (modify) {
+    //TODO: while adjusting, points can be "picked up" and linked, but we should not allow this to happen mid adjustment. If a point is selected, we know it's mid adjustment, but we must also not reset collsion
     if (vectorGui.selectedPoint.xKey === keys.x && !vectorAction) {
       r = radius * 2.125 // increase  radius of fill to match stroked circle
       vectorGui.setCollision(keys)
@@ -431,6 +438,44 @@ export function updateLinkedVectors(
   currentVector,
   saveVectorProperties = false
 ) {
+  let currentDeltaX, currentDeltaY, currentDeltaAngle //for calculating angle when using px3, px4
+  let deltaX, deltaY //for setting new angle when using px3, px4
+  if (vectorGui.selectedPoint.xKey === "px3") {
+    // get angle of control handle between currentVector p1 and p3
+    currentDeltaX =
+      currentVector.properties.vectorProperties.px1 -
+      currentVector.properties.vectorProperties.px3
+    currentDeltaY =
+      currentVector.properties.vectorProperties.py1 -
+      currentVector.properties.vectorProperties.py3
+    if (!state.tool.options.align) {
+      let angle = getAngle(currentDeltaX, currentDeltaY)
+      let savedCurrentProperties =
+        state.vectorsSavedProperties[currentVector.index]
+      let savedDeltaX = savedCurrentProperties.px1 - savedCurrentProperties.px3
+      let savedDeltaY = savedCurrentProperties.py1 - savedCurrentProperties.py3
+      let savedAngle = getAngle(savedDeltaX, savedDeltaY)
+      currentDeltaAngle = angle - savedAngle
+    }
+  } else if (vectorGui.selectedPoint.xKey === "px4") {
+    // get angle of control handle between currentVector p2 and p4
+    currentDeltaX =
+      currentVector.properties.vectorProperties.px2 -
+      currentVector.properties.vectorProperties.px4
+    currentDeltaY =
+      currentVector.properties.vectorProperties.py2 -
+      currentVector.properties.vectorProperties.py4
+    if (!state.tool.options.align) {
+      let angle = getAngle(currentDeltaX, currentDeltaY)
+      let savedCurrentProperties =
+        state.vectorsSavedProperties[currentVector.index]
+      let savedDeltaX = savedCurrentProperties.px2 - savedCurrentProperties.px4
+      let savedDeltaY = savedCurrentProperties.py2 - savedCurrentProperties.py4
+      let savedAngle = getAngle(savedDeltaX, savedDeltaY)
+      currentDeltaAngle = angle - savedAngle
+    }
+  }
+
   for (const [linkedVectorIndex, linkedPoints] of Object.entries(
     vectorGui.linkedVectors
   )) {
@@ -447,24 +492,7 @@ export function updateLinkedVectors(
       continue
     }
     const savedProperties = state.vectorsSavedProperties[linkedVectorIndex]
-    let deltaX, deltaY //for calculating angle when using px3, px4
-    if (vectorGui.selectedPoint.xKey === "px3") {
-      // get angle of control handle between currentVector p1 and p3
-      deltaX =
-        currentVector.properties.vectorProperties.px1 -
-        currentVector.properties.vectorProperties.px3
-      deltaY =
-        currentVector.properties.vectorProperties.py1 -
-        currentVector.properties.vectorProperties.py3
-    } else if (vectorGui.selectedPoint.xKey === "px4") {
-      // get angle of control handle between currentVector p2 and p4
-      deltaX =
-        currentVector.properties.vectorProperties.px2 -
-        currentVector.properties.vectorProperties.px4
-      deltaY =
-        currentVector.properties.vectorProperties.py2 -
-        currentVector.properties.vectorProperties.py4
-    }
+
     // Check if px1 is linked
     if (linkedPoints.px1) {
       if (
@@ -488,19 +516,28 @@ export function updateLinkedVectors(
         vectorGui.selectedPoint.xKey === "px3" ||
         vectorGui.selectedPoint.xKey === "px4"
       ) {
-        // let angle = getAngle(deltaX, deltaY)
-        // console.log(angle)
-        // //2. get euclidean distance of control handle between linkedVector p1 and p3
-        // let linkedDeltaX = savedProperties.px3 - savedProperties.px1
-        // let linkedDeltaY = savedProperties.py3 - savedProperties.py1
-        // let linkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
-        // let linkedDist = Math.sqrt(linkedDeltaX ** 2 + linkedDeltaY ** 2)
-        //3. as p3 or p4 of currentVector is adjusted, calculate angle and get difference between saved angle and changed angle
-        //4. apply difference to linkedVector p3 or p4 or if align option is selected, apply exact opposite angle to linkedVector p3 or p4
+        if (state.tool.options.align) {
+          deltaX = currentDeltaX * 2
+          deltaY = currentDeltaY * 2
+        } else {
+          let linkedDeltaX = savedProperties.px1 - savedProperties.px3
+          let linkedDeltaY = savedProperties.py1 - savedProperties.py3
+          let linkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
+          let linkedHandleLength = Math.sqrt(
+            linkedDeltaX ** 2 + linkedDeltaY ** 2
+          )
+          let newLinkedAngle = linkedAngle + currentDeltaAngle
+          deltaX =
+            currentDeltaX -
+            Math.round(Math.cos(newLinkedAngle) * linkedHandleLength)
+          deltaY =
+            currentDeltaY -
+            Math.round(Math.sin(newLinkedAngle) * linkedHandleLength)
+        }
         updateVectorProperties(
           linkedVector,
-          x + deltaX * 2,
-          y + deltaY * 2,
+          x + deltaX,
+          y + deltaY,
           "px3",
           "py3"
         )
@@ -530,10 +567,28 @@ export function updateLinkedVectors(
         vectorGui.selectedPoint.xKey === "px3" ||
         vectorGui.selectedPoint.xKey === "px4"
       ) {
+        if (state.tool.options.align) {
+          deltaX = currentDeltaX * 2
+          deltaY = currentDeltaY * 2
+        } else {
+          let linkedDeltaX = savedProperties.px2 - savedProperties.px4
+          let linkedDeltaY = savedProperties.py2 - savedProperties.py4
+          let linkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
+          let linkedHandleLength = Math.sqrt(
+            linkedDeltaX ** 2 + linkedDeltaY ** 2
+          )
+          let newLinkedAngle = linkedAngle + currentDeltaAngle
+          deltaX =
+            currentDeltaX -
+            Math.round(Math.cos(newLinkedAngle) * linkedHandleLength)
+          deltaY =
+            currentDeltaY -
+            Math.round(Math.sin(newLinkedAngle) * linkedHandleLength)
+        }
         updateVectorProperties(
           linkedVector,
-          x + deltaX * 2,
-          y + deltaY * 2,
+          x + deltaX,
+          y + deltaY,
           "px4",
           "py4"
         )
