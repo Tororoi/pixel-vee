@@ -4,7 +4,11 @@ import { canvas } from "../Context/canvas.js"
 import { drawCirclePath, checkPointCollision } from "../utils/guiHelpers.js"
 import { renderFillVector } from "./fill.js"
 import { renderCurveVector, renderCurvePath } from "./curve.js"
-import { renderEllipseVector, renderOffsetEllipseVector } from "./ellipse.js"
+import {
+  renderEllipseVector,
+  renderOffsetEllipseVector,
+  renderEllipsePath,
+} from "./ellipse.js"
 import { renderTransformBox } from "./transform.js"
 import { renderSelectVector, drawSelectOutline } from "./select.js"
 import { renderGrid } from "./grid.js"
@@ -303,17 +307,17 @@ function render(lineDashOffset = 0.5) {
 function renderControlPoints(toolName, vectorProperties, vectorAction = null) {
   switch (toolName) {
     case "fill":
-      renderFillVector(vectorProperties)
+      renderFillVector(vectorProperties, vectorAction)
       break
     case "quadCurve":
     case "cubicCurve":
       renderCurveVector(vectorProperties, vectorAction)
       break
     case "ellipse":
-      renderEllipseVector(vectorProperties)
+      renderEllipseVector(vectorProperties, vectorAction)
       const { x1Offset, y1Offset } = vectorProperties
       if (x1Offset || y1Offset) {
-        renderOffsetEllipseVector(vectorProperties, "red")
+        renderOffsetEllipseVector(vectorProperties)
       }
       break
     case "move":
@@ -341,7 +345,7 @@ function renderPath(toolName, vectorProperties, vectorAction = null) {
       renderCurvePath(vectorProperties, vectorAction)
       break
     case "ellipse":
-      // renderEllipseVector(state.vectorProperties)
+      renderEllipsePath(vectorProperties, vectorAction)
       break
     case "move":
       // if (canvas.currentLayer.type === "reference") {
@@ -366,7 +370,6 @@ function renderLayerVectors(layer) {
   //render paths
   for (let action of state.undoStack) {
     if (
-      !action.hidden &&
       !action.removed &&
       action.layer === layer &&
       action.tool.type === "vector" &&
@@ -392,7 +395,6 @@ function renderLayerVectors(layer) {
   vectorGui.resetLinkedVectors()
   for (let action of state.undoStack) {
     if (
-      !action.hidden &&
       !action.removed &&
       action.layer === layer &&
       action.tool.type === "vector" &&

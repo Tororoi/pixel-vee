@@ -5,8 +5,9 @@ import { vectorGui } from "./vector.js"
 /**
  * Render fill vector gui
  * @param {Object} vectorProperties
+ * @param {Object} vectorAction
  */
-export function renderFillVector(vectorProperties) {
+export function renderFillVector(vectorProperties, vectorAction) {
   let pointsKeys = [{ x: "px1", y: "py1" }]
   let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
   let circleRadius = 8 * lineWidth
@@ -14,7 +15,14 @@ export function renderFillVector(vectorProperties) {
   canvas.vectorGuiCTX.strokeStyle = "white"
   canvas.vectorGuiCTX.fillStyle = "white"
   canvas.vectorGuiCTX.beginPath()
-  vectorGui.drawControlPoints(vectorProperties, pointsKeys, circleRadius, false)
+  if (!vectorAction) {
+    vectorGui.drawControlPoints(
+      vectorProperties,
+      pointsKeys,
+      circleRadius,
+      false
+    )
+  }
   // Stroke non-filled lines
   canvas.vectorGuiCTX.stroke()
 

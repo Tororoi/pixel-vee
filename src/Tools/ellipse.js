@@ -302,7 +302,7 @@ export const ellipse = {
   disabled: false,
   options: {
     useSubPixels: true,
-    radiusExcludesCenter: false,
+    // radiusExcludesCenter: false,
     displayPaths: false,
   }, // need to expand radiusExcludesCenter to cover multiple scenarios, centerx = 0 or 1 and centery = 0 or 1
   modes: { eraser: false, inject: false },

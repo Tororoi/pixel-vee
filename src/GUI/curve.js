@@ -36,7 +36,6 @@ export function renderCurveVector(vectorProperties, vectorAction) {
     drawControlPointHandle(canvas, xOffset, yOffset, px1, py1, px3, py3)
   }
 
-  //set point radius for detection in state
   let pointsKeys = [
     { x: "px1", y: "py1" },
     { x: "px2", y: "py2" },
