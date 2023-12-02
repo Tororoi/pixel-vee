@@ -385,11 +385,15 @@ export function updateEllipseOffsets(
     state.vectorProperties.px2 - state.vectorProperties.px1,
     state.vectorProperties.py2 - state.vectorProperties.py1
   )
-  state.vectorProperties.offset = findHalf(
-    canvas.subPixelX,
-    canvas.subPixelY,
-    state.vectorProperties.angle + angleOffset
-  )
+  if (state.tool.options.useSubPixels) {
+    state.vectorProperties.offset = findHalf(
+      canvas.subPixelX,
+      canvas.subPixelY,
+      state.vectorProperties.angle + angleOffset
+    )
+  } else {
+    state.vectorProperties.offset = 0 // TODO: need logic to manually select offset values
+  }
   const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
   while (state.vectorProperties.angle < 0) {
     state.vectorProperties.angle += 2 * Math.PI

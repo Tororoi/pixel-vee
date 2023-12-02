@@ -18,7 +18,6 @@ import { getAngle } from "../utils/trig.js"
 //Note: The Vector Graphics canvas has a mix-blend-mode: difference applied to it
 export const vectorGui = {
   grid: false,
-  displayPaths: false,
   collisionPresent: false,
   collidedKeys: { xKey: null, yKey: null },
   selectedPoint: { xKey: null, yKey: null },
@@ -379,7 +378,7 @@ function renderLayerVectors(layer) {
   }
   //render selected vector path
   renderPath(state.tool.name, state.vectorProperties)
-  if (!vectorGui.displayPaths) {
+  if (!state.tool.options.displayPaths) {
     // Clear strokes from drawing area
     canvas.vectorGuiCTX.clearRect(
       canvas.xOffset,
@@ -418,13 +417,15 @@ function renderLayerVectors(layer) {
 function renderCurrentVector() {
   //render paths
   renderPath(state.tool.name, state.vectorProperties)
-  // Clear strokes from drawing area
-  canvas.vectorGuiCTX.clearRect(
-    canvas.xOffset,
-    canvas.yOffset,
-    canvas.offScreenCVS.width,
-    canvas.offScreenCVS.height
-  )
+  if (!state.tool.options.displayPaths) {
+    // Clear strokes from drawing area
+    canvas.vectorGuiCTX.clearRect(
+      canvas.xOffset,
+      canvas.yOffset,
+      canvas.offScreenCVS.width,
+      canvas.offScreenCVS.height
+    )
+  }
   vectorGui.resetCollision()
   //render control points
   renderControlPoints(state.tool.name, state.vectorProperties)

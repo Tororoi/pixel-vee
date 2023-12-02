@@ -267,6 +267,10 @@ export function adjustEllipseSteps() {
         state.vectorProperties.forceCircle = false
         currentVector.properties.vectorProperties.forceCircle = false
       }
+      if (vectorGui.selectedPoint.xKey === "px1") {
+        state.vectorProperties.forceCircle =
+          currentVector.properties.vectorProperties.forceCircle
+      }
       updateEllipseVectorProperties(currentVector)
       renderCanvas(currentVector.layer, true)
       break
@@ -299,6 +303,7 @@ export const ellipse = {
   options: {
     useSubPixels: true,
     radiusExcludesCenter: false,
+    displayPaths: false,
   }, // need to expand radiusExcludesCenter to cover multiple scenarios, centerx = 0 or 1 and centery = 0 or 1
   modes: { eraser: false, inject: false },
   type: "vector",

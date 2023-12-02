@@ -224,7 +224,11 @@ export function renderBrushStampToDOM() {
  */
 export function renderToolOptionsToDOM() {
   dom.toolOptions.innerHTML = ""
-  if (state.tool.name === "cubicCurve") {
+  if (
+    state.tool.name === "cubicCurve" ||
+    state.tool.name === "quadCurve" ||
+    state.tool.name === "ellipse"
+  ) {
     //render cubic curve options to menu
     Object.entries(state.tool.options).forEach(([key, value]) => {
       let optionToggle = createOptionToggle(

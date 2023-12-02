@@ -589,7 +589,7 @@ export const quadCurve = {
   brushSize: 1,
   brushType: "circle",
   disabled: false,
-  options: {},
+  options: { displayPaths: false },
   modes: { eraser: false, inject: false },
   type: "vector",
   cursor: "crosshair",
@@ -603,7 +603,12 @@ export const cubicCurve = {
   brushSize: 1,
   brushType: "circle",
   disabled: false,
-  options: { align: false, link: false, displayVectors: false }, //align: G1 tangent continuity, default C1 velocity continuity, link: C0/G0 positional continuity and move connected vector control point with selected control point.
+  options: {
+    align: false,
+    link: false,
+    displayVectors: false,
+    displayPaths: false,
+  }, //align: G1 tangent continuity, default C1 velocity continuity, link: C0/G0 positional continuity and move connected vector control point with selected control point.
   modes: { eraser: false, inject: false },
   type: "vector",
   cursor: "crosshair",
