@@ -387,34 +387,6 @@ function adjustCurveSteps(numPoints = 4) {
             }
             updateLinkedVectors(currentVector, true)
           }
-          //if selected point is p3 or p4, updateVectorProperties x and y values must be calculated to maintain opposite angle
-          //Instead of collided vector, use linked vector
-          // if (
-          //   state.tool.options.link &&
-          //   ["px3", "px4"].includes(vectorGui.selectedPoint.xKey)
-          // ) {
-          //   //1. get angle of control handle between currentVector p1 and p3 or p2 and p4
-          //   if (vectorGui.selectedPoint.xKey === "px3") {
-          //     //get angle of control handle between currentVector p1 and p3
-          //     let deltaX =
-          //       currentVector.properties.vectorProperties.px3 -
-          //       currentVector.properties.vectorProperties.px1
-          //     let deltaY =
-          //       currentVector.properties.vectorProperties.py3 -
-          //       currentVector.properties.vectorProperties.py1
-          //     let angle = getAngle(deltaX, deltaY)
-          //     console.log(angle)
-          //   } else if (vectorGui.selectedPoint.xKey === "px4") {
-          //   }
-          //   //2. get angle of control handle between linkedVector p1 and p3 or p2 and p4
-          //   //3. as p3 or p4 of currentVector is adjusted, calculate angle and get difference between saved angle and changed angle
-          //   //4. apply difference to linkedVector p3 or p4 or if align option is selected, apply exact opposite angle to linkedVector p3 or p4
-          // }
-
-          //TODO: logic to perform the action to link vectors will go here.
-          //This means the regular tool function will be saved first and undoing the link will have the vector still moved into position.
-          //Only the linking will be undone, which includes a transformation of the control point handle.
-          //Undoing again will of course move the vector back as expected.
         }
         renderCanvas(currentVector.layer, true)
       }
@@ -527,46 +499,6 @@ function adjustCurveSteps(numPoints = 4) {
                 )
               }
             }
-            //Link control points
-            if (state.tool.options.link) {
-              // if (vectorGui.selectedPoint.xKey === "px1") {
-              //   // Initialize the key with an empty object if it doesn't exist
-              //   if (
-              //     !currentVector.properties.p1LinkedVectors.hasOwnProperty(
-              //       canvas.collidedVectorIndex
-              //     )
-              //   ) {
-              //     currentVector.properties.p1LinkedVectors[
-              //       canvas.collidedVectorIndex
-              //     ] = {}
-              //   }
-              //   currentVector.properties.p1LinkedVectors[
-              //     canvas.collidedVectorIndex
-              //   ][vectorGui.otherCollidedKeys.xKey] = true
-              // } else if (vectorGui.selectedPoint.xKey === "px2") {
-              //   // Initialize the key with an empty object if it doesn't exist
-              //   if (
-              //     !currentVector.properties.p2LinkedVectors.hasOwnProperty(
-              //       canvas.collidedVectorIndex
-              //     )
-              //   ) {
-              //     currentVector.properties.p2LinkedVectors[
-              //       canvas.collidedVectorIndex
-              //     ] = {}
-              //   }
-              //   currentVector.properties.p2LinkedVectors[
-              //     canvas.collidedVectorIndex
-              //   ][vectorGui.otherCollidedKeys.xKey] = true
-              // }
-            }
-          }
-
-          //TODO: logic to perform the action to link vectors will go here.
-          //This means the regular tool function will be saved first and undoing the link will have the vector still moved into position.
-          //Only the linking will be undone, which includes a transformation of the control point handle.
-          //Undoing again will of course move the vector back as expected.
-          if (state.tool.options.align) {
-            //TODO: if selected point is p3 or p4 and another vector is linked, maintain angle
           }
         }
         modifyVectorAction(canvas.currentVectorIndex)
