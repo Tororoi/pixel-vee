@@ -68,14 +68,17 @@ export function activateShortcut(keyCode) {
           vectorGui.render()
         }
       } else if (dom.toolBtn.id === "cubicCurve") {
-        state.tool.options.align = true
+        state.tool.options.link = true
         renderToolOptionsToDOM()
-        //if control point is p1 or p2, can link to ther vectors. TODO: If already linked, move all linked points and control handles together. If p3 or p4, maintain angle and velocity of opposing linked vector control handle
         vectorGui.render()
       }
       break
     case "KeyA":
-      //
+      if (dom.toolBtn.id === "cubicCurve") {
+        state.tool.options.align = true
+        renderToolOptionsToDOM()
+        vectorGui.render()
+      }
       break
     case "KeyB":
       if (!state.clicked) {
@@ -294,13 +297,17 @@ export function deactivateShortcut(keyCode) {
         }
       }
       if (state.tool.name === "cubicCurve") {
-        state.tool.options.align = false
+        state.tool.options.link = false
         renderToolOptionsToDOM()
         vectorGui.render()
       }
       break
     case "KeyA":
-      //
+      if (state.tool.name === "cubicCurve") {
+        state.tool.options.align = false
+        renderToolOptionsToDOM()
+        vectorGui.render()
+      }
       break
     case "KeyB":
       //
