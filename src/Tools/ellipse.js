@@ -10,14 +10,9 @@ import {
   updateEllipseOffsets,
   updateEllipseControlPoints,
 } from "../utils/ellipse.js"
-import {
-  renderCanvas,
-  renderPreviewAction,
-  setHistoricalPreview,
-} from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { storedActions } from "../Testing/storedActions.js"
-import { updateVectorProperties } from "../utils/vectorHelpers.js"
 
 //======================================//
 //=== * * * Ellipse Controller * * * ===//
@@ -296,7 +291,6 @@ export function adjustEllipseSteps() {
 export const ellipse = {
   name: "ellipse",
   fn: ellipseSteps,
-  action: actionEllipse,
   brushSize: 1,
   brushType: "circle",
   disabled: false,

@@ -43,6 +43,10 @@ const showTooltip = (message, target) => {
 /**
  * Consolidate offscreen canvases and download image
  * TODO: Open dialog box with more options such as pixel size, where to save it to, etc.
+ * TODO: To support saving a complex file, we must save state.undoStack as json and be able to parse that json back to the same undoStack
+ * - sets cannot be saved as json. factor out maskSet and only use maskArray in actions
+ * - canvases cannot be saved as json. when restoring a save, first iterate through saved canvas.layers and create a canvas and context (offscreen and onscreen) for each layer.
+ * then iterate through saved actions and assign the correct layer based on the layer's title so the layer is a referenced object instead of a new object
  */
 function exportImage() {
   consolidateLayers()

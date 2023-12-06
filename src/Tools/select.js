@@ -101,7 +101,6 @@ function selectSteps() {
 export const select = {
   name: "select",
   fn: selectSteps,
-  action: null,
   brushSize: 1,
   brushType: "circle",
   disabled: false,

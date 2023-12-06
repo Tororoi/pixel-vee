@@ -517,7 +517,6 @@ function adjustCurveSteps(numPoints = 4) {
 export const quadCurve = {
   name: "quadCurve",
   fn: quadCurveSteps,
-  action: actionQuadraticCurve,
   brushSize: 1,
   brushType: "circle",
   disabled: false,
@@ -533,7 +532,6 @@ export const quadCurve = {
 export const cubicCurve = {
   name: "cubicCurve",
   fn: cubicCurveSteps,
-  action: actionCubicCurve,
   brushSize: 1,
   brushType: "circle",
   disabled: false,

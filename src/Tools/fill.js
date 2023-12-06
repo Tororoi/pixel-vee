@@ -145,7 +145,6 @@ export function adjustFillSteps() {
 export const fill = {
   name: "fill",
   fn: fillSteps,
-  action: actionFill,
   brushSize: 1,
   brushType: "circle",
   disabled: true,

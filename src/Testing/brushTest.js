@@ -7,6 +7,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { brushStamps } from "../Context/brushStamps.js"
 import { storedActions } from "./storedActions.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
+import { actionDraw } from "../Actions/actions.js"
 
 export function testBrushAction() {
   let brushSize = tools.brush.brushSize
@@ -38,7 +39,7 @@ export function testBrushAction() {
       previousX,
       previousY
     )
-    tools[action.tool.name].action(
+    actionDraw(
       p.x + offsetX,
       p.y + offsetY,
       p.color,
@@ -93,9 +94,9 @@ export function saveBrushAsTest() {
       color: { ...swatches.primary.color },
       layer: canvas.currentLayer,
       properties: {
-        points: [...state.points],
         maskSet: state.maskSet,
         maskArray,
+        points: [...state.points],
       },
     }
     storedActions.brush = testAction

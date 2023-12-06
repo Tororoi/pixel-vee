@@ -14,6 +14,7 @@ const tooltip = document.getElementById("tooltip")
 
 // * Tool Options * //
 const toolOptions = document.querySelector(".tool-options")
+//TODO: options dialog box where user can set default options such as display vectors, paths, or auto select most recently created vector
 // * Toggle Grid * //
 const gridBtn = document.getElementById("grid-toggle")
 // * Toggle Tooltips * //

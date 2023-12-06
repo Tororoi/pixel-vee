@@ -95,7 +95,7 @@ function brushSteps() {
       state.addToTimeline({
         tool: brush,
         layer: canvas.currentLayer,
-        properties: { points: state.points, maskSet: state.maskSet, maskArray },
+        properties: { maskSet: state.maskSet, maskArray, points: state.points },
       })
       renderCanvas(canvas.currentLayer)
       if (state.tool.modes?.colorMask) {
@@ -278,7 +278,6 @@ function handlePerfectPixels() {
 export const brush = {
   name: "brush",
   fn: brushSteps,
-  action: actionDraw,
   brushSize: 1,
   brushType: "circle",
   disabled: false,
