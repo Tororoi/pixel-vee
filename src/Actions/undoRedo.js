@@ -207,7 +207,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   }
   clearOffscreenCanvas(latestAction.layer)
   let img = new Image()
-  img.src = mostRecentActionFromSameLayer.image
+  img.src = mostRecentActionFromSameLayer.snapshot
   img.onload = function () {
     latestAction.layer.ctx.drawImage(img, 0, 0)
     renderCanvas(latestAction.layer) //should be based on layer of affected action

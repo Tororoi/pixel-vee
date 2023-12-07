@@ -20,7 +20,10 @@ import {
  * Critical function for the timeline to work
  * For handling activeIndeces, the idea is to save images of multiple actions that aren't changing to save time redrawing.
  * The current problem is that later actions "fill" or "draw" with a mask are affected by earlier actions.
- *
+ * TODO: The solution would be to modify activeIndeces so it includes dependent actions as well.
+ * TODO: Another efficiency improvement would be to perform incremental rendering with caching so only the affected region of the canvas is rerendered.
+ * TODO: Another efficiency improvement is to start the re-rendering from the first activeIndex and use the saved image from the action before that to start off the redraw process, eliminating the need to iterate through the actions before the first activeIndex.
+ * TODO: Use OffscreenCanvas in a web worker to offload rendering to a separate thread.
  * @param {Object} layer - optional parameter to limit render to a specific layer
  * @param {Array} activeIndeces - optional parameter to limit render to specific actions. If not passed in, all actions will be rendered.
  * @param {Boolean} setImages - optional parameter to set images for actions. Will be used when history is modified to update action images.
