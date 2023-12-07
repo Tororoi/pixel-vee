@@ -86,6 +86,7 @@ function brushSteps() {
       }
       //only needed if perfect pixels option is on
       drawBrushPoint(state.cursorX, state.cursorY, brushDirection)
+      renderCanvas(canvas.currentLayer)
       //add action to timeline
       let maskArray = coordArrayFromSet(
         state.maskSet,
@@ -97,7 +98,6 @@ function brushSteps() {
         layer: canvas.currentLayer,
         properties: { maskSet: state.maskSet, maskArray, points: state.points },
       })
-      renderCanvas(canvas.currentLayer)
       if (state.tool.modes?.colorMask) {
         state.maskSet = null
       }

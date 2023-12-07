@@ -213,8 +213,8 @@ export function redrawTimelineActions(
       }
     }
     if (setImages) {
-      //set image for action
-      action.image = action.layer.cvs.toDataURL()
+      //set image for action. Instead of setting to action, set to selected vectors object
+      // action.image = action.layer.cvs.toDataURL()
     }
   }
   state.redoStack.forEach((action) => {
@@ -339,7 +339,7 @@ function renderBackgroundCanvas() {
  * Clear offscreen canvas layers as needed
  * @param {Object} activeLayer
  */
-function clearOffscreenCanvas(activeLayer = null) {
+export function clearOffscreenCanvas(activeLayer = null) {
   if (activeLayer) {
     //clear one offscreen layer
     if (activeLayer.type === "raster") {
@@ -382,6 +382,7 @@ export function renderCanvas(
     //clear offscreen layers
     clearOffscreenCanvas(activeLayer)
     //render all previous actions
+    //TODO: instead of always redrawing timeline, some actions could draw the image from the previous action from the same layer and only need to render the action at the specified index.
     redrawTimelineActions(activeLayer, index)
   }
   //render background canvas

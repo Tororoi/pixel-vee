@@ -10,7 +10,7 @@ import {
 } from "../DOM/render.js"
 import { createNewRasterLayer } from "./layers.js"
 import { handleTools } from "../Tools/events.js"
-import { removeAction, changeActionMode } from "../Actions/actions.js"
+import { removeAction, changeActionMode } from "../Actions/modifyTimeline.js"
 import { vectorGui } from "../GUI/vector.js"
 import { setInitialZoom } from "../utils/canvasHelpers.js"
 import { initializeColorPicker } from "../Swatch/events.js"
@@ -137,7 +137,7 @@ const resizeOffScreenCanvas = (width, height) => {
       }
     }
   })
-  renderCanvas(null, null, false, true) //render all layers
+  renderCanvas(null, true) //render all layers and redraw timeline
   vectorGui.render()
 }
 
@@ -511,15 +511,15 @@ function vectorInteract(e) {
  * @param {Object} vector
  */
 function removeVector(vector) {
-  //set "removed" flag to true on selected layer.
-  removeAction(vector.index)
+  vector.removed = true
+  renderCanvas(vector.layer, true)
+  removeAction(vector)
   state.action = null
   state.redoStack = []
   if (canvas.currentVectorIndex === vector.index) {
     vectorGui.reset()
   }
   renderVectorsToDOM()
-  renderCanvas(vector.layer, true)
 }
 
 /**
@@ -528,11 +528,22 @@ function removeVector(vector) {
  * @param {String} modeKey
  */
 function toggleVectorMode(vector, modeKey) {
-  changeActionMode(vector.index, modeKey)
+  let oldModes = { ...vector.modes }
+  vector.modes[modeKey] = !vector.modes[modeKey]
+  //resolve conflicting modes
+  if (vector.modes[modeKey]) {
+    if (modeKey === "eraser" && vector.modes.inject) {
+      vector.modes.inject = false
+    } else if (modeKey === "inject" && vector.modes.eraser) {
+      vector.modes.eraser = false
+    }
+  }
+  let newModes = { ...vector.modes }
+  renderCanvas(vector.layer, true)
+  changeActionMode(vector, oldModes, newModes)
   state.action = null
   state.redoStack = []
   renderVectorsToDOM()
-  renderCanvas(vector.layer, true)
 }
 
 //===================================//

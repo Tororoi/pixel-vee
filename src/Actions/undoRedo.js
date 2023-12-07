@@ -1,7 +1,7 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "../GUI/vector.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { clearOffscreenCanvas, renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM } from "../DOM/render.js"
 
 //====================================//
@@ -195,11 +195,25 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   }
 
   pushStack.push(popStack.pop())
-  //clear all layers in preparation to redraw them.
-  //DRY: do all layers and actions need to be rerendered for redo?
-  renderCanvas(latestAction.layer, true) //should be based on layer of affected action
-  renderVectorsToDOM()
-  state.reset()
+  //clear affected layer and render image from most recent action from the affected layer
+  //This avoids having to redraw the timeline for every undo/redo. Close to constant time whereas redrawTimeline is closer to exponential time or worse.
+  //TODO: factor out into separate function
+  let mostRecentActionFromSameLayer = null
+  for (let i = state.undoStack.length - 1; i >= 0; i--) {
+    if (state.undoStack[i].layer === latestAction.layer) {
+      mostRecentActionFromSameLayer = state.undoStack[i]
+      break
+    }
+  }
+  clearOffscreenCanvas(latestAction.layer)
+  let img = new Image()
+  img.src = mostRecentActionFromSameLayer.image
+  img.onload = function () {
+    latestAction.layer.ctx.drawImage(img, 0, 0)
+    renderCanvas(latestAction.layer) //should be based on layer of affected action
+    renderVectorsToDOM()
+    state.reset()
+  }
 }
 
 /**

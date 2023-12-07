@@ -3,7 +3,8 @@ import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { modifyVectorAction, actionEllipse } from "../Actions/actions.js"
+import { actionEllipse } from "../Actions/actions.js"
+import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 import { vectorGui } from "../GUI/vector.js"
 import {
   updateEllipseVertex,
@@ -275,13 +276,12 @@ export function adjustEllipseSteps() {
       break
     case "pointerup":
       updateEllipseVectorProperties(currentVector)
-
-      modifyVectorAction(canvas.currentVectorIndex)
+      renderCanvas(currentVector.layer, true)
+      modifyVectorAction(currentVector)
       vectorGui.selectedPoint = {
         xKey: null,
         yKey: null,
       }
-      renderCanvas(currentVector.layer, true)
       break
     default:
     //do nothing

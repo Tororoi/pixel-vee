@@ -1,6 +1,4 @@
-import { state } from "../Context/state.js"
-import { tools } from "../Tools/index.js"
-import { brushStamps } from "../Context/brushStamps.js"
+import { canvas } from "../Context/canvas.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { vectorGui } from "../GUI/vector.js"
@@ -11,156 +9,14 @@ import {
   getColor,
 } from "../utils/imageDataHelpers.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
-import { canvas } from "../Context/canvas.js"
 import { saveEllipseAsTest } from "../Testing/ellipseTest.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
 //====================================//
 
-//"Actions" are user-initiated events that are reversible through the undo button. This file holds the functions used for reversible actions.
-//Not all reversible actions are held here currently. Clear canvas and addLayer are not present, but those don't interact with the cursor.
-
-/**
- * Modify action in the timeline
- * Only good for vector parameters
- * @param {Integer} actionIndex
- */
-export function modifyVectorAction(actionIndex) {
-  //loop through the object state.vectorsSavedProperties and for each key which represents an action index and value which is a shallow object with various properties, create an object with properties moddedActionIndex, from (the saved properties), and to (the new properties found on state.undoStack[actionIndex].properties.vectorProperties)
-  let processedActions = []
-
-  for (let vectorIndex in state.vectorsSavedProperties) {
-    // Extract the saved properties
-    let fromProperties = { ...state.vectorsSavedProperties[vectorIndex] }
-
-    // Extract the new properties
-    let toProperties = {
-      ...state.undoStack[vectorIndex].properties.vectorProperties,
-    }
-
-    // Create the new object with the required properties
-    let moddedAction = {
-      moddedActionIndex: vectorIndex,
-      from: fromProperties,
-      to: toProperties,
-    }
-
-    // Add the new object to the processedActions array
-    processedActions.push(moddedAction)
-  }
-  state.vectorsSavedProperties = {}
-  state.addToTimeline({
-    tool: tools.modify,
-    properties: {
-      moddedActionIndex: actionIndex,
-      processedActions,
-    },
-  })
-}
-
-/**
- * Modify action in the timeline
- * Only good for vector parameters
- * @param {Integer} actionIndex
- * @param {Object} newColor - {color, r, g, b, a}
- */
-export function changeActionColor(actionIndex, newColor) {
-  let action = state.undoStack[actionIndex]
-  let oldColor = {
-    ...action.color,
-  } //shallow copy, color must not contain any objects or references as values
-  let modifiedColor = {
-    ...newColor,
-  } //shallow copy, must make deep copy, at least for x, y and properties
-  action.color = {
-    ...modifiedColor,
-  }
-  state.addToTimeline({
-    tool: tools.changeColor,
-    properties: {
-      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-      moddedActionIndex: actionIndex,
-      from: oldColor,
-      to: modifiedColor,
-    },
-  })
-}
-
-/**
- * Modify action in the timeline
- * @param {Integer} actionIndex
- */
-export function removeAction(actionIndex) {
-  let action = state.undoStack[actionIndex]
-  action.removed = true
-  state.addToTimeline({
-    tool: tools.remove,
-    properties: {
-      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-      moddedActionIndex: actionIndex,
-      from: false,
-      to: true,
-    },
-  })
-}
-
-/**
- * Modify action in the timeline
- * @param {Integer} actionIndex
- * @param {String} modeKey
- */
-export function changeActionMode(actionIndex, modeKey) {
-  let action = state.undoStack[actionIndex]
-  let oldModes = { ...action.modes }
-  action.modes[modeKey] = !action.modes[modeKey]
-  //resolve conflicting modes
-  if (action.modes[modeKey]) {
-    if (modeKey === "eraser" && action.modes.inject) {
-      action.modes.inject = false
-    } else if (modeKey === "inject" && action.modes.eraser) {
-      action.modes.eraser = false
-    }
-  }
-  let newModes = { ...action.modes }
-  state.addToTimeline({
-    tool: tools.changeMode,
-    properties: {
-      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-      moddedActionIndex: actionIndex,
-      from: oldModes,
-      to: newModes,
-    },
-  })
-}
-
-/**
- * Modify actions in the timeline
- * Sets all actions before it except for action index 0 to removed = true
- * @param {Object} layer
- */
-export function actionClear(layer) {
-  let upToIndex = state.undoStack.length - 1
-  state.addToTimeline({
-    tool: tools.clear,
-    layer: layer,
-    properties: {
-      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-      upToIndex,
-    },
-  })
-  let i = 0
-  //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
-  state.undoStack.forEach((action) => {
-    if (i > upToIndex) {
-      return
-    }
-    i++
-    if (action.layer === layer) {
-      action.removed = true
-    }
-  })
-}
+//"Actions" are user-initiated events that are reversible through the undo button.
+//This file holds the functions used for reversible actions as the result of a tool.
 
 /**
  * Render a stamp from the brush to the canvas

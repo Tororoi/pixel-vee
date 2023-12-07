@@ -2,7 +2,8 @@ import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { modifyVectorAction, actionFill } from "../Actions/actions.js"
+import { actionFill } from "../Actions/actions.js"
+import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
@@ -121,12 +122,12 @@ export function adjustFillSteps() {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        modifyVectorAction(canvas.currentVectorIndex)
+        renderCanvas(currentVector.layer, true)
+        modifyVectorAction(currentVector)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(currentVector.layer, true)
       }
       break
     case "pointerout":

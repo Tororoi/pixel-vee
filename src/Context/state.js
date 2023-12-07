@@ -94,7 +94,7 @@ export const state = {
 function addToTimeline(actionObject) {
   const { tool, color, layer, properties } = actionObject
   //use current state for variables
-  let image = layer.cvs.toDataURL() //TODO: Not working for modifyVectorAction, changeActionColor, removeAction, changeActionMode because they don't affect the canvas until renderCanvas is called with redraw
+  let image = layer.cvs.toDataURL()
   state.action = {
     tool: { ...tool },
     modes: { ...tool.modes },

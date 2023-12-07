@@ -3,11 +3,8 @@ import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import {
-  modifyVectorAction,
-  actionQuadraticCurve,
-  actionCubicCurve,
-} from "../Actions/actions.js"
+import { actionQuadraticCurve, actionCubicCurve } from "../Actions/actions.js"
+import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 import {
   vectorGui,
   updateLinkedVectors,
@@ -388,6 +385,9 @@ function adjustCurveSteps(numPoints = 4) {
             updateLinkedVectors(currentVector, true)
           }
         }
+        //TODO: Ideally this renderCanvas call would save images of the actions between all the linked vectors indeces as it redraws the timeline.
+        //Then on subsequent renders, we can just render the in between images along with the changed actions instead of redrawing every single action.
+        //For example, if linked vectors are at indeces 4, 12, and 15, we would save images of actions 1-3, 5-11, 13-14, and 16+. That's only 4 images to draw instead of 16+ actions to render.
         renderCanvas(currentVector.layer, true)
       }
       break
@@ -501,12 +501,12 @@ function adjustCurveSteps(numPoints = 4) {
             }
           }
         }
-        modifyVectorAction(canvas.currentVectorIndex)
+        renderCanvas(currentVector.layer, true)
+        modifyVectorAction(currentVector)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(currentVector.layer, true)
       }
       break
     default:
