@@ -49,6 +49,7 @@ export const state = {
   //for vector tools
   clickCounter: 0,
   vectorsSavedProperties: {},
+  savedBetweenActionImages: [],
   vectorProperties: {
     px1: null,
     py1: null,

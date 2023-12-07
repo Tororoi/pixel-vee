@@ -388,7 +388,8 @@ function adjustCurveSteps(numPoints = 4) {
         //TODO: Ideally this renderCanvas call would save images of the actions between all the linked vectors indeces as it redraws the timeline.
         //Then on subsequent renders, we can just render the in between images along with the changed actions instead of redrawing every single action.
         //For example, if linked vectors are at indeces 4, 12, and 15, we would save images of actions 1-3, 5-11, 13-14, and 16+. That's only 4 images to draw instead of 16+ actions to render.
-        renderCanvas(currentVector.layer, true)
+        const activeIndeces = Object.keys(state.vectorsSavedProperties)
+        renderCanvas(currentVector.layer, true, activeIndeces, true)
       }
       break
     case "pointermove":
@@ -402,16 +403,14 @@ function adjustCurveSteps(numPoints = 4) {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        if (
-          state.tool.options.link &&
-          Object.keys(state.vectorsSavedProperties).length > 1
-        ) {
+        const activeIndeces = Object.keys(state.vectorsSavedProperties)
+        if (state.tool.options.link && activeIndeces.length > 1) {
           if (state.tool.options.align) {
             updateLockedCurrentVectorControlHandle(currentVector)
           }
           updateLinkedVectors(currentVector)
         }
-        renderCanvas(currentVector.layer, true)
+        renderCanvas(currentVector.layer, true, activeIndeces)
       }
       break
     case "pointerup":
@@ -425,11 +424,9 @@ function adjustCurveSteps(numPoints = 4) {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
+        const activeIndeces = Object.keys(state.vectorsSavedProperties)
         if (state.tool.options.align || state.tool.options.link) {
-          if (
-            state.tool.options.link &&
-            Object.keys(state.vectorsSavedProperties).length > 1
-          ) {
+          if (state.tool.options.link && activeIndeces.length > 1) {
             if (state.tool.options.align) {
               updateLockedCurrentVectorControlHandle(currentVector)
             }
@@ -457,10 +454,7 @@ function adjustCurveSteps(numPoints = 4) {
             )
             //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
             //align control handles
-            if (
-              state.tool.options.align &&
-              Object.keys(state.vectorsSavedProperties).length === 1
-            ) {
+            if (state.tool.options.align && activeIndeces.length === 1) {
               let deltaX, deltaY
               if (vectorGui.otherCollidedKeys.xKey === "px1") {
                 deltaX =
@@ -501,7 +495,7 @@ function adjustCurveSteps(numPoints = 4) {
             }
           }
         }
-        renderCanvas(currentVector.layer, true)
+        renderCanvas(currentVector.layer, true, activeIndeces)
         modifyVectorAction(currentVector)
         vectorGui.selectedPoint = {
           xKey: null,
