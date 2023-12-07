@@ -69,18 +69,18 @@ function handleRecenter() {
  * Non-cursor action that affects the timeline
  */
 function handleClearCanvas() {
-  actionClear(canvas.currentLayer)
-  state.action = null
-  state.pointsSet = null
-  state.seenPixelsSet = null
-  state.points = []
-  state.redoStack = []
   canvas.currentLayer.ctx.clearRect(
     0,
     0,
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
+  actionClear(canvas.currentLayer)
+  state.action = null
+  state.pointsSet = null
+  state.seenPixelsSet = null
+  state.points = []
+  state.redoStack = []
   renderCanvas(canvas.currentLayer)
   vectorGui.reset()
   state.reset()

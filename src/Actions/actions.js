@@ -73,6 +73,9 @@ export function changeActionColor(actionIndex, newColor) {
   let modifiedColor = {
     ...newColor,
   } //shallow copy, must make deep copy, at least for x, y and properties
+  action.color = {
+    ...modifiedColor,
+  }
   state.addToTimeline({
     tool: tools.changeColor,
     properties: {
@@ -82,9 +85,6 @@ export function changeActionColor(actionIndex, newColor) {
       to: modifiedColor,
     },
   })
-  action.color = {
-    ...modifiedColor,
-  }
 }
 
 /**
@@ -93,6 +93,7 @@ export function changeActionColor(actionIndex, newColor) {
  */
 export function removeAction(actionIndex) {
   let action = state.undoStack[actionIndex]
+  action.removed = true
   state.addToTimeline({
     tool: tools.remove,
     properties: {
@@ -102,7 +103,6 @@ export function removeAction(actionIndex) {
       to: true,
     },
   })
-  action.removed = true
 }
 
 /**

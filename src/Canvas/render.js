@@ -212,10 +212,10 @@ export function redrawTimelineActions(
         //do nothing
       }
     }
-    // if (setImages) {
-    //   //set image for action
-    //   action.image = action.layer.cvs.toDataURL()
-    // }
+    if (setImages) {
+      //set image for action
+      action.image = action.layer.cvs.toDataURL()
+    }
   }
   state.redoStack.forEach((action) => {
     if (action.tool.name === "addLayer") {
