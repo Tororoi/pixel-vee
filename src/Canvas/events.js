@@ -423,7 +423,6 @@ function removeLayer(layer) {
       tool: tools.removeLayer,
       layer,
     })
-    state.undoStack.push(state.action)
     state.action = null
     state.redoStack = []
     renderLayersToDOM()
@@ -444,7 +443,6 @@ function addRasterLayer() {
     tool: tools.addLayer,
     layer,
   })
-  state.undoStack.push(state.action)
   state.action = null
   state.redoStack = []
   renderLayersToDOM()
@@ -515,7 +513,6 @@ function vectorInteract(e) {
 function removeVector(vector) {
   //set "removed" flag to true on selected layer.
   removeAction(vector.index)
-  state.undoStack.push(state.action)
   state.action = null
   state.redoStack = []
   if (canvas.currentVectorIndex === vector.index) {
@@ -532,7 +529,6 @@ function removeVector(vector) {
  */
 function toggleVectorMode(vector, modeKey) {
   changeActionMode(vector.index, modeKey)
-  state.undoStack.push(state.action)
   state.action = null
   state.redoStack = []
   renderVectorsToDOM()

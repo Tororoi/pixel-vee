@@ -21,8 +21,14 @@ import {
  * @param {Object} layer - optional parameter to limit render to a specific layer
  * @param {Integer} endIndex - optional parameter to limit render up to a specific action
  * @param {Integer} startIndex - optional parameter to limit render from a specific action
+ * @param {Boolean} setImages - optional parameter to set images for actions. Will be used when history is modified to update action images.
  */
-export function redrawTimelineActions(layer, endIndex = null, startIndex = 0) {
+export function redrawTimelineActions(
+  layer,
+  endIndex = null,
+  startIndex = 0,
+  setImages = false
+) {
   //follows stored instructions to reassemble drawing. Costly operation. Minimize usage as much as possible.
   for (let i = startIndex + 1; i < state.undoStack.length; i++) {
     if (endIndex && i >= endIndex) {
@@ -206,6 +212,10 @@ export function redrawTimelineActions(layer, endIndex = null, startIndex = 0) {
         //do nothing
       }
     }
+    // if (setImages) {
+    //   //set image for action
+    //   action.image = action.layer.cvs.toDataURL()
+    // }
   }
   state.redoStack.forEach((action) => {
     if (action.tool.name === "addLayer") {

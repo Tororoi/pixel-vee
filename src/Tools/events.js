@@ -70,7 +70,6 @@ function handleRecenter() {
  */
 function handleClearCanvas() {
   actionClear(canvas.currentLayer)
-  state.undoStack.push(state.action)
   state.action = null
   state.pointsSet = null
   state.seenPixelsSet = null
@@ -82,7 +81,7 @@ function handleClearCanvas() {
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
-  renderCanvas(null) //render all layers
+  renderCanvas(canvas.currentLayer)
   vectorGui.reset()
   state.reset()
   renderVectorsToDOM()

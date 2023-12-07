@@ -57,56 +57,6 @@ export function modifyVectorAction(actionIndex) {
       processedActions,
     },
   })
-  // let action = state.undoStack[actionIndex]
-  // let oldProperties = {
-  //   ...action.properties.vectorProperties,
-  // } //shallow copy, properties must not contain any objects or references as values
-  // let oldProperties = {
-  //   ...state.vectorsSavedProperties[actionIndex],
-  // } //shallow copy, properties must not contain any objects or references as values
-  // let modifiedProperties = {
-  //   ...action.properties.vectorProperties,
-  // } //shallow copy, must make deep copy, at least for x, y and properties
-  // modifiedProperties = { ...state.vectorProperties }
-  // //Keep properties relative to layer offset
-  // modifiedProperties.px1 -= action.layer.x
-  // modifiedProperties.py1 -= action.layer.y
-  // if (
-  //   action.tool.name === "quadCurve" ||
-  //   action.tool.name === "cubicCurve" ||
-  //   action.tool.name === "ellipse"
-  // ) {
-  //   modifiedProperties.px2 -= action.layer.x
-  //   modifiedProperties.py2 -= action.layer.y
-
-  //   modifiedProperties.px3 -= action.layer.x
-  //   modifiedProperties.py3 -= action.layer.y
-  // }
-
-  // if (action.tool.name === "cubicCurve") {
-  //   modifiedProperties.px4 -= action.layer.x
-  //   modifiedProperties.py4 -= action.layer.y
-  // }
-
-  //maintain forceCircle property if point being adjusted is p1
-  // if (action.tool.name === "ellipse") {
-  //   modifiedProperties.forceCircle =
-  //     vectorGui.selectedPoint.xKey === "px1"
-  //       ? oldProperties.forceCircle
-  //       : state.vectorProperties.forceCircle
-  // }
-  // action.properties.vectorProperties = {
-  //   ...modifiedProperties,
-  // }
-  // state.addToTimeline({
-  //   tool: tools.modify,
-  //   properties: {
-  //     //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-  //     moddedActionIndex: actionIndex,
-  //     from: oldProperties,
-  //     to: modifiedProperties,
-  //   },
-  // })
 }
 
 /**

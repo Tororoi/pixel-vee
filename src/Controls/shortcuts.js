@@ -113,7 +113,6 @@ export function activateShortcut(keyCode) {
                 maskSet: state.maskSet,
               },
             })
-            state.undoStack.push(state.action)
             state.action = null
             state.redoStack = []
             state.resetSelectProperties()

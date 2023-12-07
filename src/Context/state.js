@@ -103,6 +103,8 @@ function addToTimeline(actionObject) {
     hidden: false,
     removed: false,
   }
+  state.undoStack.push(state.action)
+  //TODO: save image of layer to action. When undo/redo occurs, render image to canvas instead of redrawing timeline. For modify actions, images of modified action and subsequent actions must be updated.
 }
 
 /**

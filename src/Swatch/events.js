@@ -63,7 +63,6 @@ export function setColor(r, g, b, a, target) {
     target.style.backgroundColor = color.color
     if (target.vector) {
       changeActionColor(target.vector.index, color)
-      state.undoStack.push(state.action)
       state.action = null
       state.redoStack = []
       renderVectorsToDOM()
