@@ -198,6 +198,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   //clear affected layer and render image from most recent action from the affected layer
   //This avoids having to redraw the timeline for every undo/redo. Close to constant time whereas redrawTimeline is closer to exponential time or worse.
   //TODO: factor out into separate function
+  //TODO: not compatible with reference layer. Must be handled differently.
   let mostRecentActionFromSameLayer = null
   for (let i = state.undoStack.length - 1; i >= 0; i--) {
     if (state.undoStack[i].layer === latestAction.layer) {

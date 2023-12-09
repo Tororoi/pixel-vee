@@ -66,26 +66,11 @@ export function redrawTimelineActions(layer, activeIndeces, setImages = false) {
     if (!action.hidden && !action.removed) {
       // let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
       switch (action.tool.name) {
-        case "modify":
-          //do nothing
-          break
-        case "changeMode":
-          //do nothing
-          break
-        case "changeColor":
-          //do nothing
-          break
-        case "remove":
-          //do nothing
-          break
         case "addLayer":
           action.layer.removed = false
           break
         case "removeLayer":
           action.layer.removed = true
-          break
-        case "clear":
-          //Since this action marks all actions on its layer as removed, no need to clear the canvas here or do anything else related to rendering
           break
         case "brush":
           const offsetX = action.layer.x

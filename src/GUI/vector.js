@@ -603,6 +603,10 @@ export function updateLinkedVectors(
   }
 }
 
+/**
+ *
+ * @param {Object} currentVector
+ */
 export function updateLockedCurrentVectorControlHandle(currentVector) {
   const savedProperties =
     state.vectorsSavedProperties[canvas.currentVectorIndex]
