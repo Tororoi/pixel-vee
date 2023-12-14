@@ -87,6 +87,7 @@ function ellipseSteps() {
         state.vectorProperties.x1Offset,
         state.vectorProperties.y1Offset,
         state.maskSet,
+        null,
         true
       )
       break
@@ -131,6 +132,7 @@ function ellipseSteps() {
           state.vectorProperties.x1Offset,
           state.vectorProperties.y1Offset,
           state.maskSet,
+          null,
           true
         )
       }

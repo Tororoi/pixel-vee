@@ -29,6 +29,7 @@ import { saveEllipseAsTest } from "../Testing/ellipseTest.js"
  * @param {Object} currentModes
  * @param {Set} maskSet
  * @param {Set} seenPixelsSet
+ * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {Boolean} isPreview
  * @param {Boolean} excludeFromSet - don't add to seenPixelsSet if true
  */
@@ -42,13 +43,16 @@ export function actionDraw(
   currentModes,
   maskSet,
   seenPixelsSet,
+  customContext = null,
   isPreview = false,
   excludeFromSet = false
 ) {
   let offsetX = 0
   let offsetY = 0
   let ctx = layer.ctx
-  if (isPreview) {
+  if (customContext) {
+    ctx = customContext
+  } else if (isPreview) {
     ctx = layer.onscreenCtx
     offsetX = canvas.xOffset
     offsetY = canvas.yOffset
@@ -110,6 +114,7 @@ export function actionDraw(
  * @param {Integer} brushSize
  * @param {Set} maskSet
  * @param {Set} seenPixelsSet
+ * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {Boolean} isPreview
  */
 export function actionLine(
@@ -124,6 +129,7 @@ export function actionLine(
   brushSize,
   maskSet,
   seenPixelsSet = null,
+  customContext = null,
   isPreview = false
 ) {
   let angle = getAngle(tx - sx, ty - sy) // angle of line
@@ -154,6 +160,7 @@ export function actionLine(
       currentModes,
       maskSet,
       seen,
+      customContext,
       isPreview
     )
     previousX = thispoint.x
@@ -171,6 +178,7 @@ export function actionLine(
     currentModes,
     maskSet,
     seen,
+    customContext,
     isPreview
   )
 }
@@ -185,6 +193,7 @@ export function actionLine(
  * @param {Object} currentModes
  * @param {Object} selectProperties
  * @param {Set} maskSet
+ * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {Boolean} isPreview
  * @returns
  */
@@ -196,6 +205,7 @@ export function actionFill(
   currentModes,
   selectProperties,
   maskSet,
+  customContext = null,
   isPreview = false
 ) {
   let xMin = 0
@@ -215,7 +225,9 @@ export function actionFill(
   }
   //get imageData
   let ctx = layer.ctx
-  if (isPreview) {
+  if (customContext) {
+    ctx = customContext
+  } else if (isPreview) {
     ctx = canvas.previewCTX
   }
   let layerImageData = ctx.getImageData(xMin, yMin, xMax - xMin, yMax - yMin)
@@ -304,6 +316,7 @@ export function actionFill(
  * @param {CanvasRenderingContext2D} ctx
  * @param {Object} currentModes
  * @param {Set} maskSet
+ * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {Boolean} isPreview
  */
 function renderPoints(
@@ -314,6 +327,7 @@ function renderPoints(
   layer,
   currentModes,
   maskSet,
+  customContext = null,
   isPreview = false
 ) {
   const seen = new Set()
@@ -334,6 +348,7 @@ function renderPoints(
       currentModes,
       maskSet,
       seen,
+      customContext,
       isPreview
     )
     previousX = xt
@@ -360,6 +375,7 @@ function renderPoints(
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {Set} maskSet
+ * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {Boolean} isPreview
  */
 export function actionQuadraticCurve(
@@ -376,6 +392,7 @@ export function actionQuadraticCurve(
   brushStamp,
   brushSize,
   maskSet,
+  customContext = null,
   isPreview = false
 ) {
   if (stepNum === 1) {
@@ -391,6 +408,7 @@ export function actionQuadraticCurve(
       brushSize,
       maskSet,
       null,
+      customContext,
       isPreview
     )
   } else if (stepNum === 2 || stepNum === 3) {
@@ -410,6 +428,7 @@ export function actionQuadraticCurve(
       layer,
       currentModes,
       maskSet,
+      customContext,
       isPreview
     )
   }
@@ -432,6 +451,7 @@ export function actionQuadraticCurve(
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {Set} maskSet
+ * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {Boolean} isPreview
  */
 export function actionCubicCurve(
@@ -450,6 +470,7 @@ export function actionCubicCurve(
   brushStamp,
   brushSize,
   maskSet,
+  customContext = null,
   isPreview = false
 ) {
   if (stepNum === 1) {
@@ -465,6 +486,7 @@ export function actionCubicCurve(
       brushSize,
       maskSet,
       null,
+      customContext,
       isPreview
     )
   } else if (stepNum === 2) {
@@ -484,6 +506,7 @@ export function actionCubicCurve(
       layer,
       currentModes,
       maskSet,
+      customContext,
       isPreview
     )
   } else if (stepNum === 3 || stepNum === 4) {
@@ -505,6 +528,7 @@ export function actionCubicCurve(
       layer,
       currentModes,
       maskSet,
+      customContext,
       isPreview
     )
   }
@@ -529,6 +553,7 @@ export function actionCubicCurve(
  * @param {Integer} x1Offset
  * @param {Integer} y1Offset
  * @param {Set} maskSet
+ * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {Boolean} isPreview
  */
 export function actionEllipse(
@@ -551,6 +576,7 @@ export function actionEllipse(
   x1Offset,
   y1Offset,
   maskSet,
+  customContext = null,
   isPreview = false
 ) {
   if (forceCircle) {
@@ -563,6 +589,7 @@ export function actionEllipse(
       layer,
       currentModes,
       maskSet,
+      customContext,
       isPreview
     )
   } else {
@@ -585,6 +612,7 @@ export function actionEllipse(
       layer,
       currentModes,
       maskSet,
+      customContext,
       isPreview
     )
   }

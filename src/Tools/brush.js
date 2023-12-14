@@ -170,6 +170,7 @@ function drawPreviewBrushPoint() {
     state.tool.modes,
     state.maskSet,
     state.seenPixelsSet,
+    null,
     true,
     true
   )

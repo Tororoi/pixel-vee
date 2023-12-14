@@ -30,41 +30,47 @@ import {
  */
 export function redrawTimelineActions(layer, activeIndeces, setImages = false) {
   //follows stored instructions to reassemble drawing. Costly operation. Minimize usage as much as possible.
-  // let betweenCtx = null
-  // if (activeIndeces && setImages) {
-  //   //set initial sandwiched canvas
-  //   let cvs = document.createElement("canvas")
-  //   let ctx = cvs.getContext("2d")
-  //   ctx.willReadFrequently = true
-  //   cvs.width = canvas.offScreenCVS.width
-  //   cvs.height = canvas.offScreenCVS.height
-  //   state.savedBetweenActionImages.push({ cvs, ctx })
-  //   betweenCtx = ctx
-  // }
-  for (let i = 1; i < state.undoStack.length; i++) {
+  let betweenCtx = null
+  let startIndex = 1
+  if (activeIndeces) {
+    if (setImages) {
+      //set initial sandwiched canvas
+      let cvs = document.createElement("canvas")
+      let ctx = cvs.getContext("2d")
+      ctx.willReadFrequently = true
+      cvs.width = canvas.offScreenCVS.width
+      cvs.height = canvas.offScreenCVS.height
+      state.savedBetweenActionImages.push({ cvs, ctx })
+      betweenCtx = ctx
+    } else {
+      //set starting index at first active index
+      startIndex = parseInt(activeIndeces[0])
+    }
+  }
+  //loop through all actions
+  for (let i = startIndex; i < state.undoStack.length; i++) {
     let action = state.undoStack[i]
     //if layer is passed in, only redraw for that layer
     if (layer) {
       if (action.layer !== layer) continue
     }
-    // if (activeIndeces) {
-    //   if (activeIndeces.includes(i.toString())) {
-    //     //render betweenCanvas
-    //     let activeIndex = activeIndeces.indexOf(i.toString())
-    //     //draw accumulated canvas actions from previous betweenCanvas to action.layer.ctx
-    //     action.layer.ctx.drawImage(
-    //       state.savedBetweenActionImages[activeIndex - 1].cvs,
-    //       0,
-    //       0
-    //     )
-    //     if (setImages) {
-    //       //ensure activeCtx uses action.layer.ctx for action at active index
-    //       betweenCtx = null
-    //     }
-    //   }
-    // }
+    if (activeIndeces) {
+      if (activeIndeces.includes(i.toString())) {
+        //render betweenCanvas
+        let activeIndex = activeIndeces.indexOf(i.toString())
+        //draw accumulated canvas actions from previous betweenCanvas to action.layer.ctx
+        action.layer.ctx.drawImage(
+          state.savedBetweenActionImages[activeIndex].cvs,
+          0,
+          0
+        )
+        if (setImages) {
+          //ensure activeCtx uses action.layer.ctx for action at active index
+          betweenCtx = null
+        }
+      }
+    }
     if (!action.hidden && !action.removed) {
-      // let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
       switch (action.tool.name) {
         case "addLayer":
           action.layer.removed = false
@@ -108,7 +114,8 @@ export function redrawTimelineActions(layer, activeIndeces, setImages = false) {
               action.layer,
               action.modes,
               mask,
-              seen
+              seen,
+              betweenCtx
             )
             previousX = p.x + offsetX
             previousY = p.y + offsetY
@@ -141,7 +148,8 @@ export function redrawTimelineActions(layer, activeIndeces, setImages = false) {
             action.layer,
             action.modes,
             action.properties.selectProperties, //currently all null
-            action.properties.maskSet
+            action.properties.maskSet,
+            betweenCtx
           )
           break
         case "line":
@@ -155,7 +163,9 @@ export function redrawTimelineActions(layer, activeIndeces, setImages = false) {
             action.modes,
             brushStamps[action.tool.brushType][action.tool.brushSize],
             action.tool.brushSize,
-            action.properties.maskSet
+            action.properties.maskSet,
+            null,
+            betweenCtx
           )
           break
         case "quadCurve":
@@ -172,7 +182,8 @@ export function redrawTimelineActions(layer, activeIndeces, setImages = false) {
             action.modes,
             brushStamps[action.tool.brushType][action.tool.brushSize],
             action.tool.brushSize,
-            action.properties.maskSet
+            action.properties.maskSet,
+            betweenCtx
           )
           break
         case "cubicCurve":
@@ -191,7 +202,8 @@ export function redrawTimelineActions(layer, activeIndeces, setImages = false) {
             action.modes,
             brushStamps[action.tool.brushType][action.tool.brushSize],
             action.tool.brushSize,
-            action.properties.maskSet
+            action.properties.maskSet,
+            betweenCtx
           )
           break
         case "ellipse":
@@ -214,39 +226,46 @@ export function redrawTimelineActions(layer, activeIndeces, setImages = false) {
             action.properties.vectorProperties.offset,
             action.properties.vectorProperties.x1Offset,
             action.properties.vectorProperties.y1Offset,
-            action.properties.maskSet
+            action.properties.maskSet,
+            betweenCtx
           )
           break
         default:
         //do nothing
       }
     }
-    // if (activeIndeces) {
-    //   if (activeIndeces.includes(i.toString())) {
-    //     if (setImages) {
-    //       //if activeIndeces and setImages, loop through all actions and set image from previous active index to current active index to state.savedBetweenActionImages[i].betweenImage
-    //       let cvs = document.createElement("canvas")
-    //       let ctx = cvs.getContext("2d")
-    //       ctx.willReadFrequently = true
-    //       cvs.width = canvas.offScreenCVS.width
-    //       cvs.height = canvas.offScreenCVS.height
-    //       state.savedBetweenActionImages.push({ cvs, ctx })
-    //       betweenCtx = ctx
-    //       //actions rendered in loop beyond this point will render onto this cvs until a new one is set
-    //     }
-    //   }
-    //   //render last betweenCanvas
-    //   if (i === state.undoStack.length - 1) {
-    //     //get last index of activeIndeces and set it to lastActiveIndex
-    //     let lastActiveIndex = activeIndeces[activeIndeces.length - 1]
-    //     //draw accumulated canvas actions from previous betweenCanvas to action.layer.ctx
-    //     action.layer.ctx.drawImage(
-    //       state.savedBetweenActionImages[lastActiveIndex].cvs,
-    //       0,
-    //       0
-    //     )
-    //   }
-    // }
+    if (activeIndeces) {
+      if (activeIndeces.includes(i.toString())) {
+        if (setImages) {
+          //if activeIndeces and setImages, loop through all actions and set image from previous active index to current active index to state.savedBetweenActionImages[i].betweenImage
+          let cvs = document.createElement("canvas")
+          let ctx = cvs.getContext("2d")
+          ctx.willReadFrequently = true
+          cvs.width = canvas.offScreenCVS.width
+          cvs.height = canvas.offScreenCVS.height
+          state.savedBetweenActionImages.push({ cvs, ctx })
+          betweenCtx = ctx
+          //actions rendered in loop beyond this point will render onto this cvs until a new one is set
+        } else {
+          //set i to next activeIndex to skip all actions until next activeIndex
+          let nextActiveIndex = activeIndeces[activeIndeces.indexOf(i.toString()) + 1]
+          if (nextActiveIndex) {
+            i = parseInt(nextActiveIndex) - 1
+          }
+        }
+      }
+      //render last betweenCanvas
+      if (i === state.undoStack.length - 1) {
+        //draw accumulated canvas actions from previous betweenCanvas to action.layer.ctx
+        action.layer.ctx.drawImage(
+          state.savedBetweenActionImages[
+            state.savedBetweenActionImages.length - 1
+          ].cvs,
+          0,
+          0
+        )
+      }
+    }
   }
   state.redoStack.forEach((action) => {
     if (action.tool.name === "addLayer") {
@@ -409,7 +428,7 @@ export function renderCanvas(
   setImages = false
 ) {
   // window.requestAnimationFrame(() => {
-  // let begin = performance.now()
+  let begin = performance.now()
   if (redrawTimeline) {
     //clear offscreen layers
     clearOffscreenCanvas(activeLayer)
@@ -427,8 +446,8 @@ export function renderCanvas(
       drawCanvasLayer(layer, null)
     })
   }
-  // let end = performance.now()
-  // console.log(end - begin)
+  let end = performance.now()
+  console.log(end - begin)
   // })
 }
 

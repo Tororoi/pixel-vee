@@ -45,6 +45,7 @@ export function renderCursor(state, canvas, swatches) {
           state.tool.modes,
           state.maskSet,
           state.seenPixelsSet,
+          null,
           true,
           true
         )

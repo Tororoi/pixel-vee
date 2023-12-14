@@ -35,6 +35,8 @@ export function modifyVectorAction(moddedAction) {
     })
   }
   state.vectorsSavedProperties = {}
+  state.activeIndeces = []
+  state.savedBetweenActionImages = []
   state.addToTimeline({
     tool: tools.modify,
     layer: moddedAction.layer,

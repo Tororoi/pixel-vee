@@ -67,6 +67,7 @@ function quadCurveSteps() {
         brushStamps[state.tool.brushType][state.tool.brushSize],
         state.tool.brushSize,
         state.maskSet,
+        null,
         true
       )
 
@@ -101,6 +102,7 @@ function quadCurveSteps() {
         brushStamps[state.tool.brushType][state.tool.brushSize],
         state.tool.brushSize,
         state.maskSet,
+        null,
         true
       )
 
@@ -224,6 +226,7 @@ function cubicCurveSteps() {
         brushStamps[state.tool.brushType][state.tool.brushSize],
         state.tool.brushSize,
         state.maskSet,
+        null,
         true
       )
       break
@@ -263,6 +266,7 @@ function cubicCurveSteps() {
         brushStamps[state.tool.brushType][state.tool.brushSize],
         state.tool.brushSize,
         state.maskSet,
+        null,
         true
       )
       break
@@ -388,8 +392,25 @@ function adjustCurveSteps(numPoints = 4) {
         //TODO: Ideally this renderCanvas call would save images of the actions between all the linked vectors indeces as it redraws the timeline.
         //Then on subsequent renders, we can just render the in between images along with the changed actions instead of redrawing every single action.
         //For example, if linked vectors are at indeces 4, 12, and 15, we would save images of actions 1-3, 5-11, 13-14, and 16+. That's only 4 images to draw instead of 16+ actions to render.
-        const activeIndeces = Object.keys(state.vectorsSavedProperties)
-        renderCanvas(currentVector.layer, true, activeIndeces, true)
+        state.activeIndeces = Object.keys(state.vectorsSavedProperties)
+        //add fill actions to activeIndeces starting at first active index
+        // Start the loop from the first active index
+        for (
+          let i = parseInt(state.activeIndeces[0]);
+          i < state.undoStack.length;
+          i++
+        ) {
+          let action = state.undoStack[i]
+          if (
+            action.layer === currentVector.layer &&
+            action.tool.name === "fill"
+          ) {
+            state.activeIndeces.push(i.toString())
+          }
+        }
+        //sort activeIndeces
+        state.activeIndeces.sort()
+        renderCanvas(currentVector.layer, true, state.activeIndeces, true)
       }
       break
     case "pointermove":
@@ -403,14 +424,16 @@ function adjustCurveSteps(numPoints = 4) {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        const activeIndeces = Object.keys(state.vectorsSavedProperties)
-        if (state.tool.options.link && activeIndeces.length > 1) {
+        if (
+          state.tool.options.link &&
+          Object.keys(state.vectorsSavedProperties).length > 1
+        ) {
           if (state.tool.options.align) {
             updateLockedCurrentVectorControlHandle(currentVector)
           }
           updateLinkedVectors(currentVector)
         }
-        renderCanvas(currentVector.layer, true, activeIndeces)
+        renderCanvas(currentVector.layer, true, state.activeIndeces)
       }
       break
     case "pointerup":
@@ -424,9 +447,11 @@ function adjustCurveSteps(numPoints = 4) {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        const activeIndeces = Object.keys(state.vectorsSavedProperties)
         if (state.tool.options.align || state.tool.options.link) {
-          if (state.tool.options.link && activeIndeces.length > 1) {
+          if (
+            state.tool.options.link &&
+            Object.keys(state.vectorsSavedProperties).length > 1
+          ) {
             if (state.tool.options.align) {
               updateLockedCurrentVectorControlHandle(currentVector)
             }
@@ -454,7 +479,10 @@ function adjustCurveSteps(numPoints = 4) {
             )
             //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
             //align control handles
-            if (state.tool.options.align && activeIndeces.length === 1) {
+            if (
+              state.tool.options.align &&
+              Object.keys(state.vectorsSavedProperties).length === 1
+            ) {
               let deltaX, deltaY
               if (vectorGui.otherCollidedKeys.xKey === "px1") {
                 deltaX =
@@ -495,7 +523,7 @@ function adjustCurveSteps(numPoints = 4) {
             }
           }
         }
-        renderCanvas(currentVector.layer, true, activeIndeces)
+        renderCanvas(currentVector.layer, true, state.activeIndeces)
         modifyVectorAction(currentVector)
         vectorGui.selectedPoint = {
           xKey: null,
