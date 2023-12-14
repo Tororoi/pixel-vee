@@ -181,6 +181,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       vectorGui.render()
     }
   }
+  pushStack.push(popStack.pop())
   //For undo, if new latest action or new latest modded action will be a vector and its tool is currently selected, set vector properties to match
   if (newLatestAction) {
     if (
@@ -190,11 +191,9 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
       vectorGui.reset()
       vectorGui.setVectorProperties(newLatestAction)
-      vectorGui.render()
+      vectorGui.render() //render vectors after removing previous action from undoStack
     }
   }
-
-  pushStack.push(popStack.pop())
   //clear affected layer and render image from most recent action from the affected layer
   //This avoids having to redraw the timeline for every undo/redo. Close to constant time whereas redrawTimeline is closer to exponential time or worse.
   //TODO: factor out into separate function
