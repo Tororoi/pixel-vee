@@ -9,6 +9,7 @@ import {
   vectorGui,
   updateLinkedVectors,
   updateLockedCurrentVectorControlHandle,
+  createActiveIndecesForRender,
 } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
@@ -389,27 +390,7 @@ function adjustCurveSteps(numPoints = 4) {
             updateLinkedVectors(currentVector, true)
           }
         }
-        //TODO: Ideally this renderCanvas call would save images of the actions between all the linked vectors indeces as it redraws the timeline.
-        //Then on subsequent renders, we can just render the in between images along with the changed actions instead of redrawing every single action.
-        //For example, if linked vectors are at indeces 4, 12, and 15, we would save images of actions 1-3, 5-11, 13-14, and 16+. That's only 4 images to draw instead of 16+ actions to render.
-        state.activeIndeces = Object.keys(state.vectorsSavedProperties)
-        //add fill actions to activeIndeces starting at first active index
-        // Start the loop from the first active index
-        for (
-          let i = parseInt(state.activeIndeces[0]);
-          i < state.undoStack.length;
-          i++
-        ) {
-          let action = state.undoStack[i]
-          if (
-            action.layer === currentVector.layer &&
-            action.tool.name === "fill"
-          ) {
-            state.activeIndeces.push(i.toString())
-          }
-        }
-        //sort activeIndeces
-        state.activeIndeces.sort()
+        state.activeIndeces = createActiveIndecesForRender(currentVector)
         renderCanvas(currentVector.layer, true, state.activeIndeces, true)
       }
       break

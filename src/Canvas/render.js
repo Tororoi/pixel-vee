@@ -20,9 +20,7 @@ import {
  * Critical function for the timeline to work
  * For handling activeIndeces, the idea is to save images of multiple actions that aren't changing to save time redrawing.
  * The current problem is that later actions "fill" or "draw" with a mask are affected by earlier actions.
- * TODO: The solution would be to modify activeIndeces so it includes dependent actions as well.
  * TODO: Another efficiency improvement would be to perform incremental rendering with caching so only the affected region of the canvas is rerendered.
- * TODO: Another efficiency improvement is to start the re-rendering from the first activeIndex and use the saved image from the action before that to start off the redraw process, eliminating the need to iterate through the actions before the first activeIndex.
  * TODO: Use OffscreenCanvas in a web worker to offload rendering to a separate thread.
  * @param {Object} layer - optional parameter to limit render to a specific layer
  * @param {Array} activeIndeces - optional parameter to limit render to specific actions. If not passed in, all actions will be rendered.
@@ -30,21 +28,15 @@ import {
  */
 export function redrawTimelineActions(layer, activeIndeces, setImages = false) {
   //follows stored instructions to reassemble drawing. Costly operation. Minimize usage as much as possible.
-  let betweenCtx = null
+  let betweenCtx = null //canvas context for saving between actions
   let startIndex = 1
   if (activeIndeces) {
     if (setImages) {
       //set initial sandwiched canvas
-      let cvs = document.createElement("canvas")
-      let ctx = cvs.getContext("2d")
-      ctx.willReadFrequently = true
-      cvs.width = canvas.offScreenCVS.width
-      cvs.height = canvas.offScreenCVS.height
-      state.savedBetweenActionImages.push({ cvs, ctx })
-      betweenCtx = ctx
+      betweenCtx = createAndSaveContext()
     } else {
       //set starting index at first active index
-      startIndex = parseInt(activeIndeces[0])
+      startIndex = activeIndeces[0]
     }
   }
   //loop through all actions
@@ -55,9 +47,9 @@ export function redrawTimelineActions(layer, activeIndeces, setImages = false) {
       if (action.layer !== layer) continue
     }
     if (activeIndeces) {
-      if (activeIndeces.includes(i.toString())) {
+      if (activeIndeces.includes(i)) {
         //render betweenCanvas
-        let activeIndex = activeIndeces.indexOf(i.toString())
+        let activeIndex = activeIndeces.indexOf(i)
         //draw accumulated canvas actions from previous betweenCanvas to action.layer.ctx
         action.layer.ctx.drawImage(
           state.savedBetweenActionImages[activeIndex].cvs,
@@ -71,186 +63,19 @@ export function redrawTimelineActions(layer, activeIndeces, setImages = false) {
       }
     }
     if (!action.hidden && !action.removed) {
-      switch (action.tool.name) {
-        case "addLayer":
-          action.layer.removed = false
-          break
-        case "removeLayer":
-          action.layer.removed = true
-          break
-        case "brush":
-          const offsetX = action.layer.x
-          const offsetY = action.layer.y
-
-          let seen = new Set()
-          let mask = null
-          if (action.properties.maskSet) {
-            if (offsetX !== 0 || offsetY !== 0) {
-              mask = new Set(
-                action.properties.maskArray.map(
-                  (coord) => `${coord.x + offsetX},${coord.y + offsetY}`
-                )
-              )
-            } else {
-              mask = new Set(action.properties.maskSet)
-            }
-          }
-          let previousX = action.properties.points[0].x + offsetX
-          let previousY = action.properties.points[0].y + offsetY
-          let brushDirection = "0,0"
-          for (const p of action.properties.points) {
-            brushDirection = calculateBrushDirection(
-              p.x + offsetX,
-              p.y + offsetY,
-              previousX,
-              previousY
-            )
-            actionDraw(
-              p.x + offsetX,
-              p.y + offsetY,
-              p.color,
-              brushStamps[action.tool.brushType][p.brushSize][brushDirection],
-              p.brushSize,
-              action.layer,
-              action.modes,
-              mask,
-              seen,
-              betweenCtx
-            )
-            previousX = p.x + offsetX
-            previousY = p.y + offsetY
-            //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster:
-            // action.layer.ctx.fillStyle = p.color
-            // let x = p.x
-            // let y = p.y
-            // const key = `${x},${y}`
-            // if (!seen.has(key)) {
-            //   seen.add(key)
-            //   switch (action.mode) {
-            //     case "erase":
-            //       action.layer.ctx.clearRect(x, y, 1, 1)
-            //       break
-            //     case "inject":
-            //       action.layer.ctx.clearRect(x, y, 1, 1)
-            //       action.layer.ctx.fillRect(x, y, 1, 1)
-            //       break
-            //     default:
-            //       action.layer.ctx.fillRect(x, y, 1, 1)
-            //   }
-            // }
-          }
-          break
-        case "fill":
-          actionFill(
-            action.properties.vectorProperties.px1 + action.layer.x,
-            action.properties.vectorProperties.py1 + action.layer.y,
-            action.color,
-            action.layer,
-            action.modes,
-            action.properties.selectProperties, //currently all null
-            action.properties.maskSet,
-            betweenCtx
-          )
-          break
-        case "line":
-          actionLine(
-            action.properties.px1 + action.layer.x,
-            action.properties.py1 + action.layer.y,
-            action.properties.px2 + action.layer.x,
-            action.properties.py2 + action.layer.y,
-            action.color,
-            action.layer,
-            action.modes,
-            brushStamps[action.tool.brushType][action.tool.brushSize],
-            action.tool.brushSize,
-            action.properties.maskSet,
-            null,
-            betweenCtx
-          )
-          break
-        case "quadCurve":
-          actionQuadraticCurve(
-            action.properties.vectorProperties.px1 + action.layer.x,
-            action.properties.vectorProperties.py1 + action.layer.y,
-            action.properties.vectorProperties.px2 + action.layer.x,
-            action.properties.vectorProperties.py2 + action.layer.y,
-            action.properties.vectorProperties.px3 + action.layer.x,
-            action.properties.vectorProperties.py3 + action.layer.y,
-            3,
-            action.color,
-            action.layer,
-            action.modes,
-            brushStamps[action.tool.brushType][action.tool.brushSize],
-            action.tool.brushSize,
-            action.properties.maskSet,
-            betweenCtx
-          )
-          break
-        case "cubicCurve":
-          actionCubicCurve(
-            action.properties.vectorProperties.px1 + action.layer.x,
-            action.properties.vectorProperties.py1 + action.layer.y,
-            action.properties.vectorProperties.px2 + action.layer.x,
-            action.properties.vectorProperties.py2 + action.layer.y,
-            action.properties.vectorProperties.px3 + action.layer.x,
-            action.properties.vectorProperties.py3 + action.layer.y,
-            action.properties.vectorProperties.px4 + action.layer.x,
-            action.properties.vectorProperties.py4 + action.layer.y,
-            4,
-            action.color,
-            action.layer,
-            action.modes,
-            brushStamps[action.tool.brushType][action.tool.brushSize],
-            action.tool.brushSize,
-            action.properties.maskSet,
-            betweenCtx
-          )
-          break
-        case "ellipse":
-          actionEllipse(
-            action.properties.vectorProperties.px1 + action.layer.x,
-            action.properties.vectorProperties.py1 + action.layer.y,
-            action.properties.vectorProperties.px2 + action.layer.x,
-            action.properties.vectorProperties.py2 + action.layer.y,
-            action.properties.vectorProperties.px3 + action.layer.x,
-            action.properties.vectorProperties.py3 + action.layer.y,
-            action.properties.vectorProperties.radA,
-            action.properties.vectorProperties.radB,
-            action.properties.vectorProperties.forceCircle,
-            action.color,
-            action.layer,
-            action.modes,
-            brushStamps[action.tool.brushType][action.tool.brushSize],
-            action.tool.brushSize,
-            action.properties.vectorProperties.angle,
-            action.properties.vectorProperties.offset,
-            action.properties.vectorProperties.x1Offset,
-            action.properties.vectorProperties.y1Offset,
-            action.properties.maskSet,
-            betweenCtx
-          )
-          break
-        default:
-        //do nothing
-      }
+      performAction(action, betweenCtx)
     }
     if (activeIndeces) {
-      if (activeIndeces.includes(i.toString())) {
+      if (activeIndeces.includes(i)) {
         if (setImages) {
           //if activeIndeces and setImages, loop through all actions and set image from previous active index to current active index to state.savedBetweenActionImages[i].betweenImage
-          let cvs = document.createElement("canvas")
-          let ctx = cvs.getContext("2d")
-          ctx.willReadFrequently = true
-          cvs.width = canvas.offScreenCVS.width
-          cvs.height = canvas.offScreenCVS.height
-          state.savedBetweenActionImages.push({ cvs, ctx })
-          betweenCtx = ctx
+          betweenCtx = createAndSaveContext()
           //actions rendered in loop beyond this point will render onto this cvs until a new one is set
         } else {
           //set i to next activeIndex to skip all actions until next activeIndex
-          let nextActiveIndex = activeIndeces[activeIndeces.indexOf(i.toString()) + 1]
+          let nextActiveIndex = activeIndeces[activeIndeces.indexOf(i) + 1]
           if (nextActiveIndex) {
-            i = parseInt(nextActiveIndex) - 1
+            i = nextActiveIndex - 1
           }
         }
       }
@@ -267,6 +92,200 @@ export function redrawTimelineActions(layer, activeIndeces, setImages = false) {
       }
     }
   }
+  updateLayersAfterRedo()
+  renderLayersToDOM()
+  renderVectorsToDOM()
+}
+
+/**
+ * Create canvas for saving between actions
+ * @returns {CanvasRenderingContext2D} betweenCtx
+ */
+function createAndSaveContext() {
+  let cvs = document.createElement("canvas")
+  let ctx = cvs.getContext("2d")
+  ctx.willReadFrequently = true
+  cvs.width = canvas.offScreenCVS.width
+  cvs.height = canvas.offScreenCVS.height
+  state.savedBetweenActionImages.push({ cvs, ctx })
+  return ctx
+}
+
+/**
+ * Helper for redrawTimelineActions
+ * @param {Object} action
+ * @param {CanvasRenderingContext2D} betweenCtx
+ */
+function performAction(action, betweenCtx) {
+  switch (action.tool.name) {
+    case "addLayer":
+      action.layer.removed = false
+      break
+    case "removeLayer":
+      action.layer.removed = true
+      break
+    case "brush":
+      const offsetX = action.layer.x
+      const offsetY = action.layer.y
+
+      let seen = new Set()
+      let mask = null
+      if (action.properties.maskSet) {
+        if (offsetX !== 0 || offsetY !== 0) {
+          mask = new Set(
+            action.properties.maskArray.map(
+              (coord) => `${coord.x + offsetX},${coord.y + offsetY}`
+            )
+          )
+        } else {
+          mask = new Set(action.properties.maskSet)
+        }
+      }
+      let previousX = action.properties.points[0].x + offsetX
+      let previousY = action.properties.points[0].y + offsetY
+      let brushDirection = "0,0"
+      for (const p of action.properties.points) {
+        brushDirection = calculateBrushDirection(
+          p.x + offsetX,
+          p.y + offsetY,
+          previousX,
+          previousY
+        )
+        actionDraw(
+          p.x + offsetX,
+          p.y + offsetY,
+          p.color,
+          brushStamps[action.tool.brushType][p.brushSize][brushDirection],
+          p.brushSize,
+          action.layer,
+          action.modes,
+          mask,
+          seen,
+          betweenCtx
+        )
+        previousX = p.x + offsetX
+        previousY = p.y + offsetY
+        //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster:
+        // action.layer.ctx.fillStyle = p.color
+        // let x = p.x
+        // let y = p.y
+        // const key = `${x},${y}`
+        // if (!seen.has(key)) {
+        //   seen.add(key)
+        //   switch (action.mode) {
+        //     case "erase":
+        //       action.layer.ctx.clearRect(x, y, 1, 1)
+        //       break
+        //     case "inject":
+        //       action.layer.ctx.clearRect(x, y, 1, 1)
+        //       action.layer.ctx.fillRect(x, y, 1, 1)
+        //       break
+        //     default:
+        //       action.layer.ctx.fillRect(x, y, 1, 1)
+        //   }
+        // }
+      }
+      break
+    case "fill":
+      actionFill(
+        action.properties.vectorProperties.px1 + action.layer.x,
+        action.properties.vectorProperties.py1 + action.layer.y,
+        action.color,
+        action.layer,
+        action.modes,
+        action.properties.selectProperties, //currently all null
+        action.properties.maskSet,
+        betweenCtx
+      )
+      break
+    case "line":
+      actionLine(
+        action.properties.px1 + action.layer.x,
+        action.properties.py1 + action.layer.y,
+        action.properties.px2 + action.layer.x,
+        action.properties.py2 + action.layer.y,
+        action.color,
+        action.layer,
+        action.modes,
+        brushStamps[action.tool.brushType][action.tool.brushSize],
+        action.tool.brushSize,
+        action.properties.maskSet,
+        null,
+        betweenCtx
+      )
+      break
+    case "quadCurve":
+      actionQuadraticCurve(
+        action.properties.vectorProperties.px1 + action.layer.x,
+        action.properties.vectorProperties.py1 + action.layer.y,
+        action.properties.vectorProperties.px2 + action.layer.x,
+        action.properties.vectorProperties.py2 + action.layer.y,
+        action.properties.vectorProperties.px3 + action.layer.x,
+        action.properties.vectorProperties.py3 + action.layer.y,
+        3,
+        action.color,
+        action.layer,
+        action.modes,
+        brushStamps[action.tool.brushType][action.tool.brushSize],
+        action.tool.brushSize,
+        action.properties.maskSet,
+        betweenCtx
+      )
+      break
+    case "cubicCurve":
+      actionCubicCurve(
+        action.properties.vectorProperties.px1 + action.layer.x,
+        action.properties.vectorProperties.py1 + action.layer.y,
+        action.properties.vectorProperties.px2 + action.layer.x,
+        action.properties.vectorProperties.py2 + action.layer.y,
+        action.properties.vectorProperties.px3 + action.layer.x,
+        action.properties.vectorProperties.py3 + action.layer.y,
+        action.properties.vectorProperties.px4 + action.layer.x,
+        action.properties.vectorProperties.py4 + action.layer.y,
+        4,
+        action.color,
+        action.layer,
+        action.modes,
+        brushStamps[action.tool.brushType][action.tool.brushSize],
+        action.tool.brushSize,
+        action.properties.maskSet,
+        betweenCtx
+      )
+      break
+    case "ellipse":
+      actionEllipse(
+        action.properties.vectorProperties.px1 + action.layer.x,
+        action.properties.vectorProperties.py1 + action.layer.y,
+        action.properties.vectorProperties.px2 + action.layer.x,
+        action.properties.vectorProperties.py2 + action.layer.y,
+        action.properties.vectorProperties.px3 + action.layer.x,
+        action.properties.vectorProperties.py3 + action.layer.y,
+        action.properties.vectorProperties.radA,
+        action.properties.vectorProperties.radB,
+        action.properties.vectorProperties.forceCircle,
+        action.color,
+        action.layer,
+        action.modes,
+        brushStamps[action.tool.brushType][action.tool.brushSize],
+        action.tool.brushSize,
+        action.properties.vectorProperties.angle,
+        action.properties.vectorProperties.offset,
+        action.properties.vectorProperties.x1Offset,
+        action.properties.vectorProperties.y1Offset,
+        action.properties.maskSet,
+        betweenCtx
+      )
+      break
+    default:
+    //do nothing
+  }
+}
+
+/**
+ * Update layers after redo
+ * Helper for redrawTimelineActions
+ */
+function updateLayersAfterRedo() {
   state.redoStack.forEach((action) => {
     if (action.tool.name === "addLayer") {
       action.layer.removed = true
@@ -283,8 +302,6 @@ export function redrawTimelineActions(layer, activeIndeces, setImages = false) {
       }
     }
   })
-  renderLayersToDOM()
-  renderVectorsToDOM()
 }
 
 /**
@@ -428,7 +445,7 @@ export function renderCanvas(
   setImages = false
 ) {
   // window.requestAnimationFrame(() => {
-  let begin = performance.now()
+  // let begin = performance.now()
   if (redrawTimeline) {
     //clear offscreen layers
     clearOffscreenCanvas(activeLayer)
@@ -446,8 +463,8 @@ export function renderCanvas(
       drawCanvasLayer(layer, null)
     })
   }
-  let end = performance.now()
-  console.log(end - begin)
+  // let end = performance.now()
+  // console.log(end - begin)
   // })
 }
 

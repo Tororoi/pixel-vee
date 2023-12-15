@@ -638,3 +638,24 @@ export function updateLockedCurrentVectorControlHandle(currentVector) {
     )
   }
 }
+
+/**
+ *
+ * @param {Object} currentVector
+ * @returns {Array} activeIndeces
+ */
+export function createActiveIndecesForRender(currentVector) {
+  let activeIndeces = Object.keys(state.vectorsSavedProperties).map((key) =>
+    parseInt(key)
+  )
+  //add fill actions to activeIndeces starting at first active index
+  for (let i = activeIndeces[0]; i < state.undoStack.length; i++) {
+    let action = state.undoStack[i]
+    if (action.layer === currentVector.layer && action.tool.name === "fill") {
+      activeIndeces.push(i)
+    }
+  }
+  //sort activeIndeces
+  activeIndeces.sort()
+  return activeIndeces
+}

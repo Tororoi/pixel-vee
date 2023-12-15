@@ -270,15 +270,16 @@ export function adjustEllipseSteps() {
           currentVector.properties.vectorProperties.forceCircle
       }
       updateEllipseVectorProperties(currentVector)
-      renderCanvas(currentVector.layer, true)
+      state.activeIndeces = createActiveIndecesForRender(currentVector)
+      renderCanvas(currentVector.layer, true, state.activeIndeces, true)
       break
     case "pointermove":
       updateEllipseVectorProperties(currentVector)
-      renderCanvas(currentVector.layer, true)
+      renderCanvas(currentVector.layer, true, state.activeIndeces)
       break
     case "pointerup":
       updateEllipseVectorProperties(currentVector)
-      renderCanvas(currentVector.layer, true)
+      renderCanvas(currentVector.layer, true, state.activeIndeces)
       modifyVectorAction(currentVector)
       vectorGui.selectedPoint = {
         xKey: null,
