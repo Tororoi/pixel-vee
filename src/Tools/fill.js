@@ -2,9 +2,11 @@ import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { modifyVectorAction, actionFill } from "../Actions/actions.js"
-import { vectorGui } from "../GUI/vector.js"
+import { actionFill } from "../Actions/actions.js"
+import { modifyVectorAction } from "../Actions/modifyTimeline.js"
+import { vectorGui, createActiveIndexesForRender } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
+import { updateVectorProperties } from "../utils/vectorHelpers.js"
 
 //===================================//
 //=== * * * Fill Controller * * * ===//
@@ -54,12 +56,14 @@ function fillSteps() {
       if (vectorGui.selectedPoint.xKey) {
         adjustFillSteps()
       }
+      break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey) {
         adjustFillSteps()
       }
       //redraw canvas to allow onscreen cursor to render
       renderCanvas(canvas.currentLayer)
+      break
     default:
     //do nothing
   }
@@ -67,9 +71,11 @@ function fillSteps() {
 
 /**
  * Used automatically by fill tool after fill is completed.
+ * TODO: for linking fill vector, fill would be limited by active linked vectors as borders, position unchanged
+ * How should fill vector be linked, since it won't be via positioning?
  */
 export function adjustFillSteps() {
-  let action = state.undoStack[canvas.currentVectorIndex]
+  let currentVector = state.undoStack[canvas.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.collisionPresent) {
@@ -79,9 +85,18 @@ export function adjustFillSteps() {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
         }
-        action.hidden = true
-        //Only render canvas up to timeline where fill action exists while adjusting fill
-        renderCanvas(action.layer, true, canvas.currentVectorIndex) // render to canvas.currentVectorIndex
+        state.vectorsSavedProperties[canvas.currentVectorIndex] = {
+          ...currentVector.properties.vectorProperties,
+        }
+        updateVectorProperties(
+          currentVector,
+          state.cursorX,
+          state.cursorY,
+          vectorGui.selectedPoint.xKey,
+          vectorGui.selectedPoint.yKey
+        )
+        state.activeIndexes = createActiveIndexesForRender(currentVector)
+        renderCanvas(currentVector.layer, true, state.activeIndexes, true)
       }
       break
     case "pointermove":
@@ -89,19 +104,33 @@ export function adjustFillSteps() {
         //code gets past check twice here so figure out where tool fn is being called again
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
+        updateVectorProperties(
+          currentVector,
+          state.cursorX,
+          state.cursorY,
+          vectorGui.selectedPoint.xKey,
+          vectorGui.selectedPoint.yKey
+        )
+        renderCanvas(currentVector.layer, true, state.activeIndexes)
       }
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        action.hidden = false
-        modifyVectorAction(canvas.currentVectorIndex)
+        updateVectorProperties(
+          currentVector,
+          state.cursorX,
+          state.cursorY,
+          vectorGui.selectedPoint.xKey,
+          vectorGui.selectedPoint.yKey
+        )
+        renderCanvas(currentVector.layer, true, state.activeIndexes)
+        modifyVectorAction(currentVector)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(action.layer, true)
       }
       break
     case "pointerout":
@@ -120,7 +149,6 @@ export function adjustFillSteps() {
 export const fill = {
   name: "fill",
   fn: fillSteps,
-  action: actionFill,
   brushSize: 1,
   brushType: "circle",
   disabled: true,

@@ -49,7 +49,6 @@ function eyedropperSteps() {
 export const eyedropper = {
   name: "eyedropper",
   fn: eyedropperSteps,
-  action: null,
   brushSize: 1,
   brushType: "circle",
   disabled: true,

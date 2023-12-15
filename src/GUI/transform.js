@@ -1,10 +1,10 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { vectorGui } from "./vector.js"
 
 /**
- *
  */
-export function renderTransformBox(vectorGui) {
+export function renderTransformBox() {
   let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
   let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
   canvas.vectorGuiCTX.lineWidth = lineWidth

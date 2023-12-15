@@ -222,8 +222,6 @@ function handlePointerUp(e) {
   state.tool.fn()
   //add to undo stack
   if (state.action) {
-    state.undoStack.push(state.action)
-
     if (
       ["fill", "quadCurve", "cubicCurve", "ellipse"].includes(state.tool.name)
     ) {
@@ -265,19 +263,6 @@ function handlePointerUp(e) {
 function handlePointerOut(e) {
   //TODO: if touchscreen, need to handle differently. Currently cannot reach next code since clicked will be false.
   //Only purpose is to rerender with multi step tools such as curve when moving out or in the case of touch, lifting finger
-  // if (state.clicked) {
-  //   canvas.pointerEvent = "pointerout"
-  //   state.clicked = false
-  //   state.tool.fn()
-  //   //add to undo stack
-  //   if (state.action) {
-  //     state.undoStack.push(state.action)
-  //   }
-  //   state.action = null
-  //   state.points = []
-  //   //Reset redostack
-  //   state.redoStack = []
-  // }
   if (!state.touch && state.clickCounter === 0) {
     renderCanvas(canvas.currentLayer)
     vectorGui.render()

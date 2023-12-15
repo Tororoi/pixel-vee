@@ -40,8 +40,7 @@
 
   box-shadow: $shadows;
 
-  &:hover:not([disabled]),
-  &:focus {
+  &:hover:not([disabled]) {
     $active-shadows: ();
     @each $side in $sides {
       $active-shadows: append(
@@ -55,15 +54,13 @@
 }
 
 @mixin editBoxBorder {
-  &:hover:not([disabled]),
-  &:focus {
+  &:hover:not([disabled]) {
     @include boxBorder($edit-color, $edit-color);
   }
 }
 
 @mixin removeBoxBorder {
-  &:hover:not([disabled]),
-  &:focus {
+  &:hover:not([disabled]) {
     @include boxBorder($remove-color, $remove-color);
   }
 }
@@ -79,8 +76,7 @@
 
 @mixin cancelBorder {
   box-shadow: none;
-  &:hover:not([disabled]),
-  &:focus {
+  &:hover:not([disabled]) {
     box-shadow: none;
   }
 }
@@ -126,8 +122,7 @@
       }
     }
   }
-  &:hover:not([disabled]),
-  &:focus {
+  &:hover:not([disabled]) {
     .drag-btn {
       .grip {
         background: $white;

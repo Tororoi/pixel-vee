@@ -58,10 +58,6 @@ export function createNewRasterLayer(name) {
   let onscreenLayerCVS = document.createElement("canvas")
   let onscreenLayerCTX = onscreenLayerCVS.getContext("2d")
   onscreenLayerCTX.willReadFrequently = true
-  onscreenLayerCTX.scale(
-    canvas.sharpness * canvas.zoom,
-    canvas.sharpness * canvas.zoom
-  )
   onscreenLayerCVS.className = "onscreen-canvas"
   dom.canvasLayers.appendChild(onscreenLayerCVS)
   onscreenLayerCVS.width = onscreenLayerCVS.offsetWidth * canvas.sharpness

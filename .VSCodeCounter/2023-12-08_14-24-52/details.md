@@ -1,0 +1,133 @@
+# Details
+
+Date : 2023-12-08 14:24:52
+
+Directory /Users/thomascantwell/pixel-vee
+
+Total : 118 files,  16720 codes, 2536 comments, 1051 blanks, all 20307 lines
+
+[Summary](results.md) / Details / [Diff Summary](diff.md) / [Diff Details](diff-details.md)
+
+## Files
+| filename | language | code | comment | blank | total |
+| :--- | :--- | ---: | ---: | ---: | ---: |
+| [LICENSE.md](/LICENSE.md) | Markdown | 544 | 0 | 118 | 662 |
+| [README.md](/README.md) | Markdown | 316 | 0 | 26 | 342 |
+| [css/style.css](/css/style.css) | CSS | 1,583 | 65 | 55 | 1,703 |
+| [index.html](/index.html) | HTML | 679 | 25 | 3 | 707 |
+| [index.js](/index.js) | JavaScript | 1 | 0 | 1 | 2 |
+| [package-lock.json](/package-lock.json) | JSON | 3,325 | 0 | 1 | 3,326 |
+| [package.json](/package.json) | JSON | 24 | 0 | 1 | 25 |
+| [public/pixelv-addlayer.svg](/public/pixelv-addlayer.svg) | XML | 7 | 0 | 1 | 8 |
+| [public/pixelv-brush.svg](/public/pixelv-brush.svg) | XML | 7 | 0 | 1 | 8 |
+| [public/pixelv-clear.svg](/public/pixelv-clear.svg) | XML | 6 | 0 | 1 | 7 |
+| [public/pixelv-color-mask.svg](/public/pixelv-color-mask.svg) | XML | 7 | 0 | 1 | 8 |
+| [public/pixelv-cubic-curve.svg](/public/pixelv-cubic-curve.svg) | XML | 4 | 0 | 1 | 5 |
+| [public/pixelv-ellipse.svg](/public/pixelv-ellipse.svg) | XML | 4 | 0 | 1 | 5 |
+| [public/pixelv-eraser.svg](/public/pixelv-eraser.svg) | XML | 7 | 0 | 1 | 8 |
+| [public/pixelv-eyeclosed.svg](/public/pixelv-eyeclosed.svg) | XML | 6 | 0 | 1 | 7 |
+| [public/pixelv-eyedropper.svg](/public/pixelv-eyedropper.svg) | XML | 7 | 0 | 1 | 8 |
+| [public/pixelv-eyeopen.svg](/public/pixelv-eyeopen.svg) | XML | 7 | 0 | 1 | 8 |
+| [public/pixelv-fill.svg](/public/pixelv-fill.svg) | XML | 6 | 0 | 1 | 7 |
+| [public/pixelv-grab.svg](/public/pixelv-grab.svg) | XML | 7 | 0 | 1 | 8 |
+| [public/pixelv-inject.svg](/public/pixelv-inject.svg) | XML | 7 | 0 | 1 | 8 |
+| [public/pixelv-line.svg](/public/pixelv-line.svg) | XML | 4 | 0 | 1 | 5 |
+| [public/pixelv-mechanical-pencil.svg](/public/pixelv-mechanical-pencil.svg) | XML | 7 | 0 | 1 | 8 |
+| [public/pixelv-minus.svg](/public/pixelv-minus.svg) | XML | 4 | 0 | 1 | 5 |
+| [public/pixelv-move.svg](/public/pixelv-move.svg) | XML | 4 | 0 | 1 | 5 |
+| [public/pixelv-palette-knife.svg](/public/pixelv-palette-knife.svg) | XML | 7 | 0 | 1 | 8 |
+| [public/pixelv-palette-scraper.svg](/public/pixelv-palette-scraper.svg) | XML | 7 | 0 | 1 | 8 |
+| [public/pixelv-plus.svg](/public/pixelv-plus.svg) | XML | 4 | 0 | 1 | 5 |
+| [public/pixelv-quadratic-curve.svg](/public/pixelv-quadratic-curve.svg) | XML | 4 | 0 | 1 | 5 |
+| [public/pixelv-recenter.svg](/public/pixelv-recenter.svg) | XML | 6 | 0 | 1 | 7 |
+| [public/pixelv-redo.svg](/public/pixelv-redo.svg) | XML | 6 | 0 | 1 | 7 |
+| [public/pixelv-reference.svg](/public/pixelv-reference.svg) | XML | 7 | 0 | 1 | 8 |
+| [public/pixelv-swatches.svg](/public/pixelv-swatches.svg) | XML | 5 | 0 | 1 | 6 |
+| [public/pixelv-switch.svg](/public/pixelv-switch.svg) | XML | 4 | 0 | 1 | 5 |
+| [public/pixelv-trash.svg](/public/pixelv-trash.svg) | XML | 7 | 0 | 1 | 8 |
+| [public/pixelv-undo.svg](/public/pixelv-undo.svg) | XML | 6 | 0 | 1 | 7 |
+| [scss/base/_base-styles.scss](/scss/base/_base-styles.scss) | SCSS | 96 | 45 | 13 | 154 |
+| [scss/base/_icons.scss](/scss/base/_icons.scss) | SCSS | 281 | 21 | 58 | 360 |
+| [scss/base/_keyframes.scss](/scss/base/_keyframes.scss) | SCSS | 19 | 3 | 2 | 24 |
+| [scss/base/_mixins.scss](/scss/base/_mixins.scss) | SCSS | 180 | 12 | 19 | 211 |
+| [scss/base/_variables.scss](/scss/base/_variables.scss) | SCSS | 43 | 5 | 5 | 53 |
+| [scss/components/_brushes.scss](/scss/components/_brushes.scss) | SCSS | 79 | 2 | 2 | 83 |
+| [scss/components/_canvas.scss](/scss/components/_canvas.scss) | SCSS | 43 | 3 | 3 | 49 |
+| [scss/components/_color-picker.scss](/scss/components/_color-picker.scss) | SCSS | 239 | 1 | 3 | 243 |
+| [scss/components/_layers.scss](/scss/components/_layers.scss) | SCSS | 90 | 4 | 2 | 96 |
+| [scss/components/_palette.scss](/scss/components/_palette.scss) | SCSS | 158 | 2 | 2 | 162 |
+| [scss/components/_size.scss](/scss/components/_size.scss) | SCSS | 38 | 1 | 2 | 41 |
+| [scss/components/_toolbox.scss](/scss/components/_toolbox.scss) | SCSS | 166 | 12 | 30 | 208 |
+| [scss/components/_vectors.scss](/scss/components/_vectors.scss) | SCSS | 160 | 4 | 2 | 166 |
+| [scss/layout/_layout.scss](/scss/layout/_layout.scss) | SCSS | 197 | 6 | 11 | 214 |
+| [scss/layout/_nav.scss](/scss/layout/_nav.scss) | SCSS | 95 | 1 | 1 | 97 |
+| [scss/style.scss](/scss/style.scss) | SCSS | 15 | 5 | 1 | 21 |
+| [src/Actions/actions.js](/src/Actions/actions.js) | JavaScript | 436 | 140 | 16 | 592 |
+| [src/Actions/modifyTimeline.js](/src/Actions/modifyTimeline.js) | JavaScript | 84 | 41 | 11 | 136 |
+| [src/Actions/undoRedo.js](/src/Actions/undoRedo.js) | JavaScript | 166 | 62 | 10 | 238 |
+| [src/Actions/untrackedActions.js](/src/Actions/untrackedActions.js) | JavaScript | 86 | 10 | 3 | 99 |
+| [src/Canvas/events.js](/src/Canvas/events.js) | JavaScript | 446 | 137 | 35 | 618 |
+| [src/Canvas/layers.js](/src/Canvas/layers.js) | JavaScript | 74 | 12 | 4 | 90 |
+| [src/Canvas/masks.js](/src/Canvas/masks.js) | JavaScript | 47 | 8 | 4 | 59 |
+| [src/Canvas/render.js](/src/Canvas/render.js) | JavaScript | 319 | 150 | 11 | 480 |
+| [src/Context/brushStamps.js](/src/Context/brushStamps.js) | JavaScript | 5 | 0 | 2 | 7 |
+| [src/Context/canvas.js](/src/Context/canvas.js) | JavaScript | 78 | 27 | 8 | 113 |
+| [src/Context/dom.js](/src/Context/dom.js) | JavaScript | 106 | 44 | 28 | 178 |
+| [src/Context/state.js](/src/Context/state.js) | JavaScript | 99 | 29 | 6 | 134 |
+| [src/Context/swatch.js](/src/Context/swatch.js) | JavaScript | 20 | 6 | 4 | 30 |
+| [src/Controls/events.js](/src/Controls/events.js) | JavaScript | 222 | 81 | 21 | 324 |
+| [src/Controls/shortcuts.js](/src/Controls/shortcuts.js) | JavaScript | 333 | 72 | 4 | 409 |
+| [src/DOM/render.js](/src/DOM/render.js) | JavaScript | 4 | 0 | 1 | 5 |
+| [src/DOM/renderLayers.js](/src/DOM/renderLayers.js) | JavaScript | 33 | 4 | 5 | 42 |
+| [src/DOM/renderModes.js](/src/DOM/renderModes.js) | JavaScript | 31 | 9 | 3 | 43 |
+| [src/DOM/renderPalette.js](/src/DOM/renderPalette.js) | JavaScript | 47 | 15 | 11 | 73 |
+| [src/DOM/renderVectors.js](/src/DOM/renderVectors.js) | JavaScript | 174 | 35 | 22 | 231 |
+| [src/GUI/cursor.js](/src/GUI/cursor.js) | JavaScript | 80 | 27 | 10 | 117 |
+| [src/GUI/curve.js](/src/GUI/curve.js) | JavaScript | 89 | 13 | 11 | 113 |
+| [src/GUI/ellipse.js](/src/GUI/ellipse.js) | JavaScript | 177 | 24 | 15 | 216 |
+| [src/GUI/fill.js](/src/GUI/fill.js) | JavaScript | 29 | 7 | 3 | 39 |
+| [src/GUI/grid.js](/src/GUI/grid.js) | JavaScript | 42 | 12 | 3 | 57 |
+| [src/GUI/select.js](/src/GUI/select.js) | JavaScript | 111 | 92 | 33 | 236 |
+| [src/GUI/transform.js](/src/GUI/transform.js) | JavaScript | 61 | 5 | 3 | 69 |
+| [src/GUI/vector.js](/src/GUI/vector.js) | JavaScript | 509 | 101 | 27 | 637 |
+| [src/Menu/events.js](/src/Menu/events.js) | JavaScript | 71 | 21 | 7 | 99 |
+| [src/Shortcuts/keys.js](/src/Shortcuts/keys.js) | JavaScript | 37 | 3 | 1 | 41 |
+| [src/Swatch/Picker.js](/src/Swatch/Picker.js) | JavaScript | 271 | 58 | 32 | 361 |
+| [src/Swatch/events.js](/src/Swatch/events.js) | JavaScript | 204 | 66 | 18 | 288 |
+| [src/Testing/brushTest.js](/src/Testing/brushTest.js) | JavaScript | 79 | 31 | 6 | 116 |
+| [src/Testing/ellipseTest.js](/src/Testing/ellipseTest.js) | JavaScript | 78 | 4 | 3 | 85 |
+| [src/Testing/performanceTesting.js](/src/Testing/performanceTesting.js) | JavaScript | 14 | 5 | 2 | 21 |
+| [src/Testing/storedActions.js](/src/Testing/storedActions.js) | JavaScript | 12 | 0 | 1 | 13 |
+| [src/Tools/brush.js](/src/Tools/brush.js) | JavaScript | 222 | 55 | 13 | 290 |
+| [src/Tools/curve.js](/src/Tools/curve.js) | JavaScript | 476 | 57 | 10 | 543 |
+| [src/Tools/ellipse.js](/src/Tools/ellipse.js) | JavaScript | 260 | 40 | 7 | 307 |
+| [src/Tools/events.js](/src/Tools/events.js) | JavaScript | 175 | 68 | 18 | 261 |
+| [src/Tools/eyedropper.js](/src/Tools/eyedropper.js) | JavaScript | 47 | 11 | 3 | 61 |
+| [src/Tools/fill.js](/src/Tools/fill.js) | JavaScript | 136 | 17 | 5 | 158 |
+| [src/Tools/grab.js](/src/Tools/grab.js) | JavaScript | 39 | 4 | 3 | 46 |
+| [src/Tools/index.js](/src/Tools/index.js) | JavaScript | 93 | 27 | 4 | 124 |
+| [src/Tools/line.js](/src/Tools/line.js) | JavaScript | 94 | 12 | 4 | 110 |
+| [src/Tools/move.js](/src/Tools/move.js) | JavaScript | 132 | 23 | 10 | 165 |
+| [src/Tools/select.js](/src/Tools/select.js) | JavaScript | 66 | 41 | 6 | 113 |
+| [src/index.js](/src/index.js) | JavaScript | 15 | 16 | 12 | 43 |
+| [src/utils/actionInterfaceHelpers.js](/src/utils/actionInterfaceHelpers.js) | JavaScript | 43 | 24 | 6 | 73 |
+| [src/utils/bezier.js](/src/utils/bezier.js) | JavaScript | 619 | 157 | 37 | 813 |
+| [src/utils/brushHelpers.js](/src/utils/brushHelpers.js) | JavaScript | 134 | 56 | 22 | 212 |
+| [src/utils/canvasHelpers.js](/src/utils/canvasHelpers.js) | JavaScript | 17 | 5 | 1 | 23 |
+| [src/utils/colorConversion.js](/src/utils/colorConversion.js) | JavaScript | 97 | 46 | 19 | 162 |
+| [src/utils/colors.js](/src/utils/colors.js) | JavaScript | 6 | 0 | 1 | 7 |
+| [src/utils/constrainElementOffsets.js](/src/utils/constrainElementOffsets.js) | JavaScript | 11 | 1 | 1 | 13 |
+| [src/utils/drag.js](/src/utils/drag.js) | JavaScript | 189 | 26 | 18 | 233 |
+| [src/utils/drawHelpers.js](/src/utils/drawHelpers.js) | JavaScript | 22 | 17 | 2 | 41 |
+| [src/utils/ellipse.js](/src/utils/ellipse.js) | JavaScript | 374 | 106 | 29 | 509 |
+| [src/utils/eventHelpers.js](/src/utils/eventHelpers.js) | JavaScript | 31 | 0 | 7 | 38 |
+| [src/utils/guiHelpers.js](/src/utils/guiHelpers.js) | JavaScript | 30 | 27 | 3 | 60 |
+| [src/utils/imageDataHelpers.js](/src/utils/imageDataHelpers.js) | JavaScript | 30 | 22 | 4 | 56 |
+| [src/utils/maskHelpers.js](/src/utils/maskHelpers.js) | JavaScript | 15 | 5 | 1 | 21 |
+| [src/utils/moveHelpers.js](/src/utils/moveHelpers.js) | JavaScript | 40 | 25 | 14 | 79 |
+| [src/utils/optionsInterfaceHelpers.js](/src/utils/optionsInterfaceHelpers.js) | JavaScript | 29 | 14 | 9 | 52 |
+| [src/utils/pickerHelpers.js](/src/utils/pickerHelpers.js) | JavaScript | 49 | 43 | 6 | 98 |
+| [src/utils/trig.js](/src/utils/trig.js) | JavaScript | 16 | 15 | 2 | 33 |
+| [src/utils/vectorHelpers.js](/src/utils/vectorHelpers.js) | JavaScript | 4 | 8 | 1 | 13 |
+
+[Summary](results.md) / Details / [Diff Summary](diff.md) / [Diff Details](diff-details.md)

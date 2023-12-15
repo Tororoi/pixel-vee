@@ -11,7 +11,7 @@ import {
   renderPaletteToolsToDOM,
   renderPaletteToDOM,
 } from "../DOM/render.js"
-import { changeActionColor } from "../Actions/actions.js"
+import { changeActionColor } from "../Actions/modifyTimeline.js"
 import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
 
 //====================================//
@@ -62,12 +62,13 @@ export function setColor(r, g, b, a, target) {
     target.color = color
     target.style.backgroundColor = color.color
     if (target.vector) {
-      changeActionColor(target.vector.index, color)
-      state.undoStack.push(state.action)
+      let oldColor = { ...target.vector.color }
+      target.vector.color = color
+      renderCanvas(target.vector.layer, true)
+      changeActionColor(target.vector, oldColor)
       state.action = null
       state.redoStack = []
       renderVectorsToDOM()
-      renderCanvas(target.vector.layer, true)
     }
     if (swatches.activePaletteIndex !== null) {
       if (swatches.activePaletteIndex > swatches.palette.length - 1) {

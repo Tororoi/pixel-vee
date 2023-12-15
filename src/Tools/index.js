@@ -19,7 +19,6 @@ export const tools = {
   modify: {
     name: "modify",
     fn: null,
-    action: null,
     brushSize: null,
     brushType: null,
     disabled: false,
@@ -30,7 +29,6 @@ export const tools = {
   changeMode: {
     name: "changeMode",
     fn: null,
-    action: null,
     brushSize: null,
     brushType: null,
     disabled: false,
@@ -41,7 +39,6 @@ export const tools = {
   changeColor: {
     name: "changeColor",
     fn: null,
-    action: null,
     brushSize: null,
     brushType: null,
     disabled: false,
@@ -52,7 +49,6 @@ export const tools = {
   remove: {
     name: "remove",
     fn: null,
-    action: null,
     brushSize: null,
     brushType: null,
     disabled: false,
@@ -63,7 +59,6 @@ export const tools = {
   clear: {
     name: "clear",
     fn: null,
-    action: null,
     brushSize: null,
     brushType: null,
     disabled: false,
@@ -91,7 +86,6 @@ export const tools = {
   addLayer: {
     name: "addLayer",
     fn: null,
-    action: null,
     brushSize: null,
     brushType: null,
     disabled: false,
@@ -102,7 +96,6 @@ export const tools = {
   removeLayer: {
     name: "removeLayer",
     fn: null,
-    action: null,
     brushSize: null,
     brushType: null,
     disabled: false,

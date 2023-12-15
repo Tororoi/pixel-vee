@@ -1,103 +1,41 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { vectorGui } from "./vector.js"
 import { drawControlPointHandle } from "../utils/guiHelpers.js"
 
 /**
- * @param {Object} vectorGui
+ * @param {Object} vectorProperties
+ * @param {Object} vectorAction
  */
-export function renderCurveVector(vectorGui) {
+export function renderCurveVector(vectorProperties, vectorAction) {
+  const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
+  const xOffset = vectorAction
+    ? vectorAction.layer.x + canvas.xOffset
+    : canvas.xOffset
+  const yOffset = vectorAction
+    ? vectorAction.layer.y + canvas.yOffset
+    : canvas.yOffset
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  let circleRadius = 8 * lineWidth
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
   canvas.vectorGuiCTX.fillStyle = "white"
 
   canvas.vectorGuiCTX.beginPath()
-  canvas.vectorGuiCTX.moveTo(
-    canvas.xOffset + state.vectorProperties.px1 + 0.5,
-    canvas.yOffset + state.vectorProperties.py1 + 0.5
-  )
+  canvas.vectorGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
 
-  if (state.vectorProperties.px4 !== null) {
-    canvas.vectorGuiCTX.bezierCurveTo(
-      canvas.xOffset + state.vectorProperties.px3 + 0.5,
-      canvas.yOffset + state.vectorProperties.py3 + 0.5,
-      canvas.xOffset + state.vectorProperties.px4 + 0.5,
-      canvas.yOffset + state.vectorProperties.py4 + 0.5,
-      canvas.xOffset + state.vectorProperties.px2 + 0.5,
-      canvas.yOffset + state.vectorProperties.py2 + 0.5
-    )
-    // Stroke non-filled lines
-    canvas.vectorGuiCTX.stroke()
-    canvas.vectorGuiCTX.clearRect(
-      canvas.xOffset,
-      canvas.yOffset,
-      canvas.offScreenCVS.width,
-      canvas.offScreenCVS.height
-    )
+  if (Number.isInteger(px4)) {
     canvas.vectorGuiCTX.beginPath()
-    canvas.vectorGuiCTX.moveTo(
-      canvas.xOffset + state.vectorProperties.px1 + 0.5,
-      canvas.yOffset + state.vectorProperties.py1 + 0.5
-    )
-    drawControlPointHandle(
-      canvas,
-      state.vectorProperties.px1,
-      state.vectorProperties.py1,
-      state.vectorProperties.px3,
-      state.vectorProperties.py3
-    )
-    drawControlPointHandle(
-      canvas,
-      state.vectorProperties.px2,
-      state.vectorProperties.py2,
-      state.vectorProperties.px4,
-      state.vectorProperties.py4
-    )
-  } else if (state.vectorProperties.px3 !== null) {
-    canvas.vectorGuiCTX.quadraticCurveTo(
-      canvas.xOffset + state.vectorProperties.px3 + 0.5,
-      canvas.yOffset + state.vectorProperties.py3 + 0.5,
-      canvas.xOffset + state.vectorProperties.px2 + 0.5,
-      canvas.yOffset + state.vectorProperties.py2 + 0.5
-    )
-    // Stroke non-filled lines
-    canvas.vectorGuiCTX.stroke()
-    canvas.vectorGuiCTX.clearRect(
-      canvas.xOffset,
-      canvas.yOffset,
-      canvas.offScreenCVS.width,
-      canvas.offScreenCVS.height
-    )
+    canvas.vectorGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
+    drawControlPointHandle(canvas, xOffset, yOffset, px1, py1, px3, py3)
+    drawControlPointHandle(canvas, xOffset, yOffset, px2, py2, px4, py4)
+  } else if (Number.isInteger(px3)) {
     canvas.vectorGuiCTX.beginPath()
-    canvas.vectorGuiCTX.moveTo(
-      canvas.xOffset + state.vectorProperties.px1 + 0.5,
-      canvas.yOffset + state.vectorProperties.py1 + 0.5
-    )
-    drawControlPointHandle(
-      canvas,
-      state.vectorProperties.px1,
-      state.vectorProperties.py1,
-      state.vectorProperties.px3,
-      state.vectorProperties.py3
-    )
-  } else if (state.vectorProperties.px2 !== null) {
-    canvas.vectorGuiCTX.lineTo(
-      canvas.xOffset + state.vectorProperties.px2 + 0.5,
-      canvas.yOffset + state.vectorProperties.py2 + 0.5
-    )
-    // Stroke non-filled lines
-    canvas.vectorGuiCTX.stroke()
-    canvas.vectorGuiCTX.clearRect(
-      canvas.xOffset,
-      canvas.yOffset,
-      canvas.offScreenCVS.width,
-      canvas.offScreenCVS.height
-    )
+    canvas.vectorGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
+    drawControlPointHandle(canvas, xOffset, yOffset, px1, py1, px3, py3)
   }
 
-  let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
-  //set point radius for detection in state
   let pointsKeys = [
     { x: "px1", y: "py1" },
     { x: "px2", y: "py2" },
@@ -105,23 +43,70 @@ export function renderCurveVector(vectorGui) {
     { x: "px4", y: "py4" },
   ]
 
-  vectorGui.drawControlPoints(
-    state.vectorProperties,
-    pointsKeys,
-    circleRadius,
-    false
-  )
+  if (!vectorAction) {
+    vectorGui.drawControlPoints(
+      vectorProperties,
+      pointsKeys,
+      circleRadius,
+      false
+    )
+  }
 
   // Stroke non-filled lines
   canvas.vectorGuiCTX.stroke()
 
   canvas.vectorGuiCTX.beginPath()
   vectorGui.drawControlPoints(
-    state.vectorProperties,
+    vectorProperties,
     pointsKeys,
     circleRadius / 2,
-    true
+    true, // modify
+    0,
+    vectorAction
   )
   // Fill points
   canvas.vectorGuiCTX.fill()
+}
+
+/**
+ * @param {Object} vectorProperties
+ * @param {Object} vectorAction
+ */
+export function renderCurvePath(vectorProperties, vectorAction) {
+  const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
+  const xOffset = vectorAction
+    ? vectorAction.layer.x + canvas.xOffset
+    : canvas.xOffset
+  const yOffset = vectorAction
+    ? vectorAction.layer.y + canvas.yOffset
+    : canvas.yOffset
+  // Setting of context attributes.
+  let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  canvas.vectorGuiCTX.lineWidth = lineWidth
+  canvas.vectorGuiCTX.strokeStyle = "white"
+
+  canvas.vectorGuiCTX.beginPath()
+  canvas.vectorGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
+
+  if (Number.isInteger(px4)) {
+    canvas.vectorGuiCTX.bezierCurveTo(
+      xOffset + px3 + 0.5,
+      yOffset + py3 + 0.5,
+      xOffset + px4 + 0.5,
+      yOffset + py4 + 0.5,
+      xOffset + px2 + 0.5,
+      yOffset + py2 + 0.5
+    )
+  } else if (Number.isInteger(px3)) {
+    canvas.vectorGuiCTX.quadraticCurveTo(
+      xOffset + px3 + 0.5,
+      yOffset + py3 + 0.5,
+      xOffset + px2 + 0.5,
+      yOffset + py2 + 0.5
+    )
+  } else if (Number.isInteger(px2)) {
+    canvas.vectorGuiCTX.lineTo(xOffset + px2 + 0.5, yOffset + py2 + 0.5)
+  }
+  // Stroke non-filled lines
+  canvas.vectorGuiCTX.stroke()
 }

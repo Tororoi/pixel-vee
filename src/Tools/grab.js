@@ -34,7 +34,6 @@ function grabSteps() {
 export const grab = {
   name: "grab",
   fn: grabSteps,
-  action: null,
   brushSize: 1,
   brushType: "circle",
   disabled: true,

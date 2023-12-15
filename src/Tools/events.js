@@ -7,11 +7,12 @@ import { tools } from "../Tools/index.js"
 import { handleUndo, handleRedo } from "../Actions/undoRedo.js"
 import { vectorGui } from "../GUI/vector.js"
 import { updateBrushPreview } from "../utils/brushHelpers.js"
-import { actionClear } from "../Actions/actions.js"
+import { actionClear } from "../Actions/modifyTimeline.js"
 import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM, renderBrushModesToDOM } from "../DOM/render.js"
 import { renderCursor } from "../GUI/cursor.js"
+import { createOptionToggle } from "../utils/optionsInterfaceHelpers.js"
 import { testAction } from "../Testing/performanceTesting.js"
 import { storedActions } from "../Testing/storedActions.js"
 
@@ -68,20 +69,19 @@ function handleRecenter() {
  * Non-cursor action that affects the timeline
  */
 function handleClearCanvas() {
-  actionClear(canvas.currentLayer)
-  state.undoStack.push(state.action)
-  state.action = null
-  state.pointsSet = null
-  state.seenPixelsSet = null
-  state.points = []
-  state.redoStack = []
   canvas.currentLayer.ctx.clearRect(
     0,
     0,
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
-  renderCanvas(null) //render all layers
+  actionClear(canvas.currentLayer)
+  state.action = null
+  state.pointsSet = null
+  state.seenPixelsSet = null
+  state.points = []
+  state.redoStack = []
+  renderCanvas(canvas.currentLayer)
   vectorGui.reset()
   state.reset()
   renderVectorsToDOM()
@@ -122,6 +122,8 @@ export function handleTools(e, manualToolName = null) {
       } else {
         canvas.vectorGuiCVS.style.cursor = state.tool.cursor
       }
+      //render menu options
+      renderToolOptionsToDOM()
       vectorGui.reset()
       state.reset()
       renderVectorsToDOM()
@@ -214,6 +216,28 @@ export function renderBrushStampToDOM() {
     brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
     state.tool.brushSize
   )
+}
+
+/**
+ *
+ */
+export function renderToolOptionsToDOM() {
+  dom.toolOptions.innerHTML = ""
+  if (
+    state.tool.name === "cubicCurve" ||
+    state.tool.name === "quadCurve" ||
+    state.tool.name === "ellipse"
+  ) {
+    //render cubic curve options to menu
+    Object.entries(state.tool.options).forEach(([key, value]) => {
+      let optionToggle = createOptionToggle(
+        key,
+        value
+        // option.tooltip
+      )
+      dom.toolOptions.appendChild(optionToggle)
+    })
+  }
 }
 
 //===================================//
