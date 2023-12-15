@@ -9,7 +9,7 @@ import {
   vectorGui,
   updateLinkedVectors,
   updateLockedCurrentVectorControlHandle,
-  createActiveIndecesForRender,
+  createActiveIndexesForRender,
 } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
@@ -390,8 +390,8 @@ function adjustCurveSteps(numPoints = 4) {
             updateLinkedVectors(currentVector, true)
           }
         }
-        state.activeIndeces = createActiveIndecesForRender(currentVector)
-        renderCanvas(currentVector.layer, true, state.activeIndeces, true)
+        state.activeIndexes = createActiveIndexesForRender(currentVector)
+        renderCanvas(currentVector.layer, true, state.activeIndexes, true)
       }
       break
     case "pointermove":
@@ -414,7 +414,7 @@ function adjustCurveSteps(numPoints = 4) {
           }
           updateLinkedVectors(currentVector)
         }
-        renderCanvas(currentVector.layer, true, state.activeIndeces)
+        renderCanvas(currentVector.layer, true, state.activeIndexes)
       }
       break
     case "pointerup":
@@ -504,7 +504,7 @@ function adjustCurveSteps(numPoints = 4) {
             }
           }
         }
-        renderCanvas(currentVector.layer, true, state.activeIndeces)
+        renderCanvas(currentVector.layer, true, state.activeIndexes)
         modifyVectorAction(currentVector)
         vectorGui.selectedPoint = {
           xKey: null,

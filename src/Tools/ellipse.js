@@ -5,7 +5,7 @@ import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { actionEllipse } from "../Actions/actions.js"
 import { modifyVectorAction } from "../Actions/modifyTimeline.js"
-import { vectorGui } from "../GUI/vector.js"
+import { vectorGui, createActiveIndexesForRender } from "../GUI/vector.js"
 import {
   updateEllipseVertex,
   updateEllipseOffsets,
@@ -270,16 +270,16 @@ export function adjustEllipseSteps() {
           currentVector.properties.vectorProperties.forceCircle
       }
       updateEllipseVectorProperties(currentVector)
-      state.activeIndeces = createActiveIndecesForRender(currentVector)
-      renderCanvas(currentVector.layer, true, state.activeIndeces, true)
+      state.activeIndexes = createActiveIndexesForRender(currentVector)
+      renderCanvas(currentVector.layer, true, state.activeIndexes, true)
       break
     case "pointermove":
       updateEllipseVectorProperties(currentVector)
-      renderCanvas(currentVector.layer, true, state.activeIndeces)
+      renderCanvas(currentVector.layer, true, state.activeIndexes)
       break
     case "pointerup":
       updateEllipseVectorProperties(currentVector)
-      renderCanvas(currentVector.layer, true, state.activeIndeces)
+      renderCanvas(currentVector.layer, true, state.activeIndexes)
       modifyVectorAction(currentVector)
       vectorGui.selectedPoint = {
         xKey: null,

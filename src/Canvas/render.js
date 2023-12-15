@@ -18,25 +18,25 @@ import {
 /**
  * Redraw all timeline actions
  * Critical function for the timeline to work
- * For handling activeIndeces, the idea is to save images of multiple actions that aren't changing to save time redrawing.
+ * For handling activeIndexes, the idea is to save images of multiple actions that aren't changing to save time redrawing.
  * The current problem is that later actions "fill" or "draw" with a mask are affected by earlier actions.
  * TODO: Another efficiency improvement would be to perform incremental rendering with caching so only the affected region of the canvas is rerendered.
  * TODO: Use OffscreenCanvas in a web worker to offload rendering to a separate thread.
  * @param {Object} layer - optional parameter to limit render to a specific layer
- * @param {Array} activeIndeces - optional parameter to limit render to specific actions. If not passed in, all actions will be rendered.
+ * @param {Array} activeIndexes - optional parameter to limit render to specific actions. If not passed in, all actions will be rendered.
  * @param {Boolean} setImages - optional parameter to set images for actions. Will be used when history is modified to update action images.
  */
-export function redrawTimelineActions(layer, activeIndeces, setImages = false) {
+export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
   //follows stored instructions to reassemble drawing. Costly operation. Minimize usage as much as possible.
   let betweenCtx = null //canvas context for saving between actions
   let startIndex = 1
-  if (activeIndeces) {
+  if (activeIndexes) {
     if (setImages) {
       //set initial sandwiched canvas
       betweenCtx = createAndSaveContext()
     } else {
       //set starting index at first active index
-      startIndex = activeIndeces[0]
+      startIndex = activeIndexes[0]
     }
   }
   //loop through all actions
@@ -46,10 +46,10 @@ export function redrawTimelineActions(layer, activeIndeces, setImages = false) {
     if (layer) {
       if (action.layer !== layer) continue
     }
-    if (activeIndeces) {
-      if (activeIndeces.includes(i)) {
+    if (activeIndexes) {
+      if (activeIndexes.includes(i)) {
         //render betweenCanvas
-        let activeIndex = activeIndeces.indexOf(i)
+        let activeIndex = activeIndexes.indexOf(i)
         //draw accumulated canvas actions from previous betweenCanvas to action.layer.ctx
         action.layer.ctx.drawImage(
           state.savedBetweenActionImages[activeIndex].cvs,
@@ -65,15 +65,15 @@ export function redrawTimelineActions(layer, activeIndeces, setImages = false) {
     if (!action.hidden && !action.removed) {
       performAction(action, betweenCtx)
     }
-    if (activeIndeces) {
-      if (activeIndeces.includes(i)) {
+    if (activeIndexes) {
+      if (activeIndexes.includes(i)) {
         if (setImages) {
-          //if activeIndeces and setImages, loop through all actions and set image from previous active index to current active index to state.savedBetweenActionImages[i].betweenImage
+          //if activeIndexes and setImages, loop through all actions and set image from previous active index to current active index to state.savedBetweenActionImages[i].betweenImage
           betweenCtx = createAndSaveContext()
           //actions rendered in loop beyond this point will render onto this cvs until a new one is set
         } else {
           //set i to next activeIndex to skip all actions until next activeIndex
-          let nextActiveIndex = activeIndeces[activeIndeces.indexOf(i) + 1]
+          let nextActiveIndex = activeIndexes[activeIndexes.indexOf(i) + 1]
           if (nextActiveIndex) {
             i = nextActiveIndex - 1
           }
@@ -118,12 +118,6 @@ function createAndSaveContext() {
  */
 function performAction(action, betweenCtx) {
   switch (action.tool.name) {
-    case "addLayer":
-      action.layer.removed = false
-      break
-    case "removeLayer":
-      action.layer.removed = true
-      break
     case "brush":
       const offsetX = action.layer.x
       const offsetY = action.layer.y
@@ -436,12 +430,12 @@ export function clearOffscreenCanvas(activeLayer = null) {
  * Render canvas entirely including all actions in timeline
  * @param {Object} activeLayer
  * @param {Boolean} redrawTimeline - pass true to redraw all previous actions
- * @param {Boolean} setImages - pass true to set images for actions between indeces
+ * @param {Boolean} setImages - pass true to set images for actions between indexes
  */
 export function renderCanvas(
   activeLayer = null,
   redrawTimeline = false,
-  activeIndeces = null,
+  activeIndexes = null,
   setImages = false
 ) {
   // window.requestAnimationFrame(() => {
@@ -450,8 +444,7 @@ export function renderCanvas(
     //clear offscreen layers
     clearOffscreenCanvas(activeLayer)
     //render all previous actions
-    //TODO: instead of always redrawing timeline, some actions could draw the image from the previous action from the same layer and only need to render the action at the specified index.
-    redrawTimelineActions(activeLayer, activeIndeces, setImages)
+    redrawTimelineActions(activeLayer, activeIndexes, setImages)
   }
   //render background canvas
   renderBackgroundCanvas()

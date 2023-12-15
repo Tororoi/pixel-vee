@@ -2,7 +2,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "../GUI/vector.js"
 import { clearOffscreenCanvas, renderCanvas } from "../Canvas/render.js"
-import { renderVectorsToDOM } from "../DOM/render.js"
+import { renderVectorsToDOM, renderLayersToDOM } from "../DOM/render.js"
 
 //====================================//
 //========= * * * Core * * * =========//
@@ -164,6 +164,22 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       latestAction.properties[modType]
   } else if (latestAction.tool.name === "clear") {
     handleClearAction(latestAction)
+  } else if (latestAction.tool.name === "addLayer") {
+    if (modType === "from") {
+      //If undoing addLayer, remove layer from canvas
+      latestAction.layer.removed = true
+    } else if (modType === "to") {
+      //If redoing addLayer, add layer to canvas
+      latestAction.layer.removed = false
+    }
+  } else if (latestAction.tool.name === "removeLayer") {
+    if (modType === "from") {
+      //If undoing removeLayer, add layer to canvas
+      latestAction.layer.removed = false
+    } else if (modType === "to") {
+      //If redoing removeLayer, remove layer from canvas
+      latestAction.layer.removed = true
+    }
   } else if (latestAction.tool.name === "select") {
     //TODO: maybe selection should just be a modification on every action instead of separate select actions.
     //Right now, undoing a select action when the newLatestAction isn't also a select tool means the earlier select action won't be rendered even if it should be
@@ -205,12 +221,20 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       break
     }
   }
-  clearOffscreenCanvas(latestAction.layer)
-  let img = new Image()
-  img.src = mostRecentActionFromSameLayer.snapshot
-  img.onload = function () {
-    latestAction.layer.ctx.drawImage(img, 0, 0)
-    renderCanvas(latestAction.layer) //should be based on layer of affected action
+  if (mostRecentActionFromSameLayer?.snapshot) {
+    clearOffscreenCanvas(mostRecentActionFromSameLayer.layer)
+    let img = new Image()
+    img.src = mostRecentActionFromSameLayer.snapshot
+    img.onload = function () {
+      mostRecentActionFromSameLayer.layer.ctx.drawImage(img, 0, 0)
+      renderCanvas(mostRecentActionFromSameLayer.layer)
+      renderLayersToDOM()
+      renderVectorsToDOM()
+      state.reset()
+    }
+  } else {
+    renderCanvas(latestAction.layer)
+    renderLayersToDOM()
     renderVectorsToDOM()
     state.reset()
   }

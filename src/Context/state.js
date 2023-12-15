@@ -49,7 +49,7 @@ export const state = {
   //for vector tools
   clickCounter: 0,
   vectorsSavedProperties: {},
-  activeIndeces: [],
+  activeIndexes: [],
   savedBetweenActionImages: [],
   vectorProperties: {
     px1: null,
@@ -96,7 +96,7 @@ export const state = {
 function addToTimeline(actionObject) {
   const { tool, color, layer, properties } = actionObject
   //use current state for variables
-  let snapshot = layer.cvs.toDataURL()
+  let snapshot = layer.type === "raster" ? layer.cvs.toDataURL() : null
   state.action = {
     tool: { ...tool },
     modes: { ...tool.modes },
