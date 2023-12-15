@@ -11,29 +11,24 @@ function camelCaseToWords(str) {
 /**
  *
  * @param {String} optionName
- * @param {Boolean} optionSelected
- * @param {String} tooltipText
+ * @param {Object} option
  * @returns {Element}
  */
-export function createOptionToggle(
-  optionName,
-  optionSelected,
-  tooltipText = null
-) {
+export function createOptionToggle(optionName, option) {
   // Create label element
   const label = document.createElement("label")
   label.htmlFor = optionName + "-toggle"
   label.id = optionName
   label.className = "toggle"
-  if (tooltipText) {
-    label.setAttribute("data-tooltip", tooltipText)
+  if (option.tooltip) {
+    label.setAttribute("data-tooltip", option.tooltip)
   }
 
   // Create input (checkbox) element
   const input = document.createElement("input")
   input.type = "checkbox"
   input.id = optionName + "-toggle"
-  input.checked = optionSelected
+  input.checked = option.active
 
   // Create span for the checkmark
   const span = document.createElement("span")

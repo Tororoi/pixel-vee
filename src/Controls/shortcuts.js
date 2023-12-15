@@ -53,7 +53,7 @@ export function activateShortcut(keyCode) {
     case "ShiftLeft":
     case "ShiftRight":
       if (dom.toolBtn.id === "brush") {
-        state.tool.options.line = true
+        tools.brush.options.line.active = true
         state.lineStartX = state.cursorX
         state.lineStartY = state.cursorY
       } else if (dom.toolBtn.id === "ellipse") {
@@ -68,16 +68,16 @@ export function activateShortcut(keyCode) {
           vectorGui.render()
         }
       } else if (dom.toolBtn.id === "cubicCurve") {
-        // state.tool.options.link = true
-        state.tool.options.link = !state.tool.options.link
+        tools.cubicCurve.options.link.active =
+          !tools.cubicCurve.options.link.active
         renderToolOptionsToDOM()
         vectorGui.render()
       }
       break
     case "KeyA":
       if (dom.toolBtn.id === "cubicCurve") {
-        // state.tool.options.align = true
-        state.tool.options.align = !state.tool.options.align
+        tools.cubicCurve.options.align.active =
+          !tools.cubicCurve.options.align.active
         renderToolOptionsToDOM()
         vectorGui.render()
       }
@@ -281,7 +281,7 @@ export function deactivateShortcut(keyCode) {
     case "ShiftLeft":
     case "ShiftRight":
       state.tool = tools[dom.toolBtn.id]
-      tools.brush.options.line = false
+      tools.brush.options.line.active = false
       if (state.tool.name === "brush" && state.clicked) {
         state.tool.fn()
       }
@@ -297,18 +297,9 @@ export function deactivateShortcut(keyCode) {
           vectorGui.render()
         }
       }
-      // if (state.tool.name === "cubicCurve") {
-      //   state.tool.options.link = false
-      //   renderToolOptionsToDOM()
-      //   vectorGui.render()
-      // }
       break
     case "KeyA":
-      // if (state.tool.name === "cubicCurve") {
-      //   state.tool.options.align = false
-      //   renderToolOptionsToDOM()
-      //   vectorGui.render()
-      // }
+      //
       break
     case "KeyB":
       //

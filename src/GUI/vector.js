@@ -274,9 +274,9 @@ function render(lineDashOffset = 0.5) {
   canvas.vectorGuiCTX.imageSmoothingEnabled = false
   //if linking, render all vectors in the layer
   if (
-    state.tool.options.displayVectors ||
-    state.tool.options.align ||
-    state.tool.options.link
+    state.tool.options.displayVectors?.active ||
+    state.tool.options.align?.active ||
+    state.tool.options.link?.active
   ) {
     renderLayerVectors(canvas.currentLayer)
   } else {
@@ -383,7 +383,7 @@ function renderLayerVectors(layer) {
   }
   //render selected vector path
   renderPath(state.tool.name, state.vectorProperties)
-  if (!state.tool.options.displayPaths) {
+  if (!state.tool.options.displayPaths?.active) {
     // Clear strokes from drawing area
     canvas.vectorGuiCTX.clearRect(
       canvas.xOffset,
@@ -421,7 +421,7 @@ function renderLayerVectors(layer) {
 function renderCurrentVector() {
   //render paths
   renderPath(state.tool.name, state.vectorProperties)
-  if (!state.tool.options.displayPaths) {
+  if (!state.tool.options.displayPaths?.active) {
     // Clear strokes from drawing area
     canvas.vectorGuiCTX.clearRect(
       canvas.xOffset,
@@ -454,7 +454,7 @@ export function updateLinkedVectors(
     currentDeltaY =
       currentVector.properties.vectorProperties.py1 -
       currentVector.properties.vectorProperties.py3
-    if (!state.tool.options.align) {
+    if (!state.tool.options.align?.active) {
       let angle = getAngle(currentDeltaX, currentDeltaY)
       let savedCurrentProperties =
         state.vectorsSavedProperties[currentVector.index]
@@ -471,7 +471,7 @@ export function updateLinkedVectors(
     currentDeltaY =
       currentVector.properties.vectorProperties.py2 -
       currentVector.properties.vectorProperties.py4
-    if (!state.tool.options.align) {
+    if (!state.tool.options.align?.active) {
       let angle = getAngle(currentDeltaX, currentDeltaY)
       let savedCurrentProperties =
         state.vectorsSavedProperties[currentVector.index]
@@ -506,7 +506,7 @@ export function updateLinkedVectors(
         vectorGui.selectedPoint.xKey === "px2"
       ) {
         updateVectorProperties(linkedVector, x, y, "px1", "py1")
-        if (state.tool.options.align) {
+        if (state.tool.options.align?.active) {
           //update px3 and py3
           const xDiff = savedProperties.px1 - savedProperties.px3
           const yDiff = savedProperties.py1 - savedProperties.py3
@@ -522,7 +522,7 @@ export function updateLinkedVectors(
         vectorGui.selectedPoint.xKey === "px3" ||
         vectorGui.selectedPoint.xKey === "px4"
       ) {
-        if (state.tool.options.align) {
+        if (state.tool.options.align?.active) {
           deltaX = currentDeltaX * 2
           deltaY = currentDeltaY * 2
         } else {
@@ -557,7 +557,7 @@ export function updateLinkedVectors(
         vectorGui.selectedPoint.xKey === "px2"
       ) {
         updateVectorProperties(linkedVector, x, y, "px2", "py2")
-        if (state.tool.options.align) {
+        if (state.tool.options.align?.active) {
           //update px4 and py4
           const xDiff = savedProperties.px2 - savedProperties.px4
           const yDiff = savedProperties.py2 - savedProperties.py4
@@ -573,7 +573,7 @@ export function updateLinkedVectors(
         vectorGui.selectedPoint.xKey === "px3" ||
         vectorGui.selectedPoint.xKey === "px4"
       ) {
-        if (state.tool.options.align) {
+        if (state.tool.options.align?.active) {
           deltaX = currentDeltaX * 2
           deltaY = currentDeltaY * 2
         } else {

@@ -229,12 +229,8 @@ export function renderToolOptionsToDOM() {
     state.tool.name === "ellipse"
   ) {
     //render cubic curve options to menu
-    Object.entries(state.tool.options).forEach(([key, value]) => {
-      let optionToggle = createOptionToggle(
-        key,
-        value
-        // option.tooltip
-      )
+    Object.entries(state.tool.options).forEach(([name, option]) => {
+      let optionToggle = createOptionToggle(name, option)
       dom.toolOptions.appendChild(optionToggle)
     })
   }

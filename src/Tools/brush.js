@@ -44,7 +44,7 @@ function brushSteps() {
       break
     case "pointermove":
       //draw line connecting points that don't touch or if shift is held
-      if (state.tool.options.line) {
+      if (state.tool.options.line?.active) {
         renderCanvas(canvas.currentLayer)
         //preview the line
         actionLine(
@@ -282,7 +282,7 @@ export const brush = {
   brushSize: 1,
   brushType: "circle",
   disabled: false,
-  options: { line: false },
+  options: { line: { active: false } },
   modes: { eraser: false, inject: false, perfect: false, colorMask: false },
   type: "raster",
   cursor: "crosshair",

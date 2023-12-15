@@ -158,7 +158,7 @@ function handlePointerMove(e) {
   setCoordinates(e)
   let cursorMoved =
     state.previousX !== state.cursorX || state.previousY !== state.cursorY
-  if (state.tool.options.useSubPixels && !cursorMoved) {
+  if (state.tool.options.useSubPixels?.active && !cursorMoved) {
     cursorMoved =
       canvas.previousSubPixelX !== canvas.subPixelX ||
       canvas.previousSubPixelY !== canvas.subPixelY
@@ -188,7 +188,7 @@ function handlePointerMove(e) {
       renderCursor(state, canvas, swatches)
     }
   }
-  // if (!state.tool.options.line) {
+  // if (!state.tool.options.line?.active) {
   // save last point
   state.previousX = state.cursorX
   state.previousY = state.cursorY
