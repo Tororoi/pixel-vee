@@ -395,6 +395,12 @@ function addReferenceLayer() {
           removed: false,
         }
         canvas.layers.unshift(layer)
+        state.addToTimeline({
+          tool: tools.addLayer,
+          layer,
+        })
+        state.action = null
+        state.redoStack = []
         renderLayersToDOM()
         renderCanvas(null)
       }
@@ -594,6 +600,10 @@ dom.canvasWidth.addEventListener("blur", restrictSize)
 dom.canvasHeight.addEventListener("blur", restrictSize)
 
 // * Layers * //
+dom.uploadBtn.addEventListener("click", (e) => {
+  //reset value so that the same file can be uploaded multiple times
+  e.target.value = null
+})
 dom.uploadBtn.addEventListener("change", addReferenceLayer)
 dom.newLayerBtn.addEventListener("click", addRasterLayer)
 

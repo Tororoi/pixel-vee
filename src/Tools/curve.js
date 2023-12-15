@@ -524,7 +524,7 @@ export const quadCurve = {
   brushType: "circle",
   disabled: false,
   options: {
-    // displayPaths: false
+    displayPaths: false,
   },
   modes: { eraser: false, inject: false },
   type: "vector",
@@ -539,8 +539,8 @@ export const cubicCurve = {
   brushType: "circle",
   disabled: false,
   options: {
-    align: false,
-    link: false,
+    align: false, //TODO: change to object with active: false, tooltip: "Toggle Align (A). Control handles will move to opposite angle when snapping to another control point. Linked vectors' control handle will move to match velocity in addition to an opposite angle."
+    link: false, //TODO: change to object with active: false, tooltip: "Toggle Linking (Shift). Connected control points will move with selected control point."
     // displayVectors: false,
     displayPaths: true,
   }, //align: G1 tangent continuity, default C1 velocity continuity, link: C0/G0 positional continuity and move connected vector control point with selected control point.

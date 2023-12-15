@@ -68,14 +68,16 @@ export function activateShortcut(keyCode) {
           vectorGui.render()
         }
       } else if (dom.toolBtn.id === "cubicCurve") {
-        state.tool.options.link = true
+        // state.tool.options.link = true
+        state.tool.options.link = !state.tool.options.link
         renderToolOptionsToDOM()
         vectorGui.render()
       }
       break
     case "KeyA":
       if (dom.toolBtn.id === "cubicCurve") {
-        state.tool.options.align = true
+        // state.tool.options.align = true
+        state.tool.options.align = !state.tool.options.align
         renderToolOptionsToDOM()
         vectorGui.render()
       }
@@ -295,18 +297,18 @@ export function deactivateShortcut(keyCode) {
           vectorGui.render()
         }
       }
-      if (state.tool.name === "cubicCurve") {
-        state.tool.options.link = false
-        renderToolOptionsToDOM()
-        vectorGui.render()
-      }
+      // if (state.tool.name === "cubicCurve") {
+      //   state.tool.options.link = false
+      //   renderToolOptionsToDOM()
+      //   vectorGui.render()
+      // }
       break
     case "KeyA":
-      if (state.tool.name === "cubicCurve") {
-        state.tool.options.align = false
-        renderToolOptionsToDOM()
-        vectorGui.render()
-      }
+      // if (state.tool.name === "cubicCurve") {
+      //   state.tool.options.align = false
+      //   renderToolOptionsToDOM()
+      //   vectorGui.render()
+      // }
       break
     case "KeyB":
       //
