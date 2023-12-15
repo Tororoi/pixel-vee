@@ -98,7 +98,6 @@ function lineSteps() {
 export const line = {
   name: "line",
   fn: lineSteps,
-  action: actionLine,
   brushSize: 1,
   brushType: "circle",
   disabled: false,

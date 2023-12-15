@@ -48,6 +48,9 @@ export const state = {
   startScale: null,
   //for vector tools
   clickCounter: 0,
+  vectorsSavedProperties: {},
+  activeIndexes: [],
+  savedBetweenActionImages: [],
   vectorProperties: {
     px1: null,
     py1: null,
@@ -93,6 +96,7 @@ export const state = {
 function addToTimeline(actionObject) {
   const { tool, color, layer, properties } = actionObject
   //use current state for variables
+  let snapshot = layer.type === "raster" ? layer.cvs.toDataURL() : null
   state.action = {
     tool: { ...tool },
     modes: { ...tool.modes },
@@ -101,7 +105,10 @@ function addToTimeline(actionObject) {
     properties,
     hidden: false,
     removed: false,
+    snapshot,
   }
+  state.undoStack.push(state.action)
+  //TODO: save image of layer to action. When undo/redo occurs, render image to canvas instead of redrawing timeline. For modify actions, images of modified action and subsequent actions must be updated.
 }
 
 /**

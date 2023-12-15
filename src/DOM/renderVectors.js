@@ -29,7 +29,10 @@ export const renderVectorsToDOM = () => {
  * @returns {Boolean}
  */
 const isValidAction = (action) =>
-  !action.removed && !action.layer?.removed && action.tool.type === "vector"
+  !action.removed &&
+  !action.layer?.removed &&
+  action.tool.type === "vector" &&
+  action.layer === canvas.currentLayer
 
 /**
  * Render a vector element

@@ -86,6 +86,7 @@ function brushSteps() {
       }
       //only needed if perfect pixels option is on
       drawBrushPoint(state.cursorX, state.cursorY, brushDirection)
+      renderCanvas(canvas.currentLayer)
       //add action to timeline
       let maskArray = coordArrayFromSet(
         state.maskSet,
@@ -95,9 +96,8 @@ function brushSteps() {
       state.addToTimeline({
         tool: brush,
         layer: canvas.currentLayer,
-        properties: { points: state.points, maskSet: state.maskSet, maskArray },
+        properties: { maskSet: state.maskSet, maskArray, points: state.points },
       })
-      renderCanvas(canvas.currentLayer)
       if (state.tool.modes?.colorMask) {
         state.maskSet = null
       }
@@ -170,6 +170,7 @@ function drawPreviewBrushPoint() {
     state.tool.modes,
     state.maskSet,
     state.seenPixelsSet,
+    null,
     true,
     true
   )
@@ -278,7 +279,6 @@ function handlePerfectPixels() {
 export const brush = {
   name: "brush",
   fn: brushSteps,
-  action: actionDraw,
   brushSize: 1,
   brushType: "circle",
   disabled: false,

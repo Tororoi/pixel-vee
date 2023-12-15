@@ -14,6 +14,7 @@ import {
   handleTools,
   handleModes,
   renderBrushStampToDOM,
+  renderToolOptionsToDOM,
 } from "../Tools/events.js"
 import { renderCursor } from "../GUI/cursor.js"
 
@@ -66,10 +67,20 @@ export function activateShortcut(keyCode) {
           adjustEllipseSteps()
           vectorGui.render()
         }
+      } else if (dom.toolBtn.id === "cubicCurve") {
+        // state.tool.options.link = true
+        state.tool.options.link = !state.tool.options.link
+        renderToolOptionsToDOM()
+        vectorGui.render()
       }
       break
     case "KeyA":
-      //
+      if (dom.toolBtn.id === "cubicCurve") {
+        // state.tool.options.align = true
+        state.tool.options.align = !state.tool.options.align
+        renderToolOptionsToDOM()
+        vectorGui.render()
+      }
       break
     case "KeyB":
       if (!state.clicked) {
@@ -104,7 +115,6 @@ export function activateShortcut(keyCode) {
                 maskSet: state.maskSet,
               },
             })
-            state.undoStack.push(state.action)
             state.action = null
             state.redoStack = []
             state.resetSelectProperties()
@@ -276,18 +286,29 @@ export function deactivateShortcut(keyCode) {
         state.tool.fn()
       }
       state.vectorProperties.forceCircle = false
-      if (
-        (vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey) &&
-        vectorGui.selectedPoint.xKey !== "px1"
-      ) {
-        //while holding control point, readjust ellipse without having to move cursor.
-        //TODO: update this functionality to have other radii go back to previous radius value when releasing shift
-        adjustEllipseSteps()
-        vectorGui.render()
+      if (state.tool.name === "ellipse") {
+        if (
+          (vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey) &&
+          vectorGui.selectedPoint.xKey !== "px1"
+        ) {
+          //while holding control point, readjust ellipse without having to move cursor.
+          //TODO: update this functionality to have other radii go back to previous radius value when releasing shift
+          adjustEllipseSteps()
+          vectorGui.render()
+        }
       }
+      // if (state.tool.name === "cubicCurve") {
+      //   state.tool.options.link = false
+      //   renderToolOptionsToDOM()
+      //   vectorGui.render()
+      // }
       break
     case "KeyA":
-      //
+      // if (state.tool.name === "cubicCurve") {
+      //   state.tool.options.align = false
+      //   renderToolOptionsToDOM()
+      //   vectorGui.render()
+      // }
       break
     case "KeyB":
       //

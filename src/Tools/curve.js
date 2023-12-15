@@ -3,14 +3,18 @@ import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
+import { actionQuadraticCurve, actionCubicCurve } from "../Actions/actions.js"
+import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 import {
-  modifyVectorAction,
-  actionQuadraticCurve,
-  actionCubicCurve,
-} from "../Actions/actions.js"
-import { vectorGui } from "../GUI/vector.js"
+  vectorGui,
+  updateLinkedVectors,
+  updateLockedCurrentVectorControlHandle,
+  createActiveIndexesForRender,
+} from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
+import { getAngle } from "../utils/trig.js"
+import { updateVectorProperties } from "../utils/vectorHelpers.js"
 
 //=====================================//
 //=== * * * Curve Controllers * * * ===//
@@ -64,6 +68,7 @@ function quadCurveSteps() {
         brushStamps[state.tool.brushType][state.tool.brushSize],
         state.tool.brushSize,
         state.maskSet,
+        null,
         true
       )
 
@@ -98,6 +103,7 @@ function quadCurveSteps() {
         brushStamps[state.tool.brushType][state.tool.brushSize],
         state.tool.brushSize,
         state.maskSet,
+        null,
         true
       )
 
@@ -221,6 +227,7 @@ function cubicCurveSteps() {
         brushStamps[state.tool.brushType][state.tool.brushSize],
         state.tool.brushSize,
         state.maskSet,
+        null,
         true
       )
       break
@@ -260,6 +267,7 @@ function cubicCurveSteps() {
         brushStamps[state.tool.brushType][state.tool.brushSize],
         state.tool.brushSize,
         state.maskSet,
+        null,
         true
       )
       break
@@ -314,6 +322,8 @@ function cubicCurveSteps() {
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {
+            // p1LinkedVectors: {},
+            // p2LinkedVectors: {},
             vectorProperties: {
               px1: state.vectorProperties.px1 - canvas.currentLayer.x,
               py1: state.vectorProperties.py1 - canvas.currentLayer.y,
@@ -337,6 +347,10 @@ function cubicCurveSteps() {
   }
 }
 
+//=======================================//
+//======== * * * Adjusters * * * ========//
+//=======================================//
+
 /**
  * Used automatically by curve tools after curve is completed.
  * TODO: create distinct tool for adjusting that won't create a new curve when clicking.
@@ -347,7 +361,7 @@ function adjustCurveSteps(numPoints = 4) {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
-  let action = state.undoStack[canvas.currentVectorIndex]
+  let currentVector = state.undoStack[canvas.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.collisionPresent && state.clickCounter === 0) {
@@ -357,104 +371,145 @@ function adjustCurveSteps(numPoints = 4) {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
         }
-        action.hidden = true
-        if (numPoints === 3) {
-          renderCanvas(action.layer, true)
-          actionQuadraticCurve(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.px2,
-            state.vectorProperties.py2,
-            state.vectorProperties.px3,
-            state.vectorProperties.py3,
-            3,
-            action.color,
-            action.layer,
-            action.modes,
-            brushStamps[action.tool.brushType][action.tool.brushSize],
-            action.tool.brushSize,
-            action.maskSet,
-            true
-          )
-        } else {
-          renderCanvas(action.layer, true)
-          actionCubicCurve(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.px2,
-            state.vectorProperties.py2,
-            state.vectorProperties.px3,
-            state.vectorProperties.py3,
-            state.vectorProperties.px4,
-            state.vectorProperties.py4,
-            4,
-            action.color,
-            action.layer,
-            action.modes,
-            brushStamps[action.tool.brushType][action.tool.brushSize],
-            action.tool.brushSize,
-            action.maskSet,
-            true
-          )
+        state.vectorsSavedProperties[canvas.currentVectorIndex] = {
+          ...currentVector.properties.vectorProperties,
         }
+        //save linked vectors tooß
+        updateVectorProperties(
+          currentVector,
+          state.cursorX,
+          state.cursorY,
+          vectorGui.selectedPoint.xKey,
+          vectorGui.selectedPoint.yKey
+        )
+        if (state.tool.options.align || state.tool.options.link) {
+          if (state.tool.options.link) {
+            if (state.tool.options.align) {
+              updateLockedCurrentVectorControlHandle(currentVector)
+            }
+            updateLinkedVectors(currentVector, true)
+          }
+        }
+        state.activeIndexes = createActiveIndexesForRender(currentVector)
+        renderCanvas(currentVector.layer, true, state.activeIndexes, true)
       }
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        if (numPoints === 3) {
-          renderCanvas(action.layer)
-          actionQuadraticCurve(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.px2,
-            state.vectorProperties.py2,
-            state.vectorProperties.px3,
-            state.vectorProperties.py3,
-            3,
-            action.color,
-            action.layer,
-            action.modes,
-            brushStamps[action.tool.brushType][action.tool.brushSize],
-            action.tool.brushSize,
-            action.maskSet,
-            true
-          )
-        } else {
-          renderCanvas(action.layer)
-          actionCubicCurve(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.px2,
-            state.vectorProperties.py2,
-            state.vectorProperties.px3,
-            state.vectorProperties.py3,
-            state.vectorProperties.px4,
-            state.vectorProperties.py4,
-            4,
-            action.color,
-            action.layer,
-            action.modes,
-            brushStamps[action.tool.brushType][action.tool.brushSize],
-            action.tool.brushSize,
-            action.maskSet,
-            true
-          )
+        updateVectorProperties(
+          currentVector,
+          state.cursorX,
+          state.cursorY,
+          vectorGui.selectedPoint.xKey,
+          vectorGui.selectedPoint.yKey
+        )
+        if (
+          state.tool.options.link &&
+          Object.keys(state.vectorsSavedProperties).length > 1
+        ) {
+          if (state.tool.options.align) {
+            updateLockedCurrentVectorControlHandle(currentVector)
+          }
+          updateLinkedVectors(currentVector)
         }
+        renderCanvas(currentVector.layer, true, state.activeIndexes)
       }
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey && state.clickCounter === 0) {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        action.hidden = false
-        modifyVectorAction(canvas.currentVectorIndex)
+        updateVectorProperties(
+          currentVector,
+          state.cursorX,
+          state.cursorY,
+          vectorGui.selectedPoint.xKey,
+          vectorGui.selectedPoint.yKey
+        )
+        if (state.tool.options.align || state.tool.options.link) {
+          if (
+            state.tool.options.link &&
+            Object.keys(state.vectorsSavedProperties).length > 1
+          ) {
+            if (state.tool.options.align) {
+              updateLockedCurrentVectorControlHandle(currentVector)
+            }
+            updateLinkedVectors(currentVector)
+          }
+          if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
+            let collidedVector = state.undoStack[canvas.collidedVectorIndex]
+            //snap selected point to collidedVector's control point
+            let snappedToX =
+              collidedVector.properties.vectorProperties[
+                vectorGui.otherCollidedKeys.xKey
+              ] + collidedVector.layer.x
+            let snappedToY =
+              collidedVector.properties.vectorProperties[
+                vectorGui.otherCollidedKeys.yKey
+              ] + collidedVector.layer.y
+            state.vectorProperties[vectorGui.selectedPoint.xKey] = snappedToX
+            state.vectorProperties[vectorGui.selectedPoint.yKey] = snappedToY
+            updateVectorProperties(
+              currentVector,
+              snappedToX,
+              snappedToY,
+              vectorGui.selectedPoint.xKey,
+              vectorGui.selectedPoint.yKey
+            )
+            //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
+            //align control handles
+            if (
+              state.tool.options.align &&
+              Object.keys(state.vectorsSavedProperties).length === 1
+            ) {
+              let deltaX, deltaY
+              if (vectorGui.otherCollidedKeys.xKey === "px1") {
+                deltaX =
+                  collidedVector.properties.vectorProperties.px3 -
+                  collidedVector.properties.vectorProperties.px1
+                deltaY =
+                  collidedVector.properties.vectorProperties.py3 -
+                  collidedVector.properties.vectorProperties.py1
+              } else if (vectorGui.otherCollidedKeys.xKey === "px2") {
+                deltaX =
+                  collidedVector.properties.vectorProperties.px4 -
+                  collidedVector.properties.vectorProperties.px2
+                deltaY =
+                  collidedVector.properties.vectorProperties.py4 -
+                  collidedVector.properties.vectorProperties.py2
+              }
+              if (vectorGui.selectedPoint.xKey === "px1") {
+                state.vectorProperties.px3 = state.vectorProperties.px1 - deltaX
+                state.vectorProperties.py3 = state.vectorProperties.py1 - deltaY
+                updateVectorProperties(
+                  currentVector,
+                  state.vectorProperties.px3,
+                  state.vectorProperties.py3,
+                  "px3",
+                  "py3"
+                )
+              } else if (vectorGui.selectedPoint.xKey === "px2") {
+                state.vectorProperties.px4 = state.vectorProperties.px2 - deltaX
+                state.vectorProperties.py4 = state.vectorProperties.py2 - deltaY
+                updateVectorProperties(
+                  currentVector,
+                  state.vectorProperties.px4,
+                  state.vectorProperties.py4,
+                  "px4",
+                  "py4"
+                )
+              }
+            }
+          }
+        }
+        renderCanvas(currentVector.layer, true, state.activeIndexes)
+        modifyVectorAction(currentVector)
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(action.layer, true)
       }
       break
     default:
@@ -465,11 +520,12 @@ function adjustCurveSteps(numPoints = 4) {
 export const quadCurve = {
   name: "quadCurve",
   fn: quadCurveSteps,
-  action: actionQuadraticCurve,
   brushSize: 1,
   brushType: "circle",
   disabled: false,
-  options: {},
+  options: {
+    displayPaths: false,
+  },
   modes: { eraser: false, inject: false },
   type: "vector",
   cursor: "crosshair",
@@ -479,11 +535,15 @@ export const quadCurve = {
 export const cubicCurve = {
   name: "cubicCurve",
   fn: cubicCurveSteps,
-  action: actionCubicCurve,
   brushSize: 1,
   brushType: "circle",
   disabled: false,
-  options: {},
+  options: {
+    align: false, //TODO: change to object with active: false, tooltip: "Toggle Align (A). Control handles will move to opposite angle when snapping to another control point. Linked vectors' control handle will move to match velocity in addition to an opposite angle."
+    link: false, //TODO: change to object with active: false, tooltip: "Toggle Linking (Shift). Connected control points will move with selected control point."
+    // displayVectors: false,
+    displayPaths: true,
+  }, //align: G1 tangent continuity, default C1 velocity continuity, link: C0/G0 positional continuity and move connected vector control point with selected control point.
   modes: { eraser: false, inject: false },
   type: "vector",
   cursor: "crosshair",

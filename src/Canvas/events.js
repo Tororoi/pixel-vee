@@ -10,7 +10,7 @@ import {
 } from "../DOM/render.js"
 import { createNewRasterLayer } from "./layers.js"
 import { handleTools } from "../Tools/events.js"
-import { removeAction, changeActionMode } from "../Actions/actions.js"
+import { removeAction, changeActionMode } from "../Actions/modifyTimeline.js"
 import { vectorGui } from "../GUI/vector.js"
 import { setInitialZoom } from "../utils/canvasHelpers.js"
 import { initializeColorPicker } from "../Swatch/events.js"
@@ -137,7 +137,7 @@ const resizeOffScreenCanvas = (width, height) => {
       }
     }
   })
-  renderCanvas(null, null, false, true) //render all layers
+  renderCanvas(null, true) //render all layers and redraw timeline
   vectorGui.render()
 }
 
@@ -350,10 +350,6 @@ function addReferenceLayer() {
         let onscreenLayerCVS = document.createElement("canvas")
         let onscreenLayerCTX = onscreenLayerCVS.getContext("2d")
         onscreenLayerCTX.willReadFrequently = true
-        onscreenLayerCTX.scale(
-          canvas.sharpness * canvas.zoom,
-          canvas.sharpness * canvas.zoom
-        )
         onscreenLayerCVS.className = "onscreen-canvas"
         dom.canvasLayers.insertBefore(
           onscreenLayerCVS,
@@ -399,6 +395,12 @@ function addReferenceLayer() {
           removed: false,
         }
         canvas.layers.unshift(layer)
+        state.addToTimeline({
+          tool: tools.addLayer,
+          layer,
+        })
+        state.action = null
+        state.redoStack = []
         renderLayersToDOM()
         renderCanvas(null)
       }
@@ -427,7 +429,6 @@ function removeLayer(layer) {
       tool: tools.removeLayer,
       layer,
     })
-    state.undoStack.push(state.action)
     state.action = null
     state.redoStack = []
     renderLayersToDOM()
@@ -448,7 +449,6 @@ function addRasterLayer() {
     tool: tools.addLayer,
     layer,
   })
-  state.undoStack.push(state.action)
   state.action = null
   state.redoStack = []
   renderLayersToDOM()
@@ -497,27 +497,7 @@ function vectorInteract(e) {
     //select current vector
     vectorGui.reset()
     if (vector.index !== currentIndex) {
-      state.vectorProperties = { ...vector.properties.vectorProperties }
-      //Keep properties relative to layer offset
-      state.vectorProperties.px1 += vector.layer.x
-      state.vectorProperties.py1 += vector.layer.y
-      if (
-        vector.tool.name === "quadCurve" ||
-        vector.tool.name === "cubicCurve" ||
-        vector.tool.name === "ellipse"
-      ) {
-        state.vectorProperties.px2 += vector.layer.x
-        state.vectorProperties.py2 += vector.layer.y
-
-        state.vectorProperties.px3 += vector.layer.x
-        state.vectorProperties.py3 += vector.layer.y
-      }
-
-      if (vector.tool.name === "cubicCurve") {
-        state.vectorProperties.px4 += vector.layer.x
-        state.vectorProperties.py4 += vector.layer.y
-      }
-      canvas.currentVectorIndex = vector.index
+      vectorGui.setVectorProperties(vector)
       canvas.currentLayer.inactiveTools.forEach((tool) => {
         dom[`${tool}Btn`].disabled = false
       })
@@ -537,16 +517,15 @@ function vectorInteract(e) {
  * @param {Object} vector
  */
 function removeVector(vector) {
-  //set "removed" flag to true on selected layer.
-  removeAction(vector.index)
-  state.undoStack.push(state.action)
+  vector.removed = true
+  renderCanvas(vector.layer, true)
+  removeAction(vector)
   state.action = null
   state.redoStack = []
   if (canvas.currentVectorIndex === vector.index) {
     vectorGui.reset()
   }
   renderVectorsToDOM()
-  renderCanvas(vector.layer, true)
 }
 
 /**
@@ -555,12 +534,22 @@ function removeVector(vector) {
  * @param {String} modeKey
  */
 function toggleVectorMode(vector, modeKey) {
-  changeActionMode(vector.index, modeKey)
-  state.undoStack.push(state.action)
+  let oldModes = { ...vector.modes }
+  vector.modes[modeKey] = !vector.modes[modeKey]
+  //resolve conflicting modes
+  if (vector.modes[modeKey]) {
+    if (modeKey === "eraser" && vector.modes.inject) {
+      vector.modes.inject = false
+    } else if (modeKey === "inject" && vector.modes.eraser) {
+      vector.modes.eraser = false
+    }
+  }
+  let newModes = { ...vector.modes }
+  renderCanvas(vector.layer, true)
+  changeActionMode(vector, oldModes, newModes)
   state.action = null
   state.redoStack = []
   renderVectorsToDOM()
-  renderCanvas(vector.layer, true)
 }
 
 //===================================//
@@ -611,6 +600,10 @@ dom.canvasWidth.addEventListener("blur", restrictSize)
 dom.canvasHeight.addEventListener("blur", restrictSize)
 
 // * Layers * //
+dom.uploadBtn.addEventListener("click", (e) => {
+  //reset value so that the same file can be uploaded multiple times
+  e.target.value = null
+})
 dom.uploadBtn.addEventListener("change", addReferenceLayer)
 dom.newLayerBtn.addEventListener("click", addRasterLayer)
 

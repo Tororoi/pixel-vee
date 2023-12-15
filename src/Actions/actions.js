@@ -1,5 +1,4 @@
-import { state } from "../Context/state.js"
-import { tools } from "../Tools/index.js"
+import { canvas } from "../Context/canvas.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
 import { vectorGui } from "../GUI/vector.js"
@@ -10,172 +9,14 @@ import {
   getColor,
 } from "../utils/imageDataHelpers.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
-import { canvas } from "../Context/canvas.js"
 import { saveEllipseAsTest } from "../Testing/ellipseTest.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
 //====================================//
 
-//"Actions" are user-initiated events that are reversible through the undo button. This file holds the functions used for reversible actions.
-//Not all reversible actions are held here currently. Clear canvas and addLayer are not present, but those don't interact with the cursor.
-
-/**
- * Modify action in the timeline
- * Only good for vector parameters
- * @param {Integer} actionIndex
- */
-export function modifyVectorAction(actionIndex) {
-  let action = state.undoStack[actionIndex]
-  let oldProperties = {
-    ...action.properties.vectorProperties,
-  } //shallow copy, properties must not contain any objects or references as values
-  let modifiedProperties = {
-    ...action.properties.vectorProperties,
-  } //shallow copy, must make deep copy, at least for x, y and properties
-  modifiedProperties = { ...state.vectorProperties }
-  //Keep properties relative to layer offset
-  modifiedProperties.px1 -= action.layer.x
-  modifiedProperties.py1 -= action.layer.y
-  if (
-    action.tool.name === "quadCurve" ||
-    action.tool.name === "cubicCurve" ||
-    action.tool.name === "ellipse"
-  ) {
-    modifiedProperties.px2 -= action.layer.x
-    modifiedProperties.py2 -= action.layer.y
-
-    modifiedProperties.px3 -= action.layer.x
-    modifiedProperties.py3 -= action.layer.y
-  }
-
-  if (action.tool.name === "cubicCurve") {
-    modifiedProperties.px4 -= action.layer.x
-    modifiedProperties.py4 -= action.layer.y
-  }
-  //maintain forceCircle property if point being adjusted is p1
-  if (action.tool.name === "ellipse") {
-    modifiedProperties.forceCircle =
-      vectorGui.selectedPoint.xKey === "px1"
-        ? oldProperties.forceCircle
-        : state.vectorProperties.forceCircle
-  }
-  action.properties.vectorProperties = {
-    ...modifiedProperties,
-  }
-  state.addToTimeline({
-    tool: tools.modify,
-    properties: {
-      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-      moddedActionIndex: actionIndex,
-      from: oldProperties,
-      to: modifiedProperties,
-    },
-  })
-}
-
-/**
- * Modify action in the timeline
- * Only good for vector parameters
- * @param {Integer} actionIndex
- * @param {Object} newColor - {color, r, g, b, a}
- */
-export function changeActionColor(actionIndex, newColor) {
-  let action = state.undoStack[actionIndex]
-  let oldColor = {
-    ...action.color,
-  } //shallow copy, color must not contain any objects or references as values
-  let modifiedColor = {
-    ...newColor,
-  } //shallow copy, must make deep copy, at least for x, y and properties
-  state.addToTimeline({
-    tool: tools.changeColor,
-    properties: {
-      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-      moddedActionIndex: actionIndex,
-      from: oldColor,
-      to: modifiedColor,
-    },
-  })
-  action.color = {
-    ...modifiedColor,
-  }
-}
-
-/**
- * Modify action in the timeline
- * @param {Integer} actionIndex
- */
-export function removeAction(actionIndex) {
-  let action = state.undoStack[actionIndex]
-  state.addToTimeline({
-    tool: tools.remove,
-    properties: {
-      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-      moddedActionIndex: actionIndex,
-      from: false,
-      to: true,
-    },
-  })
-  action.removed = true
-}
-
-/**
- * Modify action in the timeline
- * @param {Integer} actionIndex
- * @param {String} modeKey
- */
-export function changeActionMode(actionIndex, modeKey) {
-  let action = state.undoStack[actionIndex]
-  let oldModes = { ...action.modes }
-  action.modes[modeKey] = !action.modes[modeKey]
-  //resolve conflicting modes
-  if (action.modes[modeKey]) {
-    if (modeKey === "eraser" && action.modes.inject) {
-      action.modes.inject = false
-    } else if (modeKey === "inject" && action.modes.eraser) {
-      action.modes.eraser = false
-    }
-  }
-  let newModes = { ...action.modes }
-  state.addToTimeline({
-    tool: tools.changeMode,
-    properties: {
-      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-      moddedActionIndex: actionIndex,
-      from: oldModes,
-      to: newModes,
-    },
-  })
-}
-
-/**
- * Modify actions in the timeline
- * Sets all actions before it except for action index 0 to removed = true
- * @param {Object} layer
- */
-export function actionClear(layer) {
-  let upToIndex = state.undoStack.length - 1
-  state.addToTimeline({
-    tool: tools.clear,
-    layer: layer,
-    properties: {
-      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-      upToIndex,
-    },
-  })
-  let i = 0
-  //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
-  state.undoStack.forEach((action) => {
-    if (i > upToIndex) {
-      return
-    }
-    i++
-    if (action.layer === layer) {
-      action.removed = true
-    }
-  })
-}
+//"Actions" are user-initiated events that are reversible through the undo button.
+//This file holds the functions used for reversible actions as the result of a tool.
 
 /**
  * Render a stamp from the brush to the canvas
@@ -188,6 +29,7 @@ export function actionClear(layer) {
  * @param {Object} currentModes
  * @param {Set} maskSet
  * @param {Set} seenPixelsSet
+ * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {Boolean} isPreview
  * @param {Boolean} excludeFromSet - don't add to seenPixelsSet if true
  */
@@ -201,13 +43,16 @@ export function actionDraw(
   currentModes,
   maskSet,
   seenPixelsSet,
+  customContext = null,
   isPreview = false,
   excludeFromSet = false
 ) {
   let offsetX = 0
   let offsetY = 0
   let ctx = layer.ctx
-  if (isPreview) {
+  if (customContext) {
+    ctx = customContext
+  } else if (isPreview) {
     ctx = layer.onscreenCtx
     offsetX = canvas.xOffset
     offsetY = canvas.yOffset
@@ -269,6 +114,7 @@ export function actionDraw(
  * @param {Integer} brushSize
  * @param {Set} maskSet
  * @param {Set} seenPixelsSet
+ * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {Boolean} isPreview
  */
 export function actionLine(
@@ -283,6 +129,7 @@ export function actionLine(
   brushSize,
   maskSet,
   seenPixelsSet = null,
+  customContext = null,
   isPreview = false
 ) {
   let angle = getAngle(tx - sx, ty - sy) // angle of line
@@ -313,6 +160,7 @@ export function actionLine(
       currentModes,
       maskSet,
       seen,
+      customContext,
       isPreview
     )
     previousX = thispoint.x
@@ -330,6 +178,7 @@ export function actionLine(
     currentModes,
     maskSet,
     seen,
+    customContext,
     isPreview
   )
 }
@@ -344,6 +193,8 @@ export function actionLine(
  * @param {Object} currentModes
  * @param {Object} selectProperties
  * @param {Set} maskSet
+ * @param {CanvasRenderingContext2D} customContext - use custom context if provided
+ * @param {Boolean} isPreview
  * @returns
  */
 export function actionFill(
@@ -353,7 +204,9 @@ export function actionFill(
   layer,
   currentModes,
   selectProperties,
-  maskSet
+  maskSet,
+  customContext = null,
+  isPreview = false
 ) {
   let xMin = 0
   let xMax = layer.cvs.width
@@ -371,13 +224,13 @@ export function actionFill(
     return
   }
   //get imageData
-  let layerImageData = layer.ctx.getImageData(
-    xMin,
-    yMin,
-    xMax - xMin,
-    yMax - yMin
-  )
-
+  let ctx = layer.ctx
+  if (customContext) {
+    ctx = customContext
+  } else if (isPreview) {
+    ctx = canvas.previewCTX
+  }
+  let layerImageData = ctx.getImageData(xMin, yMin, xMax - xMin, yMax - yMin)
   let clickedColor = getColor(layerImageData, startX - xMin, startY - yMin)
 
   if (currentModes?.eraser) {
@@ -393,7 +246,7 @@ export function actionFill(
   let newPos, x, y, pixelPos, reachLeft, reachRight
   floodFill()
   //render floodFill result
-  layer.ctx.putImageData(layerImageData, xMin, yMin)
+  ctx.putImageData(layerImageData, xMin, yMin)
 
   //helpers
   function floodFill() {
@@ -463,6 +316,7 @@ export function actionFill(
  * @param {CanvasRenderingContext2D} ctx
  * @param {Object} currentModes
  * @param {Set} maskSet
+ * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {Boolean} isPreview
  */
 function renderPoints(
@@ -473,6 +327,7 @@ function renderPoints(
   layer,
   currentModes,
   maskSet,
+  customContext = null,
   isPreview = false
 ) {
   const seen = new Set()
@@ -493,6 +348,7 @@ function renderPoints(
       currentModes,
       maskSet,
       seen,
+      customContext,
       isPreview
     )
     previousX = xt
@@ -519,6 +375,7 @@ function renderPoints(
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {Set} maskSet
+ * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {Boolean} isPreview
  */
 export function actionQuadraticCurve(
@@ -535,6 +392,7 @@ export function actionQuadraticCurve(
   brushStamp,
   brushSize,
   maskSet,
+  customContext = null,
   isPreview = false
 ) {
   if (stepNum === 1) {
@@ -550,6 +408,7 @@ export function actionQuadraticCurve(
       brushSize,
       maskSet,
       null,
+      customContext,
       isPreview
     )
   } else if (stepNum === 2 || stepNum === 3) {
@@ -569,6 +428,7 @@ export function actionQuadraticCurve(
       layer,
       currentModes,
       maskSet,
+      customContext,
       isPreview
     )
   }
@@ -591,6 +451,7 @@ export function actionQuadraticCurve(
  * @param {Object} brushStamp
  * @param {Integer} brushSize
  * @param {Set} maskSet
+ * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {Boolean} isPreview
  */
 export function actionCubicCurve(
@@ -609,6 +470,7 @@ export function actionCubicCurve(
   brushStamp,
   brushSize,
   maskSet,
+  customContext = null,
   isPreview = false
 ) {
   if (stepNum === 1) {
@@ -624,6 +486,7 @@ export function actionCubicCurve(
       brushSize,
       maskSet,
       null,
+      customContext,
       isPreview
     )
   } else if (stepNum === 2) {
@@ -643,6 +506,7 @@ export function actionCubicCurve(
       layer,
       currentModes,
       maskSet,
+      customContext,
       isPreview
     )
   } else if (stepNum === 3 || stepNum === 4) {
@@ -664,6 +528,7 @@ export function actionCubicCurve(
       layer,
       currentModes,
       maskSet,
+      customContext,
       isPreview
     )
   }
@@ -688,6 +553,7 @@ export function actionCubicCurve(
  * @param {Integer} x1Offset
  * @param {Integer} y1Offset
  * @param {Set} maskSet
+ * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {Boolean} isPreview
  */
 export function actionEllipse(
@@ -710,16 +576,9 @@ export function actionEllipse(
   x1Offset,
   y1Offset,
   maskSet,
+  customContext = null,
   isPreview = false
 ) {
-  //force coords to int
-  centerx = Math.floor(centerx)
-  centery = Math.floor(centery)
-  xa = Math.floor(xa)
-  ya = Math.floor(ya)
-  xb = Math.floor(xb)
-  yb = Math.floor(yb)
-
   if (forceCircle) {
     let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, offset)
     renderPoints(
@@ -730,6 +589,7 @@ export function actionEllipse(
       layer,
       currentModes,
       maskSet,
+      customContext,
       isPreview
     )
   } else {
@@ -752,6 +612,7 @@ export function actionEllipse(
       layer,
       currentModes,
       maskSet,
+      customContext,
       isPreview
     )
   }
