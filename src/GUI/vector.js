@@ -651,11 +651,16 @@ export function createActiveIndexesForRender(currentVector) {
   //add fill actions to activeIndexes starting at first active index
   for (let i = activeIndexes[0]; i < state.undoStack.length; i++) {
     let action = state.undoStack[i]
-    if (action.layer === currentVector.layer && action.tool.name === "fill") {
+    if (
+      action.layer === currentVector.layer &&
+      action.tool.name === "fill" &&
+      action !== currentVector &&
+      currentVector.tool.name !== "fill"
+    ) {
       activeIndexes.push(i)
     }
   }
   //sort activeIndexes
-  activeIndexes.sort()
+  activeIndexes.sort((a, b) => a - b)
   return activeIndexes
 }
