@@ -313,7 +313,6 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
 
 - Selection Tool
 - Dedicated Mobile/ Tablet UI
-- Link Tool: Link vectors end to end to make unified adjustable curves. All cubic curve vectors on selected layer will have control points interactable.
 - Menu dropdown for functionality that is used less frequently. Windows for canvas size for example do not need to be on screen at all times.
 
 ### Stretch Features to be added

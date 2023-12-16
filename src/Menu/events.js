@@ -72,9 +72,9 @@ dom.toolOptions.addEventListener("click", (e) => {
   if (e.target.type === "checkbox") {
     const optionName = e.target.id.split("-")[0]
     if (e.target.checked) {
-      state.tool.options[optionName] = true
+      state.tool.options[optionName].active = true
     } else {
-      state.tool.options[optionName] = false
+      state.tool.options[optionName].active = false
     }
     vectorGui.render()
   }

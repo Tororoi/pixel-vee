@@ -98,7 +98,7 @@ function addToTimeline(actionObject) {
   //use current state for variables
   let snapshot = layer.type === "raster" ? layer.cvs.toDataURL() : null
   state.action = {
-    tool: { ...tool },
+    tool: { ...tool }, //Needed properties: name, brushType, brushSize, type
     modes: { ...tool.modes },
     color: color || { ...swatches.primary.color },
     layer: layer,

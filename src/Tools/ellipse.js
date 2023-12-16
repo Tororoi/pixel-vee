@@ -298,9 +298,17 @@ export const ellipse = {
   brushType: "circle",
   disabled: false,
   options: {
-    useSubPixels: true,
+    useSubpixels: {
+      active: true,
+      tooltip:
+        "Toggle use subpixels. \n\nUse subpixels to control handling of origin point for radii. Determines odd or even length bounding box for ellipse.",
+    },
     // radiusExcludesCenter: false,
-    // displayPaths: false,
+    displayPaths: {
+      active: true,
+      tooltip: "Toggle Paths. \n\nShow paths for ellipse.",
+    },
+    //forceCircle: {active: false} //affects timeline, may need to handle this in a way that controls vectorProperties.forceCircle instead of replacing vectorProperties.forceCircle
   }, // need to expand radiusExcludesCenter to cover multiple scenarios, centerx = 0 or 1 and centery = 0 or 1
   modes: { eraser: false, inject: false },
   type: "vector",

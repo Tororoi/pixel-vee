@@ -382,9 +382,12 @@ function adjustCurveSteps(numPoints = 4) {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        if (state.tool.options.align || state.tool.options.link) {
-          if (state.tool.options.link) {
-            if (state.tool.options.align) {
+        if (
+          state.tool.options.align?.active ||
+          state.tool.options.link?.active
+        ) {
+          if (state.tool.options.link?.active) {
+            if (state.tool.options.align?.active) {
               updateLockedCurrentVectorControlHandle(currentVector)
             }
             updateLinkedVectors(currentVector, true)
@@ -406,10 +409,10 @@ function adjustCurveSteps(numPoints = 4) {
           vectorGui.selectedPoint.yKey
         )
         if (
-          state.tool.options.link &&
+          state.tool.options.link?.active &&
           Object.keys(state.vectorsSavedProperties).length > 1
         ) {
-          if (state.tool.options.align) {
+          if (state.tool.options.align?.active) {
             updateLockedCurrentVectorControlHandle(currentVector)
           }
           updateLinkedVectors(currentVector)
@@ -428,12 +431,15 @@ function adjustCurveSteps(numPoints = 4) {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        if (state.tool.options.align || state.tool.options.link) {
+        if (
+          state.tool.options.align?.active ||
+          state.tool.options.link?.active
+        ) {
           if (
-            state.tool.options.link &&
+            state.tool.options.link?.active &&
             Object.keys(state.vectorsSavedProperties).length > 1
           ) {
-            if (state.tool.options.align) {
+            if (state.tool.options.align?.active) {
               updateLockedCurrentVectorControlHandle(currentVector)
             }
             updateLinkedVectors(currentVector)
@@ -461,7 +467,7 @@ function adjustCurveSteps(numPoints = 4) {
             //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
             //align control handles
             if (
-              state.tool.options.align &&
+              state.tool.options.align?.active &&
               Object.keys(state.vectorsSavedProperties).length === 1
             ) {
               let deltaX, deltaY
@@ -524,7 +530,10 @@ export const quadCurve = {
   brushType: "circle",
   disabled: false,
   options: {
-    displayPaths: false,
+    displayPaths: {
+      active: true,
+      tooltip: "Toggle Paths. \n\nShow paths for curves.",
+    },
   },
   modes: { eraser: false, inject: false },
   type: "vector",
@@ -539,10 +548,21 @@ export const cubicCurve = {
   brushType: "circle",
   disabled: false,
   options: {
-    align: false, //TODO: change to object with active: false, tooltip: "Toggle Align (A). Control handles will move to opposite angle when snapping to another control point. Linked vectors' control handle will move to match velocity in addition to an opposite angle."
-    link: false, //TODO: change to object with active: false, tooltip: "Toggle Linking (Shift). Connected control points will move with selected control point."
+    align: {
+      active: false,
+      tooltip:
+        "Toggle Align (A). \n\nControl handle of selected point will move to opposite angle when snapping to another control point. Linked vectors' control handle will move to opposite angle when adjusting selected control handle.",
+    },
+    link: {
+      active: false,
+      tooltip:
+        "Toggle Linking (Shift). \n\nConnected control points of other vectors will move with selected control point.",
+    },
     // displayVectors: false,
-    displayPaths: true,
+    displayPaths: {
+      active: true,
+      tooltip: "Toggle Paths. \n\nShow paths for curves.",
+    },
   }, //align: G1 tangent continuity, default C1 velocity continuity, link: C0/G0 positional continuity and move connected vector control point with selected control point.
   modes: { eraser: false, inject: false },
   type: "vector",

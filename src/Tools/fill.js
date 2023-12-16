@@ -152,7 +152,7 @@ export const fill = {
   brushSize: 1,
   brushType: "circle",
   disabled: true,
-  options: { contiguous: true },
+  options: { contiguous: { active: true } },
   modes: { eraser: false },
   type: "vector",
   cursor: "crosshair",

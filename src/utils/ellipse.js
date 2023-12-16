@@ -385,7 +385,7 @@ export function updateEllipseOffsets(
     state.vectorProperties.px2 - state.vectorProperties.px1,
     state.vectorProperties.py2 - state.vectorProperties.py1
   )
-  if (state.tool.options.useSubPixels) {
+  if (state.tool.options.useSubPixels?.active) {
     state.vectorProperties.offset = findHalf(
       canvas.subPixelX,
       canvas.subPixelY,
