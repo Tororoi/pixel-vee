@@ -270,7 +270,11 @@ export function adjustEllipseSteps() {
           currentVector.properties.vectorProperties.forceCircle
       }
       updateEllipseVectorProperties(currentVector)
-      state.activeIndexes = createActiveIndexesForRender(currentVector)
+      state.activeIndexes = createActiveIndexesForRender(
+        currentVector,
+        state.vectorsSavedProperties,
+        state.undoStack
+      )
       renderCanvas(currentVector.layer, true, state.activeIndexes, true)
       break
     case "pointermove":
@@ -305,7 +309,7 @@ export const ellipse = {
     },
     // radiusExcludesCenter: false,
     displayPaths: {
-      active: true,
+      active: false,
       tooltip: "Toggle Paths. \n\nShow paths for ellipse.",
     },
     //forceCircle: {active: false} //affects timeline, may need to handle this in a way that controls vectorProperties.forceCircle instead of replacing vectorProperties.forceCircle

@@ -393,7 +393,11 @@ function adjustCurveSteps(numPoints = 4) {
             updateLinkedVectors(currentVector, true)
           }
         }
-        state.activeIndexes = createActiveIndexesForRender(currentVector)
+        state.activeIndexes = createActiveIndexesForRender(
+          currentVector,
+          state.vectorsSavedProperties,
+          state.undoStack
+        )
         renderCanvas(currentVector.layer, true, state.activeIndexes, true)
       }
       break
@@ -531,7 +535,7 @@ export const quadCurve = {
   disabled: false,
   options: {
     displayPaths: {
-      active: true,
+      active: false,
       tooltip: "Toggle Paths. \n\nShow paths for curves.",
     },
   },
@@ -560,7 +564,7 @@ export const cubicCurve = {
     },
     // displayVectors: false,
     displayPaths: {
-      active: true,
+      active: false,
       tooltip: "Toggle Paths. \n\nShow paths for curves.",
     },
   }, //align: G1 tangent continuity, default C1 velocity continuity, link: C0/G0 positional continuity and move connected vector control point with selected control point.

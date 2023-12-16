@@ -640,27 +640,36 @@ export function updateLockedCurrentVectorControlHandle(currentVector) {
 }
 
 /**
- *
+ * For efficient rendering, create an array of indexes of vectors that need to be re-rendered.
+ * Other actions will be saved to between canvases to avoid multiple ununecessary renders in redrawTimelineActions
  * @param {Object} currentVector
+ * @param {Object} vectorsSavedProperties - will have at least one entry, corresponding to currentVector
+ * @param {Array} undoStack
  * @returns {Array} activeIndexes
  */
-export function createActiveIndexesForRender(currentVector) {
-  let activeIndexes = Object.keys(state.vectorsSavedProperties).map((key) =>
-    parseInt(key)
+export function createActiveIndexesForRender(
+  currentVector,
+  vectorsSavedProperties,
+  undoStack
+) {
+  const vectorsSavedPropertiesKeys = Object.keys(vectorsSavedProperties).map(
+    (key) => parseInt(key)
   )
-  //add fill actions to activeIndexes starting at first active index
-  for (let i = activeIndexes[0]; i < state.undoStack.length; i++) {
-    let action = state.undoStack[i]
-    if (
-      action.layer === currentVector.layer &&
-      action.tool.name === "fill" &&
-      action !== currentVector &&
-      currentVector.tool.name !== "fill"
-    ) {
-      activeIndexes.push(i)
+  let activeIndexes = []
+
+  // Check the conditions only if currentVector's tool is not 'fill'
+  if (currentVector.tool.name !== "fill") {
+    for (let i = vectorsSavedPropertiesKeys[0]; i < undoStack.length; i++) {
+      let action = undoStack[i]
+      if (
+        action.layer === currentVector.layer &&
+        (action.tool.name === "fill" || vectorsSavedProperties[i])
+      ) {
+        activeIndexes.push(i)
+      }
     }
+  } else {
+    activeIndexes.push(vectorsSavedPropertiesKeys[0])
   }
-  //sort activeIndexes
-  activeIndexes.sort((a, b) => a - b)
   return activeIndexes
 }

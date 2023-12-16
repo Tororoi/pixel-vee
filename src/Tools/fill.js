@@ -95,7 +95,11 @@ export function adjustFillSteps() {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        state.activeIndexes = createActiveIndexesForRender(currentVector)
+        state.activeIndexes = createActiveIndexesForRender(
+          currentVector,
+          state.vectorsSavedProperties,
+          state.undoStack
+        )
         renderCanvas(currentVector.layer, true, state.activeIndexes, true)
       }
       break
