@@ -700,6 +700,31 @@
           </div>
         </div>
       </div>
+      <div class="export-container dialog-box draggable v-drag h-drag free">
+        <div id="export-header" class="header dragger">
+          <div class="drag-btn"><div class="grip"></div></div>
+          <span>Export</span>
+          <label
+            for="export-collapse-btn"
+            id="export-collapser"
+            class="collapse-btn"
+            data-tooltip="Collapse/ Expand"
+          >
+            <input
+              type="checkbox"
+              aria-label="Collapse or Expand"
+              class="collapse-checkbox"
+              id="export-collapse-btn"
+            />
+            <span class="arrow"></span>
+          </label>
+        </div>
+        <div class="collapsible">
+          <div id="interface" class="export-interface">
+            <!-- Select pixel scale and export folder location -->
+          </div>
+        </div>
+      </div>
     </div>
     <div id="tooltip" class="tooltip"></div>
   </body>
