@@ -158,7 +158,7 @@ function handlePointerMove(e) {
   setCoordinates(e)
   let cursorMoved =
     state.previousX !== state.cursorX || state.previousY !== state.cursorY
-  if (state.tool.options.useSubPixels?.active && !cursorMoved) {
+  if (state.tool.options.useSubpixels?.active && !cursorMoved) {
     cursorMoved =
       canvas.previousSubPixelX !== canvas.subPixelX ||
       canvas.previousSubPixelY !== canvas.subPixelY
