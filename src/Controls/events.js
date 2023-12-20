@@ -11,6 +11,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM } from "../DOM/render.js"
 import { actionZoom } from "../Actions/untrackedActions.js"
 import { throttle } from "../utils/eventHelpers.js"
+import { saveDrawing } from "../Save/savefile.js"
 
 /**
  * Set global coordinates
@@ -238,6 +239,9 @@ function handlePointerUp(e) {
     state.points = []
     //Reset redostack
     state.redoStack = []
+    // if (state.undoStack.length > 3) {
+    //   saveDrawing()
+    // }
   }
   //Deactivate pending shortcuts TODO: set active shortcut with key code to allow cleaner logic like if (state.shortcut.active) {deactivateShortcut(state.shortcut.keyCode)}
   if (state.tool.name !== dom.toolBtn.id) {

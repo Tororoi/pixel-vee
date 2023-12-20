@@ -337,7 +337,6 @@ function dragLayerEnd(e) {
  * Upload an image and create a new reference layer
  */
 function addReferenceLayer() {
-  //TODO: add to timeline
   let reader
   let img = new Image()
 
@@ -376,6 +375,7 @@ function addReferenceLayer() {
           type: "reference",
           title: `Reference ${canvas.layers.length + 1}`,
           img: img,
+          // dataUrl: img.src,
           onscreenCvs: onscreenLayerCVS,
           onscreenCtx: onscreenLayerCTX,
           x: 0,
