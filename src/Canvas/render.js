@@ -124,7 +124,7 @@ function performAction(action, betweenCtx) {
 
       let seen = new Set()
       let mask = null
-      if (action.properties.maskSet) {
+      if (action.properties.maskArray) {
         if (offsetX !== 0 || offsetY !== 0) {
           mask = new Set(
             action.properties.maskArray.map(
@@ -132,7 +132,7 @@ function performAction(action, betweenCtx) {
             )
           )
         } else {
-          mask = new Set(action.properties.maskSet)
+          mask = new Set(action.properties.maskArray)
         }
       }
       let previousX = action.properties.points[0].x + offsetX
@@ -188,7 +188,7 @@ function performAction(action, betweenCtx) {
         action.layer,
         action.modes,
         action.properties.selectProperties, //currently all null
-        action.properties.maskSet,
+        null, //maskSet made from action.properties.maskArray
         betweenCtx
       )
       break
@@ -203,7 +203,7 @@ function performAction(action, betweenCtx) {
         action.modes,
         brushStamps[action.tool.brushType][action.tool.brushSize],
         action.tool.brushSize,
-        action.properties.maskSet,
+        null, //maskSet made from action.properties.maskArray
         null,
         betweenCtx
       )
@@ -222,7 +222,7 @@ function performAction(action, betweenCtx) {
         action.modes,
         brushStamps[action.tool.brushType][action.tool.brushSize],
         action.tool.brushSize,
-        action.properties.maskSet,
+        null, //maskSet made from action.properties.maskArray
         betweenCtx
       )
       break
@@ -242,7 +242,7 @@ function performAction(action, betweenCtx) {
         action.modes,
         brushStamps[action.tool.brushType][action.tool.brushSize],
         action.tool.brushSize,
-        action.properties.maskSet,
+        null, //maskSet made from action.properties.maskArray
         betweenCtx
       )
       break
@@ -266,7 +266,7 @@ function performAction(action, betweenCtx) {
         action.properties.vectorProperties.offset,
         action.properties.vectorProperties.x1Offset,
         action.properties.vectorProperties.y1Offset,
-        action.properties.maskSet,
+        null, //maskSet made from action.properties.maskArray
         betweenCtx
       )
       break

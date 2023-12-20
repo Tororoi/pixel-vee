@@ -209,7 +209,6 @@ function ellipseSteps() {
               forceCircle: state.vectorProperties.forceCircle,
               //add bounding box minima maxima x and y?
             },
-            maskSet: state.maskSet,
             maskArray,
           },
         })

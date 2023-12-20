@@ -15,9 +15,17 @@ import { canvas } from "../Context/canvas.js"
  *
  */
 export function saveDrawing() {
-  let sanitizedUndoStack = [...state.undoStack]
-  //remove unsaveable data
+  // let sanitizedUndoStack = structuredClone(state.undoStack)
+  // Create a deep copy of undoStack by stringifying and parsing
+  let sanitizedUndoStack = JSON.parse(JSON.stringify(state.undoStack))
+
+  // Modify each action in the stack
   sanitizedUndoStack.forEach((action) => {
+    // Preserve only the title property of the layer object
+    if (action.layer) {
+      action.layer = { title: action.layer.title }
+    }
+    // Remove data urls
     delete action.snapshot
   })
   let jsonString = JSON.stringify(
@@ -29,7 +37,6 @@ export function saveDrawing() {
     null,
     2
   )
-  //TODO: instead of opening in a new window, save to special testing object
   // Create a new Blob with the JSON data and the correct MIME type
   const blob = new Blob([jsonString], { type: "application/json" })
   console.log(blob.size)

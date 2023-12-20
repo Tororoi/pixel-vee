@@ -96,7 +96,7 @@ function brushSteps() {
       state.addToTimeline({
         tool: brush,
         layer: canvas.currentLayer,
-        properties: { maskSet: state.maskSet, maskArray, points: state.points },
+        properties: { maskArray, points: state.points },
       })
       if (state.tool.modes?.colorMask) {
         state.maskSet = null

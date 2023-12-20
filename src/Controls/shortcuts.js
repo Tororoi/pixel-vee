@@ -106,13 +106,18 @@ export function activateShortcut(keyCode) {
         if (keys.MetaLeft || keys.MetaRight) {
           //deselect
           if (state.selectProperties.px1) {
+            let maskArray = coordArrayFromSet(
+              state.maskSet,
+              canvas.currentLayer.x,
+              canvas.currentLayer.y
+            )
             state.addToTimeline({
               tool: tools.select,
               layer: canvas.currentLayer,
               properties: {
                 deselect: true,
                 selectProperties: { ...state.selectProperties },
-                maskSet: state.maskSet,
+                maskArray,
               },
             })
             state.action = null

@@ -79,13 +79,18 @@ function selectSteps() {
       addMask([xMin, xMax], [0, yMin]) // Top region between xMin and xMax
       addMask([xMin, xMax], [yMax, height]) // Bottom region between xMin and xMax
       //add to timeline the maskSet, p1, p2. undo will unset from state, redo will set to state
+      let maskArray = coordArrayFromSet(
+        state.maskSet,
+        canvas.currentLayer.x,
+        canvas.currentLayer.y
+      )
       state.addToTimeline({
         tool: state.tool,
         layer: canvas.currentLayer,
         properties: {
           deselect: false,
           selectProperties: { ...state.selectProperties },
-          maskSet: state.maskSet,
+          maskArray,
         },
       })
       //TODO: constrain fill tool and vector tools to mask

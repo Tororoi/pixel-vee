@@ -161,7 +161,6 @@ function quadCurveSteps() {
               px3: state.vectorProperties.px3 - canvas.currentLayer.x,
               py3: state.vectorProperties.py3 - canvas.currentLayer.y,
             },
-            maskSet: state.maskSet,
             maskArray,
           },
         })
@@ -334,7 +333,6 @@ function cubicCurveSteps() {
               px4: state.vectorProperties.px4 - canvas.currentLayer.x,
               py4: state.vectorProperties.py4 - canvas.currentLayer.y,
             },
-            maskSet: state.maskSet,
             maskArray,
           },
         })

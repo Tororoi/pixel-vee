@@ -37,6 +37,11 @@ function fillSteps() {
           state.maskSet
         )
         //For undo ability, store starting coords and settings and pass them into actionFill
+        let maskArray = coordArrayFromSet(
+          state.maskSet,
+          canvas.currentLayer.x,
+          canvas.currentLayer.y
+        )
         state.addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
@@ -46,7 +51,7 @@ function fillSteps() {
               py1: state.vectorProperties.py1 - canvas.currentLayer.y,
             },
             selectProperties: { ...state.selectProperties },
-            maskSet: state.maskSet,
+            maskArray,
           },
         })
         renderCanvas(canvas.currentLayer)

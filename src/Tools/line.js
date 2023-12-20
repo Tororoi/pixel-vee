@@ -84,7 +84,6 @@ function lineSteps() {
           py1: state.lineStartY - canvas.currentLayer.y,
           px2: state.cursorX - canvas.currentLayer.x,
           py2: state.cursorY - canvas.currentLayer.y,
-          maskSet: state.maskSet,
           maskArray,
         },
       })
