@@ -375,7 +375,7 @@ function addReferenceLayer() {
           type: "reference",
           title: `Reference ${canvas.layers.length + 1}`,
           img: img,
-          // dataUrl: img.src,
+          dataUrl: img.src,
           onscreenCvs: onscreenLayerCVS,
           onscreenCtx: onscreenLayerCTX,
           x: 0,

@@ -30,7 +30,7 @@ export function saveDrawing() {
   })
   let jsonString = JSON.stringify(
     {
-      metadata: { version: "1.0", application: "Pixel Vee", date: Date.now() },
+      metadata: { version: "1.0", application: "Pixel Vee", timestamp: Date.now() },
       layers: canvas.layers,
       undoStack: sanitizedUndoStack,
     },
