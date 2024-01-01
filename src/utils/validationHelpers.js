@@ -25,6 +25,11 @@ export function validatePixelVeeFile(data) {
   } else if (!Array.isArray(data.layers)) {
     invalidProperties.push("layers")
   }
+  if (!data.palette) {
+    missingProperties.push("palette")
+  } else if (!Array.isArray(data.palette)) {
+    invalidProperties.push("palette")
+  }
   if (!data.history) {
     missingProperties.push("history")
   } else if (!Array.isArray(data.history)) {

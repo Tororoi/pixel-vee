@@ -3,6 +3,8 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { swatches } from "../Context/swatch.js"
+//import custom brushStamps when they are implemented
 import { vectorGui } from "../GUI/vector.js"
 import { performAction, renderCanvas } from "../Canvas/render.js"
 import {
@@ -45,6 +47,7 @@ export function saveDrawing() {
         timestamp: Date.now(),
       },
       layers: canvas.layers,
+      palette: swatches.palette,
       history: sanitizedUndoStack,
     },
     null,
@@ -95,6 +98,7 @@ export async function loadDrawing(jsonFile) {
   // Clear existing layers and undoStack
   dom.canvasLayers.innerHTML = ""
   canvas.layers = []
+  swatches.palette = []
   state.undoStack = []
   vectorGui.reset()
 
@@ -155,6 +159,8 @@ export async function loadDrawing(jsonFile) {
 
   canvas.currentLayer = canvas.layers[canvas.layers.length - 1]
 
+  swatches.palette = data.palette
+
   // Reconstruct the undoStack
   data.history.forEach((action) => {
     // Match the action's layer title with an existing layer
@@ -183,5 +189,6 @@ export async function loadDrawing(jsonFile) {
   // Additional logic to update the UI, refresh the canvas, etc.
   renderCanvas()
   renderLayersToDOM()
+  renderPaletteToDOM()
   renderVectorsToDOM()
 }
