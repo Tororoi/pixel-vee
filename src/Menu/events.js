@@ -51,22 +51,25 @@ const showTooltip = (message, target) => {
  */
 function exportImage() {
   //save .png
-  // consolidateLayers()
-  // const a = document.createElement("a")
-  // a.style.display = "none"
-  // a.href = canvas.offScreenCVS.toDataURL()
-  // a.download = "pixelvee.png"
-  // document.body.appendChild(a)
-  // a.click()
-  saveDrawing()
+  consolidateLayers()
+  const a = document.createElement("a")
+  a.style.display = "none"
+  a.href = canvas.offScreenCVS.toDataURL()
+  a.download = "pixelvee.png"
+  document.body.appendChild(a)
+  a.click()
+  // saveDrawing()
 }
 
-function importDrawing() {
+/**
+ * Open json file from desktop and load into layers and timeline
+ * TODO: initialize loading screen and stop loading screen after loaded
+ */
+function openSavedDrawing() {
   let reader
   if (this.files && this.files[0]) {
     reader = new FileReader()
     reader.onload = (e) => {
-      console.log("load drawing")
       loadDrawing(e.target.result)
     }
     reader.readAsText(this.files[0])
@@ -110,9 +113,9 @@ dom.tooltipBtn.addEventListener("click", (e) => {
     dom.tooltip.classList.remove("visible")
   }
 })
-dom.exportBtn.addEventListener("click", exportImage)
-dom.importBtn.addEventListener("click", (e) => {
+dom.saveBtn.addEventListener("click", saveDrawing)
+dom.openSaveBtn.addEventListener("click", (e) => {
   //reset value so that the same file can be imported multiple times
   e.target.value = null
 })
-dom.importBtn.addEventListener("change", importDrawing)
+dom.openSaveBtn.addEventListener("change", openSavedDrawing)

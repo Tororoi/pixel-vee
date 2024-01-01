@@ -19,10 +19,10 @@ const toolOptions = document.querySelector(".tool-options")
 const gridBtn = document.getElementById("grid-toggle")
 // * Toggle Tooltips * //
 const tooltipBtn = document.getElementById("tooltips-toggle")
-// * Export * //
-const exportBtn = document.querySelector(".export")
-// * Import * //
-const importBtn = document.getElementById("drawing-upload")
+// * Save * //
+const saveBtn = document.querySelector(".save")
+// * Open Save * //
+const openSaveBtn = document.getElementById("drawing-upload")
 
 //====================================//
 //====== * * * Save/Export * * * =====//
@@ -141,8 +141,8 @@ export const dom = {
   toolOptions,
   gridBtn,
   tooltipBtn,
-  exportBtn,
-  importBtn,
+  saveBtn,
+  openSaveBtn,
   //toolbox
   toolboxContainer,
   undoBtn,

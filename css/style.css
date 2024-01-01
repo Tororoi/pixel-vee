@@ -555,20 +555,20 @@ svg {
   padding-right: 8px;
   background: rgb(77, 77, 77);
 }
-.nav .nav-items .export {
+.nav .nav-items .save {
   padding-right: 16px;
 }
-.nav .nav-items .export .btn {
+.nav .nav-items .save .btn {
   height: 28px;
   width: 84px;
   background: rgb(77, 77, 77);
 }
-.nav .nav-items .import .btn {
+.nav .nav-items .open-save .btn {
   height: 28px;
   width: 84px;
   background: rgb(77, 77, 77);
 }
-.nav .nav-items .import input[type=file] {
+.nav .nav-items .open-save input[type=file] {
   display: none;
 }
 
