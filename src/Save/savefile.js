@@ -26,7 +26,22 @@ import { validatePixelVeeFile } from "../utils/validationHelpers.js"
  *
  */
 export function saveDrawing() {
-  // let sanitizedUndoStack = structuredClone(state.undoStack)
+  // Sanitize canvas layers
+  // Create a deep copy of canvas layers by stringifying and parsing
+  let sanitizedLayers = JSON.parse(JSON.stringify(canvas.layers))
+
+  // Modify each layer in the array
+  sanitizedLayers.forEach((layer) => {
+    // Remove reference layers
+    //TODO: if option is selected, remove reference layers from canvas.layers
+    // Remove canvases and contexts
+    delete layer.cvs
+    delete layer.ctx
+    delete layer.onscreenCvs
+    delete layer.onscreenCtx
+  })
+
+  // Sanitize undoStack
   // Create a deep copy of undoStack by stringifying and parsing
   let sanitizedUndoStack = JSON.parse(JSON.stringify(state.undoStack))
 
@@ -46,8 +61,8 @@ export function saveDrawing() {
         application: "Pixel V",
         timestamp: Date.now(),
       },
-      layers: canvas.layers,
-      palette: swatches.palette,
+      layers: sanitizedLayers,
+      palette: swatches.palette, //not required
       history: sanitizedUndoStack,
     },
     null,
@@ -98,7 +113,6 @@ export async function loadDrawing(jsonFile) {
   // Clear existing layers and undoStack
   dom.canvasLayers.innerHTML = ""
   canvas.layers = []
-  swatches.palette = []
   state.undoStack = []
   vectorGui.reset()
 
@@ -159,7 +173,13 @@ export async function loadDrawing(jsonFile) {
 
   canvas.currentLayer = canvas.layers[canvas.layers.length - 1]
 
-  swatches.palette = data.palette
+  if (data.palette) {
+    //reset other swatch properties
+    swatches.activePaletteIndex = null
+    swatches.selectedPaletteIndex = null
+    //set palette
+    swatches.palette = data.palette
+  }
 
   // Reconstruct the undoStack
   data.history.forEach((action) => {
