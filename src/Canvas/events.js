@@ -191,7 +191,7 @@ const resizeOnScreenCanvas = () => {
     0,
     0
   )
-  renderCanvas(null) // render all layers
+  renderCanvas() // render all layers
   // reset positioning styles for free moving dialog boxes
   dom.toolboxContainer.style.left = ""
   dom.toolboxContainer.style.top = ""
@@ -402,7 +402,7 @@ function addReferenceLayer() {
         state.action = null
         state.redoStack = []
         renderLayersToDOM()
-        renderCanvas(null)
+        renderCanvas()
       }
     }
 

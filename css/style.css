@@ -555,10 +555,21 @@ svg {
   padding-right: 8px;
   background: rgb(77, 77, 77);
 }
+.nav .nav-items .export {
+  padding-right: 16px;
+}
 .nav .nav-items .export .btn {
   height: 28px;
   width: 84px;
   background: rgb(77, 77, 77);
+}
+.nav .nav-items .import .btn {
+  height: 28px;
+  width: 84px;
+  background: rgb(77, 77, 77);
+}
+.nav .nav-items .import input[type=file] {
+  display: none;
 }
 
 /* Next override basic styles with specific styles when necessary */

@@ -239,9 +239,6 @@ function handlePointerUp(e) {
     state.points = []
     //Reset redostack
     state.redoStack = []
-    if (state.undoStack.length > 3) {
-      saveDrawing()
-    }
   }
   //Deactivate pending shortcuts TODO: set active shortcut with key code to allow cleaner logic like if (state.shortcut.active) {deactivateShortcut(state.shortcut.keyCode)}
   if (state.tool.name !== dom.toolBtn.id) {

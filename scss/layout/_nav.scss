@@ -91,6 +91,17 @@
         width: 84px;
         background: $gray;
       }
+      padding-right: 16px;
+    }
+    .import {
+      .btn {
+        height: 28px;
+        width: 84px;
+        background: $gray;
+      }
+      input[type="file"] {
+        display: none;
+      }
     }
   }
 }

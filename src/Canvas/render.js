@@ -116,7 +116,7 @@ function createAndSaveContext() {
  * @param {Object} action
  * @param {CanvasRenderingContext2D} betweenCtx
  */
-function performAction(action, betweenCtx) {
+export function performAction(action, betweenCtx = null) {
   switch (action.tool.name) {
     case "brush":
       const offsetX = action.layer.x

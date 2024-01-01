@@ -21,6 +21,8 @@ const gridBtn = document.getElementById("grid-toggle")
 const tooltipBtn = document.getElementById("tooltips-toggle")
 // * Export * //
 const exportBtn = document.querySelector(".export")
+// * Import * //
+const importBtn = document.getElementById("drawing-upload")
 
 //====================================//
 //====== * * * Save/Export * * * =====//
@@ -140,6 +142,7 @@ export const dom = {
   gridBtn,
   tooltipBtn,
   exportBtn,
+  importBtn,
   //toolbox
   toolboxContainer,
   undoBtn,

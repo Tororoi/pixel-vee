@@ -4,6 +4,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "../GUI/vector.js"
 import { consolidateLayers } from "../Canvas/layers.js"
+import { saveDrawing, loadDrawing } from "../Save/savefile.js"
 
 //====================================//
 //======= * * * Tooltip * * * ========//
@@ -49,13 +50,27 @@ const showTooltip = (message, target) => {
  * then iterate through saved actions and assign the correct layer based on the layer's title so the layer is a referenced object instead of a new object
  */
 function exportImage() {
-  consolidateLayers()
-  const a = document.createElement("a")
-  a.style.display = "none"
-  a.href = canvas.offScreenCVS.toDataURL()
-  a.download = "pixelvee.png"
-  document.body.appendChild(a)
-  a.click()
+  //save .png
+  // consolidateLayers()
+  // const a = document.createElement("a")
+  // a.style.display = "none"
+  // a.href = canvas.offScreenCVS.toDataURL()
+  // a.download = "pixelvee.png"
+  // document.body.appendChild(a)
+  // a.click()
+  saveDrawing()
+}
+
+function importDrawing() {
+  let reader
+  if (this.files && this.files[0]) {
+    reader = new FileReader()
+    reader.onload = (e) => {
+      console.log("load drawing")
+      loadDrawing(e.target.result)
+    }
+    reader.readAsText(this.files[0])
+  }
 }
 
 //===================================//
@@ -96,3 +111,8 @@ dom.tooltipBtn.addEventListener("click", (e) => {
   }
 })
 dom.exportBtn.addEventListener("click", exportImage)
+dom.importBtn.addEventListener("click", (e) => {
+  //reset value so that the same file can be imported multiple times
+  e.target.value = null
+})
+dom.importBtn.addEventListener("change", importDrawing)
