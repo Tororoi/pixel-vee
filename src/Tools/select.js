@@ -1,6 +1,7 @@
 import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { coordArrayFromSet } from "../utils/maskHelpers.js"
 
 //=====================================//
 //=== * * * Select Controller * * * ===//

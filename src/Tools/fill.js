@@ -7,6 +7,7 @@ import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 import { vectorGui, createActiveIndexesForRender } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
+import { coordArrayFromSet } from "../utils/maskHelpers.js"
 
 //===================================//
 //=== * * * Fill Controller * * * ===//

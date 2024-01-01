@@ -17,6 +17,7 @@ import {
   renderToolOptionsToDOM,
 } from "../Tools/events.js"
 import { renderCursor } from "../GUI/cursor.js"
+import { coordArrayFromSet } from "../utils/maskHelpers.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial

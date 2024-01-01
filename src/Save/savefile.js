@@ -3,6 +3,7 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { vectorGui } from "../GUI/vector.js"
 import { performAction, renderCanvas } from "../Canvas/render.js"
 import {
   renderLayersToDOM,
@@ -81,6 +82,7 @@ export async function loadDrawing(jsonFile) {
   dom.canvasLayers.innerHTML = ""
   canvas.layers = []
   state.undoStack = []
+  vectorGui.reset()
 
   // Recreate layers from the JSON data
   data.layers.forEach((layer) => {
@@ -125,7 +127,7 @@ export async function loadDrawing(jsonFile) {
     canvas.layers.push(layer)
   })
 
-  console.log(canvas.layers)
+  canvas.currentLayer = canvas.layers[canvas.layers.length - 1]
 
   // Reconstruct the undoStack
   data.undoStack.forEach((action) => {
