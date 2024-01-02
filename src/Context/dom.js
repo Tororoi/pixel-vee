@@ -23,11 +23,15 @@ const tooltipBtn = document.getElementById("tooltips-toggle")
 const saveBtn = document.querySelector(".save")
 // * Open Save * //
 const openSaveBtn = document.getElementById("drawing-upload")
+// * Export * //
+const exportBtn = document.querySelector(".export")
 
 //====================================//
 //====== * * * Save/Export * * * =====//
 //====================================//
 
+// * Save Container * //
+const saveContainer = document.querySelector(".save-container")
 // * Export Container * //
 const exportContainer = document.querySelector(".export-container")
 
@@ -143,6 +147,10 @@ export const dom = {
   tooltipBtn,
   saveBtn,
   openSaveBtn,
+  exportBtn,
+  //save/export
+  saveContainer,
+  exportContainer,
   //toolbox
   toolboxContainer,
   undoBtn,

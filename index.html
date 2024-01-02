@@ -74,6 +74,9 @@
           </label>
           <input type="file" accept=".pxv" id="drawing-upload" />
         </div>
+        <div class="export">
+          <div class="btn" data-tooltip="Download as .png">Export</div>
+        </div>
       </div>
     </div>
     <div class="page">
@@ -734,6 +737,100 @@
         <div class="collapsible">
           <div id="interface" class="export-interface">
             <!-- Select pixel scale and export folder location -->
+          </div>
+        </div>
+      </div>
+      <div class="save-container dialog-box draggable v-drag h-drag free">
+        <div id="save-header" class="header dragger">
+          <div class="drag-btn"><div class="grip"></div></div>
+          <span>Save</span>
+          <label
+            for="save-collapse-btn"
+            id="save-collapser"
+            class="collapse-btn"
+            data-tooltip="Collapse/ Expand"
+          >
+            <input
+              type="checkbox"
+              aria-label="Collapse or Expand"
+              class="collapse-checkbox"
+              id="save-collapse-btn"
+            />
+            <span class="arrow"></span>
+          </label>
+        </div>
+        <div class="collapsible">
+          <div id="interface" class="save-interface">
+            <!-- File name input -->
+            <div class="save-setting">
+              <label for="file-name">File Name:</label>
+              <input type="text" id="file-name" name="file-name" />
+            </div>
+
+            <!-- Folder location input -->
+            <div class="save-setting">
+              <label for="folder-location">Folder Location:</label>
+              <input type="text" id="folder-location" name="folder-location" />
+            </div>
+
+            <!-- checkbox for "Include Backup Image"-->
+            <div class="save-setting">
+              <input type="checkbox" id="backup-image" name="backup-image" />
+              <label for="backup-image">Include Backup Image</label>
+            </div>
+
+            <!-- checkbox for "Preserve Entire History"-->
+            <div class="save-setting">
+              <input
+                type="checkbox"
+                id="preserve-history"
+                name="preserve-history"
+              />
+              <label for="preserve-history">Preserve Entire History</label>
+            </div>
+
+            <!-- checkbox for "Include Palette"-->
+            <div class="save-setting">
+              <input
+                type="checkbox"
+                id="include-palette"
+                name="include-palette"
+              />
+              <label for="include-palette">Include Palette</label>
+            </div>
+
+            <!-- checkbox for "Include Reference Layers"-->
+            <div class="save-setting">
+              <input
+                type="checkbox"
+                id="include-reference-layers"
+                name="include-reference-layers"
+              />
+              <label for="include-reference-layers"
+                >Include Reference Layers</label
+              >
+            </div>
+
+            <!-- checkbox for "Include Removed Actions"-->
+            <div class="save-setting">
+              <input
+                type="checkbox"
+                id="include-removed-actions"
+                name="include-removed-actions"
+              />
+              <label for="include-removed-actions"
+                >Include Removed Actions</label
+              >
+            </div>
+
+            <!-- filesize preview-->
+            <div id="filesize-preview">Filesize: <span></span></div>
+
+            <!-- save button -->
+            <button type="button" id="save-button">Save</button>
+
+            <!-- cancel button -->
+            <button type="button" id="cancel-button">Cancel</button>
           </div>
         </div>
       </div>

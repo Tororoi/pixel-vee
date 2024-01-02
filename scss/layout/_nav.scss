@@ -2,7 +2,6 @@
   background-color: $black;
   justify-self: center;
   width: calc(100% - 4px);
-  height: 48px;
   min-height: 48px;
   display: flex;
   flex-flow: row nowrap;
@@ -30,10 +29,9 @@
   }
   .nav-items {
     display: flex;
-    flex-flow: row nowrap;
+    flex-flow: row wrap;
     align-items: center;
-    margin-left: 16px;
-    margin-right: 16px;
+    margin: 7px 16px;
     .tool-options {
       display: flex;
     }
@@ -86,14 +84,15 @@
       }
     }
     .save {
+      padding-right: 16px;
       .btn {
         height: 28px;
         width: 84px;
         background: $gray;
       }
-      padding-right: 16px;
     }
     .open-save {
+      padding-right: 16px;
       .btn {
         height: 28px;
         width: 84px;
@@ -101,6 +100,13 @@
       }
       input[type="file"] {
         display: none;
+      }
+    }
+    .export {
+      .btn {
+        height: 28px;
+        width: 84px;
+        background: $gray;
       }
     }
   }

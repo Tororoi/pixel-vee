@@ -58,7 +58,6 @@ function exportImage() {
   a.download = "pixelvee.png"
   document.body.appendChild(a)
   a.click()
-  // saveDrawing()
 }
 
 /**
@@ -119,3 +118,4 @@ dom.openSaveBtn.addEventListener("click", (e) => {
   e.target.value = null
 })
 dom.openSaveBtn.addEventListener("change", openSavedDrawing)
+dom.exportBtn.addEventListener("click", exportImage)

@@ -1,0 +1,93 @@
+.export-container {
+  user-select: none;
+  position: absolute;
+  z-index: 103;
+  width: 370px;
+  max-width: calc(100% - 4px);
+  max-height: calc(100% - 4px);
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  color: white;
+  background: $extra-dark-gray;
+  text-align: center;
+  font-family: "04Font";
+  font-size: 16px;
+  padding: 0;
+  align-self: center;
+  opacity: 1;
+  @include boxBorder;
+  .header {
+    h3 {
+      justify-self: center;
+      height: 20px;
+      margin: 0px;
+    }
+  }
+  .collapsible {
+    padding-top: 2px;
+    .export-interface {
+      display: flex;
+      flex-flow: column nowrap;
+      align-items: center;
+      margin: 10px;
+    }
+  }
+
+  @media ($bp-md) {
+    width: 570px; //important to be fixed for collapsed state
+    .collapsible {
+      .export-interface {
+        flex-flow: row nowrap;
+      }
+    }
+  }
+}
+
+.save-container {
+  user-select: none;
+  position: absolute;
+  z-index: 103;
+  width: 370px;
+  max-width: calc(100% - 4px);
+  max-height: calc(100% - 4px);
+  // display: none;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  color: white;
+  background: $extra-dark-gray;
+  text-align: center;
+  font-family: "04Font";
+  font-size: 16px;
+  padding: 0;
+  align-self: center;
+  opacity: 1;
+  @include boxBorder;
+  .header {
+    h3 {
+      justify-self: center;
+      height: 20px;
+      margin: 0px;
+    }
+  }
+  .collapsible {
+    padding-top: 2px;
+    .save-interface {
+      display: flex;
+      flex-flow: column nowrap;
+      align-items: center;
+      margin: 10px;
+      .save-setting {
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: center;
+        justify-content: flex-start;
+        width: 100%;
+        margin: 10px 0px;
+      }
+    }
+  }
+
+  @media ($bp-md) {
+  }
+}
