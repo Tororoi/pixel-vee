@@ -83,6 +83,27 @@ table {
   font-family: "04Font";
   src: url("../../public/04B_03__.ttf") format("truetype");
   font-display: swap;
+  font-weight: normal;
+}
+@font-face {
+  font-family: "Pixeloid Mono";
+  src: url("../../public/PixeloidMono-d94EV.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "basis33";
+  src: url("../../public/basis33.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Graph35";
+  src: url("../../public/Graph-35-pix.ttf") format("truetype");
+  font-display: swap;
+}
+@font-face {
+  font-family: "Monogram";
+  src: url("../../public/monogram.ttf") format("truetype");
+  font-display: swap;
 }
 html,
 body {
@@ -92,11 +113,19 @@ body {
   overscroll-behavior: none;
 }
 
+body,
+button,
+input {
+  font-family: "04Font";
+  font-size: 16px;
+  font-weight: normal;
+  -webkit-font-smoothing: none;
+}
+
 body {
   margin: 0px;
   color: white;
   background: rgb(61, 61, 61);
-  font-family: "04Font";
   user-select: none;
   display: flex;
   flex-direction: column;
@@ -114,10 +143,8 @@ a:active {
 }
 
 button {
-  font-family: "04Font";
   border: 0;
   padding: 0;
-  font-size: 16px;
   background: transparent;
   cursor: pointer;
 }
@@ -131,8 +158,6 @@ button:disabled {
 
 input {
   box-sizing: border-box;
-  font-family: "04Font";
-  font-size: 16px;
   padding-block: 0px;
   padding-inline: 0px;
   padding: 0px;
@@ -375,8 +400,6 @@ svg {
   color: black;
   background: rgb(255, 255, 199);
   text-align: center;
-  font-family: "04Font";
-  font-size: 16px;
   padding: 5px;
   align-self: flex-start;
   transition: opacity 0.3s;
@@ -409,6 +432,17 @@ svg {
   left: -2px;
   background: rgb(255, 255, 199);
   box-shadow: 2px -2px rgb(255, 255, 199), 0px -2px rgb(255, 255, 199), 0px -4px rgb(255, 255, 199);
+}
+.tooltip.page-center:after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 2px;
+  position: absolute;
+  top: -2px;
+  left: calc(50% - 1px);
+  background: rgb(255, 255, 199);
+  box-shadow: 2px -2px rgb(255, 255, 199), -2px -2px rgb(255, 255, 199), 0px -2px rgb(255, 255, 199), 0px -4px rgb(255, 255, 199);
 }
 
 /* Buttons */
@@ -470,6 +504,44 @@ svg {
   color: rgb(31, 31, 31);
 }
 
+/* Inputs */
+.input-label {
+  margin-right: 8px;
+}
+
+.toggle {
+  padding-right: 16px;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  cursor: pointer;
+}
+.toggle input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.toggle .checkmark {
+  position: relative;
+  height: 16px;
+  width: 16px;
+  background-color: rgb(61, 61, 61);
+  margin-right: 8px;
+  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+}
+.toggle:hover .checkmark {
+  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+}
+.toggle input:checked ~ .checkmark::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: -2px;
+  left: -2px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 10 10' shape-rendering='crispEdges'%3E%3Cpath stroke='%23ffffff' d='M8 0h2M7 1h1M9 1h1M6 2h1M8 2h1M3 3h1M5 3h1M7 3h1M2 4h1M4 4h1M7 4h1M1 5h1M6 5h1M2 6h1M6 6h1M3 7h1M5 7h1M4 8h1' /%3E%3Cpath stroke='%23000000' d='M8 1h1M7 2h1M6 3h1M3 4h1M5 4h2M2 5h4M3 6h3M4 7h1' /%3E%3C/svg%3E");
+}
+
 .nav {
   background-color: rgb(0, 0, 0);
   justify-self: center;
@@ -511,38 +583,6 @@ svg {
 }
 .nav .nav-items .tool-options {
   display: flex;
-}
-.nav .nav-items .toggle {
-  padding-right: 16px;
-  display: flex;
-  flex-flow: row nowrap;
-  align-items: center;
-  cursor: pointer;
-}
-.nav .nav-items .toggle input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-.nav .nav-items .toggle .checkmark {
-  position: relative;
-  height: 16px;
-  width: 16px;
-  background-color: rgb(61, 61, 61);
-  margin-right: 8px;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
-}
-.nav .nav-items .toggle:hover .checkmark {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
-}
-.nav .nav-items .toggle input:checked ~ .checkmark::after {
-  content: "";
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  top: -2px;
-  left: -2px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 10 10' shape-rendering='crispEdges'%3E%3Cpath stroke='%23ffffff' d='M8 0h2M7 1h1M9 1h1M6 2h1M8 2h1M3 3h1M5 3h1M7 3h1M2 4h1M4 4h1M7 4h1M1 5h1M6 5h1M2 6h1M6 6h1M3 7h1M5 7h1M4 8h1' /%3E%3Cpath stroke='%23000000' d='M8 1h1M7 2h1M6 3h1M3 4h1M5 4h2M2 5h4M3 6h3M4 7h1' /%3E%3C/svg%3E");
 }
 .nav .nav-items .canvas-size {
   padding-right: 16px;
@@ -703,6 +743,7 @@ canvas {
 .toolbox .collapsible .tools h4 {
   text-align: center;
   margin: 0px;
+  font-weight: normal;
 }
 .toolbox .collapsible .tools .columns {
   display: flex;
@@ -1090,7 +1131,6 @@ canvas {
   width: 100%;
   text-align: center;
   line-height: 40px;
-  font-size: 16px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -1471,8 +1511,6 @@ canvas {
   color: white;
   background: rgb(51, 51, 51);
   text-align: center;
-  font-family: "04Font";
-  font-size: 16px;
   padding: 0;
   align-self: center;
   opacity: 1;
@@ -1729,8 +1767,6 @@ canvas {
   color: white;
   background: rgb(51, 51, 51);
   text-align: center;
-  font-family: "04Font";
-  font-size: 16px;
   padding: 0;
   align-self: center;
   opacity: 1;
@@ -1769,13 +1805,12 @@ canvas {
   width: 370px;
   max-width: calc(100% - 4px);
   max-height: calc(100% - 4px);
+  display: none;
   flex-flow: column nowrap;
   justify-content: flex-start;
   color: white;
   background: rgb(51, 51, 51);
   text-align: center;
-  font-family: "04Font";
-  font-size: 16px;
   padding: 0;
   align-self: center;
   opacity: 1;
@@ -1796,7 +1831,7 @@ canvas {
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
-  margin: 10px;
+  margin: 8px;
 }
 .save-container .collapsible .save-interface .save-setting {
   display: flex;
@@ -1804,7 +1839,47 @@ canvas {
   align-items: center;
   justify-content: flex-start;
   width: 100%;
-  margin: 10px 0px;
+  margin: 8px 0px;
+}
+.save-container .collapsible .save-interface .save-setting #save-file-name {
+  width: 96px;
+  box-shadow: none;
+}
+.save-container .collapsible .save-interface .save-setting label > * {
+  pointer-events: none;
+}
+.save-container .collapsible .save-interface .save-setting label.save-file-name-label {
+  cursor: text;
+}
+.save-container .collapsible .save-interface .save-setting label.save-file-name-label > * {
+  pointer-events: unset;
+}
+.save-container .collapsible .save-interface .advanced-options {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+  margin-left: 16px;
+}
+.save-container .collapsible .save-interface .advanced-options.disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+.save-container .collapsible .save-interface .save-buttons {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 16px;
+}
+.save-container .collapsible .save-interface .save-buttons .btn {
+  height: 28px;
+  width: 84px;
+  margin: 8px;
+  background: rgb(77, 77, 77);
 }
 
 /*# sourceMappingURL=style.css.map */

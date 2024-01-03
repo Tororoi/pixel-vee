@@ -47,7 +47,7 @@
         >
           <input type="checkbox" id="grid-toggle" />
           <span class="checkmark"></span>
-          Grid
+          <span>Grid</span>
         </label>
         <label
           for="tooltips-toggle"
@@ -568,7 +568,7 @@
           </label>
         </div>
         <div class="collapsible">
-          <div id="interface" class="picker-interface">
+          <div id="picker-interface" class="picker-interface">
             <div id="left">
               <div id="picker">
                 <canvas id="color-picker"></canvas>
@@ -735,7 +735,7 @@
           </label>
         </div>
         <div class="collapsible">
-          <div id="interface" class="export-interface">
+          <div id="export-interface" class="export-interface">
             <!-- Select pixel scale and export folder location -->
           </div>
         </div>
@@ -760,78 +760,132 @@
           </label>
         </div>
         <div class="collapsible">
-          <div id="interface" class="save-interface">
+          <form id="save-interface" class="save-interface">
             <!-- File name input -->
             <div class="save-setting">
-              <label for="file-name">File Name:</label>
-              <input type="text" id="file-name" name="file-name" />
-            </div>
-
-            <!-- Folder location input -->
-            <div class="save-setting">
-              <label for="folder-location">Folder Location:</label>
-              <input type="text" id="folder-location" name="folder-location" />
-            </div>
-
-            <!-- checkbox for "Include Backup Image"-->
-            <div class="save-setting">
-              <input type="checkbox" id="backup-image" name="backup-image" />
-              <label for="backup-image">Include Backup Image</label>
-            </div>
-
-            <!-- checkbox for "Preserve Entire History"-->
-            <div class="save-setting">
-              <input
-                type="checkbox"
-                id="preserve-history"
-                name="preserve-history"
-              />
-              <label for="preserve-history">Preserve Entire History</label>
-            </div>
-
-            <!-- checkbox for "Include Palette"-->
-            <div class="save-setting">
-              <input
-                type="checkbox"
-                id="include-palette"
-                name="include-palette"
-              />
-              <label for="include-palette">Include Palette</label>
-            </div>
-
-            <!-- checkbox for "Include Reference Layers"-->
-            <div class="save-setting">
-              <input
-                type="checkbox"
-                id="include-reference-layers"
-                name="include-reference-layers"
-              />
-              <label for="include-reference-layers"
-                >Include Reference Layers</label
-              >
-            </div>
-
-            <!-- checkbox for "Include Removed Actions"-->
-            <div class="save-setting">
-              <input
-                type="checkbox"
-                id="include-removed-actions"
-                name="include-removed-actions"
-              />
-              <label for="include-removed-actions"
-                >Include Removed Actions</label
+              <label for="save-file-name" class="save-file-name-label"
+                ><span class="input-label">Save As:</span
+                ><input
+                  type="text"
+                  id="save-file-name"
+                  name="save-file-name"
+                  placeholder="my drawing"
+                  maxlength="16"
+                /><span>.pxv</span></label
               >
             </div>
 
             <!-- filesize preview-->
-            <div id="filesize-preview">Filesize: <span></span></div>
+            <div id="filesize-preview" class="save-setting">
+              <span>Filesize:&nbsp;</span><span id="savefile-size">53KB</span>
+            </div>
 
-            <!-- save button -->
-            <button type="button" id="save-button">Save</button>
+            <!-- checkbox for "Include Backup Image"-->
+            <!-- <div class="save-setting">
+              <label
+                for="backup-image-toggle"
+                id="backup-image"
+                class="toggle"
+                data-tooltip="Include backup image with savefile (increases filesize)"
+              >
+                <input
+                  type="checkbox"
+                  id="backup-image-toggle"
+                  name="backup-image"
+                />
+                <span class="checkmark"></span>
+                <span>Include Backup Image</span>
+              </label>
+            </div> -->
 
-            <!-- cancel button -->
-            <button type="button" id="cancel-button">Cancel</button>
-          </div>
+            <!-- checkbox for "Preserve Entire History"-->
+            <div class="save-setting">
+              <label
+                for="preserve-history-toggle"
+                id="preserve-history"
+                class="toggle"
+                data-tooltip="Preserve all actions in history, palette, and reference images"
+              >
+                <input
+                  type="checkbox"
+                  id="preserve-history-toggle"
+                  name="preserve-history"
+                  checked
+                />
+                <span class="checkmark"></span>
+                <span>Preserve Entire History</span>
+              </label>
+            </div>
+
+            <div class="advanced-options disabled" id="save-advanced-options">
+              <!-- checkbox for "Include Palette"-->
+              <div class="save-setting">
+                <label
+                  for="include-palette-toggle"
+                  id="include-palette"
+                  class="toggle"
+                  data-tooltip="Include palette with savefile"
+                >
+                  <input
+                    type="checkbox"
+                    id="include-palette-toggle"
+                    name="include-palette"
+                    checked
+                  />
+                  <span class="checkmark"></span>
+                  <span>Palette</span>
+                </label>
+              </div>
+
+              <!-- checkbox for "Include Reference Layers"-->
+              <div class="save-setting">
+                <label
+                  for="include-reference-layers-toggle"
+                  id="include-reference-layers"
+                  class="toggle"
+                  data-tooltip="Include reference layers with savefile"
+                >
+                  <input
+                    type="checkbox"
+                    id="include-reference-layers-toggle"
+                    name="include-reference-layers"
+                    checked
+                  />
+                  <span class="checkmark"></span>
+                  <span>Reference Layers</span>
+                </label>
+              </div>
+
+              <!-- checkbox for "Include Removed Actions"-->
+              <div class="save-setting">
+                <label
+                  for="include-removed-actions-toggle"
+                  id="include-removed-actions"
+                  class="toggle"
+                  data-tooltip="Include removed actions with savefile"
+                >
+                  <input
+                    type="checkbox"
+                    id="include-removed-actions-toggle"
+                    name="include-removed-actions"
+                    checked
+                  />
+                  <span class="checkmark"></span>
+                  <span>Removed Actions</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="save-buttons">
+              <!-- save button -->
+              <button type="button" id="save-button" class="btn">Save</button>
+
+              <!-- cancel button -->
+              <button type="button" id="cancel-save-button" class="btn">
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

@@ -32,6 +32,21 @@ const exportBtn = document.querySelector(".export")
 
 // * Save Container * //
 const saveContainer = document.querySelector(".save-container")
+// * Save Form * //
+const saveAsForm = document.querySelector("#save-interface")
+// * File Name * //
+const saveAsFileName = document.querySelector("#save-file-name")
+// * File Size Preview * //
+const fileSizePreview = document.querySelector("#savefile-size")
+// * Advanced Options * //
+const advancedOptionsContainer = document.querySelector(
+  "#save-advanced-options"
+)
+// * Save Button * //
+const saveDrawingBtn = document.querySelector("#save-button")
+// * Cancel Button * //
+const cancelSaveBtn = document.querySelector("#cancel-save-button")
+
 // * Export Container * //
 const exportContainer = document.querySelector(".export-container")
 
@@ -150,6 +165,12 @@ export const dom = {
   exportBtn,
   //save/export
   saveContainer,
+  saveAsForm,
+  saveAsFileName,
+  fileSizePreview,
+  advancedOptionsContainer,
+  saveDrawingBtn,
+  cancelSaveBtn,
   exportContainer,
   //toolbox
   toolboxContainer,

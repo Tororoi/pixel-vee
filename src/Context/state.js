@@ -18,6 +18,14 @@ export const state = {
   action: null, //object with tool, mode, properties, layer, hidden, removed, points. points will have x, y, color, brush info
   undoStack: [],
   redoStack: [],
+  //save settings
+  saveSettings: {
+    saveAsFileName: "my_drawing",
+    preserveHistory: true,
+    includePalette: true,
+    includeReferenceLayers: true,
+    includeRemovedActions: true,
+  },
   //tool settings
   tool: null, //needs to be initialized
   //touchscreen?

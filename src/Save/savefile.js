@@ -78,7 +78,7 @@ export function saveDrawing() {
   // Create a temporary anchor element
   const a = document.createElement("a")
   a.href = blobUrl
-  a.download = "drawing.pxv" // Set the file name for the download
+  a.download = "my drawing.pxv" // Set the file name for the download
 
   // Append the anchor to the body, click it, and then remove it
   document.body.appendChild(a)

@@ -5,6 +5,7 @@ import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "../GUI/vector.js"
 import { consolidateLayers } from "../Canvas/layers.js"
 import { saveDrawing, loadDrawing } from "../Save/savefile.js"
+import { measureTextWidth } from "../utils/measureHelpers.js"
 
 //====================================//
 //======= * * * Tooltip * * * ========//
@@ -18,22 +19,36 @@ const showTooltip = (message, target) => {
   if (message && target) {
     const targetRect = target.getBoundingClientRect()
     const targetCenter = targetRect.left + targetRect.width / 2
-    const pageSideRight = window.innerWidth / 2 < targetCenter
+    //get location of element relative to page (left, center, right)
+    let location = "left"
+    if (window.innerWidth * (2 / 3) < targetCenter) {
+      location = "right"
+    } else if (window.innerWidth / 3 < targetCenter) {
+      location = "center"
+    }
     dom.tooltip.innerText = message
     const tooltipRect = dom.tooltip.getBoundingClientRect()
-    const tooltipX = pageSideRight
-      ? targetRect.left - tooltipRect.width
-      : targetRect.left + targetRect.width
+    let tooltipX
+    if (location === "right") {
+      tooltipX = targetRect.left - tooltipRect.width
+    } else if (location === "center") {
+      tooltipX = targetRect.left + targetRect.width / 2 - tooltipRect.width / 2
+    } else {
+      tooltipX = targetRect.left + targetRect.width
+    }
     const tooltipY = targetRect.top + targetRect.height + 16
     dom.tooltip.classList.add("visible")
-    if (!pageSideRight) {
+    if (location === "left") {
       dom.tooltip.classList.add("page-left")
+    } else if (location === "center") {
+      dom.tooltip.classList.add("page-center")
     }
     dom.tooltip.style.top = tooltipY + "px"
     dom.tooltip.style.left = tooltipX + "px"
   } else {
     dom.tooltip.classList.remove("visible")
     dom.tooltip.classList.remove("page-left")
+    dom.tooltip.classList.remove("page-center")
   }
 }
 
@@ -112,10 +127,52 @@ dom.tooltipBtn.addEventListener("click", (e) => {
     dom.tooltip.classList.remove("visible")
   }
 })
-dom.saveBtn.addEventListener("click", saveDrawing)
 dom.openSaveBtn.addEventListener("click", (e) => {
   //reset value so that the same file can be imported multiple times
   e.target.value = null
 })
 dom.openSaveBtn.addEventListener("change", openSavedDrawing)
 dom.exportBtn.addEventListener("click", exportImage)
+dom.saveBtn.addEventListener("click", (e) => {
+  dom.saveContainer.style.display = "flex"
+})
+dom.saveAsForm.addEventListener("change", (e) => {
+  if (e.target.id === "preserve-history-toggle") {
+    if (e.target.checked) {
+      state.saveSettings.preserveHistory = true
+      dom.advancedOptionsContainer.classList.add("disabled")
+    } else {
+      state.saveSettings.preserveHistory = false
+      dom.advancedOptionsContainer.classList.remove("disabled")
+    }
+  } else if (e.target.id === "include-palette-toggle") {
+    if (e.target.checked) {
+      state.saveSettings.includePalette = true
+    } else {
+      state.saveSettings.includePalette = false
+    }
+  } else if (e.target.id === "include-reference-layers-toggle") {
+    if (e.target.checked) {
+      state.saveSettings.includeReferenceLayers = true
+    } else {
+      state.saveSettings.includeReferenceLayers = false
+    }
+  } else if (e.target.id === "include-removed-actions-toggle") {
+    if (e.target.checked) {
+      state.saveSettings.includeRemovedActions = true
+    } else {
+      state.saveSettings.includeRemovedActions = false
+    }
+  }
+})
+dom.saveAsFileName.addEventListener("input", (e) => {
+  state.saveSettings.saveAsFileName = e.target.value
+  dom.saveAsFileName.style.width =
+    measureTextWidth(state.saveSettings.saveAsFileName, "16px '04Font'") +
+    2 +
+    "px"
+})
+dom.saveDrawingBtn.addEventListener("click", saveDrawing)
+dom.cancelSaveBtn.addEventListener("click", (e) => {
+  dom.saveContainer.style.display = "none"
+})

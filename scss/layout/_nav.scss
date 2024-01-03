@@ -35,45 +35,6 @@
     .tool-options {
       display: flex;
     }
-    .toggle {
-      padding-right: 16px;
-      display: flex;
-      flex-flow: row nowrap;
-      align-items: center;
-      cursor: pointer;
-      input {
-        position: absolute;
-        opacity: 0;
-        pointer-events: none;
-      }
-      .checkmark {
-        position: relative;
-        height: 16px;
-        width: 16px;
-        background-color: $dark-gray;
-        margin-right: 8px;
-        box-shadow: 2px 0px $border-color, -2px 0px $border-color,
-          0px -2px $border-color, 0px 2px $border-color;
-      }
-      &:hover {
-        .checkmark {
-          box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white,
-            0px 2px $white;
-        }
-      }
-      input:checked ~ .checkmark {
-        // background-color: $blue;
-        &::after {
-          content: "";
-          position: absolute;
-          width: 20px;
-          height: 20px;
-          top: -2px;
-          left: -2px;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 10 10' shape-rendering='crispEdges'%3E%3Cpath stroke='%23ffffff' d='M8 0h2M7 1h1M9 1h1M6 2h1M8 2h1M3 3h1M5 3h1M7 3h1M2 4h1M4 4h1M7 4h1M1 5h1M6 5h1M2 6h1M6 6h1M3 7h1M5 7h1M4 8h1' /%3E%3Cpath stroke='%23000000' d='M8 1h1M7 2h1M6 3h1M3 4h1M5 4h2M2 5h4M3 6h3M4 7h1' /%3E%3C/svg%3E");
-        }
-      }
-    }
     .canvas-size {
       padding-right: 16px;
       .btn {

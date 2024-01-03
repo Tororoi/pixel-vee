@@ -11,7 +11,6 @@ import { renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM } from "../DOM/render.js"
 import { actionZoom } from "../Actions/untrackedActions.js"
 import { throttle } from "../utils/eventHelpers.js"
-import { saveDrawing } from "../Save/savefile.js"
 
 /**
  * Set global coordinates
@@ -48,6 +47,10 @@ const setCoordinates = (e) => {
 function handleKeyDown(e) {
   //Prevent repeated activations while holding a key down
   if (e.repeat) {
+    return
+  }
+  //if entering info on form, don't activate shortcuts
+  if (document.activeElement.tagName === "INPUT") {
     return
   }
   // e.preventDefault() - May conditionally need this for certain shortcuts, but try to avoid doing so
