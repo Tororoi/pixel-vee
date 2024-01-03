@@ -1,12 +1,39 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
 import { clearOffscreenCanvas, renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM, renderLayersToDOM } from "../DOM/render.js"
+import { setSaveFilesizePreview } from "../Save/savefile.js"
 
 //====================================//
 //========= * * * Core * * * =========//
 //====================================//
+
+/**
+ * This sets the action which is then pushed to the undoStack for the command pattern
+ * @param {Object} actionObject
+ */
+export function addToTimeline(actionObject) {
+  const { tool, color, layer, properties } = actionObject
+  //use current state for variables
+  let snapshot = layer.type === "raster" ? layer.cvs.toDataURL() : null
+  state.action = {
+    tool: { ...tool }, //Needed properties: name, brushType, brushSize, type
+    modes: { ...tool.modes },
+    color: color || { ...swatches.primary.color },
+    layer: layer,
+    properties,
+    hidden: false,
+    removed: false,
+    snapshot,
+  }
+  state.undoStack.push(state.action)
+  //TODO: save image of layer to action. When undo/redo occurs, render image to canvas instead of redrawing timeline. For modify actions, images of modified action and subsequent actions must be updated.
+  if (state.saveDialogOpen) {
+    setSaveFilesizePreview()
+  }
+}
 
 /**
  * @param {Object} latestAction
@@ -251,6 +278,9 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     renderLayersToDOM()
     renderVectorsToDOM()
     state.reset()
+  }
+  if (state.saveDialogOpen) {
+    setSaveFilesizePreview()
   }
 }
 

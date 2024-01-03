@@ -15,6 +15,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { getAngle } from "../utils/trig.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
+import { addToTimeline } from "../Actions/undoRedo.js"
 
 //=====================================//
 //=== * * * Curve Controllers * * * ===//
@@ -149,7 +150,7 @@ function quadCurveSteps() {
           canvas.currentLayer.y
         )
         //store control points for timeline
-        state.addToTimeline({
+        addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {
@@ -317,7 +318,7 @@ function cubicCurveSteps() {
           canvas.currentLayer.y
         )
         //store control points for timeline
-        state.addToTimeline({
+        addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {

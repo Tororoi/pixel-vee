@@ -16,6 +16,7 @@ import { setInitialZoom } from "../utils/canvasHelpers.js"
 import { initializeColorPicker } from "../Swatch/events.js"
 import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
 import { dragStart, dragMove, dragStop } from "../utils/drag.js"
+import { addToTimeline } from "../Actions/undoRedo.js"
 
 //====================================//
 //==== * * * Canvas Resize * * * =====//
@@ -395,7 +396,7 @@ function addReferenceLayer() {
           removed: false,
         }
         canvas.layers.unshift(layer)
-        state.addToTimeline({
+        addToTimeline({
           tool: tools.addLayer,
           layer,
         })
@@ -425,7 +426,7 @@ function removeLayer(layer) {
       )
       vectorGui.reset()
     }
-    state.addToTimeline({
+    addToTimeline({
       tool: tools.removeLayer,
       layer,
     })
@@ -445,7 +446,7 @@ function addRasterLayer() {
   //once layer is added to timeline and drawn on, can no longer be deleted
   const layer = createNewRasterLayer(`Layer ${canvas.layers.length + 1}`)
   canvas.layers.push(layer)
-  state.addToTimeline({
+  addToTimeline({
     tool: tools.addLayer,
     layer,
   })

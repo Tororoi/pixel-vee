@@ -14,6 +14,7 @@ import {
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { storedActions } from "../Testing/storedActions.js"
+import { addToTimeline } from "../Actions/undoRedo.js"
 
 //======================================//
 //=== * * * Ellipse Controller * * * ===//
@@ -189,7 +190,7 @@ function ellipseSteps() {
           canvas.currentLayer.y
         )
         //store control points for timeline
-        state.addToTimeline({
+        addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {

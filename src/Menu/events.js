@@ -4,7 +4,12 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "../GUI/vector.js"
 import { consolidateLayers } from "../Canvas/layers.js"
-import { saveDrawing, loadDrawing } from "../Save/savefile.js"
+import {
+  prepareDrawingForSave,
+  setSaveFilesizePreview,
+  saveDrawing,
+  loadDrawing,
+} from "../Save/savefile.js"
 import { measureTextWidth } from "../utils/measureHelpers.js"
 
 //====================================//
@@ -17,6 +22,10 @@ import { measureTextWidth } from "../utils/measureHelpers.js"
  */
 const showTooltip = (message, target) => {
   if (message && target) {
+    //reset tooltip
+    dom.tooltip.classList.remove("page-left")
+    dom.tooltip.classList.remove("page-center")
+    //get location and boundaries of target
     const targetRect = target.getBoundingClientRect()
     const targetCenter = targetRect.left + targetRect.width / 2
     //get location of element relative to page (left, center, right)
@@ -47,8 +56,6 @@ const showTooltip = (message, target) => {
     dom.tooltip.style.left = tooltipX + "px"
   } else {
     dom.tooltip.classList.remove("visible")
-    dom.tooltip.classList.remove("page-left")
-    dom.tooltip.classList.remove("page-center")
   }
 }
 
@@ -135,6 +142,9 @@ dom.openSaveBtn.addEventListener("change", openSavedDrawing)
 dom.exportBtn.addEventListener("click", exportImage)
 dom.saveBtn.addEventListener("click", (e) => {
   dom.saveContainer.style.display = "flex"
+  state.saveDialogOpen = true
+  setSaveFilesizePreview()
+  dom.saveAsFileName.focus()
 })
 dom.saveAsForm.addEventListener("change", (e) => {
   if (e.target.id === "preserve-history-toggle") {
@@ -145,24 +155,28 @@ dom.saveAsForm.addEventListener("change", (e) => {
       state.saveSettings.preserveHistory = false
       dom.advancedOptionsContainer.classList.remove("disabled")
     }
+    setSaveFilesizePreview()
   } else if (e.target.id === "include-palette-toggle") {
     if (e.target.checked) {
       state.saveSettings.includePalette = true
     } else {
       state.saveSettings.includePalette = false
     }
+    setSaveFilesizePreview()
   } else if (e.target.id === "include-reference-layers-toggle") {
     if (e.target.checked) {
       state.saveSettings.includeReferenceLayers = true
     } else {
       state.saveSettings.includeReferenceLayers = false
     }
+    setSaveFilesizePreview()
   } else if (e.target.id === "include-removed-actions-toggle") {
     if (e.target.checked) {
       state.saveSettings.includeRemovedActions = true
     } else {
       state.saveSettings.includeRemovedActions = false
     }
+    setSaveFilesizePreview()
   }
 })
 dom.saveAsFileName.addEventListener("input", (e) => {
@@ -172,7 +186,12 @@ dom.saveAsFileName.addEventListener("input", (e) => {
     2 +
     "px"
 })
-dom.saveDrawingBtn.addEventListener("click", saveDrawing)
+dom.saveDrawingBtn.addEventListener("click", (e) => {
+  saveDrawing()
+  dom.saveContainer.style.display = "none"
+  state.saveDialogOpen = false
+})
 dom.cancelSaveBtn.addEventListener("click", (e) => {
   dom.saveContainer.style.display = "none"
+  state.saveDialogOpen = false
 })

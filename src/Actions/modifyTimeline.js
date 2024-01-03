@@ -1,5 +1,6 @@
 import { state } from "../Context/state.js"
 import { tools } from "../Tools/index.js"
+import { addToTimeline } from "./undoRedo.js"
 
 //====================================//
 //==== * * * Modify Actions * * * ====//
@@ -37,7 +38,7 @@ export function modifyVectorAction(moddedAction) {
   state.vectorsSavedProperties = {}
   state.activeIndexes = []
   state.savedBetweenActionImages = []
-  state.addToTimeline({
+  addToTimeline({
     tool: tools.modify,
     layer: moddedAction.layer,
     properties: {
@@ -60,7 +61,7 @@ export function changeActionColor(moddedAction, oldColor) {
   let modifiedColor = {
     ...moddedAction.color,
   } //shallow copy, must make deep copy, at least for x, y and properties
-  state.addToTimeline({
+  addToTimeline({
     tool: tools.changeColor,
     layer: moddedAction.layer,
     properties: {
@@ -77,7 +78,7 @@ export function changeActionColor(moddedAction, oldColor) {
  * @param {Object} moddedAction
  */
 export function removeAction(moddedAction) {
-  state.addToTimeline({
+  addToTimeline({
     tool: tools.remove,
     layer: moddedAction.layer,
     properties: {
@@ -96,7 +97,7 @@ export function removeAction(moddedAction) {
  * @param {Object} newModes
  */
 export function changeActionMode(moddedAction, oldModes, newModes) {
-  state.addToTimeline({
+  addToTimeline({
     tool: tools.changeMode,
     layer: moddedAction.layer,
     properties: {
@@ -126,7 +127,7 @@ export function actionClear(layer) {
       action.removed = true
     }
   })
-  state.addToTimeline({
+  addToTimeline({
     tool: tools.clear,
     layer: layer,
     properties: {

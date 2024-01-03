@@ -224,7 +224,7 @@ function handlePointerUp(e) {
 
   //run selected tool step function
   state.tool.fn()
-  //add to undo stack
+  //reset action and render vectors
   if (state.action) {
     if (
       ["fill", "quadCurve", "cubicCurve", "ellipse"].includes(state.tool.name)

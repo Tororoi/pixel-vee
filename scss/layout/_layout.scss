@@ -115,7 +115,6 @@
   color: black;
   background: $tooltip-color;
   text-align: center;
-  // font-size: 16px;
   padding: 5px;
   align-self: flex-start;
   transition: opacity 0.3s;
@@ -236,15 +235,16 @@
 }
 
 .toggle {
-  padding-right: 16px;
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
   cursor: pointer;
+  > * {
+    pointer-events: none;
+  }
   input {
     position: absolute;
     opacity: 0;
-    pointer-events: none;
   }
   .checkmark {
     position: relative;

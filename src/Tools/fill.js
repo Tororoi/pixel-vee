@@ -8,6 +8,7 @@ import { vectorGui, createActiveIndexesForRender } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
+import { addToTimeline } from "../Actions/undoRedo.js"
 
 //===================================//
 //=== * * * Fill Controller * * * ===//
@@ -43,7 +44,7 @@ function fillSteps() {
           canvas.currentLayer.x,
           canvas.currentLayer.y
         )
-        state.addToTimeline({
+        addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {

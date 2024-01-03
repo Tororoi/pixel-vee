@@ -13,6 +13,11 @@ import {
   renderPaletteToDOM,
 } from "../DOM/render.js"
 import { validatePixelVeeFile } from "../utils/validationHelpers.js"
+import {
+  sanitizeLayers,
+  sanitizePalette,
+  sanitizeHistory,
+} from "../utils/sanitizeObjectsForSave.js"
 
 /**
  * Save the drawing as a JSON file
@@ -22,39 +27,36 @@ import { validatePixelVeeFile } from "../utils/validationHelpers.js"
  *     - maybe don't save reference layers at all and remove addlayer actions for reference layer?
  *   - raster layer properties: cvs, ctx, onscreenCvs, onscreenCtx
  * - tool fn - not needed because it is not used
- * - action snapshot - redraw upon load drawing, don't save unnecessary dataurls
- *
+ * - action snapshot - don't save unnecessary dataurls
+ * @returns {Blob} - A blob containing the drawing data.
  */
-export function saveDrawing() {
-  // Sanitize canvas layers
-  // Create a deep copy of canvas layers by stringifying and parsing
-  let sanitizedLayers = JSON.parse(JSON.stringify(canvas.layers))
+export function prepareDrawingForSave() {
+  const {
+    preserveHistory,
+    includePalette,
+    includeReferenceLayers,
+    includeRemovedActions,
+  } = state.saveSettings
 
-  // Modify each layer in the array
-  sanitizedLayers.forEach((layer) => {
-    // Remove reference layers
-    //TODO: if option is selected, remove reference layers from canvas.layers
-    // Remove canvases and contexts
-    delete layer.cvs
-    delete layer.ctx
-    delete layer.onscreenCvs
-    delete layer.onscreenCtx
-  })
+  let sanitizedLayers = sanitizeLayers(
+    canvas.layers,
+    preserveHistory,
+    includeReferenceLayers,
+    includeRemovedActions
+  )
+  let sanitizedPalette = sanitizePalette(
+    swatches.palette,
+    preserveHistory,
+    includePalette
+  )
+  let sanitizedUndoStack = sanitizeHistory(
+    state.undoStack,
+    preserveHistory,
+    includeReferenceLayers,
+    includeRemovedActions
+  )
 
-  // Sanitize undoStack
-  // Create a deep copy of undoStack by stringifying and parsing
-  let sanitizedUndoStack = JSON.parse(JSON.stringify(state.undoStack))
-
-  // Modify each action in the stack
-  sanitizedUndoStack.forEach((action) => {
-    // Preserve only the title property of the layer object
-    if (action.layer) {
-      action.layer = { title: action.layer.title }
-    }
-    // Remove data urls
-    delete action.snapshot
-  })
-  let jsonString = JSON.stringify(
+  let saveJsonString = JSON.stringify(
     {
       metadata: {
         version: "1.0",
@@ -62,23 +64,41 @@ export function saveDrawing() {
         timestamp: Date.now(),
       },
       layers: sanitizedLayers,
-      palette: swatches.palette, //not required
+      palette: sanitizedPalette,
       history: sanitizedUndoStack,
     },
     null,
     2
   )
+  return new Blob([saveJsonString], { type: "application/json" })
+}
+
+/**
+ * Set the preview of the file size
+ */
+export function setSaveFilesizePreview() {
+  const saveBlob = prepareDrawingForSave()
+  if (saveBlob.size > 1000000) {
+    dom.fileSizePreview.innerText = (saveBlob.size / 1000000).toFixed(1) + "MB"
+  } else {
+    dom.fileSizePreview.innerText = (saveBlob.size / 1000).toFixed(0) + "KB"
+  }
+}
+
+/**
+ * Download the drawing as a JSON file
+ */
+export function saveDrawing() {
   // Create a new Blob with the JSON data and the correct MIME type
-  const blob = new Blob([jsonString], { type: "application/json" })
-  console.log(blob.size)
+  const saveBlob = prepareDrawingForSave()
   // Create a URL for the Blob
-  const blobUrl = URL.createObjectURL(blob)
+  const blobUrl = URL.createObjectURL(saveBlob)
   // Open the URL in a new tab/window
   // window.open(blobUrl)
   // Create a temporary anchor element
   const a = document.createElement("a")
   a.href = blobUrl
-  a.download = "my drawing.pxv" // Set the file name for the download
+  a.download = state.saveSettings.saveAsFileName + ".pxv" // Set the file name for the download
 
   // Append the anchor to the body, click it, and then remove it
   document.body.appendChild(a)

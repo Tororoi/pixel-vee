@@ -4,7 +4,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
-import { handleUndo, handleRedo } from "../Actions/undoRedo.js"
+import { addToTimeline, handleUndo, handleRedo } from "../Actions/undoRedo.js"
 import { tools } from "../Tools/index.js"
 import { adjustEllipseSteps } from "../Tools/ellipse.js"
 import { renderCanvas } from "../Canvas/render.js"
@@ -112,7 +112,7 @@ export function activateShortcut(keyCode) {
               canvas.currentLayer.x,
               canvas.currentLayer.y
             )
-            state.addToTimeline({
+            addToTimeline({
               tool: tools.select,
               layer: canvas.currentLayer,
               properties: {

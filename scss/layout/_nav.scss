@@ -32,6 +32,9 @@
     flex-flow: row wrap;
     align-items: center;
     margin: 7px 16px;
+    .toggle {
+      padding-right: 16px;
+    }
     .tool-options {
       display: flex;
     }

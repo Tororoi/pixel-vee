@@ -2,6 +2,7 @@ import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
+import { addToTimeline } from "../Actions/undoRedo.js"
 
 //=====================================//
 //=== * * * Select Controller * * * ===//
@@ -85,7 +86,7 @@ function selectSteps() {
         canvas.currentLayer.x,
         canvas.currentLayer.y
       )
-      state.addToTimeline({
+      addToTimeline({
         tool: state.tool,
         layer: canvas.currentLayer,
         properties: {

@@ -510,16 +510,17 @@ svg {
 }
 
 .toggle {
-  padding-right: 16px;
   display: flex;
   flex-flow: row nowrap;
   align-items: center;
   cursor: pointer;
 }
+.toggle > * {
+  pointer-events: none;
+}
 .toggle input {
   position: absolute;
   opacity: 0;
-  pointer-events: none;
 }
 .toggle .checkmark {
   position: relative;
@@ -580,6 +581,9 @@ svg {
   flex-flow: row wrap;
   align-items: center;
   margin: 7px 16px;
+}
+.nav .nav-items .toggle {
+  padding-right: 16px;
 }
 .nav .nav-items .tool-options {
   display: flex;
@@ -1830,7 +1834,7 @@ canvas {
 .save-container .collapsible .save-interface {
   display: flex;
   flex-flow: column nowrap;
-  align-items: center;
+  align-items: flex-start;
   margin: 8px;
 }
 .save-container .collapsible .save-interface .save-setting {
@@ -1838,7 +1842,6 @@ canvas {
   flex-flow: row nowrap;
   align-items: center;
   justify-content: flex-start;
-  width: 100%;
   margin: 8px 0px;
 }
 .save-container .collapsible .save-interface .save-setting #save-file-name {
@@ -1857,15 +1860,19 @@ canvas {
 .save-container .collapsible .save-interface .advanced-options {
   display: flex;
   flex-flow: column nowrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: flex-start;
   width: 100%;
-  margin-left: 16px;
+  margin-left: 20px;
 }
 .save-container .collapsible .save-interface .advanced-options.disabled {
   opacity: 0.4;
-  pointer-events: none;
+}
+.save-container .collapsible .save-interface .advanced-options.disabled .save-setting {
   cursor: not-allowed;
+}
+.save-container .collapsible .save-interface .advanced-options.disabled .save-setting > * {
+  pointer-events: none;
 }
 .save-container .collapsible .save-interface .save-buttons {
   display: flex;

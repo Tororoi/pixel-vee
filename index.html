@@ -57,11 +57,14 @@
         >
           <input type="checkbox" checked="true" id="tooltips-toggle" />
           <span class="checkmark"></span>
-          Tooltips
+          <span>Tooltips</span>
         </label>
         <div class="save">
-          <div class="btn" data-tooltip="Download file with current progress">
-            Save
+          <div
+            class="btn"
+            data-tooltip="Open dialog box to download file with current progress"
+          >
+            <span>Save</span>
           </div>
         </div>
         <div class="open-save">
@@ -70,12 +73,14 @@
             class="btn"
             data-tooltip="Open saved drawing"
           >
-            Open
+            <span>Open</span>
           </label>
           <input type="file" accept=".pxv" id="drawing-upload" />
         </div>
         <div class="export">
-          <div class="btn" data-tooltip="Download as .png">Export</div>
+          <div class="btn" data-tooltip="Download as .png">
+            <span>Export</span>
+          </div>
         </div>
       </div>
     </div>
@@ -743,7 +748,7 @@
       <div class="save-container dialog-box draggable v-drag h-drag free">
         <div id="save-header" class="header dragger">
           <div class="drag-btn"><div class="grip"></div></div>
-          <span>Save</span>
+          <span>Save Options</span>
           <label
             for="save-collapse-btn"
             id="save-collapser"
@@ -777,7 +782,7 @@
 
             <!-- filesize preview-->
             <div id="filesize-preview" class="save-setting">
-              <span>Filesize:&nbsp;</span><span id="savefile-size">53KB</span>
+              <span>Filesize:&nbsp;</span><span id="savefile-size"></span>
             </div>
 
             <!-- checkbox for "Include Backup Image"-->

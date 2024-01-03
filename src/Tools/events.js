@@ -16,6 +16,9 @@ import { createOptionToggle } from "../utils/optionsInterfaceHelpers.js"
 import { testAction } from "../Testing/performanceTesting.js"
 import { storedActions } from "../Testing/storedActions.js"
 
+//Initialize default tool
+state.tool = tools.brush
+
 //=========================================//
 //=== * * * Button Event Handlers * * * ===//
 //=========================================//
