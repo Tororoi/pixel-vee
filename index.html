@@ -37,6 +37,15 @@
           <img src="./public/pixel-vee.png" />
         </a>
       </div>
+      <div class="file-menu">
+        <div class="file-menu-btn btn">File</div>
+        <div class="file-menu-content">
+          <div class="file-menu-item btn" id="new">New</div>
+          <div class="file-menu-item btn" id="open">Open</div>
+          <div class="file-menu-item btn" id="save">Save</div>
+          <div class="file-menu-item btn" id="export">Export</div>
+        </div>
+      </div>
       <div class="nav-items">
         <div class="tool-options"></div>
         <label
@@ -829,7 +838,7 @@
                   for="include-palette-toggle"
                   id="include-palette"
                   class="toggle"
-                  data-tooltip="Include palette with savefile"
+                  data-tooltip="Save colors in palette"
                 >
                   <input
                     type="checkbox"
@@ -848,7 +857,7 @@
                   for="include-reference-layers-toggle"
                   id="include-reference-layers"
                   class="toggle"
-                  data-tooltip="Include reference layers with savefile"
+                  data-tooltip="Save all reference images, including any transformations applied to them."
                 >
                   <input
                     type="checkbox"
@@ -867,7 +876,7 @@
                   for="include-removed-actions-toggle"
                   id="include-removed-actions"
                   class="toggle"
-                  data-tooltip="Include removed actions with savefile"
+                  data-tooltip="If a layer or vector was trashed or layer was cleared, those actions are still recoverable by using undo. If you're certain those actions won't be missed, you can remove them permanently by unchecking this box."
                 >
                   <input
                     type="checkbox"
