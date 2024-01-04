@@ -554,6 +554,7 @@ svg {
   align-items: center;
   position: relative;
   margin: 2px;
+  z-index: 2;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .nav:hover:not([disabled]) {
@@ -620,6 +621,48 @@ svg {
   height: 28px;
   width: 84px;
   background: rgb(77, 77, 77);
+}
+
+#file-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+#file-menu li {
+  position: relative;
+  padding: 5px 10px;
+  cursor: pointer;
+  background: rgb(77, 77, 77);
+}
+#file-menu li.menu-folder {
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+#file-menu li.menu-folder:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+#file-menu li ul {
+  display: none;
+  position: absolute;
+  left: 0;
+  top: 100%;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background-color: rgb(77, 77, 77);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+#file-menu li ul:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+#file-menu li ul li {
+  padding: 5px 10px;
+  cursor: pointer;
+}
+#file-menu li ul li:hover {
+  background-color: rgb(31, 31, 31);
+}
+#file-menu .show {
+  display: block;
 }
 
 /* Next override basic styles with specific styles when necessary */

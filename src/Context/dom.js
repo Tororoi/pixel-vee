@@ -26,6 +26,10 @@ const openSaveBtn = document.getElementById("drawing-upload")
 // * Export * //
 const exportBtn = document.querySelector(".export")
 
+// * File Menu * //
+const fileMenu = document.querySelector("#file-menu")
+const fileSubMenu = document.querySelector("#file-submenu")
+
 //====================================//
 //====== * * * Save/Export * * * =====//
 //====================================//
@@ -163,6 +167,8 @@ export const dom = {
   saveBtn,
   openSaveBtn,
   exportBtn,
+  fileMenu,
+  fileSubMenu,
   //save/export
   saveContainer,
   saveAsForm,

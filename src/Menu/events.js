@@ -195,3 +195,12 @@ dom.cancelSaveBtn.addEventListener("click", (e) => {
   dom.saveContainer.style.display = "none"
   state.saveDialogOpen = false
 })
+dom.fileMenu.addEventListener("click", function (e) {
+  let target = e.target
+  if (
+    target.getAttribute("role") === "menuitem" &&
+    target.getAttribute("aria-haspopup") === "true"
+  ) {
+    dom.fileSubMenu.classList.toggle("show")
+  }
+})

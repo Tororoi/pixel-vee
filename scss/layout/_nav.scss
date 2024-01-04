@@ -9,6 +9,7 @@
   align-items: center;
   position: relative;
   margin: 2px;
+  z-index: 2;
   @include boxBorder;
   .title {
     padding-left: 16px;
@@ -73,5 +74,46 @@
         background: $gray;
       }
     }
+  }
+}
+
+#file-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  li {
+    position: relative;
+    padding: 5px 10px;
+    cursor: pointer;
+    background: $gray;
+    &.menu-folder {
+      @include boxBorder;
+    }
+
+    ul {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: 100%;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      background-color: $gray;
+      @include boxBorder;
+
+      li {
+        padding: 5px 10px;
+        cursor: pointer;
+
+        &:hover {
+          background-color: $darkest-gray;
+        }
+      }
+    }
+  }
+
+  .show {
+    display: block;
   }
 }

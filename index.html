@@ -37,15 +37,17 @@
           <img src="./public/pixel-vee.png" />
         </a>
       </div>
-      <div class="file-menu">
-        <div class="file-menu-btn btn">File</div>
-        <div class="file-menu-content">
-          <div class="file-menu-item btn" id="new">New</div>
-          <div class="file-menu-item btn" id="open">Open</div>
-          <div class="file-menu-item btn" id="save">Save</div>
-          <div class="file-menu-item btn" id="export">Export</div>
-        </div>
-      </div>
+      <ul role="menu" aria-label="functions" id="file-menu">
+        <li role="menuitem" aria-haspopup="true" class="menu-folder">
+          File
+          <ul role="menu" id="file-submenu">
+            <!-- <li role="menuitem">New</li> -->
+            <li role="menuitem">Open</li>
+            <li role="menuitem">Save</li>
+            <li role="menuitem">Export</li>
+          </ul>
+        </li>
+      </ul>
       <div class="nav-items">
         <div class="tool-options"></div>
         <label
