@@ -45,18 +45,21 @@ const setCoordinates = (e) => {
  * @param {KeyboardEvent} e
  */
 function handleKeyDown(e) {
-  //Prevent repeated activations while holding a key down
-  if (e.repeat) {
-    return
-  }
-  //if entering info on form, don't activate shortcuts
-  if (document.activeElement.tagName === "INPUT") {
-    return
-  }
   // e.preventDefault() - May conditionally need this for certain shortcuts, but try to avoid doing so
   //Prevent default save behavior
   if (e.code === "KeyS" && (keys.MetaLeft || keys.MetaRight)) {
     e.preventDefault()
+  }
+  //Prevent repeated activations while holding a key down
+  if (e.repeat) {
+    return
+  }
+  //if entering info on text input, don't activate shortcuts
+  if (
+    document.activeElement.tagName === "INPUT" &&
+    document.activeElement.type === "text"
+  ) {
+    return
   }
   if (state.shortcuts) {
     keys[e.code] = true //set active key globally
