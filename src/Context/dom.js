@@ -12,6 +12,9 @@ const tooltip = document.getElementById("tooltip")
 //========= * * * Menu * * * =========//
 //====================================//
 
+// * Nav * //
+const topMenu = document.querySelector(".nav")
+
 // * Tool Options * //
 const toolOptions = document.querySelector(".tool-options")
 //TODO: options dialog box where user can set default options such as display vectors, paths, or auto select most recently created vector
@@ -19,8 +22,40 @@ const toolOptions = document.querySelector(".tool-options")
 const gridBtn = document.getElementById("grid-toggle")
 // * Toggle Tooltips * //
 const tooltipBtn = document.getElementById("tooltips-toggle")
+// * Save * //
+const saveBtn = document.querySelector(".save")
+// * Open Save * //
+const openSaveBtn = document.getElementById("drawing-upload")
 // * Export * //
 const exportBtn = document.querySelector(".export")
+
+// * File Menu * //
+const fileMenu = document.querySelector("#file-menu")
+const fileSubMenu = document.querySelector("#file-submenu")
+
+//====================================//
+//====== * * * Save/Export * * * =====//
+//====================================//
+
+// * Save Container * //
+const saveContainer = document.querySelector(".save-container")
+// * Save Form * //
+const saveAsForm = document.querySelector("#save-interface")
+// * File Name * //
+const saveAsFileName = document.querySelector("#save-file-name")
+// * File Size Preview * //
+const fileSizePreview = document.querySelector("#savefile-size")
+// * Advanced Options * //
+const advancedOptionsContainer = document.querySelector(
+  "#save-advanced-options"
+)
+// * Save Button * //
+const saveDrawingBtn = document.querySelector("#save-button")
+// * Cancel Button * //
+const cancelSaveBtn = document.querySelector("#cancel-save-button")
+
+// * Export Container * //
+const exportContainer = document.querySelector(".export-container")
 
 //====================================//
 //======= * * * Toolbox * * * ========//
@@ -129,10 +164,24 @@ export const dom = {
   canvasLayers,
   tooltip,
   //menu
+  topMenu,
   toolOptions,
   gridBtn,
   tooltipBtn,
+  saveBtn,
+  openSaveBtn,
   exportBtn,
+  fileMenu,
+  fileSubMenu,
+  //save/export
+  saveContainer,
+  saveAsForm,
+  saveAsFileName,
+  fileSizePreview,
+  advancedOptionsContainer,
+  saveDrawingBtn,
+  cancelSaveBtn,
+  exportContainer,
   //toolbox
   toolboxContainer,
   undoBtn,

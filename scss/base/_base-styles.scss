@@ -48,6 +48,31 @@ table {
   font-family: "04Font";
   src: url("../../public/04B_03__.ttf") format("truetype");
   font-display: swap;
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "Pixeloid Mono";
+  src: url("../../public/PixeloidMono-d94EV.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "basis33";
+  src: url("../../public/basis33.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Graph35";
+  src: url("../../public/Graph-35-pix.ttf") format("truetype");
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Monogram";
+  src: url("../../public/monogram.ttf") format("truetype");
+  font-display: swap;
 }
 
 html,
@@ -58,11 +83,20 @@ body {
   overscroll-behavior: none;
 }
 
+body,
+button,
+input {
+  // font-family: "Monogram", monospace;
+  font-family: "04Font";
+  font-size: 16px;
+  font-weight: normal;
+  -webkit-font-smoothing: none;
+}
+
 body {
   margin: 0px;
   color: white;
   background: $dark-gray;
-  font-family: "04Font";
   user-select: none;
   display: flex;
   flex-direction: column;
@@ -80,10 +114,8 @@ a:active {
 }
 
 button {
-  font-family: "04Font";
   border: 0;
   padding: 0;
-  font-size: 16px;
   background: transparent;
   cursor: pointer;
   &:focus {
@@ -97,8 +129,6 @@ button {
 
 input {
   box-sizing: border-box;
-  font-family: "04Font";
-  font-size: 16px;
   padding-block: 0px;
   padding-inline: 0px;
   padding: 0px;

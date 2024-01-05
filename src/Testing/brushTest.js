@@ -18,7 +18,7 @@ export function testBrushAction() {
 
   let seen = new Set()
   let mask = null
-  if (action.properties.maskSet) {
+  if (action.properties.maskArray) {
     if (offsetX !== 0 || offsetY !== 0) {
       mask = new Set(
         action.properties.maskArray.map(
@@ -26,7 +26,7 @@ export function testBrushAction() {
         )
       )
     } else {
-      mask = new Set(action.properties.maskSet)
+      mask = new Set(action.properties.maskArray)
     }
   }
   let previousX = action.properties.points[0].x + offsetX
@@ -94,7 +94,6 @@ export function saveBrushAsTest() {
       color: { ...swatches.primary.color },
       layer: canvas.currentLayer,
       properties: {
-        maskSet: state.maskSet,
         maskArray,
         points: [...state.points],
       },

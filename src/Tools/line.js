@@ -6,6 +6,7 @@ import { swatches } from "../Context/swatch.js"
 import { actionLine } from "../Actions/actions.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
+import { addToTimeline } from "../Actions/undoRedo.js"
 
 //===================================//
 //=== * * * Line Controller * * * ===//
@@ -76,7 +77,7 @@ function lineSteps() {
         canvas.currentLayer.x,
         canvas.currentLayer.y
       )
-      state.addToTimeline({
+      addToTimeline({
         tool: state.tool,
         layer: canvas.currentLayer,
         properties: {
@@ -84,7 +85,6 @@ function lineSteps() {
           py1: state.lineStartY - canvas.currentLayer.y,
           px2: state.cursorX - canvas.currentLayer.x,
           py2: state.cursorY - canvas.currentLayer.y,
-          maskSet: state.maskSet,
           maskArray,
         },
       })

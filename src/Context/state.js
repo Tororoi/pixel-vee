@@ -1,4 +1,6 @@
+import { dom } from "./dom.js"
 import { swatches } from "./swatch.js"
+import { setSaveFilesizePreview } from "../Save/savefile.js"
 
 //====================================//
 //======== * * * State * * * =========//
@@ -18,6 +20,15 @@ export const state = {
   action: null, //object with tool, mode, properties, layer, hidden, removed, points. points will have x, y, color, brush info
   undoStack: [],
   redoStack: [],
+  //save settings
+  saveDialogOpen: false,
+  saveSettings: {
+    saveAsFileName: "my drawing",
+    preserveHistory: true,
+    includePalette: true,
+    includeReferenceLayers: true,
+    includeRemovedActions: true,
+  },
   //tool settings
   tool: null, //needs to be initialized
   //touchscreen?
@@ -84,31 +95,8 @@ export const state = {
   colorLayerGlobal: null,
   localColorLayer: null,
   //functions
-  addToTimeline,
   reset,
   resetSelectProperties,
-}
-
-/**
- * This sets the action which is then pushed to the undoStack for the command pattern
- * @param {Object} actionObject
- */
-function addToTimeline(actionObject) {
-  const { tool, color, layer, properties } = actionObject
-  //use current state for variables
-  let snapshot = layer.type === "raster" ? layer.cvs.toDataURL() : null
-  state.action = {
-    tool: { ...tool }, //Needed properties: name, brushType, brushSize, type
-    modes: { ...tool.modes },
-    color: color || { ...swatches.primary.color },
-    layer: layer,
-    properties,
-    hidden: false,
-    removed: false,
-    snapshot,
-  }
-  state.undoStack.push(state.action)
-  //TODO: save image of layer to action. When undo/redo occurs, render image to canvas instead of redrawing timeline. For modify actions, images of modified action and subsequent actions must be updated.
 }
 
 /**

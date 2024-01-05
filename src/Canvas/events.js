@@ -16,6 +16,7 @@ import { setInitialZoom } from "../utils/canvasHelpers.js"
 import { initializeColorPicker } from "../Swatch/events.js"
 import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
 import { dragStart, dragMove, dragStop } from "../utils/drag.js"
+import { addToTimeline } from "../Actions/undoRedo.js"
 
 //====================================//
 //==== * * * Canvas Resize * * * =====//
@@ -191,7 +192,7 @@ const resizeOnScreenCanvas = () => {
     0,
     0
   )
-  renderCanvas(null) // render all layers
+  renderCanvas() // render all layers
   // reset positioning styles for free moving dialog boxes
   dom.toolboxContainer.style.left = ""
   dom.toolboxContainer.style.top = ""
@@ -337,7 +338,6 @@ function dragLayerEnd(e) {
  * Upload an image and create a new reference layer
  */
 function addReferenceLayer() {
-  //TODO: add to timeline
   let reader
   let img = new Image()
 
@@ -376,6 +376,7 @@ function addReferenceLayer() {
           type: "reference",
           title: `Reference ${canvas.layers.length + 1}`,
           img: img,
+          dataUrl: img.src,
           onscreenCvs: onscreenLayerCVS,
           onscreenCtx: onscreenLayerCTX,
           x: 0,
@@ -395,14 +396,14 @@ function addReferenceLayer() {
           removed: false,
         }
         canvas.layers.unshift(layer)
-        state.addToTimeline({
+        addToTimeline({
           tool: tools.addLayer,
           layer,
         })
         state.action = null
         state.redoStack = []
         renderLayersToDOM()
-        renderCanvas(null)
+        renderCanvas()
       }
     }
 
@@ -425,7 +426,7 @@ function removeLayer(layer) {
       )
       vectorGui.reset()
     }
-    state.addToTimeline({
+    addToTimeline({
       tool: tools.removeLayer,
       layer,
     })
@@ -445,7 +446,7 @@ function addRasterLayer() {
   //once layer is added to timeline and drawn on, can no longer be deleted
   const layer = createNewRasterLayer(`Layer ${canvas.layers.length + 1}`)
   canvas.layers.push(layer)
-  state.addToTimeline({
+  addToTimeline({
     tool: tools.addLayer,
     layer,
   })

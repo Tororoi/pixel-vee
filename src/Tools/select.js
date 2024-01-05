@@ -1,6 +1,8 @@
 import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { coordArrayFromSet } from "../utils/maskHelpers.js"
+import { addToTimeline } from "../Actions/undoRedo.js"
 
 //=====================================//
 //=== * * * Select Controller * * * ===//
@@ -79,13 +81,18 @@ function selectSteps() {
       addMask([xMin, xMax], [0, yMin]) // Top region between xMin and xMax
       addMask([xMin, xMax], [yMax, height]) // Bottom region between xMin and xMax
       //add to timeline the maskSet, p1, p2. undo will unset from state, redo will set to state
-      state.addToTimeline({
+      let maskArray = coordArrayFromSet(
+        state.maskSet,
+        canvas.currentLayer.x,
+        canvas.currentLayer.y
+      )
+      addToTimeline({
         tool: state.tool,
         layer: canvas.currentLayer,
         properties: {
           deselect: false,
           selectProperties: { ...state.selectProperties },
-          maskSet: state.maskSet,
+          maskArray,
         },
       })
       //TODO: constrain fill tool and vector tools to mask

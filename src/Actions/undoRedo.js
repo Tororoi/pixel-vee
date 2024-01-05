@@ -1,12 +1,39 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
 import { clearOffscreenCanvas, renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM, renderLayersToDOM } from "../DOM/render.js"
+import { setSaveFilesizePreview } from "../Save/savefile.js"
 
 //====================================//
 //========= * * * Core * * * =========//
 //====================================//
+
+/**
+ * This sets the action which is then pushed to the undoStack for the command pattern
+ * @param {Object} actionObject
+ */
+export function addToTimeline(actionObject) {
+  const { tool, color, layer, properties } = actionObject
+  //use current state for variables
+  let snapshot = layer.type === "raster" ? layer.cvs.toDataURL() : null
+  state.action = {
+    tool: { ...tool }, //Needed properties: name, brushType, brushSize, type
+    modes: { ...tool.modes },
+    color: color || { ...swatches.primary.color },
+    layer: layer,
+    properties,
+    hidden: false,
+    removed: false,
+    snapshot,
+  }
+  state.undoStack.push(state.action)
+  //TODO: save image of layer to action. When undo/redo occurs, render image to canvas instead of redrawing timeline. For modify actions, images of modified action and subsequent actions must be updated.
+  if (state.saveDialogOpen) {
+    setSaveFilesizePreview()
+  }
+}
 
 /**
  * @param {Object} latestAction
@@ -68,7 +95,7 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
         ...latestAction.properties.selectProperties,
       }
       //set maskset
-      state.maskSet = latestAction.maskSet
+      state.maskSet = new Set(latestAction.maskArray)
     }
   } else if (modType === "from") {
     if (latestAction.properties.deselect) {
@@ -77,7 +104,7 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
         ...latestAction.properties.selectProperties,
       }
       //set maskset
-      state.maskSet = latestAction.maskSet
+      state.maskSet = new Set(latestAction.maskArray)
     } else if (
       newLatestAction?.tool?.name === "select" &&
       !newLatestAction?.properties?.deselect
@@ -88,7 +115,7 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
         ...newLatestAction.properties.selectProperties,
       }
       //set maskset
-      state.maskSet = newLatestAction.maskSet
+      state.maskSet = new Set(newLatestAction.maskArray)
     } else {
       state.resetSelectProperties()
     }
@@ -213,7 +240,6 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   //clear affected layer and render image from most recent action from the affected layer
   //This avoids having to redraw the timeline for every undo/redo. Close to constant time whereas redrawTimeline is closer to exponential time or worse.
   //TODO: factor out into separate function
-  //TODO: not compatible with reference layer. Must be handled differently.
   let mostRecentActionFromSameLayer = null
   for (let i = state.undoStack.length - 1; i >= 0; i--) {
     if (state.undoStack[i].layer === latestAction.layer) {
@@ -233,10 +259,28 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       state.reset()
     }
   } else {
-    renderCanvas(latestAction.layer)
+    //no snapshot
+    if (latestAction.layer.type === "reference") {
+      renderCanvas(latestAction.layer)
+    } else {
+      renderCanvas(latestAction.layer, true)
+      //set snapshot for latest action. Normally actions will have a snapshot
+      //but since snapshots are discarded when saving a file, this code remakes the correct snapshot for an action.
+      //On subsequent undo and redo calls, the timeline will not have to be redrawn for the affected action since it will have a snapshot.
+      if (mostRecentActionFromSameLayer) {
+        let snapshot =
+          mostRecentActionFromSameLayer.layer.type === "raster"
+            ? mostRecentActionFromSameLayer.layer.cvs.toDataURL()
+            : null
+        mostRecentActionFromSameLayer.snapshot = snapshot
+      }
+    }
     renderLayersToDOM()
     renderVectorsToDOM()
     state.reset()
+  }
+  if (state.saveDialogOpen) {
+    setSaveFilesizePreview()
   }
 }
 

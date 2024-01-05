@@ -7,6 +7,8 @@ import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 import { vectorGui, createActiveIndexesForRender } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
+import { coordArrayFromSet } from "../utils/maskHelpers.js"
+import { addToTimeline } from "../Actions/undoRedo.js"
 
 //===================================//
 //=== * * * Fill Controller * * * ===//
@@ -37,7 +39,12 @@ function fillSteps() {
           state.maskSet
         )
         //For undo ability, store starting coords and settings and pass them into actionFill
-        state.addToTimeline({
+        let maskArray = coordArrayFromSet(
+          state.maskSet,
+          canvas.currentLayer.x,
+          canvas.currentLayer.y
+        )
+        addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {
@@ -46,7 +53,7 @@ function fillSteps() {
               py1: state.vectorProperties.py1 - canvas.currentLayer.y,
             },
             selectProperties: { ...state.selectProperties },
-            maskSet: state.maskSet,
+            maskArray,
           },
         })
         renderCanvas(canvas.currentLayer)
