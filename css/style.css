@@ -649,10 +649,20 @@ svg {
   color: rgb(255, 255, 255);
   cursor: pointer;
 }
-.nav .nav-menu #file-menu li ul li label {
+.nav .nav-menu #file-menu li ul li.open-save {
+  padding: 0;
+  height: 38px;
+}
+.nav .nav-menu #file-menu li ul li.open-save label {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 5px 20px;
+  width: 100%;
+  height: 100%;
   cursor: pointer;
 }
-.nav .nav-menu #file-menu li ul li input[type=file] {
+.nav .nav-menu #file-menu li ul li.open-save input[type=file] {
   display: none;
 }
 .nav .nav-menu #file-menu li ul li:hover {
