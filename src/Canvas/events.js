@@ -348,8 +348,9 @@ function addReferenceLayer() {
       img.src = e.target.result
       img.onload = () => {
         let onscreenLayerCVS = document.createElement("canvas")
-        let onscreenLayerCTX = onscreenLayerCVS.getContext("2d")
-        onscreenLayerCTX.willReadFrequently = true
+        let onscreenLayerCTX = onscreenLayerCVS.getContext("2d", {
+          willReadFrequently: true,
+        })
         onscreenLayerCVS.className = "onscreen-canvas"
         dom.canvasLayers.insertBefore(
           onscreenLayerCVS,
