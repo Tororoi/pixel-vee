@@ -108,6 +108,7 @@ export function adjustFillSteps() {
           state.undoStack
         )
         renderCanvas(currentVector.layer, true, state.activeIndexes, true)
+        // renderCanvas(currentVector.layer, true)
       }
       break
     case "pointermove":
@@ -123,6 +124,7 @@ export function adjustFillSteps() {
           vectorGui.selectedPoint.yKey
         )
         renderCanvas(currentVector.layer, true, state.activeIndexes)
+        // renderCanvas(currentVector.layer, true)
       }
       break
     case "pointerup":
@@ -137,6 +139,7 @@ export function adjustFillSteps() {
           vectorGui.selectedPoint.yKey
         )
         renderCanvas(currentVector.layer, true, state.activeIndexes)
+        // renderCanvas(currentVector.layer, true)
         modifyVectorAction(currentVector)
         vectorGui.selectedPoint = {
           xKey: null,
