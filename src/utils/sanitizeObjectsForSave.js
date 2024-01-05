@@ -83,6 +83,17 @@ export function sanitizeHistory(
       if (action.layer) {
         action.layer = { title: action.layer.title }
       }
+      if (action.properties?.points) {
+        //format each object in the array from {x,y,brushSize} to be 3 entries in a new array with just the values. The values will be reformatted back to objects on load.
+        let sanitizedPoints = []
+        for (let index = 0; index < action.properties.points.length; index++) {
+          const point = action.properties.points[index]
+          sanitizedPoints.push(point.x)
+          sanitizedPoints.push(point.y)
+          sanitizedPoints.push(point.brushSize)
+        }
+        action.properties.points = sanitizedPoints
+      }
       delete action.snapshot
     }
   }
