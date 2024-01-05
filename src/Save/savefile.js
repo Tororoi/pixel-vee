@@ -205,6 +205,18 @@ export async function loadDrawing(jsonFile) {
 
   // Reconstruct the undoStack
   data.history.forEach((action) => {
+    if (action.properties?.points) {
+      // Convert the points array into an array of objects
+      let points = []
+      for (let index = 0; index < action.properties.points.length; index += 3) {
+        points.push({
+          x: action.properties.points[index],
+          y: action.properties.points[index + 1],
+          brushSize: action.properties.points[index + 2],
+        })
+      }
+      action.properties.points = points
+    }
     // Match the action's layer title with an existing layer
     let correspondingLayer = canvas.layers.find(
       (layer) => layer.title === action.layer.title

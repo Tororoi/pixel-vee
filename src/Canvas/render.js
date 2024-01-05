@@ -137,6 +137,9 @@ export function performAction(action, betweenCtx = null) {
 
       let seen = new Set()
       let mask = null
+      //TODO: implement points and maskArray as an array of integers to reduce space cost. Could be stored as typed arrays but not meaningful for storing the json file.
+      //points require 3 entries for every coordinate, x, y, brushSize
+      //maskArray requires 2 entries for every coordinate, x, y
       if (action.properties.maskArray) {
         if (offsetX !== 0 || offsetY !== 0) {
           mask = new Set(
