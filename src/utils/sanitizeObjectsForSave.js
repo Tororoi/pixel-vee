@@ -88,9 +88,7 @@ export function sanitizeHistory(
         let sanitizedPoints = []
         for (let index = 0; index < action.properties.points.length; index++) {
           const point = action.properties.points[index]
-          sanitizedPoints.push(point.x)
-          sanitizedPoints.push(point.y)
-          sanitizedPoints.push(point.brushSize)
+          sanitizedPoints.push(point.x, point.y, point.brushSize)
         }
         action.properties.points = sanitizedPoints
       }

@@ -56,20 +56,17 @@ export function prepareDrawingForSave() {
     includeRemovedActions
   )
 
-  let saveJsonString = JSON.stringify(
-    {
-      metadata: {
-        version: "1.0",
-        application: "Pixel V",
-        timestamp: Date.now(),
-      },
-      layers: sanitizedLayers,
-      palette: sanitizedPalette,
-      history: sanitizedUndoStack,
+  let saveJsonString = JSON.stringify({
+    metadata: {
+      version: "1.0",
+      application: "Pixel V",
+      timestamp: Date.now(),
     },
-    null,
-    2
-  )
+    layers: sanitizedLayers,
+    palette: sanitizedPalette,
+    history: sanitizedUndoStack,
+  })
+
   return new Blob([saveJsonString], { type: "application/json" })
 }
 
