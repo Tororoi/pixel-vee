@@ -6,19 +6,21 @@ import { setInitialZoom } from "../utils/canvasHelpers.js"
 //===================================//
 
 const backgroundCVS = document.querySelector(".bg-canvas")
-const backgroundCTX = backgroundCVS.getContext("2d")
+const backgroundCTX = backgroundCVS.getContext("2d", {
+  willReadFrequently: true,
+})
 //Set gui canvas and its context
 const vectorGuiCVS = document.getElementById("vector-gui-canvas")
-const vectorGuiCTX = vectorGuiCVS.getContext("2d")
+const vectorGuiCTX = vectorGuiCVS.getContext("2d", { willReadFrequently: true })
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
 const offScreenCVS = document.createElement("canvas")
-const offScreenCTX = offScreenCVS.getContext("2d")
+const offScreenCTX = offScreenCVS.getContext("2d", { willReadFrequently: true })
 //Create preview canvas for use when rendering the cursor without affecting the actual layer's canvas
 const previewCVS = document.createElement("canvas")
-const previewCTX = previewCVS.getContext("2d")
+const previewCTX = previewCVS.getContext("2d", { willReadFrequently: true })
 //thumbnail canvas for making images from canvas actions
 const thumbnailCVS = document.createElement("canvas")
-const thumbnailCTX = thumbnailCVS.getContext("2d")
+const thumbnailCTX = thumbnailCVS.getContext("2d", { willReadFrequently: true })
 
 //====================================//
 //======== * * * State * * * =========//
@@ -70,11 +72,6 @@ export const canvas = {
 }
 
 //Initialize state
-canvas.vectorGuiCTX.willReadFrequently = true
-canvas.backgroundCTX.willReadFrequently = true
-canvas.offScreenCTX.willReadFrequently = true
-canvas.previewCTX.willReadFrequently = true
-canvas.thumbnailCTX.willReadFrequently = true
 //Set the dimensions of the drawing canvas
 canvas.offScreenCVS.width = 256
 canvas.offScreenCVS.height = 256

@@ -23,7 +23,7 @@ export class Picker {
     this.target.width = width
     this.target.height = height
     //Get context
-    this.context = this.target.getContext("2d")
+    this.context = this.target.getContext("2d", { willReadFrequently: true })
     //pointer
     this.pointerState = "none"
     //color selector circle

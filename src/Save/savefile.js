@@ -144,16 +144,18 @@ export async function loadDrawing(jsonFile) {
     // Set the contexts
     if (layer.type === "raster") {
       let offscreenLayerCVS = document.createElement("canvas")
-      let offscreenLayerCTX = offscreenLayerCVS.getContext("2d")
-      offscreenLayerCTX.willReadFrequently = true
+      let offscreenLayerCTX = offscreenLayerCVS.getContext("2d", {
+        willReadFrequently: true,
+      })
       offscreenLayerCVS.width = canvas.offScreenCVS.width
       offscreenLayerCVS.height = canvas.offScreenCVS.height
       layer.cvs = offscreenLayerCVS
       layer.ctx = offscreenLayerCTX
     }
     let onscreenLayerCVS = document.createElement("canvas")
-    let onscreenLayerCTX = onscreenLayerCVS.getContext("2d")
-    onscreenLayerCTX.willReadFrequently = true
+    let onscreenLayerCTX = onscreenLayerCVS.getContext("2d", {
+      willReadFrequently: true,
+    })
     onscreenLayerCVS.className = "onscreen-canvas"
     dom.canvasLayers.appendChild(onscreenLayerCVS)
     onscreenLayerCVS.width = onscreenLayerCVS.offsetWidth * canvas.sharpness
