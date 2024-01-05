@@ -190,8 +190,10 @@ export function activateShortcut(keyCode) {
       //
       break
     case "KeyR":
-      randomizeColor(swatches.primary.swatch)
-      renderPaletteToDOM()
+      if (!state.clicked) {
+        randomizeColor(swatches.primary.swatch)
+        renderPaletteToDOM()
+      }
       break
     case "KeyS":
       if (!state.clicked) {

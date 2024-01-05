@@ -161,7 +161,7 @@ export function performAction(action, betweenCtx = null) {
         actionDraw(
           p.x + offsetX,
           p.y + offsetY,
-          p.color,
+          action.color,
           brushStamps[action.tool.brushType][p.brushSize][brushDirection],
           p.brushSize,
           action.layer,
