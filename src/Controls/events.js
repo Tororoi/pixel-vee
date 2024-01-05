@@ -54,6 +54,10 @@ function handleKeyDown(e) {
     return
   }
   // e.preventDefault() - May conditionally need this for certain shortcuts, but try to avoid doing so
+  //Prevent default save behavior
+  if (e.code === "KeyS" && (keys.MetaLeft || keys.MetaRight)) {
+    e.preventDefault()
+  }
   if (state.shortcuts) {
     keys[e.code] = true //set active key globally
     activateShortcut(e.code)
