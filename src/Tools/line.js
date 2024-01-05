@@ -35,6 +35,7 @@ function lineSteps() {
         state.tool.brushSize,
         state.maskSet,
         null,
+        null,
         true
       )
       break
@@ -55,6 +56,7 @@ function lineSteps() {
         state.tool.brushSize,
         state.maskSet,
         null,
+        null,
         true
       )
       break
@@ -70,6 +72,7 @@ function lineSteps() {
         brushStamps[state.tool.brushType][state.tool.brushSize],
         state.tool.brushSize,
         state.maskSet,
+        null,
         null
       )
       let maskArray = coordArrayFromSet(
