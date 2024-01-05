@@ -3,6 +3,7 @@ import { canvas } from "../Context/canvas.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { translateAndWrap, translateWithoutWrap } from "../utils/moveHelpers.js"
 import { vectorGui } from "../GUI/vector.js"
+import { addToTimeline } from "../Actions/undoRedo.js"
 
 /**
  * Move the contents of a layer relative to other layers
@@ -39,7 +40,7 @@ function moveSteps() {
       }
       renderCanvas(canvas.currentLayer, true)
       //save start and end coordinates
-      state.addToTimeline({
+      addToTimeline({
         tool: state.tool,
         layer: canvas.currentLayer,
         properties: {

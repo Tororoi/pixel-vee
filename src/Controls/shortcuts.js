@@ -4,7 +4,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
-import { handleUndo, handleRedo } from "../Actions/undoRedo.js"
+import { addToTimeline, handleUndo, handleRedo } from "../Actions/undoRedo.js"
 import { tools } from "../Tools/index.js"
 import { adjustEllipseSteps } from "../Tools/ellipse.js"
 import { renderCanvas } from "../Canvas/render.js"
@@ -17,6 +17,7 @@ import {
   renderToolOptionsToDOM,
 } from "../Tools/events.js"
 import { renderCursor } from "../GUI/cursor.js"
+import { coordArrayFromSet } from "../utils/maskHelpers.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
@@ -106,13 +107,18 @@ export function activateShortcut(keyCode) {
         if (keys.MetaLeft || keys.MetaRight) {
           //deselect
           if (state.selectProperties.px1) {
-            state.addToTimeline({
+            let maskArray = coordArrayFromSet(
+              state.maskSet,
+              canvas.currentLayer.x,
+              canvas.currentLayer.y
+            )
+            addToTimeline({
               tool: tools.select,
               layer: canvas.currentLayer,
               properties: {
                 deselect: true,
                 selectProperties: { ...state.selectProperties },
-                maskSet: state.maskSet,
+                maskArray,
               },
             })
             state.action = null

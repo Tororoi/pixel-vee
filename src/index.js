@@ -38,5 +38,8 @@ initializeDialogBox(dom.sizeContainer, true)
 // * Color Picker * //
 initializeDialogBox(dom.colorPickerContainer)
 
+// * Save * //
+initializeDialogBox(dom.saveContainer)
+
 // * Export * //
-// TODO: initializeDialogBox(dom.exportContainer)
+initializeDialogBox(dom.exportContainer)

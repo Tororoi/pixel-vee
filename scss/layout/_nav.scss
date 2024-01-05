@@ -2,7 +2,6 @@
   background-color: $black;
   justify-self: center;
   width: calc(100% - 4px);
-  height: 48px;
   min-height: 48px;
   display: flex;
   flex-flow: row nowrap;
@@ -10,6 +9,7 @@
   align-items: center;
   position: relative;
   margin: 2px;
+  z-index: 200;
   @include boxBorder;
   .title {
     padding-left: 16px;
@@ -28,53 +28,110 @@
       }
     }
   }
-  .nav-items {
+  .nav-menu {
     display: flex;
     flex-flow: row nowrap;
     align-items: center;
-    margin-left: 16px;
-    margin-right: 16px;
-    .tool-options {
-      display: flex;
-    }
-    .toggle {
-      padding-right: 16px;
+    height: 100%;
+    #file-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
       display: flex;
       flex-flow: row nowrap;
-      align-items: center;
+      align-items: flex-end;
+      height: 100%;
       cursor: pointer;
-      input {
-        position: absolute;
-        opacity: 0;
-        pointer-events: none;
-      }
-      .checkmark {
-        position: relative;
-        height: 16px;
-        width: 16px;
-        background-color: $dark-gray;
-        margin-right: 8px;
-        box-shadow: 2px 0px $border-color, -2px 0px $border-color,
-          0px -2px $border-color, 0px 2px $border-color;
-      }
-      &:hover {
-        .checkmark {
-          box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white,
-            0px 2px $white;
+
+      li {
+        &.menu-folder {
+          position: relative;
+          display: flex;
+          align-items: center;
+          padding: 5px 20px;
+          cursor: pointer;
+          height: 24px;
+          @include boxBorder($border-color, $white, false, left right top);
+          ul {
+            top: calc(100% + 2px);
+          }
+          .menu-folder-title {
+            pointer-events: none;
+          }
+          &:hover {
+            background-color: $white;
+            color: $black;
+            height: 26px;
+            margin-bottom: -2px;
+            ul {
+              top: 100%;
+            }
+            .menu-folder-title {
+              transform: translateY(-1px);
+            }
+          }
         }
-      }
-      input:checked ~ .checkmark {
-        // background-color: $blue;
-        &::after {
-          content: "";
+        ul {
+          pointer-events: auto;
+          display: none;
           position: absolute;
-          width: 20px;
-          height: 20px;
-          top: -2px;
-          left: -2px;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 10 10' shape-rendering='crispEdges'%3E%3Cpath stroke='%23ffffff' d='M8 0h2M7 1h1M9 1h1M6 2h1M8 2h1M3 3h1M5 3h1M7 3h1M2 4h1M4 4h1M7 4h1M1 5h1M6 5h1M2 6h1M6 6h1M3 7h1M5 7h1M4 8h1' /%3E%3Cpath stroke='%23000000' d='M8 1h1M7 2h1M6 3h1M3 4h1M5 4h2M2 5h4M3 6h3M4 7h1' /%3E%3C/svg%3E");
+          left: 0;
+          // top: 100%;
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          background-color: transparent;
+          @include boxBorder($border-color, $white, false, left right bottom);
+
+          li {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            flex-flow: row nowrap;
+            white-space: nowrap;
+            height: 28px;
+            padding: 5px 20px;
+            background-color: $black;
+            color: $white;
+            cursor: pointer;
+            label {
+              cursor: pointer;
+            }
+            input[type="file"] {
+              display: none;
+            }
+            &:hover {
+              background-color: $white;
+              color: $black;
+            }
+          }
+        }
+        &:focus {
+          background-color: $white;
+          color: $black;
+          pointer-events: none;
+          @include boxBorder($white, $white, false, left right top);
+          ul {
+            display: block;
+          }
         }
       }
+
+      // .show {
+      //   display: block;
+      // }
+    }
+  }
+  .nav-items {
+    display: flex;
+    flex-flow: row wrap;
+    align-items: center;
+    margin: 7px 16px;
+    .toggle {
+      padding-right: 16px;
+    }
+    .tool-options {
+      display: flex;
     }
     .canvas-size {
       padding-right: 16px;
@@ -82,13 +139,6 @@
         height: 28px;
         padding-left: 8px;
         padding-right: 8px;
-        background: $gray;
-      }
-    }
-    .export {
-      .btn {
-        height: 28px;
-        width: 84px;
         background: $gray;
       }
     }

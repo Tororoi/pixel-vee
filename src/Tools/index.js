@@ -118,6 +118,3 @@ export const tools = {
    * TODO: Add toggle option to snap line/ curve endpoints to vanishing point if made inside vanishing points radius.
   } */
 }
-
-//Initialize default tool
-state.tool = tools.brush

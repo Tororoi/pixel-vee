@@ -4,9 +4,8 @@
  * @returns
  */
 export function coordArrayFromSet(set, xOffset, yOffset) {
-  let maskArray = []
   if (set) {
-    maskArray = Array.from(set).map((coord) => {
+    return Array.from(set).map((coord) => {
       const commaIndex = coord.indexOf(",")
       const x = Number(coord.substring(0, commaIndex)) - xOffset
       const y = Number(coord.substring(commaIndex + 1)) - yOffset
@@ -16,5 +15,5 @@ export function coordArrayFromSet(set, xOffset, yOffset) {
       }
     })
   }
-  return maskArray
+  return null
 }

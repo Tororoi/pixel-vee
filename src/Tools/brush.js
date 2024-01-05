@@ -9,6 +9,7 @@ import { calculateBrushDirection } from "../utils/drawHelpers.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { createColorMaskSet } from "../Canvas/masks.js"
 import { saveBrushAsTest } from "../Testing/brushTest.js"
+import { addToTimeline } from "../Actions/undoRedo.js"
 
 //====================================//
 //=== * * * Brush Controller * * * ===//
@@ -93,10 +94,10 @@ function brushSteps() {
         canvas.currentLayer.x,
         canvas.currentLayer.y
       )
-      state.addToTimeline({
+      addToTimeline({
         tool: brush,
         layer: canvas.currentLayer,
-        properties: { maskSet: state.maskSet, maskArray, points: state.points },
+        properties: { maskArray, points: state.points },
       })
       if (state.tool.modes?.colorMask) {
         state.maskSet = null

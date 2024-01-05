@@ -32,10 +32,47 @@
 
   <body>
     <div id="options" class="nav">
-      <div class="title">
-        <a href="https://github.com/Tororoi/pixel-vee" target="_blank">
-          <img src="./public/pixel-vee.png" />
-        </a>
+      <div class="nav-menu">
+        <div class="title">
+          <a href="https://github.com/Tororoi/pixel-vee" target="_blank">
+            <img src="./public/pixel-vee.png" />
+          </a>
+        </div>
+        <ul role="menu" aria-label="functions" id="file-menu">
+          <li
+            role="menuitem"
+            aria-haspopup="true"
+            class="menu-folder"
+            tabindex="0"
+          >
+            <span class="menu-folder-title">File</span>
+            <ul role="menu" id="file-submenu">
+              <!-- <li role="menuitem">New</li> -->
+              <li
+                role="menuitem"
+                class="open-save"
+                data-tooltip="Open saved drawing"
+              >
+                <label for="drawing-upload"> Open </label>
+                <input type="file" accept=".pxv" id="drawing-upload" />
+              </li>
+              <li
+                role="menuitem"
+                class="save"
+                data-tooltip="Open dialog box to download file with current progress"
+              >
+                Save (Cmd + S)
+              </li>
+              <li
+                role="menuitem"
+                class="export"
+                data-tooltip="Download as .png"
+              >
+                Export
+              </li>
+            </ul>
+          </li>
+        </ul>
       </div>
       <div class="nav-items">
         <div class="tool-options"></div>
@@ -47,7 +84,7 @@
         >
           <input type="checkbox" id="grid-toggle" />
           <span class="checkmark"></span>
-          Grid
+          <span>Grid</span>
         </label>
         <label
           for="tooltips-toggle"
@@ -57,11 +94,8 @@
         >
           <input type="checkbox" checked="true" id="tooltips-toggle" />
           <span class="checkmark"></span>
-          Tooltips
+          <span>Tooltips</span>
         </label>
-        <div class="export">
-          <div class="btn" data-tooltip="Download as .png">Export</div>
-        </div>
       </div>
     </div>
     <div class="page">
@@ -553,7 +587,7 @@
           </label>
         </div>
         <div class="collapsible">
-          <div id="interface" class="picker-interface">
+          <div id="picker-interface" class="picker-interface">
             <div id="left">
               <div id="picker">
                 <canvas id="color-picker"></canvas>
@@ -698,6 +732,179 @@
               </label>
             </div>
           </div>
+        </div>
+      </div>
+      <div class="export-container dialog-box draggable v-drag h-drag free">
+        <div id="export-header" class="header dragger">
+          <div class="drag-btn"><div class="grip"></div></div>
+          <span>Export</span>
+          <label
+            for="export-collapse-btn"
+            id="export-collapser"
+            class="collapse-btn"
+            data-tooltip="Collapse/ Expand"
+          >
+            <input
+              type="checkbox"
+              aria-label="Collapse or Expand"
+              class="collapse-checkbox"
+              id="export-collapse-btn"
+            />
+            <span class="arrow"></span>
+          </label>
+        </div>
+        <div class="collapsible">
+          <div id="export-interface" class="export-interface">
+            <!-- Select pixel scale and export folder location -->
+          </div>
+        </div>
+      </div>
+      <div class="save-container dialog-box draggable v-drag h-drag free">
+        <div id="save-header" class="header dragger">
+          <div class="drag-btn"><div class="grip"></div></div>
+          <span>Save Options</span>
+          <label
+            for="save-collapse-btn"
+            id="save-collapser"
+            class="collapse-btn"
+            data-tooltip="Collapse/ Expand"
+          >
+            <input
+              type="checkbox"
+              aria-label="Collapse or Expand"
+              class="collapse-checkbox"
+              id="save-collapse-btn"
+            />
+            <span class="arrow"></span>
+          </label>
+        </div>
+        <div class="collapsible">
+          <form id="save-interface" class="save-interface">
+            <!-- File name input -->
+            <div class="save-setting">
+              <label for="save-file-name" class="save-file-name-label"
+                ><span class="input-label">Save As:</span
+                ><input
+                  type="text"
+                  id="save-file-name"
+                  name="save-file-name"
+                  placeholder="my drawing"
+                  maxlength="16"
+                /><span>.pxv</span></label
+              >
+            </div>
+
+            <!-- filesize preview-->
+            <div id="filesize-preview" class="save-setting">
+              <span>Filesize:&nbsp;</span><span id="savefile-size"></span>
+            </div>
+
+            <!-- checkbox for "Include Backup Image"-->
+            <!-- <div class="save-setting">
+              <label
+                for="backup-image-toggle"
+                id="backup-image"
+                class="toggle"
+                data-tooltip="Include backup image with savefile (increases filesize)"
+              >
+                <input
+                  type="checkbox"
+                  id="backup-image-toggle"
+                  name="backup-image"
+                />
+                <span class="checkmark"></span>
+                <span>Include Backup Image</span>
+              </label>
+            </div> -->
+
+            <!-- checkbox for "Preserve Entire History"-->
+            <div class="save-setting">
+              <label
+                for="preserve-history-toggle"
+                id="preserve-history"
+                class="toggle"
+                data-tooltip="Preserve all actions in history, palette, and reference images"
+              >
+                <input
+                  type="checkbox"
+                  id="preserve-history-toggle"
+                  name="preserve-history"
+                  checked
+                />
+                <span class="checkmark"></span>
+                <span>Preserve Entire History</span>
+              </label>
+            </div>
+
+            <div class="advanced-options disabled" id="save-advanced-options">
+              <!-- checkbox for "Include Palette"-->
+              <div class="save-setting">
+                <label
+                  for="include-palette-toggle"
+                  id="include-palette"
+                  class="toggle"
+                  data-tooltip="Save colors in palette"
+                >
+                  <input
+                    type="checkbox"
+                    id="include-palette-toggle"
+                    name="include-palette"
+                    checked
+                  />
+                  <span class="checkmark"></span>
+                  <span>Palette</span>
+                </label>
+              </div>
+
+              <!-- checkbox for "Include Reference Layers"-->
+              <div class="save-setting">
+                <label
+                  for="include-reference-layers-toggle"
+                  id="include-reference-layers"
+                  class="toggle"
+                  data-tooltip="Save all reference images, including any transformations applied to them."
+                >
+                  <input
+                    type="checkbox"
+                    id="include-reference-layers-toggle"
+                    name="include-reference-layers"
+                    checked
+                  />
+                  <span class="checkmark"></span>
+                  <span>Reference Layers</span>
+                </label>
+              </div>
+
+              <!-- checkbox for "Include Removed Actions"-->
+              <div class="save-setting">
+                <label
+                  for="include-removed-actions-toggle"
+                  id="include-removed-actions"
+                  class="toggle"
+                  data-tooltip="If a layer or vector was trashed or layer was cleared, those actions are still recoverable by using undo. If you're certain those actions won't be missed, you can remove them permanently by unchecking this box."
+                >
+                  <input
+                    type="checkbox"
+                    id="include-removed-actions-toggle"
+                    name="include-removed-actions"
+                    checked
+                  />
+                  <span class="checkmark"></span>
+                  <span>Removed Actions</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="save-buttons">
+              <!-- save button -->
+              <button type="button" id="save-button" class="btn">Save</button>
+
+              <!-- cancel button -->
+              <button type="button" id="cancel-save-button" class="btn">
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>

@@ -49,6 +49,10 @@ function handleKeyDown(e) {
   if (e.repeat) {
     return
   }
+  //if entering info on form, don't activate shortcuts
+  if (document.activeElement.tagName === "INPUT") {
+    return
+  }
   // e.preventDefault() - May conditionally need this for certain shortcuts, but try to avoid doing so
   if (state.shortcuts) {
     keys[e.code] = true //set active key globally
@@ -220,7 +224,7 @@ function handlePointerUp(e) {
 
   //run selected tool step function
   state.tool.fn()
-  //add to undo stack
+  //reset action and render vectors
   if (state.action) {
     if (
       ["fill", "quadCurve", "cubicCurve", "ellipse"].includes(state.tool.name)

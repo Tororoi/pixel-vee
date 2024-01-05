@@ -31,7 +31,7 @@ export function testEllipseAction() {
     action.properties.vectorProperties.offset,
     action.properties.vectorProperties.x1Offset,
     action.properties.vectorProperties.y1Offset,
-    action.properties.maskSet
+    null //mask made from maskArray
   )
   let end = performance.now()
   console.log(`Ellipse Action: ${Math.round((end - begin) * 10000) / 10000}ms`)
@@ -75,7 +75,6 @@ export function saveEllipseAsTest(points) {
           forceCircle: state.vectorProperties.forceCircle,
           //add bounding box minima maxima x and y?
         },
-        maskSet: state.maskSet,
         maskArray,
       },
     }
