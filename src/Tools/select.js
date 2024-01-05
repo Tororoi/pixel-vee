@@ -111,7 +111,13 @@ export const select = {
   brushSize: 1,
   brushType: "circle",
   disabled: false,
-  options: { magicWand: false },
+  options: {
+    rasterOnly: {
+      active: true,
+      tooltip:
+        "Cut/Copy/Paste will not interfere with vectors that intersect with selected area",
+    },
+  },
   modes: {},
   type: "raster",
   cursor: "default",
