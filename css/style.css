@@ -594,6 +594,7 @@ svg {
   cursor: pointer;
 }
 .nav .nav-menu #file-menu li.menu-folder {
+  background: rgb(61, 61, 61);
   position: relative;
   display: flex;
   align-items: center;

@@ -64,6 +64,17 @@ const showTooltip = (message, target) => {
 //====================================//
 
 /**
+ * Open save dialog box
+ * TODO: initialize save dialog box with default settings?
+ */
+export function openSaveDialogBox() {
+  dom.saveContainer.style.display = "flex"
+  state.saveDialogOpen = true
+  setSaveFilesizePreview()
+  dom.saveAsFileName.focus()
+}
+
+/**
  * Consolidate offscreen canvases and download image
  * TODO: Open dialog box with more options such as pixel size, where to save it to, etc.
  * TODO: To support saving a complex file, we must save state.undoStack as json and be able to parse that json back to the same undoStack
@@ -140,12 +151,7 @@ dom.openSaveBtn.addEventListener("click", (e) => {
 })
 dom.openSaveBtn.addEventListener("change", openSavedDrawing)
 dom.exportBtn.addEventListener("click", exportImage)
-dom.saveBtn.addEventListener("click", (e) => {
-  dom.saveContainer.style.display = "flex"
-  state.saveDialogOpen = true
-  setSaveFilesizePreview()
-  dom.saveAsFileName.focus()
-})
+dom.saveBtn.addEventListener("click", openSaveDialogBox)
 dom.saveAsForm.addEventListener("change", (e) => {
   if (e.target.id === "preserve-history-toggle") {
     if (e.target.checked) {
