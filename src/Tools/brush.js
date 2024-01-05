@@ -60,6 +60,7 @@ function brushSteps() {
           state.tool.brushSize,
           state.maskSet,
           state.seenPixelsSet,
+          null,
           true
         )
       } else if (shouldDrawLine()) {
