@@ -421,14 +421,8 @@ function adjustCurveSteps(numPoints = 4) {
           }
           updateLinkedVectors(currentVector)
         }
-        let start = performance.now()
         renderCanvas(currentVector.layer, true, state.activeIndexes)
-        let end = performance.now()
-        console.log("renderCanvas time (activeIndexes): ", end - start)
-        start = performance.now()
-        renderCanvas(currentVector.layer, true)
-        end = performance.now()
-        console.log("renderCanvas time (all actions): ", end - start)
+        // renderCanvas(currentVector.layer, true)
       }
       break
     case "pointerup":

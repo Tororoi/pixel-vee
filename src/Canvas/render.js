@@ -31,7 +31,6 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
   //follows stored instructions to reassemble drawing. Costly operation. Minimize usage as much as possible.
   let betweenCtx = null //canvas context for saving between actions
   let startIndex = 1
-  let iterations = 0
   if (activeIndexes) {
     if (setImages) {
       //set initial sandwiched canvas
@@ -66,7 +65,6 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
     }
     if (!action.hidden && !action.removed) {
       performAction(action, betweenCtx)
-      iterations++
     }
     if (activeIndexes) {
       if (activeIndexes.includes(i)) {
@@ -108,7 +106,6 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
       }
     }
   }
-  console.log("iterations: ", iterations, activeIndexes)
   updateLayersAfterRedo()
   renderLayersToDOM()
   renderVectorsToDOM()
