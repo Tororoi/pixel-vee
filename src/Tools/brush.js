@@ -123,7 +123,6 @@ function addPointToAction(x, y) {
     state.points.push({
       x: x - canvas.currentLayer.x,
       y: y - canvas.currentLayer.y,
-      color: { ...swatches.primary.color },
       brushSize: state.tool.brushSize,
     })
     state.pointsSet.add(`${x},${y}`)
