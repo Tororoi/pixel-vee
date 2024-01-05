@@ -42,7 +42,7 @@ export function testBrushAction() {
     actionDraw(
       p.x + offsetX,
       p.y + offsetY,
-      p.color,
+      action.color,
       brushStamps[action.tool.brushType][brushSize][brushDirection],
       brushSize,
       action.layer,
@@ -53,7 +53,7 @@ export function testBrushAction() {
     previousX = p.x + offsetX
     previousY = p.y + offsetY
     //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster:
-    // action.layer.ctx.fillStyle = p.color
+    // action.layer.ctx.fillStyle = action.color
     // let x = p.x
     // let y = p.y
     // const key = `${x},${y}`
