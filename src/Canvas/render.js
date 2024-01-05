@@ -22,6 +22,7 @@ import {
  * The current problem is that later actions "fill" or "draw" with a mask are affected by earlier actions.
  * TODO: Another efficiency improvement would be to perform incremental rendering with caching so only the affected region of the canvas is rerendered.
  * TODO: Use OffscreenCanvas in a web worker to offload rendering to a separate thread.
+ * BUG: Can't simply save images and draw them for the betweenCvs because this will ignore actions use erase or inject modes.
  * @param {Object} layer - optional parameter to limit render to a specific layer
  * @param {Array} activeIndexes - optional parameter to limit render to specific actions. If not passed in, all actions will be rendered.
  * @param {Boolean} setImages - optional parameter to set images for actions. Will be used when history is modified to update action images.
@@ -30,6 +31,7 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
   //follows stored instructions to reassemble drawing. Costly operation. Minimize usage as much as possible.
   let betweenCtx = null //canvas context for saving between actions
   let startIndex = 1
+  let iterations = 0
   if (activeIndexes) {
     if (setImages) {
       //set initial sandwiched canvas
@@ -64,6 +66,7 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
     }
     if (!action.hidden && !action.removed) {
       performAction(action, betweenCtx)
+      iterations++
     }
     if (activeIndexes) {
       if (activeIndexes.includes(i)) {
@@ -80,7 +83,20 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         }
       }
       //render last betweenCanvas
-      if (i === state.undoStack.length - 1) {
+      if (i === activeIndexes[activeIndexes.length - 1] && !setImages) {
+        //Finished rendering active indexes, finish by rendering last betweenCanvas to avoid rendering actions unnecessarily.
+        //draw accumulated canvas actions from previous betweenCanvas to action.layer.ctx
+        action.layer.ctx.drawImage(
+          state.savedBetweenActionImages[
+            state.savedBetweenActionImages.length - 1
+          ].cvs,
+          0,
+          0
+        )
+        //exit for loop
+        break
+      } else if (i === state.undoStack.length - 1 && setImages) {
+        //Finished rendering all actions but last set exists only on betweenCanvas at this point, so render it to the layer
         //draw accumulated canvas actions from previous betweenCanvas to action.layer.ctx
         action.layer.ctx.drawImage(
           state.savedBetweenActionImages[
@@ -92,6 +108,7 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
       }
     }
   }
+  console.log("iterations: ", iterations, activeIndexes)
   updateLayersAfterRedo()
   renderLayersToDOM()
   renderVectorsToDOM()

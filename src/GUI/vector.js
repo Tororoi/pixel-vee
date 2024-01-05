@@ -642,6 +642,7 @@ export function updateLockedCurrentVectorControlHandle(currentVector) {
 /**
  * For efficient rendering, create an array of indexes of vectors that need to be re-rendered.
  * Other actions will be saved to between canvases to avoid multiple ununecessary renders in redrawTimelineActions
+ * TODO: Can't simply save images and draw them for the betweenCvs because this will ignore actions use erase or inject modes.
  * @param {Object} currentVector
  * @param {Object} vectorsSavedProperties - will have at least one entry, corresponding to currentVector
  * @param {Array} undoStack
@@ -658,18 +659,21 @@ export function createActiveIndexesForRender(
   let activeIndexes = []
 
   // Check the conditions only if currentVector's tool is not 'fill'
-  if (currentVector.tool.name !== "fill") {
-    for (let i = vectorsSavedPropertiesKeys[0]; i < undoStack.length; i++) {
-      let action = undoStack[i]
-      if (
-        action.layer === currentVector.layer &&
-        (action.tool.name === "fill" || vectorsSavedProperties[i])
-      ) {
-        activeIndexes.push(i)
-      }
+  // if (currentVector.tool.name !== "fill") {
+  for (let i = vectorsSavedPropertiesKeys[0]; i < undoStack.length; i++) {
+    let action = undoStack[i]
+    if (
+      action.layer === currentVector.layer &&
+      (action.tool.name === "fill" ||
+        vectorsSavedProperties[i] ||
+        action.modes?.eraser ||
+        action.modes?.inject)
+    ) {
+      activeIndexes.push(i)
     }
-  } else {
-    activeIndexes.push(vectorsSavedPropertiesKeys[0])
   }
+  // } else {
+  //   activeIndexes.push(vectorsSavedPropertiesKeys[0])
+  // }
   return activeIndexes
 }

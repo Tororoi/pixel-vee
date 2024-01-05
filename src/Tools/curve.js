@@ -398,6 +398,7 @@ function adjustCurveSteps(numPoints = 4) {
           state.undoStack
         )
         renderCanvas(currentVector.layer, true, state.activeIndexes, true)
+        // renderCanvas(currentVector.layer, true)
       }
       break
     case "pointermove":
@@ -420,7 +421,14 @@ function adjustCurveSteps(numPoints = 4) {
           }
           updateLinkedVectors(currentVector)
         }
+        let start = performance.now()
         renderCanvas(currentVector.layer, true, state.activeIndexes)
+        let end = performance.now()
+        console.log("renderCanvas time (activeIndexes): ", end - start)
+        start = performance.now()
+        renderCanvas(currentVector.layer, true)
+        end = performance.now()
+        console.log("renderCanvas time (all actions): ", end - start)
       }
       break
     case "pointerup":
@@ -514,6 +522,7 @@ function adjustCurveSteps(numPoints = 4) {
           }
         }
         renderCanvas(currentVector.layer, true, state.activeIndexes)
+        // renderCanvas(currentVector.layer, true)
         modifyVectorAction(currentVector)
         vectorGui.selectedPoint = {
           xKey: null,
