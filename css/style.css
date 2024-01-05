@@ -554,7 +554,7 @@ svg {
   align-items: center;
   position: relative;
   margin: 2px;
-  z-index: 2;
+  z-index: 200;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .nav:hover:not([disabled]) {
@@ -577,6 +577,100 @@ svg {
   image-rendering: pixelated; /* Webkit (Chrome from v41, Opera from v26) */
   -ms-interpolation-mode: nearest-neighbor;
 }
+.nav .nav-menu {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  height: 100%;
+}
+.nav .nav-menu #file-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: flex-end;
+  height: 100%;
+  cursor: pointer;
+}
+.nav .nav-menu #file-menu li.menu-folder {
+  position: relative;
+  display: flex;
+  align-items: center;
+  padding: 5px 20px;
+  cursor: pointer;
+  height: 24px;
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131);
+}
+.nav .nav-menu #file-menu li.menu-folder:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255);
+}
+.nav .nav-menu #file-menu li.menu-folder ul {
+  top: calc(100% + 2px);
+}
+.nav .nav-menu #file-menu li.menu-folder .menu-folder-title {
+  pointer-events: none;
+}
+.nav .nav-menu #file-menu li.menu-folder:hover {
+  background-color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
+  height: 26px;
+  margin-bottom: -2px;
+}
+.nav .nav-menu #file-menu li.menu-folder:hover ul {
+  top: 100%;
+}
+.nav .nav-menu #file-menu li.menu-folder:hover .menu-folder-title {
+  transform: translateY(-1px);
+}
+.nav .nav-menu #file-menu li ul {
+  pointer-events: auto;
+  display: none;
+  position: absolute;
+  left: 0;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background-color: transparent;
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.nav .nav-menu #file-menu li ul:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.nav .nav-menu #file-menu li ul li {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-flow: row nowrap;
+  white-space: nowrap;
+  height: 28px;
+  padding: 5px 20px;
+  background-color: rgb(0, 0, 0);
+  color: rgb(255, 255, 255);
+  cursor: pointer;
+}
+.nav .nav-menu #file-menu li ul li label {
+  cursor: pointer;
+}
+.nav .nav-menu #file-menu li ul li input[type=file] {
+  display: none;
+}
+.nav .nav-menu #file-menu li ul li:hover {
+  background-color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
+}
+.nav .nav-menu #file-menu li:focus {
+  background-color: rgb(255, 255, 255);
+  color: rgb(0, 0, 0);
+  pointer-events: none;
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255);
+}
+.nav .nav-menu #file-menu li:focus:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255);
+}
+.nav .nav-menu #file-menu li:focus ul {
+  display: block;
+}
 .nav .nav-items {
   display: flex;
   flex-flow: row wrap;
@@ -597,72 +691,6 @@ svg {
   padding-left: 8px;
   padding-right: 8px;
   background: rgb(77, 77, 77);
-}
-.nav .nav-items .save {
-  padding-right: 16px;
-}
-.nav .nav-items .save .btn {
-  height: 28px;
-  width: 84px;
-  background: rgb(77, 77, 77);
-}
-.nav .nav-items .open-save {
-  padding-right: 16px;
-}
-.nav .nav-items .open-save .btn {
-  height: 28px;
-  width: 84px;
-  background: rgb(77, 77, 77);
-}
-.nav .nav-items .open-save input[type=file] {
-  display: none;
-}
-.nav .nav-items .export .btn {
-  height: 28px;
-  width: 84px;
-  background: rgb(77, 77, 77);
-}
-
-#file-menu {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-#file-menu li {
-  position: relative;
-  padding: 5px 10px;
-  cursor: pointer;
-  background: rgb(77, 77, 77);
-}
-#file-menu li.menu-folder {
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
-}
-#file-menu li.menu-folder:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
-}
-#file-menu li ul {
-  display: none;
-  position: absolute;
-  left: 0;
-  top: 100%;
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  background-color: rgb(77, 77, 77);
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
-}
-#file-menu li ul:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
-}
-#file-menu li ul li {
-  padding: 5px 10px;
-  cursor: pointer;
-}
-#file-menu li ul li:hover {
-  background-color: rgb(31, 31, 31);
-}
-#file-menu .show {
-  display: block;
 }
 
 /* Next override basic styles with specific styles when necessary */

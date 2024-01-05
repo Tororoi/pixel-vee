@@ -12,6 +12,9 @@ const tooltip = document.getElementById("tooltip")
 //========= * * * Menu * * * =========//
 //====================================//
 
+// * Nav * //
+const topMenu = document.querySelector(".nav")
+
 // * Tool Options * //
 const toolOptions = document.querySelector(".tool-options")
 //TODO: options dialog box where user can set default options such as display vectors, paths, or auto select most recently created vector
@@ -161,6 +164,7 @@ export const dom = {
   canvasLayers,
   tooltip,
   //menu
+  topMenu,
   toolOptions,
   gridBtn,
   tooltipBtn,

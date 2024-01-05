@@ -32,22 +32,48 @@
 
   <body>
     <div id="options" class="nav">
-      <div class="title">
-        <a href="https://github.com/Tororoi/pixel-vee" target="_blank">
-          <img src="./public/pixel-vee.png" />
-        </a>
+      <div class="nav-menu">
+        <div class="title">
+          <a href="https://github.com/Tororoi/pixel-vee" target="_blank">
+            <img src="./public/pixel-vee.png" />
+          </a>
+        </div>
+        <ul role="menu" aria-label="functions" id="file-menu">
+          <li
+            role="menuitem"
+            aria-haspopup="true"
+            class="menu-folder"
+            tabindex="0"
+          >
+            <span class="menu-folder-title">File</span>
+            <ul role="menu" id="file-submenu">
+              <!-- <li role="menuitem">New</li> -->
+              <li
+                role="menuitem"
+                class="open-save"
+                data-tooltip="Open saved drawing"
+              >
+                <label for="drawing-upload"> Open </label>
+                <input type="file" accept=".pxv" id="drawing-upload" />
+              </li>
+              <li
+                role="menuitem"
+                class="save"
+                data-tooltip="Open dialog box to download file with current progress"
+              >
+                Save (Cmd + S)
+              </li>
+              <li
+                role="menuitem"
+                class="export"
+                data-tooltip="Download as .png"
+              >
+                Export
+              </li>
+            </ul>
+          </li>
+        </ul>
       </div>
-      <ul role="menu" aria-label="functions" id="file-menu">
-        <li role="menuitem" aria-haspopup="true" class="menu-folder">
-          File
-          <ul role="menu" id="file-submenu">
-            <!-- <li role="menuitem">New</li> -->
-            <li role="menuitem">Open</li>
-            <li role="menuitem">Save</li>
-            <li role="menuitem">Export</li>
-          </ul>
-        </li>
-      </ul>
       <div class="nav-items">
         <div class="tool-options"></div>
         <label
@@ -70,29 +96,6 @@
           <span class="checkmark"></span>
           <span>Tooltips</span>
         </label>
-        <div class="save">
-          <div
-            class="btn"
-            data-tooltip="Open dialog box to download file with current progress"
-          >
-            <span>Save</span>
-          </div>
-        </div>
-        <div class="open-save">
-          <label
-            for="drawing-upload"
-            class="btn"
-            data-tooltip="Open saved drawing"
-          >
-            <span>Open</span>
-          </label>
-          <input type="file" accept=".pxv" id="drawing-upload" />
-        </div>
-        <div class="export">
-          <div class="btn" data-tooltip="Download as .png">
-            <span>Export</span>
-          </div>
-        </div>
       </div>
     </div>
     <div class="page">

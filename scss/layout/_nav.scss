@@ -9,7 +9,7 @@
   align-items: center;
   position: relative;
   margin: 2px;
-  z-index: 2;
+  z-index: 200;
   @include boxBorder;
   .title {
     padding-left: 16px;
@@ -26,6 +26,100 @@
         image-rendering: pixelated; /* Webkit (Chrome from v41, Opera from v26) */
         -ms-interpolation-mode: nearest-neighbor;
       }
+    }
+  }
+  .nav-menu {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    height: 100%;
+    #file-menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: flex-end;
+      height: 100%;
+      cursor: pointer;
+
+      li {
+        &.menu-folder {
+          position: relative;
+          display: flex;
+          align-items: center;
+          padding: 5px 20px;
+          cursor: pointer;
+          height: 24px;
+          @include boxBorder($border-color, $white, false, left right top);
+          ul {
+            top: calc(100% + 2px);
+          }
+          .menu-folder-title {
+            pointer-events: none;
+          }
+          &:hover {
+            background-color: $white;
+            color: $black;
+            height: 26px;
+            margin-bottom: -2px;
+            ul {
+              top: 100%;
+            }
+            .menu-folder-title {
+              transform: translateY(-1px);
+            }
+          }
+        }
+        ul {
+          pointer-events: auto;
+          display: none;
+          position: absolute;
+          left: 0;
+          // top: 100%;
+          list-style: none;
+          padding: 0;
+          margin: 0;
+          background-color: transparent;
+          @include boxBorder($border-color, $white, false, left right bottom);
+
+          li {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            flex-flow: row nowrap;
+            white-space: nowrap;
+            height: 28px;
+            padding: 5px 20px;
+            background-color: $black;
+            color: $white;
+            cursor: pointer;
+            label {
+              cursor: pointer;
+            }
+            input[type="file"] {
+              display: none;
+            }
+            &:hover {
+              background-color: $white;
+              color: $black;
+            }
+          }
+        }
+        &:focus {
+          background-color: $white;
+          color: $black;
+          pointer-events: none;
+          @include boxBorder($white, $white, false, left right top);
+          ul {
+            display: block;
+          }
+        }
+      }
+
+      // .show {
+      //   display: block;
+      // }
     }
   }
   .nav-items {
@@ -48,72 +142,5 @@
         background: $gray;
       }
     }
-    .save {
-      padding-right: 16px;
-      .btn {
-        height: 28px;
-        width: 84px;
-        background: $gray;
-      }
-    }
-    .open-save {
-      padding-right: 16px;
-      .btn {
-        height: 28px;
-        width: 84px;
-        background: $gray;
-      }
-      input[type="file"] {
-        display: none;
-      }
-    }
-    .export {
-      .btn {
-        height: 28px;
-        width: 84px;
-        background: $gray;
-      }
-    }
-  }
-}
-
-#file-menu {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-
-  li {
-    position: relative;
-    padding: 5px 10px;
-    cursor: pointer;
-    background: $gray;
-    &.menu-folder {
-      @include boxBorder;
-    }
-
-    ul {
-      display: none;
-      position: absolute;
-      left: 0;
-      top: 100%;
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      background-color: $gray;
-      @include boxBorder;
-
-      li {
-        padding: 5px 10px;
-        cursor: pointer;
-
-        &:hover {
-          background-color: $darkest-gray;
-        }
-      }
-    }
-  }
-
-  .show {
-    display: block;
   }
 }
