@@ -16,19 +16,21 @@ export const renderBrushModesToDOM = () => {
     mode.id = key
     switch (key) {
       case "eraser":
+        //add aria label
+        mode.ariaLabel = "Eraser (E)"
         mode.dataset.tooltip = "Eraser (E)"
         break
       case "perfect":
+        mode.ariaLabel = "Pixel Perfect (P)"
         mode.dataset.tooltip = "Pixel Perfect (P)"
         break
       case "inject":
+        mode.ariaLabel = "Inject (I)"
         mode.dataset.tooltip =
           "Inject (I) \n\nTranslucent colors will be applied directly"
-        // if (state.tool.modes.eraser) {
-        //   mode.disabled = true
-        // }
         break
       case "colorMask":
+        mode.ariaLabel = "Color Mask (M)"
         mode.dataset.tooltip =
           "Color Mask (M) \n\nOnly draw over selected secondary swatch color"
         break

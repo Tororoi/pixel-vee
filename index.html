@@ -34,8 +34,12 @@
     <div id="options" class="nav">
       <div class="nav-menu">
         <div class="title">
-          <a href="https://github.com/Tororoi/pixel-vee" target="_blank">
-            <img src="./public/pixel-vee.png" />
+          <a
+            href="https://github.com/Tororoi/pixel-vee"
+            target="_blank"
+            aria-label="Visit the Github Repo in a new tab"
+          >
+            <img src="./public/pixel-vee.png" alt="Github Repo" />
           </a>
         </div>
         <ul role="menu" aria-label="functions" id="file-menu">
@@ -180,24 +184,28 @@
                   type="button"
                   class="mode eraser"
                   id="eraser"
+                  aria-label="Eraser (E)"
                   data-tooltip="Erase (E)"
                 ></button
                 ><button
                   type="button"
                   class="mode inject"
                   id="inject"
+                  aria-label="Inject (I)"
                   data-tooltip="Inject (I) &#010;&#010;Translucent colors will be applied directly"
                 ></button
                 ><button
                   type="button"
                   class="mode perfect"
                   id="perfect"
+                  aria-label="Pixel Perfect (P)"
                   data-tooltip="Pixel Perfect (P)"
                 ></button
                 ><button
                   type="button"
                   class="mode colorMask"
                   id="colorMask"
+                  aria-label="Color Mask (M)"
                   data-tooltip="Color Mask (M) &#010;&#010;Only draw over selected secondary swatch color"
                 ></button>
               </div>
@@ -243,6 +251,8 @@
               <button
                 type="button"
                 class="switch color-switch custom-shape"
+                id="color-switch"
+                aria-label="Switch primary/ secondary colors"
                 data-tooltip="Switch primary/ secondary colors"
               >
                 <!-- <svg
@@ -266,14 +276,14 @@
                   <button
                     type="button"
                     class="palette-edit"
-                    data-tooltip="Palette Knife (Hold K or click on the selected color) &#010;&#010;While active, click on a swatch to edit the color."
                     aria-label="Palette Knife. While active, click on a swatch to edit the color."
+                    data-tooltip="Palette Knife (Hold K or click on the selected color) &#010;&#010;While active, click on a swatch to edit the color."
                   ></button>
                   <button
                     type="button"
                     class="palette-remove"
-                    data-tooltip="Palette Scraper (Hold X) &#010;&#010;While active, click on a swatch to remove it from the palette."
                     aria-label="Palette Scraper. While active, click on a swatch to remove it from the palette."
+                    data-tooltip="Palette Scraper (Hold X) &#010;&#010;While active, click on a swatch to remove it from the palette."
                   ></button>
                 </div>
                 <div class="palette-colors">
@@ -354,7 +364,12 @@
                     </span>
                   </label>
                 </div>
-                <button type="submit" id="update-size" class="update-size btn">
+                <button
+                  type="submit"
+                  id="update-size"
+                  class="update-size btn"
+                  aria-label="Update Canvas Size"
+                >
                   Update Canvas Size
                 </button>
               </form>
@@ -396,8 +411,16 @@
                 <div class="layers">
                   <div class="layer raster selected" id="0" draggable="true">
                     Layer 1
-                    <button type="button" class="hide eyeopen"></button>
-                    <button type="button" class="trash"></button>
+                    <button
+                      type="button"
+                      class="hide eyeopen"
+                      aria-label="Hide/Show Layer"
+                    ></button>
+                    <button
+                      type="button"
+                      class="trash"
+                      aria-label="Remove Layer"
+                    ></button>
                   </div>
                 </div>
               </div>
@@ -457,12 +480,14 @@
               type="button"
               class="tool undo custom-shape"
               id="undo"
+              aria-label="Undo (Cmd + Z)"
               data-tooltip="Undo (Cmd + Z)"
             />
             <button
               type="button"
               class="tool redo custom-shape"
               id="redo"
+              aria-label="Redo (Cmd + Shift + Z)"
               data-tooltip="Redo (Cmd + Shift + Z)"
             />
           </div>
@@ -470,11 +495,13 @@
             <button
               type="button"
               class="tool recenter custom-shape"
+              aria-label="Recenter Canvas"
               data-tooltip="Recenter Canvas"
             />
             <button
               type="button"
               class="tool clear custom-shape"
+              aria-label="Clear Canvas"
               data-tooltip="Clear Canvas"
             />
           </div>
@@ -483,12 +510,14 @@
               type="button"
               id="minus"
               class="zoombtn minus"
+              aria-label="Zoom Out (Mouse Wheel)"
               data-tooltip="Zoom Out (Mouse Wheel)"
             />
             <button
               type="button"
               id="plus"
               class="zoombtn plus"
+              aria-label="Zoom In (Mouse Wheel)"
               data-tooltip="Zoom In (Mouse Wheel)"
             />
           </div>
@@ -500,42 +529,49 @@
                   type="button"
                   class="tool brush selected"
                   id="brush"
+                  aria-label="Brush (B)"
                   data-tooltip="Brush (B)"
                 ></button>
                 <button
                   type="button"
                   class="tool fill"
                   id="fill"
+                  aria-label="Fill (F)"
                   data-tooltip="Fill (F)"
                 />
                 <button
                   type="button"
                   class="tool line"
                   id="line"
+                  aria-label="Line (L or Hold Shift & Brush)"
                   data-tooltip="Line (L or Hold Shift & Brush)"
                 />
                 <button
                   type="button"
                   class="tool quadCurve"
                   id="quadCurve"
+                  aria-label="Quadratic Curve (C)"
                   data-tooltip="Quadratic Curve (C)"
                 />
                 <button
                   type="button"
                   class="tool cubicCurve"
                   id="cubicCurve"
+                  aria-label="Cubic Curve (J)"
                   data-tooltip="Cubic Curve (J)"
                 />
                 <button
                   type="button"
                   class="tool ellipse"
                   id="ellipse"
+                  aria-label="Ellipse (O) Hold Shift to maintain circle"
                   data-tooltip="Ellipse (O) &#010;&#010;Hold Shift to maintain circle"
                 />
                 <!-- <button
                 type="button"
                 class="tool btn"
                 id="select"
+                aria-label="Select (M)"
                 data-tooltip="Select (M)"
               >
                 <div class="select"></div>
@@ -546,18 +582,21 @@
                   type="button"
                   class="tool eyedropper"
                   id="eyedropper"
+                  aria-label="Eyedropper (Hold Alt)"
                   data-tooltip="Eyedropper (Hold Alt)"
                 />
                 <button
                   type="button"
                   class="tool grab"
                   id="grab"
+                  aria-label="Grab (Hold Space)"
                   data-tooltip="Grab (Hold Space)"
                 />
                 <button
                   type="button"
                   class="tool move"
                   id="move"
+                  aria-label="Move"
                   data-tooltip="Move"
                 />
               </div>
@@ -899,13 +938,19 @@
                 type="button"
                 id="save-button"
                 class="btn"
+                aria-label="Save offline as a .pxv file"
                 data-tooltip="Save offline as a .pxv file"
               >
                 Save
               </button>
 
               <!-- cancel button -->
-              <button type="button" id="cancel-save-button" class="btn">
+              <button
+                type="button"
+                id="cancel-save-button"
+                class="btn"
+                aria-label="Close save dialog box"
+              >
                 Cancel
               </button>
             </div>
