@@ -132,7 +132,7 @@ const drawOnThumbnailContext = (action) => {
     canvas.thumbnailCVS.width,
     canvas.thumbnailCVS.height
   )
-  canvas.thumbnailCTX.lineWidth = 2
+  canvas.thumbnailCTX.lineWidth = 3
   canvas.thumbnailCTX.fillStyle =
     action.index === canvas.currentVectorIndex
       ? "rgb(0, 0, 0)"
@@ -226,5 +226,7 @@ const createThumbnailImage = (action) => {
   let thumb = new Image()
   thumb.src = canvas.thumbnailCVS.toDataURL()
   thumb.alt = `thumb ${action.index}`
+  thumb.width = 202 * window.devicePixelRatio
+  thumb.height = 86 * window.devicePixelRatio
   return thumb
 }

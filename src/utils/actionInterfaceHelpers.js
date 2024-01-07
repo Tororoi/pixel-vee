@@ -10,6 +10,7 @@ export const createModeElement = (modeKey, isSelected) => {
   let mode = document.createElement("button")
   mode.type = "button"
   mode.className = "mode"
+  mode.ariaLabel = modeKey
   mode.classList.add(modeKey)
   if (isSelected) {
     mode.classList.add("selected")
@@ -26,6 +27,7 @@ export const createToolElement = (action, isSelected) => {
   let tool = document.createElement("button")
   tool.type = "button"
   tool.className = "tool"
+  tool.ariaLabel = action.tool.name
   tool.classList.add(action.tool.name)
   if (isSelected) {
     tool.classList.add("selected")
@@ -41,6 +43,7 @@ export const createColorElement = (action) => {
   let color = document.createElement("button")
   color.type = "button"
   color.className = "actionColor"
+  color.ariaLabel = "Action color"
   let colorSwatch = document.createElement("div")
   colorSwatch.className = "swatch"
   colorSwatch.style.backgroundColor = action.color.color
@@ -56,6 +59,7 @@ export const createHideElement = (hidden = false) => {
   let hide = document.createElement("button")
   hide.type = "button"
   hide.className = "hide"
+  hide.ariaLabel = "Hide/Show action"
   hidden ? hide.classList.add("eyeclosed") : hide.classList.add("eyeopen")
   return hide
 }
@@ -68,5 +72,6 @@ export const createTrashElement = () => {
   let trash = document.createElement("button")
   trash.type = "button"
   trash.className = "trash"
+  trash.ariaLabel = "Delete action"
   return trash
 }
