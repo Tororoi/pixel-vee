@@ -123,6 +123,10 @@
   @include ellipseIcon;
 }
 
+.select {
+  @include selectIcon;
+}
+
 .eyedropper {
   @include eyedropperIcon;
 }

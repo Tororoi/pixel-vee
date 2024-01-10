@@ -391,7 +391,7 @@ function addReferenceLayer() {
             "quadCurve",
             "cubicCurve",
             "ellipse",
-            // "select",
+            "select",
           ],
           hidden: false,
           removed: false,

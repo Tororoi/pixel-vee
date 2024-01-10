@@ -110,6 +110,19 @@
   }
 }
 
+@mixin selectSvg($color) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='#{$color}' d='M2 1h2M6 1h3M11 1h3M16 1h2M1 2h1M4 2h2M9 2h2M14 2h2M18 2h1M1 3h1M3 3h1M6 3h3M11 3h3M16 3h1M18 3h1M2 4h1M17 4h1M2 5h1M17 5h1M1 6h1M3 6h1M16 6h1M18 6h1M1 7h1M3 7h1M16 7h1M18 7h1M1 8h1M3 8h1M16 8h1M18 8h1M2 9h1M17 9h1M2 10h1M17 10h1M1 11h1M3 11h1M16 11h1M18 11h1M1 12h1M3 12h1M16 12h1M18 12h1M1 13h1M3 13h1M16 13h1M18 13h1M2 14h1M17 14h1M2 15h1M17 15h1M1 16h1M3 16h1M6 16h3M11 16h3M16 16h1M18 16h1M1 17h1M4 17h2M9 17h2M14 17h2M18 17h1M2 18h2M6 18h3M11 18h3M16 18h2' /%3E%3Cpath stroke='%23000000' d='M2 2h2M6 2h3M11 2h3M16 2h2M2 3h1M17 3h1M2 6h1M17 6h1M2 7h1M17 7h1M2 8h1M17 8h1M2 11h1M17 11h1M2 12h1M17 12h1M2 13h1M17 13h1M2 16h1M17 16h1M2 17h2M6 17h3M11 17h3M16 17h2' /%3E%3C/svg%3E");
+}
+
+@mixin selectIcon($border: $border-color, $active: $white) {
+  @include selectSvg($border);
+  background-size: 100%;
+  // &:hover,
+  &.selected {
+    @include selectSvg($active);
+  }
+}
+
 @mixin eyedropperSvg($color) {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='#{$color}' d='M15 1h3M10 2h2M14 2h1M18 2h1M9 3h1M12 3h2M18 3h1M8 4h1M18 4h1M9 5h1M17 5h1M9 6h1M16 6h1M8 7h1M16 7h1M7 8h1M17 8h1M6 9h1M17 9h1M5 10h1M13 10h2M16 10h1M4 11h1M12 11h1M15 11h1M4 12h1M11 12h1M3 13h1M10 13h1M3 14h1M9 14h1M2 15h1M7 15h2M2 16h1M5 16h2M2 17h1M5 17h1M3 18h2' /%3E%3Cpath stroke='%23000000' d='M15 2h3M10 3h2M14 3h4M9 4h9M10 5h7M12 6h4M13 7h3M14 8h3M13 9h4M12 10h1M15 10h1M11 11h1M5 12h1M7 12h4M4 13h1M9 13h1M4 14h1M7 14h2M3 15h4M3 16h2M3 17h2' /%3E%3Cpath stroke='%23575757' d='M10 6h2M9 7h1M12 7h1M8 8h1M13 8h1M7 9h1M6 10h1M5 11h1M5 13h4M5 14h2' /%3E%3Cpath stroke='%23acacac' d='M10 7h2M9 8h1M11 8h2M8 9h1M10 9h3M7 10h1M9 10h3M6 11h1M8 11h3M6 12h1' /%3E%3Cpath stroke='%23ffffff' d='M10 8h1M9 9h1M8 10h1M7 11h1' /%3E%3C/svg%3E");
 }

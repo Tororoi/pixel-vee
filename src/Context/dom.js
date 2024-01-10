@@ -86,7 +86,7 @@ const tools = [
   "quadCurve",
   "cubicCurve",
   "ellipse",
-  // "select",
+  "select",
   "eyedropper",
   "grab",
   "move",
