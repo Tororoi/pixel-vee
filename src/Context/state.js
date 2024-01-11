@@ -86,6 +86,14 @@ export const state = {
     px2: null,
     py2: null,
   },
+  //null bounds means no restriction on drawing
+  bounds: {
+    xMin: null,
+    yMin: null,
+    xMax: null,
+    yMax: null,
+  },
+  selectionInversed: true,
   //for perfect pixels
   lastDrawnX: null,
   lastDrawnY: null,
@@ -97,6 +105,7 @@ export const state = {
   //functions
   reset,
   resetSelectProperties,
+  resetBounds,
 }
 
 /**
@@ -119,4 +128,16 @@ function resetSelectProperties() {
     py2: null,
   }
   state.maskSet = null
+}
+
+/**
+ * Reset bounds
+ */
+function resetBounds() {
+  state.bounds = {
+    xMin: null,
+    yMin: null,
+    xMax: null,
+    yMax: null,
+  }
 }

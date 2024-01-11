@@ -95,7 +95,7 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
         ...latestAction.properties.selectProperties,
       }
       //set maskset
-      state.maskSet = new Set(latestAction.maskArray)
+      // state.maskSet = new Set(latestAction.maskArray)
     }
   } else if (modType === "from") {
     if (latestAction.properties.deselect) {
@@ -104,7 +104,7 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
         ...latestAction.properties.selectProperties,
       }
       //set maskset
-      state.maskSet = new Set(latestAction.maskArray)
+      // state.maskSet = new Set(latestAction.maskArray)
     } else if (
       newLatestAction?.tool?.name === "select" &&
       !newLatestAction?.properties?.deselect
@@ -115,7 +115,7 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
         ...newLatestAction.properties.selectProperties,
       }
       //set maskset
-      state.maskSet = new Set(newLatestAction.maskArray)
+      // state.maskSet = new Set(newLatestAction.maskArray)
     } else {
       state.resetSelectProperties()
     }

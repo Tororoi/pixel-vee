@@ -10,6 +10,7 @@ import {
 } from "../utils/imageDataHelpers.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 import { saveEllipseAsTest } from "../Testing/ellipseTest.js"
+import { isOutOfBounds } from "../utils/canvasHelpers.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -36,6 +37,8 @@ import { saveEllipseAsTest } from "../Testing/ellipseTest.js"
 export function actionDraw(
   coordX,
   coordY,
+  bounds,
+  selectionInversed,
   currentColor,
   directionalBrushStamp,
   brushSize,
@@ -58,11 +61,9 @@ export function actionDraw(
     offsetY = canvas.yOffset
   }
   ctx.fillStyle = currentColor.color
+  //check if brush is outside bounds
   if (
-    coordX >= layer.cvs.width + brushSize / 2 ||
-    coordX <= -brushSize / 2 ||
-    coordY >= layer.cvs.height + brushSize / 2 ||
-    coordY <= -brushSize / 2
+    isOutOfBounds(coordX, coordY, brushSize, layer, bounds, selectionInversed)
   ) {
     //don't iterate brush outside bounds to reduce time cost of render
     return
@@ -72,7 +73,7 @@ export function actionDraw(
   for (const pixel of directionalBrushStamp) {
     const x = baseX + pixel.x
     const y = baseY + pixel.y
-    if (x >= layer.cvs.width || x < 0 || y >= layer.cvs.height || y < 0) {
+    if (isOutOfBounds(x, y, 0, layer, bounds, selectionInversed)) {
       //don't draw outside bounds to reduce time cost of render
       continue
     }

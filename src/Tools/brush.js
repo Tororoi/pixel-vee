@@ -140,6 +140,8 @@ function drawBrushPoint(x, y, brushDirection) {
   actionDraw(
     x,
     y,
+    state.bounds,
+    state.selectionInversed,
     swatches.primary.color,
     brushStamps[state.tool.brushType][state.tool.brushSize][brushDirection],
     state.tool.brushSize,

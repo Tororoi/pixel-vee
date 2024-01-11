@@ -57,42 +57,46 @@ function selectSteps() {
     case "pointerup":
       //1. create clip mask using drag origin and current x/y as opposite corners of rectangle
       //create maskset
-      state.maskSet = new Set()
-      const { px1, py1, px2, py2 } = state.selectProperties
-      const xMin = Math.min(px1, px2)
-      const xMax = Math.max(px1, px2)
-      const yMin = Math.min(py1, py2)
-      const yMax = Math.max(py1, py2)
-      const width = canvas.currentLayer.cvs.width
-      const height = canvas.currentLayer.cvs.height
+      // state.maskSet = new Set()
+      // const { px1, py1, px2, py2 } = state.selectProperties
+      // const xMin = Math.min(px1, px2)
+      // const xMax = Math.max(px1, px2)
+      // const yMin = Math.min(py1, py2)
+      // const yMax = Math.max(py1, py2)
+      // const width = canvas.currentLayer.cvs.width
+      // const height = canvas.currentLayer.cvs.height
 
-      const addMask = (xRange, yRange) => {
-        for (let x = xRange[0]; x < xRange[1]; x++) {
-          for (let y = yRange[0]; y < yRange[1]; y++) {
-            const key = `${x},${y}`
-            state.maskSet.add(key)
-          }
-        }
-      }
+      // const addMask = (xRange, yRange) => {
+      //   for (let x = xRange[0]; x < xRange[1]; x++) {
+      //     for (let y = yRange[0]; y < yRange[1]; y++) {
+      //       const key = `${x},${y}`
+      //       state.maskSet.add(key)
+      //     }
+      //   }
+      // }
 
-      // Add masks for regions outside the rectangular area
-      addMask([0, xMin], [0, height]) // Left region
-      addMask([xMax, width], [0, height]) // Right region
-      addMask([xMin, xMax], [0, yMin]) // Top region between xMin and xMax
-      addMask([xMin, xMax], [yMax, height]) // Bottom region between xMin and xMax
-      //add to timeline the maskSet, p1, p2. undo will unset from state, redo will set to state
-      let maskArray = coordArrayFromSet(
-        state.maskSet,
-        canvas.currentLayer.x,
-        canvas.currentLayer.y
-      )
+      // // Add masks for regions outside the rectangular area
+      // addMask([0, xMin], [0, height]) // Left region
+      // addMask([xMax, width], [0, height]) // Right region
+      // addMask([xMin, xMax], [0, yMin]) // Top region between xMin and xMax
+      // addMask([xMin, xMax], [yMax, height]) // Bottom region between xMin and xMax
+      // //add to timeline the maskSet, p1, p2. undo will unset from state, redo will set to state
+      // let maskArray = coordArrayFromSet(
+      //   state.maskSet,
+      //   canvas.currentLayer.x,
+      //   canvas.currentLayer.y
+      // )
+      state.bounds.xMin = state.selectProperties.px1
+      state.bounds.yMin = state.selectProperties.py1
+      state.bounds.xMax = state.selectProperties.px2
+      state.bounds.yMax = state.selectProperties.py2
       addToTimeline({
         tool: state.tool,
         layer: canvas.currentLayer,
         properties: {
           deselect: false,
           selectProperties: { ...state.selectProperties },
-          maskArray,
+          // maskArray,
         },
       })
       //TODO: constrain fill tool and vector tools to mask
