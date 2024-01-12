@@ -53,6 +53,8 @@ function brushSteps() {
           state.lineStartY,
           state.cursorX,
           state.cursorY,
+          state.boundaryBox,
+          state.selectionInversed,
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
@@ -98,7 +100,12 @@ function brushSteps() {
       addToTimeline({
         tool: brush,
         layer: canvas.currentLayer,
-        properties: { maskArray, points: state.points },
+        properties: {
+          points: state.points,
+          maskArray,
+          boundaryBox: { ...state.boundaryBox },
+          selectionInversed: state.selectionInversed,
+        },
       })
       if (state.tool.modes?.colorMask) {
         state.maskSet = null
@@ -140,7 +147,7 @@ function drawBrushPoint(x, y, brushDirection) {
   actionDraw(
     x,
     y,
-    state.bounds,
+    state.boundaryBox,
     state.selectionInversed,
     swatches.primary.color,
     brushStamps[state.tool.brushType][state.tool.brushSize][brushDirection],
@@ -166,6 +173,8 @@ function drawPreviewBrushPoint() {
   actionDraw(
     state.cursorX,
     state.cursorY,
+    state.boundaryBox,
+    state.selectionInversed,
     swatches.primary.color,
     brushStamps[state.tool.brushType][state.tool.brushSize][brushDirection],
     state.tool.brushSize,

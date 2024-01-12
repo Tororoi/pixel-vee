@@ -94,6 +94,8 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       state.selectProperties = {
         ...latestAction.properties.selectProperties,
       }
+      //set boundary box
+      state.setBoundaryBox(state.selectProperties)
       //set maskset
       // state.maskSet = new Set(latestAction.maskArray)
     }
@@ -103,6 +105,8 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       state.selectProperties = {
         ...latestAction.properties.selectProperties,
       }
+      //set boundary box
+      state.setBoundaryBox(state.selectProperties)
       //set maskset
       // state.maskSet = new Set(latestAction.maskArray)
     } else if (
@@ -114,6 +118,8 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       state.selectProperties = {
         ...newLatestAction.properties.selectProperties,
       }
+      //set boundary box
+      state.setBoundaryBox(state.selectProperties)
       //set maskset
       // state.maskSet = new Set(newLatestAction.maskArray)
     } else {

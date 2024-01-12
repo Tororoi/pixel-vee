@@ -583,7 +583,7 @@ svg {
   align-items: center;
   height: 100%;
 }
-.nav .nav-menu #file-menu {
+.nav .nav-menu #top-menu {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -593,7 +593,8 @@ svg {
   height: 100%;
   cursor: pointer;
 }
-.nav .nav-menu #file-menu li.menu-folder {
+.nav .nav-menu #top-menu li.menu-folder {
+  margin-left: 2px;
   background: rgb(61, 61, 61);
   position: relative;
   display: flex;
@@ -603,28 +604,28 @@ svg {
   height: 24px;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131);
 }
-.nav .nav-menu #file-menu li.menu-folder:hover:not([disabled]) {
+.nav .nav-menu #top-menu li.menu-folder:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255);
 }
-.nav .nav-menu #file-menu li.menu-folder ul {
+.nav .nav-menu #top-menu li.menu-folder ul {
   top: calc(100% + 2px);
 }
-.nav .nav-menu #file-menu li.menu-folder .menu-folder-title {
+.nav .nav-menu #top-menu li.menu-folder .menu-folder-title {
   pointer-events: none;
 }
-.nav .nav-menu #file-menu li.menu-folder:hover {
+.nav .nav-menu #top-menu li.menu-folder:hover {
   background-color: rgb(255, 255, 255);
   color: rgb(0, 0, 0);
   height: 26px;
   margin-bottom: -2px;
 }
-.nav .nav-menu #file-menu li.menu-folder:hover ul {
+.nav .nav-menu #top-menu li.menu-folder:hover ul {
   top: 100%;
 }
-.nav .nav-menu #file-menu li.menu-folder:hover .menu-folder-title {
+.nav .nav-menu #top-menu li.menu-folder:hover .menu-folder-title {
   transform: translateY(-1px);
 }
-.nav .nav-menu #file-menu li ul {
+.nav .nav-menu #top-menu li ul {
   pointer-events: auto;
   display: none;
   position: absolute;
@@ -635,10 +636,10 @@ svg {
   background-color: transparent;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.nav .nav-menu #file-menu li ul:hover:not([disabled]) {
+.nav .nav-menu #top-menu li ul:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
-.nav .nav-menu #file-menu li ul li {
+.nav .nav-menu #top-menu li ul li {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -650,11 +651,11 @@ svg {
   color: rgb(255, 255, 255);
   cursor: pointer;
 }
-.nav .nav-menu #file-menu li ul li.open-save {
+.nav .nav-menu #top-menu li ul li.open-save {
   padding: 0;
   height: 38px;
 }
-.nav .nav-menu #file-menu li ul li.open-save label {
+.nav .nav-menu #top-menu li ul li.open-save label {
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -663,24 +664,27 @@ svg {
   height: 100%;
   cursor: pointer;
 }
-.nav .nav-menu #file-menu li ul li.open-save input[type=file] {
+.nav .nav-menu #top-menu li ul li.open-save input[type=file] {
   display: none;
 }
-.nav .nav-menu #file-menu li ul li:hover {
+.nav .nav-menu #top-menu li ul li:hover {
   background-color: rgb(255, 255, 255);
   color: rgb(0, 0, 0);
 }
-.nav .nav-menu #file-menu li:focus {
+.nav .nav-menu #top-menu li:focus {
   background-color: rgb(255, 255, 255);
   color: rgb(0, 0, 0);
   pointer-events: none;
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255);
 }
-.nav .nav-menu #file-menu li:focus:hover:not([disabled]) {
+.nav .nav-menu #top-menu li:focus:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255);
 }
-.nav .nav-menu #file-menu li:focus ul {
+.nav .nav-menu #top-menu li:focus ul {
   display: block;
+}
+.nav .nav-menu #top-menu li:first-of-type {
+  margin-left: 0;
 }
 .nav .nav-items {
   display: flex;

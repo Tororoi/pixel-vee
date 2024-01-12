@@ -148,6 +148,7 @@ export function handleModes(e, manualModeName = null) {
     if (manualModeName) {
       targetMode = document.querySelector(`#${manualModeName}`)
     }
+    if (!targetMode) return
     if (targetMode.classList.contains("selected")) {
       state.tool.modes[targetMode.id] = false
     } else {
@@ -229,7 +230,8 @@ export function renderToolOptionsToDOM() {
   if (
     state.tool.name === "cubicCurve" ||
     state.tool.name === "quadCurve" ||
-    state.tool.name === "ellipse"
+    state.tool.name === "ellipse" ||
+    state.tool.name === "select"
   ) {
     //render cubic curve options to menu
     Object.entries(state.tool.options).forEach(([name, option]) => {

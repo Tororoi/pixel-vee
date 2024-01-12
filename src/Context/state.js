@@ -86,14 +86,14 @@ export const state = {
     px2: null,
     py2: null,
   },
-  //null bounds means no restriction on drawing
-  bounds: {
+  //null boundaryBox means no restriction on drawing
+  boundaryBox: {
     xMin: null,
     yMin: null,
     xMax: null,
     yMax: null,
   },
-  selectionInversed: true,
+  selectionInversed: false,
   //for perfect pixels
   lastDrawnX: null,
   lastDrawnY: null,
@@ -105,7 +105,8 @@ export const state = {
   //functions
   reset,
   resetSelectProperties,
-  resetBounds,
+  resetBoundaryBox,
+  setBoundaryBox,
 }
 
 /**
@@ -131,13 +132,24 @@ function resetSelectProperties() {
 }
 
 /**
- * Reset bounds
+ * Reset boundaryBox
  */
-function resetBounds() {
-  state.bounds = {
+function resetBoundaryBox() {
+  state.boundaryBox = {
     xMin: null,
     yMin: null,
     xMax: null,
     yMax: null,
   }
+}
+
+/**
+ * Set boundaryBox
+ * @param {Object} selectProperties
+ */
+function setBoundaryBox(selectProperties) {
+  state.boundaryBox.xMin = Math.min(selectProperties.px1, selectProperties.px2)
+  state.boundaryBox.yMin = Math.min(selectProperties.py1, selectProperties.py2)
+  state.boundaryBox.xMax = Math.max(selectProperties.px2, selectProperties.px1)
+  state.boundaryBox.yMax = Math.max(selectProperties.py2, selectProperties.py1)
 }

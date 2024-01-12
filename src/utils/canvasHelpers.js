@@ -24,8 +24,14 @@ export const setInitialZoom = (width) => {
 /**
  * Check if point is outside bounds
  * Used for reducing cost to render points and to restrict rendering outside selection
+ * @param {Integer} x
+ * @param {Integer} y
+ * @param {Integer} brushSize
+ * @param {Object} layer
+ * @param {Object} boundaryBox
+ * @param {Boolean} isInversed
  */
-export const isOutOfBounds = (x, y, brushSize, layer, bounds, isInversed) => {
+export const isOutOfBounds = (x, y, brushSize, layer, boundaryBox, isInversed) => {
   // Precomputed values for efficiency
   const halfBrushSize = Math.floor(brushSize / 2)
   const xOutOfBounds =
@@ -37,21 +43,21 @@ export const isOutOfBounds = (x, y, brushSize, layer, bounds, isInversed) => {
   if (xOutOfBounds || yOutOfBounds) return true
 
   // Check bounds if defined
-  if (bounds.xMin !== null) {
+  if (boundaryBox.xMin !== null) {
     if (isInversed) {
       if (
-        x >= bounds.xMin + brushSize / 2 &&
-        x < bounds.xMax - brushSize / 2 &&
-        y >= bounds.yMin + brushSize / 2 &&
-        y < bounds.yMax - brushSize / 2
+        x >= boundaryBox.xMin + brushSize / 2 &&
+        x < boundaryBox.xMax - brushSize / 2 &&
+        y >= boundaryBox.yMin + brushSize / 2 &&
+        y < boundaryBox.yMax - brushSize / 2
       ) {
         return true
       }
     } else if (
-      x >= bounds.xMax + brushSize / 2 ||
-      x < bounds.xMin - brushSize / 2 ||
-      y >= bounds.yMax + brushSize / 2 ||
-      y < bounds.yMin - brushSize / 2
+      x >= boundaryBox.xMax + brushSize / 2 ||
+      x < boundaryBox.xMin - brushSize / 2 ||
+      y >= boundaryBox.yMax + brushSize / 2 ||
+      y < boundaryBox.yMin - brushSize / 2
     ) {
       return true
     }

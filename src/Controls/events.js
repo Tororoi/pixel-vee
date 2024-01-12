@@ -47,7 +47,10 @@ const setCoordinates = (e) => {
 function handleKeyDown(e) {
   // e.preventDefault() - May conditionally need this for certain shortcuts, but try to avoid doing so
   //Prevent default save behavior
-  if (e.code === "KeyS" && (keys.MetaLeft || keys.MetaRight)) {
+  if (
+    (e.code === "KeyS" || e.code === "KeyD") &&
+    (keys.MetaLeft || keys.MetaRight)
+  ) {
     e.preventDefault()
   }
   //Prevent repeated activations while holding a key down

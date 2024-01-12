@@ -125,6 +125,7 @@ export function activateShortcut(keyCode) {
             state.action = null
             state.redoStack = []
             state.resetSelectProperties()
+            state.resetBoundaryBox()
             vectorGui.render()
           }
         }
@@ -148,7 +149,11 @@ export function activateShortcut(keyCode) {
       break
     case "KeyI":
       if (!state.clicked) {
-        handleModes(null, "inject")
+        if (keys.MetaLeft || keys.MetaRight) {
+          state.selectionInversed = !state.selectionInversed
+        } else {
+          handleModes(null, "inject")
+        }
       }
       break
     case "KeyJ":

@@ -86,10 +86,7 @@ function selectSteps() {
       //   canvas.currentLayer.x,
       //   canvas.currentLayer.y
       // )
-      state.bounds.xMin = state.selectProperties.px1
-      state.bounds.yMin = state.selectProperties.py1
-      state.bounds.xMax = state.selectProperties.px2
-      state.bounds.yMax = state.selectProperties.py2
+      state.setBoundaryBox(state.selectProperties)
       addToTimeline({
         tool: state.tool,
         layer: canvas.currentLayer,
@@ -119,8 +116,12 @@ export const select = {
     rasterOnly: {
       active: true,
       tooltip:
-        "Cut/Copy/Paste will not interfere with vectors that intersect with selected area",
+        "Paste will rasterize any vectors that intersect with selected area",
     },
+    // inverse: {
+    //   active: false,
+    //   tooltip: "Inverse selected area",
+    // },
   },
   modes: {},
   type: "raster",

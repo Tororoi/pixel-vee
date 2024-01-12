@@ -32,6 +32,8 @@ function fillSteps() {
         actionFill(
           state.vectorProperties.px1,
           state.vectorProperties.py1,
+          state.boundaryBox,
+          state.selectionInversed,
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
@@ -54,6 +56,8 @@ function fillSteps() {
             },
             selectProperties: { ...state.selectProperties },
             maskArray,
+            boundaryBox: { ...state.boundaryBox },
+            selectionInversed: state.selectionInversed,
           },
         })
         renderCanvas(canvas.currentLayer)

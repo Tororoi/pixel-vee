@@ -42,6 +42,8 @@ export function testBrushAction() {
     actionDraw(
       p.x + offsetX,
       p.y + offsetY,
+      action.properties.boundaryBox,
+      action.properties.selectionInversed,
       action.color,
       brushStamps[action.tool.brushType][brushSize][brushDirection],
       brushSize,

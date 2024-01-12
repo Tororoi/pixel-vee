@@ -13,7 +13,9 @@ const tooltip = document.getElementById("tooltip")
 //====================================//
 
 // * Nav * //
-const topMenu = document.querySelector(".nav")
+const navBar = document.querySelector(".nav")
+
+const topMenu = document.querySelector("#top-menu")
 
 // * Tool Options * //
 const toolOptions = document.querySelector(".tool-options")
@@ -22,6 +24,9 @@ const toolOptions = document.querySelector(".tool-options")
 const gridBtn = document.getElementById("grid-toggle")
 // * Toggle Tooltips * //
 const tooltipBtn = document.getElementById("tooltips-toggle")
+
+// * File Menu * //
+const fileSubMenu = document.querySelector("#file-submenu")
 // * Save * //
 const saveBtn = document.querySelector(".save")
 // * Open Save * //
@@ -29,9 +34,10 @@ const openSaveBtn = document.getElementById("drawing-upload")
 // * Export * //
 const exportBtn = document.querySelector(".export")
 
-// * File Menu * //
-const fileMenu = document.querySelector("#file-menu")
-const fileSubMenu = document.querySelector("#file-submenu")
+// * Canvas Menu * //
+// * Canvas Size * //
+// * Deselect * //
+// * Invert Selection * //
 
 //====================================//
 //====== * * * Save/Export * * * =====//
@@ -164,15 +170,15 @@ export const dom = {
   canvasLayers,
   tooltip,
   //menu
+  navBar,
   topMenu,
   toolOptions,
   gridBtn,
   tooltipBtn,
+  fileSubMenu,
   saveBtn,
   openSaveBtn,
   exportBtn,
-  fileMenu,
-  fileSubMenu,
   //save/export
   saveContainer,
   saveAsForm,

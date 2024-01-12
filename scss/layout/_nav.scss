@@ -33,7 +33,7 @@
     flex-flow: row nowrap;
     align-items: center;
     height: 100%;
-    #file-menu {
+    #top-menu {
       list-style: none;
       padding: 0;
       margin: 0;
@@ -45,6 +45,7 @@
 
       li {
         &.menu-folder {
+          margin-left: 2px;
           background: $dark-gray;
           position: relative;
           display: flex;
@@ -60,6 +61,7 @@
             pointer-events: none;
           }
           &:hover {
+            // z-index: 3;
             background-color: $white;
             color: $black;
             height: 26px;
@@ -118,6 +120,7 @@
           }
         }
         &:focus {
+          // z-index: 2;
           background-color: $white;
           color: $black;
           pointer-events: none;
@@ -131,6 +134,10 @@
       // .show {
       //   display: block;
       // }
+      li:first-of-type {
+        margin-left: 0;
+        // z-index: 1;
+      }
     }
   }
   .nav-items {

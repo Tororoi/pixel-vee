@@ -78,6 +78,8 @@ function ellipseSteps() {
         state.vectorProperties.radA,
         state.vectorProperties.radB,
         state.vectorProperties.forceCircle, //force circle initially
+        state.boundaryBox,
+        state.selectionInversed,
         swatches.primary.color,
         canvas.currentLayer,
         state.tool.modes,
@@ -123,6 +125,8 @@ function ellipseSteps() {
           state.vectorProperties.radA,
           state.vectorProperties.radB,
           state.vectorProperties.forceCircle, //force circle initially
+          state.boundaryBox,
+          state.selectionInversed,
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
@@ -173,6 +177,8 @@ function ellipseSteps() {
           state.vectorProperties.radA,
           state.vectorProperties.radB,
           state.vectorProperties.forceCircle, //force circle initially
+          state.boundaryBox,
+          state.selectionInversed,
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
@@ -211,6 +217,8 @@ function ellipseSteps() {
               //add bounding box minima maxima x and y?
             },
             maskArray,
+            boundaryBox: { ...state.boundaryBox },
+            selectionInversed: state.selectionInversed,
           },
         })
         state.clickCounter = 0

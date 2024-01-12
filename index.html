@@ -42,7 +42,7 @@
             <img src="./public/pixel-vee.png" alt="Github Repo" />
           </a>
         </div>
-        <ul role="menu" aria-label="functions" id="file-menu">
+        <ul role="menu" aria-label="functions" id="top-menu">
           <li
             role="menuitem"
             aria-haspopup="true"
@@ -71,6 +71,38 @@
                 data-tooltip="Download as .png"
               >
                 Export
+              </li>
+            </ul>
+          </li>
+          <li
+            role="menuitem"
+            aria-haspopup="true"
+            class="menu-folder"
+            tabindex="1"
+          >
+            <span class="menu-folder-title">Canvas</span>
+            <ul role="menu" id="canvas-submenu">
+              <!-- <li role="menuitem">New</li> -->
+              <li
+                role="menuitem"
+                class="resize-canvas"
+                data-tooltip="Open dialog box to resize canvas area"
+              >
+                Resize Canvas
+              </li>
+              <li
+                role="menuitem"
+                class="deselect"
+                data-tooltip="Deselect selected area (Cmd + D)"
+              >
+                Deselect (Cmd + D)
+              </li>
+              <li
+                role="menuitem"
+                class="invert-select"
+                data-tooltip="Invert selected area (Cmd + I)"
+              >
+                Invert Selection (Cmd + I)
               </li>
             </ul>
           </li>

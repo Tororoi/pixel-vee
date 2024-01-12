@@ -38,7 +38,7 @@ export function renderCursor(state, canvas, swatches) {
         actionDraw(
           state.cursorX,
           state.cursorY,
-          state.bounds,
+          state.boundaryBox,
           state.selectionInversed,
           swatches.primary.color,
           brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],

@@ -22,6 +22,8 @@ export function testEllipseAction() {
     action.properties.vectorProperties.radA,
     action.properties.vectorProperties.radB,
     action.properties.vectorProperties.forceCircle,
+    action.properties.boundaryBox,
+    action.properties.selectionInversed,
     action.color,
     action.layer,
     action.modes,

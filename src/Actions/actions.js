@@ -23,6 +23,8 @@ import { isOutOfBounds } from "../utils/canvasHelpers.js"
  * Render a stamp from the brush to the canvas
  * @param {Integer} coordX
  * @param {Integer} coordY
+ * @param {Object} boundaryBox
+ * @param {Boolean} selectionInversed
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} directionalBrushStamp - brushStamp[brushDirection]
  * @param {Integer} brushSize
@@ -37,7 +39,7 @@ import { isOutOfBounds } from "../utils/canvasHelpers.js"
 export function actionDraw(
   coordX,
   coordY,
-  bounds,
+  boundaryBox,
   selectionInversed,
   currentColor,
   directionalBrushStamp,
@@ -63,7 +65,7 @@ export function actionDraw(
   ctx.fillStyle = currentColor.color
   //check if brush is outside bounds
   if (
-    isOutOfBounds(coordX, coordY, brushSize, layer, bounds, selectionInversed)
+    isOutOfBounds(coordX, coordY, brushSize, layer, boundaryBox, selectionInversed)
   ) {
     //don't iterate brush outside bounds to reduce time cost of render
     return
@@ -73,7 +75,7 @@ export function actionDraw(
   for (const pixel of directionalBrushStamp) {
     const x = baseX + pixel.x
     const y = baseY + pixel.y
-    if (isOutOfBounds(x, y, 0, layer, bounds, selectionInversed)) {
+    if (isOutOfBounds(x, y, 0, layer, boundaryBox, selectionInversed)) {
       //don't draw outside bounds to reduce time cost of render
       continue
     }
@@ -107,6 +109,8 @@ export function actionDraw(
  * @param {Integer} sy
  * @param {Integer} tx
  * @param {Integer} ty
+ * @param {Object} boundaryBox
+ * @param {Boolean} selectionInversed
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
  * @param {CanvasRenderingContext2D} ctx
@@ -123,6 +127,8 @@ export function actionLine(
   sy,
   tx,
   ty,
+  boundaryBox,
+  selectionInversed,
   currentColor,
   layer,
   currentModes,
@@ -154,6 +160,8 @@ export function actionLine(
     actionDraw(
       thispoint.x,
       thispoint.y,
+      boundaryBox,
+      selectionInversed,
       currentColor,
       brushStamp[brushDirection],
       brushSize,
@@ -172,6 +180,8 @@ export function actionLine(
   actionDraw(
     tx,
     ty,
+    boundaryBox,
+    selectionInversed,
     currentColor,
     brushStamp[brushDirection],
     brushSize,
@@ -189,6 +199,8 @@ export function actionLine(
  * User action for process to fill a contiguous color
  * @param {Integer} startX
  * @param {Integer} startY
+ * @param {Object} boundaryBox
+ * @param {Boolean} selectionInversed
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
  * @param {Object} currentModes
@@ -201,6 +213,8 @@ export function actionLine(
 export function actionFill(
   startX,
   startY,
+  boundaryBox,
+  selectionInversed,
   currentColor,
   layer,
   currentModes,
@@ -209,21 +223,15 @@ export function actionFill(
   customContext = null,
   isPreview = false
 ) {
-  let xMin = 0
-  let xMax = layer.cvs.width
-  let yMin = 0
-  let yMax = layer.cvs.height
-  if (selectProperties?.px1) {
-    const { px1, py1, px2, py2 } = selectProperties
-    xMin = Math.max(0, Math.min(px1, px2))
-    xMax = Math.min(layer.cvs.width, Math.max(px1, px2))
-    yMin = Math.max(0, Math.min(py1, py2))
-    yMax = Math.min(layer.cvs.height, Math.max(py1, py2))
-  }
   //exit if outside borders
-  if (startX < xMin || startX >= xMax || startY < yMin || startY >= yMax) {
+  if (isOutOfBounds(startX, startY, 0, layer, boundaryBox, selectionInversed)) {
     return
   }
+  //TODO: need logic for selectionInversed
+  let xMin = Math.max(0, boundaryBox.xMin)
+  let xMax = Math.min(layer.cvs.width, boundaryBox.xMax)
+  let yMin = Math.max(0, boundaryBox.yMin)
+  let yMax = Math.min(layer.cvs.height, boundaryBox.yMax)
   //get imageData
   let ctx = layer.ctx
   if (customContext) {
@@ -310,6 +318,8 @@ export function actionFill(
  * Helper function. TODO: move to external helper file for rendering
  * To render a pixel perfect curve, points are plotted instead of using t values, which are not equidistant.
  * @param {Array} points
+ * @param {Object} boundaryBox
+ * @param {Boolean} selectionInversed
  * @param {Object} brushStamp
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Integer} brushSize
@@ -322,6 +332,8 @@ export function actionFill(
  */
 function renderPoints(
   points,
+  boundaryBox,
+  selectionInversed,
   brushStamp,
   currentColor,
   brushSize,
@@ -342,6 +354,8 @@ function renderPoints(
     actionDraw(
       xt,
       yt,
+      boundaryBox,
+      selectionInversed,
       currentColor,
       brushStamp[brushDirection],
       brushSize,
@@ -369,6 +383,8 @@ function renderPoints(
  * @param {Integer} endy
  * @param {Integer} controlx
  * @param {Integer} controly
+ * @param {Object} boundaryBox
+ * @param {Boolean} selectionInversed
  * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
@@ -386,6 +402,8 @@ export function actionQuadraticCurve(
   endy,
   controlx,
   controly,
+  boundaryBox,
+  selectionInversed,
   stepNum,
   currentColor,
   layer,
@@ -402,6 +420,8 @@ export function actionQuadraticCurve(
       starty,
       endx,
       endy,
+      boundaryBox,
+      selectionInversed,
       currentColor,
       layer,
       currentModes,
@@ -423,6 +443,8 @@ export function actionQuadraticCurve(
     )
     renderPoints(
       plotPoints,
+      boundaryBox,
+      selectionInversed,
       brushStamp,
       currentColor,
       brushSize,
@@ -445,6 +467,8 @@ export function actionQuadraticCurve(
  * @param {Integer} controly1
  * @param {Integer} controlx2
  * @param {Integer} controly2
+ * @param {Object} boundaryBox
+ * @param {Boolean} selectionInversed
  * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
@@ -464,6 +488,8 @@ export function actionCubicCurve(
   controly1,
   controlx2,
   controly2,
+  boundaryBox,
+  selectionInversed,
   stepNum,
   currentColor,
   layer,
@@ -480,6 +506,8 @@ export function actionCubicCurve(
       starty,
       endx,
       endy,
+      boundaryBox,
+      selectionInversed,
       currentColor,
       layer,
       currentModes,
@@ -501,6 +529,8 @@ export function actionCubicCurve(
     )
     renderPoints(
       plotPoints,
+      boundaryBox,
+      selectionInversed,
       brushStamp,
       currentColor,
       brushSize,
@@ -523,6 +553,8 @@ export function actionCubicCurve(
     )
     renderPoints(
       plotPoints,
+      boundaryBox,
+      selectionInversed,
       brushStamp,
       currentColor,
       brushSize,
@@ -543,6 +575,11 @@ export function actionCubicCurve(
  * @param {Integer} ya
  * @param {Integer} xb
  * @param {Integer} yb
+ * @param {Integer} ra
+ * @param {Integer} rb
+ * @param {Boolean} forceCircle
+ * @param {Object} boundaryBox
+ * @param {Boolean} selectionInversed
  * @param {Integer} stepNum
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
@@ -567,6 +604,8 @@ export function actionEllipse(
   ra,
   rb,
   forceCircle,
+  boundaryBox,
+  selectionInversed,
   currentColor,
   layer,
   currentModes,
@@ -584,6 +623,8 @@ export function actionEllipse(
     let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, offset)
     renderPoints(
       plotPoints,
+      boundaryBox,
+      selectionInversed,
       brushStamp,
       currentColor,
       brushSize,
@@ -607,6 +648,8 @@ export function actionEllipse(
     )
     renderPoints(
       plotPoints,
+      boundaryBox,
+      selectionInversed,
       brushStamp,
       currentColor,
       brushSize,

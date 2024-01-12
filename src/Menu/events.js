@@ -201,7 +201,7 @@ dom.cancelSaveBtn.addEventListener("click", (e) => {
   dom.saveContainer.style.display = "none"
   state.saveDialogOpen = false
 })
-dom.fileMenu.addEventListener("click", function (e) {
+dom.topMenu.addEventListener("click", function (e) {
   let target = e.target
   if (
     target.getAttribute("role") === "menuitem" &&
