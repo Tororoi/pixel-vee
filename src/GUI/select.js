@@ -124,6 +124,7 @@ export function renderSelectVector(vectorGui, lineDashOffset, drawPoints) {
       { x: "px1", y: "py2" },
       { x: "px2", y: "py1" },
     ]
+    //TODO: handle collision with unique selection logic
     vectorGui.drawControlPoints(
       state.selectProperties,
       pointsKeys,

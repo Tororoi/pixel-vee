@@ -3,6 +3,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
+import { vectorGui } from "../GUI/vector.js"
 
 //=====================================//
 //=== * * * Select Controller * * * ===//
@@ -19,8 +20,13 @@ import { addToTimeline } from "../Actions/undoRedo.js"
  * Command + I to invert selection
  */
 function selectSteps() {
+  if (vectorGui.collisionPresent && state.clickCounter === 0) {
+    adjustSelectSteps()
+    return
+  }
   switch (canvas.pointerEvent) {
     case "pointerdown":
+      state.clickCounter += 1
       //1. set drag origin
       //2. save context
       // state.selectPixelPoints = []
@@ -86,6 +92,7 @@ function selectSteps() {
       //   canvas.currentLayer.x,
       //   canvas.currentLayer.y
       // )
+      state.clickCounter = 0
       state.setBoundaryBox(state.selectProperties)
       addToTimeline({
         tool: state.tool,
@@ -115,10 +122,29 @@ function selectSteps() {
 function adjustSelectSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
+      state.selectProperties[vectorGui.collidedKeys.xKey] = state.cursorX
+      state.selectProperties[vectorGui.collidedKeys.yKey] = state.cursorY
+      vectorGui.selectedPoint = {
+        xKey: vectorGui.collidedKeys.xKey,
+        yKey: vectorGui.collidedKeys.yKey,
+      }
       break
     case "pointermove":
+      if (vectorGui.selectedPoint.xKey) {
+        state.selectProperties[vectorGui.selectedPoint.xKey] = state.cursorX
+        state.selectProperties[vectorGui.selectedPoint.yKey] = state.cursorY
+      }
       break
     case "pointerup":
+      // if (vectorGui.selectedPoint.xKey) {
+      //   state.selectProperties[vectorGui.selectedPoint.xKey] = state.cursorX
+      //   state.selectProperties[vectorGui.selectedPoint.yKey] = state.cursorY
+      // }
+      state.setBoundaryBox(state.selectProperties)
+      vectorGui.selectedPoint = {
+        xKey: null,
+        yKey: null,
+      }
       break
     case "pointerout":
       break

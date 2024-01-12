@@ -35,6 +35,8 @@ export function renderCursor(state, canvas, swatches) {
       //TODO: erase mode is somewhat buggy with rendering. Find way to have it render without calling draw() more than needed.
       if (!vectorGui.collisionPresent) {
         renderCanvas(canvas.currentLayer)
+        //TODO: For better performance, draw cursor on a separate canvas and render that canvas on top of the main canvas.
+        //Then renderCanvas would not need to be called here.
         actionDraw(
           state.cursorX,
           state.cursorY,

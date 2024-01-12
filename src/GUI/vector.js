@@ -292,9 +292,9 @@ function render(lineDashOffset = 0.5) {
     renderGrid(8)
   }
   //Animate render
-  // if (state.tool.name !== "select" || !state.clicked) {
+  // if (state.selectProperties.px1 !== null || !state.clicked) {
   //   window.requestAnimationFrame(() => {
-  //     render(state, canvas, lineDashOffset < 2 ? lineDashOffset + 0.1 : 0)
+  //     render(lineDashOffset < 4 ? lineDashOffset + 0.1 : 0)
   //   })
   // }
 }
