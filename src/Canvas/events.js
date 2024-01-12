@@ -1,14 +1,12 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { tools } from "../Tools/index.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
   renderLayersToDOM,
   renderVectorsToDOM,
   renderPaletteToDOM,
 } from "../DOM/render.js"
-import { createNewRasterLayer } from "./layers.js"
 import { handleTools } from "../Tools/events.js"
 import { removeAction, changeActionMode } from "../Actions/modifyTimeline.js"
 import { vectorGui } from "../GUI/vector.js"
@@ -16,7 +14,11 @@ import { setInitialZoom } from "../utils/canvasHelpers.js"
 import { initializeColorPicker } from "../Swatch/events.js"
 import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
 import { dragStart, dragMove, dragStop } from "../utils/drag.js"
-import { addToTimeline } from "../Actions/undoRedo.js"
+import {
+  addReferenceLayer,
+  addRasterLayer,
+  removeLayer,
+} from "../Actions/nonPointerActions.js"
 
 //====================================//
 //==== * * * Canvas Resize * * * =====//
@@ -331,128 +333,6 @@ function dropLayer(e) {
  * @param {DragEvent} e
  */
 function dragLayerEnd(e) {
-  renderLayersToDOM()
-}
-
-/**
- * Upload an image and create a new reference layer
- */
-function addReferenceLayer() {
-  let reader
-  let img = new Image()
-
-  if (this.files && this.files[0]) {
-    reader = new FileReader()
-
-    reader.onload = (e) => {
-      img.src = e.target.result
-      img.onload = () => {
-        let onscreenLayerCVS = document.createElement("canvas")
-        let onscreenLayerCTX = onscreenLayerCVS.getContext("2d", {
-          willReadFrequently: true,
-        })
-        onscreenLayerCVS.className = "onscreen-canvas"
-        dom.canvasLayers.insertBefore(
-          onscreenLayerCVS,
-          dom.canvasLayers.children[0]
-        )
-        onscreenLayerCVS.width = onscreenLayerCVS.offsetWidth * canvas.sharpness
-        onscreenLayerCVS.height =
-          onscreenLayerCVS.offsetHeight * canvas.sharpness
-        onscreenLayerCTX.setTransform(
-          canvas.sharpness * canvas.zoom,
-          0,
-          0,
-          canvas.sharpness * canvas.zoom,
-          0,
-          0
-        )
-        //constrain background image to canvas with scale
-        let scale =
-          canvas.offScreenCVS.width / img.width >
-          canvas.offScreenCVS.height / img.height
-            ? canvas.offScreenCVS.height / img.height
-            : canvas.offScreenCVS.width / img.width //TODO: should be method, not var so width and height can be adjusted without having to set scale again
-        let layer = {
-          type: "reference",
-          title: `Reference ${canvas.layers.length + 1}`,
-          img: img,
-          dataUrl: img.src,
-          onscreenCvs: onscreenLayerCVS,
-          onscreenCtx: onscreenLayerCTX,
-          x: 0,
-          y: 0,
-          scale: scale,
-          opacity: 1,
-          inactiveTools: [
-            "brush",
-            "fill",
-            "line",
-            "quadCurve",
-            "cubicCurve",
-            "ellipse",
-            "select",
-          ],
-          hidden: false,
-          removed: false,
-        }
-        canvas.layers.unshift(layer)
-        addToTimeline({
-          tool: tools.addLayer,
-          layer,
-        })
-        state.action = null
-        state.redoStack = []
-        renderLayersToDOM()
-        renderCanvas()
-      }
-    }
-
-    reader.readAsDataURL(this.files[0])
-  }
-}
-
-/**
- * Mark a layer as removed
- * TODO: This is a timeline action and should be moved to an actions file
- * @param {Object} layer
- */
-function removeLayer(layer) {
-  //set "removed" flag to true on selected layer.
-  if (canvas.activeLayerCount > 1 || layer.type !== "raster") {
-    layer.removed = true
-    if (layer === canvas.currentLayer) {
-      canvas.currentLayer = canvas.layers.find(
-        (l) => l.type === "raster" && !l.removed
-      )
-      vectorGui.reset()
-    }
-    addToTimeline({
-      tool: tools.removeLayer,
-      layer,
-    })
-    state.action = null
-    state.redoStack = []
-    renderLayersToDOM()
-    renderVectorsToDOM()
-  }
-}
-
-/**
- * Add layer
- * Add a new raster layer
- * TODO: This is a timeline action and should be moved to an actions file
- */
-function addRasterLayer() {
-  //once layer is added to timeline and drawn on, can no longer be deleted
-  const layer = createNewRasterLayer(`Layer ${canvas.layers.length + 1}`)
-  canvas.layers.push(layer)
-  addToTimeline({
-    tool: tools.addLayer,
-    layer,
-  })
-  state.action = null
-  state.redoStack = []
   renderLayersToDOM()
 }
 

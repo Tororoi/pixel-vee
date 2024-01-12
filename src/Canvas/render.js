@@ -13,7 +13,7 @@ import {
   actionEllipse,
   actionQuadraticCurve,
   actionCubicCurve,
-} from "../Actions/actions.js"
+} from "../Actions/pointerActions.js"
 
 /**
  * Redraw all timeline actions

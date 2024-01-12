@@ -3,7 +3,10 @@ import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { actionQuadraticCurve, actionCubicCurve } from "../Actions/actions.js"
+import {
+  actionQuadraticCurve,
+  actionCubicCurve,
+} from "../Actions/pointerActions.js"
 import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 import {
   vectorGui,
@@ -27,7 +30,7 @@ import { addToTimeline } from "../Actions/undoRedo.js"
  */
 function quadCurveSteps() {
   if (vectorGui.collisionPresent && state.clickCounter === 0) {
-    adjustCurveSteps(3)
+    adjustCurveSteps()
     return
   }
   switch (canvas.pointerEvent) {
@@ -370,9 +373,8 @@ function cubicCurveSteps() {
  * Used automatically by curve tools after curve is completed.
  * TODO: create distinct tool for adjusting that won't create a new curve when clicking.
  * Ideally a user should be able to click on a curve and render it's vector UI that way.
- * @param {*} numPoints
  */
-function adjustCurveSteps(numPoints = 4) {
+function adjustCurveSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer

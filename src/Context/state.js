@@ -107,6 +107,8 @@ export const state = {
   resetSelectProperties,
   resetBoundaryBox,
   setBoundaryBox,
+  deselect,
+  invertSelection,
 }
 
 /**
@@ -152,4 +154,20 @@ function setBoundaryBox(selectProperties) {
   state.boundaryBox.yMin = Math.min(selectProperties.py1, selectProperties.py2)
   state.boundaryBox.xMax = Math.max(selectProperties.px2, selectProperties.px1)
   state.boundaryBox.yMax = Math.max(selectProperties.py2, selectProperties.py1)
+}
+
+/**
+ * Deselect
+ */
+function deselect() {
+  resetSelectProperties()
+  resetBoundaryBox()
+  state.selectionInversed = false
+}
+
+/**
+ * Invert selection
+ */
+function invertSelection() {
+  state.selectionInversed = !state.selectionInversed
 }

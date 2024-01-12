@@ -92,6 +92,7 @@ function selectSteps() {
         layer: canvas.currentLayer,
         properties: {
           deselect: false,
+          invertSelection: state.selectionInversed,
           selectProperties: { ...state.selectProperties },
           // maskArray,
         },
@@ -100,6 +101,26 @@ function selectSteps() {
       break
     case "pointerout":
       //1. create clip mask using drag origin and last x/y as opposite corners of rectangle
+      break
+    default:
+    //do nothing
+  }
+}
+
+/**
+ * TODO: Work in progress
+ * Adjust selected area by dragging one of eight control points
+ * Move selected area by dragging inside selected area
+ */
+function adjustSelectSteps() {
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
+      break
+    case "pointermove":
+      break
+    case "pointerup":
+      break
+    case "pointerout":
       break
     default:
     //do nothing

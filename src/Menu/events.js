@@ -11,6 +11,10 @@ import {
   loadDrawing,
 } from "../Save/savefile.js"
 import { measureTextWidth } from "../utils/measureHelpers.js"
+import {
+  actionDeselect,
+  actionInvertSelection,
+} from "../Actions/nonPointerActions.js"
 
 //====================================//
 //======= * * * Tooltip * * * ========//
@@ -149,9 +153,22 @@ dom.openSaveBtn.addEventListener("click", (e) => {
   //reset value so that the same file can be imported multiple times
   e.target.value = null
 })
+//File Submenu events
 dom.openSaveBtn.addEventListener("change", openSavedDrawing)
 dom.exportBtn.addEventListener("click", exportImage)
 dom.saveBtn.addEventListener("click", openSaveDialogBox)
+//Canvas Submenu events
+// dom.canvasSizeBtn.addEventListener("click", (e) => {
+//   dom.canvasSizeContainer.style.display = "flex"
+//   dom.canvasSizeInput.focus()
+// })
+dom.deselectBtn.addEventListener("click", (e) => {
+  actionDeselect()
+})
+dom.invertSelectionBtn.addEventListener("click", (e) => {
+  actionInvertSelection()
+})
+//Save/Export events
 dom.saveAsForm.addEventListener("change", (e) => {
   if (e.target.id === "preserve-history-toggle") {
     if (e.target.checked) {
@@ -200,13 +217,4 @@ dom.saveDrawingBtn.addEventListener("click", (e) => {
 dom.cancelSaveBtn.addEventListener("click", (e) => {
   dom.saveContainer.style.display = "none"
   state.saveDialogOpen = false
-})
-dom.topMenu.addEventListener("click", function (e) {
-  let target = e.target
-  if (
-    target.getAttribute("role") === "menuitem" &&
-    target.getAttribute("aria-haspopup") === "true"
-  ) {
-    dom.fileSubMenu.classList.toggle("show")
-  }
 })

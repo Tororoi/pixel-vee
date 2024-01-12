@@ -6,7 +6,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { brushStamps } from "../Context/brushStamps.js"
 import { storedActions } from "./storedActions.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
-import { actionEllipse } from "../Actions/actions.js"
+import { actionEllipse } from "../Actions/pointerActions.js"
 
 export function testEllipseAction() {
   let brushSize = tools.ellipse.brushSize

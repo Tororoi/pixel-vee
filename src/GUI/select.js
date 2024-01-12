@@ -86,6 +86,8 @@ import { canvas } from "../Context/canvas.js"
 // }
 
 /**
+ * TODO: instead of making select p1 to p4, generate and detect control points using bounding box
+ * TODO: use different collision logic for select tool. Along with corner control points, detect if cursor is within range of an edge for pure x or y manipulation, and detect if cursor is inside area for dragging.
  * @param {Float} lineDashOffset
  * @param {Boolean} drawPoints
  */
@@ -119,6 +121,8 @@ export function renderSelectVector(vectorGui, lineDashOffset, drawPoints) {
     let pointsKeys = [
       { x: "px1", y: "py1" },
       { x: "px2", y: "py2" },
+      { x: "px1", y: "py2" },
+      { x: "px2", y: "py1" },
     ]
     vectorGui.drawControlPoints(
       state.selectProperties,

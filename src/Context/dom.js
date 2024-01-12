@@ -15,7 +15,7 @@ const tooltip = document.getElementById("tooltip")
 // * Nav * //
 const navBar = document.querySelector(".nav")
 
-const topMenu = document.querySelector("#top-menu")
+const topMenu = document.getElementById("top-menu")
 
 // * Tool Options * //
 const toolOptions = document.querySelector(".tool-options")
@@ -26,18 +26,22 @@ const gridBtn = document.getElementById("grid-toggle")
 const tooltipBtn = document.getElementById("tooltips-toggle")
 
 // * File Menu * //
-const fileSubMenu = document.querySelector("#file-submenu")
+const fileSubMenu = document.getElementById("file-submenu")
 // * Save * //
-const saveBtn = document.querySelector(".save")
+const saveBtn = document.getElementById("save")
 // * Open Save * //
 const openSaveBtn = document.getElementById("drawing-upload")
 // * Export * //
-const exportBtn = document.querySelector(".export")
+const exportBtn = document.getElementById("export")
 
 // * Canvas Menu * //
+const canvasSubMenu = document.getElementById("canvas-submenu")
 // * Canvas Size * //
+const canvasSizeBtn = document.getElementById("canvas-size")
 // * Deselect * //
+const deselectBtn = document.getElementById("deselect")
 // * Invert Selection * //
+const invertSelectionBtn = document.getElementById("invert-selection")
 
 //====================================//
 //====== * * * Save/Export * * * =====//
@@ -179,6 +183,10 @@ export const dom = {
   saveBtn,
   openSaveBtn,
   exportBtn,
+  canvasSubMenu,
+  canvasSizeBtn,
+  deselectBtn,
+  invertSelectionBtn,
   //save/export
   saveContainer,
   saveAsForm,

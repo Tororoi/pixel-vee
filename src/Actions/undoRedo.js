@@ -88,7 +88,7 @@ function handleClearAction(latestAction) {
 function handleSelectAction(latestAction, newLatestAction, modType) {
   if (modType === "to") {
     if (latestAction.properties.deselect) {
-      state.resetSelectProperties()
+      state.deselect()
     } else {
       //set select properties
       state.selectProperties = {
@@ -96,6 +96,8 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       }
       //set boundary box
       state.setBoundaryBox(state.selectProperties)
+      //set inverse selection
+      state.selectionInversed = latestAction.properties.invertSelection
       //set maskset
       // state.maskSet = new Set(latestAction.maskArray)
     }
@@ -107,6 +109,8 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       }
       //set boundary box
       state.setBoundaryBox(state.selectProperties)
+      //set inverse selection
+      state.selectionInversed = latestAction.properties.invertSelection
       //set maskset
       // state.maskSet = new Set(latestAction.maskArray)
     } else if (
@@ -120,10 +124,12 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       }
       //set boundary box
       state.setBoundaryBox(state.selectProperties)
+      //set inverse selection
+      state.selectionInversed = newLatestAction.properties.invertSelection
       //set maskset
       // state.maskSet = new Set(newLatestAction.maskArray)
     } else {
-      state.resetSelectProperties()
+      state.deselect()
     }
   }
   vectorGui.render()
