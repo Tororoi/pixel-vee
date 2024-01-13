@@ -1,5 +1,7 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { vectorGui } from "../GUI/vector.js"
+import { drawCirclePath, checkPointCollision } from "../utils/guiHelpers.js"
 
 //TODO: currently only good for solid shapes. Must also draw outline for holes in shape. Need hole searching algorithm, then run tracing on each hole
 //pass set to function instead of recalculating it every time
@@ -99,34 +101,39 @@ export function renderSelectVector(vectorGui, lineDashOffset, drawPoints) {
   canvas.vectorGuiCTX.strokeStyle = "white"
   canvas.vectorGuiCTX.fillStyle = "white"
   canvas.vectorGuiCTX.lineCap = "round"
-  canvas.vectorGuiCTX.setLineDash([lineWidth * 4, lineWidth * 4])
   canvas.vectorGuiCTX.lineDashOffset = lineDashOffset
 
-  canvas.vectorGuiCTX.beginPath()
-  if (state.selectProperties.px2) {
+  if (state.boundaryBox.xMax !== null) {
+    canvas.vectorGuiCTX.setLineDash([lineWidth * 4, lineWidth * 4])
+    canvas.vectorGuiCTX.beginPath()
     canvas.vectorGuiCTX.rect(
-      canvas.xOffset + state.selectProperties.px1,
-      canvas.yOffset + state.selectProperties.py1,
-      state.selectProperties.px2 - state.selectProperties.px1,
-      state.selectProperties.py2 - state.selectProperties.py1
+      canvas.xOffset + state.boundaryBox.xMin,
+      canvas.yOffset + state.boundaryBox.yMin,
+      state.boundaryBox.xMax - state.boundaryBox.xMin,
+      state.boundaryBox.yMax - state.boundaryBox.yMin
     )
     // Stroke non-filled lines
     canvas.vectorGuiCTX.stroke()
-    canvas.vectorGuiCTX.setLineDash([])
-    canvas.vectorGuiCTX.beginPath()
   }
+  canvas.vectorGuiCTX.setLineDash([])
+  canvas.vectorGuiCTX.beginPath()
 
   if (drawPoints) {
     let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
     let pointsKeys = [
       { x: "px1", y: "py1" },
       { x: "px2", y: "py2" },
-      { x: "px1", y: "py2" },
-      { x: "px2", y: "py1" },
+      { x: "px3", y: "py3" },
+      { x: "px4", y: "py4" },
+      { x: "px5", y: "py5" },
+      { x: "px6", y: "py6" },
+      { x: "px7", y: "py7" },
+      { x: "px8", y: "py8" },
     ]
+
     //TODO: handle collision with unique selection logic
-    vectorGui.drawControlPoints(
-      state.selectProperties,
+    drawSelectControlPoints(
+      state.boundaryBox,
       pointsKeys,
       circleRadius,
       false,
@@ -136,8 +143,8 @@ export function renderSelectVector(vectorGui, lineDashOffset, drawPoints) {
     canvas.vectorGuiCTX.stroke()
 
     canvas.vectorGuiCTX.beginPath()
-    vectorGui.drawControlPoints(
-      state.selectProperties,
+    drawSelectControlPoints(
+      state.boundaryBox,
       pointsKeys,
       circleRadius / 2,
       true,
@@ -155,7 +162,6 @@ export function renderSelectVector(vectorGui, lineDashOffset, drawPoints) {
  * @param {Float} lineDashOffset
  */
 export function drawSelectOutline(lineDashOffset) {
-  let begin = performance.now()
   let lineWidth = canvas.zoom <= 8 ? 2 / canvas.zoom : 0.25
   let initialPoint
 
@@ -233,8 +239,139 @@ export function drawSelectOutline(lineDashOffset) {
 
   // Restore the context state to remove the clipping region
   canvas.vectorGuiCTX.restore()
-  let end = performance.now()
-  // lineDashOffset = lineDashOffset + 0.05 >= 2 ? 0 : lineDashOffset + 0.05
-  // window.requestAnimationFrame(() => render(state, canvas, lineDashOffset))
-  // console.warn("drawSelectOutline: " + (end - begin) + " milliseconds")
+}
+
+/**
+ * @param {Object} vectorProperties
+ * @param {Integer} radius
+ * @param {Boolean} modify
+ * @param {Integer} offset
+ * @param {Object} vectorAction
+ */
+function drawSelectControlPoints(
+  boundaryBox,
+  pointsKeys,
+  radius,
+  modify = false,
+  offset = 0,
+  vectorAction = null
+) {
+  const { xMin, yMin, xMax, yMax } = boundaryBox
+  const midX = Math.floor(xMin + (xMax - xMin) / 2)
+  const midY = Math.floor(yMin + (yMax - yMin) / 2)
+
+  const points = [
+    { x: xMin, y: yMin }, // Top-left
+    { x: midX, y: yMin }, // Top-center
+    { x: xMax, y: yMin }, // Top-right
+    { x: xMax, y: midY }, // Right-center
+    { x: xMax, y: yMax }, // Bottom-right
+    { x: midX, y: yMax }, // Bottom-center
+    { x: xMin, y: yMax }, // Bottom-left
+    { x: xMin, y: midY }, // Left-center
+  ]
+  for (let keys of pointsKeys) {
+    //point is at index in points array that matches index of keys in pointsKeys array
+    const point = points[pointsKeys.indexOf(keys)]
+    handleSelectCollisionAndDraw(
+      keys,
+      point,
+      radius,
+      modify,
+      offset,
+      vectorAction
+    )
+  }
+
+  setSelectionCursorStyle()
+}
+
+/**
+ * TODO: move drawing logic to separate function so modify param doesn't need to be used
+ * @param {Object} keys
+ * @param {Object} point
+ * @param {Float} radius
+ * @param {Boolean} modify - if true, check for collision with cursor and modify radius
+ * @param {Float} offset
+ * @param {Object} vectorAction
+ */
+function handleSelectCollisionAndDraw(
+  keys,
+  point,
+  radius,
+  modify,
+  offset,
+  vectorAction
+) {
+  let r = state.touch ? radius * 2 : radius
+  const xOffset = vectorAction ? vectorAction.layer.x : 0
+  const yOffset = vectorAction ? vectorAction.layer.y : 0
+
+  if (modify) {
+    if (vectorGui.selectedPoint.xKey === keys.x && !vectorAction) {
+      //selected point
+      // r = radius * 2.125 // increase  radius of fill to match stroked circle
+      vectorGui.setCollision(keys)
+      if (
+        checkPointCollision(
+          state.cursorX,
+          state.cursorY,
+          point.x - offset + xOffset,
+          point.y - offset + yOffset,
+          r * 2.125
+        )
+      ) {
+        r = radius * 2.125
+      }
+    } else if (
+      checkPointCollision(
+        state.cursorX,
+        state.cursorY,
+        point.x - offset + xOffset,
+        point.y - offset + yOffset,
+        r * 2.125
+      )
+    ) {
+      //cursor collision, not selected point
+      r = radius * 2.125
+      vectorGui.setCollision(keys)
+    }
+  }
+
+  drawCirclePath(
+    canvas,
+    canvas.xOffset + xOffset,
+    canvas.yOffset + yOffset,
+    point.x - offset,
+    point.y - offset,
+    r
+  )
+}
+
+/**
+ * Set css cursor for selection interaction
+ * @returns
+ */
+function setSelectionCursorStyle() {
+  if (!vectorGui.collisionPresent) {
+    canvas.vectorGuiCVS.style.cursor = state.tool.cursor
+    return
+  }
+
+  //If pointer is colliding with a vector control point:
+  // if (state.tool.name !== "move") {
+  //   canvas.vectorGuiCVS.style.cursor = "move" //TODO: maybe use grab/ grabbing
+  // } else {
+  //Handle cursor for transform
+  const xKey = vectorGui.collidedKeys.xKey
+  if (["px1", "px5"].includes(xKey)) {
+    canvas.vectorGuiCVS.style.cursor = "nwse-resize"
+  } else if (["px3", "px7"].includes(xKey)) {
+    canvas.vectorGuiCVS.style.cursor = "nesw-resize"
+  } else if (["px2", "px6"].includes(xKey)) {
+    canvas.vectorGuiCVS.style.cursor = "ns-resize"
+  } else if (["px4", "px8"].includes(xKey)) {
+    canvas.vectorGuiCVS.style.cursor = "ew-resize"
+  }
+  // }
 }

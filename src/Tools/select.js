@@ -59,6 +59,7 @@ function selectSteps() {
       //2. stroke outline path with animated "marching ants".
       state.selectProperties.px2 = state.cursorX
       state.selectProperties.py2 = state.cursorY
+      state.setBoundaryBox(state.selectProperties)
       break
     case "pointerup":
       //1. create clip mask using drag origin and current x/y as opposite corners of rectangle
@@ -93,6 +94,7 @@ function selectSteps() {
       //   canvas.currentLayer.y
       // )
       state.clickCounter = 0
+      state.normalizeSelectProperties()
       state.setBoundaryBox(state.selectProperties)
       addToTimeline({
         tool: state.tool,
@@ -122,17 +124,84 @@ function selectSteps() {
 function adjustSelectSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      state.selectProperties[vectorGui.collidedKeys.xKey] = state.cursorX
-      state.selectProperties[vectorGui.collidedKeys.yKey] = state.cursorY
       vectorGui.selectedPoint = {
         xKey: vectorGui.collidedKeys.xKey,
         yKey: vectorGui.collidedKeys.yKey,
       }
+
+      switch (vectorGui.selectedPoint.xKey) {
+        case "px1":
+          state.selectProperties.px1 = state.cursorX
+          state.selectProperties.py1 = state.cursorY
+          break
+        case "px2":
+          state.selectProperties.py1 = state.cursorY
+          break
+        case "px3":
+          state.selectProperties.px2 = state.cursorX
+          state.selectProperties.py1 = state.cursorY
+          break
+        case "px4":
+          state.selectProperties.px2 = state.cursorX
+          break
+        case "px5":
+          state.selectProperties.px2 = state.cursorX
+          state.selectProperties.py2 = state.cursorY
+          break
+        case "px6":
+          state.selectProperties.py2 = state.cursorY
+          break
+        case "px7":
+          state.selectProperties.px1 = state.cursorX
+          state.selectProperties.py2 = state.cursorY
+          break
+        case "px8":
+          state.selectProperties.px1 = state.cursorX
+          break
+        default:
+        //do nothing
+      }
+      state.setBoundaryBox(state.selectProperties)
+
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey) {
-        state.selectProperties[vectorGui.selectedPoint.xKey] = state.cursorX
-        state.selectProperties[vectorGui.selectedPoint.yKey] = state.cursorY
+        //selectedpoint does not correspond to the selectProperties key. Based on selected point, adjust boundaryBox.
+        //Currently works if p1 is min and p2 is max, but not if p1 is max and p2 is min.
+
+        switch (vectorGui.selectedPoint.xKey) {
+          case "px1":
+            state.selectProperties.px1 = state.cursorX
+            state.selectProperties.py1 = state.cursorY
+            break
+          case "px2":
+            state.selectProperties.py1 = state.cursorY
+            break
+          case "px3":
+            state.selectProperties.px2 = state.cursorX
+            state.selectProperties.py1 = state.cursorY
+            break
+          case "px4":
+            state.selectProperties.px2 = state.cursorX
+            break
+          case "px5":
+            state.selectProperties.px2 = state.cursorX
+            state.selectProperties.py2 = state.cursorY
+            break
+          case "px6":
+            state.selectProperties.py2 = state.cursorY
+            break
+          case "px7":
+            state.selectProperties.px1 = state.cursorX
+            state.selectProperties.py2 = state.cursorY
+            break
+          case "px8":
+            state.selectProperties.px1 = state.cursorX
+            break
+          default:
+          //do nothing
+        }
+        state.setBoundaryBox(state.selectProperties)
       }
       break
     case "pointerup":
@@ -140,6 +209,7 @@ function adjustSelectSteps() {
       //   state.selectProperties[vectorGui.selectedPoint.xKey] = state.cursorX
       //   state.selectProperties[vectorGui.selectedPoint.yKey] = state.cursorY
       // }
+      state.normalizeSelectProperties()
       state.setBoundaryBox(state.selectProperties)
       vectorGui.selectedPoint = {
         xKey: null,

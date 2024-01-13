@@ -105,6 +105,7 @@ export const state = {
   //functions
   reset,
   resetSelectProperties,
+  normalizeSelectProperties,
   resetBoundaryBox,
   setBoundaryBox,
   deselect,
@@ -131,6 +132,18 @@ function resetSelectProperties() {
     py2: null,
   }
   state.maskSet = null
+}
+
+/**
+ * Normalize select properties
+ */
+function normalizeSelectProperties() {
+  const { px1, py1, px2, py2 } = { ...state.selectProperties }
+  //set selectProperties so p1 is min and p2 is max
+  state.selectProperties.px1 = Math.min(px1, px2)
+  state.selectProperties.py1 = Math.min(py1, py2)
+  state.selectProperties.px2 = Math.max(px2, px1)
+  state.selectProperties.py2 = Math.max(py2, py1)
 }
 
 /**
