@@ -165,6 +165,7 @@ const sizeContainer = document.querySelector(".size-container")
 const dimensionsForm = document.querySelector(".dimensions-form")
 const canvasWidth = document.getElementById("canvas-width")
 const canvasHeight = document.getElementById("canvas-height")
+const canvasSizeCancelBtn = document.getElementById("cancel-resize-button")
 
 //====================================//
 //========= * * * State * * * ========//
@@ -237,4 +238,5 @@ export const dom = {
   dimensionsForm,
   canvasWidth,
   canvasHeight,
+  canvasSizeCancelBtn,
 }

@@ -587,10 +587,10 @@ svg {
   list-style: none;
   padding: 0;
   margin: 0;
+  margin-top: auto;
   display: flex;
   flex-flow: row nowrap;
   align-items: flex-end;
-  height: 100%;
   cursor: pointer;
 }
 .nav .nav-menu #top-menu li.menu-folder {
@@ -1814,24 +1814,35 @@ canvas {
 
 /* Canvas Size settings */
 .size-container {
-  order: 3;
+  user-select: none;
+  position: absolute;
+  top: 15%;
+  z-index: 103;
+  max-width: calc(100% - 4px);
+  max-height: calc(100% - 4px);
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  color: white;
+  background: rgb(51, 51, 51);
+  text-align: center;
+  padding: 0;
+  align-self: center;
+  opacity: 1;
 }
 .size-container .collapsible {
   padding-top: 2px;
-  display: none;
 }
 .size-container p {
   margin: 0px;
 }
 .size-container .dimensions-form {
-  padding: 4px;
-}
-.size-container .dimensions-form .update-size {
-  padding: 4px;
+  padding: 8px;
 }
 .size-container .dimensions-form .inputs {
   padding-right: 24px;
   padding-left: 24px;
+  padding-bottom: 0;
 }
 .size-container .dimensions-form label {
   display: flex;
@@ -1848,8 +1859,25 @@ canvas {
 .size-container .dimensions-form label input {
   margin-left: 8px;
 }
-.size-container .dimensions-form .btn {
+.size-container .dimensions-form .buttons-container {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: 18px;
+  margin-bottom: 10px;
+}
+.size-container .dimensions-form .buttons-container button {
+  color: rgb(255, 255, 255);
   background: rgb(77, 77, 77);
+  height: 28px;
+  width: 84px;
+  margin-left: 10px;
+  margin-right: 10px;
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.size-container .dimensions-form .buttons-container button:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 
 .export-container {

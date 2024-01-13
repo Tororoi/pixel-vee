@@ -33,7 +33,7 @@ initializeDialogBox(dom.layersInterfaceContainer)
 initializeDialogBox(dom.vectorsInterfaceContainer)
 
 // * Canvas Size * //
-initializeDialogBox(dom.sizeContainer, true)
+initializeDialogBox(dom.sizeContainer)
 
 // * Color Picker * //
 initializeDialogBox(dom.colorPickerContainer)

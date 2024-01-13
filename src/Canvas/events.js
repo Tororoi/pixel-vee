@@ -480,7 +480,9 @@ dom.dimensionsForm.addEventListener("pointerout", (e) => {
 dom.dimensionsForm.addEventListener("submit", handleDimensionsSubmit)
 dom.canvasWidth.addEventListener("blur", restrictSize)
 dom.canvasHeight.addEventListener("blur", restrictSize)
-
+dom.canvasSizeCancelBtn.addEventListener("click", () => {
+  dom.sizeContainer.style.display = "none"
+})
 // * Layers * //
 dom.uploadBtn.addEventListener("click", (e) => {
   //reset value so that the same file can be uploaded multiple times

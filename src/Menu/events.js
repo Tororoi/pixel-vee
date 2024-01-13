@@ -158,10 +158,9 @@ dom.openSaveBtn.addEventListener("change", openSavedDrawing)
 dom.exportBtn.addEventListener("click", exportImage)
 dom.saveBtn.addEventListener("click", openSaveDialogBox)
 //Canvas Submenu events
-// dom.canvasSizeBtn.addEventListener("click", (e) => {
-//   dom.canvasSizeContainer.style.display = "flex"
-//   dom.canvasSizeInput.focus()
-// })
+dom.canvasSizeBtn.addEventListener("click", (e) => {
+  dom.sizeContainer.style.display = "flex"
+})
 dom.deselectBtn.addEventListener("click", (e) => {
   actionDeselect()
 })

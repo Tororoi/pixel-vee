@@ -352,6 +352,7 @@ function cubicCurveSteps() {
               py4: state.vectorProperties.py4 - canvas.currentLayer.y,
             },
             maskArray,
+            //TODO: allow toggling boundary box on/off
             boundaryBox: { ...state.boundaryBox },
             selectionInversed: state.selectionInversed,
           },

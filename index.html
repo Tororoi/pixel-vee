@@ -63,7 +63,7 @@
                 id="save"
                 data-tooltip="Open dialog box to download file with current progress"
               >
-                Save (Cmd + S)
+                Save As... (Cmd + S)
               </li>
               <li role="menuitem" id="export" data-tooltip="Download as .png">
                 Export
@@ -84,7 +84,7 @@
                 id="canvas-size"
                 data-tooltip="Open dialog box to resize canvas area"
               >
-                Resize Canvas
+                Resize Canvas...
               </li>
               <li
                 role="menuitem"
@@ -327,80 +327,6 @@
                   <div class="add-color plus"></div>
                 </div>
               </div>
-            </div>
-          </div>
-          <div
-            class="size-container dialog-box draggable v-drag settings-box smooth-shift"
-          >
-            <div id="size-header" class="header dragger">
-              <div class="drag-btn"><div class="grip"></div></div>
-              Canvas Size
-              <label
-                for="size-collapse-btn"
-                id="size-collapser"
-                class="collapse-btn"
-                data-tooltip="Collapse/ Expand"
-              >
-                <input
-                  type="checkbox"
-                  aria-label="Collapse or Expand"
-                  class="collapse-checkbox"
-                  id="size-collapse-btn"
-                />
-                <span class="arrow"></span>
-              </label>
-            </div>
-            <div class="collapsible">
-              <form class="dimensions-form">
-                <div class="inputs">
-                  <label for="canvas-width"
-                    >Width:
-                    <span class="input">
-                      <input
-                        type="number"
-                        id="canvas-width"
-                        min="8"
-                        max="1024"
-                      />
-                      <span class="spin-btn">
-                        <span id="inc" class="channel-btn"
-                          ><span class="spin-content">+</span></span
-                        >
-                        <span id="dec" class="channel-btn"
-                          ><span class="spin-content">-</span></span
-                        >
-                      </span>
-                    </span>
-                  </label>
-                  <label for="canvas-height"
-                    >Height:
-                    <span class="input">
-                      <input
-                        type="number"
-                        id="canvas-height"
-                        min="8"
-                        max="1024"
-                      />
-                      <span class="spin-btn">
-                        <span id="inc" class="channel-btn"
-                          ><span class="spin-content">+</span></span
-                        >
-                        <span id="dec" class="channel-btn"
-                          ><span class="spin-content">-</span></span
-                        >
-                      </span>
-                    </span>
-                  </label>
-                </div>
-                <button
-                  type="submit"
-                  id="update-size"
-                  class="update-size btn"
-                  aria-label="Update Canvas Size"
-                >
-                  Update Canvas Size
-                </button>
-              </form>
             </div>
           </div>
           <div
@@ -795,6 +721,78 @@
               </label>
             </div>
           </div>
+        </div>
+      </div>
+      <div class="size-container dialog-box draggable v-drag h-drag free">
+        <div id="size-header" class="header dragger">
+          <div class="drag-btn"><div class="grip"></div></div>
+          Canvas Size
+          <label
+            for="size-collapse-btn"
+            id="size-collapser"
+            class="collapse-btn"
+            data-tooltip="Collapse/ Expand"
+          >
+            <input
+              type="checkbox"
+              aria-label="Collapse or Expand"
+              class="collapse-checkbox"
+              id="size-collapse-btn"
+            />
+            <span class="arrow"></span>
+          </label>
+        </div>
+        <div class="collapsible">
+          <form class="dimensions-form">
+            <div class="inputs">
+              <label for="canvas-width"
+                >Width:
+                <span class="input">
+                  <input type="number" id="canvas-width" min="8" max="1024" />
+                  <span class="spin-btn">
+                    <span id="inc" class="channel-btn"
+                      ><span class="spin-content">+</span></span
+                    >
+                    <span id="dec" class="channel-btn"
+                      ><span class="spin-content">-</span></span
+                    >
+                  </span>
+                </span>
+              </label>
+              <label for="canvas-height"
+                >Height:
+                <span class="input">
+                  <input type="number" id="canvas-height" min="8" max="1024" />
+                  <span class="spin-btn">
+                    <span id="inc" class="channel-btn"
+                      ><span class="spin-content">+</span></span
+                    >
+                    <span id="dec" class="channel-btn"
+                      ><span class="spin-content">-</span></span
+                    >
+                  </span>
+                </span>
+              </label>
+            </div>
+            <div class="buttons-container">
+              <button
+                type="submit"
+                id="update-size"
+                class="update-size"
+                aria-label="Update Canvas Size"
+              >
+                Submit
+              </button>
+              <button
+                type="button"
+                id="cancel-resize-button"
+                class="update-size"
+                aria-label="Close canvas resize dialog box"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
         </div>
       </div>
       <div class="export-container dialog-box draggable v-drag h-drag free">
