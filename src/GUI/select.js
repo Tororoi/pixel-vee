@@ -257,8 +257,18 @@ function drawSelectControlPoints(
   vectorAction = null
 ) {
   const { xMin, yMin, xMax, yMax } = boundaryBox
-  const midX = Math.floor(xMin + (xMax - xMin) / 2)
-  const midY = Math.floor(yMin + (yMax - yMin) / 2)
+  const midX = xMin + (xMax - xMin) / 2
+  const midY = yMin + (yMax - yMin) / 2
+
+  //handle collision with inner area of selection
+  if (
+    state.cursorX >= xMin &&
+    state.cursorX < xMax &&
+    state.cursorY >= yMin &&
+    state.cursorY < yMax
+  ) {
+    vectorGui.setCollision({ x: "px9", y: "py9" })
+  }
 
   const points = [
     { x: xMin, y: yMin }, // Top-left
@@ -358,11 +368,7 @@ function setSelectionCursorStyle() {
     return
   }
 
-  //If pointer is colliding with a vector control point:
-  // if (state.tool.name !== "move") {
-  //   canvas.vectorGuiCVS.style.cursor = "move" //TODO: maybe use grab/ grabbing
-  // } else {
-  //Handle cursor for transform
+  //Handle cursor for collisions
   const xKey = vectorGui.collidedKeys.xKey
   if (["px1", "px5"].includes(xKey)) {
     canvas.vectorGuiCVS.style.cursor = "nwse-resize"
@@ -372,6 +378,7 @@ function setSelectionCursorStyle() {
     canvas.vectorGuiCVS.style.cursor = "ns-resize"
   } else if (["px4", "px8"].includes(xKey)) {
     canvas.vectorGuiCVS.style.cursor = "ew-resize"
+  } else if (xKey === "px9") {
+    canvas.vectorGuiCVS.style.cursor = "move"
   }
-  // }
 }

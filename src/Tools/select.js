@@ -158,6 +158,14 @@ function adjustSelectSteps() {
         case "px8":
           state.selectProperties.px1 = state.cursorX
           break
+        case "px9":
+          //move selected area
+          const deltaX = state.cursorX - state.previousX
+          const deltaY = state.cursorY - state.previousY
+          state.selectProperties.px1 += deltaX
+          state.selectProperties.py1 += deltaY
+          state.selectProperties.px2 += deltaX
+          state.selectProperties.py2 += deltaY
         default:
         //do nothing
       }
@@ -198,6 +206,14 @@ function adjustSelectSteps() {
           case "px8":
             state.selectProperties.px1 = state.cursorX
             break
+          case "px9":
+            //move selected area
+            const deltaX = state.cursorX - state.previousX
+            const deltaY = state.cursorY - state.previousY
+            state.selectProperties.px1 += deltaX
+            state.selectProperties.py1 += deltaY
+            state.selectProperties.px2 += deltaX
+            state.selectProperties.py2 += deltaY
           default:
           //do nothing
         }
@@ -211,6 +227,16 @@ function adjustSelectSteps() {
       // }
       state.normalizeSelectProperties()
       state.setBoundaryBox(state.selectProperties)
+      addToTimeline({
+        tool: state.tool,
+        layer: canvas.currentLayer,
+        properties: {
+          deselect: false,
+          invertSelection: state.selectionInversed,
+          selectProperties: { ...state.selectProperties },
+          // maskArray,
+        },
+      })
       vectorGui.selectedPoint = {
         xKey: null,
         yKey: null,
