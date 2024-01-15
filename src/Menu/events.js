@@ -157,16 +157,12 @@ dom.openSaveBtn.addEventListener("click", (e) => {
 dom.openSaveBtn.addEventListener("change", openSavedDrawing)
 dom.exportBtn.addEventListener("click", exportImage)
 dom.saveBtn.addEventListener("click", openSaveDialogBox)
-//Canvas Submenu events
+//Edit Submenu events
 dom.canvasSizeBtn.addEventListener("click", (e) => {
   dom.sizeContainer.style.display = "flex"
 })
-dom.deselectBtn.addEventListener("click", (e) => {
-  actionDeselect()
-})
-dom.invertSelectionBtn.addEventListener("click", (e) => {
-  actionInvertSelection()
-})
+dom.deselectBtn.addEventListener("click", actionDeselect)
+dom.invertSelectionBtn.addEventListener("click", actionInvertSelection)
 //Save/Export events
 dom.saveAsForm.addEventListener("change", (e) => {
   if (e.target.id === "preserve-history-toggle") {

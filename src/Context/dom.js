@@ -38,10 +38,22 @@ const exportBtn = document.getElementById("export")
 const editSubMenu = document.getElementById("edit-submenu")
 // * Canvas Size * //
 const canvasSizeBtn = document.getElementById("canvas-size")
+// * Select All * //
+const selectAllBtn = document.getElementById("select-all")
 // * Deselect * //
 const deselectBtn = document.getElementById("deselect")
 // * Invert Selection * //
 const invertSelectionBtn = document.getElementById("invert-selection")
+// * Cut * //
+const cutBtn = document.getElementById("cut-selection")
+// * Copy * //
+const copyBtn = document.getElementById("copy-selection")
+// * Paste * //
+const pasteBtn = document.getElementById("paste-selection")
+// * Flip Horizontal * //
+const flipHorizontalBtn = document.getElementById("flip-horizontal")
+// * Flip Vertical * //
+const flipVerticalBtn = document.getElementById("flip-vertical")
 
 //====================================//
 //====== * * * Save/Export * * * =====//
@@ -180,14 +192,22 @@ export const dom = {
   toolOptions,
   gridBtn,
   tooltipBtn,
+  //File Menu
   fileSubMenu,
   saveBtn,
   openSaveBtn,
   exportBtn,
+  //Edit Menu
   editSubMenu,
   canvasSizeBtn,
+  selectAllBtn,
   deselectBtn,
   invertSelectionBtn,
+  cutBtn,
+  copyBtn,
+  pasteBtn,
+  flipHorizontalBtn,
+  flipVerticalBtn,
   //save/export
   saveContainer,
   saveAsForm,

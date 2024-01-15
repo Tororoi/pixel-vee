@@ -83,7 +83,7 @@
           list-style: none;
           padding: 0;
           margin: 0;
-          background-color: transparent;
+          background-color: $black;
           @include boxBorder($border-color, $white, false, left right bottom);
 
           li {
@@ -116,6 +116,14 @@
             &:hover {
               background-color: $white;
               color: $black;
+            }
+            &.disabled {
+              opacity: 0.6;
+              cursor: not-allowed;
+              &:hover {
+                background-color: $black;
+                color: $white;
+              }
             }
           }
         }
