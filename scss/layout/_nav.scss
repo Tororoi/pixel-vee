@@ -141,7 +141,7 @@
     display: flex;
     flex-flow: row wrap;
     align-items: center;
-    margin: 7px 16px;
+    margin: 0 4px;
     .toggle {
       padding-right: 16px;
     }
@@ -156,6 +156,16 @@
         padding-right: 8px;
         background: $gray;
       }
+    }
+  }
+  .settings {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    .settings-btn {
+      width: 40px;
+      height: 40px;
+      @include gearIcon;
     }
   }
 }

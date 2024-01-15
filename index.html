@@ -76,15 +76,21 @@
             class="menu-folder"
             tabindex="1"
           >
-            <span class="menu-folder-title">Canvas</span>
-            <ul role="menu" id="canvas-submenu">
-              <!-- <li role="menuitem">New</li> -->
+            <span class="menu-folder-title">Edit</span>
+            <ul role="menu" id="edit-submenu">
               <li
                 role="menuitem"
                 id="canvas-size"
                 data-tooltip="Open dialog box to resize canvas area"
               >
                 Resize Canvas...
+              </li>
+              <li
+                role="menuitem"
+                id="select-all"
+                data-tooltip="Select entire canvas (Cmd + A)"
+              >
+                Select All (Cmd + A)
               </li>
               <li
                 role="menuitem"
@@ -99,6 +105,41 @@
                 data-tooltip="Invert selected area (Cmd + I)"
               >
                 Invert Selection (Cmd + I)
+              </li>
+              <li
+                role="menuitem"
+                id="cut-selection"
+                data-tooltip="Cut selected area (Cmd + X)"
+              >
+                Cut (Cmd + X)
+              </li>
+              <li
+                role="menuitem"
+                id="copy-selection"
+                data-tooltip="Copy selected area (Cmd + C)"
+              >
+                Copy (Cmd + C)
+              </li>
+              <li
+                role="menuitem"
+                id="paste-selection"
+                data-tooltip="Paste selected area (Cmd + V)"
+              >
+                Paste (Cmd + V)
+              </li>
+              <li
+                role="menuitem"
+                id="flip-h-selection"
+                data-tooltip="Flip selected area horizontally"
+              >
+                Flip Horizontal
+              </li>
+              <li
+                role="menuitem"
+                id="flip-v-selection"
+                data-tooltip="Flip selected area vertically"
+              >
+                Flip Vertical
               </li>
             </ul>
           </li>
@@ -126,6 +167,14 @@
           <span class="checkmark"></span>
           <span>Tooltips</span>
         </label>
+        <div class="settings">
+          <button
+            type="button"
+            class="settings-btn"
+            id="settings-btn"
+            aria-label="Open settings menu"
+          />
+        </div>
       </div>
     </div>
     <div class="page">

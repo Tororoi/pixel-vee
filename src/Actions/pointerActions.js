@@ -10,7 +10,7 @@ import {
 } from "../utils/imageDataHelpers.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 import { saveEllipseAsTest } from "../Testing/ellipseTest.js"
-import { isOutOfBounds } from "../utils/canvasHelpers.js"
+import { isOutOfBounds, minLimit, maxLimit } from "../utils/canvasHelpers.js"
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -65,7 +65,14 @@ export function actionDraw(
   ctx.fillStyle = currentColor.color
   //check if brush is outside bounds
   if (
-    isOutOfBounds(coordX, coordY, brushSize, layer, boundaryBox, selectionInversed)
+    isOutOfBounds(
+      coordX,
+      coordY,
+      brushSize,
+      layer,
+      boundaryBox,
+      selectionInversed
+    )
   ) {
     //don't iterate brush outside bounds to reduce time cost of render
     return
@@ -204,10 +211,9 @@ export function actionLine(
  * @param {Object} currentColor - {color, r, g, b, a}
  * @param {Object} layer
  * @param {Object} currentModes
- * @param {Object} selectProperties
  * @param {Set} maskSet
- * @param {CanvasRenderingContext2D} customContext - use custom context if provided
- * @param {Boolean} isPreview
+ * @param {CanvasRenderingContext2D} [customContext] - use custom context if provided
+ * @param {Boolean} [isPreview]
  * @returns
  */
 export function actionFill(
@@ -218,7 +224,6 @@ export function actionFill(
   currentColor,
   layer,
   currentModes,
-  selectProperties,
   maskSet,
   customContext = null,
   isPreview = false
@@ -228,10 +233,10 @@ export function actionFill(
     return
   }
   //TODO: need logic for selectionInversed
-  let xMin = Math.max(0, boundaryBox.xMin)
-  let xMax = Math.min(layer.cvs.width, boundaryBox.xMax)
-  let yMin = Math.max(0, boundaryBox.yMin)
-  let yMax = Math.min(layer.cvs.height, boundaryBox.yMax)
+  let xMin = minLimit(boundaryBox.xMin, 0)
+  let xMax = maxLimit(boundaryBox.xMax, layer.cvs.width)
+  let yMin = minLimit(boundaryBox.yMin, 0)
+  let yMax = maxLimit(boundaryBox.yMax, layer.cvs.height)
   //get imageData
   let ctx = layer.ctx
   if (customContext) {

@@ -31,7 +31,14 @@ export const setInitialZoom = (width) => {
  * @param {Object} boundaryBox
  * @param {Boolean} isInversed
  */
-export const isOutOfBounds = (x, y, brushSize, layer, boundaryBox, isInversed) => {
+export const isOutOfBounds = (
+  x,
+  y,
+  brushSize,
+  layer,
+  boundaryBox,
+  isInversed
+) => {
   // Precomputed values for efficiency
   const halfBrushSize = Math.floor(brushSize / 2)
   const xOutOfBounds =
@@ -63,4 +70,25 @@ export const isOutOfBounds = (x, y, brushSize, layer, boundaryBox, isInversed) =
     }
   }
   return false
+}
+
+/**
+ * @param {Integer|null} value
+ * @param {Integer} minValue
+ * @returns {Integer}
+ */
+export function minLimit(value, minValue) {
+  return Math.max(minValue, value)
+}
+
+/**
+ * @param {Integer|null} value
+ * @param {Integer} maxValue
+ * @returns {Integer}
+ */
+export function maxLimit(value, maxValue) {
+  if (value !== null) {
+    return Math.min(maxValue, value)
+  }
+  return maxValue
 }

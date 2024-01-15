@@ -37,7 +37,6 @@ function fillSteps() {
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
-          state.selectProperties,
           state.maskSet
         )
         //For undo ability, store starting coords and settings and pass them into actionFill
@@ -54,7 +53,6 @@ function fillSteps() {
               px1: state.vectorProperties.px1 - canvas.currentLayer.x,
               py1: state.vectorProperties.py1 - canvas.currentLayer.y,
             },
-            selectProperties: { ...state.selectProperties },
             maskArray,
             boundaryBox: { ...state.boundaryBox },
             selectionInversed: state.selectionInversed,

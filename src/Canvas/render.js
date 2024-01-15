@@ -207,7 +207,6 @@ export function performAction(action, betweenCtx = null) {
         action.color,
         action.layer,
         action.modes,
-        action.properties.selectProperties, //currently all null
         null, //maskSet made from action.properties.maskArray
         betweenCtx
       )

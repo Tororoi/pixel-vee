@@ -34,8 +34,8 @@ const openSaveBtn = document.getElementById("drawing-upload")
 // * Export * //
 const exportBtn = document.getElementById("export")
 
-// * Canvas Menu * //
-const canvasSubMenu = document.getElementById("canvas-submenu")
+// * Edit Menu * //
+const editSubMenu = document.getElementById("edit-submenu")
 // * Canvas Size * //
 const canvasSizeBtn = document.getElementById("canvas-size")
 // * Deselect * //
@@ -184,7 +184,7 @@ export const dom = {
   saveBtn,
   openSaveBtn,
   exportBtn,
-  canvasSubMenu,
+  editSubMenu,
   canvasSizeBtn,
   deselectBtn,
   invertSelectionBtn,
