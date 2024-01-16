@@ -111,7 +111,7 @@ export function activateShortcut(keyCode) {
       if (!state.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           //deselect
-          if (state.selectProperties.px1) {
+          if (state.selectProperties.px1 !== null) {
             actionDeselect()
           }
         }

@@ -10,7 +10,7 @@ import {
   renderEllipsePath,
 } from "./ellipse.js"
 import { renderTransformBox } from "./transform.js"
-import { renderSelectVector, drawSelectOutline } from "./select.js"
+import { renderSelectVector, renderRasterCVS } from "./select.js"
 import { renderGrid } from "./grid.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { getAngle } from "../utils/trig.js"
@@ -63,7 +63,7 @@ export const vectorGui = {
   removeLinkedVector(vectorAction) {
     delete this.linkedVectors[vectorAction.index]
   },
-  drawSelectOutline,
+  // drawSelectOutline,
   render,
   reset,
   setVectorProperties,
@@ -263,7 +263,7 @@ function setVectorProperties(vectorAction) {
  * Render vector graphical interface
  * @param {Float} lineDashOffset
  */
-function render(lineDashOffset = 0.5) {
+function render() {
   canvas.vectorGuiCTX.clearRect(
     0,
     0,
@@ -285,7 +285,8 @@ function render(lineDashOffset = 0.5) {
   }
   //Render select vector
   if (state.selectProperties.px1 !== null) {
-    renderSelectVector(vectorGui, lineDashOffset, state.tool.name === "select")
+    // renderSelectVector(0.5, state.tool.name === "select")
+    renderRasterCVS()
   }
   //Render grid
   if (canvas.zoom >= 4 && vectorGui.grid) {

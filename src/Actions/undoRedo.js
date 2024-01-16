@@ -89,6 +89,12 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
   if (modType === "to") {
     if (latestAction.properties.deselect) {
       state.deselect()
+      canvas.rasterGuiCTX.clearRect(
+        0,
+        0,
+        canvas.rasterGuiCVS.width,
+        canvas.rasterGuiCVS.height
+      )
     } else {
       //set select properties
       state.selectProperties = {
@@ -130,6 +136,12 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       // state.maskSet = new Set(newLatestAction.maskArray)
     } else {
       state.deselect()
+      canvas.rasterGuiCTX.clearRect(
+        0,
+        0,
+        canvas.rasterGuiCVS.width,
+        canvas.rasterGuiCVS.height
+      )
     }
   }
   vectorGui.render()

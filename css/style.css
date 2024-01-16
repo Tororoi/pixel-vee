@@ -773,6 +773,9 @@ canvas {
 .canvas-container .bg-space #vector-gui-canvas {
   mix-blend-mode: difference;
 }
+.canvas-container .bg-space #raster-gui-canvas {
+  mix-blend-mode: difference;
+}
 
 /* Toolbox */
 .toolbox {

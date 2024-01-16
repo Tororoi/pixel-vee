@@ -35,7 +35,12 @@ export function actionDeselect() {
   state.action = null
   state.redoStack = []
   state.deselect()
-  vectorGui.render()
+  canvas.rasterGuiCTX.clearRect(
+    0,
+    0,
+    canvas.rasterGuiCVS.width,
+    canvas.rasterGuiCVS.height
+  )
 }
 
 /**

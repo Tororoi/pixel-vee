@@ -94,6 +94,14 @@ const resizeOffScreenCanvas = (width, height) => {
     0,
     0
   )
+  canvas.rasterGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
   canvas.layers.forEach((layer) => {
     layer.onscreenCtx.setTransform(
       canvas.sharpness * canvas.zoom,
@@ -163,6 +171,17 @@ const resizeOnScreenCanvas = () => {
   canvas.vectorGuiCVS.height =
     canvas.vectorGuiCVS.offsetHeight * canvas.sharpness
   canvas.vectorGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
+  canvas.rasterGuiCVS.width = canvas.rasterGuiCVS.offsetWidth * canvas.sharpness
+  canvas.rasterGuiCVS.height =
+    canvas.rasterGuiCVS.offsetHeight * canvas.sharpness
+  canvas.rasterGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,

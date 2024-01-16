@@ -2,6 +2,7 @@ import { dom } from "../Context/dom.js"
 import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { consolidateLayers } from "../Canvas/layers.js"
 import {
@@ -15,6 +16,7 @@ import {
   actionDeselect,
   actionInvertSelection,
 } from "../Actions/nonPointerActions.js"
+import { addToTimeline } from "../Actions/undoRedo.js"
 
 //====================================//
 //======= * * * Tooltip * * * ========//
@@ -161,8 +163,43 @@ dom.saveBtn.addEventListener("click", openSaveDialogBox)
 dom.canvasSizeBtn.addEventListener("click", (e) => {
   dom.sizeContainer.style.display = "flex"
 })
+dom.selectAllBtn.addEventListener("click", (e) => {
+  //select all pixels on canvas
+  if (canvas.currentLayer.type === "raster") {
+    state.selectProperties.px1 = 0
+    state.selectProperties.py1 = 0
+    state.selectProperties.px2 = canvas.currentLayer.cvs.width
+    state.selectProperties.py2 = canvas.currentLayer.cvs.height
+    state.setBoundaryBox(state.selectProperties)
+    addToTimeline({
+      tool: tools.select,
+      layer: canvas.currentLayer,
+      properties: {
+        deselect: false,
+        invertSelection: state.selectionInversed,
+        selectProperties: { ...state.selectProperties },
+      },
+    })
+    vectorGui.render()
+  }
+})
 dom.deselectBtn.addEventListener("click", actionDeselect)
 dom.invertSelectionBtn.addEventListener("click", actionInvertSelection)
+dom.cutBtn.addEventListener("click", (e) => {
+  //TODO: cut selected pixels
+})
+dom.copyBtn.addEventListener("click", (e) => {
+  //TODO: copy selected pixels
+})
+dom.pasteBtn.addEventListener("click", (e) => {
+  //TODO: paste copied pixels
+})
+dom.flipHorizontalBtn.addEventListener("click", (e) => {
+  //TODO: flip selected pixels horizontally
+})
+dom.flipVerticalBtn.addEventListener("click", (e) => {
+  //TODO: flip selected pixels vertically
+})
 //Save/Export events
 dom.saveAsForm.addEventListener("change", (e) => {
   if (e.target.id === "preserve-history-toggle") {
