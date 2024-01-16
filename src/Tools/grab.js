@@ -36,7 +36,7 @@ export const grab = {
   fn: grabSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: true,
+  brushDisabled: true,
   options: {},
   modes: {},
   type: "utility",

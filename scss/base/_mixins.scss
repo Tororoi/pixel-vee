@@ -208,3 +208,51 @@
     }
   }
 }
+
+//==================================================//
+//============ * * * Marching Ants * * * ===========//
+//==================================================//
+
+@mixin marching-ants-init($ant-size, $ant-width, $speed, $id) {
+  padding: 5px + $ant-width;
+  margin: 20px;
+  background-size: $ant-size $ant-width, $ant-size $ant-width,
+    $ant-width $ant-size, $ant-width $ant-size;
+  background-position: 0 0, 0 100%, 0 0, 100% 0;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  animation: marching-ants-#{$id} $speed;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-play-state: paused;
+  &.marching {
+    animation-play-state: running;
+  }
+  &.reverse {
+    animation-direction: reverse;
+  }
+}
+@mixin marching-ants-color($a, $b) {
+  background-image: linear-gradient(to right, $a 50%, $b 50%),
+    linear-gradient(to right, $a 50%, $b 50%),
+    linear-gradient(to bottom, $a 50%, $b 50%),
+    linear-gradient(to bottom, $a 50%, $b 50%);
+}
+
+@mixin marching-ants-animation($ant-size, $id) {
+  @keyframes marching-ants-#{$id} {
+    0% {
+      background-position: 0 0, 0 100%, 0 0, 100% 0;
+    }
+    100% {
+      background-position: 2 * $ant-size 0, -2 * $ant-size 100%,
+        0 -2 * $ant-size, 100% 2 * $ant-size;
+    }
+  }
+}
+
+.marching-ants {
+  @include marching-ants-init(10px, 1px, 4s, 1);
+  @include marching-ants-color($white, $black);
+}
+
+@include marching-ants-animation(10px, 1);

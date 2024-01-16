@@ -111,7 +111,7 @@ export const line = {
   fn: lineSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: false,
+  brushDisabled: false,
   options: {},
   modes: { eraser: false, inject: false },
   type: "raster",

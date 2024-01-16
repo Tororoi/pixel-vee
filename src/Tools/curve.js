@@ -553,7 +553,7 @@ export const quadCurve = {
   fn: quadCurveSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: false,
+  brushDisabled: false,
   options: {
     displayPaths: {
       active: false,
@@ -571,7 +571,7 @@ export const cubicCurve = {
   fn: cubicCurveSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: false,
+  brushDisabled: false,
   options: {
     align: {
       active: false,

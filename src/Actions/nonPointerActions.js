@@ -60,7 +60,7 @@ export function actionInvertSelection() {
   state.action = null
   state.redoStack = []
   state.invertSelection()
-  // vectorGui.render()
+  vectorGui.render()
 }
 
 /**

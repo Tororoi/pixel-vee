@@ -156,7 +156,7 @@ export const move = {
   fn: moveSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: true,
+  brushDisabled: true,
   options: {},
   modes: {},
   type: "raster",

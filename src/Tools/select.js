@@ -159,7 +159,7 @@ export const select = {
   fn: selectSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: false,
+  brushDisabled: true,
   options: {
     rasterOnly: {
       active: true,

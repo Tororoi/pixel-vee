@@ -311,7 +311,7 @@ export const ellipse = {
   fn: ellipseSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: false,
+  brushDisabled: false,
   options: {
     useSubpixels: {
       active: true,

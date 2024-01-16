@@ -3,90 +3,10 @@ import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "../GUI/vector.js"
 import { checkPointCollision, checkAreaCollision } from "../utils/guiHelpers.js"
 
-//TODO: currently only good for solid shapes. Must also draw outline for holes in shape. Need hole searching algorithm, then run tracing on each hole
-//pass set to function instead of recalculating it every time
-//pass dashOffset for animating marching ants
-// function drawSelectOutline(state, canvas, lineDashOffset) {
-//   let lineWidth = canvas.zoom <= 8 ? 2 / canvas.zoom : 0.25
-//   let brushOffset = Math.floor(state.tool.brushSize / 2)
-
-//   const pixelSet = new Set()
-//   for (const pixel of brushStamps[state.tool.brushType][state.tool.brushSize]) {
-//     pixelSet.add(`${pixel.x},${pixel.y}`)
-//     pixelSet.add(`${pixel.x + 1},${pixel.y}`)
-//     pixelSet.add(`${pixel.x},${pixel.y + 1}`)
-//     pixelSet.add(`${pixel.x + 1},${pixel.y + 1}`)
-//   }
-
-//   let initialPoint = brushStamps[state.tool.brushType][state.tool.brushSize].reduce((acc, cur) => {
-//     return cur.y < acc.y || (cur.y === acc.y && cur.x < acc.x) ? cur : acc
-//   })
-
-//   const directions = [
-//     [0, -1], // Up
-//     [1, 0], // Right
-//     [0, 1], // Down
-//     [-1, 0], // Left
-//   ]
-
-//   let currentPoint = initialPoint
-//   let previousDirection = 0
-
-//   // Save the context state before defining a clipping region
-//   canvas.vectorGuiCTX.save()
-//   canvas.vectorGuiCTX.beginPath()
-//   canvas.vectorGuiCTX.lineWidth = lineWidth
-//   canvas.vectorGuiCTX.strokeStyle = "white"
-//   canvas.vectorGuiCTX.setLineDash([1, 1])
-//   canvas.vectorGuiCTX.lineDashOffset = lineDashOffset
-
-//   // Define a clipping region that's the entire canvas so the inside of the shape will be cut when clipped
-//   //Depending on whether selection is inversed, draw or don't draw this rect.
-//   //Drawing it will put the selection line on the outside of the shape. Not drawing it puts the line on the inside of the shape.
-//   canvas.vectorGuiCTX.rect(
-//     -1,
-//     -1,
-//     canvas.vectorGuiCVS.width + 1,
-//     canvas.vectorGuiCVS.height + 1
-//   )
-
-//   // Set the starting point
-//   canvas.vectorGuiCTX.moveTo(
-//     state.cursorX + canvas.xOffset + initialPoint.x - brushOffset,
-//     state.cursorY + canvas.yOffset + initialPoint.y - brushOffset
-//   )
-
-//   do {
-//     for (let i = 0; i < 4; i++) {
-//       const newDirection = (previousDirection + i) % 4
-//       const [dx, dy] = directions[newDirection]
-
-//       if (pixelSet.has(`${currentPoint.x + dx},${currentPoint.y + dy}`)) {
-//         const x =
-//           state.cursorX + canvas.xOffset + currentPoint.x + dx - brushOffset
-//         const y =
-//           state.cursorY + canvas.yOffset + currentPoint.y + dy - brushOffset
-
-//         canvas.vectorGuiCTX.lineTo(x, y)
-//         currentPoint = { x: currentPoint.x + dx, y: currentPoint.y + dy }
-//         previousDirection = (newDirection + 3) % 4
-//         break
-//       }
-//     }
-//   } while (
-//     currentPoint.x !== initialPoint.x ||
-//     currentPoint.y !== initialPoint.y
-//   )
-
-//   canvas.vectorGuiCTX.clip("evenodd")
-
-//   // Stroke the path. Only the part outside of the shape will be visible.
-//   canvas.vectorGuiCTX.stroke()
-
-//   // Restore the context state to remove the clipping region
-//   canvas.vectorGuiCTX.restore()
-// }
-
+/**
+ * Render selection outline and control points
+ * @param {Float} lineDashOffset
+ */
 export function renderRasterCVS(lineDashOffset = 0.5) {
   canvas.rasterGuiCTX.clearRect(
     0,
@@ -100,13 +20,16 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
     //clip to selection
     canvas.rasterGuiCTX.save()
     canvas.rasterGuiCTX.beginPath()
-    canvas.rasterGuiCTX.rect(
-      canvas.xOffset,
-      canvas.yOffset,
-      canvas.offScreenCVS.width,
-      canvas.offScreenCVS.height
-    )
-    //define rectangle hole
+    if (!state.selectionInversed) {
+      //define rectangle for canvas area
+      canvas.rasterGuiCTX.rect(
+        canvas.xOffset,
+        canvas.yOffset,
+        canvas.offScreenCVS.width,
+        canvas.offScreenCVS.height
+      )
+    }
+    //define rectangle for selection area
     canvas.rasterGuiCTX.rect(
       canvas.xOffset + state.boundaryBox.xMin,
       canvas.yOffset + state.boundaryBox.yMin,
@@ -126,6 +49,7 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
     // }
     renderSelectVector(lineDashOffset, state.tool.name === "select")
     //TODO: Animating the selection currently not possible because animation is interupted by renderCanvas() call taking up the main thread
+    //All rendering would need to be part of the animation loop or on a separate thread. Maybe the marching ants could be done with css instead of on the canvas?
     // window.requestAnimationFrame(() => {
     //   renderRasterCVS(lineDashOffset < 4 ? lineDashOffset + 0.1 : 0)
     // })
@@ -133,8 +57,7 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
 }
 
 /**
- * TODO: instead of making select p1 to p4, generate and detect control points using bounding box
- * TODO: use different collision logic for select tool. Along with corner control points, detect if cursor is within range of an edge for pure x or y manipulation, and detect if cursor is inside area for dragging.
+ * Render selection outline and control points
  * @param {Float} lineDashOffset
  * @param {Boolean} drawPoints
  */
@@ -159,13 +82,12 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
     )
     // Stroke non-filled lines
     canvas.rasterGuiCTX.stroke()
+    //restore line dash
+    canvas.rasterGuiCTX.setLineDash([])
   }
-  canvas.rasterGuiCTX.setLineDash([])
-  canvas.rasterGuiCTX.beginPath()
-  canvas.rasterGuiCTX.lineWidth = lineWidth
 
   if (drawPoints) {
-    let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
+    let circleRadius = canvas.zoom <= 4 ? 8 / canvas.zoom : 1.5
     let pointsKeys = [
       { x: "px1", y: "py1" },
       { x: "px2", y: "py2" },
@@ -176,17 +98,6 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
       { x: "px7", y: "py7" },
       { x: "px8", y: "py8" },
     ]
-
-    //TODO: handle collision with unique selection logic
-    // drawSelectControlPoints(
-    //   state.boundaryBox,
-    //   pointsKeys,
-    //   circleRadius,
-    //   false,
-    //   0.5
-    // )
-    // // Stroke non-filled lines
-    // canvas.rasterGuiCTX.stroke()
 
     canvas.rasterGuiCTX.beginPath()
     drawSelectControlPoints(
@@ -204,7 +115,7 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
 }
 
 // /**
-//  *
+//  * TODO: May be used for freeform selections in the future
 //  * @param {Float} lineDashOffset
 //  */
 // export function drawSelectOutline(lineDashOffset) {
@@ -288,7 +199,8 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
 // }
 
 /**
- * @param {Object} vectorProperties
+ * @param {Object} boundaryBox
+ * @param {Array} pointsKeys
  * @param {Integer} radius
  * @param {Boolean} modify
  * @param {Integer} offset
@@ -364,86 +276,43 @@ function handleSelectCollisionAndDraw(
   const yOffset = vectorAction ? vectorAction.layer.y : 0
 
   if (modify) {
-    if (vectorGui.selectedPoint.xKey === keys.x && !vectorAction) {
-      //selected point
-      // r = radius * 2.125 // increase  radius of fill to match stroked circle
-      vectorGui.setCollision(keys)
-      if (
-        checkPointCollision(
-          state.cursorX,
-          state.cursorY,
-          point.x - offset + xOffset,
-          point.y - offset + yOffset,
-          r * 2.125
-        )
-      ) {
-        r = radius * 2.125
-      }
-    } else if (
+    const collisionPresent =
       checkPointCollision(
         state.cursorX,
         state.cursorY,
         point.x - offset + xOffset,
         point.y - offset + yOffset,
         r * 2.125
-      )
-    ) {
-      //cursor collision, not selected point
+      ) ||
+      (["px2", "px6"].includes(keys.x) &&
+        checkAreaCollision(
+          state.cursorX,
+          state.cursorY,
+          state.boundaryBox.xMin + r * 2,
+          point.y - offset + yOffset - r * 2,
+          state.boundaryBox.xMax - r * 2 - 1,
+          point.y - offset + yOffset + r * 2
+        )) ||
+      (["px4", "px8"].includes(keys.x) &&
+        checkAreaCollision(
+          state.cursorX,
+          state.cursorY,
+          point.x - offset + xOffset - r * 2,
+          state.boundaryBox.yMin + r * 2,
+          point.x - offset + xOffset + r * 2,
+          state.boundaryBox.yMax - r * 2 - 1
+        ))
+    if (collisionPresent) {
+      //cursor collision, not necessarily selected point
       r = radius * 2.125
       vectorGui.setCollision(keys)
-    } else if (
-      //check for collision with entire side for p2, p4, p6, and p8
-      (["px2"].includes(keys.x) &&
-        checkAreaCollision(
-          state.cursorX,
-          state.cursorY,
-          state.boundaryBox.xMin + r * 2,
-          point.y - offset + yOffset - r * 2,
-          state.boundaryBox.xMax - r * 2,
-          point.y - offset + yOffset + r * 2
-        )) ||
-      (["px4"].includes(keys.x) &&
-        checkAreaCollision(
-          state.cursorX,
-          state.cursorY,
-          point.x - offset + xOffset - r * 2,
-          state.boundaryBox.yMin + r * 2,
-          point.x - offset + xOffset + r * 2,
-          state.boundaryBox.yMax - r * 2
-        )) ||
-      (["px6"].includes(keys.x) &&
-        checkAreaCollision(
-          state.cursorX,
-          state.cursorY,
-          state.boundaryBox.xMin + r * 2,
-          point.y - offset + yOffset - r * 2,
-          state.boundaryBox.xMax - r * 2,
-          point.y - offset + yOffset + r * 2
-        )) ||
-      (["px8"].includes(keys.x) &&
-        checkAreaCollision(
-          state.cursorX,
-          state.cursorY,
-          point.x - offset + xOffset - r * 2,
-          state.boundaryBox.yMin + r * 2,
-          point.x - offset + xOffset + r * 2,
-          state.boundaryBox.yMax - r * 2
-        ))
-    ) {
-      r = radius * 2.125
+    } else if (vectorGui.selectedPoint.xKey === keys.x && !vectorAction) {
+      //selected point must always be considered a collision
       vectorGui.setCollision(keys)
     }
   }
 
-  // drawCirclePath(
-  //   canvas,
-  //   canvas.xOffset + xOffset,
-  //   canvas.yOffset + yOffset,
-  //   point.x - offset,
-  //   point.y - offset,
-  //   r
-  // )
-  //draw squares for control points 1, 3, 5, and 7
+  //draw squares for control points 1, 3, 5, and 7 (corners)
   if (
     keys.x === "px1" ||
     keys.x === "px3" ||
@@ -457,7 +326,7 @@ function handleSelectCollisionAndDraw(
       r * 2
     )
   }
-  //draw diamonds for control points 2, 4, 6, and 8
+  //draw diamonds for control points 2, 4, 6, and 8 (sides)
   if (
     keys.x === "px2" ||
     keys.x === "px4" ||
@@ -482,25 +351,6 @@ function handleSelectCollisionAndDraw(
       canvas.yOffset + yOffset + point.y - offset + 0.5 + r
     )
   }
-}
-
-/**
- * @param {Object} canvas
- * @param {Integer} xOffset
- * @param {Integer} yOffset
- * @param {Integer} x
- * @param {Integer} y
- * @param {Integer} r
- */
-function drawCirclePath(canvas, xOffset, yOffset, x, y, r) {
-  canvas.rasterGuiCTX.moveTo(xOffset + x + 0.5 + r, yOffset + y + 0.5)
-  canvas.rasterGuiCTX.arc(
-    xOffset + x + 0.5,
-    yOffset + y + 0.5,
-    r,
-    0,
-    2 * Math.PI
-  )
 }
 
 /**

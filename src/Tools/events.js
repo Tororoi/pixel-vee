@@ -118,7 +118,7 @@ export function handleTools(e, manualToolName = null) {
       //update options
       renderBrushStampToDOM()
       dom.brushSlider.value = state.tool.brushSize
-      dom.brushSlider.disabled = state.tool.disabled
+      dom.brushSlider.disabled = state.tool.brushDisabled
       //update cursor
       if (state.tool.modes?.eraser) {
         canvas.vectorGuiCVS.style.cursor = "none"

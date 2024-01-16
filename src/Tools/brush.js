@@ -293,7 +293,7 @@ export const brush = {
   fn: brushSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: false,
+  brushDisabled: false,
   options: { line: { active: false } },
   modes: { eraser: false, inject: false, perfect: false, colorMask: false },
   type: "raster",
