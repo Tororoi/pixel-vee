@@ -227,12 +227,32 @@ dom.copyBtn.addEventListener("click", (e) => {
     canvas.currentLayer.type === "raster" &&
     state.boundaryBox.xMax !== null
   ) {
-    state.selectClipboard.imageData = canvas.currentLayer.ctx.getImageData(
-      state.boundaryBox.xMin,
-      state.boundaryBox.yMin,
-      state.boundaryBox.xMax - state.boundaryBox.xMin,
-      state.boundaryBox.yMax - state.boundaryBox.yMin
-    )
+    if (state.selectionInversed) {
+      //inverted selection: get image data for entire canvas area minus boundaryBox
+      const imageData = canvas.currentLayer.ctx.getImageData(
+        0,
+        0,
+        canvas.currentLayer.cvs.width,
+        canvas.currentLayer.cvs.height
+      )
+      const data = imageData.data
+      const boundaryBox = state.boundaryBox
+      for (let y = boundaryBox.yMin; y < boundaryBox.yMax; y++) {
+        for (let x = boundaryBox.xMin; x < boundaryBox.xMax; x++) {
+          const index = (y * imageData.width + x) * 4
+          data[index + 3] = 0
+        }
+      }
+      state.selectClipboard.imageData = imageData
+    } else {
+      //non-inverted selection
+      state.selectClipboard.imageData = canvas.currentLayer.ctx.getImageData(
+        state.boundaryBox.xMin,
+        state.boundaryBox.yMin,
+        state.boundaryBox.xMax - state.boundaryBox.xMin,
+        state.boundaryBox.yMax - state.boundaryBox.yMin
+      )
+    }
     state.selectClipboard.boundaryBox = { ...state.boundaryBox }
   }
 })
