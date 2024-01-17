@@ -17,6 +17,7 @@ import {
   actionInvertSelection,
 } from "../Actions/nonPointerActions.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
+import { renderCanvas } from "../Canvas/render.js"
 
 //====================================//
 //======= * * * Tooltip * * * ========//
@@ -187,12 +188,77 @@ dom.deselectBtn.addEventListener("click", actionDeselect)
 dom.invertSelectionBtn.addEventListener("click", actionInvertSelection)
 dom.cutBtn.addEventListener("click", (e) => {
   //TODO: cut selected pixels
+  //1. action will copy selected pixels to clipboard
+  //2. action will clearRect for boundaryBox and push to undoStack
+  if (
+    canvas.currentLayer.type === "raster" &&
+    state.boundaryBox.xMax !== null
+  ) {
+    state.selectClipboard.imageData = canvas.currentLayer.ctx.getImageData(
+      state.boundaryBox.xMin,
+      state.boundaryBox.yMin,
+      state.boundaryBox.xMax - state.boundaryBox.xMin,
+      state.boundaryBox.yMax - state.boundaryBox.yMin
+    )
+    state.selectClipboard.boundaryBox = { ...state.boundaryBox }
+    canvas.currentLayer.ctx.clearRect(
+      state.boundaryBox.xMin,
+      state.boundaryBox.yMin,
+      state.boundaryBox.xMax - state.boundaryBox.xMin,
+      state.boundaryBox.yMax - state.boundaryBox.yMin
+    )
+    renderCanvas()
+    // addToTimeline({
+    //   tool: tools.cut,
+    //   layer: canvas.currentLayer,
+    //   properties: {
+    //     clipboard: state.selectClipboard,
+    //     boundaryBox: { ...state.boundaryBox },
+    //   },
+    // })
+    vectorGui.render()
+  }
 })
 dom.copyBtn.addEventListener("click", (e) => {
-  //TODO: copy selected pixels
+  //TODO: copy selected pixels. Must not use dataURL in order to be processed for saving and also in the future saving vectors
+  //Instead, use canvas.getImageData() and canvas.putImageData() to copy and paste. Pasting will draw onto a separate canvas and that canvas will be drawn onto the main canvas
+  //1. action will copy selected pixels to clipboard, not saved to undoStack
+  if (
+    canvas.currentLayer.type === "raster" &&
+    state.boundaryBox.xMax !== null
+  ) {
+    state.selectClipboard.imageData = canvas.currentLayer.ctx.getImageData(
+      state.boundaryBox.xMin,
+      state.boundaryBox.yMin,
+      state.boundaryBox.xMax - state.boundaryBox.xMin,
+      state.boundaryBox.yMax - state.boundaryBox.yMin
+    )
+    state.selectClipboard.boundaryBox = { ...state.boundaryBox }
+  }
 })
 dom.pasteBtn.addEventListener("click", (e) => {
   //TODO: paste copied pixels
+  //1. action will paste selected pixels from clipboard onto separate canvas, then draw that canvas onto the main canvas
+  //2. action will push to undoStack
+  if (state.selectClipboard) {
+    canvas.currentLayer.ctx.putImageData(
+      state.selectClipboard.imageData,
+      state.selectClipboard.boundaryBox.xMin,
+      state.selectClipboard.boundaryBox.yMin
+    )
+    renderCanvas()
+    // const newLayer = canvas.createLayer("raster")
+    // newLayer.ctx.putImageData(state.selectClipboard, 0, 0)
+    // addToTimeline({
+    //   tool: tools.paste,
+    //   layer: newLayer,
+    //   properties: {
+    //     clipboard: state.selectClipboard,
+    //     boundaryBox: { ...state.boundaryBox },
+    //   },
+    // })
+    vectorGui.render()
+  }
 })
 dom.flipHorizontalBtn.addEventListener("click", (e) => {
   //TODO: flip selected pixels horizontally

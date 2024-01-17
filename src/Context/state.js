@@ -94,6 +94,7 @@ export const state = {
     yMax: null,
   },
   selectionInversed: false,
+  selectClipboard: { boundaryBox: null, imageData: null },
   //for perfect pixels
   lastDrawnX: null,
   lastDrawnY: null,
