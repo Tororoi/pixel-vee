@@ -102,9 +102,14 @@ export function addReferenceLayer() {
           canvas.offScreenCVS.height / img.height
             ? canvas.offScreenCVS.height / img.height
             : canvas.offScreenCVS.width / img.width //TODO: should be method, not var so width and height can be adjusted without having to set scale again
+        let highestId = canvas.layers.reduce(
+          (max, layer) => (layer.id > max ? layer.id : max),
+          0
+        )
         let layer = {
+          id: highestId + 1,
           type: "reference",
-          title: `Reference ${canvas.layers.length + 1}`,
+          title: `Reference ${highestId + 1}`,
           img: img,
           dataUrl: img.src,
           onscreenCvs: onscreenLayerCVS,

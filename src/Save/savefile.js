@@ -216,8 +216,12 @@ export async function loadDrawing(jsonFile) {
     }
     // Match the action's layer title with an existing layer
     let correspondingLayer = canvas.layers.find(
-      (layer) => layer.title === action.layer.title
+      (layer) =>
+        action.layer?.id
+          ? layer.id === action.layer.id
+          : layer.title === action.layer.title //NOTE: This is a fix for loading files saved before layer ids were implemented. TODO: implement a versioning system to handle this in the future.
     )
+
     if (correspondingLayer) {
       action.layer = correspondingLayer
 

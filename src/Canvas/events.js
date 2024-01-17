@@ -244,7 +244,9 @@ function layerInteract(e) {
     e.target.classList.add("eyeopen")
     layer.hidden = false
   } else if (e.target.className.includes("trash")) {
-    removeLayer(layer)
+    // removeLayer(layer)
+  } else if (e.target.className.includes("gear")) {
+    //open settings dialog
   } else {
     //select current layer
     if (layer !== canvas.currentLayer) {
@@ -509,6 +511,11 @@ dom.uploadBtn.addEventListener("click", (e) => {
 })
 dom.uploadBtn.addEventListener("change", addReferenceLayer)
 dom.newLayerBtn.addEventListener("click", addRasterLayer)
+dom.deleteLayerBtn.addEventListener("click", () => {
+  let layer = canvas.currentLayer
+  removeLayer(layer)
+  renderCanvas(layer)
+})
 
 //TODO: Make similar to functionality of dragging dialog boxes.
 dom.layersContainer.addEventListener("click", layerInteract)

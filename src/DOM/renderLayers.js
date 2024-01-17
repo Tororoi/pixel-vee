@@ -3,6 +3,7 @@ import { canvas } from "../Context/canvas.js"
 import {
   createHideElement,
   createTrashElement,
+  createSettingsElement,
 } from "../utils/actionInterfaceHelpers.js"
 
 /**
@@ -31,8 +32,10 @@ export const renderLayersToDOM = () => {
 
       const hide = createHideElement(l.hidden)
       layerElement.appendChild(hide)
-      const trash = createTrashElement()
-      layerElement.appendChild(trash)
+      // const trash = createTrashElement()
+      // layerElement.appendChild(trash)
+      const settings = createSettingsElement()
+      layerElement.appendChild(settings)
       dom.layersContainer.appendChild(layerElement)
       //associate object
       layerElement.layerObj = l

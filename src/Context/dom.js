@@ -164,6 +164,7 @@ const paletteRemoveBtn = document.querySelector(".palette-remove")
 // * Layers Interface * //
 const uploadBtn = document.querySelector("#file-upload")
 const newLayerBtn = document.querySelector(".add-layer")
+const deleteLayerBtn = document.querySelector("#delete-layer")
 const layersContainer = document.querySelector(".layers")
 const layersInterfaceContainer = document.querySelector(".layers-interface")
 
@@ -248,8 +249,10 @@ export const dom = {
   paletteColors,
   paletteEditBtn,
   paletteRemoveBtn,
+  //layers
   uploadBtn,
   newLayerBtn,
+  deleteLayerBtn,
   layersContainer,
   layersInterfaceContainer,
   vectorsThumbnails,

@@ -75,3 +75,15 @@ export const createTrashElement = () => {
   trash.ariaLabel = "Delete action"
   return trash
 }
+
+/**
+ * @param {Object} action
+ * @returns {Element}
+ */
+export const createSettingsElement = () => {
+  let gear = document.createElement("button")
+  gear.type = "button"
+  gear.className = "gear"
+  gear.ariaLabel = "Adjust Layer Settings"
+  return gear
+}

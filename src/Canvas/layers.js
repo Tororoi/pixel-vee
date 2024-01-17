@@ -72,7 +72,12 @@ export function createNewRasterLayer(name) {
     0,
     0
   )
+  let highestId = canvas.layers.reduce(
+    (max, layer) => (layer.id > max ? layer.id : max),
+    0
+  )
   let layer = {
+    id: highestId + 1,
     type: "raster",
     title: name,
     cvs: offscreenLayerCVS,

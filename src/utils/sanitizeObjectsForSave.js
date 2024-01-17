@@ -81,7 +81,7 @@ export function sanitizeHistory(
       sanitizedUndoStack.splice(i, 1)
     } else {
       if (action.layer) {
-        action.layer = { title: action.layer.title }
+        action.layer = { id: action.layer.id }
       }
       if (action.properties?.points) {
         //format each object in the array from {x,y,brushSize} to be 3 entries in a new array with just the values. The values will be reformatted back to objects on load.
