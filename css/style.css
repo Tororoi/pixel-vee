@@ -706,16 +706,15 @@ svg {
   background-color: rgb(0, 0, 0);
   color: rgb(255, 255, 255);
 }
-.nav .nav-menu #top-menu li:focus {
+.nav .nav-menu #top-menu li.active {
   background-color: rgb(255, 255, 255);
   color: rgb(0, 0, 0);
-  pointer-events: none;
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255);
 }
-.nav .nav-menu #top-menu li:focus:hover:not([disabled]) {
+.nav .nav-menu #top-menu li.active:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255);
 }
-.nav .nav-menu #top-menu li:focus ul {
+.nav .nav-menu #top-menu li.active ul {
   display: block;
 }
 .nav .nav-menu #top-menu li:first-of-type {

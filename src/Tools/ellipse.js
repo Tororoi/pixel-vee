@@ -195,6 +195,14 @@ function ellipseSteps() {
           canvas.currentLayer.x,
           canvas.currentLayer.y
         )
+        //correct boundary box for layer offset
+        const boundaryBox = { ...state.boundaryBox }
+        if (boundaryBox.xMax !== null) {
+          boundaryBox.xMin -= canvas.currentLayer.x
+          boundaryBox.xMax -= canvas.currentLayer.x
+          boundaryBox.yMin -= canvas.currentLayer.y
+          boundaryBox.yMax -= canvas.currentLayer.y
+        }
         //store control points for timeline
         addToTimeline({
           tool: state.tool,
@@ -217,7 +225,7 @@ function ellipseSteps() {
               //add bounding box minima maxima x and y?
             },
             maskArray,
-            boundaryBox: { ...state.boundaryBox },
+            boundaryBox,
             selectionInversed: state.selectionInversed,
           },
         })

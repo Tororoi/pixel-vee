@@ -172,7 +172,7 @@ export const select = {
     // },
   },
   modes: {},
-  type: "raster",
+  type: "utility",
   cursor: "default",
   activeCursor: "default",
 }

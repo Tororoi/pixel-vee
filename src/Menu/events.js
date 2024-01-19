@@ -156,6 +156,24 @@ dom.openSaveBtn.addEventListener("click", (e) => {
   //reset value so that the same file can be imported multiple times
   e.target.value = null
 })
+dom.topMenu.addEventListener("click", (e) => {
+  //check if active element has class menu-folder and class "active"
+  if (document.activeElement.classList.contains("menu-folder")) {
+    //if so, toggle the active class
+    if (document.activeElement.classList.contains("active")) {
+      document.activeElement.classList.remove("active")
+    } else {
+      document.activeElement.classList.add("active")
+    }
+  }
+})
+dom.topMenu.addEventListener("focusout", (e) => {
+  //check if active element has class menu-folder
+  if (e.target.classList.contains("menu-folder")) {
+    //if so, remove the active class
+    e.target.classList.remove("active")
+  }
+})
 //File Submenu events
 dom.openSaveBtn.addEventListener("change", openSavedDrawing)
 dom.exportBtn.addEventListener("click", exportImage)
@@ -258,7 +276,7 @@ dom.copyBtn.addEventListener("click", (e) => {
 })
 dom.pasteBtn.addEventListener("click", (e) => {
   //TODO: paste copied pixels
-  //1. action will paste selected pixels from clipboard onto separate canvas, then draw that canvas onto the main canvas
+  //1. action will paste selected pixels from clipboard onto separate temporary canvas, then draw that canvas onto the main canvas after deselecting pasted pixels
   //2. action will push to undoStack
   if (state.selectClipboard) {
     canvas.currentLayer.ctx.putImageData(
@@ -266,7 +284,7 @@ dom.pasteBtn.addEventListener("click", (e) => {
       state.selectClipboard.boundaryBox.xMin,
       state.selectClipboard.boundaryBox.yMin
     )
-    renderCanvas()
+    renderCanvas(canvas.currentLayer)
     // const newLayer = canvas.createLayer("raster")
     // newLayer.ctx.putImageData(state.selectClipboard, 0, 0)
     // addToTimeline({

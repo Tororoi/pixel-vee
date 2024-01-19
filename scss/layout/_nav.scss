@@ -127,11 +127,9 @@
             }
           }
         }
-        &:focus {
-          // z-index: 2;
+        &.active {
           background-color: $white;
           color: $black;
-          pointer-events: none;
           @include boxBorder($white, $white, false, left right top);
           ul {
             display: block;

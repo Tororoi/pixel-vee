@@ -63,7 +63,11 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         }
       }
     }
-    if (!action.hidden && !action.removed) {
+    if (
+      !action.hidden &&
+      !action.removed &&
+      ["raster", "vector"].includes(action.tool.type)
+    ) {
       performAction(action, betweenCtx)
     }
     if (activeIndexes) {
@@ -130,11 +134,19 @@ function createAndSaveContext() {
  * @param {CanvasRenderingContext2D} betweenCtx
  */
 export function performAction(action, betweenCtx = null) {
+  //Correct action coordinates with layer offsets
+  const offsetX = action.layer.x
+  const offsetY = action.layer.y
+  //correct boundary box for offsets
+  const boundaryBox = { ...action.properties.boundaryBox }
+  if (boundaryBox.xMax !== null) {
+    boundaryBox.xMin += offsetX
+    boundaryBox.xMax += offsetX
+    boundaryBox.yMin += offsetY
+    boundaryBox.yMax += offsetY
+  }
   switch (action.tool.name) {
     case "brush":
-      const offsetX = action.layer.x
-      const offsetY = action.layer.y
-
       let seen = new Set()
       let mask = null
       //TODO: implement points and maskArray as an array of integers to reduce space cost. Could be stored as typed arrays but not meaningful for storing the json file.
@@ -164,7 +176,7 @@ export function performAction(action, betweenCtx = null) {
         actionDraw(
           p.x + offsetX,
           p.y + offsetY,
-          action.properties.boundaryBox,
+          boundaryBox,
           action.properties.selectionInversed,
           action.color,
           brushStamps[action.tool.brushType][p.brushSize][brushDirection],
@@ -200,9 +212,9 @@ export function performAction(action, betweenCtx = null) {
       break
     case "fill":
       actionFill(
-        action.properties.vectorProperties.px1 + action.layer.x,
-        action.properties.vectorProperties.py1 + action.layer.y,
-        action.properties.boundaryBox,
+        action.properties.vectorProperties.px1 + offsetX,
+        action.properties.vectorProperties.py1 + offsetY,
+        boundaryBox,
         action.properties.selectionInversed,
         action.color,
         action.layer,
@@ -213,11 +225,11 @@ export function performAction(action, betweenCtx = null) {
       break
     case "line":
       actionLine(
-        action.properties.px1 + action.layer.x,
-        action.properties.py1 + action.layer.y,
-        action.properties.px2 + action.layer.x,
-        action.properties.py2 + action.layer.y,
-        action.properties.boundaryBox,
+        action.properties.px1 + offsetX,
+        action.properties.py1 + offsetY,
+        action.properties.px2 + offsetX,
+        action.properties.py2 + offsetY,
+        boundaryBox,
         action.properties.selectionInversed,
         action.color,
         action.layer,
@@ -231,13 +243,13 @@ export function performAction(action, betweenCtx = null) {
       break
     case "quadCurve":
       actionQuadraticCurve(
-        action.properties.vectorProperties.px1 + action.layer.x,
-        action.properties.vectorProperties.py1 + action.layer.y,
-        action.properties.vectorProperties.px2 + action.layer.x,
-        action.properties.vectorProperties.py2 + action.layer.y,
-        action.properties.vectorProperties.px3 + action.layer.x,
-        action.properties.vectorProperties.py3 + action.layer.y,
-        action.properties.boundaryBox,
+        action.properties.vectorProperties.px1 + offsetX,
+        action.properties.vectorProperties.py1 + offsetY,
+        action.properties.vectorProperties.px2 + offsetX,
+        action.properties.vectorProperties.py2 + offsetY,
+        action.properties.vectorProperties.px3 + offsetX,
+        action.properties.vectorProperties.py3 + offsetY,
+        boundaryBox,
         action.properties.selectionInversed,
         3,
         action.color,
@@ -251,15 +263,15 @@ export function performAction(action, betweenCtx = null) {
       break
     case "cubicCurve":
       actionCubicCurve(
-        action.properties.vectorProperties.px1 + action.layer.x,
-        action.properties.vectorProperties.py1 + action.layer.y,
-        action.properties.vectorProperties.px2 + action.layer.x,
-        action.properties.vectorProperties.py2 + action.layer.y,
-        action.properties.vectorProperties.px3 + action.layer.x,
-        action.properties.vectorProperties.py3 + action.layer.y,
-        action.properties.vectorProperties.px4 + action.layer.x,
-        action.properties.vectorProperties.py4 + action.layer.y,
-        action.properties.boundaryBox,
+        action.properties.vectorProperties.px1 + offsetX,
+        action.properties.vectorProperties.py1 + offsetY,
+        action.properties.vectorProperties.px2 + offsetX,
+        action.properties.vectorProperties.py2 + offsetY,
+        action.properties.vectorProperties.px3 + offsetX,
+        action.properties.vectorProperties.py3 + offsetY,
+        action.properties.vectorProperties.px4 + offsetX,
+        action.properties.vectorProperties.py4 + offsetY,
+        boundaryBox,
         action.properties.selectionInversed,
         4,
         action.color,
@@ -273,16 +285,16 @@ export function performAction(action, betweenCtx = null) {
       break
     case "ellipse":
       actionEllipse(
-        action.properties.vectorProperties.px1 + action.layer.x,
-        action.properties.vectorProperties.py1 + action.layer.y,
-        action.properties.vectorProperties.px2 + action.layer.x,
-        action.properties.vectorProperties.py2 + action.layer.y,
-        action.properties.vectorProperties.px3 + action.layer.x,
-        action.properties.vectorProperties.py3 + action.layer.y,
+        action.properties.vectorProperties.px1 + offsetX,
+        action.properties.vectorProperties.py1 + offsetY,
+        action.properties.vectorProperties.px2 + offsetX,
+        action.properties.vectorProperties.py2 + offsetY,
+        action.properties.vectorProperties.px3 + offsetX,
+        action.properties.vectorProperties.py3 + offsetY,
         action.properties.vectorProperties.radA,
         action.properties.vectorProperties.radB,
         action.properties.vectorProperties.forceCircle,
-        action.properties.boundaryBox,
+        boundaryBox,
         action.properties.selectionInversed,
         action.color,
         action.layer,

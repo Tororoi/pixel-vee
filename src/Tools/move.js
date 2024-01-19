@@ -31,6 +31,14 @@ function moveSteps() {
         //Move layer
         canvas.currentLayer.x += state.cursorX - state.previousX
         canvas.currentLayer.y += state.cursorY - state.previousY
+        //Move selection area
+        if (state.selectProperties.px2 !== null) {
+          state.selectProperties.px1 += state.cursorX - state.previousX
+          state.selectProperties.px2 += state.cursorX - state.previousX
+          state.selectProperties.py1 += state.cursorY - state.previousY
+          state.selectProperties.py2 += state.cursorY - state.previousY
+          state.setBoundaryBox(state.selectProperties)
+        }
         renderCanvas(canvas.currentLayer, true)
       }
       break
@@ -159,7 +167,7 @@ export const move = {
   brushDisabled: true,
   options: {},
   modes: {},
-  type: "raster",
+  type: "utility",
   cursor: "move",
   activeCursor: "move",
 }

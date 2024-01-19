@@ -86,6 +86,14 @@ function lineSteps() {
         canvas.currentLayer.x,
         canvas.currentLayer.y
       )
+      //correct boundary box for layer offset
+      const boundaryBox = { ...state.boundaryBox }
+      if (boundaryBox.xMax !== null) {
+        boundaryBox.xMin -= canvas.currentLayer.x
+        boundaryBox.xMax -= canvas.currentLayer.x
+        boundaryBox.yMin -= canvas.currentLayer.y
+        boundaryBox.yMax -= canvas.currentLayer.y
+      }
       addToTimeline({
         tool: state.tool,
         layer: canvas.currentLayer,
@@ -95,7 +103,7 @@ function lineSteps() {
           px2: state.cursorX - canvas.currentLayer.x,
           py2: state.cursorY - canvas.currentLayer.y,
           maskArray,
-          boundaryBox: { ...state.boundaryBox },
+          boundaryBox,
           selectionInversed: state.selectionInversed,
         },
       })

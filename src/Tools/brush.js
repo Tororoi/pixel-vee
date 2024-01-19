@@ -97,13 +97,21 @@ function brushSteps() {
         canvas.currentLayer.x,
         canvas.currentLayer.y
       )
+      //correct boundary box for layer offset
+      const boundaryBox = { ...state.boundaryBox }
+      if (boundaryBox.xMax !== null) {
+        boundaryBox.xMin -= canvas.currentLayer.x
+        boundaryBox.xMax -= canvas.currentLayer.x
+        boundaryBox.yMin -= canvas.currentLayer.y
+        boundaryBox.yMax -= canvas.currentLayer.y
+      }
       addToTimeline({
         tool: brush,
         layer: canvas.currentLayer,
         properties: {
           points: state.points,
           maskArray,
-          boundaryBox: { ...state.boundaryBox },
+          boundaryBox,
           selectionInversed: state.selectionInversed,
         },
       })
