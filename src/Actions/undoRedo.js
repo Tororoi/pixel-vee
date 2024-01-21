@@ -176,6 +176,14 @@ function handleMoveAction(latestAction, modType) {
     state.vectorProperties.px4 += deltaX
     state.vectorProperties.py4 += deltaY
   }
+  //handle selection
+  if (state.selectProperties.px2 !== null) {
+    state.selectProperties.px1 += deltaX
+    state.selectProperties.px2 += deltaX
+    state.selectProperties.py1 += deltaY
+    state.selectProperties.py2 += deltaY
+    state.setBoundaryBox(state.selectProperties)
+  }
   vectorGui.render()
 }
 

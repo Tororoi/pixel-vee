@@ -309,6 +309,53 @@ export function performAction(action, betweenCtx = null) {
         betweenCtx
       )
       break
+    case "cut":
+      //TODO:handle betweenCtx, clean up actions so logic does not need to be repeated here
+      if (action.properties.selectionInversed) {
+        //inverted selection: clear entire canvas area minus boundaryBox
+        //create a clip mask for the boundaryBox to prevent clearing the inner area
+        action.layer.ctx.save()
+        action.layer.ctx.beginPath()
+        //define rectangle for canvas area
+        action.layer.ctx.rect(
+          0,
+          0,
+          action.layer.cvs.width,
+          action.layer.cvs.height
+        )
+        action.layer.ctx.rect(
+          boundaryBox.xMin,
+          boundaryBox.yMin,
+          boundaryBox.xMax - boundaryBox.xMin,
+          boundaryBox.yMax - boundaryBox.yMin
+        )
+        action.layer.ctx.clip("evenodd")
+        action.layer.ctx.clearRect(
+          0,
+          0,
+          action.layer.cvs.width,
+          action.layer.cvs.height
+        )
+        action.layer.ctx.restore()
+      } else {
+        //non-inverted selection: clear boundaryBox area
+        action.layer.ctx.clearRect(
+          boundaryBox.xMin,
+          boundaryBox.yMin,
+          boundaryBox.xMax - boundaryBox.xMin,
+          boundaryBox.yMax - boundaryBox.yMin
+        )
+      }
+      break
+    case "paste":
+      action.layer.ctx.drawImage(
+        action.properties.canvas,
+        boundaryBox.xMin,
+        boundaryBox.yMin,
+        boundaryBox.xMax - boundaryBox.xMin,
+        boundaryBox.yMax - boundaryBox.yMin
+      )
+      break
     default:
     //do nothing
   }

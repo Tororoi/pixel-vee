@@ -94,7 +94,12 @@ export const state = {
     yMax: null,
   },
   selectionInversed: false,
-  selectClipboard: { boundaryBox: null, imageData: null },
+  selectClipboard: {
+    boundaryBox: null,
+    dataURL: null,
+    canvas: null,
+    //TODO: for copying vectors, need more properties
+  },
   //for perfect pixels
   lastDrawnX: null,
   lastDrawnY: null,

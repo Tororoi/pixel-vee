@@ -4,13 +4,25 @@ import { canvas } from "../Context/canvas.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
-import { createNewRasterLayer } from "../Canvas/layers.js"
+import {
+  createNewRasterLayer,
+  createNewReferenceLayer,
+} from "../Canvas/layers.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
   renderLayersToDOM,
   renderVectorsToDOM,
   renderPaletteToDOM,
 } from "../DOM/render.js"
+import { cutSelectedPixels, pasteSelectedPixels } from "../Menu/edit.js"
+
+//=============================================//
+//====== * * * Non Pointer Actions * * * ======//
+//=============================================//
+
+//=============================================//
+//=========== * * * Selection * * * ===========//
+//=============================================//
 
 /**
  * Deselect
@@ -64,6 +76,73 @@ export function actionInvertSelection() {
 }
 
 /**
+ * Cut Selection
+ * Not dependent on pointer events
+ */
+export function actionCutSelection() {
+  if (
+    canvas.currentLayer.type === "raster" &&
+    state.boundaryBox.xMax !== null
+  ) {
+    cutSelectedPixels()
+    //correct boundary box for layer offset
+    const boundaryBox = { ...state.boundaryBox }
+    if (boundaryBox.xMax !== null) {
+      boundaryBox.xMin -= canvas.currentLayer.x
+      boundaryBox.xMax -= canvas.currentLayer.x
+      boundaryBox.yMin -= canvas.currentLayer.y
+      boundaryBox.yMax -= canvas.currentLayer.y
+    }
+    addToTimeline({
+      tool: tools.cut,
+      layer: canvas.currentLayer,
+      properties: {
+        selectionInversed: state.selectionInversed,
+        boundaryBox,
+      },
+    })
+    state.action = null
+    state.redoStack = []
+    renderCanvas(canvas.currentLayer)
+    vectorGui.render()
+  }
+}
+
+/**
+ * Paste Selection
+ * Not dependent on pointer events
+ */
+export function actionPasteSelection() {
+  if (canvas.currentLayer.type === "raster" && state.selectClipboard.canvas) {
+    pasteSelectedPixels()
+    //correct boundary box for layer offset
+    const boundaryBox = { ...state.selectClipboard.boundaryBox }
+    if (boundaryBox.xMax !== null) {
+      boundaryBox.xMin -= canvas.currentLayer.x
+      boundaryBox.xMax -= canvas.currentLayer.x
+      boundaryBox.yMin -= canvas.currentLayer.y
+      boundaryBox.yMax -= canvas.currentLayer.y
+    }
+    addToTimeline({
+      tool: tools.paste,
+      layer: canvas.currentLayer,
+      properties: {
+        canvas: state.selectClipboard.canvas,
+        boundaryBox,
+      },
+    })
+    state.action = null
+    state.redoStack = []
+    renderCanvas(canvas.currentLayer)
+    vectorGui.render()
+  }
+}
+
+//=============================================//
+//============ * * * Layers * * * =============//
+//=============================================//
+
+/**
  * Upload an image and create a new reference layer
  */
 export function addReferenceLayer() {
@@ -76,60 +155,7 @@ export function addReferenceLayer() {
     reader.onload = (e) => {
       img.src = e.target.result
       img.onload = () => {
-        let onscreenLayerCVS = document.createElement("canvas")
-        let onscreenLayerCTX = onscreenLayerCVS.getContext("2d", {
-          willReadFrequently: true,
-        })
-        onscreenLayerCVS.className = "onscreen-canvas"
-        dom.canvasLayers.insertBefore(
-          onscreenLayerCVS,
-          dom.canvasLayers.children[0]
-        )
-        onscreenLayerCVS.width = onscreenLayerCVS.offsetWidth * canvas.sharpness
-        onscreenLayerCVS.height =
-          onscreenLayerCVS.offsetHeight * canvas.sharpness
-        onscreenLayerCTX.setTransform(
-          canvas.sharpness * canvas.zoom,
-          0,
-          0,
-          canvas.sharpness * canvas.zoom,
-          0,
-          0
-        )
-        //constrain background image to canvas with scale
-        let scale =
-          canvas.offScreenCVS.width / img.width >
-          canvas.offScreenCVS.height / img.height
-            ? canvas.offScreenCVS.height / img.height
-            : canvas.offScreenCVS.width / img.width //TODO: should be method, not var so width and height can be adjusted without having to set scale again
-        let highestId = canvas.layers.reduce(
-          (max, layer) => (layer.id > max ? layer.id : max),
-          0
-        )
-        let layer = {
-          id: highestId + 1,
-          type: "reference",
-          title: `Reference ${highestId + 1}`,
-          img: img,
-          dataUrl: img.src,
-          onscreenCvs: onscreenLayerCVS,
-          onscreenCtx: onscreenLayerCTX,
-          x: 0,
-          y: 0,
-          scale: scale,
-          opacity: 1,
-          inactiveTools: [
-            "brush",
-            "fill",
-            "line",
-            "quadCurve",
-            "cubicCurve",
-            "ellipse",
-            "select",
-          ],
-          hidden: false,
-          removed: false,
-        }
+        const layer = createNewReferenceLayer(img)
         canvas.layers.unshift(layer)
         addToTimeline({
           tool: tools.addLayer,
@@ -152,7 +178,7 @@ export function addReferenceLayer() {
  */
 export function addRasterLayer() {
   //once layer is added to timeline and drawn on, can no longer be deleted
-  const layer = createNewRasterLayer(`Layer ${canvas.layers.length + 1}`)
+  const layer = createNewRasterLayer()
   canvas.layers.push(layer)
   addToTimeline({
     tool: tools.addLayer,

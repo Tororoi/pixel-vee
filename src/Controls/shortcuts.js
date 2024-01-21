@@ -22,7 +22,10 @@ import { openSaveDialogBox } from "../Menu/events.js"
 import {
   actionDeselect,
   actionInvertSelection,
+  actionCutSelection,
+  actionPasteSelection,
 } from "../Actions/nonPointerActions.js"
+import { actionCopySelection } from "../Actions/untrackedActions.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
@@ -96,12 +99,7 @@ export function activateShortcut(keyCode) {
     case "KeyC":
       if (!state.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
-          // console.log("copy")
-          //copy function should make an image from the currently selected area defined by
-          //state.selectProperties and store it in state.copiedRaster.image and store x, y in
-          //state.copiedRaster.x, state.copiedRaster.y, along with width and height.
-          //Advanced method would be to save an image from imageData defined by maskSet.
-          // Do not add to timeline
+          actionCopySelection()
         } else {
           handleTools(null, "quadCurve")
         }
@@ -202,10 +200,7 @@ export function activateShortcut(keyCode) {
     case "KeyV":
       if (!state.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
-          // console.log("paste")
-          //paste function should create a new raster layer and draw the image from state.copiedRaster.image at state.copiedRaster.x, etc.
-          //activate select tool for area pasted
-          // add image, coordinates and new layer to timeline as "paste" action
+          actionPasteSelection()
         }
       }
       break
@@ -215,9 +210,7 @@ export function activateShortcut(keyCode) {
     case "KeyX":
       if (!state.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
-          // console.log("cut")
-          //clear selected area, add image to state.copiedRaster, etc.
-          //add to timeline as "eraser" tool for points in selection
+          actionCutSelection()
         } else {
           swatches.paletteMode = "remove"
           renderPaletteToolsToDOM()

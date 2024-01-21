@@ -4,6 +4,7 @@ import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { setInitialZoom } from "../utils/canvasHelpers.js"
+import { copySelectedPixels } from "../Menu/edit.js"
 
 /**
  * Zoom the canvas
@@ -111,4 +112,17 @@ export function actionRecenter() {
   canvas.previousYOffset = canvas.yOffset
   renderCanvas() //render all layers
   vectorGui.render()
+}
+
+/**
+ * Copy Selection to clipboard
+ * Not dependent on pointer events
+ */
+export function actionCopySelection() {
+  if (
+    canvas.currentLayer.type === "raster" &&
+    state.boundaryBox.xMax !== null
+  ) {
+    copySelectedPixels()
+  }
 }

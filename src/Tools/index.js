@@ -103,6 +103,28 @@ export const tools = {
     modes: {},
     type: "settings",
   },
+  cut: {
+    name: "cut",
+    fn: null,
+    brushSize: null,
+    brushType: null,
+    brushDisabled: true,
+    options: {
+      //copy vectors/ actions?
+    },
+    modes: {},
+    type: "raster",
+  },
+  paste: {
+    name: "paste",
+    fn: null,
+    brushSize: null,
+    brushType: null,
+    brushDisabled: true,
+    options: {},
+    modes: {},
+    type: "raster",
+  },
   //Utility Tools (does not affect timeline)
   eyedropper,
   grab,

@@ -378,6 +378,7 @@
 @mixin gearIcon($border: $border-color, $active: $white) {
   @include gearSvg($border);
   background-size: 100%;
+  // transition: background 0.2s ease-in-out;
   &:hover {
     @include gearSvg($active);
   }

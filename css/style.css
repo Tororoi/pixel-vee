@@ -1517,16 +1517,16 @@ canvas {
   margin: 0px;
 }
 .palette-interface .colors {
-  width: 112px;
-  height: 112px;
+  width: 88px;
+  height: 88px;
   position: relative;
   margin-bottom: 16px;
 }
 .palette-interface .colors .swatch {
   position: absolute;
   background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
-  width: 72px;
-  height: 72px;
+  width: 48px;
+  height: 48px;
   margin: 8px;
   z-index: 6;
 }
@@ -1539,8 +1539,8 @@ canvas {
 .palette-interface .colors .back-swatch {
   position: absolute;
   background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
-  width: 72px;
-  height: 72px;
+  width: 48px;
+  height: 48px;
   margin: 8px;
   z-index: 5;
   transform: translateX(24px) translateY(24px);
@@ -1557,8 +1557,8 @@ canvas {
   height: 40px;
   box-shadow: none;
   margin: 0;
-  top: 84px;
-  left: 37px;
+  top: 60px;
+  left: 49px;
 }
 .palette-interface .color-switch:hover {
   box-shadow: none;
