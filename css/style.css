@@ -1663,6 +1663,49 @@ canvas {
   z-index: 106;
 }
 
+.settings-container {
+  user-select: none;
+  position: absolute;
+  top: 15%;
+  z-index: 103;
+  max-width: calc(100% - 4px);
+  max-height: calc(100% - 4px);
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  color: white;
+  background: rgb(51, 51, 51);
+  text-align: center;
+  padding: 0;
+  align-self: center;
+  opacity: 1;
+}
+.settings-container .collapsible {
+  padding-top: 2px;
+}
+.settings-container .settings-interface {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+.settings-container .settings-interface .settings-group {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  margin: 16px 32px;
+}
+.settings-container .settings-interface .settings-group .settings-section-header {
+  margin-bottom: 16px;
+}
+.settings-container .settings-interface .settings-group .settings-options {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: flex-start;
+}
+.settings-container .settings-interface .settings-group .settings-options label {
+  margin-bottom: 16px;
+}
+
 /* Color Picker */
 .picker-container {
   user-select: none;

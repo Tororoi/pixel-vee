@@ -154,6 +154,8 @@ function adjustBoundaries() {
   state.setBoundaryBox(state.selectProperties)
 }
 
+//TODO: adjust pasted pixels to move/flip/transform before setting them to the layer canvas
+
 export const select = {
   name: "select",
   fn: selectSteps,

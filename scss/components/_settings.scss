@@ -1,0 +1,43 @@
+.settings-container {
+  user-select: none;
+  position: absolute;
+  top: 15%;
+  z-index: 103;
+  max-width: calc(100% - 4px);
+  max-height: calc(100% - 4px);
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  color: white;
+  background: $extra-dark-gray;
+  text-align: center;
+  padding: 0;
+  align-self: center;
+  opacity: 1;
+  .collapsible {
+    padding-top: 2px;
+    // display: none;
+  }
+  .settings-interface {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    .settings-group {
+      display: flex;
+      flex-flow: column nowrap;
+      align-items: center;
+      margin: 16px 32px;
+      .settings-section-header {
+        margin-bottom: 16px;
+      }
+      .settings-options {
+        display: flex;
+        flex-flow: column nowrap;
+        align-items: flex-start;
+        label {
+          margin-bottom: 16px;
+        }
+      }
+    }
+  }
+}

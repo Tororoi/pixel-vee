@@ -35,6 +35,9 @@ initializeDialogBox(dom.vectorsInterfaceContainer)
 // * Canvas Size * //
 initializeDialogBox(dom.sizeContainer)
 
+// * Settings * //
+initializeDialogBox(dom.settingsContainer)
+
 // * Color Picker * //
 initializeDialogBox(dom.colorPickerContainer)
 
@@ -42,4 +45,4 @@ initializeDialogBox(dom.colorPickerContainer)
 initializeDialogBox(dom.saveContainer)
 
 // * Export * //
-initializeDialogBox(dom.exportContainer)
+// initializeDialogBox(dom.exportContainer)

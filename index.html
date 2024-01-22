@@ -618,6 +618,98 @@
           </div>
         </div>
       </div>
+      <div class="settings-container dialog-box draggable v-drag h-drag free">
+        <div id="settings-header" class="header dragger">
+          <div class="drag-btn"><div class="grip"></div></div>
+          Settings
+          <label
+            for="settings-collapse-btn"
+            id="settings-collapser"
+            class="collapse-btn"
+            data-tooltip="Collapse/ Expand"
+          >
+            <input
+              type="checkbox"
+              aria-label="Collapse or Expand"
+              class="collapse-checkbox"
+              id="settings-collapse-btn"
+            />
+            <span class="arrow"></span>
+          </label>
+        </div>
+        <div class="collapsible">
+          <div id="settings-interface" class="settings-interface">
+            <div class="settings-group">
+              <div class="settings-section-header">Tool Options</div>
+              <div class="settings-options">
+                <!-- Tool Options -->
+
+              </div>
+            </div>
+            <div class="settings-group">
+              <div class="settings-section-header">Display</div>
+              <div class="settings-options">
+                <!-- Tooltips -->
+                <label
+                  for="tooltips-toggle"
+                  id="tooltips"
+                  class="toggle"
+                  data-tooltip="Toggle tooltips on or off"
+                >
+                  <input type="checkbox" checked="true" id="tooltips-toggle" />
+                  <span class="checkmark"></span>
+                  <span>Tooltips</span>
+                </label>
+
+                <!-- Quick Menu -->
+                <label
+                  for="quick-menu-toggle"
+                  id="quick-menu"
+                  class="toggle"
+                  data-tooltip="Toggle Quick Menu on or off"
+                >
+                  <input type="checkbox" checked="true" id="quick-menu-toggle" />
+                  <span class="checkmark"></span>
+                  <span>Quick Menu</span>
+                </label>
+                <!-- Grid -->
+                <label
+                  for="grid-toggle"
+                  id="grid"
+                  class="toggle"
+                  data-tooltip="Toggle Grid on or off"
+                >
+                  <input type="checkbox" id="grid-toggle" />
+                  <span class="checkmark"></span>
+                  <span>Grid</span>
+                </label>
+                <!-- Quick Menu Grid Toggle -->
+                <label
+                  for="quick-menu-grid-toggle"
+                  id="quick-menu-grid"
+                  class="toggle"
+                  data-tooltip="Include Grid Toggle in Quick Menu"
+                >
+                  <input type="checkbox" id="quick-menu-grid-toggle" />
+                  <span class="checkmark"></span>
+                  <span>Include Grid in Quick Menu</span>
+                </label>
+                <label for="grid-spacing"
+                  >Subgrid Spacing:
+                    <input type="number" id="grid-width" min="1" max="64" />
+                    <span class="spin-btn">
+                      <span id="inc" class="channel-btn"
+                        ><span class="spin-content">+</span></span
+                      >
+                      <span id="dec" class="channel-btn"
+                        ><span class="spin-content">-</span></span
+                      >
+                    </span>
+                </label>
+              </div>
+          </div>
+        </div>
+      </div>
       <div class="picker-container dialog-box draggable v-drag h-drag free">
         <div id="picker-header" class="header dragger">
           <div class="drag-btn"><div class="grip"></div></div>
@@ -878,7 +970,7 @@
         </div>
         <div class="collapsible">
           <div id="export-interface" class="export-interface">
-            <!-- Select pixel scale and export folder location -->
+            <!-- Select pixel scale -->
           </div>
         </div>
       </div>

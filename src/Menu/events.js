@@ -215,6 +215,15 @@ dom.flipHorizontalBtn.addEventListener("click", (e) => {
 dom.flipVerticalBtn.addEventListener("click", (e) => {
   //TODO: flip selected pixels vertically
 })
+//Settings events
+dom.settingsBtn.addEventListener("click", (e) => {
+  //if settings container is already open, close it, else open it
+  if (dom.settingsContainer.style.display === "flex") {
+    dom.settingsContainer.style.display = "none"
+  } else {
+    dom.settingsContainer.style.display = "flex"
+  }
+})
 //Save/Export events
 dom.saveAsForm.addEventListener("change", (e) => {
   if (e.target.id === "preserve-history-toggle") {

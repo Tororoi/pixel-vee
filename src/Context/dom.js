@@ -55,6 +55,18 @@ const flipHorizontalBtn = document.getElementById("flip-horizontal")
 // * Flip Vertical * //
 const flipVerticalBtn = document.getElementById("flip-vertical")
 
+// * Settings Button * //
+const settingsBtn = document.getElementById("settings-btn")
+
+//====================================//
+//========= * * * Settings * * * =====//
+//====================================//
+
+// * Settings Container * //
+const settingsContainer = document.querySelector(".settings-container")
+
+// * Settings Form * //
+
 //====================================//
 //====== * * * Save/Export * * * =====//
 //====================================//
@@ -209,6 +221,10 @@ export const dom = {
   pasteBtn,
   flipHorizontalBtn,
   flipVerticalBtn,
+  //Settings
+  settingsBtn,
+  //settings
+  settingsContainer,
   //save/export
   saveContainer,
   saveAsForm,
