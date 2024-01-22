@@ -36,6 +36,24 @@
         align-items: flex-start;
         label {
           margin-bottom: 16px;
+          .icon {
+            width: 40px;
+            height: 40px;
+            // background-color: $border-color;
+            // @include boxBorder;
+          }
+          // input:checked ~ .icon {
+          //   background-color: $white;
+          //   @include boxBorder($white);
+          // }
+        }
+        &.toolbox-settings {
+          flex-flow: column wrap;
+          max-height: 200px;
+          label {
+            margin-right: 12px;
+            margin-left: 12px;
+          }
         }
       }
     }

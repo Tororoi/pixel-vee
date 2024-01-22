@@ -643,7 +643,6 @@
               <div class="settings-section-header">Tool Options</div>
               <div class="settings-options">
                 <!-- Tool Options -->
-
               </div>
             </div>
             <div class="settings-group">
@@ -668,7 +667,11 @@
                   class="toggle"
                   data-tooltip="Toggle Quick Menu on or off"
                 >
-                  <input type="checkbox" checked="true" id="quick-menu-toggle" />
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="quick-menu-toggle"
+                  />
                   <span class="checkmark"></span>
                   <span>Quick Menu</span>
                 </label>
@@ -696,17 +699,165 @@
                 </label>
                 <label for="grid-spacing"
                   >Subgrid Spacing:
-                    <input type="number" id="grid-width" min="1" max="64" />
-                    <span class="spin-btn">
-                      <span id="inc" class="channel-btn"
-                        ><span class="spin-content">+</span></span
-                      >
-                      <span id="dec" class="channel-btn"
-                        ><span class="spin-content">-</span></span
-                      >
-                    </span>
+                  <input type="number" id="grid-width" min="1" max="64" />
+                  <span class="spin-btn">
+                    <span id="inc" class="channel-btn"
+                      ><span class="spin-content">+</span></span
+                    >
+                    <span id="dec" class="channel-btn"
+                      ><span class="spin-content">-</span></span
+                    >
+                  </span>
                 </label>
               </div>
+            </div>
+            <!-- Toolbox -->
+            <div class="settings-group">
+              <div class="settings-section-header">Toolbox Tools</div>
+              <div class="settings-options toolbox-settings">
+                <!-- Toggle Toolbox Tools (Brush, Line, Select, etc.) -->
+                <!-- <label
+                  for="toolbox-brush-toggle"
+                  id="toolbox-brush"
+                  class="toggle"
+                  data-tooltip="Toggle Toolbox Brush on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-brush-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon brush"></div>
+                </label> -->
+                <label
+                  for="toolbox-fill-toggle"
+                  id="toolbox-fill"
+                  class="toggle"
+                  data-tooltip="Toggle Fill tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-fill-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon fill"></div>
+                </label>
+                <label
+                  for="toolbox-line-toggle"
+                  id="toolbox-line"
+                  class="toggle"
+                  data-tooltip="Toggle Line tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-line-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon line"></div>
+                </label>
+                <label
+                  for="toolbox-quadCurve-toggle"
+                  id="toolbox-quadCurve"
+                  class="toggle"
+                  data-tooltip="Toggle Quadratic Curve tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-quadCurve-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon quadCurve"></div>
+                </label>
+                <label
+                  for="toolbox-cubicCurve-toggle"
+                  id="toolbox-cubicCurve"
+                  class="toggle"
+                  data-tooltip="Toggle Cubic Curve tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-cubicCurve-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon cubicCurve"></div>
+                </label>
+                <label
+                  for="toolbox-ellipse-toggle"
+                  id="toolbox-ellipse"
+                  class="toggle"
+                  data-tooltip="Toggle Ellipse tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-ellipse-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon ellipse"></div>
+                </label>
+                <label
+                  for="toolbox-select-toggle"
+                  id="toolbox-select"
+                  class="toggle"
+                  data-tooltip="Toggle Select tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-select-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon select"></div>
+                </label>
+                <label
+                  for="toolbox-eyedropper-toggle"
+                  id="toolbox-eyedropper"
+                  class="toggle"
+                  data-tooltip="Toggle Eyedropper tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-eyedropper-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon eyedropper"></div>
+                </label>
+                <label
+                  for="toolbox-grab-toggle"
+                  id="toolbox-grab"
+                  class="toggle"
+                  data-tooltip="Toggle Grab tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-grab-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon grab"></div>
+                </label>
+                <label
+                  for="toolbox-move-toggle"
+                  id="toolbox-move"
+                  class="toggle"
+                  data-tooltip="Toggle Move tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-move-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon move"></div>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       </div>

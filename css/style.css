@@ -1705,6 +1705,18 @@ canvas {
 .settings-container .settings-interface .settings-group .settings-options label {
   margin-bottom: 16px;
 }
+.settings-container .settings-interface .settings-group .settings-options label .icon {
+  width: 40px;
+  height: 40px;
+}
+.settings-container .settings-interface .settings-group .settings-options.toolbox-settings {
+  flex-flow: column wrap;
+  max-height: 200px;
+}
+.settings-container .settings-interface .settings-group .settings-options.toolbox-settings label {
+  margin-right: 12px;
+  margin-left: 12px;
+}
 
 /* Color Picker */
 .picker-container {
