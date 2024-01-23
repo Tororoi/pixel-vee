@@ -22,6 +22,7 @@ import { getAngle } from "../utils/trig.js"
 //Note: The Vector Graphics canvas has a mix-blend-mode: difference applied to it
 export const vectorGui = {
   grid: false,
+  gridSpacing: 8,
   collisionPresent: false,
   collidedKeys: { xKey: null, yKey: null },
   selectedPoint: { xKey: null, yKey: null },
@@ -290,7 +291,7 @@ function render() {
   }
   //Render grid
   if (canvas.zoom >= 4 && vectorGui.grid) {
-    renderGrid(8)
+    renderGrid(vectorGui.gridSpacing)
   }
   //Animate render
   // if (state.selectProperties.px1 !== null || !state.clicked) {

@@ -117,3 +117,4 @@ canvas.thumbnailCTX.scale(canvas.sharpness, canvas.sharpness)
 //Initialize size values
 dom.canvasWidth.value = canvas.offScreenCVS.width
 dom.canvasHeight.value = canvas.offScreenCVS.height
+dom.gridSpacing.value = 8

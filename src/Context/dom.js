@@ -18,12 +18,7 @@ const navBar = document.querySelector(".nav")
 const topMenu = document.getElementById("top-menu")
 
 // * Tool Options * //
-const toolOptions = document.querySelector(".tool-options")
-//TODO: options dialog box where user can set default options such as display vectors, paths, or auto select most recently created vector
-// * Toggle Grid * //
-const gridBtn = document.getElementById("grid-toggle")
-// * Toggle Tooltips * //
-const tooltipBtn = document.getElementById("tooltips-toggle")
+const toolOptions = document.querySelector(".tool-options") //TODO: Will become quick menu
 
 // * File Menu * //
 const fileSubMenu = document.getElementById("file-submenu")
@@ -66,6 +61,14 @@ const settingsBtn = document.getElementById("settings-btn")
 const settingsContainer = document.querySelector(".settings-container")
 
 // * Settings Form * //
+//TODO: options dialog box where user can set default options such as display vectors, paths, or auto select most recently created vector
+// * Toggle Tooltips * //
+const tooltipBtn = document.getElementById("tooltips-toggle")
+// * Toggle Grid * //
+const gridBtn = document.getElementById("grid-toggle")
+// * Grid Spacing * //
+const gridSpacingSpinBtn = document.querySelector(".grid-spacing-spin")
+const gridSpacing = document.getElementById("grid-spacing")
 
 //====================================//
 //====== * * * Save/Export * * * =====//
@@ -203,8 +206,6 @@ export const dom = {
   navBar,
   topMenu,
   toolOptions,
-  gridBtn,
-  tooltipBtn,
   //File Menu
   fileSubMenu,
   saveBtn,
@@ -225,6 +226,10 @@ export const dom = {
   settingsBtn,
   //settings
   settingsContainer,
+  tooltipBtn,
+  gridBtn,
+  gridSpacingSpinBtn,
+  gridSpacing,
   //save/export
   saveContainer,
   saveAsForm,

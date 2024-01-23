@@ -147,7 +147,7 @@
       </div>
       <div class="nav-items">
         <div class="tool-options"></div>
-        <label
+        <!-- <label
           for="grid-toggle"
           id="grid"
           class="toggle"
@@ -166,7 +166,7 @@
           <input type="checkbox" checked="true" id="tooltips-toggle" />
           <span class="checkmark"></span>
           <span>Tooltips</span>
-        </label>
+        </label> -->
         <div class="settings">
           <button
             type="button"
@@ -622,32 +622,35 @@
         <div id="settings-header" class="header dragger">
           <div class="drag-btn"><div class="grip"></div></div>
           Settings
-          <label
-            for="settings-collapse-btn"
-            id="settings-collapser"
-            class="collapse-btn"
-            data-tooltip="Collapse/ Expand"
+          <button
+            type="button"
+            id="settings-closer"
+            class="close-btn"
+            data-tooltip="Close"
           >
-            <input
-              type="checkbox"
-              aria-label="Collapse or Expand"
-              class="collapse-checkbox"
-              id="settings-collapse-btn"
-            />
-            <span class="arrow"></span>
-          </label>
+            <span class="close"></span>
+          </button>
         </div>
         <div class="collapsible">
           <div id="settings-interface" class="settings-interface">
             <div class="settings-group">
-              <div class="settings-section-header">Tool Options</div>
-              <div class="settings-options">
-                <!-- Tool Options -->
-              </div>
-            </div>
-            <div class="settings-group">
               <div class="settings-section-header">Display</div>
               <div class="settings-options">
+                <!-- Quick Menu -->
+                <!-- <label
+                  for="quick-menu-settings-toggle"
+                  id="quick-menu"
+                  class="toggle"
+                  data-tooltip="Toggle Quick Menu on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="quick-menu-settings-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <span>Quick Menu</span>
+                </label> -->
                 <!-- Tooltips -->
                 <label
                   for="tooltips-toggle"
@@ -659,58 +662,34 @@
                   <span class="checkmark"></span>
                   <span>Tooltips</span>
                 </label>
-
-                <!-- Quick Menu -->
-                <label
-                  for="quick-menu-toggle"
-                  id="quick-menu"
-                  class="toggle"
-                  data-tooltip="Toggle Quick Menu on or off"
-                >
-                  <input
-                    type="checkbox"
-                    checked="true"
-                    id="quick-menu-toggle"
-                  />
-                  <span class="checkmark"></span>
-                  <span>Quick Menu</span>
-                </label>
                 <!-- Grid -->
                 <label
                   for="grid-toggle"
                   id="grid"
                   class="toggle"
-                  data-tooltip="Toggle Grid on or off"
+                  data-tooltip="Toggle grid on or off. Displays at higher zoom levels only."
                 >
                   <input type="checkbox" id="grid-toggle" />
                   <span class="checkmark"></span>
                   <span>Grid</span>
                 </label>
-                <!-- Quick Menu Grid Toggle -->
-                <label
-                  for="quick-menu-grid-toggle"
-                  id="quick-menu-grid"
-                  class="toggle"
-                  data-tooltip="Include Grid Toggle in Quick Menu"
-                >
-                  <input type="checkbox" id="quick-menu-grid-toggle" />
-                  <span class="checkmark"></span>
-                  <span>Include Grid in Quick Menu</span>
-                </label>
-                <label for="grid-spacing"
-                  >Subgrid Spacing:
-                  <input type="number" id="grid-width" min="1" max="64" />
-                  <span class="spin-btn">
-                    <span id="inc" class="channel-btn"
-                      ><span class="spin-content">+</span></span
-                    >
-                    <span id="dec" class="channel-btn"
-                      ><span class="spin-content">-</span></span
-                    >
-                  </span>
-                </label>
+                <div class="grid-spacing-container">
+                  <label for="grid-spacing"
+                    ><span>Subgrid Spacing:&nbsp;</span>
+                    <input type="number" id="grid-spacing" min="1" max="64" />
+                    <span class="grid-spacing-spin spin-btn">
+                      <span id="inc" class="channel-btn"
+                        ><span class="spin-content">+</span></span
+                      >
+                      <span id="dec" class="channel-btn"
+                        ><span class="spin-content">-</span></span
+                      >
+                    </span>
+                  </label>
+                </div>
               </div>
             </div>
+            <hr />
             <!-- Toolbox -->
             <div class="settings-group">
               <div class="settings-section-header">Toolbox Tools</div>
@@ -1129,20 +1108,14 @@
         <div id="save-header" class="header dragger">
           <div class="drag-btn"><div class="grip"></div></div>
           <span>Save Options</span>
-          <label
-            for="save-collapse-btn"
-            id="save-collapser"
-            class="collapse-btn"
-            data-tooltip="Collapse/ Expand"
+          <button
+            type="button"
+            id="save-closer"
+            class="close-btn"
+            data-tooltip="Close"
           >
-            <input
-              type="checkbox"
-              aria-label="Collapse or Expand"
-              class="collapse-checkbox"
-              id="save-collapse-btn"
-            />
-            <span class="arrow"></span>
-          </label>
+            <span class="close"></span>
+          </button>
         </div>
         <div class="collapsible">
           <form id="save-interface" class="save-interface">

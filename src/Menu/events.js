@@ -128,6 +128,7 @@ document.body.addEventListener("mouseover", (e) => {
   }
 })
 dom.toolOptions.addEventListener("click", (e) => {
+  console.log(e.target)
   if (e.target.type === "checkbox") {
     const optionName = e.target.id.split("-")[0]
     if (e.target.checked) {
@@ -144,6 +145,31 @@ dom.gridBtn.addEventListener("click", (e) => {
   } else {
     vectorGui.grid = false
   }
+  vectorGui.render()
+})
+dom.gridSpacing.addEventListener("input", (e) => {
+  //constrain value to min/max
+  if (e.target.value < 1) {
+    e.target.value = 1
+  } else if (e.target.value > 64) {
+    e.target.value = 64
+  }
+  vectorGui.gridSpacing = parseInt(e.target.value)
+  vectorGui.render()
+})
+dom.gridSpacingSpinBtn.addEventListener("pointerdown", (e) => {
+  if (e.target.id === "inc") {
+    vectorGui.gridSpacing++
+  } else if (e.target.id === "dec") {
+    vectorGui.gridSpacing--
+  }
+  //constraint value to min/max
+  if (vectorGui.gridSpacing < 1) {
+    vectorGui.gridSpacing = 1
+  } else if (vectorGui.gridSpacing > 64) {
+    vectorGui.gridSpacing = 64
+  }
+  dom.gridSpacing.value = vectorGui.gridSpacing
   vectorGui.render()
 })
 dom.tooltipBtn.addEventListener("click", (e) => {

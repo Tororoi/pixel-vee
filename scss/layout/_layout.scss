@@ -73,6 +73,9 @@
     .collapse-btn {
       @include collapseArrow;
     }
+    .close-btn {
+      @include closeX;
+    }
   }
   .collapsible {
     flex: 0 1 auto;

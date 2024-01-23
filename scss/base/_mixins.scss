@@ -187,6 +187,37 @@
   }
 }
 
+@mixin closeX {
+  position: absolute;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0px;
+  display: flex;
+  flex-flow: row nowrap;
+  cursor: pointer;
+  input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .close {
+    height: 2px;
+    width: 2px;
+    box-shadow: 5px 5px $border-color, 13px 5px $border-color,
+      7px 7px $border-color, 11px 7px $border-color, 9px 9px $border-color,
+      7px 11px $border-color, 11px 11px $border-color, 5px 13px $border-color,
+      13px 13px $border-color;
+  }
+  &:hover {
+    .close {
+      box-shadow: 5px 5px $white, 13px 5px $white, 7px 7px $white,
+        11px 7px $white, 9px 9px $white, 7px 11px $white, 11px 11px $white,
+        5px 13px $white, 13px 13px $white;
+    }
+  }
+}
+
 //==================================================//
 //================ * * * Misc * * * ================//
 //==================================================//

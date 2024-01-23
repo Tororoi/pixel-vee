@@ -388,6 +388,29 @@ svg {
 .dialog-box .header .collapse-btn:hover input:checked ~ .arrow {
   box-shadow: 9px 5px rgb(255, 255, 255), 9px 7px rgb(255, 255, 255), 5px 9px rgb(255, 255, 255), 7px 9px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 11px 9px rgb(255, 255, 255), 13px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 9px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 9px 13px rgb(255, 255, 255);
 }
+.dialog-box .header .close-btn {
+  position: absolute;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0px;
+  display: flex;
+  flex-flow: row nowrap;
+  cursor: pointer;
+}
+.dialog-box .header .close-btn input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.dialog-box .header .close-btn .close {
+  height: 2px;
+  width: 2px;
+  box-shadow: 5px 5px rgb(131, 131, 131), 13px 5px rgb(131, 131, 131), 7px 7px rgb(131, 131, 131), 11px 7px rgb(131, 131, 131), 9px 9px rgb(131, 131, 131), 7px 11px rgb(131, 131, 131), 11px 11px rgb(131, 131, 131), 5px 13px rgb(131, 131, 131), 13px 13px rgb(131, 131, 131);
+}
+.dialog-box .header .close-btn:hover .close {
+  box-shadow: 5px 5px rgb(255, 255, 255), 13px 5px rgb(255, 255, 255), 7px 7px rgb(255, 255, 255), 11px 7px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 5px 13px rgb(255, 255, 255), 13px 13px rgb(255, 255, 255);
+}
 .dialog-box .collapsible {
   flex: 0 1 auto;
   width: 100%;
@@ -1688,11 +1711,17 @@ canvas {
   flex-flow: column nowrap;
   align-items: center;
 }
+.settings-container .settings-interface hr {
+  width: calc(100% - 32px);
+  margin: 0;
+  border: 0;
+  border-top: 2px solid rgb(131, 131, 131);
+}
 .settings-container .settings-interface .settings-group {
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
-  margin: 16px 32px;
+  margin: 24px 32px;
 }
 .settings-container .settings-interface .settings-group .settings-section-header {
   margin-bottom: 16px;
@@ -1702,8 +1731,13 @@ canvas {
   flex-flow: column nowrap;
   align-items: flex-start;
 }
-.settings-container .settings-interface .settings-group .settings-options label {
+.settings-container .settings-interface .settings-group .settings-options > * {
   margin-bottom: 16px;
+}
+.settings-container .settings-interface .settings-group .settings-options label {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
 }
 .settings-container .settings-interface .settings-group .settings-options label .icon {
   width: 40px;
@@ -1716,6 +1750,19 @@ canvas {
 .settings-container .settings-interface .settings-group .settings-options.toolbox-settings label {
   margin-right: 12px;
   margin-left: 12px;
+}
+.settings-container .settings-interface .settings-group .settings-options .grid-spacing-container {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+.settings-container .settings-interface .settings-group .settings-options .grid-spacing-container #grid-spacing {
+  height: 18px;
+}
+.settings-container .settings-interface .settings-group .settings-options > :last-child {
+  margin-bottom: 0;
 }
 
 /* Color Picker */

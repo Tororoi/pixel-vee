@@ -22,11 +22,17 @@
     display: flex;
     flex-flow: column nowrap;
     align-items: center;
+    hr {
+      width: calc(100% - 32px);
+      margin: 0;
+      border: 0;
+      border-top: 2px solid $border-color;
+    }
     .settings-group {
       display: flex;
       flex-flow: column nowrap;
       align-items: center;
-      margin: 16px 32px;
+      margin: 24px 32px;
       .settings-section-header {
         margin-bottom: 16px;
       }
@@ -34,8 +40,13 @@
         display: flex;
         flex-flow: column nowrap;
         align-items: flex-start;
-        label {
+        > * {
           margin-bottom: 16px;
+        }
+        label {
+          display: flex;
+          flex-flow: row nowrap;
+          align-items: center;
           .icon {
             width: 40px;
             height: 40px;
@@ -54,6 +65,23 @@
             margin-right: 12px;
             margin-left: 12px;
           }
+        }
+        .grid-spacing-container {
+          display: flex;
+          flex-flow: row nowrap;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          #grid-spacing {
+            height: 18px;
+          }
+          // .grid-spacing-slider {
+          //   width: 100%;
+          //   margin: 0 16px;
+          // }
+        }
+        > :last-child {
+          margin-bottom: 0;
         }
       }
     }
