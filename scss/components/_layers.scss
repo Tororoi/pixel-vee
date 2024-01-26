@@ -30,9 +30,9 @@
       width: 40px;
       height: 40px;
       cursor: pointer;
-      &.disabled {
-        opacity: 0.5;
-        cursor: no-drop;
+      &:disabled {
+        opacity: 1 !important;
+        @include trashIcon($border-color, $border-color);
       }
     }
   }
@@ -95,6 +95,47 @@
           margin: 5px;
         }
       }
+    }
+  }
+}
+
+.layer-settings {
+  z-index: 1000;
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  // width: 200px;
+  // height: 200px;
+  position: absolute;
+  background: $dark-gray;
+  @include bubbleBorder;
+  > * {
+    margin: 16px 16px 0 16px;
+  }
+  > :last-child {
+    margin-bottom: 16px;
+  }
+  #layer-name {
+    width: 156px;
+    box-shadow: none;
+  }
+  label {
+    // > * {
+    //   pointer-events: none;
+    // }
+    &.layer-name-label {
+      cursor: text;
+      // > * {
+      //   pointer-events: unset;
+      // }
+    }
+  }
+  .layer-opacity-label {
+    .input-label {
+      margin-bottom: 8px;
+    }
+    .slider {
+      width: calc(100% - 4px);
     }
   }
 }

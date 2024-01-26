@@ -161,54 +161,56 @@ function handlePointerDown(e) {
  * @param {PointerEvent} e
  */
 function handlePointerMove(e) {
-  if (state.clickDisabled && state.clicked) {
-    return
-  }
-  canvas.pointerEvent = "pointermove"
-  state.clickDisabled = false
-  //currently only square dimensions work
-  canvas.zoomAtLastDraw = canvas.zoom //* */
-  //coords
-  setCoordinates(e)
-  let cursorMoved =
-    state.previousX !== state.cursorX || state.previousY !== state.cursorY
-  if (state.tool.options.useSubpixels?.active && !cursorMoved) {
-    cursorMoved =
-      canvas.previousSubPixelX !== canvas.subPixelX ||
-      canvas.previousSubPixelY !== canvas.subPixelY
-  }
-  if (cursorMoved) {
-    //Hover brush
-    // vectorGui.render()
-    if (
-      state.clicked ||
-      ((state.tool.name === "quadCurve" ||
-        state.tool.name === "cubicCurve" ||
-        state.tool.name === "fill") &&
-        state.clickCounter > 0)
-    ) {
-      //run selected tool step function
-      state.tool.fn()
-      vectorGui.render()
+  window.requestAnimationFrame(() => {
+    if (state.clickDisabled && state.clicked) {
+      return
+    }
+    canvas.pointerEvent = "pointermove"
+    state.clickDisabled = false
+    //currently only square dimensions work
+    canvas.zoomAtLastDraw = canvas.zoom //* */
+    //coords
+    setCoordinates(e)
+    let cursorMoved =
+      state.previousX !== state.cursorX || state.previousY !== state.cursorY
+    if (state.tool.options.useSubpixels?.active && !cursorMoved) {
+      cursorMoved =
+        canvas.previousSubPixelX !== canvas.subPixelX ||
+        canvas.previousSubPixelY !== canvas.subPixelY
+    }
+    if (cursorMoved) {
+      //Hover brush
+      // vectorGui.render()
       if (
-        (state.tool.name === "brush" && state.tool.modes?.eraser) ||
-        state.tool.name === "eyedropper"
+        state.clicked ||
+        ((state.tool.name === "quadCurve" ||
+          state.tool.name === "cubicCurve" ||
+          state.tool.name === "fill") &&
+          state.clickCounter > 0)
       ) {
+        //run selected tool step function
+        state.tool.fn()
+        vectorGui.render()
+        if (
+          (state.tool.name === "brush" && state.tool.modes?.eraser) ||
+          state.tool.name === "eyedropper"
+        ) {
+          renderCursor(state, canvas, swatches)
+        }
+      } else {
+        //no active tool
+        vectorGui.render()
         renderCursor(state, canvas, swatches)
       }
-    } else {
-      //no active tool
-      vectorGui.render()
-      renderCursor(state, canvas, swatches)
     }
-  }
-  // if (!state.tool.options.line?.active) {
-  // save last point
-  state.previousX = state.cursorX
-  state.previousY = state.cursorY
-  // }
-  canvas.previousSubPixelX = canvas.subPixelX
-  canvas.previousSubPixelY = canvas.subPixelY
+    // if (!state.tool.options.line?.active) {
+    // save last point
+    state.previousX = state.cursorX
+    state.previousY = state.cursorY
+    // }
+    canvas.previousSubPixelX = canvas.subPixelX
+    canvas.previousSubPixelY = canvas.subPixelY
+  })
 }
 
 /**

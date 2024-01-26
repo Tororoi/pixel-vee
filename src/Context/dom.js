@@ -182,6 +182,7 @@ const newLayerBtn = document.querySelector(".add-layer")
 const deleteLayerBtn = document.querySelector("#delete-layer")
 const layersContainer = document.querySelector(".layers")
 const layersInterfaceContainer = document.querySelector(".layers-interface")
+const layerSettingsContainer = document.querySelector(".layer-settings")
 
 // * Vectors Interface * //
 const vectorsThumbnails = document.querySelector(".vectors")
@@ -276,8 +277,11 @@ export const dom = {
   deleteLayerBtn,
   layersContainer,
   layersInterfaceContainer,
+  layerSettingsContainer,
+  //vectors
   vectorsThumbnails,
   vectorsInterfaceContainer,
+  //canvas size
   sizeContainer,
   dimensionsForm,
   canvasWidth,

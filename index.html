@@ -421,6 +421,7 @@
                   class="trash"
                   id="delete-layer"
                   aria-label="Remove Layer"
+                  disabled="true"
                 ></button>
               </div>
               <div class="layers-container">
@@ -667,7 +668,7 @@
                   for="grid-toggle"
                   id="grid"
                   class="toggle"
-                  data-tooltip="Toggle grid on or off. Displays at higher zoom levels only."
+                  data-tooltip="Toggle grid (G) &#010;&#010;Displays at higher zoom levels only."
                 >
                   <input type="checkbox" id="grid-toggle" />
                   <span class="checkmark"></span>
@@ -689,26 +690,10 @@
                 </div>
               </div>
             </div>
-            <hr />
-            <!-- Toolbox -->
-            <div class="settings-group">
+            <!-- <hr /> -->
+            <!-- <div class="settings-group">
               <div class="settings-section-header">Toolbox Tools</div>
               <div class="settings-options toolbox-settings">
-                <!-- Toggle Toolbox Tools (Brush, Line, Select, etc.) -->
-                <!-- <label
-                  for="toolbox-brush-toggle"
-                  id="toolbox-brush"
-                  class="toggle"
-                  data-tooltip="Toggle Toolbox Brush on or off"
-                >
-                  <input
-                    type="checkbox"
-                    checked="true"
-                    id="toolbox-brush-toggle"
-                  />
-                  <span class="checkmark"></span>
-                  <div class="icon brush"></div>
-                </label> -->
                 <label
                   for="toolbox-fill-toggle"
                   id="toolbox-fill"
@@ -836,7 +821,7 @@
                   <div class="icon move"></div>
                 </label>
               </div>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -1011,20 +996,14 @@
         <div id="size-header" class="header dragger">
           <div class="drag-btn"><div class="grip"></div></div>
           Canvas Size
-          <label
-            for="size-collapse-btn"
-            id="size-collapser"
-            class="collapse-btn"
-            data-tooltip="Collapse/ Expand"
+          <button
+            type="button"
+            id="size-closer"
+            class="close-btn"
+            data-tooltip="Close"
           >
-            <input
-              type="checkbox"
-              aria-label="Collapse or Expand"
-              class="collapse-checkbox"
-              id="size-collapse-btn"
-            />
-            <span class="arrow"></span>
-          </label>
+            <span class="close"></span>
+          </button>
         </div>
         <div class="collapsible">
           <form class="dimensions-form">
@@ -1260,6 +1239,7 @@
         </div>
       </div>
     </div>
+    <div class="layer-settings dialog-box"></div>
     <div id="tooltip" class="tooltip"></div>
   </body>
 </html>

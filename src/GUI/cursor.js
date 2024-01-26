@@ -17,50 +17,52 @@ import { renderCanvas } from "../Canvas/render.js"
  * @param {Object} swatches
  */
 export function renderCursor(state, canvas, swatches) {
-  switch (state.tool.name) {
-    case "grab":
-      //show nothing
-      break
-    case "eyedropper":
-      //empty square
-      drawCursorBox(state, canvas, 2)
-      break
-    case "select":
-      //show nothing
-      break
-    case "move":
-      //show nothing
-      break
-    default:
-      //TODO: erase mode is somewhat buggy with rendering. Find way to have it render without calling draw() more than needed.
-      if (!vectorGui.collisionPresent) {
-        renderCanvas(canvas.currentLayer)
-        //TODO: For better performance, draw cursor on a separate canvas and render that canvas on top of the main canvas.
-        //Then renderCanvas would not need to be called here.
-        actionDraw(
-          state.cursorX,
-          state.cursorY,
-          state.boundaryBox,
-          state.selectionInversed,
-          swatches.primary.color,
-          brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
-          state.tool.brushSize,
-          canvas.currentLayer,
-          state.tool.modes,
-          state.maskSet,
-          state.seenPixelsSet,
-          null,
-          true,
-          true
-        )
-        if (state.tool.modes?.eraser) {
-          drawCursorBox(state, canvas, 1)
-          // vectorGui.drawSelectOutline(state, canvas, state.selectPixelSet, 0.5)
+  window.requestAnimationFrame(() => {
+    switch (state.tool.name) {
+      case "grab":
+        //show nothing
+        break
+      case "eyedropper":
+        //empty square
+        drawCursorBox(state, canvas, 2)
+        break
+      case "select":
+        //show nothing
+        break
+      case "move":
+        //show nothing
+        break
+      default:
+        //TODO: erase mode is somewhat buggy with rendering. Find way to have it render without calling draw() more than needed.
+        if (!vectorGui.collisionPresent) {
+          renderCanvas(canvas.currentLayer)
+          //TODO: For better performance, draw cursor on a separate canvas and render that canvas on top of the main canvas.
+          //Then renderCanvas would not need to be called here.
+          actionDraw(
+            state.cursorX,
+            state.cursorY,
+            state.boundaryBox,
+            state.selectionInversed,
+            swatches.primary.color,
+            brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
+            state.tool.brushSize,
+            canvas.currentLayer,
+            state.tool.modes,
+            state.maskSet,
+            state.seenPixelsSet,
+            null,
+            true,
+            true
+          )
+          if (state.tool.modes?.eraser) {
+            drawCursorBox(state, canvas, 1)
+            // vectorGui.drawSelectOutline(state, canvas, state.selectPixelSet, 0.5)
+          }
+        } else {
+          renderCanvas(canvas.currentLayer) //hides existing cursor if one is drawn
         }
-      } else {
-        renderCanvas(canvas.currentLayer) //hides existing cursor if one is drawn
-      }
-  }
+    }
+  })
 }
 
 /**

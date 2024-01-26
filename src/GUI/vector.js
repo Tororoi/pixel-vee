@@ -293,12 +293,6 @@ function render() {
   if (canvas.zoom >= 4 && vectorGui.grid) {
     renderGrid(vectorGui.gridSpacing)
   }
-  //Animate render
-  // if (state.selectProperties.px1 !== null || !state.clicked) {
-  //   window.requestAnimationFrame(() => {
-  //     render(lineDashOffset < 4 ? lineDashOffset + 0.1 : 0)
-  //   })
-  // }
 }
 
 /**

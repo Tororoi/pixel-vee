@@ -277,3 +277,30 @@
     }
   }
 }
+
+.slider {
+  height: 16px;
+  background: $darkest-gray;
+  outline: none;
+  cursor: pointer;
+  &::-webkit-slider-thumb {
+    width: 16px;
+    height: 16px;
+    background: #ffffff;
+  }
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #ffffff;
+  }
+  &:disabled {
+    cursor: not-allowed;
+    background: $neutral-gray;
+    &::-webkit-slider-thumb {
+      background: rgb(200, 200, 200);
+    }
+    &::-moz-range-thumb {
+      background: rgb(200, 200, 200);
+    }
+  }
+}

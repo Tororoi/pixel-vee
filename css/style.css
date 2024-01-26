@@ -593,6 +593,33 @@ svg {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 10 10' shape-rendering='crispEdges'%3E%3Cpath stroke='%23ffffff' d='M8 0h2M7 1h1M9 1h1M6 2h1M8 2h1M3 3h1M5 3h1M7 3h1M2 4h1M4 4h1M7 4h1M1 5h1M6 5h1M2 6h1M6 6h1M3 7h1M5 7h1M4 8h1' /%3E%3Cpath stroke='%23000000' d='M8 1h1M7 2h1M6 3h1M3 4h1M5 4h2M2 5h4M3 6h3M4 7h1' /%3E%3C/svg%3E");
 }
 
+.slider {
+  height: 16px;
+  background: rgb(31, 31, 31);
+  outline: none;
+  cursor: pointer;
+}
+.slider::-webkit-slider-thumb {
+  width: 16px;
+  height: 16px;
+  background: #ffffff;
+}
+.slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  background: #ffffff;
+}
+.slider:disabled {
+  cursor: not-allowed;
+  background: rgb(131, 131, 131);
+}
+.slider:disabled::-webkit-slider-thumb {
+  background: rgb(200, 200, 200);
+}
+.slider:disabled::-moz-range-thumb {
+  background: rgb(200, 200, 200);
+}
+
 .nav {
   background-color: rgb(0, 0, 0);
   justify-self: center;
@@ -1182,9 +1209,13 @@ canvas {
   height: 40px;
   cursor: pointer;
 }
-.layers-interface .layers-control .trash.disabled {
-  opacity: 0.5;
-  cursor: no-drop;
+.layers-interface .layers-control .trash:disabled {
+  opacity: 1 !important;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h2M8 2h1M11 2h1M6 3h2M9 3h2M12 3h2M4 4h2M14 4h2M3 5h1M16 5h1M2 6h1M17 6h1M2 7h1M17 7h1M2 8h1M17 8h1M3 9h1M16 9h1M3 10h1M16 10h1M3 11h1M16 11h1M3 12h1M16 12h1M3 13h1M16 13h1M3 14h1M16 14h1M3 15h1M16 15h1M3 16h1M16 16h1M4 17h1M15 17h1M5 18h10' /%3E%3Cpath stroke='%23575757' d='M9 2h2M8 3h1M6 4h8M4 5h2M13 5h3M3 6h1M10 6h5M3 7h1M12 7h4M3 8h1M8 9h1M11 9h1M4 10h1M6 10h1M9 10h3M14 10h1M4 11h1M6 11h1M9 11h2M14 11h1M4 12h1M6 12h1M9 12h2M14 12h1M4 13h1M6 13h1M9 13h2M14 13h1M4 14h1M6 14h1M9 14h2M14 14h1M4 15h1M9 15h1M13 15h2M4 16h1M11 16h4M5 17h1' /%3E%3Cpath stroke='%23000000' d='M11 3h1M15 6h2M16 7h1M4 8h13M4 9h1M6 9h2M9 9h2M12 9h4M12 10h2M15 10h1M12 11h2M15 11h1M12 12h2M15 12h1M12 13h2M15 13h1M12 14h2M15 14h1M12 15h1M15 15h1M15 16h1M6 17h9' /%3E%3Cpath stroke='%23acacac' d='M6 5h1M8 5h5M4 6h2M7 6h3M4 7h2M8 7h4M5 9h1M5 10h1M8 10h1M5 11h1M8 11h1M11 11h1M5 12h1M8 12h1M11 12h1M5 13h1M8 13h1M11 13h1M5 14h1M8 14h1M11 14h1M5 15h1M8 15h1M10 15h2M5 16h6' /%3E%3Cpath stroke='%23ffffff' d='M7 5h1M6 6h1M6 7h2M7 10h1M7 11h1M7 12h1M7 13h1M7 14h1M6 15h2' /%3E%3C/svg%3E") !important;
+  background-size: 100% !important;
+}
+.layers-interface .layers-control .trash:disabled:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h2M8 2h1M11 2h1M6 3h2M9 3h2M12 3h2M4 4h2M14 4h2M3 5h1M16 5h1M2 6h1M17 6h1M2 7h1M17 7h1M2 8h1M17 8h1M3 9h1M16 9h1M3 10h1M16 10h1M3 11h1M16 11h1M3 12h1M16 12h1M3 13h1M16 13h1M3 14h1M16 14h1M3 15h1M16 15h1M3 16h1M16 16h1M4 17h1M15 17h1M5 18h10' /%3E%3Cpath stroke='%23575757' d='M9 2h2M8 3h1M6 4h8M4 5h2M13 5h3M3 6h1M10 6h5M3 7h1M12 7h4M3 8h1M8 9h1M11 9h1M4 10h1M6 10h1M9 10h3M14 10h1M4 11h1M6 11h1M9 11h2M14 11h1M4 12h1M6 12h1M9 12h2M14 12h1M4 13h1M6 13h1M9 13h2M14 13h1M4 14h1M6 14h1M9 14h2M14 14h1M4 15h1M9 15h1M13 15h2M4 16h1M11 16h4M5 17h1' /%3E%3Cpath stroke='%23000000' d='M11 3h1M15 6h2M16 7h1M4 8h13M4 9h1M6 9h2M9 9h2M12 9h4M12 10h2M15 10h1M12 11h2M15 11h1M12 12h2M15 12h1M12 13h2M15 13h1M12 14h2M15 14h1M12 15h1M15 15h1M15 16h1M6 17h9' /%3E%3Cpath stroke='%23acacac' d='M6 5h1M8 5h5M4 6h2M7 6h3M4 7h2M8 7h4M5 9h1M5 10h1M8 10h1M5 11h1M8 11h1M11 11h1M5 12h1M8 12h1M11 12h1M5 13h1M8 13h1M11 13h1M5 14h1M8 14h1M11 14h1M5 15h1M8 15h1M10 15h2M5 16h6' /%3E%3Cpath stroke='%23ffffff' d='M7 5h1M6 6h1M6 7h2M7 10h1M7 11h1M7 12h1M7 13h1M7 14h1M6 15h2' /%3E%3C/svg%3E") !important;
 }
 .layers-interface .layers-container {
   display: flex;
@@ -1263,6 +1294,53 @@ canvas {
   height: 40px;
   z-index: 104;
   margin: 5px;
+}
+
+.layer-settings {
+  z-index: 1000;
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  position: absolute;
+  background: rgb(61, 61, 61);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.layer-settings:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.layer-settings:after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 2px;
+  position: absolute;
+  top: calc(50% - 1px);
+  left: -4px;
+  background: rgb(131, 131, 131);
+  box-shadow: -2px -2px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px -4px rgb(131, 131, 131);
+}
+.layer-settings:hover:not([disabled]):after {
+  background: rgb(255, 255, 255);
+  box-shadow: -2px -2px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px -4px rgb(255, 255, 255);
+}
+.layer-settings > * {
+  margin: 16px 16px 0 16px;
+}
+.layer-settings > :last-child {
+  margin-bottom: 16px;
+}
+.layer-settings #layer-name {
+  width: 156px;
+  box-shadow: none;
+}
+.layer-settings label.layer-name-label {
+  cursor: text;
+}
+.layer-settings .layer-opacity-label .input-label {
+  margin-bottom: 8px;
+}
+.layer-settings .layer-opacity-label .slider {
+  width: calc(100% - 4px);
 }
 
 /* Vectors, interface provides access to select any vector existing in the timeline */
@@ -1479,31 +1557,7 @@ canvas {
 }
 .brush-container .slider {
   width: 80%;
-  height: 16px;
-  background: rgb(31, 31, 31);
-  outline: none;
   margin-bottom: 8px;
-  cursor: pointer;
-}
-.brush-container .slider::-webkit-slider-thumb {
-  width: 16px;
-  height: 16px;
-  background: #ffffff;
-}
-.brush-container .slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
-  background: #ffffff;
-}
-.brush-container .slider:disabled {
-  cursor: not-allowed;
-  background: rgb(131, 131, 131);
-}
-.brush-container .slider:disabled::-webkit-slider-thumb {
-  background: rgb(200, 200, 200);
-}
-.brush-container .slider:disabled::-moz-range-thumb {
-  background: rgb(200, 200, 200);
 }
 .brush-container .modes-title {
   margin-bottom: 4px;

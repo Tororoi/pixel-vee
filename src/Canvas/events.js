@@ -4,6 +4,7 @@ import { canvas } from "../Context/canvas.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
   renderLayersToDOM,
+  renderLayerSettingsToDOM,
   renderVectorsToDOM,
   renderPaletteToDOM,
 } from "../DOM/render.js"
@@ -243,10 +244,23 @@ function layerInteract(e) {
     e.target.classList.remove("eyeclosed")
     e.target.classList.add("eyeopen")
     layer.hidden = false
-  } else if (e.target.className.includes("trash")) {
-    // removeLayer(layer)
   } else if (e.target.className.includes("gear")) {
     //open settings dialog
+    const domLayer = e.target.closest(".layer")
+    //set top offset of layer settings container to match
+    if (
+      dom.layerSettingsContainer.style.display === "flex" &&
+      // && layer settings layer is the same as the one that was clicked
+      dom.layerSettingsContainer.layerObj === layer
+    ) {
+      dom.layerSettingsContainer.style.display = "none"
+      dom.layerSettingsContainer.layerObj = null
+    } else {
+      dom.layerSettingsContainer.style.display = "flex"
+      dom.layerSettingsContainer.layerObj = layer
+      renderLayerSettingsToDOM(domLayer)
+    }
+    //TODO: implement layer settings, including layer name and layer opacity
   } else {
     //select current layer
     if (layer !== canvas.currentLayer) {
@@ -532,6 +546,21 @@ dom.layersContainer.addEventListener("dragend", dragLayerEnd)
 // dom.layersContainer.addEventListener("pointerup", dragStop)
 // dom.layersContainer.addEventListener("pointerout", dragStop)
 // dom.layersContainer.addEventListener("pointermove", dragMove)
+dom.layerSettingsContainer.addEventListener("input", (e) => {
+  const layer = dom.layerSettingsContainer.layerObj
+  if (layer) {
+    if (e.target.matches(".slider")) {
+      layer.opacity = e.target.value / 255
+      dom.layerSettingsContainer.querySelector(
+        ".layer-opacity-label > .input-label"
+      ).textContent = `Opacity: ${Math.round(layer.opacity * 255)}`
+      renderCanvas(layer)
+    } else if (e.target.matches("#layer-name")) {
+      layer.title = e.target.value
+      renderLayersToDOM()
+    }
+  }
+})
 
 // * Vectors * //
 dom.vectorsThumbnails.addEventListener("click", vectorInteract)

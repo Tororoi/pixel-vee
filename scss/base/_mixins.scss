@@ -87,6 +87,29 @@
     0px 2px $white;
 }
 
+@mixin bubbleBorder($color: $border-color, $activeColor: $active-color) {
+  @include boxBorder($color, $activeColor);
+  &:after {
+    //Speech bubble pointer left
+    content: "";
+    display: inline-block;
+    width: 2px;
+    height: 2px;
+    position: absolute;
+    top: calc(50% - 1px);
+    left: -4px;
+    background: $color;
+    box-shadow: -2px -2px $color, 0px -2px $color, 0px -4px $color;
+  }
+  &:hover:not([disabled]) {
+    &:after {
+      background: $activeColor;
+      box-shadow: -2px -2px $activeColor, 0px -2px $activeColor,
+        0px -4px $activeColor;
+    }
+  }
+}
+
 //==================================================//
 //============= * * * Dialog Box * * * =============//
 //==================================================//

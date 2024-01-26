@@ -126,7 +126,17 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyG":
-      //
+      if (!state.clicked) {
+        //Toggle grid
+        if (vectorGui.grid) {
+          dom.gridBtn.checked = false
+          vectorGui.grid = false
+        } else {
+          dom.gridBtn.checked = true
+          vectorGui.grid = true
+        }
+        vectorGui.render()
+      }
       break
     case "KeyH":
       //
