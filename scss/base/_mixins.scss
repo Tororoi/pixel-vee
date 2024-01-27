@@ -87,7 +87,11 @@
     0px 2px $white;
 }
 
-@mixin bubbleBorder($color: $border-color, $activeColor: $active-color) {
+@mixin bubbleBorder(
+  $color: $border-color,
+  $activeColor: $active-color,
+  $background: $dark-gray
+) {
   @include boxBorder($color, $activeColor);
   &:after {
     //Speech bubble pointer left
@@ -99,13 +103,15 @@
     top: calc(50% - 1px);
     left: -4px;
     background: $color;
-    box-shadow: -2px -2px $color, 0px -2px $color, 0px -4px $color;
+    box-shadow: -2px -2px $color, 0px -2px $background, 0px -4px $color,
+      2px 0px $background, 2px -2px $background, 2px -4px $background;
   }
   &:hover:not([disabled]) {
     &:after {
       background: $activeColor;
-      box-shadow: -2px -2px $activeColor, 0px -2px $activeColor,
-        0px -4px $activeColor;
+      box-shadow: -2px -2px $activeColor, 0px -2px $background,
+        0px -4px $activeColor, 2px 0px $background, 2px -2px $background,
+        2px -4px $background;
     }
   }
 }

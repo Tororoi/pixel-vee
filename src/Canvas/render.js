@@ -524,8 +524,6 @@ export function renderCanvas(
   activeIndexes = null,
   setImages = false
 ) {
-  // window.requestAnimationFrame(() => {
-  // let begin = performance.now()
   if (redrawTimeline) {
     //clear offscreen layers
     clearOffscreenCanvas(activeLayer)
@@ -542,9 +540,6 @@ export function renderCanvas(
       drawCanvasLayer(layer, null)
     })
   }
-  // let end = performance.now()
-  // console.log(end - begin)
-  // })
 }
 
 /**

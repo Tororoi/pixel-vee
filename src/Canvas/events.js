@@ -561,6 +561,17 @@ dom.layerSettingsContainer.addEventListener("input", (e) => {
     }
   }
 })
+//TODO: maybe dynamically generate layer settings container when needed and only bind this event listener when it is open
+document.addEventListener("pointerdown", (e) => {
+  if (
+    dom.layerSettingsContainer.layerObj &&
+    !e.target.classList.contains("gear") &&
+    !dom.layerSettingsContainer.contains(e.target)
+  ) {
+    dom.layerSettingsContainer.style.display = "none"
+    dom.layerSettingsContainer.layerObj = null
+  }
+})
 
 // * Vectors * //
 dom.vectorsThumbnails.addEventListener("click", vectorInteract)

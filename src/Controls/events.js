@@ -161,14 +161,15 @@ function handlePointerDown(e) {
  * @param {PointerEvent} e
  */
 function handlePointerMove(e) {
+  if (state.clickDisabled && state.clicked) {
+    return
+  }
+  canvas.pointerEvent = "pointermove"
+  state.clickDisabled = false
+  //currently only square dimensions work
+  canvas.zoomAtLastDraw = canvas.zoom //* */
+  //use requestAnimationFrame for smoother rendering. Must be called before setting coordinates or else line may be broken unintentionally
   window.requestAnimationFrame(() => {
-    if (state.clickDisabled && state.clicked) {
-      return
-    }
-    canvas.pointerEvent = "pointermove"
-    state.clickDisabled = false
-    //currently only square dimensions work
-    canvas.zoomAtLastDraw = canvas.zoom //* */
     //coords
     setCoordinates(e)
     let cursorMoved =
@@ -179,8 +180,6 @@ function handlePointerMove(e) {
         canvas.previousSubPixelY !== canvas.subPixelY
     }
     if (cursorMoved) {
-      //Hover brush
-      // vectorGui.render()
       if (
         state.clicked ||
         ((state.tool.name === "quadCurve" ||
@@ -198,16 +197,14 @@ function handlePointerMove(e) {
           renderCursor(state, canvas, swatches)
         }
       } else {
-        //no active tool
+        //no active tool, just render cursor
         vectorGui.render()
         renderCursor(state, canvas, swatches)
       }
     }
-    // if (!state.tool.options.line?.active) {
     // save last point
     state.previousX = state.cursorX
     state.previousY = state.cursorY
-    // }
     canvas.previousSubPixelX = canvas.subPixelX
     canvas.previousSubPixelY = canvas.subPixelY
   })
