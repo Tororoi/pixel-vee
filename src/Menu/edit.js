@@ -3,6 +3,8 @@ import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { createRasterLayer } from "../Canvas/layers.js"
+import { handleTools } from "../Tools/events.js"
+import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
 
 //===================================//
 //========= * * * Edit * * * ========//
@@ -32,6 +34,7 @@ export function copySelectedPixels() {
     tempCanvas.height
   )
   tempCTX.restore()
+  state.selectClipboard.pastedBoundaryBox = { ...state.boundaryBox }
   state.selectClipboard.boundaryBox = {
     xMin: 0,
     yMin: 0,
@@ -107,8 +110,28 @@ export function pasteSelectedPixels() {
   //transformed and then draw that canvas onto the main canvas when hitting return or selecting another tool
   const tempLayer = createRasterLayer("preview")
   canvas.layers.push(tempLayer)
-  // canvas.currentLayer = tempLayer
-  tempLayer.ctx.drawImage(
+  canvas.currentLayer.inactiveTools.forEach((tool) => {
+    dom[`${tool}Btn`].disabled = false
+  })
+  //TODO: Store current layer in a separate variable to restore it after confirming pasted content
+  canvas.currentLayer = tempLayer
+  canvas.currentLayer.inactiveTools.forEach((tool) => {
+    dom[`${tool}Btn`].disabled = true
+  })
+  vectorGui.reset()
+  state.deselect()
+  //render the clipboard canvas onto the temporary layer
+  state.selectProperties = {
+    px1: state.selectClipboard.pastedBoundaryBox.xMin,
+    py1: state.selectClipboard.pastedBoundaryBox.yMin,
+    px2: state.selectClipboard.pastedBoundaryBox.xMax,
+    py2: state.selectClipboard.pastedBoundaryBox.yMax,
+  }
+  state.setBoundaryBox(state.selectProperties)
+  //TODO: need to tell that it's a modified version of the selection, so no dotted line and include transform control points for resizing (not currently implemented)
+  vectorGui.render()
+  handleTools(null, "move")
+  canvas.currentLayer.ctx.drawImage(
     state.selectClipboard.canvas,
     state.selectClipboard.boundaryBox.xMin,
     state.selectClipboard.boundaryBox.yMin,
@@ -117,5 +140,7 @@ export function pasteSelectedPixels() {
     state.selectClipboard.boundaryBox.yMax -
       state.selectClipboard.boundaryBox.yMin
   )
-  renderCanvas(tempLayer)
+  renderCanvas(canvas.currentLayer)
+  renderLayersToDOM()
+  renderVectorsToDOM()
 }

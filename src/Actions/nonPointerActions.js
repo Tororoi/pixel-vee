@@ -126,6 +126,7 @@ export function actionPasteSelection() {
       properties: {
         canvas: state.selectClipboard.canvas,
         boundaryBox,
+        pastedBoundaryBox: { ...state.selectClipboard.pastedBoundaryBox },
       },
     })
     state.action = null
