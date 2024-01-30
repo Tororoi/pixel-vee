@@ -513,7 +513,7 @@ export function clearOffscreenCanvas(activeLayer = null) {
 }
 
 /**
- * Render canvas entirely including all actions in timeline
+ * Main render function for the canvas
  * @param {Object} activeLayer
  * @param {Boolean} redrawTimeline - pass true to redraw all previous actions
  * @param {Boolean} setImages - pass true to set images for actions between indexes
@@ -524,15 +524,17 @@ export function renderCanvas(
   activeIndexes = null,
   setImages = false
 ) {
+  //Handle offscreen canvases
   if (redrawTimeline) {
     //clear offscreen layers
     clearOffscreenCanvas(activeLayer)
     //render all previous actions
     redrawTimelineActions(activeLayer, activeIndexes, setImages)
   }
+  //Handle onscreen canvases
   //render background canvas
   renderBackgroundCanvas()
-  //draw onto onscreen canvas
+  //draw offscreen canvases onto onscreen canvases
   if (activeLayer) {
     drawCanvasLayer(activeLayer)
   } else {
@@ -540,50 +542,4 @@ export function renderCanvas(
       drawCanvasLayer(layer, null)
     })
   }
-}
-
-/**
- * Render previous actions to preview canvas
- * TODO: Instead of setting onto previewCVS, set save an image and attach it to actions.
- * When performing undo, intead of rerendering all previous actions,
- * just draw the image of the affected layer that was saved before the action being undone.
- * This will require saving an image with every action and updating images for modified actions.
- * The result will be that redrawing the entire timeline will rarely need to be done and vector modifications will be much more efficient.
- * @param {Object} layer
- */
-export function setHistoricalPreview(layer) {
-  //render all previous actions
-  layer.ctx.clearRect(
-    0,
-    0,
-    canvas.offScreenCVS.width,
-    canvas.offScreenCVS.height
-  )
-  //provide start index and end index to limit render to a specific range of actions. Actions at start and end will not be rendered.
-  redrawTimelineActions(layer, canvas.currentVectorIndex)
-  canvas.previewCTX.clearRect(
-    0,
-    0,
-    canvas.previewCVS.width,
-    canvas.previewCVS.height
-  )
-  //image of previous actions saved to preview canvas to prevent unecessary rerendering
-  canvas.previewCTX.drawImage(layer.cvs, 0, 0)
-}
-
-/**
- *
- * @param {Object} layer
- * @param {Function} previewAction
- */
-export function renderPreviewAction(layer, previewAction) {
-  //put preview canvas onto offscreen canvas
-  layer.ctx.clearRect(0, 0, layer.cvs.width, layer.cvs.height)
-  layer.ctx.drawImage(canvas.previewCVS, 0, 0)
-  //render preview fill
-  previewAction()
-  //render actions from currentVectorIndex to end of timeline
-  redrawTimelineActions(layer, null, canvas.currentVectorIndex)
-  //render to onscreen canvas
-  drawCanvasLayer(layer)
 }

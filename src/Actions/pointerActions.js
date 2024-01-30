@@ -213,7 +213,6 @@ export function actionLine(
  * @param {Object} currentModes
  * @param {Set} maskSet
  * @param {CanvasRenderingContext2D} [customContext] - use custom context if provided
- * @param {Boolean} [isPreview]
  * @returns
  */
 export function actionFill(
@@ -225,8 +224,7 @@ export function actionFill(
   layer,
   currentModes,
   maskSet,
-  customContext = null,
-  isPreview = false
+  customContext = null
 ) {
   //exit if outside borders
   if (isOutOfBounds(startX, startY, 0, layer, boundaryBox, selectionInversed)) {
@@ -241,8 +239,6 @@ export function actionFill(
   let ctx = layer.ctx
   if (customContext) {
     ctx = customContext
-  } else if (isPreview) {
-    ctx = canvas.previewCTX
   }
   let layerImageData = ctx.getImageData(xMin, yMin, xMax - xMin, yMax - yMin)
   let clickedColor = getColor(layerImageData, startX - xMin, startY - yMin)

@@ -46,9 +46,10 @@ export function consolidateLayers(includeReference = false) {
 
 /**
  * Create a new raster layer
+ * @param {Boolean} isPreview - whether the layer is a preview layer
  * @returns {Object} layer
  */
-export function createNewRasterLayer() {
+export function createRasterLayer(isPreview = false) {
   let offscreenLayerCVS = document.createElement("canvas")
   let offscreenLayerCTX = offscreenLayerCVS.getContext("2d", {
     willReadFrequently: true,
@@ -90,6 +91,7 @@ export function createNewRasterLayer() {
     inactiveTools: [],
     hidden: false,
     removed: false,
+    isPreview: isPreview,
   }
 }
 
@@ -98,7 +100,7 @@ export function createNewRasterLayer() {
  * @param {Object} img - image object
  * @returns {Object} layer
  */
-export function createNewReferenceLayer(img) {
+export function createReferenceLayer(img) {
   let onscreenLayerCVS = document.createElement("canvas")
   let onscreenLayerCTX = onscreenLayerCVS.getContext("2d", {
     willReadFrequently: true,

@@ -4,10 +4,7 @@ import { canvas } from "../Context/canvas.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
-import {
-  createNewRasterLayer,
-  createNewReferenceLayer,
-} from "../Canvas/layers.js"
+import { createRasterLayer, createReferenceLayer } from "../Canvas/layers.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
   renderLayersToDOM,
@@ -155,7 +152,7 @@ export function addReferenceLayer() {
     reader.onload = (e) => {
       img.src = e.target.result
       img.onload = () => {
-        const layer = createNewReferenceLayer(img)
+        const layer = createReferenceLayer(img)
         canvas.layers.unshift(layer)
         addToTimeline({
           tool: tools.addLayer,
@@ -178,7 +175,7 @@ export function addReferenceLayer() {
  */
 export function addRasterLayer() {
   //once layer is added to timeline and drawn on, can no longer be deleted
-  const layer = createNewRasterLayer()
+  const layer = createRasterLayer()
   canvas.layers.push(layer)
   addToTimeline({
     tool: tools.addLayer,
@@ -188,6 +185,22 @@ export function addRasterLayer() {
   state.redoStack = []
   renderLayersToDOM()
 }
+
+// /**
+//  * Add layer
+//  * Add a new preview layer - used for pasting and dragging
+//  */
+// export function addPreviewLayer() {
+//   //once layer is added to timeline and drawn on, can no longer be deleted
+//   const layer = createRasterLayer("preview")
+//   canvas.layers.push(layer)
+//   addToTimeline({
+//     tool: tools.addLayer,
+//     layer,
+//   })
+//   state.action = null
+//   state.redoStack = []
+// }
 
 /**
  * Mark a layer as removed

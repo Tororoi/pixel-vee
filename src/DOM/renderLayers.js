@@ -2,7 +2,6 @@ import { dom } from "../Context/dom.js"
 import { canvas } from "../Context/canvas.js"
 import {
   createHideElement,
-  createTrashElement,
   createSettingsElement,
 } from "../utils/actionInterfaceHelpers.js"
 
@@ -15,7 +14,7 @@ export const renderLayersToDOM = () => {
   canvas.activeLayerCount = 0
 
   canvas.layers.forEach((l) => {
-    if (!l.removed) {
+    if (!l.removed && !l.isPreview) {
       if (l.type === "raster") {
         canvas.activeLayerCount++
       }

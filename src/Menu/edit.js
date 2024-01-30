@@ -2,6 +2,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
+import { createRasterLayer } from "../Canvas/layers.js"
 
 //===================================//
 //========= * * * Edit * * * ========//
@@ -88,15 +89,27 @@ export function cutSelectedPixels() {
 
 export function pasteSelectedPixels() {
   //draw clipboard canvas onto layer canvas
-  //TODO: Instead of pasting directly onto canvas layer,
+  // canvas.currentLayer.ctx.drawImage(
+  //   state.selectClipboard.canvas,
+  //   // 0,
+  //   // 0,
+  //   // canvas.currentLayer.cvs.width,
+  //   // canvas.currentLayer.cvs.height,
+  //   state.selectClipboard.boundaryBox.xMin,
+  //   state.selectClipboard.boundaryBox.yMin,
+  //   state.selectClipboard.boundaryBox.xMax -
+  //     state.selectClipboard.boundaryBox.xMin,
+  //   state.selectClipboard.boundaryBox.yMax -
+  //     state.selectClipboard.boundaryBox.yMin
+  // )
+  //Alternative: Instead of pasting directly onto canvas layer,
   //paste onto a temporary canvas layer that can be moved around/
   //transformed and then draw that canvas onto the main canvas when hitting return or selecting another tool
-  canvas.currentLayer.ctx.drawImage(
+  const tempLayer = createRasterLayer("preview")
+  canvas.layers.push(tempLayer)
+  // canvas.currentLayer = tempLayer
+  tempLayer.ctx.drawImage(
     state.selectClipboard.canvas,
-    // 0,
-    // 0,
-    // canvas.currentLayer.cvs.width,
-    // canvas.currentLayer.cvs.height,
     state.selectClipboard.boundaryBox.xMin,
     state.selectClipboard.boundaryBox.yMin,
     state.selectClipboard.boundaryBox.xMax -
@@ -104,4 +117,5 @@ export function pasteSelectedPixels() {
     state.selectClipboard.boundaryBox.yMax -
       state.selectClipboard.boundaryBox.yMin
   )
+  renderCanvas(tempLayer)
 }
