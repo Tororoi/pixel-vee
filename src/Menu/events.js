@@ -284,6 +284,13 @@ dom.saveAsForm.addEventListener("change", (e) => {
     setSaveFilesizePreview()
   }
 })
+dom.saveAsForm.addEventListener("submit", (e) => {
+  //prevent default form submission
+  e.preventDefault()
+  saveDrawing()
+  dom.saveContainer.style.display = "none"
+  state.saveDialogOpen = false
+})
 dom.saveAsFileName.addEventListener("input", (e) => {
   state.saveSettings.saveAsFileName = e.target.value
   dom.saveAsFileName.style.width =

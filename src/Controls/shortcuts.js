@@ -33,6 +33,9 @@ import { actionCopySelection } from "../Actions/untrackedActions.js"
  */
 export function activateShortcut(keyCode) {
   switch (keyCode) {
+    case "Enter":
+      //handle confirm paste
+      break
     case "MetaLeft":
     case "MetaRight":
       //command key
@@ -152,7 +155,9 @@ export function activateShortcut(keyCode) {
       break
     case "KeyJ":
       if (!state.clicked) {
+        // if (!keys.MetaLeft && !keys.MetaRight) {
         handleTools(null, "cubicCurve")
+        // }
       }
       break
     case "KeyK":
@@ -198,6 +203,8 @@ export function activateShortcut(keyCode) {
       if (!state.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           openSaveDialogBox()
+        } else {
+          handleTools(null, "select")
         }
       }
       break

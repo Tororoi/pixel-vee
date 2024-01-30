@@ -262,6 +262,7 @@ function layerInteract(e) {
     }
     //TODO: implement layer settings, including layer name and layer opacity
   } else {
+    //TODO: allow selecting multiple layers for moving purposes only
     //select current layer
     if (layer !== canvas.currentLayer) {
       canvas.currentLayer.inactiveTools.forEach((tool) => {
