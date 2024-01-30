@@ -5,23 +5,27 @@ import { renderCanvas } from "../Canvas/render.js"
 import { createRasterLayer } from "../Canvas/layers.js"
 import { handleTools } from "../Tools/events.js"
 import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
+import { addToTimeline } from "../Actions/undoRedo.js"
 
 //===================================//
 //========= * * * Edit * * * ========//
 //===================================//
 
+/**
+ * Copy selected pixels
+ * Not dependent on pointer events
+ */
 export function copySelectedPixels() {
   const { xMin, yMin, xMax, yMax } = state.boundaryBox
   const tempCanvas = document.createElement("canvas")
   tempCanvas.width = canvas.currentLayer.cvs.width
   tempCanvas.height = canvas.currentLayer.cvs.height
   const tempCTX = tempCanvas.getContext("2d", { willReadFrequently: true })
-  // if (state.selectionInversed) {
-  //inverted selection: get dataURL for entire canvas area minus boundaryBox
   //clip boundaryBox
   tempCTX.save()
   tempCTX.beginPath()
   if (state.selectionInversed) {
+    //get data for entire canvas area minus boundaryBox
     tempCTX.rect(0, 0, tempCanvas.width, tempCanvas.height)
   }
   tempCTX.rect(xMin, yMin, xMax - xMin, yMax - yMin)
@@ -41,25 +45,13 @@ export function copySelectedPixels() {
     xMax: tempCanvas.width,
     yMax: tempCanvas.height,
   }
-  // } else {
-  //   //non-inverted selection
-  //   //get dataURL for clipboard of boundaryBox area
-  //   tempCTX.drawImage(
-  //     canvas.currentLayer.cvs,
-  //     xMin,
-  //     yMin,
-  //     xMax - xMin,
-  //     yMax - yMin
-  //     // 0,
-  //     // 0,
-  //     // tempCanvas.width,
-  //     // tempCanvas.height
-  //   )
-  //   state.selectClipboard.boundaryBox = { ...state.boundaryBox }
-  // }
   state.selectClipboard.canvas = tempCanvas
 }
 
+/**
+ * Cut selected pixels
+ * Not dependent on pointer events
+ */
 export function cutSelectedPixels() {
   copySelectedPixels()
   const { xMin, yMin, xMax, yMax } = state.boundaryBox
@@ -90,30 +82,21 @@ export function cutSelectedPixels() {
   }
 }
 
+/**
+ * Paste selected pixels
+ * Not dependent on pointer events
+ * TODO: add to timeline
+ */
 export function pasteSelectedPixels() {
-  //draw clipboard canvas onto layer canvas
-  // canvas.currentLayer.ctx.drawImage(
-  //   state.selectClipboard.canvas,
-  //   // 0,
-  //   // 0,
-  //   // canvas.currentLayer.cvs.width,
-  //   // canvas.currentLayer.cvs.height,
-  //   state.selectClipboard.boundaryBox.xMin,
-  //   state.selectClipboard.boundaryBox.yMin,
-  //   state.selectClipboard.boundaryBox.xMax -
-  //     state.selectClipboard.boundaryBox.xMin,
-  //   state.selectClipboard.boundaryBox.yMax -
-  //     state.selectClipboard.boundaryBox.yMin
-  // )
-  //Alternative: Instead of pasting directly onto canvas layer,
-  //paste onto a temporary canvas layer that can be moved around/
+  //Paste onto a temporary canvas layer that can be moved around/
   //transformed and then draw that canvas onto the main canvas when hitting return or selecting another tool
   const tempLayer = createRasterLayer("preview")
   canvas.layers.push(tempLayer)
   canvas.currentLayer.inactiveTools.forEach((tool) => {
     dom[`${tool}Btn`].disabled = false
   })
-  //TODO: Store current layer in a separate variable to restore it after confirming pasted content
+  //Store current layer in a separate variable to restore it after confirming pasted content
+  canvas.pastedLayer = canvas.currentLayer
   canvas.currentLayer = tempLayer
   canvas.currentLayer.inactiveTools.forEach((tool) => {
     dom[`${tool}Btn`].disabled = true
@@ -140,7 +123,35 @@ export function pasteSelectedPixels() {
     state.selectClipboard.boundaryBox.yMax -
       state.selectClipboard.boundaryBox.yMin
   )
+  //add to timeline
+  // addToTimeline({
+  //   tool: tools.paste,
+  //   layer: canvas.pastedLayer,
+  //   properties: {
+  //     selectClipboard: { ...state.selectClipboard },
+  //   },
+  // })
+
   renderCanvas(canvas.currentLayer)
   renderLayersToDOM()
   renderVectorsToDOM()
 }
+
+/**
+ * Confirm pasted pixels
+ * Not dependent on pointer events
+ */
+// export function confirmPastedPixels() {
+//   //restore the original layer
+//   canvas.layers.splice(canvas.layers.indexOf(canvas.currentLayer), 1)
+//   canvas.currentLayer = canvas.pastedLayer
+//   canvas.pastedLayer = null
+//   canvas.currentLayer.inactiveTools.forEach((tool) => {
+//     dom[`${tool}Btn`].disabled = false
+//   })
+//   renderCanvas(canvas.currentLayer)
+//   renderLayersToDOM()
+//   renderVectorsToDOM()
+//   state.deselect()
+//   vectorGui.render()
+// }

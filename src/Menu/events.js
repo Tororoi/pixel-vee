@@ -298,11 +298,6 @@ dom.saveAsFileName.addEventListener("input", (e) => {
     2 +
     "px"
 })
-dom.saveDrawingBtn.addEventListener("click", (e) => {
-  saveDrawing()
-  dom.saveContainer.style.display = "none"
-  state.saveDialogOpen = false
-})
 dom.cancelSaveBtn.addEventListener("click", (e) => {
   dom.saveContainer.style.display = "none"
   state.saveDialogOpen = false

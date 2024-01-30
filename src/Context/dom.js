@@ -86,8 +86,6 @@ const fileSizePreview = document.querySelector("#savefile-size")
 const advancedOptionsContainer = document.querySelector(
   "#save-advanced-options"
 )
-// * Save Button * //
-const saveDrawingBtn = document.querySelector("#save-button")
 // * Cancel Button * //
 const cancelSaveBtn = document.querySelector("#cancel-save-button")
 
@@ -237,7 +235,6 @@ export const dom = {
   saveAsFileName,
   fileSizePreview,
   advancedOptionsContainer,
-  saveDrawingBtn,
   cancelSaveBtn,
   exportContainer,
   //toolbox

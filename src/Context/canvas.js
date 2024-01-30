@@ -51,7 +51,7 @@ export const canvas = {
   layers: [], //(types: raster, vector, reference)
   activeLayerCount: 0,
   currentLayer: null,
-  tempLayer: null,
+  pastedLayer: null,
   hiddenLayer: null,
   bgColor: "rgba(131, 131, 131, 0.5)",
   borderColor: "black",
