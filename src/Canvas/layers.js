@@ -167,17 +167,6 @@ export function createPreviewLayer() {
     willReadFrequently: true,
   })
   onscreenLayerCVS.className = "onscreen-canvas"
-  // dom.canvasLayers.appendChild(onscreenLayerCVS)
-  // onscreenLayerCVS.width = onscreenLayerCVS.offsetWidth * canvas.sharpness
-  // onscreenLayerCVS.height = onscreenLayerCVS.offsetHeight * canvas.sharpness
-  // onscreenLayerCTX.setTransform(
-  //   canvas.sharpness * canvas.zoom,
-  //   0,
-  //   0,
-  //   canvas.sharpness * canvas.zoom,
-  //   0,
-  //   0
-  // )
   let highestId = canvas.layers.reduce(
     (max, layer) => (layer.id > max ? layer.id : max),
     0
@@ -194,7 +183,14 @@ export function createPreviewLayer() {
     y: 0,
     scale: 1,
     opacity: 1,
-    inactiveTools: ["brush", "fill", "line", "quadCurve", "cubicCurve", "ellipse"],
+    inactiveTools: [
+      "brush",
+      "fill",
+      "line",
+      "quadCurve",
+      "cubicCurve",
+      "ellipse",
+    ],
     hidden: false,
     removed: false,
     isPreview: true,

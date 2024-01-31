@@ -11,6 +11,7 @@ import {
   renderVectorsToDOM,
   renderPaletteToDOM,
 } from "../DOM/render.js"
+import { handleTools } from "../Tools/events.js"
 import { cutSelectedPixels, pasteSelectedPixels } from "../Menu/edit.js"
 
 //=============================================//
@@ -111,28 +112,27 @@ export function actionCutSelection() {
  */
 export function actionPasteSelection() {
   if (canvas.currentLayer.type === "raster" && state.selectClipboard.canvas) {
-    pasteSelectedPixels()
-    //correct boundary box for layer offset
-    const boundaryBox = { ...state.selectClipboard.boundaryBox }
-    if (boundaryBox.xMax !== null) {
-      boundaryBox.xMin -= canvas.currentLayer.x
-      boundaryBox.xMax -= canvas.currentLayer.x
-      boundaryBox.yMin -= canvas.currentLayer.y
-      boundaryBox.yMax -= canvas.currentLayer.y
-    }
+    vectorGui.reset()
+    pasteSelectedPixels(state.selectClipboard, canvas.currentLayer)
+    //add to timeline
     addToTimeline({
       tool: tools.paste,
-      layer: canvas.currentLayer,
+      layer: canvas.pastedLayer,
       properties: {
-        canvas: state.selectClipboard.canvas,
-        boundaryBox,
+        confirmed: false,
+        boundaryBox: { ...state.selectClipboard.boundaryBox },
         pastedBoundaryBox: { ...state.selectClipboard.pastedBoundaryBox },
+        canvas: state.selectClipboard.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
       },
     })
     state.action = null
     state.redoStack = []
+
     renderCanvas(canvas.currentLayer)
+    renderLayersToDOM()
+    //TODO: need to tell that it's a modified version of the selection, so no dotted line and include transform control points for resizing (not currently implemented)
     vectorGui.render()
+    handleTools(null, "move")
   }
 }
 

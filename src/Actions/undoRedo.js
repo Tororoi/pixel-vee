@@ -1,10 +1,13 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
+// import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { clearOffscreenCanvas, renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM, renderLayersToDOM } from "../DOM/render.js"
 import { setSaveFilesizePreview } from "../Save/savefile.js"
+// import { handleTools } from "../Tools/events.js"
+// import { pasteSelectedPixels } from "../Menu/edit.js"
 
 //====================================//
 //========= * * * Core * * * =========//
@@ -155,7 +158,23 @@ function handlePasteAction(latestAction, modType) {
   //TODO: handle paste action
   //pseudo code:
   //if modType is "from" (undoing paste action), remove the templayer
-  //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
+  // if (modType === "from") {
+  //   canvas.layers.splice(canvas.layers.indexOf(canvas.tempLayer), 1)
+  //   dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
+  //   canvas.tempLayer.inactiveTools.forEach((tool) => {
+  //     dom[`${tool}Btn`].disabled = false
+  //   })
+  //   //restore the original layer
+  //   canvas.currentLayer = latestAction.layer
+  //   canvas.pastedLayer = null
+  //   canvas.currentLayer.inactiveTools.forEach((tool) => {
+  //     dom[`${tool}Btn`].disabled = true
+  //   })
+  // } else if (modType === "to") {
+  //   //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
+  //   // pasteSelectedPixels(latestAction.properties, latestAction.layer)
+  //   // handleTools(null, "move")
+  // }
 }
 
 /**
