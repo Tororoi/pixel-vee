@@ -348,13 +348,32 @@ export function performAction(action, betweenCtx = null) {
       }
       break
     case "paste":
-      action.layer.ctx.drawImage(
-        action.properties.canvas,
-        boundaryBox.xMin,
-        boundaryBox.yMin,
-        boundaryBox.xMax - boundaryBox.xMin,
-        boundaryBox.yMax - boundaryBox.yMin
-      )
+      //render confirmed paste action
+      if (action.properties.confirmed) {
+        action.layer.ctx.drawImage(
+          action.properties.canvas,
+          boundaryBox.xMin,
+          boundaryBox.yMin,
+          boundaryBox.xMax - boundaryBox.xMin,
+          boundaryBox.yMax - boundaryBox.yMin
+        )
+      }
+      // if (
+      //   canvas.tempLayer === canvas.currentLayer &&
+      //   canvas.pastedLayer === action.layer &&
+      //   //only render if this action is the last non-mod action in the stack (TODO: needs refining to handle mod actions on the pasted content before confirmation)
+      //   state.undoStack[state.undoStack.length - 1] === action
+      // )
+      else {
+        //render paste action - NOTE: this is not the final paste action, only the preview so it should only be rendered if the current layer is the temp layer
+        canvas.tempLayer.ctx.drawImage(
+          action.properties.canvas,
+          boundaryBox.xMin,
+          boundaryBox.yMin,
+          boundaryBox.xMax - boundaryBox.xMin,
+          boundaryBox.yMax - boundaryBox.yMin
+        )
+      }
       break
     default:
     //do nothing

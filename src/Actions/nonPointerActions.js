@@ -187,22 +187,6 @@ export function addRasterLayer() {
   renderLayersToDOM()
 }
 
-// /**
-//  * Add layer
-//  * Add a new preview layer - used for pasting and dragging
-//  */
-// export function addPreviewLayer() {
-//   //once layer is added to timeline and drawn on, can no longer be deleted
-//   const layer = createRasterLayer("preview")
-//   canvas.layers.push(layer)
-//   addToTimeline({
-//     tool: tools.addLayer,
-//     layer,
-//   })
-//   state.action = null
-//   state.redoStack = []
-// }
-
 /**
  * Mark a layer as removed
  * @param {Object} layer

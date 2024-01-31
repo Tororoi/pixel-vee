@@ -1,5 +1,7 @@
+import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { createRasterLayer } from "../Canvas/layers.js"
@@ -90,19 +92,41 @@ export function cutSelectedPixels() {
 export function pasteSelectedPixels() {
   //Paste onto a temporary canvas layer that can be moved around/
   //transformed and then draw that canvas onto the main canvas when hitting return or selecting another tool
-  const tempLayer = createRasterLayer("preview")
-  canvas.layers.push(tempLayer)
+  //update tempLayer dimensions to match the current layer canvas
+  canvas.tempLayer.cvs.width = canvas.currentLayer.cvs.width
+  canvas.tempLayer.cvs.height = canvas.currentLayer.cvs.height
+  //add the temp canvas to the dom and set onscreen canvas dimensions and scale
+  dom.canvasLayers.appendChild(canvas.tempLayer.onscreenCvs)
+  canvas.tempLayer.onscreenCvs.width =
+    canvas.tempLayer.onscreenCvs.offsetWidth * canvas.sharpness
+  canvas.tempLayer.onscreenCvs.height =
+    canvas.tempLayer.onscreenCvs.offsetHeight * canvas.sharpness
+  canvas.tempLayer.onscreenCtx.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
+  canvas.tempLayer.x = 0
+  canvas.tempLayer.y = 0
+  //splice the tempLayer just after the canvas.currentLayer index
+  canvas.layers.splice(
+    canvas.layers.indexOf(canvas.currentLayer) + 1,
+    0,
+    canvas.tempLayer
+  )
   canvas.currentLayer.inactiveTools.forEach((tool) => {
     dom[`${tool}Btn`].disabled = false
   })
   //Store current layer in a separate variable to restore it after confirming pasted content
   canvas.pastedLayer = canvas.currentLayer
-  canvas.currentLayer = tempLayer
+  canvas.currentLayer = canvas.tempLayer
   canvas.currentLayer.inactiveTools.forEach((tool) => {
     dom[`${tool}Btn`].disabled = true
   })
   vectorGui.reset()
-  state.deselect()
   //render the clipboard canvas onto the temporary layer
   state.selectProperties = {
     px1: state.selectClipboard.pastedBoundaryBox.xMin,
@@ -124,13 +148,18 @@ export function pasteSelectedPixels() {
       state.selectClipboard.boundaryBox.yMin
   )
   //add to timeline
-  // addToTimeline({
-  //   tool: tools.paste,
-  //   layer: canvas.pastedLayer,
-  //   properties: {
-  //     selectClipboard: { ...state.selectClipboard },
-  //   },
-  // })
+  addToTimeline({
+    tool: tools.paste,
+    layer: canvas.pastedLayer,
+    properties: {
+      confirmed: false,
+      boundaryBox: { ...state.selectClipboard.boundaryBox },
+      pastedBoundaryBox: { ...state.selectClipboard.pastedBoundaryBox },
+      canvas: state.selectClipboard.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
+    },
+  })
+  state.action = null
+  state.redoStack = []
 
   renderCanvas(canvas.currentLayer)
   renderLayersToDOM()
@@ -141,17 +170,67 @@ export function pasteSelectedPixels() {
  * Confirm pasted pixels
  * Not dependent on pointer events
  */
-// export function confirmPastedPixels() {
-//   //restore the original layer
-//   canvas.layers.splice(canvas.layers.indexOf(canvas.currentLayer), 1)
-//   canvas.currentLayer = canvas.pastedLayer
-//   canvas.pastedLayer = null
-//   canvas.currentLayer.inactiveTools.forEach((tool) => {
-//     dom[`${tool}Btn`].disabled = false
-//   })
-//   renderCanvas(canvas.currentLayer)
-//   renderLayersToDOM()
-//   renderVectorsToDOM()
-//   state.deselect()
-//   vectorGui.render()
-// }
+export function confirmPastedPixels() {
+  //draw the current layer onto the pasted layer
+  canvas.pastedLayer.ctx.drawImage(
+    canvas.tempLayer.cvs,
+    0,
+    0,
+    canvas.pastedLayer.cvs.width,
+    canvas.pastedLayer.cvs.height
+  )
+  //adjust boundaryBox for layer offset
+  const boundaryBox = { ...state.selectClipboard.boundaryBox }
+  if (boundaryBox.xMax !== null) {
+    boundaryBox.xMin += canvas.tempLayer.x
+    boundaryBox.xMax += canvas.tempLayer.x
+    boundaryBox.yMin += canvas.tempLayer.y
+    boundaryBox.yMax += canvas.tempLayer.y
+  }
+  const pastedBoundaryBox = { ...state.selectClipboard.pastedBoundaryBox }
+  if (pastedBoundaryBox.xMax !== null) {
+    pastedBoundaryBox.xMin += canvas.tempLayer.x
+    pastedBoundaryBox.xMax += canvas.tempLayer.x
+    pastedBoundaryBox.yMin += canvas.tempLayer.y
+    pastedBoundaryBox.yMax += canvas.tempLayer.y
+  }
+  //add to timeline
+  addToTimeline({
+    tool: tools.paste,
+    layer: canvas.pastedLayer,
+    properties: {
+      confirmed: true,
+      boundaryBox,
+      pastedBoundaryBox,
+      canvas: state.selectClipboard.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
+    },
+  })
+  state.action = null
+  state.redoStack = []
+  //remove the temporary layer
+  canvas.layers.splice(canvas.layers.indexOf(canvas.tempLayer), 1)
+  dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
+  canvas.tempLayer.inactiveTools.forEach((tool) => {
+    dom[`${tool}Btn`].disabled = false
+  })
+  //restore the original layer
+  canvas.currentLayer = canvas.pastedLayer
+  canvas.pastedLayer = null
+  canvas.currentLayer.inactiveTools.forEach((tool) => {
+    dom[`${tool}Btn`].disabled = true
+  })
+  //reset state properties
+  vectorGui.reset()
+  state.deselect()
+  canvas.rasterGuiCTX.clearRect(
+    0,
+    0,
+    canvas.rasterGuiCVS.width,
+    canvas.rasterGuiCVS.height
+  )
+  //render
+  vectorGui.render()
+  renderCanvas()
+  renderLayersToDOM()
+  renderVectorsToDOM()
+}

@@ -26,6 +26,7 @@ import {
   actionPasteSelection,
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
+import { confirmPastedPixels } from "../Menu/edit.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
@@ -35,6 +36,9 @@ export function activateShortcut(keyCode) {
   switch (keyCode) {
     case "Enter":
       //handle confirm paste
+      if (!state.clicked) {
+        confirmPastedPixels()
+      }
       break
     case "MetaLeft":
     case "MetaRight":

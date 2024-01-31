@@ -97,7 +97,6 @@ export const state = {
   selectClipboard: {
     boundaryBox: null,
     canvasBoundaryBox: null,
-    dataURL: null,
     canvas: null,
     //TODO: for copying vectors, need more properties
   },

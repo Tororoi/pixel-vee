@@ -46,10 +46,9 @@ export function consolidateLayers(includeReference = false) {
 
 /**
  * Create a new raster layer
- * @param {Boolean} isPreview - whether the layer is a preview layer
  * @returns {Object} layer
  */
-export function createRasterLayer(isPreview = false) {
+export function createRasterLayer() {
   let offscreenLayerCVS = document.createElement("canvas")
   let offscreenLayerCTX = offscreenLayerCVS.getContext("2d", {
     willReadFrequently: true,
@@ -91,7 +90,6 @@ export function createRasterLayer(isPreview = false) {
     inactiveTools: [],
     hidden: false,
     removed: false,
-    isPreview: isPreview,
   }
 }
 
@@ -150,5 +148,55 @@ export function createReferenceLayer(img) {
     ],
     hidden: false,
     removed: false,
+  }
+}
+
+/**
+ * Create a new preview layer
+ * @returns {Object} layer
+ */
+export function createPreviewLayer() {
+  let offscreenLayerCVS = document.createElement("canvas")
+  let offscreenLayerCTX = offscreenLayerCVS.getContext("2d", {
+    willReadFrequently: true,
+  })
+  offscreenLayerCVS.width = canvas.offScreenCVS.width
+  offscreenLayerCVS.height = canvas.offScreenCVS.height
+  let onscreenLayerCVS = document.createElement("canvas")
+  let onscreenLayerCTX = onscreenLayerCVS.getContext("2d", {
+    willReadFrequently: true,
+  })
+  onscreenLayerCVS.className = "onscreen-canvas"
+  // dom.canvasLayers.appendChild(onscreenLayerCVS)
+  // onscreenLayerCVS.width = onscreenLayerCVS.offsetWidth * canvas.sharpness
+  // onscreenLayerCVS.height = onscreenLayerCVS.offsetHeight * canvas.sharpness
+  // onscreenLayerCTX.setTransform(
+  //   canvas.sharpness * canvas.zoom,
+  //   0,
+  //   0,
+  //   canvas.sharpness * canvas.zoom,
+  //   0,
+  //   0
+  // )
+  let highestId = canvas.layers.reduce(
+    (max, layer) => (layer.id > max ? layer.id : max),
+    0
+  )
+  return {
+    id: highestId + 1,
+    type: "raster",
+    title: `Layer ${highestId + 1}`,
+    cvs: offscreenLayerCVS,
+    ctx: offscreenLayerCTX,
+    onscreenCvs: onscreenLayerCVS,
+    onscreenCtx: onscreenLayerCTX,
+    x: 0,
+    y: 0,
+    scale: 1,
+    opacity: 1,
+    inactiveTools: ["brush", "fill", "line", "quadCurve", "cubicCurve", "ellipse"],
+    hidden: false,
+    removed: false,
+    isPreview: true,
   }
 }

@@ -20,6 +20,7 @@ import {
   addRasterLayer,
   removeLayer,
 } from "../Actions/nonPointerActions.js"
+import { createPreviewLayer } from "./layers.js"
 
 //====================================//
 //==== * * * Canvas Resize * * * =====//
@@ -494,6 +495,9 @@ renderCanvas(canvas.currentLayer)
 renderLayersToDOM()
 renderPaletteToDOM()
 // renderBrushModesToDOM()
+
+//Initialize temp layer, not added to layers array
+canvas.tempLayer = createPreviewLayer()
 
 //===================================//
 //=== * * * Event Listeners * * * ===//
