@@ -357,15 +357,11 @@ export function performAction(action, betweenCtx = null) {
           boundaryBox.xMax - boundaryBox.xMin,
           boundaryBox.yMax - boundaryBox.yMin
         )
-      }
-      // if (
-      //   canvas.tempLayer === canvas.currentLayer &&
-      //   canvas.pastedLayer === action.layer &&
-      //   //only render if this action is the last non-mod action in the stack (TODO: needs refining to handle mod actions on the pasted content before confirmation)
-      //   state.undoStack[state.undoStack.length - 1] === action
-      // )
-      else {
-        //render paste action - NOTE: this is not the final paste action, only the preview so it should only be rendered if the current layer is the temp layer
+      } else if (
+        canvas.tempLayer === canvas.currentLayer && //only render if the current layer is the temp layer (active paste action)
+        state.undoStack[state.undoStack.length - 1] === action //only render if this action is the last non-mod action in the stack (TODO: needs refining to handle mod actions on the pasted content before confirmation)
+      ) {
+        //render paste action - NOTE: this is not the final paste action, only the preview so it should only be rendered if it is the active paste action
         canvas.tempLayer.ctx.drawImage(
           action.properties.canvas,
           boundaryBox.xMin,

@@ -148,6 +148,28 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
 }
 
 /**
+ * @param {Object} latestAction
+ * @param {String} modType
+ */
+function handlePasteAction(latestAction, modType) {
+  //TODO: handle paste action
+  //pseudo code:
+  //if modType is "from" (undoing paste action), remove the templayer
+  //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
+}
+
+/**
+ * @param {Object} latestAction
+ * @param {String} modType
+ */
+function handleConfirmPasteAction(latestAction, modType) {
+  //TODO: handle confirm paste action
+  //pseudo code:
+  //if modType is "from" (undoing confirm paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
+  //if modType is "to" (redoing confirm paste action), basically do the confirmPastedPixels function except use the action properties instead of the clipboard and don't add to timeline. Also don't need to adjust for layer offset
+}
+
+/**
  *
  * @param {Object} latestAction
  * @param {String} modType
