@@ -97,9 +97,9 @@ export function pasteSelectedPixels(clipboard, layer) {
   canvas.tempLayer.cvs.width = layer.cvs.width
   canvas.tempLayer.cvs.height = layer.cvs.height
   //add the temp canvas to the dom and set onscreen canvas dimensions and scale
-  // dom.canvasLayers.appendChild(canvas.tempLayer.onscreenCvs)
+  dom.canvasLayers.appendChild(canvas.tempLayer.onscreenCvs)
   //insert canvas right after the current layer's canvas in the DOM
-  layer.onscreenCvs.after(canvas.tempLayer.onscreenCvs)
+  // layer.onscreenCvs.after(canvas.tempLayer.onscreenCvs)
   canvas.tempLayer.onscreenCvs.width =
     canvas.tempLayer.onscreenCvs.offsetWidth * canvas.sharpness
   canvas.tempLayer.onscreenCvs.height =
@@ -126,7 +126,7 @@ export function pasteSelectedPixels(clipboard, layer) {
     dom[`${tool}Btn`].disabled = true
   })
 
-  const { pastedBoundaryBox, boundaryBox, canvas } = clipboard
+  const { pastedBoundaryBox, boundaryBox } = clipboard
   //render the clipboard canvas onto the temporary layer
   state.selectProperties = {
     px1: pastedBoundaryBox.xMin,
@@ -136,7 +136,7 @@ export function pasteSelectedPixels(clipboard, layer) {
   }
   state.setBoundaryBox(state.selectProperties)
   canvas.currentLayer.ctx.drawImage(
-    canvas,
+    clipboard.canvas,
     boundaryBox.xMin,
     boundaryBox.yMin,
     boundaryBox.xMax - boundaryBox.xMin,

@@ -117,12 +117,13 @@ export function actionPasteSelection() {
     //add to timeline
     addToTimeline({
       tool: tools.paste,
-      layer: canvas.pastedLayer,
+      layer: canvas.currentLayer,
       properties: {
         confirmed: false,
         boundaryBox: { ...state.selectClipboard.boundaryBox },
         pastedBoundaryBox: { ...state.selectClipboard.pastedBoundaryBox },
         canvas: state.selectClipboard.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
+        pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
       },
     })
     state.action = null
