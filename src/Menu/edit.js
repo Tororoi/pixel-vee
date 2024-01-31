@@ -4,7 +4,6 @@ import { canvas } from "../Context/canvas.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
-// import { handleTools } from "../Tools/events.js"
 import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 
