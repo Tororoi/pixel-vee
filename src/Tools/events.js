@@ -10,11 +10,13 @@ import { updateBrushPreview } from "../utils/brushHelpers.js"
 import { actionClear } from "../Actions/modifyTimeline.js"
 import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
-import { renderVectorsToDOM, renderBrushModesToDOM } from "../DOM/render.js"
+import {
+  renderVectorsToDOM,
+  renderBrushModesToDOM,
+  renderBrushStampToDOM,
+} from "../DOM/render.js"
 import { renderCursor } from "../GUI/cursor.js"
-import { createOptionToggle } from "../utils/optionsInterfaceHelpers.js"
-import { testAction } from "../Testing/performanceTesting.js"
-import { storedActions } from "../Testing/storedActions.js"
+import { switchTool } from "./toolbox.js"
 
 //Initialize default tool
 state.tool = tools.brush
@@ -93,47 +95,10 @@ function handleClearCanvas() {
 /**
  * Switch tools
  * @param {PointerEvent} e
- * @param {String} manualToolName
  */
-export function handleTools(e, manualToolName = null) {
+export function handleTools(e) {
   const targetTool = e?.target.closest(".tool")
-  if (targetTool || manualToolName) {
-    //failsafe for hacking tool ids
-    if (tools[targetTool?.id || manualToolName]) {
-      //reset old button
-      dom.toolBtn.classList.remove("selected")
-      //get new button and select it
-      if (manualToolName) {
-        dom.toolBtn = document.querySelector(`#${manualToolName}`)
-      } else {
-        dom.toolBtn = targetTool
-      }
-      //Uncomment to run performance test for selected tool if testing is enabled
-      // if (state.captureTesting && storedActions[dom.toolBtn.id]) {
-      //   testAction(dom.toolBtn.id)
-      // }
-      dom.toolBtn.classList.add("selected")
-      state.tool = tools[dom.toolBtn.id]
-      renderCanvas(canvas.currentLayer)
-      //update options
-      renderBrushStampToDOM()
-      dom.brushSlider.value = state.tool.brushSize
-      dom.brushSlider.disabled = state.tool.brushDisabled
-      //update cursor
-      if (state.tool.modes?.eraser) {
-        canvas.vectorGuiCVS.style.cursor = "none"
-      } else {
-        canvas.vectorGuiCVS.style.cursor = state.tool.cursor
-      }
-      //render menu options
-      renderToolOptionsToDOM()
-      vectorGui.reset()
-      state.reset()
-      renderVectorsToDOM()
-      renderBrushModesToDOM()
-      renderCursor(state, canvas, swatches)
-    }
-  }
+  switchTool(targetTool)
 }
 
 /**
@@ -209,37 +174,37 @@ function updateBrush(e) {
   renderBrushStampToDOM()
 }
 
-/**
- * update brush stamp in dom
- */
-export function renderBrushStampToDOM() {
-  dom.lineWeight.textContent = state.tool.brushSize
-  dom.brushPreview.style.width = state.tool.brushSize * 2 + "px"
-  dom.brushPreview.style.height = state.tool.brushSize * 2 + "px"
-  updateBrushPreview(
-    brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
-    state.tool.brushSize
-  )
-}
+// /**
+//  * update brush stamp in dom
+//  */
+// export function renderBrushStampToDOM() {
+//   dom.lineWeight.textContent = state.tool.brushSize
+//   dom.brushPreview.style.width = state.tool.brushSize * 2 + "px"
+//   dom.brushPreview.style.height = state.tool.brushSize * 2 + "px"
+//   updateBrushPreview(
+//     brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
+//     state.tool.brushSize
+//   )
+// }
 
-/**
- *
- */
-export function renderToolOptionsToDOM() {
-  dom.toolOptions.innerHTML = ""
-  if (
-    state.tool.name === "cubicCurve" ||
-    state.tool.name === "quadCurve" ||
-    state.tool.name === "ellipse" ||
-    state.tool.name === "select"
-  ) {
-    //render cubic curve options to menu
-    Object.entries(state.tool.options).forEach(([name, option]) => {
-      let optionToggle = createOptionToggle(name, option)
-      dom.toolOptions.appendChild(optionToggle)
-    })
-  }
-}
+// /**
+//  *
+//  */
+// export function renderToolOptionsToDOM() {
+//   dom.toolOptions.innerHTML = ""
+//   if (
+//     state.tool.name === "cubicCurve" ||
+//     state.tool.name === "quadCurve" ||
+//     state.tool.name === "ellipse" ||
+//     state.tool.name === "select"
+//   ) {
+//     //render cubic curve options to menu
+//     Object.entries(state.tool.options).forEach(([name, option]) => {
+//       let optionToggle = createOptionToggle(name, option)
+//       dom.toolOptions.appendChild(optionToggle)
+//     })
+//   }
+// }
 
 //===================================//
 //=== * * * Event Listeners * * * ===//

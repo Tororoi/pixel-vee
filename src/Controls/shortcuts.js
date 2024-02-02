@@ -8,14 +8,14 @@ import { handleUndo, handleRedo } from "../Actions/undoRedo.js"
 import { tools } from "../Tools/index.js"
 import { adjustEllipseSteps } from "../Tools/ellipse.js"
 import { renderCanvas } from "../Canvas/render.js"
-import { renderPaletteToolsToDOM, renderPaletteToDOM } from "../DOM/render.js"
-import { randomizeColor } from "../Swatch/events.js"
 import {
-  handleTools,
-  handleModes,
+  renderPaletteToolsToDOM,
+  renderPaletteToDOM,
   renderBrushStampToDOM,
   renderToolOptionsToDOM,
-} from "../Tools/events.js"
+} from "../DOM/render.js"
+import { randomizeColor } from "../Swatch/events.js"
+import { handleModes } from "../Tools/events.js"
 import { renderCursor } from "../GUI/cursor.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { openSaveDialogBox } from "../Menu/events.js"
@@ -27,6 +27,7 @@ import {
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
 import { confirmPastedPixels } from "../Menu/edit.js"
+import { switchTool } from "../Tools/toolbox.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
@@ -100,7 +101,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyB":
       if (!state.clicked) {
-        handleTools(null, "brush")
+        switchTool(null, "brush")
       }
       break
     case "KeyC":
@@ -108,7 +109,7 @@ export function activateShortcut(keyCode) {
         if (keys.MetaLeft || keys.MetaRight) {
           actionCopySelection()
         } else {
-          handleTools(null, "quadCurve")
+          switchTool(null, "quadCurve")
         }
       }
       break
@@ -129,7 +130,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyF":
       if (!state.clicked) {
-        handleTools(null, "fill")
+        switchTool(null, "fill")
       }
       break
     case "KeyG":
@@ -159,9 +160,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyJ":
       if (!state.clicked) {
-        // if (!keys.MetaLeft && !keys.MetaRight) {
-        handleTools(null, "cubicCurve")
-        // }
+        switchTool(null, "cubicCurve")
       }
       break
     case "KeyK":
@@ -173,7 +172,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyL":
       if (!state.clicked) {
-        handleTools(null, "line")
+        switchTool(null, "line")
       }
       break
     case "KeyM":
@@ -186,7 +185,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyO":
       if (!state.clicked) {
-        handleTools(null, "ellipse")
+        switchTool(null, "ellipse")
       }
       break
     case "KeyP":
@@ -208,7 +207,7 @@ export function activateShortcut(keyCode) {
         if (keys.MetaLeft || keys.MetaRight) {
           openSaveDialogBox()
         } else {
-          handleTools(null, "select")
+          switchTool(null, "select")
         }
       }
       break

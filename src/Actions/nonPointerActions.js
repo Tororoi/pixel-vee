@@ -11,8 +11,8 @@ import {
   renderVectorsToDOM,
   renderPaletteToDOM,
 } from "../DOM/render.js"
-import { handleTools } from "../Tools/events.js"
 import { cutSelectedPixels, pasteSelectedPixels } from "../Menu/edit.js"
+import { switchTool } from "../Tools/toolbox.js"
 
 //=============================================//
 //====== * * * Non Pointer Actions * * * ======//
@@ -133,7 +133,7 @@ export function actionPasteSelection() {
     renderLayersToDOM()
     //TODO: need to tell that it's a modified version of the selection, so no dotted line and include transform control points for resizing (not currently implemented)
     vectorGui.render()
-    handleTools(null, "move")
+    switchTool(null, "move")
   }
 }
 

@@ -8,7 +8,6 @@ import {
   renderVectorsToDOM,
   renderPaletteToDOM,
 } from "../DOM/render.js"
-import { handleTools } from "../Tools/events.js"
 import { removeAction, changeActionMode } from "../Actions/modifyTimeline.js"
 import { vectorGui } from "../GUI/vector.js"
 import { setInitialZoom } from "../utils/canvasHelpers.js"
@@ -21,6 +20,7 @@ import {
   removeLayer,
 } from "../Actions/nonPointerActions.js"
 import { createPreviewLayer } from "./layers.js"
+import { switchTool } from "../Tools/toolbox.js"
 
 //====================================//
 //==== * * * Canvas Resize * * * =====//
@@ -276,7 +276,7 @@ function layerInteract(e) {
       vectorGui.reset()
       vectorGui.render()
       if (layer.type === "reference") {
-        handleTools(null, "move")
+        switchTool(null, "move")
       }
       renderLayersToDOM()
       renderVectorsToDOM()
@@ -412,7 +412,7 @@ function vectorInteract(e) {
   } else {
     let currentIndex = canvas.currentVectorIndex
     //switch tool
-    handleTools(null, vector.tool.name)
+    switchTool(null, vector.tool.name)
     //select current vector
     vectorGui.reset()
     if (vector.index !== currentIndex) {

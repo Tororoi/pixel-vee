@@ -172,19 +172,6 @@ export function confirmPastedPixels() {
     pastedBoundaryBox.yMin += canvas.tempLayer.y
     pastedBoundaryBox.yMax += canvas.tempLayer.y
   }
-  //add to timeline
-  addToTimeline({
-    tool: tools.paste,
-    layer: canvas.pastedLayer,
-    properties: {
-      confirmed: true,
-      boundaryBox,
-      pastedBoundaryBox,
-      canvas: state.selectClipboard.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
-    },
-  })
-  state.action = null
-  state.redoStack = []
   //remove the temporary layer
   canvas.layers.splice(canvas.layers.indexOf(canvas.tempLayer), 1)
   dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
@@ -197,6 +184,19 @@ export function confirmPastedPixels() {
   canvas.currentLayer.inactiveTools.forEach((tool) => {
     dom[`${tool}Btn`].disabled = true
   })
+  //add to timeline
+  addToTimeline({
+    tool: tools.paste,
+    layer: canvas.currentLayer,
+    properties: {
+      confirmed: true,
+      boundaryBox,
+      pastedBoundaryBox,
+      canvas: state.selectClipboard.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
+    },
+  })
+  state.action = null
+  state.redoStack = []
   //reset state properties
   vectorGui.reset()
   state.deselect()
