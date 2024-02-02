@@ -24,9 +24,9 @@ import {
   actionInvertSelection,
   actionCutSelection,
   actionPasteSelection,
+  actionConfirmPastedPixels,
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
-import { confirmPastedPixels } from "../Menu/edit.js"
 import { toggleMode, switchTool } from "../Tools/toolbox.js"
 
 /**
@@ -38,7 +38,7 @@ export function activateShortcut(keyCode) {
     case "Enter":
       //handle confirm paste
       if (!state.clicked && canvas.pastedLayer) {
-        confirmPastedPixels()
+        actionConfirmPastedPixels()
       }
       break
     case "MetaLeft":

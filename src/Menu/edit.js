@@ -38,7 +38,7 @@ export function copySelectedPixels() {
     tempCanvas.height
   )
   tempCTX.restore()
-  state.selectClipboard.pastedBoundaryBox = { ...state.boundaryBox }
+  state.selectClipboard.selectProperties = { ...state.selectProperties }
   state.selectClipboard.boundaryBox = {
     xMin: 0,
     yMin: 0,
@@ -90,6 +90,7 @@ export function cutSelectedPixels() {
  * TODO: add to timeline
  */
 export function pasteSelectedPixels(clipboard, layer) {
+  vectorGui.reset()
   //Paste onto a temporary canvas layer that can be moved around/
   //transformed and then draw that canvas onto the main canvas when hitting return or selecting another tool
   //update tempLayer dimensions to match the current layer canvas
@@ -126,14 +127,9 @@ export function pasteSelectedPixels(clipboard, layer) {
     dom[`${tool}Btn`].disabled = true
   })
 
-  const { pastedBoundaryBox, boundaryBox } = clipboard
+  const { selectProperties, boundaryBox } = clipboard
   //render the clipboard canvas onto the temporary layer
-  state.selectProperties = {
-    px1: pastedBoundaryBox.xMin,
-    py1: pastedBoundaryBox.yMin,
-    px2: pastedBoundaryBox.xMax,
-    py2: pastedBoundaryBox.yMax,
-  }
+  state.selectProperties = { ...selectProperties }
   state.setBoundaryBox(state.selectProperties)
   canvas.currentLayer.ctx.drawImage(
     clipboard.canvas,
@@ -142,73 +138,27 @@ export function pasteSelectedPixels(clipboard, layer) {
     boundaryBox.xMax - boundaryBox.xMin,
     boundaryBox.yMax - boundaryBox.yMin
   )
+  //TODO: need to tell that it's a modified version of the selection, so no dotted line and include transform control points for resizing (not currently implemented)
+  vectorGui.render()
 }
 
 /**
  * Confirm pasted pixels
  * Not dependent on pointer events
  */
-export function confirmPastedPixels() {
+export function confirmPastedPixels(
+  clipboardCanvas,
+  boundaryBox,
+  layer,
+  xOffset,
+  yOffset
+) {
   //draw the current layer onto the pasted layer
-  canvas.pastedLayer.ctx.drawImage(
-    canvas.tempLayer.cvs,
-    0,
-    0,
-    canvas.pastedLayer.cvs.width,
-    canvas.pastedLayer.cvs.height
+  layer.ctx.drawImage(
+    clipboardCanvas,
+    boundaryBox.xMin + xOffset,
+    boundaryBox.yMin + yOffset,
+    boundaryBox.xMax - boundaryBox.xMin,
+    boundaryBox.yMax - boundaryBox.yMin
   )
-  //adjust boundaryBox for layer offset
-  const boundaryBox = { ...state.selectClipboard.boundaryBox }
-  if (boundaryBox.xMax !== null) {
-    boundaryBox.xMin += canvas.tempLayer.x
-    boundaryBox.xMax += canvas.tempLayer.x
-    boundaryBox.yMin += canvas.tempLayer.y
-    boundaryBox.yMax += canvas.tempLayer.y
-  }
-  const pastedBoundaryBox = { ...state.selectClipboard.pastedBoundaryBox }
-  if (pastedBoundaryBox.xMax !== null) {
-    pastedBoundaryBox.xMin += canvas.tempLayer.x
-    pastedBoundaryBox.xMax += canvas.tempLayer.x
-    pastedBoundaryBox.yMin += canvas.tempLayer.y
-    pastedBoundaryBox.yMax += canvas.tempLayer.y
-  }
-  //remove the temporary layer
-  canvas.layers.splice(canvas.layers.indexOf(canvas.tempLayer), 1)
-  dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
-  canvas.tempLayer.inactiveTools.forEach((tool) => {
-    dom[`${tool}Btn`].disabled = false
-  })
-  //restore the original layer
-  canvas.currentLayer = canvas.pastedLayer
-  canvas.pastedLayer = null
-  canvas.currentLayer.inactiveTools.forEach((tool) => {
-    dom[`${tool}Btn`].disabled = true
-  })
-  //add to timeline
-  addToTimeline({
-    tool: tools.paste,
-    layer: canvas.currentLayer,
-    properties: {
-      confirmed: true,
-      boundaryBox,
-      pastedBoundaryBox,
-      canvas: state.selectClipboard.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
-    },
-  })
-  state.action = null
-  state.redoStack = []
-  //reset state properties
-  vectorGui.reset()
-  state.deselect()
-  canvas.rasterGuiCTX.clearRect(
-    0,
-    0,
-    canvas.rasterGuiCVS.width,
-    canvas.rasterGuiCVS.height
-  )
-  //render
-  vectorGui.render()
-  renderCanvas()
-  renderLayersToDOM()
-  renderVectorsToDOM()
 }

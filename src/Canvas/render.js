@@ -348,7 +348,19 @@ export function performAction(action, betweenCtx = null) {
       }
       break
     case "paste":
-      //render confirmed paste action
+      //render paste action
+      // Determine if the action is the last 'paste' action in the undoStack
+      let isLastPasteAction = false // Default to false
+      if (!action.properties.confirmed) {
+        for (let i = state.undoStack.length - 1; i >= 0; i--) {
+          if (state.undoStack[i].tool.name === "paste") {
+            // If the first 'paste' action found from the end is the current action
+            isLastPasteAction = state.undoStack[i] === action
+            break // Stop searching once the first 'paste' action is found
+          }
+        }
+      }
+      //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
       if (action.properties.confirmed) {
         action.layer.ctx.drawImage(
           action.properties.canvas,
@@ -359,10 +371,9 @@ export function performAction(action, betweenCtx = null) {
         )
       } else if (
         canvas.tempLayer === canvas.currentLayer && //only render if the current layer is the temp layer (active paste action)
-        state.undoStack[state.undoStack.length - 1] === action //only render if this action is the last non-mod action in the stack (TODO: needs refining to handle mod actions on the pasted content before confirmation)
+        isLastPasteAction //only render if this action is the last paste action in the stack
       ) {
-        //render paste action - NOTE: this is not the final paste action, only the preview so it should only be rendered if it is the active paste action
-        canvas.tempLayer.ctx.drawImage(
+        action.layer.ctx.drawImage(
           action.properties.canvas,
           boundaryBox.xMin,
           boundaryBox.yMin,

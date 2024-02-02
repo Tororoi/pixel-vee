@@ -11,8 +11,13 @@ import {
   renderVectorsToDOM,
   renderPaletteToDOM,
 } from "../DOM/render.js"
-import { cutSelectedPixels, pasteSelectedPixels } from "../Menu/edit.js"
+import {
+  confirmPastedPixels,
+  cutSelectedPixels,
+  pasteSelectedPixels,
+} from "../Menu/edit.js"
 import { switchTool } from "../Tools/toolbox.js"
+import { select } from "../Tools/select.js"
 
 //=============================================//
 //====== * * * Non Pointer Actions * * * ======//
@@ -112,7 +117,6 @@ export function actionCutSelection() {
  */
 export function actionPasteSelection() {
   if (canvas.currentLayer.type === "raster" && state.selectClipboard.canvas) {
-    vectorGui.reset()
     pasteSelectedPixels(state.selectClipboard, canvas.currentLayer)
     //add to timeline
     addToTimeline({
@@ -121,7 +125,7 @@ export function actionPasteSelection() {
       properties: {
         confirmed: false,
         boundaryBox: { ...state.selectClipboard.boundaryBox },
-        pastedBoundaryBox: { ...state.selectClipboard.pastedBoundaryBox },
+        selectProperties: { ...state.selectClipboard.selectProperties },
         canvas: state.selectClipboard.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
         pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
       },
@@ -131,9 +135,73 @@ export function actionPasteSelection() {
 
     renderCanvas(canvas.currentLayer)
     renderLayersToDOM()
-    //TODO: need to tell that it's a modified version of the selection, so no dotted line and include transform control points for resizing (not currently implemented)
-    vectorGui.render()
     switchTool("move")
+  }
+}
+
+export function actionConfirmPastedPixels() {
+  if (canvas.currentLayer.type === "raster" && state.selectClipboard.canvas) {
+    const xOffset = canvas.tempLayer.x
+    const yOffset = canvas.tempLayer.y
+    //adjust boundaryBox for layer offset
+    const boundaryBox = { ...state.selectClipboard.boundaryBox }
+    if (boundaryBox.xMax !== null) {
+      boundaryBox.xMin += xOffset - canvas.pastedLayer.x
+      boundaryBox.xMax += xOffset - canvas.pastedLayer.x
+      boundaryBox.yMin += yOffset - canvas.pastedLayer.y
+      boundaryBox.yMax += yOffset - canvas.pastedLayer.y
+    }
+    const selectProperties = { ...state.selectClipboard.selectProperties }
+    if (selectProperties.px2 !== null) {
+      selectProperties.px1 += xOffset - canvas.pastedLayer.x
+      selectProperties.px2 += xOffset - canvas.pastedLayer.x
+      selectProperties.py1 += yOffset - canvas.pastedLayer.y
+      selectProperties.py2 += yOffset - canvas.pastedLayer.y
+    }
+    confirmPastedPixels(
+      state.selectClipboard.canvas,
+      state.selectClipboard.boundaryBox,
+      canvas.pastedLayer,
+      xOffset,
+      yOffset
+    )
+    //remove the temporary layer
+    canvas.layers.splice(canvas.layers.indexOf(canvas.tempLayer), 1)
+    dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
+    canvas.tempLayer.inactiveTools.forEach((tool) => {
+      dom[`${tool}Btn`].disabled = false
+    })
+    //restore the original layer
+    canvas.currentLayer = canvas.pastedLayer
+    canvas.pastedLayer = null
+    canvas.currentLayer.inactiveTools.forEach((tool) => {
+      dom[`${tool}Btn`].disabled = true
+    })
+    //add to timeline
+    addToTimeline({
+      tool: tools.paste,
+      layer: canvas.currentLayer,
+      properties: {
+        confirmed: true,
+        boundaryBox,
+        selectProperties,
+        canvas: state.selectClipboard.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
+      },
+    })
+    state.action = null
+    state.redoStack = []
+    //reset state properties
+    state.deselect()
+    canvas.rasterGuiCTX.clearRect(
+      0,
+      0,
+      canvas.rasterGuiCVS.width,
+      canvas.rasterGuiCVS.height
+    )
+    //render
+    vectorGui.render()
+    renderCanvas()
+    renderLayersToDOM()
   }
 }
 

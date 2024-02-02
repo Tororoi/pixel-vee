@@ -1,3 +1,4 @@
+import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
@@ -10,7 +11,11 @@ import {
   renderBrushModesToDOM,
 } from "../DOM/render.js"
 import { setSaveFilesizePreview } from "../Save/savefile.js"
-import { pasteSelectedPixels } from "../Menu/edit.js"
+import {
+  copySelectedPixels,
+  pasteSelectedPixels,
+  confirmPastedPixels,
+} from "../Menu/edit.js"
 import { switchTool } from "../Tools/toolbox.js"
 
 //====================================//
@@ -162,18 +167,20 @@ function handlePasteAction(latestAction, modType) {
   //TODO: handle paste action
   // if modType is "from" (undoing paste action), remove the templayer
   if (modType === "from") {
+    console.log("undo paste action, remove templayer")
     canvas.layers.splice(canvas.layers.indexOf(canvas.tempLayer), 1)
     dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
     canvas.tempLayer.inactiveTools.forEach((tool) => {
       dom[`${tool}Btn`].disabled = false
     })
     //restore the original layer
-    canvas.currentLayer = latestAction.layer
+    canvas.currentLayer = latestAction.properties.pastedLayer
     canvas.pastedLayer = null
     canvas.currentLayer.inactiveTools.forEach((tool) => {
       dom[`${tool}Btn`].disabled = true
     })
   } else if (modType === "to") {
+    console.log("redo paste action, goes to templayer move pasted pixels")
     //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
     pasteSelectedPixels(latestAction.properties, latestAction.layer)
     switchTool("move")
@@ -182,13 +189,47 @@ function handlePasteAction(latestAction, modType) {
 
 /**
  * @param {Object} latestAction
+ * @param {Object} newLatestAction
  * @param {String} modType
  */
-function handleConfirmPasteAction(latestAction, modType) {
+function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
   //TODO: handle confirm paste action
   //pseudo code:
   //if modType is "from" (undoing confirm paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
-  //if modType is "to" (redoing confirm paste action), basically do the confirmPastedPixels function except use the action properties instead of the clipboard and don't add to timeline. Also don't need to adjust for layer offset
+  if (modType === "from") {
+    console.log(
+      "undo confirm paste action, goes to templayer move pasted pixels"
+    )
+    pasteSelectedPixels(latestAction.properties, latestAction.layer)
+    if (newLatestAction?.tool?.name === "move") {
+      //templayer's x and y coords are often reset to 0, so set them to last move action's x and y
+      canvas.currentLayer.x = newLatestAction.properties.to.x
+      canvas.currentLayer.y = newLatestAction.properties.to.y
+    }
+    switchTool("move")
+  } else if (modType === "to") {
+    console.log("redo confirm paste action")
+    //if modType is "to" (redoing confirm paste action), basically do the confirmPastedPixels function except use the action properties instead of the clipboard and don't add to timeline. Also don't need to adjust for layer offset
+    confirmPastedPixels(
+      latestAction.properties.canvas,
+      latestAction.properties.boundaryBox,
+      latestAction.layer,
+      latestAction.properties.xOffset,
+      latestAction.properties.yOffset
+    )
+    //remove the temporary layer
+    canvas.layers.splice(canvas.layers.indexOf(canvas.tempLayer), 1)
+    dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
+    canvas.tempLayer.inactiveTools.forEach((tool) => {
+      dom[`${tool}Btn`].disabled = false
+    })
+    //restore the original layer
+    canvas.currentLayer = canvas.pastedLayer
+    canvas.pastedLayer = null
+    canvas.currentLayer.inactiveTools.forEach((tool) => {
+      dom[`${tool}Btn`].disabled = true
+    })
+  }
 }
 
 /**
@@ -288,6 +329,12 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     //Right now, undoing a select action when the newLatestAction isn't also a select tool means the earlier select action won't be rendered even if it should be
     //By saving it as a modded action with from and to we can set the selectProperties to the "from" values on undo and "to" on redo
     handleSelectAction(latestAction, newLatestAction, modType)
+  } else if (latestAction.tool.name === "paste") {
+    if (!latestAction.properties.confirmed) {
+      handlePasteAction(latestAction, modType)
+    } else {
+      handleConfirmPasteAction(latestAction, newLatestAction, modType)
+    }
   } else if (latestAction.tool.name === "move") {
     handleMoveAction(latestAction, modType)
   } else if (

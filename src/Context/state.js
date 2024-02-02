@@ -97,6 +97,12 @@ export const state = {
   selectClipboard: {
     boundaryBox: null,
     canvasBoundaryBox: null,
+    selectProperties: {
+      px1: null,
+      py1: null,
+      px2: null,
+      py2: null,
+    },
     canvas: null,
     //TODO: for copying vectors, need more properties
   },
