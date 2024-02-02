@@ -133,7 +133,7 @@ export function actionPasteSelection() {
     renderLayersToDOM()
     //TODO: need to tell that it's a modified version of the selection, so no dotted line and include transform control points for resizing (not currently implemented)
     vectorGui.render()
-    switchTool(null, "move")
+    switchTool("move")
   }
 }
 

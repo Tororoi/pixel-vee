@@ -27,7 +27,7 @@ import {
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
 import { confirmPastedPixels } from "../Menu/edit.js"
-import { switchTool } from "../Tools/toolbox.js"
+import { toggleMode, switchTool } from "../Tools/toolbox.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
@@ -101,7 +101,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyB":
       if (!state.clicked) {
-        switchTool(null, "brush")
+        switchTool("brush")
       }
       break
     case "KeyC":
@@ -109,7 +109,7 @@ export function activateShortcut(keyCode) {
         if (keys.MetaLeft || keys.MetaRight) {
           actionCopySelection()
         } else {
-          switchTool(null, "quadCurve")
+          switchTool("quadCurve")
         }
       }
       break
@@ -125,12 +125,12 @@ export function activateShortcut(keyCode) {
       break
     case "KeyE":
       if (!state.clicked) {
-        handleModes(null, "eraser")
+        toggleMode("eraser")
       }
       break
     case "KeyF":
       if (!state.clicked) {
-        switchTool(null, "fill")
+        switchTool("fill")
       }
       break
     case "KeyG":
@@ -154,13 +154,13 @@ export function activateShortcut(keyCode) {
         if (keys.MetaLeft || keys.MetaRight) {
           actionInvertSelection()
         } else {
-          handleModes(null, "inject")
+          toggleMode("inject")
         }
       }
       break
     case "KeyJ":
       if (!state.clicked) {
-        switchTool(null, "cubicCurve")
+        switchTool("cubicCurve")
       }
       break
     case "KeyK":
@@ -172,12 +172,12 @@ export function activateShortcut(keyCode) {
       break
     case "KeyL":
       if (!state.clicked) {
-        switchTool(null, "line")
+        switchTool("line")
       }
       break
     case "KeyM":
       if (!state.clicked) {
-        handleModes(null, "colorMask")
+        toggleMode("colorMask")
       }
       break
     case "KeyN":
@@ -185,12 +185,12 @@ export function activateShortcut(keyCode) {
       break
     case "KeyO":
       if (!state.clicked) {
-        switchTool(null, "ellipse")
+        switchTool("ellipse")
       }
       break
     case "KeyP":
       if (!state.clicked) {
-        handleModes(null, "perfect")
+        toggleMode("perfect")
       }
       break
     case "KeyQ":
@@ -207,7 +207,7 @@ export function activateShortcut(keyCode) {
         if (keys.MetaLeft || keys.MetaRight) {
           openSaveDialogBox()
         } else {
-          switchTool(null, "select")
+          switchTool("select")
         }
       }
       break

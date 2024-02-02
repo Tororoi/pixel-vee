@@ -276,7 +276,7 @@ function layerInteract(e) {
       vectorGui.reset()
       vectorGui.render()
       if (layer.type === "reference") {
-        switchTool(null, "move")
+        switchTool("move")
       }
       renderLayersToDOM()
       renderVectorsToDOM()
@@ -412,7 +412,7 @@ function vectorInteract(e) {
   } else {
     let currentIndex = canvas.currentVectorIndex
     //switch tool
-    switchTool(null, vector.tool.name)
+    switchTool(vector.tool.name)
     //select current vector
     vectorGui.reset()
     if (vector.index !== currentIndex) {

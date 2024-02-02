@@ -176,7 +176,7 @@ function handlePasteAction(latestAction, modType) {
   } else if (modType === "to") {
     //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
     pasteSelectedPixels(latestAction.properties, latestAction.layer)
-    switchTool(null, "move")
+    switchTool("move")
   }
 }
 

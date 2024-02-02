@@ -16,11 +16,11 @@ import { testAction } from "../Testing/performanceTesting.js"
 import { storedActions } from "../Testing/storedActions.js"
 
 /**
- *
- * @param {Element|null} toolBtn
+ * Switch active tool
  * @param {String|null} toolName
+ * @param {Element|null} toolBtn
  */
-export function switchTool(toolBtn = null, toolName = null) {
+export function switchTool(toolName = null, toolBtn = null) {
   const targetToolBtn = toolBtn || document.querySelector(`#${toolName}`)
   if (targetToolBtn) {
     //failsafe for hacking tool ids
@@ -51,6 +51,39 @@ export function switchTool(toolBtn = null, toolName = null) {
       vectorGui.reset()
       state.reset()
       renderVectorsToDOM()
+      renderBrushModesToDOM()
+      renderCursor(state, canvas, swatches)
+    }
+  }
+}
+
+/**
+ * Toggle active mode
+ * TODO: add multi-touch mode for drawing with multiple fingers
+ * TODO: add curve brush mode for freehand drawing splines
+ * @param {String|null} modeName
+ * @param {Element|null} modeBtn
+ */
+export function toggleMode(modeName = null, modeBtn = null) {
+  const targetModeBtn = modeBtn || document.querySelector(`#${modeName}`)
+  if (targetModeBtn) {
+    if (state.tool.modes[targetModeBtn.id] !== undefined) {
+      if (targetModeBtn.classList.contains("selected")) {
+        state.tool.modes[targetModeBtn.id] = false
+      } else {
+        state.tool.modes[targetModeBtn.id] = true
+        //eraser and inject modes cannot be selected at the same time
+        if (targetModeBtn.id === "eraser" && state.tool.modes?.inject) {
+          state.tool.modes.inject = false
+        } else if (targetModeBtn.id === "inject" && state.tool.modes?.eraser) {
+          state.tool.modes.eraser = false
+        }
+      }
+      if (state.tool.modes?.eraser) {
+        canvas.vectorGuiCVS.style.cursor = "none"
+      } else {
+        canvas.vectorGuiCVS.style.cursor = state.tool.cursor
+      }
       renderBrushModesToDOM()
       renderCursor(state, canvas, swatches)
     }
