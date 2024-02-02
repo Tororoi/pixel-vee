@@ -128,7 +128,6 @@ document.body.addEventListener("mouseover", (e) => {
   }
 })
 dom.toolOptions.addEventListener("click", (e) => {
-  console.log(e.target)
   if (e.target.type === "checkbox") {
     const optionName = e.target.id.split("-")[0]
     if (e.target.checked) {

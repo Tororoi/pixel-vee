@@ -113,6 +113,7 @@ export function pasteSelectedPixels(clipboard, layer) {
   )
   canvas.tempLayer.x = 0
   canvas.tempLayer.y = 0
+  canvas.tempLayer.opacity = layer.opacity
   //splice the tempLayer just after the layer index
   canvas.layers.splice(canvas.layers.indexOf(layer) + 1, 0, canvas.tempLayer)
   layer.inactiveTools.forEach((tool) => {

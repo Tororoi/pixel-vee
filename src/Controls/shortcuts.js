@@ -36,7 +36,7 @@ export function activateShortcut(keyCode) {
   switch (keyCode) {
     case "Enter":
       //handle confirm paste
-      if (!state.clicked) {
+      if (!state.clicked && canvas.pastedLayer) {
         confirmPastedPixels()
       }
       break

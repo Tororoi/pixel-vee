@@ -32,7 +32,8 @@ const isValidAction = (action) =>
   !action.removed &&
   !action.layer?.removed &&
   action.tool.type === "vector" &&
-  action.layer === canvas.currentLayer
+  (action.layer === canvas.currentLayer ||
+    (action.layer === canvas.pastedLayer && canvas.currentLayer.isPreview))
 
 /**
  * Render a vector element
