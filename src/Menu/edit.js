@@ -87,7 +87,7 @@ export function cutSelectedPixels() {
  * Not dependent on pointer events
  * @param {Object} clipboard - clipboard object
  * @param {Object} layer - layer object to paste onto
- * TODO: add to timeline
+ * @param {Boolean} useOffset - use layer offset - only needed with undo/redo functionality
  */
 export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
   vectorGui.reset()
@@ -96,10 +96,15 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
   //update tempLayer dimensions to match the current layer canvas
   canvas.tempLayer.cvs.width = layer.cvs.width
   canvas.tempLayer.cvs.height = layer.cvs.height
-  //add the temp canvas to the dom and set onscreen canvas dimensions and scale
-  dom.canvasLayers.appendChild(canvas.tempLayer.onscreenCvs)
-  //insert canvas right after the current layer's canvas in the DOM
-  // layer.onscreenCvs.after(canvas.tempLayer.onscreenCvs)
+  //insert temp canvas right after the current layer's canvas in the DOM
+  let nextSibling = layer.onscreenCvs.nextSibling // Get the next sibling of the current onscreen canvas
+  // Check if there is a next sibling; if so, insert before it, otherwise append to canvas layers
+  if (nextSibling) {
+    dom.canvasLayers.insertBefore(canvas.tempLayer.onscreenCvs, nextSibling)
+  } else {
+    dom.canvasLayers.appendChild(canvas.tempLayer.onscreenCvs)
+  }
+  // set onscreen canvas dimensions and scale
   canvas.tempLayer.onscreenCvs.width =
     canvas.tempLayer.onscreenCvs.offsetWidth * canvas.sharpness
   canvas.tempLayer.onscreenCvs.height =
@@ -161,6 +166,11 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
 /**
  * Confirm pasted pixels
  * Not dependent on pointer events
+ * @param {HTMLCanvasElement} clipboardCanvas - clipboard canvas
+ * @param {Object} boundaryBox - boundary box
+ * @param {Object} layer - layer to paste onto
+ * @param {Number} xOffset - x offset
+ * @param {Number} yOffset - y offset
  */
 export function confirmPastedPixels(
   clipboardCanvas,

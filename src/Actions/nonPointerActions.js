@@ -115,9 +115,11 @@ export function actionCutSelection() {
 /**
  * Paste Selection
  * Not dependent on pointer events
+ * Action will not fire if there is no selection in the clipboard,
+ * the current layer is not a raster layer, or if the current layer is a preview layer
  */
 export function actionPasteSelection() {
-  if (canvas.currentLayer.type === "raster" && state.selectClipboard.canvas) {
+  if (canvas.currentLayer.type === "raster" && !canvas.currentLayer.isPreview && state.selectClipboard.canvas) {
     pasteSelectedPixels(state.selectClipboard, canvas.currentLayer)
     //adjust boundaryBox for layer offset
     const boundaryBox = { ...state.selectClipboard.boundaryBox }
@@ -155,6 +157,12 @@ export function actionPasteSelection() {
   }
 }
 
+/**
+ * Confirm Pasted Pixels
+ * Not dependent on pointer events
+ * Action will not fire if the current layer is not a raster layer
+ * or if there is no selection in the clipboard
+ */
 export function actionConfirmPastedPixels() {
   if (canvas.currentLayer.type === "raster" && state.selectClipboard.canvas) {
     const xOffset = canvas.tempLayer.x

@@ -183,7 +183,11 @@ function handlePasteAction(latestAction, modType) {
   } else if (modType === "to") {
     console.log("redo paste action, goes to templayer move pasted pixels")
     //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
-    pasteSelectedPixels(latestAction.properties, latestAction.layer)
+    pasteSelectedPixels(latestAction.properties, latestAction.properties.pastedLayer)
+    console.log(
+      latestAction.layer === canvas.pastedLayer,
+      canvas.currentLayer.isPreview
+    )
     switchTool("move")
   }
 }
@@ -218,6 +222,7 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
     //   latestAction.properties.xOffset,
     //   latestAction.properties.yOffset
     // )
+    removeTempLayerFromDOM()
     //reset state properties
     state.deselect()
     canvas.rasterGuiCTX.clearRect(

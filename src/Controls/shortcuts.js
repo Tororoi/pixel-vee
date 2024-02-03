@@ -220,6 +220,7 @@ export function activateShortcut(keyCode) {
     case "KeyV":
       if (!state.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
+          //Will not do anything if already in the midst of a paste action (meaning the canvas.currentLayer is the canvas.tempLayer)
           actionPasteSelection()
         }
       }

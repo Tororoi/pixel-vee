@@ -25,10 +25,16 @@ export const renderLayersToDOM = () => {
       id += 1
       layerElement.textContent = l.title
       layerElement.draggable = true
+      console.log(
+        l === canvas.pastedLayer,
+        canvas.pastedLayer,
+        canvas.currentLayer?.isPreview
+      )
       if (
         l === canvas.currentLayer ||
         (l === canvas.pastedLayer && canvas.currentLayer.isPreview) //case for active pasted content which exists on preview layer
       ) {
+        console.log("current layer selected", l)
         layerElement.classList.add("selected")
       }
 
@@ -136,6 +142,10 @@ export function renderLayerSettingsToDOM(domLayer) {
  * Remove temp layer from DOM and restore current layer
  */
 export function removeTempLayerFromDOM() {
+  //check if canvas.layers contains tempLayer
+  if (!canvas.layers.includes(canvas.tempLayer)) {
+    return
+  }
   //remove the temporary layer
   canvas.layers.splice(canvas.layers.indexOf(canvas.tempLayer), 1)
   dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
