@@ -201,71 +201,7 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
     console.log(
       "undo confirm paste action, goes to templayer move pasted pixels"
     )
-    // pasteSelectedPixels(
-    //   latestAction.properties,
-    //   latestAction.layer,
-    //   newLatestAction.properties.to.x + latestAction.layer.x,
-    //   newLatestAction.properties.to.y + latestAction.layer.y
-    // )
-    vectorGui.reset()
-    //Paste onto a temporary canvas layer that can be moved around/
-    //transformed and then draw that canvas onto the main canvas when hitting return or selecting another tool
-    //update tempLayer dimensions to match the current layer canvas
-    canvas.tempLayer.cvs.width = latestAction.layer.cvs.width
-    canvas.tempLayer.cvs.height = latestAction.layer.cvs.height
-    //add the temp canvas to the dom and set onscreen canvas dimensions and scale
-    dom.canvasLayers.appendChild(canvas.tempLayer.onscreenCvs)
-    //insert canvas right after the current layer's canvas in the DOM
-    // layer.onscreenCvs.after(canvas.tempLayer.onscreenCvs)
-    canvas.tempLayer.onscreenCvs.width =
-      canvas.tempLayer.onscreenCvs.offsetWidth * canvas.sharpness
-    canvas.tempLayer.onscreenCvs.height =
-      canvas.tempLayer.onscreenCvs.offsetHeight * canvas.sharpness
-    canvas.tempLayer.onscreenCtx.setTransform(
-      canvas.sharpness * canvas.zoom,
-      0,
-      0,
-      canvas.sharpness * canvas.zoom,
-      0,
-      0
-    )
-    canvas.tempLayer.x = latestAction.layer.x
-    canvas.tempLayer.y = latestAction.layer.y
-    canvas.tempLayer.opacity = latestAction.layer.opacity
-    //splice the tempLayer just after the layer index
-    canvas.layers.splice(
-      canvas.layers.indexOf(latestAction.layer) + 1,
-      0,
-      canvas.tempLayer
-    )
-    latestAction.layer.inactiveTools.forEach((tool) => {
-      dom[`${tool}Btn`].disabled = false
-    })
-    //Store current layer in a separate variable to restore it after confirming pasted content
-    canvas.pastedLayer = latestAction.layer
-    canvas.currentLayer = canvas.tempLayer
-    canvas.currentLayer.inactiveTools.forEach((tool) => {
-      dom[`${tool}Btn`].disabled = true
-    })
-
-    const { selectProperties, boundaryBox } = latestAction.properties
-    // if xOffset and yOffset present, adjust selectProperties and boundaryBox
-    //render the clipboard canvas onto the temporary layer
-    state.selectProperties = { ...selectProperties }
-    //adjust selectProperties for layer offset
-    state.selectProperties.px1 += latestAction.layer.x
-    state.selectProperties.px2 += latestAction.layer.x
-    state.selectProperties.py1 += latestAction.layer.y
-    state.selectProperties.py2 += latestAction.layer.y
-    state.setBoundaryBox(state.selectProperties)
-    canvas.currentLayer.ctx.drawImage(
-      latestAction.properties.canvas,
-      boundaryBox.xMin + latestAction.layer.x,
-      boundaryBox.yMin + latestAction.layer.y,
-      boundaryBox.xMax - boundaryBox.xMin,
-      boundaryBox.yMax - boundaryBox.yMin
-    )
-    vectorGui.render()
+    pasteSelectedPixels(latestAction.properties, latestAction.layer, true)
     if (newLatestAction?.tool?.name === "move") {
       //templayer's x and y coords are often reset to 0, so set them to last move action's x and y
       canvas.currentLayer.x = newLatestAction.properties.to.x

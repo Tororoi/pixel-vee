@@ -89,7 +89,7 @@ export function cutSelectedPixels() {
  * @param {Object} layer - layer object to paste onto
  * TODO: add to timeline
  */
-export function pasteSelectedPixels(clipboard, layer) {
+export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
   vectorGui.reset()
   //Paste onto a temporary canvas layer that can be moved around/
   //transformed and then draw that canvas onto the main canvas when hitting return or selecting another tool
@@ -131,14 +131,29 @@ export function pasteSelectedPixels(clipboard, layer) {
   // if xOffset and yOffset present, adjust selectProperties and boundaryBox
   //render the clipboard canvas onto the temporary layer
   state.selectProperties = { ...selectProperties }
-  state.setBoundaryBox(state.selectProperties)
-  canvas.currentLayer.ctx.drawImage(
-    clipboard.canvas,
-    boundaryBox.xMin,
-    boundaryBox.yMin,
-    boundaryBox.xMax - boundaryBox.xMin,
-    boundaryBox.yMax - boundaryBox.yMin
-  )
+  if (useOffset) {
+    state.selectProperties.px1 += layer.x
+    state.selectProperties.px2 += layer.x
+    state.selectProperties.py1 += layer.y
+    state.selectProperties.py2 += layer.y
+    state.setBoundaryBox(state.selectProperties)
+    canvas.currentLayer.ctx.drawImage(
+      clipboard.canvas,
+      boundaryBox.xMin + layer.x,
+      boundaryBox.yMin + layer.y,
+      boundaryBox.xMax - boundaryBox.xMin,
+      boundaryBox.yMax - boundaryBox.yMin
+    )
+  } else {
+    state.setBoundaryBox(state.selectProperties)
+    canvas.currentLayer.ctx.drawImage(
+      clipboard.canvas,
+      boundaryBox.xMin,
+      boundaryBox.yMin,
+      boundaryBox.xMax - boundaryBox.xMin,
+      boundaryBox.yMax - boundaryBox.yMin
+    )
+  }
   //TODO: need to tell that it's a modified version of the selection, so no dotted line and include transform control points for resizing (not currently implemented)
   vectorGui.render()
 }
