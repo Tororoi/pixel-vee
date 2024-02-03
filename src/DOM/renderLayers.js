@@ -25,16 +25,10 @@ export const renderLayersToDOM = () => {
       id += 1
       layerElement.textContent = l.title
       layerElement.draggable = true
-      console.log(
-        l === canvas.pastedLayer,
-        canvas.pastedLayer,
-        canvas.currentLayer?.isPreview
-      )
       if (
         l === canvas.currentLayer ||
         (l === canvas.pastedLayer && canvas.currentLayer.isPreview) //case for active pasted content which exists on preview layer
       ) {
-        console.log("current layer selected", l)
         layerElement.classList.add("selected")
       }
 

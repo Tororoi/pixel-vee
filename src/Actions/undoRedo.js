@@ -165,10 +165,8 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
  * @param {String} modType
  */
 function handlePasteAction(latestAction, modType) {
-  //TODO: handle paste action
   // if modType is "from" (undoing paste action), remove the templayer
   if (modType === "from") {
-    console.log("undo paste action, remove templayer")
     canvas.layers.splice(canvas.layers.indexOf(canvas.tempLayer), 1)
     dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
     canvas.tempLayer.inactiveTools.forEach((tool) => {
@@ -181,13 +179,8 @@ function handlePasteAction(latestAction, modType) {
       dom[`${tool}Btn`].disabled = true
     })
   } else if (modType === "to") {
-    console.log("redo paste action, goes to templayer move pasted pixels")
     //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
     pasteSelectedPixels(latestAction.properties, latestAction.properties.pastedLayer)
-    console.log(
-      latestAction.layer === canvas.pastedLayer,
-      canvas.currentLayer.isPreview
-    )
     switchTool("move")
   }
 }
@@ -198,13 +191,8 @@ function handlePasteAction(latestAction, modType) {
  * @param {String} modType
  */
 function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
-  //TODO: handle confirm paste action
-  //pseudo code:
   //if modType is "from" (undoing confirm paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
   if (modType === "from") {
-    console.log(
-      "undo confirm paste action, goes to templayer move pasted pixels"
-    )
     pasteSelectedPixels(latestAction.properties, latestAction.layer, true)
     if (newLatestAction?.tool?.name === "move") {
       //templayer's x and y coords are often reset to 0, so set them to last move action's x and y
@@ -213,7 +201,6 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
     }
     switchTool("move")
   } else if (modType === "to") {
-    console.log("redo confirm paste action")
     //if modType is "to" (redoing confirm paste action), basically do the confirmPastedPixels function except use the action properties instead of the clipboard and don't add to timeline. Also don't need to adjust for layer offset
     // confirmPastedPixels(
     //   latestAction.properties.canvas,
