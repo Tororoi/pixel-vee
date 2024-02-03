@@ -18,6 +18,7 @@ import {
 } from "../Menu/edit.js"
 import { switchTool } from "../Tools/toolbox.js"
 import { select } from "../Tools/select.js"
+import { removeTempLayerFromDOM } from "../DOM/renderLayers.js"
 
 //=============================================//
 //====== * * * Non Pointer Actions * * * ======//
@@ -118,14 +119,29 @@ export function actionCutSelection() {
 export function actionPasteSelection() {
   if (canvas.currentLayer.type === "raster" && state.selectClipboard.canvas) {
     pasteSelectedPixels(state.selectClipboard, canvas.currentLayer)
+    //adjust boundaryBox for layer offset
+    const boundaryBox = { ...state.selectClipboard.boundaryBox }
+    if (boundaryBox.xMax !== null) {
+      boundaryBox.xMin -= canvas.currentLayer.x
+      boundaryBox.xMax -= canvas.currentLayer.x
+      boundaryBox.yMin -= canvas.currentLayer.y
+      boundaryBox.yMax -= canvas.currentLayer.y
+    }
+    const selectProperties = { ...state.selectClipboard.selectProperties }
+    if (selectProperties.px2 !== null) {
+      selectProperties.px1 -= canvas.currentLayer.x
+      selectProperties.px2 -= canvas.currentLayer.x
+      selectProperties.py1 -= canvas.currentLayer.y
+      selectProperties.py2 -= canvas.currentLayer.y
+    }
     //add to timeline
     addToTimeline({
       tool: tools.paste,
       layer: canvas.currentLayer,
       properties: {
         confirmed: false,
-        boundaryBox: { ...state.selectClipboard.boundaryBox },
-        selectProperties: { ...state.selectClipboard.selectProperties },
+        boundaryBox,
+        selectProperties,
         canvas: state.selectClipboard.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
         pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
       },
@@ -146,17 +162,17 @@ export function actionConfirmPastedPixels() {
     //adjust boundaryBox for layer offset
     const boundaryBox = { ...state.selectClipboard.boundaryBox }
     if (boundaryBox.xMax !== null) {
-      boundaryBox.xMin += xOffset - canvas.pastedLayer.x
-      boundaryBox.xMax += xOffset - canvas.pastedLayer.x
-      boundaryBox.yMin += yOffset - canvas.pastedLayer.y
-      boundaryBox.yMax += yOffset - canvas.pastedLayer.y
+      boundaryBox.xMin += xOffset - 2 * canvas.pastedLayer.x
+      boundaryBox.xMax += xOffset - 2 * canvas.pastedLayer.x
+      boundaryBox.yMin += yOffset - 2 * canvas.pastedLayer.y
+      boundaryBox.yMax += yOffset - 2 * canvas.pastedLayer.y
     }
     const selectProperties = { ...state.selectClipboard.selectProperties }
     if (selectProperties.px2 !== null) {
-      selectProperties.px1 += xOffset - canvas.pastedLayer.x
-      selectProperties.px2 += xOffset - canvas.pastedLayer.x
-      selectProperties.py1 += yOffset - canvas.pastedLayer.y
-      selectProperties.py2 += yOffset - canvas.pastedLayer.y
+      selectProperties.px1 += xOffset - 2 * canvas.pastedLayer.x
+      selectProperties.px2 += xOffset - 2 * canvas.pastedLayer.x
+      selectProperties.py1 += yOffset - 2 * canvas.pastedLayer.y
+      selectProperties.py2 += yOffset - 2 * canvas.pastedLayer.y
     }
     confirmPastedPixels(
       state.selectClipboard.canvas,
@@ -165,18 +181,8 @@ export function actionConfirmPastedPixels() {
       xOffset,
       yOffset
     )
-    //remove the temporary layer
-    canvas.layers.splice(canvas.layers.indexOf(canvas.tempLayer), 1)
-    dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
-    canvas.tempLayer.inactiveTools.forEach((tool) => {
-      dom[`${tool}Btn`].disabled = false
-    })
-    //restore the original layer
-    canvas.currentLayer = canvas.pastedLayer
-    canvas.pastedLayer = null
-    canvas.currentLayer.inactiveTools.forEach((tool) => {
-      dom[`${tool}Btn`].disabled = true
-    })
+    //remove temp layer from DOM and restore current layer
+    removeTempLayerFromDOM()
     //add to timeline
     addToTimeline({
       tool: tools.paste,

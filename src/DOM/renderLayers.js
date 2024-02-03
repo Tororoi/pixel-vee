@@ -131,3 +131,21 @@ export function renderLayerSettingsToDOM(domLayer) {
   }px`
   dom.layerSettingsContainer.style.left = `${domLayerRect.right + 12}px`
 }
+
+/**
+ * Remove temp layer from DOM and restore current layer
+ */
+export function removeTempLayerFromDOM() {
+  //remove the temporary layer
+  canvas.layers.splice(canvas.layers.indexOf(canvas.tempLayer), 1)
+  dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
+  canvas.tempLayer.inactiveTools.forEach((tool) => {
+    dom[`${tool}Btn`].disabled = false
+  })
+  //restore the original layer
+  canvas.currentLayer = canvas.pastedLayer
+  canvas.pastedLayer = null
+  canvas.currentLayer.inactiveTools.forEach((tool) => {
+    dom[`${tool}Btn`].disabled = true
+  })
+}

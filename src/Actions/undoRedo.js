@@ -17,6 +17,7 @@ import {
   confirmPastedPixels,
 } from "../Menu/edit.js"
 import { switchTool } from "../Tools/toolbox.js"
+import { removeTempLayerFromDOM } from "../DOM/renderLayers.js"
 
 //====================================//
 //========= * * * Core * * * =========//
@@ -200,7 +201,71 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
     console.log(
       "undo confirm paste action, goes to templayer move pasted pixels"
     )
-    pasteSelectedPixels(latestAction.properties, latestAction.layer)
+    // pasteSelectedPixels(
+    //   latestAction.properties,
+    //   latestAction.layer,
+    //   newLatestAction.properties.to.x + latestAction.layer.x,
+    //   newLatestAction.properties.to.y + latestAction.layer.y
+    // )
+    vectorGui.reset()
+    //Paste onto a temporary canvas layer that can be moved around/
+    //transformed and then draw that canvas onto the main canvas when hitting return or selecting another tool
+    //update tempLayer dimensions to match the current layer canvas
+    canvas.tempLayer.cvs.width = latestAction.layer.cvs.width
+    canvas.tempLayer.cvs.height = latestAction.layer.cvs.height
+    //add the temp canvas to the dom and set onscreen canvas dimensions and scale
+    dom.canvasLayers.appendChild(canvas.tempLayer.onscreenCvs)
+    //insert canvas right after the current layer's canvas in the DOM
+    // layer.onscreenCvs.after(canvas.tempLayer.onscreenCvs)
+    canvas.tempLayer.onscreenCvs.width =
+      canvas.tempLayer.onscreenCvs.offsetWidth * canvas.sharpness
+    canvas.tempLayer.onscreenCvs.height =
+      canvas.tempLayer.onscreenCvs.offsetHeight * canvas.sharpness
+    canvas.tempLayer.onscreenCtx.setTransform(
+      canvas.sharpness * canvas.zoom,
+      0,
+      0,
+      canvas.sharpness * canvas.zoom,
+      0,
+      0
+    )
+    canvas.tempLayer.x = latestAction.layer.x
+    canvas.tempLayer.y = latestAction.layer.y
+    canvas.tempLayer.opacity = latestAction.layer.opacity
+    //splice the tempLayer just after the layer index
+    canvas.layers.splice(
+      canvas.layers.indexOf(latestAction.layer) + 1,
+      0,
+      canvas.tempLayer
+    )
+    latestAction.layer.inactiveTools.forEach((tool) => {
+      dom[`${tool}Btn`].disabled = false
+    })
+    //Store current layer in a separate variable to restore it after confirming pasted content
+    canvas.pastedLayer = latestAction.layer
+    canvas.currentLayer = canvas.tempLayer
+    canvas.currentLayer.inactiveTools.forEach((tool) => {
+      dom[`${tool}Btn`].disabled = true
+    })
+
+    const { selectProperties, boundaryBox } = latestAction.properties
+    // if xOffset and yOffset present, adjust selectProperties and boundaryBox
+    //render the clipboard canvas onto the temporary layer
+    state.selectProperties = { ...selectProperties }
+    //adjust selectProperties for layer offset
+    state.selectProperties.px1 += latestAction.layer.x
+    state.selectProperties.px2 += latestAction.layer.x
+    state.selectProperties.py1 += latestAction.layer.y
+    state.selectProperties.py2 += latestAction.layer.y
+    state.setBoundaryBox(state.selectProperties)
+    canvas.currentLayer.ctx.drawImage(
+      latestAction.properties.canvas,
+      boundaryBox.xMin + latestAction.layer.x,
+      boundaryBox.yMin + latestAction.layer.y,
+      boundaryBox.xMax - boundaryBox.xMin,
+      boundaryBox.yMax - boundaryBox.yMin
+    )
+    vectorGui.render()
     if (newLatestAction?.tool?.name === "move") {
       //templayer's x and y coords are often reset to 0, so set them to last move action's x and y
       canvas.currentLayer.x = newLatestAction.properties.to.x
@@ -210,25 +275,23 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
   } else if (modType === "to") {
     console.log("redo confirm paste action")
     //if modType is "to" (redoing confirm paste action), basically do the confirmPastedPixels function except use the action properties instead of the clipboard and don't add to timeline. Also don't need to adjust for layer offset
-    confirmPastedPixels(
-      latestAction.properties.canvas,
-      latestAction.properties.boundaryBox,
-      latestAction.layer,
-      latestAction.properties.xOffset,
-      latestAction.properties.yOffset
+    // confirmPastedPixels(
+    //   latestAction.properties.canvas,
+    //   latestAction.properties.boundaryBox,
+    //   latestAction.layer,
+    //   latestAction.properties.xOffset,
+    //   latestAction.properties.yOffset
+    // )
+    //reset state properties
+    state.deselect()
+    canvas.rasterGuiCTX.clearRect(
+      0,
+      0,
+      canvas.rasterGuiCVS.width,
+      canvas.rasterGuiCVS.height
     )
-    //remove the temporary layer
-    canvas.layers.splice(canvas.layers.indexOf(canvas.tempLayer), 1)
-    dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
-    canvas.tempLayer.inactiveTools.forEach((tool) => {
-      dom[`${tool}Btn`].disabled = false
-    })
-    //restore the original layer
-    canvas.currentLayer = canvas.pastedLayer
-    canvas.pastedLayer = null
-    canvas.currentLayer.inactiveTools.forEach((tool) => {
-      dom[`${tool}Btn`].disabled = true
-    })
+    //render
+    vectorGui.render()
   }
 }
 
@@ -359,6 +422,22 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       vectorGui.setVectorProperties(newLatestAction)
       vectorGui.render() //render vectors after removing previous action from undoStack
     }
+    //TODO: if new latest action is confirm paste, render select properties (deselect)
+    if (
+      newLatestAction.tool.name === "paste" &&
+      newLatestAction.properties.confirmed
+    ) {
+      //reset state properties
+      state.deselect()
+      canvas.rasterGuiCTX.clearRect(
+        0,
+        0,
+        canvas.rasterGuiCVS.width,
+        canvas.rasterGuiCVS.height
+      )
+      //render
+      vectorGui.render()
+    }
   }
   //clear affected layer and render image from most recent action from the affected layer
   //This avoids having to redraw the timeline for every undo/redo. Close to constant time whereas redrawTimeline is closer to exponential time or worse.
@@ -380,6 +459,15 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       renderLayersToDOM()
       renderVectorsToDOM()
       state.reset()
+      //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
+      if (
+        latestAction.tool.name === "paste" &&
+        latestAction.properties.confirmed &&
+        modType === "to"
+      ) {
+        //remove temp layer from DOM and restore current layer
+        removeTempLayerFromDOM()
+      }
     }
   } else {
     //no snapshot
@@ -401,6 +489,15 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     renderLayersToDOM()
     renderVectorsToDOM()
     state.reset()
+    //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
+    if (
+      latestAction.tool.name === "paste" &&
+      latestAction.properties.confirmed &&
+      modType === "to"
+    ) {
+      //remove temp layer from DOM and restore current layer
+      removeTempLayerFromDOM()
+    }
   }
   if (state.saveDialogOpen) {
     setSaveFilesizePreview()

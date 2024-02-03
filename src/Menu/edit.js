@@ -112,8 +112,8 @@ export function pasteSelectedPixels(clipboard, layer) {
     0,
     0
   )
-  canvas.tempLayer.x = 0
-  canvas.tempLayer.y = 0
+  canvas.tempLayer.x = layer.x
+  canvas.tempLayer.y = layer.y
   canvas.tempLayer.opacity = layer.opacity
   //splice the tempLayer just after the layer index
   canvas.layers.splice(canvas.layers.indexOf(layer) + 1, 0, canvas.tempLayer)
@@ -128,6 +128,7 @@ export function pasteSelectedPixels(clipboard, layer) {
   })
 
   const { selectProperties, boundaryBox } = clipboard
+  // if xOffset and yOffset present, adjust selectProperties and boundaryBox
   //render the clipboard canvas onto the temporary layer
   state.selectProperties = { ...selectProperties }
   state.setBoundaryBox(state.selectProperties)
@@ -156,8 +157,8 @@ export function confirmPastedPixels(
   //draw the current layer onto the pasted layer
   layer.ctx.drawImage(
     clipboardCanvas,
-    boundaryBox.xMin + xOffset,
-    boundaryBox.yMin + yOffset,
+    boundaryBox.xMin + xOffset - layer.x,
+    boundaryBox.yMin + yOffset - layer.y,
     boundaryBox.xMax - boundaryBox.xMin,
     boundaryBox.yMax - boundaryBox.yMin
   )
