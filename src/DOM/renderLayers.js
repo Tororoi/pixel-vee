@@ -42,7 +42,10 @@ export const renderLayersToDOM = () => {
     }
   })
 
-  if (canvas.activeLayerCount <= 1) {
+  if (
+    canvas.activeLayerCount <= 1 &&
+    canvas.currentLayer?.type !== "reference"
+  ) {
     dom.deleteLayerBtn.disabled = true
   } else {
     dom.deleteLayerBtn.disabled = false
