@@ -1,10 +1,10 @@
 # Pixel V
 
-### Drawing application for pixel art
+## Drawing application for pixel art
 
 Visit here: https://pixelvee.netlify.app/
 
-### Concept
+## Concept
 
 The goal of this drawing app is to combine a vector art workflow with a typical raster art workflow. This app especially makes drawing pixellated curves and ellipses very easy. Lines made with vector tools can also be modified at any time, even on the same layer as rasterized pixels. The aim is to make a faster, smoother workflow for pixel artists.
 
@@ -386,7 +386,7 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
 
 ### Stretch Features to be added
 
-- Rasterize vectors and remove them from the vectors interface
+- Ability to rasterize vectors and remove them from the vectors interface
 - Dithered Gradient Tool
 - Dithered Brush tool
 - Custom stamp brush
@@ -398,6 +398,9 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
 - Editable properties display for vectors
 - Layer Settings: Blend-mode, duplicate layer
 - Choose from set of default color palettes
+- Ability to add colors to palette without closing the color picker
+- Color ramps in color picker, along with ability to add an entire color ramp to the palette
+- Optional palette mode with a small canvas for making a palette with a brush, eraser and eyedropper tools instead of the typical way of modifying a palette.
 - Perspective Tool: Acts as a custom overlay on the canvas with user defined vanishing points and adjustable lines. 1-point, 2-point, 3-point, multipoint, 4-point curvilinear, 5-point curvilinear, isometric
 - Smooth curves mode for brush. When drawing quickly, curves can look choppy and angular. Calculates curvature between points. Bonus: convert entire brush stroke into a series of linked vectors.
 - Spritesheet options: custom grid to subdivide canvas

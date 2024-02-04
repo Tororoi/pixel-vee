@@ -62,10 +62,10 @@ const renderVectorElement = (action) => {
   const color = createColorElement(action)
   vectorElement.appendChild(color)
 
-  const hide = createHideElement(action.hidden)
+  const hide = createHideElement(action.hidden, "Hide/Show Vector")
   vectorElement.appendChild(hide)
 
-  const trash = createTrashElement()
+  const trash = createTrashElement("Remove Vector")
   vectorElement.appendChild(trash)
 
   if (isSelected) {

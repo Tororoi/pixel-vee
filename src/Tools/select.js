@@ -163,14 +163,10 @@ export const select = {
   brushType: "circle",
   brushDisabled: true,
   options: {
-    rasterOnly: {
-      active: true,
-      tooltip:
-        "Paste will rasterize any vectors that intersect with selected area",
-    },
-    // inverse: {
-    //   active: false,
-    //   tooltip: "Inverse selected area",
+    // rasterOnly: {
+    //   active: true,
+    //   tooltip:
+    //     "Paste will rasterize any vectors that intersect with selected area",
     // },
   },
   modes: {},

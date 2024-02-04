@@ -53,37 +53,41 @@ export const createColorElement = (action) => {
 
 /**
  * @param {Boolean} hidden
+ * @param {String} tooltipText
  * @returns {Element}
  */
-export const createHideElement = (hidden = false) => {
+export const createHideElement = (hidden = false, tooltipText) => {
   let hide = document.createElement("button")
   hide.type = "button"
   hide.className = "hide"
-  hide.ariaLabel = "Hide/Show action"
+  hide.ariaLabel = tooltipText
+  hide.dataset.tooltip = tooltipText
   hidden ? hide.classList.add("eyeclosed") : hide.classList.add("eyeopen")
   return hide
 }
 
 /**
- * @param {Object} action
+ * @param {String} tooltipText
  * @returns {Element}
  */
-export const createTrashElement = () => {
+export const createTrashElement = (tooltipText) => {
   let trash = document.createElement("button")
   trash.type = "button"
   trash.className = "trash"
-  trash.ariaLabel = "Delete action"
+  trash.ariaLabel = tooltipText
+  trash.dataset.tooltip = tooltipText
   return trash
 }
 
 /**
- * @param {Object} action
+ * @param {String} tooltipText
  * @returns {Element}
  */
-export const createSettingsElement = () => {
+export const createSettingsElement = (tooltipText) => {
   let gear = document.createElement("button")
   gear.type = "button"
   gear.className = "gear"
-  gear.ariaLabel = "Adjust Layer Settings"
+  gear.ariaLabel = tooltipText
+  gear.dataset.tooltip = tooltipText
   return gear
 }

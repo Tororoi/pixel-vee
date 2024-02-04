@@ -32,11 +32,9 @@ export const renderLayersToDOM = () => {
         layerElement.classList.add("selected")
       }
 
-      const hide = createHideElement(l.hidden)
+      const hide = createHideElement(l.hidden, "Hide/Show Layer")
       layerElement.appendChild(hide)
-      // const trash = createTrashElement()
-      // layerElement.appendChild(trash)
-      const settings = createSettingsElement()
+      const settings = createSettingsElement("Adjust Layer Settings")
       layerElement.appendChild(settings)
       dom.layersContainer.appendChild(layerElement)
       //associate object
