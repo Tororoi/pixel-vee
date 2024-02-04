@@ -201,17 +201,6 @@ Visit here: https://pixelvee.netlify.app/
   </tr>
 </table>
 
-## Canvas Size
-
-<table>
-  <tr>
-    <td colspan="2"> Change Canvas Size </td>
-  </tr>
-  <tr>
-    <td colspan="2"> Change canvas dimensions to between 8 and 1024 pixels. </td>
-  </tr>
-</table>
-
 ## Layers
 
 <table>
@@ -229,6 +218,13 @@ Visit here: https://pixelvee.netlify.app/
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-reference.svg" alt="Add Reference Layer" width="40"/> </td>
     <td> Add a new layer to be used for a background reference, such as for tracing. Reference layers cannot be drawn on. </td>
   </tr>
+  <tr>
+    <td colspan="2"> Remove Layer </td>
+  </tr>
+  <tr>
+    <td width="66" height="52"> <img src="public/pixelv-trash.svg" alt="Remove Layer" width="40"/> </td>
+    <td> Click the trash icon to remove the selected layer. </td>
+  </tr>
 </table>
 <table>
   <tr>
@@ -239,11 +235,11 @@ Visit here: https://pixelvee.netlify.app/
     <td> Click the eye icon to hide/show the layer. </td>
   </tr>
   <tr>
-    <td colspan="2"> Remove Layer </td>
+    <td colspan="2"> Layer Settings </td>
   </tr>
   <tr>
-    <td width="66" height="52"> <img src="public/pixelv-trash.svg" alt="Remove Layer" width="40"/> </td>
-    <td> Click the trash icon to remove the layer. </td>
+    <td width="66" height="52"> <img src="public/pixelv-gear.svg" alt="Open Layer Settings" width="40"/> </td>
+    <td> Click the gear icon to open layer settings. The layer's name and opacity can be changed in the layer settings. </td>
   </tr>
   <tr>
     <td colspan="2"> Change Layer Order </td>
@@ -285,20 +281,20 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
   </tr>
 </table>
 
-## Top Menu
+## File Menu
 
 <table>
   <tr>
-    <td colspan="2"> Grid </td>
+    <td colspan="2"> Open </td>
   </tr>
   <tr>
-    <td colspan="2"> Toggle the grid on or off. Only displays at higher zoom levels. </td>
+    <td colspan="2"> Open saved drawing from your desktop. </td>
   </tr>
   <tr>
-    <td colspan="2"> Tooltips </td>
+    <td colspan="2"> Save As... </td>
   </tr>
   <tr>
-    <td colspan="2"> Toggle tooltips on or off. Hover to see a tooltip. </td>
+    <td colspan="2"> Open dialog box to download file with current drawing progress. </td>
   </tr>
   <tr>
     <td colspan="2"> Export </td>
@@ -308,12 +304,79 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
   </tr>
 </table>
 
+## Edit Menu
+
+<table>
+  <tr>
+    <td colspan="2"> Resize Canvas... </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Open a dialog box to change the canvas dimensions. Canvas dimensions are limited to between 8 and 1024 pixels. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Select All (Cmd + A) </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Select entire canvas area. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Deselect (Cmd + D) </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Deselect selection area. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Invert Selection (Cmd + I) </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Invert selection area. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Cut (Cmd + X) </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Cut selection. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Copy (Cmd + C) </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Copy selection. </td>
+  </tr>
+    <tr>
+    <td colspan="2"> Paste (Cmd + V) </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Paste copied selection. </td>
+  </tr>
+</table>
+
+## Settings <img src="public/pixelv-gear.svg" alt="Settings" width="40" height="40"/>
+
+<table>
+  <tr>
+    <td colspan="2"> Tooltips </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Toggle tooltips on or off. Hover to see a tooltip. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Grid </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Toggle the grid on or off. Only displays at higher zoom levels. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Subgrid Spacing </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Define the number of pixels between the subgrid overlaid onto the main grid. At a value of 1 no subgrid will be rendered. </td>
+  </tr>
+</table>
 
 ### Key Features to be added
 
-- Selection Tool
 - Dedicated Mobile/ Tablet UI
-- Menu dropdown for functionality that is used less frequently. Windows for canvas size for example do not need to be on screen at all times.
 
 ### Stretch Features to be added
 
@@ -327,13 +390,12 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
 - Preview window
 - Toggle magnify pointer area for precise placement of pixels: move magnifier on canvas and then work in magnified window to place pixels. Useful for any tools that use subpixels, and for precise placement of vectors.
 - Editable properties display for vectors
-- Layer Settings: Adjust layer opacity, blend-mode, duplicate layer
+- Layer Settings: Blend-mode, duplicate layer
 - Choose from set of default color palettes
 - Perspective Tool: Acts as a custom overlay on the canvas with user defined vanishing points and adjustable lines. 1-point, 2-point, 3-point, multipoint, 4-point curvilinear, 5-point curvilinear, isometric
 - Smooth curves mode for brush. When drawing quickly, curves can look choppy and angular. Calculates curvature between points. Bonus: convert entire brush stroke into a series of linked vectors.
 - Spritesheet options: custom grid to subdivide canvas
 - Animation options: preview spritesheet animation, onion skins as sublayers, preview animation of layers with onion skins individually and simultaneously, set framerate for animation layer, export animation
-- Dye Tool: Propogate colors through all animation frames. Adjust color in one frame and color changes in all selected frames.
 
 # Run locally
 1. Run `npm install`
