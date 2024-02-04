@@ -4,6 +4,12 @@
 
 Visit here: https://pixelvee.netlify.app/
 
+### Concept
+
+The goal of this drawing app is to combine a vector art workflow with a typical raster art workflow. This app especially makes drawing pixellated curves and ellipses very easy. Lines made with vector tools can also be modified at any time, even on the same layer as rasterized pixels. The aim is to make a faster, smoother workflow for pixel artists.
+
+This app is a work in progress. See the bottom of this page for features that are planned to be added in the future.
+
 ## Functions
 
 <table>
