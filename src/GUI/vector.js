@@ -10,7 +10,7 @@ import {
   renderEllipsePath,
 } from "./ellipse.js"
 import { renderTransformBox } from "./transform.js"
-import { renderSelectVector, drawSelectOutline } from "./select.js"
+import { renderSelectVector, renderRasterCVS } from "./select.js"
 import { renderGrid } from "./grid.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { getAngle } from "../utils/trig.js"
@@ -22,6 +22,7 @@ import { getAngle } from "../utils/trig.js"
 //Note: The Vector Graphics canvas has a mix-blend-mode: difference applied to it
 export const vectorGui = {
   grid: false,
+  gridSpacing: 8,
   collisionPresent: false,
   collidedKeys: { xKey: null, yKey: null },
   selectedPoint: { xKey: null, yKey: null },
@@ -63,7 +64,7 @@ export const vectorGui = {
   removeLinkedVector(vectorAction) {
     delete this.linkedVectors[vectorAction.index]
   },
-  drawSelectOutline,
+  // drawSelectOutline,
   render,
   reset,
   setVectorProperties,
@@ -263,7 +264,7 @@ function setVectorProperties(vectorAction) {
  * Render vector graphical interface
  * @param {Float} lineDashOffset
  */
-function render(lineDashOffset = 0.5) {
+function render() {
   canvas.vectorGuiCTX.clearRect(
     0,
     0,
@@ -285,18 +286,13 @@ function render(lineDashOffset = 0.5) {
   }
   //Render select vector
   if (state.selectProperties.px1 !== null) {
-    renderSelectVector(vectorGui, lineDashOffset, state.tool.name === "select")
+    // renderSelectVector(0.5, state.tool.name === "select")
+    renderRasterCVS()
   }
   //Render grid
   if (canvas.zoom >= 4 && vectorGui.grid) {
-    renderGrid(8)
+    renderGrid(vectorGui.gridSpacing)
   }
-  //Animate render
-  // if (state.tool.name !== "select" || !state.clicked) {
-  //   window.requestAnimationFrame(() => {
-  //     render(state, canvas, lineDashOffset < 2 ? lineDashOffset + 0.1 : 0)
-  //   })
-  // }
 }
 
 /**

@@ -2,7 +2,7 @@ import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { actionFill } from "../Actions/actions.js"
+import { actionFill } from "../Actions/pointerActions.js"
 import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 import { vectorGui, createActiveIndexesForRender } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
@@ -32,10 +32,11 @@ function fillSteps() {
         actionFill(
           state.vectorProperties.px1,
           state.vectorProperties.py1,
+          state.boundaryBox,
+          state.selectionInversed,
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
-          state.selectProperties,
           state.maskSet
         )
         //For undo ability, store starting coords and settings and pass them into actionFill
@@ -44,6 +45,14 @@ function fillSteps() {
           canvas.currentLayer.x,
           canvas.currentLayer.y
         )
+        //correct boundary box for layer offset
+        const boundaryBox = { ...state.boundaryBox }
+        if (boundaryBox.xMax !== null) {
+          boundaryBox.xMin -= canvas.currentLayer.x
+          boundaryBox.xMax -= canvas.currentLayer.x
+          boundaryBox.yMin -= canvas.currentLayer.y
+          boundaryBox.yMax -= canvas.currentLayer.y
+        }
         addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
@@ -52,8 +61,9 @@ function fillSteps() {
               px1: state.vectorProperties.px1 - canvas.currentLayer.x,
               py1: state.vectorProperties.py1 - canvas.currentLayer.y,
             },
-            selectProperties: { ...state.selectProperties },
             maskArray,
+            boundaryBox,
+            selectionInversed: state.selectionInversed,
           },
         })
         renderCanvas(canvas.currentLayer)
@@ -165,7 +175,7 @@ export const fill = {
   fn: fillSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: true,
+  brushDisabled: true,
   options: { contiguous: { active: true } },
   modes: { eraser: false },
   type: "vector",

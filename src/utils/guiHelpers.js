@@ -57,3 +57,18 @@ export function checkPointCollision(pointerX, pointerY, px, py, r) {
     pointerY <= py + r
   )
 }
+
+/**
+ * @param {Integer} pointerX
+ * @param {Integer} pointerY
+ * @param {Integer} px1
+ * @param {Integer} py1
+ * @param {Integer} px2
+ * @param {Integer} py2
+ * @returns {Boolean}
+ */
+export function checkAreaCollision(pointerX, pointerY, px1, py1, px2, py2) {
+  return (
+    pointerX >= px1 && pointerX <= px2 && pointerY >= py1 && pointerY <= py2
+  )
+}

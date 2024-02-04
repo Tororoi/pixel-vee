@@ -3,7 +3,10 @@ import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { actionQuadraticCurve, actionCubicCurve } from "../Actions/actions.js"
+import {
+  actionQuadraticCurve,
+  actionCubicCurve,
+} from "../Actions/pointerActions.js"
 import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 import {
   vectorGui,
@@ -27,7 +30,7 @@ import { addToTimeline } from "../Actions/undoRedo.js"
  */
 function quadCurveSteps() {
   if (vectorGui.collisionPresent && state.clickCounter === 0) {
-    adjustCurveSteps(3)
+    adjustCurveSteps()
     return
   }
   switch (canvas.pointerEvent) {
@@ -62,6 +65,8 @@ function quadCurveSteps() {
         state.vectorProperties.py2,
         state.vectorProperties.px3,
         state.vectorProperties.py3,
+        state.boundaryBox,
+        state.selectionInversed,
         state.clickCounter,
         swatches.primary.color,
         canvas.currentLayer,
@@ -97,6 +102,8 @@ function quadCurveSteps() {
         state.vectorProperties.py2,
         state.vectorProperties.px3,
         state.vectorProperties.py3,
+        state.boundaryBox,
+        state.selectionInversed,
         state.clickCounter,
         swatches.primary.color,
         canvas.currentLayer,
@@ -135,6 +142,8 @@ function quadCurveSteps() {
           state.vectorProperties.py2,
           state.vectorProperties.px3,
           state.vectorProperties.py3,
+          state.boundaryBox,
+          state.selectionInversed,
           state.clickCounter,
           swatches.primary.color,
           canvas.currentLayer,
@@ -149,6 +158,14 @@ function quadCurveSteps() {
           canvas.currentLayer.x,
           canvas.currentLayer.y
         )
+        //correct boundary box for layer offset
+        const boundaryBox = { ...state.boundaryBox }
+        if (boundaryBox.xMax !== null) {
+          boundaryBox.xMin -= canvas.currentLayer.x
+          boundaryBox.xMax -= canvas.currentLayer.x
+          boundaryBox.yMin -= canvas.currentLayer.y
+          boundaryBox.yMax -= canvas.currentLayer.y
+        }
         //store control points for timeline
         addToTimeline({
           tool: state.tool,
@@ -163,6 +180,8 @@ function quadCurveSteps() {
               py3: state.vectorProperties.py3 - canvas.currentLayer.y,
             },
             maskArray,
+            boundaryBox,
+            selectionInversed: state.selectionInversed,
           },
         })
         renderCanvas(canvas.currentLayer)
@@ -220,6 +239,8 @@ function cubicCurveSteps() {
         state.vectorProperties.py3,
         state.vectorProperties.px4,
         state.vectorProperties.py4,
+        state.boundaryBox,
+        state.selectionInversed,
         state.clickCounter,
         swatches.primary.color,
         canvas.currentLayer,
@@ -260,6 +281,8 @@ function cubicCurveSteps() {
         state.vectorProperties.py3,
         state.vectorProperties.px4,
         state.vectorProperties.py4,
+        state.boundaryBox,
+        state.selectionInversed,
         state.clickCounter,
         swatches.primary.color,
         canvas.currentLayer,
@@ -303,6 +326,8 @@ function cubicCurveSteps() {
           state.vectorProperties.py3,
           state.vectorProperties.px4,
           state.vectorProperties.py4,
+          state.boundaryBox,
+          state.selectionInversed,
           state.clickCounter,
           swatches.primary.color,
           canvas.currentLayer,
@@ -317,6 +342,14 @@ function cubicCurveSteps() {
           canvas.currentLayer.x,
           canvas.currentLayer.y
         )
+        //correct boundary box for layer offset
+        const boundaryBox = { ...state.boundaryBox }
+        if (boundaryBox.xMax !== null) {
+          boundaryBox.xMin -= canvas.currentLayer.x
+          boundaryBox.xMax -= canvas.currentLayer.x
+          boundaryBox.yMin -= canvas.currentLayer.y
+          boundaryBox.yMax -= canvas.currentLayer.y
+        }
         //store control points for timeline
         addToTimeline({
           tool: state.tool,
@@ -335,6 +368,9 @@ function cubicCurveSteps() {
               py4: state.vectorProperties.py4 - canvas.currentLayer.y,
             },
             maskArray,
+            //TODO: allow toggling boundary box on/off
+            boundaryBox,
+            selectionInversed: state.selectionInversed,
           },
         })
         renderCanvas(canvas.currentLayer)
@@ -354,9 +390,8 @@ function cubicCurveSteps() {
  * Used automatically by curve tools after curve is completed.
  * TODO: create distinct tool for adjusting that won't create a new curve when clicking.
  * Ideally a user should be able to click on a curve and render it's vector UI that way.
- * @param {*} numPoints
  */
-function adjustCurveSteps(numPoints = 4) {
+function adjustCurveSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
@@ -534,7 +569,7 @@ export const quadCurve = {
   fn: quadCurveSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: false,
+  brushDisabled: false,
   options: {
     displayPaths: {
       active: false,
@@ -552,7 +587,7 @@ export const cubicCurve = {
   fn: cubicCurveSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: false,
+  brushDisabled: false,
   options: {
     align: {
       active: false,

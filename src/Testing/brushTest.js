@@ -7,7 +7,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { brushStamps } from "../Context/brushStamps.js"
 import { storedActions } from "./storedActions.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
-import { actionDraw } from "../Actions/actions.js"
+import { actionDraw } from "../Actions/pointerActions.js"
 
 export function testBrushAction() {
   let brushSize = tools.brush.brushSize
@@ -42,6 +42,8 @@ export function testBrushAction() {
     actionDraw(
       p.x + offsetX,
       p.y + offsetY,
+      action.properties.boundaryBox,
+      action.properties.selectionInversed,
       action.color,
       brushStamps[action.tool.brushType][brushSize][brushDirection],
       brushSize,

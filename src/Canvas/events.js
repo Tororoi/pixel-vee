@@ -1,22 +1,26 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { tools } from "../Tools/index.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
   renderLayersToDOM,
+  renderLayerSettingsToDOM,
   renderVectorsToDOM,
   renderPaletteToDOM,
 } from "../DOM/render.js"
-import { createNewRasterLayer } from "./layers.js"
-import { handleTools } from "../Tools/events.js"
 import { removeAction, changeActionMode } from "../Actions/modifyTimeline.js"
 import { vectorGui } from "../GUI/vector.js"
 import { setInitialZoom } from "../utils/canvasHelpers.js"
 import { initializeColorPicker } from "../Swatch/events.js"
 import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
 import { dragStart, dragMove, dragStop } from "../utils/drag.js"
-import { addToTimeline } from "../Actions/undoRedo.js"
+import {
+  addReferenceLayer,
+  addRasterLayer,
+  removeLayer,
+} from "../Actions/nonPointerActions.js"
+import { createPreviewLayer } from "./layers.js"
+import { switchTool } from "../Tools/toolbox.js"
 
 //====================================//
 //==== * * * Canvas Resize * * * =====//
@@ -85,6 +89,14 @@ const resizeOffScreenCanvas = (width, height) => {
     Math.max(canvas.offScreenCVS.width, canvas.offScreenCVS.height)
   )
   canvas.vectorGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
+  canvas.rasterGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,
@@ -168,6 +180,17 @@ const resizeOnScreenCanvas = () => {
     0,
     0
   )
+  canvas.rasterGuiCVS.width = canvas.rasterGuiCVS.offsetWidth * canvas.sharpness
+  canvas.rasterGuiCVS.height =
+    canvas.rasterGuiCVS.offsetHeight * canvas.sharpness
+  canvas.rasterGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
   canvas.layers.forEach((layer) => {
     layer.onscreenCvs.width = layer.onscreenCvs.offsetWidth * canvas.sharpness
     layer.onscreenCvs.height = layer.onscreenCvs.offsetHeight * canvas.sharpness
@@ -222,9 +245,25 @@ function layerInteract(e) {
     e.target.classList.remove("eyeclosed")
     e.target.classList.add("eyeopen")
     layer.hidden = false
-  } else if (e.target.className.includes("trash")) {
-    removeLayer(layer)
+  } else if (e.target.className.includes("gear")) {
+    //open settings dialog
+    const domLayer = e.target.closest(".layer")
+    //set top offset of layer settings container to match
+    if (
+      dom.layerSettingsContainer.style.display === "flex" &&
+      // && layer settings layer is the same as the one that was clicked
+      dom.layerSettingsContainer.layerObj === layer
+    ) {
+      dom.layerSettingsContainer.style.display = "none"
+      dom.layerSettingsContainer.layerObj = null
+    } else {
+      dom.layerSettingsContainer.style.display = "flex"
+      dom.layerSettingsContainer.layerObj = layer
+      renderLayerSettingsToDOM(domLayer)
+    }
+    //TODO: implement layer settings, including layer name and layer opacity
   } else {
+    //TODO: allow selecting multiple layers for moving purposes only
     //select current layer
     if (layer !== canvas.currentLayer) {
       canvas.currentLayer.inactiveTools.forEach((tool) => {
@@ -237,7 +276,7 @@ function layerInteract(e) {
       vectorGui.reset()
       vectorGui.render()
       if (layer.type === "reference") {
-        handleTools(null, "move")
+        switchTool("move")
       }
       renderLayersToDOM()
       renderVectorsToDOM()
@@ -334,128 +373,6 @@ function dragLayerEnd(e) {
   renderLayersToDOM()
 }
 
-/**
- * Upload an image and create a new reference layer
- */
-function addReferenceLayer() {
-  let reader
-  let img = new Image()
-
-  if (this.files && this.files[0]) {
-    reader = new FileReader()
-
-    reader.onload = (e) => {
-      img.src = e.target.result
-      img.onload = () => {
-        let onscreenLayerCVS = document.createElement("canvas")
-        let onscreenLayerCTX = onscreenLayerCVS.getContext("2d", {
-          willReadFrequently: true,
-        })
-        onscreenLayerCVS.className = "onscreen-canvas"
-        dom.canvasLayers.insertBefore(
-          onscreenLayerCVS,
-          dom.canvasLayers.children[0]
-        )
-        onscreenLayerCVS.width = onscreenLayerCVS.offsetWidth * canvas.sharpness
-        onscreenLayerCVS.height =
-          onscreenLayerCVS.offsetHeight * canvas.sharpness
-        onscreenLayerCTX.setTransform(
-          canvas.sharpness * canvas.zoom,
-          0,
-          0,
-          canvas.sharpness * canvas.zoom,
-          0,
-          0
-        )
-        //constrain background image to canvas with scale
-        let scale =
-          canvas.offScreenCVS.width / img.width >
-          canvas.offScreenCVS.height / img.height
-            ? canvas.offScreenCVS.height / img.height
-            : canvas.offScreenCVS.width / img.width //TODO: should be method, not var so width and height can be adjusted without having to set scale again
-        let layer = {
-          type: "reference",
-          title: `Reference ${canvas.layers.length + 1}`,
-          img: img,
-          dataUrl: img.src,
-          onscreenCvs: onscreenLayerCVS,
-          onscreenCtx: onscreenLayerCTX,
-          x: 0,
-          y: 0,
-          scale: scale,
-          opacity: 1,
-          inactiveTools: [
-            "brush",
-            "fill",
-            "line",
-            "quadCurve",
-            "cubicCurve",
-            "ellipse",
-            // "select",
-          ],
-          hidden: false,
-          removed: false,
-        }
-        canvas.layers.unshift(layer)
-        addToTimeline({
-          tool: tools.addLayer,
-          layer,
-        })
-        state.action = null
-        state.redoStack = []
-        renderLayersToDOM()
-        renderCanvas()
-      }
-    }
-
-    reader.readAsDataURL(this.files[0])
-  }
-}
-
-/**
- * Mark a layer as removed
- * TODO: This is a timeline action and should be moved to an actions file
- * @param {Object} layer
- */
-function removeLayer(layer) {
-  //set "removed" flag to true on selected layer.
-  if (canvas.activeLayerCount > 1 || layer.type !== "raster") {
-    layer.removed = true
-    if (layer === canvas.currentLayer) {
-      canvas.currentLayer = canvas.layers.find(
-        (l) => l.type === "raster" && !l.removed
-      )
-      vectorGui.reset()
-    }
-    addToTimeline({
-      tool: tools.removeLayer,
-      layer,
-    })
-    state.action = null
-    state.redoStack = []
-    renderLayersToDOM()
-    renderVectorsToDOM()
-  }
-}
-
-/**
- * Add layer
- * Add a new raster layer
- * TODO: This is a timeline action and should be moved to an actions file
- */
-function addRasterLayer() {
-  //once layer is added to timeline and drawn on, can no longer be deleted
-  const layer = createNewRasterLayer(`Layer ${canvas.layers.length + 1}`)
-  canvas.layers.push(layer)
-  addToTimeline({
-    tool: tools.addLayer,
-    layer,
-  })
-  state.action = null
-  state.redoStack = []
-  renderLayersToDOM()
-}
-
 //====================================//
 //======= * * * Vectors * * * ========//
 //====================================//
@@ -495,7 +412,7 @@ function vectorInteract(e) {
   } else {
     let currentIndex = canvas.currentVectorIndex
     //switch tool
-    handleTools(null, vector.tool.name)
+    switchTool(vector.tool.name)
     //select current vector
     vectorGui.reset()
     if (vector.index !== currentIndex) {
@@ -579,6 +496,9 @@ renderLayersToDOM()
 renderPaletteToDOM()
 // renderBrushModesToDOM()
 
+//Initialize temp layer, not added to layers array
+canvas.tempLayer = createPreviewLayer()
+
 //===================================//
 //=== * * * Event Listeners * * * ===//
 //===================================//
@@ -600,7 +520,9 @@ dom.dimensionsForm.addEventListener("pointerout", (e) => {
 dom.dimensionsForm.addEventListener("submit", handleDimensionsSubmit)
 dom.canvasWidth.addEventListener("blur", restrictSize)
 dom.canvasHeight.addEventListener("blur", restrictSize)
-
+dom.canvasSizeCancelBtn.addEventListener("click", () => {
+  dom.sizeContainer.style.display = "none"
+})
 // * Layers * //
 dom.uploadBtn.addEventListener("click", (e) => {
   //reset value so that the same file can be uploaded multiple times
@@ -608,6 +530,11 @@ dom.uploadBtn.addEventListener("click", (e) => {
 })
 dom.uploadBtn.addEventListener("change", addReferenceLayer)
 dom.newLayerBtn.addEventListener("click", addRasterLayer)
+dom.deleteLayerBtn.addEventListener("click", () => {
+  let layer = canvas.currentLayer
+  removeLayer(layer)
+  renderCanvas(layer)
+})
 
 //TODO: Make similar to functionality of dragging dialog boxes.
 dom.layersContainer.addEventListener("click", layerInteract)
@@ -624,6 +551,32 @@ dom.layersContainer.addEventListener("dragend", dragLayerEnd)
 // dom.layersContainer.addEventListener("pointerup", dragStop)
 // dom.layersContainer.addEventListener("pointerout", dragStop)
 // dom.layersContainer.addEventListener("pointermove", dragMove)
+dom.layerSettingsContainer.addEventListener("input", (e) => {
+  const layer = dom.layerSettingsContainer.layerObj
+  if (layer) {
+    if (e.target.matches(".slider")) {
+      layer.opacity = e.target.value / 255
+      dom.layerSettingsContainer.querySelector(
+        ".layer-opacity-label > .input-label"
+      ).textContent = `Opacity: ${Math.round(layer.opacity * 255)}`
+      renderCanvas(layer)
+    } else if (e.target.matches("#layer-name")) {
+      layer.title = e.target.value
+      renderLayersToDOM()
+    }
+  }
+})
+//TODO: maybe dynamically generate layer settings container when needed and only bind this event listener when it is open
+document.addEventListener("pointerdown", (e) => {
+  if (
+    dom.layerSettingsContainer.layerObj &&
+    !e.target.classList.contains("gear") &&
+    !dom.layerSettingsContainer.contains(e.target)
+  ) {
+    dom.layerSettingsContainer.style.display = "none"
+    dom.layerSettingsContainer.layerObj = null
+  }
+})
 
 // * Vectors * //
 dom.vectorsThumbnails.addEventListener("click", vectorInteract)

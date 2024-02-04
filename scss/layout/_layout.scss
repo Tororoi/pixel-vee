@@ -73,6 +73,9 @@
     .collapse-btn {
       @include collapseArrow;
     }
+    .close-btn {
+      @include closeX;
+    }
   }
   .collapsible {
     flex: 0 1 auto;
@@ -271,6 +274,33 @@
       top: -2px;
       left: -2px;
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 10 10' shape-rendering='crispEdges'%3E%3Cpath stroke='%23ffffff' d='M8 0h2M7 1h1M9 1h1M6 2h1M8 2h1M3 3h1M5 3h1M7 3h1M2 4h1M4 4h1M7 4h1M1 5h1M6 5h1M2 6h1M6 6h1M3 7h1M5 7h1M4 8h1' /%3E%3Cpath stroke='%23000000' d='M8 1h1M7 2h1M6 3h1M3 4h1M5 4h2M2 5h4M3 6h3M4 7h1' /%3E%3C/svg%3E");
+    }
+  }
+}
+
+.slider {
+  height: 16px;
+  background: $darkest-gray;
+  outline: none;
+  cursor: pointer;
+  &::-webkit-slider-thumb {
+    width: 16px;
+    height: 16px;
+    background: #ffffff;
+  }
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: #ffffff;
+  }
+  &:disabled {
+    cursor: not-allowed;
+    background: $neutral-gray;
+    &::-webkit-slider-thumb {
+      background: rgb(200, 200, 200);
+    }
+    &::-moz-range-thumb {
+      background: rgb(200, 200, 200);
     }
   }
 }

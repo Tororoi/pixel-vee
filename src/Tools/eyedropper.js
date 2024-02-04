@@ -51,7 +51,7 @@ export const eyedropper = {
   fn: eyedropperSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: true,
+  brushDisabled: true,
   options: {},
   modes: {},
   type: "utility",

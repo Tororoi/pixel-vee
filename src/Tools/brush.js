@@ -2,7 +2,7 @@ import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { actionDraw, actionLine } from "../Actions/actions.js"
+import { actionDraw, actionLine } from "../Actions/pointerActions.js"
 import { getAngle, getTriangle } from "../utils/trig.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
@@ -53,6 +53,8 @@ function brushSteps() {
           state.lineStartY,
           state.cursorX,
           state.cursorY,
+          state.boundaryBox,
+          state.selectionInversed,
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
@@ -95,10 +97,23 @@ function brushSteps() {
         canvas.currentLayer.x,
         canvas.currentLayer.y
       )
+      //correct boundary box for layer offset
+      const boundaryBox = { ...state.boundaryBox }
+      if (boundaryBox.xMax !== null) {
+        boundaryBox.xMin -= canvas.currentLayer.x
+        boundaryBox.xMax -= canvas.currentLayer.x
+        boundaryBox.yMin -= canvas.currentLayer.y
+        boundaryBox.yMax -= canvas.currentLayer.y
+      }
       addToTimeline({
         tool: brush,
         layer: canvas.currentLayer,
-        properties: { maskArray, points: state.points },
+        properties: {
+          points: state.points,
+          maskArray,
+          boundaryBox,
+          selectionInversed: state.selectionInversed,
+        },
       })
       if (state.tool.modes?.colorMask) {
         state.maskSet = null
@@ -140,6 +155,8 @@ function drawBrushPoint(x, y, brushDirection) {
   actionDraw(
     x,
     y,
+    state.boundaryBox,
+    state.selectionInversed,
     swatches.primary.color,
     brushStamps[state.tool.brushType][state.tool.brushSize][brushDirection],
     state.tool.brushSize,
@@ -164,6 +181,8 @@ function drawPreviewBrushPoint() {
   actionDraw(
     state.cursorX,
     state.cursorY,
+    state.boundaryBox,
+    state.selectionInversed,
     swatches.primary.color,
     brushStamps[state.tool.brushType][state.tool.brushSize][brushDirection],
     state.tool.brushSize,
@@ -282,7 +301,7 @@ export const brush = {
   fn: brushSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: false,
+  brushDisabled: false,
   options: { line: { active: false } },
   modes: { eraser: false, inject: false, perfect: false, colorMask: false },
   type: "raster",

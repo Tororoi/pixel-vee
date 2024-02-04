@@ -32,7 +32,8 @@ const isValidAction = (action) =>
   !action.removed &&
   !action.layer?.removed &&
   action.tool.type === "vector" &&
-  action.layer === canvas.currentLayer
+  (action.layer === canvas.currentLayer ||
+    (action.layer === canvas.pastedLayer && canvas.currentLayer.isPreview))
 
 /**
  * Render a vector element
@@ -61,10 +62,10 @@ const renderVectorElement = (action) => {
   const color = createColorElement(action)
   vectorElement.appendChild(color)
 
-  const hide = createHideElement(action.hidden)
+  const hide = createHideElement(action.hidden, "Hide/Show Vector")
   vectorElement.appendChild(hide)
 
-  const trash = createTrashElement()
+  const trash = createTrashElement("Remove Vector")
   vectorElement.appendChild(trash)
 
   if (isSelected) {

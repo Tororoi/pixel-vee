@@ -34,12 +34,22 @@ export const initializeCollapser = (collapseTarget, startCollapsed) => {
   }
 }
 
+export const initializeCloser = (closeTarget) => {
+  const closeBtn = closeTarget.querySelector(".close-btn")
+  if (closeBtn) {
+    closeBtn.addEventListener("click", (e) => {
+      closeTarget.style.display = "none"
+    })
+  }
+}
+
 export const initializeDialogBox = (
   dialogBoxTarget,
   startCollapsed = false
 ) => {
   initializeDragger(dialogBoxTarget)
   initializeCollapser(dialogBoxTarget, startCollapsed)
+  initializeCloser(dialogBoxTarget)
 }
 
 function setDragSiblings() {

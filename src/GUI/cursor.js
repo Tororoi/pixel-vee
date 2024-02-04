@@ -2,7 +2,7 @@ import { brushStamps } from "../Context/brushStamps.js"
 // import { state } from "../Context/state.js"
 // import { canvas } from "../Context/canvas.js"
 // import { swatches } from "../Context/swatch.js"
-import { actionDraw } from "../Actions/actions.js"
+import { actionDraw } from "../Actions/pointerActions.js"
 import { vectorGui } from "./vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 
@@ -35,9 +35,13 @@ export function renderCursor(state, canvas, swatches) {
       //TODO: erase mode is somewhat buggy with rendering. Find way to have it render without calling draw() more than needed.
       if (!vectorGui.collisionPresent) {
         renderCanvas(canvas.currentLayer)
+        //TODO: For better performance, draw cursor on a separate canvas and render that canvas on top of the main canvas.
+        //Then renderCanvas would not need to be called here.
         actionDraw(
           state.cursorX,
           state.cursorY,
+          state.boundaryBox,
+          state.selectionInversed,
           swatches.primary.color,
           brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
           state.tool.brushSize,

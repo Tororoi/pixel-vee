@@ -1,0 +1,89 @@
+.settings-container {
+  user-select: none;
+  position: absolute;
+  top: 15%;
+  z-index: 103;
+  max-width: calc(100% - 4px);
+  max-height: calc(100% - 4px);
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  color: white;
+  background: $extra-dark-gray;
+  text-align: center;
+  padding: 0;
+  align-self: center;
+  opacity: 1;
+  .collapsible {
+    padding-top: 2px;
+    // display: none;
+  }
+  .settings-interface {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    hr {
+      width: calc(100% - 32px);
+      margin: 0;
+      border: 0;
+      border-top: 2px solid $border-color;
+    }
+    .settings-group {
+      display: flex;
+      flex-flow: column nowrap;
+      align-items: center;
+      margin: 24px 32px;
+      .settings-section-header {
+        margin-bottom: 16px;
+      }
+      .settings-options {
+        display: flex;
+        flex-flow: column nowrap;
+        align-items: flex-start;
+        > * {
+          margin-bottom: 16px;
+        }
+        label {
+          display: flex;
+          flex-flow: row nowrap;
+          align-items: center;
+          .icon {
+            width: 40px;
+            height: 40px;
+            // background-color: $border-color;
+            // @include boxBorder;
+          }
+          // input:checked ~ .icon {
+          //   background-color: $white;
+          //   @include boxBorder($white);
+          // }
+        }
+        &.toolbox-settings {
+          flex-flow: column wrap;
+          max-height: 200px;
+          label {
+            margin-right: 12px;
+            margin-left: 12px;
+          }
+        }
+        .grid-spacing-container {
+          display: flex;
+          flex-flow: row nowrap;
+          align-items: center;
+          justify-content: space-between;
+          width: 100%;
+          #grid-spacing {
+            height: 18px;
+          }
+          // .grid-spacing-slider {
+          //   width: 100%;
+          //   margin: 0 16px;
+          // }
+        }
+        > :last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+}

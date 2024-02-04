@@ -33,7 +33,7 @@
 //==================================================//
 
 @mixin brushSvg($color) {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='#{$color}' d='M15 1h2M14 2h1M17 2h1M13 3h1M18 3h1M12 4h1M18 4h1M11 5h1M17 5h1M10 6h1M16 6h1M9 7h1M15 7h1M8 8h1M14 8h1M7 9h1M13 9h1M6 10h1M12 10h1M5 11h1M11 11h1M4 12h1M10 12h1M3 13h1M9 13h1M3 14h1M8 14h1M3 15h1M8 15h1M2 16h1M8 16h1M1 17h1M7 17h1M2 18h5' /%3E%3Cpath stroke='%23575757' d='M15 2h2M14 3h1M13 4h1M16 4h1M12 5h1M15 5h1M11 6h1M14 6h1M10 7h1M13 7h1M9 8h1M12 8h1M8 9h1M11 9h1M7 10h1M10 10h1M8 11h2M5 13h1M5 14h1M5 15h1M4 16h1' /%3E%3Cpath stroke='%23acacac' d='M15 3h2M14 4h2M13 5h2M12 6h2M11 7h2M10 8h2M9 9h2M8 10h2M6 11h1M7 12h2' /%3E%3Cpath stroke='%23000000' d='M17 3h1M17 4h1M16 5h1M15 6h1M14 7h1M13 8h1M12 9h1M11 10h1M10 11h1M5 12h2M9 12h1M4 13h1M6 13h3M4 14h1M6 14h2M4 15h1M6 15h2M3 16h1M5 16h3M2 17h5' /%3E%3Cpath stroke='%23ffffff' d='M7 11h1' /%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='#{$color}' d='M16 1h2M14 2h2M18 2h1M12 3h2M18 3h1M11 4h1M17 4h1M10 5h1M17 5h1M9 6h1M16 6h1M8 7h1M16 7h1M8 8h1M15 8h1M7 9h1M14 9h1M6 10h2M13 10h1M4 11h2M11 11h2M3 12h1M9 12h2M2 13h1M9 13h1M2 14h1M8 14h1M2 15h1M8 15h1M2 16h1M8 16h1M1 17h1M7 17h1M2 18h5' /%3E%3Cpath stroke='%23575757' d='M16 2h2M14 3h2M12 4h2M11 5h1M15 5h1M10 6h1M14 6h1M9 7h1M13 7h1M9 8h1M12 8h1M8 9h4M9 10h2M4 13h2M8 13h1M4 14h2M4 15h2M4 16h1' /%3E%3Cpath stroke='%23acacac' d='M16 3h1M14 4h2M12 5h3M11 6h3M10 7h3M10 8h2M6 11h1M8 11h1M7 12h2' /%3E%3Cpath stroke='%23000000' d='M17 3h1M16 4h1M16 5h1M15 6h1M14 7h2M13 8h2M12 9h2M8 10h1M11 10h2M9 11h2M4 12h3M3 13h1M6 13h2M3 14h1M6 14h2M3 15h1M6 15h2M3 16h1M5 16h3M2 17h5' /%3E%3Cpath stroke='%23ffffff' d='M7 11h1' /%3E%3C/svg%3E");
 }
 
 @mixin brushIcon($border: $border-color, $active: $white) {
@@ -107,6 +107,19 @@
   // &:hover,
   &.selected {
     @include ellipseSvg($active);
+  }
+}
+
+@mixin selectSvg($color) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='#{$color}' d='M2 1h2M6 1h3M11 1h3M16 1h2M1 2h1M4 2h2M9 2h2M14 2h2M18 2h1M1 3h1M3 3h1M6 3h3M11 3h3M16 3h1M18 3h1M2 4h1M17 4h1M2 5h1M17 5h1M1 6h1M3 6h1M16 6h1M18 6h1M1 7h1M3 7h1M16 7h1M18 7h1M1 8h1M3 8h1M16 8h1M18 8h1M2 9h1M17 9h1M2 10h1M17 10h1M1 11h1M3 11h1M16 11h1M18 11h1M1 12h1M3 12h1M16 12h1M18 12h1M1 13h1M3 13h1M16 13h1M18 13h1M2 14h1M17 14h1M2 15h1M17 15h1M1 16h1M3 16h1M6 16h3M11 16h3M16 16h1M18 16h1M1 17h1M4 17h2M9 17h2M14 17h2M18 17h1M2 18h2M6 18h3M11 18h3M16 18h2' /%3E%3Cpath stroke='%23000000' d='M2 2h2M6 2h3M11 2h3M16 2h2M2 3h1M17 3h1M2 6h1M17 6h1M2 7h1M17 7h1M2 8h1M17 8h1M2 11h1M17 11h1M2 12h1M17 12h1M2 13h1M17 13h1M2 16h1M17 16h1M2 17h2M6 17h3M11 17h3M16 17h2' /%3E%3C/svg%3E");
+}
+
+@mixin selectIcon($border: $border-color, $active: $white) {
+  @include selectSvg($border);
+  background-size: 100%;
+  // &:hover,
+  &.selected {
+    @include selectSvg($active);
   }
 }
 
@@ -355,5 +368,18 @@
   background-size: 100%;
   &:hover {
     @include minusSvg($active);
+  }
+}
+
+@mixin gearSvg($color) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='#{$color}' d='M8 1h4M7 2h1M12 2h1M7 3h1M12 3h1M3 4h4M13 4h4M2 5h1M17 5h1M1 6h1M18 6h1M1 7h1M18 7h1M2 8h1M9 8h2M17 8h1M3 9h1M8 9h1M11 9h1M16 9h1M3 10h1M8 10h1M11 10h1M16 10h1M2 11h1M9 11h2M17 11h1M1 12h1M18 12h1M1 13h1M18 13h1M2 14h1M17 14h1M3 15h4M13 15h4M7 16h1M12 16h1M7 17h1M12 17h1M8 18h4' /%3E%3Cpath stroke='%23ffffff' d='M8 2h2M9 4h2M3 5h1M16 5h1M2 6h1M6 6h1M5 7h1M3 11h1M11 11h1M2 12h1' /%3E%3Cpath stroke='%23acacac' d='M10 2h1M8 3h1M7 4h2M11 4h1M4 5h4M14 5h2M2 7h1M3 8h2M11 8h1M4 9h1M12 9h1M4 10h1M12 10h1M4 11h1M5 12h1M9 12h2M2 13h1' /%3E%3Cpath stroke='%23575757' d='M11 2h1M9 3h3M12 4h1M8 5h6M3 6h3M7 6h10M3 7h2M6 7h3M11 7h3M15 7h2M5 8h3M12 8h3M5 9h2M13 9h2M5 10h2M13 10h2M5 11h3M12 11h3M3 12h2M6 12h3M11 12h3M3 13h10M7 14h5' /%3E%3Cpath stroke='%23000000' d='M17 6h1M9 7h2M14 7h1M17 7h1M8 8h1M15 8h2M7 9h1M15 9h1M7 10h1M15 10h1M8 11h1M15 11h2M14 12h4M13 13h5M3 14h4M12 14h5M7 15h6M8 16h4M8 17h4' /%3E%3C/svg%3E");
+}
+
+@mixin gearIcon($border: $border-color, $active: $white) {
+  @include gearSvg($border);
+  background-size: 100%;
+  // transition: background 0.2s ease-in-out;
+  &:hover {
+    @include gearSvg($active);
   }
 }

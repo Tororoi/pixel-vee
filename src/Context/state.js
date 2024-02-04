@@ -86,6 +86,26 @@ export const state = {
     px2: null,
     py2: null,
   },
+  //null boundaryBox means no restriction on drawing
+  boundaryBox: {
+    xMin: null,
+    yMin: null,
+    xMax: null,
+    yMax: null,
+  },
+  selectionInversed: false,
+  selectClipboard: {
+    boundaryBox: null,
+    canvasBoundaryBox: null,
+    selectProperties: {
+      px1: null,
+      py1: null,
+      px2: null,
+      py2: null,
+    },
+    canvas: null,
+    //TODO: for copying vectors, need more properties
+  },
   //for perfect pixels
   lastDrawnX: null,
   lastDrawnY: null,
@@ -97,6 +117,11 @@ export const state = {
   //functions
   reset,
   resetSelectProperties,
+  normalizeSelectProperties,
+  resetBoundaryBox,
+  setBoundaryBox,
+  deselect,
+  invertSelection,
 }
 
 /**
@@ -119,4 +144,55 @@ function resetSelectProperties() {
     py2: null,
   }
   state.maskSet = null
+}
+
+/**
+ * Normalize select properties
+ */
+function normalizeSelectProperties() {
+  const { px1, py1, px2, py2 } = { ...state.selectProperties }
+  //set selectProperties so p1 is min and p2 is max
+  state.selectProperties.px1 = Math.min(px1, px2)
+  state.selectProperties.py1 = Math.min(py1, py2)
+  state.selectProperties.px2 = Math.max(px2, px1)
+  state.selectProperties.py2 = Math.max(py2, py1)
+}
+
+/**
+ * Reset boundaryBox
+ */
+function resetBoundaryBox() {
+  state.boundaryBox = {
+    xMin: null,
+    yMin: null,
+    xMax: null,
+    yMax: null,
+  }
+}
+
+/**
+ * Set boundaryBox
+ * @param {Object} selectProperties
+ */
+function setBoundaryBox(selectProperties) {
+  state.boundaryBox.xMin = Math.min(selectProperties.px1, selectProperties.px2)
+  state.boundaryBox.yMin = Math.min(selectProperties.py1, selectProperties.py2)
+  state.boundaryBox.xMax = Math.max(selectProperties.px2, selectProperties.px1)
+  state.boundaryBox.yMax = Math.max(selectProperties.py2, selectProperties.py1)
+}
+
+/**
+ * Deselect
+ */
+function deselect() {
+  resetSelectProperties()
+  resetBoundaryBox()
+  state.selectionInversed = false
+}
+
+/**
+ * Invert selection
+ */
+function invertSelection() {
+  state.selectionInversed = !state.selectionInversed
 }

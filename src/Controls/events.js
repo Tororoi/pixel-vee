@@ -47,7 +47,10 @@ const setCoordinates = (e) => {
 function handleKeyDown(e) {
   // e.preventDefault() - May conditionally need this for certain shortcuts, but try to avoid doing so
   //Prevent default save behavior
-  if (e.code === "KeyS" && (keys.MetaLeft || keys.MetaRight)) {
+  if (
+    (e.code === "KeyS" || e.code === "KeyD") &&
+    (keys.MetaLeft || keys.MetaRight)
+  ) {
     e.preventDefault()
   }
   //Prevent repeated activations while holding a key down
@@ -165,47 +168,46 @@ function handlePointerMove(e) {
   state.clickDisabled = false
   //currently only square dimensions work
   canvas.zoomAtLastDraw = canvas.zoom //* */
-  //coords
-  setCoordinates(e)
-  let cursorMoved =
-    state.previousX !== state.cursorX || state.previousY !== state.cursorY
-  if (state.tool.options.useSubpixels?.active && !cursorMoved) {
-    cursorMoved =
-      canvas.previousSubPixelX !== canvas.subPixelX ||
-      canvas.previousSubPixelY !== canvas.subPixelY
-  }
-  if (cursorMoved) {
-    //Hover brush
-    // vectorGui.render()
-    if (
-      state.clicked ||
-      ((state.tool.name === "quadCurve" ||
-        state.tool.name === "cubicCurve" ||
-        state.tool.name === "fill") &&
-        state.clickCounter > 0)
-    ) {
-      //run selected tool step function
-      state.tool.fn()
-      vectorGui.render()
+  //use requestAnimationFrame for smoother rendering. Must be called before setting coordinates or else line may be broken unintentionally
+  window.requestAnimationFrame(() => {
+    //coords
+    setCoordinates(e)
+    let cursorMoved =
+      state.previousX !== state.cursorX || state.previousY !== state.cursorY
+    if (state.tool.options.useSubpixels?.active && !cursorMoved) {
+      cursorMoved =
+        canvas.previousSubPixelX !== canvas.subPixelX ||
+        canvas.previousSubPixelY !== canvas.subPixelY
+    }
+    if (cursorMoved) {
       if (
-        (state.tool.name === "brush" && state.tool.modes?.eraser) ||
-        state.tool.name === "eyedropper"
+        state.clicked ||
+        ((state.tool.name === "quadCurve" ||
+          state.tool.name === "cubicCurve" ||
+          state.tool.name === "fill") &&
+          state.clickCounter > 0)
       ) {
+        //run selected tool step function
+        state.tool.fn()
+        vectorGui.render()
+        if (
+          (state.tool.name === "brush" && state.tool.modes?.eraser) ||
+          state.tool.name === "eyedropper"
+        ) {
+          renderCursor(state, canvas, swatches)
+        }
+      } else {
+        //no active tool, just render cursor
+        vectorGui.render()
         renderCursor(state, canvas, swatches)
       }
-    } else {
-      //no active tool
-      vectorGui.render()
-      renderCursor(state, canvas, swatches)
     }
-  }
-  // if (!state.tool.options.line?.active) {
-  // save last point
-  state.previousX = state.cursorX
-  state.previousY = state.cursorY
-  // }
-  canvas.previousSubPixelX = canvas.subPixelX
-  canvas.previousSubPixelY = canvas.subPixelY
+    // save last point
+    state.previousX = state.cursorX
+    state.previousY = state.cursorY
+    canvas.previousSubPixelX = canvas.subPixelX
+    canvas.previousSubPixelY = canvas.subPixelY
+  })
 }
 
 /**

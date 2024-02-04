@@ -3,7 +3,7 @@ import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { actionEllipse } from "../Actions/actions.js"
+import { actionEllipse } from "../Actions/pointerActions.js"
 import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 import { vectorGui, createActiveIndexesForRender } from "../GUI/vector.js"
 import {
@@ -78,6 +78,8 @@ function ellipseSteps() {
         state.vectorProperties.radA,
         state.vectorProperties.radB,
         state.vectorProperties.forceCircle, //force circle initially
+        state.boundaryBox,
+        state.selectionInversed,
         swatches.primary.color,
         canvas.currentLayer,
         state.tool.modes,
@@ -123,6 +125,8 @@ function ellipseSteps() {
           state.vectorProperties.radA,
           state.vectorProperties.radB,
           state.vectorProperties.forceCircle, //force circle initially
+          state.boundaryBox,
+          state.selectionInversed,
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
@@ -173,6 +177,8 @@ function ellipseSteps() {
           state.vectorProperties.radA,
           state.vectorProperties.radB,
           state.vectorProperties.forceCircle, //force circle initially
+          state.boundaryBox,
+          state.selectionInversed,
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
@@ -189,6 +195,14 @@ function ellipseSteps() {
           canvas.currentLayer.x,
           canvas.currentLayer.y
         )
+        //correct boundary box for layer offset
+        const boundaryBox = { ...state.boundaryBox }
+        if (boundaryBox.xMax !== null) {
+          boundaryBox.xMin -= canvas.currentLayer.x
+          boundaryBox.xMax -= canvas.currentLayer.x
+          boundaryBox.yMin -= canvas.currentLayer.y
+          boundaryBox.yMax -= canvas.currentLayer.y
+        }
         //store control points for timeline
         addToTimeline({
           tool: state.tool,
@@ -211,6 +225,8 @@ function ellipseSteps() {
               //add bounding box minima maxima x and y?
             },
             maskArray,
+            boundaryBox,
+            selectionInversed: state.selectionInversed,
           },
         })
         state.clickCounter = 0
@@ -303,7 +319,7 @@ export const ellipse = {
   fn: ellipseSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: false,
+  brushDisabled: false,
   options: {
     useSubpixels: {
       active: true,

@@ -33,18 +33,19 @@
     flex-flow: row nowrap;
     align-items: center;
     height: 100%;
-    #file-menu {
+    #top-menu {
       list-style: none;
       padding: 0;
       margin: 0;
+      margin-top: auto;
       display: flex;
       flex-flow: row nowrap;
       align-items: flex-end;
-      height: 100%;
       cursor: pointer;
 
       li {
         &.menu-folder {
+          margin-left: 2px;
           background: $dark-gray;
           position: relative;
           display: flex;
@@ -60,6 +61,7 @@
             pointer-events: none;
           }
           &:hover {
+            // z-index: 3;
             background-color: $white;
             color: $black;
             height: 26px;
@@ -81,7 +83,7 @@
           list-style: none;
           padding: 0;
           margin: 0;
-          background-color: transparent;
+          background-color: $black;
           @include boxBorder($border-color, $white, false, left right bottom);
 
           li {
@@ -115,12 +117,19 @@
               background-color: $white;
               color: $black;
             }
+            &.disabled {
+              opacity: 0.6;
+              cursor: not-allowed;
+              &:hover {
+                background-color: $black;
+                color: $white;
+              }
+            }
           }
         }
-        &:focus {
+        &.active {
           background-color: $white;
           color: $black;
-          pointer-events: none;
           @include boxBorder($white, $white, false, left right top);
           ul {
             display: block;
@@ -128,16 +137,17 @@
         }
       }
 
-      // .show {
-      //   display: block;
-      // }
+      li:first-of-type {
+        margin-left: 0;
+        // z-index: 1;
+      }
     }
   }
   .nav-items {
     display: flex;
     flex-flow: row wrap;
     align-items: center;
-    margin: 7px 16px;
+    margin: 0 4px;
     .toggle {
       padding-right: 16px;
     }
@@ -152,6 +162,15 @@
         padding-right: 8px;
         background: $gray;
       }
+    }
+  }
+  .settings {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    .gear {
+      width: 40px;
+      height: 40px;
     }
   }
 }

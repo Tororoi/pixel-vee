@@ -12,6 +12,8 @@ const backgroundCTX = backgroundCVS.getContext("2d", {
 //Set gui canvas and its context
 const vectorGuiCVS = document.getElementById("vector-gui-canvas")
 const vectorGuiCTX = vectorGuiCVS.getContext("2d", { willReadFrequently: true })
+const rasterGuiCVS = document.getElementById("raster-gui-canvas")
+const rasterGuiCTX = rasterGuiCVS.getContext("2d", { willReadFrequently: true })
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
 const offScreenCVS = document.createElement("canvas")
 const offScreenCTX = offScreenCVS.getContext("2d", { willReadFrequently: true })
@@ -31,6 +33,8 @@ export const canvas = {
   //Parameters
   vectorGuiCVS,
   vectorGuiCTX,
+  rasterGuiCVS,
+  rasterGuiCTX,
   backgroundCVS,
   backgroundCTX,
   offScreenCVS,
@@ -48,6 +52,7 @@ export const canvas = {
   activeLayerCount: 0,
   currentLayer: null,
   tempLayer: null,
+  pastedLayer: null,
   hiddenLayer: null,
   bgColor: "rgba(131, 131, 131, 0.5)",
   borderColor: "black",
@@ -87,6 +92,8 @@ canvas.sharpness = window.devicePixelRatio
 //adjust canvas ratio here if needed
 canvas.vectorGuiCVS.width = canvas.vectorGuiCVS.offsetWidth * canvas.sharpness
 canvas.vectorGuiCVS.height = canvas.vectorGuiCVS.offsetHeight * canvas.sharpness
+canvas.rasterGuiCVS.width = canvas.rasterGuiCVS.offsetWidth * canvas.sharpness
+canvas.rasterGuiCVS.height = canvas.rasterGuiCVS.offsetHeight * canvas.sharpness
 canvas.backgroundCVS.width = canvas.backgroundCVS.offsetWidth * canvas.sharpness
 canvas.backgroundCVS.height =
   canvas.backgroundCVS.offsetHeight * canvas.sharpness
@@ -94,6 +101,10 @@ canvas.backgroundCVS.height =
 canvas.zoom = setInitialZoom(canvas.offScreenCVS.width) //zoom level should be based on absolute pixel size, not window relative to canvas
 canvas.zoomAtLastDraw = canvas.zoom
 vectorGuiCTX.scale(
+  canvas.sharpness * canvas.zoom,
+  canvas.sharpness * canvas.zoom
+)
+rasterGuiCTX.scale(
   canvas.sharpness * canvas.zoom,
   canvas.sharpness * canvas.zoom
 )
@@ -107,3 +118,4 @@ canvas.thumbnailCTX.scale(canvas.sharpness, canvas.sharpness)
 //Initialize size values
 dom.canvasWidth.value = canvas.offScreenCVS.width
 dom.canvasHeight.value = canvas.offScreenCVS.height
+dom.gridSpacing.value = 8
