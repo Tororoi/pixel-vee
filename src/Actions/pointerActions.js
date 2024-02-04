@@ -230,11 +230,16 @@ export function actionFill(
   if (isOutOfBounds(startX, startY, 0, layer, boundaryBox, selectionInversed)) {
     return
   }
-  //TODO: need logic for selectionInversed
   let xMin = minLimit(boundaryBox.xMin, 0)
   let xMax = maxLimit(boundaryBox.xMax, layer.cvs.width)
   let yMin = minLimit(boundaryBox.yMin, 0)
   let yMax = maxLimit(boundaryBox.yMax, layer.cvs.height)
+  if (selectionInversed) {
+    xMin = 0
+    xMax = layer.cvs.width
+    yMin = 0
+    yMax = layer.cvs.height
+  }
   //get imageData
   let ctx = layer.ctx
   if (customContext) {
@@ -266,7 +271,16 @@ export function actionFill(
     //get current pixel position
     pixelPos = (y * (xMax - xMin) + x) * 4
     // Go up as long as the color matches and are inside the canvas
-    while (y >= 0 && matchStartColor(layerImageData, pixelPos, clickedColor)) {
+    while (
+      y >= 0 &&
+      matchStartColor(
+        layerImageData,
+        pixelPos,
+        clickedColor,
+        boundaryBox,
+        selectionInversed
+      )
+    ) {
       y--
       pixelPos -= (xMax - xMin) * 4
     }
@@ -278,12 +292,26 @@ export function actionFill(
     // Go down as long as the color matches and in inside the canvas
     while (
       y < yMax - yMin &&
-      matchStartColor(layerImageData, pixelPos, clickedColor)
+      matchStartColor(
+        layerImageData,
+        pixelPos,
+        clickedColor,
+        boundaryBox,
+        selectionInversed
+      )
     ) {
       colorPixel(layerImageData, pixelPos, currentColor)
 
       if (x > 0) {
-        if (matchStartColor(layerImageData, pixelPos - 4, clickedColor)) {
+        if (
+          matchStartColor(
+            layerImageData,
+            pixelPos - 4,
+            clickedColor,
+            boundaryBox,
+            selectionInversed
+          )
+        ) {
           if (!reachLeft) {
             //Add pixel to stack
             pixelStack.push([x - 1, y])
@@ -295,7 +323,15 @@ export function actionFill(
       }
 
       if (x < xMax - xMin - 1) {
-        if (matchStartColor(layerImageData, pixelPos + 4, clickedColor)) {
+        if (
+          matchStartColor(
+            layerImageData,
+            pixelPos + 4,
+            clickedColor,
+            boundaryBox,
+            selectionInversed
+          )
+        ) {
           if (!reachRight) {
             //Add pixel to stack
             pixelStack.push([x + 1, y])

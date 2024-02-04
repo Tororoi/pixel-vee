@@ -149,7 +149,7 @@ export function actionPasteSelection() {
         confirmed: false,
         boundaryBox,
         selectProperties,
-        canvas: state.selectClipboard.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
+        canvas: state.selectClipboard.canvas,
         canvasProperties: {
           dataUrl: state.selectClipboard.canvas.toDataURL(),
           width: state.selectClipboard.canvas.width,
@@ -221,7 +221,7 @@ export function actionConfirmPastedPixels() {
         confirmed: true,
         boundaryBox,
         selectProperties,
-        canvas: lastPasteAction.properties.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
+        canvas: lastPasteAction.properties.canvas,
         canvasProperties: {
           dataUrl: lastPasteAction.properties.canvas.toDataURL(),
           width: lastPasteAction.properties.canvas.width,

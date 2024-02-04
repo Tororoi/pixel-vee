@@ -16,9 +16,33 @@ export function colorPixel(imageData, pixelPos, currentColor) {
  * @param {ImageData} imageData - array of color channels r,g,b,a,r,g,b,a,etc.
  * @param {Integer} pixelPos - index in image data
  * @param {Object} startColor - {color,r,g,b,a}
+ * @param {Object} boundaryBox - {xMin, xMax, yMin, yMax}
+ * @param {Boolean} selectionInversed - {true/false}
  * @returns {boolean}
  */
-export function matchStartColor(imageData, pixelPos, startColor) {
+export function matchStartColor(
+  imageData,
+  pixelPos,
+  startColor,
+  boundaryBox,
+  selectionInversed
+) {
+  if (selectionInversed) {
+    //check if pixel is inside of boundaryBox and return false if it is
+    // Calculate x and y from pixelPos
+    const x = (pixelPos / 4) % imageData.width
+    const y = Math.floor(pixelPos / 4 / imageData.width)
+
+    // Check if the pixel is inside the boundary box
+    const insideBoundary =
+      x >= boundaryBox.xMin &&
+      x < boundaryBox.xMax &&
+      y >= boundaryBox.yMin &&
+      y < boundaryBox.yMax
+    if (insideBoundary) {
+      return false
+    }
+  }
   let r = imageData.data[pixelPos]
   let g = imageData.data[pixelPos + 1]
   let b = imageData.data[pixelPos + 2]
