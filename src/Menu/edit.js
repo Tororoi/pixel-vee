@@ -159,6 +159,7 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
       boundaryBox.yMax - boundaryBox.yMin
     )
   }
+  //set state.selectClipboard?
   //TODO: need to tell that it's a modified version of the selection, so no dotted line and include transform control points for resizing (not currently implemented)
   vectorGui.render()
 }
@@ -182,8 +183,8 @@ export function confirmPastedPixels(
   //draw the current layer onto the pasted layer
   layer.ctx.drawImage(
     clipboardCanvas,
-    boundaryBox.xMin + xOffset - layer.x,
-    boundaryBox.yMin + yOffset - layer.y,
+    boundaryBox.xMin + xOffset,
+    boundaryBox.yMin + yOffset,
     boundaryBox.xMax - boundaryBox.xMin,
     boundaryBox.yMax - boundaryBox.yMin
   )

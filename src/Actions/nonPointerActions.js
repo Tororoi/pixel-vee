@@ -117,6 +117,7 @@ export function actionCutSelection() {
  * Not dependent on pointer events
  * Action will not fire if there is no selection in the clipboard,
  * the current layer is not a raster layer, or if the current layer is a preview layer
+ * Always uses the state clipboard for pasting, which is the last clipboard used for copying or cutting
  */
 export function actionPasteSelection() {
   if (
@@ -171,29 +172,41 @@ export function actionPasteSelection() {
  * Not dependent on pointer events
  * Action will not fire if the current layer is not a raster layer
  * or if there is no selection in the clipboard
+ * clipboard used is from last paste action in order to decouple from the state clipboard, which may be empty when using undo/redo to go to an unconfirmed paste action.
+ * Alternatively, the state clipboard may have other content which the user should not have overridden without them explicitly copying the new content.
  */
 export function actionConfirmPastedPixels() {
-  if (canvas.currentLayer.type === "raster" && state.selectClipboard.canvas) {
+  let lastPasteAction = null
+  for (let i = state.undoStack.length - 1; i >= 0; i--) {
+    if (
+      state.undoStack[i].tool.name === "paste" &&
+      !state.undoStack[i].properties.confirmed
+    ) {
+      lastPasteAction = state.undoStack[i]
+      break // Stop searching once the first 'paste' action is found
+    }
+  }
+  if (canvas.currentLayer.type === "raster" && lastPasteAction) {
     const xOffset = canvas.tempLayer.x
     const yOffset = canvas.tempLayer.y
     //adjust boundaryBox for layer offset
-    const boundaryBox = { ...state.selectClipboard.boundaryBox }
+    const boundaryBox = { ...lastPasteAction.properties.boundaryBox }
     if (boundaryBox.xMax !== null) {
-      boundaryBox.xMin += xOffset - 2 * canvas.pastedLayer.x
-      boundaryBox.xMax += xOffset - 2 * canvas.pastedLayer.x
-      boundaryBox.yMin += yOffset - 2 * canvas.pastedLayer.y
-      boundaryBox.yMax += yOffset - 2 * canvas.pastedLayer.y
+      boundaryBox.xMin += xOffset - canvas.pastedLayer.x
+      boundaryBox.xMax += xOffset - canvas.pastedLayer.x
+      boundaryBox.yMin += yOffset - canvas.pastedLayer.y
+      boundaryBox.yMax += yOffset - canvas.pastedLayer.y
     }
-    const selectProperties = { ...state.selectClipboard.selectProperties }
+    const selectProperties = { ...lastPasteAction.properties.selectProperties }
     if (selectProperties.px2 !== null) {
-      selectProperties.px1 += xOffset - 2 * canvas.pastedLayer.x
-      selectProperties.px2 += xOffset - 2 * canvas.pastedLayer.x
-      selectProperties.py1 += yOffset - 2 * canvas.pastedLayer.y
-      selectProperties.py2 += yOffset - 2 * canvas.pastedLayer.y
+      selectProperties.px1 += xOffset - canvas.pastedLayer.x
+      selectProperties.px2 += xOffset - canvas.pastedLayer.x
+      selectProperties.py1 += yOffset - canvas.pastedLayer.y
+      selectProperties.py2 += yOffset - canvas.pastedLayer.y
     }
     confirmPastedPixels(
-      state.selectClipboard.canvas,
-      state.selectClipboard.boundaryBox,
+      lastPasteAction.properties.canvas,
+      lastPasteAction.properties.boundaryBox,
       canvas.pastedLayer,
       xOffset,
       yOffset
@@ -208,11 +221,11 @@ export function actionConfirmPastedPixels() {
         confirmed: true,
         boundaryBox,
         selectProperties,
-        canvas: state.selectClipboard.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
+        canvas: lastPasteAction.properties.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
         canvasProperties: {
-          dataUrl: state.selectClipboard.canvas.toDataURL(),
-          width: state.selectClipboard.canvas.width,
-          height: state.selectClipboard.canvas.height,
+          dataUrl: lastPasteAction.properties.canvas.toDataURL(),
+          width: lastPasteAction.properties.canvas.width,
+          height: lastPasteAction.properties.canvas.height,
         },
       },
     })
