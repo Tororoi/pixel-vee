@@ -351,7 +351,7 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
   </tr>
 </table>
 
-## Settings <img src="public/pixelv-gear.svg" alt="Settings" width="40" height="40"/>
+## <img src="public/pixelv-gear.svg" alt="Settings" width="40" height="40"/>
 
 <table>
   <tr>

@@ -134,6 +134,9 @@ function createAndSaveContext() {
  * @param {CanvasRenderingContext2D} betweenCtx
  */
 export function performAction(action, betweenCtx = null) {
+  if (!action.properties?.boundaryBox) {
+    return
+  }
   //Correct action coordinates with layer offsets
   const offsetX = action.layer.x
   const offsetY = action.layer.y

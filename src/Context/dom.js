@@ -45,10 +45,10 @@ const cutBtn = document.getElementById("cut-selection")
 const copyBtn = document.getElementById("copy-selection")
 // * Paste * //
 const pasteBtn = document.getElementById("paste-selection")
-// * Flip Horizontal * //
-const flipHorizontalBtn = document.getElementById("flip-horizontal")
-// * Flip Vertical * //
-const flipVerticalBtn = document.getElementById("flip-vertical")
+// // * Flip Horizontal * //
+// const flipHorizontalBtn = document.getElementById("flip-horizontal")
+// // * Flip Vertical * //
+// const flipVerticalBtn = document.getElementById("flip-vertical")
 
 // * Settings Button * //
 const settingsBtn = document.getElementById("settings-btn")
@@ -219,8 +219,8 @@ export const dom = {
   cutBtn,
   copyBtn,
   pasteBtn,
-  flipHorizontalBtn,
-  flipVerticalBtn,
+  // flipHorizontalBtn,
+  // flipVerticalBtn,
   //Settings
   settingsBtn,
   //settings

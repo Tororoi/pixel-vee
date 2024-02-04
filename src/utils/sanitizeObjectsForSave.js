@@ -81,11 +81,12 @@ export function sanitizeHistory(
       sanitizedUndoStack.splice(i, 1)
     } else {
       if (action.layer) {
-        //TODO: if layer is temp layer, identify it as such in sanitized object
         action.layer = { id: action.layer.id }
       }
-      //TODO: if action.properties.pastedLayer, sanitize it as well
-      //TODO: if action.properties.canvas, convert it to a dataurl. When loading, convert it back to a canvas.
+      if (action.properties?.pastedLayer) {
+        // sanitize pasted layer
+        action.properties.pastedLayer = { id: action.properties.pastedLayer.id }
+      }
       if (action.properties?.points) {
         //format each object in the array from {x,y,brushSize} to be 3 entries in a new array with just the values. The values will be reformatted back to objects on load.
         let sanitizedPoints = []

@@ -234,12 +234,12 @@ dom.invertSelectionBtn.addEventListener("click", actionInvertSelection)
 dom.cutBtn.addEventListener("click", actionCutSelection)
 dom.copyBtn.addEventListener("click", actionCopySelection)
 dom.pasteBtn.addEventListener("click", actionPasteSelection)
-dom.flipHorizontalBtn.addEventListener("click", (e) => {
-  //TODO: flip selected pixels horizontally
-})
-dom.flipVerticalBtn.addEventListener("click", (e) => {
-  //TODO: flip selected pixels vertically
-})
+// dom.flipHorizontalBtn.addEventListener("click", (e) => {
+//   //TODO: flip selected pixels horizontally
+// })
+// dom.flipVerticalBtn.addEventListener("click", (e) => {
+//   //TODO: flip selected pixels vertically
+// })
 //Settings events
 dom.settingsBtn.addEventListener("click", (e) => {
   //if settings container is already open, close it, else open it

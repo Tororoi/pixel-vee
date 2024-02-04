@@ -167,14 +167,10 @@ export function createPreviewLayer() {
     willReadFrequently: true,
   })
   onscreenLayerCVS.className = "onscreen-canvas"
-  let highestId = canvas.layers.reduce(
-    (max, layer) => (layer.id > max ? layer.id : max),
-    0
-  )
   return {
-    id: highestId + 1,
+    id: 0, //preview layer id is always 0. This layer may sometimes be part of canvas.layers and sometimes not, so it's not reliable to use the length of canvas.layers to determine the id. Other layers will always have an id of 1 or greater.
     type: "raster",
-    title: `Layer ${highestId + 1}`,
+    title: "Preview Layer",
     cvs: offscreenLayerCVS,
     ctx: offscreenLayerCTX,
     onscreenCvs: onscreenLayerCVS,

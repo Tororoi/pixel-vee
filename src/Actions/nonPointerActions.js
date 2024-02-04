@@ -119,7 +119,11 @@ export function actionCutSelection() {
  * the current layer is not a raster layer, or if the current layer is a preview layer
  */
 export function actionPasteSelection() {
-  if (canvas.currentLayer.type === "raster" && !canvas.currentLayer.isPreview && state.selectClipboard.canvas) {
+  if (
+    canvas.currentLayer.type === "raster" &&
+    !canvas.currentLayer.isPreview &&
+    state.selectClipboard.canvas
+  ) {
     pasteSelectedPixels(state.selectClipboard, canvas.currentLayer)
     //adjust boundaryBox for layer offset
     const boundaryBox = { ...state.selectClipboard.boundaryBox }
@@ -145,6 +149,11 @@ export function actionPasteSelection() {
         boundaryBox,
         selectProperties,
         canvas: state.selectClipboard.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
+        canvasProperties: {
+          dataUrl: state.selectClipboard.canvas.toDataURL(),
+          width: state.selectClipboard.canvas.width,
+          height: state.selectClipboard.canvas.height,
+        },
         pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
       },
     })
@@ -200,6 +209,11 @@ export function actionConfirmPastedPixels() {
         boundaryBox,
         selectProperties,
         canvas: state.selectClipboard.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
+        canvasProperties: {
+          dataUrl: state.selectClipboard.canvas.toDataURL(),
+          width: state.selectClipboard.canvas.width,
+          height: state.selectClipboard.canvas.height,
+        },
       },
     })
     state.action = null
