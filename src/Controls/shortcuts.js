@@ -281,7 +281,7 @@ export function deactivateShortcut(keyCode) {
         vectorGui.render()
         renderCursor(state, canvas, swatches)
         setToolCssCursor()
-        //TODO: refactor so grabSteps can be called instead with a manually supplied pointer event pointerup
+        //TODO: (Low Priority) refactor so grabSteps can be called instead with a manually supplied pointer event pointerup
       }
       break
     case "AltLeft":
@@ -310,7 +310,7 @@ export function deactivateShortcut(keyCode) {
           vectorGui.selectedPoint.xKey !== "px1"
         ) {
           //while holding control point, readjust ellipse without having to move cursor.
-          //TODO: update this functionality to have other radii go back to previous radius value when releasing shift
+          //TODO: (Middle Priority) update this functionality to have other radii go back to previous radius value when releasing shift
           adjustEllipseSteps()
           vectorGui.render()
         }
@@ -408,7 +408,7 @@ export function deactivateShortcut(keyCode) {
 }
 
 /**
- * Set tool cursor. TODO: move to utils file
+ * Set tool cursor. TODO: (Middle Priority) move to utils file
  */
 function setToolCssCursor() {
   if (state.tool.modes?.eraser) {

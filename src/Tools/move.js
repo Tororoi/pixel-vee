@@ -7,7 +7,6 @@ import { addToTimeline } from "../Actions/undoRedo.js"
 
 /**
  * Move the contents of a layer relative to other layers
- * TODO: When select tool is implemented fully, handle moving selected area
  */
 function moveSteps() {
   // move contents of selection around canvas
@@ -27,7 +26,6 @@ function moveSteps() {
       if (vectorGui.selectedPoint.xKey) {
         scaleSteps()
       } else {
-        //TODO: additional logic will be needed to handle moving a selected area here
         //Move layer
         canvas.currentLayer.x += state.cursorX - state.previousX
         canvas.currentLayer.y += state.cursorY - state.previousY

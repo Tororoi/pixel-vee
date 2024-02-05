@@ -266,9 +266,8 @@ function layerInteract(e) {
       dom.layerSettingsContainer.layerObj = layer
       renderLayerSettingsToDOM(domLayer)
     }
-    //TODO: implement layer settings, including layer name and layer opacity
   } else {
-    //TODO: allow selecting multiple layers for moving purposes only
+    //TODO: (Low Priority) allow selecting multiple layers for moving purposes only
     //select current layer
     if (layer !== canvas.currentLayer) {
       canvas.currentLayer.inactiveTools.forEach((tool) => {
@@ -306,7 +305,6 @@ function dragLayerStart(e) {
   e.dataTransfer.setData("text", index)
   e.target.style.boxShadow =
     "inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131)"
-  //TODO: implement fancier dragging like dialog boxes
 }
 
 /**
@@ -347,7 +345,7 @@ function dropLayer(e) {
   let targetLayer = e.target.closest(".layer").layerObj
   let draggedIndex = parseInt(e.dataTransfer.getData("text"))
   let heldLayer = canvas.layers[draggedIndex]
-  //TODO: should layer order change be added to timeline?
+  //TODO: (Low Priority) should layer order change be added to timeline?
   if (e.target.className.includes("layer") && targetLayer !== heldLayer) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
       if (dom.layersContainer.children[i] === e.target) {
@@ -546,7 +544,7 @@ dom.deleteLayerBtn.addEventListener("click", () => {
   renderCanvas(layer)
 })
 
-//TODO: Make similar to functionality of dragging dialog boxes.
+//TODO: (Middle Priority) Make similar to functionality of dragging dialog boxes. To make fancier dragging work, must be made compatible with a scrolling container
 dom.layersContainer.addEventListener("click", layerInteract)
 dom.layersContainer.addEventListener("dragstart", dragLayerStart)
 dom.layersContainer.addEventListener("dragover", dragLayerOver)
@@ -554,7 +552,6 @@ dom.layersContainer.addEventListener("dragenter", dragLayerEnter)
 dom.layersContainer.addEventListener("dragleave", dragLayerLeave)
 dom.layersContainer.addEventListener("drop", dropLayer)
 dom.layersContainer.addEventListener("dragend", dragLayerEnd)
-//TODO: To make fancier dragging work, must be made compatible with a scrolling container
 // dom.layersContainer.addEventListener("pointerdown", () =>
 //   dragStart(e, e.target.closest(".layer"))
 // )
@@ -576,7 +573,7 @@ dom.layerSettingsContainer.addEventListener("input", (e) => {
     }
   }
 })
-//TODO: maybe dynamically generate layer settings container when needed and only bind this event listener when it is open
+//TODO: (Low Priority) maybe dynamically generate layer settings container when needed and only bind this event listener when it is open
 document.addEventListener("pointerdown", (e) => {
   if (
     dom.layerSettingsContainer.layerObj &&

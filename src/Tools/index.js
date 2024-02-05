@@ -137,6 +137,6 @@ export const tools = {
    * Hold shift to draw line from currently selected vanishing point to pointer location.
    * Hold control to view automatic perspective lines and click to make lines permanent.
    * NOTE: First iteration will not support curvilinear perspective. Can be approximated by combining multipoint perspective with drawing bezier curves from point to point
-   * TODO: Add toggle option to snap line/ curve endpoints to vanishing point if made inside vanishing points radius.
+   * TODO: (Low Priority) Add toggle option to snap line/ curve endpoints to vanishing point if made inside vanishing points radius.
   } */
 }

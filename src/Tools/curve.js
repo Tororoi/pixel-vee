@@ -368,7 +368,7 @@ function cubicCurveSteps() {
               py4: state.vectorProperties.py4 - canvas.currentLayer.y,
             },
             maskArray,
-            //TODO: allow toggling boundary box on/off
+            //TODO: (Middle Priority) allow toggling boundary box on/off
             boundaryBox,
             selectionInversed: state.selectionInversed,
           },
@@ -388,7 +388,7 @@ function cubicCurveSteps() {
 
 /**
  * Used automatically by curve tools after curve is completed.
- * TODO: create distinct tool for adjusting that won't create a new curve when clicking.
+ * TODO: (Low Priority) create distinct tool for adjusting that won't create a new curve when clicking.
  * Ideally a user should be able to click on a curve and render it's vector UI that way.
  */
 function adjustCurveSteps() {

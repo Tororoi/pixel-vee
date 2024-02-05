@@ -10,7 +10,7 @@ import { vectorGui } from "../GUI/vector.js"
 //=====================================//
 
 /**
- * TODO: Work in progress
+ * TODO: (Middle Priority) Work in progress
  * GOAL: create a dynamic selectable area, allowing the user to restrict the areas of the canvas that accept changes
  * Should use a mask set that keeps track of selected or unselected pixels
  * use vectorGui.drawSelectOutline for visual rendering of masked pixels
@@ -54,7 +54,7 @@ function selectSteps() {
       })
       break
     case "pointerout":
-      //TODO: handle pointerout?
+      //TODO: (Low Priority) handle pointerout?
       break
     default:
     //do nothing
@@ -62,7 +62,6 @@ function selectSteps() {
 }
 
 /**
- * TODO: Work in progress
  * Adjust selected area by dragging one of eight control points
  * Move selected area by dragging inside selected area
  */
@@ -107,7 +106,7 @@ function adjustSelectSteps() {
 
 /**
  * Adjust selected area by dragging one of eight control points or move selected area by dragging inside selected area
- * TODO: Make shortcuts for maintaining ratio while dragging
+ * TODO: (Middle Priority) Make shortcuts for maintaining ratio while dragging
  */
 function adjustBoundaries() {
   //selectedPoint does not correspond to the selectProperties key. Based on selected point, adjust boundaryBox.
@@ -153,8 +152,6 @@ function adjustBoundaries() {
   }
   state.setBoundaryBox(state.selectProperties)
 }
-
-//TODO: adjust pasted pixels to move/flip/transform before setting them to the layer canvas
 
 export const select = {
   name: "select",

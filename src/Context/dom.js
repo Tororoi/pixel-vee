@@ -18,7 +18,7 @@ const navBar = document.querySelector(".nav")
 const topMenu = document.getElementById("top-menu")
 
 // * Tool Options * //
-const toolOptions = document.querySelector(".tool-options") //TODO: Will become quick menu
+const toolOptions = document.querySelector(".tool-options") //TODO: (Middle Priority) Will become quick menu
 
 // * File Menu * //
 const fileSubMenu = document.getElementById("file-submenu")
@@ -61,7 +61,7 @@ const settingsBtn = document.getElementById("settings-btn")
 const settingsContainer = document.querySelector(".settings-container")
 
 // * Settings Form * //
-//TODO: options dialog box where user can set default options such as display vectors, paths, or auto select most recently created vector
+//TODO: (Middle Priority) options dialog box where user can set default options such as display vectors, paths, or auto select most recently created vector
 // * Toggle Tooltips * //
 const tooltipBtn = document.getElementById("tooltips-toggle")
 // * Toggle Grid * //
@@ -172,7 +172,7 @@ const paletteContainer = document.querySelector(".palette-container")
 const paletteColors = document.querySelector(".palette-colors")
 const paletteEditBtn = document.querySelector(".palette-edit")
 const paletteRemoveBtn = document.querySelector(".palette-remove")
-// TODO: button to create palette from colors on canvas
+// TODO: (Middle Priority) button to create palette from colors on canvas
 
 // * Layers Interface * //
 const layersInterfaceContainer = document.querySelector(".layers-interface")

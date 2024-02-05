@@ -379,7 +379,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       vectorGui.setVectorProperties(newLatestAction)
       vectorGui.render() //render vectors after removing previous action from undoStack
     }
-    //if new latest action is confirm paste, render select properties (deselect) TODO: maybe it should not be deselected on confirm
+    //if new latest action is confirm paste, render selection
     if (
       newLatestAction.tool.name === "paste" &&
       newLatestAction.properties.confirmed
@@ -398,7 +398,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   }
   //clear affected layer and render image from most recent action from the affected layer
   //This avoids having to redraw the timeline for every undo/redo. Close to constant time whereas redrawTimeline is closer to exponential time or worse.
-  //TODO: factor out into separate function
+  //TODO: (Low Priority) factor out into separate function
   let mostRecentActionFromSameLayer = null
   for (let i = state.undoStack.length - 1; i >= 0; i--) {
     if (state.undoStack[i].layer === latestAction.layer) {

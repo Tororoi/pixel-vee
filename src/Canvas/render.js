@@ -20,8 +20,8 @@ import {
  * Critical function for the timeline to work
  * For handling activeIndexes, the idea is to save images of multiple actions that aren't changing to save time redrawing.
  * The current problem is that later actions "fill" or "draw" with a mask are affected by earlier actions.
- * TODO: Another efficiency improvement would be to perform incremental rendering with caching so only the affected region of the canvas is rerendered.
- * TODO: Use OffscreenCanvas in a web worker to offload rendering to a separate thread.
+ * TODO: (Low Priority) Another efficiency improvement would be to perform incremental rendering with caching so only the affected region of the canvas is rerendered.
+ * TODO: (Middle Priority) Use OffscreenCanvas in a web worker to offload rendering to a separate thread.
  * BUG: Can't simply save images and draw them for the betweenCvs because this will ignore actions use erase or inject modes.
  * @param {Object} layer - optional parameter to limit render to a specific layer
  * @param {Array} activeIndexes - optional parameter to limit render to specific actions. If not passed in, all actions will be rendered.
@@ -152,7 +152,7 @@ export function performAction(action, betweenCtx = null) {
     case "brush":
       let seen = new Set()
       let mask = null
-      //TODO: implement points and maskArray as an array of integers to reduce space cost. Could be stored as typed arrays but not meaningful for storing the json file.
+      //TODO: (Low Priority) implement points and maskArray as an array of integers to reduce space cost. Could be stored as typed arrays but not meaningful for storing the json file.
       //points require 3 entries for every coordinate, x, y, brushSize
       //maskArray requires 2 entries for every coordinate, x, y
       if (action.properties.maskArray) {
@@ -313,7 +313,7 @@ export function performAction(action, betweenCtx = null) {
       )
       break
     case "cut":
-      //TODO:handle betweenCtx, clean up actions so logic does not need to be repeated here
+      //TODO:(Low Priority) handle betweenCtx, clean up actions so logic does not need to be repeated here. Not currently affected by betweenCtx so not needed for current functionality.
       if (action.properties.selectionInversed) {
         //inverted selection: clear entire canvas area minus boundaryBox
         //create a clip mask for the boundaryBox to prevent clearing the inner area

@@ -352,7 +352,7 @@ export function actionFill(
 }
 
 /**
- * Helper function. TODO: move to external helper file for rendering
+ * Helper function. TODO: (Low Priority) move to external helper file for rendering
  * To render a pixel perfect curve, points are plotted instead of using t values, which are not equidistant.
  * @param {Array} points
  * @param {Object} boundaryBox

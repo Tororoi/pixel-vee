@@ -120,7 +120,7 @@ export function createReferenceLayer(img) {
     canvas.offScreenCVS.width / img.width >
     canvas.offScreenCVS.height / img.height
       ? canvas.offScreenCVS.height / img.height
-      : canvas.offScreenCVS.width / img.width //TODO: should be method, not var so width and height can be adjusted without having to set scale again
+      : canvas.offScreenCVS.width / img.width //TODO: (Low Priority) should be method, not var so width and height can be adjusted without having to set scale again
   let highestId = canvas.layers.reduce(
     (max, layer) => (layer.id > max ? layer.id : max),
     0

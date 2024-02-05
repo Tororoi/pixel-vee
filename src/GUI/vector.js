@@ -101,7 +101,7 @@ function drawControlPoints(
 }
 
 /**
- * TODO: move drawing logic to separate function so modify param doesn't need to be used
+ * TODO: (Low Priority) move drawing logic to separate function so modify param doesn't need to be used
  * @param {Object} keys
  * @param {Object} point
  * @param {Float} radius
@@ -190,7 +190,7 @@ function setCursorStyle() {
 
   //If pointer is colliding with a vector control point:
   if (state.tool.name !== "move") {
-    canvas.vectorGuiCVS.style.cursor = "move" //TODO: maybe use grab/ grabbing
+    canvas.vectorGuiCVS.style.cursor = "move" //TODO: (Low Priority) maybe use grab/ grabbing
   } else {
     //Handle cursor for transform
     const xKey = vectorGui.collidedKeys.xKey
@@ -638,7 +638,7 @@ export function updateLockedCurrentVectorControlHandle(currentVector) {
 /**
  * For efficient rendering, create an array of indexes of vectors that need to be re-rendered.
  * Other actions will be saved to between canvases to avoid multiple ununecessary renders in redrawTimelineActions
- * TODO: Can't simply save images and draw them for the betweenCvs because this will ignore actions use erase or inject modes.
+ * Can't simply save images and draw them for the betweenCvs because this will ignore actions using erase or inject modes.
  * @param {Object} currentVector
  * @param {Object} vectorsSavedProperties - will have at least one entry, corresponding to currentVector
  * @param {Array} undoStack

@@ -8,7 +8,7 @@ import { setColor } from "../Swatch/events.js"
 
 /**
  * Eyedropper
- * TODO: add magnifying glass view that shows zoomed in view of area being sampled
+ * TODO: (Low Priority) add magnifying glass view that shows zoomed in view of area being sampled
  */
 function eyedropperSteps() {
   //eyedropper helper function

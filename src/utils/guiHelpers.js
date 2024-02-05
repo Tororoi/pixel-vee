@@ -49,7 +49,7 @@ export function drawControlPointHandle(
  * @returns {Boolean}
  */
 export function checkPointCollision(pointerX, pointerY, px, py, r) {
-  //currently a square detection field, TODO: change to circle
+  //currently a square detection field, TODO: (Low Priority) change to circle
   return (
     pointerX >= px - r &&
     pointerX <= px + r &&

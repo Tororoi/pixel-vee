@@ -74,7 +74,7 @@ const showTooltip = (message, target) => {
 
 /**
  * Open save dialog box
- * TODO: initialize save dialog box with default settings?
+ * TODO: (Low Priority) initialize save dialog box with default settings?
  */
 export function openSaveDialogBox() {
   dom.saveContainer.style.display = "flex"
@@ -85,11 +85,7 @@ export function openSaveDialogBox() {
 
 /**
  * Consolidate offscreen canvases and download image
- * TODO: Open dialog box with more options such as pixel size, where to save it to, etc.
- * TODO: To support saving a complex file, we must save state.undoStack as json and be able to parse that json back to the same undoStack
- * - sets cannot be saved as json. factor out maskSet and only use maskArray in actions
- * - canvases cannot be saved as json. when restoring a save, first iterate through saved canvas.layers and create a canvas and context (offscreen and onscreen) for each layer.
- * then iterate through saved actions and assign the correct layer based on the layer's title so the layer is a referenced object instead of a new object
+ * TODO: (Middle Priority) Open dialog box with more options such as pixel size, etc.
  */
 function exportImage() {
   //save .png
@@ -104,7 +100,7 @@ function exportImage() {
 
 /**
  * Open json file from desktop and load into layers and timeline
- * TODO: initialize loading screen and stop loading screen after loaded
+ * TODO: (Middle Priority) initialize loading screen and stop loading screen after loaded
  */
 function openSavedDrawing() {
   let reader
@@ -235,10 +231,10 @@ dom.cutBtn.addEventListener("click", actionCutSelection)
 dom.copyBtn.addEventListener("click", actionCopySelection)
 dom.pasteBtn.addEventListener("click", actionPasteSelection)
 // dom.flipHorizontalBtn.addEventListener("click", (e) => {
-//   //TODO: flip selected pixels horizontally
+//   //TODO: (High Priority) flip selected pixels horizontally
 // })
 // dom.flipVerticalBtn.addEventListener("click", (e) => {
-//   //TODO: flip selected pixels vertically
+//   //TODO: (High Priority) flip selected pixels vertically
 // })
 //Settings events
 dom.settingsBtn.addEventListener("click", (e) => {

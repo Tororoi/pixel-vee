@@ -88,7 +88,7 @@ function fillSteps() {
 
 /**
  * Used automatically by fill tool after fill is completed.
- * TODO: for linking fill vector, fill would be limited by active linked vectors as borders, position unchanged
+ * TODO: (High Priority) for linking fill vector, fill would be limited by active linked vectors as borders, position unchanged
  * How should fill vector be linked, since it won't be via positioning?
  */
 export function adjustFillSteps() {

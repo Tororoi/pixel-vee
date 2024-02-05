@@ -9,7 +9,7 @@ export function renderGrid(subGridSpacing = null) {
   if (subGridSpacing === 1) {
     subGridSpacing = null
   }
-  //get viewable boundaries - TODO: consider making these global properties as they may be useful for limiting other rendering functions or anything that iterates over the canvas while drawing
+  //get viewable boundaries - TODO: (Low Priority) consider making these global properties as they may be useful for limiting other rendering functions or anything that iterates over the canvas while drawing
   let xLarge = Math.ceil(
     canvas.layers[0].onscreenCvs.width / canvas.sharpness / canvas.zoom
   )

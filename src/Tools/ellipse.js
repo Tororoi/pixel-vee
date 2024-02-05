@@ -230,7 +230,7 @@ function ellipseSteps() {
           },
         })
         state.clickCounter = 0
-        //reset vector state TODO: forceCircle needs to be reset
+        //reset vector state forceCircle
         state.vectorProperties.forceCircle = false
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
@@ -255,7 +255,7 @@ function updateEllipseVectorProperties(currentVector) {
 
 /**
  * Used automatically by ellipse tool after curve is completed.
- * TODO: create distinct tool for adjusting that won't create a new curve when clicking.
+ * TODO: (Low Priority) create distinct tool for adjusting that won't create a new curve when clicking.
  * Ideally a user should be able to click on a curve and render it's vector UI that way.
  */
 export function adjustEllipseSteps() {

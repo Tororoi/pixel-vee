@@ -88,6 +88,7 @@ export function cutSelectedPixels() {
  * @param {Object} clipboard - clipboard object
  * @param {Object} layer - layer object to paste onto
  * @param {Boolean} useOffset - use layer offset - only needed with undo/redo functionality
+ * TODO: (Highest Priority) Make sure selection inversed status is handled correctly, without relying on state (new param required)
  */
 export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
   vectorGui.reset()
@@ -160,7 +161,7 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
     )
   }
   //set state.selectClipboard?
-  //TODO: need to tell that it's a modified version of the selection, so no dotted line and include transform control points for resizing (not currently implemented)
+  //TODO: (Middle Priority) need to tell that it's a modified version of the selection, so no dotted line and include transform control points for resizing (not currently implemented)
   vectorGui.render()
 }
 
