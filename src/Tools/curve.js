@@ -597,7 +597,7 @@ export const cubicCurve = {
     link: {
       active: false,
       tooltip:
-        "Toggle Linking (Shift). \n\nConnected control points of other vectors will move with selected control point.",
+        "Toggle Linking (L). \n\nConnected control points of other vectors will move with selected control point.",
     },
     // displayVectors: false,
     displayPaths: {

@@ -49,6 +49,8 @@ function moveSteps() {
       addToTimeline({
         tool: state.tool,
         layer: canvas.currentLayer,
+        //selectProperties: { ...state.selectProperties },
+        //selectionInversed: state.selectionInversed,
         properties: {
           from: {
             x: state.grabStartX,

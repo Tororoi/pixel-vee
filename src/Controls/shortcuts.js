@@ -31,6 +31,7 @@ import { toggleMode, switchTool } from "../Tools/toolbox.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
+ * TODO: (High Priority) prevent certain shortcuts when certain actions are active such as pasting, dragging, etc.
  * @param {String} keyCode
  */
 export function activateShortcut(keyCode) {
@@ -84,11 +85,11 @@ export function activateShortcut(keyCode) {
           adjustEllipseSteps()
           vectorGui.render()
         }
-      } else if (dom.toolBtn.id === "cubicCurve") {
-        tools.cubicCurve.options.link.active =
-          !tools.cubicCurve.options.link.active
-        renderToolOptionsToDOM()
-        vectorGui.render()
+      }
+      break
+    case "Slash":
+      if (!state.clicked) {
+        switchTool("line")
       }
       break
     case "KeyA":
@@ -109,7 +110,7 @@ export function activateShortcut(keyCode) {
         if (keys.MetaLeft || keys.MetaRight) {
           actionCopySelection()
         } else {
-          switchTool("quadCurve")
+          switchTool("cubicCurve")
         }
       }
       break
@@ -159,9 +160,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyJ":
-      if (!state.clicked) {
-        switchTool("cubicCurve")
-      }
+      //
       break
     case "KeyK":
       if (!state.clicked) {
@@ -171,8 +170,11 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyL":
-      if (!state.clicked) {
-        switchTool("line")
+      if (dom.toolBtn.id === "cubicCurve") {
+        tools.cubicCurve.options.link.active =
+          !tools.cubicCurve.options.link.active
+        renderToolOptionsToDOM()
+        vectorGui.render()
       }
       break
     case "KeyM":
@@ -194,7 +196,9 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyQ":
-      //
+      if (!state.clicked) {
+        switchTool("quadCurve")
+      }
       break
     case "KeyR":
       if (!state.clicked) {

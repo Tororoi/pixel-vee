@@ -67,21 +67,21 @@ This app is a work in progress. See the bottom of this page for features that ar
     <td> Fill in contiguous spaces of color. This tool is a vector type tool so the position and color can be adjusted at any time. Adjusting the position will hide any actions that came after the fill action until you are done making adjustments. </td>
   </tr>
   <tr>
-    <td colspan="2"> Line (L or Hold Shift with Brush) </td>
+    <td colspan="2"> Line (/ or Hold Shift with Brush) </td>
   </tr>
   <tr>
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-line.svg" alt="Line" width="40"/> </td>
     <td> Draw straight, pixel perfect lines. Click and hold to draw lines. </td>
   </tr>
   <tr>
-    <td colspan="2"> Quadratic Bezier Curve (C) </td>
+    <td colspan="2"> Quadratic Bezier Curve (Q) </td>
   </tr>
   <tr>
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-quadratic-curve.svg" alt="Quadratic Bezier Curve" width="40"/> </td>
     <td> Draws a quadratic bezier curve (3 control points). Click for each control point of the bezier curve, starting with the two endpoints. This tool is a vector type tool so the control points and color can be adjusted at any time. </td>
   </tr>
   <tr>
-    <td colspan="2"> Cubic Bezier Curve (J) </td>
+    <td colspan="2"> Cubic Bezier Curve (C) </td>
   </tr>
   <tr>
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-cubic-curve.svg" alt="Cubic Bezier Curve" width="40"/> </td>
