@@ -42,13 +42,19 @@ export const renderLayersToDOM = () => {
     }
   })
 
-  if (
-    canvas.activeLayerCount <= 1 &&
-    canvas.currentLayer?.type !== "reference"
-  ) {
-    dom.deleteLayerBtn.disabled = true
+  //active paste happening, disable layer buttons
+  if (canvas.pastedLayer) {
+    dom.layersInterfaceContainer.classList.add("disabled")
   } else {
-    dom.deleteLayerBtn.disabled = false
+    dom.layersInterfaceContainer.classList.remove("disabled")
+    if (
+      canvas.activeLayerCount <= 1 &&
+      canvas.currentLayer?.type !== "reference"
+    ) {
+      dom.deleteLayerBtn.disabled = true
+    } else {
+      dom.deleteLayerBtn.disabled = false
+    }
   }
 }
 

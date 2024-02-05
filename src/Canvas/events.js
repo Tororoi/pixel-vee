@@ -235,6 +235,11 @@ const resizeOnScreenCanvas = () => {
  * @param {PointerEvent} e
  */
 function layerInteract(e) {
+  if (canvas.pastedLayer) {
+    e.preventDefault()
+    //if there is a pasted layer, temporary layer is active and layers configuration should not be messed with
+    return
+  }
   let layer = e.target.closest(".layer").layerObj
   //toggle visibility
   if (e.target.className.includes("eyeopen")) {
@@ -290,6 +295,11 @@ function layerInteract(e) {
  * @param {DragEvent} e
  */
 function dragLayerStart(e) {
+  if (canvas.pastedLayer) {
+    e.preventDefault()
+    //if there is a pasted layer, temporary layer is active and layers configuration should not be messed with
+    return
+  }
   let layer = e.target.closest(".layer").layerObj
   let index = canvas.layers.indexOf(layer)
   //pass index through event

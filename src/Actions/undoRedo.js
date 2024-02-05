@@ -42,7 +42,6 @@ export function addToTimeline(actionObject) {
     snapshot,
   }
   state.undoStack.push(state.action)
-  //TODO: save image of layer to action. When undo/redo occurs, render image to canvas instead of redrawing timeline. For modify actions, images of modified action and subsequent actions must be updated.
   if (state.saveDialogOpen) {
     setSaveFilesizePreview()
   }
@@ -148,13 +147,24 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       //set maskset
       // state.maskSet = new Set(newLatestAction.maskArray)
     } else {
-      state.deselect()
-      canvas.rasterGuiCTX.clearRect(
-        0,
-        0,
-        canvas.rasterGuiCVS.width,
-        canvas.rasterGuiCVS.height
-      )
+      if (newLatestAction.properties?.selectProperties?.px1 !== null) {
+        //set select properties
+        state.selectProperties = {
+          ...newLatestAction.properties.selectProperties,
+        }
+        //set boundary box
+        state.setBoundaryBox(state.selectProperties)
+        //set inverse selection
+        state.selectionInversed = newLatestAction.properties.invertSelection
+      } else {
+        state.deselect()
+        canvas.rasterGuiCTX.clearRect(
+          0,
+          0,
+          canvas.rasterGuiCVS.width,
+          canvas.rasterGuiCVS.height
+        )
+      }
     }
   }
   vectorGui.render()
@@ -178,6 +188,25 @@ function handlePasteAction(latestAction, modType) {
     canvas.currentLayer.inactiveTools.forEach((tool) => {
       dom[`${tool}Btn`].disabled = true
     })
+    //Handle case of selection being active before paste. Determine whether to update selection or deselect.
+    if (latestAction.properties.prePasteSelectProperties.px1 !== null) {
+      state.selectProperties = {
+        ...latestAction.properties.prePasteSelectProperties,
+      }
+      state.setBoundaryBox(state.selectProperties)
+      //set inverse selection
+      state.selectionInversed = latestAction.properties.prePasteInvertSelection
+    } else {
+      //reset state properties
+      state.deselect()
+      canvas.rasterGuiCTX.clearRect(
+        0,
+        0,
+        canvas.rasterGuiCVS.width,
+        canvas.rasterGuiCVS.height
+      )
+    }
+    vectorGui.render()
   } else if (modType === "to") {
     //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
     pasteSelectedPixels(
@@ -214,13 +243,13 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
     // )
     removeTempLayerFromDOM()
     //reset state properties
-    state.deselect()
-    canvas.rasterGuiCTX.clearRect(
-      0,
-      0,
-      canvas.rasterGuiCVS.width,
-      canvas.rasterGuiCVS.height
-    )
+    // state.deselect()
+    // canvas.rasterGuiCTX.clearRect(
+    //   0,
+    //   0,
+    //   canvas.rasterGuiCVS.width,
+    //   canvas.rasterGuiCVS.height
+    // )
     //render
     vectorGui.render()
   }
@@ -319,9 +348,6 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       latestAction.layer.removed = true
     }
   } else if (latestAction.tool.name === "select") {
-    //TODO: maybe selection should just be a modification on every action instead of separate select actions.
-    //Right now, undoing a select action when the newLatestAction isn't also a select tool means the earlier select action won't be rendered even if it should be
-    //By saving it as a modded action with from and to we can set the selectProperties to the "from" values on undo and "to" on redo
     handleSelectAction(latestAction, newLatestAction, modType)
   } else if (latestAction.tool.name === "paste") {
     if (!latestAction.properties.confirmed) {
@@ -353,19 +379,19 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       vectorGui.setVectorProperties(newLatestAction)
       vectorGui.render() //render vectors after removing previous action from undoStack
     }
-    //TODO: if new latest action is confirm paste, render select properties (deselect)
+    //if new latest action is confirm paste, render select properties (deselect) TODO: maybe it should not be deselected on confirm
     if (
       newLatestAction.tool.name === "paste" &&
       newLatestAction.properties.confirmed
     ) {
       //reset state properties
-      state.deselect()
-      canvas.rasterGuiCTX.clearRect(
-        0,
-        0,
-        canvas.rasterGuiCVS.width,
-        canvas.rasterGuiCVS.height
-      )
+      // state.deselect()
+      // canvas.rasterGuiCTX.clearRect(
+      //   0,
+      //   0,
+      //   canvas.rasterGuiCVS.width,
+      //   canvas.rasterGuiCVS.height
+      // )
       //render
       vectorGui.render()
     }

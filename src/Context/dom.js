@@ -175,11 +175,11 @@ const paletteRemoveBtn = document.querySelector(".palette-remove")
 // TODO: button to create palette from colors on canvas
 
 // * Layers Interface * //
+const layersInterfaceContainer = document.querySelector(".layers-interface")
 const uploadBtn = document.querySelector("#file-upload")
 const newLayerBtn = document.querySelector(".add-layer")
 const deleteLayerBtn = document.querySelector("#delete-layer")
 const layersContainer = document.querySelector(".layers")
-const layersInterfaceContainer = document.querySelector(".layers-interface")
 const layerSettingsContainer = document.querySelector(".layer-settings")
 
 // * Vectors Interface * //

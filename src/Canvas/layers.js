@@ -186,6 +186,7 @@ export function createPreviewLayer() {
       "quadCurve",
       "cubicCurve",
       "ellipse",
+      "select",
     ],
     hidden: false,
     removed: false,

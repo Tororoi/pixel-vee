@@ -365,7 +365,8 @@ export function performAction(action, betweenCtx = null) {
       }
       //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
       if (action.properties.confirmed) {
-        action.layer.ctx.drawImage(
+        let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
+        activeCtx.drawImage(
           action.properties.canvas,
           boundaryBox.xMin,
           boundaryBox.yMin,

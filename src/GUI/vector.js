@@ -661,6 +661,7 @@ export function createActiveIndexesForRender(
     if (
       action.layer === currentVector.layer &&
       (action.tool.name === "fill" ||
+        action.tool.name === "cut" ||
         vectorsSavedProperties[i] ||
         action.modes?.eraser ||
         action.modes?.inject)

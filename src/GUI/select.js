@@ -72,7 +72,10 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
   canvas.rasterGuiCTX.lineDashOffset = lineDashOffset
 
   if (state.boundaryBox.xMax !== null) {
-    canvas.rasterGuiCTX.setLineDash([lineWidth * 8, lineWidth * 8])
+    if (!canvas.pastedLayer) {
+      //if active unconfirmed paste action, don't draw the dashed selection outline
+      canvas.rasterGuiCTX.setLineDash([lineWidth * 8, lineWidth * 8])
+    }
     canvas.rasterGuiCTX.beginPath()
     canvas.rasterGuiCTX.rect(
       canvas.xOffset + state.boundaryBox.xMin,
