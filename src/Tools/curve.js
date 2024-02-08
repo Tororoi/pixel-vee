@@ -589,6 +589,11 @@ export const cubicCurve = {
   brushType: "circle",
   brushDisabled: false,
   options: {
+    match: {
+      active: false,
+      tooltip:
+        "Toggle Matching (M). \n\nConnected control points of linked vectors will match the length of the selected control handle. When snapping to another control point, selected control handle will match the length of the other vector's control handle.",
+    }, //IN PROGRESS
     align: {
       active: false,
       tooltip:

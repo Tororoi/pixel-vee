@@ -49,6 +49,8 @@ const pasteBtn = document.getElementById("paste-selection")
 // const flipHorizontalBtn = document.getElementById("flip-horizontal")
 // // * Flip Vertical * //
 // const flipVerticalBtn = document.getElementById("flip-vertical")
+// * Rotate * //
+// const rotateBtn = document.getElementById("rotate-right")
 
 // * Settings Button * //
 const settingsBtn = document.getElementById("settings-btn")

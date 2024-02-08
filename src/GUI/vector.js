@@ -276,6 +276,7 @@ function render() {
   //if linking, render all vectors in the layer
   if (
     state.tool.options.displayVectors?.active ||
+    state.tool.options.match?.active ||
     state.tool.options.align?.active ||
     state.tool.options.link?.active
   ) {

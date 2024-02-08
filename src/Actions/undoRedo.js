@@ -5,17 +5,9 @@ import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { clearOffscreenCanvas, renderCanvas } from "../Canvas/render.js"
-import {
-  renderVectorsToDOM,
-  renderLayersToDOM,
-  renderBrushModesToDOM,
-} from "../DOM/render.js"
+import { renderVectorsToDOM, renderLayersToDOM } from "../DOM/render.js"
 import { setSaveFilesizePreview } from "../Save/savefile.js"
-import {
-  copySelectedPixels,
-  pasteSelectedPixels,
-  confirmPastedPixels,
-} from "../Menu/edit.js"
+import { pasteSelectedPixels, confirmPastedPixels } from "../Menu/edit.js"
 import { switchTool } from "../Tools/toolbox.js"
 import { removeTempLayerFromDOM } from "../DOM/renderLayers.js"
 
@@ -234,22 +226,7 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
     switchTool("move")
   } else if (modType === "to") {
     //if modType is "to" (redoing confirm paste action), basically do the confirmPastedPixels function except use the action properties instead of the clipboard and don't add to timeline. Also don't need to adjust for layer offset
-    // confirmPastedPixels(
-    //   latestAction.properties.canvas,
-    //   latestAction.properties.boundaryBox,
-    //   latestAction.layer,
-    //   latestAction.properties.xOffset,
-    //   latestAction.properties.yOffset
-    // )
     removeTempLayerFromDOM()
-    //reset state properties
-    // state.deselect()
-    // canvas.rasterGuiCTX.clearRect(
-    //   0,
-    //   0,
-    //   canvas.rasterGuiCVS.width,
-    //   canvas.rasterGuiCVS.height
-    // )
     //render
     vectorGui.render()
   }
