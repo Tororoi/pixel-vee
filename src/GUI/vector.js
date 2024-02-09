@@ -442,7 +442,8 @@ export function updateLinkedVectors(
   saveVectorProperties = false
 ) {
   let currentDeltaX, currentDeltaY, currentDeltaAngle //for calculating angle when using px3, px4
-  let deltaX, deltaY //for setting new angle when using px3, px4
+  let deltaX = 0,
+    deltaY = 0 //for setting new angle when using px3, px4
   if (vectorGui.selectedPoint.xKey === "px3") {
     // get angle of control handle between currentVector p1 and p3
     currentDeltaX =
@@ -503,7 +504,8 @@ export function updateLinkedVectors(
         vectorGui.selectedPoint.xKey === "px2"
       ) {
         updateVectorProperties(linkedVector, x, y, "px1", "py1")
-        if (state.tool.options.align?.active) {
+        //If lock option enabled, maintain relative angle of control handles
+        if (state.tool.options.lock?.active) {
           //update px3 and py3
           const xDiff = savedProperties.px1 - savedProperties.px3
           const yDiff = savedProperties.py1 - savedProperties.py3
@@ -516,27 +518,40 @@ export function updateLinkedVectors(
           )
         }
       } else if (
-        vectorGui.selectedPoint.xKey === "px3" ||
-        vectorGui.selectedPoint.xKey === "px4"
+        (vectorGui.selectedPoint.xKey === "px3" ||
+          vectorGui.selectedPoint.xKey === "px4") &&
+        (state.tool.options.align?.active ||
+          state.tool.options.lock?.active ||
+          state.tool.options.match?.active)
       ) {
-        if (state.tool.options.align?.active) {
-          deltaX = currentDeltaX * 2
-          deltaY = currentDeltaY * 2
-        } else {
-          let linkedDeltaX = savedProperties.px1 - savedProperties.px3
-          let linkedDeltaY = savedProperties.py1 - savedProperties.py3
-          let linkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
-          let linkedHandleLength = Math.sqrt(
-            linkedDeltaX ** 2 + linkedDeltaY ** 2
+        //If align option enabled, move px3 and py3 of linked vector to maintain opposite angle of selected control handle
+        let linkedDeltaX = savedProperties.px1 - savedProperties.px3
+        let linkedDeltaY = savedProperties.py1 - savedProperties.py3
+        let linkedHandleLength
+        if (state.tool.options.match?.active) {
+          //Match handle length to selected vector
+          linkedHandleLength = Math.sqrt(
+            currentDeltaX ** 2 + currentDeltaY ** 2
           )
-          let newLinkedAngle = linkedAngle + currentDeltaAngle
-          deltaX =
-            currentDeltaX -
-            Math.round(Math.cos(newLinkedAngle) * linkedHandleLength)
-          deltaY =
-            currentDeltaY -
-            Math.round(Math.sin(newLinkedAngle) * linkedHandleLength)
+        } else {
+          //Maintain handle length
+          linkedHandleLength = Math.sqrt(linkedDeltaX ** 2 + linkedDeltaY ** 2)
         }
+        let newLinkedAngle
+        if (state.tool.options.align?.active) {
+          //Align control handle angle of linked vector to opposite of selected vector control handle
+          newLinkedAngle = getAngle(currentDeltaX, currentDeltaY) + Math.PI
+        } else if (state.tool.options.lock?.active) {
+          //Maintain relative angle of control handles
+          let linkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
+          newLinkedAngle = linkedAngle + currentDeltaAngle
+        }
+        deltaX =
+          currentDeltaX -
+          Math.round(Math.cos(newLinkedAngle) * linkedHandleLength)
+        deltaY =
+          currentDeltaY -
+          Math.round(Math.sin(newLinkedAngle) * linkedHandleLength)
         updateVectorProperties(
           linkedVector,
           x + deltaX,
@@ -554,7 +569,8 @@ export function updateLinkedVectors(
         vectorGui.selectedPoint.xKey === "px2"
       ) {
         updateVectorProperties(linkedVector, x, y, "px2", "py2")
-        if (state.tool.options.align?.active) {
+        //If lock option enabled, maintain relative angle of control handles
+        if (state.tool.options.lock?.active) {
           //update px4 and py4
           const xDiff = savedProperties.px2 - savedProperties.px4
           const yDiff = savedProperties.py2 - savedProperties.py4
@@ -567,27 +583,39 @@ export function updateLinkedVectors(
           )
         }
       } else if (
-        vectorGui.selectedPoint.xKey === "px3" ||
-        vectorGui.selectedPoint.xKey === "px4"
+        (vectorGui.selectedPoint.xKey === "px3" ||
+          vectorGui.selectedPoint.xKey === "px4") &&
+        (state.tool.options.align?.active ||
+          state.tool.options.lock?.active ||
+          state.tool.options.match?.active)
       ) {
-        if (state.tool.options.align?.active) {
-          deltaX = currentDeltaX * 2
-          deltaY = currentDeltaY * 2
-        } else {
-          let linkedDeltaX = savedProperties.px2 - savedProperties.px4
-          let linkedDeltaY = savedProperties.py2 - savedProperties.py4
-          let linkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
-          let linkedHandleLength = Math.sqrt(
-            linkedDeltaX ** 2 + linkedDeltaY ** 2
+        let linkedDeltaX = savedProperties.px2 - savedProperties.px4
+        let linkedDeltaY = savedProperties.py2 - savedProperties.py4
+        let linkedHandleLength
+        if (state.tool.options.match?.active) {
+          //Match handle length to selected vector
+          linkedHandleLength = Math.sqrt(
+            currentDeltaX ** 2 + currentDeltaY ** 2
           )
-          let newLinkedAngle = linkedAngle + currentDeltaAngle
-          deltaX =
-            currentDeltaX -
-            Math.round(Math.cos(newLinkedAngle) * linkedHandleLength)
-          deltaY =
-            currentDeltaY -
-            Math.round(Math.sin(newLinkedAngle) * linkedHandleLength)
+        } else {
+          //Maintain handle length
+          linkedHandleLength = Math.sqrt(linkedDeltaX ** 2 + linkedDeltaY ** 2)
         }
+        let newLinkedAngle
+        if (state.tool.options.align?.active) {
+          //Align control handle angle of linked vector to opposite of selected vector control handle
+          newLinkedAngle = getAngle(currentDeltaX, currentDeltaY) + Math.PI
+        } else if (state.tool.options.lock?.active) {
+          //Maintain relative angle of control handles
+          let linkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
+          newLinkedAngle = linkedAngle + currentDeltaAngle
+        }
+        deltaX =
+          currentDeltaX -
+          Math.round(Math.cos(newLinkedAngle) * linkedHandleLength)
+        deltaY =
+          currentDeltaY -
+          Math.round(Math.sin(newLinkedAngle) * linkedHandleLength)
         updateVectorProperties(
           linkedVector,
           x + deltaX,

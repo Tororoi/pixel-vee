@@ -421,7 +421,7 @@ function adjustCurveSteps() {
           state.tool.options.link?.active
         ) {
           if (state.tool.options.link?.active) {
-            if (state.tool.options.align?.active) {
+            if (state.tool.options.lock?.active) {
               updateLockedCurrentVectorControlHandle(currentVector)
             }
             updateLinkedVectors(currentVector, true)
@@ -451,7 +451,7 @@ function adjustCurveSteps() {
           state.tool.options.link?.active &&
           Object.keys(state.vectorsSavedProperties).length > 1
         ) {
-          if (state.tool.options.align?.active) {
+          if (state.tool.options.lock?.active) {
             updateLockedCurrentVectorControlHandle(currentVector)
           }
           updateLinkedVectors(currentVector)
@@ -479,7 +479,7 @@ function adjustCurveSteps() {
             state.tool.options.link?.active &&
             Object.keys(state.vectorsSavedProperties).length > 1
           ) {
-            if (state.tool.options.align?.active) {
+            if (state.tool.options.lock?.active) {
               updateLockedCurrentVectorControlHandle(currentVector)
             }
             updateLinkedVectors(currentVector)
@@ -505,7 +505,7 @@ function adjustCurveSteps() {
               vectorGui.selectedPoint.yKey
             )
             //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
-            //align control handles
+            //align control handles TODO: (High Priority) For align, only change angle while maintaining original length of handle. Add condition for match which implements a matching length. If both options active, logic be current logic.
             if (
               state.tool.options.align?.active &&
               Object.keys(state.vectorsSavedProperties).length === 1
@@ -589,6 +589,7 @@ export const cubicCurve = {
   brushType: "circle",
   brushDisabled: false,
   options: {
+    //Priority hierarchy of options: Match = Align > Lock > Link
     match: {
       active: false,
       tooltip:
@@ -603,7 +604,7 @@ export const cubicCurve = {
       active: false,
       tooltip:
         "Toggle Locking (H). \n\nLock relative angles of all control handles attached to selected control point. Only active when linking is active.",
-    }, //IN PROGRESS
+    }, //IN PROGRESS. No effect when not in link mode. Can make render conditional based on link mode status?.
     link: {
       active: false,
       tooltip:
