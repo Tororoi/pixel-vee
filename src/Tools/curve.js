@@ -599,6 +599,11 @@ export const cubicCurve = {
       tooltip:
         "Toggle Align (A). \n\nControl handle of selected point will move to opposite angle when snapping to another control point. Linked vectors' control handle will move to opposite angle when adjusting selected control handle.",
     },
+    lock: {
+      active: false,
+      tooltip:
+        "Toggle Locking (H). \n\nLock relative angles of all control handles attached to selected control point. Only active when linking is active.",
+    }, //IN PROGRESS
     link: {
       active: false,
       tooltip:

@@ -148,7 +148,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyH":
-      //
+      //Locking shortcut for curve tool
       break
     case "KeyI":
       if (!state.clicked) {
