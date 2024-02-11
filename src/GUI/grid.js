@@ -2,8 +2,8 @@ import { canvas } from "../Context/canvas.js"
 
 /**
  * This is quite slow due to the large amount of instructions to the canvas, consider putting it on its own canvas to avoid rerender unless necessary
- * @param {Object} canvas
- * @param {Integer} subGridSpacing
+ * @param {object} canvas
+ * @param {number} subGridSpacing - (Integer)
  */
 export function renderGrid(subGridSpacing = null) {
   if (subGridSpacing === 1) {

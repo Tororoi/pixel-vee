@@ -39,8 +39,8 @@ export const renderPaletteToDOM = () => {
 
 /**
  * Create a swatch for a given palette color
- * @param {Object} colorObj
- * @param {Integer} index
+ * @param {object} colorObj
+ * @param {number} index - (Integer)
  */
 const createPaletteSwatch = (colorObj, index) => {
   const paletteColor = document.createElement("div")

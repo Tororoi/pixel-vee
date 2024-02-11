@@ -23,9 +23,9 @@ import {
  * TODO: (Low Priority) Another efficiency improvement would be to perform incremental rendering with caching so only the affected region of the canvas is rerendered.
  * TODO: (Middle Priority) Use OffscreenCanvas in a web worker to offload rendering to a separate thread.
  * BUG: Can't simply save images and draw them for the betweenCvs because this will ignore actions use erase or inject modes.
- * @param {Object} layer - optional parameter to limit render to a specific layer
+ * @param {object} layer - optional parameter to limit render to a specific layer
  * @param {Array} activeIndexes - optional parameter to limit render to specific actions. If not passed in, all actions will be rendered.
- * @param {Boolean} setImages - optional parameter to set images for actions. Will be used when history is modified to update action images.
+ * @param {boolean} setImages - optional parameter to set images for actions. Will be used when history is modified to update action images.
  */
 export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
   //follows stored instructions to reassemble drawing. Costly operation. Minimize usage as much as possible.
@@ -130,7 +130,7 @@ function createAndSaveContext() {
 
 /**
  * Helper for redrawTimelineActions
- * @param {Object} action
+ * @param {object} action
  * @param {CanvasRenderingContext2D} betweenCtx
  */
 export function performAction(action, betweenCtx = null) {
@@ -416,7 +416,7 @@ function updateLayersAfterRedo() {
 
 /**
  * Draw the canvas layers
- * @param {Object} layer
+ * @param {object} layer
  */
 function drawLayer(layer) {
   layer.onscreenCtx.save()
@@ -458,7 +458,7 @@ function drawLayer(layer) {
 
 /**
  * Draw canvas layer onto its onscreen canvas
- * @param {Object} layer
+ * @param {object} layer
  */
 export function drawCanvasLayer(layer) {
   //Prevent blurring
@@ -514,7 +514,7 @@ function renderBackgroundCanvas() {
 
 /**
  * Clear offscreen canvas layers as needed
- * @param {Object} activeLayer
+ * @param {object} activeLayer
  */
 export function clearOffscreenCanvas(activeLayer = null) {
   if (activeLayer) {
@@ -544,9 +544,9 @@ export function clearOffscreenCanvas(activeLayer = null) {
 
 /**
  * Main render function for the canvas
- * @param {Object} activeLayer
- * @param {Boolean} redrawTimeline - pass true to redraw all previous actions
- * @param {Boolean} setImages - pass true to set images for actions between indexes
+ * @param {object} activeLayer
+ * @param {boolean} redrawTimeline - pass true to redraw all previous actions
+ * @param {boolean} setImages - pass true to set images for actions between indexes
  */
 export function renderCanvas(
   activeLayer = null,

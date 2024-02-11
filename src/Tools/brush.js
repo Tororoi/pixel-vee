@@ -130,8 +130,8 @@ function brushSteps() {
 
 /**
  * Add point to state.points if it is not already there
- * @param {Integer} x
- * @param {Integer} y
+ * @param {number} x - (Integer)
+ * @param {number} y - (Integer)
  */
 function addPointToAction(x, y) {
   if (!state.pointsSet.has(`${x},${y}`)) {
@@ -146,9 +146,9 @@ function addPointToAction(x, y) {
 
 /**
  *
- * @param {Integer} x
- * @param {Integer} y
- * @param {String} brushDirection
+ * @param {number} x - (Integer)
+ * @param {number} y - (Integer)
+ * @param {string} brushDirection
  */
 function drawBrushPoint(x, y, brushDirection) {
   addPointToAction(x, y)
@@ -198,7 +198,7 @@ function drawPreviewBrushPoint() {
 
 /**
  * Check if cursor is far enough from previous point to draw a line
- * @returns {Boolean}
+ * @returns {boolean}
  */
 function shouldDrawLine() {
   return (

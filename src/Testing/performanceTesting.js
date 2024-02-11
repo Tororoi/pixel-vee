@@ -3,8 +3,8 @@ import { testEllipseAction } from "./ellipseTest.js"
 
 /**
  * End-to-End performance tests rely on capturing actual user input and replaying it.
- * The tests are not automated. 
- * @param {String} toolName
+ * The tests are not automated.
+ * @param {string} toolName
  */
 export function testAction(toolName) {
   switch (toolName) {

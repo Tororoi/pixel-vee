@@ -1,11 +1,11 @@
 /**
  * create triangle object
- * @param {Number} x1
- * @param {Number} y1
- * @param {Number} x2
- * @param {Number} y2
- * @param {Number} ang
- * @returns
+ * @param {number} x1 - (Integer)
+ * @param {number} y1 - (Integer)
+ * @param {number} x2 - (Integer)
+ * @param {number} y2 - (Integer)
+ * @param {number} ang - (Float)
+ * @returns {object} - {x: number, y: number, long: number}
  */
 export function getTriangle(x1, y1, x2, y2, ang) {
   let tri = {}
@@ -23,10 +23,20 @@ export function getTriangle(x1, y1, x2, y2, ang) {
 
 /**
  * Finds the angle of (x,y) on a plane from the origin
- * @param {Number} x
- * @param {Number} y
- * @returns
+ * @param {number} x - (Integer)
+ * @param {number} y - (Integer)
+ * @returns {number} - angle in radians
  */
 export function getAngle(x, y) {
-  return Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0)
+  // if (
+  //   Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0) !==
+  //   Math.atan2(y, x)
+  // ) {
+  //   console.warn({
+  //     atan: Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0),
+  //     atan2: Math.atan2(y, x),
+  //   })
+  // }
+  // return Math.atan(y / (x == 0 ? 0.01 : x)) + (x < 0 ? Math.PI : 0)
+  return Math.atan2(y, x)
 }

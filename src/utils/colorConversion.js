@@ -3,12 +3,12 @@
 //===================================//
 
 /**
- * @param {integer} red - red value (0-255)
- * @param {integer} green - green value (0-255)
- * @param {integer} blue - blue value (0-255)
- * @returns object with hsl values
+ * @param {number} red - red value (0-255) (Integer)
+ * @param {number} green - green value (0-255) (Integer)
+ * @param {number} blue - blue value (0-255) (Integer)
+ * @returns {object} - {hue, saturation, lightness
  */
-export const RGBToHSL = ({red, green, blue}) => {
+export const RGBToHSL = ({ red, green, blue }) => {
   // Make r, g, and b fractions of 1
   let r = red / 255
   let g = green / 255
@@ -51,12 +51,12 @@ export const RGBToHSL = ({red, green, blue}) => {
 }
 
 /**
- * @param {integer} hue - hue value (0-359)
- * @param {integer} saturation - saturation value (0-100)
- * @param {integer} lightness - lightness value (0-100)
- * @returns object with rgb values
+ * @param {number} hue - hue value (0-359) (Integer)
+ * @param {number} saturation - saturation value (0-100) (Integer)
+ * @param {number} lightness - lightness value (0-100) (Integer)
+ * @returns {object} - {red, green, blue}
  */
-export const HSLToRGB = ({hue, saturation, lightness}) => {
+export const HSLToRGB = ({ hue, saturation, lightness }) => {
   let h = hue
   // Make saturation and lightness fractions of 1
   let s = saturation / 100
@@ -127,12 +127,12 @@ export const hexToRGB = (hexcode) => {
 }
 
 /**
- * @param {integer} red - red value (0-255)
- * @param {integer} green - green value (0-255)
- * @param {integer} blue - blue value (0-255)
+ * @param {number} red - red value (0-255) (Integer)
+ * @param {number} green - green value (0-255) (Integer)
+ * @param {number} blue - blue value (0-255) (Integer)
  * @returns {string} hexcode
  */
-export const RGBToHex = ({red, green, blue}) => {
+export const RGBToHex = ({ red, green, blue }) => {
   let r = red.toString(16)
   let g = green.toString(16)
   let b = blue.toString(16)
@@ -145,10 +145,10 @@ export const RGBToHex = ({red, green, blue}) => {
 }
 
 /**
- * @param {integer} red - red value (0-255)
- * @param {integer} green - green value (0-255)
- * @param {integer} blue - blue value (0-255)
- * @returns {float} luminance
+ * @param {number} red - red value (0-255) (Integer)
+ * @param {number} green - green value (0-255) (Integer)
+ * @param {number} blue - blue value (0-255) (Integer)
+ * @returns {number} luminance (Float)
  */
 export const getLuminance = ({ red, green, blue }) => {
   // Determine relation of luminance in color

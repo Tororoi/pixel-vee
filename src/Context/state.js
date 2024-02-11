@@ -172,7 +172,7 @@ function resetBoundaryBox() {
 
 /**
  * Set boundaryBox
- * @param {Object} selectProperties
+ * @param {object} selectProperties
  */
 function setBoundaryBox(selectProperties) {
   state.boundaryBox.xMin = Math.min(selectProperties.px1, selectProperties.px2)

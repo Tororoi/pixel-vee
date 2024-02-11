@@ -5,7 +5,7 @@ import { checkPointCollision, checkAreaCollision } from "../utils/guiHelpers.js"
 
 /**
  * Render selection outline and control points
- * @param {Float} lineDashOffset
+ * @param {number} lineDashOffset - (Float)
  */
 export function renderRasterCVS(lineDashOffset = 0.5) {
   canvas.rasterGuiCTX.clearRect(
@@ -58,8 +58,8 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
 
 /**
  * Render selection outline and control points
- * @param {Float} lineDashOffset
- * @param {Boolean} drawPoints
+ * @param {number} lineDashOffset - (Float)
+ * @param {boolean} drawPoints
  */
 export function renderSelectVector(lineDashOffset, drawPoints) {
   // Setting of context attributes.
@@ -119,7 +119,7 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
 
 // /**
 //  * TODO: (Middle Priority) May be used for freeform selections in the future
-//  * @param {Float} lineDashOffset
+//  * @param {number} lineDashOffset - (Float)
 //  */
 // export function drawSelectOutline(lineDashOffset) {
 //   let lineWidth = canvas.zoom <= 8 ? 2 / canvas.zoom : 0.25
@@ -202,12 +202,12 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
 // }
 
 /**
- * @param {Object} boundaryBox
+ * @param {object} boundaryBox
  * @param {Array} pointsKeys
- * @param {Integer} radius
- * @param {Boolean} modify
- * @param {Integer} offset
- * @param {Object} vectorAction
+ * @param {number} radius - (Float)
+ * @param {boolean} modify
+ * @param {number} offset - (Integer)
+ * @param {object} vectorAction
  */
 function drawSelectControlPoints(
   boundaryBox,
@@ -259,12 +259,12 @@ function drawSelectControlPoints(
 
 /**
  * TODO: (Low Priority) move drawing logic to separate function so modify param doesn't need to be used
- * @param {Object} keys
- * @param {Object} point
- * @param {Float} radius
- * @param {Boolean} modify - if true, check for collision with cursor and modify radius
- * @param {Float} offset
- * @param {Object} vectorAction
+ * @param {object} keys
+ * @param {object} point
+ * @param {number} radius - (Float)
+ * @param {boolean} modify - if true, check for collision with cursor and modify radius
+ * @param {number} offset - (Float)
+ * @param {object} vectorAction
  */
 function handleSelectCollisionAndDraw(
   keys,

@@ -8,9 +8,9 @@ import { copySelectedPixels } from "../Menu/edit.js"
 
 /**
  * Zoom the canvas
- * @param {Float} z - ratio to multiply zoom by
- * @param {Integer} xOriginOffset - additional offset needed to keep zoom centered around cursor
- * @param {Integer} yOriginOffset - additional offset needed to keep zoom centered around cursor
+ * @param {number} z - ratio to multiply zoom by (Float)
+ * @param {number} xOriginOffset - additional offset needed to keep zoom centered around cursor (Integer)
+ * @param {number} yOriginOffset - additional offset needed to keep zoom centered around cursor (Integer)
  */
 export function actionZoom(z, xOriginOffset, yOriginOffset) {
   canvas.zoom *= z

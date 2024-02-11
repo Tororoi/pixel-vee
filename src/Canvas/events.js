@@ -74,8 +74,8 @@ const restrictSize = (e) => {
 
 /**
  * Resize the offscreen canvas and all layers
- * @param {Integer} width
- * @param {Integer} height
+ * @param {number} width - (Integer)
+ * @param {number} height - (Integer)
  */
 const resizeOffScreenCanvas = (width, height) => {
   canvas.offScreenCVS.width = width
@@ -441,7 +441,7 @@ function vectorInteract(e) {
 
 /**
  * Mark a vector action as removed
- * @param {Object} vector
+ * @param {object} vector
  */
 function removeVector(vector) {
   vector.removed = true
@@ -457,8 +457,8 @@ function removeVector(vector) {
 
 /**
  * Change a vector action's modes
- * @param {Object} vector
- * @param {String} modeKey
+ * @param {object} vector
+ * @param {string} modeKey
  */
 function toggleVectorMode(vector, modeKey) {
   let oldModes = { ...vector.modes }

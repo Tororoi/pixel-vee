@@ -8,7 +8,7 @@ import { canvas } from "../Context/canvas.js"
 
 /**
  * Draw all layers onto offscreen canvas to prepare for sampling or export
- * @param {Boolean} includeReference - whether to include reference layers as part of consolidated canvas
+ * @param {boolean} includeReference - whether to include reference layers as part of consolidated canvas
  */
 export function consolidateLayers(includeReference = false) {
   canvas.offScreenCTX.clearRect(
@@ -46,7 +46,7 @@ export function consolidateLayers(includeReference = false) {
 
 /**
  * Create a new raster layer
- * @returns {Object} layer
+ * @returns {object} layer
  */
 export function createRasterLayer() {
   let offscreenLayerCVS = document.createElement("canvas")
@@ -95,8 +95,8 @@ export function createRasterLayer() {
 
 /**
  * Create a new reference layer
- * @param {Object} img - image object
- * @returns {Object} layer
+ * @param {object} img - image object
+ * @returns {object} layer
  */
 export function createReferenceLayer(img) {
   let onscreenLayerCVS = document.createElement("canvas")
@@ -153,7 +153,7 @@ export function createReferenceLayer(img) {
 
 /**
  * Create a new preview layer
- * @returns {Object} layer
+ * @returns {object} layer
  */
 export function createPreviewLayer() {
   let offscreenLayerCVS = document.createElement("canvas")

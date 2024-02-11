@@ -3,7 +3,7 @@ import { dom } from "../Context/dom.js"
 /**
  * update the brush preview in the dom
  * @param {Array} brushPixels
- * @param {Integer} brushSize
+ * @param {number} brushSize - (Integer)
  */
 export function updateBrushPreview(brushPixels, brushSize) {
   dom.brushStamp.setAttribute("viewBox", `0 -0.5 ${brushSize} ${brushSize}`)
@@ -27,9 +27,9 @@ export function updateBrushPreview(brushPixels, brushSize) {
 }
 
 /**
- * @param {Integer} brushSize
- * @param {Integer} offsetX - (-1, 0, 1)
- * @param {Integer} offsetY - (-1, 0, 1)
+ * @param {number} brushSize - (Integer)
+ * @param {number} offsetX - (-1, 0, 1) (Integer)
+ * @param {number} offsetY - (-1, 0, 1) (Integer)
  * @param {Set} seen
  * @returns array of coordinates representing the pixels of a base brush stamp
  */
@@ -103,9 +103,9 @@ function generateCircleBrush(brushSize, offsetX, offsetY, seen) {
 }
 
 /**
- * @param {Integer} brushSize
- * @param {Integer} offsetX - (-1, 0, 1)
- * @param {Integer} offsetY - (-1, 0, 1)
+ * @param {number} brushSize - (Integer)
+ * @param {number} offsetX - (-1, 0, 1) (Integer)
+ * @param {number} offsetY - (-1, 0, 1) (Integer)
  * @param {Set} seen
  * @returns array of coordinates representing the pixels of a base brush stamp
  */
@@ -127,8 +127,8 @@ function generateSquareBrush(brushSize, offsetX, offsetY, seen) {
 
 /**
  * @param {Array} brushPixels
- * @param {Integer} offsetX - (-1, 0, 1)
- * @param {Integer} offsetY - (-1, 0, 1)
+ * @param {number} offsetX - (-1, 0, 1) (Integer)
+ * @param {number} offsetY - (-1, 0, 1) (Integer)
  * @param {Set} seen
  * @returns array of coordinates representing the pixels on the edge of a brush stamp for a given offset direction
  */
@@ -148,7 +148,7 @@ function generateOffsetBrush(brushPixels, offsetX, offsetY, seen) {
 /**
  * Using 9 arrays for the brush directions reduces the time complexity of iterating through the brush from ~O(n^2) to ~O(n)
  * @param {Function} generatorFn
- * @param {Integer} brushSize
+ * @param {number} brushSize - (Integer)
  * @returns brushStamp object with 1 base stamp and 8 direction edge stamps
  */
 function createBrushStamp(generatorFn, brushSize) {
@@ -176,7 +176,7 @@ function createBrushStamp(generatorFn, brushSize) {
 
 /**
  * draw circle brush
- * @param {Integer} brushSize
+ * @param {number} brushSize - (Integer)
  * @returns brushStamp object with 1 base stamp and 8 direction edge stamps
  */
 export function createCircleBrush(brushSize) {
@@ -185,7 +185,7 @@ export function createCircleBrush(brushSize) {
 
 /**
  * draw square brush
- * @param {Integer} brushSize
+ * @param {number} brushSize - (Integer)
  * @returns brushStamp object with 1 base stamp and 8 direction edge stamps
  */
 export function createSquareBrush(brushSize) {
@@ -194,7 +194,7 @@ export function createSquareBrush(brushSize) {
 
 /**
  *
- * @param {String} brushType
+ * @param {string} brushType
  */
 export function generateBrushStamps(brushType) {
   let brushStamp = {}

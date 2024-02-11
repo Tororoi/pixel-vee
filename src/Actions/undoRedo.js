@@ -17,7 +17,7 @@ import { removeTempLayerFromDOM } from "../DOM/renderLayers.js"
 
 /**
  * This sets the action which is then pushed to the undoStack for the command pattern
- * @param {Object} actionObject
+ * @param {object} actionObject
  */
 export function addToTimeline(actionObject) {
   const { tool, color, layer, properties } = actionObject
@@ -40,8 +40,8 @@ export function addToTimeline(actionObject) {
 }
 
 /**
- * @param {Object} latestAction
- * @param {String} modType
+ * @param {object} latestAction
+ * @param {string} modType
  */
 function handleModifyAction(latestAction, modType) {
   //for each processed action,
@@ -66,7 +66,7 @@ function handleModifyAction(latestAction, modType) {
 }
 
 /**
- * @param {Object} latestAction
+ * @param {object} latestAction
  */
 function handleClearAction(latestAction) {
   let upToIndex = latestAction.properties.upToIndex
@@ -85,9 +85,9 @@ function handleClearAction(latestAction) {
 }
 
 /**
- * @param {Object} latestAction
- * @param {Object} newLatestAction
- * @param {String} modType
+ * @param {object} latestAction
+ * @param {object} newLatestAction
+ * @param {string} modType
  */
 function handleSelectAction(latestAction, newLatestAction, modType) {
   if (modType === "to") {
@@ -163,8 +163,8 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
 }
 
 /**
- * @param {Object} latestAction
- * @param {String} modType
+ * @param {object} latestAction
+ * @param {string} modType
  */
 function handlePasteAction(latestAction, modType) {
   // if modType is "from" (undoing paste action), remove the templayer
@@ -210,9 +210,9 @@ function handlePasteAction(latestAction, modType) {
 }
 
 /**
- * @param {Object} latestAction
- * @param {Object} newLatestAction
- * @param {String} modType
+ * @param {object} latestAction
+ * @param {object} newLatestAction
+ * @param {string} modType
  */
 function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
   //if modType is "from" (undoing confirm paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
@@ -234,8 +234,8 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
 
 /**
  *
- * @param {Object} latestAction
- * @param {String} modType
+ * @param {object} latestAction
+ * @param {string} modType
  */
 function handleMoveAction(latestAction, modType) {
   let deltaX = latestAction.properties[modType].x - latestAction.layer.x
@@ -276,7 +276,7 @@ function handleMoveAction(latestAction, modType) {
  * Main pillar of the code structure - command pattern
  * @param {Array} pushStack
  * @param {Array} popStack
- * @param {String} modType - "from" or "to", used for modify actions
+ * @param {string} modType - "from" or "to", used for modify actions
  */
 export function actionUndoRedo(pushStack, popStack, modType) {
   vectorGui.reset()

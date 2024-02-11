@@ -12,8 +12,11 @@ import {
 import { renderTransformBox } from "./transform.js"
 import { renderSelectVector, renderRasterCVS } from "./select.js"
 import { renderGrid } from "./grid.js"
-import { updateVectorProperties } from "../utils/vectorHelpers.js"
-import { getAngle } from "../utils/trig.js"
+import {
+  updateVectorProperties,
+  calculateCurrentVectorDeltas,
+  handleOptionsAndUpdateVector,
+} from "../utils/vectorHelpers.js"
 
 //==================================================//
 //=== * * * Vector Graphics User Interface * * * ===//
@@ -71,12 +74,12 @@ export const vectorGui = {
 }
 
 /**
- * @param {Object} vectorProperties
- * @param {Object} pointsKeys
- * @param {Integer} radius
- * @param {Boolean} modify
- * @param {Integer} offset
- * @param {Object} vectorAction
+ * @param {object} vectorProperties
+ * @param {object} pointsKeys
+ * @param {number} radius - (Float)
+ * @param {boolean} modify
+ * @param {number} offset - (Integer)
+ * @param {object} vectorAction
  */
 function drawControlPoints(
   vectorProperties,
@@ -102,12 +105,12 @@ function drawControlPoints(
 
 /**
  * TODO: (Low Priority) move drawing logic to separate function so modify param doesn't need to be used
- * @param {Object} keys
- * @param {Object} point
- * @param {Float} radius
- * @param {Boolean} modify - if true, check for collision with cursor and modify radius
- * @param {Float} offset
- * @param {Object} vectorAction
+ * @param {object} keys
+ * @param {object} point
+ * @param {number} radius - (Float)
+ * @param {boolean} modify - if true, check for collision with cursor and modify radius
+ * @param {number} offset - (Float)
+ * @param {object} vectorAction
  */
 function handleCollisionAndDraw(
   keys,
@@ -232,7 +235,7 @@ function reset() {
 
 /**
  * Normalize vector properties based on layer offset
- * @param {Object} vectorAction
+ * @param {object} vectorAction
  */
 function setVectorProperties(vectorAction) {
   if (vectorAction.layer === canvas.currentLayer) {
@@ -262,7 +265,7 @@ function setVectorProperties(vectorAction) {
 
 /**
  * Render vector graphical interface
- * @param {Float} lineDashOffset
+ * @param {number} lineDashOffset - (Float)
  */
 function render() {
   canvas.vectorGuiCTX.clearRect(
@@ -298,10 +301,10 @@ function render() {
 
 /**
  * Render based on the current tool.
- * @param {String} toolName
- * @param {Object} vectorProperties
- * @param {Boolean} selected
- * @param {Object} vectorAction
+ * @param {string} toolName
+ * @param {object} vectorProperties
+ * @param {boolean} selected
+ * @param {object} vectorAction
  */
 function renderControlPoints(toolName, vectorProperties, vectorAction = null) {
   switch (toolName) {
@@ -330,9 +333,9 @@ function renderControlPoints(toolName, vectorProperties, vectorAction = null) {
 }
 
 /**
- * @param {String} toolName
- * @param {Object} vectorProperties
- * @param {Object} vectorAction
+ * @param {string} toolName
+ * @param {object} vectorProperties
+ * @param {object} vectorAction
  */
 function renderPath(toolName, vectorProperties, vectorAction = null) {
   switch (toolName) {
@@ -358,7 +361,7 @@ function renderPath(toolName, vectorProperties, vectorAction = null) {
 
 /**
  * For each vector action in the undoStack in a given layer, render it
- * @param {Object} layer
+ * @param {object} layer
  */
 function renderLayerVectors(layer) {
   let selectedVector = null
@@ -434,51 +437,20 @@ function renderCurrentVector() {
 
 /**
  *
- * @param {Object} currentVector
- * @param {Boolean} saveVectorProperties
+ * @param {object} currentVector
+ * @param {boolean} saveVectorProperties
  */
 export function updateLinkedVectors(
   currentVector,
   saveVectorProperties = false
 ) {
-  let currentDeltaX, currentDeltaY, currentDeltaAngle //for calculating angle when using px3, px4
-  let deltaX = 0,
-    deltaY = 0 //for setting new angle when using px3, px4
-  if (vectorGui.selectedPoint.xKey === "px3") {
-    // get angle of control handle between currentVector p1 and p3
-    currentDeltaX =
-      currentVector.properties.vectorProperties.px1 -
-      currentVector.properties.vectorProperties.px3
-    currentDeltaY =
-      currentVector.properties.vectorProperties.py1 -
-      currentVector.properties.vectorProperties.py3
-    if (!state.tool.options.align?.active) {
-      let angle = getAngle(currentDeltaX, currentDeltaY)
-      let savedCurrentProperties =
-        state.vectorsSavedProperties[currentVector.index]
-      let savedDeltaX = savedCurrentProperties.px1 - savedCurrentProperties.px3
-      let savedDeltaY = savedCurrentProperties.py1 - savedCurrentProperties.py3
-      let savedAngle = getAngle(savedDeltaX, savedDeltaY)
-      currentDeltaAngle = angle - savedAngle
-    }
-  } else if (vectorGui.selectedPoint.xKey === "px4") {
-    // get angle of control handle between currentVector p2 and p4
-    currentDeltaX =
-      currentVector.properties.vectorProperties.px2 -
-      currentVector.properties.vectorProperties.px4
-    currentDeltaY =
-      currentVector.properties.vectorProperties.py2 -
-      currentVector.properties.vectorProperties.py4
-    if (!state.tool.options.align?.active) {
-      let angle = getAngle(currentDeltaX, currentDeltaY)
-      let savedCurrentProperties =
-        state.vectorsSavedProperties[currentVector.index]
-      let savedDeltaX = savedCurrentProperties.px2 - savedCurrentProperties.px4
-      let savedDeltaY = savedCurrentProperties.py2 - savedCurrentProperties.py4
-      let savedAngle = getAngle(savedDeltaX, savedDeltaY)
-      currentDeltaAngle = angle - savedAngle
-    }
-  }
+  const { currentDeltaX, currentDeltaY, currentDeltaAngle } =
+    calculateCurrentVectorDeltas(
+      currentVector,
+      vectorGui.selectedPoint.xKey,
+      state.tool.options,
+      state.vectorsSavedProperties
+    )
 
   for (const [linkedVectorIndex, linkedPoints] of Object.entries(
     vectorGui.linkedVectors
@@ -496,177 +468,42 @@ export function updateLinkedVectors(
       continue
     }
     const savedProperties = state.vectorsSavedProperties[linkedVectorIndex]
-
-    // Check if px1 is linked
-    if (linkedPoints.px1) {
-      if (
-        vectorGui.selectedPoint.xKey === "px1" ||
-        vectorGui.selectedPoint.xKey === "px2"
-      ) {
-        updateVectorProperties(linkedVector, x, y, "px1", "py1")
-        //If lock option enabled, maintain relative angle of control handles
-        if (state.tool.options.lock?.active) {
-          //update px3 and py3
-          const xDiff = savedProperties.px1 - savedProperties.px3
-          const yDiff = savedProperties.py1 - savedProperties.py3
-          updateVectorProperties(
-            linkedVector,
-            x - xDiff,
-            y - yDiff,
-            "px3",
-            "py3"
-          )
-        }
-      } else if (
-        (vectorGui.selectedPoint.xKey === "px3" ||
-          vectorGui.selectedPoint.xKey === "px4") &&
-        (state.tool.options.align?.active ||
-          state.tool.options.lock?.active ||
-          state.tool.options.match?.active)
-      ) {
-        //If align option enabled, move px3 and py3 of linked vector to maintain opposite angle of selected control handle
-        let linkedDeltaX = savedProperties.px1 - savedProperties.px3
-        let linkedDeltaY = savedProperties.py1 - savedProperties.py3
-        let linkedHandleLength
-        if (state.tool.options.match?.active) {
-          //Match handle length to selected vector
-          linkedHandleLength = Math.sqrt(
-            currentDeltaX ** 2 + currentDeltaY ** 2
-          )
-        } else {
-          //Maintain handle length
-          linkedHandleLength = Math.sqrt(linkedDeltaX ** 2 + linkedDeltaY ** 2)
-        }
-        let newLinkedAngle
-        if (state.tool.options.align?.active) {
-          //Align control handle angle of linked vector to opposite of selected vector control handle
-          newLinkedAngle = getAngle(currentDeltaX, currentDeltaY) + Math.PI
-        } else if (state.tool.options.lock?.active) {
-          //Maintain relative angle of control handles
-          let linkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
-          newLinkedAngle = linkedAngle + currentDeltaAngle
-        } else if (state.tool.options.match?.active) {
-          //Match handle angle to selected vector
-          newLinkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
-        }
-        deltaX =
-          currentDeltaX -
-          Math.round(Math.cos(newLinkedAngle) * linkedHandleLength)
-        deltaY =
-          currentDeltaY -
-          Math.round(Math.sin(newLinkedAngle) * linkedHandleLength)
-        updateVectorProperties(
-          linkedVector,
-          x + deltaX,
-          y + deltaY,
-          "px3",
-          "py3"
-        )
-      }
-    }
-
-    // Check if px2 is linked
-    if (linkedPoints.px2) {
-      if (
-        vectorGui.selectedPoint.xKey === "px1" ||
-        vectorGui.selectedPoint.xKey === "px2"
-      ) {
-        updateVectorProperties(linkedVector, x, y, "px2", "py2")
-        //If lock option enabled, maintain relative angle of control handles
-        if (state.tool.options.lock?.active) {
-          //update px4 and py4
-          const xDiff = savedProperties.px2 - savedProperties.px4
-          const yDiff = savedProperties.py2 - savedProperties.py4
-          updateVectorProperties(
-            linkedVector,
-            x - xDiff,
-            y - yDiff,
-            "px4",
-            "py4"
-          )
-        }
-      } else if (
-        (vectorGui.selectedPoint.xKey === "px3" ||
-          vectorGui.selectedPoint.xKey === "px4") &&
-        (state.tool.options.align?.active ||
-          state.tool.options.lock?.active ||
-          state.tool.options.match?.active)
-      ) {
-        let linkedDeltaX = savedProperties.px2 - savedProperties.px4
-        let linkedDeltaY = savedProperties.py2 - savedProperties.py4
-        let linkedHandleLength
-        if (state.tool.options.match?.active) {
-          //Match handle length to selected vector
-          linkedHandleLength = Math.sqrt(
-            currentDeltaX ** 2 + currentDeltaY ** 2
-          )
-        } else {
-          //Maintain handle length
-          linkedHandleLength = Math.sqrt(linkedDeltaX ** 2 + linkedDeltaY ** 2)
-        }
-        let newLinkedAngle
-        if (state.tool.options.align?.active) {
-          //Align control handle angle of linked vector to opposite of selected vector control handle
-          newLinkedAngle = getAngle(currentDeltaX, currentDeltaY) + Math.PI
-        } else if (state.tool.options.lock?.active) {
-          //Maintain relative angle of control handles
-          let linkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
-          newLinkedAngle = linkedAngle + currentDeltaAngle
-        } else if (state.tool.options.match?.active) {
-          //Match handle angle to selected vector
-          newLinkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
-        }
-        deltaX =
-          currentDeltaX -
-          Math.round(Math.cos(newLinkedAngle) * linkedHandleLength)
-        deltaY =
-          currentDeltaY -
-          Math.round(Math.sin(newLinkedAngle) * linkedHandleLength)
-        updateVectorProperties(
-          linkedVector,
-          x + deltaX,
-          y + deltaY,
-          "px4",
-          "py4"
-        )
-      }
-    }
+    handleOptionsAndUpdateVector(
+      x,
+      y,
+      currentDeltaX,
+      currentDeltaY,
+      currentDeltaAngle,
+      vectorGui.selectedPoint.xKey,
+      linkedVector,
+      linkedPoints,
+      savedProperties,
+      state.tool.options
+    )
   }
 }
 
 /**
  *
- * @param {Object} currentVector
+ * @param {object} currentVector
  */
-export function updateLockedCurrentVectorControlHandle(currentVector) {
+export function updateLockedCurrentVectorControlHandle(currentVector, x, y) {
   const savedProperties =
     state.vectorsSavedProperties[canvas.currentVectorIndex]
   if (vectorGui.selectedPoint.xKey === "px1") {
     //update px3 and py3
     const xDiff = savedProperties.px1 - savedProperties.px3
     const yDiff = savedProperties.py1 - savedProperties.py3
-    state.vectorProperties.px3 = state.cursorX - xDiff
-    state.vectorProperties.py3 = state.cursorY - yDiff
-    updateVectorProperties(
-      currentVector,
-      state.cursorX - xDiff,
-      state.cursorY - yDiff,
-      "px3",
-      "py3"
-    )
+    state.vectorProperties.px3 = x - xDiff
+    state.vectorProperties.py3 = y - yDiff
+    updateVectorProperties(currentVector, x - xDiff, y - yDiff, "px3", "py3")
   } else if (vectorGui.selectedPoint.xKey === "px2") {
     //update px4 and py4
     const xDiff = savedProperties.px2 - savedProperties.px4
     const yDiff = savedProperties.py2 - savedProperties.py4
-    state.vectorProperties.px4 = state.cursorX - xDiff
-    state.vectorProperties.py4 = state.cursorY - yDiff
-    updateVectorProperties(
-      currentVector,
-      state.cursorX - xDiff,
-      state.cursorY - yDiff,
-      "px4",
-      "py4"
-    )
+    state.vectorProperties.px4 = x - xDiff
+    state.vectorProperties.py4 = y - yDiff
+    updateVectorProperties(currentVector, x - xDiff, y - yDiff, "px4", "py4")
   }
 }
 
@@ -674,8 +511,8 @@ export function updateLockedCurrentVectorControlHandle(currentVector) {
  * For efficient rendering, create an array of indexes of vectors that need to be re-rendered.
  * Other actions will be saved to between canvases to avoid multiple ununecessary renders in redrawTimelineActions
  * Can't simply save images and draw them for the betweenCvs because this will ignore actions using erase or inject modes.
- * @param {Object} currentVector
- * @param {Object} vectorsSavedProperties - will have at least one entry, corresponding to currentVector
+ * @param {object} currentVector
+ * @param {object} vectorsSavedProperties - will have at least one entry, corresponding to currentVector
  * @param {Array} undoStack
  * @returns {Array} activeIndexes
  */

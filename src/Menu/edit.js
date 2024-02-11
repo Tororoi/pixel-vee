@@ -85,9 +85,9 @@ export function cutSelectedPixels() {
 /**
  * Paste selected pixels
  * Not dependent on pointer events
- * @param {Object} clipboard - clipboard object
- * @param {Object} layer - layer object to paste onto
- * @param {Boolean} useOffset - use layer offset - only needed with undo/redo functionality
+ * @param {object} clipboard - clipboard object
+ * @param {object} layer - layer object to paste onto
+ * @param {boolean} useOffset - use layer offset - only needed with undo/redo functionality
  * TODO: (Highest Priority) Make sure selection inversed status is handled correctly, without relying on state (new param required)
  */
 export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
@@ -169,10 +169,10 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
  * Confirm pasted pixels
  * Not dependent on pointer events
  * @param {HTMLCanvasElement} clipboardCanvas - clipboard canvas
- * @param {Object} boundaryBox - boundary box
- * @param {Object} layer - layer to paste onto
- * @param {Number} xOffset - x offset
- * @param {Number} yOffset - y offset
+ * @param {object} boundaryBox - boundary box
+ * @param {object} layer - layer to paste onto
+ * @param {number} xOffset - x offset (Integer)
+ * @param {number} yOffset - y offset (Integer)
  */
 export function confirmPastedPixels(
   clipboardCanvas,

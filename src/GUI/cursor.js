@@ -12,9 +12,9 @@ import { renderCanvas } from "../Canvas/render.js"
 
 /**
  * Render cursor based on active tool
- * @param {Object} state
- * @param {Object} canvas
- * @param {Object} swatches
+ * @param {object} state
+ * @param {object} canvas
+ * @param {object} swatches
  */
 export function renderCursor(state, canvas, swatches) {
   switch (state.tool.name) {
@@ -63,9 +63,9 @@ export function renderCursor(state, canvas, swatches) {
 
 /**
  * Used to render eyedropper cursor and eraser
- * @param {Object} state
- * @param {Object} canvas
- * @param {Float} lineWeight
+ * @param {object} state
+ * @param {object} canvas
+ * @param {number} lineWeight - (Float)
  */
 function drawCursorBox(state, canvas, lineWeight) {
   let lineWidth =

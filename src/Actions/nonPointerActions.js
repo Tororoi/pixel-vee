@@ -315,7 +315,7 @@ export function addRasterLayer() {
 
 /**
  * Mark a layer as removed
- * @param {Object} layer
+ * @param {object} layer
  */
 export function removeLayer(layer) {
   //set "removed" flag to true on selected layer.

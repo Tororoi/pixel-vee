@@ -1,8 +1,8 @@
 /**
  *
  * @param {ImageData} imageData - array of color channels r,g,b,a,r,g,b,a,etc.
- * @param {Integer} pixelPos - index in image data
- * @param {Object} currentColor - {color,r,g,b,a}
+ * @param {number} pixelPos - index in image data (Integer)
+ * @param {object} currentColor - {color,r,g,b,a}
  */
 export function colorPixel(imageData, pixelPos, currentColor) {
   imageData.data[pixelPos] = currentColor.r
@@ -14,10 +14,10 @@ export function colorPixel(imageData, pixelPos, currentColor) {
 /**
  *
  * @param {ImageData} imageData - array of color channels r,g,b,a,r,g,b,a,etc.
- * @param {Integer} pixelPos - index in image data
- * @param {Object} startColor - {color,r,g,b,a}
- * @param {Object} boundaryBox - {xMin, xMax, yMin, yMax}
- * @param {Boolean} selectionInversed - {true/false}
+ * @param {number} pixelPos - index in image data (Integer)
+ * @param {object} startColor - {color,r,g,b,a}
+ * @param {object} boundaryBox - {xMin, xMax, yMin, yMax}
+ * @param {boolean} selectionInversed - {true/false}
  * @returns {boolean}
  */
 export function matchStartColor(
@@ -57,8 +57,8 @@ export function matchStartColor(
 
 /**
  * Get color of pixel at x/y coordinates
- * @param {integer} x
- * @param {integer} y
+ * @param {number} x - (Integer)
+ * @param {number} y - (Integer)
  * @param {ImageData} colorLayer
  * @returns {string} rgba color
  * dependencies - none

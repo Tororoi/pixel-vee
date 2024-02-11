@@ -1,10 +1,10 @@
 /**
  *
- * @param {Object} layers
- * @param {Boolean} preserveHistory
- * @param {Boolean} includeReferenceLayers
- * @param {Boolean} includeRemovedActions
- * @returns {Object} - A sanitized copy of the layers object.
+ * @param {object} layers
+ * @param {boolean} preserveHistory
+ * @param {boolean} includeReferenceLayers
+ * @param {boolean} includeRemovedActions
+ * @returns {object} - A sanitized copy of the layers object.
  */
 export function sanitizeLayers(
   layers,
@@ -39,10 +39,10 @@ export function sanitizeLayers(
 }
 
 /**
- * @param {Object} palette
- * @param {Boolean} preserveHistory
- * @param {Boolean} includePalette
- * @returns {Object} - A sanitized copy of the palette object.
+ * @param {object} palette
+ * @param {boolean} preserveHistory
+ * @param {boolean} includePalette
+ * @returns {object} - A sanitized copy of the palette object.
  */
 export function sanitizePalette(palette, preserveHistory, includePalette) {
   if (!preserveHistory && !includePalette) {
@@ -52,11 +52,11 @@ export function sanitizePalette(palette, preserveHistory, includePalette) {
 }
 
 /**
- * @param {Object} undoStack
- * @param {Boolean} preserveHistory
- * @param {Boolean} includeReferenceLayers
- * @param {Boolean} includeRemovedActions
- * @returns {Object} - A sanitized copy of the undoStack object.
+ * @param {object} undoStack
+ * @param {boolean} preserveHistory
+ * @param {boolean} includeReferenceLayers
+ * @param {boolean} includeRemovedActions
+ * @returns {object} - A sanitized copy of the undoStack object.
  */
 export function sanitizeHistory(
   undoStack,

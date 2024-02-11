@@ -416,24 +416,29 @@ function adjustCurveSteps() {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        if (
-          state.tool.options.align?.active ||
-          state.tool.options.link?.active
-        ) {
-          if (state.tool.options.link?.active) {
-            if (state.tool.options.lock?.active) {
-              updateLockedCurrentVectorControlHandle(currentVector)
-            }
-            updateLinkedVectors(currentVector, true)
-          }
+        // if (
+        //   state.tool.options.align?.active ||
+        //   state.tool.options.link?.active
+        // ) {
+        // if (state.tool.options.link?.active) {
+        if (state.tool.options.lock?.active) {
+          updateLockedCurrentVectorControlHandle(
+            currentVector,
+            state.cursorX,
+            state.cursorY
+          )
         }
+        if (state.tool.options.link?.active) {
+          updateLinkedVectors(currentVector, true)
+        }
+        // }
+        // }
         state.activeIndexes = createActiveIndexesForRender(
           currentVector,
           state.vectorsSavedProperties,
           state.undoStack
         )
         renderCanvas(currentVector.layer, true, state.activeIndexes, true)
-        // renderCanvas(currentVector.layer, true)
       }
       break
     case "pointermove":
@@ -447,17 +452,22 @@ function adjustCurveSteps() {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        if (
-          state.tool.options.link?.active &&
-          Object.keys(state.vectorsSavedProperties).length > 1
-        ) {
-          if (state.tool.options.lock?.active) {
-            updateLockedCurrentVectorControlHandle(currentVector)
-          }
+        // if (
+        //   state.tool.options.link?.active &&
+        //   Object.keys(state.vectorsSavedProperties).length > 1
+        // ) {
+        if (state.tool.options.lock?.active) {
+          updateLockedCurrentVectorControlHandle(
+            currentVector,
+            state.cursorX,
+            state.cursorY
+          )
+        }
+        if (state.tool.options.link?.active) {
           updateLinkedVectors(currentVector)
         }
+        // }
         renderCanvas(currentVector.layer, true, state.activeIndexes)
-        // renderCanvas(currentVector.layer, true)
       }
       break
     case "pointerup":
@@ -471,22 +481,31 @@ function adjustCurveSteps() {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
+        // if (
+        //   state.tool.options.link?.active &&
+        //   Object.keys(state.vectorsSavedProperties).length > 1
+        // ) {
+        if (state.tool.options.lock?.active) {
+          updateLockedCurrentVectorControlHandle(
+            currentVector,
+            state.cursorX,
+            state.cursorY
+          )
+        }
+        if (state.tool.options.link?.active) {
+          updateLinkedVectors(currentVector)
+        }
+        // }
+        //Handle snapping to other control points. Only snap when there are no linked vectors to selected vector.
         if (
-          state.tool.options.align?.active ||
-          state.tool.options.link?.active
+          (state.tool.options.align?.active ||
+            state.tool.options.match?.active ||
+            state.tool.options.link?.active) &&
+          Object.keys(state.vectorsSavedProperties).length === 1
         ) {
-          if (
-            state.tool.options.link?.active &&
-            Object.keys(state.vectorsSavedProperties).length > 1
-          ) {
-            if (state.tool.options.lock?.active) {
-              updateLockedCurrentVectorControlHandle(currentVector)
-            }
-            updateLinkedVectors(currentVector)
-          }
+          //snap selected point to collidedVector's control point
           if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
             let collidedVector = state.undoStack[canvas.collidedVectorIndex]
-            //snap selected point to collidedVector's control point
             let snappedToX =
               collidedVector.properties.vectorProperties[
                 vectorGui.otherCollidedKeys.xKey
@@ -504,49 +523,108 @@ function adjustCurveSteps() {
               vectorGui.selectedPoint.xKey,
               vectorGui.selectedPoint.yKey
             )
+            if (state.tool.options.lock?.active) {
+              updateLockedCurrentVectorControlHandle(
+                currentVector,
+                snappedToX,
+                snappedToY
+              )
+            }
             //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
             //align control handles TODO: (High Priority) For align, only change angle while maintaining original length of handle. Add condition for match which implements a matching length. If both options active, logic be current logic.
             if (
-              state.tool.options.align?.active &&
-              Object.keys(state.vectorsSavedProperties).length === 1
+              (state.tool.options.align?.active ||
+                state.tool.options.match?.active) &&
+              ["px1", "px2"].includes(vectorGui.selectedPoint.xKey)
             ) {
-              let deltaX, deltaY
+              //Set selected keys
+              let selectedEndpointXKey,
+                selectedEndpointYKey,
+                selectedHandleXKey,
+                selectedHandleYKey
+              if (vectorGui.selectedPoint.xKey === "px1") {
+                ;[
+                  selectedEndpointXKey,
+                  selectedEndpointYKey,
+                  selectedHandleXKey,
+                  selectedHandleYKey,
+                ] = ["px1", "py1", "px3", "py3"]
+              } else if (vectorGui.selectedPoint.xKey === "px2") {
+                ;[
+                  selectedEndpointXKey,
+                  selectedEndpointYKey,
+                  selectedHandleXKey,
+                  selectedHandleYKey,
+                ] = ["px2", "py2", "px4", "py4"]
+              }
+              //Set selected deltas
+              let selectedHandleDeltaX =
+                state.vectorProperties[selectedHandleXKey] -
+                state.vectorProperties[selectedEndpointXKey]
+              let selectedHandleDeltaY =
+                state.vectorProperties[selectedHandleYKey] -
+                state.vectorProperties[selectedEndpointYKey]
+              //Set collided deltas
+              let collidedHandleDeltaX, collidedHandleDeltaY
               if (vectorGui.otherCollidedKeys.xKey === "px1") {
-                deltaX =
+                collidedHandleDeltaX =
                   collidedVector.properties.vectorProperties.px3 -
                   collidedVector.properties.vectorProperties.px1
-                deltaY =
+                collidedHandleDeltaY =
                   collidedVector.properties.vectorProperties.py3 -
                   collidedVector.properties.vectorProperties.py1
               } else if (vectorGui.otherCollidedKeys.xKey === "px2") {
-                deltaX =
+                collidedHandleDeltaX =
                   collidedVector.properties.vectorProperties.px4 -
                   collidedVector.properties.vectorProperties.px2
-                deltaY =
+                collidedHandleDeltaY =
                   collidedVector.properties.vectorProperties.py4 -
                   collidedVector.properties.vectorProperties.py2
               }
-              if (vectorGui.selectedPoint.xKey === "px1") {
-                state.vectorProperties.px3 = state.vectorProperties.px1 - deltaX
-                state.vectorProperties.py3 = state.vectorProperties.py1 - deltaY
-                updateVectorProperties(
-                  currentVector,
-                  state.vectorProperties.px3,
-                  state.vectorProperties.py3,
-                  "px3",
-                  "py3"
+              let selectedHandleLength
+              if (state.tool.options.match?.active) {
+                //Match selected handle length to collided vector
+                selectedHandleLength = Math.sqrt(
+                  collidedHandleDeltaX ** 2 + collidedHandleDeltaY ** 2
                 )
-              } else if (vectorGui.selectedPoint.xKey === "px2") {
-                state.vectorProperties.px4 = state.vectorProperties.px2 - deltaX
-                state.vectorProperties.py4 = state.vectorProperties.py2 - deltaY
-                updateVectorProperties(
-                  currentVector,
-                  state.vectorProperties.px4,
-                  state.vectorProperties.py4,
-                  "px4",
-                  "py4"
+              } else {
+                //Maintain selected handle length
+                selectedHandleLength = Math.sqrt(
+                  selectedHandleDeltaX ** 2 + selectedHandleDeltaY ** 2
                 )
               }
+              let newSelectedAngle
+              //Priority for angle is align > lock > match
+              if (state.tool.options.align?.active) {
+                //Align angle of selected control handle opposite of collided vector control handle
+                newSelectedAngle =
+                  getAngle(collidedHandleDeltaX, collidedHandleDeltaY) + Math.PI
+              } else if (state.tool.options.match?.active) {
+                //Maintain absolute angle of selected control handle
+                newSelectedAngle = getAngle(
+                  selectedHandleDeltaX,
+                  selectedHandleDeltaY
+                )
+              }
+              const newSelectedHandleDeltaX = -Math.round(
+                Math.cos(newSelectedAngle) * selectedHandleLength
+              )
+              const newSelectedHandleDeltaY = -Math.round(
+                Math.sin(newSelectedAngle) * selectedHandleLength
+              )
+              state.vectorProperties[selectedHandleXKey] =
+                state.vectorProperties[selectedEndpointXKey] -
+                newSelectedHandleDeltaX
+              state.vectorProperties[selectedHandleYKey] =
+                state.vectorProperties[selectedEndpointYKey] -
+                newSelectedHandleDeltaY
+              updateVectorProperties(
+                currentVector,
+                state.vectorProperties[selectedHandleXKey],
+                state.vectorProperties[selectedHandleYKey],
+                selectedHandleXKey,
+                selectedHandleYKey
+              )
             }
           }
         }
@@ -603,7 +681,7 @@ export const cubicCurve = {
     lock: {
       active: false,
       tooltip:
-        "Toggle Locking (H). \n\nLock relative angles of all control handles attached to selected control point. Only active when linking is active.",
+        "Toggle Locking (H). \n\nLock relative angles of all control handles attached to selected control point.",
     }, //IN PROGRESS. No effect when not in link mode. Can make render conditional based on link mode status?.
     link: {
       active: false,

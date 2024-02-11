@@ -17,7 +17,7 @@ import { storedActions } from "../Testing/storedActions.js"
 
 /**
  * Switch active tool
- * @param {String|null} toolName
+ * @param {string|null} toolName
  * @param {Element|null} toolBtn
  */
 export function switchTool(toolName = null, toolBtn = null) {
@@ -61,7 +61,7 @@ export function switchTool(toolName = null, toolBtn = null) {
  * Toggle active mode
  * TODO: (Low Priority) add multi-touch mode for drawing with multiple fingers
  * TODO: (Middle Priority) add curve brush mode for freehand drawing splines
- * @param {String|null} modeName
+ * @param {string|null} modeName
  * @param {Element|null} modeBtn
  */
 export function toggleMode(modeName = null, modeBtn = null) {

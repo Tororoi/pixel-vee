@@ -26,7 +26,7 @@ import { actionCopySelection } from "../Actions/untrackedActions.js"
 //====================================//
 
 /**
- * @param {String} message
+ * @param {string} message
  * @param {Element} target
  */
 const showTooltip = (message, target) => {

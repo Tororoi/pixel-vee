@@ -1,9 +1,9 @@
 /**
  *
- * @param {array} pointsDrawn
- * @param {integer} willDrawX
- * @param {integer} willDrawY
- * @returns
+ * @param {Array} pointsDrawn
+ * @param {number} willDrawX - (Integer)
+ * @param {number} willDrawY - (Integer)
+ * @returns {boolean}
  */
 export function checkPixelAlreadyDrawn(pointsDrawn, willDrawX, willDrawY) {
   //check if pixel already drawn in current action. Reduces cost of subsequent renders and prevents colors with opacity from stacking on eachother.
@@ -17,11 +17,11 @@ export function checkPixelAlreadyDrawn(pointsDrawn, willDrawX, willDrawY) {
 
 /**
  *
- * @param {Integer} currentX
- * @param {Integer} currentY
- * @param {Integer} previousX
- * @param {Integer} previousY
- * @returns {String} brushDirection
+ * @param {number} currentX - (Integer)
+ * @param {number} currentY - (Integer)
+ * @param {number} previousX - (Integer)
+ * @param {number} previousY - (Integer)
+ * @returns {string} brushDirection
  */
 export function calculateBrushDirection(
   currentX,
