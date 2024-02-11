@@ -558,10 +558,18 @@ function adjustCurveSteps() {
                 ] = ["px2", "py2", "px4", "py4"]
               }
               //Set selected deltas
-              let selectedHandleDeltaX =
+              const savedCurrentProperties =
+                state.vectorsSavedProperties[currentVector.index]
+              const currentHandleDeltaX =
+                savedCurrentProperties[selectedEndpointXKey] -
+                savedCurrentProperties[selectedHandleXKey]
+              const currentHandleDeltaY =
+                savedCurrentProperties[selectedEndpointYKey] -
+                savedCurrentProperties[selectedHandleYKey]
+              const selectedHandleDeltaX =
                 state.vectorProperties[selectedHandleXKey] -
                 state.vectorProperties[selectedEndpointXKey]
-              let selectedHandleDeltaY =
+              const selectedHandleDeltaY =
                 state.vectorProperties[selectedHandleYKey] -
                 state.vectorProperties[selectedEndpointYKey]
               //Set collided deltas
@@ -590,7 +598,7 @@ function adjustCurveSteps() {
               } else {
                 //Maintain selected handle length
                 selectedHandleLength = Math.sqrt(
-                  selectedHandleDeltaX ** 2 + selectedHandleDeltaY ** 2
+                  currentHandleDeltaX ** 2 + currentHandleDeltaY ** 2
                 )
               }
               let newSelectedAngle
