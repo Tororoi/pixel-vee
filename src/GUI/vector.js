@@ -545,6 +545,9 @@ export function updateLinkedVectors(
           //Maintain relative angle of control handles
           let linkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
           newLinkedAngle = linkedAngle + currentDeltaAngle
+        } else if (state.tool.options.match?.active) {
+          //Match handle angle to selected vector
+          newLinkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
         }
         deltaX =
           currentDeltaX -
@@ -609,6 +612,9 @@ export function updateLinkedVectors(
           //Maintain relative angle of control handles
           let linkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
           newLinkedAngle = linkedAngle + currentDeltaAngle
+        } else if (state.tool.options.match?.active) {
+          //Match handle angle to selected vector
+          newLinkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
         }
         deltaX =
           currentDeltaX -
