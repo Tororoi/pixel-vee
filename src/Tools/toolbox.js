@@ -24,7 +24,10 @@ export function switchTool(toolName = null, toolBtn = null) {
   const targetToolBtn = toolBtn || document.querySelector(`#${toolName}`)
   if (targetToolBtn) {
     //failsafe for hacking tool ids
-    if (tools[targetToolBtn?.id]) {
+    if (
+      tools[targetToolBtn?.id] &&
+      !canvas.currentLayer.inactiveTools.includes(targetToolBtn?.id)
+    ) {
       //reset old button
       dom.toolBtn.classList.remove("selected")
       //get new button and select it
