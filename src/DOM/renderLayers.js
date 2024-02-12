@@ -42,7 +42,7 @@ export const renderLayersToDOM = () => {
     }
   })
 
-  //active paste happening, disable layer buttons
+  //active paste happening, disable layer interface. NOTE: Possible room for improvement: allow hide and settings buttons to be interacted with since they are not tied to the undoStack
   if (canvas.pastedLayer) {
     dom.layersInterfaceContainer.classList.add("disabled")
   } else {

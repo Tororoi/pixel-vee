@@ -343,6 +343,9 @@
   &:hover {
     @include clearSvg($active);
   }
+  &:disabled {
+    @include clearSvg($border);
+  }
 }
 
 @mixin plusSvg($color) {

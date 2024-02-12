@@ -183,7 +183,8 @@ function handleCollisionAndDraw(
       }
     }
   }
-
+  //TODO: (Low Priority) radius is set progressively as the render function iterates through points, but ideally only the points corresponding to selectedPoint and collidedKeys should be rendered with an expanded radius.
+  //Possible solution is to not change radius in this function, but instead at the end of the renderLayerVectors function, render a circle with the expanded radius for the selected and collided points.
   drawCirclePath(
     canvas,
     canvas.xOffset + xOffset,

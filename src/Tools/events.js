@@ -7,10 +7,7 @@ import { vectorGui } from "../GUI/vector.js"
 import { actionClear } from "../Actions/modifyTimeline.js"
 import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
-import {
-  renderVectorsToDOM,
-  renderBrushStampToDOM,
-} from "../DOM/render.js"
+import { renderVectorsToDOM, renderBrushStampToDOM } from "../DOM/render.js"
 import { toggleMode, switchTool } from "./toolbox.js"
 
 //Initialize default tool
@@ -69,6 +66,10 @@ function handleRecenter() {
  * Non-cursor action that affects the timeline
  */
 function handleClearCanvas() {
+  //Do not allow clearing if active paste is happening
+  if (canvas.pastedLayer) {
+    return
+  }
   canvas.currentLayer.ctx.clearRect(
     0,
     0,

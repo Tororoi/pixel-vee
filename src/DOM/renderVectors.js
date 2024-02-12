@@ -21,6 +21,13 @@ export const renderVectorsToDOM = () => {
       renderVectorElement(action)
     }
   })
+
+  //active paste happening, disable vector interface
+  if (canvas.pastedLayer) {
+    dom.vectorsInterfaceContainer.classList.add("disabled")
+  } else {
+    dom.vectorsInterfaceContainer.classList.remove("disabled")
+  }
 }
 
 /**

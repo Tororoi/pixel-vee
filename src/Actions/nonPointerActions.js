@@ -171,6 +171,8 @@ export function actionPasteSelection() {
     renderCanvas(canvas.currentLayer)
     renderLayersToDOM()
     switchTool("move")
+    //disable clear button. TODO: When toolbox has a dom render function like layers and vectors, this should be moved there
+    dom.clearBtn.disabled = true
   }
 }
 
@@ -251,6 +253,8 @@ export function actionConfirmPastedPixels() {
     vectorGui.render()
     renderCanvas()
     renderLayersToDOM()
+    //reenable clear button. TODO: When toolbox has a dom render function like layers and vectors, this should be moved there
+    dom.clearBtn.disabled = false
   }
 }
 

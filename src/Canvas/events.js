@@ -390,6 +390,11 @@ function dragLayerEnd(e) {
  * @param {PointerEvent} e
  */
 function vectorInteract(e) {
+  if (canvas.pastedLayer) {
+    e.preventDefault()
+    //if there is a pasted layer, temporary layer is active and vectors configuration should not be messed with
+    return
+  }
   let vector = e.target.closest(".vector").vectorObj
   if (e.target.className.includes("eraser")) {
     //change mode

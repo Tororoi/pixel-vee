@@ -45,6 +45,8 @@ const cutBtn = document.getElementById("cut-selection")
 const copyBtn = document.getElementById("copy-selection")
 // * Paste * //
 const pasteBtn = document.getElementById("paste-selection")
+// // * Delete * //
+// const deleteBtn = document.getElementById("delete-selection")
 // // * Flip Horizontal * //
 // const flipHorizontalBtn = document.getElementById("flip-horizontal")
 // // * Flip Vertical * //
