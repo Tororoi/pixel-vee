@@ -209,7 +209,7 @@ function cubicCurveSteps() {
     vectorGui.setVectorProperties(collidedVector)
     //Render new selected vector before running standard render routine
     //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.
-    renderCurrentVector()
+    // renderCurrentVector() //May not be needed after changing order of render calls in renderLayerVectors
     vectorGui.render()
   }
   if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {

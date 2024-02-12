@@ -139,13 +139,19 @@ function handleCollisionAndDraw(
     ) {
       //if cursor is colliding with a control point not on the selected vector, set collided keys specifically for collided vector
       if (vectorAction) {
-        //TODO: BUG: if selectedPoint is p3 or p4, vector will be linked when it's coordinates overlap. p3 or p4 should only be linked through their related p1 or p2
         if (keys.x === "px1" || keys.x === "px2") {
           canvas.collidedVectorIndex = vectorAction.index
-          vectorGui.setOtherVectorCollision(keys)
-          vectorGui.addLinkedVector(vectorAction, keys.x)
-          //only set new radius if selected vector is not a new vector being drawn
-          if (state.clickCounter === 0) r = radius * 2.125
+          //Only allow link if active point for selection is p1 or p2
+          let activeKey =
+            vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey
+          let allowLink = ["px1", "px2"].includes(activeKey)
+          if (allowLink) {
+            vectorGui.setOtherVectorCollision(keys)
+            vectorGui.addLinkedVector(vectorAction, keys.x)
+            if (state.clickCounter === 0) r = radius * 2.125
+          } else if (!vectorGui.selectedPoint.xKey) {
+            if (state.clickCounter === 0) r = radius * 2.125
+          }
         } else if (
           (keys.x === "px3" || keys.x === "px4") &&
           !vectorGui.selectedPoint.xKey
@@ -408,6 +414,9 @@ function renderLayerVectors(layer) {
       canvas.offScreenCVS.height
     )
   }
+  //render selected vector control points
+  vectorGui.resetCollision()
+  renderControlPoints(state.tool.name, state.vectorProperties)
   //render control points
   vectorGui.resetOtherVectorCollision()
   vectorGui.resetLinkedVectors()
@@ -426,9 +435,9 @@ function renderLayerVectors(layer) {
       )
     }
   }
-  //render selected vector control points
-  vectorGui.resetCollision()
-  renderControlPoints(state.tool.name, state.vectorProperties)
+  // //render selected vector control points
+  // vectorGui.resetCollision()
+  // renderControlPoints(state.tool.name, state.vectorProperties)
 }
 
 /**
