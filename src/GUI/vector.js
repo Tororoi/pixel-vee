@@ -139,11 +139,22 @@ function handleCollisionAndDraw(
     ) {
       //if cursor is colliding with a control point not on the selected vector, set collided keys specifically for collided vector
       if (vectorAction) {
-        canvas.collidedVectorIndex = vectorAction.index
+        // canvas.collidedVectorIndex = vectorAction.index
         if (keys.x === "px1" || keys.x === "px2") {
+          canvas.collidedVectorIndex = vectorAction.index
           r = radius * 2.125
           vectorGui.setOtherVectorCollision(keys)
           vectorGui.addLinkedVector(vectorAction, keys.x)
+        }
+        //TODO: set for px3 and px4 if selected vector is not being modified
+        if (
+          (keys.x === "px3" || keys.x === "px4") &&
+          !vectorGui.selectedPoint.xKey
+        ) {
+          canvas.collidedVectorIndex = vectorAction.index
+          r = radius * 2.125
+          // vectorGui.setOtherVectorCollision(keys)
+          // vectorGui.addLinkedVector(vectorAction, keys.x)
         }
       } else {
         r = radius * 2.125
@@ -279,7 +290,7 @@ function render() {
   //if linking, render all vectors in the layer
   if (
     state.tool.options.displayVectors?.active ||
-    state.tool.options.match?.active ||
+    state.tool.options.equal?.active ||
     state.tool.options.align?.active ||
     state.tool.options.link?.active
   ) {

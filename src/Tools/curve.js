@@ -197,6 +197,19 @@ function quadCurveSteps() {
  * Supported modes: "draw, erase",
  */
 function cubicCurveSteps() {
+  //for selecting another vector via the canvas, collisionPresent is false since it is currently based on collision with selected vector.
+  //To select via the canvas, need to check for canvas.collidedVectorIndex and then use vectorGui.setVectorProperties(collidedVectorAction)
+  if (
+    canvas.collidedVectorIndex &&
+    !vectorGui.collisionPresent &&
+    state.clickCounter === 0
+  ) {
+    //TODO: (High Priority) Need to fix linked vectors on selecting vector via canvas. Check handleCollisionAndDraw function.
+    let collidedVector = state.undoStack[canvas.collidedVectorIndex]
+    vectorGui.setVectorProperties(collidedVector)
+    vectorGui.render()
+    console.log(vectorGui.collisionPresent, state.clickCounter)
+  }
   if (vectorGui.collisionPresent && state.clickCounter === 0) {
     adjustCurveSteps()
     return
@@ -416,12 +429,7 @@ function adjustCurveSteps() {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        // if (
-        //   state.tool.options.align?.active ||
-        //   state.tool.options.link?.active
-        // ) {
-        // if (state.tool.options.link?.active) {
-        if (state.tool.options.lock?.active) {
+        if (state.tool.options.hold?.active) {
           updateLockedCurrentVectorControlHandle(
             currentVector,
             state.cursorX,
@@ -431,8 +439,6 @@ function adjustCurveSteps() {
         if (state.tool.options.link?.active) {
           updateLinkedVectors(currentVector, true)
         }
-        // }
-        // }
         state.activeIndexes = createActiveIndexesForRender(
           currentVector,
           state.vectorsSavedProperties,
@@ -452,11 +458,7 @@ function adjustCurveSteps() {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        // if (
-        //   state.tool.options.link?.active &&
-        //   Object.keys(state.vectorsSavedProperties).length > 1
-        // ) {
-        if (state.tool.options.lock?.active) {
+        if (state.tool.options.hold?.active) {
           updateLockedCurrentVectorControlHandle(
             currentVector,
             state.cursorX,
@@ -466,7 +468,6 @@ function adjustCurveSteps() {
         if (state.tool.options.link?.active) {
           updateLinkedVectors(currentVector)
         }
-        // }
         renderCanvas(currentVector.layer, true, state.activeIndexes)
       }
       break
@@ -481,11 +482,7 @@ function adjustCurveSteps() {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        // if (
-        //   state.tool.options.link?.active &&
-        //   Object.keys(state.vectorsSavedProperties).length > 1
-        // ) {
-        if (state.tool.options.lock?.active) {
+        if (state.tool.options.hold?.active) {
           updateLockedCurrentVectorControlHandle(
             currentVector,
             state.cursorX,
@@ -495,11 +492,10 @@ function adjustCurveSteps() {
         if (state.tool.options.link?.active) {
           updateLinkedVectors(currentVector)
         }
-        // }
         //Handle snapping to other control points. Only snap when there are no linked vectors to selected vector.
         if (
           (state.tool.options.align?.active ||
-            state.tool.options.match?.active ||
+            state.tool.options.equal?.active ||
             state.tool.options.link?.active) &&
           Object.keys(state.vectorsSavedProperties).length === 1
         ) {
@@ -523,18 +519,17 @@ function adjustCurveSteps() {
               vectorGui.selectedPoint.xKey,
               vectorGui.selectedPoint.yKey
             )
-            if (state.tool.options.lock?.active) {
+            if (state.tool.options.hold?.active) {
               updateLockedCurrentVectorControlHandle(
                 currentVector,
                 snappedToX,
                 snappedToY
               )
             }
-            //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
-            //align control handles TODO: (High Priority) For align, only change angle while maintaining original length of handle. Add condition for match which implements a matching length. If both options active, logic be current logic.
+            //Handle options behavior on snapping
             if (
               (state.tool.options.align?.active ||
-                state.tool.options.match?.active) &&
+                state.tool.options.equal?.active) &&
               ["px1", "px2"].includes(vectorGui.selectedPoint.xKey)
             ) {
               //Set selected keys
@@ -542,6 +537,7 @@ function adjustCurveSteps() {
                 selectedEndpointYKey,
                 selectedHandleXKey,
                 selectedHandleYKey
+              //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
               if (vectorGui.selectedPoint.xKey === "px1") {
                 ;[
                   selectedEndpointXKey,
@@ -590,8 +586,8 @@ function adjustCurveSteps() {
                   collidedVector.properties.vectorProperties.py2
               }
               let selectedHandleLength
-              if (state.tool.options.match?.active) {
-                //Match selected handle length to collided vector
+              if (state.tool.options.equal?.active) {
+                //Make selected handle length equal to collided vector' handle length
                 selectedHandleLength = Math.sqrt(
                   collidedHandleDeltaX ** 2 + collidedHandleDeltaY ** 2
                 )
@@ -602,12 +598,12 @@ function adjustCurveSteps() {
                 )
               }
               let newSelectedAngle
-              //Priority for angle is align > lock > match
+              //Priority for angle is align > equal
               if (state.tool.options.align?.active) {
                 //Align angle of selected control handle opposite of collided vector control handle
                 newSelectedAngle =
                   getAngle(collidedHandleDeltaX, collidedHandleDeltaY) + Math.PI
-              } else if (state.tool.options.match?.active) {
+              } else if (state.tool.options.equal?.active) {
                 //Maintain absolute angle of selected control handle
                 newSelectedAngle = getAngle(
                   selectedHandleDeltaX,
@@ -675,33 +671,33 @@ export const cubicCurve = {
   brushType: "circle",
   brushDisabled: false,
   options: {
-    //Priority hierarchy of options: Match = Align > Lock > Link
-    match: {
+    //Priority hierarchy of options: Equal = Align > Hold > Link
+    equal: {
       active: false,
       tooltip:
-        "Toggle Matching (M). \n\nConnected control points of linked vectors will match the length of the selected control handle. When snapping to another control point, selected control handle will match the length of the other vector's control handle.",
-    }, //IN PROGRESS
+        "Toggle Equal Length (Shift). \n\nEnsures magnitude continuity of control handles for linked vectors.",
+    }, // Magnitude continuity
     align: {
       active: false,
       tooltip:
-        "Toggle Align (A). \n\nControl handle of selected point will move to opposite angle when snapping to another control point. Linked vectors' control handle will move to opposite angle when adjusting selected control handle.",
-    },
-    lock: {
+        "Toggle Align (A). \n\nEnsures tangential continuity by moving the control handle to the opposite angle for linked vectors.",
+    }, // Tangential continuity
+    hold: {
       active: false,
       tooltip:
-        "Toggle Locking (H). \n\nLock relative angles of all control handles attached to selected control point.",
-    }, //IN PROGRESS. No effect when not in link mode. Can make render conditional based on link mode status?.
+        "Toggle Hold (H). \n\nMaintain relative angles of all control handles attached to selected control point.",
+    },
     link: {
       active: false,
       tooltip:
         "Toggle Linking (L). \n\nConnected control points of other vectors will move with selected control point.",
-    },
+    }, // Positional continuity
     // displayVectors: false,
     displayPaths: {
       active: false,
       tooltip: "Toggle Paths. \n\nShow paths for curves.",
     },
-  }, //align: G1 tangent continuity, default C1 velocity continuity, link: C0/G0 positional continuity and move connected vector control point with selected control point.
+  },
   modes: { eraser: false, inject: false },
   type: "vector",
   cursor: "crosshair",

@@ -85,6 +85,11 @@ export function activateShortcut(keyCode) {
           adjustEllipseSteps()
           vectorGui.render()
         }
+      } else if (dom.toolBtn.id === "cubicCurve") {
+        tools.cubicCurve.options.equal.active =
+          !tools.cubicCurve.options.equal.active
+        renderToolOptionsToDOM()
+        vectorGui.render()
       }
       break
     case "Slash":
@@ -149,6 +154,11 @@ export function activateShortcut(keyCode) {
       break
     case "KeyH":
       //Locking shortcut for curve tool
+      if (dom.toolBtn.id === "cubicCurve") {
+        tools.cubicCurve.options.hold.active =
+          !tools.cubicCurve.options.hold.active
+        renderToolOptionsToDOM()
+      }
       break
     case "KeyI":
       if (!state.clicked) {

@@ -127,8 +127,8 @@ export function handleOptionsAndUpdateVector(
         linkedEndpointXKey,
         linkedEndpointYKey
       )
-      //If lock option enabled, maintain relative angle of control handles
-      if (toolOptions.lock?.active) {
+      //If hold option enabled, maintain relative angle of control handles
+      if (toolOptions.hold?.active) {
         //update handle x and y
         const linkedDeltaX =
           vectorsSavedProperties[linkedEndpointXKey] -
@@ -147,8 +147,8 @@ export function handleOptionsAndUpdateVector(
     } else if (
       ["px3", "px4"].includes(selectedXKey) &&
       (toolOptions.align?.active ||
-        toolOptions.lock?.active ||
-        toolOptions.match?.active)
+        toolOptions.hold?.active ||
+        toolOptions.equal?.active)
     ) {
       //If align option enabled, move px3 and py3 of linked vector to maintain opposite angle of selected control handle
       const linkedDeltaX =
@@ -158,7 +158,7 @@ export function handleOptionsAndUpdateVector(
         vectorsSavedProperties[linkedEndpointYKey] -
         vectorsSavedProperties[linkedHandleYKey]
       let linkedHandleLength
-      if (toolOptions.match?.active) {
+      if (toolOptions.equal?.active) {
         //Match handle length to selected vector
         linkedHandleLength = Math.sqrt(currentDeltaX ** 2 + currentDeltaY ** 2)
       } else {
@@ -166,15 +166,15 @@ export function handleOptionsAndUpdateVector(
         linkedHandleLength = Math.sqrt(linkedDeltaX ** 2 + linkedDeltaY ** 2)
       }
       let newLinkedAngle
-      //Priority for angle is align > lock > match
+      //Priority for angle is align > hold > equal
       if (toolOptions.align?.active) {
         //Align angle of linked control handle opposite of selected vector control handle
         newLinkedAngle = getAngle(currentDeltaX, currentDeltaY) + Math.PI
-      } else if (toolOptions.lock?.active) {
+      } else if (toolOptions.hold?.active) {
         //Maintain relative angle of linked control handles
         let linkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
         newLinkedAngle = linkedAngle + currentDeltaAngle
-      } else if (toolOptions.match?.active) {
+      } else if (toolOptions.equal?.active) {
         //Maintain absolute angle of linked control handle
         newLinkedAngle = getAngle(linkedDeltaX, linkedDeltaY)
       }
