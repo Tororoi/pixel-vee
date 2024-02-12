@@ -12,9 +12,9 @@ import { renderCanvas } from "../Canvas/render.js"
 
 /**
  * Render cursor based on active tool
- * @param {Object} state
- * @param {Object} canvas
- * @param {Object} swatches
+ * @param {object} state
+ * @param {object} canvas
+ * @param {object} swatches
  */
 export function renderCursor(state, canvas, swatches) {
   switch (state.tool.name) {
@@ -32,10 +32,8 @@ export function renderCursor(state, canvas, swatches) {
       //show nothing
       break
     default:
-      //TODO: erase mode is somewhat buggy with rendering. Find way to have it render without calling draw() more than needed.
-      if (!vectorGui.collisionPresent) {
+      if (!vectorGui.selectedCollisionPresent && !canvas.collidedVectorIndex) {
         renderCanvas(canvas.currentLayer)
-        //TODO: For better performance, draw cursor on a separate canvas and render that canvas on top of the main canvas.
         //Then renderCanvas would not need to be called here.
         actionDraw(
           state.cursorX,
@@ -65,9 +63,9 @@ export function renderCursor(state, canvas, swatches) {
 
 /**
  * Used to render eyedropper cursor and eraser
- * @param {Object} state
- * @param {Object} canvas
- * @param {Float} lineWeight
+ * @param {object} state
+ * @param {object} canvas
+ * @param {number} lineWeight - (Float)
  */
 function drawCursorBox(state, canvas, lineWeight) {
   let lineWidth =
@@ -75,7 +73,7 @@ function drawCursorBox(state, canvas, lineWeight) {
   let brushOffset = Math.floor(state.tool.brushSize / 2)
   let ol = lineWidth / 2 // line offset to stroke off-center
 
-  // Create a Set from brushStamps[state.tool.brushType][state.tool.brushSize]//TODO: make set when creating brush stamp so it does not need to be defined here.
+  // Create a Set from brushStamps[state.tool.brushType][state.tool.brushSize]//TODO: (Middle Priority) make set when creating brush stamp so it does not need to be defined here.
   const pixelSet = new Set(
     brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"].map(
       (p) => `${p.x},${p.y}`

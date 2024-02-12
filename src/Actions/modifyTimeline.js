@@ -12,7 +12,7 @@ import { addToTimeline } from "./undoRedo.js"
 /**
  * Modify action in the timeline
  * Only good for vector parameters
- * @param {Object} moddedAction
+ * @param {object} moddedAction
  */
 export function modifyVectorAction(moddedAction) {
   //loop through the object state.vectorsSavedProperties and for each key which represents an action index and value which is a shallow object with various properties, create an object with properties moddedActionIndex, from (the saved properties), and to (the new properties found on state.undoStack[vectorIndex].properties.vectorProperties)
@@ -51,8 +51,8 @@ export function modifyVectorAction(moddedAction) {
 /**
  * Modify action in the timeline
  * Only good for vector parameters
- * @param {Object} moddedAction
- * @param {Object} oldColor
+ * @param {object} moddedAction
+ * @param {object} oldColor
  */
 export function changeActionColor(moddedAction, oldColor) {
   let previousColor = {
@@ -75,7 +75,7 @@ export function changeActionColor(moddedAction, oldColor) {
 
 /**
  * Modify action in the timeline
- * @param {Object} moddedAction
+ * @param {object} moddedAction
  */
 export function removeAction(moddedAction) {
   addToTimeline({
@@ -92,9 +92,9 @@ export function removeAction(moddedAction) {
 
 /**
  * Modify action in the timeline
- * @param {Object} moddedAction
- * @param {Object} oldModes
- * @param {Object} newModes
+ * @param {object} moddedAction
+ * @param {object} oldModes
+ * @param {object} newModes
  */
 export function changeActionMode(moddedAction, oldModes, newModes) {
   addToTimeline({
@@ -112,7 +112,7 @@ export function changeActionMode(moddedAction, oldModes, newModes) {
 /**
  * Modify actions in the timeline
  * Sets all actions before it except for action index 0 to removed = true
- * @param {Object} layer
+ * @param {object} layer
  */
 export function actionClear(layer) {
   let upToIndex = state.undoStack.length - 1

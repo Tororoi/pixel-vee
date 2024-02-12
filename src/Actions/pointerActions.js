@@ -21,20 +21,20 @@ import { isOutOfBounds, minLimit, maxLimit } from "../utils/canvasHelpers.js"
 
 /**
  * Render a stamp from the brush to the canvas
- * @param {Integer} coordX
- * @param {Integer} coordY
- * @param {Object} boundaryBox
- * @param {Boolean} selectionInversed
- * @param {Object} currentColor - {color, r, g, b, a}
- * @param {Object} directionalBrushStamp - brushStamp[brushDirection]
- * @param {Integer} brushSize
- * @param {Object} layer
- * @param {Object} currentModes
+ * @param {number} coordX - (Integer)
+ * @param {number} coordY - (Integer)
+ * @param {object} boundaryBox
+ * @param {boolean} selectionInversed
+ * @param {object} currentColor - {color, r, g, b, a}
+ * @param {object} directionalBrushStamp - brushStamp[brushDirection]
+ * @param {number} brushSize - (Integer)
+ * @param {object} layer
+ * @param {object} currentModes
  * @param {Set} maskSet
  * @param {Set} seenPixelsSet
  * @param {CanvasRenderingContext2D} customContext - use custom context if provided
- * @param {Boolean} isPreview
- * @param {Boolean} excludeFromSet - don't add to seenPixelsSet if true
+ * @param {boolean} isPreview
+ * @param {boolean} excludeFromSet - don't add to seenPixelsSet if true
  */
 export function actionDraw(
   coordX,
@@ -112,22 +112,22 @@ export function actionDraw(
 
 /**
  * Draws a pixel perfect line from point a to point b
- * @param {Integer} sx
- * @param {Integer} sy
- * @param {Integer} tx
- * @param {Integer} ty
- * @param {Object} boundaryBox
- * @param {Boolean} selectionInversed
- * @param {Object} currentColor - {color, r, g, b, a}
- * @param {Object} layer
+ * @param {number} sx - (Integer)
+ * @param {number} sy - (Integer)
+ * @param {number} tx - (Integer)
+ * @param {number} ty - (Integer)
+ * @param {object} boundaryBox
+ * @param {boolean} selectionInversed
+ * @param {object} currentColor - {color, r, g, b, a}
+ * @param {object} layer
  * @param {CanvasRenderingContext2D} ctx
- * @param {Object} currentModes
- * @param {Object} brushStamp
- * @param {Integer} brushSize
+ * @param {object} currentModes
+ * @param {object} brushStamp
+ * @param {number} brushSize - (Integer)
  * @param {Set} maskSet
  * @param {Set} seenPixelsSet
  * @param {CanvasRenderingContext2D} customContext - use custom context if provided
- * @param {Boolean} isPreview
+ * @param {boolean} isPreview
  */
 export function actionLine(
   sx,
@@ -204,13 +204,13 @@ export function actionLine(
 /**
  * NOTE: if canvas is resized and fill point exists outside canvas area, fill will not render when timeline is redrawn
  * User action for process to fill a contiguous color
- * @param {Integer} startX
- * @param {Integer} startY
- * @param {Object} boundaryBox
- * @param {Boolean} selectionInversed
- * @param {Object} currentColor - {color, r, g, b, a}
- * @param {Object} layer
- * @param {Object} currentModes
+ * @param {number} startX - (Integer)
+ * @param {number} startY - (Integer)
+ * @param {object} boundaryBox
+ * @param {boolean} selectionInversed
+ * @param {object} currentColor - {color, r, g, b, a}
+ * @param {object} layer
+ * @param {object} currentModes
  * @param {Set} maskSet
  * @param {CanvasRenderingContext2D} [customContext] - use custom context if provided
  * @returns
@@ -230,11 +230,16 @@ export function actionFill(
   if (isOutOfBounds(startX, startY, 0, layer, boundaryBox, selectionInversed)) {
     return
   }
-  //TODO: need logic for selectionInversed
   let xMin = minLimit(boundaryBox.xMin, 0)
   let xMax = maxLimit(boundaryBox.xMax, layer.cvs.width)
   let yMin = minLimit(boundaryBox.yMin, 0)
   let yMax = maxLimit(boundaryBox.yMax, layer.cvs.height)
+  if (selectionInversed) {
+    xMin = 0
+    xMax = layer.cvs.width
+    yMin = 0
+    yMax = layer.cvs.height
+  }
   //get imageData
   let ctx = layer.ctx
   if (customContext) {
@@ -266,7 +271,16 @@ export function actionFill(
     //get current pixel position
     pixelPos = (y * (xMax - xMin) + x) * 4
     // Go up as long as the color matches and are inside the canvas
-    while (y >= 0 && matchStartColor(layerImageData, pixelPos, clickedColor)) {
+    while (
+      y >= 0 &&
+      matchStartColor(
+        layerImageData,
+        pixelPos,
+        clickedColor,
+        boundaryBox,
+        selectionInversed
+      )
+    ) {
       y--
       pixelPos -= (xMax - xMin) * 4
     }
@@ -278,12 +292,26 @@ export function actionFill(
     // Go down as long as the color matches and in inside the canvas
     while (
       y < yMax - yMin &&
-      matchStartColor(layerImageData, pixelPos, clickedColor)
+      matchStartColor(
+        layerImageData,
+        pixelPos,
+        clickedColor,
+        boundaryBox,
+        selectionInversed
+      )
     ) {
       colorPixel(layerImageData, pixelPos, currentColor)
 
       if (x > 0) {
-        if (matchStartColor(layerImageData, pixelPos - 4, clickedColor)) {
+        if (
+          matchStartColor(
+            layerImageData,
+            pixelPos - 4,
+            clickedColor,
+            boundaryBox,
+            selectionInversed
+          )
+        ) {
           if (!reachLeft) {
             //Add pixel to stack
             pixelStack.push([x - 1, y])
@@ -295,7 +323,15 @@ export function actionFill(
       }
 
       if (x < xMax - xMin - 1) {
-        if (matchStartColor(layerImageData, pixelPos + 4, clickedColor)) {
+        if (
+          matchStartColor(
+            layerImageData,
+            pixelPos + 4,
+            clickedColor,
+            boundaryBox,
+            selectionInversed
+          )
+        ) {
           if (!reachRight) {
             //Add pixel to stack
             pixelStack.push([x + 1, y])
@@ -316,20 +352,20 @@ export function actionFill(
 }
 
 /**
- * Helper function. TODO: move to external helper file for rendering
+ * Helper function. TODO: (Low Priority) move to external helper file for rendering
  * To render a pixel perfect curve, points are plotted instead of using t values, which are not equidistant.
  * @param {Array} points
- * @param {Object} boundaryBox
- * @param {Boolean} selectionInversed
- * @param {Object} brushStamp
- * @param {Object} currentColor - {color, r, g, b, a}
- * @param {Integer} brushSize
- * @param {Object} layer
+ * @param {object} boundaryBox
+ * @param {boolean} selectionInversed
+ * @param {object} brushStamp
+ * @param {object} currentColor - {color, r, g, b, a}
+ * @param {number} brushSize - (Integer)
+ * @param {object} layer
  * @param {CanvasRenderingContext2D} ctx
- * @param {Object} currentModes
+ * @param {object} currentModes
  * @param {Set} maskSet
  * @param {CanvasRenderingContext2D} customContext - use custom context if provided
- * @param {Boolean} isPreview
+ * @param {boolean} isPreview
  */
 function renderPoints(
   points,
@@ -378,23 +414,23 @@ function renderPoints(
 
 /**
  * User action for process to set control points for quadratic bezier
- * @param {Integer} startx
- * @param {Integer} starty
- * @param {Integer} endx
- * @param {Integer} endy
- * @param {Integer} controlx
- * @param {Integer} controly
- * @param {Object} boundaryBox
- * @param {Boolean} selectionInversed
- * @param {Integer} stepNum
- * @param {Object} currentColor - {color, r, g, b, a}
- * @param {Object} layer
- * @param {Object} currentModes
- * @param {Object} brushStamp
- * @param {Integer} brushSize
+ * @param {number} startx - (Integer)
+ * @param {number} starty - (Integer)
+ * @param {number} endx - (Integer)
+ * @param {number} endy - (Integer)
+ * @param {number} controlx - (Integer)
+ * @param {number} controly - (Integer)
+ * @param {object} boundaryBox
+ * @param {boolean} selectionInversed
+ * @param {number} stepNum - (Integer)
+ * @param {object} currentColor - {color, r, g, b, a}
+ * @param {object} layer
+ * @param {object} currentModes
+ * @param {object} brushStamp
+ * @param {number} brushSize - (Integer)
  * @param {Set} maskSet
  * @param {CanvasRenderingContext2D} customContext - use custom context if provided
- * @param {Boolean} isPreview
+ * @param {boolean} isPreview
  */
 export function actionQuadraticCurve(
   startx,
@@ -460,25 +496,25 @@ export function actionQuadraticCurve(
 
 /**
  * User action for process to set control points for cubic bezier
- * @param {Integer} startx
- * @param {Integer} starty
- * @param {Integer} endx
- * @param {Integer} endy
- * @param {Integer} controlx1
- * @param {Integer} controly1
- * @param {Integer} controlx2
- * @param {Integer} controly2
- * @param {Object} boundaryBox
- * @param {Boolean} selectionInversed
- * @param {Integer} stepNum
- * @param {Object} currentColor - {color, r, g, b, a}
- * @param {Object} layer
- * @param {Object} currentModes
- * @param {Object} brushStamp
- * @param {Integer} brushSize
+ * @param {number} startx - (Integer)
+ * @param {number} starty - (Integer)
+ * @param {number} endx - (Integer)
+ * @param {number} endy - (Integer)
+ * @param {number} controlx1 - (Integer)
+ * @param {number} controly1 - (Integer)
+ * @param {number} controlx2 - (Integer)
+ * @param {number} controly2 - (Integer)
+ * @param {object} boundaryBox
+ * @param {boolean} selectionInversed
+ * @param {number} stepNum - (Integer)
+ * @param {object} currentColor - {color, r, g, b, a}
+ * @param {object} layer
+ * @param {object} currentModes
+ * @param {object} brushStamp
+ * @param {number} brushSize - (Integer)
  * @param {Set} maskSet
  * @param {CanvasRenderingContext2D} customContext - use custom context if provided
- * @param {Boolean} isPreview
+ * @param {boolean} isPreview
  */
 export function actionCubicCurve(
   startx,
@@ -570,30 +606,30 @@ export function actionCubicCurve(
 
 /**
  * User action for process to set control points for cubic bezier
- * @param {Integer} centerx
- * @param {Integer} centery
- * @param {Integer} xa
- * @param {Integer} ya
- * @param {Integer} xb
- * @param {Integer} yb
- * @param {Integer} ra
- * @param {Integer} rb
- * @param {Boolean} forceCircle
- * @param {Object} boundaryBox
- * @param {Boolean} selectionInversed
- * @param {Integer} stepNum
- * @param {Object} currentColor - {color, r, g, b, a}
- * @param {Object} layer
- * @param {Object} currentModes
- * @param {Object} brushStamp
- * @param {Integer} brushSize
- * @param {Float} angle - Radians
- * @param {Integer} offset
- * @param {Integer} x1Offset
- * @param {Integer} y1Offset
+ * @param {number} centerx - (Integer)
+ * @param {number} centery - (Integer)
+ * @param {number} xa - (Integer)
+ * @param {number} ya - (Integer)
+ * @param {number} xb - (Integer)
+ * @param {number} yb - (Integer)
+ * @param {number} ra - (Integer)
+ * @param {number} rb - (Integer)
+ * @param {boolean} forceCircle
+ * @param {object} boundaryBox
+ * @param {boolean} selectionInversed
+ * @param {number} stepNum - (Integer)
+ * @param {object} currentColor - {color, r, g, b, a}
+ * @param {object} layer
+ * @param {object} currentModes
+ * @param {object} brushStamp
+ * @param {number} brushSize - (Integer)
+ * @param {number} angle - Radians (Float)
+ * @param {number} offset - (Integer)
+ * @param {number} x1Offset - (Integer)
+ * @param {number} y1Offset - (Integer)
  * @param {Set} maskSet
  * @param {CanvasRenderingContext2D} customContext - use custom context if provided
- * @param {Boolean} isPreview
+ * @param {boolean} isPreview
  */
 export function actionEllipse(
   centerx,

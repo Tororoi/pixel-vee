@@ -2,8 +2,8 @@
 
 /**
  *
- * @param {String} modeKey
- * @param {Boolean} isSelected
+ * @param {string} modeKey
+ * @param {boolean} isSelected
  * @returns {Element}
  */
 export const createModeElement = (modeKey, isSelected) => {
@@ -19,8 +19,8 @@ export const createModeElement = (modeKey, isSelected) => {
 }
 
 /**
- * @param {Object} action
- * @param {Boolean} isSelected
+ * @param {object} action
+ * @param {boolean} isSelected
  * @returns {Element}
  */
 export const createToolElement = (action, isSelected) => {
@@ -36,7 +36,7 @@ export const createToolElement = (action, isSelected) => {
 }
 
 /**
- * @param {Object} action
+ * @param {object} action
  * @returns {Element}
  */
 export const createColorElement = (action) => {
@@ -52,8 +52,8 @@ export const createColorElement = (action) => {
 }
 
 /**
- * @param {Boolean} hidden
- * @param {String} tooltipText
+ * @param {boolean} hidden
+ * @param {string} tooltipText
  * @returns {Element}
  */
 export const createHideElement = (hidden = false, tooltipText) => {
@@ -67,7 +67,7 @@ export const createHideElement = (hidden = false, tooltipText) => {
 }
 
 /**
- * @param {String} tooltipText
+ * @param {string} tooltipText
  * @returns {Element}
  */
 export const createTrashElement = (tooltipText) => {
@@ -80,7 +80,7 @@ export const createTrashElement = (tooltipText) => {
 }
 
 /**
- * @param {String} tooltipText
+ * @param {string} tooltipText
  * @returns {Element}
  */
 export const createSettingsElement = (tooltipText) => {

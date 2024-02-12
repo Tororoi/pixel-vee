@@ -20,12 +20,12 @@ import {
  * Critical function for the timeline to work
  * For handling activeIndexes, the idea is to save images of multiple actions that aren't changing to save time redrawing.
  * The current problem is that later actions "fill" or "draw" with a mask are affected by earlier actions.
- * TODO: Another efficiency improvement would be to perform incremental rendering with caching so only the affected region of the canvas is rerendered.
- * TODO: Use OffscreenCanvas in a web worker to offload rendering to a separate thread.
+ * TODO: (Low Priority) Another efficiency improvement would be to perform incremental rendering with caching so only the affected region of the canvas is rerendered.
+ * TODO: (Middle Priority) Use OffscreenCanvas in a web worker to offload rendering to a separate thread.
  * BUG: Can't simply save images and draw them for the betweenCvs because this will ignore actions use erase or inject modes.
- * @param {Object} layer - optional parameter to limit render to a specific layer
+ * @param {object} layer - optional parameter to limit render to a specific layer
  * @param {Array} activeIndexes - optional parameter to limit render to specific actions. If not passed in, all actions will be rendered.
- * @param {Boolean} setImages - optional parameter to set images for actions. Will be used when history is modified to update action images.
+ * @param {boolean} setImages - optional parameter to set images for actions. Will be used when history is modified to update action images.
  */
 export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
   //follows stored instructions to reassemble drawing. Costly operation. Minimize usage as much as possible.
@@ -130,7 +130,7 @@ function createAndSaveContext() {
 
 /**
  * Helper for redrawTimelineActions
- * @param {Object} action
+ * @param {object} action
  * @param {CanvasRenderingContext2D} betweenCtx
  */
 export function performAction(action, betweenCtx = null) {
@@ -152,7 +152,7 @@ export function performAction(action, betweenCtx = null) {
     case "brush":
       let seen = new Set()
       let mask = null
-      //TODO: implement points and maskArray as an array of integers to reduce space cost. Could be stored as typed arrays but not meaningful for storing the json file.
+      //TODO: (Low Priority) implement points and maskArray as an array of integers to reduce space cost. Could be stored as typed arrays but not meaningful for storing the json file.
       //points require 3 entries for every coordinate, x, y, brushSize
       //maskArray requires 2 entries for every coordinate, x, y
       if (action.properties.maskArray) {
@@ -313,7 +313,7 @@ export function performAction(action, betweenCtx = null) {
       )
       break
     case "cut":
-      //TODO:handle betweenCtx, clean up actions so logic does not need to be repeated here
+      //TODO:(Low Priority) handle betweenCtx, clean up actions so logic does not need to be repeated here. Not currently affected by betweenCtx so not needed for current functionality.
       if (action.properties.selectionInversed) {
         //inverted selection: clear entire canvas area minus boundaryBox
         //create a clip mask for the boundaryBox to prevent clearing the inner area
@@ -365,7 +365,8 @@ export function performAction(action, betweenCtx = null) {
       }
       //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
       if (action.properties.confirmed) {
-        action.layer.ctx.drawImage(
+        let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
+        activeCtx.drawImage(
           action.properties.canvas,
           boundaryBox.xMin,
           boundaryBox.yMin,
@@ -415,7 +416,7 @@ function updateLayersAfterRedo() {
 
 /**
  * Draw the canvas layers
- * @param {Object} layer
+ * @param {object} layer
  */
 function drawLayer(layer) {
   layer.onscreenCtx.save()
@@ -457,7 +458,7 @@ function drawLayer(layer) {
 
 /**
  * Draw canvas layer onto its onscreen canvas
- * @param {Object} layer
+ * @param {object} layer
  */
 export function drawCanvasLayer(layer) {
   //Prevent blurring
@@ -513,7 +514,7 @@ function renderBackgroundCanvas() {
 
 /**
  * Clear offscreen canvas layers as needed
- * @param {Object} activeLayer
+ * @param {object} activeLayer
  */
 export function clearOffscreenCanvas(activeLayer = null) {
   if (activeLayer) {
@@ -543,9 +544,9 @@ export function clearOffscreenCanvas(activeLayer = null) {
 
 /**
  * Main render function for the canvas
- * @param {Object} activeLayer
- * @param {Boolean} redrawTimeline - pass true to redraw all previous actions
- * @param {Boolean} setImages - pass true to set images for actions between indexes
+ * @param {object} activeLayer
+ * @param {boolean} redrawTimeline - pass true to redraw all previous actions
+ * @param {boolean} setImages - pass true to set images for actions between indexes
  */
 export function renderCanvas(
   activeLayer = null,

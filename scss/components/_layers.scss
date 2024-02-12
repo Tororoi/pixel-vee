@@ -21,17 +21,26 @@
       height: 40px;
       cursor: pointer;
     }
+    input[type="file"]:disabled + .reference {
+      cursor: not-allowed;
+      opacity: 0.5;
+      @include referenceIcon($border-color, $border-color);
+    }
     .add-layer {
       width: 40px;
       height: 40px;
       cursor: pointer;
+      &:disabled {
+        // opacity: 1 !important;
+        @include addLayerIcon($border-color, $border-color);
+      }
     }
     .trash {
       width: 40px;
       height: 40px;
       cursor: pointer;
       &:disabled {
-        opacity: 1 !important;
+        // opacity: 1 !important;
         @include trashIcon($border-color, $border-color);
       }
     }
@@ -94,6 +103,30 @@
           z-index: 104;
           margin: 5px;
         }
+      }
+    }
+    // &.disabled {
+    //   cursor: not-allowed;
+    //   // opacity: 0.5;
+    //   @include boxBorder($border-color, $border-color);
+    //   * {
+    //     pointer-events: none;
+    //   }
+    //   button {
+    //     opacity: 0.5;
+    //   }
+    // }
+  }
+  &.disabled {
+    .collapsible {
+      cursor: not-allowed;
+      @include boxBorder($border-color, $border-color);
+      * {
+        pointer-events: none;
+      }
+      button,
+      label {
+        opacity: 0.5;
       }
     }
   }

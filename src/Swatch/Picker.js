@@ -10,7 +10,7 @@ import {
   drawSelector,
   drawHSLGradient,
 } from "../utils/pickerHelpers.js"
-//TODO: Add "lock" toggle to luminance field.
+//TODO: (Middle Priority) Add "lock" toggle to luminance field.
 //This will trigger the hsl grad to become a 2-dimensional gradient
 //where every value has the same luminance. The hue slider can be adjusted
 //to see the gradient for different hues at that same luminance.

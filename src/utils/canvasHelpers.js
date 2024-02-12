@@ -1,6 +1,6 @@
 /**
  *
- * @param {Integer} width
+ * @param {number} width - (Integer)
  * @returns
  */
 export const setInitialZoom = (width) => {
@@ -24,12 +24,12 @@ export const setInitialZoom = (width) => {
 /**
  * Check if point is outside bounds
  * Used for reducing cost to render points and to restrict rendering outside selection
- * @param {Integer} x
- * @param {Integer} y
- * @param {Integer} brushSize
- * @param {Object} layer
- * @param {Object} boundaryBox
- * @param {Boolean} isInversed
+ * @param {number} x - (Integer)
+ * @param {number} y - (Integer)
+ * @param {number} brushSize - (Integer)
+ * @param {object} layer
+ * @param {object} boundaryBox
+ * @param {boolean} isInversed
  */
 export const isOutOfBounds = (
   x,
@@ -73,18 +73,18 @@ export const isOutOfBounds = (
 }
 
 /**
- * @param {Integer|null} value
- * @param {Integer} minValue
- * @returns {Integer}
+ * @param {number|null} value - (Integer)
+ * @param {number} minValue - (Integer)
+ * @returns {number} - (Integer)
  */
 export function minLimit(value, minValue) {
   return Math.max(minValue, value)
 }
 
 /**
- * @param {Integer|null} value
- * @param {Integer} maxValue
- * @returns {Integer}
+ * @param {number|null} value - (Integer)
+ * @param {number} maxValue - (Integer)
+ * @returns {number} - (Integer)
  */
 export function maxLimit(value, maxValue) {
   if (value !== null) {

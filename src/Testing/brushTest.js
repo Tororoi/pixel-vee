@@ -103,7 +103,6 @@ export function saveBrushAsTest() {
     storedActions.brush = testAction
     // // Save data
     // let jsonString = JSON.stringify(testAction, null, 2)
-    // //TODO: instead of opening in a new window, save to special testing object
     // // Create a new Blob with the JSON data and the correct MIME type
     // const blob = new Blob([jsonString], { type: "application/json" })
 

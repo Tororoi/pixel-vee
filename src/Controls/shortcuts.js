@@ -31,7 +31,8 @@ import { toggleMode, switchTool } from "../Tools/toolbox.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
- * @param {String} keyCode
+ * TODO: (High Priority) prevent certain shortcuts when certain actions are active such as pasting, dragging, etc.
+ * @param {string} keyCode
  */
 export function activateShortcut(keyCode) {
   switch (keyCode) {
@@ -85,10 +86,15 @@ export function activateShortcut(keyCode) {
           vectorGui.render()
         }
       } else if (dom.toolBtn.id === "cubicCurve") {
-        tools.cubicCurve.options.link.active =
-          !tools.cubicCurve.options.link.active
+        tools.cubicCurve.options.equal.active =
+          !tools.cubicCurve.options.equal.active
         renderToolOptionsToDOM()
         vectorGui.render()
+      }
+      break
+    case "Slash":
+      if (!state.clicked) {
+        switchTool("line")
       }
       break
     case "KeyA":
@@ -109,7 +115,7 @@ export function activateShortcut(keyCode) {
         if (keys.MetaLeft || keys.MetaRight) {
           actionCopySelection()
         } else {
-          switchTool("quadCurve")
+          switchTool("cubicCurve")
         }
       }
       break
@@ -147,7 +153,12 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyH":
-      //
+      //Locking shortcut for curve tool
+      if (dom.toolBtn.id === "cubicCurve") {
+        tools.cubicCurve.options.hold.active =
+          !tools.cubicCurve.options.hold.active
+        renderToolOptionsToDOM()
+      }
       break
     case "KeyI":
       if (!state.clicked) {
@@ -159,9 +170,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyJ":
-      if (!state.clicked) {
-        switchTool("cubicCurve")
-      }
+      //
       break
     case "KeyK":
       if (!state.clicked) {
@@ -171,8 +180,11 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyL":
-      if (!state.clicked) {
-        switchTool("line")
+      if (dom.toolBtn.id === "cubicCurve") {
+        tools.cubicCurve.options.link.active =
+          !tools.cubicCurve.options.link.active
+        renderToolOptionsToDOM()
+        vectorGui.render()
       }
       break
     case "KeyM":
@@ -194,7 +206,9 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyQ":
-      //
+      if (!state.clicked) {
+        switchTool("quadCurve")
+      }
       break
     case "KeyR":
       if (!state.clicked) {
@@ -263,7 +277,7 @@ export function activateShortcut(keyCode) {
  * Deactivate Shortcut for any key.
  * Some shortcuts are active while a key is held.
  * This can be called on keyUp or on pointerUp so it is not directly tied to the keyUp event.
- * @param {String} keyCode
+ * @param {string} keyCode
  */
 export function deactivateShortcut(keyCode) {
   switch (keyCode) {
@@ -281,7 +295,7 @@ export function deactivateShortcut(keyCode) {
         vectorGui.render()
         renderCursor(state, canvas, swatches)
         setToolCssCursor()
-        //TODO: refactor so grabSteps can be called instead with a manually supplied pointer event pointerup
+        //TODO: (Low Priority) refactor so grabSteps can be called instead with a manually supplied pointer event pointerup
       }
       break
     case "AltLeft":
@@ -310,7 +324,7 @@ export function deactivateShortcut(keyCode) {
           vectorGui.selectedPoint.xKey !== "px1"
         ) {
           //while holding control point, readjust ellipse without having to move cursor.
-          //TODO: update this functionality to have other radii go back to previous radius value when releasing shift
+          //TODO: (Middle Priority) update this functionality to have other radii go back to previous radius value when releasing shift
           adjustEllipseSteps()
           vectorGui.render()
         }
@@ -408,7 +422,7 @@ export function deactivateShortcut(keyCode) {
 }
 
 /**
- * Set tool cursor. TODO: move to utils file
+ * Set tool cursor. TODO: (Middle Priority) move to utils file
  */
 function setToolCssCursor() {
   if (state.tool.modes?.eraser) {

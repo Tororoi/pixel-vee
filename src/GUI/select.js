@@ -5,7 +5,7 @@ import { checkPointCollision, checkAreaCollision } from "../utils/guiHelpers.js"
 
 /**
  * Render selection outline and control points
- * @param {Float} lineDashOffset
+ * @param {number} lineDashOffset - (Float)
  */
 export function renderRasterCVS(lineDashOffset = 0.5) {
   canvas.rasterGuiCTX.clearRect(
@@ -38,7 +38,7 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
     )
     canvas.rasterGuiCTX.clip("evenodd")
     canvas.rasterGuiCTX.globalAlpha = 0.5
-    canvas.rasterGuiCTX.fillStyle = "rgba(255, 255, 255, 0.2)"
+    canvas.rasterGuiCTX.fillStyle = "rgba(255, 255, 255, 0.1)"
     canvas.rasterGuiCTX.fillRect(
       canvas.xOffset,
       canvas.yOffset,
@@ -48,7 +48,7 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
     canvas.rasterGuiCTX.restore()
     // }
     renderSelectVector(lineDashOffset, state.tool.name === "select")
-    //TODO: Animating the selection currently not possible because animation is interupted by renderCanvas() call taking up the main thread
+    //TODO: (Middle Priority) Animating the selection currently not possible because animation is interrupted by renderCanvas() call taking up the main thread
     //All rendering would need to be part of the animation loop or on a separate thread. Maybe the marching ants could be done with css instead of on the canvas?
     // window.requestAnimationFrame(() => {
     //   renderRasterCVS(lineDashOffset < 4 ? lineDashOffset + 0.1 : 0)
@@ -58,8 +58,8 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
 
 /**
  * Render selection outline and control points
- * @param {Float} lineDashOffset
- * @param {Boolean} drawPoints
+ * @param {number} lineDashOffset - (Float)
+ * @param {boolean} drawPoints
  */
 export function renderSelectVector(lineDashOffset, drawPoints) {
   // Setting of context attributes.
@@ -72,7 +72,10 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
   canvas.rasterGuiCTX.lineDashOffset = lineDashOffset
 
   if (state.boundaryBox.xMax !== null) {
-    canvas.rasterGuiCTX.setLineDash([lineWidth * 8, lineWidth * 8])
+    if (!canvas.pastedLayer) {
+      //if active unconfirmed paste action, don't draw the dashed selection outline
+      canvas.rasterGuiCTX.setLineDash([lineWidth * 8, lineWidth * 8])
+    }
     canvas.rasterGuiCTX.beginPath()
     canvas.rasterGuiCTX.rect(
       canvas.xOffset + state.boundaryBox.xMin,
@@ -115,8 +118,8 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
 }
 
 // /**
-//  * TODO: May be used for freeform selections in the future
-//  * @param {Float} lineDashOffset
+//  * TODO: (Middle Priority) May be used for freeform selections in the future
+//  * @param {number} lineDashOffset - (Float)
 //  */
 // export function drawSelectOutline(lineDashOffset) {
 //   let lineWidth = canvas.zoom <= 8 ? 2 / canvas.zoom : 0.25
@@ -199,12 +202,12 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
 // }
 
 /**
- * @param {Object} boundaryBox
+ * @param {object} boundaryBox
  * @param {Array} pointsKeys
- * @param {Integer} radius
- * @param {Boolean} modify
- * @param {Integer} offset
- * @param {Object} vectorAction
+ * @param {number} radius - (Float)
+ * @param {boolean} modify
+ * @param {number} offset - (Integer)
+ * @param {object} vectorAction
  */
 function drawSelectControlPoints(
   boundaryBox,
@@ -255,13 +258,13 @@ function drawSelectControlPoints(
 }
 
 /**
- * TODO: move drawing logic to separate function so modify param doesn't need to be used
- * @param {Object} keys
- * @param {Object} point
- * @param {Float} radius
- * @param {Boolean} modify - if true, check for collision with cursor and modify radius
- * @param {Float} offset
- * @param {Object} vectorAction
+ * TODO: (Low Priority) move drawing logic to separate function so modify param doesn't need to be used
+ * @param {object} keys
+ * @param {object} point
+ * @param {number} radius - (Float)
+ * @param {boolean} modify - if true, check for collision with cursor and modify radius
+ * @param {number} offset - (Float)
+ * @param {object} vectorAction
  */
 function handleSelectCollisionAndDraw(
   keys,
@@ -358,7 +361,7 @@ function handleSelectCollisionAndDraw(
  * @returns
  */
 function setSelectionCursorStyle() {
-  if (!vectorGui.collisionPresent) {
+  if (!vectorGui.selectedCollisionPresent) {
     canvas.vectorGuiCVS.style.cursor = state.tool.cursor
     return
   }

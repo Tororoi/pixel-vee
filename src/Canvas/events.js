@@ -74,8 +74,8 @@ const restrictSize = (e) => {
 
 /**
  * Resize the offscreen canvas and all layers
- * @param {Integer} width
- * @param {Integer} height
+ * @param {number} width - (Integer)
+ * @param {number} height - (Integer)
  */
 const resizeOffScreenCanvas = (width, height) => {
   canvas.offScreenCVS.width = width
@@ -235,6 +235,11 @@ const resizeOnScreenCanvas = () => {
  * @param {PointerEvent} e
  */
 function layerInteract(e) {
+  if (canvas.pastedLayer) {
+    e.preventDefault()
+    //if there is a pasted layer, temporary layer is active and layers configuration should not be messed with
+    return
+  }
   let layer = e.target.closest(".layer").layerObj
   //toggle visibility
   if (e.target.className.includes("eyeopen")) {
@@ -261,9 +266,8 @@ function layerInteract(e) {
       dom.layerSettingsContainer.layerObj = layer
       renderLayerSettingsToDOM(domLayer)
     }
-    //TODO: implement layer settings, including layer name and layer opacity
   } else {
-    //TODO: allow selecting multiple layers for moving purposes only
+    //TODO: (Low Priority) allow selecting multiple layers for moving purposes only
     //select current layer
     if (layer !== canvas.currentLayer) {
       canvas.currentLayer.inactiveTools.forEach((tool) => {
@@ -290,13 +294,17 @@ function layerInteract(e) {
  * @param {DragEvent} e
  */
 function dragLayerStart(e) {
+  if (canvas.pastedLayer) {
+    e.preventDefault()
+    //if there is a pasted layer, temporary layer is active and layers configuration should not be messed with
+    return
+  }
   let layer = e.target.closest(".layer").layerObj
   let index = canvas.layers.indexOf(layer)
   //pass index through event
   e.dataTransfer.setData("text", index)
   e.target.style.boxShadow =
     "inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131)"
-  //TODO: implement fancier dragging like dialog boxes
 }
 
 /**
@@ -337,7 +345,7 @@ function dropLayer(e) {
   let targetLayer = e.target.closest(".layer").layerObj
   let draggedIndex = parseInt(e.dataTransfer.getData("text"))
   let heldLayer = canvas.layers[draggedIndex]
-  //TODO: should layer order change be added to timeline?
+  //TODO: (Low Priority) should layer order change be added to timeline?
   if (e.target.className.includes("layer") && targetLayer !== heldLayer) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
       if (dom.layersContainer.children[i] === e.target) {
@@ -382,6 +390,11 @@ function dragLayerEnd(e) {
  * @param {PointerEvent} e
  */
 function vectorInteract(e) {
+  if (canvas.pastedLayer) {
+    e.preventDefault()
+    //if there is a pasted layer, temporary layer is active and vectors configuration should not be messed with
+    return
+  }
   let vector = e.target.closest(".vector").vectorObj
   if (e.target.className.includes("eraser")) {
     //change mode
@@ -433,7 +446,7 @@ function vectorInteract(e) {
 
 /**
  * Mark a vector action as removed
- * @param {Object} vector
+ * @param {object} vector
  */
 function removeVector(vector) {
   vector.removed = true
@@ -449,8 +462,8 @@ function removeVector(vector) {
 
 /**
  * Change a vector action's modes
- * @param {Object} vector
- * @param {String} modeKey
+ * @param {object} vector
+ * @param {string} modeKey
  */
 function toggleVectorMode(vector, modeKey) {
   let oldModes = { ...vector.modes }
@@ -536,7 +549,7 @@ dom.deleteLayerBtn.addEventListener("click", () => {
   renderCanvas(layer)
 })
 
-//TODO: Make similar to functionality of dragging dialog boxes.
+//TODO: (Middle Priority) Make similar to functionality of dragging dialog boxes. To make fancier dragging work, must be made compatible with a scrolling container
 dom.layersContainer.addEventListener("click", layerInteract)
 dom.layersContainer.addEventListener("dragstart", dragLayerStart)
 dom.layersContainer.addEventListener("dragover", dragLayerOver)
@@ -544,7 +557,6 @@ dom.layersContainer.addEventListener("dragenter", dragLayerEnter)
 dom.layersContainer.addEventListener("dragleave", dragLayerLeave)
 dom.layersContainer.addEventListener("drop", dropLayer)
 dom.layersContainer.addEventListener("dragend", dragLayerEnd)
-//TODO: To make fancier dragging work, must be made compatible with a scrolling container
 // dom.layersContainer.addEventListener("pointerdown", () =>
 //   dragStart(e, e.target.closest(".layer"))
 // )
@@ -566,7 +578,7 @@ dom.layerSettingsContainer.addEventListener("input", (e) => {
     }
   }
 })
-//TODO: maybe dynamically generate layer settings container when needed and only bind this event listener when it is open
+//TODO: (Low Priority) maybe dynamically generate layer settings container when needed and only bind this event listener when it is open
 document.addEventListener("pointerdown", (e) => {
   if (
     dom.layerSettingsContainer.layerObj &&

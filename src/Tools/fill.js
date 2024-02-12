@@ -22,7 +22,7 @@ function fillSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       vectorGui.render()
-      if (vectorGui.collisionPresent) {
+      if (vectorGui.selectedCollisionPresent) {
         adjustFillSteps()
       } else {
         // //reset control points
@@ -88,14 +88,14 @@ function fillSteps() {
 
 /**
  * Used automatically by fill tool after fill is completed.
- * TODO: for linking fill vector, fill would be limited by active linked vectors as borders, position unchanged
+ * TODO: (High Priority) for linking fill vector, fill would be limited by active linked vectors as borders, position unchanged
  * How should fill vector be linked, since it won't be via positioning?
  */
 export function adjustFillSteps() {
   let currentVector = state.undoStack[canvas.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (vectorGui.collisionPresent) {
+      if (vectorGui.selectedCollisionPresent) {
         state.vectorProperties[vectorGui.collidedKeys.xKey] = state.cursorX
         state.vectorProperties[vectorGui.collidedKeys.yKey] = state.cursorY
         vectorGui.selectedPoint = {

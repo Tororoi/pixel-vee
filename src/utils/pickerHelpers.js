@@ -4,11 +4,11 @@
 
 /**
  *
- * @param {Object} pickerCircle - { x, y, width, height }
- * @param {Object} hsl - { hue, saturation, lightness }
- * @param {Integer} width
- * @param {Integer} height
- * @returns
+ * @param {object} pickerCircle - { x, y, width, height }
+ * @param {object} hsl - { hue, saturation, lightness }
+ * @param {number} width - (Integer)
+ * @param {number} height - (Integer)
+ * @returns {object} pickerCircle - { x, y, width, height }
  */
 export const calcHSLSelectorCoordinates = (
   pickerCircle,
@@ -30,9 +30,9 @@ export const calcHSLSelectorCoordinates = (
 /**
  *
  * @param {CanvasRenderingContext2D} ctx
- * @param {Object} pickerCircle
- * @param {String} color
- * @param {Integer} offset
+ * @param {object} pickerCircle
+ * @param {string} color
+ * @param {number} offset - (Integer)
  */
 const drawSelectorSides = (ctx, pickerCircle, color, offset = 0) => {
   const { x, y, width, height } = pickerCircle
@@ -61,7 +61,7 @@ const drawSelectorSides = (ctx, pickerCircle, color, offset = 0) => {
 /**
  *
  * @param {CanvasRenderingContext2D} ctx
- * @param {Object} pickerCircle
+ * @param {object} pickerCircle
  */
 export const drawSelector = (ctx, pickerCircle) => {
   const { x, y, width, height } = pickerCircle
@@ -80,9 +80,9 @@ export const drawSelector = (ctx, pickerCircle) => {
 /**
  *
  * @param {CanvasRenderingContext2D} ctx
- * @param {Integer} width
- * @param {Integer} height
- * @param {Integer} hue
+ * @param {number} width - (Integer)
+ * @param {number} height - (Integer)
+ * @param {number} hue - (Integer)
  */
 export const drawHSLGradient = (ctx, width, height, hue) => {
   // draw HSL gradient

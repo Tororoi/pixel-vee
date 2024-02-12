@@ -42,13 +42,19 @@ export const renderLayersToDOM = () => {
     }
   })
 
-  if (
-    canvas.activeLayerCount <= 1 &&
-    canvas.currentLayer?.type !== "reference"
-  ) {
-    dom.deleteLayerBtn.disabled = true
+  //active paste happening, disable layer interface. NOTE: Possible room for improvement: allow hide and settings buttons to be interacted with since they are not tied to the undoStack
+  if (canvas.pastedLayer) {
+    dom.layersInterfaceContainer.classList.add("disabled")
   } else {
-    dom.deleteLayerBtn.disabled = false
+    dom.layersInterfaceContainer.classList.remove("disabled")
+    if (
+      canvas.activeLayerCount <= 1 &&
+      canvas.currentLayer?.type !== "reference"
+    ) {
+      dom.deleteLayerBtn.disabled = true
+    } else {
+      dom.deleteLayerBtn.disabled = false
+    }
   }
 }
 

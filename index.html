@@ -141,6 +141,13 @@
               >
                 Flip Vertical
               </li> -->
+              <!-- <li
+                role="menuitem"
+                id="rotate-right"
+                data-tooltip="Rotate selection 90 degrees clockwise"
+              >
+                Rotate Right
+              </li> -->
             </ul>
           </li>
         </ul>
@@ -408,14 +415,14 @@
             </div>
             <div class="collapsible">
               <div class="layers-control">
-                <div class="add-layer" data-tooltip="New Layer"></div>
+                <button class="add-layer" data-tooltip="New Layer"></button>
+                <input type="file" id="file-upload" />
                 <label
                   for="file-upload"
                   class="reference"
                   data-tooltip="New Reference"
                 >
                 </label>
-                <input type="file" id="file-upload" />
                 <button
                   type="button"
                   class="trash"
@@ -563,22 +570,22 @@
                   type="button"
                   class="tool line"
                   id="line"
-                  aria-label="Line (L or Hold Shift & Brush)"
-                  data-tooltip="Line (L or Hold Shift & Brush)"
+                  aria-label="Line (/ or Hold Shift & Brush)"
+                  data-tooltip="Line (/ or Hold Shift & Brush)"
                 />
                 <button
                   type="button"
                   class="tool quadCurve"
                   id="quadCurve"
-                  aria-label="Quadratic Curve (C)"
-                  data-tooltip="Quadratic Curve (C)"
+                  aria-label="Quadratic Curve (Q)"
+                  data-tooltip="Quadratic Curve (Q)"
                 />
                 <button
                   type="button"
                   class="tool cubicCurve"
                   id="cubicCurve"
-                  aria-label="Cubic Curve (J)"
-                  data-tooltip="Cubic Curve (J)"
+                  aria-label="Cubic Curve (C)"
+                  data-tooltip="Cubic Curve (C)"
                 />
                 <button
                   type="button"

@@ -104,7 +104,7 @@ export const state = {
       py2: null,
     },
     canvas: null,
-    //TODO: for copying vectors, need more properties
+    //TODO: (High Priority) for copying vectors, need more properties
   },
   //for perfect pixels
   lastDrawnX: null,
@@ -126,7 +126,7 @@ export const state = {
 
 /**
  * Reset some state properties
- * TODO: add other items to reset such as those reset after an action is pushed to undoStack
+ * TODO: (Low Priority) add other items to reset such as those reset after an action is pushed to undoStack
  */
 function reset() {
   state.clickCounter = 0
@@ -172,7 +172,7 @@ function resetBoundaryBox() {
 
 /**
  * Set boundaryBox
- * @param {Object} selectProperties
+ * @param {object} selectProperties
  */
 function setBoundaryBox(selectProperties) {
   state.boundaryBox.xMin = Math.min(selectProperties.px1, selectProperties.px2)

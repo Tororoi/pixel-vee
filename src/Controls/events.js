@@ -14,7 +14,7 @@ import { throttle } from "../utils/eventHelpers.js"
 
 /**
  * Set global coordinates
- * TODO: move to separate file and import
+ * TODO: (Middle Priority) move to separate file and import
  * @param {UIEvent} e - PointerEvent, WheelEvent
  */
 const setCoordinates = (e) => {
@@ -252,7 +252,7 @@ function handlePointerUp(e) {
     //Reset redostack
     state.redoStack = []
   }
-  //Deactivate pending shortcuts TODO: set active shortcut with key code to allow cleaner logic like if (state.shortcut.active) {deactivateShortcut(state.shortcut.keyCode)}
+  //Deactivate pending shortcuts
   if (state.tool.name !== dom.toolBtn.id) {
     if (!keys.AltLeft && !keys.AltRight && state.tool.name === "eyedropper") {
       deactivateShortcut("AltLeft")
@@ -274,7 +274,7 @@ function handlePointerUp(e) {
  * @param {PointerEvent} e
  */
 function handlePointerOut(e) {
-  //TODO: if touchscreen, need to handle differently. Currently cannot reach next code since clicked will be false.
+  //TODO: (Low Priority) if touchscreen, need to handle differently. Currently cannot reach next code since clicked will be false.
   //Only purpose is to rerender with multi step tools such as curve when moving out or in the case of touch, lifting finger
   if (!state.touch && state.clickCounter === 0) {
     renderCanvas(canvas.currentLayer)

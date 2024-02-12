@@ -125,6 +125,10 @@ export function actionPasteSelection() {
     !canvas.currentLayer.isPreview &&
     state.selectClipboard.canvas
   ) {
+    // Store whether selection was active before paste action
+    let prePasteSelectProperties = { ...state.selectProperties }
+    let prePasteInvertSelection = state.selectionInversed
+    //paste selected pixels
     pasteSelectedPixels(state.selectClipboard, canvas.currentLayer)
     //adjust boundaryBox for layer offset
     const boundaryBox = { ...state.selectClipboard.boundaryBox }
@@ -147,9 +151,12 @@ export function actionPasteSelection() {
       layer: canvas.currentLayer,
       properties: {
         confirmed: false,
+        prePasteInvertSelection,
+        prePasteSelectProperties,
         boundaryBox,
         selectProperties,
-        canvas: state.selectClipboard.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
+        invertSelection: state.selectionInversed,
+        canvas: state.selectClipboard.canvas,
         canvasProperties: {
           dataUrl: state.selectClipboard.canvas.toDataURL(),
           width: state.selectClipboard.canvas.width,
@@ -164,6 +171,8 @@ export function actionPasteSelection() {
     renderCanvas(canvas.currentLayer)
     renderLayersToDOM()
     switchTool("move")
+    //disable clear button. TODO: When toolbox has a dom render function like layers and vectors, this should be moved there
+    dom.clearBtn.disabled = true
   }
 }
 
@@ -221,7 +230,8 @@ export function actionConfirmPastedPixels() {
         confirmed: true,
         boundaryBox,
         selectProperties,
-        canvas: lastPasteAction.properties.canvas, //TODO: When saving, convert to dataURL and when loading, convert back to canvas
+        invertSelection: lastPasteAction.properties.invertSelection,
+        canvas: lastPasteAction.properties.canvas,
         canvasProperties: {
           dataUrl: lastPasteAction.properties.canvas.toDataURL(),
           width: lastPasteAction.properties.canvas.width,
@@ -232,17 +242,19 @@ export function actionConfirmPastedPixels() {
     state.action = null
     state.redoStack = []
     //reset state properties
-    state.deselect()
-    canvas.rasterGuiCTX.clearRect(
-      0,
-      0,
-      canvas.rasterGuiCVS.width,
-      canvas.rasterGuiCVS.height
-    )
+    // state.deselect()
+    // canvas.rasterGuiCTX.clearRect(
+    //   0,
+    //   0,
+    //   canvas.rasterGuiCVS.width,
+    //   canvas.rasterGuiCVS.height
+    // )
     //render
     vectorGui.render()
     renderCanvas()
     renderLayersToDOM()
+    //reenable clear button. TODO: When toolbox has a dom render function like layers and vectors, this should be moved there
+    dom.clearBtn.disabled = false
   }
 }
 
@@ -254,6 +266,10 @@ export function actionConfirmPastedPixels() {
  * Upload an image and create a new reference layer
  */
 export function addReferenceLayer() {
+  if (canvas.pastedLayer) {
+    //if there is a pasted layer, temporary layer is active and layers configuration should not be messed with
+    return
+  }
   let reader
   let img = new Image()
 
@@ -285,6 +301,10 @@ export function addReferenceLayer() {
  * Add a new raster layer
  */
 export function addRasterLayer() {
+  if (canvas.pastedLayer) {
+    //if there is a pasted layer, temporary layer is active and layers configuration should not be messed with
+    return
+  }
   //once layer is added to timeline and drawn on, can no longer be deleted
   const layer = createRasterLayer()
   canvas.layers.push(layer)
@@ -299,7 +319,7 @@ export function addRasterLayer() {
 
 /**
  * Mark a layer as removed
- * @param {Object} layer
+ * @param {object} layer
  */
 export function removeLayer(layer) {
   //set "removed" flag to true on selected layer.

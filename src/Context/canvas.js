@@ -82,7 +82,7 @@ canvas.offScreenCVS.width = 256
 canvas.offScreenCVS.height = 256
 canvas.previewCVS.width = canvas.offScreenCVS.width
 canvas.previewCVS.height = canvas.offScreenCVS.height
-//set the dimensions of the thumbnail canvas
+//set the dimensions of the thumbnail canvas (NOTE: this is hardcoded based on an initial canvas width of 256)
 canvas.thumbnailCVS.width = canvas.offScreenCVS.width + 344
 canvas.thumbnailCVS.height = canvas.offScreenCVS.height
 //improve sharpness
