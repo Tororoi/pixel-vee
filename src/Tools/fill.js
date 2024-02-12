@@ -22,7 +22,7 @@ function fillSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       vectorGui.render()
-      if (vectorGui.collisionPresent) {
+      if (vectorGui.selectedCollisionPresent) {
         adjustFillSteps()
       } else {
         // //reset control points
@@ -95,7 +95,7 @@ export function adjustFillSteps() {
   let currentVector = state.undoStack[canvas.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (vectorGui.collisionPresent) {
+      if (vectorGui.selectedCollisionPresent) {
         state.vectorProperties[vectorGui.collidedKeys.xKey] = state.cursorX
         state.vectorProperties[vectorGui.collidedKeys.yKey] = state.cursorY
         vectorGui.selectedPoint = {

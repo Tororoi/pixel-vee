@@ -13,6 +13,7 @@ import {
   updateLinkedVectors,
   updateLockedCurrentVectorControlHandle,
   createActiveIndexesForRender,
+  renderCurrentVector,
 } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
@@ -29,7 +30,7 @@ import { addToTimeline } from "../Actions/undoRedo.js"
  * Supported modes: "draw, erase",
  */
 function quadCurveSteps() {
-  if (vectorGui.collisionPresent && state.clickCounter === 0) {
+  if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
     adjustCurveSteps()
     return
   }
@@ -201,16 +202,17 @@ function cubicCurveSteps() {
   //To select via the canvas, need to check for canvas.collidedVectorIndex and then use vectorGui.setVectorProperties(collidedVectorAction)
   if (
     canvas.collidedVectorIndex &&
-    !vectorGui.collisionPresent &&
+    !vectorGui.selectedCollisionPresent &&
     state.clickCounter === 0
   ) {
-    //TODO: (High Priority) Need to fix linked vectors on selecting vector via canvas. Check handleCollisionAndDraw function.
     let collidedVector = state.undoStack[canvas.collidedVectorIndex]
     vectorGui.setVectorProperties(collidedVector)
+    //Render new selected vector before running standard render routine
+    //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.
+    renderCurrentVector()
     vectorGui.render()
-    console.log(vectorGui.collisionPresent, state.clickCounter)
   }
-  if (vectorGui.collisionPresent && state.clickCounter === 0) {
+  if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
     adjustCurveSteps()
     return
   }
@@ -411,7 +413,7 @@ function adjustCurveSteps() {
   let currentVector = state.undoStack[canvas.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (vectorGui.collisionPresent && state.clickCounter === 0) {
+      if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
         state.vectorProperties[vectorGui.collidedKeys.xKey] = state.cursorX
         state.vectorProperties[vectorGui.collidedKeys.yKey] = state.cursorY
         vectorGui.selectedPoint = {
@@ -492,12 +494,13 @@ function adjustCurveSteps() {
         if (state.tool.options.link?.active) {
           updateLinkedVectors(currentVector)
         }
-        //Handle snapping to other control points. Only snap when there are no linked vectors to selected vector.
+        //Handle snapping p1 or p2 to other control points. Only snap when there are no linked vectors to selected vector.
         if (
           (state.tool.options.align?.active ||
             state.tool.options.equal?.active ||
             state.tool.options.link?.active) &&
-          Object.keys(state.vectorsSavedProperties).length === 1
+          Object.keys(state.vectorsSavedProperties).length === 1 &&
+          ["px1", "px2"].includes(vectorGui.selectedPoint.xKey)
         ) {
           //snap selected point to collidedVector's control point
           if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {

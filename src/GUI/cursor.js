@@ -32,7 +32,7 @@ export function renderCursor(state, canvas, swatches) {
       //show nothing
       break
     default:
-      if (!vectorGui.collisionPresent) {
+      if (!vectorGui.selectedCollisionPresent) {
         renderCanvas(canvas.currentLayer)
         //Then renderCanvas would not need to be called here.
         actionDraw(

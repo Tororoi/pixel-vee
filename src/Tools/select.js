@@ -20,7 +20,7 @@ import { vectorGui } from "../GUI/vector.js"
  * Command + I to invert selection
  */
 function selectSteps() {
-  if (vectorGui.collisionPresent && state.clickCounter === 0) {
+  if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
     adjustSelectSteps()
     return
   }

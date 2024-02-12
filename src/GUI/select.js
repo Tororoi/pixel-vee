@@ -361,7 +361,7 @@ function handleSelectCollisionAndDraw(
  * @returns
  */
 function setSelectionCursorStyle() {
-  if (!vectorGui.collisionPresent) {
+  if (!vectorGui.selectedCollisionPresent) {
     canvas.vectorGuiCVS.style.cursor = state.tool.cursor
     return
   }

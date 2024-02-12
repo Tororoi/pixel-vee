@@ -26,18 +26,18 @@ import {
 export const vectorGui = {
   grid: false,
   gridSpacing: 8,
-  collisionPresent: false,
+  selectedCollisionPresent: false,
   collidedKeys: { xKey: null, yKey: null },
   selectedPoint: { xKey: null, yKey: null },
   otherCollidedKeys: { xKey: null, yKey: null },
   linkedVectors: {},
   drawControlPoints,
   resetCollision() {
-    this.collisionPresent = false
+    this.selectedCollisionPresent = false
     this.collidedKeys = { xKey: null, yKey: null }
   },
   setCollision(keys) {
-    this.collisionPresent = true
+    this.selectedCollisionPresent = true
     this.collidedKeys.xKey = keys.x
     this.collidedKeys.yKey = keys.y
   },
@@ -139,22 +139,20 @@ function handleCollisionAndDraw(
     ) {
       //if cursor is colliding with a control point not on the selected vector, set collided keys specifically for collided vector
       if (vectorAction) {
-        // canvas.collidedVectorIndex = vectorAction.index
+        //TODO: BUG: if selectedPoint is p3 or p4, vector will be linked when it's coordinates overlap. p3 or p4 should only be linked through their related p1 or p2
         if (keys.x === "px1" || keys.x === "px2") {
           canvas.collidedVectorIndex = vectorAction.index
-          r = radius * 2.125
           vectorGui.setOtherVectorCollision(keys)
           vectorGui.addLinkedVector(vectorAction, keys.x)
-        }
-        //TODO: set for px3 and px4 if selected vector is not being modified
-        if (
+          //only set new radius if selected vector is not a new vector being drawn
+          if (state.clickCounter === 0) r = radius * 2.125
+        } else if (
           (keys.x === "px3" || keys.x === "px4") &&
           !vectorGui.selectedPoint.xKey
         ) {
           canvas.collidedVectorIndex = vectorAction.index
-          r = radius * 2.125
-          // vectorGui.setOtherVectorCollision(keys)
-          // vectorGui.addLinkedVector(vectorAction, keys.x)
+          //only set new radius if selected vector is not a new vector being drawn
+          if (state.clickCounter === 0) r = radius * 2.125
         }
       } else {
         r = radius * 2.125
@@ -195,7 +193,7 @@ function handleCollisionAndDraw(
  * @returns
  */
 function setCursorStyle() {
-  if (!vectorGui.collisionPresent) {
+  if (!vectorGui.selectedCollisionPresent && !canvas.collidedVectorIndex) {
     canvas.vectorGuiCVS.style.cursor = state.tool.modes?.eraser
       ? "none"
       : state.tool.cursor
@@ -204,7 +202,14 @@ function setCursorStyle() {
 
   //If pointer is colliding with a vector control point:
   if (state.tool.name !== "move") {
-    canvas.vectorGuiCVS.style.cursor = "move" //TODO: (Low Priority) maybe use grab/ grabbing
+    if (state.clickCounter !== 0) {
+      //creating new vector, don't use grab cursor
+      canvas.vectorGuiCVS.style.cursor = "move"
+    } else if (state.clicked) {
+      canvas.vectorGuiCVS.style.cursor = "grabbing"
+    } else {
+      canvas.vectorGuiCVS.style.cursor = "grab"
+    }
   } else {
     //Handle cursor for transform
     const xKey = vectorGui.collidedKeys.xKey
@@ -429,7 +434,7 @@ function renderLayerVectors(layer) {
 /**
  * Render the current vector
  */
-function renderCurrentVector() {
+export function renderCurrentVector() {
   //render paths
   renderPath(state.tool.name, state.vectorProperties)
   if (!state.tool.options.displayPaths?.active) {

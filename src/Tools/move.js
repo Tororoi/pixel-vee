@@ -18,7 +18,7 @@ function moveSteps() {
       state.grabStartY = canvas.currentLayer.y
       state.startScale = canvas.currentLayer.scale
       vectorGui.render()
-      if (vectorGui.collisionPresent) {
+      if (vectorGui.selectedCollisionPresent) {
         scaleSteps()
       }
       break
@@ -79,7 +79,7 @@ function scaleSteps() {
   //move raster layer or reference layer
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (vectorGui.collisionPresent) {
+      if (vectorGui.selectedCollisionPresent) {
         vectorGui.selectedPoint = {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,

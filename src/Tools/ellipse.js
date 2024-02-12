@@ -29,7 +29,7 @@ function ellipseSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
-  if (vectorGui.collisionPresent && state.clickCounter === 0) {
+  if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
     adjustEllipseSteps()
     return
   }
@@ -260,7 +260,7 @@ function updateEllipseVectorProperties(currentVector) {
  */
 export function adjustEllipseSteps() {
   let currentVector = state.undoStack[canvas.currentVectorIndex]
-  if (!(vectorGui.collisionPresent && state.clickCounter === 0)) {
+  if (!(vectorGui.selectedCollisionPresent && state.clickCounter === 0)) {
     return
   }
   switch (canvas.pointerEvent) {
