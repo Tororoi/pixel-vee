@@ -180,6 +180,10 @@ dom.openSaveBtn.addEventListener("click", (e) => {
   e.target.value = null
 })
 dom.topMenu.addEventListener("click", (e) => {
+  if (canvas.pastedLayer && e.target.classList.contains("disabled")) {
+    e.preventDefault()
+    return
+  }
   //check if active element has class menu-folder and class "active"
   if (document.activeElement.classList.contains("menu-folder")) {
     //if so, toggle the active class
@@ -203,9 +207,17 @@ dom.exportBtn.addEventListener("click", exportImage)
 dom.saveBtn.addEventListener("click", openSaveDialogBox)
 //Edit Submenu events
 dom.canvasSizeBtn.addEventListener("click", (e) => {
+  if (canvas.pastedLayer) {
+    //if there is a pasted layer active, do not open canvas size dialog
+    return
+  }
   dom.sizeContainer.style.display = "flex"
 })
 dom.selectAllBtn.addEventListener("click", (e) => {
+  if (canvas.pastedLayer) {
+    //if there is a pasted layer active, do not perform action
+    return
+  }
   //select all pixels on canvas
   if (canvas.currentLayer.type === "raster") {
     state.selectProperties.px1 = 0

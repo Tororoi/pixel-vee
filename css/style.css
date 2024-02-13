@@ -754,10 +754,11 @@ svg {
 }
 .nav .nav-menu #top-menu li ul li.disabled {
   opacity: 0.6;
+  background-color: rgb(61, 61, 61);
   cursor: not-allowed;
 }
 .nav .nav-menu #top-menu li ul li.disabled:hover {
-  background-color: rgb(0, 0, 0);
+  background-color: rgb(61, 61, 61);
   color: rgb(255, 255, 255);
 }
 .nav .nav-menu #top-menu li.active {

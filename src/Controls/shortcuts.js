@@ -31,7 +31,8 @@ import { toggleMode, switchTool } from "../Tools/toolbox.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
- * TODO: (High Priority) prevent certain shortcuts when certain actions are active such as pasting, dragging, etc.
+ * TODO: (High Priority) prevent certain shortcuts when certain actions are active such as pasting, dragging, etc. - tools (done), cut, copy, paste,
+ * TODO: (High Priority) prevent certain shortcuts when not available during selection: cut, copy, paste,
  * @param {string} keyCode
  */
 export function activateShortcut(keyCode) {

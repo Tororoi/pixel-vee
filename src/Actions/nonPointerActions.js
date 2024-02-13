@@ -31,61 +31,73 @@ import { removeTempLayerFromDOM } from "../DOM/renderLayers.js"
 /**
  * Deselect
  * Not dependent on pointer events
+ * Conditions: Layer is not a preview layer, and there is a selection
  */
 export function actionDeselect() {
-  // let maskArray = coordArrayFromSet(
-  //   state.maskSet,
-  //   canvas.currentLayer.x,
-  //   canvas.currentLayer.y
-  // )
-  addToTimeline({
-    tool: tools.select,
-    layer: canvas.currentLayer,
-    properties: {
-      deselect: true,
-      invertSelection: state.selectionInversed,
-      selectProperties: { ...state.selectProperties },
-      // maskArray,
-    },
-  })
-  state.action = null
-  state.redoStack = []
-  state.deselect()
-  canvas.rasterGuiCTX.clearRect(
-    0,
-    0,
-    canvas.rasterGuiCVS.width,
-    canvas.rasterGuiCVS.height
-  )
+  if (!canvas.currentLayer.isPreview && state.boundaryBox.xMax !== null) {
+    // let maskArray = coordArrayFromSet(
+    //   state.maskSet,
+    //   canvas.currentLayer.x,
+    //   canvas.currentLayer.y
+    // )
+    addToTimeline({
+      tool: tools.select,
+      layer: canvas.currentLayer,
+      properties: {
+        deselect: true,
+        invertSelection: state.selectionInversed,
+        selectProperties: { ...state.selectProperties },
+        // maskArray,
+      },
+    })
+    state.action = null
+    state.redoStack = []
+    state.deselect()
+    canvas.rasterGuiCTX.clearRect(
+      0,
+      0,
+      canvas.rasterGuiCVS.width,
+      canvas.rasterGuiCVS.height
+    )
+  }
 }
 
 /**
  * Invert Selection
  * Not dependent on pointer events
+ * Conditions: Layer is a raster layer, layer is not a preview layer, and there is a selection
  */
 export function actionInvertSelection() {
-  addToTimeline({
-    tool: tools.select,
-    layer: canvas.currentLayer,
-    properties: {
-      deselect: false,
-      invertSelection: !state.selectionInversed,
-      selectProperties: { ...state.selectProperties },
-    },
-  })
-  state.action = null
-  state.redoStack = []
-  state.invertSelection()
-  vectorGui.render()
+  if (
+    canvas.currentLayer.type === "raster" &&
+    !canvas.currentLayer.isPreview &&
+    state.boundaryBox.xMax !== null
+  ) {
+    addToTimeline({
+      tool: tools.select,
+      layer: canvas.currentLayer,
+      properties: {
+        deselect: false,
+        invertSelection: !state.selectionInversed,
+        selectProperties: { ...state.selectProperties },
+      },
+    })
+    state.action = null
+    state.redoStack = []
+    state.invertSelection()
+    vectorGui.render()
+  }
 }
 
 /**
  * Cut Selection
  * Not dependent on pointer events
+ * Conditions: Layer is a raster layer, layer is not a preview layer, and there is a selection
  */
 export function actionCutSelection() {
   if (
     canvas.currentLayer.type === "raster" &&
+    !canvas.currentLayer.isPreview &&
     state.boundaryBox.xMax !== null
   ) {
     cutSelectedPixels()
@@ -118,6 +130,7 @@ export function actionCutSelection() {
  * Action will not fire if there is no selection in the clipboard,
  * the current layer is not a raster layer, or if the current layer is a preview layer
  * Always uses the state clipboard for pasting, which is the last clipboard used for copying or cutting
+ * Conditions: Layer is a raster layer, layer is not a preview layer, and there is something in the clipboard to be pasted
  */
 export function actionPasteSelection() {
   if (
@@ -173,6 +186,14 @@ export function actionPasteSelection() {
     switchTool("move")
     //disable clear button. TODO: When toolbox has a dom render function like layers and vectors, this should be moved there
     dom.clearBtn.disabled = true
+    //disable menu buttons that can't work with a temporary layer active - cut, copy, paste, deselect, invert selection, select all, resize canvas
+    dom.canvasSizeBtn.classList.add("disabled")
+    dom.selectAllBtn.classList.add("disabled")
+    dom.deselectBtn.classList.add("disabled")
+    dom.invertSelectionBtn.classList.add("disabled")
+    dom.cutBtn.classList.add("disabled")
+    dom.copyBtn.classList.add("disabled")
+    dom.pasteBtn.classList.add("disabled")
   }
 }
 
@@ -183,6 +204,7 @@ export function actionPasteSelection() {
  * or if there is no selection in the clipboard
  * clipboard used is from last paste action in order to decouple from the state clipboard, which may be empty when using undo/redo to go to an unconfirmed paste action.
  * Alternatively, the state clipboard may have other content which the user should not have overridden without them explicitly copying the new content.
+ * Conditions: Layer is a raster layer, and the most recent paste action is unconfirmed
  */
 export function actionConfirmPastedPixels() {
   let lastPasteAction = null
@@ -264,6 +286,7 @@ export function actionConfirmPastedPixels() {
 
 /**
  * Upload an image and create a new reference layer
+ * Conditions: No active paste action (temporary layer)
  */
 export function addReferenceLayer() {
   if (canvas.pastedLayer) {
@@ -299,6 +322,7 @@ export function addReferenceLayer() {
 /**
  * Add layer
  * Add a new raster layer
+ * Conditions: No active paste action (temporary layer)
  */
 export function addRasterLayer() {
   if (canvas.pastedLayer) {
