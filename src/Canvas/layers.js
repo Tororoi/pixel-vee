@@ -9,6 +9,7 @@ import { canvas } from "../Context/canvas.js"
 /**
  * Draw all layers onto offscreen canvas to prepare for sampling or export
  * @param {boolean} includeReference - whether to include reference layers as part of consolidated canvas
+ * TODO: add a param to optionally discard any preview layers
  */
 export function consolidateLayers(includeReference = false) {
   canvas.offScreenCTX.clearRect(

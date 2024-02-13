@@ -15,7 +15,9 @@ export function sanitizeLayers(
   let sanitizedLayers = JSON.parse(JSON.stringify(layers))
   for (let i = sanitizedLayers.length - 1; i >= 0; i--) {
     const layer = sanitizedLayers[i]
-    if (layer.removed && !preserveHistory && !includeRemovedActions) {
+    if (layer.isPreview) {
+      sanitizedLayers.splice(i, 1)
+    } else if (layer.removed && !preserveHistory && !includeRemovedActions) {
       sanitizedLayers.splice(i, 1)
     } else if (
       layer.type === "reference" &&
@@ -65,9 +67,17 @@ export function sanitizeHistory(
   includeRemovedActions
 ) {
   let sanitizedUndoStack = JSON.parse(JSON.stringify(undoStack))
+  let lastPasteActionIndex
   for (let i = sanitizedUndoStack.length - 1; i >= 0; i--) {
     const action = sanitizedUndoStack[i]
-    if (
+    //if active paste action, find the latest unconfirmed paste action and remove it and all actions after it
+    if (action.tool.name === "paste" && !lastPasteActionIndex) {
+      lastPasteActionIndex = i
+      if (!action.properties.confirmed) {
+        //remove the unconfirmed paste action and all actions after it
+        sanitizedUndoStack.splice(i, sanitizedUndoStack.length - i)
+      }
+    } else if (
       (action.layer.removed || action.removed) &&
       !preserveHistory &&
       !includeRemovedActions
