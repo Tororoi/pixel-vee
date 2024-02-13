@@ -26,7 +26,7 @@ function eyedropperSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //get imageData
-      consolidateLayers(true)
+      consolidateLayers(true, true)
       state.colorLayerGlobal = canvas.offScreenCTX.getImageData(
         0,
         0,

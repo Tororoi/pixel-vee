@@ -163,7 +163,6 @@
   &.disabled {
     .collapsible {
       cursor: not-allowed;
-      @include boxBorder($border-color, $border-color);
       * {
         pointer-events: none;
       }

@@ -1562,10 +1562,6 @@ canvas {
 }
 .vectors-interface.disabled .collapsible {
   cursor: not-allowed;
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
-}
-.vectors-interface.disabled .collapsible:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .vectors-interface.disabled .collapsible * {
   pointer-events: none;
