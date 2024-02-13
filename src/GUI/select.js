@@ -65,7 +65,7 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
   canvas.rasterGuiCTX.save()
-  canvas.rasterGuiCTX.lineWidth = lineWidth * 2
+  canvas.rasterGuiCTX.lineWidth = lineWidth
   canvas.rasterGuiCTX.strokeStyle = "white"
   canvas.rasterGuiCTX.fillStyle = "white"
   canvas.rasterGuiCTX.lineCap = "round"
@@ -74,7 +74,7 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
   if (state.boundaryBox.xMax !== null) {
     if (!canvas.pastedLayer) {
       //if active unconfirmed paste action, don't draw the dashed selection outline
-      canvas.rasterGuiCTX.setLineDash([lineWidth * 8, lineWidth * 8])
+      canvas.rasterGuiCTX.setLineDash([lineWidth * 6, lineWidth * 6])
     }
     canvas.rasterGuiCTX.beginPath()
     canvas.rasterGuiCTX.rect(
