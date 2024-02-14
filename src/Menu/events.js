@@ -180,7 +180,7 @@ dom.openSaveBtn.addEventListener("click", (e) => {
   e.target.value = null
 })
 dom.topMenu.addEventListener("click", (e) => {
-  if (canvas.pastedLayer && e.target.classList.contains("disabled")) {
+  if (e.target.classList.contains("disabled")) {
     e.preventDefault()
     return
   }

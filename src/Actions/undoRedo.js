@@ -12,7 +12,7 @@ import { switchTool } from "../Tools/toolbox.js"
 import { removeTempLayerFromDOM } from "../DOM/renderLayers.js"
 import {
   disableActionsForPaste,
-  reEnableActionsFromPaste,
+  enableActionsForNoPaste,
 } from "../DOM/disableDomElements.js"
 
 //====================================//
@@ -203,7 +203,7 @@ function handlePasteAction(latestAction, modType) {
       )
     }
     vectorGui.render()
-    reEnableActionsFromPaste()
+    enableActionsForNoPaste()
   } else if (modType === "to") {
     //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
     pasteSelectedPixels(
@@ -236,7 +236,7 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
     removeTempLayerFromDOM()
     //render
     vectorGui.render()
-    reEnableActionsFromPaste()
+    enableActionsForNoPaste()
   }
 }
 

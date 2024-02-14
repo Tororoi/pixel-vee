@@ -21,7 +21,7 @@ import { select } from "../Tools/select.js"
 import { removeTempLayerFromDOM } from "../DOM/renderLayers.js"
 import {
   disableActionsForPaste,
-  reEnableActionsFromPaste,
+  enableActionsForNoPaste,
 } from "../DOM/disableDomElements.js"
 
 //=============================================//
@@ -300,7 +300,7 @@ export function actionConfirmPastedPixels() {
     vectorGui.render()
     renderCanvas()
     renderLayersToDOM()
-    reEnableActionsFromPaste()
+    enableActionsForNoPaste()
   }
 }
 

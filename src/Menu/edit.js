@@ -6,6 +6,7 @@ import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
+import { enableActionsForClipboard } from "../DOM/disableDomElements.js"
 
 //===================================//
 //========= * * * Edit * * * ========//
@@ -46,6 +47,7 @@ export function copySelectedPixels() {
     yMax: tempCanvas.height,
   }
   state.selectClipboard.canvas = tempCanvas
+  enableActionsForClipboard()
 }
 
 /**
