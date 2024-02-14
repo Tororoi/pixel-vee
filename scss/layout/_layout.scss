@@ -120,8 +120,8 @@
   text-align: center;
   padding: 5px;
   align-self: flex-start;
-  transition: opacity 0.3s;
-  transition-delay: 0.5s;
+  // transition: opacity 0.3s;
+  // transition-delay: 0.3s;
   z-index: 1000;
   box-shadow: 2px 0px $tooltip-color, -2px 0px $tooltip-color,
     0px -2px $tooltip-color, 0px 2px $tooltip-color;
@@ -141,6 +141,8 @@
   &.visible {
     visibility: visible;
     opacity: 1;
+    transition: opacity 0.3s;
+    // transition-delay: 0.3s;
   }
   &.page-left {
     &:after {

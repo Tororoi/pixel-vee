@@ -456,8 +456,6 @@ svg {
   text-align: center;
   padding: 5px;
   align-self: flex-start;
-  transition: opacity 0.3s;
-  transition-delay: 0.5s;
   z-index: 1000;
   box-shadow: 2px 0px rgb(255, 255, 199), -2px 0px rgb(255, 255, 199), 0px -2px rgb(255, 255, 199), 0px 2px rgb(255, 255, 199);
 }
@@ -475,6 +473,7 @@ svg {
 .tooltip.visible {
   visibility: visible;
   opacity: 1;
+  transition: opacity 0.3s;
 }
 .tooltip.page-left:after {
   content: "";

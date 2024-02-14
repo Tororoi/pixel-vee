@@ -12,6 +12,7 @@ import {
 
 //Main state object to keep track of global vars
 export const state = {
+  tooltipMessage: null,
   captureTesting: false,
   testNumPoints: 1000,
   //timeline

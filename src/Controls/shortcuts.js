@@ -227,7 +227,12 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyT":
-      //
+      dom.tooltipBtn.checked = !dom.tooltipBtn.checked
+      if (dom.tooltipBtn.checked && state.tooltipMessage) {
+        dom.tooltip.classList.add("visible")
+      } else {
+        dom.tooltip.classList.remove("visible")
+      }
       break
     case "KeyU":
       //

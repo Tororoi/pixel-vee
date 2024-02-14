@@ -29,7 +29,7 @@ import { actionCopySelection } from "../Actions/untrackedActions.js"
  * @param {string} message
  * @param {Element} target
  */
-const showTooltip = (message, target) => {
+const generateTooltip = (message, target) => {
   if (message && target) {
     //reset tooltip
     dom.tooltip.classList.remove("page-left")
@@ -55,7 +55,7 @@ const showTooltip = (message, target) => {
       tooltipX = targetRect.left + targetRect.width
     }
     const tooltipY = targetRect.top + targetRect.height + 16
-    dom.tooltip.classList.add("visible")
+    // dom.tooltip.classList.add("visible")
     if (location === "left") {
       dom.tooltip.classList.add("page-left")
     } else if (location === "center") {
@@ -64,7 +64,7 @@ const showTooltip = (message, target) => {
     dom.tooltip.style.top = tooltipY + "px"
     dom.tooltip.style.left = tooltipX + "px"
   } else {
-    dom.tooltip.classList.remove("visible")
+    // dom.tooltip.classList.remove("visible")
   }
 }
 
@@ -118,9 +118,13 @@ function openSavedDrawing() {
 //===================================//
 
 document.body.addEventListener("mouseover", (e) => {
-  if (dom.tooltipBtn.checked) {
-    const tooltipMessage = e.target.dataset?.tooltip
-    showTooltip(tooltipMessage, e.target)
+  state.tooltipMessage = e.target.dataset?.tooltip
+  generateTooltip(state.tooltipMessage, e.target)
+  //TODO: (Low Priority) Instead of rendering here, use a timer that resets on mousemove to detect idle time and move this logic to the mousemove event
+  if (dom.tooltipBtn.checked && state.tooltipMessage) {
+    dom.tooltip.classList.add("visible")
+  } else {
+    dom.tooltip.classList.remove("visible")
   }
 })
 dom.toolOptions.addEventListener("click", (e) => {
@@ -168,9 +172,14 @@ dom.gridSpacingSpinBtn.addEventListener("pointerdown", (e) => {
   vectorGui.render()
 })
 dom.tooltipBtn.addEventListener("click", (e) => {
-  if (dom.tooltipBtn.checked) {
-    const tooltipMessage = dom.tooltipBtn.parentNode.dataset?.tooltip
-    showTooltip(tooltipMessage, dom.tooltipBtn.parentNode)
+  // if (dom.tooltipBtn.checked) {
+  //   const tooltipMessage = dom.tooltipBtn.parentNode.dataset?.tooltip
+  //   generateTooltip(tooltipMessage, dom.tooltipBtn.parentNode)
+  // } else {
+  //   dom.tooltip.classList.remove("visible")
+  // }
+  if (dom.tooltipBtn.checked && state.tooltipMessage) {
+    dom.tooltip.classList.add("visible")
   } else {
     dom.tooltip.classList.remove("visible")
   }
