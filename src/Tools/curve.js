@@ -405,6 +405,7 @@ function cubicCurveSteps() {
  * Used automatically by curve tools after curve is completed.
  * TODO: (Low Priority) create distinct tool for adjusting that won't create a new curve when clicking.
  * Ideally a user should be able to click on a curve and render it's vector UI that way.
+ * BUG: cut selection not rendered properly in timeline
  */
 function adjustCurveSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
