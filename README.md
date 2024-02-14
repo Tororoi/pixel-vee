@@ -18,7 +18,7 @@ This app is a work in progress. See the bottom of this page for features that ar
   </tr>
   <tr>
     <td width="66" height="52"> <img src="public/pixelv-undo.svg" alt="Undo" width="40"/><img src="public/pixelv-redo.svg" alt="Redo" width="40"/> </td>
-    <td> Any action that makes a change to the canvas can be undone. </td>
+    <td> Actions that make a change to the canvas can be undone. Only affects actions which are non-reversible. Things like changing canvas dimensions, layer opacity, etc. are inherently reversible so do not qualify to be part of the undo functionality.</td>
   </tr>
   <tr>
     <td colspan="2"> Color Picker </td>
