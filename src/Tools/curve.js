@@ -682,7 +682,7 @@ export const cubicCurve = {
         "Toggle Equal Length (Shift). \n\nEnsures magnitude continuity of control handles for linked vectors.",
     }, // Magnitude continuity
     align: {
-      active: false,
+      active: true,
       tooltip:
         "Toggle Align (A). \n\nEnsures tangential continuity by moving the control handle to the opposite angle for linked vectors.",
     }, // Tangential continuity
@@ -692,7 +692,7 @@ export const cubicCurve = {
         "Toggle Hold (H). \n\nMaintain relative angles of all control handles attached to selected control point.",
     },
     link: {
-      active: false,
+      active: true,
       tooltip:
         "Toggle Linking (L). \n\nConnected control points of other vectors will move with selected control point.",
     }, // Positional continuity
