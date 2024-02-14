@@ -13,12 +13,12 @@ import {
 } from "../Save/savefile.js"
 import { measureTextWidth } from "../utils/measureHelpers.js"
 import {
+  actionSelectAll,
   actionDeselect,
   actionInvertSelection,
   actionCutSelection,
   actionPasteSelection,
 } from "../Actions/nonPointerActions.js"
-import { addToTimeline } from "../Actions/undoRedo.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
 
 //====================================//
@@ -213,30 +213,7 @@ dom.canvasSizeBtn.addEventListener("click", (e) => {
   }
   dom.sizeContainer.style.display = "flex"
 })
-dom.selectAllBtn.addEventListener("click", (e) => {
-  if (canvas.pastedLayer) {
-    //if there is a pasted layer active, do not perform action
-    return
-  }
-  //select all pixels on canvas
-  if (canvas.currentLayer.type === "raster") {
-    state.selectProperties.px1 = 0
-    state.selectProperties.py1 = 0
-    state.selectProperties.px2 = canvas.currentLayer.cvs.width
-    state.selectProperties.py2 = canvas.currentLayer.cvs.height
-    state.setBoundaryBox(state.selectProperties)
-    addToTimeline({
-      tool: tools.select,
-      layer: canvas.currentLayer,
-      properties: {
-        deselect: false,
-        invertSelection: state.selectionInversed,
-        selectProperties: { ...state.selectProperties },
-      },
-    })
-    vectorGui.render()
-  }
-})
+dom.selectAllBtn.addEventListener("click", actionSelectAll)
 dom.deselectBtn.addEventListener("click", actionDeselect)
 dom.invertSelectionBtn.addEventListener("click", actionInvertSelection)
 dom.cutBtn.addEventListener("click", actionCutSelection)

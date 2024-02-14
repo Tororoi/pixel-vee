@@ -19,6 +19,10 @@ import {
 import { switchTool } from "../Tools/toolbox.js"
 import { select } from "../Tools/select.js"
 import { removeTempLayerFromDOM } from "../DOM/renderLayers.js"
+import {
+  disableActionsForPaste,
+  reEnableActionsFromPaste,
+} from "../DOM/disableDomElements.js"
 
 //=============================================//
 //====== * * * Non Pointer Actions * * * ======//
@@ -27,6 +31,36 @@ import { removeTempLayerFromDOM } from "../DOM/renderLayers.js"
 //=============================================//
 //=========== * * * Selection * * * ===========//
 //=============================================//
+
+/**
+ * Select All
+ * Not dependent on pointer events
+ * Conditions: Layer is a raster layer, layer is not a preview layer
+ */
+export function actionSelectAll() {
+  if (canvas.pastedLayer) {
+    //if there is a pasted layer active, do not perform action
+    return
+  }
+  //select all pixels on canvas
+  if (canvas.currentLayer.type === "raster" && !canvas.currentLayer.isPreview) {
+    state.selectProperties.px1 = 0
+    state.selectProperties.py1 = 0
+    state.selectProperties.px2 = canvas.currentLayer.cvs.width
+    state.selectProperties.py2 = canvas.currentLayer.cvs.height
+    state.setBoundaryBox(state.selectProperties)
+    addToTimeline({
+      tool: tools.select,
+      layer: canvas.currentLayer,
+      properties: {
+        deselect: false,
+        invertSelection: state.selectionInversed,
+        selectProperties: { ...state.selectProperties },
+      },
+    })
+    vectorGui.render()
+  }
+}
 
 /**
  * Deselect
@@ -184,16 +218,7 @@ export function actionPasteSelection() {
     renderCanvas(canvas.currentLayer)
     renderLayersToDOM()
     switchTool("move")
-    //disable clear button. TODO: When toolbox has a dom render function like layers and vectors, this should be moved there
-    dom.clearBtn.disabled = true
-    //disable menu buttons that can't work with a temporary layer active - cut, copy, paste, deselect, invert selection, select all, resize canvas
-    dom.canvasSizeBtn.classList.add("disabled")
-    dom.selectAllBtn.classList.add("disabled")
-    dom.deselectBtn.classList.add("disabled")
-    dom.invertSelectionBtn.classList.add("disabled")
-    dom.cutBtn.classList.add("disabled")
-    dom.copyBtn.classList.add("disabled")
-    dom.pasteBtn.classList.add("disabled")
+    disableActionsForPaste()
   }
 }
 
@@ -275,8 +300,7 @@ export function actionConfirmPastedPixels() {
     vectorGui.render()
     renderCanvas()
     renderLayersToDOM()
-    //reenable clear button. TODO: When toolbox has a dom render function like layers and vectors, this should be moved there
-    dom.clearBtn.disabled = false
+    reEnableActionsFromPaste()
   }
 }
 
