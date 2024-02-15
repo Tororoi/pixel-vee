@@ -140,6 +140,21 @@ export async function loadDrawing(jsonFile) {
   dom.canvasLayers.innerHTML = ""
   canvas.layers = []
   state.undoStack = []
+  state.redoStack = []
+  //Not likely to be an issue, but reset just in case
+  state.points = []
+  state.action = null
+  state.vectorsSavedProperties = {}
+  state.activeIndexes = []
+  state.savedBetweenActionImages = []
+  //reset selection state
+  state.deselect()
+  canvas.rasterGuiCTX.clearRect(
+    0,
+    0,
+    canvas.rasterGuiCVS.width,
+    canvas.rasterGuiCVS.height
+  )
   vectorGui.reset()
 
   // Array to hold promises for image loading
@@ -286,7 +301,7 @@ export async function loadDrawing(jsonFile) {
   await Promise.all(imageLoadPromises)
 
   // Additional logic to update the UI, refresh the canvas, etc.
-  if (data.selectProperties) {
+  if (data.selectProperties && data.selectProperties.px1 !== null) {
     state.selectProperties = { ...data.selectProperties }
     state.setBoundaryBox(state.selectProperties)
   }

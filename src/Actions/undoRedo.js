@@ -177,6 +177,7 @@ function handlePasteAction(latestAction, modType) {
     dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
     canvas.tempLayer.inactiveTools.forEach((tool) => {
       dom[`${tool}Btn`].disabled = false
+      dom[`${tool}Btn`].classList.remove("deactivate-paste")
     })
     //restore the original layer
     canvas.currentLayer = latestAction.properties.pastedLayer
@@ -369,14 +370,6 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       newLatestAction.tool.name === "paste" &&
       newLatestAction.properties.confirmed
     ) {
-      //reset state properties
-      // state.deselect()
-      // canvas.rasterGuiCTX.clearRect(
-      //   0,
-      //   0,
-      //   canvas.rasterGuiCVS.width,
-      //   canvas.rasterGuiCVS.height
-      // )
       //render
       vectorGui.render()
     }

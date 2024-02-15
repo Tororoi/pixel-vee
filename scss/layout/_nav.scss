@@ -97,7 +97,8 @@
             background-color: $black;
             color: $white;
             cursor: pointer;
-            &.open-save {
+            &.open-save,
+            &.import-image {
               padding: 0;
               height: 38px;
               label {
@@ -121,6 +122,9 @@
               opacity: 0.6;
               background-color: $dark-gray;
               cursor: not-allowed;
+              * {
+                pointer-events: none;
+              }
               &:hover {
                 background-color: $dark-gray;
                 color: $white;

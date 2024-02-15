@@ -39,6 +39,9 @@
         background-color: $white;
         z-index: 105;
       }
+      &.deactivate-paste {
+        @include boxBorder($red);
+      }
       &.custom-shape {
         background-color: transparent;
         @include cancelBorder;
