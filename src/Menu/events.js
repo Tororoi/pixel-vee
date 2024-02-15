@@ -29,7 +29,7 @@ import { actionCopySelection } from "../Actions/untrackedActions.js"
  * @param {string} message
  * @param {Element} target
  */
-const generateTooltip = (message, target) => {
+export const generateTooltip = (message, target) => {
   if (message && target) {
     //reset tooltip
     dom.tooltip.classList.remove("page-left")
@@ -118,13 +118,53 @@ function openSavedDrawing() {
 //===================================//
 
 document.body.addEventListener("mouseover", (e) => {
-  state.tooltipMessage = e.target.dataset?.tooltip
-  generateTooltip(state.tooltipMessage, e.target)
   //TODO: (Low Priority) Instead of rendering here, use a timer that resets on mousemove to detect idle time and move this logic to the mousemove event
-  if (dom.tooltipBtn.checked && state.tooltipMessage) {
-    dom.tooltip.classList.add("visible")
-  } else {
+  if (!state.touch) {
+    state.tooltipMessage = e.target.dataset?.tooltip
+    if (
+      canvas.currentLayer.isPreview &&
+      e.target.classList.contains("deactivate-paste")
+    ) {
+      state.tooltipMessage =
+        state.tooltipMessage +
+        "\n\nCannot use with temporary pasted layer. Selecting will confirm pasted pixels."
+    }
+    generateTooltip(state.tooltipMessage, e.target)
+    if (dom.tooltipBtn.checked && state.tooltipMessage) {
+      dom.tooltip.classList.add("visible")
+    } else {
+      dom.tooltip.classList.remove("visible")
+    }
+  }
+})
+document.body.addEventListener("click", (e) => {
+  if (!state.touch) {
+    //Hide tooltip on click
     dom.tooltip.classList.remove("visible")
+  } else {
+    //Handle tooltip for mobile
+    let previousTooltipTarget = state.tooltipTarget
+    state.tooltipMessage = e.target.dataset?.tooltip
+    state.tooltipTarget = e.target
+    if (
+      canvas.currentLayer.isPreview &&
+      e.target.classList.contains("deactivate-paste")
+    ) {
+      state.tooltipMessage =
+        state.tooltipMessage +
+        "\n\nCannot use with temporary pasted layer. Selecting will confirm pasted pixels."
+    }
+    generateTooltip(state.tooltipMessage, e.target)
+    if (
+      dom.tooltipBtn.checked &&
+      state.tooltipMessage &&
+      state.tooltipTarget !== previousTooltipTarget
+    ) {
+      dom.tooltip.classList.add("visible")
+    } else {
+      dom.tooltip.classList.remove("visible")
+      state.tooltipTarget = null
+    }
   }
 })
 dom.toolOptions.addEventListener("click", (e) => {
@@ -172,12 +212,6 @@ dom.gridSpacingSpinBtn.addEventListener("pointerdown", (e) => {
   vectorGui.render()
 })
 dom.tooltipBtn.addEventListener("click", (e) => {
-  // if (dom.tooltipBtn.checked) {
-  //   const tooltipMessage = dom.tooltipBtn.parentNode.dataset?.tooltip
-  //   generateTooltip(tooltipMessage, dom.tooltipBtn.parentNode)
-  // } else {
-  //   dom.tooltip.classList.remove("visible")
-  // }
   if (dom.tooltipBtn.checked && state.tooltipMessage) {
     dom.tooltip.classList.add("visible")
   } else {

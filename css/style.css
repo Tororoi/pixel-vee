@@ -911,6 +911,12 @@ canvas {
   background-color: rgb(255, 255, 255);
   z-index: 105;
 }
+.toolbox .collapsible .tool.deactivate-paste {
+  box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
+}
+.toolbox .collapsible .tool.deactivate-paste:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
 .toolbox .collapsible .tool.custom-shape {
   background-color: transparent;
   box-shadow: none;
