@@ -308,7 +308,7 @@ function handleTouchStart(e) {
  */
 function handleMouseDown(e) {
   if (e.type === "mousedown") {
-    state.touch = false // NOTE: this also triggers when in tablet mode in chrome. Comment this out while testing
+    // state.touch = false // NOTE: this also triggers when in tablet mode in chrome. Comment this out while testing
   }
 }
 

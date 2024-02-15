@@ -131,8 +131,11 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
   //Store current layer in a separate variable to restore it after confirming pasted content
   canvas.pastedLayer = layer
   canvas.currentLayer = canvas.tempLayer
+  // canvas.currentLayer.inactiveTools.forEach((tool) => {
+  //   dom[`${tool}Btn`].disabled = true
+  // })
   canvas.currentLayer.inactiveTools.forEach((tool) => {
-    dom[`${tool}Btn`].disabled = true
+    dom[`${tool}Btn`].classList.add("deactivate-paste")
   })
 
   const { selectProperties, boundaryBox } = clipboard

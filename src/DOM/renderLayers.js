@@ -152,6 +152,7 @@ export function removeTempLayerFromDOM() {
   dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
   canvas.tempLayer.inactiveTools.forEach((tool) => {
     dom[`${tool}Btn`].disabled = false
+    dom[`${tool}Btn`].classList.remove("deactivate-paste")
   })
   //restore the original layer
   canvas.currentLayer = canvas.pastedLayer

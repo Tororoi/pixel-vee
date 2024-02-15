@@ -14,6 +14,7 @@ import {
 import { renderCursor } from "../GUI/cursor.js"
 import { testAction } from "../Testing/performanceTesting.js"
 import { storedActions } from "../Testing/storedActions.js"
+import { actionConfirmPastedPixels } from "../Actions/nonPointerActions.js"
 
 /**
  * Switch active tool
@@ -24,10 +25,14 @@ export function switchTool(toolName = null, toolBtn = null) {
   const targetToolBtn = toolBtn || document.querySelector(`#${toolName}`)
   if (targetToolBtn) {
     //failsafe for hacking tool ids
-    if (
-      tools[targetToolBtn?.id] &&
-      !canvas.currentLayer.inactiveTools.includes(targetToolBtn?.id)
-    ) {
+    if (tools[targetToolBtn?.id]) {
+      if (canvas.currentLayer.inactiveTools.includes(targetToolBtn?.id)) {
+        if (canvas.currentLayer.isPreview) {
+          actionConfirmPastedPixels()
+        } else {
+          return
+        }
+      }
       //reset old button
       dom.toolBtn.classList.remove("selected")
       //get new button and select it

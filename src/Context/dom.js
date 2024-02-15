@@ -26,6 +26,8 @@ const fileSubMenu = document.getElementById("file-submenu")
 const saveBtn = document.getElementById("save")
 // * Open Save * //
 const openSaveBtn = document.getElementById("drawing-upload")
+// * Import * //
+const importBtn = document.getElementById("import")
 // * Export * //
 const exportBtn = document.getElementById("export")
 
@@ -213,6 +215,7 @@ export const dom = {
   fileSubMenu,
   saveBtn,
   openSaveBtn,
+  importBtn,
   exportBtn,
   //Edit Menu
   editSubMenu,

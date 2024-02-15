@@ -20,6 +20,7 @@ import {
   actionPasteSelection,
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
+import { disableActionsForNoClipboard } from "../DOM/disableDomElements.js"
 
 //====================================//
 //======= * * * Tooltip * * * ========//
@@ -29,7 +30,7 @@ import { actionCopySelection } from "../Actions/untrackedActions.js"
  * @param {string} message
  * @param {Element} target
  */
-const generateTooltip = (message, target) => {
+export const generateTooltip = (message, target) => {
   if (message && target) {
     //reset tooltip
     dom.tooltip.classList.remove("page-left")
@@ -84,6 +85,55 @@ export function openSaveDialogBox() {
 }
 
 /**
+ * Import image from desktop
+ */
+function importImage() {
+  let reader
+  let img = new Image()
+
+  if (this.files && this.files[0]) {
+    reader = new FileReader()
+    reader.onload = (e) => {
+      //TODO: (Medium Priority) check if image is too large and prompt user to resize
+      //TODO: (High Priority) should a new layer be created for the imported image? Or maybe allow raster layers to be selected or created during active paste action and move temp layer accordingly?
+      //1. logic similar to copy selection to put image into clipboard
+      img.src = e.target.result
+      img.onload = () => {
+        const tempCanvas = document.createElement("canvas")
+        tempCanvas.width = img.width
+        tempCanvas.height = img.height
+        const tempCTX = tempCanvas.getContext("2d", {
+          willReadFrequently: true,
+        })
+        tempCTX.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height)
+        const previousClipboard = { ...state.selectClipboard }
+        previousClipboard.selectProperties = {
+          ...state.selectClipboard.selectProperties,
+        }
+        state.selectClipboard.selectProperties = {
+          px1: 0,
+          py1: 0,
+          px2: img.width,
+          py2: img.height,
+        }
+        state.selectClipboard.boundaryBox = {
+          xMin: 0,
+          yMin: 0,
+          xMax: img.width,
+          yMax: img.height,
+        }
+        state.selectClipboard.canvas = tempCanvas
+        //2. paste clipboard onto canvas
+        actionPasteSelection()
+        //3. clear clipboard
+        state.selectClipboard = previousClipboard
+      }
+    }
+    reader.readAsDataURL(this.files[0])
+  }
+}
+
+/**
  * Consolidate offscreen canvases and download image
  * TODO: (Middle Priority) Open dialog box with more options such as pixel size, etc.
  */
@@ -118,13 +168,53 @@ function openSavedDrawing() {
 //===================================//
 
 document.body.addEventListener("mouseover", (e) => {
-  state.tooltipMessage = e.target.dataset?.tooltip
-  generateTooltip(state.tooltipMessage, e.target)
   //TODO: (Low Priority) Instead of rendering here, use a timer that resets on mousemove to detect idle time and move this logic to the mousemove event
-  if (dom.tooltipBtn.checked && state.tooltipMessage) {
-    dom.tooltip.classList.add("visible")
-  } else {
+  if (!state.touch) {
+    state.tooltipMessage = e.target.dataset?.tooltip
+    if (
+      canvas.currentLayer.isPreview &&
+      e.target.classList.contains("deactivate-paste")
+    ) {
+      state.tooltipMessage =
+        state.tooltipMessage +
+        "\n\nCannot use with temporary pasted layer. Selecting will confirm pasted pixels."
+    }
+    generateTooltip(state.tooltipMessage, e.target)
+    if (dom.tooltipBtn.checked && state.tooltipMessage) {
+      dom.tooltip.classList.add("visible")
+    } else {
+      dom.tooltip.classList.remove("visible")
+    }
+  }
+})
+document.body.addEventListener("click", (e) => {
+  if (!state.touch) {
+    //Hide tooltip on click
     dom.tooltip.classList.remove("visible")
+  } else {
+    //Handle tooltip for mobile
+    let previousTooltipTarget = state.tooltipTarget
+    state.tooltipMessage = e.target.dataset?.tooltip
+    state.tooltipTarget = e.target
+    if (
+      canvas.currentLayer.isPreview &&
+      e.target.classList.contains("deactivate-paste")
+    ) {
+      state.tooltipMessage =
+        state.tooltipMessage +
+        "\n\nCannot use with temporary pasted layer. Selecting will confirm pasted pixels."
+    }
+    generateTooltip(state.tooltipMessage, e.target)
+    if (
+      dom.tooltipBtn.checked &&
+      state.tooltipMessage &&
+      state.tooltipTarget !== previousTooltipTarget
+    ) {
+      dom.tooltip.classList.add("visible")
+    } else {
+      dom.tooltip.classList.remove("visible")
+      state.tooltipTarget = null
+    }
   }
 })
 dom.toolOptions.addEventListener("click", (e) => {
@@ -172,12 +262,6 @@ dom.gridSpacingSpinBtn.addEventListener("pointerdown", (e) => {
   vectorGui.render()
 })
 dom.tooltipBtn.addEventListener("click", (e) => {
-  // if (dom.tooltipBtn.checked) {
-  //   const tooltipMessage = dom.tooltipBtn.parentNode.dataset?.tooltip
-  //   generateTooltip(tooltipMessage, dom.tooltipBtn.parentNode)
-  // } else {
-  //   dom.tooltip.classList.remove("visible")
-  // }
   if (dom.tooltipBtn.checked && state.tooltipMessage) {
     dom.tooltip.classList.add("visible")
   } else {
@@ -212,8 +296,9 @@ dom.topMenu.addEventListener("focusout", (e) => {
 })
 //File Submenu events
 dom.openSaveBtn.addEventListener("change", openSavedDrawing)
-dom.exportBtn.addEventListener("click", exportImage)
 dom.saveBtn.addEventListener("click", openSaveDialogBox)
+dom.importBtn.addEventListener("change", importImage)
+dom.exportBtn.addEventListener("click", exportImage)
 //Edit Submenu events
 dom.canvasSizeBtn.addEventListener("click", (e) => {
   if (canvas.pastedLayer) {

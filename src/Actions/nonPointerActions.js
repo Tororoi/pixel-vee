@@ -288,14 +288,6 @@ export function actionConfirmPastedPixels() {
     })
     state.action = null
     state.redoStack = []
-    //reset state properties
-    // state.deselect()
-    // canvas.rasterGuiCTX.clearRect(
-    //   0,
-    //   0,
-    //   canvas.rasterGuiCVS.width,
-    //   canvas.rasterGuiCVS.height
-    // )
     //render
     vectorGui.render()
     renderCanvas()
