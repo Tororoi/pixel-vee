@@ -83,6 +83,17 @@ export function openSaveDialogBox() {
   dom.saveAsFileName.focus()
 }
 
+// function importImage() {
+//   let reader
+//   if (this.files && this.files[0]) {
+//     reader = new FileReader()
+//     reader.onload = (e) => {
+//       pasteDrawing(e.target.result)
+//     }
+//     reader.readAsText(this.files[0])
+//   }
+// }
+
 /**
  * Consolidate offscreen canvases and download image
  * TODO: (Middle Priority) Open dialog box with more options such as pixel size, etc.
@@ -246,8 +257,9 @@ dom.topMenu.addEventListener("focusout", (e) => {
 })
 //File Submenu events
 dom.openSaveBtn.addEventListener("change", openSavedDrawing)
-dom.exportBtn.addEventListener("click", exportImage)
 dom.saveBtn.addEventListener("click", openSaveDialogBox)
+// dom.importBtn.addEventListener("click", importImage)
+dom.exportBtn.addEventListener("click", exportImage)
 //Edit Submenu events
 dom.canvasSizeBtn.addEventListener("click", (e) => {
   if (canvas.pastedLayer) {
