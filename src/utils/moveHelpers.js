@@ -1,8 +1,8 @@
 /**
  *
  * @param {CanvasRenderingContext2D} ctx
- * @param {Integer} dx
- * @param {Integer} dy
+ * @param {number} dx - (Integer)
+ * @param {number} dy - (Integer)
  */
 export function translateAndWrap(ctx, dx, dy) {
   const width = ctx.canvas.width
@@ -40,8 +40,8 @@ export function translateAndWrap(ctx, dx, dy) {
 /**
  *
  * @param {CanvasRenderingContext2D} ctx
- * @param {Integer} dx
- * @param {Integer} dy
+ * @param {number} dx - (Integer)
+ * @param {number} dy - (Integer)
  */
 export function translateWithoutWrap(ctx, dx, dy) {
   const width = ctx.canvas.width

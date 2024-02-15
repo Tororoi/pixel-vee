@@ -2,7 +2,7 @@ import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { actionFill } from "../Actions/actions.js"
+import { actionFill } from "../Actions/pointerActions.js"
 import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 import { vectorGui, createActiveIndexesForRender } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
@@ -22,7 +22,7 @@ function fillSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       vectorGui.render()
-      if (vectorGui.collisionPresent) {
+      if (vectorGui.selectedCollisionPresent) {
         adjustFillSteps()
       } else {
         // //reset control points
@@ -32,10 +32,11 @@ function fillSteps() {
         actionFill(
           state.vectorProperties.px1,
           state.vectorProperties.py1,
+          state.boundaryBox,
+          state.selectionInversed,
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
-          state.selectProperties,
           state.maskSet
         )
         //For undo ability, store starting coords and settings and pass them into actionFill
@@ -44,6 +45,14 @@ function fillSteps() {
           canvas.currentLayer.x,
           canvas.currentLayer.y
         )
+        //correct boundary box for layer offset
+        const boundaryBox = { ...state.boundaryBox }
+        if (boundaryBox.xMax !== null) {
+          boundaryBox.xMin -= canvas.currentLayer.x
+          boundaryBox.xMax -= canvas.currentLayer.x
+          boundaryBox.yMin -= canvas.currentLayer.y
+          boundaryBox.yMax -= canvas.currentLayer.y
+        }
         addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
@@ -52,8 +61,9 @@ function fillSteps() {
               px1: state.vectorProperties.px1 - canvas.currentLayer.x,
               py1: state.vectorProperties.py1 - canvas.currentLayer.y,
             },
-            selectProperties: { ...state.selectProperties },
             maskArray,
+            boundaryBox,
+            selectionInversed: state.selectionInversed,
           },
         })
         renderCanvas(canvas.currentLayer)
@@ -78,14 +88,14 @@ function fillSteps() {
 
 /**
  * Used automatically by fill tool after fill is completed.
- * TODO: for linking fill vector, fill would be limited by active linked vectors as borders, position unchanged
+ * TODO: (High Priority) for linking fill vector, fill would be limited by active linked vectors as borders, position unchanged
  * How should fill vector be linked, since it won't be via positioning?
  */
 export function adjustFillSteps() {
   let currentVector = state.undoStack[canvas.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (vectorGui.collisionPresent) {
+      if (vectorGui.selectedCollisionPresent) {
         state.vectorProperties[vectorGui.collidedKeys.xKey] = state.cursorX
         state.vectorProperties[vectorGui.collidedKeys.yKey] = state.cursorY
         vectorGui.selectedPoint = {
@@ -165,7 +175,7 @@ export const fill = {
   fn: fillSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: true,
+  brushDisabled: true,
   options: { contiguous: { active: true } },
   modes: { eraser: false },
   type: "vector",

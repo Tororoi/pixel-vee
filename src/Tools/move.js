@@ -7,7 +7,6 @@ import { addToTimeline } from "../Actions/undoRedo.js"
 
 /**
  * Move the contents of a layer relative to other layers
- * TODO: When select tool is implemented fully, handle moving selected area
  */
 function moveSteps() {
   // move contents of selection around canvas
@@ -19,7 +18,7 @@ function moveSteps() {
       state.grabStartY = canvas.currentLayer.y
       state.startScale = canvas.currentLayer.scale
       vectorGui.render()
-      if (vectorGui.collisionPresent) {
+      if (vectorGui.selectedCollisionPresent) {
         scaleSteps()
       }
       break
@@ -27,10 +26,17 @@ function moveSteps() {
       if (vectorGui.selectedPoint.xKey) {
         scaleSteps()
       } else {
-        //TODO: additional logic will be needed to handle moving a selected area here
         //Move layer
         canvas.currentLayer.x += state.cursorX - state.previousX
         canvas.currentLayer.y += state.cursorY - state.previousY
+        //Move selection area
+        if (state.selectProperties.px2 !== null) {
+          state.selectProperties.px1 += state.cursorX - state.previousX
+          state.selectProperties.px2 += state.cursorX - state.previousX
+          state.selectProperties.py1 += state.cursorY - state.previousY
+          state.selectProperties.py2 += state.cursorY - state.previousY
+          state.setBoundaryBox(state.selectProperties)
+        }
         renderCanvas(canvas.currentLayer, true)
       }
       break
@@ -43,6 +49,8 @@ function moveSteps() {
       addToTimeline({
         tool: state.tool,
         layer: canvas.currentLayer,
+        //selectProperties: { ...state.selectProperties },
+        //selectionInversed: state.selectionInversed,
         properties: {
           from: {
             x: state.grabStartX,
@@ -71,7 +79,7 @@ function scaleSteps() {
   //move raster layer or reference layer
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      if (vectorGui.collisionPresent) {
+      if (vectorGui.selectedCollisionPresent) {
         vectorGui.selectedPoint = {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
@@ -156,10 +164,10 @@ export const move = {
   fn: moveSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: true,
+  brushDisabled: true,
   options: {},
   modes: {},
-  type: "raster",
+  type: "utility",
   cursor: "move",
   activeCursor: "move",
 }

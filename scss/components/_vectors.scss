@@ -160,4 +160,16 @@
       }
     }
   }
+  &.disabled {
+    .collapsible {
+      cursor: not-allowed;
+      * {
+        pointer-events: none;
+      }
+      button,
+      label {
+        opacity: 0.5;
+      }
+    }
+  }
 }

@@ -13,25 +13,66 @@ const tooltip = document.getElementById("tooltip")
 //====================================//
 
 // * Nav * //
-const topMenu = document.querySelector(".nav")
+const navBar = document.querySelector(".nav")
+
+const topMenu = document.getElementById("top-menu")
 
 // * Tool Options * //
-const toolOptions = document.querySelector(".tool-options")
-//TODO: options dialog box where user can set default options such as display vectors, paths, or auto select most recently created vector
-// * Toggle Grid * //
-const gridBtn = document.getElementById("grid-toggle")
-// * Toggle Tooltips * //
-const tooltipBtn = document.getElementById("tooltips-toggle")
+const toolOptions = document.querySelector(".tool-options") //TODO: (Middle Priority) Will become quick menu
+
+// * File Menu * //
+const fileSubMenu = document.getElementById("file-submenu")
 // * Save * //
-const saveBtn = document.querySelector(".save")
+const saveBtn = document.getElementById("save")
 // * Open Save * //
 const openSaveBtn = document.getElementById("drawing-upload")
 // * Export * //
-const exportBtn = document.querySelector(".export")
+const exportBtn = document.getElementById("export")
 
-// * File Menu * //
-const fileMenu = document.querySelector("#file-menu")
-const fileSubMenu = document.querySelector("#file-submenu")
+// * Edit Menu * //
+const editSubMenu = document.getElementById("edit-submenu")
+// * Canvas Size * //
+const canvasSizeBtn = document.getElementById("canvas-size")
+// * Select All * //
+const selectAllBtn = document.getElementById("select-all")
+// * Deselect * //
+const deselectBtn = document.getElementById("deselect")
+// * Invert Selection * //
+const invertSelectionBtn = document.getElementById("invert-selection")
+// * Cut * //
+const cutBtn = document.getElementById("cut-selection")
+// * Copy * //
+const copyBtn = document.getElementById("copy-selection")
+// * Paste * //
+const pasteBtn = document.getElementById("paste-selection")
+// // * Delete * //
+// const deleteBtn = document.getElementById("delete-selection")
+// // * Flip Horizontal * //
+// const flipHorizontalBtn = document.getElementById("flip-horizontal")
+// // * Flip Vertical * //
+// const flipVerticalBtn = document.getElementById("flip-vertical")
+// * Rotate * //
+// const rotateBtn = document.getElementById("rotate-right")
+
+// * Settings Button * //
+const settingsBtn = document.getElementById("settings-btn")
+
+//====================================//
+//========= * * * Settings * * * =====//
+//====================================//
+
+// * Settings Container * //
+const settingsContainer = document.querySelector(".settings-container")
+
+// * Settings Form * //
+//TODO: (Middle Priority) options dialog box where user can set default options such as display vectors, paths, or auto select most recently created vector
+// * Toggle Tooltips * //
+const tooltipBtn = document.getElementById("tooltips-toggle")
+// * Toggle Grid * //
+const gridBtn = document.getElementById("grid-toggle")
+// * Grid Spacing * //
+const gridSpacingSpinBtn = document.querySelector(".grid-spacing-spin")
+const gridSpacing = document.getElementById("grid-spacing")
 
 //====================================//
 //====== * * * Save/Export * * * =====//
@@ -49,8 +90,6 @@ const fileSizePreview = document.querySelector("#savefile-size")
 const advancedOptionsContainer = document.querySelector(
   "#save-advanced-options"
 )
-// * Save Button * //
-const saveDrawingBtn = document.querySelector("#save-button")
 // * Cancel Button * //
 const cancelSaveBtn = document.querySelector("#cancel-save-button")
 
@@ -86,7 +125,7 @@ const tools = [
   "quadCurve",
   "cubicCurve",
   "ellipse",
-  // "select",
+  "select",
   "eyedropper",
   "grab",
   "move",
@@ -137,13 +176,15 @@ const paletteContainer = document.querySelector(".palette-container")
 const paletteColors = document.querySelector(".palette-colors")
 const paletteEditBtn = document.querySelector(".palette-edit")
 const paletteRemoveBtn = document.querySelector(".palette-remove")
-// TODO: button to create palette from colors on canvas
+// TODO: (Middle Priority) button to create palette from colors on canvas
 
 // * Layers Interface * //
+const layersInterfaceContainer = document.querySelector(".layers-interface")
 const uploadBtn = document.querySelector("#file-upload")
 const newLayerBtn = document.querySelector(".add-layer")
+const deleteLayerBtn = document.querySelector("#delete-layer")
 const layersContainer = document.querySelector(".layers")
-const layersInterfaceContainer = document.querySelector(".layers-interface")
+const layerSettingsContainer = document.querySelector(".layer-settings")
 
 // * Vectors Interface * //
 const vectorsThumbnails = document.querySelector(".vectors")
@@ -155,6 +196,7 @@ const sizeContainer = document.querySelector(".size-container")
 const dimensionsForm = document.querySelector(".dimensions-form")
 const canvasWidth = document.getElementById("canvas-width")
 const canvasHeight = document.getElementById("canvas-height")
+const canvasSizeCancelBtn = document.getElementById("cancel-resize-button")
 
 //====================================//
 //========= * * * State * * * ========//
@@ -164,22 +206,39 @@ export const dom = {
   canvasLayers,
   tooltip,
   //menu
+  navBar,
   topMenu,
   toolOptions,
-  gridBtn,
-  tooltipBtn,
+  //File Menu
+  fileSubMenu,
   saveBtn,
   openSaveBtn,
   exportBtn,
-  fileMenu,
-  fileSubMenu,
+  //Edit Menu
+  editSubMenu,
+  canvasSizeBtn,
+  selectAllBtn,
+  deselectBtn,
+  invertSelectionBtn,
+  cutBtn,
+  copyBtn,
+  pasteBtn,
+  // flipHorizontalBtn,
+  // flipVerticalBtn,
+  //Settings
+  settingsBtn,
+  //settings
+  settingsContainer,
+  tooltipBtn,
+  gridBtn,
+  gridSpacingSpinBtn,
+  gridSpacing,
   //save/export
   saveContainer,
   saveAsForm,
   saveAsFileName,
   fileSizePreview,
   advancedOptionsContainer,
-  saveDrawingBtn,
   cancelSaveBtn,
   exportContainer,
   //toolbox
@@ -213,14 +272,20 @@ export const dom = {
   paletteColors,
   paletteEditBtn,
   paletteRemoveBtn,
+  //layers
   uploadBtn,
   newLayerBtn,
+  deleteLayerBtn,
   layersContainer,
   layersInterfaceContainer,
+  layerSettingsContainer,
+  //vectors
   vectorsThumbnails,
   vectorsInterfaceContainer,
+  //canvas size
   sizeContainer,
   dimensionsForm,
   canvasWidth,
   canvasHeight,
+  canvasSizeCancelBtn,
 }

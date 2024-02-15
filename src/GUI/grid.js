@@ -2,11 +2,14 @@ import { canvas } from "../Context/canvas.js"
 
 /**
  * This is quite slow due to the large amount of instructions to the canvas, consider putting it on its own canvas to avoid rerender unless necessary
- * @param {Object} canvas
- * @param {Integer} subGridSpacing
+ * @param {object} canvas
+ * @param {number} subGridSpacing - (Integer)
  */
 export function renderGrid(subGridSpacing = null) {
-  //get viewable boundaries - TODO: consider making these global properties as they may be useful for limiting other rendering functions or anything that iterates over the canvas while drawing
+  if (subGridSpacing === 1) {
+    subGridSpacing = null
+  }
+  //get viewable boundaries - TODO: (Low Priority) consider making these global properties as they may be useful for limiting other rendering functions or anything that iterates over the canvas while drawing
   let xLarge = Math.ceil(
     canvas.layers[0].onscreenCvs.width / canvas.sharpness / canvas.zoom
   )

@@ -20,10 +20,10 @@ import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
 
 /**
  * Set the color of the swatch
- * @param {Integer} r
- * @param {Integer} g
- * @param {Integer} b
- * @param {Integer} a
+ * @param {number} r - (Integer)
+ * @param {number} g - (Integer)
+ * @param {number} b - (Integer)
+ * @param {number} a - (Integer)
  * @param {Element} target
  */
 export function setColor(r, g, b, a, target) {

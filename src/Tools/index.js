@@ -21,7 +21,7 @@ export const tools = {
     fn: null,
     brushSize: null,
     brushType: null,
-    disabled: false,
+    brushDisabled: false,
     options: {},
     modes: {},
     type: "modify",
@@ -31,7 +31,7 @@ export const tools = {
     fn: null,
     brushSize: null,
     brushType: null,
-    disabled: false,
+    brushDisabled: false,
     options: {},
     modes: {},
     type: "modify",
@@ -41,7 +41,7 @@ export const tools = {
     fn: null,
     brushSize: null,
     brushType: null,
-    disabled: false,
+    brushDisabled: false,
     options: {},
     modes: {},
     type: "modify",
@@ -51,7 +51,7 @@ export const tools = {
     fn: null,
     brushSize: null,
     brushType: null,
-    disabled: false,
+    brushDisabled: false,
     options: {},
     modes: {},
     type: "modify",
@@ -61,7 +61,7 @@ export const tools = {
     fn: null,
     brushSize: null,
     brushType: null,
-    disabled: false,
+    brushDisabled: false,
     options: {},
     modes: {},
     type: "modify",
@@ -88,7 +88,7 @@ export const tools = {
     fn: null,
     brushSize: null,
     brushType: null,
-    disabled: false,
+    brushDisabled: false,
     options: {},
     modes: {},
     type: "settings",
@@ -98,10 +98,32 @@ export const tools = {
     fn: null,
     brushSize: null,
     brushType: null,
-    disabled: false,
+    brushDisabled: false,
     options: {},
     modes: {},
     type: "settings",
+  },
+  cut: {
+    name: "cut",
+    fn: null,
+    brushSize: null,
+    brushType: null,
+    brushDisabled: true,
+    options: {
+      //copy vectors/ actions?
+    },
+    modes: {},
+    type: "raster",
+  },
+  paste: {
+    name: "paste",
+    fn: null,
+    brushSize: null,
+    brushType: null,
+    brushDisabled: true,
+    options: {},
+    modes: {},
+    type: "raster",
   },
   //Utility Tools (does not affect timeline)
   eyedropper,
@@ -115,6 +137,6 @@ export const tools = {
    * Hold shift to draw line from currently selected vanishing point to pointer location.
    * Hold control to view automatic perspective lines and click to make lines permanent.
    * NOTE: First iteration will not support curvilinear perspective. Can be approximated by combining multipoint perspective with drawing bezier curves from point to point
-   * TODO: Add toggle option to snap line/ curve endpoints to vanishing point if made inside vanishing points radius.
+   * TODO: (Low Priority) Add toggle option to snap line/ curve endpoints to vanishing point if made inside vanishing points radius.
   } */
 }

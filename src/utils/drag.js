@@ -34,12 +34,22 @@ export const initializeCollapser = (collapseTarget, startCollapsed) => {
   }
 }
 
+export const initializeCloser = (closeTarget) => {
+  const closeBtn = closeTarget.querySelector(".close-btn")
+  if (closeBtn) {
+    closeBtn.addEventListener("click", (e) => {
+      closeTarget.style.display = "none"
+    })
+  }
+}
+
 export const initializeDialogBox = (
   dialogBoxTarget,
   startCollapsed = false
 ) => {
   initializeDragger(dialogBoxTarget)
   initializeCollapser(dialogBoxTarget, startCollapsed)
+  initializeCloser(dialogBoxTarget)
 }
 
 function setDragSiblings() {
@@ -102,7 +112,7 @@ function reorderElements(e) {
       let dragTop = e.clientY - state.dragY
       //if drag top less than halfway height and greater than previous sibling's halfway height, set dragTarget's css order property to siblingArray[i]'s order and iterate back through higher siblings to increase their order
       //move dragTarget up
-      //TODO: Instead of colliding with valid insertion point, write this check to find the nearest overlapping element to dragTop
+      //TODO: (Middle Priority) Instead of colliding with valid insertion point, write this check to find the nearest overlapping element to dragTop
       let collision =
         dragTop > state.dragSiblings[i].top - 10 &&
         dragTop < state.dragSiblings[i].top + 10

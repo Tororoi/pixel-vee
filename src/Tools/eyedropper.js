@@ -8,7 +8,7 @@ import { setColor } from "../Swatch/events.js"
 
 /**
  * Eyedropper
- * TODO: add magnifying glass view that shows zoomed in view of area being sampled
+ * TODO: (Low Priority) add magnifying glass view that shows zoomed in view of area being sampled
  */
 function eyedropperSteps() {
   //eyedropper helper function
@@ -26,7 +26,7 @@ function eyedropperSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //get imageData
-      consolidateLayers(true)
+      consolidateLayers(true, true)
       state.colorLayerGlobal = canvas.offScreenCTX.getImageData(
         0,
         0,
@@ -51,7 +51,7 @@ export const eyedropper = {
   fn: eyedropperSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: true,
+  brushDisabled: true,
   options: {},
   modes: {},
   type: "utility",

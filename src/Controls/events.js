@@ -14,7 +14,7 @@ import { throttle } from "../utils/eventHelpers.js"
 
 /**
  * Set global coordinates
- * TODO: move to separate file and import
+ * TODO: (Middle Priority) move to separate file and import
  * @param {UIEvent} e - PointerEvent, WheelEvent
  */
 const setCoordinates = (e) => {
@@ -47,7 +47,10 @@ const setCoordinates = (e) => {
 function handleKeyDown(e) {
   // e.preventDefault() - May conditionally need this for certain shortcuts, but try to avoid doing so
   //Prevent default save behavior
-  if (e.code === "KeyS" && (keys.MetaLeft || keys.MetaRight)) {
+  if (
+    (e.code === "KeyS" || e.code === "KeyD") &&
+    (keys.MetaLeft || keys.MetaRight)
+  ) {
     e.preventDefault()
   }
   //Prevent repeated activations while holding a key down
@@ -165,47 +168,46 @@ function handlePointerMove(e) {
   state.clickDisabled = false
   //currently only square dimensions work
   canvas.zoomAtLastDraw = canvas.zoom //* */
-  //coords
-  setCoordinates(e)
-  let cursorMoved =
-    state.previousX !== state.cursorX || state.previousY !== state.cursorY
-  if (state.tool.options.useSubpixels?.active && !cursorMoved) {
-    cursorMoved =
-      canvas.previousSubPixelX !== canvas.subPixelX ||
-      canvas.previousSubPixelY !== canvas.subPixelY
-  }
-  if (cursorMoved) {
-    //Hover brush
-    // vectorGui.render()
-    if (
-      state.clicked ||
-      ((state.tool.name === "quadCurve" ||
-        state.tool.name === "cubicCurve" ||
-        state.tool.name === "fill") &&
-        state.clickCounter > 0)
-    ) {
-      //run selected tool step function
-      state.tool.fn()
-      vectorGui.render()
+  //use requestAnimationFrame for smoother rendering. Must be called before setting coordinates or else line may be broken unintentionally
+  window.requestAnimationFrame(() => {
+    //coords
+    setCoordinates(e)
+    let cursorMoved =
+      state.previousX !== state.cursorX || state.previousY !== state.cursorY
+    if (state.tool.options.useSubpixels?.active && !cursorMoved) {
+      cursorMoved =
+        canvas.previousSubPixelX !== canvas.subPixelX ||
+        canvas.previousSubPixelY !== canvas.subPixelY
+    }
+    if (cursorMoved) {
       if (
-        (state.tool.name === "brush" && state.tool.modes?.eraser) ||
-        state.tool.name === "eyedropper"
+        state.clicked ||
+        ((state.tool.name === "quadCurve" ||
+          state.tool.name === "cubicCurve" ||
+          state.tool.name === "fill") &&
+          state.clickCounter > 0)
       ) {
+        //run selected tool step function
+        state.tool.fn()
+        vectorGui.render()
+        if (
+          (state.tool.name === "brush" && state.tool.modes?.eraser) ||
+          state.tool.name === "eyedropper"
+        ) {
+          renderCursor(state, canvas, swatches)
+        }
+      } else {
+        //no active tool, just render cursor
+        vectorGui.render()
         renderCursor(state, canvas, swatches)
       }
-    } else {
-      //no active tool
-      vectorGui.render()
-      renderCursor(state, canvas, swatches)
     }
-  }
-  // if (!state.tool.options.line?.active) {
-  // save last point
-  state.previousX = state.cursorX
-  state.previousY = state.cursorY
-  // }
-  canvas.previousSubPixelX = canvas.subPixelX
-  canvas.previousSubPixelY = canvas.subPixelY
+    // save last point
+    state.previousX = state.cursorX
+    state.previousY = state.cursorY
+    canvas.previousSubPixelX = canvas.subPixelX
+    canvas.previousSubPixelY = canvas.subPixelY
+  })
 }
 
 /**
@@ -250,7 +252,7 @@ function handlePointerUp(e) {
     //Reset redostack
     state.redoStack = []
   }
-  //Deactivate pending shortcuts TODO: set active shortcut with key code to allow cleaner logic like if (state.shortcut.active) {deactivateShortcut(state.shortcut.keyCode)}
+  //Deactivate pending shortcuts
   if (state.tool.name !== dom.toolBtn.id) {
     if (!keys.AltLeft && !keys.AltRight && state.tool.name === "eyedropper") {
       deactivateShortcut("AltLeft")
@@ -272,7 +274,7 @@ function handlePointerUp(e) {
  * @param {PointerEvent} e
  */
 function handlePointerOut(e) {
-  //TODO: if touchscreen, need to handle differently. Currently cannot reach next code since clicked will be false.
+  //TODO: (Low Priority) if touchscreen, need to handle differently. Currently cannot reach next code since clicked will be false.
   //Only purpose is to rerender with multi step tools such as curve when moving out or in the case of touch, lifting finger
   if (!state.touch && state.clickCounter === 0) {
     renderCanvas(canvas.currentLayer)

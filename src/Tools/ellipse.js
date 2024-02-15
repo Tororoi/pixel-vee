@@ -3,7 +3,7 @@ import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { actionEllipse } from "../Actions/actions.js"
+import { actionEllipse } from "../Actions/pointerActions.js"
 import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 import { vectorGui, createActiveIndexesForRender } from "../GUI/vector.js"
 import {
@@ -29,7 +29,7 @@ function ellipseSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
-  if (vectorGui.collisionPresent && state.clickCounter === 0) {
+  if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
     adjustEllipseSteps()
     return
   }
@@ -78,6 +78,8 @@ function ellipseSteps() {
         state.vectorProperties.radA,
         state.vectorProperties.radB,
         state.vectorProperties.forceCircle, //force circle initially
+        state.boundaryBox,
+        state.selectionInversed,
         swatches.primary.color,
         canvas.currentLayer,
         state.tool.modes,
@@ -123,6 +125,8 @@ function ellipseSteps() {
           state.vectorProperties.radA,
           state.vectorProperties.radB,
           state.vectorProperties.forceCircle, //force circle initially
+          state.boundaryBox,
+          state.selectionInversed,
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
@@ -173,6 +177,8 @@ function ellipseSteps() {
           state.vectorProperties.radA,
           state.vectorProperties.radB,
           state.vectorProperties.forceCircle, //force circle initially
+          state.boundaryBox,
+          state.selectionInversed,
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
@@ -189,6 +195,14 @@ function ellipseSteps() {
           canvas.currentLayer.x,
           canvas.currentLayer.y
         )
+        //correct boundary box for layer offset
+        const boundaryBox = { ...state.boundaryBox }
+        if (boundaryBox.xMax !== null) {
+          boundaryBox.xMin -= canvas.currentLayer.x
+          boundaryBox.xMax -= canvas.currentLayer.x
+          boundaryBox.yMin -= canvas.currentLayer.y
+          boundaryBox.yMax -= canvas.currentLayer.y
+        }
         //store control points for timeline
         addToTimeline({
           tool: state.tool,
@@ -211,10 +225,12 @@ function ellipseSteps() {
               //add bounding box minima maxima x and y?
             },
             maskArray,
+            boundaryBox,
+            selectionInversed: state.selectionInversed,
           },
         })
         state.clickCounter = 0
-        //reset vector state TODO: forceCircle needs to be reset
+        //reset vector state forceCircle
         state.vectorProperties.forceCircle = false
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
@@ -239,12 +255,12 @@ function updateEllipseVectorProperties(currentVector) {
 
 /**
  * Used automatically by ellipse tool after curve is completed.
- * TODO: create distinct tool for adjusting that won't create a new curve when clicking.
+ * TODO: (Low Priority) create distinct tool for adjusting that won't create a new curve when clicking.
  * Ideally a user should be able to click on a curve and render it's vector UI that way.
  */
 export function adjustEllipseSteps() {
   let currentVector = state.undoStack[canvas.currentVectorIndex]
-  if (!(vectorGui.collisionPresent && state.clickCounter === 0)) {
+  if (!(vectorGui.selectedCollisionPresent && state.clickCounter === 0)) {
     return
   }
   switch (canvas.pointerEvent) {
@@ -303,7 +319,7 @@ export const ellipse = {
   fn: ellipseSteps,
   brushSize: 1,
   brushType: "circle",
-  disabled: false,
+  brushDisabled: false,
   options: {
     useSubpixels: {
       active: true,

@@ -87,6 +87,35 @@
     0px 2px $white;
 }
 
+@mixin bubbleBorder(
+  $color: $border-color,
+  $activeColor: $active-color,
+  $background: $dark-gray
+) {
+  @include boxBorder($color, $activeColor);
+  &:after {
+    //Speech bubble pointer left
+    content: "";
+    display: inline-block;
+    width: 2px;
+    height: 2px;
+    position: absolute;
+    top: calc(50% - 1px);
+    left: -4px;
+    background: $color;
+    box-shadow: -2px -2px $color, 0px -2px $background, 0px -4px $color,
+      2px 0px $background, 2px -2px $background, 2px -4px $background;
+  }
+  &:hover:not([disabled]) {
+    &:after {
+      background: $activeColor;
+      box-shadow: -2px -2px $activeColor, 0px -2px $background,
+        0px -4px $activeColor, 2px 0px $background, 2px -2px $background,
+        2px -4px $background;
+    }
+  }
+}
+
 //==================================================//
 //============= * * * Dialog Box * * * =============//
 //==================================================//
@@ -187,6 +216,37 @@
   }
 }
 
+@mixin closeX {
+  position: absolute;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0px;
+  display: flex;
+  flex-flow: row nowrap;
+  cursor: pointer;
+  input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .close {
+    height: 2px;
+    width: 2px;
+    box-shadow: 5px 5px $border-color, 13px 5px $border-color,
+      7px 7px $border-color, 11px 7px $border-color, 9px 9px $border-color,
+      7px 11px $border-color, 11px 11px $border-color, 5px 13px $border-color,
+      13px 13px $border-color;
+  }
+  &:hover {
+    .close {
+      box-shadow: 5px 5px $white, 13px 5px $white, 7px 7px $white,
+        11px 7px $white, 9px 9px $white, 7px 11px $white, 11px 11px $white,
+        5px 13px $white, 13px 13px $white;
+    }
+  }
+}
+
 //==================================================//
 //================ * * * Misc * * * ================//
 //==================================================//
@@ -208,3 +268,51 @@
     }
   }
 }
+
+//==================================================//
+//============ * * * Marching Ants * * * ===========//
+//==================================================//
+
+@mixin marching-ants-init($ant-size, $ant-width, $speed, $id) {
+  padding: 5px + $ant-width;
+  margin: 20px;
+  background-size: $ant-size $ant-width, $ant-size $ant-width,
+    $ant-width $ant-size, $ant-width $ant-size;
+  background-position: 0 0, 0 100%, 0 0, 100% 0;
+  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+  animation: marching-ants-#{$id} $speed;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  animation-play-state: paused;
+  &.marching {
+    animation-play-state: running;
+  }
+  &.reverse {
+    animation-direction: reverse;
+  }
+}
+@mixin marching-ants-color($a, $b) {
+  background-image: linear-gradient(to right, $a 50%, $b 50%),
+    linear-gradient(to right, $a 50%, $b 50%),
+    linear-gradient(to bottom, $a 50%, $b 50%),
+    linear-gradient(to bottom, $a 50%, $b 50%);
+}
+
+@mixin marching-ants-animation($ant-size, $id) {
+  @keyframes marching-ants-#{$id} {
+    0% {
+      background-position: 0 0, 0 100%, 0 0, 100% 0;
+    }
+    100% {
+      background-position: 2 * $ant-size 0, -2 * $ant-size 100%,
+        0 -2 * $ant-size, 100% 2 * $ant-size;
+    }
+  }
+}
+
+.marching-ants {
+  @include marching-ants-init(10px, 1px, 4s, 1);
+  @include marching-ants-color($white, $black);
+}
+
+@include marching-ants-animation(10px, 1);

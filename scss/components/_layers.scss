@@ -21,10 +21,28 @@
       height: 40px;
       cursor: pointer;
     }
+    input[type="file"]:disabled + .reference {
+      cursor: not-allowed;
+      opacity: 0.5;
+      @include referenceIcon($border-color, $border-color);
+    }
     .add-layer {
       width: 40px;
       height: 40px;
       cursor: pointer;
+      &:disabled {
+        // opacity: 1 !important;
+        @include addLayerIcon($border-color, $border-color);
+      }
+    }
+    .trash {
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+      &:disabled {
+        // opacity: 1 !important;
+        @include trashIcon($border-color, $border-color);
+      }
     }
   }
   .layers-container {
@@ -76,7 +94,7 @@
           // background-blend-mode: multiply;
           animation: flash 0.6s ease-in infinite alternate-reverse;
         }
-        .trash {
+        .gear {
           position: absolute;
           right: 0;
           cursor: pointer;
@@ -84,12 +102,73 @@
           height: 40px;
           z-index: 104;
           margin: 5px;
-          &.disabled {
-            opacity: 0.5;
-            cursor: no-drop;
-          }
         }
       }
+    }
+    // &.disabled {
+    //   cursor: not-allowed;
+    //   // opacity: 0.5;
+    //   @include boxBorder($border-color, $border-color);
+    //   * {
+    //     pointer-events: none;
+    //   }
+    //   button {
+    //     opacity: 0.5;
+    //   }
+    // }
+  }
+  &.disabled {
+    .collapsible {
+      cursor: not-allowed;
+      @include boxBorder($border-color, $border-color);
+      * {
+        pointer-events: none;
+      }
+      button,
+      label {
+        opacity: 0.5;
+      }
+    }
+  }
+}
+
+.layer-settings {
+  z-index: 1000;
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  // width: 200px;
+  // height: 200px;
+  position: absolute;
+  background: $dark-gray;
+  @include bubbleBorder;
+  > * {
+    margin: 16px 16px 0 16px;
+  }
+  > :last-child {
+    margin-bottom: 16px;
+  }
+  #layer-name {
+    width: 156px;
+    box-shadow: none;
+  }
+  label {
+    // > * {
+    //   pointer-events: none;
+    // }
+    &.layer-name-label {
+      cursor: text;
+      // > * {
+      //   pointer-events: unset;
+      // }
+    }
+  }
+  .layer-opacity-label {
+    .input-label {
+      margin-bottom: 8px;
+    }
+    .slider {
+      width: calc(100% - 4px);
     }
   }
 }

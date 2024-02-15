@@ -21,22 +21,30 @@ export const renderVectorsToDOM = () => {
       renderVectorElement(action)
     }
   })
+
+  //active paste happening, disable vector interface
+  if (canvas.pastedLayer) {
+    dom.vectorsInterfaceContainer.classList.add("disabled")
+  } else {
+    dom.vectorsInterfaceContainer.classList.remove("disabled")
+  }
 }
 
 /**
  * Check if action should be rendered in the vectors interface
- * @param {Object} action
- * @returns {Boolean}
+ * @param {object} action
+ * @returns {boolean}
  */
 const isValidAction = (action) =>
   !action.removed &&
   !action.layer?.removed &&
   action.tool.type === "vector" &&
-  action.layer === canvas.currentLayer
+  (action.layer === canvas.currentLayer ||
+    (action.layer === canvas.pastedLayer && canvas.currentLayer.isPreview))
 
 /**
  * Render a vector element
- * @param {Object} action
+ * @param {object} action
  */
 const renderVectorElement = (action) => {
   const isSelected = action.index === canvas.currentVectorIndex
@@ -61,10 +69,10 @@ const renderVectorElement = (action) => {
   const color = createColorElement(action)
   vectorElement.appendChild(color)
 
-  const hide = createHideElement(action.hidden)
+  const hide = createHideElement(action.hidden, "Hide/Show Vector")
   vectorElement.appendChild(hide)
 
-  const trash = createTrashElement()
+  const trash = createTrashElement("Remove Vector")
   vectorElement.appendChild(trash)
 
   if (isSelected) {
@@ -80,7 +88,7 @@ const renderVectorElement = (action) => {
 }
 
 /**
- * @param {Object} action
+ * @param {object} action
  * @returns {Element}
  */
 const createVectorElement = (action) => {
@@ -94,7 +102,7 @@ const createVectorElement = (action) => {
 
 /**
  * Calculate the multiplier and offsets for transposing the main canvas onto the thumbnail canvas
- * @returns {Object}
+ * @returns {object}
  */
 const calculateDrawingDimensions = () => {
   let border = 32
@@ -121,7 +129,7 @@ const calculateDrawingDimensions = () => {
 
 /**
  * Draw a vector action onto the thumbnail canvas
- * @param {Object} action
+ * @param {object} action
  */
 const drawOnThumbnailContext = (action) => {
   let { minD, xOffset, yOffset } = calculateDrawingDimensions()
@@ -218,7 +226,7 @@ const drawOnThumbnailContext = (action) => {
 
 /**
  * Create the thumbnail and save as an image
- * @param {Object} action
+ * @param {object} action
  * @returns {Image}
  */
 const createThumbnailImage = (action) => {

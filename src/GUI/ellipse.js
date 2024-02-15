@@ -4,8 +4,8 @@ import { vectorGui } from "./vector.js"
 import { drawCirclePath, drawControlPointHandle } from "../utils/guiHelpers.js"
 
 /**
- * @param {Object} vectorProperties
- * @param {Object} vectorAction
+ * @param {object} vectorProperties
+ * @param {object} vectorAction
  */
 export function renderEllipseVector(vectorProperties, vectorAction) {
   const {
@@ -84,7 +84,7 @@ export function renderEllipseVector(vectorProperties, vectorAction) {
 
 /**
  *
- * @param {Object} vectorProperties
+ * @param {object} vectorProperties
  */
 export function renderOffsetEllipseVector(vectorProperties) {
   const {
@@ -163,8 +163,8 @@ export function renderOffsetEllipseVector(vectorProperties) {
 }
 
 /**
- * @param {Object} vectorProperties
- * @param {Object} vectorAction
+ * @param {object} vectorProperties
+ * @param {object} vectorAction
  */
 export function renderEllipsePath(vectorProperties, vectorAction) {
   const {

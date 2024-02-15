@@ -1,20 +1,14 @@
 import { dom } from "../Context/dom.js"
-import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { handleUndo, handleRedo } from "../Actions/undoRedo.js"
 import { vectorGui } from "../GUI/vector.js"
-import { updateBrushPreview } from "../utils/brushHelpers.js"
 import { actionClear } from "../Actions/modifyTimeline.js"
 import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
-import { renderVectorsToDOM, renderBrushModesToDOM } from "../DOM/render.js"
-import { renderCursor } from "../GUI/cursor.js"
-import { createOptionToggle } from "../utils/optionsInterfaceHelpers.js"
-import { testAction } from "../Testing/performanceTesting.js"
-import { storedActions } from "../Testing/storedActions.js"
+import { renderVectorsToDOM, renderBrushStampToDOM } from "../DOM/render.js"
+import { toggleMode, switchTool } from "./toolbox.js"
 
 //Initialize default tool
 state.tool = tools.brush
@@ -72,6 +66,10 @@ function handleRecenter() {
  * Non-cursor action that affects the timeline
  */
 function handleClearCanvas() {
+  //Do not allow clearing if active paste is happening
+  if (canvas.pastedLayer) {
+    return
+  }
   canvas.currentLayer.ctx.clearRect(
     0,
     0,
@@ -93,81 +91,18 @@ function handleClearCanvas() {
 /**
  * Switch tools
  * @param {PointerEvent} e
- * @param {String} manualToolName
  */
-export function handleTools(e, manualToolName = null) {
+export function handleTools(e) {
   const targetTool = e?.target.closest(".tool")
-  if (targetTool || manualToolName) {
-    //failsafe for hacking tool ids
-    if (tools[targetTool?.id || manualToolName]) {
-      //reset old button
-      dom.toolBtn.classList.remove("selected")
-      //get new button and select it
-      if (manualToolName) {
-        dom.toolBtn = document.querySelector(`#${manualToolName}`)
-      } else {
-        dom.toolBtn = targetTool
-      }
-      //Uncomment to run performance test for selected tool if testing is enabled
-      // if (state.captureTesting && storedActions[dom.toolBtn.id]) {
-      //   testAction(dom.toolBtn.id)
-      // }
-      dom.toolBtn.classList.add("selected")
-      state.tool = tools[dom.toolBtn.id]
-      renderCanvas(canvas.currentLayer)
-      //update options
-      renderBrushStampToDOM()
-      dom.brushSlider.value = state.tool.brushSize
-      dom.brushSlider.disabled = state.tool.disabled
-      //update cursor
-      if (state.tool.modes?.eraser) {
-        canvas.vectorGuiCVS.style.cursor = "none"
-      } else {
-        canvas.vectorGuiCVS.style.cursor = state.tool.cursor
-      }
-      //render menu options
-      renderToolOptionsToDOM()
-      vectorGui.reset()
-      state.reset()
-      renderVectorsToDOM()
-      renderBrushModesToDOM()
-      renderCursor(state, canvas, swatches)
-    }
-  }
+  switchTool(null, targetTool)
 }
 
 /**
- * TODO: add multi-touch mode for drawing with multiple fingers
- * TODO: add curve brush mode for freehand drawing splines
  * @param {PointerEvent} e
- * @param {String} manualModeName
  */
-export function handleModes(e, manualModeName = null) {
-  let targetMode = e?.target.closest(".mode")
-  if (targetMode || manualModeName) {
-    if (manualModeName) {
-      targetMode = document.querySelector(`#${manualModeName}`)
-    }
-    if (targetMode.classList.contains("selected")) {
-      state.tool.modes[targetMode.id] = false
-    } else {
-      state.tool.modes[targetMode.id] = true
-      if (targetMode.id === "eraser" && state.tool.modes?.inject) {
-        state.tool.modes.inject = false
-      } else if (targetMode.id === "inject" && state.tool.modes?.eraser) {
-        state.tool.modes.eraser = false
-      }
-    }
-    if (state.tool.modes?.eraser) {
-      canvas.vectorGuiCVS.style.cursor = "none"
-    } else {
-      canvas.vectorGuiCVS.style.cursor = "crosshair"
-    }
-    // vectorGui.reset()
-    // state.reset()
-    renderBrushModesToDOM()
-    renderCursor(state, canvas, swatches)
-  }
+export function handleModes(e) {
+  const targetMode = e?.target.closest(".mode")
+  toggleMode(null, targetMode)
 }
 
 //=====================================//
@@ -206,37 +141,6 @@ function updateBrush(e) {
     //do nothing for other tools
   }
   renderBrushStampToDOM()
-}
-
-/**
- * update brush stamp in dom
- */
-export function renderBrushStampToDOM() {
-  dom.lineWeight.textContent = state.tool.brushSize
-  dom.brushPreview.style.width = state.tool.brushSize * 2 + "px"
-  dom.brushPreview.style.height = state.tool.brushSize * 2 + "px"
-  updateBrushPreview(
-    brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
-    state.tool.brushSize
-  )
-}
-
-/**
- *
- */
-export function renderToolOptionsToDOM() {
-  dom.toolOptions.innerHTML = ""
-  if (
-    state.tool.name === "cubicCurve" ||
-    state.tool.name === "quadCurve" ||
-    state.tool.name === "ellipse"
-  ) {
-    //render cubic curve options to menu
-    Object.entries(state.tool.options).forEach(([name, option]) => {
-      let optionToggle = createOptionToggle(name, option)
-      dom.toolOptions.appendChild(optionToggle)
-    })
-  }
 }
 
 //===================================//

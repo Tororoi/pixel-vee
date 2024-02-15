@@ -42,7 +42,7 @@
             <img src="./public/pixel-vee.png" alt="Github Repo" />
           </a>
         </div>
-        <ul role="menu" aria-label="functions" id="file-menu">
+        <ul role="menu" aria-label="functions" id="top-menu">
           <li
             role="menuitem"
             aria-haspopup="true"
@@ -60,25 +60,106 @@
               </li>
               <li
                 role="menuitem"
-                class="save"
+                id="save"
                 data-tooltip="Open dialog box to download file with current progress"
               >
-                Save (Cmd + S)
+                Save As... (Cmd + S)
+              </li>
+              <li role="menuitem" id="export" data-tooltip="Download as .png">
+                Export
+              </li>
+            </ul>
+          </li>
+          <li
+            role="menuitem"
+            aria-haspopup="true"
+            class="menu-folder"
+            tabindex="1"
+          >
+            <span class="menu-folder-title">Edit</span>
+            <ul role="menu" id="edit-submenu">
+              <li
+                role="menuitem"
+                id="canvas-size"
+                data-tooltip="Open dialog box to resize canvas area"
+              >
+                Resize Canvas...
               </li>
               <li
                 role="menuitem"
-                class="export"
-                data-tooltip="Download as .png"
+                id="select-all"
+                data-tooltip="Select entire canvas (Cmd + A)"
               >
-                Export
+                Select All (Cmd + A)
               </li>
+              <li
+                role="menuitem"
+                id="deselect"
+                class="disabled"
+                data-tooltip="Deselect selection area (Cmd + D)"
+              >
+                Deselect (Cmd + D)
+              </li>
+              <li
+                role="menuitem"
+                id="invert-selection"
+                class="disabled"
+                data-tooltip="Invert selection area (Cmd + I)"
+              >
+                Invert Selection (Cmd + I)
+              </li>
+              <li
+                role="menuitem"
+                id="cut-selection"
+                class="disabled"
+                data-tooltip="Cut selection (Cmd + X)"
+              >
+                Cut (Cmd + X)
+              </li>
+              <li
+                role="menuitem"
+                id="copy-selection"
+                class="disabled"
+                data-tooltip="Copy selection (Cmd + C)"
+              >
+                Copy (Cmd + C)
+              </li>
+              <li
+                role="menuitem"
+                id="paste-selection"
+                class="disabled"
+                data-tooltip="Paste copied selection (Cmd + V)"
+              >
+                Paste (Cmd + V)
+              </li>
+              <!-- <li
+                role="menuitem"
+                id="flip-horizontal"
+                data-tooltip="Flip selection horizontally"
+              >
+                Flip Horizontal
+              </li>
+              <li
+                role="menuitem"
+                id="flip-vertical"
+                data-tooltip="Flip selection vertically"
+              >
+                Flip Vertical
+              </li> -->
+              <!-- <li
+                role="menuitem"
+                id="rotate-right"
+                data-tooltip="Rotate selection 90 degrees clockwise"
+              >
+                Rotate Right
+              </li> -->
             </ul>
           </li>
         </ul>
       </div>
       <div class="nav-items">
         <div class="tool-options"></div>
-        <label
+        <!-- <label
           for="grid-toggle"
           id="grid"
           class="toggle"
@@ -97,7 +178,16 @@
           <input type="checkbox" checked="true" id="tooltips-toggle" />
           <span class="checkmark"></span>
           <span>Tooltips</span>
-        </label>
+        </label> -->
+        <div class="settings">
+          <button
+            type="button"
+            class="gear"
+            id="settings-btn"
+            aria-label="Open settings menu"
+            data-tooltip="Open settings menu"
+          />
+        </div>
       </div>
     </div>
     <div class="page">
@@ -110,6 +200,13 @@
             height="512px"
           ></canvas>
           <div class="canvas-layers"></div>
+          <!-- <div class="non-canvas-gui marching-ants bnw marching"></div> -->
+          <canvas
+            class="onscreen-canvas"
+            id="raster-gui-canvas"
+            width="512px"
+            height="512px"
+          ></canvas>
           <canvas
             class="onscreen-canvas"
             id="vector-gui-canvas"
@@ -167,7 +264,7 @@
                 </div>
               </div>
               <label for="brush-size" class="brush-size"
-                >Line Weight: <span id="line-weight">1</span>px
+                ><span id="line-weight">1</span>px
               </label>
               <input
                 type="range"
@@ -302,80 +399,6 @@
             </div>
           </div>
           <div
-            class="size-container dialog-box draggable v-drag settings-box smooth-shift"
-          >
-            <div id="size-header" class="header dragger">
-              <div class="drag-btn"><div class="grip"></div></div>
-              Canvas Size
-              <label
-                for="size-collapse-btn"
-                id="size-collapser"
-                class="collapse-btn"
-                data-tooltip="Collapse/ Expand"
-              >
-                <input
-                  type="checkbox"
-                  aria-label="Collapse or Expand"
-                  class="collapse-checkbox"
-                  id="size-collapse-btn"
-                />
-                <span class="arrow"></span>
-              </label>
-            </div>
-            <div class="collapsible">
-              <form class="dimensions-form">
-                <div class="inputs">
-                  <label for="canvas-width"
-                    >Width:
-                    <span class="input">
-                      <input
-                        type="number"
-                        id="canvas-width"
-                        min="8"
-                        max="1024"
-                      />
-                      <span class="spin-btn">
-                        <span id="inc" class="channel-btn"
-                          ><span class="spin-content">+</span></span
-                        >
-                        <span id="dec" class="channel-btn"
-                          ><span class="spin-content">-</span></span
-                        >
-                      </span>
-                    </span>
-                  </label>
-                  <label for="canvas-height"
-                    >Height:
-                    <span class="input">
-                      <input
-                        type="number"
-                        id="canvas-height"
-                        min="8"
-                        max="1024"
-                      />
-                      <span class="spin-btn">
-                        <span id="inc" class="channel-btn"
-                          ><span class="spin-content">+</span></span
-                        >
-                        <span id="dec" class="channel-btn"
-                          ><span class="spin-content">-</span></span
-                        >
-                      </span>
-                    </span>
-                  </label>
-                </div>
-                <button
-                  type="submit"
-                  id="update-size"
-                  class="update-size btn"
-                  aria-label="Update Canvas Size"
-                >
-                  Update Canvas Size
-                </button>
-              </form>
-            </div>
-          </div>
-          <div
             class="layers-interface dialog-box draggable v-drag settings-box smooth-shift"
           >
             <div id="layers-header" class="header dragger">
@@ -398,14 +421,22 @@
             </div>
             <div class="collapsible">
               <div class="layers-control">
-                <div class="add-layer" data-tooltip="New Layer"></div>
+                <button class="add-layer" data-tooltip="New Layer"></button>
+                <input type="file" id="file-upload" />
                 <label
                   for="file-upload"
                   class="reference"
                   data-tooltip="New Reference"
                 >
                 </label>
-                <input type="file" id="file-upload" />
+                <button
+                  type="button"
+                  class="trash"
+                  id="delete-layer"
+                  aria-label="Remove Layer"
+                  data-tooltip="Remove Layer"
+                  disabled="true"
+                ></button>
               </div>
               <div class="layers-container">
                 <div class="layers">
@@ -415,11 +446,13 @@
                       type="button"
                       class="hide eyeopen"
                       aria-label="Hide/Show Layer"
+                      data-tooltip="Hide/Show Layer"
                     ></button>
                     <button
                       type="button"
-                      class="trash"
-                      aria-label="Remove Layer"
+                      class="gear"
+                      aria-label="Adjust Layer Settings"
+                      data-tooltip="Adjust Layer Settings"
                     ></button>
                   </div>
                 </div>
@@ -543,22 +576,22 @@
                   type="button"
                   class="tool line"
                   id="line"
-                  aria-label="Line (L or Hold Shift & Brush)"
-                  data-tooltip="Line (L or Hold Shift & Brush)"
+                  aria-label="Line (/ or Hold Shift & Brush)"
+                  data-tooltip="Line (/ or Hold Shift & Brush)"
                 />
                 <button
                   type="button"
                   class="tool quadCurve"
                   id="quadCurve"
-                  aria-label="Quadratic Curve (C)"
-                  data-tooltip="Quadratic Curve (C)"
+                  aria-label="Quadratic Curve (Q)"
+                  data-tooltip="Quadratic Curve (Q)"
                 />
                 <button
                   type="button"
                   class="tool cubicCurve"
                   id="cubicCurve"
-                  aria-label="Cubic Curve (J)"
-                  data-tooltip="Cubic Curve (J)"
+                  aria-label="Cubic Curve (C)"
+                  data-tooltip="Cubic Curve (C)"
                 />
                 <button
                   type="button"
@@ -567,15 +600,13 @@
                   aria-label="Ellipse (O) Hold Shift to maintain circle"
                   data-tooltip="Ellipse (O) &#010;&#010;Hold Shift to maintain circle"
                 />
-                <!-- <button
-                type="button"
-                class="tool btn"
-                id="select"
-                aria-label="Select (M)"
-                data-tooltip="Select (M)"
-              >
-                <div class="select"></div>
-              </button> -->
+                <button
+                  type="button"
+                  class="tool select"
+                  id="select"
+                  aria-label="Select (S)"
+                  data-tooltip="Select (S)"
+                />
               </div>
               <div class="column">
                 <button
@@ -601,6 +632,212 @@
                 />
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+      <div class="settings-container dialog-box draggable v-drag h-drag free">
+        <div id="settings-header" class="header dragger">
+          <div class="drag-btn"><div class="grip"></div></div>
+          Settings
+          <button
+            type="button"
+            id="settings-closer"
+            class="close-btn"
+            data-tooltip="Close"
+          >
+            <span class="close"></span>
+          </button>
+        </div>
+        <div class="collapsible">
+          <div id="settings-interface" class="settings-interface">
+            <div class="settings-group">
+              <div class="settings-section-header">Display</div>
+              <div class="settings-options">
+                <!-- Quick Menu -->
+                <!-- <label
+                  for="quick-menu-settings-toggle"
+                  id="quick-menu"
+                  class="toggle"
+                  data-tooltip="Toggle Quick Menu on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="quick-menu-settings-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <span>Quick Menu</span>
+                </label> -->
+                <!-- Tooltips -->
+                <label
+                  for="tooltips-toggle"
+                  id="tooltips"
+                  class="toggle"
+                  data-tooltip="Toggle tooltips (T)"
+                >
+                  <input type="checkbox" checked="true" id="tooltips-toggle" />
+                  <span class="checkmark"></span>
+                  <span>Tooltips</span>
+                </label>
+                <!-- Grid -->
+                <label
+                  for="grid-toggle"
+                  id="grid"
+                  class="toggle"
+                  data-tooltip="Toggle grid (G) &#010;&#010;Displays at higher zoom levels only."
+                >
+                  <input type="checkbox" id="grid-toggle" />
+                  <span class="checkmark"></span>
+                  <span>Grid</span>
+                </label>
+                <div class="grid-spacing-container">
+                  <label for="grid-spacing"
+                    ><span>Subgrid Spacing:&nbsp;</span>
+                    <input type="number" id="grid-spacing" min="1" max="64" />
+                    <span class="grid-spacing-spin spin-btn">
+                      <span id="inc" class="channel-btn"
+                        ><span class="spin-content">+</span></span
+                      >
+                      <span id="dec" class="channel-btn"
+                        ><span class="spin-content">-</span></span
+                      >
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <!-- <hr /> -->
+            <!-- <div class="settings-group">
+              <div class="settings-section-header">Toolbox Tools</div>
+              <div class="settings-options toolbox-settings">
+                <label
+                  for="toolbox-fill-toggle"
+                  id="toolbox-fill"
+                  class="toggle"
+                  data-tooltip="Toggle Fill tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-fill-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon fill"></div>
+                </label>
+                <label
+                  for="toolbox-line-toggle"
+                  id="toolbox-line"
+                  class="toggle"
+                  data-tooltip="Toggle Line tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-line-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon line"></div>
+                </label>
+                <label
+                  for="toolbox-quadCurve-toggle"
+                  id="toolbox-quadCurve"
+                  class="toggle"
+                  data-tooltip="Toggle Quadratic Curve tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-quadCurve-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon quadCurve"></div>
+                </label>
+                <label
+                  for="toolbox-cubicCurve-toggle"
+                  id="toolbox-cubicCurve"
+                  class="toggle"
+                  data-tooltip="Toggle Cubic Curve tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-cubicCurve-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon cubicCurve"></div>
+                </label>
+                <label
+                  for="toolbox-ellipse-toggle"
+                  id="toolbox-ellipse"
+                  class="toggle"
+                  data-tooltip="Toggle Ellipse tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-ellipse-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon ellipse"></div>
+                </label>
+                <label
+                  for="toolbox-select-toggle"
+                  id="toolbox-select"
+                  class="toggle"
+                  data-tooltip="Toggle Select tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-select-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon select"></div>
+                </label>
+                <label
+                  for="toolbox-eyedropper-toggle"
+                  id="toolbox-eyedropper"
+                  class="toggle"
+                  data-tooltip="Toggle Eyedropper tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-eyedropper-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon eyedropper"></div>
+                </label>
+                <label
+                  for="toolbox-grab-toggle"
+                  id="toolbox-grab"
+                  class="toggle"
+                  data-tooltip="Toggle Grab tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-grab-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon grab"></div>
+                </label>
+                <label
+                  for="toolbox-move-toggle"
+                  id="toolbox-move"
+                  class="toggle"
+                  data-tooltip="Toggle Move tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-move-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon move"></div>
+                </label>
+              </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -771,6 +1008,72 @@
           </div>
         </div>
       </div>
+      <div class="size-container dialog-box draggable v-drag h-drag free">
+        <div id="size-header" class="header dragger">
+          <div class="drag-btn"><div class="grip"></div></div>
+          Canvas Size
+          <button
+            type="button"
+            id="size-closer"
+            class="close-btn"
+            data-tooltip="Close"
+          >
+            <span class="close"></span>
+          </button>
+        </div>
+        <div class="collapsible">
+          <form class="dimensions-form">
+            <div class="inputs">
+              <label for="canvas-width"
+                >Width:
+                <span class="input">
+                  <input type="number" id="canvas-width" min="8" max="1024" />
+                  <span class="spin-btn">
+                    <span id="inc" class="channel-btn"
+                      ><span class="spin-content">+</span></span
+                    >
+                    <span id="dec" class="channel-btn"
+                      ><span class="spin-content">-</span></span
+                    >
+                  </span>
+                </span>
+              </label>
+              <label for="canvas-height"
+                >Height:
+                <span class="input">
+                  <input type="number" id="canvas-height" min="8" max="1024" />
+                  <span class="spin-btn">
+                    <span id="inc" class="channel-btn"
+                      ><span class="spin-content">+</span></span
+                    >
+                    <span id="dec" class="channel-btn"
+                      ><span class="spin-content">-</span></span
+                    >
+                  </span>
+                </span>
+              </label>
+            </div>
+            <div class="buttons-container">
+              <button
+                type="submit"
+                id="update-size"
+                class="update-size"
+                aria-label="Update Canvas Size"
+              >
+                Submit
+              </button>
+              <button
+                type="button"
+                id="cancel-resize-button"
+                class="update-size"
+                aria-label="Close canvas resize dialog box"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
       <div class="export-container dialog-box draggable v-drag h-drag free">
         <div id="export-header" class="header dragger">
           <div class="drag-btn"><div class="grip"></div></div>
@@ -792,7 +1095,7 @@
         </div>
         <div class="collapsible">
           <div id="export-interface" class="export-interface">
-            <!-- Select pixel scale and export folder location -->
+            <!-- Select pixel scale -->
           </div>
         </div>
       </div>
@@ -800,20 +1103,14 @@
         <div id="save-header" class="header dragger">
           <div class="drag-btn"><div class="grip"></div></div>
           <span>Save Options</span>
-          <label
-            for="save-collapse-btn"
-            id="save-collapser"
-            class="collapse-btn"
-            data-tooltip="Collapse/ Expand"
+          <button
+            type="button"
+            id="save-closer"
+            class="close-btn"
+            data-tooltip="Close"
           >
-            <input
-              type="checkbox"
-              aria-label="Collapse or Expand"
-              class="collapse-checkbox"
-              id="save-collapse-btn"
-            />
-            <span class="arrow"></span>
-          </label>
+            <span class="close"></span>
+          </button>
         </div>
         <div class="collapsible">
           <form id="save-interface" class="save-interface">
@@ -935,7 +1232,7 @@
             <div class="save-buttons">
               <!-- save button -->
               <button
-                type="button"
+                type="submit"
                 id="save-button"
                 class="btn"
                 aria-label="Save offline as a .pxv file"
@@ -958,6 +1255,7 @@
         </div>
       </div>
     </div>
+    <div class="layer-settings dialog-box"></div>
     <div id="tooltip" class="tooltip"></div>
   </body>
 </html>

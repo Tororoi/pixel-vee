@@ -4,8 +4,8 @@ import { vectorGui } from "./vector.js"
 
 /**
  * Render fill vector gui
- * @param {Object} vectorProperties
- * @param {Object} vectorAction
+ * @param {object} vectorProperties
+ * @param {object} vectorAction
  */
 export function renderFillVector(vectorProperties, vectorAction) {
   let pointsKeys = [{ x: "px1", y: "py1" }]

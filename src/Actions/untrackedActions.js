@@ -4,12 +4,13 @@ import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { setInitialZoom } from "../utils/canvasHelpers.js"
+import { copySelectedPixels } from "../Menu/edit.js"
 
 /**
  * Zoom the canvas
- * @param {Float} z - ratio to multiply zoom by
- * @param {Integer} xOriginOffset - additional offset needed to keep zoom centered around cursor
- * @param {Integer} yOriginOffset - additional offset needed to keep zoom centered around cursor
+ * @param {number} z - ratio to multiply zoom by (Float)
+ * @param {number} xOriginOffset - additional offset needed to keep zoom centered around cursor (Integer)
+ * @param {number} yOriginOffset - additional offset needed to keep zoom centered around cursor (Integer)
  */
 export function actionZoom(z, xOriginOffset, yOriginOffset) {
   canvas.zoom *= z
@@ -19,6 +20,14 @@ export function actionZoom(z, xOriginOffset, yOriginOffset) {
   canvas.previousYOffset = canvas.yOffset
   //re scale canvas
   canvas.vectorGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
+  canvas.rasterGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,
@@ -63,6 +72,14 @@ export function actionRecenter() {
     0,
     0
   )
+  canvas.rasterGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
   canvas.layers.forEach((layer) => {
     layer.onscreenCtx.setTransform(
       canvas.sharpness * canvas.zoom,
@@ -95,4 +112,17 @@ export function actionRecenter() {
   canvas.previousYOffset = canvas.yOffset
   renderCanvas() //render all layers
   vectorGui.render()
+}
+
+/**
+ * Copy Selection to clipboard
+ * Not dependent on pointer events
+ */
+export function actionCopySelection() {
+  if (
+    canvas.currentLayer.type === "raster" &&
+    state.boundaryBox.xMax !== null
+  ) {
+    copySelectedPixels()
+  }
 }

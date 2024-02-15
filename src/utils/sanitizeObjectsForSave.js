@@ -1,10 +1,10 @@
 /**
  *
- * @param {Object} layers
- * @param {Boolean} preserveHistory
- * @param {Boolean} includeReferenceLayers
- * @param {Boolean} includeRemovedActions
- * @returns {Object} - A sanitized copy of the layers object.
+ * @param {object} layers
+ * @param {boolean} preserveHistory
+ * @param {boolean} includeReferenceLayers
+ * @param {boolean} includeRemovedActions
+ * @returns {object} - A sanitized copy of the layers object.
  */
 export function sanitizeLayers(
   layers,
@@ -15,7 +15,9 @@ export function sanitizeLayers(
   let sanitizedLayers = JSON.parse(JSON.stringify(layers))
   for (let i = sanitizedLayers.length - 1; i >= 0; i--) {
     const layer = sanitizedLayers[i]
-    if (layer.removed && !preserveHistory && !includeRemovedActions) {
+    if (layer.isPreview) {
+      sanitizedLayers.splice(i, 1)
+    } else if (layer.removed && !preserveHistory && !includeRemovedActions) {
       sanitizedLayers.splice(i, 1)
     } else if (
       layer.type === "reference" &&
@@ -39,10 +41,10 @@ export function sanitizeLayers(
 }
 
 /**
- * @param {Object} palette
- * @param {Boolean} preserveHistory
- * @param {Boolean} includePalette
- * @returns {Object} - A sanitized copy of the palette object.
+ * @param {object} palette
+ * @param {boolean} preserveHistory
+ * @param {boolean} includePalette
+ * @returns {object} - A sanitized copy of the palette object.
  */
 export function sanitizePalette(palette, preserveHistory, includePalette) {
   if (!preserveHistory && !includePalette) {
@@ -52,11 +54,11 @@ export function sanitizePalette(palette, preserveHistory, includePalette) {
 }
 
 /**
- * @param {Object} undoStack
- * @param {Boolean} preserveHistory
- * @param {Boolean} includeReferenceLayers
- * @param {Boolean} includeRemovedActions
- * @returns {Object} - A sanitized copy of the undoStack object.
+ * @param {object} undoStack
+ * @param {boolean} preserveHistory
+ * @param {boolean} includeReferenceLayers
+ * @param {boolean} includeRemovedActions
+ * @returns {object} - A sanitized copy of the undoStack object.
  */
 export function sanitizeHistory(
   undoStack,
@@ -65,9 +67,17 @@ export function sanitizeHistory(
   includeRemovedActions
 ) {
   let sanitizedUndoStack = JSON.parse(JSON.stringify(undoStack))
+  let lastPasteActionIndex
   for (let i = sanitizedUndoStack.length - 1; i >= 0; i--) {
     const action = sanitizedUndoStack[i]
-    if (
+    //if active paste action, find the latest unconfirmed paste action and remove it and all actions after it
+    if (action.tool.name === "paste" && !lastPasteActionIndex) {
+      lastPasteActionIndex = i
+      if (!action.properties.confirmed) {
+        //remove the unconfirmed paste action and all actions after it
+        sanitizedUndoStack.splice(i, sanitizedUndoStack.length - i)
+      }
+    } else if (
       (action.layer.removed || action.removed) &&
       !preserveHistory &&
       !includeRemovedActions
@@ -81,7 +91,11 @@ export function sanitizeHistory(
       sanitizedUndoStack.splice(i, 1)
     } else {
       if (action.layer) {
-        action.layer = { title: action.layer.title }
+        action.layer = { id: action.layer.id }
+      }
+      if (action.properties?.pastedLayer) {
+        // sanitize pasted layer
+        action.properties.pastedLayer = { id: action.properties.pastedLayer.id }
       }
       if (action.properties?.points) {
         //format each object in the array from {x,y,brushSize} to be 3 entries in a new array with just the values. The values will be reformatted back to objects on load.

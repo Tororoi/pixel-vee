@@ -4,8 +4,8 @@ import { vectorGui } from "./vector.js"
 import { drawControlPointHandle } from "../utils/guiHelpers.js"
 
 /**
- * @param {Object} vectorProperties
- * @param {Object} vectorAction
+ * @param {object} vectorProperties
+ * @param {object} vectorAction
  */
 export function renderCurveVector(vectorProperties, vectorAction) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
@@ -69,8 +69,8 @@ export function renderCurveVector(vectorProperties, vectorAction) {
 }
 
 /**
- * @param {Object} vectorProperties
- * @param {Object} vectorAction
+ * @param {object} vectorProperties
+ * @param {object} vectorAction
  */
 export function renderCurvePath(vectorProperties, vectorAction) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties

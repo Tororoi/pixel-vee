@@ -1,6 +1,6 @@
 /* Import order is important */
 /* First base styles and mixins, keyframes, variables */
-//TODO: create a _normalize.scss file
+//TODO: (Middle Priority) create a _normalize.scss file
 @import "base/variables";
 @import "base/icons";
 @import "base/keyframes";
@@ -16,6 +16,7 @@
 @import "components/vectors";
 @import "components/brushes";
 @import "components/palette";
+@import "components/settings";
 @import "components/color-picker";
 @import "components/size";
 @import "components/save";

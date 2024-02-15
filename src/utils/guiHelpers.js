@@ -1,10 +1,10 @@
 /**
- * @param {Object} canvas
- * @param {Integer} xOffset
- * @param {Integer} yOffset
- * @param {Integer} x
- * @param {Integer} y
- * @param {Integer} r
+ * @param {object} canvas
+ * @param {number} xOffset - (Integer)
+ * @param {number} yOffset - (Integer)
+ * @param {number} x - (Integer)
+ * @param {number} y - (Integer)
+ * @param {number} r - (Integer)
  */
 export function drawCirclePath(canvas, xOffset, yOffset, x, y, r) {
   canvas.vectorGuiCTX.moveTo(xOffset + x + 0.5 + r, yOffset + y + 0.5)
@@ -18,13 +18,13 @@ export function drawCirclePath(canvas, xOffset, yOffset, x, y, r) {
 }
 
 /**
- * @param {Object} canvas
- * @param {Integer} xOffset
- * @param {Integer} yOffset
- * @param {Integer} x1
- * @param {Integer} y1
- * @param {Integer} x2
- * @param {Integer} y2
+ * @param {object} canvas
+ * @param {number} xOffset - (Integer)
+ * @param {number} yOffset - (Integer)
+ * @param {number} x1 - (Integer)
+ * @param {number} y1 - (Integer)
+ * @param {number} x2 - (Integer)
+ * @param {number} y2 - (Integer)
  */
 export function drawControlPointHandle(
   canvas,
@@ -41,19 +41,34 @@ export function drawControlPointHandle(
 
 /**
  *
- * @param {Integer} pointerX
- * @param {Integer} pointerY
- * @param {Integer} px
- * @param {Integer} py
- * @param {Integer} r
- * @returns {Boolean}
+ * @param {number} pointerX - (Integer)
+ * @param {number} pointerY - (Integer)
+ * @param {number} px - (Integer)
+ * @param {number} py - (Integer)
+ * @param {number} r - (Integer)
+ * @returns {boolean}
  */
 export function checkPointCollision(pointerX, pointerY, px, py, r) {
-  //currently a square detection field, TODO: change to circle
+  //currently a square detection field, TODO: (Low Priority) change to circle
   return (
     pointerX >= px - r &&
     pointerX <= px + r &&
     pointerY >= py - r &&
     pointerY <= py + r
+  )
+}
+
+/**
+ * @param {number} pointerX - (Integer)
+ * @param {number} pointerY - (Integer)
+ * @param {number} px1 - (Integer)
+ * @param {number} py1 - (Integer)
+ * @param {number} px2 - (Integer)
+ * @param {number} py2 - (Integer)
+ * @returns {boolean}
+ */
+export function checkAreaCollision(pointerX, pointerY, px1, py1, px2, py2) {
+  return (
+    pointerX >= px1 && pointerX <= px2 && pointerY >= py1 && pointerY <= py2
   )
 }

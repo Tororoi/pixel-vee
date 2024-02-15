@@ -4,7 +4,7 @@ import { getColor } from "../utils/imageDataHelpers.js"
 
 /**
  * Create a mask set for a given color
- * @param {Object} matchColor
+ * @param {object} matchColor
  * @returns {Set}
  */
 export function createColorMaskSet(matchColor) {

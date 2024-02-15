@@ -10,8 +10,8 @@ function camelCaseToWords(str) {
 
 /**
  *
- * @param {String} optionName
- * @param {Object} option
+ * @param {string} optionName
+ * @param {object} option
  * @returns {Element}
  */
 export function createOptionToggle(optionName, option) {

@@ -2,6 +2,7 @@ import { dom } from "../Context/dom.js"
 import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { consolidateLayers } from "../Canvas/layers.js"
 import {
@@ -11,16 +12,24 @@ import {
   loadDrawing,
 } from "../Save/savefile.js"
 import { measureTextWidth } from "../utils/measureHelpers.js"
+import {
+  actionSelectAll,
+  actionDeselect,
+  actionInvertSelection,
+  actionCutSelection,
+  actionPasteSelection,
+} from "../Actions/nonPointerActions.js"
+import { actionCopySelection } from "../Actions/untrackedActions.js"
 
 //====================================//
 //======= * * * Tooltip * * * ========//
 //====================================//
 
 /**
- * @param {String} message
+ * @param {string} message
  * @param {Element} target
  */
-const showTooltip = (message, target) => {
+const generateTooltip = (message, target) => {
   if (message && target) {
     //reset tooltip
     dom.tooltip.classList.remove("page-left")
@@ -46,7 +55,7 @@ const showTooltip = (message, target) => {
       tooltipX = targetRect.left + targetRect.width
     }
     const tooltipY = targetRect.top + targetRect.height + 16
-    dom.tooltip.classList.add("visible")
+    // dom.tooltip.classList.add("visible")
     if (location === "left") {
       dom.tooltip.classList.add("page-left")
     } else if (location === "center") {
@@ -55,7 +64,7 @@ const showTooltip = (message, target) => {
     dom.tooltip.style.top = tooltipY + "px"
     dom.tooltip.style.left = tooltipX + "px"
   } else {
-    dom.tooltip.classList.remove("visible")
+    // dom.tooltip.classList.remove("visible")
   }
 }
 
@@ -65,7 +74,7 @@ const showTooltip = (message, target) => {
 
 /**
  * Open save dialog box
- * TODO: initialize save dialog box with default settings?
+ * TODO: (Low Priority) initialize save dialog box with default settings?
  */
 export function openSaveDialogBox() {
   dom.saveContainer.style.display = "flex"
@@ -76,11 +85,7 @@ export function openSaveDialogBox() {
 
 /**
  * Consolidate offscreen canvases and download image
- * TODO: Open dialog box with more options such as pixel size, where to save it to, etc.
- * TODO: To support saving a complex file, we must save state.undoStack as json and be able to parse that json back to the same undoStack
- * - sets cannot be saved as json. factor out maskSet and only use maskArray in actions
- * - canvases cannot be saved as json. when restoring a save, first iterate through saved canvas.layers and create a canvas and context (offscreen and onscreen) for each layer.
- * then iterate through saved actions and assign the correct layer based on the layer's title so the layer is a referenced object instead of a new object
+ * TODO: (Middle Priority) Open dialog box with more options such as pixel size, etc.
  */
 function exportImage() {
   //save .png
@@ -95,7 +100,7 @@ function exportImage() {
 
 /**
  * Open json file from desktop and load into layers and timeline
- * TODO: initialize loading screen and stop loading screen after loaded
+ * TODO: (Middle Priority) initialize loading screen and stop loading screen after loaded
  */
 function openSavedDrawing() {
   let reader
@@ -113,9 +118,13 @@ function openSavedDrawing() {
 //===================================//
 
 document.body.addEventListener("mouseover", (e) => {
-  if (dom.tooltipBtn.checked) {
-    const tooltipMessage = e.target.dataset?.tooltip
-    showTooltip(tooltipMessage, e.target)
+  state.tooltipMessage = e.target.dataset?.tooltip
+  generateTooltip(state.tooltipMessage, e.target)
+  //TODO: (Low Priority) Instead of rendering here, use a timer that resets on mousemove to detect idle time and move this logic to the mousemove event
+  if (dom.tooltipBtn.checked && state.tooltipMessage) {
+    dom.tooltip.classList.add("visible")
+  } else {
+    dom.tooltip.classList.remove("visible")
   }
 })
 dom.toolOptions.addEventListener("click", (e) => {
@@ -137,10 +146,40 @@ dom.gridBtn.addEventListener("click", (e) => {
   }
   vectorGui.render()
 })
+dom.gridSpacing.addEventListener("input", (e) => {
+  //constrain value to min/max
+  if (e.target.value < 1) {
+    e.target.value = 1
+  } else if (e.target.value > 64) {
+    e.target.value = 64
+  }
+  vectorGui.gridSpacing = parseInt(e.target.value)
+  vectorGui.render()
+})
+dom.gridSpacingSpinBtn.addEventListener("pointerdown", (e) => {
+  if (e.target.id === "inc") {
+    vectorGui.gridSpacing++
+  } else if (e.target.id === "dec") {
+    vectorGui.gridSpacing--
+  }
+  //constraint value to min/max
+  if (vectorGui.gridSpacing < 1) {
+    vectorGui.gridSpacing = 1
+  } else if (vectorGui.gridSpacing > 64) {
+    vectorGui.gridSpacing = 64
+  }
+  dom.gridSpacing.value = vectorGui.gridSpacing
+  vectorGui.render()
+})
 dom.tooltipBtn.addEventListener("click", (e) => {
-  if (dom.tooltipBtn.checked) {
-    const tooltipMessage = dom.tooltipBtn.parentNode.dataset?.tooltip
-    showTooltip(tooltipMessage, dom.tooltipBtn.parentNode)
+  // if (dom.tooltipBtn.checked) {
+  //   const tooltipMessage = dom.tooltipBtn.parentNode.dataset?.tooltip
+  //   generateTooltip(tooltipMessage, dom.tooltipBtn.parentNode)
+  // } else {
+  //   dom.tooltip.classList.remove("visible")
+  // }
+  if (dom.tooltipBtn.checked && state.tooltipMessage) {
+    dom.tooltip.classList.add("visible")
   } else {
     dom.tooltip.classList.remove("visible")
   }
@@ -149,9 +188,65 @@ dom.openSaveBtn.addEventListener("click", (e) => {
   //reset value so that the same file can be imported multiple times
   e.target.value = null
 })
+dom.topMenu.addEventListener("click", (e) => {
+  if (e.target.classList.contains("disabled")) {
+    e.preventDefault()
+    return
+  }
+  //check if active element has class menu-folder and class "active"
+  if (document.activeElement.classList.contains("menu-folder")) {
+    //if so, toggle the active class
+    if (document.activeElement.classList.contains("active")) {
+      document.activeElement.classList.remove("active")
+    } else {
+      document.activeElement.classList.add("active")
+    }
+  }
+})
+dom.topMenu.addEventListener("focusout", (e) => {
+  //check if active element has class menu-folder
+  if (e.target.classList.contains("menu-folder")) {
+    //if so, remove the active class
+    e.target.classList.remove("active")
+  }
+})
+//File Submenu events
 dom.openSaveBtn.addEventListener("change", openSavedDrawing)
 dom.exportBtn.addEventListener("click", exportImage)
 dom.saveBtn.addEventListener("click", openSaveDialogBox)
+//Edit Submenu events
+dom.canvasSizeBtn.addEventListener("click", (e) => {
+  if (canvas.pastedLayer) {
+    //if there is a pasted layer active, do not open canvas size dialog
+    return
+  }
+  dom.sizeContainer.style.display = "flex"
+})
+dom.selectAllBtn.addEventListener("click", actionSelectAll)
+dom.deselectBtn.addEventListener("click", actionDeselect)
+dom.invertSelectionBtn.addEventListener("click", actionInvertSelection)
+dom.cutBtn.addEventListener("click", actionCutSelection)
+dom.copyBtn.addEventListener("click", actionCopySelection)
+dom.pasteBtn.addEventListener("click", actionPasteSelection)
+// dom.flipHorizontalBtn.addEventListener("click", (e) => {
+//   //TODO: (High Priority) flip selected pixels horizontally
+// })
+// dom.flipVerticalBtn.addEventListener("click", (e) => {
+//   //TODO: (High Priority) flip selected pixels vertically
+// })
+// dom.rotateBtn.addEventListener("click", (e) => {
+//   //TODO: (High Priority) rotate selected pixels
+// })
+//Settings events
+dom.settingsBtn.addEventListener("click", (e) => {
+  //if settings container is already open, close it, else open it
+  if (dom.settingsContainer.style.display === "flex") {
+    dom.settingsContainer.style.display = "none"
+  } else {
+    dom.settingsContainer.style.display = "flex"
+  }
+})
+//Save/Export events
 dom.saveAsForm.addEventListener("change", (e) => {
   if (e.target.id === "preserve-history-toggle") {
     if (e.target.checked) {
@@ -185,6 +280,13 @@ dom.saveAsForm.addEventListener("change", (e) => {
     setSaveFilesizePreview()
   }
 })
+dom.saveAsForm.addEventListener("submit", (e) => {
+  //prevent default form submission
+  e.preventDefault()
+  saveDrawing()
+  dom.saveContainer.style.display = "none"
+  state.saveDialogOpen = false
+})
 dom.saveAsFileName.addEventListener("input", (e) => {
   state.saveSettings.saveAsFileName = e.target.value
   dom.saveAsFileName.style.width =
@@ -192,21 +294,7 @@ dom.saveAsFileName.addEventListener("input", (e) => {
     2 +
     "px"
 })
-dom.saveDrawingBtn.addEventListener("click", (e) => {
-  saveDrawing()
-  dom.saveContainer.style.display = "none"
-  state.saveDialogOpen = false
-})
 dom.cancelSaveBtn.addEventListener("click", (e) => {
   dom.saveContainer.style.display = "none"
   state.saveDialogOpen = false
-})
-dom.fileMenu.addEventListener("click", function (e) {
-  let target = e.target
-  if (
-    target.getAttribute("role") === "menuitem" &&
-    target.getAttribute("aria-haspopup") === "true"
-  ) {
-    dom.fileSubMenu.classList.toggle("show")
-  }
 })
