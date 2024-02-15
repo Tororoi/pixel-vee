@@ -119,9 +119,10 @@
             }
             &.disabled {
               opacity: 0.6;
+              background-color: $dark-gray;
               cursor: not-allowed;
               &:hover {
-                background-color: $black;
+                background-color: $dark-gray;
                 color: $white;
               }
             }

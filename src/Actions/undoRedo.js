@@ -7,9 +7,13 @@ import { vectorGui } from "../GUI/vector.js"
 import { clearOffscreenCanvas, renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM, renderLayersToDOM } from "../DOM/render.js"
 import { setSaveFilesizePreview } from "../Save/savefile.js"
-import { pasteSelectedPixels, confirmPastedPixels } from "../Menu/edit.js"
+import { pasteSelectedPixels } from "../Menu/edit.js"
 import { switchTool } from "../Tools/toolbox.js"
 import { removeTempLayerFromDOM } from "../DOM/renderLayers.js"
+import {
+  disableActionsForPaste,
+  enableActionsForNoPaste,
+} from "../DOM/disableDomElements.js"
 
 //====================================//
 //========= * * * Core * * * =========//
@@ -199,6 +203,7 @@ function handlePasteAction(latestAction, modType) {
       )
     }
     vectorGui.render()
+    enableActionsForNoPaste()
   } else if (modType === "to") {
     //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
     pasteSelectedPixels(
@@ -206,6 +211,7 @@ function handlePasteAction(latestAction, modType) {
       latestAction.properties.pastedLayer
     )
     switchTool("move")
+    disableActionsForPaste()
   }
 }
 
@@ -224,11 +230,13 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
       canvas.currentLayer.y = newLatestAction.properties.to.y
     }
     switchTool("move")
+    disableActionsForPaste()
   } else if (modType === "to") {
     //if modType is "to" (redoing confirm paste action), basically do the confirmPastedPixels function except use the action properties instead of the clipboard and don't add to timeline. Also don't need to adjust for layer offset
     removeTempLayerFromDOM()
     //render
     vectorGui.render()
+    enableActionsForNoPaste()
   }
 }
 

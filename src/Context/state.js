@@ -1,6 +1,10 @@
 import { dom } from "./dom.js"
 import { swatches } from "./swatch.js"
 import { setSaveFilesizePreview } from "../Save/savefile.js"
+import {
+  disableActionsForNoSelection,
+  enableActionsForSelection,
+} from "../DOM/disableDomElements.js"
 
 //====================================//
 //======== * * * State * * * =========//
@@ -8,6 +12,7 @@ import { setSaveFilesizePreview } from "../Save/savefile.js"
 
 //Main state object to keep track of global vars
 export const state = {
+  tooltipMessage: null,
   captureTesting: false,
   testNumPoints: 1000,
   //timeline
@@ -179,6 +184,7 @@ function setBoundaryBox(selectProperties) {
   state.boundaryBox.yMin = Math.min(selectProperties.py1, selectProperties.py2)
   state.boundaryBox.xMax = Math.max(selectProperties.px2, selectProperties.px1)
   state.boundaryBox.yMax = Math.max(selectProperties.py2, selectProperties.py1)
+  enableActionsForSelection()
 }
 
 /**
@@ -188,6 +194,7 @@ function deselect() {
   resetSelectProperties()
   resetBoundaryBox()
   state.selectionInversed = false
+  disableActionsForNoSelection()
 }
 
 /**

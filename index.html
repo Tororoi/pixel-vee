@@ -95,6 +95,7 @@
               <li
                 role="menuitem"
                 id="deselect"
+                class="disabled"
                 data-tooltip="Deselect selection area (Cmd + D)"
               >
                 Deselect (Cmd + D)
@@ -102,6 +103,7 @@
               <li
                 role="menuitem"
                 id="invert-selection"
+                class="disabled"
                 data-tooltip="Invert selection area (Cmd + I)"
               >
                 Invert Selection (Cmd + I)
@@ -109,6 +111,7 @@
               <li
                 role="menuitem"
                 id="cut-selection"
+                class="disabled"
                 data-tooltip="Cut selection (Cmd + X)"
               >
                 Cut (Cmd + X)
@@ -116,6 +119,7 @@
               <li
                 role="menuitem"
                 id="copy-selection"
+                class="disabled"
                 data-tooltip="Copy selection (Cmd + C)"
               >
                 Copy (Cmd + C)
@@ -123,6 +127,7 @@
               <li
                 role="menuitem"
                 id="paste-selection"
+                class="disabled"
                 data-tooltip="Paste copied selection (Cmd + V)"
               >
                 Paste (Cmd + V)
@@ -180,6 +185,7 @@
             class="gear"
             id="settings-btn"
             aria-label="Open settings menu"
+            data-tooltip="Open settings menu"
           />
         </div>
       </div>
@@ -667,7 +673,7 @@
                   for="tooltips-toggle"
                   id="tooltips"
                   class="toggle"
-                  data-tooltip="Toggle tooltips on or off"
+                  data-tooltip="Toggle tooltips (T)"
                 >
                   <input type="checkbox" checked="true" id="tooltips-toggle" />
                   <span class="checkmark"></span>

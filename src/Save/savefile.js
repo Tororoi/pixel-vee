@@ -18,6 +18,7 @@ import {
   sanitizePalette,
   sanitizeHistory,
 } from "../utils/sanitizeObjectsForSave.js"
+import { resizeOffScreenCanvas } from "../Canvas/render.js"
 
 /**
  * Save the drawing as a JSON file
@@ -28,6 +29,7 @@ import {
  *   - raster layer properties: cvs, ctx, onscreenCvs, onscreenCtx
  * - tool fn - not needed because it is not used
  * - action snapshot - don't save unnecessary dataurls
+ * TODO: (High Priority) save canvas dimensions and selectProperties
  * @returns {Blob} - A blob containing the drawing data.
  */
 export function prepareDrawingForSave() {
@@ -65,6 +67,11 @@ export function prepareDrawingForSave() {
     layers: sanitizedLayers,
     palette: sanitizedPalette,
     history: sanitizedUndoStack,
+    canvasProperties: {
+      width: canvas.offScreenCVS.width,
+      height: canvas.offScreenCVS.height,
+    },
+    selectProperties: state.selectProperties,
   })
 
   return new Blob([saveJsonString], { type: "application/json" })
@@ -108,6 +115,8 @@ export function saveDrawing() {
 
 /**
  * Load the drawing from a JSON file.
+ * TODO: (High Priority) Set canvas dimensions
+ * TODO: (High Priority) Set selection properties if latest action has a boundaryBox
  * @param {JSON} jsonFile - The JSON file containing the drawing data.
  */
 export async function loadDrawing(jsonFile) {
@@ -277,7 +286,20 @@ export async function loadDrawing(jsonFile) {
   await Promise.all(imageLoadPromises)
 
   // Additional logic to update the UI, refresh the canvas, etc.
-  renderCanvas(null, true) //redraw timeline
+  if (data.selectProperties) {
+    state.selectProperties = { ...data.selectProperties }
+    state.setBoundaryBox(state.selectProperties)
+  }
+  if (data.canvasProperties) {
+    //resize the offscreen canvas to match the saved canvas dimensions (includes redraw timeline and vectorGui.render)
+    resizeOffScreenCanvas(
+      data.canvasProperties.width,
+      data.canvasProperties.height
+    )
+  } else {
+    renderCanvas(null, true) //redraw timeline
+    vectorGui.render()
+  }
   renderLayersToDOM()
   renderPaletteToDOM()
   renderVectorsToDOM()

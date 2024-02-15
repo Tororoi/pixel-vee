@@ -13,12 +13,12 @@ import {
 } from "../Save/savefile.js"
 import { measureTextWidth } from "../utils/measureHelpers.js"
 import {
+  actionSelectAll,
   actionDeselect,
   actionInvertSelection,
   actionCutSelection,
   actionPasteSelection,
 } from "../Actions/nonPointerActions.js"
-import { addToTimeline } from "../Actions/undoRedo.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
 
 //====================================//
@@ -29,7 +29,7 @@ import { actionCopySelection } from "../Actions/untrackedActions.js"
  * @param {string} message
  * @param {Element} target
  */
-const showTooltip = (message, target) => {
+const generateTooltip = (message, target) => {
   if (message && target) {
     //reset tooltip
     dom.tooltip.classList.remove("page-left")
@@ -55,7 +55,7 @@ const showTooltip = (message, target) => {
       tooltipX = targetRect.left + targetRect.width
     }
     const tooltipY = targetRect.top + targetRect.height + 16
-    dom.tooltip.classList.add("visible")
+    // dom.tooltip.classList.add("visible")
     if (location === "left") {
       dom.tooltip.classList.add("page-left")
     } else if (location === "center") {
@@ -64,7 +64,7 @@ const showTooltip = (message, target) => {
     dom.tooltip.style.top = tooltipY + "px"
     dom.tooltip.style.left = tooltipX + "px"
   } else {
-    dom.tooltip.classList.remove("visible")
+    // dom.tooltip.classList.remove("visible")
   }
 }
 
@@ -118,9 +118,13 @@ function openSavedDrawing() {
 //===================================//
 
 document.body.addEventListener("mouseover", (e) => {
-  if (dom.tooltipBtn.checked) {
-    const tooltipMessage = e.target.dataset?.tooltip
-    showTooltip(tooltipMessage, e.target)
+  state.tooltipMessage = e.target.dataset?.tooltip
+  generateTooltip(state.tooltipMessage, e.target)
+  //TODO: (Low Priority) Instead of rendering here, use a timer that resets on mousemove to detect idle time and move this logic to the mousemove event
+  if (dom.tooltipBtn.checked && state.tooltipMessage) {
+    dom.tooltip.classList.add("visible")
+  } else {
+    dom.tooltip.classList.remove("visible")
   }
 })
 dom.toolOptions.addEventListener("click", (e) => {
@@ -168,9 +172,14 @@ dom.gridSpacingSpinBtn.addEventListener("pointerdown", (e) => {
   vectorGui.render()
 })
 dom.tooltipBtn.addEventListener("click", (e) => {
-  if (dom.tooltipBtn.checked) {
-    const tooltipMessage = dom.tooltipBtn.parentNode.dataset?.tooltip
-    showTooltip(tooltipMessage, dom.tooltipBtn.parentNode)
+  // if (dom.tooltipBtn.checked) {
+  //   const tooltipMessage = dom.tooltipBtn.parentNode.dataset?.tooltip
+  //   generateTooltip(tooltipMessage, dom.tooltipBtn.parentNode)
+  // } else {
+  //   dom.tooltip.classList.remove("visible")
+  // }
+  if (dom.tooltipBtn.checked && state.tooltipMessage) {
+    dom.tooltip.classList.add("visible")
   } else {
     dom.tooltip.classList.remove("visible")
   }
@@ -180,6 +189,10 @@ dom.openSaveBtn.addEventListener("click", (e) => {
   e.target.value = null
 })
 dom.topMenu.addEventListener("click", (e) => {
+  if (e.target.classList.contains("disabled")) {
+    e.preventDefault()
+    return
+  }
   //check if active element has class menu-folder and class "active"
   if (document.activeElement.classList.contains("menu-folder")) {
     //if so, toggle the active class
@@ -203,28 +216,13 @@ dom.exportBtn.addEventListener("click", exportImage)
 dom.saveBtn.addEventListener("click", openSaveDialogBox)
 //Edit Submenu events
 dom.canvasSizeBtn.addEventListener("click", (e) => {
+  if (canvas.pastedLayer) {
+    //if there is a pasted layer active, do not open canvas size dialog
+    return
+  }
   dom.sizeContainer.style.display = "flex"
 })
-dom.selectAllBtn.addEventListener("click", (e) => {
-  //select all pixels on canvas
-  if (canvas.currentLayer.type === "raster") {
-    state.selectProperties.px1 = 0
-    state.selectProperties.py1 = 0
-    state.selectProperties.px2 = canvas.currentLayer.cvs.width
-    state.selectProperties.py2 = canvas.currentLayer.cvs.height
-    state.setBoundaryBox(state.selectProperties)
-    addToTimeline({
-      tool: tools.select,
-      layer: canvas.currentLayer,
-      properties: {
-        deselect: false,
-        invertSelection: state.selectionInversed,
-        selectProperties: { ...state.selectProperties },
-      },
-    })
-    vectorGui.render()
-  }
-})
+dom.selectAllBtn.addEventListener("click", actionSelectAll)
 dom.deselectBtn.addEventListener("click", actionDeselect)
 dom.invertSelectionBtn.addEventListener("click", actionInvertSelection)
 dom.cutBtn.addEventListener("click", actionCutSelection)

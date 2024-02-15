@@ -9,8 +9,12 @@ import { canvas } from "../Context/canvas.js"
 /**
  * Draw all layers onto offscreen canvas to prepare for sampling or export
  * @param {boolean} includeReference - whether to include reference layers as part of consolidated canvas
+ * @param {boolean} includePreview - whether to include preview layer as part of consolidated canvas
  */
-export function consolidateLayers(includeReference = false) {
+export function consolidateLayers(
+  includeReference = false,
+  includePreview = false
+) {
   canvas.offScreenCTX.clearRect(
     0,
     0,
@@ -20,26 +24,28 @@ export function consolidateLayers(includeReference = false) {
   canvas.offScreenCTX.imageSmoothingEnabled = false
   canvas.layers.forEach((layer) => {
     if (!layer.hidden && !layer.removed && layer.opacity > 0) {
-      canvas.offScreenCTX.save()
-      canvas.offScreenCTX.globalAlpha = layer.opacity
-      if (layer.type === "raster") {
-        canvas.offScreenCTX.drawImage(
-          layer.cvs,
-          0,
-          0,
-          canvas.offScreenCVS.width,
-          canvas.offScreenCVS.height
-        )
-      } else if (includeReference && layer.type === "reference") {
-        canvas.offScreenCTX.drawImage(
-          layer.img,
-          layer.x,
-          layer.y,
-          layer.img.width * layer.scale,
-          layer.img.height * layer.scale
-        )
+      if (!layer.isPreview || includePreview) {
+        canvas.offScreenCTX.save()
+        canvas.offScreenCTX.globalAlpha = layer.opacity
+        if (layer.type === "raster") {
+          canvas.offScreenCTX.drawImage(
+            layer.cvs,
+            0,
+            0,
+            canvas.offScreenCVS.width,
+            canvas.offScreenCVS.height
+          )
+        } else if (includeReference && layer.type === "reference") {
+          canvas.offScreenCTX.drawImage(
+            layer.img,
+            layer.x,
+            layer.y,
+            layer.img.width * layer.scale,
+            layer.img.height * layer.scale
+          )
+        }
+        canvas.offScreenCTX.restore()
       }
-      canvas.offScreenCTX.restore()
     }
   })
 }

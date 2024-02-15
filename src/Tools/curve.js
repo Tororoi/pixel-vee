@@ -405,6 +405,7 @@ function cubicCurveSteps() {
  * Used automatically by curve tools after curve is completed.
  * TODO: (Low Priority) create distinct tool for adjusting that won't create a new curve when clicking.
  * Ideally a user should be able to click on a curve and render it's vector UI that way.
+ * BUG: cut selection not rendered properly in timeline
  */
 function adjustCurveSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
@@ -681,7 +682,7 @@ export const cubicCurve = {
         "Toggle Equal Length (Shift). \n\nEnsures magnitude continuity of control handles for linked vectors.",
     }, // Magnitude continuity
     align: {
-      active: false,
+      active: true,
       tooltip:
         "Toggle Align (A). \n\nEnsures tangential continuity by moving the control handle to the opposite angle for linked vectors.",
     }, // Tangential continuity
@@ -691,7 +692,7 @@ export const cubicCurve = {
         "Toggle Hold (H). \n\nMaintain relative angles of all control handles attached to selected control point.",
     },
     link: {
-      active: false,
+      active: true,
       tooltip:
         "Toggle Linking (L). \n\nConnected control points of other vectors will move with selected control point.",
     }, // Positional continuity

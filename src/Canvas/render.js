@@ -4,6 +4,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
+import { vectorGui } from "../GUI/vector.js"
 import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 import {
@@ -14,6 +15,7 @@ import {
   actionQuadraticCurve,
   actionCubicCurve,
 } from "../Actions/pointerActions.js"
+import { setInitialZoom } from "../utils/canvasHelpers.js"
 
 /**
  * Redraw all timeline actions
@@ -572,4 +574,86 @@ export function renderCanvas(
       drawCanvasLayer(layer, null)
     })
   }
+}
+
+/**
+ * Resize the offscreen canvas and all layers
+ * @param {number} width - (Integer)
+ * @param {number} height - (Integer)
+ */
+export const resizeOffScreenCanvas = (width, height) => {
+  canvas.offScreenCVS.width = width
+  canvas.offScreenCVS.height = height
+  canvas.previewCVS.width = width
+  canvas.previewCVS.height = height
+  // canvas.thumbnailCVS.width = canvas.offScreenCVS.width
+  // canvas.thumbnailCVS.height = canvas.offScreenCVS.height
+  //reset canvas state
+  canvas.zoom = setInitialZoom(
+    Math.max(canvas.offScreenCVS.width, canvas.offScreenCVS.height)
+  )
+  canvas.vectorGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
+  canvas.rasterGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
+  canvas.layers.forEach((layer) => {
+    layer.onscreenCtx.setTransform(
+      canvas.sharpness * canvas.zoom,
+      0,
+      0,
+      canvas.sharpness * canvas.zoom,
+      0,
+      0
+    )
+  })
+  canvas.backgroundCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
+  canvas.xOffset = Math.round(
+    (canvas.currentLayer.onscreenCvs.width / canvas.sharpness / canvas.zoom -
+      canvas.offScreenCVS.width) /
+      2
+  )
+  canvas.yOffset = Math.round(
+    (canvas.currentLayer.onscreenCvs.height / canvas.sharpness / canvas.zoom -
+      canvas.offScreenCVS.height) /
+      2
+  )
+  canvas.previousXOffset = canvas.xOffset
+  canvas.previousYOffset = canvas.yOffset
+  canvas.subPixelX = null
+  canvas.subPixelY = null
+  canvas.zoomPixelX = null
+  canvas.zoomPixelY = null
+  //resize layers. Per function, it's cheaper to run this inside the existing iterator in drawLayers, but since drawLayers runs so often, it's preferable to only run this here where it's needed.
+  canvas.layers.forEach((layer) => {
+    if (layer.type === "raster") {
+      if (
+        layer.cvs.width !== canvas.offScreenCVS.width ||
+        layer.cvs.height !== canvas.offScreenCVS.height
+      ) {
+        layer.cvs.width = canvas.offScreenCVS.width
+        layer.cvs.height = canvas.offScreenCVS.height
+      }
+    }
+  })
+  renderCanvas(null, true) //render all layers and redraw timeline
+  vectorGui.render()
 }
