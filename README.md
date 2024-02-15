@@ -64,7 +64,7 @@ This app is a work in progress. See the bottom of this page for features that ar
   </tr>
   <tr>
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-fill.svg" alt="Fill" width="40"/> </td>
-    <td> Fill in contiguous spaces of color. This tool is a vector type tool so the position and color can be adjusted at any time. Adjusting the position will hide any actions that came after the fill action until you are done making adjustments. </td>
+    <td> Fill in contiguous spaces of color. This tool is a vector type tool so the position and color can be adjusted at any time. </td>
   </tr>
   <tr>
     <td colspan="2"> Line (/ or Hold Shift with Brush) </td>
@@ -93,6 +93,13 @@ This app is a work in progress. See the bottom of this page for features that ar
   <tr>
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-ellipse.svg" alt="Ellipse" width="40"/> </td>
     <td> Draws an ellipse. Click down to place the center point and then drag to set the first radius. Initially this tool will draw a circle. Afterwards both radii can be adjusted separately to create an ellipse at any angle. By moving the cursor at the subpixel level you can adjust the way the center point behaves. For example, if the center is considered the center of the center pixel, a circle with a radius of 15 pixels will have a diameter of 31 pixels, but if the center is considered the top left corner of the center pixel, that circle will have a diameter of 30 pixels. Both the x and y components of this can be adjusted. This tool is a vector type tool so the control points and color can be adjusted at any time. Hold shift to force a circle. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Select (S) </td>
+  </tr>
+  <tr>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-select.svg" alt="Select" width="40"/> </td>
+    <td> Select a rectangular area. Restricts other tools to only draw inside selection area. Can be inversed, cut, or copied via the edit menu. Can be adjusted via 8 control points or moved by clicking inside the selection area while the Select tool is active.</td>
   </tr>
   <tr>
     <td colspan="2"> Eyedropper (Hold Alt) </td>
@@ -263,7 +270,7 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
     <td colspan="2"> Select Vector </td>
   </tr>
   <tr>
-    <td colspan="2"> Click on a vector to select or deselect it. Selecting a vector changes the active tool to match the vector. </td>
+    <td colspan="2"> Click on a vector via the vectors dialog box to select or deselect it. Selecting a vector changes the active tool to match the vector. While using the cubic curve tool, vectors can also be selected via the canvas if using an option that shows other cubic curve vectors. </td>
   </tr>
   <tr>
     <td colspan="2"> Change Color </td>
@@ -301,6 +308,12 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
   </tr>
   <tr>
     <td colspan="2"> Open dialog box to download file with current drawing progress. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Import </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Import an image into the current layer. </td>
   </tr>
   <tr>
     <td colspan="2"> Export </td>
@@ -361,7 +374,7 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
 
 <table>
   <tr>
-    <td colspan="2"> Tooltips </td>
+    <td colspan="2"> Tooltips (T)</td>
   </tr>
   <tr>
     <td colspan="2"> Toggle tooltips on or off. Hover to see a tooltip. </td>
@@ -386,23 +399,32 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
 
 ### Stretch Features to be added
 
+Vectors:
 - Ability to rasterize vectors and remove them from the vectors interface
-- Dithered Gradient Tool
-- Dithered Brush tool
-- Custom stamp brush
+- Editable properties display for vectors
 - Rectangle Tool
+- Straight Line Tool (Existing Raster Line Tool will be separate)
+- Dithered Gradient Tool
+- Smooth curves mode for brush. When drawing quickly, curves can look choppy and angular. Calculates curvature between points. Bonus: convert entire brush stroke into a series of linked vectors.
+Raster Tools:
 - Mask Tool
+- Amorphous selection tool
+Brush:
+- Dithered Brush mode
+- Custom stamp brush
+Utility:
 - 9-Grid Mode: Make repeating patterns for selected tile area. Also offer options for brick repeat and half-drop repeat
 - Preview window
 - Toggle magnify pointer area for precise placement of pixels: move magnifier on canvas and then work in magnified window to place pixels. Useful for any tools that use subpixels, and for precise placement of vectors.
-- Editable properties display for vectors
+- Perspective Tool: Acts as a custom overlay on the canvas with user defined vanishing points and adjustable lines. 1-point, 2-point, 3-point, multipoint, 4-point curvilinear, 5-point curvilinear, isometric
+Layers:
 - Layer Settings: Blend-mode, duplicate layer
+Palette:
 - Choose from set of default color palettes
 - Ability to add colors to palette without closing the color picker
 - Color ramps in color picker, along with ability to add an entire color ramp to the palette
 - Optional palette mode with a small canvas for making a palette with a brush, eraser and eyedropper tools instead of the typical way of modifying a palette.
-- Perspective Tool: Acts as a custom overlay on the canvas with user defined vanishing points and adjustable lines. 1-point, 2-point, 3-point, multipoint, 4-point curvilinear, 5-point curvilinear, isometric
-- Smooth curves mode for brush. When drawing quickly, curves can look choppy and angular. Calculates curvature between points. Bonus: convert entire brush stroke into a series of linked vectors.
+Animation:
 - Spritesheet options: custom grid to subdivide canvas
 - Animation options: preview spritesheet animation, onion skins as sublayers, preview animation of layers with onion skins individually and simultaneously, set framerate for animation layer, export animation
 
