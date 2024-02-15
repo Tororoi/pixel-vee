@@ -94,8 +94,9 @@ function importImage() {
   if (this.files && this.files[0]) {
     reader = new FileReader()
     reader.onload = (e) => {
-      // pasteDrawing(e.target.result)
-      //1. logic similar to copy selection tp put image into clipboard
+      //TODO: (Medium Priority) check if image is too large and prompt user to resize
+      //TODO: (High Priority) should a new layer be created for the imported image? Or maybe allow raster layers to be selected or created during active paste action and move temp layer accordingly?
+      //1. logic similar to copy selection to put image into clipboard
       img.src = e.target.result
       img.onload = () => {
         const tempCanvas = document.createElement("canvas")

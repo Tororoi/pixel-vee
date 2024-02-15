@@ -732,11 +732,11 @@ svg {
   color: rgb(255, 255, 255);
   cursor: pointer;
 }
-.nav .nav-menu #top-menu li ul li.open-save {
+.nav .nav-menu #top-menu li ul li.open-save, .nav .nav-menu #top-menu li ul li.import-image {
   padding: 0;
   height: 38px;
 }
-.nav .nav-menu #top-menu li ul li.open-save label {
+.nav .nav-menu #top-menu li ul li.open-save label, .nav .nav-menu #top-menu li ul li.import-image label {
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -745,7 +745,7 @@ svg {
   height: 100%;
   cursor: pointer;
 }
-.nav .nav-menu #top-menu li ul li.open-save input[type=file] {
+.nav .nav-menu #top-menu li ul li.open-save input[type=file], .nav .nav-menu #top-menu li ul li.import-image input[type=file] {
   display: none;
 }
 .nav .nav-menu #top-menu li ul li:hover {
@@ -756,6 +756,9 @@ svg {
   opacity: 0.6;
   background-color: rgb(61, 61, 61);
   cursor: not-allowed;
+}
+.nav .nav-menu #top-menu li ul li.disabled * {
+  pointer-events: none;
 }
 .nav .nav-menu #top-menu li ul li.disabled:hover {
   background-color: rgb(61, 61, 61);

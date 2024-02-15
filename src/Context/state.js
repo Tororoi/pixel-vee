@@ -47,7 +47,6 @@ export const state = {
   dragSiblings: [],
   //active variables for canvas
   shortcuts: true,
-  clipMask: null,
   clickDisabled: false,
   clicked: false,
   cursorX: null, //absolute cursor coordinates relative to drawing area
