@@ -1,4 +1,5 @@
 import { dom } from "../Context/dom.js"
+import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 
 /**
@@ -28,7 +29,9 @@ export function enableActionsForNoPaste() {
   dom.invertSelectionBtn.classList.remove("disabled")
   dom.cutBtn.classList.remove("disabled")
   dom.copyBtn.classList.remove("disabled")
-  dom.pasteBtn.classList.remove("disabled")
+  if (state.selectClipboard.canvas) {
+    dom.pasteBtn.classList.remove("disabled")
+  }
 }
 
 export function disableActionsForNoSelection() {

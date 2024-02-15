@@ -20,6 +20,7 @@ import {
   actionPasteSelection,
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
+import { disableActionsForNoClipboard } from "../DOM/disableDomElements.js"
 
 //====================================//
 //======= * * * Tooltip * * * ========//
@@ -83,16 +84,53 @@ export function openSaveDialogBox() {
   dom.saveAsFileName.focus()
 }
 
-// function importImage() {
-//   let reader
-//   if (this.files && this.files[0]) {
-//     reader = new FileReader()
-//     reader.onload = (e) => {
-//       pasteDrawing(e.target.result)
-//     }
-//     reader.readAsText(this.files[0])
-//   }
-// }
+/**
+ * Import image from desktop
+ */
+function importImage() {
+  let reader
+  let img = new Image()
+
+  if (this.files && this.files[0]) {
+    reader = new FileReader()
+    reader.onload = (e) => {
+      // pasteDrawing(e.target.result)
+      //1. logic similar to copy selection tp put image into clipboard
+      img.src = e.target.result
+      img.onload = () => {
+        const tempCanvas = document.createElement("canvas")
+        tempCanvas.width = img.width
+        tempCanvas.height = img.height
+        const tempCTX = tempCanvas.getContext("2d", {
+          willReadFrequently: true,
+        })
+        tempCTX.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height)
+        const previousClipboard = { ...state.selectClipboard }
+        previousClipboard.selectProperties = {
+          ...state.selectClipboard.selectProperties,
+        }
+        state.selectClipboard.selectProperties = {
+          px1: 0,
+          py1: 0,
+          px2: img.width,
+          py2: img.height,
+        }
+        state.selectClipboard.boundaryBox = {
+          xMin: 0,
+          yMin: 0,
+          xMax: img.width,
+          yMax: img.height,
+        }
+        state.selectClipboard.canvas = tempCanvas
+        //2. paste clipboard onto canvas
+        actionPasteSelection()
+        //3. clear clipboard
+        state.selectClipboard = previousClipboard
+      }
+    }
+    reader.readAsDataURL(this.files[0])
+  }
+}
 
 /**
  * Consolidate offscreen canvases and download image
@@ -258,7 +296,7 @@ dom.topMenu.addEventListener("focusout", (e) => {
 //File Submenu events
 dom.openSaveBtn.addEventListener("change", openSavedDrawing)
 dom.saveBtn.addEventListener("click", openSaveDialogBox)
-// dom.importBtn.addEventListener("click", importImage)
+dom.importBtn.addEventListener("change", importImage)
 dom.exportBtn.addEventListener("click", exportImage)
 //Edit Submenu events
 dom.canvasSizeBtn.addEventListener("click", (e) => {
