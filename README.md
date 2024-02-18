@@ -399,32 +399,33 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
 
 ### Stretch Features to be added
 
-Vectors:
+#### Vectors:
 - Ability to rasterize vectors and remove them from the vectors interface
 - Editable properties display for vectors
 - Rectangle Tool
 - Straight Line Tool (Existing Raster Line Tool will be separate)
 - Dithered Gradient Tool
 - Smooth curves mode for brush. When drawing quickly, curves can look choppy and angular. Calculates curvature between points. Bonus: convert entire brush stroke into a series of linked vectors.
-Raster Tools:
+
+#### Raster Tools:
 - Mask Tool
 - Amorphous selection tool
-Brush:
+#### Brush:
 - Dithered Brush mode
 - Custom stamp brush
-Utility:
+#### Utility:
 - 9-Grid Mode: Make repeating patterns for selected tile area. Also offer options for brick repeat and half-drop repeat
 - Preview window
 - Toggle magnify pointer area for precise placement of pixels: move magnifier on canvas and then work in magnified window to place pixels. Useful for any tools that use subpixels, and for precise placement of vectors.
 - Perspective Tool: Acts as a custom overlay on the canvas with user defined vanishing points and adjustable lines. 1-point, 2-point, 3-point, multipoint, 4-point curvilinear, 5-point curvilinear, isometric
-Layers:
+#### Layers:
 - Layer Settings: Blend-mode, duplicate layer
-Palette:
+#### Palette:
 - Choose from set of default color palettes
 - Ability to add colors to palette without closing the color picker
 - Color ramps in color picker, along with ability to add an entire color ramp to the palette
 - Optional palette mode with a small canvas for making a palette with a brush, eraser and eyedropper tools instead of the typical way of modifying a palette.
-Animation:
+#### Animation:
 - Spritesheet options: custom grid to subdivide canvas
 - Animation options: preview spritesheet animation, onion skins as sublayers, preview animation of layers with onion skins individually and simultaneously, set framerate for animation layer, export animation
 
