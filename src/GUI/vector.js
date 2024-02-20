@@ -1,6 +1,9 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { drawCirclePath, checkPointCollision } from "../utils/guiHelpers.js"
+import {
+  drawCirclePath,
+  checkSquarePointCollision,
+} from "../utils/guiHelpers.js"
 import { renderFillVector } from "./fill.js"
 import { renderCurveVector, renderCurvePath } from "./curve.js"
 import {
@@ -128,7 +131,7 @@ function handleCollisionAndDraw(
       r = radius * 2.125 // increase  radius of fill to match stroked circle
       vectorGui.setCollision(keys)
     } else if (
-      checkPointCollision(
+      checkSquarePointCollision(
         state.cursorX,
         state.cursorY,
         point.x - offset + xOffset,

@@ -66,7 +66,7 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
  */
 export function renderSelectVector(lineDashOffset, drawPoints) {
   // Setting of context attributes.
-  let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   canvas.rasterGuiCTX.save()
   canvas.rasterGuiCTX.lineWidth = lineWidth * 2
   canvas.rasterGuiCTX.strokeStyle = "white"

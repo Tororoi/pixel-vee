@@ -5,8 +5,8 @@ import { vectorGui } from "./vector.js"
  * TODO: (Middle Priority) use same aesthetic as select tool
  */
 export function renderTransformBox() {
-  let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
-  let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+  let circleRadius = 8 * lineWidth
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
   canvas.vectorGuiCTX.fillStyle = "white"
@@ -16,6 +16,16 @@ export function renderTransformBox() {
     { x: "px3", y: "py3" },
     { x: "px4", y: "py4" },
   ]
+  // let pointsKeys = [
+  //   { x: "px1", y: "py1" },
+  //   { x: "px2", y: "py2" },
+  //   { x: "px3", y: "py3" },
+  //   { x: "px4", y: "py4" },
+  //   { x: "px5", y: "py5" },
+  //   { x: "px6", y: "py6" },
+  //   { x: "px7", y: "py7" },
+  //   { x: "px8", y: "py8" },
+  // ]
   let transformPoints = {
     px1: canvas.currentLayer.x - lineWidth / 2 - 0.5,
     py1: canvas.currentLayer.y - lineWidth / 2 - 0.5,

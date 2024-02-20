@@ -8,7 +8,7 @@ import { vectorGui } from "./vector.js"
  */
 export function renderFillVector(vectorProperties, vectorAction) {
   let pointsKeys = [{ x: "px1", y: "py1" }]
-  let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   let circleRadius = 8 * lineWidth
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
