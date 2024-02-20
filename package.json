@@ -4,7 +4,9 @@
   "description": "### Drawing application for pixel art",
   "main": "index.js",
   "scripts": {
-    "sass": "sass --watch scss/style.scss:css/style.css"
+    "sass": "sass --watch scss/style.scss:css/style.css",
+    "eslint": "eslint --fix-dry-run src --ext jsx,js",
+    "eslintfix": "eslint --fix src --ext jsx,js"
   },
   "repository": {
     "type": "git",
@@ -20,5 +22,9 @@
     "sass": "^1.66.1",
     "sass-loader": "^13.0.0",
     "serve": "^14.0.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.56.0",
+    "eslint-plugin-jsdoc": "^48.1.0"
   }
 }

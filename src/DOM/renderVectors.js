@@ -32,8 +32,8 @@ export const renderVectorsToDOM = () => {
 
 /**
  * Check if action should be rendered in the vectors interface
- * @param {object} action
- * @returns {boolean}
+ * @param {object} action - The action to be checked
+ * @returns {boolean} - True if the action should be rendered
  */
 const isValidAction = (action) =>
   !action.removed &&
@@ -44,7 +44,7 @@ const isValidAction = (action) =>
 
 /**
  * Render a vector element
- * @param {object} action
+ * @param {object} action - The action to be rendered
  */
 const renderVectorElement = (action) => {
   const isSelected = action.index === canvas.currentVectorIndex
@@ -88,8 +88,8 @@ const renderVectorElement = (action) => {
 }
 
 /**
- * @param {object} action
- * @returns {Element}
+ * @param {object} action - The action to be rendered
+ * @returns {Element} - The created vector element
  */
 const createVectorElement = (action) => {
   let vectorElement = document.createElement("div")
@@ -102,7 +102,7 @@ const createVectorElement = (action) => {
 
 /**
  * Calculate the multiplier and offsets for transposing the main canvas onto the thumbnail canvas
- * @returns {object}
+ * @returns {object} - The calculated dimensions
  */
 const calculateDrawingDimensions = () => {
   let border = 32
@@ -129,7 +129,7 @@ const calculateDrawingDimensions = () => {
 
 /**
  * Draw a vector action onto the thumbnail canvas
- * @param {object} action
+ * @param {object} action - The action to be drawn
  */
 const drawOnThumbnailContext = (action) => {
   let { minD, xOffset, yOffset } = calculateDrawingDimensions()
@@ -200,7 +200,7 @@ const drawOnThumbnailContext = (action) => {
         py2 + 0.5 + yOffset
       )
       break
-    case "ellipse":
+    case "ellipse": {
       let angle = getAngle(
         action.properties.vectorProperties.px2 -
           action.properties.vectorProperties.px1,
@@ -217,6 +217,7 @@ const drawOnThumbnailContext = (action) => {
         2 * Math.PI
       )
       break
+    }
     // Add more cases if there are other drawing tools.
   }
 
@@ -226,8 +227,8 @@ const drawOnThumbnailContext = (action) => {
 
 /**
  * Create the thumbnail and save as an image
- * @param {object} action
- * @returns {Image}
+ * @param {object} action - The action to be rendered
+ * @returns {Image} - The created thumbnail image
  */
 const createThumbnailImage = (action) => {
   drawOnThumbnailContext(action)

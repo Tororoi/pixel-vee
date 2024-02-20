@@ -1,3 +1,8 @@
+/**
+ * Validate the data of a Pixel Vee save file
+ * @param {object} data - The data to be validated
+ * @returns {object} - validation object
+ */
 export function validatePixelVeeFile(data) {
   let missingProperties = []
   let invalidProperties = []

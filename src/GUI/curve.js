@@ -1,11 +1,10 @@
-import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
 import { drawControlPointHandle } from "../utils/guiHelpers.js"
 
 /**
- * @param {object} vectorProperties
- * @param {object} vectorAction
+ * @param {object} vectorProperties - The properties of the vector
+ * @param {object} vectorAction - The vector action to be rendered
  */
 export function renderCurveVector(vectorProperties, vectorAction) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
@@ -69,8 +68,8 @@ export function renderCurveVector(vectorProperties, vectorAction) {
 }
 
 /**
- * @param {object} vectorProperties
- * @param {object} vectorAction
+ * @param {object} vectorProperties - The properties of the vector
+ * @param {object} vectorAction - The vector action to be rendered
  */
 export function renderCurvePath(vectorProperties, vectorAction) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties

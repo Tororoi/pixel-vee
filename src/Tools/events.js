@@ -113,7 +113,7 @@ export function handleModes(e) {
  *
  * @param {PointerEvent} e
  */
-function switchBrush(e) {
+function switchBrush() {
   if (state.tool.brushType === "square") {
     state.tool.brushType = "circle"
   } else {

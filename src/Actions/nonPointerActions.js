@@ -1,4 +1,3 @@
-import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { tools } from "../Tools/index.js"
@@ -6,18 +5,13 @@ import { vectorGui } from "../GUI/vector.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { createRasterLayer, createReferenceLayer } from "../Canvas/layers.js"
 import { renderCanvas } from "../Canvas/render.js"
-import {
-  renderLayersToDOM,
-  renderVectorsToDOM,
-  renderPaletteToDOM,
-} from "../DOM/render.js"
+import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
 import {
   confirmPastedPixels,
   cutSelectedPixels,
   pasteSelectedPixels,
 } from "../Menu/edit.js"
 import { switchTool } from "../Tools/toolbox.js"
-import { select } from "../Tools/select.js"
 import { removeTempLayerFromDOM } from "../DOM/renderLayers.js"
 import {
   disableActionsForPaste,
@@ -58,6 +52,8 @@ export function actionSelectAll() {
         selectProperties: { ...state.selectProperties },
       },
     })
+    state.action = null
+    state.redoStack = []
     vectorGui.render()
   }
 }
@@ -359,7 +355,7 @@ export function addRasterLayer() {
 
 /**
  * Mark a layer as removed
- * @param {object} layer
+ * @param {object} layer - The layer to be removed
  */
 export function removeLayer(layer) {
   //set "removed" flag to true on selected layer.

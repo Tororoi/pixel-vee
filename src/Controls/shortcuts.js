@@ -15,9 +15,7 @@ import {
   renderToolOptionsToDOM,
 } from "../DOM/render.js"
 import { randomizeColor } from "../Swatch/events.js"
-import { handleModes } from "../Tools/events.js"
 import { renderCursor } from "../GUI/cursor.js"
-import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { openSaveDialogBox } from "../Menu/events.js"
 import {
   actionDeselect,
@@ -31,7 +29,7 @@ import { toggleMode, switchTool } from "../Tools/toolbox.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
- * @param {string} keyCode
+ * @param {string} keyCode - The key code of the key that was pressed
  */
 export function activateShortcut(keyCode) {
   switch (keyCode) {
@@ -52,7 +50,7 @@ export function activateShortcut(keyCode) {
         renderBrushStampToDOM()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
-        renderCursor(state, canvas, swatches)
+        renderCursor()
       }
       break
     case "AltLeft":
@@ -64,7 +62,7 @@ export function activateShortcut(keyCode) {
         renderBrushStampToDOM()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
-        renderCursor(state, canvas, swatches)
+        renderCursor()
       }
       break
     case "ShiftLeft":
@@ -281,7 +279,7 @@ export function activateShortcut(keyCode) {
  * Deactivate Shortcut for any key.
  * Some shortcuts are active while a key is held.
  * This can be called on keyUp or on pointerUp so it is not directly tied to the keyUp event.
- * @param {string} keyCode
+ * @param {string} keyCode - The key code of the key that was released
  */
 export function deactivateShortcut(keyCode) {
   switch (keyCode) {
@@ -297,7 +295,7 @@ export function deactivateShortcut(keyCode) {
         canvas.previousXOffset = canvas.xOffset
         canvas.previousYOffset = canvas.yOffset
         vectorGui.render()
-        renderCursor(state, canvas, swatches)
+        renderCursor()
         setToolCssCursor()
         //TODO: (Low Priority) refactor so grabSteps can be called instead with a manually supplied pointer event pointerup
       }
@@ -310,7 +308,7 @@ export function deactivateShortcut(keyCode) {
         state.tool = tools[dom.toolBtn.id]
         renderBrushStampToDOM()
         vectorGui.render()
-        renderCursor(state, canvas, swatches)
+        renderCursor()
         setToolCssCursor()
       }
       break

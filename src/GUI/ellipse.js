@@ -4,8 +4,8 @@ import { vectorGui } from "./vector.js"
 import { drawCirclePath, drawControlPointHandle } from "../utils/guiHelpers.js"
 
 /**
- * @param {object} vectorProperties
- * @param {object} vectorAction
+ * @param {object} vectorProperties - The properties of the vector
+ * @param {object} vectorAction - The vector action to be rendered
  */
 export function renderEllipseVector(vectorProperties, vectorAction) {
   const {
@@ -15,11 +15,11 @@ export function renderEllipseVector(vectorProperties, vectorAction) {
     py2,
     px3,
     py3,
-    radA,
-    radB,
-    angle,
-    x1Offset,
-    y1Offset,
+    // radA,
+    // radB,
+    // angle,
+    // x1Offset,
+    // y1Offset,
   } = vectorProperties
   const xOffset = vectorAction
     ? vectorAction.layer.x + canvas.xOffset
@@ -73,18 +73,12 @@ export function renderEllipseVector(vectorProperties, vectorAction) {
     0,
     vectorAction
   )
-  // canvas.vectorGuiCTX.fillText(
-  //   `${radA}, ${radB}`,
-  //   px1 + 30,
-  //   py1
-  // )
   // Fill points
   canvas.vectorGuiCTX.fill()
 }
 
 /**
- *
- * @param {object} vectorProperties
+ * @param {object} vectorProperties - The properties of the vector
  */
 export function renderOffsetEllipseVector(vectorProperties) {
   const {
@@ -94,9 +88,9 @@ export function renderOffsetEllipseVector(vectorProperties) {
     py2,
     px3,
     py3,
-    radA,
-    radB,
-    angle,
+    // radA,
+    // radB,
+    // angle,
     x1Offset,
     y1Offset,
   } = vectorProperties
@@ -163,17 +157,17 @@ export function renderOffsetEllipseVector(vectorProperties) {
 }
 
 /**
- * @param {object} vectorProperties
- * @param {object} vectorAction
+ * @param {object} vectorProperties - The properties of the vector
+ * @param {object} vectorAction - The vector action to be rendered
  */
 export function renderEllipsePath(vectorProperties, vectorAction) {
   const {
     px1,
     py1,
-    px2,
-    py2,
+    // px2,
+    // py2,
     px3,
-    py3,
+    // py3,
     radA,
     radB,
     angle,

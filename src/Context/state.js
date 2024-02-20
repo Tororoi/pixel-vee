@@ -1,6 +1,3 @@
-import { dom } from "./dom.js"
-import { swatches } from "./swatch.js"
-import { setSaveFilesizePreview } from "../Save/savefile.js"
 import {
   disableActionsForNoSelection,
   enableActionsForSelection,
@@ -12,8 +9,6 @@ import {
 
 //Main state object to keep track of global vars
 export const state = {
-  captureTesting: false,
-  testNumPoints: 1000,
   tooltipMessage: null,
   tooltipTarget: null,
   //timeline
@@ -177,7 +172,7 @@ function resetBoundaryBox() {
 
 /**
  * Set boundaryBox
- * @param {object} selectProperties
+ * @param {object} selectProperties - The properties of the selection
  */
 function setBoundaryBox(selectProperties) {
   state.boundaryBox.xMin = Math.min(selectProperties.px1, selectProperties.px2)

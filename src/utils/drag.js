@@ -14,7 +14,7 @@ export const initializeCollapser = (collapseTarget, startCollapsed) => {
   const collapseBtn = collapseTarget.querySelector(".collapse-checkbox")
   const collapsibleArea = collapseTarget.querySelector(".collapsible")
   if (collapseBtn && collapsibleArea) {
-    collapseBtn.addEventListener("click", (e) => {
+    collapseBtn.addEventListener("click", () => {
       if (collapseBtn.checked) {
         // collapsibleArea.style.height = 0
         collapseTarget.style.minHeight = "20px"
@@ -37,7 +37,7 @@ export const initializeCollapser = (collapseTarget, startCollapsed) => {
 export const initializeCloser = (closeTarget) => {
   const closeBtn = closeTarget.querySelector(".close-btn")
   if (closeBtn) {
-    closeBtn.addEventListener("click", (e) => {
+    closeBtn.addEventListener("click", () => {
       closeTarget.style.display = "none"
     })
   }
@@ -155,7 +155,7 @@ export const dragStart = (e, dragTarget) => {
   }
 }
 
-export const dragStop = (e) => {
+export const dragStop = () => {
   state.dragging = false
   if (state.dragTarget) {
     state.dragTarget.classList.remove("dragging")

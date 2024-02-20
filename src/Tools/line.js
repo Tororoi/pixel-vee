@@ -1,4 +1,3 @@
-import { keys } from "../Shortcuts/keys.js"
 import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
@@ -64,7 +63,7 @@ function lineSteps() {
         true
       )
       break
-    case "pointerup":
+    case "pointerup": {
       actionLine(
         state.lineStartX,
         state.lineStartY,
@@ -109,6 +108,7 @@ function lineSteps() {
       })
       renderCanvas(canvas.currentLayer)
       break
+    }
     default:
     //do nothing
   }

@@ -1,12 +1,9 @@
 import { dom } from "../Context/dom.js"
-import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { consolidateLayers } from "../Canvas/layers.js"
 import {
-  prepareDrawingForSave,
   setSaveFilesizePreview,
   saveDrawing,
   loadDrawing,
@@ -20,15 +17,14 @@ import {
   actionPasteSelection,
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
-import { disableActionsForNoClipboard } from "../DOM/disableDomElements.js"
 
 //====================================//
 //======= * * * Tooltip * * * ========//
 //====================================//
 
 /**
- * @param {string} message
- * @param {Element} target
+ * @param {string} message - The message to be displayed in the tooltip
+ * @param {Element} target - The target element the tooltip is associated with
  */
 export const generateTooltip = (message, target) => {
   if (message && target) {
@@ -228,7 +224,7 @@ dom.toolOptions.addEventListener("click", (e) => {
     vectorGui.render()
   }
 })
-dom.gridBtn.addEventListener("click", (e) => {
+dom.gridBtn.addEventListener("click", () => {
   if (dom.gridBtn.checked) {
     vectorGui.grid = true
   } else {
@@ -261,7 +257,7 @@ dom.gridSpacingSpinBtn.addEventListener("pointerdown", (e) => {
   dom.gridSpacing.value = vectorGui.gridSpacing
   vectorGui.render()
 })
-dom.tooltipBtn.addEventListener("click", (e) => {
+dom.tooltipBtn.addEventListener("click", () => {
   if (dom.tooltipBtn.checked && state.tooltipMessage) {
     dom.tooltip.classList.add("visible")
   } else {
@@ -300,7 +296,7 @@ dom.saveBtn.addEventListener("click", openSaveDialogBox)
 dom.importBtn.addEventListener("change", importImage)
 dom.exportBtn.addEventListener("click", exportImage)
 //Edit Submenu events
-dom.canvasSizeBtn.addEventListener("click", (e) => {
+dom.canvasSizeBtn.addEventListener("click", () => {
   if (canvas.pastedLayer) {
     //if there is a pasted layer active, do not open canvas size dialog
     return
@@ -323,7 +319,7 @@ dom.pasteBtn.addEventListener("click", actionPasteSelection)
 //   //TODO: (High Priority) rotate selected pixels
 // })
 //Settings events
-dom.settingsBtn.addEventListener("click", (e) => {
+dom.settingsBtn.addEventListener("click", () => {
   //if settings container is already open, close it, else open it
   if (dom.settingsContainer.style.display === "flex") {
     dom.settingsContainer.style.display = "none"
@@ -379,7 +375,7 @@ dom.saveAsFileName.addEventListener("input", (e) => {
     2 +
     "px"
 })
-dom.cancelSaveBtn.addEventListener("click", (e) => {
+dom.cancelSaveBtn.addEventListener("click", () => {
   dom.saveContainer.style.display = "none"
   state.saveDialogOpen = false
 })

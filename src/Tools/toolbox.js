@@ -12,8 +12,6 @@ import {
   renderToolOptionsToDOM,
 } from "../DOM/render.js"
 import { renderCursor } from "../GUI/cursor.js"
-import { testAction } from "../Testing/performanceTesting.js"
-import { storedActions } from "../Testing/storedActions.js"
 import { actionConfirmPastedPixels } from "../Actions/nonPointerActions.js"
 
 /**
@@ -37,10 +35,6 @@ export function switchTool(toolName = null, toolBtn = null) {
       dom.toolBtn.classList.remove("selected")
       //get new button and select it
       dom.toolBtn = targetToolBtn
-      //Uncomment to run performance test for selected tool if testing is enabled
-      // if (state.captureTesting && storedActions[dom.toolBtn.id]) {
-      //   testAction(dom.toolBtn.id)
-      // }
       dom.toolBtn.classList.add("selected")
       state.tool = tools[dom.toolBtn.id]
       renderCanvas(canvas.currentLayer)
@@ -60,7 +54,7 @@ export function switchTool(toolName = null, toolBtn = null) {
       state.reset()
       renderVectorsToDOM()
       renderBrushModesToDOM()
-      renderCursor(state, canvas, swatches)
+      renderCursor()
     }
   }
 }
@@ -93,7 +87,7 @@ export function toggleMode(modeName = null, modeBtn = null) {
         canvas.vectorGuiCVS.style.cursor = state.tool.cursor
       }
       renderBrushModesToDOM()
-      renderCursor(state, canvas, swatches)
+      renderCursor()
     }
   }
 }

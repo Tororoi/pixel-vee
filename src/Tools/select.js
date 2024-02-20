@@ -1,7 +1,5 @@
-import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { vectorGui } from "../GUI/vector.js"
 
@@ -18,6 +16,7 @@ import { vectorGui } from "../GUI/vector.js"
  * Hold shift to add to selection with magic wand
  * Hold option to minus from selection with magic wand/ free form
  * Command + I to invert selection
+ * TODO: (Medium Priority) When selecting vectors, allow rotation with recalculated vectors for accurate and useful rotation transformation
  */
 function selectSteps() {
   if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
@@ -142,7 +141,7 @@ function adjustBoundaries() {
     case "px8":
       state.selectProperties.px1 = state.cursorX
       break
-    case "px9":
+    case "px9": {
       //move selected area
       const deltaX = state.cursorX - state.previousX
       const deltaY = state.cursorY - state.previousY
@@ -150,6 +149,8 @@ function adjustBoundaries() {
       state.selectProperties.py1 += deltaY
       state.selectProperties.px2 += deltaX
       state.selectProperties.py2 += deltaY
+      break
+    }
     default:
     //do nothing
   }

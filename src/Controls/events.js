@@ -3,7 +3,6 @@ import { dom } from "../Context/dom.js"
 import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCursor } from "../GUI/cursor.js"
 import { activateShortcut, deactivateShortcut } from "./shortcuts.js"
@@ -42,7 +41,7 @@ const setCoordinates = (e) => {
 //======================================//
 
 /**
- * @param {KeyboardEvent} e
+ * @param {KeyboardEvent} e - The keydown event
  */
 function handleKeyDown(e) {
   // e.preventDefault() - May conditionally need this for certain shortcuts, but try to avoid doing so
@@ -71,7 +70,7 @@ function handleKeyDown(e) {
 }
 
 /**
- * @param {KeyboardEvent} e
+ * @param {KeyboardEvent} e - The keyup event
  */
 function handleKeyUp(e) {
   keys[e.code] = false //unset active key globally
@@ -79,7 +78,7 @@ function handleKeyUp(e) {
 }
 
 /**
- * @param {WheelEvent} e
+ * @param {WheelEvent} e - The scroll wheel event
  */
 function handleWheel(e) {
   let delta = Math.sign(e.deltaY)
@@ -116,7 +115,7 @@ function handleWheel(e) {
 //========================================//
 
 /**
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - The pointerdown event
  */
 function handlePointerDown(e) {
   //reset media type, chrome dev tools niche use or computers that have touchscreen capabilities
@@ -153,12 +152,12 @@ function handlePointerDown(e) {
     (state.tool.name === "brush" && state.tool.modes?.eraser) ||
     state.tool.name === "eyedropper"
   ) {
-    renderCursor(state, canvas, swatches)
+    renderCursor()
   }
 }
 
 /**
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - The pointermove event
  */
 function handlePointerMove(e) {
   if (state.clickDisabled && state.clicked) {
@@ -194,12 +193,12 @@ function handlePointerMove(e) {
           (state.tool.name === "brush" && state.tool.modes?.eraser) ||
           state.tool.name === "eyedropper"
         ) {
-          renderCursor(state, canvas, swatches)
+          renderCursor()
         }
       } else {
         //no active tool, just render cursor
         vectorGui.render()
-        renderCursor(state, canvas, swatches)
+        renderCursor()
       }
     }
     // save last point
@@ -211,7 +210,7 @@ function handlePointerMove(e) {
 }
 
 /**
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - The pointerup event
  */
 function handlePointerUp(e) {
   canvas.pointerEvent = "pointerup"
@@ -265,13 +264,13 @@ function handlePointerUp(e) {
   if (!e.targetTouches) {
     vectorGui.render()
     if (["brush", "colorMask", "eyedropper"].includes(state.tool.name)) {
-      renderCursor(state, canvas, swatches)
+      renderCursor()
     }
   }
 }
 
 /**
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - The pointerout event
  */
 function handlePointerOut(e) {
   //TODO: (Low Priority) if touchscreen, need to handle differently. Currently cannot reach next code since clicked will be false.
@@ -296,7 +295,7 @@ function handlePointerOut(e) {
 
 /**
  * Identify whether program is being used by touchscreen or mouse. Important for multi-step tools such as curve
- * @param {TouchEvent} e
+ * @param {TouchEvent} e - The touchstart event
  */
 function handleTouchStart(e) {
   state.touch = true
@@ -304,7 +303,7 @@ function handleTouchStart(e) {
 
 /**
  * Identify whether program is being used by touchscreen or mouse. Important for multi-step tools such as curve
- * @param {MouseEvent} e
+ * @param {MouseEvent} e - The mousedown event
  */
 function handleMouseDown(e) {
   if (e.type === "mousedown") {

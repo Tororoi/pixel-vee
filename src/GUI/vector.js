@@ -1,4 +1,3 @@
-import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { drawCirclePath, checkPointCollision } from "../utils/guiHelpers.js"
@@ -10,7 +9,7 @@ import {
   renderEllipsePath,
 } from "./ellipse.js"
 import { renderTransformBox } from "./transform.js"
-import { renderSelectVector, renderRasterCVS } from "./select.js"
+import { renderRasterCVS } from "./select.js"
 import { renderGrid } from "./grid.js"
 import {
   updateVectorProperties,
@@ -74,12 +73,12 @@ export const vectorGui = {
 }
 
 /**
- * @param {object} vectorProperties
- * @param {object} pointsKeys
+ * @param {object} vectorProperties - The properties of the vector
+ * @param {object} pointsKeys - The keys of the control points
  * @param {number} radius - (Float)
- * @param {boolean} modify
+ * @param {boolean} modify - if true, check for collision with cursor and modify radius
  * @param {number} offset - (Integer)
- * @param {object} vectorAction
+ * @param {object} vectorAction - The vector action to be rendered
  */
 function drawControlPoints(
   vectorProperties,
@@ -105,12 +104,12 @@ function drawControlPoints(
 
 /**
  * TODO: (Low Priority) move drawing logic to separate function so modify param doesn't need to be used
- * @param {object} keys
- * @param {object} point
+ * @param {object} keys - The keys of the control points
+ * @param {object} point - The coordinates of the control point
  * @param {number} radius - (Float)
  * @param {boolean} modify - if true, check for collision with cursor and modify radius
  * @param {number} offset - (Float)
- * @param {object} vectorAction
+ * @param {object} vectorAction - The vector action to be rendered
  */
 function handleCollisionAndDraw(
   keys,
@@ -197,7 +196,6 @@ function handleCollisionAndDraw(
 
 /**
  * Set css cursor for vector interaction
- * @returns
  */
 function setCursorStyle() {
   if (!vectorGui.selectedCollisionPresent && !canvas.collidedVectorIndex) {
@@ -258,7 +256,7 @@ function reset() {
 
 /**
  * Normalize vector properties based on layer offset
- * @param {object} vectorAction
+ * @param {object} vectorAction - The vector action to base the properties on
  */
 function setVectorProperties(vectorAction) {
   if (vectorAction.layer === canvas.currentLayer) {
@@ -288,7 +286,6 @@ function setVectorProperties(vectorAction) {
 
 /**
  * Render vector graphical interface
- * @param {number} lineDashOffset - (Float)
  */
 function render() {
   canvas.vectorGuiCTX.clearRect(
@@ -324,10 +321,9 @@ function render() {
 
 /**
  * Render based on the current tool.
- * @param {string} toolName
- * @param {object} vectorProperties
- * @param {boolean} selected
- * @param {object} vectorAction
+ * @param {string} toolName - The name of the tool
+ * @param {object} vectorProperties - The properties of the vector
+ * @param {object} vectorAction - The vector action to be rendered
  */
 function renderControlPoints(toolName, vectorProperties, vectorAction = null) {
   switch (toolName) {
@@ -340,8 +336,7 @@ function renderControlPoints(toolName, vectorProperties, vectorAction = null) {
       break
     case "ellipse":
       renderEllipseVector(vectorProperties, vectorAction)
-      const { x1Offset, y1Offset } = vectorProperties
-      if (x1Offset || y1Offset) {
+      if (vectorProperties.x1Offset || vectorProperties.y1Offset) {
         renderOffsetEllipseVector(vectorProperties)
       }
       break
@@ -356,9 +351,9 @@ function renderControlPoints(toolName, vectorProperties, vectorAction = null) {
 }
 
 /**
- * @param {string} toolName
- * @param {object} vectorProperties
- * @param {object} vectorAction
+ * @param {string} toolName - The name of the tool
+ * @param {object} vectorProperties - The properties of the vector
+ * @param {object} vectorAction - The vector action to be rendered
  */
 function renderPath(toolName, vectorProperties, vectorAction = null) {
   switch (toolName) {
@@ -384,7 +379,7 @@ function renderPath(toolName, vectorProperties, vectorAction = null) {
 
 /**
  * For each vector action in the undoStack in a given layer, render it
- * @param {object} layer
+ * @param {object} layer - The layer to render the vectors for
  */
 function renderLayerVectors(layer) {
   let selectedVector = null
@@ -463,8 +458,8 @@ export function renderCurrentVector() {
 
 /**
  *
- * @param {object} currentVector
- * @param {boolean} saveVectorProperties
+ * @param {object} currentVector - The vector action to base other vector handling on
+ * @param {boolean} saveVectorProperties - if true, save the properties of the vector
  */
 export function updateLinkedVectors(
   currentVector,
@@ -510,8 +505,9 @@ export function updateLinkedVectors(
 }
 
 /**
- *
- * @param {object} currentVector
+ * @param {object} currentVector - The vector action to update
+ * @param {number} x - The x coordinate of new endpoint
+ * @param {number} y - The y coordinate of new endpoint
  */
 export function updateLockedCurrentVectorControlHandle(currentVector, x, y) {
   const savedProperties =
@@ -537,9 +533,9 @@ export function updateLockedCurrentVectorControlHandle(currentVector, x, y) {
  * For efficient rendering, create an array of indexes of vectors that need to be re-rendered.
  * Other actions will be saved to between canvases to avoid multiple ununecessary renders in redrawTimelineActions
  * Can't simply save images and draw them for the betweenCvs because this will ignore actions using erase or inject modes.
- * @param {object} currentVector
+ * @param {object} currentVector - The vector action to base the active indexes on
  * @param {object} vectorsSavedProperties - will have at least one entry, corresponding to currentVector
- * @param {Array} undoStack
+ * @param {Array} undoStack - The undo stack
  * @returns {Array} activeIndexes
  */
 export function createActiveIndexesForRender(

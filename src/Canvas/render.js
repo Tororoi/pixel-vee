@@ -2,8 +2,6 @@ import { dom } from "../Context/dom.js"
 import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
-import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
@@ -132,8 +130,8 @@ function createAndSaveContext() {
 
 /**
  * Helper for redrawTimelineActions
- * @param {object} action
- * @param {CanvasRenderingContext2D} betweenCtx
+ * @param {object} action - The action to be performed
+ * @param {CanvasRenderingContext2D} betweenCtx - The canvas context for saving between actions
  */
 export function performAction(action, betweenCtx = null) {
   if (!action.properties?.boundaryBox) {
@@ -151,7 +149,7 @@ export function performAction(action, betweenCtx = null) {
     boundaryBox.yMax += offsetY
   }
   switch (action.tool.name) {
-    case "brush":
+    case "brush": {
       let seen = new Set()
       let mask = null
       //TODO: (Low Priority) implement points and maskArray as an array of integers to reduce space cost. Could be stored as typed arrays but not meaningful for storing the json file.
@@ -215,6 +213,7 @@ export function performAction(action, betweenCtx = null) {
         // }
       }
       break
+    }
     case "fill":
       actionFill(
         action.properties.vectorProperties.px1 + offsetX,
@@ -352,7 +351,7 @@ export function performAction(action, betweenCtx = null) {
         )
       }
       break
-    case "paste":
+    case "paste": {
       //render paste action
       // Determine if the action is the last 'paste' action in the undoStack
       let isLastPasteAction = false // Default to false
@@ -388,6 +387,7 @@ export function performAction(action, betweenCtx = null) {
         )
       }
       break
+    }
     default:
     //do nothing
   }
@@ -418,7 +418,7 @@ function updateLayersAfterRedo() {
 
 /**
  * Draw the canvas layers
- * @param {object} layer
+ * @param {object} layer - The layer to be drawn
  */
 function drawLayer(layer) {
   layer.onscreenCtx.save()
@@ -460,7 +460,7 @@ function drawLayer(layer) {
 
 /**
  * Draw canvas layer onto its onscreen canvas
- * @param {object} layer
+ * @param {object} layer - The layer to be drawn
  */
 export function drawCanvasLayer(layer) {
   //Prevent blurring
@@ -516,7 +516,7 @@ function renderBackgroundCanvas() {
 
 /**
  * Clear offscreen canvas layers as needed
- * @param {object} activeLayer
+ * @param {object} activeLayer - The layer to be cleared. If not passed in, all layers will be cleared.
  */
 export function clearOffscreenCanvas(activeLayer = null) {
   if (activeLayer) {
@@ -546,8 +546,9 @@ export function clearOffscreenCanvas(activeLayer = null) {
 
 /**
  * Main render function for the canvas
- * @param {object} activeLayer
+ * @param {object} activeLayer - pass in a layer to render only that layer
  * @param {boolean} redrawTimeline - pass true to redraw all previous actions
+ * @param {Array} activeIndexes - pass in an array of indexes to render only those actions
  * @param {boolean} setImages - pass true to set images for actions between indexes
  */
 export function renderCanvas(

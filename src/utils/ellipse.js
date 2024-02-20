@@ -1,5 +1,4 @@
-import { getTriangle, getAngle } from "../utils/trig.js"
-import { generateRandomRGB } from "../utils/colors.js"
+import { getAngle } from "../utils/trig.js"
 import { assert, plotConicBezierSeg } from "./bezier.js"
 
 //================================================================//

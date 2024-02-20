@@ -10,10 +10,9 @@ import {
 } from "../DOM/render.js"
 import { removeAction, changeActionMode } from "../Actions/modifyTimeline.js"
 import { vectorGui } from "../GUI/vector.js"
-// import { setInitialZoom } from "../utils/canvasHelpers.js"
 import { initializeColorPicker } from "../Swatch/events.js"
 import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
-import { dragStart, dragMove, dragStop } from "../utils/drag.js"
+// import { dragStart, dragMove, dragStop } from "../utils/drag.js"
 import {
   addReferenceLayer,
   addRasterLayer,
@@ -28,7 +27,7 @@ import { switchTool } from "../Tools/toolbox.js"
 
 /**
  * Increment canvas dimensions values
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - The pointer event
  */
 const handleIncrement = (e) => {
   let dimension = e.target.parentNode.previousSibling.previousSibling
@@ -49,7 +48,7 @@ const handleIncrement = (e) => {
 
 /**
  * Increment values while rgb button is held down
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - The pointer event
  */
 const handleSizeIncrement = (e) => {
   if (canvas.sizePointerState === "pointerdown") {
@@ -60,7 +59,7 @@ const handleSizeIncrement = (e) => {
 
 /**
  * Limit the min and max size of the canvas
- * @param {FocusEvent} e
+ * @param {FocusEvent} e - The focus event
  */
 const restrictSize = (e) => {
   const max = 1024
@@ -72,91 +71,9 @@ const restrictSize = (e) => {
   }
 }
 
-// /**
-//  * Resize the offscreen canvas and all layers
-//  * @param {number} width - (Integer)
-//  * @param {number} height - (Integer)
-//  */
-// const resizeOffScreenCanvas = (width, height) => {
-//   canvas.offScreenCVS.width = width
-//   canvas.offScreenCVS.height = height
-//   canvas.previewCVS.width = width
-//   canvas.previewCVS.height = height
-//   // canvas.thumbnailCVS.width = canvas.offScreenCVS.width
-//   // canvas.thumbnailCVS.height = canvas.offScreenCVS.height
-//   //reset canvas state
-//   canvas.zoom = setInitialZoom(
-//     Math.max(canvas.offScreenCVS.width, canvas.offScreenCVS.height)
-//   )
-//   canvas.vectorGuiCTX.setTransform(
-//     canvas.sharpness * canvas.zoom,
-//     0,
-//     0,
-//     canvas.sharpness * canvas.zoom,
-//     0,
-//     0
-//   )
-//   canvas.rasterGuiCTX.setTransform(
-//     canvas.sharpness * canvas.zoom,
-//     0,
-//     0,
-//     canvas.sharpness * canvas.zoom,
-//     0,
-//     0
-//   )
-//   canvas.layers.forEach((layer) => {
-//     layer.onscreenCtx.setTransform(
-//       canvas.sharpness * canvas.zoom,
-//       0,
-//       0,
-//       canvas.sharpness * canvas.zoom,
-//       0,
-//       0
-//     )
-//   })
-//   canvas.backgroundCTX.setTransform(
-//     canvas.sharpness * canvas.zoom,
-//     0,
-//     0,
-//     canvas.sharpness * canvas.zoom,
-//     0,
-//     0
-//   )
-//   canvas.xOffset = Math.round(
-//     (canvas.currentLayer.onscreenCvs.width / canvas.sharpness / canvas.zoom -
-//       canvas.offScreenCVS.width) /
-//       2
-//   )
-//   canvas.yOffset = Math.round(
-//     (canvas.currentLayer.onscreenCvs.height / canvas.sharpness / canvas.zoom -
-//       canvas.offScreenCVS.height) /
-//       2
-//   )
-//   canvas.previousXOffset = canvas.xOffset
-//   canvas.previousYOffset = canvas.yOffset
-//   canvas.subPixelX = null
-//   canvas.subPixelY = null
-//   canvas.zoomPixelX = null
-//   canvas.zoomPixelY = null
-//   //resize layers. Per function, it's cheaper to run this inside the existing iterator in drawLayers, but since drawLayers runs so often, it's preferable to only run this here where it's needed.
-//   canvas.layers.forEach((layer) => {
-//     if (layer.type === "raster") {
-//       if (
-//         layer.cvs.width !== canvas.offScreenCVS.width ||
-//         layer.cvs.height !== canvas.offScreenCVS.height
-//       ) {
-//         layer.cvs.width = canvas.offScreenCVS.width
-//         layer.cvs.height = canvas.offScreenCVS.height
-//       }
-//     }
-//   })
-//   renderCanvas(null, true) //render all layers and redraw timeline
-//   vectorGui.render()
-// }
-
 /**
  * Submit new dimensions for the offscreen canvas
- * @param {SubmitEvent} e
+ * @param {SubmitEvent} e - The submit event
  */
 const handleDimensionsSubmit = (e) => {
   e.preventDefault()
@@ -232,7 +149,7 @@ const resizeOnScreenCanvas = () => {
 
 /**
  * Clicking on a layer in the layers interface
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - The pointer event
  */
 function layerInteract(e) {
   if (canvas.pastedLayer) {
@@ -291,7 +208,7 @@ function layerInteract(e) {
 
 /**
  * Start dragging a layer in the layers interface
- * @param {DragEvent} e
+ * @param {DragEvent} e - The drag event
  */
 function dragLayerStart(e) {
   if (canvas.pastedLayer) {
@@ -309,7 +226,7 @@ function dragLayerStart(e) {
 
 /**
  * Prevent default behavior for drag over
- * @param {DragEvent} e
+ * @param {DragEvent} e - The drag event
  */
 function dragLayerOver(e) {
   e.preventDefault()
@@ -317,7 +234,7 @@ function dragLayerOver(e) {
 
 /**
  * Dragging a layer into another layer's space
- * @param {DragEvent} e
+ * @param {DragEvent} e - The drag event
  */
 function dragLayerEnter(e) {
   if (e.target.className.includes("layer")) {
@@ -328,7 +245,7 @@ function dragLayerEnter(e) {
 
 /**
  * Dragging a layer out of another layer's space
- * @param {DragEvent} e
+ * @param {DragEvent} e - The drag event
  */
 function dragLayerLeave(e) {
   if (e.target.className.includes("layer")) {
@@ -339,7 +256,7 @@ function dragLayerLeave(e) {
 
 /**
  * Drop a layer into another layer's space and reorder layers to match
- * @param {DragEvent} e
+ * @param {DragEvent} e - The drag event
  */
 function dropLayer(e) {
   let targetLayer = e.target.closest(".layer").layerObj
@@ -375,7 +292,7 @@ function dropLayer(e) {
 
 /**
  * Stop dragging a layer
- * @param {DragEvent} e
+ * @param {DragEvent} e - The drag event
  */
 function dragLayerEnd(e) {
   renderLayersToDOM()
@@ -387,7 +304,7 @@ function dragLayerEnd(e) {
 
 /**
  * Clicking on a vector in the vectors interface
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - The pointer event
  */
 function vectorInteract(e) {
   if (canvas.pastedLayer) {
@@ -446,7 +363,7 @@ function vectorInteract(e) {
 
 /**
  * Mark a vector action as removed
- * @param {object} vector
+ * @param {object} vector - The vector to be removed
  */
 function removeVector(vector) {
   vector.removed = true
@@ -462,8 +379,8 @@ function removeVector(vector) {
 
 /**
  * Change a vector action's modes
- * @param {object} vector
- * @param {string} modeKey
+ * @param {object} vector - The vector to be modified
+ * @param {string} modeKey - The mode to be modified
  */
 function toggleVectorMode(vector, modeKey) {
   let oldModes = { ...vector.modes }

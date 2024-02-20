@@ -1,3 +1,7 @@
+/**
+ * @param {string} str
+ * @returns {string} - A string with spaces between words
+ */
 function camelCaseToWords(str) {
   // Add a space before any uppercase letter
   let result = str.replace(/([A-Z])/g, " $1")
@@ -9,10 +13,9 @@ function camelCaseToWords(str) {
 }
 
 /**
- *
- * @param {string} optionName
- * @param {object} option
- * @returns {Element}
+ * @param {string} optionName - The name of the option
+ * @param {object} option - The option object
+ * @returns {Element} - A label element with a checkbox input and a span for the checkmark
  */
 export function createOptionToggle(optionName, option) {
   // Create label element

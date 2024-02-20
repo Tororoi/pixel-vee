@@ -1,4 +1,3 @@
-import { state } from "../Context/state.js"
 import { brush } from "./brush.js"
 import { line } from "./line.js"
 import { select } from "./select.js"

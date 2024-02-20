@@ -2,7 +2,6 @@ import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { clearOffscreenCanvas, renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM, renderLayersToDOM } from "../DOM/render.js"
@@ -21,7 +20,8 @@ import {
 
 /**
  * This sets the action which is then pushed to the undoStack for the command pattern
- * @param {object} actionObject
+ * action and redoStack are not reset here in order to allow some functionality based around checking if an action was just added to the timeline. TODO: (Low Priority) refactor to use a different method for this
+ * @param {object} actionObject - The action object to be added to the timeline
  */
 export function addToTimeline(actionObject) {
   const { tool, color, layer, properties } = actionObject
@@ -44,8 +44,8 @@ export function addToTimeline(actionObject) {
 }
 
 /**
- * @param {object} latestAction
- * @param {string} modType
+ * @param {object} latestAction - The action about to be undone or redone
+ * @param {string} modType - "from" or "to", used to identify undo or redo
  */
 function handleModifyAction(latestAction, modType) {
   //for each processed action,
@@ -70,7 +70,7 @@ function handleModifyAction(latestAction, modType) {
 }
 
 /**
- * @param {object} latestAction
+ * @param {object} latestAction - The action about to be undone or redone
  */
 function handleClearAction(latestAction) {
   let upToIndex = latestAction.properties.upToIndex
@@ -89,9 +89,9 @@ function handleClearAction(latestAction) {
 }
 
 /**
- * @param {object} latestAction
- * @param {object} newLatestAction
- * @param {string} modType
+ * @param {object} latestAction - The action about to be undone or redone
+ * @param {object} newLatestAction - The action that's about to be the most recent action, if the function is "Undo" ("from")
+ * @param {string} modType - "from" or "to", used to identify undo or redo
  */
 function handleSelectAction(latestAction, newLatestAction, modType) {
   if (modType === "to") {
@@ -167,8 +167,8 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
 }
 
 /**
- * @param {object} latestAction
- * @param {string} modType
+ * @param {object} latestAction - The action about to be undone or redone
+ * @param {string} modType - "from" or "to", used to identify undo or redo
  */
 function handlePasteAction(latestAction, modType) {
   // if modType is "from" (undoing paste action), remove the templayer
@@ -217,9 +217,9 @@ function handlePasteAction(latestAction, modType) {
 }
 
 /**
- * @param {object} latestAction
- * @param {object} newLatestAction
- * @param {string} modType
+ * @param {object} latestAction - The action about to be undone or redone
+ * @param {object} newLatestAction - The action that's about to be the most recent action, if the function is "Undo" ("from")
+ * @param {string} modType - "from" or "to", used to identify undo or redo
  */
 function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
   //if modType is "from" (undoing confirm paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
@@ -243,8 +243,8 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
 
 /**
  *
- * @param {object} latestAction
- * @param {string} modType
+ * @param {object} latestAction - The action about to be undone or redone
+ * @param {string} modType - "from" or "to", used to identify undo or redo
  */
 function handleMoveAction(latestAction, modType) {
   let deltaX = latestAction.properties[modType].x - latestAction.layer.x
@@ -283,9 +283,9 @@ function handleMoveAction(latestAction, modType) {
 
 /**
  * Main pillar of the code structure - command pattern
- * @param {Array} pushStack
- * @param {Array} popStack
- * @param {string} modType - "from" or "to", used for modify actions
+ * @param {Array} pushStack - The stack to push the action to
+ * @param {Array} popStack - The stack to pop the action from
+ * @param {string} modType - "from" or "to", used to identify undo or redo
  */
 export function actionUndoRedo(pushStack, popStack, modType) {
   vectorGui.reset()

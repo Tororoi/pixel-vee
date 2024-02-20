@@ -1,11 +1,10 @@
-import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
 
 /**
  * Render fill vector gui
- * @param {object} vectorProperties
- * @param {object} vectorAction
+ * @param {object} vectorProperties - The properties of the vector
+ * @param {object} vectorAction - The vector action to be rendered
  */
 export function renderFillVector(vectorProperties, vectorAction) {
   let pointsKeys = [{ x: "px1", y: "py1" }]

@@ -1,11 +1,7 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
-import { renderCanvas } from "../Canvas/render.js"
-import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
-import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForClipboard } from "../DOM/disableDomElements.js"
 
 //===================================//

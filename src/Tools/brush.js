@@ -8,7 +8,6 @@ import { renderCanvas } from "../Canvas/render.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { createColorMaskSet } from "../Canvas/masks.js"
-import { saveBrushAsTest } from "../Testing/brushTest.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 
 //====================================//
@@ -84,7 +83,7 @@ function brushSteps() {
         }
       }
       break
-    case "pointerup":
+    case "pointerup": {
       if (shouldDrawLine()) {
         drawLine()
       }
@@ -119,6 +118,7 @@ function brushSteps() {
         state.maskSet = null
       }
       break
+    }
     default:
     //do nothing
   }
@@ -148,7 +148,7 @@ function addPointToAction(x, y) {
  *
  * @param {number} x - (Integer)
  * @param {number} y - (Integer)
- * @param {string} brushDirection
+ * @param {string} brushDirection - one of 9 directions
  */
 function drawBrushPoint(x, y, brushDirection) {
   addPointToAction(x, y)
@@ -165,12 +165,11 @@ function drawBrushPoint(x, y, brushDirection) {
     state.maskSet,
     state.seenPixelsSet
   )
-  //Uncomment for performance testing
-  // if (state.captureTesting) {
-  //   saveBrushAsTest()
-  // }
 }
 
+/**
+ * Draw the next pixel in the brush stroke for perfect pixels preview pixel
+ */
 function drawPreviewBrushPoint() {
   let brushDirection = calculateBrushDirection(
     state.cursorX,
@@ -198,7 +197,7 @@ function drawPreviewBrushPoint() {
 
 /**
  * Check if cursor is far enough from previous point to draw a line
- * @returns {boolean}
+ * @returns {boolean} - True if cursor is far enough from previous point to draw a line
  */
 function shouldDrawLine() {
   return (

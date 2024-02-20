@@ -1,4 +1,3 @@
-import { keys } from "../Shortcuts/keys.js"
 import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
@@ -13,7 +12,6 @@ import {
   updateLinkedVectors,
   updateLockedCurrentVectorControlHandle,
   createActiveIndexesForRender,
-  renderCurrentVector,
 } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"

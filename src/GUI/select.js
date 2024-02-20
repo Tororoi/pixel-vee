@@ -59,7 +59,7 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
 /**
  * Render selection outline and control points
  * @param {number} lineDashOffset - (Float)
- * @param {boolean} drawPoints
+ * @param {boolean} drawPoints - if true, draw control points
  */
 export function renderSelectVector(lineDashOffset, drawPoints) {
   // Setting of context attributes.
@@ -202,12 +202,12 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
 // }
 
 /**
- * @param {object} boundaryBox
- * @param {Array} pointsKeys
+ * @param {object} boundaryBox - The boundary box of the selection
+ * @param {Array} pointsKeys - The keys of the control points
  * @param {number} radius - (Float)
- * @param {boolean} modify
+ * @param {boolean} modify - if true, check for collision with cursor and modify radius
  * @param {number} offset - (Integer)
- * @param {object} vectorAction
+ * @param {object} vectorAction - The vector action to be rendered (NOTE: Not certain if ever needed for this function)
  */
 function drawSelectControlPoints(
   boundaryBox,
@@ -259,12 +259,12 @@ function drawSelectControlPoints(
 
 /**
  * TODO: (Low Priority) move drawing logic to separate function so modify param doesn't need to be used
- * @param {object} keys
- * @param {object} point
+ * @param {object} keys - The keys of the control point
+ * @param {object} point - The control point
  * @param {number} radius - (Float)
  * @param {boolean} modify - if true, check for collision with cursor and modify radius
  * @param {number} offset - (Float)
- * @param {object} vectorAction
+ * @param {object} vectorAction - The vector action to be rendered (NOTE: Not certain if ever needed for this function)
  */
 function handleSelectCollisionAndDraw(
   keys,
@@ -358,7 +358,6 @@ function handleSelectCollisionAndDraw(
 
 /**
  * Set css cursor for selection interaction
- * @returns
  */
 function setSelectionCursorStyle() {
   if (!vectorGui.selectedCollisionPresent) {

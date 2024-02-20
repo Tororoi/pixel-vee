@@ -1,7 +1,7 @@
 import { brushStamps } from "../Context/brushStamps.js"
-// import { state } from "../Context/state.js"
-// import { canvas } from "../Context/canvas.js"
-// import { swatches } from "../Context/swatch.js"
+import { state } from "../Context/state.js"
+import { canvas } from "../Context/canvas.js"
+import { swatches } from "../Context/swatch.js"
 import { actionDraw } from "../Actions/pointerActions.js"
 import { vectorGui } from "./vector.js"
 import { renderCanvas } from "../Canvas/render.js"
@@ -12,18 +12,15 @@ import { renderCanvas } from "../Canvas/render.js"
 
 /**
  * Render cursor based on active tool
- * @param {object} state
- * @param {object} canvas
- * @param {object} swatches
  */
-export function renderCursor(state, canvas, swatches) {
+export function renderCursor() {
   switch (state.tool.name) {
     case "grab":
       //show nothing
       break
     case "eyedropper":
       //empty square
-      drawCursorBox(state, canvas, 2)
+      drawCursorBox(2)
       break
     case "select":
       //show nothing
@@ -52,7 +49,7 @@ export function renderCursor(state, canvas, swatches) {
           true
         )
         if (state.tool.modes?.eraser) {
-          drawCursorBox(state, canvas, 1)
+          drawCursorBox(1)
           // vectorGui.drawSelectOutline(state, canvas, state.selectPixelSet, 0.5)
         }
       } else {
@@ -63,11 +60,9 @@ export function renderCursor(state, canvas, swatches) {
 
 /**
  * Used to render eyedropper cursor and eraser
- * @param {object} state
- * @param {object} canvas
  * @param {number} lineWeight - (Float)
  */
-function drawCursorBox(state, canvas, lineWeight) {
+function drawCursorBox(lineWeight) {
   let lineWidth =
     canvas.zoom <= 8 ? lineWeight / canvas.zoom : 0.125 * lineWeight
   let brushOffset = Math.floor(state.tool.brushSize / 2)

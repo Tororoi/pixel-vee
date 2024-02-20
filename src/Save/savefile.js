@@ -6,7 +6,7 @@ import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 //import custom brushStamps when they are implemented
 import { vectorGui } from "../GUI/vector.js"
-import { performAction, renderCanvas } from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render.js"
 import {
   renderLayersToDOM,
   renderVectorsToDOM,

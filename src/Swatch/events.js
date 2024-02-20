@@ -1,7 +1,6 @@
 import { dom } from "../Context/dom.js"
 import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { Picker } from "./Picker.js"
 import { generateRandomRGB } from "../utils/colors.js"
@@ -24,7 +23,7 @@ import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
  * @param {number} g - (Integer)
  * @param {number} b - (Integer)
  * @param {number} a - (Integer)
- * @param {Element} target
+ * @param {Element} target - The swatch to set the color of
  */
 export function setColor(r, g, b, a, target) {
   a = parseInt(a)
@@ -95,7 +94,7 @@ export function setColor(r, g, b, a, target) {
 
 /**
  * Randomize the color of the swatch
- * @param {Element} target
+ * @param {Element} target - The swatch to randomize the color of
  */
 export function randomizeColor(target) {
   let color = generateRandomRGB()
@@ -103,7 +102,7 @@ export function randomizeColor(target) {
 }
 
 /**
- * @param {Element} target
+ * @param {Element} target - The swatch to initialize the color picker with
  */
 export function initializeColorPicker(target) {
   picker.swatch = target
@@ -121,7 +120,7 @@ export function initializeColorPicker(target) {
 }
 
 /**
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - pointer event on the swatch
  */
 function openColorPicker(e) {
   initializeColorPicker(e.target)
@@ -156,7 +155,7 @@ function switchColors() {
 }
 
 /**
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - pointer event on the palette
  */
 function handlePalette(e) {
   if (e.target.className.includes("swatch")) {

@@ -58,8 +58,17 @@ export const renderLayersToDOM = () => {
   }
 }
 
+/**
+ * Render layer settings interface in DOM
+ * @param {object} domLayer - The layer to render settings for
+ */
 export function renderLayerSettingsToDOM(domLayer) {
-  // Helper function to create and configure an element
+  /**
+   * Helper function to create and configure an element
+   * @param {string} type - The type of element to create
+   * @param {object} options - The options to configure the element with
+   * @returns {HTMLElement} - The created element
+   */
   function createElement(type, options = {}) {
     const element = document.createElement(type)
     Object.entries(options).forEach(([key, value]) => {

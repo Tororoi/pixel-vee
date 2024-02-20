@@ -112,7 +112,7 @@ export class Picker {
     this.updateColor()
   }
 
-  updateRGBA(e) {
+  updateRGBA() {
     const red = +this.r.value
     const green = +this.g.value
     const blue = +this.b.value
@@ -121,7 +121,7 @@ export class Picker {
     this.propogateRGBColorSpace()
   }
 
-  updateHSL(e) {
+  updateHSL() {
     const hue = +this.h.value
     const saturation = +this.s.value
     const lightness = +this.l.value
@@ -129,7 +129,7 @@ export class Picker {
     this.propogateHSLColorSpace()
   }
 
-  updateHex(e) {
+  updateHex() {
     this.hexcode = this.hex.value
     this.propogateHexColorSpace()
   }
@@ -204,7 +204,7 @@ export class Picker {
 
   /**
    * increment values while rgb button is held down
-   * @param {event} e
+   * @param {PointerEvent} e - pointer down event
    */
   handleRGBIncrement(e) {
     if (this.pointerState === "pointerdown") {
@@ -216,7 +216,7 @@ export class Picker {
 
   /**
    * increment values while hsl button is held down
-   * @param {event} e
+   * @param {PointerEvent} e - pointer down event
    */
   handleHSLIncrement(e) {
     if (this.pointerState === "pointerdown") {
@@ -255,7 +255,7 @@ export class Picker {
     )
   }
 
-  handlePointerUp(e) {
+  handlePointerUp() {
     this.clickedCanvas = false
   }
 
@@ -347,7 +347,7 @@ export class Picker {
     this.hex.addEventListener("change", (e) => {
       this.updateHex(e)
     })
-    this.oldcolor.addEventListener("pointerdown", (e) => {
+    this.oldcolor.addEventListener("pointerdown", () => {
       this.rgb = {
         red: this.initialColor.r,
         green: this.initialColor.g,
