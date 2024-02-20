@@ -1,5 +1,5 @@
 /**
- * @param {object} canvas
+ * @param {object} canvas - The canvas to draw on
  * @param {number} xOffset - (Integer)
  * @param {number} yOffset - (Integer)
  * @param {number} x - (Integer)
@@ -18,7 +18,7 @@ export function drawCirclePath(canvas, xOffset, yOffset, x, y, r) {
 }
 
 /**
- * @param {object} canvas
+ * @param {object} canvas - The canvas to draw on
  * @param {number} xOffset - (Integer)
  * @param {number} yOffset - (Integer)
  * @param {number} x1 - (Integer)
@@ -40,16 +40,30 @@ export function drawControlPointHandle(
 }
 
 /**
- *
  * @param {number} pointerX - (Integer)
  * @param {number} pointerY - (Integer)
  * @param {number} px - (Integer)
  * @param {number} py - (Integer)
  * @param {number} r - (Integer)
- * @returns {boolean}
+ * @returns {boolean} - true if pointer is inside of circle
  */
 export function checkPointCollision(pointerX, pointerY, px, py, r) {
-  //currently a square detection field, TODO: (Low Priority) change to circle
+  // Calculate the distance between the point and the center of the circle
+  const distance = Math.sqrt((pointerX - px) ** 2 + (pointerY - py) ** 2)
+
+  // Check if the distance is less than or equal to the radius
+  return distance <= r
+}
+
+/**
+ * @param {number} pointerX - (Integer)
+ * @param {number} pointerY - (Integer)
+ * @param {number} px - (Integer)
+ * @param {number} py - (Integer)
+ * @param {number} r - (Integer)
+ * @returns {boolean} - true if pointer is inside of square
+ */
+export function checkSquarePointCollision(pointerX, pointerY, px, py, r) {
   return (
     pointerX >= px - r &&
     pointerX <= px + r &&

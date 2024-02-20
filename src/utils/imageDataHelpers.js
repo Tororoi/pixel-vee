@@ -1,5 +1,4 @@
 /**
- *
  * @param {ImageData} imageData - array of color channels r,g,b,a,r,g,b,a,etc.
  * @param {number} pixelPos - index in image data (Integer)
  * @param {object} currentColor - {color,r,g,b,a}
@@ -12,13 +11,12 @@ export function colorPixel(imageData, pixelPos, currentColor) {
 }
 
 /**
- *
  * @param {ImageData} imageData - array of color channels r,g,b,a,r,g,b,a,etc.
  * @param {number} pixelPos - index in image data (Integer)
  * @param {object} startColor - {color,r,g,b,a}
  * @param {object} boundaryBox - {xMin, xMax, yMin, yMax}
  * @param {boolean} selectionInversed - {true/false}
- * @returns {boolean}
+ * @returns {boolean} - true if pixel matches startColor
  */
 export function matchStartColor(
   imageData,
@@ -57,11 +55,10 @@ export function matchStartColor(
 
 /**
  * Get color of pixel at x/y coordinates
+ * @param {ImageData} imageData - data: array of color channels r,g,b,a,r,g,b,a,etc.
  * @param {number} x - (Integer)
  * @param {number} y - (Integer)
- * @param {ImageData} colorLayer
  * @returns {string} rgba color
- * dependencies - none
  */
 export function getColor(imageData, x, y) {
   let canvasColor = {}

@@ -1,5 +1,5 @@
 /**
- * @param {string} str
+ * @param {string} str - A string in camelCase
  * @returns {string} - A string with spaces between words
  */
 function camelCaseToWords(str) {

@@ -1,7 +1,10 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "../GUI/vector.js"
-import { checkPointCollision, checkAreaCollision } from "../utils/guiHelpers.js"
+import {
+  checkSquarePointCollision,
+  checkAreaCollision,
+} from "../utils/guiHelpers.js"
 
 /**
  * Render selection outline and control points
@@ -280,7 +283,7 @@ function handleSelectCollisionAndDraw(
 
   if (modify) {
     const collisionPresent =
-      checkPointCollision(
+      checkSquarePointCollision(
         state.cursorX,
         state.cursorY,
         point.x - offset + xOffset,

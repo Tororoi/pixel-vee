@@ -10,6 +10,14 @@ import { assert, plotConicBezierSeg } from "./bezier.js"
 //=== * * * Ellipse Functions * * * ===//
 //=====================================//
 
+/**
+ * Plot an ellipse
+ * @param {number} xm - x-coordinate of the center
+ * @param {number} ym - y-coordinate of the center
+ * @param {number} a - semi-major axis
+ * @param {number} b - semi-minor axis
+ * @returns {Array} - Array of points
+ */
 export function plotEllipse(xm, ym, a, b) {
   let plotPoints = []
   var x = -a,
@@ -85,6 +93,14 @@ export function plotEllipse(xm, ym, a, b) {
 //   return plotPoints
 // }
 
+/**
+ * Plot a circle
+ * @param {number} xm - x-coordinate of the center
+ * @param {number} ym - y-coordinate of the center
+ * @param {number} r - radius
+ * @param {number} offset - subpixel offset
+ * @returns {Array} - Array of points
+ */
 export function plotCircle(xm, ym, r, offset) {
   let plotPoints = []
 
@@ -111,6 +127,14 @@ export function plotCircle(xm, ym, r, offset) {
 
   return plotPoints
 
+  /**
+   * Plot a quadrant of a circle
+   * @param {number} xm - x-coordinate of the center
+   * @param {number} ym - y-coordinate of the center
+   * @param {number} r - radius
+   * @param {number} offset - subpixel offset
+   * @param {number} quadrant - quadrant number
+   */
   function plotQuadrant(xm, ym, r, offset, quadrant) {
     var x = -r,
       y = 0,
@@ -139,6 +163,14 @@ export function plotCircle(xm, ym, r, offset) {
   }
 }
 
+/**
+ * Plot an ellipse with a rectangular parameter
+ * @param {number} x0 - x-coordinate of the top-left corner of the rectangle
+ * @param {number} y0 - y-coordinate of the top-left corner of the rectangle
+ * @param {number} x1 - x-coordinate of the bottom-right corner of the rectangle
+ * @param {number} y1 - y-coordinate of the bottom-right corner of the rectangle
+ * @returns {Array} - Array of points
+ */
 export function plotEllipseRect(x0, y0, x1, y1) {
   let plotPoints = []
   /* rectangular parameter enclosing the ellipse */
@@ -200,6 +232,19 @@ export function plotEllipseRect(x0, y0, x1, y1) {
   return plotPoints
 }
 
+/**
+ * Plot a rotated ellipse without a rectangular parameter
+ * @param {number} x - x-coordinate of the center
+ * @param {number} y - y-coordinate of the center
+ * @param {number} a - semi-major axis
+ * @param {number} b - semi-minor axis
+ * @param {number} angle - angle in radians
+ * @param {number} xa - x-coordinate of the first control point
+ * @param {number} ya - y-coordinate of the first control point
+ * @param {number} x1Offset - x direction offset
+ * @param {number} y1Offset - y direction offset
+ * @returns {Array} - Array of points
+ */
 export function plotRotatedEllipse(
   x,
   y,
@@ -233,6 +278,18 @@ export function plotRotatedEllipse(
   )
 }
 
+/**
+ * Plot a rotated ellipse with a rectangular parameter
+ * @param {number} x0 - x-coordinate of the top-left corner of the rectangle
+ * @param {number} y0 - y-coordinate of the top-left corner of the rectangle
+ * @param {number} x1 - x-coordinate of the bottom-right corner of the rectangle
+ * @param {number} y1 - y-coordinate of the bottom-right corner of the rectangle
+ * @param {number} zd - angle in radians
+ * @param {boolean} isRightAngle - is right angle
+ * @param {number} x1Offset - x direction offset
+ * @param {number} y1Offset - y direction offset
+ * @returns {Array} - Array of points
+ */
 function plotRotatedEllipseRect(
   x0,
   y0,
@@ -297,12 +354,12 @@ function plotRotatedEllipseRect(
 
 //helper functions
 /**
- *
- * @param {*} cx
- * @param {*} cy
- * @param {*} r
- * @param {*} a
- * @returns
+ * Get a point on a circle
+ * @param {number} cx - x-coordinate of the center
+ * @param {number} cy - y-coordinate of the center
+ * @param {number} r - radius
+ * @param {number} a - angle in radians
+ * @returns {object} - Object with x and y properties
  */
 function pointOnCircle(cx, cy, r, a) {
   let x = Math.round(cx + r * Math.cos(a))
@@ -311,14 +368,14 @@ function pointOnCircle(cx, cy, r, a) {
 }
 
 /**
- *
- * @param {*} px1
- * @param {*} py1
- * @param {*} px2
- * @param {*} py2
- * @param {*} radians
- * @param {*} opposingRadius
- * @returns
+ * Update the vertex of an ellipse
+ * @param {number} px1 - x-coordinate of the first control point
+ * @param {number} py1 - y-coordinate of the first control point
+ * @param {number} px2 - x-coordinate of the second control point
+ * @param {number} py2 - y-coordinate of the second control point
+ * @param {number} radians - angle in radians
+ * @param {number} opposingRadius - opposing radius
+ * @returns {object} - Object with x and y properties
  */
 export function updateEllipseVertex(
   px1,
@@ -336,12 +393,12 @@ export function updateEllipseVertex(
 /**
  * Find half of pixel that current subpixel exists in given an angle of a vector to the current pixel
  * determine subpixel close or far from origin based on angle.
- * @param {*} x - subpixel coordinate
- * @param {*} y - subpixel coordinate
- * @param {*} angle - radians
+ * @param {number} x - (Integer) subpixel coordinate
+ * @param {number} y - (Integer) subpixel coordinate
+ * @param {number} angle - (Float) radians
  * @param {boolean} inverse - inverse result
  * @param {boolean} perpendicular - rotate angle 90 degrees
- * @returns
+ * @returns {number} - 0 if far, 1 if close
  */
 export function findHalf(x, y, angle) {
   // Convert angle in degrees to slope m using tan function
@@ -365,14 +422,11 @@ export function findHalf(x, y, angle) {
 //Helper functions that affect state
 
 /**
- *
- * @param {*} state
- * @param {*} canvas
- * @param {*} px1
- * @param {*} py1
- * @param {*} px2
- * @param {*} py2
- * @param {*} angleOffset
+ * Update the offsets of an ellipse
+ * @param {object} state - The state context
+ * @param {object} canvas - The canvas context
+ * @param {boolean} forceCircle - force circle
+ * @param {number} angleOffset - angle offset
  */
 export function updateEllipseOffsets(
   state,
@@ -448,6 +502,12 @@ export function updateEllipseOffsets(
   }
 }
 
+/**
+ * Update the control points of an ellipse
+ * @param {object} state - The state context
+ * @param {object} canvas - The canvas context
+ * @param {object} vectorGui - The vectorGui context
+ */
 export function updateEllipseControlPoints(state, canvas, vectorGui) {
   if (vectorGui.selectedPoint.xKey !== "px1") {
     state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
