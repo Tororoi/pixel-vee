@@ -1,5 +1,9 @@
 import { state } from "../Context/state.js"
 
+/**
+ * Initialize dragger
+ * @param {HTMLElement} dragTarget - The element to drag
+ */
 export const initializeDragger = (dragTarget) => {
   const dragBtn = dragTarget.querySelector(".dragger")
   if (dragBtn) {
@@ -10,6 +14,11 @@ export const initializeDragger = (dragTarget) => {
   }
 }
 
+/**
+ * Initialize collapser
+ * @param {HTMLElement} collapseTarget - The element to collapse
+ * @param {boolean} startCollapsed - Whether to start collapsed
+ */
 export const initializeCollapser = (collapseTarget, startCollapsed) => {
   const collapseBtn = collapseTarget.querySelector(".collapse-checkbox")
   const collapsibleArea = collapseTarget.querySelector(".collapsible")
@@ -34,6 +43,10 @@ export const initializeCollapser = (collapseTarget, startCollapsed) => {
   }
 }
 
+/**
+ * Initialize closer
+ * @param {HTMLElement} closeTarget - The element to close
+ */
 export const initializeCloser = (closeTarget) => {
   const closeBtn = closeTarget.querySelector(".close-btn")
   if (closeBtn) {
@@ -43,6 +56,11 @@ export const initializeCloser = (closeTarget) => {
   }
 }
 
+/**
+ * Initialize dialog box
+ * @param {HTMLElement} dialogBoxTarget - The dialog box
+ * @param {boolean} startCollapsed - Whether to start collapsed
+ */
 export const initializeDialogBox = (
   dialogBoxTarget,
   startCollapsed = false
@@ -52,6 +70,9 @@ export const initializeDialogBox = (
   initializeCloser(dialogBoxTarget)
 }
 
+/**
+ * Set drag siblings
+ */
 function setDragSiblings() {
   const parentElement = state.dragTarget.parentElement
   const siblingElements = parentElement.children
@@ -93,6 +114,10 @@ function setDragSiblings() {
   }
 }
 
+/**
+ * Reorder elements
+ * @param {PointerEvent} e - The pointer event
+ */
 function reorderElements(e) {
   //fix siblings in place
   let dragTargetIndex = 0
@@ -137,7 +162,10 @@ function reorderElements(e) {
   }
 }
 
-//Drag
+/**
+ * @param {PointerEvent} e - The pointer event
+ * @param {HTMLElement} dragTarget - The element to drag
+ */
 export const dragStart = (e, dragTarget) => {
   if (!dragTarget.className.includes("locked")) {
     e.target.setPointerCapture(e.pointerId)
@@ -155,6 +183,9 @@ export const dragStart = (e, dragTarget) => {
   }
 }
 
+/**
+ * Drag stop
+ */
 export const dragStop = () => {
   state.dragging = false
   if (state.dragTarget) {
@@ -201,6 +232,10 @@ export const dragStop = () => {
   }
 }
 
+/**
+ * Drag move
+ * @param {PointerEvent} e - The pointer event
+ */
 export const dragMove = (e) => {
   if (state.dragTarget) {
     const parentElement = state.dragTarget.parentElement

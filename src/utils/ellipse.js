@@ -396,8 +396,6 @@ export function updateEllipseVertex(
  * @param {number} x - (Integer) subpixel coordinate
  * @param {number} y - (Integer) subpixel coordinate
  * @param {number} angle - (Float) radians
- * @param {boolean} inverse - inverse result
- * @param {boolean} perpendicular - rotate angle 90 degrees
  * @returns {number} - 0 if far, 1 if close
  */
 export function findHalf(x, y, angle) {

@@ -1,7 +1,6 @@
 /**
- *
  * @param {number} width - (Integer)
- * @returns
+ * @returns {number} - (Float)
  */
 export const setInitialZoom = (width) => {
   const ratio = 256 / width
@@ -27,9 +26,10 @@ export const setInitialZoom = (width) => {
  * @param {number} x - (Integer)
  * @param {number} y - (Integer)
  * @param {number} brushSize - (Integer)
- * @param {object} layer
- * @param {object} boundaryBox
- * @param {boolean} isInversed
+ * @param {object} layer - used for canvas dimensions
+ * @param {object} boundaryBox - {xMin, xMax, yMin, yMax}
+ * @param {boolean} isInversed - if true, the boundaryBox is the area to be excluded
+ * @returns {boolean} - true if point is outside bounds
  */
 export const isOutOfBounds = (
   x,

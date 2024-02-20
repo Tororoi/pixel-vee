@@ -1,10 +1,9 @@
 // * Buttons * //
 
 /**
- *
- * @param {string} modeKey
- * @param {boolean} isSelected
- * @returns {Element}
+ * @param {string} modeKey - The mode key
+ * @param {boolean} isSelected - whether the mode is selected
+ * @returns {HTMLElement} - mode button
  */
 export const createModeElement = (modeKey, isSelected) => {
   let mode = document.createElement("button")
@@ -19,9 +18,9 @@ export const createModeElement = (modeKey, isSelected) => {
 }
 
 /**
- * @param {object} action
- * @param {boolean} isSelected
- * @returns {Element}
+ * @param {object} action - The action object
+ * @param {boolean} isSelected - whether the tool is selected
+ * @returns {HTMLElement} - tool button
  */
 export const createToolElement = (action, isSelected) => {
   let tool = document.createElement("button")
@@ -36,8 +35,8 @@ export const createToolElement = (action, isSelected) => {
 }
 
 /**
- * @param {object} action
- * @returns {Element}
+ * @param {object} action - The action object
+ * @returns {HTMLElement} - color button
  */
 export const createColorElement = (action) => {
   let color = document.createElement("button")
@@ -52,9 +51,9 @@ export const createColorElement = (action) => {
 }
 
 /**
- * @param {boolean} hidden
- * @param {string} tooltipText
- * @returns {Element}
+ * @param {boolean} hidden - whether the element is hidden
+ * @param {string} tooltipText - The tooltip text
+ * @returns {HTMLElement} - hide button
  */
 export const createHideElement = (hidden = false, tooltipText) => {
   let hide = document.createElement("button")
@@ -67,8 +66,8 @@ export const createHideElement = (hidden = false, tooltipText) => {
 }
 
 /**
- * @param {string} tooltipText
- * @returns {Element}
+ * @param {string} tooltipText - The tooltip text
+ * @returns {HTMLElement} - trash button
  */
 export const createTrashElement = (tooltipText) => {
   let trash = document.createElement("button")
@@ -80,8 +79,8 @@ export const createTrashElement = (tooltipText) => {
 }
 
 /**
- * @param {string} tooltipText
- * @returns {Element}
+ * @param {string} tooltipText - The tooltip text
+ * @returns {HTMLElement} - settings button
  */
 export const createSettingsElement = (tooltipText) => {
   let gear = document.createElement("button")

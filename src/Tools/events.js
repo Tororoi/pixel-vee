@@ -19,7 +19,7 @@ state.tool = tools.brush
 
 /**
  * Handle zoom buttons
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - click event
  */
 function handleZoom(e) {
   //TRY: restrict zoom to fixed multiples, 125%, 150% etc
@@ -90,7 +90,7 @@ function handleClearCanvas() {
 
 /**
  * Switch tools
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - click event
  */
 export function handleTools(e) {
   const targetTool = e?.target.closest(".tool")
@@ -98,7 +98,7 @@ export function handleTools(e) {
 }
 
 /**
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - click event
  */
 export function handleModes(e) {
   const targetMode = e?.target.closest(".mode")
@@ -110,10 +110,9 @@ export function handleModes(e) {
 //=====================================//
 
 /**
- *
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - click event
  */
-function switchBrush() {
+function switchBrush(e) {
   if (state.tool.brushType === "square") {
     state.tool.brushType = "circle"
   } else {
@@ -123,8 +122,7 @@ function switchBrush() {
 }
 
 /**
- *
- * @param {InputEvent} e
+ * @param {InputEvent} e - input event
  */
 function updateBrush(e) {
   switch (state.tool.name) {

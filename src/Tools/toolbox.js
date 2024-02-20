@@ -1,7 +1,6 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
@@ -16,8 +15,8 @@ import { actionConfirmPastedPixels } from "../Actions/nonPointerActions.js"
 
 /**
  * Switch active tool
- * @param {string|null} toolName
- * @param {Element|null} toolBtn
+ * @param {string|null} toolName - The tool name
+ * @param {HTMLElement|null} toolBtn - The tool button
  */
 export function switchTool(toolName = null, toolBtn = null) {
   const targetToolBtn = toolBtn || document.querySelector(`#${toolName}`)
@@ -63,8 +62,8 @@ export function switchTool(toolName = null, toolBtn = null) {
  * Toggle active mode
  * TODO: (Low Priority) add multi-touch mode for drawing with multiple fingers
  * TODO: (Middle Priority) add curve brush mode for freehand drawing splines
- * @param {string|null} modeName
- * @param {Element|null} modeBtn
+ * @param {string|null} modeName - The mode name
+ * @param {HTMLElement|null} modeBtn - The mode button
  */
 export function toggleMode(modeName = null, modeBtn = null) {
   const targetModeBtn = modeBtn || document.querySelector(`#${modeName}`)

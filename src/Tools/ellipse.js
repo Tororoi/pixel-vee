@@ -240,6 +240,10 @@ function ellipseSteps() {
   }
 }
 
+/**
+ * Update ellipse vector properties
+ * @param {object} currentVector - The current vector
+ */
 function updateEllipseVectorProperties(currentVector) {
   updateEllipseControlPoints(state, canvas, vectorGui)
   currentVector.properties.vectorProperties = { ...state.vectorProperties }
@@ -313,6 +317,9 @@ export function adjustEllipseSteps() {
   }
 }
 
+/**
+ * Ellipse tool
+ */
 export const ellipse = {
   name: "ellipse",
   fn: ellipseSteps,

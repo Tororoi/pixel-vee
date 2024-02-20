@@ -79,7 +79,7 @@ export function checkSquarePointCollision(pointerX, pointerY, px, py, r) {
  * @param {number} py1 - (Integer)
  * @param {number} px2 - (Integer)
  * @param {number} py2 - (Integer)
- * @returns {boolean}
+ * @returns {boolean} - true if pointer is inside of area
  */
 export function checkAreaCollision(pointerX, pointerY, px1, py1, px2, py2) {
   return (
