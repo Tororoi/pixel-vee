@@ -74,7 +74,7 @@ export const state = {
     radA: null,
     radB: null,
     angle: null,
-    offset: null, //rename to something more specific
+    unifiedOffset: null, //Can be 0 or 1. Used for ellipse when drawing a circle to maintain same x and y offset instead of separating them.
     x1Offset: 0,
     y1Offset: 0,
     forceCircle: false,
@@ -104,7 +104,27 @@ export const state = {
       py2: null,
     },
     canvas: null,
-    //TODO: (High Priority) for copying vectors, need more properties
+    vector: {
+      type: null, //string for type of vector copied (ellipse, cubicCurve, quadCurve, fill)
+      vectorProperties: {
+        px1: null,
+        py1: null,
+        px2: null,
+        py2: null,
+        px3: null,
+        py3: null,
+        px4: null,
+        py4: null,
+        radA: null,
+        radB: null,
+        angle: null,
+        unifiedOffset: null,
+        x1Offset: 0,
+        y1Offset: 0,
+        forceCircle: false,
+      },
+      //TODO: (Medium Priority) Need way to store multiple vectors to copy linked vectors. How would that work after pasting? Added to the undoStack as one action but each vector needs its own slot in the stack. Maybe vectors should be stored separately from the undoStack?
+    },
   },
   //for perfect pixels
   lastDrawnX: null,

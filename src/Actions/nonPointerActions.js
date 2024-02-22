@@ -166,8 +166,9 @@ export function actionPasteSelection() {
   if (
     canvas.currentLayer.type === "raster" &&
     !canvas.currentLayer.isPreview &&
-    state.selectClipboard.canvas
+    (state.selectClipboard.canvas || state.selectClipboard.vector.type)
   ) {
+    //if state.selectClipboard.canvas, run pasteSelectedPixels
     // Store whether selection was active before paste action
     let prePasteSelectProperties = { ...state.selectProperties }
     let prePasteInvertSelection = state.selectionInversed
@@ -188,6 +189,7 @@ export function actionPasteSelection() {
       selectProperties.py1 -= canvas.currentLayer.y
       selectProperties.py2 -= canvas.currentLayer.y
     }
+
     //add to timeline
     addToTimeline({
       tool: tools.paste,
@@ -205,6 +207,8 @@ export function actionPasteSelection() {
           width: state.selectClipboard.canvas.width,
           height: state.selectClipboard.canvas.height,
         },
+        //vectorType: state.selectClipboard.vector.type,
+        //vectorProperties: state.selectClipboard.vector.vectorProperties,
         pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
       },
     })
@@ -288,6 +292,7 @@ export function actionConfirmPastedPixels() {
     vectorGui.render()
     renderCanvas()
     renderLayersToDOM()
+    renderVectorsToDOM()
     enableActionsForNoPaste()
   }
 }

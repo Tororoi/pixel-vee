@@ -437,13 +437,13 @@ export function updateEllipseOffsets(
     state.vectorProperties.py2 - state.vectorProperties.py1
   )
   if (state.tool.options.useSubpixels?.active) {
-    state.vectorProperties.offset = findHalf(
+    state.vectorProperties.unifiedOffset = findHalf(
       canvas.subPixelX,
       canvas.subPixelY,
       state.vectorProperties.angle + angleOffset
     )
   } else {
-    state.vectorProperties.offset = 0 // TODO: (Middle Priority) need logic to manually select offset values
+    state.vectorProperties.unifiedOffset = 0 // TODO: (Middle Priority) need logic to manually select offset values
   }
   const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
   while (state.vectorProperties.angle < 0) {
@@ -462,37 +462,37 @@ export function updateEllipseOffsets(
   //gui element could have 2 sliders, vertical and horizontal with 3 values each, offset -1, 0, 1 (right, none, left)
   //should only x1 and y1 offsets be available since they represent the center point being part of radius or not?
   if (state.clickCounter === 1 || forceCircle) {
-    state.vectorProperties.x1Offset = -state.vectorProperties.offset
-    state.vectorProperties.y1Offset = -state.vectorProperties.offset
+    state.vectorProperties.x1Offset = -state.vectorProperties.unifiedOffset
+    state.vectorProperties.y1Offset = -state.vectorProperties.unifiedOffset
   } else {
     switch (compassDir) {
       case "N":
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
+        state.vectorProperties.y1Offset = -state.vectorProperties.unifiedOffset
         break
       case "NE":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.unifiedOffset
+        state.vectorProperties.y1Offset = -state.vectorProperties.unifiedOffset
         break
       case "E":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.unifiedOffset
         break
       case "SE":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.unifiedOffset
+        state.vectorProperties.y1Offset = -state.vectorProperties.unifiedOffset
         break
       case "S":
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
+        state.vectorProperties.y1Offset = -state.vectorProperties.unifiedOffset
         break
       case "SW":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.unifiedOffset
+        state.vectorProperties.y1Offset = -state.vectorProperties.unifiedOffset
         break
       case "W":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.unifiedOffset
         break
       case "NW":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.unifiedOffset
+        state.vectorProperties.y1Offset = -state.vectorProperties.unifiedOffset
         break
       default:
       //none

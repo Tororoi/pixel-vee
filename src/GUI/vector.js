@@ -246,9 +246,9 @@ function reset() {
       radA: null,
       radB: null,
       angle: null,
+      unifiedOffset: null,
       x1Offset: 0,
       y1Offset: 0,
-      offset: null, //rename to something more specific
       forceCircle: false,
     },
   }

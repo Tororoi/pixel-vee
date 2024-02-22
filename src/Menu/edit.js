@@ -11,6 +11,7 @@ import { enableActionsForClipboard } from "../DOM/disableDomElements.js"
 /**
  * Copy selected pixels
  * Not dependent on pointer events
+ * TODO: (High Priority) Allow copying vectors if selected. Conditions are must be on vector tool and state.vectorProperties must be populated.
  */
 export function copySelectedPixels() {
   const { xMin, yMin, xMax, yMax } = state.boundaryBox

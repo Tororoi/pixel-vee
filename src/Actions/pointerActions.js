@@ -617,7 +617,7 @@ export function actionCubicCurve(
  * @param {object} brushStamp - entire brushStamp array with all directions
  * @param {number} brushSize - (Integer)
  * @param {number} angle - Radians (Float)
- * @param {number} offset - (Integer)
+ * @param {number} unifiedOffset - (Integer)
  * @param {number} x1Offset - (Integer)
  * @param {number} y1Offset - (Integer)
  * @param {Set} maskSet - set of coordinates to draw on if mask is active
@@ -642,7 +642,7 @@ export function actionEllipse(
   brushStamp,
   brushSize,
   angle,
-  offset,
+  unifiedOffset,
   x1Offset,
   y1Offset,
   maskSet,
@@ -650,7 +650,7 @@ export function actionEllipse(
   isPreview = false
 ) {
   if (forceCircle) {
-    let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, offset)
+    let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, unifiedOffset)
     renderPoints(
       plotPoints,
       boundaryBox,

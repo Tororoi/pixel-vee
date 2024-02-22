@@ -306,7 +306,7 @@ export function performAction(action, betweenCtx = null) {
         brushStamps[action.tool.brushType][action.tool.brushSize],
         action.tool.brushSize,
         action.properties.vectorProperties.angle,
-        action.properties.vectorProperties.offset,
+        action.properties.vectorProperties.unifiedOffset,
         action.properties.vectorProperties.x1Offset,
         action.properties.vectorProperties.y1Offset,
         null, //maskSet made from action.properties.maskArray

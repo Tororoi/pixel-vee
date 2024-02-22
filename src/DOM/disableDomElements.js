@@ -3,8 +3,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 
 /**
- * paste: disable clear, cut, copy, paste, deselect, invert selection, select all, resize canvas
- * selection:
+ * disable actions when paste is active
  */
 export function disableActionsForPaste() {
   //disable clear button. TODO: When toolbox has a dom render function like layers and vectors, this should be moved there
@@ -23,6 +22,9 @@ export function disableActionsForPaste() {
   dom.pasteBtn.classList.add("disabled")
 }
 
+/**
+ * Enable actions when no paste is active
+ */
 export function enableActionsForNoPaste() {
   //enable clear button. TODO: When toolbox has a dom render function like layers and vectors, this should be moved there
   dom.clearBtn.disabled = false
@@ -37,11 +39,14 @@ export function enableActionsForNoPaste() {
   dom.invertSelectionBtn.classList.remove("disabled")
   dom.cutBtn.classList.remove("disabled")
   dom.copyBtn.classList.remove("disabled")
-  if (state.selectClipboard.canvas) {
+  if (state.selectClipboard.canvas || state.selectClipboard.vector.type) {
     dom.pasteBtn.classList.remove("disabled")
   }
 }
 
+/**
+ * Disable actions when no selection is active
+ */
 export function disableActionsForNoSelection() {
   //disable menu buttons that can't work without a selection
   dom.cutBtn.classList.add("disabled")
@@ -50,6 +55,9 @@ export function disableActionsForNoSelection() {
   dom.invertSelectionBtn.classList.add("disabled")
 }
 
+/**
+ * Enable actions when a selection is active
+ */
 export function enableActionsForSelection() {
   if (canvas.pastedLayer) {
     //if there is a pasted layer active, do not enable cut, copy, paste, deselect, invert selection
@@ -62,11 +70,17 @@ export function enableActionsForSelection() {
   dom.invertSelectionBtn.classList.remove("disabled")
 }
 
+/**
+ * Disable actions when no clipboard is active
+ */
 export function disableActionsForNoClipboard() {
   //disable menu buttons that can't work without a clipboard
   dom.pasteBtn.classList.add("disabled")
 }
 
+/**
+ * Enable actions when a clipboard is active
+ */
 export function enableActionsForClipboard() {
   if (canvas.pastedLayer) {
     //if there is a pasted layer active, do not enable paste

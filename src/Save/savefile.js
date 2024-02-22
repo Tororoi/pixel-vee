@@ -29,7 +29,6 @@ import { resizeOffScreenCanvas } from "../Canvas/render.js"
  *   - raster layer properties: cvs, ctx, onscreenCvs, onscreenCtx
  * - tool fn - not needed because it is not used
  * - action snapshot - don't save unnecessary dataurls
- * TODO: (High Priority) save canvas dimensions and selectProperties
  * @returns {Blob} - A blob containing the drawing data.
  */
 export function prepareDrawingForSave() {
@@ -115,8 +114,6 @@ export function saveDrawing() {
 
 /**
  * Load the drawing from a JSON file.
- * TODO: (High Priority) Set canvas dimensions
- * TODO: (High Priority) Set selection properties if latest action has a boundaryBox
  * @param {JSON} jsonFile - The JSON file containing the drawing data.
  */
 export async function loadDrawing(jsonFile) {

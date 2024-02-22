@@ -40,6 +40,7 @@ export function drawControlPointHandle(
 }
 
 /**
+ * BUG: Results in a pixellated collision check area unless subpixels are added to the logic which would mean more frequent checks (not performant)
  * @param {number} pointerX - (Integer)
  * @param {number} pointerY - (Integer)
  * @param {number} px - (Integer)
