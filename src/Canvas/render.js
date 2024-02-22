@@ -21,7 +21,7 @@ import { setInitialZoom } from "../utils/canvasHelpers.js"
  * For handling activeIndexes, the idea is to save images of multiple actions that aren't changing to save time redrawing.
  * The current problem is that later actions "fill" or "draw" with a mask are affected by earlier actions.
  * TODO: (Low Priority) Another efficiency improvement would be to perform incremental rendering with caching so only the affected region of the canvas is rerendered.
- * TODO: (Middle Priority) Use OffscreenCanvas in a web worker to offload rendering to a separate thread.
+ * TODO: (Medium Priority) Use OffscreenCanvas in a web worker to offload rendering to a separate thread.
  * BUG: Can't simply save images and draw them for the betweenCvs because this will ignore actions use erase or inject modes.
  * @param {object} layer - optional parameter to limit render to a specific layer
  * @param {Array} activeIndexes - optional parameter to limit render to specific actions. If not passed in, all actions will be rendered.

@@ -137,7 +137,7 @@ function reorderElements(e) {
       let dragTop = e.clientY - state.dragY
       //if drag top less than halfway height and greater than previous sibling's halfway height, set dragTarget's css order property to siblingArray[i]'s order and iterate back through higher siblings to increase their order
       //move dragTarget up
-      //TODO: (Middle Priority) Instead of colliding with valid insertion point, write this check to find the nearest overlapping element to dragTop
+      //TODO: (Medium Priority) Instead of colliding with valid insertion point, write this check to find the nearest overlapping element to dragTop
       let collision =
         dragTop > state.dragSiblings[i].top - 10 &&
         dragTop < state.dragSiblings[i].top + 10

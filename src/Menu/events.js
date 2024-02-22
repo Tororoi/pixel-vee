@@ -131,7 +131,7 @@ function importImage() {
 
 /**
  * Consolidate offscreen canvases and download image
- * TODO: (Middle Priority) Open dialog box with more options such as pixel size, etc.
+ * TODO: (Medium Priority) Open dialog box with more options such as pixel size, format (png, gif), etc.
  */
 function exportImage() {
   //save .png
@@ -146,7 +146,7 @@ function exportImage() {
 
 /**
  * Open json file from desktop and load into layers and timeline
- * TODO: (Middle Priority) initialize loading screen and stop loading screen after loaded
+ * TODO: (Medium Priority) initialize loading screen and stop loading screen after loaded
  */
 function openSavedDrawing() {
   let reader

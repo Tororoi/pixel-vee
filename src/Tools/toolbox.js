@@ -61,7 +61,7 @@ export function switchTool(toolName = null, toolBtn = null) {
 /**
  * Toggle active mode
  * TODO: (Low Priority) add multi-touch mode for drawing with multiple fingers
- * TODO: (Middle Priority) add curve brush mode for freehand drawing splines
+ * TODO: (Medium Priority) add curve brush mode for freehand drawing splines
  * @param {string|null} modeName - The mode name
  * @param {HTMLElement|null} modeBtn - The mode button
  */

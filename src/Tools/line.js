@@ -13,7 +13,7 @@ import { addToTimeline } from "../Actions/undoRedo.js"
 
 /**
  * Supported modes: "draw, erase, inject",
- * TODO: (Middle Priority) add vector line tool. A raster line tool would still be present for ease of use.
+ * TODO: (Medium Priority) add vector line tool. A raster line tool would still be present for ease of use.
  */
 function lineSteps() {
   switch (canvas.pointerEvent) {

@@ -163,7 +163,7 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
     )
   }
   //set state.selectClipboard?
-  //TODO: (Middle Priority) need to tell that it's a modified version of the selection, so no dotted line and include transform control points for resizing (not currently implemented)
+  //TODO: (Medium Priority) include transform control points for resizing, rotating, etc. (not currently implemented)
   vectorGui.render()
 }
 

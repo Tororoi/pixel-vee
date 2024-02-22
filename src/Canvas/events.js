@@ -466,7 +466,7 @@ dom.deleteLayerBtn.addEventListener("click", () => {
   renderCanvas(layer)
 })
 
-//TODO: (Middle Priority) Make similar to functionality of dragging dialog boxes. To make fancier dragging work, must be made compatible with a scrolling container
+//TODO: (Medium Priority) Make similar to functionality of dragging dialog boxes. To make fancier dragging work, must be made compatible with a scrolling container
 dom.layersContainer.addEventListener("click", layerInteract)
 dom.layersContainer.addEventListener("dragstart", dragLayerStart)
 dom.layersContainer.addEventListener("dragover", dragLayerOver)

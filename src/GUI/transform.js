@@ -2,7 +2,7 @@ import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
 
 /**
- * TODO: (Middle Priority) use same aesthetic as select tool
+ * TODO: (High Priority) use same aesthetic as select tool
  */
 export function renderTransformBox() {
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8

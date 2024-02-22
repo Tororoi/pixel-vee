@@ -443,7 +443,7 @@ export function updateEllipseOffsets(
       state.vectorProperties.angle + angleOffset
     )
   } else {
-    state.vectorProperties.unifiedOffset = 0 // TODO: (Middle Priority) need logic to manually select offset values
+    state.vectorProperties.unifiedOffset = 0 // TODO: (Medium Priority) need logic to manually select offset values
   }
   const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
   while (state.vectorProperties.angle < 0) {
@@ -457,7 +457,7 @@ export function updateEllipseOffsets(
     ) % 8
   let compassDir = directions[index]
   //based on direction update x and y offsets in state
-  //TODO: (Middle Priority) keep offset consistent during radius adjustment and use another gui element to control the way radius is handled, drawn as a compass, 8 options plus default center which is no offset
+  //TODO: (Medium Priority) keep offset consistent during radius adjustment and use another gui element to control the way radius is handled, drawn as a compass, 8 options plus default center which is no offset
   //Direction shrinks opposite side. eg. radius 7 goes from diameter 15 to diameter 14
   //gui element could have 2 sliders, vertical and horizontal with 3 values each, offset -1, 0, 1 (right, none, left)
   //should only x1 and y1 offsets be available since they represent the center point being part of radius or not?

@@ -275,7 +275,7 @@ export async function loadDrawing(jsonFile) {
         (layer) =>
           action.layer?.id
             ? layer.id === action.layer.id
-            : layer.title === action.layer.title //NOTE: This is a fix for loading files saved before layer ids were implemented. TODO: (Middle Priority) implement a versioning system to handle this in the future.
+            : layer.title === action.layer.title //NOTE: This is a fix for loading files saved before layer ids were implemented. TODO: (Medium Priority) implement a versioning system to handle this in the future.
       )
 
       if (correspondingLayer) {

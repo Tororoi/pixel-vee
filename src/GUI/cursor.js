@@ -68,7 +68,7 @@ function drawCursorBox(lineWeight) {
   let brushOffset = Math.floor(state.tool.brushSize / 2)
   let ol = lineWidth / 2 // line offset to stroke off-center
 
-  // Create a Set from brushStamps[state.tool.brushType][state.tool.brushSize]//TODO: (Middle Priority) make set when creating brush stamp so it does not need to be defined here.
+  // Create a Set from brushStamps[state.tool.brushType][state.tool.brushSize]//TODO: (Medium Priority) make set when creating brush stamp so it does not need to be defined here.
   const pixelSet = new Set(
     brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"].map(
       (p) => `${p.x},${p.y}`

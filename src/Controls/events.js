@@ -13,7 +13,7 @@ import { throttle } from "../utils/eventHelpers.js"
 
 /**
  * Set global coordinates
- * TODO: (Middle Priority) move to separate file and import
+ * TODO: (Low Priority) move to separate file and import
  * @param {UIEvent} e - PointerEvent, WheelEvent
  */
 const setCoordinates = (e) => {

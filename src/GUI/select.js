@@ -51,7 +51,7 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
     canvas.rasterGuiCTX.restore()
     // }
     renderSelectVector(lineDashOffset, state.tool.name === "select")
-    //TODO: (Middle Priority) Animating the selection currently not possible because animation is interrupted by renderCanvas() call taking up the main thread
+    //TODO: (Medium Priority) Animating the selection currently not possible because animation is interrupted by renderCanvas() call taking up the main thread
     //All rendering would need to be part of the animation loop or on a separate thread. Maybe the marching ants could be done with css instead of on the canvas?
     // window.requestAnimationFrame(() => {
     //   renderRasterCVS(lineDashOffset < 4 ? lineDashOffset + 0.1 : 0)
@@ -121,7 +121,7 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
 }
 
 // /**
-//  * TODO: (Middle Priority) May be used for freeform selections in the future
+//  * TODO: (Medium Priority) May be used for freeform selections in the future
 //  * @param {number} lineDashOffset - (Float)
 //  */
 // export function drawSelectOutline(lineDashOffset) {

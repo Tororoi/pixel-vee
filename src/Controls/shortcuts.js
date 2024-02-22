@@ -326,7 +326,7 @@ export function deactivateShortcut(keyCode) {
           vectorGui.selectedPoint.xKey !== "px1"
         ) {
           //while holding control point, readjust ellipse without having to move cursor.
-          //TODO: (Middle Priority) update this functionality to have other radii go back to previous radius value when releasing shift
+          //TODO: (Medium Priority) update this functionality to have other radii go back to previous radius value when releasing shift
           adjustEllipseSteps()
           vectorGui.render()
         }
@@ -424,7 +424,7 @@ export function deactivateShortcut(keyCode) {
 }
 
 /**
- * Set tool cursor. TODO: (Middle Priority) move to utils file
+ * Set tool cursor. TODO: (Low Priority) move to utils file
  */
 function setToolCssCursor() {
   if (state.tool.modes?.eraser) {
