@@ -39,7 +39,10 @@ export function enableActionsForNoPaste() {
   dom.invertSelectionBtn.classList.remove("disabled")
   dom.cutBtn.classList.remove("disabled")
   dom.copyBtn.classList.remove("disabled")
-  if (state.selectClipboard.canvas || state.selectClipboard.vector.type) {
+  if (
+    state.selectClipboard.canvas ||
+    state.selectClipboard.vectorsSavedProperties.length > 0
+  ) {
     dom.pasteBtn.classList.remove("disabled")
   }
 }

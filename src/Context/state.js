@@ -63,6 +63,7 @@ export const state = {
   activeIndexes: [],
   savedBetweenActionImages: [],
   vectorProperties: {
+    type: null,
     px1: null,
     py1: null,
     px2: null,
@@ -104,27 +105,8 @@ export const state = {
       py2: null,
     },
     canvas: null,
-    vector: {
-      type: null, //string for type of vector copied (ellipse, cubicCurve, quadCurve, fill)
-      vectorProperties: {
-        px1: null,
-        py1: null,
-        px2: null,
-        py2: null,
-        px3: null,
-        py3: null,
-        px4: null,
-        py4: null,
-        radA: null,
-        radB: null,
-        angle: null,
-        unifiedOffset: null,
-        x1Offset: 0,
-        y1Offset: 0,
-        forceCircle: false,
-      },
-      //TODO: (Medium Priority) Need way to store multiple vectors to copy linked vectors. How would that work after pasting? Added to the undoStack as one action but each vector needs its own slot in the stack. Maybe vectors should be stored separately from the undoStack?
-    },
+    vectorType: null, //string for type of vector copied (ellipse, cubicCurve, quadCurve, fill)
+    vectorsSavedProperties: [],
   },
   //for perfect pixels
   lastDrawnX: null,

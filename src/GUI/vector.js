@@ -235,6 +235,7 @@ function setCursorStyle() {
 function reset() {
   state.vectorProperties = {
     ...{
+      type: null,
       px1: null,
       py1: null,
       px2: null,

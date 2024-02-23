@@ -25,7 +25,8 @@ function fillSteps() {
         adjustFillSteps()
       } else {
         // //reset control points
-        // vectorGui.reset() - not really needed currently since fill only uses P1
+        vectorGui.reset()
+        state.vectorProperties.type = state.tool.name
         state.vectorProperties.px1 = state.cursorX
         state.vectorProperties.py1 = state.cursorY
         actionFill(
@@ -57,6 +58,7 @@ function fillSteps() {
           layer: canvas.currentLayer,
           properties: {
             vectorProperties: {
+              type: state.vectorProperties.type,
               px1: state.vectorProperties.px1 - canvas.currentLayer.x,
               py1: state.vectorProperties.py1 - canvas.currentLayer.y,
             },

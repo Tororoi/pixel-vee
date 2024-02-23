@@ -41,6 +41,7 @@ function quadCurveSteps() {
         case 1:
           //reset control points
           vectorGui.reset()
+          state.vectorProperties.type = state.tool.name
           state.vectorProperties.px1 = state.cursorX
           state.vectorProperties.py1 = state.cursorY
           //endpoint starts at same point as startpoint
@@ -171,6 +172,7 @@ function quadCurveSteps() {
           layer: canvas.currentLayer,
           properties: {
             vectorProperties: {
+              type: state.vectorProperties.type,
               px1: state.vectorProperties.px1 - canvas.currentLayer.x,
               py1: state.vectorProperties.py1 - canvas.currentLayer.y,
               px2: state.vectorProperties.px2 - canvas.currentLayer.x,
@@ -223,6 +225,7 @@ function cubicCurveSteps() {
         case 1:
           //reset control points
           vectorGui.reset()
+          state.vectorProperties.type = state.tool.name
           state.vectorProperties.px1 = state.cursorX
           state.vectorProperties.py1 = state.cursorY
           //endpoint starts at same point as startpoint
@@ -368,9 +371,8 @@ function cubicCurveSteps() {
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {
-            // p1LinkedVectors: {},
-            // p2LinkedVectors: {},
             vectorProperties: {
+              type: state.vectorProperties.type,
               px1: state.vectorProperties.px1 - canvas.currentLayer.x,
               py1: state.vectorProperties.py1 - canvas.currentLayer.y,
               px2: state.vectorProperties.px2 - canvas.currentLayer.x,

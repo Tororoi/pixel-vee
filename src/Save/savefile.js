@@ -223,6 +223,7 @@ export async function loadDrawing(jsonFile) {
 
   // Reconstruct the undoStack
   data.history.forEach((action) => {
+    //Handle brush tool
     if (action.properties?.points) {
       // Convert the points array into an array of objects
       let points = []
@@ -235,6 +236,16 @@ export async function loadDrawing(jsonFile) {
       }
       action.properties.points = points
     }
+    //Handle vector actions
+    //For old files that don't have vectorProperties.type
+    if (
+      action.properties?.vectorProperties &&
+      !action.properties?.vectorProperties?.type
+    ) {
+      action.properties.vectorProperties.type = action.tool.name
+    }
+    //TODO: (Low Priority) If quadCurve and cubicCurve are unified into "curve", will need to add logic here to convert those to the correct type
+    //Handle actions with canvas data
     if (action.properties?.canvas) {
       // Convert the stored canvas dataUrl to a canvas
       let tempCanvas = document.createElement("canvas")
@@ -258,7 +269,7 @@ export async function loadDrawing(jsonFile) {
 
       action.properties.canvas = tempCanvas
     }
-    //if action properties has a pastedLayer, match the id with the corresponding layer
+    //Handle actions with a pastedLayer
     if (action.properties?.pastedLayer) {
       let correspondingLayer = canvas.layers.find(
         (layer) => layer.id === action.properties.pastedLayer.id
