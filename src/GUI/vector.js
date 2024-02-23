@@ -234,24 +234,24 @@ function setCursorStyle() {
  */
 function reset() {
   state.vectorProperties = {
-    ...{
-      type: null,
-      px1: null,
-      py1: null,
-      px2: null,
-      py2: null,
-      px3: null,
-      py3: null,
-      px4: null,
-      py4: null,
-      radA: null,
-      radB: null,
-      angle: null,
-      unifiedOffset: null,
-      x1Offset: 0,
-      y1Offset: 0,
-      forceCircle: false,
-    },
+    // ...{
+    //   type: null,
+    //   px1: null,
+    //   py1: null,
+    //   px2: null,
+    //   py2: null,
+    //   px3: null,
+    //   py3: null,
+    //   px4: null,
+    //   py4: null,
+    //   radA: null,
+    //   radB: null,
+    //   angle: null,
+    //   unifiedOffset: null,
+    //   x1Offset: 0,
+    //   y1Offset: 0,
+    //   forceCircle: false,
+    // },
   }
   //reset selectedpoint and collided keys
   canvas.currentVectorIndex = null

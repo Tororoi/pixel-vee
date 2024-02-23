@@ -58,7 +58,7 @@ function fillSteps() {
           layer: canvas.currentLayer,
           properties: {
             vectorProperties: {
-              type: state.vectorProperties.type,
+              ...state.vectorProperties,
               px1: state.vectorProperties.px1 - canvas.currentLayer.x,
               py1: state.vectorProperties.py1 - canvas.currentLayer.y,
             },

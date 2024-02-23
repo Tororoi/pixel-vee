@@ -203,27 +203,20 @@ function ellipseSteps() {
           boundaryBox.yMin -= canvas.currentLayer.y
           boundaryBox.yMax -= canvas.currentLayer.y
         }
+        console.log(state.vectorProperties)
         //store control points for timeline
         addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {
             vectorProperties: {
-              type: state.vectorProperties.type,
+              ...state.vectorProperties,
               px1: state.vectorProperties.px1 - canvas.currentLayer.x,
               py1: state.vectorProperties.py1 - canvas.currentLayer.y,
               px2: state.vectorProperties.px2 - canvas.currentLayer.x,
               py2: state.vectorProperties.py2 - canvas.currentLayer.y,
               px3: state.vectorProperties.px3 - canvas.currentLayer.x,
               py3: state.vectorProperties.py3 - canvas.currentLayer.y,
-              radA: state.vectorProperties.radA,
-              radB: state.vectorProperties.radB,
-              angle: state.vectorProperties.angle,
-              unifiedOffset: state.vectorProperties.unifiedOffset,
-              x1Offset: state.vectorProperties.x1Offset,
-              y1Offset: state.vectorProperties.y1Offset,
-              forceCircle: state.vectorProperties.forceCircle,
-              //add bounding box minima maxima x and y?
             },
             maskArray,
             boundaryBox,

@@ -166,13 +166,15 @@ function quadCurveSteps() {
           boundaryBox.yMin -= canvas.currentLayer.y
           boundaryBox.yMax -= canvas.currentLayer.y
         }
+        console.log(state.vectorProperties)
         //store control points for timeline
         addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {
+            //TODO: (High Priority) store properties in an object defined by vector index, eg. 3: { ... }. When setting currentVectorIndex, also set currentActionIndex so the vector can be modified by accessing state.undoStack[currentActionIndex].properties.vectors[currentVectorIndex].
             vectorProperties: {
-              type: state.vectorProperties.type,
+              ...state.vectorProperties,
               px1: state.vectorProperties.px1 - canvas.currentLayer.x,
               py1: state.vectorProperties.py1 - canvas.currentLayer.y,
               px2: state.vectorProperties.px2 - canvas.currentLayer.x,
@@ -366,13 +368,14 @@ function cubicCurveSteps() {
           boundaryBox.yMin -= canvas.currentLayer.y
           boundaryBox.yMax -= canvas.currentLayer.y
         }
+        console.log(state.vectorProperties)
         //store control points for timeline
         addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {
             vectorProperties: {
-              type: state.vectorProperties.type,
+              ...state.vectorProperties,
               px1: state.vectorProperties.px1 - canvas.currentLayer.x,
               py1: state.vectorProperties.py1 - canvas.currentLayer.y,
               px2: state.vectorProperties.px2 - canvas.currentLayer.x,
