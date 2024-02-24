@@ -166,25 +166,56 @@ function quadCurveSteps() {
           boundaryBox.yMin -= canvas.currentLayer.y
           boundaryBox.yMax -= canvas.currentLayer.y
         }
-        console.log(state.vectorProperties)
+        //generate new unique key for vector based on what already exists in state.vectorLookup object
+        let uniqueVectorKey = 0
+        while (state.vectorLookup[uniqueVectorKey]) {
+          uniqueVectorKey++
+        }
+        state.vectorLookup[uniqueVectorKey] = state.undoStack.length
+        canvas.currentVectorIndex = uniqueVectorKey
         //store control points for timeline
         addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {
-            //TODO: (High Priority) store properties in an object defined by vector index, eg. 3: { ... }. When setting currentVectorIndex, also set currentActionIndex so the vector can be modified by accessing state.undoStack[currentActionIndex].properties.vectors[currentVectorIndex].
-            vectorProperties: {
-              ...state.vectorProperties,
-              px1: state.vectorProperties.px1 - canvas.currentLayer.x,
-              py1: state.vectorProperties.py1 - canvas.currentLayer.y,
-              px2: state.vectorProperties.px2 - canvas.currentLayer.x,
-              py2: state.vectorProperties.py2 - canvas.currentLayer.y,
-              px3: state.vectorProperties.px3 - canvas.currentLayer.x,
-              py3: state.vectorProperties.py3 - canvas.currentLayer.y,
+            // modes: { ...state.tool.modes },
+            // color: { ...swatches.primary.color },
+            // //TODO: (High Priority) store properties in an object defined by vector index, eg. 3: { ... }. When setting currentVectorIndex, also set currentActionIndex so the vector can be modified by accessing state.undoStack[currentActionIndex].properties.vectors[currentVectorIndex].
+            // vectorProperties: {
+            //   ...state.vectorProperties,
+            //   px1: state.vectorProperties.px1 - canvas.currentLayer.x,
+            //   py1: state.vectorProperties.py1 - canvas.currentLayer.y,
+            //   px2: state.vectorProperties.px2 - canvas.currentLayer.x,
+            //   py2: state.vectorProperties.py2 - canvas.currentLayer.y,
+            //   px3: state.vectorProperties.px3 - canvas.currentLayer.x,
+            //   py3: state.vectorProperties.py3 - canvas.currentLayer.y,
+            // },
+            // maskArray,
+            // boundaryBox,
+            // selectionInversed: state.selectionInversed,
+            // hidden: false,
+            // removed: false,
+            vectors: {
+              [uniqueVectorKey]: {
+                index: uniqueVectorKey,
+                modes: { ...state.tool.modes },
+                color: { ...swatches.primary.color },
+                vectorProperties: {
+                  ...state.vectorProperties,
+                  px1: state.vectorProperties.px1 - canvas.currentLayer.x,
+                  py1: state.vectorProperties.py1 - canvas.currentLayer.y,
+                  px2: state.vectorProperties.px2 - canvas.currentLayer.x,
+                  py2: state.vectorProperties.py2 - canvas.currentLayer.y,
+                  px3: state.vectorProperties.px3 - canvas.currentLayer.x,
+                  py3: state.vectorProperties.py3 - canvas.currentLayer.y,
+                },
+                maskArray,
+                boundaryBox,
+                selectionInversed: state.selectionInversed,
+                hidden: false,
+                removed: false,
+              },
             },
-            maskArray,
-            boundaryBox,
-            selectionInversed: state.selectionInversed,
           },
         })
         renderCanvas(canvas.currentLayer)
@@ -368,27 +399,60 @@ function cubicCurveSteps() {
           boundaryBox.yMin -= canvas.currentLayer.y
           boundaryBox.yMax -= canvas.currentLayer.y
         }
-        console.log(state.vectorProperties)
+        //generate new unique key for vector based on what already exists in state.vectorLookup object
+        let uniqueVectorKey = 0
+        while (state.vectorLookup[uniqueVectorKey]) {
+          uniqueVectorKey++
+        }
+        state.vectorLookup[uniqueVectorKey] = state.undoStack.length
+        canvas.currentVectorIndex = uniqueVectorKey
         //store control points for timeline
         addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {
-            vectorProperties: {
-              ...state.vectorProperties,
-              px1: state.vectorProperties.px1 - canvas.currentLayer.x,
-              py1: state.vectorProperties.py1 - canvas.currentLayer.y,
-              px2: state.vectorProperties.px2 - canvas.currentLayer.x,
-              py2: state.vectorProperties.py2 - canvas.currentLayer.y,
-              px3: state.vectorProperties.px3 - canvas.currentLayer.x,
-              py3: state.vectorProperties.py3 - canvas.currentLayer.y,
-              px4: state.vectorProperties.px4 - canvas.currentLayer.x,
-              py4: state.vectorProperties.py4 - canvas.currentLayer.y,
+            // modes: { ...state.tool.modes },
+            // color: { ...swatches.primary.color },
+            // vectorProperties: {
+            //   ...state.vectorProperties,
+            //   px1: state.vectorProperties.px1 - canvas.currentLayer.x,
+            //   py1: state.vectorProperties.py1 - canvas.currentLayer.y,
+            //   px2: state.vectorProperties.px2 - canvas.currentLayer.x,
+            //   py2: state.vectorProperties.py2 - canvas.currentLayer.y,
+            //   px3: state.vectorProperties.px3 - canvas.currentLayer.x,
+            //   py3: state.vectorProperties.py3 - canvas.currentLayer.y,
+            //   px4: state.vectorProperties.px4 - canvas.currentLayer.x,
+            //   py4: state.vectorProperties.py4 - canvas.currentLayer.y,
+            // },
+            // maskArray,
+            // //TODO: (Medium Priority) allow toggling boundary box on/off in vector interface
+            // boundaryBox,
+            // selectionInversed: state.selectionInversed,
+            // hidden: false,
+            // removed: false,
+            vectors: {
+              [uniqueVectorKey]: {
+                index: uniqueVectorKey,
+                modes: { ...state.tool.modes },
+                color: { ...swatches.primary.color },
+                vectorProperties: {
+                  ...state.vectorProperties,
+                  px1: state.vectorProperties.px1 - canvas.currentLayer.x,
+                  py1: state.vectorProperties.py1 - canvas.currentLayer.y,
+                  px2: state.vectorProperties.px2 - canvas.currentLayer.x,
+                  py2: state.vectorProperties.py2 - canvas.currentLayer.y,
+                  px3: state.vectorProperties.px3 - canvas.currentLayer.x,
+                  py3: state.vectorProperties.py3 - canvas.currentLayer.y,
+                  px4: state.vectorProperties.px4 - canvas.currentLayer.x,
+                  py4: state.vectorProperties.py4 - canvas.currentLayer.y,
+                },
+                maskArray,
+                boundaryBox,
+                selectionInversed: state.selectionInversed,
+                hidden: false,
+                removed: false,
+              },
             },
-            maskArray,
-            //TODO: (Medium Priority) allow toggling boundary box on/off in vector interface
-            boundaryBox,
-            selectionInversed: state.selectionInversed,
           },
         })
         renderCanvas(canvas.currentLayer)

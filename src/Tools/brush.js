@@ -108,6 +108,8 @@ function brushSteps() {
         tool: brush,
         layer: canvas.currentLayer,
         properties: {
+          modes: { ...brush.modes },
+          color: { ...swatches.primary.color },
           points: state.points,
           maskArray,
           boundaryBox,

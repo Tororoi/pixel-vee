@@ -80,6 +80,7 @@ export const state = {
     // y1Offset: 0,
     // forceCircle: false,
   },
+  vectorLookup: {}, //for quick lookup of vector indexes eg. "[vectorIndex]": actionIndex. TODO: (High Priority) Vectors must be removed from the lookup table when they are removed from the undoStack (such as by becoming part of the redoStack)
   //for select tool
   selectProperties: {
     px1: null,
@@ -124,6 +125,7 @@ export const state = {
   setBoundaryBox,
   deselect,
   invertSelection,
+  lookupVector,
 }
 
 /**
@@ -199,4 +201,15 @@ function deselect() {
  */
 function invertSelection() {
   state.selectionInversed = !state.selectionInversed
+}
+
+/**
+ *
+ * @param {number} vectorIndex - The index of the vector
+ * @returns {object} - The vector
+ */
+function lookupVector(vectorIndex) {
+  let actionIndex = state.vectorLookup[vectorIndex]
+  let vector = state.undoStack[actionIndex].properties.vectors[vectorIndex]
+  return vector
 }

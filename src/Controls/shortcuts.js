@@ -323,7 +323,8 @@ export function deactivateShortcut(keyCode) {
       if (state.tool.name === "ellipse") {
         if (
           (vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey) &&
-          vectorGui.selectedPoint.xKey !== "px1"
+          vectorGui.selectedPoint.xKey !== "px1" &&
+          state.clicked
         ) {
           //while holding control point, readjust ellipse without having to move cursor.
           //TODO: (Medium Priority) update this functionality to have other radii go back to previous radius value when releasing shift

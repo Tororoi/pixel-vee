@@ -59,7 +59,7 @@ export function changeActionColor(moddedAction, oldColor) {
     ...oldColor,
   } //shallow copy, color must not contain any objects or references as values
   let modifiedColor = {
-    ...moddedAction.color,
+    ...moddedAction.properties.color,
   } //shallow copy, must make deep copy, at least for x, y and properties
   addToTimeline({
     tool: tools.changeColor,
@@ -125,6 +125,7 @@ export function actionClear(layer) {
     i++
     if (action.layer === layer) {
       action.removed = true
+      //TODO: (Low Priority) Should group actions also have each sub action removed set to true?
     }
   })
   addToTimeline({

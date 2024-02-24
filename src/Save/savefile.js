@@ -222,7 +222,11 @@ export async function loadDrawing(jsonFile) {
   }
 
   // Reconstruct the undoStack
-  data.history.forEach((action) => {
+  data.history.forEach((action, index) => {
+    if (!action.index) {
+      //populate index for old files that don't have it
+      action.index = index
+    }
     //Handle brush tool
     if (action.properties?.points) {
       // Convert the points array into an array of objects

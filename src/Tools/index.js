@@ -127,7 +127,8 @@ export const tools = {
   //Utility Tools (does not affect timeline)
   eyedropper,
   grab,
-  /** perspective: {
+  /**
+   * perspective: {
    * set vanishing points.
    * Click to create a vanishing point with visible radius r.
    * Points are always visible even outside canvas area.
@@ -137,5 +138,6 @@ export const tools = {
    * Hold control to view automatic perspective lines and click to make lines permanent.
    * NOTE: First iteration will not support curvilinear perspective. Can be approximated by combining multipoint perspective with drawing bezier curves from point to point
    * TODO: (Low Priority) Add toggle option to snap line/ curve endpoints to vanishing point if made inside vanishing points radius.
-  } */
+  }
+   */
 }

@@ -41,7 +41,7 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
     )
     canvas.rasterGuiCTX.clip("evenodd")
     canvas.rasterGuiCTX.globalAlpha = 0.5
-    canvas.rasterGuiCTX.fillStyle = "rgba(255, 255, 255, 0.1)"
+    canvas.rasterGuiCTX.fillStyle = "rgba(255, 255, 255, 0.2)"
     canvas.rasterGuiCTX.fillRect(
       canvas.xOffset,
       canvas.yOffset,

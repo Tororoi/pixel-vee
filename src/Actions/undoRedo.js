@@ -19,31 +19,76 @@ import {
 //====================================//
 
 /**
- * This sets the action which is then pushed to the undoStack for the command pattern
- * action and redoStack are not reset here in order to allow some functionality based around checking if an action was just added to the timeline. TODO: (Low Priority) refactor to use a different method for this
- * @param {object} actionObject - The action object to be added to the timeline
+ * @description This function is used to render the canvas to the most recent action in the undoStack. It is used in the undo and redo functions.
+ * @param {object} latestAction - The action about to be undone or redone
+ * @param {string} modType - "from" or "to", used to identify undo or redo
  */
-export function addToTimeline(actionObject) {
-  const { tool, color, layer, properties } = actionObject
-  //use current state for variables
-  let snapshot = layer.type === "raster" ? layer.cvs.toDataURL() : null
-  state.action = {
-    tool: { ...tool }, //Needed properties: name, brushType, brushSize, type
-    modes: { ...tool.modes },
-    color: color || { ...swatches.primary.color },
-    layer: layer,
-    properties,
-    hidden: false,
-    removed: false,
-    snapshot,
+function renderToLatestAction(latestAction, modType) {
+  //clear affected layer and render image from most recent action from the affected layer
+  //This avoids having to redraw the timeline for every undo/redo. Close to constant time whereas redrawTimeline is closer to exponential time or worse.
+  let mostRecentActionFromSameLayer = null
+  for (let i = state.undoStack.length - 1; i >= 0; i--) {
+    if (state.undoStack[i].layer === latestAction.layer) {
+      mostRecentActionFromSameLayer = state.undoStack[i]
+      break
+    }
   }
-  state.undoStack.push(state.action)
-  if (state.saveDialogOpen) {
-    setSaveFilesizePreview()
+  if (mostRecentActionFromSameLayer?.snapshot) {
+    clearOffscreenCanvas(mostRecentActionFromSameLayer.layer)
+    let img = new Image()
+    img.src = mostRecentActionFromSameLayer.snapshot
+    img.onload = function () {
+      mostRecentActionFromSameLayer.layer.ctx.drawImage(img, 0, 0)
+      renderCanvas(mostRecentActionFromSameLayer.layer)
+      //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
+      if (
+        latestAction.tool.name === "paste" &&
+        latestAction.properties.confirmed &&
+        modType === "to"
+      ) {
+        //remove temp layer from DOM and restore current layer
+        removeTempLayerFromDOM()
+      }
+      renderLayersToDOM()
+      renderVectorsToDOM()
+      state.reset()
+      vectorGui.render()
+    }
+  } else {
+    //no snapshot
+    if (latestAction.layer.type === "reference") {
+      renderCanvas(latestAction.layer)
+    } else {
+      renderCanvas(latestAction.layer, true)
+      //create snapshot for latest action. Normally actions will have a snapshot
+      //but since snapshots are discarded when saving a file, this code remakes the correct snapshot for an action.
+      //On subsequent undo and redo calls, the timeline will not have to be redrawn for the affected action since it will have a snapshot.
+      if (mostRecentActionFromSameLayer) {
+        let snapshot =
+          mostRecentActionFromSameLayer.layer.type === "raster"
+            ? mostRecentActionFromSameLayer.layer.cvs.toDataURL()
+            : null
+        mostRecentActionFromSameLayer.snapshot = snapshot
+      }
+    }
+    //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
+    if (
+      latestAction.tool.name === "paste" &&
+      latestAction.properties.confirmed &&
+      modType === "to"
+    ) {
+      //remove temp layer from DOM and restore current layer
+      removeTempLayerFromDOM()
+    }
+    renderLayersToDOM()
+    renderVectorsToDOM()
+    state.reset()
+    vectorGui.render()
   }
 }
 
 /**
+ * @description This function is used to handle the modify action. It is used in the undo and redo functions.
  * @param {object} latestAction - The action about to be undone or redone
  * @param {string} modType - "from" or "to", used to identify undo or redo
  */
@@ -51,7 +96,7 @@ function handleModifyAction(latestAction, modType) {
   //for each processed action,
   latestAction.properties.processedActions.forEach((mod) => {
     //find the action in the undoStack
-    const moddedAction = state.undoStack[mod.moddedActionIndex]
+    const moddedAction = state.undoStack[mod.moddedActionIndex] // need to check if this is a vector action and if it is, set the vector properties for the appropriate vector
     //set the vectorProperties to the modded action's vectorProperties
     moddedAction.properties.vectorProperties = {
       ...mod[modType],
@@ -59,17 +104,16 @@ function handleModifyAction(latestAction, modType) {
   })
   const primaryModdedAction =
     state.undoStack[latestAction.properties.moddedActionIndex]
-  // moddedAction.properties.vectorProperties = {
-  //   ...latestAction.properties[modType],
-  // }
-  if (state.tool.name === primaryModdedAction.tool.name) {
-    vectorGui.reset()
+  if (
+    state.tool.name === primaryModdedAction.tool.name &&
+    canvas.currentVectorIndex === primaryModdedAction.index
+  ) {
     vectorGui.setVectorProperties(primaryModdedAction)
-    vectorGui.render()
   }
 }
 
 /**
+ * @description This function is used to handle the clear action. It is used in the undo and redo functions.
  * @param {object} latestAction - The action about to be undone or redone
  */
 function handleClearAction(latestAction) {
@@ -89,6 +133,7 @@ function handleClearAction(latestAction) {
 }
 
 /**
+ * @description This function is used to handle the select action. It is used in the undo and redo functions.
  * @param {object} latestAction - The action about to be undone or redone
  * @param {object} newLatestAction - The action that's about to be the most recent action, if the function is "Undo" ("from")
  * @param {string} modType - "from" or "to", used to identify undo or redo
@@ -143,7 +188,10 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       //set maskset
       // state.maskSet = new Set(newLatestAction.maskArray)
     } else {
-      if (newLatestAction.properties?.selectProperties?.px1 !== null) {
+      if (
+        newLatestAction.properties?.selectProperties &&
+        newLatestAction.properties.selectProperties.px1 !== null
+      ) {
         //set select properties
         state.selectProperties = {
           ...newLatestAction.properties.selectProperties,
@@ -163,7 +211,6 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       }
     }
   }
-  vectorGui.render()
 }
 
 /**
@@ -203,7 +250,6 @@ function handlePasteAction(latestAction, modType) {
         canvas.rasterGuiCVS.height
       )
     }
-    vectorGui.render()
     enableActionsForNoPaste()
   } else if (modType === "to") {
     //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
@@ -233,10 +279,7 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
     switchTool("move")
     disableActionsForPaste()
   } else if (modType === "to") {
-    //if modType is "to" (redoing confirm paste action), basically do the confirmPastedPixels function except use the action properties instead of the clipboard and don't add to timeline. Also don't need to adjust for layer offset
-    removeTempLayerFromDOM()
-    //render
-    vectorGui.render()
+    //if modType is "to" (redoing confirm paste action), enable actions for no temp pasted layer
     enableActionsForNoPaste()
   }
 }
@@ -278,7 +321,6 @@ function handleMoveAction(latestAction, modType) {
     state.selectProperties.py2 += deltaY
     state.setBoundaryBox(state.selectProperties)
   }
-  vectorGui.render()
 }
 
 /**
@@ -288,9 +330,12 @@ function handleMoveAction(latestAction, modType) {
  * @param {string} modType - "from" or "to", used to identify undo or redo
  */
 export function actionUndoRedo(pushStack, popStack, modType) {
-  vectorGui.reset()
   //latest action is the action about to be undone or redone
   let latestAction = popStack[popStack.length - 1]
+  if (canvas.currentVectorIndex === latestAction.index) {
+    //reset vectorGui if the latest action is the current vector
+    vectorGui.reset()
+  }
   //newLatestAction is the action that's about to be the most recent action, if the function is "Undo" ("from")
   let newLatestAction =
     modType === "from" && popStack.length > 1
@@ -305,14 +350,17 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   if (latestAction.tool.name === "modify") {
     handleModifyAction(latestAction, modType)
   } else if (latestAction.tool.name === "changeMode") {
-    state.undoStack[latestAction.properties.moddedActionIndex].modes = {
+    state.undoStack[latestAction.properties.moddedActionIndex].properties.modes = {
       ...latestAction.properties[modType],
     }
   } else if (latestAction.tool.name === "changeColor") {
-    state.undoStack[latestAction.properties.moddedActionIndex].color = {
+    state.undoStack[
+      latestAction.properties.moddedActionIndex
+    ].properties.color = {
       ...latestAction.properties[modType],
     }
   } else if (latestAction.tool.name === "remove") {
+    //TODO: (High Priority) Also check if remove action is removing an action or sub action from a group action. If it is from a group action it will be .properties.vectors[moddedVectorIndex].removed instead of just .removed
     state.undoStack[latestAction.properties.moddedActionIndex].removed =
       latestAction.properties[modType]
   } else if (latestAction.tool.name === "clear") {
@@ -350,7 +398,6 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
     if (modType === "to") {
       vectorGui.setVectorProperties(latestAction)
-      vectorGui.render()
     }
   }
   pushStack.push(popStack.pop())
@@ -358,82 +405,16 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   if (newLatestAction) {
     if (
       newLatestAction.tool.name === state.tool.name &&
-      newLatestAction.tool.type === "vector"
+      newLatestAction.tool.type === "vector" &&
+      canvas.currentVectorIndex === null
     ) {
       //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
-      vectorGui.reset()
       vectorGui.setVectorProperties(newLatestAction)
-      vectorGui.render() //render vectors after removing previous action from undoStack
-    }
-    //if new latest action is confirm paste, render selection
-    if (
-      newLatestAction.tool.name === "paste" &&
-      newLatestAction.properties.confirmed
-    ) {
-      //render
-      vectorGui.render()
     }
   }
-  //clear affected layer and render image from most recent action from the affected layer
-  //This avoids having to redraw the timeline for every undo/redo. Close to constant time whereas redrawTimeline is closer to exponential time or worse.
-  //TODO: (Low Priority) factor out into separate function
-  let mostRecentActionFromSameLayer = null
-  for (let i = state.undoStack.length - 1; i >= 0; i--) {
-    if (state.undoStack[i].layer === latestAction.layer) {
-      mostRecentActionFromSameLayer = state.undoStack[i]
-      break
-    }
-  }
-  if (mostRecentActionFromSameLayer?.snapshot) {
-    clearOffscreenCanvas(mostRecentActionFromSameLayer.layer)
-    let img = new Image()
-    img.src = mostRecentActionFromSameLayer.snapshot
-    img.onload = function () {
-      mostRecentActionFromSameLayer.layer.ctx.drawImage(img, 0, 0)
-      renderCanvas(mostRecentActionFromSameLayer.layer)
-      renderLayersToDOM()
-      renderVectorsToDOM()
-      state.reset()
-      //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
-      if (
-        latestAction.tool.name === "paste" &&
-        latestAction.properties.confirmed &&
-        modType === "to"
-      ) {
-        //remove temp layer from DOM and restore current layer
-        removeTempLayerFromDOM()
-      }
-    }
-  } else {
-    //no snapshot
-    if (latestAction.layer.type === "reference") {
-      renderCanvas(latestAction.layer)
-    } else {
-      renderCanvas(latestAction.layer, true)
-      //set snapshot for latest action. Normally actions will have a snapshot
-      //but since snapshots are discarded when saving a file, this code remakes the correct snapshot for an action.
-      //On subsequent undo and redo calls, the timeline will not have to be redrawn for the affected action since it will have a snapshot.
-      if (mostRecentActionFromSameLayer) {
-        let snapshot =
-          mostRecentActionFromSameLayer.layer.type === "raster"
-            ? mostRecentActionFromSameLayer.layer.cvs.toDataURL()
-            : null
-        mostRecentActionFromSameLayer.snapshot = snapshot
-      }
-    }
-    renderLayersToDOM()
-    renderVectorsToDOM()
-    state.reset()
-    //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
-    if (
-      latestAction.tool.name === "paste" &&
-      latestAction.properties.confirmed &&
-      modType === "to"
-    ) {
-      //remove temp layer from DOM and restore current layer
-      removeTempLayerFromDOM()
-    }
-  }
+  //Render the canvas with the new latest action
+  renderToLatestAction(latestAction, modType)
+  //Recalculate size of file if save dialog is open
   if (state.saveDialogOpen) {
     setSaveFilesizePreview()
   }
@@ -455,5 +436,29 @@ export function handleUndo() {
 export function handleRedo() {
   if (state.redoStack.length >= 1) {
     actionUndoRedo(state.undoStack, state.redoStack, "to")
+  }
+}
+
+/**
+ * This sets the action which is then pushed to the undoStack for the command pattern
+ * action and redoStack are not reset here in order to allow some functionality based around checking if an action was just added to the timeline. TODO: (Low Priority) refactor to use a different method for this
+ * @param {object} actionObject - The action object to be added to the timeline
+ */
+export function addToTimeline(actionObject) {
+  const { tool, layer, properties } = actionObject
+  //use current state for variables
+  let snapshot = layer.type === "raster" ? layer.cvs.toDataURL() : null
+  state.action = {
+    index: state.undoStack.length,
+    tool: { ...tool }, //Needed properties: name, brushType, brushSize, type
+    layer: layer,
+    properties,
+    hidden: false,
+    removed: false,
+    snapshot,
+  }
+  state.undoStack.push(state.action)
+  if (state.saveDialogOpen) {
+    setSaveFilesizePreview()
   }
 }

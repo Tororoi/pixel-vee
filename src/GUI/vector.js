@@ -384,6 +384,7 @@ function renderPath(toolName, vectorProperties, vectorAction = null) {
 /**
  * For each vector action in the undoStack in a given layer, render it
  * @param {object} layer - The layer to render the vectors for
+ * TODO: (High Priority) Get vectors as sub actions of group actions, eg. selectedVector = state.lookupVector(canvas.currentVectorIndex)
  */
 function renderLayerVectors(layer) {
   let selectedVector = null
@@ -561,8 +562,8 @@ export function createActiveIndexesForRender(
       (action.tool.name === "fill" ||
         action.tool.name === "cut" ||
         vectorsSavedProperties[i] ||
-        action.modes?.eraser ||
-        action.modes?.inject)
+        action.properties?.modes?.eraser ||
+        action.properties?.modes?.inject)
     ) {
       activeIndexes.push(i)
     }

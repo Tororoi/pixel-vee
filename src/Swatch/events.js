@@ -61,8 +61,8 @@ export function setColor(r, g, b, a, target) {
     target.color = color
     target.style.backgroundColor = color.color
     if (target.vector) {
-      let oldColor = { ...target.vector.color }
-      target.vector.color = color
+      let oldColor = { ...target.vector.properties.color }
+      target.vector.properties.color = color
       renderCanvas(target.vector.layer, true)
       changeActionColor(target.vector, oldColor)
       state.action = null

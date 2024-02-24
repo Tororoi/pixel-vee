@@ -45,7 +45,7 @@ export const createColorElement = (action) => {
   color.ariaLabel = "Action color"
   let colorSwatch = document.createElement("div")
   colorSwatch.className = "swatch"
-  colorSwatch.style.backgroundColor = action.color.color
+  colorSwatch.style.backgroundColor = action.properties.color.color
   color.appendChild(colorSwatch)
   return color
 }

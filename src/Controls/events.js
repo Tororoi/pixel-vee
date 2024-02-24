@@ -237,11 +237,11 @@ function handlePointerUp(e) {
     if (
       ["fill", "quadCurve", "cubicCurve", "ellipse"].includes(state.tool.name)
     ) {
-      if (state.action.tool.type === "vector") {
-        canvas.currentVectorIndex = state.undoStack.indexOf(state.action)
-      } else if (state.action.tool.type === "modify") {
-        canvas.currentVectorIndex = state.action.properties.moddedActionIndex
-      }
+      // if (state.action.tool.type === "vector") {
+      //   canvas.currentVectorIndex = state.undoStack.indexOf(state.action)
+      // } else if (state.action.tool.type === "modify") {
+      //   canvas.currentVectorIndex = state.action.properties.moddedActionIndex
+      // }
       renderVectorsToDOM()
     }
     state.action = null

@@ -16,8 +16,8 @@ import {
 export const renderVectorsToDOM = () => {
   dom.vectorsThumbnails.innerHTML = ""
   state.undoStack.forEach((action, index) => {
-    if (isValidAction(action)) {
-      action.index = index
+    if (isValidVectorAction(action)) {
+      //TODO: (High Priority) For each vector in the group action, render the vector as long as it is not removed
       renderVectorElement(action)
     }
   })
@@ -35,7 +35,7 @@ export const renderVectorsToDOM = () => {
  * @param {object} action - The action to be checked
  * @returns {boolean} - True if the action should be rendered
  */
-const isValidAction = (action) =>
+const isValidVectorAction = (action) =>
   !action.removed &&
   !action.layer?.removed &&
   action.tool.type === "vector" &&
@@ -56,8 +56,8 @@ const renderVectorElement = (action) => {
   //left side icons
   const left = document.createElement("div")
   left.className = "left"
-  Object.keys(action.modes).forEach((modeKey) => {
-    const mode = createModeElement(modeKey, action.modes[modeKey])
+  Object.keys(action.properties.modes).forEach((modeKey) => {
+    const mode = createModeElement(modeKey, action.properties.modes[modeKey])
     left.appendChild(mode)
   })
   vectorElement.appendChild(left)

@@ -53,18 +53,47 @@ function fillSteps() {
           boundaryBox.yMin -= canvas.currentLayer.y
           boundaryBox.yMax -= canvas.currentLayer.y
         }
+        //generate new unique key for vector based on what already exists in state.vectorLookup object
+        let uniqueVectorKey = 0
+        while (state.vectorLookup[uniqueVectorKey]) {
+          uniqueVectorKey++
+        }
+        state.vectorLookup[uniqueVectorKey] = state.undoStack.length
+        canvas.currentVectorIndex = uniqueVectorKey
+        //store control points for timeline
         addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {
-            vectorProperties: {
-              ...state.vectorProperties,
-              px1: state.vectorProperties.px1 - canvas.currentLayer.x,
-              py1: state.vectorProperties.py1 - canvas.currentLayer.y,
+            // modes: { ...state.tool.modes },
+            // color: { ...swatches.primary.color },
+            // vectorProperties: {
+            //   ...state.vectorProperties,
+            //   px1: state.vectorProperties.px1 - canvas.currentLayer.x,
+            //   py1: state.vectorProperties.py1 - canvas.currentLayer.y,
+            // },
+            // maskArray,
+            // boundaryBox,
+            // selectionInversed: state.selectionInversed,
+            // hidden: false,
+            // removed: false,
+            vectors: {
+              [uniqueVectorKey]: {
+                index: uniqueVectorKey,
+                modes: { ...state.tool.modes },
+                color: { ...swatches.primary.color },
+                vectorProperties: {
+                  ...state.vectorProperties,
+                  px1: state.vectorProperties.px1 - canvas.currentLayer.x,
+                  py1: state.vectorProperties.py1 - canvas.currentLayer.y,
+                },
+                maskArray,
+                boundaryBox,
+                selectionInversed: state.selectionInversed,
+                hidden: false,
+                removed: false,
+              },
             },
-            maskArray,
-            boundaryBox,
-            selectionInversed: state.selectionInversed,
           },
         })
         renderCanvas(canvas.currentLayer)

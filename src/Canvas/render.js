@@ -68,6 +68,7 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
       !action.removed &&
       ["raster", "vector"].includes(action.tool.type)
     ) {
+      //TODO: (High Priority) Will need a way to handle group actions that create multiple vectors. Each vector has a hidden and removed property that needs to be checked.
       performAction(action, betweenCtx)
     }
     if (activeIndexes) {
@@ -181,36 +182,18 @@ export function performAction(action, betweenCtx = null) {
           p.y + offsetY,
           boundaryBox,
           action.properties.selectionInversed,
-          action.color,
+          action.properties.color,
           brushStamps[action.tool.brushType][p.brushSize][brushDirection],
           p.brushSize,
           action.layer,
-          action.modes,
+          action.properties.modes,
           mask,
           seen,
           betweenCtx
         )
         previousX = p.x + offsetX
         previousY = p.y + offsetY
-        //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster:
-        // action.layer.ctx.fillStyle = action.color
-        // let x = p.x
-        // let y = p.y
-        // const key = `${x},${y}`
-        // if (!seen.has(key)) {
-        //   seen.add(key)
-        //   switch (action.mode) {
-        //     case "erase":
-        //       action.layer.ctx.clearRect(x, y, 1, 1)
-        //       break
-        //     case "inject":
-        //       action.layer.ctx.clearRect(x, y, 1, 1)
-        //       action.layer.ctx.fillRect(x, y, 1, 1)
-        //       break
-        //     default:
-        //       action.layer.ctx.fillRect(x, y, 1, 1)
-        //   }
-        // }
+        //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster. But it sacrifices flexibility with points.
       }
       break
     }
@@ -220,9 +203,9 @@ export function performAction(action, betweenCtx = null) {
         action.properties.vectorProperties.py1 + offsetY,
         boundaryBox,
         action.properties.selectionInversed,
-        action.color,
+        action.properties.color,
         action.layer,
-        action.modes,
+        action.properties.modes,
         null, //maskSet made from action.properties.maskArray
         betweenCtx
       )
@@ -235,9 +218,9 @@ export function performAction(action, betweenCtx = null) {
         action.properties.py2 + offsetY,
         boundaryBox,
         action.properties.selectionInversed,
-        action.color,
+        action.properties.color,
         action.layer,
-        action.modes,
+        action.properties.modes,
         brushStamps[action.tool.brushType][action.tool.brushSize],
         action.tool.brushSize,
         null, //maskSet made from action.properties.maskArray
@@ -256,9 +239,9 @@ export function performAction(action, betweenCtx = null) {
         boundaryBox,
         action.properties.selectionInversed,
         3,
-        action.color,
+        action.properties.color,
         action.layer,
-        action.modes,
+        action.properties.modes,
         brushStamps[action.tool.brushType][action.tool.brushSize],
         action.tool.brushSize,
         null, //maskSet made from action.properties.maskArray
@@ -278,9 +261,9 @@ export function performAction(action, betweenCtx = null) {
         boundaryBox,
         action.properties.selectionInversed,
         4,
-        action.color,
+        action.properties.color,
         action.layer,
-        action.modes,
+        action.properties.modes,
         brushStamps[action.tool.brushType][action.tool.brushSize],
         action.tool.brushSize,
         null, //maskSet made from action.properties.maskArray
@@ -300,9 +283,9 @@ export function performAction(action, betweenCtx = null) {
         action.properties.vectorProperties.forceCircle,
         boundaryBox,
         action.properties.selectionInversed,
-        action.color,
+        action.properties.color,
         action.layer,
-        action.modes,
+        action.properties.modes,
         brushStamps[action.tool.brushType][action.tool.brushSize],
         action.tool.brushSize,
         action.properties.vectorProperties.angle,
