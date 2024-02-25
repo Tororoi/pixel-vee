@@ -12,9 +12,11 @@ import { addToTimeline } from "./undoRedo.js"
 /**
  * Modify action in the timeline
  * Only good for vector parameters
- * @param {object} moddedAction - The vector action that was modified
+ * @param {object} moddedVector - The vector action that was modified
  */
-export function modifyVectorAction(moddedAction) {
+export function modifyVectorAction(moddedVector) {
+  const moddedActionIndex = state.vectorLookup[moddedVector.index]
+  const moddedAction = state.undoStack[moddedActionIndex]
   //loop through the object state.vectorsSavedProperties and for each key which represents an action index and value which is a shallow object with various properties, create an object with properties moddedActionIndex, from (the saved properties), and to (the new properties found on state.undoStack[vectorIndex].properties.vectorProperties)
   let processedActions = []
 
@@ -23,14 +25,17 @@ export function modifyVectorAction(moddedAction) {
     let fromProperties = { ...state.vectorsSavedProperties[vectorIndex] }
 
     // Extract the new properties
+    let actionIndex = state.vectorLookup[vectorIndex]
     let toProperties = {
-      ...state.undoStack[vectorIndex].properties.vectorProperties,
+      ...state.undoStack[actionIndex].properties.vectors[vectorIndex]
+        .vectorProperties,
     }
 
     // Create the new object with the required properties
     // Add the new object to the processedActions array
     processedActions.push({
-      moddedActionIndex: vectorIndex,
+      moddedActionIndex: actionIndex,
+      moddedVectorIndex: vectorIndex,
       from: fromProperties,
       to: toProperties,
     })
@@ -43,6 +48,7 @@ export function modifyVectorAction(moddedAction) {
     layer: moddedAction.layer,
     properties: {
       moddedActionIndex: moddedAction.index,
+      moddedVectorIndex: moddedVector.index,
       processedActions,
     },
   })
