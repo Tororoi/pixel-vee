@@ -72,9 +72,9 @@ function fillSteps() {
             //   px1: state.vectorProperties.px1 - canvas.currentLayer.x,
             //   py1: state.vectorProperties.py1 - canvas.currentLayer.y,
             // },
-            // maskArray,
-            // boundaryBox,
-            // selectionInversed: state.selectionInversed,
+            maskArray,
+            boundaryBox,
+            selectionInversed: state.selectionInversed,
             // hidden: false,
             // removed: false,
             vectors: {
@@ -87,9 +87,9 @@ function fillSteps() {
                   px1: state.vectorProperties.px1 - canvas.currentLayer.x,
                   py1: state.vectorProperties.py1 - canvas.currentLayer.y,
                 },
-                maskArray,
-                boundaryBox,
-                selectionInversed: state.selectionInversed,
+                // maskArray,
+                // boundaryBox,
+                // selectionInversed: state.selectionInversed,
                 hidden: false,
                 removed: false,
               },
@@ -122,7 +122,10 @@ function fillSteps() {
  * How should fill vector be linked, since it won't be via positioning?
  */
 export function adjustFillSteps() {
-  let currentVector = state.undoStack[canvas.currentVectorIndex]
+  let currentAction =
+    state.undoStack[state.vectorLookup[canvas.currentVectorIndex]]
+  let currentVector =
+    currentAction.properties.vectors[canvas.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.selectedCollisionPresent) {
@@ -133,9 +136,10 @@ export function adjustFillSteps() {
           yKey: vectorGui.collidedKeys.yKey,
         }
         state.vectorsSavedProperties[canvas.currentVectorIndex] = {
-          ...currentVector.properties.vectorProperties,
+          ...currentVector.vectorProperties,
         }
         updateVectorProperties(
+          currentAction,
           currentVector,
           state.cursorX,
           state.cursorY,
@@ -144,11 +148,9 @@ export function adjustFillSteps() {
         )
         state.activeIndexes = createActiveIndexesForRender(
           currentVector,
-          state.vectorsSavedProperties,
-          state.undoStack
+          state.vectorsSavedProperties
         )
-        renderCanvas(currentVector.layer, true, state.activeIndexes, true)
-        // renderCanvas(currentVector.layer, true)
+        renderCanvas(currentAction.layer, true, state.activeIndexes, true)
       }
       break
     case "pointermove":
@@ -157,14 +159,14 @@ export function adjustFillSteps() {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         updateVectorProperties(
+          currentAction,
           currentVector,
           state.cursorX,
           state.cursorY,
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        renderCanvas(currentVector.layer, true, state.activeIndexes)
-        // renderCanvas(currentVector.layer, true)
+        renderCanvas(currentAction.layer, true, state.activeIndexes)
       }
       break
     case "pointerup":
@@ -172,14 +174,14 @@ export function adjustFillSteps() {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         updateVectorProperties(
+          currentAction,
           currentVector,
           state.cursorX,
           state.cursorY,
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        renderCanvas(currentVector.layer, true, state.activeIndexes)
-        // renderCanvas(currentVector.layer, true)
+        renderCanvas(currentAction.layer, true, state.activeIndexes)
         modifyVectorAction(currentVector)
         vectorGui.selectedPoint = {
           xKey: null,

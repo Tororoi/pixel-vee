@@ -57,17 +57,17 @@ export const vectorGui = {
     }
     this.linkedVectors = {}
   },
-  addLinkedVector(vectorAction, xKey) {
+  addLinkedVector(vector, xKey) {
     if (this.selectedPoint.xKey) {
       return
     }
-    if (!this.linkedVectors[vectorAction.index]) {
-      this.linkedVectors[vectorAction.index] = {}
+    if (!this.linkedVectors[vector.index]) {
+      this.linkedVectors[vector.index] = {}
     }
-    this.linkedVectors[vectorAction.index][xKey] = true
+    this.linkedVectors[vector.index][xKey] = true
   },
-  removeLinkedVector(vectorAction) {
-    delete this.linkedVectors[vectorAction.index]
+  removeLinkedVector(vector) {
+    delete this.linkedVectors[vector.index]
   },
   // drawSelectOutline,
   render,
@@ -81,7 +81,8 @@ export const vectorGui = {
  * @param {number} radius - (Float)
  * @param {boolean} modify - if true, check for collision with cursor and modify radius
  * @param {number} offset - (Integer)
- * @param {object} vectorAction - The vector action to be rendered
+ * @param {object} action - The vector action to be rendered
+ * @param {object} vector - The vector to be rendered
  */
 function drawControlPoints(
   vectorProperties,
@@ -89,7 +90,8 @@ function drawControlPoints(
   radius,
   modify = false,
   offset = 0,
-  vectorAction = null
+  action = null,
+  vector = null
 ) {
   for (let keys of pointsKeys) {
     const point = {
@@ -99,7 +101,7 @@ function drawControlPoints(
 
     if (point.x === null || point.y === null) continue
 
-    handleCollisionAndDraw(keys, point, radius, modify, offset, vectorAction)
+    handleCollisionAndDraw(keys, point, radius, modify, offset, action, vector)
   }
 
   setCursorStyle()
@@ -112,7 +114,8 @@ function drawControlPoints(
  * @param {number} radius - (Float)
  * @param {boolean} modify - if true, check for collision with cursor and modify radius
  * @param {number} offset - (Float)
- * @param {object} vectorAction - The vector action to be rendered
+ * @param {object} action - The vector action to be rendered
+ * @param {object} vector - The vector to be rendered
  */
 function handleCollisionAndDraw(
   keys,
@@ -120,14 +123,15 @@ function handleCollisionAndDraw(
   radius,
   modify,
   offset,
-  vectorAction
+  action,
+  vector
 ) {
   let r = state.touch ? radius * 2 : radius
-  const xOffset = vectorAction ? vectorAction.layer.x : 0
-  const yOffset = vectorAction ? vectorAction.layer.y : 0
+  const xOffset = action ? action.layer.x : 0
+  const yOffset = action ? action.layer.y : 0
 
   if (modify) {
-    if (vectorGui.selectedPoint.xKey === keys.x && !vectorAction) {
+    if (vectorGui.selectedPoint.xKey === keys.x && !vector) {
       r = radius * 2.125 // increase  radius of fill to match stroked circle
       vectorGui.setCollision(keys)
     } else if (
@@ -140,16 +144,16 @@ function handleCollisionAndDraw(
       )
     ) {
       //if cursor is colliding with a control point not on the selected vector, set collided keys specifically for collided vector
-      if (vectorAction) {
+      if (vector) {
         if (keys.x === "px1" || keys.x === "px2") {
-          canvas.collidedVectorIndex = vectorAction.index
+          canvas.collidedVectorIndex = vector.index
           //Only allow link if active point for selection is p1 or p2
           let activeKey =
             vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey
           let allowLink = ["px1", "px2"].includes(activeKey)
           if (allowLink) {
             vectorGui.setOtherVectorCollision(keys)
-            vectorGui.addLinkedVector(vectorAction, keys.x)
+            vectorGui.addLinkedVector(vector, keys.x)
             if (state.clickCounter === 0) r = radius * 2.125
           } else if (!vectorGui.selectedPoint.xKey) {
             if (state.clickCounter === 0) r = radius * 2.125
@@ -158,7 +162,7 @@ function handleCollisionAndDraw(
           (keys.x === "px3" || keys.x === "px4") &&
           !vectorGui.selectedPoint.xKey
         ) {
-          canvas.collidedVectorIndex = vectorAction.index
+          canvas.collidedVectorIndex = vector.index
           //only set new radius if selected vector is not a new vector being drawn
           if (state.clickCounter === 0) r = radius * 2.125
         }
@@ -168,20 +172,20 @@ function handleCollisionAndDraw(
       }
     }
     //else if selectedpoint is p3 or p4, setLinkedVector if vector's control point coords are the same as the selected point
-    if (vectorGui.collidedKeys.xKey === "px3" && vectorAction) {
+    if (vectorGui.collidedKeys.xKey === "px3" && vector) {
       if (
         point.x === state.vectorProperties.px1 &&
         point.y === state.vectorProperties.py1
       ) {
-        vectorGui.addLinkedVector(vectorAction, keys.x)
+        vectorGui.addLinkedVector(vector, keys.x)
       }
     }
-    if (vectorGui.collidedKeys.xKey === "px4" && vectorAction) {
+    if (vectorGui.collidedKeys.xKey === "px4" && vector) {
       if (
         point.x === state.vectorProperties.px2 &&
         point.y === state.vectorProperties.py2
       ) {
-        vectorGui.addLinkedVector(vectorAction, keys.x)
+        vectorGui.addLinkedVector(vector, keys.x)
       }
     }
   }
@@ -328,19 +332,25 @@ function render() {
  * Render based on the current tool.
  * @param {string} toolName - The name of the tool
  * @param {object} vectorProperties - The properties of the vector
- * @param {object} vectorAction - The vector action to be rendered
+ * @param {object|null} action - The vector action to be rendered
+ * @param {object|null} vector - The vector action to base the properties on
  */
-function renderControlPoints(toolName, vectorProperties, vectorAction = null) {
+function renderControlPoints(
+  toolName,
+  vectorProperties,
+  action = null,
+  vector = null
+) {
   switch (toolName) {
     case "fill":
-      renderFillVector(vectorProperties, vectorAction)
+      renderFillVector(vectorProperties, action, vector)
       break
     case "quadCurve":
     case "cubicCurve":
-      renderCurveVector(vectorProperties, vectorAction)
+      renderCurveVector(vectorProperties, action, vector)
       break
     case "ellipse":
-      renderEllipseVector(vectorProperties, vectorAction)
+      renderEllipseVector(vectorProperties, action, vector)
       if (vectorProperties.x1Offset || vectorProperties.y1Offset) {
         renderOffsetEllipseVector(vectorProperties)
       }
@@ -358,19 +368,20 @@ function renderControlPoints(toolName, vectorProperties, vectorAction = null) {
 /**
  * @param {string} toolName - The name of the tool
  * @param {object} vectorProperties - The properties of the vector
- * @param {object} vectorAction - The vector action to be rendered
+ * @param {object|null} action - The vector's action
+ * @param {object|null} vector - The vector to be rendered
  */
-function renderPath(toolName, vectorProperties, vectorAction = null) {
+function renderPath(toolName, vectorProperties, action = null) {
   switch (toolName) {
     case "fill":
       // renderFillVector(state.vectorProperties)
       break
     case "quadCurve":
     case "cubicCurve":
-      renderCurvePath(vectorProperties, vectorAction)
+      renderCurvePath(vectorProperties, action)
       break
     case "ellipse":
-      renderEllipsePath(vectorProperties, vectorAction)
+      renderEllipsePath(vectorProperties, action)
       break
     case "move":
       // if (canvas.currentLayer.type === "reference") {
@@ -391,6 +402,7 @@ function renderLayerVectors(layer) {
   let selectedVectorAction = null
   let selectedVector = null
   if (canvas.currentVectorIndex !== null) {
+    console.log(canvas.currentVectorIndex, state.vectorLookup)
     selectedVectorAction =
       state.undoStack[state.vectorLookup[canvas.currentVectorIndex]]
     selectedVector =
@@ -455,7 +467,8 @@ function renderLayerVectors(layer) {
           renderControlPoints(
             vector.vectorProperties.type,
             vector.vectorProperties,
-            action
+            action,
+            vector
           )
         }
       }
@@ -508,11 +521,14 @@ export function updateLinkedVectors(
   )) {
     let x = state.cursorX
     let y = state.cursorY
-    const linkedVector = state.undoStack[linkedVectorIndex]
+    const linkedVectorAction =
+      state.undoStack[state.vectorLookup[linkedVectorIndex]]
+    const linkedVector =
+      linkedVectorAction.properties.vectors[linkedVectorIndex]
 
     if (saveVectorProperties) {
       state.vectorsSavedProperties[linkedVectorIndex] = {
-        ...linkedVector.properties.vectorProperties,
+        ...linkedVector.vectorProperties,
       }
     } else if (!state.vectorsSavedProperties[linkedVectorIndex]) {
       //prevent linking vectors during pointermove
@@ -526,6 +542,7 @@ export function updateLinkedVectors(
       currentDeltaY,
       currentDeltaAngle,
       vectorGui.selectedPoint.xKey,
+      linkedVectorAction,
       linkedVector,
       linkedPoints,
       savedProperties,
@@ -535,11 +552,17 @@ export function updateLinkedVectors(
 }
 
 /**
+ * @param {object} currentAction - The action that contains the vector
  * @param {object} currentVector - The vector action to update
  * @param {number} x - The x coordinate of new endpoint
  * @param {number} y - The y coordinate of new endpoint
  */
-export function updateLockedCurrentVectorControlHandle(currentVector, x, y) {
+export function updateLockedCurrentVectorControlHandle(
+  currentAction,
+  currentVector,
+  x,
+  y
+) {
   const savedProperties =
     state.vectorsSavedProperties[canvas.currentVectorIndex]
   if (vectorGui.selectedPoint.xKey === "px1") {
@@ -548,14 +571,28 @@ export function updateLockedCurrentVectorControlHandle(currentVector, x, y) {
     const yDiff = savedProperties.py1 - savedProperties.py3
     state.vectorProperties.px3 = x - xDiff
     state.vectorProperties.py3 = y - yDiff
-    updateVectorProperties(currentVector, x - xDiff, y - yDiff, "px3", "py3")
+    updateVectorProperties(
+      currentAction,
+      currentVector,
+      x - xDiff,
+      y - yDiff,
+      "px3",
+      "py3"
+    )
   } else if (vectorGui.selectedPoint.xKey === "px2") {
     //update px4 and py4
     const xDiff = savedProperties.px2 - savedProperties.px4
     const yDiff = savedProperties.py2 - savedProperties.py4
     state.vectorProperties.px4 = x - xDiff
     state.vectorProperties.py4 = y - yDiff
-    updateVectorProperties(currentVector, x - xDiff, y - yDiff, "px4", "py4")
+    updateVectorProperties(
+      currentAction,
+      currentVector,
+      x - xDiff,
+      y - yDiff,
+      "px4",
+      "py4"
+    )
   }
 }
 
@@ -565,36 +602,32 @@ export function updateLockedCurrentVectorControlHandle(currentVector, x, y) {
  * Can't simply save images and draw them for the betweenCvs because this will ignore actions using erase or inject modes.
  * @param {object} currentVector - The vector action to base the active indexes on
  * @param {object} vectorsSavedProperties - will have at least one entry, corresponding to currentVector
- * @param {Array} undoStack - The undo stack
  * @returns {Array} activeIndexes
  */
 export function createActiveIndexesForRender(
   currentVector,
-  vectorsSavedProperties,
-  undoStack
+  vectorsSavedProperties
 ) {
-  const vectorsSavedPropertiesKeys = Object.keys(vectorsSavedProperties).map(
-    (key) => parseInt(key)
-  )
+  const vectorsSavedPropertiesActionKeys = Object.keys(
+    vectorsSavedProperties
+  ).map((key) => state.vectorLookup[key])
+  let startActionIndex =
+    state.vectorLookup[Object.keys(vectorsSavedProperties)[0]]
+  let currentAction = state.undoStack[state.vectorLookup[currentVector.index]]
   let activeIndexes = []
 
-  // Check the conditions only if currentVector's tool is not 'fill'
-  // if (currentVector.tool.name !== "fill") {
-  for (let i = vectorsSavedPropertiesKeys[0]; i < undoStack.length; i++) {
-    let action = undoStack[i]
+  for (let i = startActionIndex; i < state.undoStack.length; i++) {
+    let action = state.undoStack[i]
     if (
-      action.layer === currentVector.layer &&
+      action.layer === currentAction.layer &&
       (action.tool.name === "fill" ||
         action.tool.name === "cut" ||
-        vectorsSavedProperties[i] ||
         action.properties?.modes?.eraser ||
-        action.properties?.modes?.inject)
+        action.properties?.modes?.inject ||
+        vectorsSavedPropertiesActionKeys.includes(i))
     ) {
       activeIndexes.push(i)
     }
   }
-  // } else {
-  //   activeIndexes.push(vectorsSavedPropertiesKeys[0])
-  // }
   return activeIndexes
 }

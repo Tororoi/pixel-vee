@@ -4,15 +4,16 @@ import { drawControlPointHandle } from "../utils/guiHelpers.js"
 
 /**
  * @param {object} vectorProperties - The properties of the vector
- * @param {object} vectorAction - The vector action to be rendered
+ * @param {object} action - The vector action to be rendered
+ * @param {object} vector - The vector to be rendered
  */
-export function renderCurveVector(vectorProperties, vectorAction) {
+export function renderCurveVector(vectorProperties, action, vector) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
-  const xOffset = vectorAction
-    ? vectorAction.layer.x + canvas.xOffset
+  const xOffset = action
+    ? action.layer.x + canvas.xOffset
     : canvas.xOffset
-  const yOffset = vectorAction
-    ? vectorAction.layer.y + canvas.yOffset
+  const yOffset = action
+    ? action.layer.y + canvas.yOffset
     : canvas.yOffset
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
@@ -42,7 +43,7 @@ export function renderCurveVector(vectorProperties, vectorAction) {
     { x: "px4", y: "py4" },
   ]
 
-  if (!vectorAction) {
+  if (!action) {
     vectorGui.drawControlPoints(
       vectorProperties,
       pointsKeys,
@@ -61,7 +62,8 @@ export function renderCurveVector(vectorProperties, vectorAction) {
     circleRadius / 2,
     true, // modify
     0,
-    vectorAction
+    action,
+    vector
   )
   // Fill points
   canvas.vectorGuiCTX.fill()
@@ -69,15 +71,15 @@ export function renderCurveVector(vectorProperties, vectorAction) {
 
 /**
  * @param {object} vectorProperties - The properties of the vector
- * @param {object} vectorAction - The vector action to be rendered
+ * @param {object} action - The vector action to be rendered
  */
-export function renderCurvePath(vectorProperties, vectorAction) {
+export function renderCurvePath(vectorProperties, action) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
-  const xOffset = vectorAction
-    ? vectorAction.layer.x + canvas.xOffset
+  const xOffset = action
+    ? action.layer.x + canvas.xOffset
     : canvas.xOffset
-  const yOffset = vectorAction
-    ? vectorAction.layer.y + canvas.yOffset
+  const yOffset = action
+    ? action.layer.y + canvas.yOffset
     : canvas.yOffset
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8

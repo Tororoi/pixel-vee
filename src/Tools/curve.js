@@ -426,12 +426,10 @@ function cubicCurveSteps() {
             //   px4: state.vectorProperties.px4 - canvas.currentLayer.x,
             //   py4: state.vectorProperties.py4 - canvas.currentLayer.y,
             // },
-            // maskArray,
+            maskArray,
             // //TODO: (Medium Priority) allow toggling boundary box on/off in vector interface
-            // boundaryBox,
-            // selectionInversed: state.selectionInversed,
-            // hidden: false,
-            // removed: false,
+            boundaryBox,
+            selectionInversed: state.selectionInversed,
             vectors: {
               [uniqueVectorKey]: {
                 index: uniqueVectorKey,
@@ -448,9 +446,9 @@ function cubicCurveSteps() {
                   px4: state.vectorProperties.px4 - canvas.currentLayer.x,
                   py4: state.vectorProperties.py4 - canvas.currentLayer.y,
                 },
-                maskArray,
-                boundaryBox,
-                selectionInversed: state.selectionInversed,
+                // maskArray, //default to action's maskArray
+                // boundaryBox, //default to action's boundaryBox
+                // selectionInversed: state.selectionInversed, //default to action's selectionInversed
                 hidden: false,
                 removed: false,
               },
@@ -480,7 +478,10 @@ function adjustCurveSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
-  let currentVector = state.undoStack[canvas.currentVectorIndex]
+  let currentAction =
+    state.undoStack[state.vectorLookup[canvas.currentVectorIndex]]
+  let currentVector =
+    currentAction.properties.vectors[canvas.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
@@ -491,10 +492,11 @@ function adjustCurveSteps() {
           yKey: vectorGui.collidedKeys.yKey,
         }
         state.vectorsSavedProperties[canvas.currentVectorIndex] = {
-          ...currentVector.properties.vectorProperties,
+          ...currentVector.vectorProperties,
         }
-        //save linked vectors tooß
+        //save linked vectors too
         updateVectorProperties(
+          currentAction,
           currentVector,
           state.cursorX,
           state.cursorY,
@@ -503,6 +505,7 @@ function adjustCurveSteps() {
         )
         if (state.tool.options.hold?.active) {
           updateLockedCurrentVectorControlHandle(
+            currentAction,
             currentVector,
             state.cursorX,
             state.cursorY
@@ -513,10 +516,9 @@ function adjustCurveSteps() {
         }
         state.activeIndexes = createActiveIndexesForRender(
           currentVector,
-          state.vectorsSavedProperties,
-          state.undoStack
+          state.vectorsSavedProperties
         )
-        renderCanvas(currentVector.layer, true, state.activeIndexes, true)
+        renderCanvas(currentAction.layer, true, state.activeIndexes, true)
       }
       break
     case "pointermove":
@@ -524,6 +526,7 @@ function adjustCurveSteps() {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         updateVectorProperties(
+          currentAction,
           currentVector,
           state.cursorX,
           state.cursorY,
@@ -532,6 +535,7 @@ function adjustCurveSteps() {
         )
         if (state.tool.options.hold?.active) {
           updateLockedCurrentVectorControlHandle(
+            currentAction,
             currentVector,
             state.cursorX,
             state.cursorY
@@ -540,7 +544,7 @@ function adjustCurveSteps() {
         if (state.tool.options.link?.active) {
           updateLinkedVectors(currentVector)
         }
-        renderCanvas(currentVector.layer, true, state.activeIndexes)
+        renderCanvas(currentAction.layer, true, state.activeIndexes)
       }
       break
     case "pointerup":
@@ -548,6 +552,7 @@ function adjustCurveSteps() {
         state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
         updateVectorProperties(
+          currentAction,
           currentVector,
           state.cursorX,
           state.cursorY,
@@ -556,6 +561,7 @@ function adjustCurveSteps() {
         )
         if (state.tool.options.hold?.active) {
           updateLockedCurrentVectorControlHandle(
+            currentAction,
             currentVector,
             state.cursorX,
             state.cursorY
@@ -574,18 +580,24 @@ function adjustCurveSteps() {
         ) {
           //snap selected point to collidedVector's control point
           if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
-            let collidedVector = state.undoStack[canvas.collidedVectorIndex]
+            let collidedVectorAction =
+              state.undoStack[state.vectorLookup[canvas.collidedVectorIndex]]
+            let collidedVector =
+              collidedVectorAction.properties.vectors[
+                canvas.collidedVectorIndex
+              ]
             let snappedToX =
-              collidedVector.properties.vectorProperties[
+              collidedVector.vectorProperties[
                 vectorGui.otherCollidedKeys.xKey
-              ] + collidedVector.layer.x
+              ] + collidedVectorAction.layer.x
             let snappedToY =
-              collidedVector.properties.vectorProperties[
+              collidedVector.vectorProperties[
                 vectorGui.otherCollidedKeys.yKey
-              ] + collidedVector.layer.y
+              ] + collidedVectorAction.layer.y
             state.vectorProperties[vectorGui.selectedPoint.xKey] = snappedToX
             state.vectorProperties[vectorGui.selectedPoint.yKey] = snappedToY
             updateVectorProperties(
+              currentAction,
               currentVector,
               snappedToX,
               snappedToY,
@@ -594,6 +606,7 @@ function adjustCurveSteps() {
             )
             if (state.tool.options.hold?.active) {
               updateLockedCurrentVectorControlHandle(
+                currentAction,
                 currentVector,
                 snappedToX,
                 snappedToY
@@ -645,18 +658,18 @@ function adjustCurveSteps() {
               let collidedHandleDeltaX, collidedHandleDeltaY
               if (vectorGui.otherCollidedKeys.xKey === "px1") {
                 collidedHandleDeltaX =
-                  collidedVector.properties.vectorProperties.px3 -
-                  collidedVector.properties.vectorProperties.px1
+                  collidedVector.vectorProperties.px3 -
+                  collidedVector.vectorProperties.px1
                 collidedHandleDeltaY =
-                  collidedVector.properties.vectorProperties.py3 -
-                  collidedVector.properties.vectorProperties.py1
+                  collidedVector.vectorProperties.py3 -
+                  collidedVector.vectorProperties.py1
               } else if (vectorGui.otherCollidedKeys.xKey === "px2") {
                 collidedHandleDeltaX =
-                  collidedVector.properties.vectorProperties.px4 -
-                  collidedVector.properties.vectorProperties.px2
+                  collidedVector.vectorProperties.px4 -
+                  collidedVector.vectorProperties.px2
                 collidedHandleDeltaY =
-                  collidedVector.properties.vectorProperties.py4 -
-                  collidedVector.properties.vectorProperties.py2
+                  collidedVector.vectorProperties.py4 -
+                  collidedVector.vectorProperties.py2
               }
               let selectedHandleLength
               if (state.tool.options.equal?.active) {
@@ -696,6 +709,7 @@ function adjustCurveSteps() {
                 state.vectorProperties[selectedEndpointYKey] -
                 newSelectedHandleDeltaY
               updateVectorProperties(
+                currentAction,
                 currentVector,
                 state.vectorProperties[selectedHandleXKey],
                 state.vectorProperties[selectedHandleYKey],
@@ -705,7 +719,7 @@ function adjustCurveSteps() {
             }
           }
         }
-        renderCanvas(currentVector.layer, true, state.activeIndexes)
+        renderCanvas(currentAction.layer, true, state.activeIndexes)
         // renderCanvas(currentVector.layer, true)
         modifyVectorAction(currentVector)
         vectorGui.selectedPoint = {

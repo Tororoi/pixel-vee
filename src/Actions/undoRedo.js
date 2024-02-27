@@ -334,6 +334,7 @@ function handleMoveAction(latestAction, modType) {
  * @param {Array} pushStack - The stack to push the action to
  * @param {Array} popStack - The stack to pop the action from
  * @param {string} modType - "from" or "to", used to identify undo or redo
+ * TODO: High Priority - Maintain state.vectorLookup
  */
 export function actionUndoRedo(pushStack, popStack, modType) {
   //latest action is the action about to be undone or redone

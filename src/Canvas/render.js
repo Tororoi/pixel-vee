@@ -198,17 +198,20 @@ export function performAction(action, betweenCtx = null) {
       break
     }
     case "fill":
-      actionFill(
-        action.properties.vectorProperties.px1 + offsetX,
-        action.properties.vectorProperties.py1 + offsetY,
-        boundaryBox,
-        action.properties.selectionInversed,
-        action.properties.color,
-        action.layer,
-        action.properties.modes,
-        null, //maskSet made from action.properties.maskArray
-        betweenCtx
-      )
+      for (const vector of Object.values(action.properties.vectors)) {
+        if (vector.hidden || vector.removed) continue
+        actionFill(
+          vector.vectorProperties.px1 + offsetX,
+          vector.vectorProperties.py1 + offsetY,
+          boundaryBox,
+          action.properties.selectionInversed,
+          vector.color,
+          action.layer,
+          vector.modes,
+          null, //maskSet made from action.properties.maskArray
+          betweenCtx
+        )
+      }
       break
     case "line":
       actionLine(
@@ -229,72 +232,81 @@ export function performAction(action, betweenCtx = null) {
       )
       break
     case "quadCurve":
-      actionQuadraticCurve(
-        action.properties.vectorProperties.px1 + offsetX,
-        action.properties.vectorProperties.py1 + offsetY,
-        action.properties.vectorProperties.px2 + offsetX,
-        action.properties.vectorProperties.py2 + offsetY,
-        action.properties.vectorProperties.px3 + offsetX,
-        action.properties.vectorProperties.py3 + offsetY,
-        boundaryBox,
-        action.properties.selectionInversed,
-        3,
-        action.properties.color,
-        action.layer,
-        action.properties.modes,
-        brushStamps[action.tool.brushType][action.tool.brushSize],
-        action.tool.brushSize,
-        null, //maskSet made from action.properties.maskArray
-        betweenCtx
-      )
+      for (const vector of Object.values(action.properties.vectors)) {
+        if (vector.hidden || vector.removed) continue
+        actionQuadraticCurve(
+          vector.vectorProperties.px1 + offsetX,
+          vector.vectorProperties.py1 + offsetY,
+          vector.vectorProperties.px2 + offsetX,
+          vector.vectorProperties.py2 + offsetY,
+          vector.vectorProperties.px3 + offsetX,
+          vector.vectorProperties.py3 + offsetY,
+          boundaryBox,
+          action.properties.selectionInversed,
+          3,
+          vector.color,
+          action.layer,
+          vector.modes,
+          brushStamps[action.tool.brushType][action.tool.brushSize],
+          action.tool.brushSize,
+          null, //maskSet made from action.properties.maskArray
+          betweenCtx
+        )
+      }
       break
     case "cubicCurve":
-      actionCubicCurve(
-        action.properties.vectorProperties.px1 + offsetX,
-        action.properties.vectorProperties.py1 + offsetY,
-        action.properties.vectorProperties.px2 + offsetX,
-        action.properties.vectorProperties.py2 + offsetY,
-        action.properties.vectorProperties.px3 + offsetX,
-        action.properties.vectorProperties.py3 + offsetY,
-        action.properties.vectorProperties.px4 + offsetX,
-        action.properties.vectorProperties.py4 + offsetY,
-        boundaryBox,
-        action.properties.selectionInversed,
-        4,
-        action.properties.color,
-        action.layer,
-        action.properties.modes,
-        brushStamps[action.tool.brushType][action.tool.brushSize],
-        action.tool.brushSize,
-        null, //maskSet made from action.properties.maskArray
-        betweenCtx
-      )
+      for (const vector of Object.values(action.properties.vectors)) {
+        if (vector.hidden || vector.removed) continue
+        actionCubicCurve(
+          vector.vectorProperties.px1 + offsetX,
+          vector.vectorProperties.py1 + offsetY,
+          vector.vectorProperties.px2 + offsetX,
+          vector.vectorProperties.py2 + offsetY,
+          vector.vectorProperties.px3 + offsetX,
+          vector.vectorProperties.py3 + offsetY,
+          vector.vectorProperties.px4 + offsetX,
+          vector.vectorProperties.py4 + offsetY,
+          boundaryBox,
+          action.properties.selectionInversed,
+          4,
+          vector.color,
+          action.layer,
+          vector.modes,
+          brushStamps[action.tool.brushType][action.tool.brushSize], //TODO: (High Priority) move brush info to action separately from tool for  the sake of group actions
+          action.tool.brushSize,
+          null, //maskSet made from action.properties.maskArray
+          betweenCtx
+        )
+      }
       break
     case "ellipse":
-      actionEllipse(
-        action.properties.vectorProperties.px1 + offsetX,
-        action.properties.vectorProperties.py1 + offsetY,
-        action.properties.vectorProperties.px2 + offsetX,
-        action.properties.vectorProperties.py2 + offsetY,
-        action.properties.vectorProperties.px3 + offsetX,
-        action.properties.vectorProperties.py3 + offsetY,
-        action.properties.vectorProperties.radA,
-        action.properties.vectorProperties.radB,
-        action.properties.vectorProperties.forceCircle,
-        boundaryBox,
-        action.properties.selectionInversed,
-        action.properties.color,
-        action.layer,
-        action.properties.modes,
-        brushStamps[action.tool.brushType][action.tool.brushSize],
-        action.tool.brushSize,
-        action.properties.vectorProperties.angle,
-        action.properties.vectorProperties.unifiedOffset,
-        action.properties.vectorProperties.x1Offset,
-        action.properties.vectorProperties.y1Offset,
-        null, //maskSet made from action.properties.maskArray
-        betweenCtx
-      )
+      for (const vector of Object.values(action.properties.vectors)) {
+        if (vector.hidden || vector.removed) continue
+        actionEllipse(
+          vector.vectorProperties.px1 + offsetX,
+          vector.vectorProperties.py1 + offsetY,
+          vector.vectorProperties.px2 + offsetX,
+          vector.vectorProperties.py2 + offsetY,
+          vector.vectorProperties.px3 + offsetX,
+          vector.vectorProperties.py3 + offsetY,
+          vector.vectorProperties.radA,
+          vector.vectorProperties.radB,
+          vector.vectorProperties.forceCircle,
+          boundaryBox,
+          action.properties.selectionInversed,
+          vector.color,
+          action.layer,
+          vector.modes,
+          brushStamps[action.tool.brushType][action.tool.brushSize],
+          action.tool.brushSize,
+          vector.vectorProperties.angle,
+          vector.vectorProperties.unifiedOffset,
+          vector.vectorProperties.x1Offset,
+          vector.vectorProperties.y1Offset,
+          null, //maskSet made from action.properties.maskArray
+          betweenCtx
+        )
+      }
       break
     case "cut":
       //TODO:(Low Priority) handle betweenCtx, clean up actions so logic does not need to be repeated here. Not currently affected by betweenCtx so not needed for current functionality.
