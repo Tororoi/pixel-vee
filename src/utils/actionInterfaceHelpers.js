@@ -18,16 +18,16 @@ export const createModeElement = (modeKey, isSelected) => {
 }
 
 /**
- * @param {object} action - The action object
+ * @param {string} toolName - The tool name
  * @param {boolean} isSelected - whether the tool is selected
  * @returns {HTMLElement} - tool button
  */
-export const createToolElement = (action, isSelected) => {
+export const createToolElement = (toolName, isSelected) => {
   let tool = document.createElement("button")
   tool.type = "button"
   tool.className = "tool"
-  tool.ariaLabel = action.tool.name
-  tool.classList.add(action.tool.name)
+  tool.ariaLabel = toolName
+  tool.classList.add(toolName)
   if (isSelected) {
     tool.classList.add("selected")
   }
@@ -35,17 +35,17 @@ export const createToolElement = (action, isSelected) => {
 }
 
 /**
- * @param {object} action - The action object
+ * @param {object} brushColor - The color object
  * @returns {HTMLElement} - color button
  */
-export const createColorElement = (action) => {
+export const createColorElement = (brushColor) => {
   let color = document.createElement("button")
   color.type = "button"
   color.className = "actionColor"
   color.ariaLabel = "Action color"
   let colorSwatch = document.createElement("div")
   colorSwatch.className = "swatch"
-  colorSwatch.style.backgroundColor = action.properties.color.color
+  colorSwatch.style.backgroundColor = brushColor.color
   color.appendChild(colorSwatch)
   return color
 }

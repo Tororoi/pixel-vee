@@ -260,31 +260,32 @@ function reset() {
 
 /**
  * Normalize vector properties based on layer offset
- * @param {object} vectorAction - The vector action to base the properties on
+ * @param {object} action - The vector action
+ * @param {object} vector - The vector action to base the properties on
  */
-function setVectorProperties(vectorAction) {
-  if (vectorAction.layer === canvas.currentLayer) {
-    state.vectorProperties = { ...vectorAction.properties.vectorProperties }
+function setVectorProperties(action, vector) {
+  if (action.layer === canvas.currentLayer) {
+    state.vectorProperties = { ...vector.vectorProperties }
     //Keep properties relative to layer offset
-    state.vectorProperties.px1 += vectorAction.layer.x
-    state.vectorProperties.py1 += vectorAction.layer.y
+    state.vectorProperties.px1 += action.layer.x
+    state.vectorProperties.py1 += action.layer.y
     if (
-      vectorAction.tool.name === "quadCurve" ||
-      vectorAction.tool.name === "cubicCurve" ||
-      vectorAction.tool.name === "ellipse"
+      vector.vectorProperties.type === "quadCurve" ||
+      vector.vectorProperties.type === "cubicCurve" ||
+      vector.vectorProperties.type === "ellipse"
     ) {
-      state.vectorProperties.px2 += vectorAction.layer.x
-      state.vectorProperties.py2 += vectorAction.layer.y
+      state.vectorProperties.px2 += action.layer.x
+      state.vectorProperties.py2 += action.layer.y
 
-      state.vectorProperties.px3 += vectorAction.layer.x
-      state.vectorProperties.py3 += vectorAction.layer.y
+      state.vectorProperties.px3 += action.layer.x
+      state.vectorProperties.py3 += action.layer.y
     }
 
-    if (vectorAction.tool.name === "cubicCurve") {
-      state.vectorProperties.px4 += vectorAction.layer.x
-      state.vectorProperties.py4 += vectorAction.layer.y
+    if (vector.vectorProperties.type === "cubicCurve") {
+      state.vectorProperties.px4 += action.layer.x
+      state.vectorProperties.py4 += action.layer.y
     }
-    canvas.currentVectorIndex = vectorAction.index
+    canvas.currentVectorIndex = vector.index
   }
 }
 
@@ -387,9 +388,13 @@ function renderPath(toolName, vectorProperties, vectorAction = null) {
  * TODO: (High Priority) Get vectors as sub actions of group actions, eg. selectedVector = state.lookupVector(canvas.currentVectorIndex)
  */
 function renderLayerVectors(layer) {
+  let selectedVectorAction = null
   let selectedVector = null
-  if (canvas.currentVectorIndex) {
-    selectedVector = state.undoStack[canvas.currentVectorIndex]
+  if (canvas.currentVectorIndex !== null) {
+    selectedVectorAction =
+      state.undoStack[state.vectorLookup[canvas.currentVectorIndex]]
+    selectedVector =
+      selectedVectorAction.properties.vectors[canvas.currentVectorIndex]
   }
   //iterate through and render all vectors in the layer except the selected vector which will always be rendered last
   //render paths
@@ -397,11 +402,23 @@ function renderLayerVectors(layer) {
     if (
       !action.removed &&
       action.layer === layer &&
-      action.tool.type === "vector" &&
-      action.tool.name === state.tool.name &&
-      action !== selectedVector
+      action.tool.type === "vector"
     ) {
-      renderPath(action.tool.name, action.properties.vectorProperties, action)
+      //For each of action.properties.vectors, render paths
+      for (let vectorIndex in action.properties.vectors) {
+        let vector = action.properties.vectors[vectorIndex]
+        if (
+          !vector.removed &&
+          vector.vectorProperties.type === state.tool.name &&
+          vector !== selectedVector
+        ) {
+          renderPath(
+            vector.vectorProperties.type,
+            vector.vectorProperties,
+            action
+          )
+        }
+      }
     }
   }
   //render selected vector path
@@ -425,15 +442,23 @@ function renderLayerVectors(layer) {
     if (
       !action.removed &&
       action.layer === layer &&
-      action.tool.type === "vector" &&
-      action.tool.name === state.tool.name &&
-      action !== selectedVector
+      action.tool.type === "vector"
     ) {
-      renderControlPoints(
-        action.tool.name,
-        action.properties.vectorProperties,
-        action
-      )
+      //For each of action.properties.vectors, render control points
+      for (let vectorIndex in action.properties.vectors) {
+        let vector = action.properties.vectors[vectorIndex]
+        if (
+          !vector.removed &&
+          vector.vectorProperties.type === state.tool.name &&
+          vector !== selectedVector
+        ) {
+          renderControlPoints(
+            vector.vectorProperties.type,
+            vector.vectorProperties,
+            action
+          )
+        }
+      }
     }
   }
   // //render selected vector control points

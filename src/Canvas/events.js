@@ -8,7 +8,10 @@ import {
   renderVectorsToDOM,
   renderPaletteToDOM,
 } from "../DOM/render.js"
-import { removeAction, changeActionMode } from "../Actions/modifyTimeline.js"
+import {
+  removeActionVector,
+  changeActionVectorMode,
+} from "../Actions/modifyTimeline.js"
 import { vectorGui } from "../GUI/vector.js"
 import { initializeColorPicker } from "../Swatch/events.js"
 import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
@@ -313,44 +316,45 @@ function vectorInteract(e) {
     return
   }
   let vector = e.target.closest(".vector").vectorObj
+  let action = state.undoStack[state.vectorLookup[vector.index]]
   if (e.target.className.includes("eraser")) {
     //change mode
-    toggleVectorMode(vector, "eraser")
+    toggleVectorMode(action, vector, "eraser")
   } else if (e.target.className.includes("inject")) {
     //change mode
-    toggleVectorMode(vector, "inject")
+    toggleVectorMode(action, vector, "inject")
   } else if (e.target.className.includes("actionColor")) {
     //change color
-    e.target.color = vector.properties.color
+    e.target.color = vector.color
     e.target.vector = vector
     initializeColorPicker(e.target)
   } else if (e.target.className.includes("eyeopen")) {
     //toggle visibility
     e.target.classList.remove("eyeopen")
     e.target.classList.add("eyeclosed")
-    vector.properties.hidden = true
-    renderCanvas(vector.layer, true)
+    vector.hidden = true
+    renderCanvas(action.layer, true)
   } else if (e.target.className.includes("eyeclosed")) {
     //toggle visibility
     e.target.classList.remove("eyeclosed")
     e.target.classList.add("eyeopen")
-    vector.properties.hidden = false
-    renderCanvas(vector.layer, true)
+    vector.hidden = false
+    renderCanvas(action.layer, true)
   } else if (e.target.className.includes("trash")) {
     //remove vector
-    removeVector(vector)
+    removeVector(action, vector)
   } else {
     let currentIndex = canvas.currentVectorIndex
     //switch tool
-    switchTool(vector.tool.name)
+    switchTool(vector.vectorProperties.type)
     //select current vector
     vectorGui.reset()
     if (vector.index !== currentIndex) {
-      vectorGui.setVectorProperties(vector)
+      vectorGui.setVectorProperties(action, vector)
       canvas.currentLayer.inactiveTools.forEach((tool) => {
         dom[`${tool}Btn`].disabled = false
       })
-      canvas.currentLayer = vector.layer
+      canvas.currentLayer = action.layer
       canvas.currentLayer.inactiveTools.forEach((tool) => {
         dom[`${tool}Btn`].disabled = true
       })
@@ -363,12 +367,13 @@ function vectorInteract(e) {
 
 /**
  * Mark a vector action as removed
+ * @param {object} action - The action to be modified
  * @param {object} vector - The vector to be removed
  */
-function removeVector(vector) {
+function removeVector(action, vector) {
   vector.removed = true
-  renderCanvas(vector.layer, true)
-  removeAction(vector) //TODO: (High Priority) Need to specify that it is a sub action for a group action that is being removed
+  renderCanvas(action.layer, true)
+  removeActionVector(action, vector) //TODO: (High Priority) Need to specify that it is a sub action for a group action that is being removed
   state.action = null
   state.redoStack = []
   if (canvas.currentVectorIndex === vector.index) {
@@ -379,23 +384,24 @@ function removeVector(vector) {
 
 /**
  * Change a vector action's modes
+ * @param {object} action - The action to be modified
  * @param {object} vector - The vector to be modified
  * @param {string} modeKey - The mode to be modified
  */
-function toggleVectorMode(vector, modeKey) {
-  let oldModes = { ...vector.properties.modes }
-  vector.properties.modes[modeKey] = !vector.properties.modes[modeKey]
+function toggleVectorMode(action, vector, modeKey) {
+  let oldModes = { ...vector.modes }
+  vector.modes[modeKey] = !vector.modes[modeKey]
   //resolve conflicting modes
-  if (vector.properties.modes[modeKey]) {
-    if (modeKey === "eraser" && vector.properties.modes.inject) {
-      vector.properties.modes.inject = false
-    } else if (modeKey === "inject" && vector.properties.modes.eraser) {
-      vector.properties.modes.eraser = false
+  if (vector.modes[modeKey]) {
+    if (modeKey === "eraser" && vector.modes.inject) {
+      vector.modes.inject = false
+    } else if (modeKey === "inject" && vector.modes.eraser) {
+      vector.modes.eraser = false
     }
   }
-  let newModes = { ...vector.properties.modes }
-  renderCanvas(vector.layer, true)
-  changeActionMode(vector, oldModes, newModes)
+  let newModes = { ...vector.modes }
+  renderCanvas(action.layer, true)
+  changeActionVectorMode(action, vector, oldModes, newModes)
   state.action = null
   state.redoStack = []
   renderVectorsToDOM()

@@ -58,14 +58,15 @@ export function modifyVectorAction(moddedVector) {
  * Modify action in the timeline
  * Only good for vector parameters
  * @param {object} moddedAction - The action to be modified
+ * @param {object} vector - The vector to be modified
  * @param {object} oldColor - The color before the modification
  */
-export function changeActionColor(moddedAction, oldColor) {
+export function changeActionVectorColor(moddedAction, vector, oldColor) {
   let previousColor = {
     ...oldColor,
   } //shallow copy, color must not contain any objects or references as values
   let modifiedColor = {
-    ...moddedAction.properties.color,
+    ...vector.color,
   } //shallow copy, must make deep copy, at least for x, y and properties
   addToTimeline({
     tool: tools.changeColor,
@@ -73,6 +74,7 @@ export function changeActionColor(moddedAction, oldColor) {
     properties: {
       //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
       moddedActionIndex: moddedAction.index,
+      moddedVectorIndex: vector.index,
       from: previousColor,
       to: modifiedColor,
     },
@@ -82,14 +84,16 @@ export function changeActionColor(moddedAction, oldColor) {
 /**
  * Modify action in the timeline
  * @param {object} moddedAction - The action to be modified
+ * @param {object} vector - The vector to be removed
  */
-export function removeAction(moddedAction) {
+export function removeActionVector(moddedAction, vector) {
   addToTimeline({
     tool: tools.remove,
     layer: moddedAction.layer,
     properties: {
       //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
       moddedActionIndex: moddedAction.index,
+      moddedVectorIndex: vector.index,
       from: false,
       to: true,
     },
@@ -99,16 +103,18 @@ export function removeAction(moddedAction) {
 /**
  * Modify action in the timeline
  * @param {object} moddedAction - The action to be modified
+ * @param {object} vector - The vector to be modified
  * @param {object} oldModes - The modes before the modification
  * @param {object} newModes - The modes after the modification
  */
-export function changeActionMode(moddedAction, oldModes, newModes) {
+export function changeActionVectorMode(moddedAction, vector, oldModes, newModes) {
   addToTimeline({
     tool: tools.changeMode,
     layer: moddedAction.layer,
     properties: {
       //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
       moddedActionIndex: moddedAction.index,
+      moddedVectorIndex: vector.index,
       from: oldModes,
       to: newModes,
     },

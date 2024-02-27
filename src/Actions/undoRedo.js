@@ -96,19 +96,25 @@ function handleModifyAction(latestAction, modType) {
   //for each processed action,
   latestAction.properties.processedActions.forEach((mod) => {
     //find the action in the undoStack
-    const moddedAction = state.undoStack[mod.moddedActionIndex] // need to check if this is a vector action and if it is, set the vector properties for the appropriate vector
+    const moddedVector =
+      state.undoStack[state.vectorLookup[mod.moddedVectorIndex]].properties
+        .vectors[mod.moddedVectorIndex] // need to check if this is a vector action and if it is, set the vector properties for the appropriate vector
     //set the vectorProperties to the modded action's vectorProperties
-    moddedAction.properties.vectorProperties = {
+    moddedVector.vectorProperties = {
       ...mod[modType],
     }
   })
   const primaryModdedAction =
     state.undoStack[latestAction.properties.moddedActionIndex]
+  const primaryModdedVector =
+    primaryModdedAction.properties.vectors[
+      latestAction.properties.moddedVectorIndex
+    ]
   if (
-    state.tool.name === primaryModdedAction.tool.name &&
-    canvas.currentVectorIndex === primaryModdedAction.index
+    state.tool.name === primaryModdedVector.vectorProperties.type &&
+    canvas.currentVectorIndex === primaryModdedVector.index
   ) {
-    vectorGui.setVectorProperties(primaryModdedAction)
+    vectorGui.setVectorProperties(primaryModdedAction, primaryModdedVector)
   }
 }
 
@@ -350,7 +356,9 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   if (latestAction.tool.name === "modify") {
     handleModifyAction(latestAction, modType)
   } else if (latestAction.tool.name === "changeMode") {
-    state.undoStack[latestAction.properties.moddedActionIndex].properties.modes = {
+    state.undoStack[
+      latestAction.properties.moddedActionIndex
+    ].properties.modes = {
       ...latestAction.properties[modType],
     }
   } else if (latestAction.tool.name === "changeColor") {
@@ -397,7 +405,13 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   ) {
     //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
     if (modType === "to") {
-      vectorGui.setVectorProperties(latestAction)
+      //TODO: (High Priority) Which vector should be selected if there are multiple vectors in the action? First or last?
+      //Get first vector in the action
+      let latestVector =
+        latestAction.properties.vectors[
+          Object.keys(latestAction.properties.vectors)[0]
+        ]
+      vectorGui.setVectorProperties(latestAction, latestVector)
     }
   }
   pushStack.push(popStack.pop())
@@ -409,7 +423,11 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       canvas.currentVectorIndex === null
     ) {
       //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
-      vectorGui.setVectorProperties(newLatestAction)
+      let newLatestVector =
+        newLatestAction.properties.vectors[
+          Object.keys(newLatestAction.properties.vectors)[0]
+        ]
+      vectorGui.setVectorProperties(newLatestAction, newLatestVector)
     }
   }
   //Render the canvas with the new latest action

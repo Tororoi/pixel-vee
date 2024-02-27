@@ -232,14 +232,16 @@ function quadCurveSteps() {
  */
 function cubicCurveSteps() {
   //for selecting another vector via the canvas, collisionPresent is false since it is currently based on collision with selected vector.
-  //To select via the canvas, need to check for canvas.collidedVectorIndex and then use vectorGui.setVectorProperties(collidedVectorAction)
   if (
     canvas.collidedVectorIndex &&
     !vectorGui.selectedCollisionPresent &&
     state.clickCounter === 0
   ) {
-    let collidedVector = state.undoStack[canvas.collidedVectorIndex]
-    vectorGui.setVectorProperties(collidedVector)
+    let collidedVectorAction =
+      state.undoStack[state.vectorLookup[canvas.collidedVectorIndex]]
+    let collidedVector =
+      collidedVectorAction.properties.vectors[canvas.collidedVectorIndex]
+    vectorGui.setVectorProperties(collidedVectorAction, collidedVector)
     //Render new selected vector before running standard render routine
     //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.
     // renderCurrentVector() //May not be needed after changing order of render calls in renderLayerVectors

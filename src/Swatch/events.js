@@ -10,7 +10,7 @@ import {
   renderPaletteToolsToDOM,
   renderPaletteToDOM,
 } from "../DOM/render.js"
-import { changeActionColor } from "../Actions/modifyTimeline.js"
+import { changeActionVectorColor } from "../Actions/modifyTimeline.js"
 import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
 
 //====================================//
@@ -61,10 +61,12 @@ export function setColor(r, g, b, a, target) {
     target.color = color
     target.style.backgroundColor = color.color
     if (target.vector) {
-      let oldColor = { ...target.vector.properties.color }
-      target.vector.properties.color = color
-      renderCanvas(target.vector.layer, true)
-      changeActionColor(target.vector, oldColor)
+      let vector = target.vector
+      let action = state.undoStack[state.vectorLookup[vector.index]]
+      let oldColor = { ...vector.color }
+      vector.color = color
+      renderCanvas(action.layer, true)
+      changeActionVectorColor(action, vector, oldColor)
       state.action = null
       state.redoStack = []
       renderVectorsToDOM()
