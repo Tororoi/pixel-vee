@@ -221,6 +221,7 @@ export async function loadDrawing(jsonFile) {
     swatches.palette = data.palette
   }
 
+  let vectorLookup = {}
   // Reconstruct the undoStack
   data.history.forEach((action, index) => {
     if (!action.index) {
@@ -242,11 +243,45 @@ export async function loadDrawing(jsonFile) {
     }
     //Handle vector actions
     //For old files that don't have vectorProperties.type
-    if (
-      action.properties?.vectorProperties &&
-      !action.properties?.vectorProperties?.type
-    ) {
+    if (action.properties?.vectorProperties) {
+      //restructure vectorProoperties to include type
       action.properties.vectorProperties.type = action.tool.name
+      //restructure how vectorProperties are stored
+      let uniqueVectorKey = 1
+      while (vectorLookup[uniqueVectorKey]) {
+        uniqueVectorKey++
+      }
+      vectorLookup[uniqueVectorKey] = index
+      action.properties.vectors = {
+        [uniqueVectorKey]: {
+          index: uniqueVectorKey,
+          modes: { ...action.modes },
+          color: { ...action.color },
+          vectorProperties: { ...action.properties.vectorProperties },
+          hidden: action.hidden,
+          removed: action.removed,
+        },
+      }
+      //remove old properties
+      delete action.properties.vectorProperties
+      delete action.modes
+      delete action.color
+    }
+    if (action.modes) {
+      //convert old modes to new modes
+      if (!action.properties) {
+        action.properties = {}
+      }
+      action.properties.modes = action.modes
+      delete action.modes
+    }
+    if (action.color) {
+      //convert old color to new color
+      if (!action.properties) {
+        action.properties = {}
+      }
+      action.properties.color = action.color
+      delete action.color
     }
     //TODO: (Low Priority) If quadCurve and cubicCurve are unified into "curve", will need to add logic here to convert those to the correct type
     //Handle actions with canvas data
@@ -308,6 +343,7 @@ export async function loadDrawing(jsonFile) {
     // Add the action to the undo stack
     state.undoStack.push(action)
   })
+  state.vectorLookup = vectorLookup
 
   // Wait for all images to load
   await Promise.all(imageLoadPromises)

@@ -17,7 +17,7 @@ import { addToTimeline } from "./undoRedo.js"
 export function modifyVectorAction(moddedVector) {
   const moddedActionIndex = state.vectorLookup[moddedVector.index]
   const moddedAction = state.undoStack[moddedActionIndex]
-  //loop through the object state.vectorsSavedProperties and for each key which represents an action index and value which is a shallow object with various properties, create an object with properties moddedActionIndex, from (the saved properties), and to (the new properties found on state.undoStack[vectorIndex].properties.vectorProperties)
+  //loop through the object state.vectorsSavedProperties and create an array of objects with the required properties
   let processedActions = []
 
   for (let vectorIndex in state.vectorsSavedProperties) {

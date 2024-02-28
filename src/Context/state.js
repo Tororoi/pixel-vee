@@ -126,6 +126,7 @@ export const state = {
   deselect,
   invertSelection,
   lookupVector,
+  syncVectorLookup,
 }
 
 /**
@@ -212,4 +213,19 @@ function lookupVector(vectorIndex) {
   let actionIndex = state.vectorLookup[vectorIndex]
   let vector = state.undoStack[actionIndex].properties.vectors[vectorIndex]
   return vector
+}
+
+/**
+ * TODO: (Low Priority) This function is somewhat inefficient. Can be optimized by handling in the undoRedo functionality and only managing the vectors from the undone or redone action.
+ * Recommend implementing after improving readability or reducing complexity of actionUndoRedo.
+ */
+function syncVectorLookup() {
+  state.vectorLookup = {}
+  state.undoStack.forEach((action, index) => {
+    if (action.properties?.vectors) {
+      for (let vectorIndex in action.properties.vectors) {
+        state.vectorLookup[vectorIndex] = index
+      }
+    }
+  })
 }

@@ -5,9 +5,10 @@ import { drawCirclePath, drawControlPointHandle } from "../utils/guiHelpers.js"
 
 /**
  * @param {object} vectorProperties - The properties of the vector
- * @param {object} vectorAction - The vector action to be rendered
+ * @param {object} action - The vector action to be rendered
+ * @param {object} vector - The vector to be rendered
  */
-export function renderEllipseVector(vectorProperties, vectorAction) {
+export function renderEllipseVector(vectorProperties, action, vector) {
   const {
     px1,
     py1,
@@ -21,12 +22,8 @@ export function renderEllipseVector(vectorProperties, vectorAction) {
     // x1Offset,
     // y1Offset,
   } = vectorProperties
-  const xOffset = vectorAction
-    ? vectorAction.layer.x + canvas.xOffset
-    : canvas.xOffset
-  const yOffset = vectorAction
-    ? vectorAction.layer.y + canvas.yOffset
-    : canvas.yOffset
+  const xOffset = action ? action.layer.x + canvas.xOffset : canvas.xOffset
+  const yOffset = action ? action.layer.y + canvas.yOffset : canvas.yOffset
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   let circleRadius = 8 * lineWidth
@@ -52,7 +49,7 @@ export function renderEllipseVector(vectorProperties, vectorAction) {
     { x: "px3", y: "py3" },
   ]
 
-  if (!vectorAction) {
+  if (!action) {
     vectorGui.drawControlPoints(
       state.vectorProperties,
       pointsKeys,
@@ -71,7 +68,8 @@ export function renderEllipseVector(vectorProperties, vectorAction) {
     circleRadius / 2,
     true,
     0,
-    vectorAction
+    action,
+    vector
   )
   // Fill points
   canvas.vectorGuiCTX.fill()
@@ -158,9 +156,9 @@ export function renderOffsetEllipseVector(vectorProperties) {
 
 /**
  * @param {object} vectorProperties - The properties of the vector
- * @param {object} vectorAction - The vector action to be rendered
+ * @param {object} action - The vector action to be rendered
  */
-export function renderEllipsePath(vectorProperties, vectorAction) {
+export function renderEllipsePath(vectorProperties, action) {
   const {
     px1,
     py1,
@@ -174,12 +172,8 @@ export function renderEllipsePath(vectorProperties, vectorAction) {
     x1Offset,
     y1Offset,
   } = vectorProperties
-  const xOffset = vectorAction
-    ? vectorAction.layer.x + canvas.xOffset
-    : canvas.xOffset
-  const yOffset = vectorAction
-    ? vectorAction.layer.y + canvas.yOffset
-    : canvas.yOffset
+  const xOffset = action ? action.layer.x + canvas.xOffset : canvas.xOffset
+  const yOffset = action ? action.layer.y + canvas.yOffset : canvas.yOffset
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   canvas.vectorGuiCTX.lineWidth = lineWidth

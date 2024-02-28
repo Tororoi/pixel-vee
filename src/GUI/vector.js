@@ -402,7 +402,6 @@ function renderLayerVectors(layer) {
   let selectedVectorAction = null
   let selectedVector = null
   if (canvas.currentVectorIndex !== null) {
-    console.log(canvas.currentVectorIndex, state.vectorLookup)
     selectedVectorAction =
       state.undoStack[state.vectorLookup[canvas.currentVectorIndex]]
     selectedVector =

@@ -339,7 +339,7 @@ function handleMoveAction(latestAction, modType) {
 export function actionUndoRedo(pushStack, popStack, modType) {
   //latest action is the action about to be undone or redone
   let latestAction = popStack[popStack.length - 1]
-  if (canvas.currentVectorIndex === latestAction.index) {
+  if (state.vectorLookup[canvas.currentVectorIndex] === latestAction.index) {
     //reset vectorGui if the latest action is the current vector
     vectorGui.reset()
   }
@@ -431,6 +431,8 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       vectorGui.setVectorProperties(newLatestAction, newLatestVector)
     }
   }
+  //Sync vector lookup table
+  state.syncVectorLookup()
   //Render the canvas with the new latest action
   renderToLatestAction(latestAction, modType)
   //Recalculate size of file if save dialog is open

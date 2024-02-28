@@ -204,7 +204,7 @@ function ellipseSteps() {
           boundaryBox.yMax -= canvas.currentLayer.y
         }
         //generate new unique key for vector based on what already exists in state.vectorLookup object
-        let uniqueVectorKey = 0
+        let uniqueVectorKey = 1
         while (state.vectorLookup[uniqueVectorKey]) {
           uniqueVectorKey++
         }
