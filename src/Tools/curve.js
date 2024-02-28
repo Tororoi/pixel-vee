@@ -166,7 +166,7 @@ function quadCurveSteps() {
           boundaryBox.yMin -= canvas.currentLayer.y
           boundaryBox.yMax -= canvas.currentLayer.y
         }
-        //generate new unique key for vector based on what already exists in state.vectorLookup object
+        //generate new unique key for vector based on what already exists in state.vectorLookup object. Start at 1 for convenience in checking for falsy values
         let uniqueVectorKey = 1
         while (state.vectorLookup[uniqueVectorKey]) {
           uniqueVectorKey++
