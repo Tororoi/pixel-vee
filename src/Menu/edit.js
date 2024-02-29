@@ -1,7 +1,7 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { updateLinkedVectors, vectorGui } from "../GUI/vector.js"
+import { vectorGui } from "../GUI/vector.js"
 import { enableActionsForClipboard } from "../DOM/disableDomElements.js"
 
 //===================================//
@@ -165,6 +165,7 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
     dom[`${tool}Btn`].classList.add("deactivate-paste")
   })
 
+  //for clipboard.canvas:
   const { selectProperties, boundaryBox } = clipboard
   // if xOffset and yOffset present, adjust selectProperties and boundaryBox
   //render the clipboard canvas onto the temporary layer
@@ -192,7 +193,7 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
       boundaryBox.yMax - boundaryBox.yMin
     )
   }
-  //set state.selectClipboard?
+  //for clipboarrd.vectorsSavedProperties, draw vectors onto the temporary layer
   //TODO: (Medium Priority) include transform control points for resizing, rotating, etc. (not currently implemented)
   vectorGui.render()
 }

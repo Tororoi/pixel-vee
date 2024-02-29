@@ -9,12 +9,8 @@ import { drawControlPointHandle } from "../utils/guiHelpers.js"
  */
 export function renderCurveVector(vectorProperties, action, vector) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
-  const xOffset = action
-    ? action.layer.x + canvas.xOffset
-    : canvas.xOffset
-  const yOffset = action
-    ? action.layer.y + canvas.yOffset
-    : canvas.yOffset
+  const xOffset = action ? action.layer.x + canvas.xOffset : canvas.xOffset
+  const yOffset = action ? action.layer.y + canvas.yOffset : canvas.yOffset
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   let circleRadius = 8 * lineWidth
@@ -75,14 +71,13 @@ export function renderCurveVector(vectorProperties, action, vector) {
  */
 export function renderCurvePath(vectorProperties, action) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
-  const xOffset = action
-    ? action.layer.x + canvas.xOffset
-    : canvas.xOffset
-  const yOffset = action
-    ? action.layer.y + canvas.yOffset
-    : canvas.yOffset
+  const xOffset = action ? action.layer.x + canvas.xOffset : canvas.xOffset
+  const yOffset = action ? action.layer.y + canvas.yOffset : canvas.yOffset
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+  if (canvas.pastedLayer) {
+    lineWidth *= 8
+  }
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
 

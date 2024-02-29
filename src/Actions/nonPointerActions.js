@@ -167,53 +167,57 @@ export function actionPasteSelection() {
     canvas.currentLayer.type === "raster" &&
     !canvas.currentLayer.isPreview &&
     (state.selectClipboard.canvas ||
-      state.selectClipboard.vectorsSavedProperties.length > 0)
+      !state.selectClipboard.vectorsSavedProperties.isEmpty())
   ) {
     //if state.selectClipboard.canvas, run pasteSelectedPixels
     // Store whether selection was active before paste action
     let prePasteSelectProperties = { ...state.selectProperties }
     let prePasteInvertSelection = state.selectionInversed
-    //paste selected pixels
-    pasteSelectedPixels(state.selectClipboard, canvas.currentLayer)
-    //adjust boundaryBox for layer offset
-    const boundaryBox = { ...state.selectClipboard.boundaryBox }
-    if (boundaryBox.xMax !== null) {
-      boundaryBox.xMin -= canvas.currentLayer.x
-      boundaryBox.xMax -= canvas.currentLayer.x
-      boundaryBox.yMin -= canvas.currentLayer.y
-      boundaryBox.yMax -= canvas.currentLayer.y
-    }
-    const selectProperties = { ...state.selectClipboard.selectProperties }
-    if (selectProperties.px2 !== null) {
-      selectProperties.px1 -= canvas.currentLayer.x
-      selectProperties.px2 -= canvas.currentLayer.x
-      selectProperties.py1 -= canvas.currentLayer.y
-      selectProperties.py2 -= canvas.currentLayer.y
-    }
+    if (state.selectClipboard.vectorsSavedProperties.isEmpty()) {
+      //paste selected pixels
+      pasteSelectedPixels(state.selectClipboard, canvas.currentLayer)
+      //adjust boundaryBox for layer offset
+      const boundaryBox = { ...state.selectClipboard.boundaryBox }
+      if (boundaryBox.xMax !== null) {
+        boundaryBox.xMin -= canvas.currentLayer.x
+        boundaryBox.xMax -= canvas.currentLayer.x
+        boundaryBox.yMin -= canvas.currentLayer.y
+        boundaryBox.yMax -= canvas.currentLayer.y
+      }
+      const selectProperties = { ...state.selectClipboard.selectProperties }
+      if (selectProperties.px2 !== null) {
+        selectProperties.px1 -= canvas.currentLayer.x
+        selectProperties.px2 -= canvas.currentLayer.x
+        selectProperties.py1 -= canvas.currentLayer.y
+        selectProperties.py2 -= canvas.currentLayer.y
+      }
 
-    //add to timeline
-    addToTimeline({
-      tool: tools.paste,
-      layer: canvas.currentLayer,
-      properties: {
-        confirmed: false,
-        prePasteInvertSelection,
-        prePasteSelectProperties,
-        boundaryBox,
-        selectProperties,
-        invertSelection: state.selectionInversed,
-        canvas: state.selectClipboard.canvas,
-        canvasProperties: {
-          dataUrl: state.selectClipboard.canvas.toDataURL(),
-          width: state.selectClipboard.canvas.width,
-          height: state.selectClipboard.canvas.height,
+      //add to timeline
+      addToTimeline({
+        tool: tools.paste,
+        layer: canvas.currentLayer,
+        properties: {
+          confirmed: false,
+          prePasteInvertSelection,
+          prePasteSelectProperties,
+          boundaryBox,
+          selectProperties,
+          invertSelection: state.selectionInversed,
+          canvas: state.selectClipboard.canvas,
+          canvasProperties: {
+            dataUrl: state.selectClipboard.canvas.toDataURL(),
+            width: state.selectClipboard.canvas.width,
+            height: state.selectClipboard.canvas.height,
+          },
+          //vectorsSavedProperties: state.selectClipboard.vectorsSavedProperties,
+          pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
         },
-        //vectorsSavedProperties: state.selectClipboard.vectorsSavedProperties,
-        pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
-      },
-    })
-    state.action = null
-    state.redoStack = []
+      })
+      state.action = null
+      state.redoStack = []
+    } else {
+      //paste vectors
+    }
 
     renderCanvas(canvas.currentLayer)
     renderLayersToDOM()

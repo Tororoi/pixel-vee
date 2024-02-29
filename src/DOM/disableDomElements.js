@@ -41,7 +41,7 @@ export function enableActionsForNoPaste() {
   dom.copyBtn.classList.remove("disabled")
   if (
     state.selectClipboard.canvas ||
-    state.selectClipboard.vectorsSavedProperties.length > 0
+    !state.selectClipboard.vectorsSavedProperties.isEmpty()
   ) {
     dom.pasteBtn.classList.remove("disabled")
   }
