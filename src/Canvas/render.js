@@ -2,6 +2,8 @@ import { dom } from "../Context/dom.js"
 import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { swatches } from "../Context/swatch.js"
+import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
@@ -362,24 +364,89 @@ export function performAction(action, betweenCtx = null) {
       //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
       if (action.properties.confirmed) {
         let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
-        activeCtx.drawImage(
-          action.properties.canvas,
-          boundaryBox.xMin,
-          boundaryBox.yMin,
-          boundaryBox.xMax - boundaryBox.xMin,
-          boundaryBox.yMax - boundaryBox.yMin
-        )
+        if (
+          Object.keys(action.properties.vectorsSavedProperties).length === 0
+        ) {
+          activeCtx.drawImage(
+            action.properties.canvas,
+            boundaryBox.xMin,
+            boundaryBox.yMin,
+            boundaryBox.xMax - boundaryBox.xMin,
+            boundaryBox.yMax - boundaryBox.yMin
+          )
+        } else {
+          //render vectors
+          for (const [vectorIndex, vectorProperties] of Object.entries(
+            action.properties.vectorsSavedProperties
+          )) {
+            actionCubicCurve(
+              vectorProperties.px1 + offsetX,
+              vectorProperties.py1 + offsetY,
+              vectorProperties.px2 + offsetX,
+              vectorProperties.py2 + offsetY,
+              vectorProperties.px3 + offsetX,
+              vectorProperties.py3 + offsetY,
+              vectorProperties.px4 + offsetX,
+              vectorProperties.py4 + offsetY,
+              boundaryBox,
+              action.properties.selectionInversed,
+              4,
+              swatches.primary.color,
+              action.layer,
+              tools.cubicCurve.modes,
+              brushStamps[tools.cubicCurve.brushType][
+                tools.cubicCurve.brushSize
+              ],
+              tools.cubicCurve.brushSize,
+              null, //maskSet made from action.properties.maskArray
+              activeCtx
+            )
+          }
+        }
       } else if (
         canvas.tempLayer === canvas.currentLayer && //only render if the current layer is the temp layer (active paste action)
         isLastPasteAction //only render if this action is the last paste action in the stack
       ) {
-        action.layer.ctx.drawImage(
-          action.properties.canvas,
-          boundaryBox.xMin,
-          boundaryBox.yMin,
-          boundaryBox.xMax - boundaryBox.xMin,
-          boundaryBox.yMax - boundaryBox.yMin
-        )
+        //TODO: (High Priority) handle vectors vs raster
+        if (
+          Object.keys(action.properties.vectorsSavedProperties).length === 0
+        ) {
+          action.layer.ctx.drawImage(
+            action.properties.canvas,
+            boundaryBox.xMin,
+            boundaryBox.yMin,
+            boundaryBox.xMax - boundaryBox.xMin,
+            boundaryBox.yMax - boundaryBox.yMin
+          )
+        } else {
+          //render vectors
+          for (const [vectorIndex, vectorProperties] of Object.entries(
+            action.properties.vectorsSavedProperties
+          )) {
+            actionCubicCurve(
+              vectorProperties.px1 + offsetX,
+              vectorProperties.py1 + offsetY,
+              vectorProperties.px2 + offsetX,
+              vectorProperties.py2 + offsetY,
+              vectorProperties.px3 + offsetX,
+              vectorProperties.py3 + offsetY,
+              vectorProperties.px4 + offsetX,
+              vectorProperties.py4 + offsetY,
+              boundaryBox,
+              action.properties.selectionInversed,
+              4,
+              swatches.primary.color,
+              action.layer,
+              tools.cubicCurve.modes,
+              brushStamps[tools.cubicCurve.brushType][
+                tools.cubicCurve.brushSize
+              ], //TODO: (High Priority) move brush info to action separately from tool for  the sake of group actions
+              tools.cubicCurve.brushSize,
+              null, //maskSet made from action.properties.maskArray
+              betweenCtx
+            )
+          }
+        }
       }
       break
     }

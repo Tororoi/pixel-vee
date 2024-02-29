@@ -167,57 +167,66 @@ export function actionPasteSelection() {
     canvas.currentLayer.type === "raster" &&
     !canvas.currentLayer.isPreview &&
     (state.selectClipboard.canvas ||
-      !state.selectClipboard.vectorsSavedProperties.isEmpty())
+      Object.keys(state.selectClipboard.vectorsSavedProperties).length > 0)
   ) {
     //if state.selectClipboard.canvas, run pasteSelectedPixels
     // Store whether selection was active before paste action
     let prePasteSelectProperties = { ...state.selectProperties }
     let prePasteInvertSelection = state.selectionInversed
-    if (state.selectClipboard.vectorsSavedProperties.isEmpty()) {
-      //paste selected pixels
-      pasteSelectedPixels(state.selectClipboard, canvas.currentLayer)
-      //adjust boundaryBox for layer offset
-      const boundaryBox = { ...state.selectClipboard.boundaryBox }
-      if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin -= canvas.currentLayer.x
-        boundaryBox.xMax -= canvas.currentLayer.x
-        boundaryBox.yMin -= canvas.currentLayer.y
-        boundaryBox.yMax -= canvas.currentLayer.y
-      }
-      const selectProperties = { ...state.selectClipboard.selectProperties }
-      if (selectProperties.px2 !== null) {
-        selectProperties.px1 -= canvas.currentLayer.x
-        selectProperties.px2 -= canvas.currentLayer.x
-        selectProperties.py1 -= canvas.currentLayer.y
-        selectProperties.py2 -= canvas.currentLayer.y
-      }
-
-      //add to timeline
-      addToTimeline({
-        tool: tools.paste,
-        layer: canvas.currentLayer,
-        properties: {
-          confirmed: false,
-          prePasteInvertSelection,
-          prePasteSelectProperties,
-          boundaryBox,
-          selectProperties,
-          invertSelection: state.selectionInversed,
-          canvas: state.selectClipboard.canvas,
-          canvasProperties: {
-            dataUrl: state.selectClipboard.canvas.toDataURL(),
-            width: state.selectClipboard.canvas.width,
-            height: state.selectClipboard.canvas.height,
-          },
-          //vectorsSavedProperties: state.selectClipboard.vectorsSavedProperties,
-          pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
-        },
-      })
-      state.action = null
-      state.redoStack = []
-    } else {
-      //paste vectors
+    //paste selected pixels
+    pasteSelectedPixels(state.selectClipboard, canvas.currentLayer)
+    // if (
+    //   Object.keys(state.selectClipboard.vectorsSavedProperties).length === 0
+    // ) {
+    //adjust boundaryBox for layer offset
+    const boundaryBox = { ...state.selectClipboard.boundaryBox }
+    if (boundaryBox.xMax !== null) {
+      boundaryBox.xMin -= canvas.currentLayer.x
+      boundaryBox.xMax -= canvas.currentLayer.x
+      boundaryBox.yMin -= canvas.currentLayer.y
+      boundaryBox.yMax -= canvas.currentLayer.y
     }
+    const selectProperties = {
+      ...state.selectClipboard.selectProperties,
+    }
+    if (selectProperties.px2 !== null) {
+      selectProperties.px1 -= canvas.currentLayer.x
+      selectProperties.px2 -= canvas.currentLayer.x
+      selectProperties.py1 -= canvas.currentLayer.y
+      selectProperties.py2 -= canvas.currentLayer.y
+    }
+    // } else {
+    //paste vectors
+    // for (const [vectorIndex, vectorProperties] of Object.entries(
+    //   state.selectClipboard.vectorsSavedProperties
+    // )) {
+    //   state.vectorProperties = { ...vectorProperties }
+    // }
+    // }
+
+    //add to timeline
+    addToTimeline({
+      tool: tools.paste,
+      layer: canvas.currentLayer,
+      properties: {
+        confirmed: false,
+        prePasteInvertSelection,
+        prePasteSelectProperties,
+        boundaryBox,
+        selectProperties,
+        invertSelection: state.selectionInversed,
+        canvas: state.selectClipboard.canvas,
+        canvasProperties: {
+          dataUrl: state.selectClipboard.canvas?.toDataURL(),
+          width: state.selectClipboard.canvas?.width,
+          height: state.selectClipboard.canvas?.height,
+        },
+        vectorsSavedProperties: state.selectClipboard.vectorsSavedProperties,
+        pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
+      },
+    })
+    state.action = null
+    state.redoStack = []
 
     renderCanvas(canvas.currentLayer)
     renderLayersToDOM()
@@ -265,8 +274,7 @@ export function actionConfirmPastedPixels() {
       selectProperties.py2 += yOffset - canvas.pastedLayer.y
     }
     confirmPastedPixels(
-      lastPasteAction.properties.canvas,
-      lastPasteAction.properties.boundaryBox,
+      lastPasteAction.properties,
       canvas.pastedLayer,
       xOffset,
       yOffset
@@ -284,10 +292,12 @@ export function actionConfirmPastedPixels() {
         invertSelection: lastPasteAction.properties.invertSelection,
         canvas: lastPasteAction.properties.canvas,
         canvasProperties: {
-          dataUrl: lastPasteAction.properties.canvas.toDataURL(),
-          width: lastPasteAction.properties.canvas.width,
-          height: lastPasteAction.properties.canvas.height,
+          dataUrl: lastPasteAction.properties.canvas?.toDataURL(),
+          width: lastPasteAction.properties.canvas?.width,
+          height: lastPasteAction.properties.canvas?.height,
         },
+        vectorsSavedProperties:
+          lastPasteAction.properties.vectorsSavedProperties,
       },
     })
     state.action = null

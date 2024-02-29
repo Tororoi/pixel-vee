@@ -1,8 +1,12 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { swatches } from "../Context/swatch.js"
+import { brushStamps } from "../Context/brushStamps.js"
+import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { enableActionsForClipboard } from "../DOM/disableDomElements.js"
+import { actionCubicCurve } from "../Actions/pointerActions.js"
 
 //===================================//
 //========= * * * Edit * * * ========//
@@ -166,34 +170,43 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
   })
 
   //for clipboard.canvas:
-  const { selectProperties, boundaryBox } = clipboard
-  // if xOffset and yOffset present, adjust selectProperties and boundaryBox
-  //render the clipboard canvas onto the temporary layer
-  state.selectProperties = { ...selectProperties }
-  if (useOffset) {
-    state.selectProperties.px1 += layer.x
-    state.selectProperties.px2 += layer.x
-    state.selectProperties.py1 += layer.y
-    state.selectProperties.py2 += layer.y
-    state.setBoundaryBox(state.selectProperties)
-    canvas.currentLayer.ctx.drawImage(
-      clipboard.canvas,
-      boundaryBox.xMin + layer.x,
-      boundaryBox.yMin + layer.y,
-      boundaryBox.xMax - boundaryBox.xMin,
-      boundaryBox.yMax - boundaryBox.yMin
-    )
+  if (Object.keys(clipboard.vectorsSavedProperties).length === 0) {
+    const { selectProperties, boundaryBox } = clipboard
+    // if xOffset and yOffset present, adjust selectProperties and boundaryBox
+    //render the clipboard canvas onto the temporary layer
+    state.selectProperties = { ...selectProperties }
+    if (useOffset) {
+      state.selectProperties.px1 += layer.x
+      state.selectProperties.px2 += layer.x
+      state.selectProperties.py1 += layer.y
+      state.selectProperties.py2 += layer.y
+      state.setBoundaryBox(state.selectProperties)
+      canvas.currentLayer.ctx.drawImage(
+        clipboard.canvas,
+        boundaryBox.xMin + layer.x,
+        boundaryBox.yMin + layer.y,
+        boundaryBox.xMax - boundaryBox.xMin,
+        boundaryBox.yMax - boundaryBox.yMin
+      )
+    } else {
+      state.setBoundaryBox(state.selectProperties)
+      canvas.currentLayer.ctx.drawImage(
+        clipboard.canvas,
+        boundaryBox.xMin,
+        boundaryBox.yMin,
+        boundaryBox.xMax - boundaryBox.xMin,
+        boundaryBox.yMax - boundaryBox.yMin
+      )
+    }
   } else {
-    state.setBoundaryBox(state.selectProperties)
-    canvas.currentLayer.ctx.drawImage(
-      clipboard.canvas,
-      boundaryBox.xMin,
-      boundaryBox.yMin,
-      boundaryBox.xMax - boundaryBox.xMin,
-      boundaryBox.yMax - boundaryBox.yMin
-    )
+    //for clipboard.vectorsSavedProperties, draw vectors onto the temporary layer
+    for (const [vectorIndex, vectorProperties] of Object.entries(
+      clipboard.vectorsSavedProperties
+    )) {
+      console.log(vectorIndex, vectorProperties)
+      state.vectorProperties = { ...vectorProperties }
+    }
   }
-  //for clipboarrd.vectorsSavedProperties, draw vectors onto the temporary layer
   //TODO: (Medium Priority) include transform control points for resizing, rotating, etc. (not currently implemented)
   vectorGui.render()
 }
@@ -203,23 +216,45 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
  * Not dependent on pointer events
  * @param {HTMLCanvasElement} clipboardCanvas - clipboard canvas
  * @param {object} boundaryBox - boundary box
+ * @param clipboard
  * @param {object} layer - layer to paste onto
  * @param {number} xOffset - x offset (Integer)
  * @param {number} yOffset - y offset (Integer)
  */
-export function confirmPastedPixels(
-  clipboardCanvas,
-  boundaryBox,
-  layer,
-  xOffset,
-  yOffset
-) {
-  //draw the current layer onto the pasted layer
-  layer.ctx.drawImage(
-    clipboardCanvas,
-    boundaryBox.xMin + xOffset,
-    boundaryBox.yMin + yOffset,
-    boundaryBox.xMax - boundaryBox.xMin,
-    boundaryBox.yMax - boundaryBox.yMin
-  )
+export function confirmPastedPixels(clipboard, layer, xOffset, yOffset) {
+  if (Object.keys(clipboard.vectorsSavedProperties).length === 0) {
+    //draw the current layer onto the pasted layer
+    layer.ctx.drawImage(
+      clipboard.canvas,
+      clipboard.boundaryBox.xMin + xOffset,
+      clipboard.boundaryBox.yMin + yOffset,
+      clipboard.boundaryBox.xMax - clipboard.boundaryBox.xMin,
+      clipboard.boundaryBox.yMax - clipboard.boundaryBox.yMin
+    )
+  } else {
+    //draw vectors
+    for (const [vectorIndex, vectorProperties] of Object.entries(
+      clipboard.vectorsSavedProperties
+    )) {
+      actionCubicCurve(
+        vectorProperties.px1 + xOffset,
+        vectorProperties.py1 + yOffset,
+        vectorProperties.px2 + xOffset,
+        vectorProperties.py2 + yOffset,
+        vectorProperties.px3 + xOffset,
+        vectorProperties.py3 + yOffset,
+        vectorProperties.px4 + xOffset,
+        vectorProperties.py4 + yOffset,
+        clipboard.boundaryBox,
+        clipboard.selectionInversed,
+        4,
+        swatches.primary.color,
+        layer,
+        tools.cubicCurve.modes,
+        brushStamps[tools.cubicCurve.brushType][tools.cubicCurve.brushSize],
+        tools.cubicCurve.brushSize,
+        null //maskSet made from action.properties.maskArray
+      )
+    }
+  }
 }
