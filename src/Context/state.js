@@ -106,7 +106,7 @@ export const state = {
       py2: null,
     },
     canvas: null,
-    vectorsSavedProperties: {},
+    vectors: {},
   },
   //for perfect pixels
   lastDrawnX: null,

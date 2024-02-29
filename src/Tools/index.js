@@ -124,6 +124,16 @@ export const tools = {
     modes: {},
     type: "raster",
   },
+  vectorPaste: {
+    name: "vectorPaste",
+    fn: null,
+    brushSize: null,
+    brushType: null,
+    brushDisabled: true,
+    options: {},
+    modes: {},
+    type: "vector",
+  },
   //Utility Tools (does not affect timeline)
   eyedropper,
   grab,

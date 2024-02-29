@@ -494,6 +494,7 @@ function adjustCurveSteps() {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
         }
+        console.log(currentAction, currentVector)
         state.vectorsSavedProperties[canvas.currentVectorIndex] = {
           ...currentVector.vectorProperties,
         }

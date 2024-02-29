@@ -167,7 +167,7 @@ export function actionPasteSelection() {
     canvas.currentLayer.type === "raster" &&
     !canvas.currentLayer.isPreview &&
     (state.selectClipboard.canvas ||
-      Object.keys(state.selectClipboard.vectorsSavedProperties).length > 0)
+      Object.keys(state.selectClipboard.vectors).length > 0)
   ) {
     //if state.selectClipboard.canvas, run pasteSelectedPixels
     // Store whether selection was active before paste action
@@ -175,9 +175,6 @@ export function actionPasteSelection() {
     let prePasteInvertSelection = state.selectionInversed
     //paste selected pixels
     pasteSelectedPixels(state.selectClipboard, canvas.currentLayer)
-    // if (
-    //   Object.keys(state.selectClipboard.vectorsSavedProperties).length === 0
-    // ) {
     //adjust boundaryBox for layer offset
     const boundaryBox = { ...state.selectClipboard.boundaryBox }
     if (boundaryBox.xMax !== null) {
@@ -195,18 +192,16 @@ export function actionPasteSelection() {
       selectProperties.py1 -= canvas.currentLayer.y
       selectProperties.py2 -= canvas.currentLayer.y
     }
-    // } else {
-    //paste vectors
-    // for (const [vectorIndex, vectorProperties] of Object.entries(
-    //   state.selectClipboard.vectorsSavedProperties
-    // )) {
-    //   state.vectorProperties = { ...vectorProperties }
-    // }
-    // }
-
+    //Make deep copy of clipboard vectors:
+    const clipboardVectors = JSON.parse(
+      JSON.stringify(state.selectClipboard.vectors)
+    )
     //add to timeline
     addToTimeline({
-      tool: tools.paste,
+      tool:
+        Object.keys(state.selectClipboard.vectors).length === 0
+          ? tools.paste
+          : tools.vectorPaste,
       layer: canvas.currentLayer,
       properties: {
         confirmed: false,
@@ -221,7 +216,7 @@ export function actionPasteSelection() {
           width: state.selectClipboard.canvas?.width,
           height: state.selectClipboard.canvas?.height,
         },
-        vectorsSavedProperties: state.selectClipboard.vectorsSavedProperties,
+        vectors: clipboardVectors,
         pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
       },
     })
@@ -248,7 +243,8 @@ export function actionConfirmPastedPixels() {
   let lastPasteAction = null
   for (let i = state.undoStack.length - 1; i >= 0; i--) {
     if (
-      state.undoStack[i].tool.name === "paste" &&
+      (state.undoStack[i].tool.name === "paste" ||
+        state.undoStack[i].tool.name === "vectorPaste") &&
       !state.undoStack[i].properties.confirmed
     ) {
       lastPasteAction = state.undoStack[i]
@@ -281,9 +277,36 @@ export function actionConfirmPastedPixels() {
     )
     //remove temp layer from DOM and restore current layer
     removeTempLayerFromDOM()
+    if (lastPasteAction.properties.vectors) {
+      //correct offset coords for vectors to make agnostic to layer coords
+      for (const [vectorIndex, vector] of Object.entries(
+        lastPasteAction.properties.vectors
+      )) {
+        vector.vectorProperties.px1 += lastPasteAction.layer.x
+        vector.vectorProperties.py1 += lastPasteAction.layer.y
+        vector.vectorProperties.px2 += lastPasteAction.layer.x
+        vector.vectorProperties.py2 += lastPasteAction.layer.y
+        vector.vectorProperties.px3 += lastPasteAction.layer.x
+        vector.vectorProperties.py3 += lastPasteAction.layer.y
+        vector.vectorProperties.px4 += lastPasteAction.layer.x
+        vector.vectorProperties.py4 += lastPasteAction.layer.y
+        //add vector to vectorLookup
+        let uniqueVectorKey = 1
+        while (state.vectorLookup[uniqueVectorKey]) {
+          uniqueVectorKey++
+        }
+        state.vectorLookup[uniqueVectorKey] = state.undoStack.length
+        vector.index = uniqueVectorKey
+        delete lastPasteAction.properties.vectors[vectorIndex] // Remove old key-value pair
+        lastPasteAction.properties.vectors[uniqueVectorKey] = vector // Assign vector to new key
+      }
+    }
     //add to timeline
     addToTimeline({
-      tool: tools.paste,
+      tool:
+        Object.keys(state.selectClipboard.vectors).length === 0
+          ? tools.paste
+          : tools.vectorPaste,
       layer: canvas.currentLayer,
       properties: {
         confirmed: true,
@@ -296,8 +319,7 @@ export function actionConfirmPastedPixels() {
           width: lastPasteAction.properties.canvas?.width,
           height: lastPasteAction.properties.canvas?.height,
         },
-        vectorsSavedProperties:
-          lastPasteAction.properties.vectorsSavedProperties,
+        vectors: lastPasteAction.properties.vectors,
       },
     })
     state.action = null

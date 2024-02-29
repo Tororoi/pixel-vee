@@ -364,88 +364,98 @@ export function performAction(action, betweenCtx = null) {
       //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
       if (action.properties.confirmed) {
         let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
-        if (
-          Object.keys(action.properties.vectorsSavedProperties).length === 0
-        ) {
-          activeCtx.drawImage(
-            action.properties.canvas,
-            boundaryBox.xMin,
-            boundaryBox.yMin,
-            boundaryBox.xMax - boundaryBox.xMin,
-            boundaryBox.yMax - boundaryBox.yMin
-          )
-        } else {
-          //render vectors
-          for (const [vectorIndex, vectorProperties] of Object.entries(
-            action.properties.vectorsSavedProperties
-          )) {
-            actionCubicCurve(
-              vectorProperties.px1 + offsetX,
-              vectorProperties.py1 + offsetY,
-              vectorProperties.px2 + offsetX,
-              vectorProperties.py2 + offsetY,
-              vectorProperties.px3 + offsetX,
-              vectorProperties.py3 + offsetY,
-              vectorProperties.px4 + offsetX,
-              vectorProperties.py4 + offsetY,
-              boundaryBox,
-              action.properties.selectionInversed,
-              4,
-              swatches.primary.color,
-              action.layer,
-              tools.cubicCurve.modes,
-              brushStamps[tools.cubicCurve.brushType][
-                tools.cubicCurve.brushSize
-              ],
-              tools.cubicCurve.brushSize,
-              null, //maskSet made from action.properties.maskArray
-              activeCtx
-            )
-          }
-        }
+        activeCtx.drawImage(
+          action.properties.canvas,
+          boundaryBox.xMin,
+          boundaryBox.yMin,
+          boundaryBox.xMax - boundaryBox.xMin,
+          boundaryBox.yMax - boundaryBox.yMin
+        )
       } else if (
         canvas.tempLayer === canvas.currentLayer && //only render if the current layer is the temp layer (active paste action)
         isLastPasteAction //only render if this action is the last paste action in the stack
       ) {
         //TODO: (High Priority) handle vectors vs raster
-        if (
-          Object.keys(action.properties.vectorsSavedProperties).length === 0
-        ) {
-          action.layer.ctx.drawImage(
-            action.properties.canvas,
-            boundaryBox.xMin,
-            boundaryBox.yMin,
-            boundaryBox.xMax - boundaryBox.xMin,
-            boundaryBox.yMax - boundaryBox.yMin
-          )
-        } else {
-          //render vectors
-          for (const [vectorIndex, vectorProperties] of Object.entries(
-            action.properties.vectorsSavedProperties
-          )) {
-            actionCubicCurve(
-              vectorProperties.px1 + offsetX,
-              vectorProperties.py1 + offsetY,
-              vectorProperties.px2 + offsetX,
-              vectorProperties.py2 + offsetY,
-              vectorProperties.px3 + offsetX,
-              vectorProperties.py3 + offsetY,
-              vectorProperties.px4 + offsetX,
-              vectorProperties.py4 + offsetY,
-              boundaryBox,
-              action.properties.selectionInversed,
-              4,
-              swatches.primary.color,
-              action.layer,
-              tools.cubicCurve.modes,
-              brushStamps[tools.cubicCurve.brushType][
-                tools.cubicCurve.brushSize
-              ], //TODO: (High Priority) move brush info to action separately from tool for  the sake of group actions
-              tools.cubicCurve.brushSize,
-              null, //maskSet made from action.properties.maskArray
-              betweenCtx
-            )
+
+        action.layer.ctx.drawImage(
+          action.properties.canvas,
+          boundaryBox.xMin,
+          boundaryBox.yMin,
+          boundaryBox.xMax - boundaryBox.xMin,
+          boundaryBox.yMax - boundaryBox.yMin
+        )
+      }
+      break
+    }
+    case "vectorPaste": {
+      //render paste action
+      // Determine if the action is the last 'paste' action in the undoStack
+      let isLastPasteAction = false // Default to false
+      if (!action.properties.confirmed) {
+        for (let i = state.undoStack.length - 1; i >= 0; i--) {
+          if (state.undoStack[i].tool.name === "vectorPaste") {
+            // If the first 'paste' action found from the end is the current action
+            isLastPasteAction = state.undoStack[i] === action
+            break // Stop searching once the first 'paste' action is found
           }
+        }
+      }
+      //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
+      if (action.properties.confirmed) {
+        let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
+        //render vectors
+        for (const [vectorIndex, vector] of Object.entries(
+          action.properties.vectors
+        )) {
+          actionCubicCurve(
+            vector.vectorProperties.px1 + offsetX,
+            vector.vectorProperties.py1 + offsetY,
+            vector.vectorProperties.px2 + offsetX,
+            vector.vectorProperties.py2 + offsetY,
+            vector.vectorProperties.px3 + offsetX,
+            vector.vectorProperties.py3 + offsetY,
+            vector.vectorProperties.px4 + offsetX,
+            vector.vectorProperties.py4 + offsetY,
+            boundaryBox,
+            action.properties.selectionInversed,
+            4,
+            vector.color,
+            action.layer,
+            vector.modes,
+            brushStamps[tools.cubicCurve.brushType][tools.cubicCurve.brushSize],
+            tools.cubicCurve.brushSize,
+            null, //maskSet made from action.properties.maskArray
+            activeCtx
+          )
+        }
+      } else if (
+        canvas.tempLayer === canvas.currentLayer && //only render if the current layer is the temp layer (active paste action)
+        isLastPasteAction //only render if this action is the last paste action in the stack
+      ) {
+        //render vectors
+        for (const [vectorIndex, vector] of Object.entries(
+          action.properties.vectors
+        )) {
+          actionCubicCurve(
+            vector.vectorProperties.px1 + offsetX,
+            vector.vectorProperties.py1 + offsetY,
+            vector.vectorProperties.px2 + offsetX,
+            vector.vectorProperties.py2 + offsetY,
+            vector.vectorProperties.px3 + offsetX,
+            vector.vectorProperties.py3 + offsetY,
+            vector.vectorProperties.px4 + offsetX,
+            vector.vectorProperties.py4 + offsetY,
+            boundaryBox,
+            action.properties.selectionInversed,
+            4,
+            vector.color,
+            action.layer,
+            vector.modes,
+            brushStamps[tools.cubicCurve.brushType][tools.cubicCurve.brushSize], //TODO: (High Priority) move brush info to action separately from tool for  the sake of group actions
+            tools.cubicCurve.brushSize,
+            null, //maskSet made from action.properties.maskArray
+            betweenCtx
+          )
         }
       }
       break

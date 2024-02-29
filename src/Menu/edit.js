@@ -58,8 +58,9 @@ export function copySelectedVectors() {
   let currentVector =
     state.undoStack[state.vectorLookup[canvas.currentVectorIndex]].properties
       .vectors[canvas.currentVectorIndex]
-  state.vectorsSavedProperties[canvas.currentVectorIndex] = {
-    ...currentVector.vectorProperties,
+  let selectedVectors = {}
+  selectedVectors[canvas.currentVectorIndex] = {
+    ...currentVector,
   }
   for (const [linkedVectorIndex, linkedPoints] of Object.entries(
     vectorGui.linkedVectors
@@ -69,15 +70,14 @@ export function copySelectedVectors() {
     const linkedVector =
       linkedVectorAction.properties.vectors[linkedVectorIndex]
 
-    state.vectorsSavedProperties[linkedVectorIndex] = {
-      ...linkedVector.vectorProperties,
+    selectedVectors[linkedVectorIndex] = {
+      ...linkedVector,
     }
   }
-  state.selectClipboard.vectorsSavedProperties = {
-    ...state.vectorsSavedProperties,
+  state.selectClipboard.vectors = {
+    ...selectedVectors,
   }
-  state.vectorsSavedProperties = {}
-  console.log(state.selectClipboard.vectorsSavedProperties)
+  console.log(selectedVectors)
   // enableActionsForClipboard()
 }
 
@@ -170,7 +170,7 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
   })
 
   //for clipboard.canvas:
-  if (Object.keys(clipboard.vectorsSavedProperties).length === 0) {
+  if (Object.keys(clipboard.vectors).length === 0) {
     const { selectProperties, boundaryBox } = clipboard
     // if xOffset and yOffset present, adjust selectProperties and boundaryBox
     //render the clipboard canvas onto the temporary layer
@@ -199,13 +199,13 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
       )
     }
   } else {
-    //for clipboard.vectorsSavedProperties, draw vectors onto the temporary layer
-    for (const [vectorIndex, vectorProperties] of Object.entries(
-      clipboard.vectorsSavedProperties
-    )) {
-      console.log(vectorIndex, vectorProperties)
-      state.vectorProperties = { ...vectorProperties }
-    }
+    //for clipboard.vectors, draw vectors onto the temporary layer
+    // for (const [vectorIndex, vector] of Object.entries(
+    //   clipboard.vectors
+    // )) {
+    //   console.log(vectorIndex, vector)
+    //   state.vectorProperties = { ...vector.vectorProperties }
+    // }
   }
   //TODO: (Medium Priority) include transform control points for resizing, rotating, etc. (not currently implemented)
   vectorGui.render()
@@ -222,7 +222,7 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
  * @param {number} yOffset - y offset (Integer)
  */
 export function confirmPastedPixels(clipboard, layer, xOffset, yOffset) {
-  if (Object.keys(clipboard.vectorsSavedProperties).length === 0) {
+  if (Object.keys(clipboard.vectors).length === 0) {
     //draw the current layer onto the pasted layer
     layer.ctx.drawImage(
       clipboard.canvas,
@@ -233,24 +233,24 @@ export function confirmPastedPixels(clipboard, layer, xOffset, yOffset) {
     )
   } else {
     //draw vectors
-    for (const [vectorIndex, vectorProperties] of Object.entries(
-      clipboard.vectorsSavedProperties
+    for (const [vectorIndex, vector] of Object.entries(
+      clipboard.vectors
     )) {
       actionCubicCurve(
-        vectorProperties.px1 + xOffset,
-        vectorProperties.py1 + yOffset,
-        vectorProperties.px2 + xOffset,
-        vectorProperties.py2 + yOffset,
-        vectorProperties.px3 + xOffset,
-        vectorProperties.py3 + yOffset,
-        vectorProperties.px4 + xOffset,
-        vectorProperties.py4 + yOffset,
+        vector.vectorProperties.px1 + xOffset,
+        vector.vectorProperties.py1 + yOffset,
+        vector.vectorProperties.px2 + xOffset,
+        vector.vectorProperties.py2 + yOffset,
+        vector.vectorProperties.px3 + xOffset,
+        vector.vectorProperties.py3 + yOffset,
+        vector.vectorProperties.px4 + xOffset,
+        vector.vectorProperties.py4 + yOffset,
         clipboard.boundaryBox,
         clipboard.selectionInversed,
         4,
-        swatches.primary.color,
+        vector.color,
         layer,
-        tools.cubicCurve.modes,
+        vector.modes,
         brushStamps[tools.cubicCurve.brushType][tools.cubicCurve.brushSize],
         tools.cubicCurve.brushSize,
         null //maskSet made from action.properties.maskArray
