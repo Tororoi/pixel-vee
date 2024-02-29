@@ -208,7 +208,6 @@ export function actionPasteSelection() {
           width: state.selectClipboard.canvas.width,
           height: state.selectClipboard.canvas.height,
         },
-        //vectorType: state.selectClipboard.vectorType,
         //vectorsSavedProperties: state.selectClipboard.vectorsSavedProperties,
         pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
       },

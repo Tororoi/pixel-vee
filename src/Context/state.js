@@ -106,7 +106,6 @@ export const state = {
       py2: null,
     },
     canvas: null,
-    vectorType: null, //string for type of vector copied (ellipse, cubicCurve, quadCurve, fill)
     vectorsSavedProperties: [],
   },
   //for perfect pixels

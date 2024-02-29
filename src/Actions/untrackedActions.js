@@ -3,7 +3,7 @@ import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { setInitialZoom } from "../utils/canvasHelpers.js"
-import { copySelectedPixels } from "../Menu/edit.js"
+import { copySelectedPixels, copySelectedVectors } from "../Menu/edit.js"
 
 /**
  * Zoom the canvas
@@ -122,6 +122,10 @@ export function actionCopySelection() {
     canvas.currentLayer.type === "raster" &&
     (state.boundaryBox.xMax !== null || canvas.currentVectorIndex)
   ) {
-    copySelectedPixels()
+    if (canvas.currentVectorIndex) {
+      copySelectedVectors()
+    } else {
+      copySelectedPixels()
+    }
   }
 }

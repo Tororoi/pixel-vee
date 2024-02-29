@@ -1,7 +1,7 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { vectorGui } from "../GUI/vector.js"
+import { updateLinkedVectors, vectorGui } from "../GUI/vector.js"
 import { enableActionsForClipboard } from "../DOM/disableDomElements.js"
 
 //===================================//
@@ -45,6 +45,36 @@ export function copySelectedPixels() {
   }
   state.selectClipboard.canvas = tempCanvas
   enableActionsForClipboard()
+}
+
+/**
+ * Currently uses linked vectors, TODO: keep separate track of "selected" vectors in a similar way
+ */
+export function copySelectedVectors() {
+  let currentVector =
+    state.undoStack[state.vectorLookup[canvas.currentVectorIndex]].properties
+      .vectors[canvas.currentVectorIndex]
+  state.vectorsSavedProperties[canvas.currentVectorIndex] = {
+    ...currentVector.vectorProperties,
+  }
+  for (const [linkedVectorIndex, linkedPoints] of Object.entries(
+    vectorGui.linkedVectors
+  )) {
+    const linkedVectorAction =
+      state.undoStack[state.vectorLookup[linkedVectorIndex]]
+    const linkedVector =
+      linkedVectorAction.properties.vectors[linkedVectorIndex]
+
+    state.vectorsSavedProperties[linkedVectorIndex] = {
+      ...linkedVector.vectorProperties,
+    }
+  }
+  state.selectClipboard.vectorsSavedProperties = {
+    ...state.vectorsSavedProperties,
+  }
+  state.vectorsSavedProperties = {}
+  console.log(state.selectClipboard.vectorsSavedProperties)
+  // enableActionsForClipboard()
 }
 
 /**
