@@ -19,6 +19,10 @@ import {
   calculateCurrentVectorDeltas,
   handleOptionsAndUpdateVector,
 } from "../utils/vectorHelpers.js"
+import {
+  disableActionsForNoSelection,
+  enableActionsForSelection,
+} from "../DOM/disableDomElements.js"
 
 //==================================================//
 //=== * * * Vector Graphics User Interface * * * ===//
@@ -259,6 +263,7 @@ function reset() {
   }
   //reset selectedpoint and collided keys
   canvas.currentVectorIndex = null
+  disableActionsForNoSelection()
   vectorGui.render()
 }
 
@@ -290,6 +295,7 @@ function setVectorProperties(action, vector) {
       state.vectorProperties.py4 += action.layer.y
     }
     canvas.currentVectorIndex = vector.index
+    enableActionsForSelection()
   }
 }
 

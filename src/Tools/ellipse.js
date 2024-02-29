@@ -14,6 +14,7 @@ import {
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
+import { enableActionsForSelection } from "../DOM/disableDomElements.js"
 
 //======================================//
 //=== * * * Ellipse Controller * * * ===//
@@ -210,6 +211,7 @@ function ellipseSteps() {
         }
         state.vectorLookup[uniqueVectorKey] = state.undoStack.length
         canvas.currentVectorIndex = uniqueVectorKey
+        enableActionsForSelection()
         //store control points for timeline
         addToTimeline({
           tool: state.tool,

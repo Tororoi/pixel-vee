@@ -71,7 +71,10 @@ export function enableActionsForSelection() {
   dom.cutBtn.classList.remove("disabled")
   dom.copyBtn.classList.remove("disabled")
   dom.deselectBtn.classList.remove("disabled")
-  dom.invertSelectionBtn.classList.remove("disabled")
+  if (state.boundaryBox.xMax !== null) {
+    //only enable invert for selection box, not vectors
+    dom.invertSelectionBtn.classList.remove("disabled")
+  }
 }
 
 /**

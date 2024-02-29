@@ -194,6 +194,7 @@ function deselect() {
   resetSelectProperties()
   resetBoundaryBox()
   state.selectionInversed = false
+  //TODO: (High Priority) Also deselect current vector
   disableActionsForNoSelection()
 }
 

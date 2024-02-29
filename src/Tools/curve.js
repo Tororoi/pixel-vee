@@ -18,6 +18,7 @@ import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { getAngle } from "../utils/trig.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
+import { enableActionsForSelection } from "../DOM/disableDomElements.js"
 
 //=====================================//
 //=== * * * Curve Controllers * * * ===//
@@ -173,6 +174,7 @@ function quadCurveSteps() {
         }
         state.vectorLookup[uniqueVectorKey] = state.undoStack.length
         canvas.currentVectorIndex = uniqueVectorKey
+        enableActionsForSelection()
         //store control points for timeline
         addToTimeline({
           tool: state.tool,
@@ -408,6 +410,7 @@ function cubicCurveSteps() {
         }
         state.vectorLookup[uniqueVectorKey] = state.undoStack.length
         canvas.currentVectorIndex = uniqueVectorKey
+        enableActionsForSelection()
         //store control points for timeline
         addToTimeline({
           tool: state.tool,

@@ -8,6 +8,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
+import { enableActionsForSelection } from "../DOM/disableDomElements.js"
 
 //===================================//
 //=== * * * Fill Controller * * * ===//
@@ -60,6 +61,7 @@ function fillSteps() {
         }
         state.vectorLookup[uniqueVectorKey] = state.undoStack.length
         canvas.currentVectorIndex = uniqueVectorKey
+        enableActionsForSelection()
         //store control points for timeline
         addToTimeline({
           tool: state.tool,
