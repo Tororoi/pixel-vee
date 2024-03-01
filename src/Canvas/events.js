@@ -344,7 +344,7 @@ function vectorInteract(e) {
     //remove vector
     removeVector(action, vector)
   } else {
-    let currentIndex = canvas.currentVectorIndex
+    let currentIndex = state.currentVectorIndex
     //switch tool
     switchTool(vector.vectorProperties.type)
     //select current vector
@@ -376,7 +376,7 @@ function removeVector(action, vector) {
   removeActionVector(action, vector) //TODO: (High Priority) Need to specify that it is a sub action for a group action that is being removed
   state.action = null
   state.redoStack = []
-  if (canvas.currentVectorIndex === vector.index) {
+  if (state.currentVectorIndex === vector.index) {
     vectorGui.reset()
   }
   renderVectorsToDOM()

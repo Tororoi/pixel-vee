@@ -210,7 +210,7 @@ function ellipseSteps() {
           uniqueVectorKey++
         }
         state.vectorLookup[uniqueVectorKey] = state.undoStack.length
-        canvas.currentVectorIndex = uniqueVectorKey
+        state.currentVectorIndex = uniqueVectorKey
         enableActionsForSelection()
         //store control points for timeline
         addToTimeline({
@@ -290,9 +290,8 @@ function updateEllipseVectorProperties(currentAction, currentVector) {
  */
 export function adjustEllipseSteps() {
   let currentAction =
-    state.undoStack[state.vectorLookup[canvas.currentVectorIndex]]
-  let currentVector =
-    currentAction.properties.vectors[canvas.currentVectorIndex]
+    state.undoStack[state.vectorLookup[state.currentVectorIndex]]
+  let currentVector = currentAction.properties.vectors[state.currentVectorIndex]
   if (!(vectorGui.selectedCollisionPresent && state.clickCounter === 0)) {
     return
   }
@@ -302,7 +301,7 @@ export function adjustEllipseSteps() {
         xKey: vectorGui.collidedKeys.xKey,
         yKey: vectorGui.collidedKeys.yKey,
       }
-      state.vectorsSavedProperties[canvas.currentVectorIndex] = {
+      state.vectorsSavedProperties[state.currentVectorIndex] = {
         ...currentVector.vectorProperties,
       }
       if (

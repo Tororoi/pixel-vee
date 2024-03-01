@@ -60,7 +60,7 @@ function fillSteps() {
           uniqueVectorKey++
         }
         state.vectorLookup[uniqueVectorKey] = state.undoStack.length
-        canvas.currentVectorIndex = uniqueVectorKey
+        state.currentVectorIndex = uniqueVectorKey
         enableActionsForSelection()
         //store control points for timeline
         addToTimeline({
@@ -125,9 +125,8 @@ function fillSteps() {
  */
 export function adjustFillSteps() {
   let currentAction =
-    state.undoStack[state.vectorLookup[canvas.currentVectorIndex]]
-  let currentVector =
-    currentAction.properties.vectors[canvas.currentVectorIndex]
+    state.undoStack[state.vectorLookup[state.currentVectorIndex]]
+  let currentVector = currentAction.properties.vectors[state.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.selectedCollisionPresent) {
@@ -137,7 +136,7 @@ export function adjustFillSteps() {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
         }
-        state.vectorsSavedProperties[canvas.currentVectorIndex] = {
+        state.vectorsSavedProperties[state.currentVectorIndex] = {
           ...currentVector.vectorProperties,
         }
         updateVectorProperties(

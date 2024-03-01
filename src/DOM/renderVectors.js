@@ -53,7 +53,7 @@ const isValidVectorAction = (action) =>
  * @param {object} vector - The vector to be rendered
  */
 const renderVectorElement = (action, vector) => {
-  const isSelected = vector.index === canvas.currentVectorIndex
+  const isSelected = vector.index === state.currentVectorIndex
   const vectorElement = createVectorElement(vector)
 
   const thumb = createThumbnailImage(action, vector)
@@ -149,7 +149,7 @@ const drawOnThumbnailContext = (action, vector) => {
   )
   canvas.thumbnailCTX.lineWidth = 3
   canvas.thumbnailCTX.fillStyle =
-    vector.index === canvas.currentVectorIndex
+    vector.index === state.currentVectorIndex
       ? "rgb(0, 0, 0)"
       : "rgb(51, 51, 51)"
   canvas.thumbnailCTX.fillRect(

@@ -39,6 +39,9 @@ export function activateShortcut(keyCode) {
         actionConfirmPastedPixels()
       }
       break
+    case "Backspace":
+      //TODO: (High Priority) Delete selection (mark vectors as removed, clear pixels similar to cut but without adding anything to clipboard)
+      break
     case "MetaLeft":
     case "MetaRight":
       //command key
@@ -120,9 +123,7 @@ export function activateShortcut(keyCode) {
       if (!state.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           //deselect
-          if (state.selectProperties.px1 !== null) {
-            actionDeselect()
-          }
+          actionDeselect()
         }
       }
       break

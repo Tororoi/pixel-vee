@@ -173,7 +173,7 @@ function quadCurveSteps() {
           uniqueVectorKey++
         }
         state.vectorLookup[uniqueVectorKey] = state.undoStack.length
-        canvas.currentVectorIndex = uniqueVectorKey
+        state.currentVectorIndex = uniqueVectorKey
         enableActionsForSelection()
         //store control points for timeline
         addToTimeline({
@@ -235,14 +235,14 @@ function quadCurveSteps() {
 function cubicCurveSteps() {
   //for selecting another vector via the canvas, collisionPresent is false since it is currently based on collision with selected vector.
   if (
-    canvas.collidedVectorIndex &&
+    state.collidedVectorIndex &&
     !vectorGui.selectedCollisionPresent &&
     state.clickCounter === 0
   ) {
     let collidedVectorAction =
-      state.undoStack[state.vectorLookup[canvas.collidedVectorIndex]]
+      state.undoStack[state.vectorLookup[state.collidedVectorIndex]]
     let collidedVector =
-      collidedVectorAction.properties.vectors[canvas.collidedVectorIndex]
+      collidedVectorAction.properties.vectors[state.collidedVectorIndex]
     vectorGui.setVectorProperties(collidedVectorAction, collidedVector)
     //Render new selected vector before running standard render routine
     //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.
@@ -409,7 +409,7 @@ function cubicCurveSteps() {
           uniqueVectorKey++
         }
         state.vectorLookup[uniqueVectorKey] = state.undoStack.length
-        canvas.currentVectorIndex = uniqueVectorKey
+        state.currentVectorIndex = uniqueVectorKey
         enableActionsForSelection()
         //store control points for timeline
         addToTimeline({
@@ -482,9 +482,8 @@ function adjustCurveSteps() {
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
   let currentAction =
-    state.undoStack[state.vectorLookup[canvas.currentVectorIndex]]
-  let currentVector =
-    currentAction.properties.vectors[canvas.currentVectorIndex]
+    state.undoStack[state.vectorLookup[state.currentVectorIndex]]
+  let currentVector = currentAction.properties.vectors[state.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
@@ -495,7 +494,7 @@ function adjustCurveSteps() {
           yKey: vectorGui.collidedKeys.yKey,
         }
         console.log(currentAction, currentVector)
-        state.vectorsSavedProperties[canvas.currentVectorIndex] = {
+        state.vectorsSavedProperties[state.currentVectorIndex] = {
           ...currentVector.vectorProperties,
         }
         //save linked vectors too
@@ -583,13 +582,11 @@ function adjustCurveSteps() {
           ["px1", "px2"].includes(vectorGui.selectedPoint.xKey)
         ) {
           //snap selected point to collidedVector's control point
-          if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
+          if (state.collidedVectorIndex && state.currentVectorIndex) {
             let collidedVectorAction =
-              state.undoStack[state.vectorLookup[canvas.collidedVectorIndex]]
+              state.undoStack[state.vectorLookup[state.collidedVectorIndex]]
             let collidedVector =
-              collidedVectorAction.properties.vectors[
-                canvas.collidedVectorIndex
-              ]
+              collidedVectorAction.properties.vectors[state.collidedVectorIndex]
             let snappedToX =
               collidedVector.vectorProperties[
                 vectorGui.otherCollidedKeys.xKey

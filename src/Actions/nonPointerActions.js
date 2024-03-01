@@ -64,7 +64,11 @@ export function actionSelectAll() {
  * Conditions: Layer is not a preview layer, and there is a selection
  */
 export function actionDeselect() {
-  if (!canvas.currentLayer.isPreview && state.boundaryBox.xMax !== null) {
+  console.log("actionDeselect")
+  if (
+    !canvas.currentLayer.isPreview &&
+    (state.boundaryBox.xMax !== null || state.currentVectorIndex)
+  ) {
     // let maskArray = coordArrayFromSet(
     //   state.maskSet,
     //   canvas.currentLayer.x,
@@ -77,12 +81,15 @@ export function actionDeselect() {
         deselect: true,
         invertSelection: state.selectionInversed,
         selectProperties: { ...state.selectProperties },
+        // vectorIndex: state.currentVectorIndex, //should be for all selected vectors
         // maskArray,
       },
     })
     state.action = null
     state.redoStack = []
     state.deselect()
+    vectorGui.render()
+    renderVectorsToDOM()
     canvas.rasterGuiCTX.clearRect(
       0,
       0,

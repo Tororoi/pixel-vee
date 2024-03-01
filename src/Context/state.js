@@ -80,6 +80,9 @@ export const state = {
     // y1Offset: 0,
     // forceCircle: false,
   },
+  //Vectors
+  currentVectorIndex: null,
+  collidedVectorIndex: null,
   vectorLookup: {}, //for quick lookup of vector indexes eg. "[vectorIndex]": actionIndex. TODO: (High Priority) Vectors must be removed from the lookup table when they are removed from the undoStack (such as by becoming part of the redoStack)
   //for select tool
   selectProperties: {
@@ -190,10 +193,13 @@ function setBoundaryBox(selectProperties) {
  * Deselect
  */
 function deselect() {
+  console.log("deselect")
   resetSelectProperties()
   resetBoundaryBox()
   state.selectionInversed = false
-  //TODO: (High Priority) Also deselect current vector
+  state.vectorProperties = {}
+  state.currentVectorIndex = null
+  //should be for all selected vectors
   disableActionsForNoSelection()
 }
 

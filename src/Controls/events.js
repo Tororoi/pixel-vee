@@ -238,9 +238,9 @@ function handlePointerUp(e) {
       ["fill", "quadCurve", "cubicCurve", "ellipse"].includes(state.tool.name)
     ) {
       // if (state.action.tool.type === "vector") {
-      //   canvas.currentVectorIndex = state.undoStack.indexOf(state.action)
+      //   state.currentVectorIndex = state.undoStack.indexOf(state.action)
       // } else if (state.action.tool.type === "modify") {
-      //   canvas.currentVectorIndex = state.action.properties.moddedActionIndex
+      //   state.currentVectorIndex = state.action.properties.moddedActionIndex
       // }
       renderVectorsToDOM()
     }

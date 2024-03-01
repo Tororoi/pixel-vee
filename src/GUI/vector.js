@@ -48,7 +48,7 @@ export const vectorGui = {
     this.collidedKeys.yKey = keys.y
   },
   resetOtherVectorCollision() {
-    canvas.collidedVectorIndex = null
+    state.collidedVectorIndex = null
     this.otherCollidedKeys = { xKey: null, yKey: null }
   },
   setOtherVectorCollision(keys) {
@@ -150,7 +150,7 @@ function handleCollisionAndDraw(
       //if cursor is colliding with a control point not on the selected vector, set collided keys specifically for collided vector
       if (vector) {
         if (keys.x === "px1" || keys.x === "px2") {
-          canvas.collidedVectorIndex = vector.index
+          state.collidedVectorIndex = vector.index
           //Only allow link if active point for selection is p1 or p2
           let activeKey =
             vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey
@@ -166,7 +166,7 @@ function handleCollisionAndDraw(
           (keys.x === "px3" || keys.x === "px4") &&
           !vectorGui.selectedPoint.xKey
         ) {
-          canvas.collidedVectorIndex = vector.index
+          state.collidedVectorIndex = vector.index
           //only set new radius if selected vector is not a new vector being drawn
           if (state.clickCounter === 0) r = radius * 2.125
         }
@@ -209,7 +209,7 @@ function handleCollisionAndDraw(
  * Set css cursor for vector interaction
  */
 function setCursorStyle() {
-  if (!vectorGui.selectedCollisionPresent && !canvas.collidedVectorIndex) {
+  if (!vectorGui.selectedCollisionPresent && !state.collidedVectorIndex) {
     canvas.vectorGuiCVS.style.cursor = state.tool.modes?.eraser
       ? "none"
       : state.tool.cursor
@@ -262,7 +262,7 @@ function reset() {
     // },
   }
   //reset selectedpoint and collided keys
-  canvas.currentVectorIndex = null
+  state.currentVectorIndex = null
   disableActionsForNoSelection()
   vectorGui.render()
 }
@@ -294,7 +294,7 @@ function setVectorProperties(action, vector) {
       state.vectorProperties.px4 += action.layer.x
       state.vectorProperties.py4 += action.layer.y
     }
-    canvas.currentVectorIndex = vector.index
+    state.currentVectorIndex = vector.index
     enableActionsForSelection()
   }
 }
@@ -402,16 +402,16 @@ function renderPath(toolName, vectorProperties, action = null) {
 /**
  * For each vector action in the undoStack in a given layer, render it
  * @param {object} layer - The layer to render the vectors for
- * TODO: (High Priority) Get vectors as sub actions of group actions, eg. selectedVector = state.lookupVector(canvas.currentVectorIndex)
+ * TODO: (High Priority) Get vectors as sub actions of group actions, eg. selectedVector = state.lookupVector(state.currentVectorIndex)
  */
 function renderLayerVectors(layer) {
   let selectedVectorAction = null
   let selectedVector = null
-  if (canvas.currentVectorIndex !== null) {
+  if (state.currentVectorIndex !== null) {
     selectedVectorAction =
-      state.undoStack[state.vectorLookup[canvas.currentVectorIndex]]
+      state.undoStack[state.vectorLookup[state.currentVectorIndex]]
     selectedVector =
-      selectedVectorAction.properties.vectors[canvas.currentVectorIndex]
+      selectedVectorAction.properties.vectors[state.currentVectorIndex]
   }
   //iterate through and render all vectors in the layer except the selected vector which will always be rendered last
   //render paths
@@ -568,8 +568,7 @@ export function updateLockedCurrentVectorControlHandle(
   x,
   y
 ) {
-  const savedProperties =
-    state.vectorsSavedProperties[canvas.currentVectorIndex]
+  const savedProperties = state.vectorsSavedProperties[state.currentVectorIndex]
   if (vectorGui.selectedPoint.xKey === "px1") {
     //update px3 and py3
     const xDiff = savedProperties.px1 - savedProperties.px3

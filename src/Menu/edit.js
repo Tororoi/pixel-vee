@@ -56,10 +56,10 @@ export function copySelectedPixels() {
  */
 export function copySelectedVectors() {
   let currentVector =
-    state.undoStack[state.vectorLookup[canvas.currentVectorIndex]].properties
-      .vectors[canvas.currentVectorIndex]
+    state.undoStack[state.vectorLookup[state.currentVectorIndex]].properties
+      .vectors[state.currentVectorIndex]
   let selectedVectors = {}
-  selectedVectors[canvas.currentVectorIndex] = {
+  selectedVectors[state.currentVectorIndex] = {
     ...currentVector,
   }
   for (const [linkedVectorIndex, linkedPoints] of Object.entries(
@@ -233,9 +233,7 @@ export function confirmPastedPixels(clipboard, layer, xOffset, yOffset) {
     )
   } else {
     //draw vectors
-    for (const [vectorIndex, vector] of Object.entries(
-      clipboard.vectors
-    )) {
+    for (const [vectorIndex, vector] of Object.entries(clipboard.vectors)) {
       actionCubicCurve(
         vector.vectorProperties.px1 + xOffset,
         vector.vectorProperties.py1 + yOffset,

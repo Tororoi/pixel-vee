@@ -56,12 +56,6 @@ export const canvas = {
   hiddenLayer: null,
   bgColor: "rgba(131, 131, 131, 0.5)",
   borderColor: "black",
-  //Vectors
-  currentVectorIndex: null,
-  collidedVectorIndex: null,
-  //Better vector lookup: TODO: Create a vector lookup table that stores an object with the vector index as the key and the value is action index
-  // currentVectorLookup: { actionIndex: null, vectorIndex: null },
-  // collidedVectorLookup: { actionIndex: null, vectorIndex: null },
   //Cursor
   pointerEvent: "none",
   sizePointerState: "none",

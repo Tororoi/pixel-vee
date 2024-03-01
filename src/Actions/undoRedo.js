@@ -112,7 +112,7 @@ function handleModifyAction(latestAction, modType) {
     ]
   if (
     state.tool.name === primaryModdedVector.vectorProperties.type &&
-    canvas.currentVectorIndex === primaryModdedVector.index
+    state.currentVectorIndex === primaryModdedVector.index
   ) {
     vectorGui.setVectorProperties(primaryModdedAction, primaryModdedVector)
   }
@@ -339,7 +339,7 @@ function handleMoveAction(latestAction, modType) {
 export function actionUndoRedo(pushStack, popStack, modType) {
   //latest action is the action about to be undone or redone
   let latestAction = popStack[popStack.length - 1]
-  if (state.vectorLookup[canvas.currentVectorIndex] === latestAction.index) {
+  if (state.vectorLookup[state.currentVectorIndex] === latestAction.index) {
     //reset vectorGui if the latest action is the current vector
     vectorGui.reset()
   }
@@ -421,7 +421,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     if (
       newLatestAction.tool.name === state.tool.name &&
       newLatestAction.tool.type === "vector" &&
-      canvas.currentVectorIndex === null
+      state.currentVectorIndex === null
     ) {
       //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
       let newLatestVector =
@@ -474,6 +474,7 @@ export function addToTimeline(actionObject) {
     tool: { ...tool }, //Needed properties: name, brushType, brushSize, type
     layer: layer,
     properties,
+    //{...properties } //TODO: (High Priority) Remove nesting of properties object
     hidden: false,
     removed: false,
     snapshot,
