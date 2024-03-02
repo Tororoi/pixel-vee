@@ -23,6 +23,7 @@ import {
 } from "../Actions/nonPointerActions.js"
 import { createPreviewLayer } from "./layers.js"
 import { switchTool } from "../Tools/toolbox.js"
+import { enableActionsForSelection } from "../DOM/disableDomElements.js"
 
 //====================================//
 //==== * * * Canvas Resize * * * =====//
@@ -349,6 +350,13 @@ function vectorInteract(e) {
     switchTool(vector.vectorProperties.type)
     //select current vector
     vectorGui.reset()
+    if (!state.selectedVectors[vector.index]) {
+      //select if shift key held down
+      state.selectedVectors[vector.index] = vector
+      enableActionsForSelection()
+    } else {
+      //deselect if option key held down
+    } //else reset selectedVectors
     if (vector.index !== currentIndex) {
       vectorGui.setVectorProperties(action, vector)
       canvas.currentLayer.inactiveTools.forEach((tool) => {

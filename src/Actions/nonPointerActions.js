@@ -64,9 +64,10 @@ export function actionSelectAll() {
  * Conditions: Layer is not a preview layer, and there is a selection
  */
 export function actionDeselect() {
+  console.log("deselect", state.currentVectorIndex)
   if (
     !canvas.currentLayer.isPreview &&
-    (state.boundaryBox.xMax !== null || state.currentVectorIndex)
+    (state.boundaryBox.xMax !== null || state.currentVectorIndex !== null)
   ) {
     // let maskArray = coordArrayFromSet(
     //   state.maskSet,
@@ -84,6 +85,7 @@ export function actionDeselect() {
         // maskArray,
       },
     })
+    console.log("deselect")
     state.action = null
     state.redoStack = []
     state.deselect()

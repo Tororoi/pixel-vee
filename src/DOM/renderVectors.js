@@ -53,10 +53,13 @@ const isValidVectorAction = (action) =>
  * @param {object} vector - The vector to be rendered
  */
 const renderVectorElement = (action, vector) => {
-  const isSelected = vector.index === state.currentVectorIndex
+  // const isSelected = vector.index === state.currentVectorIndex
+  const isSelected =
+    !!state.selectedVectors[vector.index] ||
+    vector.index === state.currentVectorIndex //TODO: (High Priority) Need way to mark selected vs current vector
   const vectorElement = createVectorElement(vector)
 
-  const thumb = createThumbnailImage(action, vector)
+  const thumb = createThumbnailImage(action, vector, isSelected)
   vectorElement.appendChild(thumb)
 
   //left side icons
@@ -137,8 +140,9 @@ const calculateDrawingDimensions = () => {
  * Draw a vector vector onto the thumbnail canvas
  * @param {object} action - The action to be drawn
  * @param {object} vector - The vector to be drawn
+ * @param {boolean} isSelected - True if the vector is selected
  */
-const drawOnThumbnailContext = (action, vector) => {
+const drawOnThumbnailContext = (action, vector, isSelected) => {
   let { minD, xOffset, yOffset } = calculateDrawingDimensions()
 
   canvas.thumbnailCTX.clearRect(
@@ -148,10 +152,9 @@ const drawOnThumbnailContext = (action, vector) => {
     canvas.thumbnailCVS.height
   )
   canvas.thumbnailCTX.lineWidth = 3
-  canvas.thumbnailCTX.fillStyle =
-    vector.index === state.currentVectorIndex
-      ? "rgb(0, 0, 0)"
-      : "rgb(51, 51, 51)"
+  canvas.thumbnailCTX.fillStyle = isSelected
+    ? "rgb(0, 0, 0)"
+    : "rgb(51, 51, 51)"
   canvas.thumbnailCTX.fillRect(
     0,
     0,
@@ -234,10 +237,11 @@ const drawOnThumbnailContext = (action, vector) => {
  * Create the thumbnail and save as an image
  * @param {object} action - The action to be rendered
  * @param {object} vector - The vector to be rendered
+ * @param {boolean} isSelected - True if the vector is selected
  * @returns {Image} - The created thumbnail image
  */
-const createThumbnailImage = (action, vector) => {
-  drawOnThumbnailContext(action, vector)
+const createThumbnailImage = (action, vector, isSelected) => {
+  drawOnThumbnailContext(action, vector, isSelected)
   let thumb = new Image()
   thumb.src = canvas.thumbnailCVS.toDataURL()
   thumb.alt = `thumb ${vector.index}`

@@ -461,8 +461,8 @@ function cubicCurveSteps() {
             },
           },
         })
-        state.selectedVectors[uniqueVectorKey] =
-          state.action.vectors[uniqueVectorKey]
+        // state.selectedVectors[uniqueVectorKey] =
+        //   state.action.vectors[uniqueVectorKey]
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
       }

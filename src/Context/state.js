@@ -209,6 +209,7 @@ function deselect() {
   state.selectionInversed = false
   state.vectorProperties = {}
   state.currentVectorIndex = null
+  state.selectedVectors = {}
   //should be for all selected vectors
   disableActionsForNoSelection()
 }
