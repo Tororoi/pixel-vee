@@ -323,9 +323,16 @@ function render() {
     //else render only the current vector
     renderCurrentVector()
   }
-  //Render select vector
-  if (state.selectProperties.px1 !== null) {
-    // renderSelectVector(0.5, state.tool.name === "select")
+  //TODO: (High Priority) Need special render function for unconfirmed pasted vectors and selected vectors
+  // if (Object.keys(state.selectedVectors).length !== 0) {
+  //   // renderSelectedVectors()
+  // }
+  //Render selection outline
+  if (
+    state.selectProperties.px1 !== null ||
+    Object.keys(state.selectedVectors).length > 0
+  ) {
+    // renderSelectionBoxOutline(0.5, state.tool.name === "select")
     renderRasterCVS()
   }
   //Render grid
@@ -377,14 +384,14 @@ function renderControlPoints(
  * @param {object|null} action - The vector's action
  * @param {object|null} vector - The vector to be rendered
  */
-function renderPath(toolName, vectorProperties, action = null) {
+function renderPath(toolName, vectorProperties, action = null, vector = null) {
   switch (toolName) {
     case "fill":
       // renderFillVector(state.vectorProperties)
       break
     case "quadCurve":
     case "cubicCurve":
-      renderCurvePath(vectorProperties, action)
+      renderCurvePath(vectorProperties, action, vector)
       break
     case "ellipse":
       renderEllipsePath(vectorProperties, action)
@@ -426,19 +433,21 @@ function renderLayerVectors(layer) {
         let vector = action.properties.vectors[vectorIndex]
         if (
           !vector.removed &&
-          vector.vectorProperties.type === state.tool.name &&
-          vector !== selectedVector
+          vector.vectorProperties.type === state.tool.name
+          // &&
+          // vector !== selectedVector
         ) {
           renderPath(
             vector.vectorProperties.type,
             vector.vectorProperties,
-            action
+            action,
+            vector
           )
         }
       }
     }
   }
-  //render selected vector path
+  //render vector path for in progress vectors
   renderPath(state.tool.name, state.vectorProperties)
   if (!state.tool.options.displayPaths?.active) {
     // Clear strokes from drawing area

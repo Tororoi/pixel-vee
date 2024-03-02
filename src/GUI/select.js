@@ -17,13 +17,42 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
     canvas.rasterGuiCVS.width,
     canvas.rasterGuiCVS.height
   )
-  if (state.boundaryBox.xMax !== null) {
-    // if (tools.select.options.maskArea) {
+  let isRasterSelection = state.boundaryBox.xMax !== null
+  let isVectorSelection = Object.keys(state.selectedVectors).length > 0
+  if (isRasterSelection || isVectorSelection) {
     //Create greyed out area around selection
     //clip to selection
     canvas.rasterGuiCTX.save()
     canvas.rasterGuiCTX.beginPath()
-    if (!state.selectionInversed) {
+    if (state.selectProperties.px1 !== null) {
+      if (!state.selectionInversed) {
+        //define rectangle for canvas area
+        canvas.rasterGuiCTX.rect(
+          canvas.xOffset,
+          canvas.yOffset,
+          canvas.offScreenCVS.width,
+          canvas.offScreenCVS.height
+        )
+      }
+      //define rectangle for selection area
+      canvas.rasterGuiCTX.rect(
+        canvas.xOffset + state.boundaryBox.xMin,
+        canvas.yOffset + state.boundaryBox.yMin,
+        state.boundaryBox.xMax - state.boundaryBox.xMin,
+        state.boundaryBox.yMax - state.boundaryBox.yMin
+      )
+      canvas.rasterGuiCTX.clip("evenodd")
+      // canvas.rasterGuiCTX.globalAlpha = 0.5
+      canvas.rasterGuiCTX.fillStyle = "rgba(255, 255, 255, 0.1)"
+      canvas.rasterGuiCTX.fillRect(
+        canvas.xOffset,
+        canvas.yOffset,
+        canvas.offScreenCVS.width,
+        canvas.offScreenCVS.height
+      )
+      canvas.rasterGuiCTX.restore()
+      renderSelectionBoxOutline(lineDashOffset, state.tool.name === "select")
+    } else if (Object.keys(state.selectedVectors).length > 0) {
       //define rectangle for canvas area
       canvas.rasterGuiCTX.rect(
         canvas.xOffset,
@@ -31,30 +60,61 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
         canvas.offScreenCVS.width,
         canvas.offScreenCVS.height
       )
+      //grey out canvas area
+      canvas.rasterGuiCTX.fillStyle = "rgba(255, 255, 255, 0.1)"
+      canvas.rasterGuiCTX.fillRect(
+        canvas.xOffset,
+        canvas.yOffset,
+        canvas.offScreenCVS.width,
+        canvas.offScreenCVS.height
+      )
+      //construct vector paths
+      const xOffset = canvas.currentLayer.x + canvas.xOffset
+      const yOffset = canvas.currentLayer.y + canvas.yOffset
+      canvas.rasterGuiCTX.beginPath()
+      //Need to chain paths?
+      for (const [vectorIndex, vector] of Object.entries(
+        state.selectedVectors
+      )) {
+        const { px1, py1, px2, py2, px3, py3, px4, py4 } =
+          vector.vectorProperties
+        canvas.rasterGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
+        canvas.rasterGuiCTX.bezierCurveTo(
+          xOffset + px3 + 0.5,
+          yOffset + py3 + 0.5,
+          xOffset + px4 + 0.5,
+          yOffset + py4 + 0.5,
+          xOffset + px2 + 0.5,
+          yOffset + py2 + 0.5
+        )
+      }
+      // stroke vector paths with thick squared off dashed line then stroke vector paths with slightly thinner eraser (use some built-in html canvas composite mode) to clear greyed out area for vectors
+      let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+      // canvas.rasterGuiCTX.lineDashOffset = 0.5
+      // canvas.rasterGuiCTX.setLineDash([lineWidth * 6, lineWidth * 6])
+      canvas.rasterGuiCTX.lineWidth = lineWidth * 19
+      canvas.rasterGuiCTX.lineCap = "round"
+      canvas.rasterGuiCTX.strokeStyle = "white"
+      canvas.rasterGuiCTX.stroke()
+      canvas.rasterGuiCTX.lineDashOffset = lineDashOffset * 2
+      canvas.rasterGuiCTX.setLineDash([lineWidth * 12, lineWidth * 12])
+      canvas.rasterGuiCTX.lineWidth = lineWidth * 20
+      canvas.rasterGuiCTX.lineCap = "butt"
+      canvas.rasterGuiCTX.strokeStyle = "black"
+      canvas.rasterGuiCTX.stroke()
+      canvas.rasterGuiCTX.strokeStyle = "rgba(255, 255, 255, 0.1)"
+      canvas.rasterGuiCTX.stroke()
+      canvas.rasterGuiCTX.setLineDash([])
+      canvas.rasterGuiCTX.lineWidth = lineWidth * 17
+      canvas.rasterGuiCTX.lineCap = "round"
+      canvas.rasterGuiCTX.strokeStyle = "black"
+      canvas.rasterGuiCTX.stroke()
+      canvas.rasterGuiCTX.restore()
     }
-    //define rectangle for selection area
-    canvas.rasterGuiCTX.rect(
-      canvas.xOffset + state.boundaryBox.xMin,
-      canvas.yOffset + state.boundaryBox.yMin,
-      state.boundaryBox.xMax - state.boundaryBox.xMin,
-      state.boundaryBox.yMax - state.boundaryBox.yMin
-    )
-    canvas.rasterGuiCTX.clip("evenodd")
-    canvas.rasterGuiCTX.globalAlpha = 0.5
-    canvas.rasterGuiCTX.fillStyle = "rgba(255, 255, 255, 0.2)"
-    canvas.rasterGuiCTX.fillRect(
-      canvas.xOffset,
-      canvas.yOffset,
-      canvas.offScreenCVS.width,
-      canvas.offScreenCVS.height
-    )
-    canvas.rasterGuiCTX.restore()
-    // }
-    renderSelectVector(lineDashOffset, state.tool.name === "select")
     //TODO: (Medium Priority) Animating the selection currently not possible because animation is interrupted by renderCanvas() call taking up the main thread
-    //All rendering would need to be part of the animation loop or on a separate thread. Maybe the marching ants could be done with css instead of on the canvas?
+    // All rendering would need to be part of the animation loop or on a separate thread. Maybe the marching ants could be done with css instead of on the canvas?
     // window.requestAnimationFrame(() => {
-    //   renderRasterCVS(lineDashOffset < 4 ? lineDashOffset + 0.1 : 0)
+    //   renderRasterCVS(lineDashOffset < 6 ? lineDashOffset + 0.1 : 0)
     // })
   }
 }
@@ -64,7 +124,7 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
  * @param {number} lineDashOffset - (Float)
  * @param {boolean} drawPoints - if true, draw control points
  */
-export function renderSelectVector(lineDashOffset, drawPoints) {
+export function renderSelectionBoxOutline(lineDashOffset, drawPoints) {
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   canvas.rasterGuiCTX.save()

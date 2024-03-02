@@ -202,19 +202,22 @@ export function actionPasteSelection() {
     const clipboardVectors = JSON.parse(
       JSON.stringify(state.selectClipboard.vectors)
     )
+    console.log(canvas.currentLayer.x, canvas.currentLayer.y)
+    console.log("before offset: ", JSON.parse(JSON.stringify(clipboardVectors)))
     if (Object.keys(clipboardVectors).length !== 0) {
       //correct offset coords for vectors to make agnostic to layer coords
       for (const [vectorIndex, vector] of Object.entries(clipboardVectors)) {
-        vector.vectorProperties.px1 -= canvas.currentLayer.x
-        vector.vectorProperties.py1 -= canvas.currentLayer.y
-        vector.vectorProperties.px2 -= canvas.currentLayer.x
-        vector.vectorProperties.py2 -= canvas.currentLayer.y
-        vector.vectorProperties.px3 -= canvas.currentLayer.x
-        vector.vectorProperties.py3 -= canvas.currentLayer.y
-        vector.vectorProperties.px4 -= canvas.currentLayer.x
-        vector.vectorProperties.py4 -= canvas.currentLayer.y
+        vector.vectorProperties.px1 += canvas.currentLayer.x
+        vector.vectorProperties.py1 += canvas.currentLayer.y
+        vector.vectorProperties.px2 += canvas.currentLayer.x
+        vector.vectorProperties.py2 += canvas.currentLayer.y
+        vector.vectorProperties.px3 += canvas.currentLayer.x
+        vector.vectorProperties.py3 += canvas.currentLayer.y
+        vector.vectorProperties.px4 += canvas.currentLayer.x
+        vector.vectorProperties.py4 += canvas.currentLayer.y
       }
     }
+    console.log("after offset: ", JSON.parse(JSON.stringify(clipboardVectors)))
     //add to timeline
     addToTimeline({
       tool:
@@ -288,6 +291,33 @@ export function actionConfirmPastedPixels() {
       selectProperties.py1 += yOffset - canvas.pastedLayer.y
       selectProperties.py2 += yOffset - canvas.pastedLayer.y
     }
+    let clipboardVectors = {}
+    if (lastPasteAction.properties.vectors) {
+      //Make deep copy of clipboard vectors:
+      clipboardVectors = JSON.parse(
+        JSON.stringify(lastPasteAction.properties.vectors)
+      )
+      //correct offset coords for vectors to make agnostic to layer coords
+      for (const [vectorIndex, vector] of Object.entries(clipboardVectors)) {
+        vector.vectorProperties.px1 += xOffset - canvas.pastedLayer.x
+        vector.vectorProperties.py1 += yOffset - canvas.pastedLayer.y
+        vector.vectorProperties.px2 += xOffset - canvas.pastedLayer.x
+        vector.vectorProperties.py2 += yOffset - canvas.pastedLayer.y
+        vector.vectorProperties.px3 += xOffset - canvas.pastedLayer.x
+        vector.vectorProperties.py3 += yOffset - canvas.pastedLayer.y
+        vector.vectorProperties.px4 += xOffset - canvas.pastedLayer.x
+        vector.vectorProperties.py4 += yOffset - canvas.pastedLayer.y
+        //add vector to vectorLookup
+        let uniqueVectorKey = 1
+        while (state.vectorLookup[uniqueVectorKey]) {
+          uniqueVectorKey++
+        }
+        state.vectorLookup[uniqueVectorKey] = state.undoStack.length
+        vector.index = uniqueVectorKey
+        delete clipboardVectors[vectorIndex] // Remove old key-value pair
+        clipboardVectors[uniqueVectorKey] = vector // Assign vector to new key
+      }
+    }
     confirmPastedPixels(
       lastPasteAction.properties,
       canvas.pastedLayer,
@@ -296,30 +326,6 @@ export function actionConfirmPastedPixels() {
     )
     //remove temp layer from DOM and restore current layer
     removeTempLayerFromDOM()
-    if (lastPasteAction.properties.vectors) {
-      //correct offset coords for vectors to make agnostic to layer coords
-      for (const [vectorIndex, vector] of Object.entries(
-        lastPasteAction.properties.vectors
-      )) {
-        vector.vectorProperties.px1 += lastPasteAction.layer.x
-        vector.vectorProperties.py1 += lastPasteAction.layer.y
-        vector.vectorProperties.px2 += lastPasteAction.layer.x
-        vector.vectorProperties.py2 += lastPasteAction.layer.y
-        vector.vectorProperties.px3 += lastPasteAction.layer.x
-        vector.vectorProperties.py3 += lastPasteAction.layer.y
-        vector.vectorProperties.px4 += lastPasteAction.layer.x
-        vector.vectorProperties.py4 += lastPasteAction.layer.y
-        //add vector to vectorLookup
-        let uniqueVectorKey = 1
-        while (state.vectorLookup[uniqueVectorKey]) {
-          uniqueVectorKey++
-        }
-        state.vectorLookup[uniqueVectorKey] = state.undoStack.length
-        vector.index = uniqueVectorKey
-        delete lastPasteAction.properties.vectors[vectorIndex] // Remove old key-value pair
-        lastPasteAction.properties.vectors[uniqueVectorKey] = vector // Assign vector to new key
-      }
-    }
     //add to timeline
     addToTimeline({
       tool:
@@ -338,7 +344,7 @@ export function actionConfirmPastedPixels() {
           width: lastPasteAction.properties.canvas?.width,
           height: lastPasteAction.properties.canvas?.height,
         },
-        vectors: lastPasteAction.properties.vectors,
+        vectors: clipboardVectors,
       },
     })
     state.action = null

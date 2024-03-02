@@ -84,6 +84,7 @@ export const state = {
   currentVectorIndex: null,
   collidedVectorIndex: null,
   vectorLookup: {}, //for quick lookup of vector indexes eg. "[vectorIndex]": actionIndex. TODO: (High Priority) Vectors must be removed from the lookup table when they are removed from the undoStack (such as by becoming part of the redoStack)
+  selectedVectors: {},
   //for select tool
   selectProperties: {
     px1: null,
