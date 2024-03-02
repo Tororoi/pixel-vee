@@ -48,6 +48,7 @@ export function copySelectedPixels() {
     yMax: tempCanvas.height,
   }
   state.selectClipboard.canvas = tempCanvas
+  state.selectClipboard.vectors = {}
   enableActionsForClipboard()
 }
 
@@ -74,11 +75,18 @@ export function copySelectedVectors() {
       ...linkedVector,
     }
   }
+  state.selectClipboard.selectProperties = { ...state.selectProperties }
+  state.selectClipboard.boundaryBox = {
+    xMin: null,
+    yMin: null,
+    xMax: null,
+    yMax: null,
+  }
+  state.selectClipboard.canvas = null
   state.selectClipboard.vectors = {
     ...selectedVectors,
   }
-  console.log(selectedVectors)
-  // enableActionsForClipboard()
+  enableActionsForClipboard()
 }
 
 /**
@@ -169,9 +177,9 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
     dom[`${tool}Btn`].classList.add("deactivate-paste")
   })
 
+  const { selectProperties, boundaryBox } = clipboard
   //for clipboard.canvas:
   if (Object.keys(clipboard.vectors).length === 0) {
-    const { selectProperties, boundaryBox } = clipboard
     // if xOffset and yOffset present, adjust selectProperties and boundaryBox
     //render the clipboard canvas onto the temporary layer
     state.selectProperties = { ...selectProperties }
@@ -200,12 +208,28 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
     }
   } else {
     //for clipboard.vectors, draw vectors onto the temporary layer
-    // for (const [vectorIndex, vector] of Object.entries(
-    //   clipboard.vectors
-    // )) {
-    //   console.log(vectorIndex, vector)
-    //   state.vectorProperties = { ...vector.vectorProperties }
-    // }
+    //render vectors
+    for (const [vectorIndex, vector] of Object.entries(clipboard.vectors)) {
+      actionCubicCurve(
+        vector.vectorProperties.px1 + layer.x,
+        vector.vectorProperties.py1 + layer.y,
+        vector.vectorProperties.px2 + layer.x,
+        vector.vectorProperties.py2 + layer.y,
+        vector.vectorProperties.px3 + layer.x,
+        vector.vectorProperties.py3 + layer.y,
+        vector.vectorProperties.px4 + layer.x,
+        vector.vectorProperties.py4 + layer.y,
+        boundaryBox,
+        false,
+        4,
+        vector.color,
+        canvas.currentLayer,
+        vector.modes,
+        brushStamps[tools.cubicCurve.brushType][tools.cubicCurve.brushSize], //TODO: (High Priority) move brush info to action separately from tool for  the sake of group actions
+        tools.cubicCurve.brushSize,
+        null //maskSet made from action.properties.maskArray
+      )
+    }
   }
   //TODO: (Medium Priority) include transform control points for resizing, rotating, etc. (not currently implemented)
   vectorGui.render()

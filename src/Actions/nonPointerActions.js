@@ -64,7 +64,6 @@ export function actionSelectAll() {
  * Conditions: Layer is not a preview layer, and there is a selection
  */
 export function actionDeselect() {
-  console.log("actionDeselect")
   if (
     !canvas.currentLayer.isPreview &&
     (state.boundaryBox.xMax !== null || state.currentVectorIndex)
@@ -203,6 +202,19 @@ export function actionPasteSelection() {
     const clipboardVectors = JSON.parse(
       JSON.stringify(state.selectClipboard.vectors)
     )
+    if (Object.keys(clipboardVectors).length !== 0) {
+      //correct offset coords for vectors to make agnostic to layer coords
+      for (const [vectorIndex, vector] of Object.entries(clipboardVectors)) {
+        vector.vectorProperties.px1 -= canvas.currentLayer.x
+        vector.vectorProperties.py1 -= canvas.currentLayer.y
+        vector.vectorProperties.px2 -= canvas.currentLayer.x
+        vector.vectorProperties.py2 -= canvas.currentLayer.y
+        vector.vectorProperties.px3 -= canvas.currentLayer.x
+        vector.vectorProperties.py3 -= canvas.currentLayer.y
+        vector.vectorProperties.px4 -= canvas.currentLayer.x
+        vector.vectorProperties.py4 -= canvas.currentLayer.y
+      }
+    }
     //add to timeline
     addToTimeline({
       tool:

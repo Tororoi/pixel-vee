@@ -100,8 +100,18 @@ export const state = {
   },
   selectionInversed: false,
   selectClipboard: {
-    boundaryBox: null,
-    canvasBoundaryBox: null,
+    boundaryBox: {
+      xMin: null,
+      yMin: null,
+      xMax: null,
+      yMax: null,
+    },
+    canvasBoundaryBox: {
+      xMin: null,
+      yMin: null,
+      xMax: null,
+      yMax: null,
+    },
     selectProperties: {
       px1: null,
       py1: null,
@@ -193,7 +203,6 @@ function setBoundaryBox(selectProperties) {
  * Deselect
  */
 function deselect() {
-  console.log("deselect")
   resetSelectProperties()
   resetBoundaryBox()
   state.selectionInversed = false

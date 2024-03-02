@@ -392,7 +392,10 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     }
   } else if (latestAction.tool.name === "select") {
     handleSelectAction(latestAction, newLatestAction, modType)
-  } else if (latestAction.tool.name === "paste") {
+  } else if (
+    latestAction.tool.name === "paste" ||
+    latestAction.tool.name === "vectorPaste"
+  ) {
     if (!latestAction.properties.confirmed) {
       handlePasteAction(latestAction, modType)
     } else {
