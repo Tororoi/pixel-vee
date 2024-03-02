@@ -27,8 +27,7 @@ export function modifyVectorAction(moddedVector) {
     // Extract the new properties
     let actionIndex = state.vectorLookup[vectorIndex]
     let toProperties = {
-      ...state.undoStack[actionIndex].properties.vectors[vectorIndex]
-        .vectorProperties,
+      ...state.undoStack[actionIndex].vectors[vectorIndex].vectorProperties,
     }
 
     // Create the new object with the required properties
@@ -107,7 +106,12 @@ export function removeActionVector(moddedAction, vector) {
  * @param {object} oldModes - The modes before the modification
  * @param {object} newModes - The modes after the modification
  */
-export function changeActionVectorMode(moddedAction, vector, oldModes, newModes) {
+export function changeActionVectorMode(
+  moddedAction,
+  vector,
+  oldModes,
+  newModes
+) {
   addToTimeline({
     tool: tools.changeMode,
     layer: moddedAction.layer,

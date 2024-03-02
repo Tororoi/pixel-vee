@@ -137,14 +137,14 @@ function createAndSaveContext() {
  * @param {CanvasRenderingContext2D} betweenCtx - The canvas context for saving between actions
  */
 export function performAction(action, betweenCtx = null) {
-  if (!action.properties?.boundaryBox) {
+  if (!action?.boundaryBox) {
     return
   }
   //Correct action coordinates with layer offsets
   const offsetX = action.layer.x
   const offsetY = action.layer.y
   //correct boundary box for offsets
-  const boundaryBox = { ...action.properties.boundaryBox }
+  const boundaryBox = { ...action.boundaryBox }
   if (boundaryBox.xMax !== null) {
     boundaryBox.xMin += offsetX
     boundaryBox.xMax += offsetX
@@ -158,21 +158,21 @@ export function performAction(action, betweenCtx = null) {
       //TODO: (Low Priority) implement points and maskArray as an array of integers to reduce space cost. Could be stored as typed arrays but not meaningful for storing the json file.
       //points require 3 entries for every coordinate, x, y, brushSize
       //maskArray requires 2 entries for every coordinate, x, y
-      if (action.properties.maskArray) {
+      if (action.maskArray) {
         if (offsetX !== 0 || offsetY !== 0) {
           mask = new Set(
-            action.properties.maskArray.map(
+            action.maskArray.map(
               (coord) => `${coord.x + offsetX},${coord.y + offsetY}`
             )
           )
         } else {
-          mask = new Set(action.properties.maskArray)
+          mask = new Set(action.maskArray)
         }
       }
-      let previousX = action.properties.points[0].x + offsetX
-      let previousY = action.properties.points[0].y + offsetY
+      let previousX = action.points[0].x + offsetX
+      let previousY = action.points[0].y + offsetY
       let brushDirection = "0,0"
-      for (const p of action.properties.points) {
+      for (const p of action.points) {
         brushDirection = calculateBrushDirection(
           p.x + offsetX,
           p.y + offsetY,
@@ -183,12 +183,12 @@ export function performAction(action, betweenCtx = null) {
           p.x + offsetX,
           p.y + offsetY,
           boundaryBox,
-          action.properties.selectionInversed,
-          action.properties.color,
+          action.selectionInversed,
+          action.color,
           brushStamps[action.tool.brushType][p.brushSize][brushDirection],
           p.brushSize,
           action.layer,
-          action.properties.modes,
+          action.modes,
           mask,
           seen,
           betweenCtx
@@ -200,41 +200,41 @@ export function performAction(action, betweenCtx = null) {
       break
     }
     case "fill":
-      for (const vector of Object.values(action.properties.vectors)) {
+      for (const vector of Object.values(action.vectors)) {
         if (vector.hidden || vector.removed) continue
         actionFill(
           vector.vectorProperties.px1 + offsetX,
           vector.vectorProperties.py1 + offsetY,
           boundaryBox,
-          action.properties.selectionInversed,
+          action.selectionInversed,
           vector.color,
           action.layer,
           vector.modes,
-          null, //maskSet made from action.properties.maskArray
+          null, //maskSet made from action.maskArray
           betweenCtx
         )
       }
       break
     case "line":
       actionLine(
-        action.properties.px1 + offsetX,
-        action.properties.py1 + offsetY,
-        action.properties.px2 + offsetX,
-        action.properties.py2 + offsetY,
+        action.px1 + offsetX,
+        action.py1 + offsetY,
+        action.px2 + offsetX,
+        action.py2 + offsetY,
         boundaryBox,
-        action.properties.selectionInversed,
-        action.properties.color,
+        action.selectionInversed,
+        action.color,
         action.layer,
-        action.properties.modes,
+        action.modes,
         brushStamps[action.tool.brushType][action.tool.brushSize],
         action.tool.brushSize,
-        null, //maskSet made from action.properties.maskArray
+        null, //maskSet made from action.maskArray
         null,
         betweenCtx
       )
       break
     case "quadCurve":
-      for (const vector of Object.values(action.properties.vectors)) {
+      for (const vector of Object.values(action.vectors)) {
         if (vector.hidden || vector.removed) continue
         actionQuadraticCurve(
           vector.vectorProperties.px1 + offsetX,
@@ -244,20 +244,20 @@ export function performAction(action, betweenCtx = null) {
           vector.vectorProperties.px3 + offsetX,
           vector.vectorProperties.py3 + offsetY,
           boundaryBox,
-          action.properties.selectionInversed,
+          action.selectionInversed,
           3,
           vector.color,
           action.layer,
           vector.modes,
           brushStamps[action.tool.brushType][action.tool.brushSize],
           action.tool.brushSize,
-          null, //maskSet made from action.properties.maskArray
+          null, //maskSet made from action.maskArray
           betweenCtx
         )
       }
       break
     case "cubicCurve":
-      for (const vector of Object.values(action.properties.vectors)) {
+      for (const vector of Object.values(action.vectors)) {
         if (vector.hidden || vector.removed) continue
         actionCubicCurve(
           vector.vectorProperties.px1 + offsetX,
@@ -269,20 +269,20 @@ export function performAction(action, betweenCtx = null) {
           vector.vectorProperties.px4 + offsetX,
           vector.vectorProperties.py4 + offsetY,
           boundaryBox,
-          action.properties.selectionInversed,
+          action.selectionInversed,
           4,
           vector.color,
           action.layer,
           vector.modes,
           brushStamps[action.tool.brushType][action.tool.brushSize], //TODO: (High Priority) move brush info to action separately from tool for  the sake of group actions
           action.tool.brushSize,
-          null, //maskSet made from action.properties.maskArray
+          null, //maskSet made from action.maskArray
           betweenCtx
         )
       }
       break
     case "ellipse":
-      for (const vector of Object.values(action.properties.vectors)) {
+      for (const vector of Object.values(action.vectors)) {
         if (vector.hidden || vector.removed) continue
         actionEllipse(
           vector.vectorProperties.px1 + offsetX,
@@ -295,7 +295,7 @@ export function performAction(action, betweenCtx = null) {
           vector.vectorProperties.radB,
           vector.vectorProperties.forceCircle,
           boundaryBox,
-          action.properties.selectionInversed,
+          action.selectionInversed,
           vector.color,
           action.layer,
           vector.modes,
@@ -305,14 +305,14 @@ export function performAction(action, betweenCtx = null) {
           vector.vectorProperties.unifiedOffset,
           vector.vectorProperties.x1Offset,
           vector.vectorProperties.y1Offset,
-          null, //maskSet made from action.properties.maskArray
+          null, //maskSet made from action.maskArray
           betweenCtx
         )
       }
       break
     case "cut":
       //TODO:(Low Priority) handle betweenCtx, clean up actions so logic does not need to be repeated here. Not currently affected by betweenCtx so not needed for current functionality.
-      if (action.properties.selectionInversed) {
+      if (action.selectionInversed) {
         //inverted selection: clear entire canvas area minus boundaryBox
         //create a clip mask for the boundaryBox to prevent clearing the inner area
         action.layer.ctx.save()
@@ -352,7 +352,7 @@ export function performAction(action, betweenCtx = null) {
       //render paste action
       // Determine if the action is the last 'paste' action in the undoStack
       let isLastPasteAction = false // Default to false
-      if (!action.properties.confirmed) {
+      if (!action.confirmed) {
         for (let i = state.undoStack.length - 1; i >= 0; i--) {
           if (state.undoStack[i].tool.name === "paste") {
             // If the first 'paste' action found from the end is the current action
@@ -362,10 +362,10 @@ export function performAction(action, betweenCtx = null) {
         }
       }
       //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
-      if (action.properties.confirmed) {
+      if (action.confirmed) {
         let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
         activeCtx.drawImage(
-          action.properties.canvas,
+          action.canvas,
           boundaryBox.xMin,
           boundaryBox.yMin,
           boundaryBox.xMax - boundaryBox.xMin,
@@ -378,7 +378,7 @@ export function performAction(action, betweenCtx = null) {
         //TODO: (High Priority) handle vectors vs raster
 
         action.layer.ctx.drawImage(
-          action.properties.canvas,
+          action.canvas,
           boundaryBox.xMin,
           boundaryBox.yMin,
           boundaryBox.xMax - boundaryBox.xMin,
@@ -391,7 +391,7 @@ export function performAction(action, betweenCtx = null) {
       //render paste action
       // Determine if the action is the last 'paste' action in the undoStack
       let isLastPasteAction = false // Default to false
-      if (!action.properties.confirmed) {
+      if (!action.confirmed) {
         for (let i = state.undoStack.length - 1; i >= 0; i--) {
           if (state.undoStack[i].tool.name === "vectorPaste") {
             // If the first 'paste' action found from the end is the current action
@@ -401,12 +401,10 @@ export function performAction(action, betweenCtx = null) {
         }
       }
       //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
-      if (action.properties.confirmed) {
+      if (action.confirmed) {
         let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
         //render vectors
-        for (const [vectorIndex, vector] of Object.entries(
-          action.properties.vectors
-        )) {
+        for (const [vectorIndex, vector] of Object.entries(action.vectors)) {
           actionCubicCurve(
             vector.vectorProperties.px1 + offsetX,
             vector.vectorProperties.py1 + offsetY,
@@ -417,14 +415,14 @@ export function performAction(action, betweenCtx = null) {
             vector.vectorProperties.px4 + offsetX,
             vector.vectorProperties.py4 + offsetY,
             boundaryBox,
-            action.properties.selectionInversed,
+            action.selectionInversed,
             4,
             vector.color,
             action.layer,
             vector.modes,
-            brushStamps[tools.cubicCurve.brushType][tools.cubicCurve.brushSize],
-            tools.cubicCurve.brushSize,
-            null, //maskSet made from action.properties.maskArray
+            brushStamps[vector.brushType][vector.brushSize],
+            vector.brushSize,
+            null, //maskSet made from action.maskArray
             activeCtx
           )
         }
@@ -433,9 +431,7 @@ export function performAction(action, betweenCtx = null) {
         isLastPasteAction //only render if this action is the last paste action in the stack
       ) {
         //render vectors
-        for (const [vectorIndex, vector] of Object.entries(
-          action.properties.vectors
-        )) {
+        for (const [vectorIndex, vector] of Object.entries(action.vectors)) {
           actionCubicCurve(
             vector.vectorProperties.px1 + offsetX,
             vector.vectorProperties.py1 + offsetY,
@@ -446,14 +442,14 @@ export function performAction(action, betweenCtx = null) {
             vector.vectorProperties.px4 + offsetX,
             vector.vectorProperties.py4 + offsetY,
             boundaryBox,
-            action.properties.selectionInversed,
+            action.selectionInversed,
             4,
             vector.color,
             action.layer,
             vector.modes,
-            brushStamps[tools.cubicCurve.brushType][tools.cubicCurve.brushSize], //TODO: (High Priority) move brush info to action separately from tool for  the sake of group actions
-            tools.cubicCurve.brushSize,
-            null, //maskSet made from action.properties.maskArray
+            brushStamps[vector.brushType][vector.brushSize], //TODO: (High Priority) move brush info to action separately from tool for  the sake of group actions
+            vector.brushSize,
+            null, //maskSet made from action.maskArray
             betweenCtx
           )
         }

@@ -417,8 +417,7 @@ function renderLayerVectors(layer) {
   if (state.currentVectorIndex !== null) {
     selectedVectorAction =
       state.undoStack[state.vectorLookup[state.currentVectorIndex]]
-    selectedVector =
-      selectedVectorAction.properties.vectors[state.currentVectorIndex]
+    selectedVector = selectedVectorAction.vectors[state.currentVectorIndex]
   }
   //iterate through and render all vectors in the layer except the selected vector which will always be rendered last
   //render paths
@@ -428,9 +427,9 @@ function renderLayerVectors(layer) {
       action.layer === layer &&
       action.tool.type === "vector"
     ) {
-      //For each of action.properties.vectors, render paths
-      for (let vectorIndex in action.properties.vectors) {
-        let vector = action.properties.vectors[vectorIndex]
+      //For each of action.vectors, render paths
+      for (let vectorIndex in action.vectors) {
+        let vector = action.vectors[vectorIndex]
         if (
           !vector.removed &&
           vector.vectorProperties.type === state.tool.name
@@ -470,9 +469,9 @@ function renderLayerVectors(layer) {
       action.layer === layer &&
       action.tool.type === "vector"
     ) {
-      //For each of action.properties.vectors, render control points
-      for (let vectorIndex in action.properties.vectors) {
-        let vector = action.properties.vectors[vectorIndex]
+      //For each of action.vectors, render control points
+      for (let vectorIndex in action.vectors) {
+        let vector = action.vectors[vectorIndex]
         if (
           !vector.removed &&
           vector.vectorProperties.type === state.tool.name &&
@@ -537,8 +536,7 @@ export function updateLinkedVectors(
     let y = state.cursorY
     const linkedVectorAction =
       state.undoStack[state.vectorLookup[linkedVectorIndex]]
-    const linkedVector =
-      linkedVectorAction.properties.vectors[linkedVectorIndex]
+    const linkedVector = linkedVectorAction.vectors[linkedVectorIndex]
 
     if (saveVectorProperties) {
       state.vectorsSavedProperties[linkedVectorIndex] = {
@@ -635,8 +633,8 @@ export function createActiveIndexesForRender(
       action.layer === currentAction.layer &&
       (action.tool.name === "fill" ||
         action.tool.name === "cut" ||
-        action.properties?.modes?.eraser ||
-        action.properties?.modes?.inject ||
+        action?.modes?.eraser ||
+        action?.modes?.inject ||
         vectorsSavedPropertiesActionKeys.includes(i))
     ) {
       activeIndexes.push(i)

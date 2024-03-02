@@ -182,7 +182,7 @@ function quadCurveSteps() {
           properties: {
             // modes: { ...state.tool.modes },
             // color: { ...swatches.primary.color },
-            // //TODO: (High Priority) store properties in an object defined by vector index, eg. 3: { ... }. When setting currentVectorIndex, also set currentActionIndex so the vector can be modified by accessing state.undoStack[currentActionIndex].properties.vectors[currentVectorIndex].
+            // //TODO: (High Priority) store properties in an object defined by vector index, eg. 3: { ... }. When setting currentVectorIndex, also set currentActionIndex so the vector can be modified by accessing state.undoStack[currentActionIndex].vectors[currentVectorIndex].
             // vectorProperties: {
             //   ...state.vectorProperties,
             //   px1: state.vectorProperties.px1 - canvas.currentLayer.x,
@@ -202,6 +202,8 @@ function quadCurveSteps() {
                 index: uniqueVectorKey,
                 modes: { ...state.tool.modes },
                 color: { ...swatches.primary.color },
+                brushSize: state.tool.brushSize,
+                brushType: state.tool.brushType,
                 vectorProperties: {
                   ...state.vectorProperties,
                   px1: state.vectorProperties.px1 - canvas.currentLayer.x,
@@ -241,8 +243,7 @@ function cubicCurveSteps() {
   ) {
     let collidedVectorAction =
       state.undoStack[state.vectorLookup[state.collidedVectorIndex]]
-    let collidedVector =
-      collidedVectorAction.properties.vectors[state.collidedVectorIndex]
+    let collidedVector = collidedVectorAction.vectors[state.collidedVectorIndex]
     vectorGui.setVectorProperties(collidedVectorAction, collidedVector)
     //Render new selected vector before running standard render routine
     //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.
@@ -438,6 +439,8 @@ function cubicCurveSteps() {
                 index: uniqueVectorKey,
                 modes: { ...state.tool.modes },
                 color: { ...swatches.primary.color },
+                brushSize: state.tool.brushSize,
+                brushType: state.tool.brushType,
                 vectorProperties: {
                   ...state.vectorProperties,
                   px1: state.vectorProperties.px1 - canvas.currentLayer.x,
@@ -459,7 +462,7 @@ function cubicCurveSteps() {
           },
         })
         state.selectedVectors[uniqueVectorKey] =
-          state.action.properties.vectors[uniqueVectorKey]
+          state.action.vectors[uniqueVectorKey]
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
       }
@@ -485,7 +488,7 @@ function adjustCurveSteps() {
   //this routine would be better for touchscreens, and no worse with pointer
   let currentAction =
     state.undoStack[state.vectorLookup[state.currentVectorIndex]]
-  let currentVector = currentAction.properties.vectors[state.currentVectorIndex]
+  let currentVector = currentAction.vectors[state.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
@@ -587,7 +590,7 @@ function adjustCurveSteps() {
             let collidedVectorAction =
               state.undoStack[state.vectorLookup[state.collidedVectorIndex]]
             let collidedVector =
-              collidedVectorAction.properties.vectors[state.collidedVectorIndex]
+              collidedVectorAction.vectors[state.collidedVectorIndex]
             let snappedToX =
               collidedVector.vectorProperties[
                 vectorGui.otherCollidedKeys.xKey

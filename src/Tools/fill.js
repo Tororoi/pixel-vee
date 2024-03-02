@@ -84,6 +84,8 @@ function fillSteps() {
                 index: uniqueVectorKey,
                 modes: { ...state.tool.modes },
                 color: { ...swatches.primary.color },
+                brushSize: state.tool.brushSize,
+                brushType: state.tool.brushType,
                 vectorProperties: {
                   ...state.vectorProperties,
                   px1: state.vectorProperties.px1 - canvas.currentLayer.x,
@@ -126,7 +128,7 @@ function fillSteps() {
 export function adjustFillSteps() {
   let currentAction =
     state.undoStack[state.vectorLookup[state.currentVectorIndex]]
-  let currentVector = currentAction.properties.vectors[state.currentVectorIndex]
+  let currentVector = currentAction.vectors[state.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.selectedCollisionPresent) {

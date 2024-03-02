@@ -227,7 +227,7 @@ function invertSelection() {
  */
 function lookupVector(vectorIndex) {
   let actionIndex = state.vectorLookup[vectorIndex]
-  let vector = state.undoStack[actionIndex].properties.vectors[vectorIndex]
+  let vector = state.undoStack[actionIndex].vectors[vectorIndex]
   return vector
 }
 
@@ -238,8 +238,8 @@ function lookupVector(vectorIndex) {
 function syncVectorLookup() {
   state.vectorLookup = {}
   state.undoStack.forEach((action, index) => {
-    if (action.properties?.vectors) {
-      for (let vectorIndex in action.properties.vectors) {
+    if (action?.vectors) {
+      for (let vectorIndex in action.vectors) {
         state.vectorLookup[vectorIndex] = index
       }
     }

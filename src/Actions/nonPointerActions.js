@@ -267,7 +267,7 @@ export function actionConfirmPastedPixels() {
     if (
       (state.undoStack[i].tool.name === "paste" ||
         state.undoStack[i].tool.name === "vectorPaste") &&
-      !state.undoStack[i].properties.confirmed
+      !state.undoStack[i].confirmed
     ) {
       lastPasteAction = state.undoStack[i]
       break // Stop searching once the first 'paste' action is found
@@ -277,14 +277,14 @@ export function actionConfirmPastedPixels() {
     const xOffset = canvas.tempLayer.x
     const yOffset = canvas.tempLayer.y
     //adjust boundaryBox for layer offset
-    const boundaryBox = { ...lastPasteAction.properties.boundaryBox }
+    const boundaryBox = { ...lastPasteAction.boundaryBox }
     if (boundaryBox.xMax !== null) {
       boundaryBox.xMin += xOffset - canvas.pastedLayer.x
       boundaryBox.xMax += xOffset - canvas.pastedLayer.x
       boundaryBox.yMin += yOffset - canvas.pastedLayer.y
       boundaryBox.yMax += yOffset - canvas.pastedLayer.y
     }
-    const selectProperties = { ...lastPasteAction.properties.selectProperties }
+    const selectProperties = { ...lastPasteAction.selectProperties }
     if (selectProperties.px2 !== null) {
       selectProperties.px1 += xOffset - canvas.pastedLayer.x
       selectProperties.px2 += xOffset - canvas.pastedLayer.x
@@ -292,11 +292,9 @@ export function actionConfirmPastedPixels() {
       selectProperties.py2 += yOffset - canvas.pastedLayer.y
     }
     let clipboardVectors = {}
-    if (lastPasteAction.properties.vectors) {
+    if (lastPasteAction.vectors) {
       //Make deep copy of clipboard vectors:
-      clipboardVectors = JSON.parse(
-        JSON.stringify(lastPasteAction.properties.vectors)
-      )
+      clipboardVectors = JSON.parse(JSON.stringify(lastPasteAction.vectors))
       //correct offset coords for vectors to make agnostic to layer coords
       for (const [vectorIndex, vector] of Object.entries(clipboardVectors)) {
         vector.vectorProperties.px1 += xOffset - canvas.pastedLayer.x
@@ -318,12 +316,7 @@ export function actionConfirmPastedPixels() {
         clipboardVectors[uniqueVectorKey] = vector // Assign vector to new key
       }
     }
-    confirmPastedPixels(
-      lastPasteAction.properties,
-      canvas.pastedLayer,
-      xOffset,
-      yOffset
-    )
+    confirmPastedPixels(lastPasteAction, canvas.pastedLayer, xOffset, yOffset)
     //remove temp layer from DOM and restore current layer
     removeTempLayerFromDOM()
     //add to timeline
@@ -337,12 +330,12 @@ export function actionConfirmPastedPixels() {
         confirmed: true,
         boundaryBox,
         selectProperties,
-        invertSelection: lastPasteAction.properties.invertSelection,
-        canvas: lastPasteAction.properties.canvas,
+        invertSelection: lastPasteAction.invertSelection,
+        canvas: lastPasteAction.canvas,
         canvasProperties: {
-          dataUrl: lastPasteAction.properties.canvas?.toDataURL(),
-          width: lastPasteAction.properties.canvas?.width,
-          height: lastPasteAction.properties.canvas?.height,
+          dataUrl: lastPasteAction.canvas?.toDataURL(),
+          width: lastPasteAction.canvas?.width,
+          height: lastPasteAction.canvas?.height,
         },
         vectors: clipboardVectors,
       },

@@ -236,6 +236,8 @@ function ellipseSteps() {
                 index: uniqueVectorKey,
                 modes: { ...state.tool.modes },
                 color: { ...swatches.primary.color },
+                brushSize: state.tool.brushSize,
+                brushType: state.tool.brushType,
                 vectorProperties: {
                   ...state.vectorProperties,
                   px1: state.vectorProperties.px1 - canvas.currentLayer.x,
@@ -291,7 +293,7 @@ function updateEllipseVectorProperties(currentAction, currentVector) {
 export function adjustEllipseSteps() {
   let currentAction =
     state.undoStack[state.vectorLookup[state.currentVectorIndex]]
-  let currentVector = currentAction.properties.vectors[state.currentVectorIndex]
+  let currentVector = currentAction.vectors[state.currentVectorIndex]
   if (!(vectorGui.selectedCollisionPresent && state.clickCounter === 0)) {
     return
   }

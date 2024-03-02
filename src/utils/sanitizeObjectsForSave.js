@@ -72,7 +72,7 @@ export function sanitizeHistory(
     //if active paste action, find the latest unconfirmed paste action and remove it and all actions after it
     if (action.tool.name === "paste" && !lastPasteActionIndex) {
       lastPasteActionIndex = i
-      if (!action.properties.confirmed) {
+      if (!action.confirmed) {
         //remove the unconfirmed paste action and all actions after it
         sanitizedUndoStack.splice(i, sanitizedUndoStack.length - i)
       }
@@ -92,18 +92,18 @@ export function sanitizeHistory(
       if (action.layer) {
         action.layer = { id: action.layer.id }
       }
-      if (action.properties?.pastedLayer) {
+      if (action?.pastedLayer) {
         // sanitize pasted layer
-        action.properties.pastedLayer = { id: action.properties.pastedLayer.id }
+        action.pastedLayer = { id: action.pastedLayer.id }
       }
-      if (action.properties?.points) {
+      if (action?.points) {
         //format each object in the array from {x,y,brushSize} to be 3 entries in a new array with just the values. The values will be reformatted back to objects on load.
         let sanitizedPoints = []
-        for (let index = 0; index < action.properties.points.length; index++) {
-          const point = action.properties.points[index]
+        for (let index = 0; index < action.points.length; index++) {
+          const point = action.points[index]
           sanitizedPoints.push(point.x, point.y, point.brushSize)
         }
-        action.properties.points = sanitizedPoints
+        action.points = sanitizedPoints
       }
       delete action.snapshot
     }

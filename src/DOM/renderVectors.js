@@ -18,10 +18,10 @@ export const renderVectorsToDOM = () => {
   state.undoStack.forEach((action, index) => {
     if (isValidVectorAction(action)) {
       //TODO: (High Priority) For each vector in the group action, render the vector as long as it is not removed
-      //For each action.properties.vectors (object), render the vector as long as it is not removed
-      for (let vectorIndex in action.properties.vectors) {
-        if (!action.properties.vectors[vectorIndex].removed) {
-          renderVectorElement(action, action.properties.vectors[vectorIndex])
+      //For each action.vectors (object), render the vector as long as it is not removed
+      for (let vectorIndex in action.vectors) {
+        if (!action.vectors[vectorIndex].removed) {
+          renderVectorElement(action, action.vectors[vectorIndex])
         }
       }
     }

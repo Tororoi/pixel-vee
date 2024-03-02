@@ -56,25 +56,27 @@ export function copySelectedPixels() {
  * Currently uses linked vectors, TODO: keep separate track of "selected" vectors in a similar way
  */
 export function copySelectedVectors() {
-  let currentVector =
-    state.undoStack[state.vectorLookup[state.currentVectorIndex]].properties
-      .vectors[state.currentVectorIndex]
-  let selectedVectors = {}
-  selectedVectors[state.currentVectorIndex] = {
-    ...currentVector,
-  }
-  for (const [linkedVectorIndex, linkedPoints] of Object.entries(
-    vectorGui.linkedVectors
-  )) {
-    const linkedVectorAction =
-      state.undoStack[state.vectorLookup[linkedVectorIndex]]
-    const linkedVector =
-      linkedVectorAction.properties.vectors[linkedVectorIndex]
-
-    selectedVectors[linkedVectorIndex] = {
-      ...linkedVector,
+  let selectedVectors = { ...state.selectedVectors }
+  if (Object.entries(selectedVectors).length === 0) {
+    let currentVector =
+      state.undoStack[state.vectorLookup[state.currentVectorIndex]].vectors[
+        state.currentVectorIndex
+      ]
+    selectedVectors[state.currentVectorIndex] = {
+      ...currentVector,
     }
   }
+  // for (const [linkedVectorIndex, linkedPoints] of Object.entries(
+  //   vectorGui.linkedVectors
+  // )) {
+  //   const linkedVectorAction =
+  //     state.undoStack[state.vectorLookup[linkedVectorIndex]]
+  //   const linkedVector = linkedVectorAction.vectors[linkedVectorIndex]
+
+  //   selectedVectors[linkedVectorIndex] = {
+  //     ...linkedVector,
+  //   }
+  // }
   state.selectClipboard.selectProperties = { ...state.selectProperties }
   state.selectClipboard.boundaryBox = {
     xMin: null,
@@ -83,9 +85,7 @@ export function copySelectedVectors() {
     yMax: null,
   }
   state.selectClipboard.canvas = null
-  state.selectClipboard.vectors = {
-    ...selectedVectors,
-  }
+  state.selectClipboard.vectors = selectedVectors
   enableActionsForClipboard()
 }
 
@@ -225,9 +225,9 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
         vector.color,
         canvas.currentLayer,
         vector.modes,
-        brushStamps[tools.cubicCurve.brushType][tools.cubicCurve.brushSize], //TODO: (High Priority) move brush info to action separately from tool for  the sake of group actions
-        tools.cubicCurve.brushSize,
-        null //maskSet made from action.properties.maskArray
+        brushStamps[vector.brushType][vector.brushSize], //TODO: (High Priority) move brush info to action separately from tool for  the sake of group actions
+        vector.brushSize,
+        null //maskSet made from action.maskArray
       )
     }
   }
@@ -273,9 +273,9 @@ export function confirmPastedPixels(clipboard, layer, xOffset, yOffset) {
         vector.color,
         layer,
         vector.modes,
-        brushStamps[tools.cubicCurve.brushType][tools.cubicCurve.brushSize],
-        tools.cubicCurve.brushSize,
-        null //maskSet made from action.properties.maskArray
+        brushStamps[vector.brushType][vector.brushSize],
+        vector.brushSize,
+        null //maskSet made from action.maskArray
       )
     }
   }

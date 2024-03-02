@@ -229,70 +229,70 @@ export async function loadDrawing(jsonFile) {
       action.index = index
     }
     //Handle brush tool
-    if (action.properties?.points) {
+    if (action?.points) {
       // Convert the points array into an array of objects
       let points = []
-      for (let index = 0; index < action.properties.points.length; index += 3) {
+      for (let index = 0; index < action.points.length; index += 3) {
         points.push({
-          x: action.properties.points[index],
-          y: action.properties.points[index + 1],
-          brushSize: action.properties.points[index + 2],
+          x: action.points[index],
+          y: action.points[index + 1],
+          brushSize: action.points[index + 2],
         })
       }
-      action.properties.points = points
+      action.points = points
     }
     //Handle vector actions
     //For old files that don't have vectorProperties.type
-    if (action.properties?.vectorProperties) {
+    if (action?.vectorProperties) {
       //restructure vectorProoperties to include type
-      action.properties.vectorProperties.type = action.tool.name
+      action.vectorProperties.type = action.tool.name
       //restructure how vectorProperties are stored
       let uniqueVectorKey = 1
       while (vectorLookup[uniqueVectorKey]) {
         uniqueVectorKey++
       }
       vectorLookup[uniqueVectorKey] = index
-      action.properties.vectors = {
+      action.vectors = {
         [uniqueVectorKey]: {
           index: uniqueVectorKey,
           modes: { ...action.modes },
           color: { ...action.color },
-          vectorProperties: { ...action.properties.vectorProperties },
+          vectorProperties: { ...action.vectorProperties },
           hidden: action.hidden,
           removed: action.removed,
         },
       }
       //remove old properties
-      delete action.properties.vectorProperties
+      delete action.vectorProperties
       delete action.modes
       delete action.color
     }
     if (action.modes) {
       //convert old modes to new modes
-      if (!action.properties) {
-        action.properties = {}
+      if (!action) {
+        action = {}
       }
-      action.properties.modes = action.modes
+      action.modes = action.modes
       delete action.modes
     }
     if (action.color) {
       //convert old color to new color
-      if (!action.properties) {
-        action.properties = {}
+      if (!action) {
+        action = {}
       }
-      action.properties.color = action.color
+      action.color = action.color
       delete action.color
     }
     //TODO: (Low Priority) If quadCurve and cubicCurve are unified into "curve", will need to add logic here to convert those to the correct type
     //Handle actions with canvas data
-    if (action.properties?.canvas) {
+    if (action?.canvas) {
       // Convert the stored canvas dataUrl to a canvas
       let tempCanvas = document.createElement("canvas")
-      tempCanvas.width = action.properties.canvasProperties.width
-      tempCanvas.height = action.properties.canvasProperties.height
+      tempCanvas.width = action.canvasProperties.width
+      tempCanvas.height = action.canvasProperties.height
       let tempCtx = tempCanvas.getContext("2d")
       let img = new Image()
-      img.src = action.properties.canvasProperties.dataUrl
+      img.src = action.canvasProperties.dataUrl
 
       // Wrap the image loading and drawing in a promise
       let drawImagePromise = new Promise((resolve, reject) => {
@@ -306,15 +306,15 @@ export async function loadDrawing(jsonFile) {
       // Add the promise to the array to ensure it completes before continuing
       imageLoadPromises.push(drawImagePromise)
 
-      action.properties.canvas = tempCanvas
+      action.canvas = tempCanvas
     }
     //Handle actions with a pastedLayer
-    if (action.properties?.pastedLayer) {
+    if (action?.pastedLayer) {
       let correspondingLayer = canvas.layers.find(
-        (layer) => layer.id === action.properties.pastedLayer.id
+        (layer) => layer.id === action.pastedLayer.id
       )
       if (correspondingLayer) {
-        action.properties.pastedLayer = correspondingLayer
+        action.pastedLayer = correspondingLayer
       }
     }
     // Match the action's layer id with an existing layer
