@@ -406,6 +406,7 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
 - Straight Line Tool (Existing Raster Line Tool will be separate)
 - Dithered Gradient Tool
 - Smooth curves mode for brush. When drawing quickly, curves can look choppy and angular. Calculates curvature between points. Bonus: convert entire brush stroke into a series of linked vectors.
+- Shapes which are a collection of vectors that can be easily selected to manipulate together.
 
 #### Raster Tools:
 - Mask Tool

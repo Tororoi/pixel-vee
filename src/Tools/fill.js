@@ -101,6 +101,7 @@ function fillSteps() {
           },
         })
         renderCanvas(canvas.currentLayer)
+        vectorGui.reset()
       }
       break
     case "pointermove":

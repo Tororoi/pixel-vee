@@ -767,7 +767,7 @@ export const cubicCurve = {
     equal: {
       active: false,
       tooltip:
-        "Toggle Equal Length (Shift). \n\nEnsures magnitude continuity of control handles for linked vectors.",
+        "Toggle Equal Length (=). \n\nEnsures magnitude continuity of control handles for linked vectors.",
     }, // Magnitude continuity
     align: {
       active: true,

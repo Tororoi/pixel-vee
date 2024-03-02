@@ -85,7 +85,10 @@ export function activateShortcut(keyCode) {
           adjustEllipseSteps()
           vectorGui.render()
         }
-      } else if (dom.toolBtn.id === "cubicCurve") {
+      }
+      break
+    case "Equal":
+      if (dom.toolBtn.id === "cubicCurve") {
         tools.cubicCurve.options.equal.active =
           !tools.cubicCurve.options.equal.active
         renderToolOptionsToDOM()

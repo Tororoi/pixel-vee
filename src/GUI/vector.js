@@ -332,7 +332,6 @@ function render() {
     state.selectProperties.px1 !== null ||
     Object.keys(state.selectedVectors).length > 0
   ) {
-    // renderSelectionBoxOutline(0.5, state.tool.name === "select")
     renderRasterCVS()
   }
   //Render grid

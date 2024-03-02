@@ -371,7 +371,7 @@ dom.saveAsForm.addEventListener("submit", (e) => {
 dom.saveAsFileName.addEventListener("input", (e) => {
   state.saveSettings.saveAsFileName = e.target.value
   dom.saveAsFileName.style.width =
-    measureTextWidth(state.saveSettings.saveAsFileName, "16px 'Monogram'") +
+    measureTextWidth(state.saveSettings.saveAsFileName, "16px '04Font'") +
     2 +
     "px"
 })
