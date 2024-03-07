@@ -15,15 +15,9 @@ import {
  */
 export const renderVectorsToDOM = () => {
   dom.vectorsThumbnails.innerHTML = ""
-  state.undoStack.forEach((action, index) => {
-    if (isValidVectorAction(action)) {
-      //TODO: (High Priority) For each vector in the group action, render the vector as long as it is not removed
-      //For each action.vectors (object), render the vector as long as it is not removed
-      for (let vectorIndex in action.vectors) {
-        if (!action.vectors[vectorIndex].removed) {
-          renderVectorElement(action, action.vectors[vectorIndex])
-        }
-      }
+  state.vectors.forEach((vector, index) => {
+    if (isValidVector(vector)) {
+      renderVectorElement(vector)
     }
   })
 
@@ -37,29 +31,27 @@ export const renderVectorsToDOM = () => {
 
 /**
  * Check if action should be rendered in the vectors interface
- * @param {object} action - The action to be checked
- * @returns {boolean} - True if the action should be rendered
+ * @param {object} vector - The vector to be checked
+ * @returns {boolean} - True if the vector should be rendered
  */
-const isValidVectorAction = (action) =>
-  !action.removed &&
-  !action.layer?.removed &&
-  action.tool.type === "vector" &&
-  (action.layer === canvas.currentLayer ||
-    (action.layer === canvas.pastedLayer && canvas.currentLayer.isPreview))
+const isValidVector = (vector) =>
+  !vector.removed &&
+  !vector.layer?.removed &&
+  (vector.layer === canvas.currentLayer ||
+    (vector.layer === canvas.pastedLayer && canvas.currentLayer.isPreview))
 
 /**
  * Render a vector element
- * @param {object} action - The action to be rendered
  * @param {object} vector - The vector to be rendered
  */
-const renderVectorElement = (action, vector) => {
+const renderVectorElement = (vector) => {
   // const isSelected = vector.index === state.currentVectorIndex
   const isSelected =
-    !!state.selectedVectors[vector.index] ||
+    state.selectedVectorIndicesSet.has(vector.index) ||
     vector.index === state.currentVectorIndex //TODO: (High Priority) Need way to mark selected vs current vector
   const vectorElement = createVectorElement(vector)
 
-  const thumb = createThumbnailImage(action, vector, isSelected)
+  const thumb = createThumbnailImage(vector, isSelected)
   vectorElement.appendChild(thumb)
 
   //left side icons
@@ -138,11 +130,10 @@ const calculateDrawingDimensions = () => {
 
 /**
  * Draw a vector vector onto the thumbnail canvas
- * @param {object} action - The action to be drawn
  * @param {object} vector - The vector to be drawn
  * @param {boolean} isSelected - True if the vector is selected
  */
-const drawOnThumbnailContext = (action, vector, isSelected) => {
+const drawOnThumbnailContext = (vector, isSelected) => {
   let { minD, xOffset, yOffset } = calculateDrawingDimensions()
 
   canvas.thumbnailCTX.clearRect(
@@ -171,14 +162,14 @@ const drawOnThumbnailContext = (action, vector, isSelected) => {
   canvas.thumbnailCTX.strokeStyle = "black" // This can be adjusted based on your requirements.
   canvas.thumbnailCTX.beginPath()
 
-  let px1 = minD * (vector.vectorProperties.px1 + action.layer.x)
-  let py1 = minD * (vector.vectorProperties.py1 + action.layer.y)
-  let px2 = minD * (vector.vectorProperties.px2 + action.layer.x)
-  let py2 = minD * (vector.vectorProperties.py2 + action.layer.y)
-  let px3 = minD * (vector.vectorProperties.px3 + action.layer.x)
-  let py3 = minD * (vector.vectorProperties.py3 + action.layer.y)
-  let px4 = minD * (vector.vectorProperties.px4 + action.layer.x)
-  let py4 = minD * (vector.vectorProperties.py4 + action.layer.y)
+  let px1 = minD * (vector.vectorProperties.px1 + vector.layer.x)
+  let py1 = minD * (vector.vectorProperties.py1 + vector.layer.y)
+  let px2 = minD * (vector.vectorProperties.px2 + vector.layer.x)
+  let py2 = minD * (vector.vectorProperties.py2 + vector.layer.y)
+  let px3 = minD * (vector.vectorProperties.px3 + vector.layer.x)
+  let py3 = minD * (vector.vectorProperties.py3 + vector.layer.y)
+  let px4 = minD * (vector.vectorProperties.px4 + vector.layer.x)
+  let py4 = minD * (vector.vectorProperties.py4 + vector.layer.y)
   switch (vector.vectorProperties.type) {
     case "fill":
       canvas.thumbnailCTX.arc(
@@ -235,13 +226,12 @@ const drawOnThumbnailContext = (action, vector, isSelected) => {
 
 /**
  * Create the thumbnail and save as an image
- * @param {object} action - The action to be rendered
  * @param {object} vector - The vector to be rendered
  * @param {boolean} isSelected - True if the vector is selected
  * @returns {Image} - The created thumbnail image
  */
-const createThumbnailImage = (action, vector, isSelected) => {
-  drawOnThumbnailContext(action, vector, isSelected)
+const createThumbnailImage = (vector, isSelected) => {
+  drawOnThumbnailContext(vector, isSelected)
   let thumb = new Image()
   thumb.src = canvas.thumbnailCVS.toDataURL()
   thumb.alt = `thumb ${vector.index}`

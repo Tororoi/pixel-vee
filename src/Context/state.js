@@ -81,10 +81,11 @@ export const state = {
     // forceCircle: false,
   },
   //Vectors
+  vectors: {},
   currentVectorIndex: null,
   collidedVectorIndex: null,
-  vectorLookup: {}, //for quick lookup of vector indexes eg. "[vectorIndex]": actionIndex. TODO: (High Priority) Vectors must be removed from the lookup table when they are removed from the undoStack (such as by becoming part of the redoStack)
-  selectedVectors: {},
+  highestVectorKey: 0,
+  selectedVectorIndicesSet: new Set(),
   //for select tool
   selectProperties: {
     px1: null,
@@ -138,8 +139,6 @@ export const state = {
   setBoundaryBox,
   deselect,
   invertSelection,
-  lookupVector,
-  syncVectorLookup,
 }
 
 /**
@@ -209,7 +208,7 @@ function deselect() {
   state.selectionInversed = false
   state.vectorProperties = {}
   state.currentVectorIndex = null
-  state.selectedVectors = {}
+  state.selectedVectorIndicesSet.clear()
   //should be for all selected vectors
   disableActionsForNoSelection()
 }
@@ -219,30 +218,4 @@ function deselect() {
  */
 function invertSelection() {
   state.selectionInversed = !state.selectionInversed
-}
-
-/**
- *
- * @param {number} vectorIndex - The index of the vector
- * @returns {object} - The vector
- */
-function lookupVector(vectorIndex) {
-  let actionIndex = state.vectorLookup[vectorIndex]
-  let vector = state.undoStack[actionIndex].vectors[vectorIndex]
-  return vector
-}
-
-/**
- * TODO: (Low Priority) This function is somewhat inefficient. Can be optimized by handling in the undoRedo functionality and only managing the vectors from the undone or redone action.
- * Recommend implementing after improving readability or reducing complexity of actionUndoRedo.
- */
-function syncVectorLookup() {
-  state.vectorLookup = {}
-  state.undoStack.forEach((action, index) => {
-    if (action?.vectors) {
-      for (let vectorIndex in action.vectors) {
-        state.vectorLookup[vectorIndex] = index
-      }
-    }
-  })
 }

@@ -2,16 +2,15 @@ import { getAngle } from "./trig.js"
 
 /**
  * WARNING: This function directly manipulates the vector's properties in the history.
- * @param {object} action - The action that contains the vector
  * @param {object} vector - The vector to update
  * @param {number} x - (Integer)
  * @param {number} y - (Integer)
  * @param {string} xKey - The key of the x property to update
  * @param {string} yKey - The key of the y property to update
  */
-export function updateVectorProperties(action, vector, x, y, xKey, yKey) {
-  vector.vectorProperties[xKey] = x - action.layer.x
-  vector.vectorProperties[yKey] = y - action.layer.y
+export function updateVectorProperties(vector, x, y, xKey, yKey) {
+  vector.vectorProperties[xKey] = x - vector.layer.x
+  vector.vectorProperties[yKey] = y - vector.layer.y
 }
 
 /**
@@ -84,7 +83,6 @@ export function calculateCurrentVectorDeltas(
  * @param {number} currentDeltaY - (Integer)
  * @param {number} currentDeltaAngle - (Float)
  * @param {string} selectedXKey - The key of the x property of the selected point
- * @param {object} linkedVectorAction - The linked vector action
  * @param {object} linkedVector - The linked vector
  * @param {object} linkedPoints - The linked points
  * @param {object} vectorsSavedProperties - The saved properties of the vectors
@@ -97,7 +95,6 @@ export function handleOptionsAndUpdateVector(
   currentDeltaY,
   currentDeltaAngle,
   selectedXKey,
-  linkedVectorAction,
   linkedVector,
   linkedPoints,
   vectorsSavedProperties,
@@ -120,7 +117,6 @@ export function handleOptionsAndUpdateVector(
   if (linkedEndpointXKey) {
     if (["px1", "px2"].includes(selectedXKey)) {
       updateVectorProperties(
-        linkedVectorAction,
         linkedVector,
         x,
         y,
@@ -137,7 +133,6 @@ export function handleOptionsAndUpdateVector(
           vectorsSavedProperties[linkedEndpointYKey] -
           vectorsSavedProperties[linkedHandleYKey]
         updateVectorProperties(
-          linkedVectorAction,
           linkedVector,
           x - linkedDeltaX,
           y - linkedDeltaY,
@@ -186,7 +181,6 @@ export function handleOptionsAndUpdateVector(
         currentDeltaY -
         Math.round(Math.sin(newLinkedAngle) * linkedHandleLength)
       updateVectorProperties(
-        linkedVectorAction,
         linkedVector,
         x + newLinkedDeltaX,
         y + newLinkedDeltaY,

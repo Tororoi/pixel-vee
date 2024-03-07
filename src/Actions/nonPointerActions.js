@@ -204,11 +204,10 @@ export function actionPasteSelection() {
     const clipboardVectors = JSON.parse(
       JSON.stringify(state.selectClipboard.vectors)
     )
-    console.log(canvas.currentLayer.x, canvas.currentLayer.y)
-    console.log("before offset: ", JSON.parse(JSON.stringify(clipboardVectors)))
     if (Object.keys(clipboardVectors).length !== 0) {
       //correct offset coords for vectors to make agnostic to layer coords
       for (const [vectorIndex, vector] of Object.entries(clipboardVectors)) {
+        vector.layer = canvas.currentLayer
         vector.vectorProperties.px1 += canvas.currentLayer.x
         vector.vectorProperties.py1 += canvas.currentLayer.y
         vector.vectorProperties.px2 += canvas.currentLayer.x
@@ -217,9 +216,17 @@ export function actionPasteSelection() {
         vector.vectorProperties.py3 += canvas.currentLayer.y
         vector.vectorProperties.px4 += canvas.currentLayer.x
         vector.vectorProperties.py4 += canvas.currentLayer.y
+        //update vector index and action index
+        state.highestVectorKey += 1
+        let uniqueVectorKey = state.highestVectorKey
+        vector.index = uniqueVectorKey
+        vector.actionIndex = state.undoStack.length
+        delete clipboardVectors[vectorIndex] // Remove old key-value pair
+        clipboardVectors[uniqueVectorKey] = vector // Assign vector to new key
+        //add to state.vectors
+        state.vectors[uniqueVectorKey] = vector
       }
     }
-    console.log("after offset: ", JSON.parse(JSON.stringify(clipboardVectors)))
     //add to timeline
     addToTimeline({
       tool:
@@ -240,7 +247,8 @@ export function actionPasteSelection() {
           width: state.selectClipboard.canvas?.width,
           height: state.selectClipboard.canvas?.height,
         },
-        vectors: clipboardVectors,
+        vectorIndices: Object.keys(clipboardVectors),
+        // vectors: clipboardVectors,
         pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
       },
     })
@@ -294,11 +302,15 @@ export function actionConfirmPastedPixels() {
       selectProperties.py2 += yOffset - canvas.pastedLayer.y
     }
     let clipboardVectors = {}
-    if (lastPasteAction.vectors) {
+    if (lastPasteAction.vectorIndices) {
+      lastPasteAction.vectorIndices.forEach((vectorIndex) => {
+        clipboardVectors[vectorIndex] = state.vectors[vectorIndex]
+      })
       //Make deep copy of clipboard vectors:
-      clipboardVectors = JSON.parse(JSON.stringify(lastPasteAction.vectors))
+      clipboardVectors = JSON.parse(JSON.stringify(clipboardVectors))
       //correct offset coords for vectors to make agnostic to layer coords
       for (const [vectorIndex, vector] of Object.entries(clipboardVectors)) {
+        vector.layer = canvas.pastedLayer
         vector.vectorProperties.px1 += xOffset - canvas.pastedLayer.x
         vector.vectorProperties.py1 += yOffset - canvas.pastedLayer.y
         vector.vectorProperties.px2 += xOffset - canvas.pastedLayer.x
@@ -307,15 +319,15 @@ export function actionConfirmPastedPixels() {
         vector.vectorProperties.py3 += yOffset - canvas.pastedLayer.y
         vector.vectorProperties.px4 += xOffset - canvas.pastedLayer.x
         vector.vectorProperties.py4 += yOffset - canvas.pastedLayer.y
-        //add vector to vectorLookup
-        let uniqueVectorKey = 1
-        while (state.vectorLookup[uniqueVectorKey]) {
-          uniqueVectorKey++
-        }
-        state.vectorLookup[uniqueVectorKey] = state.undoStack.length
+        //update vector index and action index
+        state.highestVectorKey += 1
+        let uniqueVectorKey = state.highestVectorKey
         vector.index = uniqueVectorKey
+        vector.actionIndex = state.undoStack.length
         delete clipboardVectors[vectorIndex] // Remove old key-value pair
         clipboardVectors[uniqueVectorKey] = vector // Assign vector to new key
+        //add to state.vectors
+        state.vectors[uniqueVectorKey] = vector
       }
     }
     confirmPastedPixels(lastPasteAction, canvas.pastedLayer, xOffset, yOffset)
@@ -339,7 +351,8 @@ export function actionConfirmPastedPixels() {
           width: lastPasteAction.canvas?.width,
           height: lastPasteAction.canvas?.height,
         },
-        vectors: clipboardVectors,
+        vectorIndices: Object.keys(clipboardVectors),
+        // vectors: clipboardVectors,
       },
     })
     state.action = null

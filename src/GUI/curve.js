@@ -1,17 +1,15 @@
-import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
 import { drawControlPointHandle } from "../utils/guiHelpers.js"
 
 /**
  * @param {object} vectorProperties - The properties of the vector
- * @param {object} action - The vector action to be rendered
  * @param {object} vector - The vector to be rendered
  */
-export function renderCurveVector(vectorProperties, action, vector) {
+export function renderCurveVector(vectorProperties, vector) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
-  const xOffset = action ? action.layer.x + canvas.xOffset : canvas.xOffset
-  const yOffset = action ? action.layer.y + canvas.yOffset : canvas.yOffset
+  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
+  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   let circleRadius = 8 * lineWidth
@@ -40,7 +38,7 @@ export function renderCurveVector(vectorProperties, action, vector) {
     { x: "px4", y: "py4" },
   ]
 
-  if (!action) {
+  if (!vector) {
     vectorGui.drawControlPoints(
       vectorProperties,
       pointsKeys,
@@ -59,7 +57,6 @@ export function renderCurveVector(vectorProperties, action, vector) {
     circleRadius / 2,
     true, // modify
     0,
-    action,
     vector
   )
   // Fill points
@@ -68,26 +65,14 @@ export function renderCurveVector(vectorProperties, action, vector) {
 
 /**
  * @param {object} vectorProperties - The properties of the vector
- * @param {object} action - The vector action to be rendered
  * @param {object} vector - The vector to be rendered
  */
-export function renderCurvePath(vectorProperties, action, vector) {
+export function renderCurvePath(vectorProperties, vector) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
-  const xOffset = action ? action.layer.x + canvas.xOffset : canvas.xOffset
-  const yOffset = action ? action.layer.y + canvas.yOffset : canvas.yOffset
+  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
+  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
-  // if (state.selectedVectors[vector.index]) {
-  //   lineWidth *= 8
-  // }
-  // if (vector) {
-  //   if (state.currentVectorIndex === vector.index) {
-  //     // canvas.vectorGuiCTX.lineCap = "round"
-  //     canvas.vectorGuiCTX.lineDashOffset = 0.5
-  //     canvas.vectorGuiCTX.setLineDash([lineWidth * 12, lineWidth * 12])
-  //     lineWidth *= 17
-  //   }
-  // }
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
 

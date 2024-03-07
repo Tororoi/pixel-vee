@@ -53,30 +53,22 @@ export function copySelectedPixels() {
 }
 
 /**
- * Currently uses linked vectors, TODO: keep separate track of "selected" vectors in a similar way
+ * Copy selected vectors
  */
 export function copySelectedVectors() {
-  let selectedVectors = { ...state.selectedVectors }
-  if (Object.entries(selectedVectors).length === 0) {
-    let currentVector =
-      state.undoStack[state.vectorLookup[state.currentVectorIndex]].vectors[
-        state.currentVectorIndex
-      ]
+  let selectedVectors = {}
+  state.selectedVectorIndicesSet.forEach((vectorIndex) => {
+    let vector = state.vectors[vectorIndex]
+    selectedVectors[vectorIndex] = {
+      ...vector,
+    }
+  })
+  if (state.selectedVectorIndicesSet.size === 0) {
+    let currentVector = state.vectors[state.currentVectorIndex]
     selectedVectors[state.currentVectorIndex] = {
       ...currentVector,
     }
   }
-  // for (const [linkedVectorIndex, linkedPoints] of Object.entries(
-  //   vectorGui.linkedVectors
-  // )) {
-  //   const linkedVectorAction =
-  //     state.undoStack[state.vectorLookup[linkedVectorIndex]]
-  //   const linkedVector = linkedVectorAction.vectors[linkedVectorIndex]
-
-  //   selectedVectors[linkedVectorIndex] = {
-  //     ...linkedVector,
-  //   }
-  // }
   state.selectClipboard.selectProperties = { ...state.selectProperties }
   state.selectClipboard.boundaryBox = {
     xMin: null,

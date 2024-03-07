@@ -62,11 +62,10 @@ export function setColor(r, g, b, a, target) {
     target.style.backgroundColor = color.color
     if (target.vector) {
       let vector = target.vector
-      let action = state.undoStack[state.vectorLookup[vector.index]]
       let oldColor = { ...vector.color }
       vector.color = color
-      renderCanvas(action.layer, true)
-      changeActionVectorColor(action, vector, oldColor)
+      renderCanvas(vector.layer, true)
+      changeActionVectorColor(vector, oldColor)
       state.action = null
       state.redoStack = []
       renderVectorsToDOM()

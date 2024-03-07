@@ -163,6 +163,8 @@ function openSavedDrawing() {
 //=== * * * Event Listeners * * * ===//
 //===================================//
 
+//TODO: (Medium Priority) use event delegation so menu elements can be created dynamically
+
 document.body.addEventListener("mouseover", (e) => {
   //TODO: (Low Priority) Instead of rendering here, use a timer that resets on mousemove to detect idle time and move this logic to the mousemove event
   if (!state.touch) {
@@ -225,11 +227,7 @@ dom.toolOptions.addEventListener("click", (e) => {
   }
 })
 dom.gridBtn.addEventListener("click", () => {
-  if (dom.gridBtn.checked) {
-    vectorGui.grid = true
-  } else {
-    vectorGui.grid = false
-  }
+  vectorGui.grid = dom.gridBtn.checked
   vectorGui.render()
 })
 dom.gridSpacing.addEventListener("input", (e) => {
@@ -309,6 +307,9 @@ dom.invertSelectionBtn.addEventListener("click", actionInvertSelection)
 dom.cutBtn.addEventListener("click", actionCutSelection)
 dom.copyBtn.addEventListener("click", actionCopySelection)
 dom.pasteBtn.addEventListener("click", actionPasteSelection)
+// dom.deleteBtn.addEventListener("click", (e) => {
+//TODO: (High Priority) delete selected pixels (cut without adding to clipboard)
+//})
 // dom.flipHorizontalBtn.addEventListener("click", (e) => {
 //   //TODO: (High Priority) flip selected pixels horizontally
 // })

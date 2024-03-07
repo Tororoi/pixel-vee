@@ -96,25 +96,18 @@ function handleModifyAction(latestAction, modType) {
   //for each processed action,
   latestAction.processedActions.forEach((mod) => {
     //find the action in the undoStack
-    const moddedVector =
-      state.undoStack[state.vectorLookup[mod.moddedVectorIndex]]
-        .vectors[mod.moddedVectorIndex] // need to check if this is a vector action and if it is, set the vector properties for the appropriate vector
+    const moddedVector = state.vectors[mod.moddedVectorIndex] // need to check if this is a vector action and if it is, set the vector properties for the appropriate vector
     //set the vectorProperties to the modded action's vectorProperties
     moddedVector.vectorProperties = {
       ...mod[modType],
     }
   })
-  const primaryModdedAction =
-    state.undoStack[latestAction.moddedActionIndex]
-  const primaryModdedVector =
-    primaryModdedAction.vectors[
-      latestAction.moddedVectorIndex
-    ]
+  const primaryModdedVector = state.vectors[latestAction.moddedVectorIndex]
   if (
     state.tool.name === primaryModdedVector.vectorProperties.type &&
     state.currentVectorIndex === primaryModdedVector.index
   ) {
-    vectorGui.setVectorProperties(primaryModdedAction, primaryModdedVector)
+    vectorGui.setVectorProperties(primaryModdedVector)
   }
 }
 
@@ -259,10 +252,7 @@ function handlePasteAction(latestAction, modType) {
     enableActionsForNoPaste()
   } else if (modType === "to") {
     //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
-    pasteSelectedPixels(
-      latestAction,
-      latestAction.pastedLayer
-    )
+    pasteSelectedPixels(latestAction, latestAction.pastedLayer)
     switchTool("move")
     disableActionsForPaste()
   }
@@ -334,12 +324,14 @@ function handleMoveAction(latestAction, modType) {
  * @param {Array} pushStack - The stack to push the action to
  * @param {Array} popStack - The stack to pop the action from
  * @param {string} modType - "from" or "to", used to identify undo or redo
- * TODO: High Priority - Maintain state.vectorLookup
+ * TODO: High Priority - Maintain state.vectors by removing or adding vectors to the state.vectors
  */
 export function actionUndoRedo(pushStack, popStack, modType) {
   //latest action is the action about to be undone or redone
   let latestAction = popStack[popStack.length - 1]
-  if (state.vectorLookup[state.currentVectorIndex] === latestAction.index) {
+  if (
+    state.vectors[state.currentVectorIndex].actionIndex === latestAction.index
+  ) {
     //reset vectorGui if the latest action is the current vector
     vectorGui.reset()
   }
@@ -357,21 +349,24 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   if (latestAction.tool.name === "modify") {
     handleModifyAction(latestAction, modType)
   } else if (latestAction.tool.name === "changeMode") {
-    state.undoStack[
-      latestAction.moddedActionIndex
-    ].modes = {
+    state.undoStack[latestAction.moddedActionIndex].modes = {
       ...latestAction[modType],
     }
   } else if (latestAction.tool.name === "changeColor") {
-    state.undoStack[
-      latestAction.moddedActionIndex
-    ].color = {
+    state.undoStack[latestAction.moddedActionIndex].color = {
       ...latestAction[modType],
     }
   } else if (latestAction.tool.name === "remove") {
-    //TODO: (High Priority) Also check if remove action is removing an action or sub action from a group action. If it is from a group action it will be .vectors[moddedVectorIndex].removed instead of just .removed
-    state.undoStack[latestAction.moddedActionIndex].removed =
-      latestAction[modType]
+    if (latestAction.moddedVectorIndex !== undefined) {
+      //If the remove action has a vector index, set the vector's removed property
+      state.undoStack[latestAction.moddedActionIndex].vectors[
+        latestAction.moddedVectorIndex
+      ].removed = latestAction[modType]
+    } else {
+      //If the remove action only has a modded action index, set the removed property of the action
+      state.undoStack[latestAction.moddedActionIndex].removed =
+        latestAction[modType]
+    }
   } else if (latestAction.tool.name === "clear") {
     handleClearAction(latestAction)
   } else if (latestAction.tool.name === "addLayer") {
@@ -412,10 +407,8 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       //TODO: (High Priority) Which vector should be selected if there are multiple vectors in the action? First or last?
       //Get first vector in the action
       let latestVector =
-        latestAction.vectors[
-          Object.keys(latestAction.vectors)[0]
-        ]
-      vectorGui.setVectorProperties(latestAction, latestVector)
+        state.vectors[latestAction.vectorIndices[0]] //TODO: (High Priority) Need to handle removing vectors no longer part of undoStack
+      vectorGui.setVectorProperties(latestVector)
     }
   }
   pushStack.push(popStack.pop())
@@ -428,14 +421,10 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     ) {
       //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
       let newLatestVector =
-        newLatestAction.vectors[
-          Object.keys(newLatestAction.vectors)[0]
-        ]
-      vectorGui.setVectorProperties(newLatestAction, newLatestVector)
+        newLatestAction.vectors[Object.keys(newLatestAction.vectors)[0]]
+      vectorGui.setVectorProperties(newLatestVector)
     }
   }
-  //Sync vector lookup table
-  state.syncVectorLookup()
   //Render the canvas with the new latest action
   renderToLatestAction(latestAction, modType)
   //Recalculate size of file if save dialog is open
@@ -476,8 +465,7 @@ export function addToTimeline(actionObject) {
     index: state.undoStack.length,
     tool: { ...tool }, //Needed properties: name, brushType, brushSize, type
     layer: layer,
-    // properties,
-    ...properties, //TODO: (High Priority) Remove nesting of properties object
+    ...properties,
     hidden: false,
     removed: false,
     snapshot,

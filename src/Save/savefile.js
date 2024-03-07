@@ -59,11 +59,12 @@ export function prepareDrawingForSave() {
 
   let saveJsonString = JSON.stringify({
     metadata: {
-      version: "1.0",
+      version: "1.1",
       application: "Pixel V",
       timestamp: Date.now(),
     },
     layers: sanitizedLayers,
+    // vectors: sanitizedVectors, //TODO: (High Priority) sanitize state.vectors (should just be sanitizing vector.layer)
     palette: sanitizedPalette,
     history: sanitizedUndoStack,
     canvasProperties: {
@@ -141,6 +142,8 @@ export async function loadDrawing(jsonFile) {
   //Not likely to be an issue, but reset just in case
   state.points = []
   state.action = null
+  state.vectors = {}
+  state.highestVectorKey = 0
   state.vectorsSavedProperties = {}
   state.activeIndexes = []
   state.savedBetweenActionImages = []
@@ -153,6 +156,11 @@ export async function loadDrawing(jsonFile) {
     canvas.rasterGuiCVS.height
   )
   vectorGui.reset()
+
+  //Handle old files that don't have the vectors object
+  if (data.metadata.version === "1.0") {
+    data.vectors = {}
+  }
 
   // Array to hold promises for image loading
   let imageLoadPromises = []
@@ -221,7 +229,6 @@ export async function loadDrawing(jsonFile) {
     swatches.palette = data.palette
   }
 
-  let vectorLookup = {}
   // Reconstruct the undoStack
   data.history.forEach((action, index) => {
     if (!action.index) {
@@ -242,45 +249,29 @@ export async function loadDrawing(jsonFile) {
       action.points = points
     }
     //Handle vector actions
-    //For old files that don't have vectorProperties.type
-    if (action?.vectorProperties) {
-      //restructure vectorProoperties to include type
+    //For old files that don't use the vectors object
+    if (data.metadata.version === "1.0" && action?.vectorProperties) {
+      //restructure vectorProperties to include type
       action.vectorProperties.type = action.tool.name
       //restructure how vectorProperties are stored
-      let uniqueVectorKey = 1
-      while (vectorLookup[uniqueVectorKey]) {
-        uniqueVectorKey++
+      state.highestVectorKey += 1
+      let uniqueVectorKey = state.highestVectorKey
+      data.vectors[uniqueVectorKey] = {
+        index: uniqueVectorKey,
+        actionIndex: index,
+        layer: action.layer,
+        modes: { ...action.modes },
+        color: { ...action.color },
+        brushSize: action.tool.brushSize,
+        brushType: action.tool.brushType,
+        vectorProperties: { ...action.vectorProperties },
+        hidden: action.hidden,
+        removed: action.removed,
       }
-      vectorLookup[uniqueVectorKey] = index
-      action.vectors = {
-        [uniqueVectorKey]: {
-          index: uniqueVectorKey,
-          modes: { ...action.modes },
-          color: { ...action.color },
-          vectorProperties: { ...action.vectorProperties },
-          hidden: action.hidden,
-          removed: action.removed,
-        },
-      }
+
       //remove old properties
       delete action.vectorProperties
       delete action.modes
-      delete action.color
-    }
-    if (action.modes) {
-      //convert old modes to new modes
-      if (!action) {
-        action = {}
-      }
-      action.modes = action.modes
-      delete action.modes
-    }
-    if (action.color) {
-      //convert old color to new color
-      if (!action) {
-        action = {}
-      }
-      action.color = action.color
       delete action.color
     }
     //TODO: (Low Priority) If quadCurve and cubicCurve are unified into "curve", will need to add logic here to convert those to the correct type
@@ -322,10 +313,7 @@ export async function loadDrawing(jsonFile) {
       action.layer = canvas.tempLayer
     } else {
       let correspondingLayer = canvas.layers.find(
-        (layer) =>
-          action.layer?.id
-            ? layer.id === action.layer.id
-            : layer.title === action.layer.title //NOTE: This is a fix for loading files saved before layer ids were implemented. TODO: (Medium Priority) implement a versioning system to handle this in the future.
+        (layer) => layer.id === action.layer.id
       )
 
       if (correspondingLayer) {
@@ -343,7 +331,26 @@ export async function loadDrawing(jsonFile) {
     // Add the action to the undo stack
     state.undoStack.push(action)
   })
-  state.vectorLookup = vectorLookup
+
+  //Reconstruct vectors (object, not array) by iterating through it and assigning the proper layer to each vector
+  for (let vectorKey in data.vectors) {
+    let vector = data.vectors[vectorKey]
+    if (vector.layer.id === 0) {
+      vector.layer = canvas.tempLayer
+    } else {
+      let correspondingLayer = canvas.layers.find(
+        (layer) => layer.id === vector.layer.id
+      )
+      if (correspondingLayer) {
+        vector.layer = correspondingLayer
+        state.vectors[vectorKey] = vector
+      }
+    }
+    //find the highest vector key
+    if (Number(vectorKey) > state.highestVectorKey) {
+      state.highestVectorKey = Number(vectorKey)
+    }
+  }
 
   // Wait for all images to load
   await Promise.all(imageLoadPromises)

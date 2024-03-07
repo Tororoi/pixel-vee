@@ -18,7 +18,7 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
     canvas.rasterGuiCVS.height
   )
   let isRasterSelection = state.boundaryBox.xMax !== null
-  let isVectorSelection = Object.keys(state.selectedVectors).length > 0
+  let isVectorSelection = state.selectedVectorIndicesSet.size > 0
   if (isRasterSelection || isVectorSelection) {
     //Create greyed out area around selection
     //clip to selection
@@ -52,7 +52,7 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
       )
       canvas.rasterGuiCTX.restore()
       renderSelectionBoxOutline(lineDashOffset, state.tool.name === "select")
-    } else if (Object.keys(state.selectedVectors).length > 0) {
+    } else if (state.selectedVectorIndicesSet.size > 0) {
       //define rectangle for canvas area
       canvas.rasterGuiCTX.rect(
         canvas.xOffset,
@@ -73,9 +73,8 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
       const yOffset = canvas.currentLayer.y + canvas.yOffset
       canvas.rasterGuiCTX.beginPath()
       //Need to chain paths?
-      for (const [vectorIndex, vector] of Object.entries(
-        state.selectedVectors
-      )) {
+      state.selectedVectorIndicesSet.forEach((vectorIndex) => {
+        const vector = state.vectors[vectorIndex]
         const { px1, py1, px2, py2, px3, py3, px4, py4 } =
           vector.vectorProperties
         canvas.rasterGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
@@ -87,7 +86,7 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
           xOffset + px2 + 0.5,
           yOffset + py2 + 0.5
         )
-      }
+      })
       // stroke vector paths with thick squared off dashed line then stroke vector paths with slightly thinner eraser (use some built-in html canvas composite mode) to clear greyed out area for vectors
       let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
       // canvas.rasterGuiCTX.lineDashOffset = 0.5

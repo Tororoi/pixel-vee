@@ -5,10 +5,9 @@ import { drawCirclePath, drawControlPointHandle } from "../utils/guiHelpers.js"
 
 /**
  * @param {object} vectorProperties - The properties of the vector
- * @param {object} action - The vector action to be rendered
  * @param {object} vector - The vector to be rendered
  */
-export function renderEllipseVector(vectorProperties, action, vector) {
+export function renderEllipseVector(vectorProperties, vector) {
   const {
     px1,
     py1,
@@ -22,8 +21,8 @@ export function renderEllipseVector(vectorProperties, action, vector) {
     // x1Offset,
     // y1Offset,
   } = vectorProperties
-  const xOffset = action ? action.layer.x + canvas.xOffset : canvas.xOffset
-  const yOffset = action ? action.layer.y + canvas.yOffset : canvas.yOffset
+  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
+  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   let circleRadius = 8 * lineWidth
@@ -49,7 +48,7 @@ export function renderEllipseVector(vectorProperties, action, vector) {
     { x: "px3", y: "py3" },
   ]
 
-  if (!action) {
+  if (!vector) {
     vectorGui.drawControlPoints(
       state.vectorProperties,
       pointsKeys,
@@ -68,7 +67,6 @@ export function renderEllipseVector(vectorProperties, action, vector) {
     circleRadius / 2,
     true,
     0,
-    action,
     vector
   )
   // Fill points
@@ -156,9 +154,9 @@ export function renderOffsetEllipseVector(vectorProperties) {
 
 /**
  * @param {object} vectorProperties - The properties of the vector
- * @param {object} action - The vector action to be rendered
+ * @param {object} vector - The vector to be rendered
  */
-export function renderEllipsePath(vectorProperties, action) {
+export function renderEllipsePath(vectorProperties, vector) {
   const {
     px1,
     py1,
@@ -172,8 +170,8 @@ export function renderEllipsePath(vectorProperties, action) {
     x1Offset,
     y1Offset,
   } = vectorProperties
-  const xOffset = action ? action.layer.x + canvas.xOffset : canvas.xOffset
-  const yOffset = action ? action.layer.y + canvas.yOffset : canvas.yOffset
+  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
+  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   canvas.vectorGuiCTX.lineWidth = lineWidth

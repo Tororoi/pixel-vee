@@ -204,58 +204,47 @@ function ellipseSteps() {
           boundaryBox.yMin -= canvas.currentLayer.y
           boundaryBox.yMax -= canvas.currentLayer.y
         }
-        //generate new unique key for vector based on what already exists in state.vectorLookup object
-        let uniqueVectorKey = 1
-        while (state.vectorLookup[uniqueVectorKey]) {
-          uniqueVectorKey++
-        }
-        state.vectorLookup[uniqueVectorKey] = state.undoStack.length
-        state.currentVectorIndex = uniqueVectorKey
-        enableActionsForSelection()
+        //generate new unique key for vector
+        state.highestVectorKey += 1
+        let uniqueVectorKey = state.highestVectorKey
         //store control points for timeline
         addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {
-            // modes: { ...state.tool.modes },
-            // color: { ...swatches.primary.color },
-            // vectorProperties: {
-            //   ...state.vectorProperties,
-            //   px1: state.vectorProperties.px1 - canvas.currentLayer.x,
-            //   py1: state.vectorProperties.py1 - canvas.currentLayer.y,
-            //   px2: state.vectorProperties.px2 - canvas.currentLayer.x,
-            //   py2: state.vectorProperties.py2 - canvas.currentLayer.y,
-            //   px3: state.vectorProperties.px3 - canvas.currentLayer.x,
-            //   py3: state.vectorProperties.py3 - canvas.currentLayer.y,
-            // },
             maskArray,
             boundaryBox,
             selectionInversed: state.selectionInversed,
-            vectors: {
-              [uniqueVectorKey]: {
-                index: uniqueVectorKey,
-                modes: { ...state.tool.modes },
-                color: { ...swatches.primary.color },
-                brushSize: state.tool.brushSize,
-                brushType: state.tool.brushType,
-                vectorProperties: {
-                  ...state.vectorProperties,
-                  px1: state.vectorProperties.px1 - canvas.currentLayer.x,
-                  py1: state.vectorProperties.py1 - canvas.currentLayer.y,
-                  px2: state.vectorProperties.px2 - canvas.currentLayer.x,
-                  py2: state.vectorProperties.py2 - canvas.currentLayer.y,
-                  px3: state.vectorProperties.px3 - canvas.currentLayer.x,
-                  py3: state.vectorProperties.py3 - canvas.currentLayer.y,
-                },
-                // maskArray,
-                // boundaryBox,
-                // selectionInversed: state.selectionInversed,
-                hidden: false,
-                removed: false,
-              },
-            },
+            vectorIndices: [uniqueVectorKey],
           },
         })
+        //Store vector in state
+        state.vectors[uniqueVectorKey] = {
+          index: uniqueVectorKey,
+          actionIndex: state.action.index,
+          action: state.action,
+          layer: canvas.currentLayer,
+          modes: { ...state.tool.modes },
+          color: { ...swatches.primary.color },
+          brushSize: state.tool.brushSize,
+          brushType: state.tool.brushType,
+          vectorProperties: {
+            ...state.vectorProperties,
+            px1: state.vectorProperties.px1 - canvas.currentLayer.x,
+            py1: state.vectorProperties.py1 - canvas.currentLayer.y,
+            px2: state.vectorProperties.px2 - canvas.currentLayer.x,
+            py2: state.vectorProperties.py2 - canvas.currentLayer.y,
+            px3: state.vectorProperties.px3 - canvas.currentLayer.x,
+            py3: state.vectorProperties.py3 - canvas.currentLayer.y,
+          },
+          // maskArray,
+          // boundaryBox,
+          // selectionInversed: state.selectionInversed,
+          hidden: false,
+          removed: false,
+        }
+        state.currentVectorIndex = uniqueVectorKey
+        enableActionsForSelection()
         state.clickCounter = 0
         //reset vector state forceCircle
         state.vectorProperties.forceCircle = false
@@ -270,19 +259,18 @@ function ellipseSteps() {
 
 /**
  * Update ellipse vector properties
- * @param {object} currentAction - The current action
  * @param {object} currentVector - The current vector
  */
-function updateEllipseVectorProperties(currentAction, currentVector) {
+function updateEllipseVectorProperties(currentVector) {
   updateEllipseControlPoints(state, canvas, vectorGui)
   currentVector.vectorProperties = { ...state.vectorProperties }
   //Keep properties relative to layer offset
-  currentVector.vectorProperties.px1 -= currentAction.layer.x
-  currentVector.vectorProperties.py1 -= currentAction.layer.y
-  currentVector.vectorProperties.px2 -= currentAction.layer.x
-  currentVector.vectorProperties.py2 -= currentAction.layer.y
-  currentVector.vectorProperties.px3 -= currentAction.layer.x
-  currentVector.vectorProperties.py3 -= currentAction.layer.y
+  currentVector.vectorProperties.px1 -= currentVector.layer.x
+  currentVector.vectorProperties.py1 -= currentVector.layer.y
+  currentVector.vectorProperties.px2 -= currentVector.layer.x
+  currentVector.vectorProperties.py2 -= currentVector.layer.y
+  currentVector.vectorProperties.px3 -= currentVector.layer.x
+  currentVector.vectorProperties.py3 -= currentVector.layer.y
 }
 
 /**
@@ -291,9 +279,7 @@ function updateEllipseVectorProperties(currentAction, currentVector) {
  * Ideally a user should be able to click on a curve and render it's vector UI that way.
  */
 export function adjustEllipseSteps() {
-  let currentAction =
-    state.undoStack[state.vectorLookup[state.currentVectorIndex]]
-  let currentVector = currentAction.vectors[state.currentVectorIndex]
+  let currentVector = state.vectors[state.currentVectorIndex]
   if (!(vectorGui.selectedCollisionPresent && state.clickCounter === 0)) {
     return
   }
@@ -319,22 +305,22 @@ export function adjustEllipseSteps() {
         state.vectorProperties.forceCircle =
           currentVector.vectorProperties.forceCircle
       }
-      updateEllipseVectorProperties(currentAction, currentVector)
+      updateEllipseVectorProperties(currentVector)
       state.activeIndexes = createActiveIndexesForRender(
         currentVector,
         state.vectorsSavedProperties
       )
-      renderCanvas(currentAction.layer, true, state.activeIndexes, true)
+      renderCanvas(currentVector.layer, true, state.activeIndexes, true)
       // renderCanvas(currentVector.layer, true)
       break
     case "pointermove":
-      updateEllipseVectorProperties(currentAction, currentVector)
-      renderCanvas(currentAction.layer, true, state.activeIndexes)
+      updateEllipseVectorProperties(currentVector)
+      renderCanvas(currentVector.layer, true, state.activeIndexes)
       // renderCanvas(currentVector.layer, true)
       break
     case "pointerup":
-      updateEllipseVectorProperties(currentAction, currentVector)
-      renderCanvas(currentAction.layer, true, state.activeIndexes)
+      updateEllipseVectorProperties(currentVector)
+      renderCanvas(currentVector.layer, true, state.activeIndexes)
       // renderCanvas(currentVector.layer, true)
       modifyVectorAction(currentVector)
       vectorGui.selectedPoint = {

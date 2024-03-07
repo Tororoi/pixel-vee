@@ -317,13 +317,12 @@ function vectorInteract(e) {
     return
   }
   let vector = e.target.closest(".vector").vectorObj
-  let action = state.undoStack[state.vectorLookup[vector.index]]
   if (e.target.className.includes("eraser")) {
     //change mode
-    toggleVectorMode(action, vector, "eraser")
+    toggleVectorMode(vector, "eraser")
   } else if (e.target.className.includes("inject")) {
     //change mode
-    toggleVectorMode(action, vector, "inject")
+    toggleVectorMode(vector, "inject")
   } else if (e.target.className.includes("actionColor")) {
     //change color
     e.target.color = vector.color
@@ -334,35 +333,35 @@ function vectorInteract(e) {
     e.target.classList.remove("eyeopen")
     e.target.classList.add("eyeclosed")
     vector.hidden = true
-    renderCanvas(action.layer, true)
+    renderCanvas(vector.layer, true)
   } else if (e.target.className.includes("eyeclosed")) {
     //toggle visibility
     e.target.classList.remove("eyeclosed")
     e.target.classList.add("eyeopen")
     vector.hidden = false
-    renderCanvas(action.layer, true)
+    renderCanvas(vector.layer, true)
   } else if (e.target.className.includes("trash")) {
     //remove vector
-    removeVector(action, vector)
+    removeVector(vector)
   } else {
     let currentIndex = state.currentVectorIndex
     //switch tool
     switchTool(vector.vectorProperties.type)
     //select current vector
     vectorGui.reset()
-    if (!state.selectedVectors[vector.index]) {
+    if (!state.selectedVectorIndicesSet.has(vector.index)) {
       //select if shift key held down
-      state.selectedVectors[vector.index] = vector
+      state.selectedVectorIndicesSet.add(vector.index)
       enableActionsForSelection()
     } else {
       //deselect if option key held down
     } //else reset selectedVectors
     if (vector.index !== currentIndex) {
-      vectorGui.setVectorProperties(action, vector)
+      vectorGui.setVectorProperties(vector)
       canvas.currentLayer.inactiveTools.forEach((tool) => {
         dom[`${tool}Btn`].disabled = false
       })
-      canvas.currentLayer = action.layer
+      canvas.currentLayer = vector.layer
       canvas.currentLayer.inactiveTools.forEach((tool) => {
         dom[`${tool}Btn`].disabled = true
       })
@@ -375,13 +374,12 @@ function vectorInteract(e) {
 
 /**
  * Mark a vector action as removed
- * @param {object} action - The action to be modified
  * @param {object} vector - The vector to be removed
  */
-function removeVector(action, vector) {
+function removeVector(vector) {
   vector.removed = true
-  renderCanvas(action.layer, true)
-  removeActionVector(action, vector) //TODO: (High Priority) Need to specify that it is a sub action for a group action that is being removed
+  renderCanvas(vector.layer, true)
+  removeActionVector(vector)
   state.action = null
   state.redoStack = []
   if (state.currentVectorIndex === vector.index) {
@@ -392,11 +390,10 @@ function removeVector(action, vector) {
 
 /**
  * Change a vector action's modes
- * @param {object} action - The action to be modified
  * @param {object} vector - The vector to be modified
  * @param {string} modeKey - The mode to be modified
  */
-function toggleVectorMode(action, vector, modeKey) {
+function toggleVectorMode(vector, modeKey) {
   let oldModes = { ...vector.modes }
   vector.modes[modeKey] = !vector.modes[modeKey]
   //resolve conflicting modes
@@ -408,8 +405,8 @@ function toggleVectorMode(action, vector, modeKey) {
     }
   }
   let newModes = { ...vector.modes }
-  renderCanvas(action.layer, true)
-  changeActionVectorMode(action, vector, oldModes, newModes)
+  renderCanvas(vector.layer, true)
+  changeActionVectorMode(vector, oldModes, newModes)
   state.action = null
   state.redoStack = []
   renderVectorsToDOM()
