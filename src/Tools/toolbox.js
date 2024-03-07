@@ -51,7 +51,7 @@ export function switchTool(toolName = null, toolBtn = null) {
       renderToolOptionsToDOM()
       vectorGui.reset()
       state.reset()
-      renderVectorsToDOM()
+      // renderVectorsToDOM()
       renderBrushModesToDOM()
       renderCursor()
     }

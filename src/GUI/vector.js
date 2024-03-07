@@ -309,12 +309,12 @@ function render() {
     renderCurrentVector()
   }
   //Render selection outline
-  if (
-    state.selectProperties.px1 !== null ||
-    state.selectedVectorIndicesSet.size > 0
-  ) {
-    renderRasterCVS()
-  }
+  // if (
+  //   state.selectProperties.px1 !== null ||
+  //   state.selectedVectorIndicesSet.size > 0
+  // ) {
+  renderRasterCVS()
+  // }
   //Render grid
   if (canvas.zoom >= 4 && vectorGui.grid) {
     renderGrid(vectorGui.gridSpacing)
@@ -391,8 +391,12 @@ function renderLayerVectors(layer) {
   }
   //iterate through and render all vectors in the layer except the selected vector which will always be rendered last
   //render paths
-  for (let vector of state.vectors) {
-    if (!vector.removed && vector.layer === layer) {
+  for (let vector of Object.values(state.vectors)) {
+    if (
+      !vector.removed &&
+      vector.layer === layer &&
+      state.undoStack.includes(vector.action)
+    ) {
       //For each vector, render paths
       if (!vector.removed && vector.vectorProperties.type === state.tool.name) {
         renderPath(
@@ -420,8 +424,12 @@ function renderLayerVectors(layer) {
   //render control points
   vectorGui.resetOtherVectorCollision()
   vectorGui.resetLinkedVectors()
-  for (let vector of state.vectors) {
-    if (!vector.removed && vector.layer === layer) {
+  for (let vector of Object.values(state.vectors)) {
+    if (
+      !vector.removed &&
+      vector.layer === layer &&
+      state.undoStack.includes(vector.action)
+    ) {
       //For each vector, render control points
       if (
         !vector.removed &&

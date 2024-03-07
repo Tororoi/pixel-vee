@@ -170,7 +170,7 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
   })
 
   const { selectProperties, boundaryBox } = clipboard
-  //for clipboard.canvas:
+  // //for clipboard.canvas:
   if (Object.keys(clipboard.vectors).length === 0) {
     // if xOffset and yOffset present, adjust selectProperties and boundaryBox
     //render the clipboard canvas onto the temporary layer
@@ -230,20 +230,16 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
 /**
  * Confirm pasted pixels
  * Not dependent on pointer events
- * @param {HTMLCanvasElement} clipboardCanvas - clipboard canvas
- * @param {object} boundaryBox - boundary box
- * @param clipboard
+ * @param {object} clipboard - clipboard object
  * @param {object} layer - layer to paste onto
- * @param {number} xOffset - x offset (Integer)
- * @param {number} yOffset - y offset (Integer)
  */
-export function confirmPastedPixels(clipboard, layer, xOffset, yOffset) {
+export function confirmPastedPixels(clipboard, layer) {
   if (Object.keys(clipboard.vectors).length === 0) {
     //draw the current layer onto the pasted layer
     layer.ctx.drawImage(
       clipboard.canvas,
-      clipboard.boundaryBox.xMin + xOffset,
-      clipboard.boundaryBox.yMin + yOffset,
+      clipboard.boundaryBox.xMin + canvas.pastedLayer.x,
+      clipboard.boundaryBox.yMin + canvas.pastedLayer.y,
       clipboard.boundaryBox.xMax - clipboard.boundaryBox.xMin,
       clipboard.boundaryBox.yMax - clipboard.boundaryBox.yMin
     )
@@ -251,14 +247,14 @@ export function confirmPastedPixels(clipboard, layer, xOffset, yOffset) {
     //draw vectors
     for (const [vectorIndex, vector] of Object.entries(clipboard.vectors)) {
       actionCubicCurve(
-        vector.vectorProperties.px1 + xOffset,
-        vector.vectorProperties.py1 + yOffset,
-        vector.vectorProperties.px2 + xOffset,
-        vector.vectorProperties.py2 + yOffset,
-        vector.vectorProperties.px3 + xOffset,
-        vector.vectorProperties.py3 + yOffset,
-        vector.vectorProperties.px4 + xOffset,
-        vector.vectorProperties.py4 + yOffset,
+        vector.vectorProperties.px1 + canvas.pastedLayer.x,
+        vector.vectorProperties.py1 + canvas.pastedLayer.y,
+        vector.vectorProperties.px2 + canvas.pastedLayer.x,
+        vector.vectorProperties.py2 + canvas.pastedLayer.y,
+        vector.vectorProperties.px3 + canvas.pastedLayer.x,
+        vector.vectorProperties.py3 + canvas.pastedLayer.y,
+        vector.vectorProperties.px4 + canvas.pastedLayer.x,
+        vector.vectorProperties.py4 + canvas.pastedLayer.y,
         clipboard.boundaryBox,
         clipboard.selectionInversed,
         4,

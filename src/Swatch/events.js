@@ -66,8 +66,8 @@ export function setColor(r, g, b, a, target) {
       vector.color = color
       renderCanvas(vector.layer, true)
       changeActionVectorColor(vector, oldColor)
-      state.action = null
-      state.redoStack = []
+
+      state.clearRedoStack()
       renderVectorsToDOM()
     }
     if (swatches.activePaletteIndex !== null) {

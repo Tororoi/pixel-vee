@@ -15,11 +15,11 @@ import {
  */
 export const renderVectorsToDOM = () => {
   dom.vectorsThumbnails.innerHTML = ""
-  state.vectors.forEach((vector, index) => {
+  for (let vector of Object.values(state.vectors)) {
     if (isValidVector(vector)) {
       renderVectorElement(vector)
     }
-  })
+  }
 
   //active paste happening, disable vector interface
   if (canvas.pastedLayer) {
@@ -37,6 +37,7 @@ export const renderVectorsToDOM = () => {
 const isValidVector = (vector) =>
   !vector.removed &&
   !vector.layer?.removed &&
+  state.undoStack.includes(vector.action) &&
   (vector.layer === canvas.currentLayer ||
     (vector.layer === canvas.pastedLayer && canvas.currentLayer.isPreview))
 
@@ -46,9 +47,8 @@ const isValidVector = (vector) =>
  */
 const renderVectorElement = (vector) => {
   // const isSelected = vector.index === state.currentVectorIndex
-  const isSelected =
-    state.selectedVectorIndicesSet.has(vector.index) ||
-    vector.index === state.currentVectorIndex //TODO: (High Priority) Need way to mark selected vs current vector
+  const isSelected = state.selectedVectorIndicesSet.has(vector.index) //TODO: (High Priority) Need way to mark selected vs current vector
+  const isCurrentVector = vector.index === state.currentVectorIndex
   const vectorElement = createVectorElement(vector)
 
   const thumb = createThumbnailImage(vector, isSelected)
@@ -64,7 +64,7 @@ const renderVectorElement = (vector) => {
   vectorElement.appendChild(left)
 
   //right side icons
-  const tool = createToolElement(vector.vectorProperties.type, isSelected)
+  const tool = createToolElement(vector.vectorProperties.type, isCurrentVector)
   vectorElement.appendChild(tool)
 
   const color = createColorElement(vector.color)

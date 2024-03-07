@@ -138,10 +138,10 @@ export async function loadDrawing(jsonFile) {
   dom.canvasLayers.innerHTML = ""
   canvas.layers = []
   state.undoStack = []
-  state.redoStack = []
+  state.clearRedoStack()
   //Not likely to be an issue, but reset just in case
   state.points = []
-  state.action = null
+
   state.vectors = {}
   state.highestVectorKey = 0
   state.vectorsSavedProperties = {}
@@ -149,12 +149,12 @@ export async function loadDrawing(jsonFile) {
   state.savedBetweenActionImages = []
   //reset selection state
   state.deselect()
-  canvas.rasterGuiCTX.clearRect(
-    0,
-    0,
-    canvas.rasterGuiCVS.width,
-    canvas.rasterGuiCVS.height
-  )
+  // canvas.rasterGuiCTX.clearRect(
+  //   0,
+  //   0,
+  //   canvas.rasterGuiCVS.width,
+  //   canvas.rasterGuiCVS.height
+  // )
   vectorGui.reset()
 
   //Handle old files that don't have the vectors object

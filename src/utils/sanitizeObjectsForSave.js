@@ -70,7 +70,10 @@ export function sanitizeHistory(
   for (let i = sanitizedUndoStack.length - 1; i >= 0; i--) {
     const action = sanitizedUndoStack[i]
     //if active paste action, find the latest unconfirmed paste action and remove it and all actions after it
-    if (action.tool.name === "paste" && !lastPasteActionIndex) {
+    if (
+      ["paste", "vectorPaste"].includes(action.tool.name) &&
+      !lastPasteActionIndex
+    ) {
       lastPasteActionIndex = i
       if (!action.confirmed) {
         //remove the unconfirmed paste action and all actions after it

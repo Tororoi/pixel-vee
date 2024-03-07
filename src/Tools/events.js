@@ -77,11 +77,10 @@ function handleClearCanvas() {
     canvas.offScreenCVS.height
   )
   actionClear(canvas.currentLayer)
-  state.action = null
   state.pointsSet = null
   state.seenPixelsSet = null
   state.points = []
-  state.redoStack = []
+  state.clearRedoStack()
   renderCanvas(canvas.currentLayer)
   vectorGui.reset()
   state.reset()
@@ -95,6 +94,7 @@ function handleClearCanvas() {
 export function handleTools(e) {
   const targetTool = e?.target.closest(".tool")
   switchTool(null, targetTool)
+  renderVectorsToDOM()
 }
 
 /**

@@ -139,6 +139,7 @@ export const state = {
   setBoundaryBox,
   deselect,
   invertSelection,
+  clearRedoStack,
 }
 
 /**
@@ -218,4 +219,18 @@ function deselect() {
  */
 function invertSelection() {
   state.selectionInversed = !state.selectionInversed
+}
+
+/**
+ *
+ */
+function clearRedoStack() {
+  state.action = null
+  //remove vectors from state.vectors that are part of redoStack
+  state.redoStack.forEach((action) => {
+    action.vectorIndices.forEach((index) => {
+      delete state.vectors[index]
+    })
+  })
+  state.redoStack = []
 }

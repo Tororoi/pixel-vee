@@ -345,7 +345,7 @@ export function performAction(action, betweenCtx = null) {
       if (!action.confirmed) {
         for (let i = state.undoStack.length - 1; i >= 0; i--) {
           if (state.undoStack[i].tool.name === "vectorPaste") {
-            // If the first 'paste' action found from the end is the current action
+            // If the first 'vectorPaste' action found from the end is the current action
             isLastPasteAction = state.undoStack[i] === action
             break // Stop searching once the first 'paste' action is found
           }
@@ -391,7 +391,7 @@ function renderActionVectors(action, activeCtx = null) {
   for (let i = 0; i < action.vectorIndices.length; i++) {
     const vector = state.vectors[action.vectorIndices[i]]
     if (vector.hidden || vector.removed) continue
-    switch (vector.type) {
+    switch (vector.vectorProperties.type) {
       case "fill":
         actionFill(
           vector.vectorProperties.px1 + offsetX,

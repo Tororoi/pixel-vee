@@ -52,8 +52,8 @@ export function actionSelectAll() {
         selectProperties: { ...state.selectProperties },
       },
     })
-    state.action = null
-    state.redoStack = []
+
+    state.clearRedoStack()
     vectorGui.render()
   }
 }
@@ -64,10 +64,11 @@ export function actionSelectAll() {
  * Conditions: Layer is not a preview layer, and there is a selection
  */
 export function actionDeselect() {
-  console.log("deselect", state.currentVectorIndex)
   if (
     !canvas.currentLayer.isPreview &&
-    (state.boundaryBox.xMax !== null || state.currentVectorIndex !== null)
+    (state.boundaryBox.xMax !== null ||
+      state.selectedVectorIndicesSet.size > 0 ||
+      state.currentVectorIndex !== null)
   ) {
     // let maskArray = coordArrayFromSet(
     //   state.maskSet,
@@ -85,18 +86,17 @@ export function actionDeselect() {
         // maskArray,
       },
     })
-    console.log("deselect")
-    state.action = null
-    state.redoStack = []
+
+    state.clearRedoStack()
     state.deselect()
     vectorGui.render()
     renderVectorsToDOM()
-    canvas.rasterGuiCTX.clearRect(
-      0,
-      0,
-      canvas.rasterGuiCVS.width,
-      canvas.rasterGuiCVS.height
-    )
+    // canvas.rasterGuiCTX.clearRect(
+    //   0,
+    //   0,
+    //   canvas.rasterGuiCVS.width,
+    //   canvas.rasterGuiCVS.height
+    // )
   }
 }
 
@@ -120,8 +120,8 @@ export function actionInvertSelection() {
         selectProperties: { ...state.selectProperties },
       },
     })
-    state.action = null
-    state.redoStack = []
+
+    state.clearRedoStack()
     state.invertSelection()
     vectorGui.render()
   }
@@ -155,8 +155,8 @@ export function actionCutSelection() {
         boundaryBox,
       },
     })
-    state.action = null
-    state.redoStack = []
+
+    state.clearRedoStack()
     renderCanvas(canvas.currentLayer)
     vectorGui.render()
   }
@@ -248,16 +248,19 @@ export function actionPasteSelection() {
           height: state.selectClipboard.canvas?.height,
         },
         vectorIndices: Object.keys(clipboardVectors),
-        // vectors: clipboardVectors,
         pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
       },
     })
-    state.action = null
-    state.redoStack = []
+    state.action.vectorIndices.forEach((vectorIndex) => {
+      state.vectors[vectorIndex].action = state.action
+    })
 
-    renderCanvas(canvas.currentLayer)
-    renderLayersToDOM()
+    state.clearRedoStack()
+
+    renderCanvas(canvas.currentLayer, true)
     switchTool("move")
+    renderLayersToDOM()
+    renderVectorsToDOM()
     disableActionsForPaste()
   }
 }
@@ -301,15 +304,15 @@ export function actionConfirmPastedPixels() {
       selectProperties.py1 += yOffset - canvas.pastedLayer.y
       selectProperties.py2 += yOffset - canvas.pastedLayer.y
     }
-    let clipboardVectors = {}
-    if (lastPasteAction.vectorIndices) {
+    let vectors = {}
+    if (lastPasteAction.vectorIndices.length !== 0) {
       lastPasteAction.vectorIndices.forEach((vectorIndex) => {
-        clipboardVectors[vectorIndex] = state.vectors[vectorIndex]
+        vectors[vectorIndex] = state.vectors[vectorIndex]
       })
       //Make deep copy of clipboard vectors:
-      clipboardVectors = JSON.parse(JSON.stringify(clipboardVectors))
+      vectors = JSON.parse(JSON.stringify(vectors))
       //correct offset coords for vectors to make agnostic to layer coords
-      for (const [vectorIndex, vector] of Object.entries(clipboardVectors)) {
+      for (const [vectorIndex, vector] of Object.entries(vectors)) {
         vector.layer = canvas.pastedLayer
         vector.vectorProperties.px1 += xOffset - canvas.pastedLayer.x
         vector.vectorProperties.py1 += yOffset - canvas.pastedLayer.y
@@ -324,13 +327,24 @@ export function actionConfirmPastedPixels() {
         let uniqueVectorKey = state.highestVectorKey
         vector.index = uniqueVectorKey
         vector.actionIndex = state.undoStack.length
-        delete clipboardVectors[vectorIndex] // Remove old key-value pair
-        clipboardVectors[uniqueVectorKey] = vector // Assign vector to new key
+        delete vectors[vectorIndex] // Remove old key-value pair
+        vectors[uniqueVectorKey] = vector // Assign vector to new key
         //add to state.vectors
         state.vectors[uniqueVectorKey] = vector
       }
     }
-    confirmPastedPixels(lastPasteAction, canvas.pastedLayer, xOffset, yOffset)
+    const confirmedClipboard = {
+      boundaryBox,
+      selectProperties,
+      vectors,
+      canvas: lastPasteAction.canvas,
+    }
+    confirmPastedPixels(
+      confirmedClipboard,
+      canvas.pastedLayer,
+      xOffset,
+      yOffset
+    )
     //remove temp layer from DOM and restore current layer
     removeTempLayerFromDOM()
     //add to timeline
@@ -351,15 +365,16 @@ export function actionConfirmPastedPixels() {
           width: lastPasteAction.canvas?.width,
           height: lastPasteAction.canvas?.height,
         },
-        vectorIndices: Object.keys(clipboardVectors),
-        // vectors: clipboardVectors,
+        vectorIndices: Object.keys(vectors),
       },
     })
-    state.action = null
-    state.redoStack = []
+    state.action.vectorIndices.forEach((vectorIndex) => {
+      state.vectors[vectorIndex].action = state.action
+    })
+    state.clearRedoStack()
     //render
     vectorGui.render()
-    renderCanvas()
+    renderCanvas(canvas.currentLayer)
     renderLayersToDOM()
     renderVectorsToDOM()
     enableActionsForNoPaste()
@@ -394,8 +409,7 @@ export function addReferenceLayer() {
           tool: tools.addLayer,
           layer,
         })
-        state.action = null
-        state.redoStack = []
+        state.clearRedoStack()
         renderLayersToDOM()
         renderCanvas()
       }
@@ -422,8 +436,7 @@ export function addRasterLayer() {
     tool: tools.addLayer,
     layer,
   })
-  state.action = null
-  state.redoStack = []
+  state.clearRedoStack()
   renderLayersToDOM()
 }
 
@@ -445,8 +458,7 @@ export function removeLayer(layer) {
       tool: tools.removeLayer,
       layer,
     })
-    state.action = null
-    state.redoStack = []
+    state.clearRedoStack()
     renderLayersToDOM()
     renderVectorsToDOM()
   }

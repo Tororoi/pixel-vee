@@ -244,12 +244,12 @@ function handlePointerUp(e) {
       // }
       renderVectorsToDOM()
     }
-    state.action = null
+
     state.pointsSet = null
     state.seenPixelsSet = null
     state.points = []
     //Reset redostack
-    state.redoStack = []
+    state.clearRedoStack()
   }
   //Deactivate pending shortcuts
   if (state.tool.name !== dom.toolBtn.id) {

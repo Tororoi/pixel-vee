@@ -42,7 +42,7 @@ function renderToLatestAction(latestAction, modType) {
       renderCanvas(mostRecentActionFromSameLayer.layer)
       //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
       if (
-        latestAction.tool.name === "paste" &&
+        ["paste", "vectorPaste"].includes(latestAction.tool.name) &&
         latestAction.confirmed &&
         modType === "to"
       ) {
@@ -73,7 +73,7 @@ function renderToLatestAction(latestAction, modType) {
     }
     //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
     if (
-      latestAction.tool.name === "paste" &&
+      ["paste", "vectorPaste"].includes(latestAction.tool.name) &&
       latestAction.confirmed &&
       modType === "to"
     ) {
@@ -141,12 +141,12 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
   if (modType === "to") {
     if (latestAction.deselect) {
       state.deselect()
-      canvas.rasterGuiCTX.clearRect(
-        0,
-        0,
-        canvas.rasterGuiCVS.width,
-        canvas.rasterGuiCVS.height
-      )
+      // canvas.rasterGuiCTX.clearRect(
+      //   0,
+      //   0,
+      //   canvas.rasterGuiCVS.width,
+      //   canvas.rasterGuiCVS.height
+      // )
     } else {
       //set select properties
       state.selectProperties = {
@@ -201,12 +201,12 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
         state.selectionInversed = newLatestAction.invertSelection
       } else {
         state.deselect()
-        canvas.rasterGuiCTX.clearRect(
-          0,
-          0,
-          canvas.rasterGuiCVS.width,
-          canvas.rasterGuiCVS.height
-        )
+        // canvas.rasterGuiCTX.clearRect(
+        //   0,
+        //   0,
+        //   canvas.rasterGuiCVS.width,
+        //   canvas.rasterGuiCVS.height
+        // )
       }
     }
   }
@@ -242,17 +242,29 @@ function handlePasteAction(latestAction, modType) {
     } else {
       //reset state properties
       state.deselect()
-      canvas.rasterGuiCTX.clearRect(
-        0,
-        0,
-        canvas.rasterGuiCVS.width,
-        canvas.rasterGuiCVS.height
-      )
+      // canvas.rasterGuiCTX.clearRect(
+      //   0,
+      //   0,
+      //   canvas.rasterGuiCVS.width,
+      //   canvas.rasterGuiCVS.height
+      // )
     }
     enableActionsForNoPaste()
   } else if (modType === "to") {
     //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
-    pasteSelectedPixels(latestAction, latestAction.pastedLayer)
+    const vectors = {}
+    if (latestAction.vectorIndices.length > 0) {
+      latestAction.vectorIndices.forEach((index) => {
+        vectors[index] = state.vectors[index]
+      })
+    }
+    const clipboard = {
+      selectProperties: latestAction.selectProperties,
+      boundaryBox: latestAction.boundaryBox,
+      vectors,
+      canvas: latestAction.canvas,
+    }
+    pasteSelectedPixels(clipboard, latestAction.pastedLayer)
     switchTool("move")
     disableActionsForPaste()
   }
@@ -266,7 +278,19 @@ function handlePasteAction(latestAction, modType) {
 function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
   //if modType is "from" (undoing confirm paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
   if (modType === "from") {
-    pasteSelectedPixels(latestAction, latestAction.layer, true)
+    const vectors = {}
+    if (latestAction.vectorIndices.length > 0) {
+      latestAction.vectorIndices.forEach((index) => {
+        vectors[index] = state.vectors[index]
+      })
+    }
+    const clipboard = {
+      selectProperties: latestAction.selectProperties,
+      boundaryBox: latestAction.boundaryBox,
+      vectors,
+      canvas: latestAction.canvas,
+    }
+    pasteSelectedPixels(clipboard, latestAction.layer, true)
     if (newLatestAction?.tool?.name === "move") {
       //templayer's x and y coords are often reset to 0, so set them to last move action's x and y
       canvas.currentLayer.x = newLatestAction.to.x
@@ -330,9 +354,9 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   //latest action is the action about to be undone or redone
   let latestAction = popStack[popStack.length - 1]
   if (
-    state.vectors[state.currentVectorIndex].actionIndex === latestAction.index
+    state.vectors[state.currentVectorIndex]?.actionIndex === latestAction.index
   ) {
-    //reset vectorGui if the latest action is the current vector
+    //reset vectorGui if the latest action has the current vector
     vectorGui.reset()
   }
   //newLatestAction is the action that's about to be the most recent action, if the function is "Undo" ("from")
@@ -387,10 +411,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     }
   } else if (latestAction.tool.name === "select") {
     handleSelectAction(latestAction, newLatestAction, modType)
-  } else if (
-    latestAction.tool.name === "paste" ||
-    latestAction.tool.name === "vectorPaste"
-  ) {
+  } else if (["paste", "vectorPaste"].includes(latestAction.tool.name)) {
     if (!latestAction.confirmed) {
       handlePasteAction(latestAction, modType)
     } else {
@@ -406,8 +427,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     if (modType === "to") {
       //TODO: (High Priority) Which vector should be selected if there are multiple vectors in the action? First or last?
       //Get first vector in the action
-      let latestVector =
-        state.vectors[latestAction.vectorIndices[0]] //TODO: (High Priority) Need to handle removing vectors no longer part of undoStack
+      let latestVector = state.vectors[latestAction.vectorIndices[0]] //TODO: (High Priority) Need to handle removing vectors no longer part of undoStack
       vectorGui.setVectorProperties(latestVector)
     }
   }
@@ -420,8 +440,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       state.currentVectorIndex === null
     ) {
       //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
-      let newLatestVector =
-        newLatestAction.vectors[Object.keys(newLatestAction.vectors)[0]]
+      let newLatestVector = state.vectors[newLatestAction.vectorIndices[0]]
       vectorGui.setVectorProperties(newLatestVector)
     }
   }

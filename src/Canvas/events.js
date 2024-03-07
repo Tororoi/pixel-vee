@@ -1,4 +1,5 @@
 import { dom } from "../Context/dom.js"
+import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { renderCanvas, resizeOffScreenCanvas } from "../Canvas/render.js"
@@ -344,19 +345,23 @@ function vectorInteract(e) {
     //remove vector
     removeVector(vector)
   } else {
-    let currentIndex = state.currentVectorIndex
-    //switch tool
-    switchTool(vector.vectorProperties.type)
     //select current vector
-    vectorGui.reset()
-    if (!state.selectedVectorIndicesSet.has(vector.index)) {
-      //select if shift key held down
-      state.selectedVectorIndicesSet.add(vector.index)
-      enableActionsForSelection()
+    // vectorGui.reset()
+    if (keys.ShiftLeft || keys.ShiftRight) {
+      if (!state.selectedVectorIndicesSet.has(vector.index)) {
+        //select if shift key held down
+        state.selectedVectorIndicesSet.add(vector.index)
+        enableActionsForSelection()
+      } else {
+        state.selectedVectorIndicesSet.delete(vector.index)
+      }
     } else {
-      //deselect if option key held down
-    } //else reset selectedVectors
-    if (vector.index !== currentIndex) {
+      state.selectedVectorIndicesSet.clear()
+    }
+    if (vector.index !== state.currentVectorIndex) {
+      //switch tool
+      switchTool(vector.vectorProperties.type)
+      // vectorGui.reset()
       vectorGui.setVectorProperties(vector)
       canvas.currentLayer.inactiveTools.forEach((tool) => {
         dom[`${tool}Btn`].disabled = false
@@ -380,8 +385,8 @@ function removeVector(vector) {
   vector.removed = true
   renderCanvas(vector.layer, true)
   removeActionVector(vector)
-  state.action = null
-  state.redoStack = []
+
+  state.clearRedoStack()
   if (state.currentVectorIndex === vector.index) {
     vectorGui.reset()
   }
@@ -407,8 +412,8 @@ function toggleVectorMode(vector, modeKey) {
   let newModes = { ...vector.modes }
   renderCanvas(vector.layer, true)
   changeActionVectorMode(vector, oldModes, newModes)
-  state.action = null
-  state.redoStack = []
+
+  state.clearRedoStack()
   renderVectorsToDOM()
 }
 

@@ -13,6 +13,7 @@ import {
   renderPaletteToDOM,
   renderBrushStampToDOM,
   renderToolOptionsToDOM,
+  renderVectorsToDOM,
 } from "../DOM/render.js"
 import { randomizeColor } from "../Swatch/events.js"
 import { renderCursor } from "../GUI/cursor.js"
@@ -98,6 +99,7 @@ export function activateShortcut(keyCode) {
     case "Slash":
       if (!state.clicked) {
         switchTool("line")
+        renderVectorsToDOM()
       }
       break
     case "KeyA":
@@ -111,6 +113,7 @@ export function activateShortcut(keyCode) {
     case "KeyB":
       if (!state.clicked) {
         switchTool("brush")
+        renderVectorsToDOM()
       }
       break
     case "KeyC":
@@ -119,6 +122,7 @@ export function activateShortcut(keyCode) {
           actionCopySelection()
         } else {
           switchTool("cubicCurve")
+          renderVectorsToDOM()
         }
       }
       break
@@ -138,6 +142,7 @@ export function activateShortcut(keyCode) {
     case "KeyF":
       if (!state.clicked) {
         switchTool("fill")
+        renderVectorsToDOM()
       }
       break
     case "KeyG":
@@ -199,6 +204,7 @@ export function activateShortcut(keyCode) {
     case "KeyO":
       if (!state.clicked) {
         switchTool("ellipse")
+        renderVectorsToDOM()
       }
       break
     case "KeyP":
@@ -209,6 +215,7 @@ export function activateShortcut(keyCode) {
     case "KeyQ":
       if (!state.clicked) {
         switchTool("quadCurve")
+        renderVectorsToDOM()
       }
       break
     case "KeyR":
@@ -223,6 +230,7 @@ export function activateShortcut(keyCode) {
           openSaveDialogBox()
         } else {
           switchTool("select")
+          renderVectorsToDOM()
         }
       }
       break
