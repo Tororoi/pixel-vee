@@ -353,15 +353,14 @@ export function performAction(action, betweenCtx = null) {
       }
       //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
       if (action.confirmed) {
-        let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
         //render vectors
-        renderActionVectors(action, activeCtx)
+        renderActionVectors(action, betweenCtx)
       } else if (
         canvas.tempLayer === canvas.currentLayer && //only render if the current layer is the temp layer (active paste action)
         isLastPasteAction //only render if this action is the last paste action in the stack
       ) {
         //render vectors
-        renderActionVectors(action, betweenCtx)
+        renderActionVectors(action)
       }
       break
     }

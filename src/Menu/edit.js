@@ -174,41 +174,33 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
     dom[`${tool}Btn`].classList.add("deactivate-paste")
   })
 
-  const { selectProperties, boundaryBox } = clipboard
-  const offsetX = layer.x
-  const offsetY = layer.y
+  const { selectProperties, boundaryBox, vectors } = clipboard
+  let offsetX = useOffset ? layer.x : 0
+  let offsetY = useOffset ? layer.y : 0
   // //for clipboard.canvas:
-  if (Object.keys(clipboard.vectors).length === 0) {
+  if (Object.keys(vectors).length === 0) {
     // if xOffset and yOffset present, adjust selectProperties and boundaryBox
     //render the clipboard canvas onto the temporary layer
     state.selectProperties = { ...selectProperties }
-    if (useOffset) {
-      state.selectProperties.px1 += offsetX
-      state.selectProperties.px2 += offsetX
-      state.selectProperties.py1 += offsetY
-      state.selectProperties.py2 += offsetY
-      state.setBoundaryBox(state.selectProperties)
-      canvas.currentLayer.ctx.drawImage(
-        clipboard.canvas,
-        boundaryBox.xMin + offsetX,
-        boundaryBox.yMin + offsetY,
-        boundaryBox.xMax - boundaryBox.xMin,
-        boundaryBox.yMax - boundaryBox.yMin
-      )
-    } else {
-      state.setBoundaryBox(state.selectProperties)
-      canvas.currentLayer.ctx.drawImage(
-        clipboard.canvas,
-        boundaryBox.xMin,
-        boundaryBox.yMin,
-        boundaryBox.xMax - boundaryBox.xMin,
-        boundaryBox.yMax - boundaryBox.yMin
-      )
-    }
+    state.selectProperties.px1 += offsetX
+    state.selectProperties.px2 += offsetX
+    state.selectProperties.py1 += offsetY
+    state.selectProperties.py2 += offsetY
+    state.setBoundaryBox(state.selectProperties)
+    canvas.currentLayer.ctx.drawImage(
+      clipboard.canvas,
+      boundaryBox.xMin + offsetX,
+      boundaryBox.yMin + offsetY,
+      boundaryBox.xMax - boundaryBox.xMin,
+      boundaryBox.yMax - boundaryBox.yMin
+    )
   } else {
     //for clipboard.vectors, draw vectors onto the temporary layer
+    //always offset vectors by layer.x and layer.y
+    offsetX = layer.x
+    offsetY = layer.y
     //render vectors
-    for (const [vectorIndex, vector] of Object.entries(clipboard.vectors)) {
+    for (const [vectorIndex, vector] of Object.entries(vectors)) {
       if (vector.hidden || vector.removed) continue
       switch (vector.vectorProperties.type) {
         case "fill":

@@ -202,20 +202,20 @@ export function actionPasteSelection() {
       //correct offset coords for vectors to make agnostic to layer coords
       for (const [vectorIndex, vector] of Object.entries(clipboardVectors)) {
         vector.layer = canvas.currentLayer
-        vector.vectorProperties.px1 += canvas.currentLayer.x
-        vector.vectorProperties.py1 += canvas.currentLayer.y
-        if (Object.hasOwn(vector.vectorProperties, "px2")) {
-          vector.vectorProperties.px2 += canvas.currentLayer.x
-          vector.vectorProperties.py2 += canvas.currentLayer.y
-        }
-        if (Object.hasOwn(vector.vectorProperties, "px3")) {
-          vector.vectorProperties.px3 += canvas.currentLayer.x
-          vector.vectorProperties.py3 += canvas.currentLayer.y
-        }
-        if (Object.hasOwn(vector.vectorProperties, "px4")) {
-          vector.vectorProperties.px4 += canvas.currentLayer.x
-          vector.vectorProperties.py4 += canvas.currentLayer.y
-        }
+        // vector.vectorProperties.px1 += canvas.currentLayer.x
+        // vector.vectorProperties.py1 += canvas.currentLayer.y
+        // if (Object.hasOwn(vector.vectorProperties, "px2")) {
+        //   vector.vectorProperties.px2 += canvas.currentLayer.x
+        //   vector.vectorProperties.py2 += canvas.currentLayer.y
+        // }
+        // if (Object.hasOwn(vector.vectorProperties, "px3")) {
+        //   vector.vectorProperties.px3 += canvas.currentLayer.x
+        //   vector.vectorProperties.py3 += canvas.currentLayer.y
+        // }
+        // if (Object.hasOwn(vector.vectorProperties, "px4")) {
+        //   vector.vectorProperties.px4 += canvas.currentLayer.x
+        //   vector.vectorProperties.py4 += canvas.currentLayer.y
+        // }
         //update vector index and action index
         state.highestVectorKey += 1
         let uniqueVectorKey = state.highestVectorKey
@@ -257,7 +257,7 @@ export function actionPasteSelection() {
 
     state.clearRedoStack()
 
-    renderCanvas(canvas.currentLayer, true)
+    renderCanvas(canvas.currentLayer)
     switchTool("move")
     renderLayersToDOM()
     renderVectorsToDOM()
