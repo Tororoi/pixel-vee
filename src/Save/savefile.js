@@ -149,12 +149,6 @@ export async function loadDrawing(jsonFile) {
   state.savedBetweenActionImages = []
   //reset selection state
   state.deselect()
-  // canvas.rasterGuiCTX.clearRect(
-  //   0,
-  //   0,
-  //   canvas.rasterGuiCVS.width,
-  //   canvas.rasterGuiCVS.height
-  // )
   vectorGui.reset()
 
   //Handle old files that don't have the vectors object

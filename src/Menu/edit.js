@@ -6,7 +6,12 @@ import { brushStamps } from "../Context/brushStamps.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { enableActionsForClipboard } from "../DOM/disableDomElements.js"
-import { actionCubicCurve } from "../Actions/pointerActions.js"
+import {
+  actionFill,
+  actionQuadraticCurve,
+  actionCubicCurve,
+  actionEllipse,
+} from "../Actions/pointerActions.js"
 
 //===================================//
 //========= * * * Edit * * * ========//
@@ -170,21 +175,23 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
   })
 
   const { selectProperties, boundaryBox } = clipboard
+  const offsetX = layer.x
+  const offsetY = layer.y
   // //for clipboard.canvas:
   if (Object.keys(clipboard.vectors).length === 0) {
     // if xOffset and yOffset present, adjust selectProperties and boundaryBox
     //render the clipboard canvas onto the temporary layer
     state.selectProperties = { ...selectProperties }
     if (useOffset) {
-      state.selectProperties.px1 += layer.x
-      state.selectProperties.px2 += layer.x
-      state.selectProperties.py1 += layer.y
-      state.selectProperties.py2 += layer.y
+      state.selectProperties.px1 += offsetX
+      state.selectProperties.px2 += offsetX
+      state.selectProperties.py1 += offsetY
+      state.selectProperties.py2 += offsetY
       state.setBoundaryBox(state.selectProperties)
       canvas.currentLayer.ctx.drawImage(
         clipboard.canvas,
-        boundaryBox.xMin + layer.x,
-        boundaryBox.yMin + layer.y,
+        boundaryBox.xMin + offsetX,
+        boundaryBox.yMin + offsetY,
         boundaryBox.xMax - boundaryBox.xMin,
         boundaryBox.yMax - boundaryBox.yMin
       )
@@ -202,25 +209,88 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
     //for clipboard.vectors, draw vectors onto the temporary layer
     //render vectors
     for (const [vectorIndex, vector] of Object.entries(clipboard.vectors)) {
-      actionCubicCurve(
-        vector.vectorProperties.px1 + layer.x,
-        vector.vectorProperties.py1 + layer.y,
-        vector.vectorProperties.px2 + layer.x,
-        vector.vectorProperties.py2 + layer.y,
-        vector.vectorProperties.px3 + layer.x,
-        vector.vectorProperties.py3 + layer.y,
-        vector.vectorProperties.px4 + layer.x,
-        vector.vectorProperties.py4 + layer.y,
-        boundaryBox,
-        false,
-        4,
-        vector.color,
-        canvas.currentLayer,
-        vector.modes,
-        brushStamps[vector.brushType][vector.brushSize], //TODO: (High Priority) move brush info to action separately from tool for  the sake of group actions
-        vector.brushSize,
-        null //maskSet made from action.maskArray
-      )
+      if (vector.hidden || vector.removed) continue
+      switch (vector.vectorProperties.type) {
+        case "fill":
+          actionFill(
+            vector.vectorProperties.px1 + offsetX,
+            vector.vectorProperties.py1 + offsetY,
+            boundaryBox,
+            false,
+            vector.color,
+            canvas.currentLayer,
+            vector.modes,
+            null //maskSet made from action.maskArray
+          )
+          break
+        case "quadCurve":
+          actionQuadraticCurve(
+            vector.vectorProperties.px1 + offsetX,
+            vector.vectorProperties.py1 + offsetY,
+            vector.vectorProperties.px2 + offsetX,
+            vector.vectorProperties.py2 + offsetY,
+            vector.vectorProperties.px3 + offsetX,
+            vector.vectorProperties.py3 + offsetY,
+            boundaryBox,
+            false,
+            3,
+            vector.color,
+            canvas.currentLayer,
+            vector.modes,
+            brushStamps[vector.brushType][vector.brushSize],
+            vector.brushSize,
+            null //maskSet made from action.maskArray
+          )
+          break
+        case "cubicCurve":
+          actionCubicCurve(
+            vector.vectorProperties.px1 + offsetX,
+            vector.vectorProperties.py1 + offsetY,
+            vector.vectorProperties.px2 + offsetX,
+            vector.vectorProperties.py2 + offsetY,
+            vector.vectorProperties.px3 + offsetX,
+            vector.vectorProperties.py3 + offsetY,
+            vector.vectorProperties.px4 + offsetX,
+            vector.vectorProperties.py4 + offsetY,
+            boundaryBox,
+            false,
+            4,
+            vector.color,
+            canvas.currentLayer,
+            vector.modes,
+            brushStamps[vector.brushType][vector.brushSize],
+            vector.brushSize,
+            null //maskSet made from action.maskArray
+          )
+          break
+        case "ellipse":
+          actionEllipse(
+            vector.vectorProperties.px1 + offsetX,
+            vector.vectorProperties.py1 + offsetY,
+            vector.vectorProperties.px2 + offsetX,
+            vector.vectorProperties.py2 + offsetY,
+            vector.vectorProperties.px3 + offsetX,
+            vector.vectorProperties.py3 + offsetY,
+            vector.vectorProperties.radA,
+            vector.vectorProperties.radB,
+            vector.vectorProperties.forceCircle,
+            boundaryBox,
+            false,
+            vector.color,
+            canvas.currentLayer,
+            vector.modes,
+            brushStamps[vector.brushType][vector.brushSize],
+            vector.brushSize,
+            vector.vectorProperties.angle,
+            vector.vectorProperties.unifiedOffset,
+            vector.vectorProperties.x1Offset,
+            vector.vectorProperties.y1Offset,
+            null //maskSet made from action.maskArray
+          )
+          break
+        default:
+        //do nothing
+      }
     }
   }
   //TODO: (Medium Priority) include transform control points for resizing, rotating, etc. (not currently implemented)
@@ -234,39 +304,106 @@ export function pasteSelectedPixels(clipboard, layer, useOffset = false) {
  * @param {object} layer - layer to paste onto
  */
 export function confirmPastedPixels(clipboard, layer) {
-  if (Object.keys(clipboard.vectors).length === 0) {
+  const { boundaryBox, vectors } = clipboard
+  const offsetX = layer.x
+  const offsetY = layer.y
+  if (Object.keys(vectors).length === 0) {
     //draw the current layer onto the pasted layer
     layer.ctx.drawImage(
       clipboard.canvas,
-      clipboard.boundaryBox.xMin + canvas.pastedLayer.x,
-      clipboard.boundaryBox.yMin + canvas.pastedLayer.y,
-      clipboard.boundaryBox.xMax - clipboard.boundaryBox.xMin,
-      clipboard.boundaryBox.yMax - clipboard.boundaryBox.yMin
+      boundaryBox.xMin + offsetX,
+      boundaryBox.yMin + offsetY,
+      boundaryBox.xMax - boundaryBox.xMin,
+      boundaryBox.yMax - boundaryBox.yMin
     )
   } else {
     //draw vectors and set selectedVectorIndicesSet
     state.selectedVectorIndicesSet.clear()
-    for (const [vectorIndex, vector] of Object.entries(clipboard.vectors)) {
+    for (const [vectorIndex, vector] of Object.entries(vectors)) {
+      if (vector.removed) continue
       state.selectedVectorIndicesSet.add(vectorIndex)
-      actionCubicCurve(
-        vector.vectorProperties.px1 + canvas.pastedLayer.x,
-        vector.vectorProperties.py1 + canvas.pastedLayer.y,
-        vector.vectorProperties.px2 + canvas.pastedLayer.x,
-        vector.vectorProperties.py2 + canvas.pastedLayer.y,
-        vector.vectorProperties.px3 + canvas.pastedLayer.x,
-        vector.vectorProperties.py3 + canvas.pastedLayer.y,
-        vector.vectorProperties.px4 + canvas.pastedLayer.x,
-        vector.vectorProperties.py4 + canvas.pastedLayer.y,
-        clipboard.boundaryBox,
-        clipboard.selectionInversed,
-        4,
-        vector.color,
-        layer,
-        vector.modes,
-        brushStamps[vector.brushType][vector.brushSize],
-        vector.brushSize,
-        null //maskSet made from action.maskArray
-      )
+      if (vector.hidden) continue
+      switch (vector.vectorProperties.type) {
+        case "fill":
+          actionFill(
+            vector.vectorProperties.px1 + offsetX,
+            vector.vectorProperties.py1 + offsetY,
+            boundaryBox,
+            false,
+            vector.color,
+            vector.layer,
+            vector.modes,
+            null //maskSet made from action.maskArray
+          )
+          break
+        case "quadCurve":
+          actionQuadraticCurve(
+            vector.vectorProperties.px1 + offsetX,
+            vector.vectorProperties.py1 + offsetY,
+            vector.vectorProperties.px2 + offsetX,
+            vector.vectorProperties.py2 + offsetY,
+            vector.vectorProperties.px3 + offsetX,
+            vector.vectorProperties.py3 + offsetY,
+            boundaryBox,
+            false,
+            3,
+            vector.color,
+            vector.layer,
+            vector.modes,
+            brushStamps[vector.brushType][vector.brushSize],
+            vector.brushSize,
+            null //maskSet made from action.maskArray
+          )
+          break
+        case "cubicCurve":
+          actionCubicCurve(
+            vector.vectorProperties.px1 + offsetX,
+            vector.vectorProperties.py1 + offsetY,
+            vector.vectorProperties.px2 + offsetX,
+            vector.vectorProperties.py2 + offsetY,
+            vector.vectorProperties.px3 + offsetX,
+            vector.vectorProperties.py3 + offsetY,
+            vector.vectorProperties.px4 + offsetX,
+            vector.vectorProperties.py4 + offsetY,
+            boundaryBox,
+            false,
+            4,
+            vector.color,
+            vector.layer,
+            vector.modes,
+            brushStamps[vector.brushType][vector.brushSize],
+            vector.brushSize,
+            null //maskSet made from action.maskArray
+          )
+          break
+        case "ellipse":
+          actionEllipse(
+            vector.vectorProperties.px1 + offsetX,
+            vector.vectorProperties.py1 + offsetY,
+            vector.vectorProperties.px2 + offsetX,
+            vector.vectorProperties.py2 + offsetY,
+            vector.vectorProperties.px3 + offsetX,
+            vector.vectorProperties.py3 + offsetY,
+            vector.vectorProperties.radA,
+            vector.vectorProperties.radB,
+            vector.vectorProperties.forceCircle,
+            boundaryBox,
+            false,
+            vector.color,
+            vector.layer,
+            vector.modes,
+            brushStamps[vector.brushType][vector.brushSize],
+            vector.brushSize,
+            vector.vectorProperties.angle,
+            vector.vectorProperties.unifiedOffset,
+            vector.vectorProperties.x1Offset,
+            vector.vectorProperties.y1Offset,
+            null //maskSet made from action.maskArray
+          )
+          break
+        default:
+        //do nothing
+      }
     }
   }
 }

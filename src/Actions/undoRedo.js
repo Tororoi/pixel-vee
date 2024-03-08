@@ -141,12 +141,6 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
   if (modType === "to") {
     if (latestAction.deselect) {
       state.deselect()
-      // canvas.rasterGuiCTX.clearRect(
-      //   0,
-      //   0,
-      //   canvas.rasterGuiCVS.width,
-      //   canvas.rasterGuiCVS.height
-      // )
     } else {
       //set select properties
       state.selectProperties = {
@@ -201,12 +195,6 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
         state.selectionInversed = newLatestAction.invertSelection
       } else {
         state.deselect()
-        // canvas.rasterGuiCTX.clearRect(
-        //   0,
-        //   0,
-        //   canvas.rasterGuiCVS.width,
-        //   canvas.rasterGuiCVS.height
-        // )
       }
     }
   }
@@ -242,12 +230,6 @@ function handlePasteAction(latestAction, modType) {
     } else {
       //reset state properties
       state.deselect()
-      // canvas.rasterGuiCTX.clearRect(
-      //   0,
-      //   0,
-      //   canvas.rasterGuiCVS.width,
-      //   canvas.rasterGuiCVS.height
-      // )
     }
     enableActionsForNoPaste()
   } else if (modType === "to") {

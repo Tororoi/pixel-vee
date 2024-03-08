@@ -91,12 +91,6 @@ export function actionDeselect() {
     state.deselect()
     vectorGui.render()
     renderVectorsToDOM()
-    // canvas.rasterGuiCTX.clearRect(
-    //   0,
-    //   0,
-    //   canvas.rasterGuiCVS.width,
-    //   canvas.rasterGuiCVS.height
-    // )
   }
 }
 
@@ -210,12 +204,18 @@ export function actionPasteSelection() {
         vector.layer = canvas.currentLayer
         vector.vectorProperties.px1 += canvas.currentLayer.x
         vector.vectorProperties.py1 += canvas.currentLayer.y
-        vector.vectorProperties.px2 += canvas.currentLayer.x
-        vector.vectorProperties.py2 += canvas.currentLayer.y
-        vector.vectorProperties.px3 += canvas.currentLayer.x
-        vector.vectorProperties.py3 += canvas.currentLayer.y
-        vector.vectorProperties.px4 += canvas.currentLayer.x
-        vector.vectorProperties.py4 += canvas.currentLayer.y
+        if (Object.hasOwn(vector.vectorProperties, "px2")) {
+          vector.vectorProperties.px2 += canvas.currentLayer.x
+          vector.vectorProperties.py2 += canvas.currentLayer.y
+        }
+        if (Object.hasOwn(vector.vectorProperties, "px3")) {
+          vector.vectorProperties.px3 += canvas.currentLayer.x
+          vector.vectorProperties.py3 += canvas.currentLayer.y
+        }
+        if (Object.hasOwn(vector.vectorProperties, "px4")) {
+          vector.vectorProperties.px4 += canvas.currentLayer.x
+          vector.vectorProperties.py4 += canvas.currentLayer.y
+        }
         //update vector index and action index
         state.highestVectorKey += 1
         let uniqueVectorKey = state.highestVectorKey
@@ -316,12 +316,18 @@ export function actionConfirmPastedPixels() {
         vector.layer = canvas.pastedLayer
         vector.vectorProperties.px1 += xOffset - canvas.pastedLayer.x
         vector.vectorProperties.py1 += yOffset - canvas.pastedLayer.y
-        vector.vectorProperties.px2 += xOffset - canvas.pastedLayer.x
-        vector.vectorProperties.py2 += yOffset - canvas.pastedLayer.y
-        vector.vectorProperties.px3 += xOffset - canvas.pastedLayer.x
-        vector.vectorProperties.py3 += yOffset - canvas.pastedLayer.y
-        vector.vectorProperties.px4 += xOffset - canvas.pastedLayer.x
-        vector.vectorProperties.py4 += yOffset - canvas.pastedLayer.y
+        if (Object.hasOwn(vector.vectorProperties, "px2")) {
+          vector.vectorProperties.px2 += xOffset - canvas.pastedLayer.x
+          vector.vectorProperties.py2 += yOffset - canvas.pastedLayer.y
+        }
+        if (Object.hasOwn(vector.vectorProperties, "px3")) {
+          vector.vectorProperties.px3 += xOffset - canvas.pastedLayer.x
+          vector.vectorProperties.py3 += yOffset - canvas.pastedLayer.y
+        }
+        if (Object.hasOwn(vector.vectorProperties, "px4")) {
+          vector.vectorProperties.px4 += xOffset - canvas.pastedLayer.x
+          vector.vectorProperties.py4 += yOffset - canvas.pastedLayer.y
+        }
         //update vector index and action index
         state.highestVectorKey += 1
         let uniqueVectorKey = state.highestVectorKey
@@ -339,12 +345,7 @@ export function actionConfirmPastedPixels() {
       vectors,
       canvas: lastPasteAction.canvas,
     }
-    confirmPastedPixels(
-      confirmedClipboard,
-      canvas.pastedLayer,
-      xOffset,
-      yOffset
-    )
+    confirmPastedPixels(confirmedClipboard, canvas.pastedLayer)
     //remove temp layer from DOM and restore current layer
     removeTempLayerFromDOM()
     //add to timeline

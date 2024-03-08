@@ -73,28 +73,86 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
       const yOffset = canvas.currentLayer.y + canvas.yOffset
       canvas.rasterGuiCTX.beginPath()
       //Need to chain paths?
-      state.selectedVectorIndicesSet.forEach((vectorIndex) => {
+      for (let vectorIndex of state.selectedVectorIndicesSet) {
+        console.log("vectorIndex", vectorIndex)
+        //BUG: vector is undefined sometimes when moving after undoing confirm paste TODO: (High Priority) selectedVectorIndices need to be correct. Currently they do not change when performing paste action, whether normal or from undo.
         const vector = state.vectors[vectorIndex]
-        const { px1, py1, px2, py2, px3, py3, px4, py4 } =
-          vector.vectorProperties
-        canvas.rasterGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
-        canvas.rasterGuiCTX.bezierCurveTo(
-          xOffset + px3 + 0.5,
-          yOffset + py3 + 0.5,
-          xOffset + px4 + 0.5,
-          yOffset + py4 + 0.5,
-          xOffset + px2 + 0.5,
-          yOffset + py2 + 0.5
-        )
-      })
+        if (vector.hidden || vector.removed) continue
+        //switch based on vector type
+        switch (vector.vectorProperties.type) {
+          case "fill":
+            //need idea to render selection of fill vector
+            break
+          case "quadCurve": {
+            const { px1, py1, px2, py2, px3, py3 } = vector.vectorProperties
+            canvas.rasterGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
+            canvas.rasterGuiCTX.quadraticCurveTo(
+              xOffset + px3 + 0.5,
+              yOffset + py3 + 0.5,
+              xOffset + px2 + 0.5,
+              yOffset + py2 + 0.5
+            )
+            break
+          }
+          case "cubicCurve": {
+            const { px1, py1, px2, py2, px3, py3, px4, py4 } =
+              vector.vectorProperties
+            canvas.rasterGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
+            canvas.rasterGuiCTX.bezierCurveTo(
+              xOffset + px3 + 0.5,
+              yOffset + py3 + 0.5,
+              xOffset + px4 + 0.5,
+              yOffset + py4 + 0.5,
+              xOffset + px2 + 0.5,
+              yOffset + py2 + 0.5
+            )
+            break
+          }
+          case "ellipse": {
+            const {
+              px1,
+              py1,
+              // px2,
+              // py2,
+              px3,
+              // py3,
+              radA,
+              radB,
+              angle,
+              x1Offset,
+              y1Offset,
+            } = vector.vectorProperties
+            //Don't let radii be negative with offset
+            let majorAxis = radA + x1Offset / 2 > 0 ? radA + x1Offset / 2 : 0
+            let minorAxis = radB + y1Offset / 2 > 0 ? radB + y1Offset / 2 : 0
+
+            if (!Number.isInteger(px3)) {
+              minorAxis = majorAxis
+            }
+
+            canvas.rasterGuiCTX.ellipse(
+              xOffset + px1 + 0.5 + x1Offset / 2,
+              yOffset + py1 + 0.5 + y1Offset / 2,
+              majorAxis,
+              minorAxis,
+              angle + 4 * Math.PI,
+              0,
+              angle + 2 * Math.PI
+            )
+            break
+          }
+          default:
+          //do nothing
+        }
+      }
       // stroke vector paths with thick squared off dashed line then stroke vector paths with slightly thinner eraser (use some built-in html canvas composite mode) to clear greyed out area for vectors
       let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
-      // canvas.rasterGuiCTX.lineDashOffset = 0.5
-      // canvas.rasterGuiCTX.setLineDash([lineWidth * 6, lineWidth * 6])
+      //Draw outline border by drawing different thicknesses of lines
       canvas.rasterGuiCTX.lineWidth = lineWidth * 19
       canvas.rasterGuiCTX.lineCap = "round"
       canvas.rasterGuiCTX.strokeStyle = "white"
       canvas.rasterGuiCTX.stroke()
+      //Make border a dotted line
       canvas.rasterGuiCTX.lineDashOffset = lineDashOffset * 2
       canvas.rasterGuiCTX.setLineDash([lineWidth * 12, lineWidth * 12])
       canvas.rasterGuiCTX.lineWidth = lineWidth * 20
@@ -104,6 +162,7 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
       canvas.rasterGuiCTX.strokeStyle = "rgba(255, 255, 255, 0.1)"
       canvas.rasterGuiCTX.stroke()
       canvas.rasterGuiCTX.setLineDash([])
+      //clear greyed out area for vectors
       canvas.rasterGuiCTX.lineWidth = lineWidth * 17
       canvas.rasterGuiCTX.lineCap = "round"
       canvas.rasterGuiCTX.strokeStyle = "black"
