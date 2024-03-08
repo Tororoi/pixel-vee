@@ -227,10 +227,12 @@ function invertSelection() {
 function clearRedoStack() {
   state.action = null
   //remove vectors from state.vectors that are part of redoStack
-  state.redoStack.forEach((action) => {
-    action.vectorIndices.forEach((index) => {
-      delete state.vectors[index]
-    })
-  })
+  for (const action of state.redoStack) {
+    if (action.vectorIndices) {
+      action.vectorIndices.forEach((index) => {
+        delete state.vectors[index]
+      })
+    }
+  }
   state.redoStack = []
 }

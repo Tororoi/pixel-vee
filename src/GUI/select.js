@@ -24,7 +24,7 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
     //clip to selection
     canvas.rasterGuiCTX.save()
     canvas.rasterGuiCTX.beginPath()
-    if (state.selectProperties.px1 !== null) {
+    if (isRasterSelection) {
       if (!state.selectionInversed) {
         //define rectangle for canvas area
         canvas.rasterGuiCTX.rect(
@@ -52,7 +52,7 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
       )
       canvas.rasterGuiCTX.restore()
       renderSelectionBoxOutline(lineDashOffset, state.tool.name === "select")
-    } else if (state.selectedVectorIndicesSet.size > 0) {
+    } else if (isVectorSelection) {
       //define rectangle for canvas area
       canvas.rasterGuiCTX.rect(
         canvas.xOffset,

@@ -244,8 +244,10 @@ export function confirmPastedPixels(clipboard, layer) {
       clipboard.boundaryBox.yMax - clipboard.boundaryBox.yMin
     )
   } else {
-    //draw vectors
+    //draw vectors and set selectedVectorIndicesSet
+    state.selectedVectorIndicesSet.clear()
     for (const [vectorIndex, vector] of Object.entries(clipboard.vectors)) {
+      state.selectedVectorIndicesSet.add(vectorIndex)
       actionCubicCurve(
         vector.vectorProperties.px1 + canvas.pastedLayer.x,
         vector.vectorProperties.py1 + canvas.pastedLayer.y,
