@@ -227,6 +227,10 @@ function handlePasteAction(latestAction, modType) {
       state.setBoundaryBox(state.selectProperties)
       //set inverse selection
       state.selectionInversed = latestAction.prePasteInvertSelection
+    } else if (latestAction.prePasteSelectedVectorIndices.length > 0) {
+      state.selectedVectorIndicesSet = new Set(
+        latestAction.prePasteSelectedVectorIndices
+      )
     } else {
       //reset state properties
       state.deselect()
@@ -252,7 +256,12 @@ function handlePasteAction(latestAction, modType) {
       offsetX = latestAction.pastedLayer.x
       offsetY = latestAction.pastedLayer.y
     }
+    //BUG: raster gui not rendering properly from here
     pasteSelectedPixels(clipboard, latestAction.pastedLayer, offsetX, offsetY)
+    state.selectedVectorIndicesSet.clear()
+    latestAction.vectorIndices.forEach((vectorIndex) => {
+      state.selectedVectorIndicesSet.add(vectorIndex)
+    })
     switchTool("move")
     disableActionsForPaste()
   }
@@ -298,6 +307,10 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
     switchTool("move")
     disableActionsForPaste()
   } else if (modType === "to") {
+    state.selectedVectorIndicesSet.clear()
+    latestAction.vectorIndices.forEach((vectorIndex) => {
+      state.selectedVectorIndicesSet.add(vectorIndex)
+    })
     //if modType is "to" (redoing confirm paste action), enable actions for no temp pasted layer
     enableActionsForNoPaste()
   }

@@ -122,10 +122,10 @@ export function actionCopySelection() {
     canvas.currentLayer.type === "raster" &&
     (state.boundaryBox.xMax !== null || state.currentVectorIndex)
   ) {
-    if (state.currentVectorIndex) {
-      copySelectedVectors()
-    } else {
+    if (state.boundaryBox.xMax !== null) {
       copySelectedPixels()
+    } else {
+      copySelectedVectors()
     }
   }
 }
