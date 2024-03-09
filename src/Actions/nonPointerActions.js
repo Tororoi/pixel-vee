@@ -175,8 +175,19 @@ export function actionPasteSelection() {
     // Store whether selection was active before paste action
     let prePasteSelectProperties = { ...state.selectProperties }
     let prePasteInvertSelection = state.selectionInversed
+    let offsetX = 0
+    let offsetY = 0
+    if (Object.keys(state.selectClipboard.vectors).length > 0) {
+      offsetX = canvas.currentLayer.x
+      offsetY = canvas.currentLayer.y
+    }
     //paste selected pixels
-    pasteSelectedPixels(state.selectClipboard, canvas.currentLayer)
+    pasteSelectedPixels(
+      state.selectClipboard,
+      canvas.currentLayer,
+      offsetX,
+      offsetY
+    )
     //adjust boundaryBox for layer offset
     const boundaryBox = { ...state.selectClipboard.boundaryBox }
     if (boundaryBox.xMax !== null) {
@@ -238,6 +249,9 @@ export function actionPasteSelection() {
         confirmed: false,
         prePasteInvertSelection,
         prePasteSelectProperties,
+        prePasteSelectedVectorIndices: Array.from(
+          state.selectedVectorIndicesSet
+        ),
         boundaryBox,
         selectProperties,
         invertSelection: state.selectionInversed,
@@ -251,8 +265,10 @@ export function actionPasteSelection() {
         pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
       },
     })
+    state.selectedVectorIndicesSet.clear()
     state.action.vectorIndices.forEach((vectorIndex) => {
       state.vectors[vectorIndex].action = state.action
+      state.selectedVectorIndicesSet.add(vectorIndex)
     })
 
     state.clearRedoStack()
@@ -357,6 +373,11 @@ export function actionConfirmPastedPixels() {
       layer: canvas.currentLayer,
       properties: {
         confirmed: true,
+        preConfirmPasteSelectedVectorIndices: Array.from(
+          state.selectedVectorIndicesSet
+        ),
+        preConfirmXOffset: xOffset,
+        preConfirmYOffset: yOffset,
         boundaryBox,
         selectProperties,
         invertSelection: lastPasteAction.invertSelection,
@@ -369,8 +390,10 @@ export function actionConfirmPastedPixels() {
         vectorIndices: Object.keys(vectors),
       },
     })
+    state.selectedVectorIndicesSet.clear()
     state.action.vectorIndices.forEach((vectorIndex) => {
       state.vectors[vectorIndex].action = state.action
+      state.selectedVectorIndicesSet.add(vectorIndex)
     })
     state.clearRedoStack()
     //render

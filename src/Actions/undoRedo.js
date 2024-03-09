@@ -246,7 +246,13 @@ function handlePasteAction(latestAction, modType) {
       vectors,
       canvas: latestAction.canvas,
     }
-    pasteSelectedPixels(clipboard, latestAction.pastedLayer)
+    let offsetX = 0
+    let offsetY = 0
+    if (latestAction.vectorIndices.length > 0) {
+      offsetX = latestAction.pastedLayer.x
+      offsetY = latestAction.pastedLayer.y
+    }
+    pasteSelectedPixels(clipboard, latestAction.pastedLayer, offsetX, offsetY)
     switchTool("move")
     disableActionsForPaste()
   }
@@ -261,9 +267,11 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
   //if modType is "from" (undoing confirm paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
   if (modType === "from") {
     const vectors = {}
+    state.selectedVectorIndicesSet.clear()
     if (latestAction.vectorIndices.length > 0) {
-      latestAction.vectorIndices.forEach((index) => {
+      latestAction.preConfirmPasteSelectedVectorIndices.forEach((index) => {
         vectors[index] = state.vectors[index]
+        state.selectedVectorIndicesSet.add(index)
       })
     }
     const clipboard = {
@@ -272,7 +280,16 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
       vectors,
       canvas: latestAction.canvas,
     }
-    pasteSelectedPixels(clipboard, latestAction.layer, true)
+    //IN PROGRESS: pass custom x and y offset to pasteSelectedPixels
+    //raster offset
+    let offsetX = latestAction.layer.x
+    let offsetY = latestAction.layer.y
+    if (latestAction.vectorIndices.length > 0) {
+      offsetX = latestAction.preConfirmXOffset
+      offsetY = latestAction.preConfirmYOffset
+    }
+    //vector offset
+    pasteSelectedPixels(clipboard, latestAction.layer, offsetX, offsetY)
     if (newLatestAction?.tool?.name === "move") {
       //templayer's x and y coords are often reset to 0, so set them to last move action's x and y
       canvas.currentLayer.x = newLatestAction.to.x

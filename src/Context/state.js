@@ -82,6 +82,7 @@ export const state = {
   },
   //Vectors
   vectors: {},
+  redoStackHeldVectors: {},
   currentVectorIndex: null,
   collidedVectorIndex: null,
   highestVectorKey: 0,

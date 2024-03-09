@@ -74,8 +74,6 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
       canvas.rasterGuiCTX.beginPath()
       //Need to chain paths?
       for (let vectorIndex of state.selectedVectorIndicesSet) {
-        console.log("vectorIndex", vectorIndex)
-        //BUG: vector is undefined sometimes when moving after undoing confirm paste TODO: (High Priority) selectedVectorIndices need to be correct. Currently they do not change when performing paste action, whether normal or from undo.
         const vector = state.vectors[vectorIndex]
         if (vector.hidden || vector.removed) continue
         //switch based on vector type
@@ -152,16 +150,18 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
       canvas.rasterGuiCTX.lineCap = "round"
       canvas.rasterGuiCTX.strokeStyle = "white"
       canvas.rasterGuiCTX.stroke()
-      //Make border a dotted line
-      canvas.rasterGuiCTX.lineDashOffset = lineDashOffset * 2
-      canvas.rasterGuiCTX.setLineDash([lineWidth * 12, lineWidth * 12])
-      canvas.rasterGuiCTX.lineWidth = lineWidth * 20
-      canvas.rasterGuiCTX.lineCap = "butt"
-      canvas.rasterGuiCTX.strokeStyle = "black"
-      canvas.rasterGuiCTX.stroke()
-      canvas.rasterGuiCTX.strokeStyle = "rgba(255, 255, 255, 0.1)"
-      canvas.rasterGuiCTX.stroke()
-      canvas.rasterGuiCTX.setLineDash([])
+      //Make border a dotted line TODO: (High Priority) During active paste, use solid line
+      if (!canvas.pastedLayer) {
+        canvas.rasterGuiCTX.lineDashOffset = lineDashOffset * 2
+        canvas.rasterGuiCTX.setLineDash([lineWidth * 12, lineWidth * 12])
+        canvas.rasterGuiCTX.lineWidth = lineWidth * 20
+        canvas.rasterGuiCTX.lineCap = "butt"
+        canvas.rasterGuiCTX.strokeStyle = "black"
+        canvas.rasterGuiCTX.stroke()
+        canvas.rasterGuiCTX.strokeStyle = "rgba(255, 255, 255, 0.1)"
+        canvas.rasterGuiCTX.stroke()
+        canvas.rasterGuiCTX.setLineDash([])
+      }
       //clear greyed out area for vectors
       canvas.rasterGuiCTX.lineWidth = lineWidth * 17
       canvas.rasterGuiCTX.lineCap = "round"
