@@ -51,7 +51,10 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
         canvas.offScreenCVS.height
       )
       canvas.rasterGuiCTX.restore()
-      renderSelectionBoxOutline(lineDashOffset, state.tool.name === "select")
+      let shouldRenderPoints =
+        state.tool.name === "select" ||
+        (state.tool.name === "move" && canvas.pastedLayer)
+      renderSelectionBoxOutline(lineDashOffset, shouldRenderPoints)
     } else if (isVectorSelection) {
       //define rectangle for canvas area
       canvas.rasterGuiCTX.rect(
