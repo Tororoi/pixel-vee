@@ -47,14 +47,14 @@ const cutBtn = document.getElementById("cut-selection")
 const copyBtn = document.getElementById("copy-selection")
 // * Paste * //
 const pasteBtn = document.getElementById("paste-selection")
-// // * Delete * //
-// const deleteBtn = document.getElementById("delete-selection")
-// // * Flip Horizontal * //
-// const flipHorizontalBtn = document.getElementById("flip-horizontal")
-// // * Flip Vertical * //
-// const flipVerticalBtn = document.getElementById("flip-vertical")
+// * Delete * //
+const deleteBtn = document.getElementById("delete-selection")
+// * Flip Horizontal * //
+const flipHorizontalBtn = document.getElementById("flip-horizontal")
+// * Flip Vertical * //
+const flipVerticalBtn = document.getElementById("flip-vertical")
 // * Rotate * //
-// const rotateBtn = document.getElementById("rotate-right")
+const rotateBtn = document.getElementById("rotate-right")
 
 // * Settings Button * //
 const settingsBtn = document.getElementById("settings-btn")
@@ -226,8 +226,10 @@ export const dom = {
   cutBtn,
   copyBtn,
   pasteBtn,
-  // flipHorizontalBtn,
-  // flipVerticalBtn,
+  deleteBtn,
+  flipHorizontalBtn,
+  flipVerticalBtn,
+  rotateBtn,
   //Settings
   settingsBtn,
   //settings

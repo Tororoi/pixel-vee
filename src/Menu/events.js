@@ -307,18 +307,18 @@ dom.invertSelectionBtn.addEventListener("click", actionInvertSelection)
 dom.cutBtn.addEventListener("click", actionCutSelection)
 dom.copyBtn.addEventListener("click", actionCopySelection)
 dom.pasteBtn.addEventListener("click", actionPasteSelection)
-// dom.deleteBtn.addEventListener("click", (e) => {
-//TODO: (High Priority) delete selected pixels (cut without adding to clipboard)
-//})
-// dom.flipHorizontalBtn.addEventListener("click", (e) => {
-//   //TODO: (High Priority) flip selected pixels horizontally
-// })
-// dom.flipVerticalBtn.addEventListener("click", (e) => {
-//   //TODO: (High Priority) flip selected pixels vertically
-// })
-// dom.rotateBtn.addEventListener("click", (e) => {
-//   //TODO: (High Priority) rotate selected pixels
-// })
+dom.deleteBtn.addEventListener("click", (e) => {
+// TODO: (High Priority) delete selected pixels (cut without adding to clipboard)
+})
+dom.flipHorizontalBtn.addEventListener("click", (e) => {
+  //TODO: (High Priority) flip selected pixels horizontally
+})
+dom.flipVerticalBtn.addEventListener("click", (e) => {
+  //TODO: (High Priority) flip selected pixels vertically
+})
+dom.rotateBtn.addEventListener("click", (e) => {
+  //TODO: (High Priority) rotate selected pixels
+})
 //Settings events
 dom.settingsBtn.addEventListener("click", () => {
   //if settings container is already open, close it, else open it
