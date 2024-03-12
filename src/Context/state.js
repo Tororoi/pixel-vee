@@ -86,7 +86,7 @@ export const state = {
   currentVectorIndex: null,
   collidedVectorIndex: null,
   highestVectorKey: 0,
-  selectedVectorIndicesSet: new Set(),
+  selectedVectorIndicesSet: new Set(), //TODO: (High Priority) logic for which actions reset selected vectors
   //for select tool
   selectProperties: {
     px1: null,

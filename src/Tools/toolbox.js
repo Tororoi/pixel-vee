@@ -49,9 +49,16 @@ export function switchTool(toolName = null, toolBtn = null) {
       }
       //render menu options
       renderToolOptionsToDOM()
+      //If the tool is not a vector tool, clear the selected vector indices
+      if (
+        !["fill", "quadCurve", "cubicCurve", "ellipse", "move"].includes(
+          tools[targetToolBtn.id].name
+        )
+      ) {
+        state.selectedVectorIndicesSet.clear()
+      }
       vectorGui.reset()
       state.reset()
-      // renderVectorsToDOM()
       renderBrushModesToDOM()
       renderCursor()
     }

@@ -110,8 +110,8 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
             const {
               px1,
               py1,
-              // px2,
-              // py2,
+              px2,
+              py2,
               px3,
               // py3,
               radA,
@@ -127,7 +127,7 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
             if (!Number.isInteger(px3)) {
               minorAxis = majorAxis
             }
-
+            canvas.rasterGuiCTX.moveTo(xOffset + px2 + 0.5, yOffset + py2 + 0.5) //need to move to keep paths from being auto-connected when traced
             canvas.rasterGuiCTX.ellipse(
               xOffset + px1 + 0.5 + x1Offset / 2,
               yOffset + py1 + 0.5 + y1Offset / 2,

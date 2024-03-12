@@ -2,6 +2,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { vectorGui } from "../GUI/vector.js"
+import { renderVectorsToDOM } from "../DOM/renderVectors.js"
 
 //=====================================//
 //=== * * * Select Controller * * * ===//
@@ -25,6 +26,9 @@ function selectSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       state.clickCounter += 1
+      //reset selected vectors
+      state.selectedVectorIndicesSet.clear()
+      renderVectorsToDOM()
       //set initial properties
       state.selectProperties.px1 = state.cursorX
       state.selectProperties.py1 = state.cursorY

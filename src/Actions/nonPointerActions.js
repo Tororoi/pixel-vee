@@ -38,6 +38,10 @@ export function actionSelectAll() {
   }
   //select all pixels on canvas
   if (canvas.currentLayer.type === "raster" && !canvas.currentLayer.isPreview) {
+    //reset selected vectors
+    state.selectedVectorIndicesSet.clear()
+    renderVectorsToDOM()
+    //set initial properties
     state.selectProperties.px1 = 0
     state.selectProperties.py1 = 0
     state.selectProperties.px2 = canvas.currentLayer.cvs.width
@@ -274,7 +278,7 @@ export function actionPasteSelection() {
     state.clearRedoStack()
 
     renderCanvas(canvas.currentLayer)
-    switchTool("move")
+    switchTool("move") //TODO: (High Priority) Instead of move tool being selected, automatically use temporary transform tool which is not in the toolbox.
     renderLayersToDOM()
     renderVectorsToDOM()
     disableActionsForPaste()
