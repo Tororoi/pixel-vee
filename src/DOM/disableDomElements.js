@@ -20,6 +20,11 @@ export function disableActionsForPaste() {
   dom.cutBtn.classList.add("disabled")
   dom.copyBtn.classList.add("disabled")
   dom.pasteBtn.classList.add("disabled")
+  dom.deleteBtn.classList.add("disabled")
+  //enable transform menu
+  dom.flipHorizontalBtn.classList.remove("disabled")
+  dom.flipVerticalBtn.classList.remove("disabled")
+  dom.rotateBtn.classList.remove("disabled")
 }
 
 /**
@@ -45,6 +50,11 @@ export function enableActionsForNoPaste() {
   ) {
     dom.pasteBtn.classList.remove("disabled")
   }
+  dom.deleteBtn.classList.remove("disabled")
+  //disable transform menu
+  dom.flipHorizontalBtn.classList.add("disabled")
+  dom.flipVerticalBtn.classList.add("disabled")
+  dom.rotateBtn.classList.add("disabled")
 }
 
 /**
