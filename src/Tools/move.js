@@ -84,6 +84,17 @@ function transformSteps() {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
         }
+        if (canvas.currentLayer.type === "raster") {
+          //set original pixels for transform
+          state.originalImageDataForTransform =
+            canvas.currentLayer.ctx.getImageData(
+              state.boundaryBox.xMin,
+              state.boundaryBox.yMin,
+              state.boundaryBox.xMax - state.boundaryBox.xMin,
+              state.boundaryBox.yMax - state.boundaryBox.yMin
+            )
+          state.originalBoundaryBox = { ...state.boundaryBox }
+        }
       }
       break
     case "pointermove":
@@ -96,9 +107,11 @@ function transformSteps() {
             vectorGui.selectedPoint.xKey,
             vectorGui.selectedPoint.yKey
           )
-          // transformBoundaries()
+          transformBoundaries()
+          const newBoundaryBox = { ...state.boundaryBox }
+          stretchContent(state.originalBoundaryBox, newBoundaryBox)
         }
-        renderCanvas(canvas.currentLayer, true)
+        renderCanvas(canvas.currentLayer)
       }
       break
     case "pointerup":
@@ -165,6 +178,65 @@ function transformBoundaries() {
     //do nothing
   }
   state.setBoundaryBox(state.selectProperties)
+}
+
+/**
+ *
+ * @param originalBoundaryBox
+ * @param newBoundaryBox
+ */
+function stretchContent(originalBoundaryBox, newBoundaryBox) {
+  const originalWidth = originalBoundaryBox.xMax - originalBoundaryBox.xMin
+  const originalHeight = originalBoundaryBox.yMax - originalBoundaryBox.yMin
+  const newWidth = newBoundaryBox.xMax - newBoundaryBox.xMin
+  const newHeight = newBoundaryBox.yMax - newBoundaryBox.yMin
+
+  // Get the original pixel data
+  const originalPixels = state.originalImageDataForTransform
+
+  if (newWidth === 0 || newHeight === 0) {
+    // If the new width or height is 0, return
+    return
+  }
+  // Create a new ImageData object to hold the stretched or shrunk image
+  const adjustedPixels = canvas.currentLayer.ctx.createImageData(
+    newWidth,
+    newHeight
+  )
+
+  // Adjusting algorithm (stretching or shrinking)
+  for (let y = 0; y < newHeight; y++) {
+    for (let x = 0; x < newWidth; x++) {
+      const originalX = Math.floor(x / (newWidth / originalWidth))
+      const originalY = Math.floor(y / (newHeight / originalHeight))
+      const originalIndex = (originalX + originalY * originalWidth) * 4
+      const newIndex = (x + y * newWidth) * 4
+
+      adjustedPixels.data[newIndex] = originalPixels.data[originalIndex] // R
+      adjustedPixels.data[newIndex + 1] = originalPixels.data[originalIndex + 1] // G
+      adjustedPixels.data[newIndex + 2] = originalPixels.data[originalIndex + 2] // B
+      adjustedPixels.data[newIndex + 3] = originalPixels.data[originalIndex + 3] // A
+    }
+  }
+
+  //clear entire canvas (layer should be temporary layer and therefore have no other content)
+  canvas.currentLayer.ctx.clearRect(
+    0,
+    0,
+    canvas.currentLayer.cvs.width,
+    canvas.currentLayer.cvs.height
+  )
+
+  // Place the adjusted image back on the canvas
+  canvas.currentLayer.ctx.putImageData(
+    adjustedPixels,
+    newBoundaryBox.xMin,
+    newBoundaryBox.yMin
+  )
+
+  //TODO: (High Priority) Add to timeline, store adjusted pixels either as image data array or store canvas.currentLayer.cvs as dataURL
+
+  renderCanvas(canvas.currentLayer)
 }
 
 /**

@@ -18,6 +18,7 @@ import {
   actionDeleteSelection,
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
+import { renderCanvas } from "../Canvas/render.js"
 
 //====================================//
 //======= * * * Tooltip * * * ========//
@@ -311,9 +312,84 @@ dom.pasteBtn.addEventListener("click", actionPasteSelection)
 dom.deleteBtn.addEventListener("click", actionDeleteSelection)
 dom.flipHorizontalBtn.addEventListener("click", (e) => {
   //TODO: (High Priority) flip selected pixels horizontally
+  //use setTransform to flip pixels based on boundaryBox and keep centered based on the boundaryBox position on the layer x and y
+  const boundaryBox = state.boundaryBox
+  const tempCanvas = document.createElement("canvas")
+  const tempCTX = tempCanvas.getContext("2d", {
+    willReadFrequently: true,
+  })
+  tempCanvas.width = boundaryBox.xMax - boundaryBox.xMin
+  tempCanvas.height = boundaryBox.yMax - boundaryBox.yMin
+  tempCTX.setTransform(-1, 0, 0, 1, tempCanvas.width, 0)
+  tempCTX.drawImage(
+    canvas.currentLayer.cvs,
+    boundaryBox.xMin,
+    boundaryBox.yMin,
+    tempCanvas.width,
+    tempCanvas.height,
+    0,
+    0,
+    tempCanvas.width,
+    tempCanvas.height
+  )
+  canvas.currentLayer.ctx.clearRect(
+    boundaryBox.xMin,
+    boundaryBox.yMin,
+    tempCanvas.width,
+    tempCanvas.height
+  )
+  canvas.currentLayer.ctx.drawImage(
+    tempCanvas,
+    0,
+    0,
+    tempCanvas.width,
+    tempCanvas.height,
+    boundaryBox.xMin,
+    boundaryBox.yMin,
+    tempCanvas.width,
+    tempCanvas.height
+  )
+  renderCanvas(canvas.currentLayer)
 })
 dom.flipVerticalBtn.addEventListener("click", (e) => {
   //TODO: (High Priority) flip selected pixels vertically
+  const boundaryBox = state.boundaryBox
+  const tempCanvas = document.createElement("canvas")
+  const tempCTX = tempCanvas.getContext("2d", {
+    willReadFrequently: true,
+  })
+  tempCanvas.width = boundaryBox.xMax - boundaryBox.xMin
+  tempCanvas.height = boundaryBox.yMax - boundaryBox.yMin
+  tempCTX.setTransform(1, 0, 0, -1, 0, tempCanvas.height)
+  tempCTX.drawImage(
+    canvas.currentLayer.cvs,
+    boundaryBox.xMin,
+    boundaryBox.yMin,
+    tempCanvas.width,
+    tempCanvas.height,
+    0,
+    0,
+    tempCanvas.width,
+    tempCanvas.height
+  )
+  canvas.currentLayer.ctx.clearRect(
+    boundaryBox.xMin,
+    boundaryBox.yMin,
+    tempCanvas.width,
+    tempCanvas.height
+  )
+  canvas.currentLayer.ctx.drawImage(
+    tempCanvas,
+    0,
+    0,
+    tempCanvas.width,
+    tempCanvas.height,
+    boundaryBox.xMin,
+    boundaryBox.yMin,
+    tempCanvas.width,
+    tempCanvas.height
+  )
+  renderCanvas(canvas.currentLayer)
 })
 dom.rotateBtn.addEventListener("click", (e) => {
   //TODO: (High Priority) rotate selected pixels

@@ -101,6 +101,8 @@ export const state = {
     xMax: null,
     yMax: null,
   },
+  originalImageDataForTransform: null,
+  originalBoundaryBox: null,
   selectionInversed: false,
   selectClipboard: {
     boundaryBox: {
