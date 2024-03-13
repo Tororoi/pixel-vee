@@ -27,7 +27,9 @@ export function copySelectedPixels() {
   const tempCanvas = document.createElement("canvas")
   tempCanvas.width = canvas.currentLayer.cvs.width
   tempCanvas.height = canvas.currentLayer.cvs.height
-  const tempCTX = tempCanvas.getContext("2d", { willReadFrequently: true })
+  const tempCTX = tempCanvas.getContext("2d", {
+    willReadFrequently: true,
+  })
   //clip boundaryBox
   tempCTX.save()
   tempCTX.beginPath()
@@ -89,9 +91,12 @@ export function copySelectedVectors() {
 /**
  * Cut selected pixels
  * Not dependent on pointer events
+ * @param {boolean} copyToClipboard - whether to copy selected pixels to clipboard (delete method doesn't copy)
  */
-export function cutSelectedPixels() {
-  copySelectedPixels()
+export function cutSelectedPixels(copyToClipboard) {
+  if (copyToClipboard) {
+    copySelectedPixels()
+  }
   const { xMin, yMin, xMax, yMax } = state.boundaryBox
   if (state.selectionInversed) {
     //inverted selection: clear entire canvas area minus boundaryBox

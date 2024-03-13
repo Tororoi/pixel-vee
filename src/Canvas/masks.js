@@ -21,7 +21,9 @@ export function createColorMaskSet(matchColor) {
     const tempCanvas = document.createElement("canvas")
     tempCanvas.width = 1
     tempCanvas.height = 1
-    const tempCtx = tempCanvas.getContext("2d", { willReadFrequently: true })
+    const tempCtx = tempCanvas.getContext("2d", {
+      willReadFrequently: true,
+    })
 
     tempCtx.fillStyle = `rgba(${matchColor.r}, ${matchColor.g}, ${
       matchColor.b

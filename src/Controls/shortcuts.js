@@ -24,6 +24,7 @@ import {
   actionCutSelection,
   actionPasteSelection,
   actionConfirmPastedPixels,
+  actionDeleteSelection,
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
 import { toggleMode, switchTool } from "../Tools/toolbox.js"
@@ -42,6 +43,10 @@ export function activateShortcut(keyCode) {
       break
     case "Backspace":
       //TODO: (High Priority) Delete selection (mark vectors as removed, clear pixels similar to cut but without adding anything to clipboard)
+      if (!state.clicked) {
+        //delete selection TODO: (High Priority) handle delete vectors
+        actionDeleteSelection()
+      }
       break
     case "MetaLeft":
     case "MetaRight":

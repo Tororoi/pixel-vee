@@ -129,14 +129,15 @@ export function actionInvertSelection() {
  * Cut Selection
  * Not dependent on pointer events
  * Conditions: Layer is a raster layer, layer is not a preview layer, and there is a selection
+ * @param {boolean} copyToClipboard - Whether to copy the selection to the clipboard (delete action doesn't copy)
  */
-export function actionCutSelection() {
+export function actionCutSelection(copyToClipboard = true) {
   if (
     canvas.currentLayer.type === "raster" &&
     !canvas.currentLayer.isPreview &&
     state.boundaryBox.xMax !== null
   ) {
-    cutSelectedPixels()
+    cutSelectedPixels(copyToClipboard)
     //correct boundary box for layer offset
     const boundaryBox = { ...state.boundaryBox }
     if (boundaryBox.xMax !== null) {
@@ -158,6 +159,16 @@ export function actionCutSelection() {
     renderCanvas(canvas.currentLayer)
     vectorGui.render()
   }
+}
+
+/**
+ *
+ */
+export function actionDeleteSelection() {
+  //1. check for selected raster or vector
+  //2. if raster, cut selection passing false to not copy to clipboard
+  actionCutSelection(false)
+  //3. if vector, mark selected vectors as removed
 }
 
 /**

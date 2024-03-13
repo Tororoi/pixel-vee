@@ -96,7 +96,7 @@ function transformSteps() {
             vectorGui.selectedPoint.xKey,
             vectorGui.selectedPoint.yKey
           )
-          transformBoundaries()
+          // transformBoundaries()
         }
         renderCanvas(canvas.currentLayer, true)
       }

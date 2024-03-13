@@ -123,7 +123,9 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
  */
 function createAndSaveContext() {
   let cvs = document.createElement("canvas")
-  let ctx = cvs.getContext("2d", { willReadFrequently: true })
+  let ctx = cvs.getContext("2d", {
+    willReadFrequently: true,
+  })
   cvs.width = canvas.offScreenCVS.width
   cvs.height = canvas.offScreenCVS.height
   state.savedBetweenActionImages.push({ cvs, ctx })

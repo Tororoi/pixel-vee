@@ -15,6 +15,7 @@ import {
   actionInvertSelection,
   actionCutSelection,
   actionPasteSelection,
+  actionDeleteSelection,
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
 
@@ -307,9 +308,7 @@ dom.invertSelectionBtn.addEventListener("click", actionInvertSelection)
 dom.cutBtn.addEventListener("click", actionCutSelection)
 dom.copyBtn.addEventListener("click", actionCopySelection)
 dom.pasteBtn.addEventListener("click", actionPasteSelection)
-dom.deleteBtn.addEventListener("click", (e) => {
-// TODO: (High Priority) delete selected pixels (cut without adding to clipboard)
-})
+dom.deleteBtn.addEventListener("click", actionDeleteSelection)
 dom.flipHorizontalBtn.addEventListener("click", (e) => {
   //TODO: (High Priority) flip selected pixels horizontally
 })

@@ -275,7 +275,9 @@ export async function loadDrawing(jsonFile) {
       let tempCanvas = document.createElement("canvas")
       tempCanvas.width = action.canvasProperties.width
       tempCanvas.height = action.canvasProperties.height
-      let tempCtx = tempCanvas.getContext("2d")
+      let tempCtx = tempCanvas.getContext("2d", {
+        willReadFrequently: true,
+      })
       let img = new Image()
       img.src = action.canvasProperties.dataUrl
 
