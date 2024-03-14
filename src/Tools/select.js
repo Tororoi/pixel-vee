@@ -50,7 +50,7 @@ function selectSteps() {
         layer: canvas.currentLayer,
         properties: {
           deselect: false,
-          invertSelection: state.selectionInversed,
+          selectionInversed: state.selectionInversed,
           selectProperties: { ...state.selectProperties },
         },
       })
@@ -92,7 +92,7 @@ function adjustSelectSteps() {
         layer: canvas.currentLayer,
         properties: {
           deselect: false,
-          invertSelection: state.selectionInversed,
+          selectionInversed: state.selectionInversed,
           selectProperties: { ...state.selectProperties },
           // maskArray,
         },

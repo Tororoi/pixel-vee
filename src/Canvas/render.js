@@ -319,24 +319,44 @@ export function performAction(action, betweenCtx = null) {
       //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
       if (action.confirmed) {
         let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
-        activeCtx.drawImage(
-          action.canvas,
-          boundaryBox.xMin,
-          boundaryBox.yMin,
-          boundaryBox.xMax - boundaryBox.xMin,
-          boundaryBox.yMax - boundaryBox.yMin
-        )
+        if (action.selectionInversed) {
+          activeCtx.drawImage(
+            action.canvas,
+            offsetX,
+            offsetY,
+            action.canvas.width,
+            action.canvas.height
+          )
+        } else {
+          activeCtx.drawImage(
+            action.canvas,
+            boundaryBox.xMin,
+            boundaryBox.yMin,
+            boundaryBox.xMax - boundaryBox.xMin,
+            boundaryBox.yMax - boundaryBox.yMin
+          )
+        }
       } else if (
         canvas.tempLayer === canvas.currentLayer && //only render if the current layer is the temp layer (active paste action)
         isLastPasteAction //only render if this action is the last paste action in the stack
       ) {
-        action.layer.ctx.drawImage(
-          action.canvas,
-          boundaryBox.xMin,
-          boundaryBox.yMin,
-          boundaryBox.xMax - boundaryBox.xMin,
-          boundaryBox.yMax - boundaryBox.yMin
-        )
+        if (action.selectionInversed) {
+          action.layer.ctx.drawImage(
+            action.canvas,
+            offsetX,
+            offsetY,
+            action.canvas.width,
+            action.canvas.height
+          )
+        } else {
+          action.layer.ctx.drawImage(
+            action.canvas,
+            boundaryBox.xMin,
+            boundaryBox.yMin,
+            boundaryBox.xMax - boundaryBox.xMin,
+            boundaryBox.yMax - boundaryBox.yMin
+          )
+        }
       }
       break
     }

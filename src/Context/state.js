@@ -123,6 +123,7 @@ export const state = {
       px2: null,
       py2: null,
     },
+    selectionInversed: false,
     canvas: null,
     vectors: {},
   },
