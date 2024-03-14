@@ -393,6 +393,85 @@ dom.flipVerticalBtn.addEventListener("click", (e) => {
 })
 dom.rotateBtn.addEventListener("click", (e) => {
   //TODO: (High Priority) rotate selected pixels
+  rotateContent(state.boundaryBox, 270)
+  /**
+   *
+   * @param boundaryBox
+   * @param angleDegrees
+   */
+  function rotateContent(boundaryBox, angleDegrees) {
+    // Calculate dimensions and center of the boundaryBox
+    const originalWidth = boundaryBox.xMax - boundaryBox.xMin
+    const originalHeight = boundaryBox.yMax - boundaryBox.yMin
+    const centerX = originalWidth / 2
+    const centerY = originalHeight / 2
+    const angleRadians = (angleDegrees * Math.PI) / 180
+
+    // Get the original pixel data within the boundaryBox
+    const originalPixels = canvas.currentLayer.ctx.getImageData(
+      boundaryBox.xMin,
+      boundaryBox.yMin,
+      originalWidth,
+      originalHeight
+    )
+    const rotatedPixels = canvas.currentLayer.ctx.createImageData(
+      originalWidth,
+      originalHeight
+    )
+
+    // Calculate the rotated position for each pixel
+    for (let y = 0; y < originalHeight; y++) {
+      for (let x = 0; x < originalWidth; x++) {
+        const adjustedX = x - centerX
+        const adjustedY = y - centerY
+
+        // Apply rotation matrix to each pixel position
+        const newX =
+          Math.cos(angleRadians) * adjustedX -
+          Math.sin(angleRadians) * adjustedY +
+          centerX
+        const newY =
+          Math.sin(angleRadians) * adjustedX +
+          Math.cos(angleRadians) * adjustedY +
+          centerY
+
+        if (
+          newX >= 0 &&
+          newX < originalWidth &&
+          newY >= 0 &&
+          newY < originalHeight
+        ) {
+          const originalIndex =
+            (Math.floor(newY) * originalWidth + Math.floor(newX)) * 4
+          const newIndex = (y * originalWidth + x) * 4
+
+          // Copy the pixel data
+          for (let i = 0; i < 4; i++) {
+            rotatedPixels.data[newIndex + i] =
+              originalPixels.data[originalIndex + i]
+          }
+        }
+      }
+    }
+
+    // Clear the area where the rotated image will be placed
+    canvas.currentLayer.ctx.clearRect(
+      boundaryBox.xMin,
+      boundaryBox.yMin,
+      originalWidth,
+      originalHeight
+    )
+
+    // Place the rotated image back on the canvas at the original boundaryBox position
+    canvas.currentLayer.ctx.putImageData(
+      rotatedPixels,
+      boundaryBox.xMin,
+      boundaryBox.yMin
+    )
+
+    // Assuming there's a function like this to refresh or re-render the canvas
+    renderCanvas(canvas.currentLayer)
+  }
 })
 //Settings events
 dom.settingsBtn.addEventListener("click", () => {
