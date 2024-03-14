@@ -53,7 +53,6 @@ function brushSteps() {
           state.cursorX,
           state.cursorY,
           state.boundaryBox,
-          state.selectionInversed,
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
@@ -113,7 +112,6 @@ function brushSteps() {
           points: state.points,
           maskArray,
           boundaryBox,
-          selectionInversed: state.selectionInversed,
         },
       })
       if (state.tool.modes?.colorMask) {
@@ -158,7 +156,6 @@ function drawBrushPoint(x, y, brushDirection) {
     x,
     y,
     state.boundaryBox,
-    state.selectionInversed,
     swatches.primary.color,
     brushStamps[state.tool.brushType][state.tool.brushSize][brushDirection],
     state.tool.brushSize,
@@ -183,7 +180,6 @@ function drawPreviewBrushPoint() {
     state.cursorX,
     state.cursorY,
     state.boundaryBox,
-    state.selectionInversed,
     swatches.primary.color,
     brushStamps[state.tool.brushType][state.tool.brushSize][brushDirection],
     state.tool.brushSize,

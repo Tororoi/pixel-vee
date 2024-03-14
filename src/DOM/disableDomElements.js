@@ -8,7 +8,7 @@ import { canvas } from "../Context/canvas.js"
 export function disableActionsForPaste() {
   //disable clear button. TODO: When toolbox has a dom render function like layers and vectors, this should be moved there
   dom.clearBtn.disabled = true
-  //disable menu buttons that can't work with a temporary layer active - cut, copy, paste, deselect, invert selection, select all, resize canvas
+  //disable menu buttons that can't work with a temporary layer active - cut, copy, paste, deselect, select all, resize canvas
   //file menu
   dom.importBtn.parentElement.classList.add("disabled")
   dom.importBtn.disabled = true
@@ -16,7 +16,6 @@ export function disableActionsForPaste() {
   dom.canvasSizeBtn.classList.add("disabled")
   dom.selectAllBtn.classList.add("disabled")
   dom.deselectBtn.classList.add("disabled")
-  dom.invertSelectionBtn.classList.add("disabled")
   dom.cutBtn.classList.add("disabled")
   dom.copyBtn.classList.add("disabled")
   dom.pasteBtn.classList.add("disabled")
@@ -33,7 +32,7 @@ export function disableActionsForPaste() {
 export function enableActionsForNoPaste() {
   //enable clear button. TODO: When toolbox has a dom render function like layers and vectors, this should be moved there
   dom.clearBtn.disabled = false
-  //enable menu buttons that can't work with a temporary layer active - cut, copy, paste, deselect, invert selection, select all, resize canvas
+  //enable menu buttons that can't work with a temporary layer active - cut, copy, paste, deselect, select all, resize canvas
   //file menu
   dom.importBtn.parentElement.classList.remove("disabled")
   dom.importBtn.disabled = false
@@ -41,7 +40,6 @@ export function enableActionsForNoPaste() {
   dom.canvasSizeBtn.classList.remove("disabled")
   dom.selectAllBtn.classList.remove("disabled")
   dom.deselectBtn.classList.remove("disabled")
-  dom.invertSelectionBtn.classList.remove("disabled")
   dom.cutBtn.classList.remove("disabled")
   dom.copyBtn.classList.remove("disabled")
   if (
@@ -66,7 +64,6 @@ export function disableActionsForNoSelection() {
   dom.cutBtn.classList.add("disabled")
   dom.copyBtn.classList.add("disabled")
   dom.deselectBtn.classList.add("disabled")
-  dom.invertSelectionBtn.classList.add("disabled")
 }
 
 /**
@@ -74,17 +71,13 @@ export function disableActionsForNoSelection() {
  */
 export function enableActionsForSelection() {
   if (canvas.pastedLayer) {
-    //if there is a pasted layer active, do not enable cut, copy, paste, deselect, invert selection
+    //if there is a pasted layer active, do not enable cut, copy, paste, deselect
     return
   }
   //enable menu buttons that can't work without a selection
   dom.cutBtn.classList.remove("disabled")
   dom.copyBtn.classList.remove("disabled")
   dom.deselectBtn.classList.remove("disabled")
-  if (state.boundaryBox.xMax !== null) {
-    //only enable invert for selection box, not vectors
-    dom.invertSelectionBtn.classList.remove("disabled")
-  }
 }
 
 /**

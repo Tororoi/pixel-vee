@@ -52,7 +52,6 @@ export function actionSelectAll() {
       layer: canvas.currentLayer,
       properties: {
         deselect: false,
-        selectionInversed: state.selectionInversed,
         selectProperties: { ...state.selectProperties },
       },
     })
@@ -84,7 +83,6 @@ export function actionDeselect() {
       layer: canvas.currentLayer,
       properties: {
         deselect: true,
-        selectionInversed: state.selectionInversed,
         selectProperties: { ...state.selectProperties },
         // vectorIndex: state.currentVectorIndex, //should be for all selected vectors
         // maskArray,
@@ -95,33 +93,6 @@ export function actionDeselect() {
     state.deselect()
     vectorGui.render()
     renderVectorsToDOM()
-  }
-}
-
-/**
- * Invert Selection
- * Not dependent on pointer events
- * Conditions: Layer is a raster layer, layer is not a preview layer, and there is a selection
- */
-export function actionInvertSelection() {
-  if (
-    canvas.currentLayer.type === "raster" &&
-    !canvas.currentLayer.isPreview &&
-    state.boundaryBox.xMax !== null
-  ) {
-    addToTimeline({
-      tool: tools.select,
-      layer: canvas.currentLayer,
-      properties: {
-        deselect: false,
-        selectionInversed: !state.selectionInversed,
-        selectProperties: { ...state.selectProperties },
-      },
-    })
-
-    state.clearRedoStack()
-    state.invertSelection()
-    vectorGui.render()
   }
 }
 
@@ -150,7 +121,6 @@ export function actionCutSelection(copyToClipboard = true) {
       tool: tools.cut,
       layer: canvas.currentLayer,
       properties: {
-        selectionInversed: state.selectionInversed,
         boundaryBox,
       },
     })
@@ -189,7 +159,6 @@ export function actionPasteSelection() {
     //if state.selectClipboard.canvas, run pasteSelectedPixels
     // Store whether selection was active before paste action
     let prePasteSelectProperties = { ...state.selectProperties }
-    let prePasteSelectionInversed = state.selectionInversed
     let offsetX = 0
     let offsetY = 0
     if (Object.keys(state.selectClipboard.vectors).length > 0) {
@@ -262,14 +231,12 @@ export function actionPasteSelection() {
       layer: canvas.currentLayer,
       properties: {
         confirmed: false,
-        prePasteSelectionInversed,
         prePasteSelectProperties,
         prePasteSelectedVectorIndices: Array.from(
           state.selectedVectorIndicesSet
         ),
         boundaryBox,
         selectProperties,
-        selectionInversed: state.selectionInversed,
         canvas: state.selectClipboard.canvas,
         canvasProperties: {
           dataUrl: state.selectClipboard.canvas?.toDataURL(),
@@ -390,40 +357,23 @@ export function actionConfirmPastedPixels() {
     // const confirmedCanvas = canvas.currentLayer.cvs
     //create copy of current canvas
     const confirmedCanvas = document.createElement("canvas")
-    //For non-inverted selection, the boundaryBox will be the same as the canvas size, else use the whole canvas for canvas size
-    if (lastPasteAction.selectionInversed) {
-      confirmedCanvas.width = canvas.currentLayer.cvs.width
-      confirmedCanvas.height = canvas.currentLayer.cvs.height
-    } else {
-      confirmedCanvas.width = boundaryBox.xMax - boundaryBox.xMin
-      confirmedCanvas.height = boundaryBox.yMax - boundaryBox.yMin
-    }
+    confirmedCanvas.width = boundaryBox.xMax - boundaryBox.xMin
+    confirmedCanvas.height = boundaryBox.yMax - boundaryBox.yMin
     const confirmedCTX = confirmedCanvas.getContext("2d")
-    if (lastPasteAction.selectionInversed) {
-      confirmedCTX.drawImage(
-        canvas.currentLayer.cvs,
-        0,
-        0,
-        confirmedCanvas.width,
-        confirmedCanvas.height
-      )
-    } else {
-      confirmedCTX.drawImage(
-        canvas.currentLayer.cvs,
-        boundaryBox.xMin,
-        boundaryBox.yMin,
-        confirmedCanvas.width,
-        confirmedCanvas.height,
-        0,
-        0,
-        confirmedCanvas.width,
-        confirmedCanvas.height
-      )
-    }
+    confirmedCTX.drawImage(
+      canvas.currentLayer.cvs,
+      boundaryBox.xMin,
+      boundaryBox.yMin,
+      confirmedCanvas.width,
+      confirmedCanvas.height,
+      0,
+      0,
+      confirmedCanvas.width,
+      confirmedCanvas.height
+    )
     const confirmedClipboard = {
       boundaryBox,
       selectProperties,
-      selectionInversed: lastPasteAction.selectionInversed,
       vectors,
       canvas: confirmedCanvas,
     }
@@ -446,7 +396,6 @@ export function actionConfirmPastedPixels() {
         preConfirmYOffset: yOffset,
         boundaryBox,
         selectProperties,
-        selectionInversed: lastPasteAction.selectionInversed,
         canvas: confirmedCanvas,
         canvasProperties: {
           dataUrl: confirmedCanvas?.toDataURL(),

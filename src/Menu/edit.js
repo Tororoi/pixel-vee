@@ -25,47 +25,23 @@ import {
 export function copySelectedPixels() {
   const { xMin, yMin, xMax, yMax } = state.boundaryBox
   const tempCanvas = document.createElement("canvas")
-  if (state.selectionInversed) {
-    tempCanvas.width = canvas.currentLayer.cvs.width
-    tempCanvas.height = canvas.currentLayer.cvs.height
-  } else {
-    tempCanvas.width = xMax - xMin
-    tempCanvas.height = yMax - yMin
-  }
+  tempCanvas.width = xMax - xMin
+  tempCanvas.height = yMax - yMin
   const tempCTX = tempCanvas.getContext("2d", {
     willReadFrequently: true,
   })
-  if (state.selectionInversed) {
-    //clip boundaryBox
-    tempCTX.save()
-    tempCTX.beginPath()
-    //get data for entire canvas area minus boundaryBox
-    tempCTX.rect(0, 0, tempCanvas.width, tempCanvas.height)
-    tempCTX.rect(xMin, yMin, xMax - xMin, yMax - yMin)
-    tempCTX.clip("evenodd")
-    tempCTX.drawImage(
-      canvas.currentLayer.cvs,
-      0,
-      0,
-      tempCanvas.width,
-      tempCanvas.height
-    )
-    tempCTX.restore()
-  } else {
-    tempCTX.drawImage(
-      canvas.currentLayer.cvs,
-      xMin,
-      yMin,
-      xMax - xMin,
-      yMax - yMin,
-      0,
-      0,
-      tempCanvas.width,
-      tempCanvas.height
-    )
-  }
+  tempCTX.drawImage(
+    canvas.currentLayer.cvs,
+    xMin,
+    yMin,
+    xMax - xMin,
+    yMax - yMin,
+    0,
+    0,
+    tempCanvas.width,
+    tempCanvas.height
+  )
   state.selectClipboard.selectProperties = { ...state.selectProperties }
-  state.selectClipboard.selectionInversed = state.selectionInversed
   state.selectClipboard.boundaryBox = {
     ...state.boundaryBox,
   }
@@ -92,7 +68,6 @@ export function copySelectedVectors() {
     }
   }
   state.selectClipboard.selectProperties = { ...state.selectProperties }
-  state.selectClipboard.selectionInversed = state.selectionInversed
   state.selectClipboard.boundaryBox = {
     xMin: null,
     yMin: null,
@@ -114,31 +89,8 @@ export function cutSelectedPixels(copyToClipboard) {
     copySelectedPixels()
   }
   const { xMin, yMin, xMax, yMax } = state.boundaryBox
-  if (state.selectionInversed) {
-    //inverted selection: clear entire canvas area minus boundaryBox
-    //create a clip mask for the boundaryBox to prevent clearing the inner area
-    canvas.currentLayer.ctx.save()
-    canvas.currentLayer.ctx.beginPath()
-    //define rectangle for canvas area
-    canvas.currentLayer.ctx.rect(
-      0,
-      0,
-      canvas.currentLayer.cvs.width,
-      canvas.currentLayer.cvs.height
-    )
-    canvas.currentLayer.ctx.rect(xMin, yMin, xMax - xMin, yMax - yMin)
-    canvas.currentLayer.ctx.clip("evenodd")
-    canvas.currentLayer.ctx.clearRect(
-      0,
-      0,
-      canvas.currentLayer.cvs.width,
-      canvas.currentLayer.cvs.height
-    )
-    canvas.currentLayer.ctx.restore()
-  } else {
-    //non-inverted selection: clear boundaryBox area
-    canvas.currentLayer.ctx.clearRect(xMin, yMin, xMax - xMin, yMax - yMin)
-  }
+  //Clear boundaryBox area
+  canvas.currentLayer.ctx.clearRect(xMin, yMin, xMax - xMin, yMax - yMin)
 }
 
 /**
@@ -148,8 +100,6 @@ export function cutSelectedPixels(copyToClipboard) {
  * @param {object} layer - layer object to paste onto
  * @param {number} offsetX - x offset
  * @param {number} offsetY - y offset
- * TODO: (Highest Priority) Make sure selection inversed status is handled correctly, without relying on state (new param required)
- * TODO: (High Priority) Temp layer canvas should be initialized with the same dimensions as the clipboard canvas
  */
 export function pasteSelectedPixels(clipboard, layer, offsetX, offsetY) {
   vectorGui.reset()
@@ -235,24 +185,13 @@ function renderPaste(clipboard, layer, offsetX, offsetY) {
   const { boundaryBox, vectors } = clipboard
   if (Object.keys(vectors).length === 0) {
     //render the clipboard canvas onto the temporary layer
-    if (clipboard.selectionInversed) {
-      layer.ctx.drawImage(
-        clipboard.canvas,
-        offsetX,
-        offsetY,
-        clipboard.canvas.width,
-        clipboard.canvas.height
-      )
-    } else {
-      //draw exactly inside boundary box
-      layer.ctx.drawImage(
-        clipboard.canvas,
-        boundaryBox.xMin + offsetX,
-        boundaryBox.yMin + offsetY,
-        boundaryBox.xMax - boundaryBox.xMin,
-        boundaryBox.yMax - boundaryBox.yMin
-      )
-    }
+    layer.ctx.drawImage(
+      clipboard.canvas,
+      boundaryBox.xMin + offsetX,
+      boundaryBox.yMin + offsetY,
+      boundaryBox.xMax - boundaryBox.xMin,
+      boundaryBox.yMax - boundaryBox.yMin
+    )
   } else {
     //for clipboard.vectors, draw vectors onto the temporary layer
     //render vectors

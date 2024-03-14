@@ -25,15 +25,13 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
     canvas.rasterGuiCTX.save()
     canvas.rasterGuiCTX.beginPath()
     if (isRasterSelection) {
-      if (!state.selectionInversed) {
-        //define rectangle for canvas area
-        canvas.rasterGuiCTX.rect(
-          canvas.xOffset,
-          canvas.yOffset,
-          canvas.offScreenCVS.width,
-          canvas.offScreenCVS.height
-        )
-      }
+      //define rectangle for canvas area
+      canvas.rasterGuiCTX.rect(
+        canvas.xOffset,
+        canvas.yOffset,
+        canvas.offScreenCVS.width,
+        canvas.offScreenCVS.height
+      )
       //define rectangle for selection area
       canvas.rasterGuiCTX.rect(
         canvas.xOffset + state.boundaryBox.xMin,

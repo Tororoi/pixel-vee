@@ -39,8 +39,6 @@ const canvasSizeBtn = document.getElementById("canvas-size")
 const selectAllBtn = document.getElementById("select-all")
 // * Deselect * //
 const deselectBtn = document.getElementById("deselect")
-// * Invert Selection * //
-const invertSelectionBtn = document.getElementById("invert-selection")
 // * Cut * //
 const cutBtn = document.getElementById("cut-selection")
 // * Copy * //
@@ -222,7 +220,6 @@ export const dom = {
   canvasSizeBtn,
   selectAllBtn,
   deselectBtn,
-  invertSelectionBtn,
   cutBtn,
   copyBtn,
   pasteBtn,

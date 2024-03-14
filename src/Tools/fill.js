@@ -34,7 +34,6 @@ function fillSteps() {
           state.vectorProperties.px1,
           state.vectorProperties.py1,
           state.boundaryBox,
-          state.selectionInversed,
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
@@ -64,7 +63,6 @@ function fillSteps() {
           properties: {
             maskArray,
             boundaryBox,
-            selectionInversed: state.selectionInversed,
             vectorIndices: [uniqueVectorKey],
           },
         })
@@ -85,7 +83,6 @@ function fillSteps() {
           },
           // maskArray,
           // boundaryBox,
-          // selectionInversed: state.selectionInversed,
           hidden: false,
           removed: false,
         }

@@ -20,7 +20,6 @@ import { renderCursor } from "../GUI/cursor.js"
 import { openSaveDialogBox } from "../Menu/events.js"
 import {
   actionDeselect,
-  actionInvertSelection,
   actionCutSelection,
   actionPasteSelection,
   actionConfirmPastedPixels,
@@ -173,11 +172,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyI":
       if (!state.clicked) {
-        if (keys.MetaLeft || keys.MetaRight) {
-          actionInvertSelection()
-        } else {
-          toggleMode("inject")
-        }
+        toggleMode("inject")
       }
       break
     case "KeyJ":

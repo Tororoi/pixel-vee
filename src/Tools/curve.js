@@ -67,7 +67,6 @@ function quadCurveSteps() {
         state.vectorProperties.px3,
         state.vectorProperties.py3,
         state.boundaryBox,
-        state.selectionInversed,
         state.clickCounter,
         swatches.primary.color,
         canvas.currentLayer,
@@ -104,7 +103,6 @@ function quadCurveSteps() {
         state.vectorProperties.px3,
         state.vectorProperties.py3,
         state.boundaryBox,
-        state.selectionInversed,
         state.clickCounter,
         swatches.primary.color,
         canvas.currentLayer,
@@ -144,7 +142,6 @@ function quadCurveSteps() {
           state.vectorProperties.px3,
           state.vectorProperties.py3,
           state.boundaryBox,
-          state.selectionInversed,
           state.clickCounter,
           swatches.primary.color,
           canvas.currentLayer,
@@ -177,7 +174,6 @@ function quadCurveSteps() {
           properties: {
             maskArray,
             boundaryBox,
-            selectionInversed: state.selectionInversed,
             vectorIndices: [uniqueVectorKey],
           },
         })
@@ -202,7 +198,6 @@ function quadCurveSteps() {
           },
           // maskArray,
           // boundaryBox,
-          // selectionInversed: state.selectionInversed,
           hidden: false,
           removed: false,
         }
@@ -278,7 +273,6 @@ function cubicCurveSteps() {
         state.vectorProperties.px4,
         state.vectorProperties.py4,
         state.boundaryBox,
-        state.selectionInversed,
         state.clickCounter,
         swatches.primary.color,
         canvas.currentLayer,
@@ -320,7 +314,6 @@ function cubicCurveSteps() {
         state.vectorProperties.px4,
         state.vectorProperties.py4,
         state.boundaryBox,
-        state.selectionInversed,
         state.clickCounter,
         swatches.primary.color,
         canvas.currentLayer,
@@ -365,7 +358,6 @@ function cubicCurveSteps() {
           state.vectorProperties.px4,
           state.vectorProperties.py4,
           state.boundaryBox,
-          state.selectionInversed,
           state.clickCounter,
           swatches.primary.color,
           canvas.currentLayer,
@@ -398,7 +390,6 @@ function cubicCurveSteps() {
           properties: {
             maskArray,
             boundaryBox,
-            selectionInversed: state.selectionInversed,
             vectorIndices: [uniqueVectorKey],
           },
         })
@@ -425,7 +416,6 @@ function cubicCurveSteps() {
           },
           // maskArray, //default to action's maskArray
           // boundaryBox, //default to action's boundaryBox
-          // selectionInversed: state.selectionInversed, //default to action's selectionInversed
           hidden: false,
           removed: false,
         }

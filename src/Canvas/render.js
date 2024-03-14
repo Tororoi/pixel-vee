@@ -184,7 +184,6 @@ export function performAction(action, betweenCtx = null) {
           p.x + offsetX,
           p.y + offsetY,
           boundaryBox,
-          action.selectionInversed,
           action.color,
           brushStamps[action.tool.brushType][p.brushSize][brushDirection],
           p.brushSize,
@@ -221,7 +220,6 @@ export function performAction(action, betweenCtx = null) {
         action.px2 + offsetX,
         action.py2 + offsetY,
         boundaryBox,
-        action.selectionInversed,
         action.color,
         action.layer,
         action.modes,
@@ -255,41 +253,13 @@ export function performAction(action, betweenCtx = null) {
         boundaryBox.yMax += offsetY
       }
       //TODO:(Low Priority) handle betweenCtx, clean up actions so logic does not need to be repeated here. Not currently affected by betweenCtx so not needed for current functionality.
-      if (action.selectionInversed) {
-        //inverted selection: clear entire canvas area minus boundaryBox
-        //create a clip mask for the boundaryBox to prevent clearing the inner area
-        action.layer.ctx.save()
-        action.layer.ctx.beginPath()
-        //define rectangle for canvas area
-        action.layer.ctx.rect(
-          0,
-          0,
-          action.layer.cvs.width,
-          action.layer.cvs.height
-        )
-        action.layer.ctx.rect(
-          boundaryBox.xMin,
-          boundaryBox.yMin,
-          boundaryBox.xMax - boundaryBox.xMin,
-          boundaryBox.yMax - boundaryBox.yMin
-        )
-        action.layer.ctx.clip("evenodd")
-        action.layer.ctx.clearRect(
-          0,
-          0,
-          action.layer.cvs.width,
-          action.layer.cvs.height
-        )
-        action.layer.ctx.restore()
-      } else {
-        //non-inverted selection: clear boundaryBox area
-        action.layer.ctx.clearRect(
-          boundaryBox.xMin,
-          boundaryBox.yMin,
-          boundaryBox.xMax - boundaryBox.xMin,
-          boundaryBox.yMax - boundaryBox.yMin
-        )
-      }
+      //Clear boundaryBox area
+      action.layer.ctx.clearRect(
+        boundaryBox.xMin,
+        boundaryBox.yMin,
+        boundaryBox.xMax - boundaryBox.xMin,
+        boundaryBox.yMax - boundaryBox.yMin
+      )
       break
     }
     case "paste": {
@@ -319,44 +289,24 @@ export function performAction(action, betweenCtx = null) {
       //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
       if (action.confirmed) {
         let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
-        if (action.selectionInversed) {
-          activeCtx.drawImage(
-            action.canvas,
-            offsetX,
-            offsetY,
-            action.canvas.width,
-            action.canvas.height
-          )
-        } else {
-          activeCtx.drawImage(
-            action.canvas,
-            boundaryBox.xMin,
-            boundaryBox.yMin,
-            boundaryBox.xMax - boundaryBox.xMin,
-            boundaryBox.yMax - boundaryBox.yMin
-          )
-        }
+        activeCtx.drawImage(
+          action.canvas,
+          boundaryBox.xMin,
+          boundaryBox.yMin,
+          boundaryBox.xMax - boundaryBox.xMin,
+          boundaryBox.yMax - boundaryBox.yMin
+        )
       } else if (
         canvas.tempLayer === canvas.currentLayer && //only render if the current layer is the temp layer (active paste action)
         isLastPasteAction //only render if this action is the last paste action in the stack
       ) {
-        if (action.selectionInversed) {
-          action.layer.ctx.drawImage(
-            action.canvas,
-            offsetX,
-            offsetY,
-            action.canvas.width,
-            action.canvas.height
-          )
-        } else {
-          action.layer.ctx.drawImage(
-            action.canvas,
-            boundaryBox.xMin,
-            boundaryBox.yMin,
-            boundaryBox.xMax - boundaryBox.xMin,
-            boundaryBox.yMax - boundaryBox.yMin
-          )
-        }
+        action.layer.ctx.drawImage(
+          action.canvas,
+          boundaryBox.xMin,
+          boundaryBox.yMin,
+          boundaryBox.xMax - boundaryBox.xMin,
+          boundaryBox.yMax - boundaryBox.yMin
+        )
       }
       break
     }
@@ -418,7 +368,6 @@ function renderActionVectors(action, activeCtx = null) {
           vector.vectorProperties.px1 + offsetX,
           vector.vectorProperties.py1 + offsetY,
           boundaryBox,
-          action.selectionInversed,
           vector.color,
           action.layer,
           vector.modes,
@@ -435,7 +384,6 @@ function renderActionVectors(action, activeCtx = null) {
           vector.vectorProperties.px3 + offsetX,
           vector.vectorProperties.py3 + offsetY,
           boundaryBox,
-          action.selectionInversed,
           3,
           vector.color,
           action.layer,
@@ -457,7 +405,6 @@ function renderActionVectors(action, activeCtx = null) {
           vector.vectorProperties.px4 + offsetX,
           vector.vectorProperties.py4 + offsetY,
           boundaryBox,
-          action.selectionInversed,
           4,
           vector.color,
           action.layer,
@@ -480,7 +427,6 @@ function renderActionVectors(action, activeCtx = null) {
           vector.vectorProperties.radB,
           vector.vectorProperties.forceCircle,
           boundaryBox,
-          action.selectionInversed,
           vector.color,
           action.layer,
           vector.modes,

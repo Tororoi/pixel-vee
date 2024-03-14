@@ -36,7 +36,6 @@ export function renderCursor() {
           state.cursorX,
           state.cursorY,
           state.boundaryBox,
-          state.selectionInversed,
           swatches.primary.color,
           brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
           state.tool.brushSize,

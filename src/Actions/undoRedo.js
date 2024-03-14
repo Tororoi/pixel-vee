@@ -148,8 +148,6 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       }
       //set boundary box
       state.setBoundaryBox(state.selectProperties)
-      //set inverse selection
-      state.selectionInversed = latestAction.selectionInversed
       //set maskset
       // state.maskSet = new Set(latestAction.maskArray)
     }
@@ -161,8 +159,6 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       }
       //set boundary box
       state.setBoundaryBox(state.selectProperties)
-      //set inverse selection
-      state.selectionInversed = latestAction.selectionInversed
       //set maskset
       // state.maskSet = new Set(latestAction.maskArray)
     } else if (
@@ -176,8 +172,6 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       }
       //set boundary box
       state.setBoundaryBox(state.selectProperties)
-      //set inverse selection
-      state.selectionInversed = newLatestAction.selectionInversed
       //set maskset
       // state.maskSet = new Set(newLatestAction.maskArray)
     } else {
@@ -191,8 +185,6 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
         }
         //set boundary box
         state.setBoundaryBox(state.selectProperties)
-        //set inverse selection
-        state.selectionInversed = newLatestAction.selectionInversed
       } else {
         state.deselect()
       }
@@ -225,8 +217,6 @@ function handlePasteAction(latestAction, modType) {
         ...latestAction.prePasteSelectProperties,
       }
       state.setBoundaryBox(state.selectProperties)
-      //set inverse selection
-      state.selectionInversed = latestAction.prePasteSelectionInversed
     } else if (latestAction.prePasteSelectedVectorIndices.length > 0) {
       state.selectedVectorIndicesSet = new Set(
         latestAction.prePasteSelectedVectorIndices
@@ -246,7 +236,6 @@ function handlePasteAction(latestAction, modType) {
     }
     const clipboard = {
       selectProperties: latestAction.selectProperties,
-      selectionInversed: latestAction.selectionInversed,
       boundaryBox: latestAction.boundaryBox,
       vectors,
       canvas: latestAction.canvas,
@@ -286,7 +275,6 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
     }
     const clipboard = {
       selectProperties: latestAction.selectProperties,
-      selectionInversed: latestAction.selectionInversed,
       boundaryBox: latestAction.boundaryBox,
       vectors,
       canvas: latestAction.canvas,

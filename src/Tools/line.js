@@ -28,7 +28,6 @@ function lineSteps() {
         state.cursorX,
         state.cursorY,
         state.boundaryBox,
-        state.selectionInversed,
         swatches.primary.color,
         canvas.currentLayer,
         state.tool.modes,
@@ -51,7 +50,6 @@ function lineSteps() {
         state.cursorX,
         state.cursorY,
         state.boundaryBox,
-        state.selectionInversed,
         swatches.primary.color,
         canvas.currentLayer,
         state.tool.modes,
@@ -70,7 +68,6 @@ function lineSteps() {
         state.cursorX,
         state.cursorY,
         state.boundaryBox,
-        state.selectionInversed,
         swatches.primary.color,
         canvas.currentLayer,
         state.tool.modes,
@@ -105,7 +102,6 @@ function lineSteps() {
           py2: state.cursorY - canvas.currentLayer.y,
           maskArray,
           boundaryBox,
-          selectionInversed: state.selectionInversed,
         },
       })
       renderCanvas(canvas.currentLayer)

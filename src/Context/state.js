@@ -103,7 +103,6 @@ export const state = {
   },
   originalImageDataForTransform: null,
   originalBoundaryBox: null,
-  selectionInversed: false,
   selectClipboard: {
     boundaryBox: {
       xMin: null,
@@ -123,7 +122,6 @@ export const state = {
       px2: null,
       py2: null,
     },
-    selectionInversed: false,
     canvas: null,
     vectors: {},
   },
@@ -142,7 +140,6 @@ export const state = {
   resetBoundaryBox,
   setBoundaryBox,
   deselect,
-  invertSelection,
   clearRedoStack,
 }
 
@@ -210,7 +207,6 @@ function setBoundaryBox(selectProperties) {
 function deselect() {
   resetSelectProperties()
   resetBoundaryBox()
-  state.selectionInversed = false
   state.vectorProperties = {}
   state.currentVectorIndex = null
   state.selectedVectorIndicesSet.clear()
@@ -220,10 +216,11 @@ function deselect() {
 
 /**
  * Invert selection
+ * TODO: (Low Priority) implement invertSelection. Can only be done by redefining the masked area, should NOT use a marker which changes the logic elsewhere in the code
  */
-function invertSelection() {
-  state.selectionInversed = !state.selectionInversed
-}
+// function invertSelection() {
+
+// }
 
 /**
  *

@@ -80,7 +80,6 @@ function ellipseSteps() {
         state.vectorProperties.radB,
         state.vectorProperties.forceCircle, //force circle initially
         state.boundaryBox,
-        state.selectionInversed,
         swatches.primary.color,
         canvas.currentLayer,
         state.tool.modes,
@@ -127,7 +126,6 @@ function ellipseSteps() {
           state.vectorProperties.radB,
           state.vectorProperties.forceCircle, //force circle initially
           state.boundaryBox,
-          state.selectionInversed,
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
@@ -179,7 +177,6 @@ function ellipseSteps() {
           state.vectorProperties.radB,
           state.vectorProperties.forceCircle, //force circle initially
           state.boundaryBox,
-          state.selectionInversed,
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
@@ -214,7 +211,6 @@ function ellipseSteps() {
           properties: {
             maskArray,
             boundaryBox,
-            selectionInversed: state.selectionInversed,
             vectorIndices: [uniqueVectorKey],
           },
         })
@@ -239,7 +235,6 @@ function ellipseSteps() {
           },
           // maskArray,
           // boundaryBox,
-          // selectionInversed: state.selectionInversed,
           hidden: false,
           removed: false,
         }
