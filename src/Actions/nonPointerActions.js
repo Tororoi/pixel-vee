@@ -176,6 +176,13 @@ export function actionPasteSelection() {
       offsetX,
       offsetY
     )
+    state.originalImageDataForTransform = canvas.currentLayer.ctx.getImageData(
+      state.boundaryBox.xMin,
+      state.boundaryBox.yMin,
+      state.boundaryBox.xMax - state.boundaryBox.xMin,
+      state.boundaryBox.yMax - state.boundaryBox.yMin
+    )
+    state.originalBoundaryBox = { ...state.boundaryBox }
     //adjust boundaryBox for layer offset
     const boundaryBox = { ...state.selectClipboard.boundaryBox }
     if (boundaryBox.xMax !== null) {
@@ -430,7 +437,7 @@ export function actionConfirmPastedPixels() {
 /**
  * Helper function to add a transform action to the timeline
  */
-function addTransformToTimeline() {
+export function addTransformToTimeline() {
   //save to timeline
   const boundaryBox = { ...state.boundaryBox }
   //create canvas with transformed pixels

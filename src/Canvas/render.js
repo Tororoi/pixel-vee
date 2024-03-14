@@ -337,6 +337,7 @@ export function performAction(action, betweenCtx = null) {
       break
     }
     case "transform": {
+      // if (canvas.tempLayer === canvas.currentLayer && currentTransformSeries)
       //Correct action coordinates with layer offsets
       const offsetX = action.layer.x
       const offsetY = action.layer.y

@@ -5,6 +5,7 @@ import { vectorGui } from "../GUI/vector.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { stretchRasterContent } from "../utils/transformHelpers.js"
 import { tools } from "./index.js"
+import { addTransformToTimeline } from "../Actions/nonPointerActions.js"
 
 /**
  * Move the contents of a layer relative to other layers
@@ -86,15 +87,15 @@ function transformSteps() {
           yKey: vectorGui.collidedKeys.yKey,
         }
         if (canvas.currentLayer.type === "raster") {
-          //set original pixels for transform
-          state.originalImageDataForTransform =
-            canvas.currentLayer.ctx.getImageData(
-              state.boundaryBox.xMin,
-              state.boundaryBox.yMin,
-              state.boundaryBox.xMax - state.boundaryBox.xMin,
-              state.boundaryBox.yMax - state.boundaryBox.yMin
-            )
-          state.originalBoundaryBox = { ...state.boundaryBox }
+          //set original pixels for transform //TODO: (High Priority) Instead of definining the original here, to reduce loss of data as much as possible only define it upon paste
+          // state.originalImageDataForTransform =
+          //   canvas.currentLayer.ctx.getImageData(
+          //     state.boundaryBox.xMin,
+          //     state.boundaryBox.yMin,
+          //     state.boundaryBox.xMax - state.boundaryBox.xMin,
+          //     state.boundaryBox.yMax - state.boundaryBox.yMin
+          //   )
+          state.previousBoundaryBox = { ...state.boundaryBox }
         }
       }
       break
@@ -109,12 +110,13 @@ function transformSteps() {
             vectorGui.selectedPoint.yKey
           )
           transformBoundaries()
+          //TODO: (High Priority) Need way to track mirroring and rotation across multiple transforms or it will be reset by the original data
           const isMirroredHorizontally =
-            state.boundaryBox.xMax === state.originalBoundaryBox.xMin ||
-            state.boundaryBox.xMin === state.originalBoundaryBox.xMax
+            state.boundaryBox.xMax === state.previousBoundaryBox.xMin ||
+            state.boundaryBox.xMin === state.previousBoundaryBox.xMax
           const isMirroredVertically =
-            state.boundaryBox.yMax === state.originalBoundaryBox.yMin ||
-            state.boundaryBox.yMin === state.originalBoundaryBox.yMax
+            state.boundaryBox.yMax === state.previousBoundaryBox.yMin ||
+            state.boundaryBox.yMin === state.previousBoundaryBox.yMax
           stretchRasterContent(
             canvas.currentLayer,
             state.originalImageDataForTransform,
@@ -129,43 +131,13 @@ function transformSteps() {
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey) {
+        state.normalizeSelectProperties()
+        state.setBoundaryBox(state.selectProperties)
+        addTransformToTimeline()
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
-        const boundaryBox = { ...state.boundaryBox }
-        //create canvas with transformed pixels
-        const transformedCanvas = document.createElement("canvas")
-        transformedCanvas.width = boundaryBox.xMax - boundaryBox.xMin
-        transformedCanvas.height = boundaryBox.yMax - boundaryBox.yMin
-        const transformedCtx = transformedCanvas.getContext("2d")
-        transformedCtx.putImageData(
-          canvas.currentLayer.ctx.getImageData(
-            boundaryBox.xMin,
-            boundaryBox.yMin,
-            boundaryBox.xMax - boundaryBox.xMin,
-            boundaryBox.yMax - boundaryBox.yMin
-          ),
-          0,
-          0
-        )
-        if (boundaryBox.xMax !== null) {
-          boundaryBox.xMin -= canvas.currentLayer.x
-          boundaryBox.xMax -= canvas.currentLayer.x
-          boundaryBox.yMin -= canvas.currentLayer.y
-          boundaryBox.yMax -= canvas.currentLayer.y
-        }
-        addToTimeline({
-          tool: tools.transform,
-          layer: canvas.currentLayer,
-          properties: {
-            boundaryBox,
-            canvas: transformedCanvas, //result of transformation
-            canvasProperties: {
-              dataUrl: transformedCanvas?.toDataURL(),
-            },
-          },
-        })
       }
       break
     default:

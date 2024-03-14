@@ -235,11 +235,15 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyT":
-      dom.tooltipBtn.checked = !dom.tooltipBtn.checked
-      if (dom.tooltipBtn.checked && state.tooltipMessage) {
-        dom.tooltip.classList.add("visible")
+      if (!state.clicked && (keys.MetaLeft || keys.MetaRight)) {
+        //shortcut for transform - cuts and pastes selection to allow free transform
       } else {
-        dom.tooltip.classList.remove("visible")
+        dom.tooltipBtn.checked = !dom.tooltipBtn.checked
+        if (dom.tooltipBtn.checked && state.tooltipMessage) {
+          dom.tooltip.classList.add("visible")
+        } else {
+          dom.tooltip.classList.remove("visible")
+        }
       }
       break
     case "KeyU":

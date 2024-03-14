@@ -103,6 +103,7 @@ export const state = {
   },
   originalImageDataForTransform: null,
   originalBoundaryBox: null,
+  previousBoundaryBox: null,
   selectClipboard: {
     boundaryBox: {
       xMin: null,
