@@ -134,12 +134,6 @@ function transformSteps() {
           yKey: null,
         }
         const boundaryBox = { ...state.boundaryBox }
-        if (boundaryBox.xMax !== null) {
-          boundaryBox.xMin -= canvas.currentLayer.x
-          boundaryBox.xMax -= canvas.currentLayer.x
-          boundaryBox.yMin -= canvas.currentLayer.y
-          boundaryBox.yMax -= canvas.currentLayer.y
-        }
         //create canvas with transformed pixels
         const transformedCanvas = document.createElement("canvas")
         transformedCanvas.width = boundaryBox.xMax - boundaryBox.xMin
@@ -155,6 +149,12 @@ function transformSteps() {
           0,
           0
         )
+        if (boundaryBox.xMax !== null) {
+          boundaryBox.xMin -= canvas.currentLayer.x
+          boundaryBox.xMax -= canvas.currentLayer.x
+          boundaryBox.yMin -= canvas.currentLayer.y
+          boundaryBox.yMax -= canvas.currentLayer.y
+        }
         addToTimeline({
           tool: tools.transform,
           layer: canvas.currentLayer,

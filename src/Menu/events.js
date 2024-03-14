@@ -15,6 +15,8 @@ import {
   actionCutSelection,
   actionPasteSelection,
   actionDeleteSelection,
+  actionFlipPixels,
+  actionRotatePixels,
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
@@ -313,76 +315,12 @@ dom.copyBtn.addEventListener("click", actionCopySelection)
 dom.pasteBtn.addEventListener("click", actionPasteSelection)
 dom.deleteBtn.addEventListener("click", actionDeleteSelection)
 dom.flipHorizontalBtn.addEventListener("click", (e) => {
-  const originalImageDataForTransform = canvas.currentLayer.ctx.getImageData(
-    state.boundaryBox.xMin,
-    state.boundaryBox.yMin,
-    state.boundaryBox.xMax - state.boundaryBox.xMin,
-    state.boundaryBox.yMax - state.boundaryBox.yMin
-  )
-  const transformedBoundaryBox = {
-    xMin: state.boundaryBox.xMax,
-    yMin: state.boundaryBox.yMin,
-    xMax: state.boundaryBox.xMin,
-    yMax: state.boundaryBox.yMax,
-  }
-  stretchRasterContent(
-    canvas.currentLayer,
-    originalImageDataForTransform,
-    state.boundaryBox,
-    transformedBoundaryBox,
-    true,
-    false
-  )
-  renderCanvas(canvas.currentLayer)
+  actionFlipPixels(true)
 })
 dom.flipVerticalBtn.addEventListener("click", (e) => {
-  const originalImageDataForTransform = canvas.currentLayer.ctx.getImageData(
-    state.boundaryBox.xMin,
-    state.boundaryBox.yMin,
-    state.boundaryBox.xMax - state.boundaryBox.xMin,
-    state.boundaryBox.yMax - state.boundaryBox.yMin
-  )
-  const transformedBoundaryBox = {
-    xMin: state.boundaryBox.xMin,
-    yMin: state.boundaryBox.yMax,
-    xMax: state.boundaryBox.xMax,
-    yMax: state.boundaryBox.yMin,
-  }
-  stretchRasterContent(
-    canvas.currentLayer,
-    originalImageDataForTransform,
-    state.boundaryBox,
-    transformedBoundaryBox,
-    false,
-    true
-  )
-  renderCanvas(canvas.currentLayer)
+  actionFlipPixels(false)
 })
-dom.rotateBtn.addEventListener("click", (e) => {
-  const rotateBoundaryBox90Clockwise = (boundaryBox) => {
-    const { xMin, xMax, yMin, yMax } = boundaryBox
-    const centerX = (xMin + xMax) / 2
-    const centerY = (yMin + yMax) / 2
-
-    // Calculate distances of the original edges from the center
-    const width = xMax - xMin
-    const height = yMax - yMin
-
-    // After rotation, the box's width becomes its height and vice versa
-    return {
-      xMin: centerX - height / 2,
-      xMax: centerX + height / 2,
-      yMin: centerY - width / 2,
-      yMax: centerY + width / 2,
-    }
-  }
-
-  const rotatedBoundaryBox = rotateBoundaryBox90Clockwise(state.boundaryBox)
-  rotateRasterContent90DegreesClockwise(canvas.currentLayer, state.boundaryBox, rotatedBoundaryBox)
-  state.boundaryBox = { ...rotatedBoundaryBox }
-  vectorGui.render()
-  renderCanvas(canvas.currentLayer)
-})
+dom.rotateBtn.addEventListener("click", actionRotatePixels)
 //Settings events
 dom.settingsBtn.addEventListener("click", () => {
   //if settings container is already open, close it, else open it

@@ -336,6 +336,35 @@ export function performAction(action, betweenCtx = null) {
       }
       break
     }
+    case "transform": {
+      //Correct action coordinates with layer offsets
+      const offsetX = action.layer.x
+      const offsetY = action.layer.y
+      //correct boundary box for offsets
+      const boundaryBox = { ...action.boundaryBox }
+      if (boundaryBox.xMax !== null) {
+        boundaryBox.xMin += offsetX
+        boundaryBox.xMax += offsetX
+        boundaryBox.yMin += offsetY
+        boundaryBox.yMax += offsetY
+      }
+      //clear canvas
+      action.layer.ctx.clearRect(
+        0,
+        0,
+        action.layer.cvs.width,
+        action.layer.cvs.height
+      )
+      //draw action.canvas in boundaryBox
+      action.layer.ctx.drawImage(
+        action.canvas,
+        boundaryBox.xMin,
+        boundaryBox.yMin,
+        boundaryBox.xMax - boundaryBox.xMin,
+        boundaryBox.yMax - boundaryBox.yMin
+      )
+      break
+    }
     default:
     //do nothing
   }

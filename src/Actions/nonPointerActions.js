@@ -17,6 +17,10 @@ import {
   disableActionsForPaste,
   enableActionsForNoPaste,
 } from "../DOM/disableDomElements.js"
+import {
+  rotateRasterContent90DegreesClockwise,
+  stretchRasterContent,
+} from "../utils/transformHelpers.js"
 
 //=============================================//
 //====== * * * Non Pointer Actions * * * ======//
@@ -288,35 +292,21 @@ export function actionConfirmPastedPixels() {
     const xOffset = canvas.tempLayer.x
     const yOffset = canvas.tempLayer.y
     //adjust boundaryBox for layer offset
-    const boundaryBox = { ...lastPasteAction.boundaryBox }
-    if (boundaryBox.xMax !== null) {
-      boundaryBox.xMin += xOffset - canvas.pastedLayer.x
-      boundaryBox.xMax += xOffset - canvas.pastedLayer.x
-      boundaryBox.yMin += yOffset - canvas.pastedLayer.y
-      boundaryBox.yMax += yOffset - canvas.pastedLayer.y
-    }
-    const selectProperties = { ...lastPasteAction.selectProperties }
-    if (selectProperties.px2 !== null) {
-      selectProperties.px1 += xOffset - canvas.pastedLayer.x
-      selectProperties.px2 += xOffset - canvas.pastedLayer.x
-      selectProperties.py1 += yOffset - canvas.pastedLayer.y
-      selectProperties.py2 += yOffset - canvas.pastedLayer.y
-    }
-    // const boundaryBox = { ...state.selectClipboard.boundaryBox }
+    // const boundaryBox = { ...lastPasteAction.boundaryBox }
+    // const boundaryBox = { ...state.boundaryBox }
     // if (boundaryBox.xMax !== null) {
-    //   boundaryBox.xMin -= canvas.pastedLayer.x
-    //   boundaryBox.xMax -= canvas.pastedLayer.x
-    //   boundaryBox.yMin -= canvas.pastedLayer.y
-    //   boundaryBox.yMax -= canvas.pastedLayer.y
+    //   boundaryBox.xMin += xOffset - canvas.pastedLayer.x
+    //   boundaryBox.xMax += xOffset - canvas.pastedLayer.x
+    //   boundaryBox.yMin += yOffset - canvas.pastedLayer.y
+    //   boundaryBox.yMax += yOffset - canvas.pastedLayer.y
     // }
-    // const selectProperties = {
-    //   ...state.selectClipboard.selectProperties,
-    // }
+    // // // const selectProperties = { ...lastPasteAction.selectProperties }
+    // const selectProperties = { ...state.selectProperties }
     // if (selectProperties.px2 !== null) {
-    //   selectProperties.px1 -= canvas.pastedLayer.x
-    //   selectProperties.px2 -= canvas.pastedLayer.x
-    //   selectProperties.py1 -= canvas.pastedLayer.y
-    //   selectProperties.py2 -= canvas.pastedLayer.y
+    //   selectProperties.px1 += xOffset - canvas.pastedLayer.x
+    //   selectProperties.px2 += xOffset - canvas.pastedLayer.x
+    //   selectProperties.py1 += yOffset - canvas.pastedLayer.y
+    //   selectProperties.py2 += yOffset - canvas.pastedLayer.y
     // }
     let vectors = {}
     if (lastPasteAction.vectorIndices.length !== 0) {
@@ -353,8 +343,8 @@ export function actionConfirmPastedPixels() {
         state.vectors[uniqueVectorKey] = vector
       }
     }
-    // confirmedCanvas = lastPasteAction.canvas
-    // const confirmedCanvas = canvas.currentLayer.cvs
+    const boundaryBox = { ...state.boundaryBox }
+    const selectProperties = { ...state.selectProperties }
     //create copy of current canvas
     const confirmedCanvas = document.createElement("canvas")
     confirmedCanvas.width = boundaryBox.xMax - boundaryBox.xMin
@@ -371,6 +361,19 @@ export function actionConfirmPastedPixels() {
       confirmedCanvas.width,
       confirmedCanvas.height
     )
+    //adjust boundaryBox for layer offset
+    if (boundaryBox.xMax !== null) {
+      boundaryBox.xMin -= canvas.pastedLayer.x
+      boundaryBox.xMax -= canvas.pastedLayer.x
+      boundaryBox.yMin -= canvas.pastedLayer.y
+      boundaryBox.yMax -= canvas.pastedLayer.y
+    }
+    if (selectProperties.px2 !== null) {
+      selectProperties.px1 -= canvas.pastedLayer.x
+      selectProperties.px2 -= canvas.pastedLayer.x
+      selectProperties.py1 -= canvas.pastedLayer.y
+      selectProperties.py2 -= canvas.pastedLayer.y
+    }
     const confirmedClipboard = {
       boundaryBox,
       selectProperties,
@@ -425,13 +428,120 @@ export function actionConfirmPastedPixels() {
 //=============================================//
 
 /**
+ * Helper function to add a transform action to the timeline
+ */
+function addTransformToTimeline() {
+  //save to timeline
+  const boundaryBox = { ...state.boundaryBox }
+  //create canvas with transformed pixels
+  const transformedCanvas = document.createElement("canvas")
+  transformedCanvas.width = boundaryBox.xMax - boundaryBox.xMin
+  transformedCanvas.height = boundaryBox.yMax - boundaryBox.yMin
+  const transformedCtx = transformedCanvas.getContext("2d")
+  transformedCtx.putImageData(
+    canvas.currentLayer.ctx.getImageData(
+      boundaryBox.xMin,
+      boundaryBox.yMin,
+      boundaryBox.xMax - boundaryBox.xMin,
+      boundaryBox.yMax - boundaryBox.yMin
+    ),
+    0,
+    0
+  )
+  if (boundaryBox.xMax !== null) {
+    boundaryBox.xMin -= canvas.currentLayer.x
+    boundaryBox.xMax -= canvas.currentLayer.x
+    boundaryBox.yMin -= canvas.currentLayer.y
+    boundaryBox.yMax -= canvas.currentLayer.y
+  }
+  addToTimeline({
+    tool: tools.transform,
+    layer: canvas.currentLayer,
+    properties: {
+      boundaryBox,
+      canvas: transformedCanvas, //result of transformation
+      canvasProperties: {
+        dataUrl: transformedCanvas?.toDataURL(),
+      },
+    },
+  })
+  state.clearRedoStack()
+}
+
+/**
  * Stretch Layer Content
  * Not dependent on pointer events
  * Conditions: Layer is a raster layer, layer is a preview layer, and there is a selection
+ * @param {boolean} flipHorizontally - Whether to flip horizontally
  */
-export function actionFlipPixels() {
+export function actionFlipPixels(flipHorizontally) {
   if (canvas.currentLayer.isPreview) {
+    //flip pixels
+    const originalImageDataForTransform = canvas.currentLayer.ctx.getImageData(
+      state.boundaryBox.xMin,
+      state.boundaryBox.yMin,
+      state.boundaryBox.xMax - state.boundaryBox.xMin,
+      state.boundaryBox.yMax - state.boundaryBox.yMin
+    )
+    const transformedBoundaryBox = { ...state.boundaryBox }
+    if (flipHorizontally) {
+      transformedBoundaryBox.xMin = state.boundaryBox.xMax
+      transformedBoundaryBox.xMax = state.boundaryBox.xMin
+    } else {
+      transformedBoundaryBox.yMin = state.boundaryBox.yMax
+      transformedBoundaryBox.yMax = state.boundaryBox.yMin
+    }
+    const isMirroredHorizontally =
+      transformedBoundaryBox.xMin === state.boundaryBox.xMax
+    const isMirroredVertically =
+      transformedBoundaryBox.yMin === state.boundaryBox.yMax
+    stretchRasterContent(
+      canvas.currentLayer,
+      originalImageDataForTransform,
+      state.boundaryBox,
+      transformedBoundaryBox,
+      isMirroredHorizontally,
+      isMirroredVertically
+    )
+    addTransformToTimeline()
+    renderCanvas(canvas.currentLayer)
+  }
+}
+
+/**
+ *
+ */
+export function actionRotatePixels() {
+  if (canvas.currentLayer.isPreview) {
+    const rotateBoundaryBox90Clockwise = (boundaryBox) => {
+      const { xMin, xMax, yMin, yMax } = boundaryBox
+      const centerX = (xMin + xMax) / 2
+      const centerY = (yMin + yMax) / 2
+
+      // Calculate distances of the original edges from the center
+      const width = xMax - xMin
+      const height = yMax - yMin
+
+      // After rotation, the box's width becomes its height and vice versa
+      return {
+        px1: centerX - height / 2,
+        px2: centerX + height / 2,
+        py1: centerY - width / 2,
+        py2: centerY + width / 2,
+      }
+    }
+
     const oldBoundaryBox = { ...state.boundaryBox }
+    state.selectProperties = rotateBoundaryBox90Clockwise(oldBoundaryBox)
+    state.setBoundaryBox(state.selectProperties)
+    rotateRasterContent90DegreesClockwise(
+      canvas.currentLayer,
+      oldBoundaryBox,
+      state.boundaryBox
+    )
+    addTransformToTimeline()
+    vectorGui.render()
+    renderCanvas(canvas.currentLayer)
   }
 }
 
