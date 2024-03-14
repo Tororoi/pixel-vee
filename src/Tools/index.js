@@ -134,6 +134,16 @@ export const tools = {
     modes: {},
     type: "vector",
   },
+  transform: {
+    name: "transform",
+    fn: null, //used for stretch and flip functionality
+    brushSize: null,
+    brushType: null,
+    brushDisabled: true,
+    options: {},
+    modes: {},
+    type: "raster",
+  },
   //Utility Tools (does not affect timeline)
   eyedropper,
   grab,

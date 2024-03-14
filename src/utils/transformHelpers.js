@@ -3,14 +3,20 @@
  * @param {object} layer - The layer to run the transform on
  * @param {object} boundaryBox - The boundary box of the content to be transformed
  * @param {object} angleDegrees - The angle to rotate the content counter clockwise
+ * @param {object} rotatedBoundaryBox - The new boundary box of the content after rotation
  */
-export function rotateRasterContent(layer, boundaryBox, angleDegrees) {
-  // Calculate dimensions and center of the boundaryBox
+export function rotateRasterContent90DegreesClockwise(
+  layer,
+  boundaryBox,
+  rotatedBoundaryBox
+) {
+  // Calculate dimensions of the boundaryBox
   const originalWidth = boundaryBox.xMax - boundaryBox.xMin
   const originalHeight = boundaryBox.yMax - boundaryBox.yMin
-  const centerX = originalWidth / 2
-  const centerY = originalHeight / 2
-  const angleRadians = (angleDegrees * Math.PI) / 180
+
+  // Since rotation is always 90 degrees clockwise, swap dimensions
+  const rotatedWidth = originalHeight
+  const rotatedHeight = originalWidth
 
   // Get the original pixel data within the boundaryBox
   const originalPixels = layer.ctx.getImageData(
@@ -19,53 +25,29 @@ export function rotateRasterContent(layer, boundaryBox, angleDegrees) {
     originalWidth,
     originalHeight
   )
-  const rotatedPixels = layer.ctx.createImageData(originalWidth, originalHeight)
+  const rotatedPixels = layer.ctx.createImageData(rotatedWidth, rotatedHeight)
 
-  // Calculate the rotated position for each pixel
+  // Rotate each pixel
   for (let y = 0; y < originalHeight; y++) {
     for (let x = 0; x < originalWidth; x++) {
-      const adjustedX = x - centerX
-      const adjustedY = y - centerY
+      const newIndex = (x * rotatedWidth + (originalHeight - 1 - y)) * 4
+      const originalIndex = (y * originalWidth + x) * 4
 
-      // Apply rotation matrix to each pixel position
-      const newX =
-        Math.cos(angleRadians) * adjustedX -
-        Math.sin(angleRadians) * adjustedY +
-        centerX
-      const newY =
-        Math.sin(angleRadians) * adjustedX +
-        Math.cos(angleRadians) * adjustedY +
-        centerY
-
-      if (
-        newX >= 0 &&
-        newX < originalWidth &&
-        newY >= 0 &&
-        newY < originalHeight
-      ) {
-        const originalIndex =
-          (Math.floor(newY) * originalWidth + Math.floor(newX)) * 4
-        const newIndex = (y * originalWidth + x) * 4
-
-        // Copy the pixel data
-        for (let i = 0; i < 4; i++) {
-          rotatedPixels.data[newIndex + i] =
-            originalPixels.data[originalIndex + i]
-        }
+      // Copy the pixel data
+      for (let i = 0; i < 4; i++) {
+        rotatedPixels.data[newIndex + i] =
+          originalPixels.data[originalIndex + i]
       }
     }
   }
 
-  // Clear the area where the rotated image will be placed
-  layer.ctx.clearRect(
-    boundaryBox.xMin,
-    boundaryBox.yMin,
-    originalWidth,
-    originalHeight
+  layer.ctx.clearRect(0, 0, layer.cvs.width, layer.cvs.height)
+  // Place the rotated image back on the canvas, aligning with the top left corner of the original boundaryBox
+  layer.ctx.putImageData(
+    rotatedPixels,
+    rotatedBoundaryBox.xMin,
+    rotatedBoundaryBox.yMin
   )
-
-  // Place the rotated image back on the canvas at the original boundaryBox position
-  layer.ctx.putImageData(rotatedPixels, boundaryBox.xMin, boundaryBox.yMin)
 }
 
 /**
@@ -74,17 +56,21 @@ export function rotateRasterContent(layer, boundaryBox, angleDegrees) {
  * @param {ImageData} originalPixels - The original pixel data to be stretched or shrunk
  * @param {object} originalBoundaryBox - The original boundary box of the content to be transformed
  * @param {object} newBoundaryBox - The new boundary box of the content to be transformed
+ * @param {boolean} isMirroredHorizontally - Whether to mirror horizontally
+ * @param {boolean} isMirroredVertically - Whether to mirror vertically
  */
 export function stretchRasterContent(
   layer,
   originalPixels,
   originalBoundaryBox,
-  newBoundaryBox
+  newBoundaryBox,
+  isMirroredHorizontally = false,
+  isMirroredVertically = false
 ) {
   const originalWidth = originalBoundaryBox.xMax - originalBoundaryBox.xMin
   const originalHeight = originalBoundaryBox.yMax - originalBoundaryBox.yMin
-  const newWidth = newBoundaryBox.xMax - newBoundaryBox.xMin
-  const newHeight = newBoundaryBox.yMax - newBoundaryBox.yMin
+  const newWidth = Math.abs(newBoundaryBox.xMax - newBoundaryBox.xMin)
+  const newHeight = Math.abs(newBoundaryBox.yMax - newBoundaryBox.yMin)
 
   if (newWidth === 0 || newHeight === 0) {
     // If the new width or height is 0, return
@@ -96,8 +82,15 @@ export function stretchRasterContent(
   // Adjusting algorithm (stretching or shrinking)
   for (let y = 0; y < newHeight; y++) {
     for (let x = 0; x < newWidth; x++) {
-      const originalX = Math.floor(x / (newWidth / originalWidth))
-      const originalY = Math.floor(y / (newHeight / originalHeight))
+      let originalX = Math.floor(x / (newWidth / originalWidth))
+      let originalY = Math.floor(y / (newHeight / originalHeight))
+      if (isMirroredHorizontally) {
+        originalX = originalWidth - 1 - originalX // Mirror horizontally
+      }
+      if (isMirroredVertically) {
+        originalY = originalHeight - 1 - originalY // Mirror vertically
+      }
+
       const originalIndex = (originalX + originalY * originalWidth) * 4
       const newIndex = (x + y * newWidth) * 4
 
@@ -110,67 +103,12 @@ export function stretchRasterContent(
 
   //clear entire canvas (layer should be temporary layer and therefore have no other content)
   layer.ctx.clearRect(0, 0, layer.cvs.width, layer.cvs.height)
-
   // Place the adjusted image back on the canvas
   layer.ctx.putImageData(
     adjustedPixels,
-    newBoundaryBox.xMin,
-    newBoundaryBox.yMin
+    Math.min(newBoundaryBox.xMin, newBoundaryBox.xMax),
+    Math.min(newBoundaryBox.yMin, newBoundaryBox.yMax)
   )
 
   //TODO: (High Priority) Add to timeline, store adjusted pixels either as image data array or store layer.cvs as dataURL
-}
-
-/**
- *
- * @param {object} layer - The layer to run the transform on
- * @param {object} boundaryBox - The boundary box of the content to be transformed
- * @param {boolean} flipHorizontally - Whether to flip horizontally or vertically
- */
-export function flipRasterContent(
-  layer,
-  boundaryBox,
-  flipHorizontally
-) {
-  const tempCanvas = document.createElement("canvas")
-  const tempCTX = tempCanvas.getContext("2d", {
-    willReadFrequently: true,
-  })
-  tempCanvas.width = boundaryBox.xMax - boundaryBox.xMin
-  tempCanvas.height = boundaryBox.yMax - boundaryBox.yMin
-  if (flipHorizontally) {
-    //flip horizontally
-    tempCTX.setTransform(-1, 0, 0, 1, tempCanvas.width, 0)
-  } else {
-    //flip vertically
-    tempCTX.setTransform(1, 0, 0, -1, 0, tempCanvas.height)
-  }
-  tempCTX.drawImage(
-    layer.cvs,
-    boundaryBox.xMin,
-    boundaryBox.yMin,
-    tempCanvas.width,
-    tempCanvas.height,
-    0,
-    0,
-    tempCanvas.width,
-    tempCanvas.height
-  )
-  layer.ctx.clearRect(
-    boundaryBox.xMin,
-    boundaryBox.yMin,
-    tempCanvas.width,
-    tempCanvas.height
-  )
-  layer.ctx.drawImage(
-    tempCanvas,
-    0,
-    0,
-    tempCanvas.width,
-    tempCanvas.height,
-    boundaryBox.xMin,
-    boundaryBox.yMin,
-    tempCanvas.width,
-    tempCanvas.height
-  )
 }

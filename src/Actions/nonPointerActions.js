@@ -421,6 +421,21 @@ export function actionConfirmPastedPixels() {
 }
 
 //=============================================//
+//=========== * * * Transform * * * ===========//
+//=============================================//
+
+/**
+ * Stretch Layer Content
+ * Not dependent on pointer events
+ * Conditions: Layer is a raster layer, layer is a preview layer, and there is a selection
+ */
+export function actionFlipPixels() {
+  if (canvas.currentLayer.isPreview) {
+    const oldBoundaryBox = { ...state.boundaryBox }
+  }
+}
+
+//=============================================//
 //============ * * * Layers * * * =============//
 //=============================================//
 

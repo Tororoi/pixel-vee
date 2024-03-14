@@ -4,6 +4,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { vectorGui } from "../GUI/vector.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { stretchRasterContent } from "../utils/transformHelpers.js"
+import { tools } from "./index.js"
 
 /**
  * Move the contents of a layer relative to other layers
@@ -108,12 +109,19 @@ function transformSteps() {
             vectorGui.selectedPoint.yKey
           )
           transformBoundaries()
-          const newBoundaryBox = { ...state.boundaryBox }
+          const isMirroredHorizontally =
+            state.boundaryBox.xMax === state.originalBoundaryBox.xMin ||
+            state.boundaryBox.xMin === state.originalBoundaryBox.xMax
+          const isMirroredVertically =
+            state.boundaryBox.yMax === state.originalBoundaryBox.yMin ||
+            state.boundaryBox.yMin === state.originalBoundaryBox.yMax
           stretchRasterContent(
             canvas.currentLayer,
             state.originalImageDataForTransform,
             state.originalBoundaryBox,
-            newBoundaryBox
+            state.boundaryBox,
+            isMirroredHorizontally,
+            isMirroredVertically
           )
         }
         renderCanvas(canvas.currentLayer)
@@ -125,6 +133,39 @@ function transformSteps() {
           xKey: null,
           yKey: null,
         }
+        const boundaryBox = { ...state.boundaryBox }
+        if (boundaryBox.xMax !== null) {
+          boundaryBox.xMin -= canvas.currentLayer.x
+          boundaryBox.xMax -= canvas.currentLayer.x
+          boundaryBox.yMin -= canvas.currentLayer.y
+          boundaryBox.yMax -= canvas.currentLayer.y
+        }
+        //create canvas with transformed pixels
+        const transformedCanvas = document.createElement("canvas")
+        transformedCanvas.width = boundaryBox.xMax - boundaryBox.xMin
+        transformedCanvas.height = boundaryBox.yMax - boundaryBox.yMin
+        const transformedCtx = transformedCanvas.getContext("2d")
+        transformedCtx.putImageData(
+          canvas.currentLayer.ctx.getImageData(
+            boundaryBox.xMin,
+            boundaryBox.yMin,
+            boundaryBox.xMax - boundaryBox.xMin,
+            boundaryBox.yMax - boundaryBox.yMin
+          ),
+          0,
+          0
+        )
+        addToTimeline({
+          tool: tools.transform,
+          layer: canvas.currentLayer,
+          properties: {
+            boundaryBox,
+            canvas: transformedCanvas, //result of transformation
+            canvasProperties: {
+              dataUrl: transformedCanvas?.toDataURL(),
+            },
+          },
+        })
       }
       break
     default:
