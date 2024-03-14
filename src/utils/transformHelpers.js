@@ -120,3 +120,57 @@ export function stretchRasterContent(
 
   //TODO: (High Priority) Add to timeline, store adjusted pixels either as image data array or store layer.cvs as dataURL
 }
+
+/**
+ *
+ * @param {object} layer - The layer to run the transform on
+ * @param {object} boundaryBox - The boundary box of the content to be transformed
+ * @param {boolean} flipHorizontally - Whether to flip horizontally or vertically
+ */
+export function flipRasterContent(
+  layer,
+  boundaryBox,
+  flipHorizontally
+) {
+  const tempCanvas = document.createElement("canvas")
+  const tempCTX = tempCanvas.getContext("2d", {
+    willReadFrequently: true,
+  })
+  tempCanvas.width = boundaryBox.xMax - boundaryBox.xMin
+  tempCanvas.height = boundaryBox.yMax - boundaryBox.yMin
+  if (flipHorizontally) {
+    //flip horizontally
+    tempCTX.setTransform(-1, 0, 0, 1, tempCanvas.width, 0)
+  } else {
+    //flip vertically
+    tempCTX.setTransform(1, 0, 0, -1, 0, tempCanvas.height)
+  }
+  tempCTX.drawImage(
+    layer.cvs,
+    boundaryBox.xMin,
+    boundaryBox.yMin,
+    tempCanvas.width,
+    tempCanvas.height,
+    0,
+    0,
+    tempCanvas.width,
+    tempCanvas.height
+  )
+  layer.ctx.clearRect(
+    boundaryBox.xMin,
+    boundaryBox.yMin,
+    tempCanvas.width,
+    tempCanvas.height
+  )
+  layer.ctx.drawImage(
+    tempCanvas,
+    0,
+    0,
+    tempCanvas.width,
+    tempCanvas.height,
+    boundaryBox.xMin,
+    boundaryBox.yMin,
+    tempCanvas.width,
+    tempCanvas.height
+  )
+}
