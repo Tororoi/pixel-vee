@@ -104,6 +104,8 @@ export const state = {
   originalImageDataForTransform: null,
   originalBoundaryBox: null,
   previousBoundaryBox: null,
+  isMirroredHorizontally: false,
+  isMirroredVertically: false,
   selectClipboard: {
     boundaryBox: {
       xMin: null,

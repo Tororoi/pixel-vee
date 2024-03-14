@@ -111,12 +111,24 @@ function transformSteps() {
           )
           transformBoundaries()
           //TODO: (High Priority) Need way to track mirroring and rotation across multiple transforms or it will be reset by the original data
-          const isMirroredHorizontally =
-            state.boundaryBox.xMax === state.previousBoundaryBox.xMin ||
-            state.boundaryBox.xMin === state.previousBoundaryBox.xMax
-          const isMirroredVertically =
-            state.boundaryBox.yMax === state.previousBoundaryBox.yMin ||
-            state.boundaryBox.yMin === state.previousBoundaryBox.yMax
+          let isMirroredHorizontally = state.isMirroredHorizontally
+          let isMirroredVertically = state.isMirroredVertically
+          if (vectorGui.selectedPoint.xKey !== "px9") {
+            //Don't check for mirroring when moving whole selection
+            if (
+              state.boundaryBox.xMax === state.previousBoundaryBox.xMin ||
+              state.boundaryBox.xMin === state.previousBoundaryBox.xMax
+            ) {
+              isMirroredHorizontally = !state.isMirroredHorizontally
+            }
+            if (
+              state.boundaryBox.yMax === state.previousBoundaryBox.yMin ||
+              state.boundaryBox.yMin === state.previousBoundaryBox.yMax
+            ) {
+              isMirroredVertically = !state.isMirroredVertically
+            }
+          }
+
           stretchRasterContent(
             canvas.currentLayer,
             state.originalImageDataForTransform,
@@ -131,6 +143,18 @@ function transformSteps() {
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey) {
+        if (
+          state.boundaryBox.xMax === state.previousBoundaryBox.xMin ||
+          state.boundaryBox.xMin === state.previousBoundaryBox.xMax
+        ) {
+          state.isMirroredHorizontally = !state.isMirroredHorizontally
+        }
+        if (
+          state.boundaryBox.yMax === state.previousBoundaryBox.yMin ||
+          state.boundaryBox.yMin === state.previousBoundaryBox.yMax
+        ) {
+          state.isMirroredVertically = !state.isMirroredVertically
+        }
         state.normalizeSelectProperties()
         state.setBoundaryBox(state.selectProperties)
         addTransformToTimeline()

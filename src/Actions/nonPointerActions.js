@@ -484,31 +484,23 @@ export function addTransformToTimeline() {
 export function actionFlipPixels(flipHorizontally) {
   if (canvas.currentLayer.isPreview) {
     //flip pixels
-    const originalImageDataForTransform = canvas.currentLayer.ctx.getImageData(
-      state.boundaryBox.xMin,
-      state.boundaryBox.yMin,
-      state.boundaryBox.xMax - state.boundaryBox.xMin,
-      state.boundaryBox.yMax - state.boundaryBox.yMin
-    )
     const transformedBoundaryBox = { ...state.boundaryBox }
     if (flipHorizontally) {
       transformedBoundaryBox.xMin = state.boundaryBox.xMax
       transformedBoundaryBox.xMax = state.boundaryBox.xMin
+      state.isMirroredHorizontally = !state.isMirroredHorizontally
     } else {
       transformedBoundaryBox.yMin = state.boundaryBox.yMax
       transformedBoundaryBox.yMax = state.boundaryBox.yMin
+      state.isMirroredVertically = !state.isMirroredVertically
     }
-    const isMirroredHorizontally =
-      transformedBoundaryBox.xMin === state.boundaryBox.xMax
-    const isMirroredVertically =
-      transformedBoundaryBox.yMin === state.boundaryBox.yMax
     stretchRasterContent(
       canvas.currentLayer,
-      originalImageDataForTransform,
-      state.boundaryBox,
+      state.originalImageDataForTransform,
+      state.originalBoundaryBox,
       transformedBoundaryBox,
-      isMirroredHorizontally,
-      isMirroredVertically
+      state.isMirroredHorizontally,
+      state.isMirroredVertically
     )
     addTransformToTimeline()
     renderCanvas(canvas.currentLayer)
