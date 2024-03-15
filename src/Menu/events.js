@@ -19,11 +19,6 @@ import {
   actionRotatePixels,
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
-import { renderCanvas } from "../Canvas/render.js"
-import {
-  rotateRasterContent90DegreesClockwise,
-  stretchRasterContent,
-} from "../utils/transformHelpers.js"
 
 //====================================//
 //======= * * * Tooltip * * * ========//

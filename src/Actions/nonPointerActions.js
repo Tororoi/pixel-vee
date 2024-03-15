@@ -522,21 +522,28 @@ export function actionRotatePixels() {
       const height = yMax - yMin
 
       // After rotation, the box's width becomes its height and vice versa
+      const px1 = Math.round(centerX - height / 2)
+      const px2 = Math.round(centerX + height / 2)
+      const py1 = Math.round(centerY - width / 2)
+      const py2 = Math.round(centerY + width / 2)
+
       return {
-        px1: centerX - height / 2,
-        px2: centerX + height / 2,
-        py1: centerY - width / 2,
-        py2: centerY + width / 2,
+        px1,
+        px2,
+        py1,
+        py2,
       }
     }
 
-    const oldBoundaryBox = { ...state.boundaryBox }
-    state.selectProperties = rotateBoundaryBox90Clockwise(oldBoundaryBox)
+    state.selectProperties = rotateBoundaryBox90Clockwise(state.boundaryBox)
     state.setBoundaryBox(state.selectProperties)
+    state.transformationRotationDegrees += 90
     rotateRasterContent90DegreesClockwise(
       canvas.currentLayer,
-      oldBoundaryBox,
-      state.boundaryBox
+      state.originalImageDataForTransform,
+      state.originalBoundaryBox,
+      state.boundaryBox,
+      state.transformationRotationDegrees
     )
     addTransformToTimeline()
     vectorGui.render()

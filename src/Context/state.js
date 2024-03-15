@@ -106,6 +106,7 @@ export const state = {
   previousBoundaryBox: null,
   isMirroredHorizontally: false,
   isMirroredVertically: false,
+  transformationRotationDegrees: 0,
   selectClipboard: {
     boundaryBox: {
       xMin: null,

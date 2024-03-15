@@ -3,7 +3,10 @@ import { canvas } from "../Context/canvas.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { vectorGui } from "../GUI/vector.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
-import { stretchRasterContent } from "../utils/transformHelpers.js"
+import {
+  stretchRasterContent,
+  transformRasterContent,
+} from "../utils/transformHelpers.js"
 import { tools } from "./index.js"
 import { addTransformToTimeline } from "../Actions/nonPointerActions.js"
 
@@ -110,7 +113,7 @@ function transformSteps() {
             vectorGui.selectedPoint.yKey
           )
           transformBoundaries()
-          //TODO: (High Priority) Need way to track mirroring and rotation across multiple transforms or it will be reset by the original data
+          //TODO: (High Priority) Need way to track rotation across multiple transforms or it will be reset by the original data
           let isMirroredHorizontally = state.isMirroredHorizontally
           let isMirroredVertically = state.isMirroredVertically
           if (vectorGui.selectedPoint.xKey !== "px9") {
@@ -129,14 +132,23 @@ function transformSteps() {
             }
           }
 
-          stretchRasterContent(
+          transformRasterContent(
             canvas.currentLayer,
             state.originalImageDataForTransform,
             state.originalBoundaryBox,
             state.boundaryBox,
+            state.transformationRotationDegrees,
             isMirroredHorizontally,
             isMirroredVertically
           )
+          // stretchRasterContent(
+          //   canvas.currentLayer,
+          //   state.originalImageDataForTransform,
+          //   state.originalBoundaryBox,
+          //   state.boundaryBox,
+          //   isMirroredHorizontally,
+          //   isMirroredVertically
+          // )
         }
         renderCanvas(canvas.currentLayer)
       }
