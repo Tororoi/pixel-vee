@@ -4,7 +4,6 @@ import { renderCanvas } from "../Canvas/render.js"
 import { vectorGui } from "../GUI/vector.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import {
-  stretchRasterContent,
   transformRasterContent,
 } from "../utils/transformHelpers.js"
 import { tools } from "./index.js"
@@ -131,24 +130,15 @@ function transformSteps() {
               isMirroredVertically = !state.isMirroredVertically
             }
           }
-
           transformRasterContent(
             canvas.currentLayer,
             state.originalImageDataForTransform,
             state.originalBoundaryBox,
             state.boundaryBox,
-            state.transformationRotationDegrees,
+            state.transformationRotationDegrees % 360,
             isMirroredHorizontally,
             isMirroredVertically
           )
-          // stretchRasterContent(
-          //   canvas.currentLayer,
-          //   state.originalImageDataForTransform,
-          //   state.originalBoundaryBox,
-          //   state.boundaryBox,
-          //   isMirroredHorizontally,
-          //   isMirroredVertically
-          // )
         }
         renderCanvas(canvas.currentLayer)
       }

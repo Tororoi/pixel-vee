@@ -131,6 +131,11 @@ export function actionClear(layer) {
     i++
     if (action.layer === layer) {
       action.removed = true
+      if (action.vectorIndices) {
+        action.vectorIndices.forEach((vectorIndex) => {
+          state.vectors[vectorIndex].removed = true
+        })
+      }
       //TODO: (Low Priority) Should group actions also have each sub action removed set to true?
     }
   })

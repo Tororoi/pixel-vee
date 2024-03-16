@@ -17,10 +17,7 @@ import {
   disableActionsForPaste,
   enableActionsForNoPaste,
 } from "../DOM/disableDomElements.js"
-import {
-  rotateRasterContent90DegreesClockwise,
-  stretchRasterContent,
-} from "../utils/transformHelpers.js"
+import { transformRasterContent } from "../utils/transformHelpers.js"
 
 //=============================================//
 //====== * * * Non Pointer Actions * * * ======//
@@ -176,13 +173,16 @@ export function actionPasteSelection() {
       offsetX,
       offsetY
     )
-    state.originalImageDataForTransform = canvas.currentLayer.ctx.getImageData(
-      state.boundaryBox.xMin,
-      state.boundaryBox.yMin,
-      state.boundaryBox.xMax - state.boundaryBox.xMin,
-      state.boundaryBox.yMax - state.boundaryBox.yMin
-    )
-    state.originalBoundaryBox = { ...state.boundaryBox }
+    if (state.selectClipboard.canvas) {
+      state.originalImageDataForTransform =
+        canvas.currentLayer.ctx.getImageData(
+          state.boundaryBox.xMin,
+          state.boundaryBox.yMin,
+          state.boundaryBox.xMax - state.boundaryBox.xMin,
+          state.boundaryBox.yMax - state.boundaryBox.yMin
+        )
+      state.originalBoundaryBox = { ...state.boundaryBox }
+    }
     //adjust boundaryBox for layer offset
     const boundaryBox = { ...state.selectClipboard.boundaryBox }
     if (boundaryBox.xMax !== null) {
@@ -494,11 +494,12 @@ export function actionFlipPixels(flipHorizontally) {
       transformedBoundaryBox.yMax = state.boundaryBox.yMin
       state.isMirroredVertically = !state.isMirroredVertically
     }
-    stretchRasterContent(
+    transformRasterContent(
       canvas.currentLayer,
       state.originalImageDataForTransform,
       state.originalBoundaryBox,
       transformedBoundaryBox,
+      state.transformationRotationDegrees % 360,
       state.isMirroredHorizontally,
       state.isMirroredVertically
     )
@@ -514,18 +515,20 @@ export function actionRotatePixels() {
   if (canvas.currentLayer.isPreview) {
     const rotateBoundaryBox90Clockwise = (boundaryBox) => {
       const { xMin, xMax, yMin, yMax } = boundaryBox
-      const centerX = (xMin + xMax) / 2
-      const centerY = (yMin + yMax) / 2
+      const centerX = Math.floor((xMin + xMax) / 2)
+      const centerY = Math.floor((yMin + yMax) / 2)
+      //if side is odd, center is the middle pixel
+      //if side is even, center is the pixel to the left and above the middle
 
       // Calculate distances of the original edges from the center
       const width = xMax - xMin
       const height = yMax - yMin
 
       // After rotation, the box's width becomes its height and vice versa
-      const px1 = Math.round(centerX - height / 2)
-      const px2 = Math.round(centerX + height / 2)
-      const py1 = Math.round(centerY - width / 2)
-      const py2 = Math.round(centerY + width / 2)
+      const px1 = centerX - Math.floor(height / 2)
+      const px2 = centerX + Math.ceil(height / 2)
+      const py1 = centerY - Math.floor(width / 2)
+      const py2 = centerY + Math.ceil(width / 2)
 
       return {
         px1,
@@ -538,12 +541,14 @@ export function actionRotatePixels() {
     state.selectProperties = rotateBoundaryBox90Clockwise(state.boundaryBox)
     state.setBoundaryBox(state.selectProperties)
     state.transformationRotationDegrees += 90
-    rotateRasterContent90DegreesClockwise(
+    transformRasterContent(
       canvas.currentLayer,
       state.originalImageDataForTransform,
       state.originalBoundaryBox,
       state.boundaryBox,
-      state.transformationRotationDegrees
+      state.transformationRotationDegrees % 360,
+      state.isMirroredHorizontally,
+      state.isMirroredVertically
     )
     addTransformToTimeline()
     vectorGui.render()

@@ -126,6 +126,11 @@ function handleClearAction(latestAction) {
     i++
     if (action.layer === canvas.currentLayer) {
       action.removed = !action.removed
+      if (action.vectorIndices) {
+        action.vectorIndices.forEach((vectorIndex) => {
+          state.vectors[vectorIndex].removed = !state.vectors[vectorIndex].removed
+        })
+      }
     }
   })
   vectorGui.reset()

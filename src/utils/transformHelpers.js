@@ -6,7 +6,7 @@
  * @param {object} newBoundaryBox - The new boundary box of the content after rotation
  * @param {number} degrees - The number of degrees to rotate the content
  */
-export function rotateRasterContent90DegreesClockwise(
+export function rotateRasterContent(
   layer,
   originalPixels,
   originalBoundaryBox,
@@ -19,38 +19,48 @@ export function rotateRasterContent90DegreesClockwise(
   const newWidth = Math.abs(newBoundaryBox.xMax - newBoundaryBox.xMin)
   const newHeight = Math.abs(newBoundaryBox.yMax - newBoundaryBox.yMin)
 
-  // Calculate new dimensions and rotation factor based on the degrees of rotation
-  let rotationFactor
-  switch (degrees % 360) {
-    case 90:
-      rotationFactor = (x, y) => ({ newX: originalHeight - 1 - y, newY: x })
-      break
-    case 180:
-      rotationFactor = (x, y) => ({
-        newX: originalWidth - 1 - x,
-        newY: originalHeight - 1 - y,
-      })
-      break
-    case 270:
-      rotationFactor = (x, y) => ({ newX: y, newY: originalWidth - 1 - x })
-      break
-    default: // Assumes 0 degrees or invalid input, resulting in no rotation.
-      rotationFactor = (x, y) => ({ newX: x, newY: y })
-      break
-  }
+  // Convert degrees to radians for trigonometric functions
+  const radians = (degrees * Math.PI) / 180
+  const cos = Math.cos(-radians)
+  const sin = Math.sin(-radians)
 
   const adjustedPixels = layer.ctx.createImageData(newWidth, newHeight)
 
-  // Rotate each pixel
-  for (let y = 0; y < originalHeight; y++) {
-    for (let x = 0; x < originalWidth; x++) {
-      const { newX, newY } = rotationFactor(x, y)
-      const newIndex = (newY * newWidth + newX) * 4
-      const originalIndex = (y * originalWidth + x) * 4
-      // Copy the pixel data
-      for (let i = 0; i < 4; i++) {
-        adjustedPixels.data[newIndex + i] =
-          originalPixels.data[originalIndex + i]
+  // Calculate the center of the image
+  const cx = originalWidth / 2
+  const cy = originalHeight / 2
+  const nCx = newWidth / 2
+  const nCy = newHeight / 2
+
+  // Iterate through new dimensions and calculate the corresponding pixel in the original image
+  for (let y = 0; y < newHeight; y++) {
+    for (let x = 0; x < newWidth; x++) {
+      // Calculate the position of each pixel relative to the center of the new image
+      const dx = x - nCx
+      const dy = y - nCy
+
+      // Apply the inverse rotation to find the corresponding original pixel
+      const originalX = cos * dx - sin * dy + cx
+      const originalY = sin * dx + cos * dy + cy
+
+      // Round to get the index of the nearest pixel in the original image
+      const finalX = Math.round(originalX)
+      const finalY = Math.round(originalY)
+
+      if (
+        finalX >= 0 &&
+        finalX < originalWidth &&
+        finalY >= 0 &&
+        finalY < originalHeight
+      ) {
+        const newIndex = (y * newWidth + x) * 4
+        const originalIndex = (finalY * originalWidth + finalX) * 4
+
+        // Copy the pixel data from the original image to the new position in the adjusted image
+        for (let i = 0; i < 4; i++) {
+          adjustedPixels.data[newIndex + i] =
+            originalPixels.data[originalIndex + i]
+        }
       }
     }
   }
@@ -134,6 +144,8 @@ export function stretchRasterContent(
  * @param {number} degrees - The number of degrees to rotate the content (0, 90, 180, 270).
  * @param {boolean} isMirroredHorizontally - Whether to mirror the content horizontally.
  * @param {boolean} isMirroredVertically - Whether to mirror the content vertically.
+ * TODO: (Low Priority) Add support for non-90 degree rotations.
+ * TODO: (Low Priority) Can this be refactored to only use one for loop that handles both rotation and stretching?
  */
 export function transformRasterContent(
   layer,
@@ -146,39 +158,18 @@ export function transformRasterContent(
 ) {
   const originalWidth = originalBoundaryBox.xMax - originalBoundaryBox.xMin
   const originalHeight = originalBoundaryBox.yMax - originalBoundaryBox.yMin
+  const radians = (degrees * Math.PI) / 180
+  const cos = Math.cos(radians)
+  const sin = Math.sin(radians)
+  // Calculate rotated width and height
+  const rotatedWidth = Math.round(
+    Math.abs(originalWidth * cos) + Math.abs(originalHeight * sin)
+  )
+  const rotatedHeight = Math.round(
+    Math.abs(originalWidth * sin) + Math.abs(originalHeight * cos)
+  )
   const newWidth = Math.abs(newBoundaryBox.xMax - newBoundaryBox.xMin)
   const newHeight = Math.abs(newBoundaryBox.yMax - newBoundaryBox.yMin)
-
-  let rotationFactor
-  switch (degrees % 360) {
-    case 90:
-      // For 90 degrees rotation, (x, y) goes to (newHeight-y-1, x)
-      rotationFactor = (x, y, oWidth, oHeight, nWidth, nHeight) => ({
-        newX: nHeight - 1 - y,
-        newY: x,
-      })
-      break
-    case 180:
-      // For 180 degrees rotation, (x, y) goes to (oWidth-x-1, oHeight-y-1)
-      rotationFactor = (x, y, oWidth, oHeight, nWidth, nHeight) => ({
-        newX: oWidth - 1 - x,
-        newY: oHeight - 1 - y,
-      })
-      break
-    case 270:
-      // For 270 degrees rotation, (x, y) goes to (y, oWidth-x-1)
-      rotationFactor = (x, y, oWidth, oHeight, nWidth, nHeight) => ({
-        newX: y,
-        newY: oWidth - 1 - x,
-      })
-      break
-    default: // Assumes 0 degrees or invalid input, resulting in no rotation.
-      rotationFactor = (x, y, oWidth, oHeight, nWidth, nHeight) => ({
-        newX: x,
-        newY: y,
-      })
-      break
-  }
 
   layer.ctx.clearRect(0, 0, layer.cvs.width, layer.cvs.height)
 
@@ -187,46 +178,72 @@ export function transformRasterContent(
     return
   }
 
-  const adjustedPixels = new ImageData(newWidth, newHeight)
+  const rotatedPixels = new ImageData(rotatedWidth, rotatedHeight)
 
-  // Apply transformations
-  for (let y = 0; y < newHeight; y++) {
-    for (let x = 0; x < newWidth; x++) {
-      // Adjust coordinates for stretching/shrinking
-      let originalX = Math.floor(x / (newWidth / originalWidth))
-      let originalY = Math.floor(y / (newHeight / originalHeight))
-      if (isMirroredHorizontally) {
-        originalX = originalWidth - 1 - originalX
-      }
-      if (isMirroredVertically) {
-        originalY = originalHeight - 1 - originalY
-      }
+  const cx = originalWidth / 2
+  const cy = originalHeight / 2
+  const nCx = rotatedWidth / 2
+  const nCy = rotatedHeight / 2
 
-      const originalIndex = (originalY * originalWidth + originalX) * 4
-      // Apply rotation
-      const { newX, newY } = rotationFactor(
-        x,
-        y,
-        originalWidth,
-        originalHeight,
-        newWidth,
-        newHeight
-      )
+  // Rotate the original image
+  for (let y = 0; y < originalHeight; y++) {
+    for (let x = 0; x < originalWidth; x++) {
+      // Calculate the position of each pixel relative to the center
+      const dx = x - cx
+      const dy = y - cy
 
-      const newIndex = (newY * newWidth + newX) * 4
-      // Copy the pixel data
-      for (let i = 0; i < 4; i++) {
-        adjustedPixels.data[newIndex + i] =
-          originalPixels.data[originalIndex + i]
+      // Apply the rotation
+      const newX = cos * dx - sin * dy + nCx
+      const newY = sin * dx + cos * dy + nCy
+
+      // Round to get the index of the nearest pixel
+      const finalX = Math.round(newX)
+      const finalY = Math.round(newY)
+
+      if (
+        finalX >= 0 &&
+        finalX < rotatedWidth &&
+        finalY >= 0 &&
+        finalY < rotatedHeight
+      ) {
+        const newIndex = (finalY * rotatedWidth + finalX) * 4
+        const originalIndex = (y * originalWidth + x) * 4
+
+        // Copy the pixel data
+        for (let i = 0; i < 4; i++) {
+          rotatedPixels.data[newIndex + i] =
+            originalPixels.data[originalIndex + i]
+        }
       }
     }
   }
 
-  // layer.ctx.clearRect(0, 0, layer.cvs.width, layer.cvs.height)
+  const adjustedPixels = new ImageData(newWidth, newHeight)
+  // Adjusting algorithm (stretching or shrinking)
+  for (let y = 0; y < newHeight; y++) {
+    for (let x = 0; x < newWidth; x++) {
+      let rotatedX = Math.floor(x / (newWidth / rotatedWidth))
+      let rotatedY = Math.floor(y / (newHeight / rotatedHeight))
+      if (isMirroredHorizontally) {
+        rotatedX = rotatedWidth - 1 - rotatedX // Mirror horizontally
+      }
+      if (isMirroredVertically) {
+        rotatedY = rotatedHeight - 1 - rotatedY // Mirror vertically
+      }
+
+      const rotatedIndex = (rotatedY * rotatedWidth + rotatedX) * 4
+      const newIndex = (y * newWidth + x) * 4
+
+      for (let i = 0; i < 4; i++) {
+        adjustedPixels.data[newIndex + i] = rotatedPixels.data[rotatedIndex + i]
+      }
+    }
+  }
+
   // Place the transformed image back on the canvas
   layer.ctx.putImageData(
     adjustedPixels,
-    newBoundaryBox.xMin,
-    newBoundaryBox.yMin
+    Math.min(newBoundaryBox.xMin, newBoundaryBox.xMax),
+    Math.min(newBoundaryBox.yMin, newBoundaryBox.yMax)
   )
 }
