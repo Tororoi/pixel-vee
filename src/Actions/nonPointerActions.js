@@ -421,6 +421,10 @@ export function actionConfirmPastedPixels() {
       state.selectedVectorIndicesSet.add(vectorIndex)
     })
     state.clearRedoStack()
+    //Reset transform properties
+    state.transformationRotationDegrees = 0
+    state.isMirroredHorizontally = false
+    state.isMirroredVertically = false
     //render
     vectorGui.render()
     renderCanvas(canvas.currentLayer)
@@ -461,11 +465,19 @@ export function addTransformToTimeline() {
     boundaryBox.yMin -= canvas.currentLayer.y
     boundaryBox.yMax -= canvas.currentLayer.y
   }
+  const selectProperties = { ...state.selectProperties }
+  if (state.selectProperties.px2 !== null) {
+    selectProperties.px1 -= canvas.currentLayer.x
+    selectProperties.px2 -= canvas.currentLayer.x
+    selectProperties.py1 -= canvas.currentLayer.y
+    selectProperties.py2 -= canvas.currentLayer.y
+  }
   addToTimeline({
     tool: tools.transform,
     layer: canvas.currentLayer,
     properties: {
       boundaryBox,
+      selectProperties,
       canvas: transformedCanvas, //result of transformation
       canvasProperties: {
         dataUrl: transformedCanvas?.toDataURL(),

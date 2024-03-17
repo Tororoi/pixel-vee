@@ -3,9 +3,7 @@ import { canvas } from "../Context/canvas.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { vectorGui } from "../GUI/vector.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
-import {
-  transformRasterContent,
-} from "../utils/transformHelpers.js"
+import { transformRasterContent } from "../utils/transformHelpers.js"
 import { addTransformToTimeline } from "../Actions/nonPointerActions.js"
 
 /**
@@ -47,26 +45,27 @@ function moveSteps() {
     case "pointerup":
       if (vectorGui.selectedPoint.xKey) {
         transformSteps()
+      } else {
+        renderCanvas(canvas.currentLayer, true)
+        //save start and end coordinates
+        addToTimeline({
+          tool: state.tool,
+          layer: canvas.currentLayer,
+          //selectProperties: { ...state.selectProperties },
+          properties: {
+            from: {
+              x: state.grabStartX,
+              y: state.grabStartY,
+              scale: state.startScale,
+            },
+            to: {
+              x: canvas.currentLayer.x,
+              y: canvas.currentLayer.y,
+              scale: canvas.currentLayer.scale,
+            },
+          },
+        })
       }
-      renderCanvas(canvas.currentLayer, true)
-      //save start and end coordinates
-      addToTimeline({
-        tool: state.tool,
-        layer: canvas.currentLayer,
-        //selectProperties: { ...state.selectProperties },
-        properties: {
-          from: {
-            x: state.grabStartX,
-            y: state.grabStartY,
-            scale: state.startScale,
-          },
-          to: {
-            x: canvas.currentLayer.x,
-            y: canvas.currentLayer.y,
-            scale: canvas.currentLayer.scale,
-          },
-        },
-      })
       break
     default:
     //do nothing
@@ -157,6 +156,7 @@ function transformSteps() {
           xKey: null,
           yKey: null,
         }
+        renderCanvas(canvas.currentLayer, true)
       }
       break
     default:

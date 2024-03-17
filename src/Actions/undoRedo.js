@@ -240,9 +240,23 @@ function handlePasteAction(latestAction, modType) {
         vectors[index] = state.vectors[index]
       })
     }
+    const selectProperties = {
+      ...latestAction.selectProperties,
+    }
+    selectProperties.px1 += latestAction.pastedLayer.x
+    selectProperties.px2 += latestAction.pastedLayer.x
+    selectProperties.py1 += latestAction.pastedLayer.y
+    selectProperties.py2 += latestAction.pastedLayer.y
+    const boundaryBox = {
+      ...latestAction.boundaryBox,
+    }
+    boundaryBox.xMin += latestAction.pastedLayer.x
+    boundaryBox.xMax += latestAction.pastedLayer.x
+    boundaryBox.yMin += latestAction.pastedLayer.y
+    boundaryBox.yMax += latestAction.pastedLayer.y
     const clipboard = {
-      selectProperties: latestAction.selectProperties,
-      boundaryBox: latestAction.boundaryBox,
+      selectProperties,
+      boundaryBox,
       vectors,
       canvas: latestAction.canvas,
     }
@@ -352,6 +366,35 @@ function handleMoveAction(latestAction, modType) {
 }
 
 /**
+ *
+ * @param {object} latestAction - The action about to be undone or redone
+ * @param {object} newLatestAction - The action that's about to be the most recent action, if the function is "Undo" ("from")
+ * @param {string} modType - "from" or "to", used to identify undo or redo
+ */
+function handleTransformAction(latestAction, newLatestAction, modType) {
+  //set boundaryBox and selectProperties
+  if (modType === "to") {
+    //offset selectProperties by layer x and y
+    const selectProperties = { ...latestAction.selectProperties }
+    selectProperties.px1 += latestAction.layer.x
+    selectProperties.px2 += latestAction.layer.x
+    selectProperties.py1 += latestAction.layer.y
+    selectProperties.py2 += latestAction.layer.y
+    state.selectProperties = {
+      ...selectProperties,
+    }
+    state.setBoundaryBox(selectProperties)
+  } else if (modType === "from") {
+    const selectProperties = { ...newLatestAction.selectProperties }
+    selectProperties.px1 += newLatestAction.layer.x
+    selectProperties.px2 += newLatestAction.layer.x
+    selectProperties.py1 += newLatestAction.layer.y
+    selectProperties.py2 += newLatestAction.layer.y
+    state.setBoundaryBox(selectProperties)
+  }
+}
+
+/**
  * Main pillar of the code structure - command pattern
  * @param {Array} pushStack - The stack to push the action to
  * @param {Array} popStack - The stack to pop the action from
@@ -428,6 +471,8 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     }
   } else if (latestAction.tool.name === "move") {
     handleMoveAction(latestAction, modType)
+  } else if (latestAction.tool.name === "transform") {
+    handleTransformAction(latestAction, newLatestAction, modType)
   } else if (
     latestAction.tool.name === state.tool.name &&
     latestAction.tool.type === "vector"
