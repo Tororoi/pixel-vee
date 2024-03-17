@@ -541,6 +541,12 @@ export function actionRotatePixels() {
     state.selectProperties = rotateBoundaryBox90Clockwise(state.boundaryBox)
     state.setBoundaryBox(state.selectProperties)
     state.transformationRotationDegrees += 90
+    if (state.isMirroredHorizontally) {
+      state.transformationRotationDegrees += 180
+    }
+    if (state.isMirroredVertically) {
+      state.transformationRotationDegrees += 180
+    }
     transformRasterContent(
       canvas.currentLayer,
       state.originalImageDataForTransform,

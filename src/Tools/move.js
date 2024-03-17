@@ -106,13 +106,7 @@ function transformSteps() {
         if (canvas.currentLayer.type === "reference") {
           scaleReference()
         } else if (canvas.currentLayer.type === "raster") {
-          //TODO: (High Priority) Add transform logic for 9 control points
-          console.log(
-            vectorGui.selectedPoint.xKey,
-            vectorGui.selectedPoint.yKey
-          )
           transformBoundaries()
-          //TODO: (High Priority) Need way to track rotation across multiple transforms or it will be reset by the original data
           let isMirroredHorizontally = state.isMirroredHorizontally
           let isMirroredVertically = state.isMirroredVertically
           if (vectorGui.selectedPoint.xKey !== "px9") {

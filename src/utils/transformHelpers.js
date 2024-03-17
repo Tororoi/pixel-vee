@@ -227,7 +227,6 @@ export function transformRasterContent(
       if (isMirroredHorizontally) {
         rotatedX = rotatedWidth - 1 - rotatedX // Mirror horizontally
       }
-      //TODO: (High Priority) Mirroring vertically is the same as horizontal flip + 180 degrees rotation. Do that instead of having 2 flags for mirroring
       if (isMirroredVertically) {
         rotatedY = rotatedHeight - 1 - rotatedY // Mirror vertically
       }
