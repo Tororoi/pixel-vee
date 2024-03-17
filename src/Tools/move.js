@@ -125,7 +125,6 @@ function transformSteps() {
           transformRasterContent(
             canvas.currentLayer,
             state.originalImageDataForTransform,
-            state.originalBoundaryBox,
             state.boundaryBox,
             state.transformationRotationDegrees % 360,
             isMirroredHorizontally,

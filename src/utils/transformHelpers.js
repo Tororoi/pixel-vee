@@ -139,7 +139,6 @@ export function stretchRasterContent(
  * Transforms raster content by rotating and stretching/shrinking.
  * @param {object} layer - The layer to run the transform on.
  * @param {ImageData} originalPixels - The original pixel data.
- * @param {object} originalBoundaryBox - The original boundary box of the content to be transformed.
  * @param {object} newBoundaryBox - The new boundary box of the content after transformation.
  * @param {number} degrees - The number of degrees to rotate the content (0, 90, 180, 270).
  * @param {boolean} isMirroredHorizontally - Whether to mirror the content horizontally.
@@ -150,14 +149,13 @@ export function stretchRasterContent(
 export function transformRasterContent(
   layer,
   originalPixels,
-  originalBoundaryBox,
   newBoundaryBox,
   degrees,
   isMirroredHorizontally = false,
   isMirroredVertically = false
 ) {
-  const originalWidth = originalBoundaryBox.xMax - originalBoundaryBox.xMin
-  const originalHeight = originalBoundaryBox.yMax - originalBoundaryBox.yMin
+  const originalWidth = originalPixels.width
+  const originalHeight = originalPixels.height
   const radians = (degrees * Math.PI) / 180
   const cos = Math.cos(radians)
   const sin = Math.sin(radians)

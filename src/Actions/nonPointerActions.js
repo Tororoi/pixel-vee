@@ -181,7 +181,6 @@ export function actionPasteSelection() {
           state.boundaryBox.xMax - state.boundaryBox.xMin,
           state.boundaryBox.yMax - state.boundaryBox.yMin
         )
-      state.originalBoundaryBox = { ...state.boundaryBox }
     }
     //adjust boundaryBox for layer offset
     const boundaryBox = { ...state.selectClipboard.boundaryBox }
@@ -478,7 +477,10 @@ export function addTransformToTimeline() {
     properties: {
       boundaryBox,
       selectProperties,
-      canvas: transformedCanvas, //result of transformation
+      transformationRotationDegrees: state.transformationRotationDegrees,
+      isMirroredHorizontally: state.isMirroredHorizontally,
+      isMirroredVertically: state.isMirroredVertically,
+      canvas: transformedCanvas, //result of transformation TODO: (High Priority) Use a reference to stored originalImageDataForTransform instead of canvas
       canvasProperties: {
         dataUrl: transformedCanvas?.toDataURL(),
       },
@@ -509,7 +511,6 @@ export function actionFlipPixels(flipHorizontally) {
     transformRasterContent(
       canvas.currentLayer,
       state.originalImageDataForTransform,
-      state.originalBoundaryBox,
       transformedBoundaryBox,
       state.transformationRotationDegrees % 360,
       state.isMirroredHorizontally,
@@ -562,7 +563,6 @@ export function actionRotatePixels() {
     transformRasterContent(
       canvas.currentLayer,
       state.originalImageDataForTransform,
-      state.originalBoundaryBox,
       state.boundaryBox,
       state.transformationRotationDegrees % 360,
       state.isMirroredHorizontally,
