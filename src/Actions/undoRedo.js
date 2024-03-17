@@ -128,7 +128,8 @@ function handleClearAction(latestAction) {
       action.removed = !action.removed
       if (action.vectorIndices) {
         action.vectorIndices.forEach((vectorIndex) => {
-          state.vectors[vectorIndex].removed = !state.vectors[vectorIndex].removed
+          state.vectors[vectorIndex].removed =
+            !state.vectors[vectorIndex].removed
         })
       }
     }
@@ -356,6 +357,7 @@ function handleMoveAction(latestAction, modType) {
  * @param {Array} popStack - The stack to pop the action from
  * @param {string} modType - "from" or "to", used to identify undo or redo
  * TODO: High Priority - Maintain state.vectors by removing or adding vectors to the state.vectors
+ * TODO: High Priority - Add handle transform action
  */
 export function actionUndoRedo(pushStack, popStack, modType) {
   //latest action is the action about to be undone or redone

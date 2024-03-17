@@ -6,7 +6,6 @@ import { addToTimeline } from "../Actions/undoRedo.js"
 import {
   transformRasterContent,
 } from "../utils/transformHelpers.js"
-import { tools } from "./index.js"
 import { addTransformToTimeline } from "../Actions/nonPointerActions.js"
 
 /**
