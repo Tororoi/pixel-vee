@@ -87,14 +87,6 @@ function transformSteps() {
           yKey: vectorGui.collidedKeys.yKey,
         }
         if (canvas.currentLayer.type === "raster") {
-          //set original pixels for transform //TODO: (High Priority) Instead of definining the original here, to reduce loss of data as much as possible only define it upon paste
-          // state.originalImageDataForTransform =
-          //   canvas.currentLayer.ctx.getImageData(
-          //     state.boundaryBox.xMin,
-          //     state.boundaryBox.yMin,
-          //     state.boundaryBox.xMax - state.boundaryBox.xMin,
-          //     state.boundaryBox.yMax - state.boundaryBox.yMin
-          //   )
           state.previousBoundaryBox = { ...state.boundaryBox }
         }
       }
@@ -103,7 +95,10 @@ function transformSteps() {
       if (vectorGui.selectedPoint.xKey) {
         if (canvas.currentLayer.type === "reference") {
           scaleReference()
-        } else if (canvas.currentLayer.type === "raster") {
+        } else if (
+          canvas.currentLayer.type === "raster" &&
+          canvas.currentLayer.isPreview
+        ) {
           transformBoundaries()
           let isMirroredHorizontally = state.isMirroredHorizontally
           let isMirroredVertically = state.isMirroredVertically
@@ -124,7 +119,7 @@ function transformSteps() {
           }
           transformRasterContent(
             canvas.currentLayer,
-            state.originalImageDataForTransform,
+            state.pastedImages[state.currentPastedImageKey].imageData,
             state.boundaryBox,
             state.transformationRotationDegrees % 360,
             isMirroredHorizontally,

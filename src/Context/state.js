@@ -101,8 +101,20 @@ export const state = {
     xMax: null,
     yMax: null,
   },
-  originalImageDataForTransform: null,
-  originalBoundaryBox: null,
+  //Transform/ Paste
+  pastedImages: {
+    // index: {
+    //   actionIndex: null,
+    //   action: null,
+    //   imageData: null,
+    //   width: null,
+    //   height: null,
+    //   dataURL: null,
+    // },
+  },
+  highestPastedImageKey: 0,
+  currentPastedImageKey: null,
+  // originalImageDataForTransform: null,
   previousBoundaryBox: null,
   isMirroredHorizontally: false,
   isMirroredVertically: false,
@@ -127,6 +139,7 @@ export const state = {
       py2: null,
     },
     canvas: null,
+    imageData: null,
     vectors: {},
   },
   //for perfect pixels

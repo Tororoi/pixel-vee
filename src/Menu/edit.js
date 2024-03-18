@@ -46,6 +46,12 @@ export function copySelectedPixels() {
     ...state.boundaryBox,
   }
   state.selectClipboard.canvas = tempCanvas
+  state.selectClipboard.imageData = canvas.currentLayer.ctx.getImageData(
+    xMin,
+    yMin,
+    xMax - xMin,
+    yMax - yMin
+  )
   state.selectClipboard.vectors = {}
   enableActionsForClipboard()
 }

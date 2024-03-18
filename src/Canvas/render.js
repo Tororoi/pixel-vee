@@ -16,6 +16,7 @@ import {
   actionCubicCurve,
 } from "../Actions/pointerActions.js"
 import { setInitialZoom } from "../utils/canvasHelpers.js"
+import { transformRasterContent } from "../utils/transformHelpers.js"
 
 /**
  * Redraw all timeline actions
@@ -337,33 +338,41 @@ export function performAction(action, betweenCtx = null) {
       break
     }
     case "transform": {
-      // if (canvas.tempLayer === canvas.currentLayer && currentTransformSeries)
-      //Correct action coordinates with layer offsets
-      const offsetX = action.layer.x
-      const offsetY = action.layer.y
-      //correct boundary box for offsets
-      const boundaryBox = { ...action.boundaryBox }
-      if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin += offsetX
-        boundaryBox.xMax += offsetX
-        boundaryBox.yMin += offsetY
-        boundaryBox.yMax += offsetY
+      if (
+        canvas.tempLayer === canvas.currentLayer &&
+        action.pastedImageKey === state.currentPastedImageKey
+      ) {
+        let isLastTransformAction = false // Default to false
+        for (let i = state.undoStack.length - 1; i >= 0; i--) {
+          if (state.undoStack[i].tool.name === "transform") {
+            // If the first 'paste' action found from the end is the current action
+            isLastTransformAction = state.undoStack[i] === action
+            break // Stop searching once the first 'paste' action is found
+          }
+        }
+        if (isLastTransformAction) {
+          //Correct action coordinates with layer offsets
+          const offsetX = action.layer.x
+          const offsetY = action.layer.y
+          //correct boundary box for offsets
+          const boundaryBox = { ...action.boundaryBox }
+          if (boundaryBox.xMax !== null) {
+            boundaryBox.xMin += offsetX
+            boundaryBox.xMax += offsetX
+            boundaryBox.yMin += offsetY
+            boundaryBox.yMax += offsetY
+          }
+          //put transformed image data onto canvas (ok to use put image data because the layer should not have anything else on it at this point)
+          transformRasterContent(
+            action.layer,
+            state.pastedImages[action.pastedImageKey].imageData,
+            boundaryBox,
+            action.transformationRotationDegrees % 360,
+            action.isMirroredHorizontally,
+            action.isMirroredVertically
+          )
+        }
       }
-      //clear canvas
-      action.layer.ctx.clearRect(
-        0,
-        0,
-        action.layer.cvs.width,
-        action.layer.cvs.height
-      )
-      //draw action.canvas in boundaryBox
-      action.layer.ctx.drawImage(
-        action.canvas,
-        boundaryBox.xMin,
-        boundaryBox.yMin,
-        boundaryBox.xMax - boundaryBox.xMin,
-        boundaryBox.yMax - boundaryBox.yMin
-      )
       break
     }
     default:

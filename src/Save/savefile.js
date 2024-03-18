@@ -30,6 +30,7 @@ import { resizeOffScreenCanvas } from "../Canvas/render.js"
  * - tool fn - not needed because it is not used
  * - action snapshot - don't save unnecessary dataurls
  * @returns {Blob} - A blob containing the drawing data.
+ * TODO: (High Priority) Add error handling for saving the drawing
  */
 export function prepareDrawingForSave() {
   const {
@@ -116,6 +117,8 @@ export function saveDrawing() {
 /**
  * Load the drawing from a JSON file.
  * @param {JSON} jsonFile - The JSON file containing the drawing data.
+ * TODO: (High Priority) Add error handling for loading the drawing
+ * TODO: (High Priority) For transform actions, construct the state.pastedImages by using the canvas from each paste action, set at action.pastedImageKey
  */
 export async function loadDrawing(jsonFile) {
   let data

@@ -173,15 +173,6 @@ export function actionPasteSelection() {
       offsetX,
       offsetY
     )
-    if (state.selectClipboard.canvas) {
-      state.originalImageDataForTransform =
-        canvas.currentLayer.ctx.getImageData(
-          state.boundaryBox.xMin,
-          state.boundaryBox.yMin,
-          state.boundaryBox.xMax - state.boundaryBox.xMin,
-          state.boundaryBox.yMax - state.boundaryBox.yMin
-        )
-    }
     //adjust boundaryBox for layer offset
     const boundaryBox = { ...state.selectClipboard.boundaryBox }
     if (boundaryBox.xMax !== null) {
@@ -232,6 +223,11 @@ export function actionPasteSelection() {
         state.vectors[uniqueVectorKey] = vector
       }
     }
+    let uniquePastedImageKey = null
+    if (state.selectClipboard.canvas) {
+      state.highestPastedImageKey += 1
+      uniquePastedImageKey = state.highestPastedImageKey
+    }
     //add to timeline
     addToTimeline({
       tool:
@@ -247,6 +243,7 @@ export function actionPasteSelection() {
         ),
         boundaryBox,
         selectProperties,
+        pastedImageKey: uniquePastedImageKey,
         canvas: state.selectClipboard.canvas,
         canvasProperties: {
           dataUrl: state.selectClipboard.canvas?.toDataURL(),
@@ -262,6 +259,21 @@ export function actionPasteSelection() {
       state.vectors[vectorIndex].action = state.action
       state.selectedVectorIndicesSet.add(vectorIndex)
     })
+    if (state.selectClipboard.imageData) {
+      // state.originalImageDataForTransform = state.selectClipboard.imageData
+      // canvas.currentLayer.ctx.getImageData(
+      //   state.boundaryBox.xMin,
+      //   state.boundaryBox.yMin,
+      //   state.boundaryBox.xMax - state.boundaryBox.xMin,
+      //   state.boundaryBox.yMax - state.boundaryBox.yMin
+      // )
+
+      state.pastedImages[uniquePastedImageKey] = {
+        actionIndex: state.action.index,
+        imageData: state.selectClipboard.imageData,
+      }
+      state.currentPastedImageKey = uniquePastedImageKey
+    }
 
     state.clearRedoStack()
 
@@ -405,6 +417,7 @@ export function actionConfirmPastedPixels() {
         preConfirmYOffset: yOffset,
         boundaryBox,
         selectProperties,
+        pastedImageKey: state.currentPastedImageKey, //needed for reference on undo?
         canvas: confirmedCanvas,
         canvasProperties: {
           dataUrl: confirmedCanvas?.toDataURL(),
@@ -421,6 +434,7 @@ export function actionConfirmPastedPixels() {
     })
     state.clearRedoStack()
     //Reset transform properties
+    state.currentPastedImageKey = null
     state.transformationRotationDegrees = 0
     state.isMirroredHorizontally = false
     state.isMirroredVertically = false
@@ -477,13 +491,10 @@ export function addTransformToTimeline() {
     properties: {
       boundaryBox,
       selectProperties,
+      pastedImageKey: state.currentPastedImageKey,
       transformationRotationDegrees: state.transformationRotationDegrees,
       isMirroredHorizontally: state.isMirroredHorizontally,
       isMirroredVertically: state.isMirroredVertically,
-      canvas: transformedCanvas, //result of transformation TODO: (High Priority) Use a reference to stored originalImageDataForTransform instead of canvas
-      canvasProperties: {
-        dataUrl: transformedCanvas?.toDataURL(),
-      },
     },
   })
   state.clearRedoStack()
@@ -510,7 +521,7 @@ export function actionFlipPixels(flipHorizontally) {
     }
     transformRasterContent(
       canvas.currentLayer,
-      state.originalImageDataForTransform,
+      state.pastedImages[state.currentPastedImageKey].imageData,
       transformedBoundaryBox,
       state.transformationRotationDegrees % 360,
       state.isMirroredHorizontally,
@@ -562,7 +573,7 @@ export function actionRotatePixels() {
     }
     transformRasterContent(
       canvas.currentLayer,
-      state.originalImageDataForTransform,
+      state.pastedImages[state.currentPastedImageKey].imageData,
       state.boundaryBox,
       state.transformationRotationDegrees % 360,
       state.isMirroredHorizontally,

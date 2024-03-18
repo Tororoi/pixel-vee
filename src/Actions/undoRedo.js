@@ -13,6 +13,7 @@ import {
   disableActionsForPaste,
   enableActionsForNoPaste,
 } from "../DOM/disableDomElements.js"
+import { transformRasterContent } from "../utils/transformHelpers.js"
 
 //====================================//
 //========= * * * Core * * * =========//
@@ -384,6 +385,14 @@ function handleTransformAction(latestAction, newLatestAction, modType) {
       ...selectProperties,
     }
     state.setBoundaryBox(selectProperties)
+    transformRasterContent(
+      latestAction.layer,
+      state.pastedImages[latestAction.pastedImageKey].imageData,
+      state.boundaryBox,
+      latestAction.transformationRotationDegrees % 360,
+      latestAction.isMirroredHorizontally,
+      latestAction.isMirroredVertically
+    )
   } else if (modType === "from") {
     const selectProperties = { ...newLatestAction.selectProperties }
     selectProperties.px1 += newLatestAction.layer.x
@@ -391,6 +400,17 @@ function handleTransformAction(latestAction, newLatestAction, modType) {
     selectProperties.py1 += newLatestAction.layer.y
     selectProperties.py2 += newLatestAction.layer.y
     state.setBoundaryBox(selectProperties)
+    //Eventually undoing transform actions will result in the newLatestAction being a paste action. In that case, don't render a transformation
+    if (newLatestAction.tool.name === "transform") {
+      transformRasterContent(
+        newLatestAction.layer,
+        state.pastedImages[newLatestAction.pastedImageKey].imageData,
+        state.boundaryBox,
+        newLatestAction.transformationRotationDegrees % 360,
+        newLatestAction.isMirroredHorizontally,
+        newLatestAction.isMirroredVertically
+      )
+    }
   }
 }
 
