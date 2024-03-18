@@ -86,7 +86,7 @@ export const state = {
   currentVectorIndex: null,
   collidedVectorIndex: null,
   highestVectorKey: 0,
-  selectedVectorIndicesSet: new Set(), //TODO: (High Priority) logic for which actions reset selected vectors
+  selectedVectorIndicesSet: new Set(), //TODO: (Medium Priority) logic for which actions reset selected vectors
   //for select tool
   selectProperties: {
     px1: null,
@@ -240,7 +240,7 @@ function deselect() {
 // }
 
 /**
- *
+ * TODO: (High Priority) delete pastedImages for each paste action in the redo stack
  */
 function clearRedoStack() {
   state.action = null

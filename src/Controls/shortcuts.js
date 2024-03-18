@@ -41,9 +41,8 @@ export function activateShortcut(keyCode) {
       }
       break
     case "Backspace":
-      //TODO: (High Priority) Delete selection (mark vectors as removed, clear pixels similar to cut but without adding anything to clipboard)
       if (!state.clicked) {
-        //delete selection TODO: (High Priority) handle delete vectors
+        //delete selection TODO: (High Priority) handle delete vectors (mark vectors as removed)
         actionDeleteSelection()
       }
       break
@@ -145,8 +144,17 @@ export function activateShortcut(keyCode) {
       break
     case "KeyF":
       if (!state.clicked) {
-        switchTool("fill")
-        renderVectorsToDOM()
+        if (keys.MetaLeft || keys.MetaRight) {
+          if (keys.AltLeft || keys.AltRight) {
+            //option+meta+z
+            //Flip vertical
+          } else {
+            //Flip horizontal
+          }
+        } else {
+          switchTool("fill")
+          renderVectorsToDOM()
+        }
       }
       break
     case "KeyG":
@@ -220,8 +228,12 @@ export function activateShortcut(keyCode) {
       break
     case "KeyR":
       if (!state.clicked) {
-        randomizeColor(swatches.primary.swatch)
-        renderPaletteToDOM()
+        if (keys.MetaLeft || keys.MetaRight) {
+          //Rotate right
+        } else {
+          randomizeColor(swatches.primary.swatch)
+          renderPaletteToDOM()
+        }
       }
       break
     case "KeyS":

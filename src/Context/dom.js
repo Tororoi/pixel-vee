@@ -18,7 +18,7 @@ const navBar = document.querySelector(".nav")
 const topMenu = document.getElementById("top-menu")
 
 // * Tool Options * //
-const toolOptions = document.querySelector(".tool-options") //TODO: (High Priority) Will become quick menu
+const toolOptions = document.querySelector(".tool-options") //TODO: (Medium Priority) Will become quick menu
 
 // * File Menu * //
 const fileSubMenu = document.getElementById("file-submenu")

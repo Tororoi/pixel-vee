@@ -93,7 +93,7 @@ function importImage() {
     reader = new FileReader()
     reader.onload = (e) => {
       //TODO: (Medium Priority) check if image is too large and prompt user to resize
-      //TODO: (High Priority) should a new layer be created for the imported image? Or maybe allow raster layers to be selected or created during active paste action and move temp layer accordingly?
+      //TODO: (Medium Priority) should a new layer be created for the imported image?
       //1. logic similar to copy selection to put image into clipboard
       img.src = e.target.result
       img.onload = () => {

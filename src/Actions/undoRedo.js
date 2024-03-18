@@ -419,8 +419,6 @@ function handleTransformAction(latestAction, newLatestAction, modType) {
  * @param {Array} pushStack - The stack to push the action to
  * @param {Array} popStack - The stack to pop the action from
  * @param {string} modType - "from" or "to", used to identify undo or redo
- * TODO: High Priority - Maintain state.vectors by removing or adding vectors to the state.vectors
- * TODO: High Priority - Add handle transform action
  */
 export function actionUndoRedo(pushStack, popStack, modType) {
   //latest action is the action about to be undone or redone
@@ -499,9 +497,9 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   ) {
     //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
     if (modType === "to") {
-      //TODO: (High Priority) Which vector should be selected if there are multiple vectors in the action? First or last?
+      //TODO: (Low Priority) Which vector should be selected if there are multiple vectors in the action? First or last?
       //Get first vector in the action
-      let latestVector = state.vectors[latestAction.vectorIndices[0]] //TODO: (High Priority) Need to handle removing vectors no longer part of undoStack
+      let latestVector = state.vectors[latestAction.vectorIndices[0]]
       vectorGui.setVectorProperties(latestVector)
     }
   }

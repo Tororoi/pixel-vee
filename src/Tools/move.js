@@ -160,9 +160,7 @@ function transformSteps() {
 
 /**
  * Transform selected area by dragging one of eight control points or move selected area by dragging inside selected area
- * TODO: (Medium Priority) Make shortcuts for maintaining ratio while dragging
- * NOTE: Template from select tool, must be modified to actually transform contents.
- * TODO: (High Priority) Create function for resize contents of selection
+ * TODO: (Medium Priority) Make shortcuts for maintaining ratio while dragging control points
  */
 function transformBoundaries() {
   //selectedPoint does not correspond to the selectProperties key. Based on selected point, adjust boundaryBox.

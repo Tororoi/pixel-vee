@@ -47,7 +47,7 @@ const isValidVector = (vector) =>
  */
 const renderVectorElement = (vector) => {
   // const isSelected = vector.index === state.currentVectorIndex
-  const isSelected = state.selectedVectorIndicesSet.has(vector.index) //TODO: (High Priority) Need way to mark selected vs current vector
+  const isSelected = state.selectedVectorIndicesSet.has(vector.index) //TODO: (Low Priority) Need better way to mark selected vs current vector in vector interface
   const isCurrentVector = vector.index === state.currentVectorIndex
   const vectorElement = createVectorElement(vector)
 

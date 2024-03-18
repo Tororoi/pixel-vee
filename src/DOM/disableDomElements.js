@@ -57,7 +57,6 @@ export function enableActionsForNoPaste() {
 
 /**
  * Disable actions when no selection is active
- * TODO: (High Priority) Consider a selected vectors as a selection being present
  */
 export function disableActionsForNoSelection() {
   //disable menu buttons that can't work without a selection

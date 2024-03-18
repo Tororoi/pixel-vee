@@ -2,7 +2,7 @@ import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
 
 /**
- * TODO: (High Priority) use same aesthetic as select tool
+ *
  */
 export function renderTransformBox() {
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
@@ -16,16 +16,6 @@ export function renderTransformBox() {
     { x: "px3", y: "py3" },
     { x: "px4", y: "py4" },
   ]
-  // let pointsKeys = [
-  //   { x: "px1", y: "py1" },
-  //   { x: "px2", y: "py2" },
-  //   { x: "px3", y: "py3" },
-  //   { x: "px4", y: "py4" },
-  //   { x: "px5", y: "py5" },
-  //   { x: "px6", y: "py6" },
-  //   { x: "px7", y: "py7" },
-  //   { x: "px8", y: "py8" },
-  // ]
   let transformPoints = {
     px1: canvas.currentLayer.x - lineWidth / 2 - 0.5,
     py1: canvas.currentLayer.y - lineWidth / 2 - 0.5,
