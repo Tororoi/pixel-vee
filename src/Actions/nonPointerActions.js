@@ -149,6 +149,7 @@ export function actionDeleteSelection() {
  * the current layer is not a raster layer, or if the current layer is a preview layer
  * Always uses the state clipboard for pasting, which is the last clipboard used for copying or cutting
  * Conditions: Layer is a raster layer, layer is not a preview layer, and there is something in the clipboard to be pasted
+ * TODO: (High Priority) When pasting vectors, don't really need a temporary layer. Separate the concerns more clearly. With a vector transform tool, user can move the entire vectors around, stretch and squash them, mirror them at a user defined point and angle, and rotate them.
  */
 export function actionPasteSelection() {
   if (
