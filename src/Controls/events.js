@@ -45,9 +45,12 @@ const setCoordinates = (e) => {
  */
 function handleKeyDown(e) {
   // e.preventDefault() - May conditionally need this for certain shortcuts, but try to avoid doing so
-  //Prevent default save behavior
+  //Prevent default bookmark behavior (KeyD)
+  //Prevent default find behavior (KeyF)
+  //Prevent default reload behavior (KeyR)
+  //Prevent default save behavior (KeyS)
   if (
-    (e.code === "KeyS" || e.code === "KeyD") &&
+    ["KeyD", "KeyF", "KeyR", "KeyS"].includes(e.code) &&
     (keys.MetaLeft || keys.MetaRight)
   ) {
     e.preventDefault()

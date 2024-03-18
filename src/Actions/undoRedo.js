@@ -384,7 +384,7 @@ function handleTransformAction(latestAction, newLatestAction, modType) {
     state.selectProperties = {
       ...selectProperties,
     }
-    state.setBoundaryBox(selectProperties)
+    state.setBoundaryBox(state.selectProperties)
     transformRasterContent(
       latestAction.layer,
       state.pastedImages[latestAction.pastedImageKey].imageData,
@@ -393,15 +393,21 @@ function handleTransformAction(latestAction, newLatestAction, modType) {
       latestAction.isMirroredHorizontally,
       latestAction.isMirroredVertically
     )
+    state.transformationRotationDegrees =
+      latestAction.transformationRotationDegrees
+    state.isMirroredHorizontally = latestAction.isMirroredHorizontally
+    state.isMirroredVertically = latestAction.isMirroredVertically
   } else if (modType === "from") {
     const selectProperties = { ...newLatestAction.selectProperties }
     selectProperties.px1 += newLatestAction.layer.x
     selectProperties.px2 += newLatestAction.layer.x
     selectProperties.py1 += newLatestAction.layer.y
     selectProperties.py2 += newLatestAction.layer.y
-    state.setBoundaryBox(selectProperties)
+    state.selectProperties = { ...selectProperties }
+    state.setBoundaryBox(state.selectProperties)
     //Eventually undoing transform actions will result in the newLatestAction being a paste action. In that case, don't render a transformation
     if (newLatestAction.tool.name === "transform") {
+      console.log(newLatestAction)
       transformRasterContent(
         newLatestAction.layer,
         state.pastedImages[newLatestAction.pastedImageKey].imageData,
@@ -410,6 +416,10 @@ function handleTransformAction(latestAction, newLatestAction, modType) {
         newLatestAction.isMirroredHorizontally,
         newLatestAction.isMirroredVertically
       )
+      state.transformationRotationDegrees =
+        newLatestAction.transformationRotationDegrees
+      state.isMirroredHorizontally = newLatestAction.isMirroredHorizontally
+      state.isMirroredVertically = newLatestAction.isMirroredVertically
     }
   }
 }

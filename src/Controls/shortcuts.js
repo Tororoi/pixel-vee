@@ -24,6 +24,8 @@ import {
   actionPasteSelection,
   actionConfirmPastedPixels,
   actionDeleteSelection,
+  actionFlipPixels,
+  actionRotatePixels,
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
 import { toggleMode, switchTool } from "../Tools/toolbox.js"
@@ -148,8 +150,10 @@ export function activateShortcut(keyCode) {
           if (keys.AltLeft || keys.AltRight) {
             //option+meta+z
             //Flip vertical
+            actionFlipPixels(false)
           } else {
             //Flip horizontal
+            actionFlipPixels(true)
           }
         } else {
           switchTool("fill")
@@ -230,6 +234,7 @@ export function activateShortcut(keyCode) {
       if (!state.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           //Rotate right
+          actionRotatePixels()
         } else {
           randomizeColor(swatches.primary.swatch)
           renderPaletteToDOM()
