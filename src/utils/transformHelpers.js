@@ -54,8 +54,16 @@ export function transformRasterContent(
       const dy = y - cy
 
       // Apply the rotation
-      const newX = cos * dx - sin * dy + nCx
-      const newY = sin * dx + cos * dy + nCy
+      let newX = cos * dx - sin * dy + nCx
+      let newY = sin * dx + cos * dy + nCy
+
+      //NOTE: Fixes the issue where the image is not centered after rotation. TODO: (Low Priority) Find a better solution that addresses the problem directly in the calculation.
+      if (degrees === 90 || degrees === 180) {
+        newX -= 1
+      }
+      if (degrees === 180 || degrees === 270) {
+        newY -= 1
+      }
 
       // Round to get the index of the nearest pixel
       const finalX = Math.round(newX)

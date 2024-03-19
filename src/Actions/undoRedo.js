@@ -273,6 +273,8 @@ function handlePasteAction(latestAction, modType) {
     latestAction.vectorIndices.forEach((vectorIndex) => {
       state.selectedVectorIndicesSet.add(vectorIndex)
     })
+    //set currentPastedImageKey
+    state.currentPastedImageKey = latestAction.pastedImageKey
     switchTool("move")
     disableActionsForPaste()
   }
@@ -315,6 +317,8 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
       canvas.currentLayer.x = newLatestAction.to.x
       canvas.currentLayer.y = newLatestAction.to.y
     }
+    //set currentPastedImageKey
+    state.currentPastedImageKey = latestAction.pastedImageKey
     switchTool("move")
     disableActionsForPaste()
   } else if (modType === "to") {
@@ -373,8 +377,30 @@ function handleMoveAction(latestAction, modType) {
  * @param {string} modType - "from" or "to", used to identify undo or redo
  */
 function handleTransformAction(latestAction, newLatestAction, modType) {
-  //set boundaryBox and selectProperties
-  if (modType === "to") {
+  if (modType === "from") {
+    const selectProperties = { ...newLatestAction.selectProperties }
+    selectProperties.px1 += newLatestAction.layer.x
+    selectProperties.px2 += newLatestAction.layer.x
+    selectProperties.py1 += newLatestAction.layer.y
+    selectProperties.py2 += newLatestAction.layer.y
+    state.selectProperties = { ...selectProperties }
+    state.setBoundaryBox(state.selectProperties)
+    //Eventually undoing transform actions will result in the newLatestAction being a paste action. In that case, don't render a transformation
+    if (newLatestAction.tool.name === "transform") {
+      transformRasterContent(
+        newLatestAction.layer,
+        state.pastedImages[newLatestAction.pastedImageKey].imageData,
+        state.boundaryBox,
+        newLatestAction.transformationRotationDegrees % 360,
+        newLatestAction.isMirroredHorizontally,
+        newLatestAction.isMirroredVertically
+      )
+      state.transformationRotationDegrees =
+        newLatestAction.transformationRotationDegrees
+      state.isMirroredHorizontally = newLatestAction.isMirroredHorizontally
+      state.isMirroredVertically = newLatestAction.isMirroredVertically
+    }
+  } else if (modType === "to") {
     //offset selectProperties by layer x and y
     const selectProperties = { ...latestAction.selectProperties }
     selectProperties.px1 += latestAction.layer.x
@@ -397,30 +423,6 @@ function handleTransformAction(latestAction, newLatestAction, modType) {
       latestAction.transformationRotationDegrees
     state.isMirroredHorizontally = latestAction.isMirroredHorizontally
     state.isMirroredVertically = latestAction.isMirroredVertically
-  } else if (modType === "from") {
-    const selectProperties = { ...newLatestAction.selectProperties }
-    selectProperties.px1 += newLatestAction.layer.x
-    selectProperties.px2 += newLatestAction.layer.x
-    selectProperties.py1 += newLatestAction.layer.y
-    selectProperties.py2 += newLatestAction.layer.y
-    state.selectProperties = { ...selectProperties }
-    state.setBoundaryBox(state.selectProperties)
-    //Eventually undoing transform actions will result in the newLatestAction being a paste action. In that case, don't render a transformation
-    if (newLatestAction.tool.name === "transform") {
-      console.log(newLatestAction)
-      transformRasterContent(
-        newLatestAction.layer,
-        state.pastedImages[newLatestAction.pastedImageKey].imageData,
-        state.boundaryBox,
-        newLatestAction.transformationRotationDegrees % 360,
-        newLatestAction.isMirroredHorizontally,
-        newLatestAction.isMirroredVertically
-      )
-      state.transformationRotationDegrees =
-        newLatestAction.transformationRotationDegrees
-      state.isMirroredHorizontally = newLatestAction.isMirroredHorizontally
-      state.isMirroredVertically = newLatestAction.isMirroredVertically
-    }
   }
 }
 
