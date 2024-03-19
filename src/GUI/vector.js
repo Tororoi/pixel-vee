@@ -395,7 +395,7 @@ function renderLayerVectors(layer) {
     if (
       !vector.removed &&
       vector.layer === layer &&
-      state.undoStack.includes(vector.action)
+      state.undoStack[vector.actionIndex] !== undefined
     ) {
       //For each vector, render paths
       if (!vector.removed && vector.vectorProperties.type === state.tool.name) {
@@ -428,7 +428,7 @@ function renderLayerVectors(layer) {
     if (
       !vector.removed &&
       vector.layer === layer &&
-      state.undoStack.includes(vector.action)
+      state.undoStack[vector.actionIndex] !== undefined
     ) {
       //For each vector, render control points
       if (

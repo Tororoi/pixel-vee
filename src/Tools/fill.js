@@ -70,7 +70,6 @@ function fillSteps() {
         state.vectors[uniqueVectorKey] = {
           index: uniqueVectorKey,
           actionIndex: state.action.index,
-          action: state.action,
           layer: canvas.currentLayer,
           modes: { ...state.tool.modes },
           color: { ...swatches.primary.color },

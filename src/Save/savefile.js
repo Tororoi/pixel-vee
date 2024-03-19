@@ -17,8 +17,10 @@ import {
   sanitizeLayers,
   sanitizePalette,
   sanitizeHistory,
+  sanitizeVectors,
 } from "../utils/sanitizeObjectsForSave.js"
 import { resizeOffScreenCanvas } from "../Canvas/render.js"
+import { consolidateLayers } from "../Canvas/layers.js"
 
 /**
  * Save the drawing as a JSON file
@@ -46,6 +48,11 @@ export function prepareDrawingForSave() {
     includeReferenceLayers,
     includeRemovedActions
   )
+  let sanitizedVectors = sanitizeVectors(
+    state.vectors,
+    preserveHistory,
+    includeRemovedActions
+  )
   let sanitizedPalette = sanitizePalette(
     swatches.palette,
     preserveHistory,
@@ -57,15 +64,18 @@ export function prepareDrawingForSave() {
     includeReferenceLayers,
     includeRemovedActions
   )
-
+  // Consolidate the layers onto the offscreen canvas for the backup image
+  consolidateLayers()
+  // Create a JSON string from the drawing data
   let saveJsonString = JSON.stringify({
     metadata: {
       version: "1.1",
       application: "Pixel V",
       timestamp: Date.now(),
+      backupImage: canvas.offScreenCVS.toDataURL(),
     },
     layers: sanitizedLayers,
-    // vectors: sanitizedVectors, //TODO: (High Priority) sanitize state.vectors (should just be sanitizing vector.layer)
+    vectors: sanitizedVectors,
     palette: sanitizedPalette,
     history: sanitizedUndoStack,
     canvasProperties: {

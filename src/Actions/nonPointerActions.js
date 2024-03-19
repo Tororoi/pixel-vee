@@ -257,7 +257,6 @@ export function actionPasteSelection() {
     })
     state.selectedVectorIndicesSet.clear()
     state.action.vectorIndices.forEach((vectorIndex) => {
-      state.vectors[vectorIndex].action = state.action
       state.selectedVectorIndicesSet.add(vectorIndex)
     })
     if (state.selectClipboard.imageData) {
@@ -430,7 +429,6 @@ export function actionConfirmPastedPixels() {
     })
     state.selectedVectorIndicesSet.clear()
     state.action.vectorIndices.forEach((vectorIndex) => {
-      state.vectors[vectorIndex].action = state.action
       state.selectedVectorIndicesSet.add(vectorIndex)
     })
     state.clearRedoStack()

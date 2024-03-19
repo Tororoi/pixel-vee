@@ -1,9 +1,9 @@
 /**
- * @param {object} layers - The layers object to be sanitized
+ * @param {Array} layers - The layers object to be sanitized
  * @param {boolean} preserveHistory - Whether to preserve the history
  * @param {boolean} includeReferenceLayers - Whether to include reference layers
  * @param {boolean} includeRemovedActions - Whether to include removed actions
- * @returns {object} - A sanitized copy of the layers object.
+ * @returns {Array} - A sanitized copy of the layers object.
  */
 export function sanitizeLayers(
   layers,
@@ -40,6 +40,33 @@ export function sanitizeLayers(
 }
 
 /**
+ * @param {object} vectors - The vectors object to be sanitized
+ * @param {boolean} preserveHistory - Whether to preserve the history
+ * @param {boolean} includeRemovedActions - Whether to include removed actions
+ * @returns {object} - A sanitized copy of the vectors object.
+ */
+export function sanitizeVectors(
+  vectors,
+  preserveHistory,
+  includeRemovedActions
+) {
+  let sanitizedVectors = JSON.parse(JSON.stringify(vectors))
+  for (let i = sanitizedVectors.length - 1; i >= 0; i--) {
+    const vector = sanitizedVectors[i]
+    if (
+      (vector.layer.removed || vector.removed) &&
+      !preserveHistory &&
+      !includeRemovedActions
+    ) {
+      sanitizedVectors.splice(i, 1)
+    } else {
+      vector.layer = { id: vector.layer.id }
+    }
+  }
+  return sanitizedVectors
+}
+
+/**
  * @param {object} palette - The palette object to be sanitized
  * @param {boolean} preserveHistory - Whether to preserve the history
  * @param {boolean} includePalette - Whether to include the palette
@@ -53,11 +80,11 @@ export function sanitizePalette(palette, preserveHistory, includePalette) {
 }
 
 /**
- * @param {object} undoStack - The undoStack object to be sanitized
+ * @param {Array} undoStack - The undoStack object to be sanitized
  * @param {boolean} preserveHistory - Whether to preserve the history
  * @param {boolean} includeReferenceLayers - Whether to include reference layers
  * @param {boolean} includeRemovedActions - Whether to include removed actions
- * @returns {object} - A sanitized copy of the undoStack object.
+ * @returns {Array} - A sanitized copy of the undoStack object.
  */
 export function sanitizeHistory(
   undoStack,
@@ -84,6 +111,7 @@ export function sanitizeHistory(
       !preserveHistory &&
       !includeRemovedActions
     ) {
+      //TODO: (Medium Priority) Should also remove actions that marked the action as removed?
       sanitizedUndoStack.splice(i, 1)
     } else if (
       action.layer.type === "reference" &&

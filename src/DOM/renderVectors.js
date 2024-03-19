@@ -37,7 +37,7 @@ export const renderVectorsToDOM = () => {
 const isValidVector = (vector) =>
   !vector.removed &&
   !vector.layer?.removed &&
-  state.undoStack.includes(vector.action) &&
+  state.undoStack[vector.actionIndex] !== undefined &&
   (vector.layer === canvas.currentLayer ||
     (vector.layer === canvas.pastedLayer && canvas.currentLayer.isPreview))
 
