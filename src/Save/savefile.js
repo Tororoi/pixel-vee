@@ -154,7 +154,9 @@ export async function loadDrawing(jsonFile) {
   state.clearRedoStack()
   //Not likely to be an issue, but reset just in case
   state.points = []
-
+  //pasted images
+  state.pastedImages = {}
+  //vectors
   state.vectors = {}
   state.highestVectorKey = 0
   state.vectorsSavedProperties = {}
@@ -242,6 +244,71 @@ export async function loadDrawing(jsonFile) {
       //populate index for old files that don't have it
       action.index = index
     }
+    //For old files that don't use the vectors object
+    if (data.metadata.version === "1.0") {
+      if (action.properties) {
+        //Handle vector actions
+        if (action.properties?.vectorProperties) {
+          //restructure vectorProperties to include type
+          action.properties.vectorProperties.type = action.tool.name
+          //restructure how vectorProperties are stored
+          state.highestVectorKey += 1
+          let uniqueVectorKey = state.highestVectorKey
+          data.vectors[uniqueVectorKey] = {
+            index: uniqueVectorKey,
+            actionIndex: index,
+            layer: action.layer,
+            modes: { ...action.modes },
+            color: { ...action.color },
+            brushSize: action.tool.brushSize,
+            brushType: action.tool.brushType,
+            vectorProperties: { ...action.properties.vectorProperties },
+            hidden: action.hidden,
+            removed: action.removed,
+          }
+          action.vectorIndices = [uniqueVectorKey]
+          //remove old properties
+          delete action.modes
+          delete action.color
+        }
+        //Handle actions with points
+        if (action.properties?.points) {
+          action.points = action.properties.points
+        }
+        //Handle actions with maskArray
+        if (action.properties?.maskArray) {
+          action.maskArray = action.properties.maskArray
+        }
+        //Handle actions with boundaryBox
+        if (action.properties?.boundaryBox) {
+          action.boundaryBox = action.properties.boundaryBox
+        }
+        //Handle modify actions
+        if (action.properties?.moddedActionIndex) {
+          action.moddedActionIndex = action.properties.moddedActionIndex
+        }
+        if (action.properties?.processedActions) {
+          //As of 1.0, only vector modifications use processedActions
+          action.moddedVectorIndex =
+            data.history[action.moddedActionIndex].vectorIndices[0]
+          action.processedActions = action.properties.processedActions
+          //modify processedAction to include moddedVectorIndex
+          for (let processedAction of action.processedActions) {
+            processedAction.moddedVectorIndex =
+              data.history[processedAction.moddedActionIndex].vectorIndices[0]
+          }
+        }
+        if (action.properties.from) {
+          action.from = action.properties.from
+        }
+        if (action.properties.to) {
+          action.to = action.properties.to
+        }
+        //remove old properties
+        delete action.properties
+      }
+    }
+
     //Handle brush tool
     if (action?.points) {
       // Convert the points array into an array of objects
@@ -255,34 +322,9 @@ export async function loadDrawing(jsonFile) {
       }
       action.points = points
     }
-    //Handle vector actions
-    //For old files that don't use the vectors object
-    if (data.metadata.version === "1.0" && action?.vectorProperties) {
-      //restructure vectorProperties to include type
-      action.vectorProperties.type = action.tool.name
-      //restructure how vectorProperties are stored
-      state.highestVectorKey += 1
-      let uniqueVectorKey = state.highestVectorKey
-      data.vectors[uniqueVectorKey] = {
-        index: uniqueVectorKey,
-        actionIndex: index,
-        layer: action.layer,
-        modes: { ...action.modes },
-        color: { ...action.color },
-        brushSize: action.tool.brushSize,
-        brushType: action.tool.brushType,
-        vectorProperties: { ...action.vectorProperties },
-        hidden: action.hidden,
-        removed: action.removed,
-      }
 
-      //remove old properties
-      delete action.vectorProperties
-      delete action.modes
-      delete action.color
-    }
     //TODO: (Low Priority) If quadCurve and cubicCurve are unified into "curve", will need to add logic here to convert those to the correct type
-    //Handle actions with canvas data
+    //Handle actions with canvas data (paste, confirm paste)
     if (action?.canvas) {
       // Convert the stored canvas dataUrl to a canvas
       let tempCanvas = document.createElement("canvas")
@@ -298,6 +340,16 @@ export async function loadDrawing(jsonFile) {
       let drawImagePromise = new Promise((resolve, reject) => {
         img.onload = () => {
           tempCtx.drawImage(img, 0, 0)
+          //IN PROGRESS: Construct the state.pastedImages by using the canvas from each paste action, set at action.pastedImageKey. If no key, set it to the highestPastedImageKey
+          state.pastedImages[action.pastedImageKey] = {
+            actionIndex: action.index,
+            imageData: tempCtx.getImageData(
+              0,
+              0,
+              action.canvasProperties.width,
+              action.canvasProperties.height
+            ),
+          }
           resolve() // Resolve the promise after the image has been drawn
         }
         img.onerror = reject
