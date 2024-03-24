@@ -128,7 +128,6 @@ export function saveDrawing() {
  * Load the drawing from a JSON file.
  * @param {JSON} jsonFile - The JSON file containing the drawing data.
  * TODO: (High Priority) Add error handling for loading the drawing
- * TODO: (High Priority) QA for select, line, clear, and paste tools
  */
 export async function loadDrawing(jsonFile) {
   let data
