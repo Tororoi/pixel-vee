@@ -99,7 +99,7 @@ This app is a work in progress. See the bottom of this page for features that ar
   </tr>
   <tr>
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-select.svg" alt="Select" width="40"/> </td>
-    <td> Select a rectangular area. Restricts other tools to only draw inside selection area. Can be inversed, cut, or copied via the edit menu. Can be adjusted via 8 control points or moved by clicking inside the selection area while the Select tool is active.</td>
+    <td> Select a rectangular area. Restricts other tools to only draw inside selection area. Can be cut or copied via the edit menu. Can be adjusted via 8 control points or moved by clicking inside the selection area while the Select tool is active.</td>
   </tr>
   <tr>
     <td colspan="2"> Eyedropper (Hold Alt) </td>
@@ -345,12 +345,6 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
     <td colspan="2"> Deselect selection area. </td>
   </tr>
   <tr>
-    <td colspan="2"> Invert Selection (Cmd + I) </td>
-  </tr>
-  <tr>
-    <td colspan="2"> Invert selection area. </td>
-  </tr>
-  <tr>
     <td colspan="2"> Cut (Cmd + X) </td>
   </tr>
   <tr>
@@ -406,6 +400,8 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
 - Straight Line Tool (Existing Raster Line Tool will be separate)
 - Dithered Gradient Tool
 - Smooth curves mode for brush. When drawing quickly, curves can look choppy and angular. Calculates curvature between points. Bonus: convert entire brush stroke into a series of linked vectors.
+- Shapes which are a collection of vectors that can be easily selected to manipulate together.
+- "Cut" vectors at any point to subdivide it into 2 separate curves.
 
 #### Raster Tools:
 - Mask Tool

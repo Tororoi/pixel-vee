@@ -1,5 +1,4 @@
-import { getTriangle, getAngle } from "../utils/trig.js"
-import { generateRandomRGB } from "../utils/colors.js"
+import { getAngle } from "../utils/trig.js"
 import { assert, plotConicBezierSeg } from "./bezier.js"
 
 //================================================================//
@@ -11,6 +10,14 @@ import { assert, plotConicBezierSeg } from "./bezier.js"
 //=== * * * Ellipse Functions * * * ===//
 //=====================================//
 
+/**
+ * Plot an ellipse
+ * @param {number} xm - x-coordinate of the center
+ * @param {number} ym - y-coordinate of the center
+ * @param {number} a - semi-major axis
+ * @param {number} b - semi-minor axis
+ * @returns {Array} - Array of points
+ */
 export function plotEllipse(xm, ym, a, b) {
   let plotPoints = []
   var x = -a,
@@ -86,6 +93,14 @@ export function plotEllipse(xm, ym, a, b) {
 //   return plotPoints
 // }
 
+/**
+ * Plot a circle
+ * @param {number} xm - x-coordinate of the center
+ * @param {number} ym - y-coordinate of the center
+ * @param {number} r - radius
+ * @param {number} offset - subpixel offset
+ * @returns {Array} - Array of points
+ */
 export function plotCircle(xm, ym, r, offset) {
   let plotPoints = []
 
@@ -112,6 +127,14 @@ export function plotCircle(xm, ym, r, offset) {
 
   return plotPoints
 
+  /**
+   * Plot a quadrant of a circle
+   * @param {number} xm - x-coordinate of the center
+   * @param {number} ym - y-coordinate of the center
+   * @param {number} r - radius
+   * @param {number} offset - subpixel offset
+   * @param {number} quadrant - quadrant number
+   */
   function plotQuadrant(xm, ym, r, offset, quadrant) {
     var x = -r,
       y = 0,
@@ -140,6 +163,14 @@ export function plotCircle(xm, ym, r, offset) {
   }
 }
 
+/**
+ * Plot an ellipse with a rectangular parameter
+ * @param {number} x0 - x-coordinate of the top-left corner of the rectangle
+ * @param {number} y0 - y-coordinate of the top-left corner of the rectangle
+ * @param {number} x1 - x-coordinate of the bottom-right corner of the rectangle
+ * @param {number} y1 - y-coordinate of the bottom-right corner of the rectangle
+ * @returns {Array} - Array of points
+ */
 export function plotEllipseRect(x0, y0, x1, y1) {
   let plotPoints = []
   /* rectangular parameter enclosing the ellipse */
@@ -201,6 +232,19 @@ export function plotEllipseRect(x0, y0, x1, y1) {
   return plotPoints
 }
 
+/**
+ * Plot a rotated ellipse without a rectangular parameter
+ * @param {number} x - x-coordinate of the center
+ * @param {number} y - y-coordinate of the center
+ * @param {number} a - semi-major axis
+ * @param {number} b - semi-minor axis
+ * @param {number} angle - angle in radians
+ * @param {number} xa - x-coordinate of the first control point
+ * @param {number} ya - y-coordinate of the first control point
+ * @param {number} x1Offset - x direction offset
+ * @param {number} y1Offset - y direction offset
+ * @returns {Array} - Array of points
+ */
 export function plotRotatedEllipse(
   x,
   y,
@@ -234,6 +278,18 @@ export function plotRotatedEllipse(
   )
 }
 
+/**
+ * Plot a rotated ellipse with a rectangular parameter
+ * @param {number} x0 - x-coordinate of the top-left corner of the rectangle
+ * @param {number} y0 - y-coordinate of the top-left corner of the rectangle
+ * @param {number} x1 - x-coordinate of the bottom-right corner of the rectangle
+ * @param {number} y1 - y-coordinate of the bottom-right corner of the rectangle
+ * @param {number} zd - angle in radians
+ * @param {boolean} isRightAngle - is right angle
+ * @param {number} x1Offset - x direction offset
+ * @param {number} y1Offset - y direction offset
+ * @returns {Array} - Array of points
+ */
 function plotRotatedEllipseRect(
   x0,
   y0,
@@ -298,12 +354,12 @@ function plotRotatedEllipseRect(
 
 //helper functions
 /**
- *
- * @param {*} cx
- * @param {*} cy
- * @param {*} r
- * @param {*} a
- * @returns
+ * Get a point on a circle
+ * @param {number} cx - x-coordinate of the center
+ * @param {number} cy - y-coordinate of the center
+ * @param {number} r - radius
+ * @param {number} a - angle in radians
+ * @returns {object} - Object with x and y properties
  */
 function pointOnCircle(cx, cy, r, a) {
   let x = Math.round(cx + r * Math.cos(a))
@@ -312,14 +368,14 @@ function pointOnCircle(cx, cy, r, a) {
 }
 
 /**
- *
- * @param {*} px1
- * @param {*} py1
- * @param {*} px2
- * @param {*} py2
- * @param {*} radians
- * @param {*} opposingRadius
- * @returns
+ * Update the vertex of an ellipse
+ * @param {number} px1 - x-coordinate of the first control point
+ * @param {number} py1 - y-coordinate of the first control point
+ * @param {number} px2 - x-coordinate of the second control point
+ * @param {number} py2 - y-coordinate of the second control point
+ * @param {number} radians - angle in radians
+ * @param {number} opposingRadius - opposing radius
+ * @returns {object} - Object with x and y properties
  */
 export function updateEllipseVertex(
   px1,
@@ -337,12 +393,10 @@ export function updateEllipseVertex(
 /**
  * Find half of pixel that current subpixel exists in given an angle of a vector to the current pixel
  * determine subpixel close or far from origin based on angle.
- * @param {*} x - subpixel coordinate
- * @param {*} y - subpixel coordinate
- * @param {*} angle - radians
- * @param {boolean} inverse - inverse result
- * @param {boolean} perpendicular - rotate angle 90 degrees
- * @returns
+ * @param {number} x - (Integer) subpixel coordinate
+ * @param {number} y - (Integer) subpixel coordinate
+ * @param {number} angle - (Float) radians
+ * @returns {number} - 0 if far, 1 if close
  */
 export function findHalf(x, y, angle) {
   // Convert angle in degrees to slope m using tan function
@@ -366,14 +420,11 @@ export function findHalf(x, y, angle) {
 //Helper functions that affect state
 
 /**
- *
- * @param {*} state
- * @param {*} canvas
- * @param {*} px1
- * @param {*} py1
- * @param {*} px2
- * @param {*} py2
- * @param {*} angleOffset
+ * Update the offsets of an ellipse
+ * @param {object} state - The state context
+ * @param {object} canvas - The canvas context
+ * @param {boolean} forceCircle - force circle
+ * @param {number} angleOffset - angle offset
  */
 export function updateEllipseOffsets(
   state,
@@ -386,13 +437,13 @@ export function updateEllipseOffsets(
     state.vectorProperties.py2 - state.vectorProperties.py1
   )
   if (state.tool.options.useSubpixels?.active) {
-    state.vectorProperties.offset = findHalf(
+    state.vectorProperties.unifiedOffset = findHalf(
       canvas.subPixelX,
       canvas.subPixelY,
       state.vectorProperties.angle + angleOffset
     )
   } else {
-    state.vectorProperties.offset = 0 // TODO: (Middle Priority) need logic to manually select offset values
+    state.vectorProperties.unifiedOffset = 0 // TODO: (Medium Priority) need logic to manually select offset values
   }
   const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
   while (state.vectorProperties.angle < 0) {
@@ -406,42 +457,42 @@ export function updateEllipseOffsets(
     ) % 8
   let compassDir = directions[index]
   //based on direction update x and y offsets in state
-  //TODO: (Middle Priority) keep offset consistent during radius adjustment and use another gui element to control the way radius is handled, drawn as a compass, 8 options plus default center which is no offset
+  //TODO: (Medium Priority) keep offset consistent during radius adjustment and use another gui element to control the way radius is handled, drawn as a compass, 8 options plus default center which is no offset
   //Direction shrinks opposite side. eg. radius 7 goes from diameter 15 to diameter 14
   //gui element could have 2 sliders, vertical and horizontal with 3 values each, offset -1, 0, 1 (right, none, left)
   //should only x1 and y1 offsets be available since they represent the center point being part of radius or not?
   if (state.clickCounter === 1 || forceCircle) {
-    state.vectorProperties.x1Offset = -state.vectorProperties.offset
-    state.vectorProperties.y1Offset = -state.vectorProperties.offset
+    state.vectorProperties.x1Offset = -state.vectorProperties.unifiedOffset
+    state.vectorProperties.y1Offset = -state.vectorProperties.unifiedOffset
   } else {
     switch (compassDir) {
       case "N":
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
+        state.vectorProperties.y1Offset = -state.vectorProperties.unifiedOffset
         break
       case "NE":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.unifiedOffset
+        state.vectorProperties.y1Offset = -state.vectorProperties.unifiedOffset
         break
       case "E":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.unifiedOffset
         break
       case "SE":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.unifiedOffset
+        state.vectorProperties.y1Offset = -state.vectorProperties.unifiedOffset
         break
       case "S":
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
+        state.vectorProperties.y1Offset = -state.vectorProperties.unifiedOffset
         break
       case "SW":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.unifiedOffset
+        state.vectorProperties.y1Offset = -state.vectorProperties.unifiedOffset
         break
       case "W":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.unifiedOffset
         break
       case "NW":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
+        state.vectorProperties.x1Offset = -state.vectorProperties.unifiedOffset
+        state.vectorProperties.y1Offset = -state.vectorProperties.unifiedOffset
         break
       default:
       //none
@@ -449,6 +500,12 @@ export function updateEllipseOffsets(
   }
 }
 
+/**
+ * Update the control points of an ellipse
+ * @param {object} state - The state context
+ * @param {object} canvas - The canvas context
+ * @param {object} vectorGui - The vectorGui context
+ */
 export function updateEllipseControlPoints(state, canvas, vectorGui) {
   if (vectorGui.selectedPoint.xKey !== "px1") {
     state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX

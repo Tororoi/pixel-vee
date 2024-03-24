@@ -1,10 +1,9 @@
 /**
- *
- * @param {object} layers
- * @param {boolean} preserveHistory
- * @param {boolean} includeReferenceLayers
- * @param {boolean} includeRemovedActions
- * @returns {object} - A sanitized copy of the layers object.
+ * @param {Array} layers - The layers object to be sanitized
+ * @param {boolean} preserveHistory - Whether to preserve the history
+ * @param {boolean} includeReferenceLayers - Whether to include reference layers
+ * @param {boolean} includeRemovedActions - Whether to include removed actions
+ * @returns {Array} - A sanitized copy of the layers object.
  */
 export function sanitizeLayers(
   layers,
@@ -41,9 +40,36 @@ export function sanitizeLayers(
 }
 
 /**
- * @param {object} palette
- * @param {boolean} preserveHistory
- * @param {boolean} includePalette
+ * @param {object} vectors - The vectors object to be sanitized
+ * @param {boolean} preserveHistory - Whether to preserve the history
+ * @param {boolean} includeRemovedActions - Whether to include removed actions
+ * @returns {object} - A sanitized copy of the vectors object.
+ */
+export function sanitizeVectors(
+  vectors,
+  preserveHistory,
+  includeRemovedActions
+) {
+  let sanitizedVectors = JSON.parse(JSON.stringify(vectors))
+  for (let i = sanitizedVectors.length - 1; i >= 0; i--) {
+    const vector = sanitizedVectors[i]
+    if (
+      (vector.layer.removed || vector.removed) &&
+      !preserveHistory &&
+      !includeRemovedActions
+    ) {
+      sanitizedVectors.splice(i, 1)
+    } else {
+      vector.layer = { id: vector.layer.id }
+    }
+  }
+  return sanitizedVectors
+}
+
+/**
+ * @param {object} palette - The palette object to be sanitized
+ * @param {boolean} preserveHistory - Whether to preserve the history
+ * @param {boolean} includePalette - Whether to include the palette
  * @returns {object} - A sanitized copy of the palette object.
  */
 export function sanitizePalette(palette, preserveHistory, includePalette) {
@@ -54,11 +80,11 @@ export function sanitizePalette(palette, preserveHistory, includePalette) {
 }
 
 /**
- * @param {object} undoStack
- * @param {boolean} preserveHistory
- * @param {boolean} includeReferenceLayers
- * @param {boolean} includeRemovedActions
- * @returns {object} - A sanitized copy of the undoStack object.
+ * @param {Array} undoStack - The undoStack object to be sanitized
+ * @param {boolean} preserveHistory - Whether to preserve the history
+ * @param {boolean} includeReferenceLayers - Whether to include reference layers
+ * @param {boolean} includeRemovedActions - Whether to include removed actions
+ * @returns {Array} - A sanitized copy of the undoStack object.
  */
 export function sanitizeHistory(
   undoStack,
@@ -71,9 +97,12 @@ export function sanitizeHistory(
   for (let i = sanitizedUndoStack.length - 1; i >= 0; i--) {
     const action = sanitizedUndoStack[i]
     //if active paste action, find the latest unconfirmed paste action and remove it and all actions after it
-    if (action.tool.name === "paste" && !lastPasteActionIndex) {
+    if (
+      ["paste", "vectorPaste"].includes(action.tool.name) &&
+      !lastPasteActionIndex
+    ) {
       lastPasteActionIndex = i
-      if (!action.properties.confirmed) {
+      if (!action.confirmed) {
         //remove the unconfirmed paste action and all actions after it
         sanitizedUndoStack.splice(i, sanitizedUndoStack.length - i)
       }
@@ -82,6 +111,7 @@ export function sanitizeHistory(
       !preserveHistory &&
       !includeRemovedActions
     ) {
+      //TODO: (Medium Priority) Should also remove actions that marked the action as removed?
       sanitizedUndoStack.splice(i, 1)
     } else if (
       action.layer.type === "reference" &&
@@ -93,18 +123,18 @@ export function sanitizeHistory(
       if (action.layer) {
         action.layer = { id: action.layer.id }
       }
-      if (action.properties?.pastedLayer) {
+      if (action?.pastedLayer) {
         // sanitize pasted layer
-        action.properties.pastedLayer = { id: action.properties.pastedLayer.id }
+        action.pastedLayer = { id: action.pastedLayer.id }
       }
-      if (action.properties?.points) {
+      if (action?.points) {
         //format each object in the array from {x,y,brushSize} to be 3 entries in a new array with just the values. The values will be reformatted back to objects on load.
         let sanitizedPoints = []
-        for (let index = 0; index < action.properties.points.length; index++) {
-          const point = action.properties.points[index]
+        for (let index = 0; index < action.points.length; index++) {
+          const point = action.points[index]
           sanitizedPoints.push(point.x, point.y, point.brushSize)
         }
-        action.properties.points = sanitizedPoints
+        action.points = sanitizedPoints
       }
       delete action.snapshot
     }

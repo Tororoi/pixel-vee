@@ -1,22 +1,17 @@
-import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
 import { drawControlPointHandle } from "../utils/guiHelpers.js"
 
 /**
- * @param {object} vectorProperties
- * @param {object} vectorAction
+ * @param {object} vectorProperties - The properties of the vector
+ * @param {object} vector - The vector to be rendered
  */
-export function renderCurveVector(vectorProperties, vectorAction) {
+export function renderCurveVector(vectorProperties, vector) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
-  const xOffset = vectorAction
-    ? vectorAction.layer.x + canvas.xOffset
-    : canvas.xOffset
-  const yOffset = vectorAction
-    ? vectorAction.layer.y + canvas.yOffset
-    : canvas.yOffset
+  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
+  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
   // Setting of context attributes.
-  let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   let circleRadius = 8 * lineWidth
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
@@ -43,7 +38,7 @@ export function renderCurveVector(vectorProperties, vectorAction) {
     { x: "px4", y: "py4" },
   ]
 
-  if (!vectorAction) {
+  if (!vector) {
     vectorGui.drawControlPoints(
       vectorProperties,
       pointsKeys,
@@ -62,26 +57,22 @@ export function renderCurveVector(vectorProperties, vectorAction) {
     circleRadius / 2,
     true, // modify
     0,
-    vectorAction
+    vector
   )
   // Fill points
   canvas.vectorGuiCTX.fill()
 }
 
 /**
- * @param {object} vectorProperties
- * @param {object} vectorAction
+ * @param {object} vectorProperties - The properties of the vector
+ * @param {object} vector - The vector to be rendered
  */
-export function renderCurvePath(vectorProperties, vectorAction) {
+export function renderCurvePath(vectorProperties, vector) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
-  const xOffset = vectorAction
-    ? vectorAction.layer.x + canvas.xOffset
-    : canvas.xOffset
-  const yOffset = vectorAction
-    ? vectorAction.layer.y + canvas.yOffset
-    : canvas.yOffset
+  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
+  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
   // Setting of context attributes.
-  let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
 
@@ -108,5 +99,9 @@ export function renderCurvePath(vectorProperties, vectorAction) {
     canvas.vectorGuiCTX.lineTo(xOffset + px2 + 0.5, yOffset + py2 + 0.5)
   }
   // Stroke non-filled lines
+  // canvas.vectorGuiCTX.stroke()
+  // canvas.vectorGuiCTX.setLineDash([])
+  // canvas.vectorGuiCTX.lineWidth = lineWidth - lineWidth / 8
+  // canvas.vectorGuiCTX.strokeStyle = "black"
   canvas.vectorGuiCTX.stroke()
 }

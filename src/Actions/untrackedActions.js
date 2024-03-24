@@ -1,10 +1,9 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { setInitialZoom } from "../utils/canvasHelpers.js"
-import { copySelectedPixels } from "../Menu/edit.js"
+import { copySelectedPixels, copySelectedVectors } from "../Menu/edit.js"
 
 /**
  * Zoom the canvas
@@ -121,8 +120,12 @@ export function actionRecenter() {
 export function actionCopySelection() {
   if (
     canvas.currentLayer.type === "raster" &&
-    state.boundaryBox.xMax !== null
+    (state.boundaryBox.xMax !== null || state.currentVectorIndex)
   ) {
-    copySelectedPixels()
+    if (state.boundaryBox.xMax !== null) {
+      copySelectedPixels()
+    } else {
+      copySelectedVectors()
+    }
   }
 }

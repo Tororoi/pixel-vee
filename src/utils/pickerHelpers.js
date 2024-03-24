@@ -3,7 +3,6 @@
 //===================================//
 
 /**
- *
  * @param {object} pickerCircle - { x, y, width, height }
  * @param {object} hsl - { hue, saturation, lightness }
  * @param {number} width - (Integer)
@@ -28,10 +27,9 @@ export const calcHSLSelectorCoordinates = (
 //===================================//
 
 /**
- *
- * @param {CanvasRenderingContext2D} ctx
- * @param {object} pickerCircle
- * @param {string} color
+ * @param {CanvasRenderingContext2D} ctx - The canvas context to draw on
+ * @param {object} pickerCircle - { x, y, width, height }
+ * @param {string} color - The color to draw the selector
  * @param {number} offset - (Integer)
  */
 const drawSelectorSides = (ctx, pickerCircle, color, offset = 0) => {
@@ -59,9 +57,8 @@ const drawSelectorSides = (ctx, pickerCircle, color, offset = 0) => {
 }
 
 /**
- *
- * @param {CanvasRenderingContext2D} ctx
- * @param {object} pickerCircle
+ * @param {CanvasRenderingContext2D} ctx - The canvas context to draw on
+ * @param {object} pickerCircle - { x, y, width, height }
  */
 export const drawSelector = (ctx, pickerCircle) => {
   const { x, y, width, height } = pickerCircle
@@ -78,8 +75,7 @@ export const drawSelector = (ctx, pickerCircle) => {
 }
 
 /**
- *
- * @param {CanvasRenderingContext2D} ctx
+ * @param {CanvasRenderingContext2D} ctx - The canvas context to draw on
  * @param {number} width - (Integer)
  * @param {number} height - (Integer)
  * @param {number} hue - (Integer)

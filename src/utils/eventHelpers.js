@@ -1,3 +1,8 @@
+/**
+ * @param {Function} fn - The function to debounce
+ * @param {number} wait - The time to wait in milliseconds
+ * @returns {Function} - The debounced function
+ */
 export function debounce(fn, wait) {
   let timeout
 
@@ -12,6 +17,11 @@ export function debounce(fn, wait) {
   }
 }
 
+/**
+ * @param {Function} fn - The function to throttle
+ * @param {number} limit - The time to wait in milliseconds
+ * @returns {Function} - The throttled function
+ */
 export function throttle(fn, limit) {
   let inThrottle
   let lastFunc

@@ -1,13 +1,12 @@
-import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
 
 /**
- * TODO: (Middle Priority) use same aesthetic as select tool
+ *
  */
 export function renderTransformBox() {
-  let circleRadius = canvas.zoom <= 8 ? 8 / canvas.zoom : 1
-  let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+  let circleRadius = 8 * lineWidth
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
   canvas.vectorGuiCTX.fillStyle = "white"

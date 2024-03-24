@@ -1,4 +1,3 @@
-import { keys } from "../Shortcuts/keys.js"
 import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
@@ -13,13 +12,13 @@ import {
   updateLinkedVectors,
   updateLockedCurrentVectorControlHandle,
   createActiveIndexesForRender,
-  renderCurrentVector,
 } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { getAngle } from "../utils/trig.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
+import { enableActionsForSelection } from "../DOM/disableDomElements.js"
 
 //=====================================//
 //=== * * * Curve Controllers * * * ===//
@@ -43,6 +42,7 @@ function quadCurveSteps() {
         case 1:
           //reset control points
           vectorGui.reset()
+          state.vectorProperties.type = state.tool.name
           state.vectorProperties.px1 = state.cursorX
           state.vectorProperties.py1 = state.cursorY
           //endpoint starts at same point as startpoint
@@ -67,7 +67,6 @@ function quadCurveSteps() {
         state.vectorProperties.px3,
         state.vectorProperties.py3,
         state.boundaryBox,
-        state.selectionInversed,
         state.clickCounter,
         swatches.primary.color,
         canvas.currentLayer,
@@ -104,7 +103,6 @@ function quadCurveSteps() {
         state.vectorProperties.px3,
         state.vectorProperties.py3,
         state.boundaryBox,
-        state.selectionInversed,
         state.clickCounter,
         swatches.primary.color,
         canvas.currentLayer,
@@ -144,7 +142,6 @@ function quadCurveSteps() {
           state.vectorProperties.px3,
           state.vectorProperties.py3,
           state.boundaryBox,
-          state.selectionInversed,
           state.clickCounter,
           swatches.primary.color,
           canvas.currentLayer,
@@ -167,24 +164,44 @@ function quadCurveSteps() {
           boundaryBox.yMin -= canvas.currentLayer.y
           boundaryBox.yMax -= canvas.currentLayer.y
         }
+        //generate new unique key for vector
+        state.highestVectorKey += 1
+        let uniqueVectorKey = state.highestVectorKey
         //store control points for timeline
         addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {
-            vectorProperties: {
-              px1: state.vectorProperties.px1 - canvas.currentLayer.x,
-              py1: state.vectorProperties.py1 - canvas.currentLayer.y,
-              px2: state.vectorProperties.px2 - canvas.currentLayer.x,
-              py2: state.vectorProperties.py2 - canvas.currentLayer.y,
-              px3: state.vectorProperties.px3 - canvas.currentLayer.x,
-              py3: state.vectorProperties.py3 - canvas.currentLayer.y,
-            },
             maskArray,
             boundaryBox,
-            selectionInversed: state.selectionInversed,
+            vectorIndices: [uniqueVectorKey],
           },
         })
+        //Add the vector to the state
+        state.vectors[uniqueVectorKey] = {
+          index: uniqueVectorKey,
+          actionIndex: state.action.index,
+          layer: canvas.currentLayer,
+          modes: { ...state.tool.modes },
+          color: { ...swatches.primary.color },
+          brushSize: state.tool.brushSize,
+          brushType: state.tool.brushType,
+          vectorProperties: {
+            ...state.vectorProperties,
+            px1: state.vectorProperties.px1 - canvas.currentLayer.x,
+            py1: state.vectorProperties.py1 - canvas.currentLayer.y,
+            px2: state.vectorProperties.px2 - canvas.currentLayer.x,
+            py2: state.vectorProperties.py2 - canvas.currentLayer.y,
+            px3: state.vectorProperties.px3 - canvas.currentLayer.x,
+            py3: state.vectorProperties.py3 - canvas.currentLayer.y,
+          },
+          // maskArray,
+          // boundaryBox,
+          hidden: false,
+          removed: false,
+        }
+        state.currentVectorIndex = uniqueVectorKey
+        enableActionsForSelection()
         renderCanvas(canvas.currentLayer)
       }
       break
@@ -199,13 +216,12 @@ function quadCurveSteps() {
  */
 function cubicCurveSteps() {
   //for selecting another vector via the canvas, collisionPresent is false since it is currently based on collision with selected vector.
-  //To select via the canvas, need to check for canvas.collidedVectorIndex and then use vectorGui.setVectorProperties(collidedVectorAction)
   if (
-    canvas.collidedVectorIndex &&
+    state.collidedVectorIndex &&
     !vectorGui.selectedCollisionPresent &&
     state.clickCounter === 0
   ) {
-    let collidedVector = state.undoStack[canvas.collidedVectorIndex]
+    let collidedVector = state.vectors[state.collidedVectorIndex]
     vectorGui.setVectorProperties(collidedVector)
     //Render new selected vector before running standard render routine
     //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.
@@ -225,6 +241,7 @@ function cubicCurveSteps() {
         case 1:
           //reset control points
           vectorGui.reset()
+          state.vectorProperties.type = state.tool.name
           state.vectorProperties.px1 = state.cursorX
           state.vectorProperties.py1 = state.cursorY
           //endpoint starts at same point as startpoint
@@ -255,7 +272,6 @@ function cubicCurveSteps() {
         state.vectorProperties.px4,
         state.vectorProperties.py4,
         state.boundaryBox,
-        state.selectionInversed,
         state.clickCounter,
         swatches.primary.color,
         canvas.currentLayer,
@@ -297,7 +313,6 @@ function cubicCurveSteps() {
         state.vectorProperties.px4,
         state.vectorProperties.py4,
         state.boundaryBox,
-        state.selectionInversed,
         state.clickCounter,
         swatches.primary.color,
         canvas.currentLayer,
@@ -342,7 +357,6 @@ function cubicCurveSteps() {
           state.vectorProperties.px4,
           state.vectorProperties.py4,
           state.boundaryBox,
-          state.selectionInversed,
           state.clickCounter,
           swatches.primary.color,
           canvas.currentLayer,
@@ -365,29 +379,46 @@ function cubicCurveSteps() {
           boundaryBox.yMin -= canvas.currentLayer.y
           boundaryBox.yMax -= canvas.currentLayer.y
         }
+        //generate new unique key for vector
+        state.highestVectorKey += 1
+        let uniqueVectorKey = state.highestVectorKey
         //store control points for timeline
         addToTimeline({
           tool: state.tool,
           layer: canvas.currentLayer,
           properties: {
-            // p1LinkedVectors: {},
-            // p2LinkedVectors: {},
-            vectorProperties: {
-              px1: state.vectorProperties.px1 - canvas.currentLayer.x,
-              py1: state.vectorProperties.py1 - canvas.currentLayer.y,
-              px2: state.vectorProperties.px2 - canvas.currentLayer.x,
-              py2: state.vectorProperties.py2 - canvas.currentLayer.y,
-              px3: state.vectorProperties.px3 - canvas.currentLayer.x,
-              py3: state.vectorProperties.py3 - canvas.currentLayer.y,
-              px4: state.vectorProperties.px4 - canvas.currentLayer.x,
-              py4: state.vectorProperties.py4 - canvas.currentLayer.y,
-            },
             maskArray,
-            //TODO: (Middle Priority) allow toggling boundary box on/off
             boundaryBox,
-            selectionInversed: state.selectionInversed,
+            vectorIndices: [uniqueVectorKey],
           },
         })
+        //Store vector in state
+        state.vectors[uniqueVectorKey] = {
+          index: uniqueVectorKey,
+          actionIndex: state.action.index,
+          layer: canvas.currentLayer,
+          modes: { ...state.tool.modes },
+          color: { ...swatches.primary.color },
+          brushSize: state.tool.brushSize,
+          brushType: state.tool.brushType,
+          vectorProperties: {
+            ...state.vectorProperties,
+            px1: state.vectorProperties.px1 - canvas.currentLayer.x,
+            py1: state.vectorProperties.py1 - canvas.currentLayer.y,
+            px2: state.vectorProperties.px2 - canvas.currentLayer.x,
+            py2: state.vectorProperties.py2 - canvas.currentLayer.y,
+            px3: state.vectorProperties.px3 - canvas.currentLayer.x,
+            py3: state.vectorProperties.py3 - canvas.currentLayer.y,
+            px4: state.vectorProperties.px4 - canvas.currentLayer.x,
+            py4: state.vectorProperties.py4 - canvas.currentLayer.y,
+          },
+          // maskArray, //default to action's maskArray
+          // boundaryBox, //default to action's boundaryBox
+          hidden: false,
+          removed: false,
+        }
+        state.currentVectorIndex = uniqueVectorKey
+        enableActionsForSelection()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
       }
@@ -411,7 +442,7 @@ function adjustCurveSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
-  let currentVector = state.undoStack[canvas.currentVectorIndex]
+  let currentVector = state.vectors[state.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
@@ -421,10 +452,10 @@ function adjustCurveSteps() {
           xKey: vectorGui.collidedKeys.xKey,
           yKey: vectorGui.collidedKeys.yKey,
         }
-        state.vectorsSavedProperties[canvas.currentVectorIndex] = {
-          ...currentVector.properties.vectorProperties,
+        state.vectorsSavedProperties[state.currentVectorIndex] = {
+          ...currentVector.vectorProperties,
         }
-        //save linked vectors tooß
+        //save linked vectors too
         updateVectorProperties(
           currentVector,
           state.cursorX,
@@ -444,8 +475,7 @@ function adjustCurveSteps() {
         }
         state.activeIndexes = createActiveIndexesForRender(
           currentVector,
-          state.vectorsSavedProperties,
-          state.undoStack
+          state.vectorsSavedProperties
         )
         renderCanvas(currentVector.layer, true, state.activeIndexes, true)
       }
@@ -504,14 +534,14 @@ function adjustCurveSteps() {
           ["px1", "px2"].includes(vectorGui.selectedPoint.xKey)
         ) {
           //snap selected point to collidedVector's control point
-          if (canvas.collidedVectorIndex && canvas.currentVectorIndex) {
-            let collidedVector = state.undoStack[canvas.collidedVectorIndex]
+          if (state.collidedVectorIndex && state.currentVectorIndex) {
+            let collidedVector = state.vectors[state.collidedVectorIndex]
             let snappedToX =
-              collidedVector.properties.vectorProperties[
+              collidedVector.vectorProperties[
                 vectorGui.otherCollidedKeys.xKey
               ] + collidedVector.layer.x
             let snappedToY =
-              collidedVector.properties.vectorProperties[
+              collidedVector.vectorProperties[
                 vectorGui.otherCollidedKeys.yKey
               ] + collidedVector.layer.y
             state.vectorProperties[vectorGui.selectedPoint.xKey] = snappedToX
@@ -576,18 +606,18 @@ function adjustCurveSteps() {
               let collidedHandleDeltaX, collidedHandleDeltaY
               if (vectorGui.otherCollidedKeys.xKey === "px1") {
                 collidedHandleDeltaX =
-                  collidedVector.properties.vectorProperties.px3 -
-                  collidedVector.properties.vectorProperties.px1
+                  collidedVector.vectorProperties.px3 -
+                  collidedVector.vectorProperties.px1
                 collidedHandleDeltaY =
-                  collidedVector.properties.vectorProperties.py3 -
-                  collidedVector.properties.vectorProperties.py1
+                  collidedVector.vectorProperties.py3 -
+                  collidedVector.vectorProperties.py1
               } else if (vectorGui.otherCollidedKeys.xKey === "px2") {
                 collidedHandleDeltaX =
-                  collidedVector.properties.vectorProperties.px4 -
-                  collidedVector.properties.vectorProperties.px2
+                  collidedVector.vectorProperties.px4 -
+                  collidedVector.vectorProperties.px2
                 collidedHandleDeltaY =
-                  collidedVector.properties.vectorProperties.py4 -
-                  collidedVector.properties.vectorProperties.py2
+                  collidedVector.vectorProperties.py4 -
+                  collidedVector.vectorProperties.py2
               }
               let selectedHandleLength
               if (state.tool.options.equal?.active) {
@@ -679,7 +709,7 @@ export const cubicCurve = {
     equal: {
       active: false,
       tooltip:
-        "Toggle Equal Length (Shift). \n\nEnsures magnitude continuity of control handles for linked vectors.",
+        "Toggle Equal Length (=). \n\nEnsures magnitude continuity of control handles for linked vectors.",
     }, // Magnitude continuity
     align: {
       active: true,

@@ -110,14 +110,6 @@
               </li>
               <li
                 role="menuitem"
-                id="invert-selection"
-                class="disabled"
-                data-tooltip="Invert selection area (Cmd + I)"
-              >
-                Invert Selection (Cmd + I)
-              </li>
-              <li
-                role="menuitem"
                 id="cut-selection"
                 class="disabled"
                 data-tooltip="Cut selection (Cmd + X)"
@@ -140,27 +132,38 @@
               >
                 Paste (Cmd + V)
               </li>
-              <!-- <li
+              <li
+                role="menuitem"
+                id="delete-selection"
+                class="disabled"
+                data-tooltip="Delete selection (Backspace)"
+              >
+                Clear (Backspace)
+              </li>
+              <li
                 role="menuitem"
                 id="flip-horizontal"
-                data-tooltip="Flip selection horizontally"
+                class="disabled"
+                data-tooltip="Flip selection horizontally (Cmd + F)"
               >
-                Flip Horizontal
+                Flip Horizontal (Cmd + F)
               </li>
               <li
                 role="menuitem"
                 id="flip-vertical"
-                data-tooltip="Flip selection vertically"
+                class="disabled"
+                data-tooltip="Flip selection vertically (Cmd + Alt + F)"
               >
-                Flip Vertical
-              </li> -->
-              <!-- <li
+                Flip Vertical (Cmd + Alt + F)
+              </li>
+              <li
                 role="menuitem"
                 id="rotate-right"
-                data-tooltip="Rotate selection 90 degrees clockwise"
+                class="disabled"
+                data-tooltip="Rotate selection 90 degrees clockwise (Cmd + R)"
               >
-                Rotate Right
-              </li> -->
+                Rotate Right (Cmd + R)
+              </li>
             </ul>
           </li>
         </ul>
@@ -321,7 +324,7 @@
           >
             <div id="palette-header" class="header dragger">
               <div class="drag-btn"><div class="grip"></div></div>
-              Palette
+              <div>Palette</div>
               <label
                 for="palette-collapse-btn"
                 id="palette-collapser"

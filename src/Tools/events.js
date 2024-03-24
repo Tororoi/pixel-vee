@@ -19,7 +19,7 @@ state.tool = tools.brush
 
 /**
  * Handle zoom buttons
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - click event
  */
 function handleZoom(e) {
   //TRY: restrict zoom to fixed multiples, 125%, 150% etc
@@ -77,11 +77,10 @@ function handleClearCanvas() {
     canvas.offScreenCVS.height
   )
   actionClear(canvas.currentLayer)
-  state.action = null
   state.pointsSet = null
   state.seenPixelsSet = null
   state.points = []
-  state.redoStack = []
+  state.clearRedoStack()
   renderCanvas(canvas.currentLayer)
   vectorGui.reset()
   state.reset()
@@ -90,15 +89,16 @@ function handleClearCanvas() {
 
 /**
  * Switch tools
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - click event
  */
 export function handleTools(e) {
   const targetTool = e?.target.closest(".tool")
   switchTool(null, targetTool)
+  renderVectorsToDOM()
 }
 
 /**
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - click event
  */
 export function handleModes(e) {
   const targetMode = e?.target.closest(".mode")
@@ -110,8 +110,7 @@ export function handleModes(e) {
 //=====================================//
 
 /**
- *
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - click event
  */
 function switchBrush(e) {
   if (state.tool.brushType === "square") {
@@ -123,8 +122,7 @@ function switchBrush(e) {
 }
 
 /**
- *
- * @param {InputEvent} e
+ * @param {InputEvent} e - input event
  */
 function updateBrush(e) {
   switch (state.tool.name) {

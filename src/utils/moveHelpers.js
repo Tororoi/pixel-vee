@@ -1,6 +1,5 @@
 /**
- *
- * @param {CanvasRenderingContext2D} ctx
+ * @param {CanvasRenderingContext2D} ctx - The canvas context to draw on
  * @param {number} dx - (Integer)
  * @param {number} dy - (Integer)
  */
@@ -38,8 +37,7 @@ export function translateAndWrap(ctx, dx, dy) {
 }
 
 /**
- *
- * @param {CanvasRenderingContext2D} ctx
+ * @param {CanvasRenderingContext2D} ctx - The canvas context to draw on
  * @param {number} dx - (Integer)
  * @param {number} dy - (Integer)
  */

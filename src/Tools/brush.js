@@ -8,7 +8,6 @@ import { renderCanvas } from "../Canvas/render.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { createColorMaskSet } from "../Canvas/masks.js"
-import { saveBrushAsTest } from "../Testing/brushTest.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 
 //====================================//
@@ -54,7 +53,6 @@ function brushSteps() {
           state.cursorX,
           state.cursorY,
           state.boundaryBox,
-          state.selectionInversed,
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.modes,
@@ -84,7 +82,7 @@ function brushSteps() {
         }
       }
       break
-    case "pointerup":
+    case "pointerup": {
       if (shouldDrawLine()) {
         drawLine()
       }
@@ -109,16 +107,20 @@ function brushSteps() {
         tool: brush,
         layer: canvas.currentLayer,
         properties: {
+          modes: { ...brush.modes },
+          color: { ...swatches.primary.color },
+          brushSize: brush.brushSize,
+          brushType: brush.brushType,
           points: state.points,
           maskArray,
           boundaryBox,
-          selectionInversed: state.selectionInversed,
         },
       })
       if (state.tool.modes?.colorMask) {
         state.maskSet = null
       }
       break
+    }
     default:
     //do nothing
   }
@@ -148,7 +150,7 @@ function addPointToAction(x, y) {
  *
  * @param {number} x - (Integer)
  * @param {number} y - (Integer)
- * @param {string} brushDirection
+ * @param {string} brushDirection - one of 9 directions
  */
 function drawBrushPoint(x, y, brushDirection) {
   addPointToAction(x, y)
@@ -156,7 +158,6 @@ function drawBrushPoint(x, y, brushDirection) {
     x,
     y,
     state.boundaryBox,
-    state.selectionInversed,
     swatches.primary.color,
     brushStamps[state.tool.brushType][state.tool.brushSize][brushDirection],
     state.tool.brushSize,
@@ -165,12 +166,11 @@ function drawBrushPoint(x, y, brushDirection) {
     state.maskSet,
     state.seenPixelsSet
   )
-  //Uncomment for performance testing
-  // if (state.captureTesting) {
-  //   saveBrushAsTest()
-  // }
 }
 
+/**
+ * Draw the next pixel in the brush stroke for perfect pixels preview pixel
+ */
 function drawPreviewBrushPoint() {
   let brushDirection = calculateBrushDirection(
     state.cursorX,
@@ -182,7 +182,6 @@ function drawPreviewBrushPoint() {
     state.cursorX,
     state.cursorY,
     state.boundaryBox,
-    state.selectionInversed,
     swatches.primary.color,
     brushStamps[state.tool.brushType][state.tool.brushSize][brushDirection],
     state.tool.brushSize,
@@ -198,7 +197,7 @@ function drawPreviewBrushPoint() {
 
 /**
  * Check if cursor is far enough from previous point to draw a line
- * @returns {boolean}
+ * @returns {boolean} - True if cursor is far enough from previous point to draw a line
  */
 function shouldDrawLine() {
   return (

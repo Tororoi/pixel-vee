@@ -1,4 +1,3 @@
-import { keys } from "../Shortcuts/keys.js"
 import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
@@ -14,7 +13,7 @@ import { addToTimeline } from "../Actions/undoRedo.js"
 
 /**
  * Supported modes: "draw, erase, inject",
- * TODO: (Middle Priority) add vector line tool. A raster line tool would still be present for ease of use.
+ * TODO: (Medium Priority) add vector line tool. A raster line tool would still be present for ease of use.
  */
 function lineSteps() {
   switch (canvas.pointerEvent) {
@@ -29,7 +28,6 @@ function lineSteps() {
         state.cursorX,
         state.cursorY,
         state.boundaryBox,
-        state.selectionInversed,
         swatches.primary.color,
         canvas.currentLayer,
         state.tool.modes,
@@ -52,7 +50,6 @@ function lineSteps() {
         state.cursorX,
         state.cursorY,
         state.boundaryBox,
-        state.selectionInversed,
         swatches.primary.color,
         canvas.currentLayer,
         state.tool.modes,
@@ -64,14 +61,13 @@ function lineSteps() {
         true
       )
       break
-    case "pointerup":
+    case "pointerup": {
       actionLine(
         state.lineStartX,
         state.lineStartY,
         state.cursorX,
         state.cursorY,
         state.boundaryBox,
-        state.selectionInversed,
         swatches.primary.color,
         canvas.currentLayer,
         state.tool.modes,
@@ -98,17 +94,21 @@ function lineSteps() {
         tool: state.tool,
         layer: canvas.currentLayer,
         properties: {
+          modes: { ...state.tool.modes },
+          color: { ...swatches.primary.color },
+          brushSize: state.tool.brushSize,
+          brushType: state.tool.brushType,
           px1: state.lineStartX - canvas.currentLayer.x,
           py1: state.lineStartY - canvas.currentLayer.y,
           px2: state.cursorX - canvas.currentLayer.x,
           py2: state.cursorY - canvas.currentLayer.y,
           maskArray,
           boundaryBox,
-          selectionInversed: state.selectionInversed,
         },
       })
       renderCanvas(canvas.currentLayer)
       break
+    }
     default:
     //do nothing
   }

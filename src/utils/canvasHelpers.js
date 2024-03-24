@@ -1,7 +1,6 @@
 /**
- *
  * @param {number} width - (Integer)
- * @returns
+ * @returns {number} - (Float)
  */
 export const setInitialZoom = (width) => {
   const ratio = 256 / width
@@ -27,18 +26,11 @@ export const setInitialZoom = (width) => {
  * @param {number} x - (Integer)
  * @param {number} y - (Integer)
  * @param {number} brushSize - (Integer)
- * @param {object} layer
- * @param {object} boundaryBox
- * @param {boolean} isInversed
+ * @param {object} layer - used for canvas dimensions
+ * @param {object} boundaryBox - {xMin, xMax, yMin, yMax}
+ * @returns {boolean} - true if point is outside bounds
  */
-export const isOutOfBounds = (
-  x,
-  y,
-  brushSize,
-  layer,
-  boundaryBox,
-  isInversed
-) => {
+export const isOutOfBounds = (x, y, brushSize, layer, boundaryBox) => {
   // Precomputed values for efficiency
   const halfBrushSize = Math.floor(brushSize / 2)
   const xOutOfBounds =
@@ -51,16 +43,7 @@ export const isOutOfBounds = (
 
   // Check bounds if defined
   if (boundaryBox.xMin !== null) {
-    if (isInversed) {
-      if (
-        x >= boundaryBox.xMin + brushSize / 2 &&
-        x < boundaryBox.xMax - brushSize / 2 &&
-        y >= boundaryBox.yMin + brushSize / 2 &&
-        y < boundaryBox.yMax - brushSize / 2
-      ) {
-        return true
-      }
-    } else if (
+    if (
       x >= boundaryBox.xMax + brushSize / 2 ||
       x < boundaryBox.xMin - brushSize / 2 ||
       y >= boundaryBox.yMax + brushSize / 2 ||

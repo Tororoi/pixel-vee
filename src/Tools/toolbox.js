@@ -1,7 +1,6 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
@@ -12,14 +11,12 @@ import {
   renderToolOptionsToDOM,
 } from "../DOM/render.js"
 import { renderCursor } from "../GUI/cursor.js"
-import { testAction } from "../Testing/performanceTesting.js"
-import { storedActions } from "../Testing/storedActions.js"
 import { actionConfirmPastedPixels } from "../Actions/nonPointerActions.js"
 
 /**
  * Switch active tool
- * @param {string|null} toolName
- * @param {Element|null} toolBtn
+ * @param {string|null} toolName - The tool name
+ * @param {HTMLElement|null} toolBtn - The tool button
  */
 export function switchTool(toolName = null, toolBtn = null) {
   const targetToolBtn = toolBtn || document.querySelector(`#${toolName}`)
@@ -37,10 +34,6 @@ export function switchTool(toolName = null, toolBtn = null) {
       dom.toolBtn.classList.remove("selected")
       //get new button and select it
       dom.toolBtn = targetToolBtn
-      //Uncomment to run performance test for selected tool if testing is enabled
-      // if (state.captureTesting && storedActions[dom.toolBtn.id]) {
-      //   testAction(dom.toolBtn.id)
-      // }
       dom.toolBtn.classList.add("selected")
       state.tool = tools[dom.toolBtn.id]
       renderCanvas(canvas.currentLayer)
@@ -56,11 +49,18 @@ export function switchTool(toolName = null, toolBtn = null) {
       }
       //render menu options
       renderToolOptionsToDOM()
+      //If the tool is not a vector tool, clear the selected vector indices
+      if (
+        !["fill", "quadCurve", "cubicCurve", "ellipse", "move"].includes(
+          tools[targetToolBtn.id].name
+        )
+      ) {
+        state.selectedVectorIndicesSet.clear()
+      }
       vectorGui.reset()
       state.reset()
-      renderVectorsToDOM()
       renderBrushModesToDOM()
-      renderCursor(state, canvas, swatches)
+      renderCursor()
     }
   }
 }
@@ -68,9 +68,9 @@ export function switchTool(toolName = null, toolBtn = null) {
 /**
  * Toggle active mode
  * TODO: (Low Priority) add multi-touch mode for drawing with multiple fingers
- * TODO: (Middle Priority) add curve brush mode for freehand drawing splines
- * @param {string|null} modeName
- * @param {Element|null} modeBtn
+ * TODO: (Medium Priority) add curve brush mode for freehand drawing splines
+ * @param {string|null} modeName - The mode name
+ * @param {HTMLElement|null} modeBtn - The mode button
  */
 export function toggleMode(modeName = null, modeBtn = null) {
   const targetModeBtn = modeBtn || document.querySelector(`#${modeName}`)
@@ -93,7 +93,7 @@ export function toggleMode(modeName = null, modeBtn = null) {
         canvas.vectorGuiCVS.style.cursor = state.tool.cursor
       }
       renderBrushModesToDOM()
-      renderCursor(state, canvas, swatches)
+      renderCursor()
     }
   }
 }
