@@ -251,6 +251,11 @@ export async function loadDrawing(jsonFile) {
         if (action.properties?.vectorProperties) {
           //restructure vectorProperties to include type
           action.properties.vectorProperties.type = action.tool.name
+          if (action.properties.vectorProperties.type === "ellipse") {
+            action.properties.vectorProperties.unifiedOffset =
+              action.properties.vectorProperties.offset
+            delete action.properties.vectorProperties.offset
+          }
           //restructure how vectorProperties are stored
           state.highestVectorKey += 1
           let uniqueVectorKey = state.highestVectorKey
@@ -274,6 +279,13 @@ export async function loadDrawing(jsonFile) {
         //Handle actions with points
         if (action.properties?.points) {
           action.points = action.properties.points
+        }
+        //Handle line actions
+        if (action.tool.name === "line") {
+          action.px1 = action.properties.px1
+          action.py1 = action.properties.py1
+          action.px2 = action.properties.px2
+          action.py2 = action.properties.py2
         }
         //Handle actions with maskArray
         if (action.properties?.maskArray) {
@@ -306,6 +318,11 @@ export async function loadDrawing(jsonFile) {
         }
         //remove old properties
         delete action.properties
+      }
+      //Handle actions with brush information
+      if (action.tool?.brushSize) {
+        action.brushSize = action.tool.brushSize
+        action.brushType = action.tool.brushType
       }
     }
 

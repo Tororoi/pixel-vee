@@ -96,6 +96,8 @@ function lineSteps() {
         properties: {
           modes: { ...state.tool.modes },
           color: { ...swatches.primary.color },
+          brushSize: state.tool.brushSize,
+          brushType: state.tool.brushType,
           px1: state.lineStartX - canvas.currentLayer.x,
           py1: state.lineStartY - canvas.currentLayer.y,
           px2: state.cursorX - canvas.currentLayer.x,

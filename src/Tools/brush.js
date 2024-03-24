@@ -109,6 +109,8 @@ function brushSteps() {
         properties: {
           modes: { ...brush.modes },
           color: { ...swatches.primary.color },
+          brushSize: brush.brushSize,
+          brushType: brush.brushType,
           points: state.points,
           maskArray,
           boundaryBox,
