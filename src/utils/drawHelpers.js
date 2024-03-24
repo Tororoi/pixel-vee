@@ -1,9 +1,9 @@
 /**
  *
- * @param {Array} pointsDrawn
+ * @param {Array} pointsDrawn - The array of points drawn
  * @param {number} willDrawX - (Integer)
  * @param {number} willDrawY - (Integer)
- * @returns {boolean}
+ * @returns {boolean} - true if pixel already drawn
  */
 export function checkPixelAlreadyDrawn(pointsDrawn, willDrawX, willDrawY) {
   //check if pixel already drawn in current action. Reduces cost of subsequent renders and prevents colors with opacity from stacking on eachother.

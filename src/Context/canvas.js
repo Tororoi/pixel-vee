@@ -11,18 +11,28 @@ const backgroundCTX = backgroundCVS.getContext("2d", {
 })
 //Set gui canvas and its context
 const vectorGuiCVS = document.getElementById("vector-gui-canvas")
-const vectorGuiCTX = vectorGuiCVS.getContext("2d", { willReadFrequently: true })
+const vectorGuiCTX = vectorGuiCVS.getContext("2d", {
+  willReadFrequently: true,
+})
 const rasterGuiCVS = document.getElementById("raster-gui-canvas")
-const rasterGuiCTX = rasterGuiCVS.getContext("2d", { willReadFrequently: true })
+const rasterGuiCTX = rasterGuiCVS.getContext("2d", {
+  willReadFrequently: true,
+})
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
 const offScreenCVS = document.createElement("canvas")
-const offScreenCTX = offScreenCVS.getContext("2d", { willReadFrequently: true })
+const offScreenCTX = offScreenCVS.getContext("2d", {
+  willReadFrequently: true,
+})
 //Create preview canvas for use when rendering the cursor without affecting the actual layer's canvas
 const previewCVS = document.createElement("canvas")
-const previewCTX = previewCVS.getContext("2d", { willReadFrequently: true })
+const previewCTX = previewCVS.getContext("2d", {
+  willReadFrequently: true,
+})
 //thumbnail canvas for making images from canvas actions
 const thumbnailCVS = document.createElement("canvas")
-const thumbnailCTX = thumbnailCVS.getContext("2d", { willReadFrequently: true })
+const thumbnailCTX = thumbnailCVS.getContext("2d", {
+  willReadFrequently: true,
+})
 
 //====================================//
 //======== * * * State * * * =========//
@@ -56,9 +66,6 @@ export const canvas = {
   hiddenLayer: null,
   bgColor: "rgba(131, 131, 131, 0.5)",
   borderColor: "black",
-  //Vectors
-  currentVectorIndex: null,
-  collidedVectorIndex: null,
   //Cursor
   pointerEvent: "none",
   sizePointerState: "none",

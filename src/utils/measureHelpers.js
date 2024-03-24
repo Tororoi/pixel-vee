@@ -1,3 +1,8 @@
+/**
+ * @param {string} text - The text to measure
+ * @param {string} font - The font to use
+ * @returns {number} - The width of the text in pixels
+ */
 export function measureTextWidth(text, font) {
   // Create a temporary element
   const tempElement = document.createElement("span")

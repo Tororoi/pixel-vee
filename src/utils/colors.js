@@ -1,3 +1,7 @@
+/**
+ * Generate a random color
+ * @returns {object} - { color: string, r: number, g: number, b: number, a: number }
+ */
 export function generateRandomRGB() {
   let r = Math.floor(Math.random() * 256)
   let g = Math.floor(Math.random() * 256)

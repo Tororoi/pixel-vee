@@ -1,4 +1,3 @@
-import { state } from "../Context/state.js"
 import { brush } from "./brush.js"
 import { line } from "./line.js"
 import { select } from "./select.js"
@@ -125,10 +124,31 @@ export const tools = {
     modes: {},
     type: "raster",
   },
+  vectorPaste: {
+    name: "vectorPaste",
+    fn: null,
+    brushSize: null,
+    brushType: null,
+    brushDisabled: true,
+    options: {},
+    modes: {},
+    type: "vector",
+  },
+  transform: {
+    name: "transform",
+    fn: null, //used for stretch and flip functionality
+    brushSize: null,
+    brushType: null,
+    brushDisabled: true,
+    options: {},
+    modes: {},
+    type: "raster",
+  },
   //Utility Tools (does not affect timeline)
   eyedropper,
   grab,
-  /** perspective: {
+  /**
+   * perspective: {
    * set vanishing points.
    * Click to create a vanishing point with visible radius r.
    * Points are always visible even outside canvas area.
@@ -138,5 +158,6 @@ export const tools = {
    * Hold control to view automatic perspective lines and click to make lines permanent.
    * NOTE: First iteration will not support curvilinear perspective. Can be approximated by combining multipoint perspective with drawing bezier curves from point to point
    * TODO: (Low Priority) Add toggle option to snap line/ curve endpoints to vanishing point if made inside vanishing points radius.
-  } */
+  }
+   */
 }

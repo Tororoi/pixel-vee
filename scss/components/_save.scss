@@ -81,7 +81,9 @@
         justify-content: flex-start;
         margin: 8px 0px;
         #save-file-name {
-          width: 96px;
+          width: 96px; //04Font 16px
+          // width: 62px; //Monogram 16px
+          // width: 77px; //Monogram 20px
           // background: none;
           box-shadow: none;
         }

@@ -2,23 +2,23 @@ import { getAngle } from "./trig.js"
 
 /**
  * WARNING: This function directly manipulates the vector's properties in the history.
- * @param {object} vector
+ * @param {object} vector - The vector to update
  * @param {number} x - (Integer)
  * @param {number} y - (Integer)
- * @param {string} xKey
- * @param {string} yKey
+ * @param {string} xKey - The key of the x property to update
+ * @param {string} yKey - The key of the y property to update
  */
 export function updateVectorProperties(vector, x, y, xKey, yKey) {
-  vector.properties.vectorProperties[xKey] = x - vector.layer.x
-  vector.properties.vectorProperties[yKey] = y - vector.layer.y
+  vector.vectorProperties[xKey] = x - vector.layer.x
+  vector.vectorProperties[yKey] = y - vector.layer.y
 }
 
 /**
  * Calculate the change in position and angle of the current vector.
- * @param {object} currentVector - Description of currentVector.
- * @param {string} selectedPointXKey - Description of selectedPointXKey.
- * @param {object} toolOptions - Description of toolOptions.
- * @param {object} vectorsSavedProperties - Description of vectorsSavedProperties.
+ * @param {object} currentVector - The vector to calculate the deltas for
+ * @param {string} selectedPointXKey - The key of the x property of the selected point
+ * @param {object} toolOptions - The options for the tool
+ * @param {object} vectorsSavedProperties - The saved properties of the vectors
  * @returns {{currentDeltaX: number, currentDeltaY: number, currentDeltaAngle: number}} - Returns an object with properties.
  *          `currentDeltaX` and `currentDeltaY` are expected to be integers representing the change in position.
  *          `currentDeltaAngle` is expected to be a float representing the change in angle in radians.
@@ -52,11 +52,11 @@ export function calculateCurrentVectorDeltas(
     }
 
     currentDeltaX =
-      currentVector.properties.vectorProperties[selectedEndpointXKey] -
-      currentVector.properties.vectorProperties[selectedHandleXKey]
+      currentVector.vectorProperties[selectedEndpointXKey] -
+      currentVector.vectorProperties[selectedHandleXKey]
     currentDeltaY =
-      currentVector.properties.vectorProperties[selectedEndpointYKey] -
-      currentVector.properties.vectorProperties[selectedHandleYKey]
+      currentVector.vectorProperties[selectedEndpointYKey] -
+      currentVector.vectorProperties[selectedHandleYKey]
 
     if (!toolOptions.align?.active) {
       const angle = getAngle(currentDeltaX, currentDeltaY)
@@ -82,11 +82,11 @@ export function calculateCurrentVectorDeltas(
  * @param {number} currentDeltaX - (Integer)
  * @param {number} currentDeltaY - (Integer)
  * @param {number} currentDeltaAngle - (Float)
- * @param {string} selectedXKey
- * @param {object} linkedVector
- * @param {object} linkedPoints
- * @param {object} vectorsSavedProperties
- * @param {object} toolOptions
+ * @param {string} selectedXKey - The key of the x property of the selected point
+ * @param {object} linkedVector - The linked vector
+ * @param {object} linkedPoints - The linked points
+ * @param {object} vectorsSavedProperties - The saved properties of the vectors
+ * @param {object} toolOptions - The options for the tool
  */
 export function handleOptionsAndUpdateVector(
   x,
@@ -103,19 +103,15 @@ export function handleOptionsAndUpdateVector(
   //Set linked keys
   let linkedEndpointXKey, linkedEndpointYKey, linkedHandleXKey, linkedHandleYKey
   if (linkedPoints.px1) {
-    ;[
-      linkedEndpointXKey,
-      linkedEndpointYKey,
-      linkedHandleXKey,
-      linkedHandleYKey,
-    ] = ["px1", "py1", "px3", "py3"]
+    linkedEndpointXKey = "px1"
+    linkedEndpointYKey = "py1"
+    linkedHandleXKey = "px3"
+    linkedHandleYKey = "py3"
   } else if (linkedPoints.px2) {
-    ;[
-      linkedEndpointXKey,
-      linkedEndpointYKey,
-      linkedHandleXKey,
-      linkedHandleYKey,
-    ] = ["px2", "py2", "px4", "py4"]
+    linkedEndpointXKey = "px2"
+    linkedEndpointYKey = "py2"
+    linkedHandleXKey = "px4"
+    linkedHandleYKey = "py4"
   }
   // If vector is linked via px1 or px2, update vector properties
   if (linkedEndpointXKey) {

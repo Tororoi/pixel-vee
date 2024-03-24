@@ -10,9 +10,8 @@ import { getTriangle, getAngle } from "../utils/trig.js"
 //====================================//
 
 /**
- *
- * @param {*} condition
- * @param {*} message
+ * @param {boolean} condition - condition to assert
+ * @param {string} message - message to throw
  */
 export function assert(condition, message) {
   if (!condition) {
@@ -22,14 +21,14 @@ export function assert(condition, message) {
 
 /**
  * Bresenham's algorithm for bezier limited to gradients without sign change.
- * @param {*} x0
- * @param {*} y0
- * @param {*} x1
- * @param {*} y1
- * @param {*} x2
- * @param {*} y2
- * @param {*} color
- * @returns
+ * @param {number} x0 - startX
+ * @param {number} y0 - startY
+ * @param {number} x1 - ctrlX1
+ * @param {number} y1 - ctrlY1
+ * @param {number} x2 - endX
+ * @param {number} y2 - endY
+ * @param {string} color - rgba color
+ * @returns {Array} - array of coordinates representing the pixels of a bezier segment
  */
 function plotQuadBezierSeg(x0, y0, x1, y1, x2, y2, color) {
   let plotPoints = []
@@ -122,16 +121,16 @@ function plotQuadBezierSeg(x0, y0, x1, y1, x2, y2, color) {
 
 /**
  * Bresenham's algorithm for bezier limited to gradients without sign change.
- * @param {*} x0
- * @param {*} y0
- * @param {*} x1
- * @param {*} y1
- * @param {*} x2
- * @param {*} y2
- * @param {*} x3
- * @param {*} y3
- * @param {*} color
- * @returns
+ * @param {number} x0 - startX
+ * @param {number} y0 - startY
+ * @param {number} x1 - ctrlX1
+ * @param {number} y1 - ctrlY1
+ * @param {number} x2 - ctrlX2
+ * @param {number} y2 - ctrlY2
+ * @param {number} x3 - endX
+ * @param {number} y3 - endY
+ * @param {string} color - rgba color
+ * @returns {Array} - array of coordinates representing the pixels of a bezier segment
  */
 function plotCubicBezierSeg(x0, y0, x1, y1, x2, y2, x3, y3, color) {
   let plotPoints = []
@@ -316,14 +315,14 @@ function plotCubicBezierSeg(x0, y0, x1, y1, x2, y2, x3, y3, color) {
 
 /**
  * Plot any rational quadratic bezier segment
- * @param {*} x0 - startX
- * @param {*} y0 - startY
- * @param {*} x1 - ctrlX1
- * @param {*} y1 - ctrlY1
- * @param {*} x2 - endX
- * @param {*} y2 - endY
- * @param {*} w - weight
- * @returns
+ * @param {number} x0 - startX
+ * @param {number} y0 - startY
+ * @param {number} x1 - ctrlX1
+ * @param {number} y1 - ctrlY1
+ * @param {number} x2 - endX
+ * @param {number} y2 - endY
+ * @param {number} w - weight
+ * @returns {Array} - array of coordinates representing the pixels of a bezier segment
  */
 export function plotConicBezierSeg(x0, y0, x1, y1, x2, y2, w) {
   let plotPoints = []
@@ -438,13 +437,13 @@ export function plotConicBezierSeg(x0, y0, x1, y1, x2, y2, w) {
 
 /**
  * Rasterize any quad bezier
- * @param {*} x0 - startX
- * @param {*} y0 - startY
- * @param {*} x1 - ctrlX1
- * @param {*} y1 - ctrlY1
- * @param {*} x2 - endX
- * @param {*} y2 - endY
- * @returns
+ * @param {number} x0 - startX
+ * @param {number} y0 - startY
+ * @param {number} x1 - ctrlX1
+ * @param {number} y1 - ctrlY1
+ * @param {number} x2 - endX
+ * @param {number} y2 - endY
+ * @returns {Array} - array of coordinates representing the pixels of a quadratic bezier
  */
 export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
   let plotPoints = []
@@ -535,15 +534,15 @@ export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
 
 /**
  * Rasterize any cubic bezier
- * @param {*} x0 - startX
- * @param {*} y0 - startY
- * @param {*} x1 - ctrlX1
- * @param {*} y1 - ctrlY1
- * @param {*} x2 - ctrlX2
- * @param {*} y2 - ctrlY2
- * @param {*} x3 - endX
- * @param {*} y3 - endY
- * @returns
+ * @param {number} x0 - startX
+ * @param {number} y0 - startY
+ * @param {number} x1 - ctrlX1
+ * @param {number} y1 - ctrlY1
+ * @param {number} x2 - ctrlX2
+ * @param {number} y2 - ctrlY2
+ * @param {number} x3 - endX
+ * @param {number} y3 - endY
+ * @returns {Array} - array of coordinates representing the pixels of a cubic bezier
  */
 export function plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3) {
   let plotPoints = []
@@ -701,14 +700,14 @@ export function plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3) {
 
 /**
  * Plot any rational quadratic bezier
- * @param {*} x0 - startX
- * @param {*} y0 - startY
- * @param {*} x1 - ctrlX1
- * @param {*} y1 - ctrlY1
- * @param {*} x2 - endX
- * @param {*} y2 - endY
- * @param {*} w - weight
- * @returns
+ * @param {number} x0 - startX
+ * @param {number} y0 - startY
+ * @param {number} x1 - ctrlX1
+ * @param {number} y1 - ctrlY1
+ * @param {number} x2 - endX
+ * @param {number} y2 - endY
+ * @param {number} w - weight
+ * @returns {Array} - array of coordinates representing the pixels of a conic bezier
  */
 export function plotConicBezier(x0, y0, x1, y1, x2, y2, w) {
   let plotPoints = []

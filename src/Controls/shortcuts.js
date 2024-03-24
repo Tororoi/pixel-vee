@@ -13,25 +13,26 @@ import {
   renderPaletteToDOM,
   renderBrushStampToDOM,
   renderToolOptionsToDOM,
+  renderVectorsToDOM,
 } from "../DOM/render.js"
 import { randomizeColor } from "../Swatch/events.js"
-import { handleModes } from "../Tools/events.js"
 import { renderCursor } from "../GUI/cursor.js"
-import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { openSaveDialogBox } from "../Menu/events.js"
 import {
   actionDeselect,
-  actionInvertSelection,
   actionCutSelection,
   actionPasteSelection,
   actionConfirmPastedPixels,
+  actionDeleteSelection,
+  actionFlipPixels,
+  actionRotatePixels,
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
 import { toggleMode, switchTool } from "../Tools/toolbox.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
- * @param {string} keyCode
+ * @param {string} keyCode - The key code of the key that was pressed
  */
 export function activateShortcut(keyCode) {
   switch (keyCode) {
@@ -39,6 +40,12 @@ export function activateShortcut(keyCode) {
       //handle confirm paste
       if (!state.clicked && canvas.pastedLayer) {
         actionConfirmPastedPixels()
+      }
+      break
+    case "Backspace":
+      if (!state.clicked) {
+        //delete selection TODO: (High Priority) handle delete vectors (mark vectors as removed)
+        actionDeleteSelection()
       }
       break
     case "MetaLeft":
@@ -52,7 +59,7 @@ export function activateShortcut(keyCode) {
         renderBrushStampToDOM()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
-        renderCursor(state, canvas, swatches)
+        renderCursor()
       }
       break
     case "AltLeft":
@@ -64,7 +71,7 @@ export function activateShortcut(keyCode) {
         renderBrushStampToDOM()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
-        renderCursor(state, canvas, swatches)
+        renderCursor()
       }
       break
     case "ShiftLeft":
@@ -84,7 +91,10 @@ export function activateShortcut(keyCode) {
           adjustEllipseSteps()
           vectorGui.render()
         }
-      } else if (dom.toolBtn.id === "cubicCurve") {
+      }
+      break
+    case "Equal":
+      if (dom.toolBtn.id === "cubicCurve") {
         tools.cubicCurve.options.equal.active =
           !tools.cubicCurve.options.equal.active
         renderToolOptionsToDOM()
@@ -94,6 +104,7 @@ export function activateShortcut(keyCode) {
     case "Slash":
       if (!state.clicked) {
         switchTool("line")
+        renderVectorsToDOM()
       }
       break
     case "KeyA":
@@ -107,6 +118,7 @@ export function activateShortcut(keyCode) {
     case "KeyB":
       if (!state.clicked) {
         switchTool("brush")
+        renderVectorsToDOM()
       }
       break
     case "KeyC":
@@ -115,6 +127,7 @@ export function activateShortcut(keyCode) {
           actionCopySelection()
         } else {
           switchTool("cubicCurve")
+          renderVectorsToDOM()
         }
       }
       break
@@ -122,9 +135,7 @@ export function activateShortcut(keyCode) {
       if (!state.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           //deselect
-          if (state.selectProperties.px1 !== null) {
-            actionDeselect()
-          }
+          actionDeselect()
         }
       }
       break
@@ -135,7 +146,19 @@ export function activateShortcut(keyCode) {
       break
     case "KeyF":
       if (!state.clicked) {
-        switchTool("fill")
+        if (keys.MetaLeft || keys.MetaRight) {
+          if (keys.AltLeft || keys.AltRight) {
+            //option+meta+z
+            //Flip vertical
+            actionFlipPixels(false)
+          } else {
+            //Flip horizontal
+            actionFlipPixels(true)
+          }
+        } else {
+          switchTool("fill")
+          renderVectorsToDOM()
+        }
       }
       break
     case "KeyG":
@@ -161,11 +184,7 @@ export function activateShortcut(keyCode) {
       break
     case "KeyI":
       if (!state.clicked) {
-        if (keys.MetaLeft || keys.MetaRight) {
-          actionInvertSelection()
-        } else {
-          toggleMode("inject")
-        }
+        toggleMode("inject")
       }
       break
     case "KeyJ":
@@ -197,6 +216,7 @@ export function activateShortcut(keyCode) {
     case "KeyO":
       if (!state.clicked) {
         switchTool("ellipse")
+        renderVectorsToDOM()
       }
       break
     case "KeyP":
@@ -207,12 +227,18 @@ export function activateShortcut(keyCode) {
     case "KeyQ":
       if (!state.clicked) {
         switchTool("quadCurve")
+        renderVectorsToDOM()
       }
       break
     case "KeyR":
       if (!state.clicked) {
-        randomizeColor(swatches.primary.swatch)
-        renderPaletteToDOM()
+        if (keys.MetaLeft || keys.MetaRight) {
+          //Rotate right
+          actionRotatePixels()
+        } else {
+          randomizeColor(swatches.primary.swatch)
+          renderPaletteToDOM()
+        }
       }
       break
     case "KeyS":
@@ -221,15 +247,20 @@ export function activateShortcut(keyCode) {
           openSaveDialogBox()
         } else {
           switchTool("select")
+          renderVectorsToDOM()
         }
       }
       break
     case "KeyT":
-      dom.tooltipBtn.checked = !dom.tooltipBtn.checked
-      if (dom.tooltipBtn.checked && state.tooltipMessage) {
-        dom.tooltip.classList.add("visible")
+      if (!state.clicked && (keys.MetaLeft || keys.MetaRight)) {
+        //shortcut for transform - cuts and pastes selection to allow free transform
       } else {
-        dom.tooltip.classList.remove("visible")
+        dom.tooltipBtn.checked = !dom.tooltipBtn.checked
+        if (dom.tooltipBtn.checked && state.tooltipMessage) {
+          dom.tooltip.classList.add("visible")
+        } else {
+          dom.tooltip.classList.remove("visible")
+        }
       }
       break
     case "KeyU":
@@ -281,7 +312,7 @@ export function activateShortcut(keyCode) {
  * Deactivate Shortcut for any key.
  * Some shortcuts are active while a key is held.
  * This can be called on keyUp or on pointerUp so it is not directly tied to the keyUp event.
- * @param {string} keyCode
+ * @param {string} keyCode - The key code of the key that was released
  */
 export function deactivateShortcut(keyCode) {
   switch (keyCode) {
@@ -297,7 +328,7 @@ export function deactivateShortcut(keyCode) {
         canvas.previousXOffset = canvas.xOffset
         canvas.previousYOffset = canvas.yOffset
         vectorGui.render()
-        renderCursor(state, canvas, swatches)
+        renderCursor()
         setToolCssCursor()
         //TODO: (Low Priority) refactor so grabSteps can be called instead with a manually supplied pointer event pointerup
       }
@@ -310,7 +341,7 @@ export function deactivateShortcut(keyCode) {
         state.tool = tools[dom.toolBtn.id]
         renderBrushStampToDOM()
         vectorGui.render()
-        renderCursor(state, canvas, swatches)
+        renderCursor()
         setToolCssCursor()
       }
       break
@@ -325,10 +356,11 @@ export function deactivateShortcut(keyCode) {
       if (state.tool.name === "ellipse") {
         if (
           (vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey) &&
-          vectorGui.selectedPoint.xKey !== "px1"
+          vectorGui.selectedPoint.xKey !== "px1" &&
+          state.clicked
         ) {
           //while holding control point, readjust ellipse without having to move cursor.
-          //TODO: (Middle Priority) update this functionality to have other radii go back to previous radius value when releasing shift
+          //TODO: (Medium Priority) update this functionality to have other radii go back to previous radius value when releasing shift
           adjustEllipseSteps()
           vectorGui.render()
         }
@@ -426,7 +458,7 @@ export function deactivateShortcut(keyCode) {
 }
 
 /**
- * Set tool cursor. TODO: (Middle Priority) move to utils file
+ * Set tool cursor. TODO: (Low Priority) move to utils file
  */
 function setToolCssCursor() {
   if (state.tool.modes?.eraser) {

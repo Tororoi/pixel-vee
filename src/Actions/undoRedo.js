@@ -2,7 +2,6 @@ import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { clearOffscreenCanvas, renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM, renderLayersToDOM } from "../DOM/render.js"
@@ -14,66 +13,111 @@ import {
   disableActionsForPaste,
   enableActionsForNoPaste,
 } from "../DOM/disableDomElements.js"
+import { transformRasterContent } from "../utils/transformHelpers.js"
 
 //====================================//
 //========= * * * Core * * * =========//
 //====================================//
 
 /**
- * This sets the action which is then pushed to the undoStack for the command pattern
- * @param {object} actionObject
+ * @description This function is used to render the canvas to the most recent action in the undoStack. It is used in the undo and redo functions.
+ * @param {object} latestAction - The action about to be undone or redone
+ * @param {string} modType - "from" or "to", used to identify undo or redo
  */
-export function addToTimeline(actionObject) {
-  const { tool, color, layer, properties } = actionObject
-  //use current state for variables
-  let snapshot = layer.type === "raster" ? layer.cvs.toDataURL() : null
-  state.action = {
-    tool: { ...tool }, //Needed properties: name, brushType, brushSize, type
-    modes: { ...tool.modes },
-    color: color || { ...swatches.primary.color },
-    layer: layer,
-    properties,
-    hidden: false,
-    removed: false,
-    snapshot,
-  }
-  state.undoStack.push(state.action)
-  if (state.saveDialogOpen) {
-    setSaveFilesizePreview()
-  }
-}
-
-/**
- * @param {object} latestAction
- * @param {string} modType
- */
-function handleModifyAction(latestAction, modType) {
-  //for each processed action,
-  latestAction.properties.processedActions.forEach((mod) => {
-    //find the action in the undoStack
-    const moddedAction = state.undoStack[mod.moddedActionIndex]
-    //set the vectorProperties to the modded action's vectorProperties
-    moddedAction.properties.vectorProperties = {
-      ...mod[modType],
+function renderToLatestAction(latestAction, modType) {
+  //clear affected layer and render image from most recent action from the affected layer
+  //This avoids having to redraw the timeline for every undo/redo. Close to constant time whereas redrawTimeline is closer to exponential time or worse.
+  let mostRecentActionFromSameLayer = null
+  for (let i = state.undoStack.length - 1; i >= 0; i--) {
+    if (state.undoStack[i].layer === latestAction.layer) {
+      mostRecentActionFromSameLayer = state.undoStack[i]
+      break
     }
-  })
-  const primaryModdedAction =
-    state.undoStack[latestAction.properties.moddedActionIndex]
-  // moddedAction.properties.vectorProperties = {
-  //   ...latestAction.properties[modType],
-  // }
-  if (state.tool.name === primaryModdedAction.tool.name) {
-    vectorGui.reset()
-    vectorGui.setVectorProperties(primaryModdedAction)
+  }
+  if (mostRecentActionFromSameLayer?.snapshot) {
+    clearOffscreenCanvas(mostRecentActionFromSameLayer.layer)
+    let img = new Image()
+    img.src = mostRecentActionFromSameLayer.snapshot
+    img.onload = function () {
+      mostRecentActionFromSameLayer.layer.ctx.drawImage(img, 0, 0)
+      renderCanvas(mostRecentActionFromSameLayer.layer)
+      //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
+      if (
+        ["paste", "vectorPaste"].includes(latestAction.tool.name) &&
+        latestAction.confirmed &&
+        modType === "to"
+      ) {
+        //remove temp layer from DOM and restore current layer
+        removeTempLayerFromDOM()
+      }
+      renderLayersToDOM()
+      renderVectorsToDOM()
+      state.reset()
+      vectorGui.render()
+    }
+  } else {
+    //no snapshot
+    if (latestAction.layer.type === "reference") {
+      renderCanvas(latestAction.layer)
+    } else {
+      renderCanvas(latestAction.layer, true)
+      //create snapshot for latest action. Normally actions will have a snapshot
+      //but since snapshots are discarded when saving a file, this code remakes the correct snapshot for an action.
+      //On subsequent undo and redo calls, the timeline will not have to be redrawn for the affected action since it will have a snapshot.
+      if (mostRecentActionFromSameLayer) {
+        let snapshot =
+          mostRecentActionFromSameLayer.layer.type === "raster"
+            ? mostRecentActionFromSameLayer.layer.cvs.toDataURL()
+            : null
+        mostRecentActionFromSameLayer.snapshot = snapshot
+      }
+    }
+    //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
+    if (
+      ["paste", "vectorPaste"].includes(latestAction.tool.name) &&
+      latestAction.confirmed &&
+      modType === "to"
+    ) {
+      //remove temp layer from DOM and restore current layer
+      removeTempLayerFromDOM()
+    }
+    renderLayersToDOM()
+    renderVectorsToDOM()
+    state.reset()
     vectorGui.render()
   }
 }
 
 /**
- * @param {object} latestAction
+ * @description This function is used to handle the modify action. It is used in the undo and redo functions.
+ * @param {object} latestAction - The action about to be undone or redone
+ * @param {string} modType - "from" or "to", used to identify undo or redo
+ */
+function handleModifyAction(latestAction, modType) {
+  //for each processed action,
+  latestAction.processedActions.forEach((mod) => {
+    //find the action in the undoStack
+    const moddedVector = state.vectors[mod.moddedVectorIndex] // need to check if this is a vector action and if it is, set the vector properties for the appropriate vector
+    //set the vectorProperties to the modded action's vectorProperties
+    moddedVector.vectorProperties = {
+      ...mod[modType],
+    }
+  })
+  const primaryModdedVector = state.vectors[latestAction.moddedVectorIndex]
+  if (
+    state.tool.name === primaryModdedVector.vectorProperties.type &&
+    state.currentVectorIndex === primaryModdedVector.index
+  ) {
+    vectorGui.setVectorProperties(primaryModdedVector)
+  }
+}
+
+/**
+ * @description This function is used to handle the clear action. It is used in the undo and redo functions.
+ * @param {object} latestAction - The action about to be undone or redone
  */
 function handleClearAction(latestAction) {
-  let upToIndex = latestAction.properties.upToIndex
+  let upToIndex = latestAction.upToIndex
   let i = 0
   //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
   state.undoStack.forEach((action) => {
@@ -83,92 +127,81 @@ function handleClearAction(latestAction) {
     i++
     if (action.layer === canvas.currentLayer) {
       action.removed = !action.removed
+      if (action.vectorIndices) {
+        action.vectorIndices.forEach((vectorIndex) => {
+          state.vectors[vectorIndex].removed =
+            !state.vectors[vectorIndex].removed
+        })
+      }
     }
   })
   vectorGui.reset()
 }
 
 /**
- * @param {object} latestAction
- * @param {object} newLatestAction
- * @param {string} modType
+ * @description This function is used to handle the select action. It is used in the undo and redo functions.
+ * @param {object} latestAction - The action about to be undone or redone
+ * @param {object} newLatestAction - The action that's about to be the most recent action, if the function is "Undo" ("from")
+ * @param {string} modType - "from" or "to", used to identify undo or redo
  */
 function handleSelectAction(latestAction, newLatestAction, modType) {
   if (modType === "to") {
-    if (latestAction.properties.deselect) {
+    if (latestAction.deselect) {
       state.deselect()
-      canvas.rasterGuiCTX.clearRect(
-        0,
-        0,
-        canvas.rasterGuiCVS.width,
-        canvas.rasterGuiCVS.height
-      )
     } else {
       //set select properties
       state.selectProperties = {
-        ...latestAction.properties.selectProperties,
+        ...latestAction.selectProperties,
       }
       //set boundary box
       state.setBoundaryBox(state.selectProperties)
-      //set inverse selection
-      state.selectionInversed = latestAction.properties.invertSelection
       //set maskset
       // state.maskSet = new Set(latestAction.maskArray)
     }
   } else if (modType === "from") {
-    if (latestAction.properties.deselect) {
+    if (latestAction.deselect) {
       //set select properties
       state.selectProperties = {
-        ...latestAction.properties.selectProperties,
+        ...latestAction.selectProperties,
       }
       //set boundary box
       state.setBoundaryBox(state.selectProperties)
-      //set inverse selection
-      state.selectionInversed = latestAction.properties.invertSelection
       //set maskset
       // state.maskSet = new Set(latestAction.maskArray)
     } else if (
       newLatestAction?.tool?.name === "select" &&
-      !newLatestAction?.properties?.deselect
+      !newLatestAction?.deselect
     ) {
       //If the action before the one being undone is a select tool, set context - may need to separate this from latestAction also being the "select" tool
       //set select properties
       state.selectProperties = {
-        ...newLatestAction.properties.selectProperties,
+        ...newLatestAction.selectProperties,
       }
       //set boundary box
       state.setBoundaryBox(state.selectProperties)
-      //set inverse selection
-      state.selectionInversed = newLatestAction.properties.invertSelection
       //set maskset
       // state.maskSet = new Set(newLatestAction.maskArray)
     } else {
-      if (newLatestAction.properties?.selectProperties?.px1 !== null) {
+      if (
+        newLatestAction?.selectProperties &&
+        newLatestAction.selectProperties.px1 !== null
+      ) {
         //set select properties
         state.selectProperties = {
-          ...newLatestAction.properties.selectProperties,
+          ...newLatestAction.selectProperties,
         }
         //set boundary box
         state.setBoundaryBox(state.selectProperties)
-        //set inverse selection
-        state.selectionInversed = newLatestAction.properties.invertSelection
       } else {
         state.deselect()
-        canvas.rasterGuiCTX.clearRect(
-          0,
-          0,
-          canvas.rasterGuiCVS.width,
-          canvas.rasterGuiCVS.height
-        )
       }
     }
   }
-  vectorGui.render()
 }
 
 /**
- * @param {object} latestAction
- * @param {string} modType
+ * @param {object} latestAction - The action about to be undone or redone
+ * @param {string} modType - "from" or "to", used to identify undo or redo
  */
 function handlePasteAction(latestAction, modType) {
   // if modType is "from" (undoing paste action), remove the templayer
@@ -180,79 +213,136 @@ function handlePasteAction(latestAction, modType) {
       dom[`${tool}Btn`].classList.remove("deactivate-paste")
     })
     //restore the original layer
-    canvas.currentLayer = latestAction.properties.pastedLayer
+    canvas.currentLayer = latestAction.pastedLayer
     canvas.pastedLayer = null
     canvas.currentLayer.inactiveTools.forEach((tool) => {
       dom[`${tool}Btn`].disabled = true
     })
     //Handle case of selection being active before paste. Determine whether to update selection or deselect.
-    if (latestAction.properties.prePasteSelectProperties.px1 !== null) {
+    if (latestAction.prePasteSelectProperties.px1 !== null) {
       state.selectProperties = {
-        ...latestAction.properties.prePasteSelectProperties,
+        ...latestAction.prePasteSelectProperties,
       }
       state.setBoundaryBox(state.selectProperties)
-      //set inverse selection
-      state.selectionInversed = latestAction.properties.prePasteInvertSelection
+    } else if (latestAction.prePasteSelectedVectorIndices.length > 0) {
+      state.selectedVectorIndicesSet = new Set(
+        latestAction.prePasteSelectedVectorIndices
+      )
     } else {
       //reset state properties
       state.deselect()
-      canvas.rasterGuiCTX.clearRect(
-        0,
-        0,
-        canvas.rasterGuiCVS.width,
-        canvas.rasterGuiCVS.height
-      )
     }
-    vectorGui.render()
     enableActionsForNoPaste()
   } else if (modType === "to") {
     //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
-    pasteSelectedPixels(
-      latestAction.properties,
-      latestAction.properties.pastedLayer
-    )
+    const vectors = {}
+    if (latestAction.vectorIndices.length > 0) {
+      latestAction.vectorIndices.forEach((index) => {
+        vectors[index] = state.vectors[index]
+      })
+    }
+    const selectProperties = {
+      ...latestAction.selectProperties,
+    }
+    selectProperties.px1 += latestAction.pastedLayer.x
+    selectProperties.px2 += latestAction.pastedLayer.x
+    selectProperties.py1 += latestAction.pastedLayer.y
+    selectProperties.py2 += latestAction.pastedLayer.y
+    const boundaryBox = {
+      ...latestAction.boundaryBox,
+    }
+    boundaryBox.xMin += latestAction.pastedLayer.x
+    boundaryBox.xMax += latestAction.pastedLayer.x
+    boundaryBox.yMin += latestAction.pastedLayer.y
+    boundaryBox.yMax += latestAction.pastedLayer.y
+    const clipboard = {
+      selectProperties,
+      boundaryBox,
+      vectors,
+      canvas: latestAction.canvas,
+    }
+    let offsetX = 0
+    let offsetY = 0
+    if (latestAction.vectorIndices.length > 0) {
+      offsetX = latestAction.pastedLayer.x
+      offsetY = latestAction.pastedLayer.y
+    }
+    //BUG: raster gui not rendering properly from here
+    pasteSelectedPixels(clipboard, latestAction.pastedLayer, offsetX, offsetY)
+    state.selectedVectorIndicesSet.clear()
+    latestAction.vectorIndices.forEach((vectorIndex) => {
+      state.selectedVectorIndicesSet.add(vectorIndex)
+    })
+    //set currentPastedImageKey
+    state.currentPastedImageKey = latestAction.pastedImageKey
     switchTool("move")
     disableActionsForPaste()
   }
 }
 
 /**
- * @param {object} latestAction
- * @param {object} newLatestAction
- * @param {string} modType
+ * @param {object} latestAction - The action about to be undone or redone
+ * @param {object} newLatestAction - The action that's about to be the most recent action, if the function is "Undo" ("from")
+ * @param {string} modType - "from" or "to", used to identify undo or redo
  */
 function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
   //if modType is "from" (undoing confirm paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
   if (modType === "from") {
-    pasteSelectedPixels(latestAction.properties, latestAction.layer, true)
+    const vectors = {}
+    state.selectedVectorIndicesSet.clear()
+    if (latestAction.vectorIndices.length > 0) {
+      latestAction.preConfirmPasteSelectedVectorIndices.forEach((index) => {
+        vectors[index] = state.vectors[index]
+        state.selectedVectorIndicesSet.add(index)
+      })
+    }
+    const clipboard = {
+      selectProperties: latestAction.selectProperties,
+      boundaryBox: latestAction.boundaryBox,
+      vectors,
+      canvas: latestAction.canvas,
+    }
+    //IN PROGRESS: pass custom x and y offset to pasteSelectedPixels
+    //raster offset
+    let offsetX = latestAction.layer.x
+    let offsetY = latestAction.layer.y
+    if (latestAction.vectorIndices.length > 0) {
+      offsetX = latestAction.preConfirmXOffset
+      offsetY = latestAction.preConfirmYOffset
+    }
+    //vector offset
+    pasteSelectedPixels(clipboard, latestAction.layer, offsetX, offsetY)
     if (newLatestAction?.tool?.name === "move") {
       //templayer's x and y coords are often reset to 0, so set them to last move action's x and y
-      canvas.currentLayer.x = newLatestAction.properties.to.x
-      canvas.currentLayer.y = newLatestAction.properties.to.y
+      canvas.currentLayer.x = newLatestAction.to.x
+      canvas.currentLayer.y = newLatestAction.to.y
     }
+    //set currentPastedImageKey
+    state.currentPastedImageKey = latestAction.pastedImageKey
     switchTool("move")
     disableActionsForPaste()
   } else if (modType === "to") {
-    //if modType is "to" (redoing confirm paste action), basically do the confirmPastedPixels function except use the action properties instead of the clipboard and don't add to timeline. Also don't need to adjust for layer offset
-    removeTempLayerFromDOM()
-    //render
-    vectorGui.render()
+    state.selectedVectorIndicesSet.clear()
+    latestAction.vectorIndices.forEach((vectorIndex) => {
+      state.selectedVectorIndicesSet.add(vectorIndex)
+    })
+    //if modType is "to" (redoing confirm paste action), enable actions for no temp pasted layer
     enableActionsForNoPaste()
   }
 }
 
 /**
  *
- * @param {object} latestAction
- * @param {string} modType
+ * @param {object} latestAction - The action about to be undone or redone
+ * @param {string} modType - "from" or "to", used to identify undo or redo
  */
 function handleMoveAction(latestAction, modType) {
-  let deltaX = latestAction.properties[modType].x - latestAction.layer.x
-  let deltaY = latestAction.properties[modType].y - latestAction.layer.y
+  let deltaX = latestAction[modType].x - latestAction.layer.x
+  let deltaY = latestAction[modType].y - latestAction.layer.y
   //set layer x and y to modType
-  latestAction.layer.x = latestAction.properties[modType].x
-  latestAction.layer.y = latestAction.properties[modType].y
-  latestAction.layer.scale = latestAction.properties[modType].scale
+  latestAction.layer.x = latestAction[modType].x
+  latestAction.layer.y = latestAction[modType].y
+  latestAction.layer.scale = latestAction[modType].scale
   //Keep properties relative to layer offset
   if (state.vectorProperties.px1) {
     state.vectorProperties.px1 += deltaX
@@ -278,19 +368,79 @@ function handleMoveAction(latestAction, modType) {
     state.selectProperties.py2 += deltaY
     state.setBoundaryBox(state.selectProperties)
   }
-  vectorGui.render()
+}
+
+/**
+ *
+ * @param {object} latestAction - The action about to be undone or redone
+ * @param {object} newLatestAction - The action that's about to be the most recent action, if the function is "Undo" ("from")
+ * @param {string} modType - "from" or "to", used to identify undo or redo
+ */
+function handleTransformAction(latestAction, newLatestAction, modType) {
+  if (modType === "from") {
+    const selectProperties = { ...newLatestAction.selectProperties }
+    selectProperties.px1 += newLatestAction.layer.x
+    selectProperties.px2 += newLatestAction.layer.x
+    selectProperties.py1 += newLatestAction.layer.y
+    selectProperties.py2 += newLatestAction.layer.y
+    state.selectProperties = { ...selectProperties }
+    state.setBoundaryBox(state.selectProperties)
+    //Eventually undoing transform actions will result in the newLatestAction being a paste action. In that case, don't render a transformation
+    if (newLatestAction.tool.name === "transform") {
+      transformRasterContent(
+        newLatestAction.layer,
+        state.pastedImages[newLatestAction.pastedImageKey].imageData,
+        state.boundaryBox,
+        newLatestAction.transformationRotationDegrees % 360,
+        newLatestAction.isMirroredHorizontally,
+        newLatestAction.isMirroredVertically
+      )
+      state.transformationRotationDegrees =
+        newLatestAction.transformationRotationDegrees
+      state.isMirroredHorizontally = newLatestAction.isMirroredHorizontally
+      state.isMirroredVertically = newLatestAction.isMirroredVertically
+    }
+  } else if (modType === "to") {
+    //offset selectProperties by layer x and y
+    const selectProperties = { ...latestAction.selectProperties }
+    selectProperties.px1 += latestAction.layer.x
+    selectProperties.px2 += latestAction.layer.x
+    selectProperties.py1 += latestAction.layer.y
+    selectProperties.py2 += latestAction.layer.y
+    state.selectProperties = {
+      ...selectProperties,
+    }
+    state.setBoundaryBox(state.selectProperties)
+    transformRasterContent(
+      latestAction.layer,
+      state.pastedImages[latestAction.pastedImageKey].imageData,
+      state.boundaryBox,
+      latestAction.transformationRotationDegrees % 360,
+      latestAction.isMirroredHorizontally,
+      latestAction.isMirroredVertically
+    )
+    state.transformationRotationDegrees =
+      latestAction.transformationRotationDegrees
+    state.isMirroredHorizontally = latestAction.isMirroredHorizontally
+    state.isMirroredVertically = latestAction.isMirroredVertically
+  }
 }
 
 /**
  * Main pillar of the code structure - command pattern
- * @param {Array} pushStack
- * @param {Array} popStack
- * @param {string} modType - "from" or "to", used for modify actions
+ * @param {Array} pushStack - The stack to push the action to
+ * @param {Array} popStack - The stack to pop the action from
+ * @param {string} modType - "from" or "to", used to identify undo or redo
  */
 export function actionUndoRedo(pushStack, popStack, modType) {
-  vectorGui.reset()
   //latest action is the action about to be undone or redone
   let latestAction = popStack[popStack.length - 1]
+  if (
+    state.vectors[state.currentVectorIndex]?.actionIndex === latestAction.index
+  ) {
+    //reset vectorGui if the latest action has the current vector
+    vectorGui.reset()
+  }
   //newLatestAction is the action that's about to be the most recent action, if the function is "Undo" ("from")
   let newLatestAction =
     modType === "from" && popStack.length > 1
@@ -299,22 +449,30 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   if (modType === "from" && popStack.length > 1) {
     if (newLatestAction.tool.name === "modify") {
       //If action is modif, new latest action will be considered the modded action
-      newLatestAction = popStack[newLatestAction.properties.moddedActionIndex]
+      newLatestAction = popStack[newLatestAction.moddedActionIndex]
     }
   }
   if (latestAction.tool.name === "modify") {
     handleModifyAction(latestAction, modType)
   } else if (latestAction.tool.name === "changeMode") {
-    state.undoStack[latestAction.properties.moddedActionIndex].modes = {
-      ...latestAction.properties[modType],
+    state.undoStack[latestAction.moddedActionIndex].modes = {
+      ...latestAction[modType],
     }
   } else if (latestAction.tool.name === "changeColor") {
-    state.undoStack[latestAction.properties.moddedActionIndex].color = {
-      ...latestAction.properties[modType],
+    state.undoStack[latestAction.moddedActionIndex].color = {
+      ...latestAction[modType],
     }
   } else if (latestAction.tool.name === "remove") {
-    state.undoStack[latestAction.properties.moddedActionIndex].removed =
-      latestAction.properties[modType]
+    if (latestAction.moddedVectorIndex !== undefined) {
+      //If the remove action has a vector index, set the vector's removed property
+      state.undoStack[latestAction.moddedActionIndex].vectors[
+        latestAction.moddedVectorIndex
+      ].removed = latestAction[modType]
+    } else {
+      //If the remove action only has a modded action index, set the removed property of the action
+      state.undoStack[latestAction.moddedActionIndex].removed =
+        latestAction[modType]
+    }
   } else if (latestAction.tool.name === "clear") {
     handleClearAction(latestAction)
   } else if (latestAction.tool.name === "addLayer") {
@@ -335,22 +493,26 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     }
   } else if (latestAction.tool.name === "select") {
     handleSelectAction(latestAction, newLatestAction, modType)
-  } else if (latestAction.tool.name === "paste") {
-    if (!latestAction.properties.confirmed) {
+  } else if (["paste", "vectorPaste"].includes(latestAction.tool.name)) {
+    if (!latestAction.confirmed) {
       handlePasteAction(latestAction, modType)
     } else {
       handleConfirmPasteAction(latestAction, newLatestAction, modType)
     }
   } else if (latestAction.tool.name === "move") {
     handleMoveAction(latestAction, modType)
+  } else if (latestAction.tool.name === "transform") {
+    handleTransformAction(latestAction, newLatestAction, modType)
   } else if (
     latestAction.tool.name === state.tool.name &&
     latestAction.tool.type === "vector"
   ) {
     //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
     if (modType === "to") {
-      vectorGui.setVectorProperties(latestAction)
-      vectorGui.render()
+      //TODO: (Low Priority) Which vector should be selected if there are multiple vectors in the action? First or last?
+      //Get first vector in the action
+      let latestVector = state.vectors[latestAction.vectorIndices[0]]
+      vectorGui.setVectorProperties(latestVector)
     }
   }
   pushStack.push(popStack.pop())
@@ -358,82 +520,17 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   if (newLatestAction) {
     if (
       newLatestAction.tool.name === state.tool.name &&
-      newLatestAction.tool.type === "vector"
+      newLatestAction.tool.type === "vector" &&
+      state.currentVectorIndex === null
     ) {
       //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
-      vectorGui.reset()
-      vectorGui.setVectorProperties(newLatestAction)
-      vectorGui.render() //render vectors after removing previous action from undoStack
-    }
-    //if new latest action is confirm paste, render selection
-    if (
-      newLatestAction.tool.name === "paste" &&
-      newLatestAction.properties.confirmed
-    ) {
-      //render
-      vectorGui.render()
+      let newLatestVector = state.vectors[newLatestAction.vectorIndices[0]]
+      vectorGui.setVectorProperties(newLatestVector)
     }
   }
-  //clear affected layer and render image from most recent action from the affected layer
-  //This avoids having to redraw the timeline for every undo/redo. Close to constant time whereas redrawTimeline is closer to exponential time or worse.
-  //TODO: (Low Priority) factor out into separate function
-  let mostRecentActionFromSameLayer = null
-  for (let i = state.undoStack.length - 1; i >= 0; i--) {
-    if (state.undoStack[i].layer === latestAction.layer) {
-      mostRecentActionFromSameLayer = state.undoStack[i]
-      break
-    }
-  }
-  if (mostRecentActionFromSameLayer?.snapshot) {
-    clearOffscreenCanvas(mostRecentActionFromSameLayer.layer)
-    let img = new Image()
-    img.src = mostRecentActionFromSameLayer.snapshot
-    img.onload = function () {
-      mostRecentActionFromSameLayer.layer.ctx.drawImage(img, 0, 0)
-      renderCanvas(mostRecentActionFromSameLayer.layer)
-      renderLayersToDOM()
-      renderVectorsToDOM()
-      state.reset()
-      //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
-      if (
-        latestAction.tool.name === "paste" &&
-        latestAction.properties.confirmed &&
-        modType === "to"
-      ) {
-        //remove temp layer from DOM and restore current layer
-        removeTempLayerFromDOM()
-      }
-    }
-  } else {
-    //no snapshot
-    if (latestAction.layer.type === "reference") {
-      renderCanvas(latestAction.layer)
-    } else {
-      renderCanvas(latestAction.layer, true)
-      //set snapshot for latest action. Normally actions will have a snapshot
-      //but since snapshots are discarded when saving a file, this code remakes the correct snapshot for an action.
-      //On subsequent undo and redo calls, the timeline will not have to be redrawn for the affected action since it will have a snapshot.
-      if (mostRecentActionFromSameLayer) {
-        let snapshot =
-          mostRecentActionFromSameLayer.layer.type === "raster"
-            ? mostRecentActionFromSameLayer.layer.cvs.toDataURL()
-            : null
-        mostRecentActionFromSameLayer.snapshot = snapshot
-      }
-    }
-    renderLayersToDOM()
-    renderVectorsToDOM()
-    state.reset()
-    //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
-    if (
-      latestAction.tool.name === "paste" &&
-      latestAction.properties.confirmed &&
-      modType === "to"
-    ) {
-      //remove temp layer from DOM and restore current layer
-      removeTempLayerFromDOM()
-    }
-  }
+  //Render the canvas with the new latest action
+  renderToLatestAction(latestAction, modType)
+  //Recalculate size of file if save dialog is open
   if (state.saveDialogOpen) {
     setSaveFilesizePreview()
   }
@@ -455,5 +552,29 @@ export function handleUndo() {
 export function handleRedo() {
   if (state.redoStack.length >= 1) {
     actionUndoRedo(state.undoStack, state.redoStack, "to")
+  }
+}
+
+/**
+ * This sets the action which is then pushed to the undoStack for the command pattern
+ * action and redoStack are not reset here in order to allow some functionality based around checking if an action was just added to the timeline. TODO: (Low Priority) refactor to use a different method for this
+ * @param {object} actionObject - The action object to be added to the timeline
+ */
+export function addToTimeline(actionObject) {
+  const { tool, layer, properties } = actionObject
+  //use current state for variables
+  let snapshot = layer.type === "raster" ? layer.cvs.toDataURL() : null
+  state.action = {
+    index: state.undoStack.length,
+    tool: { ...tool }, //Needed properties: name, brushType, brushSize, type
+    layer: layer,
+    ...properties,
+    hidden: false,
+    removed: false,
+    snapshot,
+  }
+  state.undoStack.push(state.action)
+  if (state.saveDialogOpen) {
+    setSaveFilesizePreview()
   }
 }

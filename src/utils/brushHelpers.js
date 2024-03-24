@@ -2,7 +2,7 @@ import { dom } from "../Context/dom.js"
 
 /**
  * update the brush preview in the dom
- * @param {Array} brushPixels
+ * @param {Array} brushPixels - array of coordinates representing the pixels of a base brush stamp
  * @param {number} brushSize - (Integer)
  */
 export function updateBrushPreview(brushPixels, brushSize) {
@@ -10,9 +10,21 @@ export function updateBrushPreview(brushPixels, brushSize) {
   dom.brushStamp.style.width = brushSize * 2
   dom.brushStamp.style.height = brushSize * 2
 
+  /**
+   * @param {number} x - (Integer)
+   * @param {number} y - (Integer)
+   * @param {number} w - (Integer)
+   * @returns {string} - path data
+   */
   function makePathData(x, y, w) {
     return "M" + x + " " + y + "h" + w + ""
   }
+
+  /**
+   * @param {string} color - rgba color
+   * @param {string} data - path data
+   * @returns {string} - path element
+   */
   function makePath(color, data) {
     return '<path stroke="' + color + '" d="' + data + '" />\n'
   }
@@ -30,8 +42,8 @@ export function updateBrushPreview(brushPixels, brushSize) {
  * @param {number} brushSize - (Integer)
  * @param {number} offsetX - (-1, 0, 1) (Integer)
  * @param {number} offsetY - (-1, 0, 1) (Integer)
- * @param {Set} seen
- * @returns array of coordinates representing the pixels of a base brush stamp
+ * @param {Set} seen - set of pixels already seen
+ * @returns {Array} - array of coordinates representing the pixels of a base brush stamp
  */
 function generateCircleBrush(brushSize, offsetX, offsetY, seen) {
   const brushPixels = []
@@ -55,8 +67,19 @@ function generateCircleBrush(brushSize, offsetX, offsetY, seen) {
     eightfoldSym(xO, yO, x, y)
   }
 
+  /**
+   * Create eightfold symmetry of a pixellated circle
+   * @param {number} xc - (Integer)
+   * @param {number} yc - (Integer)
+   * @param {number} x - (Integer)
+   * @param {number} y - (Integer)
+   */
   function eightfoldSym(xc, yc, x, y) {
-    // Helper function to add a pixel to the list
+    /**
+     * Helper function to add a pixel to the list of brush pixels
+     * @param {number} px - (Integer)
+     * @param {number} py - (Integer)
+     */
     function addPixel(px, py) {
       //put hole
       // if (px === 8 && py === 8) {
@@ -106,8 +129,8 @@ function generateCircleBrush(brushSize, offsetX, offsetY, seen) {
  * @param {number} brushSize - (Integer)
  * @param {number} offsetX - (-1, 0, 1) (Integer)
  * @param {number} offsetY - (-1, 0, 1) (Integer)
- * @param {Set} seen
- * @returns array of coordinates representing the pixels of a base brush stamp
+ * @param {Set} seen - set of pixels already seen
+ * @returns {Array} - array of coordinates representing the pixels of a base brush stamp
  */
 function generateSquareBrush(brushSize, offsetX, offsetY, seen) {
   const brush = []
@@ -126,11 +149,11 @@ function generateSquareBrush(brushSize, offsetX, offsetY, seen) {
 }
 
 /**
- * @param {Array} brushPixels
+ * @param {Array} brushPixels - array of coordinates representing the pixels of a base brush stamp
  * @param {number} offsetX - (-1, 0, 1) (Integer)
  * @param {number} offsetY - (-1, 0, 1) (Integer)
- * @param {Set} seen
- * @returns array of coordinates representing the pixels on the edge of a brush stamp for a given offset direction
+ * @param {Set} seen - set of pixels already seen
+ * @returns {Array} - array of coordinates representing the pixels on the edge of a brush stamp for a given offset direction
  */
 function generateOffsetBrush(brushPixels, offsetX, offsetY, seen) {
   const offsetBrush = []
@@ -147,9 +170,9 @@ function generateOffsetBrush(brushPixels, offsetX, offsetY, seen) {
 
 /**
  * Using 9 arrays for the brush directions reduces the time complexity of iterating through the brush from ~O(n^2) to ~O(n)
- * @param {Function} generatorFn
+ * @param {Function} generatorFn - function to generate the base brush stamp
  * @param {number} brushSize - (Integer)
- * @returns brushStamp object with 1 base stamp and 8 direction edge stamps
+ * @returns {object} - brushStamp object with 1 base stamp and 8 direction edge stamps
  */
 function createBrushStamp(generatorFn, brushSize) {
   const seen = new Set()
@@ -177,7 +200,7 @@ function createBrushStamp(generatorFn, brushSize) {
 /**
  * draw circle brush
  * @param {number} brushSize - (Integer)
- * @returns brushStamp object with 1 base stamp and 8 direction edge stamps
+ * @returns {object} - brushStamp object with 1 base stamp and 8 direction edge stamps
  */
 export function createCircleBrush(brushSize) {
   return createBrushStamp(generateCircleBrush, brushSize)
@@ -186,15 +209,15 @@ export function createCircleBrush(brushSize) {
 /**
  * draw square brush
  * @param {number} brushSize - (Integer)
- * @returns brushStamp object with 1 base stamp and 8 direction edge stamps
+ * @returns {object} - brushStamp object with 1 base stamp and 8 direction edge stamps
  */
 export function createSquareBrush(brushSize) {
   return createBrushStamp(generateSquareBrush, brushSize)
 }
 
 /**
- *
- * @param {string} brushType
+ * @param {string} brushType - "circle" or "square"
+ * @returns {object} - brushStamp object with 1 base stamp and 8 direction edge stamps
  */
 export function generateBrushStamps(brushType) {
   let brushStamp = {}

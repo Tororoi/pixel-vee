@@ -1,6 +1,3 @@
-import { dom } from "./dom.js"
-import { swatches } from "./swatch.js"
-import { setSaveFilesizePreview } from "../Save/savefile.js"
 import {
   disableActionsForNoSelection,
   enableActionsForSelection,
@@ -12,8 +9,6 @@ import {
 
 //Main state object to keep track of global vars
 export const state = {
-  captureTesting: false,
-  testNumPoints: 1000,
   tooltipMessage: null,
   tooltipTarget: null,
   //timeline
@@ -68,22 +63,30 @@ export const state = {
   activeIndexes: [],
   savedBetweenActionImages: [],
   vectorProperties: {
-    px1: null,
-    py1: null,
-    px2: null,
-    py2: null,
-    px3: null,
-    py3: null,
-    px4: null,
-    py4: null,
-    radA: null,
-    radB: null,
-    angle: null,
-    offset: null, //rename to something more specific
-    x1Offset: 0,
-    y1Offset: 0,
-    forceCircle: false,
+    // type: null,
+    // px1: null,
+    // py1: null,
+    // px2: null,
+    // py2: null,
+    // px3: null,
+    // py3: null,
+    // px4: null,
+    // py4: null,
+    // radA: null,
+    // radB: null,
+    // angle: null,
+    // unifiedOffset: null, //Can be 0 or 1. Used for ellipse when drawing a circle to maintain same x and y offset instead of separating them.
+    // x1Offset: 0,
+    // y1Offset: 0,
+    // forceCircle: false,
   },
+  //Vectors
+  vectors: {},
+  redoStackHeldVectors: {},
+  currentVectorIndex: null,
+  collidedVectorIndex: null,
+  highestVectorKey: 0,
+  selectedVectorIndicesSet: new Set(), //TODO: (Medium Priority) logic for which actions reset selected vectors
   //for select tool
   selectProperties: {
     px1: null,
@@ -98,10 +101,37 @@ export const state = {
     xMax: null,
     yMax: null,
   },
-  selectionInversed: false,
+  //Transform/ Paste
+  pastedImages: {
+    // index: {
+    //   actionIndex: null,
+    //   action: null,
+    //   imageData: null,
+    //   width: null,
+    //   height: null,
+    //   dataURL: null,
+    // },
+  },
+  highestPastedImageKey: 0,
+  currentPastedImageKey: null,
+  // originalImageDataForTransform: null,
+  previousBoundaryBox: null,
+  isMirroredHorizontally: false,
+  isMirroredVertically: false,
+  transformationRotationDegrees: 0,
   selectClipboard: {
-    boundaryBox: null,
-    canvasBoundaryBox: null,
+    boundaryBox: {
+      xMin: null,
+      yMin: null,
+      xMax: null,
+      yMax: null,
+    },
+    canvasBoundaryBox: {
+      xMin: null,
+      yMin: null,
+      xMax: null,
+      yMax: null,
+    },
     selectProperties: {
       px1: null,
       py1: null,
@@ -109,7 +139,8 @@ export const state = {
       py2: null,
     },
     canvas: null,
-    //TODO: (High Priority) for copying vectors, need more properties
+    imageData: null,
+    vectors: {},
   },
   //for perfect pixels
   lastDrawnX: null,
@@ -126,7 +157,7 @@ export const state = {
   resetBoundaryBox,
   setBoundaryBox,
   deselect,
-  invertSelection,
+  clearRedoStack,
 }
 
 /**
@@ -177,7 +208,7 @@ function resetBoundaryBox() {
 
 /**
  * Set boundaryBox
- * @param {object} selectProperties
+ * @param {object} selectProperties - The properties of the selection
  */
 function setBoundaryBox(selectProperties) {
   state.boundaryBox.xMin = Math.min(selectProperties.px1, selectProperties.px2)
@@ -193,13 +224,33 @@ function setBoundaryBox(selectProperties) {
 function deselect() {
   resetSelectProperties()
   resetBoundaryBox()
-  state.selectionInversed = false
+  state.vectorProperties = {}
+  state.currentVectorIndex = null
+  state.selectedVectorIndicesSet.clear()
+  //should be for all selected vectors
   disableActionsForNoSelection()
 }
 
 /**
  * Invert selection
+ * TODO: (Low Priority) implement invertSelection. Can only be done by redefining the masked area, should NOT use a marker which changes the logic elsewhere in the code
  */
-function invertSelection() {
-  state.selectionInversed = !state.selectionInversed
+// function invertSelection() {
+
+// }
+
+/**
+ * TODO: (High Priority) delete pastedImages for each paste action in the redo stack
+ */
+function clearRedoStack() {
+  state.action = null
+  //remove vectors from state.vectors that are part of redoStack
+  for (const action of state.redoStack) {
+    if (action.vectorIndices) {
+      action.vectorIndices.forEach((index) => {
+        delete state.vectors[index]
+      })
+    }
+  }
+  state.redoStack = []
 }

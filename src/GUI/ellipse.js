@@ -4,10 +4,10 @@ import { vectorGui } from "./vector.js"
 import { drawCirclePath, drawControlPointHandle } from "../utils/guiHelpers.js"
 
 /**
- * @param {object} vectorProperties
- * @param {object} vectorAction
+ * @param {object} vectorProperties - The properties of the vector
+ * @param {object} vector - The vector to be rendered
  */
-export function renderEllipseVector(vectorProperties, vectorAction) {
+export function renderEllipseVector(vectorProperties, vector) {
   const {
     px1,
     py1,
@@ -15,20 +15,16 @@ export function renderEllipseVector(vectorProperties, vectorAction) {
     py2,
     px3,
     py3,
-    radA,
-    radB,
-    angle,
-    x1Offset,
-    y1Offset,
+    // radA,
+    // radB,
+    // angle,
+    // x1Offset,
+    // y1Offset,
   } = vectorProperties
-  const xOffset = vectorAction
-    ? vectorAction.layer.x + canvas.xOffset
-    : canvas.xOffset
-  const yOffset = vectorAction
-    ? vectorAction.layer.y + canvas.yOffset
-    : canvas.yOffset
+  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
+  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
   // Setting of context attributes.
-  let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   let circleRadius = 8 * lineWidth
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
@@ -52,7 +48,7 @@ export function renderEllipseVector(vectorProperties, vectorAction) {
     { x: "px3", y: "py3" },
   ]
 
-  if (!vectorAction) {
+  if (!vector) {
     vectorGui.drawControlPoints(
       state.vectorProperties,
       pointsKeys,
@@ -71,20 +67,14 @@ export function renderEllipseVector(vectorProperties, vectorAction) {
     circleRadius / 2,
     true,
     0,
-    vectorAction
+    vector
   )
-  // canvas.vectorGuiCTX.fillText(
-  //   `${radA}, ${radB}`,
-  //   px1 + 30,
-  //   py1
-  // )
   // Fill points
   canvas.vectorGuiCTX.fill()
 }
 
 /**
- *
- * @param {object} vectorProperties
+ * @param {object} vectorProperties - The properties of the vector
  */
 export function renderOffsetEllipseVector(vectorProperties) {
   const {
@@ -94,14 +84,14 @@ export function renderOffsetEllipseVector(vectorProperties) {
     py2,
     px3,
     py3,
-    radA,
-    radB,
-    angle,
+    // radA,
+    // radB,
+    // angle,
     x1Offset,
     y1Offset,
   } = vectorProperties
   // Setting of context attributes.
-  let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   let circleRadius = 8 * lineWidth
   canvas.vectorGuiCTX.strokeStyle = "red"
   canvas.vectorGuiCTX.fillStyle = "red"
@@ -163,31 +153,27 @@ export function renderOffsetEllipseVector(vectorProperties) {
 }
 
 /**
- * @param {object} vectorProperties
- * @param {object} vectorAction
+ * @param {object} vectorProperties - The properties of the vector
+ * @param {object} vector - The vector to be rendered
  */
-export function renderEllipsePath(vectorProperties, vectorAction) {
+export function renderEllipsePath(vectorProperties, vector) {
   const {
     px1,
     py1,
-    px2,
-    py2,
+    // px2,
+    // py2,
     px3,
-    py3,
+    // py3,
     radA,
     radB,
     angle,
     x1Offset,
     y1Offset,
   } = vectorProperties
-  const xOffset = vectorAction
-    ? vectorAction.layer.x + canvas.xOffset
-    : canvas.xOffset
-  const yOffset = vectorAction
-    ? vectorAction.layer.y + canvas.yOffset
-    : canvas.yOffset
+  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
+  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
   // Setting of context attributes.
-  let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
+  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
 
