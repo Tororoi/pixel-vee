@@ -1,13 +1,17 @@
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
-import { drawControlPointHandle } from "../utils/guiHelpers.js"
 
 /**
  * @param {object} vectorProperties - The properties of the vector
  * @param {object} vector - The vector to be rendered
  */
 export function renderLineVector(vectorProperties, vector) {
-  const { px1, py1, px2, py2 } = vectorProperties
+  const {
+    px1,
+    py1,
+    // px2,
+    // py2
+  } = vectorProperties
   const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
   const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
   // Setting of context attributes.
@@ -69,10 +73,6 @@ export function renderLinePath(vectorProperties, vector) {
   if (Number.isInteger(px2)) {
     canvas.vectorGuiCTX.lineTo(xOffset + px2 + 0.5, yOffset + py2 + 0.5)
   }
-  // Stroke non-filled lines
-  // canvas.vectorGuiCTX.stroke()
-  // canvas.vectorGuiCTX.setLineDash([])
-  // canvas.vectorGuiCTX.lineWidth = lineWidth - lineWidth / 8
-  // canvas.vectorGuiCTX.strokeStyle = "black"
+
   canvas.vectorGuiCTX.stroke()
 }

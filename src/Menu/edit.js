@@ -1,9 +1,7 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
 import { brushStamps } from "../Context/brushStamps.js"
-import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { enableActionsForClipboard } from "../DOM/disableDomElements.js"
 import {

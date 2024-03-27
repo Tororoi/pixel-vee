@@ -5,7 +5,7 @@ import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
-  renderVectorsToDOM,
+  // renderVectorsToDOM,
   renderBrushModesToDOM,
   renderBrushStampToDOM,
   renderToolOptionsToDOM,
@@ -51,9 +51,14 @@ export function switchTool(toolName = null, toolBtn = null) {
       renderToolOptionsToDOM()
       //If the tool is not a vector tool, clear the selected vector indices
       if (
-        !["fill", "line", "quadCurve", "cubicCurve", "ellipse", "move"].includes(
-          tools[targetToolBtn.id].name
-        )
+        ![
+          "fill",
+          "line",
+          "quadCurve",
+          "cubicCurve",
+          "ellipse",
+          "move",
+        ].includes(tools[targetToolBtn.id].name)
       ) {
         state.selectedVectorIndicesSet.clear()
       }
