@@ -2,7 +2,6 @@ import { dom } from "../Context/dom.js"
 import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
@@ -66,10 +65,11 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         }
       }
     }
+    const tool = tools[action.tool]
     if (
       !action.hidden &&
       !action.removed &&
-      ["raster", "vector"].includes(action.tool.type)
+      ["raster", "vector"].includes(tool.type)
     ) {
       performAction(action, betweenCtx)
     }
@@ -142,7 +142,7 @@ export function performAction(action, betweenCtx = null) {
   if (!action?.boundaryBox) {
     return
   }
-  switch (action.tool.name) {
+  switch (action.tool) {
     case "brush": {
       //Correct action coordinates with layer offsets
       const offsetX = action.layer.x
@@ -186,7 +186,7 @@ export function performAction(action, betweenCtx = null) {
           p.y + offsetY,
           boundaryBox,
           action.color,
-          brushStamps[action.tool.brushType][p.brushSize][brushDirection],
+          brushStamps[action.brushType][p.brushSize][brushDirection],
           p.brushSize,
           action.layer,
           action.modes,
@@ -203,35 +203,9 @@ export function performAction(action, betweenCtx = null) {
     case "fill":
       renderActionVectors(action, betweenCtx)
       break
-    case "line": {
-      //Correct action coordinates with layer offsets
-      const offsetX = action.layer.x
-      const offsetY = action.layer.y
-      //correct boundary box for offsets
-      const boundaryBox = { ...action.boundaryBox }
-      if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin += offsetX
-        boundaryBox.xMax += offsetX
-        boundaryBox.yMin += offsetY
-        boundaryBox.yMax += offsetY
-      }
-      actionLine(
-        action.px1 + offsetX,
-        action.py1 + offsetY,
-        action.px2 + offsetX,
-        action.py2 + offsetY,
-        boundaryBox,
-        action.color,
-        action.layer,
-        action.modes,
-        brushStamps[action.tool.brushType][action.tool.brushSize],
-        action.tool.brushSize,
-        null, //maskSet made from action.maskArray
-        null,
-        betweenCtx
-      )
+    case "line":
+      renderActionVectors(action, betweenCtx)
       break
-    }
     case "quadCurve":
       renderActionVectors(action, betweenCtx)
       break
@@ -408,9 +382,26 @@ function renderActionVectors(action, activeCtx = null) {
           vector.vectorProperties.py1 + offsetY,
           boundaryBox,
           vector.color,
-          action.layer,
+          vector.layer,
           vector.modes,
           null, //maskSet made from action.maskArray
+          activeCtx
+        )
+        break
+      case "line":
+        actionLine(
+          vector.vectorProperties.px1 + offsetX,
+          vector.vectorProperties.py1 + offsetY,
+          vector.vectorProperties.px2 + offsetX,
+          vector.vectorProperties.py2 + offsetY,
+          boundaryBox,
+          vector.color,
+          vector.layer,
+          vector.modes,
+          brushStamps[vector.brushType][vector.brushSize],
+          vector.brushSize,
+          null, //maskSet made from action.maskArray
+          null,
           activeCtx
         )
         break
@@ -423,9 +414,9 @@ function renderActionVectors(action, activeCtx = null) {
           vector.vectorProperties.px3 + offsetX,
           vector.vectorProperties.py3 + offsetY,
           boundaryBox,
-          3,
+          2,
           vector.color,
-          action.layer,
+          vector.layer,
           vector.modes,
           brushStamps[vector.brushType][vector.brushSize],
           vector.brushSize,
@@ -444,9 +435,9 @@ function renderActionVectors(action, activeCtx = null) {
           vector.vectorProperties.px4 + offsetX,
           vector.vectorProperties.py4 + offsetY,
           boundaryBox,
-          4,
+          3,
           vector.color,
-          action.layer,
+          vector.layer,
           vector.modes,
           brushStamps[vector.brushType][vector.brushSize],
           vector.brushSize,
@@ -467,7 +458,7 @@ function renderActionVectors(action, activeCtx = null) {
           vector.vectorProperties.forceCircle,
           boundaryBox,
           vector.color,
-          action.layer,
+          vector.layer,
           vector.modes,
           brushStamps[vector.brushType][vector.brushSize],
           vector.brushSize,
@@ -491,7 +482,7 @@ function renderActionVectors(action, activeCtx = null) {
  */
 function updateLayersAfterRedo() {
   state.redoStack.forEach((action) => {
-    if (action.tool.name === "addLayer") {
+    if (action.tool === "addLayer") {
       action.layer.removed = true
       if (action.layer === canvas.currentLayer) {
         canvas.currentLayer.inactiveTools.forEach((tool) => {

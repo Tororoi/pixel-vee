@@ -128,7 +128,6 @@ export function saveDrawing() {
  * Load the drawing from a JSON file.
  * @param {JSON} jsonFile - The JSON file containing the drawing data.
  * TODO: (High Priority) Add error handling for loading the drawing
- * TODO: (High Priority) QA for select, line, clear, and paste tools
  */
 export async function loadDrawing(jsonFile) {
   let data
@@ -282,10 +281,28 @@ export async function loadDrawing(jsonFile) {
         }
         //Handle line actions
         if (action.tool.name === "line") {
-          action.px1 = action.properties.px1
-          action.py1 = action.properties.py1
-          action.px2 = action.properties.px2
-          action.py2 = action.properties.py2
+          //convert to a vector tool
+          state.highestVectorKey += 1
+          let uniqueVectorKey = state.highestVectorKey
+          data.vectors[uniqueVectorKey] = {
+            index: uniqueVectorKey,
+            actionIndex: index,
+            layer: action.layer,
+            modes: { ...action.modes },
+            color: { ...action.color },
+            brushSize: action.tool.brushSize,
+            brushType: action.tool.brushType,
+            vectorProperties: {
+              type: "line",
+              px1: action.properties.px1,
+              py1: action.properties.py1,
+              px2: action.properties.px2,
+              py2: action.properties.py2,
+            },
+            hidden: action.hidden,
+            removed: action.removed,
+          }
+          action.vectorIndices = [uniqueVectorKey]
         }
         //Handle actions with maskArray
         if (action.properties?.maskArray) {
@@ -320,10 +337,13 @@ export async function loadDrawing(jsonFile) {
         delete action.properties
       }
       //Handle actions with brush information
-      if (action.tool?.brushSize) {
+      if (action.tool.brushSize) {
         action.brushSize = action.tool.brushSize
         action.brushType = action.tool.brushType
       }
+      //Convert tool to just be the name of the tool
+      action.tool = action.tool.name
+      //--- End of version 1.0 conversion ---//
     }
 
     //Handle brush tool

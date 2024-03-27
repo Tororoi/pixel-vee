@@ -1,9 +1,7 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
 import { brushStamps } from "../Context/brushStamps.js"
-import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { enableActionsForClipboard } from "../DOM/disableDomElements.js"
 import {
@@ -11,6 +9,7 @@ import {
   actionQuadraticCurve,
   actionCubicCurve,
   actionEllipse,
+  actionLine,
 } from "../Actions/pointerActions.js"
 
 //===================================//
@@ -214,6 +213,21 @@ function renderPaste(clipboard, layer, offsetX, offsetY) {
             null //maskSet made from action.maskArray
           )
           break
+        case "line":
+          actionLine(
+            vector.vectorProperties.px1 + offsetX,
+            vector.vectorProperties.py1 + offsetY,
+            vector.vectorProperties.px2 + offsetX,
+            vector.vectorProperties.py2 + offsetY,
+            boundaryBox,
+            vector.color,
+            layer,
+            vector.modes,
+            brushStamps[vector.brushType][vector.brushSize],
+            vector.brushSize,
+            null //maskSet made from action.maskArray
+          )
+          break
         case "quadCurve":
           actionQuadraticCurve(
             vector.vectorProperties.px1 + offsetX,
@@ -223,7 +237,7 @@ function renderPaste(clipboard, layer, offsetX, offsetY) {
             vector.vectorProperties.px3 + offsetX,
             vector.vectorProperties.py3 + offsetY,
             boundaryBox,
-            3,
+            2,
             vector.color,
             layer,
             vector.modes,
@@ -243,7 +257,7 @@ function renderPaste(clipboard, layer, offsetX, offsetY) {
             vector.vectorProperties.px4 + offsetX,
             vector.vectorProperties.py4 + offsetY,
             boundaryBox,
-            4,
+            3,
             vector.color,
             layer,
             vector.modes,

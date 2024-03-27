@@ -41,7 +41,7 @@ export function modifyVectorAction(moddedVector) {
   state.activeIndexes = []
   state.savedBetweenActionImages = []
   addToTimeline({
-    tool: tools.modify,
+    tool: tools.modify.name,
     layer: moddedVector.layer,
     properties: {
       moddedActionIndex: moddedVector.actionIndex,
@@ -65,7 +65,7 @@ export function changeActionVectorColor(moddedVector, oldColor) {
     ...moddedVector.color,
   } //shallow copy, must make deep copy, at least for x, y and properties
   addToTimeline({
-    tool: tools.changeColor,
+    tool: tools.changeColor.name,
     layer: moddedVector.layer,
     properties: {
       //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
@@ -83,7 +83,7 @@ export function changeActionVectorColor(moddedVector, oldColor) {
  */
 export function removeActionVector(moddedVector) {
   addToTimeline({
-    tool: tools.remove,
+    tool: tools.remove.name,
     layer: moddedVector.layer,
     properties: {
       //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
@@ -103,7 +103,7 @@ export function removeActionVector(moddedVector) {
  */
 export function changeActionVectorMode(moddedVector, oldModes, newModes) {
   addToTimeline({
-    tool: tools.changeMode,
+    tool: tools.changeMode.name,
     layer: moddedVector.layer,
     properties: {
       //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
@@ -140,7 +140,7 @@ export function actionClear(layer) {
     }
   })
   addToTimeline({
-    tool: tools.clear,
+    tool: tools.clear.name,
     layer: layer,
     properties: {
       //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified

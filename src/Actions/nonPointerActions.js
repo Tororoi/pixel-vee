@@ -49,7 +49,7 @@ export function actionSelectAll() {
     state.selectProperties.py2 = canvas.currentLayer.cvs.height
     state.setBoundaryBox(state.selectProperties)
     addToTimeline({
-      tool: tools.select,
+      tool: tools.select.name,
       layer: canvas.currentLayer,
       properties: {
         deselect: false,
@@ -80,7 +80,7 @@ export function actionDeselect() {
     //   canvas.currentLayer.y
     // )
     addToTimeline({
-      tool: tools.select,
+      tool: tools.select.name,
       layer: canvas.currentLayer,
       properties: {
         deselect: true,
@@ -119,7 +119,7 @@ export function actionCutSelection(copyToClipboard = true) {
       boundaryBox.yMax -= canvas.currentLayer.y
     }
     addToTimeline({
-      tool: tools.cut,
+      tool: tools.cut.name,
       layer: canvas.currentLayer,
       properties: {
         boundaryBox,
@@ -233,8 +233,8 @@ export function actionPasteSelection() {
     addToTimeline({
       tool:
         Object.keys(state.selectClipboard.vectors).length === 0
-          ? tools.paste
-          : tools.vectorPaste,
+          ? tools.paste.name
+          : tools.vectorPaste.name,
       layer: canvas.currentLayer,
       properties: {
         confirmed: false,
@@ -405,8 +405,8 @@ export function actionConfirmPastedPixels() {
     addToTimeline({
       tool:
         Object.keys(state.selectClipboard.vectors).length === 0
-          ? tools.paste
-          : tools.vectorPaste,
+          ? tools.paste.name
+          : tools.vectorPaste.name,
       layer: canvas.currentLayer,
       properties: {
         confirmed: true,
@@ -485,7 +485,7 @@ export function addTransformToTimeline() {
     selectProperties.py2 -= canvas.currentLayer.y
   }
   addToTimeline({
-    tool: tools.transform,
+    tool: tools.transform.name,
     layer: canvas.currentLayer,
     properties: {
       boundaryBox,
@@ -609,7 +609,7 @@ export function addReferenceLayer() {
         const layer = createReferenceLayer(img)
         canvas.layers.unshift(layer)
         addToTimeline({
-          tool: tools.addLayer,
+          tool: tools.addLayer.name,
           layer,
         })
         state.clearRedoStack()
@@ -636,7 +636,7 @@ export function addRasterLayer() {
   const layer = createRasterLayer()
   canvas.layers.push(layer)
   addToTimeline({
-    tool: tools.addLayer,
+    tool: tools.addLayer.name,
     layer,
   })
   state.clearRedoStack()
@@ -658,7 +658,7 @@ export function removeLayer(layer) {
       vectorGui.reset()
     }
     addToTimeline({
-      tool: tools.removeLayer,
+      tool: tools.removeLayer.name,
       layer,
     })
     state.clearRedoStack()

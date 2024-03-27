@@ -46,7 +46,7 @@ function selectSteps() {
       state.normalizeSelectProperties()
       state.setBoundaryBox(state.selectProperties)
       addToTimeline({
-        tool: state.tool,
+        tool: state.tool.name,
         layer: canvas.currentLayer,
         properties: {
           deselect: false,
@@ -87,7 +87,7 @@ function adjustSelectSteps() {
       state.normalizeSelectProperties()
       state.setBoundaryBox(state.selectProperties)
       addToTimeline({
-        tool: state.tool,
+        tool: state.tool.name,
         layer: canvas.currentLayer,
         properties: {
           deselect: false,
