@@ -37,7 +37,7 @@ function quadCurveSteps() {
     case "pointerdown":
       //solidify end points
       state.clickCounter += 1
-      if (state.clickCounter > 3) state.clickCounter = 1
+      if (state.clickCounter > 2) state.clickCounter = 1
       switch (state.clickCounter) {
         case 1:
           //reset control points
@@ -50,7 +50,6 @@ function quadCurveSteps() {
           state.vectorProperties.py2 = state.cursorY
           break
         case 2:
-        case 3:
           state.vectorProperties.px3 = state.cursorX
           state.vectorProperties.py3 = state.cursorY
           break
@@ -86,7 +85,6 @@ function quadCurveSteps() {
           state.vectorProperties.py2 = state.cursorY
           break
         case 2:
-        case 3:
           state.vectorProperties.px3 = state.cursorX
           state.vectorProperties.py3 = state.cursorY
           break
@@ -116,16 +114,12 @@ function quadCurveSteps() {
 
       break
     case "pointerup":
-      if (state.touch && state.clickCounter === 2) {
-        state.clickCounter += 1
-      }
       switch (state.clickCounter) {
         case 1:
           state.vectorProperties.px2 = state.cursorX
           state.vectorProperties.py2 = state.cursorY
           break
         case 2:
-        case 3:
           state.vectorProperties.px3 = state.cursorX
           state.vectorProperties.py3 = state.cursorY
           break
@@ -133,7 +127,7 @@ function quadCurveSteps() {
         //do nothing
       }
       //Solidify curve
-      if (state.clickCounter === 3) {
+      if (state.clickCounter === 2) {
         actionQuadraticCurve(
           state.vectorProperties.px1,
           state.vectorProperties.py1,
@@ -236,7 +230,7 @@ function cubicCurveSteps() {
     case "pointerdown":
       //solidify end points
       state.clickCounter += 1
-      if (state.clickCounter > 4) state.clickCounter = 1
+      if (state.clickCounter > 3) state.clickCounter = 1
       switch (state.clickCounter) {
         case 1:
           //reset control points
@@ -253,7 +247,6 @@ function cubicCurveSteps() {
           state.vectorProperties.py3 = state.cursorY
           break
         case 3:
-        case 4:
           state.vectorProperties.px4 = state.cursorX
           state.vectorProperties.py4 = state.cursorY
           break
@@ -294,7 +287,6 @@ function cubicCurveSteps() {
           state.vectorProperties.py3 = state.cursorY
           break
         case 3:
-        case 4:
           state.vectorProperties.px4 = state.cursorX
           state.vectorProperties.py4 = state.cursorY
           break
@@ -325,9 +317,6 @@ function cubicCurveSteps() {
       )
       break
     case "pointerup":
-      if (state.touch && state.clickCounter === 3) {
-        state.clickCounter += 1
-      }
       switch (state.clickCounter) {
         case 1:
           state.vectorProperties.px2 = state.cursorX
@@ -338,7 +327,6 @@ function cubicCurveSteps() {
           state.vectorProperties.py3 = state.cursorY
           break
         case 3:
-        case 4:
           state.vectorProperties.px4 = state.cursorX
           state.vectorProperties.py4 = state.cursorY
           break
@@ -346,7 +334,7 @@ function cubicCurveSteps() {
         //do nothing
       }
       //Solidify curve
-      if (state.clickCounter === 4) {
+      if (state.clickCounter === 3) {
         actionCubicCurve(
           state.vectorProperties.px1,
           state.vectorProperties.py1,

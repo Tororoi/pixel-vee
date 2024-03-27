@@ -31,7 +31,6 @@ export function renderCursor() {
     default:
       if (!vectorGui.selectedCollisionPresent && !state.collidedVectorIndex) {
         renderCanvas(canvas.currentLayer)
-        //Then renderCanvas would not need to be called here.
         actionDraw(
           state.cursorX,
           state.cursorY,
