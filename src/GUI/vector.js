@@ -23,6 +23,7 @@ import {
   disableActionsForNoSelection,
   enableActionsForSelection,
 } from "../DOM/disableDomElements.js"
+import { renderLinePath, renderLineVector } from "./line.js"
 
 //==================================================//
 //=== * * * Vector Graphics User Interface * * * ===//
@@ -261,21 +262,21 @@ function setVectorProperties(vector) {
   if (vector.layer === canvas.currentLayer) {
     state.vectorProperties = { ...vector.vectorProperties }
     //Keep properties relative to layer offset
+    //All vector types have at least one control point
     state.vectorProperties.px1 += vector.layer.x
     state.vectorProperties.py1 += vector.layer.y
-    if (
-      vector.vectorProperties.type === "quadCurve" ||
-      vector.vectorProperties.type === "cubicCurve" ||
-      vector.vectorProperties.type === "ellipse"
-    ) {
+    //line, quadCurve, cubicCurve, ellipse
+    if (state.vectorProperties.px2 !== undefined) {
       state.vectorProperties.px2 += vector.layer.x
       state.vectorProperties.py2 += vector.layer.y
-
+    }
+    //quadCurve, cubicCurve, ellipse
+    if (state.vectorProperties.px3 !== undefined) {
       state.vectorProperties.px3 += vector.layer.x
       state.vectorProperties.py3 += vector.layer.y
     }
-
-    if (vector.vectorProperties.type === "cubicCurve") {
+    //cubicCurve
+    if (state.vectorProperties.px4 !== undefined) {
       state.vectorProperties.px4 += vector.layer.x
       state.vectorProperties.py4 += vector.layer.y
     }
@@ -332,6 +333,9 @@ function renderControlPoints(toolName, vectorProperties, vector = null) {
     case "fill":
       renderFillVector(vectorProperties, vector)
       break
+    case "line":
+      renderLineVector(vectorProperties, vector)
+      break
     case "quadCurve":
     case "cubicCurve":
       renderCurveVector(vectorProperties, vector)
@@ -361,6 +365,9 @@ function renderPath(toolName, vectorProperties, vector = null) {
   switch (toolName) {
     case "fill":
       // renderFillVector(state.vectorProperties)
+      break
+    case "line":
+      renderLinePath(vectorProperties, vector)
       break
     case "quadCurve":
     case "cubicCurve":

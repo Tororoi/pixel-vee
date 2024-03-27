@@ -11,6 +11,7 @@ import {
   actionQuadraticCurve,
   actionCubicCurve,
   actionEllipse,
+  actionLine,
 } from "../Actions/pointerActions.js"
 
 //===================================//
@@ -211,6 +212,21 @@ function renderPaste(clipboard, layer, offsetX, offsetY) {
             vector.color,
             layer,
             vector.modes,
+            null //maskSet made from action.maskArray
+          )
+          break
+        case "line":
+          actionLine(
+            vector.vectorProperties.px1 + offsetX,
+            vector.vectorProperties.py1 + offsetY,
+            vector.vectorProperties.px2 + offsetX,
+            vector.vectorProperties.py2 + offsetY,
+            boundaryBox,
+            vector.color,
+            layer,
+            vector.modes,
+            brushStamps[vector.brushType][vector.brushSize],
+            vector.brushSize,
             null //maskSet made from action.maskArray
           )
           break

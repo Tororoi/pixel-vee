@@ -223,6 +223,7 @@ function handlePointerUp(e) {
   state.clicked = false
   canvas.vectorGuiCVS.style.cursor = state.tool.cursor
   setCoordinates(e)
+  //if drawing on hidden layer, stop flashing hide btn
   if (canvas.currentLayer.hidden) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
       if (dom.layersContainer.children[i].layerObj === canvas.currentLayer) {
@@ -238,7 +239,7 @@ function handlePointerUp(e) {
   //reset action and render vectors
   if (state.action) {
     if (
-      ["fill", "quadCurve", "cubicCurve", "ellipse"].includes(state.tool.name)
+      ["fill", "line", "quadCurve", "cubicCurve", "ellipse"].includes(state.tool.name)
     ) {
       // if (state.action.tool.type === "vector") {
       //   state.currentVectorIndex = state.undoStack.indexOf(state.action)

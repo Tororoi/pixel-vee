@@ -82,6 +82,12 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
           case "fill":
             //need idea to render selection of fill vector
             break
+          case "line": {
+            const { px1, py1, px2, py2 } = vector.vectorProperties
+            canvas.rasterGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
+            canvas.rasterGuiCTX.lineTo(xOffset + px2 + 0.5, yOffset + py2 + 0.5)
+            break
+          }
           case "quadCurve": {
             const { px1, py1, px2, py2, px3, py3 } = vector.vectorProperties
             canvas.rasterGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)

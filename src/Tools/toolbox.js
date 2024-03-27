@@ -51,7 +51,7 @@ export function switchTool(toolName = null, toolBtn = null) {
       renderToolOptionsToDOM()
       //If the tool is not a vector tool, clear the selected vector indices
       if (
-        !["fill", "quadCurve", "cubicCurve", "ellipse", "move"].includes(
+        !["fill", "line", "quadCurve", "cubicCurve", "ellipse", "move"].includes(
           tools[targetToolBtn.id].name
         )
       ) {

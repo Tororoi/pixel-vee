@@ -203,35 +203,35 @@ export function performAction(action, betweenCtx = null) {
     case "fill":
       renderActionVectors(action, betweenCtx)
       break
-    case "line": {
-      //Correct action coordinates with layer offsets
-      const offsetX = action.layer.x
-      const offsetY = action.layer.y
-      //correct boundary box for offsets
-      const boundaryBox = { ...action.boundaryBox }
-      if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin += offsetX
-        boundaryBox.xMax += offsetX
-        boundaryBox.yMin += offsetY
-        boundaryBox.yMax += offsetY
-      }
-      actionLine(
-        action.px1 + offsetX,
-        action.py1 + offsetY,
-        action.px2 + offsetX,
-        action.py2 + offsetY,
-        boundaryBox,
-        action.color,
-        action.layer,
-        action.modes,
-        brushStamps[action.tool.brushType][action.tool.brushSize],
-        action.tool.brushSize,
-        null, //maskSet made from action.maskArray
-        null,
-        betweenCtx
-      )
+    case "line":
+      // //Correct action coordinates with layer offsets
+      // const offsetX = action.layer.x
+      // const offsetY = action.layer.y
+      // //correct boundary box for offsets
+      // const boundaryBox = { ...action.boundaryBox }
+      // if (boundaryBox.xMax !== null) {
+      //   boundaryBox.xMin += offsetX
+      //   boundaryBox.xMax += offsetX
+      //   boundaryBox.yMin += offsetY
+      //   boundaryBox.yMax += offsetY
+      // }
+      // actionLine(
+      //   action.px1 + offsetX,
+      //   action.py1 + offsetY,
+      //   action.px2 + offsetX,
+      //   action.py2 + offsetY,
+      //   boundaryBox,
+      //   action.color,
+      //   action.layer,
+      //   action.modes,
+      //   brushStamps[action.tool.brushType][action.tool.brushSize],
+      //   action.tool.brushSize,
+      //   null, //maskSet made from action.maskArray
+      //   null,
+      //   betweenCtx
+      // )
+      renderActionVectors(action, betweenCtx)
       break
-    }
     case "quadCurve":
       renderActionVectors(action, betweenCtx)
       break
@@ -408,9 +408,26 @@ function renderActionVectors(action, activeCtx = null) {
           vector.vectorProperties.py1 + offsetY,
           boundaryBox,
           vector.color,
-          action.layer,
+          vector.layer,
           vector.modes,
           null, //maskSet made from action.maskArray
+          activeCtx
+        )
+        break
+      case "line":
+        actionLine(
+          vector.vectorProperties.px1 + offsetX,
+          vector.vectorProperties.py1 + offsetY,
+          vector.vectorProperties.px2 + offsetX,
+          vector.vectorProperties.py2 + offsetY,
+          boundaryBox,
+          vector.color,
+          vector.layer,
+          vector.modes,
+          brushStamps[vector.brushType][vector.brushSize],
+          vector.brushSize,
+          null, //maskSet made from action.maskArray
+          null,
           activeCtx
         )
         break
@@ -425,7 +442,7 @@ function renderActionVectors(action, activeCtx = null) {
           boundaryBox,
           3,
           vector.color,
-          action.layer,
+          vector.layer,
           vector.modes,
           brushStamps[vector.brushType][vector.brushSize],
           vector.brushSize,
@@ -446,7 +463,7 @@ function renderActionVectors(action, activeCtx = null) {
           boundaryBox,
           4,
           vector.color,
-          action.layer,
+          vector.layer,
           vector.modes,
           brushStamps[vector.brushType][vector.brushSize],
           vector.brushSize,
@@ -467,7 +484,7 @@ function renderActionVectors(action, activeCtx = null) {
           vector.vectorProperties.forceCircle,
           boundaryBox,
           vector.color,
-          action.layer,
+          vector.layer,
           vector.modes,
           brushStamps[vector.brushType][vector.brushSize],
           vector.brushSize,
