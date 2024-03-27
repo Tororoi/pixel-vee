@@ -49,7 +49,7 @@ function moveSteps() {
         renderCanvas(canvas.currentLayer, true)
         //save start and end coordinates
         addToTimeline({
-          tool: state.tool,
+          tool: state.tool.name,
           layer: canvas.currentLayer,
           //selectProperties: { ...state.selectProperties },
           properties: {

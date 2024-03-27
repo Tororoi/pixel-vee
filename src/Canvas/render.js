@@ -66,10 +66,11 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         }
       }
     }
+    const tool = tools[action.tool]
     if (
       !action.hidden &&
       !action.removed &&
-      ["raster", "vector"].includes(action.tool.type)
+      ["raster", "vector"].includes(tool.type)
     ) {
       performAction(action, betweenCtx)
     }
@@ -142,7 +143,7 @@ export function performAction(action, betweenCtx = null) {
   if (!action?.boundaryBox) {
     return
   }
-  switch (action.tool.name) {
+  switch (action.tool) {
     case "brush": {
       //Correct action coordinates with layer offsets
       const offsetX = action.layer.x
@@ -186,7 +187,7 @@ export function performAction(action, betweenCtx = null) {
           p.y + offsetY,
           boundaryBox,
           action.color,
-          brushStamps[action.tool.brushType][p.brushSize][brushDirection],
+          brushStamps[action.brushType][p.brushSize][brushDirection],
           p.brushSize,
           action.layer,
           action.modes,
@@ -204,32 +205,6 @@ export function performAction(action, betweenCtx = null) {
       renderActionVectors(action, betweenCtx)
       break
     case "line":
-      // //Correct action coordinates with layer offsets
-      // const offsetX = action.layer.x
-      // const offsetY = action.layer.y
-      // //correct boundary box for offsets
-      // const boundaryBox = { ...action.boundaryBox }
-      // if (boundaryBox.xMax !== null) {
-      //   boundaryBox.xMin += offsetX
-      //   boundaryBox.xMax += offsetX
-      //   boundaryBox.yMin += offsetY
-      //   boundaryBox.yMax += offsetY
-      // }
-      // actionLine(
-      //   action.px1 + offsetX,
-      //   action.py1 + offsetY,
-      //   action.px2 + offsetX,
-      //   action.py2 + offsetY,
-      //   boundaryBox,
-      //   action.color,
-      //   action.layer,
-      //   action.modes,
-      //   brushStamps[action.tool.brushType][action.tool.brushSize],
-      //   action.tool.brushSize,
-      //   null, //maskSet made from action.maskArray
-      //   null,
-      //   betweenCtx
-      // )
       renderActionVectors(action, betweenCtx)
       break
     case "quadCurve":
@@ -508,7 +483,7 @@ function renderActionVectors(action, activeCtx = null) {
  */
 function updateLayersAfterRedo() {
   state.redoStack.forEach((action) => {
-    if (action.tool.name === "addLayer") {
+    if (action.tool === "addLayer") {
       action.layer.removed = true
       if (action.layer === canvas.currentLayer) {
         canvas.currentLayer.inactiveTools.forEach((tool) => {

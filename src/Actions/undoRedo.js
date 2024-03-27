@@ -43,7 +43,7 @@ function renderToLatestAction(latestAction, modType) {
       renderCanvas(mostRecentActionFromSameLayer.layer)
       //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
       if (
-        ["paste", "vectorPaste"].includes(latestAction.tool.name) &&
+        ["paste", "vectorPaste"].includes(latestAction.tool) &&
         latestAction.confirmed &&
         modType === "to"
       ) {
@@ -74,7 +74,7 @@ function renderToLatestAction(latestAction, modType) {
     }
     //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
     if (
-      ["paste", "vectorPaste"].includes(latestAction.tool.name) &&
+      ["paste", "vectorPaste"].includes(latestAction.tool) &&
       latestAction.confirmed &&
       modType === "to"
     ) {
@@ -386,7 +386,7 @@ function handleTransformAction(latestAction, newLatestAction, modType) {
     state.selectProperties = { ...selectProperties }
     state.setBoundaryBox(state.selectProperties)
     //Eventually undoing transform actions will result in the newLatestAction being a paste action. In that case, don't render a transformation
-    if (newLatestAction.tool.name === "transform") {
+    if (newLatestAction.tool === "transform") {
       transformRasterContent(
         newLatestAction.layer,
         state.pastedImages[newLatestAction.pastedImageKey].imageData,
@@ -447,22 +447,22 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       ? popStack[popStack.length - 2]
       : null
   if (modType === "from" && popStack.length > 1) {
-    if (newLatestAction.tool.name === "modify") {
+    if (newLatestAction.tool === "modify") {
       //If action is modif, new latest action will be considered the modded action
       newLatestAction = popStack[newLatestAction.moddedActionIndex]
     }
   }
-  if (latestAction.tool.name === "modify") {
+  if (latestAction.tool === "modify") {
     handleModifyAction(latestAction, modType)
-  } else if (latestAction.tool.name === "changeMode") {
+  } else if (latestAction.tool === "changeMode") {
     state.undoStack[latestAction.moddedActionIndex].modes = {
       ...latestAction[modType],
     }
-  } else if (latestAction.tool.name === "changeColor") {
+  } else if (latestAction.tool === "changeColor") {
     state.undoStack[latestAction.moddedActionIndex].color = {
       ...latestAction[modType],
     }
-  } else if (latestAction.tool.name === "remove") {
+  } else if (latestAction.tool === "remove") {
     if (latestAction.moddedVectorIndex !== undefined) {
       //If the remove action has a vector index, set the vector's removed property
       state.undoStack[latestAction.moddedActionIndex].vectors[
@@ -473,9 +473,9 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       state.undoStack[latestAction.moddedActionIndex].removed =
         latestAction[modType]
     }
-  } else if (latestAction.tool.name === "clear") {
+  } else if (latestAction.tool === "clear") {
     handleClearAction(latestAction)
-  } else if (latestAction.tool.name === "addLayer") {
+  } else if (latestAction.tool === "addLayer") {
     if (modType === "from") {
       //If undoing addLayer, remove layer from canvas
       latestAction.layer.removed = true
@@ -483,7 +483,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       //If redoing addLayer, add layer to canvas
       latestAction.layer.removed = false
     }
-  } else if (latestAction.tool.name === "removeLayer") {
+  } else if (latestAction.tool === "removeLayer") {
     if (modType === "from") {
       //If undoing removeLayer, add layer to canvas
       latestAction.layer.removed = false
@@ -491,21 +491,21 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       //If redoing removeLayer, remove layer from canvas
       latestAction.layer.removed = true
     }
-  } else if (latestAction.tool.name === "select") {
+  } else if (latestAction.tool === "select") {
     handleSelectAction(latestAction, newLatestAction, modType)
-  } else if (["paste", "vectorPaste"].includes(latestAction.tool.name)) {
+  } else if (["paste", "vectorPaste"].includes(latestAction.tool)) {
     if (!latestAction.confirmed) {
       handlePasteAction(latestAction, modType)
     } else {
       handleConfirmPasteAction(latestAction, newLatestAction, modType)
     }
-  } else if (latestAction.tool.name === "move") {
+  } else if (latestAction.tool === "move") {
     handleMoveAction(latestAction, modType)
-  } else if (latestAction.tool.name === "transform") {
+  } else if (latestAction.tool === "transform") {
     handleTransformAction(latestAction, newLatestAction, modType)
   } else if (
-    latestAction.tool.name === state.tool.name &&
-    latestAction.tool.type === "vector"
+    latestAction.tool === state.tool.name &&
+    state.tool.type === "vector"
   ) {
     //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
     if (modType === "to") {
@@ -519,8 +519,8 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   //For undo, if new latest action or new latest modded action will be a vector and its tool is currently selected, set vector properties to match
   if (newLatestAction) {
     if (
-      newLatestAction.tool.name === state.tool.name &&
-      newLatestAction.tool.type === "vector" &&
+      newLatestAction.tool === state.tool.name &&
+      state.tool.type === "vector" &&
       state.currentVectorIndex === null
     ) {
       //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
@@ -566,8 +566,8 @@ export function addToTimeline(actionObject) {
   let snapshot = layer.type === "raster" ? layer.cvs.toDataURL() : null
   state.action = {
     index: state.undoStack.length,
-    tool: { ...tool }, //Needed properties: name, brushType, brushSize, type
-    layer: layer,
+    tool,
+    layer,
     ...properties,
     hidden: false,
     removed: false,

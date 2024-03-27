@@ -109,28 +109,12 @@ function lineSteps() {
         boundaryBox.yMin -= canvas.currentLayer.y
         boundaryBox.yMax -= canvas.currentLayer.y
       }
-      // addToTimeline({
-      //   tool: state.tool,
-      //   layer: canvas.currentLayer,
-      //   properties: {
-      //     modes: { ...state.tool.modes },
-      //     color: { ...swatches.primary.color },
-      //     brushSize: state.tool.brushSize,
-      //     brushType: state.tool.brushType,
-      //     px1: state.lineStartX - canvas.currentLayer.x,
-      //     py1: state.lineStartY - canvas.currentLayer.y,
-      //     px2: state.cursorX - canvas.currentLayer.x,
-      //     py2: state.cursorY - canvas.currentLayer.y,
-      //     maskArray,
-      //     boundaryBox,
-      //   },
-      // })
       //generate new unique key for vector
       state.highestVectorKey += 1
       let uniqueVectorKey = state.highestVectorKey
       //store control points for timeline
       addToTimeline({
-        tool: state.tool,
+        tool: state.tool.name,
         layer: canvas.currentLayer,
         properties: {
           maskArray,

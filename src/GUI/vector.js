@@ -570,8 +570,8 @@ export function createActiveIndexesForRender(
     let action = state.undoStack[i]
     if (
       action.layer === currentVector.layer &&
-      (action.tool.name === "fill" ||
-        action.tool.name === "cut" ||
+      (action.tool === "fill" ||
+        action.tool === "cut" ||
         action?.modes?.eraser ||
         action?.modes?.inject ||
         vectorsSavedPropertiesActionKeys.includes(i))

@@ -251,11 +251,6 @@ function handlePointerUp(e) {
         state.tool.name
       )
     ) {
-      // if (state.action.tool.type === "vector") {
-      //   state.currentVectorIndex = state.undoStack.indexOf(state.action)
-      // } else if (state.action.tool.type === "modify") {
-      //   state.currentVectorIndex = state.action.moddedActionIndex
-      // }
       renderVectorsToDOM()
     }
 

@@ -163,7 +163,7 @@ function quadCurveSteps() {
         let uniqueVectorKey = state.highestVectorKey
         //store control points for timeline
         addToTimeline({
-          tool: state.tool,
+          tool: state.tool.name,
           layer: canvas.currentLayer,
           properties: {
             maskArray,
@@ -372,7 +372,7 @@ function cubicCurveSteps() {
         let uniqueVectorKey = state.highestVectorKey
         //store control points for timeline
         addToTimeline({
-          tool: state.tool,
+          tool: state.tool.name,
           layer: canvas.currentLayer,
           properties: {
             maskArray,
