@@ -109,7 +109,6 @@ function drawControlPoints(
   pointsKeys,
   radius,
   modify = false,
-  offset = 0,
   vector = null
 ) {
   for (let keys of pointsKeys) {
@@ -120,7 +119,7 @@ function drawControlPoints(
 
     if (point.x === null || point.y === null) continue
 
-    handleCollisionAndDraw(keys, point, radius, modify, offset, vector)
+    handleCollisionAndDraw(keys, point, radius, modify, vector)
   }
 
   setCursorStyle()
@@ -132,16 +131,15 @@ function drawControlPoints(
  * @param {object} point - The coordinates of the control point
  * @param {number} radius - (Float)
  * @param {boolean} modify - if true, check for collision with cursor and modify radius
- * @param {number} offset - (Float)
  * @param {object} vector - The vector to be rendered
  */
-function handleCollisionAndDraw(keys, point, radius, modify, offset, vector) {
+function handleCollisionAndDraw(keys, point, radius, modify, vector) {
   let r = state.touch ? radius * 2 : radius
   const xOffset = vector ? vector.layer.x : 0
   const yOffset = vector ? vector.layer.y : 0
 
-  const normalizedX = point.x - offset + xOffset
-  const normalizedY = point.y - offset + yOffset
+  const normalizedX = point.x + xOffset
+  const normalizedY = point.y + yOffset
 
   if (modify) {
     if (vectorGui.selectedPoint.xKey === keys.x && !vector) {
@@ -208,8 +206,8 @@ function handleCollisionAndDraw(keys, point, radius, modify, offset, vector) {
     canvas,
     canvas.xOffset + xOffset,
     canvas.yOffset + yOffset,
-    point.x - offset,
-    point.y - offset,
+    point.x,
+    point.y,
     r
   )
 }

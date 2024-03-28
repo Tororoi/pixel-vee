@@ -56,7 +56,6 @@ export function renderCurveVector(vectorProperties, vector) {
     pointsKeys,
     circleRadius / 2,
     true, // modify
-    0,
     vector
   )
   // Fill points
