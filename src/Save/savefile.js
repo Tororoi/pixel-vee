@@ -22,6 +22,8 @@ import {
 import { resizeOffScreenCanvas } from "../Canvas/render.js"
 import { consolidateLayers } from "../Canvas/layers.js"
 
+const currentVersion = "1.1"
+
 /**
  * Save the drawing as a JSON file
  * Unsaveable data:
@@ -69,7 +71,7 @@ export function prepareDrawingForSave() {
   // Create a JSON string from the drawing data
   let saveJsonString = JSON.stringify({
     metadata: {
-      version: "1.1",
+      version: currentVersion,
       application: "Pixel V",
       timestamp: Date.now(),
       backupImage: canvas.offScreenCVS.toDataURL(),
@@ -244,106 +246,8 @@ export async function loadDrawing(jsonFile) {
       action.index = index
     }
     //For old files that don't use the vectors object
-    if (data.metadata.version === "1.0") {
-      if (action.properties) {
-        //Handle vector actions
-        if (action.properties?.vectorProperties) {
-          //restructure vectorProperties to include type
-          action.properties.vectorProperties.type = action.tool.name
-          if (action.properties.vectorProperties.type === "ellipse") {
-            action.properties.vectorProperties.unifiedOffset =
-              action.properties.vectorProperties.offset
-            delete action.properties.vectorProperties.offset
-          }
-          //restructure how vectorProperties are stored
-          state.highestVectorKey += 1
-          let uniqueVectorKey = state.highestVectorKey
-          data.vectors[uniqueVectorKey] = {
-            index: uniqueVectorKey,
-            actionIndex: index,
-            layer: action.layer,
-            modes: { ...action.modes },
-            color: { ...action.color },
-            brushSize: action.tool.brushSize,
-            brushType: action.tool.brushType,
-            vectorProperties: { ...action.properties.vectorProperties },
-            hidden: action.hidden,
-            removed: action.removed,
-          }
-          action.vectorIndices = [uniqueVectorKey]
-          //remove old properties
-          delete action.modes
-          delete action.color
-        }
-        //Handle actions with points
-        if (action.properties?.points) {
-          action.points = action.properties.points
-        }
-        //Handle line actions
-        if (action.tool.name === "line") {
-          //convert to a vector tool
-          state.highestVectorKey += 1
-          let uniqueVectorKey = state.highestVectorKey
-          data.vectors[uniqueVectorKey] = {
-            index: uniqueVectorKey,
-            actionIndex: index,
-            layer: action.layer,
-            modes: { ...action.modes },
-            color: { ...action.color },
-            brushSize: action.tool.brushSize,
-            brushType: action.tool.brushType,
-            vectorProperties: {
-              type: "line",
-              px1: action.properties.px1,
-              py1: action.properties.py1,
-              px2: action.properties.px2,
-              py2: action.properties.py2,
-            },
-            hidden: action.hidden,
-            removed: action.removed,
-          }
-          action.vectorIndices = [uniqueVectorKey]
-        }
-        //Handle actions with maskArray
-        if (action.properties?.maskArray) {
-          action.maskArray = action.properties.maskArray
-        }
-        //Handle actions with boundaryBox
-        if (action.properties?.boundaryBox) {
-          action.boundaryBox = action.properties.boundaryBox
-        }
-        //Handle modify actions
-        if (action.properties?.moddedActionIndex) {
-          action.moddedActionIndex = action.properties.moddedActionIndex
-        }
-        if (action.properties?.processedActions) {
-          //As of 1.0, only vector modifications use processedActions
-          action.moddedVectorIndex =
-            data.history[action.moddedActionIndex].vectorIndices[0]
-          action.processedActions = action.properties.processedActions
-          //modify processedAction to include moddedVectorIndex
-          for (let processedAction of action.processedActions) {
-            processedAction.moddedVectorIndex =
-              data.history[processedAction.moddedActionIndex].vectorIndices[0]
-          }
-        }
-        if (action.properties.from) {
-          action.from = action.properties.from
-        }
-        if (action.properties.to) {
-          action.to = action.properties.to
-        }
-        //remove old properties
-        delete action.properties
-      }
-      //Handle actions with brush information
-      if (action.tool.brushSize) {
-        action.brushSize = action.tool.brushSize
-        action.brushType = action.tool.brushType
-      }
-      //Convert tool to just be the name of the tool
-      action.tool = action.tool.name
-      //--- End of version 1.0 conversion ---//
+    if (data.metadata.version !== currentVersion) {
+      convertActionToNewFormat(data, action)
     }
 
     //Handle brush tool
@@ -471,4 +375,113 @@ export async function loadDrawing(jsonFile) {
   renderLayersToDOM()
   renderPaletteToDOM()
   renderVectorsToDOM()
+}
+
+/**
+ * Modifies the original data to convert it to the new format
+ * @param {object} data - The data object, containing history, vectors, and metadata, etc.
+ * @param {object} action - The action object to be converted
+ */
+function convertActionToNewFormat(data, action) {
+  if (data.metadata.version === "1.0") {
+    if (action.properties) {
+      //Handle vector actions
+      if (action.properties?.vectorProperties) {
+        //restructure vectorProperties to include type
+        action.properties.vectorProperties.type = action.tool.name
+        if (action.properties.vectorProperties.type === "ellipse") {
+          action.properties.vectorProperties.unifiedOffset =
+            action.properties.vectorProperties.offset
+          delete action.properties.vectorProperties.offset
+        }
+        //restructure how vectorProperties are stored
+        state.highestVectorKey += 1
+        let uniqueVectorKey = state.highestVectorKey
+        data.vectors[uniqueVectorKey] = {
+          index: uniqueVectorKey,
+          actionIndex: action.index,
+          layer: action.layer,
+          modes: { ...action.modes },
+          color: { ...action.color },
+          brushSize: action.tool.brushSize,
+          brushType: action.tool.brushType,
+          vectorProperties: { ...action.properties.vectorProperties },
+          hidden: action.hidden,
+          removed: action.removed,
+        }
+        action.vectorIndices = [uniqueVectorKey]
+        //remove old properties
+        delete action.modes
+        delete action.color
+      }
+      //Handle actions with points
+      if (action.properties?.points) {
+        action.points = action.properties.points
+      }
+      //Handle line actions
+      if (action.tool.name === "line") {
+        //convert to a vector tool
+        state.highestVectorKey += 1
+        let uniqueVectorKey = state.highestVectorKey
+        data.vectors[uniqueVectorKey] = {
+          index: uniqueVectorKey,
+          actionIndex: action.index,
+          layer: action.layer,
+          modes: { ...action.modes },
+          color: { ...action.color },
+          brushSize: action.tool.brushSize,
+          brushType: action.tool.brushType,
+          vectorProperties: {
+            type: "line",
+            px1: action.properties.px1,
+            py1: action.properties.py1,
+            px2: action.properties.px2,
+            py2: action.properties.py2,
+          },
+          hidden: action.hidden,
+          removed: action.removed,
+        }
+        action.vectorIndices = [uniqueVectorKey]
+      }
+      //Handle actions with maskArray
+      if (action.properties?.maskArray) {
+        action.maskArray = action.properties.maskArray
+      }
+      //Handle actions with boundaryBox
+      if (action.properties?.boundaryBox) {
+        action.boundaryBox = action.properties.boundaryBox
+      }
+      //Handle modify actions
+      if (action.properties?.moddedActionIndex) {
+        action.moddedActionIndex = action.properties.moddedActionIndex
+      }
+      if (action.properties?.processedActions) {
+        //As of 1.0, only vector modifications use processedActions
+        action.moddedVectorIndex =
+          data.history[action.moddedActionIndex].vectorIndices[0]
+        action.processedActions = action.properties.processedActions
+        //modify processedAction to include moddedVectorIndex
+        for (let processedAction of action.processedActions) {
+          processedAction.moddedVectorIndex =
+            data.history[processedAction.moddedActionIndex].vectorIndices[0]
+        }
+      }
+      if (action.properties.from) {
+        action.from = action.properties.from
+      }
+      if (action.properties.to) {
+        action.to = action.properties.to
+      }
+      //remove old properties
+      delete action.properties
+    }
+    //Handle actions with brush information
+    if (action.tool.brushSize) {
+      action.brushSize = action.tool.brushSize
+      action.brushType = action.tool.brushType
+    }
+    //Convert tool to just be the name of the tool
+    action.tool = action.tool.name
+    //--- End of version 1.0 conversion ---//
+  }
 }

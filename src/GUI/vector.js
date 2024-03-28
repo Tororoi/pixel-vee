@@ -140,6 +140,9 @@ function handleCollisionAndDraw(keys, point, radius, modify, offset, vector) {
   const xOffset = vector ? vector.layer.x : 0
   const yOffset = vector ? vector.layer.y : 0
 
+  const normalizedX = point.x - offset + xOffset
+  const normalizedY = point.y - offset + yOffset
+
   if (modify) {
     if (vectorGui.selectedPoint.xKey === keys.x && !vector) {
       r = radius * 2.125 // increase  radius of fill to match stroked circle
@@ -148,8 +151,8 @@ function handleCollisionAndDraw(keys, point, radius, modify, offset, vector) {
       checkSquarePointCollision(
         state.cursorX,
         state.cursorY,
-        point.x - offset + xOffset,
-        point.y - offset + yOffset,
+        normalizedX,
+        normalizedY,
         r * 2.125
       )
     ) {
@@ -184,16 +187,16 @@ function handleCollisionAndDraw(keys, point, radius, modify, offset, vector) {
     //else if selectedpoint is p3 or p4, setLinkedVector if vector's control point coords are the same as the selected point
     if (vectorGui.collidedKeys.xKey === "px3" && vector) {
       if (
-        point.x === state.vectorProperties.px1 &&
-        point.y === state.vectorProperties.py1
+        normalizedX === state.vectorProperties.px1 &&
+        normalizedY === state.vectorProperties.py1
       ) {
         vectorGui.addLinkedVector(vector, keys.x)
       }
     }
     if (vectorGui.collidedKeys.xKey === "px4" && vector) {
       if (
-        point.x === state.vectorProperties.px2 &&
-        point.y === state.vectorProperties.py2
+        normalizedX === state.vectorProperties.px2 &&
+        normalizedY === state.vectorProperties.py2
       ) {
         vectorGui.addLinkedVector(vector, keys.x)
       }
