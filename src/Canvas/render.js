@@ -227,9 +227,9 @@ export function performAction(action, betweenCtx = null) {
         boundaryBox.yMin += offsetY
         boundaryBox.yMax += offsetY
       }
-      //TODO:(Low Priority) handle betweenCtx, clean up actions so logic does not need to be repeated here. Not currently affected by betweenCtx so not needed for current functionality.
+      let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
       //Clear boundaryBox area
-      action.layer.ctx.clearRect(
+      activeCtx.clearRect(
         boundaryBox.xMin,
         boundaryBox.yMin,
         boundaryBox.xMax - boundaryBox.xMin,
@@ -254,7 +254,7 @@ export function performAction(action, betweenCtx = null) {
       let isLastPasteAction = false // Default to false
       if (!action.confirmed) {
         for (let i = state.undoStack.length - 1; i >= 0; i--) {
-          if (state.undoStack[i].tool.name === "paste") {
+          if (state.undoStack[i].tool === "paste") {
             // If the first 'paste' action found from the end is the current action
             isLastPasteAction = state.undoStack[i] === action
             break // Stop searching once the first 'paste' action is found
@@ -286,29 +286,8 @@ export function performAction(action, betweenCtx = null) {
       break
     }
     case "vectorPaste": {
-      //render paste action
-      // Determine if the action is the last 'paste' action in the undoStack
-      let isLastPasteAction = false // Default to false
-      if (!action.confirmed) {
-        for (let i = state.undoStack.length - 1; i >= 0; i--) {
-          if (state.undoStack[i].tool.name === "vectorPaste") {
-            // If the first 'vectorPaste' action found from the end is the current action
-            isLastPasteAction = state.undoStack[i] === action
-            break // Stop searching once the first 'paste' action is found
-          }
-        }
-      }
-      //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
-      if (action.confirmed) {
-        //render vectors
-        renderActionVectors(action, betweenCtx)
-      } else if (
-        canvas.tempLayer === canvas.currentLayer && //only render if the current layer is the temp layer (active paste action)
-        isLastPasteAction //only render if this action is the last paste action in the stack
-      ) {
-        //render vectors
-        renderActionVectors(action)
-      }
+      //render vector paste action (only vectors)
+      renderActionVectors(action, betweenCtx)
       break
     }
     case "transform": {
@@ -318,7 +297,7 @@ export function performAction(action, betweenCtx = null) {
       ) {
         let isLastTransformAction = false // Default to false
         for (let i = state.undoStack.length - 1; i >= 0; i--) {
-          if (state.undoStack[i].tool.name === "transform") {
+          if (state.undoStack[i].tool === "transform") {
             // If the first 'paste' action found from the end is the current action
             isLastTransformAction = state.undoStack[i] === action
             break // Stop searching once the first 'paste' action is found

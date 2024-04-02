@@ -51,6 +51,7 @@ function selectSteps() {
         properties: {
           deselect: false,
           selectProperties: { ...state.selectProperties },
+          selectedVectorIndices: [],
         },
       })
       break
@@ -93,6 +94,7 @@ function adjustSelectSteps() {
           deselect: false,
           selectProperties: { ...state.selectProperties },
           // maskArray,
+          selectedVectorIndices: [],
         },
       })
       vectorGui.selectedPoint = {

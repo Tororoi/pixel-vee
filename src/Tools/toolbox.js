@@ -11,7 +11,10 @@ import {
   renderToolOptionsToDOM,
 } from "../DOM/render.js"
 import { renderCursor } from "../GUI/cursor.js"
-import { actionConfirmPastedPixels } from "../Actions/nonPointerActions.js"
+import {
+  actionConfirmPastedPixels,
+  actionDeselect,
+} from "../Actions/nonPointerActions.js"
 
 /**
  * Switch active tool
@@ -60,7 +63,9 @@ export function switchTool(toolName = null, toolBtn = null) {
           "move",
         ].includes(tools[targetToolBtn.id].name)
       ) {
-        state.selectedVectorIndicesSet.clear()
+        if (state.selectedVectorIndicesSet.size > 0) {
+          actionDeselect()
+        }
       }
       vectorGui.reset()
       state.reset()

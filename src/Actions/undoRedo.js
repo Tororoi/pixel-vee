@@ -42,7 +42,7 @@ function renderToLatestAction(latestAction, modType) {
       renderCanvas(mostRecentActionFromSameLayer.layer)
       //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
       if (
-        ["paste", "vectorPaste"].includes(latestAction.tool) &&
+        latestAction.tool === "paste" &&
         latestAction.confirmed &&
         modType === "to"
       ) {
@@ -73,7 +73,7 @@ function renderToLatestAction(latestAction, modType) {
     }
     //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
     if (
-      ["paste", "vectorPaste"].includes(latestAction.tool) &&
+      latestAction.tool === "paste" &&
       latestAction.confirmed &&
       modType === "to"
     ) {
@@ -156,6 +156,9 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       state.setBoundaryBox(state.selectProperties)
       //set maskset
       // state.maskSet = new Set(latestAction.maskArray)
+      state.selectedVectorIndicesSet = new Set(
+        latestAction.selectedVectorIndices
+      )
     }
   } else if (modType === "from") {
     if (latestAction.deselect) {
@@ -167,6 +170,9 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       state.setBoundaryBox(state.selectProperties)
       //set maskset
       // state.maskSet = new Set(latestAction.maskArray)
+      state.selectedVectorIndicesSet = new Set(
+        latestAction.selectedVectorIndices
+      )
     } else if (
       newLatestAction?.tool?.name === "select" &&
       !newLatestAction?.deselect
@@ -180,10 +186,13 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       state.setBoundaryBox(state.selectProperties)
       //set maskset
       // state.maskSet = new Set(newLatestAction.maskArray)
+      state.selectedVectorIndicesSet = new Set(
+        newLatestAction.selectedVectorIndices
+      )
     } else {
       if (
-        newLatestAction?.selectProperties &&
-        newLatestAction.selectProperties.px1 !== null
+        (newLatestAction?.selectProperties &&
+        newLatestAction.selectProperties.px1 !== null) || newLatestAction?.selectedVectorIndices?.length > 0
       ) {
         //set select properties
         state.selectProperties = {
@@ -191,6 +200,9 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
         }
         //set boundary box
         state.setBoundaryBox(state.selectProperties)
+        state.selectedVectorIndicesSet = new Set(
+          newLatestAction.selectedVectorIndices
+        )
       } else {
         state.deselect()
       }
@@ -234,12 +246,6 @@ function handlePasteAction(latestAction, modType) {
     enableActionsForNoPaste()
   } else if (modType === "to") {
     //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
-    const vectors = {}
-    if (latestAction.vectorIndices.length > 0) {
-      latestAction.vectorIndices.forEach((index) => {
-        vectors[index] = state.vectors[index]
-      })
-    }
     const selectProperties = {
       ...latestAction.selectProperties,
     }
@@ -257,21 +263,13 @@ function handlePasteAction(latestAction, modType) {
     const clipboard = {
       selectProperties,
       boundaryBox,
-      vectors,
       canvas: latestAction.canvas,
     }
     let offsetX = 0
     let offsetY = 0
-    if (latestAction.vectorIndices.length > 0) {
-      offsetX = latestAction.pastedLayer.x
-      offsetY = latestAction.pastedLayer.y
-    }
     //BUG: raster gui not rendering properly from here
     pasteSelectedPixels(clipboard, latestAction.pastedLayer, offsetX, offsetY)
     state.selectedVectorIndicesSet.clear()
-    latestAction.vectorIndices.forEach((vectorIndex) => {
-      state.selectedVectorIndicesSet.add(vectorIndex)
-    })
     //set currentPastedImageKey
     state.currentPastedImageKey = latestAction.pastedImageKey
     switchTool("move")
@@ -287,28 +285,14 @@ function handlePasteAction(latestAction, modType) {
 function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
   //if modType is "from" (undoing confirm paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
   if (modType === "from") {
-    const vectors = {}
-    state.selectedVectorIndicesSet.clear()
-    if (latestAction.vectorIndices.length > 0) {
-      latestAction.preConfirmPasteSelectedVectorIndices.forEach((index) => {
-        vectors[index] = state.vectors[index]
-        state.selectedVectorIndicesSet.add(index)
-      })
-    }
     const clipboard = {
       selectProperties: latestAction.selectProperties,
       boundaryBox: latestAction.boundaryBox,
-      vectors,
       canvas: latestAction.canvas,
     }
-    //IN PROGRESS: pass custom x and y offset to pasteSelectedPixels
     //raster offset
     let offsetX = latestAction.layer.x
     let offsetY = latestAction.layer.y
-    if (latestAction.vectorIndices.length > 0) {
-      offsetX = latestAction.preConfirmXOffset
-      offsetY = latestAction.preConfirmYOffset
-    }
     //vector offset
     pasteSelectedPixels(clipboard, latestAction.layer, offsetX, offsetY)
     if (newLatestAction?.tool?.name === "move") {
@@ -321,10 +305,6 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
     switchTool("move")
     disableActionsForPaste()
   } else if (modType === "to") {
-    state.selectedVectorIndicesSet.clear()
-    latestAction.vectorIndices.forEach((vectorIndex) => {
-      state.selectedVectorIndicesSet.add(vectorIndex)
-    })
     //if modType is "to" (redoing confirm paste action), enable actions for no temp pasted layer
     enableActionsForNoPaste()
   }
@@ -492,11 +472,33 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     }
   } else if (latestAction.tool === "select") {
     handleSelectAction(latestAction, newLatestAction, modType)
-  } else if (["paste", "vectorPaste"].includes(latestAction.tool)) {
+  } else if (latestAction.tool === "paste") {
     if (!latestAction.confirmed) {
       handlePasteAction(latestAction, modType)
     } else {
       handleConfirmPasteAction(latestAction, newLatestAction, modType)
+    }
+  } else if (latestAction.tool === "vectorPaste") {
+    if (modType === "from") {
+      //Handle case of selection being active before paste. Determine whether to update selection or deselect.
+      if (latestAction.prePasteSelectProperties.px1 !== null) {
+        state.selectProperties = {
+          ...latestAction.prePasteSelectProperties,
+        }
+        state.setBoundaryBox(state.selectProperties)
+      } else if (latestAction.prePasteSelectedVectorIndices.length > 0) {
+        state.selectedVectorIndicesSet = new Set(
+          latestAction.prePasteSelectedVectorIndices
+        )
+      } else {
+        //reset state properties
+        state.deselect()
+      }
+    } else if (modType === "to") {
+      state.selectedVectorIndicesSet.clear()
+      latestAction.vectorIndices.forEach((vectorIndex) => {
+        state.selectedVectorIndicesSet.add(vectorIndex)
+      })
     }
   } else if (latestAction.tool === "move") {
     handleMoveAction(latestAction, modType)
