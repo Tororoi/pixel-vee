@@ -451,6 +451,10 @@ function convertActionToNewFormat(data, action) {
       if (action.properties?.boundaryBox) {
         action.boundaryBox = action.properties.boundaryBox
       }
+      //Handle select actions
+      if (action.tool.name === "select") {
+        action.selectedVectorIndices = []
+      }
       //Handle modify actions
       if (action.properties?.moddedActionIndex) {
         action.moddedActionIndex = action.properties.moddedActionIndex
