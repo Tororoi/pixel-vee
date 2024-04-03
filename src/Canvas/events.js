@@ -351,7 +351,6 @@ function vectorInteract(e) {
     //select current vector
     // vectorGui.reset()
     if (keys.ShiftLeft || keys.ShiftRight) {
-      console.log(!state.selectedVectorIndicesSet.has(vector.index))
       if (!state.selectedVectorIndicesSet.has(vector.index)) {
         //select if shift key held down
         actionSelectVector(vector.index)

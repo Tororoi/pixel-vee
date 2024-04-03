@@ -65,7 +65,7 @@ export function actionSelectAll() {
 
 /**
  *
- * @param vectorIndex
+ * @param {number} vectorIndex - The vector index
  */
 export function actionSelectVector(vectorIndex) {
   if (!state.selectedVectorIndicesSet.has(vectorIndex)) {
@@ -90,7 +90,7 @@ export function actionSelectVector(vectorIndex) {
 
 /**
  *
- * @param vectorIndex
+ * @param {number} vectorIndex - The vector index
  */
 export function actionDeselectVector(vectorIndex) {
   if (state.selectedVectorIndicesSet.has(vectorIndex)) {

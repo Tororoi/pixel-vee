@@ -173,26 +173,12 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       state.selectedVectorIndicesSet = new Set(
         latestAction.selectedVectorIndices
       )
-    } else if (
-      newLatestAction?.tool?.name === "select" &&
-      !newLatestAction?.deselect
-    ) {
-      //If the action before the one being undone is a select tool, set context - may need to separate this from latestAction also being the "select" tool
-      //set select properties
-      state.selectProperties = {
-        ...newLatestAction.selectProperties,
-      }
-      //set boundary box
-      state.setBoundaryBox(state.selectProperties)
-      //set maskset
-      // state.maskSet = new Set(newLatestAction.maskArray)
-      state.selectedVectorIndicesSet = new Set(
-        newLatestAction.selectedVectorIndices
-      )
     } else {
       if (
-        (newLatestAction?.selectProperties &&
-        newLatestAction.selectProperties.px1 !== null) || newLatestAction?.selectedVectorIndices?.length > 0
+        ((newLatestAction?.selectProperties &&
+          newLatestAction.selectProperties.px1 !== null) ||
+          newLatestAction?.selectedVectorIndices?.length > 0) &&
+        !newLatestAction?.deselect
       ) {
         //set select properties
         state.selectProperties = {

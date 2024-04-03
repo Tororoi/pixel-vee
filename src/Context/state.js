@@ -211,11 +211,32 @@ function resetBoundaryBox() {
  * @param {object} selectProperties - The properties of the selection
  */
 function setBoundaryBox(selectProperties) {
-  state.boundaryBox.xMin = Math.min(selectProperties.px1, selectProperties.px2)
-  state.boundaryBox.yMin = Math.min(selectProperties.py1, selectProperties.py2)
-  state.boundaryBox.xMax = Math.max(selectProperties.px2, selectProperties.px1)
-  state.boundaryBox.yMax = Math.max(selectProperties.py2, selectProperties.py1)
-  enableActionsForSelection()
+  if (
+    selectProperties.px1 !== null &&
+    selectProperties.py1 !== null &&
+    selectProperties.px2 !== null &&
+    selectProperties.py2 !== null
+  ) {
+    state.boundaryBox.xMin = Math.min(
+      selectProperties.px1,
+      selectProperties.px2
+    )
+    state.boundaryBox.yMin = Math.min(
+      selectProperties.py1,
+      selectProperties.py2
+    )
+    state.boundaryBox.xMax = Math.max(
+      selectProperties.px2,
+      selectProperties.px1
+    )
+    state.boundaryBox.yMax = Math.max(
+      selectProperties.py2,
+      selectProperties.py1
+    )
+    enableActionsForSelection()
+  } else {
+    resetBoundaryBox()
+  }
 }
 
 /**
