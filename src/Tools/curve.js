@@ -226,6 +226,11 @@ function cubicCurveSteps() {
     adjustCurveSteps()
     return
   }
+  //TODO: (High Priority) If there are selected vectors, call transformVectorSteps() instead of this function
+  // if (state.selectedVectorIndicesSet.size > 0) {
+  //   transformVectorSteps()
+  //   return
+  // }
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //solidify end points
