@@ -177,7 +177,8 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
       if (
         ((newLatestAction?.selectProperties &&
           newLatestAction.selectProperties.px1 !== null) ||
-          newLatestAction?.selectedVectorIndices?.length > 0) &&
+          newLatestAction?.selectedVectorIndices?.length > 0 ||
+          latestAction.preActionSelectedVectorIndices?.length > 0) &&
         !newLatestAction?.deselect
       ) {
         //set select properties
@@ -186,9 +187,15 @@ function handleSelectAction(latestAction, newLatestAction, modType) {
         }
         //set boundary box
         state.setBoundaryBox(state.selectProperties)
-        state.selectedVectorIndicesSet = new Set(
-          newLatestAction.selectedVectorIndices
-        )
+        if (latestAction.preActionSelectedVectorIndices?.length > 0) {
+          state.selectedVectorIndicesSet = new Set(
+            latestAction.preActionSelectedVectorIndices
+          )
+        } else {
+          state.selectedVectorIndicesSet = new Set(
+            newLatestAction.selectedVectorIndices
+          )
+        }
       } else {
         state.deselect()
       }
