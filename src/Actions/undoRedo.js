@@ -121,13 +121,6 @@ function handleModifyAction(latestAction, modType) {
       ...mod[modType],
     }
   })
-  // const primaryModdedVector = state.vectors[latestAction.moddedVectorIndex]
-  // if (
-  //   state.tool.name === primaryModdedVector.vectorProperties.type &&
-  //   state.currentVectorIndex === primaryModdedVector.index
-  // ) {
-  //   vectorGui.setVectorProperties(primaryModdedVector)
-  // }
 }
 
 /**
@@ -338,12 +331,7 @@ function handleTransformAction(latestAction, newLatestAction, modType) {
 export function actionUndoRedo(pushStack, popStack, modType) {
   //latest action is the action about to be undone or redone
   let latestAction = popStack[popStack.length - 1]
-  // if (
-  //   state.vectors[state.currentVectorIndex]?.actionIndex === latestAction.index
-  // ) {
-  //   //reset vectorGui if the latest action has the current vector
   vectorGui.reset()
-  // }
   //newLatestAction is the action that's about to be the most recent action, if the function is "Undo" ("from")
   let newLatestAction =
     modType === "from" && popStack.length > 1
@@ -400,31 +388,8 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     handleMoveAction(latestAction, modType)
   } else if (latestAction.tool === "transform") {
     handleTransformAction(latestAction, newLatestAction, modType)
-  } else if (
-    latestAction.tool === state.tool.name &&
-    state.tool.type === "vector"
-  ) {
-    //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
-    // if (modType === "to") {
-    //   //TODO: (Low Priority) Which vector should be selected if there are multiple vectors in the action? First or last?
-    //   //Get first vector in the action
-    //   let latestVector = state.vectors[latestAction.vectorIndices[0]]
-    //   vectorGui.setVectorProperties(latestVector)
-    // }
   }
   pushStack.push(popStack.pop())
-  //For undo, if new latest action or new latest modded action will be a vector and its tool is currently selected, set vector properties to match
-  // if (newLatestAction) {
-  //   if (
-  //     newLatestAction.tool === state.tool.name &&
-  //     state.tool.type === "vector" &&
-  //     state.currentVectorIndex === null
-  //   ) {
-  //     //When redoing a vector's initial action while the matching tool is selected, set vectorProperties
-  //     let newLatestVector = state.vectors[newLatestAction.vectorIndices[0]]
-  //     vectorGui.setVectorProperties(newLatestVector)
-  //   }
-  // }
   //Render the canvas with the new latest action
   renderToLatestAction(latestAction, modType)
   //Recalculate size of file if save dialog is open
