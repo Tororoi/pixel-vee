@@ -5,13 +5,16 @@ import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
-  renderVectorsToDOM,
+  // renderVectorsToDOM,
   renderBrushModesToDOM,
   renderBrushStampToDOM,
   renderToolOptionsToDOM,
 } from "../DOM/render.js"
 import { renderCursor } from "../GUI/cursor.js"
-import { actionConfirmPastedPixels } from "../Actions/nonPointerActions.js"
+import {
+  actionConfirmPastedPixels,
+  actionDeselect,
+} from "../Actions/nonPointerActions.js"
 
 /**
  * Switch active tool
@@ -51,11 +54,18 @@ export function switchTool(toolName = null, toolBtn = null) {
       renderToolOptionsToDOM()
       //If the tool is not a vector tool, clear the selected vector indices
       if (
-        !["fill", "quadCurve", "cubicCurve", "ellipse", "move"].includes(
-          tools[targetToolBtn.id].name
-        )
+        ![
+          "fill",
+          "line",
+          "quadCurve",
+          "cubicCurve",
+          "ellipse",
+          "move",
+        ].includes(tools[targetToolBtn.id].name)
       ) {
-        state.selectedVectorIndicesSet.clear()
+        if (state.selectedVectorIndicesSet.size > 0) {
+          actionDeselect()
+        }
       }
       vectorGui.reset()
       state.reset()

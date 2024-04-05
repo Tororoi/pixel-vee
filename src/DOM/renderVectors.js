@@ -181,6 +181,10 @@ const drawOnThumbnailContext = (vector, isSelected) => {
         true
       )
       break
+    case "line":
+      canvas.thumbnailCTX.moveTo(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset)
+      canvas.thumbnailCTX.lineTo(px2 + 0.5 + xOffset, py2 + 0.5 + yOffset)
+      break
     case "quadCurve":
       canvas.thumbnailCTX.moveTo(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset)
       canvas.thumbnailCTX.quadraticCurveTo(

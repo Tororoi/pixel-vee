@@ -21,6 +21,9 @@ import {
   addReferenceLayer,
   addRasterLayer,
   removeLayer,
+  actionSelectVector,
+  actionDeselectVector,
+  actionDeselect,
 } from "../Actions/nonPointerActions.js"
 import { createPreviewLayer } from "./layers.js"
 import { switchTool } from "../Tools/toolbox.js"
@@ -350,13 +353,13 @@ function vectorInteract(e) {
     if (keys.ShiftLeft || keys.ShiftRight) {
       if (!state.selectedVectorIndicesSet.has(vector.index)) {
         //select if shift key held down
-        state.selectedVectorIndicesSet.add(vector.index)
+        actionSelectVector(vector.index)
         enableActionsForSelection()
       } else {
-        state.selectedVectorIndicesSet.delete(vector.index)
+        actionDeselectVector(vector.index)
       }
     } else {
-      state.selectedVectorIndicesSet.clear()
+      actionDeselect()
     }
     if (vector.index !== state.currentVectorIndex) {
       //switch tool

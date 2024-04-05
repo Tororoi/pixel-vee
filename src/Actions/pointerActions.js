@@ -420,7 +420,7 @@ export function actionQuadraticCurve(
       customContext,
       isPreview
     )
-  } else if (stepNum === 2 || stepNum === 3) {
+  } else if (stepNum === 2) {
     let plotPoints = plotQuadBezier(
       startx,
       starty,
@@ -523,7 +523,7 @@ export function actionCubicCurve(
       customContext,
       isPreview
     )
-  } else if (stepNum === 3 || stepNum === 4) {
+  } else if (stepNum === 3) {
     let plotPoints = plotCubicBezier(
       startx,
       starty,

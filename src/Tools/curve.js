@@ -37,7 +37,7 @@ function quadCurveSteps() {
     case "pointerdown":
       //solidify end points
       state.clickCounter += 1
-      if (state.clickCounter > 3) state.clickCounter = 1
+      if (state.clickCounter > 2) state.clickCounter = 1
       switch (state.clickCounter) {
         case 1:
           //reset control points
@@ -50,7 +50,6 @@ function quadCurveSteps() {
           state.vectorProperties.py2 = state.cursorY
           break
         case 2:
-        case 3:
           state.vectorProperties.px3 = state.cursorX
           state.vectorProperties.py3 = state.cursorY
           break
@@ -86,7 +85,6 @@ function quadCurveSteps() {
           state.vectorProperties.py2 = state.cursorY
           break
         case 2:
-        case 3:
           state.vectorProperties.px3 = state.cursorX
           state.vectorProperties.py3 = state.cursorY
           break
@@ -116,16 +114,12 @@ function quadCurveSteps() {
 
       break
     case "pointerup":
-      if (state.touch && state.clickCounter === 2) {
-        state.clickCounter += 1
-      }
       switch (state.clickCounter) {
         case 1:
           state.vectorProperties.px2 = state.cursorX
           state.vectorProperties.py2 = state.cursorY
           break
         case 2:
-        case 3:
           state.vectorProperties.px3 = state.cursorX
           state.vectorProperties.py3 = state.cursorY
           break
@@ -133,7 +127,7 @@ function quadCurveSteps() {
         //do nothing
       }
       //Solidify curve
-      if (state.clickCounter === 3) {
+      if (state.clickCounter === 2) {
         actionQuadraticCurve(
           state.vectorProperties.px1,
           state.vectorProperties.py1,
@@ -169,7 +163,7 @@ function quadCurveSteps() {
         let uniqueVectorKey = state.highestVectorKey
         //store control points for timeline
         addToTimeline({
-          tool: state.tool,
+          tool: state.tool.name,
           layer: canvas.currentLayer,
           properties: {
             maskArray,
@@ -232,11 +226,16 @@ function cubicCurveSteps() {
     adjustCurveSteps()
     return
   }
+  // TODO: (High Priority) If there are selected vectors, call transformVectorSteps() instead of this function
+  if (state.selectedVectorIndicesSet.size > 0) {
+    transformVectorSteps()
+    return
+  }
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //solidify end points
       state.clickCounter += 1
-      if (state.clickCounter > 4) state.clickCounter = 1
+      if (state.clickCounter > 3) state.clickCounter = 1
       switch (state.clickCounter) {
         case 1:
           //reset control points
@@ -253,7 +252,6 @@ function cubicCurveSteps() {
           state.vectorProperties.py3 = state.cursorY
           break
         case 3:
-        case 4:
           state.vectorProperties.px4 = state.cursorX
           state.vectorProperties.py4 = state.cursorY
           break
@@ -294,7 +292,6 @@ function cubicCurveSteps() {
           state.vectorProperties.py3 = state.cursorY
           break
         case 3:
-        case 4:
           state.vectorProperties.px4 = state.cursorX
           state.vectorProperties.py4 = state.cursorY
           break
@@ -325,9 +322,6 @@ function cubicCurveSteps() {
       )
       break
     case "pointerup":
-      if (state.touch && state.clickCounter === 3) {
-        state.clickCounter += 1
-      }
       switch (state.clickCounter) {
         case 1:
           state.vectorProperties.px2 = state.cursorX
@@ -338,7 +332,6 @@ function cubicCurveSteps() {
           state.vectorProperties.py3 = state.cursorY
           break
         case 3:
-        case 4:
           state.vectorProperties.px4 = state.cursorX
           state.vectorProperties.py4 = state.cursorY
           break
@@ -346,7 +339,7 @@ function cubicCurveSteps() {
         //do nothing
       }
       //Solidify curve
-      if (state.clickCounter === 4) {
+      if (state.clickCounter === 3) {
         actionCubicCurve(
           state.vectorProperties.px1,
           state.vectorProperties.py1,
@@ -384,7 +377,7 @@ function cubicCurveSteps() {
         let uniqueVectorKey = state.highestVectorKey
         //store control points for timeline
         addToTimeline({
-          tool: state.tool,
+          tool: state.tool.name,
           layer: canvas.currentLayer,
           properties: {
             maskArray,
@@ -439,9 +432,6 @@ function cubicCurveSteps() {
  * BUG: cut selection not rendered properly in timeline
  */
 function adjustCurveSteps() {
-  //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
-  //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
-  //this routine would be better for touchscreens, and no worse with pointer
   let currentVector = state.vectors[state.currentVectorIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
@@ -678,6 +668,100 @@ function adjustCurveSteps() {
     default:
     //do nothing
   }
+}
+
+//=======================================//
+//======== * * * Transformers * * * =====//
+//=======================================//
+
+/**
+ * Transform selected vectors
+ * Ignore all tool options
+ * This is for full vector rotation, scaling, and translation
+ */
+function transformVectorSteps() {
+  //Doesn't really matter which selected vector is used since all selected vectors will be transformed, but one is needed for keeping track of the right layer, etc. so use the first one.
+  let currentVector =
+    state.vectors[state.selectedVectorIndicesSet.values().next().value]
+  switch (canvas.pointerEvent) {
+    case "pointerdown": {
+      state.grabStartX = state.cursorX
+      state.grabStartY = state.cursorY
+      //reset current vector properties
+      vectorGui.reset()
+      //Set state.vectorsSavedProperties for all selected vectors
+      state.vectorsSavedProperties = {}
+      state.selectedVectorIndicesSet.forEach((index) => {
+        state.vectorsSavedProperties[index] = {
+          ...state.vectors[index].vectorProperties,
+        }
+      })
+      //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
+      //Translation
+
+      //Set activeIndexes for all selected vectors
+      state.activeIndexes = createActiveIndexesForRender(
+        currentVector,
+        state.vectorsSavedProperties
+      )
+      renderCanvas(currentVector.layer, true, state.activeIndexes, true)
+      break
+    }
+    case "pointermove": {
+      //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
+      //Based on the action being taken, update the vector properties for all selected vectors.
+      //Translation
+      translateVectors(currentVector.layer)
+      renderCanvas(currentVector.layer, true, state.activeIndexes)
+      break
+    }
+    case "pointerup": {
+      //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
+      //Based on the action being taken, update the vector properties for all selected vectors.
+      //Translation
+      translateVectors(currentVector.layer)
+      renderCanvas(currentVector.layer, true, state.activeIndexes)
+      // renderCanvas(currentVector.layer, true)
+      modifyVectorAction(currentVector)
+      break
+    }
+    default:
+    //do nothing
+  }
+}
+
+/**
+ *
+ * @param {object} layer - The layer object
+ */
+function translateVectors(layer) {
+  const xDiff = state.cursorX - state.grabStartX + layer.x
+  const yDiff = state.cursorY - state.grabStartY + layer.y
+  state.selectedVectorIndicesSet.forEach((index) => {
+    //Use diffs between cursorX/ cursorY and previousX/ previousY to update all selected vectors
+
+    const vector = state.vectors[index]
+    const pointsArray = [1, 2, 3, 4]
+    const originalVecorProperties = state.vectorsSavedProperties[index]
+    // Update properties if they exist.
+    pointsArray.forEach((n) => {
+      const pxProp = `px${n}`
+      const pyProp = `py${n}`
+
+      if (
+        originalVecorProperties[pxProp] !== undefined &&
+        originalVecorProperties[pyProp] !== undefined
+      ) {
+        updateVectorProperties(
+          vector,
+          originalVecorProperties[pxProp] + xDiff,
+          originalVecorProperties[pyProp] + yDiff,
+          pxProp,
+          pyProp
+        )
+      }
+    })
+  })
 }
 
 export const quadCurve = {

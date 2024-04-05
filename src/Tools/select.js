@@ -46,11 +46,12 @@ function selectSteps() {
       state.normalizeSelectProperties()
       state.setBoundaryBox(state.selectProperties)
       addToTimeline({
-        tool: state.tool,
+        tool: state.tool.name,
         layer: canvas.currentLayer,
         properties: {
           deselect: false,
           selectProperties: { ...state.selectProperties },
+          selectedVectorIndices: [],
         },
       })
       break
@@ -87,12 +88,13 @@ function adjustSelectSteps() {
       state.normalizeSelectProperties()
       state.setBoundaryBox(state.selectProperties)
       addToTimeline({
-        tool: state.tool,
+        tool: state.tool.name,
         layer: canvas.currentLayer,
         properties: {
           deselect: false,
           selectProperties: { ...state.selectProperties },
           // maskArray,
+          selectedVectorIndices: [],
         },
       })
       vectorGui.selectedPoint = {

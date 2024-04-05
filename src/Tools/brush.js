@@ -104,7 +104,7 @@ function brushSteps() {
         boundaryBox.yMax -= canvas.currentLayer.y
       }
       addToTimeline({
-        tool: brush,
+        tool: brush.name,
         layer: canvas.currentLayer,
         properties: {
           modes: { ...brush.modes },

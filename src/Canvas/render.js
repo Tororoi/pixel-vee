@@ -2,7 +2,6 @@ import { dom } from "../Context/dom.js"
 import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
@@ -66,10 +65,11 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         }
       }
     }
+    const tool = tools[action.tool]
     if (
       !action.hidden &&
       !action.removed &&
-      ["raster", "vector"].includes(action.tool.type)
+      ["raster", "vector"].includes(tool.type)
     ) {
       performAction(action, betweenCtx)
     }
@@ -142,7 +142,7 @@ export function performAction(action, betweenCtx = null) {
   if (!action?.boundaryBox) {
     return
   }
-  switch (action.tool.name) {
+  switch (action.tool) {
     case "brush": {
       //Correct action coordinates with layer offsets
       const offsetX = action.layer.x
@@ -186,7 +186,7 @@ export function performAction(action, betweenCtx = null) {
           p.y + offsetY,
           boundaryBox,
           action.color,
-          brushStamps[action.tool.brushType][p.brushSize][brushDirection],
+          brushStamps[action.brushType][p.brushSize][brushDirection],
           p.brushSize,
           action.layer,
           action.modes,
@@ -203,35 +203,9 @@ export function performAction(action, betweenCtx = null) {
     case "fill":
       renderActionVectors(action, betweenCtx)
       break
-    case "line": {
-      //Correct action coordinates with layer offsets
-      const offsetX = action.layer.x
-      const offsetY = action.layer.y
-      //correct boundary box for offsets
-      const boundaryBox = { ...action.boundaryBox }
-      if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin += offsetX
-        boundaryBox.xMax += offsetX
-        boundaryBox.yMin += offsetY
-        boundaryBox.yMax += offsetY
-      }
-      actionLine(
-        action.px1 + offsetX,
-        action.py1 + offsetY,
-        action.px2 + offsetX,
-        action.py2 + offsetY,
-        boundaryBox,
-        action.color,
-        action.layer,
-        action.modes,
-        brushStamps[action.tool.brushType][action.tool.brushSize],
-        action.tool.brushSize,
-        null, //maskSet made from action.maskArray
-        null,
-        betweenCtx
-      )
+    case "line":
+      renderActionVectors(action, betweenCtx)
       break
-    }
     case "quadCurve":
       renderActionVectors(action, betweenCtx)
       break
@@ -253,9 +227,9 @@ export function performAction(action, betweenCtx = null) {
         boundaryBox.yMin += offsetY
         boundaryBox.yMax += offsetY
       }
-      //TODO:(Low Priority) handle betweenCtx, clean up actions so logic does not need to be repeated here. Not currently affected by betweenCtx so not needed for current functionality.
+      let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
       //Clear boundaryBox area
-      action.layer.ctx.clearRect(
+      activeCtx.clearRect(
         boundaryBox.xMin,
         boundaryBox.yMin,
         boundaryBox.xMax - boundaryBox.xMin,
@@ -280,7 +254,7 @@ export function performAction(action, betweenCtx = null) {
       let isLastPasteAction = false // Default to false
       if (!action.confirmed) {
         for (let i = state.undoStack.length - 1; i >= 0; i--) {
-          if (state.undoStack[i].tool.name === "paste") {
+          if (state.undoStack[i].tool === "paste") {
             // If the first 'paste' action found from the end is the current action
             isLastPasteAction = state.undoStack[i] === action
             break // Stop searching once the first 'paste' action is found
@@ -312,29 +286,8 @@ export function performAction(action, betweenCtx = null) {
       break
     }
     case "vectorPaste": {
-      //render paste action
-      // Determine if the action is the last 'paste' action in the undoStack
-      let isLastPasteAction = false // Default to false
-      if (!action.confirmed) {
-        for (let i = state.undoStack.length - 1; i >= 0; i--) {
-          if (state.undoStack[i].tool.name === "vectorPaste") {
-            // If the first 'vectorPaste' action found from the end is the current action
-            isLastPasteAction = state.undoStack[i] === action
-            break // Stop searching once the first 'paste' action is found
-          }
-        }
-      }
-      //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
-      if (action.confirmed) {
-        //render vectors
-        renderActionVectors(action, betweenCtx)
-      } else if (
-        canvas.tempLayer === canvas.currentLayer && //only render if the current layer is the temp layer (active paste action)
-        isLastPasteAction //only render if this action is the last paste action in the stack
-      ) {
-        //render vectors
-        renderActionVectors(action)
-      }
+      //render vector paste action (only vectors)
+      renderActionVectors(action, betweenCtx)
       break
     }
     case "transform": {
@@ -344,7 +297,7 @@ export function performAction(action, betweenCtx = null) {
       ) {
         let isLastTransformAction = false // Default to false
         for (let i = state.undoStack.length - 1; i >= 0; i--) {
-          if (state.undoStack[i].tool.name === "transform") {
+          if (state.undoStack[i].tool === "transform") {
             // If the first 'paste' action found from the end is the current action
             isLastTransformAction = state.undoStack[i] === action
             break // Stop searching once the first 'paste' action is found
@@ -408,9 +361,26 @@ function renderActionVectors(action, activeCtx = null) {
           vector.vectorProperties.py1 + offsetY,
           boundaryBox,
           vector.color,
-          action.layer,
+          vector.layer,
           vector.modes,
           null, //maskSet made from action.maskArray
+          activeCtx
+        )
+        break
+      case "line":
+        actionLine(
+          vector.vectorProperties.px1 + offsetX,
+          vector.vectorProperties.py1 + offsetY,
+          vector.vectorProperties.px2 + offsetX,
+          vector.vectorProperties.py2 + offsetY,
+          boundaryBox,
+          vector.color,
+          vector.layer,
+          vector.modes,
+          brushStamps[vector.brushType][vector.brushSize],
+          vector.brushSize,
+          null, //maskSet made from action.maskArray
+          null,
           activeCtx
         )
         break
@@ -423,9 +393,9 @@ function renderActionVectors(action, activeCtx = null) {
           vector.vectorProperties.px3 + offsetX,
           vector.vectorProperties.py3 + offsetY,
           boundaryBox,
-          3,
+          2,
           vector.color,
-          action.layer,
+          vector.layer,
           vector.modes,
           brushStamps[vector.brushType][vector.brushSize],
           vector.brushSize,
@@ -444,9 +414,9 @@ function renderActionVectors(action, activeCtx = null) {
           vector.vectorProperties.px4 + offsetX,
           vector.vectorProperties.py4 + offsetY,
           boundaryBox,
-          4,
+          3,
           vector.color,
-          action.layer,
+          vector.layer,
           vector.modes,
           brushStamps[vector.brushType][vector.brushSize],
           vector.brushSize,
@@ -467,7 +437,7 @@ function renderActionVectors(action, activeCtx = null) {
           vector.vectorProperties.forceCircle,
           boundaryBox,
           vector.color,
-          action.layer,
+          vector.layer,
           vector.modes,
           brushStamps[vector.brushType][vector.brushSize],
           vector.brushSize,
@@ -491,7 +461,7 @@ function renderActionVectors(action, activeCtx = null) {
  */
 function updateLayersAfterRedo() {
   state.redoStack.forEach((action) => {
-    if (action.tool.name === "addLayer") {
+    if (action.tool === "addLayer") {
       action.layer.removed = true
       if (action.layer === canvas.currentLayer) {
         canvas.currentLayer.inactiveTools.forEach((tool) => {

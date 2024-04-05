@@ -23,6 +23,7 @@ import {
   disableActionsForNoSelection,
   enableActionsForSelection,
 } from "../DOM/disableDomElements.js"
+import { renderLinePath, renderLineVector } from "./line.js"
 
 //==================================================//
 //=== * * * Vector Graphics User Interface * * * ===//
@@ -108,7 +109,6 @@ function drawControlPoints(
   pointsKeys,
   radius,
   modify = false,
-  offset = 0,
   vector = null
 ) {
   for (let keys of pointsKeys) {
@@ -119,7 +119,7 @@ function drawControlPoints(
 
     if (point.x === null || point.y === null) continue
 
-    handleCollisionAndDraw(keys, point, radius, modify, offset, vector)
+    handleCollisionAndDraw(keys, point, radius, modify, vector)
   }
 
   setCursorStyle()
@@ -131,13 +131,15 @@ function drawControlPoints(
  * @param {object} point - The coordinates of the control point
  * @param {number} radius - (Float)
  * @param {boolean} modify - if true, check for collision with cursor and modify radius
- * @param {number} offset - (Float)
  * @param {object} vector - The vector to be rendered
  */
-function handleCollisionAndDraw(keys, point, radius, modify, offset, vector) {
+function handleCollisionAndDraw(keys, point, radius, modify, vector) {
   let r = state.touch ? radius * 2 : radius
   const xOffset = vector ? vector.layer.x : 0
   const yOffset = vector ? vector.layer.y : 0
+
+  const normalizedX = point.x + xOffset
+  const normalizedY = point.y + yOffset
 
   if (modify) {
     if (vectorGui.selectedPoint.xKey === keys.x && !vector) {
@@ -147,8 +149,8 @@ function handleCollisionAndDraw(keys, point, radius, modify, offset, vector) {
       checkSquarePointCollision(
         state.cursorX,
         state.cursorY,
-        point.x - offset + xOffset,
-        point.y - offset + yOffset,
+        normalizedX,
+        normalizedY,
         r * 2.125
       )
     ) {
@@ -183,16 +185,16 @@ function handleCollisionAndDraw(keys, point, radius, modify, offset, vector) {
     //else if selectedpoint is p3 or p4, setLinkedVector if vector's control point coords are the same as the selected point
     if (vectorGui.collidedKeys.xKey === "px3" && vector) {
       if (
-        point.x === state.vectorProperties.px1 &&
-        point.y === state.vectorProperties.py1
+        normalizedX === state.vectorProperties.px1 &&
+        normalizedY === state.vectorProperties.py1
       ) {
         vectorGui.addLinkedVector(vector, keys.x)
       }
     }
     if (vectorGui.collidedKeys.xKey === "px4" && vector) {
       if (
-        point.x === state.vectorProperties.px2 &&
-        point.y === state.vectorProperties.py2
+        normalizedX === state.vectorProperties.px2 &&
+        normalizedY === state.vectorProperties.py2
       ) {
         vectorGui.addLinkedVector(vector, keys.x)
       }
@@ -204,8 +206,8 @@ function handleCollisionAndDraw(keys, point, radius, modify, offset, vector) {
     canvas,
     canvas.xOffset + xOffset,
     canvas.yOffset + yOffset,
-    point.x - offset,
-    point.y - offset,
+    point.x,
+    point.y,
     r
   )
 }
@@ -215,6 +217,11 @@ function handleCollisionAndDraw(keys, point, radius, modify, offset, vector) {
  */
 function setCursorStyle() {
   if (!vectorGui.selectedCollisionPresent && !state.collidedVectorIndex) {
+    if (state.selectedVectorIndicesSet.size > 0) {
+      //For transform actions
+      canvas.vectorGuiCVS.style.cursor = "move"
+      return
+    }
     canvas.vectorGuiCVS.style.cursor = state.tool.modes?.eraser
       ? "none"
       : state.tool.cursor
@@ -261,21 +268,21 @@ function setVectorProperties(vector) {
   if (vector.layer === canvas.currentLayer) {
     state.vectorProperties = { ...vector.vectorProperties }
     //Keep properties relative to layer offset
+    //All vector types have at least one control point
     state.vectorProperties.px1 += vector.layer.x
     state.vectorProperties.py1 += vector.layer.y
-    if (
-      vector.vectorProperties.type === "quadCurve" ||
-      vector.vectorProperties.type === "cubicCurve" ||
-      vector.vectorProperties.type === "ellipse"
-    ) {
+    //line, quadCurve, cubicCurve, ellipse
+    if (state.vectorProperties.px2 !== undefined) {
       state.vectorProperties.px2 += vector.layer.x
       state.vectorProperties.py2 += vector.layer.y
-
+    }
+    //quadCurve, cubicCurve, ellipse
+    if (state.vectorProperties.px3 !== undefined) {
       state.vectorProperties.px3 += vector.layer.x
       state.vectorProperties.py3 += vector.layer.y
     }
-
-    if (vector.vectorProperties.type === "cubicCurve") {
+    //cubicCurve
+    if (state.vectorProperties.px4 !== undefined) {
       state.vectorProperties.px4 += vector.layer.x
       state.vectorProperties.py4 += vector.layer.y
     }
@@ -332,6 +339,9 @@ function renderControlPoints(toolName, vectorProperties, vector = null) {
     case "fill":
       renderFillVector(vectorProperties, vector)
       break
+    case "line":
+      renderLineVector(vectorProperties, vector)
+      break
     case "quadCurve":
     case "cubicCurve":
       renderCurveVector(vectorProperties, vector)
@@ -361,6 +371,9 @@ function renderPath(toolName, vectorProperties, vector = null) {
   switch (toolName) {
     case "fill":
       // renderFillVector(state.vectorProperties)
+      break
+    case "line":
+      renderLinePath(vectorProperties, vector)
       break
     case "quadCurve":
     case "cubicCurve":
@@ -563,8 +576,8 @@ export function createActiveIndexesForRender(
     let action = state.undoStack[i]
     if (
       action.layer === currentVector.layer &&
-      (action.tool.name === "fill" ||
-        action.tool.name === "cut" ||
+      (action.tool === "fill" ||
+        action.tool === "cut" ||
         action?.modes?.eraser ||
         action?.modes?.inject ||
         vectorsSavedPropertiesActionKeys.includes(i))

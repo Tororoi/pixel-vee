@@ -183,11 +183,12 @@ function handlePointerMove(e) {
     }
     if (cursorMoved) {
       if (
-        state.clicked ||
-        ((state.tool.name === "quadCurve" ||
-          state.tool.name === "cubicCurve" ||
-          state.tool.name === "fill") &&
-          state.clickCounter > 0)
+        state.clicked
+        // ||
+        // ((state.tool.name === "quadCurve" ||
+        //   state.tool.name === "cubicCurve" ||
+        //   state.tool.name === "fill") &&
+        //   state.clickCounter > 0)
       ) {
         //run selected tool step function
         state.tool.fn()
@@ -201,7 +202,14 @@ function handlePointerMove(e) {
       } else {
         //no active tool, just render cursor
         vectorGui.render()
-        renderCursor()
+        if (
+          !(
+            ["quadCurve", "cubicCurve"].includes(state.tool.name) &&
+            state.clickCounter > 0
+          )
+        ) {
+          renderCursor()
+        }
       }
     }
     // save last point
@@ -223,6 +231,7 @@ function handlePointerUp(e) {
   state.clicked = false
   canvas.vectorGuiCVS.style.cursor = state.tool.cursor
   setCoordinates(e)
+  //if drawing on hidden layer, stop flashing hide btn
   if (canvas.currentLayer.hidden) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
       if (dom.layersContainer.children[i].layerObj === canvas.currentLayer) {
@@ -238,13 +247,10 @@ function handlePointerUp(e) {
   //reset action and render vectors
   if (state.action) {
     if (
-      ["fill", "quadCurve", "cubicCurve", "ellipse"].includes(state.tool.name)
+      ["fill", "line", "quadCurve", "cubicCurve", "ellipse"].includes(
+        state.tool.name
+      )
     ) {
-      // if (state.action.tool.type === "vector") {
-      //   state.currentVectorIndex = state.undoStack.indexOf(state.action)
-      // } else if (state.action.tool.type === "modify") {
-      //   state.currentVectorIndex = state.action.moddedActionIndex
-      // }
       renderVectorsToDOM()
     }
 

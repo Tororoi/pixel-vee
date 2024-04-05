@@ -66,7 +66,6 @@ export function renderEllipseVector(vectorProperties, vector) {
     pointsKeys,
     circleRadius / 2,
     true,
-    0,
     vector
   )
   // Fill points
