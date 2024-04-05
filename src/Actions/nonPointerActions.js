@@ -52,6 +52,9 @@ export function actionSelectAll() {
         deselect: false,
         selectProperties: { ...state.selectProperties },
         selectedVectorIndices: [],
+        preActionSelectedVectorIndices: Array.from(
+          state.selectedVectorIndicesSet
+        ),
       },
     })
     //reset selected vectors
@@ -334,10 +337,8 @@ export function actionPasteSelection() {
       state.clearRedoStack()
 
       renderCanvas(canvas.currentLayer)
-      switchTool("move") //TODO: (High Priority) Instead of move tool being selected, automatically use temporary transform tool which is not in the toolbox.
       renderLayersToDOM()
       renderVectorsToDOM()
-      disableActionsForPaste()
     }
   }
 }
