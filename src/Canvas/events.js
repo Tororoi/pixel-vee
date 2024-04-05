@@ -349,7 +349,7 @@ function vectorInteract(e) {
     removeVector(vector)
   } else {
     //select current vector
-    // vectorGui.reset()
+    //Only manipulate timeline if selection is happening
     if (keys.ShiftLeft || keys.ShiftRight) {
       if (!state.selectedVectorIndicesSet.has(vector.index)) {
         //select if shift key held down
@@ -358,7 +358,7 @@ function vectorInteract(e) {
       } else {
         actionDeselectVector(vector.index)
       }
-    } else {
+    } else if (state.selectedVectorIndicesSet.size > 0) {
       actionDeselect()
     }
     if (vector.index !== state.currentVectorIndex) {
@@ -386,13 +386,13 @@ function vectorInteract(e) {
  */
 function removeVector(vector) {
   vector.removed = true
+  if (state.currentVectorIndex === vector.index) {
+    vectorGui.reset()
+  }
   renderCanvas(vector.layer, true)
   removeActionVector(vector)
 
   state.clearRedoStack()
-  if (state.currentVectorIndex === vector.index) {
-    vectorGui.reset()
-  }
   renderVectorsToDOM()
 }
 

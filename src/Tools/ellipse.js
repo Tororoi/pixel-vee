@@ -204,6 +204,8 @@ function ellipseSteps() {
         //generate new unique key for vector
         state.highestVectorKey += 1
         let uniqueVectorKey = state.highestVectorKey
+        state.currentVectorIndex = uniqueVectorKey
+        enableActionsForSelection()
         //store control points for timeline
         addToTimeline({
           tool: state.tool.name,
@@ -237,11 +239,7 @@ function ellipseSteps() {
           hidden: false,
           removed: false,
         }
-        state.currentVectorIndex = uniqueVectorKey
-        enableActionsForSelection()
-        state.clickCounter = 0
-        //reset vector state forceCircle
-        state.vectorProperties.forceCircle = false
+        state.reset()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
       }

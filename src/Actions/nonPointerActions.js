@@ -8,6 +8,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
 import {
   confirmPastedPixels,
+  copySelectedVectors,
   cutSelectedPixels,
   pasteSelectedPixels,
 } from "../Menu/edit.js"
@@ -16,6 +17,7 @@ import { removeTempLayerFromDOM } from "../DOM/renderLayers.js"
 import {
   disableActionsForPaste,
   enableActionsForNoPaste,
+  enableActionsForSelection,
 } from "../DOM/disableDomElements.js"
 import { transformRasterContent } from "../utils/transformHelpers.js"
 
@@ -39,6 +41,7 @@ export function actionSelectAll() {
   }
   //select all pixels on canvas
   if (canvas.currentLayer.type === "raster" && !canvas.currentLayer.isPreview) {
+    state.deselect()
     //set initial properties
     state.selectProperties.px1 = 0
     state.selectProperties.py1 = 0
@@ -50,18 +53,16 @@ export function actionSelectAll() {
       layer: canvas.currentLayer,
       properties: {
         deselect: false,
-        selectProperties: { ...state.selectProperties },
-        selectedVectorIndices: [],
-        preActionSelectedVectorIndices: Array.from(
-          state.selectedVectorIndicesSet
-        ),
+        // selectProperties: { ...state.selectProperties },
+        // selectedVectorIndices: [],
+        // preActionSelectedVectorIndices: Array.from(
+        //   state.selectedVectorIndicesSet
+        // ),
       },
     })
-    //reset selected vectors
-    state.selectedVectorIndicesSet.clear() //TODO: (High Priority) Should this be stored in the action?
-    renderVectorsToDOM()
-
     state.clearRedoStack()
+    //re-render vectors in DOM and GUI
+    renderVectorsToDOM()
     vectorGui.render()
   }
 }
@@ -73,16 +74,16 @@ export function actionSelectAll() {
 export function actionSelectVector(vectorIndex) {
   if (!state.selectedVectorIndicesSet.has(vectorIndex)) {
     state.selectedVectorIndicesSet.add(vectorIndex)
-    const selectedVectorIndices = new Set(state.selectedVectorIndicesSet)
-    state.deselect()
-    state.selectedVectorIndicesSet = selectedVectorIndices
+    // const selectedVectorIndices = new Set(state.selectedVectorIndicesSet)
+    // state.deselect()
+    // state.selectedVectorIndicesSet = selectedVectorIndices
     addToTimeline({
       tool: tools.select.name,
       layer: canvas.currentLayer,
       properties: {
         deselect: false,
-        selectProperties: { ...state.selectProperties },
-        selectedVectorIndices: Array.from(state.selectedVectorIndicesSet),
+        // selectProperties: { ...state.selectProperties },
+        // selectedVectorIndices: Array.from(state.selectedVectorIndicesSet),
         // vectorIndex: state.currentVectorIndex, //should be for all selected vectors
         // maskArray,
       },
@@ -103,8 +104,8 @@ export function actionDeselectVector(vectorIndex) {
       layer: canvas.currentLayer,
       properties: {
         deselect: false,
-        selectProperties: { ...state.selectProperties },
-        selectedVectorIndices: Array.from(state.selectedVectorIndicesSet),
+        // selectProperties: { ...state.selectProperties },
+        // selectedVectorIndices: Array.from(state.selectedVectorIndicesSet),
         // vectorIndex: state.currentVectorIndex, //should be for all selected vectors
         // maskArray,
       },
@@ -130,20 +131,14 @@ export function actionDeselect() {
     //   canvas.currentLayer.x,
     //   canvas.currentLayer.y
     // )
+    state.deselect()
     addToTimeline({
       tool: tools.select.name,
       layer: canvas.currentLayer,
-      properties: {
-        deselect: true,
-        selectProperties: { ...state.selectProperties },
-        selectedVectorIndices: Array.from(state.selectedVectorIndicesSet),
-        // vectorIndex: state.currentVectorIndex, //should be for all selected vectors
-        // maskArray,
-      },
+      properties: {},
     })
 
     state.clearRedoStack()
-    state.deselect()
     vectorGui.render()
     renderVectorsToDOM()
   }
@@ -159,28 +154,56 @@ export function actionCutSelection(copyToClipboard = true) {
   if (
     canvas.currentLayer.type === "raster" &&
     !canvas.currentLayer.isPreview &&
-    state.boundaryBox.xMax !== null
+    (state.boundaryBox.xMax !== null ||
+      state.currentVectorIndex ||
+      state.selectedVectorIndicesSet.size > 0)
   ) {
-    cutSelectedPixels(copyToClipboard)
-    //correct boundary box for layer offset
-    const boundaryBox = { ...state.boundaryBox }
-    if (boundaryBox.xMax !== null) {
-      boundaryBox.xMin -= canvas.currentLayer.x
-      boundaryBox.xMax -= canvas.currentLayer.x
-      boundaryBox.yMin -= canvas.currentLayer.y
-      boundaryBox.yMax -= canvas.currentLayer.y
-    }
-    addToTimeline({
-      tool: tools.cut.name,
-      layer: canvas.currentLayer,
-      properties: {
-        boundaryBox,
-      },
-    })
+    if (state.boundaryBox.xMax !== null) {
+      cutSelectedPixels(copyToClipboard)
+      //correct boundary box for layer offset
+      const boundaryBox = { ...state.boundaryBox }
+      if (boundaryBox.xMax !== null) {
+        boundaryBox.xMin -= canvas.currentLayer.x
+        boundaryBox.xMax -= canvas.currentLayer.x
+        boundaryBox.yMin -= canvas.currentLayer.y
+        boundaryBox.yMax -= canvas.currentLayer.y
+      }
+      addToTimeline({
+        tool: tools.cut.name,
+        layer: canvas.currentLayer,
+        properties: {
+          boundaryBox,
+        },
+      })
 
-    state.clearRedoStack()
-    renderCanvas(canvas.currentLayer)
-    vectorGui.render()
+      state.clearRedoStack()
+      renderCanvas(canvas.currentLayer)
+      vectorGui.render()
+    } else if (
+      state.currentVectorIndex ||
+      state.selectedVectorIndicesSet.size > 0
+    ) {
+      //cut selected vectors (mark as removed) TODO: (High Priority) Need new action to process multiple removals at once
+      copySelectedVectors()
+      state.selectedVectorIndicesSet.forEach((vectorIndex) => {
+        state.vectors[vectorIndex].removed = true
+      })
+      const vectorIndices = Array.from(state.selectedVectorIndicesSet)
+      state.deselect()
+      addToTimeline({
+        tool: tools.remove.name,
+        layer: canvas.currentLayer,
+        properties: {
+          vectorIndices,
+          from: false,
+          to: true,
+        },
+      })
+
+      state.clearRedoStack()
+      renderCanvas(canvas.currentLayer, true)
+      vectorGui.render()
+    }
   }
 }
 
@@ -316,6 +339,7 @@ export function actionPasteSelection() {
         //add to state.vectors
         state.vectors[uniqueVectorKey] = vector
       }
+      //TODO: (High Priority) Need to render onto canvas
       //add to timeline
       addToTimeline({
         tool: tools.vectorPaste.name,
@@ -339,6 +363,8 @@ export function actionPasteSelection() {
       renderCanvas(canvas.currentLayer)
       renderLayersToDOM()
       renderVectorsToDOM()
+      enableActionsForSelection()
+      vectorGui.render()
     }
   }
 }

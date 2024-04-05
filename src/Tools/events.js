@@ -76,14 +76,15 @@ function handleClearCanvas() {
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
-  actionClear(canvas.currentLayer)
   state.pointsSet = null
   state.seenPixelsSet = null
   state.points = []
-  state.clearRedoStack()
-  renderCanvas(canvas.currentLayer)
   vectorGui.reset()
   state.reset()
+  actionClear(canvas.currentLayer)
+
+  state.clearRedoStack()
+  renderCanvas(canvas.currentLayer)
   renderVectorsToDOM()
 }
 

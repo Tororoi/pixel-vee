@@ -86,9 +86,7 @@ export function removeActionVector(moddedVector) {
     tool: tools.remove.name,
     layer: moddedVector.layer,
     properties: {
-      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-      moddedActionIndex: moddedVector.actionIndex,
-      moddedVectorIndex: moddedVector.index,
+      vectorIndices: [moddedVector.index],
       from: false,
       to: true,
     },
