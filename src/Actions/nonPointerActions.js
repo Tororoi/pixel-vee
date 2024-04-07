@@ -185,10 +185,16 @@ export function actionCutSelection(copyToClipboard = true) {
     ) {
       //cut selected vectors (mark as removed) TODO: (High Priority) Need new action to process multiple removals at once
       copySelectedVectors()
-      state.selectedVectorIndicesSet.forEach((vectorIndex) => {
-        state.vectors[vectorIndex].removed = true
-      })
-      const vectorIndices = Array.from(state.selectedVectorIndicesSet)
+      let vectorIndices = []
+      if (state.selectedVectorIndicesSet.size > 0) {
+        state.selectedVectorIndicesSet.forEach((vectorIndex) => {
+          state.vectors[vectorIndex].removed = true
+        })
+        vectorIndices = Array.from(state.selectedVectorIndicesSet)
+      } else {
+        state.vectors[state.currentVectorIndex].removed = true
+        vectorIndices = [state.currentVectorIndex]
+      }
       state.deselect()
       addToTimeline({
         tool: tools.remove.name,
@@ -234,8 +240,6 @@ export function actionPasteSelection() {
       Object.keys(state.selectClipboard.vectors).length > 0)
   ) {
     //if state.selectClipboard.canvas, run pasteSelectedPixels
-    // Store whether selection was active before paste action
-    let prePasteSelectProperties = { ...state.selectProperties }
     //adjust boundaryBox for layer offset
     const boundaryBox = { ...state.selectClipboard.boundaryBox }
     if (boundaryBox.xMax !== null) {
@@ -261,16 +265,28 @@ export function actionPasteSelection() {
         state.highestPastedImageKey += 1
         uniquePastedImageKey = state.highestPastedImageKey
       }
+      if (state.selectClipboard.imageData) {
+        // state.originalImageDataForTransform = state.selectClipboard.imageData
+        // canvas.currentLayer.ctx.getImageData(
+        //   state.boundaryBox.xMin,
+        //   state.boundaryBox.yMin,
+        //   state.boundaryBox.xMax - state.boundaryBox.xMin,
+        //   state.boundaryBox.yMax - state.boundaryBox.yMin
+        // )
+
+        state.pastedImages[uniquePastedImageKey] = {
+          imageData: state.selectClipboard.imageData,
+        }
+        state.currentPastedImageKey = uniquePastedImageKey
+      }
+      //clear any selected vectors
+      state.selectedVectorIndicesSet.clear()
       //add to timeline
       addToTimeline({
         tool: tools.paste.name,
         layer: canvas.currentLayer,
         properties: {
           confirmed: false,
-          prePasteSelectProperties,
-          prePasteSelectedVectorIndices: Array.from(
-            state.selectedVectorIndicesSet
-          ),
           boundaryBox,
           selectProperties,
           pastedImageKey: uniquePastedImageKey,
@@ -283,22 +299,6 @@ export function actionPasteSelection() {
           pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
         },
       })
-      state.selectedVectorIndicesSet.clear()
-      if (state.selectClipboard.imageData) {
-        // state.originalImageDataForTransform = state.selectClipboard.imageData
-        // canvas.currentLayer.ctx.getImageData(
-        //   state.boundaryBox.xMin,
-        //   state.boundaryBox.yMin,
-        //   state.boundaryBox.xMax - state.boundaryBox.xMin,
-        //   state.boundaryBox.yMax - state.boundaryBox.yMin
-        // )
-
-        state.pastedImages[uniquePastedImageKey] = {
-          actionIndex: state.action.index,
-          imageData: state.selectClipboard.imageData,
-        }
-        state.currentPastedImageKey = uniquePastedImageKey
-      }
 
       state.clearRedoStack()
 
@@ -339,28 +339,25 @@ export function actionPasteSelection() {
         //add to state.vectors
         state.vectors[uniqueVectorKey] = vector
       }
+      state.selectedVectorIndicesSet.clear()
+      const vectorIndices = Object.keys(clipboardVectors)
+      vectorIndices.forEach((vectorIndex) => {
+        state.selectedVectorIndicesSet.add(vectorIndex)
+      })
       //TODO: (High Priority) Need to render onto canvas
       //add to timeline
       addToTimeline({
         tool: tools.vectorPaste.name,
         layer: canvas.currentLayer,
         properties: {
-          prePasteSelectProperties,
-          prePasteSelectedVectorIndices: Array.from(
-            state.selectedVectorIndicesSet
-          ),
           boundaryBox,
           selectProperties,
-          vectorIndices: Object.keys(clipboardVectors),
+          vectorIndices,
         },
-      })
-      state.selectedVectorIndicesSet.clear()
-      state.action.vectorIndices.forEach((vectorIndex) => {
-        state.selectedVectorIndicesSet.add(vectorIndex)
       })
       state.clearRedoStack()
 
-      renderCanvas(canvas.currentLayer)
+      renderCanvas(canvas.currentLayer, true)
       renderLayersToDOM()
       renderVectorsToDOM()
       enableActionsForSelection()
