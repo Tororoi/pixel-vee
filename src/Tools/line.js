@@ -112,6 +112,8 @@ function lineSteps() {
       //generate new unique key for vector
       state.highestVectorKey += 1
       let uniqueVectorKey = state.highestVectorKey
+      state.currentVectorIndex = uniqueVectorKey
+      enableActionsForSelection()
       //store control points for timeline
       addToTimeline({
         tool: state.tool.name,
@@ -143,8 +145,6 @@ function lineSteps() {
         hidden: false,
         removed: false,
       }
-      state.currentVectorIndex = uniqueVectorKey
-      enableActionsForSelection()
       renderCanvas(canvas.currentLayer)
       break
     }

@@ -63,6 +63,11 @@ export function disableActionsForNoSelection() {
   dom.cutBtn.classList.add("disabled")
   dom.copyBtn.classList.add("disabled")
   dom.deselectBtn.classList.add("disabled")
+  dom.deleteBtn.classList.add("disabled")
+  //disable transform menu
+  dom.flipHorizontalBtn.classList.add("disabled")
+  dom.flipVerticalBtn.classList.add("disabled")
+  dom.rotateBtn.classList.add("disabled")
 }
 
 /**
@@ -77,6 +82,13 @@ export function enableActionsForSelection() {
   dom.cutBtn.classList.remove("disabled")
   dom.copyBtn.classList.remove("disabled")
   dom.deselectBtn.classList.remove("disabled")
+  dom.deleteBtn.classList.remove("disabled")
+  //enable transform menu if selection is vector
+  if (state.currentVectorIndex || state.selectedVectorIndicesSet.size > 0) {
+    dom.flipHorizontalBtn.classList.remove("disabled")
+    dom.flipVerticalBtn.classList.remove("disabled")
+    dom.rotateBtn.classList.remove("disabled")
+  }
 }
 
 /**

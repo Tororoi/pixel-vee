@@ -50,8 +50,8 @@ function selectSteps() {
         layer: canvas.currentLayer,
         properties: {
           deselect: false,
-          selectProperties: { ...state.selectProperties },
-          selectedVectorIndices: [],
+          // selectProperties: { ...state.selectProperties },
+          // selectedVectorIndices: [],
         },
       })
       break
@@ -92,9 +92,9 @@ function adjustSelectSteps() {
         layer: canvas.currentLayer,
         properties: {
           deselect: false,
-          selectProperties: { ...state.selectProperties },
+          // selectProperties: { ...state.selectProperties },
           // maskArray,
-          selectedVectorIndices: [],
+          // selectedVectorIndices: [],
         },
       })
       vectorGui.selectedPoint = {

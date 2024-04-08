@@ -147,7 +147,7 @@ export function activateShortcut(keyCode) {
     case "KeyF":
       if (!state.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
-          if (keys.AltLeft || keys.AltRight) {
+          if (keys.ShiftLeft || keys.ShiftRight) {
             //option+meta+z
             //Flip vertical
             actionFlipPixels(false)

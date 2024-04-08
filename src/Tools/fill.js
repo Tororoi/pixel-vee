@@ -85,8 +85,8 @@ function fillSteps() {
           hidden: false,
           removed: false,
         }
-        state.currentVectorIndex = uniqueVectorKey
-        enableActionsForSelection()
+        // state.currentVectorIndex = uniqueVectorKey
+        // enableActionsForSelection()
         renderCanvas(canvas.currentLayer)
         vectorGui.reset()
       }

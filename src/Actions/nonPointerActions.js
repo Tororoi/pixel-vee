@@ -8,6 +8,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
 import {
   confirmPastedPixels,
+  copySelectedVectors,
   cutSelectedPixels,
   pasteSelectedPixels,
 } from "../Menu/edit.js"
@@ -16,8 +17,11 @@ import { removeTempLayerFromDOM } from "../DOM/renderLayers.js"
 import {
   disableActionsForPaste,
   enableActionsForNoPaste,
+  enableActionsForSelection,
 } from "../DOM/disableDomElements.js"
 import { transformRasterContent } from "../utils/transformHelpers.js"
+import { updateVectorProperties } from "../utils/vectorHelpers.js"
+import { modifyVectorAction } from "./modifyTimeline.js"
 
 //=============================================//
 //====== * * * Non Pointer Actions * * * ======//
@@ -39,6 +43,7 @@ export function actionSelectAll() {
   }
   //select all pixels on canvas
   if (canvas.currentLayer.type === "raster" && !canvas.currentLayer.isPreview) {
+    state.deselect()
     //set initial properties
     state.selectProperties.px1 = 0
     state.selectProperties.py1 = 0
@@ -50,18 +55,16 @@ export function actionSelectAll() {
       layer: canvas.currentLayer,
       properties: {
         deselect: false,
-        selectProperties: { ...state.selectProperties },
-        selectedVectorIndices: [],
-        preActionSelectedVectorIndices: Array.from(
-          state.selectedVectorIndicesSet
-        ),
+        // selectProperties: { ...state.selectProperties },
+        // selectedVectorIndices: [],
+        // preActionSelectedVectorIndices: Array.from(
+        //   state.selectedVectorIndicesSet
+        // ),
       },
     })
-    //reset selected vectors
-    state.selectedVectorIndicesSet.clear() //TODO: (High Priority) Should this be stored in the action?
-    renderVectorsToDOM()
-
     state.clearRedoStack()
+    //re-render vectors in DOM and GUI
+    renderVectorsToDOM()
     vectorGui.render()
   }
 }
@@ -73,16 +76,16 @@ export function actionSelectAll() {
 export function actionSelectVector(vectorIndex) {
   if (!state.selectedVectorIndicesSet.has(vectorIndex)) {
     state.selectedVectorIndicesSet.add(vectorIndex)
-    const selectedVectorIndices = new Set(state.selectedVectorIndicesSet)
-    state.deselect()
-    state.selectedVectorIndicesSet = selectedVectorIndices
+    // const selectedVectorIndices = new Set(state.selectedVectorIndicesSet)
+    // state.deselect()
+    // state.selectedVectorIndicesSet = selectedVectorIndices
     addToTimeline({
       tool: tools.select.name,
       layer: canvas.currentLayer,
       properties: {
         deselect: false,
-        selectProperties: { ...state.selectProperties },
-        selectedVectorIndices: Array.from(state.selectedVectorIndicesSet),
+        // selectProperties: { ...state.selectProperties },
+        // selectedVectorIndices: Array.from(state.selectedVectorIndicesSet),
         // vectorIndex: state.currentVectorIndex, //should be for all selected vectors
         // maskArray,
       },
@@ -103,8 +106,8 @@ export function actionDeselectVector(vectorIndex) {
       layer: canvas.currentLayer,
       properties: {
         deselect: false,
-        selectProperties: { ...state.selectProperties },
-        selectedVectorIndices: Array.from(state.selectedVectorIndicesSet),
+        // selectProperties: { ...state.selectProperties },
+        // selectedVectorIndices: Array.from(state.selectedVectorIndicesSet),
         // vectorIndex: state.currentVectorIndex, //should be for all selected vectors
         // maskArray,
       },
@@ -130,20 +133,14 @@ export function actionDeselect() {
     //   canvas.currentLayer.x,
     //   canvas.currentLayer.y
     // )
+    state.deselect()
     addToTimeline({
       tool: tools.select.name,
       layer: canvas.currentLayer,
-      properties: {
-        deselect: true,
-        selectProperties: { ...state.selectProperties },
-        selectedVectorIndices: Array.from(state.selectedVectorIndicesSet),
-        // vectorIndex: state.currentVectorIndex, //should be for all selected vectors
-        // maskArray,
-      },
+      properties: {},
     })
 
     state.clearRedoStack()
-    state.deselect()
     vectorGui.render()
     renderVectorsToDOM()
   }
@@ -159,28 +156,64 @@ export function actionCutSelection(copyToClipboard = true) {
   if (
     canvas.currentLayer.type === "raster" &&
     !canvas.currentLayer.isPreview &&
-    state.boundaryBox.xMax !== null
+    (state.boundaryBox.xMax !== null ||
+      state.currentVectorIndex ||
+      state.selectedVectorIndicesSet.size > 0)
   ) {
-    cutSelectedPixels(copyToClipboard)
-    //correct boundary box for layer offset
-    const boundaryBox = { ...state.boundaryBox }
-    if (boundaryBox.xMax !== null) {
-      boundaryBox.xMin -= canvas.currentLayer.x
-      boundaryBox.xMax -= canvas.currentLayer.x
-      boundaryBox.yMin -= canvas.currentLayer.y
-      boundaryBox.yMax -= canvas.currentLayer.y
-    }
-    addToTimeline({
-      tool: tools.cut.name,
-      layer: canvas.currentLayer,
-      properties: {
-        boundaryBox,
-      },
-    })
+    if (state.boundaryBox.xMax !== null) {
+      cutSelectedPixels(copyToClipboard)
+      //correct boundary box for layer offset
+      const boundaryBox = { ...state.boundaryBox }
+      if (boundaryBox.xMax !== null) {
+        boundaryBox.xMin -= canvas.currentLayer.x
+        boundaryBox.xMax -= canvas.currentLayer.x
+        boundaryBox.yMin -= canvas.currentLayer.y
+        boundaryBox.yMax -= canvas.currentLayer.y
+      }
+      addToTimeline({
+        tool: tools.cut.name,
+        layer: canvas.currentLayer,
+        properties: {
+          boundaryBox,
+        },
+      })
 
-    state.clearRedoStack()
-    renderCanvas(canvas.currentLayer)
-    vectorGui.render()
+      state.clearRedoStack()
+      renderCanvas(canvas.currentLayer)
+      vectorGui.render()
+    } else if (
+      state.currentVectorIndex ||
+      state.selectedVectorIndicesSet.size > 0
+    ) {
+      //cut selected vectors (mark as removed) TODO: (High Priority) Need new action to process multiple removals at once
+      if (copyToClipboard) {
+        copySelectedVectors()
+      }
+      let vectorIndices = []
+      if (state.selectedVectorIndicesSet.size > 0) {
+        state.selectedVectorIndicesSet.forEach((vectorIndex) => {
+          state.vectors[vectorIndex].removed = true
+        })
+        vectorIndices = Array.from(state.selectedVectorIndicesSet)
+      } else {
+        state.vectors[state.currentVectorIndex].removed = true
+        vectorIndices = [state.currentVectorIndex]
+      }
+      state.deselect()
+      renderCanvas(canvas.currentLayer, true)
+      addToTimeline({
+        tool: tools.remove.name,
+        layer: canvas.currentLayer,
+        properties: {
+          vectorIndices,
+          from: false,
+          to: true,
+        },
+      })
+
+      state.clearRedoStack()
+      vectorGui.render()
+    }
   }
 }
 
@@ -211,8 +244,6 @@ export function actionPasteSelection() {
       Object.keys(state.selectClipboard.vectors).length > 0)
   ) {
     //if state.selectClipboard.canvas, run pasteSelectedPixels
-    // Store whether selection was active before paste action
-    let prePasteSelectProperties = { ...state.selectProperties }
     //adjust boundaryBox for layer offset
     const boundaryBox = { ...state.selectClipboard.boundaryBox }
     if (boundaryBox.xMax !== null) {
@@ -238,16 +269,28 @@ export function actionPasteSelection() {
         state.highestPastedImageKey += 1
         uniquePastedImageKey = state.highestPastedImageKey
       }
+      if (state.selectClipboard.imageData) {
+        // state.originalImageDataForTransform = state.selectClipboard.imageData
+        // canvas.currentLayer.ctx.getImageData(
+        //   state.boundaryBox.xMin,
+        //   state.boundaryBox.yMin,
+        //   state.boundaryBox.xMax - state.boundaryBox.xMin,
+        //   state.boundaryBox.yMax - state.boundaryBox.yMin
+        // )
+
+        state.pastedImages[uniquePastedImageKey] = {
+          imageData: state.selectClipboard.imageData,
+        }
+        state.currentPastedImageKey = uniquePastedImageKey
+      }
+      //clear any selected vectors
+      state.selectedVectorIndicesSet.clear()
       //add to timeline
       addToTimeline({
         tool: tools.paste.name,
         layer: canvas.currentLayer,
         properties: {
           confirmed: false,
-          prePasteSelectProperties,
-          prePasteSelectedVectorIndices: Array.from(
-            state.selectedVectorIndicesSet
-          ),
           boundaryBox,
           selectProperties,
           pastedImageKey: uniquePastedImageKey,
@@ -260,22 +303,6 @@ export function actionPasteSelection() {
           pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
         },
       })
-      state.selectedVectorIndicesSet.clear()
-      if (state.selectClipboard.imageData) {
-        // state.originalImageDataForTransform = state.selectClipboard.imageData
-        // canvas.currentLayer.ctx.getImageData(
-        //   state.boundaryBox.xMin,
-        //   state.boundaryBox.yMin,
-        //   state.boundaryBox.xMax - state.boundaryBox.xMin,
-        //   state.boundaryBox.yMax - state.boundaryBox.yMin
-        // )
-
-        state.pastedImages[uniquePastedImageKey] = {
-          actionIndex: state.action.index,
-          imageData: state.selectClipboard.imageData,
-        }
-        state.currentPastedImageKey = uniquePastedImageKey
-      }
 
       state.clearRedoStack()
 
@@ -316,29 +343,29 @@ export function actionPasteSelection() {
         //add to state.vectors
         state.vectors[uniqueVectorKey] = vector
       }
+      state.selectedVectorIndicesSet.clear()
+      const vectorIndices = Object.keys(clipboardVectors)
+      vectorIndices.forEach((vectorIndex) => {
+        state.selectedVectorIndicesSet.add(vectorIndex)
+      })
+      //TODO: (High Priority) Need to render onto canvas to remove need to redraw timeline
+      renderCanvas(canvas.currentLayer, true)
       //add to timeline
       addToTimeline({
         tool: tools.vectorPaste.name,
         layer: canvas.currentLayer,
         properties: {
-          prePasteSelectProperties,
-          prePasteSelectedVectorIndices: Array.from(
-            state.selectedVectorIndicesSet
-          ),
           boundaryBox,
           selectProperties,
-          vectorIndices: Object.keys(clipboardVectors),
+          vectorIndices,
         },
-      })
-      state.selectedVectorIndicesSet.clear()
-      state.action.vectorIndices.forEach((vectorIndex) => {
-        state.selectedVectorIndicesSet.add(vectorIndex)
       })
       state.clearRedoStack()
 
-      renderCanvas(canvas.currentLayer)
       renderLayersToDOM()
       renderVectorsToDOM()
+      enableActionsForSelection()
+      vectorGui.render()
     }
   }
 }
@@ -454,7 +481,7 @@ export function actionConfirmPastedPixels() {
 }
 
 //=============================================//
-//=========== * * * Transform * * * ===========//
+//======== * * * Raster Transform * * * =======//
 //=============================================//
 
 /**
@@ -513,6 +540,7 @@ export function addTransformToTimeline() {
  * @param {boolean} flipHorizontally - Whether to flip horizontally
  */
 export function actionFlipPixels(flipHorizontally) {
+  //raster flip
   if (canvas.currentLayer.isPreview) {
     //flip pixels
     const transformedBoundaryBox = { ...state.boundaryBox }
@@ -535,6 +563,12 @@ export function actionFlipPixels(flipHorizontally) {
     )
     addTransformToTimeline()
     renderCanvas(canvas.currentLayer)
+  } else if (
+    state.currentVectorIndex ||
+    state.selectedVectorIndicesSet.size > 0
+  ) {
+    //vector flip
+    actionFlipVectors(flipHorizontally)
   }
 }
 
@@ -589,6 +623,87 @@ export function actionRotatePixels() {
     vectorGui.render()
     renderCanvas(canvas.currentLayer)
   }
+}
+
+//=============================================//
+//======== * * * Vector Transform * * * =======//
+//=============================================//
+
+/**
+ * Flip selected vectors horizontally around point at center of min and max bounds of selected vectors
+ * @param {boolean} flipHorizontally - Whether to flip horizontally
+ */
+export function actionFlipVectors(flipHorizontally) {
+  //get bounding box of all vectors
+  let [xMin, xMax, yMin, yMax] = [null, null, null, null]
+  const vectorIndicesSet = new Set(state.selectedVectorIndicesSet)
+  if (vectorIndicesSet.size === 0) {
+    vectorIndicesSet.add(state.currentVectorIndex)
+  }
+  for (const vectorIndex of vectorIndicesSet) {
+    const vector = state.vectors[vectorIndex]
+    const vectorXPoints = []
+    const vectorYPoints = []
+
+    for (let i = 1; i <= 4; i++) {
+      if (
+        "px" + i in vector.vectorProperties &&
+        "py" + i in vector.vectorProperties
+      ) {
+        vectorXPoints.push(vector.vectorProperties[`px${i}`])
+        vectorYPoints.push(vector.vectorProperties[`py${i}`])
+      }
+    }
+
+    xMin = Math.min(xMin ?? Infinity, ...vectorXPoints)
+    xMax = Math.max(xMax ?? -Infinity, ...vectorXPoints)
+    yMin = Math.min(yMin ?? Infinity, ...vectorYPoints)
+    yMax = Math.max(yMax ?? -Infinity, ...vectorYPoints)
+  }
+  //get center point of selected vectors
+  const centerX = (xMin + xMax) / 2
+  const centerY = (yMin + yMax) / 2
+  let referenceVector
+  //flip vectors horizontally around center point
+  for (const vectorIndex of vectorIndicesSet) {
+    const vector = state.vectors[vectorIndex]
+    referenceVector = vector //TODO: (Low Priority) Determine a better method for setting a reference vector or remove the need for one.
+    state.vectorsSavedProperties[vectorIndex] = {
+      ...vector.vectorProperties,
+    }
+    for (let i = 1; i <= 4; i++) {
+      if (
+        "px" + i in vector.vectorProperties &&
+        "py" + i in vector.vectorProperties
+      ) {
+        const xKey = `px${i}`
+        const yKey = `py${i}`
+        let newX = vector.vectorProperties[xKey]
+        let newY = vector.vectorProperties[yKey]
+        if (flipHorizontally) {
+          newX = Math.round(2 * centerX) - vector.vectorProperties[xKey]
+        } else {
+          newY = Math.round(2 * centerY) - vector.vectorProperties[yKey]
+        }
+        updateVectorProperties(vector, newX, newY, xKey, yKey)
+      }
+    }
+    if (vectorIndex === state.currentVectorIndex) {
+      vectorGui.setVectorProperties(vector)
+    }
+  }
+  renderCanvas(canvas.currentLayer, true)
+  //Get any selected vector to use for modifyVectorAction
+  modifyVectorAction(referenceVector)
+  state.clearRedoStack()
+  vectorGui.render()
+}
+
+/**
+ * Freely rotate selected vectors at any angle around origin point (default center of vectors bounding box)
+ */
+export function actionRotateVectors() {
+  //TODO: (High Priority) Freely rotate selected vectors at any angle around origin point (default center of vectors bounding box)
 }
 
 //=============================================//

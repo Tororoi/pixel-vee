@@ -161,6 +161,8 @@ function quadCurveSteps() {
         //generate new unique key for vector
         state.highestVectorKey += 1
         let uniqueVectorKey = state.highestVectorKey
+        state.currentVectorIndex = uniqueVectorKey
+        enableActionsForSelection()
         //store control points for timeline
         addToTimeline({
           tool: state.tool.name,
@@ -194,8 +196,6 @@ function quadCurveSteps() {
           hidden: false,
           removed: false,
         }
-        state.currentVectorIndex = uniqueVectorKey
-        enableActionsForSelection()
         renderCanvas(canvas.currentLayer)
       }
       break
@@ -375,6 +375,8 @@ function cubicCurveSteps() {
         //generate new unique key for vector
         state.highestVectorKey += 1
         let uniqueVectorKey = state.highestVectorKey
+        state.currentVectorIndex = uniqueVectorKey
+        enableActionsForSelection()
         //store control points for timeline
         addToTimeline({
           tool: state.tool.name,
@@ -410,8 +412,6 @@ function cubicCurveSteps() {
           hidden: false,
           removed: false,
         }
-        state.currentVectorIndex = uniqueVectorKey
-        enableActionsForSelection()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
       }
