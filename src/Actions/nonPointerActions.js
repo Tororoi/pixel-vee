@@ -622,6 +622,12 @@ export function actionRotatePixels() {
     addTransformToTimeline()
     vectorGui.render()
     renderCanvas(canvas.currentLayer)
+  } else if (
+    state.currentVectorIndex ||
+    state.selectedVectorIndicesSet.size > 0
+  ) {
+    //vector flip
+    actionRotateVectors(90)
   }
 }
 
@@ -701,9 +707,81 @@ export function actionFlipVectors(flipHorizontally) {
 
 /**
  * Freely rotate selected vectors at any angle around origin point (default center of vectors bounding box)
+ * @param degrees
  */
-export function actionRotateVectors() {
+export function actionRotateVectors(degrees) {
+  //get bounding box of all vectors
+  let [xMin, xMax, yMin, yMax] = [null, null, null, null]
+  const vectorIndicesSet = new Set(state.selectedVectorIndicesSet)
+  if (vectorIndicesSet.size === 0) {
+    vectorIndicesSet.add(state.currentVectorIndex)
+  }
+  for (const vectorIndex of vectorIndicesSet) {
+    const vector = state.vectors[vectorIndex]
+    const vectorXPoints = []
+    const vectorYPoints = []
+
+    for (let i = 1; i <= 4; i++) {
+      if (
+        "px" + i in vector.vectorProperties &&
+        "py" + i in vector.vectorProperties
+      ) {
+        vectorXPoints.push(vector.vectorProperties[`px${i}`])
+        vectorYPoints.push(vector.vectorProperties[`py${i}`])
+      }
+    }
+
+    xMin = Math.min(xMin ?? Infinity, ...vectorXPoints)
+    xMax = Math.max(xMax ?? -Infinity, ...vectorXPoints)
+    yMin = Math.min(yMin ?? Infinity, ...vectorYPoints)
+    yMax = Math.max(yMax ?? -Infinity, ...vectorYPoints)
+  }
+  //get center point of selected vectors
+  //TODO: (High Priority) To keep rotation point consistent, keep point in state and update it when vectors are moved, not when rotating or flipping
+  const centerX = (xMin + xMax) / 2
+  const centerY = (yMin + yMax) / 2
   //TODO: (High Priority) Freely rotate selected vectors at any angle around origin point (default center of vectors bounding box)
+  let referenceVector
+  for (const vectorIndex of vectorIndicesSet) {
+    const vector = state.vectors[vectorIndex]
+    referenceVector = vector //TODO: (Low Priority) Determine a better method for setting a reference vector or remove the need for one.
+    state.vectorsSavedProperties[vectorIndex] = {
+      ...vector.vectorProperties,
+    }
+    for (let i = 1; i <= 4; i++) {
+      if (
+        "px" + i in vector.vectorProperties &&
+        "py" + i in vector.vectorProperties
+      ) {
+        const xKey = `px${i}`
+        const yKey = `py${i}`
+        let newX = vector.vectorProperties[xKey]
+        let newY = vector.vectorProperties[yKey]
+        const radians = (degrees * Math.PI) / 180
+        const cos = Math.cos(radians)
+        const sin = Math.sin(radians)
+        newX = Math.floor(
+          cos * (vector.vectorProperties[xKey] - centerX) -
+            sin * (vector.vectorProperties[yKey] - centerY) +
+            centerX
+        )
+        newY = Math.floor(
+          sin * (vector.vectorProperties[xKey] - centerX) +
+            cos * (vector.vectorProperties[yKey] - centerY) +
+            centerY
+        )
+        updateVectorProperties(vector, newX, newY, xKey, yKey)
+      }
+    }
+    if (vectorIndex === state.currentVectorIndex) {
+      vectorGui.setVectorProperties(vector)
+    }
+  }
+  renderCanvas(canvas.currentLayer, true)
+  //Get any selected vector to use for modifyVectorAction
+  modifyVectorAction(referenceVector)
+  state.clearRedoStack()
+  vectorGui.render()
 }
 
 //=============================================//
