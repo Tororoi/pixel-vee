@@ -699,6 +699,13 @@ export function actionFlipVectors(flipHorizontally) {
   vectorGui.render()
 }
 
+/**
+ * Freely rotate selected vectors at any angle around origin point (default center of vectors bounding box)
+ */
+export function actionRotateVectors() {
+  //TODO: (High Priority) Freely rotate selected vectors at any angle around origin point (default center of vectors bounding box)
+}
+
 //=============================================//
 //============ * * * Layers * * * =============//
 //=============================================//
