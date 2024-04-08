@@ -628,7 +628,7 @@ export function actionRotatePixels() {
  */
 export function actionFlipVectorsHorizontally() {
   //get bounding box of all vectors
-  let [xMin, xMax, yMin, yMax] = [0, 0, 0, 0]
+  let [xMin, xMax, yMin, yMax] = [null, null, null, null]
 
   for (const vectorIndex of state.selectedVectorIndicesSet) {
     const vector = state.vectors[vectorIndex]
@@ -645,10 +645,10 @@ export function actionFlipVectorsHorizontally() {
       }
     }
 
-    xMin = Math.min(xMin, ...vectorXPoints)
-    xMax = Math.max(xMax, ...vectorXPoints)
-    yMin = Math.min(yMin, ...vectorYPoints)
-    yMax = Math.max(yMax, ...vectorYPoints)
+    xMin = Math.min(xMin ?? Infinity, ...vectorXPoints)
+    xMax = Math.max(xMax ?? -Infinity, ...vectorXPoints)
+    yMin = Math.min(yMin ?? Infinity, ...vectorYPoints)
+    yMax = Math.max(yMax ?? -Infinity, ...vectorYPoints)
   }
   //get center point of selected vectors
   const centerX = Math.floor((xMin + xMax) / 2)
@@ -665,7 +665,7 @@ export function actionFlipVectorsHorizontally() {
         const yKey = `py${i}`
         updateVectorProperties(
           vector,
-          2 * (xMax - centerX) - vector.vectorProperties[xKey],
+          2 * centerX - vector.vectorProperties[xKey],
           vector.vectorProperties[yKey],
           xKey,
           yKey
