@@ -20,6 +20,7 @@ import {
   enableActionsForSelection,
 } from "../DOM/disableDomElements.js"
 import { transformRasterContent } from "../utils/transformHelpers.js"
+import { updateVectorProperties } from "../utils/vectorHelpers.js"
 
 //=============================================//
 //====== * * * Non Pointer Actions * * * ======//
@@ -477,7 +478,7 @@ export function actionConfirmPastedPixels() {
 }
 
 //=============================================//
-//=========== * * * Transform * * * ===========//
+//======== * * * Raster Transform * * * =======//
 //=============================================//
 
 /**
@@ -536,6 +537,7 @@ export function addTransformToTimeline() {
  * @param {boolean} flipHorizontally - Whether to flip horizontally
  */
 export function actionFlipPixels(flipHorizontally) {
+  //raster flip
   if (canvas.currentLayer.isPreview) {
     //flip pixels
     const transformedBoundaryBox = { ...state.boundaryBox }
@@ -558,6 +560,9 @@ export function actionFlipPixels(flipHorizontally) {
     )
     addTransformToTimeline()
     renderCanvas(canvas.currentLayer)
+  } else if (state.selectedVectorIndicesSet.size > 0) {
+    //vector flip
+    actionFlipVectorsHorizontally()
   }
 }
 
@@ -612,6 +617,65 @@ export function actionRotatePixels() {
     vectorGui.render()
     renderCanvas(canvas.currentLayer)
   }
+}
+
+//=============================================//
+//======== * * * Vector Transform * * * =======//
+//=============================================//
+
+/**
+ * Flip selected vectors horizontally around point at center of min and max bounds of selected vectors
+ */
+export function actionFlipVectorsHorizontally() {
+  //get bounding box of all vectors
+  let [xMin, xMax, yMin, yMax] = [0, 0, 0, 0]
+
+  for (const vectorIndex of state.selectedVectorIndicesSet) {
+    const vector = state.vectors[vectorIndex]
+    const vectorXPoints = []
+    const vectorYPoints = []
+
+    for (let i = 1; i <= 4; i++) {
+      if (
+        "px" + i in vector.vectorProperties &&
+        "py" + i in vector.vectorProperties
+      ) {
+        vectorXPoints.push(vector.vectorProperties[`px${i}`])
+        vectorYPoints.push(vector.vectorProperties[`py${i}`])
+      }
+    }
+
+    xMin = Math.min(xMin, ...vectorXPoints)
+    xMax = Math.max(xMax, ...vectorXPoints)
+    yMin = Math.min(yMin, ...vectorYPoints)
+    yMax = Math.max(yMax, ...vectorYPoints)
+  }
+  //get center point of selected vectors
+  const centerX = Math.floor((xMin + xMax) / 2)
+  // const centerY = Math.floor((yMin + yMax) / 2)
+  //flip vectors horizontally around center point
+  for (const vectorIndex of state.selectedVectorIndicesSet) {
+    const vector = state.vectors[vectorIndex]
+    for (let i = 1; i <= 4; i++) {
+      if (
+        "px" + i in vector.vectorProperties &&
+        "py" + i in vector.vectorProperties
+      ) {
+        const xKey = `px${i}`
+        const yKey = `py${i}`
+        updateVectorProperties(
+          vector,
+          2 * (xMax - centerX) - vector.vectorProperties[xKey],
+          vector.vectorProperties[yKey],
+          xKey,
+          yKey
+        )
+      }
+    }
+  }
+  //TODO: update state.vectorProperties
+  renderCanvas(canvas.currentLayer, true)
+  vectorGui.render()
 }
 
 //=============================================//
