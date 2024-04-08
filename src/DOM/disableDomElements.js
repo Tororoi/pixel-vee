@@ -84,7 +84,7 @@ export function enableActionsForSelection() {
   dom.deselectBtn.classList.remove("disabled")
   dom.deleteBtn.classList.remove("disabled")
   //enable transform menu if selection is vector
-  if (state.selectedVectorIndicesSet.size > 0) {
+  if (state.currentVectorIndex || state.selectedVectorIndicesSet.size > 0) {
     dom.flipHorizontalBtn.classList.remove("disabled")
     dom.flipVerticalBtn.classList.remove("disabled")
     dom.rotateBtn.classList.remove("disabled")

@@ -146,11 +146,11 @@ function transformSteps() {
         state.normalizeSelectProperties()
         state.setBoundaryBox(state.selectProperties)
         addTransformToTimeline()
+        renderCanvas(canvas.currentLayer) //TODO: (Low Priority) QA to figure out need to redraw timeline?
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
-        renderCanvas(canvas.currentLayer, true)
       }
       break
     default:

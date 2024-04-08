@@ -354,7 +354,7 @@ function vectorInteract(e) {
       if (!state.selectedVectorIndicesSet.has(vector.index)) {
         //select if shift key held down
         actionSelectVector(vector.index)
-        enableActionsForSelection()
+        // enableActionsForSelection()
       } else {
         actionDeselectVector(vector.index)
       }
@@ -374,6 +374,7 @@ function vectorInteract(e) {
         dom[`${tool}Btn`].disabled = true
       })
     }
+    enableActionsForSelection() //If code reaches this case, either vector is selected or is current vector
     vectorGui.render()
     renderLayersToDOM()
     renderVectorsToDOM()

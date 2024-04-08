@@ -21,6 +21,7 @@ import {
 } from "../DOM/disableDomElements.js"
 import { transformRasterContent } from "../utils/transformHelpers.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
+import { modifyVectorAction } from "./modifyTimeline.js"
 
 //=============================================//
 //====== * * * Non Pointer Actions * * * ======//
@@ -185,7 +186,9 @@ export function actionCutSelection(copyToClipboard = true) {
       state.selectedVectorIndicesSet.size > 0
     ) {
       //cut selected vectors (mark as removed) TODO: (High Priority) Need new action to process multiple removals at once
-      copySelectedVectors()
+      if (copyToClipboard) {
+        copySelectedVectors()
+      }
       let vectorIndices = []
       if (state.selectedVectorIndicesSet.size > 0) {
         state.selectedVectorIndicesSet.forEach((vectorIndex) => {
@@ -197,6 +200,7 @@ export function actionCutSelection(copyToClipboard = true) {
         vectorIndices = [state.currentVectorIndex]
       }
       state.deselect()
+      renderCanvas(canvas.currentLayer, true)
       addToTimeline({
         tool: tools.remove.name,
         layer: canvas.currentLayer,
@@ -208,7 +212,6 @@ export function actionCutSelection(copyToClipboard = true) {
       })
 
       state.clearRedoStack()
-      renderCanvas(canvas.currentLayer, true)
       vectorGui.render()
     }
   }
@@ -345,7 +348,8 @@ export function actionPasteSelection() {
       vectorIndices.forEach((vectorIndex) => {
         state.selectedVectorIndicesSet.add(vectorIndex)
       })
-      //TODO: (High Priority) Need to render onto canvas
+      //TODO: (High Priority) Need to render onto canvas to remove need to redraw timeline
+      renderCanvas(canvas.currentLayer, true)
       //add to timeline
       addToTimeline({
         tool: tools.vectorPaste.name,
@@ -358,7 +362,6 @@ export function actionPasteSelection() {
       })
       state.clearRedoStack()
 
-      renderCanvas(canvas.currentLayer, true)
       renderLayersToDOM()
       renderVectorsToDOM()
       enableActionsForSelection()
@@ -560,9 +563,12 @@ export function actionFlipPixels(flipHorizontally) {
     )
     addTransformToTimeline()
     renderCanvas(canvas.currentLayer)
-  } else if (state.selectedVectorIndicesSet.size > 0) {
+  } else if (
+    state.currentVectorIndex ||
+    state.selectedVectorIndicesSet.size > 0
+  ) {
     //vector flip
-    actionFlipVectorsHorizontally()
+    actionFlipVectors(flipHorizontally)
   }
 }
 
@@ -625,12 +631,16 @@ export function actionRotatePixels() {
 
 /**
  * Flip selected vectors horizontally around point at center of min and max bounds of selected vectors
+ * @param {boolean} flipHorizontally - Whether to flip horizontally
  */
-export function actionFlipVectorsHorizontally() {
+export function actionFlipVectors(flipHorizontally) {
   //get bounding box of all vectors
   let [xMin, xMax, yMin, yMax] = [null, null, null, null]
-
-  for (const vectorIndex of state.selectedVectorIndicesSet) {
+  const vectorIndicesSet = new Set(state.selectedVectorIndicesSet)
+  if (vectorIndicesSet.size === 0) {
+    vectorIndicesSet.add(state.currentVectorIndex)
+  }
+  for (const vectorIndex of vectorIndicesSet) {
     const vector = state.vectors[vectorIndex]
     const vectorXPoints = []
     const vectorYPoints = []
@@ -651,11 +661,16 @@ export function actionFlipVectorsHorizontally() {
     yMax = Math.max(yMax ?? -Infinity, ...vectorYPoints)
   }
   //get center point of selected vectors
-  const centerX = Math.floor((xMin + xMax) / 2)
-  // const centerY = Math.floor((yMin + yMax) / 2)
+  const centerX = (xMin + xMax) / 2
+  const centerY = (yMin + yMax) / 2
+  let referenceVector
   //flip vectors horizontally around center point
-  for (const vectorIndex of state.selectedVectorIndicesSet) {
+  for (const vectorIndex of vectorIndicesSet) {
     const vector = state.vectors[vectorIndex]
+    referenceVector = vector //TODO: (Low Priority) Determine a better method for setting a reference vector or remove the need for one.
+    state.vectorsSavedProperties[vectorIndex] = {
+      ...vector.vectorProperties,
+    }
     for (let i = 1; i <= 4; i++) {
       if (
         "px" + i in vector.vectorProperties &&
@@ -663,18 +678,24 @@ export function actionFlipVectorsHorizontally() {
       ) {
         const xKey = `px${i}`
         const yKey = `py${i}`
-        updateVectorProperties(
-          vector,
-          2 * centerX - vector.vectorProperties[xKey],
-          vector.vectorProperties[yKey],
-          xKey,
-          yKey
-        )
+        let newX = vector.vectorProperties[xKey]
+        let newY = vector.vectorProperties[yKey]
+        if (flipHorizontally) {
+          newX = Math.round(2 * centerX) - vector.vectorProperties[xKey]
+        } else {
+          newY = Math.round(2 * centerY) - vector.vectorProperties[yKey]
+        }
+        updateVectorProperties(vector, newX, newY, xKey, yKey)
       }
     }
+    if (vectorIndex === state.currentVectorIndex) {
+      vectorGui.setVectorProperties(vector)
+    }
   }
-  //TODO: update state.vectorProperties
   renderCanvas(canvas.currentLayer, true)
+  //Get any selected vector to use for modifyVectorAction
+  modifyVectorAction(referenceVector)
+  state.clearRedoStack()
   vectorGui.render()
 }
 

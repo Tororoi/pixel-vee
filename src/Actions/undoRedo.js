@@ -51,8 +51,10 @@ function renderToLatestAction(latestAction, modType) {
       state.vectors[mostRecentAction.currentVectorIndex]
     )
   }
+  //Confirm a valid snapshot (may need to be updated for some actions)
+  const snapshotIsValid = mostRecentActionFromSameLayer?.snapshot
   //Re-render the layer that was associated with the undone/redone action
-  if (mostRecentActionFromSameLayer?.snapshot) {
+  if (snapshotIsValid) {
     clearOffscreenCanvas(mostRecentActionFromSameLayer.layer)
     let img = new Image()
     img.src = mostRecentActionFromSameLayer.snapshot
