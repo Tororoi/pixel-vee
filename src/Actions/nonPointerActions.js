@@ -707,7 +707,7 @@ export function actionFlipVectors(flipHorizontally) {
 
 /**
  * Freely rotate selected vectors at any angle around origin point (default center of vectors bounding box)
- * @param degrees
+ * @param {number} degrees - The number of degrees to rotate the vectors
  */
 export function actionRotateVectors(degrees) {
   //get bounding box of all vectors

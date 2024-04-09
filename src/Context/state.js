@@ -142,6 +142,12 @@ export const state = {
     imageData: null,
     vectors: {},
   },
+  //vector ui mother object
+  // vectorGui: {
+  //   origin: {x: null, y: null},
+  //   rotation: 0, //degrees or radians?
+  //  ...
+  // },
   //for perfect pixels
   lastDrawnX: null,
   lastDrawnY: null,

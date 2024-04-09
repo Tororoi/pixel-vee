@@ -154,23 +154,24 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
       let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
       //Draw outline border by drawing different thicknesses of lines
       canvas.rasterGuiCTX.lineWidth = lineWidth * 19
+      // canvas.rasterGuiCTX.lineWidth = lineWidth * 10
       canvas.rasterGuiCTX.lineCap = "round"
       canvas.rasterGuiCTX.strokeStyle = "white"
       canvas.rasterGuiCTX.stroke()
-      //Make border a dotted line TODO: (High Priority) During active paste, use solid line
-      if (!canvas.pastedLayer) {
-        canvas.rasterGuiCTX.lineDashOffset = lineDashOffset * 2
-        canvas.rasterGuiCTX.setLineDash([lineWidth * 12, lineWidth * 12])
-        canvas.rasterGuiCTX.lineWidth = lineWidth * 20
-        canvas.rasterGuiCTX.lineCap = "butt"
-        canvas.rasterGuiCTX.strokeStyle = "black"
-        canvas.rasterGuiCTX.stroke()
-        canvas.rasterGuiCTX.strokeStyle = "rgba(255, 255, 255, 0.1)"
-        canvas.rasterGuiCTX.stroke()
-        canvas.rasterGuiCTX.setLineDash([])
-      }
+      //Make border a dotted line
+      canvas.rasterGuiCTX.lineDashOffset = lineDashOffset * 2
+      canvas.rasterGuiCTX.setLineDash([lineWidth * 12, lineWidth * 12])
+      canvas.rasterGuiCTX.lineWidth = lineWidth * 20
+      // canvas.rasterGuiCTX.lineWidth = lineWidth * 11
+      canvas.rasterGuiCTX.lineCap = "butt"
+      canvas.rasterGuiCTX.strokeStyle = "black"
+      canvas.rasterGuiCTX.stroke()
+      canvas.rasterGuiCTX.strokeStyle = "rgba(255, 255, 255, 0.1)"
+      canvas.rasterGuiCTX.stroke()
+      canvas.rasterGuiCTX.setLineDash([])
       //clear greyed out area for vectors
       canvas.rasterGuiCTX.lineWidth = lineWidth * 17
+      // canvas.rasterGuiCTX.lineWidth = lineWidth * 8
       canvas.rasterGuiCTX.lineCap = "round"
       canvas.rasterGuiCTX.strokeStyle = "black"
       canvas.rasterGuiCTX.stroke()
