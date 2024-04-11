@@ -1,7 +1,7 @@
 /**
  * @param {object} canvas - The canvas to draw on
- * @param {number} xOffset - (Integer)
- * @param {number} yOffset - (Integer)
+ * @param {number} xOffset - (Integer) canvas and layer offsets
+ * @param {number} yOffset - (Integer) canvas and layer offsets
  * @param {number} x - (Integer)
  * @param {number} y - (Integer)
  * @param {number} r - (Integer)

@@ -33,6 +33,12 @@ import { renderLinePath, renderLineVector } from "./line.js"
 export const vectorGui = {
   grid: false,
   gridSpacing: 8,
+  mother: {
+    x: null,
+    y: null,
+    rotation: 0,
+    rotationOrigin: { x: null, y: null },
+  },
   selectedCollisionPresent: false,
   collidedKeys: { xKey: null, yKey: null },
   selectedPoint: { xKey: null, yKey: null },
@@ -314,6 +320,27 @@ function render() {
   } else {
     //else render only the current vector
     renderCurrentVector()
+  }
+  //if selected vectors, render mother ui
+  //Mother ui is a control center for rotation, translation and scaling of selected vectors
+  if (state.selectedVectorIndicesSet.size > 0) {
+    //for now, mother ui is always in the center of the canvas
+    vectorGui.mother.x = Math.floor(canvas.currentLayer.cvs.width / 2)
+    vectorGui.mother.y = Math.floor(canvas.currentLayer.cvs.height / 2)
+    //Render mother ui
+    canvas.vectorGuiCTX.save()
+    canvas.vectorGuiCTX.fillStyle = "white"
+    canvas.vectorGuiCTX.beginPath()
+    drawCirclePath(
+      canvas,
+      canvas.xOffset + canvas.currentLayer.x,
+      canvas.yOffset + canvas.currentLayer.y,
+      vectorGui.mother.x,
+      vectorGui.mother.y,
+      12
+    )
+    canvas.vectorGuiCTX.fill()
+    canvas.vectorGuiCTX.restore()
   }
   //Render selection outline
   // if (

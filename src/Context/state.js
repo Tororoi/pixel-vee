@@ -143,11 +143,11 @@ export const state = {
     vectors: {},
   },
   //vector ui mother object
-  // vectorGui: {
-  //   origin: {x: null, y: null},
-  //   rotation: 0, //degrees or radians?
-  //  ...
-  // },
+  vectorGui: {
+    // motherOrigin: { x: null, y: null },
+    rotationOrigin: {x: null, y: null},
+    rotation: 0, //radians
+  },
   //for perfect pixels
   lastDrawnX: null,
   lastDrawnY: null,
