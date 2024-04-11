@@ -105,10 +105,11 @@ const resizeOnScreenCanvas = () => {
     0,
     0
   )
-  canvas.rasterGuiCVS.width = canvas.rasterGuiCVS.offsetWidth * canvas.sharpness
-  canvas.rasterGuiCVS.height =
-    canvas.rasterGuiCVS.offsetHeight * canvas.sharpness
-  canvas.rasterGuiCTX.setTransform(
+  canvas.selectionGuiCVS.width =
+    canvas.selectionGuiCVS.offsetWidth * canvas.sharpness
+  canvas.selectionGuiCVS.height =
+    canvas.selectionGuiCVS.offsetHeight * canvas.sharpness
+  canvas.selectionGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,

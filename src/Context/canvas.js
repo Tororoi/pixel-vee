@@ -14,8 +14,8 @@ const vectorGuiCVS = document.getElementById("vector-gui-canvas")
 const vectorGuiCTX = vectorGuiCVS.getContext("2d", {
   willReadFrequently: true,
 })
-const rasterGuiCVS = document.getElementById("raster-gui-canvas")
-const rasterGuiCTX = rasterGuiCVS.getContext("2d", {
+const selectionGuiCVS = document.getElementById("selection-gui-canvas")
+const selectionGuiCTX = selectionGuiCVS.getContext("2d", {
   willReadFrequently: true,
 })
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
@@ -43,8 +43,8 @@ export const canvas = {
   //Parameters
   vectorGuiCVS,
   vectorGuiCTX,
-  rasterGuiCVS,
-  rasterGuiCTX,
+  selectionGuiCVS,
+  selectionGuiCTX,
   backgroundCVS,
   backgroundCTX,
   offScreenCVS,
@@ -99,8 +99,10 @@ canvas.sharpness = window.devicePixelRatio
 //adjust canvas ratio here if needed
 canvas.vectorGuiCVS.width = canvas.vectorGuiCVS.offsetWidth * canvas.sharpness
 canvas.vectorGuiCVS.height = canvas.vectorGuiCVS.offsetHeight * canvas.sharpness
-canvas.rasterGuiCVS.width = canvas.rasterGuiCVS.offsetWidth * canvas.sharpness
-canvas.rasterGuiCVS.height = canvas.rasterGuiCVS.offsetHeight * canvas.sharpness
+canvas.selectionGuiCVS.width =
+  canvas.selectionGuiCVS.offsetWidth * canvas.sharpness
+canvas.selectionGuiCVS.height =
+  canvas.selectionGuiCVS.offsetHeight * canvas.sharpness
 canvas.backgroundCVS.width = canvas.backgroundCVS.offsetWidth * canvas.sharpness
 canvas.backgroundCVS.height =
   canvas.backgroundCVS.offsetHeight * canvas.sharpness
@@ -111,7 +113,7 @@ vectorGuiCTX.scale(
   canvas.sharpness * canvas.zoom,
   canvas.sharpness * canvas.zoom
 )
-rasterGuiCTX.scale(
+selectionGuiCTX.scale(
   canvas.sharpness * canvas.zoom,
   canvas.sharpness * canvas.zoom
 )

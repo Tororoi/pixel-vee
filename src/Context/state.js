@@ -2,6 +2,7 @@ import {
   disableActionsForNoSelection,
   enableActionsForSelection,
 } from "../DOM/disableDomElements.js"
+import { vectorGui } from "../GUI/vector.js"
 
 //====================================//
 //======== * * * State * * * =========//
@@ -145,7 +146,7 @@ export const state = {
   //vector ui mother object
   vectorGui: {
     // motherOrigin: { x: null, y: null },
-    rotationOrigin: {x: null, y: null},
+    rotationOrigin: { x: null, y: null },
     rotation: 0, //radians
   },
   //for perfect pixels
@@ -254,6 +255,8 @@ function deselect() {
   state.vectorProperties = {}
   state.currentVectorIndex = null
   state.selectedVectorIndicesSet.clear()
+  vectorGui.mother.rotationOrigin.x = null
+  vectorGui.mother.rotationOrigin.y = null
   //should be for all selected vectors
   disableActionsForNoSelection()
 }

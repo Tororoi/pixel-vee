@@ -663,7 +663,7 @@ export const resizeOffScreenCanvas = (width, height) => {
     0,
     0
   )
-  canvas.rasterGuiCTX.setTransform(
+  canvas.selectionGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,

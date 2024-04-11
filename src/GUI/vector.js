@@ -12,7 +12,7 @@ import {
   renderEllipsePath,
 } from "./ellipse.js"
 import { renderTransformBox } from "./transform.js"
-import { renderRasterCVS } from "./select.js"
+import { renderSelectionCVS } from "./select.js"
 import { renderGrid } from "./grid.js"
 import {
   updateVectorProperties,
@@ -323,31 +323,67 @@ function render() {
   }
   //if selected vectors, render mother ui
   //Mother ui is a control center for rotation, translation and scaling of selected vectors
-  if (state.selectedVectorIndicesSet.size > 0) {
-    //for now, mother ui is always in the center of the canvas
-    vectorGui.mother.x = Math.floor(canvas.currentLayer.cvs.width / 2)
-    vectorGui.mother.y = Math.floor(canvas.currentLayer.cvs.height / 2)
-    //Render mother ui
-    canvas.vectorGuiCTX.save()
-    canvas.vectorGuiCTX.fillStyle = "white"
-    canvas.vectorGuiCTX.beginPath()
-    drawCirclePath(
-      canvas,
-      canvas.xOffset + canvas.currentLayer.x,
-      canvas.yOffset + canvas.currentLayer.y,
-      vectorGui.mother.x,
-      vectorGui.mother.y,
-      12
-    )
-    canvas.vectorGuiCTX.fill()
-    canvas.vectorGuiCTX.restore()
-  }
+  //TODO: (High Priority) Implement collision detection with mother, rotation child (origin and handles)
+  // if (state.selectedVectorIndicesSet.size > 0) {
+  //   if (vectorGui.mother.rotationOrigin.x === null) {
+  //     //get bounding box of all vectors
+  //     let [xMin, xMax, yMin, yMax] = [null, null, null, null]
+  //     const vectorIndicesSet = new Set(state.selectedVectorIndicesSet)
+  //     if (vectorIndicesSet.size === 0) {
+  //       vectorIndicesSet.add(state.currentVectorIndex)
+  //     }
+  //     for (const vectorIndex of vectorIndicesSet) {
+  //       const vector = state.vectors[vectorIndex]
+  //       const vectorXPoints = []
+  //       const vectorYPoints = []
+
+  //       for (let i = 1; i <= 4; i++) {
+  //         if (
+  //           "px" + i in vector.vectorProperties &&
+  //           "py" + i in vector.vectorProperties
+  //         ) {
+  //           vectorXPoints.push(vector.vectorProperties[`px${i}`])
+  //           vectorYPoints.push(vector.vectorProperties[`py${i}`])
+  //         }
+  //       }
+
+  //       xMin = Math.min(xMin ?? Infinity, ...vectorXPoints)
+  //       xMax = Math.max(xMax ?? -Infinity, ...vectorXPoints)
+  //       yMin = Math.min(yMin ?? Infinity, ...vectorYPoints)
+  //       yMax = Math.max(yMax ?? -Infinity, ...vectorYPoints)
+  //     }
+  //     //get center point of selected vectors
+  //     const centerX = (xMin + xMax) / 2
+  //     const centerY = (yMin + yMax) / 2
+  //     //for now, mother ui is always in the center of the canvas
+  //     vectorGui.mother.rotationOrigin.x = centerX
+  //     vectorGui.mother.rotationOrigin.y = centerY
+  //   }
+  //   //Render mother ui rotation child
+  //   let lineWidth = canvas.zoom <= 8 ? 2 / canvas.zoom : 1 / 4
+  //   let circleRadius = 8 * lineWidth
+  //   canvas.vectorGuiCTX.save()
+  //   canvas.vectorGuiCTX.lineWidth = lineWidth
+  //   canvas.vectorGuiCTX.strokeStyle = "white"
+  //   canvas.vectorGuiCTX.fillStyle = "white"
+  //   canvas.vectorGuiCTX.beginPath()
+  //   drawCirclePath(
+  //     canvas,
+  //     canvas.xOffset + canvas.currentLayer.x,
+  //     canvas.yOffset + canvas.currentLayer.y,
+  //     vectorGui.mother.rotationOrigin.x,
+  //     vectorGui.mother.rotationOrigin.y,
+  //     circleRadius
+  //   )
+  //   canvas.vectorGuiCTX.fill()
+  //   canvas.vectorGuiCTX.restore()
+  // }
   //Render selection outline
   // if (
   //   state.selectProperties.px1 !== null ||
   //   state.selectedVectorIndicesSet.size > 0
   // ) {
-  renderRasterCVS()
+  renderSelectionCVS()
   // }
   //Render grid
   if (canvas.zoom >= 4 && vectorGui.grid) {
