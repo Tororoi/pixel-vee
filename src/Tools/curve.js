@@ -19,6 +19,7 @@ import { getAngle } from "../utils/trig.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
+import { makeCircle } from "../utils/smallestEnclosingCircle.js"
 
 //=====================================//
 //=== * * * Curve Controllers * * * ===//
@@ -701,6 +702,25 @@ function transformVectorSteps() {
           ...state.vectors[index].vectorProperties,
         }
       })
+      const points = []
+      for (const vectorIndex of vectorIndicesSet) {
+        const vector = state.vectors[vectorIndex]
+        for (let i = 1; i <= 2; i++) {
+          if (vector.vectorProperties.type === "ellipse" && i === 2) {
+            continue
+          }
+          if (
+            "px" + i in vector.vectorProperties &&
+            "py" + i in vector.vectorProperties
+          ) {
+            points.push({
+              x: vector.vectorProperties[`px${i}`],
+              y: vector.vectorProperties[`py${i}`],
+            })
+          }
+        }
+      }
+      state.smallestEnclosingCircle = makeCircle(points)
       //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
       //Translation
 
@@ -716,9 +736,9 @@ function transformVectorSteps() {
       //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
       //Based on the action being taken, update the vector properties for all selected vectors.
       //Translation
-      translateVectors(currentVector.layer)
+      // translateVectors(currentVector.layer)
       //Rotation
-      // rotateVectors(currentVector.layer)
+      rotateVectors(currentVector.layer)
       renderCanvas(currentVector.layer, true, state.activeIndexes)
       break
     }
@@ -726,9 +746,9 @@ function transformVectorSteps() {
       //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
       //Based on the action being taken, update the vector properties for all selected vectors.
       //Translation
-      translateVectors(currentVector.layer)
+      // translateVectors(currentVector.layer)
       //Rotation
-      // rotateVectors(currentVector.layer)
+      rotateVectors(currentVector.layer)
       renderCanvas(currentVector.layer, true, state.activeIndexes)
       modifyVectorAction(currentVector)
       break
@@ -781,10 +801,11 @@ function rotateVectors(layer) {
     vectorIndicesSet.add(state.currentVectorIndex)
   }
 
-  // const centerX = 128
-  // const centerY = 128
-  const centerX = vectorGui.mother.rotationOrigin.x
-  const centerY = vectorGui.mother.rotationOrigin.y
+  const centerX = 128
+  const centerY = 128
+  //TODO: to keep center more consistent, and also keep ui simple, find the center point based on a circle that passes through outer most points of all selected vectors.
+  // const centerX = vectorGui.mother.rotationOrigin.x
+  // const centerY = vectorGui.mother.rotationOrigin.y
   const absoluteRadians = getAngle(
     state.cursorX - centerX,
     state.cursorY - centerY
@@ -819,6 +840,10 @@ function rotateVectors(layer) {
             cos * (originalVectorProperties[yKey] - centerY) +
             centerY
         )
+        if (originalVectorProperties.type === "ellipse") {
+          //TODO: (High Priority) Implement rotation for ellipses. updateVectorProperties is not enough. See if radA, radB, and angle can be factored out of the vectorProperties object.
+          console.log("ellipse", vector)
+        }
         updateVectorProperties(vector, newX, newY, xKey, yKey)
       }
     }
