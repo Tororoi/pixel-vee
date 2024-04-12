@@ -105,12 +105,7 @@ export const state = {
   //Transform/ Paste
   pastedImages: {
     // index: {
-    //   actionIndex: null,
-    //   action: null,
     //   imageData: null,
-    //   width: null,
-    //   height: null,
-    //   dataURL: null,
     // },
   },
   highestPastedImageKey: 0,

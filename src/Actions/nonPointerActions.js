@@ -337,7 +337,6 @@ export function actionPasteSelection() {
         state.highestVectorKey += 1
         let uniqueVectorKey = state.highestVectorKey
         vector.index = uniqueVectorKey
-        vector.actionIndex = state.undoStack.length
         delete clipboardVectors[vectorIndex] // Remove old key-value pair
         clipboardVectors[uniqueVectorKey] = vector // Assign vector to new key
         //add to state.vectors
@@ -359,6 +358,9 @@ export function actionPasteSelection() {
           selectProperties,
           vectorIndices,
         },
+      })
+      vectorIndices.forEach((vectorIndex) => {
+        state.vectors[vectorIndex].action = state.action
       })
       state.clearRedoStack()
 

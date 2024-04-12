@@ -471,7 +471,7 @@ function renderLayerVectors(layer) {
     if (
       !vector.removed &&
       vector.layer === layer &&
-      state.undoStack[vector.actionIndex] !== undefined
+      state.undoStack.includes(vector.action)
     ) {
       //For each vector, render paths
       if (!vector.removed && vector.vectorProperties.type === state.tool.name) {
@@ -504,7 +504,7 @@ function renderLayerVectors(layer) {
     if (
       !vector.removed &&
       vector.layer === layer &&
-      state.undoStack[vector.actionIndex] !== undefined
+      state.undoStack.includes(vector.action)
     ) {
       //For each vector, render control points
       if (
@@ -631,7 +631,7 @@ export function createActiveIndexesForRender(
 ) {
   const vectorsSavedPropertiesActionKeys = Object.keys(
     vectorsSavedProperties
-  ).map((key) => state.vectors[key].actionIndex)
+  ).map((key) => state.vectors[key].action.index)
   let startActionIndex = Math.min(...vectorsSavedPropertiesActionKeys)
   let activeIndexes = []
 

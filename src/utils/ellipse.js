@@ -518,14 +518,13 @@ export function updateEllipseControlPoints(state, canvas, vectorGui) {
   if (vectorGui.selectedPoint.xKey === "px1") {
     state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
     state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-  }
-  if (vectorGui.selectedPoint.xKey === "px1") {
     state.vectorProperties.px2 = state.vectorProperties.px1 + dxa
     state.vectorProperties.py2 = state.vectorProperties.py1 + dya
     state.vectorProperties.px3 = state.vectorProperties.px1 + dxb
     state.vectorProperties.py3 = state.vectorProperties.py1 + dyb
   } else if (vectorGui.selectedPoint.xKey === "px2") {
     state.vectorProperties.radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
+    //radB remains constant while radA changes unless forceCircle is true
     if (state.vectorProperties.forceCircle) {
       state.vectorProperties.radB = state.vectorProperties.radA
     }
@@ -542,6 +541,7 @@ export function updateEllipseControlPoints(state, canvas, vectorGui) {
     updateEllipseOffsets(state, canvas, state.vectorProperties.forceCircle, 0)
   } else if (vectorGui.selectedPoint.xKey === "px3") {
     state.vectorProperties.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
+    //radA remains constant while radB changes unless forceCircle is true
     if (state.vectorProperties.forceCircle) {
       state.vectorProperties.radA = state.vectorProperties.radB
     }

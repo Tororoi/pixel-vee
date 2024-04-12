@@ -23,15 +23,15 @@ export function modifyVectorAction(moddedVector) {
     let fromProperties = { ...state.vectorsSavedProperties[vectorIndex] }
 
     // Extract the new properties
-    let actionIndex = state.vectors[vectorIndex].actionIndex
+    let vector = state.vectors[vectorIndex]
     let toProperties = {
-      ...state.vectors[vectorIndex].vectorProperties,
+      ...vector.vectorProperties,
     }
 
     // Create the new object with the required properties
     // Add the new object to the processedActions array
     processedActions.push({
-      moddedActionIndex: actionIndex,
+      moddedActionIndex: vector.action.index,
       moddedVectorIndex: vectorIndex,
       from: fromProperties,
       to: toProperties,
@@ -44,7 +44,7 @@ export function modifyVectorAction(moddedVector) {
     tool: tools.modify.name,
     layer: moddedVector.layer,
     properties: {
-      moddedActionIndex: moddedVector.actionIndex,
+      moddedActionIndex: moddedVector.action.index,
       moddedVectorIndex: moddedVector.index,
       processedActions,
     },
@@ -69,7 +69,7 @@ export function changeActionVectorColor(moddedVector, oldColor) {
     layer: moddedVector.layer,
     properties: {
       //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-      moddedActionIndex: moddedVector.actionIndex,
+      moddedActionIndex: moddedVector.action.index,
       moddedVectorIndex: moddedVector.index,
       from: previousColor,
       to: modifiedColor,
