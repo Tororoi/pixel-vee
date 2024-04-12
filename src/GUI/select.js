@@ -5,6 +5,7 @@ import {
   checkSquarePointCollision,
   checkAreaCollision,
 } from "../utils/guiHelpers.js"
+import { getAngle } from "../utils/trig.js"
 
 /**
  * Render selection outline and control points
@@ -132,13 +133,24 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
               px2,
               py2,
               px3,
-              // py3,
-              radA,
-              radB,
-              angle,
+              py3,
+              // radA,
+              // radB,
+              // angle,
               x1Offset,
               y1Offset,
             } = vector.vectorProperties
+            //Calculate ra, rb, and angle instead of passing as params
+            let dxa = px2 - px1
+            let dya = py2 - py1
+            const radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
+            let dxb = px3 - px1
+            let dyb = py3 - py1
+            const radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
+            let angleA = getAngle(dxa, dya)
+            while (angleA < 0) {
+              angleA += 2 * Math.PI
+            }
             //Don't let radii be negative with offset
             let majorAxis = radA + x1Offset / 2 > 0 ? radA + x1Offset / 2 : 0
             let minorAxis = radB + y1Offset / 2 > 0 ? radB + y1Offset / 2 : 0
@@ -155,9 +167,9 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
               yOffset + py1 + 0.5 + y1Offset / 2,
               majorAxis,
               minorAxis,
-              angle + 4 * Math.PI,
+              angleA + 4 * Math.PI,
               0,
-              angle + 2 * Math.PI
+              angleA + 2 * Math.PI
             )
             break
           }

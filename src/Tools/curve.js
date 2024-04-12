@@ -19,7 +19,6 @@ import { getAngle } from "../utils/trig.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
-import { makeCircle } from "../utils/smallestEnclosingCircle.js"
 
 //=====================================//
 //=== * * * Curve Controllers * * * ===//
@@ -702,25 +701,6 @@ function transformVectorSteps() {
           ...state.vectors[index].vectorProperties,
         }
       })
-      const points = []
-      for (const vectorIndex of vectorIndicesSet) {
-        const vector = state.vectors[vectorIndex]
-        for (let i = 1; i <= 2; i++) {
-          if (vector.vectorProperties.type === "ellipse" && i === 2) {
-            continue
-          }
-          if (
-            "px" + i in vector.vectorProperties &&
-            "py" + i in vector.vectorProperties
-          ) {
-            points.push({
-              x: vector.vectorProperties[`px${i}`],
-              y: vector.vectorProperties[`py${i}`],
-            })
-          }
-        }
-      }
-      state.smallestEnclosingCircle = makeCircle(points)
       //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
       //Translation
 

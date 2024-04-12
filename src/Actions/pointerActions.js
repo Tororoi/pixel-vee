@@ -598,8 +598,17 @@ export function actionEllipse(
   customContext = null,
   isPreview = false
 ) {
+  //Calculate ra, rb, and angle instead of passing as params
+  let dxa = xa - centerx
+  let dya = ya - centery
+  const radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
   if (forceCircle) {
-    let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, unifiedOffset)
+    let plotPoints = plotCircle(
+      centerx + 0.5,
+      centery + 0.5,
+      radA,
+      unifiedOffset
+    )
     renderPoints(
       plotPoints,
       boundaryBox,
@@ -613,12 +622,16 @@ export function actionEllipse(
       isPreview
     )
   } else {
+    let dxb = xb - centerx
+    let dyb = yb - centery
+    const radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
+    const angleA = getAngle(dxa, dya)
     let plotPoints = plotRotatedEllipse(
       centerx,
       centery,
-      ra,
-      rb,
-      angle,
+      radA,
+      radB,
+      angleA,
       xa,
       ya,
       x1Offset,
