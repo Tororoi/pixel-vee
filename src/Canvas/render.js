@@ -355,7 +355,11 @@ function renderActionVectors(action, activeCtx = null) {
     const vector = state.vectors[action.vectorIndices[i]]
     if (vector.hidden || vector.removed) continue
     switch (vector.vectorProperties.type) {
-      case "fill":
+      case "fill": {
+        // let tempMask = new Set([
+        //   vector.vectorProperties.px1 + offsetX,
+        //   vector.vectorProperties.py1 + offsetY,
+        // ])
         actionFill(
           vector.vectorProperties.px1 + offsetX,
           vector.vectorProperties.py1 + offsetY,
@@ -367,6 +371,7 @@ function renderActionVectors(action, activeCtx = null) {
           activeCtx
         )
         break
+      }
       case "line":
         actionLine(
           vector.vectorProperties.px1 + offsetX,

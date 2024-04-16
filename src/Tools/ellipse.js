@@ -6,11 +6,8 @@ import { swatches } from "../Context/swatch.js"
 import { actionEllipse } from "../Actions/pointerActions.js"
 import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 import { vectorGui, createActiveIndexesForRender } from "../GUI/vector.js"
-import {
-  updateEllipseVertex,
-  updateEllipseOffsets,
-  updateEllipseControlPoints,
-} from "../utils/ellipse.js"
+import { getAngle } from "../utils/trig.js"
+import { getOpposingEllipseVertex, findHalf } from "../utils/ellipse.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
@@ -60,7 +57,7 @@ function ellipseSteps() {
           Math.sqrt(dxa * dxa + dya * dya)
         )
       }
-      updateEllipseOffsets(state, canvas)
+      updateEllipseOffsets(state.vectorProperties)
       //adjusting p3 should make findHalf on a perpendicular angle rotated -90 degrees, adjusting p1 should maintain offset, no subpixels
       // let calcAngle = angle - Math.PI / 2 // adjust p3
 
@@ -112,7 +109,7 @@ function ellipseSteps() {
             Math.sqrt(dxa * dxa + dya * dya)
           )
         }
-        updateEllipseOffsets(state, canvas)
+        updateEllipseOffsets(state.vectorProperties)
         //onscreen preview
         renderCanvas(canvas.currentLayer)
         actionEllipse(
@@ -149,7 +146,7 @@ function ellipseSteps() {
           Math.sqrt(dxa * dxa + dya * dya)
         )
         //set px3 at right angle on the circle
-        let newVertex = updateEllipseVertex(
+        let newVertex = getOpposingEllipseVertex(
           state.vectorProperties.px1,
           state.vectorProperties.py1,
           state.vectorProperties.px2,
@@ -165,7 +162,7 @@ function ellipseSteps() {
         state.vectorProperties.radB = Math.floor(
           Math.sqrt(dxb * dxb + dyb * dyb)
         )
-        updateEllipseOffsets(state, canvas)
+        updateEllipseOffsets(state.vectorProperties)
         actionEllipse(
           state.vectorProperties.px1,
           state.vectorProperties.py1,
@@ -254,7 +251,13 @@ function ellipseSteps() {
  * @param {object} currentVector - The current vector
  */
 function updateEllipseVectorProperties(currentVector) {
-  updateEllipseControlPoints(state, canvas, vectorGui)
+  syncEllipseProperties(
+    state.vectorProperties,
+    vectorGui.selectedPoint.xKey,
+    vectorGui.selectedPoint.yKey,
+    state.cursorX,
+    state.cursorY
+  )
   currentVector.vectorProperties = { ...state.vectorProperties }
   //Keep properties relative to layer offset
   currentVector.vectorProperties.px1 -= currentVector.layer.x
@@ -322,6 +325,163 @@ export function adjustEllipseSteps() {
       break
     default:
     //do nothing
+  }
+}
+
+//Helper functions for ellipse tool
+
+/**
+ * Update the offsets of an ellipse
+ * @param {object} vectorProperties - The properties of the vector
+ * @param {boolean|null|undefined} overrideForceCircle - force circle if passed in
+ * @param {number} angleOffset - angle offset
+ */
+function updateEllipseOffsets(
+  vectorProperties,
+  overrideForceCircle,
+  angleOffset = 0
+) {
+  const forceCircle = overrideForceCircle ?? vectorProperties.forceCircle
+  vectorProperties.angle = getAngle(
+    vectorProperties.px2 - vectorProperties.px1,
+    vectorProperties.py2 - vectorProperties.py1
+  )
+  if (state.tool.options.useSubpixels?.active) {
+    vectorProperties.unifiedOffset = findHalf(
+      canvas.subPixelX,
+      canvas.subPixelY,
+      vectorProperties.angle + angleOffset
+    )
+  } else {
+    vectorProperties.unifiedOffset = 0 // TODO: (Medium Priority) need logic to manually select offset values
+  }
+  const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+  while (vectorProperties.angle < 0) {
+    vectorProperties.angle += 2 * Math.PI
+  }
+  // Determine the slice in which the angle exists
+  let index =
+    Math.floor(
+      (vectorProperties.angle + angleOffset + Math.PI / 2 + Math.PI / 8) /
+        (Math.PI / 4)
+    ) % 8
+  let compassDir = directions[index]
+  //based on direction update x and y offsets in state
+  //TODO: (Medium Priority) keep offset consistent during radius adjustment and use another gui element to control the way radius is handled, drawn as a compass, 8 options plus default center which is no offset
+  //Direction shrinks opposite side. eg. radius 7 goes from diameter 15 to diameter 14
+  //gui element could have 2 sliders, vertical and horizontal with 3 values each, offset -1, 0, 1 (right, none, left)
+  //should only x1 and y1 offsets be available since they represent the center point being part of radius or not?
+  if (forceCircle) {
+    vectorProperties.x1Offset = -vectorProperties.unifiedOffset
+    vectorProperties.y1Offset = -vectorProperties.unifiedOffset
+  } else {
+    switch (compassDir) {
+      case "N":
+        vectorProperties.y1Offset = -vectorProperties.unifiedOffset
+        break
+      case "NE":
+        vectorProperties.x1Offset = -vectorProperties.unifiedOffset
+        vectorProperties.y1Offset = -vectorProperties.unifiedOffset
+        break
+      case "E":
+        vectorProperties.x1Offset = -vectorProperties.unifiedOffset
+        break
+      case "SE":
+        vectorProperties.x1Offset = -vectorProperties.unifiedOffset
+        vectorProperties.y1Offset = -vectorProperties.unifiedOffset
+        break
+      case "S":
+        vectorProperties.y1Offset = -vectorProperties.unifiedOffset
+        break
+      case "SW":
+        vectorProperties.x1Offset = -vectorProperties.unifiedOffset
+        vectorProperties.y1Offset = -vectorProperties.unifiedOffset
+        break
+      case "W":
+        vectorProperties.x1Offset = -vectorProperties.unifiedOffset
+        break
+      case "NW":
+        vectorProperties.x1Offset = -vectorProperties.unifiedOffset
+        vectorProperties.y1Offset = -vectorProperties.unifiedOffset
+        break
+      default:
+      //none
+    }
+  }
+}
+
+/**
+ * Update the opposing control points of an ellipse
+ * @param {object} vectorProperties - The properties of the vector
+ * @param {object} shiftedPoint - The shifted point
+ * @param {string} shiftedXKey
+ * @param {string} shiftedYKey
+ * @param {number} newX - The new x value for the shifted point
+ * @param {number} newY - The new y value for the shifted point
+ */
+export function syncEllipseProperties(
+  vectorProperties,
+  shiftedXKey,
+  shiftedYKey,
+  newX,
+  newY
+) {
+  if (shiftedXKey !== "px1") {
+    vectorProperties[shiftedXKey] = newX
+    vectorProperties[shiftedYKey] = newY
+  }
+  let dxa = vectorProperties.px2 - vectorProperties.px1
+  let dya = vectorProperties.py2 - vectorProperties.py1
+  let dxb = vectorProperties.px3 - vectorProperties.px1
+  let dyb = vectorProperties.py3 - vectorProperties.py1
+  if (shiftedXKey === "px1") {
+    //Moving center point, shift other control points to match
+    vectorProperties[shiftedXKey] = newX
+    vectorProperties[shiftedYKey] = newY
+    vectorProperties.px2 = vectorProperties.px1 + dxa
+    vectorProperties.py2 = vectorProperties.py1 + dya
+    vectorProperties.px3 = vectorProperties.px1 + dxb
+    vectorProperties.py3 = vectorProperties.py1 + dyb
+  } else if (shiftedXKey === "px2") {
+    //Moving px2, adjust radA and px3
+    vectorProperties.radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
+    //radB remains constant while radA changes unless forceCircle is true
+    if (vectorProperties.forceCircle) {
+      vectorProperties.radB = vectorProperties.radA
+    }
+    let newVertex = getOpposingEllipseVertex(
+      vectorProperties.px1,
+      vectorProperties.py1,
+      vectorProperties.px2,
+      vectorProperties.py2,
+      -Math.PI / 2,
+      vectorProperties.radB
+    )
+    vectorProperties.px3 = newVertex.x
+    vectorProperties.py3 = newVertex.y
+    updateEllipseOffsets(vectorProperties, vectorProperties.forceCircle, 0)
+  } else if (shiftedXKey === "px3") {
+    //Moving px3, adjust radB and px2
+    vectorProperties.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
+    //radA remains constant while radB changes unless forceCircle is true
+    if (vectorProperties.forceCircle) {
+      vectorProperties.radA = vectorProperties.radB
+    }
+    let newVertex = getOpposingEllipseVertex(
+      vectorProperties.px1,
+      vectorProperties.py1,
+      vectorProperties.px3,
+      vectorProperties.py3,
+      Math.PI / 2,
+      vectorProperties.radA
+    )
+    vectorProperties.px2 = newVertex.x
+    vectorProperties.py2 = newVertex.y
+    updateEllipseOffsets(
+      vectorProperties,
+      vectorProperties.forceCircle,
+      1.5 * Math.PI
+    )
   }
 }
 

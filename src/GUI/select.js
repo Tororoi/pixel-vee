@@ -80,9 +80,19 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
         if (vector.hidden || vector.removed) continue
         //switch based on vector type
         switch (vector.vectorProperties.type) {
-          case "fill":
+          case "fill": {
             //need idea to render selection of fill vector
+            const { px1, py1 } = vector.vectorProperties
+            canvas.selectionGuiCTX.moveTo(
+              xOffset + px1 + 0.5,
+              yOffset + py1 + 0.5
+            )
+            canvas.selectionGuiCTX.lineTo(
+              xOffset + px1 + 0.5,
+              yOffset + py1 + 0.5
+            )
             break
+          }
           case "line": {
             const { px1, py1, px2, py2 } = vector.vectorProperties
             canvas.selectionGuiCTX.moveTo(

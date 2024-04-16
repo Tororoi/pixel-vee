@@ -820,12 +820,16 @@ function rotateVectors(layer) {
             cos * (originalVectorProperties[yKey] - centerY) +
             centerY
         )
-        if (originalVectorProperties.type === "ellipse") {
-          //TODO: (High Priority) Implement rotation for ellipses. updateVectorProperties is not enough. See if radA, radB, and angle can be factored out of the vectorProperties object.
-          console.log("ellipse", vector)
-        }
         updateVectorProperties(vector, newX, newY, xKey, yKey)
       }
+    }
+    if (originalVectorProperties.type === "ellipse") {
+      //TODO: (High Priority) Implement rotation for ellipses. updateVectorProperties is not enough. See if radA, radB, and angle can be factored out of the vectorProperties object.
+      // console.log("ellipse", vector)
+      vector.vectorProperties.angle = getAngle(
+        vector.vectorProperties.px2 - vector.vectorProperties.px1,
+        vector.vectorProperties.py2 - vector.vectorProperties.py1
+      )
     }
     if (vectorIndex === state.currentVectorIndex) {
       vectorGui.setVectorProperties(vector)
