@@ -190,3 +190,116 @@ export function handleOptionsAndUpdateVector(
     }
   }
 }
+
+//===============================================//
+//======== * * * Transform Helpers * * * ========//
+//===============================================//
+
+/**
+ *
+ * @param {object} layer - The layer object
+ * @param {object} vectorsSavedProperties - The saved properties of the vectors
+ * @param {object} vectors - The vectors in state
+ * @param {number} cursorX - The x coordinate of the cursor
+ * @param {number} cursorY - The y coordinate of the cursor
+ * @param {number} startX - The x coordinate of the starting cursor position of the transformation
+ * @param {number} startY - The y coordinate of the starting cursor position of the transformation
+ */
+export function translateVectors(
+  layer,
+  vectorsSavedProperties,
+  vectors,
+  cursorX,
+  cursorY,
+  startX,
+  startY
+) {
+  const xDiff = cursorX - startX + layer.x
+  const yDiff = cursorY - startY + layer.y
+  for (const [vectorIndex, originalVectorProperties] of Object.entries(
+    vectorsSavedProperties
+  )) {
+    //Use diffs between cursorX/ cursorY and previousX/ previousY to update all selected vectors
+    const vector = vectors[parseInt(vectorIndex)]
+    const pointsArray = [1, 2, 3, 4]
+    // Update properties if they exist.
+    pointsArray.forEach((n) => {
+      const pxProp = `px${n}`
+      const pyProp = `py${n}`
+      if (
+        originalVectorProperties[pxProp] !== undefined &&
+        originalVectorProperties[pyProp] !== undefined
+      ) {
+        updateVectorProperties(
+          vector,
+          originalVectorProperties[pxProp] + xDiff,
+          originalVectorProperties[pyProp] + yDiff,
+          pxProp,
+          pyProp
+        )
+      }
+    })
+  }
+}
+
+/**
+ *
+ * @param {object} layer - The layer object
+ * @param {object} vectorsSavedProperties - The saved properties of the vectors
+ * @param {object} vectors - The vectors in state
+ * @param {number} cursorX - The x coordinate of the cursor
+ * @param {number} cursorY - The y coordinate of the cursor
+ * @param {number} startX - The x coordinate of the starting cursor position of the transformation
+ * @param {number} startY - The y coordinate of the starting cursor position of the transformation
+ */
+export function rotateVectors(
+  layer,
+  vectorsSavedProperties,
+  vectors,
+  cursorX,
+  cursorY,
+  startX,
+  startY
+) {
+  const centerX = 128
+  const centerY = 128
+  //TODO: to keep center more consistent, and also keep ui simple, find the center point based on a circle that passes through outer most points of all selected vectors.
+  // const centerX = vectorGui.mother.rotationOrigin.x
+  // const centerY = vectorGui.mother.rotationOrigin.y
+  const absoluteRadians = getAngle(cursorX - centerX, cursorY - centerY)
+  const originalRadians = getAngle(startX - centerX, startY - centerY)
+  const radians = absoluteRadians - originalRadians
+  //Freely rotate selected vectors at any angle around origin point (default center of vectors bounding box)
+  for (const [vectorIndex, originalVectorProperties] of Object.entries(
+    vectorsSavedProperties
+  )) {
+    const vector = vectors[vectorIndex]
+    for (let i = 1; i <= 4; i++) {
+      if (
+        "px" + i in originalVectorProperties &&
+        "py" + i in originalVectorProperties
+      ) {
+        const xKey = `px${i}`
+        const yKey = `py${i}`
+        const cos = Math.cos(radians)
+        const sin = Math.sin(radians)
+        const oldX = originalVectorProperties[xKey] + layer.x
+        const oldY = originalVectorProperties[yKey] + layer.y
+        const newX = Math.floor(
+          cos * (oldX - centerX) - sin * (oldY - centerY) + centerX
+        )
+        const newY = Math.floor(
+          sin * (oldX - centerX) + cos * (oldY - centerY) + centerY
+        )
+        updateVectorProperties(vector, newX, newY, xKey, yKey)
+      }
+    }
+    if (originalVectorProperties.type === "ellipse") {
+      //updateVectorProperties is not enough for ellipses. The angle must be updated as well.
+      vector.vectorProperties.angle = getAngle(
+        vector.vectorProperties.px2 - vector.vectorProperties.px1,
+        vector.vectorProperties.py2 - vector.vectorProperties.py1
+      )
+    }
+  }
+}

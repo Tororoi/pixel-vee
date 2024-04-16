@@ -12,6 +12,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
+import { transformVectorSteps } from "./transform.js"
 
 //======================================//
 //=== * * * Ellipse Controller * * * ===//
@@ -28,6 +29,11 @@ function ellipseSteps() {
   //this routine would be better for touchscreens, and no worse with pointer
   if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
     adjustEllipseSteps()
+    return
+  }
+  //If there are selected vectors, call transformVectorSteps() instead of this function
+  if (state.selectedVectorIndicesSet.size > 0) {
+    transformVectorSteps()
     return
   }
   switch (canvas.pointerEvent) {

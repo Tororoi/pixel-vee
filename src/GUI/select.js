@@ -144,23 +144,12 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
               py2,
               px3,
               py3,
-              // radA,
-              // radB,
-              // angle,
+              radA,
+              radB,
+              angle,
               x1Offset,
               y1Offset,
             } = vector.vectorProperties
-            //Calculate ra, rb, and angle instead of passing as params
-            let dxa = px2 - px1
-            let dya = py2 - py1
-            const radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
-            let dxb = px3 - px1
-            let dyb = py3 - py1
-            const radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
-            let angleA = getAngle(dxa, dya)
-            while (angleA < 0) {
-              angleA += 2 * Math.PI
-            }
             //Don't let radii be negative with offset
             let majorAxis = radA + x1Offset / 2 > 0 ? radA + x1Offset / 2 : 0
             let minorAxis = radB + y1Offset / 2 > 0 ? radB + y1Offset / 2 : 0
@@ -177,9 +166,9 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
               yOffset + py1 + 0.5 + y1Offset / 2,
               majorAxis,
               minorAxis,
-              angleA + 4 * Math.PI,
+              angle + 4 * Math.PI,
               0,
-              angleA + 2 * Math.PI
+              angle + 6 * Math.PI
             )
             break
           }
@@ -191,24 +180,19 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
       let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
       //Draw outline border by drawing different thicknesses of lines
       canvas.selectionGuiCTX.lineWidth = lineWidth * 19
-      // canvas.selectionGuiCTX.lineWidth = lineWidth * 10
       canvas.selectionGuiCTX.lineCap = "round"
       canvas.selectionGuiCTX.strokeStyle = "white"
       canvas.selectionGuiCTX.stroke()
       //Make border a dotted line
       canvas.selectionGuiCTX.lineDashOffset = lineDashOffset * 2
       canvas.selectionGuiCTX.setLineDash([lineWidth * 12, lineWidth * 12])
-      canvas.selectionGuiCTX.lineWidth = lineWidth * 20
-      // canvas.selectionGuiCTX.lineWidth = lineWidth * 11
+      canvas.selectionGuiCTX.lineWidth = lineWidth * 19
       canvas.selectionGuiCTX.lineCap = "butt"
       canvas.selectionGuiCTX.strokeStyle = "black"
-      canvas.selectionGuiCTX.stroke()
-      canvas.selectionGuiCTX.strokeStyle = "rgba(255, 255, 255, 0.1)"
       canvas.selectionGuiCTX.stroke()
       canvas.selectionGuiCTX.setLineDash([])
       //clear greyed out area for vectors
       canvas.selectionGuiCTX.lineWidth = lineWidth * 17
-      // canvas.selectionGuiCTX.lineWidth = lineWidth * 8
       canvas.selectionGuiCTX.lineCap = "round"
       canvas.selectionGuiCTX.strokeStyle = "black"
       canvas.selectionGuiCTX.stroke()

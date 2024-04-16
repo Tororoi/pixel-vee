@@ -1,3 +1,4 @@
+
 /**
  * Transforms raster content by rotating and stretching/shrinking.
  * @param {object} layer - The layer to run the transform on.

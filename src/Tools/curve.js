@@ -19,6 +19,7 @@ import { getAngle } from "../utils/trig.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
+import { transformVectorSteps } from "./transform.js"
 
 //=====================================//
 //=== * * * Curve Controllers * * * ===//
@@ -226,7 +227,7 @@ function cubicCurveSteps() {
     adjustCurveSteps()
     return
   }
-  // TODO: (High Priority) If there are selected vectors, call transformVectorSteps() instead of this function
+  //If there are selected vectors, call transformVectorSteps() instead of this function
   if (state.selectedVectorIndicesSet.size > 0) {
     transformVectorSteps()
     return
@@ -667,173 +668,6 @@ function adjustCurveSteps() {
       break
     default:
     //do nothing
-  }
-}
-
-//=======================================//
-//======== * * * Transformers * * * =====//
-//=======================================//
-
-/**
- * Transform selected vectors
- * Ignore all tool options
- * This is for full vector rotation, scaling, and translation
- */
-function transformVectorSteps() {
-  //Doesn't really matter which selected vector is used since all selected vectors will be transformed, but one is needed for keeping track of the right layer, etc. so use the first one.
-  let currentVector =
-    state.vectors[state.selectedVectorIndicesSet.values().next().value] ||
-    state.vectors[state.currentVectorIndex]
-  switch (canvas.pointerEvent) {
-    case "pointerdown": {
-      state.grabStartX = state.cursorX
-      state.grabStartY = state.cursorY
-      //reset current vector properties
-      vectorGui.reset()
-      //Set state.vectorsSavedProperties for all selected vectors
-      state.vectorsSavedProperties = {}
-      const vectorIndicesSet = new Set(state.selectedVectorIndicesSet)
-      if (vectorIndicesSet.size === 0) {
-        vectorIndicesSet.add(state.currentVectorIndex)
-      }
-      vectorIndicesSet.forEach((index) => {
-        state.vectorsSavedProperties[index] = {
-          ...state.vectors[index].vectorProperties,
-        }
-      })
-      //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
-      //Translation
-
-      //Set activeIndexes for all selected vectors
-      state.activeIndexes = createActiveIndexesForRender(
-        currentVector,
-        state.vectorsSavedProperties
-      )
-      renderCanvas(currentVector.layer, true, state.activeIndexes, true)
-      break
-    }
-    case "pointermove": {
-      //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
-      //Based on the action being taken, update the vector properties for all selected vectors.
-      //Translation
-      // translateVectors(currentVector.layer)
-      //Rotation
-      rotateVectors(currentVector.layer)
-      renderCanvas(currentVector.layer, true, state.activeIndexes)
-      break
-    }
-    case "pointerup": {
-      //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
-      //Based on the action being taken, update the vector properties for all selected vectors.
-      //Translation
-      // translateVectors(currentVector.layer)
-      //Rotation
-      rotateVectors(currentVector.layer)
-      renderCanvas(currentVector.layer, true, state.activeIndexes)
-      modifyVectorAction(currentVector)
-      break
-    }
-    default:
-    //do nothing
-  }
-}
-
-/**
- *
- * @param {object} layer - The layer object
- */
-function translateVectors(layer) {
-  const xDiff = state.cursorX - state.grabStartX + layer.x
-  const yDiff = state.cursorY - state.grabStartY + layer.y
-  for (const [vectorIndex, originalVectorProperties] of Object.entries(
-    state.vectorsSavedProperties
-  )) {
-    //Use diffs between cursorX/ cursorY and previousX/ previousY to update all selected vectors
-    const vector = state.vectors[parseInt(vectorIndex)]
-    const pointsArray = [1, 2, 3, 4]
-    // Update properties if they exist.
-    pointsArray.forEach((n) => {
-      const pxProp = `px${n}`
-      const pyProp = `py${n}`
-      if (
-        originalVectorProperties[pxProp] !== undefined &&
-        originalVectorProperties[pyProp] !== undefined
-      ) {
-        updateVectorProperties(
-          vector,
-          originalVectorProperties[pxProp] + xDiff,
-          originalVectorProperties[pyProp] + yDiff,
-          pxProp,
-          pyProp
-        )
-      }
-    })
-  }
-}
-
-/**
- *
- * @param {object} layer - The layer object
- */
-function rotateVectors(layer) {
-  const vectorIndicesSet = new Set(state.selectedVectorIndicesSet)
-  if (vectorIndicesSet.size === 0) {
-    vectorIndicesSet.add(state.currentVectorIndex)
-  }
-
-  const centerX = 128
-  const centerY = 128
-  //TODO: to keep center more consistent, and also keep ui simple, find the center point based on a circle that passes through outer most points of all selected vectors.
-  // const centerX = vectorGui.mother.rotationOrigin.x
-  // const centerY = vectorGui.mother.rotationOrigin.y
-  const absoluteRadians = getAngle(
-    state.cursorX - centerX,
-    state.cursorY - centerY
-  )
-  const originalRadians = getAngle(
-    state.grabStartX - centerX,
-    state.grabStartY - centerY
-  )
-  const radians = absoluteRadians - originalRadians
-  //TODO: (High Priority) Freely rotate selected vectors at any angle around origin point (default center of vectors bounding box)
-  for (const vectorIndex of vectorIndicesSet) {
-    const vector = state.vectors[vectorIndex]
-    const originalVectorProperties = state.vectorsSavedProperties[vectorIndex]
-    for (let i = 1; i <= 4; i++) {
-      if (
-        "px" + i in originalVectorProperties &&
-        "py" + i in originalVectorProperties
-      ) {
-        const xKey = `px${i}`
-        const yKey = `py${i}`
-        let newX = originalVectorProperties[xKey]
-        let newY = originalVectorProperties[yKey]
-        const cos = Math.cos(radians)
-        const sin = Math.sin(radians)
-        newX = Math.floor(
-          cos * (originalVectorProperties[xKey] - centerX) -
-            sin * (originalVectorProperties[yKey] - centerY) +
-            centerX
-        )
-        newY = Math.floor(
-          sin * (originalVectorProperties[xKey] - centerX) +
-            cos * (originalVectorProperties[yKey] - centerY) +
-            centerY
-        )
-        updateVectorProperties(vector, newX, newY, xKey, yKey)
-      }
-    }
-    if (originalVectorProperties.type === "ellipse") {
-      //TODO: (High Priority) Implement rotation for ellipses. updateVectorProperties is not enough. See if radA, radB, and angle can be factored out of the vectorProperties object.
-      // console.log("ellipse", vector)
-      vector.vectorProperties.angle = getAngle(
-        vector.vectorProperties.px2 - vector.vectorProperties.px1,
-        vector.vectorProperties.py2 - vector.vectorProperties.py1
-      )
-    }
-    if (vectorIndex === state.currentVectorIndex) {
-      vectorGui.setVectorProperties(vector)
-    }
   }
 }
 
