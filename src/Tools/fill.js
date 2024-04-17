@@ -9,6 +9,7 @@ import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
+import { transformVectorSteps } from "./transform.js"
 
 //===================================//
 //=== * * * Fill Controller * * * ===//
@@ -19,87 +20,88 @@ import { enableActionsForSelection } from "../DOM/disableDomElements.js"
  * Supported modes: "draw, erase"
  */
 function fillSteps() {
+  vectorGui.render()
+  if (vectorGui.selectedCollisionPresent) {
+    adjustFillSteps()
+    return
+  }
+  //If there are selected vectors, call transformVectorSteps() instead of this function
+  if (state.selectedVectorIndicesSet.size > 0) {
+    transformVectorSteps()
+    return
+  }
   switch (canvas.pointerEvent) {
-    case "pointerdown":
-      vectorGui.render()
-      if (vectorGui.selectedCollisionPresent) {
-        adjustFillSteps()
-      } else {
-        // //reset control points
-        vectorGui.reset()
-        state.vectorProperties.type = state.tool.name
-        state.vectorProperties.px1 = state.cursorX
-        state.vectorProperties.py1 = state.cursorY
-        actionFill(
-          state.vectorProperties.px1,
-          state.vectorProperties.py1,
-          state.boundaryBox,
-          swatches.primary.color,
-          canvas.currentLayer,
-          state.tool.modes,
-          state.maskSet
-        )
-        //For undo ability, store starting coords and settings and pass them into actionFill
-        let maskArray = coordArrayFromSet(
-          state.maskSet,
-          canvas.currentLayer.x,
-          canvas.currentLayer.y
-        )
-        //correct boundary box for layer offset
-        const boundaryBox = { ...state.boundaryBox }
-        if (boundaryBox.xMax !== null) {
-          boundaryBox.xMin -= canvas.currentLayer.x
-          boundaryBox.xMax -= canvas.currentLayer.x
-          boundaryBox.yMin -= canvas.currentLayer.y
-          boundaryBox.yMax -= canvas.currentLayer.y
-        }
-        //generate new unique key for vector
-        state.highestVectorKey += 1
-        let uniqueVectorKey = state.highestVectorKey
-        //store control points for timeline
-        addToTimeline({
-          tool: state.tool.name,
-          layer: canvas.currentLayer,
-          properties: {
-            maskArray,
-            boundaryBox,
-            vectorIndices: [uniqueVectorKey],
-          },
-        })
-        //Store vector in state
-        state.vectors[uniqueVectorKey] = {
-          index: uniqueVectorKey,
-          action: state.action,
-          layer: canvas.currentLayer,
-          modes: { ...state.tool.modes },
-          color: { ...swatches.primary.color },
-          brushSize: state.tool.brushSize,
-          brushType: state.tool.brushType,
-          vectorProperties: {
-            ...state.vectorProperties,
-            px1: state.vectorProperties.px1 - canvas.currentLayer.x,
-            py1: state.vectorProperties.py1 - canvas.currentLayer.y,
-          },
-          // maskArray,
-          // boundaryBox,
-          hidden: false,
-          removed: false,
-        }
-        // state.currentVectorIndex = uniqueVectorKey
-        // enableActionsForSelection()
-        renderCanvas(canvas.currentLayer)
-        vectorGui.reset()
+    case "pointerdown": {
+      //reset control points
+      vectorGui.reset()
+      state.vectorProperties.type = state.tool.name
+      state.vectorProperties.px1 = state.cursorX
+      state.vectorProperties.py1 = state.cursorY
+      actionFill(
+        state.vectorProperties.px1,
+        state.vectorProperties.py1,
+        state.boundaryBox,
+        swatches.primary.color,
+        canvas.currentLayer,
+        state.tool.modes,
+        state.maskSet
+      )
+      //For undo ability, store starting coords and settings and pass them into actionFill
+      let maskArray = coordArrayFromSet(
+        state.maskSet,
+        canvas.currentLayer.x,
+        canvas.currentLayer.y
+      )
+      //correct boundary box for layer offset
+      const boundaryBox = { ...state.boundaryBox }
+      if (boundaryBox.xMax !== null) {
+        boundaryBox.xMin -= canvas.currentLayer.x
+        boundaryBox.xMax -= canvas.currentLayer.x
+        boundaryBox.yMin -= canvas.currentLayer.y
+        boundaryBox.yMax -= canvas.currentLayer.y
       }
+      //generate new unique key for vector
+      state.highestVectorKey += 1
+      let uniqueVectorKey = state.highestVectorKey
+      //store control points for timeline
+      addToTimeline({
+        tool: state.tool.name,
+        layer: canvas.currentLayer,
+        properties: {
+          maskArray,
+          boundaryBox,
+          vectorIndices: [uniqueVectorKey],
+        },
+      })
+      //Store vector in state
+      state.vectors[uniqueVectorKey] = {
+        index: uniqueVectorKey,
+        action: state.action,
+        layer: canvas.currentLayer,
+        modes: { ...state.tool.modes },
+        color: { ...swatches.primary.color },
+        brushSize: state.tool.brushSize,
+        brushType: state.tool.brushType,
+        vectorProperties: {
+          ...state.vectorProperties,
+          px1: state.vectorProperties.px1 - canvas.currentLayer.x,
+          py1: state.vectorProperties.py1 - canvas.currentLayer.y,
+        },
+        // maskArray,
+        // boundaryBox,
+        hidden: false,
+        removed: false,
+      }
+      // state.currentVectorIndex = uniqueVectorKey
+      // enableActionsForSelection()
+      renderCanvas(canvas.currentLayer)
+      vectorGui.reset()
       break
+    }
     case "pointermove":
-      if (vectorGui.selectedPoint.xKey) {
-        adjustFillSteps()
-      }
+      //do nothing
       break
     case "pointerup":
-      if (vectorGui.selectedPoint.xKey) {
-        adjustFillSteps()
-      }
       //redraw canvas to allow onscreen cursor to render
       renderCanvas(canvas.currentLayer)
       break

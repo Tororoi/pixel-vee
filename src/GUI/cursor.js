@@ -30,7 +30,11 @@ export function renderCursor() {
       //show nothing
       break
     default:
-      if (!vectorGui.selectedCollisionPresent && !state.collidedVectorIndex) {
+      if (
+        !vectorGui.selectedCollisionPresent &&
+        !state.collidedVectorIndex &&
+        state.selectedVectorIndicesSet.size === 0
+      ) {
         renderCanvas(canvas.currentLayer)
         actionDraw(
           state.cursorX,
