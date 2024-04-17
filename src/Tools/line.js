@@ -10,6 +10,7 @@ import { enableActionsForSelection } from "../DOM/disableDomElements.js"
 import { createActiveIndexesForRender, vectorGui } from "../GUI/vector.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { modifyVectorAction } from "../Actions/modifyTimeline.js"
+import { transformVectorSteps } from "./transform.js"
 
 //===================================//
 //=== * * * Line Controller * * * ===//
@@ -22,6 +23,11 @@ import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 function lineSteps() {
   if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
     adjustLineSteps()
+    return
+  }
+  //If there are selected vectors, call transformVectorSteps() instead of this function
+  if (state.selectedVectorIndicesSet.size > 0) {
+    transformVectorSteps()
     return
   }
   switch (canvas.pointerEvent) {

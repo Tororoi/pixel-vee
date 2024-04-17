@@ -157,18 +157,35 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
             if (!Number.isInteger(px3)) {
               minorAxis = majorAxis
             }
-            canvas.selectionGuiCTX.moveTo(
-              xOffset + px2 + 0.5,
-              yOffset + py2 + 0.5
-            ) //need to move to keep paths from being auto-connected when traced
+            // Calculate ellipse center
+            let centerX = xOffset + px1 + 0.5 + x1Offset / 2
+            let centerY = yOffset + py1 + 0.5 + y1Offset / 2
+
+            // Calculate the angle t (e.g., t = 0 for the point on the right side of the ellipse)
+            let t = 0 // Starting angle on the ellipse (can be adjusted if needed)
+
+            // Calculate a point on the ellipse using the parametric equation of the ellipse
+            let pointX =
+              centerX +
+              majorAxis * Math.cos(t) * Math.cos(angle) -
+              minorAxis * Math.sin(t) * Math.sin(angle)
+            let pointY =
+              centerY +
+              majorAxis * Math.cos(t) * Math.sin(angle) +
+              minorAxis * Math.sin(t) * Math.cos(angle)
+
+            // Move to point on ellipse to start drawing
+            canvas.selectionGuiCTX.moveTo(pointX, pointY)
+
+            // Drawing the ellipse
             canvas.selectionGuiCTX.ellipse(
-              xOffset + px1 + 0.5 + x1Offset / 2,
-              yOffset + py1 + 0.5 + y1Offset / 2,
+              centerX,
+              centerY,
               majorAxis,
               minorAxis,
-              angle + 4 * Math.PI,
+              angle,
               0,
-              angle + 6 * Math.PI
+              2 * Math.PI
             )
             break
           }
@@ -186,7 +203,7 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
       //Make border a dotted line
       canvas.selectionGuiCTX.lineDashOffset = lineDashOffset * 2
       canvas.selectionGuiCTX.setLineDash([lineWidth * 12, lineWidth * 12])
-      canvas.selectionGuiCTX.lineWidth = lineWidth * 19
+      canvas.selectionGuiCTX.lineWidth = lineWidth * 20
       canvas.selectionGuiCTX.lineCap = "butt"
       canvas.selectionGuiCTX.strokeStyle = "black"
       canvas.selectionGuiCTX.stroke()
