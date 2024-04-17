@@ -1,5 +1,6 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { keys } from "../Shortcuts/keys.js"
 import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 import { vectorGui, createActiveIndexesForRender } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
@@ -7,6 +8,7 @@ import {
   updateVectorProperties,
   rotateVectors,
   translateVectors,
+  findCentroid,
 } from "../utils/vectorHelpers.js"
 
 //=======================================//
@@ -33,15 +35,28 @@ export function transformVectorSteps() {
       vectorGui.reset()
       //Set state.vectorsSavedProperties for all selected vectors
       state.vectorsSavedProperties = {}
+      const vectorPoints = []
       const vectorIndicesSet = new Set(state.selectedVectorIndicesSet)
       if (vectorIndicesSet.size === 0) {
         vectorIndicesSet.add(state.currentVectorIndex)
       }
       vectorIndicesSet.forEach((index) => {
+        const vectorProperties = state.vectors[index].vectorProperties
         state.vectorsSavedProperties[index] = {
-          ...state.vectors[index].vectorProperties,
+          ...vectorProperties,
+        }
+        //Get points for center point calculation. TODO: (Medium Priority) For better consistency, set upon selection and translation instead of transform, which will be slightly off after rotation
+        for (let i = 1; i <= 4; i++) {
+          if ("px" + i in vectorProperties && "py" + i in vectorProperties) {
+            const xKey = `px${i}`
+            const yKey = `py${i}`
+            vectorPoints.push([vectorProperties[xKey], vectorProperties[yKey]])
+          }
         }
       })
+      const [centerX, centerY] = findCentroid(vectorPoints)
+      state.shapeCenterX = centerX
+      state.shapeCenterY = centerY
       //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
       //Translation
 
@@ -59,15 +74,29 @@ export function transformVectorSteps() {
       //Translation
       // translateVectors(currentVector.layer, state.vectorsSavedProperties, state.vectors, state.cursorX, state.cursorY, state.grabStartX, state.grabStartY)
       //Rotation
-      rotateVectors(
-        currentVector.layer,
-        state.vectorsSavedProperties,
-        state.vectors,
-        state.cursorX,
-        state.cursorY,
-        state.grabStartX,
-        state.grabStartY
-      )
+      if (keys.ShiftRight || keys.ShiftLeft) {
+        rotateVectors(
+          currentVector.layer,
+          state.vectorsSavedProperties,
+          state.vectors,
+          state.cursorX,
+          state.cursorY,
+          state.grabStartX,
+          state.grabStartY,
+          state.shapeCenterX,
+          state.shapeCenterY
+        )
+      } else {
+        translateVectors(
+          currentVector.layer,
+          state.vectorsSavedProperties,
+          state.vectors,
+          state.cursorX,
+          state.cursorY,
+          state.grabStartX,
+          state.grabStartY
+        )
+      }
       if (currentVector.index === state.currentVectorIndex) {
         vectorGui.setVectorProperties(currentVector)
       }
@@ -80,15 +109,29 @@ export function transformVectorSteps() {
       //Translation
       // translateVectors(currentVector.layer, state.vectorsSavedProperties, state.vectors, state.cursorX, state.cursorY, state.grabStartX, state.grabStartY)
       //Rotation
-      rotateVectors(
-        currentVector.layer,
-        state.vectorsSavedProperties,
-        state.vectors,
-        state.cursorX,
-        state.cursorY,
-        state.grabStartX,
-        state.grabStartY
-      )
+      if (keys.ShiftRight || keys.ShiftLeft) {
+        rotateVectors(
+          currentVector.layer,
+          state.vectorsSavedProperties,
+          state.vectors,
+          state.cursorX,
+          state.cursorY,
+          state.grabStartX,
+          state.grabStartY,
+          state.shapeCenterX,
+          state.shapeCenterY
+        )
+      } else {
+        translateVectors(
+          currentVector.layer,
+          state.vectorsSavedProperties,
+          state.vectors,
+          state.cursorX,
+          state.cursorY,
+          state.grabStartX,
+          state.grabStartY
+        )
+      }
       if (currentVector.index === state.currentVectorIndex) {
         vectorGui.setVectorProperties(currentVector)
       }

@@ -88,6 +88,8 @@ export const state = {
   collidedVectorIndex: null,
   highestVectorKey: 0,
   selectedVectorIndicesSet: new Set(), //TODO: (Medium Priority) logic for which actions reset selected vectors
+  shapeCenterX: null,
+  shapeCenterY: null,
   //for select tool
   selectProperties: {
     px1: null,

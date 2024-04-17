@@ -197,6 +197,27 @@ export function handleOptionsAndUpdateVector(
 
 /**
  *
+ * @param {Array} points - An array of points
+ * @returns {Array} - Returns an array of points
+ */
+export function findCentroid(points) {
+  let sumX = 0
+  let sumY = 0
+  const n = points.length
+
+  for (let i = 0; i < n; i++) {
+    sumX += points[i][0]
+    sumY += points[i][1]
+  }
+
+  const centroidX = Math.round(sumX / n)
+  const centroidY = Math.round(sumY / n)
+
+  return [centroidX, centroidY]
+}
+
+/**
+ *
  * @param {object} layer - The layer object
  * @param {object} vectorsSavedProperties - The saved properties of the vectors
  * @param {object} vectors - The vectors in state
@@ -259,10 +280,14 @@ export function rotateVectors(
   cursorX,
   cursorY,
   startX,
-  startY
+  startY,
+  centerX,
+  centerY
 ) {
-  const centerX = 128
-  const centerY = 128
+  // const centerX = 128
+  // const centerY = 128
+
+  console.log(centerX, centerY)
   //TODO: to keep center more consistent, and also keep ui simple, find the center point based on a circle that passes through outer most points of all selected vectors.
   // const centerX = vectorGui.mother.rotationOrigin.x
   // const centerY = vectorGui.mother.rotationOrigin.y
