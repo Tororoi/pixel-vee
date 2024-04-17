@@ -9,6 +9,7 @@ import {
   rotateVectors,
   translateVectors,
   findCentroid,
+  findVectorShapeCentroid,
 } from "../utils/vectorHelpers.js"
 
 //=======================================//
@@ -25,38 +26,21 @@ import {
 export function transformVectorSteps() {
   //Doesn't really matter which selected vector is used since all selected vectors will be transformed, but one is needed for keeping track of the right layer, etc. so use the first one.
   let currentVector =
-    state.vectors[state.selectedVectorIndicesSet.values().next().value] ||
-    state.vectors[state.currentVectorIndex]
+    state.vectors[state.selectedVectorIndicesSet.values().next().value]
   switch (canvas.pointerEvent) {
     case "pointerdown": {
       state.grabStartX = state.cursorX
       state.grabStartY = state.cursorY
-      //reset current vector properties
+      //reset current vector properties (this also resets the state.currentVectorIndex if there is one)
       vectorGui.reset()
       //Set state.vectorsSavedProperties for all selected vectors
       state.vectorsSavedProperties = {}
-      const vectorPoints = []
-      const vectorIndicesSet = new Set(state.selectedVectorIndicesSet)
-      if (vectorIndicesSet.size === 0) {
-        vectorIndicesSet.add(state.currentVectorIndex)
-      }
-      vectorIndicesSet.forEach((index) => {
+      state.selectedVectorIndicesSet.forEach((index) => {
         const vectorProperties = state.vectors[index].vectorProperties
         state.vectorsSavedProperties[index] = {
           ...vectorProperties,
         }
-        //Get points for center point calculation. TODO: (Medium Priority) For better consistency, set upon selection and translation instead of transform, which will be slightly off after rotation
-        for (let i = 1; i <= 4; i++) {
-          if ("px" + i in vectorProperties && "py" + i in vectorProperties) {
-            const xKey = `px${i}`
-            const yKey = `py${i}`
-            vectorPoints.push([vectorProperties[xKey], vectorProperties[yKey]])
-          }
-        }
       })
-      const [centerX, centerY] = findCentroid(vectorPoints)
-      state.shapeCenterX = centerX
-      state.shapeCenterY = centerY
       //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
       //Translation
 
@@ -71,10 +55,8 @@ export function transformVectorSteps() {
     case "pointermove": {
       //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
       //Based on the action being taken, update the vector properties for all selected vectors.
-      //Translation
-      // translateVectors(currentVector.layer, state.vectorsSavedProperties, state.vectors, state.cursorX, state.cursorY, state.grabStartX, state.grabStartY)
-      //Rotation
       if (keys.ShiftRight || keys.ShiftLeft) {
+        //Rotation
         rotateVectors(
           currentVector.layer,
           state.vectorsSavedProperties,
@@ -87,6 +69,7 @@ export function transformVectorSteps() {
           state.shapeCenterY
         )
       } else {
+        //Translation
         translateVectors(
           currentVector.layer,
           state.vectorsSavedProperties,
@@ -96,9 +79,13 @@ export function transformVectorSteps() {
           state.grabStartX,
           state.grabStartY
         )
-      }
-      if (currentVector.index === state.currentVectorIndex) {
-        vectorGui.setVectorProperties(currentVector)
+        //Update shape center
+        const [centerX, centerY] = findVectorShapeCentroid(
+          state.selectedVectorIndicesSet,
+          state.vectors
+        )
+        state.shapeCenterX = centerX
+        state.shapeCenterY = centerY
       }
       renderCanvas(currentVector.layer, true, state.activeIndexes)
       break
@@ -106,10 +93,8 @@ export function transformVectorSteps() {
     case "pointerup": {
       //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
       //Based on the action being taken, update the vector properties for all selected vectors.
-      //Translation
-      // translateVectors(currentVector.layer, state.vectorsSavedProperties, state.vectors, state.cursorX, state.cursorY, state.grabStartX, state.grabStartY)
-      //Rotation
       if (keys.ShiftRight || keys.ShiftLeft) {
+        //Rotation
         rotateVectors(
           currentVector.layer,
           state.vectorsSavedProperties,
@@ -122,6 +107,7 @@ export function transformVectorSteps() {
           state.shapeCenterY
         )
       } else {
+        //Translation
         translateVectors(
           currentVector.layer,
           state.vectorsSavedProperties,
@@ -131,9 +117,13 @@ export function transformVectorSteps() {
           state.grabStartX,
           state.grabStartY
         )
-      }
-      if (currentVector.index === state.currentVectorIndex) {
-        vectorGui.setVectorProperties(currentVector)
+        //Update shape center
+        const [centerX, centerY] = findVectorShapeCentroid(
+          state.selectedVectorIndicesSet,
+          state.vectors
+        )
+        state.shapeCenterX = centerX
+        state.shapeCenterY = centerY
       }
       renderCanvas(currentVector.layer, true, state.activeIndexes)
       modifyVectorAction(currentVector)

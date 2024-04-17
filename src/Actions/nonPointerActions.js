@@ -20,7 +20,10 @@ import {
   enableActionsForSelection,
 } from "../DOM/disableDomElements.js"
 import { transformRasterContent } from "../utils/transformHelpers.js"
-import { updateVectorProperties } from "../utils/vectorHelpers.js"
+import {
+  findVectorShapeCentroid,
+  updateVectorProperties,
+} from "../utils/vectorHelpers.js"
 import { modifyVectorAction } from "./modifyTimeline.js"
 
 //=============================================//
@@ -91,6 +94,13 @@ export function actionSelectVector(vectorIndex) {
       },
     })
     state.clearRedoStack()
+    //Update shape center
+    const [centerX, centerY] = findVectorShapeCentroid(
+      state.selectedVectorIndicesSet,
+      state.vectors
+    )
+    state.shapeCenterX = centerX
+    state.shapeCenterY = centerY
   }
 }
 
@@ -113,6 +123,13 @@ export function actionDeselectVector(vectorIndex) {
       },
     })
     state.clearRedoStack()
+    //Update shape center
+    const [centerX, centerY] = findVectorShapeCentroid(
+      state.selectedVectorIndicesSet,
+      state.vectors
+    )
+    state.shapeCenterX = centerX
+    state.shapeCenterY = centerY
   }
 }
 

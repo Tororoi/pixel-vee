@@ -272,6 +272,8 @@ export function translateVectors(
  * @param {number} cursorY - The y coordinate of the cursor
  * @param {number} startX - The x coordinate of the starting cursor position of the transformation
  * @param {number} startY - The y coordinate of the starting cursor position of the transformation
+ * @param {number} centerX - The x coordinate of the center of the vector shape
+ * @param {number} centerY - The y coordinate of the center of the vector shape
  */
 export function rotateVectors(
   layer,
@@ -284,13 +286,6 @@ export function rotateVectors(
   centerX,
   centerY
 ) {
-  // const centerX = 128
-  // const centerY = 128
-
-  console.log(centerX, centerY)
-  //TODO: to keep center more consistent, and also keep ui simple, find the center point based on a circle that passes through outer most points of all selected vectors.
-  // const centerX = vectorGui.mother.rotationOrigin.x
-  // const centerY = vectorGui.mother.rotationOrigin.y
   const absoluteRadians = getAngle(cursorX - centerX, cursorY - centerY)
   const originalRadians = getAngle(startX - centerX, startY - centerY)
   const radians = absoluteRadians - originalRadians
@@ -327,4 +322,26 @@ export function rotateVectors(
       )
     }
   }
+}
+
+/**
+ * For better consistency with rotation point, this is used upon the event of selection or translation of vectors, not after every transformation.
+ * @param {Set} vectorIndicesSet - A set of vector indices
+ * @param {object} vectors - The vectors in state
+ * @returns {Array} - Returns an array with centerX and centerY
+ */
+export function findVectorShapeCentroid(vectorIndicesSet, vectors) {
+  const vectorPoints = []
+  vectorIndicesSet.forEach((index) => {
+    const vectorProperties = vectors[index].vectorProperties
+    //Get points for center point calculation.
+    for (let i = 1; i <= 4; i++) {
+      if ("px" + i in vectorProperties && "py" + i in vectorProperties) {
+        const xKey = `px${i}`
+        const yKey = `py${i}`
+        vectorPoints.push([vectorProperties[xKey], vectorProperties[yKey]])
+      }
+    }
+  })
+  return findCentroid(vectorPoints)
 }
