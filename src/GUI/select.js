@@ -214,6 +214,9 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
       canvas.selectionGuiCTX.strokeStyle = "black"
       canvas.selectionGuiCTX.stroke()
       canvas.selectionGuiCTX.restore()
+
+      //render transform box control points
+      // renderSelectionBoxOutline(lineDashOffset, true)
     }
     //TODO: (Medium Priority) Animating the selection currently not possible because animation is interrupted by renderCanvas() call taking up the main thread
     // All rendering would need to be part of the animation loop or on a separate thread. Maybe the marching ants could be done with css instead of on the canvas?
