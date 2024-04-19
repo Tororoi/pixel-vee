@@ -97,7 +97,7 @@ export function renderOffsetEllipseVector(vectorProperties) {
   canvas.vectorGuiCTX.beginPath()
   if (Number.isInteger(px2)) {
     drawCirclePath(
-      canvas,
+      canvas.vectorGuiCTX,
       canvas.xOffset,
       canvas.yOffset,
       px1 + x1Offset / 2,
@@ -105,7 +105,7 @@ export function renderOffsetEllipseVector(vectorProperties) {
       circleRadius / 2
     )
     drawCirclePath(
-      canvas,
+      canvas.vectorGuiCTX,
       canvas.xOffset,
       canvas.yOffset,
       px2 + x1Offset / 2,
@@ -115,7 +115,7 @@ export function renderOffsetEllipseVector(vectorProperties) {
   }
   if (Number.isInteger(px3)) {
     drawCirclePath(
-      canvas,
+      canvas.vectorGuiCTX,
       canvas.xOffset,
       canvas.yOffset,
       px3 + x1Offset / 2,

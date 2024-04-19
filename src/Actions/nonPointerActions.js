@@ -99,8 +99,11 @@ export function actionSelectVector(vectorIndex) {
       state.selectedVectorIndicesSet,
       state.vectors
     )
-    state.shapeCenterX = centerX
-    state.shapeCenterY = centerY
+    state.shapeCenterX = centerX + canvas.currentLayer.x
+    state.shapeCenterY = centerY + canvas.currentLayer.y
+    //reset vectorGui mother object
+    vectorGui.mother.newRotation = 0
+    vectorGui.mother.currentRotation = 0
   }
 }
 
@@ -128,8 +131,11 @@ export function actionDeselectVector(vectorIndex) {
       state.selectedVectorIndicesSet,
       state.vectors
     )
-    state.shapeCenterX = centerX
-    state.shapeCenterY = centerY
+    state.shapeCenterX = centerX + canvas.currentLayer.x
+    state.shapeCenterY = centerY + canvas.currentLayer.y
+    //reset vectorGui mother object
+    vectorGui.mother.newRotation = 0
+    vectorGui.mother.currentRotation = 0
   }
 }
 

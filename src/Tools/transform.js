@@ -11,6 +11,7 @@ import {
   findCentroid,
   findVectorShapeCentroid,
 } from "../utils/vectorHelpers.js"
+import { getAngle } from "../utils/trig.js"
 
 //=======================================//
 //======== * * * Transform * * * ========//
@@ -29,8 +30,12 @@ export function transformVectorSteps() {
     state.vectors[state.selectedVectorIndicesSet.values().next().value]
   switch (canvas.pointerEvent) {
     case "pointerdown": {
+      //Incrementing click counter stops vector adjustment from triggering when cursor hovers over a vector control point while transforming. TODO: (Low Priority) Implement a clearer way to handle this specific to transform.
+      state.clickCounter += 1
       state.grabStartX = state.cursorX
       state.grabStartY = state.cursorY
+      state.grabStartShapeCenterX = state.shapeCenterX
+      state.grabStartShapeCenterY = state.shapeCenterY
       //reset current vector properties (this also resets the state.currentVectorIndex if there is one)
       vectorGui.reset()
       //Set state.vectorsSavedProperties for all selected vectors
@@ -41,14 +46,18 @@ export function transformVectorSteps() {
           ...vectorProperties,
         }
       })
-      //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
-      //Translation
-
       //Set activeIndexes for all selected vectors
       state.activeIndexes = createActiveIndexesForRender(
         currentVector,
         state.vectorsSavedProperties
       )
+      if (keys.ShiftRight || keys.ShiftLeft) {
+        //Rotation
+        state.grabStartAngle = getAngle(
+          state.shapeCenterX - state.grabStartX,
+          state.shapeCenterY - state.grabStartY
+        )
+      }
       renderCanvas(currentVector.layer, true, state.activeIndexes, true)
       break
     }
@@ -70,22 +79,18 @@ export function transformVectorSteps() {
         )
       } else {
         //Translation
+        const xDiff = state.cursorX - state.grabStartX
+        const yDiff = state.cursorY - state.grabStartY
         translateVectors(
           currentVector.layer,
           state.vectorsSavedProperties,
           state.vectors,
-          state.cursorX,
-          state.cursorY,
-          state.grabStartX,
-          state.grabStartY
+          xDiff,
+          yDiff
         )
         //Update shape center
-        const [centerX, centerY] = findVectorShapeCentroid(
-          state.selectedVectorIndicesSet,
-          state.vectors
-        )
-        state.shapeCenterX = centerX
-        state.shapeCenterY = centerY
+        state.shapeCenterX = state.grabStartShapeCenterX + xDiff
+        state.shapeCenterY = state.grabStartShapeCenterY + yDiff
       }
       renderCanvas(currentVector.layer, true, state.activeIndexes)
       break
@@ -106,25 +111,26 @@ export function transformVectorSteps() {
           state.shapeCenterX,
           state.shapeCenterY
         )
+        vectorGui.mother.currentRotation = vectorGui.mother.newRotation
+        state.grabStartAngle = null
       } else {
         //Translation
+        const xDiff = state.cursorX - state.grabStartX
+        const yDiff = state.cursorY - state.grabStartY
         translateVectors(
           currentVector.layer,
           state.vectorsSavedProperties,
           state.vectors,
-          state.cursorX,
-          state.cursorY,
-          state.grabStartX,
-          state.grabStartY
+          xDiff,
+          yDiff
         )
         //Update shape center
-        const [centerX, centerY] = findVectorShapeCentroid(
-          state.selectedVectorIndicesSet,
-          state.vectors
-        )
-        state.shapeCenterX = centerX
-        state.shapeCenterY = centerY
+        state.shapeCenterX = state.grabStartShapeCenterX + xDiff
+        state.shapeCenterY = state.grabStartShapeCenterY + yDiff
       }
+      state.grabStartShapeCenterX = null
+      state.grabStartShapeCenterY = null
+      state.clickCounter = 0
       renderCanvas(currentVector.layer, true, state.activeIndexes)
       modifyVectorAction(currentVector)
       break

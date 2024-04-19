@@ -90,6 +90,9 @@ export const state = {
   selectedVectorIndicesSet: new Set(), //TODO: (Medium Priority) logic for which actions reset selected vectors
   shapeCenterX: null,
   shapeCenterY: null,
+  grabStartShapeCenterX: null,
+  grabStartShapeCenterY: null,
+  grabStartAngle: null,
   //for select tool
   selectProperties: {
     px1: null,
@@ -139,12 +142,6 @@ export const state = {
     canvas: null,
     imageData: null,
     vectors: {},
-  },
-  //vector ui mother object
-  vectorGui: {
-    // motherOrigin: { x: null, y: null },
-    rotationOrigin: { x: null, y: null },
-    rotation: 0, //radians
   },
   //for perfect pixels
   lastDrawnX: null,
@@ -252,6 +249,9 @@ function deselect() {
   state.vectorProperties = {}
   state.currentVectorIndex = null
   state.selectedVectorIndicesSet.clear()
+  //reset vectorGui mother object
+  vectorGui.mother.newRotation = 0
+  vectorGui.mother.currentRotation = 0
   vectorGui.mother.rotationOrigin.x = null
   vectorGui.mother.rotationOrigin.y = null
   //should be for all selected vectors

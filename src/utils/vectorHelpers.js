@@ -221,22 +221,16 @@ export function findCentroid(points) {
  * @param {object} layer - The layer object
  * @param {object} vectorsSavedProperties - The saved properties of the vectors
  * @param {object} vectors - The vectors in state
- * @param {number} cursorX - The x coordinate of the cursor
- * @param {number} cursorY - The y coordinate of the cursor
- * @param {number} startX - The x coordinate of the starting cursor position of the transformation
- * @param {number} startY - The y coordinate of the starting cursor position of the transformation
+ * @param {number} xDiff - The difference in x for current cursor vs grab start
+ * @param {number} yDiff - The difference in y for current cursor vs grab start
  */
 export function translateVectors(
   layer,
   vectorsSavedProperties,
   vectors,
-  cursorX,
-  cursorY,
-  startX,
-  startY
+  xDiff,
+  yDiff
 ) {
-  const xDiff = cursorX - startX + layer.x
-  const yDiff = cursorY - startY + layer.y
   for (const [vectorIndex, originalVectorProperties] of Object.entries(
     vectorsSavedProperties
   )) {
@@ -253,8 +247,8 @@ export function translateVectors(
       ) {
         updateVectorProperties(
           vector,
-          originalVectorProperties[pxProp] + xDiff,
-          originalVectorProperties[pyProp] + yDiff,
+          originalVectorProperties[pxProp] + xDiff + layer.x,
+          originalVectorProperties[pyProp] + yDiff + layer.y,
           pxProp,
           pyProp
         )

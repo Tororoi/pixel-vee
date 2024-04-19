@@ -11,7 +11,7 @@ import {
   renderOffsetEllipseVector,
   renderEllipsePath,
 } from "./ellipse.js"
-import { renderTransformBox } from "./transform.js"
+import { renderTransformBox, renderVectorMother } from "./transform.js"
 import { renderSelectionCVS } from "./select.js"
 import { renderGrid } from "./grid.js"
 import {
@@ -37,7 +37,8 @@ export const vectorGui = {
   mother: {
     x: null,
     y: null,
-    rotation: 0,
+    newRotation: 0,
+    currentRotation: 0,
     rotationOrigin: { x: null, y: null },
   },
   selectedCollisionPresent: false,
@@ -210,7 +211,7 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
   //TODO: (Low Priority) radius is set progressively as the render function iterates through points, but ideally only the points corresponding to selectedPoint and collidedKeys should be rendered with an expanded radius.
   //Possible solution is to not change radius in this function, but instead at the end of the renderLayerVectors function, render a circle with the expanded radius for the selected and collided points.
   drawCirclePath(
-    canvas,
+    canvas.vectorGuiCTX,
     canvas.xOffset + xOffset,
     canvas.yOffset + yOffset,
     point.x,
@@ -322,67 +323,19 @@ function render() {
     //else render only the current vector
     renderCurrentVector()
   }
+  renderSelectionCVS()
   //if selected vectors, render mother ui
   //Mother ui is a control center for rotation, translation and scaling of selected vectors
   //TODO: (High Priority) Implement collision detection with mother, rotation child (origin and handles)
-  // if (state.selectedVectorIndicesSet.size > 0 && state.shapeCenterX !== null) {
-  //   //for now, mother ui is always in the shape center
-  //   vectorGui.mother.rotationOrigin.x = state.shapeCenterX
-  //   vectorGui.mother.rotationOrigin.y = state.shapeCenterY
-  //   if (state.clicked) {
-  //     vectorGui.mother.rotation = getAngle(
-  //       vectorGui.mother.rotationOrigin.x - state.cursorX,
-  //       vectorGui.mother.rotationOrigin.y - state.cursorY
-  //     )
-  //   }
-  //   //Render mother ui rotation child
-  //   let lineWidth = canvas.zoom <= 8 ? 2 / canvas.zoom : 1 / 4
-  //   let circleRadius = 6 * lineWidth
-  //   canvas.vectorGuiCTX.save()
-  //   canvas.vectorGuiCTX.lineWidth = lineWidth
-  //   canvas.vectorGuiCTX.strokeStyle = "white"
-  //   canvas.vectorGuiCTX.fillStyle = "white"
-  //   canvas.vectorGuiCTX.beginPath()
-  //   drawCirclePath(
-  //     canvas,
-  //     canvas.xOffset + canvas.currentLayer.x,
-  //     canvas.yOffset + canvas.currentLayer.y,
-  //     vectorGui.mother.rotationOrigin.x,
-  //     vectorGui.mother.rotationOrigin.y,
-  //     circleRadius
-  //   )
-  //   canvas.vectorGuiCTX.fill()
-  //   //render line bisecting rotation child at angle of rotation
-  //   canvas.vectorGuiCTX.beginPath()
-  //   canvas.vectorGuiCTX.moveTo(
-  //     canvas.xOffset +
-  //       vectorGui.mother.rotationOrigin.x -
-  //       3 * circleRadius * Math.cos(vectorGui.mother.rotation) +
-  //       0.5,
-  //     canvas.yOffset +
-  //       vectorGui.mother.rotationOrigin.y -
-  //       3 * circleRadius * Math.sin(vectorGui.mother.rotation) +
-  //       0.5
-  //   )
-  //   canvas.vectorGuiCTX.lineTo(
-  //     canvas.xOffset +
-  //       vectorGui.mother.rotationOrigin.x +
-  //       3 * circleRadius * Math.cos(vectorGui.mother.rotation) +
-  //       0.5,
-  //     canvas.yOffset +
-  //       vectorGui.mother.rotationOrigin.y +
-  //       3 * circleRadius * Math.sin(vectorGui.mother.rotation) +
-  //       0.5
-  //   )
-  //   canvas.vectorGuiCTX.stroke()
-  //   canvas.vectorGuiCTX.restore()
-  // }
+  if (state.selectedVectorIndicesSet.size > 0 && state.shapeCenterX !== null) {
+    renderVectorMother()
+  }
   //Render selection outline
   // if (
   //   state.selectProperties.px1 !== null ||
   //   state.selectedVectorIndicesSet.size > 0
   // ) {
-  renderSelectionCVS()
+  // renderSelectionCVS()
   // }
   //Render grid
   if (canvas.zoom >= 4 && vectorGui.grid) {
