@@ -88,9 +88,7 @@ export function renderVectorMother() {
   }
   //Render mother ui rotation child
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
-  lineWidth *= 2 //Line twice as thick as other vector lines
-  let circleRadius = 6 * lineWidth
-  const lineLengthFactor = 6
+  let circleRadius = 16 * lineWidth
   let pointsKeys = [{ x: "rotationx", y: "rotationy" }]
   let motherPoints = {
     rotationx: vectorGui.mother.rotationOrigin.x,
@@ -101,113 +99,69 @@ export function renderVectorMother() {
   canvas.vectorGuiCTX.strokeStyle = "white"
   canvas.vectorGuiCTX.fillStyle = "white"
   //render rotation origin
-  // canvas.vectorGuiCTX.beginPath()
-  // drawCirclePath(
-  //   canvas.vectorGuiCTX,
-  //   canvas.xOffset,
-  //   canvas.yOffset,
-  //   vectorGui.mother.rotationOrigin.x,
-  //   vectorGui.mother.rotationOrigin.y,
-  //   circleRadius / 2
-  // )
-  // canvas.vectorGuiCTX.fill()
-  // canvas.vectorGuiCTX.beginPath()
-  // drawCirclePath(
-  //   canvas.vectorGuiCTX,
-  //   canvas.xOffset,
-  //   canvas.yOffset,
-  //   vectorGui.mother.rotationOrigin.x,
-  //   vectorGui.mother.rotationOrigin.y,
-  //   circleRadius
-  // )
-  // canvas.vectorGuiCTX.stroke()
   canvas.vectorGuiCTX.beginPath()
   vectorGui.drawControlPoints(motherPoints, pointsKeys, circleRadius, false)
   // Stroke non-filled lines
-  canvas.vectorGuiCTX.stroke()
-
-  canvas.vectorGuiCTX.beginPath()
-  vectorGui.drawControlPoints(motherPoints, pointsKeys, circleRadius / 2, true)
+  // canvas.vectorGuiCTX.stroke()
+  // canvas.vectorGuiCTX.beginPath()
+  // vectorGui.drawControlPoints(motherPoints, pointsKeys, circleRadius / 2, true)
   // Fill points
   canvas.vectorGuiCTX.fill()
-  //render dotted line representing starting angle (0)
-  // Create Radial
-  const grd = canvas.vectorGuiCTX.createRadialGradient(
-    canvas.xOffset + vectorGui.mother.rotationOrigin.x + 0.5,
-    canvas.yOffset + vectorGui.mother.rotationOrigin.y + 0.5,
-    (lineLengthFactor - 3) * circleRadius,
-    canvas.xOffset + vectorGui.mother.rotationOrigin.x + 0.5,
-    canvas.yOffset + vectorGui.mother.rotationOrigin.y + 0.5,
-    lineLengthFactor * circleRadius
-  )
-  grd.addColorStop(0, "white")
-  grd.addColorStop(1, "transparent")
-
-  canvas.vectorGuiCTX.strokeStyle = grd
+  // Render rotation icon at the rotation origin
+  canvas.vectorGuiCTX.strokeStyle = "black"
+  canvas.vectorGuiCTX.fillStyle = "black"
+  canvas.vectorGuiCTX.lineWidth = lineWidth * 4
   canvas.vectorGuiCTX.beginPath()
-  canvas.vectorGuiCTX.moveTo(
-    canvas.xOffset + vectorGui.mother.rotationOrigin.x + 0.5,
-    canvas.yOffset + vectorGui.mother.rotationOrigin.y + 0.5
-  )
-  canvas.vectorGuiCTX.lineTo(
-    canvas.xOffset +
-      vectorGui.mother.rotationOrigin.x -
-      lineLengthFactor * circleRadius * Math.cos(0) +
-      0.5,
-    canvas.yOffset +
-      vectorGui.mother.rotationOrigin.y -
-      lineLengthFactor * circleRadius * Math.sin(0) +
-      0.5
-  )
-  canvas.vectorGuiCTX.moveTo(
-    canvas.xOffset + vectorGui.mother.rotationOrigin.x + 0.5,
-    canvas.yOffset + vectorGui.mother.rotationOrigin.y + 0.5
-  )
-  canvas.vectorGuiCTX.lineTo(
-    canvas.xOffset +
-      vectorGui.mother.rotationOrigin.x +
-      lineLengthFactor * circleRadius * Math.cos(0) +
-      0.5,
-    canvas.yOffset +
-      vectorGui.mother.rotationOrigin.y +
-      lineLengthFactor * circleRadius * Math.sin(0) +
-      0.5
-  )
-  canvas.vectorGuiCTX.setLineDash([lineWidth * 4, lineWidth * 4])
-  canvas.vectorGuiCTX.stroke()
-  canvas.vectorGuiCTX.setLineDash([])
-  //render line bisecting rotation child at angle of rotation
-  canvas.vectorGuiCTX.strokeStyle = "white"
-  canvas.vectorGuiCTX.lineCap = "round"
-  canvas.vectorGuiCTX.beginPath()
-  // canvas.vectorGuiCTX.moveTo(
-  //   canvas.xOffset +
-  //     vectorGui.mother.rotationOrigin.x -
-  //     lineLengthFactor *
-  //       circleRadius *
-  //       Math.cos(vectorGui.mother.newRotation) +
-  //     0.5,
-  //   canvas.yOffset +
-  //     vectorGui.mother.rotationOrigin.y -
-  //     lineLengthFactor *
-  //       circleRadius *
-  //       Math.sin(vectorGui.mother.newRotation) +
-  //     0.5
-  // )
-  canvas.vectorGuiCTX.moveTo(
-    canvas.xOffset + vectorGui.mother.rotationOrigin.x + 0.5,
-    canvas.yOffset + vectorGui.mother.rotationOrigin.y + 0.5
-  )
-  canvas.vectorGuiCTX.lineTo(
-    canvas.xOffset +
-      vectorGui.mother.rotationOrigin.x +
-      lineLengthFactor * circleRadius * Math.cos(vectorGui.mother.newRotation) +
-      0.5,
-    canvas.yOffset +
-      vectorGui.mother.rotationOrigin.y +
-      lineLengthFactor * circleRadius * Math.sin(vectorGui.mother.newRotation) +
-      0.5
+  //create an arc that goes from 0 to 1.5pi
+  canvas.vectorGuiCTX.arc(
+    canvas.xOffset + canvas.currentLayer.x + motherPoints.rotationx + 0.5,
+    canvas.yOffset + canvas.currentLayer.y + motherPoints.rotationy + 0.5,
+    circleRadius - lineWidth * 7,
+    0.9 * Math.PI,
+    0.5 * Math.PI
   )
   canvas.vectorGuiCTX.stroke()
+  //fill triangle at end of arc (triangle is pointing left)
+  canvas.vectorGuiCTX.beginPath()
+  canvas.vectorGuiCTX.moveTo(
+    canvas.xOffset +
+      canvas.currentLayer.x +
+      motherPoints.rotationx +
+      0.5 +
+      lineWidth,
+    canvas.yOffset +
+      canvas.currentLayer.y +
+      motherPoints.rotationy +
+      0.5 +
+      circleRadius -
+      lineWidth * 13
+  )
+  canvas.vectorGuiCTX.lineTo(
+    canvas.xOffset +
+      canvas.currentLayer.x +
+      motherPoints.rotationx +
+      0.5 -
+      lineWidth * 6,
+    canvas.yOffset +
+      canvas.currentLayer.y +
+      motherPoints.rotationy +
+      0.5 +
+      circleRadius -
+      lineWidth * 7
+  )
+  canvas.vectorGuiCTX.lineTo(
+    canvas.xOffset +
+      canvas.currentLayer.x +
+      motherPoints.rotationx +
+      0.5 +
+      lineWidth,
+    canvas.yOffset +
+      canvas.currentLayer.y +
+      motherPoints.rotationy +
+      0.5 +
+      circleRadius -
+      lineWidth * 1
+  )
+  canvas.vectorGuiCTX.fill()
   canvas.vectorGuiCTX.restore()
 }

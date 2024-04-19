@@ -226,7 +226,7 @@ function cubicCurveSteps() {
   if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
     console.log(vectorGui.selectedPoint.xKey)
     if (vectorGui.selectedPoint.xKey === "rotationx") {
-      //Move vector mother ui point
+      //Move vector mother ui point (IN PROGRESS)
       console.log("Move vector mother ui point")
       state.shapeCenterX = state.cursorX
       state.shapeCenterY = state.cursorY
