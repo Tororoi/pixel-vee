@@ -229,7 +229,8 @@ function cubicCurveSteps() {
     vectorGui.selectedPoint.xKey === "rotationx"
   ) {
     //Move vector mother ui point (IN PROGRESS)
-    //TODO: (Medium Priority) Track shape center in timeline for transformations to keep translate consistent. No need to track it in this code block until shapes are added as a feature
+    //TODO: (Medium Priority) Track shape center in timeline for transformations to keep translate consistent. No need to track it in this code block until shapes are added as a feature.
+    //Alternatively just recalculate center when undoing/ redoing transformations.
     switch (canvas.pointerEvent) {
       case "pointerdown":
         vectorGui.selectedPoint = {
@@ -474,6 +475,7 @@ function adjustCurveSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
+        //TODO: (Medium Priority) If holding shift, add or remove vector from selected vectors set and return
         state.vectorProperties[vectorGui.collidedPoint.xKey] = state.cursorX
         state.vectorProperties[vectorGui.collidedPoint.yKey] = state.cursorY
         vectorGui.selectedPoint = {

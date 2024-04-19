@@ -16,7 +16,7 @@ import { renderVectorsToDOM } from "../DOM/renderVectors.js"
  * Select tools: rectangle, free form, magic wand (auto select color)
  * Hold shift to add to selection with magic wand
  * Hold option to minus from selection with magic wand/ free form
- * TODO: (Medium Priority) When selecting vectors, allow rotation with recalculated vectors for accurate and useful rotation transformation
+ * TODO: (Medium Priority) Allow selecting all vectors within box by checking if control points fall within selection area
  */
 function selectSteps() {
   if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {

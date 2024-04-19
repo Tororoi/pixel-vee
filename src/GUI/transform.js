@@ -119,8 +119,8 @@ export function renderVectorMother() {
   canvas.vectorGuiCTX.beginPath()
   //create an arc that goes from 0 to 1.5pi
   canvas.vectorGuiCTX.arc(
-    canvas.xOffset + canvas.currentLayer.x + motherPoints.rotationx + 0.5,
-    canvas.yOffset + canvas.currentLayer.y + motherPoints.rotationy + 0.5,
+    canvas.xOffset + motherPoints.rotationx + 0.5,
+    canvas.yOffset + motherPoints.rotationy + 0.5,
     circleRadius - lineWidth * 7,
     0.9 * Math.PI,
     0.5 * Math.PI
@@ -129,43 +129,20 @@ export function renderVectorMother() {
   //fill triangle at end of arc (triangle is pointing left)
   canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.moveTo(
-    canvas.xOffset +
-      canvas.currentLayer.x +
-      motherPoints.rotationx +
-      0.5 +
-      lineWidth,
+    canvas.xOffset + motherPoints.rotationx + 0.5 + lineWidth,
     canvas.yOffset +
-      canvas.currentLayer.y +
       motherPoints.rotationy +
       0.5 +
       circleRadius -
       lineWidth * 13
   )
   canvas.vectorGuiCTX.lineTo(
-    canvas.xOffset +
-      canvas.currentLayer.x +
-      motherPoints.rotationx +
-      0.5 -
-      lineWidth * 6,
-    canvas.yOffset +
-      canvas.currentLayer.y +
-      motherPoints.rotationy +
-      0.5 +
-      circleRadius -
-      lineWidth * 7
+    canvas.xOffset + motherPoints.rotationx + 0.5 - lineWidth * 6,
+    canvas.yOffset + motherPoints.rotationy + 0.5 + circleRadius - lineWidth * 7
   )
   canvas.vectorGuiCTX.lineTo(
-    canvas.xOffset +
-      canvas.currentLayer.x +
-      motherPoints.rotationx +
-      0.5 +
-      lineWidth,
-    canvas.yOffset +
-      canvas.currentLayer.y +
-      motherPoints.rotationy +
-      0.5 +
-      circleRadius -
-      lineWidth * 1
+    canvas.xOffset + motherPoints.rotationx + 0.5 + lineWidth,
+    canvas.yOffset + motherPoints.rotationy + 0.5 + circleRadius - lineWidth * 1
   )
   canvas.vectorGuiCTX.fill()
   canvas.vectorGuiCTX.restore()
