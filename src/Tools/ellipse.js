@@ -287,8 +287,8 @@ export function adjustEllipseSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       vectorGui.selectedPoint = {
-        xKey: vectorGui.collidedKeys.xKey,
-        yKey: vectorGui.collidedKeys.yKey,
+        xKey: vectorGui.collidedPoint.xKey,
+        yKey: vectorGui.collidedPoint.yKey,
       }
       state.vectorsSavedProperties[state.currentVectorIndex] = {
         ...currentVector.vectorProperties,

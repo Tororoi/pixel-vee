@@ -120,11 +120,11 @@ export function adjustFillSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.selectedCollisionPresent) {
-        state.vectorProperties[vectorGui.collidedKeys.xKey] = state.cursorX
-        state.vectorProperties[vectorGui.collidedKeys.yKey] = state.cursorY
+        state.vectorProperties[vectorGui.collidedPoint.xKey] = state.cursorX
+        state.vectorProperties[vectorGui.collidedPoint.yKey] = state.cursorY
         vectorGui.selectedPoint = {
-          xKey: vectorGui.collidedKeys.xKey,
-          yKey: vectorGui.collidedKeys.yKey,
+          xKey: vectorGui.collidedPoint.xKey,
+          yKey: vectorGui.collidedPoint.yKey,
         }
         state.vectorsSavedProperties[state.currentVectorIndex] = {
           ...currentVector.vectorProperties,

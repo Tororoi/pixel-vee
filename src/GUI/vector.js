@@ -42,19 +42,19 @@ export const vectorGui = {
     rotationOrigin: { x: null, y: null },
   },
   selectedCollisionPresent: false,
-  collidedKeys: { xKey: null, yKey: null },
+  collidedPoint: { xKey: null, yKey: null },
   selectedPoint: { xKey: null, yKey: null },
   otherCollidedKeys: { xKey: null, yKey: null },
   linkedVectors: {},
   drawControlPoints,
   resetCollision() {
     this.selectedCollisionPresent = false
-    this.collidedKeys = { xKey: null, yKey: null }
+    this.collidedPoint = { xKey: null, yKey: null }
   },
   setCollision(keys) {
     this.selectedCollisionPresent = true
-    this.collidedKeys.xKey = keys.x
-    this.collidedKeys.yKey = keys.y
+    this.collidedPoint.xKey = keys.x
+    this.collidedPoint.yKey = keys.y
   },
   resetOtherVectorCollision() {
     state.collidedVectorIndex = null
@@ -168,7 +168,7 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
           state.collidedVectorIndex = vector.index
           //Only allow link if active point for selection is p1 or p2
           let activeKey =
-            vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey
+            vectorGui.selectedPoint.xKey || vectorGui.collidedPoint.xKey
           let allowLink = ["px1", "px2"].includes(activeKey)
           if (allowLink) {
             vectorGui.setOtherVectorCollision(keys)
@@ -191,7 +191,7 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
       }
     }
     //else if selectedpoint is p3 or p4, setLinkedVector if vector's control point coords are the same as the selected point
-    if (vectorGui.collidedKeys.xKey === "px3" && vector) {
+    if (vectorGui.collidedPoint.xKey === "px3" && vector) {
       if (
         normalizedX === state.vectorProperties.px1 &&
         normalizedY === state.vectorProperties.py1
@@ -199,7 +199,7 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
         vectorGui.addLinkedVector(vector, keys.x)
       }
     }
-    if (vectorGui.collidedKeys.xKey === "px4" && vector) {
+    if (vectorGui.collidedPoint.xKey === "px4" && vector) {
       if (
         normalizedX === state.vectorProperties.px2 &&
         normalizedY === state.vectorProperties.py2
@@ -208,7 +208,7 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
       }
     }
   }
-  //TODO: (Low Priority) radius is set progressively as the render function iterates through points, but ideally only the points corresponding to selectedPoint and collidedKeys should be rendered with an expanded radius.
+  //TODO: (Low Priority) radius is set progressively as the render function iterates through points, but ideally only the points corresponding to selectedPoint and collidedPoint should be rendered with an expanded radius.
   //Possible solution is to not change radius in this function, but instead at the end of the renderLayerVectors function, render a circle with the expanded radius for the selected and collided points.
   drawCirclePath(
     canvas.vectorGuiCTX,
@@ -248,7 +248,7 @@ function setCursorStyle() {
     }
   } else {
     //Handle cursor for transform
-    const xKey = vectorGui.collidedKeys.xKey
+    const xKey = vectorGui.collidedPoint.xKey
     if (["px1", "px4"].includes(xKey)) {
       canvas.vectorGuiCVS.style.cursor = "nwse-resize"
     } else if (["px2", "px3"].includes(xKey)) {

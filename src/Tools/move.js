@@ -83,8 +83,8 @@ function transformSteps() {
     case "pointerdown":
       if (vectorGui.selectedCollisionPresent) {
         vectorGui.selectedPoint = {
-          xKey: vectorGui.collidedKeys.xKey,
-          yKey: vectorGui.collidedKeys.yKey,
+          xKey: vectorGui.collidedPoint.xKey,
+          yKey: vectorGui.collidedPoint.yKey,
         }
         if (canvas.currentLayer.type === "raster") {
           state.previousBoundaryBox = { ...state.boundaryBox }

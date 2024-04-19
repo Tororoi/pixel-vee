@@ -104,7 +104,12 @@ export function renderVectorMother() {
   // Stroke non-filled lines
   // canvas.vectorGuiCTX.stroke()
   // canvas.vectorGuiCTX.beginPath()
-  // vectorGui.drawControlPoints(motherPoints, pointsKeys, circleRadius / 2, true)
+  vectorGui.drawControlPoints(
+    motherPoints,
+    pointsKeys,
+    circleRadius * 0.75,
+    true
+  )
   // Fill points
   canvas.vectorGuiCTX.fill()
   // Render rotation icon at the rotation origin

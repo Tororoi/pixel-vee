@@ -223,22 +223,45 @@ function cubicCurveSteps() {
     // renderCurrentVector() //May not be needed after changing order of render calls in renderLayerVectors
     vectorGui.render()
   }
-  if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
-    console.log(vectorGui.selectedPoint.xKey)
-    if (vectorGui.selectedPoint.xKey === "rotationx") {
-      //Move vector mother ui point (IN PROGRESS)
-      console.log("Move vector mother ui point")
-      state.shapeCenterX = state.cursorX
-      state.shapeCenterY = state.cursorY
-      if (canvas.pointerEvent === "pointerup") {
+  if (
+    (vectorGui.collidedPoint.xKey === "rotationx" &&
+      vectorGui.selectedPoint.xKey === null) ||
+    vectorGui.selectedPoint.xKey === "rotationx"
+  ) {
+    //Move vector mother ui point (IN PROGRESS)
+    //TODO: (Medium Priority) Track shape center in timeline for transformations to keep translate consistent. No need to track it in this code block until shapes are added as a feature
+    switch (canvas.pointerEvent) {
+      case "pointerdown":
+        vectorGui.selectedPoint = {
+          xKey: vectorGui.collidedPoint.xKey,
+          yKey: vectorGui.collidedPoint.yKey,
+        }
+        state.shapeCenterX = state.cursorX
+        state.shapeCenterY = state.cursorY
+        break
+      case "pointermove":
+        state.shapeCenterX = state.cursorX
+        state.shapeCenterY = state.cursorY
+        break
+      case "pointerup":
+        state.shapeCenterX = state.cursorX
+        state.shapeCenterY = state.cursorY
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
-      }
-    } else {
-      adjustCurveSteps()
+        break
+      default:
+      //do nothing
     }
+    return
+  }
+  if (
+    vectorGui.selectedCollisionPresent &&
+    state.clickCounter === 0 &&
+    state.currentVectorIndex
+  ) {
+    adjustCurveSteps()
     return
   }
   //If there are selected vectors, call transformVectorSteps() instead of this function
@@ -451,11 +474,11 @@ function adjustCurveSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
-        state.vectorProperties[vectorGui.collidedKeys.xKey] = state.cursorX
-        state.vectorProperties[vectorGui.collidedKeys.yKey] = state.cursorY
+        state.vectorProperties[vectorGui.collidedPoint.xKey] = state.cursorX
+        state.vectorProperties[vectorGui.collidedPoint.yKey] = state.cursorY
         vectorGui.selectedPoint = {
-          xKey: vectorGui.collidedKeys.xKey,
-          yKey: vectorGui.collidedKeys.yKey,
+          xKey: vectorGui.collidedPoint.xKey,
+          yKey: vectorGui.collidedPoint.yKey,
         }
         state.vectorsSavedProperties[state.currentVectorIndex] = {
           ...currentVector.vectorProperties,

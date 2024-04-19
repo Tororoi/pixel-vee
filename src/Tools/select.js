@@ -71,8 +71,8 @@ function adjustSelectSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       vectorGui.selectedPoint = {
-        xKey: vectorGui.collidedKeys.xKey,
-        yKey: vectorGui.collidedKeys.yKey,
+        xKey: vectorGui.collidedPoint.xKey,
+        yKey: vectorGui.collidedPoint.yKey,
       }
       //Ensure moving the selection area has the correct origin point (important for mobile, doesn't affect desktop)
       state.previousX = state.cursorX

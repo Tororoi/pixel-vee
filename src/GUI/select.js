@@ -536,7 +536,7 @@ function setSelectionCursorStyle() {
   }
 
   //Handle cursor for collisions
-  const xKey = vectorGui.collidedKeys.xKey
+  const xKey = vectorGui.collidedPoint.xKey
   if (["px1", "px5"].includes(xKey)) {
     canvas.vectorGuiCVS.style.cursor = "nwse-resize"
   } else if (["px3", "px7"].includes(xKey)) {

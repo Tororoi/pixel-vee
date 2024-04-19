@@ -355,7 +355,7 @@ export function deactivateShortcut(keyCode) {
       state.vectorProperties.forceCircle = false
       if (state.tool.name === "ellipse") {
         if (
-          (vectorGui.selectedPoint.xKey || vectorGui.collidedKeys.xKey) &&
+          (vectorGui.selectedPoint.xKey || vectorGui.collidedPoint.xKey) &&
           vectorGui.selectedPoint.xKey !== "px1" &&
           state.clicked
         ) {
