@@ -51,6 +51,7 @@ export function prepareDrawingForSave() {
     includeRemovedActions
   )
   let sanitizedVectors = sanitizeVectors(
+    state.undoStack,
     state.vectors,
     preserveHistory,
     includeRemovedActions
