@@ -224,9 +224,10 @@ function cubicCurveSteps() {
     vectorGui.render()
   }
   if (
-    (vectorGui.collidedPoint.xKey === "rotationx" &&
+    ((vectorGui.collidedPoint.xKey === "rotationx" &&
       vectorGui.selectedPoint.xKey === null) ||
-    vectorGui.selectedPoint.xKey === "rotationx"
+      vectorGui.selectedPoint.xKey === "rotationx") &&
+    state.clickCounter === 0
   ) {
     //Move vector mother ui point (IN PROGRESS)
     //TODO: (Medium Priority) Track shape center in timeline for transformations to keep translate consistent. No need to track it in this code block until shapes are added as a feature.
