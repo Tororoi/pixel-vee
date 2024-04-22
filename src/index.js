@@ -46,3 +46,6 @@ initializeDialogBox(dom.saveContainer)
 
 // * Export * //
 // initializeDialogBox(dom.exportContainer)
+
+// * Vector Transform * //
+initializeDialogBox(dom.vectorTransformUIContainer)

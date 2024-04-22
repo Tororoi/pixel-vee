@@ -1265,6 +1265,82 @@
           </form>
         </div>
       </div>
+      <div
+        class="vector-transform-ui-container dialog-box draggable v-drag h-drag free"
+      >
+        <!-- Radio buttons for toggling mode between Translate (default), Rotate, and Scale. Under Rotate toggle is a button to recenter the rotation point. Under Scale is a lock button to maintain aspect ratio. -->
+        <div id="vector-transform-ui-header" class="header dragger">
+          <div class="drag-btn"><div class="grip"></div></div>
+          <span>Transform</span>
+          <button
+            type="button"
+            id="vector-transform-ui-closer"
+            class="close-btn"
+            data-tooltip="Close"
+          >
+            <span class="close"></span>
+          </button>
+        </div>
+        <div class="collapsible">
+          <div id="vector-transform-ui-interface" class="vector-transform-ui-interface">
+            <div class="vector-transform-modes">
+              <label for="translate-mode" class="transform-mode"
+                ><input
+                  type="radio"
+                  id="translate-mode"
+                  name="transform-mode"
+                  value="translate"
+                  checked
+                />
+                Translate
+                </label>
+              <label for="rotate-mode" class="transform-mode"
+                ><input
+                  type="radio"
+                  id="rotate-mode"
+                  name="transform-mode"
+                  value="rotate"
+                />
+                Rotate
+                </label>
+              <label for="scale-mode" class="transform-mode"
+                ><input
+                  type="radio"
+                  id="scale-mode"
+                  name="transform-mode"
+                  value="scale"
+                />
+                Scale
+              </label>
+            </div>
+            <div class="transform-options">
+              <div class="rotate-options">
+                <button
+                  type="button"
+                  id="recenter-rotation"
+                  aria-label="Recenter Rotation Point"
+                  data-tooltip="Recenter Rotation Point"
+                >
+                  (Recenter Icon)
+                </button>
+              </div>
+              <div class="scale-options">
+                <label
+                  for="maintain-aspect-ratio"
+                  aria-label="Maintain Aspect Ratio"
+                  data-tooltip="Maintain Aspect Ratio"
+                >
+                  <input
+                    type="checkbox"
+                    id="maintain-aspect-ratio"
+                    name="maintain-aspect-ratio"
+                  />
+                  (Lock Icon)
+                </label>
+              </div>
+            </div>
+          </div>
+      </div>
     </div>
     <div class="layer-settings dialog-box"></div>
     <div id="tooltip" class="tooltip"></div>

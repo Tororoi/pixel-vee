@@ -199,6 +199,16 @@ const canvasHeight = document.getElementById("canvas-height")
 const canvasSizeCancelBtn = document.getElementById("cancel-resize-button")
 
 //====================================//
+//=== * * Vector Transform UI * * ====//
+//====================================//
+
+// * Vector Transform UI Mother * //
+const vectorTransformUIContainer = document.querySelector(".vector-transform-ui-container")
+
+// * Vector Transform UI * //
+const vectorTransformModeContainer = document.querySelector(".vector-transform-modes")
+
+//====================================//
 //========= * * * State * * * ========//
 //====================================//
 
@@ -290,4 +300,7 @@ export const dom = {
   canvasWidth,
   canvasHeight,
   canvasSizeCancelBtn,
+  //vector transform
+  vectorTransformUIContainer,
+  vectorTransformModeContainer,
 }

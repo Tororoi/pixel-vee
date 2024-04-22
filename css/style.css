@@ -2291,5 +2291,66 @@ canvas {
   margin: 8px;
   background: rgb(77, 77, 77);
 }
+.vector-transform-ui-container {
+  user-select: none;
+  position: absolute;
+  z-index: 103;
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  color: white;
+  background: rgb(51, 51, 51);
+  text-align: center;
+  padding: 0;
+  align-self: center;
+  opacity: 1;
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.vector-transform-ui-container:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.vector-transform-ui-container .header h3 {
+  justify-self: center;
+  height: 20px;
+  margin: 0px;
+}
+.vector-transform-ui-container .collapsible {
+  padding-top: 2px;
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  margin: 10px;
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .vector-transform-modes {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  margin: 10px;
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .vector-transform-modes .vector-transform-mode {
+  margin: 0 5px;
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .transform-options {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+  margin: 10px;
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .transform-options .transform-option {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  margin: 5px;
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .transform-options .transform-option .transform-option-label {
+  margin: 0 5px;
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .transform-options .transform-option .transform-option-input {
+  margin: 0 5px;
+}
 
 /*# sourceMappingURL=style.css.map */

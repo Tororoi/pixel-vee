@@ -305,6 +305,7 @@ function handlePointerOut(e) {
 /**
  * Identify whether program is being used by touchscreen or mouse. Important for multi-step tools such as curve
  * @param {TouchEvent} e - The touchstart event
+ * //TODO: (Medium Priority) Prevent default pinch zoom behavior and replace it with a custom pinch zoom on the canvas only
  */
 function handleTouchStart(e) {
   state.touch = true
