@@ -2,6 +2,7 @@
   user-select: none;
   position: absolute;
   z-index: 103;
+  // top: 75%;
   // width: 370px;
   // max-width: calc(100% - 4px);
   // max-height: calc(100% - 4px);
@@ -34,29 +35,42 @@
         display: flex;
         flex-flow: row nowrap;
         justify-content: center;
-        margin: 10px;
-        .vector-transform-mode {
-          margin: 0 5px;
-        }
+        // margin: 10px;
       }
       .transform-options {
         display: flex;
-        flex-flow: column nowrap;
+        flex-flow: row nowrap;
         justify-content: center;
         align-items: center;
-        margin: 10px;
-        .transform-option {
-          display: flex;
-          flex-flow: row nowrap;
-          justify-content: center;
-          align-items: center;
-          margin: 5px;
-          .transform-option-label {
-            margin: 0 5px;
-          }
-          .transform-option-input {
-            margin: 0 5px;
-          }
+        // margin: 10px;
+        button {
+          color: $white;
+        }
+      }
+      .tool {
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        user-select: none;
+        text-align: center;
+        color: white;
+        width: 40px;
+        height: 40px;
+        margin: 3px;
+        opacity: 1;
+        background-color: $button-color;
+        @include boxBorder;
+        &:hover {
+          z-index: 104;
+        }
+        &.selected {
+          background-color: $white;
+          z-index: 105;
+        }
+        &.custom-shape {
+          background-color: transparent;
+          @include cancelBorder;
         }
       }
     }

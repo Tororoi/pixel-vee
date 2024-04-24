@@ -1,3 +1,4 @@
+import { TRANSLATE } from "../utils/constants.js"
 import {
   disableActionsForNoSelection,
   enableActionsForSelection,
@@ -93,6 +94,7 @@ export const state = {
   grabStartShapeCenterX: null,
   grabStartShapeCenterY: null,
   grabStartAngle: null,
+  vectorTransformMode: TRANSLATE, //enum: translate, rotate, scale
   //for select tool
   selectProperties: {
     px1: null,
