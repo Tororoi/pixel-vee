@@ -317,7 +317,8 @@ function render() {
     state.tool.options.displayVectors?.active ||
     state.tool.options.equal?.active ||
     state.tool.options.align?.active ||
-    state.tool.options.link?.active
+    state.tool.options.link?.active ||
+    state.selectedVectorIndicesSet.size > 0
   ) {
     renderLayerVectors(canvas.currentLayer)
   } else {
@@ -438,7 +439,11 @@ function renderLayerVectors(layer) {
       state.undoStack.includes(vector.action)
     ) {
       //For each vector, render paths
-      if (!vector.removed && vector.vectorProperties.type === state.tool.name) {
+      if (
+        (vector.vectorProperties.type === state.tool.name &&
+          state.selectedVectorIndicesSet.size === 0) ||
+        state.selectedVectorIndicesSet.has(vector.index)
+      ) {
         renderPath(
           vector.vectorProperties.type,
           vector.vectorProperties,
@@ -449,7 +454,10 @@ function renderLayerVectors(layer) {
   }
   //render vector path for in progress vectors
   renderPath(state.tool.name, state.vectorProperties)
-  if (!state.tool.options.displayPaths?.active) {
+  if (
+    !state.tool.options.displayPaths?.active &&
+    state.selectedVectorIndicesSet.size === 0
+  ) {
     // Clear strokes from drawing area
     canvas.vectorGuiCTX.clearRect(
       canvas.xOffset,
@@ -472,9 +480,10 @@ function renderLayerVectors(layer) {
     ) {
       //For each vector, render control points
       if (
-        !vector.removed &&
-        vector.vectorProperties.type === state.tool.name &&
-        vector !== selectedVector
+        (vector.vectorProperties.type === state.tool.name &&
+          vector !== selectedVector &&
+          state.selectedVectorIndicesSet.size === 0) ||
+        state.selectedVectorIndicesSet.has(vector.index)
       ) {
         renderControlPoints(
           vector.vectorProperties.type,
