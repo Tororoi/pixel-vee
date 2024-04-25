@@ -73,7 +73,7 @@ export function renderTransformBox() {
 /**
  *
  */
-export function renderVectorMother() {
+export function renderVectorRotationControl() {
   //for now, mother ui is always in the shape center
   vectorGui.mother.rotationOrigin.x = state.shapeCenterX
   vectorGui.mother.rotationOrigin.y = state.shapeCenterY

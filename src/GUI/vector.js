@@ -1,3 +1,4 @@
+import { TRANSLATE, ROTATE, SCALE } from "../utils/constants.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import {
@@ -11,7 +12,7 @@ import {
   renderOffsetEllipseVector,
   renderEllipsePath,
 } from "./ellipse.js"
-import { renderTransformBox, renderVectorMother } from "./transform.js"
+import { renderTransformBox, renderVectorRotationControl } from "./transform.js"
 import { renderSelectionCVS } from "./select.js"
 import { renderGrid } from "./grid.js"
 import {
@@ -328,7 +329,18 @@ function render() {
   //Mother ui is a control center for rotation, translation and scaling of selected vectors
   //TODO: (High Priority) Implement collision detection with mother, rotation child (origin and handles)
   if (state.selectedVectorIndicesSet.size > 0 && state.shapeCenterX !== null) {
-    renderVectorMother()
+    switch (state.vectorTransformMode) {
+      case ROTATE:
+        renderVectorRotationControl()
+        break
+      case TRANSLATE:
+        //
+        break
+      case SCALE:
+        // renderTransformBox()
+        break
+      default:
+    }
   }
   //Render selection outline
   // if (

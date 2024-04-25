@@ -1,3 +1,4 @@
+import { TRANSLATE, ROTATE, SCALE } from "../utils/constants.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { keys } from "../Shortcuts/keys.js"
@@ -51,7 +52,7 @@ export function transformVectorSteps() {
         currentVector,
         state.vectorsSavedProperties
       )
-      if (keys.ShiftRight || keys.ShiftLeft) {
+      if (state.vectorTransformMode === ROTATE) {
         //Rotation
         state.grabStartAngle = getAngle(
           state.shapeCenterX - state.grabStartX,
@@ -64,7 +65,7 @@ export function transformVectorSteps() {
     case "pointermove": {
       //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
       //Based on the action being taken, update the vector properties for all selected vectors.
-      if (keys.ShiftRight || keys.ShiftLeft) {
+      if (state.vectorTransformMode === ROTATE) {
         //Rotation
         rotateVectors(
           currentVector.layer,
@@ -77,7 +78,7 @@ export function transformVectorSteps() {
           state.shapeCenterX,
           state.shapeCenterY
         )
-      } else {
+      } else if (state.vectorTransformMode === TRANSLATE) {
         //Translation
         const xDiff = state.cursorX - state.grabStartX
         const yDiff = state.cursorY - state.grabStartY
@@ -98,7 +99,7 @@ export function transformVectorSteps() {
     case "pointerup": {
       //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
       //Based on the action being taken, update the vector properties for all selected vectors.
-      if (keys.ShiftRight || keys.ShiftLeft) {
+      if (state.vectorTransformMode === ROTATE) {
         //Rotation
         rotateVectors(
           currentVector.layer,
@@ -113,7 +114,7 @@ export function transformVectorSteps() {
         )
         vectorGui.mother.currentRotation = vectorGui.mother.newRotation
         state.grabStartAngle = null
-      } else {
+      } else if (state.vectorTransformMode === TRANSLATE) {
         //Translation
         const xDiff = state.cursorX - state.grabStartX
         const yDiff = state.cursorY - state.grabStartY
