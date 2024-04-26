@@ -71,13 +71,24 @@ export const vectorGui = {
     }
     this.linkedVectors = {}
   },
-  addLinkedVector(vector, xKey) {
+  addLinkedVector(vector, xKey, linkingPoint) {
     if (this.selectedPoint.xKey) {
       return
     }
     if (!this.linkedVectors[vector.index]) {
       this.linkedVectors[vector.index] = {}
     }
+    if (vector.vectorProperties.type === "quadCurve") {
+      //prevent linking to same vector on px2 if px1 is already linked and vector is quadCurve
+      if (xKey === "px2" && this.linkedVectors[vector.index]["px1"]) {
+        return
+      }
+      //if vector is quadCurve and px2 is already linked and xKey is px1, remove px2 link
+      if (xKey === "px1" && this.linkedVectors[vector.index]["px2"]) {
+        delete this.linkedVectors[vector.index]["px2"]
+      }
+    }
+    this.linkedVectors[vector.index].linkingPoint = linkingPoint
     this.linkedVectors[vector.index][xKey] = true
   },
   removeLinkedVector(vector) {
@@ -168,12 +179,16 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
         if (keys.x === "px1" || keys.x === "px2") {
           state.collidedVectorIndex = vector.index
           //Only allow link if active point for selection is p1 or p2
-          let activeKey =
-            vectorGui.selectedPoint.xKey || vectorGui.collidedPoint.xKey
-          let allowLink = ["px1", "px2"].includes(activeKey)
+          let linkingPoint = null
+          if (vectorGui.selectedPoint.xKey) {
+            linkingPoint = vectorGui.selectedPoint
+          } else if (vectorGui.collidedPoint.xKey) {
+            linkingPoint = vectorGui.collidedPoint
+          }
+          let allowLink = ["px1", "px2"].includes(linkingPoint?.xKey)
           if (allowLink) {
             vectorGui.setOtherVectorCollision(keys)
-            vectorGui.addLinkedVector(vector, keys.x)
+            vectorGui.addLinkedVector(vector, keys.x, linkingPoint)
             if (state.clickCounter === 0) r = radius * 2.125
           } else if (!vectorGui.selectedPoint.xKey) {
             if (state.clickCounter === 0) r = radius * 2.125
@@ -197,7 +212,18 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
         normalizedX === state.vectorProperties.px1 &&
         normalizedY === state.vectorProperties.py1
       ) {
-        vectorGui.addLinkedVector(vector, keys.x)
+        vectorGui.addLinkedVector(vector, keys.x, { xKey: "px1", yKey: "py1" })
+      }
+      if (state.tool.name === "quadCurve") {
+        if (
+          normalizedX === state.vectorProperties.px2 &&
+          normalizedY === state.vectorProperties.py2
+        ) {
+          vectorGui.addLinkedVector(vector, keys.x, {
+            xKey: "px2",
+            yKey: "py2",
+          })
+        }
       }
     }
     if (vectorGui.collidedPoint.xKey === "px4" && vector) {
@@ -205,7 +231,7 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
         normalizedX === state.vectorProperties.px2 &&
         normalizedY === state.vectorProperties.py2
       ) {
-        vectorGui.addLinkedVector(vector, keys.x)
+        vectorGui.addLinkedVector(vector, keys.x, { xKey: "px2", yKey: "py2" })
       }
     }
   }
@@ -480,10 +506,10 @@ function renderLayerVectors(layer) {
     ) {
       //For each vector, render control points
       if (
-        (vector.vectorProperties.type === state.tool.name &&
-          vector !== selectedVector &&
+        ((vector.vectorProperties.type === state.tool.name &&
           state.selectedVectorIndicesSet.size === 0) ||
-        state.selectedVectorIndicesSet.has(vector.index)
+          state.selectedVectorIndicesSet.has(vector.index)) &&
+        vector !== selectedVector
       ) {
         renderControlPoints(
           vector.vectorProperties.type,
@@ -522,25 +548,29 @@ export function renderCurrentVector() {
  *
  * @param {object} currentVector - The vector action to base other vector handling on
  * @param {boolean} saveVectorProperties - if true, save the properties of the vector
+ * quadCurve must run this twice. Two sets of linked vectors should be maintained, one for p1 and one for p2 of the quad curve.
  */
 export function updateLinkedVectors(
   currentVector,
   saveVectorProperties = false
 ) {
-  const { currentDeltaX, currentDeltaY, currentDeltaAngle } =
-    calculateCurrentVectorDeltas(
-      currentVector,
-      vectorGui.selectedPoint.xKey,
-      state.tool.options,
-      state.vectorsSavedProperties
-    )
-
   for (const [linkedVectorIndex, linkedPoints] of Object.entries(
     vectorGui.linkedVectors
   )) {
+    const { currentDeltaX, currentDeltaY, currentDeltaAngle } =
+      calculateCurrentVectorDeltas(
+        currentVector,
+        vectorGui.selectedPoint,
+        state.tool.options,
+        state.vectorsSavedProperties,
+        linkedPoints.linkingPoint
+      )
+
     let x = state.cursorX
     let y = state.cursorY
     const linkedVector = state.vectors[linkedVectorIndex]
+
+    //As long as linked vector is quadCurve, must propogate linking to connected vectors
 
     if (saveVectorProperties) {
       state.vectorsSavedProperties[linkedVectorIndex] = {
@@ -567,26 +597,92 @@ export function updateLinkedVectors(
 }
 
 /**
+ * Helper function to update vector properties based on the control handle selection.
+ * @param {object} currentVector - The vector action to update
+ * @param {number} x - The new x coordinate
+ * @param {number} y - The new y coordinate
+ * @param {object} savedProperties - Previously saved properties of the vector
+ * @param {number} currentPointNumber - The number of the currently selected control point
+ * @param {number} targetPointNumber - The number of the target control point to update
+ */
+function updateVectorControl(
+  currentVector,
+  x,
+  y,
+  savedProperties,
+  currentPointNumber,
+  targetPointNumber
+) {
+  const currentXKey = `px${currentPointNumber}`
+  const currentYKey = `py${currentPointNumber}`
+  const targetXKey = `px${targetPointNumber}`
+  const targetYKey = `py${targetPointNumber}`
+  const xDiff = savedProperties[currentXKey] - savedProperties[targetXKey]
+  const yDiff = savedProperties[currentYKey] - savedProperties[targetYKey]
+  state.vectorProperties[targetXKey] = x - xDiff
+  state.vectorProperties[targetYKey] = y - yDiff
+  updateVectorProperties(
+    currentVector,
+    x - xDiff,
+    y - yDiff,
+    targetXKey,
+    targetYKey
+  )
+}
+
+/**
  * @param {object} currentVector - The vector action to update
  * @param {number} x - The x coordinate of new endpoint
  * @param {number} y - The y coordinate of new endpoint
  */
 export function updateLockedCurrentVectorControlHandle(currentVector, x, y) {
   const savedProperties = state.vectorsSavedProperties[state.currentVectorIndex]
-  if (vectorGui.selectedPoint.xKey === "px1") {
-    //update px3 and py3
-    const xDiff = savedProperties.px1 - savedProperties.px3
-    const yDiff = savedProperties.py1 - savedProperties.py3
-    state.vectorProperties.px3 = x - xDiff
-    state.vectorProperties.py3 = y - yDiff
-    updateVectorProperties(currentVector, x - xDiff, y - yDiff, "px3", "py3")
-  } else if (vectorGui.selectedPoint.xKey === "px2") {
-    //update px4 and py4
-    const xDiff = savedProperties.px2 - savedProperties.px4
-    const yDiff = savedProperties.py2 - savedProperties.py4
-    state.vectorProperties.px4 = x - xDiff
-    state.vectorProperties.py4 = y - yDiff
-    updateVectorProperties(currentVector, x - xDiff, y - yDiff, "px4", "py4")
+  //cubic curve
+  switch (savedProperties.type) {
+    case "cubicCurve": {
+      const currentPointNumber = parseInt(vectorGui.selectedPoint.xKey[2])
+      //point 1 holds point 3, point 2 holds point 4
+      const targetPointNumber = currentPointNumber === 1 ? 3 : 4
+      updateVectorControl(
+        currentVector,
+        x,
+        y,
+        savedProperties,
+        currentPointNumber,
+        targetPointNumber
+      )
+      break
+    }
+    case "quadCurve": {
+      const currentPointNumber = parseInt(vectorGui.selectedPoint.xKey[2])
+      //both point 1 and 2 hold point 3
+      const targetPointNumber = 3
+      updateVectorControl(
+        currentVector,
+        x,
+        y,
+        savedProperties,
+        currentPointNumber,
+        targetPointNumber
+      )
+      break
+    }
+    case "line": {
+      const currentPointNumber = parseInt(vectorGui.selectedPoint.xKey[2])
+      //point 1 holds point 2, point 2 holds point 1
+      const targetPointNumber = currentPointNumber === 1 ? 2 : 1
+      updateVectorControl(
+        currentVector,
+        x,
+        y,
+        savedProperties,
+        currentPointNumber,
+        targetPointNumber
+      )
+      break
+    }
+    default:
+    //do nothing
   }
 }
 

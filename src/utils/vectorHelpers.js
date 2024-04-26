@@ -16,57 +16,42 @@ export function updateVectorProperties(vector, x, y, xKey, yKey) {
 /**
  * Calculate the change in position and angle of the current vector.
  * @param {object} currentVector - The vector to calculate the deltas for
- * @param {string} selectedPointXKey - The key of the x property of the selected point
+ * @param {string} selectedPoint - The selected point
  * @param {object} toolOptions - The options for the tool
  * @param {object} vectorsSavedProperties - The saved properties of the vectors
+ * @param {object} linkingEndpoint - The linking endpoint for the selected vector, needed for quad curves that need to get these calculations for both p1 and p2
  * @returns {{currentDeltaX: number, currentDeltaY: number, currentDeltaAngle: number}} - Returns an object with properties.
  *          `currentDeltaX` and `currentDeltaY` are expected to be integers representing the change in position.
  *          `currentDeltaAngle` is expected to be a float representing the change in angle in radians.
  */
 export function calculateCurrentVectorDeltas(
   currentVector,
-  selectedPointXKey,
+  selectedPoint,
   toolOptions,
-  vectorsSavedProperties
+  vectorsSavedProperties,
+  linkingEndpoint
 ) {
   let currentDeltaX = 0
   let currentDeltaY = 0
   let currentDeltaAngle = 0 // Default to 0 if alignment is active
 
-  if (!["px1", "px2"].includes(selectedPointXKey)) {
-    //Set selected keys
-    let selectedEndpointXKey,
-      selectedEndpointYKey,
-      selectedHandleXKey,
-      selectedHandleYKey
-    if (selectedPointXKey === "px3") {
-      selectedEndpointXKey = "px1"
-      selectedEndpointYKey = "py1"
-      selectedHandleXKey = "px3"
-      selectedHandleYKey = "py3"
-    } else if (selectedPointXKey === "px4") {
-      selectedEndpointXKey = "px2"
-      selectedEndpointYKey = "py2"
-      selectedHandleXKey = "px4"
-      selectedHandleYKey = "py4"
-    }
-
+  if (!["px1", "px2"].includes(selectedPoint.xKey)) {
     currentDeltaX =
-      currentVector.vectorProperties[selectedEndpointXKey] -
-      currentVector.vectorProperties[selectedHandleXKey]
+      currentVector.vectorProperties[linkingEndpoint.xKey] -
+      currentVector.vectorProperties[selectedPoint.xKey]
     currentDeltaY =
-      currentVector.vectorProperties[selectedEndpointYKey] -
-      currentVector.vectorProperties[selectedHandleYKey]
+      currentVector.vectorProperties[linkingEndpoint.yKey] -
+      currentVector.vectorProperties[selectedPoint.yKey]
 
     if (!toolOptions.align?.active) {
       const angle = getAngle(currentDeltaX, currentDeltaY)
       const savedCurrentProperties = vectorsSavedProperties[currentVector.index]
       const savedDeltaX =
-        savedCurrentProperties[selectedEndpointXKey] -
-        savedCurrentProperties[selectedHandleXKey]
+        savedCurrentProperties[linkingEndpoint.xKey] -
+        savedCurrentProperties[selectedPoint.xKey]
       const savedDeltaY =
-        savedCurrentProperties[selectedEndpointYKey] -
-        savedCurrentProperties[selectedHandleYKey]
+        savedCurrentProperties[linkingEndpoint.yKey] -
+        savedCurrentProperties[selectedPoint.yKey]
       const savedAngle = getAngle(savedDeltaX, savedDeltaY)
       currentDeltaAngle = angle - savedAngle
     }
@@ -110,8 +95,13 @@ export function handleOptionsAndUpdateVector(
   } else if (linkedPoints.px2) {
     linkedEndpointXKey = "px2"
     linkedEndpointYKey = "py2"
-    linkedHandleXKey = "px4"
-    linkedHandleYKey = "py4"
+    if (linkedVector.vectorProperties.type === "quadCurve") {
+      linkedHandleXKey = "px3"
+      linkedHandleYKey = "py3"
+    } else {
+      linkedHandleXKey = "px4"
+      linkedHandleYKey = "py4"
+    }
   }
   // If vector is linked via px1 or px2, update vector properties
   if (linkedEndpointXKey) {

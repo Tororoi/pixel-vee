@@ -140,3 +140,35 @@ export function transformVectorSteps() {
     //do nothing
   }
 }
+
+/**
+ * Move rotation point for vectors (rotate around a point)
+ * TODO: (Medium Priority) Track shape center in timeline for transformations to keep translate consistent. No need to track it in this code block until shapes are added as a feature.
+ * Alternatively just recalculate center when undoing/ redoing transformations.
+ */
+export function moveVectorRotationPointSteps() {
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
+      vectorGui.selectedPoint = {
+        xKey: vectorGui.collidedPoint.xKey,
+        yKey: vectorGui.collidedPoint.yKey,
+      }
+      state.shapeCenterX = state.cursorX
+      state.shapeCenterY = state.cursorY
+      break
+    case "pointermove":
+      state.shapeCenterX = state.cursorX
+      state.shapeCenterY = state.cursorY
+      break
+    case "pointerup":
+      state.shapeCenterX = state.cursorX
+      state.shapeCenterY = state.cursorY
+      vectorGui.selectedPoint = {
+        xKey: null,
+        yKey: null,
+      }
+      break
+    default:
+    //do nothing
+  }
+}
