@@ -31,7 +31,7 @@ import {
  */
 function lineSteps() {
   if (
-    state.collidedVectorIndex &&
+    state.collidedVectorIndex !== null &&
     !vectorGui.selectedCollisionPresent &&
     state.clickCounter === 0
   ) {

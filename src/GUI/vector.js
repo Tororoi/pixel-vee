@@ -26,6 +26,7 @@ import {
 } from "../DOM/disableDomElements.js"
 import { renderLinePath, renderLineVector } from "./line.js"
 import { getAngle } from "../utils/trig.js"
+import { switchTool } from "../Tools/toolbox.js"
 
 //==================================================//
 //=== * * * Vector Graphics User Interface * * * ===//
@@ -35,6 +36,7 @@ import { getAngle } from "../utils/trig.js"
 export const vectorGui = {
   grid: false,
   gridSpacing: 8,
+  outlineVectorSelection: true,
   mother: {
     x: null,
     y: null,
@@ -322,6 +324,7 @@ function setVectorProperties(vector) {
       state.vectorProperties.py4 += vector.layer.y
     }
     state.currentVectorIndex = vector.index
+    // switchTool(vector.vectorProperties.type)
     enableActionsForSelection()
   }
 }

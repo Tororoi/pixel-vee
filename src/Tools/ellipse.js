@@ -31,6 +31,19 @@ function ellipseSteps() {
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
   if (
+    state.collidedVectorIndex !== null &&
+    !vectorGui.selectedCollisionPresent &&
+    state.clickCounter === 0
+  ) {
+    let collidedVector = state.vectors[state.collidedVectorIndex]
+    vectorGui.setVectorProperties(collidedVector)
+    //Render new selected vector before running standard render routine
+    //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.
+    // renderCurrentVector() //May not be needed after changing order of render calls in renderLayerVectors
+    vectorGui.render()
+    //TODO: (Highest Priority) This function assumes the collided vector is the same type of vector as the current vector. This may not always be the case.
+  }
+  if (
     ((vectorGui.collidedPoint.xKey === "rotationx" &&
       vectorGui.selectedPoint.xKey === null) ||
       vectorGui.selectedPoint.xKey === "rotationx") &&
@@ -39,7 +52,11 @@ function ellipseSteps() {
     moveVectorRotationPointSteps()
     return
   }
-  if (vectorGui.selectedCollisionPresent && state.clickCounter === 0 && state.currentVectorIndex !== null) {
+  if (
+    vectorGui.selectedCollisionPresent &&
+    state.clickCounter === 0 &&
+    state.currentVectorIndex !== null
+  ) {
     adjustEllipseSteps()
     return
   }

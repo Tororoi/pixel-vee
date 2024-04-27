@@ -54,7 +54,7 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
         state.tool.name === "select" ||
         (state.tool.name === "move" && canvas.pastedLayer)
       renderSelectionBoxOutline(lineDashOffset, shouldRenderPoints)
-    } else if (isVectorSelection) {
+    } else if (isVectorSelection && vectorGui.outlineVectorSelection) {
       //define rectangle for canvas area
       canvas.selectionGuiCTX.rect(
         canvas.xOffset,

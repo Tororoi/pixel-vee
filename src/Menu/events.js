@@ -264,6 +264,10 @@ dom.tooltipBtn.addEventListener("click", () => {
     dom.tooltip.classList.remove("visible")
   }
 })
+dom.vectorSelectionOutlineBtn.addEventListener("click", () => {
+  vectorGui.outlineVectorSelection = dom.vectorSelectionOutlineBtn.checked
+  vectorGui.render()
+})
 dom.openSaveBtn.addEventListener("click", (e) => {
   //reset value so that the same file can be imported multiple times
   e.target.value = null
