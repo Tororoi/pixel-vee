@@ -180,7 +180,7 @@ export function actionCutSelection(copyToClipboard = true) {
     canvas.currentLayer.type === "raster" &&
     !canvas.currentLayer.isPreview &&
     (state.boundaryBox.xMax !== null ||
-      state.currentVectorIndex ||
+      state.currentVectorIndex !== null ||
       state.selectedVectorIndicesSet.size > 0)
   ) {
     if (state.boundaryBox.xMax !== null) {
@@ -205,7 +205,7 @@ export function actionCutSelection(copyToClipboard = true) {
       renderCanvas(canvas.currentLayer)
       vectorGui.render()
     } else if (
-      state.currentVectorIndex ||
+      state.currentVectorIndex !== null ||
       state.selectedVectorIndicesSet.size > 0
     ) {
       //cut selected vectors (mark as removed)
@@ -589,7 +589,7 @@ export function actionFlipPixels(flipHorizontally) {
     addTransformToTimeline()
     renderCanvas(canvas.currentLayer)
   } else if (
-    state.currentVectorIndex ||
+    state.currentVectorIndex !== null ||
     state.selectedVectorIndicesSet.size > 0
   ) {
     //vector flip
@@ -648,7 +648,7 @@ export function actionRotatePixels() {
     vectorGui.render()
     renderCanvas(canvas.currentLayer)
   } else if (
-    state.currentVectorIndex ||
+    state.currentVectorIndex !== null ||
     state.selectedVectorIndicesSet.size > 0
   ) {
     //vector flip

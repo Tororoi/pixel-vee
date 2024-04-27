@@ -7,10 +7,18 @@ import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
-import { createActiveIndexesForRender, vectorGui } from "../GUI/vector.js"
+import {
+  createActiveIndexesForRender,
+  updateLinkedVectors,
+  updateLockedCurrentVectorControlHandle,
+  vectorGui,
+} from "../GUI/vector.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { modifyVectorAction } from "../Actions/modifyTimeline.js"
-import { transformVectorSteps } from "./transform.js"
+import {
+  moveVectorRotationPointSteps,
+  transformVectorSteps,
+} from "./transform.js"
 
 //===================================//
 //=== * * * Line Controller * * * ===//
@@ -21,7 +29,32 @@ import { transformVectorSteps } from "./transform.js"
  * TODO: (Medium Priority) add vector line tool. A raster line tool would still be present for ease of use.
  */
 function lineSteps() {
-  if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
+  if (
+    state.collidedVectorIndex &&
+    !vectorGui.selectedCollisionPresent &&
+    state.clickCounter === 0
+  ) {
+    let collidedVector = state.vectors[state.collidedVectorIndex]
+    vectorGui.setVectorProperties(collidedVector)
+    //Render new selected vector before running standard render routine
+    //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.
+    // renderCurrentVector() //May not be needed after changing order of render calls in renderLayerVectors
+    vectorGui.render()
+  }
+  if (
+    ((vectorGui.collidedPoint.xKey === "rotationx" &&
+      vectorGui.selectedPoint.xKey === null) ||
+      vectorGui.selectedPoint.xKey === "rotationx") &&
+    state.clickCounter === 0
+  ) {
+    moveVectorRotationPointSteps()
+    return
+  }
+  if (
+    vectorGui.selectedCollisionPresent &&
+    state.clickCounter === 0 &&
+    state.currentVectorIndex !== null
+  ) {
     adjustLineSteps()
     return
   }
@@ -86,6 +119,25 @@ function lineSteps() {
     case "pointerup": {
       state.vectorProperties.px2 = state.cursorX
       state.vectorProperties.py2 = state.cursorY
+      //Handle snapping p1 or p2 to other control points. Only snap when there are no linked vectors to selected vector.
+      if (
+        state.tool.options.align?.active ||
+        state.tool.options.equal?.active ||
+        state.tool.options.link?.active
+      ) {
+        //snap selected point to collidedVector's control point
+        if (state.collidedVectorIndex !== null) {
+          let collidedVector = state.vectors[state.collidedVectorIndex]
+          let snappedToX =
+            collidedVector.vectorProperties[vectorGui.otherCollidedKeys.xKey] +
+            collidedVector.layer.x
+          let snappedToY =
+            collidedVector.vectorProperties[vectorGui.otherCollidedKeys.yKey] +
+            collidedVector.layer.y
+          state.vectorProperties.px2 = snappedToX
+          state.vectorProperties.py2 = snappedToY
+        }
+      }
       actionLine(
         state.vectorProperties.px1,
         state.vectorProperties.py1,
@@ -187,16 +239,16 @@ function adjustLineSteps() {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        // if (state.tool.options.hold?.active) {
-        //   updateLockedCurrentVectorControlHandle(
-        //     currentVector,
-        //     state.cursorX,
-        //     state.cursorY
-        //   )
-        // }
-        // if (state.tool.options.link?.active) {
-        //   updateLinkedVectors(currentVector, true)
-        // }
+        if (state.tool.options.hold?.active) {
+          updateLockedCurrentVectorControlHandle(
+            currentVector,
+            state.cursorX,
+            state.cursorY
+          )
+        }
+        if (state.tool.options.link?.active) {
+          updateLinkedVectors(currentVector, true)
+        }
         state.activeIndexes = createActiveIndexesForRender(
           currentVector,
           state.vectorsSavedProperties
@@ -215,16 +267,16 @@ function adjustLineSteps() {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        // if (state.tool.options.hold?.active) {
-        //   updateLockedCurrentVectorControlHandle(
-        //     currentVector,
-        //     state.cursorX,
-        //     state.cursorY
-        //   )
-        // }
-        // if (state.tool.options.link?.active) {
-        //   updateLinkedVectors(currentVector)
-        // }
+        if (state.tool.options.hold?.active) {
+          updateLockedCurrentVectorControlHandle(
+            currentVector,
+            state.cursorX,
+            state.cursorY
+          )
+        }
+        if (state.tool.options.link?.active) {
+          updateLinkedVectors(currentVector)
+        }
         renderCanvas(currentVector.layer, true, state.activeIndexes)
       }
       break
@@ -239,157 +291,160 @@ function adjustLineSteps() {
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        // if (state.tool.options.hold?.active) {
-        //   updateLockedCurrentVectorControlHandle(
-        //     currentVector,
-        //     state.cursorX,
-        //     state.cursorY
-        //   )
-        // }
-        // if (state.tool.options.link?.active) {
-        //   updateLinkedVectors(currentVector)
-        // }
+        if (state.tool.options.hold?.active) {
+          updateLockedCurrentVectorControlHandle(
+            currentVector,
+            state.cursorX,
+            state.cursorY
+          )
+        }
+        if (state.tool.options.link?.active) {
+          updateLinkedVectors(currentVector)
+        }
         //Handle snapping p1 or p2 to other control points. Only snap when there are no linked vectors to selected vector.
-        // if (
-        //   (state.tool.options.align?.active ||
-        //     state.tool.options.equal?.active ||
-        //     state.tool.options.link?.active) &&
-        //   Object.keys(state.vectorsSavedProperties).length === 1 &&
-        //   ["px1", "px2"].includes(vectorGui.selectedPoint.xKey)
-        // ) {
-        //   //snap selected point to collidedVector's control point
-        //   if (state.collidedVectorIndex && state.currentVectorIndex) {
-        //     let collidedVector = state.vectors[state.collidedVectorIndex]
-        //     let snappedToX =
-        //       collidedVector.vectorProperties[
-        //         vectorGui.otherCollidedKeys.xKey
-        //       ] + collidedVector.layer.x
-        //     let snappedToY =
-        //       collidedVector.vectorProperties[
-        //         vectorGui.otherCollidedKeys.yKey
-        //       ] + collidedVector.layer.y
-        //     state.vectorProperties[vectorGui.selectedPoint.xKey] = snappedToX
-        //     state.vectorProperties[vectorGui.selectedPoint.yKey] = snappedToY
-        //     updateVectorProperties(
-        //       currentVector,
-        //       snappedToX,
-        //       snappedToY,
-        //       vectorGui.selectedPoint.xKey,
-        //       vectorGui.selectedPoint.yKey
-        //     )
-        //     if (state.tool.options.hold?.active) {
-        //       updateLockedCurrentVectorControlHandle(
-        //         currentVector,
-        //         snappedToX,
-        //         snappedToY
-        //       )
-        //     }
-        //     //Handle options behavior on snapping
-        //     if (
-        //       (state.tool.options.align?.active ||
-        //         state.tool.options.equal?.active) &&
-        //       ["px1", "px2"].includes(vectorGui.selectedPoint.xKey)
-        //     ) {
-        //       //Set selected keys
-        //       let selectedEndpointXKey,
-        //         selectedEndpointYKey,
-        //         selectedHandleXKey,
-        //         selectedHandleYKey
-        //       //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
-        //       if (vectorGui.selectedPoint.xKey === "px1") {
-        //         ;[
-        //           selectedEndpointXKey,
-        //           selectedEndpointYKey,
-        //           selectedHandleXKey,
-        //           selectedHandleYKey,
-        //         ] = ["px1", "py1", "px3", "py3"]
-        //       } else if (vectorGui.selectedPoint.xKey === "px2") {
-        //         ;[
-        //           selectedEndpointXKey,
-        //           selectedEndpointYKey,
-        //           selectedHandleXKey,
-        //           selectedHandleYKey,
-        //         ] = ["px2", "py2", "px4", "py4"]
-        //       }
-        //       //Set selected deltas
-        //       const savedCurrentProperties =
-        //         state.vectorsSavedProperties[currentVector.index]
-        //       const currentHandleDeltaX =
-        //         savedCurrentProperties[selectedEndpointXKey] -
-        //         savedCurrentProperties[selectedHandleXKey]
-        //       const currentHandleDeltaY =
-        //         savedCurrentProperties[selectedEndpointYKey] -
-        //         savedCurrentProperties[selectedHandleYKey]
-        //       const selectedHandleDeltaX =
-        //         state.vectorProperties[selectedHandleXKey] -
-        //         state.vectorProperties[selectedEndpointXKey]
-        //       const selectedHandleDeltaY =
-        //         state.vectorProperties[selectedHandleYKey] -
-        //         state.vectorProperties[selectedEndpointYKey]
-        //       //Set collided deltas
-        //       let collidedHandleDeltaX, collidedHandleDeltaY
-        //       if (vectorGui.otherCollidedKeys.xKey === "px1") {
-        //         collidedHandleDeltaX =
-        //           collidedVector.vectorProperties.px3 -
-        //           collidedVector.vectorProperties.px1
-        //         collidedHandleDeltaY =
-        //           collidedVector.vectorProperties.py3 -
-        //           collidedVector.vectorProperties.py1
-        //       } else if (vectorGui.otherCollidedKeys.xKey === "px2") {
-        //         collidedHandleDeltaX =
-        //           collidedVector.vectorProperties.px4 -
-        //           collidedVector.vectorProperties.px2
-        //         collidedHandleDeltaY =
-        //           collidedVector.vectorProperties.py4 -
-        //           collidedVector.vectorProperties.py2
-        //       }
-        //       let selectedHandleLength
-        //       if (state.tool.options.equal?.active) {
-        //         //Make selected handle length equal to collided vector' handle length
-        //         selectedHandleLength = Math.sqrt(
-        //           collidedHandleDeltaX ** 2 + collidedHandleDeltaY ** 2
-        //         )
-        //       } else {
-        //         //Maintain selected handle length
-        //         selectedHandleLength = Math.sqrt(
-        //           currentHandleDeltaX ** 2 + currentHandleDeltaY ** 2
-        //         )
-        //       }
-        //       let newSelectedAngle
-        //       //Priority for angle is align > equal
-        //       if (state.tool.options.align?.active) {
-        //         //Align angle of selected control handle opposite of collided vector control handle
-        //         newSelectedAngle =
-        //           getAngle(collidedHandleDeltaX, collidedHandleDeltaY) + Math.PI
-        //       } else if (state.tool.options.equal?.active) {
-        //         //Maintain absolute angle of selected control handle
-        //         newSelectedAngle = getAngle(
-        //           selectedHandleDeltaX,
-        //           selectedHandleDeltaY
-        //         )
-        //       }
-        //       const newSelectedHandleDeltaX = -Math.round(
-        //         Math.cos(newSelectedAngle) * selectedHandleLength
-        //       )
-        //       const newSelectedHandleDeltaY = -Math.round(
-        //         Math.sin(newSelectedAngle) * selectedHandleLength
-        //       )
-        //       state.vectorProperties[selectedHandleXKey] =
-        //         state.vectorProperties[selectedEndpointXKey] -
-        //         newSelectedHandleDeltaX
-        //       state.vectorProperties[selectedHandleYKey] =
-        //         state.vectorProperties[selectedEndpointYKey] -
-        //         newSelectedHandleDeltaY
-        //       updateVectorProperties(
-        //         currentVector,
-        //         state.vectorProperties[selectedHandleXKey],
-        //         state.vectorProperties[selectedHandleYKey],
-        //         selectedHandleXKey,
-        //         selectedHandleYKey
-        //       )
-        //     }
-        //   }
-        // }
+        if (
+          (state.tool.options.align?.active ||
+            state.tool.options.equal?.active ||
+            state.tool.options.link?.active) &&
+          Object.keys(state.vectorsSavedProperties).length === 1 &&
+          ["px1", "px2"].includes(vectorGui.selectedPoint.xKey)
+        ) {
+          //snap selected point to collidedVector's control point
+          if (
+            state.collidedVectorIndex !== null &&
+            state.currentVectorIndex !== null
+          ) {
+            let collidedVector = state.vectors[state.collidedVectorIndex]
+            let snappedToX =
+              collidedVector.vectorProperties[
+                vectorGui.otherCollidedKeys.xKey
+              ] + collidedVector.layer.x
+            let snappedToY =
+              collidedVector.vectorProperties[
+                vectorGui.otherCollidedKeys.yKey
+              ] + collidedVector.layer.y
+            state.vectorProperties[vectorGui.selectedPoint.xKey] = snappedToX
+            state.vectorProperties[vectorGui.selectedPoint.yKey] = snappedToY
+            updateVectorProperties(
+              currentVector,
+              snappedToX,
+              snappedToY,
+              vectorGui.selectedPoint.xKey,
+              vectorGui.selectedPoint.yKey
+            )
+            if (state.tool.options.hold?.active) {
+              updateLockedCurrentVectorControlHandle(
+                currentVector,
+                snappedToX,
+                snappedToY
+              )
+            }
+            //Handle options behavior on snapping
+            // if (
+            //   (state.tool.options.align?.active ||
+            //     state.tool.options.equal?.active) &&
+            //   ["px1", "px2"].includes(vectorGui.selectedPoint.xKey)
+            // ) {
+            //   //Set selected keys
+            //   let selectedEndpointXKey,
+            //     selectedEndpointYKey,
+            //     selectedHandleXKey,
+            //     selectedHandleYKey
+            //   //if control point is p1, handle is line to p3, if control point is p2, handle is line to p4
+            //   if (vectorGui.selectedPoint.xKey === "px1") {
+            //     ;[
+            //       selectedEndpointXKey,
+            //       selectedEndpointYKey,
+            //       selectedHandleXKey,
+            //       selectedHandleYKey,
+            //     ] = ["px1", "py1", "px3", "py3"]
+            //   } else if (vectorGui.selectedPoint.xKey === "px2") {
+            //     ;[
+            //       selectedEndpointXKey,
+            //       selectedEndpointYKey,
+            //       selectedHandleXKey,
+            //       selectedHandleYKey,
+            //     ] = ["px2", "py2", "px4", "py4"]
+            //   }
+            //   //Set selected deltas
+            //   const savedCurrentProperties =
+            //     state.vectorsSavedProperties[currentVector.index]
+            //   const currentHandleDeltaX =
+            //     savedCurrentProperties[selectedEndpointXKey] -
+            //     savedCurrentProperties[selectedHandleXKey]
+            //   const currentHandleDeltaY =
+            //     savedCurrentProperties[selectedEndpointYKey] -
+            //     savedCurrentProperties[selectedHandleYKey]
+            //   const selectedHandleDeltaX =
+            //     state.vectorProperties[selectedHandleXKey] -
+            //     state.vectorProperties[selectedEndpointXKey]
+            //   const selectedHandleDeltaY =
+            //     state.vectorProperties[selectedHandleYKey] -
+            //     state.vectorProperties[selectedEndpointYKey]
+            //   //Set collided deltas
+            //   let collidedHandleDeltaX, collidedHandleDeltaY
+            //   if (vectorGui.otherCollidedKeys.xKey === "px1") {
+            //     collidedHandleDeltaX =
+            //       collidedVector.vectorProperties.px3 -
+            //       collidedVector.vectorProperties.px1
+            //     collidedHandleDeltaY =
+            //       collidedVector.vectorProperties.py3 -
+            //       collidedVector.vectorProperties.py1
+            //   } else if (vectorGui.otherCollidedKeys.xKey === "px2") {
+            //     collidedHandleDeltaX =
+            //       collidedVector.vectorProperties.px4 -
+            //       collidedVector.vectorProperties.px2
+            //     collidedHandleDeltaY =
+            //       collidedVector.vectorProperties.py4 -
+            //       collidedVector.vectorProperties.py2
+            //   }
+            //   let selectedHandleLength
+            //   if (state.tool.options.equal?.active) {
+            //     //Make selected handle length equal to collided vector' handle length
+            //     selectedHandleLength = Math.sqrt(
+            //       collidedHandleDeltaX ** 2 + collidedHandleDeltaY ** 2
+            //     )
+            //   } else {
+            //     //Maintain selected handle length
+            //     selectedHandleLength = Math.sqrt(
+            //       currentHandleDeltaX ** 2 + currentHandleDeltaY ** 2
+            //     )
+            //   }
+            //   let newSelectedAngle
+            //   //Priority for angle is align > equal
+            //   if (state.tool.options.align?.active) {
+            //     //Align angle of selected control handle opposite of collided vector control handle
+            //     newSelectedAngle =
+            //       getAngle(collidedHandleDeltaX, collidedHandleDeltaY) + Math.PI
+            //   } else if (state.tool.options.equal?.active) {
+            //     //Maintain absolute angle of selected control handle
+            //     newSelectedAngle = getAngle(
+            //       selectedHandleDeltaX,
+            //       selectedHandleDeltaY
+            //     )
+            //   }
+            //   const newSelectedHandleDeltaX = -Math.round(
+            //     Math.cos(newSelectedAngle) * selectedHandleLength
+            //   )
+            //   const newSelectedHandleDeltaY = -Math.round(
+            //     Math.sin(newSelectedAngle) * selectedHandleLength
+            //   )
+            //   state.vectorProperties[selectedHandleXKey] =
+            //     state.vectorProperties[selectedEndpointXKey] -
+            //     newSelectedHandleDeltaX
+            //   state.vectorProperties[selectedHandleYKey] =
+            //     state.vectorProperties[selectedEndpointYKey] -
+            //     newSelectedHandleDeltaY
+            //   updateVectorProperties(
+            //     currentVector,
+            //     state.vectorProperties[selectedHandleXKey],
+            //     state.vectorProperties[selectedHandleYKey],
+            //     selectedHandleXKey,
+            //     selectedHandleYKey
+            //   )
+            // }
+          }
+        }
         renderCanvas(currentVector.layer, true, state.activeIndexes)
         // renderCanvas(currentVector.layer, true)
         modifyVectorAction(currentVector)
@@ -411,6 +466,27 @@ export const line = {
   brushType: "circle",
   brushDisabled: false,
   options: {
+    //Priority hierarchy of options: Equal = Align > Hold > Link
+    // equal: {
+    //   active: false,
+    //   tooltip:
+    //     "Toggle Equal Length (=). \n\nEnsures magnitude continuity of control handles for linked vectors.",
+    // }, // Magnitude continuity
+    // align: {
+    //   active: false,
+    //   tooltip:
+    //     "Toggle Align (A). \n\nEnsures tangential continuity by moving the control handle to the opposite angle for linked vectors.",
+    // }, // Tangential continuity
+    hold: {
+      active: false,
+      tooltip:
+        "Toggle Hold (H). \n\nMaintain relative angles of all control handles attached to selected control point.",
+    },
+    link: {
+      active: true,
+      tooltip:
+        "Toggle Linking (L). \n\nConnected control points of other vectors will move with selected control point.",
+    }, // Positional continuity
     displayPaths: {
       active: false,
       tooltip: "Toggle Paths. \n\nShow paths for lines.",

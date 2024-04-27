@@ -58,7 +58,7 @@ function quadCurveSteps() {
   if (
     vectorGui.selectedCollisionPresent &&
     state.clickCounter === 0 &&
-    state.currentVectorIndex
+    state.currentVectorIndex !== null
   ) {
     adjustCurveSteps()
     return
@@ -269,7 +269,7 @@ function cubicCurveSteps() {
   if (
     vectorGui.selectedCollisionPresent &&
     state.clickCounter === 0 &&
-    state.currentVectorIndex
+    state.currentVectorIndex !== null
   ) {
     adjustCurveSteps()
     return
@@ -573,7 +573,10 @@ function adjustCurveSteps() {
           ["px1", "px2"].includes(vectorGui.selectedPoint.xKey)
         ) {
           //snap selected point to collidedVector's control point
-          if (state.collidedVectorIndex && state.currentVectorIndex) {
+          if (
+            state.collidedVectorIndex !== null &&
+            state.currentVectorIndex !== null
+          ) {
             let collidedVector = state.vectors[state.collidedVectorIndex]
             let snappedToX =
               collidedVector.vectorProperties[

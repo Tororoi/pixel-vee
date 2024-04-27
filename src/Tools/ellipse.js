@@ -12,7 +12,10 @@ import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
-import { transformVectorSteps } from "./transform.js"
+import {
+  moveVectorRotationPointSteps,
+  transformVectorSteps,
+} from "./transform.js"
 
 //======================================//
 //=== * * * Ellipse Controller * * * ===//
@@ -27,7 +30,16 @@ function ellipseSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
-  if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
+  if (
+    ((vectorGui.collidedPoint.xKey === "rotationx" &&
+      vectorGui.selectedPoint.xKey === null) ||
+      vectorGui.selectedPoint.xKey === "rotationx") &&
+    state.clickCounter === 0
+  ) {
+    moveVectorRotationPointSteps()
+    return
+  }
+  if (vectorGui.selectedCollisionPresent && state.clickCounter === 0 && state.currentVectorIndex !== null) {
     adjustEllipseSteps()
     return
   }

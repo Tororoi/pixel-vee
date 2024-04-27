@@ -464,7 +464,7 @@ function renderLayerVectors(layer) {
       vector.layer === layer &&
       state.undoStack.includes(vector.action)
     ) {
-      //For each vector, render paths
+      //For each vector, render paths TODO: (High Priority) render paths for all line type vectors, not just the same type as the current tool
       if (
         (vector.vectorProperties.type === state.tool.name &&
           state.selectedVectorIndicesSet.size === 0) ||
@@ -557,6 +557,7 @@ export function updateLinkedVectors(
   for (const [linkedVectorIndex, linkedPoints] of Object.entries(
     vectorGui.linkedVectors
   )) {
+    //Values are 0 across the board for p1 or p2 as selected point
     const { currentDeltaX, currentDeltaY, currentDeltaAngle } =
       calculateCurrentVectorDeltas(
         currentVector,
