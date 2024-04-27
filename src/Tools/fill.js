@@ -9,7 +9,7 @@ import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
-import { transformVectorSteps } from "./transform.js"
+import { adjustVectorSteps, transformVectorSteps } from "./transform.js"
 
 //===================================//
 //=== * * * Fill Controller * * * ===//
@@ -21,8 +21,12 @@ import { transformVectorSteps } from "./transform.js"
  */
 function fillSteps() {
   vectorGui.render()
-  if (vectorGui.selectedCollisionPresent) {
-    adjustFillSteps()
+  if (
+    vectorGui.selectedCollisionPresent &&
+    state.clickCounter === 0 &&
+    state.currentVectorIndex !== null
+  ) {
+    adjustVectorSteps()
     return
   }
   //If there are selected vectors, call transformVectorSteps() instead of this function
@@ -104,86 +108,6 @@ function fillSteps() {
     case "pointerup":
       //redraw canvas to allow onscreen cursor to render
       renderCanvas(canvas.currentLayer)
-      break
-    default:
-    //do nothing
-  }
-}
-
-/**
- * Used automatically by fill tool after fill is completed.
- * TODO: (Medium Priority) for linking fill vector, fill would be limited by active linked vectors as borders, position unchanged
- * How should fill vector be linked, since it won't be via positioning?
- */
-export function adjustFillSteps() {
-  let currentVector = state.vectors[state.currentVectorIndex]
-  switch (canvas.pointerEvent) {
-    case "pointerdown":
-      if (vectorGui.selectedCollisionPresent) {
-        state.vectorProperties[vectorGui.collidedPoint.xKey] = state.cursorX
-        state.vectorProperties[vectorGui.collidedPoint.yKey] = state.cursorY
-        vectorGui.selectedPoint = {
-          xKey: vectorGui.collidedPoint.xKey,
-          yKey: vectorGui.collidedPoint.yKey,
-        }
-        state.vectorsSavedProperties[state.currentVectorIndex] = {
-          ...currentVector.vectorProperties,
-        }
-        updateVectorProperties(
-          currentVector,
-          state.cursorX,
-          state.cursorY,
-          vectorGui.selectedPoint.xKey,
-          vectorGui.selectedPoint.yKey
-        )
-        state.activeIndexes = createActiveIndexesForRender(
-          currentVector,
-          state.vectorsSavedProperties
-        )
-        renderCanvas(currentVector.layer, true, state.activeIndexes, true)
-      }
-      break
-    case "pointermove":
-      if (vectorGui.selectedPoint.xKey) {
-        //code gets past check twice here so figure out where tool fn is being called again
-        state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
-        state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        updateVectorProperties(
-          currentVector,
-          state.cursorX,
-          state.cursorY,
-          vectorGui.selectedPoint.xKey,
-          vectorGui.selectedPoint.yKey
-        )
-        renderCanvas(currentVector.layer, true, state.activeIndexes)
-      }
-      break
-    case "pointerup":
-      if (vectorGui.selectedPoint.xKey) {
-        state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
-        state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-        updateVectorProperties(
-          currentVector,
-          state.cursorX,
-          state.cursorY,
-          vectorGui.selectedPoint.xKey,
-          vectorGui.selectedPoint.yKey
-        )
-        renderCanvas(currentVector.layer, true, state.activeIndexes)
-        modifyVectorAction(currentVector)
-        vectorGui.selectedPoint = {
-          xKey: null,
-          yKey: null,
-        }
-      }
-      break
-    case "pointerout":
-      if (vectorGui.selectedPoint.xKey) {
-        vectorGui.selectedPoint = {
-          xKey: null,
-          yKey: null,
-        }
-      }
       break
     default:
     //do nothing
