@@ -113,7 +113,6 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
       }
     }
   }
-  updateLayersAfterRedo()
   renderLayersToDOM()
   renderVectorsToDOM()
 }
@@ -458,29 +457,6 @@ function renderActionVectors(action, activeCtx = null) {
       //do nothing
     }
   }
-}
-
-/**
- * Update layers after redo
- * Helper for redrawTimelineActions
- */
-function updateLayersAfterRedo() {
-  state.redoStack.forEach((action) => {
-    if (action.tool === "addLayer") {
-      action.layer.removed = true
-      if (action.layer === canvas.currentLayer) {
-        canvas.currentLayer.inactiveTools.forEach((tool) => {
-          dom[`${tool}Btn`].disabled = false
-        })
-        canvas.currentLayer = canvas.layers.find(
-          (layer) => layer.type === "raster" && layer.removed === false
-        )
-        canvas.currentLayer.inactiveTools.forEach((tool) => {
-          dom[`${tool}Btn`].disabled = true
-        })
-      }
-    }
-  })
 }
 
 /**

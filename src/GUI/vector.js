@@ -342,7 +342,10 @@ function render() {
   //Prevent blurring
   canvas.vectorGuiCTX.imageSmoothingEnabled = false
   //if linking, render all vectors in the layer
-  if (
+  if (canvas.currentLayer.type === "reference") {
+    vectorGui.resetCollision()
+    renderTransformBox()
+  } else if (
     state.tool.options.displayVectors?.active ||
     state.tool.options.equal?.active ||
     state.tool.options.align?.active ||
@@ -387,12 +390,11 @@ function render() {
 
 /**
  * Render based on the current tool.
- * @param {string} toolName - The name of the tool
  * @param {object} vectorProperties - The properties of the vector
  * @param {object|null} vector - The vector action to base the properties on
  */
-function renderControlPoints(toolName, vectorProperties, vector = null) {
-  switch (toolName) {
+function renderControlPoints(vectorProperties, vector = null) {
+  switch (vectorProperties.type) {
     case "fill":
       renderFillVector(vectorProperties, vector)
       break
@@ -409,23 +411,17 @@ function renderControlPoints(toolName, vectorProperties, vector = null) {
         renderOffsetEllipseVector(vectorProperties)
       }
       break
-    case "move":
-      if (canvas.currentLayer.type === "reference") {
-        renderTransformBox()
-      }
-      break
     default:
     //
   }
 }
 
 /**
- * @param {string} toolName - The name of the tool
  * @param {object} vectorProperties - The properties of the vector
  * @param {object|null} vector - The vector to be rendered
  */
-function renderPath(toolName, vectorProperties, vector = null) {
-  switch (toolName) {
+function renderPath(vectorProperties, vector = null) {
+  switch (vectorProperties.type) {
     case "fill":
       // renderFillVector(state.vectorProperties)
       break
@@ -438,11 +434,6 @@ function renderPath(toolName, vectorProperties, vector = null) {
       break
     case "ellipse":
       renderEllipsePath(vectorProperties, vector)
-      break
-    case "move":
-      // if (canvas.currentLayer.type === "reference") {
-      //   renderTransformBox()
-      // }
       break
     default:
     //
@@ -473,16 +464,12 @@ function renderLayerVectors(layer) {
           state.selectedVectorIndicesSet.size === 0) ||
         state.selectedVectorIndicesSet.has(vector.index)
       ) {
-        renderPath(
-          vector.vectorProperties.type,
-          vector.vectorProperties,
-          vector
-        )
+        renderPath(vector.vectorProperties, vector)
       }
     }
   }
   //render vector path for in progress vectors
-  renderPath(state.tool.name, state.vectorProperties)
+  renderPath(state.vectorProperties)
   if (
     !state.tool.options.displayPaths?.active &&
     state.selectedVectorIndicesSet.size === 0
@@ -497,7 +484,7 @@ function renderLayerVectors(layer) {
   }
   //render selected vector control points
   vectorGui.resetCollision()
-  renderControlPoints(state.tool.name, state.vectorProperties)
+  renderControlPoints(state.vectorProperties)
   //render control points
   vectorGui.resetOtherVectorCollision()
   vectorGui.resetLinkedVectors()
@@ -514,17 +501,10 @@ function renderLayerVectors(layer) {
           state.selectedVectorIndicesSet.has(vector.index)) &&
         vector !== selectedVector
       ) {
-        renderControlPoints(
-          vector.vectorProperties.type,
-          vector.vectorProperties,
-          vector
-        )
+        renderControlPoints(vector.vectorProperties, vector)
       }
     }
   }
-  // //render selected vector control points
-  // vectorGui.resetCollision()
-  // renderControlPoints(state.tool.name, state.vectorProperties)
 }
 
 /**
@@ -532,7 +512,7 @@ function renderLayerVectors(layer) {
  */
 export function renderCurrentVector() {
   //render paths
-  renderPath(state.tool.name, state.vectorProperties)
+  renderPath(state.vectorProperties)
   if (!state.tool.options.displayPaths?.active) {
     // Clear strokes from drawing area
     canvas.vectorGuiCTX.clearRect(
@@ -544,7 +524,7 @@ export function renderCurrentVector() {
   }
   vectorGui.resetCollision()
   //render control points
-  renderControlPoints(state.tool.name, state.vectorProperties)
+  renderControlPoints(state.vectorProperties)
 }
 
 /**

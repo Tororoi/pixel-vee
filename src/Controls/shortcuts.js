@@ -6,7 +6,6 @@ import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
 import { handleUndo, handleRedo } from "../Actions/undoRedo.js"
 import { tools } from "../Tools/index.js"
-import { adjustEllipseSteps } from "../Tools/ellipse.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
   renderPaletteToolsToDOM,
@@ -29,6 +28,7 @@ import {
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
 import { toggleMode, switchTool } from "../Tools/toolbox.js"
+import { adjustVectorSteps } from "../Tools/transform.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
@@ -88,7 +88,7 @@ export function activateShortcut(keyCode) {
           vectorGui.selectedPoint.xKey !== "px1"
         ) {
           //while holding control point, readjust ellipse without having to move cursor.
-          adjustEllipseSteps()
+          adjustVectorSteps()
           vectorGui.render()
         }
       }
@@ -361,7 +361,7 @@ export function deactivateShortcut(keyCode) {
         ) {
           //while holding control point, readjust ellipse without having to move cursor.
           //TODO: (Medium Priority) update this functionality to have other radii go back to previous radius value when releasing shift
-          adjustEllipseSteps()
+          adjustVectorSteps()
           vectorGui.render()
         }
       }

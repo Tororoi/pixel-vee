@@ -169,7 +169,9 @@ export const state = {
  */
 function reset() {
   state.clickCounter = 0
-  state.vectorProperties.forceCircle = false
+  if (state.vectorProperties.forceCircle) {
+    state.vectorProperties.forceCircle = false
+  }
 }
 
 /**

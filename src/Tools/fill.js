@@ -9,7 +9,11 @@ import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
-import { adjustVectorSteps, transformVectorSteps } from "./transform.js"
+import {
+  adjustVectorSteps,
+  moveVectorRotationPointSteps,
+  transformVectorSteps,
+} from "./transform.js"
 
 //===================================//
 //=== * * * Fill Controller * * * ===//
@@ -20,7 +24,29 @@ import { adjustVectorSteps, transformVectorSteps } from "./transform.js"
  * Supported modes: "draw, erase"
  */
 function fillSteps() {
-  vectorGui.render()
+  //for selecting another vector via the canvas, collisionPresent is false since it is currently based on collision with selected vector.
+  if (
+    state.collidedVectorIndex !== null &&
+    !vectorGui.selectedCollisionPresent &&
+    state.clickCounter === 0
+  ) {
+    let collidedVector = state.vectors[state.collidedVectorIndex]
+    vectorGui.setVectorProperties(collidedVector)
+    //Render new selected vector before running standard render routine
+    //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.
+    // renderCurrentVector() //May not be needed after changing order of render calls in renderLayerVectors
+    vectorGui.render()
+    //TODO: (Highest Priority) This function assumes the collided vector is the same type of vector as the current vector. This may not always be the case.
+  }
+  if (
+    ((vectorGui.collidedPoint.xKey === "rotationx" &&
+      vectorGui.selectedPoint.xKey === null) ||
+      vectorGui.selectedPoint.xKey === "rotationx") &&
+    state.clickCounter === 0
+  ) {
+    moveVectorRotationPointSteps()
+    return
+  }
   if (
     vectorGui.selectedCollisionPresent &&
     state.clickCounter === 0 &&
