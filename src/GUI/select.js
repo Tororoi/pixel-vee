@@ -19,7 +19,8 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
     canvas.selectionGuiCVS.height
   )
   let isRasterSelection = state.boundaryBox.xMax !== null
-  let isVectorSelection = state.selectedVectorIndicesSet.size > 0
+  let isVectorSelection =
+    state.selectedVectorIndicesSet.size > 0 && state.tool.type === "vector"
   if (isRasterSelection || isVectorSelection) {
     //Create greyed out area around selection
     //clip to selection

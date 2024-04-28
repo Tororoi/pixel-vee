@@ -45,6 +45,11 @@ function renderToLatestAction(latestAction, modType) {
   state.selectedVectorIndicesSet = new Set(
     mostRecentAction.selectedVectorIndices
   )
+  if (state.selectedVectorIndicesSet.size > 0) {
+    dom.vectorTransformUIContainer.style.display = "flex"
+  } else {
+    dom.vectorTransformUIContainer.style.display = "none"
+  }
   //set current vector index
   if (mostRecentAction.currentVectorIndex !== null) {
     vectorGui.setVectorProperties(

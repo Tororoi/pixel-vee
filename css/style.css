@@ -2325,7 +2325,8 @@ canvas {
   user-select: none;
   position: absolute;
   z-index: 103;
-  display: flex;
+  top: 10%;
+  display: none;
   flex-flow: column nowrap;
   justify-content: flex-start;
   color: white;

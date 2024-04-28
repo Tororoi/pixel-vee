@@ -5,7 +5,7 @@ import { getAngle } from "../utils/trig.js"
 import { drawCirclePath } from "../utils/guiHelpers.js"
 
 /**
- *
+ * TODO: (Medium Priority) Refactor this function to use the square transform box control points
  */
 export function renderTransformBox() {
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8

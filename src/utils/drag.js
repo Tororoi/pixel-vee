@@ -46,12 +46,16 @@ export const initializeCollapser = (collapseTarget, startCollapsed) => {
 /**
  * Initialize closer
  * @param {HTMLElement} closeTarget - The element to close
+ * @param {Function} closerFn - The function to call when closing
  */
-export const initializeCloser = (closeTarget) => {
+export const initializeCloser = (closeTarget, closerFn) => {
   const closeBtn = closeTarget.querySelector(".close-btn")
   if (closeBtn) {
     closeBtn.addEventListener("click", () => {
       closeTarget.style.display = "none"
+      if (closerFn) {
+        closerFn()
+      }
     })
   }
 }
@@ -60,14 +64,16 @@ export const initializeCloser = (closeTarget) => {
  * Initialize dialog box
  * @param {HTMLElement} dialogBoxTarget - The dialog box
  * @param {boolean} startCollapsed - Whether to start collapsed
+ * @param {Function} closerFn - The function to call when closing
  */
 export const initializeDialogBox = (
   dialogBoxTarget,
-  startCollapsed = false
+  startCollapsed = false,
+  closerFn = null
 ) => {
   initializeDragger(dialogBoxTarget)
   initializeCollapser(dialogBoxTarget, startCollapsed)
-  initializeCloser(dialogBoxTarget)
+  initializeCloser(dialogBoxTarget, closerFn)
 }
 
 /**

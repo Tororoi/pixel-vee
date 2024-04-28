@@ -25,6 +25,7 @@ import {
   updateVectorProperties,
 } from "../utils/vectorHelpers.js"
 import { modifyVectorAction } from "./modifyTimeline.js"
+import { dom } from "../Context/dom.js"
 
 //=============================================//
 //====== * * * Non Pointer Actions * * * ======//
@@ -79,6 +80,7 @@ export function actionSelectAll() {
 export function actionSelectVector(vectorIndex) {
   if (!state.selectedVectorIndicesSet.has(vectorIndex)) {
     state.selectedVectorIndicesSet.add(vectorIndex)
+    dom.vectorTransformUIContainer.style.display = "flex"
     // const selectedVectorIndices = new Set(state.selectedVectorIndicesSet)
     // state.deselect()
     // state.selectedVectorIndicesSet = selectedVectorIndices
@@ -114,6 +116,9 @@ export function actionSelectVector(vectorIndex) {
 export function actionDeselectVector(vectorIndex) {
   if (state.selectedVectorIndicesSet.has(vectorIndex)) {
     state.selectedVectorIndicesSet.delete(vectorIndex)
+    if (state.selectedVectorIndicesSet.size === 0) {
+      dom.vectorTransformUIContainer.style.display = "none"
+    }
     addToTimeline({
       tool: tools.select.name,
       layer: canvas.currentLayer,
@@ -308,6 +313,7 @@ export function actionPasteSelection() {
       }
       //clear any selected vectors
       state.selectedVectorIndicesSet.clear()
+      dom.vectorTransformUIContainer.style.display = "none"
       //add to timeline
       addToTimeline({
         tool: tools.paste.name,
@@ -370,6 +376,11 @@ export function actionPasteSelection() {
       vectorIndices.forEach((vectorIndex) => {
         state.selectedVectorIndicesSet.add(vectorIndex)
       })
+      if (state.selectedVectorIndicesSet.size > 0) {
+        dom.vectorTransformUIContainer.style.display = "flex"
+      } else {
+        dom.vectorTransformUIContainer.style.display = "none"
+      }
       //TODO: (High Priority) Need to render onto canvas to remove need to redraw timeline
       // renderCanvas(canvas.currentLayer)
       //add to timeline

@@ -3,6 +3,7 @@ import { canvas } from "../Context/canvas.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderVectorsToDOM } from "../DOM/renderVectors.js"
+import { dom } from "../Context/dom.js"
 
 //=====================================//
 //=== * * * Select Controller * * * ===//
@@ -28,6 +29,7 @@ function selectSteps() {
       state.clickCounter += 1
       //reset selected vectors
       state.selectedVectorIndicesSet.clear()
+      dom.vectorTransformUIContainer.style.display = "none"
       renderVectorsToDOM()
       //set initial properties
       state.selectProperties.px1 = state.cursorX

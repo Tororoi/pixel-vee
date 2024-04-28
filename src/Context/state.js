@@ -4,6 +4,7 @@ import {
   enableActionsForSelection,
 } from "../DOM/disableDomElements.js"
 import { vectorGui } from "../GUI/vector.js"
+import { dom } from "./dom.js"
 
 //====================================//
 //======== * * * State * * * =========//
@@ -253,6 +254,7 @@ function deselect() {
   state.vectorProperties = {}
   state.currentVectorIndex = null
   state.selectedVectorIndicesSet.clear()
+  dom.vectorTransformUIContainer.style.display = "none"
   //reset vectorGui mother object
   vectorGui.mother.newRotation = 0
   vectorGui.mother.currentRotation = 0

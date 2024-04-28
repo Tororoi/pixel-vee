@@ -259,13 +259,18 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
  */
 function setCursorStyle() {
   if (!vectorGui.selectedCollisionPresent && !state.collidedVectorIndex) {
-    if (state.selectedVectorIndicesSet.size > 0) {
+    if (
+      state.selectedVectorIndicesSet.size > 0 &&
+      state.tool.type === "vector"
+    ) {
       //For transform actions
       canvas.vectorGuiCVS.style.cursor = "move"
       return
     }
     canvas.vectorGuiCVS.style.cursor = state.tool.modes?.eraser
       ? "none"
+      : state.clicked
+      ? state.tool.activeCursor
       : state.tool.cursor
     return
   }
@@ -355,10 +360,10 @@ function render() {
     state.tool.options.equal?.active ||
     state.tool.options.align?.active ||
     state.tool.options.link?.active ||
-    state.selectedVectorIndicesSet.size > 0
+    (state.selectedVectorIndicesSet.size > 0 && state.tool.type === "vector")
   ) {
     renderLayerVectors(canvas.currentLayer)
-  } else {
+  } else if (state.tool.type === "vector") {
     //else render only the current vector
     renderCurrentVector()
   }
