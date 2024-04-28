@@ -486,14 +486,18 @@ export function adjustVectorSteps() {
               state.tool.options.equal?.active ||
               state.tool.options.link?.active) &&
             Object.keys(state.vectorsSavedProperties).length === 1 &&
-            ["px1", "px2"].includes(vectorGui.selectedPoint.xKey)
+            ["px1", "px2"].includes(vectorGui.selectedPoint.xKey) &&
+            state.collidedVectorIndex !== null &&
+            state.currentVectorIndex !== null
           ) {
             //snap selected point to collidedVector's control point
+            let collidedVector = state.vectors[state.collidedVectorIndex]
             if (
-              state.collidedVectorIndex !== null &&
-              state.currentVectorIndex !== null
+              !["fill", "ellipse"].includes(
+                collidedVector.vectorProperties.type
+              ) &&
+              !["fill", "ellipse"].includes(currentVector.vectorProperties.type)
             ) {
-              let collidedVector = state.vectors[state.collidedVectorIndex]
               let snappedToX =
                 collidedVector.vectorProperties[
                   vectorGui.otherCollidedKeys.xKey

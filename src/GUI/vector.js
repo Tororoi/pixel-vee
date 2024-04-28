@@ -74,7 +74,12 @@ export const vectorGui = {
     this.linkedVectors = {}
   },
   addLinkedVector(vector, xKey, linkingPoint) {
-    if (this.selectedPoint.xKey) {
+    if (
+      this.selectedPoint.xKey ||
+      ["fill", "ellipse"].includes(vector.vectorProperties.type) ||
+      ["fill", "ellipse"].includes(state.vectorProperties.type)
+    ) {
+      //Don't link a point to itself and don't link to fill or ellipse vectors.
       return
     }
     if (!this.linkedVectors[vector.index]) {
@@ -458,7 +463,7 @@ function renderLayerVectors(layer) {
       vector.layer === layer &&
       state.undoStack.includes(vector.action)
     ) {
-      //For each vector, render paths TODO: (High Priority) render paths for all line type vectors, not just the same type as the current tool
+      //For each vector, render paths
       if (
         (vector.vectorProperties.type === state.tool.name &&
           state.selectedVectorIndicesSet.size === 0) ||

@@ -50,7 +50,7 @@ export function renderEllipseVector(vectorProperties, vector) {
 
   if (!vector) {
     vectorGui.drawControlPoints(
-      state.vectorProperties,
+      vectorProperties,
       pointsKeys,
       circleRadius,
       false
@@ -62,7 +62,7 @@ export function renderEllipseVector(vectorProperties, vector) {
 
   canvas.vectorGuiCTX.beginPath()
   vectorGui.drawControlPoints(
-    state.vectorProperties,
+    vectorProperties,
     pointsKeys,
     circleRadius / 2,
     true,
