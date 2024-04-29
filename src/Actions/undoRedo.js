@@ -361,7 +361,6 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       ...latestAction[modType],
     }
   } else if (latestAction.tool === "remove") {
-    //TODO: (High Priority) Refactor to allow multiple vectors/ actions to be removed at once
     if (latestAction.vectorIndices?.length > 0) {
       latestAction.vectorIndices.forEach((vectorIndex) => {
         state.vectors[vectorIndex].removed = latestAction[modType]

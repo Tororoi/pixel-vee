@@ -36,7 +36,6 @@ function fillSteps() {
     //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.
     // renderCurrentVector() //May not be needed after changing order of render calls in renderLayerVectors
     vectorGui.render()
-    //TODO: (Highest Priority) This function assumes the collided vector is the same type of vector as the current vector. This may not always be the case.
   }
   if (
     ((vectorGui.collidedPoint.xKey === "rotationx" &&

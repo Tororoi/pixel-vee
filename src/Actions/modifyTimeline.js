@@ -80,6 +80,7 @@ export function changeActionVectorColor(moddedVector, oldColor) {
 /**
  * Modify action in the timeline
  * @param {object} moddedVector - The vector to be removed
+ * NOTE: When multiple vectors are removed, currently routed through cut selection action. TODO: (Low Priority) Refactor to use same function for single and multiple vector removal
  */
 export function removeActionVector(moddedVector) {
   addToTimeline({

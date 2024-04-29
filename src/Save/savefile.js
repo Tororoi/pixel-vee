@@ -130,7 +130,7 @@ export function saveDrawing() {
 /**
  * Load the drawing from a JSON file.
  * @param {JSON} jsonFile - The JSON file containing the drawing data.
- * TODO: (High Priority) Add error handling for loading the drawing
+ * TODO: (High Priority) Add more elegant error popup when loading the drawing
  */
 export async function loadDrawing(jsonFile) {
   let data
@@ -140,12 +140,14 @@ export async function loadDrawing(jsonFile) {
     data = JSON.parse(jsonFile)
   } catch (e) {
     console.error(e)
+    alert(e)
     return
   }
   // Validate the JSON file as a Pixel V save file and log which properties are missing
   let validation = validatePixelVeeFile(data)
   if (!validation.valid) {
     console.error(validation.message)
+    alert(validation.message)
     return
   }
 

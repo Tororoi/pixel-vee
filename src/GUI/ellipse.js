@@ -74,8 +74,9 @@ export function renderEllipseVector(vectorProperties, vector) {
 
 /**
  * @param {object} vectorProperties - The properties of the vector
+ * @param {object} vector - The vector to be rendered
  */
-export function renderOffsetEllipseVector(vectorProperties) {
+export function renderOffsetEllipseVector(vectorProperties, vector) {
   const {
     px1,
     py1,
@@ -89,6 +90,8 @@ export function renderOffsetEllipseVector(vectorProperties) {
     x1Offset,
     y1Offset,
   } = vectorProperties
+  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
+  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   let circleRadius = 8 * lineWidth
@@ -98,16 +101,16 @@ export function renderOffsetEllipseVector(vectorProperties) {
   if (Number.isInteger(px2)) {
     drawCirclePath(
       canvas.vectorGuiCTX,
-      canvas.xOffset,
-      canvas.yOffset,
+      xOffset,
+      yOffset,
       px1 + x1Offset / 2,
       py1 + y1Offset / 2,
       circleRadius / 2
     )
     drawCirclePath(
       canvas.vectorGuiCTX,
-      canvas.xOffset,
-      canvas.yOffset,
+      xOffset,
+      yOffset,
       px2 + x1Offset / 2,
       py2 + y1Offset / 2,
       circleRadius / 2
@@ -116,8 +119,8 @@ export function renderOffsetEllipseVector(vectorProperties) {
   if (Number.isInteger(px3)) {
     drawCirclePath(
       canvas.vectorGuiCTX,
-      canvas.xOffset,
-      canvas.yOffset,
+      xOffset,
+      yOffset,
       px3 + x1Offset / 2,
       py3 + y1Offset / 2,
       circleRadius / 2
@@ -128,22 +131,22 @@ export function renderOffsetEllipseVector(vectorProperties) {
   canvas.vectorGuiCTX.setLineDash([1, 1])
   if (Number.isInteger(px2)) {
     canvas.vectorGuiCTX.moveTo(
-      canvas.xOffset + px1 + 0.5 + x1Offset / 2,
-      canvas.yOffset + py1 + 0.5 + y1Offset / 2
+      xOffset + px1 + 0.5 + x1Offset / 2,
+      yOffset + py1 + 0.5 + y1Offset / 2
     )
     canvas.vectorGuiCTX.lineTo(
-      canvas.xOffset + px2 + 0.5 + x1Offset / 2,
-      canvas.yOffset + py2 + 0.5 + y1Offset / 2
+      xOffset + px2 + 0.5 + x1Offset / 2,
+      yOffset + py2 + 0.5 + y1Offset / 2
     )
   }
   if (Number.isInteger(px3)) {
     canvas.vectorGuiCTX.moveTo(
-      canvas.xOffset + px1 + 0.5 + x1Offset / 2,
-      canvas.yOffset + py1 + 0.5 + y1Offset / 2
+      xOffset + px1 + 0.5 + x1Offset / 2,
+      yOffset + py1 + 0.5 + y1Offset / 2
     )
     canvas.vectorGuiCTX.lineTo(
-      canvas.xOffset + px3 + 0.5 + x1Offset / 2,
-      canvas.yOffset + py3 + 0.5 + y1Offset / 2
+      xOffset + px3 + 0.5 + x1Offset / 2,
+      yOffset + py3 + 0.5 + y1Offset / 2
     )
   }
 

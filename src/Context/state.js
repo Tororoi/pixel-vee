@@ -5,6 +5,7 @@ import {
 } from "../DOM/disableDomElements.js"
 import { vectorGui } from "../GUI/vector.js"
 import { dom } from "./dom.js"
+import { tools } from "../Tools/index.js"
 
 //====================================//
 //======== * * * State * * * =========//
@@ -273,16 +274,19 @@ function deselect() {
 // }
 
 /**
- * TODO: (High Priority) delete pastedImages for each paste action in the redo stack
  */
 function clearRedoStack() {
   state.action = null
-  //remove vectors from state.vectors that are part of redoStack
   for (const action of state.redoStack) {
-    if (action.vectorIndices) {
+    //remove vectors from state.vectors that has creation action as part of redoStack
+    if (action.vectorIndices && tools[action.tool].type === "vector") {
       action.vectorIndices.forEach((index) => {
         delete state.vectors[index]
       })
+    }
+    //remove pastedImages from state.pastedImages that has creation action as part of redoStack (Currently that includes unconfirmed paste action only)
+    if (action.pastedImageKey && action.tool === "paste" && !action.confirmed) {
+      delete state.pastedImages[action.pastedImageKey]
     }
   }
   state.redoStack = []

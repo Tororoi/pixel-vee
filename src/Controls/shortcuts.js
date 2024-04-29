@@ -44,7 +44,6 @@ export function activateShortcut(keyCode) {
       break
     case "Backspace":
       if (!state.clicked) {
-        //delete selection TODO: (High Priority) handle delete vectors (mark vectors as removed)
         actionDeleteSelection()
       }
       break

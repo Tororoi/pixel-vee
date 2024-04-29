@@ -12,7 +12,7 @@ import { renderCanvas } from "../Canvas/render.js"
 
 /**
  * Render cursor based on active tool
- * TODO: (High Priority) Render vectorGui cursor for vector tools with remaining control points indicator
+ * TODO: (Low Priority) Render vectorGui cursor for vector tools with remaining control points indicator
  */
 export function renderCursor() {
   switch (state.tool.name) {

@@ -368,9 +368,7 @@ function render() {
     renderCurrentVector()
   }
   renderSelectionCVS()
-  //if selected vectors, render mother ui
-  //Mother ui is a control center for rotation, translation and scaling of selected vectors
-  //TODO: (High Priority) Implement collision detection with mother, rotation child (origin and handles)
+  //Render vector transform ui
   if (state.selectedVectorIndicesSet.size > 0 && state.shapeCenterX !== null) {
     switch (state.vectorTransformMode) {
       case ROTATE:
@@ -418,7 +416,7 @@ function renderControlPoints(vectorProperties, vector = null) {
     case "ellipse":
       renderEllipseVector(vectorProperties, vector)
       if (vectorProperties.x1Offset || vectorProperties.y1Offset) {
-        renderOffsetEllipseVector(vectorProperties)
+        renderOffsetEllipseVector(vectorProperties, vector)
       }
       break
     default:
@@ -453,7 +451,6 @@ function renderPath(vectorProperties, vector = null) {
 /**
  * For each vector action in the undoStack in a given layer, render it
  * @param {object} layer - The layer to render the vectors for
- * TODO: (High Priority) Get vectors as sub actions of group actions, eg. selectedVector = state.lookupVector(state.currentVectorIndex)
  */
 function renderLayerVectors(layer) {
   let selectedVector = null

@@ -189,6 +189,7 @@ export function actionCutSelection(copyToClipboard = true) {
       state.selectedVectorIndicesSet.size > 0)
   ) {
     if (state.boundaryBox.xMax !== null) {
+      //Cut raster content
       cutSelectedPixels(copyToClipboard)
       //correct boundary box for layer offset
       const boundaryBox = { ...state.boundaryBox }
@@ -213,7 +214,7 @@ export function actionCutSelection(copyToClipboard = true) {
       state.currentVectorIndex !== null ||
       state.selectedVectorIndicesSet.size > 0
     ) {
-      //cut selected vectors (mark as removed)
+      //Cut selected vectors (mark as removed)
       if (copyToClipboard) {
         copySelectedVectors()
       }
@@ -251,8 +252,8 @@ export function actionCutSelection(copyToClipboard = true) {
 export function actionDeleteSelection() {
   //1. check for selected raster or vector
   //2. if raster, cut selection passing false to not copy to clipboard
-  actionCutSelection(false)
   //3. if vector, mark selected vectors as removed
+  actionCutSelection(false)
 }
 
 /**
@@ -262,7 +263,6 @@ export function actionDeleteSelection() {
  * the current layer is not a raster layer, or if the current layer is a preview layer
  * Always uses the state clipboard for pasting, which is the last clipboard used for copying or cutting
  * Conditions: Layer is a raster layer, layer is not a preview layer, and there is something in the clipboard to be pasted
- * TODO: (High Priority) When pasting vectors, don't really need a temporary layer. Separate the concerns more clearly. With a vector transform tool, user can move the entire vectors around, stretch and squash them, mirror them at a user defined point and angle, and rotate them.
  */
 export function actionPasteSelection() {
   if (
@@ -336,7 +336,7 @@ export function actionPasteSelection() {
       state.clearRedoStack()
 
       renderCanvas(canvas.currentLayer)
-      switchTool("move") //TODO: (High Priority) Instead of move tool being selected, automatically use temporary transform tool which is not in the toolbox.
+      switchTool("move") //TODO: (Medium Priority) Instead of move tool being selected, automatically use temporary transform tool which is not in the toolbox.
       renderLayersToDOM()
       renderVectorsToDOM()
       disableActionsForPaste()
@@ -773,7 +773,6 @@ export function actionRotateVectors(degrees) {
   //   yMax = Math.max(yMax ?? -Infinity, ...vectorYPoints)
   // }
   //get center point of selected vectors
-  //TODO: (High Priority) To keep rotation point consistent, keep point in state and update it when vectors are moved, not when rotating or flipping
   if (state.shapeCenterX === null) {
     //Update shape center
     const [centerX, centerY] = findVectorShapeCentroid(
@@ -785,7 +784,6 @@ export function actionRotateVectors(degrees) {
   }
   const rotationOriginX = state.shapeCenterX
   const rotationOriginY = state.shapeCenterY
-  //TODO: (High Priority) Freely rotate selected vectors at any angle around origin point (default center of vectors bounding box)
   let referenceVector
   for (const vectorIndex of vectorIndicesSet) {
     const vector = state.vectors[vectorIndex]

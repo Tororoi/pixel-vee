@@ -15,7 +15,7 @@ function moveSteps() {
   //move raster layer or reference layer
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      //TODO: (High Priority) Make distinction that for general move, it's moving the layer, but for a selection, it's moving the selection area with the contents (only works for active paste or vector tools)
+      //TODO: (Low Priority) Make distinction for user that for general move, it's moving the layer, but for a selection, it's moving the selection area with the contents (only works for active paste)
       state.grabStartX = canvas.currentLayer.x
       state.grabStartY = canvas.currentLayer.y
       state.startScale = canvas.currentLayer.scale

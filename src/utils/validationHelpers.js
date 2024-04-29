@@ -13,13 +13,21 @@ export function validatePixelVeeFile(data) {
   } else {
     if (!data.metadata.version) {
       missingProperties.push("metadata.version")
-    } else if (data.metadata.version === "1.0") {
-      if (
-        !data.metadata.application ||
-        data.metadata.application !== "Pixel V"
-      ) {
-        invalidProperties.push("metadata.application")
+    } else {
+      if (!["1.0", "1.1"].includes(data.metadata.version)) {
+        invalidProperties.push("metadata.version")
       }
+      if (data.metadata.version === "1.1") {
+        if (!data.vectors) {
+          missingProperties.push("vectors")
+          //TODO: (Low Priority) Add message: Expected vectors array in version 1.1 file
+        } else if (!Array.isArray(data.vectors)) {
+          invalidProperties.push("vectors")
+        }
+      }
+    }
+    if (!data.metadata.application || data.metadata.application !== "Pixel V") {
+      invalidProperties.push("metadata.application")
     }
     if (!data.metadata.timestamp) {
       missingProperties.push("metadata.timestamp")
@@ -49,7 +57,7 @@ export function validatePixelVeeFile(data) {
     return {
       valid: false,
       message:
-        "The JSON file is not a valid Pixel Vee save file. Missing properties: " +
+        "The JSON file is not a valid Pixel Vee save file. " +
         errors.join(", "),
     }
   }
