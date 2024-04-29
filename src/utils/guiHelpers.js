@@ -1,20 +1,14 @@
 /**
- * @param {object} canvas - The canvas to draw on
- * @param {number} xOffset - (Integer)
- * @param {number} yOffset - (Integer)
+ * @param {CanvasRenderingContext2D} ctx - The context to draw on
+ * @param {number} xOffset - (Integer) canvas and layer offsets
+ * @param {number} yOffset - (Integer) canvas and layer offsets
  * @param {number} x - (Integer)
  * @param {number} y - (Integer)
  * @param {number} r - (Integer)
  */
-export function drawCirclePath(canvas, xOffset, yOffset, x, y, r) {
-  canvas.vectorGuiCTX.moveTo(xOffset + x + 0.5 + r, yOffset + y + 0.5)
-  canvas.vectorGuiCTX.arc(
-    xOffset + x + 0.5,
-    yOffset + y + 0.5,
-    r,
-    0,
-    2 * Math.PI
-  )
+export function drawCirclePath(ctx, xOffset, yOffset, x, y, r) {
+  ctx.moveTo(xOffset + x + 0.5 + r, yOffset + y + 0.5)
+  ctx.arc(xOffset + x + 0.5, yOffset + y + 0.5, r, 0, 2 * Math.PI)
 }
 
 /**

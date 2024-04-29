@@ -40,12 +40,14 @@ export function sanitizeLayers(
 }
 
 /**
+ * @param {Array} undoStack - The undoStack array
  * @param {object} vectors - The vectors object to be sanitized
  * @param {boolean} preserveHistory - Whether to preserve the history
  * @param {boolean} includeRemovedActions - Whether to include removed actions
  * @returns {object} - A sanitized copy of the vectors object.
  */
 export function sanitizeVectors(
+  undoStack,
   vectors,
   preserveHistory,
   includeRemovedActions
@@ -54,13 +56,15 @@ export function sanitizeVectors(
   for (let i = sanitizedVectors.length - 1; i >= 0; i--) {
     const vector = sanitizedVectors[i]
     if (
-      (vector.layer.removed || vector.removed) &&
-      !preserveHistory &&
-      !includeRemovedActions
+      ((vector.layer.removed || vector.removed) &&
+        !preserveHistory &&
+        !includeRemovedActions) ||
+      !undoStack.includes(vector.action)
     ) {
       sanitizedVectors.splice(i, 1)
     } else {
       vector.layer = { id: vector.layer.id }
+      vector.action = { index: vector.action.index }
     }
   }
   return sanitizedVectors
@@ -80,7 +84,7 @@ export function sanitizePalette(palette, preserveHistory, includePalette) {
 }
 
 /**
- * @param {Array} undoStack - The undoStack object to be sanitized
+ * @param {Array} undoStack - The undoStack array to be sanitized
  * @param {boolean} preserveHistory - Whether to preserve the history
  * @param {boolean} includeReferenceLayers - Whether to include reference layers
  * @param {boolean} includeRemovedActions - Whether to include removed actions

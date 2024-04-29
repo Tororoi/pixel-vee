@@ -557,8 +557,8 @@ export function actionCubicCurve(
  * @param {number} ya - (Integer)
  * @param {number} xb - (Integer)
  * @param {number} yb - (Integer)
- * @param {number} ra - (Integer)
- * @param {number} rb - (Integer)
+ * @param {number} radA - (Integer)
+ * @param {number} radB - (Integer)
  * @param {boolean} forceCircle - whether to force a circle
  * @param {object} boundaryBox - {xMin, xMax, yMin, yMax}
  * @param {object} currentColor - {color, r, g, b, a}
@@ -581,8 +581,8 @@ export function actionEllipse(
   ya,
   xb,
   yb,
-  ra,
-  rb,
+  radA,
+  radB,
   forceCircle,
   boundaryBox,
   currentColor,
@@ -599,7 +599,12 @@ export function actionEllipse(
   isPreview = false
 ) {
   if (forceCircle) {
-    let plotPoints = plotCircle(centerx + 0.5, centery + 0.5, ra, unifiedOffset)
+    let plotPoints = plotCircle(
+      centerx + 0.5,
+      centery + 0.5,
+      radA,
+      unifiedOffset
+    )
     renderPoints(
       plotPoints,
       boundaryBox,
@@ -616,8 +621,8 @@ export function actionEllipse(
     let plotPoints = plotRotatedEllipse(
       centerx,
       centery,
-      ra,
-      rb,
+      radA,
+      radB,
       angle,
       xa,
       ya,

@@ -1,7 +1,11 @@
+import { TRANSLATE } from "../utils/constants.js"
 import {
   disableActionsForNoSelection,
   enableActionsForSelection,
 } from "../DOM/disableDomElements.js"
+import { vectorGui } from "../GUI/vector.js"
+import { dom } from "./dom.js"
+import { tools } from "../Tools/index.js"
 
 //====================================//
 //======== * * * State * * * =========//
@@ -87,6 +91,12 @@ export const state = {
   collidedVectorIndex: null,
   highestVectorKey: 0,
   selectedVectorIndicesSet: new Set(), //TODO: (Medium Priority) logic for which actions reset selected vectors
+  shapeCenterX: null,
+  shapeCenterY: null,
+  grabStartShapeCenterX: null,
+  grabStartShapeCenterY: null,
+  grabStartAngle: null,
+  vectorTransformMode: TRANSLATE, //enum: translate, rotate, scale
   //for select tool
   selectProperties: {
     px1: null,
@@ -104,12 +114,7 @@ export const state = {
   //Transform/ Paste
   pastedImages: {
     // index: {
-    //   actionIndex: null,
-    //   action: null,
     //   imageData: null,
-    //   width: null,
-    //   height: null,
-    //   dataURL: null,
     // },
   },
   highestPastedImageKey: 0,
@@ -166,7 +171,9 @@ export const state = {
  */
 function reset() {
   state.clickCounter = 0
-  state.vectorProperties.forceCircle = false
+  if (state.vectorProperties.forceCircle) {
+    state.vectorProperties.forceCircle = false
+  }
 }
 
 /**
@@ -248,6 +255,12 @@ function deselect() {
   state.vectorProperties = {}
   state.currentVectorIndex = null
   state.selectedVectorIndicesSet.clear()
+  dom.vectorTransformUIContainer.style.display = "none"
+  //reset vectorGui mother object
+  vectorGui.mother.newRotation = 0
+  vectorGui.mother.currentRotation = 0
+  vectorGui.mother.rotationOrigin.x = null
+  vectorGui.mother.rotationOrigin.y = null
   //should be for all selected vectors
   disableActionsForNoSelection()
 }
@@ -261,16 +274,19 @@ function deselect() {
 // }
 
 /**
- * TODO: (High Priority) delete pastedImages for each paste action in the redo stack
  */
 function clearRedoStack() {
   state.action = null
-  //remove vectors from state.vectors that are part of redoStack
   for (const action of state.redoStack) {
-    if (action.vectorIndices) {
+    //remove vectors from state.vectors that has creation action as part of redoStack
+    if (action.vectorIndices && tools[action.tool].type === "vector") {
       action.vectorIndices.forEach((index) => {
         delete state.vectors[index]
       })
+    }
+    //remove pastedImages from state.pastedImages that has creation action as part of redoStack (Currently that includes unconfirmed paste action only)
+    if (action.pastedImageKey && action.tool === "paste" && !action.confirmed) {
+      delete state.pastedImages[action.pastedImageKey]
     }
   }
   state.redoStack = []

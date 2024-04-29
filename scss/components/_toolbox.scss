@@ -162,6 +162,14 @@
   @include colorMaskIcon;
 }
 
+.rotate {
+  @include rotateIcon;
+}
+
+.scale {
+  @include scaleIcon;
+}
+
 //========================================================//
 //============= * * * One-click Icons * * * ==============//
 //========================================================//
@@ -215,4 +223,8 @@
 }
 .gear {
   @include gearIcon;
+}
+
+.lock {
+  @include lockIcon;
 }

@@ -45,6 +45,11 @@ function renderToLatestAction(latestAction, modType) {
   state.selectedVectorIndicesSet = new Set(
     mostRecentAction.selectedVectorIndices
   )
+  if (state.selectedVectorIndicesSet.size > 0) {
+    dom.vectorTransformUIContainer.style.display = "flex"
+  } else {
+    dom.vectorTransformUIContainer.style.display = "none"
+  }
   //set current vector index
   if (mostRecentAction.currentVectorIndex !== null) {
     vectorGui.setVectorProperties(
@@ -356,7 +361,6 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       ...latestAction[modType],
     }
   } else if (latestAction.tool === "remove") {
-    //TODO: (High Priority) Refactor to allow multiple vectors/ actions to be removed at once
     if (latestAction.vectorIndices?.length > 0) {
       latestAction.vectorIndices.forEach((vectorIndex) => {
         state.vectors[vectorIndex].removed = latestAction[modType]

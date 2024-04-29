@@ -20,8 +20,12 @@ import {
   enableActionsForSelection,
 } from "../DOM/disableDomElements.js"
 import { transformRasterContent } from "../utils/transformHelpers.js"
-import { updateVectorProperties } from "../utils/vectorHelpers.js"
+import {
+  findVectorShapeCentroid,
+  updateVectorProperties,
+} from "../utils/vectorHelpers.js"
 import { modifyVectorAction } from "./modifyTimeline.js"
+import { dom } from "../Context/dom.js"
 
 //=============================================//
 //====== * * * Non Pointer Actions * * * ======//
@@ -76,6 +80,7 @@ export function actionSelectAll() {
 export function actionSelectVector(vectorIndex) {
   if (!state.selectedVectorIndicesSet.has(vectorIndex)) {
     state.selectedVectorIndicesSet.add(vectorIndex)
+    dom.vectorTransformUIContainer.style.display = "flex"
     // const selectedVectorIndices = new Set(state.selectedVectorIndicesSet)
     // state.deselect()
     // state.selectedVectorIndicesSet = selectedVectorIndices
@@ -91,6 +96,16 @@ export function actionSelectVector(vectorIndex) {
       },
     })
     state.clearRedoStack()
+    //Update shape center
+    const [centerX, centerY] = findVectorShapeCentroid(
+      state.selectedVectorIndicesSet,
+      state.vectors
+    )
+    state.shapeCenterX = centerX + canvas.currentLayer.x
+    state.shapeCenterY = centerY + canvas.currentLayer.y
+    //reset vectorGui mother object
+    vectorGui.mother.newRotation = 0
+    vectorGui.mother.currentRotation = 0
   }
 }
 
@@ -101,6 +116,9 @@ export function actionSelectVector(vectorIndex) {
 export function actionDeselectVector(vectorIndex) {
   if (state.selectedVectorIndicesSet.has(vectorIndex)) {
     state.selectedVectorIndicesSet.delete(vectorIndex)
+    if (state.selectedVectorIndicesSet.size === 0) {
+      dom.vectorTransformUIContainer.style.display = "none"
+    }
     addToTimeline({
       tool: tools.select.name,
       layer: canvas.currentLayer,
@@ -113,6 +131,16 @@ export function actionDeselectVector(vectorIndex) {
       },
     })
     state.clearRedoStack()
+    //Update shape center
+    const [centerX, centerY] = findVectorShapeCentroid(
+      state.selectedVectorIndicesSet,
+      state.vectors
+    )
+    state.shapeCenterX = centerX + canvas.currentLayer.x
+    state.shapeCenterY = centerY + canvas.currentLayer.y
+    //reset vectorGui mother object
+    vectorGui.mother.newRotation = 0
+    vectorGui.mother.currentRotation = 0
   }
 }
 
@@ -157,10 +185,11 @@ export function actionCutSelection(copyToClipboard = true) {
     canvas.currentLayer.type === "raster" &&
     !canvas.currentLayer.isPreview &&
     (state.boundaryBox.xMax !== null ||
-      state.currentVectorIndex ||
+      state.currentVectorIndex !== null ||
       state.selectedVectorIndicesSet.size > 0)
   ) {
     if (state.boundaryBox.xMax !== null) {
+      //Cut raster content
       cutSelectedPixels(copyToClipboard)
       //correct boundary box for layer offset
       const boundaryBox = { ...state.boundaryBox }
@@ -182,10 +211,10 @@ export function actionCutSelection(copyToClipboard = true) {
       renderCanvas(canvas.currentLayer)
       vectorGui.render()
     } else if (
-      state.currentVectorIndex ||
+      state.currentVectorIndex !== null ||
       state.selectedVectorIndicesSet.size > 0
     ) {
-      //cut selected vectors (mark as removed) TODO: (High Priority) Need new action to process multiple removals at once
+      //Cut selected vectors (mark as removed)
       if (copyToClipboard) {
         copySelectedVectors()
       }
@@ -223,8 +252,8 @@ export function actionCutSelection(copyToClipboard = true) {
 export function actionDeleteSelection() {
   //1. check for selected raster or vector
   //2. if raster, cut selection passing false to not copy to clipboard
-  actionCutSelection(false)
   //3. if vector, mark selected vectors as removed
+  actionCutSelection(false)
 }
 
 /**
@@ -234,7 +263,6 @@ export function actionDeleteSelection() {
  * the current layer is not a raster layer, or if the current layer is a preview layer
  * Always uses the state clipboard for pasting, which is the last clipboard used for copying or cutting
  * Conditions: Layer is a raster layer, layer is not a preview layer, and there is something in the clipboard to be pasted
- * TODO: (High Priority) When pasting vectors, don't really need a temporary layer. Separate the concerns more clearly. With a vector transform tool, user can move the entire vectors around, stretch and squash them, mirror them at a user defined point and angle, and rotate them.
  */
 export function actionPasteSelection() {
   if (
@@ -285,6 +313,7 @@ export function actionPasteSelection() {
       }
       //clear any selected vectors
       state.selectedVectorIndicesSet.clear()
+      dom.vectorTransformUIContainer.style.display = "none"
       //add to timeline
       addToTimeline({
         tool: tools.paste.name,
@@ -307,7 +336,7 @@ export function actionPasteSelection() {
       state.clearRedoStack()
 
       renderCanvas(canvas.currentLayer)
-      switchTool("move") //TODO: (High Priority) Instead of move tool being selected, automatically use temporary transform tool which is not in the toolbox.
+      switchTool("move") //TODO: (Medium Priority) Instead of move tool being selected, automatically use temporary transform tool which is not in the toolbox.
       renderLayersToDOM()
       renderVectorsToDOM()
       disableActionsForPaste()
@@ -337,7 +366,6 @@ export function actionPasteSelection() {
         state.highestVectorKey += 1
         let uniqueVectorKey = state.highestVectorKey
         vector.index = uniqueVectorKey
-        vector.actionIndex = state.undoStack.length
         delete clipboardVectors[vectorIndex] // Remove old key-value pair
         clipboardVectors[uniqueVectorKey] = vector // Assign vector to new key
         //add to state.vectors
@@ -348,8 +376,13 @@ export function actionPasteSelection() {
       vectorIndices.forEach((vectorIndex) => {
         state.selectedVectorIndicesSet.add(vectorIndex)
       })
+      if (state.selectedVectorIndicesSet.size > 0) {
+        dom.vectorTransformUIContainer.style.display = "flex"
+      } else {
+        dom.vectorTransformUIContainer.style.display = "none"
+      }
       //TODO: (High Priority) Need to render onto canvas to remove need to redraw timeline
-      renderCanvas(canvas.currentLayer, true)
+      // renderCanvas(canvas.currentLayer)
       //add to timeline
       addToTimeline({
         tool: tools.vectorPaste.name,
@@ -360,8 +393,11 @@ export function actionPasteSelection() {
           vectorIndices,
         },
       })
+      vectorIndices.forEach((vectorIndex) => {
+        state.vectors[vectorIndex].action = state.action
+      })
       state.clearRedoStack()
-
+      renderCanvas(canvas.currentLayer, true) //Must occur after adding to timeline. Once direct render is implemented, render canvas can be before add to timeline
       renderLayersToDOM()
       renderVectorsToDOM()
       enableActionsForSelection()
@@ -564,7 +600,7 @@ export function actionFlipPixels(flipHorizontally) {
     addTransformToTimeline()
     renderCanvas(canvas.currentLayer)
   } else if (
-    state.currentVectorIndex ||
+    state.currentVectorIndex !== null ||
     state.selectedVectorIndicesSet.size > 0
   ) {
     //vector flip
@@ -622,6 +658,12 @@ export function actionRotatePixels() {
     addTransformToTimeline()
     vectorGui.render()
     renderCanvas(canvas.currentLayer)
+  } else if (
+    state.currentVectorIndex !== null ||
+    state.selectedVectorIndicesSet.size > 0
+  ) {
+    //vector flip
+    actionRotateVectors(90)
   }
 }
 
@@ -701,9 +743,88 @@ export function actionFlipVectors(flipHorizontally) {
 
 /**
  * Freely rotate selected vectors at any angle around origin point (default center of vectors bounding box)
+ * @param {number} degrees - The number of degrees to rotate the vectors
  */
-export function actionRotateVectors() {
-  //TODO: (High Priority) Freely rotate selected vectors at any angle around origin point (default center of vectors bounding box)
+export function actionRotateVectors(degrees) {
+  //get bounding box of all vectors
+  // let [xMin, xMax, yMin, yMax] = [null, null, null, null]
+  const vectorIndicesSet = new Set(state.selectedVectorIndicesSet)
+  if (vectorIndicesSet.size === 0) {
+    vectorIndicesSet.add(state.currentVectorIndex)
+  }
+  // for (const vectorIndex of vectorIndicesSet) {
+  //   const vector = state.vectors[vectorIndex]
+  //   const vectorXPoints = []
+  //   const vectorYPoints = []
+
+  //   for (let i = 1; i <= 4; i++) {
+  //     if (
+  //       "px" + i in vector.vectorProperties &&
+  //       "py" + i in vector.vectorProperties
+  //     ) {
+  //       vectorXPoints.push(vector.vectorProperties[`px${i}`])
+  //       vectorYPoints.push(vector.vectorProperties[`py${i}`])
+  //     }
+  //   }
+
+  //   xMin = Math.min(xMin ?? Infinity, ...vectorXPoints)
+  //   xMax = Math.max(xMax ?? -Infinity, ...vectorXPoints)
+  //   yMin = Math.min(yMin ?? Infinity, ...vectorYPoints)
+  //   yMax = Math.max(yMax ?? -Infinity, ...vectorYPoints)
+  // }
+  //get center point of selected vectors
+  if (state.shapeCenterX === null) {
+    //Update shape center
+    const [centerX, centerY] = findVectorShapeCentroid(
+      vectorIndicesSet,
+      state.vectors
+    )
+    state.shapeCenterX = centerX + canvas.currentLayer.x
+    state.shapeCenterY = centerY + canvas.currentLayer.y
+  }
+  const rotationOriginX = state.shapeCenterX
+  const rotationOriginY = state.shapeCenterY
+  let referenceVector
+  for (const vectorIndex of vectorIndicesSet) {
+    const vector = state.vectors[vectorIndex]
+    referenceVector = vector //TODO: (Low Priority) Determine a better method for setting a reference vector or remove the need for one.
+    state.vectorsSavedProperties[vectorIndex] = {
+      ...vector.vectorProperties,
+    }
+    for (let i = 1; i <= 4; i++) {
+      if (
+        "px" + i in vector.vectorProperties &&
+        "py" + i in vector.vectorProperties
+      ) {
+        const xKey = `px${i}`
+        const yKey = `py${i}`
+        let newX = vector.vectorProperties[xKey]
+        let newY = vector.vectorProperties[yKey]
+        const radians = (degrees * Math.PI) / 180
+        const cos = Math.cos(radians)
+        const sin = Math.sin(radians)
+        newX = Math.floor(
+          cos * (vector.vectorProperties[xKey] - rotationOriginX) -
+            sin * (vector.vectorProperties[yKey] - rotationOriginY) +
+            rotationOriginX
+        )
+        newY = Math.floor(
+          sin * (vector.vectorProperties[xKey] - rotationOriginX) +
+            cos * (vector.vectorProperties[yKey] - rotationOriginY) +
+            rotationOriginY
+        )
+        updateVectorProperties(vector, newX, newY, xKey, yKey)
+      }
+    }
+    if (vectorIndex === state.currentVectorIndex) {
+      vectorGui.setVectorProperties(vector)
+    }
+  }
+  renderCanvas(canvas.currentLayer, true)
+  //Get any selected vector to use for modifyVectorAction
+  modifyVectorAction(referenceVector)
+  state.clearRedoStack()
+  vectorGui.render()
 }
 
 //=============================================//

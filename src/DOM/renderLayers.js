@@ -6,12 +6,32 @@ import {
 } from "../utils/actionInterfaceHelpers.js"
 
 /**
+ * Update layers after redo
+ * Helper for redrawTimelineActions
+ */
+function selectValidLayer() {
+  canvas.currentLayer.inactiveTools.forEach((tool) => {
+    dom[`${tool}Btn`].disabled = false
+  })
+  canvas.currentLayer = canvas.layers.find(
+    (layer) => layer.type === "raster" && layer.removed === false
+  )
+  canvas.currentLayer.inactiveTools.forEach((tool) => {
+    dom[`${tool}Btn`].disabled = true
+  })
+}
+
+/**
  * Render layers interface in DOM
  */
 export const renderLayersToDOM = () => {
   dom.layersContainer.innerHTML = ""
   let id = 0
   canvas.activeLayerCount = 0
+
+  if (canvas.currentLayer?.removed) {
+    selectValidLayer()
+  }
 
   canvas.layers.forEach((l) => {
     if (!l.removed && !l.isPreview) {

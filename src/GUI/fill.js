@@ -30,8 +30,8 @@ export function renderFillVector(vectorProperties, vector) {
     vectorProperties,
     pointsKeys,
     circleRadius / 2,
-    true
-    // vector
+    true,
+    vector
   )
   // Fill points
   canvas.vectorGuiCTX.fill()

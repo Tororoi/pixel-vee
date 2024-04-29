@@ -15,7 +15,7 @@ function moveSteps() {
   //move raster layer or reference layer
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      //TODO: (High Priority) Make distinction that for general move, it's moving the layer, but for a selection, it's moving the selection area with the contents (only works for active paste or vector tools)
+      //TODO: (Low Priority) Make distinction for user that for general move, it's moving the layer, but for a selection, it's moving the selection area with the contents (only works for active paste)
       state.grabStartX = canvas.currentLayer.x
       state.grabStartY = canvas.currentLayer.y
       state.startScale = canvas.currentLayer.scale
@@ -83,8 +83,8 @@ function transformSteps() {
     case "pointerdown":
       if (vectorGui.selectedCollisionPresent) {
         vectorGui.selectedPoint = {
-          xKey: vectorGui.collidedKeys.xKey,
-          yKey: vectorGui.collidedKeys.yKey,
+          xKey: vectorGui.collidedPoint.xKey,
+          yKey: vectorGui.collidedPoint.yKey,
         }
         if (canvas.currentLayer.type === "raster") {
           state.previousBoundaryBox = { ...state.boundaryBox }
@@ -131,21 +131,44 @@ function transformSteps() {
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey) {
-        if (
-          state.boundaryBox.xMax === state.previousBoundaryBox.xMin ||
-          state.boundaryBox.xMin === state.previousBoundaryBox.xMax
+        if (canvas.currentLayer.type === "reference") {
+          addToTimeline({
+            tool: state.tool.name,
+            layer: canvas.currentLayer,
+            //selectProperties: { ...state.selectProperties },
+            properties: {
+              from: {
+                x: state.grabStartX,
+                y: state.grabStartY,
+                scale: state.startScale,
+              },
+              to: {
+                x: canvas.currentLayer.x,
+                y: canvas.currentLayer.y,
+                scale: canvas.currentLayer.scale,
+              },
+            },
+          })
+        } else if (
+          canvas.currentLayer.type === "raster" &&
+          canvas.currentLayer.isPreview
         ) {
-          state.isMirroredHorizontally = !state.isMirroredHorizontally
+          if (
+            state.boundaryBox.xMax === state.previousBoundaryBox.xMin ||
+            state.boundaryBox.xMin === state.previousBoundaryBox.xMax
+          ) {
+            state.isMirroredHorizontally = !state.isMirroredHorizontally
+          }
+          if (
+            state.boundaryBox.yMax === state.previousBoundaryBox.yMin ||
+            state.boundaryBox.yMin === state.previousBoundaryBox.yMax
+          ) {
+            state.isMirroredVertically = !state.isMirroredVertically
+          }
+          state.normalizeSelectProperties()
+          state.setBoundaryBox(state.selectProperties)
+          addTransformToTimeline()
         }
-        if (
-          state.boundaryBox.yMax === state.previousBoundaryBox.yMin ||
-          state.boundaryBox.yMin === state.previousBoundaryBox.yMax
-        ) {
-          state.isMirroredVertically = !state.isMirroredVertically
-        }
-        state.normalizeSelectProperties()
-        state.setBoundaryBox(state.selectProperties)
-        addTransformToTimeline()
         renderCanvas(canvas.currentLayer) //TODO: (Low Priority) QA to figure out need to redraw timeline?
         vectorGui.selectedPoint = {
           xKey: null,

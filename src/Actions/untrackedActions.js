@@ -26,7 +26,7 @@ export function actionZoom(z, xOriginOffset, yOriginOffset) {
     0,
     0
   )
-  canvas.rasterGuiCTX.setTransform(
+  canvas.selectionGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,
@@ -71,7 +71,7 @@ export function actionRecenter() {
     0,
     0
   )
-  canvas.rasterGuiCTX.setTransform(
+  canvas.selectionGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,
@@ -120,7 +120,9 @@ export function actionRecenter() {
 export function actionCopySelection() {
   if (
     canvas.currentLayer.type === "raster" &&
-    (state.boundaryBox.xMax !== null || state.currentVectorIndex || state.selectedVectorIndicesSet.size > 0)
+    (state.boundaryBox.xMax !== null ||
+      state.currentVectorIndex !== null ||
+      state.selectedVectorIndicesSet.size > 0)
   ) {
     if (state.boundaryBox.xMax !== null) {
       copySelectedPixels()

@@ -6,21 +6,25 @@ import { swatches } from "../Context/swatch.js"
 import { actionEllipse } from "../Actions/pointerActions.js"
 import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 import { vectorGui, createActiveIndexesForRender } from "../GUI/vector.js"
-import {
-  updateEllipseVertex,
-  updateEllipseOffsets,
-  updateEllipseControlPoints,
-} from "../utils/ellipse.js"
+import { getAngle } from "../utils/trig.js"
+import { getOpposingEllipseVertex, findHalf } from "../utils/ellipse.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
+import {
+  adjustVectorSteps,
+  moveVectorRotationPointSteps,
+  transformVectorSteps,
+  updateEllipseOffsets,
+} from "./transform.js"
 
 //======================================//
 //=== * * * Ellipse Controller * * * ===//
 //======================================//
 
 /**
+ * TODO: (Medium Priority) Add control points on opposite side of point 2 and 3, for a total of 5 control points
  * Draw ellipse
  * Supported modes: "draw, erase",
  * Due to method of modifying radius on a pixel grid, only odd diameter circles are created. Eg. 15px radius creates a 31px diameter circle. To fix this, allow half pixel increments.
@@ -29,8 +33,38 @@ function ellipseSteps() {
   //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
   //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
   //this routine would be better for touchscreens, and no worse with pointer
-  if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
-    adjustEllipseSteps()
+  if (
+    state.collidedVectorIndex !== null &&
+    !vectorGui.selectedCollisionPresent &&
+    state.clickCounter === 0
+  ) {
+    let collidedVector = state.vectors[state.collidedVectorIndex]
+    vectorGui.setVectorProperties(collidedVector)
+    //Render new selected vector before running standard render routine
+    //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.
+    // renderCurrentVector() //May not be needed after changing order of render calls in renderLayerVectors
+    vectorGui.render()
+  }
+  if (
+    ((vectorGui.collidedPoint.xKey === "rotationx" &&
+      vectorGui.selectedPoint.xKey === null) ||
+      vectorGui.selectedPoint.xKey === "rotationx") &&
+    state.clickCounter === 0
+  ) {
+    moveVectorRotationPointSteps()
+    return
+  }
+  if (
+    vectorGui.selectedCollisionPresent &&
+    state.clickCounter === 0 &&
+    state.currentVectorIndex !== null
+  ) {
+    adjustVectorSteps()
+    return
+  }
+  //If there are selected vectors, call transformVectorSteps() instead of this function
+  if (state.selectedVectorIndicesSet.size > 0) {
+    transformVectorSteps()
     return
   }
   switch (canvas.pointerEvent) {
@@ -60,7 +94,7 @@ function ellipseSteps() {
           Math.sqrt(dxa * dxa + dya * dya)
         )
       }
-      updateEllipseOffsets(state, canvas)
+      updateEllipseOffsets(state.vectorProperties)
       //adjusting p3 should make findHalf on a perpendicular angle rotated -90 degrees, adjusting p1 should maintain offset, no subpixels
       // let calcAngle = angle - Math.PI / 2 // adjust p3
 
@@ -112,7 +146,7 @@ function ellipseSteps() {
             Math.sqrt(dxa * dxa + dya * dya)
           )
         }
-        updateEllipseOffsets(state, canvas)
+        updateEllipseOffsets(state.vectorProperties)
         //onscreen preview
         renderCanvas(canvas.currentLayer)
         actionEllipse(
@@ -149,7 +183,7 @@ function ellipseSteps() {
           Math.sqrt(dxa * dxa + dya * dya)
         )
         //set px3 at right angle on the circle
-        let newVertex = updateEllipseVertex(
+        let newVertex = getOpposingEllipseVertex(
           state.vectorProperties.px1,
           state.vectorProperties.py1,
           state.vectorProperties.px2,
@@ -165,7 +199,7 @@ function ellipseSteps() {
         state.vectorProperties.radB = Math.floor(
           Math.sqrt(dxb * dxb + dyb * dyb)
         )
-        updateEllipseOffsets(state, canvas)
+        updateEllipseOffsets(state.vectorProperties)
         actionEllipse(
           state.vectorProperties.px1,
           state.vectorProperties.py1,
@@ -219,7 +253,7 @@ function ellipseSteps() {
         //Store vector in state
         state.vectors[uniqueVectorKey] = {
           index: uniqueVectorKey,
-          actionIndex: state.action.index,
+          action: state.action,
           layer: canvas.currentLayer,
           modes: { ...state.tool.modes },
           color: { ...swatches.primary.color },
@@ -242,82 +276,6 @@ function ellipseSteps() {
         state.reset()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
-      }
-      break
-    default:
-    //do nothing
-  }
-}
-
-/**
- * Update ellipse vector properties
- * @param {object} currentVector - The current vector
- */
-function updateEllipseVectorProperties(currentVector) {
-  updateEllipseControlPoints(state, canvas, vectorGui)
-  currentVector.vectorProperties = { ...state.vectorProperties }
-  //Keep properties relative to layer offset
-  currentVector.vectorProperties.px1 -= currentVector.layer.x
-  currentVector.vectorProperties.py1 -= currentVector.layer.y
-  currentVector.vectorProperties.px2 -= currentVector.layer.x
-  currentVector.vectorProperties.py2 -= currentVector.layer.y
-  currentVector.vectorProperties.px3 -= currentVector.layer.x
-  currentVector.vectorProperties.py3 -= currentVector.layer.y
-}
-
-/**
- * Used automatically by ellipse tool after curve is completed.
- * TODO: (Low Priority) create distinct tool for adjusting that won't create a new curve when clicking.
- * Ideally a user should be able to click on a curve and render it's vector UI that way.
- */
-export function adjustEllipseSteps() {
-  let currentVector = state.vectors[state.currentVectorIndex]
-  if (!(vectorGui.selectedCollisionPresent && state.clickCounter === 0)) {
-    return
-  }
-  switch (canvas.pointerEvent) {
-    case "pointerdown":
-      vectorGui.selectedPoint = {
-        xKey: vectorGui.collidedKeys.xKey,
-        yKey: vectorGui.collidedKeys.yKey,
-      }
-      state.vectorsSavedProperties[state.currentVectorIndex] = {
-        ...currentVector.vectorProperties,
-      }
-      if (
-        !keys.ShiftLeft &&
-        !keys.ShiftRight &&
-        vectorGui.selectedPoint.xKey !== "px1"
-      ) {
-        //if shift key is not being held, reset forceCircle
-        state.vectorProperties.forceCircle = false
-        currentVector.vectorProperties.forceCircle = false
-      }
-      if (vectorGui.selectedPoint.xKey === "px1") {
-        state.vectorProperties.forceCircle =
-          currentVector.vectorProperties.forceCircle
-      }
-      updateEllipseVectorProperties(currentVector)
-      state.activeIndexes = createActiveIndexesForRender(
-        currentVector,
-        state.vectorsSavedProperties
-      )
-      renderCanvas(currentVector.layer, true, state.activeIndexes, true)
-      // renderCanvas(currentVector.layer, true)
-      break
-    case "pointermove":
-      updateEllipseVectorProperties(currentVector)
-      renderCanvas(currentVector.layer, true, state.activeIndexes)
-      // renderCanvas(currentVector.layer, true)
-      break
-    case "pointerup":
-      updateEllipseVectorProperties(currentVector)
-      renderCanvas(currentVector.layer, true, state.activeIndexes)
-      // renderCanvas(currentVector.layer, true)
-      modifyVectorAction(currentVector)
-      vectorGui.selectedPoint = {
-        xKey: null,
-        yKey: null,
       }
       break
     default:

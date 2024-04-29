@@ -12,7 +12,7 @@ import { renderCanvas } from "../Canvas/render.js"
 
 /**
  * Render cursor based on active tool
- * TODO: (High Priority) Render vectorGui cursor for vector tools with remaining control points indicator
+ * TODO: (Low Priority) Render vectorGui cursor for vector tools with remaining control points indicator
  */
 export function renderCursor() {
   switch (state.tool.name) {
@@ -30,7 +30,11 @@ export function renderCursor() {
       //show nothing
       break
     default:
-      if (!vectorGui.selectedCollisionPresent && !state.collidedVectorIndex) {
+      if (
+        !vectorGui.selectedCollisionPresent &&
+        !state.collidedVectorIndex &&
+        state.selectedVectorIndicesSet.size === 0
+      ) {
         renderCanvas(canvas.currentLayer)
         actionDraw(
           state.cursorX,

@@ -113,7 +113,6 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
       }
     }
   }
-  updateLayersAfterRedo()
   renderLayersToDOM()
   renderVectorsToDOM()
 }
@@ -355,7 +354,11 @@ function renderActionVectors(action, activeCtx = null) {
     const vector = state.vectors[action.vectorIndices[i]]
     if (vector.hidden || vector.removed) continue
     switch (vector.vectorProperties.type) {
-      case "fill":
+      case "fill": {
+        // let tempMask = new Set([
+        //   vector.vectorProperties.px1 + offsetX,
+        //   vector.vectorProperties.py1 + offsetY,
+        // ])
         actionFill(
           vector.vectorProperties.px1 + offsetX,
           vector.vectorProperties.py1 + offsetY,
@@ -367,6 +370,7 @@ function renderActionVectors(action, activeCtx = null) {
           activeCtx
         )
         break
+      }
       case "line":
         actionLine(
           vector.vectorProperties.px1 + offsetX,
@@ -453,29 +457,6 @@ function renderActionVectors(action, activeCtx = null) {
       //do nothing
     }
   }
-}
-
-/**
- * Update layers after redo
- * Helper for redrawTimelineActions
- */
-function updateLayersAfterRedo() {
-  state.redoStack.forEach((action) => {
-    if (action.tool === "addLayer") {
-      action.layer.removed = true
-      if (action.layer === canvas.currentLayer) {
-        canvas.currentLayer.inactiveTools.forEach((tool) => {
-          dom[`${tool}Btn`].disabled = false
-        })
-        canvas.currentLayer = canvas.layers.find(
-          (layer) => layer.type === "raster" && layer.removed === false
-        )
-        canvas.currentLayer.inactiveTools.forEach((tool) => {
-          dom[`${tool}Btn`].disabled = true
-        })
-      }
-    }
-  })
 }
 
 /**
@@ -663,7 +644,7 @@ export const resizeOffScreenCanvas = (width, height) => {
     0,
     0
   )
-  canvas.rasterGuiCTX.setTransform(
+  canvas.selectionGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,

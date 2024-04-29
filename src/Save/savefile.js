@@ -51,6 +51,7 @@ export function prepareDrawingForSave() {
     includeRemovedActions
   )
   let sanitizedVectors = sanitizeVectors(
+    state.undoStack,
     state.vectors,
     preserveHistory,
     includeRemovedActions
@@ -129,7 +130,7 @@ export function saveDrawing() {
 /**
  * Load the drawing from a JSON file.
  * @param {JSON} jsonFile - The JSON file containing the drawing data.
- * TODO: (High Priority) Add error handling for loading the drawing
+ * TODO: (High Priority) Add more elegant error popup when loading the drawing
  */
 export async function loadDrawing(jsonFile) {
   let data
@@ -139,12 +140,14 @@ export async function loadDrawing(jsonFile) {
     data = JSON.parse(jsonFile)
   } catch (e) {
     console.error(e)
+    alert(e)
     return
   }
   // Validate the JSON file as a Pixel V save file and log which properties are missing
   let validation = validatePixelVeeFile(data)
   if (!validation.valid) {
     console.error(validation.message)
+    alert(validation.message)
     return
   }
 
@@ -283,7 +286,6 @@ export async function loadDrawing(jsonFile) {
           tempCtx.drawImage(img, 0, 0)
           //IN PROGRESS: Construct the state.pastedImages by using the canvas from each paste action, set at action.pastedImageKey. If no key, set it to the highestPastedImageKey
           state.pastedImages[action.pastedImageKey] = {
-            actionIndex: action.index,
             imageData: tempCtx.getImageData(
               0,
               0,
@@ -337,20 +339,22 @@ export async function loadDrawing(jsonFile) {
   //Reconstruct vectors (object, not array) by iterating through it and assigning the proper layer to each vector
   for (let vectorKey in data.vectors) {
     let vector = data.vectors[vectorKey]
-    if (vector.layer.id === 0) {
-      vector.layer = canvas.tempLayer
-    } else {
-      let correspondingLayer = canvas.layers.find(
-        (layer) => layer.id === vector.layer.id
-      )
-      if (correspondingLayer) {
-        vector.layer = correspondingLayer
+    let correspondingLayer = canvas.layers.find(
+      (layer) => layer.id === vector.layer.id
+    )
+    if (correspondingLayer) {
+      //associate vector's layer
+      vector.layer = correspondingLayer
+      if (state.undoStack[vector.action.index]) {
+        //associate vector's action
+        vector.action = state.undoStack[vector.action.index]
+        //add vector to state.vectors if valid layer and action present
         state.vectors[vectorKey] = vector
+        //find the highest vector key
+        if (Number(vectorKey) > state.highestVectorKey) {
+          state.highestVectorKey = Number(vectorKey)
+        }
       }
-    }
-    //find the highest vector key
-    if (Number(vectorKey) > state.highestVectorKey) {
-      state.highestVectorKey = Number(vectorKey)
     }
   }
 
@@ -399,7 +403,7 @@ function convertActionToNewFormat(data, action) {
         let uniqueVectorKey = state.highestVectorKey
         data.vectors[uniqueVectorKey] = {
           index: uniqueVectorKey,
-          actionIndex: action.index,
+          action: { index: action.index }, //formatted with index for saving, mapped to action later
           layer: action.layer,
           modes: { ...action.modes },
           color: { ...action.color },
@@ -425,7 +429,7 @@ function convertActionToNewFormat(data, action) {
         let uniqueVectorKey = state.highestVectorKey
         data.vectors[uniqueVectorKey] = {
           index: uniqueVectorKey,
-          actionIndex: action.index,
+          action: { index: action.index },
           layer: action.layer,
           modes: { ...action.modes },
           color: { ...action.color },
