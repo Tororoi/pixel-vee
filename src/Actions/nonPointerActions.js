@@ -827,6 +827,13 @@ export function actionRotateVectors(degrees) {
   vectorGui.render()
 }
 
+/**
+ * Scale selected vectors by a factor calculated from the given x and y minimum and maximum points
+ */
+export function actionScaleVectors() {
+  //IN PROGRESS
+}
+
 //=============================================//
 //============ * * * Layers * * * =============//
 //=============================================//
