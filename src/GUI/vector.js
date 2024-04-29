@@ -36,7 +36,7 @@ import { switchTool } from "../Tools/toolbox.js"
 export const vectorGui = {
   grid: false,
   gridSpacing: 8,
-  outlineVectorSelection: true,
+  outlineVectorSelection: false,
   mother: {
     x: null,
     y: null,
@@ -479,7 +479,15 @@ function renderLayerVectors(layer) {
     }
   }
   //render vector path for in progress vectors
-  renderPath(state.vectorProperties)
+  if (
+    !(
+      state.selectedVectorIndicesSet.size > 0 &&
+      !state.selectedVectorIndicesSet.has(state.currentVectorIndex)
+    )
+  ) {
+    //Only render path for selected vector if it is in the selectedVectorIndicesSet
+    renderPath(state.vectorProperties)
+  }
   if (
     !state.tool.options.displayPaths?.active &&
     state.selectedVectorIndicesSet.size === 0
@@ -494,7 +502,15 @@ function renderLayerVectors(layer) {
   }
   //render selected vector control points
   vectorGui.resetCollision()
-  renderControlPoints(state.vectorProperties)
+  if (
+    !(
+      state.selectedVectorIndicesSet.size > 0 &&
+      !state.selectedVectorIndicesSet.has(state.currentVectorIndex)
+    )
+  ) {
+    //Only render control points for selected vector if it is in the selectedVectorIndicesSet
+    renderControlPoints(state.vectorProperties)
+  }
   //render control points
   vectorGui.resetOtherVectorCollision()
   vectorGui.resetLinkedVectors()
