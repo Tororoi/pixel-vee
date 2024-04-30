@@ -12,7 +12,10 @@ import {
   renderOffsetEllipseVector,
   renderEllipsePath,
 } from "./ellipse.js"
-import { renderTransformBox, renderVectorRotationControl } from "./transform.js"
+import {
+  renderReferenceTransformBox,
+  renderVectorRotationControl,
+} from "./transform.js"
 import { renderSelectionCVS } from "./select.js"
 import { renderGrid } from "./grid.js"
 import {
@@ -354,7 +357,19 @@ function render() {
   //if linking, render all vectors in the layer
   if (canvas.currentLayer.type === "reference") {
     vectorGui.resetCollision()
-    renderTransformBox()
+    // renderReferenceTransformBox()
+    let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+    state.selectProperties.px1 = canvas.currentLayer.x - lineWidth
+    state.selectProperties.py1 = canvas.currentLayer.y - lineWidth
+    state.selectProperties.px2 =
+      canvas.currentLayer.x +
+      canvas.currentLayer.img.width * canvas.currentLayer.scale +
+      lineWidth
+    state.selectProperties.py2 =
+      canvas.currentLayer.y +
+      canvas.currentLayer.img.height * canvas.currentLayer.scale +
+      lineWidth
+    state.setBoundaryBox(state.selectProperties)
   } else if (
     state.tool.options.displayVectors?.active ||
     state.tool.options.equal?.active ||
@@ -378,7 +393,7 @@ function render() {
         //
         break
       case SCALE:
-        // renderTransformBox()
+        // renderVectorTransformBox()
         break
       default:
     }

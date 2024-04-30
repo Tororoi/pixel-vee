@@ -53,7 +53,8 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
       canvas.selectionGuiCTX.restore()
       let shouldRenderPoints =
         state.tool.name === "select" ||
-        (state.tool.name === "move" && canvas.pastedLayer)
+        (state.tool.name === "move" && canvas.pastedLayer) ||
+        canvas.currentLayer.type === "reference"
       renderSelectionBoxOutline(lineDashOffset, shouldRenderPoints)
     } else if (isVectorSelection && vectorGui.outlineVectorSelection) {
       //define rectangle for canvas area
@@ -243,7 +244,7 @@ export function renderSelectionBoxOutline(lineDashOffset, drawPoints) {
   canvas.selectionGuiCTX.lineDashOffset = lineDashOffset
 
   if (state.boundaryBox.xMax !== null) {
-    if (!canvas.pastedLayer) {
+    if (!canvas.pastedLayer && canvas.currentLayer.type !== "reference") {
       //if active unconfirmed paste action, don't draw the dashed selection outline
       canvas.selectionGuiCTX.setLineDash([lineWidth * 6, lineWidth * 6])
     }
@@ -380,7 +381,7 @@ export function renderSelectionBoxOutline(lineDashOffset, drawPoints) {
  * @param {number} offset - (Integer)
  * @param {object} vectorAction - The vector action to be rendered (NOTE: Not certain if ever needed for this function)
  */
-function drawSelectControlPoints(
+export function drawSelectControlPoints(
   boundaryBox,
   pointsKeys,
   radius,
@@ -485,7 +486,6 @@ function handleSelectCollisionAndDraw(
       vectorGui.setCollision(keys)
     }
   }
-
   //draw squares for control points 1, 3, 5, and 7 (corners)
   if (
     keys.x === "px1" ||

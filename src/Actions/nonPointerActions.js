@@ -902,6 +902,7 @@ export function removeLayer(layer) {
   if (canvas.activeLayerCount > 1 || layer.type !== "raster") {
     layer.removed = true
     if (layer === canvas.currentLayer) {
+      //TODO: (Medium Priority) Reference layer selection should be deselected when switching to raster layer
       canvas.currentLayer = canvas.layers.find(
         (l) => l.type === "raster" && !l.removed
       )

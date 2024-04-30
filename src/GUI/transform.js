@@ -3,22 +3,23 @@ import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
 import { getAngle } from "../utils/trig.js"
 import { drawCirclePath } from "../utils/guiHelpers.js"
+import { drawSelectControlPoints, renderSelectionBoxOutline } from "./select.js"
 
 /**
  * TODO: (Medium Priority) Refactor this function to use the square transform box control points
  */
-export function renderTransformBox() {
+export function renderReferenceTransformBox() {
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   let circleRadius = 8 * lineWidth
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
   canvas.vectorGuiCTX.fillStyle = "white"
-  let pointsKeys = [
-    { x: "px1", y: "py1" },
-    { x: "px2", y: "py2" },
-    { x: "px3", y: "py3" },
-    { x: "px4", y: "py4" },
-  ]
+  // let pointsKeys = [
+  //   { x: "px1", y: "py1" },
+  //   { x: "px2", y: "py2" },
+  //   { x: "px3", y: "py3" },
+  //   { x: "px4", y: "py4" },
+  // ]
   let transformPoints = {
     px1: canvas.currentLayer.x - lineWidth / 2 - 0.5,
     py1: canvas.currentLayer.y - lineWidth / 2 - 0.5,
@@ -45,29 +46,60 @@ export function renderTransformBox() {
       lineWidth / 2 -
       0.5,
   }
+  let pointsKeys = [
+    { x: "px1", y: "py1" },
+    { x: "px2", y: "py2" },
+    { x: "px3", y: "py3" },
+    { x: "px4", y: "py4" },
+    { x: "px5", y: "py5" },
+    { x: "px6", y: "py6" },
+    { x: "px7", y: "py7" },
+    { x: "px8", y: "py8" },
+  ]
+  state.selectProperties.px1 = canvas.currentLayer.x - lineWidth / 2 - 0.5
+  state.selectProperties.py1 = canvas.currentLayer.y - lineWidth / 2 - 0.5
+  state.selectProperties.px2 =
+    canvas.currentLayer.x +
+    canvas.currentLayer.img.width * canvas.currentLayer.scale +
+    lineWidth / 2 -
+    0.5
+  state.selectProperties.py2 =
+    canvas.currentLayer.y +
+    canvas.currentLayer.img.height * canvas.currentLayer.scale +
+    lineWidth / 2 -
+    0.5
+  state.setBoundaryBox(state.selectProperties)
+  // renderSelectionBoxOutline(0, true)
   // canvas.vectorGuiCTX.setLineDash([lineWidth * 4, lineWidth * 4])
-  canvas.vectorGuiCTX.beginPath()
-  canvas.vectorGuiCTX.rect(
-    canvas.currentLayer.x + canvas.xOffset - lineWidth / 2,
-    canvas.currentLayer.y + canvas.yOffset - lineWidth / 2,
-    canvas.currentLayer.img.width * canvas.currentLayer.scale + lineWidth,
-    canvas.currentLayer.img.height * canvas.currentLayer.scale + lineWidth
-  )
-  canvas.vectorGuiCTX.stroke()
-  canvas.vectorGuiCTX.beginPath()
-  vectorGui.drawControlPoints(transformPoints, pointsKeys, circleRadius, false)
-  // Stroke non-filled lines
-  canvas.vectorGuiCTX.stroke()
+  // canvas.vectorGuiCTX.beginPath()
+  // canvas.vectorGuiCTX.rect(
+  //   canvas.currentLayer.x + canvas.xOffset - lineWidth / 2,
+  //   canvas.currentLayer.y + canvas.yOffset - lineWidth / 2,
+  //   canvas.currentLayer.img.width * canvas.currentLayer.scale + lineWidth,
+  //   canvas.currentLayer.img.height * canvas.currentLayer.scale + lineWidth
+  // )
+  // canvas.vectorGuiCTX.stroke()
+  // // canvas.vectorGuiCTX.beginPath()
+  // // vectorGui.drawControlPoints(transformPoints, pointsKeys, circleRadius, false)
+  // // Stroke non-filled lines
+  // // canvas.vectorGuiCTX.stroke()
 
-  canvas.vectorGuiCTX.beginPath()
-  vectorGui.drawControlPoints(
-    transformPoints,
-    pointsKeys,
-    circleRadius / 2,
-    true
-  )
-  // Fill points
-  canvas.vectorGuiCTX.fill()
+  // canvas.vectorGuiCTX.beginPath()
+  // // vectorGui.drawControlPoints(
+  // //   transformPoints,
+  // //   pointsKeys,
+  // //   circleRadius / 2,
+  // //   true
+  // // )
+  // drawSelectControlPoints(
+  //   state.boundaryBox,
+  //   pointsKeys,
+  //   circleRadius / 2,
+  //   true,
+  //   0.5
+  // )
+  // // Fill points
+  // canvas.vectorGuiCTX.fill()
 }
 
 /**
