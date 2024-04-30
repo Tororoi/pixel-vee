@@ -390,7 +390,7 @@ function render() {
         //
         break
       case SCALE: {
-        //Update shape boundary box
+        //Update shape boundary box TODO: (Medium Priority) Instead of updating shapeBoundaryBox here, update it when the vectors are changed or when the scale mode is toggled.
         const shapeBoundaryBox = findVectorShapeBoundaryBox(
           state.selectedVectorIndicesSet,
           state.vectors
@@ -665,8 +665,18 @@ export function updateLockedCurrentVectorControlHandle(currentVector, x, y) {
   switch (savedProperties.type) {
     case "cubicCurve": {
       const currentPointNumber = parseInt(vectorGui.selectedPoint.xKey[2])
-      //point 1 holds point 3, point 2 holds point 4
-      const targetPointNumber = currentPointNumber === 1 ? 3 : 4
+      //point 1 holds point 3, point 2 holds point 4, point 3 and 4 don't hold any points
+      let targetPointNumber = currentPointNumber
+      switch (currentPointNumber) {
+        case 1:
+          targetPointNumber = 3
+          break
+        case 2:
+          targetPointNumber = 4
+          break
+        default:
+        //do nothing
+      }
       updateVectorControl(
         currentVector,
         x,
