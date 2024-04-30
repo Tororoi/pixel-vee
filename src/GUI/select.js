@@ -6,6 +6,7 @@ import {
   checkAreaCollision,
 } from "../utils/guiHelpers.js"
 import { getAngle } from "../utils/trig.js"
+import { SCALE } from "../utils/constants.js"
 
 /**
  * Render selection outline and control points
@@ -54,169 +55,171 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
       let shouldRenderPoints =
         state.tool.name === "select" ||
         (state.tool.name === "move" && canvas.pastedLayer) ||
-        canvas.currentLayer.type === "reference"
+        canvas.currentLayer.type === "reference" ||
+        state.vectorTransformMode === SCALE
       renderSelectionBoxOutline(lineDashOffset, shouldRenderPoints)
-    } else if (isVectorSelection && vectorGui.outlineVectorSelection) {
-      //define rectangle for canvas area
-      canvas.selectionGuiCTX.rect(
-        canvas.xOffset,
-        canvas.yOffset,
-        canvas.offScreenCVS.width,
-        canvas.offScreenCVS.height
-      )
-      //grey out canvas area
-      canvas.selectionGuiCTX.fillStyle = "rgba(255, 255, 255, 0.1)"
-      canvas.selectionGuiCTX.fillRect(
-        canvas.xOffset,
-        canvas.yOffset,
-        canvas.offScreenCVS.width,
-        canvas.offScreenCVS.height
-      )
-      //construct vector paths
-      const xOffset = canvas.currentLayer.x + canvas.xOffset
-      const yOffset = canvas.currentLayer.y + canvas.yOffset
-      canvas.selectionGuiCTX.beginPath()
-      //Need to chain paths?
-      for (let vectorIndex of state.selectedVectorIndicesSet) {
-        const vector = state.vectors[vectorIndex]
-        if (vector.hidden || vector.removed) continue
-        //switch based on vector type
-        switch (vector.vectorProperties.type) {
-          case "fill": {
-            //need idea to render selection of fill vector
-            const { px1, py1 } = vector.vectorProperties
-            canvas.selectionGuiCTX.moveTo(
-              xOffset + px1 + 0.5,
-              yOffset + py1 + 0.5
-            )
-            canvas.selectionGuiCTX.lineTo(
-              xOffset + px1 + 0.5,
-              yOffset + py1 + 0.5
-            )
-            break
-          }
-          case "line": {
-            const { px1, py1, px2, py2 } = vector.vectorProperties
-            canvas.selectionGuiCTX.moveTo(
-              xOffset + px1 + 0.5,
-              yOffset + py1 + 0.5
-            )
-            canvas.selectionGuiCTX.lineTo(
-              xOffset + px2 + 0.5,
-              yOffset + py2 + 0.5
-            )
-            break
-          }
-          case "quadCurve": {
-            const { px1, py1, px2, py2, px3, py3 } = vector.vectorProperties
-            canvas.selectionGuiCTX.moveTo(
-              xOffset + px1 + 0.5,
-              yOffset + py1 + 0.5
-            )
-            canvas.selectionGuiCTX.quadraticCurveTo(
-              xOffset + px3 + 0.5,
-              yOffset + py3 + 0.5,
-              xOffset + px2 + 0.5,
-              yOffset + py2 + 0.5
-            )
-            break
-          }
-          case "cubicCurve": {
-            const { px1, py1, px2, py2, px3, py3, px4, py4 } =
-              vector.vectorProperties
-            canvas.selectionGuiCTX.moveTo(
-              xOffset + px1 + 0.5,
-              yOffset + py1 + 0.5
-            )
-            canvas.selectionGuiCTX.bezierCurveTo(
-              xOffset + px3 + 0.5,
-              yOffset + py3 + 0.5,
-              xOffset + px4 + 0.5,
-              yOffset + py4 + 0.5,
-              xOffset + px2 + 0.5,
-              yOffset + py2 + 0.5
-            )
-            break
-          }
-          case "ellipse": {
-            const {
-              px1,
-              py1,
-              px2,
-              py2,
-              px3,
-              py3,
-              radA,
-              radB,
-              angle,
-              x1Offset,
-              y1Offset,
-            } = vector.vectorProperties
-            //Don't let radii be negative with offset
-            let majorAxis = radA + x1Offset / 2 > 0 ? radA + x1Offset / 2 : 0
-            let minorAxis = radB + y1Offset / 2 > 0 ? radB + y1Offset / 2 : 0
-
-            if (!Number.isInteger(px3)) {
-              minorAxis = majorAxis
+    } else if (isVectorSelection) {
+      if (vectorGui.outlineVectorSelection) {
+        //define rectangle for canvas area
+        canvas.selectionGuiCTX.rect(
+          canvas.xOffset,
+          canvas.yOffset,
+          canvas.offScreenCVS.width,
+          canvas.offScreenCVS.height
+        )
+        //grey out canvas area
+        canvas.selectionGuiCTX.fillStyle = "rgba(255, 255, 255, 0.1)"
+        canvas.selectionGuiCTX.fillRect(
+          canvas.xOffset,
+          canvas.yOffset,
+          canvas.offScreenCVS.width,
+          canvas.offScreenCVS.height
+        )
+        //construct vector paths
+        const xOffset = canvas.currentLayer.x + canvas.xOffset
+        const yOffset = canvas.currentLayer.y + canvas.yOffset
+        canvas.selectionGuiCTX.beginPath()
+        //Need to chain paths?
+        for (let vectorIndex of state.selectedVectorIndicesSet) {
+          const vector = state.vectors[vectorIndex]
+          if (vector.hidden || vector.removed) continue
+          //switch based on vector type
+          switch (vector.vectorProperties.type) {
+            case "fill": {
+              //need idea to render selection of fill vector
+              const { px1, py1 } = vector.vectorProperties
+              canvas.selectionGuiCTX.moveTo(
+                xOffset + px1 + 0.5,
+                yOffset + py1 + 0.5
+              )
+              canvas.selectionGuiCTX.lineTo(
+                xOffset + px1 + 0.5,
+                yOffset + py1 + 0.5
+              )
+              break
             }
-            // Calculate ellipse center
-            let centerX = xOffset + px1 + 0.5 + x1Offset / 2
-            let centerY = yOffset + py1 + 0.5 + y1Offset / 2
+            case "line": {
+              const { px1, py1, px2, py2 } = vector.vectorProperties
+              canvas.selectionGuiCTX.moveTo(
+                xOffset + px1 + 0.5,
+                yOffset + py1 + 0.5
+              )
+              canvas.selectionGuiCTX.lineTo(
+                xOffset + px2 + 0.5,
+                yOffset + py2 + 0.5
+              )
+              break
+            }
+            case "quadCurve": {
+              const { px1, py1, px2, py2, px3, py3 } = vector.vectorProperties
+              canvas.selectionGuiCTX.moveTo(
+                xOffset + px1 + 0.5,
+                yOffset + py1 + 0.5
+              )
+              canvas.selectionGuiCTX.quadraticCurveTo(
+                xOffset + px3 + 0.5,
+                yOffset + py3 + 0.5,
+                xOffset + px2 + 0.5,
+                yOffset + py2 + 0.5
+              )
+              break
+            }
+            case "cubicCurve": {
+              const { px1, py1, px2, py2, px3, py3, px4, py4 } =
+                vector.vectorProperties
+              canvas.selectionGuiCTX.moveTo(
+                xOffset + px1 + 0.5,
+                yOffset + py1 + 0.5
+              )
+              canvas.selectionGuiCTX.bezierCurveTo(
+                xOffset + px3 + 0.5,
+                yOffset + py3 + 0.5,
+                xOffset + px4 + 0.5,
+                yOffset + py4 + 0.5,
+                xOffset + px2 + 0.5,
+                yOffset + py2 + 0.5
+              )
+              break
+            }
+            case "ellipse": {
+              const {
+                px1,
+                py1,
+                px2,
+                py2,
+                px3,
+                py3,
+                radA,
+                radB,
+                angle,
+                x1Offset,
+                y1Offset,
+              } = vector.vectorProperties
+              //Don't let radii be negative with offset
+              let majorAxis = radA + x1Offset / 2 > 0 ? radA + x1Offset / 2 : 0
+              let minorAxis = radB + y1Offset / 2 > 0 ? radB + y1Offset / 2 : 0
 
-            // Calculate the angle t (e.g., t = 0 for the point on the right side of the ellipse)
-            let t = 0 // Starting angle on the ellipse (can be adjusted if needed)
+              if (!Number.isInteger(px3)) {
+                minorAxis = majorAxis
+              }
+              // Calculate ellipse center
+              let centerX = xOffset + px1 + 0.5 + x1Offset / 2
+              let centerY = yOffset + py1 + 0.5 + y1Offset / 2
 
-            // Calculate a point on the ellipse using the parametric equation of the ellipse
-            let pointX =
-              centerX +
-              majorAxis * Math.cos(t) * Math.cos(angle) -
-              minorAxis * Math.sin(t) * Math.sin(angle)
-            let pointY =
-              centerY +
-              majorAxis * Math.cos(t) * Math.sin(angle) +
-              minorAxis * Math.sin(t) * Math.cos(angle)
+              // Calculate the angle t (e.g., t = 0 for the point on the right side of the ellipse)
+              let t = 0 // Starting angle on the ellipse (can be adjusted if needed)
 
-            // Move to point on ellipse to start drawing
-            canvas.selectionGuiCTX.moveTo(pointX, pointY)
+              // Calculate a point on the ellipse using the parametric equation of the ellipse
+              let pointX =
+                centerX +
+                majorAxis * Math.cos(t) * Math.cos(angle) -
+                minorAxis * Math.sin(t) * Math.sin(angle)
+              let pointY =
+                centerY +
+                majorAxis * Math.cos(t) * Math.sin(angle) +
+                minorAxis * Math.sin(t) * Math.cos(angle)
 
-            // Drawing the ellipse
-            canvas.selectionGuiCTX.ellipse(
-              centerX,
-              centerY,
-              majorAxis,
-              minorAxis,
-              angle,
-              0,
-              2 * Math.PI
-            )
-            break
+              // Move to point on ellipse to start drawing
+              canvas.selectionGuiCTX.moveTo(pointX, pointY)
+
+              // Drawing the ellipse
+              canvas.selectionGuiCTX.ellipse(
+                centerX,
+                centerY,
+                majorAxis,
+                minorAxis,
+                angle,
+                0,
+                2 * Math.PI
+              )
+              break
+            }
+            default:
+            //do nothing
           }
-          default:
-          //do nothing
         }
+        // stroke vector paths with thick squared off dashed line then stroke vector paths with slightly thinner eraser (use some built-in html canvas composite mode) to clear greyed out area for vectors
+        let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+        //Draw outline border by drawing different thicknesses of lines
+        canvas.selectionGuiCTX.lineWidth = lineWidth * 19
+        canvas.selectionGuiCTX.lineCap = "round"
+        canvas.selectionGuiCTX.strokeStyle = "white"
+        canvas.selectionGuiCTX.stroke()
+        //Make border a dotted line
+        canvas.selectionGuiCTX.lineDashOffset = lineDashOffset * 2
+        canvas.selectionGuiCTX.setLineDash([lineWidth * 12, lineWidth * 12])
+        canvas.selectionGuiCTX.lineWidth = lineWidth * 20
+        canvas.selectionGuiCTX.lineCap = "butt"
+        canvas.selectionGuiCTX.strokeStyle = "black"
+        canvas.selectionGuiCTX.stroke()
+        canvas.selectionGuiCTX.setLineDash([])
+        //clear greyed out area for vectors
+        canvas.selectionGuiCTX.lineWidth = lineWidth * 17
+        canvas.selectionGuiCTX.lineCap = "round"
+        canvas.selectionGuiCTX.strokeStyle = "black"
+        canvas.selectionGuiCTX.stroke()
+        canvas.selectionGuiCTX.restore()
       }
-      // stroke vector paths with thick squared off dashed line then stroke vector paths with slightly thinner eraser (use some built-in html canvas composite mode) to clear greyed out area for vectors
-      let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
-      //Draw outline border by drawing different thicknesses of lines
-      canvas.selectionGuiCTX.lineWidth = lineWidth * 19
-      canvas.selectionGuiCTX.lineCap = "round"
-      canvas.selectionGuiCTX.strokeStyle = "white"
-      canvas.selectionGuiCTX.stroke()
-      //Make border a dotted line
-      canvas.selectionGuiCTX.lineDashOffset = lineDashOffset * 2
-      canvas.selectionGuiCTX.setLineDash([lineWidth * 12, lineWidth * 12])
-      canvas.selectionGuiCTX.lineWidth = lineWidth * 20
-      canvas.selectionGuiCTX.lineCap = "butt"
-      canvas.selectionGuiCTX.strokeStyle = "black"
-      canvas.selectionGuiCTX.stroke()
-      canvas.selectionGuiCTX.setLineDash([])
-      //clear greyed out area for vectors
-      canvas.selectionGuiCTX.lineWidth = lineWidth * 17
-      canvas.selectionGuiCTX.lineCap = "round"
-      canvas.selectionGuiCTX.strokeStyle = "black"
-      canvas.selectionGuiCTX.stroke()
-      canvas.selectionGuiCTX.restore()
-
       //render transform box control points
       // renderSelectionBoxOutline(lineDashOffset, true)
     }

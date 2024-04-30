@@ -12,16 +12,14 @@ import {
   renderOffsetEllipseVector,
   renderEllipsePath,
 } from "./ellipse.js"
-import {
-  renderReferenceTransformBox,
-  renderVectorRotationControl,
-} from "./transform.js"
+import { renderVectorRotationControl } from "./transform.js"
 import { renderSelectionCVS } from "./select.js"
 import { renderGrid } from "./grid.js"
 import {
   updateVectorProperties,
   calculateCurrentVectorDeltas,
   handleOptionsAndUpdateVector,
+  findVectorShapeBoundaryBox,
 } from "../utils/vectorHelpers.js"
 import {
   disableActionsForNoSelection,
@@ -357,7 +355,6 @@ function render() {
   //if linking, render all vectors in the layer
   if (canvas.currentLayer.type === "reference") {
     vectorGui.resetCollision()
-    // renderReferenceTransformBox()
     let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
     state.selectProperties.px1 = canvas.currentLayer.x - lineWidth
     state.selectProperties.py1 = canvas.currentLayer.y - lineWidth
@@ -370,7 +367,8 @@ function render() {
       canvas.currentLayer.img.height * canvas.currentLayer.scale +
       lineWidth
     state.setBoundaryBox(state.selectProperties)
-  } else if (
+  }
+  if (
     state.tool.options.displayVectors?.active ||
     state.tool.options.equal?.active ||
     state.tool.options.align?.active ||
@@ -382,7 +380,6 @@ function render() {
     //else render only the current vector
     renderCurrentVector()
   }
-  renderSelectionCVS()
   //Render vector transform ui
   if (state.selectedVectorIndicesSet.size > 0 && state.shapeCenterX !== null) {
     switch (state.vectorTransformMode) {
@@ -392,19 +389,24 @@ function render() {
       case TRANSLATE:
         //
         break
-      case SCALE:
-        // renderVectorTransformBox()
+      case SCALE: {
+        //Update shape boundary box
+        const shapeBoundaryBox = findVectorShapeBoundaryBox(
+          state.selectedVectorIndicesSet,
+          state.vectors
+        )
+        state.selectProperties.px1 = shapeBoundaryBox.xMin
+        state.selectProperties.py1 = shapeBoundaryBox.yMin
+        state.selectProperties.px2 = shapeBoundaryBox.xMax
+        state.selectProperties.py2 = shapeBoundaryBox.yMax
+        state.setBoundaryBox(state.selectProperties)
         break
+      }
       default:
     }
   }
-  //Render selection outline
-  // if (
-  //   state.selectProperties.px1 !== null ||
-  //   state.selectedVectorIndicesSet.size > 0
-  // ) {
-  // renderSelectionCVS()
-  // }
+  //Render selection outline and selection control points
+  renderSelectionCVS()
   //Render grid
   if (canvas.zoom >= 4 && vectorGui.grid) {
     renderGrid(vectorGui.gridSpacing)

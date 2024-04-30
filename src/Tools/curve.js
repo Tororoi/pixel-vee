@@ -56,6 +56,7 @@ function quadCurveSteps() {
     moveVectorRotationPointSteps()
     return
   }
+  //TODO: (High Priority) Implement function for handling scaling vector shapes. 
   if (
     vectorGui.selectedCollisionPresent &&
     state.clickCounter === 0 &&

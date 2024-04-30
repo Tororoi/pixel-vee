@@ -329,3 +329,36 @@ export function findVectorShapeCentroid(vectorIndicesSet, vectors) {
   })
   return findCentroid(vectorPoints)
 }
+
+/**
+ *
+ * @param {Set} vectorIndicesSet - A set of vector indices
+ * @param {object} vectors - The vectors in state
+ * @returns {object} - Returns an object with xMin, xMax, yMin, and yMax
+ */
+export function findVectorShapeBoundaryBox(vectorIndicesSet, vectors) {
+  let [xMin, xMax, yMin, yMax] = [null, null, null, null]
+  // const vectorIndicesSet = new Set(state.selectedVectorIndicesSet)
+  // if (vectorIndicesSet.size === 0) {
+  //   vectorIndicesSet.add(state.currentVectorIndex)
+  // }
+  for (const vectorIndex of vectorIndicesSet) {
+    const vector = vectors[vectorIndex]
+    const vectorXPoints = []
+    const vectorYPoints = []
+    for (let i = 1; i <= 4; i++) {
+      if (
+        "px" + i in vector.vectorProperties &&
+        "py" + i in vector.vectorProperties
+      ) {
+        vectorXPoints.push(vector.vectorProperties[`px${i}`])
+        vectorYPoints.push(vector.vectorProperties[`py${i}`])
+      }
+    }
+    xMin = Math.min(xMin ?? Infinity, ...vectorXPoints)
+    xMax = Math.max(xMax ?? -Infinity, ...vectorXPoints)
+    yMin = Math.min(yMin ?? Infinity, ...vectorYPoints)
+    yMax = Math.max(yMax ?? -Infinity, ...vectorYPoints)
+  }
+  return { xMin, xMax, yMin, yMax }
+}

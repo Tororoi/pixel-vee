@@ -21,6 +21,7 @@ import {
 } from "../DOM/disableDomElements.js"
 import { transformRasterContent } from "../utils/transformHelpers.js"
 import {
+  findVectorShapeBoundaryBox,
   findVectorShapeCentroid,
   updateVectorProperties,
 } from "../utils/vectorHelpers.js"
@@ -747,31 +748,10 @@ export function actionFlipVectors(flipHorizontally) {
  */
 export function actionRotateVectors(degrees) {
   //get bounding box of all vectors
-  // let [xMin, xMax, yMin, yMax] = [null, null, null, null]
   const vectorIndicesSet = new Set(state.selectedVectorIndicesSet)
   if (vectorIndicesSet.size === 0) {
     vectorIndicesSet.add(state.currentVectorIndex)
   }
-  // for (const vectorIndex of vectorIndicesSet) {
-  //   const vector = state.vectors[vectorIndex]
-  //   const vectorXPoints = []
-  //   const vectorYPoints = []
-
-  //   for (let i = 1; i <= 4; i++) {
-  //     if (
-  //       "px" + i in vector.vectorProperties &&
-  //       "py" + i in vector.vectorProperties
-  //     ) {
-  //       vectorXPoints.push(vector.vectorProperties[`px${i}`])
-  //       vectorYPoints.push(vector.vectorProperties[`py${i}`])
-  //     }
-  //   }
-
-  //   xMin = Math.min(xMin ?? Infinity, ...vectorXPoints)
-  //   xMax = Math.max(xMax ?? -Infinity, ...vectorXPoints)
-  //   yMin = Math.min(yMin ?? Infinity, ...vectorYPoints)
-  //   yMax = Math.max(yMax ?? -Infinity, ...vectorYPoints)
-  // }
   //get center point of selected vectors
   if (state.shapeCenterX === null) {
     //Update shape center
