@@ -15,6 +15,7 @@ import { enableActionsForSelection } from "../DOM/disableDomElements.js"
 import {
   adjustVectorSteps,
   moveVectorRotationPointSteps,
+  rerouteVectorStepsAction,
   transformVectorSteps,
   updateEllipseOffsets,
 } from "./transform.js"
@@ -30,43 +31,7 @@ import {
  * Due to method of modifying radius on a pixel grid, only odd diameter circles are created. Eg. 15px radius creates a 31px diameter circle. To fix this, allow half pixel increments.
  */
 function ellipseSteps() {
-  //FIX: new routine, should be 1. pointerdown, 2. drag to p2,
-  //3. pointerup solidify p2, 4. pointerdown/move to drag p3, 5. pointerup to solidify p3
-  //this routine would be better for touchscreens, and no worse with pointer
-  if (
-    state.collidedVectorIndex !== null &&
-    !vectorGui.selectedCollisionPresent &&
-    state.clickCounter === 0
-  ) {
-    let collidedVector = state.vectors[state.collidedVectorIndex]
-    vectorGui.setVectorProperties(collidedVector)
-    //Render new selected vector before running standard render routine
-    //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.
-    // renderCurrentVector() //May not be needed after changing order of render calls in renderLayerVectors
-    vectorGui.render()
-  }
-  if (
-    ((vectorGui.collidedPoint.xKey === "rotationx" &&
-      vectorGui.selectedPoint.xKey === null) ||
-      vectorGui.selectedPoint.xKey === "rotationx") &&
-    state.clickCounter === 0
-  ) {
-    moveVectorRotationPointSteps()
-    return
-  }
-  if (
-    vectorGui.selectedCollisionPresent &&
-    state.clickCounter === 0 &&
-    state.currentVectorIndex !== null
-  ) {
-    adjustVectorSteps()
-    return
-  }
-  //If there are selected vectors, call transformVectorSteps() instead of this function
-  if (state.selectedVectorIndicesSet.size > 0) {
-    transformVectorSteps()
-    return
-  }
+  if (rerouteVectorStepsAction()) return
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //solidify end points

@@ -12,6 +12,7 @@ import { enableActionsForSelection } from "../DOM/disableDomElements.js"
 import {
   adjustVectorSteps,
   moveVectorRotationPointSteps,
+  rerouteVectorStepsAction,
   transformVectorSteps,
 } from "./transform.js"
 
@@ -24,41 +25,7 @@ import {
  * Supported modes: "draw, erase"
  */
 function fillSteps() {
-  //for selecting another vector via the canvas, collisionPresent is false since it is currently based on collision with selected vector.
-  if (
-    state.collidedVectorIndex !== null &&
-    !vectorGui.selectedCollisionPresent &&
-    state.clickCounter === 0
-  ) {
-    let collidedVector = state.vectors[state.collidedVectorIndex]
-    vectorGui.setVectorProperties(collidedVector)
-    //Render new selected vector before running standard render routine
-    //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.
-    // renderCurrentVector() //May not be needed after changing order of render calls in renderLayerVectors
-    vectorGui.render()
-  }
-  if (
-    ((vectorGui.collidedPoint.xKey === "rotationx" &&
-      vectorGui.selectedPoint.xKey === null) ||
-      vectorGui.selectedPoint.xKey === "rotationx") &&
-    state.clickCounter === 0
-  ) {
-    moveVectorRotationPointSteps()
-    return
-  }
-  if (
-    vectorGui.selectedCollisionPresent &&
-    state.clickCounter === 0 &&
-    state.currentVectorIndex !== null
-  ) {
-    adjustVectorSteps()
-    return
-  }
-  //If there are selected vectors, call transformVectorSteps() instead of this function
-  if (state.selectedVectorIndicesSet.size > 0) {
-    transformVectorSteps()
-    return
-  }
+  if (rerouteVectorStepsAction()) return
   switch (canvas.pointerEvent) {
     case "pointerdown": {
       //reset control points

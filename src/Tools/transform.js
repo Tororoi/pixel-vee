@@ -141,8 +141,91 @@ export function transformVectorSteps() {
       state.clickCounter = 0
       renderCanvas(currentVector.layer, true, state.activeIndexes)
       modifyVectorAction(currentVector)
+      vectorGui.selectedPoint = {
+        xKey: null,
+        yKey: null,
+      }
       break
     }
+    default:
+    //do nothing
+  }
+}
+
+/**
+ *
+ */
+function scaleVectorShape() {
+  //selectedPoint does not correspond to the selectProperties key. Based on selected point, adjust boundaryBox.
+  switch (vectorGui.selectedPoint.xKey) {
+    case "px1":
+      // state.selectProperties.px1 = state.cursorX
+      // state.selectProperties.py1 = state.cursorY
+      break
+    case "px2":
+      // state.selectProperties.py1 = state.cursorY
+      break
+    case "px3":
+      // state.selectProperties.px2 = state.cursorX
+      // state.selectProperties.py1 = state.cursorY
+      break
+    case "px4":
+      // state.selectProperties.px2 = state.cursorX
+      break
+    case "px5":
+      // state.selectProperties.px2 = state.cursorX
+      // state.selectProperties.py2 = state.cursorY
+      break
+    case "px6":
+      // state.selectProperties.py2 = state.cursorY
+      break
+    case "px7":
+      // state.selectProperties.px1 = state.cursorX
+      // state.selectProperties.py2 = state.cursorY
+      break
+    case "px8":
+      // state.selectProperties.px1 = state.cursorX
+      break
+    case "px9": {
+      //move selected contents
+      // const deltaX = state.cursorX - state.previousX
+      // const deltaY = state.cursorY - state.previousY
+      // state.selectProperties.px1 += deltaX
+      // state.selectProperties.py1 += deltaY
+      // state.selectProperties.px2 += deltaX
+      // state.selectProperties.py2 += deltaY
+      break
+    }
+    default:
+    //do nothing
+  }
+  // state.setBoundaryBox(state.selectProperties)
+}
+
+/**
+ *
+ */
+function scaleVectorSteps() {
+  console.log(
+    "scaleVectorSteps",
+    vectorGui.collidedPoint.xKey,
+    vectorGui.selectedPoint.xKey
+  )
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
+      vectorGui.selectedPoint = {
+        xKey: vectorGui.collidedPoint.xKey,
+        yKey: vectorGui.collidedPoint.yKey,
+      }
+      break
+    case "pointermove":
+      break
+    case "pointerup":
+      vectorGui.selectedPoint = {
+        xKey: null,
+        yKey: null,
+      }
+      break
     default:
     //do nothing
   }
@@ -652,4 +735,52 @@ export function adjustVectorSteps() {
     default:
     //do nothing
   }
+}
+
+/**
+ *
+ * @returns {boolean} - True if action is taken, false if not
+ */
+export function rerouteVectorStepsAction() {
+  //for selecting another vector via the canvas, collisionPresent is false since it is currently based on collision with selected vector.
+  if (
+    state.collidedVectorIndex !== null &&
+    !vectorGui.selectedCollisionPresent &&
+    state.clickCounter === 0
+  ) {
+    let collidedVector = state.vectors[state.collidedVectorIndex]
+    vectorGui.setVectorProperties(collidedVector)
+    //Render new selected vector before running standard render routine
+    //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.
+    // renderCurrentVector() //May not be needed after changing order of render calls in renderLayerVectors
+    vectorGui.render()
+  }
+  if (
+    ((vectorGui.collidedPoint.xKey === "rotationx" &&
+      vectorGui.selectedPoint.xKey === null) ||
+      vectorGui.selectedPoint.xKey === "rotationx") &&
+    state.clickCounter === 0
+  ) {
+    moveVectorRotationPointSteps()
+    return true
+  }
+  //TODO: (High Priority) Implement function for handling scaling vector shapes.
+  if (state.vectorTransformMode === SCALE) {
+    scaleVectorSteps()
+    return true
+  }
+  if (
+    vectorGui.selectedCollisionPresent &&
+    state.clickCounter === 0 &&
+    state.currentVectorIndex !== null
+  ) {
+    adjustVectorSteps()
+    return true
+  }
+  //If there are selected vectors, call transformVectorSteps() instead of this function
+  if (state.selectedVectorIndicesSet.size > 0) {
+    transformVectorSteps()
+    return true
+  }
+  return false
 }
