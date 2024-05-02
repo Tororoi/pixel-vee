@@ -154,57 +154,8 @@ export function transformVectorSteps() {
 }
 
 /**
- *
- */
-function scaleVectorShape() {
-  //selectedPoint does not correspond to the selectProperties key. Based on selected point, adjust boundaryBox.
-  switch (vectorGui.selectedPoint.xKey) {
-    case "px1":
-      // state.selectProperties.px1 = state.cursorX
-      // state.selectProperties.py1 = state.cursorY
-      break
-    case "px2":
-      // state.selectProperties.py1 = state.cursorY
-      break
-    case "px3":
-      // state.selectProperties.px2 = state.cursorX
-      // state.selectProperties.py1 = state.cursorY
-      break
-    case "px4":
-      // state.selectProperties.px2 = state.cursorX
-      break
-    case "px5":
-      // state.selectProperties.px2 = state.cursorX
-      // state.selectProperties.py2 = state.cursorY
-      break
-    case "px6":
-      // state.selectProperties.py2 = state.cursorY
-      break
-    case "px7":
-      // state.selectProperties.px1 = state.cursorX
-      // state.selectProperties.py2 = state.cursorY
-      break
-    case "px8":
-      // state.selectProperties.px1 = state.cursorX
-      break
-    case "px9": {
-      //move selected contents
-      // const deltaX = state.cursorX - state.previousX
-      // const deltaY = state.cursorY - state.previousY
-      // state.selectProperties.px1 += deltaX
-      // state.selectProperties.py1 += deltaY
-      // state.selectProperties.px2 += deltaX
-      // state.selectProperties.py2 += deltaY
-      break
-    }
-    default:
-    //do nothing
-  }
-  // state.setBoundaryBox(state.selectProperties)
-}
-
-/**
- *
+ * TODO: (High Priority) Currently does not work for ellipses. Most likely will have to fundamentally change the way ellipses are renderd to allow squashing and stretching.
+ * TODO: (High Priority) Implement locking ratio to maintain aspect ratio while scaling.
  */
 function scaleVectorSteps() {
   let currentVector =
@@ -863,7 +814,10 @@ export function rerouteVectorStepsAction() {
     return true
   }
   //TODO: (High Priority) Implement function for handling scaling vector shapes.
-  if (state.vectorTransformMode === SCALE && state.selectedVectorIndicesSet.size > 0) {
+  if (
+    state.vectorTransformMode === SCALE &&
+    state.selectedVectorIndicesSet.size > 0
+  ) {
     scaleVectorSteps()
     return true
   }
