@@ -4,6 +4,7 @@ import { vectorGui } from "./vector.js"
 import { getAngle } from "../utils/trig.js"
 import { drawCirclePath } from "../utils/guiHelpers.js"
 import { drawSelectControlPoints, renderSelectionBoxOutline } from "./select.js"
+import { findVectorShapeBoundaryBox } from "../utils/vectorHelpers.js"
 
 /**
  *
@@ -81,4 +82,20 @@ export function renderVectorRotationControl() {
   )
   canvas.vectorGuiCTX.fill()
   canvas.vectorGuiCTX.restore()
+}
+
+/**
+ *
+ */
+export function setVectorShapeBoundaryBox() {
+  //Update shape boundary box
+  const shapeBoundaryBox = findVectorShapeBoundaryBox(
+    state.selectedVectorIndicesSet,
+    state.vectors
+  )
+  state.selectProperties.px1 = shapeBoundaryBox.xMin
+  state.selectProperties.py1 = shapeBoundaryBox.yMin
+  state.selectProperties.px2 = shapeBoundaryBox.xMax
+  state.selectProperties.py2 = shapeBoundaryBox.yMax
+  state.setBoundaryBox(state.selectProperties)
 }

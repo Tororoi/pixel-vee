@@ -21,12 +21,13 @@ import {
 } from "../DOM/disableDomElements.js"
 import { transformRasterContent } from "../utils/transformHelpers.js"
 import {
-  findVectorShapeBoundaryBox,
   findVectorShapeCentroid,
   updateVectorProperties,
 } from "../utils/vectorHelpers.js"
 import { modifyVectorAction } from "./modifyTimeline.js"
 import { dom } from "../Context/dom.js"
+import { SCALE } from "../utils/constants.js"
+import { setVectorShapeBoundaryBox } from "../GUI/transform.js"
 
 //=============================================//
 //====== * * * Non Pointer Actions * * * ======//
@@ -82,6 +83,9 @@ export function actionSelectVector(vectorIndex) {
   if (!state.selectedVectorIndicesSet.has(vectorIndex)) {
     state.selectedVectorIndicesSet.add(vectorIndex)
     dom.vectorTransformUIContainer.style.display = "flex"
+    if (state.vectorTransformMode === SCALE) {
+      setVectorShapeBoundaryBox()
+    }
     // const selectedVectorIndices = new Set(state.selectedVectorIndicesSet)
     // state.deselect()
     // state.selectedVectorIndicesSet = selectedVectorIndices
@@ -119,6 +123,11 @@ export function actionDeselectVector(vectorIndex) {
     state.selectedVectorIndicesSet.delete(vectorIndex)
     if (state.selectedVectorIndicesSet.size === 0) {
       dom.vectorTransformUIContainer.style.display = "none"
+      state.deselect()
+    } else if (state.selectedVectorIndicesSet.size > 0) {
+      if (state.vectorTransformMode === SCALE) {
+        setVectorShapeBoundaryBox()
+      }
     }
     addToTimeline({
       tool: tools.select.name,
@@ -379,6 +388,9 @@ export function actionPasteSelection() {
       })
       if (state.selectedVectorIndicesSet.size > 0) {
         dom.vectorTransformUIContainer.style.display = "flex"
+        if (state.vectorTransformMode === SCALE) {
+          setVectorShapeBoundaryBox()
+        }
       } else {
         dom.vectorTransformUIContainer.style.display = "none"
       }

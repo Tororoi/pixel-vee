@@ -145,9 +145,10 @@ export function transformVectorContent(
   const newWidth = Math.abs(newBoundaryBox.xMax - newBoundaryBox.xMin)
   const newHeight = Math.abs(newBoundaryBox.yMax - newBoundaryBox.yMin)
 
-  if (newWidth === 0 || newHeight === 0) {
-    // If the new width or height is 0, vectors must always have minimum of 1 pixel width and height. Integrity of curve will be broken if it becomes flat horizontally or vertically (can't be stretched vertically if completely horizontal)
-    // return
+  // Check if the original dimensions are zero
+  if (originalWidth === 0 || originalHeight === 0) {
+    //Original width or height is zero, transformation skipped.
+    return
   }
 
   const scaleX = newWidth / originalWidth

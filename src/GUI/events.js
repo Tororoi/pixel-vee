@@ -4,7 +4,7 @@ import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
-import { findVectorShapeBoundaryBox } from "../utils/vectorHelpers.js"
+import { setVectorShapeBoundaryBox } from "./transform.js"
 
 /**
  * Switches the vector transform mode
@@ -41,16 +41,17 @@ dom.vectorTransformModeContainer.addEventListener("click", (e) => {
       switchVectorTransformMode(ROTATE)
       break
     case SCALE: {
-      //Update shape boundary box
-      const shapeBoundaryBox = findVectorShapeBoundaryBox(
-        state.selectedVectorIndicesSet,
-        state.vectors
-      )
-      state.selectProperties.px1 = shapeBoundaryBox.xMin
-      state.selectProperties.py1 = shapeBoundaryBox.yMin
-      state.selectProperties.px2 = shapeBoundaryBox.xMax
-      state.selectProperties.py2 = shapeBoundaryBox.yMax
-      state.setBoundaryBox(state.selectProperties)
+      // //Update shape boundary box
+      // const shapeBoundaryBox = findVectorShapeBoundaryBox(
+      //   state.selectedVectorIndicesSet,
+      //   state.vectors
+      // )
+      // state.selectProperties.px1 = shapeBoundaryBox.xMin
+      // state.selectProperties.py1 = shapeBoundaryBox.yMin
+      // state.selectProperties.px2 = shapeBoundaryBox.xMax
+      // state.selectProperties.py2 = shapeBoundaryBox.yMax
+      // state.setBoundaryBox(state.selectProperties)
+      setVectorShapeBoundaryBox()
       switchVectorTransformMode(SCALE)
       break
     }
