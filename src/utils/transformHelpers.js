@@ -1,3 +1,4 @@
+import { updateVectorProperties } from "./vectorHelpers.js"
 
 /**
  * Transforms raster content by rotating and stretching/shrinking.
@@ -116,4 +117,141 @@ export function transformRasterContent(
     Math.min(newBoundaryBox.xMin, newBoundaryBox.xMax),
     Math.min(newBoundaryBox.yMin, newBoundaryBox.yMax)
   )
+}
+
+/**
+ * Transforms vector content by stretching/shrinking.
+ * @param {object} vectors - The vectors associated with the content.
+ * @param {object} vectorsSavedProperties - The saved properties of the vectors.
+ * @param {object} previousBoundaryBox - The previous boundary box of the content before transformation.
+ * @param {object} newBoundaryBox - The new boundary box of the content after transformation.
+ * @param {boolean} isMirroredHorizontally - Whether to mirror the content horizontally.
+ * @param {boolean} isMirroredVertically - Whether to mirror the content vertically.
+ */
+export function transformVectorContent(
+  vectors,
+  vectorsSavedProperties,
+  previousBoundaryBox,
+  newBoundaryBox,
+  isMirroredHorizontally = false,
+  isMirroredVertically = false
+) {
+  const originalWidth = Math.abs(
+    previousBoundaryBox.xMax - previousBoundaryBox.xMin
+  )
+  const originalHeight = Math.abs(
+    previousBoundaryBox.yMax - previousBoundaryBox.yMin
+  )
+  const newWidth = Math.abs(newBoundaryBox.xMax - newBoundaryBox.xMin)
+  const newHeight = Math.abs(newBoundaryBox.yMax - newBoundaryBox.yMin)
+
+  if (newWidth === 0 || newHeight === 0) {
+    // If the new width or height is 0, vectors must always have minimum of 1 pixel width and height. Integrity of curve will be broken if it becomes flat horizontally or vertically (can't be stretched vertically if completely horizontal)
+    // return
+  }
+
+  const scaleX = newWidth / originalWidth
+  const scaleY = newHeight / originalHeight
+
+  const xOffset = newBoundaryBox.xMin - previousBoundaryBox.xMin * scaleX
+  const yOffset = newBoundaryBox.yMin - previousBoundaryBox.yMin * scaleY
+
+  for (let vectorIndex in vectorsSavedProperties) {
+    let originalProperties = { ...vectorsSavedProperties[vectorIndex] }
+    let vector = vectors[vectorIndex]
+    // Transform each control point
+    transformControlPoint(
+      vector,
+      originalProperties,
+      "px1",
+      "py1",
+      scaleX,
+      scaleY,
+      xOffset,
+      yOffset,
+      isMirroredHorizontally,
+      isMirroredVertically
+    )
+    transformControlPoint(
+      vector,
+      originalProperties,
+      "px2",
+      "py2",
+      scaleX,
+      scaleY,
+      xOffset,
+      yOffset,
+      isMirroredHorizontally,
+      isMirroredVertically
+    )
+    transformControlPoint(
+      vector,
+      originalProperties,
+      "px3",
+      "py3",
+      scaleX,
+      scaleY,
+      xOffset,
+      yOffset,
+      isMirroredHorizontally,
+      isMirroredVertically
+    )
+    transformControlPoint(
+      vector,
+      originalProperties,
+      "px4",
+      "py4",
+      scaleX,
+      scaleY,
+      xOffset,
+      yOffset,
+      isMirroredHorizontally,
+      isMirroredVertically
+    )
+  }
+
+  /**
+   *
+   * @param vector
+   * @param properties
+   * @param xProp
+   * @param yProp
+   * @param scaleX
+   * @param scaleY
+   * @param xOffset
+   * @param yOffset
+   * @param isMirroredHorizontally
+   * @param isMirroredVertically
+   */
+  function transformControlPoint(
+    vector,
+    properties,
+    xProp,
+    yProp,
+    scaleX,
+    scaleY,
+    xOffset,
+    yOffset,
+    isMirroredHorizontally,
+    isMirroredVertically
+  ) {
+    if (Object.hasOwn(properties, xProp)) {
+      let originalX = properties[xProp]
+      let originalY = properties[yProp]
+      let newX = originalX * scaleX + xOffset
+      let newY = originalY * scaleY + yOffset
+
+      // Apply mirroring if necessary
+      if (isMirroredHorizontally) {
+        newX = newBoundaryBox.xMax - newX + newBoundaryBox.xMin
+      }
+      if (isMirroredVertically) {
+        newY = newBoundaryBox.yMax - newY + newBoundaryBox.yMin
+      }
+      newX = Math.round(newX)
+      newY = Math.round(newY)
+      // Update vector properties
+      updateVectorProperties(vector, newX, newY, xProp, yProp)
+    }
+  }
 }

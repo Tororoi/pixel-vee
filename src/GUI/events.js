@@ -41,16 +41,16 @@ dom.vectorTransformModeContainer.addEventListener("click", (e) => {
       switchVectorTransformMode(ROTATE)
       break
     case SCALE: {
-      // //Update shape boundary box
-      // const shapeBoundaryBox = findVectorShapeBoundaryBox(
-      //   state.selectedVectorIndicesSet,
-      //   state.vectors
-      // )
-      // state.selectProperties.px1 = shapeBoundaryBox.xMin
-      // state.selectProperties.py1 = shapeBoundaryBox.yMin
-      // state.selectProperties.px2 = shapeBoundaryBox.xMax
-      // state.selectProperties.py2 = shapeBoundaryBox.yMax
-      // state.setBoundaryBox(state.selectProperties)
+      //Update shape boundary box
+      const shapeBoundaryBox = findVectorShapeBoundaryBox(
+        state.selectedVectorIndicesSet,
+        state.vectors
+      )
+      state.selectProperties.px1 = shapeBoundaryBox.xMin
+      state.selectProperties.py1 = shapeBoundaryBox.yMin
+      state.selectProperties.px2 = shapeBoundaryBox.xMax
+      state.selectProperties.py2 = shapeBoundaryBox.yMax
+      state.setBoundaryBox(state.selectProperties)
       switchVectorTransformMode(SCALE)
       break
     }

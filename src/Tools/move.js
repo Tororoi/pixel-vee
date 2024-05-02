@@ -5,6 +5,7 @@ import { vectorGui } from "../GUI/vector.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { transformRasterContent } from "../utils/transformHelpers.js"
 import { addTransformToTimeline } from "../Actions/nonPointerActions.js"
+import { transformBoundaries } from "./transform.js"
 
 /**
  * Move the contents of a layer relative to other layers
@@ -179,57 +180,6 @@ function transformSteps() {
     default:
     //do nothing
   }
-}
-
-/**
- * Transform selected area by dragging one of eight control points or move selected area by dragging inside selected area
- * TODO: (Medium Priority) Make shortcuts for maintaining ratio while dragging control points
- */
-function transformBoundaries() {
-  //selectedPoint does not correspond to the selectProperties key. Based on selected point, adjust boundaryBox.
-  switch (vectorGui.selectedPoint.xKey) {
-    case "px1":
-      state.selectProperties.px1 = state.cursorX
-      state.selectProperties.py1 = state.cursorY
-      break
-    case "px2":
-      state.selectProperties.py1 = state.cursorY
-      break
-    case "px3":
-      state.selectProperties.px2 = state.cursorX
-      state.selectProperties.py1 = state.cursorY
-      break
-    case "px4":
-      state.selectProperties.px2 = state.cursorX
-      break
-    case "px5":
-      state.selectProperties.px2 = state.cursorX
-      state.selectProperties.py2 = state.cursorY
-      break
-    case "px6":
-      state.selectProperties.py2 = state.cursorY
-      break
-    case "px7":
-      state.selectProperties.px1 = state.cursorX
-      state.selectProperties.py2 = state.cursorY
-      break
-    case "px8":
-      state.selectProperties.px1 = state.cursorX
-      break
-    case "px9": {
-      //move selected contents
-      const deltaX = state.cursorX - state.previousX
-      const deltaY = state.cursorY - state.previousY
-      state.selectProperties.px1 += deltaX
-      state.selectProperties.py1 += deltaY
-      state.selectProperties.px2 += deltaX
-      state.selectProperties.py2 += deltaY
-      break
-    }
-    default:
-    //do nothing
-  }
-  state.setBoundaryBox(state.selectProperties)
 }
 
 /**

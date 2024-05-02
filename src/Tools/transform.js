@@ -20,6 +20,7 @@ import {
   findCentroid,
   findVectorShapeCentroid,
 } from "../utils/vectorHelpers.js"
+import { transformVectorContent } from "../utils/transformHelpers.js"
 
 //=======================================//
 //======== * * * Transform * * * ========//
@@ -206,21 +207,67 @@ function scaleVectorShape() {
  *
  */
 function scaleVectorSteps() {
-  console.log(
-    "scaleVectorSteps",
-    vectorGui.collidedPoint.xKey,
-    vectorGui.selectedPoint.xKey
-  )
+  let currentVector =
+    state.vectors[state.selectedVectorIndicesSet.values().next().value]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       vectorGui.selectedPoint = {
         xKey: vectorGui.collidedPoint.xKey,
         yKey: vectorGui.collidedPoint.yKey,
       }
+      state.previousBoundaryBox = { ...state.boundaryBox }
+      //reset current vector properties (this also resets the state.currentVectorIndex if there is one)
+      vectorGui.reset()
+      //Set state.vectorsSavedProperties for all selected vectors
+      state.vectorsSavedProperties = {}
+      state.selectedVectorIndicesSet.forEach((index) => {
+        const vectorProperties = state.vectors[index].vectorProperties
+        state.vectorsSavedProperties[index] = {
+          ...vectorProperties,
+        }
+      })
+      //Set activeIndexes for all selected vectors
+      state.activeIndexes = createActiveIndexesForRender(
+        currentVector,
+        state.vectorsSavedProperties
+      )
+      renderCanvas(currentVector.layer, true, state.activeIndexes, true)
       break
-    case "pointermove":
+    case "pointermove": {
+      transformBoundaries()
+      let isMirroredHorizontally = false
+      let isMirroredVertically = false
+      if (vectorGui.selectedPoint.xKey !== "px9") {
+        //Don't check for mirroring when moving whole selection
+        if (
+          state.boundaryBox.xMax === state.previousBoundaryBox.xMin ||
+          state.boundaryBox.xMin === state.previousBoundaryBox.xMax
+        ) {
+          isMirroredHorizontally = !isMirroredHorizontally
+        }
+        if (
+          state.boundaryBox.yMax === state.previousBoundaryBox.yMin ||
+          state.boundaryBox.yMin === state.previousBoundaryBox.yMax
+        ) {
+          isMirroredVertically = !isMirroredVertically
+        }
+      }
+      transformVectorContent(
+        state.vectors,
+        state.vectorsSavedProperties,
+        state.previousBoundaryBox,
+        state.boundaryBox,
+        isMirroredHorizontally,
+        isMirroredVertically
+      )
+      renderCanvas(currentVector.layer, true, state.activeIndexes)
       break
+    }
     case "pointerup":
+      state.normalizeSelectProperties()
+      state.setBoundaryBox(state.selectProperties)
+      renderCanvas(currentVector.layer, true, state.activeIndexes)
+      modifyVectorAction(currentVector)
       vectorGui.selectedPoint = {
         xKey: null,
         yKey: null,
@@ -261,6 +308,57 @@ export function moveVectorRotationPointSteps() {
     default:
     //do nothing
   }
+}
+
+/**
+ * Transform selected area by dragging one of eight control points or move selected area by dragging inside selected area
+ * TODO: (Medium Priority) Make shortcuts for maintaining ratio while dragging control points
+ */
+export function transformBoundaries() {
+  //selectedPoint does not correspond to the selectProperties key. Based on selected point, adjust boundaryBox.
+  switch (vectorGui.selectedPoint.xKey) {
+    case "px1":
+      state.selectProperties.px1 = state.cursorX
+      state.selectProperties.py1 = state.cursorY
+      break
+    case "px2":
+      state.selectProperties.py1 = state.cursorY
+      break
+    case "px3":
+      state.selectProperties.px2 = state.cursorX
+      state.selectProperties.py1 = state.cursorY
+      break
+    case "px4":
+      state.selectProperties.px2 = state.cursorX
+      break
+    case "px5":
+      state.selectProperties.px2 = state.cursorX
+      state.selectProperties.py2 = state.cursorY
+      break
+    case "px6":
+      state.selectProperties.py2 = state.cursorY
+      break
+    case "px7":
+      state.selectProperties.px1 = state.cursorX
+      state.selectProperties.py2 = state.cursorY
+      break
+    case "px8":
+      state.selectProperties.px1 = state.cursorX
+      break
+    case "px9": {
+      //move selected contents
+      const deltaX = state.cursorX - state.previousX
+      const deltaY = state.cursorY - state.previousY
+      state.selectProperties.px1 += deltaX
+      state.selectProperties.py1 += deltaY
+      state.selectProperties.px2 += deltaX
+      state.selectProperties.py2 += deltaY
+      break
+    }
+    default:
+    //do nothing
+  }
+  state.setBoundaryBox(state.selectProperties)
 }
 
 //=======================================//
@@ -765,7 +863,7 @@ export function rerouteVectorStepsAction() {
     return true
   }
   //TODO: (High Priority) Implement function for handling scaling vector shapes.
-  if (state.vectorTransformMode === SCALE) {
+  if (state.vectorTransformMode === SCALE && state.selectedVectorIndicesSet.size > 0) {
     scaleVectorSteps()
     return true
   }

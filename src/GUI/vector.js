@@ -391,15 +391,15 @@ function render() {
         break
       case SCALE: {
         //Update shape boundary box TODO: (Medium Priority) Instead of updating shapeBoundaryBox here, update it when the vectors are changed or when the scale mode is toggled.
-        const shapeBoundaryBox = findVectorShapeBoundaryBox(
-          state.selectedVectorIndicesSet,
-          state.vectors
-        )
-        state.selectProperties.px1 = shapeBoundaryBox.xMin
-        state.selectProperties.py1 = shapeBoundaryBox.yMin
-        state.selectProperties.px2 = shapeBoundaryBox.xMax
-        state.selectProperties.py2 = shapeBoundaryBox.yMax
-        state.setBoundaryBox(state.selectProperties)
+        // const shapeBoundaryBox = findVectorShapeBoundaryBox(
+        //   state.selectedVectorIndicesSet,
+        //   state.vectors
+        // )
+        // state.selectProperties.px1 = shapeBoundaryBox.xMin
+        // state.selectProperties.py1 = shapeBoundaryBox.yMin
+        // state.selectProperties.px2 = shapeBoundaryBox.xMax
+        // state.selectProperties.py2 = shapeBoundaryBox.yMax
+        // state.setBoundaryBox(state.selectProperties)
         break
       }
       default:
