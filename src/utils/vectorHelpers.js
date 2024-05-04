@@ -1,3 +1,4 @@
+import { calculateEllipseBoundingBox } from "./transformHelpers.js"
 import { getAngle } from "./trig.js"
 
 /**
@@ -346,13 +347,22 @@ export function findVectorShapeBoundaryBox(vectorIndicesSet, vectors) {
     const vector = vectors[vectorIndex]
     const vectorXPoints = []
     const vectorYPoints = []
-    for (let i = 1; i <= 4; i++) {
-      if (
-        "px" + i in vector.vectorProperties &&
-        "py" + i in vector.vectorProperties
-      ) {
-        vectorXPoints.push(vector.vectorProperties[`px${i}`])
-        vectorYPoints.push(vector.vectorProperties[`py${i}`])
+    if (vector.vectorProperties.type === "ellipse") {
+      //Ellipse has a center point and a radius. The boundary box is calculated differently.
+      const ellipseBoundingBox = calculateEllipseBoundingBox(
+        vector.vectorProperties
+      )
+      vectorXPoints.push(ellipseBoundingBox.xMin, ellipseBoundingBox.xMax)
+      vectorYPoints.push(ellipseBoundingBox.yMin, ellipseBoundingBox.yMax)
+    } else {
+      for (let i = 1; i <= 4; i++) {
+        if (
+          "px" + i in vector.vectorProperties &&
+          "py" + i in vector.vectorProperties
+        ) {
+          vectorXPoints.push(vector.vectorProperties[`px${i}`])
+          vectorYPoints.push(vector.vectorProperties[`py${i}`])
+        }
       }
     }
     xMin = Math.min(xMin ?? Infinity, ...vectorXPoints)

@@ -154,7 +154,7 @@ export function transformVectorSteps() {
 }
 
 /**
- * TODO: (High Priority) Currently does not work for ellipses. Most likely will have to fundamentally change the way ellipses are renderd to allow squashing and stretching.
+ * TODO: (High Priority) Currently does not work for ellipses. Angle and radii will have to be recalculated.
  * TODO: (High Priority) Implement locking ratio to maintain aspect ratio while scaling.
  */
 function scaleVectorSteps() {
