@@ -243,16 +243,16 @@ export function transformVectorContent(
       //calculate new angle and length of radii. originalProperties has angle in radians, radA and radB as length in pixels
       // Recalculate the angle considering mirroring effects
       let angle = originalProperties.angle
-      // Update angle based on the scaling factors. updated angle should always exist in same quadrant as original angle
+      // // Update angle based on the scaling factors. updated angle should always exist in same quadrant as original angle
       let updatedAngle = Math.atan2(
         scaleY * Math.sin(angle),
         scaleX * Math.cos(angle)
       )
-      // let updatedAngle = -Math.PI / 3
+      // // let updatedAngle = -Math.PI / 3
 
-      // Consider mirroring effects on angle
-      if (isMirroredHorizontally) updatedAngle = Math.PI - updatedAngle
-      if (isMirroredVertically) updatedAngle = -updatedAngle
+      // // Consider mirroring effects on angle
+      // if (isMirroredHorizontally) updatedAngle = Math.PI - updatedAngle
+      // if (isMirroredVertically) updatedAngle = -updatedAngle
 
       //reverse engineer plotRotatedEllipse function to get new radii and angle. ellipse boundaries are known after transformation. p1 is the center point so calculate the boundary of the ellipse
       const originalEllipseBoundingBox =
@@ -268,14 +268,166 @@ export function transformVectorContent(
       // 1. calculate the tangent points on the original bounding box,
       // 2. use scaleX and scaleY to move those points.
       // 3. calculate the new axis lengths and angle from the tangent points
+      /**
+       * The tangent points (x,y) can be expressed as:
+       * Top: ( px1 + radA * cos(angle) , py1 + radB * cos(angle) )
+       * Right: ( px1 + radA * sin(angle) , py1 + radB * sin(angle) )
+       * Bottom: ( px1 - radA * cos(angle) , py1 - radB * cos(angle) )
+       * Left: ( px1 - radA * sin(angle) , py1 - radB * sin(angle) )
+       */
+      /* plot ellipse rotated by angle (radian) */
+      console.log(originalProperties.x1Offset, originalProperties.y1Offset)
+      let a = originalProperties.radA
+      let b = originalProperties.radB
+      var xd = a * a,
+        yd = b * b
+      var s = Math.sin(angle),
+        zd = (xd - yd) * s /* ellipse rotation */
+      ;(xd = Math.sqrt(xd - zd * s)),
+        (yd = Math.sqrt(yd + zd * s)) /* surrounding rect */
+      a = Math.floor(xd + 0.5)
+      b = Math.floor(yd + 0.5)
+      zd = (zd * a * b) / (xd * yd)
+      let x0 = originalProperties.px1 - a
+      let y0 = originalProperties.py1 - b
+      let x1 = originalProperties.px1 + a
+      let y1 = originalProperties.py1 + b
+      // x1 = x1 + originalProperties.x1Offset
+      // y1 = y1 + originalProperties.y1Offset
+      xd = x1 - x0
+      yd = y1 - y0
+      let w = xd * yd
+      if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
+      //Breaks down at smaller radii, need enforced minimum where offset is not applied? if assertion fails, try again after w is calculated without offset
+      if (!(w <= 1.0 && w >= 0.0)) {
+        //if assertion expected to fail with offsets, remove offsets and reset vars before trying assert
+        // x1 = x1 - originalProperties.x1Offset
+        // y1 = y1 - originalProperties.y1Offset
+        xd = x1 - x0
+        yd = y1 - y0
+        w = xd * yd
+        if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
+      }
+      xd = Math.floor(xd * w + 0.5)
+      yd = Math.floor(yd * w + 0.5) /* snap to int */
+      const topTangent = {
+        x: x0 + xd,
+        y: y0,
+      }
+      const rightTangent = {
+        x: x1,
+        y: y1 - yd,
+      }
+      const bottomTangent = {
+        x: x1 - xd,
+        y: y1,
+      }
+      const leftTangent = {
+        x: x0,
+        y: y0 + yd,
+      }
 
-      const newEllipseValues = calculateEllipseAxes(
-        transformedEllipseBoundingBox,
-        updatedAngle
+      // Calculate the new tangent points
+      // const newTopTangent = {
+      //   x: topTangent.x * scaleX + xOffset,
+      //   y: topTangent.y * scaleY + yOffset,
+      // }
+      // const newRightTangent = {
+      //   x: rightTangent.x * scaleX + xOffset,
+      //   y: rightTangent.y * scaleY + yOffset,
+      // }
+      // const newBottomTangent = {
+      //   x: bottomTangent.x * scaleX + xOffset,
+      //   y: bottomTangent.y * scaleY + yOffset,
+      // }
+      // const newLeftTangent = {
+      //   x: leftTangent.x * scaleX + xOffset,
+      //   y: leftTangent.y * scaleY + yOffset,
+      // }
+
+      // // Calculate the new axis lengths
+      // let updatedRadA = Math.abs((newRightTangent.x - newLeftTangent.x) / 2)
+      // let updatedRadB = Math.abs((newTopTangent.y - newBottomTangent.y) / 2)
+
+      // // Calculate the new angle
+      // let updatedAngle = Math.atan2(
+      //   newTopTangent.y - vector.vectorProperties.py1,
+      //   newTopTangent.x - vector.vectorProperties.px1
+      // )
+
+      // Calculate the new axis lengths (formula not correct)
+      console.log(
+        originalEllipseBoundingBox.xMax - originalEllipseBoundingBox.xMin,
+        originalEllipseBoundingBox.yMax - originalEllipseBoundingBox.yMin,
+        rightTangent.x - leftTangent.x,
+        topTangent.y - bottomTangent.y
       )
+
+      const width =
+        originalEllipseBoundingBox.xMax - 1 - originalEllipseBoundingBox.xMin
+      const height =
+        originalEllipseBoundingBox.yMax - 1 - originalEllipseBoundingBox.yMin
+      let updatedRadA =
+        Math.pow(0.5, 3 / 2) *
+        Math.sqrt(
+          width * width +
+            height * height +
+            (width * width - height * height) /
+              (Math.cos(angle) * Math.cos(angle) -
+                Math.sin(angle) * Math.sin(angle))
+        )
+      let updatedRadB =
+        Math.pow(0.5, 3 / 2) *
+        Math.sqrt(
+          width * width +
+            height * height -
+            (width * width - height * height) /
+              (Math.cos(angle) * Math.cos(angle) -
+                Math.sin(angle) * Math.sin(angle))
+        )
+      console.log(
+        originalProperties.radA,
+        updatedRadA,
+        originalProperties.radB,
+        updatedRadB
+      )
+
+      // // Calculate the new angle (formula probably correct)
+      // let updatedAngle =
+      //   2 * Math.PI -
+      //   Math.atan2(
+      //     topTangent.y - originalProperties.py1,
+      //     topTangent.x - originalProperties.px1
+      //   )
+      // // Calculate differences for both coordinates
+      // let deltaX = x1 - x0
+      // let deltaY = y1 - y0 - 2 * yd
+
+      // // Calculate the angle in radians
+      // let updatedAngle = Math.atan2(deltaY, deltaX)
+
+      // // If yd > xd, we need to adjust the angle by 90 degrees (or pi/2 radians)
+      // // because the semi-major axis is closer to being vertical.
+      // if (yd > xd) {
+      //   updatedAngle += Math.PI / 2
+      // }
+
+      console.log(
+        "updatedAngle: ",
+        updatedAngle,
+        "original angle: ",
+        originalProperties.angle
+      )
+
+      // const newEllipseValues = calculateEllipseAxes(
+      //   transformedEllipseBoundingBox,
+      //   updatedAngle
+      // )
       // Calculate new radii
-      let radA = newEllipseValues.radA
-      let radB = newEllipseValues.radB
+      // let radA = updatedRadA
+      // let radB = updatedRadB
+      let radA = originalProperties.radA
+      let radB = originalProperties.radB
       // Calculate points on the ellipse's axes after transformation
       let p2 = {
         x: Math.round(

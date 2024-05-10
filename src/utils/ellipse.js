@@ -339,6 +339,14 @@ function plotRotatedEllipseRect(
     ...plotPoints,
     ...plotConicBezierSeg(x1, y1 - yd, x1, y0, x0 + xd, y0, w),
   ]
+  // plotPoints.push({ x: x0, y: y0 + yd }) // left tangent point
+  // plotPoints.push({ x: x0 + xd, y: y0 }) // top tangent point
+  // plotPoints.push({ x: x1 - xd, y: y1 }) // bottom tangent point
+  // plotPoints.push({ x: x1, y: y1 - yd }) // right tangent point
+  plotPoints.push({ x: x0, y: y0 }) // top-left corner
+  plotPoints.push({ x: x1, y: y0 }) // top-right corner
+  plotPoints.push({ x: x1, y: y1 }) // bottom-right corner
+  plotPoints.push({ x: x0, y: y1 }) // bottom-left corner
   //remove duplicate coordinates
   const seen = new Set()
   plotPoints = plotPoints.filter((point) => {

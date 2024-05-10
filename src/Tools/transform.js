@@ -432,7 +432,7 @@ export function syncEllipseProperties(
     vectorProperties.py3 = vectorProperties.py1 + dyb
   } else if (shiftedXKey === "px2") {
     //Moving px2, adjust radA and px3
-    vectorProperties.radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
+    vectorProperties.radA = Math.sqrt(dxa * dxa + dya * dya)
     //radB remains constant while radA changes unless forceCircle is true
     if (vectorProperties.forceCircle) {
       vectorProperties.radB = vectorProperties.radA
@@ -450,7 +450,7 @@ export function syncEllipseProperties(
     updateEllipseOffsets(vectorProperties, vectorProperties.forceCircle, 0)
   } else if (shiftedXKey === "px3") {
     //Moving px3, adjust radB and px2
-    vectorProperties.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
+    vectorProperties.radB = Math.sqrt(dxb * dxb + dyb * dyb)
     //radA remains constant while radB changes unless forceCircle is true
     if (vectorProperties.forceCircle) {
       vectorProperties.radA = vectorProperties.radB

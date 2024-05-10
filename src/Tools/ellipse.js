@@ -55,9 +55,7 @@ function ellipseSteps() {
         state.vectorProperties.py2 = state.cursorY
         let dxa = state.vectorProperties.px2 - state.vectorProperties.px1
         let dya = state.vectorProperties.py2 - state.vectorProperties.py1
-        state.vectorProperties.radA = Math.floor(
-          Math.sqrt(dxa * dxa + dya * dya)
-        )
+        state.vectorProperties.radA = Math.sqrt(dxa * dxa + dya * dya)
       }
       updateEllipseOffsets(state.vectorProperties)
       //adjusting p3 should make findHalf on a perpendicular angle rotated -90 degrees, adjusting p1 should maintain offset, no subpixels
@@ -107,9 +105,7 @@ function ellipseSteps() {
           state.vectorProperties.py2 = state.cursorY
           let dxa = state.vectorProperties.px2 - state.vectorProperties.px1
           let dya = state.vectorProperties.py2 - state.vectorProperties.py1
-          state.vectorProperties.radA = Math.floor(
-            Math.sqrt(dxa * dxa + dya * dya)
-          )
+          state.vectorProperties.radA = Math.sqrt(dxa * dxa + dya * dya)
         }
         updateEllipseOffsets(state.vectorProperties)
         //onscreen preview
@@ -144,9 +140,8 @@ function ellipseSteps() {
       if (state.clickCounter === 1) {
         let dxa = state.vectorProperties.px2 - state.vectorProperties.px1
         let dya = state.vectorProperties.py2 - state.vectorProperties.py1
-        state.vectorProperties.radA = Math.floor(
-          Math.sqrt(dxa * dxa + dya * dya)
-        )
+        state.vectorProperties.radA = Math.sqrt(dxa * dxa + dya * dya)
+
         //set px3 at right angle on the circle
         let newVertex = getOpposingEllipseVertex(
           state.vectorProperties.px1,
@@ -161,9 +156,8 @@ function ellipseSteps() {
         //set rb
         let dxb = state.vectorProperties.px3 - state.vectorProperties.px1
         let dyb = state.vectorProperties.py3 - state.vectorProperties.py1
-        state.vectorProperties.radB = Math.floor(
-          Math.sqrt(dxb * dxb + dyb * dyb)
-        )
+        state.vectorProperties.radB = Math.sqrt(dxb * dxb + dyb * dyb)
+
         updateEllipseOffsets(state.vectorProperties)
         actionEllipse(
           state.vectorProperties.px1,
