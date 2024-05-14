@@ -20,11 +20,11 @@ import { assert, plotConicBezierSeg } from "./bezier.js"
  */
 export function plotEllipse(xm, ym, a, b) {
   let plotPoints = []
-  var x = -a,
+  let x = -a,
     y = 0 /* II. quadrant from bottom left to top right */
-  var e2,
+  let e2,
     dx = (1 + 2 * x) * b * b /* error increment  */
-  var dy = x * x,
+  let dy = x * x,
     err = dx + dy /* error of 1.step */
 
   do {
@@ -63,7 +63,7 @@ export function plotEllipse(xm, ym, a, b) {
 
 // export function plotCircle(xm, ym, r, offset) {
 //   let plotPoints = []
-//   var x = -r,
+//   let x = -r,
 //     y = 0,
 //     err = 2 - 2 * r /* bottom left to top right */
 //   //offset when subpixel is nearer to center
@@ -136,7 +136,7 @@ export function plotCircle(xm, ym, r, offset) {
    * @param {number} quadrant - quadrant number
    */
   function plotQuadrant(xm, ym, r, offset, quadrant) {
-    var x = -r,
+    let x = -r,
       y = 0,
       err = 2 - 2 * r
 
@@ -174,12 +174,12 @@ export function plotCircle(xm, ym, r, offset) {
 export function plotEllipseRect(x0, y0, x1, y1) {
   let plotPoints = []
   /* rectangular parameter enclosing the ellipse */
-  var a = Math.abs(x1 - x0),
+  let a = Math.abs(x1 - x0),
     b = Math.abs(y1 - y0),
     b1 = b & 1 /* diameter */
-  var dx = 4 * (1.0 - a) * b * b,
+  let dx = 4 * (1.0 - a) * b * b,
     dy = 4 * (b1 + 1) * a * a /* error increment */
-  var err = dx + dy + b1 * a * a,
+  let err = dx + dy + b1 * a * a,
     e2 /* error of 1.step */
 
   if (x0 > x1) {
@@ -257,9 +257,9 @@ export function plotRotatedEllipse(
   y1Offset
 ) {
   /* plot ellipse rotated by angle (radian) */
-  var xd = a * a,
+  let xd = a * a,
     yd = b * b
-  var s = Math.sin(angle),
+  let s = Math.sin(angle),
     zd = (xd - yd) * s /* ellipse rotation */
   ;(xd = Math.sqrt(xd - zd * s)),
     (yd = Math.sqrt(yd + zd * s)) /* surrounding rect */
@@ -302,13 +302,13 @@ function plotRotatedEllipseRect(
 ) {
   x1 = x1 + x1Offset
   y1 = y1 + y1Offset
+  if (isRightAngle) return plotEllipseRect(x0, y0, x1, y1) /* looks nicer */
+
   let plotPoints = []
   /* rectangle enclosing the ellipse, integer rotation angle */
-  var xd = x1 - x0,
+  let xd = x1 - x0,
     yd = y1 - y0,
     w = xd * yd
-  // if (Math.abs(zd) == 0) //original algorithm, only works for radius at 0 degrees
-  if (isRightAngle) return plotEllipseRect(x0, y0, x1, y1) /* looks nicer */
   if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
   //Breaks down at smaller radii, need enforced minimum where offset is not applied? if assertion fails, try again after w is calculated without offset
   if (!(w <= 1.0 && w >= 0.0)) {
