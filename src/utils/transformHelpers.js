@@ -390,7 +390,8 @@ function getTimeAtFirstAxis(radA, radB, scaleX, scaleY, radians) {
       2 * term4
   )
   let arctanX = -arctanXNumerator / arctanXDenominator
-  let timeAtFirstAxis = 0.5 * Math.atan2(arctanY, arctanX)
+  //Arctan[arctanY,arctanX]
+  let timeAtFirstAxis = 0.5 * Math.atan2(arctanX, arctanY)
   return timeAtFirstAxis
 }
 
@@ -556,6 +557,9 @@ export function transformVectorContent(
       }
 
       /////////////////////////////////
+      // let centerX = vector.vectorProperties.px1
+      // let centerY = vector.vectorProperties.py1
+      // let radB =
 
       //////////////////////////////
 
@@ -653,6 +657,7 @@ export function transformVectorContent(
 
       ///////////////////////////
       const timeAtAxisA = getTimeAtFirstAxis(radA, radB, scaleX, scaleY, angle)
+      console.log(timeAtAxisA, { radA, radB, scaleX, scaleY, angle })
       //Plug in time to parametric equations for ellipse to get x and y values of semi-major axis vertex and length of axis
       let px2 =
         scaleX *
@@ -665,26 +670,18 @@ export function transformVectorContent(
           radB * Math.sin(timeAtAxisA) * Math.cos(angle) +
           radA * Math.cos(timeAtAxisA) * Math.sin(angle))
 
-      // const timeAtAxisB = getTimeAtFirstAxis(
-      //   radA,
-      //   radB,
-      //   scaleX,
-      //   scaleY,
-      //   angle - Math.PI / 2
-      // )
-
       let px3 =
         scaleX *
         (originalProperties.px1 +
-          radA * Math.cos(timeAtAxisA) * Math.cos(angle - Math.PI / 2) -
-          radB * Math.sin(timeAtAxisA) * Math.sin(angle - Math.PI / 2))
+          radA * Math.cos(timeAtAxisA - Math.PI / 2) * Math.cos(angle) -
+          radB * Math.sin(timeAtAxisA - Math.PI / 2) * Math.sin(angle))
       let py3 =
         scaleY *
         (originalProperties.py1 +
-          radB * Math.sin(timeAtAxisA) * Math.cos(angle - Math.PI / 2) +
-          radA * Math.cos(timeAtAxisA) * Math.sin(angle - Math.PI / 2))
+          radB * Math.sin(timeAtAxisA - Math.PI / 2) * Math.cos(angle) +
+          radA * Math.cos(timeAtAxisA - Math.PI / 2) * Math.sin(angle))
 
-      //////////////////////////
+      //////////////////////›////
       // Calculate points on the ellipse's axes after transformation
       let p2 = {
         x: Math.round(px2),
@@ -707,6 +704,9 @@ export function transformVectorContent(
       let dxb = p3.x - vector.vectorProperties.px1
       let dyb = p3.y - vector.vectorProperties.py1
       vector.vectorProperties.radB = Math.sqrt(dxb * dxb + dyb * dyb)
+      // vector.vectorProperties.radA = newRadA
+      // vector.vectorProperties.radB = newRadB
+      // vector.vectorProperties.angle = updatedAngle
     } else {
       transformControlPoint(
         vector,
