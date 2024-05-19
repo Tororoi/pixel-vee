@@ -325,6 +325,7 @@ function plotCubicBezierSeg(x0, y0, x1, y1, x2, y2, x3, y3, color) {
  * @returns {Array} - array of coordinates representing the pixels of a bezier segment
  */
 export function plotConicBezierSeg(x0, y0, x1, y1, x2, y2, w) {
+  // console.log("weight: ", w)
   let plotPoints = []
   /* plot a limited rational Bezier segment, squared weight */
   var sx = x2 - x1,

@@ -467,7 +467,7 @@ export function transformVectorContent(
       //reverse engineer plotRotatedEllipse function to get new radii and angle. ellipse boundaries are known after transformation. p1 is the center point so calculate the boundary of the ellipse
       const originalEllipseBoundingBox =
         calculateEllipseBoundingBox(originalProperties)
-      //TODO: (High Priority) Take a different approach to ellipse transformation. Find the minimum bounding rectangle (rotated at same angle as ellipse) then apply scaling to corners of rectangle.
+      //TODO: (High Priority) Take a different approach to ellipse transformation. Find the minimum bounding rectangle (rotated at same angle as ellipse) then apply scaling to corners of rectangle. Before transformation, vertices are tangent to rectangle.
       const transformedEllipseBoundingBox = {
         xMin: Math.round(originalEllipseBoundingBox.xMin * scaleX + xOffset),
         xMax: Math.round(originalEllipseBoundingBox.xMax * scaleX + xOffset),
@@ -488,73 +488,73 @@ export function transformVectorContent(
        */
       /* plot ellipse rotated by angle (radian) */
       // console.log(originalProperties.x1Offset, originalProperties.y1Offset)
-      let a = originalProperties.radA
-      let b = originalProperties.radB
-      var xd = a * a,
-        yd = b * b
-      var s = Math.sin(angle),
-        zd = (xd - yd) * s /* ellipse rotation */
-      ;(xd = Math.sqrt(xd - zd * s)),
-        (yd = Math.sqrt(yd + zd * s)) /* surrounding rect */
-      a = Math.floor(xd + 0.5)
-      b = Math.floor(yd + 0.5)
-      zd = (zd * a * b) / (xd * yd)
-      let x0 = originalProperties.px1 - a
-      let y0 = originalProperties.py1 - b
-      let x1 = originalProperties.px1 + a
-      let y1 = originalProperties.py1 + b
-      // x1 = x1 + originalProperties.x1Offset
-      // y1 = y1 + originalProperties.y1Offset
-      xd = x1 - x0
-      yd = y1 - y0
-      let w = xd * yd
-      if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
-      //Breaks down at smaller radii, need enforced minimum where offset is not applied? if assertion fails, try again after w is calculated without offset
-      if (!(w <= 1.0 && w >= 0.0)) {
-        //if assertion expected to fail with offsets, remove offsets and reset vars before trying assert
-        // x1 = x1 - originalProperties.x1Offset
-        // y1 = y1 - originalProperties.y1Offset
-        xd = x1 - x0
-        yd = y1 - y0
-        w = xd * yd
-        if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
-      }
-      xd = Math.floor(xd * w + 0.5)
-      yd = Math.floor(yd * w + 0.5) /* snap to int */
-      const topTangent = {
-        x: x0 + xd,
-        y: y0,
-      }
-      const rightTangent = {
-        x: x1,
-        y: y1 - yd,
-      }
-      const bottomTangent = {
-        x: x1 - xd,
-        y: y1,
-      }
-      const leftTangent = {
-        x: x0,
-        y: y0 + yd,
-      }
+      // let a = originalProperties.radA
+      // let b = originalProperties.radB
+      // var xd = a * a,
+      //   yd = b * b
+      // var s = Math.sin(angle),
+      //   zd = (xd - yd) * s /* ellipse rotation */
+      // ;(xd = Math.sqrt(xd - zd * s)),
+      //   (yd = Math.sqrt(yd + zd * s)) /* surrounding rect */
+      // a = Math.floor(xd + 0.5)
+      // b = Math.floor(yd + 0.5)
+      // zd = (zd * a * b) / (xd * yd)
+      // let x0 = originalProperties.px1 - a
+      // let y0 = originalProperties.py1 - b
+      // let x1 = originalProperties.px1 + a
+      // let y1 = originalProperties.py1 + b
+      // // x1 = x1 + originalProperties.x1Offset
+      // // y1 = y1 + originalProperties.y1Offset
+      // xd = x1 - x0
+      // yd = y1 - y0
+      // let w = xd * yd
+      // if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
+      // //Breaks down at smaller radii, need enforced minimum where offset is not applied? if assertion fails, try again after w is calculated without offset
+      // if (!(w <= 1.0 && w >= 0.0)) {
+      //   //if assertion expected to fail with offsets, remove offsets and reset vars before trying assert
+      //   // x1 = x1 - originalProperties.x1Offset
+      //   // y1 = y1 - originalProperties.y1Offset
+      //   xd = x1 - x0
+      //   yd = y1 - y0
+      //   w = xd * yd
+      //   if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
+      // }
+      // xd = Math.floor(xd * w + 0.5)
+      // yd = Math.floor(yd * w + 0.5) /* snap to int */
+      // const topTangent = {
+      //   x: x0 + xd,
+      //   y: y0,
+      // }
+      // const rightTangent = {
+      //   x: x1,
+      //   y: y1 - yd,
+      // }
+      // const bottomTangent = {
+      //   x: x1 - xd,
+      //   y: y1,
+      // }
+      // const leftTangent = {
+      //   x: x0,
+      //   y: y0 + yd,
+      // }
 
-      // Calculate the new tangent points
-      const newTopTangent = {
-        x: topTangent.x * scaleX + xOffset,
-        y: topTangent.y * scaleY + yOffset,
-      }
-      const newRightTangent = {
-        x: rightTangent.x * scaleX + xOffset,
-        y: rightTangent.y * scaleY + yOffset,
-      }
-      const newBottomTangent = {
-        x: bottomTangent.x * scaleX + xOffset,
-        y: bottomTangent.y * scaleY + yOffset,
-      }
-      const newLeftTangent = {
-        x: leftTangent.x * scaleX + xOffset,
-        y: leftTangent.y * scaleY + yOffset,
-      }
+      // // Calculate the new tangent points
+      // const newTopTangent = {
+      //   x: topTangent.x * scaleX + xOffset,
+      //   y: topTangent.y * scaleY + yOffset,
+      // }
+      // const newRightTangent = {
+      //   x: rightTangent.x * scaleX + xOffset,
+      //   y: rightTangent.y * scaleY + yOffset,
+      // }
+      // const newBottomTangent = {
+      //   x: bottomTangent.x * scaleX + xOffset,
+      //   y: bottomTangent.y * scaleY + yOffset,
+      // }
+      // const newLeftTangent = {
+      //   x: leftTangent.x * scaleX + xOffset,
+      //   y: leftTangent.y * scaleY + yOffset,
+      // }
 
       /////////////////////////////////
       // let centerX = vector.vectorProperties.px1
@@ -657,7 +657,19 @@ export function transformVectorContent(
 
       ///////////////////////////
       const timeAtAxisA = getTimeAtFirstAxis(radA, radB, scaleX, scaleY, angle)
-      console.log(timeAtAxisA, { radA, radB, scaleX, scaleY, angle })
+      console.log(
+        timeAtAxisA,
+        "radA: ",
+        radA,
+        "radB: ",
+        radB,
+        "scaleX: ",
+        scaleX,
+        "scaleY: ",
+        scaleY,
+        "angle: ",
+        angle
+      )
       //Plug in time to parametric equations for ellipse to get x and y values of semi-major axis vertex and length of axis
       let px2 =
         scaleX *
