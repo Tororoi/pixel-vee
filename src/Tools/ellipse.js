@@ -159,7 +159,7 @@ function ellipseSteps() {
         state.vectorProperties.radB = Math.sqrt(dxb * dxb + dyb * dyb)
 
         updateEllipseOffsets(state.vectorProperties)
-        actionEllipse(
+        const conicControlPoints = actionEllipse(
           state.vectorProperties.px1,
           state.vectorProperties.py1,
           state.vectorProperties.px2,
@@ -209,6 +209,7 @@ function ellipseSteps() {
             vectorIndices: [uniqueVectorKey],
           },
         })
+        console.log(conicControlPoints)
         //Store vector in state
         state.vectors[uniqueVectorKey] = {
           index: uniqueVectorKey,
@@ -226,6 +227,7 @@ function ellipseSteps() {
             py2: state.vectorProperties.py2 - canvas.currentLayer.y,
             px3: state.vectorProperties.px3 - canvas.currentLayer.x,
             py3: state.vectorProperties.py3 - canvas.currentLayer.y,
+            ...conicControlPoints,
           },
           // maskArray,
           // boundaryBox,

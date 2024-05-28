@@ -464,16 +464,22 @@ export function transformVectorContent(
       // if (isMirroredHorizontally) updatedAngle = Math.PI - updatedAngle
       // if (isMirroredVertically) updatedAngle = -updatedAngle
 
-      //reverse engineer plotRotatedEllipse function to get new radii and angle. ellipse boundaries are known after transformation. p1 is the center point so calculate the boundary of the ellipse
       const originalEllipseBoundingBox =
         calculateEllipseBoundingBox(originalProperties)
-      //TODO: (High Priority) Take a different approach to ellipse transformation. Find the minimum bounding rectangle (rotated at same angle as ellipse) then apply scaling to corners of rectangle. Before transformation, vertices are tangent to rectangle.
       const transformedEllipseBoundingBox = {
         xMin: Math.round(originalEllipseBoundingBox.xMin * scaleX + xOffset),
         xMax: Math.round(originalEllipseBoundingBox.xMax * scaleX + xOffset),
         yMin: Math.round(originalEllipseBoundingBox.yMin * scaleY + yOffset),
         yMax: Math.round(originalEllipseBoundingBox.yMax * scaleY + yOffset),
       }
+
+      //get the geometric mean of the scaling factors
+      console.log(originalProperties) //TODO: Save control points via plotCircle
+      let scalingFactor = Math.sqrt(scaleX * scaleY)
+      // let newWeight1 = originalProperties.conicWeight1 / scalingFactor
+
+      // zd === (a^2 - b^2) * Math.sin(angle)
+      // let zd = w - 2 * Math.pow(w, 2)
 
       //TODO: (High Priority) In order to transform the ellipse,
       // 1. calculate the tangent points on the original bounding box,
@@ -656,44 +662,52 @@ export function transformVectorContent(
       let radB = originalProperties.radB
 
       ///////////////////////////
-      const timeAtAxisA = getTimeAtFirstAxis(radA, radB, scaleX, scaleY, angle)
-      console.log(
-        timeAtAxisA,
-        "radA: ",
-        radA,
-        "radB: ",
-        radB,
-        "scaleX: ",
-        scaleX,
-        "scaleY: ",
-        scaleY,
-        "angle: ",
-        angle
-      )
-      //Plug in time to parametric equations for ellipse to get x and y values of semi-major axis vertex and length of axis
-      let px2 =
-        scaleX *
-        (originalProperties.px1 +
-          radA * Math.cos(timeAtAxisA) * Math.cos(angle) -
-          radB * Math.sin(timeAtAxisA) * Math.sin(angle))
-      let py2 =
-        scaleY *
-        (originalProperties.py1 +
-          radB * Math.sin(timeAtAxisA) * Math.cos(angle) +
-          radA * Math.cos(timeAtAxisA) * Math.sin(angle))
+      // const timeAtAxisA = getTimeAtFirstAxis(radA, radB, scaleX, scaleY, angle)
+      // console.log(
+      //   timeAtAxisA,
+      //   "radA: ",
+      //   radA,
+      //   "radB: ",
+      //   radB,
+      //   "scaleX: ",
+      //   scaleX,
+      //   "scaleY: ",
+      //   scaleY,
+      //   "angle: ",
+      //   angle
+      // )
+      // //Plug in time to parametric equations for ellipse to get x and y values of semi-major axis vertex and length of axis
+      // let px2 =
+      //   scaleX *
+      //   (originalProperties.px1 +
+      //     radA * Math.cos(timeAtAxisA) * Math.cos(angle) -
+      //     radB * Math.sin(timeAtAxisA) * Math.sin(angle))
+      // let py2 =
+      //   scaleY *
+      //   (originalProperties.py1 +
+      //     radB * Math.sin(timeAtAxisA) * Math.cos(angle) +
+      //     radA * Math.cos(timeAtAxisA) * Math.sin(angle))
 
-      let px3 =
-        scaleX *
-        (originalProperties.px1 +
-          radA * Math.cos(timeAtAxisA - Math.PI / 2) * Math.cos(angle) -
-          radB * Math.sin(timeAtAxisA - Math.PI / 2) * Math.sin(angle))
-      let py3 =
-        scaleY *
-        (originalProperties.py1 +
-          radB * Math.sin(timeAtAxisA - Math.PI / 2) * Math.cos(angle) +
-          radA * Math.cos(timeAtAxisA - Math.PI / 2) * Math.sin(angle))
+      // let px3 =
+      //   scaleX *
+      //   (originalProperties.px1 +
+      //     radA * Math.cos(timeAtAxisA - Math.PI / 2) * Math.cos(angle) -
+      //     radB * Math.sin(timeAtAxisA - Math.PI / 2) * Math.sin(angle))
+      // let py3 =
+      //   scaleY *
+      //   (originalProperties.py1 +
+      //     radB * Math.sin(timeAtAxisA - Math.PI / 2) * Math.cos(angle) +
+      //     radA * Math.cos(timeAtAxisA - Math.PI / 2) * Math.sin(angle))
 
       //////////////////////›////
+      let px2 = vector.vectorProperties.px1 + scaleX * (radA * Math.cos(angle))
+      let py2 = vector.vectorProperties.py1 + scaleY * (radA * Math.sin(angle))
+      let px3 =
+        vector.vectorProperties.px1 +
+        scaleX * (radB * Math.cos(angle - Math.PI / 2))
+      let py3 =
+        vector.vectorProperties.py1 +
+        scaleY * (radB * Math.sin(angle - Math.PI / 2))
       // Calculate points on the ellipse's axes after transformation
       let p2 = {
         x: Math.round(px2),

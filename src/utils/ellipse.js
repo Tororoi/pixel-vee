@@ -323,26 +323,30 @@ function plotRotatedEllipseRect(
   assert(w <= 1.0 && w >= 0.0) /* limit angle to |zd|<=xd*yd */
   xd = Math.floor(xd * w + 0.5)
   yd = Math.floor(yd * w + 0.5) /* snap to int */
-  plotPoints = [
-    ...plotPoints,
-    ...plotConicBezierSeg(x0, y0 + yd, x0, y0, x0 + xd, y0, 1.0 - w),
-  ]
-  plotPoints = [
-    ...plotPoints,
-    ...plotConicBezierSeg(x0, y0 + yd, x0, y1, x1 - xd, y1, w),
-  ]
-  plotPoints = [
-    ...plotPoints,
-    ...plotConicBezierSeg(x1, y1 - yd, x1, y1, x1 - xd, y1, 1.0 - w),
-  ]
-  plotPoints = [
-    ...plotPoints,
-    ...plotConicBezierSeg(x1, y1 - yd, x1, y0, x0 + xd, y0, w),
-  ]
-  // plotPoints.push({ x: x0, y: y0 + yd }) // left tangent point
-  // plotPoints.push({ x: x0 + xd, y: y0 }) // top tangent point
-  // plotPoints.push({ x: x1 - xd, y: y1 }) // bottom tangent point
-  // plotPoints.push({ x: x1, y: y1 - yd }) // right tangent point
+  // plotPoints = [
+  //   ...plotPoints,
+  //   ...plotConicBezierSeg(x0, y0 + yd, x0, y0, x0 + xd, y0, 1.0 - w),
+  // ]
+  // plotPoints = [
+  //   ...plotPoints,
+  //   ...plotConicBezierSeg(x0, y0 + yd, x0, y1, x1 - xd, y1, w),
+  // ]
+  // plotPoints = [
+  //   ...plotPoints,
+  //   ...plotConicBezierSeg(x1, y1 - yd, x1, y1, x1 - xd, y1, 1.0 - w),
+  // ]
+  // plotPoints = [
+  //   ...plotPoints,
+  //   ...plotConicBezierSeg(x1, y1 - yd, x1, y0, x0 + xd, y0, w),
+  // ]
+  plotPoints.push({ x: x0, y: y0 + yd }) // left tangent point
+  plotPoints.push({ x: x0, y: y0 }) // control point 1
+  plotPoints.push({ x: x0 + xd, y: y0 }) // top tangent point
+  plotPoints.push({ x: x0, y: y1 }) // control point 2
+  plotPoints.push({ x: x1 - xd, y: y1 }) // bottom tangent point
+  plotPoints.push({ x: x1, y: y1 }) // control point 3
+  plotPoints.push({ x: x1, y: y1 - yd }) // right tangent point
+  plotPoints.push({ x: x1, y: y0 }) // control point 4
   // plotPoints.push({ x: x0, y: y0 }) // top-left corner
   // plotPoints.push({ x: x1, y: y0 }) // top-right corner
   // plotPoints.push({ x: x1, y: y1 }) // bottom-right corner
@@ -357,7 +361,20 @@ function plotRotatedEllipseRect(
     seen.add(key)
     return true // keep this item
   })
-  return plotPoints
+  return {
+    plotPoints,
+    controlPoints: {
+      weight: w,
+      xMin: x0,
+      xMax: x1,
+      yMin: y0,
+      yMax: y1,
+      yLeftTangent: y0 + yd,
+      yRightTangent: y1 - yd,
+      xTopTangent: x0 + xd,
+      xBottomTangent: x1 - xd,
+    },
+  }
 }
 
 //helper functions

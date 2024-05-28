@@ -550,7 +550,7 @@ export function actionCubicCurve(
 }
 
 /**
- * User action for process to set control points for cubic bezier
+ * User action for process to set control points for ellipse based on vertices
  * @param {number} centerx - (Integer)
  * @param {number} centery - (Integer)
  * @param {number} xa - (Integer)
@@ -573,6 +573,7 @@ export function actionCubicCurve(
  * @param {Set} maskSet - set of coordinates to draw on if mask is active
  * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {boolean} isPreview - whether the action is a preview (not on main canvas) - used by vector tools before line is confirmed
+ * @returns {Object} controlPoints - array of control points for ellipse conic segments
  */
 export function actionEllipse(
   centerx,
@@ -618,7 +619,7 @@ export function actionEllipse(
       isPreview
     )
   } else {
-    let plotPoints = plotRotatedEllipse(
+    const { plotPoints, controlPoints } = plotRotatedEllipse(
       centerx,
       centery,
       radA,
@@ -641,5 +642,6 @@ export function actionEllipse(
       customContext,
       isPreview
     )
+    return controlPoints
   }
 }
