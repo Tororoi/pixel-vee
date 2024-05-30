@@ -229,6 +229,7 @@ export function plotEllipseRect(x0, y0, x1, y1) {
     seen.add(key)
     return true // keep this item
   })
+
   return plotPoints
 }
 
@@ -304,7 +305,6 @@ function plotRotatedEllipseRect(
   y1 = y1 + y1Offset
   if (isRightAngle) return plotEllipseRect(x0, y0, x1, y1) /* looks nicer */
 
-  let plotPoints = []
   /* rectangle enclosing the ellipse, integer rotation angle */
   let xd = x1 - x0,
     yd = y1 - y0,
@@ -323,22 +323,24 @@ function plotRotatedEllipseRect(
   assert(w <= 1.0 && w >= 0.0) /* limit angle to |zd|<=xd*yd */
   xd = Math.floor(xd * w + 0.5)
   yd = Math.floor(yd * w + 0.5) /* snap to int */
-  // plotPoints = [
-  //   ...plotPoints,
-  //   ...plotConicBezierSeg(x0, y0 + yd, x0, y0, x0 + xd, y0, 1.0 - w),
-  // ]
-  // plotPoints = [
-  //   ...plotPoints,
-  //   ...plotConicBezierSeg(x0, y0 + yd, x0, y1, x1 - xd, y1, w),
-  // ]
-  // plotPoints = [
-  //   ...plotPoints,
-  //   ...plotConicBezierSeg(x1, y1 - yd, x1, y1, x1 - xd, y1, 1.0 - w),
-  // ]
-  // plotPoints = [
-  //   ...plotPoints,
-  //   ...plotConicBezierSeg(x1, y1 - yd, x1, y0, x0 + xd, y0, w),
-  // ]
+  // w = 0.5 //for circle
+  let plotPoints = []
+  plotPoints = [
+    ...plotPoints,
+    ...plotConicBezierSeg(x0, y0 + yd, x0, y0, x0 + xd, y0, 1.0 - w),
+  ]
+  plotPoints = [
+    ...plotPoints,
+    ...plotConicBezierSeg(x0, y0 + yd, x0, y1, x1 - xd, y1, w),
+  ]
+  plotPoints = [
+    ...plotPoints,
+    ...plotConicBezierSeg(x1, y1 - yd, x1, y1, x1 - xd, y1, 1.0 - w),
+  ]
+  plotPoints = [
+    ...plotPoints,
+    ...plotConicBezierSeg(x1, y1 - yd, x1, y0, x0 + xd, y0, w),
+  ]
   plotPoints.push({ x: x0, y: y0 + yd }) // left tangent point
   plotPoints.push({ x: x0, y: y0 }) // control point 1
   plotPoints.push({ x: x0 + xd, y: y0 }) // top tangent point
@@ -358,23 +360,23 @@ function plotRotatedEllipseRect(
     if (seen.has(key)) {
       return false // skip this item
     }
+    //remove tangent points for visibility (temporary)
+    if (key === `${x0},${y0 + yd}`) {
+      return false
+    }
+    if (key === `${x0 + xd},${y0}`) {
+      return false
+    }
+    if (key === `${x1 - xd},${y1}`) {
+      return false
+    }
+    if (key === `${x1},${y1 - yd}`) {
+      return false
+    }
     seen.add(key)
     return true // keep this item
   })
-  return {
-    plotPoints,
-    controlPoints: {
-      weight: w,
-      xMin: x0,
-      xMax: x1,
-      yMin: y0,
-      yMax: y1,
-      yLeftTangent: y0 + yd,
-      yRightTangent: y1 - yd,
-      xTopTangent: x0 + xd,
-      xBottomTangent: x1 - xd,
-    },
-  }
+  return plotPoints
 }
 
 //helper functions

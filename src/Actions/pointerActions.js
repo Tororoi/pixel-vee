@@ -573,7 +573,7 @@ export function actionCubicCurve(
  * @param {Set} maskSet - set of coordinates to draw on if mask is active
  * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {boolean} isPreview - whether the action is a preview (not on main canvas) - used by vector tools before line is confirmed
- * @returns {Object} controlPoints - array of control points for ellipse conic segments
+ * @returns {object} controlPoints - array of control points for ellipse conic segments
  */
 export function actionEllipse(
   centerx,
@@ -600,7 +600,7 @@ export function actionEllipse(
   isPreview = false
 ) {
   if (forceCircle) {
-    let plotPoints = plotCircle(
+    const plotPoints = plotCircle(
       centerx + 0.5,
       centery + 0.5,
       radA,
@@ -619,7 +619,7 @@ export function actionEllipse(
       isPreview
     )
   } else {
-    const { plotPoints, controlPoints } = plotRotatedEllipse(
+    const plotPoints = plotRotatedEllipse(
       centerx,
       centery,
       radA,
@@ -642,6 +642,5 @@ export function actionEllipse(
       customContext,
       isPreview
     )
-    return controlPoints
   }
 }
