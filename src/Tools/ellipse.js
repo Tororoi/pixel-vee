@@ -7,7 +7,11 @@ import { actionEllipse } from "../Actions/pointerActions.js"
 import { modifyVectorAction } from "../Actions/modifyTimeline.js"
 import { vectorGui, createActiveIndexesForRender } from "../GUI/vector.js"
 import { getAngle } from "../utils/trig.js"
-import { getOpposingEllipseVertex, findHalf } from "../utils/ellipse.js"
+import {
+  getOpposingEllipseVertex,
+  findHalf,
+  calcEllipseConicsFromVertices,
+} from "../utils/ellipse.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
@@ -210,33 +214,15 @@ function ellipseSteps() {
           },
         })
         //Define conic control points
-        let x0 = state.vectorProperties.px1 - state.vectorProperties.radA
-        let x1 =
-          state.vectorProperties.px1 +
-          state.vectorProperties.radA +
-          state.vectorProperties.x1Offset
-        let y0 = state.vectorProperties.py1 - state.vectorProperties.radA
-        let y1 =
-          state.vectorProperties.py1 +
-          state.vectorProperties.radA +
+        let conicControlPoints = calcEllipseConicsFromVertices(
+          state.vectorProperties.px1,
+          state.vectorProperties.py1,
+          state.vectorProperties.radA,
+          state.vectorProperties.radB,
+          state.vectorProperties.angle,
+          state.vectorProperties.x1Offset,
           state.vectorProperties.y1Offset
-        let xd =
-            state.vectorProperties.radA * 2 + state.vectorProperties.x1Offset,
-          yd = state.vectorProperties.radA * 2 + state.vectorProperties.y1Offset
-        let w = 0.5 //used for circle
-        xd = Math.floor(xd * w + 0.5)
-        yd = Math.floor(yd * w + 0.5) /* snap to int */
-        let conicControlPoints = {
-          weight: w,
-          xMin: x0 - canvas.currentLayer.x,
-          xMax: x1 - canvas.currentLayer.x,
-          yMin: y0 - canvas.currentLayer.y,
-          yMax: y1 - canvas.currentLayer.y,
-          yLeftTangent: y0 + yd - canvas.currentLayer.y,
-          yRightTangent: y1 - yd - canvas.currentLayer.y,
-          xTopTangent: x0 + xd - canvas.currentLayer.x,
-          xBottomTangent: x1 - xd - canvas.currentLayer.x,
-        }
+        )
         //Store vector in state
         state.vectors[uniqueVectorKey] = {
           index: uniqueVectorKey,

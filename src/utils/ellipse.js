@@ -280,6 +280,69 @@ export function plotRotatedEllipse(
 }
 
 /**
+ *
+ * @param {number} x - x-coordinate of the center
+ * @param {number} y - y-coordinate of the center
+ * @param {number} a - semi-major axis
+ * @param {number} b - semi-minor axis
+ * @param {number} angle - angle in radians
+ * @param {number} x1Offset - x direction offset
+ * @param {number} y1Offset - y direction offset
+ * @returns {object} - {weight, leftTangentX, leftTangentY, topTangentX, topTangentY, rightTangentX, rightTangentY, bottomTangentX, bottomTangentY}
+ */
+export function calcEllipseConicsFromVertices(
+  x,
+  y,
+  a,
+  b,
+  angle,
+  x1Offset,
+  y1Offset
+) {
+  let aa = a * a,
+    bb = b * b
+  let s = Math.sin(angle),
+    zd = (aa - bb) * s /* ellipse rotation */
+  ;(aa = Math.sqrt(aa - zd * s)),
+    (bb = Math.sqrt(bb + zd * s)) /* surrounding rect */
+  a = Math.floor(aa + 0.5)
+  b = Math.floor(bb + 0.5)
+  zd = (zd * a * b) / (aa * bb)
+  let x0 = x - a,
+    y0 = y - b,
+    x1 = x + a + x1Offset,
+    y1 = y + b + y1Offset
+  let xd = x1 - x0,
+    yd = y1 - y0,
+    w = xd * yd
+  if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
+  //Breaks down at smaller radii, need enforced minimum where offset is not applied? if assertion fails, try again after w is calculated without offset
+  if (!(w <= 1.0 && w >= 0.0)) {
+    //if assertion expected to fail with offsets, remove offsets and reset vars before trying assert
+    x1 = x1 - x1Offset
+    y1 = y1 - y1Offset
+    xd = x1 - x0
+    yd = y1 - y0
+    w = xd * yd
+    if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
+  }
+  assert(w <= 1.0 && w >= 0.0) /* limit angle to |zd|<=xd*yd */
+  xd = Math.floor(xd * w + 0.5)
+  yd = Math.floor(yd * w + 0.5) /* snap to int */
+  return {
+    weight: w,
+    leftTangentX: x0,
+    leftTangentY: y0 + yd,
+    topTangentX: x0 + xd,
+    topTangentY: y0,
+    rightTangentX: x1,
+    rightTangentY: y1 - yd,
+    bottomTangentX: x1 - xd,
+    bottomTangentY: y1,
+  }
+}
+
+/**
  * Plot a rotated ellipse with a rectangular parameter
  * @param {number} x0 - x-coordinate of the top-left corner of the rectangle
  * @param {number} y0 - y-coordinate of the top-left corner of the rectangle

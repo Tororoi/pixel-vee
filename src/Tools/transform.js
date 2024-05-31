@@ -11,7 +11,11 @@ import {
   createActiveIndexesForRender,
 } from "../GUI/vector.js"
 import { getAngle } from "../utils/trig.js"
-import { getOpposingEllipseVertex, findHalf } from "../utils/ellipse.js"
+import {
+  getOpposingEllipseVertex,
+  findHalf,
+  calcEllipseConicsFromVertices,
+} from "../utils/ellipse.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
   updateVectorProperties,
@@ -406,6 +410,7 @@ export function updateEllipseOffsets(
  * @param {string} shiftedYKey
  * @param {number} newX - The new x value for the shifted point
  * @param {number} newY - The new y value for the shifted point
+ * TODO: update conic properties here
  */
 export function syncEllipseProperties(
   vectorProperties,
@@ -471,6 +476,24 @@ export function syncEllipseProperties(
       1.5 * Math.PI
     )
   }
+  let conicControlPoints = calcEllipseConicsFromVertices(
+    vectorProperties.px1,
+    vectorProperties.py1,
+    vectorProperties.radA,
+    vectorProperties.radB,
+    vectorProperties.angle,
+    vectorProperties.x1Offset,
+    vectorProperties.y1Offset
+  )
+  vectorProperties.weight = conicControlPoints.weight
+  vectorProperties.leftTangentX = conicControlPoints.leftTangentX
+  vectorProperties.leftTangentY = conicControlPoints.leftTangentY
+  vectorProperties.topTangentX = conicControlPoints.topTangentX
+  vectorProperties.topTangentY = conicControlPoints.topTangentY
+  vectorProperties.rightTangentX = conicControlPoints.rightTangentX
+  vectorProperties.rightTangentY = conicControlPoints.rightTangentY
+  vectorProperties.bottomTangentX = conicControlPoints.bottomTangentX
+  vectorProperties.bottomTangentY = conicControlPoints.bottomTangentY
 }
 
 /**
@@ -485,7 +508,9 @@ function updateEllipseVectorProperties(currentVector) {
     state.cursorX,
     state.cursorY
   )
-  currentVector.vectorProperties = { ...state.vectorProperties }
+  currentVector.vectorProperties = {
+    ...state.vectorProperties,
+  }
   //Keep properties relative to layer offset
   currentVector.vectorProperties.px1 -= currentVector.layer.x
   currentVector.vectorProperties.py1 -= currentVector.layer.y
