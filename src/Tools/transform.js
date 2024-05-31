@@ -518,6 +518,14 @@ function updateEllipseVectorProperties(currentVector) {
   currentVector.vectorProperties.py2 -= currentVector.layer.y
   currentVector.vectorProperties.px3 -= currentVector.layer.x
   currentVector.vectorProperties.py3 -= currentVector.layer.y
+  currentVector.vectorProperties.leftTangentX -= currentVector.layer.x
+  currentVector.vectorProperties.leftTangentY -= currentVector.layer.y
+  currentVector.vectorProperties.topTangentX -= currentVector.layer.x
+  currentVector.vectorProperties.topTangentY -= currentVector.layer.y
+  currentVector.vectorProperties.rightTangentX -= currentVector.layer.x
+  currentVector.vectorProperties.rightTangentY -= currentVector.layer.y
+  currentVector.vectorProperties.bottomTangentX -= currentVector.layer.x
+  currentVector.vectorProperties.bottomTangentY -= currentVector.layer.y
 }
 
 /**

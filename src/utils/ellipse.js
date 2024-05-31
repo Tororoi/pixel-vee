@@ -308,6 +308,7 @@ export function calcEllipseConicsFromVertices(
   a = Math.floor(aa + 0.5)
   b = Math.floor(bb + 0.5)
   zd = (zd * a * b) / (aa * bb)
+  zd = 4 * zd * Math.cos(angle)
   let x0 = x - a,
     y0 = y - b,
     x1 = x + a + x1Offset,
@@ -340,6 +341,117 @@ export function calcEllipseConicsFromVertices(
     bottomTangentX: x1 - xd,
     bottomTangentY: y1,
   }
+}
+
+/**
+ * Plot a rotated ellipse with conic segments
+ * @param {number} weight - weight of the conic segment
+ * @param {number} leftTangentX - x-coordinate of the left tangent point
+ * @param {number} leftTangentY - y-coordinate of the left tangent point
+ * @param {number} topTangentX - x-coordinate of the top tangent point
+ * @param {number} topTangentY - y-coordinate of the top tangent point
+ * @param {number} rightTangentX - x-coordinate of the right tangent point
+ * @param {number} rightTangentY - y-coordinate of the right tangent point
+ * @param {number} bottomTangentX - x-coordinate of the bottom tangent point
+ * @param {number} bottomTangentY - y-coordinate of the bottom tangent point
+ * @returns {Array} - Array of points
+ */
+export function plotRotatedEllipseConics(
+  weight,
+  leftTangentX,
+  leftTangentY,
+  topTangentX,
+  topTangentY,
+  rightTangentX,
+  rightTangentY,
+  bottomTangentX,
+  bottomTangentY
+) {
+  let plotPoints = []
+  plotPoints = [
+    ...plotPoints,
+    ...plotConicBezierSeg(
+      leftTangentX,
+      leftTangentY,
+      leftTangentX,
+      topTangentY,
+      topTangentX,
+      topTangentY,
+      1.0 - weight
+    ), //top-left corner
+  ]
+  plotPoints = [
+    ...plotPoints,
+    ...plotConicBezierSeg(
+      leftTangentX,
+      leftTangentY,
+      leftTangentX,
+      bottomTangentY,
+      bottomTangentX,
+      bottomTangentY,
+      weight
+    ), //top-right corner
+  ]
+  plotPoints = [
+    ...plotPoints,
+    ...plotConicBezierSeg(
+      rightTangentX,
+      rightTangentY,
+      rightTangentX,
+      bottomTangentY,
+      bottomTangentX,
+      bottomTangentY,
+      1.0 - weight
+    ), //bottom-right corner
+  ]
+  plotPoints = [
+    ...plotPoints,
+    ...plotConicBezierSeg(
+      rightTangentX,
+      rightTangentY,
+      rightTangentX,
+      topTangentY,
+      topTangentX,
+      topTangentY,
+      weight
+    ), //bottom-left corner
+  ]
+  plotPoints.push({ x: leftTangentX, y: leftTangentY }) // left tangent point
+  plotPoints.push({ x: leftTangentX, y: topTangentY }) // control point 1
+  plotPoints.push({ x: topTangentX, y: topTangentY }) // top tangent point
+  plotPoints.push({ x: leftTangentX, y: bottomTangentY }) // control point 2
+  plotPoints.push({ x: bottomTangentX, y: bottomTangentY }) // bottom tangent point
+  plotPoints.push({ x: rightTangentX, y: bottomTangentY }) // control point 3
+  plotPoints.push({ x: rightTangentX, y: rightTangentY }) // right tangent point
+  plotPoints.push({ x: rightTangentX, y: topTangentY }) // control point 4
+  // plotPoints.push({ x: x0, y: y0 }) // top-left corner
+  // plotPoints.push({ x: x1, y: y0 }) // top-right corner
+  // plotPoints.push({ x: x1, y: y1 }) // bottom-right corner
+  // plotPoints.push({ x: x0, y: y1 }) // bottom-left corner
+  //remove duplicate coordinates
+  const seen = new Set()
+  plotPoints = plotPoints.filter((point) => {
+    let key = `${point.x},${point.y}`
+    if (seen.has(key)) {
+      return false // skip this item
+    }
+    //remove tangent points for visibility (temporary)
+    if (key === `${leftTangentX},${leftTangentY}`) {
+      return false
+    }
+    if (key === `${topTangentX},${topTangentY}`) {
+      return false
+    }
+    if (key === `${rightTangentX},${rightTangentY}`) {
+      return false
+    }
+    if (key === `${bottomTangentX},${bottomTangentY}`) {
+      return false
+    }
+    seen.add(key)
+    return true // keep this item
+  })
+  return plotPoints
 }
 
 /**
@@ -390,19 +502,19 @@ function plotRotatedEllipseRect(
   let plotPoints = []
   plotPoints = [
     ...plotPoints,
-    ...plotConicBezierSeg(x0, y0 + yd, x0, y0, x0 + xd, y0, 1.0 - w),
+    ...plotConicBezierSeg(x0, y0 + yd, x0, y0, x0 + xd, y0, 1.0 - w), //top-left corner
   ]
   plotPoints = [
     ...plotPoints,
-    ...plotConicBezierSeg(x0, y0 + yd, x0, y1, x1 - xd, y1, w),
+    ...plotConicBezierSeg(x0, y0 + yd, x0, y1, x1 - xd, y1, w), //top-right corner
   ]
   plotPoints = [
     ...plotPoints,
-    ...plotConicBezierSeg(x1, y1 - yd, x1, y1, x1 - xd, y1, 1.0 - w),
+    ...plotConicBezierSeg(x1, y1 - yd, x1, y1, x1 - xd, y1, 1.0 - w), //bottom-right corner
   ]
   plotPoints = [
     ...plotPoints,
-    ...plotConicBezierSeg(x1, y1 - yd, x1, y0, x0 + xd, y0, w),
+    ...plotConicBezierSeg(x1, y1 - yd, x1, y0, x0 + xd, y0, w), //bottom-left corner
   ]
   plotPoints.push({ x: x0, y: y0 + yd }) // left tangent point
   plotPoints.push({ x: x0, y: y0 }) // control point 1

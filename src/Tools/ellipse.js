@@ -71,6 +71,7 @@ function ellipseSteps() {
       //onscreen preview
       renderCanvas(canvas.currentLayer)
       actionEllipse(
+        state.vectorProperties,
         state.vectorProperties.px1,
         state.vectorProperties.py1,
         state.vectorProperties.px2,
@@ -115,6 +116,7 @@ function ellipseSteps() {
         //onscreen preview
         renderCanvas(canvas.currentLayer)
         actionEllipse(
+          state.vectorProperties,
           state.vectorProperties.px1,
           state.vectorProperties.py1,
           state.vectorProperties.px2,
@@ -164,6 +166,7 @@ function ellipseSteps() {
 
         updateEllipseOffsets(state.vectorProperties)
         actionEllipse(
+          state.vectorProperties,
           state.vectorProperties.px1,
           state.vectorProperties.py1,
           state.vectorProperties.px2,

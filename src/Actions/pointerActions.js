@@ -1,7 +1,11 @@
 import { canvas } from "../Context/canvas.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
-import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
+import {
+  plotCircle,
+  plotRotatedEllipse,
+  plotRotatedEllipseConics,
+} from "../utils/ellipse.js"
 import {
   colorPixel,
   matchStartColor,
@@ -551,6 +555,7 @@ export function actionCubicCurve(
 
 /**
  * User action for process to set control points for ellipse based on vertices
+ * @param vectorProperties
  * @param {number} centerx - (Integer)
  * @param {number} centery - (Integer)
  * @param {number} xa - (Integer)
@@ -576,6 +581,7 @@ export function actionCubicCurve(
  * @returns {object} controlPoints - array of control points for ellipse conic segments
  */
 export function actionEllipse(
+  vectorProperties,
   centerx,
   centery,
   xa,
@@ -619,16 +625,28 @@ export function actionEllipse(
       isPreview
     )
   } else {
-    const plotPoints = plotRotatedEllipse(
-      centerx,
-      centery,
-      radA,
-      radB,
-      angle,
-      xa,
-      ya,
-      x1Offset,
-      y1Offset
+    //Temp: use plot function that passes conics parameters instead of radii, angle
+    // const plotPoints = plotRotatedEllipse(
+    //   centerx,
+    //   centery,
+    //   radA,
+    //   radB,
+    //   angle,
+    //   xa,
+    //   ya,
+    //   x1Offset,
+    //   y1Offset
+    // )
+    const plotPoints = plotRotatedEllipseConics(
+      vectorProperties.weight,
+      vectorProperties.leftTangentX,
+      vectorProperties.leftTangentY,
+      vectorProperties.topTangentX,
+      vectorProperties.topTangentY,
+      vectorProperties.rightTangentX,
+      vectorProperties.rightTangentY,
+      vectorProperties.bottomTangentX,
+      vectorProperties.bottomTangentY
     )
     renderPoints(
       plotPoints,

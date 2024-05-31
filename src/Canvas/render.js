@@ -430,6 +430,7 @@ function renderActionVectors(action, activeCtx = null) {
         break
       case "ellipse":
         actionEllipse(
+          vector.vectorProperties,
           vector.vectorProperties.px1 + offsetX,
           vector.vectorProperties.py1 + offsetY,
           vector.vectorProperties.px2 + offsetX,

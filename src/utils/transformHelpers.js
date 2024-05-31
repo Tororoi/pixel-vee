@@ -150,9 +150,9 @@ export function calculateEllipseBoundingBox(properties) {
 
   // Calculate the bounding box by translating these maxima by the ellipse's center coordinates
   const xMin = Math.round(px1 - xMaxFromCenter)
-  const xMax = Math.round(px1 + xMaxFromCenter + x1Offset + 1)
+  const xMax = Math.round(px1 + xMaxFromCenter + x1Offset)
   const yMin = Math.round(py1 - yMaxFromCenter)
-  const yMax = Math.round(py1 + yMaxFromCenter + y1Offset + 1)
+  const yMax = Math.round(py1 + yMaxFromCenter + y1Offset)
 
   // Return the bounding box as an object
   return { xMin, yMin, xMax, yMax }
@@ -413,13 +413,13 @@ export function transformVectorContent(
   isMirroredVertically = false
 ) {
   const originalWidth = Math.abs(
-    previousBoundaryBox.xMax - previousBoundaryBox.xMin
+    previousBoundaryBox.xMax - 1 - previousBoundaryBox.xMin
   )
   const originalHeight = Math.abs(
-    previousBoundaryBox.yMax - previousBoundaryBox.yMin
+    previousBoundaryBox.yMax - 1 - previousBoundaryBox.yMin
   )
-  const newWidth = Math.abs(newBoundaryBox.xMax - newBoundaryBox.xMin)
-  const newHeight = Math.abs(newBoundaryBox.yMax - newBoundaryBox.yMin)
+  const newWidth = Math.abs(newBoundaryBox.xMax - 1 - newBoundaryBox.xMin)
+  const newHeight = Math.abs(newBoundaryBox.yMax - 1 - newBoundaryBox.yMin)
 
   // Check if the original dimensions are zero
   if (originalWidth === 0 || originalHeight === 0) {
@@ -464,22 +464,20 @@ export function transformVectorContent(
       // if (isMirroredHorizontally) updatedAngle = Math.PI - updatedAngle
       // if (isMirroredVertically) updatedAngle = -updatedAngle
 
-      const originalEllipseBoundingBox =
-        calculateEllipseBoundingBox(originalProperties)
-      const transformedEllipseBoundingBox = {
-        xMin: Math.round(originalEllipseBoundingBox.xMin * scaleX + xOffset),
-        xMax: Math.round(originalEllipseBoundingBox.xMax * scaleX + xOffset),
-        yMin: Math.round(originalEllipseBoundingBox.yMin * scaleY + yOffset),
-        yMax: Math.round(originalEllipseBoundingBox.yMax * scaleY + yOffset),
-      }
+      // const originalEllipseBoundingBox =
+      //   calculateEllipseBoundingBox(originalProperties)
+      // const transformedEllipseBoundingBox = {
+      //   xMin: Math.round(originalEllipseBoundingBox.xMin * scaleX + xOffset),
+      //   xMax: Math.round(originalEllipseBoundingBox.xMax * scaleX + xOffset),
+      //   yMin: Math.round(originalEllipseBoundingBox.yMin * scaleY + yOffset),
+      //   yMax: Math.round(originalEllipseBoundingBox.yMax * scaleY + yOffset),
+      // }
 
       //get the geometric mean of the scaling factors
-      console.log(originalProperties) //TODO: Save control points via plotCircle
-      let scalingFactor = Math.sqrt(scaleX * scaleY)
-      // let newWeight1 = originalProperties.conicWeight1 / scalingFactor
-
-      // zd === (a^2 - b^2) * Math.sin(angle)
-      // let zd = w - 2 * Math.pow(w, 2)
+      // let scalingFactor = Math.sqrt(scaleX * scaleY)
+      // let newWeight = originalProperties.weight / scalingFactor
+      // console.log(newWeight, originalProperties.weight)
+      // vector.vectorProperties.weight = newWeight
 
       //TODO: (High Priority) In order to transform the ellipse,
       // 1. calculate the tangent points on the original bounding box,
@@ -544,23 +542,62 @@ export function transformVectorContent(
       //   y: y0 + yd,
       // }
 
-      // // Calculate the new tangent points
-      // const newTopTangent = {
-      //   x: topTangent.x * scaleX + xOffset,
-      //   y: topTangent.y * scaleY + yOffset,
-      // }
-      // const newRightTangent = {
-      //   x: rightTangent.x * scaleX + xOffset,
-      //   y: rightTangent.y * scaleY + yOffset,
-      // }
-      // const newBottomTangent = {
-      //   x: bottomTangent.x * scaleX + xOffset,
-      //   y: bottomTangent.y * scaleY + yOffset,
-      // }
-      // const newLeftTangent = {
-      //   x: leftTangent.x * scaleX + xOffset,
-      //   y: leftTangent.y * scaleY + yOffset,
-      // }
+      // Calculate the new tangent points
+      transformControlPoint(
+        vector,
+        originalProperties,
+        "leftTangentX",
+        "leftTangentY",
+        scaleX,
+        scaleY,
+        xOffset,
+        yOffset,
+        isMirroredHorizontally,
+        isMirroredVertically
+      )
+      transformControlPoint(
+        vector,
+        originalProperties,
+        "topTangentX",
+        "topTangentY",
+        scaleX,
+        scaleY,
+        xOffset,
+        yOffset,
+        isMirroredHorizontally,
+        isMirroredVertically
+      )
+      transformControlPoint(
+        vector,
+        originalProperties,
+        "rightTangentX",
+        "rightTangentY",
+        scaleX,
+        scaleY,
+        xOffset,
+        yOffset,
+        isMirroredHorizontally,
+        isMirroredVertically
+      )
+      transformControlPoint(
+        vector,
+        originalProperties,
+        "bottomTangentX",
+        "bottomTangentY",
+        scaleX,
+        scaleY,
+        xOffset,
+        yOffset,
+        isMirroredHorizontally,
+        isMirroredVertically
+      )
+
+      //weight doesn't change?
+
+      // zd = (Math.pow(a, 2) - Math.pow(b, 2)) * Math.sin(angle)
+      // zd = (zd * a * b) / (Math.pow(a, 2) * Math.pow(b, 2))
+      // zd = 4 * zd * Math.cos(angle)
+      // zd === w - 2 * Math.pow(w, 2)
 
       /////////////////////////////////
       // let centerX = vector.vectorProperties.px1
