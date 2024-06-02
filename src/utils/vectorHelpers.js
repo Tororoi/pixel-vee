@@ -1,8 +1,10 @@
+import { calcEllipseConicsFromVertices } from "./ellipse.js"
 import { calculateEllipseBoundingBox } from "./transformHelpers.js"
 import { getAngle } from "./trig.js"
 
 /**
  * WARNING: This function directly manipulates the vector's properties in the history.
+ * Used for updating coordinate properties of a vector.
  * @param {object} vector - The vector to update
  * @param {number} x - (Integer)
  * @param {number} y - (Integer)
@@ -300,10 +302,57 @@ export function rotateVectors(
       }
     }
     if (originalVectorProperties.type === "ellipse") {
-      //updateVectorProperties is not enough for ellipses. The angle must be updated as well.
+      //updateVectorProperties is not enough for ellipses. The angle and radii must be updated as well as the values for conic segments.
       vector.vectorProperties.angle = getAngle(
         vector.vectorProperties.px2 - vector.vectorProperties.px1,
         vector.vectorProperties.py2 - vector.vectorProperties.py1
+      )
+      vector.vectorProperties.radA = Math.sqrt(
+        (vector.vectorProperties.px1 - vector.vectorProperties.px2) ** 2 +
+          (vector.vectorProperties.py1 - vector.vectorProperties.py2) ** 2
+      )
+      //TODO: (Medium Priority) Should p3 be recalculated here to maintain integrity of rotated ellipse?
+      vector.vectorProperties.radB = Math.sqrt(
+        (vector.vectorProperties.px1 - vector.vectorProperties.px3) ** 2 +
+          (vector.vectorProperties.py1 - vector.vectorProperties.py3) ** 2
+      )
+      const vectorConics = calcEllipseConicsFromVertices(
+        vector.vectorProperties.px1,
+        vector.vectorProperties.py1,
+        vector.vectorProperties.radA,
+        vector.vectorProperties.radB,
+        vector.vectorProperties.angle,
+        vector.vectorProperties.x1Offset,
+        vector.vectorProperties.y1Offset
+      )
+      vector.vectorProperties.weight = vectorConics.weight
+      updateVectorProperties(
+        vector,
+        vectorConics.leftTangentX,
+        vectorConics.leftTangentY,
+        "leftTangentX",
+        "leftTangentY"
+      )
+      updateVectorProperties(
+        vector,
+        vectorConics.topTangentX,
+        vectorConics.topTangentY,
+        "topTangentX",
+        "topTangentY"
+      )
+      updateVectorProperties(
+        vector,
+        vectorConics.rightTangentX,
+        vectorConics.rightTangentY,
+        "rightTangentX",
+        "rightTangentY"
+      )
+      updateVectorProperties(
+        vector,
+        vectorConics.bottomTangentX,
+        vectorConics.bottomTangentY,
+        "bottomTangentX",
+        "bottomTangentY"
       )
     }
   }

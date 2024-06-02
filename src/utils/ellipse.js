@@ -345,6 +345,317 @@ export function calcEllipseConicsFromVertices(
 }
 
 /**
+ * Calculate the semi-major axis, semi-minor axis, and angle of rotation from conic segments.
+ * @param {number} weight - squared weight of P1
+ * @param {number} leftTangentX - x-coordinate of the left tangent
+ * @param {number} leftTangentY - y-coordinate of the left tangent
+ * @param {number} topTangentX - x-coordinate of the top tangent
+ * @param {number} topTangentY - y-coordinate of the top tangent
+ * @param {number} rightTangentX - x-coordinate of the right tangent
+ * @param {number} rightTangentY - y-coordinate of the right tangent
+ * @param {number} bottomTangentX - x-coordinate of the bottom tangent
+ * @param {number} bottomTangentY - y-coordinate of the bottom tangent
+ * @returns {object} - {a, b, angle}
+ * //IN PROGRESS, currently not working
+ */
+export function calcEllipseParamsFromConics(
+  weight,
+  leftTangentX,
+  leftTangentY,
+  topTangentX,
+  topTangentY,
+  rightTangentX,
+  rightTangentY,
+  bottomTangentX,
+  bottomTangentY
+) {
+  //top-left corner
+  const topLeftVertex = findConicSegmentVertex(
+    1 - weight,
+    leftTangentX,
+    leftTangentY,
+    leftTangentX,
+    topTangentY,
+    topTangentX,
+    topTangentY
+  )
+  //top-right corner
+  const topRightVertex = findConicSegmentVertex(
+    weight,
+    topTangentX,
+    topTangentY,
+    rightTangentX,
+    topTangentY,
+    rightTangentX,
+    rightTangentY
+  )
+  //bottom-right corner
+  const bottomRightVertex = findConicSegmentVertex(
+    1 - weight,
+    rightTangentX,
+    rightTangentY,
+    rightTangentX,
+    bottomTangentY,
+    bottomTangentX,
+    bottomTangentY
+  )
+  //bottom-left corner
+  const bottomLeftVertex = findConicSegmentVertex(
+    weight,
+    bottomTangentX,
+    bottomTangentY,
+    leftTangentX,
+    bottomTangentY,
+    leftTangentX,
+    leftTangentY
+  )
+
+  const px3 = Math.round(topRightVertex.lowestCurvatureX)
+  const py3 = Math.round(topRightVertex.lowestCurvatureY)
+  const px2 = Math.round(bottomRightVertex.highestCurvatureX)
+  const py2 = Math.round(bottomRightVertex.highestCurvatureY)
+
+  console.log({
+    topLeftVertex,
+    topRightVertex,
+    bottomRightVertex,
+    bottomLeftVertex,
+  })
+
+  return {
+    px2,
+    py2,
+    px3,
+    py3,
+  }
+}
+
+/**
+ * Calculate the vertex coordinates of a conic Bézier curve
+ * @param weight - squared weight of P1
+ * @param px0 - x-coordinate of the first control point
+ * @param py0 - y-coordinate of the first control point
+ * @param px1 - x-coordinate of the second control point
+ * @param py1 - y-coordinate of the second control point
+ * @param px2 - x-coordinate of the third control point
+ * @param py2 - y-coordinate of the third control point
+ */
+function findConicSegmentVertex(weight, px0, py0, px1, py1, px2, py2) {
+  // Function to calculate the derivatives of the conic Bézier curve
+  /**
+   *
+   * @param weight
+   * @param t
+   * @param px0
+   * @param py0
+   * @param px1
+   * @param py1
+   * @param px2
+   * @param py2
+   */
+  function bezierConicDerivatives(weight, t, px0, py0, px1, py1, px2, py2) {
+    const w = Math.sqrt(weight)
+    const mt = 1 - t
+
+    // First derivative
+    const dx1 = 2 * (mt * (px1 - px0) + t * (px2 - px1) * w)
+    const dy1 = 2 * (mt * (py1 - py0) + t * (py2 - py1) * w)
+
+    // Second derivative
+    const dx2 = 2 * ((px2 - 2 * px1 + px0) * w)
+    const dy2 = 2 * ((py2 - 2 * py1 + py0) * w)
+
+    return { dx1, dy1, dx2, dy2 }
+  }
+
+  // Function to calculate the curvature
+  /**
+   *
+   * @param t
+   * @param px0
+   * @param py0
+   * @param px1
+   * @param py1
+   * @param px2
+   * @param py2
+   * @param weight
+   */
+  function curvature(t, px0, py0, px1, py1, px2, py2, weight) {
+    const { dx1, dy1, dx2, dy2 } = bezierConicDerivatives(
+      weight,
+      t,
+      px0,
+      py0,
+      px1,
+      py1,
+      px2,
+      py2
+    )
+
+    const numerator = Math.abs(dx1 * dy2 - dy1 * dx2)
+    const denominator = Math.pow(dx1 * dx1 + dy1 * dy1, 1.5)
+
+    return numerator / denominator
+  }
+
+  // Evaluate the conic Bézier curve at parameter t
+  /**
+   *
+   * @param t
+   * @param px0
+   * @param py0
+   * @param px1
+   * @param py1
+   * @param px2
+   * @param py2
+   * @param weight
+   */
+  function evaluateBezier(t, px0, py0, px1, py1, px2, py2, weight) {
+    const w = Math.sqrt(weight)
+    const mt = 1 - t
+
+    const denominator = mt * mt + 2 * w * mt * t + t * t
+
+    const x = (mt * mt * px0 + 2 * w * mt * t * px1 + t * t * px2) / denominator
+    const y = (mt * mt * py0 + 2 * w * mt * t * py1 + t * t * py2) / denominator
+
+    return { x, y }
+  }
+
+  // Golden-section search to find the minimum curvature
+  /**
+   *
+   * @param a - the lower bound of the search interval
+   * @param b - the upper bound of the search interval
+   * @param f - the function whose minimum value we're searching for
+   * @param tol - the tolerance for the search precision (default is 1e-5)
+   */
+  function goldenSectionSearchMin(a, b, f, tol = 1e-5) {
+    const gr = (Math.sqrt(5) + 1) / 2
+    let c = b - (b - a) / gr
+    let d = a + (b - a) / gr
+
+    while (Math.abs(c - d) > tol) {
+      if (f(c) < f(d)) {
+        b = d
+      } else {
+        a = c
+      }
+      c = b - (b - a) / gr
+      d = a + (b - a) / gr
+    }
+
+    return (b + a) / 2
+  }
+
+  // Golden-section search to find the maximum curvature
+  /**
+   *
+   * @param a - the lower bound of the search interval
+   * @param b - the upper bound of the search interval
+   * @param f - the function whose minimum value we're searching for
+   * @param tol - the tolerance for the search precision (default is 1e-5)
+   */
+  function goldenSectionSearchMax(a, b, f, tol = 1e-5) {
+    const gr = (Math.sqrt(5) + 1) / 2
+    let c = b - (b - a) / gr
+    let d = a + (b - a) / gr
+
+    while (Math.abs(c - d) > tol) {
+      if (f(c) > f(d)) {
+        b = d
+      } else {
+        a = c
+      }
+      c = b - (b - a) / gr
+      d = a + (b - a) / gr
+    }
+
+    return (b + a) / 2
+  }
+
+  const curvatureFunction = (t) =>
+    curvature(t, px0, py0, px1, py1, px2, py2, weight)
+
+  // Initial check at endpoints
+  const curvatureAt0 = curvature(0, px0, py0, px1, py1, px2, py2, weight)
+  const curvatureAt1 = curvature(1, px0, py0, px1, py1, px2, py2, weight)
+
+  let lowestCurvatureT = 0
+  let highestCurvatureT = 0
+  let minCurvature = curvatureAt0
+  let maxCurvature = curvatureAt0
+
+  if (curvatureAt1 < minCurvature) {
+    minCurvature = curvatureAt1
+    lowestCurvatureT = 1
+  }
+  if (curvatureAt1 > maxCurvature) {
+    maxCurvature = curvatureAt1
+    highestCurvatureT = 1
+  }
+
+  // Search for highest curvature
+  const highestCurvatureSearchT = goldenSectionSearchMax(
+    0,
+    1,
+    curvatureFunction,
+    1e-5
+  )
+  const highestCurvatureValue = curvatureFunction(highestCurvatureSearchT)
+
+  if (highestCurvatureValue > maxCurvature) {
+    maxCurvature = highestCurvatureValue
+    highestCurvatureT = highestCurvatureSearchT
+  }
+
+  // Search for lowest curvature
+  const lowestCurvatureSearchT = goldenSectionSearchMin(
+    0,
+    1,
+    curvatureFunction,
+    1e-5
+  )
+  const lowestCurvatureValue = curvatureFunction(lowestCurvatureSearchT)
+
+  if (lowestCurvatureValue < minCurvature) {
+    minCurvature = lowestCurvatureValue
+    lowestCurvatureT = lowestCurvatureSearchT
+  }
+
+  // Calculate the coordinates at the points of highest and lowest curvature
+  const highestCurvaturePoint = evaluateBezier(
+    highestCurvatureT,
+    px0,
+    py0,
+    px1,
+    py1,
+    px2,
+    py2,
+    weight
+  )
+  const lowestCurvaturePoint = evaluateBezier(
+    lowestCurvatureT,
+    px0,
+    py0,
+    px1,
+    py1,
+    px2,
+    py2,
+    weight
+  )
+
+  return {
+    highestCurvatureT,
+    highestCurvatureX: highestCurvaturePoint.x,
+    highestCurvatureY: highestCurvaturePoint.y,
+    lowestCurvatureT,
+    lowestCurvatureX: lowestCurvaturePoint.x,
+    lowestCurvatureY: lowestCurvaturePoint.y,
+  }
+}
+
+/**
  * Plot a rotated ellipse with conic segments
  * @param {number} weight - weight of the conic segment
  * @param {number} leftTangentX - x-coordinate of the left tangent point
