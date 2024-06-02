@@ -5,7 +5,6 @@ import {
   checkSquarePointCollision,
   checkAreaCollision,
 } from "../utils/guiHelpers.js"
-import { getAngle } from "../utils/trig.js"
 import { SCALE } from "../utils/constants.js"
 
 /**
@@ -145,10 +144,10 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
               const {
                 px1,
                 py1,
-                px2,
-                py2,
+                // px2,
+                // py2,
                 px3,
-                py3,
+                // py3,
                 radA,
                 radB,
                 angle,

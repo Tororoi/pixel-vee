@@ -7,20 +7,8 @@ import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
-import {
-  createActiveIndexesForRender,
-  updateLinkedVectors,
-  updateLockedCurrentVectorControlHandle,
-  vectorGui,
-} from "../GUI/vector.js"
-import { updateVectorProperties } from "../utils/vectorHelpers.js"
-import { modifyVectorAction } from "../Actions/modifyTimeline.js"
-import {
-  adjustVectorSteps,
-  moveVectorRotationPointSteps,
-  rerouteVectorStepsAction,
-  transformVectorSteps,
-} from "./transform.js"
+import { vectorGui } from "../GUI/vector.js"
+import { rerouteVectorStepsAction } from "./transform.js"
 
 //===================================//
 //=== * * * Line Controller * * * ===//

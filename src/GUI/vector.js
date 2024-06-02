@@ -19,15 +19,14 @@ import {
   updateVectorProperties,
   calculateCurrentVectorDeltas,
   handleOptionsAndUpdateVector,
-  findVectorShapeBoundaryBox,
+  // findVectorShapeBoundaryBox,
 } from "../utils/vectorHelpers.js"
 import {
   disableActionsForNoSelection,
   enableActionsForSelection,
 } from "../DOM/disableDomElements.js"
 import { renderLinePath, renderLineVector } from "./line.js"
-import { getAngle } from "../utils/trig.js"
-import { switchTool } from "../Tools/toolbox.js"
+// import { switchTool } from "../Tools/toolbox.js"
 
 //==================================================//
 //=== * * * Vector Graphics User Interface * * * ===//
@@ -129,7 +128,6 @@ export const vectorGui = {
  * @param {object} pointsKeys - The keys of the control points
  * @param {number} radius - (Float)
  * @param {boolean} modify - if true, check for collision with cursor and modify radius
- * @param {number} offset - (Integer)
  * @param {object} vector - The vector to be rendered
  */
 function drawControlPoints(

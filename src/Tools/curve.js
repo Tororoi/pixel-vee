@@ -6,25 +6,12 @@ import {
   actionQuadraticCurve,
   actionCubicCurve,
 } from "../Actions/pointerActions.js"
-import { modifyVectorAction } from "../Actions/modifyTimeline.js"
-import {
-  vectorGui,
-  updateLinkedVectors,
-  updateLockedCurrentVectorControlHandle,
-  createActiveIndexesForRender,
-} from "../GUI/vector.js"
+import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
-import { getAngle } from "../utils/trig.js"
-import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
-import {
-  adjustVectorSteps,
-  moveVectorRotationPointSteps,
-  rerouteVectorStepsAction,
-  transformVectorSteps,
-} from "./transform.js"
+import { rerouteVectorStepsAction } from "./transform.js"
 
 //=====================================//
 //=== * * * Curve Controllers * * * ===//

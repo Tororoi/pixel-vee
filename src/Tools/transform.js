@@ -1,5 +1,4 @@
 import { TRANSLATE, ROTATE, SCALE } from "../utils/constants.js"
-import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { keys } from "../Shortcuts/keys.js"
@@ -21,8 +20,6 @@ import {
   updateVectorProperties,
   rotateVectors,
   translateVectors,
-  findCentroid,
-  findVectorShapeCentroid,
 } from "../utils/vectorHelpers.js"
 import { transformVectorContent } from "../utils/transformHelpers.js"
 
@@ -405,12 +402,10 @@ export function updateEllipseOffsets(
 /**
  * Update the opposing control points of an ellipse
  * @param {object} vectorProperties - The properties of the vector
- * @param {object} shiftedPoint - The shifted point
- * @param {string} shiftedXKey
- * @param {string} shiftedYKey
+ * @param {string} shiftedXKey - The key of the shifted x value
+ * @param {string} shiftedYKey - The key of the shifted y value
  * @param {number} newX - The new x value for the shifted point
  * @param {number} newY - The new y value for the shifted point
- * TODO: update conic properties here
  */
 export function syncEllipseProperties(
   vectorProperties,

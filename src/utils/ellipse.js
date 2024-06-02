@@ -102,6 +102,7 @@ export function plotEllipse(xm, ym, a, b) {
  * @returns {Array} - Array of points
  */
 export function plotCircle(xm, ym, r, offset) {
+  r = Math.round(r)
   let plotPoints = []
 
   // I. Quadrant (+x, +y)
@@ -280,7 +281,7 @@ export function plotRotatedEllipse(
 }
 
 /**
- *
+ * Calculate conic segments from vertices of an ellipse. Length of axes and angle of rotation are given, having already been calculated from the vertices.
  * @param {number} x - x-coordinate of the center
  * @param {number} y - y-coordinate of the center
  * @param {number} a - semi-major axis
@@ -367,6 +368,14 @@ export function plotRotatedEllipseConics(
   bottomTangentX,
   bottomTangentY
 ) {
+  //weight is 0.5 for rotation angles multiple of pi/2
+  if (weight === 0.5)
+    return plotEllipseRect(
+      leftTangentX,
+      topTangentY,
+      rightTangentX,
+      bottomTangentY
+    ) /* looks nicer */
   let plotPoints = []
   plotPoints = [
     ...plotPoints,
@@ -416,14 +425,14 @@ export function plotRotatedEllipseConics(
       weight
     ), //bottom-left corner
   ]
-  plotPoints.push({ x: leftTangentX, y: leftTangentY }) // left tangent point
-  plotPoints.push({ x: leftTangentX, y: topTangentY }) // control point 1
-  plotPoints.push({ x: topTangentX, y: topTangentY }) // top tangent point
-  plotPoints.push({ x: leftTangentX, y: bottomTangentY }) // control point 2
-  plotPoints.push({ x: bottomTangentX, y: bottomTangentY }) // bottom tangent point
-  plotPoints.push({ x: rightTangentX, y: bottomTangentY }) // control point 3
-  plotPoints.push({ x: rightTangentX, y: rightTangentY }) // right tangent point
-  plotPoints.push({ x: rightTangentX, y: topTangentY }) // control point 4
+  // plotPoints.push({ x: leftTangentX, y: leftTangentY }) // left tangent point
+  // plotPoints.push({ x: leftTangentX, y: topTangentY }) // control point 1
+  // plotPoints.push({ x: topTangentX, y: topTangentY }) // top tangent point
+  // plotPoints.push({ x: leftTangentX, y: bottomTangentY }) // control point 2
+  // plotPoints.push({ x: bottomTangentX, y: bottomTangentY }) // bottom tangent point
+  // plotPoints.push({ x: rightTangentX, y: bottomTangentY }) // control point 3
+  // plotPoints.push({ x: rightTangentX, y: rightTangentY }) // right tangent point
+  // plotPoints.push({ x: rightTangentX, y: topTangentY }) // control point 4
   // plotPoints.push({ x: x0, y: y0 }) // top-left corner
   // plotPoints.push({ x: x1, y: y0 }) // top-right corner
   // plotPoints.push({ x: x1, y: y1 }) // bottom-right corner
@@ -435,19 +444,19 @@ export function plotRotatedEllipseConics(
     if (seen.has(key)) {
       return false // skip this item
     }
-    //remove tangent points for visibility (temporary)
-    if (key === `${leftTangentX},${leftTangentY}`) {
-      return false
-    }
-    if (key === `${topTangentX},${topTangentY}`) {
-      return false
-    }
-    if (key === `${rightTangentX},${rightTangentY}`) {
-      return false
-    }
-    if (key === `${bottomTangentX},${bottomTangentY}`) {
-      return false
-    }
+    // //remove tangent points for visibility (temporary)
+    // if (key === `${leftTangentX},${leftTangentY}`) {
+    //   return false
+    // }
+    // if (key === `${topTangentX},${topTangentY}`) {
+    //   return false
+    // }
+    // if (key === `${rightTangentX},${rightTangentY}`) {
+    //   return false
+    // }
+    // if (key === `${bottomTangentX},${bottomTangentY}`) {
+    //   return false
+    // }
     seen.add(key)
     return true // keep this item
   })

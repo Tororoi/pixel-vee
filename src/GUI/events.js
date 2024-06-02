@@ -1,8 +1,6 @@
 import { TRANSLATE, ROTATE, SCALE } from "../utils/constants.js"
 import { dom } from "../Context/dom.js"
-import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
 import { setVectorShapeBoundaryBox } from "./transform.js"
 

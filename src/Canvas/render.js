@@ -1,4 +1,3 @@
-import { dom } from "../Context/dom.js"
 import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
@@ -430,26 +429,21 @@ function renderActionVectors(action, activeCtx = null) {
         break
       case "ellipse":
         actionEllipse(
-          vector.vectorProperties,
-          vector.vectorProperties.px1 + offsetX,
-          vector.vectorProperties.py1 + offsetY,
-          vector.vectorProperties.px2 + offsetX,
-          vector.vectorProperties.py2 + offsetY,
-          vector.vectorProperties.px3 + offsetX,
-          vector.vectorProperties.py3 + offsetY,
-          vector.vectorProperties.radA,
-          vector.vectorProperties.radB,
-          vector.vectorProperties.forceCircle,
+          vector.vectorProperties.weight,
+          vector.vectorProperties.leftTangentX + offsetX,
+          vector.vectorProperties.leftTangentY + offsetY,
+          vector.vectorProperties.topTangentX + offsetX,
+          vector.vectorProperties.topTangentY + offsetY,
+          vector.vectorProperties.rightTangentX + offsetX,
+          vector.vectorProperties.rightTangentY + offsetY,
+          vector.vectorProperties.bottomTangentX + offsetX,
+          vector.vectorProperties.bottomTangentY + offsetY,
           boundaryBox,
           vector.color,
           vector.layer,
           vector.modes,
           brushStamps[vector.brushType][vector.brushSize],
           vector.brushSize,
-          vector.vectorProperties.angle,
-          vector.vectorProperties.unifiedOffset,
-          vector.vectorProperties.x1Offset,
-          vector.vectorProperties.y1Offset,
           null, //maskSet made from action.maskArray
           activeCtx
         )

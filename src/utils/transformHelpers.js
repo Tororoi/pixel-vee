@@ -1,4 +1,3 @@
-import { canvas } from "../Context/canvas.js"
 import { getAngle } from "./trig.js"
 import { updateVectorProperties } from "./vectorHelpers.js"
 
@@ -158,242 +157,242 @@ export function calculateEllipseBoundingBox(properties) {
   return { xMin, yMin, xMax, yMax }
 }
 
-/**
- * Calculates the semi-major and semi-minor axes of a rotated ellipse within a given rectangle
- * @param ellipseBoundingBox - aligned with x and y axis. Not rotated.
- * @param angle - angle of rotation in radians of the ellipse along one axis
- */
-function calculateEllipseAxes(ellipseBoundingBox, angle) {
-  const { xMin, xMax, yMin, yMax } = ellipseBoundingBox
+// /**
+//  * Calculates the semi-major and semi-minor axes of a rotated ellipse within a given rectangle
+//  * @param ellipseBoundingBox - aligned with x and y axis. Not rotated.
+//  * @param angle - angle of rotation in radians of the ellipse along one axis
+//  */
+// function calculateEllipseAxes(ellipseBoundingBox, angle) {
+//   const { xMin, xMax, yMin, yMax } = ellipseBoundingBox
 
-  // Calculate the half-widths of the bounding box
-  const width = xMax - xMin
-  const height = yMax - yMin
+//   // Calculate the half-widths of the bounding box
+//   const width = xMax - xMin
+//   const height = yMax - yMin
 
-  const kk = Math.pow(1 / 2, 3 / 2) // * (1/k)
-  const ww = width * width
-  const hh = height * height
-  let cos2Theta = Math.cos(2 * angle)
-  // Prevent division by zero
-  if (cos2Theta === 0) {
-    cos2Theta = 0.0000001
-  }
+//   const kk = Math.pow(1 / 2, 3 / 2) // * (1/k)
+//   const ww = width * width
+//   const hh = height * height
+//   let cos2Theta = Math.cos(2 * angle)
+//   // Prevent division by zero
+//   if (cos2Theta === 0) {
+//     cos2Theta = 0.0000001
+//   }
 
-  // Calculate the semi-major and semi-minor axes
-  const radA = kk * Math.sqrt(ww + hh + (ww - hh) / cos2Theta)
-  const radB = kk * Math.sqrt(ww + hh - (ww - hh) / cos2Theta)
-  // Return the calculated semi-major and semi-minor axes
-  return { radA, radB }
-}
+//   // Calculate the semi-major and semi-minor axes
+//   const radA = kk * Math.sqrt(ww + hh + (ww - hh) / cos2Theta)
+//   const radB = kk * Math.sqrt(ww + hh - (ww - hh) / cos2Theta)
+//   // Return the calculated semi-major and semi-minor axes
+//   return { radA, radB }
+// }
 
-/**
- *
- * @param W
- * @param H
- * @param T1y
- */
-function calculateEllipseInclination(W, H, T1y) {
-  // Helper function to convert degrees to radians
-  // /**
-  //  *
-  //  * @param degrees
-  //  */
-  // function degToRad(degrees) {
-  //   return (degrees * Math.PI) / 180
-  // }
+// /**
+//  *
+//  * @param W
+//  * @param H
+//  * @param T1y
+//  */
+// function calculateEllipseInclination(W, H, T1y) {
+//   // Helper function to convert degrees to radians
+//   // /**
+//   //  *
+//   //  * @param degrees
+//   //  */
+//   // function degToRad(degrees) {
+//   //   return (degrees * Math.PI) / 180
+//   // }
 
-  // Calculate the denominator |W^2 - H^2|
-  let denominator = Math.abs(W * W - H * H)
+//   // Calculate the denominator |W^2 - H^2|
+//   let denominator = Math.abs(W * W - H * H)
 
-  // Calculate the numerator 2 * W * (2 * T1y - H)
-  let numerator = 2 * W * (2 * T1y - H)
+//   // Calculate the numerator 2 * W * (2 * T1y - H)
+//   let numerator = 2 * W * (2 * T1y - H)
 
-  // Calculate theta in radians
-  let thetaRadians = 0.5 * Math.atan(numerator / denominator)
+//   // Calculate theta in radians
+//   let thetaRadians = 0.5 * Math.atan(numerator / denominator)
 
-  // Convert theta to degrees
-  // let thetaDegrees = thetaRadians * (180 / Math.PI)
+//   // Convert theta to degrees
+//   // let thetaDegrees = thetaRadians * (180 / Math.PI)
 
-  // Edge case: When W == H, theta should be 45 degrees or -45 degrees based on the sign of (2 * T1y - H)
-  if (W === H) {
-    // thetaDegrees = 2 * T1y - H >= 0 ? 45 : -45
-    thetaRadians = Math.PI / 4
-  }
+//   // Edge case: When W == H, theta should be 45 degrees or -45 degrees based on the sign of (2 * T1y - H)
+//   if (W === H) {
+//     // thetaDegrees = 2 * T1y - H >= 0 ? 45 : -45
+//     thetaRadians = Math.PI / 4
+//   }
 
-  return 2 * Math.PI - thetaRadians
-}
+//   return 2 * Math.PI - thetaRadians
+// }
 
-/**
- *
- * @param p1
- * @param p2
- * @param p3
- * @param p4
- * @param center
- */
-function calculateEllipseOrientation(p1, p2, p3, p4, center) {
-  // Helper function to calculate the midpoint between two points
-  /**
-   *
-   * @param pointA
-   * @param pointB
-   */
-  function midpoint(pointA, pointB) {
-    return {
-      x: (pointA.x + pointB.x) / 2,
-      y: (pointA.y + pointB.y) / 2,
-    }
-  }
+// /**
+//  *
+//  * @param p1
+//  * @param p2
+//  * @param p3
+//  * @param p4
+//  * @param center
+//  */
+// function calculateEllipseOrientation(p1, p2, p3, p4, center) {
+//   // Helper function to calculate the midpoint between two points
+//   /**
+//    *
+//    * @param pointA
+//    * @param pointB
+//    */
+//   function midpoint(pointA, pointB) {
+//     return {
+//       x: (pointA.x + pointB.x) / 2,
+//       y: (pointA.y + pointB.y) / 2,
+//     }
+//   }
 
-  // Calculate the midpoints of each side of the quadrilateral
-  let m12 = midpoint(p1, p2)
-  let m23 = midpoint(p2, p3)
-  let m34 = midpoint(p3, p4)
-  let m41 = midpoint(p4, p1)
+//   // Calculate the midpoints of each side of the quadrilateral
+//   let m12 = midpoint(p1, p2)
+//   let m23 = midpoint(p2, p3)
+//   let m34 = midpoint(p3, p4)
+//   let m41 = midpoint(p4, p1)
 
-  // Calculate the slopes of the lines through midpoints
-  // Slope of the line through M12 and M34
-  let m12_34 = (m34.y - m12.y) / (m34.x - m12.x)
+//   // Calculate the slopes of the lines through midpoints
+//   // Slope of the line through M12 and M34
+//   let m12_34 = (m34.y - m12.y) / (m34.x - m12.x)
 
-  // Slope of the line through M23 and M41
-  let m23_41 = (m41.y - m23.y) / (m41.x - m23.x)
+//   // Slope of the line through M23 and M41
+//   let m23_41 = (m41.y - m23.y) / (m41.x - m23.x)
 
-  // Determine the major axis based on the spread of midpoints
-  let majorAxisSlope
-  if (Math.abs(m34.x - m12.x) > Math.abs(m41.x - m23.x)) {
-    majorAxisSlope = m12_34
-  } else {
-    majorAxisSlope = m23_41
-  }
+//   // Determine the major axis based on the spread of midpoints
+//   let majorAxisSlope
+//   if (Math.abs(m34.x - m12.x) > Math.abs(m41.x - m23.x)) {
+//     majorAxisSlope = m12_34
+//   } else {
+//     majorAxisSlope = m23_41
+//   }
 
-  // Calculate the orientation angle of the ellipse's major axis
-  let theta = Math.atan(majorAxisSlope)
+//   // Calculate the orientation angle of the ellipse's major axis
+//   let theta = Math.atan(majorAxisSlope)
 
-  return theta
-}
+//   return theta
+// }
 
-/**
- *
- * @param p1
- * @param p2
- * @param p3
- * @param p4
- * @param center
- */
-function calculateEllipseDetails(p1, p2, p3, p4, center) {
-  // Helper function to calculate the midpoint between two points
-  /**
-   *
-   * @param pointA
-   * @param pointB
-   */
-  function midpoint(pointA, pointB) {
-    return {
-      x: (pointA.x + pointB.x) / 2,
-      y: (pointA.y + pointB.y) / 2,
-    }
-  }
+// /**
+//  *
+//  * @param p1
+//  * @param p2
+//  * @param p3
+//  * @param p4
+//  * @param center
+//  */
+// function calculateEllipseDetails(p1, p2, p3, p4, center) {
+//   // Helper function to calculate the midpoint between two points
+//   /**
+//    *
+//    * @param pointA
+//    * @param pointB
+//    */
+//   function midpoint(pointA, pointB) {
+//     return {
+//       x: (pointA.x + pointB.x) / 2,
+//       y: (pointA.y + pointB.y) / 2,
+//     }
+//   }
 
-  // Helper function to calculate the distance between two points
-  /**
-   *
-   * @param pointA
-   * @param pointB
-   */
-  function distance(pointA, pointB) {
-    return Math.sqrt(
-      Math.pow(pointA.x - pointB.x, 2) + Math.pow(pointA.y - pointB.y, 2)
-    )
-  }
+//   // Helper function to calculate the distance between two points
+//   /**
+//    *
+//    * @param pointA
+//    * @param pointB
+//    */
+//   function distance(pointA, pointB) {
+//     return Math.sqrt(
+//       Math.pow(pointA.x - pointB.x, 2) + Math.pow(pointA.y - pointB.y, 2)
+//     )
+//   }
 
-  // Calculate the midpoints of each side of the quadrilateral
-  let m12 = midpoint(p1, p2)
-  let m23 = midpoint(p2, p3)
-  let m34 = midpoint(p3, p4)
-  let m41 = midpoint(p4, p1)
+//   // Calculate the midpoints of each side of the quadrilateral
+//   let m12 = midpoint(p1, p2)
+//   let m23 = midpoint(p2, p3)
+//   let m34 = midpoint(p3, p4)
+//   let m41 = midpoint(p4, p1)
 
-  // Calculate the slopes of the lines through midpoints
-  // Slope of the line through M12 and M34
-  let m12_34 = (m34.y - m12.y) / (m34.x - m12.x)
+//   // Calculate the slopes of the lines through midpoints
+//   // Slope of the line through M12 and M34
+//   let m12_34 = (m34.y - m12.y) / (m34.x - m12.x)
 
-  // Slope of the line through M23 and M41
-  let m23_41 = (m41.y - m23.y) / (m41.x - m23.x)
+//   // Slope of the line through M23 and M41
+//   let m23_41 = (m41.y - m23.y) / (m41.x - m23.x)
 
-  // Determine the major and minor axes based on the spread of midpoints
-  let majorAxisSlope, minorAxisSlope
-  let aMidpoints, bMidpoints
-  if (Math.abs(m34.x - m12.x) > Math.abs(m41.x - m23.x)) {
-    majorAxisSlope = m12_34
-    minorAxisSlope = m23_41
-    aMidpoints = [m12, m34]
-    bMidpoints = [m23, m41]
-  } else {
-    majorAxisSlope = m23_41
-    minorAxisSlope = m12_34
-    aMidpoints = [m23, m41]
-    bMidpoints = [m12, m34]
-  }
+//   // Determine the major and minor axes based on the spread of midpoints
+//   let majorAxisSlope, minorAxisSlope
+//   let aMidpoints, bMidpoints
+//   if (Math.abs(m34.x - m12.x) > Math.abs(m41.x - m23.x)) {
+//     majorAxisSlope = m12_34
+//     minorAxisSlope = m23_41
+//     aMidpoints = [m12, m34]
+//     bMidpoints = [m23, m41]
+//   } else {
+//     majorAxisSlope = m23_41
+//     minorAxisSlope = m12_34
+//     aMidpoints = [m23, m41]
+//     bMidpoints = [m12, m34]
+//   }
 
-  // Calculate the orientation angle of the ellipse's major axis
-  let theta = Math.atan(majorAxisSlope)
+//   // Calculate the orientation angle of the ellipse's major axis
+//   let theta = Math.atan(majorAxisSlope)
 
-  // Calculate the lengths of the semi-major and semi-minor axes
-  let a = 0.5 * distance(aMidpoints[0], aMidpoints[1])
-  let b = 0.5 * distance(bMidpoints[0], bMidpoints[1])
+//   // Calculate the lengths of the semi-major and semi-minor axes
+//   let a = 0.5 * distance(aMidpoints[0], aMidpoints[1])
+//   let b = 0.5 * distance(bMidpoints[0], bMidpoints[1])
 
-  return {
-    theta: theta,
-    semiMajorAxis: a,
-    semiMinorAxis: b,
-  }
-}
+//   return {
+//     theta: theta,
+//     semiMajorAxis: a,
+//     semiMinorAxis: b,
+//   }
+// }
 
-/**
- * Plug the result of this function into the parametric equation for an ellipse to get the x and y values of the semi-major axis
- * @param {number} radA - semi-major axis
- * @param {number} radB - semi-minor axis
- * @param {number} scaleX - scaling factor along x-axis
- * @param {number} scaleY - scaling factor along y-axis
- * @param {number} radians - angle of rotation in radians
- * @returns {number} - time at first axis
- */
-function getTimeAtFirstAxis(radA, radB, scaleX, scaleY, radians) {
-  let a = radA
-  let b = radB
-  let c = scaleX
-  let d = scaleY
-  let phi = radians
-  let a2 = a * a
-  let b2 = b * b
-  let c2 = c * c
-  let d2 = d * d
-  let term1 = a2 * c2 - b2 * d2
-  let term2 = -b2 * c2 + a2 * d2
-  let term3 = b2 * c2 - a2 * d2
-  let term4 =
-    (Math.pow(a, 4) * c2 * d2 +
-      Math.pow(b, 4) * c2 * d2 +
-      a2 * b2 * (Math.pow(c, 4) - 4 * c2 * d2 + Math.pow(d, 4))) *
-    Math.pow(Math.sin(2 * phi), 2)
-  let arctanYNumerator =
-    term1 * Math.pow(Math.cos(phi), 2) + term2 * Math.pow(Math.sin(phi), 2)
-  let arctanYDenominator = Math.sqrt(
-    term1 * term1 * Math.pow(Math.cos(phi), 4) +
-      term3 * term3 * Math.pow(Math.sin(phi), 4) +
-      0.5 * term4
-  )
-  let arctanY = arctanYNumerator / arctanYDenominator
-  let arctanXNumerator = 2 * a * b * (c2 - d2) * Math.sin(2 * phi)
-  let arctanXDenominator = Math.sqrt(
-    4 * term1 * term1 * Math.pow(Math.cos(phi), 4) +
-      4 * term3 * term3 * Math.pow(Math.sin(phi), 4) +
-      2 * term4
-  )
-  let arctanX = -arctanXNumerator / arctanXDenominator
-  //Arctan[arctanY,arctanX]
-  let timeAtFirstAxis = 0.5 * Math.atan2(arctanX, arctanY)
-  return timeAtFirstAxis
-}
+// /**
+//  * Plug the result of this function into the parametric equation for an ellipse to get the x and y values of the semi-major axis
+//  * @param {number} radA - semi-major axis
+//  * @param {number} radB - semi-minor axis
+//  * @param {number} scaleX - scaling factor along x-axis
+//  * @param {number} scaleY - scaling factor along y-axis
+//  * @param {number} radians - angle of rotation in radians
+//  * @returns {number} - time at first axis
+//  */
+// function getTimeAtFirstAxis(radA, radB, scaleX, scaleY, radians) {
+//   let a = radA
+//   let b = radB
+//   let c = scaleX
+//   let d = scaleY
+//   let phi = radians
+//   let a2 = a * a
+//   let b2 = b * b
+//   let c2 = c * c
+//   let d2 = d * d
+//   let term1 = a2 * c2 - b2 * d2
+//   let term2 = -b2 * c2 + a2 * d2
+//   let term3 = b2 * c2 - a2 * d2
+//   let term4 =
+//     (Math.pow(a, 4) * c2 * d2 +
+//       Math.pow(b, 4) * c2 * d2 +
+//       a2 * b2 * (Math.pow(c, 4) - 4 * c2 * d2 + Math.pow(d, 4))) *
+//     Math.pow(Math.sin(2 * phi), 2)
+//   let arctanYNumerator =
+//     term1 * Math.pow(Math.cos(phi), 2) + term2 * Math.pow(Math.sin(phi), 2)
+//   let arctanYDenominator = Math.sqrt(
+//     term1 * term1 * Math.pow(Math.cos(phi), 4) +
+//       term3 * term3 * Math.pow(Math.sin(phi), 4) +
+//       0.5 * term4
+//   )
+//   let arctanY = arctanYNumerator / arctanYDenominator
+//   let arctanXNumerator = 2 * a * b * (c2 - d2) * Math.sin(2 * phi)
+//   let arctanXDenominator = Math.sqrt(
+//     4 * term1 * term1 * Math.pow(Math.cos(phi), 4) +
+//       4 * term3 * term3 * Math.pow(Math.sin(phi), 4) +
+//       2 * term4
+//   )
+//   let arctanX = -arctanXNumerator / arctanXDenominator
+//   //Arctan[arctanY,arctanX]
+//   let timeAtFirstAxis = 0.5 * Math.atan2(arctanX, arctanY)
+//   return timeAtFirstAxis
+// }
 
 /**
  * Transforms vector content by stretching/shrinking.
@@ -450,98 +449,6 @@ export function transformVectorContent(
       isMirroredVertically
     )
     if (originalProperties.type === "ellipse") {
-      //calculate new angle and length of radii. originalProperties has angle in radians, radA and radB as length in pixels
-      // Recalculate the angle considering mirroring effects
-      let angle = originalProperties.angle
-      // // Update angle based on the scaling factors. updated angle should always exist in same quadrant as original angle
-      // let newAngle = Math.atan2(
-      //   scaleY * Math.sin(angle),
-      //   scaleX * Math.cos(angle)
-      // )
-      // // let updatedAngle = -Math.PI / 3
-
-      // // Consider mirroring effects on angle
-      // if (isMirroredHorizontally) updatedAngle = Math.PI - updatedAngle
-      // if (isMirroredVertically) updatedAngle = -updatedAngle
-
-      // const originalEllipseBoundingBox =
-      //   calculateEllipseBoundingBox(originalProperties)
-      // const transformedEllipseBoundingBox = {
-      //   xMin: Math.round(originalEllipseBoundingBox.xMin * scaleX + xOffset),
-      //   xMax: Math.round(originalEllipseBoundingBox.xMax * scaleX + xOffset),
-      //   yMin: Math.round(originalEllipseBoundingBox.yMin * scaleY + yOffset),
-      //   yMax: Math.round(originalEllipseBoundingBox.yMax * scaleY + yOffset),
-      // }
-
-      //get the geometric mean of the scaling factors
-      // let scalingFactor = Math.sqrt(scaleX * scaleY)
-      // let newWeight = originalProperties.weight / scalingFactor
-      // console.log(newWeight, originalProperties.weight)
-      // vector.vectorProperties.weight = newWeight
-
-      //TODO: (High Priority) In order to transform the ellipse,
-      // 1. calculate the tangent points on the original bounding box,
-      // 2. use scaleX and scaleY to move those points.
-      // 3. calculate the new axis lengths and angle from the tangent points
-      /**
-       * The tangent points (x,y) can be expressed as:
-       * Top: ( px1 + radA * cos(angle) , py1 + radB * cos(angle) )
-       * Right: ( px1 + radA * sin(angle) , py1 + radB * sin(angle) )
-       * Bottom: ( px1 - radA * cos(angle) , py1 - radB * cos(angle) )
-       * Left: ( px1 - radA * sin(angle) , py1 - radB * sin(angle) )
-       */
-      /* plot ellipse rotated by angle (radian) */
-      // console.log(originalProperties.x1Offset, originalProperties.y1Offset)
-      // let a = originalProperties.radA
-      // let b = originalProperties.radB
-      // var xd = a * a,
-      //   yd = b * b
-      // var s = Math.sin(angle),
-      //   zd = (xd - yd) * s /* ellipse rotation */
-      // ;(xd = Math.sqrt(xd - zd * s)),
-      //   (yd = Math.sqrt(yd + zd * s)) /* surrounding rect */
-      // a = Math.floor(xd + 0.5)
-      // b = Math.floor(yd + 0.5)
-      // zd = (zd * a * b) / (xd * yd)
-      // let x0 = originalProperties.px1 - a
-      // let y0 = originalProperties.py1 - b
-      // let x1 = originalProperties.px1 + a
-      // let y1 = originalProperties.py1 + b
-      // // x1 = x1 + originalProperties.x1Offset
-      // // y1 = y1 + originalProperties.y1Offset
-      // xd = x1 - x0
-      // yd = y1 - y0
-      // let w = xd * yd
-      // if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
-      // //Breaks down at smaller radii, need enforced minimum where offset is not applied? if assertion fails, try again after w is calculated without offset
-      // if (!(w <= 1.0 && w >= 0.0)) {
-      //   //if assertion expected to fail with offsets, remove offsets and reset vars before trying assert
-      //   // x1 = x1 - originalProperties.x1Offset
-      //   // y1 = y1 - originalProperties.y1Offset
-      //   xd = x1 - x0
-      //   yd = y1 - y0
-      //   w = xd * yd
-      //   if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
-      // }
-      // xd = Math.floor(xd * w + 0.5)
-      // yd = Math.floor(yd * w + 0.5) /* snap to int */
-      // const topTangent = {
-      //   x: x0 + xd,
-      //   y: y0,
-      // }
-      // const rightTangent = {
-      //   x: x1,
-      //   y: y1 - yd,
-      // }
-      // const bottomTangent = {
-      //   x: x1 - xd,
-      //   y: y1,
-      // }
-      // const leftTangent = {
-      //   x: x0,
-      //   y: y0 + yd,
-      // }
-
       // Calculate the new tangent points
       transformControlPoint(
         vector,
@@ -599,105 +506,6 @@ export function transformVectorContent(
       // zd = 4 * zd * Math.cos(angle)
       // zd === w - 2 * Math.pow(w, 2)
 
-      /////////////////////////////////
-      // let centerX = vector.vectorProperties.px1
-      // let centerY = vector.vectorProperties.py1
-      // let radB =
-
-      //////////////////////////////
-
-      // // Calculate the new axis lengths
-      // let updatedRadA = Math.abs((newRightTangent.x - newLeftTangent.x) / 2)
-      // let updatedRadB = Math.abs((newTopTangent.y - newBottomTangent.y) / 2)
-
-      // // Calculate the new angle
-      // let updatedAngle = Math.atan2(
-      //   newTopTangent.y - vector.vectorProperties.py1,
-      //   newTopTangent.x - vector.vectorProperties.px1
-      // )
-
-      // Calculate the new axis lengths (formula not correct)
-      // console.log(
-      //   originalEllipseBoundingBox.xMax - originalEllipseBoundingBox.xMin,
-      //   originalEllipseBoundingBox.yMax - originalEllipseBoundingBox.yMin,
-      //   rightTangent.x - leftTangent.x,
-      //   topTangent.y - bottomTangent.y
-      // )
-
-      // const width =
-      //   transformedEllipseBoundingBox.xMax - transformedEllipseBoundingBox.xMin
-      // const height =
-      //   transformedEllipseBoundingBox.yMax - transformedEllipseBoundingBox.yMin
-      // const center = {
-      //   x: vector.vectorProperties.px1,
-      //   y: vector.vectorProperties.py1,
-      // }
-      // let newEllipseDetails = calculateEllipseDetails(
-      //   newLeftTangent,
-      //   newTopTangent,
-      //   newRightTangent,
-      //   newBottomTangent,
-      //   center
-      // )
-      // let updatedAngle = newEllipseDetails.theta
-      // let updatedRadA = newEllipseDetails.semiMajorAxis
-      // let updatedRadB = newEllipseDetails.semiMinorAxis
-      // console.log(updatedRadA, updatedRadB)
-      // console.log(angle * (180 / Math.PI), updatedAngle * (180 / Math.PI))
-      // let denominator =
-      //   Math.cos(updatedAngle) * Math.cos(updatedAngle) -
-      //   Math.sin(updatedAngle) * Math.sin(updatedAngle)
-      // let numerator = width * width - height * height
-      // let k = numerator / denominator
-      // let c = width * width + height * height
-      // console.log(c + k, c - k)
-      // let updatedRadA = Math.pow(0.5, 3 / 2) * Math.sqrt(Math.abs(c + k))
-      // let updatedRadB = Math.pow(0.5, 3 / 2) * Math.sqrt(Math.abs(c - k))
-      // console.log(updatedRadA, updatedRadB)
-      // console.log(
-      //   originalProperties.radA,
-      //   updatedRadA,
-      //   originalProperties.radB,
-      //   updatedRadB
-      // )
-
-      // // Calculate the new angle (formula probably correct)
-      // let updatedAngle =
-      //   2 * Math.PI -
-      //   Math.atan2(
-      //     topTangent.y - originalProperties.py1,
-      //     topTangent.x - originalProperties.px1
-      //   )
-      // // Calculate differences for both coordinates
-      // let deltaX = x1 - x0
-      // let deltaY = y1 - y0 - 2 * yd
-
-      // // Calculate the angle in radians
-      // let updatedAngle = Math.atan2(deltaY, deltaX)
-
-      // // If yd > xd, we need to adjust the angle by 90 degrees (or pi/2 radians)
-      // // because the semi-major axis is closer to being vertical.
-      // if (yd > xd) {
-      //   updatedAngle += Math.PI / 2
-      // }
-
-      // console.log(
-      //   "updatedAngle: ",
-      //   updatedAngle,
-      //   "original angle: ",
-      //   originalProperties.angle
-      // )
-
-      // const newEllipseValues = calculateEllipseAxes(
-      //   transformedEllipseBoundingBox,
-      //   updatedAngle
-      // )
-      // Calculate new radii
-      // let radA = updatedRadA
-      // let radB = updatedRadB
-      let radA = originalProperties.radA
-      let radB = originalProperties.radB
-
       ///////////////////////////
       // const timeAtAxisA = getTimeAtFirstAxis(radA, radB, scaleX, scaleY, angle)
       // console.log(
@@ -736,40 +544,39 @@ export function transformVectorContent(
       //     radB * Math.sin(timeAtAxisA - Math.PI / 2) * Math.cos(angle) +
       //     radA * Math.cos(timeAtAxisA - Math.PI / 2) * Math.sin(angle))
 
-      //////////////////////›////
-      let px2 = vector.vectorProperties.px1 + scaleX * (radA * Math.cos(angle))
-      let py2 = vector.vectorProperties.py1 + scaleY * (radA * Math.sin(angle))
-      let px3 =
-        vector.vectorProperties.px1 +
-        scaleX * (radB * Math.cos(angle - Math.PI / 2))
-      let py3 =
-        vector.vectorProperties.py1 +
-        scaleY * (radB * Math.sin(angle - Math.PI / 2))
+      //////////////////////////
       // Calculate points on the ellipse's axes after transformation
-      let p2 = {
-        x: Math.round(px2),
-        y: Math.round(py2),
-      }
-      let p3 = {
-        x: Math.round(px3),
-        y: Math.round(py3),
-      }
+      let radA = originalProperties.radA
+      let radB = originalProperties.radB
+      let angle = originalProperties.angle
+      let px2 = Math.round(
+        vector.vectorProperties.px1 + scaleX * (radA * Math.cos(angle))
+      )
+      let py2 = Math.round(
+        vector.vectorProperties.py1 + scaleY * (radA * Math.sin(angle))
+      )
+      let px3 = Math.round(
+        vector.vectorProperties.px1 +
+          scaleX * (radB * Math.cos(angle - Math.PI / 2))
+      )
+      let py3 = Math.round(
+        vector.vectorProperties.py1 +
+          scaleY * (radB * Math.sin(angle - Math.PI / 2))
+      )
 
-      updateVectorProperties(vector, p2.x, p2.y, "px2", "py2")
-      updateVectorProperties(vector, p3.x, p3.y, "px3", "py3")
-      let dxa = p2.x - vector.vectorProperties.px1
-      let dya = p2.y - vector.vectorProperties.py1
-      let updatedAngle = getAngle(dxa, dya)
-      vector.vectorProperties.angle = updatedAngle
+      updateVectorProperties(vector, px2, py2, "px2", "py2")
+      updateVectorProperties(vector, px3, py3, "px3", "py3")
       //new radA is length between p2 and p1
+      let dxa = px2 - vector.vectorProperties.px1
+      let dya = py2 - vector.vectorProperties.py1
       vector.vectorProperties.radA = Math.sqrt(dxa * dxa + dya * dya)
       //new radB is length between p3 and p1
-      let dxb = p3.x - vector.vectorProperties.px1
-      let dyb = p3.y - vector.vectorProperties.py1
+      let dxb = px3 - vector.vectorProperties.px1
+      let dyb = py3 - vector.vectorProperties.py1
       vector.vectorProperties.radB = Math.sqrt(dxb * dxb + dyb * dyb)
-      // vector.vectorProperties.radA = newRadA
-      // vector.vectorProperties.radB = newRadB
-      // vector.vectorProperties.angle = updatedAngle
+      //new angle is angle between p2 and p1
+      let updatedAngle = getAngle(dxa, dya)
+      vector.vectorProperties.angle = updatedAngle
     } else {
       transformControlPoint(
         vector,

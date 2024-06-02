@@ -1,4 +1,3 @@
-import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
 import { drawCirclePath, drawControlPointHandle } from "../utils/guiHelpers.js"

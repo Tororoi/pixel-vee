@@ -2,19 +2,12 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { actionFill } from "../Actions/pointerActions.js"
-import { modifyVectorAction } from "../Actions/modifyTimeline.js"
-import { vectorGui, createActiveIndexesForRender } from "../GUI/vector.js"
+import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
-import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
-import { enableActionsForSelection } from "../DOM/disableDomElements.js"
-import {
-  adjustVectorSteps,
-  moveVectorRotationPointSteps,
-  rerouteVectorStepsAction,
-  transformVectorSteps,
-} from "./transform.js"
+// import { enableActionsForSelection } from "../DOM/disableDomElements.js"
+import { rerouteVectorStepsAction } from "./transform.js"
 
 //===================================//
 //=== * * * Fill Controller * * * ===//

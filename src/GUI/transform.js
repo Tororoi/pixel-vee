@@ -2,8 +2,8 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
 import { getAngle } from "../utils/trig.js"
-import { drawCirclePath } from "../utils/guiHelpers.js"
-import { drawSelectControlPoints, renderSelectionBoxOutline } from "./select.js"
+// import { drawCirclePath } from "../utils/guiHelpers.js"
+// import { drawSelectControlPoints, renderSelectionBoxOutline } from "./select.js"
 import { findVectorShapeBoundaryBox } from "../utils/vectorHelpers.js"
 
 /**
