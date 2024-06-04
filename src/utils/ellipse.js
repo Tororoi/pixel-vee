@@ -453,10 +453,9 @@ export function calcEllipseParamsFromConics(
       break
     }
     default:
-      //
-      console.log("Invalid angle", originalAngle <= Math.PI / 2)
+    //
   }
-  if (vertexA.majorRadius > vertexB.majorRadius) {
+  if (vertexA.minorRadius > vertexB.minorRadius) {
     px2 = Math.round(vertexA.majorX)
     py2 = Math.round(vertexA.majorY)
     px3 = Math.round(vertexB.minorX)
@@ -612,7 +611,6 @@ function findConicSegmentVertex(
     py2,
     weight
   )
-
   return {
     majorRadius: radiusFunction(majorT),
     majorX: majorPoint.x,

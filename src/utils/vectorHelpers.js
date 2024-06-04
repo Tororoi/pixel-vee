@@ -307,6 +307,9 @@ export function rotateVectors(
         vector.vectorProperties.px2 - vector.vectorProperties.px1,
         vector.vectorProperties.py2 - vector.vectorProperties.py1
       )
+      while (vector.vectorProperties.angle < 0) {
+        vector.vectorProperties.angle += 2 * Math.PI
+      }
       vector.vectorProperties.radA = Math.sqrt(
         (vector.vectorProperties.px1 - vector.vectorProperties.px2) ** 2 +
           (vector.vectorProperties.py1 - vector.vectorProperties.py2) ** 2
@@ -419,5 +422,10 @@ export function findVectorShapeBoundaryBox(vectorIndicesSet, vectors) {
     yMin = Math.min(yMin ?? Infinity, ...vectorYPoints)
     yMax = Math.max(yMax ?? -Infinity, ...vectorYPoints)
   }
+  let layer = vectors[vectorIndicesSet.values().next().value].layer
+  xMin += layer.x
+  xMax += layer.x
+  yMin += layer.y
+  yMax += layer.y
   return { xMin, xMax, yMin, yMax }
 }

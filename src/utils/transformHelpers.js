@@ -436,19 +436,6 @@ export function transformVectorContent(
   for (let vectorIndex in vectorsSavedProperties) {
     let originalProperties = { ...vectorsSavedProperties[vectorIndex] }
     let vector = vectors[vectorIndex]
-    // Transform each control point
-    transformControlPoint(
-      vector,
-      originalProperties,
-      "px1",
-      "py1",
-      scaleX,
-      scaleY,
-      xOffset,
-      yOffset,
-      isMirroredHorizontally,
-      isMirroredVertically
-    )
     if (originalProperties.type === "ellipse") {
       // Calculate the new tangent points
       transformControlPoint(
@@ -499,104 +486,132 @@ export function transformVectorContent(
         isMirroredHorizontally,
         isMirroredVertically
       )
-
-      ///////////////////////////
-      // const timeAtAxisA = getTimeAtFirstAxis(radA, radB, scaleX, scaleY, angle)
-      // console.log(
-      //   timeAtAxisA,
-      //   "radA: ",
-      //   radA,
-      //   "radB: ",
-      //   radB,
-      //   "scaleX: ",
-      //   scaleX,
-      //   "scaleY: ",
-      //   scaleY,
-      //   "angle: ",
-      //   angle
-      // )
-      // //Plug in time to parametric equations for ellipse to get x and y values of semi-major axis vertex and length of axis
-      // let px2 =
-      //   scaleX *
-      //   (originalProperties.px1 +
-      //     radA * Math.cos(timeAtAxisA) * Math.cos(angle) -
-      //     radB * Math.sin(timeAtAxisA) * Math.sin(angle))
-      // let py2 =
-      //   scaleY *
-      //   (originalProperties.py1 +
-      //     radB * Math.sin(timeAtAxisA) * Math.cos(angle) +
-      //     radA * Math.cos(timeAtAxisA) * Math.sin(angle))
-
-      // let px3 =
-      //   scaleX *
-      //   (originalProperties.px1 +
-      //     radA * Math.cos(timeAtAxisA - Math.PI / 2) * Math.cos(angle) -
-      //     radB * Math.sin(timeAtAxisA - Math.PI / 2) * Math.sin(angle))
-      // let py3 =
-      //   scaleY *
-      //   (originalProperties.py1 +
-      //     radB * Math.sin(timeAtAxisA - Math.PI / 2) * Math.cos(angle) +
-      //     radA * Math.cos(timeAtAxisA - Math.PI / 2) * Math.sin(angle))
-
-      //////////////////////////
-      // Calculate points on the ellipse's axes after transformation
-      // let radA = originalProperties.radA
-      // let radB = originalProperties.radB
-      // let angle = originalProperties.angle
-      const { px2, py2, px3, py3 } = calcEllipseParamsFromConics(
-        vector.vectorProperties.weight,
-        vector.vectorProperties.leftTangentX,
-        vector.vectorProperties.leftTangentY,
-        vector.vectorProperties.topTangentX,
-        vector.vectorProperties.topTangentY,
-        vector.vectorProperties.rightTangentX,
-        vector.vectorProperties.rightTangentY,
-        vector.vectorProperties.bottomTangentX,
-        vector.vectorProperties.bottomTangentY,
-        vector.vectorProperties.px1,
-        vector.vectorProperties.py1,
-        originalProperties.angle
-      )
-      // let px2 = Math.round(vector.vectorProperties.px1 + radA * Math.cos(angle))
-      // let py2 = Math.round(vector.vectorProperties.py1 + radA * Math.sin(angle))
-      // let px3 = Math.round(
-      //   vector.vectorProperties.px1 + radB * Math.cos(angle - Math.PI / 2)
-      // )
-      // let py3 = Math.round(
-      //   vector.vectorProperties.py1 + radB * Math.sin(angle - Math.PI / 2)
-      // )
-      // let px2 = Math.round(
-      //   vector.vectorProperties.px1 + scaleX * (radA * Math.cos(angle))
-      // )
-      // let py2 = Math.round(
-      //   vector.vectorProperties.py1 + scaleY * (radA * Math.sin(angle))
-      // )
-      // let px3 = Math.round(
-      //   vector.vectorProperties.px1 +
-      //     scaleX * (radB * Math.cos(angle - Math.PI / 2))
-      // )
-      // let py3 = Math.round(
-      //   vector.vectorProperties.py1 +
-      //     scaleY * (radB * Math.sin(angle - Math.PI / 2))
-      // )
-
-      updateVectorProperties(vector, px2, py2, "px2", "py2")
-      updateVectorProperties(vector, px3, py3, "px3", "py3")
-      // vector.vectorProperties.radA = radA
-      // vector.vectorProperties.radB = radB
-      // vector.vectorProperties.angle = angle
-      //new radA is length between p2 and p1
-      let dxa = px2 - vector.vectorProperties.px1
-      let dya = py2 - vector.vectorProperties.py1
-      vector.vectorProperties.radA = Math.sqrt(dxa * dxa + dya * dya)
-      // new radB is length between p3 and p1
-      let dxb = px3 - vector.vectorProperties.px1
-      let dyb = py3 - vector.vectorProperties.py1
-      vector.vectorProperties.radB = Math.sqrt(dxb * dxb + dyb * dyb)
-      // new angle is angle between p2 and p1
-      let updatedAngle = getAngle(dxa, dya)
-      vector.vectorProperties.angle = updatedAngle
+      if ((originalProperties.angle % Math.PI) / 2 === 0) {
+        //For right angles, angle remains the same and vertices can be stretched same way as center point
+        // Transform each control point
+        transformControlPoint(
+          vector,
+          originalProperties,
+          "px1",
+          "py1",
+          scaleX,
+          scaleY,
+          xOffset,
+          yOffset,
+          isMirroredHorizontally,
+          isMirroredVertically
+        )
+        transformControlPoint(
+          vector,
+          originalProperties,
+          "px2",
+          "py2",
+          scaleX,
+          scaleY,
+          xOffset,
+          yOffset,
+          isMirroredHorizontally,
+          isMirroredVertically
+        )
+        transformControlPoint(
+          vector,
+          originalProperties,
+          "px3",
+          "py3",
+          scaleX,
+          scaleY,
+          xOffset,
+          yOffset,
+          isMirroredHorizontally,
+          isMirroredVertically
+        )
+        //recalculate radA and radB
+        let dxa = vector.vectorProperties.px2 - vector.vectorProperties.px1
+        let dya = vector.vectorProperties.py2 - vector.vectorProperties.py1
+        vector.vectorProperties.radA = Math.sqrt(dxa * dxa + dya * dya)
+        let dxb = vector.vectorProperties.px3 - vector.vectorProperties.px1
+        let dyb = vector.vectorProperties.py3 - vector.vectorProperties.py1
+        vector.vectorProperties.radB = Math.sqrt(dxb * dxb + dyb * dyb)
+      } else {
+        const px1 = Math.round(
+          vector.vectorProperties.leftTangentX +
+            (vector.vectorProperties.rightTangentX -
+              vector.vectorProperties.leftTangentX) /
+              2
+        )
+        const py1 = Math.round(
+          vector.vectorProperties.topTangentY +
+            (vector.vectorProperties.bottomTangentY -
+              vector.vectorProperties.topTangentY) /
+              2
+        )
+        const { px2, py2, px3, py3 } = calcEllipseParamsFromConics(
+          vector.vectorProperties.weight,
+          vector.vectorProperties.leftTangentX,
+          vector.vectorProperties.leftTangentY,
+          vector.vectorProperties.topTangentX,
+          vector.vectorProperties.topTangentY,
+          vector.vectorProperties.rightTangentX,
+          vector.vectorProperties.rightTangentY,
+          vector.vectorProperties.bottomTangentX,
+          vector.vectorProperties.bottomTangentY,
+          px1,
+          py1,
+          originalProperties.angle
+        )
+        //Don't need to use updateVectorProperties function as values are already corrected for the layer offsets
+        vector.vectorProperties.px1 = px1
+        vector.vectorProperties.py1 = py1
+        vector.vectorProperties.px2 = px2
+        vector.vectorProperties.py2 = py2
+        vector.vectorProperties.px3 = px3
+        vector.vectorProperties.py3 = py3
+        //new radA is length between p2 and p1
+        let dxa = px2 - px1
+        let dya = py2 - py1
+        vector.vectorProperties.radA = Math.sqrt(dxa * dxa + dya * dya)
+        // new radB is length between p3 and p1
+        let dxb = px3 - px1
+        let dyb = py3 - py1
+        vector.vectorProperties.radB = Math.sqrt(dxb * dxb + dyb * dyb)
+        // new angle is angle between p2 and p1
+        let updatedAngle = getAngle(dxa, dya)
+        while (updatedAngle < 0) {
+          updatedAngle += 2 * Math.PI
+        }
+        vector.vectorProperties.angle = updatedAngle
+      }
+      //adjust offsets
+      vector.vectorProperties.x1Offset =
+        (vector.vectorProperties.rightTangentX -
+          vector.vectorProperties.leftTangentX) %
+          2 ===
+        0
+          ? 0
+          : -1
+      vector.vectorProperties.y1Offset =
+        (vector.vectorProperties.bottomTangentY -
+          vector.vectorProperties.topTangentY) %
+          2 ===
+        0
+          ? 0
+          : -1
+      vector.vectorProperties.unifiedOffset =
+        vector.vectorProperties.x1Offset * vector.vectorProperties.y1Offset
     } else {
+      // Transform each control point
+      transformControlPoint(
+        vector,
+        originalProperties,
+        "px1",
+        "py1",
+        scaleX,
+        scaleY,
+        xOffset,
+        yOffset,
+        isMirroredHorizontally,
+        isMirroredVertically
+      )
       transformControlPoint(
         vector,
         originalProperties,
@@ -662,8 +677,8 @@ export function transformVectorContent(
     isMirroredVertically
   ) {
     if (Object.hasOwn(originalProperties, xKey)) {
-      let originalX = originalProperties[xKey]
-      let originalY = originalProperties[yKey]
+      let originalX = originalProperties[xKey] + vector.layer.x
+      let originalY = originalProperties[yKey] + vector.layer.y
       let newX = originalX * scaleX + xOffset
       let newY = originalY * scaleY + yOffset
 

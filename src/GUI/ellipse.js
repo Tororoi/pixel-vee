@@ -187,7 +187,6 @@ export function renderEllipsePath(vectorProperties, vector) {
   if (!Number.isInteger(px3)) {
     minorAxis = majorAxis
   }
-
   canvas.vectorGuiCTX.ellipse(
     xOffset + px1 + 0.5 + x1Offset / 2,
     yOffset + py1 + 0.5 + y1Offset / 2,
