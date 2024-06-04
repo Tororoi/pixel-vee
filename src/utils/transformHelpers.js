@@ -552,7 +552,10 @@ export function transformVectorContent(
         vector.vectorProperties.rightTangentX,
         vector.vectorProperties.rightTangentY,
         vector.vectorProperties.bottomTangentX,
-        vector.vectorProperties.bottomTangentY
+        vector.vectorProperties.bottomTangentY,
+        vector.vectorProperties.px1,
+        vector.vectorProperties.py1,
+        originalProperties.angle
       )
       // let px2 = Math.round(vector.vectorProperties.px1 + radA * Math.cos(angle))
       // let py2 = Math.round(vector.vectorProperties.py1 + radA * Math.sin(angle))

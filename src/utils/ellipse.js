@@ -355,8 +355,10 @@ export function calcEllipseConicsFromVertices(
  * @param {number} rightTangentY - y-coordinate of the right tangent
  * @param {number} bottomTangentX - x-coordinate of the bottom tangent
  * @param {number} bottomTangentY - y-coordinate of the bottom tangent
+ * @param {number} centerX - x-coordinate of the center of the ellipse
+ * @param {number} centerY - y-coordinate of the center of the ellipse
+ * @param {number} originalAngle - original angle of ellipse before transformation. Used to know the quadrants to check for the vertices
  * @returns {object} - {a, b, angle}
- * //IN PROGRESS, currently not working
  */
 export function calcEllipseParamsFromConics(
   weight,
@@ -367,60 +369,104 @@ export function calcEllipseParamsFromConics(
   rightTangentX,
   rightTangentY,
   bottomTangentX,
-  bottomTangentY
+  bottomTangentY,
+  centerX,
+  centerY,
+  originalAngle
 ) {
   //top-left corner
-  const topLeftVertex = findConicSegmentVertex(
-    1 - weight,
-    leftTangentX,
-    leftTangentY,
-    leftTangentX,
-    topTangentY,
-    topTangentX,
-    topTangentY
-  )
+  const topLeftVertex = () =>
+    findConicSegmentVertex(
+      1 - weight,
+      leftTangentX,
+      leftTangentY,
+      leftTangentX,
+      topTangentY,
+      topTangentX,
+      topTangentY,
+      centerX,
+      centerY
+    )
   //top-right corner
-  const topRightVertex = findConicSegmentVertex(
-    weight,
-    topTangentX,
-    topTangentY,
-    rightTangentX,
-    topTangentY,
-    rightTangentX,
-    rightTangentY
-  )
+  const topRightVertex = () =>
+    findConicSegmentVertex(
+      weight,
+      topTangentX,
+      topTangentY,
+      rightTangentX,
+      topTangentY,
+      rightTangentX,
+      rightTangentY,
+      centerX,
+      centerY
+    )
   //bottom-right corner
-  const bottomRightVertex = findConicSegmentVertex(
-    1 - weight,
-    rightTangentX,
-    rightTangentY,
-    rightTangentX,
-    bottomTangentY,
-    bottomTangentX,
-    bottomTangentY
-  )
+  const bottomRightVertex = () =>
+    findConicSegmentVertex(
+      1 - weight,
+      rightTangentX,
+      rightTangentY,
+      rightTangentX,
+      bottomTangentY,
+      bottomTangentX,
+      bottomTangentY,
+      centerX,
+      centerY
+    )
   //bottom-left corner
-  const bottomLeftVertex = findConicSegmentVertex(
-    weight,
-    bottomTangentX,
-    bottomTangentY,
-    leftTangentX,
-    bottomTangentY,
-    leftTangentX,
-    leftTangentY
-  )
-
-  const px3 = Math.round(topRightVertex.lowestCurvatureX)
-  const py3 = Math.round(topRightVertex.lowestCurvatureY)
-  const px2 = Math.round(bottomRightVertex.highestCurvatureX)
-  const py2 = Math.round(bottomRightVertex.highestCurvatureY)
-
-  console.log({
-    topLeftVertex,
-    topRightVertex,
-    bottomRightVertex,
-    bottomLeftVertex,
-  })
+  const bottomLeftVertex = () =>
+    findConicSegmentVertex(
+      weight,
+      bottomTangentX,
+      bottomTangentY,
+      leftTangentX,
+      bottomTangentY,
+      leftTangentX,
+      leftTangentY,
+      centerX,
+      centerY
+    )
+  let px2, py2, px3, py3, vertexA, vertexB
+  switch (true) {
+    case originalAngle <= Math.PI / 2: {
+      //bottom-right corner
+      vertexA = bottomRightVertex()
+      vertexB = topRightVertex()
+      break
+    }
+    case originalAngle <= Math.PI: {
+      //bottom-left corner
+      vertexA = bottomLeftVertex()
+      vertexB = bottomRightVertex()
+      break
+    }
+    case originalAngle <= (3 * Math.PI) / 2: {
+      //top-left corner
+      vertexA = topLeftVertex()
+      vertexB = bottomLeftVertex()
+      break
+    }
+    case originalAngle <= 2 * Math.PI: {
+      //top-right corner
+      vertexA = topRightVertex()
+      vertexB = topLeftVertex()
+      break
+    }
+    default:
+      //
+      console.log("Invalid angle", originalAngle <= Math.PI / 2)
+  }
+  if (vertexA.majorRadius > vertexB.majorRadius) {
+    px2 = Math.round(vertexA.majorX)
+    py2 = Math.round(vertexA.majorY)
+    px3 = Math.round(vertexB.minorX)
+    py3 = Math.round(vertexB.minorY)
+  } else {
+    px2 = Math.round(vertexA.minorX)
+    py2 = Math.round(vertexA.minorY)
+    px3 = Math.round(vertexB.majorX)
+    py3 = Math.round(vertexB.majorY)
+  }
 
   return {
     px2,
@@ -431,7 +477,80 @@ export function calcEllipseParamsFromConics(
 }
 
 /**
- * Calculate the vertex coordinates of a conic Bézier curve
+ * Golden-section search to find the minimum radius of curvature
+ * @param a - lower bound of the search interval
+ * @param b - upper bound of the search interval
+ * @param f - function whose minimum value we're searching for
+ * @param tol - tolerance for the search precision (default is 1e-5)
+ */
+function goldenSectionSearchMin(a, b, f, tol = 1e-5) {
+  const gr = (Math.sqrt(5) + 1) / 2
+  let c = b - (b - a) / gr
+  let d = a + (b - a) / gr
+
+  while (Math.abs(c - d) > tol) {
+    if (f(c) < f(d)) {
+      b = d
+    } else {
+      a = c
+    }
+    c = b - (b - a) / gr
+    d = a + (b - a) / gr
+  }
+
+  return (b + a) / 2
+}
+
+/**
+ * Golden-section search to find the maximum radius of curvature
+ * @param a - lower bound of the search interval
+ * @param b - upper bound of the search interval
+ * @param f - function whose maximum value we're searching for
+ * @param tol - tolerance for the search precision (default is 1e-5)
+ */
+function goldenSectionSearchMax(a, b, f, tol = 1e-5) {
+  const gr = (Math.sqrt(5) + 1) / 2
+  let c = b - (b - a) / gr
+  let d = a + (b - a) / gr
+
+  while (Math.abs(c - d) > tol) {
+    if (f(c) > f(d)) {
+      b = d
+    } else {
+      a = c
+    }
+    c = b - (b - a) / gr
+    d = a + (b - a) / gr
+  }
+
+  return (b + a) / 2
+}
+
+/**
+ * Evaluate the conic Bézier curve at parameter t
+ * @param t - parameter value at which to evaluate the curve
+ * @param px0 - x-coordinate of the first control point
+ * @param py0 - y-coordinate of the first control point
+ * @param px1 - x-coordinate of the second control point
+ * @param py1 - y-coordinate of the second control point
+ * @param px2 - x-coordinate of the third control point
+ * @param py2 - y-coordinate of the third control point
+ * @param weight - squared weight of the middle control point
+ */
+function evaluateBezier(t, px0, py0, px1, py1, px2, py2, weight) {
+  const w = Math.sqrt(weight)
+  const mt = 1 - t
+
+  const denominator = mt * mt + 2 * w * mt * t + t * t
+
+  const x = (mt * mt * px0 + 2 * w * mt * t * px1 + t * t * px2) / denominator
+  const y = (mt * mt * py0 + 2 * w * mt * t * py1 + t * t * py2) / denominator
+
+  return { x, y }
+}
+
+/**
+ * Find the points of highest and lowest curvature on a conic Bézier curve
  * @param weight - squared weight of P1
  * @param px0 - x-coordinate of the first control point
  * @param py0 - y-coordinate of the first control point
@@ -439,193 +558,42 @@ export function calcEllipseParamsFromConics(
  * @param py1 - y-coordinate of the second control point
  * @param px2 - x-coordinate of the third control point
  * @param py2 - y-coordinate of the third control point
+ * @param centerX
+ * @param centerY
  */
-function findConicSegmentVertex(weight, px0, py0, px1, py1, px2, py2) {
-  // Function to calculate the derivatives of the conic Bézier curve
+function findConicSegmentVertex(
+  weight,
+  px0,
+  py0,
+  px1,
+  py1,
+  px2,
+  py2,
+  centerX,
+  centerY
+) {
   /**
-   *
-   * @param weight
-   * @param t
-   * @param px0
-   * @param py0
-   * @param px1
-   * @param py1
-   * @param px2
-   * @param py2
+   * Check radius of ellipse at given t on the conic segment
+   * @param {*} t
+   * @returns
    */
-  function bezierConicDerivatives(weight, t, px0, py0, px1, py1, px2, py2) {
-    const w = Math.sqrt(weight)
-    const mt = 1 - t
-
-    // First derivative
-    const dx1 = 2 * (mt * (px1 - px0) + t * (px2 - px1) * w)
-    const dy1 = 2 * (mt * (py1 - py0) + t * (py2 - py1) * w)
-
-    // Second derivative
-    const dx2 = 2 * ((px2 - 2 * px1 + px0) * w)
-    const dy2 = 2 * ((py2 - 2 * py1 + py0) * w)
-
-    return { dx1, dy1, dx2, dy2 }
-  }
-
-  // Function to calculate the curvature
-  /**
-   *
-   * @param t
-   * @param px0
-   * @param py0
-   * @param px1
-   * @param py1
-   * @param px2
-   * @param py2
-   * @param weight
-   */
-  function curvature(t, px0, py0, px1, py1, px2, py2, weight) {
-    const { dx1, dy1, dx2, dy2 } = bezierConicDerivatives(
-      weight,
-      t,
-      px0,
-      py0,
-      px1,
-      py1,
-      px2,
-      py2
+  const radiusFunction = (t) => {
+    const pointOnCurve = evaluateBezier(t, px0, py0, px1, py1, px2, py2, weight)
+    const distanceToPointFromCenter = Math.sqrt(
+      (pointOnCurve.x - centerX) ** 2 + (pointOnCurve.y - centerY) ** 2
     )
-
-    const numerator = Math.abs(dx1 * dy2 - dy1 * dx2)
-    const denominator = Math.pow(dx1 * dx1 + dy1 * dy1, 1.5)
-
-    return numerator / denominator
+    return distanceToPointFromCenter
   }
 
-  // Evaluate the conic Bézier curve at parameter t
-  /**
-   *
-   * @param t
-   * @param px0
-   * @param py0
-   * @param px1
-   * @param py1
-   * @param px2
-   * @param py2
-   * @param weight
-   */
-  function evaluateBezier(t, px0, py0, px1, py1, px2, py2, weight) {
-    const w = Math.sqrt(weight)
-    const mt = 1 - t
+  // Search for largest distance to center
+  const majorT = goldenSectionSearchMax(0, 1, radiusFunction, 1e-5)
 
-    const denominator = mt * mt + 2 * w * mt * t + t * t
-
-    const x = (mt * mt * px0 + 2 * w * mt * t * px1 + t * t * px2) / denominator
-    const y = (mt * mt * py0 + 2 * w * mt * t * py1 + t * t * py2) / denominator
-
-    return { x, y }
-  }
-
-  // Golden-section search to find the minimum curvature
-  /**
-   *
-   * @param a - the lower bound of the search interval
-   * @param b - the upper bound of the search interval
-   * @param f - the function whose minimum value we're searching for
-   * @param tol - the tolerance for the search precision (default is 1e-5)
-   */
-  function goldenSectionSearchMin(a, b, f, tol = 1e-5) {
-    const gr = (Math.sqrt(5) + 1) / 2
-    let c = b - (b - a) / gr
-    let d = a + (b - a) / gr
-
-    while (Math.abs(c - d) > tol) {
-      if (f(c) < f(d)) {
-        b = d
-      } else {
-        a = c
-      }
-      c = b - (b - a) / gr
-      d = a + (b - a) / gr
-    }
-
-    return (b + a) / 2
-  }
-
-  // Golden-section search to find the maximum curvature
-  /**
-   *
-   * @param a - the lower bound of the search interval
-   * @param b - the upper bound of the search interval
-   * @param f - the function whose minimum value we're searching for
-   * @param tol - the tolerance for the search precision (default is 1e-5)
-   */
-  function goldenSectionSearchMax(a, b, f, tol = 1e-5) {
-    const gr = (Math.sqrt(5) + 1) / 2
-    let c = b - (b - a) / gr
-    let d = a + (b - a) / gr
-
-    while (Math.abs(c - d) > tol) {
-      if (f(c) > f(d)) {
-        b = d
-      } else {
-        a = c
-      }
-      c = b - (b - a) / gr
-      d = a + (b - a) / gr
-    }
-
-    return (b + a) / 2
-  }
-
-  const curvatureFunction = (t) =>
-    curvature(t, px0, py0, px1, py1, px2, py2, weight)
-
-  // Initial check at endpoints
-  const curvatureAt0 = curvature(0, px0, py0, px1, py1, px2, py2, weight)
-  const curvatureAt1 = curvature(1, px0, py0, px1, py1, px2, py2, weight)
-
-  let lowestCurvatureT = 0
-  let highestCurvatureT = 0
-  let minCurvature = curvatureAt0
-  let maxCurvature = curvatureAt0
-
-  if (curvatureAt1 < minCurvature) {
-    minCurvature = curvatureAt1
-    lowestCurvatureT = 1
-  }
-  if (curvatureAt1 > maxCurvature) {
-    maxCurvature = curvatureAt1
-    highestCurvatureT = 1
-  }
-
-  // Search for highest curvature
-  const highestCurvatureSearchT = goldenSectionSearchMax(
-    0,
-    1,
-    curvatureFunction,
-    1e-5
-  )
-  const highestCurvatureValue = curvatureFunction(highestCurvatureSearchT)
-
-  if (highestCurvatureValue > maxCurvature) {
-    maxCurvature = highestCurvatureValue
-    highestCurvatureT = highestCurvatureSearchT
-  }
-
-  // Search for lowest curvature
-  const lowestCurvatureSearchT = goldenSectionSearchMin(
-    0,
-    1,
-    curvatureFunction,
-    1e-5
-  )
-  const lowestCurvatureValue = curvatureFunction(lowestCurvatureSearchT)
-
-  if (lowestCurvatureValue < minCurvature) {
-    minCurvature = lowestCurvatureValue
-    lowestCurvatureT = lowestCurvatureSearchT
-  }
+  // Search for smallest distance to center
+  const minorT = goldenSectionSearchMin(0, 1, radiusFunction, 1e-5)
 
   // Calculate the coordinates at the points of highest and lowest curvature
-  const highestCurvaturePoint = evaluateBezier(
-    highestCurvatureT,
+  const majorPoint = evaluateBezier(
+    majorT,
     px0,
     py0,
     px1,
@@ -634,8 +602,8 @@ function findConicSegmentVertex(weight, px0, py0, px1, py1, px2, py2) {
     py2,
     weight
   )
-  const lowestCurvaturePoint = evaluateBezier(
-    lowestCurvatureT,
+  const minorPoint = evaluateBezier(
+    minorT,
     px0,
     py0,
     px1,
@@ -646,12 +614,12 @@ function findConicSegmentVertex(weight, px0, py0, px1, py1, px2, py2) {
   )
 
   return {
-    highestCurvatureT,
-    highestCurvatureX: highestCurvaturePoint.x,
-    highestCurvatureY: highestCurvaturePoint.y,
-    lowestCurvatureT,
-    lowestCurvatureX: lowestCurvaturePoint.x,
-    lowestCurvatureY: lowestCurvaturePoint.y,
+    majorRadius: radiusFunction(majorT),
+    majorX: majorPoint.x,
+    majorY: majorPoint.y,
+    minorRadius: radiusFunction(minorT),
+    minorX: minorPoint.x,
+    minorY: minorPoint.y,
   }
 }
 
