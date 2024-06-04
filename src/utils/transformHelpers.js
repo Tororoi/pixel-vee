@@ -581,7 +581,7 @@ export function transformVectorContent(
         }
         vector.vectorProperties.angle = updatedAngle
       }
-      //adjust offsets
+      //adjust offsets TODO: (High Priority) Offsets should be handled as a positive, not negative. Currently adjusting vector after transformation may change the min/max values of the bounding box even without changing the position of control points.
       vector.vectorProperties.x1Offset =
         (vector.vectorProperties.rightTangentX -
           vector.vectorProperties.leftTangentX) %
