@@ -1,7 +1,7 @@
 import { canvas } from "../Context/canvas.js"
 import { getTriangle, getAngle } from "../utils/trig.js"
 import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
-import { plotCircle, plotRotatedEllipse } from "../utils/ellipse.js"
+import { plotRotatedEllipseConics } from "../utils/ellipse.js"
 import {
   colorPixel,
   matchStartColor,
@@ -550,96 +550,67 @@ export function actionCubicCurve(
 }
 
 /**
- * User action for process to set control points for cubic bezier
- * @param {number} centerx - (Integer)
- * @param {number} centery - (Integer)
- * @param {number} xa - (Integer)
- * @param {number} ya - (Integer)
- * @param {number} xb - (Integer)
- * @param {number} yb - (Integer)
- * @param {number} radA - (Integer)
- * @param {number} radB - (Integer)
- * @param {boolean} forceCircle - whether to force a circle
+ * User action for process to set control points for ellipse based on vertices
+ * @param {number} weight - (Integer)
+ * @param {number} leftTangentX - (Integer)
+ * @param {number} leftTangentY - (Integer)
+ * @param {number} topTangentX - (Integer)
+ * @param {number} topTangentY - (Integer)
+ * @param {number} rightTangentX - (Integer)
+ * @param {number} rightTangentY - (Integer)
+ * @param {number} bottomTangentX - (Integer)
+ * @param {number} bottomTangentY - (Integer)
  * @param {object} boundaryBox - {xMin, xMax, yMin, yMax}
  * @param {object} currentColor - {color, r, g, b, a}
  * @param {object} layer - the affected layer
  * @param {object} currentModes - modes to be used for rendering
  * @param {object} brushStamp - entire brushStamp array with all directions
  * @param {number} brushSize - (Integer)
- * @param {number} angle - Radians (Float)
- * @param {number} unifiedOffset - (Integer)
- * @param {number} x1Offset - (Integer)
- * @param {number} y1Offset - (Integer)
  * @param {Set} maskSet - set of coordinates to draw on if mask is active
  * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {boolean} isPreview - whether the action is a preview (not on main canvas) - used by vector tools before line is confirmed
  */
 export function actionEllipse(
-  centerx,
-  centery,
-  xa,
-  ya,
-  xb,
-  yb,
-  radA,
-  radB,
-  forceCircle,
+  weight,
+  leftTangentX,
+  leftTangentY,
+  topTangentX,
+  topTangentY,
+  rightTangentX,
+  rightTangentY,
+  bottomTangentX,
+  bottomTangentY,
   boundaryBox,
   currentColor,
   layer,
   currentModes,
   brushStamp,
   brushSize,
-  angle,
-  unifiedOffset,
-  x1Offset,
-  y1Offset,
   maskSet,
   customContext = null,
   isPreview = false
 ) {
-  if (forceCircle) {
-    let plotPoints = plotCircle(
-      centerx + 0.5,
-      centery + 0.5,
-      radA,
-      unifiedOffset
-    )
-    renderPoints(
-      plotPoints,
-      boundaryBox,
-      brushStamp,
-      currentColor,
-      brushSize,
-      layer,
-      currentModes,
-      maskSet,
-      customContext,
-      isPreview
-    )
-  } else {
-    let plotPoints = plotRotatedEllipse(
-      centerx,
-      centery,
-      radA,
-      radB,
-      angle,
-      xa,
-      ya,
-      x1Offset,
-      y1Offset
-    )
-    renderPoints(
-      plotPoints,
-      boundaryBox,
-      brushStamp,
-      currentColor,
-      brushSize,
-      layer,
-      currentModes,
-      maskSet,
-      customContext,
-      isPreview
-    )
-  }
+  const plotPoints = plotRotatedEllipseConics(
+    weight,
+    leftTangentX,
+    leftTangentY,
+    topTangentX,
+    topTangentY,
+    rightTangentX,
+    rightTangentY,
+    bottomTangentX,
+    bottomTangentY
+  )
+  renderPoints(
+    plotPoints,
+    boundaryBox,
+    brushStamp,
+    currentColor,
+    brushSize,
+    layer,
+    currentModes,
+    maskSet,
+    customContext,
+    isPreview
+  )
 }

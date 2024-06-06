@@ -1,5 +1,4 @@
 import { TRANSLATE, ROTATE, SCALE } from "../utils/constants.js"
-import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { keys } from "../Shortcuts/keys.js"
@@ -11,15 +10,18 @@ import {
   createActiveIndexesForRender,
 } from "../GUI/vector.js"
 import { getAngle } from "../utils/trig.js"
-import { getOpposingEllipseVertex, findHalf } from "../utils/ellipse.js"
+import {
+  getOpposingEllipseVertex,
+  findHalf,
+  calcEllipseConicsFromVertices,
+} from "../utils/ellipse.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
   updateVectorProperties,
   rotateVectors,
   translateVectors,
-  findCentroid,
-  findVectorShapeCentroid,
 } from "../utils/vectorHelpers.js"
+import { transformVectorContent } from "../utils/transformHelpers.js"
 
 //=======================================//
 //======== * * * Transform * * * ========//
@@ -141,8 +143,88 @@ export function transformVectorSteps() {
       state.clickCounter = 0
       renderCanvas(currentVector.layer, true, state.activeIndexes)
       modifyVectorAction(currentVector)
+      vectorGui.selectedPoint = {
+        xKey: null,
+        yKey: null,
+      }
       break
     }
+    default:
+    //do nothing
+  }
+}
+
+/**
+ * Transform selected vectors by scaling
+ * TODO: (High Priority) Implement locking ratio to maintain aspect ratio while scaling.
+ */
+function scaleVectorSteps() {
+  let currentVector =
+    state.vectors[state.selectedVectorIndicesSet.values().next().value]
+  switch (canvas.pointerEvent) {
+    case "pointerdown":
+      vectorGui.selectedPoint = {
+        xKey: vectorGui.collidedPoint.xKey,
+        yKey: vectorGui.collidedPoint.yKey,
+      }
+      state.previousBoundaryBox = { ...state.boundaryBox }
+      //reset current vector properties (this also resets the state.currentVectorIndex if there is one)
+      vectorGui.reset()
+      //Set state.vectorsSavedProperties for all selected vectors
+      state.vectorsSavedProperties = {}
+      state.selectedVectorIndicesSet.forEach((index) => {
+        const vectorProperties = state.vectors[index].vectorProperties
+        state.vectorsSavedProperties[index] = {
+          ...vectorProperties,
+        }
+      })
+      //Set activeIndexes for all selected vectors
+      state.activeIndexes = createActiveIndexesForRender(
+        currentVector,
+        state.vectorsSavedProperties
+      )
+      renderCanvas(currentVector.layer, true, state.activeIndexes, true)
+      break
+    case "pointermove": {
+      transformBoundaries()
+      let isMirroredHorizontally = false
+      let isMirroredVertically = false
+      if (vectorGui.selectedPoint.xKey !== "px9") {
+        //Don't check for mirroring when moving whole selection
+        if (
+          state.boundaryBox.xMax === state.previousBoundaryBox.xMin ||
+          state.boundaryBox.xMin === state.previousBoundaryBox.xMax
+        ) {
+          isMirroredHorizontally = !isMirroredHorizontally
+        }
+        if (
+          state.boundaryBox.yMax === state.previousBoundaryBox.yMin ||
+          state.boundaryBox.yMin === state.previousBoundaryBox.yMax
+        ) {
+          isMirroredVertically = !isMirroredVertically
+        }
+      }
+      transformVectorContent(
+        state.vectors,
+        state.vectorsSavedProperties,
+        state.previousBoundaryBox,
+        state.boundaryBox,
+        isMirroredHorizontally,
+        isMirroredVertically
+      )
+      renderCanvas(currentVector.layer, true, state.activeIndexes)
+      break
+    }
+    case "pointerup":
+      state.normalizeSelectProperties()
+      state.setBoundaryBox(state.selectProperties)
+      renderCanvas(currentVector.layer, true, state.activeIndexes)
+      modifyVectorAction(currentVector)
+      vectorGui.selectedPoint = {
+        xKey: null,
+        yKey: null,
+      }
+      break
     default:
     //do nothing
   }
@@ -178,6 +260,57 @@ export function moveVectorRotationPointSteps() {
     default:
     //do nothing
   }
+}
+
+/**
+ * Transform selected area by dragging one of eight control points or move selected area by dragging inside selected area
+ * TODO: (Medium Priority) Make shortcuts for maintaining ratio while dragging control points
+ */
+export function transformBoundaries() {
+  //selectedPoint does not correspond to the selectProperties key. Based on selected point, adjust boundaryBox.
+  switch (vectorGui.selectedPoint.xKey) {
+    case "px1":
+      state.selectProperties.px1 = state.cursorX
+      state.selectProperties.py1 = state.cursorY
+      break
+    case "px2":
+      state.selectProperties.py1 = state.cursorY
+      break
+    case "px3":
+      state.selectProperties.px2 = state.cursorX
+      state.selectProperties.py1 = state.cursorY
+      break
+    case "px4":
+      state.selectProperties.px2 = state.cursorX
+      break
+    case "px5":
+      state.selectProperties.px2 = state.cursorX
+      state.selectProperties.py2 = state.cursorY
+      break
+    case "px6":
+      state.selectProperties.py2 = state.cursorY
+      break
+    case "px7":
+      state.selectProperties.px1 = state.cursorX
+      state.selectProperties.py2 = state.cursorY
+      break
+    case "px8":
+      state.selectProperties.px1 = state.cursorX
+      break
+    case "px9": {
+      //move selected contents
+      const deltaX = state.cursorX - state.previousX
+      const deltaY = state.cursorY - state.previousY
+      state.selectProperties.px1 += deltaX
+      state.selectProperties.py1 += deltaY
+      state.selectProperties.px2 += deltaX
+      state.selectProperties.py2 += deltaY
+      break
+    }
+    default:
+    //do nothing
+  }
+  state.setBoundaryBox(state.selectProperties)
 }
 
 //=======================================//
@@ -269,9 +402,8 @@ export function updateEllipseOffsets(
 /**
  * Update the opposing control points of an ellipse
  * @param {object} vectorProperties - The properties of the vector
- * @param {object} shiftedPoint - The shifted point
- * @param {string} shiftedXKey
- * @param {string} shiftedYKey
+ * @param {string} shiftedXKey - The key of the shifted x value
+ * @param {string} shiftedYKey - The key of the shifted y value
  * @param {number} newX - The new x value for the shifted point
  * @param {number} newY - The new y value for the shifted point
  */
@@ -300,7 +432,7 @@ export function syncEllipseProperties(
     vectorProperties.py3 = vectorProperties.py1 + dyb
   } else if (shiftedXKey === "px2") {
     //Moving px2, adjust radA and px3
-    vectorProperties.radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
+    vectorProperties.radA = Math.sqrt(dxa * dxa + dya * dya)
     //radB remains constant while radA changes unless forceCircle is true
     if (vectorProperties.forceCircle) {
       vectorProperties.radB = vectorProperties.radA
@@ -318,7 +450,7 @@ export function syncEllipseProperties(
     updateEllipseOffsets(vectorProperties, vectorProperties.forceCircle, 0)
   } else if (shiftedXKey === "px3") {
     //Moving px3, adjust radB and px2
-    vectorProperties.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
+    vectorProperties.radB = Math.sqrt(dxb * dxb + dyb * dyb)
     //radA remains constant while radB changes unless forceCircle is true
     if (vectorProperties.forceCircle) {
       vectorProperties.radA = vectorProperties.radB
@@ -339,6 +471,24 @@ export function syncEllipseProperties(
       1.5 * Math.PI
     )
   }
+  let conicControlPoints = calcEllipseConicsFromVertices(
+    vectorProperties.px1,
+    vectorProperties.py1,
+    vectorProperties.radA,
+    vectorProperties.radB,
+    vectorProperties.angle,
+    vectorProperties.x1Offset,
+    vectorProperties.y1Offset
+  )
+  vectorProperties.weight = conicControlPoints.weight
+  vectorProperties.leftTangentX = conicControlPoints.leftTangentX
+  vectorProperties.leftTangentY = conicControlPoints.leftTangentY
+  vectorProperties.topTangentX = conicControlPoints.topTangentX
+  vectorProperties.topTangentY = conicControlPoints.topTangentY
+  vectorProperties.rightTangentX = conicControlPoints.rightTangentX
+  vectorProperties.rightTangentY = conicControlPoints.rightTangentY
+  vectorProperties.bottomTangentX = conicControlPoints.bottomTangentX
+  vectorProperties.bottomTangentY = conicControlPoints.bottomTangentY
 }
 
 /**
@@ -353,7 +503,9 @@ function updateEllipseVectorProperties(currentVector) {
     state.cursorX,
     state.cursorY
   )
-  currentVector.vectorProperties = { ...state.vectorProperties }
+  currentVector.vectorProperties = {
+    ...state.vectorProperties,
+  }
   //Keep properties relative to layer offset
   currentVector.vectorProperties.px1 -= currentVector.layer.x
   currentVector.vectorProperties.py1 -= currentVector.layer.y
@@ -361,6 +513,14 @@ function updateEllipseVectorProperties(currentVector) {
   currentVector.vectorProperties.py2 -= currentVector.layer.y
   currentVector.vectorProperties.px3 -= currentVector.layer.x
   currentVector.vectorProperties.py3 -= currentVector.layer.y
+  currentVector.vectorProperties.leftTangentX -= currentVector.layer.x
+  currentVector.vectorProperties.leftTangentY -= currentVector.layer.y
+  currentVector.vectorProperties.topTangentX -= currentVector.layer.x
+  currentVector.vectorProperties.topTangentY -= currentVector.layer.y
+  currentVector.vectorProperties.rightTangentX -= currentVector.layer.x
+  currentVector.vectorProperties.rightTangentY -= currentVector.layer.y
+  currentVector.vectorProperties.bottomTangentX -= currentVector.layer.x
+  currentVector.vectorProperties.bottomTangentY -= currentVector.layer.y
 }
 
 /**
@@ -652,4 +812,54 @@ export function adjustVectorSteps() {
     default:
     //do nothing
   }
+}
+
+/**
+ *
+ * @returns {boolean} - True if action is taken, false if not
+ */
+export function rerouteVectorStepsAction() {
+  //for selecting another vector via the canvas, collisionPresent is false since it is currently based on collision with selected vector.
+  if (
+    state.collidedVectorIndex !== null &&
+    !vectorGui.selectedCollisionPresent &&
+    state.clickCounter === 0
+  ) {
+    let collidedVector = state.vectors[state.collidedVectorIndex]
+    vectorGui.setVectorProperties(collidedVector)
+    //Render new selected vector before running standard render routine
+    //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.
+    // renderCurrentVector() //May not be needed after changing order of render calls in renderLayerVectors
+    vectorGui.render()
+  }
+  if (
+    ((vectorGui.collidedPoint.xKey === "rotationx" &&
+      vectorGui.selectedPoint.xKey === null) ||
+      vectorGui.selectedPoint.xKey === "rotationx") &&
+    state.clickCounter === 0
+  ) {
+    moveVectorRotationPointSteps()
+    return true
+  }
+  if (
+    state.vectorTransformMode === SCALE &&
+    state.selectedVectorIndicesSet.size > 0
+  ) {
+    scaleVectorSteps()
+    return true
+  }
+  if (
+    vectorGui.selectedCollisionPresent &&
+    state.clickCounter === 0 &&
+    state.currentVectorIndex !== null
+  ) {
+    adjustVectorSteps()
+    return true
+  }
+  //If there are selected vectors, call transformVectorSteps() instead of this function
+  if (state.selectedVectorIndicesSet.size > 0) {
+    transformVectorSteps()
+    return true
+  }
+  return false
 }

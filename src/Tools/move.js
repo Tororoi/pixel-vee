@@ -5,6 +5,7 @@ import { vectorGui } from "../GUI/vector.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { transformRasterContent } from "../utils/transformHelpers.js"
 import { addTransformToTimeline } from "../Actions/nonPointerActions.js"
+import { transformBoundaries } from "./transform.js"
 
 /**
  * Move the contents of a layer relative to other layers
@@ -182,110 +183,137 @@ function transformSteps() {
 }
 
 /**
- * Transform selected area by dragging one of eight control points or move selected area by dragging inside selected area
- * TODO: (Medium Priority) Make shortcuts for maintaining ratio while dragging control points
+ *
  */
-function transformBoundaries() {
-  //selectedPoint does not correspond to the selectProperties key. Based on selected point, adjust boundaryBox.
+function scaleReference() {
   switch (vectorGui.selectedPoint.xKey) {
-    case "px1":
-      state.selectProperties.px1 = state.cursorX
-      state.selectProperties.py1 = state.cursorY
+    case "px1": {
+      //top left corner
+      let newWidth =
+        state.grabStartX +
+        canvas.currentLayer.img.width * state.startScale -
+        state.cursorX
+      let scaleFactor = newWidth / canvas.currentLayer.img.width
+      //round change in height to snap to grid, but more useful and smooth if not snapped to grid
+      let changeInHeight =
+        canvas.currentLayer.img.height * state.startScale -
+        canvas.currentLayer.img.height * scaleFactor
+
+      canvas.currentLayer.scale = scaleFactor
+
+      canvas.currentLayer.x = state.cursorX
+      canvas.currentLayer.y = state.grabStartY + changeInHeight
       break
-    case "px2":
-      state.selectProperties.py1 = state.cursorY
+    }
+    case "px2": {
+      //top middle, expand or contract width
+      let newHeight =
+        state.grabStartY +
+        canvas.currentLayer.img.height * state.startScale -
+        state.cursorY
+      let scaleFactor = newHeight / canvas.currentLayer.img.height
+      let changeInWidth =
+        canvas.currentLayer.img.width * state.startScale -
+        canvas.currentLayer.img.width * scaleFactor
+
+      canvas.currentLayer.scale = scaleFactor
+
+      canvas.currentLayer.x = state.grabStartX + changeInWidth / 2
+      canvas.currentLayer.y = state.cursorY
       break
-    case "px3":
-      state.selectProperties.px2 = state.cursorX
-      state.selectProperties.py1 = state.cursorY
+    }
+    case "px3": {
+      //top right corner
+      let newWidth = state.cursorX - state.grabStartX
+      let scaleFactor = newWidth / canvas.currentLayer.img.width
+      let changeInHeight =
+        canvas.currentLayer.img.height * state.startScale -
+        canvas.currentLayer.img.height * scaleFactor
+
+      canvas.currentLayer.scale = scaleFactor
+
+      canvas.currentLayer.y = state.grabStartY + changeInHeight
       break
-    case "px4":
-      state.selectProperties.px2 = state.cursorX
+    }
+    case "px4": {
+      //middle right, expand or contract height
+      let newWidth = state.cursorX - state.grabStartX
+      let scaleFactor = newWidth / canvas.currentLayer.img.width
+      let changeInHeight =
+        canvas.currentLayer.img.height * state.startScale -
+        canvas.currentLayer.img.height * scaleFactor
+
+      canvas.currentLayer.scale = scaleFactor
+
+      canvas.currentLayer.y = state.grabStartY + changeInHeight / 2
       break
-    case "px5":
-      state.selectProperties.px2 = state.cursorX
-      state.selectProperties.py2 = state.cursorY
+    }
+    case "px5": {
+      //lower right corner
+      let newWidth = state.cursorX - state.grabStartX
+      let newHeight = state.cursorY - state.grabStartY
+      canvas.currentLayer.scale =
+        canvas.offScreenCVS.width / canvas.currentLayer.img.width >
+        canvas.offScreenCVS.height / canvas.currentLayer.img.height
+          ? newHeight / canvas.currentLayer.img.height
+          : newWidth / canvas.currentLayer.img.width
       break
-    case "px6":
-      state.selectProperties.py2 = state.cursorY
+    }
+    case "px6": {
+      //lower middle, expand or contract width
+      let newHeight = state.cursorY - state.grabStartY
+      let scaleFactor = newHeight / canvas.currentLayer.img.height
+      let changeInWidth =
+        canvas.currentLayer.img.width * state.startScale -
+        canvas.currentLayer.img.width * scaleFactor
+
+      canvas.currentLayer.scale = scaleFactor
+
+      canvas.currentLayer.x = state.grabStartX + changeInWidth / 2
       break
-    case "px7":
-      state.selectProperties.px1 = state.cursorX
-      state.selectProperties.py2 = state.cursorY
+    }
+    case "px7": {
+      //bottom left corner
+      let newWidth =
+        state.grabStartX +
+        canvas.currentLayer.img.width * state.startScale -
+        state.cursorX
+      let newHeight = state.cursorY - state.grabStartY
+
+      canvas.currentLayer.scale =
+        canvas.offScreenCVS.width / canvas.currentLayer.img.width >
+        canvas.offScreenCVS.height / canvas.currentLayer.img.height
+          ? newHeight / canvas.currentLayer.img.height
+          : newWidth / canvas.currentLayer.img.width
+
+      canvas.currentLayer.x = state.cursorX
       break
-    case "px8":
-      state.selectProperties.px1 = state.cursorX
+    }
+    case "px8": {
+      //middle left, expand or contract height
+      let newWidth =
+        state.grabStartX +
+        canvas.currentLayer.img.width * state.startScale -
+        state.cursorX
+      let scaleFactor = newWidth / canvas.currentLayer.img.width
+      let changeInHeight =
+        canvas.currentLayer.img.height * state.startScale -
+        canvas.currentLayer.img.height * scaleFactor
+
+      canvas.currentLayer.scale = scaleFactor
+
+      canvas.currentLayer.x = state.cursorX
+      canvas.currentLayer.y = state.grabStartY + changeInHeight / 2
       break
+    }
     case "px9": {
-      //move selected contents
-      const deltaX = state.cursorX - state.previousX
-      const deltaY = state.cursorY - state.previousY
-      state.selectProperties.px1 += deltaX
-      state.selectProperties.py1 += deltaY
-      state.selectProperties.px2 += deltaX
-      state.selectProperties.py2 += deltaY
+      //Move layer
+      canvas.currentLayer.x += state.cursorX - state.previousX
+      canvas.currentLayer.y += state.cursorY - state.previousY
       break
     }
     default:
     //do nothing
-  }
-  state.setBoundaryBox(state.selectProperties)
-}
-
-/**
- *
- */
-function scaleReference() {
-  if (vectorGui.selectedPoint.xKey === "px1") {
-    //top left corner
-    let newWidth =
-      canvas.currentLayer.x +
-      canvas.currentLayer.img.width * canvas.currentLayer.scale -
-      state.cursorX
-    let scaleFactor = newWidth / canvas.currentLayer.img.width
-    let changeInHeight =
-      canvas.currentLayer.img.height * canvas.currentLayer.scale -
-      canvas.currentLayer.img.height * scaleFactor
-
-    canvas.currentLayer.scale = scaleFactor
-
-    canvas.currentLayer.x = state.cursorX
-    canvas.currentLayer.y += changeInHeight
-  } else if (vectorGui.selectedPoint.xKey === "px2") {
-    //top right corner
-    let newWidth = state.cursorX - canvas.currentLayer.x
-    let scaleFactor = newWidth / canvas.currentLayer.img.width
-    let changeInHeight =
-      canvas.currentLayer.img.height * canvas.currentLayer.scale -
-      canvas.currentLayer.img.height * scaleFactor
-
-    canvas.currentLayer.scale = scaleFactor
-
-    canvas.currentLayer.y += changeInHeight
-  } else if (vectorGui.selectedPoint.xKey === "px3") {
-    //bottom left corner
-    let width =
-      canvas.currentLayer.x +
-      canvas.currentLayer.img.width * canvas.currentLayer.scale -
-      state.cursorX
-    let height = state.cursorY - canvas.currentLayer.y
-
-    canvas.currentLayer.scale =
-      canvas.offScreenCVS.width / canvas.currentLayer.img.width >
-      canvas.offScreenCVS.height / canvas.currentLayer.img.height
-        ? height / canvas.currentLayer.img.height
-        : width / canvas.currentLayer.img.width
-
-    canvas.currentLayer.x = state.cursorX
-  } else if (vectorGui.selectedPoint.xKey === "px4") {
-    //lower right corner, don't change canvas.currentLayer.x or canvas.currentLayer.y
-    let width = state.cursorX - canvas.currentLayer.x
-    let height = state.cursorY - canvas.currentLayer.y
-    canvas.currentLayer.scale =
-      canvas.offScreenCVS.width / canvas.currentLayer.img.width >
-      canvas.offScreenCVS.height / canvas.currentLayer.img.height
-        ? height / canvas.currentLayer.img.height
-        : width / canvas.currentLayer.img.width
   }
 }
 

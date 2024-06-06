@@ -12,21 +12,21 @@ import {
   renderOffsetEllipseVector,
   renderEllipsePath,
 } from "./ellipse.js"
-import { renderTransformBox, renderVectorRotationControl } from "./transform.js"
+import { renderVectorRotationControl } from "./transform.js"
 import { renderSelectionCVS } from "./select.js"
 import { renderGrid } from "./grid.js"
 import {
   updateVectorProperties,
   calculateCurrentVectorDeltas,
   handleOptionsAndUpdateVector,
+  // findVectorShapeBoundaryBox,
 } from "../utils/vectorHelpers.js"
 import {
   disableActionsForNoSelection,
   enableActionsForSelection,
 } from "../DOM/disableDomElements.js"
 import { renderLinePath, renderLineVector } from "./line.js"
-import { getAngle } from "../utils/trig.js"
-import { switchTool } from "../Tools/toolbox.js"
+// import { switchTool } from "../Tools/toolbox.js"
 
 //==================================================//
 //=== * * * Vector Graphics User Interface * * * ===//
@@ -128,7 +128,6 @@ export const vectorGui = {
  * @param {object} pointsKeys - The keys of the control points
  * @param {number} radius - (Float)
  * @param {boolean} modify - if true, check for collision with cursor and modify radius
- * @param {number} offset - (Integer)
  * @param {object} vector - The vector to be rendered
  */
 function drawControlPoints(
@@ -354,8 +353,20 @@ function render() {
   //if linking, render all vectors in the layer
   if (canvas.currentLayer.type === "reference") {
     vectorGui.resetCollision()
-    renderTransformBox()
-  } else if (
+    let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+    state.selectProperties.px1 = canvas.currentLayer.x - lineWidth
+    state.selectProperties.py1 = canvas.currentLayer.y - lineWidth
+    state.selectProperties.px2 =
+      canvas.currentLayer.x +
+      canvas.currentLayer.img.width * canvas.currentLayer.scale +
+      lineWidth
+    state.selectProperties.py2 =
+      canvas.currentLayer.y +
+      canvas.currentLayer.img.height * canvas.currentLayer.scale +
+      lineWidth
+    state.setBoundaryBox(state.selectProperties)
+  }
+  if (
     state.tool.options.displayVectors?.active ||
     state.tool.options.equal?.active ||
     state.tool.options.align?.active ||
@@ -367,7 +378,6 @@ function render() {
     //else render only the current vector
     renderCurrentVector()
   }
-  renderSelectionCVS()
   //Render vector transform ui
   if (state.selectedVectorIndicesSet.size > 0 && state.shapeCenterX !== null) {
     switch (state.vectorTransformMode) {
@@ -377,19 +387,24 @@ function render() {
       case TRANSLATE:
         //
         break
-      case SCALE:
-        // renderTransformBox()
+      case SCALE: {
+        //Update shape boundary box TODO: (Medium Priority) Instead of updating shapeBoundaryBox here, update it when the vectors are changed or when the scale mode is toggled.
+        // const shapeBoundaryBox = findVectorShapeBoundaryBox(
+        //   state.selectedVectorIndicesSet,
+        //   state.vectors
+        // )
+        // state.selectProperties.px1 = shapeBoundaryBox.xMin
+        // state.selectProperties.py1 = shapeBoundaryBox.yMin
+        // state.selectProperties.px2 = shapeBoundaryBox.xMax
+        // state.selectProperties.py2 = shapeBoundaryBox.yMax
+        // state.setBoundaryBox(state.selectProperties)
         break
+      }
       default:
     }
   }
-  //Render selection outline
-  // if (
-  //   state.selectProperties.px1 !== null ||
-  //   state.selectedVectorIndicesSet.size > 0
-  // ) {
-  // renderSelectionCVS()
-  // }
+  //Render selection outline and selection control points
+  renderSelectionCVS()
   //Render grid
   if (canvas.zoom >= 4 && vectorGui.grid) {
     renderGrid(vectorGui.gridSpacing)
@@ -648,8 +663,18 @@ export function updateLockedCurrentVectorControlHandle(currentVector, x, y) {
   switch (savedProperties.type) {
     case "cubicCurve": {
       const currentPointNumber = parseInt(vectorGui.selectedPoint.xKey[2])
-      //point 1 holds point 3, point 2 holds point 4
-      const targetPointNumber = currentPointNumber === 1 ? 3 : 4
+      //point 1 holds point 3, point 2 holds point 4, point 3 and 4 don't hold any points
+      let targetPointNumber = currentPointNumber
+      switch (currentPointNumber) {
+        case 1:
+          targetPointNumber = 3
+          break
+        case 2:
+          targetPointNumber = 4
+          break
+        default:
+        //do nothing
+      }
       updateVectorControl(
         currentVector,
         x,

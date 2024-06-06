@@ -26,6 +26,8 @@ import {
 } from "../utils/vectorHelpers.js"
 import { modifyVectorAction } from "./modifyTimeline.js"
 import { dom } from "../Context/dom.js"
+import { SCALE } from "../utils/constants.js"
+import { setVectorShapeBoundaryBox } from "../GUI/transform.js"
 
 //=============================================//
 //====== * * * Non Pointer Actions * * * ======//
@@ -81,6 +83,9 @@ export function actionSelectVector(vectorIndex) {
   if (!state.selectedVectorIndicesSet.has(vectorIndex)) {
     state.selectedVectorIndicesSet.add(vectorIndex)
     dom.vectorTransformUIContainer.style.display = "flex"
+    if (state.vectorTransformMode === SCALE) {
+      setVectorShapeBoundaryBox()
+    }
     // const selectedVectorIndices = new Set(state.selectedVectorIndicesSet)
     // state.deselect()
     // state.selectedVectorIndicesSet = selectedVectorIndices
@@ -118,6 +123,11 @@ export function actionDeselectVector(vectorIndex) {
     state.selectedVectorIndicesSet.delete(vectorIndex)
     if (state.selectedVectorIndicesSet.size === 0) {
       dom.vectorTransformUIContainer.style.display = "none"
+      state.deselect()
+    } else if (state.selectedVectorIndicesSet.size > 0) {
+      if (state.vectorTransformMode === SCALE) {
+        setVectorShapeBoundaryBox()
+      }
     }
     addToTimeline({
       tool: tools.select.name,
@@ -298,14 +308,6 @@ export function actionPasteSelection() {
         uniquePastedImageKey = state.highestPastedImageKey
       }
       if (state.selectClipboard.imageData) {
-        // state.originalImageDataForTransform = state.selectClipboard.imageData
-        // canvas.currentLayer.ctx.getImageData(
-        //   state.boundaryBox.xMin,
-        //   state.boundaryBox.yMin,
-        //   state.boundaryBox.xMax - state.boundaryBox.xMin,
-        //   state.boundaryBox.yMax - state.boundaryBox.yMin
-        // )
-
         state.pastedImages[uniquePastedImageKey] = {
           imageData: state.selectClipboard.imageData,
         }
@@ -378,6 +380,9 @@ export function actionPasteSelection() {
       })
       if (state.selectedVectorIndicesSet.size > 0) {
         dom.vectorTransformUIContainer.style.display = "flex"
+        if (state.vectorTransformMode === SCALE) {
+          setVectorShapeBoundaryBox()
+        }
       } else {
         dom.vectorTransformUIContainer.style.display = "none"
       }
@@ -747,31 +752,10 @@ export function actionFlipVectors(flipHorizontally) {
  */
 export function actionRotateVectors(degrees) {
   //get bounding box of all vectors
-  // let [xMin, xMax, yMin, yMax] = [null, null, null, null]
   const vectorIndicesSet = new Set(state.selectedVectorIndicesSet)
   if (vectorIndicesSet.size === 0) {
     vectorIndicesSet.add(state.currentVectorIndex)
   }
-  // for (const vectorIndex of vectorIndicesSet) {
-  //   const vector = state.vectors[vectorIndex]
-  //   const vectorXPoints = []
-  //   const vectorYPoints = []
-
-  //   for (let i = 1; i <= 4; i++) {
-  //     if (
-  //       "px" + i in vector.vectorProperties &&
-  //       "py" + i in vector.vectorProperties
-  //     ) {
-  //       vectorXPoints.push(vector.vectorProperties[`px${i}`])
-  //       vectorYPoints.push(vector.vectorProperties[`py${i}`])
-  //     }
-  //   }
-
-  //   xMin = Math.min(xMin ?? Infinity, ...vectorXPoints)
-  //   xMax = Math.max(xMax ?? -Infinity, ...vectorXPoints)
-  //   yMin = Math.min(yMin ?? Infinity, ...vectorYPoints)
-  //   yMax = Math.max(yMax ?? -Infinity, ...vectorYPoints)
-  // }
   //get center point of selected vectors
   if (state.shapeCenterX === null) {
     //Update shape center
@@ -825,6 +809,13 @@ export function actionRotateVectors(degrees) {
   modifyVectorAction(referenceVector)
   state.clearRedoStack()
   vectorGui.render()
+}
+
+/**
+ * Scale selected vectors by a factor calculated from the given x and y minimum and maximum points
+ */
+export function actionScaleVectors() {
+  //IN PROGRESS
 }
 
 //=============================================//
@@ -895,6 +886,7 @@ export function removeLayer(layer) {
   if (canvas.activeLayerCount > 1 || layer.type !== "raster") {
     layer.removed = true
     if (layer === canvas.currentLayer) {
+      //TODO: (Medium Priority) Reference layer selection should be deselected when switching to raster layer
       canvas.currentLayer = canvas.layers.find(
         (l) => l.type === "raster" && !l.removed
       )

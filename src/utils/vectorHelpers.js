@@ -1,7 +1,10 @@
+import { calcEllipseConicsFromVertices } from "./ellipse.js"
+import { calculateEllipseBoundingBox } from "./transformHelpers.js"
 import { getAngle } from "./trig.js"
 
 /**
  * WARNING: This function directly manipulates the vector's properties in the history.
+ * Used for updating coordinate properties of a vector.
  * @param {object} vector - The vector to update
  * @param {number} x - (Integer)
  * @param {number} y - (Integer)
@@ -244,6 +247,26 @@ export function translateVectors(
         )
       }
     })
+    if (originalVectorProperties.type === "ellipse") {
+      const conicControlPoints = calcEllipseConicsFromVertices(
+        vector.vectorProperties.px1,
+        vector.vectorProperties.py1,
+        vector.vectorProperties.radA,
+        vector.vectorProperties.radB,
+        vector.vectorProperties.angle,
+        vector.vectorProperties.x1Offset,
+        vector.vectorProperties.y1Offset
+      )
+      vector.vectorProperties.weight = conicControlPoints.weight
+      vector.vectorProperties.leftTangentX = conicControlPoints.leftTangentX
+      vector.vectorProperties.leftTangentY = conicControlPoints.leftTangentY
+      vector.vectorProperties.topTangentX = conicControlPoints.topTangentX
+      vector.vectorProperties.topTangentY = conicControlPoints.topTangentY
+      vector.vectorProperties.rightTangentX = conicControlPoints.rightTangentX
+      vector.vectorProperties.rightTangentY = conicControlPoints.rightTangentY
+      vector.vectorProperties.bottomTangentX = conicControlPoints.bottomTangentX
+      vector.vectorProperties.bottomTangentY = conicControlPoints.bottomTangentY
+    }
   }
 }
 
@@ -299,11 +322,41 @@ export function rotateVectors(
       }
     }
     if (originalVectorProperties.type === "ellipse") {
-      //updateVectorProperties is not enough for ellipses. The angle must be updated as well.
+      //updateVectorProperties is not enough for ellipses. The angle and radii must be updated as well as the values for conic segments.
       vector.vectorProperties.angle = getAngle(
         vector.vectorProperties.px2 - vector.vectorProperties.px1,
         vector.vectorProperties.py2 - vector.vectorProperties.py1
       )
+      while (vector.vectorProperties.angle < 0) {
+        vector.vectorProperties.angle += 2 * Math.PI
+      }
+      vector.vectorProperties.radA = Math.sqrt(
+        (vector.vectorProperties.px1 - vector.vectorProperties.px2) ** 2 +
+          (vector.vectorProperties.py1 - vector.vectorProperties.py2) ** 2
+      )
+      //TODO: (Medium Priority) Should p3 be recalculated here to maintain integrity of rotated ellipse?
+      vector.vectorProperties.radB = Math.sqrt(
+        (vector.vectorProperties.px1 - vector.vectorProperties.px3) ** 2 +
+          (vector.vectorProperties.py1 - vector.vectorProperties.py3) ** 2
+      )
+      const conicControlPoints = calcEllipseConicsFromVertices(
+        vector.vectorProperties.px1,
+        vector.vectorProperties.py1,
+        vector.vectorProperties.radA,
+        vector.vectorProperties.radB,
+        vector.vectorProperties.angle,
+        vector.vectorProperties.x1Offset,
+        vector.vectorProperties.y1Offset
+      )
+      vector.vectorProperties.weight = conicControlPoints.weight
+      vector.vectorProperties.leftTangentX = conicControlPoints.leftTangentX
+      vector.vectorProperties.leftTangentY = conicControlPoints.leftTangentY
+      vector.vectorProperties.topTangentX = conicControlPoints.topTangentX
+      vector.vectorProperties.topTangentY = conicControlPoints.topTangentY
+      vector.vectorProperties.rightTangentX = conicControlPoints.rightTangentX
+      vector.vectorProperties.rightTangentY = conicControlPoints.rightTangentY
+      vector.vectorProperties.bottomTangentX = conicControlPoints.bottomTangentX
+      vector.vectorProperties.bottomTangentY = conicControlPoints.bottomTangentY
     }
   }
 }
@@ -328,4 +381,51 @@ export function findVectorShapeCentroid(vectorIndicesSet, vectors) {
     }
   })
   return findCentroid(vectorPoints)
+}
+
+/**
+ *
+ * @param {Set} vectorIndicesSet - A set of vector indices
+ * @param {object} vectors - The vectors in state
+ * @returns {object} - Returns an object with xMin, xMax, yMin, and yMax
+ */
+export function findVectorShapeBoundaryBox(vectorIndicesSet, vectors) {
+  let [xMin, xMax, yMin, yMax] = [null, null, null, null]
+  // const vectorIndicesSet = new Set(state.selectedVectorIndicesSet)
+  // if (vectorIndicesSet.size === 0) {
+  //   vectorIndicesSet.add(state.currentVectorIndex)
+  // }
+  for (const vectorIndex of vectorIndicesSet) {
+    const vector = vectors[vectorIndex]
+    const vectorXPoints = []
+    const vectorYPoints = []
+    if (vector.vectorProperties.type === "ellipse") {
+      //Ellipse has a center point and a radius. The boundary box is calculated differently.
+      const ellipseBoundingBox = calculateEllipseBoundingBox(
+        vector.vectorProperties
+      )
+      vectorXPoints.push(ellipseBoundingBox.xMin, ellipseBoundingBox.xMax)
+      vectorYPoints.push(ellipseBoundingBox.yMin, ellipseBoundingBox.yMax)
+    } else {
+      for (let i = 1; i <= 4; i++) {
+        if (
+          "px" + i in vector.vectorProperties &&
+          "py" + i in vector.vectorProperties
+        ) {
+          vectorXPoints.push(vector.vectorProperties[`px${i}`])
+          vectorYPoints.push(vector.vectorProperties[`py${i}`])
+        }
+      }
+    }
+    xMin = Math.min(xMin ?? Infinity, ...vectorXPoints)
+    xMax = Math.max(xMax ?? -Infinity, ...vectorXPoints)
+    yMin = Math.min(yMin ?? Infinity, ...vectorYPoints)
+    yMax = Math.max(yMax ?? -Infinity, ...vectorYPoints)
+  }
+  let layer = vectors[vectorIndicesSet.values().next().value].layer
+  xMin += layer.x
+  xMax += layer.x
+  yMin += layer.y
+  yMax += layer.y
+  return { xMin, xMax, yMin, yMax }
 }

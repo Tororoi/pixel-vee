@@ -1,9 +1,8 @@
 import { TRANSLATE, ROTATE, SCALE } from "../utils/constants.js"
 import { dom } from "../Context/dom.js"
-import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
+import { setVectorShapeBoundaryBox } from "./transform.js"
 
 /**
  * Switches the vector transform mode
@@ -30,14 +29,30 @@ dom.vectorTransformModeContainer.addEventListener("click", (e) => {
   //check for button click on translate, rotate or scale by checking e.target.id
   switch (e.target.id) {
     case TRANSLATE:
+      state.resetSelectProperties()
+      state.resetBoundaryBox()
       switchVectorTransformMode(TRANSLATE)
       break
     case ROTATE:
+      state.resetSelectProperties()
+      state.resetBoundaryBox()
       switchVectorTransformMode(ROTATE)
       break
-    case SCALE:
+    case SCALE: {
+      // //Update shape boundary box
+      // const shapeBoundaryBox = findVectorShapeBoundaryBox(
+      //   state.selectedVectorIndicesSet,
+      //   state.vectors
+      // )
+      // state.selectProperties.px1 = shapeBoundaryBox.xMin
+      // state.selectProperties.py1 = shapeBoundaryBox.yMin
+      // state.selectProperties.px2 = shapeBoundaryBox.xMax
+      // state.selectProperties.py2 = shapeBoundaryBox.yMax
+      // state.setBoundaryBox(state.selectProperties)
+      setVectorShapeBoundaryBox()
       switchVectorTransformMode(SCALE)
       break
+    }
     default:
     //do nothing
   }

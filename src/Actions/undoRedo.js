@@ -13,6 +13,8 @@ import {
   enableActionsForNoPaste,
 } from "../DOM/disableDomElements.js"
 import { transformRasterContent } from "../utils/transformHelpers.js"
+import { SCALE } from "../utils/constants.js"
+import { setVectorShapeBoundaryBox } from "../GUI/transform.js"
 
 //====================================//
 //========= * * * Core * * * =========//
@@ -47,6 +49,9 @@ function renderToLatestAction(latestAction, modType) {
   )
   if (state.selectedVectorIndicesSet.size > 0) {
     dom.vectorTransformUIContainer.style.display = "flex"
+    if (state.vectorTransformMode === SCALE) {
+      setVectorShapeBoundaryBox()
+    }
   } else {
     dom.vectorTransformUIContainer.style.display = "none"
   }
