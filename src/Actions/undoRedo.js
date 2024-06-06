@@ -358,11 +358,11 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   if (latestAction.tool === "modify") {
     handleModifyAction(latestAction, modType)
   } else if (latestAction.tool === "changeMode") {
-    state.undoStack[latestAction.moddedActionIndex].modes = {
+    state.vectors[latestAction.moddedVectorIndex].modes = {
       ...latestAction[modType],
     }
   } else if (latestAction.tool === "changeColor") {
-    state.undoStack[latestAction.moddedActionIndex].color = {
+    state.vectors[latestAction.moddedVectorIndex].color = {
       ...latestAction[modType],
     }
   } else if (latestAction.tool === "remove") {
