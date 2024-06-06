@@ -121,6 +121,12 @@ function importImage() {
           yMax: img.height,
         }
         state.selectClipboard.canvas = tempCanvas
+        state.selectClipboard.imageData = tempCTX.getImageData(
+          0,
+          0,
+          img.width,
+          img.height
+        )
         //2. paste clipboard onto canvas
         actionPasteSelection()
         //3. clear clipboard

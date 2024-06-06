@@ -155,7 +155,7 @@ export function transformVectorSteps() {
 }
 
 /**
- * TODO: (High Priority) Currently does not work for ellipses. Angle and radii will have to be recalculated.
+ * Transform selected vectors by scaling
  * TODO: (High Priority) Implement locking ratio to maintain aspect ratio while scaling.
  */
 function scaleVectorSteps() {
@@ -841,7 +841,6 @@ export function rerouteVectorStepsAction() {
     moveVectorRotationPointSteps()
     return true
   }
-  //TODO: (High Priority) Implement function for handling scaling vector shapes.
   if (
     state.vectorTransformMode === SCALE &&
     state.selectedVectorIndicesSet.size > 0

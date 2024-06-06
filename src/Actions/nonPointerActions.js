@@ -308,14 +308,6 @@ export function actionPasteSelection() {
         uniquePastedImageKey = state.highestPastedImageKey
       }
       if (state.selectClipboard.imageData) {
-        // state.originalImageDataForTransform = state.selectClipboard.imageData
-        // canvas.currentLayer.ctx.getImageData(
-        //   state.boundaryBox.xMin,
-        //   state.boundaryBox.yMin,
-        //   state.boundaryBox.xMax - state.boundaryBox.xMin,
-        //   state.boundaryBox.yMax - state.boundaryBox.yMin
-        // )
-
         state.pastedImages[uniquePastedImageKey] = {
           imageData: state.selectClipboard.imageData,
         }

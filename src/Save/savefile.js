@@ -409,21 +409,21 @@ function convertActionToNewFormat(data, action) {
           )
           action.properties.vectorProperties.weight = conicControlPoints.weight
           action.properties.vectorProperties.leftTangentX =
-            conicControlPoints.leftTangentX - action.layer.x
+            conicControlPoints.leftTangentX
           action.properties.vectorProperties.leftTangentY =
-            conicControlPoints.leftTangentY - action.layer.y
+            conicControlPoints.leftTangentY
           action.properties.vectorProperties.topTangentX =
-            conicControlPoints.topTangentX - action.layer.x
+            conicControlPoints.topTangentX
           action.properties.vectorProperties.topTangentY =
-            conicControlPoints.topTangentY - action.layer.y
+            conicControlPoints.topTangentY
           action.properties.vectorProperties.rightTangentX =
-            conicControlPoints.rightTangentX - action.layer.x
+            conicControlPoints.rightTangentX
           action.properties.vectorProperties.rightTangentY =
-            conicControlPoints.rightTangentY - action.layer.y
+            conicControlPoints.rightTangentY
           action.properties.vectorProperties.bottomTangentX =
-            conicControlPoints.bottomTangentX - action.layer.x
+            conicControlPoints.bottomTangentX
           action.properties.vectorProperties.bottomTangentY =
-            conicControlPoints.bottomTangentY - action.layer.y
+            conicControlPoints.bottomTangentY
         }
         //restructure how vectorProperties are stored
         state.highestVectorKey += 1

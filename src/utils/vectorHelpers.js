@@ -247,6 +247,26 @@ export function translateVectors(
         )
       }
     })
+    if (originalVectorProperties.type === "ellipse") {
+      const conicControlPoints = calcEllipseConicsFromVertices(
+        vector.vectorProperties.px1,
+        vector.vectorProperties.py1,
+        vector.vectorProperties.radA,
+        vector.vectorProperties.radB,
+        vector.vectorProperties.angle,
+        vector.vectorProperties.x1Offset,
+        vector.vectorProperties.y1Offset
+      )
+      vector.vectorProperties.weight = conicControlPoints.weight
+      vector.vectorProperties.leftTangentX = conicControlPoints.leftTangentX
+      vector.vectorProperties.leftTangentY = conicControlPoints.leftTangentY
+      vector.vectorProperties.topTangentX = conicControlPoints.topTangentX
+      vector.vectorProperties.topTangentY = conicControlPoints.topTangentY
+      vector.vectorProperties.rightTangentX = conicControlPoints.rightTangentX
+      vector.vectorProperties.rightTangentY = conicControlPoints.rightTangentY
+      vector.vectorProperties.bottomTangentX = conicControlPoints.bottomTangentX
+      vector.vectorProperties.bottomTangentY = conicControlPoints.bottomTangentY
+    }
   }
 }
 
@@ -319,7 +339,7 @@ export function rotateVectors(
         (vector.vectorProperties.px1 - vector.vectorProperties.px3) ** 2 +
           (vector.vectorProperties.py1 - vector.vectorProperties.py3) ** 2
       )
-      const vectorConics = calcEllipseConicsFromVertices(
+      const conicControlPoints = calcEllipseConicsFromVertices(
         vector.vectorProperties.px1,
         vector.vectorProperties.py1,
         vector.vectorProperties.radA,
@@ -328,35 +348,15 @@ export function rotateVectors(
         vector.vectorProperties.x1Offset,
         vector.vectorProperties.y1Offset
       )
-      vector.vectorProperties.weight = vectorConics.weight
-      updateVectorProperties(
-        vector,
-        vectorConics.leftTangentX,
-        vectorConics.leftTangentY,
-        "leftTangentX",
-        "leftTangentY"
-      )
-      updateVectorProperties(
-        vector,
-        vectorConics.topTangentX,
-        vectorConics.topTangentY,
-        "topTangentX",
-        "topTangentY"
-      )
-      updateVectorProperties(
-        vector,
-        vectorConics.rightTangentX,
-        vectorConics.rightTangentY,
-        "rightTangentX",
-        "rightTangentY"
-      )
-      updateVectorProperties(
-        vector,
-        vectorConics.bottomTangentX,
-        vectorConics.bottomTangentY,
-        "bottomTangentX",
-        "bottomTangentY"
-      )
+      vector.vectorProperties.weight = conicControlPoints.weight
+      vector.vectorProperties.leftTangentX = conicControlPoints.leftTangentX
+      vector.vectorProperties.leftTangentY = conicControlPoints.leftTangentY
+      vector.vectorProperties.topTangentX = conicControlPoints.topTangentX
+      vector.vectorProperties.topTangentY = conicControlPoints.topTangentY
+      vector.vectorProperties.rightTangentX = conicControlPoints.rightTangentX
+      vector.vectorProperties.rightTangentY = conicControlPoints.rightTangentY
+      vector.vectorProperties.bottomTangentX = conicControlPoints.bottomTangentX
+      vector.vectorProperties.bottomTangentY = conicControlPoints.bottomTangentY
     }
   }
 }
