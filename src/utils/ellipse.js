@@ -476,44 +476,21 @@ export function calcEllipseParamsFromConics(
 }
 
 /**
- * Golden-section search to find the minimum radius of curvature
- * @param a - lower bound of the search interval
- * @param b - upper bound of the search interval
- * @param f - function whose minimum value we're searching for
- * @param tol - tolerance for the search precision (default is 1e-5)
+ * Golden-section search to find the maximum or minimum distance to the center of an ellipse
+ * @param {number} a - lower bound of the search interval
+ * @param {number} b - upper bound of the search interval
+ * @param {Function} f - function whose minimum value we're searching for
+ * @param {number} tol - tolerance for the search precision (default is 1e-5)
+ * @param {boolean} findMax - whether to find the maximum or minimum value (default is true)
+ * @returns {number} - maximum value
  */
-function goldenSectionSearchMin(a, b, f, tol = 1e-5) {
+function goldenSectionSearch(a, b, f, tol = 1e-5, findMax = true) {
   const gr = (Math.sqrt(5) + 1) / 2
   let c = b - (b - a) / gr
   let d = a + (b - a) / gr
 
   while (Math.abs(c - d) > tol) {
-    if (f(c) < f(d)) {
-      b = d
-    } else {
-      a = c
-    }
-    c = b - (b - a) / gr
-    d = a + (b - a) / gr
-  }
-
-  return (b + a) / 2
-}
-
-/**
- * Golden-section search to find the maximum radius of curvature
- * @param a - lower bound of the search interval
- * @param b - upper bound of the search interval
- * @param f - function whose maximum value we're searching for
- * @param tol - tolerance for the search precision (default is 1e-5)
- */
-function goldenSectionSearchMax(a, b, f, tol = 1e-5) {
-  const gr = (Math.sqrt(5) + 1) / 2
-  let c = b - (b - a) / gr
-  let d = a + (b - a) / gr
-
-  while (Math.abs(c - d) > tol) {
-    if (f(c) > f(d)) {
+    if (findMax ? f(c) > f(d) : f(c) < f(d)) {
       b = d
     } else {
       a = c
@@ -527,14 +504,15 @@ function goldenSectionSearchMax(a, b, f, tol = 1e-5) {
 
 /**
  * Evaluate the conic Bézier curve at parameter t
- * @param t - parameter value at which to evaluate the curve
- * @param px0 - x-coordinate of the first control point
- * @param py0 - y-coordinate of the first control point
- * @param px1 - x-coordinate of the second control point
- * @param py1 - y-coordinate of the second control point
- * @param px2 - x-coordinate of the third control point
- * @param py2 - y-coordinate of the third control point
- * @param weight - squared weight of the middle control point
+ * @param {number} t - parameter value at which to evaluate the curve
+ * @param {number} px0 - x-coordinate of the first control point
+ * @param {number} py0 - y-coordinate of the first control point
+ * @param {number} px1 - x-coordinate of the second control point
+ * @param {number} py1 - y-coordinate of the second control point
+ * @param {number} px2 - x-coordinate of the third control point
+ * @param {number} py2 - y-coordinate of the third control point
+ * @param {number} weight - squared weight of the middle control point
+ * @returns {object} - {x, y}
  */
 function evaluateBezier(t, px0, py0, px1, py1, px2, py2, weight) {
   const w = Math.sqrt(weight)
@@ -549,16 +527,17 @@ function evaluateBezier(t, px0, py0, px1, py1, px2, py2, weight) {
 }
 
 /**
- * Find the points of highest and lowest curvature on a conic Bézier curve
- * @param weight - squared weight of P1
- * @param px0 - x-coordinate of the first control point
- * @param py0 - y-coordinate of the first control point
- * @param px1 - x-coordinate of the second control point
- * @param py1 - y-coordinate of the second control point
- * @param px2 - x-coordinate of the third control point
- * @param py2 - y-coordinate of the third control point
- * @param centerX
- * @param centerY
+ * Find the points of highest and lowest radius on a conic Bézier curve as part of an ellipse
+ * @param {number} weight - squared weight of P1
+ * @param {number} px0 - x-coordinate of the first control point
+ * @param {number} py0 - y-coordinate of the first control point
+ * @param {number} px1 - x-coordinate of the second control point
+ * @param {number} py1 - y-coordinate of the second control point
+ * @param {number} px2 - x-coordinate of the third control point
+ * @param {number} py2 - y-coordinate of the third control point
+ * @param {number} centerX - x-coordinate of the center of the ellipse
+ * @param {number} centerY - y-coordinate of the center of the ellipse
+ * @returns {object} - {majorRadius, majorX, majorY, minorRadius, minorX, minorY}
  */
 function findConicSegmentVertex(
   weight,
@@ -573,8 +552,8 @@ function findConicSegmentVertex(
 ) {
   /**
    * Check radius of ellipse at given t on the conic segment
-   * @param {*} t
-   * @returns
+   * @param {number} t - parameter value at which to evaluate the curve
+   * @returns {number} - distance to center
    */
   const radiusFunction = (t) => {
     const pointOnCurve = evaluateBezier(t, px0, py0, px1, py1, px2, py2, weight)
@@ -584,11 +563,9 @@ function findConicSegmentVertex(
     return distanceToPointFromCenter
   }
 
-  // Search for largest distance to center
-  const majorT = goldenSectionSearchMax(0, 1, radiusFunction, 1e-5)
-
-  // Search for smallest distance to center
-  const minorT = goldenSectionSearchMin(0, 1, radiusFunction, 1e-5)
+  // Find the t value of largest and smallest radius
+  const majorT = goldenSectionSearch(0, 1, radiusFunction, 1e-5, true)
+  const minorT = goldenSectionSearch(0, 1, radiusFunction, 1e-5, false)
 
   // Calculate the coordinates at the points of highest and lowest curvature
   const majorPoint = evaluateBezier(
@@ -702,18 +679,6 @@ export function plotRotatedEllipseConics(
       weight
     ), //bottom-left corner
   ]
-  // plotPoints.push({ x: leftTangentX, y: leftTangentY }) // left tangent point
-  // plotPoints.push({ x: leftTangentX, y: topTangentY }) // control point 1
-  // plotPoints.push({ x: topTangentX, y: topTangentY }) // top tangent point
-  // plotPoints.push({ x: leftTangentX, y: bottomTangentY }) // control point 2
-  // plotPoints.push({ x: bottomTangentX, y: bottomTangentY }) // bottom tangent point
-  // plotPoints.push({ x: rightTangentX, y: bottomTangentY }) // control point 3
-  // plotPoints.push({ x: rightTangentX, y: rightTangentY }) // right tangent point
-  // plotPoints.push({ x: rightTangentX, y: topTangentY }) // control point 4
-  // plotPoints.push({ x: x0, y: y0 }) // top-left corner
-  // plotPoints.push({ x: x1, y: y0 }) // top-right corner
-  // plotPoints.push({ x: x1, y: y1 }) // bottom-right corner
-  // plotPoints.push({ x: x0, y: y1 }) // bottom-left corner
   //remove duplicate coordinates
   const seen = new Set()
   plotPoints = plotPoints.filter((point) => {
@@ -721,19 +686,6 @@ export function plotRotatedEllipseConics(
     if (seen.has(key)) {
       return false // skip this item
     }
-    // //remove tangent points for visibility (temporary)
-    // if (key === `${leftTangentX},${leftTangentY}`) {
-    //   return false
-    // }
-    // if (key === `${topTangentX},${topTangentY}`) {
-    //   return false
-    // }
-    // if (key === `${rightTangentX},${rightTangentY}`) {
-    //   return false
-    // }
-    // if (key === `${bottomTangentX},${bottomTangentY}`) {
-    //   return false
-    // }
     seen.add(key)
     return true // keep this item
   })
