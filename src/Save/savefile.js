@@ -6,7 +6,7 @@ import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 //import custom brushStamps when they are implemented
 import { vectorGui } from "../GUI/vector.js"
-import { performAction, renderCanvas } from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render.js"
 import {
   renderLayersToDOM,
   renderVectorsToDOM,
@@ -17,8 +17,13 @@ import {
   sanitizeLayers,
   sanitizePalette,
   sanitizeHistory,
+  sanitizeVectors,
 } from "../utils/sanitizeObjectsForSave.js"
 import { resizeOffScreenCanvas } from "../Canvas/render.js"
+import { consolidateLayers } from "../Canvas/layers.js"
+import { calcEllipseConicsFromVertices } from "../utils/ellipse.js"
+
+const currentVersion = "1.1"
 
 /**
  * Save the drawing as a JSON file
@@ -29,8 +34,8 @@ import { resizeOffScreenCanvas } from "../Canvas/render.js"
  *   - raster layer properties: cvs, ctx, onscreenCvs, onscreenCtx
  * - tool fn - not needed because it is not used
  * - action snapshot - don't save unnecessary dataurls
- * TODO: (High Priority) save canvas dimensions and selectProperties
  * @returns {Blob} - A blob containing the drawing data.
+ * TODO: (High Priority) Add error handling for saving the drawing
  */
 export function prepareDrawingForSave() {
   const {
@@ -46,6 +51,12 @@ export function prepareDrawingForSave() {
     includeReferenceLayers,
     includeRemovedActions
   )
+  let sanitizedVectors = sanitizeVectors(
+    state.undoStack,
+    state.vectors,
+    preserveHistory,
+    includeRemovedActions
+  )
   let sanitizedPalette = sanitizePalette(
     swatches.palette,
     preserveHistory,
@@ -57,14 +68,18 @@ export function prepareDrawingForSave() {
     includeReferenceLayers,
     includeRemovedActions
   )
-
+  // Consolidate the layers onto the offscreen canvas for the backup image
+  consolidateLayers()
+  // Create a JSON string from the drawing data
   let saveJsonString = JSON.stringify({
     metadata: {
-      version: "1.0",
+      version: currentVersion,
       application: "Pixel V",
       timestamp: Date.now(),
+      backupImage: canvas.offScreenCVS.toDataURL(),
     },
     layers: sanitizedLayers,
+    vectors: sanitizedVectors,
     palette: sanitizedPalette,
     history: sanitizedUndoStack,
     canvasProperties: {
@@ -115,9 +130,8 @@ export function saveDrawing() {
 
 /**
  * Load the drawing from a JSON file.
- * TODO: (High Priority) Set canvas dimensions
- * TODO: (High Priority) Set selection properties if latest action has a boundaryBox
  * @param {JSON} jsonFile - The JSON file containing the drawing data.
+ * TODO: (High Priority) Add more elegant error popup when loading the drawing
  */
 export async function loadDrawing(jsonFile) {
   let data
@@ -127,12 +141,14 @@ export async function loadDrawing(jsonFile) {
     data = JSON.parse(jsonFile)
   } catch (e) {
     console.error(e)
+    alert(e)
     return
   }
   // Validate the JSON file as a Pixel V save file and log which properties are missing
   let validation = validatePixelVeeFile(data)
   if (!validation.valid) {
     console.error(validation.message)
+    alert(validation.message)
     return
   }
 
@@ -140,22 +156,25 @@ export async function loadDrawing(jsonFile) {
   dom.canvasLayers.innerHTML = ""
   canvas.layers = []
   state.undoStack = []
-  state.redoStack = []
+  state.clearRedoStack()
   //Not likely to be an issue, but reset just in case
   state.points = []
-  state.action = null
+  //pasted images
+  state.pastedImages = {}
+  //vectors
+  state.vectors = {}
+  state.highestVectorKey = 0
   state.vectorsSavedProperties = {}
   state.activeIndexes = []
   state.savedBetweenActionImages = []
   //reset selection state
   state.deselect()
-  canvas.rasterGuiCTX.clearRect(
-    0,
-    0,
-    canvas.rasterGuiCVS.width,
-    canvas.rasterGuiCVS.height
-  )
   vectorGui.reset()
+
+  //Handle old files that don't have the vectors object
+  if (data.metadata.version === "1.0") {
+    data.vectors = {}
+  }
 
   // Array to hold promises for image loading
   let imageLoadPromises = []
@@ -225,49 +244,18 @@ export async function loadDrawing(jsonFile) {
   }
 
   // Reconstruct the undoStack
-  data.history.forEach((action) => {
-    if (action.properties?.points) {
-      // Convert the points array into an array of objects
-      let points = []
-      for (let index = 0; index < action.properties.points.length; index += 3) {
-        points.push({
-          x: action.properties.points[index],
-          y: action.properties.points[index + 1],
-          brushSize: action.properties.points[index + 2],
-        })
-      }
-      action.properties.points = points
+  data.history.forEach((action, index) => {
+    if (!action.index) {
+      //populate index for old files that don't have it
+      action.index = index
     }
-    if (action.properties?.canvas) {
-      // Convert the stored canvas dataUrl to a canvas
-      let tempCanvas = document.createElement("canvas")
-      tempCanvas.width = action.properties.canvasProperties.width
-      tempCanvas.height = action.properties.canvasProperties.height
-      let tempCtx = tempCanvas.getContext("2d")
-      let img = new Image()
-      img.src = action.properties.canvasProperties.dataUrl
-
-      // Wrap the image loading and drawing in a promise
-      let drawImagePromise = new Promise((resolve, reject) => {
-        img.onload = () => {
-          tempCtx.drawImage(img, 0, 0)
-          resolve() // Resolve the promise after the image has been drawn
-        }
-        img.onerror = reject
-      })
-
-      // Add the promise to the array to ensure it completes before continuing
-      imageLoadPromises.push(drawImagePromise)
-
-      action.properties.canvas = tempCanvas
-    }
-    //if action properties has a pastedLayer, match the id with the corresponding layer
-    if (action.properties?.pastedLayer) {
+    //Handle actions with a pastedLayer
+    if (action?.pastedLayer) {
       let correspondingLayer = canvas.layers.find(
-        (layer) => layer.id === action.properties.pastedLayer.id
+        (layer) => layer.id === action.pastedLayer.id
       )
       if (correspondingLayer) {
-        action.properties.pastedLayer = correspondingLayer
+        action.pastedLayer = correspondingLayer
       }
     }
     // Match the action's layer id with an existing layer
@@ -275,10 +263,7 @@ export async function loadDrawing(jsonFile) {
       action.layer = canvas.tempLayer
     } else {
       let correspondingLayer = canvas.layers.find(
-        (layer) =>
-          action.layer?.id
-            ? layer.id === action.layer.id
-            : layer.title === action.layer.title //NOTE: This is a fix for loading files saved before layer ids were implemented. TODO: (Middle Priority) implement a versioning system to handle this in the future.
+        (layer) => layer.id === action.layer.id
       )
 
       if (correspondingLayer) {
@@ -292,10 +277,87 @@ export async function loadDrawing(jsonFile) {
          */
       }
     }
+    //For old files that don't use the vectors object
+    if (data.metadata.version !== currentVersion) {
+      convertActionToNewFormat(data, action)
+    }
+
+    //Handle brush tool
+    if (action?.points) {
+      // Convert the points array into an array of objects
+      let points = []
+      for (let index = 0; index < action.points.length; index += 3) {
+        points.push({
+          x: action.points[index],
+          y: action.points[index + 1],
+          brushSize: action.points[index + 2],
+        })
+      }
+      action.points = points
+    }
+
+    //TODO: (Low Priority) If quadCurve and cubicCurve are unified into "curve", will need to add logic here to convert those to the correct type
+    //Handle actions with canvas data (paste, confirm paste)
+    if (action?.canvas) {
+      // Convert the stored canvas dataUrl to a canvas
+      let tempCanvas = document.createElement("canvas")
+      tempCanvas.width = action.canvasProperties.width
+      tempCanvas.height = action.canvasProperties.height
+      let tempCtx = tempCanvas.getContext("2d", {
+        willReadFrequently: true,
+      })
+      let img = new Image()
+      img.src = action.canvasProperties.dataUrl
+
+      // Wrap the image loading and drawing in a promise
+      let drawImagePromise = new Promise((resolve, reject) => {
+        img.onload = () => {
+          tempCtx.drawImage(img, 0, 0)
+          //IN PROGRESS: Construct the state.pastedImages by using the canvas from each paste action, set at action.pastedImageKey. If no key, set it to the highestPastedImageKey
+          state.pastedImages[action.pastedImageKey] = {
+            imageData: tempCtx.getImageData(
+              0,
+              0,
+              action.canvasProperties.width,
+              action.canvasProperties.height
+            ),
+          }
+          resolve() // Resolve the promise after the image has been drawn
+        }
+        img.onerror = reject
+      })
+
+      // Add the promise to the array to ensure it completes before continuing
+      imageLoadPromises.push(drawImagePromise)
+
+      action.canvas = tempCanvas
+    }
 
     // Add the action to the undo stack
     state.undoStack.push(action)
   })
+
+  //Reconstruct vectors (object, not array) by iterating through it and assigning the proper layer to each vector
+  for (let vectorKey in data.vectors) {
+    let vector = data.vectors[vectorKey]
+    let correspondingLayer = canvas.layers.find(
+      (layer) => layer.id === vector.layer.id
+    )
+    if (correspondingLayer) {
+      //associate vector's layer
+      vector.layer = correspondingLayer
+      if (state.undoStack[vector.action.index]) {
+        //associate vector's action
+        vector.action = state.undoStack[vector.action.index]
+        //add vector to state.vectors if valid layer and action present
+        state.vectors[vectorKey] = vector
+        //find the highest vector key
+        if (Number(vectorKey) > state.highestVectorKey) {
+          state.highestVectorKey = Number(vectorKey)
+        }
+      }
+    }
+  }
 
   // Wait for all images to load
   await Promise.all(imageLoadPromises)
@@ -318,4 +380,143 @@ export async function loadDrawing(jsonFile) {
   renderLayersToDOM()
   renderPaletteToDOM()
   renderVectorsToDOM()
+}
+
+/**
+ * Modifies the original data to convert it to the new format
+ * @param {object} data - The data object, containing history, vectors, and metadata, etc.
+ * @param {object} action - The action object to be converted
+ */
+function convertActionToNewFormat(data, action) {
+  if (data.metadata.version === "1.0") {
+    if (action.properties) {
+      //Handle vector actions
+      if (action.properties?.vectorProperties) {
+        //restructure vectorProperties to include type
+        action.properties.vectorProperties.type = action.tool.name
+        if (action.properties.vectorProperties.type === "ellipse") {
+          action.properties.vectorProperties.unifiedOffset =
+            action.properties.vectorProperties.offset
+          delete action.properties.vectorProperties.offset
+          let conicControlPoints = calcEllipseConicsFromVertices(
+            action.properties.vectorProperties.px1,
+            action.properties.vectorProperties.py1,
+            action.properties.vectorProperties.radA,
+            action.properties.vectorProperties.radB,
+            action.properties.vectorProperties.angle,
+            action.properties.vectorProperties.x1Offset,
+            action.properties.vectorProperties.y1Offset
+          )
+          action.properties.vectorProperties.weight = conicControlPoints.weight
+          action.properties.vectorProperties.leftTangentX =
+            conicControlPoints.leftTangentX
+          action.properties.vectorProperties.leftTangentY =
+            conicControlPoints.leftTangentY
+          action.properties.vectorProperties.topTangentX =
+            conicControlPoints.topTangentX
+          action.properties.vectorProperties.topTangentY =
+            conicControlPoints.topTangentY
+          action.properties.vectorProperties.rightTangentX =
+            conicControlPoints.rightTangentX
+          action.properties.vectorProperties.rightTangentY =
+            conicControlPoints.rightTangentY
+          action.properties.vectorProperties.bottomTangentX =
+            conicControlPoints.bottomTangentX
+          action.properties.vectorProperties.bottomTangentY =
+            conicControlPoints.bottomTangentY
+        }
+        //restructure how vectorProperties are stored
+        state.highestVectorKey += 1
+        let uniqueVectorKey = state.highestVectorKey
+        data.vectors[uniqueVectorKey] = {
+          index: uniqueVectorKey,
+          action: { index: action.index }, //formatted with index for saving, mapped to action later
+          layer: action.layer,
+          modes: { ...action.modes },
+          color: { ...action.color },
+          brushSize: action.tool.brushSize,
+          brushType: action.tool.brushType,
+          vectorProperties: { ...action.properties.vectorProperties },
+          hidden: action.hidden,
+          removed: action.removed,
+        }
+        action.vectorIndices = [uniqueVectorKey]
+        //remove old properties
+        delete action.modes
+        delete action.color
+      }
+      //Handle actions with points
+      if (action.properties?.points) {
+        action.points = action.properties.points
+      }
+      //Handle line actions
+      if (action.tool.name === "line") {
+        //convert to a vector tool
+        state.highestVectorKey += 1
+        let uniqueVectorKey = state.highestVectorKey
+        data.vectors[uniqueVectorKey] = {
+          index: uniqueVectorKey,
+          action: { index: action.index },
+          layer: action.layer,
+          modes: { ...action.modes },
+          color: { ...action.color },
+          brushSize: action.tool.brushSize,
+          brushType: action.tool.brushType,
+          vectorProperties: {
+            type: "line",
+            px1: action.properties.px1,
+            py1: action.properties.py1,
+            px2: action.properties.px2,
+            py2: action.properties.py2,
+          },
+          hidden: action.hidden,
+          removed: action.removed,
+        }
+        action.vectorIndices = [uniqueVectorKey]
+      }
+      //Handle actions with maskArray
+      if (action.properties?.maskArray) {
+        action.maskArray = action.properties.maskArray
+      }
+      //Handle actions with boundaryBox
+      if (action.properties?.boundaryBox) {
+        action.boundaryBox = action.properties.boundaryBox
+      }
+      //Handle select actions
+      if (action.tool.name === "select") {
+        action.selectedVectorIndices = []
+      }
+      //Handle modify actions
+      if (action.properties?.moddedActionIndex) {
+        action.moddedActionIndex = action.properties.moddedActionIndex
+      }
+      if (action.properties?.processedActions) {
+        //As of 1.0, only vector modifications use processedActions
+        action.moddedVectorIndex =
+          data.history[action.moddedActionIndex].vectorIndices[0]
+        action.processedActions = action.properties.processedActions
+        //modify processedAction to include moddedVectorIndex
+        for (let processedAction of action.processedActions) {
+          processedAction.moddedVectorIndex =
+            data.history[processedAction.moddedActionIndex].vectorIndices[0]
+        }
+      }
+      if (action.properties.from) {
+        action.from = action.properties.from
+      }
+      if (action.properties.to) {
+        action.to = action.properties.to
+      }
+      //remove old properties
+      delete action.properties
+    }
+    //Handle actions with brush information
+    if (action.tool.brushSize) {
+      action.brushSize = action.tool.brushSize
+      action.brushType = action.tool.brushType
+    }
+    //Convert tool to just be the name of the tool
+    action.tool = action.tool.name
+    //--- End of version 1.0 conversion ---//
+  }
 }

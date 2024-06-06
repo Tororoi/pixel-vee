@@ -1,5 +1,9 @@
 import { state } from "../Context/state.js"
 
+/**
+ * Initialize dragger
+ * @param {HTMLElement} dragTarget - The element to drag
+ */
 export const initializeDragger = (dragTarget) => {
   const dragBtn = dragTarget.querySelector(".dragger")
   if (dragBtn) {
@@ -10,11 +14,16 @@ export const initializeDragger = (dragTarget) => {
   }
 }
 
+/**
+ * Initialize collapser
+ * @param {HTMLElement} collapseTarget - The element to collapse
+ * @param {boolean} startCollapsed - Whether to start collapsed
+ */
 export const initializeCollapser = (collapseTarget, startCollapsed) => {
   const collapseBtn = collapseTarget.querySelector(".collapse-checkbox")
   const collapsibleArea = collapseTarget.querySelector(".collapsible")
   if (collapseBtn && collapsibleArea) {
-    collapseBtn.addEventListener("click", (e) => {
+    collapseBtn.addEventListener("click", () => {
       if (collapseBtn.checked) {
         // collapsibleArea.style.height = 0
         collapseTarget.style.minHeight = "20px"
@@ -34,24 +43,42 @@ export const initializeCollapser = (collapseTarget, startCollapsed) => {
   }
 }
 
-export const initializeCloser = (closeTarget) => {
+/**
+ * Initialize closer
+ * @param {HTMLElement} closeTarget - The element to close
+ * @param {Function} closerFn - The function to call when closing
+ */
+export const initializeCloser = (closeTarget, closerFn) => {
   const closeBtn = closeTarget.querySelector(".close-btn")
   if (closeBtn) {
-    closeBtn.addEventListener("click", (e) => {
+    closeBtn.addEventListener("click", () => {
       closeTarget.style.display = "none"
+      if (closerFn) {
+        closerFn()
+      }
     })
   }
 }
 
+/**
+ * Initialize dialog box
+ * @param {HTMLElement} dialogBoxTarget - The dialog box
+ * @param {boolean} startCollapsed - Whether to start collapsed
+ * @param {Function} closerFn - The function to call when closing
+ */
 export const initializeDialogBox = (
   dialogBoxTarget,
-  startCollapsed = false
+  startCollapsed = false,
+  closerFn = null
 ) => {
   initializeDragger(dialogBoxTarget)
   initializeCollapser(dialogBoxTarget, startCollapsed)
-  initializeCloser(dialogBoxTarget)
+  initializeCloser(dialogBoxTarget, closerFn)
 }
 
+/**
+ * Set drag siblings
+ */
 function setDragSiblings() {
   const parentElement = state.dragTarget.parentElement
   const siblingElements = parentElement.children
@@ -93,6 +120,10 @@ function setDragSiblings() {
   }
 }
 
+/**
+ * Reorder elements
+ * @param {PointerEvent} e - The pointer event
+ */
 function reorderElements(e) {
   //fix siblings in place
   let dragTargetIndex = 0
@@ -112,7 +143,7 @@ function reorderElements(e) {
       let dragTop = e.clientY - state.dragY
       //if drag top less than halfway height and greater than previous sibling's halfway height, set dragTarget's css order property to siblingArray[i]'s order and iterate back through higher siblings to increase their order
       //move dragTarget up
-      //TODO: (Middle Priority) Instead of colliding with valid insertion point, write this check to find the nearest overlapping element to dragTop
+      //TODO: (Medium Priority) Instead of colliding with valid insertion point, write this check to find the nearest overlapping element to dragTop
       let collision =
         dragTop > state.dragSiblings[i].top - 10 &&
         dragTop < state.dragSiblings[i].top + 10
@@ -137,7 +168,10 @@ function reorderElements(e) {
   }
 }
 
-//Drag
+/**
+ * @param {PointerEvent} e - The pointer event
+ * @param {HTMLElement} dragTarget - The element to drag
+ */
 export const dragStart = (e, dragTarget) => {
   if (!dragTarget.className.includes("locked")) {
     e.target.setPointerCapture(e.pointerId)
@@ -155,7 +189,10 @@ export const dragStart = (e, dragTarget) => {
   }
 }
 
-export const dragStop = (e) => {
+/**
+ * Drag stop
+ */
+export const dragStop = () => {
   state.dragging = false
   if (state.dragTarget) {
     state.dragTarget.classList.remove("dragging")
@@ -201,6 +238,10 @@ export const dragStop = (e) => {
   }
 }
 
+/**
+ * Drag move
+ * @param {PointerEvent} e - The pointer event
+ */
 export const dragMove = (e) => {
   if (state.dragTarget) {
     const parentElement = state.dragTarget.parentElement

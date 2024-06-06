@@ -10,7 +10,7 @@ import {
   drawSelector,
   drawHSLGradient,
 } from "../utils/pickerHelpers.js"
-//TODO: (Middle Priority) Add "lock" toggle to luminance field.
+//TODO: (Low Priority) Add "lock" toggle to luminance field.
 //This will trigger the hsl grad to become a 2-dimensional gradient
 //where every value has the same luminance. The hue slider can be adjusted
 //to see the gradient for different hues at that same luminance.
@@ -23,7 +23,9 @@ export class Picker {
     this.target.width = width
     this.target.height = height
     //Get context
-    this.context = this.target.getContext("2d", { willReadFrequently: true })
+    this.context = this.target.getContext("2d", {
+      willReadFrequently: true,
+    })
     //pointer
     this.pointerState = "none"
     //color selector circle
@@ -112,7 +114,7 @@ export class Picker {
     this.updateColor()
   }
 
-  updateRGBA(e) {
+  updateRGBA() {
     const red = +this.r.value
     const green = +this.g.value
     const blue = +this.b.value
@@ -121,7 +123,7 @@ export class Picker {
     this.propogateRGBColorSpace()
   }
 
-  updateHSL(e) {
+  updateHSL() {
     const hue = +this.h.value
     const saturation = +this.s.value
     const lightness = +this.l.value
@@ -129,7 +131,7 @@ export class Picker {
     this.propogateHSLColorSpace()
   }
 
-  updateHex(e) {
+  updateHex() {
     this.hexcode = this.hex.value
     this.propogateHexColorSpace()
   }
@@ -204,7 +206,7 @@ export class Picker {
 
   /**
    * increment values while rgb button is held down
-   * @param {event} e
+   * @param {PointerEvent} e - pointer down event
    */
   handleRGBIncrement(e) {
     if (this.pointerState === "pointerdown") {
@@ -216,7 +218,7 @@ export class Picker {
 
   /**
    * increment values while hsl button is held down
-   * @param {event} e
+   * @param {PointerEvent} e - pointer down event
    */
   handleHSLIncrement(e) {
     if (this.pointerState === "pointerdown") {
@@ -255,7 +257,7 @@ export class Picker {
     )
   }
 
-  handlePointerUp(e) {
+  handlePointerUp() {
     this.clickedCanvas = false
   }
 
@@ -347,7 +349,7 @@ export class Picker {
     this.hex.addEventListener("change", (e) => {
       this.updateHex(e)
     })
-    this.oldcolor.addEventListener("pointerdown", (e) => {
+    this.oldcolor.addEventListener("pointerdown", () => {
       this.rgb = {
         red: this.initialColor.r,
         green: this.initialColor.g,

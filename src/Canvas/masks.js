@@ -1,11 +1,10 @@
-import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { getColor } from "../utils/imageDataHelpers.js"
 
 /**
  * Create a mask set for a given color
- * @param {object} matchColor
- * @returns {Set}
+ * @param {object} matchColor - The color to create a mask from
+ * @returns {Set} - A set of all the pixels that match the color
  */
 export function createColorMaskSet(matchColor) {
   // state.pointsSet = new Set()
@@ -22,7 +21,9 @@ export function createColorMaskSet(matchColor) {
     const tempCanvas = document.createElement("canvas")
     tempCanvas.width = 1
     tempCanvas.height = 1
-    const tempCtx = tempCanvas.getContext("2d", { willReadFrequently: true })
+    const tempCtx = tempCanvas.getContext("2d", {
+      willReadFrequently: true,
+    })
 
     tempCtx.fillStyle = `rgba(${matchColor.r}, ${matchColor.g}, ${
       matchColor.b

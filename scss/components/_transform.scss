@@ -1,0 +1,87 @@
+.vector-transform-ui-container {
+  user-select: none;
+  position: absolute;
+  z-index: 103;
+  top: 10%;
+  // width: 370px;
+  // max-width: calc(100% - 4px);
+  // max-height: calc(100% - 4px);
+  display: none;
+  // display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  color: white;
+  background: $extra-dark-gray;
+  text-align: center;
+  padding: 0;
+  align-self: center;
+  opacity: 1;
+  @include boxBorder;
+  .header {
+    h3 {
+      justify-self: center;
+      height: 20px;
+      margin: 0px;
+    }
+  }
+  .collapsible {
+    padding-top: 2px;
+    .vector-transform-ui-interface {
+      display: flex;
+      flex-flow: column nowrap;
+      align-items: center;
+      margin: 10px;
+      .vector-transform-modes {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: center;
+        // margin: 10px;
+      }
+      .transform-options {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: center;
+        align-items: center;
+        // margin: 10px;
+        button {
+          color: $white;
+        }
+      }
+      .tool {
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        user-select: none;
+        text-align: center;
+        color: white;
+        width: 40px;
+        height: 40px;
+        margin: 3px;
+        opacity: 1;
+        background-color: $button-color;
+        @include boxBorder;
+        &:hover {
+          z-index: 104;
+        }
+        &.selected {
+          background-color: $white;
+          z-index: 105;
+        }
+        &.custom-shape {
+          background-color: transparent;
+          @include cancelBorder;
+        }
+      }
+    }
+  }
+
+  @media ($bp-md) {
+    // width: 570px; //important to be fixed for collapsed state
+    .collapsible {
+      .vector-transform-ui-interface {
+        // flex-flow: row nowrap;
+      }
+    }
+  }
+}

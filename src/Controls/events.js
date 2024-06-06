@@ -3,7 +3,6 @@ import { dom } from "../Context/dom.js"
 import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCursor } from "../GUI/cursor.js"
 import { activateShortcut, deactivateShortcut } from "./shortcuts.js"
@@ -14,7 +13,7 @@ import { throttle } from "../utils/eventHelpers.js"
 
 /**
  * Set global coordinates
- * TODO: (Middle Priority) move to separate file and import
+ * TODO: (Low Priority) move to separate file and import
  * @param {UIEvent} e - PointerEvent, WheelEvent
  */
 const setCoordinates = (e) => {
@@ -42,13 +41,16 @@ const setCoordinates = (e) => {
 //======================================//
 
 /**
- * @param {KeyboardEvent} e
+ * @param {KeyboardEvent} e - The keydown event
  */
 function handleKeyDown(e) {
   // e.preventDefault() - May conditionally need this for certain shortcuts, but try to avoid doing so
-  //Prevent default save behavior
+  //Prevent default bookmark behavior (KeyD)
+  //Prevent default find behavior (KeyF)
+  //Prevent default reload behavior (KeyR)
+  //Prevent default save behavior (KeyS)
   if (
-    (e.code === "KeyS" || e.code === "KeyD") &&
+    ["KeyD", "KeyF", "KeyR", "KeyS"].includes(e.code) &&
     (keys.MetaLeft || keys.MetaRight)
   ) {
     e.preventDefault()
@@ -71,7 +73,7 @@ function handleKeyDown(e) {
 }
 
 /**
- * @param {KeyboardEvent} e
+ * @param {KeyboardEvent} e - The keyup event
  */
 function handleKeyUp(e) {
   keys[e.code] = false //unset active key globally
@@ -79,7 +81,7 @@ function handleKeyUp(e) {
 }
 
 /**
- * @param {WheelEvent} e
+ * @param {WheelEvent} e - The scroll wheel event
  */
 function handleWheel(e) {
   let delta = Math.sign(e.deltaY)
@@ -116,7 +118,7 @@ function handleWheel(e) {
 //========================================//
 
 /**
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - The pointerdown event
  */
 function handlePointerDown(e) {
   //reset media type, chrome dev tools niche use or computers that have touchscreen capabilities
@@ -153,12 +155,12 @@ function handlePointerDown(e) {
     (state.tool.name === "brush" && state.tool.modes?.eraser) ||
     state.tool.name === "eyedropper"
   ) {
-    renderCursor(state, canvas, swatches)
+    renderCursor()
   }
 }
 
 /**
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - The pointermove event
  */
 function handlePointerMove(e) {
   if (state.clickDisabled && state.clicked) {
@@ -181,11 +183,12 @@ function handlePointerMove(e) {
     }
     if (cursorMoved) {
       if (
-        state.clicked ||
-        ((state.tool.name === "quadCurve" ||
-          state.tool.name === "cubicCurve" ||
-          state.tool.name === "fill") &&
-          state.clickCounter > 0)
+        state.clicked
+        // ||
+        // ((state.tool.name === "quadCurve" ||
+        //   state.tool.name === "cubicCurve" ||
+        //   state.tool.name === "fill") &&
+        //   state.clickCounter > 0)
       ) {
         //run selected tool step function
         state.tool.fn()
@@ -194,12 +197,19 @@ function handlePointerMove(e) {
           (state.tool.name === "brush" && state.tool.modes?.eraser) ||
           state.tool.name === "eyedropper"
         ) {
-          renderCursor(state, canvas, swatches)
+          renderCursor()
         }
       } else {
         //no active tool, just render cursor
         vectorGui.render()
-        renderCursor(state, canvas, swatches)
+        if (
+          !(
+            ["quadCurve", "cubicCurve"].includes(state.tool.name) &&
+            state.clickCounter > 0
+          )
+        ) {
+          renderCursor()
+        }
       }
     }
     // save last point
@@ -211,7 +221,7 @@ function handlePointerMove(e) {
 }
 
 /**
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - The pointerup event
  */
 function handlePointerUp(e) {
   canvas.pointerEvent = "pointerup"
@@ -221,6 +231,7 @@ function handlePointerUp(e) {
   state.clicked = false
   canvas.vectorGuiCVS.style.cursor = state.tool.cursor
   setCoordinates(e)
+  //if drawing on hidden layer, stop flashing hide btn
   if (canvas.currentLayer.hidden) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
       if (dom.layersContainer.children[i].layerObj === canvas.currentLayer) {
@@ -236,21 +247,18 @@ function handlePointerUp(e) {
   //reset action and render vectors
   if (state.action) {
     if (
-      ["fill", "quadCurve", "cubicCurve", "ellipse"].includes(state.tool.name)
+      ["fill", "line", "quadCurve", "cubicCurve", "ellipse"].includes(
+        state.tool.name
+      )
     ) {
-      if (state.action.tool.type === "vector") {
-        canvas.currentVectorIndex = state.undoStack.indexOf(state.action)
-      } else if (state.action.tool.type === "modify") {
-        canvas.currentVectorIndex = state.action.properties.moddedActionIndex
-      }
       renderVectorsToDOM()
     }
-    state.action = null
+
     state.pointsSet = null
     state.seenPixelsSet = null
     state.points = []
     //Reset redostack
-    state.redoStack = []
+    state.clearRedoStack()
   }
   //Deactivate pending shortcuts
   if (state.tool.name !== dom.toolBtn.id) {
@@ -265,13 +273,13 @@ function handlePointerUp(e) {
   if (!e.targetTouches) {
     vectorGui.render()
     if (["brush", "colorMask", "eyedropper"].includes(state.tool.name)) {
-      renderCursor(state, canvas, swatches)
+      renderCursor()
     }
   }
 }
 
 /**
- * @param {PointerEvent} e
+ * @param {PointerEvent} e - The pointerout event
  */
 function handlePointerOut(e) {
   //TODO: (Low Priority) if touchscreen, need to handle differently. Currently cannot reach next code since clicked will be false.
@@ -296,7 +304,8 @@ function handlePointerOut(e) {
 
 /**
  * Identify whether program is being used by touchscreen or mouse. Important for multi-step tools such as curve
- * @param {TouchEvent} e
+ * @param {TouchEvent} e - The touchstart event
+ * //TODO: (Medium Priority) Prevent default pinch zoom behavior and replace it with a custom pinch zoom on the canvas only
  */
 function handleTouchStart(e) {
   state.touch = true
@@ -304,7 +313,7 @@ function handleTouchStart(e) {
 
 /**
  * Identify whether program is being used by touchscreen or mouse. Important for multi-step tools such as curve
- * @param {MouseEvent} e
+ * @param {MouseEvent} e - The mousedown event
  */
 function handleMouseDown(e) {
   if (e.type === "mousedown") {

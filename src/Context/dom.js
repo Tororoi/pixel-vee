@@ -18,7 +18,7 @@ const navBar = document.querySelector(".nav")
 const topMenu = document.getElementById("top-menu")
 
 // * Tool Options * //
-const toolOptions = document.querySelector(".tool-options") //TODO: (Middle Priority) Will become quick menu
+const toolOptions = document.querySelector(".tool-options") //TODO: (Medium Priority) Will become quick menu
 
 // * File Menu * //
 const fileSubMenu = document.getElementById("file-submenu")
@@ -39,22 +39,20 @@ const canvasSizeBtn = document.getElementById("canvas-size")
 const selectAllBtn = document.getElementById("select-all")
 // * Deselect * //
 const deselectBtn = document.getElementById("deselect")
-// * Invert Selection * //
-const invertSelectionBtn = document.getElementById("invert-selection")
 // * Cut * //
 const cutBtn = document.getElementById("cut-selection")
 // * Copy * //
 const copyBtn = document.getElementById("copy-selection")
 // * Paste * //
 const pasteBtn = document.getElementById("paste-selection")
-// // * Delete * //
-// const deleteBtn = document.getElementById("delete-selection")
-// // * Flip Horizontal * //
-// const flipHorizontalBtn = document.getElementById("flip-horizontal")
-// // * Flip Vertical * //
-// const flipVerticalBtn = document.getElementById("flip-vertical")
+// * Delete * //
+const deleteBtn = document.getElementById("delete-selection")
+// * Flip Horizontal * //
+const flipHorizontalBtn = document.getElementById("flip-horizontal")
+// * Flip Vertical * //
+const flipVerticalBtn = document.getElementById("flip-vertical")
 // * Rotate * //
-// const rotateBtn = document.getElementById("rotate-right")
+const rotateBtn = document.getElementById("rotate-right")
 
 // * Settings Button * //
 const settingsBtn = document.getElementById("settings-btn")
@@ -67,7 +65,7 @@ const settingsBtn = document.getElementById("settings-btn")
 const settingsContainer = document.querySelector(".settings-container")
 
 // * Settings Form * //
-//TODO: (Middle Priority) options dialog box where user can set default options such as display vectors, paths, or auto select most recently created vector
+//TODO: (Medium Priority) options dialog box where user can set default options such as display vectors, paths, or auto select most recently created vector, custom shortcuts, etc.
 // * Toggle Tooltips * //
 const tooltipBtn = document.getElementById("tooltips-toggle")
 // * Toggle Grid * //
@@ -75,6 +73,10 @@ const gridBtn = document.getElementById("grid-toggle")
 // * Grid Spacing * //
 const gridSpacingSpinBtn = document.querySelector(".grid-spacing-spin")
 const gridSpacing = document.getElementById("grid-spacing")
+// * Vector Selection Outline * //
+const vectorSelectionOutlineBtn = document.getElementById(
+  "vector-outline-toggle"
+)
 
 //====================================//
 //====== * * * Save/Export * * * =====//
@@ -178,7 +180,7 @@ const paletteContainer = document.querySelector(".palette-container")
 const paletteColors = document.querySelector(".palette-colors")
 const paletteEditBtn = document.querySelector(".palette-edit")
 const paletteRemoveBtn = document.querySelector(".palette-remove")
-// TODO: (Middle Priority) button to create palette from colors on canvas
+// TODO: (Low Priority) button to create palette from colors on canvas
 
 // * Layers Interface * //
 const layersInterfaceContainer = document.querySelector(".layers-interface")
@@ -199,6 +201,20 @@ const dimensionsForm = document.querySelector(".dimensions-form")
 const canvasWidth = document.getElementById("canvas-width")
 const canvasHeight = document.getElementById("canvas-height")
 const canvasSizeCancelBtn = document.getElementById("cancel-resize-button")
+
+//====================================//
+//=== * * Vector Transform UI * * ====//
+//====================================//
+
+// * Vector Transform UI Mother * //
+const vectorTransformUIContainer = document.querySelector(
+  ".vector-transform-ui-container"
+)
+
+// * Vector Transform UI * //
+const vectorTransformModeContainer = document.querySelector(
+  ".vector-transform-modes"
+)
 
 //====================================//
 //========= * * * State * * * ========//
@@ -222,12 +238,13 @@ export const dom = {
   canvasSizeBtn,
   selectAllBtn,
   deselectBtn,
-  invertSelectionBtn,
   cutBtn,
   copyBtn,
   pasteBtn,
-  // flipHorizontalBtn,
-  // flipVerticalBtn,
+  deleteBtn,
+  flipHorizontalBtn,
+  flipVerticalBtn,
+  rotateBtn,
   //Settings
   settingsBtn,
   //settings
@@ -236,6 +253,7 @@ export const dom = {
   gridBtn,
   gridSpacingSpinBtn,
   gridSpacing,
+  vectorSelectionOutlineBtn,
   //save/export
   saveContainer,
   saveAsForm,
@@ -291,4 +309,7 @@ export const dom = {
   canvasWidth,
   canvasHeight,
   canvasSizeCancelBtn,
+  //vector transform
+  vectorTransformUIContainer,
+  vectorTransformModeContainer,
 }

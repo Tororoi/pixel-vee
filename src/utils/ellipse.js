@@ -1,5 +1,4 @@
-import { getTriangle, getAngle } from "../utils/trig.js"
-import { generateRandomRGB } from "../utils/colors.js"
+import { getAngle } from "../utils/trig.js"
 import { assert, plotConicBezierSeg } from "./bezier.js"
 
 //================================================================//
@@ -11,13 +10,21 @@ import { assert, plotConicBezierSeg } from "./bezier.js"
 //=== * * * Ellipse Functions * * * ===//
 //=====================================//
 
+/**
+ * Plot an ellipse
+ * @param {number} xm - x-coordinate of the center
+ * @param {number} ym - y-coordinate of the center
+ * @param {number} a - semi-major axis
+ * @param {number} b - semi-minor axis
+ * @returns {Array} - Array of points
+ */
 export function plotEllipse(xm, ym, a, b) {
   let plotPoints = []
-  var x = -a,
+  let x = -a,
     y = 0 /* II. quadrant from bottom left to top right */
-  var e2,
+  let e2,
     dx = (1 + 2 * x) * b * b /* error increment  */
-  var dy = x * x,
+  let dy = x * x,
     err = dx + dy /* error of 1.step */
 
   do {
@@ -56,7 +63,7 @@ export function plotEllipse(xm, ym, a, b) {
 
 // export function plotCircle(xm, ym, r, offset) {
 //   let plotPoints = []
-//   var x = -r,
+//   let x = -r,
 //     y = 0,
 //     err = 2 - 2 * r /* bottom left to top right */
 //   //offset when subpixel is nearer to center
@@ -86,7 +93,16 @@ export function plotEllipse(xm, ym, a, b) {
 //   return plotPoints
 // }
 
+/**
+ * Plot a circle
+ * @param {number} xm - x-coordinate of the center
+ * @param {number} ym - y-coordinate of the center
+ * @param {number} r - radius
+ * @param {number} offset - subpixel offset
+ * @returns {Array} - Array of points
+ */
 export function plotCircle(xm, ym, r, offset) {
+  r = Math.round(r)
   let plotPoints = []
 
   // I. Quadrant (+x, +y)
@@ -112,8 +128,16 @@ export function plotCircle(xm, ym, r, offset) {
 
   return plotPoints
 
+  /**
+   * Plot a quadrant of a circle
+   * @param {number} xm - x-coordinate of the center
+   * @param {number} ym - y-coordinate of the center
+   * @param {number} r - radius
+   * @param {number} offset - subpixel offset
+   * @param {number} quadrant - quadrant number
+   */
   function plotQuadrant(xm, ym, r, offset, quadrant) {
-    var x = -r,
+    let x = -r,
       y = 0,
       err = 2 - 2 * r
 
@@ -140,15 +164,23 @@ export function plotCircle(xm, ym, r, offset) {
   }
 }
 
+/**
+ * Plot an ellipse with a rectangular parameter
+ * @param {number} x0 - x-coordinate of the top-left corner of the rectangle
+ * @param {number} y0 - y-coordinate of the top-left corner of the rectangle
+ * @param {number} x1 - x-coordinate of the bottom-right corner of the rectangle
+ * @param {number} y1 - y-coordinate of the bottom-right corner of the rectangle
+ * @returns {Array} - Array of points
+ */
 export function plotEllipseRect(x0, y0, x1, y1) {
   let plotPoints = []
   /* rectangular parameter enclosing the ellipse */
-  var a = Math.abs(x1 - x0),
+  let a = Math.abs(x1 - x0),
     b = Math.abs(y1 - y0),
     b1 = b & 1 /* diameter */
-  var dx = 4 * (1.0 - a) * b * b,
+  let dx = 4 * (1.0 - a) * b * b,
     dy = 4 * (b1 + 1) * a * a /* error increment */
-  var err = dx + dy + b1 * a * a,
+  let err = dx + dy + b1 * a * a,
     e2 /* error of 1.step */
 
   if (x0 > x1) {
@@ -198,9 +230,23 @@ export function plotEllipseRect(x0, y0, x1, y1) {
     seen.add(key)
     return true // keep this item
   })
+
   return plotPoints
 }
 
+/**
+ * Plot a rotated ellipse without a rectangular parameter
+ * @param {number} x - x-coordinate of the center
+ * @param {number} y - y-coordinate of the center
+ * @param {number} a - semi-major axis
+ * @param {number} b - semi-minor axis
+ * @param {number} angle - angle in radians
+ * @param {number} xa - x-coordinate of the first control point
+ * @param {number} ya - y-coordinate of the first control point
+ * @param {number} x1Offset - x direction offset
+ * @param {number} y1Offset - y direction offset
+ * @returns {Array} - Array of points
+ */
 export function plotRotatedEllipse(
   x,
   y,
@@ -213,9 +259,9 @@ export function plotRotatedEllipse(
   y1Offset
 ) {
   /* plot ellipse rotated by angle (radian) */
-  var xd = a * a,
+  let xd = a * a,
     yd = b * b
-  var s = Math.sin(angle),
+  let s = Math.sin(angle),
     zd = (xd - yd) * s /* ellipse rotation */
   ;(xd = Math.sqrt(xd - zd * s)),
     (yd = Math.sqrt(yd + zd * s)) /* surrounding rect */
@@ -234,25 +280,43 @@ export function plotRotatedEllipse(
   )
 }
 
-function plotRotatedEllipseRect(
-  x0,
-  y0,
-  x1,
-  y1,
-  zd,
-  isRightAngle,
+/**
+ * Calculate conic segments from vertices of an ellipse. Length of axes and angle of rotation are given, having already been calculated from the vertices.
+ * @param {number} x - x-coordinate of the center
+ * @param {number} y - y-coordinate of the center
+ * @param {number} a - semi-major axis
+ * @param {number} b - semi-minor axis
+ * @param {number} angle - angle in radians
+ * @param {number} x1Offset - x direction offset
+ * @param {number} y1Offset - y direction offset
+ * @returns {object} - {weight, leftTangentX, leftTangentY, topTangentX, topTangentY, rightTangentX, rightTangentY, bottomTangentX, bottomTangentY}
+ */
+export function calcEllipseConicsFromVertices(
+  x,
+  y,
+  a,
+  b,
+  angle,
   x1Offset,
   y1Offset
 ) {
-  x1 = x1 + x1Offset
-  y1 = y1 + y1Offset
-  let plotPoints = []
-  /* rectangle enclosing the ellipse, integer rotation angle */
-  var xd = x1 - x0,
+  let aa = a * a,
+    bb = b * b
+  let s = Math.sin(angle),
+    zd = (aa - bb) * s /* ellipse rotation */
+  ;(aa = Math.sqrt(aa - zd * s)),
+    (bb = Math.sqrt(bb + zd * s)) /* surrounding rect */
+  a = Math.floor(aa + 0.5)
+  b = Math.floor(bb + 0.5)
+  zd = (zd * a * b) / (aa * bb)
+  zd = 4 * zd * Math.cos(angle)
+  let x0 = x - a,
+    y0 = y - b,
+    x1 = x + a + x1Offset,
+    y1 = y + b + y1Offset
+  let xd = x1 - x0,
     yd = y1 - y0,
     w = xd * yd
-  // if (Math.abs(zd) == 0) //original algorithm, only works for radius at 0 degrees
-  if (isRightAngle) return plotEllipseRect(x0, y0, x1, y1) /* looks nicer */
   if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
   //Breaks down at smaller radii, need enforced minimum where offset is not applied? if assertion fails, try again after w is calculated without offset
   if (!(w <= 1.0 && w >= 0.0)) {
@@ -267,21 +331,353 @@ function plotRotatedEllipseRect(
   assert(w <= 1.0 && w >= 0.0) /* limit angle to |zd|<=xd*yd */
   xd = Math.floor(xd * w + 0.5)
   yd = Math.floor(yd * w + 0.5) /* snap to int */
+  return {
+    weight: w,
+    leftTangentX: x0,
+    leftTangentY: y0 + yd,
+    topTangentX: x0 + xd,
+    topTangentY: y0,
+    rightTangentX: x1,
+    rightTangentY: y1 - yd,
+    bottomTangentX: x1 - xd,
+    bottomTangentY: y1,
+  }
+}
+
+/**
+ * Calculate the semi-major axis, semi-minor axis, and angle of rotation from conic segments.
+ * @param {number} weight - squared weight of P1
+ * @param {number} leftTangentX - x-coordinate of the left tangent
+ * @param {number} leftTangentY - y-coordinate of the left tangent
+ * @param {number} topTangentX - x-coordinate of the top tangent
+ * @param {number} topTangentY - y-coordinate of the top tangent
+ * @param {number} rightTangentX - x-coordinate of the right tangent
+ * @param {number} rightTangentY - y-coordinate of the right tangent
+ * @param {number} bottomTangentX - x-coordinate of the bottom tangent
+ * @param {number} bottomTangentY - y-coordinate of the bottom tangent
+ * @param {number} centerX - x-coordinate of the center of the ellipse
+ * @param {number} centerY - y-coordinate of the center of the ellipse
+ * @param {number} originalAngle - original angle of ellipse before transformation. Used to know the quadrants to check for the vertices
+ * @returns {object} - {a, b, angle}
+ */
+export function calcEllipseParamsFromConics(
+  weight,
+  leftTangentX,
+  leftTangentY,
+  topTangentX,
+  topTangentY,
+  rightTangentX,
+  rightTangentY,
+  bottomTangentX,
+  bottomTangentY,
+  centerX,
+  centerY,
+  originalAngle
+) {
+  //top-left corner
+  const topLeftVertex = () =>
+    findConicSegmentVertex(
+      1 - weight,
+      leftTangentX,
+      leftTangentY,
+      leftTangentX,
+      topTangentY,
+      topTangentX,
+      topTangentY,
+      centerX,
+      centerY
+    )
+  //top-right corner
+  const topRightVertex = () =>
+    findConicSegmentVertex(
+      weight,
+      topTangentX,
+      topTangentY,
+      rightTangentX,
+      topTangentY,
+      rightTangentX,
+      rightTangentY,
+      centerX,
+      centerY
+    )
+  //bottom-right corner
+  const bottomRightVertex = () =>
+    findConicSegmentVertex(
+      1 - weight,
+      rightTangentX,
+      rightTangentY,
+      rightTangentX,
+      bottomTangentY,
+      bottomTangentX,
+      bottomTangentY,
+      centerX,
+      centerY
+    )
+  //bottom-left corner
+  const bottomLeftVertex = () =>
+    findConicSegmentVertex(
+      weight,
+      bottomTangentX,
+      bottomTangentY,
+      leftTangentX,
+      bottomTangentY,
+      leftTangentX,
+      leftTangentY,
+      centerX,
+      centerY
+    )
+  let px2, py2, px3, py3, vertexA, vertexB
+  switch (true) {
+    case originalAngle <= Math.PI / 2: {
+      //bottom-right corner
+      vertexA = bottomRightVertex()
+      vertexB = topRightVertex()
+      break
+    }
+    case originalAngle <= Math.PI: {
+      //bottom-left corner
+      vertexA = bottomLeftVertex()
+      vertexB = bottomRightVertex()
+      break
+    }
+    case originalAngle <= (3 * Math.PI) / 2: {
+      //top-left corner
+      vertexA = topLeftVertex()
+      vertexB = bottomLeftVertex()
+      break
+    }
+    case originalAngle <= 2 * Math.PI: {
+      //top-right corner
+      vertexA = topRightVertex()
+      vertexB = topLeftVertex()
+      break
+    }
+    default:
+    //
+  }
+  if (vertexA.minorRadius > vertexB.minorRadius) {
+    px2 = Math.round(vertexA.majorX)
+    py2 = Math.round(vertexA.majorY)
+    px3 = Math.round(vertexB.minorX)
+    py3 = Math.round(vertexB.minorY)
+  } else {
+    px2 = Math.round(vertexA.minorX)
+    py2 = Math.round(vertexA.minorY)
+    px3 = Math.round(vertexB.majorX)
+    py3 = Math.round(vertexB.majorY)
+  }
+
+  return {
+    px2,
+    py2,
+    px3,
+    py3,
+  }
+}
+
+/**
+ * Golden-section search to find the maximum or minimum distance to the center of an ellipse
+ * @param {number} a - lower bound of the search interval
+ * @param {number} b - upper bound of the search interval
+ * @param {Function} f - function whose minimum value we're searching for
+ * @param {number} tol - tolerance for the search precision (default is 1e-5)
+ * @param {boolean} findMax - whether to find the maximum or minimum value (default is true)
+ * @returns {number} - maximum value
+ */
+function goldenSectionSearch(a, b, f, tol = 1e-5, findMax = true) {
+  const gr = (Math.sqrt(5) + 1) / 2
+  let c = b - (b - a) / gr
+  let d = a + (b - a) / gr
+
+  while (Math.abs(c - d) > tol) {
+    if (findMax ? f(c) > f(d) : f(c) < f(d)) {
+      b = d
+    } else {
+      a = c
+    }
+    c = b - (b - a) / gr
+    d = a + (b - a) / gr
+  }
+
+  return (b + a) / 2
+}
+
+/**
+ * Evaluate the conic Bézier curve at parameter t
+ * @param {number} t - parameter value at which to evaluate the curve
+ * @param {number} px0 - x-coordinate of the first control point
+ * @param {number} py0 - y-coordinate of the first control point
+ * @param {number} px1 - x-coordinate of the second control point
+ * @param {number} py1 - y-coordinate of the second control point
+ * @param {number} px2 - x-coordinate of the third control point
+ * @param {number} py2 - y-coordinate of the third control point
+ * @param {number} weight - squared weight of the middle control point
+ * @returns {object} - {x, y}
+ */
+function evaluateBezier(t, px0, py0, px1, py1, px2, py2, weight) {
+  const w = Math.sqrt(weight)
+  const mt = 1 - t
+
+  const denominator = mt * mt + 2 * w * mt * t + t * t
+
+  const x = (mt * mt * px0 + 2 * w * mt * t * px1 + t * t * px2) / denominator
+  const y = (mt * mt * py0 + 2 * w * mt * t * py1 + t * t * py2) / denominator
+
+  return { x, y }
+}
+
+/**
+ * Find the points of highest and lowest radius on a conic Bézier curve as part of an ellipse
+ * @param {number} weight - squared weight of P1
+ * @param {number} px0 - x-coordinate of the first control point
+ * @param {number} py0 - y-coordinate of the first control point
+ * @param {number} px1 - x-coordinate of the second control point
+ * @param {number} py1 - y-coordinate of the second control point
+ * @param {number} px2 - x-coordinate of the third control point
+ * @param {number} py2 - y-coordinate of the third control point
+ * @param {number} centerX - x-coordinate of the center of the ellipse
+ * @param {number} centerY - y-coordinate of the center of the ellipse
+ * @returns {object} - {majorRadius, majorX, majorY, minorRadius, minorX, minorY}
+ */
+function findConicSegmentVertex(
+  weight,
+  px0,
+  py0,
+  px1,
+  py1,
+  px2,
+  py2,
+  centerX,
+  centerY
+) {
+  /**
+   * Check radius of ellipse at given t on the conic segment
+   * @param {number} t - parameter value at which to evaluate the curve
+   * @returns {number} - distance to center
+   */
+  const radiusFunction = (t) => {
+    const pointOnCurve = evaluateBezier(t, px0, py0, px1, py1, px2, py2, weight)
+    const distanceToPointFromCenter = Math.sqrt(
+      (pointOnCurve.x - centerX) ** 2 + (pointOnCurve.y - centerY) ** 2
+    )
+    return distanceToPointFromCenter
+  }
+
+  // Find the t value of largest and smallest radius
+  const majorT = goldenSectionSearch(0, 1, radiusFunction, 1e-5, true)
+  const minorT = goldenSectionSearch(0, 1, radiusFunction, 1e-5, false)
+
+  // Calculate the coordinates at the points of highest and lowest curvature
+  const majorPoint = evaluateBezier(
+    majorT,
+    px0,
+    py0,
+    px1,
+    py1,
+    px2,
+    py2,
+    weight
+  )
+  const minorPoint = evaluateBezier(
+    minorT,
+    px0,
+    py0,
+    px1,
+    py1,
+    px2,
+    py2,
+    weight
+  )
+  return {
+    majorRadius: radiusFunction(majorT),
+    majorX: majorPoint.x,
+    majorY: majorPoint.y,
+    minorRadius: radiusFunction(minorT),
+    minorX: minorPoint.x,
+    minorY: minorPoint.y,
+  }
+}
+
+/**
+ * Plot a rotated ellipse with conic segments
+ * @param {number} weight - weight of the conic segment
+ * @param {number} leftTangentX - x-coordinate of the left tangent point
+ * @param {number} leftTangentY - y-coordinate of the left tangent point
+ * @param {number} topTangentX - x-coordinate of the top tangent point
+ * @param {number} topTangentY - y-coordinate of the top tangent point
+ * @param {number} rightTangentX - x-coordinate of the right tangent point
+ * @param {number} rightTangentY - y-coordinate of the right tangent point
+ * @param {number} bottomTangentX - x-coordinate of the bottom tangent point
+ * @param {number} bottomTangentY - y-coordinate of the bottom tangent point
+ * @returns {Array} - Array of points
+ */
+export function plotRotatedEllipseConics(
+  weight,
+  leftTangentX,
+  leftTangentY,
+  topTangentX,
+  topTangentY,
+  rightTangentX,
+  rightTangentY,
+  bottomTangentX,
+  bottomTangentY
+) {
+  //weight is 0.5 for rotation angles multiple of pi/2
+  if (weight === 0.5)
+    return plotEllipseRect(
+      leftTangentX,
+      topTangentY,
+      rightTangentX,
+      bottomTangentY
+    ) /* looks nicer */
+  let plotPoints = []
   plotPoints = [
     ...plotPoints,
-    ...plotConicBezierSeg(x0, y0 + yd, x0, y0, x0 + xd, y0, 1.0 - w),
+    ...plotConicBezierSeg(
+      leftTangentX,
+      leftTangentY,
+      leftTangentX,
+      topTangentY,
+      topTangentX,
+      topTangentY,
+      1.0 - weight
+    ), //top-left corner
   ]
   plotPoints = [
     ...plotPoints,
-    ...plotConicBezierSeg(x0, y0 + yd, x0, y1, x1 - xd, y1, w),
+    ...plotConicBezierSeg(
+      leftTangentX,
+      leftTangentY,
+      leftTangentX,
+      bottomTangentY,
+      bottomTangentX,
+      bottomTangentY,
+      weight
+    ), //top-right corner
   ]
   plotPoints = [
     ...plotPoints,
-    ...plotConicBezierSeg(x1, y1 - yd, x1, y1, x1 - xd, y1, 1.0 - w),
+    ...plotConicBezierSeg(
+      rightTangentX,
+      rightTangentY,
+      rightTangentX,
+      bottomTangentY,
+      bottomTangentX,
+      bottomTangentY,
+      1.0 - weight
+    ), //bottom-right corner
   ]
   plotPoints = [
     ...plotPoints,
-    ...plotConicBezierSeg(x1, y1 - yd, x1, y0, x0 + xd, y0, w),
+    ...plotConicBezierSeg(
+      rightTangentX,
+      rightTangentY,
+      rightTangentX,
+      topTangentY,
+      topTangentX,
+      topTangentY,
+      weight
+    ), //bottom-left corner
   ]
   //remove duplicate coordinates
   const seen = new Set()
@@ -296,14 +692,114 @@ function plotRotatedEllipseRect(
   return plotPoints
 }
 
+/**
+ * Plot a rotated ellipse with a rectangular parameter
+ * @param {number} x0 - x-coordinate of the top-left corner of the rectangle
+ * @param {number} y0 - y-coordinate of the top-left corner of the rectangle
+ * @param {number} x1 - x-coordinate of the bottom-right corner of the rectangle
+ * @param {number} y1 - y-coordinate of the bottom-right corner of the rectangle
+ * @param {number} zd - angle in radians
+ * @param {boolean} isRightAngle - is right angle
+ * @param {number} x1Offset - x direction offset
+ * @param {number} y1Offset - y direction offset
+ * @returns {Array} - Array of points
+ */
+function plotRotatedEllipseRect(
+  x0,
+  y0,
+  x1,
+  y1,
+  zd,
+  isRightAngle,
+  x1Offset,
+  y1Offset
+) {
+  x1 = x1 + x1Offset
+  y1 = y1 + y1Offset
+  if (isRightAngle) return plotEllipseRect(x0, y0, x1, y1) /* looks nicer */
+
+  /* rectangle enclosing the ellipse, integer rotation angle */
+  let xd = x1 - x0,
+    yd = y1 - y0,
+    w = xd * yd
+  if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
+  //Breaks down at smaller radii, need enforced minimum where offset is not applied? if assertion fails, try again after w is calculated without offset
+  if (!(w <= 1.0 && w >= 0.0)) {
+    //if assertion expected to fail with offsets, remove offsets and reset vars before trying assert
+    x1 = x1 - x1Offset
+    y1 = y1 - y1Offset
+    xd = x1 - x0
+    yd = y1 - y0
+    w = xd * yd
+    if (w != 0.0) w = (w - zd) / (w + w) /* squared weight of P1 */
+  }
+  assert(w <= 1.0 && w >= 0.0) /* limit angle to |zd|<=xd*yd */
+  xd = Math.floor(xd * w + 0.5)
+  yd = Math.floor(yd * w + 0.5) /* snap to int */
+  // w = 0.5 //for circle
+  let plotPoints = []
+  plotPoints = [
+    ...plotPoints,
+    ...plotConicBezierSeg(x0, y0 + yd, x0, y0, x0 + xd, y0, 1.0 - w), //top-left corner
+  ]
+  plotPoints = [
+    ...plotPoints,
+    ...plotConicBezierSeg(x0, y0 + yd, x0, y1, x1 - xd, y1, w), //top-right corner
+  ]
+  plotPoints = [
+    ...plotPoints,
+    ...plotConicBezierSeg(x1, y1 - yd, x1, y1, x1 - xd, y1, 1.0 - w), //bottom-right corner
+  ]
+  plotPoints = [
+    ...plotPoints,
+    ...plotConicBezierSeg(x1, y1 - yd, x1, y0, x0 + xd, y0, w), //bottom-left corner
+  ]
+  plotPoints.push({ x: x0, y: y0 + yd }) // left tangent point
+  plotPoints.push({ x: x0, y: y0 }) // control point 1
+  plotPoints.push({ x: x0 + xd, y: y0 }) // top tangent point
+  plotPoints.push({ x: x0, y: y1 }) // control point 2
+  plotPoints.push({ x: x1 - xd, y: y1 }) // bottom tangent point
+  plotPoints.push({ x: x1, y: y1 }) // control point 3
+  plotPoints.push({ x: x1, y: y1 - yd }) // right tangent point
+  plotPoints.push({ x: x1, y: y0 }) // control point 4
+  // plotPoints.push({ x: x0, y: y0 }) // top-left corner
+  // plotPoints.push({ x: x1, y: y0 }) // top-right corner
+  // plotPoints.push({ x: x1, y: y1 }) // bottom-right corner
+  // plotPoints.push({ x: x0, y: y1 }) // bottom-left corner
+  //remove duplicate coordinates
+  const seen = new Set()
+  plotPoints = plotPoints.filter((point) => {
+    let key = `${point.x},${point.y}`
+    if (seen.has(key)) {
+      return false // skip this item
+    }
+    //remove tangent points for visibility (temporary)
+    if (key === `${x0},${y0 + yd}`) {
+      return false
+    }
+    if (key === `${x0 + xd},${y0}`) {
+      return false
+    }
+    if (key === `${x1 - xd},${y1}`) {
+      return false
+    }
+    if (key === `${x1},${y1 - yd}`) {
+      return false
+    }
+    seen.add(key)
+    return true // keep this item
+  })
+  return plotPoints
+}
+
 //helper functions
 /**
- *
- * @param {*} cx
- * @param {*} cy
- * @param {*} r
- * @param {*} a
- * @returns
+ * Get a point on a circle
+ * @param {number} cx - x-coordinate of the center
+ * @param {number} cy - y-coordinate of the center
+ * @param {number} r - radius
+ * @param {number} a - angle in radians
+ * @returns {object} - Object with x and y properties
  */
 function pointOnCircle(cx, cy, r, a) {
   let x = Math.round(cx + r * Math.cos(a))
@@ -312,16 +808,16 @@ function pointOnCircle(cx, cy, r, a) {
 }
 
 /**
- *
- * @param {*} px1
- * @param {*} py1
- * @param {*} px2
- * @param {*} py2
- * @param {*} radians
- * @param {*} opposingRadius
- * @returns
+ * Update the vertex of an ellipse
+ * @param {number} px1 - x-coordinate of the first control point
+ * @param {number} py1 - y-coordinate of the first control point
+ * @param {number} px2 - x-coordinate of the second control point
+ * @param {number} py2 - y-coordinate of the second control point
+ * @param {number} radians - angle in radians
+ * @param {number} opposingRadius - opposing radius
+ * @returns {object} - Object with x and y properties
  */
-export function updateEllipseVertex(
+export function getOpposingEllipseVertex(
   px1,
   py1,
   px2,
@@ -337,12 +833,10 @@ export function updateEllipseVertex(
 /**
  * Find half of pixel that current subpixel exists in given an angle of a vector to the current pixel
  * determine subpixel close or far from origin based on angle.
- * @param {*} x - subpixel coordinate
- * @param {*} y - subpixel coordinate
- * @param {*} angle - radians
- * @param {boolean} inverse - inverse result
- * @param {boolean} perpendicular - rotate angle 90 degrees
- * @returns
+ * @param {number} x - (Integer) subpixel coordinate
+ * @param {number} y - (Integer) subpixel coordinate
+ * @param {number} angle - (Float) radians
+ * @returns {number} - 0 if far, 1 if close
  */
 export function findHalf(x, y, angle) {
   // Convert angle in degrees to slope m using tan function
@@ -360,149 +854,5 @@ export function findHalf(x, y, angle) {
     return angle <= Math.PI && angle > 0 ? 0 : 1
   } else {
     return angle <= Math.PI && angle > 0 ? 1 : 0
-  }
-}
-
-//Helper functions that affect state
-
-/**
- *
- * @param {*} state
- * @param {*} canvas
- * @param {*} px1
- * @param {*} py1
- * @param {*} px2
- * @param {*} py2
- * @param {*} angleOffset
- */
-export function updateEllipseOffsets(
-  state,
-  canvas,
-  forceCircle = false,
-  angleOffset = 0
-) {
-  state.vectorProperties.angle = getAngle(
-    state.vectorProperties.px2 - state.vectorProperties.px1,
-    state.vectorProperties.py2 - state.vectorProperties.py1
-  )
-  if (state.tool.options.useSubpixels?.active) {
-    state.vectorProperties.offset = findHalf(
-      canvas.subPixelX,
-      canvas.subPixelY,
-      state.vectorProperties.angle + angleOffset
-    )
-  } else {
-    state.vectorProperties.offset = 0 // TODO: (Middle Priority) need logic to manually select offset values
-  }
-  const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
-  while (state.vectorProperties.angle < 0) {
-    state.vectorProperties.angle += 2 * Math.PI
-  }
-  // Determine the slice in which the angle exists
-  let index =
-    Math.floor(
-      (state.vectorProperties.angle + angleOffset + Math.PI / 2 + Math.PI / 8) /
-        (Math.PI / 4)
-    ) % 8
-  let compassDir = directions[index]
-  //based on direction update x and y offsets in state
-  //TODO: (Middle Priority) keep offset consistent during radius adjustment and use another gui element to control the way radius is handled, drawn as a compass, 8 options plus default center which is no offset
-  //Direction shrinks opposite side. eg. radius 7 goes from diameter 15 to diameter 14
-  //gui element could have 2 sliders, vertical and horizontal with 3 values each, offset -1, 0, 1 (right, none, left)
-  //should only x1 and y1 offsets be available since they represent the center point being part of radius or not?
-  if (state.clickCounter === 1 || forceCircle) {
-    state.vectorProperties.x1Offset = -state.vectorProperties.offset
-    state.vectorProperties.y1Offset = -state.vectorProperties.offset
-  } else {
-    switch (compassDir) {
-      case "N":
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
-        break
-      case "NE":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
-        break
-      case "E":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
-        break
-      case "SE":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
-        break
-      case "S":
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
-        break
-      case "SW":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
-        break
-      case "W":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
-        break
-      case "NW":
-        state.vectorProperties.x1Offset = -state.vectorProperties.offset
-        state.vectorProperties.y1Offset = -state.vectorProperties.offset
-        break
-      default:
-      //none
-    }
-  }
-}
-
-export function updateEllipseControlPoints(state, canvas, vectorGui) {
-  if (vectorGui.selectedPoint.xKey !== "px1") {
-    state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
-    state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-  }
-  let dxa = state.vectorProperties.px2 - state.vectorProperties.px1
-  let dya = state.vectorProperties.py2 - state.vectorProperties.py1
-  let dxb = state.vectorProperties.px3 - state.vectorProperties.px1
-  let dyb = state.vectorProperties.py3 - state.vectorProperties.py1
-  if (vectorGui.selectedPoint.xKey === "px1") {
-    state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
-    state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
-  }
-  if (vectorGui.selectedPoint.xKey === "px1") {
-    state.vectorProperties.px2 = state.vectorProperties.px1 + dxa
-    state.vectorProperties.py2 = state.vectorProperties.py1 + dya
-    state.vectorProperties.px3 = state.vectorProperties.px1 + dxb
-    state.vectorProperties.py3 = state.vectorProperties.py1 + dyb
-  } else if (vectorGui.selectedPoint.xKey === "px2") {
-    state.vectorProperties.radA = Math.floor(Math.sqrt(dxa * dxa + dya * dya))
-    if (state.vectorProperties.forceCircle) {
-      state.vectorProperties.radB = state.vectorProperties.radA
-    }
-    let newVertex = updateEllipseVertex(
-      state.vectorProperties.px1,
-      state.vectorProperties.py1,
-      state.vectorProperties.px2,
-      state.vectorProperties.py2,
-      -Math.PI / 2,
-      state.vectorProperties.radB
-    )
-    state.vectorProperties.px3 = newVertex.x
-    state.vectorProperties.py3 = newVertex.y
-    updateEllipseOffsets(state, canvas, state.vectorProperties.forceCircle, 0)
-  } else if (vectorGui.selectedPoint.xKey === "px3") {
-    state.vectorProperties.radB = Math.floor(Math.sqrt(dxb * dxb + dyb * dyb))
-    if (state.vectorProperties.forceCircle) {
-      state.vectorProperties.radA = state.vectorProperties.radB
-    }
-    let newVertex = updateEllipseVertex(
-      state.vectorProperties.px1,
-      state.vectorProperties.py1,
-      state.vectorProperties.px3,
-      state.vectorProperties.py3,
-      Math.PI / 2,
-      state.vectorProperties.radA
-    )
-    state.vectorProperties.px2 = newVertex.x
-    state.vectorProperties.py2 = newVertex.y
-    updateEllipseOffsets(
-      state,
-      canvas,
-      state.vectorProperties.forceCircle,
-      1.5 * Math.PI
-    )
   }
 }

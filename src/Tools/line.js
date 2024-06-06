@@ -1,4 +1,3 @@
-import { keys } from "../Shortcuts/keys.js"
 import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
@@ -7,6 +6,9 @@ import { actionLine } from "../Actions/pointerActions.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
+import { enableActionsForSelection } from "../DOM/disableDomElements.js"
+import { vectorGui } from "../GUI/vector.js"
+import { rerouteVectorStepsAction } from "./transform.js"
 
 //===================================//
 //=== * * * Line Controller * * * ===//
@@ -14,22 +16,28 @@ import { addToTimeline } from "../Actions/undoRedo.js"
 
 /**
  * Supported modes: "draw, erase, inject",
- * TODO: (Middle Priority) add vector line tool. A raster line tool would still be present for ease of use.
+ * TODO: (Medium Priority) add vector line tool. A raster line tool would still be present for ease of use.
  */
 function lineSteps() {
+  if (rerouteVectorStepsAction()) return
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      state.lineStartX = state.cursorX
-      state.lineStartY = state.cursorY
+      state.clickCounter += 1
+      //reset control points
+      vectorGui.reset()
+      state.vectorProperties.type = state.tool.name
+      state.vectorProperties.px1 = state.cursorX
+      state.vectorProperties.py1 = state.cursorY
+      state.vectorProperties.px2 = state.cursorX
+      state.vectorProperties.py2 = state.cursorY
       renderCanvas(canvas.currentLayer)
       //preview line
       actionLine(
-        state.cursorX,
-        state.cursorY,
-        state.cursorX,
-        state.cursorY,
+        state.vectorProperties.px1,
+        state.vectorProperties.py1,
+        state.vectorProperties.px2,
+        state.vectorProperties.py2,
         state.boundaryBox,
-        state.selectionInversed,
         swatches.primary.color,
         canvas.currentLayer,
         state.tool.modes,
@@ -43,16 +51,17 @@ function lineSteps() {
       break
     case "pointermove":
       //draw line from origin point to current point onscreen
+      state.vectorProperties.px2 = state.cursorX
+      state.vectorProperties.py2 = state.cursorY
       //only draw when necessary
       renderCanvas(canvas.currentLayer)
       //preview line
       actionLine(
-        state.lineStartX,
-        state.lineStartY,
-        state.cursorX,
-        state.cursorY,
+        state.vectorProperties.px1,
+        state.vectorProperties.py1,
+        state.vectorProperties.px2,
+        state.vectorProperties.py2,
         state.boundaryBox,
-        state.selectionInversed,
         swatches.primary.color,
         canvas.currentLayer,
         state.tool.modes,
@@ -64,14 +73,34 @@ function lineSteps() {
         true
       )
       break
-    case "pointerup":
+    case "pointerup": {
+      state.vectorProperties.px2 = state.cursorX
+      state.vectorProperties.py2 = state.cursorY
+      //Handle snapping p1 or p2 to other control points. Only snap when there are no linked vectors to selected vector.
+      if (
+        state.tool.options.align?.active ||
+        state.tool.options.equal?.active ||
+        state.tool.options.link?.active
+      ) {
+        //snap selected point to collidedVector's control point
+        if (state.collidedVectorIndex !== null) {
+          let collidedVector = state.vectors[state.collidedVectorIndex]
+          let snappedToX =
+            collidedVector.vectorProperties[vectorGui.otherCollidedKeys.xKey] +
+            collidedVector.layer.x
+          let snappedToY =
+            collidedVector.vectorProperties[vectorGui.otherCollidedKeys.yKey] +
+            collidedVector.layer.y
+          state.vectorProperties.px2 = snappedToX
+          state.vectorProperties.py2 = snappedToY
+        }
+      }
       actionLine(
-        state.lineStartX,
-        state.lineStartY,
-        state.cursorX,
-        state.cursorY,
+        state.vectorProperties.px1,
+        state.vectorProperties.py1,
+        state.vectorProperties.px2,
+        state.vectorProperties.py2,
         state.boundaryBox,
-        state.selectionInversed,
         swatches.primary.color,
         canvas.currentLayer,
         state.tool.modes,
@@ -81,6 +110,7 @@ function lineSteps() {
         null,
         null
       )
+      state.clickCounter = 0
       let maskArray = coordArrayFromSet(
         state.maskSet,
         canvas.currentLayer.x,
@@ -94,21 +124,45 @@ function lineSteps() {
         boundaryBox.yMin -= canvas.currentLayer.y
         boundaryBox.yMax -= canvas.currentLayer.y
       }
+      //generate new unique key for vector
+      state.highestVectorKey += 1
+      let uniqueVectorKey = state.highestVectorKey
+      state.currentVectorIndex = uniqueVectorKey
+      enableActionsForSelection()
+      //store control points for timeline
       addToTimeline({
-        tool: state.tool,
+        tool: state.tool.name,
         layer: canvas.currentLayer,
         properties: {
-          px1: state.lineStartX - canvas.currentLayer.x,
-          py1: state.lineStartY - canvas.currentLayer.y,
-          px2: state.cursorX - canvas.currentLayer.x,
-          py2: state.cursorY - canvas.currentLayer.y,
           maskArray,
           boundaryBox,
-          selectionInversed: state.selectionInversed,
+          vectorIndices: [uniqueVectorKey],
         },
       })
+      //Add the vector to the state
+      state.vectors[uniqueVectorKey] = {
+        index: uniqueVectorKey,
+        action: state.action,
+        layer: canvas.currentLayer,
+        modes: { ...state.tool.modes },
+        color: { ...swatches.primary.color },
+        brushSize: state.tool.brushSize,
+        brushType: state.tool.brushType,
+        vectorProperties: {
+          ...state.vectorProperties,
+          px1: state.vectorProperties.px1 - canvas.currentLayer.x,
+          py1: state.vectorProperties.py1 - canvas.currentLayer.y,
+          px2: state.vectorProperties.px2 - canvas.currentLayer.x,
+          py2: state.vectorProperties.py2 - canvas.currentLayer.y,
+        },
+        // maskArray,
+        // boundaryBox,
+        hidden: false,
+        removed: false,
+      }
       renderCanvas(canvas.currentLayer)
       break
+    }
     default:
     //do nothing
   }
@@ -120,9 +174,35 @@ export const line = {
   brushSize: 1,
   brushType: "circle",
   brushDisabled: false,
-  options: {},
+  options: {
+    //Priority hierarchy of options: Equal = Align > Hold > Link
+    // equal: {
+    //   active: false,
+    //   tooltip:
+    //     "Toggle Equal Length (=). \n\nEnsures magnitude continuity of control handles for linked vectors.",
+    // }, // Magnitude continuity
+    // align: {
+    //   active: false,
+    //   tooltip:
+    //     "Toggle Align (A). \n\nEnsures tangential continuity by moving the control handle to the opposite angle for linked vectors.",
+    // }, // Tangential continuity
+    hold: {
+      active: false,
+      tooltip:
+        "Toggle Hold (H). \n\nMaintain relative angles of all control handles attached to selected control point.",
+    },
+    link: {
+      active: true,
+      tooltip:
+        "Toggle Linking (L). \n\nConnected control points of other vectors will move with selected control point.",
+    }, // Positional continuity
+    displayPaths: {
+      active: false,
+      tooltip: "Toggle Paths. \n\nShow paths for lines.",
+    },
+  },
   modes: { eraser: false, inject: false },
-  type: "raster",
+  type: "vector",
   cursor: "crosshair",
   activeCursor: "crosshair",
 }

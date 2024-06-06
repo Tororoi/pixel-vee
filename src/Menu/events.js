@@ -1,12 +1,9 @@
 import { dom } from "../Context/dom.js"
-import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { consolidateLayers } from "../Canvas/layers.js"
 import {
-  prepareDrawingForSave,
   setSaveFilesizePreview,
   saveDrawing,
   loadDrawing,
@@ -15,20 +12,21 @@ import { measureTextWidth } from "../utils/measureHelpers.js"
 import {
   actionSelectAll,
   actionDeselect,
-  actionInvertSelection,
   actionCutSelection,
   actionPasteSelection,
+  actionDeleteSelection,
+  actionFlipPixels,
+  actionRotatePixels,
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
-import { disableActionsForNoClipboard } from "../DOM/disableDomElements.js"
 
 //====================================//
 //======= * * * Tooltip * * * ========//
 //====================================//
 
 /**
- * @param {string} message
- * @param {Element} target
+ * @param {string} message - The message to be displayed in the tooltip
+ * @param {Element} target - The target element the tooltip is associated with
  */
 export const generateTooltip = (message, target) => {
   if (message && target) {
@@ -95,7 +93,7 @@ function importImage() {
     reader = new FileReader()
     reader.onload = (e) => {
       //TODO: (Medium Priority) check if image is too large and prompt user to resize
-      //TODO: (High Priority) should a new layer be created for the imported image? Or maybe allow raster layers to be selected or created during active paste action and move temp layer accordingly?
+      //TODO: (Medium Priority) should a new layer be created for the imported image?
       //1. logic similar to copy selection to put image into clipboard
       img.src = e.target.result
       img.onload = () => {
@@ -123,6 +121,12 @@ function importImage() {
           yMax: img.height,
         }
         state.selectClipboard.canvas = tempCanvas
+        state.selectClipboard.imageData = tempCTX.getImageData(
+          0,
+          0,
+          img.width,
+          img.height
+        )
         //2. paste clipboard onto canvas
         actionPasteSelection()
         //3. clear clipboard
@@ -135,7 +139,7 @@ function importImage() {
 
 /**
  * Consolidate offscreen canvases and download image
- * TODO: (Middle Priority) Open dialog box with more options such as pixel size, etc.
+ * TODO: (Medium Priority) Open dialog box with more options such as pixel size, format (png, gif), etc.
  */
 function exportImage() {
   //save .png
@@ -150,7 +154,7 @@ function exportImage() {
 
 /**
  * Open json file from desktop and load into layers and timeline
- * TODO: (Middle Priority) initialize loading screen and stop loading screen after loaded
+ * TODO: (Medium Priority) initialize loading screen and stop loading screen after loaded
  */
 function openSavedDrawing() {
   let reader
@@ -166,6 +170,8 @@ function openSavedDrawing() {
 //===================================//
 //=== * * * Event Listeners * * * ===//
 //===================================//
+
+//TODO: (Medium Priority) use event delegation so menu elements can be created dynamically
 
 document.body.addEventListener("mouseover", (e) => {
   //TODO: (Low Priority) Instead of rendering here, use a timer that resets on mousemove to detect idle time and move this logic to the mousemove event
@@ -228,12 +234,8 @@ dom.toolOptions.addEventListener("click", (e) => {
     vectorGui.render()
   }
 })
-dom.gridBtn.addEventListener("click", (e) => {
-  if (dom.gridBtn.checked) {
-    vectorGui.grid = true
-  } else {
-    vectorGui.grid = false
-  }
+dom.gridBtn.addEventListener("click", () => {
+  vectorGui.grid = dom.gridBtn.checked
   vectorGui.render()
 })
 dom.gridSpacing.addEventListener("input", (e) => {
@@ -261,12 +263,16 @@ dom.gridSpacingSpinBtn.addEventListener("pointerdown", (e) => {
   dom.gridSpacing.value = vectorGui.gridSpacing
   vectorGui.render()
 })
-dom.tooltipBtn.addEventListener("click", (e) => {
+dom.tooltipBtn.addEventListener("click", () => {
   if (dom.tooltipBtn.checked && state.tooltipMessage) {
     dom.tooltip.classList.add("visible")
   } else {
     dom.tooltip.classList.remove("visible")
   }
+})
+dom.vectorSelectionOutlineBtn.addEventListener("click", () => {
+  vectorGui.outlineVectorSelection = dom.vectorSelectionOutlineBtn.checked
+  vectorGui.render()
 })
 dom.openSaveBtn.addEventListener("click", (e) => {
   //reset value so that the same file can be imported multiple times
@@ -300,7 +306,7 @@ dom.saveBtn.addEventListener("click", openSaveDialogBox)
 dom.importBtn.addEventListener("change", importImage)
 dom.exportBtn.addEventListener("click", exportImage)
 //Edit Submenu events
-dom.canvasSizeBtn.addEventListener("click", (e) => {
+dom.canvasSizeBtn.addEventListener("click", () => {
   if (canvas.pastedLayer) {
     //if there is a pasted layer active, do not open canvas size dialog
     return
@@ -309,21 +315,19 @@ dom.canvasSizeBtn.addEventListener("click", (e) => {
 })
 dom.selectAllBtn.addEventListener("click", actionSelectAll)
 dom.deselectBtn.addEventListener("click", actionDeselect)
-dom.invertSelectionBtn.addEventListener("click", actionInvertSelection)
 dom.cutBtn.addEventListener("click", actionCutSelection)
 dom.copyBtn.addEventListener("click", actionCopySelection)
 dom.pasteBtn.addEventListener("click", actionPasteSelection)
-// dom.flipHorizontalBtn.addEventListener("click", (e) => {
-//   //TODO: (High Priority) flip selected pixels horizontally
-// })
-// dom.flipVerticalBtn.addEventListener("click", (e) => {
-//   //TODO: (High Priority) flip selected pixels vertically
-// })
-// dom.rotateBtn.addEventListener("click", (e) => {
-//   //TODO: (High Priority) rotate selected pixels
-// })
+dom.deleteBtn.addEventListener("click", actionDeleteSelection)
+dom.flipHorizontalBtn.addEventListener("click", (e) => {
+  actionFlipPixels(true)
+})
+dom.flipVerticalBtn.addEventListener("click", (e) => {
+  actionFlipPixels(false)
+})
+dom.rotateBtn.addEventListener("click", actionRotatePixels)
 //Settings events
-dom.settingsBtn.addEventListener("click", (e) => {
+dom.settingsBtn.addEventListener("click", () => {
   //if settings container is already open, close it, else open it
   if (dom.settingsContainer.style.display === "flex") {
     dom.settingsContainer.style.display = "none"
@@ -379,7 +383,7 @@ dom.saveAsFileName.addEventListener("input", (e) => {
     2 +
     "px"
 })
-dom.cancelSaveBtn.addEventListener("click", (e) => {
+dom.cancelSaveBtn.addEventListener("click", () => {
   dom.saveContainer.style.display = "none"
   state.saveDialogOpen = false
 })

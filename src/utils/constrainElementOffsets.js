@@ -1,3 +1,7 @@
+/**
+ * Constrain draggable element inside window
+ * @param {HTMLElement} target - The draggable element
+ */
 export function constrainElementOffsets(target) {
   let pRect = target.parentElement.getBoundingClientRect()
   let tgtRect = target.getBoundingClientRect()

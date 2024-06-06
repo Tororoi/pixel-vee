@@ -1,57 +1,231 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "../GUI/vector.js"
-import { checkPointCollision, checkAreaCollision } from "../utils/guiHelpers.js"
+import {
+  checkSquarePointCollision,
+  checkAreaCollision,
+} from "../utils/guiHelpers.js"
+import { SCALE } from "../utils/constants.js"
 
 /**
  * Render selection outline and control points
  * @param {number} lineDashOffset - (Float)
  */
-export function renderRasterCVS(lineDashOffset = 0.5) {
-  canvas.rasterGuiCTX.clearRect(
+export function renderSelectionCVS(lineDashOffset = 0.5) {
+  canvas.selectionGuiCTX.clearRect(
     0,
     0,
-    canvas.rasterGuiCVS.width,
-    canvas.rasterGuiCVS.height
+    canvas.selectionGuiCVS.width,
+    canvas.selectionGuiCVS.height
   )
-  if (state.boundaryBox.xMax !== null) {
-    // if (tools.select.options.maskArea) {
+  let isRasterSelection = state.boundaryBox.xMax !== null
+  let isVectorSelection =
+    state.selectedVectorIndicesSet.size > 0 && state.tool.type === "vector"
+  if (isRasterSelection || isVectorSelection) {
     //Create greyed out area around selection
     //clip to selection
-    canvas.rasterGuiCTX.save()
-    canvas.rasterGuiCTX.beginPath()
-    if (!state.selectionInversed) {
+    canvas.selectionGuiCTX.save()
+    canvas.selectionGuiCTX.beginPath()
+    if (isRasterSelection) {
       //define rectangle for canvas area
-      canvas.rasterGuiCTX.rect(
+      canvas.selectionGuiCTX.rect(
         canvas.xOffset,
         canvas.yOffset,
         canvas.offScreenCVS.width,
         canvas.offScreenCVS.height
       )
+      //define rectangle for selection area
+      canvas.selectionGuiCTX.rect(
+        canvas.xOffset + state.boundaryBox.xMin,
+        canvas.yOffset + state.boundaryBox.yMin,
+        state.boundaryBox.xMax - state.boundaryBox.xMin,
+        state.boundaryBox.yMax - state.boundaryBox.yMin
+      )
+      canvas.selectionGuiCTX.clip("evenodd")
+      // canvas.selectionGuiCTX.globalAlpha = 0.5
+      canvas.selectionGuiCTX.fillStyle = "rgba(255, 255, 255, 0.1)"
+      canvas.selectionGuiCTX.fillRect(
+        canvas.xOffset,
+        canvas.yOffset,
+        canvas.offScreenCVS.width,
+        canvas.offScreenCVS.height
+      )
+      canvas.selectionGuiCTX.restore()
+      let shouldRenderPoints =
+        state.tool.name === "select" ||
+        (state.tool.name === "move" && canvas.pastedLayer) ||
+        canvas.currentLayer.type === "reference" ||
+        state.vectorTransformMode === SCALE
+      renderSelectionBoxOutline(lineDashOffset, shouldRenderPoints)
+    } else if (isVectorSelection) {
+      if (vectorGui.outlineVectorSelection) {
+        //define rectangle for canvas area
+        canvas.selectionGuiCTX.rect(
+          canvas.xOffset,
+          canvas.yOffset,
+          canvas.offScreenCVS.width,
+          canvas.offScreenCVS.height
+        )
+        //grey out canvas area
+        canvas.selectionGuiCTX.fillStyle = "rgba(255, 255, 255, 0.1)"
+        canvas.selectionGuiCTX.fillRect(
+          canvas.xOffset,
+          canvas.yOffset,
+          canvas.offScreenCVS.width,
+          canvas.offScreenCVS.height
+        )
+        //construct vector paths
+        const xOffset = canvas.currentLayer.x + canvas.xOffset
+        const yOffset = canvas.currentLayer.y + canvas.yOffset
+        canvas.selectionGuiCTX.beginPath()
+        //Need to chain paths?
+        for (let vectorIndex of state.selectedVectorIndicesSet) {
+          const vector = state.vectors[vectorIndex]
+          if (vector.hidden || vector.removed) continue
+          //switch based on vector type
+          switch (vector.vectorProperties.type) {
+            case "fill": {
+              //need idea to render selection of fill vector
+              const { px1, py1 } = vector.vectorProperties
+              canvas.selectionGuiCTX.moveTo(
+                xOffset + px1 + 0.5,
+                yOffset + py1 + 0.5
+              )
+              canvas.selectionGuiCTX.lineTo(
+                xOffset + px1 + 0.5,
+                yOffset + py1 + 0.5
+              )
+              break
+            }
+            case "line": {
+              const { px1, py1, px2, py2 } = vector.vectorProperties
+              canvas.selectionGuiCTX.moveTo(
+                xOffset + px1 + 0.5,
+                yOffset + py1 + 0.5
+              )
+              canvas.selectionGuiCTX.lineTo(
+                xOffset + px2 + 0.5,
+                yOffset + py2 + 0.5
+              )
+              break
+            }
+            case "quadCurve": {
+              const { px1, py1, px2, py2, px3, py3 } = vector.vectorProperties
+              canvas.selectionGuiCTX.moveTo(
+                xOffset + px1 + 0.5,
+                yOffset + py1 + 0.5
+              )
+              canvas.selectionGuiCTX.quadraticCurveTo(
+                xOffset + px3 + 0.5,
+                yOffset + py3 + 0.5,
+                xOffset + px2 + 0.5,
+                yOffset + py2 + 0.5
+              )
+              break
+            }
+            case "cubicCurve": {
+              const { px1, py1, px2, py2, px3, py3, px4, py4 } =
+                vector.vectorProperties
+              canvas.selectionGuiCTX.moveTo(
+                xOffset + px1 + 0.5,
+                yOffset + py1 + 0.5
+              )
+              canvas.selectionGuiCTX.bezierCurveTo(
+                xOffset + px3 + 0.5,
+                yOffset + py3 + 0.5,
+                xOffset + px4 + 0.5,
+                yOffset + py4 + 0.5,
+                xOffset + px2 + 0.5,
+                yOffset + py2 + 0.5
+              )
+              break
+            }
+            case "ellipse": {
+              const {
+                px1,
+                py1,
+                // px2,
+                // py2,
+                px3,
+                // py3,
+                radA,
+                radB,
+                angle,
+                x1Offset,
+                y1Offset,
+              } = vector.vectorProperties
+              //Don't let radii be negative with offset
+              let majorAxis = radA + x1Offset / 2 > 0 ? radA + x1Offset / 2 : 0
+              let minorAxis = radB + y1Offset / 2 > 0 ? radB + y1Offset / 2 : 0
+
+              if (!Number.isInteger(px3)) {
+                minorAxis = majorAxis
+              }
+              // Calculate ellipse center
+              let centerX = xOffset + px1 + 0.5 + x1Offset / 2
+              let centerY = yOffset + py1 + 0.5 + y1Offset / 2
+
+              // Calculate the angle t (e.g., t = 0 for the point on the right side of the ellipse)
+              let t = 0 // Starting angle on the ellipse (can be adjusted if needed)
+
+              // Calculate a point on the ellipse using the parametric equation of the ellipse
+              let pointX =
+                centerX +
+                majorAxis * Math.cos(t) * Math.cos(angle) -
+                minorAxis * Math.sin(t) * Math.sin(angle)
+              let pointY =
+                centerY +
+                majorAxis * Math.cos(t) * Math.sin(angle) +
+                minorAxis * Math.sin(t) * Math.cos(angle)
+
+              // Move to point on ellipse to start drawing
+              canvas.selectionGuiCTX.moveTo(pointX, pointY)
+
+              // Drawing the ellipse
+              canvas.selectionGuiCTX.ellipse(
+                centerX,
+                centerY,
+                majorAxis,
+                minorAxis,
+                angle,
+                0,
+                2 * Math.PI
+              )
+              break
+            }
+            default:
+            //do nothing
+          }
+        }
+        // stroke vector paths with thick squared off dashed line then stroke vector paths with slightly thinner eraser (use some built-in html canvas composite mode) to clear greyed out area for vectors
+        let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+        //Draw outline border by drawing different thicknesses of lines
+        canvas.selectionGuiCTX.lineWidth = lineWidth * 19
+        canvas.selectionGuiCTX.lineCap = "round"
+        canvas.selectionGuiCTX.strokeStyle = "white"
+        canvas.selectionGuiCTX.stroke()
+        //Make border a dotted line
+        canvas.selectionGuiCTX.lineDashOffset = lineDashOffset * 2
+        canvas.selectionGuiCTX.setLineDash([lineWidth * 12, lineWidth * 12])
+        canvas.selectionGuiCTX.lineWidth = lineWidth * 20
+        canvas.selectionGuiCTX.lineCap = "butt"
+        canvas.selectionGuiCTX.strokeStyle = "black"
+        canvas.selectionGuiCTX.stroke()
+        canvas.selectionGuiCTX.setLineDash([])
+        //clear greyed out area for vectors
+        canvas.selectionGuiCTX.lineWidth = lineWidth * 17
+        canvas.selectionGuiCTX.lineCap = "round"
+        canvas.selectionGuiCTX.strokeStyle = "black"
+        canvas.selectionGuiCTX.stroke()
+        canvas.selectionGuiCTX.restore()
+      }
+      //render transform box control points
+      // renderSelectionBoxOutline(lineDashOffset, true)
     }
-    //define rectangle for selection area
-    canvas.rasterGuiCTX.rect(
-      canvas.xOffset + state.boundaryBox.xMin,
-      canvas.yOffset + state.boundaryBox.yMin,
-      state.boundaryBox.xMax - state.boundaryBox.xMin,
-      state.boundaryBox.yMax - state.boundaryBox.yMin
-    )
-    canvas.rasterGuiCTX.clip("evenodd")
-    canvas.rasterGuiCTX.globalAlpha = 0.5
-    canvas.rasterGuiCTX.fillStyle = "rgba(255, 255, 255, 0.1)"
-    canvas.rasterGuiCTX.fillRect(
-      canvas.xOffset,
-      canvas.yOffset,
-      canvas.offScreenCVS.width,
-      canvas.offScreenCVS.height
-    )
-    canvas.rasterGuiCTX.restore()
-    // }
-    renderSelectVector(lineDashOffset, state.tool.name === "select")
-    //TODO: (Middle Priority) Animating the selection currently not possible because animation is interrupted by renderCanvas() call taking up the main thread
-    //All rendering would need to be part of the animation loop or on a separate thread. Maybe the marching ants could be done with css instead of on the canvas?
+    //TODO: (Medium Priority) Animating the selection currently not possible because animation is interrupted by renderCanvas() call taking up the main thread
+    // All rendering would need to be part of the animation loop or on a separate thread. Maybe the marching ants could be done with css instead of on the canvas?
     // window.requestAnimationFrame(() => {
-    //   renderRasterCVS(lineDashOffset < 4 ? lineDashOffset + 0.1 : 0)
+    //   renderSelectionCVS(lineDashOffset < 6 ? lineDashOffset + 0.1 : 0)
     // })
   }
 }
@@ -59,34 +233,34 @@ export function renderRasterCVS(lineDashOffset = 0.5) {
 /**
  * Render selection outline and control points
  * @param {number} lineDashOffset - (Float)
- * @param {boolean} drawPoints
+ * @param {boolean} drawPoints - if true, draw control points
  */
-export function renderSelectVector(lineDashOffset, drawPoints) {
+export function renderSelectionBoxOutline(lineDashOffset, drawPoints) {
   // Setting of context attributes.
-  let lineWidth = canvas.zoom <= 4 ? 1 / canvas.zoom : 0.25
-  canvas.rasterGuiCTX.save()
-  canvas.rasterGuiCTX.lineWidth = lineWidth * 2
-  canvas.rasterGuiCTX.strokeStyle = "white"
-  canvas.rasterGuiCTX.fillStyle = "white"
-  canvas.rasterGuiCTX.lineCap = "round"
-  canvas.rasterGuiCTX.lineDashOffset = lineDashOffset
+  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+  canvas.selectionGuiCTX.save()
+  canvas.selectionGuiCTX.lineWidth = lineWidth * 2
+  canvas.selectionGuiCTX.strokeStyle = "white"
+  canvas.selectionGuiCTX.fillStyle = "white"
+  canvas.selectionGuiCTX.lineCap = "round"
+  canvas.selectionGuiCTX.lineDashOffset = lineDashOffset
 
   if (state.boundaryBox.xMax !== null) {
-    if (!canvas.pastedLayer) {
+    if (!canvas.pastedLayer && canvas.currentLayer.type !== "reference") {
       //if active unconfirmed paste action, don't draw the dashed selection outline
-      canvas.rasterGuiCTX.setLineDash([lineWidth * 6, lineWidth * 6])
+      canvas.selectionGuiCTX.setLineDash([lineWidth * 6, lineWidth * 6])
     }
-    canvas.rasterGuiCTX.beginPath()
-    canvas.rasterGuiCTX.rect(
+    canvas.selectionGuiCTX.beginPath()
+    canvas.selectionGuiCTX.rect(
       canvas.xOffset + state.boundaryBox.xMin,
       canvas.yOffset + state.boundaryBox.yMin,
       state.boundaryBox.xMax - state.boundaryBox.xMin,
       state.boundaryBox.yMax - state.boundaryBox.yMin
     )
     // Stroke non-filled lines
-    canvas.rasterGuiCTX.stroke()
+    canvas.selectionGuiCTX.stroke()
     //restore line dash
-    canvas.rasterGuiCTX.setLineDash([])
+    canvas.selectionGuiCTX.setLineDash([])
   }
 
   if (drawPoints) {
@@ -102,7 +276,7 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
       { x: "px8", y: "py8" },
     ]
 
-    canvas.rasterGuiCTX.beginPath()
+    canvas.selectionGuiCTX.beginPath()
     drawSelectControlPoints(
       state.boundaryBox,
       pointsKeys,
@@ -111,14 +285,14 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
       0.5
     )
     // Fill points
-    canvas.rasterGuiCTX.fill()
+    canvas.selectionGuiCTX.fill()
   }
 
-  canvas.rasterGuiCTX.restore()
+  canvas.selectionGuiCTX.restore()
 }
 
 // /**
-//  * TODO: (Middle Priority) May be used for freeform selections in the future
+//  * TODO: (Medium Priority) May be used for freeform selections in the future
 //  * @param {number} lineDashOffset - (Float)
 //  */
 // export function drawSelectOutline(lineDashOffset) {
@@ -202,14 +376,14 @@ export function renderSelectVector(lineDashOffset, drawPoints) {
 // }
 
 /**
- * @param {object} boundaryBox
- * @param {Array} pointsKeys
+ * @param {object} boundaryBox - The boundary box of the selection
+ * @param {Array} pointsKeys - The keys of the control points
  * @param {number} radius - (Float)
- * @param {boolean} modify
+ * @param {boolean} modify - if true, check for collision with cursor and modify radius
  * @param {number} offset - (Integer)
- * @param {object} vectorAction
+ * @param {object} vectorAction - The vector action to be rendered (NOTE: Not certain if ever needed for this function)
  */
-function drawSelectControlPoints(
+export function drawSelectControlPoints(
   boundaryBox,
   pointsKeys,
   radius,
@@ -259,12 +433,12 @@ function drawSelectControlPoints(
 
 /**
  * TODO: (Low Priority) move drawing logic to separate function so modify param doesn't need to be used
- * @param {object} keys
- * @param {object} point
+ * @param {object} keys - The keys of the control point
+ * @param {object} point - The control point
  * @param {number} radius - (Float)
  * @param {boolean} modify - if true, check for collision with cursor and modify radius
  * @param {number} offset - (Float)
- * @param {object} vectorAction
+ * @param {object} vectorAction - The vector action to be rendered (NOTE: Not certain if ever needed for this function)
  */
 function handleSelectCollisionAndDraw(
   keys,
@@ -280,7 +454,7 @@ function handleSelectCollisionAndDraw(
 
   if (modify) {
     const collisionPresent =
-      checkPointCollision(
+      checkSquarePointCollision(
         state.cursorX,
         state.cursorY,
         point.x - offset + xOffset,
@@ -314,7 +488,6 @@ function handleSelectCollisionAndDraw(
       vectorGui.setCollision(keys)
     }
   }
-
   //draw squares for control points 1, 3, 5, and 7 (corners)
   if (
     keys.x === "px1" ||
@@ -322,7 +495,7 @@ function handleSelectCollisionAndDraw(
     keys.x === "px5" ||
     keys.x === "px7"
   ) {
-    canvas.rasterGuiCTX.rect(
+    canvas.selectionGuiCTX.rect(
       canvas.xOffset + xOffset + point.x - offset + 0.5 - r,
       canvas.yOffset + yOffset + point.y - offset + 0.5 - r,
       r * 2,
@@ -337,19 +510,19 @@ function handleSelectCollisionAndDraw(
     keys.x === "px8"
   ) {
     r *= Math.sqrt(2)
-    canvas.rasterGuiCTX.moveTo(
+    canvas.selectionGuiCTX.moveTo(
       canvas.xOffset + xOffset + point.x - offset + 0.5 - r,
       canvas.yOffset + yOffset + point.y - offset + 0.5
     )
-    canvas.rasterGuiCTX.lineTo(
+    canvas.selectionGuiCTX.lineTo(
       canvas.xOffset + xOffset + point.x - offset + 0.5,
       canvas.yOffset + yOffset + point.y - offset + 0.5 - r
     )
-    canvas.rasterGuiCTX.lineTo(
+    canvas.selectionGuiCTX.lineTo(
       canvas.xOffset + xOffset + point.x - offset + 0.5 + r,
       canvas.yOffset + yOffset + point.y - offset + 0.5
     )
-    canvas.rasterGuiCTX.lineTo(
+    canvas.selectionGuiCTX.lineTo(
       canvas.xOffset + xOffset + point.x - offset + 0.5,
       canvas.yOffset + yOffset + point.y - offset + 0.5 + r
     )
@@ -358,7 +531,6 @@ function handleSelectCollisionAndDraw(
 
 /**
  * Set css cursor for selection interaction
- * @returns
  */
 function setSelectionCursorStyle() {
   if (!vectorGui.selectedCollisionPresent) {
@@ -367,7 +539,7 @@ function setSelectionCursorStyle() {
   }
 
   //Handle cursor for collisions
-  const xKey = vectorGui.collidedKeys.xKey
+  const xKey = vectorGui.collidedPoint.xKey
   if (["px1", "px5"].includes(xKey)) {
     canvas.vectorGuiCVS.style.cursor = "nwse-resize"
   } else if (["px3", "px7"].includes(xKey)) {

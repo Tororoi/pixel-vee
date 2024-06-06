@@ -3,9 +3,10 @@
 //===================================//
 
 /**
- * @param {number} red - red value (0-255) (Integer)
- * @param {number} green - green value (0-255) (Integer)
- * @param {number} blue - blue value (0-255) (Integer)
+ * @param {object} rgb - object with rgb values
+ * @param {number} rgb.red - red value (0-255) (Integer)
+ * @param {number} rgb.green - green value (0-255) (Integer)
+ * @param {number} rgb.blue - blue value (0-255) (Integer)
  * @returns {object} - {hue, saturation, lightness
  */
 export const RGBToHSL = ({ red, green, blue }) => {
@@ -51,9 +52,10 @@ export const RGBToHSL = ({ red, green, blue }) => {
 }
 
 /**
- * @param {number} hue - hue value (0-359) (Integer)
- * @param {number} saturation - saturation value (0-100) (Integer)
- * @param {number} lightness - lightness value (0-100) (Integer)
+ * @param {object} hsl - object with hsl values
+ * @param {number} hsl.hue - hue value (0-359) (Integer)
+ * @param {number} hsl.saturation - saturation value (0-100) (Integer)
+ * @param {number} hsl.lightness - lightness value (0-100) (Integer)
  * @returns {object} - {red, green, blue}
  */
 export const HSLToRGB = ({ hue, saturation, lightness }) => {
@@ -103,8 +105,8 @@ export const HSLToRGB = ({ hue, saturation, lightness }) => {
 }
 
 /**
- * @param {string} hexcode
- * @returns object with rgb values
+ * @param {string} hexcode - hexcode value
+ * @returns {object} - {red, green, blue}
  */
 export const hexToRGB = (hexcode) => {
   // Convert hex to RGB
@@ -127,9 +129,10 @@ export const hexToRGB = (hexcode) => {
 }
 
 /**
- * @param {number} red - red value (0-255) (Integer)
- * @param {number} green - green value (0-255) (Integer)
- * @param {number} blue - blue value (0-255) (Integer)
+ * @param {object} rgb - object with rgb values
+ * @param {number} rgb.red - red value (0-255) (Integer)
+ * @param {number} rgb.green - green value (0-255) (Integer)
+ * @param {number} rgb.blue - blue value (0-255) (Integer)
  * @returns {string} hexcode
  */
 export const RGBToHex = ({ red, green, blue }) => {
@@ -145,9 +148,10 @@ export const RGBToHex = ({ red, green, blue }) => {
 }
 
 /**
- * @param {number} red - red value (0-255) (Integer)
- * @param {number} green - green value (0-255) (Integer)
- * @param {number} blue - blue value (0-255) (Integer)
+ * @param {object} rgb - object with rgb values
+ * @param {number} rgb.red - red value (0-255) (Integer)
+ * @param {number} rgb.green - green value (0-255) (Integer)
+ * @param {number} rgb.blue - blue value (0-255) (Integer)
  * @returns {number} luminance (Float)
  */
 export const getLuminance = ({ red, green, blue }) => {

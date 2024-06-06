@@ -110,14 +110,6 @@
               </li>
               <li
                 role="menuitem"
-                id="invert-selection"
-                class="disabled"
-                data-tooltip="Invert selection area (Cmd + I)"
-              >
-                Invert Selection (Cmd + I)
-              </li>
-              <li
-                role="menuitem"
                 id="cut-selection"
                 class="disabled"
                 data-tooltip="Cut selection (Cmd + X)"
@@ -140,53 +132,44 @@
               >
                 Paste (Cmd + V)
               </li>
-              <!-- <li
+              <li
+                role="menuitem"
+                id="delete-selection"
+                class="disabled"
+                data-tooltip="Delete selection (Backspace)"
+              >
+                Clear (Backspace)
+              </li>
+              <li
                 role="menuitem"
                 id="flip-horizontal"
-                data-tooltip="Flip selection horizontally"
+                class="disabled"
+                data-tooltip="Flip selection horizontally (Cmd + F)"
               >
-                Flip Horizontal
+                Flip Horizontal (Cmd + F)
               </li>
               <li
                 role="menuitem"
                 id="flip-vertical"
-                data-tooltip="Flip selection vertically"
+                class="disabled"
+                data-tooltip="Flip selection vertically (Cmd + Shift + F)"
               >
-                Flip Vertical
-              </li> -->
-              <!-- <li
+                Flip Vertical (Cmd + Shift + F)
+              </li>
+              <li
                 role="menuitem"
                 id="rotate-right"
-                data-tooltip="Rotate selection 90 degrees clockwise"
+                class="disabled"
+                data-tooltip="Rotate selection 90 degrees clockwise (Cmd + R)"
               >
-                Rotate Right
-              </li> -->
+                Rotate Right (Cmd + R)
+              </li>
             </ul>
           </li>
         </ul>
       </div>
       <div class="nav-items">
         <div class="tool-options"></div>
-        <!-- <label
-          for="grid-toggle"
-          id="grid"
-          class="toggle"
-          data-tooltip="Toggle grid on or off. Displays at higher zoom levels only."
-        >
-          <input type="checkbox" id="grid-toggle" />
-          <span class="checkmark"></span>
-          <span>Grid</span>
-        </label>
-        <label
-          for="tooltips-toggle"
-          id="tooltips"
-          class="toggle"
-          data-tooltip="Toggle tooltips on or off"
-        >
-          <input type="checkbox" checked="true" id="tooltips-toggle" />
-          <span class="checkmark"></span>
-          <span>Tooltips</span>
-        </label> -->
         <div class="settings">
           <button
             type="button"
@@ -211,7 +194,7 @@
           <!-- <div class="non-canvas-gui marching-ants bnw marching"></div> -->
           <canvas
             class="onscreen-canvas"
-            id="raster-gui-canvas"
+            id="selection-gui-canvas"
             width="512px"
             height="512px"
           ></canvas>
@@ -321,7 +304,7 @@
           >
             <div id="palette-header" class="header dragger">
               <div class="drag-btn"><div class="grip"></div></div>
-              Palette
+              <div>Palette</div>
               <label
                 for="palette-collapse-btn"
                 id="palette-collapser"
@@ -712,6 +695,17 @@
                     </span>
                   </label>
                 </div>
+                <!-- Vector Selection Outline -->
+                <label
+                  for="vector-outline-toggle"
+                  id="vector-outline"
+                  class="toggle"
+                  data-tooltip="Toggle vector selection outline"
+                >
+                  <input type="checkbox" id="vector-outline-toggle" />
+                  <span class="checkmark"></span>
+                  <span>Vector Selection Outline</span>
+                </label>
               </div>
             </div>
             <!-- <hr /> -->
@@ -1080,6 +1074,68 @@
               </button>
             </div>
           </form>
+        </div>
+      </div>
+      <div
+        class="vector-transform-ui-container dialog-box draggable v-drag h-drag free"
+      >
+        <div id="vector-transform-ui-header" class="header dragger">
+          <div class="drag-btn"><div class="grip"></div></div>
+          <span>Transform</span>
+          <button
+            type="button"
+            id="vector-transform-ui-closer"
+            class="close-btn"
+            data-tooltip="Close"
+          >
+            <span class="close"></span>
+          </button>
+        </div>
+        <div class="collapsible">
+          <div
+            id="vector-transform-ui-interface"
+            class="vector-transform-ui-interface"
+          >
+            <div class="vector-transform-modes">
+              <button
+                type="button"
+                class="transform-mode tool move custom-shape selected"
+                id="translate"
+                aria-label="Translate"
+                data-tooltip="Translate"
+              ></button>
+              <button
+                type="button"
+                class="transform-mode tool rotate custom-shape"
+                id="rotate"
+                aria-label="Rotate"
+                data-tooltip="Rotate"
+              ></button>
+              <button
+                type="button"
+                class="transform-mode tool scale custom-shape"
+                id="scale"
+                aria-label="Scale"
+                data-tooltip="Scale"
+              ></button>
+            </div>
+            <!-- <div class="transform-options">
+              <button
+                type="button"
+                id="recenter-rotation"
+                class="tool recenter custom-shape"
+                aria-label="Recenter Rotation Point"
+                data-tooltip="Recenter Rotation Point"
+              ></button>
+              <button
+                type="button"
+                id="maintain-aspect-ratio"
+                class="tool lock custom-shape"
+                aria-label="Maintain Aspect Ratio"
+                data-tooltip="Maintain Aspect Ratio"
+              ></button>
+            </div> -->
+          </div>
         </div>
       </div>
       <div class="export-container dialog-box draggable v-drag h-drag free">

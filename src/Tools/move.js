@@ -1,9 +1,11 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { renderCanvas } from "../Canvas/render.js"
-import { translateAndWrap, translateWithoutWrap } from "../utils/moveHelpers.js"
 import { vectorGui } from "../GUI/vector.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
+import { transformRasterContent } from "../utils/transformHelpers.js"
+import { addTransformToTimeline } from "../Actions/nonPointerActions.js"
+import { transformBoundaries } from "./transform.js"
 
 /**
  * Move the contents of a layer relative to other layers
@@ -14,17 +16,18 @@ function moveSteps() {
   //move raster layer or reference layer
   switch (canvas.pointerEvent) {
     case "pointerdown":
+      //TODO: (Low Priority) Make distinction for user that for general move, it's moving the layer, but for a selection, it's moving the selection area with the contents (only works for active paste)
       state.grabStartX = canvas.currentLayer.x
       state.grabStartY = canvas.currentLayer.y
       state.startScale = canvas.currentLayer.scale
       vectorGui.render()
       if (vectorGui.selectedCollisionPresent) {
-        scaleSteps()
+        transformSteps()
       }
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey) {
-        scaleSteps()
+        transformSteps()
       } else {
         //Move layer
         canvas.currentLayer.x += state.cursorX - state.previousX
@@ -42,28 +45,28 @@ function moveSteps() {
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey) {
-        scaleSteps()
+        transformSteps()
+      } else {
+        renderCanvas(canvas.currentLayer, true)
+        //save start and end coordinates
+        addToTimeline({
+          tool: state.tool.name,
+          layer: canvas.currentLayer,
+          //selectProperties: { ...state.selectProperties },
+          properties: {
+            from: {
+              x: state.grabStartX,
+              y: state.grabStartY,
+              scale: state.startScale,
+            },
+            to: {
+              x: canvas.currentLayer.x,
+              y: canvas.currentLayer.y,
+              scale: canvas.currentLayer.scale,
+            },
+          },
+        })
       }
-      renderCanvas(canvas.currentLayer, true)
-      //save start and end coordinates
-      addToTimeline({
-        tool: state.tool,
-        layer: canvas.currentLayer,
-        //selectProperties: { ...state.selectProperties },
-        //selectionInversed: state.selectionInversed,
-        properties: {
-          from: {
-            x: state.grabStartX,
-            y: state.grabStartY,
-            scale: state.startScale,
-          },
-          to: {
-            x: canvas.currentLayer.x,
-            y: canvas.currentLayer.y,
-            scale: canvas.currentLayer.scale,
-          },
-        },
-      })
       break
     default:
     //do nothing
@@ -73,7 +76,7 @@ function moveSteps() {
 /**
  * Scale selection. Currently only for resizing reference images
  */
-function scaleSteps() {
+function transformSteps() {
   // move contents of selection around canvas
   // default selection is entire canvas contents
   //move raster layer or reference layer
@@ -81,79 +84,234 @@ function scaleSteps() {
     case "pointerdown":
       if (vectorGui.selectedCollisionPresent) {
         vectorGui.selectedPoint = {
-          xKey: vectorGui.collidedKeys.xKey,
-          yKey: vectorGui.collidedKeys.yKey,
+          xKey: vectorGui.collidedPoint.xKey,
+          yKey: vectorGui.collidedPoint.yKey,
+        }
+        if (canvas.currentLayer.type === "raster") {
+          state.previousBoundaryBox = { ...state.boundaryBox }
         }
       }
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey) {
         if (canvas.currentLayer.type === "reference") {
-          if (vectorGui.selectedPoint.xKey === "px1") {
-            //top left corner
-            let newWidth =
-              canvas.currentLayer.x +
-              canvas.currentLayer.img.width * canvas.currentLayer.scale -
-              state.cursorX
-            let scaleFactor = newWidth / canvas.currentLayer.img.width
-            let changeInHeight =
-              canvas.currentLayer.img.height * canvas.currentLayer.scale -
-              canvas.currentLayer.img.height * scaleFactor
-
-            canvas.currentLayer.scale = scaleFactor
-
-            canvas.currentLayer.x = state.cursorX
-            canvas.currentLayer.y += changeInHeight
-          } else if (vectorGui.selectedPoint.xKey === "px2") {
-            //top right corner
-            let newWidth = state.cursorX - canvas.currentLayer.x
-            let scaleFactor = newWidth / canvas.currentLayer.img.width
-            let changeInHeight =
-              canvas.currentLayer.img.height * canvas.currentLayer.scale -
-              canvas.currentLayer.img.height * scaleFactor
-
-            canvas.currentLayer.scale = scaleFactor
-
-            canvas.currentLayer.y += changeInHeight
-          } else if (vectorGui.selectedPoint.xKey === "px3") {
-            //bottom left corner
-            let width =
-              canvas.currentLayer.x +
-              canvas.currentLayer.img.width * canvas.currentLayer.scale -
-              state.cursorX
-            let height = state.cursorY - canvas.currentLayer.y
-
-            canvas.currentLayer.scale =
-              canvas.offScreenCVS.width / canvas.currentLayer.img.width >
-              canvas.offScreenCVS.height / canvas.currentLayer.img.height
-                ? height / canvas.currentLayer.img.height
-                : width / canvas.currentLayer.img.width
-
-            canvas.currentLayer.x = state.cursorX
-          } else if (vectorGui.selectedPoint.xKey === "px4") {
-            //lower right corner, don't change canvas.currentLayer.x or canvas.currentLayer.y
-            let width = state.cursorX - canvas.currentLayer.x
-            let height = state.cursorY - canvas.currentLayer.y
-            canvas.currentLayer.scale =
-              canvas.offScreenCVS.width / canvas.currentLayer.img.width >
-              canvas.offScreenCVS.height / canvas.currentLayer.img.height
-                ? height / canvas.currentLayer.img.height
-                : width / canvas.currentLayer.img.width
+          scaleReference()
+        } else if (
+          canvas.currentLayer.type === "raster" &&
+          canvas.currentLayer.isPreview
+        ) {
+          transformBoundaries()
+          let isMirroredHorizontally = state.isMirroredHorizontally
+          let isMirroredVertically = state.isMirroredVertically
+          if (vectorGui.selectedPoint.xKey !== "px9") {
+            //Don't check for mirroring when moving whole selection
+            if (
+              state.boundaryBox.xMax === state.previousBoundaryBox.xMin ||
+              state.boundaryBox.xMin === state.previousBoundaryBox.xMax
+            ) {
+              isMirroredHorizontally = !state.isMirroredHorizontally
+            }
+            if (
+              state.boundaryBox.yMax === state.previousBoundaryBox.yMin ||
+              state.boundaryBox.yMin === state.previousBoundaryBox.yMax
+            ) {
+              isMirroredVertically = !state.isMirroredVertically
+            }
           }
-        } else if (canvas.currentLayer.type === "raster") {
-          //do nothing yet
+          transformRasterContent(
+            canvas.currentLayer,
+            state.pastedImages[state.currentPastedImageKey].imageData,
+            state.boundaryBox,
+            state.transformationRotationDegrees % 360,
+            isMirroredHorizontally,
+            isMirroredVertically
+          )
         }
-        renderCanvas(canvas.currentLayer, true)
+        renderCanvas(canvas.currentLayer)
       }
       break
     case "pointerup":
       if (vectorGui.selectedPoint.xKey) {
+        if (canvas.currentLayer.type === "reference") {
+          addToTimeline({
+            tool: state.tool.name,
+            layer: canvas.currentLayer,
+            //selectProperties: { ...state.selectProperties },
+            properties: {
+              from: {
+                x: state.grabStartX,
+                y: state.grabStartY,
+                scale: state.startScale,
+              },
+              to: {
+                x: canvas.currentLayer.x,
+                y: canvas.currentLayer.y,
+                scale: canvas.currentLayer.scale,
+              },
+            },
+          })
+        } else if (
+          canvas.currentLayer.type === "raster" &&
+          canvas.currentLayer.isPreview
+        ) {
+          if (
+            state.boundaryBox.xMax === state.previousBoundaryBox.xMin ||
+            state.boundaryBox.xMin === state.previousBoundaryBox.xMax
+          ) {
+            state.isMirroredHorizontally = !state.isMirroredHorizontally
+          }
+          if (
+            state.boundaryBox.yMax === state.previousBoundaryBox.yMin ||
+            state.boundaryBox.yMin === state.previousBoundaryBox.yMax
+          ) {
+            state.isMirroredVertically = !state.isMirroredVertically
+          }
+          state.normalizeSelectProperties()
+          state.setBoundaryBox(state.selectProperties)
+          addTransformToTimeline()
+        }
+        renderCanvas(canvas.currentLayer) //TODO: (Low Priority) QA to figure out need to redraw timeline?
         vectorGui.selectedPoint = {
           xKey: null,
           yKey: null,
         }
       }
       break
+    default:
+    //do nothing
+  }
+}
+
+/**
+ *
+ */
+function scaleReference() {
+  switch (vectorGui.selectedPoint.xKey) {
+    case "px1": {
+      //top left corner
+      let newWidth =
+        state.grabStartX +
+        canvas.currentLayer.img.width * state.startScale -
+        state.cursorX
+      let scaleFactor = newWidth / canvas.currentLayer.img.width
+      //round change in height to snap to grid, but more useful and smooth if not snapped to grid
+      let changeInHeight =
+        canvas.currentLayer.img.height * state.startScale -
+        canvas.currentLayer.img.height * scaleFactor
+
+      canvas.currentLayer.scale = scaleFactor
+
+      canvas.currentLayer.x = state.cursorX
+      canvas.currentLayer.y = state.grabStartY + changeInHeight
+      break
+    }
+    case "px2": {
+      //top middle, expand or contract width
+      let newHeight =
+        state.grabStartY +
+        canvas.currentLayer.img.height * state.startScale -
+        state.cursorY
+      let scaleFactor = newHeight / canvas.currentLayer.img.height
+      let changeInWidth =
+        canvas.currentLayer.img.width * state.startScale -
+        canvas.currentLayer.img.width * scaleFactor
+
+      canvas.currentLayer.scale = scaleFactor
+
+      canvas.currentLayer.x = state.grabStartX + changeInWidth / 2
+      canvas.currentLayer.y = state.cursorY
+      break
+    }
+    case "px3": {
+      //top right corner
+      let newWidth = state.cursorX - state.grabStartX
+      let scaleFactor = newWidth / canvas.currentLayer.img.width
+      let changeInHeight =
+        canvas.currentLayer.img.height * state.startScale -
+        canvas.currentLayer.img.height * scaleFactor
+
+      canvas.currentLayer.scale = scaleFactor
+
+      canvas.currentLayer.y = state.grabStartY + changeInHeight
+      break
+    }
+    case "px4": {
+      //middle right, expand or contract height
+      let newWidth = state.cursorX - state.grabStartX
+      let scaleFactor = newWidth / canvas.currentLayer.img.width
+      let changeInHeight =
+        canvas.currentLayer.img.height * state.startScale -
+        canvas.currentLayer.img.height * scaleFactor
+
+      canvas.currentLayer.scale = scaleFactor
+
+      canvas.currentLayer.y = state.grabStartY + changeInHeight / 2
+      break
+    }
+    case "px5": {
+      //lower right corner
+      let newWidth = state.cursorX - state.grabStartX
+      let newHeight = state.cursorY - state.grabStartY
+      canvas.currentLayer.scale =
+        canvas.offScreenCVS.width / canvas.currentLayer.img.width >
+        canvas.offScreenCVS.height / canvas.currentLayer.img.height
+          ? newHeight / canvas.currentLayer.img.height
+          : newWidth / canvas.currentLayer.img.width
+      break
+    }
+    case "px6": {
+      //lower middle, expand or contract width
+      let newHeight = state.cursorY - state.grabStartY
+      let scaleFactor = newHeight / canvas.currentLayer.img.height
+      let changeInWidth =
+        canvas.currentLayer.img.width * state.startScale -
+        canvas.currentLayer.img.width * scaleFactor
+
+      canvas.currentLayer.scale = scaleFactor
+
+      canvas.currentLayer.x = state.grabStartX + changeInWidth / 2
+      break
+    }
+    case "px7": {
+      //bottom left corner
+      let newWidth =
+        state.grabStartX +
+        canvas.currentLayer.img.width * state.startScale -
+        state.cursorX
+      let newHeight = state.cursorY - state.grabStartY
+
+      canvas.currentLayer.scale =
+        canvas.offScreenCVS.width / canvas.currentLayer.img.width >
+        canvas.offScreenCVS.height / canvas.currentLayer.img.height
+          ? newHeight / canvas.currentLayer.img.height
+          : newWidth / canvas.currentLayer.img.width
+
+      canvas.currentLayer.x = state.cursorX
+      break
+    }
+    case "px8": {
+      //middle left, expand or contract height
+      let newWidth =
+        state.grabStartX +
+        canvas.currentLayer.img.width * state.startScale -
+        state.cursorX
+      let scaleFactor = newWidth / canvas.currentLayer.img.width
+      let changeInHeight =
+        canvas.currentLayer.img.height * state.startScale -
+        canvas.currentLayer.img.height * scaleFactor
+
+      canvas.currentLayer.scale = scaleFactor
+
+      canvas.currentLayer.x = state.cursorX
+      canvas.currentLayer.y = state.grabStartY + changeInHeight / 2
+      break
+    }
+    case "px9": {
+      //Move layer
+      canvas.currentLayer.x += state.cursorX - state.previousX
+      canvas.currentLayer.y += state.cursorY - state.previousY
+      break
+    }
     default:
     //do nothing
   }

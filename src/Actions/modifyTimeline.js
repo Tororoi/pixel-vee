@@ -12,10 +12,10 @@ import { addToTimeline } from "./undoRedo.js"
 /**
  * Modify action in the timeline
  * Only good for vector parameters
- * @param {object} moddedAction
+ * @param {object} moddedVector - The vector action that was modified
  */
-export function modifyVectorAction(moddedAction) {
-  //loop through the object state.vectorsSavedProperties and for each key which represents an action index and value which is a shallow object with various properties, create an object with properties moddedActionIndex, from (the saved properties), and to (the new properties found on state.undoStack[vectorIndex].properties.vectorProperties)
+export function modifyVectorAction(moddedVector) {
+  //loop through the object state.vectorsSavedProperties and create an array of objects with the required properties
   let processedActions = []
 
   for (let vectorIndex in state.vectorsSavedProperties) {
@@ -23,14 +23,16 @@ export function modifyVectorAction(moddedAction) {
     let fromProperties = { ...state.vectorsSavedProperties[vectorIndex] }
 
     // Extract the new properties
+    let vector = state.vectors[vectorIndex]
     let toProperties = {
-      ...state.undoStack[vectorIndex].properties.vectorProperties,
+      ...vector.vectorProperties,
     }
 
     // Create the new object with the required properties
     // Add the new object to the processedActions array
     processedActions.push({
-      moddedActionIndex: vectorIndex,
+      moddedActionIndex: vector.action.index,
+      moddedVectorIndex: vectorIndex,
       from: fromProperties,
       to: toProperties,
     })
@@ -39,10 +41,11 @@ export function modifyVectorAction(moddedAction) {
   state.activeIndexes = []
   state.savedBetweenActionImages = []
   addToTimeline({
-    tool: tools.modify,
-    layer: moddedAction.layer,
+    tool: tools.modify.name,
+    layer: moddedVector.layer,
     properties: {
-      moddedActionIndex: moddedAction.index,
+      moddedActionIndex: moddedVector.action.index,
+      moddedVectorIndex: moddedVector.index,
       processedActions,
     },
   })
@@ -51,22 +54,23 @@ export function modifyVectorAction(moddedAction) {
 /**
  * Modify action in the timeline
  * Only good for vector parameters
- * @param {object} moddedAction
- * @param {object} oldColor
+ * @param {object} moddedVector - The vector to be modified
+ * @param {object} oldColor - The color before the modification
  */
-export function changeActionColor(moddedAction, oldColor) {
+export function changeActionVectorColor(moddedVector, oldColor) {
   let previousColor = {
     ...oldColor,
   } //shallow copy, color must not contain any objects or references as values
   let modifiedColor = {
-    ...moddedAction.color,
+    ...moddedVector.color,
   } //shallow copy, must make deep copy, at least for x, y and properties
   addToTimeline({
-    tool: tools.changeColor,
-    layer: moddedAction.layer,
+    tool: tools.changeColor.name,
+    layer: moddedVector.layer,
     properties: {
       //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-      moddedActionIndex: moddedAction.index,
+      moddedActionIndex: moddedVector.action.index,
+      moddedVectorIndex: moddedVector.index,
       from: previousColor,
       to: modifiedColor,
     },
@@ -75,15 +79,15 @@ export function changeActionColor(moddedAction, oldColor) {
 
 /**
  * Modify action in the timeline
- * @param {object} moddedAction
+ * @param {object} moddedVector - The vector to be removed
+ * NOTE: When multiple vectors are removed, currently routed through cut selection action. TODO: (Low Priority) Refactor to use same function for single and multiple vector removal
  */
-export function removeAction(moddedAction) {
+export function removeActionVector(moddedVector) {
   addToTimeline({
-    tool: tools.remove,
-    layer: moddedAction.layer,
+    tool: tools.remove.name,
+    layer: moddedVector.layer,
     properties: {
-      //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-      moddedActionIndex: moddedAction.index,
+      vectorIndices: [moddedVector.index],
       from: false,
       to: true,
     },
@@ -92,17 +96,18 @@ export function removeAction(moddedAction) {
 
 /**
  * Modify action in the timeline
- * @param {object} moddedAction
- * @param {object} oldModes
- * @param {object} newModes
+ * @param {object} moddedVector - The vector to be modified
+ * @param {object} oldModes - The modes before the modification
+ * @param {object} newModes - The modes after the modification
  */
-export function changeActionMode(moddedAction, oldModes, newModes) {
+export function changeActionVectorMode(moddedVector, oldModes, newModes) {
   addToTimeline({
-    tool: tools.changeMode,
-    layer: moddedAction.layer,
+    tool: tools.changeMode.name,
+    layer: moddedVector.layer,
     properties: {
       //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
-      moddedActionIndex: moddedAction.index,
+      moddedActionIndex: moddedVector.actionIndex,
+      moddedVectorIndex: moddedVector.index,
       from: oldModes,
       to: newModes,
     },
@@ -112,7 +117,7 @@ export function changeActionMode(moddedAction, oldModes, newModes) {
 /**
  * Modify actions in the timeline
  * Sets all actions before it except for action index 0 to removed = true
- * @param {object} layer
+ * @param {object} layer - The layer with actions to be modified
  */
 export function actionClear(layer) {
   let upToIndex = state.undoStack.length - 1
@@ -125,10 +130,16 @@ export function actionClear(layer) {
     i++
     if (action.layer === layer) {
       action.removed = true
+      if (action.vectorIndices) {
+        action.vectorIndices.forEach((vectorIndex) => {
+          state.vectors[vectorIndex].removed = true
+        })
+      }
+      //TODO: (Low Priority) Should group actions also have each sub action removed set to true?
     }
   })
   addToTimeline({
-    tool: tools.clear,
+    tool: tools.clear.name,
     layer: layer,
     properties: {
       //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified

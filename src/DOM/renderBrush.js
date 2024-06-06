@@ -64,10 +64,9 @@ export const renderBrushModesToDOM = () => {
 export function renderToolOptionsToDOM() {
   dom.toolOptions.innerHTML = ""
   if (
-    state.tool.name === "cubicCurve" ||
-    state.tool.name === "quadCurve" ||
-    state.tool.name === "ellipse" ||
-    state.tool.name === "select"
+    ["line", "quadCurve", "cubicCurve", "ellipse", "select"].includes(
+      state.tool.name
+    )
   ) {
     //render cubic curve options to menu
     Object.entries(state.tool.options).forEach(([name, option]) => {

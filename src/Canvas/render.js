@@ -1,8 +1,6 @@
-import { dom } from "../Context/dom.js"
 import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
 import { tools } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
@@ -16,6 +14,7 @@ import {
   actionCubicCurve,
 } from "../Actions/pointerActions.js"
 import { setInitialZoom } from "../utils/canvasHelpers.js"
+import { transformRasterContent } from "../utils/transformHelpers.js"
 
 /**
  * Redraw all timeline actions
@@ -23,7 +22,7 @@ import { setInitialZoom } from "../utils/canvasHelpers.js"
  * For handling activeIndexes, the idea is to save images of multiple actions that aren't changing to save time redrawing.
  * The current problem is that later actions "fill" or "draw" with a mask are affected by earlier actions.
  * TODO: (Low Priority) Another efficiency improvement would be to perform incremental rendering with caching so only the affected region of the canvas is rerendered.
- * TODO: (Middle Priority) Use OffscreenCanvas in a web worker to offload rendering to a separate thread.
+ * TODO: (Medium Priority) Use OffscreenCanvas in a web worker to offload rendering to a separate thread.
  * BUG: Can't simply save images and draw them for the betweenCvs because this will ignore actions use erase or inject modes.
  * @param {object} layer - optional parameter to limit render to a specific layer
  * @param {Array} activeIndexes - optional parameter to limit render to specific actions. If not passed in, all actions will be rendered.
@@ -65,10 +64,11 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         }
       }
     }
+    const tool = tools[action.tool]
     if (
       !action.hidden &&
       !action.removed &&
-      ["raster", "vector"].includes(action.tool.type)
+      ["raster", "vector"].includes(tool.type)
     ) {
       performAction(action, betweenCtx)
     }
@@ -112,7 +112,6 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
       }
     }
   }
-  updateLayersAfterRedo()
   renderLayersToDOM()
   renderVectorsToDOM()
 }
@@ -123,7 +122,9 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
  */
 function createAndSaveContext() {
   let cvs = document.createElement("canvas")
-  let ctx = cvs.getContext("2d", { willReadFrequently: true })
+  let ctx = cvs.getContext("2d", {
+    willReadFrequently: true,
+  })
   cvs.width = canvas.offScreenCVS.width
   cvs.height = canvas.offScreenCVS.height
   state.savedBetweenActionImages.push({ cvs, ctx })
@@ -132,46 +133,46 @@ function createAndSaveContext() {
 
 /**
  * Helper for redrawTimelineActions
- * @param {object} action
- * @param {CanvasRenderingContext2D} betweenCtx
+ * @param {object} action - The action to be performed
+ * @param {CanvasRenderingContext2D} betweenCtx - The canvas context for saving between actions
  */
 export function performAction(action, betweenCtx = null) {
-  if (!action.properties?.boundaryBox) {
+  if (!action?.boundaryBox) {
     return
   }
-  //Correct action coordinates with layer offsets
-  const offsetX = action.layer.x
-  const offsetY = action.layer.y
-  //correct boundary box for offsets
-  const boundaryBox = { ...action.properties.boundaryBox }
-  if (boundaryBox.xMax !== null) {
-    boundaryBox.xMin += offsetX
-    boundaryBox.xMax += offsetX
-    boundaryBox.yMin += offsetY
-    boundaryBox.yMax += offsetY
-  }
-  switch (action.tool.name) {
-    case "brush":
+  switch (action.tool) {
+    case "brush": {
+      //Correct action coordinates with layer offsets
+      const offsetX = action.layer.x
+      const offsetY = action.layer.y
+      //correct boundary box for offsets
+      const boundaryBox = { ...action.boundaryBox }
+      if (boundaryBox.xMax !== null) {
+        boundaryBox.xMin += offsetX
+        boundaryBox.xMax += offsetX
+        boundaryBox.yMin += offsetY
+        boundaryBox.yMax += offsetY
+      }
       let seen = new Set()
       let mask = null
       //TODO: (Low Priority) implement points and maskArray as an array of integers to reduce space cost. Could be stored as typed arrays but not meaningful for storing the json file.
       //points require 3 entries for every coordinate, x, y, brushSize
       //maskArray requires 2 entries for every coordinate, x, y
-      if (action.properties.maskArray) {
+      if (action.maskArray) {
         if (offsetX !== 0 || offsetY !== 0) {
           mask = new Set(
-            action.properties.maskArray.map(
+            action.maskArray.map(
               (coord) => `${coord.x + offsetX},${coord.y + offsetY}`
             )
           )
         } else {
-          mask = new Set(action.properties.maskArray)
+          mask = new Set(action.maskArray)
         }
       }
-      let previousX = action.properties.points[0].x + offsetX
-      let previousY = action.properties.points[0].y + offsetY
+      let previousX = action.points[0].x + offsetX
+      let previousY = action.points[0].y + offsetY
       let brushDirection = "0,0"
-      for (const p of action.properties.points) {
+      for (const p of action.points) {
         brushDirection = calculateBrushDirection(
           p.x + offsetX,
           p.y + offsetY,
@@ -182,9 +183,8 @@ export function performAction(action, betweenCtx = null) {
           p.x + offsetX,
           p.y + offsetY,
           boundaryBox,
-          action.properties.selectionInversed,
           action.color,
-          brushStamps[action.tool.brushType][p.brushSize][brushDirection],
+          brushStamps[action.brushType][p.brushSize][brushDirection],
           p.brushSize,
           action.layer,
           action.modes,
@@ -194,171 +194,65 @@ export function performAction(action, betweenCtx = null) {
         )
         previousX = p.x + offsetX
         previousY = p.y + offsetY
-        //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster:
-        // action.layer.ctx.fillStyle = action.color
-        // let x = p.x
-        // let y = p.y
-        // const key = `${x},${y}`
-        // if (!seen.has(key)) {
-        //   seen.add(key)
-        //   switch (action.mode) {
-        //     case "erase":
-        //       action.layer.ctx.clearRect(x, y, 1, 1)
-        //       break
-        //     case "inject":
-        //       action.layer.ctx.clearRect(x, y, 1, 1)
-        //       action.layer.ctx.fillRect(x, y, 1, 1)
-        //       break
-        //     default:
-        //       action.layer.ctx.fillRect(x, y, 1, 1)
-        //   }
-        // }
+        //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster. But it sacrifices flexibility with points.
       }
       break
+    }
     case "fill":
-      actionFill(
-        action.properties.vectorProperties.px1 + offsetX,
-        action.properties.vectorProperties.py1 + offsetY,
-        boundaryBox,
-        action.properties.selectionInversed,
-        action.color,
-        action.layer,
-        action.modes,
-        null, //maskSet made from action.properties.maskArray
-        betweenCtx
-      )
+      renderActionVectors(action, betweenCtx)
       break
     case "line":
-      actionLine(
-        action.properties.px1 + offsetX,
-        action.properties.py1 + offsetY,
-        action.properties.px2 + offsetX,
-        action.properties.py2 + offsetY,
-        boundaryBox,
-        action.properties.selectionInversed,
-        action.color,
-        action.layer,
-        action.modes,
-        brushStamps[action.tool.brushType][action.tool.brushSize],
-        action.tool.brushSize,
-        null, //maskSet made from action.properties.maskArray
-        null,
-        betweenCtx
-      )
+      renderActionVectors(action, betweenCtx)
       break
     case "quadCurve":
-      actionQuadraticCurve(
-        action.properties.vectorProperties.px1 + offsetX,
-        action.properties.vectorProperties.py1 + offsetY,
-        action.properties.vectorProperties.px2 + offsetX,
-        action.properties.vectorProperties.py2 + offsetY,
-        action.properties.vectorProperties.px3 + offsetX,
-        action.properties.vectorProperties.py3 + offsetY,
-        boundaryBox,
-        action.properties.selectionInversed,
-        3,
-        action.color,
-        action.layer,
-        action.modes,
-        brushStamps[action.tool.brushType][action.tool.brushSize],
-        action.tool.brushSize,
-        null, //maskSet made from action.properties.maskArray
-        betweenCtx
-      )
+      renderActionVectors(action, betweenCtx)
       break
     case "cubicCurve":
-      actionCubicCurve(
-        action.properties.vectorProperties.px1 + offsetX,
-        action.properties.vectorProperties.py1 + offsetY,
-        action.properties.vectorProperties.px2 + offsetX,
-        action.properties.vectorProperties.py2 + offsetY,
-        action.properties.vectorProperties.px3 + offsetX,
-        action.properties.vectorProperties.py3 + offsetY,
-        action.properties.vectorProperties.px4 + offsetX,
-        action.properties.vectorProperties.py4 + offsetY,
-        boundaryBox,
-        action.properties.selectionInversed,
-        4,
-        action.color,
-        action.layer,
-        action.modes,
-        brushStamps[action.tool.brushType][action.tool.brushSize],
-        action.tool.brushSize,
-        null, //maskSet made from action.properties.maskArray
-        betweenCtx
-      )
+      renderActionVectors(action, betweenCtx)
       break
     case "ellipse":
-      actionEllipse(
-        action.properties.vectorProperties.px1 + offsetX,
-        action.properties.vectorProperties.py1 + offsetY,
-        action.properties.vectorProperties.px2 + offsetX,
-        action.properties.vectorProperties.py2 + offsetY,
-        action.properties.vectorProperties.px3 + offsetX,
-        action.properties.vectorProperties.py3 + offsetY,
-        action.properties.vectorProperties.radA,
-        action.properties.vectorProperties.radB,
-        action.properties.vectorProperties.forceCircle,
-        boundaryBox,
-        action.properties.selectionInversed,
-        action.color,
-        action.layer,
-        action.modes,
-        brushStamps[action.tool.brushType][action.tool.brushSize],
-        action.tool.brushSize,
-        action.properties.vectorProperties.angle,
-        action.properties.vectorProperties.offset,
-        action.properties.vectorProperties.x1Offset,
-        action.properties.vectorProperties.y1Offset,
-        null, //maskSet made from action.properties.maskArray
-        betweenCtx
+      renderActionVectors(action, betweenCtx)
+      break
+    case "cut": {
+      //Correct action coordinates with layer offsets
+      const offsetX = action.layer.x
+      const offsetY = action.layer.y
+      //correct boundary box for offsets
+      const boundaryBox = { ...action.boundaryBox }
+      if (boundaryBox.xMax !== null) {
+        boundaryBox.xMin += offsetX
+        boundaryBox.xMax += offsetX
+        boundaryBox.yMin += offsetY
+        boundaryBox.yMax += offsetY
+      }
+      let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
+      //Clear boundaryBox area
+      activeCtx.clearRect(
+        boundaryBox.xMin,
+        boundaryBox.yMin,
+        boundaryBox.xMax - boundaryBox.xMin,
+        boundaryBox.yMax - boundaryBox.yMin
       )
       break
-    case "cut":
-      //TODO:(Low Priority) handle betweenCtx, clean up actions so logic does not need to be repeated here. Not currently affected by betweenCtx so not needed for current functionality.
-      if (action.properties.selectionInversed) {
-        //inverted selection: clear entire canvas area minus boundaryBox
-        //create a clip mask for the boundaryBox to prevent clearing the inner area
-        action.layer.ctx.save()
-        action.layer.ctx.beginPath()
-        //define rectangle for canvas area
-        action.layer.ctx.rect(
-          0,
-          0,
-          action.layer.cvs.width,
-          action.layer.cvs.height
-        )
-        action.layer.ctx.rect(
-          boundaryBox.xMin,
-          boundaryBox.yMin,
-          boundaryBox.xMax - boundaryBox.xMin,
-          boundaryBox.yMax - boundaryBox.yMin
-        )
-        action.layer.ctx.clip("evenodd")
-        action.layer.ctx.clearRect(
-          0,
-          0,
-          action.layer.cvs.width,
-          action.layer.cvs.height
-        )
-        action.layer.ctx.restore()
-      } else {
-        //non-inverted selection: clear boundaryBox area
-        action.layer.ctx.clearRect(
-          boundaryBox.xMin,
-          boundaryBox.yMin,
-          boundaryBox.xMax - boundaryBox.xMin,
-          boundaryBox.yMax - boundaryBox.yMin
-        )
-      }
-      break
-    case "paste":
+    }
+    case "paste": {
       //render paste action
+      //Correct action coordinates with layer offsets
+      const offsetX = action.layer.x
+      const offsetY = action.layer.y
+      //correct boundary box for offsets
+      const boundaryBox = { ...action.boundaryBox }
+      if (boundaryBox.xMax !== null) {
+        boundaryBox.xMin += offsetX
+        boundaryBox.xMax += offsetX
+        boundaryBox.yMin += offsetY
+        boundaryBox.yMax += offsetY
+      }
       // Determine if the action is the last 'paste' action in the undoStack
       let isLastPasteAction = false // Default to false
-      if (!action.properties.confirmed) {
+      if (!action.confirmed) {
         for (let i = state.undoStack.length - 1; i >= 0; i--) {
-          if (state.undoStack[i].tool.name === "paste") {
+          if (state.undoStack[i].tool === "paste") {
             // If the first 'paste' action found from the end is the current action
             isLastPasteAction = state.undoStack[i] === action
             break // Stop searching once the first 'paste' action is found
@@ -366,10 +260,10 @@ export function performAction(action, betweenCtx = null) {
         }
       }
       //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
-      if (action.properties.confirmed) {
+      if (action.confirmed) {
         let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
         activeCtx.drawImage(
-          action.properties.canvas,
+          action.canvas,
           boundaryBox.xMin,
           boundaryBox.yMin,
           boundaryBox.xMax - boundaryBox.xMin,
@@ -380,7 +274,7 @@ export function performAction(action, betweenCtx = null) {
         isLastPasteAction //only render if this action is the last paste action in the stack
       ) {
         action.layer.ctx.drawImage(
-          action.properties.canvas,
+          action.canvas,
           boundaryBox.xMin,
           boundaryBox.yMin,
           boundaryBox.xMax - boundaryBox.xMin,
@@ -388,37 +282,181 @@ export function performAction(action, betweenCtx = null) {
         )
       }
       break
+    }
+    case "vectorPaste": {
+      //render vector paste action (only vectors)
+      renderActionVectors(action, betweenCtx)
+      break
+    }
+    case "transform": {
+      if (
+        canvas.tempLayer === canvas.currentLayer &&
+        action.pastedImageKey === state.currentPastedImageKey
+      ) {
+        let isLastTransformAction = false // Default to false
+        for (let i = state.undoStack.length - 1; i >= 0; i--) {
+          if (state.undoStack[i].tool === "transform") {
+            // If the first 'paste' action found from the end is the current action
+            isLastTransformAction = state.undoStack[i] === action
+            break // Stop searching once the first 'paste' action is found
+          }
+        }
+        if (isLastTransformAction) {
+          //Correct action coordinates with layer offsets
+          const offsetX = action.layer.x
+          const offsetY = action.layer.y
+          //correct boundary box for offsets
+          const boundaryBox = { ...action.boundaryBox }
+          if (boundaryBox.xMax !== null) {
+            boundaryBox.xMin += offsetX
+            boundaryBox.xMax += offsetX
+            boundaryBox.yMin += offsetY
+            boundaryBox.yMax += offsetY
+          }
+          //put transformed image data onto canvas (ok to use put image data because the layer should not have anything else on it at this point)
+          transformRasterContent(
+            action.layer,
+            state.pastedImages[action.pastedImageKey].imageData,
+            boundaryBox,
+            action.transformationRotationDegrees % 360,
+            action.isMirroredHorizontally,
+            action.isMirroredVertically
+          )
+        }
+      }
+      break
+    }
     default:
     //do nothing
   }
 }
 
 /**
- * Update layers after redo
- * Helper for redrawTimelineActions
+ * Helper for performAction to render vectors
+ * @param {object} action - The vector action to be rendered
+ * @param {CanvasRenderingContext2D} activeCtx - The canvas context for saving between actions
  */
-function updateLayersAfterRedo() {
-  state.redoStack.forEach((action) => {
-    if (action.tool.name === "addLayer") {
-      action.layer.removed = true
-      if (action.layer === canvas.currentLayer) {
-        canvas.currentLayer.inactiveTools.forEach((tool) => {
-          dom[`${tool}Btn`].disabled = false
-        })
-        canvas.currentLayer = canvas.layers.find(
-          (layer) => layer.type === "raster" && layer.removed === false
+function renderActionVectors(action, activeCtx = null) {
+  //Correct action coordinates with layer offsets
+  const offsetX = action.layer.x
+  const offsetY = action.layer.y
+  //correct boundary box for offsets
+  const boundaryBox = { ...action.boundaryBox }
+  if (boundaryBox.xMax !== null) {
+    boundaryBox.xMin += offsetX
+    boundaryBox.xMax += offsetX
+    boundaryBox.yMin += offsetY
+    boundaryBox.yMax += offsetY
+  }
+  //render vectors
+  for (let i = 0; i < action.vectorIndices.length; i++) {
+    const vector = state.vectors[action.vectorIndices[i]]
+    if (vector.hidden || vector.removed) continue
+    switch (vector.vectorProperties.type) {
+      case "fill": {
+        // let tempMask = new Set([
+        //   vector.vectorProperties.px1 + offsetX,
+        //   vector.vectorProperties.py1 + offsetY,
+        // ])
+        actionFill(
+          vector.vectorProperties.px1 + offsetX,
+          vector.vectorProperties.py1 + offsetY,
+          boundaryBox,
+          vector.color,
+          vector.layer,
+          vector.modes,
+          null, //maskSet made from action.maskArray
+          activeCtx
         )
-        canvas.currentLayer.inactiveTools.forEach((tool) => {
-          dom[`${tool}Btn`].disabled = true
-        })
+        break
       }
+      case "line":
+        actionLine(
+          vector.vectorProperties.px1 + offsetX,
+          vector.vectorProperties.py1 + offsetY,
+          vector.vectorProperties.px2 + offsetX,
+          vector.vectorProperties.py2 + offsetY,
+          boundaryBox,
+          vector.color,
+          vector.layer,
+          vector.modes,
+          brushStamps[vector.brushType][vector.brushSize],
+          vector.brushSize,
+          null, //maskSet made from action.maskArray
+          null,
+          activeCtx
+        )
+        break
+      case "quadCurve":
+        actionQuadraticCurve(
+          vector.vectorProperties.px1 + offsetX,
+          vector.vectorProperties.py1 + offsetY,
+          vector.vectorProperties.px2 + offsetX,
+          vector.vectorProperties.py2 + offsetY,
+          vector.vectorProperties.px3 + offsetX,
+          vector.vectorProperties.py3 + offsetY,
+          boundaryBox,
+          2,
+          vector.color,
+          vector.layer,
+          vector.modes,
+          brushStamps[vector.brushType][vector.brushSize],
+          vector.brushSize,
+          null, //maskSet made from action.maskArray
+          activeCtx
+        )
+        break
+      case "cubicCurve":
+        actionCubicCurve(
+          vector.vectorProperties.px1 + offsetX,
+          vector.vectorProperties.py1 + offsetY,
+          vector.vectorProperties.px2 + offsetX,
+          vector.vectorProperties.py2 + offsetY,
+          vector.vectorProperties.px3 + offsetX,
+          vector.vectorProperties.py3 + offsetY,
+          vector.vectorProperties.px4 + offsetX,
+          vector.vectorProperties.py4 + offsetY,
+          boundaryBox,
+          3,
+          vector.color,
+          vector.layer,
+          vector.modes,
+          brushStamps[vector.brushType][vector.brushSize],
+          vector.brushSize,
+          null, //maskSet made from action.maskArray
+          activeCtx
+        )
+        break
+      case "ellipse":
+        actionEllipse(
+          vector.vectorProperties.weight,
+          vector.vectorProperties.leftTangentX + offsetX,
+          vector.vectorProperties.leftTangentY + offsetY,
+          vector.vectorProperties.topTangentX + offsetX,
+          vector.vectorProperties.topTangentY + offsetY,
+          vector.vectorProperties.rightTangentX + offsetX,
+          vector.vectorProperties.rightTangentY + offsetY,
+          vector.vectorProperties.bottomTangentX + offsetX,
+          vector.vectorProperties.bottomTangentY + offsetY,
+          boundaryBox,
+          vector.color,
+          vector.layer,
+          vector.modes,
+          brushStamps[vector.brushType][vector.brushSize],
+          vector.brushSize,
+          null, //maskSet made from action.maskArray
+          activeCtx
+        )
+        break
+      default:
+      //do nothing
     }
-  })
+  }
 }
 
 /**
  * Draw the canvas layers
- * @param {object} layer
+ * @param {object} layer - The layer to be drawn
  */
 function drawLayer(layer) {
   layer.onscreenCtx.save()
@@ -460,7 +498,7 @@ function drawLayer(layer) {
 
 /**
  * Draw canvas layer onto its onscreen canvas
- * @param {object} layer
+ * @param {object} layer - The layer to be drawn
  */
 export function drawCanvasLayer(layer) {
   //Prevent blurring
@@ -516,7 +554,7 @@ function renderBackgroundCanvas() {
 
 /**
  * Clear offscreen canvas layers as needed
- * @param {object} activeLayer
+ * @param {object} activeLayer - The layer to be cleared. If not passed in, all layers will be cleared.
  */
 export function clearOffscreenCanvas(activeLayer = null) {
   if (activeLayer) {
@@ -546,8 +584,9 @@ export function clearOffscreenCanvas(activeLayer = null) {
 
 /**
  * Main render function for the canvas
- * @param {object} activeLayer
+ * @param {object} activeLayer - pass in a layer to render only that layer
  * @param {boolean} redrawTimeline - pass true to redraw all previous actions
+ * @param {Array} activeIndexes - pass in an array of indexes to render only those actions
  * @param {boolean} setImages - pass true to set images for actions between indexes
  */
 export function renderCanvas(
@@ -600,7 +639,7 @@ export const resizeOffScreenCanvas = (width, height) => {
     0,
     0
   )
-  canvas.rasterGuiCTX.setTransform(
+  canvas.selectionGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,

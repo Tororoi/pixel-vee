@@ -1,7 +1,7 @@
 import { brushStamps } from "../Context/brushStamps.js"
-// import { state } from "../Context/state.js"
-// import { canvas } from "../Context/canvas.js"
-// import { swatches } from "../Context/swatch.js"
+import { state } from "../Context/state.js"
+import { canvas } from "../Context/canvas.js"
+import { swatches } from "../Context/swatch.js"
 import { actionDraw } from "../Actions/pointerActions.js"
 import { vectorGui } from "./vector.js"
 import { renderCanvas } from "../Canvas/render.js"
@@ -12,18 +12,16 @@ import { renderCanvas } from "../Canvas/render.js"
 
 /**
  * Render cursor based on active tool
- * @param {object} state
- * @param {object} canvas
- * @param {object} swatches
+ * TODO: (Low Priority) Render vectorGui cursor for vector tools with remaining control points indicator
  */
-export function renderCursor(state, canvas, swatches) {
+export function renderCursor() {
   switch (state.tool.name) {
     case "grab":
       //show nothing
       break
     case "eyedropper":
       //empty square
-      drawCursorBox(state, canvas, 2)
+      drawCursorBox(2)
       break
     case "select":
       //show nothing
@@ -32,14 +30,16 @@ export function renderCursor(state, canvas, swatches) {
       //show nothing
       break
     default:
-      if (!vectorGui.selectedCollisionPresent && !canvas.collidedVectorIndex) {
+      if (
+        !vectorGui.selectedCollisionPresent &&
+        !state.collidedVectorIndex &&
+        state.selectedVectorIndicesSet.size === 0
+      ) {
         renderCanvas(canvas.currentLayer)
-        //Then renderCanvas would not need to be called here.
         actionDraw(
           state.cursorX,
           state.cursorY,
           state.boundaryBox,
-          state.selectionInversed,
           swatches.primary.color,
           brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
           state.tool.brushSize,
@@ -52,7 +52,7 @@ export function renderCursor(state, canvas, swatches) {
           true
         )
         if (state.tool.modes?.eraser) {
-          drawCursorBox(state, canvas, 1)
+          drawCursorBox(1)
           // vectorGui.drawSelectOutline(state, canvas, state.selectPixelSet, 0.5)
         }
       } else {
@@ -63,17 +63,15 @@ export function renderCursor(state, canvas, swatches) {
 
 /**
  * Used to render eyedropper cursor and eraser
- * @param {object} state
- * @param {object} canvas
  * @param {number} lineWeight - (Float)
  */
-function drawCursorBox(state, canvas, lineWeight) {
+function drawCursorBox(lineWeight) {
   let lineWidth =
     canvas.zoom <= 8 ? lineWeight / canvas.zoom : 0.125 * lineWeight
   let brushOffset = Math.floor(state.tool.brushSize / 2)
   let ol = lineWidth / 2 // line offset to stroke off-center
 
-  // Create a Set from brushStamps[state.tool.brushType][state.tool.brushSize]//TODO: (Middle Priority) make set when creating brush stamp so it does not need to be defined here.
+  // Create a Set from brushStamps[state.tool.brushType][state.tool.brushSize]//TODO: (Medium Priority) make set when creating brush stamp so it does not need to be defined here.
   const pixelSet = new Set(
     brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"].map(
       (p) => `${p.x},${p.y}`
