@@ -13,7 +13,8 @@ import { transformBoundaries } from "./transform.js"
 function moveSteps() {
   // move contents of selection around canvas
   // default selection is entire canvas contents
-  //move raster layer or reference layer
+  // move raster layer or reference layer
+  console.log("moveSteps", canvas.pointerEvent)
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //TODO: (Low Priority) Make distinction for user that for general move, it's moving the layer, but for a selection, it's moving the selection area with the contents (only works for active paste)
