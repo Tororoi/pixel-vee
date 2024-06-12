@@ -126,10 +126,10 @@ function handlePointerDown(e) {
   canvas.pointerEvent = "pointerdown"
   state.clicked = true
   //reset selected point
-  // vectorGui.selectedPoint = {
-  //   xKey: null,
-  //   yKey: null,
-  // }
+  vectorGui.selectedPoint = {
+    xKey: null,
+    yKey: null,
+  }
   if (state.clickDisabled) {
     return
   }
