@@ -377,7 +377,7 @@ export function actionPasteSelection() {
       state.selectedVectorIndicesSet.clear()
       const vectorIndices = Object.keys(clipboardVectors)
       vectorIndices.forEach((vectorIndex) => {
-        state.selectedVectorIndicesSet.add(vectorIndex)
+        state.selectedVectorIndicesSet.add(parseInt(vectorIndex))
       })
       if (state.selectedVectorIndicesSet.size > 0) {
         dom.vectorTransformUIContainer.style.display = "flex"
