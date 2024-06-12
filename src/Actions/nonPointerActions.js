@@ -252,6 +252,7 @@ export function actionCutSelection(copyToClipboard = true) {
 
       state.clearRedoStack()
       vectorGui.render()
+      renderVectorsToDOM()
     }
   }
 }

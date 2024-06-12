@@ -253,6 +253,10 @@ function deselect() {
   resetSelectProperties()
   resetBoundaryBox()
   state.vectorProperties = {}
+  vectorGui.selectedPoint = {
+    xKey: null,
+    yKey: null,
+  }
   state.currentVectorIndex = null
   state.selectedVectorIndicesSet.clear()
   dom.vectorTransformUIContainer.style.display = "none"

@@ -125,6 +125,11 @@ function handlePointerDown(e) {
   e.target.setPointerCapture(e.pointerId)
   canvas.pointerEvent = "pointerdown"
   state.clicked = true
+  //reset selected point
+  // vectorGui.selectedPoint = {
+  //   xKey: null,
+  //   yKey: null,
+  // }
   if (state.clickDisabled) {
     return
   }
