@@ -257,6 +257,7 @@ function deselect() {
     xKey: null,
     yKey: null,
   }
+  vectorGui.resetCollision()
   state.currentVectorIndex = null
   state.selectedVectorIndicesSet.clear()
   dom.vectorTransformUIContainer.style.display = "none"
