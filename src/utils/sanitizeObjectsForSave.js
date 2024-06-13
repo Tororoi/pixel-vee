@@ -96,7 +96,23 @@ export function sanitizeHistory(
   includeReferenceLayers,
   includeRemovedActions
 ) {
-  let sanitizedUndoStack = JSON.parse(JSON.stringify(undoStack))
+  let sanitizedUndoStack
+  try {
+    sanitizedUndoStack = JSON.parse(JSON.stringify(undoStack))
+  } catch (error) {
+    console.log("#1: ", error)
+    for (let i = 0; i < undoStack.length; i++) {
+      const action = undoStack[i]
+      delete action.snapshot
+    }
+    console.log("try without snapshots")
+    try {
+      sanitizedUndoStack = JSON.parse(JSON.stringify(undoStack))
+    } catch (error) {
+      console.log("#2: ", error)
+    }
+  }
+  // let sanitizedUndoStack = JSON.parse(JSON.stringify(undoStack))
   let lastPasteActionIndex
   for (let i = sanitizedUndoStack.length - 1; i >= 0; i--) {
     const action = sanitizedUndoStack[i]
@@ -145,3 +161,65 @@ export function sanitizeHistory(
   }
   return sanitizedUndoStack
 }
+
+// /**
+//  * @param {Array} undoStack - The undoStack array to be sanitized
+//  * @param {boolean} preserveHistory - Whether to preserve the history
+//  * @param {boolean} includeReferenceLayers - Whether to include reference layers
+//  * @param {boolean} includeRemovedActions - Whether to include removed actions
+//  * @returns {Array} - A sanitized copy of the undoStack object.
+//  */
+// export function sanitizeHistory(
+//   undoStack,
+//   preserveHistory,
+//   includeReferenceLayers,
+//   includeRemovedActions
+// ) {
+//   const sanitizeAction = (action) => {
+//     if (action.layer) {
+//       action.layer = { id: action.layer.id };
+//     }
+//     if (action.pastedLayer) {
+//       action.pastedLayer = { id: action.pastedLayer.id };
+//     }
+//     if (action.points) {
+//       // Reformat points
+//       const sanitizedPoints = [];
+//       for (let index = 0; index < action.points.length; index++) {
+//         const point = action.points[index];
+//         sanitizedPoints.push(point.x, point.y, point.brushSize);
+//       }
+//       action.points = sanitizedPoints;
+//     }
+//     delete action.snapshot;
+//     return action;
+//   };
+
+//   const sanitizedUndoStack = undoStack.map(action => sanitizeAction(JSON.parse(JSON.stringify(action))));
+
+//   let lastPasteActionIndex;
+//   for (let i = sanitizedUndoStack.length - 1; i >= 0; i--) {
+//     const action = sanitizedUndoStack[i];
+//     if (["paste", "vectorPaste"].includes(action.tool) && !lastPasteActionIndex) {
+//       lastPasteActionIndex = i;
+//       if (!action.confirmed) {
+//         // Remove the unconfirmed paste action and all actions after it
+//         sanitizedUndoStack.splice(i, sanitizedUndoStack.length - i);
+//       }
+//     } else if (
+//       (action.layer.removed || action.removed) &&
+//       !preserveHistory &&
+//       !includeRemovedActions
+//     ) {
+//       // Remove actions that marked the action as removed
+//       sanitizedUndoStack.splice(i, 1);
+//     } else if (
+//       action.layer.type === "reference" &&
+//       !preserveHistory &&
+//       !includeReferenceLayers
+//     ) {
+//       sanitizedUndoStack.splice(i, 1);
+//     }
+//   }
+//   return sanitizedUndoStack;
+// }
