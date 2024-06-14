@@ -97,6 +97,7 @@ export function prepareDrawingForSave() {
  */
 export function setSaveFilesizePreview() {
   dom.fileSizePreview.innerText = "Calculating..."
+
   return new Promise((resolve) => {
     setTimeout(() => {
       let saveBlob = prepareDrawingForSave()
@@ -106,7 +107,6 @@ export function setSaveFilesizePreview() {
         sizeInMB > 1 ? `${sizeInMB.toFixed(1)} MB` : `${sizeInKB.toFixed(0)} KB`
 
       dom.fileSizePreview.innerText = formattedSize
-
       resolve()
     }, 0)
   })
