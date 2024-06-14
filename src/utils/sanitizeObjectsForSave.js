@@ -97,21 +97,21 @@ export function sanitizeHistory(
   includeRemovedActions
 ) {
   let sanitizedUndoStack
-  try {
-    sanitizedUndoStack = JSON.parse(JSON.stringify(undoStack))
-  } catch (error) {
-    console.log("#1: ", error)
-    for (let i = 0; i < undoStack.length; i++) {
-      const action = undoStack[i]
-      delete action.snapshot
-    }
-    console.log("try without snapshots")
-    try {
-      sanitizedUndoStack = JSON.parse(JSON.stringify(undoStack))
-    } catch (error) {
-      console.log("#2: ", error)
-    }
-  }
+  // try {
+  sanitizedUndoStack = JSON.parse(JSON.stringify(undoStack))
+  // } catch (error) {
+  //   console.log("#1: ", error)
+  // for (let i = 0; i < undoStack.length; i++) {
+  //   const action = undoStack[i]
+  //   delete action.snapshot
+  // }
+  // console.log("try without snapshots")
+  // try {
+  //   sanitizedUndoStack = JSON.parse(JSON.stringify(undoStack))
+  // } catch (error) {
+  //   console.log("#2: ", error)
+  // }
+  // }
   // let sanitizedUndoStack = JSON.parse(JSON.stringify(undoStack))
   let lastPasteActionIndex
   for (let i = sanitizedUndoStack.length - 1; i >= 0; i--) {

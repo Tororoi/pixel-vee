@@ -25,6 +25,7 @@ export const state = {
   action: null, //object with tool, mode, properties, layer, hidden, removed, points. points will have x, y, color, brush info
   undoStack: [],
   redoStack: [],
+  sanitizedUndoStack: [],
   //save settings
   saveDialogOpen: false,
   saveSettings: {

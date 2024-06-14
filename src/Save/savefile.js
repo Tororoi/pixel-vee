@@ -96,12 +96,20 @@ export function prepareDrawingForSave() {
  * Set the preview of the file size
  */
 export function setSaveFilesizePreview() {
-  const saveBlob = prepareDrawingForSave()
-  if (saveBlob.size > 1000000) {
-    dom.fileSizePreview.innerText = (saveBlob.size / 1000000).toFixed(1) + "MB"
-  } else {
-    dom.fileSizePreview.innerText = (saveBlob.size / 1000).toFixed(0) + "KB"
-  }
+  dom.fileSizePreview.innerText = "Calculating..."
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      let saveBlob = prepareDrawingForSave()
+      const sizeInMB = saveBlob.size / 1000000
+      const sizeInKB = saveBlob.size / 1000
+      const formattedSize =
+        sizeInMB > 1 ? `${sizeInMB.toFixed(1)} MB` : `${sizeInKB.toFixed(0)} KB`
+
+      dom.fileSizePreview.innerText = formattedSize
+
+      resolve()
+    }, 0)
+  })
 }
 
 /**
