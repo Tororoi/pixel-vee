@@ -887,10 +887,18 @@ export function removeLayer(layer) {
   if (canvas.activeLayerCount > 1 || layer.type !== "raster") {
     layer.removed = true
     if (layer === canvas.currentLayer) {
-      //TODO: (Medium Priority) Reference layer selection should be deselected when switching to raster layer
+      if (layer.type === "reference") {
+        state.deselect()
+      }
+      layer.inactiveTools.forEach((tool) => {
+        dom[`${tool}Btn`].disabled = false
+      })
       canvas.currentLayer = canvas.layers.find(
         (l) => l.type === "raster" && !l.removed
       )
+      canvas.currentLayer.inactiveTools.forEach((tool) => {
+        dom[`${tool}Btn`].disabled = true
+      })
       vectorGui.reset()
     }
     addToTimeline({

@@ -452,6 +452,7 @@ export function addToTimeline(actionObject) {
   }
   state.undoStack.push(state.action)
   if (state.saveDialogOpen) {
+    //TODO: (Low Priority) refactor to add it to a queue of filesize calculations so that calculations do not happen concurrently
     setSaveFilesizePreview()
   }
 }

@@ -196,6 +196,9 @@ function layerInteract(e) {
     //TODO: (Low Priority) allow selecting multiple layers for moving purposes only
     //select current layer
     if (layer !== canvas.currentLayer) {
+      if (canvas.currentLayer.type === "reference") {
+        state.deselect()
+      }
       canvas.currentLayer.inactiveTools.forEach((tool) => {
         dom[`${tool}Btn`].disabled = false
       })
