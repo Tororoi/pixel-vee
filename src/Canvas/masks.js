@@ -7,7 +7,7 @@ import { getColor } from "../utils/imageDataHelpers.js"
  * @returns {Set} - A set of all the pixels that match the color
  */
 export function createColorMaskSet(matchColor) {
-  // state.pointsSet = new Set()
+  // state.selection.pointsSet = new Set()
   const maskSet = new Set()
   //create mask set
   const layerImageData = canvas.currentLayer.ctx.getImageData(

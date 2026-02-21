@@ -120,11 +120,11 @@ export function actionRecenter() {
 export function actionCopySelection() {
   if (
     canvas.currentLayer.type === "raster" &&
-    (state.boundaryBox.xMax !== null ||
-      state.currentVectorIndex !== null ||
-      state.selectedVectorIndicesSet.size > 0)
+    (state.selection.boundaryBox.xMax !== null ||
+      state.vector.currentIndex !== null ||
+      state.vector.selectedIndices.size > 0)
   ) {
-    if (state.boundaryBox.xMax !== null) {
+    if (state.selection.boundaryBox.xMax !== null) {
       copySelectedPixels()
     } else {
       copySelectedVectors()

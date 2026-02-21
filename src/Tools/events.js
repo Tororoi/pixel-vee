@@ -11,7 +11,7 @@ import { renderVectorsToDOM, renderBrushStampToDOM } from "../DOM/render.js"
 import { toggleMode, switchTool } from "./toolbox.js"
 
 //Initialize default tool
-state.tool = tools.brush
+state.tool.current = tools.brush
 
 //=========================================//
 //=== * * * Button Event Handlers * * * ===//
@@ -76,9 +76,9 @@ function handleClearCanvas() {
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height
   )
-  state.pointsSet = null
-  state.seenPixelsSet = null
-  state.points = []
+  state.selection.pointsSet = null
+  state.selection.seenPixelsSet = null
+  state.timeline.points = []
   vectorGui.reset()
   state.reset()
   actionClear(canvas.currentLayer)
@@ -114,10 +114,10 @@ export function handleModes(e) {
  * @param {PointerEvent} e - click event
  */
 function switchBrush(e) {
-  if (state.tool.brushType === "square") {
-    state.tool.brushType = "circle"
+  if (state.tool.current.brushType === "square") {
+    state.tool.current.brushType = "circle"
   } else {
-    state.tool.brushType = "square"
+    state.tool.current.brushType = "square"
   }
   renderBrushStampToDOM()
 }
@@ -126,7 +126,7 @@ function switchBrush(e) {
  * @param {InputEvent} e - input event
  */
 function updateBrush(e) {
-  switch (state.tool.name) {
+  switch (state.tool.current.name) {
     case "brush":
     case "colorMask":
     case "line":
@@ -134,7 +134,7 @@ function updateBrush(e) {
     case "cubicCurve":
     case "ellipse":
     case "select":
-      state.tool.brushSize = parseInt(e.target.value)
+      state.tool.current.brushSize = parseInt(e.target.value)
       break
     default:
     //do nothing for other tools

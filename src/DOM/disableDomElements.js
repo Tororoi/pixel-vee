@@ -43,8 +43,8 @@ export function enableActionsForNoPaste() {
   dom.cutBtn.classList.remove("disabled")
   dom.copyBtn.classList.remove("disabled")
   if (
-    state.selectClipboard.canvas ||
-    Object.keys(state.selectClipboard.vectors).length > 0
+    state.clipboard.select.canvas ||
+    Object.keys(state.clipboard.select.vectors).length > 0
   ) {
     dom.pasteBtn.classList.remove("disabled")
   }
@@ -85,8 +85,8 @@ export function enableActionsForSelection() {
   dom.deleteBtn.classList.remove("disabled")
   //enable transform menu if selection is vector
   if (
-    state.currentVectorIndex !== null ||
-    state.selectedVectorIndicesSet.size > 0
+    state.vector.currentIndex !== null ||
+    state.vector.selectedIndices.size > 0
   ) {
     dom.flipHorizontalBtn.classList.remove("disabled")
     dom.flipVerticalBtn.classList.remove("disabled")

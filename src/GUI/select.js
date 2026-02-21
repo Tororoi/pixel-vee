@@ -18,9 +18,9 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
     canvas.selectionGuiCVS.width,
     canvas.selectionGuiCVS.height
   )
-  let isRasterSelection = state.boundaryBox.xMax !== null
+  let isRasterSelection = state.selection.boundaryBox.xMax !== null
   let isVectorSelection =
-    state.selectedVectorIndicesSet.size > 0 && state.tool.type === "vector"
+    state.vector.selectedIndices.size > 0 && state.tool.current.type === "vector"
   if (isRasterSelection || isVectorSelection) {
     //Create greyed out area around selection
     //clip to selection
@@ -36,10 +36,10 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
       )
       //define rectangle for selection area
       canvas.selectionGuiCTX.rect(
-        canvas.xOffset + state.boundaryBox.xMin,
-        canvas.yOffset + state.boundaryBox.yMin,
-        state.boundaryBox.xMax - state.boundaryBox.xMin,
-        state.boundaryBox.yMax - state.boundaryBox.yMin
+        canvas.xOffset + state.selection.boundaryBox.xMin,
+        canvas.yOffset + state.selection.boundaryBox.yMin,
+        state.selection.boundaryBox.xMax - state.selection.boundaryBox.xMin,
+        state.selection.boundaryBox.yMax - state.selection.boundaryBox.yMin
       )
       canvas.selectionGuiCTX.clip("evenodd")
       // canvas.selectionGuiCTX.globalAlpha = 0.5
@@ -52,10 +52,10 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
       )
       canvas.selectionGuiCTX.restore()
       let shouldRenderPoints =
-        state.tool.name === "select" ||
-        (state.tool.name === "move" && canvas.pastedLayer) ||
+        state.tool.current.name === "select" ||
+        (state.tool.current.name === "move" && canvas.pastedLayer) ||
         canvas.currentLayer.type === "reference" ||
-        state.vectorTransformMode === SCALE
+        state.vector.transformMode === SCALE
       renderSelectionBoxOutline(lineDashOffset, shouldRenderPoints)
     } else if (isVectorSelection) {
       if (vectorGui.outlineVectorSelection) {
@@ -79,8 +79,8 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
         const yOffset = canvas.currentLayer.y + canvas.yOffset
         canvas.selectionGuiCTX.beginPath()
         //Need to chain paths?
-        for (let vectorIndex of state.selectedVectorIndicesSet) {
-          const vector = state.vectors[vectorIndex]
+        for (let vectorIndex of state.vector.selectedIndices) {
+          const vector = state.vector.all[vectorIndex]
           if (vector.hidden || vector.removed) continue
           //switch based on vector type
           switch (vector.vectorProperties.type) {
@@ -245,17 +245,17 @@ export function renderSelectionBoxOutline(lineDashOffset, drawPoints) {
   canvas.selectionGuiCTX.lineCap = "round"
   canvas.selectionGuiCTX.lineDashOffset = lineDashOffset
 
-  if (state.boundaryBox.xMax !== null) {
+  if (state.selection.boundaryBox.xMax !== null) {
     if (!canvas.pastedLayer && canvas.currentLayer.type !== "reference") {
       //if active unconfirmed paste action, don't draw the dashed selection outline
       canvas.selectionGuiCTX.setLineDash([lineWidth * 6, lineWidth * 6])
     }
     canvas.selectionGuiCTX.beginPath()
     canvas.selectionGuiCTX.rect(
-      canvas.xOffset + state.boundaryBox.xMin,
-      canvas.yOffset + state.boundaryBox.yMin,
-      state.boundaryBox.xMax - state.boundaryBox.xMin,
-      state.boundaryBox.yMax - state.boundaryBox.yMin
+      canvas.xOffset + state.selection.boundaryBox.xMin,
+      canvas.yOffset + state.selection.boundaryBox.yMin,
+      state.selection.boundaryBox.xMax - state.selection.boundaryBox.xMin,
+      state.selection.boundaryBox.yMax - state.selection.boundaryBox.yMin
     )
     // Stroke non-filled lines
     canvas.selectionGuiCTX.stroke()
@@ -278,7 +278,7 @@ export function renderSelectionBoxOutline(lineDashOffset, drawPoints) {
 
     canvas.selectionGuiCTX.beginPath()
     drawSelectControlPoints(
-      state.boundaryBox,
+      state.selection.boundaryBox,
       pointsKeys,
       circleRadius / 2,
       true,
@@ -301,8 +301,8 @@ export function renderSelectionBoxOutline(lineDashOffset, drawPoints) {
 
 //   outerLoop: for (let x = 0; x < canvas.offScreenCVS.width; x++) {
 //     for (let y = 0; y < canvas.offScreenCVS.height; y++) {
-//       if (state.selectPixelPoints[`${x},${y}`]) {
-//         initialPoint = state.selectPixelPoints[`${x},${y}`]
+//       if (state.selection.pixelPoints[`${x},${y}`]) {
+//         initialPoint = state.selection.pixelPoints[`${x},${y}`]
 //         break outerLoop
 //       }
 //     }
@@ -348,7 +348,7 @@ export function renderSelectionBoxOutline(lineDashOffset, drawPoints) {
 //       const [dx, dy] = directions[newDirection]
 
 //       if (
-//         state.selectCornersSet.has(
+//         state.selection.cornersSet.has(
 //           `${currentPoint.x + dx},${currentPoint.y + dy}`
 //         )
 //       ) {
@@ -397,10 +397,10 @@ export function drawSelectControlPoints(
 
   //handle collision with inner area of selection
   if (
-    state.cursorX >= xMin &&
-    state.cursorX < xMax &&
-    state.cursorY >= yMin &&
-    state.cursorY < yMax
+    state.cursor.x >= xMin &&
+    state.cursor.x < xMax &&
+    state.cursor.y >= yMin &&
+    state.cursor.y < yMax
   ) {
     vectorGui.setCollision({ x: "px9", y: "py9" })
   }
@@ -448,36 +448,36 @@ function handleSelectCollisionAndDraw(
   offset,
   vectorAction
 ) {
-  let r = state.touch ? radius * 2 : radius
+  let r = state.tool.touch ? radius * 2 : radius
   const xOffset = vectorAction ? vectorAction.layer.x : 0
   const yOffset = vectorAction ? vectorAction.layer.y : 0
 
   if (modify) {
     const collisionPresent =
       checkSquarePointCollision(
-        state.cursorX,
-        state.cursorY,
+        state.cursor.x,
+        state.cursor.y,
         point.x - offset + xOffset,
         point.y - offset + yOffset,
         r * 2.125
       ) ||
       (["px2", "px6"].includes(keys.x) &&
         checkAreaCollision(
-          state.cursorX,
-          state.cursorY,
-          state.boundaryBox.xMin + r * 2,
+          state.cursor.x,
+          state.cursor.y,
+          state.selection.boundaryBox.xMin + r * 2,
           point.y - offset + yOffset - r * 2,
-          state.boundaryBox.xMax - r * 2 - 1,
+          state.selection.boundaryBox.xMax - r * 2 - 1,
           point.y - offset + yOffset + r * 2
         )) ||
       (["px4", "px8"].includes(keys.x) &&
         checkAreaCollision(
-          state.cursorX,
-          state.cursorY,
+          state.cursor.x,
+          state.cursor.y,
           point.x - offset + xOffset - r * 2,
-          state.boundaryBox.yMin + r * 2,
+          state.selection.boundaryBox.yMin + r * 2,
           point.x - offset + xOffset + r * 2,
-          state.boundaryBox.yMax - r * 2 - 1
+          state.selection.boundaryBox.yMax - r * 2 - 1
         ))
     if (collisionPresent) {
       //cursor collision, not necessarily selected point
@@ -534,7 +534,7 @@ function handleSelectCollisionAndDraw(
  */
 function setSelectionCursorStyle() {
   if (!vectorGui.selectedCollisionPresent) {
-    canvas.vectorGuiCVS.style.cursor = state.tool.cursor
+    canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
     return
   }
 

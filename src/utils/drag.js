@@ -80,7 +80,7 @@ export const initializeDialogBox = (
  * Set drag siblings
  */
 function setDragSiblings() {
-  const parentElement = state.dragTarget.parentElement
+  const parentElement = state.ui.dragTarget.parentElement
   const siblingElements = parentElement.children
   // Convert the NodeList or HTMLCollection to an array
   let siblingArray = Array.from(siblingElements)
@@ -98,7 +98,7 @@ function setDragSiblings() {
     return orderA - orderB // This will sort in ascending order
   })
   let dragTargetMargin = 0
-  if (state.dragTarget.className.includes("dialog-box")) {
+  if (state.ui.dragTarget.className.includes("dialog-box")) {
     dragTargetMargin = 2
   }
   for (let i = 0; i < siblingArray.length; i++) {
@@ -107,16 +107,16 @@ function setDragSiblings() {
     newSiblingProperties.height = bounds.height
     newSiblingProperties.top = siblingArray[i].offsetTop - dragTargetMargin
     newSiblingProperties.element = siblingArray[i]
-    state.dragSiblings.push(newSiblingProperties)
+    state.ui.dragSiblings.push(newSiblingProperties)
   }
   //set properties
   parentElement.style.height = parentElement.offsetHeight + "px"
   parentElement.style.background = "white"
-  for (let i = 0; i < state.dragSiblings.length; i++) {
-    state.dragSiblings[i].element.style.position = "absolute"
-    state.dragSiblings[i].element.style.top = state.dragSiblings[i].top + "px"
-    state.dragSiblings[i].element.style.maxHeight =
-      state.dragSiblings[i].height + "px"
+  for (let i = 0; i < state.ui.dragSiblings.length; i++) {
+    state.ui.dragSiblings[i].element.style.position = "absolute"
+    state.ui.dragSiblings[i].element.style.top = state.ui.dragSiblings[i].top + "px"
+    state.ui.dragSiblings[i].element.style.maxHeight =
+      state.ui.dragSiblings[i].height + "px"
   }
 }
 
@@ -128,39 +128,39 @@ function reorderElements(e) {
   //fix siblings in place
   let dragTargetIndex = 0
   //set properties
-  for (let i = 0; i < state.dragSiblings.length; i++) {
-    if (state.dragSiblings[i].element === state.dragTarget) {
+  for (let i = 0; i < state.ui.dragSiblings.length; i++) {
+    if (state.ui.dragSiblings[i].element === state.ui.dragTarget) {
       dragTargetIndex = i
     }
   }
   let dragTargetMargin = 0
-  if (state.dragTarget.className.includes("dialog-box")) {
+  if (state.ui.dragTarget.className.includes("dialog-box")) {
     dragTargetMargin = 2
   }
   //check location of drag target and reorder elements
-  for (let i = 0; i < state.dragSiblings.length; i++) {
-    if (state.dragSiblings[i].element !== state.dragTarget) {
-      let dragTop = e.clientY - state.dragY
+  for (let i = 0; i < state.ui.dragSiblings.length; i++) {
+    if (state.ui.dragSiblings[i].element !== state.ui.dragTarget) {
+      let dragTop = e.clientY - state.ui.dragY
       //if drag top less than halfway height and greater than previous sibling's halfway height, set dragTarget's css order property to siblingArray[i]'s order and iterate back through higher siblings to increase their order
       //move dragTarget up
       //TODO: (Medium Priority) Instead of colliding with valid insertion point, write this check to find the nearest overlapping element to dragTop
       let collision =
-        dragTop > state.dragSiblings[i].top - 10 &&
-        dragTop < state.dragSiblings[i].top + 10
+        dragTop > state.ui.dragSiblings[i].top - 10 &&
+        dragTop < state.ui.dragSiblings[i].top + 10
       if (collision) {
-        let dragTarget = state.dragSiblings[dragTargetIndex]
-        state.dragSiblings.splice(dragTargetIndex, 1)
-        state.dragSiblings.splice(i, 0, dragTarget)
+        let dragTarget = state.ui.dragSiblings[dragTargetIndex]
+        state.ui.dragSiblings.splice(dragTargetIndex, 1)
+        state.ui.dragSiblings.splice(i, 0, dragTarget)
 
         // recalculate all elements positions
         let offset = 0
-        for (let j = 0; j < state.dragSiblings.length; j++) {
-          state.dragSiblings[j].element.style.order = j + 1
-          if (state.dragSiblings[j].element !== state.dragTarget) {
-            state.dragSiblings[j].element.style.top = offset + "px"
-            state.dragSiblings[j].top = offset
+        for (let j = 0; j < state.ui.dragSiblings.length; j++) {
+          state.ui.dragSiblings[j].element.style.order = j + 1
+          if (state.ui.dragSiblings[j].element !== state.ui.dragTarget) {
+            state.ui.dragSiblings[j].element.style.top = offset + "px"
+            state.ui.dragSiblings[j].top = offset
           }
-          offset += state.dragSiblings[j].height + 2 * dragTargetMargin
+          offset += state.ui.dragSiblings[j].height + 2 * dragTargetMargin
         }
         break
       }
@@ -175,14 +175,14 @@ function reorderElements(e) {
 export const dragStart = (e, dragTarget) => {
   if (!dragTarget.className.includes("locked")) {
     e.target.setPointerCapture(e.pointerId)
-    state.dragging = true
-    state.dragTarget = dragTarget
-    if (state.dragTarget) {
-      state.dragTarget.classList.add("dragging")
-      state.dragX = e.clientX - state.dragTarget.offsetLeft
-      state.dragY = e.clientY - state.dragTarget.offsetTop
-      //push each element to state.dragSiblings with bounding box
-      if (!state.dragTarget.className.includes("h-drag")) {
+    state.ui.dragging = true
+    state.ui.dragTarget = dragTarget
+    if (state.ui.dragTarget) {
+      state.ui.dragTarget.classList.add("dragging")
+      state.ui.dragX = e.clientX - state.ui.dragTarget.offsetLeft
+      state.ui.dragY = e.clientY - state.ui.dragTarget.offsetTop
+      //push each element to state.ui.dragSiblings with bounding box
+      if (!state.ui.dragTarget.className.includes("h-drag")) {
         setDragSiblings()
       }
     }
@@ -193,13 +193,13 @@ export const dragStart = (e, dragTarget) => {
  * Drag stop
  */
 export const dragStop = () => {
-  state.dragging = false
-  if (state.dragTarget) {
-    state.dragTarget.classList.remove("dragging")
-    if (!state.dragTarget.className.includes("free")) {
+  state.ui.dragging = false
+  if (state.ui.dragTarget) {
+    state.ui.dragTarget.classList.remove("dragging")
+    if (!state.ui.dragTarget.className.includes("free")) {
       //NOTE: currently only works for vertical dragging of horizontally locked elements
-      const parentElement = state.dragTarget.parentElement
-      if (!state.dragTarget.className.includes("h-drag")) {
+      const parentElement = state.ui.dragTarget.parentElement
+      if (!state.ui.dragTarget.className.includes("h-drag")) {
         const siblingElements = parentElement.children
         // Convert the NodeList or HTMLCollection to an array
         let siblingArray = Array.from(siblingElements)
@@ -220,7 +220,7 @@ export const dragStop = () => {
         parentElement.style.background = ""
 
         for (let i = 0; i < siblingArray.length; i++) {
-          if (siblingArray[i] !== state.dragTarget) {
+          if (siblingArray[i] !== state.ui.dragTarget) {
             siblingArray[i].style.zIndex = ""
             siblingArray[i].style.top = ""
             siblingArray[i].style.maxHeight = ""
@@ -228,13 +228,13 @@ export const dragStop = () => {
           }
         }
       }
-      state.dragTarget.style.top = ""
-      state.dragTarget.style.maxHeight = "" //reset to default
-      state.dragTarget.style.position = "relative"
+      state.ui.dragTarget.style.top = ""
+      state.ui.dragTarget.style.maxHeight = "" //reset to default
+      state.ui.dragTarget.style.position = "relative"
       parentElement.style.height = "" //reset to default
     }
-    state.dragSiblings = []
-    state.dragTarget = null
+    state.ui.dragSiblings = []
+    state.ui.dragTarget = null
   }
 }
 
@@ -243,39 +243,39 @@ export const dragStop = () => {
  * @param {PointerEvent} e - The pointer event
  */
 export const dragMove = (e) => {
-  if (state.dragTarget) {
-    const parentElement = state.dragTarget.parentElement
+  if (state.ui.dragTarget) {
+    const parentElement = state.ui.dragTarget.parentElement
     //For vertical drag and replace, fix siblings in place
-    if (!state.dragTarget.className.includes("h-drag")) {
+    if (!state.ui.dragTarget.className.includes("h-drag")) {
       reorderElements(e)
-      state.dragTarget.style.maxHeight = state.dragTarget.offsetHeight + "px" //NOTE: May need to be placed elsewhere
+      state.ui.dragTarget.style.maxHeight = state.ui.dragTarget.offsetHeight + "px" //NOTE: May need to be placed elsewhere
     }
-    state.dragTarget.style.position = "absolute"
-    if (state.dragTarget.className.includes("h-drag")) {
-      state.dragTarget.style.left = e.clientX - state.dragX + "px"
+    state.ui.dragTarget.style.position = "absolute"
+    if (state.ui.dragTarget.className.includes("h-drag")) {
+      state.ui.dragTarget.style.left = e.clientX - state.ui.dragX + "px"
     }
-    if (state.dragTarget.className.includes("v-drag")) {
-      state.dragTarget.style.top = e.clientY - state.dragY + "px"
+    if (state.ui.dragTarget.className.includes("v-drag")) {
+      state.ui.dragTarget.style.top = e.clientY - state.ui.dragY + "px"
     }
     let pRect = parentElement.getBoundingClientRect()
-    let tgtRect = state.dragTarget.getBoundingClientRect()
+    let tgtRect = state.ui.dragTarget.getBoundingClientRect()
     let dragTargetMargin = 0
-    if (state.dragTarget.className.includes("dialog-box")) {
+    if (state.ui.dragTarget.className.includes("dialog-box")) {
       dragTargetMargin = 2
     }
     //Constrain draggable element inside window, include box shadow border
-    if (state.dragTarget.className.includes("h-drag")) {
+    if (state.ui.dragTarget.className.includes("h-drag")) {
       if (tgtRect.left - dragTargetMargin < pRect.left)
-        state.dragTarget.style.left = 0 + "px"
+        state.ui.dragTarget.style.left = 0 + "px"
       if (tgtRect.right + dragTargetMargin > pRect.right)
-        state.dragTarget.style.left =
+        state.ui.dragTarget.style.left =
           pRect.width - tgtRect.width - 2 * dragTargetMargin + "px"
     }
-    if (state.dragTarget.className.includes("v-drag")) {
+    if (state.ui.dragTarget.className.includes("v-drag")) {
       if (tgtRect.top - dragTargetMargin < pRect.top)
-        state.dragTarget.style.top = 0 + "px"
+        state.ui.dragTarget.style.top = 0 + "px"
       if (tgtRect.bottom + dragTargetMargin > pRect.bottom) {
-        state.dragTarget.style.top =
+        state.ui.dragTarget.style.top =
           pRect.height - tgtRect.height - 2 * dragTargetMargin + "px"
       }
     }

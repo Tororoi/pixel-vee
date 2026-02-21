@@ -22,28 +22,28 @@ function lineSteps() {
   if (rerouteVectorStepsAction()) return
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      state.clickCounter += 1
+      state.tool.clickCounter += 1
       //reset control points
       vectorGui.reset()
-      state.vectorProperties.type = state.tool.name
-      state.vectorProperties.px1 = state.cursorX
-      state.vectorProperties.py1 = state.cursorY
-      state.vectorProperties.px2 = state.cursorX
-      state.vectorProperties.py2 = state.cursorY
+      state.vector.properties.type = state.tool.current.name
+      state.vector.properties.px1 = state.cursor.x
+      state.vector.properties.py1 = state.cursor.y
+      state.vector.properties.px2 = state.cursor.x
+      state.vector.properties.py2 = state.cursor.y
       renderCanvas(canvas.currentLayer)
       //preview line
       actionLine(
-        state.vectorProperties.px1,
-        state.vectorProperties.py1,
-        state.vectorProperties.px2,
-        state.vectorProperties.py2,
-        state.boundaryBox,
+        state.vector.properties.px1,
+        state.vector.properties.py1,
+        state.vector.properties.px2,
+        state.vector.properties.py2,
+        state.selection.boundaryBox,
         swatches.primary.color,
         canvas.currentLayer,
-        state.tool.modes,
-        brushStamps[state.tool.brushType][state.tool.brushSize],
-        state.tool.brushSize,
-        state.maskSet,
+        state.tool.current.modes,
+        brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+        state.tool.current.brushSize,
+        state.selection.maskSet,
         null,
         null,
         true
@@ -51,73 +51,73 @@ function lineSteps() {
       break
     case "pointermove":
       //draw line from origin point to current point onscreen
-      state.vectorProperties.px2 = state.cursorX
-      state.vectorProperties.py2 = state.cursorY
+      state.vector.properties.px2 = state.cursor.x
+      state.vector.properties.py2 = state.cursor.y
       //only draw when necessary
       renderCanvas(canvas.currentLayer)
       //preview line
       actionLine(
-        state.vectorProperties.px1,
-        state.vectorProperties.py1,
-        state.vectorProperties.px2,
-        state.vectorProperties.py2,
-        state.boundaryBox,
+        state.vector.properties.px1,
+        state.vector.properties.py1,
+        state.vector.properties.px2,
+        state.vector.properties.py2,
+        state.selection.boundaryBox,
         swatches.primary.color,
         canvas.currentLayer,
-        state.tool.modes,
-        brushStamps[state.tool.brushType][state.tool.brushSize],
-        state.tool.brushSize,
-        state.maskSet,
+        state.tool.current.modes,
+        brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+        state.tool.current.brushSize,
+        state.selection.maskSet,
         null,
         null,
         true
       )
       break
     case "pointerup": {
-      state.vectorProperties.px2 = state.cursorX
-      state.vectorProperties.py2 = state.cursorY
+      state.vector.properties.px2 = state.cursor.x
+      state.vector.properties.py2 = state.cursor.y
       //Handle snapping p1 or p2 to other control points. Only snap when there are no linked vectors to selected vector.
       if (
-        state.tool.options.align?.active ||
-        state.tool.options.equal?.active ||
-        state.tool.options.link?.active
+        state.tool.current.options.align?.active ||
+        state.tool.current.options.equal?.active ||
+        state.tool.current.options.link?.active
       ) {
         //snap selected point to collidedVector's control point
-        if (state.collidedVectorIndex !== null) {
-          let collidedVector = state.vectors[state.collidedVectorIndex]
+        if (state.vector.collidedIndex !== null) {
+          let collidedVector = state.vector.all[state.vector.collidedIndex]
           let snappedToX =
             collidedVector.vectorProperties[vectorGui.otherCollidedKeys.xKey] +
             collidedVector.layer.x
           let snappedToY =
             collidedVector.vectorProperties[vectorGui.otherCollidedKeys.yKey] +
             collidedVector.layer.y
-          state.vectorProperties.px2 = snappedToX
-          state.vectorProperties.py2 = snappedToY
+          state.vector.properties.px2 = snappedToX
+          state.vector.properties.py2 = snappedToY
         }
       }
       actionLine(
-        state.vectorProperties.px1,
-        state.vectorProperties.py1,
-        state.vectorProperties.px2,
-        state.vectorProperties.py2,
-        state.boundaryBox,
+        state.vector.properties.px1,
+        state.vector.properties.py1,
+        state.vector.properties.px2,
+        state.vector.properties.py2,
+        state.selection.boundaryBox,
         swatches.primary.color,
         canvas.currentLayer,
-        state.tool.modes,
-        brushStamps[state.tool.brushType][state.tool.brushSize],
-        state.tool.brushSize,
-        state.maskSet,
+        state.tool.current.modes,
+        brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+        state.tool.current.brushSize,
+        state.selection.maskSet,
         null,
         null
       )
-      state.clickCounter = 0
+      state.tool.clickCounter = 0
       let maskArray = coordArrayFromSet(
-        state.maskSet,
+        state.selection.maskSet,
         canvas.currentLayer.x,
         canvas.currentLayer.y
       )
       //correct boundary box for layer offset
-      const boundaryBox = { ...state.boundaryBox }
+      const boundaryBox = { ...state.selection.boundaryBox }
       if (boundaryBox.xMax !== null) {
         boundaryBox.xMin -= canvas.currentLayer.x
         boundaryBox.xMax -= canvas.currentLayer.x
@@ -125,13 +125,13 @@ function lineSteps() {
         boundaryBox.yMax -= canvas.currentLayer.y
       }
       //generate new unique key for vector
-      state.highestVectorKey += 1
-      let uniqueVectorKey = state.highestVectorKey
-      state.currentVectorIndex = uniqueVectorKey
+      state.vector.highestKey += 1
+      let uniqueVectorKey = state.vector.highestKey
+      state.vector.currentIndex = uniqueVectorKey
       enableActionsForSelection()
       //store control points for timeline
       addToTimeline({
-        tool: state.tool.name,
+        tool: state.tool.current.name,
         layer: canvas.currentLayer,
         properties: {
           maskArray,
@@ -140,20 +140,20 @@ function lineSteps() {
         },
       })
       //Add the vector to the state
-      state.vectors[uniqueVectorKey] = {
+      state.vector.all[uniqueVectorKey] = {
         index: uniqueVectorKey,
-        action: state.action,
+        action: state.timeline.currentAction,
         layer: canvas.currentLayer,
-        modes: { ...state.tool.modes },
+        modes: { ...state.tool.current.modes },
         color: { ...swatches.primary.color },
-        brushSize: state.tool.brushSize,
-        brushType: state.tool.brushType,
+        brushSize: state.tool.current.brushSize,
+        brushType: state.tool.current.brushType,
         vectorProperties: {
-          ...state.vectorProperties,
-          px1: state.vectorProperties.px1 - canvas.currentLayer.x,
-          py1: state.vectorProperties.py1 - canvas.currentLayer.y,
-          px2: state.vectorProperties.px2 - canvas.currentLayer.x,
-          py2: state.vectorProperties.py2 - canvas.currentLayer.y,
+          ...state.vector.properties,
+          px1: state.vector.properties.px1 - canvas.currentLayer.x,
+          py1: state.vector.properties.py1 - canvas.currentLayer.y,
+          px2: state.vector.properties.px2 - canvas.currentLayer.x,
+          py2: state.vector.properties.py2 - canvas.currentLayer.y,
         },
         // maskArray,
         // boundaryBox,

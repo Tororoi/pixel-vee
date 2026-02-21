@@ -15,7 +15,7 @@ function eyedropperSteps() {
    * @param {number} y - (Integer)
    */
   function sampleColor(x, y) {
-    let newColor = getColor(state.colorLayerGlobal, x, y)
+    let newColor = getColor(state.drawing.colorLayerGlobal, x, y)
     //not simply passing whole color in until random color function is refined
     setColor(
       newColor.r,
@@ -29,19 +29,19 @@ function eyedropperSteps() {
     case "pointerdown":
       //get imageData
       consolidateLayers(true, true)
-      state.colorLayerGlobal = canvas.offScreenCTX.getImageData(
+      state.drawing.colorLayerGlobal = canvas.offScreenCTX.getImageData(
         0,
         0,
         canvas.offScreenCVS.width,
         canvas.offScreenCVS.height
       )
       //set color
-      sampleColor(state.cursorX, state.cursorY)
+      sampleColor(state.cursor.x, state.cursor.y)
       break
     case "pointermove":
       //normalize pointermove to pixelgrid, get color here too
       //get color
-      sampleColor(state.cursorX, state.cursorY)
+      sampleColor(state.cursor.x, state.cursor.y)
       break
     default:
     //do nothing

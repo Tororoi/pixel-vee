@@ -43,7 +43,7 @@ export function prepareDrawingForSave() {
     includePalette,
     includeReferenceLayers,
     includeRemovedActions,
-  } = state.saveSettings
+  } = state.ui.saveSettings
 
   let sanitizedLayers = sanitizeLayers(
     canvas.layers,
@@ -52,8 +52,8 @@ export function prepareDrawingForSave() {
     includeRemovedActions
   )
   let sanitizedVectors = sanitizeVectors(
-    state.undoStack,
-    state.vectors,
+    state.timeline.undoStack,
+    state.vector.all,
     preserveHistory,
     includeRemovedActions
   )
@@ -63,7 +63,7 @@ export function prepareDrawingForSave() {
     includePalette
   )
   let sanitizedUndoStack = sanitizeHistory(
-    state.undoStack,
+    state.timeline.undoStack,
     preserveHistory,
     includeReferenceLayers,
     includeRemovedActions
@@ -86,7 +86,7 @@ export function prepareDrawingForSave() {
       width: canvas.offScreenCVS.width,
       height: canvas.offScreenCVS.height,
     },
-    selectProperties: state.selectProperties,
+    selectProperties: state.selection.properties,
   })
 
   return new Blob([saveJsonString], { type: "application/json" })
@@ -125,7 +125,7 @@ export function saveDrawing() {
   // Create a temporary anchor element
   const a = document.createElement("a")
   a.href = blobUrl
-  a.download = state.saveSettings.saveAsFileName + ".pxv" // Set the file name for the download
+  a.download = state.ui.saveSettings.saveAsFileName + ".pxv" // Set the file name for the download
 
   // Append the anchor to the body, click it, and then remove it
   document.body.appendChild(a)
@@ -163,18 +163,18 @@ export async function loadDrawing(jsonFile) {
   // Clear existing layers and undoStack
   dom.canvasLayers.innerHTML = ""
   canvas.layers = []
-  state.undoStack = []
+  state.timeline.undoStack = []
   state.clearRedoStack()
   //Not likely to be an issue, but reset just in case
-  state.points = []
+  state.timeline.points = []
   //pasted images
-  state.pastedImages = {}
+  state.clipboard.pastedImages = {}
   //vectors
-  state.vectors = {}
-  state.highestVectorKey = 0
-  state.vectorsSavedProperties = {}
-  state.activeIndexes = []
-  state.savedBetweenActionImages = []
+  state.vector.all = {}
+  state.vector.highestKey = 0
+  state.vector.savedProperties = {}
+  state.timeline.activeIndexes = []
+  state.timeline.savedBetweenActionImages = []
   //reset selection state
   state.deselect()
   vectorGui.reset()
@@ -321,8 +321,8 @@ export async function loadDrawing(jsonFile) {
       let drawImagePromise = new Promise((resolve, reject) => {
         img.onload = () => {
           tempCtx.drawImage(img, 0, 0)
-          //IN PROGRESS: Construct the state.pastedImages by using the canvas from each paste action, set at action.pastedImageKey. If no key, set it to the highestPastedImageKey
-          state.pastedImages[action.pastedImageKey] = {
+          //IN PROGRESS: Construct the state.clipboard.pastedImages by using the canvas from each paste action, set at action.pastedImageKey. If no key, set it to the highestPastedImageKey
+          state.clipboard.pastedImages[action.pastedImageKey] = {
             imageData: tempCtx.getImageData(
               0,
               0,
@@ -342,7 +342,7 @@ export async function loadDrawing(jsonFile) {
     }
 
     // Add the action to the undo stack
-    state.undoStack.push(action)
+    state.timeline.undoStack.push(action)
   })
 
   //Reconstruct vectors (object, not array) by iterating through it and assigning the proper layer to each vector
@@ -354,14 +354,14 @@ export async function loadDrawing(jsonFile) {
     if (correspondingLayer) {
       //associate vector's layer
       vector.layer = correspondingLayer
-      if (state.undoStack[vector.action.index]) {
+      if (state.timeline.undoStack[vector.action.index]) {
         //associate vector's action
-        vector.action = state.undoStack[vector.action.index]
-        //add vector to state.vectors if valid layer and action present
-        state.vectors[vectorKey] = vector
+        vector.action = state.timeline.undoStack[vector.action.index]
+        //add vector to state.vector.all if valid layer and action present
+        state.vector.all[vectorKey] = vector
         //find the highest vector key
-        if (Number(vectorKey) > state.highestVectorKey) {
-          state.highestVectorKey = Number(vectorKey)
+        if (Number(vectorKey) > state.vector.highestKey) {
+          state.vector.highestKey = Number(vectorKey)
         }
       }
     }
@@ -372,8 +372,8 @@ export async function loadDrawing(jsonFile) {
 
   // Additional logic to update the UI, refresh the canvas, etc.
   if (data.selectProperties && data.selectProperties.px1 !== null) {
-    state.selectProperties = { ...data.selectProperties }
-    state.setBoundaryBox(state.selectProperties)
+    state.selection.properties = { ...data.selectProperties }
+    state.setBoundaryBox(state.selection.properties)
   }
   if (data.canvasProperties) {
     //resize the offscreen canvas to match the saved canvas dimensions (includes redraw timeline and vectorGui.render)
@@ -434,8 +434,8 @@ function convertActionToNewFormat(data, action) {
             conicControlPoints.bottomTangentY
         }
         //restructure how vectorProperties are stored
-        state.highestVectorKey += 1
-        let uniqueVectorKey = state.highestVectorKey
+        state.vector.highestKey += 1
+        let uniqueVectorKey = state.vector.highestKey
         data.vectors[uniqueVectorKey] = {
           index: uniqueVectorKey,
           action: { index: action.index }, //formatted with index for saving, mapped to action later
@@ -460,8 +460,8 @@ function convertActionToNewFormat(data, action) {
       //Handle line actions
       if (action.tool.name === "line") {
         //convert to a vector tool
-        state.highestVectorKey += 1
-        let uniqueVectorKey = state.highestVectorKey
+        state.vector.highestKey += 1
+        let uniqueVectorKey = state.vector.highestKey
         data.vectors[uniqueVectorKey] = {
           index: uniqueVectorKey,
           action: { index: action.index },

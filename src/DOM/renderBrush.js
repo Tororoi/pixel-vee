@@ -8,12 +8,12 @@ import { createOptionToggle } from "../utils/optionsInterfaceHelpers.js"
  * update brush stamp in dom
  */
 export function renderBrushStampToDOM() {
-  dom.lineWeight.textContent = state.tool.brushSize
-  dom.brushPreview.style.width = state.tool.brushSize * 2 + "px"
-  dom.brushPreview.style.height = state.tool.brushSize * 2 + "px"
+  dom.lineWeight.textContent = state.tool.current.brushSize
+  dom.brushPreview.style.width = state.tool.current.brushSize * 2 + "px"
+  dom.brushPreview.style.height = state.tool.current.brushSize * 2 + "px"
   updateBrushPreview(
-    brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
-    state.tool.brushSize
+    brushStamps[state.tool.current.brushType][state.tool.current.brushSize]["0,0"],
+    state.tool.current.brushSize
   )
 }
 
@@ -23,8 +23,8 @@ export function renderBrushStampToDOM() {
 export const renderBrushModesToDOM = () => {
   dom.modesContainer.innerHTML = ""
 
-  //iterate through object keys in state.tool.options
-  for (const [key, value] of Object.entries(state.tool.modes)) {
+  //iterate through object keys in state.tool.current.options
+  for (const [key, value] of Object.entries(state.tool.current.modes)) {
     const mode = document.createElement("button")
     mode.type = "button"
     mode.className = `mode ${key}`
@@ -65,11 +65,11 @@ export function renderToolOptionsToDOM() {
   dom.toolOptions.innerHTML = ""
   if (
     ["line", "quadCurve", "cubicCurve", "ellipse", "select"].includes(
-      state.tool.name
+      state.tool.current.name
     )
   ) {
     //render cubic curve options to menu
-    Object.entries(state.tool.options).forEach(([name, option]) => {
+    Object.entries(state.tool.current.options).forEach(([name, option]) => {
       let optionToggle = createOptionToggle(name, option)
       dom.toolOptions.appendChild(optionToggle)
     })

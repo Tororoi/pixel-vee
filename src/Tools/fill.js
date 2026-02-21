@@ -23,26 +23,26 @@ function fillSteps() {
     case "pointerdown": {
       //reset control points
       vectorGui.reset()
-      state.vectorProperties.type = state.tool.name
-      state.vectorProperties.px1 = state.cursorX
-      state.vectorProperties.py1 = state.cursorY
+      state.vector.properties.type = state.tool.current.name
+      state.vector.properties.px1 = state.cursor.x
+      state.vector.properties.py1 = state.cursor.y
       actionFill(
-        state.vectorProperties.px1,
-        state.vectorProperties.py1,
-        state.boundaryBox,
+        state.vector.properties.px1,
+        state.vector.properties.py1,
+        state.selection.boundaryBox,
         swatches.primary.color,
         canvas.currentLayer,
-        state.tool.modes,
-        state.maskSet
+        state.tool.current.modes,
+        state.selection.maskSet
       )
       //For undo ability, store starting coords and settings and pass them into actionFill
       let maskArray = coordArrayFromSet(
-        state.maskSet,
+        state.selection.maskSet,
         canvas.currentLayer.x,
         canvas.currentLayer.y
       )
       //correct boundary box for layer offset
-      const boundaryBox = { ...state.boundaryBox }
+      const boundaryBox = { ...state.selection.boundaryBox }
       if (boundaryBox.xMax !== null) {
         boundaryBox.xMin -= canvas.currentLayer.x
         boundaryBox.xMax -= canvas.currentLayer.x
@@ -50,11 +50,11 @@ function fillSteps() {
         boundaryBox.yMax -= canvas.currentLayer.y
       }
       //generate new unique key for vector
-      state.highestVectorKey += 1
-      let uniqueVectorKey = state.highestVectorKey
+      state.vector.highestKey += 1
+      let uniqueVectorKey = state.vector.highestKey
       //store control points for timeline
       addToTimeline({
-        tool: state.tool.name,
+        tool: state.tool.current.name,
         layer: canvas.currentLayer,
         properties: {
           maskArray,
@@ -63,25 +63,25 @@ function fillSteps() {
         },
       })
       //Store vector in state
-      state.vectors[uniqueVectorKey] = {
+      state.vector.all[uniqueVectorKey] = {
         index: uniqueVectorKey,
-        action: state.action,
+        action: state.timeline.currentAction,
         layer: canvas.currentLayer,
-        modes: { ...state.tool.modes },
+        modes: { ...state.tool.current.modes },
         color: { ...swatches.primary.color },
-        brushSize: state.tool.brushSize,
-        brushType: state.tool.brushType,
+        brushSize: state.tool.current.brushSize,
+        brushType: state.tool.current.brushType,
         vectorProperties: {
-          ...state.vectorProperties,
-          px1: state.vectorProperties.px1 - canvas.currentLayer.x,
-          py1: state.vectorProperties.py1 - canvas.currentLayer.y,
+          ...state.vector.properties,
+          px1: state.vector.properties.px1 - canvas.currentLayer.x,
+          py1: state.vector.properties.py1 - canvas.currentLayer.y,
         },
         // maskArray,
         // boundaryBox,
         hidden: false,
         removed: false,
       }
-      // state.currentVectorIndex = uniqueVectorKey
+      // state.vector.currentIndex = uniqueVectorKey
       // enableActionsForSelection()
       renderCanvas(canvas.currentLayer)
       vectorGui.reset()

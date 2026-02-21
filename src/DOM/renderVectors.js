@@ -15,7 +15,7 @@ import {
  */
 export const renderVectorsToDOM = () => {
   dom.vectorsThumbnails.innerHTML = ""
-  for (let vector of Object.values(state.vectors)) {
+  for (let vector of Object.values(state.vector.all)) {
     if (isValidVector(vector)) {
       renderVectorElement(vector)
     }
@@ -37,7 +37,7 @@ export const renderVectorsToDOM = () => {
 const isValidVector = (vector) =>
   !vector.removed &&
   !vector.layer?.removed &&
-  state.undoStack.includes(vector.action) &&
+  state.timeline.undoStack.includes(vector.action) &&
   (vector.layer === canvas.currentLayer ||
     (vector.layer === canvas.pastedLayer && canvas.currentLayer.isPreview))
 
@@ -46,9 +46,9 @@ const isValidVector = (vector) =>
  * @param {object} vector - The vector to be rendered
  */
 const renderVectorElement = (vector) => {
-  // const isSelected = vector.index === state.currentVectorIndex
-  const isSelected = state.selectedVectorIndicesSet.has(vector.index) //TODO: (Low Priority) Need better way to mark selected vs current vector in vector interface
-  const isCurrentVector = vector.index === state.currentVectorIndex
+  // const isSelected = vector.index === state.vector.currentIndex
+  const isSelected = state.vector.selectedIndices.has(vector.index) //TODO: (Low Priority) Need better way to mark selected vs current vector in vector interface
+  const isCurrentVector = vector.index === state.vector.currentIndex
   const vectorElement = createVectorElement(vector)
 
   const thumb = createThumbnailImage(vector, isSelected)

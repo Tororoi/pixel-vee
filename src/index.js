@@ -7,6 +7,16 @@ import "./Tools/events.js"
 import "./Controls/events.js"
 import "./GUI/events.js"
 import { actionDeselect } from "./Actions/nonPointerActions.js"
+import { vectorGui } from "./GUI/vector.js"
+import { registerVectorGui, registerDOMHelpers } from "./Context/state.js"
+import {
+  disableActionsForNoSelection,
+  enableActionsForSelection,
+} from "./DOM/disableDomElements.js"
+
+// Register dependencies that would otherwise create circular imports in state.js
+registerVectorGui(vectorGui)
+registerDOMHelpers({ disableActionsForNoSelection, enableActionsForSelection })
 
 //===================================//
 //===== * * * Initialize * * * ======//

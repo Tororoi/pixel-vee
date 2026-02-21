@@ -37,111 +37,111 @@ import { transformVectorContent } from "../utils/transformHelpers.js"
 export function transformVectorSteps() {
   //Doesn't really matter which selected vector is used since all selected vectors will be transformed, but one is needed for keeping track of the right layer, etc. so use the first one.
   let currentVector =
-    state.vectors[state.selectedVectorIndicesSet.values().next().value]
+    state.vector.all[state.vector.selectedIndices.values().next().value]
   switch (canvas.pointerEvent) {
     case "pointerdown": {
       //Incrementing click counter stops vector adjustment from triggering when cursor hovers over a vector control point while transforming. TODO: (Low Priority) Implement a clearer way to handle this specific to transform.
-      state.clickCounter += 1
-      state.grabStartX = state.cursorX
-      state.grabStartY = state.cursorY
-      state.grabStartShapeCenterX = state.shapeCenterX
-      state.grabStartShapeCenterY = state.shapeCenterY
-      //reset current vector properties (this also resets the state.currentVectorIndex if there is one)
+      state.tool.clickCounter += 1
+      state.tool.grabStartX = state.cursor.x
+      state.tool.grabStartY = state.cursor.y
+      state.vector.grabStartShapeCenterX = state.vector.shapeCenterX
+      state.vector.grabStartShapeCenterY = state.vector.shapeCenterY
+      //reset current vector properties (this also resets the state.vector.currentIndex if there is one)
       vectorGui.reset()
-      //Set state.vectorsSavedProperties for all selected vectors
-      state.vectorsSavedProperties = {}
-      state.selectedVectorIndicesSet.forEach((index) => {
-        const vectorProperties = state.vectors[index].vectorProperties
-        state.vectorsSavedProperties[index] = {
+      //Set state.vector.savedProperties for all selected vectors
+      state.vector.savedProperties = {}
+      state.vector.selectedIndices.forEach((index) => {
+        const vectorProperties = state.vector.all[index].vectorProperties
+        state.vector.savedProperties[index] = {
           ...vectorProperties,
         }
       })
       //Set activeIndexes for all selected vectors
-      state.activeIndexes = createActiveIndexesForRender(
+      state.timeline.activeIndexes = createActiveIndexesForRender(
         currentVector,
-        state.vectorsSavedProperties
+        state.vector.savedProperties
       )
-      if (state.vectorTransformMode === ROTATE) {
+      if (state.vector.transformMode === ROTATE) {
         //Rotation
-        state.grabStartAngle = getAngle(
-          state.shapeCenterX - state.grabStartX,
-          state.shapeCenterY - state.grabStartY
+        state.vector.grabStartAngle = getAngle(
+          state.vector.shapeCenterX - state.tool.grabStartX,
+          state.vector.shapeCenterY - state.tool.grabStartY
         )
       }
-      renderCanvas(currentVector.layer, true, state.activeIndexes, true)
+      renderCanvas(currentVector.layer, true, state.timeline.activeIndexes, true)
       break
     }
     case "pointermove": {
       //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
       //Based on the action being taken, update the vector properties for all selected vectors.
-      if (state.vectorTransformMode === ROTATE) {
+      if (state.vector.transformMode === ROTATE) {
         //Rotation
         rotateVectors(
           currentVector.layer,
-          state.vectorsSavedProperties,
-          state.vectors,
-          state.cursorX,
-          state.cursorY,
-          state.grabStartX,
-          state.grabStartY,
-          state.shapeCenterX,
-          state.shapeCenterY
+          state.vector.savedProperties,
+          state.vector.all,
+          state.cursor.x,
+          state.cursor.y,
+          state.tool.grabStartX,
+          state.tool.grabStartY,
+          state.vector.shapeCenterX,
+          state.vector.shapeCenterY
         )
-      } else if (state.vectorTransformMode === TRANSLATE) {
+      } else if (state.vector.transformMode === TRANSLATE) {
         //Translation
-        const xDiff = state.cursorX - state.grabStartX
-        const yDiff = state.cursorY - state.grabStartY
+        const xDiff = state.cursor.x - state.tool.grabStartX
+        const yDiff = state.cursor.y - state.tool.grabStartY
         translateVectors(
           currentVector.layer,
-          state.vectorsSavedProperties,
-          state.vectors,
+          state.vector.savedProperties,
+          state.vector.all,
           xDiff,
           yDiff
         )
         //Update shape center
-        state.shapeCenterX = state.grabStartShapeCenterX + xDiff
-        state.shapeCenterY = state.grabStartShapeCenterY + yDiff
+        state.vector.shapeCenterX = state.vector.grabStartShapeCenterX + xDiff
+        state.vector.shapeCenterY = state.vector.grabStartShapeCenterY + yDiff
       }
-      renderCanvas(currentVector.layer, true, state.activeIndexes)
+      renderCanvas(currentVector.layer, true, state.timeline.activeIndexes)
       break
     }
     case "pointerup": {
       //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
       //Based on the action being taken, update the vector properties for all selected vectors.
-      if (state.vectorTransformMode === ROTATE) {
+      if (state.vector.transformMode === ROTATE) {
         //Rotation
         rotateVectors(
           currentVector.layer,
-          state.vectorsSavedProperties,
-          state.vectors,
-          state.cursorX,
-          state.cursorY,
-          state.grabStartX,
-          state.grabStartY,
-          state.shapeCenterX,
-          state.shapeCenterY
+          state.vector.savedProperties,
+          state.vector.all,
+          state.cursor.x,
+          state.cursor.y,
+          state.tool.grabStartX,
+          state.tool.grabStartY,
+          state.vector.shapeCenterX,
+          state.vector.shapeCenterY
         )
         vectorGui.mother.currentRotation = vectorGui.mother.newRotation
-        state.grabStartAngle = null
-      } else if (state.vectorTransformMode === TRANSLATE) {
+        state.vector.grabStartAngle = null
+      } else if (state.vector.transformMode === TRANSLATE) {
         //Translation
-        const xDiff = state.cursorX - state.grabStartX
-        const yDiff = state.cursorY - state.grabStartY
+        const xDiff = state.cursor.x - state.tool.grabStartX
+        const yDiff = state.cursor.y - state.tool.grabStartY
         translateVectors(
           currentVector.layer,
-          state.vectorsSavedProperties,
-          state.vectors,
+          state.vector.savedProperties,
+          state.vector.all,
           xDiff,
           yDiff
         )
         //Update shape center
-        state.shapeCenterX = state.grabStartShapeCenterX + xDiff
-        state.shapeCenterY = state.grabStartShapeCenterY + yDiff
+        state.vector.shapeCenterX = state.vector.grabStartShapeCenterX + xDiff
+        state.vector.shapeCenterY = state.vector.grabStartShapeCenterY + yDiff
       }
-      state.grabStartShapeCenterX = null
-      state.grabStartShapeCenterY = null
-      state.clickCounter = 0
-      renderCanvas(currentVector.layer, true, state.activeIndexes)
+      state.vector.grabStartShapeCenterX = null
+      state.vector.grabStartShapeCenterY = null
+      state.tool.clickCounter = 0
+      renderCanvas(currentVector.layer, true, state.timeline.activeIndexes)
       modifyVectorAction(currentVector)
       vectorGui.selectedPoint = {
         xKey: null,
@@ -160,30 +160,30 @@ export function transformVectorSteps() {
  */
 function scaleVectorSteps() {
   let currentVector =
-    state.vectors[state.selectedVectorIndicesSet.values().next().value]
+    state.vector.all[state.vector.selectedIndices.values().next().value]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       vectorGui.selectedPoint = {
         xKey: vectorGui.collidedPoint.xKey,
         yKey: vectorGui.collidedPoint.yKey,
       }
-      state.previousBoundaryBox = { ...state.boundaryBox }
-      //reset current vector properties (this also resets the state.currentVectorIndex if there is one)
+      state.selection.previousBoundaryBox = { ...state.selection.boundaryBox }
+      //reset current vector properties (this also resets the state.vector.currentIndex if there is one)
       vectorGui.reset()
-      //Set state.vectorsSavedProperties for all selected vectors
-      state.vectorsSavedProperties = {}
-      state.selectedVectorIndicesSet.forEach((index) => {
-        const vectorProperties = state.vectors[index].vectorProperties
-        state.vectorsSavedProperties[index] = {
+      //Set state.vector.savedProperties for all selected vectors
+      state.vector.savedProperties = {}
+      state.vector.selectedIndices.forEach((index) => {
+        const vectorProperties = state.vector.all[index].vectorProperties
+        state.vector.savedProperties[index] = {
           ...vectorProperties,
         }
       })
       //Set activeIndexes for all selected vectors
-      state.activeIndexes = createActiveIndexesForRender(
+      state.timeline.activeIndexes = createActiveIndexesForRender(
         currentVector,
-        state.vectorsSavedProperties
+        state.vector.savedProperties
       )
-      renderCanvas(currentVector.layer, true, state.activeIndexes, true)
+      renderCanvas(currentVector.layer, true, state.timeline.activeIndexes, true)
       break
     case "pointermove": {
       transformBoundaries()
@@ -192,33 +192,33 @@ function scaleVectorSteps() {
       if (vectorGui.selectedPoint.xKey !== "px9") {
         //Don't check for mirroring when moving whole selection
         if (
-          state.boundaryBox.xMax === state.previousBoundaryBox.xMin ||
-          state.boundaryBox.xMin === state.previousBoundaryBox.xMax
+          state.selection.boundaryBox.xMax === state.selection.previousBoundaryBox.xMin ||
+          state.selection.boundaryBox.xMin === state.selection.previousBoundaryBox.xMax
         ) {
           isMirroredHorizontally = !isMirroredHorizontally
         }
         if (
-          state.boundaryBox.yMax === state.previousBoundaryBox.yMin ||
-          state.boundaryBox.yMin === state.previousBoundaryBox.yMax
+          state.selection.boundaryBox.yMax === state.selection.previousBoundaryBox.yMin ||
+          state.selection.boundaryBox.yMin === state.selection.previousBoundaryBox.yMax
         ) {
           isMirroredVertically = !isMirroredVertically
         }
       }
       transformVectorContent(
-        state.vectors,
-        state.vectorsSavedProperties,
-        state.previousBoundaryBox,
-        state.boundaryBox,
+        state.vector.all,
+        state.vector.savedProperties,
+        state.selection.previousBoundaryBox,
+        state.selection.boundaryBox,
         isMirroredHorizontally,
         isMirroredVertically
       )
-      renderCanvas(currentVector.layer, true, state.activeIndexes)
+      renderCanvas(currentVector.layer, true, state.timeline.activeIndexes)
       break
     }
     case "pointerup":
       state.normalizeSelectProperties()
-      state.setBoundaryBox(state.selectProperties)
-      renderCanvas(currentVector.layer, true, state.activeIndexes)
+      state.setBoundaryBox(state.selection.properties)
+      renderCanvas(currentVector.layer, true, state.timeline.activeIndexes)
       modifyVectorAction(currentVector)
       vectorGui.selectedPoint = {
         xKey: null,
@@ -242,16 +242,16 @@ export function moveVectorRotationPointSteps() {
         xKey: vectorGui.collidedPoint.xKey,
         yKey: vectorGui.collidedPoint.yKey,
       }
-      state.shapeCenterX = state.cursorX
-      state.shapeCenterY = state.cursorY
+      state.vector.shapeCenterX = state.cursor.x
+      state.vector.shapeCenterY = state.cursor.y
       break
     case "pointermove":
-      state.shapeCenterX = state.cursorX
-      state.shapeCenterY = state.cursorY
+      state.vector.shapeCenterX = state.cursor.x
+      state.vector.shapeCenterY = state.cursor.y
       break
     case "pointerup":
-      state.shapeCenterX = state.cursorX
-      state.shapeCenterY = state.cursorY
+      state.vector.shapeCenterX = state.cursor.x
+      state.vector.shapeCenterY = state.cursor.y
       vectorGui.selectedPoint = {
         xKey: null,
         yKey: null,
@@ -270,47 +270,47 @@ export function transformBoundaries() {
   //selectedPoint does not correspond to the selectProperties key. Based on selected point, adjust boundaryBox.
   switch (vectorGui.selectedPoint.xKey) {
     case "px1":
-      state.selectProperties.px1 = state.cursorX
-      state.selectProperties.py1 = state.cursorY
+      state.selection.properties.px1 = state.cursor.x
+      state.selection.properties.py1 = state.cursor.y
       break
     case "px2":
-      state.selectProperties.py1 = state.cursorY
+      state.selection.properties.py1 = state.cursor.y
       break
     case "px3":
-      state.selectProperties.px2 = state.cursorX
-      state.selectProperties.py1 = state.cursorY
+      state.selection.properties.px2 = state.cursor.x
+      state.selection.properties.py1 = state.cursor.y
       break
     case "px4":
-      state.selectProperties.px2 = state.cursorX
+      state.selection.properties.px2 = state.cursor.x
       break
     case "px5":
-      state.selectProperties.px2 = state.cursorX
-      state.selectProperties.py2 = state.cursorY
+      state.selection.properties.px2 = state.cursor.x
+      state.selection.properties.py2 = state.cursor.y
       break
     case "px6":
-      state.selectProperties.py2 = state.cursorY
+      state.selection.properties.py2 = state.cursor.y
       break
     case "px7":
-      state.selectProperties.px1 = state.cursorX
-      state.selectProperties.py2 = state.cursorY
+      state.selection.properties.px1 = state.cursor.x
+      state.selection.properties.py2 = state.cursor.y
       break
     case "px8":
-      state.selectProperties.px1 = state.cursorX
+      state.selection.properties.px1 = state.cursor.x
       break
     case "px9": {
       //move selected contents
-      const deltaX = state.cursorX - state.previousX
-      const deltaY = state.cursorY - state.previousY
-      state.selectProperties.px1 += deltaX
-      state.selectProperties.py1 += deltaY
-      state.selectProperties.px2 += deltaX
-      state.selectProperties.py2 += deltaY
+      const deltaX = state.cursor.x - state.cursor.prevX
+      const deltaY = state.cursor.y - state.cursor.prevY
+      state.selection.properties.px1 += deltaX
+      state.selection.properties.py1 += deltaY
+      state.selection.properties.px2 += deltaX
+      state.selection.properties.py2 += deltaY
       break
     }
     default:
     //do nothing
   }
-  state.setBoundaryBox(state.selectProperties)
+  state.setBoundaryBox(state.selection.properties)
 }
 
 //=======================================//
@@ -335,7 +335,7 @@ export function updateEllipseOffsets(
     vectorProperties.px2 - vectorProperties.px1,
     vectorProperties.py2 - vectorProperties.py1
   )
-  if (state.tool.options.useSubpixels?.active) {
+  if (state.tool.current.options.useSubpixels?.active) {
     vectorProperties.unifiedOffset = findHalf(
       canvas.subPixelX,
       canvas.subPixelY,
@@ -497,14 +497,14 @@ export function syncEllipseProperties(
  */
 function updateEllipseVectorProperties(currentVector) {
   syncEllipseProperties(
-    state.vectorProperties,
+    state.vector.properties,
     vectorGui.selectedPoint.xKey,
     vectorGui.selectedPoint.yKey,
-    state.cursorX,
-    state.cursorY
+    state.cursor.x,
+    state.cursor.y
   )
   currentVector.vectorProperties = {
-    ...state.vectorProperties,
+    ...state.vector.properties,
   }
   //Keep properties relative to layer offset
   currentVector.vectorProperties.px1 -= currentVector.layer.x
@@ -533,7 +533,7 @@ function updateEllipseVectorProperties(currentVector) {
  * BUG: cut selection not rendered properly in timeline
  */
 export function adjustVectorSteps() {
-  let currentVector = state.vectors[state.currentVectorIndex]
+  let currentVector = state.vector.all[state.vector.currentIndex]
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //TODO: (Medium Priority) If holding shift, add or remove vector from selected vectors set and return
@@ -541,7 +541,7 @@ export function adjustVectorSteps() {
         xKey: vectorGui.collidedPoint.xKey,
         yKey: vectorGui.collidedPoint.yKey,
       }
-      state.vectorsSavedProperties[state.currentVectorIndex] = {
+      state.vector.savedProperties[state.vector.currentIndex] = {
         ...currentVector.vectorProperties,
       }
       if (currentVector.vectorProperties.type === "ellipse") {
@@ -551,69 +551,69 @@ export function adjustVectorSteps() {
           vectorGui.selectedPoint.xKey !== "px1"
         ) {
           //if shift key is not being held and selected point is not the center, reset forceCircle
-          state.vectorProperties.forceCircle = false
+          state.vector.properties.forceCircle = false
           currentVector.vectorProperties.forceCircle = false
         }
         if (vectorGui.selectedPoint.xKey === "px1") {
           //if center point is selected, use current vector's forceCircle value
-          state.vectorProperties.forceCircle =
+          state.vector.properties.forceCircle =
             currentVector.vectorProperties.forceCircle
         }
         updateEllipseVectorProperties(currentVector)
       } else {
-        state.vectorProperties[vectorGui.collidedPoint.xKey] = state.cursorX
-        state.vectorProperties[vectorGui.collidedPoint.yKey] = state.cursorY
+        state.vector.properties[vectorGui.collidedPoint.xKey] = state.cursor.x
+        state.vector.properties[vectorGui.collidedPoint.yKey] = state.cursor.y
         //save linked vectors too
         updateVectorProperties(
           currentVector,
-          state.cursorX,
-          state.cursorY,
+          state.cursor.x,
+          state.cursor.y,
           vectorGui.selectedPoint.xKey,
           vectorGui.selectedPoint.yKey
         )
-        if (state.tool.options.hold?.active) {
+        if (state.tool.current.options.hold?.active) {
           updateLockedCurrentVectorControlHandle(
             currentVector,
-            state.cursorX,
-            state.cursorY
+            state.cursor.x,
+            state.cursor.y
           )
         }
-        if (state.tool.options.link?.active) {
+        if (state.tool.current.options.link?.active) {
           updateLinkedVectors(currentVector, true)
         }
       }
-      state.activeIndexes = createActiveIndexesForRender(
+      state.timeline.activeIndexes = createActiveIndexesForRender(
         currentVector,
-        state.vectorsSavedProperties
+        state.vector.savedProperties
       )
-      renderCanvas(currentVector.layer, true, state.activeIndexes, true)
+      renderCanvas(currentVector.layer, true, state.timeline.activeIndexes, true)
       break
     case "pointermove":
       if (vectorGui.selectedPoint.xKey) {
         if (currentVector.vectorProperties.type === "ellipse") {
           updateEllipseVectorProperties(currentVector)
         } else {
-          state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
-          state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
+          state.vector.properties[vectorGui.selectedPoint.xKey] = state.cursor.x
+          state.vector.properties[vectorGui.selectedPoint.yKey] = state.cursor.y
           updateVectorProperties(
             currentVector,
-            state.cursorX,
-            state.cursorY,
+            state.cursor.x,
+            state.cursor.y,
             vectorGui.selectedPoint.xKey,
             vectorGui.selectedPoint.yKey
           )
-          if (state.tool.options.hold?.active) {
+          if (state.tool.current.options.hold?.active) {
             updateLockedCurrentVectorControlHandle(
               currentVector,
-              state.cursorX,
-              state.cursorY
+              state.cursor.x,
+              state.cursor.y
             )
           }
-          if (state.tool.options.link?.active) {
+          if (state.tool.current.options.link?.active) {
             updateLinkedVectors(currentVector)
           }
         }
-        renderCanvas(currentVector.layer, true, state.activeIndexes)
+        renderCanvas(currentVector.layer, true, state.timeline.activeIndexes)
       }
       break
     case "pointerup":
@@ -621,37 +621,37 @@ export function adjustVectorSteps() {
         if (currentVector.vectorProperties.type === "ellipse") {
           updateEllipseVectorProperties(currentVector)
         } else {
-          state.vectorProperties[vectorGui.selectedPoint.xKey] = state.cursorX
-          state.vectorProperties[vectorGui.selectedPoint.yKey] = state.cursorY
+          state.vector.properties[vectorGui.selectedPoint.xKey] = state.cursor.x
+          state.vector.properties[vectorGui.selectedPoint.yKey] = state.cursor.y
           updateVectorProperties(
             currentVector,
-            state.cursorX,
-            state.cursorY,
+            state.cursor.x,
+            state.cursor.y,
             vectorGui.selectedPoint.xKey,
             vectorGui.selectedPoint.yKey
           )
-          if (state.tool.options.hold?.active) {
+          if (state.tool.current.options.hold?.active) {
             updateLockedCurrentVectorControlHandle(
               currentVector,
-              state.cursorX,
-              state.cursorY
+              state.cursor.x,
+              state.cursor.y
             )
           }
-          if (state.tool.options.link?.active) {
+          if (state.tool.current.options.link?.active) {
             updateLinkedVectors(currentVector)
           }
           //Handle snapping p1 or p2 to other control points. Only snap when there are no linked vectors to selected vector.
           if (
-            (state.tool.options.align?.active ||
-              state.tool.options.equal?.active ||
-              state.tool.options.link?.active) &&
-            Object.keys(state.vectorsSavedProperties).length === 1 &&
+            (state.tool.current.options.align?.active ||
+              state.tool.current.options.equal?.active ||
+              state.tool.current.options.link?.active) &&
+            Object.keys(state.vector.savedProperties).length === 1 &&
             ["px1", "px2"].includes(vectorGui.selectedPoint.xKey) &&
-            state.collidedVectorIndex !== null &&
-            state.currentVectorIndex !== null
+            state.vector.collidedIndex !== null &&
+            state.vector.currentIndex !== null
           ) {
             //snap selected point to collidedVector's control point
-            let collidedVector = state.vectors[state.collidedVectorIndex]
+            let collidedVector = state.vector.all[state.vector.collidedIndex]
             if (
               !["fill", "ellipse"].includes(
                 collidedVector.vectorProperties.type
@@ -666,8 +666,8 @@ export function adjustVectorSteps() {
                 collidedVector.vectorProperties[
                   vectorGui.otherCollidedKeys.yKey
                 ] + collidedVector.layer.y
-              state.vectorProperties[vectorGui.selectedPoint.xKey] = snappedToX
-              state.vectorProperties[vectorGui.selectedPoint.yKey] = snappedToY
+              state.vector.properties[vectorGui.selectedPoint.xKey] = snappedToX
+              state.vector.properties[vectorGui.selectedPoint.yKey] = snappedToY
               updateVectorProperties(
                 currentVector,
                 snappedToX,
@@ -675,7 +675,7 @@ export function adjustVectorSteps() {
                 vectorGui.selectedPoint.xKey,
                 vectorGui.selectedPoint.yKey
               )
-              if (state.tool.options.hold?.active) {
+              if (state.tool.current.options.hold?.active) {
                 updateLockedCurrentVectorControlHandle(
                   currentVector,
                   snappedToX,
@@ -684,8 +684,8 @@ export function adjustVectorSteps() {
               }
               //Handle options behavior on snapping, currently only viable for quadCurve and cubicCurve
               if (
-                (state.tool.options.align?.active ||
-                  state.tool.options.equal?.active) &&
+                (state.tool.current.options.align?.active ||
+                  state.tool.current.options.equal?.active) &&
                 ["px1", "px2"].includes(vectorGui.selectedPoint.xKey)
               ) {
                 //Set selected keys
@@ -712,7 +712,7 @@ export function adjustVectorSteps() {
                 }
                 //Set selected deltas
                 const savedCurrentProperties =
-                  state.vectorsSavedProperties[currentVector.index]
+                  state.vector.savedProperties[currentVector.index]
                 const currentHandleDeltaX =
                   savedCurrentProperties[selectedEndpointXKey] -
                   savedCurrentProperties[selectedHandleXKey]
@@ -720,11 +720,11 @@ export function adjustVectorSteps() {
                   savedCurrentProperties[selectedEndpointYKey] -
                   savedCurrentProperties[selectedHandleYKey]
                 const selectedHandleDeltaX =
-                  state.vectorProperties[selectedHandleXKey] -
-                  state.vectorProperties[selectedEndpointXKey]
+                  state.vector.properties[selectedHandleXKey] -
+                  state.vector.properties[selectedEndpointXKey]
                 const selectedHandleDeltaY =
-                  state.vectorProperties[selectedHandleYKey] -
-                  state.vectorProperties[selectedEndpointYKey]
+                  state.vector.properties[selectedHandleYKey] -
+                  state.vector.properties[selectedEndpointYKey]
                 //Set collided deltas
                 let collidedHandleDeltaX, collidedHandleDeltaY
                 if (vectorGui.otherCollidedKeys.xKey === "px1") {
@@ -752,7 +752,7 @@ export function adjustVectorSteps() {
                   }
                 }
                 let selectedHandleLength
-                if (state.tool.options.equal?.active) {
+                if (state.tool.current.options.equal?.active) {
                   //Make selected handle length equal to collided vector's handle length
                   selectedHandleLength = Math.sqrt(
                     collidedHandleDeltaX ** 2 + collidedHandleDeltaY ** 2
@@ -765,12 +765,12 @@ export function adjustVectorSteps() {
                 }
                 let newSelectedAngle
                 //Priority for angle is align > equal
-                if (state.tool.options.align?.active) {
+                if (state.tool.current.options.align?.active) {
                   //Align angle of selected control handle opposite of collided vector control handle
                   newSelectedAngle =
                     getAngle(collidedHandleDeltaX, collidedHandleDeltaY) +
                     Math.PI
-                } else if (state.tool.options.equal?.active) {
+                } else if (state.tool.current.options.equal?.active) {
                   //Maintain absolute angle of selected control handle
                   newSelectedAngle = getAngle(
                     selectedHandleDeltaX,
@@ -783,16 +783,16 @@ export function adjustVectorSteps() {
                 const newSelectedHandleDeltaY = -Math.round(
                   Math.sin(newSelectedAngle) * selectedHandleLength
                 )
-                state.vectorProperties[selectedHandleXKey] =
-                  state.vectorProperties[selectedEndpointXKey] -
+                state.vector.properties[selectedHandleXKey] =
+                  state.vector.properties[selectedEndpointXKey] -
                   newSelectedHandleDeltaX
-                state.vectorProperties[selectedHandleYKey] =
-                  state.vectorProperties[selectedEndpointYKey] -
+                state.vector.properties[selectedHandleYKey] =
+                  state.vector.properties[selectedEndpointYKey] -
                   newSelectedHandleDeltaY
                 updateVectorProperties(
                   currentVector,
-                  state.vectorProperties[selectedHandleXKey],
-                  state.vectorProperties[selectedHandleYKey],
+                  state.vector.properties[selectedHandleXKey],
+                  state.vector.properties[selectedHandleYKey],
                   selectedHandleXKey,
                   selectedHandleYKey
                 )
@@ -800,7 +800,7 @@ export function adjustVectorSteps() {
             }
           }
         }
-        renderCanvas(currentVector.layer, true, state.activeIndexes)
+        renderCanvas(currentVector.layer, true, state.timeline.activeIndexes)
         // renderCanvas(currentVector.layer, true)
         modifyVectorAction(currentVector)
         vectorGui.selectedPoint = {
@@ -821,11 +821,11 @@ export function adjustVectorSteps() {
 export function rerouteVectorStepsAction() {
   //for selecting another vector via the canvas, collisionPresent is false since it is currently based on collision with selected vector.
   if (
-    state.collidedVectorIndex !== null &&
+    state.vector.collidedIndex !== null &&
     !vectorGui.selectedCollisionPresent &&
-    state.clickCounter === 0
+    state.tool.clickCounter === 0
   ) {
-    let collidedVector = state.vectors[state.collidedVectorIndex]
+    let collidedVector = state.vector.all[state.vector.collidedIndex]
     vectorGui.setVectorProperties(collidedVector)
     //Render new selected vector before running standard render routine
     //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.
@@ -836,28 +836,28 @@ export function rerouteVectorStepsAction() {
     ((vectorGui.collidedPoint.xKey === "rotationx" &&
       vectorGui.selectedPoint.xKey === null) ||
       vectorGui.selectedPoint.xKey === "rotationx") &&
-    state.clickCounter === 0
+    state.tool.clickCounter === 0
   ) {
     moveVectorRotationPointSteps()
     return true
   }
   if (
-    state.vectorTransformMode === SCALE &&
-    state.selectedVectorIndicesSet.size > 0
+    state.vector.transformMode === SCALE &&
+    state.vector.selectedIndices.size > 0
   ) {
     scaleVectorSteps()
     return true
   }
   if (
     vectorGui.selectedCollisionPresent &&
-    state.clickCounter === 0 &&
-    state.currentVectorIndex !== null
+    state.tool.clickCounter === 0 &&
+    state.vector.currentIndex !== null
   ) {
     adjustVectorSteps()
     return true
   }
   //If there are selected vectors, call transformVectorSteps() instead of this function
-  if (state.selectedVectorIndicesSet.size > 0) {
+  if (state.vector.selectedIndices.size > 0) {
     transformVectorSteps()
     return true
   }
