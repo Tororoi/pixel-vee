@@ -53,15 +53,16 @@ export function sanitizeVectors(
   includeRemovedActions
 ) {
   let sanitizedVectors = JSON.parse(JSON.stringify(vectors))
-  for (let i = sanitizedVectors.length - 1; i >= 0; i--) {
-    const vector = sanitizedVectors[i]
+  const validActionIndices = new Set(undoStack.map((a) => a.index))
+  for (const key in sanitizedVectors) {
+    const vector = sanitizedVectors[key]
     if (
       ((vector.layer.removed || vector.removed) &&
         !preserveHistory &&
         !includeRemovedActions) ||
-      !undoStack.includes(vector.action)
+      !validActionIndices.has(vector.action.index)
     ) {
-      sanitizedVectors.splice(i, 1)
+      delete sanitizedVectors[key]
     } else {
       vector.layer = { id: vector.layer.id }
       vector.action = { index: vector.action.index }
