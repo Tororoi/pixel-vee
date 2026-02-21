@@ -4,7 +4,7 @@ import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { actionDraw, actionLine } from "../Actions/pointerActions.js"
 import { getAngle, getTriangle } from "../utils/trig.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { renderCanvas, scheduleRender } from "../Canvas/render.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { createColorMaskSet } from "../Canvas/masks.js"
@@ -40,7 +40,7 @@ function brushSteps() {
       state.drawing.lastDrawnY = state.cursor.y
       state.drawing.waitingPixelX = state.cursor.x
       state.drawing.waitingPixelY = state.cursor.y
-      renderCanvas(canvas.currentLayer)
+      scheduleRender(canvas.currentLayer)
       break
     case "pointermove":
       //draw line connecting points that don't touch or if shift is held
@@ -65,7 +65,7 @@ function brushSteps() {
         )
       } else if (shouldDrawLine()) {
         drawLine()
-        renderCanvas(canvas.currentLayer)
+        scheduleRender(canvas.currentLayer)
       } else {
         if (state.tool.current.modes?.perfect) {
           handlePerfectPixels()
@@ -78,7 +78,7 @@ function brushSteps() {
             state.cursor.prevY
           )
           drawBrushPoint(state.cursor.x, state.cursor.y, brushDirection)
-          renderCanvas(canvas.currentLayer)
+          scheduleRender(canvas.currentLayer)
         }
       }
       break
@@ -88,7 +88,7 @@ function brushSteps() {
       }
       //only needed if perfect pixels option is on
       drawBrushPoint(state.cursor.x, state.cursor.y, brushDirection)
-      renderCanvas(canvas.currentLayer)
+      scheduleRender(canvas.currentLayer)
       //add action to timeline
       let maskArray = coordArrayFromSet(
         state.selection.maskSet,

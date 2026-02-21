@@ -16,6 +16,29 @@ import {
 import { setInitialZoom } from "../utils/canvasHelpers.js"
 import { transformRasterContent } from "../utils/transformHelpers.js"
 
+// rAF batching for brush stroke renders
+let _scheduledLayer = null
+let _rafId = null
+
+/**
+ * Schedule a renderCanvas call for the next animation frame.
+ * Multiple calls before the frame fires collapse into one render,
+ * eliminating wasted redraws on high-frequency pointermove events.
+ * Only use this when the offscreen canvas is already up-to-date and
+ * you just need to blit it to the onscreen canvas (no preview draw follows).
+ * @param {object} layer - the layer to render (passed through to renderCanvas)
+ */
+export function scheduleRender(layer) {
+  _scheduledLayer = layer
+  if (_rafId === null) {
+    _rafId = requestAnimationFrame(() => {
+      _rafId = null
+      renderCanvas(_scheduledLayer)
+      _scheduledLayer = null
+    })
+  }
+}
+
 /**
  * Redraw all timeline actions
  * Critical function for the timeline to work
@@ -32,6 +55,10 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
   //follows stored instructions to reassemble drawing. Costly operation. Minimize usage as much as possible.
   let betweenCtx = null //canvas context for saving between actions
   let startIndex = 1
+  // Build a Map for O(1) position lookups instead of repeated O(n) includes/indexOf calls
+  const activeIndexMap = activeIndexes
+    ? new Map(activeIndexes.map((idx, pos) => [idx, pos]))
+    : null
   if (activeIndexes) {
     if (setImages) {
       //set initial sandwiched canvas
@@ -41,6 +68,16 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
       startIndex = activeIndexes[0]
     }
   }
+  // Pre-compute the last unconfirmed paste and transform actions so performAction
+  // can do an O(1) reference check instead of an O(n) reverse scan per action.
+  let lastPasteAction = null
+  let lastTransformAction = null
+  for (let i = state.timeline.undoStack.length - 1; i >= 0; i--) {
+    const a = state.timeline.undoStack[i]
+    if (lastPasteAction === null && a.tool === "paste" && !a.confirmed) lastPasteAction = a
+    if (lastTransformAction === null && a.tool === "transform") lastTransformAction = a
+    if (lastPasteAction !== null && lastTransformAction !== null) break
+  }
   //loop through all actions
   for (let i = startIndex; i < state.timeline.undoStack.length; i++) {
     let action = state.timeline.undoStack[i]
@@ -48,10 +85,10 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
     if (layer) {
       if (action.layer !== layer) continue
     }
-    if (activeIndexes) {
-      if (activeIndexes.includes(i)) {
+    if (activeIndexMap) {
+      if (activeIndexMap.has(i)) {
         //render betweenCanvas
-        let activeIndex = activeIndexes.indexOf(i)
+        let activeIndex = activeIndexMap.get(i)
         //draw accumulated canvas actions from previous betweenCanvas to action.layer.ctx
         action.layer.ctx.drawImage(
           state.timeline.savedBetweenActionImages[activeIndex].cvs,
@@ -70,17 +107,17 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
       !action.removed &&
       ["raster", "vector"].includes(tool.type)
     ) {
-      performAction(action, betweenCtx)
+      performAction(action, betweenCtx, lastPasteAction, lastTransformAction)
     }
-    if (activeIndexes) {
-      if (activeIndexes.includes(i)) {
+    if (activeIndexMap) {
+      if (activeIndexMap.has(i)) {
         if (setImages) {
           //if activeIndexes and setImages, loop through all actions and set image from previous active index to current active index to state.timeline.savedBetweenActionImages[i].betweenImage
           betweenCtx = createAndSaveContext()
           //actions rendered in loop beyond this point will render onto this cvs until a new one is set
         } else {
           //set i to next activeIndex to skip all actions until next activeIndex
-          let nextActiveIndex = activeIndexes[activeIndexes.indexOf(i) + 1]
+          let nextActiveIndex = activeIndexes[activeIndexMap.get(i) + 1]
           if (nextActiveIndex) {
             i = nextActiveIndex - 1
           }
@@ -136,7 +173,7 @@ function createAndSaveContext() {
  * @param {object} action - The action to be performed
  * @param {CanvasRenderingContext2D} betweenCtx - The canvas context for saving between actions
  */
-export function performAction(action, betweenCtx = null) {
+export function performAction(action, betweenCtx = null, lastPasteAction = null, lastTransformAction = null) {
   if (!action?.boundaryBox) {
     return
   }
@@ -248,17 +285,8 @@ export function performAction(action, betweenCtx = null) {
         boundaryBox.yMin += offsetY
         boundaryBox.yMax += offsetY
       }
-      // Determine if the action is the last 'paste' action in the undoStack
-      let isLastPasteAction = false // Default to false
-      if (!action.confirmed) {
-        for (let i = state.timeline.undoStack.length - 1; i >= 0; i--) {
-          if (state.timeline.undoStack[i].tool === "paste") {
-            // If the first 'paste' action found from the end is the current action
-            isLastPasteAction = state.timeline.undoStack[i] === action
-            break // Stop searching once the first 'paste' action is found
-          }
-        }
-      }
+      // Determine if the action is the last unconfirmed 'paste' action in the undoStack
+      const isLastPasteAction = action === lastPasteAction
       //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
       if (action.confirmed) {
         let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
@@ -293,15 +321,7 @@ export function performAction(action, betweenCtx = null) {
         canvas.tempLayer === canvas.currentLayer &&
         action.pastedImageKey === state.clipboard.currentPastedImageKey
       ) {
-        let isLastTransformAction = false // Default to false
-        for (let i = state.timeline.undoStack.length - 1; i >= 0; i--) {
-          if (state.timeline.undoStack[i].tool === "transform") {
-            // If the first 'paste' action found from the end is the current action
-            isLastTransformAction = state.timeline.undoStack[i] === action
-            break // Stop searching once the first 'paste' action is found
-          }
-        }
-        if (isLastTransformAction) {
+        if (action === lastTransformAction) {
           //Correct action coordinates with layer offsets
           const offsetX = action.layer.x
           const offsetY = action.layer.y
