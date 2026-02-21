@@ -189,6 +189,8 @@ function createBrushStamp(generatorFn, brushSize) {
   ]
   const directions = {
     "0,0": base,
+    // Pre-built Set for O(1) neighbor lookups in drawCursorBox (avoids rebuilding every frame)
+    pixelSet: new Set(base.map((p) => `${p.x},${p.y}`)),
   }
   for (const [x, y] of offsets) {
     directions[`${x},${y}`] = generateOffsetBrush(base, x, y, seen)
