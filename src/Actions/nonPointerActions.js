@@ -55,7 +55,7 @@ export function actionSelectAll() {
     state.selection.properties.py1 = 0
     state.selection.properties.px2 = canvas.currentLayer.cvs.width
     state.selection.properties.py2 = canvas.currentLayer.cvs.height
-    state.setBoundaryBox(state.selection.properties)
+    state.selection.setBoundaryBox(state.selection.properties)
     addToTimeline({
       tool: tools.select.name,
       layer: canvas.currentLayer,
@@ -81,7 +81,7 @@ export function actionSelectAll() {
  */
 export function actionSelectVector(vectorIndex) {
   if (!state.vector.selectedIndices.has(vectorIndex)) {
-    state.vector.selectedIndices.add(vectorIndex)
+    state.vector.addSelected(vectorIndex)
     dom.vectorTransformUIContainer.style.display = "flex"
     if (state.vector.transformMode === SCALE) {
       setVectorShapeBoundaryBox()
@@ -120,7 +120,7 @@ export function actionSelectVector(vectorIndex) {
  */
 export function actionDeselectVector(vectorIndex) {
   if (state.vector.selectedIndices.has(vectorIndex)) {
-    state.vector.selectedIndices.delete(vectorIndex)
+    state.vector.removeSelected(vectorIndex)
     if (state.vector.selectedIndices.size === 0) {
       dom.vectorTransformUIContainer.style.display = "none"
       state.deselect()
@@ -315,7 +315,7 @@ export function actionPasteSelection() {
         state.clipboard.currentPastedImageKey = uniquePastedImageKey
       }
       //clear any selected vectors
-      state.vector.selectedIndices.clear()
+      state.vector.clearSelected()
       dom.vectorTransformUIContainer.style.display = "none"
       //add to timeline
       addToTimeline({
@@ -366,18 +366,17 @@ export function actionPasteSelection() {
         //   vector.vectorProperties.py4 += canvas.currentLayer.y
         // }
         //update vector index and action index
-        state.vector.highestKey += 1
-        let uniqueVectorKey = state.vector.highestKey
+        const uniqueVectorKey = state.vector.nextKey()
         vector.index = uniqueVectorKey
         delete clipboardVectors[vectorIndex] // Remove old key-value pair
         clipboardVectors[uniqueVectorKey] = vector // Assign vector to new key
         //add to state.vector.all
         state.vector.all[uniqueVectorKey] = vector
       }
-      state.vector.selectedIndices.clear()
+      state.vector.clearSelected()
       const vectorIndices = Object.keys(clipboardVectors)
       vectorIndices.forEach((vectorIndex) => {
-        state.vector.selectedIndices.add(parseInt(vectorIndex))
+        state.vector.addSelected(parseInt(vectorIndex))
       })
       if (state.vector.selectedIndices.size > 0) {
         dom.vectorTransformUIContainer.style.display = "flex"
@@ -645,7 +644,7 @@ export function actionRotatePixels() {
     }
 
     state.selection.properties = rotateBoundaryBox90Clockwise(state.selection.boundaryBox)
-    state.setBoundaryBox(state.selection.properties)
+    state.selection.setBoundaryBox(state.selection.properties)
     state.transform.rotationDegrees += 90
     if (state.transform.isMirroredHorizontally) {
       state.transform.rotationDegrees += 180

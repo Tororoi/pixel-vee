@@ -29,13 +29,13 @@ dom.vectorTransformModeContainer.addEventListener("click", (e) => {
   //check for button click on translate, rotate or scale by checking e.target.id
   switch (e.target.id) {
     case TRANSLATE:
-      state.resetSelectProperties()
-      state.resetBoundaryBox()
+      state.selection.resetProperties()
+      state.selection.resetBoundaryBox()
       switchVectorTransformMode(TRANSLATE)
       break
     case ROTATE:
-      state.resetSelectProperties()
-      state.resetBoundaryBox()
+      state.selection.resetProperties()
+      state.selection.resetBoundaryBox()
       switchVectorTransformMode(ROTATE)
       break
     case SCALE: {
@@ -48,7 +48,7 @@ dom.vectorTransformModeContainer.addEventListener("click", (e) => {
       // state.selection.properties.py1 = shapeBoundaryBox.yMin
       // state.selection.properties.px2 = shapeBoundaryBox.xMax
       // state.selection.properties.py2 = shapeBoundaryBox.yMax
-      // state.setBoundaryBox(state.selection.properties)
+      // state.selection.setBoundaryBox(state.selection.properties)
       setVectorShapeBoundaryBox()
       switchVectorTransformMode(SCALE)
       break

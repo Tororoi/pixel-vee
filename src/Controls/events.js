@@ -256,7 +256,7 @@ function handlePointerUp(e) {
 
     state.selection.pointsSet = null
     state.selection.seenPixelsSet = null
-    state.timeline.points = []
+    state.timeline.clearPoints()
     //Reset redostack
     state.clearRedoStack()
   }

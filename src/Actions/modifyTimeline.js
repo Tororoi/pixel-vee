@@ -38,8 +38,8 @@ export function modifyVectorAction(moddedVector) {
     })
   }
   state.vector.savedProperties = {}
-  state.timeline.activeIndexes = []
-  state.timeline.savedBetweenActionImages = []
+  state.timeline.clearActiveIndexes()
+  state.timeline.clearSavedBetweenActionImages()
   addToTimeline({
     tool: tools.modify.name,
     layer: moddedVector.layer,

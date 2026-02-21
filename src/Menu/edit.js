@@ -149,7 +149,7 @@ export function pasteSelectedPixels(clipboard, layer, offsetX, offsetY) {
   state.selection.properties.px2 += offsetX
   state.selection.properties.py1 += offsetY
   state.selection.properties.py2 += offsetY
-  state.setBoundaryBox(state.selection.properties)
+  state.selection.setBoundaryBox(state.selection.properties)
   renderPaste(clipboard, canvas.tempLayer, offsetX, offsetY)
   //TODO: (Medium Priority) include transform control points for resizing, rotating, etc. (not currently implemented)
   vectorGui.render()

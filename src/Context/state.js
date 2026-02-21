@@ -63,6 +63,13 @@ export const state = {
     grabStartShapeCenterX: null, // was: grabStartShapeCenterX
     grabStartShapeCenterY: null, // was: grabStartShapeCenterY
     grabStartAngle: null, // was: grabStartAngle
+    // Setters
+    setCurrentIndex(idx) { this.currentIndex = idx },
+    nextKey() { this.highestKey += 1; return this.highestKey },
+    addSelected(idx) { this.selectedIndices.add(idx) },
+    removeSelected(idx) { this.selectedIndices.delete(idx) },
+    clearSelected() { this.selectedIndices.clear() },
+    setTransformMode(mode) { this.transformMode = mode },
   },
   // SELECTION — selection area, boundary box, and masks
   selection: {
@@ -84,6 +91,49 @@ export const state = {
     pointsSet: null, // was: pointsSet
     pixelPoints: null, // was: selectPixelPoints
     cornersSet: null, // was: selectCornersSet
+    // Setters / methods (promoted from top-level state)
+    resetProperties() {
+      this.properties = { px1: null, py1: null, px2: null, py2: null }
+      this.maskSet = null
+    },
+    normalize() {
+      const { px1, py1, px2, py2 } = { ...this.properties }
+      this.properties.px1 = Math.min(px1, px2)
+      this.properties.py1 = Math.min(py1, py2)
+      this.properties.px2 = Math.max(px2, px1)
+      this.properties.py2 = Math.max(py2, py1)
+    },
+    resetBoundaryBox() {
+      this.boundaryBox = { xMin: null, yMin: null, xMax: null, yMax: null }
+    },
+    setBoundaryBox(selectProperties) {
+      if (
+        selectProperties.px1 !== null &&
+        selectProperties.py1 !== null &&
+        selectProperties.px2 !== null &&
+        selectProperties.py2 !== null
+      ) {
+        this.boundaryBox.xMin = Math.min(
+          selectProperties.px1,
+          selectProperties.px2
+        )
+        this.boundaryBox.yMin = Math.min(
+          selectProperties.py1,
+          selectProperties.py2
+        )
+        this.boundaryBox.xMax = Math.max(
+          selectProperties.px2,
+          selectProperties.px1
+        )
+        this.boundaryBox.yMax = Math.max(
+          selectProperties.py2,
+          selectProperties.py1
+        )
+        if (_enableActionsForSelection) _enableActionsForSelection()
+      } else {
+        this.resetBoundaryBox()
+      }
+    },
   },
   // TIMELINE — undo/redo stacks and current action
   timeline: {
@@ -94,6 +144,11 @@ export const state = {
     activeIndexes: [], // was: activeIndexes
     savedBetweenActionImages: [], // was: savedBetweenActionImages
     points: [], // was: points
+    // Setters
+    clearPoints() { this.points = [] },
+    addPoint(pt) { this.points.push(pt) },
+    clearActiveIndexes() { this.activeIndexes = [] },
+    clearSavedBetweenActionImages() { this.savedBetweenActionImages = [] },
   },
   // UI — drag, tooltip, shortcuts, and save dialog
   ui: {
@@ -162,12 +217,8 @@ export const state = {
     colorLayerGlobal: null, // was: colorLayerGlobal
     localColorLayer: null, // was: localColorLayer
   },
-  //functions
+  // Cross-domain methods
   reset,
-  resetSelectProperties,
-  normalizeSelectProperties,
-  resetBoundaryBox,
-  setBoundaryBox,
   deselect,
   clearRedoStack,
 }
@@ -215,81 +266,11 @@ function reset() {
 }
 
 /**
- * Reset select properties
- */
-function resetSelectProperties() {
-  state.selection.properties = {
-    px1: null,
-    py1: null,
-    px2: null,
-    py2: null,
-  }
-  state.selection.maskSet = null
-}
-
-/**
- * Normalize select properties
- */
-function normalizeSelectProperties() {
-  const { px1, py1, px2, py2 } = { ...state.selection.properties }
-  //set selectProperties so p1 is min and p2 is max
-  state.selection.properties.px1 = Math.min(px1, px2)
-  state.selection.properties.py1 = Math.min(py1, py2)
-  state.selection.properties.px2 = Math.max(px2, px1)
-  state.selection.properties.py2 = Math.max(py2, py1)
-}
-
-/**
- * Reset boundaryBox
- */
-function resetBoundaryBox() {
-  state.selection.boundaryBox = {
-    xMin: null,
-    yMin: null,
-    xMax: null,
-    yMax: null,
-  }
-}
-
-/**
- * Set boundaryBox
- * @param {object} selectProperties - The properties of the selection
- */
-function setBoundaryBox(selectProperties) {
-  if (
-    selectProperties.px1 !== null &&
-    selectProperties.py1 !== null &&
-    selectProperties.px2 !== null &&
-    selectProperties.py2 !== null
-  ) {
-    state.selection.boundaryBox.xMin = Math.min(
-      selectProperties.px1,
-      selectProperties.px2
-    )
-    state.selection.boundaryBox.yMin = Math.min(
-      selectProperties.py1,
-      selectProperties.py2
-    )
-    state.selection.boundaryBox.xMax = Math.max(
-      selectProperties.px2,
-      selectProperties.px1
-    )
-    state.selection.boundaryBox.yMax = Math.max(
-      selectProperties.py2,
-      selectProperties.py1
-    )
-    if (_enableActionsForSelection) _enableActionsForSelection()
-  } else {
-    resetBoundaryBox()
-  }
-}
-
-/**
  * Deselect
  */
 function deselect() {
-  resetSelectProperties()
-  resetBoundaryBox()
+  state.selection.resetProperties()
+  state.selection.resetBoundaryBox()
   state.vector.properties = {}
   if (_vectorGui) {
     _vectorGui.selectedPoint = {
@@ -298,8 +279,8 @@ function deselect() {
     }
     _vectorGui.resetCollision()
   }
-  state.vector.currentIndex = null
-  state.vector.selectedIndices.clear()
+  state.vector.setCurrentIndex(null)
+  state.vector.clearSelected()
   dom.vectorTransformUIContainer.style.display = "none"
   if (_vectorGui) {
     //reset vectorGui mother object

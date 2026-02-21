@@ -42,7 +42,7 @@ function renderToLatestAction(latestAction, modType) {
     ...mostRecentAction.selectProperties,
   }
   //set boundary box
-  state.setBoundaryBox(state.selection.properties)
+  state.selection.setBoundaryBox(state.selection.properties)
   //set selected vectors
   state.vector.selectedIndices = new Set(
     mostRecentAction.selectedVectorIndices
@@ -206,7 +206,7 @@ function handlePasteAction(latestAction, modType) {
     let offsetY = 0
     //BUG: raster gui not rendering properly from here
     pasteSelectedPixels(clipboard, latestAction.pastedLayer, offsetX, offsetY)
-    // state.vector.selectedIndices.clear()
+    // state.vector.clearSelected()
     //set currentPastedImageKey
     state.clipboard.currentPastedImageKey = latestAction.pastedImageKey
     switchTool("move")
@@ -292,7 +292,7 @@ function handleTransformAction(latestAction, newLatestAction, modType) {
     selectProperties.py1 += newLatestAction.layer.y
     selectProperties.py2 += newLatestAction.layer.y
     state.selection.properties = { ...selectProperties }
-    state.setBoundaryBox(state.selection.properties)
+    state.selection.setBoundaryBox(state.selection.properties)
     //Eventually undoing transform actions will result in the newLatestAction being a paste action. In that case, don't render a transformation
     if (newLatestAction.tool === "transform") {
       transformRasterContent(
@@ -318,7 +318,7 @@ function handleTransformAction(latestAction, newLatestAction, modType) {
     state.selection.properties = {
       ...selectProperties,
     }
-    state.setBoundaryBox(state.selection.properties)
+    state.selection.setBoundaryBox(state.selection.properties)
     transformRasterContent(
       latestAction.layer,
       state.clipboard.pastedImages[latestAction.pastedImageKey].imageData,

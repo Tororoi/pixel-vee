@@ -166,15 +166,15 @@ export async function loadDrawing(jsonFile) {
   state.timeline.undoStack = []
   state.clearRedoStack()
   //Not likely to be an issue, but reset just in case
-  state.timeline.points = []
+  state.timeline.clearPoints()
   //pasted images
   state.clipboard.pastedImages = {}
   //vectors
   state.vector.all = {}
   state.vector.highestKey = 0
   state.vector.savedProperties = {}
-  state.timeline.activeIndexes = []
-  state.timeline.savedBetweenActionImages = []
+  state.timeline.clearActiveIndexes()
+  state.timeline.clearSavedBetweenActionImages()
   //reset selection state
   state.deselect()
   vectorGui.reset()
@@ -373,7 +373,7 @@ export async function loadDrawing(jsonFile) {
   // Additional logic to update the UI, refresh the canvas, etc.
   if (data.selectProperties && data.selectProperties.px1 !== null) {
     state.selection.properties = { ...data.selectProperties }
-    state.setBoundaryBox(state.selection.properties)
+    state.selection.setBoundaryBox(state.selection.properties)
   }
   if (data.canvasProperties) {
     //resize the offscreen canvas to match the saved canvas dimensions (includes redraw timeline and vectorGui.render)

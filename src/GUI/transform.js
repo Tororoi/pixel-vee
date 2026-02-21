@@ -97,5 +97,5 @@ export function setVectorShapeBoundaryBox() {
   state.selection.properties.py1 = shapeBoundaryBox.yMin
   state.selection.properties.px2 = shapeBoundaryBox.xMax + 1
   state.selection.properties.py2 = shapeBoundaryBox.yMax + 1
-  state.setBoundaryBox(state.selection.properties)
+  state.selection.setBoundaryBox(state.selection.properties)
 }

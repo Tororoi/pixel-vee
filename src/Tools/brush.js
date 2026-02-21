@@ -137,7 +137,7 @@ function brushSteps() {
  */
 function addPointToAction(x, y) {
   if (!state.selection.pointsSet.has(`${x},${y}`)) {
-    state.timeline.points.push({
+    state.timeline.addPoint({
       x: x - canvas.currentLayer.x,
       y: y - canvas.currentLayer.y,
       brushSize: state.tool.current.brushSize,

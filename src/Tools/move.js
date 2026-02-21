@@ -38,7 +38,7 @@ function moveSteps() {
           state.selection.properties.px2 += state.cursor.x - state.cursor.prevX
           state.selection.properties.py1 += state.cursor.y - state.cursor.prevY
           state.selection.properties.py2 += state.cursor.y - state.cursor.prevY
-          state.setBoundaryBox(state.selection.properties)
+          state.selection.setBoundaryBox(state.selection.properties)
         }
         renderCanvas(canvas.currentLayer, true)
       }
@@ -166,8 +166,8 @@ function transformSteps() {
           ) {
             state.transform.isMirroredVertically = !state.transform.isMirroredVertically
           }
-          state.normalizeSelectProperties()
-          state.setBoundaryBox(state.selection.properties)
+          state.selection.normalize()
+          state.selection.setBoundaryBox(state.selection.properties)
           addTransformToTimeline()
         }
         renderCanvas(canvas.currentLayer) //TODO: (Low Priority) QA to figure out need to redraw timeline?

@@ -301,7 +301,7 @@ function setCursorStyle() {
 function reset() {
   state.vector.properties = {}
   //reset selectedpoint and collided keys
-  state.vector.currentIndex = null
+  state.vector.setCurrentIndex(null)
   disableActionsForNoSelection()
   vectorGui.render()
 }
@@ -332,7 +332,7 @@ function setVectorProperties(vector) {
       state.vector.properties.px4 += vector.layer.x
       state.vector.properties.py4 += vector.layer.y
     }
-    state.vector.currentIndex = vector.index
+    state.vector.setCurrentIndex(vector.index)
     // switchTool(vector.vectorProperties.type)
     enableActionsForSelection()
   }
@@ -364,7 +364,7 @@ function render() {
       canvas.currentLayer.y +
       canvas.currentLayer.img.height * canvas.currentLayer.scale +
       lineWidth
-    state.setBoundaryBox(state.selection.properties)
+    state.selection.setBoundaryBox(state.selection.properties)
   }
   if (
     state.tool.current.options.displayVectors?.active ||
@@ -397,7 +397,7 @@ function render() {
         // state.selection.properties.py1 = shapeBoundaryBox.yMin
         // state.selection.properties.px2 = shapeBoundaryBox.xMax
         // state.selection.properties.py2 = shapeBoundaryBox.yMax
-        // state.setBoundaryBox(state.selection.properties)
+        // state.selection.setBoundaryBox(state.selection.properties)
         break
       }
       default:

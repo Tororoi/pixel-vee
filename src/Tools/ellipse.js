@@ -213,9 +213,8 @@ function ellipseSteps() {
           boundaryBox.yMax -= canvas.currentLayer.y
         }
         //generate new unique key for vector
-        state.vector.highestKey += 1
-        let uniqueVectorKey = state.vector.highestKey
-        state.vector.currentIndex = uniqueVectorKey
+        const uniqueVectorKey = state.vector.nextKey()
+        state.vector.setCurrentIndex(uniqueVectorKey)
         enableActionsForSelection()
         //store control points for timeline
         addToTimeline({

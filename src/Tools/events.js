@@ -78,7 +78,7 @@ function handleClearCanvas() {
   )
   state.selection.pointsSet = null
   state.selection.seenPixelsSet = null
-  state.timeline.points = []
+  state.timeline.clearPoints()
   vectorGui.reset()
   state.reset()
   actionClear(canvas.currentLayer)

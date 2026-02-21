@@ -216,8 +216,8 @@ function scaleVectorSteps() {
       break
     }
     case "pointerup":
-      state.normalizeSelectProperties()
-      state.setBoundaryBox(state.selection.properties)
+      state.selection.normalize()
+      state.selection.setBoundaryBox(state.selection.properties)
       renderCanvas(currentVector.layer, true, state.timeline.activeIndexes)
       modifyVectorAction(currentVector)
       vectorGui.selectedPoint = {
@@ -310,7 +310,7 @@ export function transformBoundaries() {
     default:
     //do nothing
   }
-  state.setBoundaryBox(state.selection.properties)
+  state.selection.setBoundaryBox(state.selection.properties)
 }
 
 //=======================================//

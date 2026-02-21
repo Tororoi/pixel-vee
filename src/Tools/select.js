@@ -28,7 +28,7 @@ function selectSteps() {
     case "pointerdown":
       state.tool.clickCounter += 1
       //reset selected vectors
-      state.vector.selectedIndices.clear()
+      state.vector.clearSelected()
       dom.vectorTransformUIContainer.style.display = "none"
       renderVectorsToDOM()
       //set initial properties
@@ -36,17 +36,17 @@ function selectSteps() {
       state.selection.properties.py1 = state.cursor.y
       state.selection.properties.px2 = state.cursor.x
       state.selection.properties.py2 = state.cursor.y
-      state.setBoundaryBox(state.selection.properties)
+      state.selection.setBoundaryBox(state.selection.properties)
       break
     case "pointermove":
       state.selection.properties.px2 = state.cursor.x
       state.selection.properties.py2 = state.cursor.y
-      state.setBoundaryBox(state.selection.properties)
+      state.selection.setBoundaryBox(state.selection.properties)
       break
     case "pointerup":
       state.tool.clickCounter = 0
-      state.normalizeSelectProperties()
-      state.setBoundaryBox(state.selection.properties)
+      state.selection.normalize()
+      state.selection.setBoundaryBox(state.selection.properties)
       addToTimeline({
         tool: state.tool.current.name,
         layer: canvas.currentLayer,
@@ -87,8 +87,8 @@ function adjustSelectSteps() {
       }
       break
     case "pointerup":
-      state.normalizeSelectProperties()
-      state.setBoundaryBox(state.selection.properties)
+      state.selection.normalize()
+      state.selection.setBoundaryBox(state.selection.properties)
       addToTimeline({
         tool: state.tool.current.name,
         layer: canvas.currentLayer,
@@ -159,7 +159,7 @@ function adjustBoundaries() {
     default:
     //do nothing
   }
-  state.setBoundaryBox(state.selection.properties)
+  state.selection.setBoundaryBox(state.selection.properties)
 }
 
 export const select = {
