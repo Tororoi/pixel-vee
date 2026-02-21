@@ -129,38 +129,40 @@ const calculateDrawingDimensions = () => {
 }
 
 /**
- * Draw a vector vector onto the thumbnail canvas
+ * Draw a vector onto a canvas context (shared thumbnailCTX by default, or a
+ * per-vector ctx when creating individual thumbnail elements).
  * @param {object} vector - The vector to be drawn
  * @param {boolean} isSelected - True if the vector is selected
+ * @param {CanvasRenderingContext2D} ctx - Target context (defaults to shared thumbnailCTX)
  */
-const drawOnThumbnailContext = (vector, isSelected) => {
+const drawOnThumbnailContext = (vector, isSelected, ctx = canvas.thumbnailCTX) => {
   let { minD, xOffset, yOffset } = calculateDrawingDimensions()
 
-  canvas.thumbnailCTX.clearRect(
+  ctx.clearRect(
     0,
     0,
     canvas.thumbnailCVS.width,
     canvas.thumbnailCVS.height
   )
-  canvas.thumbnailCTX.lineWidth = 3
-  canvas.thumbnailCTX.fillStyle = isSelected
+  ctx.lineWidth = 3
+  ctx.fillStyle = isSelected
     ? "rgb(0, 0, 0)"
     : "rgb(51, 51, 51)"
-  canvas.thumbnailCTX.fillRect(
+  ctx.fillRect(
     0,
     0,
     canvas.thumbnailCVS.width,
     canvas.thumbnailCVS.height
   )
-  canvas.thumbnailCTX.clearRect(
+  ctx.clearRect(
     xOffset,
     yOffset,
     minD * canvas.offScreenCVS.width,
     minD * canvas.offScreenCVS.height
   )
 
-  canvas.thumbnailCTX.strokeStyle = "black" // This can be adjusted based on your requirements.
-  canvas.thumbnailCTX.beginPath()
+  ctx.strokeStyle = "black"
+  ctx.beginPath()
 
   let px1 = minD * (vector.vectorProperties.px1 + vector.layer.x)
   let py1 = minD * (vector.vectorProperties.py1 + vector.layer.y)
@@ -172,7 +174,7 @@ const drawOnThumbnailContext = (vector, isSelected) => {
   let py4 = minD * (vector.vectorProperties.py4 + vector.layer.y)
   switch (vector.vectorProperties.type) {
     case "fill":
-      canvas.thumbnailCTX.arc(
+      ctx.arc(
         px1 + 0.5 + xOffset,
         py1 + 0.5 + yOffset,
         1,
@@ -182,12 +184,12 @@ const drawOnThumbnailContext = (vector, isSelected) => {
       )
       break
     case "line":
-      canvas.thumbnailCTX.moveTo(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset)
-      canvas.thumbnailCTX.lineTo(px2 + 0.5 + xOffset, py2 + 0.5 + yOffset)
+      ctx.moveTo(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset)
+      ctx.lineTo(px2 + 0.5 + xOffset, py2 + 0.5 + yOffset)
       break
     case "quadCurve":
-      canvas.thumbnailCTX.moveTo(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset)
-      canvas.thumbnailCTX.quadraticCurveTo(
+      ctx.moveTo(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset)
+      ctx.quadraticCurveTo(
         px3 + 0.5 + xOffset,
         py3 + 0.5 + yOffset,
         px2 + 0.5 + xOffset,
@@ -195,8 +197,8 @@ const drawOnThumbnailContext = (vector, isSelected) => {
       )
       break
     case "cubicCurve":
-      canvas.thumbnailCTX.moveTo(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset)
-      canvas.thumbnailCTX.bezierCurveTo(
+      ctx.moveTo(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset)
+      ctx.bezierCurveTo(
         px3 + 0.5 + xOffset,
         py3 + 0.5 + yOffset,
         px4 + 0.5 + xOffset,
@@ -210,7 +212,7 @@ const drawOnThumbnailContext = (vector, isSelected) => {
         vector.vectorProperties.px2 - vector.vectorProperties.px1,
         vector.vectorProperties.py2 - vector.vectorProperties.py1
       )
-      canvas.thumbnailCTX.ellipse(
+      ctx.ellipse(
         px1 + xOffset,
         py1 + yOffset,
         minD * vector.vectorProperties.radA,
@@ -224,22 +226,24 @@ const drawOnThumbnailContext = (vector, isSelected) => {
     // Add more cases if there are other drawing tools.
   }
 
-  canvas.thumbnailCTX.globalCompositeOperation = "xor"
-  canvas.thumbnailCTX.stroke()
+  ctx.globalCompositeOperation = "xor"
+  ctx.stroke()
 }
 
 /**
- * Create the thumbnail and save as an image
+ * Create a thumbnail canvas element for the given vector.
+ * Draws directly into a per-vector <canvas> instead of encoding the shared
+ * thumbnailCVS to a base64 data URL, eliminating the expensive toDataURL() call.
  * @param {object} vector - The vector to be rendered
  * @param {boolean} isSelected - True if the vector is selected
- * @returns {Image} - The created thumbnail image
+ * @returns {HTMLCanvasElement} - The created thumbnail canvas
  */
 const createThumbnailImage = (vector, isSelected) => {
-  drawOnThumbnailContext(vector, isSelected)
-  let thumb = new Image()
-  thumb.src = canvas.thumbnailCVS.toDataURL()
-  thumb.alt = `thumb ${vector.index}`
-  thumb.width = 202 * window.devicePixelRatio
-  thumb.height = 86 * window.devicePixelRatio
-  return thumb
+  const cvs = document.createElement("canvas")
+  cvs.width = canvas.thumbnailCVS.width
+  cvs.height = canvas.thumbnailCVS.height
+  const ctx = cvs.getContext("2d")
+  ctx.scale(canvas.sharpness, canvas.sharpness)
+  drawOnThumbnailContext(vector, isSelected, ctx)
+  return cvs
 }
