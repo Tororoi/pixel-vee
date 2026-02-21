@@ -18,13 +18,11 @@ import { initializeColorPicker } from "../Swatch/events.js"
 import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
 // import { dragStart, dragMove, dragStop } from "../utils/drag.js"
 import {
-  addReferenceLayer,
-  addRasterLayer,
-  removeLayer,
   actionSelectVector,
   actionDeselectVector,
   actionDeselect,
 } from "../Actions/nonPointerActions.js"
+import { addReferenceLayer, addRasterLayer, removeLayer } from "../Actions/layerActions.js"
 import { createPreviewLayer } from "./layers.js"
 import { switchTool } from "../Tools/toolbox.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"

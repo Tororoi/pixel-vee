@@ -23,9 +23,8 @@ import {
   actionPasteSelection,
   actionConfirmPastedPixels,
   actionDeleteSelection,
-  actionFlipPixels,
-  actionRotatePixels,
 } from "../Actions/nonPointerActions.js"
+import { actionFlipPixels, actionRotatePixels } from "../Actions/transformActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
 import { toggleMode, switchTool } from "../Tools/toolbox.js"
 import { adjustVectorSteps } from "../Tools/adjust.js"
@@ -147,10 +146,11 @@ export function activateShortcut(keyCode) {
       if (!state.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           if (keys.ShiftLeft || keys.ShiftRight) {
-            //option+meta+z
+            //meta+shift+f
             //Flip vertical
             actionFlipPixels(false)
           } else {
+            //meta+f
             //Flip horizontal
             actionFlipPixels(true)
           }

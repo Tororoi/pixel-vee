@@ -4,7 +4,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { vectorGui } from "../GUI/vector.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { transformRasterContent } from "../utils/transformHelpers.js"
-import { addTransformToTimeline } from "../Actions/nonPointerActions.js"
+import { addTransformToTimeline } from "../Actions/transformActions.js"
 import { transformBoundaries } from "./transform.js"
 
 /**

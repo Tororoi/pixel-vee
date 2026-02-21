@@ -15,9 +15,8 @@ import {
   actionCutSelection,
   actionPasteSelection,
   actionDeleteSelection,
-  actionFlipPixels,
-  actionRotatePixels,
 } from "../Actions/nonPointerActions.js"
+import { actionFlipPixels, actionRotatePixels } from "../Actions/transformActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
 
 //====================================//
