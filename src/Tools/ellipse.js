@@ -12,7 +12,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
-import { rerouteVectorStepsAction, updateEllipseOffsets } from "./transform.js"
+import { rerouteVectorStepsAction, updateEllipseOffsets } from "./adjust.js"
 
 //======================================//
 //=== * * * Ellipse Controller * * * ===//

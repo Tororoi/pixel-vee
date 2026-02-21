@@ -28,7 +28,7 @@ import {
 } from "../Actions/nonPointerActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
 import { toggleMode, switchTool } from "../Tools/toolbox.js"
-import { adjustVectorSteps } from "../Tools/transform.js"
+import { adjustVectorSteps } from "../Tools/adjust.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial

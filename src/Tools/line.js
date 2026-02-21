@@ -8,7 +8,7 @@ import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
 import { vectorGui } from "../GUI/vector.js"
-import { rerouteVectorStepsAction } from "./transform.js"
+import { rerouteVectorStepsAction } from "./adjust.js"
 
 //===================================//
 //=== * * * Line Controller * * * ===//
