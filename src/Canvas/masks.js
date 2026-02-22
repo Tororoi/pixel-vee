@@ -1,4 +1,4 @@
-import { canvas } from "../Context/canvas.js"
+import { canvas } from '../Context/canvas.js'
 
 /**
  * Create a mask set for a given color
@@ -13,14 +13,14 @@ export function createColorMaskSet(matchColor) {
     0,
     0,
     canvas.currentLayer.cvs.width,
-    canvas.currentLayer.cvs.height
+    canvas.currentLayer.cvs.height,
   )
   if (matchColor.a < 255) {
     //draw then sample color to math premultiplied alpha version of color
-    const tempCanvas = document.createElement("canvas")
+    const tempCanvas = document.createElement('canvas')
     tempCanvas.width = 1
     tempCanvas.height = 1
-    const tempCtx = tempCanvas.getContext("2d", {
+    const tempCtx = tempCanvas.getContext('2d', {
       willReadFrequently: true,
     })
 
@@ -42,13 +42,19 @@ export function createColorMaskSet(matchColor) {
   }
   // Single linear scan through the raw typed array — avoids per-pixel object
   // allocations from getColor() and is cache-friendly on the Uint8ClampedArray.
+  // Keys are packed as (y << 16) | x — no string allocation, no GC pressure.
   const { data, width } = layerImageData
   const { r: mr, g: mg, b: mb, a: ma } = matchColor
   let x = 0
   let y = 0
   for (let i = 0; i < data.length; i += 4) {
-    if (data[i] === mr && data[i + 1] === mg && data[i + 2] === mb && data[i + 3] === ma) {
-      maskSet.add(`${x},${y}`)
+    if (
+      data[i] === mr &&
+      data[i + 1] === mg &&
+      data[i + 2] === mb &&
+      data[i + 3] === ma
+    ) {
+      maskSet.add((y << 16) | x)
     }
     if (++x === width) {
       x = 0

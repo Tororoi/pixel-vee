@@ -76,7 +76,7 @@ export function actionDraw(
     const key = `${x},${y}`
     //if maskSet exists, only draw if it contains coordinates
     if (maskSet) {
-      if (!maskSet.has(key)) {
+      if (!maskSet.has((y << 16) | x)) {
         continue
       }
     }
