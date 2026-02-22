@@ -15,8 +15,10 @@ import {
  */
 export const renderVectorsToDOM = () => {
   dom.vectorsThumbnails.innerHTML = ""
+  // Build once per render so isValidVector can use O(1) Set.has() instead of O(n) Array.includes()
+  const undoStackSet = new Set(state.timeline.undoStack)
   for (let vector of Object.values(state.vector.all)) {
-    if (isValidVector(vector)) {
+    if (isValidVector(vector, undoStackSet)) {
       renderVectorElement(vector)
     }
   }
@@ -32,12 +34,13 @@ export const renderVectorsToDOM = () => {
 /**
  * Check if action should be rendered in the vectors interface
  * @param {object} vector - The vector to be checked
+ * @param {Set} undoStackSet - Pre-built Set of undoStack actions for O(1) lookup
  * @returns {boolean} - True if the vector should be rendered
  */
-const isValidVector = (vector) =>
+const isValidVector = (vector, undoStackSet) =>
   !vector.removed &&
   !vector.layer?.removed &&
-  state.timeline.undoStack.includes(vector.action) &&
+  undoStackSet.has(vector.action) &&
   (vector.layer === canvas.currentLayer ||
     (vector.layer === canvas.pastedLayer && canvas.currentLayer.isPreview))
 
