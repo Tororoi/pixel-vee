@@ -73,7 +73,6 @@ export function actionDraw(
       //don't draw outside bounds to reduce time cost of render
       continue
     }
-    const key = `${x},${y}`
     //if maskSet exists, only draw if it contains coordinates
     if (maskSet) {
       if (!maskSet.has((y << 16) | x)) {
@@ -81,11 +80,11 @@ export function actionDraw(
       }
     }
     if (seenPixelsSet) {
-      if (seenPixelsSet.has(key)) {
+      if (seenPixelsSet.has((y << 16) | x)) {
         continue // skip this point
       }
       if (!excludeFromSet) {
-        seenPixelsSet.add(key)
+        seenPixelsSet.add((y << 16) | x)
       }
     }
     if (currentModes?.eraser || currentModes?.inject) {
