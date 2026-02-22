@@ -1,5 +1,4 @@
 import { canvas } from "../Context/canvas.js"
-import { getColor } from "../utils/imageDataHelpers.js"
 
 /**
  * Create a mask set for a given color
@@ -7,7 +6,7 @@ import { getColor } from "../utils/imageDataHelpers.js"
  * @returns {Set} - A set of all the pixels that match the color
  */
 export function createColorMaskSet(matchColor) {
-  // state.pointsSet = new Set()
+  // state.selection.pointsSet = new Set()
   const maskSet = new Set()
   //create mask set
   const layerImageData = canvas.currentLayer.ctx.getImageData(
@@ -41,18 +40,19 @@ export function createColorMaskSet(matchColor) {
       a: sampledColor[3],
     }
   }
-  for (let x = 0; x < canvas.currentLayer.cvs.width; x++) {
-    for (let y = 0; y < canvas.currentLayer.cvs.height; y++) {
-      let color = getColor(layerImageData, x, y)
-      if (
-        color.r === matchColor.r &&
-        color.g === matchColor.g &&
-        color.b === matchColor.b &&
-        color.a === matchColor.a
-      ) {
-        const key = `${x},${y}`
-        maskSet.add(key)
-      }
+  // Single linear scan through the raw typed array — avoids per-pixel object
+  // allocations from getColor() and is cache-friendly on the Uint8ClampedArray.
+  const { data, width } = layerImageData
+  const { r: mr, g: mg, b: mb, a: ma } = matchColor
+  let x = 0
+  let y = 0
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i] === mr && data[i + 1] === mg && data[i + 2] === mb && data[i + 3] === ma) {
+      maskSet.add(`${x},${y}`)
+    }
+    if (++x === width) {
+      x = 0
+      y++
     }
   }
   return maskSet

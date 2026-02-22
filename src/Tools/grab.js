@@ -10,12 +10,12 @@ function grabSteps() {
     case "pointerdown":
       canvas.previousXOffset = canvas.xOffset
       canvas.previousYOffset = canvas.yOffset
-      state.grabStartX = state.cursorX
-      state.grabStartY = state.cursorY
+      state.tool.grabStartX = state.cursor.x
+      state.tool.grabStartY = state.cursor.y
       break
     case "pointermove":
-      canvas.xOffset = state.cursorX - state.grabStartX + canvas.previousXOffset
-      canvas.yOffset = state.cursorY - state.grabStartY + canvas.previousYOffset
+      canvas.xOffset = state.cursor.x - state.tool.grabStartX + canvas.previousXOffset
+      canvas.yOffset = state.cursor.y - state.tool.grabStartY + canvas.previousYOffset
       renderCanvas() //affect all layers
       break
     case "pointerup":

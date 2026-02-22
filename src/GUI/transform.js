@@ -11,15 +11,15 @@ import { findVectorShapeBoundaryBox } from "../utils/vectorHelpers.js"
  */
 export function renderVectorRotationControl() {
   //for now, mother ui is always in the shape center
-  vectorGui.mother.rotationOrigin.x = state.shapeCenterX
-  vectorGui.mother.rotationOrigin.y = state.shapeCenterY
-  if (state.clicked && state.grabStartAngle !== null) {
+  vectorGui.mother.rotationOrigin.x = state.vector.shapeCenterX
+  vectorGui.mother.rotationOrigin.y = state.vector.shapeCenterY
+  if (state.cursor.clicked && state.vector.grabStartAngle !== null) {
     vectorGui.mother.newRotation =
       getAngle(
-        vectorGui.mother.rotationOrigin.x - state.cursorX,
-        vectorGui.mother.rotationOrigin.y - state.cursorY
+        vectorGui.mother.rotationOrigin.x - state.cursor.x,
+        vectorGui.mother.rotationOrigin.y - state.cursor.y
       ) -
-      state.grabStartAngle +
+      state.vector.grabStartAngle +
       vectorGui.mother.currentRotation
   }
   //Render mother ui rotation child
@@ -90,12 +90,12 @@ export function renderVectorRotationControl() {
 export function setVectorShapeBoundaryBox() {
   //Update shape boundary box
   const shapeBoundaryBox = findVectorShapeBoundaryBox(
-    state.selectedVectorIndicesSet,
-    state.vectors
+    state.vector.selectedIndices,
+    state.vector.all
   )
-  state.selectProperties.px1 = shapeBoundaryBox.xMin
-  state.selectProperties.py1 = shapeBoundaryBox.yMin
-  state.selectProperties.px2 = shapeBoundaryBox.xMax + 1
-  state.selectProperties.py2 = shapeBoundaryBox.yMax + 1
-  state.setBoundaryBox(state.selectProperties)
+  state.selection.properties.px1 = shapeBoundaryBox.xMin
+  state.selection.properties.py1 = shapeBoundaryBox.yMin
+  state.selection.properties.px2 = shapeBoundaryBox.xMax + 1
+  state.selection.properties.py2 = shapeBoundaryBox.yMax + 1
+  state.selection.setBoundaryBox(state.selection.properties)
 }

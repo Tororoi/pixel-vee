@@ -11,7 +11,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
-import { rerouteVectorStepsAction } from "./transform.js"
+import { rerouteVectorStepsAction } from "./adjust.js"
 
 //=====================================//
 //=== * * * Curve Controllers * * * ===//
@@ -26,22 +26,22 @@ function quadCurveSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //solidify end points
-      state.clickCounter += 1
-      if (state.clickCounter > 2) state.clickCounter = 1
-      switch (state.clickCounter) {
+      state.tool.clickCounter += 1
+      if (state.tool.clickCounter > 2) state.tool.clickCounter = 1
+      switch (state.tool.clickCounter) {
         case 1:
           //reset control points
           vectorGui.reset()
-          state.vectorProperties.type = state.tool.name
-          state.vectorProperties.px1 = state.cursorX
-          state.vectorProperties.py1 = state.cursorY
+          state.vector.properties.type = state.tool.current.name
+          state.vector.properties.px1 = state.cursor.x
+          state.vector.properties.py1 = state.cursor.y
           //endpoint starts at same point as startpoint
-          state.vectorProperties.px2 = state.cursorX
-          state.vectorProperties.py2 = state.cursorY
+          state.vector.properties.px2 = state.cursor.x
+          state.vector.properties.py2 = state.cursor.y
           break
         case 2:
-          state.vectorProperties.px3 = state.cursorX
-          state.vectorProperties.py3 = state.cursorY
+          state.vector.properties.px3 = state.cursor.x
+          state.vector.properties.py3 = state.cursor.y
           break
         default:
         //do nothing
@@ -49,34 +49,34 @@ function quadCurveSteps() {
       //onscreen preview
       renderCanvas(canvas.currentLayer)
       actionQuadraticCurve(
-        state.vectorProperties.px1,
-        state.vectorProperties.py1,
-        state.vectorProperties.px2,
-        state.vectorProperties.py2,
-        state.vectorProperties.px3,
-        state.vectorProperties.py3,
-        state.boundaryBox,
-        state.clickCounter,
+        state.vector.properties.px1,
+        state.vector.properties.py1,
+        state.vector.properties.px2,
+        state.vector.properties.py2,
+        state.vector.properties.px3,
+        state.vector.properties.py3,
+        state.selection.boundaryBox,
+        state.tool.clickCounter,
         swatches.primary.color,
         canvas.currentLayer,
-        state.tool.modes,
-        brushStamps[state.tool.brushType][state.tool.brushSize],
-        state.tool.brushSize,
-        state.maskSet,
+        state.tool.current.modes,
+        brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+        state.tool.current.brushSize,
+        state.selection.maskSet,
         null,
         true
       )
 
       break
     case "pointermove":
-      switch (state.clickCounter) {
+      switch (state.tool.clickCounter) {
         case 1:
-          state.vectorProperties.px2 = state.cursorX
-          state.vectorProperties.py2 = state.cursorY
+          state.vector.properties.px2 = state.cursor.x
+          state.vector.properties.py2 = state.cursor.y
           break
         case 2:
-          state.vectorProperties.px3 = state.cursorX
-          state.vectorProperties.py3 = state.cursorY
+          state.vector.properties.px3 = state.cursor.x
+          state.vector.properties.py3 = state.cursor.y
           break
         default:
         //do nothing
@@ -84,64 +84,64 @@ function quadCurveSteps() {
       //onscreen preview
       renderCanvas(canvas.currentLayer)
       actionQuadraticCurve(
-        state.vectorProperties.px1,
-        state.vectorProperties.py1,
-        state.vectorProperties.px2,
-        state.vectorProperties.py2,
-        state.vectorProperties.px3,
-        state.vectorProperties.py3,
-        state.boundaryBox,
-        state.clickCounter,
+        state.vector.properties.px1,
+        state.vector.properties.py1,
+        state.vector.properties.px2,
+        state.vector.properties.py2,
+        state.vector.properties.px3,
+        state.vector.properties.py3,
+        state.selection.boundaryBox,
+        state.tool.clickCounter,
         swatches.primary.color,
         canvas.currentLayer,
-        state.tool.modes,
-        brushStamps[state.tool.brushType][state.tool.brushSize],
-        state.tool.brushSize,
-        state.maskSet,
+        state.tool.current.modes,
+        brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+        state.tool.current.brushSize,
+        state.selection.maskSet,
         null,
         true
       )
 
       break
     case "pointerup":
-      switch (state.clickCounter) {
+      switch (state.tool.clickCounter) {
         case 1:
-          state.vectorProperties.px2 = state.cursorX
-          state.vectorProperties.py2 = state.cursorY
+          state.vector.properties.px2 = state.cursor.x
+          state.vector.properties.py2 = state.cursor.y
           break
         case 2:
-          state.vectorProperties.px3 = state.cursorX
-          state.vectorProperties.py3 = state.cursorY
+          state.vector.properties.px3 = state.cursor.x
+          state.vector.properties.py3 = state.cursor.y
           break
         default:
         //do nothing
       }
       //Solidify curve
-      if (state.clickCounter === 2) {
+      if (state.tool.clickCounter === 2) {
         actionQuadraticCurve(
-          state.vectorProperties.px1,
-          state.vectorProperties.py1,
-          state.vectorProperties.px2,
-          state.vectorProperties.py2,
-          state.vectorProperties.px3,
-          state.vectorProperties.py3,
-          state.boundaryBox,
-          state.clickCounter,
+          state.vector.properties.px1,
+          state.vector.properties.py1,
+          state.vector.properties.px2,
+          state.vector.properties.py2,
+          state.vector.properties.px3,
+          state.vector.properties.py3,
+          state.selection.boundaryBox,
+          state.tool.clickCounter,
           swatches.primary.color,
           canvas.currentLayer,
-          state.tool.modes,
-          brushStamps[state.tool.brushType][state.tool.brushSize],
-          state.tool.brushSize,
-          state.maskSet
+          state.tool.current.modes,
+          brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+          state.tool.current.brushSize,
+          state.selection.maskSet
         )
-        state.clickCounter = 0
+        state.tool.clickCounter = 0
         let maskArray = coordArrayFromSet(
-          state.maskSet,
+          state.selection.maskSet,
           canvas.currentLayer.x,
           canvas.currentLayer.y
         )
         //correct boundary box for layer offset
-        const boundaryBox = { ...state.boundaryBox }
+        const boundaryBox = { ...state.selection.boundaryBox }
         if (boundaryBox.xMax !== null) {
           boundaryBox.xMin -= canvas.currentLayer.x
           boundaryBox.xMax -= canvas.currentLayer.x
@@ -149,13 +149,12 @@ function quadCurveSteps() {
           boundaryBox.yMax -= canvas.currentLayer.y
         }
         //generate new unique key for vector
-        state.highestVectorKey += 1
-        let uniqueVectorKey = state.highestVectorKey
-        state.currentVectorIndex = uniqueVectorKey
+        const uniqueVectorKey = state.vector.nextKey()
+        state.vector.setCurrentIndex(uniqueVectorKey)
         enableActionsForSelection()
         //store control points for timeline
         addToTimeline({
-          tool: state.tool.name,
+          tool: state.tool.current.name,
           layer: canvas.currentLayer,
           properties: {
             maskArray,
@@ -164,22 +163,22 @@ function quadCurveSteps() {
           },
         })
         //Add the vector to the state
-        state.vectors[uniqueVectorKey] = {
+        state.vector.all[uniqueVectorKey] = {
           index: uniqueVectorKey,
-          action: state.action,
+          action: state.timeline.currentAction,
           layer: canvas.currentLayer,
-          modes: { ...state.tool.modes },
+          modes: { ...state.tool.current.modes },
           color: { ...swatches.primary.color },
-          brushSize: state.tool.brushSize,
-          brushType: state.tool.brushType,
+          brushSize: state.tool.current.brushSize,
+          brushType: state.tool.current.brushType,
           vectorProperties: {
-            ...state.vectorProperties,
-            px1: state.vectorProperties.px1 - canvas.currentLayer.x,
-            py1: state.vectorProperties.py1 - canvas.currentLayer.y,
-            px2: state.vectorProperties.px2 - canvas.currentLayer.x,
-            py2: state.vectorProperties.py2 - canvas.currentLayer.y,
-            px3: state.vectorProperties.px3 - canvas.currentLayer.x,
-            py3: state.vectorProperties.py3 - canvas.currentLayer.y,
+            ...state.vector.properties,
+            px1: state.vector.properties.px1 - canvas.currentLayer.x,
+            py1: state.vector.properties.py1 - canvas.currentLayer.y,
+            px2: state.vector.properties.px2 - canvas.currentLayer.x,
+            py2: state.vector.properties.py2 - canvas.currentLayer.y,
+            px3: state.vector.properties.px3 - canvas.currentLayer.x,
+            py3: state.vector.properties.py3 - canvas.currentLayer.y,
           },
           // maskArray,
           // boundaryBox,
@@ -203,26 +202,26 @@ function cubicCurveSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //solidify end points
-      state.clickCounter += 1
-      if (state.clickCounter > 3) state.clickCounter = 1
-      switch (state.clickCounter) {
+      state.tool.clickCounter += 1
+      if (state.tool.clickCounter > 3) state.tool.clickCounter = 1
+      switch (state.tool.clickCounter) {
         case 1:
           //reset control points
           vectorGui.reset()
-          state.vectorProperties.type = state.tool.name
-          state.vectorProperties.px1 = state.cursorX
-          state.vectorProperties.py1 = state.cursorY
+          state.vector.properties.type = state.tool.current.name
+          state.vector.properties.px1 = state.cursor.x
+          state.vector.properties.py1 = state.cursor.y
           //endpoint starts at same point as startpoint
-          state.vectorProperties.px2 = state.cursorX
-          state.vectorProperties.py2 = state.cursorY
+          state.vector.properties.px2 = state.cursor.x
+          state.vector.properties.py2 = state.cursor.y
           break
         case 2:
-          state.vectorProperties.px3 = state.cursorX
-          state.vectorProperties.py3 = state.cursorY
+          state.vector.properties.px3 = state.cursor.x
+          state.vector.properties.py3 = state.cursor.y
           break
         case 3:
-          state.vectorProperties.px4 = state.cursorX
-          state.vectorProperties.py4 = state.cursorY
+          state.vector.properties.px4 = state.cursor.x
+          state.vector.properties.py4 = state.cursor.y
           break
         default:
         //do nothing
@@ -230,39 +229,39 @@ function cubicCurveSteps() {
       //onscreen preview
       renderCanvas(canvas.currentLayer)
       actionCubicCurve(
-        state.vectorProperties.px1,
-        state.vectorProperties.py1,
-        state.vectorProperties.px2,
-        state.vectorProperties.py2,
-        state.vectorProperties.px3,
-        state.vectorProperties.py3,
-        state.vectorProperties.px4,
-        state.vectorProperties.py4,
-        state.boundaryBox,
-        state.clickCounter,
+        state.vector.properties.px1,
+        state.vector.properties.py1,
+        state.vector.properties.px2,
+        state.vector.properties.py2,
+        state.vector.properties.px3,
+        state.vector.properties.py3,
+        state.vector.properties.px4,
+        state.vector.properties.py4,
+        state.selection.boundaryBox,
+        state.tool.clickCounter,
         swatches.primary.color,
         canvas.currentLayer,
-        state.tool.modes,
-        brushStamps[state.tool.brushType][state.tool.brushSize],
-        state.tool.brushSize,
-        state.maskSet,
+        state.tool.current.modes,
+        brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+        state.tool.current.brushSize,
+        state.selection.maskSet,
         null,
         true
       )
       break
     case "pointermove":
-      switch (state.clickCounter) {
+      switch (state.tool.clickCounter) {
         case 1:
-          state.vectorProperties.px2 = state.cursorX
-          state.vectorProperties.py2 = state.cursorY
+          state.vector.properties.px2 = state.cursor.x
+          state.vector.properties.py2 = state.cursor.y
           break
         case 2:
-          state.vectorProperties.px3 = state.cursorX
-          state.vectorProperties.py3 = state.cursorY
+          state.vector.properties.px3 = state.cursor.x
+          state.vector.properties.py3 = state.cursor.y
           break
         case 3:
-          state.vectorProperties.px4 = state.cursorX
-          state.vectorProperties.py4 = state.cursorY
+          state.vector.properties.px4 = state.cursor.x
+          state.vector.properties.py4 = state.cursor.y
           break
         default:
         //do nothing
@@ -270,71 +269,71 @@ function cubicCurveSteps() {
       //onscreen preview
       renderCanvas(canvas.currentLayer)
       actionCubicCurve(
-        state.vectorProperties.px1,
-        state.vectorProperties.py1,
-        state.vectorProperties.px2,
-        state.vectorProperties.py2,
-        state.vectorProperties.px3,
-        state.vectorProperties.py3,
-        state.vectorProperties.px4,
-        state.vectorProperties.py4,
-        state.boundaryBox,
-        state.clickCounter,
+        state.vector.properties.px1,
+        state.vector.properties.py1,
+        state.vector.properties.px2,
+        state.vector.properties.py2,
+        state.vector.properties.px3,
+        state.vector.properties.py3,
+        state.vector.properties.px4,
+        state.vector.properties.py4,
+        state.selection.boundaryBox,
+        state.tool.clickCounter,
         swatches.primary.color,
         canvas.currentLayer,
-        state.tool.modes,
-        brushStamps[state.tool.brushType][state.tool.brushSize],
-        state.tool.brushSize,
-        state.maskSet,
+        state.tool.current.modes,
+        brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+        state.tool.current.brushSize,
+        state.selection.maskSet,
         null,
         true
       )
       break
     case "pointerup":
-      switch (state.clickCounter) {
+      switch (state.tool.clickCounter) {
         case 1:
-          state.vectorProperties.px2 = state.cursorX
-          state.vectorProperties.py2 = state.cursorY
+          state.vector.properties.px2 = state.cursor.x
+          state.vector.properties.py2 = state.cursor.y
           break
         case 2:
-          state.vectorProperties.px3 = state.cursorX
-          state.vectorProperties.py3 = state.cursorY
+          state.vector.properties.px3 = state.cursor.x
+          state.vector.properties.py3 = state.cursor.y
           break
         case 3:
-          state.vectorProperties.px4 = state.cursorX
-          state.vectorProperties.py4 = state.cursorY
+          state.vector.properties.px4 = state.cursor.x
+          state.vector.properties.py4 = state.cursor.y
           break
         default:
         //do nothing
       }
       //Solidify curve
-      if (state.clickCounter === 3) {
+      if (state.tool.clickCounter === 3) {
         actionCubicCurve(
-          state.vectorProperties.px1,
-          state.vectorProperties.py1,
-          state.vectorProperties.px2,
-          state.vectorProperties.py2,
-          state.vectorProperties.px3,
-          state.vectorProperties.py3,
-          state.vectorProperties.px4,
-          state.vectorProperties.py4,
-          state.boundaryBox,
-          state.clickCounter,
+          state.vector.properties.px1,
+          state.vector.properties.py1,
+          state.vector.properties.px2,
+          state.vector.properties.py2,
+          state.vector.properties.px3,
+          state.vector.properties.py3,
+          state.vector.properties.px4,
+          state.vector.properties.py4,
+          state.selection.boundaryBox,
+          state.tool.clickCounter,
           swatches.primary.color,
           canvas.currentLayer,
-          state.tool.modes,
-          brushStamps[state.tool.brushType][state.tool.brushSize],
-          state.tool.brushSize,
-          state.maskSet
+          state.tool.current.modes,
+          brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+          state.tool.current.brushSize,
+          state.selection.maskSet
         )
-        state.clickCounter = 0
+        state.tool.clickCounter = 0
         let maskArray = coordArrayFromSet(
-          state.maskSet,
+          state.selection.maskSet,
           canvas.currentLayer.x,
           canvas.currentLayer.y
         )
         //correct boundary box for layer offset
-        const boundaryBox = { ...state.boundaryBox }
+        const boundaryBox = { ...state.selection.boundaryBox }
         if (boundaryBox.xMax !== null) {
           boundaryBox.xMin -= canvas.currentLayer.x
           boundaryBox.xMax -= canvas.currentLayer.x
@@ -342,13 +341,12 @@ function cubicCurveSteps() {
           boundaryBox.yMax -= canvas.currentLayer.y
         }
         //generate new unique key for vector
-        state.highestVectorKey += 1
-        let uniqueVectorKey = state.highestVectorKey
-        state.currentVectorIndex = uniqueVectorKey
+        const uniqueVectorKey = state.vector.nextKey()
+        state.vector.setCurrentIndex(uniqueVectorKey)
         enableActionsForSelection()
         //store control points for timeline
         addToTimeline({
-          tool: state.tool.name,
+          tool: state.tool.current.name,
           layer: canvas.currentLayer,
           properties: {
             maskArray,
@@ -357,24 +355,24 @@ function cubicCurveSteps() {
           },
         })
         //Store vector in state
-        state.vectors[uniqueVectorKey] = {
+        state.vector.all[uniqueVectorKey] = {
           index: uniqueVectorKey,
-          action: state.action,
+          action: state.timeline.currentAction,
           layer: canvas.currentLayer,
-          modes: { ...state.tool.modes },
+          modes: { ...state.tool.current.modes },
           color: { ...swatches.primary.color },
-          brushSize: state.tool.brushSize,
-          brushType: state.tool.brushType,
+          brushSize: state.tool.current.brushSize,
+          brushType: state.tool.current.brushType,
           vectorProperties: {
-            ...state.vectorProperties,
-            px1: state.vectorProperties.px1 - canvas.currentLayer.x,
-            py1: state.vectorProperties.py1 - canvas.currentLayer.y,
-            px2: state.vectorProperties.px2 - canvas.currentLayer.x,
-            py2: state.vectorProperties.py2 - canvas.currentLayer.y,
-            px3: state.vectorProperties.px3 - canvas.currentLayer.x,
-            py3: state.vectorProperties.py3 - canvas.currentLayer.y,
-            px4: state.vectorProperties.px4 - canvas.currentLayer.x,
-            py4: state.vectorProperties.py4 - canvas.currentLayer.y,
+            ...state.vector.properties,
+            px1: state.vector.properties.px1 - canvas.currentLayer.x,
+            py1: state.vector.properties.py1 - canvas.currentLayer.y,
+            px2: state.vector.properties.px2 - canvas.currentLayer.x,
+            py2: state.vector.properties.py2 - canvas.currentLayer.y,
+            px3: state.vector.properties.px3 - canvas.currentLayer.x,
+            py3: state.vector.properties.py3 - canvas.currentLayer.y,
+            px4: state.vector.properties.px4 - canvas.currentLayer.x,
+            py4: state.vector.properties.py4 - canvas.currentLayer.y,
           },
           // maskArray, //default to action's maskArray
           // boundaryBox, //default to action's boundaryBox

@@ -4,7 +4,7 @@ import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { actionDraw, actionLine } from "../Actions/pointerActions.js"
 import { getAngle, getTriangle } from "../utils/trig.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { renderCanvas, scheduleRender } from "../Canvas/render.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { createColorMaskSet } from "../Canvas/masks.js"
@@ -22,63 +22,63 @@ function brushSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //initialize sets
-      if (state.tool.modes?.colorMask) {
-        state.maskSet = createColorMaskSet(
+      if (state.tool.current.modes?.colorMask) {
+        state.selection.maskSet = createColorMaskSet(
           swatches.secondary.color,
           canvas.currentLayer
         )
       }
-      state.pointsSet = new Set()
-      state.seenPixelsSet = new Set()
+      state.selection.pointsSet = new Set()
+      state.selection.seenPixelsSet = new Set()
       //initial point
-      drawBrushPoint(state.cursorX, state.cursorY, brushDirection)
+      drawBrushPoint(state.cursor.x, state.cursor.y, brushDirection)
       //For line
-      state.lineStartX = state.cursorX
-      state.lineStartY = state.cursorY
+      state.tool.lineStartX = state.cursor.x
+      state.tool.lineStartY = state.cursor.y
       //for perfect pixels
-      state.lastDrawnX = state.cursorX
-      state.lastDrawnY = state.cursorY
-      state.waitingPixelX = state.cursorX
-      state.waitingPixelY = state.cursorY
-      renderCanvas(canvas.currentLayer)
+      state.drawing.lastDrawnX = state.cursor.x
+      state.drawing.lastDrawnY = state.cursor.y
+      state.drawing.waitingPixelX = state.cursor.x
+      state.drawing.waitingPixelY = state.cursor.y
+      scheduleRender(canvas.currentLayer)
       break
     case "pointermove":
       //draw line connecting points that don't touch or if shift is held
-      if (state.tool.options.line?.active) {
+      if (state.tool.current.options.line?.active) {
         renderCanvas(canvas.currentLayer)
         //preview the line
         actionLine(
-          state.lineStartX,
-          state.lineStartY,
-          state.cursorX,
-          state.cursorY,
-          state.boundaryBox,
+          state.tool.lineStartX,
+          state.tool.lineStartY,
+          state.cursor.x,
+          state.cursor.y,
+          state.selection.boundaryBox,
           swatches.primary.color,
           canvas.currentLayer,
-          state.tool.modes,
-          brushStamps[state.tool.brushType][state.tool.brushSize],
-          state.tool.brushSize,
-          state.maskSet,
-          state.seenPixelsSet,
+          state.tool.current.modes,
+          brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+          state.tool.current.brushSize,
+          state.selection.maskSet,
+          state.selection.seenPixelsSet,
           null,
           true
         )
       } else if (shouldDrawLine()) {
         drawLine()
-        renderCanvas(canvas.currentLayer)
+        scheduleRender(canvas.currentLayer)
       } else {
-        if (state.tool.modes?.perfect) {
+        if (state.tool.current.modes?.perfect) {
           handlePerfectPixels()
         } else {
           //draw normally
           brushDirection = calculateBrushDirection(
-            state.cursorX,
-            state.cursorY,
-            state.previousX,
-            state.previousY
+            state.cursor.x,
+            state.cursor.y,
+            state.cursor.prevX,
+            state.cursor.prevY
           )
-          drawBrushPoint(state.cursorX, state.cursorY, brushDirection)
-          renderCanvas(canvas.currentLayer)
+          drawBrushPoint(state.cursor.x, state.cursor.y, brushDirection)
+          scheduleRender(canvas.currentLayer)
         }
       }
       break
@@ -87,16 +87,16 @@ function brushSteps() {
         drawLine()
       }
       //only needed if perfect pixels option is on
-      drawBrushPoint(state.cursorX, state.cursorY, brushDirection)
-      renderCanvas(canvas.currentLayer)
+      drawBrushPoint(state.cursor.x, state.cursor.y, brushDirection)
+      scheduleRender(canvas.currentLayer)
       //add action to timeline
       let maskArray = coordArrayFromSet(
-        state.maskSet,
+        state.selection.maskSet,
         canvas.currentLayer.x,
         canvas.currentLayer.y
       )
       //correct boundary box for layer offset
-      const boundaryBox = { ...state.boundaryBox }
+      const boundaryBox = { ...state.selection.boundaryBox }
       if (boundaryBox.xMax !== null) {
         boundaryBox.xMin -= canvas.currentLayer.x
         boundaryBox.xMax -= canvas.currentLayer.x
@@ -111,13 +111,13 @@ function brushSteps() {
           color: { ...swatches.primary.color },
           brushSize: brush.brushSize,
           brushType: brush.brushType,
-          points: state.points,
+          points: state.timeline.points,
           maskArray,
           boundaryBox,
         },
       })
-      if (state.tool.modes?.colorMask) {
-        state.maskSet = null
+      if (state.tool.current.modes?.colorMask) {
+        state.selection.maskSet = null
       }
       break
     }
@@ -131,18 +131,18 @@ function brushSteps() {
 //====================================//
 
 /**
- * Add point to state.points if it is not already there
+ * Add point to state.timeline.points if it is not already there
  * @param {number} x - (Integer)
  * @param {number} y - (Integer)
  */
 function addPointToAction(x, y) {
-  if (!state.pointsSet.has(`${x},${y}`)) {
-    state.points.push({
+  if (!state.selection.pointsSet.has(`${x},${y}`)) {
+    state.timeline.addPoint({
       x: x - canvas.currentLayer.x,
       y: y - canvas.currentLayer.y,
-      brushSize: state.tool.brushSize,
+      brushSize: state.tool.current.brushSize,
     })
-    state.pointsSet.add(`${x},${y}`)
+    state.selection.pointsSet.add(`${x},${y}`)
   }
 }
 
@@ -157,14 +157,14 @@ function drawBrushPoint(x, y, brushDirection) {
   actionDraw(
     x,
     y,
-    state.boundaryBox,
+    state.selection.boundaryBox,
     swatches.primary.color,
-    brushStamps[state.tool.brushType][state.tool.brushSize][brushDirection],
-    state.tool.brushSize,
+    brushStamps[state.tool.current.brushType][state.tool.current.brushSize][brushDirection],
+    state.tool.current.brushSize,
     canvas.currentLayer,
-    state.tool.modes,
-    state.maskSet,
-    state.seenPixelsSet
+    state.tool.current.modes,
+    state.selection.maskSet,
+    state.selection.seenPixelsSet
   )
 }
 
@@ -173,22 +173,22 @@ function drawBrushPoint(x, y, brushDirection) {
  */
 function drawPreviewBrushPoint() {
   let brushDirection = calculateBrushDirection(
-    state.cursorX,
-    state.cursorY,
-    state.lastDrawnX,
-    state.lastDrawnY
+    state.cursor.x,
+    state.cursor.y,
+    state.drawing.lastDrawnX,
+    state.drawing.lastDrawnY
   )
   actionDraw(
-    state.cursorX,
-    state.cursorY,
-    state.boundaryBox,
+    state.cursor.x,
+    state.cursor.y,
+    state.selection.boundaryBox,
     swatches.primary.color,
-    brushStamps[state.tool.brushType][state.tool.brushSize][brushDirection],
-    state.tool.brushSize,
+    brushStamps[state.tool.current.brushType][state.tool.current.brushSize][brushDirection],
+    state.tool.current.brushSize,
     canvas.currentLayer,
-    state.tool.modes,
-    state.maskSet,
-    state.seenPixelsSet,
+    state.tool.current.modes,
+    state.selection.maskSet,
+    state.selection.seenPixelsSet,
     null,
     true,
     true
@@ -201,9 +201,9 @@ function drawPreviewBrushPoint() {
  */
 function shouldDrawLine() {
   return (
-    Math.abs(state.cursorX - state.previousX) > 1 ||
-    Math.abs(state.cursorY - state.previousY) > 1 ||
-    (state.lineStartX !== null && state.lineStartY !== null)
+    Math.abs(state.cursor.x - state.cursor.prevX) > 1 ||
+    Math.abs(state.cursor.y - state.cursor.prevY) > 1 ||
+    (state.tool.lineStartX !== null && state.tool.lineStartY !== null)
   )
 }
 
@@ -212,15 +212,15 @@ function shouldDrawLine() {
  */
 function drawLine() {
   let lineStartX =
-    state.lineStartX !== null ? state.lineStartX : state.previousX
+    state.tool.lineStartX !== null ? state.tool.lineStartX : state.cursor.prevX
   let lineStartY =
-    state.lineStartY !== null ? state.lineStartY : state.previousY
-  let angle = getAngle(state.cursorX - lineStartX, state.cursorY - lineStartY) // angle of line
+    state.tool.lineStartY !== null ? state.tool.lineStartY : state.cursor.prevY
+  let angle = getAngle(state.cursor.x - lineStartX, state.cursor.y - lineStartY)
   let tri = getTriangle(
     lineStartX,
     lineStartY,
-    state.cursorX,
-    state.cursorY,
+    state.cursor.x,
+    state.cursor.y,
     angle
   )
 
@@ -244,16 +244,16 @@ function drawLine() {
     previousY = thispoint.y
   }
   //Reset lineStart Coords
-  state.lineStartX = null
-  state.lineStartY = null
+  state.tool.lineStartX = null
+  state.tool.lineStartY = null
   //fill endpoint
   brushDirection = calculateBrushDirection(
-    state.cursorX,
-    state.cursorY,
+    state.cursor.x,
+    state.cursor.y,
     previousX,
     previousY
   )
-  drawBrushPoint(state.cursorX, state.cursorY, brushDirection)
+  drawBrushPoint(state.cursor.x, state.cursor.y, brushDirection)
 }
 
 /**
@@ -263,28 +263,28 @@ function handlePerfectPixels() {
   let brushDirection = "0,0"
   //if current pixel not a neighbor to lastDrawn and has not already been drawn, draw waiting pixel
   if (
-    Math.abs(state.cursorX - state.lastDrawnX) > 1 ||
-    Math.abs(state.cursorY - state.lastDrawnY) > 1
+    Math.abs(state.cursor.x - state.drawing.lastDrawnX) > 1 ||
+    Math.abs(state.cursor.y - state.drawing.lastDrawnY) > 1
   ) {
     //Draw the previous waiting pixel
     brushDirection = calculateBrushDirection(
-      state.waitingPixelX,
-      state.waitingPixelY,
-      state.lastDrawnX,
-      state.lastDrawnY
+      state.drawing.waitingPixelX,
+      state.drawing.waitingPixelY,
+      state.drawing.lastDrawnX,
+      state.drawing.lastDrawnY
     )
-    drawBrushPoint(state.waitingPixelX, state.waitingPixelY, brushDirection)
+    drawBrushPoint(state.drawing.waitingPixelX, state.drawing.waitingPixelY, brushDirection)
     //update queue
-    state.lastDrawnX = state.waitingPixelX
-    state.lastDrawnY = state.waitingPixelY
-    state.waitingPixelX = state.cursorX
-    state.waitingPixelY = state.cursorY
+    state.drawing.lastDrawnX = state.drawing.waitingPixelX
+    state.drawing.lastDrawnY = state.drawing.waitingPixelY
+    state.drawing.waitingPixelX = state.cursor.x
+    state.drawing.waitingPixelY = state.cursor.y
     renderCanvas(canvas.currentLayer)
     //preview the next pixel
     drawPreviewBrushPoint()
   } else {
-    state.waitingPixelX = state.cursorX
-    state.waitingPixelY = state.cursorY
+    state.drawing.waitingPixelX = state.cursor.x
+    state.drawing.waitingPixelY = state.cursor.y
     renderCanvas(canvas.currentLayer)
     //preview the next pixel
     drawPreviewBrushPoint()

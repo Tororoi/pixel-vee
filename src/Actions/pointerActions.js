@@ -1,14 +1,14 @@
-import { canvas } from "../Context/canvas.js"
-import { getTriangle, getAngle } from "../utils/trig.js"
-import { plotCubicBezier, plotQuadBezier } from "../utils/bezier.js"
-import { plotRotatedEllipseConics } from "../utils/ellipse.js"
+import { canvas } from '../Context/canvas.js'
+import { getTriangle, getAngle } from '../utils/trig.js'
+import { plotCubicBezier, plotQuadBezier } from '../utils/bezier.js'
+import { plotRotatedEllipseConics } from '../utils/ellipse.js'
 import {
   colorPixel,
   matchStartColor,
   getColor,
-} from "../utils/imageDataHelpers.js"
-import { calculateBrushDirection } from "../utils/drawHelpers.js"
-import { isOutOfBounds, minLimit, maxLimit } from "../utils/canvasHelpers.js"
+} from '../utils/imageDataHelpers.js'
+import { calculateBrushDirection } from '../utils/drawHelpers.js'
+import { isOutOfBounds, minLimit, maxLimit } from '../utils/canvasHelpers.js'
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -46,7 +46,7 @@ export function actionDraw(
   seenPixelsSet,
   customContext = null,
   isPreview = false,
-  excludeFromSet = false
+  excludeFromSet = false,
 ) {
   let offsetX = 0
   let offsetY = 0
@@ -128,14 +128,14 @@ export function actionLine(
   maskSet,
   seenPixelsSet = null,
   customContext = null,
-  isPreview = false
+  isPreview = false,
 ) {
   let angle = getAngle(tx - sx, ty - sy) // angle of line
   let tri = getTriangle(sx, sy, tx, ty, angle)
   const seen = seenPixelsSet ? new Set(seenPixelsSet) : new Set()
   let previousX = sx
   let previousY = sy
-  let brushDirection = "0,0"
+  let brushDirection = '0,0'
   for (let i = 0; i < tri.long; i++) {
     let thispoint = {
       x: Math.round(sx + tri.x * i),
@@ -145,7 +145,7 @@ export function actionLine(
       thispoint.x,
       thispoint.y,
       previousX,
-      previousY
+      previousY,
     )
     // for each point along the line
     actionDraw(
@@ -160,7 +160,7 @@ export function actionLine(
       maskSet,
       seen,
       customContext,
-      isPreview
+      isPreview,
     )
     previousX = thispoint.x
     previousY = thispoint.y
@@ -179,7 +179,7 @@ export function actionLine(
     maskSet,
     seen,
     customContext,
-    isPreview
+    isPreview,
   )
 }
 
@@ -203,7 +203,7 @@ export function actionFill(
   layer,
   currentModes,
   maskSet,
-  customContext = null
+  customContext = null,
 ) {
   //exit if outside borders
   if (isOutOfBounds(startX, startY, 0, layer, boundaryBox)) {
@@ -222,7 +222,7 @@ export function actionFill(
   let clickedColor = getColor(layerImageData, startX - xMin, startY - yMin)
 
   if (currentModes?.eraser) {
-    currentColor = { color: "rgba(0,0,0,0)", r: 0, g: 0, b: 0, a: 0 }
+    currentColor = { color: 'rgba(0,0,0,0)', r: 0, g: 0, b: 0, a: 0 }
   }
 
   //exit if color is the same
@@ -230,38 +230,32 @@ export function actionFill(
     return
   }
   //Start with click coords
-  let pixelStack = [[startX - xMin, startY - yMin]]
-  let newPos, x, y, pixelPos, reachLeft, reachRight
-  floodFill()
-  //render floodFill result
-  ctx.putImageData(layerImageData, xMin, yMin)
-
-  //helpers
-  /**
-   * Recursive function to fill a contiguous color
-   */
-  function floodFill() {
-    newPos = pixelStack.pop()
-    x = newPos[0]
-    y = newPos[1]
+  const pixelStack = [[startX - xMin, startY - yMin]]
+  let x, y, pixelPos, reachLeft, reachRight
+  const width = xMax - xMin
+  const height = yMax - yMin
+  while (pixelStack.length) {
+    const pos = pixelStack.pop()
+    x = pos[0]
+    y = pos[1]
     //get current pixel position
-    pixelPos = (y * (xMax - xMin) + x) * 4
+    pixelPos = (y * width + x) * 4
     // Go up as long as the color matches and are inside the canvas
     while (
       y >= 0 &&
       matchStartColor(layerImageData, pixelPos, clickedColor, boundaryBox)
     ) {
       y--
-      pixelPos -= (xMax - xMin) * 4
+      pixelPos -= width * 4
     }
     //Don't overextend
-    pixelPos += (xMax - xMin) * 4
+    pixelPos += width * 4
     y++
     reachLeft = false
     reachRight = false
-    // Go down as long as the color matches and in inside the canvas
+    // Go down as long as the color matches and inside the canvas
     while (
-      y < yMax - yMin &&
+      y < height &&
       matchStartColor(layerImageData, pixelPos, clickedColor, boundaryBox)
     ) {
       colorPixel(layerImageData, pixelPos, currentColor)
@@ -272,7 +266,7 @@ export function actionFill(
             layerImageData,
             pixelPos - 4,
             clickedColor,
-            boundaryBox
+            boundaryBox,
           )
         ) {
           if (!reachLeft) {
@@ -285,13 +279,13 @@ export function actionFill(
         }
       }
 
-      if (x < xMax - xMin - 1) {
+      if (x < width - 1) {
         if (
           matchStartColor(
             layerImageData,
             pixelPos + 4,
             clickedColor,
-            boundaryBox
+            boundaryBox,
           )
         ) {
           if (!reachRight) {
@@ -304,13 +298,11 @@ export function actionFill(
         }
       }
       y++
-      pixelPos += (xMax - xMin) * 4
-    }
-
-    if (pixelStack.length) {
-      floodFill()
+      pixelPos += width * 4
     }
   }
+  //render floodFill result
+  ctx.putImageData(layerImageData, xMin, yMin)
 }
 
 /**
@@ -337,7 +329,7 @@ function renderPoints(
   currentModes,
   maskSet,
   customContext = null,
-  isPreview = false
+  isPreview = false,
 ) {
   const seen = new Set()
   let previousX = Math.floor(points[0].x)
@@ -359,7 +351,7 @@ function renderPoints(
       maskSet,
       seen,
       customContext,
-      isPreview
+      isPreview,
     )
     previousX = xt
     previousY = yt
@@ -401,7 +393,7 @@ export function actionQuadraticCurve(
   brushSize,
   maskSet,
   customContext = null,
-  isPreview = false
+  isPreview = false,
 ) {
   if (stepNum === 1) {
     actionLine(
@@ -418,7 +410,7 @@ export function actionQuadraticCurve(
       maskSet,
       null,
       customContext,
-      isPreview
+      isPreview,
     )
   } else if (stepNum === 2) {
     let plotPoints = plotQuadBezier(
@@ -427,7 +419,7 @@ export function actionQuadraticCurve(
       controlx,
       controly,
       endx,
-      endy
+      endy,
     )
     renderPoints(
       plotPoints,
@@ -439,7 +431,7 @@ export function actionQuadraticCurve(
       currentModes,
       maskSet,
       customContext,
-      isPreview
+      isPreview,
     )
   }
 }
@@ -483,7 +475,7 @@ export function actionCubicCurve(
   brushSize,
   maskSet,
   customContext = null,
-  isPreview = false
+  isPreview = false,
 ) {
   if (stepNum === 1) {
     actionLine(
@@ -500,7 +492,7 @@ export function actionCubicCurve(
       maskSet,
       null,
       customContext,
-      isPreview
+      isPreview,
     )
   } else if (stepNum === 2) {
     let plotPoints = plotQuadBezier(
@@ -509,7 +501,7 @@ export function actionCubicCurve(
       controlx1,
       controly1,
       endx,
-      endy
+      endy,
     )
     renderPoints(
       plotPoints,
@@ -521,7 +513,7 @@ export function actionCubicCurve(
       currentModes,
       maskSet,
       customContext,
-      isPreview
+      isPreview,
     )
   } else if (stepNum === 3) {
     let plotPoints = plotCubicBezier(
@@ -532,7 +524,7 @@ export function actionCubicCurve(
       controlx2,
       controly2,
       endx,
-      endy
+      endy,
     )
     renderPoints(
       plotPoints,
@@ -544,7 +536,7 @@ export function actionCubicCurve(
       currentModes,
       maskSet,
       customContext,
-      isPreview
+      isPreview,
     )
   }
 }
@@ -588,7 +580,7 @@ export function actionEllipse(
   brushSize,
   maskSet,
   customContext = null,
-  isPreview = false
+  isPreview = false,
 ) {
   const plotPoints = plotRotatedEllipseConics(
     weight,
@@ -599,7 +591,7 @@ export function actionEllipse(
     rightTangentX,
     rightTangentY,
     bottomTangentX,
-    bottomTangentY
+    bottomTangentY,
   )
   renderPoints(
     plotPoints,
@@ -611,6 +603,6 @@ export function actionEllipse(
     currentModes,
     maskSet,
     customContext,
-    isPreview
+    isPreview,
   )
 }

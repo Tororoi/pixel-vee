@@ -6,7 +6,9 @@
   "scripts": {
     "sass": "sass --watch scss/style.scss:css/style.css",
     "eslint": "eslint --fix-dry-run src --ext jsx,js",
-    "eslintfix": "eslint --fix src --ext jsx,js"
+    "eslintfix": "eslint --fix src --ext jsx,js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "repository": {
     "type": "git",
@@ -25,6 +27,7 @@
   },
   "devDependencies": {
     "eslint": "^8.56.0",
-    "eslint-plugin-jsdoc": "^48.1.0"
+    "eslint-plugin-jsdoc": "^48.1.0",
+    "vitest": "^4.0.18"
   }
 }

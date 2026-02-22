@@ -18,13 +18,11 @@ import { initializeColorPicker } from "../Swatch/events.js"
 import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
 // import { dragStart, dragMove, dragStop } from "../utils/drag.js"
 import {
-  addReferenceLayer,
-  addRasterLayer,
-  removeLayer,
   actionSelectVector,
   actionDeselectVector,
   actionDeselect,
 } from "../Actions/nonPointerActions.js"
+import { addReferenceLayer, addRasterLayer, removeLayer } from "../Actions/layerActions.js"
 import { createPreviewLayer } from "./layers.js"
 import { switchTool } from "../Tools/toolbox.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
@@ -355,17 +353,17 @@ function vectorInteract(e) {
     //select current vector
     //Only manipulate timeline if selection is happening
     if (keys.ShiftLeft || keys.ShiftRight) {
-      if (!state.selectedVectorIndicesSet.has(vector.index)) {
+      if (!state.vector.selectedIndices.has(vector.index)) {
         //select if shift key held down
         actionSelectVector(vector.index)
         // enableActionsForSelection()
       } else {
         actionDeselectVector(vector.index)
       }
-    } else if (state.selectedVectorIndicesSet.size > 0) {
+    } else if (state.vector.selectedIndices.size > 0) {
       actionDeselect()
     }
-    if (vector.index !== state.currentVectorIndex) {
+    if (vector.index !== state.vector.currentIndex) {
       //switch tool
       switchTool(vector.vectorProperties.type)
       // vectorGui.reset()
@@ -391,7 +389,7 @@ function vectorInteract(e) {
  */
 function removeVector(vector) {
   vector.removed = true
-  if (state.currentVectorIndex === vector.index) {
+  if (state.vector.currentIndex === vector.index) {
     vectorGui.reset()
   }
   renderCanvas(vector.layer, true)

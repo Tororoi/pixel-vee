@@ -15,7 +15,7 @@ import { renderCanvas } from "../Canvas/render.js"
  * TODO: (Low Priority) Render vectorGui cursor for vector tools with remaining control points indicator
  */
 export function renderCursor() {
-  switch (state.tool.name) {
+  switch (state.tool.current.name) {
     case "grab":
       //show nothing
       break
@@ -32,26 +32,26 @@ export function renderCursor() {
     default:
       if (
         !vectorGui.selectedCollisionPresent &&
-        !state.collidedVectorIndex &&
-        state.selectedVectorIndicesSet.size === 0
+        !state.vector.collidedIndex &&
+        state.vector.selectedIndices.size === 0
       ) {
         renderCanvas(canvas.currentLayer)
         actionDraw(
-          state.cursorX,
-          state.cursorY,
-          state.boundaryBox,
+          state.cursor.x,
+          state.cursor.y,
+          state.selection.boundaryBox,
           swatches.primary.color,
-          brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"],
-          state.tool.brushSize,
+          brushStamps[state.tool.current.brushType][state.tool.current.brushSize]["0,0"],
+          state.tool.current.brushSize,
           canvas.currentLayer,
-          state.tool.modes,
-          state.maskSet,
-          state.seenPixelsSet,
+          state.tool.current.modes,
+          state.selection.maskSet,
+          state.selection.seenPixelsSet,
           null,
           true,
           true
         )
-        if (state.tool.modes?.eraser) {
+        if (state.tool.current.modes?.eraser) {
           drawCursorBox(1)
           // vectorGui.drawSelectOutline(state, canvas, state.selectPixelSet, 0.5)
         }
@@ -68,25 +68,20 @@ export function renderCursor() {
 function drawCursorBox(lineWeight) {
   let lineWidth =
     canvas.zoom <= 8 ? lineWeight / canvas.zoom : 0.125 * lineWeight
-  let brushOffset = Math.floor(state.tool.brushSize / 2)
+  let brushOffset = Math.floor(state.tool.current.brushSize / 2)
   let ol = lineWidth / 2 // line offset to stroke off-center
 
-  // Create a Set from brushStamps[state.tool.brushType][state.tool.brushSize]//TODO: (Medium Priority) make set when creating brush stamp so it does not need to be defined here.
-  const pixelSet = new Set(
-    brushStamps[state.tool.brushType][state.tool.brushSize]["0,0"].map(
-      (p) => `${p.x},${p.y}`
-    )
-  )
+  const pixelSet = brushStamps[state.tool.current.brushType][state.tool.current.brushSize].pixelSet
 
   canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.lineWidth = lineWidth
   canvas.vectorGuiCTX.strokeStyle = "white"
 
-  for (const pixel of brushStamps[state.tool.brushType][state.tool.brushSize][
+  for (const pixel of brushStamps[state.tool.current.brushType][state.tool.current.brushSize][
     "0,0"
   ]) {
-    const x = state.cursorX + canvas.xOffset + pixel.x - brushOffset
-    const y = state.cursorY + canvas.yOffset + pixel.y - brushOffset
+    const x = state.cursor.x + canvas.xOffset + pixel.x - brushOffset
+    const y = state.cursor.y + canvas.yOffset + pixel.y - brushOffset
 
     // Check for neighboring pixels using the Set
     const hasTopNeighbor = pixelSet.has(`${pixel.x},${pixel.y - 1}`)

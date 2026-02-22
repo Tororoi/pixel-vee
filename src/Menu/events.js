@@ -15,9 +15,8 @@ import {
   actionCutSelection,
   actionPasteSelection,
   actionDeleteSelection,
-  actionFlipPixels,
-  actionRotatePixels,
 } from "../Actions/nonPointerActions.js"
+import { actionFlipPixels, actionRotatePixels } from "../Actions/transformActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
 
 //====================================//
@@ -77,7 +76,7 @@ export const generateTooltip = (message, target) => {
  */
 export function openSaveDialogBox() {
   dom.saveContainer.style.display = "flex"
-  state.saveDialogOpen = true
+  state.ui.saveDialogOpen = true
   setSaveFilesizePreview()
   dom.saveAsFileName.focus()
 }
@@ -104,24 +103,24 @@ function importImage() {
           willReadFrequently: true,
         })
         tempCTX.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height)
-        const previousClipboard = { ...state.selectClipboard }
+        const previousClipboard = { ...state.clipboard.select }
         previousClipboard.selectProperties = {
-          ...state.selectClipboard.selectProperties,
+          ...state.clipboard.select.selectProperties,
         }
-        state.selectClipboard.selectProperties = {
+        state.clipboard.select.selectProperties = {
           px1: 0,
           py1: 0,
           px2: img.width,
           py2: img.height,
         }
-        state.selectClipboard.boundaryBox = {
+        state.clipboard.select.boundaryBox = {
           xMin: 0,
           yMin: 0,
           xMax: img.width,
           yMax: img.height,
         }
-        state.selectClipboard.canvas = tempCanvas
-        state.selectClipboard.imageData = tempCTX.getImageData(
+        state.clipboard.select.canvas = tempCanvas
+        state.clipboard.select.imageData = tempCTX.getImageData(
           0,
           0,
           img.width,
@@ -130,7 +129,7 @@ function importImage() {
         //2. paste clipboard onto canvas
         actionPasteSelection()
         //3. clear clipboard
-        state.selectClipboard = previousClipboard
+        state.clipboard.select = previousClipboard
       }
     }
     reader.readAsDataURL(this.files[0])
@@ -175,18 +174,18 @@ function openSavedDrawing() {
 
 document.body.addEventListener("mouseover", (e) => {
   //TODO: (Low Priority) Instead of rendering here, use a timer that resets on mousemove to detect idle time and move this logic to the mousemove event
-  if (!state.touch) {
-    state.tooltipMessage = e.target.dataset?.tooltip
+  if (!state.tool.touch) {
+    state.ui.tooltipMessage = e.target.dataset?.tooltip
     if (
       canvas.currentLayer.isPreview &&
       e.target.classList.contains("deactivate-paste")
     ) {
-      state.tooltipMessage =
-        state.tooltipMessage +
+      state.ui.tooltipMessage =
+        state.ui.tooltipMessage +
         "\n\nCannot use with temporary pasted layer. Selecting will confirm pasted pixels."
     }
-    generateTooltip(state.tooltipMessage, e.target)
-    if (dom.tooltipBtn.checked && state.tooltipMessage) {
+    generateTooltip(state.ui.tooltipMessage, e.target)
+    if (dom.tooltipBtn.checked && state.ui.tooltipMessage) {
       dom.tooltip.classList.add("visible")
     } else {
       dom.tooltip.classList.remove("visible")
@@ -194,32 +193,32 @@ document.body.addEventListener("mouseover", (e) => {
   }
 })
 document.body.addEventListener("click", (e) => {
-  if (!state.touch) {
+  if (!state.tool.touch) {
     //Hide tooltip on click
     dom.tooltip.classList.remove("visible")
   } else {
     //Handle tooltip for mobile
-    let previousTooltipTarget = state.tooltipTarget
-    state.tooltipMessage = e.target.dataset?.tooltip
-    state.tooltipTarget = e.target
+    let previousTooltipTarget = state.ui.tooltipTarget
+    state.ui.tooltipMessage = e.target.dataset?.tooltip
+    state.ui.tooltipTarget = e.target
     if (
       canvas.currentLayer.isPreview &&
       e.target.classList.contains("deactivate-paste")
     ) {
-      state.tooltipMessage =
-        state.tooltipMessage +
+      state.ui.tooltipMessage =
+        state.ui.tooltipMessage +
         "\n\nCannot use with temporary pasted layer. Selecting will confirm pasted pixels."
     }
-    generateTooltip(state.tooltipMessage, e.target)
+    generateTooltip(state.ui.tooltipMessage, e.target)
     if (
       dom.tooltipBtn.checked &&
-      state.tooltipMessage &&
-      state.tooltipTarget !== previousTooltipTarget
+      state.ui.tooltipMessage &&
+      state.ui.tooltipTarget !== previousTooltipTarget
     ) {
       dom.tooltip.classList.add("visible")
     } else {
       dom.tooltip.classList.remove("visible")
-      state.tooltipTarget = null
+      state.ui.tooltipTarget = null
     }
   }
 })
@@ -227,9 +226,9 @@ dom.toolOptions.addEventListener("click", (e) => {
   if (e.target.type === "checkbox") {
     const optionName = e.target.id.split("-")[0]
     if (e.target.checked) {
-      state.tool.options[optionName].active = true
+      state.tool.current.options[optionName].active = true
     } else {
-      state.tool.options[optionName].active = false
+      state.tool.current.options[optionName].active = false
     }
     vectorGui.render()
   }
@@ -264,7 +263,7 @@ dom.gridSpacingSpinBtn.addEventListener("pointerdown", (e) => {
   vectorGui.render()
 })
 dom.tooltipBtn.addEventListener("click", () => {
-  if (dom.tooltipBtn.checked && state.tooltipMessage) {
+  if (dom.tooltipBtn.checked && state.ui.tooltipMessage) {
     dom.tooltip.classList.add("visible")
   } else {
     dom.tooltip.classList.remove("visible")
@@ -339,32 +338,32 @@ dom.settingsBtn.addEventListener("click", () => {
 dom.saveAsForm.addEventListener("change", (e) => {
   if (e.target.id === "preserve-history-toggle") {
     if (e.target.checked) {
-      state.saveSettings.preserveHistory = true
+      state.ui.saveSettings.preserveHistory = true
       dom.advancedOptionsContainer.classList.add("disabled")
     } else {
-      state.saveSettings.preserveHistory = false
+      state.ui.saveSettings.preserveHistory = false
       dom.advancedOptionsContainer.classList.remove("disabled")
     }
     setSaveFilesizePreview()
   } else if (e.target.id === "include-palette-toggle") {
     if (e.target.checked) {
-      state.saveSettings.includePalette = true
+      state.ui.saveSettings.includePalette = true
     } else {
-      state.saveSettings.includePalette = false
+      state.ui.saveSettings.includePalette = false
     }
     setSaveFilesizePreview()
   } else if (e.target.id === "include-reference-layers-toggle") {
     if (e.target.checked) {
-      state.saveSettings.includeReferenceLayers = true
+      state.ui.saveSettings.includeReferenceLayers = true
     } else {
-      state.saveSettings.includeReferenceLayers = false
+      state.ui.saveSettings.includeReferenceLayers = false
     }
     setSaveFilesizePreview()
   } else if (e.target.id === "include-removed-actions-toggle") {
     if (e.target.checked) {
-      state.saveSettings.includeRemovedActions = true
+      state.ui.saveSettings.includeRemovedActions = true
     } else {
-      state.saveSettings.includeRemovedActions = false
+      state.ui.saveSettings.includeRemovedActions = false
     }
     setSaveFilesizePreview()
   }
@@ -374,16 +373,16 @@ dom.saveAsForm.addEventListener("submit", (e) => {
   e.preventDefault()
   saveDrawing()
   dom.saveContainer.style.display = "none"
-  state.saveDialogOpen = false
+  state.ui.saveDialogOpen = false
 })
 dom.saveAsFileName.addEventListener("input", (e) => {
-  state.saveSettings.saveAsFileName = e.target.value
+  state.ui.saveSettings.saveAsFileName = e.target.value
   dom.saveAsFileName.style.width =
-    measureTextWidth(state.saveSettings.saveAsFileName, "16px '04Font'") +
+    measureTextWidth(state.ui.saveSettings.saveAsFileName, "16px '04Font'") +
     2 +
     "px"
 })
 dom.cancelSaveBtn.addEventListener("click", () => {
   dom.saveContainer.style.display = "none"
-  state.saveDialogOpen = false
+  state.ui.saveDialogOpen = false
 })
