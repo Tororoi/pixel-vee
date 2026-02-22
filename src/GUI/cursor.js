@@ -84,10 +84,10 @@ function drawCursorBox(lineWeight) {
     const y = state.cursor.y + canvas.yOffset + pixel.y - brushOffset
 
     // Check for neighboring pixels using the Set
-    const hasTopNeighbor = pixelSet.has(`${pixel.x},${pixel.y - 1}`)
-    const hasRightNeighbor = pixelSet.has(`${pixel.x + 1},${pixel.y}`)
-    const hasBottomNeighbor = pixelSet.has(`${pixel.x},${pixel.y + 1}`)
-    const hasLeftNeighbor = pixelSet.has(`${pixel.x - 1},${pixel.y}`)
+    const hasTopNeighbor = pixelSet.has(((pixel.y - 1) << 16) | pixel.x)
+    const hasRightNeighbor = pixelSet.has((pixel.y << 16) | (pixel.x + 1))
+    const hasBottomNeighbor = pixelSet.has(((pixel.y + 1) << 16) | pixel.x)
+    const hasLeftNeighbor = pixelSet.has((pixel.y << 16) | (pixel.x - 1))
 
     // Draw lines only for sides that don't have neighboring pixels
     if (!hasTopNeighbor) {

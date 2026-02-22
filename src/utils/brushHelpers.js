@@ -88,7 +88,7 @@ function generateCircleBrush(brushSize, offsetX, offsetY, seen) {
       //
       let x = px + offsetX
       let y = py + offsetY
-      const key = `${x},${y}`
+      const key = (y << 16) | x
       if (seen.has(key)) {
         return
       } else {
@@ -137,7 +137,7 @@ function generateSquareBrush(brushSize, offsetX, offsetY, seen) {
 
   for (let y = 0; y < brushSize; y++) {
     for (let x = 0; x < brushSize; x++) {
-      const coord = `${x + offsetX},${y + offsetY}`
+      const coord = ((y + offsetY) << 16) | (x + offsetX)
       if (!seen.has(coord)) {
         brush.push({ x, y })
         seen.add(coord)
@@ -159,7 +159,7 @@ function generateOffsetBrush(brushPixels, offsetX, offsetY, seen) {
   const offsetBrush = []
 
   for (const { x, y } of brushPixels) {
-    const coord = `${x + offsetX},${y + offsetY}`
+    const coord = ((y + offsetY) << 16) | (x + offsetX)
     if (!seen.has(coord)) {
       offsetBrush.push({ x, y })
     }
@@ -190,7 +190,7 @@ function createBrushStamp(generatorFn, brushSize) {
   const directions = {
     "0,0": base,
     // Pre-built Set for O(1) neighbor lookups in drawCursorBox (avoids rebuilding every frame)
-    pixelSet: new Set(base.map((p) => `${p.x},${p.y}`)),
+    pixelSet: new Set(base.map((p) => (p.y << 16) | p.x)),
   }
   for (const [x, y] of offsets) {
     directions[`${x},${y}`] = generateOffsetBrush(base, x, y, seen)
