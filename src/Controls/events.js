@@ -170,18 +170,26 @@ function handlePointerMove(e) {
   state.cursor.clickDisabled = false
   //currently only square dimensions work
   canvas.zoomAtLastDraw = canvas.zoom //* */
-  //use requestAnimationFrame for smoother rendering. Must be called before setting coordinates or else line may be broken unintentionally
-  window.requestAnimationFrame(() => {
-    //coords
-    setCoordinates(e)
-    let cursorMoved =
-      state.cursor.prevX !== state.cursor.x || state.cursor.prevY !== state.cursor.y
-    if (state.tool.current.options.useSubpixels?.active && !cursorMoved) {
-      cursorMoved =
-        canvas.previousSubPixelX !== canvas.subPixelX ||
-        canvas.previousSubPixelY !== canvas.subPixelY
-    }
-    if (cursorMoved) {
+
+  // Process all coalesced events for smoother strokes at high mouse speed.
+  // Drawing (pixel writes to offscreen canvas) is synchronous — no RAF deferral
+  // needed here because scheduleRender() inside each tool fn() already batches
+  // the offscreen→onscreen blit via its own RAF.
+  const events = e.getCoalescedEvents?.() ?? [e]
+  let cursorMoved = false
+
+  for (const evt of events) {
+    setCoordinates(evt)
+    const moved =
+      state.cursor.prevX !== state.cursor.x ||
+      state.cursor.prevY !== state.cursor.y
+    const subpixelMoved =
+      state.tool.current.options.useSubpixels?.active &&
+      (canvas.previousSubPixelX !== canvas.subPixelX ||
+        canvas.previousSubPixelY !== canvas.subPixelY)
+
+    if (moved || subpixelMoved) {
+      cursorMoved = true
       if (
         state.cursor.clicked
         // ||
@@ -192,6 +200,20 @@ function handlePointerMove(e) {
       ) {
         //run selected tool step function
         state.tool.current.fn()
+      }
+      // save last point
+      state.cursor.prevX = state.cursor.x
+      state.cursor.prevY = state.cursor.y
+      canvas.previousSubPixelX = canvas.subPixelX
+      canvas.previousSubPixelY = canvas.subPixelY
+    }
+  }
+
+  // Defer only the visual overlay renders (GUI vectors, cursor preview) to RAF.
+  // These don't write pixel data — a one-frame delay on overlays is imperceptible.
+  if (cursorMoved) {
+    window.requestAnimationFrame(() => {
+      if (state.cursor.clicked) {
         vectorGui.render()
         if (
           (state.tool.current.name === "brush" && state.tool.current.modes?.eraser) ||
@@ -211,13 +233,8 @@ function handlePointerMove(e) {
           renderCursor()
         }
       }
-    }
-    // save last point
-    state.cursor.prevX = state.cursor.x
-    state.cursor.prevY = state.cursor.y
-    canvas.previousSubPixelX = canvas.subPixelX
-    canvas.previousSubPixelY = canvas.subPixelY
-  })
+    })
+  }
 }
 
 /**
