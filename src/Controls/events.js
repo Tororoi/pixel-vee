@@ -209,31 +209,26 @@ function handlePointerMove(e) {
     }
   }
 
-  // Defer only the visual overlay renders (GUI vectors, cursor preview) to RAF.
-  // These don't write pixel data — a one-frame delay on overlays is imperceptible.
   if (cursorMoved) {
-    window.requestAnimationFrame(() => {
-      if (state.cursor.clicked) {
-        vectorGui.render()
-        if (
-          (state.tool.current.name === "brush" && state.tool.current.modes?.eraser) ||
-          state.tool.current.name === "eyedropper"
-        ) {
-          renderCursor()
-        }
-      } else {
-        //no active tool, just render cursor
-        vectorGui.render()
-        if (
-          !(
-            ["quadCurve", "cubicCurve"].includes(state.tool.current.name) &&
-            state.tool.clickCounter > 0
-          )
-        ) {
-          renderCursor()
-        }
+    vectorGui.render()
+    if (state.cursor.clicked) {
+      if (
+        (state.tool.current.name === "brush" && state.tool.current.modes?.eraser) ||
+        state.tool.current.name === "eyedropper"
+      ) {
+        renderCursor()
       }
-    })
+    } else {
+      //no active tool, just render cursor
+      if (
+        !(
+          ["quadCurve", "cubicCurve"].includes(state.tool.current.name) &&
+          state.tool.clickCounter > 0
+        )
+      ) {
+        renderCursor()
+      }
+    }
   }
 }
 
