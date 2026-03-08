@@ -36,81 +36,89 @@ export function renderCursor() {
         !state.vector.collidedIndex &&
         state.vector.selectedIndices.size === 0
       ) {
-        if (
-          !state.tool.current.modes?.eraser &&
-          !state.tool.current.modes?.inject
-        ) {
-          // Normal mode: draw preview on cursor canvas.
-          // vectorGui.render() already cleared it, so no layer blit needed.
-          const brushSize = state.tool.current.brushSize
-          const stamp =
-            brushStamps[state.tool.current.brushType][brushSize]['0,0']
-          const baseX = Math.ceil(state.cursor.x - brushSize / 2)
-          const baseY = Math.ceil(state.cursor.y - brushSize / 2)
-          canvas.cursorCTX.fillStyle = swatches.primary.color.color
-          for (const pixel of stamp) {
-            const x = baseX + pixel.x
-            const y = baseY + pixel.y
-            if (
-              isOutOfBounds(
-                x,
-                y,
-                0,
-                canvas.currentLayer,
-                state.selection.boundaryBox,
-              )
-            )
-              continue
-            if (
-              state.selection.maskSet &&
-              !state.selection.maskSet.has((y << 16) | x)
-            )
-              continue
-            canvas.cursorCTX.fillRect(
-              x + canvas.xOffset,
-              y + canvas.yOffset,
-              1,
-              1,
-            )
+        if (state.tool.current.modes?.eraser) {
+          if (vectorGui.showCursorPreview) {
+            drawInjectPreview()
+          }
+          drawCursorBox(1)
+        } else if (vectorGui.showCursorPreview) {
+          if (state.tool.current.modes?.inject) {
+            drawInjectPreview()
+          } else {
+            drawNormalPreview()
           }
         } else {
-          // Eraser / inject: accurate preview requires drawing on the layer
-          // canvas so transparency and compositing behave correctly.
-          renderCanvas(canvas.currentLayer)
-          actionDraw(
-            state.cursor.x,
-            state.cursor.y,
-            state.selection.boundaryBox,
-            swatches.primary.color,
-            brushStamps[state.tool.current.brushType][
-              state.tool.current.brushSize
-            ]['0,0'],
-            state.tool.current.brushSize,
-            canvas.currentLayer,
-            state.tool.current.modes,
-            state.selection.maskSet,
-            state.selection.seenPixelsSet,
-            null,
-            true,
-            true,
-          )
-          if (state.tool.current.modes?.eraser) {
-            drawCursorBox(1)
-          }
+          // Cursor preview disabled (default): show box outline for all modes.
+          drawCursorBox(1)
         }
       } else {
-        // Collision present — no cursor preview drawn.
-        // For eraser/inject the preview is on layer.onscreenCtx, so we need
-        // to blit the layer to clear any leftover preview pixel.
-        if (
-          state.tool.current.modes?.eraser ||
-          state.tool.current.modes?.inject
-        ) {
-          renderCanvas(canvas.currentLayer)
-        }
-        // Normal mode cursor lives on the cursor canvas which is already
-        // cleared by vectorGui.render(), so nothing extra needed.
+        clearLayerPreviewIfNeeded()
       }
+  }
+}
+
+/**
+ * Inject mode preview: accurate preview on layer.onscreenCtx because
+ * clearRect+fillRect compositing must happen on the actual layer canvas.
+ */
+function drawInjectPreview() {
+  renderCanvas(canvas.currentLayer)
+  actionDraw(
+    state.cursor.x,
+    state.cursor.y,
+    state.selection.boundaryBox,
+    swatches.primary.color,
+    brushStamps[state.tool.current.brushType][state.tool.current.brushSize][
+      '0,0'
+    ],
+    state.tool.current.brushSize,
+    canvas.currentLayer,
+    state.tool.current.modes,
+    state.selection.maskSet,
+    state.selection.seenPixelsSet,
+    null,
+    true,
+    true,
+  )
+}
+
+/**
+ * Normal mode preview: draw brush stamp directly on the cursor canvas.
+ * vectorGui.render() already cleared it — no layer blit needed.
+ */
+function drawNormalPreview() {
+  const brushSize = state.tool.current.brushSize
+  const stamp = brushStamps[state.tool.current.brushType][brushSize]['0,0']
+  const baseX = Math.ceil(state.cursor.x - brushSize / 2)
+  const baseY = Math.ceil(state.cursor.y - brushSize / 2)
+  canvas.cursorCTX.fillStyle = swatches.primary.color.color
+  for (const pixel of stamp) {
+    const x = baseX + pixel.x
+    const y = baseY + pixel.y
+    if (
+      isOutOfBounds(x, y, 0, canvas.currentLayer, state.selection.boundaryBox)
+    )
+      continue
+    if (state.selection.maskSet && !state.selection.maskSet.has((y << 16) | x))
+      continue
+    canvas.cursorCTX.fillRect(x + canvas.xOffset, y + canvas.yOffset, 1, 1)
+  }
+}
+
+/**
+ * Collision present — no cursor preview drawn.
+ * If the preview was drawn on layer.onscreenCtx (eraser or inject with
+ * preview enabled), blit the layer to clear it.
+ * Normal mode cursor lives on the cursor canvas (auto-cleared by
+ * vectorGui.render()), and box outline is on vectorGuiCTX (also
+ * auto-cleared), so nothing extra needed for those cases.
+ */
+function clearLayerPreviewIfNeeded() {
+  if (
+    vectorGui.showCursorPreview &&
+    (state.tool.current.modes?.eraser || state.tool.current.modes?.inject)
+  ) {
+    renderCanvas(canvas.currentLayer)
   }
 }
 

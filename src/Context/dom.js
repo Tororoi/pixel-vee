@@ -77,6 +77,8 @@ const gridSpacing = document.getElementById("grid-spacing")
 const vectorSelectionOutlineBtn = document.getElementById(
   "vector-outline-toggle"
 )
+// * Cursor Preview * //
+const cursorPreviewBtn = document.getElementById("cursor-preview-toggle")
 
 //====================================//
 //====== * * * Save/Export * * * =====//
@@ -254,6 +256,7 @@ export const dom = {
   gridSpacingSpinBtn,
   gridSpacing,
   vectorSelectionOutlineBtn,
+  cursorPreviewBtn,
   //save/export
   saveContainer,
   saveAsForm,

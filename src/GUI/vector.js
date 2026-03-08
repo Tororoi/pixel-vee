@@ -37,6 +37,7 @@ export const vectorGui = {
   grid: false,
   gridSpacing: 8,
   outlineVectorSelection: false,
+  showCursorPreview: false,
   mother: {
     x: null,
     y: null,
