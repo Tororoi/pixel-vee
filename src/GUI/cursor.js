@@ -1,10 +1,11 @@
-import { brushStamps } from "../Context/brushStamps.js"
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
-import { actionDraw } from "../Actions/pointerActions.js"
-import { vectorGui } from "./vector.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { brushStamps } from '../Context/brushStamps.js'
+import { state } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { swatches } from '../Context/swatch.js'
+import { actionDraw } from '../Actions/pointerActions.js'
+import { vectorGui } from './vector.js'
+import { renderCanvas } from '../Canvas/render.js'
+import { isOutOfBounds } from '../utils/canvasHelpers.js'
 
 //===========================================//
 //=== * * * Graphics User Interface * * * ===//
@@ -16,17 +17,17 @@ import { renderCanvas } from "../Canvas/render.js"
  */
 export function renderCursor() {
   switch (state.tool.current.name) {
-    case "grab":
+    case 'grab':
       //show nothing
       break
-    case "eyedropper":
+    case 'eyedropper':
       //empty square
       drawCursorBox(2)
       break
-    case "select":
+    case 'select':
       //show nothing
       break
-    case "move":
+    case 'move':
       //show nothing
       break
     default:
@@ -35,28 +36,80 @@ export function renderCursor() {
         !state.vector.collidedIndex &&
         state.vector.selectedIndices.size === 0
       ) {
-        renderCanvas(canvas.currentLayer)
-        actionDraw(
-          state.cursor.x,
-          state.cursor.y,
-          state.selection.boundaryBox,
-          swatches.primary.color,
-          brushStamps[state.tool.current.brushType][state.tool.current.brushSize]["0,0"],
-          state.tool.current.brushSize,
-          canvas.currentLayer,
-          state.tool.current.modes,
-          state.selection.maskSet,
-          state.selection.seenPixelsSet,
-          null,
-          true,
-          true
-        )
-        if (state.tool.current.modes?.eraser) {
-          drawCursorBox(1)
-          // vectorGui.drawSelectOutline(state, canvas, state.selectPixelSet, 0.5)
+        if (
+          !state.tool.current.modes?.eraser &&
+          !state.tool.current.modes?.inject
+        ) {
+          // Normal mode: draw preview on cursor canvas.
+          // vectorGui.render() already cleared it, so no layer blit needed.
+          const brushSize = state.tool.current.brushSize
+          const stamp =
+            brushStamps[state.tool.current.brushType][brushSize]['0,0']
+          const baseX = Math.ceil(state.cursor.x - brushSize / 2)
+          const baseY = Math.ceil(state.cursor.y - brushSize / 2)
+          canvas.cursorCTX.fillStyle = swatches.primary.color.color
+          for (const pixel of stamp) {
+            const x = baseX + pixel.x
+            const y = baseY + pixel.y
+            if (
+              isOutOfBounds(
+                x,
+                y,
+                0,
+                canvas.currentLayer,
+                state.selection.boundaryBox,
+              )
+            )
+              continue
+            if (
+              state.selection.maskSet &&
+              !state.selection.maskSet.has((y << 16) | x)
+            )
+              continue
+            canvas.cursorCTX.fillRect(
+              x + canvas.xOffset,
+              y + canvas.yOffset,
+              1,
+              1,
+            )
+          }
+        } else {
+          // Eraser / inject: accurate preview requires drawing on the layer
+          // canvas so transparency and compositing behave correctly.
+          renderCanvas(canvas.currentLayer)
+          actionDraw(
+            state.cursor.x,
+            state.cursor.y,
+            state.selection.boundaryBox,
+            swatches.primary.color,
+            brushStamps[state.tool.current.brushType][
+              state.tool.current.brushSize
+            ]['0,0'],
+            state.tool.current.brushSize,
+            canvas.currentLayer,
+            state.tool.current.modes,
+            state.selection.maskSet,
+            state.selection.seenPixelsSet,
+            null,
+            true,
+            true,
+          )
+          if (state.tool.current.modes?.eraser) {
+            drawCursorBox(1)
+          }
         }
       } else {
-        renderCanvas(canvas.currentLayer) //hides existing cursor if one is drawn
+        // Collision present — no cursor preview drawn.
+        // For eraser/inject the preview is on layer.onscreenCtx, so we need
+        // to blit the layer to clear any leftover preview pixel.
+        if (
+          state.tool.current.modes?.eraser ||
+          state.tool.current.modes?.inject
+        ) {
+          renderCanvas(canvas.currentLayer)
+        }
+        // Normal mode cursor lives on the cursor canvas which is already
+        // cleared by vectorGui.render(), so nothing extra needed.
       }
   }
 }
@@ -71,15 +124,17 @@ function drawCursorBox(lineWeight) {
   let brushOffset = Math.floor(state.tool.current.brushSize / 2)
   let ol = lineWidth / 2 // line offset to stroke off-center
 
-  const pixelSet = brushStamps[state.tool.current.brushType][state.tool.current.brushSize].pixelSet
+  const pixelSet =
+    brushStamps[state.tool.current.brushType][state.tool.current.brushSize]
+      .pixelSet
 
   canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.lineWidth = lineWidth
-  canvas.vectorGuiCTX.strokeStyle = "white"
+  canvas.vectorGuiCTX.strokeStyle = 'white'
 
-  for (const pixel of brushStamps[state.tool.current.brushType][state.tool.current.brushSize][
-    "0,0"
-  ]) {
+  for (const pixel of brushStamps[state.tool.current.brushType][
+    state.tool.current.brushSize
+  ]['0,0']) {
     const x = state.cursor.x + canvas.xOffset + pixel.x - brushOffset
     const y = state.cursor.y + canvas.yOffset + pixel.y - brushOffset
 

@@ -115,6 +115,16 @@ const resizeOnScreenCanvas = () => {
     0,
     0
   )
+  canvas.cursorCVS.width = canvas.cursorCVS.offsetWidth * canvas.sharpness
+  canvas.cursorCVS.height = canvas.cursorCVS.offsetHeight * canvas.sharpness
+  canvas.cursorCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
   canvas.layers.forEach((layer) => {
     layer.onscreenCvs.width = layer.onscreenCvs.offsetWidth * canvas.sharpness
     layer.onscreenCvs.height = layer.onscreenCvs.offsetHeight * canvas.sharpness

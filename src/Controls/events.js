@@ -17,19 +17,20 @@ import { throttle } from '../utils/eventHelpers.js'
  * @param {UIEvent} e - PointerEvent, WheelEvent
  */
 const setCoordinates = (e) => {
-  const x = Math.floor(e.layerX)
-  const y = Math.floor(e.layerY)
-  const fidelity = canvas.zoom / 16
-  canvas.subPixelX = Math.floor(
-    (x - Math.floor(x / canvas.zoom) * canvas.zoom) / fidelity,
-  )
-  canvas.subPixelY = Math.floor(
-    (y - Math.floor(y / canvas.zoom) * canvas.zoom) / fidelity,
-  )
-  state.cursor.withOffsetX = Math.floor(x / canvas.zoom)
-  state.cursor.withOffsetY = Math.floor(y / canvas.zoom)
-  state.cursor.x = Math.round(state.cursor.withOffsetX - canvas.previousXOffset)
-  state.cursor.y = Math.round(state.cursor.withOffsetY - canvas.previousYOffset)
+  const x = Math.floor(e.offsetX)
+  const y = Math.floor(e.offsetY)
+  const zoom = canvas.zoom
+  const xOverZoom = Math.floor(x / zoom)
+  const yOverZoom = Math.floor(y / zoom)
+  state.cursor.withOffsetX = xOverZoom
+  state.cursor.withOffsetY = yOverZoom
+  state.cursor.x = Math.round(xOverZoom - canvas.previousXOffset)
+  state.cursor.y = Math.round(yOverZoom - canvas.previousYOffset)
+  if (state.tool.current.options.useSubpixels?.active) {
+    const fidelity = zoom / 16
+    canvas.subPixelX = Math.floor((x - xOverZoom * zoom) / fidelity)
+    canvas.subPixelY = Math.floor((y - yOverZoom * zoom) / fidelity)
+  }
 }
 
 //======================================//

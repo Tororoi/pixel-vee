@@ -18,6 +18,10 @@ const selectionGuiCVS = document.getElementById("selection-gui-canvas")
 const selectionGuiCTX = selectionGuiCVS.getContext("2d", {
   desynchronized: true,
 })
+const cursorCVS = document.getElementById("cursor-canvas")
+const cursorCTX = cursorCVS.getContext("2d", {
+  desynchronized: true,
+})
 //Create an offscreen canvas. This is where we will actually be drawing, in order to keep the image consistent and free of distortions.
 const offScreenCVS = document.createElement("canvas")
 const offScreenCTX = offScreenCVS.getContext("2d", {
@@ -45,6 +49,8 @@ export const canvas = {
   vectorGuiCTX,
   selectionGuiCVS,
   selectionGuiCTX,
+  cursorCVS,
+  cursorCTX,
   backgroundCVS,
   backgroundCTX,
   offScreenCVS,
@@ -103,6 +109,8 @@ canvas.selectionGuiCVS.width =
   canvas.selectionGuiCVS.offsetWidth * canvas.sharpness
 canvas.selectionGuiCVS.height =
   canvas.selectionGuiCVS.offsetHeight * canvas.sharpness
+canvas.cursorCVS.width = canvas.cursorCVS.offsetWidth * canvas.sharpness
+canvas.cursorCVS.height = canvas.cursorCVS.offsetHeight * canvas.sharpness
 canvas.backgroundCVS.width = canvas.backgroundCVS.offsetWidth * canvas.sharpness
 canvas.backgroundCVS.height =
   canvas.backgroundCVS.offsetHeight * canvas.sharpness
@@ -114,6 +122,10 @@ vectorGuiCTX.scale(
   canvas.sharpness * canvas.zoom
 )
 selectionGuiCTX.scale(
+  canvas.sharpness * canvas.zoom,
+  canvas.sharpness * canvas.zoom
+)
+cursorCTX.scale(
   canvas.sharpness * canvas.zoom,
   canvas.sharpness * canvas.zoom
 )

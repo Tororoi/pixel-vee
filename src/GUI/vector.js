@@ -348,6 +348,12 @@ function render() {
     canvas.vectorGuiCVS.width / canvas.zoom,
     canvas.vectorGuiCVS.height / canvas.zoom
   )
+  canvas.cursorCTX.clearRect(
+    0,
+    0,
+    canvas.cursorCVS.width / canvas.zoom,
+    canvas.cursorCVS.height / canvas.zoom
+  )
   //Prevent blurring
   canvas.vectorGuiCTX.imageSmoothingEnabled = false
   //if linking, render all vectors in the layer
