@@ -1,5 +1,6 @@
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
+import { getGuiLineWidth } from "../utils/guiHelpers.js"
 
 /**
  * Render fill vector gui
@@ -8,8 +9,8 @@ import { vectorGui } from "./vector.js"
  */
 export function renderFillVector(vectorProperties, vector) {
   let pointsKeys = [{ x: "px1", y: "py1" }]
-  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
-  let circleRadius = 8 * lineWidth
+  const lineWidth = getGuiLineWidth()
+  const circleRadius = 8 * lineWidth
   if (!vector) {
     vectorGui.drawControlPoints(
       vectorProperties,

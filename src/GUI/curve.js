@@ -1,6 +1,6 @@
-import { canvas } from "../Context/canvas.js"
-import { vectorGui } from "./vector.js"
-import { drawControlPointHandle } from "../utils/guiHelpers.js"
+import { canvas } from '../Context/canvas.js'
+import { vectorGui } from './vector.js'
+import { drawControlPointHandle, getGuiLineWidth, doubleStroke } from '../utils/guiHelpers.js'
 
 /**
  * @param {object} vectorProperties - The properties of the vector
@@ -10,7 +10,7 @@ export function renderCurveVector(vectorProperties, vector) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
   const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
   const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
-  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+  const lineWidth = getGuiLineWidth()
   let circleRadius = 8 * lineWidth
 
   if (Number.isInteger(px4)) {
@@ -21,10 +21,10 @@ export function renderCurveVector(vectorProperties, vector) {
   }
 
   let pointsKeys = [
-    { x: "px1", y: "py1" },
-    { x: "px2", y: "py2" },
-    { x: "px3", y: "py3" },
-    { x: "px4", y: "py4" },
+    { x: 'px1', y: 'py1' },
+    { x: 'px2', y: 'py2' },
+    { x: 'px3', y: 'py3' },
+    { x: 'px4', y: 'py4' },
   ]
 
   if (!vector) {
@@ -32,7 +32,7 @@ export function renderCurveVector(vectorProperties, vector) {
       vectorProperties,
       pointsKeys,
       circleRadius,
-      false
+      false,
     )
   }
 
@@ -41,7 +41,7 @@ export function renderCurveVector(vectorProperties, vector) {
     pointsKeys,
     circleRadius / 2,
     true, // modify
-    vector
+    vector,
   )
 }
 
@@ -53,7 +53,7 @@ export function renderCurvePath(vectorProperties, vector) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
   const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
   const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
-  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+  const lineWidth = getGuiLineWidth()
 
   canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
@@ -65,24 +65,19 @@ export function renderCurvePath(vectorProperties, vector) {
       xOffset + px4 + 0.5,
       yOffset + py4 + 0.5,
       xOffset + px2 + 0.5,
-      yOffset + py2 + 0.5
+      yOffset + py2 + 0.5,
     )
   } else if (Number.isInteger(px3)) {
     canvas.vectorGuiCTX.quadraticCurveTo(
       xOffset + px3 + 0.5,
       yOffset + py3 + 0.5,
       xOffset + px2 + 0.5,
-      yOffset + py2 + 0.5
+      yOffset + py2 + 0.5,
     )
   } else if (Number.isInteger(px2)) {
     canvas.vectorGuiCTX.lineTo(xOffset + px2 + 0.5, yOffset + py2 + 0.5)
   } else {
     return
   }
-  canvas.vectorGuiCTX.lineWidth = lineWidth * 3
-  canvas.vectorGuiCTX.strokeStyle = "black"
-  canvas.vectorGuiCTX.stroke()
-  canvas.vectorGuiCTX.lineWidth = lineWidth
-  canvas.vectorGuiCTX.strokeStyle = "white"
-  canvas.vectorGuiCTX.stroke()
+  doubleStroke(canvas.vectorGuiCTX, lineWidth, 'black', 'white')
 }

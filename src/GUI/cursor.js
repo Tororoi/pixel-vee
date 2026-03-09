@@ -6,6 +6,7 @@ import { actionDraw } from '../Actions/pointerActions.js'
 import { vectorGui } from './vector.js'
 import { renderCanvas } from '../Canvas/render.js'
 import { isOutOfBounds } from '../utils/canvasHelpers.js'
+import { getGuiLineWidth, doubleStroke } from '../utils/guiHelpers.js'
 
 //===========================================//
 //=== * * * Graphics User Interface * * * ===//
@@ -127,8 +128,7 @@ function clearLayerPreviewIfNeeded() {
  * @param {number} lineWeight - (Float)
  */
 function drawCursorBox(lineWeight) {
-  let lineWidth =
-    canvas.zoom <= 8 ? lineWeight / canvas.zoom : 0.125 * lineWeight
+  const lineWidth = getGuiLineWidth(lineWeight)
   let brushOffset = Math.floor(state.tool.current.brushSize / 2)
   let ol = lineWidth / 2 // line offset to stroke off-center
 
@@ -169,10 +169,5 @@ function drawCursorBox(lineWeight) {
     }
   }
 
-  canvas.vectorGuiCTX.lineWidth = lineWidth * 3
-  canvas.vectorGuiCTX.strokeStyle = 'black'
-  canvas.vectorGuiCTX.stroke()
-  canvas.vectorGuiCTX.lineWidth = lineWidth
-  canvas.vectorGuiCTX.strokeStyle = 'white'
-  canvas.vectorGuiCTX.stroke()
+  doubleStroke(canvas.vectorGuiCTX, lineWidth, 'black', 'white')
 }

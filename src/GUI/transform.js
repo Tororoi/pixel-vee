@@ -2,7 +2,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
 import { getAngle } from "../utils/trig.js"
-// import { drawCirclePath } from "../utils/guiHelpers.js"
+import { getGuiLineWidth } from "../utils/guiHelpers.js"
 // import { drawSelectControlPoints, renderSelectionBoxOutline } from "./select.js"
 import { findVectorShapeBoundaryBox } from "../utils/vectorHelpers.js"
 
@@ -23,7 +23,7 @@ export function renderVectorRotationControl() {
       vectorGui.mother.currentRotation
   }
   //Render mother ui rotation child
-  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+  const lineWidth = getGuiLineWidth()
   let circleRadius = 16 * lineWidth
   let pointsKeys = [{ x: "rotationx", y: "rotationy" }]
   let motherPoints = {

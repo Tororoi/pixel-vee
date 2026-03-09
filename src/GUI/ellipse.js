@@ -1,6 +1,6 @@
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "./vector.js"
-import { drawControlPointHandle } from "../utils/guiHelpers.js"
+import { drawControlPointHandle, getGuiLineWidth, doubleStroke } from "../utils/guiHelpers.js"
 
 /**
  * @param {object} vectorProperties - The properties of the vector
@@ -22,7 +22,7 @@ export function renderEllipseVector(vectorProperties, vector) {
   } = vectorProperties
   const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
   const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
-  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+  const lineWidth = getGuiLineWidth()
   let circleRadius = 8 * lineWidth
 
   if (Number.isInteger(px3)) {
@@ -76,7 +76,7 @@ export function renderOffsetEllipseVector(vectorProperties, vector) {
   } = vectorProperties
   const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
   const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
-  const lw = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+  const lw = getGuiLineWidth()
   const circleRadius = 8 * lw
 
   function drawOffsetCircle(x, y) {
@@ -122,12 +122,7 @@ export function renderOffsetEllipseVector(vectorProperties, vector) {
       yOffset + py3 + 0.5 + y1Offset / 2
     )
   }
-  canvas.vectorGuiCTX.lineWidth = lw * 3
-  canvas.vectorGuiCTX.strokeStyle = "black"
-  canvas.vectorGuiCTX.stroke()
-  canvas.vectorGuiCTX.lineWidth = lw
-  canvas.vectorGuiCTX.strokeStyle = "red"
-  canvas.vectorGuiCTX.stroke()
+  doubleStroke(canvas.vectorGuiCTX, lw, "black", "red")
   canvas.vectorGuiCTX.setLineDash([])
 }
 
@@ -151,7 +146,7 @@ export function renderEllipsePath(vectorProperties, vector) {
   } = vectorProperties
   const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
   const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
-  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+  const lineWidth = getGuiLineWidth()
 
   //Don't let radii be negative with offset
   let majorAxis = radA + x1Offset / 2 > 0 ? radA + x1Offset / 2 : 0
@@ -171,10 +166,5 @@ export function renderEllipsePath(vectorProperties, vector) {
     0,
     angle + 2 * Math.PI
   )
-  canvas.vectorGuiCTX.lineWidth = lineWidth * 3
-  canvas.vectorGuiCTX.strokeStyle = "black"
-  canvas.vectorGuiCTX.stroke()
-  canvas.vectorGuiCTX.lineWidth = lineWidth
-  canvas.vectorGuiCTX.strokeStyle = "white"
-  canvas.vectorGuiCTX.stroke()
+  doubleStroke(canvas.vectorGuiCTX, lineWidth, "black", "white")
 }

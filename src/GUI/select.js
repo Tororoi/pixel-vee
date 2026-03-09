@@ -4,6 +4,7 @@ import { vectorGui } from '../GUI/vector.js'
 import {
   checkSquarePointCollision,
   checkAreaCollision,
+  getGuiLineWidth,
 } from '../utils/guiHelpers.js'
 import { SCALE } from '../utils/constants.js'
 
@@ -199,7 +200,7 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
           }
         }
         // stroke vector paths with thick squared off dashed line then stroke vector paths with slightly thinner eraser (use some built-in html canvas composite mode) to clear greyed out area for vectors
-        let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+        const lineWidth = getGuiLineWidth()
         //Draw outline border by drawing different thicknesses of lines
         canvas.selectionGuiCTX.lineWidth = lineWidth * 19
         canvas.selectionGuiCTX.lineCap = 'round'
@@ -237,7 +238,7 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
  * @param {boolean} drawPoints - if true, draw control points
  */
 export function renderSelectionBoxOutline(lineDashOffset, drawPoints) {
-  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+  const lineWidth = getGuiLineWidth()
   canvas.selectionGuiCTX.save()
   canvas.selectionGuiCTX.lineCap = 'round'
 
