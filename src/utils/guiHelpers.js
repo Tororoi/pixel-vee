@@ -29,8 +29,16 @@ export function drawControlPointHandle(
   x2,
   y2
 ) {
+  const lw = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+  canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.moveTo(xOffset + x1 + 0.5, yOffset + y1 + 0.5)
   canvas.vectorGuiCTX.lineTo(xOffset + x2 + 0.5, yOffset + y2 + 0.5)
+  canvas.vectorGuiCTX.lineWidth = lw * 3
+  canvas.vectorGuiCTX.strokeStyle = "black"
+  canvas.vectorGuiCTX.stroke()
+  canvas.vectorGuiCTX.lineWidth = lw
+  canvas.vectorGuiCTX.strokeStyle = "white"
+  canvas.vectorGuiCTX.stroke()
 }
 
 /**

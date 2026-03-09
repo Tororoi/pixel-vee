@@ -21,11 +21,7 @@ export function renderGrid(subGridSpacing = null) {
   let yMax = Math.min(yMin + yLarge, canvas.offScreenCVS.height)
 
   let lineWidth = 0.5 / canvas.zoom
-  canvas.vectorGuiCTX.lineWidth = lineWidth
-  canvas.vectorGuiCTX.strokeStyle = "rgba(255,255,255,0.5)"
   canvas.vectorGuiCTX.beginPath()
-  //limit render to viewable area
-  canvas.vectorGuiCTX.moveTo(canvas.xOffset, canvas.yOffset)
   for (let i = xMin; i <= xMax; i++) {
     //draw vertical grid lines
     canvas.vectorGuiCTX.moveTo(canvas.xOffset + i, canvas.yOffset + yMin)
@@ -36,12 +32,16 @@ export function renderGrid(subGridSpacing = null) {
     canvas.vectorGuiCTX.moveTo(canvas.xOffset + xMin, canvas.yOffset + j)
     canvas.vectorGuiCTX.lineTo(canvas.xOffset + xMax, canvas.yOffset + j)
   }
+  canvas.vectorGuiCTX.lineWidth = lineWidth * 3
+  canvas.vectorGuiCTX.strokeStyle = "rgba(0,0,0,0.3)"
+  canvas.vectorGuiCTX.stroke()
+  canvas.vectorGuiCTX.lineWidth = lineWidth
+  canvas.vectorGuiCTX.strokeStyle = "rgba(255,255,255,0.5)"
   canvas.vectorGuiCTX.stroke()
   if (subGridSpacing) {
     //render subgrid every _ pixels
     xMin -= xMin % subGridSpacing
     yMin -= yMin % subGridSpacing
-    canvas.vectorGuiCTX.lineWidth = lineWidth * 2
     canvas.vectorGuiCTX.beginPath()
     for (let i = xMin; i <= xMax; i += subGridSpacing) {
       //draw vertical grid lines
@@ -53,6 +53,11 @@ export function renderGrid(subGridSpacing = null) {
       canvas.vectorGuiCTX.moveTo(canvas.xOffset + xMin, canvas.yOffset + j)
       canvas.vectorGuiCTX.lineTo(canvas.xOffset + xMax, canvas.yOffset + j)
     }
+    canvas.vectorGuiCTX.lineWidth = lineWidth * 6
+    canvas.vectorGuiCTX.strokeStyle = "rgba(0,0,0,0.3)"
+    canvas.vectorGuiCTX.stroke()
+    canvas.vectorGuiCTX.lineWidth = lineWidth * 2
+    canvas.vectorGuiCTX.strokeStyle = "rgba(255,255,255,0.5)"
     canvas.vectorGuiCTX.stroke()
   }
 }

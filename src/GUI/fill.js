@@ -10,10 +10,6 @@ export function renderFillVector(vectorProperties, vector) {
   let pointsKeys = [{ x: "px1", y: "py1" }]
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   let circleRadius = 8 * lineWidth
-  canvas.vectorGuiCTX.lineWidth = lineWidth
-  canvas.vectorGuiCTX.strokeStyle = "white"
-  canvas.vectorGuiCTX.fillStyle = "white"
-  canvas.vectorGuiCTX.beginPath()
   if (!vector) {
     vectorGui.drawControlPoints(
       vectorProperties,
@@ -22,10 +18,6 @@ export function renderFillVector(vectorProperties, vector) {
       false
     )
   }
-  // Stroke non-filled lines
-  canvas.vectorGuiCTX.stroke()
-
-  canvas.vectorGuiCTX.beginPath()
   vectorGui.drawControlPoints(
     vectorProperties,
     pointsKeys,
@@ -33,6 +25,4 @@ export function renderFillVector(vectorProperties, vector) {
     true,
     vector
   )
-  // Fill points
-  canvas.vectorGuiCTX.fill()
 }

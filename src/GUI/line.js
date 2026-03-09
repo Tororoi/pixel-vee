@@ -6,23 +6,10 @@ import { vectorGui } from "./vector.js"
  * @param {object} vector - The vector to be rendered
  */
 export function renderLineVector(vectorProperties, vector) {
-  const {
-    px1,
-    py1,
-    // px2,
-    // py2
-  } = vectorProperties
   const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
   const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
-  // Setting of context attributes.
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   let circleRadius = 8 * lineWidth
-  canvas.vectorGuiCTX.lineWidth = lineWidth
-  canvas.vectorGuiCTX.strokeStyle = "white"
-  canvas.vectorGuiCTX.fillStyle = "white"
-
-  canvas.vectorGuiCTX.beginPath()
-  canvas.vectorGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
 
   let pointsKeys = [
     { x: "px1", y: "py1" },
@@ -38,10 +25,6 @@ export function renderLineVector(vectorProperties, vector) {
     )
   }
 
-  // Stroke non-filled lines
-  canvas.vectorGuiCTX.stroke()
-
-  canvas.vectorGuiCTX.beginPath()
   vectorGui.drawControlPoints(
     vectorProperties,
     pointsKeys,
@@ -49,8 +32,6 @@ export function renderLineVector(vectorProperties, vector) {
     true, // modify
     vector
   )
-  // Fill points
-  canvas.vectorGuiCTX.fill()
 }
 
 /**
@@ -63,15 +44,15 @@ export function renderLinePath(vectorProperties, vector) {
   const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
   // Setting of context attributes.
   let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
-  canvas.vectorGuiCTX.lineWidth = lineWidth
-  canvas.vectorGuiCTX.strokeStyle = "white"
+  if (!Number.isInteger(px2)) return
 
   canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
-
-  if (Number.isInteger(px2)) {
-    canvas.vectorGuiCTX.lineTo(xOffset + px2 + 0.5, yOffset + py2 + 0.5)
-  }
-
+  canvas.vectorGuiCTX.lineTo(xOffset + px2 + 0.5, yOffset + py2 + 0.5)
+  canvas.vectorGuiCTX.lineWidth = lineWidth * 3
+  canvas.vectorGuiCTX.strokeStyle = "black"
+  canvas.vectorGuiCTX.stroke()
+  canvas.vectorGuiCTX.lineWidth = lineWidth
+  canvas.vectorGuiCTX.strokeStyle = "white"
   canvas.vectorGuiCTX.stroke()
 }

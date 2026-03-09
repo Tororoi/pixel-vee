@@ -2,7 +2,6 @@ import { TRANSLATE, ROTATE, SCALE } from "../utils/constants.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import {
-  drawCirclePath,
   checkSquarePointCollision,
 } from "../utils/guiHelpers.js"
 import { renderFillVector } from "./fill.js"
@@ -144,7 +143,7 @@ function drawControlPoints(
       y: vectorProperties[keys.y],
     }
 
-    if (point.x === null || point.y === null) continue
+    if (point.x == null || point.y == null) continue
 
     handleCollisionAndDraw(keys, point, radius, modify, vector)
   }
@@ -244,14 +243,27 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
   }
   //TODO: (Low Priority) radius is set progressively as the render function iterates through points, but ideally only the points corresponding to selectedPoint and collidedPoint should be rendered with an expanded radius.
   //Possible solution is to not change radius in this function, but instead at the end of the renderLayerVectors function, render a circle with the expanded radius for the selected and collided points.
-  drawCirclePath(
-    canvas.vectorGuiCTX,
-    canvas.xOffset + xOffset,
-    canvas.yOffset + yOffset,
-    point.x,
-    point.y,
-    r
-  )
+  const lw = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
+  const cx = canvas.xOffset + xOffset + point.x + 0.5
+  const cy = canvas.yOffset + yOffset + point.y + 0.5
+  canvas.vectorGuiCTX.beginPath()
+  canvas.vectorGuiCTX.arc(cx, cy, r, 0, 2 * Math.PI)
+  if (modify) {
+    // Filled circle: black outline ring, then white fill
+    canvas.vectorGuiCTX.lineWidth = lw * 2
+    canvas.vectorGuiCTX.strokeStyle = "black"
+    canvas.vectorGuiCTX.stroke()
+    canvas.vectorGuiCTX.fillStyle = "white"
+    canvas.vectorGuiCTX.fill()
+  } else {
+    // Outline circle: black thick stroke, then white thin stroke
+    canvas.vectorGuiCTX.lineWidth = lw * 3
+    canvas.vectorGuiCTX.strokeStyle = "black"
+    canvas.vectorGuiCTX.stroke()
+    canvas.vectorGuiCTX.lineWidth = lw
+    canvas.vectorGuiCTX.strokeStyle = "white"
+    canvas.vectorGuiCTX.stroke()
+  }
 }
 
 /**

@@ -137,8 +137,6 @@ function drawCursorBox(lineWeight) {
       .pixelSet
 
   canvas.vectorGuiCTX.beginPath()
-  canvas.vectorGuiCTX.lineWidth = lineWidth
-  canvas.vectorGuiCTX.strokeStyle = 'white'
 
   for (const pixel of brushStamps[state.tool.current.brushType][
     state.tool.current.brushSize
@@ -171,5 +169,10 @@ function drawCursorBox(lineWeight) {
     }
   }
 
+  canvas.vectorGuiCTX.lineWidth = lineWidth * 3
+  canvas.vectorGuiCTX.strokeStyle = 'black'
+  canvas.vectorGuiCTX.stroke()
+  canvas.vectorGuiCTX.lineWidth = lineWidth
+  canvas.vectorGuiCTX.strokeStyle = 'white'
   canvas.vectorGuiCTX.stroke()
 }

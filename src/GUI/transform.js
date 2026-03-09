@@ -31,23 +31,14 @@ export function renderVectorRotationControl() {
     rotationy: vectorGui.mother.rotationOrigin.y,
   }
   canvas.vectorGuiCTX.save()
-  canvas.vectorGuiCTX.lineWidth = lineWidth
-  canvas.vectorGuiCTX.strokeStyle = "white"
-  canvas.vectorGuiCTX.fillStyle = "white"
   //render rotation origin
-  canvas.vectorGuiCTX.beginPath()
   vectorGui.drawControlPoints(motherPoints, pointsKeys, circleRadius, false)
-  // Stroke non-filled lines
-  // canvas.vectorGuiCTX.stroke()
-  // canvas.vectorGuiCTX.beginPath()
   vectorGui.drawControlPoints(
     motherPoints,
     pointsKeys,
     circleRadius * 0.75,
     true
   )
-  // Fill points
-  canvas.vectorGuiCTX.fill()
   // Render rotation icon at the rotation origin
   canvas.vectorGuiCTX.strokeStyle = "black"
   canvas.vectorGuiCTX.fillStyle = "black"
