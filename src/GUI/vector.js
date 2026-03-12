@@ -154,7 +154,195 @@ function drawControlPoints(
 }
 
 /**
- * TODO: (Low Priority) move drawing logic to separate function so modify param doesn't need to be used
+ * Resolves whether a control point on the current vector is selected or cursor-colliding.
+ * Sets collision state on vectorGui/state as a side effect.
+ * @param {object} keys - The x/y property keys for this control point
+ * @param {number} normalizedX - Point x plus layer offset
+ * @param {number} normalizedY - Point y plus layer offset
+ * @param {number} r - Current effective radius
+ * @param {number} radius - Base radius before touch/active scaling
+ * @returns {{ r: number, isActive: boolean }} Updated radius and active state
+ */
+function resolveCurrentVectorCollision(keys, normalizedX, normalizedY, r, radius) {
+  if (
+    checkSquarePointCollision(
+      state.cursor.x,
+      state.cursor.y,
+      normalizedX,
+      normalizedY,
+      r * 3.125,
+    )
+  ) {
+    vectorGui.setCollision(keys)
+    return { r: radius * 3.125, isActive: true }
+  }
+  return { r, isActive: false }
+}
+
+/**
+ * Resolves whether a control point on another vector is cursor-colliding, and handles linking.
+ * Sets collision state on vectorGui/state as a side effect.
+ * @param {object} keys - The x/y property keys for this control point
+ * @param {number} normalizedX - Point x plus layer offset
+ * @param {number} normalizedY - Point y plus layer offset
+ * @param {number} r - Current effective radius
+ * @param {number} radius - Base radius before touch/active scaling
+ * @param {object} vector - The other vector being checked
+ * @returns {{ r: number, isActive: boolean }} Updated radius and active state
+ */
+function resolveOtherVectorCollision(keys, normalizedX, normalizedY, r, radius, vector) {
+  if (
+    !checkSquarePointCollision(
+      state.cursor.x,
+      state.cursor.y,
+      normalizedX,
+      normalizedY,
+      r * 3.125,
+    )
+  ) {
+    return { r, isActive: false }
+  }
+
+  if (keys.x === 'px1' || keys.x === 'px2') {
+    state.vector.collidedIndex = vector.index
+    //Only allow link if active point for selection is p1 or p2
+    let linkingPoint = null
+    if (vectorGui.selectedPoint.xKey) {
+      linkingPoint = vectorGui.selectedPoint
+    } else if (vectorGui.collidedPoint.xKey) {
+      linkingPoint = vectorGui.collidedPoint
+    }
+    const allowLink = ['px1', 'px2'].includes(linkingPoint?.xKey)
+    if (allowLink) {
+      vectorGui.setOtherVectorCollision(keys)
+      vectorGui.addLinkedVector(vector, keys.x, linkingPoint)
+      if (state.tool.clickCounter === 0) {
+        return { r: radius * 3.125, isActive: true }
+      }
+    } else if (!vectorGui.selectedPoint.xKey) {
+      if (state.tool.clickCounter === 0) {
+        return { r: radius * 3.125, isActive: true }
+      }
+    }
+  } else if (
+    (keys.x === 'px3' || keys.x === 'px4') &&
+    !vectorGui.selectedPoint.xKey
+  ) {
+    state.vector.collidedIndex = vector.index
+    //only set new radius if selected vector is not a new vector being drawn
+    if (state.tool.clickCounter === 0) {
+      return { r: radius * 3.125, isActive: true }
+    }
+  }
+  return { r, isActive: false }
+}
+
+/**
+ * Resolves linked vectors when the collided point is px3 or px4.
+ * @param {object} keys - The x/y property keys for this control point
+ * @param {number} normalizedX - Point x plus layer offset
+ * @param {number} normalizedY - Point y plus layer offset
+ * @param {object} vector - The vector being checked for linking
+ */
+function resolveLinkedVectors(keys, normalizedX, normalizedY, vector) {
+  if (!vector) return
+
+  if (vectorGui.collidedPoint.xKey === 'px3') {
+    if (
+      normalizedX === state.vector.properties.px1 &&
+      normalizedY === state.vector.properties.py1
+    ) {
+      vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px1', yKey: 'py1' })
+    }
+    if (state.tool.current.name === 'quadCurve') {
+      if (
+        normalizedX === state.vector.properties.px2 &&
+        normalizedY === state.vector.properties.py2
+      ) {
+        vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px2', yKey: 'py2' })
+      }
+    }
+  }
+  if (vectorGui.collidedPoint.xKey === 'px4') {
+    if (
+      normalizedX === state.vector.properties.px2 &&
+      normalizedY === state.vector.properties.py2
+    ) {
+      vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px2', yKey: 'py2' })
+    }
+  }
+}
+
+/**
+ * Draws a crosshair with a small center dot for a hovered/selected control point.
+ * @param {number} cx - Canvas x coordinate (with offsets and 0.5 subpixel adjustment)
+ * @param {number} cy - Canvas y coordinate (with offsets and 0.5 subpixel adjustment)
+ * @param {number} r - Active radius
+ * @param {number} lw - GUI line width
+ */
+function drawActiveControlPoint(cx, cy, r, lw) {
+  const gap = r * 0.55
+  canvas.vectorGuiCTX.beginPath()
+  canvas.vectorGuiCTX.moveTo(cx - r, cy)
+  canvas.vectorGuiCTX.lineTo(cx - gap, cy)
+  canvas.vectorGuiCTX.moveTo(cx + gap, cy)
+  canvas.vectorGuiCTX.lineTo(cx + r, cy)
+  canvas.vectorGuiCTX.moveTo(cx, cy - r)
+  canvas.vectorGuiCTX.lineTo(cx, cy - gap)
+  canvas.vectorGuiCTX.moveTo(cx, cy + gap)
+  canvas.vectorGuiCTX.lineTo(cx, cy + r)
+  canvas.vectorGuiCTX.lineCap = 'square'
+  doubleStroke(canvas.vectorGuiCTX, lw, 'black', 'white')
+  canvas.vectorGuiCTX.lineCap = 'butt'
+  // Small filled circle at center
+  canvas.vectorGuiCTX.beginPath()
+  canvas.vectorGuiCTX.arc(cx, cy, r * 0.2, 0, 2 * Math.PI)
+  canvas.vectorGuiCTX.lineWidth = lw * 2
+  canvas.vectorGuiCTX.strokeStyle = 'black'
+  canvas.vectorGuiCTX.stroke()
+  canvas.vectorGuiCTX.fillStyle = 'white'
+  canvas.vectorGuiCTX.fill()
+}
+
+/**
+ * Draws a filled circle (modify=true) or outline circle (modify=false) for a non-active point.
+ * The outline circle is skipped when the cursor is close enough that the modify pass will
+ * draw a crosshair instead.
+ * @param {number} cx - Canvas x coordinate (with offsets and 0.5 subpixel adjustment)
+ * @param {number} cy - Canvas y coordinate (with offsets and 0.5 subpixel adjustment)
+ * @param {number} r - Effective radius
+ * @param {number} lw - GUI line width
+ * @param {boolean} modify - If true, draw interactive filled circle; otherwise draw outline circle
+ * @param {object} keys - The x/y property keys for this control point
+ * @param {number} normalizedX - Point x plus layer offset
+ * @param {number} normalizedY - Point y plus layer offset
+ */
+function drawInactiveControlPoint(cx, cy, r, lw, modify, keys, normalizedX, normalizedY) {
+  if (modify) {
+    canvas.vectorGuiCTX.beginPath()
+    canvas.vectorGuiCTX.arc(cx, cy, r, 0, 2 * Math.PI)
+    canvas.vectorGuiCTX.lineWidth = lw * 2
+    canvas.vectorGuiCTX.strokeStyle = 'black'
+    canvas.vectorGuiCTX.stroke()
+    canvas.vectorGuiCTX.fillStyle = 'white'
+    canvas.vectorGuiCTX.fill()
+  } else {
+    // Skip if the modify pass will draw a crosshair here
+    const wouldBeActive =
+      vectorGui.selectedPoint.xKey === keys.x ||
+      checkSquarePointCollision(state.cursor.x, state.cursor.y, normalizedX, normalizedY, r)
+    if (!wouldBeActive) {
+      canvas.vectorGuiCTX.beginPath()
+      canvas.vectorGuiCTX.arc(cx, cy, r, 0, 2 * Math.PI)
+      doubleStroke(canvas.vectorGuiCTX, lw, 'black', 'white')
+    }
+  }
+}
+
+/**
+ * TODO: (Low Priority) radius is set progressively as the render function iterates through points,
+ * but ideally only the points corresponding to selectedPoint and collidedPoint should be rendered
+ * with an expanded radius.
  * @param {object} keys - The keys of the control points
  * @param {object} point - The coordinates of the control point
  * @param {number} radius - (Float)
@@ -165,150 +353,34 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
   let r = state.tool.touch ? radius * 2 : radius
   const xOffset = vector ? vector.layer.x : 0
   const yOffset = vector ? vector.layer.y : 0
-
   const normalizedX = point.x + xOffset
   const normalizedY = point.y + yOffset
 
   let isActive = false
-
   if (modify) {
     if (vectorGui.selectedPoint.xKey === keys.x && !vector) {
-      r = radius * 3.125 // increase  radius of fill to match stroked circle
+      r = radius * 3.125 // increase radius of fill to match stroked circle
       isActive = true
       vectorGui.setCollision(keys)
-    } else if (
-      checkSquarePointCollision(
-        state.cursor.x,
-        state.cursor.y,
-        normalizedX,
-        normalizedY,
-        r * 3.125,
-      )
-    ) {
-      //if cursor is colliding with a control point not on the selected vector, set collided keys specifically for collided vector
-      if (vector) {
-        if (keys.x === 'px1' || keys.x === 'px2') {
-          state.vector.collidedIndex = vector.index
-          //Only allow link if active point for selection is p1 or p2
-          let linkingPoint = null
-          if (vectorGui.selectedPoint.xKey) {
-            linkingPoint = vectorGui.selectedPoint
-          } else if (vectorGui.collidedPoint.xKey) {
-            linkingPoint = vectorGui.collidedPoint
-          }
-          let allowLink = ['px1', 'px2'].includes(linkingPoint?.xKey)
-          if (allowLink) {
-            vectorGui.setOtherVectorCollision(keys)
-            vectorGui.addLinkedVector(vector, keys.x, linkingPoint)
-            if (state.tool.clickCounter === 0) {
-              r = radius * 3.125
-              isActive = true
-            }
-          } else if (!vectorGui.selectedPoint.xKey) {
-            if (state.tool.clickCounter === 0) {
-              r = radius * 3.125
-              isActive = true
-            }
-          }
-        } else if (
-          (keys.x === 'px3' || keys.x === 'px4') &&
-          !vectorGui.selectedPoint.xKey
-        ) {
-          state.vector.collidedIndex = vector.index
-          //only set new radius if selected vector is not a new vector being drawn
-          if (state.tool.clickCounter === 0) {
-            r = radius * 3.125
-            isActive = true
-          }
-        }
-      } else {
-        r = radius * 3.125
-        isActive = true
-        vectorGui.setCollision(keys)
-      }
+    } else if (vector) {
+      const result = resolveOtherVectorCollision(keys, normalizedX, normalizedY, r, radius, vector)
+      r = result.r
+      isActive = result.isActive
+    } else {
+      const result = resolveCurrentVectorCollision(keys, normalizedX, normalizedY, r, radius)
+      r = result.r
+      isActive = result.isActive
     }
-    //else if selectedpoint is p3 or p4, setLinkedVector if vector's control point coords are the same as the selected point
-    if (vectorGui.collidedPoint.xKey === 'px3' && vector) {
-      if (
-        normalizedX === state.vector.properties.px1 &&
-        normalizedY === state.vector.properties.py1
-      ) {
-        vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px1', yKey: 'py1' })
-      }
-      if (state.tool.current.name === 'quadCurve') {
-        if (
-          normalizedX === state.vector.properties.px2 &&
-          normalizedY === state.vector.properties.py2
-        ) {
-          vectorGui.addLinkedVector(vector, keys.x, {
-            xKey: 'px2',
-            yKey: 'py2',
-          })
-        }
-      }
-    }
-    if (vectorGui.collidedPoint.xKey === 'px4' && vector) {
-      if (
-        normalizedX === state.vector.properties.px2 &&
-        normalizedY === state.vector.properties.py2
-      ) {
-        vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px2', yKey: 'py2' })
-      }
-    }
+    resolveLinkedVectors(keys, normalizedX, normalizedY, vector)
   }
-  //TODO: (Low Priority) radius is set progressively as the render function iterates through points, but ideally only the points corresponding to selectedPoint and collidedPoint should be rendered with an expanded radius.
-  //Possible solution is to not change radius in this function, but instead at the end of the renderLayerVectors function, render a circle with the expanded radius for the selected and collided points.
+
   const lw = getGuiLineWidth()
   const cx = canvas.xOffset + xOffset + point.x + 0.5
   const cy = canvas.yOffset + yOffset + point.y + 0.5
   if (isActive) {
-    // Crosshair with gap in center for hovered/selected control points
-    const gap = r * 0.55
-    canvas.vectorGuiCTX.beginPath()
-    canvas.vectorGuiCTX.moveTo(cx - r, cy)
-    canvas.vectorGuiCTX.lineTo(cx - gap, cy)
-    canvas.vectorGuiCTX.moveTo(cx + gap, cy)
-    canvas.vectorGuiCTX.lineTo(cx + r, cy)
-    canvas.vectorGuiCTX.moveTo(cx, cy - r)
-    canvas.vectorGuiCTX.lineTo(cx, cy - gap)
-    canvas.vectorGuiCTX.moveTo(cx, cy + gap)
-    canvas.vectorGuiCTX.lineTo(cx, cy + r)
-    canvas.vectorGuiCTX.lineCap = 'square'
-    doubleStroke(canvas.vectorGuiCTX, lw, 'black', 'white')
-    canvas.vectorGuiCTX.lineCap = 'butt'
-    // Small filled circle at center
-    canvas.vectorGuiCTX.beginPath()
-    canvas.vectorGuiCTX.arc(cx, cy, r * 0.2, 0, 2 * Math.PI)
-    canvas.vectorGuiCTX.lineWidth = lw * 2
-    canvas.vectorGuiCTX.strokeStyle = 'black'
-    canvas.vectorGuiCTX.stroke()
-    canvas.vectorGuiCTX.fillStyle = 'white'
-    canvas.vectorGuiCTX.fill()
-  } else if (modify) {
-    // Filled circle for non-active interactive points
-    canvas.vectorGuiCTX.beginPath()
-    canvas.vectorGuiCTX.arc(cx, cy, r, 0, 2 * Math.PI)
-    canvas.vectorGuiCTX.lineWidth = lw * 2
-    canvas.vectorGuiCTX.strokeStyle = 'black'
-    canvas.vectorGuiCTX.stroke()
-    canvas.vectorGuiCTX.fillStyle = 'white'
-    canvas.vectorGuiCTX.fill()
+    drawActiveControlPoint(cx, cy, r, lw)
   } else {
-    // Outline circle — skip if this point is hovered/selected (the modify pass will draw the crosshair)
-    const wouldBeActive =
-      vectorGui.selectedPoint.xKey === keys.x ||
-      checkSquarePointCollision(
-        state.cursor.x,
-        state.cursor.y,
-        normalizedX,
-        normalizedY,
-        r,
-      )
-    if (!wouldBeActive) {
-      canvas.vectorGuiCTX.beginPath()
-      canvas.vectorGuiCTX.arc(cx, cy, r, 0, 2 * Math.PI)
-      doubleStroke(canvas.vectorGuiCTX, lw, 'black', 'white')
-    }
+    drawInactiveControlPoint(cx, cy, r, lw, modify, keys, normalizedX, normalizedY)
   }
 }
 
