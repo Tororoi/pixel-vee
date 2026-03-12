@@ -1,6 +1,10 @@
-import { canvas } from "../Context/canvas.js"
-import { vectorGui } from "./vector.js"
-import { drawControlPointHandle, getGuiLineWidth, doubleStroke } from "../utils/guiHelpers.js"
+import { canvas } from '../Context/canvas.js'
+import { vectorGui } from './vector.js'
+import {
+  drawControlPointHandle,
+  getGuiLineWidth,
+  doubleStroke,
+} from '../utils/guiHelpers.js'
 
 /**
  * @param {object} vectorProperties - The properties of the vector
@@ -23,7 +27,7 @@ export function renderEllipseVector(vectorProperties, vector) {
   const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
   const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
   const lineWidth = getGuiLineWidth()
-  let circleRadius = 8 * lineWidth
+  let circleRadius = 20 * lineWidth
 
   if (Number.isInteger(px3)) {
     drawControlPointHandle(canvas, xOffset, yOffset, px1, py1, px3, py3)
@@ -33,9 +37,9 @@ export function renderEllipseVector(vectorProperties, vector) {
   }
 
   let pointsKeys = [
-    { x: "px1", y: "py1" },
-    { x: "px2", y: "py2" },
-    { x: "px3", y: "py3" },
+    { x: 'px1', y: 'py1' },
+    { x: 'px2', y: 'py2' },
+    { x: 'px3', y: 'py3' },
   ]
 
   if (!vector) {
@@ -43,16 +47,16 @@ export function renderEllipseVector(vectorProperties, vector) {
       vectorProperties,
       pointsKeys,
       circleRadius,
-      false
+      false,
     )
   }
 
   vectorGui.drawControlPoints(
     vectorProperties,
     pointsKeys,
-    circleRadius / 2,
+    circleRadius / 3,
     true,
-    vector
+    vector,
   )
 }
 
@@ -77,20 +81,50 @@ export function renderOffsetEllipseVector(vectorProperties, vector) {
   const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
   const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
   const lw = getGuiLineWidth()
-  const circleRadius = 8 * lw
+  const circleRadius = 20 * lw
 
+  /**
+   *
+   * @param x
+   * @param y
+   */
   function drawOffsetCircle(x, y) {
     const cx = xOffset + x + 0.5
     const cy = yOffset + y + 0.5
-    const r = circleRadius / 2
+    const r = circleRadius / 3
     canvas.vectorGuiCTX.beginPath()
-    canvas.vectorGuiCTX.arc(cx, cy, r, 0, 2 * Math.PI)
+    canvas.vectorGuiCTX.arc(cx, cy, r * 0.625, 0, 2 * Math.PI)
     canvas.vectorGuiCTX.lineWidth = lw * 2
-    canvas.vectorGuiCTX.strokeStyle = "black"
+    canvas.vectorGuiCTX.strokeStyle = 'black'
     canvas.vectorGuiCTX.stroke()
-    canvas.vectorGuiCTX.fillStyle = "red"
+    canvas.vectorGuiCTX.fillStyle = 'red'
     canvas.vectorGuiCTX.fill()
   }
+
+  canvas.vectorGuiCTX.setLineDash([1, 1])
+  canvas.vectorGuiCTX.beginPath()
+  if (Number.isInteger(px2)) {
+    canvas.vectorGuiCTX.moveTo(
+      xOffset + px1 + 0.5 + x1Offset / 2,
+      yOffset + py1 + 0.5 + y1Offset / 2,
+    )
+    canvas.vectorGuiCTX.lineTo(
+      xOffset + px2 + 0.5 + x1Offset / 2,
+      yOffset + py2 + 0.5 + y1Offset / 2,
+    )
+  }
+  if (Number.isInteger(px3)) {
+    canvas.vectorGuiCTX.moveTo(
+      xOffset + px1 + 0.5 + x1Offset / 2,
+      yOffset + py1 + 0.5 + y1Offset / 2,
+    )
+    canvas.vectorGuiCTX.lineTo(
+      xOffset + px3 + 0.5 + x1Offset / 2,
+      yOffset + py3 + 0.5 + y1Offset / 2,
+    )
+  }
+  doubleStroke(canvas.vectorGuiCTX, lw, 'black', 'red')
+  canvas.vectorGuiCTX.setLineDash([])
 
   if (Number.isInteger(px2)) {
     drawOffsetCircle(px1 + x1Offset / 2, py1 + y1Offset / 2)
@@ -99,31 +133,6 @@ export function renderOffsetEllipseVector(vectorProperties, vector) {
   if (Number.isInteger(px3)) {
     drawOffsetCircle(px3 + x1Offset / 2, py3 + y1Offset / 2)
   }
-
-  canvas.vectorGuiCTX.setLineDash([1, 1])
-  canvas.vectorGuiCTX.beginPath()
-  if (Number.isInteger(px2)) {
-    canvas.vectorGuiCTX.moveTo(
-      xOffset + px1 + 0.5 + x1Offset / 2,
-      yOffset + py1 + 0.5 + y1Offset / 2
-    )
-    canvas.vectorGuiCTX.lineTo(
-      xOffset + px2 + 0.5 + x1Offset / 2,
-      yOffset + py2 + 0.5 + y1Offset / 2
-    )
-  }
-  if (Number.isInteger(px3)) {
-    canvas.vectorGuiCTX.moveTo(
-      xOffset + px1 + 0.5 + x1Offset / 2,
-      yOffset + py1 + 0.5 + y1Offset / 2
-    )
-    canvas.vectorGuiCTX.lineTo(
-      xOffset + px3 + 0.5 + x1Offset / 2,
-      yOffset + py3 + 0.5 + y1Offset / 2
-    )
-  }
-  doubleStroke(canvas.vectorGuiCTX, lw, "black", "red")
-  canvas.vectorGuiCTX.setLineDash([])
 }
 
 /**
@@ -164,7 +173,7 @@ export function renderEllipsePath(vectorProperties, vector) {
     minorAxis,
     angle + 4 * Math.PI,
     0,
-    angle + 2 * Math.PI
+    angle + 2 * Math.PI,
   )
-  doubleStroke(canvas.vectorGuiCTX, lineWidth, "black", "white")
+  doubleStroke(canvas.vectorGuiCTX, lineWidth, 'black', 'white')
 }

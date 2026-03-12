@@ -10,7 +10,7 @@ export function renderLineVector(vectorProperties, vector) {
   const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
   const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
   const lineWidth = getGuiLineWidth()
-  let circleRadius = 8 * lineWidth
+  let circleRadius = 20 * lineWidth
 
   let pointsKeys = [
     { x: 'px1', y: 'py1' },
@@ -29,7 +29,7 @@ export function renderLineVector(vectorProperties, vector) {
   vectorGui.drawControlPoints(
     vectorProperties,
     pointsKeys,
-    circleRadius / 2,
+    circleRadius / 3,
     true, // modify
     vector,
   )

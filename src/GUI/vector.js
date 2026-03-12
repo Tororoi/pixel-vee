@@ -169,9 +169,12 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
   const normalizedX = point.x + xOffset
   const normalizedY = point.y + yOffset
 
+  let isActive = false
+
   if (modify) {
     if (vectorGui.selectedPoint.xKey === keys.x && !vector) {
-      r = radius * 2.125 // increase  radius of fill to match stroked circle
+      r = radius * 3.125 // increase  radius of fill to match stroked circle
+      isActive = true
       vectorGui.setCollision(keys)
     } else if (
       checkSquarePointCollision(
@@ -179,7 +182,7 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
         state.cursor.y,
         normalizedX,
         normalizedY,
-        r * 2.125,
+        r * 3.125,
       )
     ) {
       //if cursor is colliding with a control point not on the selected vector, set collided keys specifically for collided vector
@@ -197,9 +200,15 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
           if (allowLink) {
             vectorGui.setOtherVectorCollision(keys)
             vectorGui.addLinkedVector(vector, keys.x, linkingPoint)
-            if (state.tool.clickCounter === 0) r = radius * 2.125
+            if (state.tool.clickCounter === 0) {
+              r = radius * 3.125
+              isActive = true
+            }
           } else if (!vectorGui.selectedPoint.xKey) {
-            if (state.tool.clickCounter === 0) r = radius * 2.125
+            if (state.tool.clickCounter === 0) {
+              r = radius * 3.125
+              isActive = true
+            }
           }
         } else if (
           (keys.x === 'px3' || keys.x === 'px4') &&
@@ -207,10 +216,14 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
         ) {
           state.vector.collidedIndex = vector.index
           //only set new radius if selected vector is not a new vector being drawn
-          if (state.tool.clickCounter === 0) r = radius * 2.125
+          if (state.tool.clickCounter === 0) {
+            r = radius * 3.125
+            isActive = true
+          }
         }
       } else {
-        r = radius * 2.125
+        r = radius * 3.125
+        isActive = true
         vectorGui.setCollision(keys)
       }
     }
@@ -248,18 +261,54 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
   const lw = getGuiLineWidth()
   const cx = canvas.xOffset + xOffset + point.x + 0.5
   const cy = canvas.yOffset + yOffset + point.y + 0.5
-  canvas.vectorGuiCTX.beginPath()
-  canvas.vectorGuiCTX.arc(cx, cy, r, 0, 2 * Math.PI)
-  if (modify) {
-    // Filled circle: black outline ring, then white fill
+  if (isActive) {
+    // Crosshair with gap in center for hovered/selected control points
+    const gap = r * 0.55
+    canvas.vectorGuiCTX.beginPath()
+    canvas.vectorGuiCTX.moveTo(cx - r, cy)
+    canvas.vectorGuiCTX.lineTo(cx - gap, cy)
+    canvas.vectorGuiCTX.moveTo(cx + gap, cy)
+    canvas.vectorGuiCTX.lineTo(cx + r, cy)
+    canvas.vectorGuiCTX.moveTo(cx, cy - r)
+    canvas.vectorGuiCTX.lineTo(cx, cy - gap)
+    canvas.vectorGuiCTX.moveTo(cx, cy + gap)
+    canvas.vectorGuiCTX.lineTo(cx, cy + r)
+    canvas.vectorGuiCTX.lineCap = 'square'
+    doubleStroke(canvas.vectorGuiCTX, lw, 'black', 'white')
+    canvas.vectorGuiCTX.lineCap = 'butt'
+    // Small filled circle at center
+    canvas.vectorGuiCTX.beginPath()
+    canvas.vectorGuiCTX.arc(cx, cy, r * 0.2, 0, 2 * Math.PI)
+    canvas.vectorGuiCTX.lineWidth = lw * 2
+    canvas.vectorGuiCTX.strokeStyle = 'black'
+    canvas.vectorGuiCTX.stroke()
+    canvas.vectorGuiCTX.fillStyle = 'white'
+    canvas.vectorGuiCTX.fill()
+  } else if (modify) {
+    // Filled circle for non-active interactive points
+    canvas.vectorGuiCTX.beginPath()
+    canvas.vectorGuiCTX.arc(cx, cy, r, 0, 2 * Math.PI)
     canvas.vectorGuiCTX.lineWidth = lw * 2
     canvas.vectorGuiCTX.strokeStyle = 'black'
     canvas.vectorGuiCTX.stroke()
     canvas.vectorGuiCTX.fillStyle = 'white'
     canvas.vectorGuiCTX.fill()
   } else {
-    // Outline circle: black thick stroke, then white thin stroke
-    doubleStroke(canvas.vectorGuiCTX, lw, 'black', 'white')
+    // Outline circle — skip if this point is hovered/selected (the modify pass will draw the crosshair)
+    const wouldBeActive =
+      vectorGui.selectedPoint.xKey === keys.x ||
+      checkSquarePointCollision(
+        state.cursor.x,
+        state.cursor.y,
+        normalizedX,
+        normalizedY,
+        r,
+      )
+    if (!wouldBeActive) {
+      canvas.vectorGuiCTX.beginPath()
+      canvas.vectorGuiCTX.arc(cx, cy, r, 0, 2 * Math.PI)
+      doubleStroke(canvas.vectorGuiCTX, lw, 'black', 'white')
+    }
   }
 }
 

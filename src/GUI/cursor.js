@@ -23,7 +23,7 @@ export function renderCursor() {
       break
     case 'eyedropper':
       //empty square
-      drawCursorBox(2)
+      drawCursorBox(0.5)
       break
     case 'select':
       //show nothing
@@ -41,7 +41,7 @@ export function renderCursor() {
           if (vectorGui.showCursorPreview) {
             drawInjectPreview()
           }
-          drawCursorBox(1)
+          drawCursorBox(0.5)
         } else if (vectorGui.showCursorPreview) {
           if (state.tool.current.modes?.inject) {
             drawInjectPreview()
@@ -50,7 +50,7 @@ export function renderCursor() {
           }
         } else {
           // Cursor preview disabled (default): show box outline for all modes.
-          drawCursorBox(1)
+          drawCursorBox(0.5)
         }
       } else {
         clearLayerPreviewIfNeeded()

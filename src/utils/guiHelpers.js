@@ -5,7 +5,7 @@ import { canvas } from '../Context/canvas.js'
  * @param {number} lineWeight - Multiplier (default 1; use 2 for eraser cursor)
  * @returns {number}
  */
-export function getGuiLineWidth(lineWeight = 1) {
+export function getGuiLineWidth(lineWeight = 0.5) {
   return canvas.zoom <= 8 ? lineWeight / canvas.zoom : lineWeight / 8
 }
 

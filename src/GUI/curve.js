@@ -1,6 +1,10 @@
 import { canvas } from '../Context/canvas.js'
 import { vectorGui } from './vector.js'
-import { drawControlPointHandle, getGuiLineWidth, doubleStroke } from '../utils/guiHelpers.js'
+import {
+  drawControlPointHandle,
+  getGuiLineWidth,
+  doubleStroke,
+} from '../utils/guiHelpers.js'
 
 /**
  * @param {object} vectorProperties - The properties of the vector
@@ -11,7 +15,7 @@ export function renderCurveVector(vectorProperties, vector) {
   const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
   const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
   const lineWidth = getGuiLineWidth()
-  let circleRadius = 8 * lineWidth
+  let circleRadius = 20 * lineWidth
 
   if (Number.isInteger(px4)) {
     drawControlPointHandle(canvas, xOffset, yOffset, px1, py1, px3, py3)
@@ -39,7 +43,7 @@ export function renderCurveVector(vectorProperties, vector) {
   vectorGui.drawControlPoints(
     vectorProperties,
     pointsKeys,
-    circleRadius / 2,
+    circleRadius / 3,
     true, // modify
     vector,
   )
