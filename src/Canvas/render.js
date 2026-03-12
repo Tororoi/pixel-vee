@@ -1,10 +1,10 @@
-import { brushStamps } from "../Context/brushStamps.js"
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { tools } from "../Tools/index.js"
-import { vectorGui } from "../GUI/vector.js"
-import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
-import { calculateBrushDirection } from "../utils/drawHelpers.js"
+import { brushStamps } from '../Context/brushStamps.js'
+import { state } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { tools } from '../Tools/index.js'
+import { vectorGui } from '../GUI/vector.js'
+import { renderLayersToDOM, renderVectorsToDOM } from '../DOM/render.js'
+import { calculateBrushDirection } from '../utils/drawHelpers.js'
 import {
   actionDraw,
   actionLine,
@@ -12,9 +12,9 @@ import {
   actionEllipse,
   actionQuadraticCurve,
   actionCubicCurve,
-} from "../Actions/pointerActions.js"
-import { setInitialZoom } from "../utils/canvasHelpers.js"
-import { transformRasterContent } from "../utils/transformHelpers.js"
+} from '../Actions/pointerActions.js'
+import { setInitialZoom } from '../utils/canvasHelpers.js'
+import { transformRasterContent } from '../utils/transformHelpers.js'
 
 // rAF batching for brush stroke renders
 let _scheduledLayer = null
@@ -74,8 +74,10 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
   let lastTransformAction = null
   for (let i = state.timeline.undoStack.length - 1; i >= 0; i--) {
     const a = state.timeline.undoStack[i]
-    if (lastPasteAction === null && a.tool === "paste" && !a.confirmed) lastPasteAction = a
-    if (lastTransformAction === null && a.tool === "transform") lastTransformAction = a
+    if (lastPasteAction === null && a.tool === 'paste' && !a.confirmed)
+      lastPasteAction = a
+    if (lastTransformAction === null && a.tool === 'transform')
+      lastTransformAction = a
     if (lastPasteAction !== null && lastTransformAction !== null) break
   }
   //loop through all actions
@@ -93,7 +95,7 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         action.layer.ctx.drawImage(
           state.timeline.savedBetweenActionImages[activeIndex].cvs,
           0,
-          0
+          0,
         )
         if (setImages) {
           //ensure activeCtx uses action.layer.ctx for action at active index
@@ -105,7 +107,7 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
     if (
       !action.hidden &&
       !action.removed &&
-      ["raster", "vector"].includes(tool.type)
+      ['raster', 'vector'].includes(tool.type)
     ) {
       performAction(action, betweenCtx, lastPasteAction, lastTransformAction)
     }
@@ -132,7 +134,7 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
             state.timeline.savedBetweenActionImages.length - 1
           ].cvs,
           0,
-          0
+          0,
         )
         //exit for loop
         break
@@ -144,7 +146,7 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
             state.timeline.savedBetweenActionImages.length - 1
           ].cvs,
           0,
-          0
+          0,
         )
       }
     }
@@ -158,8 +160,8 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
  * @returns {CanvasRenderingContext2D} betweenCtx
  */
 function createAndSaveContext() {
-  let cvs = document.createElement("canvas")
-  let ctx = cvs.getContext("2d", {
+  let cvs = document.createElement('canvas')
+  let ctx = cvs.getContext('2d', {
     willReadFrequently: true,
   })
   cvs.width = canvas.offScreenCVS.width
@@ -172,13 +174,20 @@ function createAndSaveContext() {
  * Helper for redrawTimelineActions
  * @param {object} action - The action to be performed
  * @param {CanvasRenderingContext2D} betweenCtx - The canvas context for saving between actions
+ * @param lastPasteAction
+ * @param lastTransformAction
  */
-export function performAction(action, betweenCtx = null, lastPasteAction = null, lastTransformAction = null) {
+export function performAction(
+  action,
+  betweenCtx = null,
+  lastPasteAction = null,
+  lastTransformAction = null,
+) {
   if (!action?.boundaryBox) {
     return
   }
   switch (action.tool) {
-    case "brush": {
+    case 'brush': {
       //Correct action coordinates with layer offsets
       const offsetX = action.layer.x
       const offsetY = action.layer.y
@@ -199,8 +208,8 @@ export function performAction(action, betweenCtx = null, lastPasteAction = null,
         if (offsetX !== 0 || offsetY !== 0) {
           mask = new Set(
             action.maskArray.map(
-              (coord) => `${coord.x + offsetX},${coord.y + offsetY}`
-            )
+              (coord) => `${coord.x + offsetX},${coord.y + offsetY}`,
+            ),
           )
         } else {
           mask = new Set(action.maskArray)
@@ -208,13 +217,13 @@ export function performAction(action, betweenCtx = null, lastPasteAction = null,
       }
       let previousX = action.points[0].x + offsetX
       let previousY = action.points[0].y + offsetY
-      let brushDirection = "0,0"
+      let brushDirection = '0,0'
       for (const p of action.points) {
         brushDirection = calculateBrushDirection(
           p.x + offsetX,
           p.y + offsetY,
           previousX,
-          previousY
+          previousY,
         )
         actionDraw(
           p.x + offsetX,
@@ -227,7 +236,7 @@ export function performAction(action, betweenCtx = null, lastPasteAction = null,
           action.modes,
           mask,
           seen,
-          betweenCtx
+          betweenCtx,
         )
         previousX = p.x + offsetX
         previousY = p.y + offsetY
@@ -235,22 +244,22 @@ export function performAction(action, betweenCtx = null, lastPasteAction = null,
       }
       break
     }
-    case "fill":
+    case 'fill':
       renderActionVectors(action, betweenCtx)
       break
-    case "line":
+    case 'line':
       renderActionVectors(action, betweenCtx)
       break
-    case "quadCurve":
+    case 'quadCurve':
       renderActionVectors(action, betweenCtx)
       break
-    case "cubicCurve":
+    case 'cubicCurve':
       renderActionVectors(action, betweenCtx)
       break
-    case "ellipse":
+    case 'ellipse':
       renderActionVectors(action, betweenCtx)
       break
-    case "cut": {
+    case 'cut': {
       //Correct action coordinates with layer offsets
       const offsetX = action.layer.x
       const offsetY = action.layer.y
@@ -268,11 +277,11 @@ export function performAction(action, betweenCtx = null, lastPasteAction = null,
         boundaryBox.xMin,
         boundaryBox.yMin,
         boundaryBox.xMax - boundaryBox.xMin,
-        boundaryBox.yMax - boundaryBox.yMin
+        boundaryBox.yMax - boundaryBox.yMin,
       )
       break
     }
-    case "paste": {
+    case 'paste': {
       //render paste action
       //Correct action coordinates with layer offsets
       const offsetX = action.layer.x
@@ -295,7 +304,7 @@ export function performAction(action, betweenCtx = null, lastPasteAction = null,
           boundaryBox.xMin,
           boundaryBox.yMin,
           boundaryBox.xMax - boundaryBox.xMin,
-          boundaryBox.yMax - boundaryBox.yMin
+          boundaryBox.yMax - boundaryBox.yMin,
         )
       } else if (
         canvas.tempLayer === canvas.currentLayer && //only render if the current layer is the temp layer (active paste action)
@@ -306,17 +315,17 @@ export function performAction(action, betweenCtx = null, lastPasteAction = null,
           boundaryBox.xMin,
           boundaryBox.yMin,
           boundaryBox.xMax - boundaryBox.xMin,
-          boundaryBox.yMax - boundaryBox.yMin
+          boundaryBox.yMax - boundaryBox.yMin,
         )
       }
       break
     }
-    case "vectorPaste": {
+    case 'vectorPaste': {
       //render vector paste action (only vectors)
       renderActionVectors(action, betweenCtx)
       break
     }
-    case "transform": {
+    case 'transform': {
       if (
         canvas.tempLayer === canvas.currentLayer &&
         action.pastedImageKey === state.clipboard.currentPastedImageKey
@@ -340,7 +349,7 @@ export function performAction(action, betweenCtx = null, lastPasteAction = null,
             boundaryBox,
             action.transformationRotationDegrees % 360,
             action.isMirroredHorizontally,
-            action.isMirroredVertically
+            action.isMirroredVertically,
           )
         }
       }
@@ -373,7 +382,7 @@ function renderActionVectors(action, activeCtx = null) {
     const vector = state.vector.all[action.vectorIndices[i]]
     if (vector.hidden || vector.removed) continue
     switch (vector.vectorProperties.type) {
-      case "fill": {
+      case 'fill': {
         // let tempMask = new Set([
         //   vector.vectorProperties.px1 + offsetX,
         //   vector.vectorProperties.py1 + offsetY,
@@ -386,11 +395,11 @@ function renderActionVectors(action, activeCtx = null) {
           vector.layer,
           vector.modes,
           null, //maskSet made from action.maskArray
-          activeCtx
+          activeCtx,
         )
         break
       }
-      case "line":
+      case 'line':
         actionLine(
           vector.vectorProperties.px1 + offsetX,
           vector.vectorProperties.py1 + offsetY,
@@ -404,10 +413,10 @@ function renderActionVectors(action, activeCtx = null) {
           vector.brushSize,
           null, //maskSet made from action.maskArray
           null,
-          activeCtx
+          activeCtx,
         )
         break
-      case "quadCurve":
+      case 'quadCurve':
         actionQuadraticCurve(
           vector.vectorProperties.px1 + offsetX,
           vector.vectorProperties.py1 + offsetY,
@@ -423,10 +432,10 @@ function renderActionVectors(action, activeCtx = null) {
           brushStamps[vector.brushType][vector.brushSize],
           vector.brushSize,
           null, //maskSet made from action.maskArray
-          activeCtx
+          activeCtx,
         )
         break
-      case "cubicCurve":
+      case 'cubicCurve':
         actionCubicCurve(
           vector.vectorProperties.px1 + offsetX,
           vector.vectorProperties.py1 + offsetY,
@@ -444,10 +453,10 @@ function renderActionVectors(action, activeCtx = null) {
           brushStamps[vector.brushType][vector.brushSize],
           vector.brushSize,
           null, //maskSet made from action.maskArray
-          activeCtx
+          activeCtx,
         )
         break
-      case "ellipse":
+      case 'ellipse':
         actionEllipse(
           vector.vectorProperties.weight,
           vector.vectorProperties.leftTangentX + offsetX,
@@ -465,7 +474,7 @@ function renderActionVectors(action, activeCtx = null) {
           brushStamps[vector.brushType][vector.brushSize],
           vector.brushSize,
           null, //maskSet made from action.maskArray
-          activeCtx
+          activeCtx,
         )
         break
       default:
@@ -482,7 +491,7 @@ function drawLayer(layer) {
   layer.onscreenCtx.save()
 
   if (!layer.removed && !layer.hidden) {
-    if (layer.type === "reference") {
+    if (layer.type === 'reference') {
       layer.onscreenCtx.globalAlpha = layer.opacity
       //layer.x, layer.y need to be normalized to the pixel grid
       layer.onscreenCtx.drawImage(
@@ -492,7 +501,7 @@ function drawLayer(layer) {
         canvas.yOffset +
           (layer.y * canvas.offScreenCVS.width) / canvas.offScreenCVS.width,
         layer.img.width * layer.scale,
-        layer.img.height * layer.scale
+        layer.img.height * layer.scale,
       )
     } else {
       layer.onscreenCtx.beginPath()
@@ -500,7 +509,7 @@ function drawLayer(layer) {
         canvas.xOffset,
         canvas.yOffset,
         canvas.offScreenCVS.width,
-        canvas.offScreenCVS.height
+        canvas.offScreenCVS.height,
       )
       layer.onscreenCtx.clip()
       layer.onscreenCtx.globalAlpha = layer.opacity
@@ -509,7 +518,7 @@ function drawLayer(layer) {
         canvas.xOffset,
         canvas.yOffset,
         canvas.offScreenCVS.width,
-        canvas.offScreenCVS.height
+        canvas.offScreenCVS.height,
       )
     }
   }
@@ -528,7 +537,7 @@ export function drawCanvasLayer(layer) {
     0,
     0,
     layer.onscreenCvs.width / canvas.zoom,
-    layer.onscreenCvs.height / canvas.zoom
+    layer.onscreenCvs.height / canvas.zoom,
   )
   drawLayer(layer)
   //draw border
@@ -537,7 +546,7 @@ export function drawCanvasLayer(layer) {
     canvas.xOffset - 1,
     canvas.yOffset - 1,
     canvas.offScreenCVS.width + 2,
-    canvas.offScreenCVS.height + 2
+    canvas.offScreenCVS.height + 2,
   )
   layer.onscreenCtx.lineWidth = 2
   layer.onscreenCtx.strokeStyle = canvas.borderColor
@@ -553,7 +562,7 @@ function renderBackgroundCanvas() {
     0,
     0,
     canvas.backgroundCVS.width / canvas.zoom,
-    canvas.backgroundCVS.height / canvas.zoom
+    canvas.backgroundCVS.height / canvas.zoom,
   )
   //fill background with neutral gray
   canvas.backgroundCTX.fillStyle = canvas.bgColor
@@ -561,14 +570,14 @@ function renderBackgroundCanvas() {
     0,
     0,
     canvas.backgroundCVS.width / canvas.zoom,
-    canvas.backgroundCVS.height / canvas.zoom
+    canvas.backgroundCVS.height / canvas.zoom,
   )
   //clear drawing space
   canvas.backgroundCTX.clearRect(
     canvas.xOffset,
     canvas.yOffset,
     canvas.offScreenCVS.width,
-    canvas.offScreenCVS.height
+    canvas.offScreenCVS.height,
   )
 }
 
@@ -579,23 +588,23 @@ function renderBackgroundCanvas() {
 export function clearOffscreenCanvas(activeLayer = null) {
   if (activeLayer) {
     //clear one offscreen layer
-    if (activeLayer.type === "raster") {
+    if (activeLayer.type === 'raster') {
       activeLayer.ctx.clearRect(
         0,
         0,
         canvas.offScreenCVS.width,
-        canvas.offScreenCVS.height
+        canvas.offScreenCVS.height,
       )
     }
   } else {
     //clear all offscreen layers
     canvas.layers.forEach((layer) => {
-      if (layer.type === "raster") {
+      if (layer.type === 'raster') {
         layer.ctx.clearRect(
           0,
           0,
           canvas.offScreenCVS.width,
-          canvas.offScreenCVS.height
+          canvas.offScreenCVS.height,
         )
       }
     })
@@ -613,7 +622,7 @@ export function renderCanvas(
   activeLayer = null,
   redrawTimeline = false,
   activeIndexes = null,
-  setImages = false
+  setImages = false,
 ) {
   //Handle offscreen canvases
   if (redrawTimeline) {
@@ -649,7 +658,7 @@ export const resizeOffScreenCanvas = (width, height) => {
   // canvas.thumbnailCVS.height = canvas.offScreenCVS.height
   //reset canvas state
   canvas.zoom = setInitialZoom(
-    Math.max(canvas.offScreenCVS.width, canvas.offScreenCVS.height)
+    Math.max(canvas.offScreenCVS.width, canvas.offScreenCVS.height),
   )
   canvas.vectorGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
@@ -657,7 +666,7 @@ export const resizeOffScreenCanvas = (width, height) => {
     0,
     canvas.sharpness * canvas.zoom,
     0,
-    0
+    0,
   )
   canvas.selectionGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
@@ -665,7 +674,15 @@ export const resizeOffScreenCanvas = (width, height) => {
     0,
     canvas.sharpness * canvas.zoom,
     0,
-    0
+    0,
+  )
+  canvas.cursorCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
   )
   canvas.layers.forEach((layer) => {
     layer.onscreenCtx.setTransform(
@@ -674,7 +691,7 @@ export const resizeOffScreenCanvas = (width, height) => {
       0,
       canvas.sharpness * canvas.zoom,
       0,
-      0
+      0,
     )
   })
   canvas.backgroundCTX.setTransform(
@@ -683,17 +700,17 @@ export const resizeOffScreenCanvas = (width, height) => {
     0,
     canvas.sharpness * canvas.zoom,
     0,
-    0
+    0,
   )
   canvas.xOffset = Math.round(
     (canvas.currentLayer.onscreenCvs.width / canvas.sharpness / canvas.zoom -
       canvas.offScreenCVS.width) /
-      2
+      2,
   )
   canvas.yOffset = Math.round(
     (canvas.currentLayer.onscreenCvs.height / canvas.sharpness / canvas.zoom -
       canvas.offScreenCVS.height) /
-      2
+      2,
   )
   canvas.previousXOffset = canvas.xOffset
   canvas.previousYOffset = canvas.yOffset
@@ -703,7 +720,7 @@ export const resizeOffScreenCanvas = (width, height) => {
   canvas.zoomPixelY = null
   //resize layers. Per function, it's cheaper to run this inside the existing iterator in drawLayers, but since drawLayers runs so often, it's preferable to only run this here where it's needed.
   canvas.layers.forEach((layer) => {
-    if (layer.type === "raster") {
+    if (layer.type === 'raster') {
       if (
         layer.cvs.width !== canvas.offScreenCVS.width ||
         layer.cvs.height !== canvas.offScreenCVS.height

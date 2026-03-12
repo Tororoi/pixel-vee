@@ -8,9 +8,8 @@
 export function coordArrayFromSet(set, xOffset, yOffset) {
   if (set) {
     return Array.from(set).map((coord) => {
-      const commaIndex = coord.indexOf(",")
-      const x = Number(coord.substring(0, commaIndex)) - xOffset
-      const y = Number(coord.substring(commaIndex + 1)) - yOffset
+      const x = (coord & 0xffff) - xOffset
+      const y = (coord >> 16) - yOffset
       return {
         x,
         y,

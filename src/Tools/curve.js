@@ -1,17 +1,17 @@
-import { brushStamps } from "../Context/brushStamps.js"
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
+import { brushStamps } from '../Context/brushStamps.js'
+import { state } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { swatches } from '../Context/swatch.js'
 import {
   actionQuadraticCurve,
   actionCubicCurve,
-} from "../Actions/pointerActions.js"
-import { vectorGui } from "../GUI/vector.js"
-import { renderCanvas } from "../Canvas/render.js"
-import { coordArrayFromSet } from "../utils/maskHelpers.js"
-import { addToTimeline } from "../Actions/undoRedo.js"
-import { enableActionsForSelection } from "../DOM/disableDomElements.js"
-import { rerouteVectorStepsAction } from "./adjust.js"
+} from '../Actions/pointerActions.js'
+import { vectorGui } from '../GUI/vector.js'
+import { renderCanvas } from '../Canvas/render.js'
+import { coordArrayFromSet } from '../utils/maskHelpers.js'
+import { addToTimeline } from '../Actions/undoRedo.js'
+import { enableActionsForSelection } from '../DOM/disableDomElements.js'
+import { rerouteVectorStepsAction } from './adjust.js'
 
 //=====================================//
 //=== * * * Curve Controllers * * * ===//
@@ -24,7 +24,7 @@ import { rerouteVectorStepsAction } from "./adjust.js"
 function quadCurveSteps() {
   if (rerouteVectorStepsAction()) return
   switch (canvas.pointerEvent) {
-    case "pointerdown":
+    case 'pointerdown':
       //solidify end points
       state.tool.clickCounter += 1
       if (state.tool.clickCounter > 2) state.tool.clickCounter = 1
@@ -64,11 +64,11 @@ function quadCurveSteps() {
         state.tool.current.brushSize,
         state.selection.maskSet,
         null,
-        true
+        true,
       )
 
       break
-    case "pointermove":
+    case 'pointermove':
       switch (state.tool.clickCounter) {
         case 1:
           state.vector.properties.px2 = state.cursor.x
@@ -99,11 +99,11 @@ function quadCurveSteps() {
         state.tool.current.brushSize,
         state.selection.maskSet,
         null,
-        true
+        true,
       )
 
       break
-    case "pointerup":
+    case 'pointerup':
       switch (state.tool.clickCounter) {
         case 1:
           state.vector.properties.px2 = state.cursor.x
@@ -130,15 +130,17 @@ function quadCurveSteps() {
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.current.modes,
-          brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+          brushStamps[state.tool.current.brushType][
+            state.tool.current.brushSize
+          ],
           state.tool.current.brushSize,
-          state.selection.maskSet
+          state.selection.maskSet,
         )
         state.tool.clickCounter = 0
         let maskArray = coordArrayFromSet(
           state.selection.maskSet,
           canvas.currentLayer.x,
-          canvas.currentLayer.y
+          canvas.currentLayer.y,
         )
         //correct boundary box for layer offset
         const boundaryBox = { ...state.selection.boundaryBox }
@@ -200,7 +202,7 @@ function quadCurveSteps() {
 function cubicCurveSteps() {
   if (rerouteVectorStepsAction()) return
   switch (canvas.pointerEvent) {
-    case "pointerdown":
+    case 'pointerdown':
       //solidify end points
       state.tool.clickCounter += 1
       if (state.tool.clickCounter > 3) state.tool.clickCounter = 1
@@ -246,10 +248,10 @@ function cubicCurveSteps() {
         state.tool.current.brushSize,
         state.selection.maskSet,
         null,
-        true
+        true,
       )
       break
-    case "pointermove":
+    case 'pointermove':
       switch (state.tool.clickCounter) {
         case 1:
           state.vector.properties.px2 = state.cursor.x
@@ -286,10 +288,10 @@ function cubicCurveSteps() {
         state.tool.current.brushSize,
         state.selection.maskSet,
         null,
-        true
+        true,
       )
       break
-    case "pointerup":
+    case 'pointerup':
       switch (state.tool.clickCounter) {
         case 1:
           state.vector.properties.px2 = state.cursor.x
@@ -322,15 +324,17 @@ function cubicCurveSteps() {
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.current.modes,
-          brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+          brushStamps[state.tool.current.brushType][
+            state.tool.current.brushSize
+          ],
           state.tool.current.brushSize,
-          state.selection.maskSet
+          state.selection.maskSet,
         )
         state.tool.clickCounter = 0
         let maskArray = coordArrayFromSet(
           state.selection.maskSet,
           canvas.currentLayer.x,
-          canvas.currentLayer.y
+          canvas.currentLayer.y,
         )
         //correct boundary box for layer offset
         const boundaryBox = { ...state.selection.boundaryBox }
@@ -389,80 +393,80 @@ function cubicCurveSteps() {
 }
 
 export const quadCurve = {
-  name: "quadCurve",
+  name: 'quadCurve',
   fn: quadCurveSteps,
   brushSize: 1,
-  brushType: "circle",
+  brushType: 'circle',
   brushDisabled: false,
   options: {
     //Priority hierarchy of options: Equal = Align > Hold > Link
     equal: {
       active: false,
       tooltip:
-        "Toggle Equal Length (=). \n\nEnsures magnitude continuity of control handles for linked vectors.",
+        'Toggle Equal Length (=). \n\nEnsures magnitude continuity of control handles for linked vectors.',
     }, // Magnitude continuity
     align: {
       active: true,
       tooltip:
-        "Toggle Align (A). \n\nEnsures tangential continuity by moving the control handle to the opposite angle for linked vectors.",
+        'Toggle Align (A). \n\nEnsures tangential continuity by moving the control handle to the opposite angle for linked vectors.',
     }, // Tangential continuity
     hold: {
       active: false,
       tooltip:
-        "Toggle Hold (H). \n\nMaintain relative angles of all control handles attached to selected control point.",
+        'Toggle Hold (H). \n\nMaintain relative angles of all control handles attached to selected control point.',
     },
     link: {
       active: true,
       tooltip:
-        "Toggle Linking (L). \n\nConnected control points of other vectors will move with selected control point.",
+        'Toggle Linking (L). \n\nConnected control points of other vectors will move with selected control point.',
     }, // Positional continuity
     displayPaths: {
       active: false,
-      tooltip: "Toggle Paths. \n\nShow paths for curves.",
+      tooltip: 'Toggle Paths. \n\nShow paths for curves.',
     },
   },
   modes: { eraser: false, inject: false },
-  type: "vector",
-  cursor: "crosshair",
-  activeCursor: "crosshair",
+  type: 'vector',
+  cursor: 'crosshair',
+  activeCursor: 'crosshair',
 }
 
 export const cubicCurve = {
-  name: "cubicCurve",
+  name: 'cubicCurve',
   fn: cubicCurveSteps,
   brushSize: 1,
-  brushType: "circle",
+  brushType: 'circle',
   brushDisabled: false,
   options: {
     //Priority hierarchy of options: Equal = Align > Hold > Link
     equal: {
       active: false,
       tooltip:
-        "Toggle Equal Length (=). \n\nEnsures magnitude continuity of control handles for linked vectors.",
+        'Toggle Equal Length (=). \n\nEnsures magnitude continuity of control handles for linked vectors.',
     }, // Magnitude continuity
     align: {
       active: true,
       tooltip:
-        "Toggle Align (A). \n\nEnsures tangential continuity by moving the control handle to the opposite angle for linked vectors.",
+        'Toggle Align (A). \n\nEnsures tangential continuity by moving the control handle to the opposite angle for linked vectors.',
     }, // Tangential continuity
     hold: {
       active: false,
       tooltip:
-        "Toggle Hold (H). \n\nMaintain relative angles of all control handles attached to selected control point.",
+        'Toggle Hold (H). \n\nMaintain relative angles of all control handles attached to selected control point.',
     },
     link: {
       active: true,
       tooltip:
-        "Toggle Linking (L). \n\nConnected control points of other vectors will move with selected control point.",
+        'Toggle Linking (L). \n\nConnected control points of other vectors will move with selected control point.',
     }, // Positional continuity
     // displayVectors: false,
     displayPaths: {
       active: false,
-      tooltip: "Toggle Paths. \n\nShow paths for curves.",
+      tooltip: 'Toggle Paths. \n\nShow paths for curves.',
     },
   },
   modes: { eraser: false, inject: false },
-  type: "vector",
-  cursor: "crosshair",
-  activeCursor: "crosshair",
+  type: 'vector',
+  cursor: 'crosshair',
+  activeCursor: 'crosshair',
 }

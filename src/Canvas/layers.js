@@ -62,7 +62,7 @@ export function createRasterLayer() {
   offscreenLayerCVS.height = canvas.offScreenCVS.height
   let onscreenLayerCVS = document.createElement("canvas")
   let onscreenLayerCTX = onscreenLayerCVS.getContext("2d", {
-    willReadFrequently: true,
+    desynchronized: true,
   })
   onscreenLayerCVS.className = "onscreen-canvas"
   dom.canvasLayers.appendChild(onscreenLayerCVS)
@@ -106,7 +106,7 @@ export function createRasterLayer() {
 export function createReferenceLayer(img) {
   let onscreenLayerCVS = document.createElement("canvas")
   let onscreenLayerCTX = onscreenLayerCVS.getContext("2d", {
-    willReadFrequently: true,
+    desynchronized: true,
   })
   onscreenLayerCVS.className = "onscreen-canvas"
   dom.canvasLayers.insertBefore(onscreenLayerCVS, dom.canvasLayers.children[0])
@@ -169,7 +169,7 @@ export function createPreviewLayer() {
   offscreenLayerCVS.height = canvas.offScreenCVS.height
   let onscreenLayerCVS = document.createElement("canvas")
   let onscreenLayerCTX = onscreenLayerCVS.getContext("2d", {
-    willReadFrequently: true,
+    desynchronized: true,
   })
   onscreenLayerCVS.className = "onscreen-canvas"
   return {

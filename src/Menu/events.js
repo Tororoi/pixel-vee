@@ -237,6 +237,9 @@ dom.gridBtn.addEventListener("click", () => {
   vectorGui.grid = dom.gridBtn.checked
   vectorGui.render()
 })
+dom.cursorPreviewBtn.addEventListener("click", () => {
+  vectorGui.showCursorPreview = dom.cursorPreviewBtn.checked
+})
 dom.gridSpacing.addEventListener("input", (e) => {
   //constrain value to min/max
   if (e.target.value < 1) {

@@ -130,3 +130,126 @@ it("calls enableActionsForSelection when coords are valid", () => {
 5. **Prefer `toEqual` over `toBe` for objects** — `toBe` checks reference equality; `toEqual` checks deep value equality.
 
 6. **Test the contract, not the implementation** — test what a method does (its observable effect on state), not how it does it internally.
+
+---
+
+## Performance benchmarks
+
+Benchmarks live in `tests/benchmarks/` and use Vitest's built-in `bench()` API (Vitest 4.x, no extra dependencies).
+
+### Running benchmarks
+
+```bash
+# Run all benchmark files
+npx vitest bench
+
+# Run a specific file
+npx vitest bench tests/benchmarks/colorMask.bench.js
+
+# Verbose output with full percentile table
+npx vitest bench --reporter=verbose
+```
+
+Benchmark files use the `.bench.js` extension and are excluded from the regular `npm test` run.
+
+### Benchmark file structure
+
+```
+tests/benchmarks/
+  colorMask.bench.js   — createColorMaskSet() pixel scan loop
+  fill.bench.js        — flood fill scanline algorithm (actionFill)
+  transform.bench.js   — raster rotation + scaling (transformRasterContent)
+  brush.bench.js       — brush stamp generation for all 32 sizes
+  bezier.bench.js      — quad, cubic, and conic bezier rasterization
+```
+
+Each file inlines the core algorithm (isolated from canvas/DOM) and tests multiple canvas sizes and input shapes to reveal how performance scales.
+
+### How to write a benchmark
+
+Benchmark files follow the same import/describe pattern as test files, but use `bench()` instead of `it()`:
+
+```js
+import { describe, bench } from "vitest"
+
+describe("my operation", () => {
+  bench("256×256", () => {
+    // code to time — runs many iterations automatically
+  })
+})
+```
+
+For operations that modify a buffer in-place (e.g. flood fill), reset the buffer at the start of each iteration using `Uint8ClampedArray.set()` rather than allocating a fresh array, to avoid measuring allocation overhead:
+
+```js
+const template = makePixelBuffer(size, size, 255, 0, 0, 255)
+const data = new Uint8ClampedArray(template.length)
+
+bench(`${size}×${size}`, () => {
+  data.set(template) // fast memcpy — resets without re-allocating
+  floodFill(data, size, size, ...)
+})
+```
+
+### Baseline results (macOS, Apple M-series, Vitest 4.0.18)
+
+Results recorded 2026-02-22. Use these as the comparison baseline when evaluating WASM implementations.
+
+#### Flood fill — uniform canvas from center (worst case: every pixel visited)
+
+| Canvas | mean | ops/sec |
+|--------|------|---------|
+| 256×256 | 0.79ms | 1,273 |
+| 512×512 | 3.0ms | 333 |
+| 1024×1024 | 13.8ms | 73 |
+
+Scaling is ~3.8–4× per canvas doubling — close to the expected O(n) linear. Stack-based pixel loop in `src/Actions/pointerActions.js:237`.
+
+#### Color mask — worst case (all pixels match)
+
+| Canvas | mean | ops/sec |
+|--------|------|---------|
+| 256×256 | 11.2ms | 89 |
+| 512×512 | 72.5ms | 13.8 |
+| 1024×1024 | 466ms | 2.1 |
+
+Scaling is ~6.5–41× per doubling — **severely superlinear**. The raw pixel scan (no Set insertions) takes only 2.9ms at 1024×1024; the bottleneck is the `` `${x},${y}` `` string allocation per matching pixel, which creates GC pressure at scale. Switching to numeric Set keys would dramatically reduce this cost before any WASM work.
+
+#### Color mask — no pixels match (scan only, no Set insertions)
+
+| Canvas | mean | ops/sec |
+|--------|------|---------|
+| 256×256 | 0.18ms | 5,425 |
+| 512×512 | 0.74ms | 1,345 |
+| 1024×1024 | 2.94ms | 341 |
+
+Scales ~4× per doubling — perfectly linear. Shows the true cost of the pixel loop without GC noise.
+
+#### Transform — full pipeline (rotate 90° + scale 1:1)
+
+| Canvas | mean | ops/sec |
+|--------|------|---------|
+| 256×256 | 2.57ms | 389 |
+| 512×512 | 9.67ms | 103 |
+| 1024×1024 | 37.6ms | 27 |
+
+Scaling is ~3.8× per doubling — linear. Two nested O(w×h) loops in `src/utils/transformHelpers.js:54`.
+
+#### Brush stamp generation — all 32 sizes at startup
+
+| Brush type | mean |
+|-----------|------|
+| Circle (sizes 1–32) | 7.9ms |
+| Square (sizes 1–32) | 9.6ms |
+
+Runs once at startup. Per-size cost at size 32 is ~0.7ms (circle) and ~0.9ms (square). Scaling from size 1 to 32 is ~300–470× (superlinear, same string-key Set cause as colorMask).
+
+#### Bezier rasterization
+
+| Curve type | ~50px span | ~200px span | ~500px span |
+|------------|-----------|------------|------------|
+| Quad bezier | 0.008ms | 0.031ms | 0.082ms |
+| Cubic bezier | 0.011ms | 0.041ms | 0.102ms |
+| Conic (w=0.7) | 0.025ms | — | 0.068ms |
+
+All scale ~4× per 4× span increase — linear and fast. Not a meaningful WASM target.

@@ -34,6 +34,14 @@ export function actionZoom(z, xOriginOffset, yOriginOffset) {
     0,
     0
   )
+  canvas.cursorCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
   canvas.layers.forEach((layer) => {
     layer.onscreenCtx.setTransform(
       canvas.sharpness * canvas.zoom,
@@ -72,6 +80,14 @@ export function actionRecenter() {
     0
   )
   canvas.selectionGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
+  canvas.cursorCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,

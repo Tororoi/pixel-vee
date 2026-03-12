@@ -1,5 +1,6 @@
-import { canvas } from "../Context/canvas.js"
-import { vectorGui } from "./vector.js"
+import { canvas } from '../Context/canvas.js'
+import { vectorGui } from './vector.js'
+import { getGuiLineWidth } from '../utils/guiHelpers.js'
 
 /**
  * Render fill vector gui
@@ -7,32 +8,22 @@ import { vectorGui } from "./vector.js"
  * @param {object} vector - The vector to be rendered
  */
 export function renderFillVector(vectorProperties, vector) {
-  let pointsKeys = [{ x: "px1", y: "py1" }]
-  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
-  let circleRadius = 8 * lineWidth
-  canvas.vectorGuiCTX.lineWidth = lineWidth
-  canvas.vectorGuiCTX.strokeStyle = "white"
-  canvas.vectorGuiCTX.fillStyle = "white"
-  canvas.vectorGuiCTX.beginPath()
+  let pointsKeys = [{ x: 'px1', y: 'py1' }]
+  const lineWidth = getGuiLineWidth()
+  const circleRadius = 20 * lineWidth
   if (!vector) {
     vectorGui.drawControlPoints(
       vectorProperties,
       pointsKeys,
       circleRadius,
-      false
+      false,
     )
   }
-  // Stroke non-filled lines
-  canvas.vectorGuiCTX.stroke()
-
-  canvas.vectorGuiCTX.beginPath()
   vectorGui.drawControlPoints(
     vectorProperties,
     pointsKeys,
-    circleRadius / 2,
+    circleRadius / 3,
     true,
-    vector
+    vector,
   )
-  // Fill points
-  canvas.vectorGuiCTX.fill()
 }

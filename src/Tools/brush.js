@@ -136,13 +136,14 @@ function brushSteps() {
  * @param {number} y - (Integer)
  */
 function addPointToAction(x, y) {
-  if (!state.selection.pointsSet.has(`${x},${y}`)) {
+  const key = (y << 16) | x
+  if (!state.selection.pointsSet.has(key)) {
     state.timeline.addPoint({
       x: x - canvas.currentLayer.x,
       y: y - canvas.currentLayer.y,
       brushSize: state.tool.current.brushSize,
     })
-    state.selection.pointsSet.add(`${x},${y}`)
+    state.selection.pointsSet.add(key)
   }
 }
 
@@ -228,20 +229,13 @@ function drawLine() {
   let previousY = lineStartY
   let brushDirection = "0,0"
   for (let i = 0; i < tri.long; i++) {
-    let thispoint = {
-      x: Math.round(lineStartX + tri.x * i),
-      y: Math.round(lineStartY + tri.y * i),
-    }
+    const thisx = Math.round(lineStartX + tri.x * i)
+    const thisy = Math.round(lineStartY + tri.y * i)
     // for each point along the line
-    brushDirection = calculateBrushDirection(
-      thispoint.x,
-      thispoint.y,
-      previousX,
-      previousY
-    )
-    drawBrushPoint(thispoint.x, thispoint.y, brushDirection)
-    previousX = thispoint.x
-    previousY = thispoint.y
+    brushDirection = calculateBrushDirection(thisx, thisy, previousX, previousY)
+    drawBrushPoint(thisx, thisy, brushDirection)
+    previousX = thisx
+    previousY = thisy
   }
   //Reset lineStart Coords
   state.tool.lineStartX = null

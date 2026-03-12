@@ -66,10 +66,12 @@ describe("getTriangle", () => {
 })
 
 // ─── coordArrayFromSet ────────────────────────────────────────────────────────
+// Keys are packed integers: (y << 16) | x — matching the format written by
+// createColorMaskSet(). Canvas coordinates are always non-negative (0..65535).
 
 describe("coordArrayFromSet", () => {
-  it("converts a set of 'x,y' strings to {x, y} objects", () => {
-    const set = new Set(["10,20", "30,40"])
+  it("converts a set of packed-integer keys to {x, y} objects", () => {
+    const set = new Set([(20 << 16) | 10, (40 << 16) | 30])
     const result = coordArrayFromSet(set, 0, 0)
     expect(result).toEqual([
       { x: 10, y: 20 },
@@ -78,7 +80,7 @@ describe("coordArrayFromSet", () => {
   })
 
   it("applies xOffset and yOffset to each coordinate", () => {
-    const set = new Set(["10,20"])
+    const set = new Set([(20 << 16) | 10])
     const result = coordArrayFromSet(set, 3, 5)
     expect(result).toEqual([{ x: 7, y: 15 }])
   })
@@ -95,14 +97,8 @@ describe("coordArrayFromSet", () => {
     expect(coordArrayFromSet(new Set(), 0, 0)).toEqual([])
   })
 
-  it("handles negative coordinates", () => {
-    const set = new Set(["-5,-10"])
-    const result = coordArrayFromSet(set, 0, 0)
-    expect(result).toEqual([{ x: -5, y: -10 }])
-  })
-
   it("handles negative offset resulting in negative coords", () => {
-    const set = new Set(["3,4"])
+    const set = new Set([(4 << 16) | 3])
     const result = coordArrayFromSet(set, 10, 10)
     expect(result).toEqual([{ x: -7, y: -6 }])
   })

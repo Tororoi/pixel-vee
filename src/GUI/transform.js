@@ -1,15 +1,19 @@
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { vectorGui } from "./vector.js"
-import { getAngle } from "../utils/trig.js"
-// import { drawCirclePath } from "../utils/guiHelpers.js"
+import { state } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { vectorGui } from './vector.js'
+import { getAngle } from '../utils/trig.js'
+import {
+  checkSquarePointCollision,
+  doubleStroke,
+  getGuiLineWidth,
+} from '../utils/guiHelpers.js'
 // import { drawSelectControlPoints, renderSelectionBoxOutline } from "./select.js"
-import { findVectorShapeBoundaryBox } from "../utils/vectorHelpers.js"
+import { findVectorShapeBoundaryBox } from '../utils/vectorHelpers.js'
 
 /**
- *
+ * Updates the rotation angle while the user is dragging.
  */
-export function renderVectorRotationControl() {
+function updateRotationAngle() {
   //for now, mother ui is always in the shape center
   vectorGui.mother.rotationOrigin.x = state.vector.shapeCenterX
   vectorGui.mother.rotationOrigin.y = state.vector.shapeCenterY
@@ -17,70 +21,157 @@ export function renderVectorRotationControl() {
     vectorGui.mother.newRotation =
       getAngle(
         vectorGui.mother.rotationOrigin.x - state.cursor.x,
-        vectorGui.mother.rotationOrigin.y - state.cursor.y
+        vectorGui.mother.rotationOrigin.y - state.cursor.y,
       ) -
       state.vector.grabStartAngle +
       vectorGui.mother.currentRotation
   }
-  //Render mother ui rotation child
-  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
-  let circleRadius = 16 * lineWidth
-  let pointsKeys = [{ x: "rotationx", y: "rotationy" }]
-  let motherPoints = {
+}
+
+/**
+ * Checks hover/selected state for the rotation control, sets collision and cursor if active.
+ * @param {object} motherPoints - Object with rotationx and rotationy canvas coordinates
+ * @param {number} r - Collision radius
+ * @returns {boolean} - True if the control is hovered or selected
+ */
+function resolveRotationActiveState(motherPoints, r) {
+  const isSelected = vectorGui.selectedPoint.xKey === 'rotationx'
+  const isHovered =
+    !isSelected &&
+    checkSquarePointCollision(
+      state.cursor.x,
+      state.cursor.y,
+      motherPoints.rotationx,
+      motherPoints.rotationy,
+      r,
+    )
+  const isActive = isSelected || isHovered
+  if (isActive) {
+    vectorGui.setCollision({ x: 'rotationx', y: 'rotationy' })
+    canvas.vectorGuiCVS.style.cursor = state.cursor.clicked ? 'grabbing' : 'grab'
+  }
+  return isActive
+}
+
+/**
+ * Draws the Archimedean spiral that represents the rotation control.
+ * @param {number} cx - Center x in canvas pixel space
+ * @param {number} cy - Center y in canvas pixel space
+ * @param {number} lineWidth - Base GUI line width
+ * @param {number} minRadius - Inner radius of spiral
+ * @param {number} maxRadius - Outer radius of spiral
+ */
+function drawRotationSpiral(cx, cy, lineWidth, minRadius, maxRadius) {
+  const spiralTurns = 2
+  const totalSegments = Math.round(spiralTurns * 48)
+  canvas.vectorGuiCTX.beginPath()
+  for (let i = 0; i <= totalSegments; i++) {
+    const t = i / totalSegments
+    const angle = t * spiralTurns * 2 * Math.PI
+    const spiralRadius = minRadius + t * (maxRadius - minRadius)
+    const x = cx + Math.cos(angle) * spiralRadius
+    const y = cy + Math.sin(angle) * spiralRadius
+    if (i === 0) {
+      canvas.vectorGuiCTX.moveTo(x, y)
+    } else {
+      canvas.vectorGuiCTX.lineTo(x, y)
+    }
+  }
+  doubleStroke(canvas.vectorGuiCTX, lineWidth * 2, 'black', 'white')
+}
+
+/**
+ * Draws a small filled circle at the spiral's origin point.
+ * @param {number} cx - Center x in canvas pixel space
+ * @param {number} cy - Center y in canvas pixel space
+ * @param {number} lineWidth - Base GUI line width
+ */
+function drawRotationOriginDot(cx, cy, lineWidth) {
+  canvas.vectorGuiCTX.beginPath()
+  canvas.vectorGuiCTX.arc(cx, cy, lineWidth * 6, 0, 2 * Math.PI)
+  canvas.vectorGuiCTX.lineWidth = lineWidth * 4
+  canvas.vectorGuiCTX.strokeStyle = 'black'
+  canvas.vectorGuiCTX.stroke()
+  canvas.vectorGuiCTX.fillStyle = 'white'
+  canvas.vectorGuiCTX.fill()
+}
+
+/**
+ * Draws 4 outward-pointing rounded triangles to indicate the control can be moved.
+ * @param {number} cx - Center x in canvas pixel space
+ * @param {number} cy - Center y in canvas pixel space
+ * @param {number} lineWidth - Base GUI line width
+ * @param {number} maxRadius - Outer radius of spiral, used to position arrows
+ */
+function drawRotationDirectionArrows(cx, cy, lineWidth, maxRadius) {
+  const arrowDist = maxRadius + lineWidth * 8
+  const arrowHeight = lineWidth * 12
+  const arrowHalfWidth = lineWidth * 12
+  const cornerRadius = lineWidth * 2
+  // [dirX, dirY] for each cardinal direction
+  const directions = [
+    [0, -1],
+    [0, 1],
+    [-1, 0],
+    [1, 0],
+  ]
+  for (const [dx, dy] of directions) {
+    // Perpendicular axis for the arrow base
+    const perpX = -dy
+    const perpY = dx
+    const tip = {
+      x: cx + dx * (arrowDist + arrowHeight),
+      y: cy + dy * (arrowDist + arrowHeight),
+    }
+    const left = {
+      x: cx + dx * arrowDist + perpX * arrowHalfWidth,
+      y: cy + dy * arrowDist + perpY * arrowHalfWidth,
+    }
+    const right = {
+      x: cx + dx * arrowDist - perpX * arrowHalfWidth,
+      y: cy + dy * arrowDist - perpY * arrowHalfWidth,
+    }
+    // Rounded triangle via arcTo at each vertex
+    canvas.vectorGuiCTX.beginPath()
+    canvas.vectorGuiCTX.moveTo((right.x + tip.x) / 2, (right.y + tip.y) / 2)
+    canvas.vectorGuiCTX.arcTo(tip.x, tip.y, left.x, left.y, cornerRadius)
+    canvas.vectorGuiCTX.arcTo(left.x, left.y, right.x, right.y, cornerRadius)
+    canvas.vectorGuiCTX.arcTo(right.x, right.y, tip.x, tip.y, cornerRadius)
+    canvas.vectorGuiCTX.closePath()
+    canvas.vectorGuiCTX.fillStyle = 'white'
+    canvas.vectorGuiCTX.fill()
+    canvas.vectorGuiCTX.lineWidth = lineWidth * 2
+    canvas.vectorGuiCTX.strokeStyle = 'black'
+    canvas.vectorGuiCTX.stroke()
+  }
+}
+
+/**
+ *
+ */
+export function renderVectorRotationControl() {
+  updateRotationAngle()
+
+  const lineWidth = getGuiLineWidth(0.5)
+  const circleRadius = 48 * lineWidth
+  const motherPoints = {
     rotationx: vectorGui.mother.rotationOrigin.x,
     rotationy: vectorGui.mother.rotationOrigin.y,
   }
+  const cx = canvas.xOffset + motherPoints.rotationx + 0.5
+  const cy = canvas.yOffset + motherPoints.rotationy + 0.5
+  const minRadius = lineWidth
+  const maxRadius = circleRadius - lineWidth * 2
+
+  const isActive = resolveRotationActiveState(motherPoints, circleRadius * 0.75)
+
   canvas.vectorGuiCTX.save()
-  canvas.vectorGuiCTX.lineWidth = lineWidth
-  canvas.vectorGuiCTX.strokeStyle = "white"
-  canvas.vectorGuiCTX.fillStyle = "white"
-  //render rotation origin
-  canvas.vectorGuiCTX.beginPath()
-  vectorGui.drawControlPoints(motherPoints, pointsKeys, circleRadius, false)
-  // Stroke non-filled lines
-  // canvas.vectorGuiCTX.stroke()
-  // canvas.vectorGuiCTX.beginPath()
-  vectorGui.drawControlPoints(
-    motherPoints,
-    pointsKeys,
-    circleRadius * 0.75,
-    true
-  )
-  // Fill points
-  canvas.vectorGuiCTX.fill()
-  // Render rotation icon at the rotation origin
-  canvas.vectorGuiCTX.strokeStyle = "black"
-  canvas.vectorGuiCTX.fillStyle = "black"
-  canvas.vectorGuiCTX.lineWidth = lineWidth * 4
-  canvas.vectorGuiCTX.beginPath()
-  //create an arc that goes from 0 to 1.5pi
-  canvas.vectorGuiCTX.arc(
-    canvas.xOffset + motherPoints.rotationx + 0.5,
-    canvas.yOffset + motherPoints.rotationy + 0.5,
-    circleRadius - lineWidth * 7,
-    0.9 * Math.PI,
-    0.5 * Math.PI
-  )
-  canvas.vectorGuiCTX.stroke()
-  //fill triangle at end of arc (triangle is pointing left)
-  canvas.vectorGuiCTX.beginPath()
-  canvas.vectorGuiCTX.moveTo(
-    canvas.xOffset + motherPoints.rotationx + 0.5 + lineWidth,
-    canvas.yOffset +
-      motherPoints.rotationy +
-      0.5 +
-      circleRadius -
-      lineWidth * 13
-  )
-  canvas.vectorGuiCTX.lineTo(
-    canvas.xOffset + motherPoints.rotationx + 0.5 - lineWidth * 6,
-    canvas.yOffset + motherPoints.rotationy + 0.5 + circleRadius - lineWidth * 7
-  )
-  canvas.vectorGuiCTX.lineTo(
-    canvas.xOffset + motherPoints.rotationx + 0.5 + lineWidth,
-    canvas.yOffset + motherPoints.rotationy + 0.5 + circleRadius - lineWidth * 1
-  )
-  canvas.vectorGuiCTX.fill()
+  canvas.vectorGuiCTX.lineCap = 'round'
+  drawRotationSpiral(cx, cy, lineWidth, minRadius, maxRadius)
+  drawRotationOriginDot(cx, cy, lineWidth)
+  if (isActive) {
+    drawRotationDirectionArrows(cx, cy, lineWidth, maxRadius)
+  }
   canvas.vectorGuiCTX.restore()
 }
 
@@ -91,7 +182,7 @@ export function setVectorShapeBoundaryBox() {
   //Update shape boundary box
   const shapeBoundaryBox = findVectorShapeBoundaryBox(
     state.vector.selectedIndices,
-    state.vector.all
+    state.vector.all,
   )
   state.selection.properties.px1 = shapeBoundaryBox.xMin
   state.selection.properties.py1 = shapeBoundaryBox.yMin
