@@ -34,6 +34,14 @@ export function actionZoom(z, xOriginOffset, yOriginOffset) {
     0,
     0
   )
+  canvas.cursorCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
   canvas.layers.forEach((layer) => {
     layer.onscreenCtx.setTransform(
       canvas.sharpness * canvas.zoom,
@@ -72,6 +80,14 @@ export function actionRecenter() {
     0
   )
   canvas.selectionGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0
+  )
+  canvas.cursorCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,
@@ -120,11 +136,11 @@ export function actionRecenter() {
 export function actionCopySelection() {
   if (
     canvas.currentLayer.type === "raster" &&
-    (state.boundaryBox.xMax !== null ||
-      state.currentVectorIndex !== null ||
-      state.selectedVectorIndicesSet.size > 0)
+    (state.selection.boundaryBox.xMax !== null ||
+      state.vector.currentIndex !== null ||
+      state.vector.selectedIndices.size > 0)
   ) {
-    if (state.boundaryBox.xMax !== null) {
+    if (state.selection.boundaryBox.xMax !== null) {
       copySelectedPixels()
     } else {
       copySelectedVectors()

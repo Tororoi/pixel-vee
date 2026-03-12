@@ -23,12 +23,11 @@ import {
   actionPasteSelection,
   actionConfirmPastedPixels,
   actionDeleteSelection,
-  actionFlipPixels,
-  actionRotatePixels,
 } from "../Actions/nonPointerActions.js"
+import { actionFlipPixels, actionRotatePixels } from "../Actions/transformActions.js"
 import { actionCopySelection } from "../Actions/untrackedActions.js"
 import { toggleMode, switchTool } from "../Tools/toolbox.js"
-import { adjustVectorSteps } from "../Tools/transform.js"
+import { adjustVectorSteps } from "../Tools/adjust.js"
 
 /**
  * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
@@ -38,12 +37,12 @@ export function activateShortcut(keyCode) {
   switch (keyCode) {
     case "Enter":
       //handle confirm paste
-      if (!state.clicked && canvas.pastedLayer) {
+      if (!state.cursor.clicked && canvas.pastedLayer) {
         actionConfirmPastedPixels()
       }
       break
     case "Backspace":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         actionDeleteSelection()
       }
       break
@@ -52,9 +51,9 @@ export function activateShortcut(keyCode) {
       //command key
       break
     case "Space":
-      if (!state.clicked) {
-        state.tool = tools["grab"]
-        canvas.vectorGuiCVS.style.cursor = state.tool.cursor
+      if (!state.cursor.clicked) {
+        state.tool.current = tools["grab"]
+        canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
         renderBrushStampToDOM()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
@@ -64,9 +63,9 @@ export function activateShortcut(keyCode) {
     case "AltLeft":
     case "AltRight":
       //option key
-      if (!state.clicked) {
-        state.tool = tools["eyedropper"]
-        canvas.vectorGuiCVS.style.cursor = state.tool.cursor
+      if (!state.cursor.clicked) {
+        state.tool.current = tools["eyedropper"]
+        canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
         renderBrushStampToDOM()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
@@ -77,13 +76,13 @@ export function activateShortcut(keyCode) {
     case "ShiftRight":
       if (dom.toolBtn.id === "brush") {
         tools.brush.options.line.active = true
-        state.lineStartX = state.cursorX
-        state.lineStartY = state.cursorY
+        state.tool.lineStartX = state.cursor.x
+        state.tool.lineStartY = state.cursor.y
       } else if (dom.toolBtn.id === "ellipse") {
-        state.vectorProperties.forceCircle = true
+        state.vector.properties.forceCircle = true
         if (
           vectorGui.selectedPoint.xKey &&
-          state.clickCounter === 0 &&
+          state.tool.clickCounter === 0 &&
           vectorGui.selectedPoint.xKey !== "px1"
         ) {
           //while holding control point, readjust ellipse without having to move cursor.
@@ -101,7 +100,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case "Slash":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         switchTool("line")
         renderVectorsToDOM()
       }
@@ -115,13 +114,13 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyB":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         switchTool("brush")
         renderVectorsToDOM()
       }
       break
     case "KeyC":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           actionCopySelection()
         } else {
@@ -131,7 +130,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyD":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           //deselect
           actionDeselect()
@@ -139,18 +138,19 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyE":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         toggleMode("eraser")
       }
       break
     case "KeyF":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           if (keys.ShiftLeft || keys.ShiftRight) {
-            //option+meta+z
+            //meta+shift+f
             //Flip vertical
             actionFlipPixels(false)
           } else {
+            //meta+f
             //Flip horizontal
             actionFlipPixels(true)
           }
@@ -161,7 +161,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyG":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         //Toggle grid
         if (vectorGui.grid) {
           dom.gridBtn.checked = false
@@ -182,7 +182,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyI":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         toggleMode("inject")
       }
       break
@@ -190,7 +190,7 @@ export function activateShortcut(keyCode) {
       //
       break
     case "KeyK":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         swatches.paletteMode = "edit"
         renderPaletteToolsToDOM()
         renderPaletteToDOM()
@@ -205,7 +205,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyM":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         toggleMode("colorMask")
       }
       break
@@ -213,24 +213,24 @@ export function activateShortcut(keyCode) {
       //
       break
     case "KeyO":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         switchTool("ellipse")
         renderVectorsToDOM()
       }
       break
     case "KeyP":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         toggleMode("perfect")
       }
       break
     case "KeyQ":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         switchTool("quadCurve")
         renderVectorsToDOM()
       }
       break
     case "KeyR":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           //Rotate right
           actionRotatePixels()
@@ -241,7 +241,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyS":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           openSaveDialogBox()
         } else {
@@ -251,11 +251,11 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyT":
-      if (!state.clicked && (keys.MetaLeft || keys.MetaRight)) {
+      if (!state.cursor.clicked && (keys.MetaLeft || keys.MetaRight)) {
         //shortcut for transform - cuts and pastes selection to allow free transform
       } else {
         dom.tooltipBtn.checked = !dom.tooltipBtn.checked
-        if (dom.tooltipBtn.checked && state.tooltipMessage) {
+        if (dom.tooltipBtn.checked && state.ui.tooltipMessage) {
           dom.tooltip.classList.add("visible")
         } else {
           dom.tooltip.classList.remove("visible")
@@ -266,7 +266,7 @@ export function activateShortcut(keyCode) {
       //
       break
     case "KeyV":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           //Will not do anything if already in the midst of a paste action (meaning the canvas.currentLayer is the canvas.tempLayer)
           actionPasteSelection()
@@ -277,7 +277,7 @@ export function activateShortcut(keyCode) {
       //
       break
     case "KeyX":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           actionCutSelection()
         } else {
@@ -291,7 +291,7 @@ export function activateShortcut(keyCode) {
       //
       break
     case "KeyZ":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           if (keys.ShiftLeft || keys.ShiftRight) {
             //shift+meta+z
@@ -321,8 +321,8 @@ export function deactivateShortcut(keyCode) {
       break
     case "Space":
       //only deactivate while not clicked
-      if (!state.clicked) {
-        state.tool = tools[dom.toolBtn.id]
+      if (!state.cursor.clicked) {
+        state.tool.current = tools[dom.toolBtn.id]
         renderBrushStampToDOM()
         canvas.previousXOffset = canvas.xOffset
         canvas.previousYOffset = canvas.yOffset
@@ -336,8 +336,8 @@ export function deactivateShortcut(keyCode) {
     case "AltRight":
       //option key
       //only deactivate while not clicked
-      if (!state.clicked) {
-        state.tool = tools[dom.toolBtn.id]
+      if (!state.cursor.clicked) {
+        state.tool.current = tools[dom.toolBtn.id]
         renderBrushStampToDOM()
         vectorGui.render()
         renderCursor()
@@ -346,17 +346,17 @@ export function deactivateShortcut(keyCode) {
       break
     case "ShiftLeft":
     case "ShiftRight":
-      state.tool = tools[dom.toolBtn.id]
+      state.tool.current = tools[dom.toolBtn.id]
       tools.brush.options.line.active = false
-      if (state.tool.name === "brush" && state.clicked) {
-        state.tool.fn()
+      if (state.tool.current.name === "brush" && state.cursor.clicked) {
+        state.tool.current.fn()
       }
-      state.vectorProperties.forceCircle = false
-      if (state.tool.name === "ellipse") {
+      state.vector.properties.forceCircle = false
+      if (state.tool.current.name === "ellipse") {
         if (
           (vectorGui.selectedPoint.xKey || vectorGui.collidedPoint.xKey) &&
           vectorGui.selectedPoint.xKey !== "px1" &&
-          state.clicked
+          state.cursor.clicked
         ) {
           //while holding control point, readjust ellipse without having to move cursor.
           //TODO: (Medium Priority) update this functionality to have other radii go back to previous radius value when releasing shift
@@ -396,7 +396,7 @@ export function deactivateShortcut(keyCode) {
       //
       break
     case "KeyK":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         swatches.paletteMode = "select"
         renderPaletteToolsToDOM()
         renderPaletteToDOM()
@@ -439,7 +439,7 @@ export function deactivateShortcut(keyCode) {
       //
       break
     case "KeyX":
-      if (!state.clicked) {
+      if (!state.cursor.clicked) {
         swatches.paletteMode = "select"
         renderPaletteToolsToDOM()
         renderPaletteToDOM()
@@ -460,9 +460,9 @@ export function deactivateShortcut(keyCode) {
  * Set tool cursor. TODO: (Low Priority) move to utils file
  */
 function setToolCssCursor() {
-  if (state.tool.modes?.eraser) {
+  if (state.tool.current.modes?.eraser) {
     canvas.vectorGuiCVS.style.cursor = "none"
   } else {
-    canvas.vectorGuiCVS.style.cursor = state.tool.cursor
+    canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
   }
 }

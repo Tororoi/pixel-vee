@@ -12,7 +12,7 @@ import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
-import { rerouteVectorStepsAction, updateEllipseOffsets } from "./transform.js"
+import { rerouteVectorStepsAction, updateEllipseOffsets } from "./adjust.js"
 
 //======================================//
 //=== * * * Ellipse Controller * * * ===//
@@ -29,29 +29,29 @@ function ellipseSteps() {
   switch (canvas.pointerEvent) {
     case "pointerdown":
       //solidify end points
-      state.clickCounter += 1
-      if (state.clickCounter > 2) state.clickCounter = 1
-      switch (state.clickCounter) {
+      state.tool.clickCounter += 1
+      if (state.tool.clickCounter > 2) state.tool.clickCounter = 1
+      switch (state.tool.clickCounter) {
         case 1:
           //reset control points
           vectorGui.reset()
-          state.vectorProperties.type = state.tool.name
-          state.vectorProperties.px1 = state.cursorX
-          state.vectorProperties.py1 = state.cursorY
-          state.vectorProperties.forceCircle = true //force circle initially
+          state.vector.properties.type = state.tool.current.name
+          state.vector.properties.px1 = state.cursor.x
+          state.vector.properties.py1 = state.cursor.y
+          state.vector.properties.forceCircle = true //force circle initially
           break
         default:
         //do nothing
       }
-      if (state.clickCounter === 1) {
+      if (state.tool.clickCounter === 1) {
         //initialize circle with radius 15 by default?
-        state.vectorProperties.px2 = state.cursorX
-        state.vectorProperties.py2 = state.cursorY
-        let dxa = state.vectorProperties.px2 - state.vectorProperties.px1
-        let dya = state.vectorProperties.py2 - state.vectorProperties.py1
-        state.vectorProperties.radA = Math.sqrt(dxa * dxa + dya * dya)
+        state.vector.properties.px2 = state.cursor.x
+        state.vector.properties.py2 = state.cursor.y
+        let dxa = state.vector.properties.px2 - state.vector.properties.px1
+        let dya = state.vector.properties.py2 - state.vector.properties.py1
+        state.vector.properties.radA = Math.sqrt(dxa * dxa + dya * dya)
       }
-      updateEllipseOffsets(state.vectorProperties)
+      updateEllipseOffsets(state.vector.properties)
       //adjusting p3 should make findHalf on a perpendicular angle rotated -90 degrees, adjusting p1 should maintain offset, no subpixels
       // let calcAngle = angle - Math.PI / 2 // adjust p3
 
@@ -60,35 +60,35 @@ function ellipseSteps() {
       //for ellipse, passing the quadrant is also important to make offset go in the right direction
       //onscreen preview
       renderCanvas(canvas.currentLayer)
-      state.vectorProperties = {
-        ...state.vectorProperties,
+      state.vector.properties = {
+        ...state.vector.properties,
         ...calcEllipseConicsFromVertices(
-          state.vectorProperties.px1,
-          state.vectorProperties.py1,
-          state.vectorProperties.radA,
-          state.vectorProperties.radA,
-          state.vectorProperties.angle,
-          state.vectorProperties.x1Offset,
-          state.vectorProperties.y1Offset
+          state.vector.properties.px1,
+          state.vector.properties.py1,
+          state.vector.properties.radA,
+          state.vector.properties.radA,
+          state.vector.properties.angle,
+          state.vector.properties.x1Offset,
+          state.vector.properties.y1Offset
         ),
       }
       actionEllipse(
-        state.vectorProperties.weight,
-        state.vectorProperties.leftTangentX,
-        state.vectorProperties.leftTangentY,
-        state.vectorProperties.topTangentX,
-        state.vectorProperties.topTangentY,
-        state.vectorProperties.rightTangentX,
-        state.vectorProperties.rightTangentY,
-        state.vectorProperties.bottomTangentX,
-        state.vectorProperties.bottomTangentY,
-        state.boundaryBox,
+        state.vector.properties.weight,
+        state.vector.properties.leftTangentX,
+        state.vector.properties.leftTangentY,
+        state.vector.properties.topTangentX,
+        state.vector.properties.topTangentY,
+        state.vector.properties.rightTangentX,
+        state.vector.properties.rightTangentY,
+        state.vector.properties.bottomTangentX,
+        state.vector.properties.bottomTangentY,
+        state.selection.boundaryBox,
         swatches.primary.color,
         canvas.currentLayer,
-        state.tool.modes,
-        brushStamps[state.tool.brushType][state.tool.brushSize],
-        state.tool.brushSize,
-        state.maskSet,
+        state.tool.current.modes,
+        brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+        state.tool.current.brushSize,
+        state.selection.maskSet,
         null,
         true
       )
@@ -97,115 +97,115 @@ function ellipseSteps() {
       //draw line from origin point to current point onscreen
       //normalize pointermove to pixelgrid
       if (
-        state.cursorX + canvas.subPixelX !==
-          state.previousX + canvas.previousSubPixelX ||
-        state.cursorY + canvas.subPixelY !==
-          state.previousY + canvas.previousSubPixelY
+        state.cursor.x + canvas.subPixelX !==
+          state.cursor.prevX + canvas.previousSubPixelX ||
+        state.cursor.y + canvas.subPixelY !==
+          state.cursor.prevY + canvas.previousSubPixelY
       ) {
-        if (state.clickCounter === 1) {
-          state.vectorProperties.px2 = state.cursorX
-          state.vectorProperties.py2 = state.cursorY
-          let dxa = state.vectorProperties.px2 - state.vectorProperties.px1
-          let dya = state.vectorProperties.py2 - state.vectorProperties.py1
-          state.vectorProperties.radA = Math.sqrt(dxa * dxa + dya * dya)
+        if (state.tool.clickCounter === 1) {
+          state.vector.properties.px2 = state.cursor.x
+          state.vector.properties.py2 = state.cursor.y
+          let dxa = state.vector.properties.px2 - state.vector.properties.px1
+          let dya = state.vector.properties.py2 - state.vector.properties.py1
+          state.vector.properties.radA = Math.sqrt(dxa * dxa + dya * dya)
         }
-        updateEllipseOffsets(state.vectorProperties)
+        updateEllipseOffsets(state.vector.properties)
         //onscreen preview
         renderCanvas(canvas.currentLayer)
-        state.vectorProperties = {
-          ...state.vectorProperties,
+        state.vector.properties = {
+          ...state.vector.properties,
           ...calcEllipseConicsFromVertices(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.radA,
-            state.vectorProperties.radA,
-            state.vectorProperties.angle,
-            state.vectorProperties.x1Offset,
-            state.vectorProperties.y1Offset
+            state.vector.properties.px1,
+            state.vector.properties.py1,
+            state.vector.properties.radA,
+            state.vector.properties.radA,
+            state.vector.properties.angle,
+            state.vector.properties.x1Offset,
+            state.vector.properties.y1Offset
           ),
         }
         actionEllipse(
-          state.vectorProperties.weight,
-          state.vectorProperties.leftTangentX,
-          state.vectorProperties.leftTangentY,
-          state.vectorProperties.topTangentX,
-          state.vectorProperties.topTangentY,
-          state.vectorProperties.rightTangentX,
-          state.vectorProperties.rightTangentY,
-          state.vectorProperties.bottomTangentX,
-          state.vectorProperties.bottomTangentY,
-          state.boundaryBox,
+          state.vector.properties.weight,
+          state.vector.properties.leftTangentX,
+          state.vector.properties.leftTangentY,
+          state.vector.properties.topTangentX,
+          state.vector.properties.topTangentY,
+          state.vector.properties.rightTangentX,
+          state.vector.properties.rightTangentY,
+          state.vector.properties.bottomTangentX,
+          state.vector.properties.bottomTangentY,
+          state.selection.boundaryBox,
           swatches.primary.color,
           canvas.currentLayer,
-          state.tool.modes,
-          brushStamps[state.tool.brushType][state.tool.brushSize],
-          state.tool.brushSize,
-          state.maskSet,
+          state.tool.current.modes,
+          brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+          state.tool.current.brushSize,
+          state.selection.maskSet,
           null,
           true
         )
       }
       break
     case "pointerup":
-      if (state.clickCounter === 1) {
-        let dxa = state.vectorProperties.px2 - state.vectorProperties.px1
-        let dya = state.vectorProperties.py2 - state.vectorProperties.py1
-        state.vectorProperties.radA = Math.sqrt(dxa * dxa + dya * dya)
+      if (state.tool.clickCounter === 1) {
+        let dxa = state.vector.properties.px2 - state.vector.properties.px1
+        let dya = state.vector.properties.py2 - state.vector.properties.py1
+        state.vector.properties.radA = Math.sqrt(dxa * dxa + dya * dya)
 
         //set px3 at right angle on the circle
         let newVertex = getOpposingEllipseVertex(
-          state.vectorProperties.px1,
-          state.vectorProperties.py1,
-          state.vectorProperties.px2,
-          state.vectorProperties.py2,
+          state.vector.properties.px1,
+          state.vector.properties.py1,
+          state.vector.properties.px2,
+          state.vector.properties.py2,
           -Math.PI / 2,
-          state.vectorProperties.radA
+          state.vector.properties.radA
         )
-        state.vectorProperties.px3 = newVertex.x
-        state.vectorProperties.py3 = newVertex.y
+        state.vector.properties.px3 = newVertex.x
+        state.vector.properties.py3 = newVertex.y
         //set rb
-        let dxb = state.vectorProperties.px3 - state.vectorProperties.px1
-        let dyb = state.vectorProperties.py3 - state.vectorProperties.py1
-        state.vectorProperties.radB = Math.sqrt(dxb * dxb + dyb * dyb)
+        let dxb = state.vector.properties.px3 - state.vector.properties.px1
+        let dyb = state.vector.properties.py3 - state.vector.properties.py1
+        state.vector.properties.radB = Math.sqrt(dxb * dxb + dyb * dyb)
 
-        updateEllipseOffsets(state.vectorProperties)
-        state.vectorProperties = {
-          ...state.vectorProperties,
+        updateEllipseOffsets(state.vector.properties)
+        state.vector.properties = {
+          ...state.vector.properties,
           ...calcEllipseConicsFromVertices(
-            state.vectorProperties.px1,
-            state.vectorProperties.py1,
-            state.vectorProperties.radA,
-            state.vectorProperties.radB,
-            state.vectorProperties.angle,
-            state.vectorProperties.x1Offset,
-            state.vectorProperties.y1Offset
+            state.vector.properties.px1,
+            state.vector.properties.py1,
+            state.vector.properties.radA,
+            state.vector.properties.radB,
+            state.vector.properties.angle,
+            state.vector.properties.x1Offset,
+            state.vector.properties.y1Offset
           ),
         }
         actionEllipse(
-          state.vectorProperties.weight,
-          state.vectorProperties.leftTangentX,
-          state.vectorProperties.leftTangentY,
-          state.vectorProperties.topTangentX,
-          state.vectorProperties.topTangentY,
-          state.vectorProperties.rightTangentX,
-          state.vectorProperties.rightTangentY,
-          state.vectorProperties.bottomTangentX,
-          state.vectorProperties.bottomTangentY,
-          state.boundaryBox,
+          state.vector.properties.weight,
+          state.vector.properties.leftTangentX,
+          state.vector.properties.leftTangentY,
+          state.vector.properties.topTangentX,
+          state.vector.properties.topTangentY,
+          state.vector.properties.rightTangentX,
+          state.vector.properties.rightTangentY,
+          state.vector.properties.bottomTangentX,
+          state.vector.properties.bottomTangentY,
+          state.selection.boundaryBox,
           swatches.primary.color,
           canvas.currentLayer,
-          state.tool.modes,
-          brushStamps[state.tool.brushType][state.tool.brushSize],
-          state.tool.brushSize,
-          state.maskSet
+          state.tool.current.modes,
+          brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+          state.tool.current.brushSize,
+          state.selection.maskSet
         )
         let maskArray = coordArrayFromSet(
-          state.maskSet,
+          state.selection.maskSet,
           canvas.currentLayer.x,
           canvas.currentLayer.y
         )
         //correct boundary box for layer offset
-        const boundaryBox = { ...state.boundaryBox }
+        const boundaryBox = { ...state.selection.boundaryBox }
         if (boundaryBox.xMax !== null) {
           boundaryBox.xMin -= canvas.currentLayer.x
           boundaryBox.xMax -= canvas.currentLayer.x
@@ -213,13 +213,12 @@ function ellipseSteps() {
           boundaryBox.yMax -= canvas.currentLayer.y
         }
         //generate new unique key for vector
-        state.highestVectorKey += 1
-        let uniqueVectorKey = state.highestVectorKey
-        state.currentVectorIndex = uniqueVectorKey
+        const uniqueVectorKey = state.vector.nextKey()
+        state.vector.setCurrentIndex(uniqueVectorKey)
         enableActionsForSelection()
         //store control points for timeline
         addToTimeline({
-          tool: state.tool.name,
+          tool: state.tool.current.name,
           layer: canvas.currentLayer,
           properties: {
             maskArray,
@@ -228,39 +227,39 @@ function ellipseSteps() {
           },
         })
         //Store vector in state
-        state.vectors[uniqueVectorKey] = {
+        state.vector.all[uniqueVectorKey] = {
           index: uniqueVectorKey,
-          action: state.action,
+          action: state.timeline.currentAction,
           layer: canvas.currentLayer,
-          modes: { ...state.tool.modes },
+          modes: { ...state.tool.current.modes },
           color: { ...swatches.primary.color },
-          brushSize: state.tool.brushSize,
-          brushType: state.tool.brushType,
+          brushSize: state.tool.current.brushSize,
+          brushType: state.tool.current.brushType,
           vectorProperties: {
-            ...state.vectorProperties,
-            px1: state.vectorProperties.px1 - canvas.currentLayer.x,
-            py1: state.vectorProperties.py1 - canvas.currentLayer.y,
-            px2: state.vectorProperties.px2 - canvas.currentLayer.x,
-            py2: state.vectorProperties.py2 - canvas.currentLayer.y,
-            px3: state.vectorProperties.px3 - canvas.currentLayer.x,
-            py3: state.vectorProperties.py3 - canvas.currentLayer.y,
-            weight: state.vectorProperties.weight,
+            ...state.vector.properties,
+            px1: state.vector.properties.px1 - canvas.currentLayer.x,
+            py1: state.vector.properties.py1 - canvas.currentLayer.y,
+            px2: state.vector.properties.px2 - canvas.currentLayer.x,
+            py2: state.vector.properties.py2 - canvas.currentLayer.y,
+            px3: state.vector.properties.px3 - canvas.currentLayer.x,
+            py3: state.vector.properties.py3 - canvas.currentLayer.y,
+            weight: state.vector.properties.weight,
             leftTangentX:
-              state.vectorProperties.leftTangentX - canvas.currentLayer.x,
+              state.vector.properties.leftTangentX - canvas.currentLayer.x,
             leftTangentY:
-              state.vectorProperties.leftTangentY - canvas.currentLayer.y,
+              state.vector.properties.leftTangentY - canvas.currentLayer.y,
             topTangentX:
-              state.vectorProperties.topTangentX - canvas.currentLayer.x,
+              state.vector.properties.topTangentX - canvas.currentLayer.x,
             topTangentY:
-              state.vectorProperties.topTangentY - canvas.currentLayer.y,
+              state.vector.properties.topTangentY - canvas.currentLayer.y,
             rightTangentX:
-              state.vectorProperties.rightTangentX - canvas.currentLayer.x,
+              state.vector.properties.rightTangentX - canvas.currentLayer.x,
             rightTangentY:
-              state.vectorProperties.rightTangentY - canvas.currentLayer.y,
+              state.vector.properties.rightTangentY - canvas.currentLayer.y,
             bottomTangentX:
-              state.vectorProperties.bottomTangentX - canvas.currentLayer.x,
+              state.vector.properties.bottomTangentX - canvas.currentLayer.x,
             bottomTangentY:
-              state.vectorProperties.bottomTangentY - canvas.currentLayer.y,
+              state.vector.properties.bottomTangentY - canvas.currentLayer.y,
           },
           // maskArray,
           // boundaryBox,

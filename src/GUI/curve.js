@@ -1,6 +1,10 @@
-import { canvas } from "../Context/canvas.js"
-import { vectorGui } from "./vector.js"
-import { drawControlPointHandle } from "../utils/guiHelpers.js"
+import { canvas } from '../Context/canvas.js'
+import { vectorGui } from './vector.js'
+import {
+  drawControlPointHandle,
+  getGuiLineWidth,
+  doubleStroke,
+} from '../utils/guiHelpers.js'
 
 /**
  * @param {object} vectorProperties - The properties of the vector
@@ -10,32 +14,21 @@ export function renderCurveVector(vectorProperties, vector) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
   const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
   const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
-  // Setting of context attributes.
-  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
-  let circleRadius = 8 * lineWidth
-  canvas.vectorGuiCTX.lineWidth = lineWidth
-  canvas.vectorGuiCTX.strokeStyle = "white"
-  canvas.vectorGuiCTX.fillStyle = "white"
-
-  canvas.vectorGuiCTX.beginPath()
-  canvas.vectorGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
+  const lineWidth = getGuiLineWidth()
+  let circleRadius = 20 * lineWidth
 
   if (Number.isInteger(px4)) {
-    canvas.vectorGuiCTX.beginPath()
-    canvas.vectorGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
     drawControlPointHandle(canvas, xOffset, yOffset, px1, py1, px3, py3)
     drawControlPointHandle(canvas, xOffset, yOffset, px2, py2, px4, py4)
   } else if (Number.isInteger(px3)) {
-    canvas.vectorGuiCTX.beginPath()
-    canvas.vectorGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
     drawControlPointHandle(canvas, xOffset, yOffset, px1, py1, px3, py3)
   }
 
   let pointsKeys = [
-    { x: "px1", y: "py1" },
-    { x: "px2", y: "py2" },
-    { x: "px3", y: "py3" },
-    { x: "px4", y: "py4" },
+    { x: 'px1', y: 'py1' },
+    { x: 'px2', y: 'py2' },
+    { x: 'px3', y: 'py3' },
+    { x: 'px4', y: 'py4' },
   ]
 
   if (!vector) {
@@ -43,23 +36,17 @@ export function renderCurveVector(vectorProperties, vector) {
       vectorProperties,
       pointsKeys,
       circleRadius,
-      false
+      false,
     )
   }
 
-  // Stroke non-filled lines
-  canvas.vectorGuiCTX.stroke()
-
-  canvas.vectorGuiCTX.beginPath()
   vectorGui.drawControlPoints(
     vectorProperties,
     pointsKeys,
-    circleRadius / 2,
+    circleRadius / 3,
     true, // modify
-    vector
+    vector,
   )
-  // Fill points
-  canvas.vectorGuiCTX.fill()
 }
 
 /**
@@ -70,10 +57,7 @@ export function renderCurvePath(vectorProperties, vector) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
   const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
   const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
-  // Setting of context attributes.
-  let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
-  canvas.vectorGuiCTX.lineWidth = lineWidth
-  canvas.vectorGuiCTX.strokeStyle = "white"
+  const lineWidth = getGuiLineWidth()
 
   canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
@@ -85,22 +69,19 @@ export function renderCurvePath(vectorProperties, vector) {
       xOffset + px4 + 0.5,
       yOffset + py4 + 0.5,
       xOffset + px2 + 0.5,
-      yOffset + py2 + 0.5
+      yOffset + py2 + 0.5,
     )
   } else if (Number.isInteger(px3)) {
     canvas.vectorGuiCTX.quadraticCurveTo(
       xOffset + px3 + 0.5,
       yOffset + py3 + 0.5,
       xOffset + px2 + 0.5,
-      yOffset + py2 + 0.5
+      yOffset + py2 + 0.5,
     )
   } else if (Number.isInteger(px2)) {
     canvas.vectorGuiCTX.lineTo(xOffset + px2 + 0.5, yOffset + py2 + 0.5)
+  } else {
+    return
   }
-  // Stroke non-filled lines
-  // canvas.vectorGuiCTX.stroke()
-  // canvas.vectorGuiCTX.setLineDash([])
-  // canvas.vectorGuiCTX.lineWidth = lineWidth - lineWidth / 8
-  // canvas.vectorGuiCTX.strokeStyle = "black"
-  canvas.vectorGuiCTX.stroke()
+  doubleStroke(canvas.vectorGuiCTX, lineWidth, 'black', 'white')
 }

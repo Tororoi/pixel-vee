@@ -13,7 +13,7 @@ import { enableActionsForClipboard } from "../DOM/disableDomElements.js"
  * Not dependent on pointer events
  */
 export function copySelectedPixels() {
-  const { xMin, yMin, xMax, yMax } = state.boundaryBox
+  const { xMin, yMin, xMax, yMax } = state.selection.boundaryBox
   const tempCanvas = document.createElement("canvas")
   tempCanvas.width = xMax - xMin
   tempCanvas.height = yMax - yMin
@@ -31,18 +31,18 @@ export function copySelectedPixels() {
     tempCanvas.width,
     tempCanvas.height
   )
-  state.selectClipboard.selectProperties = { ...state.selectProperties }
-  state.selectClipboard.boundaryBox = {
-    ...state.boundaryBox,
+  state.clipboard.select.selectProperties = { ...state.selection.properties }
+  state.clipboard.select.boundaryBox = {
+    ...state.selection.boundaryBox,
   }
-  state.selectClipboard.canvas = tempCanvas
-  state.selectClipboard.imageData = canvas.currentLayer.ctx.getImageData(
+  state.clipboard.select.canvas = tempCanvas
+  state.clipboard.select.imageData = canvas.currentLayer.ctx.getImageData(
     xMin,
     yMin,
     xMax - xMin,
     yMax - yMin
   )
-  state.selectClipboard.vectors = {}
+  state.clipboard.select.vectors = {}
   enableActionsForClipboard()
 }
 
@@ -51,27 +51,27 @@ export function copySelectedPixels() {
  */
 export function copySelectedVectors() {
   let selectedVectors = {}
-  state.selectedVectorIndicesSet.forEach((vectorIndex) => {
-    let vector = state.vectors[vectorIndex]
+  state.vector.selectedIndices.forEach((vectorIndex) => {
+    let vector = state.vector.all[vectorIndex]
     selectedVectors[vectorIndex] = {
       ...vector,
     }
   })
-  if (state.selectedVectorIndicesSet.size === 0) {
-    let currentVector = state.vectors[state.currentVectorIndex]
-    selectedVectors[state.currentVectorIndex] = {
+  if (state.vector.selectedIndices.size === 0) {
+    let currentVector = state.vector.all[state.vector.currentIndex]
+    selectedVectors[state.vector.currentIndex] = {
       ...currentVector,
     }
   }
-  state.selectClipboard.selectProperties = { ...state.selectProperties }
-  state.selectClipboard.boundaryBox = {
+  state.clipboard.select.selectProperties = { ...state.selection.properties }
+  state.clipboard.select.boundaryBox = {
     xMin: null,
     yMin: null,
     xMax: null,
     yMax: null,
   }
-  state.selectClipboard.canvas = null
-  state.selectClipboard.vectors = selectedVectors
+  state.clipboard.select.canvas = null
+  state.clipboard.select.vectors = selectedVectors
   enableActionsForClipboard()
 }
 
@@ -84,7 +84,7 @@ export function cutSelectedPixels(copyToClipboard) {
   if (copyToClipboard) {
     copySelectedPixels()
   }
-  const { xMin, yMin, xMax, yMax } = state.boundaryBox
+  const { xMin, yMin, xMax, yMax } = state.selection.boundaryBox
   //Clear boundaryBox area
   canvas.currentLayer.ctx.clearRect(xMin, yMin, xMax - xMin, yMax - yMin)
 }
@@ -144,12 +144,12 @@ export function pasteSelectedPixels(clipboard, layer, offsetX, offsetY) {
   })
 
   // if raster paste, adjust selectProperties and boundaryBox
-  state.selectProperties = { ...clipboard.selectProperties }
-  state.selectProperties.px1 += offsetX
-  state.selectProperties.px2 += offsetX
-  state.selectProperties.py1 += offsetY
-  state.selectProperties.py2 += offsetY
-  state.setBoundaryBox(state.selectProperties)
+  state.selection.properties = { ...clipboard.selectProperties }
+  state.selection.properties.px1 += offsetX
+  state.selection.properties.px2 += offsetX
+  state.selection.properties.py1 += offsetY
+  state.selection.properties.py2 += offsetY
+  state.selection.setBoundaryBox(state.selection.properties)
   renderPaste(clipboard, canvas.tempLayer, offsetX, offsetY)
   //TODO: (Medium Priority) include transform control points for resizing, rotating, etc. (not currently implemented)
   vectorGui.render()

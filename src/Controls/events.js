@@ -1,15 +1,15 @@
 //Import order is important. 1. DOM initialization, 2. state managers
-import { dom } from "../Context/dom.js"
-import { keys } from "../Shortcuts/keys.js"
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { vectorGui } from "../GUI/vector.js"
-import { renderCursor } from "../GUI/cursor.js"
-import { activateShortcut, deactivateShortcut } from "./shortcuts.js"
-import { renderCanvas } from "../Canvas/render.js"
-import { renderVectorsToDOM } from "../DOM/render.js"
-import { actionZoom } from "../Actions/untrackedActions.js"
-import { throttle } from "../utils/eventHelpers.js"
+import { dom } from '../Context/dom.js'
+import { keys } from '../Shortcuts/keys.js'
+import { state } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { vectorGui } from '../GUI/vector.js'
+import { renderCursor } from '../GUI/cursor.js'
+import { activateShortcut, deactivateShortcut } from './shortcuts.js'
+import { renderCanvas } from '../Canvas/render.js'
+import { renderVectorsToDOM } from '../DOM/render.js'
+import { actionZoom } from '../Actions/untrackedActions.js'
+import { throttle } from '../utils/eventHelpers.js'
 
 /**
  * Set global coordinates
@@ -17,23 +17,20 @@ import { throttle } from "../utils/eventHelpers.js"
  * @param {UIEvent} e - PointerEvent, WheelEvent
  */
 const setCoordinates = (e) => {
-  const x = Math.floor(e.layerX)
-  const y = Math.floor(e.layerY)
-  const fidelity = canvas.zoom / 16
-  canvas.subPixelX = Math.floor(
-    (x - Math.floor(x / canvas.zoom) * canvas.zoom) / fidelity
-  )
-  canvas.subPixelY = Math.floor(
-    (y - Math.floor(y / canvas.zoom) * canvas.zoom) / fidelity
-  )
-  state.cursorWithCanvasOffsetX = Math.floor(x / canvas.zoom)
-  state.cursorWithCanvasOffsetY = Math.floor(y / canvas.zoom)
-  state.cursorX = Math.round(
-    state.cursorWithCanvasOffsetX - canvas.previousXOffset
-  )
-  state.cursorY = Math.round(
-    state.cursorWithCanvasOffsetY - canvas.previousYOffset
-  )
+  const x = Math.floor(e.offsetX)
+  const y = Math.floor(e.offsetY)
+  const zoom = canvas.zoom
+  const xOverZoom = Math.floor(x / zoom)
+  const yOverZoom = Math.floor(y / zoom)
+  state.cursor.withOffsetX = xOverZoom
+  state.cursor.withOffsetY = yOverZoom
+  state.cursor.x = Math.round(xOverZoom - canvas.previousXOffset)
+  state.cursor.y = Math.round(yOverZoom - canvas.previousYOffset)
+  if (state.tool.current.options.useSubpixels?.active) {
+    const fidelity = zoom / 16
+    canvas.subPixelX = Math.floor((x - xOverZoom * zoom) / fidelity)
+    canvas.subPixelY = Math.floor((y - yOverZoom * zoom) / fidelity)
+  }
 }
 
 //======================================//
@@ -50,7 +47,7 @@ function handleKeyDown(e) {
   //Prevent default reload behavior (KeyR)
   //Prevent default save behavior (KeyS)
   if (
-    ["KeyD", "KeyF", "KeyR", "KeyS"].includes(e.code) &&
+    ['KeyD', 'KeyF', 'KeyR', 'KeyS'].includes(e.code) &&
     (keys.MetaLeft || keys.MetaRight)
   ) {
     e.preventDefault()
@@ -61,12 +58,12 @@ function handleKeyDown(e) {
   }
   //if entering info on text input, don't activate shortcuts
   if (
-    document.activeElement.tagName === "INPUT" &&
-    document.activeElement.type === "text"
+    document.activeElement.tagName === 'INPUT' &&
+    document.activeElement.type === 'text'
   ) {
     return
   }
-  if (state.shortcuts) {
+  if (state.ui.shortcuts) {
     keys[e.code] = true //set active key globally
     activateShortcut(e.code)
   }
@@ -91,22 +88,22 @@ function handleWheel(e) {
   if (delta < 0) {
     z = 0.5
     //get target coordinates
-    let zoomedX = state.cursorWithCanvasOffsetX / z
-    let zoomedY = state.cursorWithCanvasOffsetY / z
+    let zoomedX = state.cursor.withOffsetX / z
+    let zoomedY = state.cursor.withOffsetY / z
     //offset by cursor coords
-    let nox = zoomedX - state.cursorX
-    let noy = zoomedY - state.cursorY
+    let nox = zoomedX - state.cursor.x
+    let noy = zoomedY - state.cursor.y
     if (canvas.zoom > 0.5) {
       actionZoom(z, nox, noy)
     }
   } else if (delta > 0) {
     z = 2
     //get target coordinates
-    let zoomedX = state.cursorWithCanvasOffsetX / z
-    let zoomedY = state.cursorWithCanvasOffsetY / z
+    let zoomedX = state.cursor.withOffsetX / z
+    let zoomedY = state.cursor.withOffsetY / z
     //offset by half of canvas
-    let nox = zoomedX - state.cursorX
-    let noy = zoomedY - state.cursorY
+    let nox = zoomedX - state.cursor.x
+    let noy = zoomedY - state.cursor.y
     if (canvas.zoom < 32) {
       actionZoom(z, nox, noy)
     }
@@ -123,15 +120,15 @@ function handleWheel(e) {
 function handlePointerDown(e) {
   //reset media type, chrome dev tools niche use or computers that have touchscreen capabilities
   e.target.setPointerCapture(e.pointerId)
-  canvas.pointerEvent = "pointerdown"
-  state.clicked = true
-  if (state.clickDisabled) {
+  canvas.pointerEvent = 'pointerdown'
+  state.cursor.clicked = true
+  if (state.cursor.clickDisabled) {
     return
   }
-  canvas.vectorGuiCVS.style.cursor = state.tool.activeCursor
+  canvas.vectorGuiCVS.style.cursor = state.tool.current.activeCursor
   setCoordinates(e)
-  if (state.touch) {
-    vectorGui.render() // For tablets, vectors must be rendered before running state.tool.fn in order to check control points collision logic
+  if (state.tool.touch) {
+    vectorGui.render() // For tablets, vectors must be rendered before running state.tool.current.fn in order to check control points collision logic
   }
   renderCanvas(canvas.currentLayer)
   //if drawing on hidden layer, flash hide btn
@@ -139,21 +136,21 @@ function handlePointerDown(e) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
       if (dom.layersContainer.children[i].layerObj === canvas.currentLayer) {
         dom.layersContainer.children[i]
-          .querySelector(".hide")
-          .classList.add("warning")
+          .querySelector('.hide')
+          .classList.add('warning')
       }
     }
   }
   //run selected tool step function
-  state.tool.fn()
+  state.tool.current.fn()
   // save last point
-  state.previousX = state.cursorX
-  state.previousY = state.cursorY
+  state.cursor.prevX = state.cursor.x
+  state.cursor.prevY = state.cursor.y
   //Re-render GUI
   vectorGui.render()
   if (
-    (state.tool.name === "brush" && state.tool.modes?.eraser) ||
-    state.tool.name === "eyedropper"
+    (state.tool.current.name === 'brush' && state.tool.current.modes?.eraser) ||
+    state.tool.current.name === 'eyedropper'
   ) {
     renderCursor()
   }
@@ -163,116 +160,139 @@ function handlePointerDown(e) {
  * @param {PointerEvent} e - The pointermove event
  */
 function handlePointerMove(e) {
-  if (state.clickDisabled && state.clicked) {
+  if (state.cursor.clickDisabled && state.cursor.clicked) {
     return
   }
-  canvas.pointerEvent = "pointermove"
-  state.clickDisabled = false
+  canvas.pointerEvent = 'pointermove'
+  state.cursor.clickDisabled = false
   //currently only square dimensions work
   canvas.zoomAtLastDraw = canvas.zoom //* */
-  //use requestAnimationFrame for smoother rendering. Must be called before setting coordinates or else line may be broken unintentionally
-  window.requestAnimationFrame(() => {
-    //coords
-    setCoordinates(e)
-    let cursorMoved =
-      state.previousX !== state.cursorX || state.previousY !== state.cursorY
-    if (state.tool.options.useSubpixels?.active && !cursorMoved) {
-      cursorMoved =
-        canvas.previousSubPixelX !== canvas.subPixelX ||
-        canvas.previousSubPixelY !== canvas.subPixelY
-    }
-    if (cursorMoved) {
+
+  // Process all coalesced events for smoother strokes at high mouse speed.
+  // Drawing (pixel writes to offscreen canvas) is synchronous — no RAF deferral
+  // needed here because scheduleRender() inside each tool fn() already batches
+  // the offscreen→onscreen blit via its own RAF.
+  const events = e.getCoalescedEvents?.() ?? [e]
+  // Uncomment to use predicted events
+  // const coalesced = e.getCoalescedEvents?.() ?? [e]
+  // const predicted = state.cursor.clicked ? (e.getPredictedEvents?.() ?? []) : []
+  // const events = [...coalesced, ...predicted]
+  let cursorMoved = false
+
+  for (const evt of events) {
+    setCoordinates(evt)
+    const moved =
+      state.cursor.prevX !== state.cursor.x ||
+      state.cursor.prevY !== state.cursor.y
+    const subpixelMoved =
+      state.tool.current.options.useSubpixels?.active &&
+      (canvas.previousSubPixelX !== canvas.subPixelX ||
+        canvas.previousSubPixelY !== canvas.subPixelY)
+
+    if (moved || subpixelMoved) {
+      cursorMoved = true
       if (
-        state.clicked
+        state.cursor.clicked
         // ||
-        // ((state.tool.name === "quadCurve" ||
-        //   state.tool.name === "cubicCurve" ||
-        //   state.tool.name === "fill") &&
-        //   state.clickCounter > 0)
+        // ((state.tool.current.name === "quadCurve" ||
+        //   state.tool.current.name === "cubicCurve" ||
+        //   state.tool.current.name === "fill") &&
+        //   state.tool.clickCounter > 0)
       ) {
         //run selected tool step function
-        state.tool.fn()
-        vectorGui.render()
-        if (
-          (state.tool.name === "brush" && state.tool.modes?.eraser) ||
-          state.tool.name === "eyedropper"
-        ) {
-          renderCursor()
-        }
-      } else {
-        //no active tool, just render cursor
-        vectorGui.render()
-        if (
-          !(
-            ["quadCurve", "cubicCurve"].includes(state.tool.name) &&
-            state.clickCounter > 0
-          )
-        ) {
-          renderCursor()
-        }
+        state.tool.current.fn()
+      }
+      // save last point
+      state.cursor.prevX = state.cursor.x
+      state.cursor.prevY = state.cursor.y
+      canvas.previousSubPixelX = canvas.subPixelX
+      canvas.previousSubPixelY = canvas.subPixelY
+    }
+  }
+
+  if (cursorMoved) {
+    vectorGui.render()
+    if (state.cursor.clicked) {
+      if (
+        (state.tool.current.name === 'brush' &&
+          state.tool.current.modes?.eraser) ||
+        state.tool.current.name === 'eyedropper'
+      ) {
+        renderCursor()
+      }
+    } else {
+      //no active tool, just render cursor
+      if (
+        !(
+          ['quadCurve', 'cubicCurve'].includes(state.tool.current.name) &&
+          state.tool.clickCounter > 0
+        )
+      ) {
+        renderCursor()
       }
     }
-    // save last point
-    state.previousX = state.cursorX
-    state.previousY = state.cursorY
-    canvas.previousSubPixelX = canvas.subPixelX
-    canvas.previousSubPixelY = canvas.subPixelY
-  })
+  }
 }
 
 /**
  * @param {PointerEvent} e - The pointerup event
  */
 function handlePointerUp(e) {
-  canvas.pointerEvent = "pointerup"
-  if (state.clickDisabled || !state.clicked) {
+  canvas.pointerEvent = 'pointerup'
+  if (state.cursor.clickDisabled || !state.cursor.clicked) {
     return
   }
-  state.clicked = false
-  canvas.vectorGuiCVS.style.cursor = state.tool.cursor
+  state.cursor.clicked = false
+  canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
   setCoordinates(e)
   //if drawing on hidden layer, stop flashing hide btn
   if (canvas.currentLayer.hidden) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
       if (dom.layersContainer.children[i].layerObj === canvas.currentLayer) {
         dom.layersContainer.children[i]
-          .querySelector(".hide")
-          .classList.remove("warning")
+          .querySelector('.hide')
+          .classList.remove('warning')
       }
     }
   }
 
   //run selected tool step function
-  state.tool.fn()
+  state.tool.current.fn()
   //reset action and render vectors
-  if (state.action) {
+  if (state.timeline.currentAction) {
     if (
-      ["fill", "line", "quadCurve", "cubicCurve", "ellipse"].includes(
-        state.tool.name
+      ['fill', 'line', 'quadCurve', 'cubicCurve', 'ellipse'].includes(
+        state.tool.current.name,
       )
     ) {
       renderVectorsToDOM()
     }
 
-    state.pointsSet = null
-    state.seenPixelsSet = null
-    state.points = []
+    state.selection.pointsSet = null
+    state.selection.seenPixelsSet = null
+    state.timeline.clearPoints()
     //Reset redostack
     state.clearRedoStack()
   }
   //Deactivate pending shortcuts
-  if (state.tool.name !== dom.toolBtn.id) {
-    if (!keys.AltLeft && !keys.AltRight && state.tool.name === "eyedropper") {
-      deactivateShortcut("AltLeft")
+  if (state.tool.current.name !== dom.toolBtn.id) {
+    if (
+      !keys.AltLeft &&
+      !keys.AltRight &&
+      state.tool.current.name === 'eyedropper'
+    ) {
+      deactivateShortcut('AltLeft')
     }
-    if (!keys.Space && state.tool.name === "grab") {
-      deactivateShortcut("Space")
+    if (!keys.Space && state.tool.current.name === 'grab') {
+      deactivateShortcut('Space')
     }
   }
-  canvas.pointerEvent = "none"
+  canvas.pointerEvent = 'none'
   if (!e.targetTouches) {
     vectorGui.render()
-    if (["brush", "colorMask", "eyedropper"].includes(state.tool.name)) {
+    if (
+      ['brush', 'colorMask', 'eyedropper'].includes(state.tool.current.name)
+    ) {
       renderCursor()
     }
   }
@@ -284,10 +304,10 @@ function handlePointerUp(e) {
 function handlePointerOut(e) {
   //TODO: (Low Priority) if touchscreen, need to handle differently. Currently cannot reach next code since clicked will be false.
   //Only purpose is to rerender with multi step tools such as curve when moving out or in the case of touch, lifting finger
-  if (!state.touch && state.clickCounter === 0) {
+  if (!state.tool.touch && state.tool.clickCounter === 0) {
     renderCanvas(canvas.currentLayer)
     vectorGui.render()
-    canvas.pointerEvent = "none"
+    canvas.pointerEvent = 'none'
   }
 }
 
@@ -308,7 +328,7 @@ function handlePointerOut(e) {
  * //TODO: (Medium Priority) Prevent default pinch zoom behavior and replace it with a custom pinch zoom on the canvas only
  */
 function handleTouchStart(e) {
-  state.touch = true
+  state.tool.touch = true
 }
 
 /**
@@ -316,8 +336,8 @@ function handleTouchStart(e) {
  * @param {MouseEvent} e - The mousedown event
  */
 function handleMouseDown(e) {
-  if (e.type === "mousedown") {
-    // state.touch = false // NOTE: this also triggers when in tablet mode in chrome. Comment this out while testing
+  if (e.type === 'mousedown') {
+    // state.tool.touch = false // NOTE: this also triggers when in tablet mode in chrome. Comment this out while testing
   }
 }
 
@@ -326,20 +346,20 @@ function handleMouseDown(e) {
 //===================================//
 
 //Shortcuts
-document.addEventListener("keydown", handleKeyDown)
-document.addEventListener("keyup", handleKeyUp)
+document.addEventListener('keydown', handleKeyDown)
+document.addEventListener('keyup', handleKeyUp)
 const throttledHandleWheel = throttle(handleWheel, 100)
-canvas.vectorGuiCVS.addEventListener("wheel", throttledHandleWheel, {
+canvas.vectorGuiCVS.addEventListener('wheel', throttledHandleWheel, {
   passive: true,
 })
 
 //Pointer
-canvas.vectorGuiCVS.addEventListener("pointermove", handlePointerMove)
-canvas.vectorGuiCVS.addEventListener("pointerdown", handlePointerDown)
-canvas.vectorGuiCVS.addEventListener("pointerup", handlePointerUp)
-canvas.vectorGuiCVS.addEventListener("pointerout", handlePointerOut) //NOTE: Deprecated? May need to rewrite just for multistep tools such as curve that can be in use while pointer is up
+canvas.vectorGuiCVS.addEventListener('pointermove', handlePointerMove)
+canvas.vectorGuiCVS.addEventListener('pointerdown', handlePointerDown)
+canvas.vectorGuiCVS.addEventListener('pointerup', handlePointerUp)
+canvas.vectorGuiCVS.addEventListener('pointerout', handlePointerOut) //NOTE: Deprecated? May need to rewrite just for multistep tools such as curve that can be in use while pointer is up
 
-canvas.vectorGuiCVS.addEventListener("touchstart", handleTouchStart, {
+canvas.vectorGuiCVS.addEventListener('touchstart', handleTouchStart, {
   passive: true,
 })
-canvas.vectorGuiCVS.addEventListener("mousedown", handleMouseDown)
+canvas.vectorGuiCVS.addEventListener('mousedown', handleMouseDown)

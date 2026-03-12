@@ -15,15 +15,15 @@ import { addToTimeline } from "./undoRedo.js"
  * @param {object} moddedVector - The vector action that was modified
  */
 export function modifyVectorAction(moddedVector) {
-  //loop through the object state.vectorsSavedProperties and create an array of objects with the required properties
+  //loop through the object state.vector.savedProperties and create an array of objects with the required properties
   let processedActions = []
 
-  for (let vectorIndex in state.vectorsSavedProperties) {
+  for (let vectorIndex in state.vector.savedProperties) {
     // Extract the saved properties
-    let fromProperties = { ...state.vectorsSavedProperties[vectorIndex] }
+    let fromProperties = { ...state.vector.savedProperties[vectorIndex] }
 
     // Extract the new properties
-    let vector = state.vectors[vectorIndex]
+    let vector = state.vector.all[vectorIndex]
     let toProperties = {
       ...vector.vectorProperties,
     }
@@ -37,9 +37,9 @@ export function modifyVectorAction(moddedVector) {
       to: toProperties,
     })
   }
-  state.vectorsSavedProperties = {}
-  state.activeIndexes = []
-  state.savedBetweenActionImages = []
+  state.vector.savedProperties = {}
+  state.timeline.clearActiveIndexes()
+  state.timeline.clearSavedBetweenActionImages()
   addToTimeline({
     tool: tools.modify.name,
     layer: moddedVector.layer,
@@ -120,10 +120,10 @@ export function changeActionVectorMode(moddedVector, oldModes, newModes) {
  * @param {object} layer - The layer with actions to be modified
  */
 export function actionClear(layer) {
-  let upToIndex = state.undoStack.length - 1
+  let upToIndex = state.timeline.undoStack.length - 1
   let i = 0
   //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
-  state.undoStack.forEach((action) => {
+  state.timeline.undoStack.forEach((action) => {
     if (i > upToIndex) {
       return
     }
@@ -132,7 +132,7 @@ export function actionClear(layer) {
       action.removed = true
       if (action.vectorIndices) {
         action.vectorIndices.forEach((vectorIndex) => {
-          state.vectors[vectorIndex].removed = true
+          state.vector.all[vectorIndex].removed = true
         })
       }
       //TODO: (Low Priority) Should group actions also have each sub action removed set to true?

@@ -38,17 +38,17 @@ export function switchTool(toolName = null, toolBtn = null) {
       //get new button and select it
       dom.toolBtn = targetToolBtn
       dom.toolBtn.classList.add("selected")
-      state.tool = tools[dom.toolBtn.id]
+      state.tool.current = tools[dom.toolBtn.id]
       renderCanvas(canvas.currentLayer)
       //update options
       renderBrushStampToDOM()
-      dom.brushSlider.value = state.tool.brushSize
-      dom.brushSlider.disabled = state.tool.brushDisabled
+      dom.brushSlider.value = state.tool.current.brushSize
+      dom.brushSlider.disabled = state.tool.current.brushDisabled
       //update cursor
-      if (state.tool.modes?.eraser) {
+      if (state.tool.current.modes?.eraser) {
         canvas.vectorGuiCVS.style.cursor = "none"
       } else {
-        canvas.vectorGuiCVS.style.cursor = state.tool.cursor
+        canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
       }
       //render menu options
       renderToolOptionsToDOM()
@@ -63,7 +63,7 @@ export function switchTool(toolName = null, toolBtn = null) {
           "move",
         ].includes(tools[targetToolBtn.id].name)
       ) {
-        if (state.selectedVectorIndicesSet.size > 0) {
+        if (state.vector.selectedIndices.size > 0) {
           actionDeselect()
         }
       }
@@ -85,22 +85,22 @@ export function switchTool(toolName = null, toolBtn = null) {
 export function toggleMode(modeName = null, modeBtn = null) {
   const targetModeBtn = modeBtn || document.querySelector(`#${modeName}`)
   if (targetModeBtn) {
-    if (state.tool.modes[targetModeBtn.id] !== undefined) {
+    if (state.tool.current.modes[targetModeBtn.id] !== undefined) {
       if (targetModeBtn.classList.contains("selected")) {
-        state.tool.modes[targetModeBtn.id] = false
+        state.tool.current.modes[targetModeBtn.id] = false
       } else {
-        state.tool.modes[targetModeBtn.id] = true
+        state.tool.current.modes[targetModeBtn.id] = true
         //eraser and inject modes cannot be selected at the same time
-        if (targetModeBtn.id === "eraser" && state.tool.modes?.inject) {
-          state.tool.modes.inject = false
-        } else if (targetModeBtn.id === "inject" && state.tool.modes?.eraser) {
-          state.tool.modes.eraser = false
+        if (targetModeBtn.id === "eraser" && state.tool.current.modes?.inject) {
+          state.tool.current.modes.inject = false
+        } else if (targetModeBtn.id === "inject" && state.tool.current.modes?.eraser) {
+          state.tool.current.modes.eraser = false
         }
       }
-      if (state.tool.modes?.eraser) {
+      if (state.tool.current.modes?.eraser) {
         canvas.vectorGuiCVS.style.cursor = "none"
       } else {
-        canvas.vectorGuiCVS.style.cursor = state.tool.cursor
+        canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
       }
       renderBrushModesToDOM()
       renderCursor()

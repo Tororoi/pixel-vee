@@ -20,39 +20,39 @@ import { dom } from "../Context/dom.js"
  * TODO: (Medium Priority) Allow selecting all vectors within box by checking if control points fall within selection area
  */
 function selectSteps() {
-  if (vectorGui.selectedCollisionPresent && state.clickCounter === 0) {
+  if (vectorGui.selectedCollisionPresent && state.tool.clickCounter === 0) {
     adjustSelectSteps()
     return
   }
   switch (canvas.pointerEvent) {
     case "pointerdown":
-      state.clickCounter += 1
+      state.tool.clickCounter += 1
       //reset selected vectors
-      state.selectedVectorIndicesSet.clear()
+      state.vector.clearSelected()
       dom.vectorTransformUIContainer.style.display = "none"
       renderVectorsToDOM()
       //set initial properties
-      state.selectProperties.px1 = state.cursorX
-      state.selectProperties.py1 = state.cursorY
-      state.selectProperties.px2 = state.cursorX
-      state.selectProperties.py2 = state.cursorY
-      state.setBoundaryBox(state.selectProperties)
+      state.selection.properties.px1 = state.cursor.x
+      state.selection.properties.py1 = state.cursor.y
+      state.selection.properties.px2 = state.cursor.x
+      state.selection.properties.py2 = state.cursor.y
+      state.selection.setBoundaryBox(state.selection.properties)
       break
     case "pointermove":
-      state.selectProperties.px2 = state.cursorX
-      state.selectProperties.py2 = state.cursorY
-      state.setBoundaryBox(state.selectProperties)
+      state.selection.properties.px2 = state.cursor.x
+      state.selection.properties.py2 = state.cursor.y
+      state.selection.setBoundaryBox(state.selection.properties)
       break
     case "pointerup":
-      state.clickCounter = 0
-      state.normalizeSelectProperties()
-      state.setBoundaryBox(state.selectProperties)
+      state.tool.clickCounter = 0
+      state.selection.normalize()
+      state.selection.setBoundaryBox(state.selection.properties)
       addToTimeline({
-        tool: state.tool.name,
+        tool: state.tool.current.name,
         layer: canvas.currentLayer,
         properties: {
           deselect: false,
-          // selectProperties: { ...state.selectProperties },
+          // selectProperties: { ...state.selection.properties },
           // selectedVectorIndices: [],
         },
       })
@@ -77,8 +77,8 @@ function adjustSelectSteps() {
         yKey: vectorGui.collidedPoint.yKey,
       }
       //Ensure moving the selection area has the correct origin point (important for mobile, doesn't affect desktop)
-      state.previousX = state.cursorX
-      state.previousY = state.cursorY
+      state.cursor.prevX = state.cursor.x
+      state.cursor.prevY = state.cursor.y
       adjustBoundaries()
       break
     case "pointermove":
@@ -87,14 +87,14 @@ function adjustSelectSteps() {
       }
       break
     case "pointerup":
-      state.normalizeSelectProperties()
-      state.setBoundaryBox(state.selectProperties)
+      state.selection.normalize()
+      state.selection.setBoundaryBox(state.selection.properties)
       addToTimeline({
-        tool: state.tool.name,
+        tool: state.tool.current.name,
         layer: canvas.currentLayer,
         properties: {
           deselect: false,
-          // selectProperties: { ...state.selectProperties },
+          // selectProperties: { ...state.selection.properties },
           // maskArray,
           // selectedVectorIndices: [],
         },
@@ -119,47 +119,47 @@ function adjustBoundaries() {
   //selectedPoint does not correspond to the selectProperties key. Based on selected point, adjust boundaryBox.
   switch (vectorGui.selectedPoint.xKey) {
     case "px1":
-      state.selectProperties.px1 = state.cursorX
-      state.selectProperties.py1 = state.cursorY
+      state.selection.properties.px1 = state.cursor.x
+      state.selection.properties.py1 = state.cursor.y
       break
     case "px2":
-      state.selectProperties.py1 = state.cursorY
+      state.selection.properties.py1 = state.cursor.y
       break
     case "px3":
-      state.selectProperties.px2 = state.cursorX
-      state.selectProperties.py1 = state.cursorY
+      state.selection.properties.px2 = state.cursor.x
+      state.selection.properties.py1 = state.cursor.y
       break
     case "px4":
-      state.selectProperties.px2 = state.cursorX
+      state.selection.properties.px2 = state.cursor.x
       break
     case "px5":
-      state.selectProperties.px2 = state.cursorX
-      state.selectProperties.py2 = state.cursorY
+      state.selection.properties.px2 = state.cursor.x
+      state.selection.properties.py2 = state.cursor.y
       break
     case "px6":
-      state.selectProperties.py2 = state.cursorY
+      state.selection.properties.py2 = state.cursor.y
       break
     case "px7":
-      state.selectProperties.px1 = state.cursorX
-      state.selectProperties.py2 = state.cursorY
+      state.selection.properties.px1 = state.cursor.x
+      state.selection.properties.py2 = state.cursor.y
       break
     case "px8":
-      state.selectProperties.px1 = state.cursorX
+      state.selection.properties.px1 = state.cursor.x
       break
     case "px9": {
       //move selected area
-      const deltaX = state.cursorX - state.previousX
-      const deltaY = state.cursorY - state.previousY
-      state.selectProperties.px1 += deltaX
-      state.selectProperties.py1 += deltaY
-      state.selectProperties.px2 += deltaX
-      state.selectProperties.py2 += deltaY
+      const deltaX = state.cursor.x - state.cursor.prevX
+      const deltaY = state.cursor.y - state.cursor.prevY
+      state.selection.properties.px1 += deltaX
+      state.selection.properties.py1 += deltaY
+      state.selection.properties.px2 += deltaX
+      state.selection.properties.py2 += deltaY
       break
     }
     default:
     //do nothing
   }
-  state.setBoundaryBox(state.selectProperties)
+  state.selection.setBoundaryBox(state.selection.properties)
 }
 
 export const select = {

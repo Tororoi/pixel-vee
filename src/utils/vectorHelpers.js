@@ -391,9 +391,9 @@ export function findVectorShapeCentroid(vectorIndicesSet, vectors) {
  */
 export function findVectorShapeBoundaryBox(vectorIndicesSet, vectors) {
   let [xMin, xMax, yMin, yMax] = [null, null, null, null]
-  // const vectorIndicesSet = new Set(state.selectedVectorIndicesSet)
+  // const vectorIndicesSet = new Set(state.vector.selectedIndices)
   // if (vectorIndicesSet.size === 0) {
-  //   vectorIndicesSet.add(state.currentVectorIndex)
+  //   vectorIndicesSet.add(state.vector.currentIndex)
   // }
   for (const vectorIndex of vectorIndicesSet) {
     const vector = vectors[vectorIndex]

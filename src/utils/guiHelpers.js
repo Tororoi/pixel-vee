@@ -1,3 +1,38 @@
+import { canvas } from '../Context/canvas.js'
+
+/**
+ * Returns the standard lineWidth for vector GUI elements.
+ * @param {number} lineWeight - Multiplier (default 1; use 2 for eraser cursor)
+ * @returns {number}
+ */
+export function getGuiLineWidth(lineWeight = 0.5) {
+  return canvas.zoom <= 8 ? lineWeight / canvas.zoom : lineWeight / 8
+}
+
+/**
+ * Returns the lineWidth for pixel grid lines.
+ * @returns {number}
+ */
+export function getGridLineWidth() {
+  return 0.5 / canvas.zoom
+}
+
+/**
+ * Strokes the current path twice: outer (wider, outerStyle) then inner (narrower, innerStyle).
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {number} lineWidth - Inner (thin) stroke width; outer is 3×
+ * @param {string} outerStyle - Stroke style for the outer (wider) stroke
+ * @param {string} innerStyle - Stroke style for the inner (narrower) stroke
+ */
+export function doubleStroke(ctx, lineWidth, outerStyle, innerStyle) {
+  ctx.lineWidth = lineWidth * 3
+  ctx.strokeStyle = outerStyle
+  ctx.stroke()
+  ctx.lineWidth = lineWidth
+  ctx.strokeStyle = innerStyle
+  ctx.stroke()
+}
+
 /**
  * @param {CanvasRenderingContext2D} ctx - The context to draw on
  * @param {number} xOffset - (Integer) canvas and layer offsets
@@ -27,10 +62,13 @@ export function drawControlPointHandle(
   x1,
   y1,
   x2,
-  y2
+  y2,
 ) {
+  const lw = getGuiLineWidth()
+  canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.moveTo(xOffset + x1 + 0.5, yOffset + y1 + 0.5)
   canvas.vectorGuiCTX.lineTo(xOffset + x2 + 0.5, yOffset + y2 + 0.5)
+  doubleStroke(canvas.vectorGuiCTX, lw, 'black', 'white')
 }
 
 /**

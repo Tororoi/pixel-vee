@@ -29,27 +29,27 @@ function renderToLatestAction(latestAction, modType) {
   //clear affected layer and render image from most recent action from the affected layer
   //This avoids having to redraw the timeline for every undo/redo. Close to constant time whereas redrawTimeline is closer to exponential time or worse.
   let mostRecentActionFromSameLayer = null
-  for (let i = state.undoStack.length - 1; i >= 0; i--) {
-    if (state.undoStack[i].layer === latestAction.layer) {
-      mostRecentActionFromSameLayer = state.undoStack[i]
+  for (let i = state.timeline.undoStack.length - 1; i >= 0; i--) {
+    if (state.timeline.undoStack[i].layer === latestAction.layer) {
+      mostRecentActionFromSameLayer = state.timeline.undoStack[i]
       break
     }
   }
   //Set selection state based on absolute most recent action
-  const mostRecentAction = state.undoStack[state.undoStack.length - 1]
+  const mostRecentAction = state.timeline.undoStack[state.timeline.undoStack.length - 1]
   //set select properties
-  state.selectProperties = {
+  state.selection.properties = {
     ...mostRecentAction.selectProperties,
   }
   //set boundary box
-  state.setBoundaryBox(state.selectProperties)
+  state.selection.setBoundaryBox(state.selection.properties)
   //set selected vectors
-  state.selectedVectorIndicesSet = new Set(
+  state.vector.selectedIndices = new Set(
     mostRecentAction.selectedVectorIndices
   )
-  if (state.selectedVectorIndicesSet.size > 0) {
+  if (state.vector.selectedIndices.size > 0) {
     dom.vectorTransformUIContainer.style.display = "flex"
-    if (state.vectorTransformMode === SCALE) {
+    if (state.vector.transformMode === SCALE) {
       setVectorShapeBoundaryBox()
     }
   } else {
@@ -58,7 +58,7 @@ function renderToLatestAction(latestAction, modType) {
   //set current vector index
   if (mostRecentAction.currentVectorIndex !== null) {
     vectorGui.setVectorProperties(
-      state.vectors[mostRecentAction.currentVectorIndex]
+      state.vector.all[mostRecentAction.currentVectorIndex]
     )
   }
   //Confirm a valid snapshot (may need to be updated for some actions)
@@ -127,7 +127,7 @@ function handleModifyAction(latestAction, modType) {
   //for each processed action,
   latestAction.processedActions.forEach((mod) => {
     //find the action in the undoStack
-    const moddedVector = state.vectors[mod.moddedVectorIndex] // need to check if this is a vector action and if it is, set the vector properties for the appropriate vector
+    const moddedVector = state.vector.all[mod.moddedVectorIndex] // need to check if this is a vector action and if it is, set the vector properties for the appropriate vector
     //set the vectorProperties to the modded action's vectorProperties
     moddedVector.vectorProperties = {
       ...mod[modType],
@@ -143,7 +143,7 @@ function handleClearAction(latestAction) {
   let upToIndex = latestAction.upToIndex
   let i = 0
   //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
-  state.undoStack.forEach((action) => {
+  state.timeline.undoStack.forEach((action) => {
     if (i > upToIndex) {
       return
     }
@@ -152,8 +152,8 @@ function handleClearAction(latestAction) {
       action.removed = !action.removed
       if (action.vectorIndices) {
         action.vectorIndices.forEach((vectorIndex) => {
-          state.vectors[vectorIndex].removed =
-            !state.vectors[vectorIndex].removed
+          state.vector.all[vectorIndex].removed =
+            !state.vector.all[vectorIndex].removed
         })
       }
     }
@@ -206,9 +206,9 @@ function handlePasteAction(latestAction, modType) {
     let offsetY = 0
     //BUG: raster gui not rendering properly from here
     pasteSelectedPixels(clipboard, latestAction.pastedLayer, offsetX, offsetY)
-    // state.selectedVectorIndicesSet.clear()
+    // state.vector.clearSelected()
     //set currentPastedImageKey
-    state.currentPastedImageKey = latestAction.pastedImageKey
+    state.clipboard.currentPastedImageKey = latestAction.pastedImageKey
     switchTool("move")
     disableActionsForPaste()
   }
@@ -238,7 +238,7 @@ function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
       canvas.currentLayer.y = newLatestAction.to.y
     }
     //set currentPastedImageKey
-    state.currentPastedImageKey = latestAction.pastedImageKey
+    state.clipboard.currentPastedImageKey = latestAction.pastedImageKey
     switchTool("move")
     disableActionsForPaste()
   } else if (modType === "to") {
@@ -260,21 +260,21 @@ function handleMoveAction(latestAction, modType) {
   latestAction.layer.y = latestAction[modType].y
   latestAction.layer.scale = latestAction[modType].scale
   //Keep properties relative to layer offset
-  if (state.vectorProperties.px1) {
-    state.vectorProperties.px1 += deltaX
-    state.vectorProperties.py1 += deltaY
+  if (state.vector.properties.px1) {
+    state.vector.properties.px1 += deltaX
+    state.vector.properties.py1 += deltaY
   }
-  if (state.vectorProperties.px2) {
-    state.vectorProperties.px2 += deltaX
-    state.vectorProperties.py2 += deltaY
+  if (state.vector.properties.px2) {
+    state.vector.properties.px2 += deltaX
+    state.vector.properties.py2 += deltaY
   }
-  if (state.vectorProperties.px3) {
-    state.vectorProperties.px3 += deltaX
-    state.vectorProperties.py3 += deltaY
+  if (state.vector.properties.px3) {
+    state.vector.properties.px3 += deltaX
+    state.vector.properties.py3 += deltaY
   }
-  if (state.vectorProperties.px4) {
-    state.vectorProperties.px4 += deltaX
-    state.vectorProperties.py4 += deltaY
+  if (state.vector.properties.px4) {
+    state.vector.properties.px4 += deltaX
+    state.vector.properties.py4 += deltaY
   }
 }
 
@@ -291,22 +291,22 @@ function handleTransformAction(latestAction, newLatestAction, modType) {
     selectProperties.px2 += newLatestAction.layer.x
     selectProperties.py1 += newLatestAction.layer.y
     selectProperties.py2 += newLatestAction.layer.y
-    state.selectProperties = { ...selectProperties }
-    state.setBoundaryBox(state.selectProperties)
+    state.selection.properties = { ...selectProperties }
+    state.selection.setBoundaryBox(state.selection.properties)
     //Eventually undoing transform actions will result in the newLatestAction being a paste action. In that case, don't render a transformation
     if (newLatestAction.tool === "transform") {
       transformRasterContent(
         newLatestAction.layer,
-        state.pastedImages[newLatestAction.pastedImageKey].imageData,
-        state.boundaryBox,
+        state.clipboard.pastedImages[newLatestAction.pastedImageKey].imageData,
+        state.selection.boundaryBox,
         newLatestAction.transformationRotationDegrees % 360,
         newLatestAction.isMirroredHorizontally,
         newLatestAction.isMirroredVertically
       )
-      state.transformationRotationDegrees =
+      state.transform.rotationDegrees =
         newLatestAction.transformationRotationDegrees
-      state.isMirroredHorizontally = newLatestAction.isMirroredHorizontally
-      state.isMirroredVertically = newLatestAction.isMirroredVertically
+      state.transform.isMirroredHorizontally = newLatestAction.isMirroredHorizontally
+      state.transform.isMirroredVertically = newLatestAction.isMirroredVertically
     }
   } else if (modType === "to") {
     //offset selectProperties by layer x and y
@@ -315,22 +315,22 @@ function handleTransformAction(latestAction, newLatestAction, modType) {
     selectProperties.px2 += latestAction.layer.x
     selectProperties.py1 += latestAction.layer.y
     selectProperties.py2 += latestAction.layer.y
-    state.selectProperties = {
+    state.selection.properties = {
       ...selectProperties,
     }
-    state.setBoundaryBox(state.selectProperties)
+    state.selection.setBoundaryBox(state.selection.properties)
     transformRasterContent(
       latestAction.layer,
-      state.pastedImages[latestAction.pastedImageKey].imageData,
-      state.boundaryBox,
+      state.clipboard.pastedImages[latestAction.pastedImageKey].imageData,
+      state.selection.boundaryBox,
       latestAction.transformationRotationDegrees % 360,
       latestAction.isMirroredHorizontally,
       latestAction.isMirroredVertically
     )
-    state.transformationRotationDegrees =
+    state.transform.rotationDegrees =
       latestAction.transformationRotationDegrees
-    state.isMirroredHorizontally = latestAction.isMirroredHorizontally
-    state.isMirroredVertically = latestAction.isMirroredVertically
+    state.transform.isMirroredHorizontally = latestAction.isMirroredHorizontally
+    state.transform.isMirroredVertically = latestAction.isMirroredVertically
   }
 }
 
@@ -358,17 +358,17 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   if (latestAction.tool === "modify") {
     handleModifyAction(latestAction, modType)
   } else if (latestAction.tool === "changeMode") {
-    state.vectors[latestAction.moddedVectorIndex].modes = {
+    state.vector.all[latestAction.moddedVectorIndex].modes = {
       ...latestAction[modType],
     }
   } else if (latestAction.tool === "changeColor") {
-    state.vectors[latestAction.moddedVectorIndex].color = {
+    state.vector.all[latestAction.moddedVectorIndex].color = {
       ...latestAction[modType],
     }
   } else if (latestAction.tool === "remove") {
     if (latestAction.vectorIndices?.length > 0) {
       latestAction.vectorIndices.forEach((vectorIndex) => {
-        state.vectors[vectorIndex].removed = latestAction[modType]
+        state.vector.all[vectorIndex].removed = latestAction[modType]
       })
     }
   } else if (latestAction.tool === "clear") {
@@ -404,7 +404,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   //Render the canvas with the new latest action
   renderToLatestAction(latestAction, modType)
   //Recalculate size of file if save dialog is open
-  if (state.saveDialogOpen) {
+  if (state.ui.saveDialogOpen) {
     setSaveFilesizePreview()
   }
 }
@@ -414,8 +414,8 @@ export function actionUndoRedo(pushStack, popStack, modType) {
  */
 export function handleUndo() {
   //length 1 prevents initial layer from being undone
-  if (state.undoStack.length > 1) {
-    actionUndoRedo(state.redoStack, state.undoStack, "from")
+  if (state.timeline.undoStack.length > 1) {
+    actionUndoRedo(state.timeline.redoStack, state.timeline.undoStack, "from")
   }
 }
 
@@ -423,8 +423,8 @@ export function handleUndo() {
  * Redo an action
  */
 export function handleRedo() {
-  if (state.redoStack.length >= 1) {
-    actionUndoRedo(state.undoStack, state.redoStack, "to")
+  if (state.timeline.redoStack.length >= 1) {
+    actionUndoRedo(state.timeline.undoStack, state.timeline.redoStack, "to")
   }
 }
 
@@ -438,20 +438,20 @@ export function addToTimeline(actionObject) {
   //use current state for variables
   //Make selectProperties and selectedVectorIndices part of every action to reduce logic complexity. This means a small decrease in space efficiency for save files.
   let snapshot = layer.type === "raster" ? layer.cvs.toDataURL() : null
-  state.action = {
-    index: state.undoStack.length,
+  state.timeline.currentAction = {
+    index: state.timeline.undoStack.length,
     tool,
     layer,
     ...properties,
-    selectProperties: { ...state.selectProperties },
-    selectedVectorIndices: Array.from(state.selectedVectorIndicesSet),
-    currentVectorIndex: state.currentVectorIndex,
+    selectProperties: { ...state.selection.properties },
+    selectedVectorIndices: Array.from(state.vector.selectedIndices),
+    currentVectorIndex: state.vector.currentIndex,
     hidden: false,
     removed: false,
     snapshot,
   }
-  state.undoStack.push(state.action)
-  if (state.saveDialogOpen) {
+  state.timeline.undoStack.push(state.timeline.currentAction)
+  if (state.ui.saveDialogOpen) {
     //TODO: (Low Priority) refactor to add it to a queue of filesize calculations so that calculations do not happen concurrently
     setSaveFilesizePreview()
   }
