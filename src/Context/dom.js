@@ -159,6 +159,7 @@ const colorSwitch = document.querySelector(".color-switch")
 const colorPickerContainer = document.querySelector(".picker-container")
 const confirmBtn = document.getElementById("confirm-btn")
 const cancelBtn = document.getElementById("cancel-btn")
+const newColorBtn = document.getElementById("newcolor-btn")
 
 //====================================//
 //======= * * * Sidebar * * * ========//
@@ -182,6 +183,8 @@ const paletteContainer = document.querySelector(".palette-container")
 const paletteColors = document.querySelector(".palette-colors")
 const paletteEditBtn = document.querySelector(".palette-edit")
 const paletteRemoveBtn = document.querySelector(".palette-remove")
+const palettePresetsBtn = document.querySelector(".palette-presets-btn")
+const palettePresetsList = document.querySelector(".palette-presets-list")
 // TODO: (Low Priority) button to create palette from colors on canvas
 
 // * Layers Interface * //
@@ -282,6 +285,7 @@ export const dom = {
   colorPickerContainer,
   confirmBtn,
   cancelBtn,
+  newColorBtn,
   //sidebar
   sidebarContainer,
   brushContainer,
@@ -296,6 +300,8 @@ export const dom = {
   paletteColors,
   paletteEditBtn,
   paletteRemoveBtn,
+  palettePresetsBtn,
+  palettePresetsList,
   //layers
   uploadBtn,
   newLayerBtn,

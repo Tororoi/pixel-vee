@@ -20,6 +20,8 @@ export const swatches = {
   activePaletteIndex: null,
   selectedPaletteIndex: null,
   paletteMode: "select", //select, edit, remove
+  currentPreset: "1bit",
+  customPalettes: {},
   //Functions
 }
 //TODO: (Low Priority) Add Mixing palette that consists of a small canvas with basic paint, sample, fill and erase tools.

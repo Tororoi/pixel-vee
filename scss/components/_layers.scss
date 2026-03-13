@@ -6,6 +6,7 @@
   min-height: 120px; //header and layers-control plus 1 layer.
   .collapsible {
     padding-top: 2px;
+    overflow: hidden;
   }
   .layers-control {
     flex-shrink: 0; /* Prevents the child from shrinking below its content size */

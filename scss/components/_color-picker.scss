@@ -196,6 +196,25 @@
               }
             }
           }
+          #newcolor-btn {
+            position: relative;
+            cursor: pointer;
+            #newcolor-plus {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 20px;
+              height: 20px;
+              margin: 10px;
+              opacity: 0;
+              pointer-events: none;
+              @include plusSvg($white);
+              background-size: 100%;
+            }
+            &:hover #newcolor-plus {
+              opacity: 1;
+            }
+          }
         }
         #rgbahsl {
           display: flex;

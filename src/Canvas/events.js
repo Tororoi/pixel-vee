@@ -8,6 +8,7 @@ import {
   renderLayerSettingsToDOM,
   renderVectorsToDOM,
   renderPaletteToDOM,
+  renderPalettePresetsToDOM,
 } from "../DOM/render.js"
 import {
   removeActionVector,
@@ -456,6 +457,7 @@ canvas.previousYOffset = canvas.yOffset
 renderCanvas(canvas.currentLayer)
 renderLayersToDOM()
 renderPaletteToDOM()
+renderPalettePresetsToDOM()
 // renderBrushModesToDOM()
 
 //Initialize temp layer, not added to layers array
