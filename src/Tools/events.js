@@ -9,6 +9,7 @@ import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM, renderBrushStampToDOM } from "../DOM/render.js"
 import { toggleMode, switchTool } from "./toolbox.js"
+import { ZOOM_LEVELS } from "../utils/constants.js"
 
 //Initialize default tool
 state.tool.current = tools.brush
@@ -22,37 +23,19 @@ state.tool.current = tools.brush
  * @param {PointerEvent} e - click event
  */
 function handleZoom(e) {
-  //TRY: restrict zoom to fixed multiples, 125%, 150% etc
-  //general zoom based on center
-  if (e.target.closest(".zoombtn")) {
-    let zoomBtn = e.target.closest(".zoombtn")
-    let z
-    if (zoomBtn.id === "minus") {
-      z = 0.5
-      //get new expected centered offsets based on center of canvas
-      //get center coordinates
-      let zoomedX = (canvas.xOffset + canvas.offScreenCVS.width / 2) / z
-      let zoomedY = (canvas.yOffset + canvas.offScreenCVS.height / 2) / z
-      // offset by half of canvas
-      let nox = zoomedX - canvas.offScreenCVS.width / 2
-      let noy = zoomedY - canvas.offScreenCVS.height / 2
-      if (canvas.zoom > 0.5) {
-        actionZoom(z, nox, noy)
-      }
-    } else if (zoomBtn.id === "plus") {
-      z = 2
-      //get new expected centered offsets based on center of canvas
-      //get center coordinates
-      let zoomedX = (canvas.xOffset + canvas.offScreenCVS.width / 2) / z
-      let zoomedY = (canvas.yOffset + canvas.offScreenCVS.height / 2) / z
-      //offset by half of canvas
-      let nox = zoomedX - canvas.offScreenCVS.width / 2
-      let noy = zoomedY - canvas.offScreenCVS.height / 2
-      if (canvas.zoom < 64) {
-        actionZoom(z, nox, noy)
-      }
-    }
-  }
+  const zoomBtn = e.target.closest(".zoombtn")
+  if (!zoomBtn) return
+  let idx = ZOOM_LEVELS.findIndex((l) => l >= canvas.zoom)
+  if (idx === -1) idx = ZOOM_LEVELS.length - 1
+  const nextIdx = zoomBtn.id === "minus" ? idx - 1 : idx + 1
+  if (nextIdx < 0 || nextIdx >= ZOOM_LEVELS.length) return
+  const z = ZOOM_LEVELS[nextIdx] / canvas.zoom
+  //get new expected centered offsets based on center of canvas
+  const zoomedX = (canvas.xOffset + canvas.offScreenCVS.width / 2) / z
+  const zoomedY = (canvas.yOffset + canvas.offScreenCVS.height / 2) / z
+  const nox = zoomedX - canvas.offScreenCVS.width / 2
+  const noy = zoomedY - canvas.offScreenCVS.height / 2
+  actionZoom(z, nox, noy)
 }
 
 /**

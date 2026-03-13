@@ -9,7 +9,8 @@ import { activateShortcut, deactivateShortcut } from './shortcuts.js'
 import { renderCanvas } from '../Canvas/render.js'
 import { renderVectorsToDOM } from '../DOM/render.js'
 import { actionZoom } from '../Actions/untrackedActions.js'
-import { throttle } from '../utils/eventHelpers.js'
+import { debounce } from '../utils/eventHelpers.js'
+import { ZOOM_LEVELS, WHEEL_THRESHOLD } from '../utils/constants.js'
 
 /**
  * Set global coordinates
@@ -77,37 +78,57 @@ function handleKeyUp(e) {
   deactivateShortcut(e.code)
 }
 
+
+let wheelAccumulator = 0
+let wheelGestureActive = false
+let wheelLastDirection = 0
+const resetWheelGesture = debounce(() => {
+  wheelAccumulator = 0
+  wheelGestureActive = false
+  wheelLastDirection = 0
+}, 300)
+
 /**
  * @param {WheelEvent} e - The scroll wheel event
  */
 function handleWheel(e) {
-  let delta = Math.sign(e.deltaY)
-  //zoom based on pointer coords
-  let z
-  setCoordinates(e)
-  if (delta < 0) {
-    z = 0.5
-    //get target coordinates
-    let zoomedX = state.cursor.withOffsetX / z
-    let zoomedY = state.cursor.withOffsetY / z
-    //offset by cursor coords
-    let nox = zoomedX - state.cursor.x
-    let noy = zoomedY - state.cursor.y
-    if (canvas.zoom > 0.5) {
-      actionZoom(z, nox, noy)
-    }
-  } else if (delta > 0) {
-    z = 2
-    //get target coordinates
-    let zoomedX = state.cursor.withOffsetX / z
-    let zoomedY = state.cursor.withOffsetY / z
-    //offset by half of canvas
-    let nox = zoomedX - state.cursor.x
-    let noy = zoomedY - state.cursor.y
-    if (canvas.zoom < 32) {
-      actionZoom(z, nox, noy)
-    }
+  //normalize delta: lines → ~40px, pages → ~800px
+  let rawDelta = e.deltaY
+  if (e.deltaMode === 1) rawDelta *= 40
+  else if (e.deltaMode === 2) rawDelta *= 800
+  const rawDirection = Math.sign(rawDelta)
+  //reset gesture on direction change so the first step in the new direction fires immediately
+  if (
+    rawDirection !== 0 &&
+    wheelLastDirection !== 0 &&
+    rawDirection !== wheelLastDirection
+  ) {
+    wheelAccumulator = 0
+    wheelGestureActive = false
   }
+  wheelLastDirection = rawDirection
+  wheelAccumulator += rawDelta
+  resetWheelGesture()
+  const threshold = wheelGestureActive ? WHEEL_THRESHOLD : 1
+  if (Math.abs(wheelAccumulator) < threshold) return
+  const direction = Math.sign(wheelAccumulator)
+  wheelAccumulator = 0
+  wheelGestureActive = true
+  setCoordinates(e)
+  //find nearest zoom level index
+  let idx = ZOOM_LEVELS.findIndex((l) => l >= canvas.zoom)
+  if (idx === -1) idx = ZOOM_LEVELS.length - 1
+  //step one level at a time: direction < 0 zooms out, direction > 0 zooms in
+  const nextIdx = idx + (direction < 0 ? -1 : 1)
+  if (nextIdx < 0 || nextIdx >= ZOOM_LEVELS.length) return
+  const z = ZOOM_LEVELS[nextIdx] / canvas.zoom
+  //zoom based on pointer coords
+  const zoomedX = state.cursor.withOffsetX / z
+  const zoomedY = state.cursor.withOffsetY / z
+  //offset by cursor coords
+  const nox = zoomedX - state.cursor.x
+  const noy = zoomedY - state.cursor.y
+  actionZoom(z, nox, noy)
 }
 
 //========================================//
@@ -348,8 +369,7 @@ function handleMouseDown(e) {
 //Shortcuts
 document.addEventListener('keydown', handleKeyDown)
 document.addEventListener('keyup', handleKeyUp)
-const throttledHandleWheel = throttle(handleWheel, 100)
-canvas.vectorGuiCVS.addEventListener('wheel', throttledHandleWheel, {
+canvas.vectorGuiCVS.addEventListener('wheel', handleWheel, {
   passive: true,
 })
 

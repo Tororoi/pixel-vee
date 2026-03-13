@@ -115,7 +115,12 @@ canvas.backgroundCVS.width = canvas.backgroundCVS.offsetWidth * canvas.sharpness
 canvas.backgroundCVS.height =
   canvas.backgroundCVS.offsetHeight * canvas.sharpness
 
-canvas.zoom = setInitialZoom(canvas.offScreenCVS.width) //zoom level should be based on absolute pixel size, not window relative to canvas
+canvas.zoom = setInitialZoom(
+  canvas.offScreenCVS.width,
+  canvas.offScreenCVS.height,
+  canvas.vectorGuiCVS.offsetWidth,
+  canvas.vectorGuiCVS.offsetHeight,
+)
 canvas.zoomAtLastDraw = canvas.zoom
 vectorGuiCTX.scale(
   canvas.sharpness * canvas.zoom,

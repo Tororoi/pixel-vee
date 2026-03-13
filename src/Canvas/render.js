@@ -658,7 +658,10 @@ export const resizeOffScreenCanvas = (width, height) => {
   // canvas.thumbnailCVS.height = canvas.offScreenCVS.height
   //reset canvas state
   canvas.zoom = setInitialZoom(
-    Math.max(canvas.offScreenCVS.width, canvas.offScreenCVS.height),
+    canvas.offScreenCVS.width,
+    canvas.offScreenCVS.height,
+    canvas.vectorGuiCVS.offsetWidth,
+    canvas.vectorGuiCVS.offsetHeight,
   )
   canvas.vectorGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
