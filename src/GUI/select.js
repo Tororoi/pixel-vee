@@ -8,6 +8,78 @@ import {
 } from '../utils/guiHelpers.js'
 import { SCALE } from '../utils/constants.js'
 
+//=============================================//
+//======= * * * Marching Ants Loop * * * ======//
+//=============================================//
+
+let marchOffset = 0
+let marchAnimId = null
+
+// Path2D cache — rebuilt only when maskSet reference or canvas pan changes
+let cachedMaskPath = null
+let cachedMaskSetRef = null
+let cachedPathXOffset = null
+let cachedPathYOffset = null
+
+/**
+ * Builds a Path2D from the maskSet edge segments.
+ * @param {Set<number>} maskSet - packed (y<<16)|x pixel set
+ * @returns {Path2D} path of all border segments
+ */
+function buildMaskPath(maskSet) {
+  const path = new Path2D()
+  const ox = canvas.xOffset
+  const oy = canvas.yOffset
+  for (const key of maskSet) {
+    const x = key & 0xffff
+    const y = (key >> 16) & 0xffff
+    if (!maskSet.has(((y - 1) << 16) | x)) {
+      path.moveTo(ox + x, oy + y)
+      path.lineTo(ox + x + 1, oy + y)
+    }
+    if (!maskSet.has(((y + 1) << 16) | x)) {
+      path.moveTo(ox + x, oy + y + 1)
+      path.lineTo(ox + x + 1, oy + y + 1)
+    }
+    if (!maskSet.has((y << 16) | (x - 1))) {
+      path.moveTo(ox + x, oy + y)
+      path.lineTo(ox + x, oy + y + 1)
+    }
+    if (!maskSet.has((y << 16) | (x + 1))) {
+      path.moveTo(ox + x + 1, oy + y)
+      path.lineTo(ox + x + 1, oy + y + 1)
+    }
+  }
+  return path
+}
+
+/**
+ * Advances the march offset and re-renders the selection canvas each frame.
+ */
+function tickMarchingAnts() {
+  marchOffset += 0.3 / canvas.zoom
+  marchAnimId = requestAnimationFrame(tickMarchingAnts)
+  renderSelectionCVS()
+}
+
+/**
+ * Starts the marching ants animation loop if not already running.
+ */
+function startMarchingAnts() {
+  if (marchAnimId !== null) return
+  marchAnimId = requestAnimationFrame(tickMarchingAnts)
+}
+
+/**
+ * Stops the marching ants animation loop.
+ */
+function stopMarchingAnts() {
+  if (marchAnimId !== null) {
+    cancelAnimationFrame(marchAnimId)
+    marchAnimId = null
+  }
+}
+
 /**
  * Render pixel-level contour marching ants for magic wand selections.
  * Iterates over all pixels in state.selection.maskSet and draws edge segments
@@ -20,37 +92,16 @@ function renderMaskContourOutline(lineDashOffset) {
   const lineWidth = getGuiLineWidth()
   canvas.selectionGuiCTX.save()
 
-  //Build path of all edge segments
-  canvas.selectionGuiCTX.beginPath()
-  for (const key of maskSet) {
-    const x = key & 0xffff
-    const y = (key >> 16) & 0xffff
-    //Top edge — neighbor above is not selected
-    if (!maskSet.has(((y - 1) << 16) | x)) {
-      canvas.selectionGuiCTX.moveTo(canvas.xOffset + x, canvas.yOffset + y)
-      canvas.selectionGuiCTX.lineTo(canvas.xOffset + x + 1, canvas.yOffset + y)
-    }
-    //Bottom edge — neighbor below is not selected
-    if (!maskSet.has(((y + 1) << 16) | x)) {
-      canvas.selectionGuiCTX.moveTo(canvas.xOffset + x, canvas.yOffset + y + 1)
-      canvas.selectionGuiCTX.lineTo(
-        canvas.xOffset + x + 1,
-        canvas.yOffset + y + 1,
-      )
-    }
-    //Left edge — neighbor to left is not selected
-    if (!maskSet.has((y << 16) | (x - 1))) {
-      canvas.selectionGuiCTX.moveTo(canvas.xOffset + x, canvas.yOffset + y)
-      canvas.selectionGuiCTX.lineTo(canvas.xOffset + x, canvas.yOffset + y + 1)
-    }
-    //Right edge — neighbor to right is not selected
-    if (!maskSet.has((y << 16) | (x + 1))) {
-      canvas.selectionGuiCTX.moveTo(canvas.xOffset + x + 1, canvas.yOffset + y)
-      canvas.selectionGuiCTX.lineTo(
-        canvas.xOffset + x + 1,
-        canvas.yOffset + y + 1,
-      )
-    }
+  //Rebuild Path2D only when maskSet or canvas pan changes
+  if (
+    maskSet !== cachedMaskSetRef ||
+    canvas.xOffset !== cachedPathXOffset ||
+    canvas.yOffset !== cachedPathYOffset
+  ) {
+    cachedMaskSetRef = maskSet
+    cachedPathXOffset = canvas.xOffset
+    cachedPathYOffset = canvas.yOffset
+    cachedMaskPath = buildMaskPath(maskSet)
   }
 
   //Rounded dotted line: black border first, then white dots on top
@@ -59,19 +110,20 @@ function renderMaskContourOutline(lineDashOffset) {
   canvas.selectionGuiCTX.lineDashOffset = lineDashOffset
   canvas.selectionGuiCTX.lineWidth = lineWidth * 4
   canvas.selectionGuiCTX.strokeStyle = 'black'
-  canvas.selectionGuiCTX.stroke()
+  canvas.selectionGuiCTX.stroke(cachedMaskPath)
   canvas.selectionGuiCTX.lineWidth = lineWidth * 2
   canvas.selectionGuiCTX.strokeStyle = 'white'
-  canvas.selectionGuiCTX.stroke()
+  canvas.selectionGuiCTX.stroke(cachedMaskPath)
   canvas.selectionGuiCTX.setLineDash([])
   canvas.selectionGuiCTX.restore()
 }
 
 /**
- * Render selection outline and control points
- * @param {number} lineDashOffset - (Float)
+ * Render selection outline and control points.
+ * Starts the marching ants animation loop when a selection is active,
+ * stops it when there is nothing selected.
  */
-export function renderSelectionCVS(lineDashOffset = 0.5) {
+export function renderSelectionCVS() {
   canvas.selectionGuiCTX.clearRect(
     0,
     0,
@@ -83,6 +135,7 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
     state.vector.selectedIndices.size > 0 &&
     state.tool.current.type === 'vector'
   if (isRasterSelection || isVectorSelection) {
+    startMarchingAnts()
     //Create greyed out area around selection
     //clip to selection
     canvas.selectionGuiCTX.save()
@@ -115,14 +168,14 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
       }
       canvas.selectionGuiCTX.restore()
       if (state.selection.maskSet) {
-        renderMaskContourOutline(lineDashOffset)
+        renderMaskContourOutline(marchOffset)
       } else {
         let shouldRenderPoints =
           state.tool.current.name === 'select' ||
           (state.tool.current.name === 'move' && canvas.pastedLayer) ||
           canvas.currentLayer.type === 'reference' ||
           state.vector.transformMode === SCALE
-        renderSelectionBoxOutline(lineDashOffset, shouldRenderPoints)
+        renderSelectionBoxOutline(marchOffset, shouldRenderPoints)
       }
     } else if (isVectorSelection) {
       if (vectorGui.outlineVectorSelection) {
@@ -272,7 +325,7 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
         canvas.selectionGuiCTX.strokeStyle = 'white'
         canvas.selectionGuiCTX.stroke()
         //Make border a dotted line
-        canvas.selectionGuiCTX.lineDashOffset = lineDashOffset * 2
+        canvas.selectionGuiCTX.lineDashOffset = marchOffset * 2
         canvas.selectionGuiCTX.setLineDash([lineWidth * 12, lineWidth * 12])
         canvas.selectionGuiCTX.lineWidth = lineWidth * 20
         canvas.selectionGuiCTX.lineCap = 'butt'
@@ -289,11 +342,8 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
       //render transform box control points
       // renderSelectionBoxOutline(lineDashOffset, true)
     }
-    //TODO: (Medium Priority) Animating the selection currently not possible because animation is interrupted by renderCanvas() call taking up the main thread
-    // All rendering would need to be part of the animation loop or on a separate thread. Maybe the marching ants could be done with css instead of on the canvas?
-    // window.requestAnimationFrame(() => {
-    //   renderSelectionCVS(lineDashOffset < 6 ? lineDashOffset + 0.1 : 0)
-    // })
+  } else {
+    stopMarchingAnts()
   }
 }
 
