@@ -69,7 +69,10 @@ export function actionZoom(z, xOriginOffset, yOriginOffset) {
  */
 export function actionRecenter() {
   canvas.zoom = setInitialZoom(
-    Math.max(canvas.offScreenCVS.width, canvas.offScreenCVS.height)
+    canvas.offScreenCVS.width,
+    canvas.offScreenCVS.height,
+    canvas.vectorGuiCVS.offsetWidth,
+    canvas.vectorGuiCVS.offsetHeight,
   )
   canvas.vectorGuiCTX.setTransform(
     canvas.sharpness * canvas.zoom,
