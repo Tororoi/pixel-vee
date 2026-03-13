@@ -572,28 +572,39 @@
                   id="fill"
                   aria-label="Fill (F)"
                   data-tooltip="Fill (F)"
-                />
-                <button
-                  type="button"
-                  class="tool line"
-                  id="line"
-                  aria-label="Line (/ or Hold Shift & Brush)"
-                  data-tooltip="Line (/ or Hold Shift & Brush)"
-                />
-                <button
-                  type="button"
-                  class="tool quadCurve"
-                  id="quadCurve"
-                  aria-label="Quadratic Curve (Q)"
-                  data-tooltip="Quadratic Curve (Q)"
-                />
-                <button
-                  type="button"
-                  class="tool cubicCurve"
-                  id="cubicCurve"
-                  aria-label="Cubic Curve (C)"
-                  data-tooltip="Cubic Curve (C)"
-                />
+                ></button>
+                <div class="tool-group" data-group="curves">
+                  <button
+                    type="button"
+                    class="tool-group-btn line"
+                    data-group="curves"
+                    aria-label="Curves"
+                    data-tooltip="Curves"
+                  ></button>
+                  <div class="tool-group-popout">
+                    <button
+                      type="button"
+                      class="tool line"
+                      id="line"
+                      aria-label="Line (/ or Hold Shift & Brush)"
+                      data-tooltip="Line (/ or Hold Shift & Brush)"
+                    ></button>
+                    <button
+                      type="button"
+                      class="tool quadCurve"
+                      id="quadCurve"
+                      aria-label="Quadratic Curve (Q)"
+                      data-tooltip="Quadratic Curve (Q)"
+                    ></button>
+                    <button
+                      type="button"
+                      class="tool cubicCurve"
+                      id="cubicCurve"
+                      aria-label="Cubic Curve (C)"
+                      data-tooltip="Cubic Curve (C)"
+                    ></button>
+                  </div>
+                </div>
                 <button
                   type="button"
                   class="tool ellipse"

@@ -39,7 +39,7 @@
 @mixin brushIcon($border: $border-color, $active: $white) {
   @include brushSvg($border);
   background-size: 100%;
-  // &:hover,
+  &:hover,
   &.selected {
     @include brushSvg($active);
   }
@@ -52,7 +52,7 @@
 @mixin fillIcon($border: $border-color, $active: $white) {
   @include fillSvg($border);
   background-size: 100%;
-  // &:hover,
+  &:hover,
   &.selected {
     @include fillSvg($active);
   }
@@ -65,7 +65,7 @@
 @mixin lineIcon($border: $border-color, $active: $white) {
   @include lineSvg($border);
   background-size: 100%;
-  // &:hover,
+  &:hover,
   &.selected {
     @include lineSvg($active);
   }
@@ -78,7 +78,7 @@
 @mixin quadCurveIcon($border: $border-color, $active: $white) {
   @include quadCurveSvg($border);
   background-size: 100%;
-  // &:hover,
+  &:hover,
   &.selected {
     @include quadCurveSvg($active);
   }
@@ -91,7 +91,7 @@
 @mixin cubicCurveIcon($border: $border-color, $active: $white) {
   @include cubicCurveSvg($border);
   background-size: 100%;
-  // &:hover,
+  &:hover,
   &.selected {
     @include cubicCurveSvg($active);
   }
@@ -104,7 +104,7 @@
 @mixin ellipseIcon($border: $border-color, $active: $white) {
   @include ellipseSvg($border);
   background-size: 100%;
-  // &:hover,
+  &:hover,
   &.selected {
     @include ellipseSvg($active);
   }
@@ -117,7 +117,7 @@
 @mixin selectIcon($border: $border-color, $active: $white) {
   @include selectSvg($border);
   background-size: 100%;
-  // &:hover,
+  &:hover,
   &.selected {
     @include selectSvg($active);
   }
@@ -130,7 +130,7 @@
 @mixin eyedropperIcon($border: $border-color, $active: $white) {
   @include eyedropperSvg($border);
   background-size: 100%;
-  // &:hover,
+  &:hover,
   &.selected {
     @include eyedropperSvg($active);
   }
@@ -143,7 +143,7 @@
 @mixin grabIcon($border: $border-color, $active: $white) {
   @include grabSvg($border);
   background-size: 100%;
-  // &:hover,
+  &:hover,
   &.selected {
     @include grabSvg($active);
   }
@@ -156,7 +156,7 @@
 @mixin moveIcon($border: $border-color, $active: $white) {
   @include moveSvg($border);
   background-size: 100%;
-  // &:hover,
+  &:hover,
   &.selected {
     @include moveSvg($active);
   }

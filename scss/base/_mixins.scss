@@ -104,37 +104,59 @@
 @mixin bubbleBorder(
   $color: $border-color,
   $activeColor: $active-color,
-  $background: $dark-gray
+  $background: $dark-gray,
+  $arrowSide: left,
+  $arrowTop: calc(50% - 1px)
 ) {
   @include boxBorder($color, $activeColor);
   &:after {
-    //Speech bubble pointer left
     content: '';
     display: inline-block;
     width: 2px;
     height: 2px;
     position: absolute;
-    top: calc(50% - 1px);
-    left: -4px;
+    top: $arrowTop;
     background: $color;
-    box-shadow:
-      -2px -2px $color,
-      0 -2px $background,
-      0 -4px $color,
-      2px 0 $background,
-      2px -2px $background,
-      2px -4px $background;
+    @if $arrowSide == right {
+      right: -4px;
+      box-shadow:
+        2px -2px $color,
+        0 -2px $background,
+        0 -4px $color,
+        -2px 0 $background,
+        -2px -2px $background,
+        -2px -4px $background;
+    } @else {
+      left: -4px;
+      box-shadow:
+        -2px -2px $color,
+        0 -2px $background,
+        0 -4px $color,
+        2px 0 $background,
+        2px -2px $background,
+        2px -4px $background;
+    }
   }
   &:hover:not([disabled]) {
     &:after {
       background: $activeColor;
-      box-shadow:
-        -2px -2px $activeColor,
-        0 -2px $background,
-        0 -4px $activeColor,
-        2px 0 $background,
-        2px -2px $background,
-        2px -4px $background;
+      @if $arrowSide == right {
+        box-shadow:
+          2px -2px $activeColor,
+          0 -2px $background,
+          0 -4px $activeColor,
+          -2px 0 $background,
+          -2px -2px $background,
+          -2px -4px $background;
+      } @else {
+        box-shadow:
+          -2px -2px $activeColor,
+          0 -2px $background,
+          0 -4px $activeColor,
+          2px 0 $background,
+          2px -2px $background,
+          2px -4px $background;
+      }
     }
   }
 }
