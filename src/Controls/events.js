@@ -10,6 +10,7 @@ import { renderCanvas } from '../Canvas/render.js'
 import { renderVectorsToDOM } from '../DOM/render.js'
 import { actionZoom } from '../Actions/untrackedActions.js'
 import { debounce } from '../utils/eventHelpers.js'
+import { ZOOM_LEVELS, WHEEL_THRESHOLD } from '../utils/constants.js'
 
 /**
  * Set global coordinates
@@ -77,8 +78,7 @@ function handleKeyUp(e) {
   deactivateShortcut(e.code)
 }
 
-const ZOOM_LEVELS = [0.5, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 16, 20, 24, 28, 32]
-const WHEEL_THRESHOLD = 20 // accumulated pixels required to trigger each zoom step after the first
+
 let wheelAccumulator = 0
 let wheelGestureActive = false
 let wheelLastDirection = 0
