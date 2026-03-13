@@ -161,3 +161,18 @@ export const tools = {
   }
    */
 }
+
+//====================================//
+//===== * * * Tool Groups * * * ======//
+//====================================//
+
+/**
+ * Defines groups of related tools that share a single toolbox slot.
+ * activeTool tracks which tool in the group is currently shown/selected.
+ */
+export const toolGroups = {
+  curves: {
+    tools: ["line", "quadCurve", "cubicCurve"],
+    activeTool: "line",
+  },
+}
