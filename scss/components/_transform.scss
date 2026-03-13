@@ -1,27 +1,12 @@
 .vector-transform-ui-container {
-  user-select: none;
-  position: absolute;
-  z-index: 103;
+  @extend %floating-dialog;
   top: 10%;
-  // width: 370px;
-  // max-width: calc(100% - 4px);
-  // max-height: calc(100% - 4px);
-  display: none;
-  // display: flex;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  color: white;
-  background: $extra-dark-gray;
-  text-align: center;
-  padding: 0;
-  align-self: center;
-  opacity: 1;
   @include boxBorder;
   .header {
     h3 {
       justify-self: center;
       height: 20px;
-      margin: 0px;
+      margin: 0;
     }
   }
   .collapsible {
@@ -48,30 +33,7 @@
         }
       }
       .tool {
-        cursor: pointer;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        user-select: none;
-        text-align: center;
-        color: white;
-        width: 40px;
-        height: 40px;
-        margin: 3px;
-        opacity: 1;
-        background-color: $button-color;
-        @include boxBorder;
-        &:hover {
-          z-index: 104;
-        }
-        &.selected {
-          background-color: $white;
-          z-index: 105;
-        }
-        &.custom-shape {
-          background-color: transparent;
-          @include cancelBorder;
-        }
+        @extend %tool-btn;
       }
     }
   }

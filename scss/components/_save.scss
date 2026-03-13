@@ -1,25 +1,14 @@
 .export-container {
-  user-select: none;
-  position: absolute;
-  z-index: 103;
+  @extend %floating-dialog;
   width: 370px;
   max-width: calc(100% - 4px);
   max-height: calc(100% - 4px);
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  color: white;
-  background: $extra-dark-gray;
-  text-align: center;
-  padding: 0;
-  align-self: center;
-  opacity: 1;
   @include boxBorder;
   .header {
     h3 {
       justify-self: center;
       height: 20px;
-      margin: 0px;
+      margin: 0;
     }
   }
   .collapsible {
@@ -43,28 +32,17 @@
 }
 
 .save-container {
-  user-select: none;
-  position: absolute;
+  @extend %floating-dialog;
   top: 15%;
-  z-index: 103;
   width: 370px;
   max-width: calc(100% - 4px);
   max-height: calc(100% - 4px);
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  color: white;
-  background: $extra-dark-gray;
-  text-align: center;
-  padding: 0;
-  align-self: center;
-  opacity: 1;
   @include boxBorder;
   .header {
     h3 {
       justify-self: center;
       height: 20px;
-      margin: 0px;
+      margin: 0;
     }
   }
   .collapsible {
@@ -79,7 +57,7 @@
         flex-flow: row nowrap;
         align-items: center;
         justify-content: flex-start;
-        margin: 8px 0px;
+        margin: 8px 0;
         #save-file-name {
           width: 96px; //04Font 16px
           // width: 62px; //Monogram 16px
@@ -131,8 +109,5 @@
         }
       }
     }
-  }
-
-  @media ($bp-md) {
   }
 }

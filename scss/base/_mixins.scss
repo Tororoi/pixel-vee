@@ -6,21 +6,21 @@
 @function side-shadow($side, $color, $inset: false) {
   $x: 0;
   $y: 0;
-  $inset-str: "";
+  $inset-str: '';
 
   // Determine the side for the shadow offset
-  @if $side == "left" {
+  @if $side == 'left' {
     $x: -2px;
-  } @else if $side == "right" {
+  } @else if $side == 'right' {
     $x: 2px;
-  } @else if $side == "top" {
+  } @else if $side == 'top' {
     $y: -2px;
-  } @else if $side == "bottom" {
+  } @else if $side == 'bottom' {
     $y: 2px;
   }
 
   @if $inset {
-    $inset-str: "inset";
+    $inset-str: 'inset';
   }
 
   @return #{$inset-str} #{$x} #{$y} 0 0 $color;
@@ -66,12 +66,19 @@
 }
 
 @mixin inactiveBoxBorder {
-  box-shadow: 2px 0px $border-color, -2px 0px $border-color,
-    0px -2px $border-color, 0px 2px $border-color;
+  box-shadow:
+    2px 0 $border-color,
+    -2px 0 $border-color,
+    0 -2px $border-color,
+    0 2px $border-color;
 }
 
 @mixin activeBoxBorder {
-  box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white, 0px 2px $white;
+  box-shadow:
+    2px 0 $white,
+    -2px 0 $white,
+    0 -2px $white,
+    0 2px $white;
 }
 
 @mixin cancelBorder {
@@ -82,9 +89,16 @@
 }
 
 @mixin doubleThinActiveBorder {
-  box-shadow: 1px 0px $black, -1px 0px $black, 0px -1px $black, 0px 1px $black,
-    0 0 0 1px $white, 2px 0px $white, -2px 0px $white, 0px -2px $white,
-    0px 2px $white;
+  box-shadow:
+    1px 0 $black,
+    -1px 0 $black,
+    0 -1px $black,
+    0 1px $black,
+    0 0 0 1px $white,
+    2px 0 $white,
+    -2px 0 $white,
+    0 -2px $white,
+    0 2px $white;
 }
 
 @mixin bubbleBorder(
@@ -95,7 +109,7 @@
   @include boxBorder($color, $activeColor);
   &:after {
     //Speech bubble pointer left
-    content: "";
+    content: '';
     display: inline-block;
     width: 2px;
     height: 2px;
@@ -103,14 +117,23 @@
     top: calc(50% - 1px);
     left: -4px;
     background: $color;
-    box-shadow: -2px -2px $color, 0px -2px $background, 0px -4px $color,
-      2px 0px $background, 2px -2px $background, 2px -4px $background;
+    box-shadow:
+      -2px -2px $color,
+      0 -2px $background,
+      0 -4px $color,
+      2px 0 $background,
+      2px -2px $background,
+      2px -4px $background;
   }
   &:hover:not([disabled]) {
     &:after {
       background: $activeColor;
-      box-shadow: -2px -2px $activeColor, 0px -2px $background,
-        0px -4px $activeColor, 2px 0px $background, 2px -2px $background,
+      box-shadow:
+        -2px -2px $activeColor,
+        0 -2px $background,
+        0 -4px $activeColor,
+        2px 0 $background,
+        2px -2px $background,
         2px -4px $background;
     }
   }
@@ -132,22 +155,45 @@
       height: 2px;
       width: 2px;
       background: $border-color;
-      box-shadow: 0px 0px $border-color, 4px 0px $border-color,
-        0px 4px $border-color, 4px 4px $border-color, 0px 8px $border-color,
+      box-shadow:
+        0 0 $border-color,
+        4px 0 $border-color,
+        0 4px $border-color,
+        4px 4px $border-color,
+        0 8px $border-color,
         4px 8px $border-color;
     }
     &.locked {
       .grip {
-        box-shadow: 2px -2px $border-color, 4px -2px $border-color,
-          0px 0px $border-color, 6px 0px $border-color, 0px 2px $border-color,
-          6px 2px $border-color, -2px 4px $border-color, 0px 4px $border-color,
-          2px 4px $border-color, 4px 4px $border-color, 6px 4px $border-color,
-          8px 4px $border-color, -2px 6px $border-color, 0px 6px $border-color,
-          4px 6px $border-color, 6px 6px $border-color, 8px 6px $border-color,
-          -2px 8px $border-color, 0px 8px $border-color, 4px 8px $border-color,
-          6px 8px $border-color, 8px 8px $border-color, -2px 10px $border-color,
-          0px 10px $border-color, 2px 10px $border-color, 4px 10px $border-color,
-          6px 10px $border-color, 8px 10px $border-color;
+        box-shadow:
+          2px -2px $border-color,
+          4px -2px $border-color,
+          0 0 $border-color,
+          6px 0 $border-color,
+          0 2px $border-color,
+          6px 2px $border-color,
+          -2px 4px $border-color,
+          0 4px $border-color,
+          2px 4px $border-color,
+          4px 4px $border-color,
+          6px 4px $border-color,
+          8px 4px $border-color,
+          -2px 6px $border-color,
+          0 6px $border-color,
+          4px 6px $border-color,
+          6px 6px $border-color,
+          8px 6px $border-color,
+          -2px 8px $border-color,
+          0 8px $border-color,
+          4px 8px $border-color,
+          6px 8px $border-color,
+          8px 8px $border-color,
+          -2px 10px $border-color,
+          0 10px $border-color,
+          2px 10px $border-color,
+          4px 10px $border-color,
+          6px 10px $border-color,
+          8px 10px $border-color;
       }
     }
   }
@@ -155,18 +201,44 @@
     .drag-btn {
       .grip {
         background: $white;
-        box-shadow: 0px 0px $white, 4px 0px $white, 0px 4px $white,
-          4px 4px $white, 0px 8px $white, 4px 8px $white;
+        box-shadow:
+          0 0 $white,
+          4px 0 $white,
+          0 4px $white,
+          4px 4px $white,
+          0 8px $white,
+          4px 8px $white;
       }
       &.locked {
         .grip {
-          box-shadow: 2px -2px $white, 4px -2px $white, 0px 0px $white,
-            6px 0px $white, 0px 2px $white, 6px 2px $white, -2px 4px $white,
-            0px 4px $white, 2px 4px $white, 4px 4px $white, 6px 4px $white,
-            8px 4px $white, -2px 6px $white, 0px 6px $white, 4px 6px $white,
-            6px 6px $white, 8px 6px $white, -2px 8px $white, 0px 8px $white,
-            4px 8px $white, 6px 8px $white, 8px 8px $white, -2px 10px $white,
-            0px 10px $white, 2px 10px $white, 4px 10px $white, 6px 10px $white,
+          box-shadow:
+            2px -2px $white,
+            4px -2px $white,
+            0 0 $white,
+            6px 0 $white,
+            0 2px $white,
+            6px 2px $white,
+            -2px 4px $white,
+            0 4px $white,
+            2px 4px $white,
+            4px 4px $white,
+            6px 4px $white,
+            8px 4px $white,
+            -2px 6px $white,
+            0 6px $white,
+            4px 6px $white,
+            6px 6px $white,
+            8px 6px $white,
+            -2px 8px $white,
+            0 8px $white,
+            4px 8px $white,
+            6px 8px $white,
+            8px 8px $white,
+            -2px 10px $white,
+            0 10px $white,
+            2px 10px $white,
+            4px 10px $white,
+            6px 10px $white,
             8px 10px $white;
         }
       }
@@ -179,7 +251,7 @@
   right: 0;
   width: 20px;
   height: 20px;
-  margin: 0px;
+  margin: 0;
   display: flex;
   flex-flow: row nowrap;
   cursor: pointer;
@@ -191,27 +263,61 @@
   .arrow {
     height: 2px;
     width: 2px;
-    box-shadow: 9px 5px $border-color, 7px 7px $border-color,
-      9px 7px $border-color, 11px 7px $border-color, 5px 9px $border-color,
-      7px 9px $border-color, 9px 9px $border-color, 11px 9px $border-color,
-      13px 9px $border-color, 9px 11px $border-color, 9px 13px $border-color;
+    box-shadow:
+      9px 5px $border-color,
+      7px 7px $border-color,
+      9px 7px $border-color,
+      11px 7px $border-color,
+      5px 9px $border-color,
+      7px 9px $border-color,
+      9px 9px $border-color,
+      11px 9px $border-color,
+      13px 9px $border-color,
+      9px 11px $border-color,
+      9px 13px $border-color;
   }
   input:checked ~ .arrow {
-    box-shadow: 9px 5px $border-color, 9px 7px $border-color,
-      5px 9px $border-color, 7px 9px $border-color, 9px 9px $border-color,
-      11px 9px $border-color, 13px 9px $border-color, 7px 11px $border-color,
-      9px 11px $border-color, 11px 11px $border-color, 9px 13px $border-color;
+    box-shadow:
+      9px 5px $border-color,
+      9px 7px $border-color,
+      5px 9px $border-color,
+      7px 9px $border-color,
+      9px 9px $border-color,
+      11px 9px $border-color,
+      13px 9px $border-color,
+      7px 11px $border-color,
+      9px 11px $border-color,
+      11px 11px $border-color,
+      9px 13px $border-color;
   }
   &:hover {
     .arrow {
-      box-shadow: 9px 5px $white, 7px 7px $white, 9px 7px $white,
-        11px 7px $white, 5px 9px $white, 7px 9px $white, 9px 9px $white,
-        11px 9px $white, 13px 9px $white, 9px 11px $white, 9px 13px $white;
+      box-shadow:
+        9px 5px $white,
+        7px 7px $white,
+        9px 7px $white,
+        11px 7px $white,
+        5px 9px $white,
+        7px 9px $white,
+        9px 9px $white,
+        11px 9px $white,
+        13px 9px $white,
+        9px 11px $white,
+        9px 13px $white;
     }
     input:checked ~ .arrow {
-      box-shadow: 9px 5px $white, 9px 7px $white, 5px 9px $white, 7px 9px $white,
-        9px 9px $white, 11px 9px $white, 13px 9px $white, 7px 11px $white,
-        9px 11px $white, 11px 11px $white, 9px 13px $white;
+      box-shadow:
+        9px 5px $white,
+        9px 7px $white,
+        5px 9px $white,
+        7px 9px $white,
+        9px 9px $white,
+        11px 9px $white,
+        13px 9px $white,
+        7px 11px $white,
+        9px 11px $white,
+        11px 11px $white,
+        9px 13px $white;
     }
   }
 }
@@ -221,7 +327,7 @@
   right: 0;
   width: 20px;
   height: 20px;
-  margin: 0px;
+  margin: 0;
   display: flex;
   flex-flow: row nowrap;
   cursor: pointer;
@@ -233,16 +339,29 @@
   .close {
     height: 2px;
     width: 2px;
-    box-shadow: 5px 5px $border-color, 13px 5px $border-color,
-      7px 7px $border-color, 11px 7px $border-color, 9px 9px $border-color,
-      7px 11px $border-color, 11px 11px $border-color, 5px 13px $border-color,
+    box-shadow:
+      5px 5px $border-color,
+      13px 5px $border-color,
+      7px 7px $border-color,
+      11px 7px $border-color,
+      9px 9px $border-color,
+      7px 11px $border-color,
+      11px 11px $border-color,
+      5px 13px $border-color,
       13px 13px $border-color;
   }
   &:hover {
     .close {
-      box-shadow: 5px 5px $white, 13px 5px $white, 7px 7px $white,
-        11px 7px $white, 9px 9px $white, 7px 11px $white, 11px 11px $white,
-        5px 13px $white, 13px 13px $white;
+      box-shadow:
+        5px 5px $white,
+        13px 5px $white,
+        7px 7px $white,
+        11px 7px $white,
+        9px 9px $white,
+        7px 11px $white,
+        11px 11px $white,
+        5px 13px $white,
+        13px 13px $white;
     }
   }
 }
@@ -276,9 +395,16 @@
 @mixin marching-ants-init($ant-size, $ant-width, $speed, $id) {
   padding: 5px + $ant-width;
   margin: 20px;
-  background-size: $ant-size $ant-width, $ant-size $ant-width,
-    $ant-width $ant-size, $ant-width $ant-size;
-  background-position: 0 0, 0 100%, 0 0, 100% 0;
+  background-size:
+    $ant-size $ant-width,
+    $ant-size $ant-width,
+    $ant-width $ant-size,
+    $ant-width $ant-size;
+  background-position:
+    0 0,
+    0 100%,
+    0 0,
+    100% 0;
   background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
   animation: marching-ants-#{$id} $speed;
   animation-timing-function: linear;
@@ -292,7 +418,8 @@
   }
 }
 @mixin marching-ants-color($a, $b) {
-  background-image: linear-gradient(to right, $a 50%, $b 50%),
+  background-image:
+    linear-gradient(to right, $a 50%, $b 50%),
     linear-gradient(to right, $a 50%, $b 50%),
     linear-gradient(to bottom, $a 50%, $b 50%),
     linear-gradient(to bottom, $a 50%, $b 50%);
@@ -301,11 +428,18 @@
 @mixin marching-ants-animation($ant-size, $id) {
   @keyframes marching-ants-#{$id} {
     0% {
-      background-position: 0 0, 0 100%, 0 0, 100% 0;
+      background-position:
+        0 0,
+        0 100%,
+        0 0,
+        100% 0;
     }
     100% {
-      background-position: 2 * $ant-size 0, -2 * $ant-size 100%,
-        0 -2 * $ant-size, 100% 2 * $ant-size;
+      background-position:
+        2 * $ant-size 0,
+        -2 * $ant-size 100%,
+        0 -2 * $ant-size,
+        100% 2 * $ant-size;
     }
   }
 }
@@ -316,3 +450,74 @@
 }
 
 @include marching-ants-animation(10px, 1);
+
+//==================================================//
+//============ * * * Placeholders * * * ============//
+//==================================================//
+
+// Base styles shared by all floating dialog/panel containers
+%floating-dialog {
+  user-select: none;
+  position: absolute;
+  z-index: 103;
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  color: $white;
+  background: $extra-dark-gray;
+  text-align: center;
+  padding: 0;
+  align-self: center;
+  opacity: 1;
+}
+
+// Base styles shared by tool button squares in toolbox and transform panels
+%tool-btn {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  text-align: center;
+  color: $white;
+  width: 40px;
+  height: 40px;
+  margin: 3px;
+  opacity: 1;
+  background-color: $button-color;
+  @include boxBorder;
+  &:hover {
+    z-index: 104;
+  }
+  &.selected {
+    background-color: $white;
+    z-index: 105;
+  }
+  &.custom-shape {
+    background-color: transparent;
+    @include cancelBorder;
+  }
+}
+
+// Base styles for pixel-art speech-bubble pointer on tooltips
+%tooltip-pointer-base {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 2px;
+  position: absolute;
+  top: -2px;
+  background: $tooltip-color;
+}
+
+// Disabled state for sidebar panels (layers, vectors)
+@mixin disabled-collapsible {
+  cursor: not-allowed;
+  * {
+    pointer-events: none;
+  }
+  button,
+  label {
+    opacity: 0.5;
+  }
+}
