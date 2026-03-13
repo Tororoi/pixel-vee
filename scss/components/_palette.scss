@@ -100,8 +100,8 @@
     }
     .palette-presets {
       position: relative;
-      width: 100%;
-      margin-bottom: 8px;
+      width: calc(100% - 2px);
+      margin: 0px 0px 8px 2px;
       .palette-presets-btn {
         width: 100%;
         background: $gray;
@@ -144,6 +144,8 @@
     .palette-colors {
       display: flex;
       flex-flow: row wrap;
+      width: 100%;
+      margin: 0px 1px;
       .palette-color {
         cursor: pointer;
         width: 20px;

@@ -425,7 +425,6 @@ svg {
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: hidden;
   position: relative;
 }
 
@@ -1226,6 +1225,7 @@ canvas {
 }
 .layers-interface .collapsible {
   padding-top: 2px;
+  overflow: hidden;
 }
 .layers-interface .layers-control {
   flex-shrink: 0; /* Prevents the child from shrinking below its content size */
@@ -1428,6 +1428,7 @@ canvas {
 }
 .vectors-interface .collapsible {
   padding-top: 2px;
+  overflow: hidden;
 }
 .vectors-interface .vectors-container {
   display: flex;
@@ -1670,7 +1671,6 @@ canvas {
 }
 .palette-interface .collapsible {
   padding-top: 2px;
-  overflow: visible;
 }
 .palette-interface p {
   margin: 0px;
@@ -1760,8 +1760,8 @@ canvas {
 }
 .palette-interface .palette-container .palette-presets {
   position: relative;
-  width: 100%;
-  margin-bottom: 8px;
+  width: calc(100% - 2px);
+  margin: 0px 0px 8px 2px;
 }
 .palette-interface .palette-container .palette-presets .palette-presets-btn {
   width: 100%;
@@ -1810,6 +1810,8 @@ canvas {
 .palette-interface .palette-container .palette-colors {
   display: flex;
   flex-flow: row wrap;
+  width: 100%;
+  margin: 0px 1px;
 }
 .palette-interface .palette-container .palette-colors .palette-color {
   cursor: pointer;
