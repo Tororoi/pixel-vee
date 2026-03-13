@@ -33,7 +33,10 @@ function renderMaskContourOutline(lineDashOffset) {
     //Bottom edge — neighbor below is not selected
     if (!maskSet.has(((y + 1) << 16) | x)) {
       canvas.selectionGuiCTX.moveTo(canvas.xOffset + x, canvas.yOffset + y + 1)
-      canvas.selectionGuiCTX.lineTo(canvas.xOffset + x + 1, canvas.yOffset + y + 1)
+      canvas.selectionGuiCTX.lineTo(
+        canvas.xOffset + x + 1,
+        canvas.yOffset + y + 1,
+      )
     }
     //Left edge — neighbor to left is not selected
     if (!maskSet.has((y << 16) | (x - 1))) {
@@ -43,18 +46,20 @@ function renderMaskContourOutline(lineDashOffset) {
     //Right edge — neighbor to right is not selected
     if (!maskSet.has((y << 16) | (x + 1))) {
       canvas.selectionGuiCTX.moveTo(canvas.xOffset + x + 1, canvas.yOffset + y)
-      canvas.selectionGuiCTX.lineTo(canvas.xOffset + x + 1, canvas.yOffset + y + 1)
+      canvas.selectionGuiCTX.lineTo(
+        canvas.xOffset + x + 1,
+        canvas.yOffset + y + 1,
+      )
     }
   }
 
-  //Solid black underline for contrast
+  //Rounded dotted line: black border first, then white dots on top
+  canvas.selectionGuiCTX.lineCap = 'round'
+  canvas.selectionGuiCTX.setLineDash([0.5, lineWidth * 8])
+  canvas.selectionGuiCTX.lineDashOffset = lineDashOffset
   canvas.selectionGuiCTX.lineWidth = lineWidth * 4
   canvas.selectionGuiCTX.strokeStyle = 'black'
   canvas.selectionGuiCTX.stroke()
-
-  //White dashed line on top (marching ants)
-  canvas.selectionGuiCTX.setLineDash([lineWidth * 6, lineWidth * 6])
-  canvas.selectionGuiCTX.lineDashOffset = lineDashOffset
   canvas.selectionGuiCTX.lineWidth = lineWidth * 2
   canvas.selectionGuiCTX.strokeStyle = 'white'
   canvas.selectionGuiCTX.stroke()
@@ -310,15 +315,14 @@ export function renderSelectionBoxOutline(lineDashOffset, drawPoints) {
       state.selection.boundaryBox.xMax - state.selection.boundaryBox.xMin,
       state.selection.boundaryBox.yMax - state.selection.boundaryBox.yMin,
     )
-    // Solid black underline for contrast on any background
+    // Rounded dotted line: black border first, then white dots on top
+    if (!canvas.pastedLayer && canvas.currentLayer.type !== 'reference') {
+      canvas.selectionGuiCTX.setLineDash([0.5, lineWidth * 8])
+      canvas.selectionGuiCTX.lineDashOffset = lineDashOffset
+    }
     canvas.selectionGuiCTX.lineWidth = lineWidth * 4
     canvas.selectionGuiCTX.strokeStyle = 'black'
     canvas.selectionGuiCTX.stroke()
-    // White dashed line on top (marching ants when not pasting)
-    if (!canvas.pastedLayer && canvas.currentLayer.type !== 'reference') {
-      canvas.selectionGuiCTX.setLineDash([lineWidth * 6, lineWidth * 6])
-      canvas.selectionGuiCTX.lineDashOffset = lineDashOffset
-    }
     canvas.selectionGuiCTX.lineWidth = lineWidth * 2
     canvas.selectionGuiCTX.strokeStyle = 'white'
     canvas.selectionGuiCTX.stroke()
