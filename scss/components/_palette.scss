@@ -98,6 +98,49 @@
         @include paletteScraperIcon;
       }
     }
+    .palette-presets {
+      position: relative;
+      width: 100%;
+      margin-bottom: 8px;
+      .palette-presets-btn {
+        width: 100%;
+        background: $gray;
+        color: $white;
+        cursor: pointer;
+        font-size: 12px;
+        padding: 4px;
+        text-align: left;
+        @include boxBorder;
+      }
+      .palette-presets-list {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: $extra-dark-gray;
+        z-index: 200;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        @include boxBorder;
+        li {
+          padding: 4px;
+          cursor: pointer;
+          font-size: 12px;
+          color: $white;
+          &:hover {
+            background: $gray;
+          }
+          &.selected {
+            background: $dark-gray;
+          }
+        }
+      }
+      &.open .palette-presets-list {
+        display: block;
+      }
+    }
     .palette-colors {
       display: flex;
       flex-flow: row wrap;
