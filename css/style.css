@@ -4,8 +4,9 @@
 /* Breakpoints */
 /* Colors */
 /* Color Assignments */
+/* Backgrounds */
 :root {
-  --border-color: $border-color;
+  --border-color: rgb(131, 131, 131);
   --primary-swatch-color: 0, 0, 0;
   --primary-swatch-alpha: 1;
   --secondary-swatch-color: 255, 255, 255;
@@ -64,6 +65,64 @@
     background-position: 20px 0, -20px 100%, 0 -20px, 100% 20px;
   }
 }
+.vector-transform-ui-container, .save-container, .export-container, .size-container, .settings-container {
+  user-select: none;
+  position: absolute;
+  z-index: 103;
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  color: rgb(255, 255, 255);
+  background: rgb(51, 51, 51);
+  text-align: center;
+  padding: 0;
+  align-self: center;
+  opacity: 1;
+}
+
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool, .toolbox .collapsible .tool {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  text-align: center;
+  color: rgb(255, 255, 255);
+  width: 40px;
+  height: 40px;
+  margin: 3px;
+  opacity: 1;
+  background-color: rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool:hover:not([disabled]), .toolbox .collapsible .tool:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool:hover, .toolbox .collapsible .tool:hover {
+  z-index: 104;
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .selected.tool, .toolbox .collapsible .selected.tool {
+  background-color: rgb(255, 255, 255);
+  z-index: 105;
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .custom-shape.tool, .toolbox .collapsible .custom-shape.tool {
+  background-color: transparent;
+  box-shadow: none;
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .custom-shape.tool:hover:not([disabled]), .toolbox .collapsible .custom-shape.tool:hover:not([disabled]) {
+  box-shadow: none;
+}
+
+.tooltip.page-center:after, .tooltip.page-left:after, .tooltip:after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 2px;
+  position: absolute;
+  top: -2px;
+  background: rgb(255, 255, 199);
+}
+
 /* Reset styles */
 /* html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
@@ -152,7 +211,6 @@ input {
 }
 
 body {
-  margin: 0px;
   color: white;
   background: rgb(61, 61, 61);
   user-select: none;
@@ -187,9 +245,9 @@ button:disabled {
 
 input {
   box-sizing: border-box;
-  padding-block: 0px;
-  padding-inline: 0px;
-  padding: 0px;
+  padding-block: 0;
+  padding-inline: 0;
+  padding: 0;
   text-indent: 2px;
   background-color: rgb(31, 31, 31);
   color: white;
@@ -331,7 +389,7 @@ svg {
   justify-self: center;
   width: 100%;
   min-height: 20px;
-  margin: 0px;
+  margin: 0;
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
@@ -355,24 +413,24 @@ svg {
   height: 2px;
   width: 2px;
   background: rgb(131, 131, 131);
-  box-shadow: 0px 0px rgb(131, 131, 131), 4px 0px rgb(131, 131, 131), 0px 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 0px 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131);
+  box-shadow: 0 0 rgb(131, 131, 131), 4px 0 rgb(131, 131, 131), 0 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 0 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131);
 }
 .dialog-box .header .drag-btn.locked .grip {
-  box-shadow: 2px -2px rgb(131, 131, 131), 4px -2px rgb(131, 131, 131), 0px 0px rgb(131, 131, 131), 6px 0px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131), 6px 2px rgb(131, 131, 131), -2px 4px rgb(131, 131, 131), 0px 4px rgb(131, 131, 131), 2px 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 6px 4px rgb(131, 131, 131), 8px 4px rgb(131, 131, 131), -2px 6px rgb(131, 131, 131), 0px 6px rgb(131, 131, 131), 4px 6px rgb(131, 131, 131), 6px 6px rgb(131, 131, 131), 8px 6px rgb(131, 131, 131), -2px 8px rgb(131, 131, 131), 0px 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131), 6px 8px rgb(131, 131, 131), 8px 8px rgb(131, 131, 131), -2px 10px rgb(131, 131, 131), 0px 10px rgb(131, 131, 131), 2px 10px rgb(131, 131, 131), 4px 10px rgb(131, 131, 131), 6px 10px rgb(131, 131, 131), 8px 10px rgb(131, 131, 131);
+  box-shadow: 2px -2px rgb(131, 131, 131), 4px -2px rgb(131, 131, 131), 0 0 rgb(131, 131, 131), 6px 0 rgb(131, 131, 131), 0 2px rgb(131, 131, 131), 6px 2px rgb(131, 131, 131), -2px 4px rgb(131, 131, 131), 0 4px rgb(131, 131, 131), 2px 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 6px 4px rgb(131, 131, 131), 8px 4px rgb(131, 131, 131), -2px 6px rgb(131, 131, 131), 0 6px rgb(131, 131, 131), 4px 6px rgb(131, 131, 131), 6px 6px rgb(131, 131, 131), 8px 6px rgb(131, 131, 131), -2px 8px rgb(131, 131, 131), 0 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131), 6px 8px rgb(131, 131, 131), 8px 8px rgb(131, 131, 131), -2px 10px rgb(131, 131, 131), 0 10px rgb(131, 131, 131), 2px 10px rgb(131, 131, 131), 4px 10px rgb(131, 131, 131), 6px 10px rgb(131, 131, 131), 8px 10px rgb(131, 131, 131);
 }
 .dialog-box .header:hover:not([disabled]) .drag-btn .grip {
   background: rgb(255, 255, 255);
-  box-shadow: 0px 0px rgb(255, 255, 255), 4px 0px rgb(255, 255, 255), 0px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 0px 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255);
+  box-shadow: 0 0 rgb(255, 255, 255), 4px 0 rgb(255, 255, 255), 0 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 0 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255);
 }
 .dialog-box .header:hover:not([disabled]) .drag-btn.locked .grip {
-  box-shadow: 2px -2px rgb(255, 255, 255), 4px -2px rgb(255, 255, 255), 0px 0px rgb(255, 255, 255), 6px 0px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255), 6px 2px rgb(255, 255, 255), -2px 4px rgb(255, 255, 255), 0px 4px rgb(255, 255, 255), 2px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 6px 4px rgb(255, 255, 255), 8px 4px rgb(255, 255, 255), -2px 6px rgb(255, 255, 255), 0px 6px rgb(255, 255, 255), 4px 6px rgb(255, 255, 255), 6px 6px rgb(255, 255, 255), 8px 6px rgb(255, 255, 255), -2px 8px rgb(255, 255, 255), 0px 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255), 6px 8px rgb(255, 255, 255), 8px 8px rgb(255, 255, 255), -2px 10px rgb(255, 255, 255), 0px 10px rgb(255, 255, 255), 2px 10px rgb(255, 255, 255), 4px 10px rgb(255, 255, 255), 6px 10px rgb(255, 255, 255), 8px 10px rgb(255, 255, 255);
+  box-shadow: 2px -2px rgb(255, 255, 255), 4px -2px rgb(255, 255, 255), 0 0 rgb(255, 255, 255), 6px 0 rgb(255, 255, 255), 0 2px rgb(255, 255, 255), 6px 2px rgb(255, 255, 255), -2px 4px rgb(255, 255, 255), 0 4px rgb(255, 255, 255), 2px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 6px 4px rgb(255, 255, 255), 8px 4px rgb(255, 255, 255), -2px 6px rgb(255, 255, 255), 0 6px rgb(255, 255, 255), 4px 6px rgb(255, 255, 255), 6px 6px rgb(255, 255, 255), 8px 6px rgb(255, 255, 255), -2px 8px rgb(255, 255, 255), 0 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255), 6px 8px rgb(255, 255, 255), 8px 8px rgb(255, 255, 255), -2px 10px rgb(255, 255, 255), 0 10px rgb(255, 255, 255), 2px 10px rgb(255, 255, 255), 4px 10px rgb(255, 255, 255), 6px 10px rgb(255, 255, 255), 8px 10px rgb(255, 255, 255);
 }
 .dialog-box .header .collapse-btn {
   position: absolute;
   right: 0;
   width: 20px;
   height: 20px;
-  margin: 0px;
+  margin: 0;
   display: flex;
   flex-flow: row nowrap;
   cursor: pointer;
@@ -401,7 +459,7 @@ svg {
   right: 0;
   width: 20px;
   height: 20px;
-  margin: 0px;
+  margin: 0;
   display: flex;
   flex-flow: row nowrap;
   cursor: pointer;
@@ -460,18 +518,11 @@ svg {
   padding: 5px;
   align-self: flex-start;
   z-index: 1000;
-  box-shadow: 2px 0px rgb(255, 255, 199), -2px 0px rgb(255, 255, 199), 0px -2px rgb(255, 255, 199), 0px 2px rgb(255, 255, 199);
+  box-shadow: 2px 0 rgb(255, 255, 199), -2px 0 rgb(255, 255, 199), 0 -2px rgb(255, 255, 199), 0 2px rgb(255, 255, 199);
 }
 .tooltip:after {
-  content: "";
-  display: inline-block;
-  width: 2px;
-  height: 2px;
-  position: absolute;
-  top: -2px;
   right: -2px;
-  background: rgb(255, 255, 199);
-  box-shadow: -2px -2px rgb(255, 255, 199), 0px -2px rgb(255, 255, 199), 0px -4px rgb(255, 255, 199);
+  box-shadow: -2px -2px rgb(255, 255, 199), 0 -2px rgb(255, 255, 199), 0 -4px rgb(255, 255, 199);
 }
 .tooltip.visible {
   visibility: visible;
@@ -480,26 +531,12 @@ svg {
   transition-delay: 0.5s;
 }
 .tooltip.page-left:after {
-  content: "";
-  display: inline-block;
-  width: 2px;
-  height: 2px;
-  position: absolute;
-  top: -2px;
   left: -2px;
-  background: rgb(255, 255, 199);
-  box-shadow: 2px -2px rgb(255, 255, 199), 0px -2px rgb(255, 255, 199), 0px -4px rgb(255, 255, 199);
+  box-shadow: 2px -2px rgb(255, 255, 199), 0 -2px rgb(255, 255, 199), 0 -4px rgb(255, 255, 199);
 }
 .tooltip.page-center:after {
-  content: "";
-  display: inline-block;
-  width: 2px;
-  height: 2px;
-  position: absolute;
-  top: -2px;
   left: calc(50% - 1px);
-  background: rgb(255, 255, 199);
-  box-shadow: 2px -2px rgb(255, 255, 199), -2px -2px rgb(255, 255, 199), 0px -2px rgb(255, 255, 199), 0px -4px rgb(255, 255, 199);
+  box-shadow: 2px -2px rgb(255, 255, 199), -2px -2px rgb(255, 255, 199), 0 -2px rgb(255, 255, 199), 0 -4px rgb(255, 255, 199);
 }
 
 /* Buttons */
@@ -585,10 +622,10 @@ svg {
   width: 16px;
   background-color: rgb(61, 61, 61);
   margin-right: 8px;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: 2px 0 rgb(131, 131, 131), -2px 0 rgb(131, 131, 131), 0 -2px rgb(131, 131, 131), 0 2px rgb(131, 131, 131);
 }
 .toggle:hover .checkmark {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: 2px 0 rgb(255, 255, 255), -2px 0 rgb(255, 255, 255), 0 -2px rgb(255, 255, 255), 0 2px rgb(255, 255, 255);
 }
 .toggle input:checked ~ .checkmark::after {
   content: "";
@@ -609,12 +646,12 @@ svg {
 .slider::-webkit-slider-thumb {
   width: 16px;
   height: 16px;
-  background: #ffffff;
+  background: rgb(255, 255, 255);
 }
 .slider::-moz-range-thumb {
   width: 16px;
   height: 16px;
-  background: #ffffff;
+  background: rgb(255, 255, 255);
 }
 .slider:disabled {
   cursor: not-allowed;
@@ -842,7 +879,7 @@ canvas {
 }
 .canvas-container .bg-space .bg-canvas {
   position: absolute;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   width: 100%;
   height: 100%;
 }
@@ -884,43 +921,11 @@ canvas {
 .toolbox .collapsible :first-child {
   margin-top: 6px;
 }
-.toolbox .collapsible .tool {
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  user-select: none;
-  text-align: center;
-  color: white;
-  width: 40px;
-  height: 40px;
-  margin: 3px;
-  opacity: 1;
-  background-color: rgb(131, 131, 131);
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
-}
-.toolbox .collapsible .tool:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
-}
-.toolbox .collapsible .tool:hover {
-  z-index: 104;
-}
-.toolbox .collapsible .tool.selected {
-  background-color: rgb(255, 255, 255);
-  z-index: 105;
-}
 .toolbox .collapsible .tool.deactivate-paste {
   box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
 }
 .toolbox .collapsible .tool.deactivate-paste:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
-}
-.toolbox .collapsible .tool.custom-shape {
-  background-color: transparent;
-  box-shadow: none;
-}
-.toolbox .collapsible .tool.custom-shape:hover:not([disabled]) {
-  box-shadow: none;
 }
 .toolbox .collapsible .zoom .zoombtn {
   height: 40px;
@@ -946,7 +951,7 @@ canvas {
 }
 .toolbox .collapsible .tools h4 {
   text-align: center;
-  margin: 0px;
+  margin: 0;
   font-weight: normal;
 }
 .toolbox .collapsible .tools .columns {
@@ -1355,10 +1360,6 @@ canvas {
 }
 .layers-interface.disabled .collapsible {
   cursor: not-allowed;
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
-}
-.layers-interface.disabled .collapsible:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .layers-interface.disabled .collapsible * {
   pointer-events: none;
@@ -1366,6 +1367,12 @@ canvas {
 .layers-interface.disabled .collapsible button,
 .layers-interface.disabled .collapsible label {
   opacity: 0.5;
+}
+.layers-interface.disabled .collapsible {
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.layers-interface.disabled .collapsible:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 
 .layer-settings {
@@ -1389,11 +1396,11 @@ canvas {
   top: calc(50% - 1px);
   left: -4px;
   background: rgb(131, 131, 131);
-  box-shadow: -2px -2px rgb(131, 131, 131), 0px -2px rgb(61, 61, 61), 0px -4px rgb(131, 131, 131), 2px 0px rgb(61, 61, 61), 2px -2px rgb(61, 61, 61), 2px -4px rgb(61, 61, 61);
+  box-shadow: -2px -2px rgb(131, 131, 131), 0 -2px rgb(61, 61, 61), 0 -4px rgb(131, 131, 131), 2px 0 rgb(61, 61, 61), 2px -2px rgb(61, 61, 61), 2px -4px rgb(61, 61, 61);
 }
 .layer-settings:hover:not([disabled]):after {
   background: rgb(255, 255, 255);
-  box-shadow: -2px -2px rgb(255, 255, 255), 0px -2px rgb(61, 61, 61), 0px -4px rgb(255, 255, 255), 2px 0px rgb(61, 61, 61), 2px -2px rgb(61, 61, 61), 2px -4px rgb(61, 61, 61);
+  box-shadow: -2px -2px rgb(255, 255, 255), 0 -2px rgb(61, 61, 61), 0 -4px rgb(255, 255, 255), 2px 0 rgb(61, 61, 61), 2px -2px rgb(61, 61, 61), 2px -4px rgb(61, 61, 61);
 }
 .layer-settings > * {
   margin: 16px 16px 0 16px;
@@ -1479,14 +1486,14 @@ canvas {
 }
 .vectors-interface .vectors-container .vectors .vector img {
   pointer-events: none;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   height: 100%;
   overflow: hidden;
   object-fit: cover;
 }
 .vectors-interface .vectors-container .vectors .vector canvas {
   position: absolute;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   width: 100%;
   height: 100%;
 }
@@ -1554,7 +1561,7 @@ canvas {
 .vectors-interface .vectors-container .vectors .vector .actionColor {
   right: 0;
   top: 22px;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container .vectors .vector .actionColor:hover:not([disabled]) {
@@ -1590,7 +1597,7 @@ canvas {
   border: 2px solid rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector:hover .tool {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: 2px 0 rgb(255, 255, 255), -2px 0 rgb(255, 255, 255), 0 -2px rgb(255, 255, 255), 0 2px rgb(255, 255, 255);
   z-index: 105;
 }
 .vectors-interface .vectors-container .vectors .vector .warning {
@@ -1619,7 +1626,7 @@ canvas {
   margin-top: 8px;
 }
 .brush-container p {
-  margin: 0px;
+  margin: 0;
 }
 .brush-container .brush-size {
   padding-top: 2px;
@@ -1673,7 +1680,7 @@ canvas {
   padding-top: 2px;
 }
 .palette-interface p {
-  margin: 0px;
+  margin: 0;
 }
 .palette-interface {
   /* Color Swatches */
@@ -1686,7 +1693,7 @@ canvas {
 }
 .palette-interface .colors .swatch {
   position: absolute;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   width: 48px;
   height: 48px;
   margin: 8px;
@@ -1700,7 +1707,7 @@ canvas {
 }
 .palette-interface .colors .back-swatch {
   position: absolute;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   width: 48px;
   height: 48px;
   margin: 8px;
@@ -1761,7 +1768,7 @@ canvas {
 .palette-interface .palette-container .palette-presets {
   position: relative;
   width: calc(100% - 2px);
-  margin: 0px 0px 8px 2px;
+  margin: 0 0 8px 2px;
 }
 .palette-interface .palette-container .palette-presets .palette-presets-btn {
   width: 100%;
@@ -1811,13 +1818,13 @@ canvas {
   display: flex;
   flex-flow: row wrap;
   width: 100%;
-  margin: 0px 1px;
+  margin: 0 1px;
 }
 .palette-interface .palette-container .palette-colors .palette-color {
   cursor: pointer;
   width: 20px;
   height: 20px;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   margin: 1px;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
@@ -1826,7 +1833,7 @@ canvas {
 }
 .palette-interface .palette-container .palette-colors .palette-color.selected {
   z-index: 105;
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: 2px 0 rgb(255, 255, 255), -2px 0 rgb(255, 255, 255), 0 -2px rgb(255, 255, 255), 0 2px rgb(255, 255, 255);
 }
 .palette-interface .palette-container .palette-colors .palette-color.selected:hover:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
@@ -1848,16 +1855,16 @@ canvas {
   box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
+  box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]):hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
+  box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
+  box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]):hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
+  box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover .swatch {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h2M8 2h1M11 2h1M6 3h2M9 3h2M12 3h2M4 4h2M14 4h2M3 5h1M16 5h1M2 6h1M17 6h1M2 7h1M17 7h1M2 8h1M17 8h1M3 9h1M16 9h1M3 10h1M16 10h1M3 11h1M16 11h1M3 12h1M16 12h1M3 13h1M16 13h1M3 14h1M16 14h1M3 15h1M16 15h1M3 16h1M16 16h1M4 17h1M15 17h1M5 18h10' /%3E%3Cpath stroke='%23575757' d='M9 2h2M8 3h1M6 4h8M4 5h2M13 5h3M3 6h1M10 6h5M3 7h1M12 7h4M3 8h1M8 9h1M11 9h1M4 10h1M6 10h1M9 10h3M14 10h1M4 11h1M6 11h1M9 11h2M14 11h1M4 12h1M6 12h1M9 12h2M14 12h1M4 13h1M6 13h1M9 13h2M14 13h1M4 14h1M6 14h1M9 14h2M14 14h1M4 15h1M9 15h1M13 15h2M4 16h1M11 16h4M5 17h1' /%3E%3Cpath stroke='%23000000' d='M11 3h1M15 6h2M16 7h1M4 8h13M4 9h1M6 9h2M9 9h2M12 9h4M12 10h2M15 10h1M12 11h2M15 11h1M12 12h2M15 12h1M12 13h2M15 13h1M12 14h2M15 14h1M12 15h1M15 15h1M15 16h1M6 17h9' /%3E%3Cpath stroke='%23acacac' d='M6 5h1M8 5h5M4 6h2M7 6h3M4 7h2M8 7h4M5 9h1M5 10h1M8 10h1M5 11h1M8 11h1M11 11h1M5 12h1M8 12h1M11 12h1M5 13h1M8 13h1M11 13h1M5 14h1M8 14h1M11 14h1M5 15h1M8 15h1M10 15h2M5 16h6' /%3E%3Cpath stroke='%23ffffff' d='M7 5h1M6 6h1M6 7h2M7 10h1M7 11h1M7 12h1M7 13h1M7 14h1M6 15h2' /%3E%3C/svg%3E") !important;
@@ -1877,21 +1884,9 @@ canvas {
 }
 
 .settings-container {
-  user-select: none;
-  position: absolute;
   top: 15%;
-  z-index: 103;
   max-width: calc(100% - 4px);
   max-height: calc(100% - 4px);
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  color: white;
-  background: rgb(51, 51, 51);
-  text-align: center;
-  padding: 0;
-  align-self: center;
-  opacity: 1;
 }
 .settings-container .collapsible {
   padding-top: 2px;
@@ -1980,7 +1975,7 @@ canvas {
 .picker-container .header h3 {
   justify-self: center;
   height: 20px;
-  margin: 0px;
+  margin: 0;
 }
 .picker-container .collapsible {
   padding-top: 2px;
@@ -2038,7 +2033,7 @@ canvas {
   height: 24px;
   width: 9px;
   border: 2px solid black;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: 2px 0 rgb(131, 131, 131), -2px 0 rgb(131, 131, 131), 0 -2px rgb(131, 131, 131), 0 2px rgb(131, 131, 131);
 }
 .picker-container .collapsible .picker-interface #left #picker .picker-slider::-moz-range-thumb {
   box-sizing: border-box;
@@ -2046,13 +2041,13 @@ canvas {
   height: 24px;
   width: 9px;
   border: 2px solid black;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: 2px 0 rgb(131, 131, 131), -2px 0 rgb(131, 131, 131), 0 -2px rgb(131, 131, 131), 0 2px rgb(131, 131, 131);
 }
 .picker-container .collapsible .picker-interface #left #picker .picker-slider:hover::-webkit-slider-thumb, .picker-container .collapsible .picker-interface #left #picker .picker-slider:focus::-webkit-slider-thumb {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: 2px 0 rgb(255, 255, 255), -2px 0 rgb(255, 255, 255), 0 -2px rgb(255, 255, 255), 0 2px rgb(255, 255, 255);
 }
 .picker-container .collapsible .picker-interface #left #picker .picker-slider:hover::-moz-range-thumb, .picker-container .collapsible .picker-interface #left #picker .picker-slider:focus::-moz-range-thumb {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: 2px 0 rgb(255, 255, 255), -2px 0 rgb(255, 255, 255), 0 -2px rgb(255, 255, 255), 0 2px rgb(255, 255, 255);
 }
 .picker-container .collapsible .picker-interface #left #picker #hueslider {
   top: 240px;
@@ -2088,7 +2083,7 @@ canvas {
   background: rgb(77, 77, 77);
   font-size: 20px;
   padding: 8px;
-  margin: 0px 20px 0px 20px;
+  margin: 0 20px 0 20px;
 }
 .picker-container .collapsible .picker-interface #right {
   display: flex;
@@ -2193,27 +2188,15 @@ canvas {
 
 /* Canvas Size settings */
 .size-container {
-  user-select: none;
-  position: absolute;
   top: 15%;
-  z-index: 103;
   max-width: calc(100% - 4px);
   max-height: calc(100% - 4px);
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  color: white;
-  background: rgb(51, 51, 51);
-  text-align: center;
-  padding: 0;
-  align-self: center;
-  opacity: 1;
 }
 .size-container .collapsible {
   padding-top: 2px;
 }
 .size-container p {
-  margin: 0px;
+  margin: 0;
 }
 .size-container .dimensions-form {
   padding: 8px;
@@ -2260,21 +2243,9 @@ canvas {
 }
 
 .export-container {
-  user-select: none;
-  position: absolute;
-  z-index: 103;
   width: 370px;
   max-width: calc(100% - 4px);
   max-height: calc(100% - 4px);
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  color: white;
-  background: rgb(51, 51, 51);
-  text-align: center;
-  padding: 0;
-  align-self: center;
-  opacity: 1;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .export-container:hover:not([disabled]) {
@@ -2283,7 +2254,7 @@ canvas {
 .export-container .header h3 {
   justify-self: center;
   height: 20px;
-  margin: 0px;
+  margin: 0;
 }
 .export-container .collapsible {
   padding-top: 2px;
@@ -2304,22 +2275,10 @@ canvas {
 }
 
 .save-container {
-  user-select: none;
-  position: absolute;
   top: 15%;
-  z-index: 103;
   width: 370px;
   max-width: calc(100% - 4px);
   max-height: calc(100% - 4px);
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  color: white;
-  background: rgb(51, 51, 51);
-  text-align: center;
-  padding: 0;
-  align-self: center;
-  opacity: 1;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .save-container:hover:not([disabled]) {
@@ -2328,7 +2287,7 @@ canvas {
 .save-container .header h3 {
   justify-self: center;
   height: 20px;
-  margin: 0px;
+  margin: 0;
 }
 .save-container .collapsible {
   padding-top: 2px;
@@ -2344,7 +2303,7 @@ canvas {
   flex-flow: row nowrap;
   align-items: center;
   justify-content: flex-start;
-  margin: 8px 0px;
+  margin: 8px 0;
 }
 .save-container .collapsible .save-interface .save-setting #save-file-name {
   width: 96px;
@@ -2390,20 +2349,9 @@ canvas {
   margin: 8px;
   background: rgb(77, 77, 77);
 }
+
 .vector-transform-ui-container {
-  user-select: none;
-  position: absolute;
-  z-index: 103;
   top: 10%;
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  color: white;
-  background: rgb(51, 51, 51);
-  text-align: center;
-  padding: 0;
-  align-self: center;
-  opacity: 1;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .vector-transform-ui-container:hover:not([disabled]) {
@@ -2412,7 +2360,7 @@ canvas {
 .vector-transform-ui-container .header h3 {
   justify-self: center;
   height: 20px;
-  margin: 0px;
+  margin: 0;
 }
 .vector-transform-ui-container .collapsible {
   padding-top: 2px;
@@ -2436,38 +2384,6 @@ canvas {
 }
 .vector-transform-ui-container .collapsible .vector-transform-ui-interface .transform-options button {
   color: rgb(255, 255, 255);
-}
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool {
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  user-select: none;
-  text-align: center;
-  color: white;
-  width: 40px;
-  height: 40px;
-  margin: 3px;
-  opacity: 1;
-  background-color: rgb(131, 131, 131);
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
-}
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
-}
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool:hover {
-  z-index: 104;
-}
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool.selected {
-  background-color: rgb(255, 255, 255);
-  z-index: 105;
-}
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool.custom-shape {
-  background-color: transparent;
-  box-shadow: none;
-}
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool.custom-shape:hover:not([disabled]) {
-  box-shadow: none;
 }
 
 /*# sourceMappingURL=style.css.map */

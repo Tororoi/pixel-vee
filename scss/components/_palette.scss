@@ -6,7 +6,7 @@
     padding-top: 2px;
   }
   p {
-    margin: 0px;
+    margin: 0;
   }
   /* Color Swatches */
   .colors {
@@ -16,13 +16,7 @@
     margin-bottom: 16px;
     .swatch {
       position: absolute;
-      background-image: repeating-linear-gradient(
-        -45deg,
-        white,
-        white 5px,
-        rgb(216, 216, 216) 5px,
-        rgb(216, 216, 216) 10px
-      );
+      background-image: $diagonal-stripe-bg;
       width: 48px;
       height: 48px;
       margin: 8px;
@@ -39,13 +33,7 @@
     }
     .back-swatch {
       position: absolute;
-      background-image: repeating-linear-gradient(
-        -45deg,
-        white,
-        white 5px,
-        rgb(216, 216, 216) 5px,
-        rgb(216, 216, 216) 10px
-      );
+      background-image: $diagonal-stripe-bg;
       width: 48px;
       height: 48px;
       margin: 8px;
@@ -101,7 +89,7 @@
     .palette-presets {
       position: relative;
       width: calc(100% - 2px);
-      margin: 0px 0px 8px 2px;
+      margin: 0 0 8px 2px;
       .palette-presets-btn {
         width: 100%;
         background: $gray;
@@ -145,18 +133,12 @@
       display: flex;
       flex-flow: row wrap;
       width: 100%;
-      margin: 0px 1px;
+      margin: 0 1px;
       .palette-color {
         cursor: pointer;
         width: 20px;
         height: 20px;
-        background-image: repeating-linear-gradient(
-          -45deg,
-          white,
-          white 5px,
-          rgb(216, 216, 216) 5px,
-          rgb(216, 216, 216) 10px
-        );
+        background-image: $diagonal-stripe-bg;
         margin: 1px;
         @include boxBorder;
         &.selected {

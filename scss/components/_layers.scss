@@ -120,15 +120,8 @@
   }
   &.disabled {
     .collapsible {
-      cursor: not-allowed;
+      @include disabled-collapsible;
       @include boxBorder($border-color, $border-color);
-      * {
-        pointer-events: none;
-      }
-      button,
-      label {
-        opacity: 0.5;
-      }
     }
   }
 }

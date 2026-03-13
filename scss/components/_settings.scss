@@ -1,19 +1,8 @@
 .settings-container {
-  user-select: none;
-  position: absolute;
+  @extend %floating-dialog;
   top: 15%;
-  z-index: 103;
   max-width: calc(100% - 4px);
   max-height: calc(100% - 4px);
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  color: white;
-  background: $extra-dark-gray;
-  text-align: center;
-  padding: 0;
-  align-self: center;
-  opacity: 1;
   .collapsible {
     padding-top: 2px;
     // display: none;

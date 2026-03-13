@@ -1,18 +1,18 @@
-@use "sass:math";
+@use 'sass:math';
 /* Variables */
 
 /* Breakpoints */
-$bp-xs: "min-width: 375px" !default;
-$bp-sm: "min-width: 512px" !default;
-$bp-md: "min-width: 768px" !default;
-$bp-lg: "min-width: 1024px" !default;
-$bp-xl: "min-width: 1280px" !default;
-$bp-xxl: "min-width: 1440px" !default;
-$bp-vxs: "min-height: 375px" !default;
-$bp-vsm: "min-height: 512px" !default;
-$bp-vmd: "min-height: 768px" !default;
-$bp-landscape: "orientation: landscape" !default;
-$bp-portrait: "orientation: portrait" !default;
+$bp-xs: 'min-width: 375px' !default;
+$bp-sm: 'min-width: 512px' !default;
+$bp-md: 'min-width: 768px' !default;
+$bp-lg: 'min-width: 1024px' !default;
+$bp-xl: 'min-width: 1280px' !default;
+$bp-xxl: 'min-width: 1440px' !default;
+$bp-vxs: 'min-height: 375px' !default;
+$bp-vsm: 'min-height: 512px' !default;
+$bp-vmd: 'min-height: 768px' !default;
+$bp-landscape: 'orientation: landscape' !default;
+$bp-portrait: 'orientation: portrait' !default;
 
 /* Colors */
 $white: rgb(255, 255, 255) !default;
@@ -36,11 +36,20 @@ $active-color: $white !default;
 $button-color: $neutral-gray !default;
 $warning-color: $red !default;
 $edit-color: rgb(71, 255, 47) !default;
-$remove-color: red !default;
+$remove-color: $red !default;
+
+/* Backgrounds */
+$diagonal-stripe-bg: repeating-linear-gradient(
+  -45deg,
+  $white,
+  $white 5px,
+  $lighter-gray 5px,
+  $lighter-gray 10px
+) !default;
 
 :root {
   //Define css vars after scss vars to have option to use scss vars as single source of truth
-  --border-color: $border-color;
+  --border-color: #{$border-color};
   --primary-swatch-color: 0, 0, 0;
   --primary-swatch-alpha: 1;
   --secondary-swatch-color: 255, 255, 255;
