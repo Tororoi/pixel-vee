@@ -63,7 +63,8 @@ export function activateShortcut(keyCode) {
     case "AltLeft":
     case "AltRight":
       //option key
-      if (!state.cursor.clicked) {
+      //magicWand uses Alt as a subtract-from-selection modifier, not for eyedropper
+      if (!state.cursor.clicked && dom.toolBtn.id !== "magicWand") {
         state.tool.current = tools["eyedropper"]
         canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
         renderBrushStampToDOM()
@@ -274,7 +275,10 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyW":
-      //
+      if (!state.cursor.clicked) {
+        switchTool("magicWand")
+        renderVectorsToDOM()
+      }
       break
     case "KeyX":
       if (!state.cursor.clicked) {

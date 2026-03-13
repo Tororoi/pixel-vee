@@ -9,6 +9,60 @@ import {
 import { SCALE } from '../utils/constants.js'
 
 /**
+ * Render pixel-level contour marching ants for magic wand selections.
+ * Iterates over all pixels in state.selection.maskSet and draws edge segments
+ * wherever a selected pixel borders a non-selected pixel.
+ * @param {number} lineDashOffset - (Float)
+ */
+function renderMaskContourOutline(lineDashOffset) {
+  const maskSet = state.selection.maskSet
+  if (!maskSet || maskSet.size === 0) return
+  const lineWidth = getGuiLineWidth()
+  canvas.selectionGuiCTX.save()
+
+  //Build path of all edge segments
+  canvas.selectionGuiCTX.beginPath()
+  for (const key of maskSet) {
+    const x = key & 0xffff
+    const y = (key >> 16) & 0xffff
+    //Top edge — neighbor above is not selected
+    if (!maskSet.has(((y - 1) << 16) | x)) {
+      canvas.selectionGuiCTX.moveTo(canvas.xOffset + x, canvas.yOffset + y)
+      canvas.selectionGuiCTX.lineTo(canvas.xOffset + x + 1, canvas.yOffset + y)
+    }
+    //Bottom edge — neighbor below is not selected
+    if (!maskSet.has(((y + 1) << 16) | x)) {
+      canvas.selectionGuiCTX.moveTo(canvas.xOffset + x, canvas.yOffset + y + 1)
+      canvas.selectionGuiCTX.lineTo(canvas.xOffset + x + 1, canvas.yOffset + y + 1)
+    }
+    //Left edge — neighbor to left is not selected
+    if (!maskSet.has((y << 16) | (x - 1))) {
+      canvas.selectionGuiCTX.moveTo(canvas.xOffset + x, canvas.yOffset + y)
+      canvas.selectionGuiCTX.lineTo(canvas.xOffset + x, canvas.yOffset + y + 1)
+    }
+    //Right edge — neighbor to right is not selected
+    if (!maskSet.has((y << 16) | (x + 1))) {
+      canvas.selectionGuiCTX.moveTo(canvas.xOffset + x + 1, canvas.yOffset + y)
+      canvas.selectionGuiCTX.lineTo(canvas.xOffset + x + 1, canvas.yOffset + y + 1)
+    }
+  }
+
+  //Solid black underline for contrast
+  canvas.selectionGuiCTX.lineWidth = lineWidth * 4
+  canvas.selectionGuiCTX.strokeStyle = 'black'
+  canvas.selectionGuiCTX.stroke()
+
+  //White dashed line on top (marching ants)
+  canvas.selectionGuiCTX.setLineDash([lineWidth * 6, lineWidth * 6])
+  canvas.selectionGuiCTX.lineDashOffset = lineDashOffset
+  canvas.selectionGuiCTX.lineWidth = lineWidth * 2
+  canvas.selectionGuiCTX.strokeStyle = 'white'
+  canvas.selectionGuiCTX.stroke()
+  canvas.selectionGuiCTX.setLineDash([])
+  canvas.selectionGuiCTX.restore()
+}
+
+/**
  * Render selection outline and control points
  * @param {number} lineDashOffset - (Float)
  */
@@ -53,12 +107,16 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
         canvas.offScreenCVS.height,
       )
       canvas.selectionGuiCTX.restore()
-      let shouldRenderPoints =
-        state.tool.current.name === 'select' ||
-        (state.tool.current.name === 'move' && canvas.pastedLayer) ||
-        canvas.currentLayer.type === 'reference' ||
-        state.vector.transformMode === SCALE
-      renderSelectionBoxOutline(lineDashOffset, shouldRenderPoints)
+      if (state.selection.maskSet) {
+        renderMaskContourOutline(lineDashOffset)
+      } else {
+        let shouldRenderPoints =
+          state.tool.current.name === 'select' ||
+          (state.tool.current.name === 'move' && canvas.pastedLayer) ||
+          canvas.currentLayer.type === 'reference' ||
+          state.vector.transformMode === SCALE
+        renderSelectionBoxOutline(lineDashOffset, shouldRenderPoints)
+      }
     } else if (isVectorSelection) {
       if (vectorGui.outlineVectorSelection) {
         //define rectangle for canvas area
