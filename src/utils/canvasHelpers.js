@@ -1,23 +1,29 @@
+import { ZOOM_LEVELS } from './constants.js'
+
 /**
- * @param {number} width - (Integer)
- * @returns {number} - (Float)
+ * Find the largest zoom level where the canvas fits entirely within the container.
+ * @param {number} canvasWidth - art canvas width in pixels (Integer)
+ * @param {number} canvasHeight - art canvas height in pixels (Integer)
+ * @param {number} containerWidth - available container width in CSS pixels (Integer)
+ * @param {number} containerHeight - available container height in CSS pixels (Integer)
+ * @returns {number} - zoom level (Float)
  */
-export const setInitialZoom = (width) => {
-  const ratio = 256 / width
-  switch (true) {
-    case ratio >= 8:
-      return 16
-    case ratio >= 4:
-      return 8
-    case ratio >= 2:
-      return 4
-    case ratio >= 1:
-      return 2
-    case ratio >= 0.5:
-      return 1
-    default:
-      return 0.5
+export const setInitialZoom = (
+  canvasWidth,
+  canvasHeight,
+  containerWidth,
+  containerHeight,
+) => {
+  for (let i = ZOOM_LEVELS.length - 1; i >= 0; i--) {
+    const zoom = ZOOM_LEVELS[i]
+    if (
+      canvasWidth * zoom <= containerWidth &&
+      canvasHeight * zoom <= containerHeight
+    ) {
+      return zoom
+    }
   }
+  return ZOOM_LEVELS[0]
 }
 
 /**
