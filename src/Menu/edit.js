@@ -14,23 +14,35 @@ import { enableActionsForClipboard } from "../DOM/disableDomElements.js"
  */
 export function copySelectedPixels() {
   const { xMin, yMin, xMax, yMax } = state.selection.boundaryBox
+  const w = xMax - xMin
+  const h = yMax - yMin
   const tempCanvas = document.createElement("canvas")
-  tempCanvas.width = xMax - xMin
-  tempCanvas.height = yMax - yMin
+  tempCanvas.width = w
+  tempCanvas.height = h
   const tempCTX = tempCanvas.getContext("2d", {
     willReadFrequently: true,
   })
-  tempCTX.drawImage(
-    canvas.currentLayer.cvs,
-    xMin,
-    yMin,
-    xMax - xMin,
-    yMax - yMin,
-    0,
-    0,
-    tempCanvas.width,
-    tempCanvas.height
-  )
+  if (state.selection.maskSet) {
+    //Only copy pixels that are in the maskSet — leave the rest transparent
+    const srcImageData = canvas.currentLayer.ctx.getImageData(xMin, yMin, w, h)
+    const dstImageData = tempCTX.createImageData(w, h)
+    const src = srcImageData.data
+    const dst = dstImageData.data
+    for (const key of state.selection.maskSet) {
+      const cx = key & 0xffff
+      const cy = (key >> 16) & 0xffff
+      const bx = cx - xMin
+      const by = cy - yMin
+      const idx = (by * w + bx) * 4
+      dst[idx] = src[idx]
+      dst[idx + 1] = src[idx + 1]
+      dst[idx + 2] = src[idx + 2]
+      dst[idx + 3] = src[idx + 3]
+    }
+    tempCTX.putImageData(dstImageData, 0, 0)
+  } else {
+    tempCTX.drawImage(canvas.currentLayer.cvs, xMin, yMin, w, h, 0, 0, w, h)
+  }
   state.clipboard.select.selectProperties = { ...state.selection.properties }
   state.clipboard.select.boundaryBox = {
     ...state.selection.boundaryBox,
@@ -39,10 +51,14 @@ export function copySelectedPixels() {
   state.clipboard.select.imageData = canvas.currentLayer.ctx.getImageData(
     xMin,
     yMin,
-    xMax - xMin,
-    yMax - yMin
+    w,
+    h
   )
   state.clipboard.select.vectors = {}
+  //Store the layer offset at copy time so paste can correctly position content
+  //even if the layer is moved between copy and paste
+  state.clipboard.select.layerX = canvas.currentLayer.x
+  state.clipboard.select.layerY = canvas.currentLayer.y
   enableActionsForClipboard()
 }
 
@@ -84,9 +100,25 @@ export function cutSelectedPixels(copyToClipboard) {
   if (copyToClipboard) {
     copySelectedPixels()
   }
-  const { xMin, yMin, xMax, yMax } = state.selection.boundaryBox
-  //Clear boundaryBox area
-  canvas.currentLayer.ctx.clearRect(xMin, yMin, xMax - xMin, yMax - yMin)
+  if (state.selection.maskSet) {
+    //Only clear pixels that are in the maskSet
+    const { xMin, yMin, xMax, yMax } = state.selection.boundaryBox
+    const w = xMax - xMin
+    const h = yMax - yMin
+    const imageData = canvas.currentLayer.ctx.getImageData(xMin, yMin, w, h)
+    const { data } = imageData
+    for (const key of state.selection.maskSet) {
+      const bx = (key & 0xffff) - xMin
+      const by = ((key >> 16) & 0xffff) - yMin
+      const idx = (by * w + bx) * 4
+      data[idx] = data[idx + 1] = data[idx + 2] = data[idx + 3] = 0
+    }
+    canvas.currentLayer.ctx.putImageData(imageData, xMin, yMin)
+  } else {
+    const { xMin, yMin, xMax, yMax } = state.selection.boundaryBox
+    //Clear boundaryBox area
+    canvas.currentLayer.ctx.clearRect(xMin, yMin, xMax - xMin, yMax - yMin)
+  }
 }
 
 /**

@@ -83,29 +83,31 @@ export function renderSelectionCVS(lineDashOffset = 0.5) {
     canvas.selectionGuiCTX.save()
     canvas.selectionGuiCTX.beginPath()
     if (isRasterSelection) {
-      //define rectangle for canvas area
-      canvas.selectionGuiCTX.rect(
-        canvas.xOffset,
-        canvas.yOffset,
-        canvas.offScreenCVS.width,
-        canvas.offScreenCVS.height,
-      )
-      //define rectangle for selection area
-      canvas.selectionGuiCTX.rect(
-        canvas.xOffset + state.selection.boundaryBox.xMin,
-        canvas.yOffset + state.selection.boundaryBox.yMin,
-        state.selection.boundaryBox.xMax - state.selection.boundaryBox.xMin,
-        state.selection.boundaryBox.yMax - state.selection.boundaryBox.yMin,
-      )
-      canvas.selectionGuiCTX.clip('evenodd')
-      // canvas.selectionGuiCTX.globalAlpha = 0.5
-      canvas.selectionGuiCTX.fillStyle = 'rgba(0, 0, 0, 0.1)'
-      canvas.selectionGuiCTX.fillRect(
-        canvas.xOffset,
-        canvas.yOffset,
-        canvas.offScreenCVS.width,
-        canvas.offScreenCVS.height,
-      )
+      //Grey overlay — only for rectangular selections, not maskSet (magic wand) selections
+      if (!state.selection.maskSet) {
+        //define rectangle for canvas area
+        canvas.selectionGuiCTX.rect(
+          canvas.xOffset,
+          canvas.yOffset,
+          canvas.offScreenCVS.width,
+          canvas.offScreenCVS.height,
+        )
+        //define rectangle for selection area
+        canvas.selectionGuiCTX.rect(
+          canvas.xOffset + state.selection.boundaryBox.xMin,
+          canvas.yOffset + state.selection.boundaryBox.yMin,
+          state.selection.boundaryBox.xMax - state.selection.boundaryBox.xMin,
+          state.selection.boundaryBox.yMax - state.selection.boundaryBox.yMin,
+        )
+        canvas.selectionGuiCTX.clip('evenodd')
+        canvas.selectionGuiCTX.fillStyle = 'rgba(0, 0, 0, 0.1)'
+        canvas.selectionGuiCTX.fillRect(
+          canvas.xOffset,
+          canvas.yOffset,
+          canvas.offScreenCVS.width,
+          canvas.offScreenCVS.height,
+        )
+      }
       canvas.selectionGuiCTX.restore()
       if (state.selection.maskSet) {
         renderMaskContourOutline(lineDashOffset)

@@ -29,16 +29,32 @@ function moveSteps() {
       if (vectorGui.selectedPoint.xKey) {
         transformSteps()
       } else {
+        const dx = state.cursor.x - state.cursor.prevX
+        const dy = state.cursor.y - state.cursor.prevY
         //Move layer
-        canvas.currentLayer.x += state.cursor.x - state.cursor.prevX
-        canvas.currentLayer.y += state.cursor.y - state.cursor.prevY
+        canvas.currentLayer.x += dx
+        canvas.currentLayer.y += dy
         //Move selection area
         if (state.selection.properties.px2 !== null) {
-          state.selection.properties.px1 += state.cursor.x - state.cursor.prevX
-          state.selection.properties.px2 += state.cursor.x - state.cursor.prevX
-          state.selection.properties.py1 += state.cursor.y - state.cursor.prevY
-          state.selection.properties.py2 += state.cursor.y - state.cursor.prevY
+          state.selection.properties.px1 += dx
+          state.selection.properties.px2 += dx
+          state.selection.properties.py1 += dy
+          state.selection.properties.py2 += dy
           state.selection.setBoundaryBox(state.selection.properties)
+        }
+        //Move maskSet pixel coordinates with the layer
+        if (state.selection.maskSet && (dx !== 0 || dy !== 0)) {
+          const newMaskSet = new Set()
+          const w = canvas.offScreenCVS.width
+          const h = canvas.offScreenCVS.height
+          for (const key of state.selection.maskSet) {
+            const nx = (key & 0xffff) + dx
+            const ny = ((key >> 16) & 0xffff) + dy
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+              newMaskSet.add((ny << 16) | nx)
+            }
+          }
+          state.selection.maskSet = newMaskSet
         }
         renderCanvas(canvas.currentLayer, true)
       }

@@ -14,9 +14,12 @@ import { renderCanvas } from "../Canvas/render.js"
  * color regardless of their RGB values (premultiplied alpha clears RGB on transparent pixels).
  * @param {number} startX
  * @param {number} startY
+ * @param {Set<number>|null} containMask - When provided, the existing selection maskSet acts as
+ *   a boundary wall. The flood fill is confined to pixels on the same side (selected vs unselected)
+ *   as the start pixel, so the selection boundary cannot be crossed.
  * @returns {Set<number>}
  */
-function floodFill(startX, startY) {
+function floodFill(startX, startY, containMask = null) {
   const imageData = canvas.currentLayer.ctx.getImageData(
     0,
     0,
@@ -29,6 +32,10 @@ function floodFill(startX, startY) {
   const tg = data[startIdx + 1]
   const tb = data[startIdx + 2]
   const ta = data[startIdx + 3]
+
+  //Determine which "side" of the selection boundary the start pixel is on
+  const startIsSelected =
+    containMask !== null && containMask.has((startY << 16) | startX)
 
   const maskSet = new Set()
   const stack = [startY * width + startX]
@@ -52,6 +59,11 @@ function floodFill(startX, startY) {
         data[i + 3] !== ta
       )
         continue
+    }
+
+    //Containment check: only traverse pixels on the same side of the selection boundary
+    if (containMask !== null) {
+      if (containMask.has((y << 16) | x) !== startIsSelected) continue
     }
 
     maskSet.add((y << 16) | x)
@@ -105,9 +117,15 @@ function magicWandSteps() {
       const h = canvas.offScreenCVS.height
       if (x < 0 || x >= w || y < 0 || y >= h) return
 
-      const newSet = floodFill(x, y)
       const isShift = keys.ShiftLeft || keys.ShiftRight
       const isAlt = keys.AltLeft || keys.AltRight
+      //When modifying an existing selection, pass it as a containment boundary so the
+      //flood fill cannot cross the selection edge (selected pixels wall off unselected ones)
+      const containMask =
+        (isShift || isAlt) && state.selection.maskSet
+          ? state.selection.maskSet
+          : null
+      const newSet = floodFill(x, y, containMask)
       let changed = false
 
       if (isShift && state.selection.maskSet) {
