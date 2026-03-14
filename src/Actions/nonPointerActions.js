@@ -187,6 +187,8 @@ export function actionCutSelection(copyToClipboard = true) {
         layer: canvas.currentLayer,
         properties: {
           boundaryBox,
+          originalLayerX: canvas.currentLayer.x,
+          originalLayerY: canvas.currentLayer.y,
         },
       })
 
@@ -256,26 +258,37 @@ export function actionPasteSelection() {
       Object.keys(state.clipboard.select.vectors).length > 0)
   ) {
     //if state.clipboard.select.canvas, run pasteSelectedPixels
-    //adjust boundaryBox for layer offset
+    //Compute layer-relative coords by subtracting the layer offset AT COPY TIME (not now).
+    //This keeps the paste anchored to the same layer-relative position as the copied pixels,
+    //so moving the layer between copy and paste shifts the paste with the content.
+    const clipboardLayerX = state.clipboard.select.layerX ?? 0
+    const clipboardLayerY = state.clipboard.select.layerY ?? 0
     const boundaryBox = { ...state.clipboard.select.boundaryBox }
     if (boundaryBox.xMax !== null) {
-      boundaryBox.xMin -= canvas.currentLayer.x
-      boundaryBox.xMax -= canvas.currentLayer.x
-      boundaryBox.yMin -= canvas.currentLayer.y
-      boundaryBox.yMax -= canvas.currentLayer.y
+      boundaryBox.xMin -= clipboardLayerX
+      boundaryBox.xMax -= clipboardLayerX
+      boundaryBox.yMin -= clipboardLayerY
+      boundaryBox.yMax -= clipboardLayerY
     }
     const selectProperties = {
       ...state.clipboard.select.selectProperties,
     }
     if (selectProperties.px2 !== null) {
-      selectProperties.px1 -= canvas.currentLayer.x
-      selectProperties.px2 -= canvas.currentLayer.x
-      selectProperties.py1 -= canvas.currentLayer.y
-      selectProperties.py2 -= canvas.currentLayer.y
+      selectProperties.px1 -= clipboardLayerX
+      selectProperties.px2 -= clipboardLayerX
+      selectProperties.py1 -= clipboardLayerY
+      selectProperties.py2 -= clipboardLayerY
     }
     if (state.clipboard.select.canvas) {
       //paste selected pixels (creates temporary canvas layer for pasting)
-      pasteSelectedPixels(state.clipboard.select, canvas.currentLayer, 0, 0)
+      //Pass adjusted clipboard and current layer offset so the live paste draws at the
+      //correct canvas position (layer-relative + current layer.x = canvas position)
+      const adjustedClipboard = {
+        ...state.clipboard.select,
+        boundaryBox,
+        selectProperties,
+      }
+      pasteSelectedPixels(adjustedClipboard, canvas.currentLayer, canvas.currentLayer.x, canvas.currentLayer.y)
       let uniquePastedImageKey = null
       if (state.clipboard.select.canvas) {
         state.clipboard.highestPastedImageKey += 1
