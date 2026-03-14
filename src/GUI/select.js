@@ -33,18 +33,22 @@ function buildMaskPath(maskSet) {
   for (const key of maskSet) {
     const x = key & 0xffff
     const y = (key >> 16) & 0xffff
+    // Top edge: left to right for clockwise marching
     if (!maskSet.has(((y - 1) << 16) | x)) {
       path.moveTo(ox + x, oy + y)
       path.lineTo(ox + x + 1, oy + y)
     }
+    // Bottom edge: right to left for clockwise marching
     if (!maskSet.has(((y + 1) << 16) | x)) {
-      path.moveTo(ox + x, oy + y + 1)
-      path.lineTo(ox + x + 1, oy + y + 1)
-    }
-    if (!maskSet.has((y << 16) | (x - 1))) {
-      path.moveTo(ox + x, oy + y)
+      path.moveTo(ox + x + 1, oy + y + 1)
       path.lineTo(ox + x, oy + y + 1)
     }
+    // Left edge: bottom to top for clockwise marching
+    if (!maskSet.has((y << 16) | (x - 1))) {
+      path.moveTo(ox + x, oy + y + 1)
+      path.lineTo(ox + x, oy + y)
+    }
+    // Right edge: top to bottom for clockwise marching
     if (!maskSet.has((y << 16) | (x + 1))) {
       path.moveTo(ox + x + 1, oy + y)
       path.lineTo(ox + x + 1, oy + y + 1)
@@ -57,7 +61,7 @@ function buildMaskPath(maskSet) {
  * Advances the march offset and re-renders the selection canvas each frame.
  */
 function tickMarchingAnts() {
-  marchOffset += 0.3 / canvas.zoom
+  marchOffset += 0.015
   marchAnimId = requestAnimationFrame(tickMarchingAnts)
   renderSelectionCVS()
 }
@@ -106,7 +110,7 @@ function renderMaskContourOutline(lineDashOffset) {
 
   //Rounded dotted line: black border first, then white dots on top
   canvas.selectionGuiCTX.lineCap = 'round'
-  canvas.selectionGuiCTX.setLineDash([0.5, lineWidth * 8])
+  canvas.selectionGuiCTX.setLineDash([0.4, 0.6])
   canvas.selectionGuiCTX.lineDashOffset = lineDashOffset
   canvas.selectionGuiCTX.lineWidth = lineWidth * 4
   canvas.selectionGuiCTX.strokeStyle = 'black'
@@ -367,7 +371,7 @@ export function renderSelectionBoxOutline(lineDashOffset, drawPoints) {
     )
     // Rounded dotted line: black border first, then white dots on top
     if (!canvas.pastedLayer && canvas.currentLayer.type !== 'reference') {
-      canvas.selectionGuiCTX.setLineDash([0.5, lineWidth * 8])
+      canvas.selectionGuiCTX.setLineDash([0.4, 0.6])
       canvas.selectionGuiCTX.lineDashOffset = lineDashOffset
     }
     canvas.selectionGuiCTX.lineWidth = lineWidth * 4
