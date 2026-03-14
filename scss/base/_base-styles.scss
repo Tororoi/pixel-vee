@@ -45,33 +45,33 @@ table {
 } */
 
 @font-face {
-  font-family: "04Font";
-  src: url("../../public/04B_03__.ttf") format("truetype");
+  font-family: '04Font';
+  src: url('../../public/04B_03__.ttf') format('truetype');
   font-display: swap;
   font-weight: normal;
 }
 
 @font-face {
-  font-family: "Pixeloid Mono";
-  src: url("../../public/PixeloidMono-d94EV.ttf") format("truetype");
+  font-family: 'Pixeloid Mono';
+  src: url('../../public/PixeloidMono-d94EV.ttf') format('truetype');
   font-display: swap;
 }
 
 @font-face {
-  font-family: "basis33";
-  src: url("../../public/basis33.ttf") format("truetype");
+  font-family: 'basis33';
+  src: url('../../public/basis33.ttf') format('truetype');
   font-display: swap;
 }
 
 @font-face {
-  font-family: "Graph35";
-  src: url("../../public/Graph-35-pix.ttf") format("truetype");
+  font-family: 'Graph35';
+  src: url('../../public/Graph-35-pix.ttf') format('truetype');
   font-display: swap;
 }
 
 @font-face {
-  font-family: "Monogram";
-  src: url("../../public/monogram.ttf") format("truetype");
+  font-family: 'Monogram';
+  src: url('../../public/monogram.ttf') format('truetype');
   font-display: swap;
 }
 
@@ -87,7 +87,7 @@ body,
 button,
 input {
   // font-family: "Monogram", monospace;
-  font-family: "04Font";
+  font-family: '04Font';
   // font-family: Arial, Helvetica, sans-serif;
   font-size: 16px;
   font-weight: normal;
@@ -95,7 +95,6 @@ input {
 }
 
 body {
-  margin: 0px;
   color: white;
   background: $dark-gray;
   user-select: none;
@@ -130,9 +129,9 @@ button {
 
 input {
   box-sizing: border-box;
-  padding-block: 0px;
-  padding-inline: 0px;
-  padding: 0px;
+  padding-block: 0;
+  padding-inline: 0;
+  padding: 0;
   text-indent: 2px;
   background-color: $darkest-gray;
   color: white;
@@ -149,7 +148,7 @@ input {
   }
 }
 
-input[type="number"] {
+input[type='number'] {
   width: 40px;
   -moz-appearance: textfield;
   &::-webkit-inner-spin-button,
@@ -159,7 +158,7 @@ input[type="number"] {
   }
 }
 
-input[type="range"] {
+input[type='range'] {
   -webkit-appearance: none;
   &::-webkit-slider-thumb {
     -webkit-appearance: none;

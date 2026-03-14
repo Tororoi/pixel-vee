@@ -9,9 +9,11 @@ import {
   renderVectorsToDOM,
   renderPaletteToolsToDOM,
   renderPaletteToDOM,
+  renderPalettePresetsToDOM,
 } from "../DOM/render.js"
 import { changeActionVectorColor } from "../Actions/modifyTimeline.js"
 import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
+import { DEFAULT_PALETTES, PRESETS } from "../utils/palettes.js"
 
 //====================================//
 //===== * * * Color Picker * * * =====//
@@ -82,6 +84,7 @@ export function setColor(r, g, b, a, target) {
       } else {
         swatches.palette[swatches.activePaletteIndex] = target.color
       }
+      onPaletteModified()
       swatches.activePaletteIndex = null
     }
   }
@@ -169,6 +172,7 @@ function handlePalette(e) {
       if (activePaletteIndex !== -1) {
         // Ensure the color is found in the palette
         swatches.palette.splice(activePaletteIndex, 1)
+        onPaletteModified()
         if (!keys["KeyX"]) {
           //reset paletteMode unless holding x
           swatches.paletteMode = "select"
@@ -277,11 +281,82 @@ picker.build()
 //=== * * * Event Listeners * * * ===//
 //===================================//
 
+/**
+ * Add the current picker color to the palette without closing the picker
+ */
+function handleAddToPalette() {
+  const { red: r, green: g, blue: b } = picker.rgb
+  const a = picker.alpha
+  swatches.palette.push({ color: `rgba(${r},${g},${b},${a / 255})`, r, g, b, a })
+  onPaletteModified()
+  renderPaletteToDOM()
+}
+
+/**
+ * Load a preset or custom palette by id
+ * @param {string} id - preset or custom palette id
+ */
+function handlePresetSelect(id) {
+  if (id in DEFAULT_PALETTES) {
+    swatches.palette = DEFAULT_PALETTES[id].map((c) => ({ ...c }))
+  } else if (id in swatches.customPalettes) {
+    swatches.palette = swatches.customPalettes[id].colors.map((c) => ({ ...c }))
+  } else {
+    return
+  }
+  swatches.currentPreset = id
+  renderPaletteToDOM()
+  renderPalettePresetsToDOM()
+}
+
+/**
+ * Track palette modifications: create a new custom entry when on a preset,
+ * or update the existing custom entry in place.
+ */
+function onPaletteModified() {
+  const id = swatches.currentPreset
+  if (id in DEFAULT_PALETTES) {
+    const base = PRESETS.find((p) => p.id === id)?.label ?? id
+    const existingCount = Object.keys(swatches.customPalettes).filter((k) =>
+      k.startsWith(`custom_${id}_`)
+    ).length
+    const n = existingCount + 1
+    const customId = `custom_${id}_${n}`
+    const label = n === 1 ? `Custom (${base})` : `Custom (${base}) ${n}`
+    swatches.customPalettes[customId] = {
+      label,
+      colors: swatches.palette.map((c) => ({ ...c })),
+    }
+    swatches.currentPreset = customId
+  } else if (id in swatches.customPalettes) {
+    swatches.customPalettes[id].colors = swatches.palette.map((c) => ({ ...c }))
+  }
+  renderPalettePresetsToDOM()
+}
+
 dom.swatch.addEventListener("click", openColorPicker)
 dom.backSwatch.addEventListener("click", openColorPicker)
 dom.colorSwitch.addEventListener("click", switchColors)
 //Palette
 dom.paletteContainer.addEventListener("click", handlePalette)
+dom.palettePresetsBtn.addEventListener("click", (e) => {
+  e.stopPropagation()
+  const container = dom.palettePresetsBtn.parentElement
+  const isOpen = container.classList.toggle("open")
+  dom.paletteInterfaceContainer.style.zIndex = isOpen ? "200" : ""
+})
+dom.palettePresetsList.addEventListener("click", (e) => {
+  const li = e.target.closest("li[data-id]")
+  if (!li) return
+  handlePresetSelect(li.dataset.id)
+  dom.palettePresetsBtn.parentElement.classList.remove("open")
+  dom.paletteInterfaceContainer.style.zIndex = ""
+})
+document.addEventListener("click", () => {
+  dom.palettePresetsBtn.parentElement.classList.remove("open")
+  dom.paletteInterfaceContainer.style.zIndex = ""
+})
 //Color Picker
 dom.confirmBtn.addEventListener("click", handleConfirm)
 dom.cancelBtn.addEventListener("click", closePickerWindow)
+dom.newColorBtn.addEventListener("click", handleAddToPalette)

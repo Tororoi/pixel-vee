@@ -1,5 +1,6 @@
 import { dom } from "../Context/dom.js"
 import { swatches } from "../Context/swatch.js"
+import { PRESETS } from "../utils/palettes.js"
 
 /**
  * Render palette tools in DOM
@@ -69,4 +70,35 @@ const createAddColorButton = () => {
   const addColorBtn = document.createElement("div")
   addColorBtn.className = "add-color plus"
   dom.paletteColors.appendChild(addColorBtn)
+}
+
+/**
+ * Rebuild the preset dropdown list and update the button label
+ */
+export const renderPalettePresetsToDOM = () => {
+  const btn = dom.palettePresetsBtn
+  const list = dom.palettePresetsList
+  list.innerHTML = ""
+
+  PRESETS.forEach(({ id, label }) => {
+    const li = document.createElement("li")
+    li.dataset.id = id
+    li.textContent = label
+    if (swatches.currentPreset === id) li.classList.add("selected")
+    list.appendChild(li)
+  })
+
+  Object.entries(swatches.customPalettes).forEach(([id, { label }]) => {
+    const li = document.createElement("li")
+    li.dataset.id = id
+    li.textContent = label
+    if (swatches.currentPreset === id) li.classList.add("selected")
+    list.appendChild(li)
+  })
+
+  const currentPreset = PRESETS.find((p) => p.id === swatches.currentPreset)
+  btn.textContent =
+    currentPreset?.label ??
+    swatches.customPalettes[swatches.currentPreset]?.label ??
+    "Palette"
 }

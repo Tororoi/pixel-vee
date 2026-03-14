@@ -21,7 +21,7 @@
     h3 {
       justify-self: center;
       height: 20px;
-      margin: 0px;
+      margin: 0;
     }
   }
   .collapsible {
@@ -137,7 +137,7 @@
             background: $gray;
             font-size: 20px;
             padding: 8px;
-            margin: 0px 20px 0px 20px;
+            margin: 0 20px 0 20px;
           }
         }
       }
@@ -194,6 +194,25 @@
                   rgba(var(--old-swatch-color), 1) 110%
                 );
               }
+            }
+          }
+          #newcolor-btn {
+            position: relative;
+            cursor: pointer;
+            #newcolor-plus {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 20px;
+              height: 20px;
+              margin: 10px;
+              opacity: 0;
+              pointer-events: none;
+              @include plusSvg($white);
+              background-size: 100%;
+            }
+            &:hover #newcolor-plus {
+              opacity: 1;
             }
           }
         }

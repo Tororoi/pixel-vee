@@ -1,6 +1,7 @@
 import { brush } from "./brush.js"
 import { line } from "./line.js"
 import { select } from "./select.js"
+import { magicWand } from "./magicWand.js"
 import { move } from "./move.js"
 import { fill } from "./fill.js"
 import { quadCurve, cubicCurve } from "./curve.js"
@@ -72,6 +73,7 @@ export const tools = {
   // user selects hsl shading color which mixes with colors that the user draws on to create dynamic shading
   // },
   select,
+  magicWand,
   move,
   // gradient: {
   // Create a dithered gradient
@@ -160,4 +162,23 @@ export const tools = {
    * TODO: (Low Priority) Add toggle option to snap line/ curve endpoints to vanishing point if made inside vanishing points radius.
   }
    */
+}
+
+//====================================//
+//===== * * * Tool Groups * * * ======//
+//====================================//
+
+/**
+ * Defines groups of related tools that share a single toolbox slot.
+ * activeTool tracks which tool in the group is currently shown/selected.
+ */
+export const toolGroups = {
+  curves: {
+    tools: ["line", "quadCurve", "cubicCurve"],
+    activeTool: "line",
+  },
+  selectionTools: {
+    tools: ["select", "magicWand"],
+    activeTool: "select",
+  },
 }

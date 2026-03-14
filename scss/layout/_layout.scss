@@ -61,7 +61,7 @@
     justify-self: center;
     width: 100%;
     min-height: 20px;
-    margin: 0px;
+    margin: 0;
     display: flex;
     flex-flow: row nowrap;
     justify-content: center;
@@ -83,7 +83,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    overflow: hidden;
     position: relative;
   }
 }
@@ -123,20 +122,19 @@
   // transition: opacity 0.3s;
   // transition-delay: 0.3s;
   z-index: 1000;
-  box-shadow: 2px 0px $tooltip-color, -2px 0px $tooltip-color,
-    0px -2px $tooltip-color, 0px 2px $tooltip-color;
+  box-shadow:
+    2px 0 $tooltip-color,
+    -2px 0 $tooltip-color,
+    0 -2px $tooltip-color,
+    0 2px $tooltip-color;
   &:after {
     //Speech bubble pointer
-    content: "";
-    display: inline-block;
-    width: 2px;
-    height: 2px;
-    position: absolute;
-    top: -2px;
+    @extend %tooltip-pointer-base;
     right: -2px;
-    background: $tooltip-color;
-    box-shadow: -2px -2px $tooltip-color, 0px -2px $tooltip-color,
-      0px -4px $tooltip-color;
+    box-shadow:
+      -2px -2px $tooltip-color,
+      0 -2px $tooltip-color,
+      0 -4px $tooltip-color;
   }
   &.visible {
     visibility: visible;
@@ -147,31 +145,24 @@
   &.page-left {
     &:after {
       //Speech bubble pointer
-      content: "";
-      display: inline-block;
-      width: 2px;
-      height: 2px;
-      position: absolute;
-      top: -2px;
+      @extend %tooltip-pointer-base;
       left: -2px;
-      background: $tooltip-color;
-      box-shadow: 2px -2px $tooltip-color, 0px -2px $tooltip-color,
-        0px -4px $tooltip-color;
+      box-shadow:
+        2px -2px $tooltip-color,
+        0 -2px $tooltip-color,
+        0 -4px $tooltip-color;
     }
   }
   &.page-center {
     &:after {
       //Speech bubble pointer
-      content: "";
-      display: inline-block;
-      width: 2px;
-      height: 2px;
-      position: absolute;
-      top: -2px;
+      @extend %tooltip-pointer-base;
       left: calc(50% - 1px);
-      background: $tooltip-color;
-      box-shadow: 2px -2px $tooltip-color, -2px -2px $tooltip-color,
-        0px -2px $tooltip-color, 0px -4px $tooltip-color;
+      box-shadow:
+        2px -2px $tooltip-color,
+        -2px -2px $tooltip-color,
+        0 -2px $tooltip-color,
+        0 -4px $tooltip-color;
     }
   }
 }
@@ -257,19 +248,25 @@
     width: 16px;
     background-color: $dark-gray;
     margin-right: 8px;
-    box-shadow: 2px 0px $border-color, -2px 0px $border-color,
-      0px -2px $border-color, 0px 2px $border-color;
+    box-shadow:
+      2px 0 $border-color,
+      -2px 0 $border-color,
+      0 -2px $border-color,
+      0 2px $border-color;
   }
   &:hover {
     .checkmark {
-      box-shadow: 2px 0px $white, -2px 0px $white, 0px -2px $white,
-        0px 2px $white;
+      box-shadow:
+        2px 0 $white,
+        -2px 0 $white,
+        0 -2px $white,
+        0 2px $white;
     }
   }
   input:checked ~ .checkmark {
     // background-color: $blue;
     &::after {
-      content: "";
+      content: '';
       position: absolute;
       width: 20px;
       height: 20px;
@@ -288,12 +285,12 @@
   &::-webkit-slider-thumb {
     width: 16px;
     height: 16px;
-    background: #ffffff;
+    background: $white;
   }
   &::-moz-range-thumb {
     width: 16px;
     height: 16px;
-    background: #ffffff;
+    background: $white;
   }
   &:disabled {
     cursor: not-allowed;

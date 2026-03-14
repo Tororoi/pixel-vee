@@ -1,31 +1,36 @@
-import { dom } from "../Context/dom.js"
-import { keys } from "../Shortcuts/keys.js"
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { renderCanvas, resizeOffScreenCanvas } from "../Canvas/render.js"
+import { dom } from '../Context/dom.js'
+import { keys } from '../Shortcuts/keys.js'
+import { state } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { renderCanvas, resizeOffScreenCanvas } from '../Canvas/render.js'
 import {
   renderLayersToDOM,
   renderLayerSettingsToDOM,
   renderVectorsToDOM,
   renderPaletteToDOM,
-} from "../DOM/render.js"
+  renderPalettePresetsToDOM,
+} from '../DOM/render.js'
 import {
   removeActionVector,
   changeActionVectorMode,
-} from "../Actions/modifyTimeline.js"
-import { vectorGui } from "../GUI/vector.js"
-import { initializeColorPicker } from "../Swatch/events.js"
-import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
+} from '../Actions/modifyTimeline.js'
+import { vectorGui } from '../GUI/vector.js'
+import { initializeColorPicker } from '../Swatch/events.js'
+import { constrainElementOffsets } from '../utils/constrainElementOffsets.js'
 // import { dragStart, dragMove, dragStop } from "../utils/drag.js"
 import {
   actionSelectVector,
   actionDeselectVector,
   actionDeselect,
-} from "../Actions/nonPointerActions.js"
-import { addReferenceLayer, addRasterLayer, removeLayer } from "../Actions/layerActions.js"
-import { createPreviewLayer } from "./layers.js"
-import { switchTool } from "../Tools/toolbox.js"
-import { enableActionsForSelection } from "../DOM/disableDomElements.js"
+} from '../Actions/nonPointerActions.js'
+import {
+  addReferenceLayer,
+  addRasterLayer,
+  removeLayer,
+} from '../Actions/layerActions.js'
+import { createPreviewLayer } from './layers.js'
+import { switchTool } from '../Tools/toolbox.js'
+import { enableActionsForSelection } from '../DOM/disableDomElements.js'
 
 //====================================//
 //==== * * * Canvas Resize * * * =====//
@@ -39,12 +44,12 @@ const handleIncrement = (e) => {
   let dimension = e.target.parentNode.previousSibling.previousSibling
   let max = 1024
   let min = 8
-  if (e.target.id === "inc") {
+  if (e.target.id === 'inc') {
     let newValue = Math.floor(+dimension.value)
     if (newValue < max) {
       dimension.value = newValue + 1
     }
-  } else if (e.target.id === "dec") {
+  } else if (e.target.id === 'dec') {
     let newValue = Math.floor(+dimension.value)
     if (newValue > min) {
       dimension.value = newValue - 1
@@ -57,7 +62,7 @@ const handleIncrement = (e) => {
  * @param {PointerEvent} e - The pointer event
  */
 const handleSizeIncrement = (e) => {
-  if (canvas.sizePointerState === "pointerdown") {
+  if (canvas.sizePointerState === 'pointerdown') {
     handleIncrement(e)
     window.setTimeout(() => handleSizeIncrement(e), 150)
   }
@@ -101,7 +106,7 @@ const resizeOnScreenCanvas = () => {
     0,
     canvas.sharpness * canvas.zoom,
     0,
-    0
+    0,
   )
   canvas.selectionGuiCVS.width =
     canvas.selectionGuiCVS.offsetWidth * canvas.sharpness
@@ -113,7 +118,7 @@ const resizeOnScreenCanvas = () => {
     0,
     canvas.sharpness * canvas.zoom,
     0,
-    0
+    0,
   )
   canvas.cursorCVS.width = canvas.cursorCVS.offsetWidth * canvas.sharpness
   canvas.cursorCVS.height = canvas.cursorCVS.offsetHeight * canvas.sharpness
@@ -123,7 +128,7 @@ const resizeOnScreenCanvas = () => {
     0,
     canvas.sharpness * canvas.zoom,
     0,
-    0
+    0,
   )
   canvas.layers.forEach((layer) => {
     layer.onscreenCvs.width = layer.onscreenCvs.offsetWidth * canvas.sharpness
@@ -134,7 +139,7 @@ const resizeOnScreenCanvas = () => {
       0,
       canvas.sharpness * canvas.zoom,
       0,
-      0
+      0,
     )
   })
   canvas.backgroundCVS.width =
@@ -147,14 +152,14 @@ const resizeOnScreenCanvas = () => {
     0,
     canvas.sharpness * canvas.zoom,
     0,
-    0
+    0,
   )
   renderCanvas() // render all layers
   // reset positioning styles for free moving dialog boxes
-  dom.toolboxContainer.style.left = ""
-  dom.toolboxContainer.style.top = ""
-  dom.sidebarContainer.style.left = ""
-  dom.sidebarContainer.style.top = ""
+  dom.toolboxContainer.style.left = ''
+  dom.toolboxContainer.style.top = ''
+  dom.sidebarContainer.style.left = ''
+  dom.sidebarContainer.style.top = ''
   if (dom.colorPickerContainer.offsetHeight !== 0) {
     constrainElementOffsets(dom.colorPickerContainer)
   }
@@ -174,29 +179,29 @@ function layerInteract(e) {
     //if there is a pasted layer, temporary layer is active and layers configuration should not be messed with
     return
   }
-  let layer = e.target.closest(".layer").layerObj
+  let layer = e.target.closest('.layer').layerObj
   //toggle visibility
-  if (e.target.className.includes("eyeopen")) {
-    e.target.classList.remove("eyeopen")
-    e.target.classList.add("eyeclosed")
+  if (e.target.className.includes('eyeopen')) {
+    e.target.classList.remove('eyeopen')
+    e.target.classList.add('eyeclosed')
     layer.hidden = true
-  } else if (e.target.className.includes("eyeclosed")) {
-    e.target.classList.remove("eyeclosed")
-    e.target.classList.add("eyeopen")
+  } else if (e.target.className.includes('eyeclosed')) {
+    e.target.classList.remove('eyeclosed')
+    e.target.classList.add('eyeopen')
     layer.hidden = false
-  } else if (e.target.className.includes("gear")) {
+  } else if (e.target.className.includes('gear')) {
     //open settings dialog
-    const domLayer = e.target.closest(".layer")
+    const domLayer = e.target.closest('.layer')
     //set top offset of layer settings container to match
     if (
-      dom.layerSettingsContainer.style.display === "flex" &&
+      dom.layerSettingsContainer.style.display === 'flex' &&
       // && layer settings layer is the same as the one that was clicked
       dom.layerSettingsContainer.layerObj === layer
     ) {
-      dom.layerSettingsContainer.style.display = "none"
+      dom.layerSettingsContainer.style.display = 'none'
       dom.layerSettingsContainer.layerObj = null
     } else {
-      dom.layerSettingsContainer.style.display = "flex"
+      dom.layerSettingsContainer.style.display = 'flex'
       dom.layerSettingsContainer.layerObj = layer
       renderLayerSettingsToDOM(domLayer)
     }
@@ -204,7 +209,7 @@ function layerInteract(e) {
     //TODO: (Low Priority) allow selecting multiple layers for moving purposes only
     //select current layer
     if (layer !== canvas.currentLayer) {
-      if (canvas.currentLayer.type === "reference") {
+      if (canvas.currentLayer.type === 'reference') {
         state.deselect()
       }
       canvas.currentLayer.inactiveTools.forEach((tool) => {
@@ -216,8 +221,8 @@ function layerInteract(e) {
       })
       vectorGui.reset()
       vectorGui.render()
-      if (layer.type === "reference") {
-        switchTool("move")
+      if (layer.type === 'reference') {
+        switchTool('move')
       }
       renderLayersToDOM()
       renderVectorsToDOM()
@@ -236,12 +241,12 @@ function dragLayerStart(e) {
     //if there is a pasted layer, temporary layer is active and layers configuration should not be messed with
     return
   }
-  let layer = e.target.closest(".layer").layerObj
+  let layer = e.target.closest('.layer').layerObj
   let index = canvas.layers.indexOf(layer)
   //pass index through event
-  e.dataTransfer.setData("text", index)
+  e.dataTransfer.setData('text', index)
   e.target.style.boxShadow =
-    "inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131)"
+    'inset 2px 0 rgb(131, 131, 131), inset -2px 0 rgb(131, 131, 131), inset 0 -2px rgb(131, 131, 131), inset 0 2px rgb(131, 131, 131)'
 }
 
 /**
@@ -257,9 +262,9 @@ function dragLayerOver(e) {
  * @param {DragEvent} e - The drag event
  */
 function dragLayerEnter(e) {
-  if (e.target.className.includes("layer")) {
+  if (e.target.className.includes('layer')) {
     e.target.style.boxShadow =
-      "inset 2px 0px rgb(255, 255, 255), inset -2px 0px rgb(255, 255, 255), inset 0px -2px rgb(255, 255, 255), inset 0px 2px rgb(255, 255, 255)"
+      'inset 2px 0 rgb(255, 255, 255), inset -2px 0 rgb(255, 255, 255), inset 0 -2px rgb(255, 255, 255), inset 0 2px rgb(255, 255, 255)'
   }
 }
 
@@ -268,9 +273,9 @@ function dragLayerEnter(e) {
  * @param {DragEvent} e - The drag event
  */
 function dragLayerLeave(e) {
-  if (e.target.className.includes("layer")) {
+  if (e.target.className.includes('layer')) {
     e.target.style.boxShadow =
-      "inset 2px 0px rgb(131, 131, 131), inset -2px 0px rgb(131, 131, 131), inset 0px -2px rgb(131, 131, 131), inset 0px 2px rgb(131, 131, 131)"
+      'inset 2px 0 rgb(131, 131, 131), inset -2px 0 rgb(131, 131, 131), inset 0 -2px rgb(131, 131, 131), inset 0 2px rgb(131, 131, 131)'
   }
 }
 
@@ -279,15 +284,15 @@ function dragLayerLeave(e) {
  * @param {DragEvent} e - The drag event
  */
 function dropLayer(e) {
-  let targetLayer = e.target.closest(".layer").layerObj
-  let draggedIndex = parseInt(e.dataTransfer.getData("text"))
+  let targetLayer = e.target.closest('.layer').layerObj
+  let draggedIndex = parseInt(e.dataTransfer.getData('text'))
   let heldLayer = canvas.layers[draggedIndex]
   //TODO: (Low Priority) should layer order change be added to timeline?
-  if (e.target.className.includes("layer") && targetLayer !== heldLayer) {
+  if (e.target.className.includes('layer') && targetLayer !== heldLayer) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
       if (dom.layersContainer.children[i] === e.target) {
         let newIndex = canvas.layers.indexOf(
-          dom.layersContainer.children[i].layerObj
+          dom.layersContainer.children[i].layerObj,
         )
         canvas.layers.splice(draggedIndex, 1)
         canvas.layers.splice(newIndex, 0, heldLayer)
@@ -301,7 +306,7 @@ function dropLayer(e) {
           // otherwise, insert before the canvas at the new index
           dom.canvasLayers.insertBefore(
             heldLayer.onscreenCvs,
-            dom.canvasLayers.children[newIndex]
+            dom.canvasLayers.children[newIndex],
           )
         }
       }
@@ -332,31 +337,31 @@ function vectorInteract(e) {
     //if there is a pasted layer, temporary layer is active and vectors configuration should not be messed with
     return
   }
-  let vector = e.target.closest(".vector").vectorObj
-  if (e.target.className.includes("eraser")) {
+  let vector = e.target.closest('.vector').vectorObj
+  if (e.target.className.includes('eraser')) {
     //change mode
-    toggleVectorMode(vector, "eraser")
-  } else if (e.target.className.includes("inject")) {
+    toggleVectorMode(vector, 'eraser')
+  } else if (e.target.className.includes('inject')) {
     //change mode
-    toggleVectorMode(vector, "inject")
-  } else if (e.target.className.includes("actionColor")) {
+    toggleVectorMode(vector, 'inject')
+  } else if (e.target.className.includes('actionColor')) {
     //change color
     e.target.color = vector.color
     e.target.vector = vector
     initializeColorPicker(e.target)
-  } else if (e.target.className.includes("eyeopen")) {
+  } else if (e.target.className.includes('eyeopen')) {
     //toggle visibility
-    e.target.classList.remove("eyeopen")
-    e.target.classList.add("eyeclosed")
+    e.target.classList.remove('eyeopen')
+    e.target.classList.add('eyeclosed')
     vector.hidden = true
     renderCanvas(vector.layer, true)
-  } else if (e.target.className.includes("eyeclosed")) {
+  } else if (e.target.className.includes('eyeclosed')) {
     //toggle visibility
-    e.target.classList.remove("eyeclosed")
-    e.target.classList.add("eyeopen")
+    e.target.classList.remove('eyeclosed')
+    e.target.classList.add('eyeopen')
     vector.hidden = false
     renderCanvas(vector.layer, true)
-  } else if (e.target.className.includes("trash")) {
+  } else if (e.target.className.includes('trash')) {
     //remove vector
     removeVector(vector)
   } else {
@@ -419,9 +424,9 @@ function toggleVectorMode(vector, modeKey) {
   vector.modes[modeKey] = !vector.modes[modeKey]
   //resolve conflicting modes
   if (vector.modes[modeKey]) {
-    if (modeKey === "eraser" && vector.modes.inject) {
+    if (modeKey === 'eraser' && vector.modes.inject) {
       vector.modes.inject = false
-    } else if (modeKey === "inject" && vector.modes.eraser) {
+    } else if (modeKey === 'inject' && vector.modes.eraser) {
       vector.modes.eraser = false
     }
   }
@@ -444,18 +449,19 @@ canvas.currentLayer = canvas.layers[0]
 canvas.xOffset = Math.round(
   (canvas.currentLayer.onscreenCvs.width / canvas.sharpness / canvas.zoom -
     canvas.offScreenCVS.width) /
-    2
+    2,
 )
 canvas.yOffset = Math.round(
   (canvas.currentLayer.onscreenCvs.height / canvas.sharpness / canvas.zoom -
     canvas.offScreenCVS.height) /
-    2
+    2,
 )
 canvas.previousXOffset = canvas.xOffset
 canvas.previousYOffset = canvas.yOffset
 renderCanvas(canvas.currentLayer)
 renderLayersToDOM()
 renderPaletteToDOM()
+renderPalettePresetsToDOM()
 // renderBrushModesToDOM()
 
 //Initialize temp layer, not added to layers array
@@ -466,78 +472,78 @@ canvas.tempLayer = createPreviewLayer()
 //===================================//
 
 // UI Canvas * //
-window.addEventListener("resize", resizeOnScreenCanvas)
+window.addEventListener('resize', resizeOnScreenCanvas)
 
 // * Canvas Size * //
-dom.dimensionsForm.addEventListener("pointerdown", (e) => {
+dom.dimensionsForm.addEventListener('pointerdown', (e) => {
   canvas.sizePointerState = e.type
   handleSizeIncrement(e)
 })
-dom.dimensionsForm.addEventListener("pointerup", (e) => {
+dom.dimensionsForm.addEventListener('pointerup', (e) => {
   canvas.sizePointerState = e.type
 })
-dom.dimensionsForm.addEventListener("pointerout", (e) => {
+dom.dimensionsForm.addEventListener('pointerout', (e) => {
   canvas.sizePointerState = e.type
 })
-dom.dimensionsForm.addEventListener("submit", handleDimensionsSubmit)
-dom.canvasWidth.addEventListener("blur", restrictSize)
-dom.canvasHeight.addEventListener("blur", restrictSize)
-dom.canvasSizeCancelBtn.addEventListener("click", () => {
-  dom.sizeContainer.style.display = "none"
+dom.dimensionsForm.addEventListener('submit', handleDimensionsSubmit)
+dom.canvasWidth.addEventListener('blur', restrictSize)
+dom.canvasHeight.addEventListener('blur', restrictSize)
+dom.canvasSizeCancelBtn.addEventListener('click', () => {
+  dom.sizeContainer.style.display = 'none'
 })
 // * Layers * //
-dom.uploadBtn.addEventListener("click", (e) => {
+dom.uploadBtn.addEventListener('click', (e) => {
   //reset value so that the same file can be uploaded multiple times
   e.target.value = null
 })
-dom.uploadBtn.addEventListener("change", addReferenceLayer)
-dom.newLayerBtn.addEventListener("click", addRasterLayer)
-dom.deleteLayerBtn.addEventListener("click", () => {
+dom.uploadBtn.addEventListener('change', addReferenceLayer)
+dom.newLayerBtn.addEventListener('click', addRasterLayer)
+dom.deleteLayerBtn.addEventListener('click', () => {
   let layer = canvas.currentLayer
   removeLayer(layer)
   renderCanvas(layer)
 })
 
 //TODO: (Medium Priority) Make similar to functionality of dragging dialog boxes. To make fancier dragging work, must be made compatible with a scrolling container
-dom.layersContainer.addEventListener("click", layerInteract)
-dom.layersContainer.addEventListener("dragstart", dragLayerStart)
-dom.layersContainer.addEventListener("dragover", dragLayerOver)
-dom.layersContainer.addEventListener("dragenter", dragLayerEnter)
-dom.layersContainer.addEventListener("dragleave", dragLayerLeave)
-dom.layersContainer.addEventListener("drop", dropLayer)
-dom.layersContainer.addEventListener("dragend", dragLayerEnd)
+dom.layersContainer.addEventListener('click', layerInteract)
+dom.layersContainer.addEventListener('dragstart', dragLayerStart)
+dom.layersContainer.addEventListener('dragover', dragLayerOver)
+dom.layersContainer.addEventListener('dragenter', dragLayerEnter)
+dom.layersContainer.addEventListener('dragleave', dragLayerLeave)
+dom.layersContainer.addEventListener('drop', dropLayer)
+dom.layersContainer.addEventListener('dragend', dragLayerEnd)
 // dom.layersContainer.addEventListener("pointerdown", () =>
 //   dragStart(e, e.target.closest(".layer"))
 // )
 // dom.layersContainer.addEventListener("pointerup", dragStop)
 // dom.layersContainer.addEventListener("pointerout", dragStop)
 // dom.layersContainer.addEventListener("pointermove", dragMove)
-dom.layerSettingsContainer.addEventListener("input", (e) => {
+dom.layerSettingsContainer.addEventListener('input', (e) => {
   const layer = dom.layerSettingsContainer.layerObj
   if (layer) {
-    if (e.target.matches(".slider")) {
+    if (e.target.matches('.slider')) {
       layer.opacity = e.target.value / 255
       dom.layerSettingsContainer.querySelector(
-        ".layer-opacity-label > .input-label"
+        '.layer-opacity-label > .input-label',
       ).textContent = `Opacity: ${Math.round(layer.opacity * 255)}`
       renderCanvas(layer)
-    } else if (e.target.matches("#layer-name")) {
+    } else if (e.target.matches('#layer-name')) {
       layer.title = e.target.value
       renderLayersToDOM()
     }
   }
 })
 //TODO: (Low Priority) maybe dynamically generate layer settings container when needed and only bind this event listener when it is open
-document.addEventListener("pointerdown", (e) => {
+document.addEventListener('pointerdown', (e) => {
   if (
     dom.layerSettingsContainer.layerObj &&
-    !e.target.classList.contains("gear") &&
+    !e.target.classList.contains('gear') &&
     !dom.layerSettingsContainer.contains(e.target)
   ) {
-    dom.layerSettingsContainer.style.display = "none"
+    dom.layerSettingsContainer.style.display = 'none'
     dom.layerSettingsContainer.layerObj = null
   }
 })
 
 // * Vectors * //
-dom.vectorsThumbnails.addEventListener("click", vectorInteract)
+dom.vectorsThumbnails.addEventListener('click', vectorInteract)

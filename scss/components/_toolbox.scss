@@ -15,36 +15,20 @@
   @include boxBorder;
   .collapsible {
     padding-top: 2px;
-    :first-child {
+    > :first-child {
       margin-top: 6px;
     }
     .tool {
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      user-select: none;
-      text-align: center;
-      color: white;
-      width: 40px;
-      height: 40px;
-      margin: 3px;
-      opacity: 1;
-      background-color: $button-color;
-      @include boxBorder;
-      &:hover {
-        z-index: 104;
-      }
-      &.selected {
-        background-color: $white;
-        z-index: 105;
-      }
+      @extend %tool-btn;
       &.deactivate-paste {
         @include boxBorder($red);
       }
-      &.custom-shape {
-        background-color: transparent;
-        @include cancelBorder;
+    }
+    .tool-group-btn {
+      @extend %tool-btn;
+      position: relative;
+      &:hover {
+        z-index: 104;
       }
     }
     .zoom {
@@ -72,7 +56,7 @@
       margin-bottom: 4px;
       h4 {
         text-align: center;
-        margin: 0px;
+        margin: 0;
         font-weight: normal;
       }
       .columns {
@@ -92,6 +76,33 @@
           align-items: center;
           flex-flow: column wrap;
           margin: 5px;
+        }
+        .tool-group {
+          position: relative;
+          .tool-group-popout {
+            margin: 3px;
+            display: none;
+            position: absolute;
+            right: calc(100% + 3px);
+            top: 0;
+            background-color: $extra-dark-gray;
+            @include bubbleBorder(
+              $background: $extra-dark-gray,
+              $arrowSide: right,
+              $arrowTop: calc(40px / 2 - 1px)
+            );
+            z-index: 106;
+            flex-flow: column nowrap;
+            gap: 2px;
+            .tool {
+              margin: 0;
+              background-color: unset;
+              @include cancelBorder;
+            }
+          }
+          &.open .tool-group-popout {
+            display: flex;
+          }
         }
       }
     }
@@ -128,6 +139,10 @@
 
 .select {
   @include selectIcon;
+}
+
+.magicWand {
+  @include magicWandIcon;
 }
 
 .eyedropper {

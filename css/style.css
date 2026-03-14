@@ -4,8 +4,9 @@
 /* Breakpoints */
 /* Colors */
 /* Color Assignments */
+/* Backgrounds */
 :root {
-  --border-color: $border-color;
+  --border-color: rgb(131, 131, 131);
   --primary-swatch-color: 0, 0, 0;
   --primary-swatch-alpha: 1;
   --secondary-swatch-color: 255, 255, 255;
@@ -64,6 +65,64 @@
     background-position: 20px 0, -20px 100%, 0 -20px, 100% 20px;
   }
 }
+.vector-transform-ui-container, .save-container, .export-container, .size-container, .settings-container {
+  user-select: none;
+  position: absolute;
+  z-index: 103;
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  color: rgb(255, 255, 255);
+  background: rgb(51, 51, 51);
+  text-align: center;
+  padding: 0;
+  align-self: center;
+  opacity: 1;
+}
+
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool, .toolbox .collapsible .tool-group-btn, .toolbox .collapsible .tool {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  text-align: center;
+  color: rgb(255, 255, 255);
+  width: 40px;
+  height: 40px;
+  margin: 3px;
+  opacity: 1;
+  background-color: rgb(131, 131, 131);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool:hover:not([disabled]), .toolbox .collapsible .tool-group-btn:hover:not([disabled]), .toolbox .collapsible .tool:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool:hover, .toolbox .collapsible .tool-group-btn:hover, .toolbox .collapsible .tool:hover {
+  z-index: 104;
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .selected.tool, .toolbox .collapsible .selected.tool-group-btn, .toolbox .collapsible .selected.tool {
+  background-color: rgb(255, 255, 255);
+  z-index: 105;
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .custom-shape.tool, .toolbox .collapsible .custom-shape.tool-group-btn, .toolbox .collapsible .custom-shape.tool {
+  background-color: transparent;
+  box-shadow: none;
+}
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .custom-shape.tool:hover:not([disabled]), .toolbox .collapsible .custom-shape.tool-group-btn:hover:not([disabled]), .toolbox .collapsible .custom-shape.tool:hover:not([disabled]) {
+  box-shadow: none;
+}
+
+.tooltip.page-center:after, .tooltip.page-left:after, .tooltip:after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 2px;
+  position: absolute;
+  top: -2px;
+  background: rgb(255, 255, 199);
+}
+
 /* Reset styles */
 /* html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
@@ -152,7 +211,6 @@ input {
 }
 
 body {
-  margin: 0px;
   color: white;
   background: rgb(61, 61, 61);
   user-select: none;
@@ -187,9 +245,9 @@ button:disabled {
 
 input {
   box-sizing: border-box;
-  padding-block: 0px;
-  padding-inline: 0px;
-  padding: 0px;
+  padding-block: 0;
+  padding-inline: 0;
+  padding: 0;
   text-indent: 2px;
   background-color: rgb(31, 31, 31);
   color: white;
@@ -331,7 +389,7 @@ svg {
   justify-self: center;
   width: 100%;
   min-height: 20px;
-  margin: 0px;
+  margin: 0;
   display: flex;
   flex-flow: row nowrap;
   justify-content: center;
@@ -355,24 +413,24 @@ svg {
   height: 2px;
   width: 2px;
   background: rgb(131, 131, 131);
-  box-shadow: 0px 0px rgb(131, 131, 131), 4px 0px rgb(131, 131, 131), 0px 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 0px 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131);
+  box-shadow: 0 0 rgb(131, 131, 131), 4px 0 rgb(131, 131, 131), 0 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 0 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131);
 }
 .dialog-box .header .drag-btn.locked .grip {
-  box-shadow: 2px -2px rgb(131, 131, 131), 4px -2px rgb(131, 131, 131), 0px 0px rgb(131, 131, 131), 6px 0px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131), 6px 2px rgb(131, 131, 131), -2px 4px rgb(131, 131, 131), 0px 4px rgb(131, 131, 131), 2px 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 6px 4px rgb(131, 131, 131), 8px 4px rgb(131, 131, 131), -2px 6px rgb(131, 131, 131), 0px 6px rgb(131, 131, 131), 4px 6px rgb(131, 131, 131), 6px 6px rgb(131, 131, 131), 8px 6px rgb(131, 131, 131), -2px 8px rgb(131, 131, 131), 0px 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131), 6px 8px rgb(131, 131, 131), 8px 8px rgb(131, 131, 131), -2px 10px rgb(131, 131, 131), 0px 10px rgb(131, 131, 131), 2px 10px rgb(131, 131, 131), 4px 10px rgb(131, 131, 131), 6px 10px rgb(131, 131, 131), 8px 10px rgb(131, 131, 131);
+  box-shadow: 2px -2px rgb(131, 131, 131), 4px -2px rgb(131, 131, 131), 0 0 rgb(131, 131, 131), 6px 0 rgb(131, 131, 131), 0 2px rgb(131, 131, 131), 6px 2px rgb(131, 131, 131), -2px 4px rgb(131, 131, 131), 0 4px rgb(131, 131, 131), 2px 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 6px 4px rgb(131, 131, 131), 8px 4px rgb(131, 131, 131), -2px 6px rgb(131, 131, 131), 0 6px rgb(131, 131, 131), 4px 6px rgb(131, 131, 131), 6px 6px rgb(131, 131, 131), 8px 6px rgb(131, 131, 131), -2px 8px rgb(131, 131, 131), 0 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131), 6px 8px rgb(131, 131, 131), 8px 8px rgb(131, 131, 131), -2px 10px rgb(131, 131, 131), 0 10px rgb(131, 131, 131), 2px 10px rgb(131, 131, 131), 4px 10px rgb(131, 131, 131), 6px 10px rgb(131, 131, 131), 8px 10px rgb(131, 131, 131);
 }
 .dialog-box .header:hover:not([disabled]) .drag-btn .grip {
   background: rgb(255, 255, 255);
-  box-shadow: 0px 0px rgb(255, 255, 255), 4px 0px rgb(255, 255, 255), 0px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 0px 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255);
+  box-shadow: 0 0 rgb(255, 255, 255), 4px 0 rgb(255, 255, 255), 0 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 0 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255);
 }
 .dialog-box .header:hover:not([disabled]) .drag-btn.locked .grip {
-  box-shadow: 2px -2px rgb(255, 255, 255), 4px -2px rgb(255, 255, 255), 0px 0px rgb(255, 255, 255), 6px 0px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255), 6px 2px rgb(255, 255, 255), -2px 4px rgb(255, 255, 255), 0px 4px rgb(255, 255, 255), 2px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 6px 4px rgb(255, 255, 255), 8px 4px rgb(255, 255, 255), -2px 6px rgb(255, 255, 255), 0px 6px rgb(255, 255, 255), 4px 6px rgb(255, 255, 255), 6px 6px rgb(255, 255, 255), 8px 6px rgb(255, 255, 255), -2px 8px rgb(255, 255, 255), 0px 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255), 6px 8px rgb(255, 255, 255), 8px 8px rgb(255, 255, 255), -2px 10px rgb(255, 255, 255), 0px 10px rgb(255, 255, 255), 2px 10px rgb(255, 255, 255), 4px 10px rgb(255, 255, 255), 6px 10px rgb(255, 255, 255), 8px 10px rgb(255, 255, 255);
+  box-shadow: 2px -2px rgb(255, 255, 255), 4px -2px rgb(255, 255, 255), 0 0 rgb(255, 255, 255), 6px 0 rgb(255, 255, 255), 0 2px rgb(255, 255, 255), 6px 2px rgb(255, 255, 255), -2px 4px rgb(255, 255, 255), 0 4px rgb(255, 255, 255), 2px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 6px 4px rgb(255, 255, 255), 8px 4px rgb(255, 255, 255), -2px 6px rgb(255, 255, 255), 0 6px rgb(255, 255, 255), 4px 6px rgb(255, 255, 255), 6px 6px rgb(255, 255, 255), 8px 6px rgb(255, 255, 255), -2px 8px rgb(255, 255, 255), 0 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255), 6px 8px rgb(255, 255, 255), 8px 8px rgb(255, 255, 255), -2px 10px rgb(255, 255, 255), 0 10px rgb(255, 255, 255), 2px 10px rgb(255, 255, 255), 4px 10px rgb(255, 255, 255), 6px 10px rgb(255, 255, 255), 8px 10px rgb(255, 255, 255);
 }
 .dialog-box .header .collapse-btn {
   position: absolute;
   right: 0;
   width: 20px;
   height: 20px;
-  margin: 0px;
+  margin: 0;
   display: flex;
   flex-flow: row nowrap;
   cursor: pointer;
@@ -401,7 +459,7 @@ svg {
   right: 0;
   width: 20px;
   height: 20px;
-  margin: 0px;
+  margin: 0;
   display: flex;
   flex-flow: row nowrap;
   cursor: pointer;
@@ -425,7 +483,6 @@ svg {
   display: flex;
   flex-direction: column;
   align-items: center;
-  overflow: hidden;
   position: relative;
 }
 
@@ -461,18 +518,11 @@ svg {
   padding: 5px;
   align-self: flex-start;
   z-index: 1000;
-  box-shadow: 2px 0px rgb(255, 255, 199), -2px 0px rgb(255, 255, 199), 0px -2px rgb(255, 255, 199), 0px 2px rgb(255, 255, 199);
+  box-shadow: 2px 0 rgb(255, 255, 199), -2px 0 rgb(255, 255, 199), 0 -2px rgb(255, 255, 199), 0 2px rgb(255, 255, 199);
 }
 .tooltip:after {
-  content: "";
-  display: inline-block;
-  width: 2px;
-  height: 2px;
-  position: absolute;
-  top: -2px;
   right: -2px;
-  background: rgb(255, 255, 199);
-  box-shadow: -2px -2px rgb(255, 255, 199), 0px -2px rgb(255, 255, 199), 0px -4px rgb(255, 255, 199);
+  box-shadow: -2px -2px rgb(255, 255, 199), 0 -2px rgb(255, 255, 199), 0 -4px rgb(255, 255, 199);
 }
 .tooltip.visible {
   visibility: visible;
@@ -481,26 +531,12 @@ svg {
   transition-delay: 0.5s;
 }
 .tooltip.page-left:after {
-  content: "";
-  display: inline-block;
-  width: 2px;
-  height: 2px;
-  position: absolute;
-  top: -2px;
   left: -2px;
-  background: rgb(255, 255, 199);
-  box-shadow: 2px -2px rgb(255, 255, 199), 0px -2px rgb(255, 255, 199), 0px -4px rgb(255, 255, 199);
+  box-shadow: 2px -2px rgb(255, 255, 199), 0 -2px rgb(255, 255, 199), 0 -4px rgb(255, 255, 199);
 }
 .tooltip.page-center:after {
-  content: "";
-  display: inline-block;
-  width: 2px;
-  height: 2px;
-  position: absolute;
-  top: -2px;
   left: calc(50% - 1px);
-  background: rgb(255, 255, 199);
-  box-shadow: 2px -2px rgb(255, 255, 199), -2px -2px rgb(255, 255, 199), 0px -2px rgb(255, 255, 199), 0px -4px rgb(255, 255, 199);
+  box-shadow: 2px -2px rgb(255, 255, 199), -2px -2px rgb(255, 255, 199), 0 -2px rgb(255, 255, 199), 0 -4px rgb(255, 255, 199);
 }
 
 /* Buttons */
@@ -586,10 +622,10 @@ svg {
   width: 16px;
   background-color: rgb(61, 61, 61);
   margin-right: 8px;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: 2px 0 rgb(131, 131, 131), -2px 0 rgb(131, 131, 131), 0 -2px rgb(131, 131, 131), 0 2px rgb(131, 131, 131);
 }
 .toggle:hover .checkmark {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: 2px 0 rgb(255, 255, 255), -2px 0 rgb(255, 255, 255), 0 -2px rgb(255, 255, 255), 0 2px rgb(255, 255, 255);
 }
 .toggle input:checked ~ .checkmark::after {
   content: "";
@@ -610,12 +646,12 @@ svg {
 .slider::-webkit-slider-thumb {
   width: 16px;
   height: 16px;
-  background: #ffffff;
+  background: rgb(255, 255, 255);
 }
 .slider::-moz-range-thumb {
   width: 16px;
   height: 16px;
-  background: #ffffff;
+  background: rgb(255, 255, 255);
 }
 .slider:disabled {
   cursor: not-allowed;
@@ -843,7 +879,7 @@ canvas {
 }
 .canvas-container .bg-space .bg-canvas {
   position: absolute;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   width: 100%;
   height: 100%;
 }
@@ -882,33 +918,8 @@ canvas {
 .toolbox .collapsible {
   padding-top: 2px;
 }
-.toolbox .collapsible :first-child {
+.toolbox .collapsible > :first-child {
   margin-top: 6px;
-}
-.toolbox .collapsible .tool {
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  user-select: none;
-  text-align: center;
-  color: white;
-  width: 40px;
-  height: 40px;
-  margin: 3px;
-  opacity: 1;
-  background-color: rgb(131, 131, 131);
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
-}
-.toolbox .collapsible .tool:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
-}
-.toolbox .collapsible .tool:hover {
-  z-index: 104;
-}
-.toolbox .collapsible .tool.selected {
-  background-color: rgb(255, 255, 255);
-  z-index: 105;
 }
 .toolbox .collapsible .tool.deactivate-paste {
   box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
@@ -916,12 +927,11 @@ canvas {
 .toolbox .collapsible .tool.deactivate-paste:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
-.toolbox .collapsible .tool.custom-shape {
-  background-color: transparent;
-  box-shadow: none;
+.toolbox .collapsible .tool-group-btn {
+  position: relative;
 }
-.toolbox .collapsible .tool.custom-shape:hover:not([disabled]) {
-  box-shadow: none;
+.toolbox .collapsible .tool-group-btn:hover {
+  z-index: 104;
 }
 .toolbox .collapsible .zoom .zoombtn {
   height: 40px;
@@ -947,7 +957,7 @@ canvas {
 }
 .toolbox .collapsible .tools h4 {
   text-align: center;
-  margin: 0px;
+  margin: 0;
   font-weight: normal;
 }
 .toolbox .collapsible .tools .columns {
@@ -965,12 +975,58 @@ canvas {
   flex-flow: column wrap;
   margin: 5px;
 }
+.toolbox .collapsible .tools .columns .tool-group {
+  position: relative;
+}
+.toolbox .collapsible .tools .columns .tool-group .tool-group-popout {
+  margin: 3px;
+  display: none;
+  position: absolute;
+  right: calc(100% + 3px);
+  top: 0;
+  background-color: rgb(51, 51, 51);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.toolbox .collapsible .tools .columns .tool-group .tool-group-popout:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.toolbox .collapsible .tools .columns .tool-group .tool-group-popout:after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 2px;
+  position: absolute;
+  top: 19px;
+  background: rgb(131, 131, 131);
+  right: -4px;
+  box-shadow: 2px -2px rgb(131, 131, 131), 0 -2px rgb(51, 51, 51), 0 -4px rgb(131, 131, 131), -2px 0 rgb(51, 51, 51), -2px -2px rgb(51, 51, 51), -2px -4px rgb(51, 51, 51);
+}
+.toolbox .collapsible .tools .columns .tool-group .tool-group-popout:hover:not([disabled]):after {
+  background: rgb(255, 255, 255);
+  box-shadow: 2px -2px rgb(255, 255, 255), 0 -2px rgb(51, 51, 51), 0 -4px rgb(255, 255, 255), -2px 0 rgb(51, 51, 51), -2px -2px rgb(51, 51, 51), -2px -4px rgb(51, 51, 51);
+}
+.toolbox .collapsible .tools .columns .tool-group .tool-group-popout {
+  z-index: 106;
+  flex-flow: column nowrap;
+  gap: 2px;
+}
+.toolbox .collapsible .tools .columns .tool-group .tool-group-popout .tool {
+  margin: 0;
+  background-color: unset;
+  box-shadow: none;
+}
+.toolbox .collapsible .tools .columns .tool-group .tool-group-popout .tool:hover:not([disabled]) {
+  box-shadow: none;
+}
+.toolbox .collapsible .tools .columns .tool-group.open .tool-group-popout {
+  display: flex;
+}
 
 .brush {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M16 1h2M14 2h2M18 2h1M12 3h2M18 3h1M11 4h1M17 4h1M10 5h1M17 5h1M9 6h1M16 6h1M8 7h1M16 7h1M8 8h1M15 8h1M7 9h1M14 9h1M6 10h2M13 10h1M4 11h2M11 11h2M3 12h1M9 12h2M2 13h1M9 13h1M2 14h1M8 14h1M2 15h1M8 15h1M2 16h1M8 16h1M1 17h1M7 17h1M2 18h5' /%3E%3Cpath stroke='%23575757' d='M16 2h2M14 3h2M12 4h2M11 5h1M15 5h1M10 6h1M14 6h1M9 7h1M13 7h1M9 8h1M12 8h1M8 9h4M9 10h2M4 13h2M8 13h1M4 14h2M4 15h2M4 16h1' /%3E%3Cpath stroke='%23acacac' d='M16 3h1M14 4h2M12 5h3M11 6h3M10 7h3M10 8h2M6 11h1M8 11h1M7 12h2' /%3E%3Cpath stroke='%23000000' d='M17 3h1M16 4h1M16 5h1M15 6h1M14 7h2M13 8h2M12 9h2M8 10h1M11 10h2M9 11h2M4 12h3M3 13h1M6 13h2M3 14h1M6 14h2M3 15h1M6 15h2M3 16h1M5 16h3M2 17h5' /%3E%3Cpath stroke='%23ffffff' d='M7 11h1' /%3E%3C/svg%3E");
   background-size: 100%;
 }
-.brush.selected {
+.brush:hover, .brush.selected {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M16 1h2M14 2h2M18 2h1M12 3h2M18 3h1M11 4h1M17 4h1M10 5h1M17 5h1M9 6h1M16 6h1M8 7h1M16 7h1M8 8h1M15 8h1M7 9h1M14 9h1M6 10h2M13 10h1M4 11h2M11 11h2M3 12h1M9 12h2M2 13h1M9 13h1M2 14h1M8 14h1M2 15h1M8 15h1M2 16h1M8 16h1M1 17h1M7 17h1M2 18h5' /%3E%3Cpath stroke='%23575757' d='M16 2h2M14 3h2M12 4h2M11 5h1M15 5h1M10 6h1M14 6h1M9 7h1M13 7h1M9 8h1M12 8h1M8 9h4M9 10h2M4 13h2M8 13h1M4 14h2M4 15h2M4 16h1' /%3E%3Cpath stroke='%23acacac' d='M16 3h1M14 4h2M12 5h3M11 6h3M10 7h3M10 8h2M6 11h1M8 11h1M7 12h2' /%3E%3Cpath stroke='%23000000' d='M17 3h1M16 4h1M16 5h1M15 6h1M14 7h2M13 8h2M12 9h2M8 10h1M11 10h2M9 11h2M4 12h3M3 13h1M6 13h2M3 14h1M6 14h2M3 15h1M6 15h2M3 16h1M5 16h3M2 17h5' /%3E%3Cpath stroke='%23ffffff' d='M7 11h1' /%3E%3C/svg%3E");
 }
 
@@ -978,7 +1034,7 @@ canvas {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h1M8 2h1M10 2h1M8 3h1M10 3h1M8 4h1M11 4h1M7 5h1M11 5h1M7 6h1M11 6h1M7 7h1M12 7h1M6 8h1M12 8h1M6 9h1M13 9h1M5 10h1M14 10h1M4 11h1M15 11h1M3 12h1M16 12h1M3 13h1M16 13h1M3 14h1M16 14h1M3 15h1M16 15h1M4 16h1M15 16h1M5 17h2M13 17h2M7 18h6' /%3E%3Cpath stroke='%23000000' d='M9 2h1M9 3h1M9 4h2M8 5h3M8 6h3M8 7h4M7 8h2M10 8h2M7 9h2M10 9h3M6 10h2M10 10h4M5 11h2M9 11h6M4 12h2M9 12h5M15 12h1M4 13h2M8 13h6M15 13h1M4 14h9M15 14h1M4 15h7M15 15h1M5 16h2M13 16h2M7 17h6' /%3E%3Cpath stroke='%23ffffff' d='M9 8h1M9 9h1M8 10h2M7 11h2M6 12h3M6 13h2' /%3E%3Cpath stroke='%23575757' d='M14 12h1M14 13h1M13 14h2M11 15h4M7 16h6' /%3E%3C/svg%3E");
   background-size: 100%;
 }
-.fill.selected {
+.fill:hover, .fill.selected {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M9 1h1M8 2h1M10 2h1M8 3h1M10 3h1M8 4h1M11 4h1M7 5h1M11 5h1M7 6h1M11 6h1M7 7h1M12 7h1M6 8h1M12 8h1M6 9h1M13 9h1M5 10h1M14 10h1M4 11h1M15 11h1M3 12h1M16 12h1M3 13h1M16 13h1M3 14h1M16 14h1M3 15h1M16 15h1M4 16h1M15 16h1M5 17h2M13 17h2M7 18h6' /%3E%3Cpath stroke='%23000000' d='M9 2h1M9 3h1M9 4h2M8 5h3M8 6h3M8 7h4M7 8h2M10 8h2M7 9h2M10 9h3M6 10h2M10 10h4M5 11h2M9 11h6M4 12h2M9 12h5M15 12h1M4 13h2M8 13h6M15 13h1M4 14h9M15 14h1M4 15h7M15 15h1M5 16h2M13 16h2M7 17h6' /%3E%3Cpath stroke='%23ffffff' d='M9 8h1M9 9h1M8 10h2M7 11h2M6 12h3M6 13h2' /%3E%3Cpath stroke='%23575757' d='M14 12h1M14 13h1M13 14h2M11 15h4M7 16h6' /%3E%3C/svg%3E");
 }
 
@@ -986,7 +1042,7 @@ canvas {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M17 1h1M16 2h1M18 2h1M15 3h1M17 3h1M14 4h1M16 4h1M13 5h1M15 5h1M12 6h1M14 6h1M11 7h1M13 7h1M10 8h1M12 8h1M9 9h1M11 9h1M8 10h1M10 10h1M7 11h1M9 11h1M6 12h1M8 12h1M5 13h1M7 13h1M4 14h1M6 14h1M3 15h1M5 15h1M2 16h1M4 16h1M1 17h1M3 17h1M2 18h1' /%3E%3Cpath stroke='%23000000' d='M17 2h1M16 3h1M15 4h1M14 5h1M13 6h1M12 7h1M11 8h1M10 9h1M9 10h1M8 11h1M7 12h1M6 13h1M5 14h1M4 15h1M3 16h1M2 17h1' /%3E%3C/svg%3E");
   background-size: 100%;
 }
-.line.selected {
+.line:hover, .line.selected {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M17 1h1M16 2h1M18 2h1M15 3h1M17 3h1M14 4h1M16 4h1M13 5h1M15 5h1M12 6h1M14 6h1M11 7h1M13 7h1M10 8h1M12 8h1M9 9h1M11 9h1M8 10h1M10 10h1M7 11h1M9 11h1M6 12h1M8 12h1M5 13h1M7 13h1M4 14h1M6 14h1M3 15h1M5 15h1M2 16h1M4 16h1M1 17h1M3 17h1M2 18h1' /%3E%3Cpath stroke='%23000000' d='M17 2h1M16 3h1M15 4h1M14 5h1M13 6h1M12 7h1M11 8h1M10 9h1M9 10h1M8 11h1M7 12h1M6 13h1M5 14h1M4 15h1M3 16h1M2 17h1' /%3E%3C/svg%3E");
 }
 
@@ -994,7 +1050,7 @@ canvas {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M12 1h6M9 2h3M18 2h1M7 3h2M12 3h6M6 4h1M9 4h3M5 5h1M7 5h2M4 6h1M6 6h1M3 7h1M5 7h1M3 8h1M5 8h1M2 9h1M4 9h1M2 10h1M4 10h1M2 11h1M4 11h1M1 12h1M3 12h1M1 13h1M3 13h1M1 14h1M3 14h1M1 15h1M3 15h1M1 16h1M3 16h1M1 17h1M3 17h1M2 18h1' /%3E%3Cpath stroke='%23000000' d='M12 2h6M9 3h3M7 4h2M6 5h1M5 6h1M4 7h1M4 8h1M3 9h1M3 10h1M3 11h1M2 12h1M2 13h1M2 14h1M2 15h1M2 16h1M2 17h1' /%3E%3C/svg%3E");
   background-size: 100%;
 }
-.quadCurve.selected {
+.quadCurve:hover, .quadCurve.selected {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M12 1h6M9 2h3M18 2h1M7 3h2M12 3h6M6 4h1M9 4h3M5 5h1M7 5h2M4 6h1M6 6h1M3 7h1M5 7h1M3 8h1M5 8h1M2 9h1M4 9h1M2 10h1M4 10h1M2 11h1M4 11h1M1 12h1M3 12h1M1 13h1M3 13h1M1 14h1M3 14h1M1 15h1M3 15h1M1 16h1M3 16h1M1 17h1M3 17h1M2 18h1' /%3E%3Cpath stroke='%23000000' d='M12 2h6M9 3h3M7 4h2M6 5h1M5 6h1M4 7h1M4 8h1M3 9h1M3 10h1M3 11h1M2 12h1M2 13h1M2 14h1M2 15h1M2 16h1M2 17h1' /%3E%3C/svg%3E");
 }
 
@@ -1002,7 +1058,7 @@ canvas {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M17 1h1M16 2h1M18 2h1M16 3h1M18 3h1M16 4h1M18 4h1M6 5h3M15 5h1M17 5h1M5 6h1M9 6h1M15 6h1M17 6h1M4 7h1M6 7h3M10 7h1M15 7h1M17 7h1M3 8h1M5 8h1M9 8h1M11 8h1M14 8h1M16 8h1M3 9h1M5 9h1M9 9h1M11 9h1M14 9h1M16 9h1M2 10h1M4 10h1M10 10h1M12 10h2M15 10h1M2 11h1M4 11h1M11 11h1M14 11h1M2 12h1M4 12h1M12 12h2M1 13h1M3 13h1M1 14h1M3 14h1M1 15h1M3 15h1M1 16h1M3 16h1M1 17h1M3 17h1M2 18h1' /%3E%3Cpath stroke='%23000000' d='M17 2h1M17 3h1M17 4h1M16 5h1M6 6h3M16 6h1M5 7h1M9 7h1M16 7h1M4 8h1M10 8h1M15 8h1M4 9h1M10 9h1M15 9h1M3 10h1M11 10h1M14 10h1M3 11h1M12 11h2M3 12h1M2 13h1M2 14h1M2 15h1M2 16h1M2 17h1' /%3E%3C/svg%3E");
   background-size: 100%;
 }
-.cubicCurve.selected {
+.cubicCurve:hover, .cubicCurve.selected {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M17 1h1M16 2h1M18 2h1M16 3h1M18 3h1M16 4h1M18 4h1M6 5h3M15 5h1M17 5h1M5 6h1M9 6h1M15 6h1M17 6h1M4 7h1M6 7h3M10 7h1M15 7h1M17 7h1M3 8h1M5 8h1M9 8h1M11 8h1M14 8h1M16 8h1M3 9h1M5 9h1M9 9h1M11 9h1M14 9h1M16 9h1M2 10h1M4 10h1M10 10h1M12 10h2M15 10h1M2 11h1M4 11h1M11 11h1M14 11h1M2 12h1M4 12h1M12 12h2M1 13h1M3 13h1M1 14h1M3 14h1M1 15h1M3 15h1M1 16h1M3 16h1M1 17h1M3 17h1M2 18h1' /%3E%3Cpath stroke='%23000000' d='M17 2h1M17 3h1M17 4h1M16 5h1M6 6h3M16 6h1M5 7h1M9 7h1M16 7h1M4 8h1M10 8h1M15 8h1M4 9h1M10 9h1M15 9h1M3 10h1M11 10h1M14 10h1M3 11h1M12 11h2M3 12h1M2 13h1M2 14h1M2 15h1M2 16h1M2 17h1' /%3E%3C/svg%3E");
 }
 
@@ -1010,7 +1066,7 @@ canvas {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M12 1h4M10 2h2M16 2h1M8 3h2M12 3h4M17 3h1M7 4h1M10 4h2M16 4h1M18 4h1M6 5h1M8 5h2M16 5h1M18 5h1M5 6h1M7 6h1M16 6h1M18 6h1M4 7h1M6 7h1M16 7h1M18 7h1M3 8h1M5 8h1M15 8h1M17 8h1M3 9h1M5 9h1M15 9h1M17 9h1M2 10h1M4 10h1M14 10h1M16 10h1M2 11h1M4 11h1M14 11h1M16 11h1M1 12h1M3 12h1M13 12h1M15 12h1M1 13h1M3 13h1M12 13h1M14 13h1M1 14h1M3 14h1M10 14h2M13 14h1M1 15h1M3 15h1M8 15h2M12 15h1M2 16h1M4 16h4M10 16h2M3 17h1M8 17h2M4 18h4' /%3E%3Cpath stroke='%23000000' d='M12 2h4M10 3h2M16 3h1M8 4h2M17 4h1M7 5h1M17 5h1M6 6h1M17 6h1M5 7h1M17 7h1M4 8h1M16 8h1M4 9h1M16 9h1M3 10h1M15 10h1M3 11h1M15 11h1M2 12h1M14 12h1M2 13h1M13 13h1M2 14h1M12 14h1M2 15h1M10 15h2M3 16h1M8 16h2M4 17h4' /%3E%3C/svg%3E");
   background-size: 100%;
 }
-.ellipse.selected {
+.ellipse:hover, .ellipse.selected {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M12 1h4M10 2h2M16 2h1M8 3h2M12 3h4M17 3h1M7 4h1M10 4h2M16 4h1M18 4h1M6 5h1M8 5h2M16 5h1M18 5h1M5 6h1M7 6h1M16 6h1M18 6h1M4 7h1M6 7h1M16 7h1M18 7h1M3 8h1M5 8h1M15 8h1M17 8h1M3 9h1M5 9h1M15 9h1M17 9h1M2 10h1M4 10h1M14 10h1M16 10h1M2 11h1M4 11h1M14 11h1M16 11h1M1 12h1M3 12h1M13 12h1M15 12h1M1 13h1M3 13h1M12 13h1M14 13h1M1 14h1M3 14h1M10 14h2M13 14h1M1 15h1M3 15h1M8 15h2M12 15h1M2 16h1M4 16h4M10 16h2M3 17h1M8 17h2M4 18h4' /%3E%3Cpath stroke='%23000000' d='M12 2h4M10 3h2M16 3h1M8 4h2M17 4h1M7 5h1M17 5h1M6 6h1M17 6h1M5 7h1M17 7h1M4 8h1M16 8h1M4 9h1M16 9h1M3 10h1M15 10h1M3 11h1M15 11h1M2 12h1M14 12h1M2 13h1M13 13h1M2 14h1M12 14h1M2 15h1M10 15h2M3 16h1M8 16h2M4 17h4' /%3E%3C/svg%3E");
 }
 
@@ -1018,15 +1074,23 @@ canvas {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M2 1h2M6 1h3M11 1h3M16 1h2M1 2h1M4 2h2M9 2h2M14 2h2M18 2h1M1 3h1M3 3h1M6 3h3M11 3h3M16 3h1M18 3h1M2 4h1M17 4h1M2 5h1M17 5h1M1 6h1M3 6h1M16 6h1M18 6h1M1 7h1M3 7h1M16 7h1M18 7h1M1 8h1M3 8h1M16 8h1M18 8h1M2 9h1M17 9h1M2 10h1M17 10h1M1 11h1M3 11h1M16 11h1M18 11h1M1 12h1M3 12h1M16 12h1M18 12h1M1 13h1M3 13h1M16 13h1M18 13h1M2 14h1M17 14h1M2 15h1M17 15h1M1 16h1M3 16h1M6 16h3M11 16h3M16 16h1M18 16h1M1 17h1M4 17h2M9 17h2M14 17h2M18 17h1M2 18h2M6 18h3M11 18h3M16 18h2' /%3E%3Cpath stroke='%23000000' d='M2 2h2M6 2h3M11 2h3M16 2h2M2 3h1M17 3h1M2 6h1M17 6h1M2 7h1M17 7h1M2 8h1M17 8h1M2 11h1M17 11h1M2 12h1M17 12h1M2 13h1M17 13h1M2 16h1M17 16h1M2 17h2M6 17h3M11 17h3M16 17h2' /%3E%3C/svg%3E");
   background-size: 100%;
 }
-.select.selected {
+.select:hover, .select.selected {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M2 1h2M6 1h3M11 1h3M16 1h2M1 2h1M4 2h2M9 2h2M14 2h2M18 2h1M1 3h1M3 3h1M6 3h3M11 3h3M16 3h1M18 3h1M2 4h1M17 4h1M2 5h1M17 5h1M1 6h1M3 6h1M16 6h1M18 6h1M1 7h1M3 7h1M16 7h1M18 7h1M1 8h1M3 8h1M16 8h1M18 8h1M2 9h1M17 9h1M2 10h1M17 10h1M1 11h1M3 11h1M16 11h1M18 11h1M1 12h1M3 12h1M16 12h1M18 12h1M1 13h1M3 13h1M16 13h1M18 13h1M2 14h1M17 14h1M2 15h1M17 15h1M1 16h1M3 16h1M6 16h3M11 16h3M16 16h1M18 16h1M1 17h1M4 17h2M9 17h2M14 17h2M18 17h1M2 18h2M6 18h3M11 18h3M16 18h2' /%3E%3Cpath stroke='%23000000' d='M2 2h2M6 2h3M11 2h3M16 2h2M2 3h1M17 3h1M2 6h1M17 6h1M2 7h1M17 7h1M2 8h1M17 8h1M2 11h1M17 11h1M2 12h1M17 12h1M2 13h1M17 13h1M2 16h1M17 16h1M2 17h2M6 17h3M11 17h3M16 17h2' /%3E%3C/svg%3E");
+}
+
+.magicWand {
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'><path stroke='rgb(131, 131, 131)' d='M6 1h1M3 2h1M5 2h1M7 2h2M2 3h1M4 3h4M9 3h1M3 4h1M8 4h1M2 5h2M8 5h2M1 6h1M3 6h1M8 6h1M10 6h1M2 7h2M8 7h2M2 8h1M4 8h4M9 8h2M3 9h1M5 9h1M7 9h2M11 9h1M6 10h1M8 10h1M12 10h1M9 11h1M13 11h1M10 12h1M14 12h1M11 13h1M15 13h1M12 14h1M16 14h1M13 15h1M17 15h1M14 16h1M18 16h1M15 17h1M18 17h1M16 18h2' /><path stroke='%23acacac' d='M6 2h1M3 3h1M8 3h1M4 4h4M4 5h1M7 5h1M2 6h1M4 6h1M7 6h1M9 6h1M4 7h4M3 8h1M8 8h1M6 9h1M11 11h1M12 12h1M14 14h1' /><path stroke='%23ffffff' d='M5 5h1M5 6h2' /><path stroke='%23fffffd' d='M6 5h1M10 10h1' /><path stroke='%23575757' d='M9 9h2M9 10h1M10 11h1M11 12h1M13 13h1M15 15h1' /><path stroke='%23000000' d='M11 10h1M12 11h1M13 12h1M12 13h1M14 13h1M13 14h1M15 14h1M14 15h1M16 15h1M15 16h3M16 17h2' /></svg>");
+  background-size: 100%;
+}
+.magicWand:hover, .magicWand.selected {
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'><path stroke='rgb(255, 255, 255)' d='M6 1h1M3 2h1M5 2h1M7 2h2M2 3h1M4 3h4M9 3h1M3 4h1M8 4h1M2 5h2M8 5h2M1 6h1M3 6h1M8 6h1M10 6h1M2 7h2M8 7h2M2 8h1M4 8h4M9 8h2M3 9h1M5 9h1M7 9h2M11 9h1M6 10h1M8 10h1M12 10h1M9 11h1M13 11h1M10 12h1M14 12h1M11 13h1M15 13h1M12 14h1M16 14h1M13 15h1M17 15h1M14 16h1M18 16h1M15 17h1M18 17h1M16 18h2' /><path stroke='%23acacac' d='M6 2h1M3 3h1M8 3h1M4 4h4M4 5h1M7 5h1M2 6h1M4 6h1M7 6h1M9 6h1M4 7h4M3 8h1M8 8h1M6 9h1M11 11h1M12 12h1M14 14h1' /><path stroke='%23ffffff' d='M5 5h1M5 6h2' /><path stroke='%23fffffd' d='M6 5h1M10 10h1' /><path stroke='%23575757' d='M9 9h2M9 10h1M10 11h1M11 12h1M13 13h1M15 15h1' /><path stroke='%23000000' d='M11 10h1M12 11h1M13 12h1M12 13h1M14 13h1M13 14h1M15 14h1M14 15h1M16 15h1M15 16h3M16 17h2' /></svg>");
 }
 
 .eyedropper {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M15 1h3M10 2h2M14 2h1M18 2h1M9 3h1M12 3h2M18 3h1M8 4h1M18 4h1M9 5h1M17 5h1M9 6h1M16 6h1M8 7h1M16 7h1M7 8h1M17 8h1M6 9h1M17 9h1M5 10h1M13 10h2M16 10h1M4 11h1M12 11h1M15 11h1M4 12h1M11 12h1M3 13h1M10 13h1M3 14h1M9 14h1M2 15h1M7 15h2M2 16h1M5 16h2M2 17h1M5 17h1M3 18h2' /%3E%3Cpath stroke='%23000000' d='M15 2h3M10 3h2M14 3h4M9 4h9M10 5h7M12 6h4M13 7h3M14 8h3M13 9h4M12 10h1M15 10h1M11 11h1M5 12h1M7 12h4M4 13h1M9 13h1M4 14h1M7 14h2M3 15h4M3 16h2M3 17h2' /%3E%3Cpath stroke='%23575757' d='M10 6h2M9 7h1M12 7h1M8 8h1M13 8h1M7 9h1M6 10h1M5 11h1M5 13h4M5 14h2' /%3E%3Cpath stroke='%23acacac' d='M10 7h2M9 8h1M11 8h2M8 9h1M10 9h3M7 10h1M9 10h3M6 11h1M8 11h3M6 12h1' /%3E%3Cpath stroke='%23ffffff' d='M10 8h1M9 9h1M8 10h1M7 11h1' /%3E%3C/svg%3E");
   background-size: 100%;
 }
-.eyedropper.selected {
+.eyedropper:hover, .eyedropper.selected {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M15 1h3M10 2h2M14 2h1M18 2h1M9 3h1M12 3h2M18 3h1M8 4h1M18 4h1M9 5h1M17 5h1M9 6h1M16 6h1M8 7h1M16 7h1M7 8h1M17 8h1M6 9h1M17 9h1M5 10h1M13 10h2M16 10h1M4 11h1M12 11h1M15 11h1M4 12h1M11 12h1M3 13h1M10 13h1M3 14h1M9 14h1M2 15h1M7 15h2M2 16h1M5 16h2M2 17h1M5 17h1M3 18h2' /%3E%3Cpath stroke='%23000000' d='M15 2h3M10 3h2M14 3h4M9 4h9M10 5h7M12 6h4M13 7h3M14 8h3M13 9h4M12 10h1M15 10h1M11 11h1M5 12h1M7 12h4M4 13h1M9 13h1M4 14h1M7 14h2M3 15h4M3 16h2M3 17h2' /%3E%3Cpath stroke='%23575757' d='M10 6h2M9 7h1M12 7h1M8 8h1M13 8h1M7 9h1M6 10h1M5 11h1M5 13h4M5 14h2' /%3E%3Cpath stroke='%23acacac' d='M10 7h2M9 8h1M11 8h2M8 9h1M10 9h3M7 10h1M9 10h3M6 11h1M8 11h3M6 12h1' /%3E%3Cpath stroke='%23ffffff' d='M10 8h1M9 9h1M8 10h1M7 11h1' /%3E%3C/svg%3E");
 }
 
@@ -1034,7 +1098,7 @@ canvas {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h2M8 2h1M11 2h3M5 3h3M14 3h1M4 4h1M7 4h1M15 4h2M3 5h1M17 5h1M3 6h1M18 6h1M4 7h1M18 7h1M4 8h1M18 8h1M4 9h2M18 9h1M3 10h1M17 10h1M2 11h1M17 11h1M2 12h1M17 12h1M3 13h1M16 13h1M4 14h1M16 14h1M5 15h1M16 15h1M6 16h1M15 16h1M7 17h1M14 17h1M8 18h6' /%3E%3Cpath stroke='%23575757' d='M9 2h2M8 3h1M12 3h2M5 4h2M8 4h1M4 5h1M16 5h1M4 6h1M7 6h1M11 6h1M15 6h1M5 7h1M11 7h1M14 7h2M5 8h1M8 8h1M11 8h1M14 8h1M6 9h1M14 9h1M16 9h1M4 10h2M3 11h1M6 11h2M13 11h1M3 12h1M13 12h1M15 12h1M14 15h1M13 16h1' /%3E%3Cpath stroke='%23ffffff' d='M9 3h2M9 4h1M12 4h2M5 5h2M9 5h1M12 5h1M5 6h2M9 6h1M12 6h1M6 7h1M9 7h1M12 7h1M6 8h2M9 8h1M12 8h1M7 9h1M9 9h1M12 9h1M7 10h4M12 10h1M4 11h2M8 11h1M10 11h1M12 11h1M4 12h3M8 12h1M10 12h1M12 12h1M6 13h7M7 14h6M8 15h4' /%3E%3Cpath stroke='%23000000' d='M11 3h1M11 4h1M14 4h1M7 5h2M11 5h1M14 5h2M8 6h1M14 6h1M17 6h1M8 7h1M17 7h1M17 8h1M17 9h1M6 10h1M16 10h1M16 11h1M16 12h1M4 13h1M15 13h1M5 14h1M15 14h1M6 15h1M15 15h1M7 16h1M14 16h1M8 17h6' /%3E%3Cpath stroke='%23acacac' d='M10 4h1M10 5h1M13 5h1M10 6h1M13 6h1M16 6h1M7 7h1M10 7h1M13 7h1M16 7h1M10 8h1M13 8h1M15 8h2M8 9h1M10 9h2M13 9h1M15 9h1M11 10h1M13 10h3M9 11h1M11 11h1M14 11h2M7 12h1M9 12h1M11 12h1M14 12h1M5 13h1M13 13h2M6 14h1M13 14h2M7 15h1M12 15h2M8 16h5' /%3E%3C/svg%3E");
   background-size: 100%;
 }
-.grab.selected {
+.grab:hover, .grab.selected {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M9 1h2M8 2h1M11 2h3M5 3h3M14 3h1M4 4h1M7 4h1M15 4h2M3 5h1M17 5h1M3 6h1M18 6h1M4 7h1M18 7h1M4 8h1M18 8h1M4 9h2M18 9h1M3 10h1M17 10h1M2 11h1M17 11h1M2 12h1M17 12h1M3 13h1M16 13h1M4 14h1M16 14h1M5 15h1M16 15h1M6 16h1M15 16h1M7 17h1M14 17h1M8 18h6' /%3E%3Cpath stroke='%23575757' d='M9 2h2M8 3h1M12 3h2M5 4h2M8 4h1M4 5h1M16 5h1M4 6h1M7 6h1M11 6h1M15 6h1M5 7h1M11 7h1M14 7h2M5 8h1M8 8h1M11 8h1M14 8h1M6 9h1M14 9h1M16 9h1M4 10h2M3 11h1M6 11h2M13 11h1M3 12h1M13 12h1M15 12h1M14 15h1M13 16h1' /%3E%3Cpath stroke='%23ffffff' d='M9 3h2M9 4h1M12 4h2M5 5h2M9 5h1M12 5h1M5 6h2M9 6h1M12 6h1M6 7h1M9 7h1M12 7h1M6 8h2M9 8h1M12 8h1M7 9h1M9 9h1M12 9h1M7 10h4M12 10h1M4 11h2M8 11h1M10 11h1M12 11h1M4 12h3M8 12h1M10 12h1M12 12h1M6 13h7M7 14h6M8 15h4' /%3E%3Cpath stroke='%23000000' d='M11 3h1M11 4h1M14 4h1M7 5h2M11 5h1M14 5h2M8 6h1M14 6h1M17 6h1M8 7h1M17 7h1M17 8h1M17 9h1M6 10h1M16 10h1M16 11h1M16 12h1M4 13h1M15 13h1M5 14h1M15 14h1M6 15h1M15 15h1M7 16h1M14 16h1M8 17h6' /%3E%3Cpath stroke='%23acacac' d='M10 4h1M10 5h1M13 5h1M10 6h1M13 6h1M16 6h1M7 7h1M10 7h1M13 7h1M16 7h1M10 8h1M13 8h1M15 8h2M8 9h1M10 9h2M13 9h1M15 9h1M11 10h1M13 10h3M9 11h1M11 11h1M14 11h2M7 12h1M9 12h1M11 12h1M14 12h1M5 13h1M13 13h2M6 14h1M13 14h2M7 15h1M12 15h2M8 16h5' /%3E%3C/svg%3E");
 }
 
@@ -1042,7 +1106,7 @@ canvas {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h2M8 2h1M11 2h1M7 3h1M12 3h1M6 4h1M13 4h1M7 5h2M11 5h2M4 6h1M8 6h1M11 6h1M15 6h1M3 7h1M5 7h1M8 7h1M11 7h1M14 7h1M16 7h1M2 8h1M5 8h4M11 8h4M17 8h1M1 9h1M18 9h1M1 10h1M18 10h1M2 11h1M5 11h4M11 11h4M17 11h1M3 12h1M5 12h1M8 12h1M11 12h1M14 12h1M16 12h1M4 13h1M8 13h1M11 13h1M15 13h1M7 14h2M11 14h2M6 15h1M13 15h1M7 16h1M12 16h1M8 17h1M11 17h1M9 18h2' /%3E%3Cpath stroke='%23000000' d='M9 2h2M8 3h4M7 4h6M9 5h2M9 6h2M4 7h1M9 7h2M15 7h1M3 8h2M9 8h2M15 8h2M2 9h16M2 10h16M3 11h2M9 11h2M15 11h2M4 12h1M9 12h2M15 12h1M9 13h2M9 14h2M7 15h6M8 16h4M9 17h2' /%3E%3C/svg%3E");
   background-size: 100%;
 }
-.move.selected {
+.move:hover, .move.selected {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M9 1h2M8 2h1M11 2h1M7 3h1M12 3h1M6 4h1M13 4h1M7 5h2M11 5h2M4 6h1M8 6h1M11 6h1M15 6h1M3 7h1M5 7h1M8 7h1M11 7h1M14 7h1M16 7h1M2 8h1M5 8h4M11 8h4M17 8h1M1 9h1M18 9h1M1 10h1M18 10h1M2 11h1M5 11h4M11 11h4M17 11h1M3 12h1M5 12h1M8 12h1M11 12h1M14 12h1M16 12h1M4 13h1M8 13h1M11 13h1M15 13h1M7 14h2M11 14h2M6 15h1M13 15h1M7 16h1M12 16h1M8 17h1M11 17h1M9 18h2' /%3E%3Cpath stroke='%23000000' d='M9 2h2M8 3h4M7 4h6M9 5h2M9 6h2M4 7h1M9 7h2M15 7h1M3 8h2M9 8h2M15 8h2M2 9h16M2 10h16M3 11h2M9 11h2M15 11h2M4 12h1M9 12h2M15 12h1M9 13h2M9 14h2M7 15h6M8 16h4M9 17h2' /%3E%3C/svg%3E");
 }
 
@@ -1226,6 +1290,7 @@ canvas {
 }
 .layers-interface .collapsible {
   padding-top: 2px;
+  overflow: hidden;
 }
 .layers-interface .layers-control {
   flex-shrink: 0; /* Prevents the child from shrinking below its content size */
@@ -1355,10 +1420,6 @@ canvas {
 }
 .layers-interface.disabled .collapsible {
   cursor: not-allowed;
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
-}
-.layers-interface.disabled .collapsible:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .layers-interface.disabled .collapsible * {
   pointer-events: none;
@@ -1366,6 +1427,12 @@ canvas {
 .layers-interface.disabled .collapsible button,
 .layers-interface.disabled .collapsible label {
   opacity: 0.5;
+}
+.layers-interface.disabled .collapsible {
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.layers-interface.disabled .collapsible:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 
 .layer-settings {
@@ -1387,13 +1454,13 @@ canvas {
   height: 2px;
   position: absolute;
   top: calc(50% - 1px);
-  left: -4px;
   background: rgb(131, 131, 131);
-  box-shadow: -2px -2px rgb(131, 131, 131), 0px -2px rgb(61, 61, 61), 0px -4px rgb(131, 131, 131), 2px 0px rgb(61, 61, 61), 2px -2px rgb(61, 61, 61), 2px -4px rgb(61, 61, 61);
+  left: -4px;
+  box-shadow: -2px -2px rgb(131, 131, 131), 0 -2px rgb(61, 61, 61), 0 -4px rgb(131, 131, 131), 2px 0 rgb(61, 61, 61), 2px -2px rgb(61, 61, 61), 2px -4px rgb(61, 61, 61);
 }
 .layer-settings:hover:not([disabled]):after {
   background: rgb(255, 255, 255);
-  box-shadow: -2px -2px rgb(255, 255, 255), 0px -2px rgb(61, 61, 61), 0px -4px rgb(255, 255, 255), 2px 0px rgb(61, 61, 61), 2px -2px rgb(61, 61, 61), 2px -4px rgb(61, 61, 61);
+  box-shadow: -2px -2px rgb(255, 255, 255), 0 -2px rgb(61, 61, 61), 0 -4px rgb(255, 255, 255), 2px 0 rgb(61, 61, 61), 2px -2px rgb(61, 61, 61), 2px -4px rgb(61, 61, 61);
 }
 .layer-settings > * {
   margin: 16px 16px 0 16px;
@@ -1428,6 +1495,7 @@ canvas {
 }
 .vectors-interface .collapsible {
   padding-top: 2px;
+  overflow: hidden;
 }
 .vectors-interface .vectors-container {
   display: flex;
@@ -1478,14 +1546,14 @@ canvas {
 }
 .vectors-interface .vectors-container .vectors .vector img {
   pointer-events: none;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   height: 100%;
   overflow: hidden;
   object-fit: cover;
 }
 .vectors-interface .vectors-container .vectors .vector canvas {
   position: absolute;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   width: 100%;
   height: 100%;
 }
@@ -1553,7 +1621,7 @@ canvas {
 .vectors-interface .vectors-container .vectors .vector .actionColor {
   right: 0;
   top: 22px;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .vectors-interface .vectors-container .vectors .vector .actionColor:hover:not([disabled]) {
@@ -1589,7 +1657,7 @@ canvas {
   border: 2px solid rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector:hover .tool {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: 2px 0 rgb(255, 255, 255), -2px 0 rgb(255, 255, 255), 0 -2px rgb(255, 255, 255), 0 2px rgb(255, 255, 255);
   z-index: 105;
 }
 .vectors-interface .vectors-container .vectors .vector .warning {
@@ -1618,7 +1686,7 @@ canvas {
   margin-top: 8px;
 }
 .brush-container p {
-  margin: 0px;
+  margin: 0;
 }
 .brush-container .brush-size {
   padding-top: 2px;
@@ -1672,7 +1740,7 @@ canvas {
   padding-top: 2px;
 }
 .palette-interface p {
-  margin: 0px;
+  margin: 0;
 }
 .palette-interface {
   /* Color Swatches */
@@ -1685,7 +1753,7 @@ canvas {
 }
 .palette-interface .colors .swatch {
   position: absolute;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   width: 48px;
   height: 48px;
   margin: 8px;
@@ -1699,7 +1767,7 @@ canvas {
 }
 .palette-interface .colors .back-swatch {
   position: absolute;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   width: 48px;
   height: 48px;
   margin: 8px;
@@ -1757,15 +1825,66 @@ canvas {
 .palette-interface .palette-container .palette-tools .palette-remove:hover, .palette-interface .palette-container .palette-tools .palette-remove.selected {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M8 1h1M7 2h1M9 2h2M6 3h1M11 3h1M5 4h1M12 4h1M4 5h1M13 5h1M3 6h1M14 6h1M2 7h1M14 7h1M1 8h1M15 8h2M2 9h1M17 9h1M2 10h1M18 10h1M3 11h1M18 11h1M4 12h1M18 12h1M5 13h1M17 13h1M6 14h2M16 14h1M8 15h1M15 15h1M8 16h1M14 16h1M9 17h1M13 17h1M10 18h3' /%3E%3Cpath stroke='%23575757' d='M8 2h1M7 3h1M6 4h1M5 5h1M10 5h2M4 6h1M9 6h1M11 6h2M3 7h1M8 7h1M12 7h1M2 8h1M7 8h1M11 8h2M6 9h1M10 9h2M13 9h2M5 10h1M8 10h3M12 10h1M14 10h1M6 11h1M8 11h2M11 11h3M16 11h1M7 12h2M10 12h7M9 13h1M11 13h2M15 13h1M10 14h1M12 14h1M14 14h1M12 15h2M12 16h1' /%3E%3Cpath stroke='%23acacac' d='M8 3h1M8 4h1M10 4h1M6 5h1M9 5h1M6 6h1M8 6h1M7 7h1M11 7h1M3 8h1M6 8h1M10 8h1M5 9h1M9 9h1M4 10h1M15 10h2M5 11h1M6 12h1M9 14h1M10 15h1M10 16h2' /%3E%3Cpath stroke='%23000000' d='M9 3h2M9 4h1M11 4h1M8 5h1M12 5h1M7 6h1M10 6h1M13 6h1M6 7h1M9 7h2M13 7h1M5 8h1M8 8h2M13 8h2M3 9h2M7 9h2M12 9h1M15 9h2M3 10h1M6 10h2M11 10h1M13 10h1M17 10h1M4 11h1M7 11h1M10 11h1M14 11h2M17 11h1M5 12h1M9 12h1M17 12h1M6 13h3M10 13h1M13 13h2M16 13h1M8 14h1M11 14h1M13 14h1M15 14h1M9 15h1M11 15h1M14 15h1M9 16h1M13 16h1M10 17h3' /%3E%3Cpath stroke='%23ffffff' d='M7 4h1M7 5h1M5 6h1M4 7h2M4 8h1' /%3E%3C/svg%3E");
 }
+.palette-interface .palette-container .palette-presets {
+  position: relative;
+  width: calc(100% - 2px);
+  margin: 0 0 8px 2px;
+}
+.palette-interface .palette-container .palette-presets .palette-presets-btn {
+  width: 100%;
+  background: rgb(77, 77, 77);
+  color: rgb(255, 255, 255);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 4px;
+  text-align: left;
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.palette-interface .palette-container .palette-presets .palette-presets-btn:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.palette-interface .palette-container .palette-presets .palette-presets-list {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgb(51, 51, 51);
+  z-index: 200;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.palette-interface .palette-container .palette-presets .palette-presets-list:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.palette-interface .palette-container .palette-presets .palette-presets-list li {
+  padding: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  color: rgb(255, 255, 255);
+}
+.palette-interface .palette-container .palette-presets .palette-presets-list li:hover {
+  background: rgb(77, 77, 77);
+}
+.palette-interface .palette-container .palette-presets .palette-presets-list li.selected {
+  background: rgb(61, 61, 61);
+}
+.palette-interface .palette-container .palette-presets.open .palette-presets-list {
+  display: block;
+}
 .palette-interface .palette-container .palette-colors {
   display: flex;
   flex-flow: row wrap;
+  width: 100%;
+  margin: 0 1px;
 }
 .palette-interface .palette-container .palette-colors .palette-color {
   cursor: pointer;
   width: 20px;
   height: 20px;
-  background-image: repeating-linear-gradient(-45deg, white, white 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   margin: 1px;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
@@ -1774,7 +1893,7 @@ canvas {
 }
 .palette-interface .palette-container .palette-colors .palette-color.selected {
   z-index: 105;
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: 2px 0 rgb(255, 255, 255), -2px 0 rgb(255, 255, 255), 0 -2px rgb(255, 255, 255), 0 2px rgb(255, 255, 255);
 }
 .palette-interface .palette-container .palette-colors .palette-color.selected:hover:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
@@ -1796,16 +1915,16 @@ canvas {
   box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
+  box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]):hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
+  box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
+  box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]):hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 red, 2px 0 0 0 red, 0 -2px 0 0 red, 0 2px 0 0 red;
+  box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover .swatch {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h2M8 2h1M11 2h1M6 3h2M9 3h2M12 3h2M4 4h2M14 4h2M3 5h1M16 5h1M2 6h1M17 6h1M2 7h1M17 7h1M2 8h1M17 8h1M3 9h1M16 9h1M3 10h1M16 10h1M3 11h1M16 11h1M3 12h1M16 12h1M3 13h1M16 13h1M3 14h1M16 14h1M3 15h1M16 15h1M3 16h1M16 16h1M4 17h1M15 17h1M5 18h10' /%3E%3Cpath stroke='%23575757' d='M9 2h2M8 3h1M6 4h8M4 5h2M13 5h3M3 6h1M10 6h5M3 7h1M12 7h4M3 8h1M8 9h1M11 9h1M4 10h1M6 10h1M9 10h3M14 10h1M4 11h1M6 11h1M9 11h2M14 11h1M4 12h1M6 12h1M9 12h2M14 12h1M4 13h1M6 13h1M9 13h2M14 13h1M4 14h1M6 14h1M9 14h2M14 14h1M4 15h1M9 15h1M13 15h2M4 16h1M11 16h4M5 17h1' /%3E%3Cpath stroke='%23000000' d='M11 3h1M15 6h2M16 7h1M4 8h13M4 9h1M6 9h2M9 9h2M12 9h4M12 10h2M15 10h1M12 11h2M15 11h1M12 12h2M15 12h1M12 13h2M15 13h1M12 14h2M15 14h1M12 15h1M15 15h1M15 16h1M6 17h9' /%3E%3Cpath stroke='%23acacac' d='M6 5h1M8 5h5M4 6h2M7 6h3M4 7h2M8 7h4M5 9h1M5 10h1M8 10h1M5 11h1M8 11h1M11 11h1M5 12h1M8 12h1M11 12h1M5 13h1M8 13h1M11 13h1M5 14h1M8 14h1M11 14h1M5 15h1M8 15h1M10 15h2M5 16h6' /%3E%3Cpath stroke='%23ffffff' d='M7 5h1M6 6h1M6 7h2M7 10h1M7 11h1M7 12h1M7 13h1M7 14h1M6 15h2' /%3E%3C/svg%3E") !important;
@@ -1825,21 +1944,9 @@ canvas {
 }
 
 .settings-container {
-  user-select: none;
-  position: absolute;
   top: 15%;
-  z-index: 103;
   max-width: calc(100% - 4px);
   max-height: calc(100% - 4px);
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  color: white;
-  background: rgb(51, 51, 51);
-  text-align: center;
-  padding: 0;
-  align-self: center;
-  opacity: 1;
 }
 .settings-container .collapsible {
   padding-top: 2px;
@@ -1928,7 +2035,7 @@ canvas {
 .picker-container .header h3 {
   justify-self: center;
   height: 20px;
-  margin: 0px;
+  margin: 0;
 }
 .picker-container .collapsible {
   padding-top: 2px;
@@ -1986,7 +2093,7 @@ canvas {
   height: 24px;
   width: 9px;
   border: 2px solid black;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: 2px 0 rgb(131, 131, 131), -2px 0 rgb(131, 131, 131), 0 -2px rgb(131, 131, 131), 0 2px rgb(131, 131, 131);
 }
 .picker-container .collapsible .picker-interface #left #picker .picker-slider::-moz-range-thumb {
   box-sizing: border-box;
@@ -1994,13 +2101,13 @@ canvas {
   height: 24px;
   width: 9px;
   border: 2px solid black;
-  box-shadow: 2px 0px rgb(131, 131, 131), -2px 0px rgb(131, 131, 131), 0px -2px rgb(131, 131, 131), 0px 2px rgb(131, 131, 131);
+  box-shadow: 2px 0 rgb(131, 131, 131), -2px 0 rgb(131, 131, 131), 0 -2px rgb(131, 131, 131), 0 2px rgb(131, 131, 131);
 }
 .picker-container .collapsible .picker-interface #left #picker .picker-slider:hover::-webkit-slider-thumb, .picker-container .collapsible .picker-interface #left #picker .picker-slider:focus::-webkit-slider-thumb {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: 2px 0 rgb(255, 255, 255), -2px 0 rgb(255, 255, 255), 0 -2px rgb(255, 255, 255), 0 2px rgb(255, 255, 255);
 }
 .picker-container .collapsible .picker-interface #left #picker .picker-slider:hover::-moz-range-thumb, .picker-container .collapsible .picker-interface #left #picker .picker-slider:focus::-moz-range-thumb {
-  box-shadow: 2px 0px rgb(255, 255, 255), -2px 0px rgb(255, 255, 255), 0px -2px rgb(255, 255, 255), 0px 2px rgb(255, 255, 255);
+  box-shadow: 2px 0 rgb(255, 255, 255), -2px 0 rgb(255, 255, 255), 0 -2px rgb(255, 255, 255), 0 2px rgb(255, 255, 255);
 }
 .picker-container .collapsible .picker-interface #left #picker #hueslider {
   top: 240px;
@@ -2036,7 +2143,7 @@ canvas {
   background: rgb(77, 77, 77);
   font-size: 20px;
   padding: 8px;
-  margin: 0px 20px 0px 20px;
+  margin: 0 20px 0 20px;
 }
 .picker-container .collapsible .picker-interface #right {
   display: flex;
@@ -2083,6 +2190,25 @@ canvas {
 .picker-container .collapsible .picker-interface #right #colors .color .swatch #oldcolor {
   background-image: radial-gradient(rgba(var(--old-swatch-color), var(--old-swatch-alpha)) 50%, rgba(var(--old-swatch-color), 1) 110%);
 }
+.picker-container .collapsible .picker-interface #right #colors #newcolor-btn {
+  position: relative;
+  cursor: pointer;
+}
+.picker-container .collapsible .picker-interface #right #colors #newcolor-btn #newcolor-plus {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 20px;
+  height: 20px;
+  margin: 10px;
+  opacity: 0;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 10 10' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M4 1h2M3 2h1M6 2h1M2 3h2M6 3h2M1 4h1M8 4h1M1 5h1M8 5h1M2 6h2M6 6h2M3 7h1M6 7h1M4 8h2' /%3E%3Cpath stroke='%23000000' d='M4 2h2M4 3h2M2 4h6M2 5h6M4 6h2M4 7h2' /%3E%3C/svg%3E") no-repeat;
+  background-size: 100%;
+}
+.picker-container .collapsible .picker-interface #right #colors #newcolor-btn:hover #newcolor-plus {
+  opacity: 1;
+}
 .picker-container .collapsible .picker-interface #right #rgbahsl {
   display: flex;
   flex-flow: row nowrap;
@@ -2122,27 +2248,15 @@ canvas {
 
 /* Canvas Size settings */
 .size-container {
-  user-select: none;
-  position: absolute;
   top: 15%;
-  z-index: 103;
   max-width: calc(100% - 4px);
   max-height: calc(100% - 4px);
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  color: white;
-  background: rgb(51, 51, 51);
-  text-align: center;
-  padding: 0;
-  align-self: center;
-  opacity: 1;
 }
 .size-container .collapsible {
   padding-top: 2px;
 }
 .size-container p {
-  margin: 0px;
+  margin: 0;
 }
 .size-container .dimensions-form {
   padding: 8px;
@@ -2189,21 +2303,9 @@ canvas {
 }
 
 .export-container {
-  user-select: none;
-  position: absolute;
-  z-index: 103;
   width: 370px;
   max-width: calc(100% - 4px);
   max-height: calc(100% - 4px);
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  color: white;
-  background: rgb(51, 51, 51);
-  text-align: center;
-  padding: 0;
-  align-self: center;
-  opacity: 1;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .export-container:hover:not([disabled]) {
@@ -2212,7 +2314,7 @@ canvas {
 .export-container .header h3 {
   justify-self: center;
   height: 20px;
-  margin: 0px;
+  margin: 0;
 }
 .export-container .collapsible {
   padding-top: 2px;
@@ -2233,22 +2335,10 @@ canvas {
 }
 
 .save-container {
-  user-select: none;
-  position: absolute;
   top: 15%;
-  z-index: 103;
   width: 370px;
   max-width: calc(100% - 4px);
   max-height: calc(100% - 4px);
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  color: white;
-  background: rgb(51, 51, 51);
-  text-align: center;
-  padding: 0;
-  align-self: center;
-  opacity: 1;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .save-container:hover:not([disabled]) {
@@ -2257,7 +2347,7 @@ canvas {
 .save-container .header h3 {
   justify-self: center;
   height: 20px;
-  margin: 0px;
+  margin: 0;
 }
 .save-container .collapsible {
   padding-top: 2px;
@@ -2273,7 +2363,7 @@ canvas {
   flex-flow: row nowrap;
   align-items: center;
   justify-content: flex-start;
-  margin: 8px 0px;
+  margin: 8px 0;
 }
 .save-container .collapsible .save-interface .save-setting #save-file-name {
   width: 96px;
@@ -2319,20 +2409,9 @@ canvas {
   margin: 8px;
   background: rgb(77, 77, 77);
 }
+
 .vector-transform-ui-container {
-  user-select: none;
-  position: absolute;
-  z-index: 103;
   top: 10%;
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  color: white;
-  background: rgb(51, 51, 51);
-  text-align: center;
-  padding: 0;
-  align-self: center;
-  opacity: 1;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .vector-transform-ui-container:hover:not([disabled]) {
@@ -2341,7 +2420,7 @@ canvas {
 .vector-transform-ui-container .header h3 {
   justify-self: center;
   height: 20px;
-  margin: 0px;
+  margin: 0;
 }
 .vector-transform-ui-container .collapsible {
   padding-top: 2px;
@@ -2365,38 +2444,6 @@ canvas {
 }
 .vector-transform-ui-container .collapsible .vector-transform-ui-interface .transform-options button {
   color: rgb(255, 255, 255);
-}
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool {
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  user-select: none;
-  text-align: center;
-  color: white;
-  width: 40px;
-  height: 40px;
-  margin: 3px;
-  opacity: 1;
-  background-color: rgb(131, 131, 131);
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
-}
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
-}
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool:hover {
-  z-index: 104;
-}
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool.selected {
-  background-color: rgb(255, 255, 255);
-  z-index: 105;
-}
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool.custom-shape {
-  background-color: transparent;
-  box-shadow: none;
-}
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool.custom-shape:hover:not([disabled]) {
-  box-shadow: none;
 }
 
 /*# sourceMappingURL=style.css.map */

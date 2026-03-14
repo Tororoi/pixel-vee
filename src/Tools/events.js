@@ -8,11 +8,12 @@ import { actionClear } from "../Actions/modifyTimeline.js"
 import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { renderVectorsToDOM, renderBrushStampToDOM } from "../DOM/render.js"
-import { toggleMode, switchTool } from "./toolbox.js"
+import { toggleMode, switchTool, initToolGroups } from "./toolbox.js"
 import { ZOOM_LEVELS } from "../utils/constants.js"
 
 //Initialize default tool
 state.tool.current = tools.brush
+initToolGroups()
 
 //=========================================//
 //=== * * * Button Event Handlers * * * ===//
@@ -76,10 +77,31 @@ function handleClearCanvas() {
  * @param {PointerEvent} e - click event
  */
 export function handleTools(e) {
+  // Handle group button click — toggle popout open/closed
+  const groupBtn = e?.target.closest(".tool-group-btn")
+  if (groupBtn) {
+    groupBtn.closest(".tool-group")?.classList.toggle("open")
+    return
+  }
+  // Handle tool click (works for both regular tools and tools inside popouts)
   const targetTool = e?.target.closest(".tool")
+  if (!targetTool) return
+  // Close any open popout before switching
+  document
+    .querySelectorAll(".tool-group.open")
+    .forEach((g) => g.classList.remove("open"))
   switchTool(null, targetTool)
   renderVectorsToDOM()
 }
+
+// Close open popouts when clicking outside any tool group
+document.addEventListener("click", (e) => {
+  if (!e.target.closest(".tool-group")) {
+    document
+      .querySelectorAll(".tool-group.open")
+      .forEach((g) => g.classList.remove("open"))
+  }
+})
 
 /**
  * @param {PointerEvent} e - click event

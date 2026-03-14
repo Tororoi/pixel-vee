@@ -43,6 +43,10 @@ function renderToLatestAction(latestAction, modType) {
   }
   //set boundary box
   state.selection.setBoundaryBox(state.selection.properties)
+  //set mask set
+  state.selection.maskSet = mostRecentAction.maskSet
+    ? new Set(mostRecentAction.maskSet)
+    : null
   //set selected vectors
   state.vector.selectedIndices = new Set(
     mostRecentAction.selectedVectorIndices
@@ -444,6 +448,7 @@ export function addToTimeline(actionObject) {
     layer,
     ...properties,
     selectProperties: { ...state.selection.properties },
+    maskSet: state.selection.maskSet ? Array.from(state.selection.maskSet) : null,
     selectedVectorIndices: Array.from(state.vector.selectedIndices),
     currentVectorIndex: state.vector.currentIndex,
     hidden: false,

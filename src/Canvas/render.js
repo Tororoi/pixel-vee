@@ -272,13 +272,39 @@ export function performAction(
         boundaryBox.yMax += offsetY
       }
       let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
-      //Clear boundaryBox area
-      activeCtx.clearRect(
-        boundaryBox.xMin,
-        boundaryBox.yMin,
-        boundaryBox.xMax - boundaryBox.xMin,
-        boundaryBox.yMax - boundaryBox.yMin,
-      )
+      if (action.maskSet && action.maskSet.length > 0) {
+        // maskSet pixels are stored as offscreen canvas coords at the time of the cut.
+        // Recover the original bounding box origin in offscreen canvas coords so that
+        // each maskSet pixel's relative position is preserved even after layer moves.
+        const origXMin = action.boundaryBox.xMin + (action.originalLayerX ?? 0)
+        const origYMin = action.boundaryBox.yMin + (action.originalLayerY ?? 0)
+        const w = boundaryBox.xMax - boundaryBox.xMin
+        const h = boundaryBox.yMax - boundaryBox.yMin
+        const imageData = activeCtx.getImageData(
+          boundaryBox.xMin,
+          boundaryBox.yMin,
+          w,
+          h,
+        )
+        const { data } = imageData
+        for (const key of action.maskSet) {
+          const bx = (key & 0xffff) - origXMin
+          const by = ((key >> 16) & 0xffff) - origYMin
+          if (bx >= 0 && bx < w && by >= 0 && by < h) {
+            const idx = (by * w + bx) * 4
+            data[idx] = data[idx + 1] = data[idx + 2] = data[idx + 3] = 0
+          }
+        }
+        activeCtx.putImageData(imageData, boundaryBox.xMin, boundaryBox.yMin)
+      } else {
+        //Clear boundaryBox area
+        activeCtx.clearRect(
+          boundaryBox.xMin,
+          boundaryBox.yMin,
+          boundaryBox.xMax - boundaryBox.xMin,
+          boundaryBox.yMax - boundaryBox.yMin,
+        )
+      }
       break
     }
     case 'paste': {

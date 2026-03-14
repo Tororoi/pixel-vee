@@ -6,7 +6,7 @@
     padding-top: 2px;
   }
   p {
-    margin: 0px;
+    margin: 0;
   }
   /* Color Swatches */
   .colors {
@@ -16,13 +16,7 @@
     margin-bottom: 16px;
     .swatch {
       position: absolute;
-      background-image: repeating-linear-gradient(
-        -45deg,
-        white,
-        white 5px,
-        rgb(216, 216, 216) 5px,
-        rgb(216, 216, 216) 10px
-      );
+      background-image: $diagonal-stripe-bg;
       width: 48px;
       height: 48px;
       margin: 8px;
@@ -39,13 +33,7 @@
     }
     .back-swatch {
       position: absolute;
-      background-image: repeating-linear-gradient(
-        -45deg,
-        white,
-        white 5px,
-        rgb(216, 216, 216) 5px,
-        rgb(216, 216, 216) 10px
-      );
+      background-image: $diagonal-stripe-bg;
       width: 48px;
       height: 48px;
       margin: 8px;
@@ -98,20 +86,59 @@
         @include paletteScraperIcon;
       }
     }
+    .palette-presets {
+      position: relative;
+      width: calc(100% - 2px);
+      margin: 0 0 8px 2px;
+      .palette-presets-btn {
+        width: 100%;
+        background: $gray;
+        color: $white;
+        cursor: pointer;
+        font-size: 12px;
+        padding: 4px;
+        text-align: left;
+        @include boxBorder;
+      }
+      .palette-presets-list {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: $extra-dark-gray;
+        z-index: 200;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        @include boxBorder;
+        li {
+          padding: 4px;
+          cursor: pointer;
+          font-size: 12px;
+          color: $white;
+          &:hover {
+            background: $gray;
+          }
+          &.selected {
+            background: $dark-gray;
+          }
+        }
+      }
+      &.open .palette-presets-list {
+        display: block;
+      }
+    }
     .palette-colors {
       display: flex;
       flex-flow: row wrap;
+      width: 100%;
+      margin: 0 1px;
       .palette-color {
         cursor: pointer;
         width: 20px;
         height: 20px;
-        background-image: repeating-linear-gradient(
-          -45deg,
-          white,
-          white 5px,
-          rgb(216, 216, 216) 5px,
-          rgb(216, 216, 216) 10px
-        );
+        background-image: $diagonal-stripe-bg;
         margin: 1px;
         @include boxBorder;
         &.selected {
