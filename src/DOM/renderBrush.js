@@ -27,8 +27,10 @@ export function renderBrushStampToDOM() {
 export const renderBrushModesToDOM = () => {
   dom.modesContainer.innerHTML = ''
 
-  //iterate through object keys in state.tool.current.options
+  //iterate through object keys in state.tool.current.modes
   for (const [key, value] of Object.entries(state.tool.current.modes)) {
+    // twoColor lives in the dither dialog, not the modes row
+    if (key === 'twoColor') continue
     const mode = document.createElement('button')
     mode.type = 'button'
     mode.className = `mode ${key}`
@@ -97,8 +99,40 @@ export function renderDitherOptionsToDOM() {
     ditherSection.style.display = ''
     renderDitherPreviewSVG()
     updateDitherPickerColors()
+    renderDitherControlsToDOM()
   } else {
     ditherSection.style.display = 'none'
+  }
+}
+
+/**
+ * Sync the three toggle buttons in the dither picker dialog (Two-Color, Mirror H, Mirror V).
+ */
+export function renderDitherControlsToDOM() {
+  const twoColorBtn = document.getElementById('dither-ctrl-two-color')
+  const mirrorXBtn = document.getElementById('dither-ctrl-mirror-x')
+  const mirrorYBtn = document.getElementById('dither-ctrl-mirror-y')
+  const mirrorX = state.tool.current.mirrorX ?? false
+  const mirrorY = state.tool.current.mirrorY ?? false
+  if (twoColorBtn) {
+    twoColorBtn.classList.toggle('selected', state.tool.current.modes?.twoColor ?? false)
+  }
+  if (mirrorXBtn) {
+    mirrorXBtn.classList.toggle('selected', mirrorX)
+  }
+  if (mirrorYBtn) {
+    mirrorYBtn.classList.toggle('selected', mirrorY)
+  }
+  // Mirror the SVG thumbnails in the grid and preview via CSS transforms
+  const grid = document.querySelector('.dither-grid')
+  if (grid) {
+    grid.classList.toggle('mirror-x', mirrorX)
+    grid.classList.toggle('mirror-y', mirrorY)
+  }
+  const preview = document.querySelector('.dither-preview')
+  if (preview) {
+    preview.classList.toggle('mirror-x', mirrorX)
+    preview.classList.toggle('mirror-y', mirrorY)
   }
 }
 

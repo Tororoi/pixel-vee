@@ -116,6 +116,8 @@ function drawDitherInjectPreview() {
     ditherPatterns[state.tool.current.ditherPatternIndex],
     state.tool.current.modes?.twoColor ?? false,
     swatches.secondary.color,
+    state.tool.current.mirrorX ?? false,
+    state.tool.current.mirrorY ?? false,
     null,
     true,
     true,
@@ -163,7 +165,7 @@ function drawDitherPreview() {
       continue
     if (state.selection.maskSet && !state.selection.maskSet.has((y << 16) | x))
       continue
-    if (isDitherOn(pattern, x, y)) {
+    if (isDitherOn(pattern, x, y, state.tool.current.mirrorX ?? false, state.tool.current.mirrorY ?? false)) {
       canvas.cursorCTX.fillStyle = swatches.primary.color.color
       canvas.cursorCTX.fillRect(x + canvas.xOffset, y + canvas.yOffset, 1, 1)
     } else if (twoColor) {

@@ -114,6 +114,8 @@ export function actionDraw(
  * @param {object} ditherPattern - pattern object from ditherPatterns
  * @param {boolean} twoColorMode - if true, "off" pixels use secondaryColor
  * @param {object} secondaryColor - {color, r, g, b, a} for two-color mode
+ * @param {boolean} mirrorX - flip the dither pattern horizontally
+ * @param {boolean} mirrorY - flip the dither pattern vertically
  * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {boolean} isPreview - whether the action is a preview
  * @param {boolean} excludeFromSet - don't add to seenPixelsSet if true
@@ -132,6 +134,8 @@ export function actionDitherDraw(
   ditherPattern,
   twoColorMode,
   secondaryColor,
+  mirrorX = false,
+  mirrorY = false,
   customContext = null,
   isPreview = false,
   excludeFromSet = false,
@@ -170,7 +174,7 @@ export function actionDitherDraw(
         seenPixelsSet.add((y << 16) | x)
       }
     }
-    const isOn = isDitherOn(ditherPattern, x, y)
+    const isOn = isDitherOn(ditherPattern, x, y, mirrorX, mirrorY)
     if (isOn) {
       if (currentModes?.eraser || currentModes?.inject) {
         ctx.clearRect(x + offsetX, y + offsetY, 1, 1)

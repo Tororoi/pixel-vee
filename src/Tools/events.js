@@ -11,6 +11,7 @@ import {
   renderVectorsToDOM,
   renderBrushStampToDOM,
   renderDitherOptionsToDOM,
+  renderDitherControlsToDOM,
   initDitherPicker,
   highlightSelectedDitherPattern,
   updateDitherPickerColors,
@@ -189,5 +190,25 @@ document.querySelector(".dither-grid")?.addEventListener("click", (e) => {
   state.tool.current.ditherPatternIndex = parseInt(btn.dataset.patternIndex)
   highlightSelectedDitherPattern()
   renderDitherOptionsToDOM()
+})
+
+document.getElementById("dither-ctrl-two-color")?.addEventListener("click", () => {
+  if (state.tool.current.name !== "ditherBrush") return
+  state.tool.current.modes.twoColor = !state.tool.current.modes.twoColor
+  renderDitherControlsToDOM()
+  updateDitherPickerColors()
+  renderDitherOptionsToDOM()
+})
+
+document.getElementById("dither-ctrl-mirror-x")?.addEventListener("click", () => {
+  if (state.tool.current.name !== "ditherBrush") return
+  state.tool.current.mirrorX = !state.tool.current.mirrorX
+  renderDitherControlsToDOM()
+})
+
+document.getElementById("dither-ctrl-mirror-y")?.addEventListener("click", () => {
+  if (state.tool.current.name !== "ditherBrush") return
+  state.tool.current.mirrorY = !state.tool.current.mirrorY
+  renderDitherControlsToDOM()
 })
 

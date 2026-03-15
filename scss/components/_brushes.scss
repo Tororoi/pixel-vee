@@ -68,6 +68,18 @@
       background: $diagonal-stripe-bg;
       cursor: pointer;
       margin-bottom: 8px;
+      &.mirror-x .dither-grid-svg {
+        transform: scaleX(-1);
+        transform-origin: center;
+      }
+      &.mirror-y .dither-grid-svg {
+        transform: scaleY(-1);
+        transform-origin: center;
+      }
+      &.mirror-x.mirror-y .dither-grid-svg {
+        transform: scale(-1, -1);
+        transform-origin: center;
+      }
     }
   }
 }
@@ -78,11 +90,41 @@
   width: 308px;
   max-width: calc(100% - 4px);
   max-height: calc(100% - 4px);
+  .dither-controls {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    padding: 4px 2px 2px 2px;
+    gap: 2px;
+    .dither-toggle {
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+      opacity: 1;
+    }
+  }
   .dither-grid {
     display: grid;
     grid-template-columns: repeat(9, 1fr);
     gap: 2px;
     padding: 4px 2px 2px 2px;
+    &.mirror-x .dither-grid-svg {
+      transform: scaleX(-1);
+      transform-origin: center;
+    }
+    &.mirror-y .dither-grid-svg {
+      transform: scaleY(-1);
+      transform-origin: center;
+    }
+    &.mirror-x.mirror-y .dither-grid-svg {
+      transform: scale(-1, -1);
+      transform-origin: center;
+    }
     .dither-grid-btn {
       width: 32px;
       height: 32px;

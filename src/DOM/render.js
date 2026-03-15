@@ -6,6 +6,7 @@ export {
   renderBrushModesToDOM,
   renderToolOptionsToDOM,
   renderDitherOptionsToDOM,
+  renderDitherControlsToDOM,
   initDitherPicker,
   highlightSelectedDitherPattern,
   updateDitherPickerColors,

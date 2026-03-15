@@ -294,6 +294,8 @@ export function performAction(
           pattern,
           action.modes.twoColor,
           action.secondaryColor,
+          action.mirrorX ?? false,
+          action.mirrorY ?? false,
           betweenCtx,
         )
         previousX = p.x + offsetX

@@ -37,8 +37,10 @@ export const ditherPatterns = Array.from({ length: 65 }, (_, threshold) => ({
  * @param {number} y - absolute canvas y coordinate
  * @returns {boolean} true if pixel should be drawn with primary color
  */
-export function isDitherOn(pattern, x, y) {
-  const px = ((x % 8) + 8) % 8
-  const py = ((y % 8) + 8) % 8
+export function isDitherOn(pattern, x, y, mirrorX = false, mirrorY = false) {
+  let px = ((x % 8) + 8) % 8
+  let py = ((y % 8) + 8) % 8
+  if (mirrorX) px = 7 - px
+  if (mirrorY) py = 7 - py
   return pattern.data[py * 8 + px] === 1
 }

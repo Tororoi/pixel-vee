@@ -104,6 +104,8 @@ function ditherBrushSteps() {
           brushSize: ditherBrush.brushSize,
           brushType: ditherBrush.brushType,
           ditherPatternIndex: ditherBrush.ditherPatternIndex,
+          mirrorX: ditherBrush.mirrorX,
+          mirrorY: ditherBrush.mirrorY,
           points: state.timeline.points,
           maskArray,
           boundaryBox,
@@ -160,7 +162,9 @@ function drawDitherBrushPoint(x, y, brushDirection) {
     state.selection.seenPixelsSet,
     ditherPatterns[ditherBrush.ditherPatternIndex],
     ditherBrush.modes.twoColor,
-    swatches.secondary.color
+    swatches.secondary.color,
+    ditherBrush.mirrorX,
+    ditherBrush.mirrorY
   )
 }
 
@@ -188,6 +192,8 @@ function drawPreviewDitherBrushPoint() {
     ditherPatterns[ditherBrush.ditherPatternIndex],
     ditherBrush.modes.twoColor,
     swatches.secondary.color,
+    ditherBrush.mirrorX,
+    ditherBrush.mirrorY,
     null,
     true,
     true
@@ -290,6 +296,8 @@ export const ditherBrush = {
   brushType: "circle",
   brushDisabled: false,
   ditherPatternIndex: 32,
+  mirrorX: false,
+  mirrorY: false,
   options: { line: { active: false } },
   modes: {
     eraser: false,
