@@ -2,7 +2,8 @@ import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { actionDraw, actionLine } from "../Actions/pointerActions.js"
+import { ditherPatterns } from "../Context/ditherPatterns.js"
+import { actionDitherDraw, actionLine } from "../Actions/pointerActions.js"
 import { getAngle, getTriangle } from "../utils/trig.js"
 import { renderCanvas, scheduleRender } from "../Canvas/render.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
@@ -109,8 +110,12 @@ function brushSteps() {
         properties: {
           modes: { ...brush.modes },
           color: { ...swatches.primary.color },
+          secondaryColor: { ...swatches.secondary.color },
           brushSize: brush.brushSize,
           brushType: brush.brushType,
+          ditherPatternIndex: brush.ditherPatternIndex,
+          mirrorX: brush.mirrorX,
+          mirrorY: brush.mirrorY,
           points: state.timeline.points,
           maskArray,
           boundaryBox,
@@ -155,7 +160,7 @@ function addPointToAction(x, y) {
  */
 function drawBrushPoint(x, y, brushDirection) {
   addPointToAction(x, y)
-  actionDraw(
+  actionDitherDraw(
     x,
     y,
     state.selection.boundaryBox,
@@ -165,7 +170,12 @@ function drawBrushPoint(x, y, brushDirection) {
     canvas.currentLayer,
     state.tool.current.modes,
     state.selection.maskSet,
-    state.selection.seenPixelsSet
+    state.selection.seenPixelsSet,
+    ditherPatterns[brush.ditherPatternIndex],
+    brush.modes.twoColor,
+    swatches.secondary.color,
+    brush.mirrorX,
+    brush.mirrorY
   )
 }
 
@@ -179,7 +189,7 @@ function drawPreviewBrushPoint() {
     state.drawing.lastDrawnX,
     state.drawing.lastDrawnY
   )
-  actionDraw(
+  actionDitherDraw(
     state.cursor.x,
     state.cursor.y,
     state.selection.boundaryBox,
@@ -190,6 +200,11 @@ function drawPreviewBrushPoint() {
     state.tool.current.modes,
     state.selection.maskSet,
     state.selection.seenPixelsSet,
+    ditherPatterns[brush.ditherPatternIndex],
+    brush.modes.twoColor,
+    swatches.secondary.color,
+    brush.mirrorX,
+    brush.mirrorY,
     null,
     true,
     true
@@ -295,8 +310,11 @@ export const brush = {
   brushSize: 1,
   brushType: "circle",
   brushDisabled: false,
+  ditherPatternIndex: 64,
+  mirrorX: false,
+  mirrorY: false,
   options: { line: { active: false } },
-  modes: { eraser: false, inject: false, perfect: false, colorMask: false },
+  modes: { eraser: false, inject: false, perfect: false, colorMask: false, twoColor: false },
   type: "raster",
   cursor: "crosshair",
   activeCursor: "crosshair",

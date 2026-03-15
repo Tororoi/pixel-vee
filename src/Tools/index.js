@@ -8,7 +8,6 @@ import { quadCurve, cubicCurve } from "./curve.js"
 import { ellipse } from "./ellipse.js"
 import { eyedropper } from "./eyedropper.js"
 import { grab } from "./grab.js"
-import { ditherBrush } from "./ditherBrush.js"
 
 //====================================//
 //===== * * * Tools Object * * * =====//
@@ -69,7 +68,6 @@ export const tools = {
   },
   //Raster Tools
   brush,
-  ditherBrush,
   line,
   // shading: {
   // user selects hsl shading color which mixes with colors that the user draws on to create dynamic shading
@@ -175,10 +173,6 @@ export const tools = {
  * activeTool tracks which tool in the group is currently shown/selected.
  */
 export const toolGroups = {
-  brushTools: {
-    tools: ["brush", "ditherBrush"],
-    activeTool: "brush",
-  },
   curves: {
     tools: ["line", "quadCurve", "cubicCurve"],
     activeTool: "line",

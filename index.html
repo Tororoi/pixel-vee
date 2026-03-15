@@ -303,12 +303,32 @@
                   data-tooltip="Color Mask (M) &#010;&#010;Only draw over selected secondary swatch color"
                 ></button>
               </div>
-              <div class="dither-options" style="display: none">
+              <div class="dither-options">
                 <span class="modes-title">Dither</span>
                 <div
                   class="dither-preview btn"
                   data-tooltip="Click to select dither pattern"
-                ></div>
+                >
+                  <svg
+                    viewBox="0 -0.5 8 8"
+                    shape-rendering="crispEdges"
+                    class="dither-grid-svg"
+                  >
+                    <rect
+                      x="0"
+                      y="-0.5"
+                      width="8"
+                      height="8"
+                      fill="none"
+                      class="dither-bg-rect"
+                    ></rect>
+                    <path
+                      stroke="rgba(0,0,0,1)"
+                      d="M0 0h8M0 1h8M0 2h8M0 3h8M0 4h8M0 5h8M0 6h8M0 7h8"
+                      class="dither-on-path"
+                    ></path>
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
@@ -572,31 +592,13 @@
             <h4>Tools</h4>
             <div class="columns">
               <div class="column">
-                <div class="tool-group" data-group="brushTools">
-                  <button
-                    type="button"
-                    class="tool-group-btn brush selected"
-                    data-group="brushTools"
-                    aria-label="Brush (B)"
-                    data-tooltip="Brush (B)"
-                  ></button>
-                  <div class="tool-group-popout">
-                    <button
-                      type="button"
-                      class="tool brush selected"
-                      id="brush"
-                      aria-label="Brush (B)"
-                      data-tooltip="Brush (B)"
-                    ></button>
-                    <button
-                      type="button"
-                      class="tool ditherBrush"
-                      id="ditherBrush"
-                      aria-label="Dither Brush (Shift+B)"
-                      data-tooltip="Dither Brush (Shift+B)"
-                    ></button>
-                  </div>
-                </div>
+                <button
+                  type="button"
+                  class="tool brush selected"
+                  id="brush"
+                  aria-label="Brush (B)"
+                  data-tooltip="Brush (B)"
+                ></button>
                 <button
                   type="button"
                   class="tool fill"
@@ -931,14 +933,14 @@
         <div class="header dragger">
           <div class="drag-btn"><div class="grip"></div></div>
           Dither Pattern
-          <label class="collapse-btn" data-tooltip="Collapse/ Expand">
-            <input
-              type="checkbox"
-              aria-label="Collapse or Expand"
-              class="collapse-checkbox"
-            />
-            <span class="arrow"></span>
-          </label>
+          <button
+            type="button"
+            id="dither-closer"
+            class="close-btn"
+            data-tooltip="Close"
+          >
+            <span class="close"></span>
+          </button>
         </div>
         <div class="collapsible">
           <div class="dither-controls">
@@ -971,20 +973,14 @@
         <div id="picker-header" class="header dragger">
           <div class="drag-btn"><div class="grip"></div></div>
           <span>Color Picker</span>
-          <label
-            for="picker-collapse-btn"
-            id="picker-collapser"
-            class="collapse-btn"
-            data-tooltip="Collapse/ Expand"
+          <button
+            type="button"
+            id="picker-closer"
+            class="close-btn"
+            data-tooltip="Close"
           >
-            <input
-              type="checkbox"
-              aria-label="Collapse or Expand"
-              class="collapse-checkbox"
-              id="picker-collapse-btn"
-            />
-            <span class="arrow"></span>
-          </label>
+            <span class="close"></span>
+          </button>
         </div>
         <div class="collapsible">
           <div id="picker-interface" class="picker-interface">

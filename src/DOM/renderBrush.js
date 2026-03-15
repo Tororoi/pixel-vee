@@ -95,7 +95,7 @@ export function renderDitherOptionsToDOM() {
   const ditherSection = document.querySelector('.dither-options')
   if (!ditherSection) return
 
-  if (state.tool.current.name === 'ditherBrush') {
+  if (state.tool.current.name === 'brush') {
     ditherSection.style.display = ''
     renderDitherPreviewSVG()
     updateDitherPickerColors()
@@ -115,7 +115,10 @@ export function renderDitherControlsToDOM() {
   const mirrorX = state.tool.current.mirrorX ?? false
   const mirrorY = state.tool.current.mirrorY ?? false
   if (twoColorBtn) {
-    twoColorBtn.classList.toggle('selected', state.tool.current.modes?.twoColor ?? false)
+    twoColorBtn.classList.toggle(
+      'selected',
+      state.tool.current.modes?.twoColor ?? false,
+    )
   }
   if (mirrorXBtn) {
     mirrorXBtn.classList.toggle('selected', mirrorX)
@@ -230,7 +233,7 @@ export function initDitherPicker() {
     btn.type = 'button'
     btn.className = 'dither-grid-btn'
     btn.dataset.patternIndex = i
-    btn.dataset.tooltip = `${Math.round((i / 64) * 100)}%`
+    btn.dataset.tooltip = i === 32 ? '33/65: Checkerboard' : `${i + 1}/65`
     btn.appendChild(createDitherPatternSVG(ditherPatterns[i]))
     grid.appendChild(btn)
   }

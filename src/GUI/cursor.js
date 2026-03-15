@@ -40,7 +40,7 @@ export function renderCursor() {
       ) {
         if (state.tool.current.modes?.eraser) {
           if (vectorGui.showCursorPreview) {
-            if (state.tool.current.name === 'ditherBrush') {
+            if (state.tool.current.ditherPatternIndex !== undefined && state.tool.current.ditherPatternIndex < 64) {
               drawDitherInjectPreview()
             } else {
               drawInjectPreview()
@@ -48,7 +48,7 @@ export function renderCursor() {
           }
           drawCursorBox(0.5)
         } else if (vectorGui.showCursorPreview) {
-          if (state.tool.current.name === 'ditherBrush') {
+          if (state.tool.current.ditherPatternIndex !== undefined && state.tool.current.ditherPatternIndex < 64) {
             if (state.tool.current.modes?.inject) {
               drawDitherInjectPreview()
             } else {

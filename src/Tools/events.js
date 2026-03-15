@@ -22,6 +22,7 @@ import { ZOOM_LEVELS } from "../utils/constants.js"
 //Initialize default tool
 state.tool.current = tools.brush
 initToolGroups()
+renderDitherOptionsToDOM()
 
 //=========================================//
 //=== * * * Button Event Handlers * * * ===//
@@ -141,7 +142,6 @@ function switchBrush(e) {
 function updateBrush(e) {
   switch (state.tool.current.name) {
     case "brush":
-    case "ditherBrush":
     case "colorMask":
     case "line":
     case "quadCurve":
@@ -186,14 +186,14 @@ document.querySelector(".dither-preview")?.addEventListener("click", () => {
 
 document.querySelector(".dither-grid")?.addEventListener("click", (e) => {
   const btn = e.target.closest(".dither-grid-btn")
-  if (!btn || state.tool.current.name !== "ditherBrush") return
+  if (!btn || state.tool.current.name !== "brush") return
   state.tool.current.ditherPatternIndex = parseInt(btn.dataset.patternIndex)
   highlightSelectedDitherPattern()
   renderDitherOptionsToDOM()
 })
 
 document.getElementById("dither-ctrl-two-color")?.addEventListener("click", () => {
-  if (state.tool.current.name !== "ditherBrush") return
+  if (state.tool.current.name !== "brush") return
   state.tool.current.modes.twoColor = !state.tool.current.modes.twoColor
   renderDitherControlsToDOM()
   updateDitherPickerColors()
@@ -201,13 +201,13 @@ document.getElementById("dither-ctrl-two-color")?.addEventListener("click", () =
 })
 
 document.getElementById("dither-ctrl-mirror-x")?.addEventListener("click", () => {
-  if (state.tool.current.name !== "ditherBrush") return
+  if (state.tool.current.name !== "brush") return
   state.tool.current.mirrorX = !state.tool.current.mirrorX
   renderDitherControlsToDOM()
 })
 
 document.getElementById("dither-ctrl-mirror-y")?.addEventListener("click", () => {
-  if (state.tool.current.name !== "ditherBrush") return
+  if (state.tool.current.name !== "brush") return
   state.tool.current.mirrorY = !state.tool.current.mirrorY
   renderDitherControlsToDOM()
 })
