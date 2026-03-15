@@ -4,6 +4,7 @@ import { brushStamps } from '../Context/brushStamps.js'
 import { updateBrushPreview } from '../utils/brushHelpers.js'
 import { createOptionToggle } from '../utils/optionsInterfaceHelpers.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
+import { swatches } from '../Context/swatch.js'
 
 /**
  * update brush stamp in dom
@@ -94,36 +95,24 @@ export function renderDitherOptionsToDOM() {
 
   if (state.tool.current.name === 'ditherBrush') {
     ditherSection.style.display = ''
-    renderDitherPreviewCanvas()
-    const checkbox = document.getElementById('dither-two-color')
-    if (checkbox) {
-      checkbox.checked = state.tool.current.modes?.twoColor ?? false
-    }
+    renderDitherPreviewSVG()
+    updateDitherPickerColors()
   } else {
     ditherSection.style.display = 'none'
   }
 }
 
 /**
- * Draw the current dither pattern on the preview canvas in the brush dialog
+ * Render the current dither pattern as an SVG in the brush dialog preview area.
+ * Replaces any existing SVG so the pattern updates when selection changes.
  */
-function renderDitherPreviewCanvas() {
-  const previewCanvas = document.querySelector('.dither-preview-canvas')
-  if (!previewCanvas) return
-  const ctx = previewCanvas.getContext('2d')
+function renderDitherPreviewSVG() {
+  const previewContainer = document.querySelector('.dither-preview')
+  if (!previewContainer) return
+  const existing = previewContainer.querySelector('.dither-grid-svg')
+  if (existing) existing.remove()
   const pattern = ditherPatterns[state.tool.current.ditherPatternIndex]
-  ctx.clearRect(0, 0, 8, 8)
-  for (let y = 0; y < 8; y++) {
-    for (let x = 0; x < 8; x++) {
-      if (pattern.data[y * 8 + x] === 1) {
-        ctx.fillStyle = '#ffffff'
-        ctx.fillRect(x, y, 1, 1)
-      } else {
-        ctx.fillStyle = '#333333'
-        ctx.fillRect(x, y, 1, 1)
-      }
-    }
-  }
+  previewContainer.appendChild(createDitherPatternSVG(pattern))
 }
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -141,11 +130,14 @@ function createDitherPatternSVG(pattern) {
   svg.setAttribute('shape-rendering', 'crispEdges')
   svg.classList.add('dither-grid-svg')
 
-  // const bg = document.createElementNS(SVG_NS, "rect")
-  // bg.setAttribute("width", "8")
-  // bg.setAttribute("height", "8")
-  // bg.setAttribute("fill", "#333333")
-  // svg.appendChild(bg)
+  const bg = document.createElementNS(SVG_NS, 'rect')
+  bg.setAttribute('x', '0')
+  bg.setAttribute('y', '-0.5')
+  bg.setAttribute('width', '8')
+  bg.setAttribute('height', '8')
+  bg.setAttribute('fill', 'none')
+  bg.classList.add('dither-bg-rect')
+  svg.appendChild(bg)
 
   let d = ''
   for (let y = 0; y < 8; y++) {
@@ -162,13 +154,30 @@ function createDitherPatternSVG(pattern) {
       d += `M${runStart} ${y}h${8 - runStart}`
     }
   }
-  if (d) {
-    const path = document.createElementNS(SVG_NS, 'path')
-    path.setAttribute('stroke', '#ffffff')
-    path.setAttribute('d', d)
-    svg.appendChild(path)
-  }
+  const path = document.createElementNS(SVG_NS, 'path')
+  path.setAttribute('stroke', '#ffffff')
+  path.setAttribute('d', d)
+  path.classList.add('dither-on-path')
+  svg.appendChild(path)
+
   return svg
+}
+
+/**
+ * Update all dither picker SVG thumbnails to reflect current primary/secondary colors
+ * and two-color mode. Call whenever colors change or two-color mode is toggled.
+ */
+export function updateDitherPickerColors() {
+  const primaryColor = swatches.primary.color.color
+  const secondaryColor = swatches.secondary.color.color
+  const twoColor = state.tool.current.modes?.twoColor ?? false
+  const bgFill = twoColor ? secondaryColor : 'none'
+  document.querySelectorAll('.dither-bg-rect').forEach((rect) => {
+    rect.setAttribute('fill', bgFill)
+  })
+  document.querySelectorAll('.dither-on-path').forEach((path) => {
+    path.setAttribute('stroke', primaryColor)
+  })
 }
 
 let ditherPickerInitialized = false

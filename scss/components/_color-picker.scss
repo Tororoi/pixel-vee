@@ -159,13 +159,7 @@
             .swatch {
               width: 40px;
               height: 40px;
-              background-image: repeating-linear-gradient(
-                -45deg,
-                white,
-                white 5px,
-                rgb(216, 216, 216) 5px,
-                rgb(216, 216, 216) 10px
-              );
+              background-image: $diagonal-stripe-bg;
               margin: 0;
               .swatch-color {
                 width: 100%;

@@ -10,6 +10,7 @@ import {
   renderBrushStampToDOM,
   renderToolOptionsToDOM,
   renderDitherOptionsToDOM,
+  updateDitherPickerColors,
 } from "../DOM/render.js"
 import { renderCursor } from "../GUI/cursor.js"
 import {
@@ -148,6 +149,7 @@ export function toggleMode(modeName = null, modeBtn = null) {
       }
       renderBrushModesToDOM()
       renderCursor()
+      updateDitherPickerColors()
     }
   }
 }

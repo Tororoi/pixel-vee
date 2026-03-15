@@ -8,4 +8,5 @@ export {
   renderDitherOptionsToDOM,
   initDitherPicker,
   highlightSelectedDitherPattern,
+  updateDitherPickerColors,
 } from "./renderBrush.js"

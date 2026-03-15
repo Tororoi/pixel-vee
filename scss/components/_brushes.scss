@@ -56,30 +56,18 @@
     }
   }
   .dither-options {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
     .modes-title {
       margin-bottom: 4px;
     }
     .dither-preview {
       width: 32px;
       height: 32px;
-      background: $darkest-gray;
+      background: $diagonal-stripe-bg;
       cursor: pointer;
       margin-bottom: 8px;
-      .dither-preview-canvas {
-        width: 100%;
-        height: 100%;
-        image-rendering: pixelated;
-      }
-    }
-    .dither-color-toggle {
-      margin-bottom: 8px;
-      label {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        font-size: 11px;
-        cursor: pointer;
-      }
     }
   }
 }
@@ -99,7 +87,7 @@
       width: 32px;
       height: 32px;
       cursor: pointer;
-      background: $black;
+      background: $diagonal-stripe-bg;
       @include boxBorder;
       &.selected {
         border-color: $white;

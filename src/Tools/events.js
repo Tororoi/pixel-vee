@@ -13,6 +13,7 @@ import {
   renderDitherOptionsToDOM,
   initDitherPicker,
   highlightSelectedDitherPattern,
+  updateDitherPickerColors,
 } from "../DOM/render.js"
 import { toggleMode, switchTool, initToolGroups } from "./toolbox.js"
 import { ZOOM_LEVELS } from "../utils/constants.js"
@@ -177,6 +178,7 @@ dom.brushSlider.addEventListener("input", updateBrush)
 document.querySelector(".dither-preview")?.addEventListener("click", () => {
   if (!dom.ditherPickerContainer) return
   initDitherPicker()
+  updateDitherPickerColors()
   dom.ditherPickerContainer.style.display =
     dom.ditherPickerContainer.style.display === "flex" ? "none" : "flex"
 })
@@ -189,8 +191,3 @@ document.querySelector(".dither-grid")?.addEventListener("click", (e) => {
   renderDitherOptionsToDOM()
 })
 
-document.getElementById("dither-two-color")?.addEventListener("change", (e) => {
-  if (state.tool.current.name === "ditherBrush") {
-    state.tool.current.modes.twoColor = e.target.checked
-  }
-})
