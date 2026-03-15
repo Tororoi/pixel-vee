@@ -2,11 +2,12 @@ import { brushStamps } from '../Context/brushStamps.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
-import { actionDraw } from '../Actions/pointerActions.js'
+import { actionDraw, actionDitherDraw } from '../Actions/pointerActions.js'
 import { vectorGui } from './vector.js'
 import { renderCanvas } from '../Canvas/render.js'
 import { isOutOfBounds } from '../utils/canvasHelpers.js'
 import { getGuiLineWidth, doubleStroke } from '../utils/guiHelpers.js'
+import { ditherPatterns, isDitherOn } from '../Context/ditherPatterns.js'
 
 //===========================================//
 //=== * * * Graphics User Interface * * * ===//
@@ -39,11 +40,21 @@ export function renderCursor() {
       ) {
         if (state.tool.current.modes?.eraser) {
           if (vectorGui.showCursorPreview) {
-            drawInjectPreview()
+            if (state.tool.current.name === 'ditherBrush') {
+              drawDitherInjectPreview()
+            } else {
+              drawInjectPreview()
+            }
           }
           drawCursorBox(0.5)
         } else if (vectorGui.showCursorPreview) {
-          if (state.tool.current.modes?.inject) {
+          if (state.tool.current.name === 'ditherBrush') {
+            if (state.tool.current.modes?.inject) {
+              drawDitherInjectPreview()
+            } else {
+              drawDitherPreview()
+            }
+          } else if (state.tool.current.modes?.inject) {
             drawInjectPreview()
           } else {
             drawNormalPreview()
@@ -84,6 +95,34 @@ function drawInjectPreview() {
 }
 
 /**
+ * Inject/eraser preview for dither brush: blits the layer then applies
+ * actionDitherDraw in preview mode so only dither-pattern pixels are affected.
+ */
+function drawDitherInjectPreview() {
+  renderCanvas(canvas.currentLayer)
+  actionDitherDraw(
+    state.cursor.x,
+    state.cursor.y,
+    state.selection.boundaryBox,
+    swatches.primary.color,
+    brushStamps[state.tool.current.brushType][state.tool.current.brushSize][
+      '0,0'
+    ],
+    state.tool.current.brushSize,
+    canvas.currentLayer,
+    state.tool.current.modes,
+    state.selection.maskSet,
+    state.selection.seenPixelsSet,
+    ditherPatterns[state.tool.current.ditherPatternIndex],
+    state.tool.current.modes?.twoColor ?? false,
+    swatches.secondary.color,
+    null,
+    true,
+    true,
+  )
+}
+
+/**
  * Normal mode preview: draw brush stamp directly on the cursor canvas.
  * vectorGui.render() already cleared it — no layer blit needed.
  */
@@ -103,6 +142,34 @@ function drawNormalPreview() {
     if (state.selection.maskSet && !state.selection.maskSet.has((y << 16) | x))
       continue
     canvas.cursorCTX.fillRect(x + canvas.xOffset, y + canvas.yOffset, 1, 1)
+  }
+}
+
+/**
+ * Dither brush preview: draw each stamp pixel on the cursor canvas,
+ * filtering by the current dither pattern using absolute canvas coordinates.
+ */
+function drawDitherPreview() {
+  const brushSize = state.tool.current.brushSize
+  const stamp = brushStamps[state.tool.current.brushType][brushSize]['0,0']
+  const baseX = Math.ceil(state.cursor.x - brushSize / 2)
+  const baseY = Math.ceil(state.cursor.y - brushSize / 2)
+  const pattern = ditherPatterns[state.tool.current.ditherPatternIndex]
+  const twoColor = state.tool.current.modes?.twoColor ?? false
+  for (const pixel of stamp) {
+    const x = baseX + pixel.x
+    const y = baseY + pixel.y
+    if (isOutOfBounds(x, y, 0, canvas.currentLayer, state.selection.boundaryBox))
+      continue
+    if (state.selection.maskSet && !state.selection.maskSet.has((y << 16) | x))
+      continue
+    if (isDitherOn(pattern, x, y)) {
+      canvas.cursorCTX.fillStyle = swatches.primary.color.color
+      canvas.cursorCTX.fillRect(x + canvas.xOffset, y + canvas.yOffset, 1, 1)
+    } else if (twoColor) {
+      canvas.cursorCTX.fillStyle = swatches.secondary.color.color
+      canvas.cursorCTX.fillRect(x + canvas.xOffset, y + canvas.yOffset, 1, 1)
+    }
   }
 }
 
