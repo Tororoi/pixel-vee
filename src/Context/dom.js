@@ -155,6 +155,9 @@ const swatch = document.querySelector(".swatch")
 const backSwatch = document.querySelector(".back-swatch")
 const colorSwitch = document.querySelector(".color-switch")
 
+// * Dither Picker * //
+const ditherPickerContainer = document.querySelector(".dither-picker-container")
+
 // * Color Picker * //
 const colorPickerContainer = document.querySelector(".picker-container")
 const confirmBtn = document.getElementById("confirm-btn")
@@ -278,6 +281,8 @@ export const dom = {
   toolsContainer,
   ...toolButtons,
   toolBtn,
+  //dither picker
+  ditherPickerContainer,
   //color picker
   swatch,
   backSwatch,

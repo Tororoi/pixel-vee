@@ -85,30 +85,32 @@
 }
 
 /* Dither pattern picker dialog */
-.dither-picker {
-  order: 2;
+.dither-picker-container {
+  @extend %floating-dialog;
+  width: 308px;
+  max-width: calc(100% - 4px);
+  max-height: calc(100% - 4px);
   .dither-grid {
     display: grid;
     grid-template-columns: repeat(9, 1fr);
     gap: 2px;
-    padding: 4px;
+    padding: 4px 2px 2px 2px;
     .dither-grid-btn {
-      width: 24px;
-      height: 24px;
-      padding: 1px;
+      width: 32px;
+      height: 32px;
       cursor: pointer;
-      border: 1px solid transparent;
-      background: none;
+      background: $black;
+      @include boxBorder;
       &.selected {
         border-color: $white;
       }
       &:hover {
+        z-index: 104;
         border-color: $border-color;
       }
-      .dither-grid-canvas {
+      svg {
         width: 100%;
         height: 100%;
-        image-rendering: pixelated;
       }
     }
   }

@@ -50,6 +50,9 @@ initializeDialogBox(dom.sizeContainer)
 // * Settings * //
 initializeDialogBox(dom.settingsContainer)
 
+// * Dither Picker * //
+initializeDialogBox(dom.ditherPickerContainer)
+
 // * Color Picker * //
 initializeDialogBox(dom.colorPickerContainer)
 

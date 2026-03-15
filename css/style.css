@@ -65,7 +65,7 @@
     background-position: 20px 0, -20px 100%, 0 -20px, 100% 20px;
   }
 }
-.vector-transform-ui-container, .save-container, .export-container, .size-container, .settings-container {
+.vector-transform-ui-container, .save-container, .export-container, .size-container, .picker-container, .settings-container, .dither-picker-container {
   user-select: none;
   position: absolute;
   z-index: 103;
@@ -1774,33 +1774,37 @@ canvas {
 }
 
 /* Dither pattern picker dialog */
-.dither-picker {
-  order: 2;
+.dither-picker-container {
+  width: 308px;
+  max-width: calc(100% - 4px);
+  max-height: calc(100% - 4px);
 }
-.dither-picker .dither-grid {
+.dither-picker-container .dither-grid {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   gap: 2px;
-  padding: 4px;
+  padding: 4px 2px 2px 2px;
 }
-.dither-picker .dither-grid .dither-grid-btn {
-  width: 24px;
-  height: 24px;
-  padding: 1px;
+.dither-picker-container .dither-grid .dither-grid-btn {
+  width: 32px;
+  height: 32px;
   cursor: pointer;
-  border: 1px solid transparent;
-  background: none;
+  background: rgb(0, 0, 0);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.dither-picker .dither-grid .dither-grid-btn.selected {
+.dither-picker-container .dither-grid .dither-grid-btn:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.dither-picker-container .dither-grid .dither-grid-btn.selected {
   border-color: rgb(255, 255, 255);
 }
-.dither-picker .dither-grid .dither-grid-btn:hover {
+.dither-picker-container .dither-grid .dither-grid-btn:hover {
+  z-index: 104;
   border-color: rgb(131, 131, 131);
 }
-.dither-picker .dither-grid .dither-grid-btn .dither-grid-canvas {
+.dither-picker-container .dither-grid .dither-grid-btn svg {
   width: 100%;
   height: 100%;
-  image-rendering: pixelated;
 }
 
 /* Palette */
@@ -2083,21 +2087,9 @@ canvas {
 
 /* Color Picker */
 .picker-container {
-  user-select: none;
-  position: absolute;
-  z-index: 103;
   width: 370px;
   max-width: calc(100% - 4px);
   max-height: calc(100% - 4px);
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  color: white;
-  background: rgb(51, 51, 51);
-  text-align: center;
-  padding: 0;
-  align-self: center;
-  opacity: 1;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .picker-container:hover:not([disabled]) {

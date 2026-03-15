@@ -175,10 +175,10 @@ dom.brushSlider.addEventListener("input", updateBrush)
 
 // * Dither Brush * //
 document.querySelector(".dither-preview")?.addEventListener("click", () => {
-  const picker = document.querySelector(".dither-picker")
-  if (!picker) return
+  if (!dom.ditherPickerContainer) return
   initDitherPicker()
-  picker.style.display = picker.style.display === "none" ? "" : "none"
+  dom.ditherPickerContainer.style.display =
+    dom.ditherPickerContainer.style.display === "flex" ? "none" : "flex"
 })
 
 document.querySelector(".dither-grid")?.addEventListener("click", (e) => {
