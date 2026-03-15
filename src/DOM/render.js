@@ -5,4 +5,7 @@ export {
   renderBrushStampToDOM,
   renderBrushModesToDOM,
   renderToolOptionsToDOM,
+  renderDitherOptionsToDOM,
+  initDitherPicker,
+  highlightSelectedDitherPattern,
 } from "./renderBrush.js"

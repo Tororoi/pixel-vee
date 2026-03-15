@@ -117,6 +117,11 @@
   @include brushIcon;
 }
 
+.ditherBrush {
+  // TODO: Replace with dedicated dither brush icon SVG
+  @include brushIcon;
+}
+
 .fill {
   @include fillIcon;
 }
@@ -174,6 +179,11 @@
 }
 
 .colorMask {
+  @include colorMaskIcon;
+}
+
+.twoColor {
+  // TODO: Replace with dedicated two-color icon SVG
   @include colorMaskIcon;
 }
 

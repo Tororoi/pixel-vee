@@ -3,6 +3,7 @@ import { state } from "../Context/state.js"
 import { brushStamps } from "../Context/brushStamps.js"
 import { updateBrushPreview } from "../utils/brushHelpers.js"
 import { createOptionToggle } from "../utils/optionsInterfaceHelpers.js"
+import { ditherPatterns } from "../Context/ditherPatterns.js"
 
 /**
  * update brush stamp in dom
@@ -49,6 +50,11 @@ export const renderBrushModesToDOM = () => {
         mode.dataset.tooltip =
           "Color Mask (M) \n\nOnly draw over selected secondary swatch color"
         break
+      case "twoColor":
+        mode.ariaLabel = "Two-Color"
+        mode.dataset.tooltip =
+          "Two-Color \n\nUse secondary color instead of transparency for dither"
+        break
       default:
       //
     }
@@ -74,4 +80,102 @@ export function renderToolOptionsToDOM() {
       dom.toolOptions.appendChild(optionToggle)
     })
   }
+}
+
+/**
+ * Show or hide dither-specific options based on active tool.
+ * Also updates the preview canvas to show the current pattern.
+ */
+export function renderDitherOptionsToDOM() {
+  const ditherSection = document.querySelector(".dither-options")
+  if (!ditherSection) return
+
+  if (state.tool.current.name === "ditherBrush") {
+    ditherSection.style.display = ""
+    renderDitherPreviewCanvas()
+    const checkbox = document.getElementById("dither-two-color")
+    if (checkbox) {
+      checkbox.checked = state.tool.current.modes?.twoColor ?? false
+    }
+  } else {
+    ditherSection.style.display = "none"
+  }
+}
+
+/**
+ * Draw the current dither pattern on the preview canvas in the brush dialog
+ */
+function renderDitherPreviewCanvas() {
+  const previewCanvas = document.querySelector(".dither-preview-canvas")
+  if (!previewCanvas) return
+  const ctx = previewCanvas.getContext("2d")
+  const pattern = ditherPatterns[state.tool.current.ditherPatternIndex]
+  ctx.clearRect(0, 0, 8, 8)
+  for (let y = 0; y < 8; y++) {
+    for (let x = 0; x < 8; x++) {
+      if (pattern.data[y * 8 + x] === 1) {
+        ctx.fillStyle = "#ffffff"
+        ctx.fillRect(x, y, 1, 1)
+      } else {
+        ctx.fillStyle = "#333333"
+        ctx.fillRect(x, y, 1, 1)
+      }
+    }
+  }
+}
+
+let ditherPickerInitialized = false
+
+/**
+ * Populate the dither picker grid with 65 pattern thumbnails.
+ * Called once on first open.
+ */
+export function initDitherPicker() {
+  if (ditherPickerInitialized) return
+  ditherPickerInitialized = true
+  const grid = document.querySelector(".dither-grid")
+  if (!grid) return
+  for (let i = 0; i < ditherPatterns.length; i++) {
+    const btn = document.createElement("button")
+    btn.type = "button"
+    btn.className = "dither-grid-btn"
+    btn.dataset.patternIndex = i
+    btn.dataset.tooltip = `${Math.round((i / 64) * 100)}%`
+    const cvs = document.createElement("canvas")
+    cvs.width = 8
+    cvs.height = 8
+    cvs.className = "dither-grid-canvas"
+    const ctx = cvs.getContext("2d")
+    const pattern = ditherPatterns[i]
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 8; x++) {
+        if (pattern.data[y * 8 + x] === 1) {
+          ctx.fillStyle = "#ffffff"
+          ctx.fillRect(x, y, 1, 1)
+        } else {
+          ctx.fillStyle = "#333333"
+          ctx.fillRect(x, y, 1, 1)
+        }
+      }
+    }
+    btn.appendChild(cvs)
+    grid.appendChild(btn)
+  }
+  highlightSelectedDitherPattern()
+}
+
+/**
+ * Highlight the currently selected pattern in the dither picker grid
+ */
+export function highlightSelectedDitherPattern() {
+  const grid = document.querySelector(".dither-grid")
+  if (!grid) return
+  const buttons = grid.querySelectorAll(".dither-grid-btn")
+  buttons.forEach((btn) => {
+    if (parseInt(btn.dataset.patternIndex) === state.tool.current.ditherPatternIndex) {
+      btn.classList.add("selected")
+    } else {
+      btn.classList.remove("selected")
+    }
+  })
 }

@@ -9,6 +9,7 @@ import {
 } from '../utils/imageDataHelpers.js'
 import { calculateBrushDirection } from '../utils/drawHelpers.js'
 import { isOutOfBounds, minLimit, maxLimit } from '../utils/canvasHelpers.js'
+import { isDitherOn } from '../Context/ditherPatterns.js'
 
 //====================================//
 //===== * * * Tool Actions * * * =====//
@@ -92,6 +93,100 @@ export function actionDraw(
     }
     if (!currentModes?.eraser) {
       ctx.fillRect(x + offsetX, y + offsetY, 1, 1)
+    }
+  }
+}
+
+/**
+ * Render a dithered stamp from the brush to the canvas.
+ * Same as actionDraw but applies a dither pattern to decide per-pixel
+ * whether to draw with primary color, secondary color, or skip.
+ * @param {number} coordX - (Integer)
+ * @param {number} coordY - (Integer)
+ * @param {object} boundaryBox - {xMin, xMax, yMin, yMax}
+ * @param {object} currentColor - {color, r, g, b, a}
+ * @param {object} directionalBrushStamp - brushStamp[brushDirection]
+ * @param {number} brushSize - (Integer)
+ * @param {object} layer - the affected layer
+ * @param {object} currentModes - {eraser, inject, perfect, colorMask, twoColor}
+ * @param {Set} maskSet - set of coordinates to draw on if mask is active
+ * @param {Set} seenPixelsSet - set of coordinates already drawn on
+ * @param {object} ditherPattern - pattern object from ditherPatterns
+ * @param {boolean} twoColorMode - if true, "off" pixels use secondaryColor
+ * @param {object} secondaryColor - {color, r, g, b, a} for two-color mode
+ * @param {CanvasRenderingContext2D} customContext - use custom context if provided
+ * @param {boolean} isPreview - whether the action is a preview
+ * @param {boolean} excludeFromSet - don't add to seenPixelsSet if true
+ */
+export function actionDitherDraw(
+  coordX,
+  coordY,
+  boundaryBox,
+  currentColor,
+  directionalBrushStamp,
+  brushSize,
+  layer,
+  currentModes,
+  maskSet,
+  seenPixelsSet,
+  ditherPattern,
+  twoColorMode,
+  secondaryColor,
+  customContext = null,
+  isPreview = false,
+  excludeFromSet = false,
+) {
+  let offsetX = 0
+  let offsetY = 0
+  let ctx = layer.ctx
+  if (customContext) {
+    ctx = customContext
+  } else if (isPreview) {
+    ctx = layer.onscreenCtx
+    offsetX = canvas.xOffset
+    offsetY = canvas.yOffset
+  }
+  if (isOutOfBounds(coordX, coordY, brushSize, layer, boundaryBox)) {
+    return
+  }
+  const baseX = Math.ceil(coordX - brushSize / 2)
+  const baseY = Math.ceil(coordY - brushSize / 2)
+  for (const pixel of directionalBrushStamp) {
+    const x = baseX + pixel.x
+    const y = baseY + pixel.y
+    if (isOutOfBounds(x, y, 0, layer, boundaryBox)) {
+      continue
+    }
+    if (maskSet) {
+      if (!maskSet.has((y << 16) | x)) {
+        continue
+      }
+    }
+    if (seenPixelsSet) {
+      if (seenPixelsSet.has((y << 16) | x)) {
+        continue
+      }
+      if (!excludeFromSet) {
+        seenPixelsSet.add((y << 16) | x)
+      }
+    }
+    const isOn = isDitherOn(ditherPattern, x, y)
+    if (isOn) {
+      if (currentModes?.eraser || currentModes?.inject) {
+        ctx.clearRect(x + offsetX, y + offsetY, 1, 1)
+      }
+      if (!currentModes?.eraser) {
+        ctx.fillStyle = currentColor.color
+        ctx.fillRect(x + offsetX, y + offsetY, 1, 1)
+      }
+    } else if (twoColorMode) {
+      if (currentModes?.eraser || currentModes?.inject) {
+        ctx.clearRect(x + offsetX, y + offsetY, 1, 1)
+      }
+      if (!currentModes?.eraser) {
+        ctx.fillStyle = secondaryColor.color
+        ctx.fillRect(x + offsetX, y + offsetY, 1, 1)
+      }
     }
   }
 }

@@ -7,7 +7,13 @@ import { vectorGui } from "../GUI/vector.js"
 import { actionClear } from "../Actions/modifyTimeline.js"
 import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
-import { renderVectorsToDOM, renderBrushStampToDOM } from "../DOM/render.js"
+import {
+  renderVectorsToDOM,
+  renderBrushStampToDOM,
+  renderDitherOptionsToDOM,
+  initDitherPicker,
+  highlightSelectedDitherPattern,
+} from "../DOM/render.js"
 import { toggleMode, switchTool, initToolGroups } from "./toolbox.js"
 import { ZOOM_LEVELS } from "../utils/constants.js"
 
@@ -133,6 +139,7 @@ function switchBrush(e) {
 function updateBrush(e) {
   switch (state.tool.current.name) {
     case "brush":
+    case "ditherBrush":
     case "colorMask":
     case "line":
     case "quadCurve":
@@ -165,3 +172,25 @@ dom.modesContainer.addEventListener("click", handleModes)
 // * Brush * //
 dom.brushDisplay.addEventListener("click", switchBrush)
 dom.brushSlider.addEventListener("input", updateBrush)
+
+// * Dither Brush * //
+document.querySelector(".dither-preview")?.addEventListener("click", () => {
+  const picker = document.querySelector(".dither-picker")
+  if (!picker) return
+  initDitherPicker()
+  picker.style.display = picker.style.display === "none" ? "" : "none"
+})
+
+document.querySelector(".dither-grid")?.addEventListener("click", (e) => {
+  const btn = e.target.closest(".dither-grid-btn")
+  if (!btn || state.tool.current.name !== "ditherBrush") return
+  state.tool.current.ditherPatternIndex = parseInt(btn.dataset.patternIndex)
+  highlightSelectedDitherPattern()
+  renderDitherOptionsToDOM()
+})
+
+document.getElementById("dither-two-color")?.addEventListener("change", (e) => {
+  if (state.tool.current.name === "ditherBrush") {
+    state.tool.current.modes.twoColor = e.target.checked
+  }
+})

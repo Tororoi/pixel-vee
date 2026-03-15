@@ -303,6 +303,48 @@
                   data-tooltip="Color Mask (M) &#010;&#010;Only draw over selected secondary swatch color"
                 ></button>
               </div>
+              <div class="dither-options" style="display: none">
+                <span class="modes-title">Dither</span>
+                <div
+                  class="dither-preview btn"
+                  data-tooltip="Click to select dither pattern"
+                >
+                  <canvas
+                    class="dither-preview-canvas"
+                    width="8"
+                    height="8"
+                  ></canvas>
+                </div>
+                <div class="dither-color-toggle">
+                  <label
+                    for="dither-two-color"
+                    data-tooltip="Use secondary color instead of transparency"
+                  >
+                    <input type="checkbox" id="dither-two-color" />
+                    Two-color
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="dither-picker dialog-box draggable v-drag settings-box smooth-shift"
+            style="display: none"
+          >
+            <div class="header dragger">
+              <div class="drag-btn"><div class="grip"></div></div>
+              Dither Pattern
+              <label class="collapse-btn" data-tooltip="Collapse/ Expand">
+                <input
+                  type="checkbox"
+                  aria-label="Collapse or Expand"
+                  class="collapse-checkbox"
+                />
+                <span class="arrow"></span>
+              </label>
+            </div>
+            <div class="collapsible">
+              <div class="dither-grid"></div>
             </div>
           </div>
           <div
@@ -565,13 +607,31 @@
             <h4>Tools</h4>
             <div class="columns">
               <div class="column">
-                <button
-                  type="button"
-                  class="tool brush selected"
-                  id="brush"
-                  aria-label="Brush (B)"
-                  data-tooltip="Brush (B)"
-                ></button>
+                <div class="tool-group" data-group="brushTools">
+                  <button
+                    type="button"
+                    class="tool-group-btn brush selected"
+                    data-group="brushTools"
+                    aria-label="Brush (B)"
+                    data-tooltip="Brush (B)"
+                  ></button>
+                  <div class="tool-group-popout">
+                    <button
+                      type="button"
+                      class="tool brush selected"
+                      id="brush"
+                      aria-label="Brush (B)"
+                      data-tooltip="Brush (B)"
+                    ></button>
+                    <button
+                      type="button"
+                      class="tool ditherBrush"
+                      id="ditherBrush"
+                      aria-label="Dither Brush (Shift+B)"
+                      data-tooltip="Dither Brush (Shift+B)"
+                    ></button>
+                  </div>
+                </div>
                 <button
                   type="button"
                   class="tool fill"

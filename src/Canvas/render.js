@@ -7,12 +7,14 @@ import { renderLayersToDOM, renderVectorsToDOM } from '../DOM/render.js'
 import { calculateBrushDirection } from '../utils/drawHelpers.js'
 import {
   actionDraw,
+  actionDitherDraw,
   actionLine,
   actionFill,
   actionEllipse,
   actionQuadraticCurve,
   actionCubicCurve,
 } from '../Actions/pointerActions.js'
+import { ditherPatterns } from '../Context/ditherPatterns.js'
 import { setInitialZoom } from '../utils/canvasHelpers.js'
 import { transformRasterContent } from '../utils/transformHelpers.js'
 
@@ -241,6 +243,61 @@ export function performAction(
         previousX = p.x + offsetX
         previousY = p.y + offsetY
         //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster. But it sacrifices flexibility with points.
+      }
+      break
+    }
+    case 'ditherBrush': {
+      const offsetX = action.layer.x
+      const offsetY = action.layer.y
+      const boundaryBox = { ...action.boundaryBox }
+      if (boundaryBox.xMax !== null) {
+        boundaryBox.xMin += offsetX
+        boundaryBox.xMax += offsetX
+        boundaryBox.yMin += offsetY
+        boundaryBox.yMax += offsetY
+      }
+      let seen = new Set()
+      let mask = null
+      if (action.maskArray) {
+        if (offsetX !== 0 || offsetY !== 0) {
+          mask = new Set(
+            action.maskArray.map(
+              (coord) => `${coord.x + offsetX},${coord.y + offsetY}`,
+            ),
+          )
+        } else {
+          mask = new Set(action.maskArray)
+        }
+      }
+      const pattern = ditherPatterns[action.ditherPatternIndex]
+      let previousX = action.points[0].x + offsetX
+      let previousY = action.points[0].y + offsetY
+      let brushDirection = '0,0'
+      for (const p of action.points) {
+        brushDirection = calculateBrushDirection(
+          p.x + offsetX,
+          p.y + offsetY,
+          previousX,
+          previousY,
+        )
+        actionDitherDraw(
+          p.x + offsetX,
+          p.y + offsetY,
+          boundaryBox,
+          action.color,
+          brushStamps[action.brushType][p.brushSize][brushDirection],
+          p.brushSize,
+          action.layer,
+          action.modes,
+          mask,
+          seen,
+          pattern,
+          action.modes.twoColor,
+          action.secondaryColor,
+          betweenCtx,
+        )
+        previousX = p.x + offsetX
+        previousY = p.y + offsetY
       }
       break
     }

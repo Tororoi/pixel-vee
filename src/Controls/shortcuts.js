@@ -116,7 +116,11 @@ export function activateShortcut(keyCode) {
       break
     case "KeyB":
       if (!state.cursor.clicked) {
-        switchTool("brush")
+        if (keys.ShiftLeft || keys.ShiftRight) {
+          switchTool("ditherBrush")
+        } else {
+          switchTool("brush")
+        }
         renderVectorsToDOM()
       }
       break
