@@ -3,7 +3,6 @@ import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { tools } from '../Tools/index.js'
 import { vectorGui } from '../GUI/vector.js'
-import { renderLayersToDOM, renderVectorsToDOM } from '../DOM/render.js'
 import { calculateBrushDirection } from '../utils/drawHelpers.js'
 import {
   actionDitherDraw,
@@ -122,9 +121,19 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         }
         buildUpDensityMap = buildUpLayerMaps.get(action.layer)
       }
-      performAction(action, betweenCtx, lastPasteAction, lastTransformAction, buildUpDensityMap)
+      performAction(
+        action,
+        betweenCtx,
+        lastPasteAction,
+        lastTransformAction,
+        buildUpDensityMap,
+      )
       // After rendering, accumulate this action's delta into the layer map
-      if (action.tool === 'brush' && action.modes?.buildUpDither && action.buildUpDensityDelta) {
+      if (
+        action.tool === 'brush' &&
+        action.modes?.buildUpDither &&
+        action.buildUpDensityDelta
+      ) {
         const layerMap = buildUpLayerMaps.get(action.layer)
         for (const coord of action.buildUpDensityDelta) {
           layerMap.set(coord, (layerMap.get(coord) ?? 0) + 1)
@@ -194,8 +203,9 @@ function createAndSaveContext() {
  * Helper for redrawTimelineActions
  * @param {object} action - The action to be performed
  * @param {CanvasRenderingContext2D} betweenCtx - The canvas context for saving between actions
- * @param lastPasteAction
- * @param lastTransformAction
+ * @param {object|null} lastPasteAction - Most recent paste action for this layer
+ * @param {object|null} lastTransformAction - Most recent transform action for this layer
+ * @param {Map<number, number>|null} buildUpDensityMap - Accumulated density counts for build-up dither
  */
 export function performAction(
   action,
@@ -241,7 +251,9 @@ export function performAction(
       let brushDirection = '0,0'
       const isBuildUp = action.modes?.buildUpDither ?? false
       const buildUpSteps = action.buildUpSteps ?? [16, 32, 48, 64]
-      const pattern = isBuildUp ? null : ditherPatterns[action.ditherPatternIndex ?? 64]
+      const pattern = isBuildUp
+        ? null
+        : ditherPatterns[action.ditherPatternIndex ?? 64]
       for (const p of action.points) {
         brushDirection = calculateBrushDirection(
           p.x + offsetX,

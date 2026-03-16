@@ -204,7 +204,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg'
  * Uses a background rect and a single stroke path for "on" pixels,
  * matching the horizontal-run format used by brush stamp icons.
  * @param {object} pattern - pattern from ditherPatterns
- * @returns {SVGElement}
+ * @returns {SVGElement} SVG thumbnail element
  */
 function createDitherPatternSVG(pattern) {
   const svg = document.createElementNS(SVG_NS, 'svg')
