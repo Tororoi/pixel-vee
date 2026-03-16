@@ -171,6 +171,7 @@ export function renderBuildUpStepsToDOM() {
     btn.appendChild(createDitherPatternSVG(ditherPatterns[patternIndex]))
     slots.appendChild(btn)
   })
+  updateDitherPickerColors()
 }
 
 /**
@@ -226,7 +227,8 @@ function createDitherPatternSVG(pattern) {
     }
   }
   const path = document.createElementNS(SVG_NS, 'path')
-  path.setAttribute('stroke', '#ffffff')
+  const primaryColor = swatches.primary.color.color
+  path.setAttribute('stroke', primaryColor)
   path.setAttribute('d', d)
   path.classList.add('dither-on-path')
   svg.appendChild(path)
