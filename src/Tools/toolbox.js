@@ -9,6 +9,8 @@ import {
   renderBrushModesToDOM,
   renderBrushStampToDOM,
   renderToolOptionsToDOM,
+  renderDitherOptionsToDOM,
+  updateDitherPickerColors,
 } from "../DOM/render.js"
 import { renderCursor } from "../GUI/cursor.js"
 import {
@@ -112,6 +114,7 @@ export function switchTool(toolName = null, toolBtn = null) {
       vectorGui.reset()
       state.reset()
       renderBrushModesToDOM()
+      renderDitherOptionsToDOM()
       renderCursor()
     }
   }
@@ -146,6 +149,7 @@ export function toggleMode(modeName = null, modeBtn = null) {
       }
       renderBrushModesToDOM()
       renderCursor()
+      updateDitherPickerColors()
     }
   }
 }

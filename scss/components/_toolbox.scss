@@ -157,6 +157,14 @@
   @include moveIcon;
 }
 
+.mirrorX {
+  @include mirrorHorizontalIcon;
+}
+
+.mirrorY {
+  @include mirrorVerticalIcon;
+}
+
 //========================================================//
 //================ * * * Mode Icons * * * ================//
 //========================================================//
@@ -175,6 +183,10 @@
 
 .colorMask {
   @include colorMaskIcon;
+}
+
+.twoColor {
+  @include twoColorDitherIcon;
 }
 
 .rotate {

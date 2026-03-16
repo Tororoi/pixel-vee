@@ -6,13 +6,14 @@ import { vectorGui } from '../GUI/vector.js'
 import { renderLayersToDOM, renderVectorsToDOM } from '../DOM/render.js'
 import { calculateBrushDirection } from '../utils/drawHelpers.js'
 import {
-  actionDraw,
+  actionDitherDraw,
   actionLine,
   actionFill,
   actionEllipse,
   actionQuadraticCurve,
   actionCubicCurve,
 } from '../Actions/pointerActions.js'
+import { ditherPatterns } from '../Context/ditherPatterns.js'
 import { setInitialZoom } from '../utils/canvasHelpers.js'
 import { transformRasterContent } from '../utils/transformHelpers.js'
 
@@ -215,6 +216,7 @@ export function performAction(
           mask = new Set(action.maskArray)
         }
       }
+      const pattern = ditherPatterns[action.ditherPatternIndex ?? 64]
       let previousX = action.points[0].x + offsetX
       let previousY = action.points[0].y + offsetY
       let brushDirection = '0,0'
@@ -225,7 +227,7 @@ export function performAction(
           previousX,
           previousY,
         )
-        actionDraw(
+        actionDitherDraw(
           p.x + offsetX,
           p.y + offsetY,
           boundaryBox,
@@ -236,6 +238,11 @@ export function performAction(
           action.modes,
           mask,
           seen,
+          pattern,
+          action.modes?.twoColor ?? false,
+          action.secondaryColor,
+          action.mirrorX ?? false,
+          action.mirrorY ?? false,
           betweenCtx,
         )
         previousX = p.x + offsetX

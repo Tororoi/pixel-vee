@@ -7,13 +7,22 @@ import { vectorGui } from "../GUI/vector.js"
 import { actionClear } from "../Actions/modifyTimeline.js"
 import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
 import { renderCanvas } from "../Canvas/render.js"
-import { renderVectorsToDOM, renderBrushStampToDOM } from "../DOM/render.js"
+import {
+  renderVectorsToDOM,
+  renderBrushStampToDOM,
+  renderDitherOptionsToDOM,
+  renderDitherControlsToDOM,
+  initDitherPicker,
+  highlightSelectedDitherPattern,
+  updateDitherPickerColors,
+} from "../DOM/render.js"
 import { toggleMode, switchTool, initToolGroups } from "./toolbox.js"
 import { ZOOM_LEVELS } from "../utils/constants.js"
 
 //Initialize default tool
 state.tool.current = tools.brush
 initToolGroups()
+renderDitherOptionsToDOM()
 
 //=========================================//
 //=== * * * Button Event Handlers * * * ===//
@@ -165,3 +174,41 @@ dom.modesContainer.addEventListener("click", handleModes)
 // * Brush * //
 dom.brushDisplay.addEventListener("click", switchBrush)
 dom.brushSlider.addEventListener("input", updateBrush)
+
+// * Dither Brush * //
+document.querySelector(".dither-preview")?.addEventListener("click", () => {
+  if (!dom.ditherPickerContainer) return
+  initDitherPicker()
+  updateDitherPickerColors()
+  dom.ditherPickerContainer.style.display =
+    dom.ditherPickerContainer.style.display === "flex" ? "none" : "flex"
+})
+
+document.querySelector(".dither-grid")?.addEventListener("click", (e) => {
+  const btn = e.target.closest(".dither-grid-btn")
+  if (!btn || state.tool.current.name !== "brush") return
+  state.tool.current.ditherPatternIndex = parseInt(btn.dataset.patternIndex)
+  highlightSelectedDitherPattern()
+  renderDitherOptionsToDOM()
+})
+
+document.getElementById("dither-ctrl-two-color")?.addEventListener("click", () => {
+  if (state.tool.current.name !== "brush") return
+  state.tool.current.modes.twoColor = !state.tool.current.modes.twoColor
+  renderDitherControlsToDOM()
+  updateDitherPickerColors()
+  renderDitherOptionsToDOM()
+})
+
+document.getElementById("dither-ctrl-mirror-x")?.addEventListener("click", () => {
+  if (state.tool.current.name !== "brush") return
+  state.tool.current.mirrorX = !state.tool.current.mirrorX
+  renderDitherControlsToDOM()
+})
+
+document.getElementById("dither-ctrl-mirror-y")?.addEventListener("click", () => {
+  if (state.tool.current.name !== "brush") return
+  state.tool.current.mirrorY = !state.tool.current.mirrorY
+  renderDitherControlsToDOM()
+})
+

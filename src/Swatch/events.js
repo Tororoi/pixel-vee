@@ -10,6 +10,7 @@ import {
   renderPaletteToolsToDOM,
   renderPaletteToDOM,
   renderPalettePresetsToDOM,
+  updateDitherPickerColors,
 } from "../DOM/render.js"
 import { changeActionVectorColor } from "../Actions/modifyTimeline.js"
 import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
@@ -94,6 +95,7 @@ export function setColor(r, g, b, a, target) {
   if (!keys.KeyR) {
     renderPaletteToDOM()
   }
+  updateDitherPickerColors()
 }
 
 /**
@@ -156,6 +158,7 @@ function switchColors() {
     `${temp.a / 255}`
   )
   renderPaletteToDOM()
+  updateDitherPickerColors()
 }
 
 /**

@@ -1,21 +1,10 @@
 /* Color Picker */
 
 .picker-container {
-  user-select: none;
-  position: absolute;
-  z-index: 103;
+  @extend %floating-dialog;
   width: 370px;
   max-width: calc(100% - 4px);
   max-height: calc(100% - 4px);
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  color: white;
-  background: $extra-dark-gray;
-  text-align: center;
-  padding: 0;
-  align-self: center;
-  opacity: 1;
   @include boxBorder;
   .header {
     h3 {
@@ -170,13 +159,7 @@
             .swatch {
               width: 40px;
               height: 40px;
-              background-image: repeating-linear-gradient(
-                -45deg,
-                white,
-                white 5px,
-                rgb(216, 216, 216) 5px,
-                rgb(216, 216, 216) 10px
-              );
+              background-image: $diagonal-stripe-bg;
               margin: 0;
               .swatch-color {
                 width: 100%;
