@@ -3,7 +3,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { tools } from "../Tools/index.js"
 import { handleUndo, handleRedo } from "../Actions/undoRedo.js"
-import { brush, rebuildBuildUpDensityMap } from "../Tools/brush.js"
+import { brush, rebuildBuildUpDensityMap, BAYER_STEPS } from "../Tools/brush.js"
 import { vectorGui } from "../GUI/vector.js"
 import { actionClear } from "../Actions/modifyTimeline.js"
 import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
@@ -245,6 +245,25 @@ document.getElementById("dither-ctrl-build-up-reset")?.addEventListener("click",
   if (state.tool.current.name !== "brush") return
   brush._buildUpResetAtIndex = state.timeline.undoStack.length
   brush._buildUpDensityMap = new Map()
+})
+
+// Build-up mode selector (Custom / 2×2 / 4×4 / 8×8)
+document.querySelector(".build-up-mode-selector")?.addEventListener("click", (e) => {
+  const btn = e.target.closest(".build-up-mode-btn")
+  if (!btn || state.tool.current.name !== "brush") return
+  const mode = btn.dataset.mode
+  // Save custom steps before leaving custom mode
+  if (brush.buildUpMode === "custom" && mode !== "custom") {
+    brush._customBuildUpSteps = [...brush.buildUpSteps]
+  }
+  brush.buildUpMode = mode
+  if (mode === "custom") {
+    brush.buildUpSteps = [...brush._customBuildUpSteps]
+  } else {
+    brush.buildUpSteps = [...BAYER_STEPS[mode]]
+  }
+  brush.buildUpActiveStepSlot = null
+  renderBuildUpStepsToDOM()
 })
 
 // Step slot clicks: set the active slot index then open the dither picker

@@ -675,7 +675,7 @@ svg {
   align-items: center;
   position: relative;
   margin: 2px;
-  z-index: 200;
+  z-index: 300;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .nav:hover:not([disabled]) {
@@ -1814,6 +1814,27 @@ canvas {
 }
 .dither-picker-container .build-up-steps .build-up-steps-label {
   margin-bottom: 4px;
+}
+.dither-picker-container .build-up-steps .build-up-mode-selector {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 2px;
+  margin-bottom: 4px;
+}
+.dither-picker-container .build-up-steps .build-up-mode-selector .build-up-mode-btn {
+  font-size: 11px;
+  padding: 2px 5px;
+  cursor: pointer;
+  color: white;
+  background: transparent;
+  border: 1px solid rgb(131, 131, 131);
+}
+.dither-picker-container .build-up-steps .build-up-mode-selector .build-up-mode-btn.selected {
+  border-color: rgb(255, 255, 255);
+  background: rgb(61, 61, 61);
+}
+.dither-picker-container .build-up-steps .build-up-mode-selector .build-up-mode-btn:hover:not(.selected) {
+  border-color: rgb(200, 200, 200);
 }
 .dither-picker-container .build-up-steps .build-up-step-slots {
   display: flex;

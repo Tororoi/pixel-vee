@@ -156,11 +156,21 @@ export function renderBuildUpStepsToDOM() {
   const isBuildUp = state.tool.current.modes?.buildUpDither ?? false
   section.style.display = isBuildUp ? '' : 'none'
   if (!isBuildUp) return
+
+  // Sync mode selector buttons
+  const buildUpMode = state.tool.current.buildUpMode ?? 'custom'
+  section.querySelectorAll('.build-up-mode-btn').forEach((btn) => {
+    btn.classList.toggle('selected', btn.dataset.mode === buildUpMode)
+  })
+
+  // Only render step slot thumbnails in custom mode
   const slots = section.querySelector('.build-up-step-slots')
   if (!slots) return
+  slots.innerHTML = ''
+  if (buildUpMode !== 'custom') return
+
   const buildUpSteps = state.tool.current.buildUpSteps ?? [16, 32, 48, 64]
   const activeSlot = state.tool.current.buildUpActiveStepSlot
-  slots.innerHTML = ''
   buildUpSteps.forEach((patternIndex, i) => {
     const btn = document.createElement('button')
     btn.type = 'button'

@@ -115,6 +115,27 @@
     .build-up-steps-label {
       margin-bottom: 4px;
     }
+    .build-up-mode-selector {
+      display: flex;
+      flex-flow: row nowrap;
+      gap: 2px;
+      margin-bottom: 4px;
+      .build-up-mode-btn {
+        font-size: 11px;
+        padding: 2px 5px;
+        cursor: pointer;
+        color: white;
+        background: transparent;
+        border: 1px solid $border-color;
+        &.selected {
+          border-color: $white;
+          background: $dark-gray;
+        }
+        &:hover:not(.selected) {
+          border-color: $light-gray;
+        }
+      }
+    }
     .build-up-step-slots {
       display: flex;
       flex-flow: row nowrap;
