@@ -1,3 +1,6 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
 .vector-transform-ui-container {
   @extend %floating-dialog;
   top: 10%;

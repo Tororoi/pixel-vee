@@ -1,3 +1,6 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
 .sidebar {
   position: absolute;
   left: 0;

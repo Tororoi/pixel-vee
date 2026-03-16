@@ -1,3 +1,6 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
 /* Vectors, interface provides access to select any vector existing in the timeline */
 
 .vectors-interface {

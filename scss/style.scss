@@ -1,23 +1,22 @@
-/* Import order is important */
-/* First base styles and mixins, keyframes, variables */
+/* Base styles, mixins, keyframes, variables */
 //TODO: (Medium Priority) create a _normalize.scss file
-@import "base/variables";
-@import "base/icons";
-@import "base/keyframes";
-@import "base/mixins";
-@import "base/base-styles";
-/* Next basic site layout components */
-@import "layout/layout";
-@import "layout/nav";
-/* Next override basic styles with specific styles when necessary */
-@import "components/canvas";
-@import "components/toolbox";
-@import "components/layers";
-@import "components/vectors";
-@import "components/brushes";
-@import "components/palette";
-@import "components/settings";
-@import "components/color-picker";
-@import "components/size";
-@import "components/save";
-@import "components/transform";
+@use "base/variables";
+@use "base/icons";
+@use "base/keyframes";
+@use "base/mixins";
+@use "base/base-styles";
+/* Basic site layout components */
+@use "layout/layout";
+@use "layout/nav";
+/* Override basic styles with specific styles when necessary */
+@use "components/canvas";
+@use "components/toolbox";
+@use "components/layers";
+@use "components/vectors";
+@use "components/brushes";
+@use "components/palette";
+@use "components/settings";
+@use "components/color-picker";
+@use "components/size";
+@use "components/save";
+@use "components/transform";

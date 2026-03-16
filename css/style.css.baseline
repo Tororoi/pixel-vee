@@ -1,4 +1,5 @@
-/* Base styles, mixins, keyframes, variables */
+/* Import order is important */
+/* First base styles and mixins, keyframes, variables */
 /* Variables */
 /* Breakpoints */
 /* Colors */
@@ -16,7 +17,6 @@
   --new-swatch-alpha: 1;
 }
 
-/* Base styles, mixins, keyframes, variables */
 @keyframes flash {
   0% {
     opacity: 1;
@@ -36,7 +36,6 @@
     transform: translateY(-2px);
   }
 }
-/* Base styles, mixins, keyframes, variables */
 .marching-ants {
   padding: 6px;
   margin: 20px;
@@ -66,7 +65,7 @@
     background-position: 20px 0, -20px 100%, 0 -20px, 100% 20px;
   }
 }
-.vector-transform-ui-container, .export-container, .save-container, .size-container, .picker-container, .settings-container, .dither-picker-container {
+.vector-transform-ui-container, .save-container, .export-container, .size-container, .picker-container, .settings-container, .dither-picker-container {
   user-select: none;
   position: absolute;
   z-index: 103;
@@ -81,7 +80,7 @@
   opacity: 1;
 }
 
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool, .toolbox .collapsible .tool, .toolbox .collapsible .tool-group-btn {
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool, .toolbox .collapsible .tool-group-btn, .toolbox .collapsible .tool {
   cursor: pointer;
   display: flex;
   justify-content: center;
@@ -96,25 +95,25 @@
   background-color: rgb(131, 131, 131);
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool:hover:not([disabled]), .toolbox .collapsible .tool:hover:not([disabled]), .toolbox .collapsible .tool-group-btn:hover:not([disabled]) {
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool:hover:not([disabled]), .toolbox .collapsible .tool-group-btn:hover:not([disabled]), .toolbox .collapsible .tool:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool:hover, .toolbox .collapsible .tool:hover, .toolbox .collapsible .tool-group-btn:hover {
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .tool:hover, .toolbox .collapsible .tool-group-btn:hover, .toolbox .collapsible .tool:hover {
   z-index: 104;
 }
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .selected.tool, .toolbox .collapsible .selected.tool, .toolbox .collapsible .selected.tool-group-btn {
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .selected.tool, .toolbox .collapsible .selected.tool-group-btn, .toolbox .collapsible .selected.tool {
   background-color: rgb(255, 255, 255);
   z-index: 105;
 }
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .custom-shape.tool, .toolbox .collapsible .custom-shape.tool, .toolbox .collapsible .custom-shape.tool-group-btn {
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .custom-shape.tool, .toolbox .collapsible .custom-shape.tool-group-btn, .toolbox .collapsible .custom-shape.tool {
   background-color: transparent;
   box-shadow: none;
 }
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .custom-shape.tool:hover:not([disabled]), .toolbox .collapsible .custom-shape.tool:hover:not([disabled]), .toolbox .collapsible .custom-shape.tool-group-btn:hover:not([disabled]) {
+.vector-transform-ui-container .collapsible .vector-transform-ui-interface .custom-shape.tool:hover:not([disabled]), .toolbox .collapsible .custom-shape.tool-group-btn:hover:not([disabled]), .toolbox .collapsible .custom-shape.tool:hover:not([disabled]) {
   box-shadow: none;
 }
 
-.tooltip:after, .tooltip.page-left:after, .tooltip.page-center:after {
+.tooltip.page-center:after, .tooltip.page-left:after, .tooltip:after {
   content: "";
   display: inline-block;
   width: 2px;
@@ -124,7 +123,6 @@
   background: rgb(255, 255, 199);
 }
 
-/* Base styles, mixins, keyframes, variables */
 /* Reset styles */
 /* html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
@@ -305,8 +303,7 @@ svg {
   height: 0;
 }
 
-/* Basic site layout components */
-/* Base styles, mixins, keyframes, variables */
+/* Next basic site layout components */
 .sidebar {
   position: absolute;
   left: 0;
@@ -667,7 +664,6 @@ svg {
   background: rgb(200, 200, 200);
 }
 
-/* Base styles, mixins, keyframes, variables */
 .nav {
   background-color: rgb(0, 0, 0);
   justify-self: center;
@@ -853,8 +849,7 @@ svg {
   height: 40px;
 }
 
-/* Override basic styles with specific styles when necessary */
-/* Base styles, mixins, keyframes, variables */
+/* Next override basic styles with specific styles when necessary */
 /* Canvas */
 canvas {
   image-rendering: pixelated;
@@ -902,7 +897,6 @@ canvas {
   height: 50px;
 }
 
-/* Base styles, mixins, keyframes, variables */
 /* Toolbox */
 .toolbox {
   user-select: none;
@@ -1312,7 +1306,6 @@ canvas {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M7 1h6M6 2h1M13 2h1M5 3h1M14 3h1M4 4h1M15 4h1M4 5h1M8 5h4M15 5h1M4 6h1M8 6h1M11 6h1M15 6h1M5 7h3M11 7h1M15 7h1M3 8h9M15 8h2M2 9h1M17 9h1M2 10h1M17 10h1M2 11h1M17 11h1M2 12h1M17 12h1M2 13h1M17 13h1M2 14h1M17 14h1M2 15h1M17 15h1M2 16h1M17 16h1M2 17h1M17 17h1M3 18h14' /%3E%3Cpath stroke='%23000000' d='M7 2h6M6 3h1M13 3h1M5 4h1M7 4h6M14 4h1M5 5h1M7 5h1M12 5h1M14 5h1M5 6h1M7 6h1M12 6h1M14 6h1M12 7h1M14 7h1M12 8h1M14 8h1M8 11h2M8 12h2M9 13h1M16 16h1M15 17h2' /%3E%3Cpath stroke='%23acacac' d='M7 3h2M6 5h1M5 9h6M9 10h6M10 11h1M13 11h2M7 12h1M10 12h2M13 12h2M6 13h3M10 13h2M13 13h2M3 14h1M6 14h6M13 14h2M3 15h3M12 15h3M3 16h11' /%3E%3Cpath stroke='%23575757' d='M9 3h4M13 4h1M13 5h1M6 6h1M13 6h1M13 7h1M13 8h1M3 9h2M11 9h6M15 10h2M5 11h2M11 11h2M15 11h2M5 12h1M15 12h2M5 13h1M15 13h2M5 14h1M15 14h2M15 15h2M14 16h2M3 17h12' /%3E%3Cpath stroke='%23ffffff' d='M6 4h1M3 10h6M3 11h2M7 11h1M3 12h2M6 12h1M12 12h1M3 13h2M12 13h1M4 14h1M12 14h1M6 15h6' /%3E%3C/svg%3E");
 }
 
-/* Base styles, mixins, keyframes, variables */
 /* Layers */
 .layers-interface {
   order: 4;
@@ -1513,7 +1506,6 @@ canvas {
   width: calc(100% - 4px);
 }
 
-/* Base styles, mixins, keyframes, variables */
 /* Vectors, interface provides access to select any vector existing in the timeline */
 .vectors-interface {
   order: 5;
@@ -1707,7 +1699,6 @@ canvas {
   opacity: 0.5;
 }
 
-/* Base styles, mixins, keyframes, variables */
 /* Brush settings */
 .brush-container {
   order: 1;
@@ -1913,7 +1904,6 @@ canvas {
   height: 100%;
 }
 
-/* Base styles, mixins, keyframes, variables */
 /* Palette */
 .palette-interface {
   order: 2;
@@ -2125,7 +2115,6 @@ canvas {
   z-index: 106;
 }
 
-/* Base styles, mixins, keyframes, variables */
 .settings-container {
   top: 15%;
   max-width: calc(100% - 4px);
@@ -2193,7 +2182,6 @@ canvas {
   margin-bottom: 0;
 }
 
-/* Base styles, mixins, keyframes, variables */
 /* Color Picker */
 .picker-container {
   width: 370px;
@@ -2418,7 +2406,6 @@ canvas {
   }
 }
 
-/* Base styles, mixins, keyframes, variables */
 /* Canvas Size settings */
 .size-container {
   top: 15%;
@@ -2475,7 +2462,6 @@ canvas {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 
-/* Base styles, mixins, keyframes, variables */
 .export-container {
   width: 370px;
   max-width: calc(100% - 4px);
@@ -2584,7 +2570,6 @@ canvas {
   background: rgb(77, 77, 77);
 }
 
-/* Base styles, mixins, keyframes, variables */
 .vector-transform-ui-container {
   top: 10%;
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
