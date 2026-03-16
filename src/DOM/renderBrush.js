@@ -29,8 +29,8 @@ export const renderBrushModesToDOM = () => {
 
   //iterate through object keys in state.tool.current.modes
   for (const [key, value] of Object.entries(state.tool.current.modes)) {
-    // twoColor lives in the dither dialog, not the modes row
-    if (key === 'twoColor') continue
+    // twoColor and buildUpDither live in the dither dialog, not the modes row
+    if (key === 'twoColor' || key === 'buildUpDither') continue
     const mode = document.createElement('button')
     mode.type = 'button'
     mode.className = `mode ${key}`
@@ -106,14 +106,17 @@ export function renderDitherOptionsToDOM() {
 }
 
 /**
- * Sync the three toggle buttons in the dither picker dialog (Two-Color, Mirror H, Mirror V).
+ * Sync the toggle buttons in the dither picker dialog (Two-Color, Mirror H, Mirror V)
+ * and the build-up dither toggle in the main toolbar.
  */
 export function renderDitherControlsToDOM() {
   const twoColorBtn = document.getElementById('dither-ctrl-two-color')
   const mirrorXBtn = document.getElementById('dither-ctrl-mirror-x')
   const mirrorYBtn = document.getElementById('dither-ctrl-mirror-y')
+  const buildUpBtn = document.getElementById('dither-ctrl-build-up')
   const mirrorX = state.tool.current.mirrorX ?? false
   const mirrorY = state.tool.current.mirrorY ?? false
+  const isBuildUp = state.tool.current.modes?.buildUpDither ?? false
   if (twoColorBtn) {
     twoColorBtn.classList.toggle(
       'selected',
@@ -126,6 +129,9 @@ export function renderDitherControlsToDOM() {
   if (mirrorYBtn) {
     mirrorYBtn.classList.toggle('selected', mirrorY)
   }
+  if (buildUpBtn) {
+    buildUpBtn.classList.toggle('selected', isBuildUp)
+  }
   // Mirror the SVG thumbnails in the grid and preview via CSS transforms
   const grid = document.querySelector('.dither-grid')
   if (grid) {
@@ -137,6 +143,34 @@ export function renderDitherControlsToDOM() {
     preview.classList.toggle('mirror-x', mirrorX)
     preview.classList.toggle('mirror-y', mirrorY)
   }
+  renderBuildUpStepsToDOM()
+}
+
+/**
+ * Render the build-up step slot buttons in the dither picker dialog.
+ * Shows or hides the whole .build-up-steps section based on whether the mode is active.
+ */
+export function renderBuildUpStepsToDOM() {
+  const section = document.querySelector('.build-up-steps')
+  if (!section) return
+  const isBuildUp = state.tool.current.modes?.buildUpDither ?? false
+  section.style.display = isBuildUp ? '' : 'none'
+  if (!isBuildUp) return
+  const slots = section.querySelector('.build-up-step-slots')
+  if (!slots) return
+  const buildUpSteps = state.tool.current.buildUpSteps ?? [16, 32, 48, 64]
+  const activeSlot = state.tool.current.buildUpActiveStepSlot
+  slots.innerHTML = ''
+  buildUpSteps.forEach((patternIndex, i) => {
+    const btn = document.createElement('button')
+    btn.type = 'button'
+    btn.className = 'build-up-step-btn'
+    btn.dataset.stepSlot = i
+    btn.dataset.tooltip = `Step ${i + 1}: pattern ${patternIndex + 1}/65`
+    if (i === activeSlot) btn.classList.add('selected')
+    btn.appendChild(createDitherPatternSVG(ditherPatterns[patternIndex]))
+    slots.appendChild(btn)
+  })
 }
 
 /**

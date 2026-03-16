@@ -357,13 +357,13 @@ svg {
 }
 
 .draggable {
-  z-index: 100;
+  z-index: 200;
   touch-action: none;
 }
 .draggable.dragging {
   cursor: grabbing;
   user-select: none;
-  z-index: 150;
+  z-index: 250;
 }
 .draggable.dragging > * {
   cursor: grabbing !important;
@@ -1806,6 +1806,42 @@ canvas {
   width: 40px;
   height: 40px;
   opacity: 1;
+}
+.dither-picker-container .build-up-steps {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+.dither-picker-container .build-up-steps .build-up-steps-label {
+  margin-bottom: 4px;
+}
+.dither-picker-container .build-up-steps .build-up-step-slots {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+.dither-picker-container .build-up-steps .build-up-step-slots .build-up-step-btn {
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  background: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.dither-picker-container .build-up-steps .build-up-step-slots .build-up-step-btn:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.dither-picker-container .build-up-steps .build-up-step-slots .build-up-step-btn.selected {
+  border-color: rgb(255, 255, 255);
+}
+.dither-picker-container .build-up-steps .build-up-step-slots .build-up-step-btn:hover {
+  z-index: 104;
+  border-color: rgb(131, 131, 131);
+}
+.dither-picker-container .build-up-steps .build-up-step-slots .build-up-step-btn svg {
+  width: 100%;
+  height: 100%;
 }
 .dither-picker-container .dither-grid {
   display: grid;

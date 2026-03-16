@@ -108,6 +108,39 @@
       opacity: 1;
     }
   }
+  .build-up-steps {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    .build-up-steps-label {
+      margin-bottom: 4px;
+    }
+    .build-up-step-slots {
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      .build-up-step-btn {
+        width: 32px;
+        height: 32px;
+        cursor: pointer;
+        background: $diagonal-stripe-bg;
+        @include boxBorder;
+        &.selected {
+          border-color: $white;
+        }
+        &:hover {
+          z-index: 104;
+          border-color: $border-color;
+        }
+        svg {
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
+  }
   .dither-grid {
     display: grid;
     grid-template-columns: repeat(9, 1fr);

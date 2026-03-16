@@ -965,6 +965,23 @@
               aria-label="Mirror Vertical"
               data-tooltip="Mirror Vertical"
             ></button>
+            <button
+              type="button"
+              class="dither-toggle buildUpDither"
+              id="dither-ctrl-build-up"
+              aria-label="Build-Up Dither"
+              data-tooltip="Build-Up Dither&#010;&#010;Automatically increase dither density on overlapping strokes"
+            ></button>
+          </div>
+          <div class="build-up-steps" style="display: none">
+            <span class="build-up-steps-label">Build-Up Steps</span>
+            <div class="build-up-step-slots"></div>
+            <button
+              type="button"
+              id="dither-ctrl-build-up-reset"
+              class="btn build-up-reset-btn"
+              data-tooltip="Reset build-up density&#010;&#010;Clears accumulated stroke history on all layers"
+            >Reset</button>
           </div>
           <div class="dither-grid"></div>
         </div>

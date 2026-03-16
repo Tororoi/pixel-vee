@@ -3,7 +3,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { ditherPatterns } from "../Context/ditherPatterns.js"
-import { actionDitherDraw, actionLine } from "../Actions/pointerActions.js"
+import { actionDitherDraw, actionBuildUpDitherDraw, actionLine } from "../Actions/pointerActions.js"
 import { getAngle, getTriangle } from "../utils/trig.js"
 import { renderCanvas, scheduleRender } from "../Canvas/render.js"
 import { calculateBrushDirection } from "../utils/drawHelpers.js"
@@ -31,6 +31,10 @@ function brushSteps() {
       }
       state.selection.pointsSet = new Set()
       state.selection.seenPixelsSet = new Set()
+      //rebuild build-up density map from timeline so drawing is always correct
+      if (brush.modes.buildUpDither) {
+        rebuildBuildUpDensityMap()
+      }
       //initial point
       drawBrushPoint(state.cursor.x, state.cursor.y, brushDirection)
       //For line
@@ -104,23 +108,31 @@ function brushSteps() {
         boundaryBox.yMin -= canvas.currentLayer.y
         boundaryBox.yMax -= canvas.currentLayer.y
       }
+      const timelineProperties = {
+        modes: { ...brush.modes },
+        color: { ...swatches.primary.color },
+        secondaryColor: { ...swatches.secondary.color },
+        brushSize: brush.brushSize,
+        brushType: brush.brushType,
+        ditherPatternIndex: brush.ditherPatternIndex,
+        mirrorX: brush.mirrorX,
+        mirrorY: brush.mirrorY,
+        points: state.timeline.points,
+        maskArray,
+        boundaryBox,
+      }
+      if (brush.modes.buildUpDither) {
+        timelineProperties.buildUpDensityDelta = [...state.selection.seenPixelsSet]
+        timelineProperties.buildUpSteps = [...brush.buildUpSteps]
+      }
       addToTimeline({
         tool: brush.name,
         layer: canvas.currentLayer,
-        properties: {
-          modes: { ...brush.modes },
-          color: { ...swatches.primary.color },
-          secondaryColor: { ...swatches.secondary.color },
-          brushSize: brush.brushSize,
-          brushType: brush.brushType,
-          ditherPatternIndex: brush.ditherPatternIndex,
-          mirrorX: brush.mirrorX,
-          mirrorY: brush.mirrorY,
-          points: state.timeline.points,
-          maskArray,
-          boundaryBox,
-        },
+        properties: timelineProperties,
       })
+      if (brush.modes.buildUpDither) {
+        rebuildBuildUpDensityMap()
+      }
       if (state.tool.current.modes?.colorMask) {
         state.selection.maskSet = null
       }
@@ -160,23 +172,45 @@ function addPointToAction(x, y) {
  */
 function drawBrushPoint(x, y, brushDirection) {
   addPointToAction(x, y)
-  actionDitherDraw(
-    x,
-    y,
-    state.selection.boundaryBox,
-    swatches.primary.color,
-    brushStamps[state.tool.current.brushType][state.tool.current.brushSize][brushDirection],
-    state.tool.current.brushSize,
-    canvas.currentLayer,
-    state.tool.current.modes,
-    state.selection.maskSet,
-    state.selection.seenPixelsSet,
-    ditherPatterns[brush.ditherPatternIndex],
-    brush.modes.twoColor,
-    swatches.secondary.color,
-    brush.mirrorX,
-    brush.mirrorY
-  )
+  const stamp = brushStamps[state.tool.current.brushType][state.tool.current.brushSize][brushDirection]
+  if (brush.modes.buildUpDither) {
+    actionBuildUpDitherDraw(
+      x,
+      y,
+      state.selection.boundaryBox,
+      swatches.primary.color,
+      stamp,
+      state.tool.current.brushSize,
+      canvas.currentLayer,
+      state.tool.current.modes,
+      state.selection.maskSet,
+      state.selection.seenPixelsSet,
+      brush._buildUpDensityMap,
+      brush.buildUpSteps,
+      brush.modes.twoColor,
+      swatches.secondary.color,
+      brush.mirrorX,
+      brush.mirrorY
+    )
+  } else {
+    actionDitherDraw(
+      x,
+      y,
+      state.selection.boundaryBox,
+      swatches.primary.color,
+      stamp,
+      state.tool.current.brushSize,
+      canvas.currentLayer,
+      state.tool.current.modes,
+      state.selection.maskSet,
+      state.selection.seenPixelsSet,
+      ditherPatterns[brush.ditherPatternIndex],
+      brush.modes.twoColor,
+      swatches.secondary.color,
+      brush.mirrorX,
+      brush.mirrorY
+    )
+  }
 }
 
 /**
@@ -189,26 +223,51 @@ function drawPreviewBrushPoint() {
     state.drawing.lastDrawnX,
     state.drawing.lastDrawnY
   )
-  actionDitherDraw(
-    state.cursor.x,
-    state.cursor.y,
-    state.selection.boundaryBox,
-    swatches.primary.color,
-    brushStamps[state.tool.current.brushType][state.tool.current.brushSize][brushDirection],
-    state.tool.current.brushSize,
-    canvas.currentLayer,
-    state.tool.current.modes,
-    state.selection.maskSet,
-    state.selection.seenPixelsSet,
-    ditherPatterns[brush.ditherPatternIndex],
-    brush.modes.twoColor,
-    swatches.secondary.color,
-    brush.mirrorX,
-    brush.mirrorY,
-    null,
-    true,
-    true
-  )
+  const stamp = brushStamps[state.tool.current.brushType][state.tool.current.brushSize][brushDirection]
+  if (brush.modes.buildUpDither) {
+    actionBuildUpDitherDraw(
+      state.cursor.x,
+      state.cursor.y,
+      state.selection.boundaryBox,
+      swatches.primary.color,
+      stamp,
+      state.tool.current.brushSize,
+      canvas.currentLayer,
+      state.tool.current.modes,
+      state.selection.maskSet,
+      state.selection.seenPixelsSet,
+      brush._buildUpDensityMap,
+      brush.buildUpSteps,
+      brush.modes.twoColor,
+      swatches.secondary.color,
+      brush.mirrorX,
+      brush.mirrorY,
+      null,
+      true,
+      true
+    )
+  } else {
+    actionDitherDraw(
+      state.cursor.x,
+      state.cursor.y,
+      state.selection.boundaryBox,
+      swatches.primary.color,
+      stamp,
+      state.tool.current.brushSize,
+      canvas.currentLayer,
+      state.tool.current.modes,
+      state.selection.maskSet,
+      state.selection.seenPixelsSet,
+      ditherPatterns[brush.ditherPatternIndex],
+      brush.modes.twoColor,
+      swatches.secondary.color,
+      brush.mirrorX,
+      brush.mirrorY,
+      null,
+      true,
+      true
+    )
+  }
 }
 
 /**
@@ -314,8 +373,37 @@ export const brush = {
   mirrorX: false,
   mirrorY: false,
   options: { line: { active: false } },
-  modes: { eraser: false, inject: false, perfect: false, colorMask: false, twoColor: false },
+  modes: { eraser: false, inject: false, perfect: false, colorMask: false, twoColor: false, buildUpDither: false },
+  buildUpSteps: [16, 32, 48, 64],
+  buildUpActiveStepSlot: null,
+  _buildUpDensityMap: new Map(),
+  _buildUpResetAtIndex: 0,
   type: "raster",
   cursor: "crosshair",
   activeCursor: "crosshair",
+}
+
+/**
+ * Rebuild brush._buildUpDensityMap by scanning the undo stack for all
+ * build-up dither brush actions on the current layer.
+ * Call this whenever strokes are added, undone, or redone.
+ */
+export function rebuildBuildUpDensityMap() {
+  const layer = canvas.currentLayer
+  const map = new Map()
+  const startIndex = brush._buildUpResetAtIndex ?? 0
+  for (let i = startIndex; i < state.timeline.undoStack.length; i++) {
+    const action = state.timeline.undoStack[i]
+    if (
+      action.tool === "brush" &&
+      action.modes?.buildUpDither &&
+      action.layer === layer &&
+      action.buildUpDensityDelta
+    ) {
+      for (const coord of action.buildUpDensityDelta) {
+        map.set(coord, (map.get(coord) ?? 0) + 1)
+      }
+    }
+  }
+  brush._buildUpDensityMap = map
 }
