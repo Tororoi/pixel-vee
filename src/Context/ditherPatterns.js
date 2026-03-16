@@ -35,6 +35,8 @@ export const ditherPatterns = Array.from({ length: 65 }, (_, threshold) => ({
  * @param {object} pattern - pattern from ditherPatterns
  * @param {number} x - absolute canvas x coordinate
  * @param {number} y - absolute canvas y coordinate
+ * @param {boolean} mirrorX - flip pattern horizontally
+ * @param {boolean} mirrorY - flip pattern vertically
  * @returns {boolean} true if pixel should be drawn with primary color
  */
 export function isDitherOn(pattern, x, y, mirrorX = false, mirrorY = false) {

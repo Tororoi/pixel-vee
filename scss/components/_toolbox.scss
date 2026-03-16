@@ -1,3 +1,7 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+@use '../base/icons' as *;
+
 /* Toolbox */
 
 .toolbox {
@@ -187,6 +191,10 @@
 
 .twoColor {
   @include twoColorDitherIcon;
+}
+
+.buildUpDither {
+  @include buildUpDitherIcon;
 }
 
 .rotate {

@@ -7,8 +7,8 @@ import { getGuiLineWidth, doubleStroke } from '../utils/guiHelpers.js'
  * @param {object} vector - The vector to be rendered
  */
 export function renderLineVector(vectorProperties, vector) {
-  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
-  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
+  // const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
+  // const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
   const lineWidth = getGuiLineWidth()
   let circleRadius = 20 * lineWidth
 

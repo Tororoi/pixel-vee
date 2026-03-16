@@ -2,7 +2,7 @@ import { brushStamps } from '../Context/brushStamps.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
-import { actionDraw, actionDitherDraw } from '../Actions/pointerActions.js'
+import { actionDraw, actionDitherDraw, actionBuildUpDitherDraw } from '../Actions/pointerActions.js'
 import { vectorGui } from './vector.js'
 import { renderCanvas } from '../Canvas/render.js'
 import { isOutOfBounds } from '../utils/canvasHelpers.js'
@@ -38,9 +38,10 @@ export function renderCursor() {
         !state.vector.collidedIndex &&
         state.vector.selectedIndices.size === 0
       ) {
+        const isDitherActive = (state.tool.current.ditherPatternIndex !== undefined && state.tool.current.ditherPatternIndex < 64) || (state.tool.current.modes?.buildUpDither ?? false)
         if (state.tool.current.modes?.eraser) {
           if (vectorGui.showCursorPreview) {
-            if (state.tool.current.ditherPatternIndex !== undefined && state.tool.current.ditherPatternIndex < 64) {
+            if (isDitherActive) {
               drawDitherInjectPreview()
             } else {
               drawInjectPreview()
@@ -48,7 +49,7 @@ export function renderCursor() {
           }
           drawCursorBox(0.5)
         } else if (vectorGui.showCursorPreview) {
-          if (state.tool.current.ditherPatternIndex !== undefined && state.tool.current.ditherPatternIndex < 64) {
+          if (isDitherActive) {
             if (state.tool.current.modes?.inject) {
               drawDitherInjectPreview()
             } else {
@@ -96,32 +97,55 @@ function drawInjectPreview() {
 
 /**
  * Inject/eraser preview for dither brush: blits the layer then applies
- * actionDitherDraw in preview mode so only dither-pattern pixels are affected.
+ * the appropriate dither draw in preview mode so only dither-pattern pixels are affected.
  */
 function drawDitherInjectPreview() {
   renderCanvas(canvas.currentLayer)
-  actionDitherDraw(
-    state.cursor.x,
-    state.cursor.y,
-    state.selection.boundaryBox,
-    swatches.primary.color,
-    brushStamps[state.tool.current.brushType][state.tool.current.brushSize][
-      '0,0'
-    ],
-    state.tool.current.brushSize,
-    canvas.currentLayer,
-    state.tool.current.modes,
-    state.selection.maskSet,
-    state.selection.seenPixelsSet,
-    ditherPatterns[state.tool.current.ditherPatternIndex],
-    state.tool.current.modes?.twoColor ?? false,
-    swatches.secondary.color,
-    state.tool.current.mirrorX ?? false,
-    state.tool.current.mirrorY ?? false,
-    null,
-    true,
-    true,
-  )
+  const stamp = brushStamps[state.tool.current.brushType][state.tool.current.brushSize]['0,0']
+  if (state.tool.current.modes?.buildUpDither) {
+    actionBuildUpDitherDraw(
+      state.cursor.x,
+      state.cursor.y,
+      state.selection.boundaryBox,
+      swatches.primary.color,
+      stamp,
+      state.tool.current.brushSize,
+      canvas.currentLayer,
+      state.tool.current.modes,
+      state.selection.maskSet,
+      state.selection.seenPixelsSet,
+      state.tool.current._buildUpDensityMap,
+      state.tool.current.buildUpSteps,
+      state.tool.current.modes?.twoColor ?? false,
+      swatches.secondary.color,
+      state.tool.current.mirrorX ?? false,
+      state.tool.current.mirrorY ?? false,
+      null,
+      true,
+      true,
+    )
+  } else {
+    actionDitherDraw(
+      state.cursor.x,
+      state.cursor.y,
+      state.selection.boundaryBox,
+      swatches.primary.color,
+      stamp,
+      state.tool.current.brushSize,
+      canvas.currentLayer,
+      state.tool.current.modes,
+      state.selection.maskSet,
+      state.selection.seenPixelsSet,
+      ditherPatterns[state.tool.current.ditherPatternIndex],
+      state.tool.current.modes?.twoColor ?? false,
+      swatches.secondary.color,
+      state.tool.current.mirrorX ?? false,
+      state.tool.current.mirrorY ?? false,
+      null,
+      true,
+      true,
+    )
+  }
 }
 
 /**
@@ -150,14 +174,20 @@ function drawNormalPreview() {
 /**
  * Dither brush preview: draw each stamp pixel on the cursor canvas,
  * filtering by the current dither pattern using absolute canvas coordinates.
+ * In build-up dither mode, the pattern is determined per-pixel from the density map.
  */
 function drawDitherPreview() {
   const brushSize = state.tool.current.brushSize
   const stamp = brushStamps[state.tool.current.brushType][brushSize]['0,0']
   const baseX = Math.ceil(state.cursor.x - brushSize / 2)
   const baseY = Math.ceil(state.cursor.y - brushSize / 2)
-  const pattern = ditherPatterns[state.tool.current.ditherPatternIndex]
   const twoColor = state.tool.current.modes?.twoColor ?? false
+  const mirrorX = state.tool.current.mirrorX ?? false
+  const mirrorY = state.tool.current.mirrorY ?? false
+  const isBuildUp = state.tool.current.modes?.buildUpDither ?? false
+  const densityMap = isBuildUp ? state.tool.current._buildUpDensityMap : null
+  const buildUpSteps = state.tool.current.buildUpSteps
+  const basePattern = isBuildUp ? null : ditherPatterns[state.tool.current.ditherPatternIndex]
   for (const pixel of stamp) {
     const x = baseX + pixel.x
     const y = baseY + pixel.y
@@ -165,7 +195,15 @@ function drawDitherPreview() {
       continue
     if (state.selection.maskSet && !state.selection.maskSet.has((y << 16) | x))
       continue
-    if (isDitherOn(pattern, x, y, state.tool.current.mirrorX ?? false, state.tool.current.mirrorY ?? false)) {
+    let pattern
+    if (isBuildUp) {
+      const count = densityMap ? (densityMap.get((y << 16) | x) ?? 0) : 0
+      const stepIndex = Math.min(count, buildUpSteps.length - 1)
+      pattern = ditherPatterns[buildUpSteps[stepIndex]]
+    } else {
+      pattern = basePattern
+    }
+    if (isDitherOn(pattern, x, y, mirrorX, mirrorY)) {
       canvas.cursorCTX.fillStyle = swatches.primary.color.color
       canvas.cursorCTX.fillRect(x + canvas.xOffset, y + canvas.yOffset, 1, 1)
     } else if (twoColor) {

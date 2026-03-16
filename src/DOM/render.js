@@ -7,6 +7,7 @@ export {
   renderToolOptionsToDOM,
   renderDitherOptionsToDOM,
   renderDitherControlsToDOM,
+  renderBuildUpStepsToDOM,
   initDitherPicker,
   highlightSelectedDitherPattern,
   updateDitherPickerColors,

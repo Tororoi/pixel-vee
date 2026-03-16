@@ -1,3 +1,6 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
 .sidebar {
   position: absolute;
   left: 0;
@@ -34,12 +37,12 @@
 }
 
 .draggable {
-  z-index: 100;
+  z-index: 200;
   touch-action: none;
   &.dragging {
     cursor: grabbing;
     user-select: none;
-    z-index: 150;
+    z-index: 250;
     > * {
       cursor: grabbing !important;
     }

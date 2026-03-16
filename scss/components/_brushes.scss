@@ -1,3 +1,6 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
 /* Brush settings */
 
 .brush-container {
@@ -106,6 +109,71 @@
       width: 40px;
       height: 40px;
       opacity: 1;
+    }
+  }
+  .build-up-steps {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    .build-up-steps-label {
+      margin-bottom: 4px;
+    }
+    .build-up-mode-selector {
+      display: flex;
+      flex-flow: row nowrap;
+      gap: 2px;
+      margin-bottom: 6px;
+      .build-up-mode-btn {
+        font-size: 11px;
+        padding: 2px 5px;
+        cursor: pointer;
+        color: $white;
+        background: $dark-gray;
+        border-color: $border-color;
+        @include boxBorder;
+        z-index: 102;
+        &.selected {
+          @include boxBorder($white);
+          background: $dark-gray;
+          z-index: 104;
+        }
+        &:hover:not(.selected) {
+          z-index: 103;
+        }
+      }
+    }
+    .build-up-step-slots {
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      margin-bottom: 6px;
+      .build-up-step-btn {
+        width: 32px;
+        height: 32px;
+        cursor: pointer;
+        background: $diagonal-stripe-bg;
+        @include boxBorder;
+        &.selected {
+          border-color: $white;
+        }
+        &:hover {
+          z-index: 104;
+          border-color: $border-color;
+        }
+        svg {
+          width: 100%;
+          height: 100%;
+        }
+      }
+    }
+    .build-up-reset-btn {
+      margin: 0;
+      margin-top: 14px;
+      margin-bottom: 16px;
+      background: $dark-gray;
+      padding: 4px;
     }
   }
   .dither-grid {

@@ -3,7 +3,7 @@ import { canvas } from '../Context/canvas.js'
 /**
  * Returns the standard lineWidth for vector GUI elements.
  * @param {number} lineWeight - Multiplier (default 1; use 2 for eraser cursor)
- * @returns {number}
+ * @returns {number} scaled line width
  */
 export function getGuiLineWidth(lineWeight = 0.5) {
   return canvas.zoom <= 8 ? lineWeight / canvas.zoom : lineWeight / 8
@@ -11,7 +11,7 @@ export function getGuiLineWidth(lineWeight = 0.5) {
 
 /**
  * Returns the lineWidth for pixel grid lines.
- * @returns {number}
+ * @returns {number} scaled grid line width
  */
 export function getGridLineWidth() {
   return 0.5 / canvas.zoom
@@ -19,7 +19,7 @@ export function getGridLineWidth() {
 
 /**
  * Strokes the current path twice: outer (wider, outerStyle) then inner (narrower, innerStyle).
- * @param {CanvasRenderingContext2D} ctx
+ * @param {CanvasRenderingContext2D} ctx - canvas rendering context
  * @param {number} lineWidth - Inner (thin) stroke width; outer is 3×
  * @param {string} outerStyle - Stroke style for the outer (wider) stroke
  * @param {string} innerStyle - Stroke style for the inner (narrower) stroke

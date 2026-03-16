@@ -1,3 +1,5 @@
+@use 'variables' as *;
+
 //==================================================//
 //============== * * * Palette * * * ===============//
 //==================================================//
@@ -244,6 +246,19 @@
   &:hover,
   &.selected {
     @include twoColorDitherSvg($active);
+  }
+}
+
+@mixin buildUpDitherSvg($color) {
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'><path stroke='#{$color}' d='M7 1h6M5 2h2M13 2h2M4 3h1M15 3h1M3 4h1M16 4h1M2 5h1M17 5h1M2 6h1M17 6h1M1 7h1M18 7h1M1 8h1M18 8h1M1 9h1M18 9h1M1 10h1M18 10h1M1 11h1M18 11h1M1 12h1M18 12h1M2 13h1M17 13h1M2 14h1M17 14h1M3 15h1M16 15h1M4 16h1M15 16h1M5 17h2M13 17h2M7 18h6' /><path stroke='%23000000' d='M7 2h6M5 3h3M9 3h1M11 3h1M13 3h2M4 4h1M6 4h1M8 4h1M10 4h1M12 4h4M3 5h1M5 5h1M11 5h1M13 5h1M15 5h2M3 6h2M6 6h1M10 6h1M12 6h1M14 6h3M2 7h2M13 7h1M15 7h1M17 7h1M2 8h1M4 8h1M12 8h1M14 8h4M2 9h2M13 9h1M15 9h3M2 10h1M4 10h1M6 10h1M10 10h1M12 10h1M14 10h4M2 11h2M5 11h1M11 11h1M13 11h3M17 11h1M2 12h3M6 12h1M8 12h1M10 12h1M12 12h6M3 13h1M5 13h1M7 13h1M9 13h1M11 13h3M15 13h2M3 14h14M4 15h2M7 15h1M9 15h1M11 15h1M13 15h3M5 16h10M7 17h6' /><path stroke='%23ffffff' d='M8 3h1M10 3h1M12 3h1M5 4h1M7 4h1M9 4h1M11 4h1M4 5h1M6 5h5M12 5h1M14 5h1M5 6h1M7 6h3M11 6h1M13 6h1M4 7h9M14 7h1M16 7h1M3 8h1M5 8h7M13 8h1M4 9h9M14 9h1M3 10h1M5 10h1M7 10h3M11 10h1M13 10h1M4 11h1M6 11h5M12 11h1M16 11h1M5 12h1M7 12h1M9 12h1M11 12h1M4 13h1M6 13h1M8 13h1M10 13h1M14 13h1M6 15h1M8 15h1M10 15h1M12 15h1' /></svg>");
+}
+
+@mixin buildUpDitherIcon($border: $border-color, $active: $white) {
+  @include buildUpDitherSvg($border);
+  background-size: 100%;
+  &:hover,
+  &.selected {
+    @include buildUpDitherSvg($active);
   }
 }
 

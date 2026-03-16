@@ -29,8 +29,8 @@ export const renderBrushModesToDOM = () => {
 
   //iterate through object keys in state.tool.current.modes
   for (const [key, value] of Object.entries(state.tool.current.modes)) {
-    // twoColor lives in the dither dialog, not the modes row
-    if (key === 'twoColor') continue
+    // twoColor and buildUpDither live in the dither dialog, not the modes row
+    if (key === 'twoColor' || key === 'buildUpDither') continue
     const mode = document.createElement('button')
     mode.type = 'button'
     mode.className = `mode ${key}`
@@ -106,14 +106,17 @@ export function renderDitherOptionsToDOM() {
 }
 
 /**
- * Sync the three toggle buttons in the dither picker dialog (Two-Color, Mirror H, Mirror V).
+ * Sync the toggle buttons in the dither picker dialog (Two-Color, Mirror H, Mirror V)
+ * and the build-up dither toggle in the main toolbar.
  */
 export function renderDitherControlsToDOM() {
   const twoColorBtn = document.getElementById('dither-ctrl-two-color')
   const mirrorXBtn = document.getElementById('dither-ctrl-mirror-x')
   const mirrorYBtn = document.getElementById('dither-ctrl-mirror-y')
+  const buildUpBtn = document.getElementById('dither-ctrl-build-up')
   const mirrorX = state.tool.current.mirrorX ?? false
   const mirrorY = state.tool.current.mirrorY ?? false
+  const isBuildUp = state.tool.current.modes?.buildUpDither ?? false
   if (twoColorBtn) {
     twoColorBtn.classList.toggle(
       'selected',
@@ -126,6 +129,9 @@ export function renderDitherControlsToDOM() {
   if (mirrorYBtn) {
     mirrorYBtn.classList.toggle('selected', mirrorY)
   }
+  if (buildUpBtn) {
+    buildUpBtn.classList.toggle('selected', isBuildUp)
+  }
   // Mirror the SVG thumbnails in the grid and preview via CSS transforms
   const grid = document.querySelector('.dither-grid')
   if (grid) {
@@ -137,6 +143,45 @@ export function renderDitherControlsToDOM() {
     preview.classList.toggle('mirror-x', mirrorX)
     preview.classList.toggle('mirror-y', mirrorY)
   }
+  renderBuildUpStepsToDOM()
+}
+
+/**
+ * Render the build-up step slot buttons in the dither picker dialog.
+ * Shows or hides the whole .build-up-steps section based on whether the mode is active.
+ */
+export function renderBuildUpStepsToDOM() {
+  const section = document.querySelector('.build-up-steps')
+  if (!section) return
+  const isBuildUp = state.tool.current.modes?.buildUpDither ?? false
+  section.style.display = isBuildUp ? '' : 'none'
+  if (!isBuildUp) return
+
+  // Sync mode selector buttons
+  const buildUpMode = state.tool.current.buildUpMode ?? 'custom'
+  section.querySelectorAll('.build-up-mode-btn').forEach((btn) => {
+    btn.classList.toggle('selected', btn.dataset.mode === buildUpMode)
+  })
+
+  // Only render step slot thumbnails in custom mode
+  const slots = section.querySelector('.build-up-step-slots')
+  if (!slots) return
+  slots.innerHTML = ''
+  if (buildUpMode !== 'custom') return
+
+  const buildUpSteps = state.tool.current.buildUpSteps ?? [16, 32, 48, 64]
+  const activeSlot = state.tool.current.buildUpActiveStepSlot
+  buildUpSteps.forEach((patternIndex, i) => {
+    const btn = document.createElement('button')
+    btn.type = 'button'
+    btn.className = 'build-up-step-btn'
+    btn.dataset.stepSlot = i
+    btn.dataset.tooltip = `Step ${i + 1}: pattern ${patternIndex + 1}/65`
+    if (i === activeSlot) btn.classList.add('selected')
+    btn.appendChild(createDitherPatternSVG(ditherPatterns[patternIndex]))
+    slots.appendChild(btn)
+  })
+  updateDitherPickerColors()
 }
 
 /**
@@ -159,7 +204,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg'
  * Uses a background rect and a single stroke path for "on" pixels,
  * matching the horizontal-run format used by brush stamp icons.
  * @param {object} pattern - pattern from ditherPatterns
- * @returns {SVGElement}
+ * @returns {SVGElement} SVG thumbnail element
  */
 function createDitherPatternSVG(pattern) {
   const svg = document.createElementNS(SVG_NS, 'svg')
@@ -192,7 +237,8 @@ function createDitherPatternSVG(pattern) {
     }
   }
   const path = document.createElementNS(SVG_NS, 'path')
-  path.setAttribute('stroke', '#ffffff')
+  const primaryColor = swatches.primary.color.color
+  path.setAttribute('stroke', primaryColor)
   path.setAttribute('d', d)
   path.classList.add('dither-on-path')
   svg.appendChild(path)

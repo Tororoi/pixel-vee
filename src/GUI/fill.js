@@ -1,4 +1,3 @@
-import { canvas } from '../Context/canvas.js'
 import { vectorGui } from './vector.js'
 import { getGuiLineWidth } from '../utils/guiHelpers.js'
 
