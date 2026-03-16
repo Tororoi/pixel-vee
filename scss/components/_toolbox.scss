@@ -117,11 +117,6 @@
   @include brushIcon;
 }
 
-.ditherBrush {
-  // TODO: Replace with dedicated dither brush icon SVG
-  @include brushIcon;
-}
-
 .fill {
   @include fillIcon;
 }
@@ -162,6 +157,14 @@
   @include moveIcon;
 }
 
+.mirrorX {
+  @include mirrorHorizontalIcon;
+}
+
+.mirrorY {
+  @include mirrorVerticalIcon;
+}
+
 //========================================================//
 //================ * * * Mode Icons * * * ================//
 //========================================================//
@@ -183,8 +186,7 @@
 }
 
 .twoColor {
-  // TODO: Replace with dedicated two-color icon SVG
-  @include colorMaskIcon;
+  @include twoColorDitherIcon;
 }
 
 .rotate {
