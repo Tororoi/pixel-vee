@@ -1,3 +1,6 @@
+@use 'sass:list';
+@use 'variables' as *;
+
 //==================================================//
 //============= * * * Box Shadow * * * =============//
 //==================================================//
@@ -35,7 +38,7 @@
 ) {
   $shadows: ();
   @each $side in $sides {
-    $shadows: append($shadows, side-shadow($side, $color, $inset), comma);
+    $shadows: list.append($shadows, side-shadow($side, $color, $inset), comma);
   }
 
   box-shadow: $shadows;
@@ -43,7 +46,7 @@
   &:hover:not([disabled]) {
     $active-shadows: ();
     @each $side in $sides {
-      $active-shadows: append(
+      $active-shadows: list.append(
         $active-shadows,
         side-shadow($side, $activeColor, $inset),
         comma

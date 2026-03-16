@@ -965,6 +965,59 @@
               aria-label="Mirror Vertical"
               data-tooltip="Mirror Vertical"
             ></button>
+            <button
+              type="button"
+              class="dither-toggle buildUpDither"
+              id="dither-ctrl-build-up"
+              aria-label="Build-Up Dither"
+              data-tooltip="Build-Up Dither&#010;&#010;Automatically increase dither density on overlapping strokes"
+            ></button>
+          </div>
+          <div class="build-up-steps" style="display: none">
+            <span class="build-up-steps-label">Build-Up Steps</span>
+            <div class="build-up-mode-selector">
+              <button
+                type="button"
+                class="build-up-mode-btn selected"
+                data-mode="custom"
+                data-tooltip="Custom build-up steps. Select a step and then select a dither pattern to use for that step"
+              >
+                Custom
+              </button>
+              <button
+                type="button"
+                class="build-up-mode-btn"
+                data-mode="2x2"
+                data-tooltip="4 steps from a 2x2 Bayer Matrix"
+              >
+                2×2
+              </button>
+              <button
+                type="button"
+                class="build-up-mode-btn"
+                data-mode="4x4"
+                data-tooltip="16 steps from a 4x4 Bayer Matrix"
+              >
+                4×4
+              </button>
+              <button
+                type="button"
+                class="build-up-mode-btn"
+                data-mode="8x8"
+                data-tooltip="64 steps from an 8x8 Bayer Matrix"
+              >
+                8×8
+              </button>
+            </div>
+            <div class="build-up-step-slots"></div>
+            <button
+              type="button"
+              id="dither-ctrl-build-up-reset"
+              class="btn build-up-reset-btn"
+              data-tooltip="Reset build-up density&#010;&#010;Clears accumulated stroke history on all layers"
+            >
+              Reset Density Map
+            </button>
           </div>
           <div class="dither-grid"></div>
         </div>

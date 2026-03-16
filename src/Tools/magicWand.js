@@ -12,12 +12,12 @@ import { renderCanvas } from "../Canvas/render.js"
  * Flood-fill starting at (startX, startY), returns a Set of packed (y << 16) | x integers.
  * Matches pixels with identical RGBA. Transparent pixels (a=0) are all treated as the same
  * color regardless of their RGB values (premultiplied alpha clears RGB on transparent pixels).
- * @param {number} startX
- * @param {number} startY
+ * @param {number} startX - x coordinate to start flood fill from
+ * @param {number} startY - y coordinate to start flood fill from
  * @param {Set<number>|null} containMask - When provided, the existing selection maskSet acts as
  *   a boundary wall. The flood fill is confined to pixels on the same side (selected vs unselected)
  *   as the start pixel, so the selection boundary cannot be crossed.
- * @returns {Set<number>}
+ * @returns {Set<number>} set of packed coordinates matching the flood fill
  */
 function floodFill(startX, startY, containMask = null) {
   const imageData = canvas.currentLayer.ctx.getImageData(
@@ -86,8 +86,8 @@ function floodFill(startX, startY, containMask = null) {
 
 /**
  * Compute a bounding box from a maskSet.
- * @param {Set<number>} maskSet
- * @returns {{ xMin: number, yMin: number, xMax: number, yMax: number }}
+ * @param {Set<number>} maskSet - set of packed (y << 16) | x coordinates
+ * @returns {{ xMin: number, yMin: number, xMax: number, yMax: number }} bounding box
  */
 export function boundaryBoxFromMaskSet(maskSet) {
   let xMin = Infinity,

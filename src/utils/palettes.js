@@ -1,7 +1,7 @@
 /**
  * Convert a 6-character hex string to the app's color object format.
- * @param {string} hex - 6-character hex string (no #)
- * @returns {{ color: string, r: number, g: number, b: number, a: number }}
+ * @param {string} h - 6-character hex string (no #)
+ * @returns {{ color: string, r: number, g: number, b: number, a: number }} color object
  */
 function hex(h) {
   const r = parseInt(h.slice(0, 2), 16)

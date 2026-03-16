@@ -84,9 +84,8 @@ export function renderOffsetEllipseVector(vectorProperties, vector) {
   const circleRadius = 20 * lw
 
   /**
-   *
-   * @param x
-   * @param y
+   * @param {number} x - center x coordinate
+   * @param {number} y - center y coordinate
    */
   function drawOffsetCircle(x, y) {
     const cx = xOffset + x + 0.5

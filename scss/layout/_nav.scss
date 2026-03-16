@@ -1,3 +1,6 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
 .nav {
   background-color: $black;
   justify-self: center;
@@ -9,7 +12,7 @@
   align-items: center;
   position: relative;
   margin: 2px;
-  z-index: 200;
+  z-index: 300;
   @include boxBorder;
   .title {
     padding-left: 16px;
@@ -110,7 +113,7 @@
                 height: 100%;
                 cursor: pointer;
               }
-              input[type="file"] {
+              input[type='file'] {
                 display: none;
               }
             }

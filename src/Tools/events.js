@@ -3,6 +3,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { tools } from "../Tools/index.js"
 import { handleUndo, handleRedo } from "../Actions/undoRedo.js"
+import { brush, rebuildBuildUpDensityMap, BAYER_STEPS } from "../Tools/brush.js"
 import { vectorGui } from "../GUI/vector.js"
 import { actionClear } from "../Actions/modifyTimeline.js"
 import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
@@ -12,6 +13,7 @@ import {
   renderBrushStampToDOM,
   renderDitherOptionsToDOM,
   renderDitherControlsToDOM,
+  renderBuildUpStepsToDOM,
   initDitherPicker,
   highlightSelectedDitherPattern,
   updateDitherPickerColors,
@@ -160,8 +162,14 @@ function updateBrush(e) {
 //=== * * * Event Listeners * * * ===//
 //===================================//
 
-dom.undoBtn.addEventListener("click", handleUndo)
-dom.redoBtn.addEventListener("click", handleRedo)
+dom.undoBtn.addEventListener("click", () => {
+  handleUndo()
+  if (brush.modes.buildUpDither) rebuildBuildUpDensityMap()
+})
+dom.redoBtn.addEventListener("click", () => {
+  handleRedo()
+  if (brush.modes.buildUpDither) rebuildBuildUpDensityMap()
+})
 
 dom.recenterBtn.addEventListener("click", handleRecenter)
 dom.clearBtn.addEventListener("click", handleClearCanvas)
@@ -187,9 +195,17 @@ document.querySelector(".dither-preview")?.addEventListener("click", () => {
 document.querySelector(".dither-grid")?.addEventListener("click", (e) => {
   const btn = e.target.closest(".dither-grid-btn")
   if (!btn || state.tool.current.name !== "brush") return
-  state.tool.current.ditherPatternIndex = parseInt(btn.dataset.patternIndex)
-  highlightSelectedDitherPattern()
-  renderDitherOptionsToDOM()
+  const patternIndex = parseInt(btn.dataset.patternIndex)
+  if (brush.buildUpActiveStepSlot !== null) {
+    // Assign the selected pattern to the active build-up step slot
+    brush.buildUpSteps[brush.buildUpActiveStepSlot] = patternIndex
+    brush.buildUpActiveStepSlot = null
+    renderBuildUpStepsToDOM()
+  } else {
+    state.tool.current.ditherPatternIndex = patternIndex
+    highlightSelectedDitherPattern()
+    renderDitherOptionsToDOM()
+  }
 })
 
 document.getElementById("dither-ctrl-two-color")?.addEventListener("click", () => {
@@ -210,5 +226,58 @@ document.getElementById("dither-ctrl-mirror-y")?.addEventListener("click", () =>
   if (state.tool.current.name !== "brush") return
   state.tool.current.mirrorY = !state.tool.current.mirrorY
   renderDitherControlsToDOM()
+})
+
+document.getElementById("dither-ctrl-build-up")?.addEventListener("click", () => {
+  if (state.tool.current.name !== "brush") return
+  brush.modes.buildUpDither = !brush.modes.buildUpDither
+  if (brush.modes.buildUpDither) {
+    rebuildBuildUpDensityMap()
+  } else {
+    brush._buildUpDensityMap = new Map()
+    brush.buildUpActiveStepSlot = null
+  }
+  renderDitherControlsToDOM()
+  renderDitherOptionsToDOM()
+})
+
+document.getElementById("dither-ctrl-build-up-reset")?.addEventListener("click", () => {
+  if (state.tool.current.name !== "brush") return
+  brush._buildUpResetAtIndex = state.timeline.undoStack.length
+  brush._buildUpDensityMap = new Map()
+})
+
+// Build-up mode selector (Custom / 2×2 / 4×4 / 8×8)
+document.querySelector(".build-up-mode-selector")?.addEventListener("click", (e) => {
+  const btn = e.target.closest(".build-up-mode-btn")
+  if (!btn || state.tool.current.name !== "brush") return
+  const mode = btn.dataset.mode
+  // Save custom steps before leaving custom mode
+  if (brush.buildUpMode === "custom" && mode !== "custom") {
+    brush._customBuildUpSteps = [...brush.buildUpSteps]
+  }
+  brush.buildUpMode = mode
+  if (mode === "custom") {
+    brush.buildUpSteps = [...brush._customBuildUpSteps]
+  } else {
+    brush.buildUpSteps = [...BAYER_STEPS[mode]]
+  }
+  brush.buildUpActiveStepSlot = null
+  renderBuildUpStepsToDOM()
+})
+
+// Step slot clicks: set the active slot index then open the dither picker
+document.querySelector(".build-up-step-slots")?.addEventListener("click", (e) => {
+  const btn = e.target.closest(".build-up-step-btn")
+  if (!btn) return
+  const slotIndex = parseInt(btn.dataset.stepSlot)
+  brush.buildUpActiveStepSlot = brush.buildUpActiveStepSlot === slotIndex ? null : slotIndex
+  renderBuildUpStepsToDOM()
+  // Ensure the picker is open for pattern selection
+  if (brush.buildUpActiveStepSlot !== null && dom.ditherPickerContainer) {
+    initDitherPicker()
+    updateDitherPickerColors()
+    dom.ditherPickerContainer.style.display = "flex"
+  }
 })
 

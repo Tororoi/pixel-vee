@@ -3,10 +3,10 @@ import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { tools } from '../Tools/index.js'
 import { vectorGui } from '../GUI/vector.js'
-import { renderLayersToDOM, renderVectorsToDOM } from '../DOM/render.js'
 import { calculateBrushDirection } from '../utils/drawHelpers.js'
 import {
   actionDitherDraw,
+  actionBuildUpDitherDraw,
   actionLine,
   actionFill,
   actionEllipse,
@@ -81,6 +81,9 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
       lastTransformAction = a
     if (lastPasteAction !== null && lastTransformAction !== null) break
   }
+  // Per-layer density maps for build-up dither replay.
+  // Keys are layer objects; values are Map<(y<<16)|x, count>.
+  const buildUpLayerMaps = new Map()
   //loop through all actions
   for (let i = startIndex; i < state.timeline.undoStack.length; i++) {
     let action = state.timeline.undoStack[i]
@@ -110,7 +113,32 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
       !action.removed &&
       ['raster', 'vector'].includes(tool.type)
     ) {
-      performAction(action, betweenCtx, lastPasteAction, lastTransformAction)
+      // Resolve the density map for this action (only relevant for buildUpDither brush actions)
+      let buildUpDensityMap = null
+      if (action.tool === 'brush' && action.modes?.buildUpDither) {
+        if (!buildUpLayerMaps.has(action.layer)) {
+          buildUpLayerMaps.set(action.layer, new Map())
+        }
+        buildUpDensityMap = buildUpLayerMaps.get(action.layer)
+      }
+      performAction(
+        action,
+        betweenCtx,
+        lastPasteAction,
+        lastTransformAction,
+        buildUpDensityMap,
+      )
+      // After rendering, accumulate this action's delta into the layer map
+      if (
+        action.tool === 'brush' &&
+        action.modes?.buildUpDither &&
+        action.buildUpDensityDelta
+      ) {
+        const layerMap = buildUpLayerMaps.get(action.layer)
+        for (const coord of action.buildUpDensityDelta) {
+          layerMap.set(coord, (layerMap.get(coord) ?? 0) + 1)
+        }
+      }
     }
     if (activeIndexMap) {
       if (activeIndexMap.has(i)) {
@@ -175,14 +203,16 @@ function createAndSaveContext() {
  * Helper for redrawTimelineActions
  * @param {object} action - The action to be performed
  * @param {CanvasRenderingContext2D} betweenCtx - The canvas context for saving between actions
- * @param lastPasteAction
- * @param lastTransformAction
+ * @param {object|null} lastPasteAction - Most recent paste action for this layer
+ * @param {object|null} lastTransformAction - Most recent transform action for this layer
+ * @param {Map<number, number>|null} buildUpDensityMap - Accumulated density counts for build-up dither
  */
 export function performAction(
   action,
   betweenCtx = null,
   lastPasteAction = null,
   lastTransformAction = null,
+  buildUpDensityMap = null,
 ) {
   if (!action?.boundaryBox) {
     return
@@ -216,10 +246,14 @@ export function performAction(
           mask = new Set(action.maskArray)
         }
       }
-      const pattern = ditherPatterns[action.ditherPatternIndex ?? 64]
       let previousX = action.points[0].x + offsetX
       let previousY = action.points[0].y + offsetY
       let brushDirection = '0,0'
+      const isBuildUp = action.modes?.buildUpDither ?? false
+      const buildUpSteps = action.buildUpSteps ?? [16, 32, 48, 64]
+      const pattern = isBuildUp
+        ? null
+        : ditherPatterns[action.ditherPatternIndex ?? 64]
       for (const p of action.points) {
         brushDirection = calculateBrushDirection(
           p.x + offsetX,
@@ -227,24 +261,46 @@ export function performAction(
           previousX,
           previousY,
         )
-        actionDitherDraw(
-          p.x + offsetX,
-          p.y + offsetY,
-          boundaryBox,
-          action.color,
-          brushStamps[action.brushType][p.brushSize][brushDirection],
-          p.brushSize,
-          action.layer,
-          action.modes,
-          mask,
-          seen,
-          pattern,
-          action.modes?.twoColor ?? false,
-          action.secondaryColor,
-          action.mirrorX ?? false,
-          action.mirrorY ?? false,
-          betweenCtx,
-        )
+        if (isBuildUp) {
+          actionBuildUpDitherDraw(
+            p.x + offsetX,
+            p.y + offsetY,
+            boundaryBox,
+            action.color,
+            brushStamps[action.brushType][p.brushSize][brushDirection],
+            p.brushSize,
+            action.layer,
+            action.modes,
+            mask,
+            seen,
+            buildUpDensityMap,
+            buildUpSteps,
+            action.modes?.twoColor ?? false,
+            action.secondaryColor,
+            action.mirrorX ?? false,
+            action.mirrorY ?? false,
+            betweenCtx,
+          )
+        } else {
+          actionDitherDraw(
+            p.x + offsetX,
+            p.y + offsetY,
+            boundaryBox,
+            action.color,
+            brushStamps[action.brushType][p.brushSize][brushDirection],
+            p.brushSize,
+            action.layer,
+            action.modes,
+            mask,
+            seen,
+            pattern,
+            action.modes?.twoColor ?? false,
+            action.secondaryColor,
+            action.mirrorX ?? false,
+            action.mirrorY ?? false,
+            betweenCtx,
+          )
+        }
         previousX = p.x + offsetX
         previousY = p.y + offsetY
         //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster. But it sacrifices flexibility with points.

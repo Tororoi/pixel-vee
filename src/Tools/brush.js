@@ -1,15 +1,19 @@
-import { brushStamps } from "../Context/brushStamps.js"
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
-import { ditherPatterns } from "../Context/ditherPatterns.js"
-import { actionDitherDraw, actionLine } from "../Actions/pointerActions.js"
-import { getAngle, getTriangle } from "../utils/trig.js"
-import { renderCanvas, scheduleRender } from "../Canvas/render.js"
-import { calculateBrushDirection } from "../utils/drawHelpers.js"
-import { coordArrayFromSet } from "../utils/maskHelpers.js"
-import { createColorMaskSet } from "../Canvas/masks.js"
-import { addToTimeline } from "../Actions/undoRedo.js"
+import { brushStamps } from '../Context/brushStamps.js'
+import { state } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { swatches } from '../Context/swatch.js'
+import { ditherPatterns } from '../Context/ditherPatterns.js'
+import {
+  actionDitherDraw,
+  actionBuildUpDitherDraw,
+  actionLine,
+} from '../Actions/pointerActions.js'
+import { getAngle, getTriangle } from '../utils/trig.js'
+import { renderCanvas, scheduleRender } from '../Canvas/render.js'
+import { calculateBrushDirection } from '../utils/drawHelpers.js'
+import { coordArrayFromSet } from '../utils/maskHelpers.js'
+import { createColorMaskSet } from '../Canvas/masks.js'
+import { addToTimeline } from '../Actions/undoRedo.js'
 
 //====================================//
 //=== * * * Brush Controller * * * ===//
@@ -19,18 +23,22 @@ import { addToTimeline } from "../Actions/undoRedo.js"
  * Handle brush tool with global state
  */
 function brushSteps() {
-  let brushDirection = "0,0"
+  let brushDirection = '0,0'
   switch (canvas.pointerEvent) {
-    case "pointerdown":
+    case 'pointerdown':
       //initialize sets
       if (state.tool.current.modes?.colorMask) {
         state.selection.maskSet = createColorMaskSet(
           swatches.secondary.color,
-          canvas.currentLayer
+          canvas.currentLayer,
         )
       }
       state.selection.pointsSet = new Set()
       state.selection.seenPixelsSet = new Set()
+      //rebuild build-up density map from timeline so drawing is always correct
+      if (brush.modes.buildUpDither) {
+        rebuildBuildUpDensityMap()
+      }
       //initial point
       drawBrushPoint(state.cursor.x, state.cursor.y, brushDirection)
       //For line
@@ -43,7 +51,7 @@ function brushSteps() {
       state.drawing.waitingPixelY = state.cursor.y
       scheduleRender(canvas.currentLayer)
       break
-    case "pointermove":
+    case 'pointermove':
       //draw line connecting points that don't touch or if shift is held
       if (state.tool.current.options.line?.active) {
         renderCanvas(canvas.currentLayer)
@@ -57,12 +65,14 @@ function brushSteps() {
           swatches.primary.color,
           canvas.currentLayer,
           state.tool.current.modes,
-          brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+          brushStamps[state.tool.current.brushType][
+            state.tool.current.brushSize
+          ],
           state.tool.current.brushSize,
           state.selection.maskSet,
           state.selection.seenPixelsSet,
           null,
-          true
+          true,
         )
       } else if (shouldDrawLine()) {
         drawLine()
@@ -76,14 +86,14 @@ function brushSteps() {
             state.cursor.x,
             state.cursor.y,
             state.cursor.prevX,
-            state.cursor.prevY
+            state.cursor.prevY,
           )
           drawBrushPoint(state.cursor.x, state.cursor.y, brushDirection)
           scheduleRender(canvas.currentLayer)
         }
       }
       break
-    case "pointerup": {
+    case 'pointerup': {
       if (shouldDrawLine()) {
         drawLine()
       }
@@ -94,7 +104,7 @@ function brushSteps() {
       let maskArray = coordArrayFromSet(
         state.selection.maskSet,
         canvas.currentLayer.x,
-        canvas.currentLayer.y
+        canvas.currentLayer.y,
       )
       //correct boundary box for layer offset
       const boundaryBox = { ...state.selection.boundaryBox }
@@ -104,23 +114,33 @@ function brushSteps() {
         boundaryBox.yMin -= canvas.currentLayer.y
         boundaryBox.yMax -= canvas.currentLayer.y
       }
+      const timelineProperties = {
+        modes: { ...brush.modes },
+        color: { ...swatches.primary.color },
+        secondaryColor: { ...swatches.secondary.color },
+        brushSize: brush.brushSize,
+        brushType: brush.brushType,
+        ditherPatternIndex: brush.ditherPatternIndex,
+        mirrorX: brush.mirrorX,
+        mirrorY: brush.mirrorY,
+        points: state.timeline.points,
+        maskArray,
+        boundaryBox,
+      }
+      if (brush.modes.buildUpDither) {
+        timelineProperties.buildUpDensityDelta = [
+          ...state.selection.seenPixelsSet,
+        ]
+        timelineProperties.buildUpSteps = [...brush.buildUpSteps]
+      }
       addToTimeline({
         tool: brush.name,
         layer: canvas.currentLayer,
-        properties: {
-          modes: { ...brush.modes },
-          color: { ...swatches.primary.color },
-          secondaryColor: { ...swatches.secondary.color },
-          brushSize: brush.brushSize,
-          brushType: brush.brushType,
-          ditherPatternIndex: brush.ditherPatternIndex,
-          mirrorX: brush.mirrorX,
-          mirrorY: brush.mirrorY,
-          points: state.timeline.points,
-          maskArray,
-          boundaryBox,
-        },
+        properties: timelineProperties,
       })
+      if (brush.modes.buildUpDither) {
+        rebuildBuildUpDensityMap()
+      }
       if (state.tool.current.modes?.colorMask) {
         state.selection.maskSet = null
       }
@@ -160,23 +180,48 @@ function addPointToAction(x, y) {
  */
 function drawBrushPoint(x, y, brushDirection) {
   addPointToAction(x, y)
-  actionDitherDraw(
-    x,
-    y,
-    state.selection.boundaryBox,
-    swatches.primary.color,
-    brushStamps[state.tool.current.brushType][state.tool.current.brushSize][brushDirection],
-    state.tool.current.brushSize,
-    canvas.currentLayer,
-    state.tool.current.modes,
-    state.selection.maskSet,
-    state.selection.seenPixelsSet,
-    ditherPatterns[brush.ditherPatternIndex],
-    brush.modes.twoColor,
-    swatches.secondary.color,
-    brush.mirrorX,
-    brush.mirrorY
-  )
+  const stamp =
+    brushStamps[state.tool.current.brushType][state.tool.current.brushSize][
+      brushDirection
+    ]
+  if (brush.modes.buildUpDither) {
+    actionBuildUpDitherDraw(
+      x,
+      y,
+      state.selection.boundaryBox,
+      swatches.primary.color,
+      stamp,
+      state.tool.current.brushSize,
+      canvas.currentLayer,
+      state.tool.current.modes,
+      state.selection.maskSet,
+      state.selection.seenPixelsSet,
+      brush._buildUpDensityMap,
+      brush.buildUpSteps,
+      brush.modes.twoColor,
+      swatches.secondary.color,
+      brush.mirrorX,
+      brush.mirrorY,
+    )
+  } else {
+    actionDitherDraw(
+      x,
+      y,
+      state.selection.boundaryBox,
+      swatches.primary.color,
+      stamp,
+      state.tool.current.brushSize,
+      canvas.currentLayer,
+      state.tool.current.modes,
+      state.selection.maskSet,
+      state.selection.seenPixelsSet,
+      ditherPatterns[brush.ditherPatternIndex],
+      brush.modes.twoColor,
+      swatches.secondary.color,
+      brush.mirrorX,
+      brush.mirrorY,
+    )
+  }
 }
 
 /**
@@ -187,28 +232,56 @@ function drawPreviewBrushPoint() {
     state.cursor.x,
     state.cursor.y,
     state.drawing.lastDrawnX,
-    state.drawing.lastDrawnY
+    state.drawing.lastDrawnY,
   )
-  actionDitherDraw(
-    state.cursor.x,
-    state.cursor.y,
-    state.selection.boundaryBox,
-    swatches.primary.color,
-    brushStamps[state.tool.current.brushType][state.tool.current.brushSize][brushDirection],
-    state.tool.current.brushSize,
-    canvas.currentLayer,
-    state.tool.current.modes,
-    state.selection.maskSet,
-    state.selection.seenPixelsSet,
-    ditherPatterns[brush.ditherPatternIndex],
-    brush.modes.twoColor,
-    swatches.secondary.color,
-    brush.mirrorX,
-    brush.mirrorY,
-    null,
-    true,
-    true
-  )
+  const stamp =
+    brushStamps[state.tool.current.brushType][state.tool.current.brushSize][
+      brushDirection
+    ]
+  if (brush.modes.buildUpDither) {
+    actionBuildUpDitherDraw(
+      state.cursor.x,
+      state.cursor.y,
+      state.selection.boundaryBox,
+      swatches.primary.color,
+      stamp,
+      state.tool.current.brushSize,
+      canvas.currentLayer,
+      state.tool.current.modes,
+      state.selection.maskSet,
+      state.selection.seenPixelsSet,
+      brush._buildUpDensityMap,
+      brush.buildUpSteps,
+      brush.modes.twoColor,
+      swatches.secondary.color,
+      brush.mirrorX,
+      brush.mirrorY,
+      null,
+      true,
+      true,
+    )
+  } else {
+    actionDitherDraw(
+      state.cursor.x,
+      state.cursor.y,
+      state.selection.boundaryBox,
+      swatches.primary.color,
+      stamp,
+      state.tool.current.brushSize,
+      canvas.currentLayer,
+      state.tool.current.modes,
+      state.selection.maskSet,
+      state.selection.seenPixelsSet,
+      ditherPatterns[brush.ditherPatternIndex],
+      brush.modes.twoColor,
+      swatches.secondary.color,
+      brush.mirrorX,
+      brush.mirrorY,
+      null,
+      true,
+      true,
+    )
+  }
 }
 
 /**
@@ -237,12 +310,12 @@ function drawLine() {
     lineStartY,
     state.cursor.x,
     state.cursor.y,
-    angle
+    angle,
   )
 
   let previousX = lineStartX
   let previousY = lineStartY
-  let brushDirection = "0,0"
+  let brushDirection = '0,0'
   for (let i = 0; i < tri.long; i++) {
     const thisx = Math.round(lineStartX + tri.x * i)
     const thisy = Math.round(lineStartY + tri.y * i)
@@ -260,7 +333,7 @@ function drawLine() {
     state.cursor.x,
     state.cursor.y,
     previousX,
-    previousY
+    previousY,
   )
   drawBrushPoint(state.cursor.x, state.cursor.y, brushDirection)
 }
@@ -269,7 +342,7 @@ function drawLine() {
  * Draw perfect pixels
  */
 function handlePerfectPixels() {
-  let brushDirection = "0,0"
+  let brushDirection = '0,0'
   //if current pixel not a neighbor to lastDrawn and has not already been drawn, draw waiting pixel
   if (
     Math.abs(state.cursor.x - state.drawing.lastDrawnX) > 1 ||
@@ -280,9 +353,13 @@ function handlePerfectPixels() {
       state.drawing.waitingPixelX,
       state.drawing.waitingPixelY,
       state.drawing.lastDrawnX,
-      state.drawing.lastDrawnY
+      state.drawing.lastDrawnY,
     )
-    drawBrushPoint(state.drawing.waitingPixelX, state.drawing.waitingPixelY, brushDirection)
+    drawBrushPoint(
+      state.drawing.waitingPixelX,
+      state.drawing.waitingPixelY,
+      brushDirection,
+    )
     //update queue
     state.drawing.lastDrawnX = state.drawing.waitingPixelX
     state.drawing.lastDrawnY = state.drawing.waitingPixelY
@@ -304,18 +381,62 @@ function handlePerfectPixels() {
 //===== * * * Brush Object * * * =====//
 //====================================//
 
+export const BAYER_STEPS = {
+  '2x2': [16, 32, 48, 64],
+  '4x4': [4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64],
+  '8x8': Array.from({ length: 64 }, (_, i) => i + 1),
+}
+
 export const brush = {
-  name: "brush",
+  name: 'brush',
   fn: brushSteps,
   brushSize: 1,
-  brushType: "circle",
+  brushType: 'circle',
   brushDisabled: false,
   ditherPatternIndex: 64,
   mirrorX: false,
   mirrorY: false,
   options: { line: { active: false } },
-  modes: { eraser: false, inject: false, perfect: false, colorMask: false, twoColor: false },
-  type: "raster",
-  cursor: "crosshair",
-  activeCursor: "crosshair",
+  modes: {
+    eraser: false,
+    inject: false,
+    perfect: false,
+    colorMask: false,
+    twoColor: false,
+    buildUpDither: false,
+  },
+  buildUpMode: 'custom',
+  buildUpSteps: [8, 16, 24, 32, 40, 48, 56, 64],
+  _customBuildUpSteps: [8, 16, 24, 32, 40, 48, 56, 64],
+  buildUpActiveStepSlot: null,
+  _buildUpDensityMap: new Map(),
+  _buildUpResetAtIndex: 0,
+  type: 'raster',
+  cursor: 'crosshair',
+  activeCursor: 'crosshair',
+}
+
+/**
+ * Rebuild brush._buildUpDensityMap by scanning the undo stack for all
+ * build-up dither brush actions on the current layer.
+ * Call this whenever strokes are added, undone, or redone.
+ */
+export function rebuildBuildUpDensityMap() {
+  const layer = canvas.currentLayer
+  const map = new Map()
+  const startIndex = brush._buildUpResetAtIndex ?? 0
+  for (let i = startIndex; i < state.timeline.undoStack.length; i++) {
+    const action = state.timeline.undoStack[i]
+    if (
+      action.tool === 'brush' &&
+      action.modes?.buildUpDither &&
+      action.layer === layer &&
+      action.buildUpDensityDelta
+    ) {
+      for (const coord of action.buildUpDensityDelta) {
+        map.set(coord, (map.get(coord) ?? 0) + 1)
+      }
+    }
+  }
+  brush._buildUpDensityMap = map
 }
