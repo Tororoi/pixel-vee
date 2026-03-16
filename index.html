@@ -303,6 +303,33 @@
                   data-tooltip="Color Mask (M) &#010;&#010;Only draw over selected secondary swatch color"
                 ></button>
               </div>
+              <div class="dither-options">
+                <span class="modes-title">Dither</span>
+                <div
+                  class="dither-preview btn"
+                  data-tooltip="Click to select dither pattern"
+                >
+                  <svg
+                    viewBox="0 -0.5 8 8"
+                    shape-rendering="crispEdges"
+                    class="dither-grid-svg"
+                  >
+                    <rect
+                      x="0"
+                      y="-0.5"
+                      width="8"
+                      height="8"
+                      fill="none"
+                      class="dither-bg-rect"
+                    ></rect>
+                    <path
+                      stroke="rgba(0,0,0,1)"
+                      d="M0 0h8M0 1h8M0 2h8M0 3h8M0 4h8M0 5h8M0 6h8M0 7h8"
+                      class="dither-on-path"
+                    ></path>
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
           <div
@@ -899,24 +926,61 @@
           </div>
         </div>
       </div>
+      <div
+        class="dither-picker-container dialog-box draggable v-drag h-drag free"
+        style="display: none"
+      >
+        <div class="header dragger">
+          <div class="drag-btn"><div class="grip"></div></div>
+          Dither Pattern
+          <button
+            type="button"
+            id="dither-closer"
+            class="close-btn"
+            data-tooltip="Close"
+          >
+            <span class="close"></span>
+          </button>
+        </div>
+        <div class="collapsible">
+          <div class="dither-controls">
+            <button
+              type="button"
+              class="dither-toggle twoColor"
+              id="dither-ctrl-two-color"
+              aria-label="Two-Color"
+              data-tooltip="Two-Color"
+            ></button>
+            <button
+              type="button"
+              class="dither-toggle mirrorX"
+              id="dither-ctrl-mirror-x"
+              aria-label="Mirror Horizontal"
+              data-tooltip="Mirror Horizontal"
+            ></button>
+            <button
+              type="button"
+              class="dither-toggle mirrorY"
+              id="dither-ctrl-mirror-y"
+              aria-label="Mirror Vertical"
+              data-tooltip="Mirror Vertical"
+            ></button>
+          </div>
+          <div class="dither-grid"></div>
+        </div>
+      </div>
       <div class="picker-container dialog-box draggable v-drag h-drag free">
         <div id="picker-header" class="header dragger">
           <div class="drag-btn"><div class="grip"></div></div>
           <span>Color Picker</span>
-          <label
-            for="picker-collapse-btn"
-            id="picker-collapser"
-            class="collapse-btn"
-            data-tooltip="Collapse/ Expand"
+          <button
+            type="button"
+            id="picker-closer"
+            class="close-btn"
+            data-tooltip="Close"
           >
-            <input
-              type="checkbox"
-              aria-label="Collapse or Expand"
-              class="collapse-checkbox"
-              id="picker-collapse-btn"
-            />
-            <span class="arrow"></span>
-          </label>
+            <span class="close"></span>
+          </button>
         </div>
         <div class="collapsible">
           <div id="picker-interface" class="picker-interface">
