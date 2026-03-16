@@ -193,6 +193,10 @@
   @include twoColorDitherIcon;
 }
 
+.buildUpDither {
+  @include buildUpDitherIcon;
+}
+
 .rotate {
   @include rotateIcon;
 }

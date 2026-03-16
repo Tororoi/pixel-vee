@@ -122,20 +122,23 @@
       display: flex;
       flex-flow: row nowrap;
       gap: 2px;
-      margin-bottom: 4px;
+      margin-bottom: 6px;
       .build-up-mode-btn {
         font-size: 11px;
         padding: 2px 5px;
         cursor: pointer;
-        color: white;
-        background: transparent;
-        border: 1px solid $border-color;
+        color: $white;
+        background: $dark-gray;
+        border-color: $border-color;
+        @include boxBorder;
+        z-index: 102;
         &.selected {
-          border-color: $white;
+          @include boxBorder($white);
           background: $dark-gray;
+          z-index: 104;
         }
         &:hover:not(.selected) {
-          border-color: $light-gray;
+          z-index: 103;
         }
       }
     }
@@ -145,6 +148,7 @@
       align-items: center;
       justify-content: center;
       gap: 2px;
+      margin-bottom: 6px;
       .build-up-step-btn {
         width: 32px;
         height: 32px;
@@ -163,6 +167,13 @@
           height: 100%;
         }
       }
+    }
+    .build-up-reset-btn {
+      margin: 0;
+      margin-top: 14px;
+      margin-bottom: 16px;
+      background: $dark-gray;
+      padding: 4px;
     }
   }
   .dither-grid {
