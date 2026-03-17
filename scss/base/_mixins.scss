@@ -84,49 +84,6 @@
     0 2px $white;
 }
 
-@mixin close-btn {
-  .close-btn {
-    position: absolute;
-    right: 0;
-    top: 0;
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    background: transparent;
-    &::after {
-      content: '';
-      display: block;
-      position: absolute;
-      height: 2px;
-      width: 2px;
-      top: 0;
-      left: 0;
-      box-shadow:
-        5px 5px $border-color,
-        13px 5px $border-color,
-        7px 7px $border-color,
-        11px 7px $border-color,
-        9px 9px $border-color,
-        7px 11px $border-color,
-        11px 11px $border-color,
-        5px 13px $border-color,
-        13px 13px $border-color;
-    }
-    &:hover::after {
-      box-shadow:
-        5px 5px $white,
-        13px 5px $white,
-        7px 7px $white,
-        11px 7px $white,
-        9px 9px $white,
-        7px 11px $white,
-        11px 11px $white,
-        5px 13px $white,
-        13px 13px $white;
-    }
-  }
-}
-
 @mixin cancelBorder {
   box-shadow: none;
   &:hover:not([disabled]) {
@@ -315,111 +272,112 @@
 }
 
 @mixin collapseArrow {
-  position: absolute;
-  right: 0;
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  display: flex;
-  flex-flow: row nowrap;
-  cursor: pointer;
-  input {
+  .collapse-btn {
     position: absolute;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .arrow {
-    height: 2px;
-    width: 2px;
-    box-shadow:
-      9px 5px $border-color,
-      7px 7px $border-color,
-      9px 7px $border-color,
-      11px 7px $border-color,
-      5px 9px $border-color,
-      7px 9px $border-color,
-      9px 9px $border-color,
-      11px 9px $border-color,
-      13px 9px $border-color,
-      9px 11px $border-color,
-      9px 13px $border-color;
-  }
-  input:checked ~ .arrow {
-    box-shadow:
-      9px 5px $border-color,
-      9px 7px $border-color,
-      5px 9px $border-color,
-      7px 9px $border-color,
-      9px 9px $border-color,
-      11px 9px $border-color,
-      13px 9px $border-color,
-      7px 11px $border-color,
-      9px 11px $border-color,
-      11px 11px $border-color,
-      9px 13px $border-color;
-  }
-  &:hover {
+    right: 0;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    display: flex;
+    flex-flow: row nowrap;
+    cursor: pointer;
+    input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
     .arrow {
+      height: 2px;
+      width: 2px;
       box-shadow:
-        9px 5px $white,
-        7px 7px $white,
-        9px 7px $white,
-        11px 7px $white,
-        5px 9px $white,
-        7px 9px $white,
-        9px 9px $white,
-        11px 9px $white,
-        13px 9px $white,
-        9px 11px $white,
-        9px 13px $white;
+        9px 5px $border-color,
+        7px 7px $border-color,
+        9px 7px $border-color,
+        11px 7px $border-color,
+        5px 9px $border-color,
+        7px 9px $border-color,
+        9px 9px $border-color,
+        11px 9px $border-color,
+        13px 9px $border-color,
+        9px 11px $border-color,
+        9px 13px $border-color;
     }
     input:checked ~ .arrow {
       box-shadow:
-        9px 5px $white,
-        9px 7px $white,
-        5px 9px $white,
-        7px 9px $white,
-        9px 9px $white,
-        11px 9px $white,
-        13px 9px $white,
-        7px 11px $white,
-        9px 11px $white,
-        11px 11px $white,
-        9px 13px $white;
+        9px 5px $border-color,
+        9px 7px $border-color,
+        5px 9px $border-color,
+        7px 9px $border-color,
+        9px 9px $border-color,
+        11px 9px $border-color,
+        13px 9px $border-color,
+        7px 11px $border-color,
+        9px 11px $border-color,
+        11px 11px $border-color,
+        9px 13px $border-color;
+    }
+    &:hover {
+      .arrow {
+        box-shadow:
+          9px 5px $white,
+          7px 7px $white,
+          9px 7px $white,
+          11px 7px $white,
+          5px 9px $white,
+          7px 9px $white,
+          9px 9px $white,
+          11px 9px $white,
+          13px 9px $white,
+          9px 11px $white,
+          9px 13px $white;
+      }
+      input:checked ~ .arrow {
+        box-shadow:
+          9px 5px $white,
+          9px 7px $white,
+          5px 9px $white,
+          7px 9px $white,
+          9px 9px $white,
+          11px 9px $white,
+          13px 9px $white,
+          7px 11px $white,
+          9px 11px $white,
+          11px 11px $white,
+          9px 13px $white;
+      }
     }
   }
 }
 
-@mixin closeX {
-  position: absolute;
-  right: 0;
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  display: flex;
-  flex-flow: row nowrap;
-  cursor: pointer;
-  input {
+@mixin closeButton {
+  .close-btn {
     position: absolute;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .close {
-    height: 2px;
-    width: 2px;
-    box-shadow:
-      5px 5px $border-color,
-      13px 5px $border-color,
-      7px 7px $border-color,
-      11px 7px $border-color,
-      9px 9px $border-color,
-      7px 11px $border-color,
-      11px 11px $border-color,
-      5px 13px $border-color,
-      13px 13px $border-color;
-  }
-  &:hover {
-    .close {
+    right: 0;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    background: transparent;
+    &::after {
+      content: '';
+      display: block;
+      position: absolute;
+      height: 2px;
+      width: 2px;
+      top: 0;
+      left: 0;
+      box-shadow:
+        5px 5px $border-color,
+        13px 5px $border-color,
+        7px 7px $border-color,
+        11px 7px $border-color,
+        9px 9px $border-color,
+        7px 11px $border-color,
+        11px 11px $border-color,
+        5px 13px $border-color,
+        13px 13px $border-color;
+    }
+    &:hover::after {
       box-shadow:
         5px 5px $white,
         13px 5px $white,

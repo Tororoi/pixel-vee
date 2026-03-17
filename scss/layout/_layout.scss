@@ -14,6 +14,7 @@
   align-items: center;
   z-index: 103;
   overflow: hidden;
+  background-color: $dark-gray;
   @include boxBorder;
   touch-action: none;
   .content {
@@ -77,10 +78,8 @@
     cursor: grab;
     @include boxBorder($border-color, $white, false, bottom);
     @include dragger;
-    .collapse-btn {
-      @include collapseArrow;
-    }
-    @include close-btn;
+    @include collapseArrow;
+    @include closeButton;
   }
   .collapsible {
     flex: 0 1 auto;

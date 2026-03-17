@@ -320,6 +320,7 @@ svg {
   align-items: center;
   z-index: 103;
   overflow: hidden;
+  background-color: rgb(61, 61, 61);
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .sidebar:hover:not([disabled]) {
