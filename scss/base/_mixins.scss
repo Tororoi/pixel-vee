@@ -84,8 +84,8 @@
     0 2px $white;
 }
 
-@mixin settings-close-btn {
-  .settings-close-btn {
+@mixin close-btn {
+  .close-btn {
     position: absolute;
     right: 0;
     top: 0;

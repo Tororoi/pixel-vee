@@ -156,7 +156,7 @@
     position: relative;
     min-height: 20px;
     @include dragger;
-    @include settings-close-btn;
+    @include close-btn;
   }
   #layer-name {
     width: 156px;

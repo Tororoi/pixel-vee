@@ -571,14 +571,14 @@ dom.vectorsThumbnails.addEventListener('click', vectorInteract)
 
 // * Vector Settings Dialog * //
 dom.layerSettingsContainer.addEventListener('click', (e) => {
-  if (e.target.classList.contains('settings-close-btn')) {
+  if (e.target.classList.contains('close-btn')) {
     dom.layerSettingsContainer.style.display = 'none'
     dom.layerSettingsContainer.layerObj = null
   }
 })
 
 dom.vectorSettingsContainer.addEventListener('click', (e) => {
-  if (e.target.classList.contains('settings-close-btn')) {
+  if (e.target.classList.contains('close-btn')) {
     dom.vectorSettingsContainer.style.display = 'none'
     dom.vectorSettingsContainer.vectorObj = null
     if (dom.ditherPickerContainer) dom.ditherPickerContainer.editingVector = false
@@ -664,7 +664,7 @@ dom.vectorSettingsContainer.addEventListener('input', (e) => {
 
 // * Vector Dither Picker Dialog * //
 dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
-  if (e.target.classList.contains('settings-close-btn')) {
+  if (e.target.classList.contains('close-btn')) {
     dom.vectorDitherPickerContainer.style.display = 'none'
     return
   }

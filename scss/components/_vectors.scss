@@ -170,7 +170,7 @@
     font-size: 16px;
     min-height: 20px;
     @include dragger;
-    @include settings-close-btn;
+    @include close-btn;
   }
   .vector-settings-modes {
     display: flex;
@@ -264,7 +264,7 @@
     width: 100%;
     margin: 0;
     @include dragger;
-    @include settings-close-btn;
+    @include close-btn;
   }
   .vector-dither-grid {
     display: grid;

@@ -464,24 +464,23 @@ svg {
 .dialog-box .header .close-btn {
   position: absolute;
   right: 0;
+  top: 0;
   width: 20px;
   height: 20px;
-  margin: 0;
-  display: flex;
-  flex-flow: row nowrap;
   cursor: pointer;
+  background: transparent;
 }
-.dialog-box .header .close-btn input {
+.dialog-box .header .close-btn::after {
+  content: "";
+  display: block;
   position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-.dialog-box .header .close-btn .close {
   height: 2px;
   width: 2px;
+  top: 0;
+  left: 0;
   box-shadow: 5px 5px rgb(131, 131, 131), 13px 5px rgb(131, 131, 131), 7px 7px rgb(131, 131, 131), 11px 7px rgb(131, 131, 131), 9px 9px rgb(131, 131, 131), 7px 11px rgb(131, 131, 131), 11px 11px rgb(131, 131, 131), 5px 13px rgb(131, 131, 131), 13px 13px rgb(131, 131, 131);
 }
-.dialog-box .header .close-btn:hover .close {
+.dialog-box .header .close-btn:hover::after {
   box-shadow: 5px 5px rgb(255, 255, 255), 13px 5px rgb(255, 255, 255), 7px 7px rgb(255, 255, 255), 11px 7px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 5px 13px rgb(255, 255, 255), 13px 13px rgb(255, 255, 255);
 }
 .dialog-box .collapsible {
@@ -1545,7 +1544,7 @@ canvas {
 .layer-settings .header:hover:not([disabled]) .drag-btn.locked .grip {
   box-shadow: 2px -2px rgb(255, 255, 255), 4px -2px rgb(255, 255, 255), 0 0 rgb(255, 255, 255), 6px 0 rgb(255, 255, 255), 0 2px rgb(255, 255, 255), 6px 2px rgb(255, 255, 255), -2px 4px rgb(255, 255, 255), 0 4px rgb(255, 255, 255), 2px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 6px 4px rgb(255, 255, 255), 8px 4px rgb(255, 255, 255), -2px 6px rgb(255, 255, 255), 0 6px rgb(255, 255, 255), 4px 6px rgb(255, 255, 255), 6px 6px rgb(255, 255, 255), 8px 6px rgb(255, 255, 255), -2px 8px rgb(255, 255, 255), 0 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255), 6px 8px rgb(255, 255, 255), 8px 8px rgb(255, 255, 255), -2px 10px rgb(255, 255, 255), 0 10px rgb(255, 255, 255), 2px 10px rgb(255, 255, 255), 4px 10px rgb(255, 255, 255), 6px 10px rgb(255, 255, 255), 8px 10px rgb(255, 255, 255);
 }
-.layer-settings .header .settings-close-btn {
+.layer-settings .header .close-btn {
   position: absolute;
   right: 0;
   top: 0;
@@ -1554,7 +1553,7 @@ canvas {
   cursor: pointer;
   background: transparent;
 }
-.layer-settings .header .settings-close-btn::after {
+.layer-settings .header .close-btn::after {
   content: "";
   display: block;
   position: absolute;
@@ -1564,7 +1563,7 @@ canvas {
   left: 0;
   box-shadow: 5px 5px rgb(131, 131, 131), 13px 5px rgb(131, 131, 131), 7px 7px rgb(131, 131, 131), 11px 7px rgb(131, 131, 131), 9px 9px rgb(131, 131, 131), 7px 11px rgb(131, 131, 131), 11px 11px rgb(131, 131, 131), 5px 13px rgb(131, 131, 131), 13px 13px rgb(131, 131, 131);
 }
-.layer-settings .header .settings-close-btn:hover::after {
+.layer-settings .header .close-btn:hover::after {
   box-shadow: 5px 5px rgb(255, 255, 255), 13px 5px rgb(255, 255, 255), 7px 7px rgb(255, 255, 255), 11px 7px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 5px 13px rgb(255, 255, 255), 13px 13px rgb(255, 255, 255);
 }
 .layer-settings #layer-name {
@@ -1823,7 +1822,7 @@ canvas {
 .vector-settings .header:hover:not([disabled]) .drag-btn.locked .grip {
   box-shadow: 2px -2px rgb(255, 255, 255), 4px -2px rgb(255, 255, 255), 0 0 rgb(255, 255, 255), 6px 0 rgb(255, 255, 255), 0 2px rgb(255, 255, 255), 6px 2px rgb(255, 255, 255), -2px 4px rgb(255, 255, 255), 0 4px rgb(255, 255, 255), 2px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 6px 4px rgb(255, 255, 255), 8px 4px rgb(255, 255, 255), -2px 6px rgb(255, 255, 255), 0 6px rgb(255, 255, 255), 4px 6px rgb(255, 255, 255), 6px 6px rgb(255, 255, 255), 8px 6px rgb(255, 255, 255), -2px 8px rgb(255, 255, 255), 0 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255), 6px 8px rgb(255, 255, 255), 8px 8px rgb(255, 255, 255), -2px 10px rgb(255, 255, 255), 0 10px rgb(255, 255, 255), 2px 10px rgb(255, 255, 255), 4px 10px rgb(255, 255, 255), 6px 10px rgb(255, 255, 255), 8px 10px rgb(255, 255, 255);
 }
-.vector-settings .header .settings-close-btn {
+.vector-settings .header .close-btn {
   position: absolute;
   right: 0;
   top: 0;
@@ -1832,7 +1831,7 @@ canvas {
   cursor: pointer;
   background: transparent;
 }
-.vector-settings .header .settings-close-btn::after {
+.vector-settings .header .close-btn::after {
   content: "";
   display: block;
   position: absolute;
@@ -1842,7 +1841,7 @@ canvas {
   left: 0;
   box-shadow: 5px 5px rgb(131, 131, 131), 13px 5px rgb(131, 131, 131), 7px 7px rgb(131, 131, 131), 11px 7px rgb(131, 131, 131), 9px 9px rgb(131, 131, 131), 7px 11px rgb(131, 131, 131), 11px 11px rgb(131, 131, 131), 5px 13px rgb(131, 131, 131), 13px 13px rgb(131, 131, 131);
 }
-.vector-settings .header .settings-close-btn:hover::after {
+.vector-settings .header .close-btn:hover::after {
   box-shadow: 5px 5px rgb(255, 255, 255), 13px 5px rgb(255, 255, 255), 7px 7px rgb(255, 255, 255), 11px 7px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 5px 13px rgb(255, 255, 255), 13px 13px rgb(255, 255, 255);
 }
 .vector-settings .vector-settings-modes {
@@ -1989,7 +1988,7 @@ canvas {
 .vector-dither-picker .header:hover:not([disabled]) .drag-btn.locked .grip {
   box-shadow: 2px -2px rgb(255, 255, 255), 4px -2px rgb(255, 255, 255), 0 0 rgb(255, 255, 255), 6px 0 rgb(255, 255, 255), 0 2px rgb(255, 255, 255), 6px 2px rgb(255, 255, 255), -2px 4px rgb(255, 255, 255), 0 4px rgb(255, 255, 255), 2px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 6px 4px rgb(255, 255, 255), 8px 4px rgb(255, 255, 255), -2px 6px rgb(255, 255, 255), 0 6px rgb(255, 255, 255), 4px 6px rgb(255, 255, 255), 6px 6px rgb(255, 255, 255), 8px 6px rgb(255, 255, 255), -2px 8px rgb(255, 255, 255), 0 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255), 6px 8px rgb(255, 255, 255), 8px 8px rgb(255, 255, 255), -2px 10px rgb(255, 255, 255), 0 10px rgb(255, 255, 255), 2px 10px rgb(255, 255, 255), 4px 10px rgb(255, 255, 255), 6px 10px rgb(255, 255, 255), 8px 10px rgb(255, 255, 255);
 }
-.vector-dither-picker .header .settings-close-btn {
+.vector-dither-picker .header .close-btn {
   position: absolute;
   right: 0;
   top: 0;
@@ -1998,7 +1997,7 @@ canvas {
   cursor: pointer;
   background: transparent;
 }
-.vector-dither-picker .header .settings-close-btn::after {
+.vector-dither-picker .header .close-btn::after {
   content: "";
   display: block;
   position: absolute;
@@ -2008,7 +2007,7 @@ canvas {
   left: 0;
   box-shadow: 5px 5px rgb(131, 131, 131), 13px 5px rgb(131, 131, 131), 7px 7px rgb(131, 131, 131), 11px 7px rgb(131, 131, 131), 9px 9px rgb(131, 131, 131), 7px 11px rgb(131, 131, 131), 11px 11px rgb(131, 131, 131), 5px 13px rgb(131, 131, 131), 13px 13px rgb(131, 131, 131);
 }
-.vector-dither-picker .header .settings-close-btn:hover::after {
+.vector-dither-picker .header .close-btn:hover::after {
   box-shadow: 5px 5px rgb(255, 255, 255), 13px 5px rgb(255, 255, 255), 7px 7px rgb(255, 255, 255), 11px 7px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 5px 13px rgb(255, 255, 255), 13px 13px rgb(255, 255, 255);
 }
 .vector-dither-picker .vector-dither-grid {

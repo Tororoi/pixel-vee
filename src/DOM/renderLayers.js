@@ -115,7 +115,7 @@ export function renderLayerSettingsToDOM(domLayer) {
   )
   const layerSettingsCloseBtn = createElement("button", {
     type: "button",
-    class: "settings-close-btn",
+    class: "close-btn",
     "aria-label": "Close",
   })
   layerSettingsHeader.appendChild(layerSettingsCloseBtn)

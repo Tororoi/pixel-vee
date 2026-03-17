@@ -100,7 +100,7 @@ export function renderVectorSettingsToDOM(domVector) {
   header.appendChild(headerTitle)
   const headerCloseBtn = document.createElement("button")
   headerCloseBtn.type = "button"
-  headerCloseBtn.className = "settings-close-btn"
+  headerCloseBtn.className = "close-btn"
   headerCloseBtn.ariaLabel = "Close"
   header.appendChild(headerCloseBtn)
   dom.vectorSettingsContainer.appendChild(header)
