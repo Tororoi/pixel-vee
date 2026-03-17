@@ -95,7 +95,8 @@ export function renderDitherOptionsToDOM() {
   const ditherSection = document.querySelector('.dither-options')
   if (!ditherSection) return
 
-  if (state.tool.current.name === 'brush') {
+  const ditherTools = ['brush', 'line', 'quadCurve', 'cubicCurve', 'ellipse']
+  if (ditherTools.includes(state.tool.current.name)) {
     ditherSection.style.display = ''
     renderDitherPreviewSVG()
     updateDitherPickerColors()

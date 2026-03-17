@@ -2,6 +2,7 @@ import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
+import { ditherPatterns } from "../Context/ditherPatterns.js"
 import { actionEllipse } from "../Actions/pointerActions.js"
 import { vectorGui } from "../GUI/vector.js"
 import {
@@ -90,7 +91,12 @@ function ellipseSteps() {
         state.tool.current.brushSize,
         state.selection.maskSet,
         null,
-        true
+        true,
+        ditherPatterns[state.tool.current.ditherPatternIndex],
+        state.tool.current.modes?.twoColor ?? false,
+        swatches.secondary.color,
+        state.tool.current.mirrorX ?? false,
+        state.tool.current.mirrorY ?? false,
       )
       break
     case "pointermove":
@@ -142,7 +148,12 @@ function ellipseSteps() {
           state.tool.current.brushSize,
           state.selection.maskSet,
           null,
-          true
+          true,
+          ditherPatterns[state.tool.current.ditherPatternIndex],
+          state.tool.current.modes?.twoColor ?? false,
+          swatches.secondary.color,
+          state.tool.current.mirrorX ?? false,
+          state.tool.current.mirrorY ?? false,
         )
       }
       break
@@ -197,7 +208,14 @@ function ellipseSteps() {
           state.tool.current.modes,
           brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
           state.tool.current.brushSize,
-          state.selection.maskSet
+          state.selection.maskSet,
+          null,
+          false,
+          ditherPatterns[state.tool.current.ditherPatternIndex],
+          state.tool.current.modes?.twoColor ?? false,
+          swatches.secondary.color,
+          state.tool.current.mirrorX ?? false,
+          state.tool.current.mirrorY ?? false,
         )
         let maskArray = coordArrayFromSet(
           state.selection.maskSet,
@@ -233,6 +251,10 @@ function ellipseSteps() {
           layer: canvas.currentLayer,
           modes: { ...state.tool.current.modes },
           color: { ...swatches.primary.color },
+          secondaryColor: { ...swatches.secondary.color },
+          ditherPatternIndex: state.tool.current.ditherPatternIndex,
+          mirrorX: state.tool.current.mirrorX,
+          mirrorY: state.tool.current.mirrorY,
           brushSize: state.tool.current.brushSize,
           brushType: state.tool.current.brushType,
           vectorProperties: {
@@ -285,6 +307,9 @@ export const ellipse = {
   brushSize: 1,
   brushType: "circle",
   brushDisabled: false,
+  ditherPatternIndex: 64,
+  mirrorX: false,
+  mirrorY: false,
   options: {
     useSubpixels: {
       active: true,
@@ -298,7 +323,7 @@ export const ellipse = {
     },
     //forceCircle: {active: false} //affects timeline, may need to handle this in a way that controls vectorProperties.forceCircle instead of replacing vectorProperties.forceCircle
   }, // need to expand radiusExcludesCenter to cover multiple scenarios, centerx = 0 or 1 and centery = 0 or 1
-  modes: { eraser: false, inject: false },
+  modes: { eraser: false, inject: false, twoColor: false },
   type: "vector",
   cursor: "crosshair",
   activeCursor: "crosshair",

@@ -2,6 +2,7 @@ import { brushStamps } from "../Context/brushStamps.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
+import { ditherPatterns } from "../Context/ditherPatterns.js"
 import { actionLine } from "../Actions/pointerActions.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
@@ -46,7 +47,12 @@ function lineSteps() {
         state.selection.maskSet,
         null,
         null,
-        true
+        true,
+        ditherPatterns[state.tool.current.ditherPatternIndex],
+        state.tool.current.modes?.twoColor ?? false,
+        swatches.secondary.color,
+        state.tool.current.mirrorX ?? false,
+        state.tool.current.mirrorY ?? false,
       )
       break
     case "pointermove":
@@ -70,7 +76,12 @@ function lineSteps() {
         state.selection.maskSet,
         null,
         null,
-        true
+        true,
+        ditherPatterns[state.tool.current.ditherPatternIndex],
+        state.tool.current.modes?.twoColor ?? false,
+        swatches.secondary.color,
+        state.tool.current.mirrorX ?? false,
+        state.tool.current.mirrorY ?? false,
       )
       break
     case "pointerup": {
@@ -108,7 +119,13 @@ function lineSteps() {
         state.tool.current.brushSize,
         state.selection.maskSet,
         null,
-        null
+        null,
+        false,
+        ditherPatterns[state.tool.current.ditherPatternIndex],
+        state.tool.current.modes?.twoColor ?? false,
+        swatches.secondary.color,
+        state.tool.current.mirrorX ?? false,
+        state.tool.current.mirrorY ?? false,
       )
       state.tool.clickCounter = 0
       let maskArray = coordArrayFromSet(
@@ -145,6 +162,10 @@ function lineSteps() {
         layer: canvas.currentLayer,
         modes: { ...state.tool.current.modes },
         color: { ...swatches.primary.color },
+        secondaryColor: { ...swatches.secondary.color },
+        ditherPatternIndex: state.tool.current.ditherPatternIndex,
+        mirrorX: state.tool.current.mirrorX,
+        mirrorY: state.tool.current.mirrorY,
         brushSize: state.tool.current.brushSize,
         brushType: state.tool.current.brushType,
         vectorProperties: {
@@ -200,7 +221,10 @@ export const line = {
       tooltip: "Toggle Paths. \n\nShow paths for lines.",
     },
   },
-  modes: { eraser: false, inject: false },
+  modes: { eraser: false, inject: false, twoColor: false },
+  ditherPatternIndex: 64,
+  mirrorX: false,
+  mirrorY: false,
   type: "vector",
   cursor: "crosshair",
   activeCursor: "crosshair",

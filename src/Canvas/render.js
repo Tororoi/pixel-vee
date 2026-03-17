@@ -503,6 +503,12 @@ function renderActionVectors(action, activeCtx = null) {
           null, //maskSet made from action.maskArray
           null,
           activeCtx,
+          false,
+          ditherPatterns[vector.ditherPatternIndex ?? 64],
+          vector.modes?.twoColor ?? false,
+          vector.secondaryColor ?? null,
+          vector.mirrorX ?? false,
+          vector.mirrorY ?? false,
         )
         break
       case 'quadCurve':
@@ -522,6 +528,12 @@ function renderActionVectors(action, activeCtx = null) {
           vector.brushSize,
           null, //maskSet made from action.maskArray
           activeCtx,
+          false,
+          ditherPatterns[vector.ditherPatternIndex ?? 64],
+          vector.modes?.twoColor ?? false,
+          vector.secondaryColor ?? null,
+          vector.mirrorX ?? false,
+          vector.mirrorY ?? false,
         )
         break
       case 'cubicCurve':
@@ -543,6 +555,12 @@ function renderActionVectors(action, activeCtx = null) {
           vector.brushSize,
           null, //maskSet made from action.maskArray
           activeCtx,
+          false,
+          ditherPatterns[vector.ditherPatternIndex ?? 64],
+          vector.modes?.twoColor ?? false,
+          vector.secondaryColor ?? null,
+          vector.mirrorX ?? false,
+          vector.mirrorY ?? false,
         )
         break
       case 'ellipse':
@@ -564,6 +582,12 @@ function renderActionVectors(action, activeCtx = null) {
           vector.brushSize,
           null, //maskSet made from action.maskArray
           activeCtx,
+          false,
+          ditherPatterns[vector.ditherPatternIndex ?? 64],
+          vector.modes?.twoColor ?? false,
+          vector.secondaryColor ?? null,
+          vector.mirrorX ?? false,
+          vector.mirrorY ?? false,
         )
         break
       default:

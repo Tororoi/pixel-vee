@@ -2,6 +2,7 @@ import { brushStamps } from '../Context/brushStamps.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
+import { ditherPatterns } from '../Context/ditherPatterns.js'
 import {
   actionQuadraticCurve,
   actionCubicCurve,
@@ -65,6 +66,11 @@ function quadCurveSteps() {
         state.selection.maskSet,
         null,
         true,
+        ditherPatterns[state.tool.current.ditherPatternIndex],
+        state.tool.current.modes?.twoColor ?? false,
+        swatches.secondary.color,
+        state.tool.current.mirrorX ?? false,
+        state.tool.current.mirrorY ?? false,
       )
 
       break
@@ -100,6 +106,11 @@ function quadCurveSteps() {
         state.selection.maskSet,
         null,
         true,
+        ditherPatterns[state.tool.current.ditherPatternIndex],
+        state.tool.current.modes?.twoColor ?? false,
+        swatches.secondary.color,
+        state.tool.current.mirrorX ?? false,
+        state.tool.current.mirrorY ?? false,
       )
 
       break
@@ -135,6 +146,13 @@ function quadCurveSteps() {
           ],
           state.tool.current.brushSize,
           state.selection.maskSet,
+          null,
+          false,
+          ditherPatterns[state.tool.current.ditherPatternIndex],
+          state.tool.current.modes?.twoColor ?? false,
+          swatches.secondary.color,
+          state.tool.current.mirrorX ?? false,
+          state.tool.current.mirrorY ?? false,
         )
         state.tool.clickCounter = 0
         let maskArray = coordArrayFromSet(
@@ -171,6 +189,10 @@ function quadCurveSteps() {
           layer: canvas.currentLayer,
           modes: { ...state.tool.current.modes },
           color: { ...swatches.primary.color },
+          secondaryColor: { ...swatches.secondary.color },
+          ditherPatternIndex: state.tool.current.ditherPatternIndex,
+          mirrorX: state.tool.current.mirrorX,
+          mirrorY: state.tool.current.mirrorY,
           brushSize: state.tool.current.brushSize,
           brushType: state.tool.current.brushType,
           vectorProperties: {
@@ -249,6 +271,11 @@ function cubicCurveSteps() {
         state.selection.maskSet,
         null,
         true,
+        ditherPatterns[state.tool.current.ditherPatternIndex],
+        state.tool.current.modes?.twoColor ?? false,
+        swatches.secondary.color,
+        state.tool.current.mirrorX ?? false,
+        state.tool.current.mirrorY ?? false,
       )
       break
     case 'pointermove':
@@ -289,6 +316,11 @@ function cubicCurveSteps() {
         state.selection.maskSet,
         null,
         true,
+        ditherPatterns[state.tool.current.ditherPatternIndex],
+        state.tool.current.modes?.twoColor ?? false,
+        swatches.secondary.color,
+        state.tool.current.mirrorX ?? false,
+        state.tool.current.mirrorY ?? false,
       )
       break
     case 'pointerup':
@@ -329,6 +361,13 @@ function cubicCurveSteps() {
           ],
           state.tool.current.brushSize,
           state.selection.maskSet,
+          null,
+          false,
+          ditherPatterns[state.tool.current.ditherPatternIndex],
+          state.tool.current.modes?.twoColor ?? false,
+          swatches.secondary.color,
+          state.tool.current.mirrorX ?? false,
+          state.tool.current.mirrorY ?? false,
         )
         state.tool.clickCounter = 0
         let maskArray = coordArrayFromSet(
@@ -365,6 +404,10 @@ function cubicCurveSteps() {
           layer: canvas.currentLayer,
           modes: { ...state.tool.current.modes },
           color: { ...swatches.primary.color },
+          secondaryColor: { ...swatches.secondary.color },
+          ditherPatternIndex: state.tool.current.ditherPatternIndex,
+          mirrorX: state.tool.current.mirrorX,
+          mirrorY: state.tool.current.mirrorY,
           brushSize: state.tool.current.brushSize,
           brushType: state.tool.current.brushType,
           vectorProperties: {
@@ -398,6 +441,9 @@ export const quadCurve = {
   brushSize: 1,
   brushType: 'circle',
   brushDisabled: false,
+  ditherPatternIndex: 64,
+  mirrorX: false,
+  mirrorY: false,
   options: {
     //Priority hierarchy of options: Equal = Align > Hold > Link
     equal: {
@@ -425,7 +471,7 @@ export const quadCurve = {
       tooltip: 'Toggle Paths. \n\nShow paths for curves.',
     },
   },
-  modes: { eraser: false, inject: false },
+  modes: { eraser: false, inject: false, twoColor: false },
   type: 'vector',
   cursor: 'crosshair',
   activeCursor: 'crosshair',
@@ -437,6 +483,9 @@ export const cubicCurve = {
   brushSize: 1,
   brushType: 'circle',
   brushDisabled: false,
+  ditherPatternIndex: 64,
+  mirrorX: false,
+  mirrorY: false,
   options: {
     //Priority hierarchy of options: Equal = Align > Hold > Link
     equal: {
@@ -465,7 +514,7 @@ export const cubicCurve = {
       tooltip: 'Toggle Paths. \n\nShow paths for curves.',
     },
   },
-  modes: { eraser: false, inject: false },
+  modes: { eraser: false, inject: false, twoColor: false },
   type: 'vector',
   cursor: 'crosshair',
   activeCursor: 'crosshair',
