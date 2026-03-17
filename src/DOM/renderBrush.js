@@ -209,7 +209,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg'
  * @param {object} pattern - pattern from ditherPatterns
  * @returns {SVGElement} SVG thumbnail element
  */
-function createDitherPatternSVG(pattern) {
+export function createDitherPatternSVG(pattern) {
   const svg = document.createElementNS(SVG_NS, 'svg')
   svg.setAttribute('viewBox', '0 -0.5 8 8')
   svg.setAttribute('shape-rendering', 'crispEdges')
@@ -291,19 +291,18 @@ export function initDitherPicker() {
 
 /**
  * Highlight the currently selected pattern in the dither picker grid
+ * @param {number} [patternIndex] - Pattern index to highlight; defaults to active tool's index
  */
-export function highlightSelectedDitherPattern() {
+export function highlightSelectedDitherPattern(
+  patternIndex = state.tool.current.ditherPatternIndex
+) {
   const grid = document.querySelector('.dither-grid')
   if (!grid) return
   const buttons = grid.querySelectorAll('.dither-grid-btn')
   buttons.forEach((btn) => {
-    if (
-      parseInt(btn.dataset.patternIndex) ===
-      state.tool.current.ditherPatternIndex
-    ) {
-      btn.classList.add('selected')
-    } else {
-      btn.classList.remove('selected')
-    }
+    btn.classList.toggle(
+      'selected',
+      parseInt(btn.dataset.patternIndex) === patternIndex
+    )
   })
 }

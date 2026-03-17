@@ -84,6 +84,49 @@
     0 2px $white;
 }
 
+@mixin settings-close-btn {
+  .settings-close-btn {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    background: transparent;
+    &::after {
+      content: '';
+      display: block;
+      position: absolute;
+      height: 2px;
+      width: 2px;
+      top: 0;
+      left: 0;
+      box-shadow:
+        5px 5px $border-color,
+        13px 5px $border-color,
+        7px 7px $border-color,
+        11px 7px $border-color,
+        9px 9px $border-color,
+        7px 11px $border-color,
+        11px 11px $border-color,
+        5px 13px $border-color,
+        13px 13px $border-color;
+    }
+    &:hover::after {
+      box-shadow:
+        5px 5px $white,
+        13px 5px $white,
+        7px 7px $white,
+        11px 7px $white,
+        9px 9px $white,
+        7px 11px $white,
+        11px 11px $white,
+        5px 13px $white,
+        13px 13px $white;
+    }
+  }
+}
+
 @mixin cancelBorder {
   box-shadow: none;
   &:hover:not([disabled]) {

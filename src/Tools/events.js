@@ -196,8 +196,10 @@ const DITHER_TOOLS = ["brush", "line", "quadCurve", "cubicCurve", "ellipse"]
 
 document.querySelector(".dither-grid")?.addEventListener("click", (e) => {
   const btn = e.target.closest(".dither-grid-btn")
-  if (!btn || !DITHER_TOOLS.includes(state.tool.current.name)) return
+  if (!btn) return
   const patternIndex = parseInt(btn.dataset.patternIndex)
+
+  if (!DITHER_TOOLS.includes(state.tool.current.name)) return
   if (brush.buildUpActiveStepSlot !== null) {
     // Assign the selected pattern to the active build-up step slot
     brush.buildUpSteps[brush.buildUpActiveStepSlot] = patternIndex

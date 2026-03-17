@@ -106,10 +106,19 @@ export function renderLayerSettingsToDOM(domLayer) {
   dom.layerSettingsContainer.innerHTML = ""
 
   // Create layer settings header
-  const layerSettingsHeader = createElement("div", {
-    class: "header",
-    textContent: "Layer Settings",
+  const layerSettingsHeader = createElement("div", { class: "header" })
+  const dragBtn = createElement("div", { class: "drag-btn locked" })
+  dragBtn.appendChild(createElement("div", { class: "grip" }))
+  layerSettingsHeader.appendChild(dragBtn)
+  layerSettingsHeader.appendChild(
+    createElement("span", { textContent: "Layer Settings" })
+  )
+  const layerSettingsCloseBtn = createElement("button", {
+    type: "button",
+    class: "settings-close-btn",
+    "aria-label": "Close",
   })
+  layerSettingsHeader.appendChild(layerSettingsCloseBtn)
 
   // Create layer name input
   const layerNameInput = createElement("label", {

@@ -7,8 +7,12 @@ import {
   renderLayersToDOM,
   renderLayerSettingsToDOM,
   renderVectorsToDOM,
+  renderVectorSettingsToDOM,
   renderPaletteToDOM,
   renderPalettePresetsToDOM,
+  initVectorDitherPicker,
+  updateVectorDitherPreview,
+  updateVectorDitherPickerColors,
 } from '../DOM/render.js'
 import {
   removeActionVector,
@@ -345,6 +349,7 @@ function vectorInteract(e) {
     //change mode
     toggleVectorMode(vector, 'inject')
   } else if (e.target.className.includes('twoColor')) {
+    //change mode
     toggleVectorMode(vector, 'twoColor')
   } else if (e.target.className.includes('actionColor')) {
     //change color
@@ -366,6 +371,20 @@ function vectorInteract(e) {
   } else if (e.target.className.includes('trash')) {
     //remove vector
     removeVector(vector)
+  } else if (e.target.className.includes('gear')) {
+    //open/close vector settings dialog
+    const domVector = e.target.closest('.vector')
+    if (
+      dom.vectorSettingsContainer.style.display === 'flex' &&
+      dom.vectorSettingsContainer.vectorObj === vector
+    ) {
+      dom.vectorSettingsContainer.style.display = 'none'
+      dom.vectorSettingsContainer.vectorObj = null
+    } else {
+      dom.vectorSettingsContainer.style.display = 'flex'
+      dom.vectorSettingsContainer.vectorObj = vector
+      renderVectorSettingsToDOM(domVector)
+    }
   } else {
     //select current vector
     //Only manipulate timeline if selection is happening
@@ -549,3 +568,127 @@ document.addEventListener('pointerdown', (e) => {
 
 // * Vectors * //
 dom.vectorsThumbnails.addEventListener('click', vectorInteract)
+
+// * Vector Settings Dialog * //
+dom.layerSettingsContainer.addEventListener('click', (e) => {
+  if (e.target.classList.contains('settings-close-btn')) {
+    dom.layerSettingsContainer.style.display = 'none'
+    dom.layerSettingsContainer.layerObj = null
+  }
+})
+
+dom.vectorSettingsContainer.addEventListener('click', (e) => {
+  if (e.target.classList.contains('settings-close-btn')) {
+    dom.vectorSettingsContainer.style.display = 'none'
+    dom.vectorSettingsContainer.vectorObj = null
+    if (dom.ditherPickerContainer) dom.ditherPickerContainer.editingVector = false
+    return
+  }
+
+  const vector = dom.vectorSettingsContainer.vectorObj
+  if (!vector) return
+
+  const modeBtn = e.target.closest('.mode')
+  if (modeBtn) {
+    const modeKey = ['eraser', 'inject', 'twoColor'].find((k) =>
+      modeBtn.classList.contains(k)
+    )
+    if (modeKey) {
+      toggleVectorMode(vector, modeKey)
+      // toggleVectorMode already updated vector.modes[modeKey]; sync the button
+      modeBtn.classList.toggle('selected', vector.modes[modeKey])
+      if (modeKey === 'twoColor') {
+        updateVectorDitherPreview(vector)
+        updateVectorDitherPickerColors(vector)
+      }
+    }
+    return
+  }
+
+  const primaryBtn = e.target.closest('.primary-color')
+  if (primaryBtn) {
+    primaryBtn.color = vector.color
+    primaryBtn.vector = vector
+    primaryBtn.isSecondaryColor = false
+    initializeColorPicker(primaryBtn)
+    return
+  }
+
+  const secondaryBtn = e.target.closest('.secondary-color')
+  if (secondaryBtn) {
+    if (!vector.secondaryColor) {
+      vector.secondaryColor = { r: 0, g: 0, b: 0, a: 0, color: 'rgba(0,0,0,0)' }
+    }
+    secondaryBtn.color = vector.secondaryColor
+    secondaryBtn.vector = vector
+    secondaryBtn.isSecondaryColor = true
+    initializeColorPicker(secondaryBtn)
+    return
+  }
+
+  const ditherPreviewBtn = e.target.closest('.vector-dither-preview')
+  if (ditherPreviewBtn && dom.vectorDitherPickerContainer) {
+    const isOpen =
+      dom.vectorDitherPickerContainer.style.display === 'flex'
+    if (isOpen) {
+      dom.vectorDitherPickerContainer.style.display = 'none'
+    } else {
+      initVectorDitherPicker(vector)
+      const settingsRect = dom.vectorSettingsContainer.getBoundingClientRect()
+      dom.vectorDitherPickerContainer.style.display = 'flex'
+      dom.vectorDitherPickerContainer.style.top = `${
+        settingsRect.top -
+        dom.vectorDitherPickerContainer.offsetHeight / 2 +
+        ditherPreviewBtn.getBoundingClientRect().top -
+        settingsRect.top +
+        ditherPreviewBtn.offsetHeight / 2
+      }px`
+      dom.vectorDitherPickerContainer.style.left = `${settingsRect.right + 12}px`
+    }
+  }
+})
+
+dom.vectorSettingsContainer.addEventListener('input', (e) => {
+  const vector = dom.vectorSettingsContainer.vectorObj
+  if (!vector) return
+  if (e.target.classList.contains('vector-brush-size-slider')) {
+    const newSize = parseInt(e.target.value)
+    vector.brushSize = newSize
+    const display = dom.vectorSettingsContainer.querySelector(
+      '.vector-brush-size-display'
+    )
+    if (display) display.textContent = `Size: ${newSize}`
+    renderCanvas(vector.layer, true)
+  }
+})
+
+// * Vector Dither Picker Dialog * //
+dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
+  if (e.target.classList.contains('settings-close-btn')) {
+    dom.vectorDitherPickerContainer.style.display = 'none'
+    return
+  }
+  const btn = e.target.closest('.dither-grid-btn')
+  if (!btn) return
+  const vector = dom.vectorSettingsContainer?.vectorObj
+  if (!vector) return
+  const patternIndex = parseInt(btn.dataset.patternIndex)
+  vector.ditherPatternIndex = patternIndex
+  updateVectorDitherPreview(vector)
+  dom.vectorDitherPickerContainer.style.display = 'none'
+  renderCanvas(vector.layer, true)
+})
+
+document.addEventListener('pointerdown', (e) => {
+  if (
+    dom.vectorSettingsContainer.vectorObj &&
+    !e.target.classList.contains('gear') &&
+    !dom.vectorSettingsContainer.contains(e.target) &&
+    !dom.colorPickerContainer?.contains(e.target) &&
+    !dom.vectorDitherPickerContainer?.contains(e.target)
+  ) {
+    dom.vectorSettingsContainer.style.display = 'none'
+    dom.vectorSettingsContainer.vectorObj = null
+    dom.vectorDitherPickerContainer.style.display = 'none'
+  }
+})
