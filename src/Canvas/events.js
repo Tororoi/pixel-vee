@@ -344,6 +344,8 @@ function vectorInteract(e) {
   } else if (e.target.className.includes('inject')) {
     //change mode
     toggleVectorMode(vector, 'inject')
+  } else if (e.target.className.includes('twoColor')) {
+    toggleVectorMode(vector, 'twoColor')
   } else if (e.target.className.includes('actionColor')) {
     //change color
     e.target.color = vector.color

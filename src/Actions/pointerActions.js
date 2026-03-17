@@ -183,7 +183,7 @@ export function actionDitherDraw(
         ctx.fillStyle = currentColor.color
         ctx.fillRect(x + offsetX, y + offsetY, 1, 1)
       }
-    } else if (twoColorMode) {
+    } else if (twoColorMode && secondaryColor) {
       if (currentModes?.eraser || currentModes?.inject) {
         ctx.clearRect(x + offsetX, y + offsetY, 1, 1)
       }

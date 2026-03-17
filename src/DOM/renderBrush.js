@@ -132,6 +132,8 @@ export function renderDitherControlsToDOM() {
   }
   if (buildUpBtn) {
     buildUpBtn.classList.toggle('selected', isBuildUp)
+    buildUpBtn.style.display =
+      state.tool.current.name === 'brush' ? '' : 'none'
   }
   // Mirror the SVG thumbnails in the grid and preview via CSS transforms
   const grid = document.querySelector('.dither-grid')
