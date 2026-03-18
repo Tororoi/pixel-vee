@@ -1486,33 +1486,33 @@
     </div>
     <div class="layer-settings dialog-box"></div>
     <div class="vector-settings dialog-box"></div>
-    <div class="vector-dither-picker dialog-box" style="display: none">
+    <div id="vector-dither-picker" class="dither-picker-container dialog-box" style="display: none">
       <div class="header">
         <div class="drag-btn locked"><div class="grip"></div></div>
         <span>Dither Pattern</span>
         <button type="button" class="close-btn" aria-label="Close"></button>
       </div>
-      <div class="vector-dither-controls">
+      <div class="dither-controls">
         <button
           type="button"
-          class="vector-dither-toggle twoColor"
+          class="dither-toggle twoColor"
           aria-label="Two-Color"
           data-tooltip="Two-Color"
         ></button>
         <button
           type="button"
-          class="vector-dither-toggle mirrorX"
+          class="dither-toggle mirrorX"
           aria-label="Mirror Horizontal"
           data-tooltip="Mirror Horizontal"
         ></button>
         <button
           type="button"
-          class="vector-dither-toggle mirrorY"
+          class="dither-toggle mirrorY"
           aria-label="Mirror Vertical"
           data-tooltip="Mirror Vertical"
         ></button>
       </div>
-      <div class="vector-dither-grid"></div>
+      <div class="dither-grid"></div>
     </div>
     <div id="tooltip" class="tooltip"></div>
   </body>

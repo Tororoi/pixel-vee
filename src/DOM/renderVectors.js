@@ -408,7 +408,7 @@ let vectorDitherPickerInitialized = false
  */
 export function initVectorDitherPicker(vector) {
   const grid = dom.vectorDitherPickerContainer?.querySelector(
-    ".vector-dither-grid"
+    ".dither-grid"
   )
   if (!grid) return
   if (!vectorDitherPickerInitialized) {
@@ -435,15 +435,15 @@ export function initVectorDitherPicker(vector) {
 export function updateVectorDitherControls(vector) {
   const container = dom.vectorDitherPickerContainer
   if (!container) return
-  const twoColorBtn = container.querySelector('.vector-dither-toggle.twoColor')
-  const mirrorXBtn = container.querySelector('.vector-dither-toggle.mirrorX')
-  const mirrorYBtn = container.querySelector('.vector-dither-toggle.mirrorY')
+  const twoColorBtn = container.querySelector('.dither-toggle.twoColor')
+  const mirrorXBtn = container.querySelector('.dither-toggle.mirrorX')
+  const mirrorYBtn = container.querySelector('.dither-toggle.mirrorY')
   const mirrorX = vector.mirrorX ?? false
   const mirrorY = vector.mirrorY ?? false
   if (twoColorBtn) twoColorBtn.classList.toggle('selected', vector.modes?.twoColor ?? false)
   if (mirrorXBtn) mirrorXBtn.classList.toggle('selected', mirrorX)
   if (mirrorYBtn) mirrorYBtn.classList.toggle('selected', mirrorY)
-  const grid = container.querySelector('.vector-dither-grid')
+  const grid = container.querySelector('.dither-grid')
   if (grid) {
     grid.classList.toggle('mirror-x', mirrorX)
     grid.classList.toggle('mirror-y', mirrorY)
@@ -474,7 +474,7 @@ export function updateVectorDitherPickerColors(vector) {
  */
 export function highlightVectorDitherPattern(patternIndex) {
   const grid = dom.vectorDitherPickerContainer?.querySelector(
-    ".vector-dither-grid"
+    ".dither-grid"
   )
   if (!grid) return
   grid.querySelectorAll(".dither-grid-btn").forEach((btn) => {

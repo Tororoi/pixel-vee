@@ -76,28 +76,28 @@
   box-shadow: none;
 }
 
-.vector-settings .header .drag-btn, .vector-dither-picker .header .drag-btn, .layer-settings .header .drag-btn, .dialog-box .header .drag-btn {
+.vector-settings .header .drag-btn, .layer-settings .header .drag-btn, .dialog-box .header .drag-btn {
   position: absolute;
   left: 0;
   top: 0;
   width: 20px;
   height: 20px;
 }
-.vector-settings .header .drag-btn .grip, .vector-dither-picker .header .drag-btn .grip, .layer-settings .header .drag-btn .grip, .dialog-box .header .drag-btn .grip {
+.vector-settings .header .drag-btn .grip, .layer-settings .header .drag-btn .grip, .dialog-box .header .drag-btn .grip {
   margin: 5px;
   height: 2px;
   width: 2px;
   background: rgb(131, 131, 131);
   box-shadow: 0 0 rgb(131, 131, 131), 4px 0 rgb(131, 131, 131), 0 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 0 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131);
 }
-.vector-settings .header .drag-btn.locked .grip, .vector-dither-picker .header .drag-btn.locked .grip, .layer-settings .header .drag-btn.locked .grip, .dialog-box .header .drag-btn.locked .grip {
+.vector-settings .header .drag-btn.locked .grip, .layer-settings .header .drag-btn.locked .grip, .dialog-box .header .drag-btn.locked .grip {
   box-shadow: 2px -2px rgb(131, 131, 131), 4px -2px rgb(131, 131, 131), 0 0 rgb(131, 131, 131), 6px 0 rgb(131, 131, 131), 0 2px rgb(131, 131, 131), 6px 2px rgb(131, 131, 131), -2px 4px rgb(131, 131, 131), 0 4px rgb(131, 131, 131), 2px 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 6px 4px rgb(131, 131, 131), 8px 4px rgb(131, 131, 131), -2px 6px rgb(131, 131, 131), 0 6px rgb(131, 131, 131), 4px 6px rgb(131, 131, 131), 6px 6px rgb(131, 131, 131), 8px 6px rgb(131, 131, 131), -2px 8px rgb(131, 131, 131), 0 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131), 6px 8px rgb(131, 131, 131), 8px 8px rgb(131, 131, 131), -2px 10px rgb(131, 131, 131), 0 10px rgb(131, 131, 131), 2px 10px rgb(131, 131, 131), 4px 10px rgb(131, 131, 131), 6px 10px rgb(131, 131, 131), 8px 10px rgb(131, 131, 131);
 }
-.vector-settings .header:hover:not([disabled]) .drag-btn .grip, .vector-dither-picker .header:hover:not([disabled]) .drag-btn .grip, .layer-settings .header:hover:not([disabled]) .drag-btn .grip, .dialog-box .header:hover:not([disabled]) .drag-btn .grip {
+.vector-settings .header:hover:not([disabled]) .drag-btn .grip, .layer-settings .header:hover:not([disabled]) .drag-btn .grip, .dialog-box .header:hover:not([disabled]) .drag-btn .grip {
   background: rgb(255, 255, 255);
   box-shadow: 0 0 rgb(255, 255, 255), 4px 0 rgb(255, 255, 255), 0 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 0 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255);
 }
-.vector-settings .header:hover:not([disabled]) .drag-btn.locked .grip, .vector-dither-picker .header:hover:not([disabled]) .drag-btn.locked .grip, .layer-settings .header:hover:not([disabled]) .drag-btn.locked .grip, .dialog-box .header:hover:not([disabled]) .drag-btn.locked .grip {
+.vector-settings .header:hover:not([disabled]) .drag-btn.locked .grip, .layer-settings .header:hover:not([disabled]) .drag-btn.locked .grip, .dialog-box .header:hover:not([disabled]) .drag-btn.locked .grip {
   box-shadow: 2px -2px rgb(255, 255, 255), 4px -2px rgb(255, 255, 255), 0 0 rgb(255, 255, 255), 6px 0 rgb(255, 255, 255), 0 2px rgb(255, 255, 255), 6px 2px rgb(255, 255, 255), -2px 4px rgb(255, 255, 255), 0 4px rgb(255, 255, 255), 2px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 6px 4px rgb(255, 255, 255), 8px 4px rgb(255, 255, 255), -2px 6px rgb(255, 255, 255), 0 6px rgb(255, 255, 255), 4px 6px rgb(255, 255, 255), 6px 6px rgb(255, 255, 255), 8px 6px rgb(255, 255, 255), -2px 8px rgb(255, 255, 255), 0 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255), 6px 8px rgb(255, 255, 255), 8px 8px rgb(255, 255, 255), -2px 10px rgb(255, 255, 255), 0 10px rgb(255, 255, 255), 2px 10px rgb(255, 255, 255), 4px 10px rgb(255, 255, 255), 6px 10px rgb(255, 255, 255), 8px 10px rgb(255, 255, 255);
 }
 
@@ -131,7 +131,7 @@
   box-shadow: 9px 5px rgb(255, 255, 255), 9px 7px rgb(255, 255, 255), 5px 9px rgb(255, 255, 255), 7px 9px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 11px 9px rgb(255, 255, 255), 13px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 9px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 9px 13px rgb(255, 255, 255);
 }
 
-.vector-settings .header .close-btn, .vector-dither-picker .header .close-btn, .layer-settings .header .close-btn, .dialog-box .header .close-btn {
+.vector-settings .header .close-btn, .layer-settings .header .close-btn, .dialog-box .header .close-btn {
   position: absolute;
   right: 0;
   top: 0;
@@ -140,7 +140,7 @@
   cursor: pointer;
   background: transparent;
 }
-.vector-settings .header .close-btn::after, .vector-dither-picker .header .close-btn::after, .layer-settings .header .close-btn::after, .dialog-box .header .close-btn::after {
+.vector-settings .header .close-btn::after, .layer-settings .header .close-btn::after, .dialog-box .header .close-btn::after {
   content: "";
   display: block;
   position: absolute;
@@ -150,7 +150,7 @@
   left: 0;
   box-shadow: 5px 5px rgb(131, 131, 131), 13px 5px rgb(131, 131, 131), 7px 7px rgb(131, 131, 131), 11px 7px rgb(131, 131, 131), 9px 9px rgb(131, 131, 131), 7px 11px rgb(131, 131, 131), 11px 11px rgb(131, 131, 131), 5px 13px rgb(131, 131, 131), 13px 13px rgb(131, 131, 131);
 }
-.vector-settings .header .close-btn:hover::after, .vector-dither-picker .header .close-btn:hover::after, .layer-settings .header .close-btn:hover::after, .dialog-box .header .close-btn:hover::after {
+.vector-settings .header .close-btn:hover::after, .layer-settings .header .close-btn:hover::after, .dialog-box .header .close-btn:hover::after {
   box-shadow: 5px 5px rgb(255, 255, 255), 13px 5px rgb(255, 255, 255), 7px 7px rgb(255, 255, 255), 11px 7px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 5px 13px rgb(255, 255, 255), 13px 13px rgb(255, 255, 255);
 }
 
@@ -181,34 +181,34 @@
   min-width: 60px;
 }
 
-.dither-picker-container .dither-grid, .vector-dither-picker .vector-dither-grid {
+.dither-picker-container .dither-grid {
   display: grid;
   grid-template-columns: repeat(9, 1fr);
   gap: 2px;
   padding: 4px 2px 2px 2px;
 }
 
-.dither-picker-container .dither-grid .dither-grid-btn, .vector-dither-picker .vector-dither-grid .dither-grid-btn {
+.dither-picker-container .dither-grid .dither-grid-btn {
   width: 32px;
   height: 32px;
   cursor: pointer;
   background: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.dither-picker-container .dither-grid .dither-grid-btn:hover:not([disabled]), .vector-dither-picker .vector-dither-grid .dither-grid-btn:hover:not([disabled]) {
+.dither-picker-container .dither-grid .dither-grid-btn:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
-.dither-picker-container .dither-grid .selected.dither-grid-btn, .vector-dither-picker .vector-dither-grid .selected.dither-grid-btn {
+.dither-picker-container .dither-grid .selected.dither-grid-btn {
   z-index: 105;
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
-.dither-picker-container .dither-grid .selected.dither-grid-btn:hover:not([disabled]), .vector-dither-picker .vector-dither-grid .selected.dither-grid-btn:hover:not([disabled]) {
+.dither-picker-container .dither-grid .selected.dither-grid-btn:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
-.dither-picker-container .dither-grid .dither-grid-btn:hover, .vector-dither-picker .vector-dither-grid .dither-grid-btn:hover {
+.dither-picker-container .dither-grid .dither-grid-btn:hover {
   z-index: 104;
 }
-.dither-picker-container .dither-grid .dither-grid-btn svg, .vector-dither-picker .vector-dither-grid .dither-grid-btn svg {
+.dither-picker-container .dither-grid .dither-grid-btn svg {
   width: 100%;
   height: 100%;
 }
@@ -1834,20 +1834,14 @@ canvas {
   width: calc(100% - 4px);
 }
 
-.vector-dither-picker {
+#vector-dither-picker {
   z-index: 1001;
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  align-items: center;
-  position: absolute;
-  background: rgb(61, 61, 61);
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.vector-dither-picker:hover:not([disabled]) {
+#vector-dither-picker:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
-.vector-dither-picker:after {
+#vector-dither-picker:after {
   content: "";
   display: inline-block;
   width: 2px;
@@ -1858,49 +1852,11 @@ canvas {
   left: -4px;
   box-shadow: -2px -2px rgb(131, 131, 131), 0 -2px rgb(61, 61, 61), 0 -4px rgb(131, 131, 131), 2px 0 rgb(61, 61, 61), 2px -2px rgb(61, 61, 61), 2px -4px rgb(61, 61, 61);
 }
-.vector-dither-picker:hover:not([disabled]):after {
+#vector-dither-picker:hover:not([disabled]):after {
   background: rgb(255, 255, 255);
   box-shadow: -2px -2px rgb(255, 255, 255), 0 -2px rgb(61, 61, 61), 0 -4px rgb(255, 255, 255), 2px 0 rgb(61, 61, 61), 2px -2px rgb(61, 61, 61), 2px -4px rgb(61, 61, 61);
 }
-.vector-dither-picker .header {
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-  min-height: 20px;
-  width: 100%;
-  margin: 0;
-}
-.vector-dither-picker .vector-dither-controls {
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: center;
-  padding: 4px 2px 2px 2px;
-  gap: 2px;
-}
-.vector-dither-picker .vector-dither-controls .vector-dither-toggle {
-  cursor: pointer;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  user-select: none;
-  color: white;
-  width: 40px;
-  height: 40px;
-}
-.vector-dither-picker .vector-dither-grid.mirror-x .dither-grid-svg {
-  transform: scaleX(-1);
-  transform-origin: center;
-}
-.vector-dither-picker .vector-dither-grid.mirror-y .dither-grid-svg {
-  transform: scaleY(-1);
-  transform-origin: center;
-}
-.vector-dither-picker .vector-dither-grid.mirror-x.mirror-y .dither-grid-svg {
-  transform: scale(-1, -1);
-  transform-origin: center;
-}
+
 /* Base styles, mixins, keyframes, variables */
 /* Brush settings */
 .brush-container {
@@ -2005,10 +1961,9 @@ canvas {
   justify-content: center;
   align-items: center;
   user-select: none;
-  color: white;
+  color: rgb(255, 255, 255);
   width: 40px;
   height: 40px;
-  opacity: 1;
 }
 .dither-picker-container .build-up-steps {
   display: flex;

@@ -672,7 +672,7 @@ dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
   const vector = dom.vectorSettingsContainer?.vectorObj
   if (!vector) return
 
-  const toggleBtn = e.target.closest('.vector-dither-toggle')
+  const toggleBtn = e.target.closest('.dither-toggle')
   if (toggleBtn) {
     if (toggleBtn.classList.contains('twoColor')) {
       toggleVectorMode(vector, 'twoColor')
