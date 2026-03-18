@@ -1872,6 +1872,35 @@ canvas {
   width: 100%;
   margin: 0;
 }
+.vector-dither-picker .vector-dither-controls {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  padding: 4px 2px 2px 2px;
+  gap: 2px;
+}
+.vector-dither-picker .vector-dither-controls .vector-dither-toggle {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  color: white;
+  width: 40px;
+  height: 40px;
+}
+.vector-dither-picker .vector-dither-grid.mirror-x .dither-grid-svg {
+  transform: scaleX(-1);
+  transform-origin: center;
+}
+.vector-dither-picker .vector-dither-grid.mirror-y .dither-grid-svg {
+  transform: scaleY(-1);
+  transform-origin: center;
+}
+.vector-dither-picker .vector-dither-grid.mirror-x.mirror-y .dither-grid-svg {
+  transform: scale(-1, -1);
+  transform-origin: center;
+}
 /* Base styles, mixins, keyframes, variables */
 /* Brush settings */
 .brush-container {

@@ -4,6 +4,7 @@ export {
   renderVectorSettingsToDOM,
   initVectorDitherPicker,
   updateVectorDitherPickerColors,
+  updateVectorDitherControls,
   highlightVectorDitherPattern,
   updateVectorDitherPreview,
 } from "./renderVectors.js"

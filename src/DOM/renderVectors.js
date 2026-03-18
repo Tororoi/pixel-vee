@@ -424,7 +424,30 @@ export function initVectorDitherPicker(vector) {
     }
   }
   updateVectorDitherPickerColors(vector)
+  updateVectorDitherControls(vector)
   highlightVectorDitherPattern(vector.ditherPatternIndex ?? 64)
+}
+
+/**
+ * Sync the toggle buttons and grid mirror classes in the vector dither picker.
+ * @param {object} vector - The vector whose settings to reflect
+ */
+export function updateVectorDitherControls(vector) {
+  const container = dom.vectorDitherPickerContainer
+  if (!container) return
+  const twoColorBtn = container.querySelector('.vector-dither-toggle.twoColor')
+  const mirrorXBtn = container.querySelector('.vector-dither-toggle.mirrorX')
+  const mirrorYBtn = container.querySelector('.vector-dither-toggle.mirrorY')
+  const mirrorX = vector.mirrorX ?? false
+  const mirrorY = vector.mirrorY ?? false
+  if (twoColorBtn) twoColorBtn.classList.toggle('selected', vector.modes?.twoColor ?? false)
+  if (mirrorXBtn) mirrorXBtn.classList.toggle('selected', mirrorX)
+  if (mirrorYBtn) mirrorYBtn.classList.toggle('selected', mirrorY)
+  const grid = container.querySelector('.vector-dither-grid')
+  if (grid) {
+    grid.classList.toggle('mirror-x', mirrorX)
+    grid.classList.toggle('mirror-y', mirrorY)
+  }
 }
 
 /**

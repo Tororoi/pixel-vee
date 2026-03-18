@@ -13,6 +13,7 @@ import {
   initVectorDitherPicker,
   updateVectorDitherPreview,
   updateVectorDitherPickerColors,
+  updateVectorDitherControls,
 } from '../DOM/render.js'
 import {
   removeActionVector,
@@ -668,10 +669,32 @@ dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
     dom.vectorDitherPickerContainer.style.display = 'none'
     return
   }
-  const btn = e.target.closest('.dither-grid-btn')
-  if (!btn) return
   const vector = dom.vectorSettingsContainer?.vectorObj
   if (!vector) return
+
+  const toggleBtn = e.target.closest('.vector-dither-toggle')
+  if (toggleBtn) {
+    if (toggleBtn.classList.contains('twoColor')) {
+      toggleVectorMode(vector, 'twoColor')
+      updateVectorDitherControls(vector)
+      updateVectorDitherPickerColors(vector)
+      updateVectorDitherPreview(vector)
+      // sync twoColor button in settings dialog if open
+      const settingsModeBtn = dom.vectorSettingsContainer?.querySelector('.mode.twoColor')
+      if (settingsModeBtn) settingsModeBtn.classList.toggle('selected', vector.modes.twoColor)
+    } else if (toggleBtn.classList.contains('mirrorX')) {
+      vector.mirrorX = !vector.mirrorX
+      updateVectorDitherControls(vector)
+    } else if (toggleBtn.classList.contains('mirrorY')) {
+      vector.mirrorY = !vector.mirrorY
+      updateVectorDitherControls(vector)
+    }
+    renderCanvas(vector.layer, true)
+    return
+  }
+
+  const btn = e.target.closest('.dither-grid-btn')
+  if (!btn) return
   const patternIndex = parseInt(btn.dataset.patternIndex)
   vector.ditherPatternIndex = patternIndex
   updateVectorDitherPreview(vector)

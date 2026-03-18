@@ -252,8 +252,37 @@
     @extend %dragger;
     @extend %closeButton;
   }
+  .vector-dither-controls {
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: center;
+    padding: 4px 2px 2px 2px;
+    gap: 2px;
+    .vector-dither-toggle {
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+      color: white;
+      width: 40px;
+      height: 40px;
+    }
+  }
   .vector-dither-grid {
     @extend %dither-grid;
+    &.mirror-x .dither-grid-svg {
+      transform: scaleX(-1);
+      transform-origin: center;
+    }
+    &.mirror-y .dither-grid-svg {
+      transform: scaleY(-1);
+      transform-origin: center;
+    }
+    &.mirror-x.mirror-y .dither-grid-svg {
+      transform: scale(-1, -1);
+      transform-origin: center;
+    }
     .dither-grid-btn {
       @extend %dither-grid-btn;
     }
