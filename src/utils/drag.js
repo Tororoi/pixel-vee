@@ -113,12 +113,12 @@ function setDragSiblings() {
   }
   //set properties
   parentElement.style.height = parentElement.offsetHeight + 'px'
-  parentElement.style.background = 'transparent'
+  parentElement.style.background = 'white'
   for (let i = 0; i < state.ui.dragSiblings.length; i++) {
     state.ui.dragSiblings[i].element.style.position = 'absolute'
     state.ui.dragSiblings[i].element.style.top =
       state.ui.dragSiblings[i].top + 'px'
-    state.ui.dragSiblings[i].element.style.maxHeight =
+    state.ui.dragSiblings[i].element.style.height =
       state.ui.dragSiblings[i].height + 'px'
   }
 }
@@ -226,13 +226,13 @@ export const dragStop = () => {
           if (siblingArray[i] !== state.ui.dragTarget) {
             siblingArray[i].style.zIndex = ''
             siblingArray[i].style.top = ''
-            siblingArray[i].style.maxHeight = ''
+            siblingArray[i].style.height = ''
             siblingArray[i].style.position = 'relative'
           }
         }
       }
       state.ui.dragTarget.style.top = ''
-      state.ui.dragTarget.style.maxHeight = '' //reset to default
+      state.ui.dragTarget.style.height = '' //reset to default
       state.ui.dragTarget.style.position = 'relative'
       parentElement.style.height = '' //reset to default
     }
