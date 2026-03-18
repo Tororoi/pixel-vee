@@ -233,6 +233,7 @@ export const dragStop = () => {
       }
       state.ui.dragTarget.style.top = ''
       state.ui.dragTarget.style.height = '' //reset to default
+      state.ui.dragTarget.style.maxHeight = '' //reset to default
       state.ui.dragTarget.style.position = 'relative'
       parentElement.style.height = '' //reset to default
     }

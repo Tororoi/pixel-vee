@@ -418,6 +418,53 @@
 //============ * * * Placeholders * * * ============//
 //==================================================//
 
+// Centered flex row with label + control, used in settings panels
+%settings-row {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: $spacing-md;
+  span {
+    font-size: 11px;
+    min-width: 60px;
+  }
+}
+
+// 9-column dither pattern grid layout
+%dither-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: $spacing-xs;
+  padding: $spacing-sm $spacing-xs $spacing-xs $spacing-xs;
+}
+
+// Individual button within a dither grid
+%dither-grid-btn {
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  background: $diagonal-stripe-bg;
+  @include boxBorder;
+  &.selected {
+    z-index: 105;
+    @include boxBorder($white, $white);
+  }
+  &:hover {
+    z-index: 104;
+  }
+  svg {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+// Centered flex container
+%flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 // Base styles shared by all floating dialog/panel containers
 %floating-dialog {
   user-select: none;

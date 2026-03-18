@@ -78,14 +78,14 @@
       justify-content: center;
       margin-bottom: 8px;
       .palette-edit {
-        width: 40px;
-        height: 40px;
+        width: $size-button-md;
+        height: $size-button-md;
         cursor: pointer;
         @include paletteKnifeIcon;
       }
       .palette-remove {
-        width: 40px;
-        height: 40px;
+        width: $size-button-md;
+        height: $size-button-md;
         cursor: pointer;
         @include paletteScraperIcon;
       }

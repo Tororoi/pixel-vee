@@ -37,8 +37,8 @@
     }
     .zoom {
       .zoombtn {
-        height: 40px;
-        width: 40px;
+        height: $size-button-md;
+        width: $size-button-md;
         padding: 10px;
         background-origin: content-box;
       }

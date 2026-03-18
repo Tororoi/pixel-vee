@@ -24,8 +24,8 @@
       display: none;
     }
     .reference {
-      width: 40px;
-      height: 40px;
+      width: $size-button-md;
+      height: $size-button-md;
       cursor: pointer;
     }
     input[type="file"]:disabled + .reference {
@@ -34,8 +34,8 @@
       @include referenceIcon($border-color, $border-color);
     }
     .add-layer {
-      width: 40px;
-      height: 40px;
+      width: $size-button-md;
+      height: $size-button-md;
       cursor: pointer;
       &:disabled {
         // opacity: 1 !important;
@@ -43,8 +43,8 @@
       }
     }
     .trash {
-      width: 40px;
-      height: 40px;
+      width: $size-button-md;
+      height: $size-button-md;
       cursor: pointer;
       &:disabled {
         // opacity: 1 !important;
@@ -71,7 +71,7 @@
       justify-content: flex-end;
       .layer {
         cursor: grab;
-        height: 50px;
+        height: $size-button-lg;
         width: 100%;
         text-align: center;
         line-height: 40px;
@@ -91,8 +91,8 @@
           background: black;
         }
         .hide {
-          width: 40px;
-          height: 40px;
+          width: $size-button-md;
+          height: $size-button-md;
           margin: 5px;
           cursor: pointer;
         }
@@ -105,8 +105,8 @@
           position: absolute;
           right: 0;
           cursor: pointer;
-          width: 40px;
-          height: 40px;
+          width: $size-button-md;
+          height: $size-button-md;
           z-index: 104;
           margin: 5px;
         }

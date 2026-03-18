@@ -1,0 +1,25 @@
+@use 'sass:meta';
+@use 'variables' as *;
+
+//==================================================//
+//========== * * * Icon Factory Mixins * * * ========//
+//==================================================//
+
+// For tool buttons: hover + selected state both change the icon color
+@mixin toolIcon($svg-mixin, $border: $border-color, $active: $white) {
+  @include meta.apply($svg-mixin, $border);
+  background-size: 100%;
+  &:hover,
+  &.selected {
+    @include meta.apply($svg-mixin, $active);
+  }
+}
+
+// For one-click action buttons: only hover changes the icon color
+@mixin actionIcon($svg-mixin, $border: $border-color, $active: $white) {
+  @include meta.apply($svg-mixin, $border);
+  background-size: 100%;
+  &:hover {
+    @include meta.apply($svg-mixin, $active);
+  }
+}

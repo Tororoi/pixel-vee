@@ -64,8 +64,8 @@
         button {
           position: absolute;
           cursor: pointer;
-          width: 20px;
-          height: 20px;
+          width: $size-button-sm;
+          height: $size-button-sm;
           z-index: 104;
           margin-bottom: 2px;
           &:hover {
@@ -117,8 +117,8 @@
         .gear {
           top: 0;
           right: 0;
-          width: 40px;
-          height: 40px;
+          width: $size-button-md;
+          height: $size-button-md;
           margin-bottom: 0;
         }
         &.selected {
@@ -175,23 +175,16 @@
   .vector-settings-modes {
     display: flex;
     flex-flow: row nowrap;
-    gap: 4px;
+    gap: $spacing-sm;
     .mode {
       position: relative;
-      width: 40px;
-      height: 40px;
+      width: $size-button-md;
+      height: $size-button-md;
       cursor: pointer;
     }
   }
   .vector-settings-color-row {
-    display: flex;
-    flex-flow: row nowrap;
-    align-items: center;
-    gap: 8px;
-    span {
-      font-size: 11px;
-      min-width: 60px;
-    }
+    @extend %settings-row;
     .actionColor {
       position: relative;
       width: 32px;
@@ -207,14 +200,7 @@
     }
   }
   .vector-settings-dither-row {
-    display: flex;
-    flex-flow: row nowrap;
-    align-items: center;
-    gap: 8px;
-    span {
-      font-size: 11px;
-      min-width: 60px;
-    }
+    @extend %settings-row;
     .vector-dither-preview {
       position: relative;
       width: 32px;
@@ -267,27 +253,9 @@
     @extend %closeButton;
   }
   .vector-dither-grid {
-    display: grid;
-    grid-template-columns: repeat(9, 1fr);
-    gap: 2px;
-    padding: 4px 2px 2px 2px;
+    @extend %dither-grid;
     .dither-grid-btn {
-      width: 32px;
-      height: 32px;
-      cursor: pointer;
-      background: $diagonal-stripe-bg;
-      @include boxBorder;
-      &.selected {
-        z-index: 105;
-        @include boxBorder($white, $white);
-      }
-      &:hover {
-        z-index: 104;
-      }
-      svg {
-        width: 100%;
-        height: 100%;
-      }
+      @extend %dither-grid-btn;
     }
   }
 }
