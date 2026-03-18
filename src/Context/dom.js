@@ -202,7 +202,7 @@ const layerSettingsContainer = document.querySelector(".layer-settings")
 const vectorsThumbnails = document.querySelector(".vectors")
 const vectorsInterfaceContainer = document.querySelector(".vectors-interface")
 const vectorSettingsContainer = document.querySelector(".vector-settings")
-const vectorDitherPickerContainer = document.querySelector(".vector-dither-picker")
+const vectorDitherPickerContainer = document.querySelector("#vector-dither-picker")
 
 // * Canvas Size Interface * //
 const sizeContainer = document.querySelector(".size-container")
