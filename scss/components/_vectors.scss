@@ -231,31 +231,7 @@
   }
 }
 
-.vector-dither-picker {
+#vector-dither-picker {
   z-index: 1001;
-  display: none;
-  flex-flow: column nowrap;
-  justify-content: flex-start;
-  align-items: center;
-  position: absolute;
-  background: $dark-gray;
   @include bubbleBorder;
-  .header {
-    display: flex;
-    flex-flow: row nowrap;
-    justify-content: center;
-    align-items: center;
-    position: relative;
-    min-height: 20px;
-    width: 100%;
-    margin: 0;
-    @extend %dragger;
-    @extend %closeButton;
-  }
-  .vector-dither-grid {
-    @extend %dither-grid;
-    .dither-grid-btn {
-      @extend %dither-grid-btn;
-    }
-  }
 }
