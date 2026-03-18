@@ -5,8 +5,8 @@
   position: absolute;
   left: 0;
   top: 0;
-  min-width: 206px;
-  width: 206px;
+  min-width: var(--sidebar-width);
+  width: var(--sidebar-width);
   height: 100%;
   max-height: calc(100% - 4px);
   display: flex;
@@ -22,7 +22,7 @@
     // opacity: 0.25;
     height: auto;
     overflow-y: scroll;
-    @include scrollBar;
+    @extend %scrollBar;
   }
   &.dialog-box > .collapsible {
     margin-top: 2px;
@@ -37,7 +37,7 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: calc(100% - 52px);
+  height: calc(100% - var(--nav-height));
   user-select: none;
 }
 
@@ -77,9 +77,9 @@
     position: relative;
     cursor: grab;
     @include boxBorder($border-color, $white, false, bottom);
-    @include dragger;
-    @include collapseArrow;
-    @include closeButton;
+    @extend %dragger;
+    @extend %collapseArrow;
+    @extend %closeButton;
   }
   .collapsible {
     flex: 0 1 auto;
@@ -126,11 +126,7 @@
   // transition: opacity 0.3s;
   // transition-delay: 0.3s;
   z-index: 1000;
-  box-shadow:
-    2px 0 $tooltip-color,
-    -2px 0 $tooltip-color,
-    0 -2px $tooltip-color,
-    0 2px $tooltip-color;
+  @include boxBorder($tooltip-color, $tooltip-color);
   &:after {
     //Speech bubble pointer
     @extend %tooltip-pointer-base;
