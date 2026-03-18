@@ -200,7 +200,8 @@
       background: $diagonal-stripe-bg;
       @include boxBorder;
       &.selected {
-        border-color: $white;
+        z-index: 105;
+        @include boxBorder($white, $white);
       }
       &:hover {
         z-index: 104;

@@ -192,10 +192,14 @@ document.querySelector(".dither-preview")?.addEventListener("click", () => {
     dom.ditherPickerContainer.style.display === "flex" ? "none" : "flex"
 })
 
+const DITHER_TOOLS = ["brush", "line", "quadCurve", "cubicCurve", "ellipse"]
+
 document.querySelector(".dither-grid")?.addEventListener("click", (e) => {
   const btn = e.target.closest(".dither-grid-btn")
-  if (!btn || state.tool.current.name !== "brush") return
+  if (!btn) return
   const patternIndex = parseInt(btn.dataset.patternIndex)
+
+  if (!DITHER_TOOLS.includes(state.tool.current.name)) return
   if (brush.buildUpActiveStepSlot !== null) {
     // Assign the selected pattern to the active build-up step slot
     brush.buildUpSteps[brush.buildUpActiveStepSlot] = patternIndex
@@ -209,7 +213,7 @@ document.querySelector(".dither-grid")?.addEventListener("click", (e) => {
 })
 
 document.getElementById("dither-ctrl-two-color")?.addEventListener("click", () => {
-  if (state.tool.current.name !== "brush") return
+  if (!DITHER_TOOLS.includes(state.tool.current.name)) return
   state.tool.current.modes.twoColor = !state.tool.current.modes.twoColor
   renderDitherControlsToDOM()
   updateDitherPickerColors()
@@ -217,13 +221,13 @@ document.getElementById("dither-ctrl-two-color")?.addEventListener("click", () =
 })
 
 document.getElementById("dither-ctrl-mirror-x")?.addEventListener("click", () => {
-  if (state.tool.current.name !== "brush") return
+  if (!DITHER_TOOLS.includes(state.tool.current.name)) return
   state.tool.current.mirrorX = !state.tool.current.mirrorX
   renderDitherControlsToDOM()
 })
 
 document.getElementById("dither-ctrl-mirror-y")?.addEventListener("click", () => {
-  if (state.tool.current.name !== "brush") return
+  if (!DITHER_TOOLS.includes(state.tool.current.name)) return
   state.tool.current.mirrorY = !state.tool.current.mirrorY
   renderDitherControlsToDOM()
 })

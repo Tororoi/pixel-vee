@@ -183,7 +183,7 @@ export function actionDitherDraw(
         ctx.fillStyle = currentColor.color
         ctx.fillRect(x + offsetX, y + offsetY, 1, 1)
       }
-    } else if (twoColorMode) {
+    } else if (twoColorMode && secondaryColor) {
       if (currentModes?.eraser || currentModes?.inject) {
         ctx.clearRect(x + offsetX, y + offsetY, 1, 1)
       }
@@ -313,6 +313,11 @@ export function actionBuildUpDitherDraw(
  * @param {Set} seenPixelsSet - set of coordinates already drawn on
  * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {boolean} isPreview - whether the action is a preview (not on main canvas) - used by line tool and brush tool before line is confirmed
+ * @param {object} [ditherPattern] - pattern object from ditherPatterns; when provided uses dither drawing
+ * @param {boolean} [twoColorMode] - if true, "off" dither pixels use secondaryColor
+ * @param {object} [secondaryColor] - {color, r, g, b, a} for two-color dither mode
+ * @param {boolean} [mirrorX] - flip the dither pattern horizontally
+ * @param {boolean} [mirrorY] - flip the dither pattern vertically
  */
 export function actionLine(
   sx,
@@ -329,6 +334,11 @@ export function actionLine(
   seenPixelsSet = null,
   customContext = null,
   isPreview = false,
+  ditherPattern = null,
+  twoColorMode = false,
+  secondaryColor = null,
+  mirrorX = false,
+  mirrorY = false,
 ) {
   let angle = getAngle(tx - sx, ty - sy) // angle of line
   let tri = getTriangle(sx, sy, tx, ty, angle)
@@ -348,9 +358,71 @@ export function actionLine(
       previousY,
     )
     // for each point along the line
+    if (ditherPattern) {
+      actionDitherDraw(
+        thispoint.x,
+        thispoint.y,
+        boundaryBox,
+        currentColor,
+        brushStamp[brushDirection],
+        brushSize,
+        layer,
+        currentModes,
+        maskSet,
+        seen,
+        ditherPattern,
+        twoColorMode,
+        secondaryColor,
+        mirrorX,
+        mirrorY,
+        customContext,
+        isPreview,
+      )
+    } else {
+      actionDraw(
+        thispoint.x,
+        thispoint.y,
+        boundaryBox,
+        currentColor,
+        brushStamp[brushDirection],
+        brushSize,
+        layer,
+        currentModes,
+        maskSet,
+        seen,
+        customContext,
+        isPreview,
+      )
+    }
+    previousX = thispoint.x
+    previousY = thispoint.y
+  }
+  //fill endpoint
+  brushDirection = calculateBrushDirection(tx, ty, previousX, previousY)
+  if (ditherPattern) {
+    actionDitherDraw(
+      tx,
+      ty,
+      boundaryBox,
+      currentColor,
+      brushStamp[brushDirection],
+      brushSize,
+      layer,
+      currentModes,
+      maskSet,
+      seen,
+      ditherPattern,
+      twoColorMode,
+      secondaryColor,
+      mirrorX,
+      mirrorY,
+      customContext,
+      isPreview,
+    )
+  } else {
     actionDraw(
-      thispoint.x,
-      thispoint.y,
+      tx,
+      ty,
       boundaryBox,
       currentColor,
       brushStamp[brushDirection],
@@ -362,25 +434,7 @@ export function actionLine(
       customContext,
       isPreview,
     )
-    previousX = thispoint.x
-    previousY = thispoint.y
   }
-  //fill endpoint
-  brushDirection = calculateBrushDirection(tx, ty, previousX, previousY)
-  actionDraw(
-    tx,
-    ty,
-    boundaryBox,
-    currentColor,
-    brushStamp[brushDirection],
-    brushSize,
-    layer,
-    currentModes,
-    maskSet,
-    seen,
-    customContext,
-    isPreview,
-  )
 }
 
 /**
@@ -530,6 +584,11 @@ function renderPoints(
   maskSet,
   customContext = null,
   isPreview = false,
+  ditherPattern = null,
+  twoColorMode = false,
+  secondaryColor = null,
+  mirrorX = false,
+  mirrorY = false,
 ) {
   const seen = new Set()
   let previousX = Math.floor(points[0].x)
@@ -539,20 +598,42 @@ function renderPoints(
     let xt = Math.floor(x)
     let yt = Math.floor(y)
     let brushDirection = calculateBrushDirection(xt, yt, previousX, previousY)
-    actionDraw(
-      xt,
-      yt,
-      boundaryBox,
-      currentColor,
-      brushStamp[brushDirection],
-      brushSize,
-      layer,
-      currentModes,
-      maskSet,
-      seen,
-      customContext,
-      isPreview,
-    )
+    if (ditherPattern) {
+      actionDitherDraw(
+        xt,
+        yt,
+        boundaryBox,
+        currentColor,
+        brushStamp[brushDirection],
+        brushSize,
+        layer,
+        currentModes,
+        maskSet,
+        seen,
+        ditherPattern,
+        twoColorMode,
+        secondaryColor,
+        mirrorX,
+        mirrorY,
+        customContext,
+        isPreview,
+      )
+    } else {
+      actionDraw(
+        xt,
+        yt,
+        boundaryBox,
+        currentColor,
+        brushStamp[brushDirection],
+        brushSize,
+        layer,
+        currentModes,
+        maskSet,
+        seen,
+        customContext,
+        isPreview,
+      )
+    }
     previousX = xt
     previousY = yt
   }
@@ -576,6 +657,11 @@ function renderPoints(
  * @param {Set} maskSet - set of coordinates to draw on if mask is active
  * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {boolean} isPreview - whether the action is a preview (not on main canvas) - used by vector tools before line is confirmed
+ * @param {object} [ditherPattern] - pattern object from ditherPatterns; when provided uses dither drawing
+ * @param {boolean} [twoColorMode] - if true, "off" dither pixels use secondaryColor
+ * @param {object} [secondaryColor] - {color, r, g, b, a} for two-color dither mode
+ * @param {boolean} [mirrorX] - flip the dither pattern horizontally
+ * @param {boolean} [mirrorY] - flip the dither pattern vertically
  */
 export function actionQuadraticCurve(
   startx,
@@ -594,6 +680,11 @@ export function actionQuadraticCurve(
   maskSet,
   customContext = null,
   isPreview = false,
+  ditherPattern = null,
+  twoColorMode = false,
+  secondaryColor = null,
+  mirrorX = false,
+  mirrorY = false,
 ) {
   if (stepNum === 1) {
     actionLine(
@@ -611,6 +702,11 @@ export function actionQuadraticCurve(
       null,
       customContext,
       isPreview,
+      ditherPattern,
+      twoColorMode,
+      secondaryColor,
+      mirrorX,
+      mirrorY,
     )
   } else if (stepNum === 2) {
     let plotPoints = plotQuadBezier(
@@ -632,6 +728,11 @@ export function actionQuadraticCurve(
       maskSet,
       customContext,
       isPreview,
+      ditherPattern,
+      twoColorMode,
+      secondaryColor,
+      mirrorX,
+      mirrorY,
     )
   }
 }
@@ -656,6 +757,11 @@ export function actionQuadraticCurve(
  * @param {Set} maskSet - set of coordinates to draw on if mask is active
  * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {boolean} isPreview - whether the action is a preview (not on main canvas) - used by vector tools before line is confirmed
+ * @param {object} [ditherPattern] - pattern object from ditherPatterns; when provided uses dither drawing
+ * @param {boolean} [twoColorMode] - if true, "off" dither pixels use secondaryColor
+ * @param {object} [secondaryColor] - {color, r, g, b, a} for two-color dither mode
+ * @param {boolean} [mirrorX] - flip the dither pattern horizontally
+ * @param {boolean} [mirrorY] - flip the dither pattern vertically
  */
 export function actionCubicCurve(
   startx,
@@ -676,6 +782,11 @@ export function actionCubicCurve(
   maskSet,
   customContext = null,
   isPreview = false,
+  ditherPattern = null,
+  twoColorMode = false,
+  secondaryColor = null,
+  mirrorX = false,
+  mirrorY = false,
 ) {
   if (stepNum === 1) {
     actionLine(
@@ -693,6 +804,11 @@ export function actionCubicCurve(
       null,
       customContext,
       isPreview,
+      ditherPattern,
+      twoColorMode,
+      secondaryColor,
+      mirrorX,
+      mirrorY,
     )
   } else if (stepNum === 2) {
     let plotPoints = plotQuadBezier(
@@ -714,6 +830,11 @@ export function actionCubicCurve(
       maskSet,
       customContext,
       isPreview,
+      ditherPattern,
+      twoColorMode,
+      secondaryColor,
+      mirrorX,
+      mirrorY,
     )
   } else if (stepNum === 3) {
     let plotPoints = plotCubicBezier(
@@ -737,6 +858,11 @@ export function actionCubicCurve(
       maskSet,
       customContext,
       isPreview,
+      ditherPattern,
+      twoColorMode,
+      secondaryColor,
+      mirrorX,
+      mirrorY,
     )
   }
 }
@@ -761,6 +887,11 @@ export function actionCubicCurve(
  * @param {Set} maskSet - set of coordinates to draw on if mask is active
  * @param {CanvasRenderingContext2D} customContext - use custom context if provided
  * @param {boolean} isPreview - whether the action is a preview (not on main canvas) - used by vector tools before line is confirmed
+ * @param {object} [ditherPattern] - pattern object from ditherPatterns; when provided uses dither drawing
+ * @param {boolean} [twoColorMode] - if true, "off" dither pixels use secondaryColor
+ * @param {object} [secondaryColor] - {color, r, g, b, a} for two-color dither mode
+ * @param {boolean} [mirrorX] - flip the dither pattern horizontally
+ * @param {boolean} [mirrorY] - flip the dither pattern vertically
  */
 export function actionEllipse(
   weight,
@@ -781,6 +912,11 @@ export function actionEllipse(
   maskSet,
   customContext = null,
   isPreview = false,
+  ditherPattern = null,
+  twoColorMode = false,
+  secondaryColor = null,
+  mirrorX = false,
+  mirrorY = false,
 ) {
   const plotPoints = plotRotatedEllipseConics(
     weight,
@@ -804,5 +940,10 @@ export function actionEllipse(
     maskSet,
     customContext,
     isPreview,
+    ditherPattern,
+    twoColorMode,
+    secondaryColor,
+    mirrorX,
+    mirrorY,
   )
 }

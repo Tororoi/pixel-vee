@@ -7,11 +7,14 @@
   top: 0;
   min-width: 206px;
   width: 206px;
+  height: 100%;
   max-height: calc(100% - 4px);
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
   z-index: 103;
+  overflow: hidden;
+  background-color: $dark-gray;
   @include boxBorder;
   touch-action: none;
   .content {
@@ -21,8 +24,10 @@
     overflow-y: scroll;
     @include scrollBar;
   }
-  > .collapsible {
+  &.dialog-box > .collapsible {
     margin-top: 2px;
+    flex: 1 1 0;
+    min-height: 0;
   }
 }
 
@@ -73,12 +78,8 @@
     cursor: grab;
     @include boxBorder($border-color, $white, false, bottom);
     @include dragger;
-    .collapse-btn {
-      @include collapseArrow;
-    }
-    .close-btn {
-      @include closeX;
-    }
+    @include collapseArrow;
+    @include closeButton;
   }
   .collapsible {
     flex: 0 1 auto;

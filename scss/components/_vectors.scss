@@ -15,6 +15,8 @@
   .collapsible {
     padding-top: 2px;
     overflow: hidden;
+    flex: 1 1 0;
+    min-height: 0;
   }
   .vectors-container {
     display: flex;
@@ -41,6 +43,7 @@
         text-align: center;
         line-height: 40px;
         display: flex;
+        flex-flow: column nowrap;
         justify-content: center;
         align-items: center;
         box-sizing: border-box;
@@ -91,26 +94,14 @@
             @include boxBorder($border-color, $white, false, right top);
           }
         }
-        .mode {
-          background-color: $button-color;
-          &.selected {
-            background-color: $white;
-          }
-        }
         .tool {
-          right: 0;
-          top: 0;
           background-color: $button-color;
-          @include boxBorder($border-color, $white, false, left bottom);
           &.selected {
             background-color: $white;
           }
         }
         .actionColor {
-          right: 0;
-          top: 22px;
           background-image: $diagonal-stripe-bg;
-          @include boxBorder($border-color, $white, false, left top bottom);
           .swatch {
             width: 100%;
             height: 100%;
@@ -118,24 +109,25 @@
           }
         }
         .hide {
-          right: 0;
-          top: 44px;
           background-color: $dark-gray;
-          @include boxBorder($border-color, $white, false, left top bottom);
         }
         .trash {
-          right: 0;
-          top: 66px;
           background-color: $dark-gray;
-          @include boxBorder($border-color, $white, false, left top);
+        }
+        .gear {
+          top: 0;
+          right: 0;
+          width: 40px;
+          height: 40px;
+          margin-bottom: 0;
         }
         &.selected {
           background: $gray;
         }
         &:hover {
           border: 2px solid $white;
-          .tool {
-            @include activeBoxBorder;
+          .tool,
+          .gear {
             z-index: 105;
           }
         }
@@ -149,6 +141,153 @@
   &.disabled {
     .collapsible {
       @include disabled-collapsible;
+    }
+  }
+}
+
+.vector-settings {
+  z-index: 1000;
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  position: absolute;
+  background: $dark-gray;
+  min-width: 200px;
+  @include bubbleBorder;
+  > * {
+    margin: 12px 12px 0 12px;
+  }
+  > :last-child {
+    margin-bottom: 12px;
+  }
+  .header {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    font-size: 16px;
+    min-height: 20px;
+    @include dragger;
+    @include closeButton;
+  }
+  .vector-settings-modes {
+    display: flex;
+    flex-flow: row nowrap;
+    gap: 4px;
+    .mode {
+      position: relative;
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+    }
+  }
+  .vector-settings-color-row {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 8px;
+    span {
+      font-size: 11px;
+      min-width: 60px;
+    }
+    .actionColor {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      background-image: $diagonal-stripe-bg;
+      @include boxBorder;
+      cursor: pointer;
+      .swatch {
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+    }
+  }
+  .vector-settings-dither-row {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    gap: 8px;
+    span {
+      font-size: 11px;
+      min-width: 60px;
+    }
+    .vector-dither-preview {
+      position: relative;
+      width: 32px;
+      height: 32px;
+      background: $diagonal-stripe-bg;
+      @include boxBorder;
+      cursor: pointer;
+      svg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+    }
+  }
+  .vector-settings-brush-row {
+    display: flex;
+    flex-flow: column nowrap;
+    gap: 4px;
+    span {
+      font-size: 11px;
+    }
+    .slider {
+      width: calc(100% - 4px);
+    }
+  }
+}
+
+.vector-dither-picker {
+  z-index: 1001;
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  position: absolute;
+  background: $dark-gray;
+  @include bubbleBorder;
+  .header {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    min-height: 20px;
+    width: 100%;
+    margin: 0;
+    @include dragger;
+    @include closeButton;
+  }
+  .vector-dither-grid {
+    display: grid;
+    grid-template-columns: repeat(9, 1fr);
+    gap: 2px;
+    padding: 4px 2px 2px 2px;
+    .dither-grid-btn {
+      width: 32px;
+      height: 32px;
+      cursor: pointer;
+      background: $diagonal-stripe-bg;
+      @include boxBorder;
+      &.selected {
+        z-index: 105;
+        @include boxBorder($white, $white);
+      }
+      &:hover {
+        z-index: 104;
+      }
+      svg {
+        width: 100%;
+        height: 100%;
+      }
     }
   }
 }

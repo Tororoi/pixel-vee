@@ -11,6 +11,8 @@ import {
   renderPaletteToDOM,
   renderPalettePresetsToDOM,
   updateDitherPickerColors,
+  updateVectorDitherPreview,
+  updateVectorDitherPickerColors,
 } from "../DOM/render.js"
 import { changeActionVectorColor } from "../Actions/modifyTimeline.js"
 import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
@@ -63,15 +65,25 @@ export function setColor(r, g, b, a, target) {
     let color = { color: `rgba(${r},${g},${b},${a / 255})`, r, g, b, a }
     target.color = color
     target.style.backgroundColor = color.color
+    // Update inner swatch div if present (e.g. vector settings dialog color buttons)
+    const innerSwatch = target.querySelector?.('.swatch')
+    if (innerSwatch) innerSwatch.style.backgroundColor = color.color
     if (target.vector) {
       let vector = target.vector
-      let oldColor = { ...vector.color }
-      vector.color = color
-      renderCanvas(vector.layer, true)
-      changeActionVectorColor(vector, oldColor)
-
-      state.clearRedoStack()
-      renderVectorsToDOM()
+      if (target.isSecondaryColor) {
+        vector.secondaryColor = color
+        renderCanvas(vector.layer, true)
+        state.clearRedoStack()
+      } else {
+        let oldColor = { ...vector.color }
+        vector.color = color
+        renderCanvas(vector.layer, true)
+        changeActionVectorColor(vector, oldColor)
+        state.clearRedoStack()
+        renderVectorsToDOM()
+      }
+      updateVectorDitherPreview(vector)
+      updateVectorDitherPickerColors(vector)
     }
     if (swatches.activePaletteIndex !== null) {
       if (swatches.activePaletteIndex > swatches.palette.length - 1) {

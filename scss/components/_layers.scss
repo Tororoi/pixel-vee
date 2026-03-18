@@ -11,6 +11,8 @@
   .collapsible {
     padding-top: 2px;
     overflow: hidden;
+    flex: 1 1 0;
+    min-height: 0;
   }
   .layers-control {
     flex-shrink: 0; /* Prevents the child from shrinking below its content size */
@@ -145,6 +147,16 @@
   }
   > :last-child {
     margin-bottom: 16px;
+  }
+  .header {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    min-height: 20px;
+    @include dragger;
+    @include closeButton;
   }
   #layer-name {
     width: 156px;
