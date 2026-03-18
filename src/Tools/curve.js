@@ -3,14 +3,11 @@ import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
-import {
-  actionQuadraticCurve,
-  actionCubicCurve,
-} from '../Actions/pointerActions.js'
+import { actionQuadraticCurve, actionCubicCurve } from '../Actions/pointer/curve.js'
 import { vectorGui } from '../GUI/vector.js'
 import { renderCanvas } from '../Canvas/render.js'
 import { coordArrayFromSet } from '../utils/maskHelpers.js'
-import { addToTimeline } from '../Actions/undoRedo.js'
+import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
 import { enableActionsForSelection } from '../DOM/disableDomElements.js'
 import { rerouteVectorStepsAction } from './adjust.js'
 

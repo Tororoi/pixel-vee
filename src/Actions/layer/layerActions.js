@@ -1,12 +1,12 @@
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { tools } from "../Tools/index.js"
-import { vectorGui } from "../GUI/vector.js"
-import { addToTimeline } from "../Actions/undoRedo.js"
-import { createRasterLayer, createReferenceLayer } from "../Canvas/layers.js"
-import { renderCanvas } from "../Canvas/render.js"
-import { renderLayersToDOM, renderVectorsToDOM } from "../DOM/render.js"
-import { dom } from "../Context/dom.js"
+import { state } from "../../Context/state.js"
+import { canvas } from "../../Context/canvas.js"
+import { tools } from "../../Tools/index.js"
+import { vectorGui } from "../../GUI/vector.js"
+import { addToTimeline } from "../undoRedo/undoRedo.js"
+import { createRasterLayer, createReferenceLayer } from "../../Canvas/layers.js"
+import { renderCanvas } from "../../Canvas/render.js"
+import { renderLayersToDOM, renderVectorsToDOM } from "../../DOM/render.js"
+import { dom } from "../../Context/dom.js"
 
 //=============================================//
 //============ * * * Layers * * * =============//

@@ -4,15 +4,11 @@ import { canvas } from '../Context/canvas.js'
 import { tools } from '../Tools/index.js'
 import { vectorGui } from '../GUI/vector.js'
 import { calculateBrushDirection } from '../utils/drawHelpers.js'
-import {
-  actionDitherDraw,
-  actionBuildUpDitherDraw,
-  actionLine,
-  actionFill,
-  actionEllipse,
-  actionQuadraticCurve,
-  actionCubicCurve,
-} from '../Actions/pointerActions.js'
+import { actionDitherDraw, actionBuildUpDitherDraw } from '../Actions/pointer/draw.js'
+import { actionLine } from '../Actions/pointer/line.js'
+import { actionFill } from '../Actions/pointer/fill.js'
+import { actionEllipse } from '../Actions/pointer/ellipse.js'
+import { actionQuadraticCurve, actionCubicCurve } from '../Actions/pointer/curve.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
 import { setInitialZoom } from '../utils/canvasHelpers.js'
 import { transformRasterContent } from '../utils/transformHelpers.js'

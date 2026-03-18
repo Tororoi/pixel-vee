@@ -1,6 +1,6 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { addToTimeline } from "../Actions/undoRedo.js"
+import { addToTimeline } from "../Actions/undoRedo/undoRedo.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderVectorsToDOM } from "../DOM/renderVectors.js"
 import { dom } from "../Context/dom.js"

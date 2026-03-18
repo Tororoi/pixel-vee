@@ -18,7 +18,7 @@ import {
 import {
   removeActionVector,
   changeActionVectorMode,
-} from '../Actions/modifyTimeline.js'
+} from '../Actions/modifyTimeline/modifyTimeline.js'
 import { vectorGui } from '../GUI/vector.js'
 import { initializeColorPicker } from '../Swatch/events.js'
 import { constrainElementOffsets } from '../utils/constrainElementOffsets.js'
@@ -27,12 +27,12 @@ import {
   actionSelectVector,
   actionDeselectVector,
   actionDeselect,
-} from '../Actions/nonPointerActions.js'
+} from '../Actions/nonPointer/selectionActions.js'
 import {
   addReferenceLayer,
   addRasterLayer,
   removeLayer,
-} from '../Actions/layerActions.js'
+} from '../Actions/layer/layerActions.js'
 import { createPreviewLayer } from './layers.js'
 import { switchTool } from '../Tools/toolbox.js'
 import { enableActionsForSelection } from '../DOM/disableDomElements.js'

@@ -3,17 +3,14 @@ import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
-import {
-  actionDitherDraw,
-  actionBuildUpDitherDraw,
-  actionLine,
-} from '../Actions/pointerActions.js'
+import { actionDitherDraw, actionBuildUpDitherDraw } from '../Actions/pointer/draw.js'
+import { actionLine } from '../Actions/pointer/line.js'
 import { getAngle, getTriangle } from '../utils/trig.js'
 import { renderCanvas, scheduleRender } from '../Canvas/render.js'
 import { calculateBrushDirection } from '../utils/drawHelpers.js'
 import { coordArrayFromSet } from '../utils/maskHelpers.js'
 import { createColorMaskSet } from '../Canvas/masks.js'
-import { addToTimeline } from '../Actions/undoRedo.js'
+import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
 
 //====================================//
 //=== * * * Brush Controller * * * ===//

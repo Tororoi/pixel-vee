@@ -1,7 +1,7 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { keys } from "../Shortcuts/keys.js"
-import { addToTimeline } from "../Actions/undoRedo.js"
+import { addToTimeline } from "../Actions/undoRedo/undoRedo.js"
 import { renderCanvas } from "../Canvas/render.js"
 
 //==========================================//

@@ -14,7 +14,7 @@ import {
   updateVectorDitherPreview,
   updateVectorDitherPickerColors,
 } from "../DOM/render.js"
-import { changeActionVectorColor } from "../Actions/modifyTimeline.js"
+import { changeActionVectorColor } from "../Actions/modifyTimeline/modifyTimeline.js"
 import { constrainElementOffsets } from "../utils/constrainElementOffsets.js"
 import { DEFAULT_PALETTES, PRESETS } from "../utils/palettes.js"
 

@@ -13,10 +13,8 @@ import {
   updateDitherPickerColors,
 } from "../DOM/render.js"
 import { renderCursor } from "../GUI/cursor.js"
-import {
-  actionConfirmPastedPixels,
-  actionDeselect,
-} from "../Actions/nonPointerActions.js"
+import { actionDeselect } from "../Actions/nonPointer/selectionActions.js"
+import { actionConfirmPastedPixels } from "../Actions/nonPointer/clipboardActions.js"
 
 /**
  * Sync each tool group button to its default active tool on page load

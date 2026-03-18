@@ -1,7 +1,7 @@
 import { TRANSLATE, ROTATE } from "../utils/constants.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { modifyVectorAction } from "../Actions/modifyTimeline.js"
+import { modifyVectorAction } from "../Actions/modifyTimeline/modifyTimeline.js"
 import {
   vectorGui,
   createActiveIndexesForRender,
