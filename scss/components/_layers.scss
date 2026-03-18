@@ -64,7 +64,7 @@
     overflow-y: auto;
     margin: 2px;
     @include boxBorder;
-    @include scrollBar;
+    @extend %scrollBar;
     .layers {
       display: flex;
       flex-flow: column-reverse nowrap;
@@ -126,7 +126,7 @@
   }
   &.disabled {
     .collapsible {
-      @include disabled-collapsible;
+      @extend %disabled-collapsible;
       @include boxBorder($border-color, $border-color);
     }
   }
@@ -155,8 +155,8 @@
     align-items: center;
     position: relative;
     min-height: 20px;
-    @include dragger;
-    @include closeButton;
+    @extend %dragger;
+    @extend %closeButton;
   }
   #layer-name {
     width: 156px;

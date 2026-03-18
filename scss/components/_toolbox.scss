@@ -101,7 +101,7 @@
             .tool {
               margin: 0;
               background-color: unset;
-              @include cancelBorder;
+              @extend %cancelBorder;
             }
           }
           &.open .tool-group-popout {
