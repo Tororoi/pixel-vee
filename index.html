@@ -191,7 +191,6 @@
             height="512px"
           ></canvas>
           <div class="canvas-layers"></div>
-          <!-- <div class="non-canvas-gui marching-ants bnw marching"></div> -->
           <canvas
             class="onscreen-canvas"
             id="cursor-canvas"
@@ -707,9 +706,7 @@
             id="settings-closer"
             class="close-btn"
             data-tooltip="Close"
-          >
-            <span class="close"></span>
-          </button>
+          ></button>
         </div>
         <div class="collapsible">
           <div id="settings-interface" class="settings-interface">
@@ -938,9 +935,7 @@
             id="dither-closer"
             class="close-btn"
             data-tooltip="Close"
-          >
-            <span class="close"></span>
-          </button>
+          ></button>
         </div>
         <div class="collapsible">
           <div class="dither-controls">
@@ -1031,9 +1026,7 @@
             id="picker-closer"
             class="close-btn"
             data-tooltip="Close"
-          >
-            <span class="close"></span>
-          </button>
+          ></button>
         </div>
         <div class="collapsible">
           <div id="picker-interface" class="picker-interface">
@@ -1197,9 +1190,7 @@
             id="size-closer"
             class="close-btn"
             data-tooltip="Close"
-          >
-            <span class="close"></span>
-          </button>
+          ></button>
         </div>
         <div class="collapsible">
           <form class="dimensions-form">
@@ -1265,9 +1256,7 @@
             id="vector-transform-ui-closer"
             class="close-btn"
             data-tooltip="Close"
-          >
-            <span class="close"></span>
-          </button>
+          ></button>
         </div>
         <div class="collapsible">
           <div
@@ -1350,9 +1339,7 @@
             id="save-closer"
             class="close-btn"
             data-tooltip="Close"
-          >
-            <span class="close"></span>
-          </button>
+          ></button>
         </div>
         <div class="collapsible">
           <form id="save-interface" class="save-interface">
@@ -1498,6 +1485,15 @@
       </div>
     </div>
     <div class="layer-settings dialog-box"></div>
+    <div class="vector-settings dialog-box"></div>
+    <div class="vector-dither-picker dialog-box" style="display: none">
+      <div class="header">
+        <div class="drag-btn locked"><div class="grip"></div></div>
+        <span>Dither Pattern</span>
+        <button type="button" class="close-btn" aria-label="Close"></button>
+      </div>
+      <div class="vector-dither-grid"></div>
+    </div>
     <div id="tooltip" class="tooltip"></div>
   </body>
 </html>

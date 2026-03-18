@@ -8,11 +8,23 @@ $bp-md: 'min-width: 768px' !default;
 $bp-lg: 'min-width: 1024px' !default;
 $bp-xl: 'min-width: 1280px' !default;
 $bp-xxl: 'min-width: 1440px' !default;
-$bp-vxs: 'min-height: 375px' !default;
-$bp-vsm: 'min-height: 512px' !default;
-$bp-vmd: 'min-height: 768px' !default;
 $bp-landscape: 'orientation: landscape' !default;
 $bp-portrait: 'orientation: portrait' !default;
+
+/* Spacing */
+$spacing-xs: 2px !default;
+$spacing-sm: 4px !default;
+$spacing-md: 8px !default;
+$spacing-lg: 16px !default;
+
+/* Component Sizes */
+$size-button-sm: 20px !default; // small inline action buttons
+$size-button-md: 40px !default; // standard tool/action buttons
+$size-button-lg: 50px !default; // layer row height
+
+/* Layout Dimensions */
+$sidebar-width: 206px !default;
+$nav-height: 52px !default;
 
 /* Colors */
 $white: rgb(255, 255, 255) !default;
@@ -50,6 +62,8 @@ $diagonal-stripe-bg: repeating-linear-gradient(
 :root {
   //Define css vars after scss vars to have option to use scss vars as single source of truth
   --border-color: #{$border-color};
+  --sidebar-width: #{$sidebar-width};
+  --nav-height: #{$nav-height};
   --primary-swatch-color: 0, 0, 0;
   --primary-swatch-alpha: 1;
   --secondary-swatch-color: 255, 255, 255;

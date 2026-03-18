@@ -11,6 +11,8 @@
   .collapsible {
     padding-top: 2px;
     overflow: hidden;
+    flex: 1 1 0;
+    min-height: 0;
   }
   .layers-control {
     flex-shrink: 0; /* Prevents the child from shrinking below its content size */
@@ -22,8 +24,8 @@
       display: none;
     }
     .reference {
-      width: 40px;
-      height: 40px;
+      width: $size-button-md;
+      height: $size-button-md;
       cursor: pointer;
     }
     input[type="file"]:disabled + .reference {
@@ -32,8 +34,8 @@
       @include referenceIcon($border-color, $border-color);
     }
     .add-layer {
-      width: 40px;
-      height: 40px;
+      width: $size-button-md;
+      height: $size-button-md;
       cursor: pointer;
       &:disabled {
         // opacity: 1 !important;
@@ -41,8 +43,8 @@
       }
     }
     .trash {
-      width: 40px;
-      height: 40px;
+      width: $size-button-md;
+      height: $size-button-md;
       cursor: pointer;
       &:disabled {
         // opacity: 1 !important;
@@ -62,14 +64,14 @@
     overflow-y: auto;
     margin: 2px;
     @include boxBorder;
-    @include scrollBar;
+    @extend %scrollBar;
     .layers {
       display: flex;
       flex-flow: column-reverse nowrap;
       justify-content: flex-end;
       .layer {
         cursor: grab;
-        height: 50px;
+        height: $size-button-lg;
         width: 100%;
         text-align: center;
         line-height: 40px;
@@ -89,8 +91,8 @@
           background: black;
         }
         .hide {
-          width: 40px;
-          height: 40px;
+          width: $size-button-md;
+          height: $size-button-md;
           margin: 5px;
           cursor: pointer;
         }
@@ -103,8 +105,8 @@
           position: absolute;
           right: 0;
           cursor: pointer;
-          width: 40px;
-          height: 40px;
+          width: $size-button-md;
+          height: $size-button-md;
           z-index: 104;
           margin: 5px;
         }
@@ -124,7 +126,7 @@
   }
   &.disabled {
     .collapsible {
-      @include disabled-collapsible;
+      @extend %disabled-collapsible;
       @include boxBorder($border-color, $border-color);
     }
   }
@@ -145,6 +147,16 @@
   }
   > :last-child {
     margin-bottom: 16px;
+  }
+  .header {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    min-height: 20px;
+    @extend %dragger;
+    @extend %closeButton;
   }
   #layer-name {
     width: 156px;

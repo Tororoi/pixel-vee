@@ -1,11 +1,16 @@
 /* Base styles, mixins, keyframes, variables */
 /* Variables */
 /* Breakpoints */
+/* Spacing */
+/* Component Sizes */
+/* Layout Dimensions */
 /* Colors */
 /* Color Assignments */
 /* Backgrounds */
 :root {
   --border-color: rgb(131, 131, 131);
+  --sidebar-width: 206px;
+  --nav-height: 52px;
   --primary-swatch-color: 0, 0, 0;
   --primary-swatch-alpha: 1;
   --secondary-swatch-color: 255, 255, 255;
@@ -16,6 +21,11 @@
   --new-swatch-alpha: 1;
 }
 
+/* Base styles, mixins, keyframes, variables */
+/* Base styles, mixins, keyframes, variables */
+/* Base styles, mixins, keyframes, variables */
+/* Base styles, mixins, keyframes, variables */
+/* Base styles, mixins, keyframes, variables */
 /* Base styles, mixins, keyframes, variables */
 @keyframes flash {
   0% {
@@ -37,35 +47,172 @@
   }
 }
 /* Base styles, mixins, keyframes, variables */
-.marching-ants {
-  padding: 6px;
-  margin: 20px;
-  background-size: 10px 1px, 10px 1px, 1px 10px, 1px 10px;
-  background-position: 0 0, 0 100%, 0 0, 100% 0;
-  background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
-  animation: marching-ants-1 4s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
-  animation-play-state: paused;
+.palette-interface .palette-container .palette-colors .palette-color.selected:hover:not([disabled]), .palette-interface .palette-container .palette-colors.edit-mode .palette-color:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
 }
-.marching-ants.marching {
-  animation-play-state: running;
-}
-.marching-ants.reverse {
-  animation-direction: reverse;
-}
-.marching-ants {
-  background-image: linear-gradient(to right, rgb(255, 255, 255) 50%, rgb(0, 0, 0) 50%), linear-gradient(to right, rgb(255, 255, 255) 50%, rgb(0, 0, 0) 50%), linear-gradient(to bottom, rgb(255, 255, 255) 50%, rgb(0, 0, 0) 50%), linear-gradient(to bottom, rgb(255, 255, 255) 50%, rgb(0, 0, 0) 50%);
+.palette-interface .palette-container .palette-colors .palette-color.selected:hover:not([disabled]):hover:not([disabled]), .palette-interface .palette-container .palette-colors.edit-mode .palette-color:hover:not([disabled]):hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
 }
 
-@keyframes marching-ants-1 {
-  0% {
-    background-position: 0 0, 0 100%, 0 0, 100% 0;
-  }
-  100% {
-    background-position: 20px 0, -20px 100%, 0 -20px, 100% 20px;
-  }
+.palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
 }
+.palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]):hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
+}
+
+.picker-container .collapsible .picker-interface #left #picker .picker-slider::-webkit-slider-thumb, .picker-container .collapsible .picker-interface #left #picker .picker-slider::-moz-range-thumb {
+  box-shadow: 2px 0 rgb(131, 131, 131), -2px 0 rgb(131, 131, 131), 0 -2px rgb(131, 131, 131), 0 2px rgb(131, 131, 131);
+}
+
+.picker-container .collapsible .picker-interface #left #picker .picker-slider:hover::-webkit-slider-thumb, .picker-container .collapsible .picker-interface #left #picker .picker-slider:focus::-webkit-slider-thumb, .picker-container .collapsible .picker-interface #left #picker .picker-slider:hover::-moz-range-thumb, .picker-container .collapsible .picker-interface #left #picker .picker-slider:focus::-moz-range-thumb, .palette-interface .palette-container .palette-colors .palette-color.selected {
+  box-shadow: 2px 0 rgb(255, 255, 255), -2px 0 rgb(255, 255, 255), 0 -2px rgb(255, 255, 255), 0 2px rgb(255, 255, 255);
+}
+
+.toolbox .collapsible .tools .columns .tool-group .tool-group-popout .tool, .vector-transform-ui-container .collapsible .vector-transform-ui-interface .custom-shape.tool, .toolbox .collapsible .custom-shape.tool, .toolbox .collapsible .custom-shape.tool-group-btn {
+  box-shadow: none;
+}
+.toolbox .collapsible .tools .columns .tool-group .tool-group-popout .tool:hover:not([disabled]), .vector-transform-ui-container .collapsible .vector-transform-ui-interface .custom-shape.tool:hover:not([disabled]), .toolbox .collapsible .custom-shape.tool:hover:not([disabled]), .toolbox .collapsible .custom-shape.tool-group-btn:hover:not([disabled]) {
+  box-shadow: none;
+}
+
+.vector-settings .header .drag-btn, .vector-dither-picker .header .drag-btn, .layer-settings .header .drag-btn, .dialog-box .header .drag-btn {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+}
+.vector-settings .header .drag-btn .grip, .vector-dither-picker .header .drag-btn .grip, .layer-settings .header .drag-btn .grip, .dialog-box .header .drag-btn .grip {
+  margin: 5px;
+  height: 2px;
+  width: 2px;
+  background: rgb(131, 131, 131);
+  box-shadow: 0 0 rgb(131, 131, 131), 4px 0 rgb(131, 131, 131), 0 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 0 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131);
+}
+.vector-settings .header .drag-btn.locked .grip, .vector-dither-picker .header .drag-btn.locked .grip, .layer-settings .header .drag-btn.locked .grip, .dialog-box .header .drag-btn.locked .grip {
+  box-shadow: 2px -2px rgb(131, 131, 131), 4px -2px rgb(131, 131, 131), 0 0 rgb(131, 131, 131), 6px 0 rgb(131, 131, 131), 0 2px rgb(131, 131, 131), 6px 2px rgb(131, 131, 131), -2px 4px rgb(131, 131, 131), 0 4px rgb(131, 131, 131), 2px 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 6px 4px rgb(131, 131, 131), 8px 4px rgb(131, 131, 131), -2px 6px rgb(131, 131, 131), 0 6px rgb(131, 131, 131), 4px 6px rgb(131, 131, 131), 6px 6px rgb(131, 131, 131), 8px 6px rgb(131, 131, 131), -2px 8px rgb(131, 131, 131), 0 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131), 6px 8px rgb(131, 131, 131), 8px 8px rgb(131, 131, 131), -2px 10px rgb(131, 131, 131), 0 10px rgb(131, 131, 131), 2px 10px rgb(131, 131, 131), 4px 10px rgb(131, 131, 131), 6px 10px rgb(131, 131, 131), 8px 10px rgb(131, 131, 131);
+}
+.vector-settings .header:hover:not([disabled]) .drag-btn .grip, .vector-dither-picker .header:hover:not([disabled]) .drag-btn .grip, .layer-settings .header:hover:not([disabled]) .drag-btn .grip, .dialog-box .header:hover:not([disabled]) .drag-btn .grip {
+  background: rgb(255, 255, 255);
+  box-shadow: 0 0 rgb(255, 255, 255), 4px 0 rgb(255, 255, 255), 0 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 0 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255);
+}
+.vector-settings .header:hover:not([disabled]) .drag-btn.locked .grip, .vector-dither-picker .header:hover:not([disabled]) .drag-btn.locked .grip, .layer-settings .header:hover:not([disabled]) .drag-btn.locked .grip, .dialog-box .header:hover:not([disabled]) .drag-btn.locked .grip {
+  box-shadow: 2px -2px rgb(255, 255, 255), 4px -2px rgb(255, 255, 255), 0 0 rgb(255, 255, 255), 6px 0 rgb(255, 255, 255), 0 2px rgb(255, 255, 255), 6px 2px rgb(255, 255, 255), -2px 4px rgb(255, 255, 255), 0 4px rgb(255, 255, 255), 2px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 6px 4px rgb(255, 255, 255), 8px 4px rgb(255, 255, 255), -2px 6px rgb(255, 255, 255), 0 6px rgb(255, 255, 255), 4px 6px rgb(255, 255, 255), 6px 6px rgb(255, 255, 255), 8px 6px rgb(255, 255, 255), -2px 8px rgb(255, 255, 255), 0 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255), 6px 8px rgb(255, 255, 255), 8px 8px rgb(255, 255, 255), -2px 10px rgb(255, 255, 255), 0 10px rgb(255, 255, 255), 2px 10px rgb(255, 255, 255), 4px 10px rgb(255, 255, 255), 6px 10px rgb(255, 255, 255), 8px 10px rgb(255, 255, 255);
+}
+
+.dialog-box .header .collapse-btn {
+  position: absolute;
+  right: 0;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  display: flex;
+  flex-flow: row nowrap;
+  cursor: pointer;
+}
+.dialog-box .header .collapse-btn input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+.dialog-box .header .collapse-btn .arrow {
+  height: 2px;
+  width: 2px;
+  box-shadow: 9px 5px rgb(131, 131, 131), 7px 7px rgb(131, 131, 131), 9px 7px rgb(131, 131, 131), 11px 7px rgb(131, 131, 131), 5px 9px rgb(131, 131, 131), 7px 9px rgb(131, 131, 131), 9px 9px rgb(131, 131, 131), 11px 9px rgb(131, 131, 131), 13px 9px rgb(131, 131, 131), 9px 11px rgb(131, 131, 131), 9px 13px rgb(131, 131, 131);
+}
+.dialog-box .header .collapse-btn input:checked ~ .arrow {
+  box-shadow: 9px 5px rgb(131, 131, 131), 9px 7px rgb(131, 131, 131), 5px 9px rgb(131, 131, 131), 7px 9px rgb(131, 131, 131), 9px 9px rgb(131, 131, 131), 11px 9px rgb(131, 131, 131), 13px 9px rgb(131, 131, 131), 7px 11px rgb(131, 131, 131), 9px 11px rgb(131, 131, 131), 11px 11px rgb(131, 131, 131), 9px 13px rgb(131, 131, 131);
+}
+.dialog-box .header .collapse-btn:hover .arrow {
+  box-shadow: 9px 5px rgb(255, 255, 255), 7px 7px rgb(255, 255, 255), 9px 7px rgb(255, 255, 255), 11px 7px rgb(255, 255, 255), 5px 9px rgb(255, 255, 255), 7px 9px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 11px 9px rgb(255, 255, 255), 13px 9px rgb(255, 255, 255), 9px 11px rgb(255, 255, 255), 9px 13px rgb(255, 255, 255);
+}
+.dialog-box .header .collapse-btn:hover input:checked ~ .arrow {
+  box-shadow: 9px 5px rgb(255, 255, 255), 9px 7px rgb(255, 255, 255), 5px 9px rgb(255, 255, 255), 7px 9px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 11px 9px rgb(255, 255, 255), 13px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 9px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 9px 13px rgb(255, 255, 255);
+}
+
+.vector-settings .header .close-btn, .vector-dither-picker .header .close-btn, .layer-settings .header .close-btn, .dialog-box .header .close-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  background: transparent;
+}
+.vector-settings .header .close-btn::after, .vector-dither-picker .header .close-btn::after, .layer-settings .header .close-btn::after, .dialog-box .header .close-btn::after {
+  content: "";
+  display: block;
+  position: absolute;
+  height: 2px;
+  width: 2px;
+  top: 0;
+  left: 0;
+  box-shadow: 5px 5px rgb(131, 131, 131), 13px 5px rgb(131, 131, 131), 7px 7px rgb(131, 131, 131), 11px 7px rgb(131, 131, 131), 9px 9px rgb(131, 131, 131), 7px 11px rgb(131, 131, 131), 11px 11px rgb(131, 131, 131), 5px 13px rgb(131, 131, 131), 13px 13px rgb(131, 131, 131);
+}
+.vector-settings .header .close-btn:hover::after, .vector-dither-picker .header .close-btn:hover::after, .layer-settings .header .close-btn:hover::after, .dialog-box .header .close-btn:hover::after {
+  box-shadow: 5px 5px rgb(255, 255, 255), 13px 5px rgb(255, 255, 255), 7px 7px rgb(255, 255, 255), 11px 7px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 5px 13px rgb(255, 255, 255), 13px 13px rgb(255, 255, 255);
+}
+
+.vectors-interface .vectors-container::-webkit-scrollbar, .layers-interface .layers-container::-webkit-scrollbar, .sidebar .content::-webkit-scrollbar {
+  width: 10px;
+}
+.vectors-interface .vectors-container::-webkit-scrollbar-track, .layers-interface .layers-container::-webkit-scrollbar-track, .sidebar .content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.vectors-interface .vectors-container::-webkit-scrollbar-thumb, .layers-interface .layers-container::-webkit-scrollbar-thumb, .sidebar .content::-webkit-scrollbar-thumb {
+  background: rgb(131, 131, 131);
+  background-clip: content-box;
+  border: 2px solid transparent;
+}
+.vectors-interface .vectors-container::-webkit-scrollbar-thumb:hover, .layers-interface .layers-container::-webkit-scrollbar-thumb:hover, .sidebar .content::-webkit-scrollbar-thumb:hover {
+  background: white;
+  background-clip: content-box;
+}
+
+.vector-settings .vector-settings-color-row, .vector-settings .vector-settings-dither-row {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  gap: 8px;
+}
+.vector-settings .vector-settings-color-row span, .vector-settings .vector-settings-dither-row span {
+  font-size: 11px;
+  min-width: 60px;
+}
+
+.dither-picker-container .dither-grid, .vector-dither-picker .vector-dither-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: 2px;
+  padding: 4px 2px 2px 2px;
+}
+
+.dither-picker-container .dither-grid .dither-grid-btn, .vector-dither-picker .vector-dither-grid .dither-grid-btn {
+  width: 32px;
+  height: 32px;
+  cursor: pointer;
+  background: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.dither-picker-container .dither-grid .dither-grid-btn:hover:not([disabled]), .vector-dither-picker .vector-dither-grid .dither-grid-btn:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.dither-picker-container .dither-grid .selected.dither-grid-btn, .vector-dither-picker .vector-dither-grid .selected.dither-grid-btn {
+  z-index: 105;
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.dither-picker-container .dither-grid .selected.dither-grid-btn:hover:not([disabled]), .vector-dither-picker .vector-dither-grid .selected.dither-grid-btn:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.dither-picker-container .dither-grid .dither-grid-btn:hover, .vector-dither-picker .vector-dither-grid .dither-grid-btn:hover {
+  z-index: 104;
+}
+.dither-picker-container .dither-grid .dither-grid-btn svg, .vector-dither-picker .vector-dither-grid .dither-grid-btn svg {
+  width: 100%;
+  height: 100%;
+}
+
 .vector-transform-ui-container, .export-container, .save-container, .size-container, .picker-container, .settings-container, .dither-picker-container {
   user-select: none;
   position: absolute;
@@ -108,10 +255,6 @@
 }
 .vector-transform-ui-container .collapsible .vector-transform-ui-interface .custom-shape.tool, .toolbox .collapsible .custom-shape.tool, .toolbox .collapsible .custom-shape.tool-group-btn {
   background-color: transparent;
-  box-shadow: none;
-}
-.vector-transform-ui-container .collapsible .vector-transform-ui-interface .custom-shape.tool:hover:not([disabled]), .toolbox .collapsible .custom-shape.tool:hover:not([disabled]), .toolbox .collapsible .custom-shape.tool-group-btn:hover:not([disabled]) {
-  box-shadow: none;
 }
 
 .tooltip:after, .tooltip.page-left:after, .tooltip.page-center:after {
@@ -122,6 +265,18 @@
   position: absolute;
   top: -2px;
   background: rgb(255, 255, 199);
+}
+
+.vectors-interface.disabled .collapsible, .layers-interface.disabled .collapsible {
+  cursor: not-allowed;
+}
+.vectors-interface.disabled .collapsible *, .layers-interface.disabled .collapsible * {
+  pointer-events: none;
+}
+.vectors-interface.disabled .collapsible button, .layers-interface.disabled .collapsible button,
+.vectors-interface.disabled .collapsible label,
+.layers-interface.disabled .collapsible label {
+  opacity: 0.5;
 }
 
 /* Base styles, mixins, keyframes, variables */
@@ -311,13 +466,16 @@ svg {
   position: absolute;
   left: 0;
   top: 0;
-  min-width: 206px;
-  width: 206px;
+  min-width: var(--sidebar-width);
+  width: var(--sidebar-width);
+  height: 100%;
   max-height: calc(100% - 4px);
   display: flex;
   flex-flow: column nowrap;
   align-items: center;
   z-index: 103;
+  overflow: hidden;
+  background-color: rgb(61, 61, 61);
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .sidebar:hover:not([disabled]) {
@@ -330,23 +488,10 @@ svg {
   height: auto;
   overflow-y: scroll;
 }
-.sidebar .content::-webkit-scrollbar {
-  width: 10px;
-}
-.sidebar .content::-webkit-scrollbar-track {
-  background: transparent;
-}
-.sidebar .content::-webkit-scrollbar-thumb {
-  background: rgb(131, 131, 131);
-  background-clip: content-box;
-  border: 2px solid transparent;
-}
-.sidebar .content::-webkit-scrollbar-thumb:hover {
-  background: white;
-  background-clip: content-box;
-}
-.sidebar > .collapsible {
+.sidebar.dialog-box > .collapsible {
   margin-top: 2px;
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 .page {
@@ -355,7 +500,7 @@ svg {
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: calc(100% - 52px);
+  height: calc(100% - var(--nav-height));
   user-select: none;
 }
 
@@ -404,82 +549,6 @@ svg {
 .dialog-box .header:hover:not([disabled]) {
   box-shadow: 0 2px 0 0 rgb(255, 255, 255);
 }
-.dialog-box .header .drag-btn {
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 20px;
-  height: 20px;
-}
-.dialog-box .header .drag-btn .grip {
-  margin: 5px;
-  height: 2px;
-  width: 2px;
-  background: rgb(131, 131, 131);
-  box-shadow: 0 0 rgb(131, 131, 131), 4px 0 rgb(131, 131, 131), 0 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 0 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131);
-}
-.dialog-box .header .drag-btn.locked .grip {
-  box-shadow: 2px -2px rgb(131, 131, 131), 4px -2px rgb(131, 131, 131), 0 0 rgb(131, 131, 131), 6px 0 rgb(131, 131, 131), 0 2px rgb(131, 131, 131), 6px 2px rgb(131, 131, 131), -2px 4px rgb(131, 131, 131), 0 4px rgb(131, 131, 131), 2px 4px rgb(131, 131, 131), 4px 4px rgb(131, 131, 131), 6px 4px rgb(131, 131, 131), 8px 4px rgb(131, 131, 131), -2px 6px rgb(131, 131, 131), 0 6px rgb(131, 131, 131), 4px 6px rgb(131, 131, 131), 6px 6px rgb(131, 131, 131), 8px 6px rgb(131, 131, 131), -2px 8px rgb(131, 131, 131), 0 8px rgb(131, 131, 131), 4px 8px rgb(131, 131, 131), 6px 8px rgb(131, 131, 131), 8px 8px rgb(131, 131, 131), -2px 10px rgb(131, 131, 131), 0 10px rgb(131, 131, 131), 2px 10px rgb(131, 131, 131), 4px 10px rgb(131, 131, 131), 6px 10px rgb(131, 131, 131), 8px 10px rgb(131, 131, 131);
-}
-.dialog-box .header:hover:not([disabled]) .drag-btn .grip {
-  background: rgb(255, 255, 255);
-  box-shadow: 0 0 rgb(255, 255, 255), 4px 0 rgb(255, 255, 255), 0 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 0 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255);
-}
-.dialog-box .header:hover:not([disabled]) .drag-btn.locked .grip {
-  box-shadow: 2px -2px rgb(255, 255, 255), 4px -2px rgb(255, 255, 255), 0 0 rgb(255, 255, 255), 6px 0 rgb(255, 255, 255), 0 2px rgb(255, 255, 255), 6px 2px rgb(255, 255, 255), -2px 4px rgb(255, 255, 255), 0 4px rgb(255, 255, 255), 2px 4px rgb(255, 255, 255), 4px 4px rgb(255, 255, 255), 6px 4px rgb(255, 255, 255), 8px 4px rgb(255, 255, 255), -2px 6px rgb(255, 255, 255), 0 6px rgb(255, 255, 255), 4px 6px rgb(255, 255, 255), 6px 6px rgb(255, 255, 255), 8px 6px rgb(255, 255, 255), -2px 8px rgb(255, 255, 255), 0 8px rgb(255, 255, 255), 4px 8px rgb(255, 255, 255), 6px 8px rgb(255, 255, 255), 8px 8px rgb(255, 255, 255), -2px 10px rgb(255, 255, 255), 0 10px rgb(255, 255, 255), 2px 10px rgb(255, 255, 255), 4px 10px rgb(255, 255, 255), 6px 10px rgb(255, 255, 255), 8px 10px rgb(255, 255, 255);
-}
-.dialog-box .header .collapse-btn {
-  position: absolute;
-  right: 0;
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  display: flex;
-  flex-flow: row nowrap;
-  cursor: pointer;
-}
-.dialog-box .header .collapse-btn input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-.dialog-box .header .collapse-btn .arrow {
-  height: 2px;
-  width: 2px;
-  box-shadow: 9px 5px rgb(131, 131, 131), 7px 7px rgb(131, 131, 131), 9px 7px rgb(131, 131, 131), 11px 7px rgb(131, 131, 131), 5px 9px rgb(131, 131, 131), 7px 9px rgb(131, 131, 131), 9px 9px rgb(131, 131, 131), 11px 9px rgb(131, 131, 131), 13px 9px rgb(131, 131, 131), 9px 11px rgb(131, 131, 131), 9px 13px rgb(131, 131, 131);
-}
-.dialog-box .header .collapse-btn input:checked ~ .arrow {
-  box-shadow: 9px 5px rgb(131, 131, 131), 9px 7px rgb(131, 131, 131), 5px 9px rgb(131, 131, 131), 7px 9px rgb(131, 131, 131), 9px 9px rgb(131, 131, 131), 11px 9px rgb(131, 131, 131), 13px 9px rgb(131, 131, 131), 7px 11px rgb(131, 131, 131), 9px 11px rgb(131, 131, 131), 11px 11px rgb(131, 131, 131), 9px 13px rgb(131, 131, 131);
-}
-.dialog-box .header .collapse-btn:hover .arrow {
-  box-shadow: 9px 5px rgb(255, 255, 255), 7px 7px rgb(255, 255, 255), 9px 7px rgb(255, 255, 255), 11px 7px rgb(255, 255, 255), 5px 9px rgb(255, 255, 255), 7px 9px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 11px 9px rgb(255, 255, 255), 13px 9px rgb(255, 255, 255), 9px 11px rgb(255, 255, 255), 9px 13px rgb(255, 255, 255);
-}
-.dialog-box .header .collapse-btn:hover input:checked ~ .arrow {
-  box-shadow: 9px 5px rgb(255, 255, 255), 9px 7px rgb(255, 255, 255), 5px 9px rgb(255, 255, 255), 7px 9px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 11px 9px rgb(255, 255, 255), 13px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 9px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 9px 13px rgb(255, 255, 255);
-}
-.dialog-box .header .close-btn {
-  position: absolute;
-  right: 0;
-  width: 20px;
-  height: 20px;
-  margin: 0;
-  display: flex;
-  flex-flow: row nowrap;
-  cursor: pointer;
-}
-.dialog-box .header .close-btn input {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-}
-.dialog-box .header .close-btn .close {
-  height: 2px;
-  width: 2px;
-  box-shadow: 5px 5px rgb(131, 131, 131), 13px 5px rgb(131, 131, 131), 7px 7px rgb(131, 131, 131), 11px 7px rgb(131, 131, 131), 9px 9px rgb(131, 131, 131), 7px 11px rgb(131, 131, 131), 11px 11px rgb(131, 131, 131), 5px 13px rgb(131, 131, 131), 13px 13px rgb(131, 131, 131);
-}
-.dialog-box .header .close-btn:hover .close {
-  box-shadow: 5px 5px rgb(255, 255, 255), 13px 5px rgb(255, 255, 255), 7px 7px rgb(255, 255, 255), 11px 7px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 5px 13px rgb(255, 255, 255), 13px 13px rgb(255, 255, 255);
-}
 .dialog-box .collapsible {
   flex: 0 1 auto;
   width: 100%;
@@ -521,7 +590,10 @@ svg {
   padding: 5px;
   align-self: flex-start;
   z-index: 1000;
-  box-shadow: 2px 0 rgb(255, 255, 199), -2px 0 rgb(255, 255, 199), 0 -2px rgb(255, 255, 199), 0 2px rgb(255, 255, 199);
+  box-shadow: -2px 0 0 0 rgb(255, 255, 199), 2px 0 0 0 rgb(255, 255, 199), 0 -2px 0 0 rgb(255, 255, 199), 0 2px 0 0 rgb(255, 255, 199);
+}
+.tooltip:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 199), 2px 0 0 0 rgb(255, 255, 199), 0 -2px 0 0 rgb(255, 255, 199), 0 2px 0 0 rgb(255, 255, 199);
 }
 .tooltip:after {
   right: -2px;
@@ -1019,10 +1091,6 @@ canvas {
 .toolbox .collapsible .tools .columns .tool-group .tool-group-popout .tool {
   margin: 0;
   background-color: unset;
-  box-shadow: none;
-}
-.toolbox .collapsible .tools .columns .tool-group .tool-group-popout .tool:hover:not([disabled]) {
-  box-shadow: none;
 }
 .toolbox .collapsible .tools .columns .tool-group.open .tool-group-popout {
   display: flex;
@@ -1225,10 +1293,13 @@ canvas {
 
 .trash {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h2M8 2h1M11 2h1M6 3h2M9 3h2M12 3h2M4 4h2M14 4h2M3 5h1M16 5h1M2 6h1M17 6h1M2 7h1M17 7h1M2 8h1M17 8h1M3 9h1M16 9h1M3 10h1M16 10h1M3 11h1M16 11h1M3 12h1M16 12h1M3 13h1M16 13h1M3 14h1M16 14h1M3 15h1M16 15h1M3 16h1M16 16h1M4 17h1M15 17h1M5 18h10' /%3E%3Cpath stroke='%23575757' d='M9 2h2M8 3h1M6 4h8M4 5h2M13 5h3M3 6h1M10 6h5M3 7h1M12 7h4M3 8h1M8 9h1M11 9h1M4 10h1M6 10h1M9 10h3M14 10h1M4 11h1M6 11h1M9 11h2M14 11h1M4 12h1M6 12h1M9 12h2M14 12h1M4 13h1M6 13h1M9 13h2M14 13h1M4 14h1M6 14h1M9 14h2M14 14h1M4 15h1M9 15h1M13 15h2M4 16h1M11 16h4M5 17h1' /%3E%3Cpath stroke='%23000000' d='M11 3h1M15 6h2M16 7h1M4 8h13M4 9h1M6 9h2M9 9h2M12 9h4M12 10h2M15 10h1M12 11h2M15 11h1M12 12h2M15 12h1M12 13h2M15 13h1M12 14h2M15 14h1M12 15h1M15 15h1M15 16h1M6 17h9' /%3E%3Cpath stroke='%23acacac' d='M6 5h1M8 5h5M4 6h2M7 6h3M4 7h2M8 7h4M5 9h1M5 10h1M8 10h1M5 11h1M8 11h1M11 11h1M5 12h1M8 12h1M11 12h1M5 13h1M8 13h1M11 13h1M5 14h1M8 14h1M11 14h1M5 15h1M8 15h1M10 15h2M5 16h6' /%3E%3Cpath stroke='%23ffffff' d='M7 5h1M6 6h1M6 7h2M7 10h1M7 11h1M7 12h1M7 13h1M7 14h1M6 15h2' /%3E%3C/svg%3E") !important;
-  background-size: 100% !important;
+  background-size: 100%;
 }
 .trash:hover {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M9 1h2M8 2h1M11 2h1M6 3h2M9 3h2M12 3h2M4 4h2M14 4h2M3 5h1M16 5h1M2 6h1M17 6h1M2 7h1M17 7h1M2 8h1M17 8h1M3 9h1M16 9h1M3 10h1M16 10h1M3 11h1M16 11h1M3 12h1M16 12h1M3 13h1M16 13h1M3 14h1M16 14h1M3 15h1M16 15h1M3 16h1M16 16h1M4 17h1M15 17h1M5 18h10' /%3E%3Cpath stroke='%23575757' d='M9 2h2M8 3h1M6 4h8M4 5h2M13 5h3M3 6h1M10 6h5M3 7h1M12 7h4M3 8h1M8 9h1M11 9h1M4 10h1M6 10h1M9 10h3M14 10h1M4 11h1M6 11h1M9 11h2M14 11h1M4 12h1M6 12h1M9 12h2M14 12h1M4 13h1M6 13h1M9 13h2M14 13h1M4 14h1M6 14h1M9 14h2M14 14h1M4 15h1M9 15h1M13 15h2M4 16h1M11 16h4M5 17h1' /%3E%3Cpath stroke='%23000000' d='M11 3h1M15 6h2M16 7h1M4 8h13M4 9h1M6 9h2M9 9h2M12 9h4M12 10h2M15 10h1M12 11h2M15 11h1M12 12h2M15 12h1M12 13h2M15 13h1M12 14h2M15 14h1M12 15h1M15 15h1M15 16h1M6 17h9' /%3E%3Cpath stroke='%23acacac' d='M6 5h1M8 5h5M4 6h2M7 6h3M4 7h2M8 7h4M5 9h1M5 10h1M8 10h1M5 11h1M8 11h1M11 11h1M5 12h1M8 12h1M11 12h1M5 13h1M8 13h1M11 13h1M5 14h1M8 14h1M11 14h1M5 15h1M8 15h1M10 15h2M5 16h6' /%3E%3Cpath stroke='%23ffffff' d='M7 5h1M6 6h1M6 7h2M7 10h1M7 11h1M7 12h1M7 13h1M7 14h1M6 15h2' /%3E%3C/svg%3E") !important;
+}
+.trash {
+  background-size: 100% !important;
 }
 
 .reference {
@@ -1330,6 +1401,8 @@ canvas {
 .layers-interface .collapsible {
   padding-top: 2px;
   overflow: hidden;
+  flex: 1 1 0;
+  min-height: 0;
 }
 .layers-interface .layers-control {
   flex-shrink: 0; /* Prevents the child from shrinking below its content size */
@@ -1374,10 +1447,13 @@ canvas {
 }
 .layers-interface .layers-control .trash:disabled {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h2M8 2h1M11 2h1M6 3h2M9 3h2M12 3h2M4 4h2M14 4h2M3 5h1M16 5h1M2 6h1M17 6h1M2 7h1M17 7h1M2 8h1M17 8h1M3 9h1M16 9h1M3 10h1M16 10h1M3 11h1M16 11h1M3 12h1M16 12h1M3 13h1M16 13h1M3 14h1M16 14h1M3 15h1M16 15h1M3 16h1M16 16h1M4 17h1M15 17h1M5 18h10' /%3E%3Cpath stroke='%23575757' d='M9 2h2M8 3h1M6 4h8M4 5h2M13 5h3M3 6h1M10 6h5M3 7h1M12 7h4M3 8h1M8 9h1M11 9h1M4 10h1M6 10h1M9 10h3M14 10h1M4 11h1M6 11h1M9 11h2M14 11h1M4 12h1M6 12h1M9 12h2M14 12h1M4 13h1M6 13h1M9 13h2M14 13h1M4 14h1M6 14h1M9 14h2M14 14h1M4 15h1M9 15h1M13 15h2M4 16h1M11 16h4M5 17h1' /%3E%3Cpath stroke='%23000000' d='M11 3h1M15 6h2M16 7h1M4 8h13M4 9h1M6 9h2M9 9h2M12 9h4M12 10h2M15 10h1M12 11h2M15 11h1M12 12h2M15 12h1M12 13h2M15 13h1M12 14h2M15 14h1M12 15h1M15 15h1M15 16h1M6 17h9' /%3E%3Cpath stroke='%23acacac' d='M6 5h1M8 5h5M4 6h2M7 6h3M4 7h2M8 7h4M5 9h1M5 10h1M8 10h1M5 11h1M8 11h1M11 11h1M5 12h1M8 12h1M11 12h1M5 13h1M8 13h1M11 13h1M5 14h1M8 14h1M11 14h1M5 15h1M8 15h1M10 15h2M5 16h6' /%3E%3Cpath stroke='%23ffffff' d='M7 5h1M6 6h1M6 7h2M7 10h1M7 11h1M7 12h1M7 13h1M7 14h1M6 15h2' /%3E%3C/svg%3E") !important;
-  background-size: 100% !important;
+  background-size: 100%;
 }
 .layers-interface .layers-control .trash:disabled:hover {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h2M8 2h1M11 2h1M6 3h2M9 3h2M12 3h2M4 4h2M14 4h2M3 5h1M16 5h1M2 6h1M17 6h1M2 7h1M17 7h1M2 8h1M17 8h1M3 9h1M16 9h1M3 10h1M16 10h1M3 11h1M16 11h1M3 12h1M16 12h1M3 13h1M16 13h1M3 14h1M16 14h1M3 15h1M16 15h1M3 16h1M16 16h1M4 17h1M15 17h1M5 18h10' /%3E%3Cpath stroke='%23575757' d='M9 2h2M8 3h1M6 4h8M4 5h2M13 5h3M3 6h1M10 6h5M3 7h1M12 7h4M3 8h1M8 9h1M11 9h1M4 10h1M6 10h1M9 10h3M14 10h1M4 11h1M6 11h1M9 11h2M14 11h1M4 12h1M6 12h1M9 12h2M14 12h1M4 13h1M6 13h1M9 13h2M14 13h1M4 14h1M6 14h1M9 14h2M14 14h1M4 15h1M9 15h1M13 15h2M4 16h1M11 16h4M5 17h1' /%3E%3Cpath stroke='%23000000' d='M11 3h1M15 6h2M16 7h1M4 8h13M4 9h1M6 9h2M9 9h2M12 9h4M12 10h2M15 10h1M12 11h2M15 11h1M12 12h2M15 12h1M12 13h2M15 13h1M12 14h2M15 14h1M12 15h1M15 15h1M15 16h1M6 17h9' /%3E%3Cpath stroke='%23acacac' d='M6 5h1M8 5h5M4 6h2M7 6h3M4 7h2M8 7h4M5 9h1M5 10h1M8 10h1M5 11h1M8 11h1M11 11h1M5 12h1M8 12h1M11 12h1M5 13h1M8 13h1M11 13h1M5 14h1M8 14h1M11 14h1M5 15h1M8 15h1M10 15h2M5 16h6' /%3E%3Cpath stroke='%23ffffff' d='M7 5h1M6 6h1M6 7h2M7 10h1M7 11h1M7 12h1M7 13h1M7 14h1M6 15h2' /%3E%3C/svg%3E") !important;
+}
+.layers-interface .layers-control .trash:disabled {
+  background-size: 100% !important;
 }
 .layers-interface .layers-container {
   display: flex;
@@ -1393,21 +1469,6 @@ canvas {
 }
 .layers-interface .layers-container:hover:not([disabled]) {
   box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
-}
-.layers-interface .layers-container::-webkit-scrollbar {
-  width: 10px;
-}
-.layers-interface .layers-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-.layers-interface .layers-container::-webkit-scrollbar-thumb {
-  background: rgb(131, 131, 131);
-  background-clip: content-box;
-  border: 2px solid transparent;
-}
-.layers-interface .layers-container::-webkit-scrollbar-thumb:hover {
-  background: white;
-  background-clip: content-box;
 }
 .layers-interface .layers-container .layers {
   display: flex;
@@ -1458,16 +1519,6 @@ canvas {
   margin: 5px;
 }
 .layers-interface.disabled .collapsible {
-  cursor: not-allowed;
-}
-.layers-interface.disabled .collapsible * {
-  pointer-events: none;
-}
-.layers-interface.disabled .collapsible button,
-.layers-interface.disabled .collapsible label {
-  opacity: 0.5;
-}
-.layers-interface.disabled .collapsible {
   box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
 .layers-interface.disabled .collapsible:hover:not([disabled]) {
@@ -1507,6 +1558,14 @@ canvas {
 .layer-settings > :last-child {
   margin-bottom: 16px;
 }
+.layer-settings .header {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  min-height: 20px;
+}
 .layer-settings #layer-name {
   width: 156px;
   box-shadow: none;
@@ -1536,6 +1595,8 @@ canvas {
 .vectors-interface .collapsible {
   padding-top: 2px;
   overflow: hidden;
+  flex: 1 1 0;
+  min-height: 0;
 }
 .vectors-interface .vectors-container {
   display: flex;
@@ -1551,21 +1612,6 @@ canvas {
 .vectors-interface .vectors-container:hover:not([disabled]) {
   box-shadow: 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
-.vectors-interface .vectors-container::-webkit-scrollbar {
-  width: 10px;
-}
-.vectors-interface .vectors-container::-webkit-scrollbar-track {
-  background: transparent;
-}
-.vectors-interface .vectors-container::-webkit-scrollbar-thumb {
-  background: rgb(131, 131, 131);
-  background-clip: content-box;
-  border: 2px solid transparent;
-}
-.vectors-interface .vectors-container::-webkit-scrollbar-thumb:hover {
-  background: white;
-  background-clip: content-box;
-}
 .vectors-interface .vectors-container .vectors {
   display: flex;
   flex-flow: column-reverse nowrap;
@@ -1579,6 +1625,7 @@ canvas {
   text-align: center;
   line-height: 40px;
   display: flex;
+  flex-flow: column nowrap;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
@@ -1640,32 +1687,14 @@ canvas {
 .vectors-interface .vectors-container .vectors .vector .left > :nth-child(4):hover:not([disabled]) {
   box-shadow: 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255);
 }
-.vectors-interface .vectors-container .vectors .vector .mode {
-  background-color: rgb(131, 131, 131);
-}
-.vectors-interface .vectors-container .vectors .vector .mode.selected {
-  background-color: rgb(255, 255, 255);
-}
 .vectors-interface .vectors-container .vectors .vector .tool {
-  right: 0;
-  top: 0;
   background-color: rgb(131, 131, 131);
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
-}
-.vectors-interface .vectors-container .vectors .vector .tool:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .tool.selected {
   background-color: rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .actionColor {
-  right: 0;
-  top: 22px;
   background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
-}
-.vectors-interface .vectors-container .vectors .vector .actionColor:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .actionColor .swatch {
   width: 100%;
@@ -1673,22 +1702,17 @@ canvas {
   pointer-events: none;
 }
 .vectors-interface .vectors-container .vectors .vector .hide {
-  right: 0;
-  top: 44px;
   background-color: rgb(61, 61, 61);
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
-}
-.vectors-interface .vectors-container .vectors .vector .hide:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
 }
 .vectors-interface .vectors-container .vectors .vector .trash {
-  right: 0;
-  top: 66px;
   background-color: rgb(61, 61, 61);
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131);
 }
-.vectors-interface .vectors-container .vectors .vector .trash:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255);
+.vectors-interface .vectors-container .vectors .vector .gear {
+  top: 0;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 0;
 }
 .vectors-interface .vectors-container .vectors .vector.selected {
   background: rgb(77, 77, 77);
@@ -1696,25 +1720,158 @@ canvas {
 .vectors-interface .vectors-container .vectors .vector:hover {
   border: 2px solid rgb(255, 255, 255);
 }
-.vectors-interface .vectors-container .vectors .vector:hover .tool {
-  box-shadow: 2px 0 rgb(255, 255, 255), -2px 0 rgb(255, 255, 255), 0 -2px rgb(255, 255, 255), 0 2px rgb(255, 255, 255);
+.vectors-interface .vectors-container .vectors .vector:hover .tool,
+.vectors-interface .vectors-container .vectors .vector:hover .gear {
   z-index: 105;
 }
 .vectors-interface .vectors-container .vectors .vector .warning {
   background: rgb(239, 63, 57);
   animation: flash 0.6s ease-in infinite alternate-reverse;
 }
-.vectors-interface.disabled .collapsible {
-  cursor: not-allowed;
+.vector-settings {
+  z-index: 1000;
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  position: absolute;
+  background: rgb(61, 61, 61);
+  min-width: 200px;
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
 }
-.vectors-interface.disabled .collapsible * {
+.vector-settings:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.vector-settings:after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 2px;
+  position: absolute;
+  top: calc(50% - 1px);
+  background: rgb(131, 131, 131);
+  left: -4px;
+  box-shadow: -2px -2px rgb(131, 131, 131), 0 -2px rgb(61, 61, 61), 0 -4px rgb(131, 131, 131), 2px 0 rgb(61, 61, 61), 2px -2px rgb(61, 61, 61), 2px -4px rgb(61, 61, 61);
+}
+.vector-settings:hover:not([disabled]):after {
+  background: rgb(255, 255, 255);
+  box-shadow: -2px -2px rgb(255, 255, 255), 0 -2px rgb(61, 61, 61), 0 -4px rgb(255, 255, 255), 2px 0 rgb(61, 61, 61), 2px -2px rgb(61, 61, 61), 2px -4px rgb(61, 61, 61);
+}
+.vector-settings > * {
+  margin: 12px 12px 0 12px;
+}
+.vector-settings > :last-child {
+  margin-bottom: 12px;
+}
+.vector-settings .header {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  font-size: 16px;
+  min-height: 20px;
+}
+.vector-settings .vector-settings-modes {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 4px;
+}
+.vector-settings .vector-settings-modes .mode {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+}
+.vector-settings .vector-settings-color-row .actionColor {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.vector-settings .vector-settings-color-row .actionColor:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.vector-settings .vector-settings-color-row .actionColor {
+  cursor: pointer;
+}
+.vector-settings .vector-settings-color-row .actionColor .swatch {
+  width: 100%;
+  height: 100%;
   pointer-events: none;
 }
-.vectors-interface.disabled .collapsible button,
-.vectors-interface.disabled .collapsible label {
-  opacity: 0.5;
+.vector-settings .vector-settings-dither-row .vector-dither-preview {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  background: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.vector-settings .vector-settings-dither-row .vector-dither-preview:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.vector-settings .vector-settings-dither-row .vector-dither-preview {
+  cursor: pointer;
+}
+.vector-settings .vector-settings-dither-row .vector-dither-preview svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.vector-settings .vector-settings-brush-row {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 4px;
+}
+.vector-settings .vector-settings-brush-row span {
+  font-size: 11px;
+}
+.vector-settings .vector-settings-brush-row .slider {
+  width: calc(100% - 4px);
 }
 
+.vector-dither-picker {
+  z-index: 1001;
+  display: none;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  position: absolute;
+  background: rgb(61, 61, 61);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.vector-dither-picker:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.vector-dither-picker:after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 2px;
+  position: absolute;
+  top: calc(50% - 1px);
+  background: rgb(131, 131, 131);
+  left: -4px;
+  box-shadow: -2px -2px rgb(131, 131, 131), 0 -2px rgb(61, 61, 61), 0 -4px rgb(131, 131, 131), 2px 0 rgb(61, 61, 61), 2px -2px rgb(61, 61, 61), 2px -4px rgb(61, 61, 61);
+}
+.vector-dither-picker:hover:not([disabled]):after {
+  background: rgb(255, 255, 255);
+  box-shadow: -2px -2px rgb(255, 255, 255), 0 -2px rgb(61, 61, 61), 0 -4px rgb(255, 255, 255), 2px 0 rgb(61, 61, 61), 2px -2px rgb(61, 61, 61), 2px -4px rgb(61, 61, 61);
+}
+.vector-dither-picker .header {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  min-height: 20px;
+  width: 100%;
+  margin: 0;
+}
 /* Base styles, mixins, keyframes, variables */
 /* Brush settings */
 .brush-container {
@@ -1902,12 +2059,6 @@ canvas {
   background: rgb(61, 61, 61);
   padding: 4px;
 }
-.dither-picker-container .dither-grid {
-  display: grid;
-  grid-template-columns: repeat(9, 1fr);
-  gap: 2px;
-  padding: 4px 2px 2px 2px;
-}
 .dither-picker-container .dither-grid.mirror-x .dither-grid-svg {
   transform: scaleX(-1);
   transform-origin: center;
@@ -1920,28 +2071,6 @@ canvas {
   transform: scale(-1, -1);
   transform-origin: center;
 }
-.dither-picker-container .dither-grid .dither-grid-btn {
-  width: 32px;
-  height: 32px;
-  cursor: pointer;
-  background: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
-  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
-}
-.dither-picker-container .dither-grid .dither-grid-btn:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
-}
-.dither-picker-container .dither-grid .dither-grid-btn.selected {
-  border-color: rgb(255, 255, 255);
-}
-.dither-picker-container .dither-grid .dither-grid-btn:hover {
-  z-index: 104;
-  border-color: rgb(131, 131, 131);
-}
-.dither-picker-container .dither-grid .dither-grid-btn svg {
-  width: 100%;
-  height: 100%;
-}
-
 /* Base styles, mixins, keyframes, variables */
 /* Palette */
 .palette-interface {
@@ -2104,13 +2233,6 @@ canvas {
 }
 .palette-interface .palette-container .palette-colors .palette-color.selected {
   z-index: 105;
-  box-shadow: 2px 0 rgb(255, 255, 255), -2px 0 rgb(255, 255, 255), 0 -2px rgb(255, 255, 255), 0 2px rgb(255, 255, 255);
-}
-.palette-interface .palette-container .palette-colors .palette-color.selected:hover:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
-}
-.palette-interface .palette-container .palette-colors .palette-color.selected:hover:hover:not([disabled]):hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
 }
 .palette-interface .palette-container .palette-colors .palette-color:hover {
   z-index: 106;
@@ -2119,30 +2241,15 @@ canvas {
   width: 100%;
   height: 100%;
 }
-.palette-interface .palette-container .palette-colors.edit-mode .palette-color:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
-}
-.palette-interface .palette-container .palette-colors.edit-mode .palette-color:hover:not([disabled]):hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(71, 255, 47), 2px 0 0 0 rgb(71, 255, 47), 0 -2px 0 0 rgb(71, 255, 47), 0 2px 0 0 rgb(71, 255, 47);
-}
-.palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
-}
-.palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover:not([disabled]):hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
-}
-.palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
-}
-.palette-interface .palette-container .palette-colors.remove-mode .palette-color.selected:hover:not([disabled]):hover:not([disabled]) {
-  box-shadow: -2px 0 0 0 rgb(239, 63, 57), 2px 0 0 0 rgb(239, 63, 57), 0 -2px 0 0 rgb(239, 63, 57), 0 2px 0 0 rgb(239, 63, 57);
-}
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover .swatch {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M9 1h2M8 2h1M11 2h1M6 3h2M9 3h2M12 3h2M4 4h2M14 4h2M3 5h1M16 5h1M2 6h1M17 6h1M2 7h1M17 7h1M2 8h1M17 8h1M3 9h1M16 9h1M3 10h1M16 10h1M3 11h1M16 11h1M3 12h1M16 12h1M3 13h1M16 13h1M3 14h1M16 14h1M3 15h1M16 15h1M3 16h1M16 16h1M4 17h1M15 17h1M5 18h10' /%3E%3Cpath stroke='%23575757' d='M9 2h2M8 3h1M6 4h8M4 5h2M13 5h3M3 6h1M10 6h5M3 7h1M12 7h4M3 8h1M8 9h1M11 9h1M4 10h1M6 10h1M9 10h3M14 10h1M4 11h1M6 11h1M9 11h2M14 11h1M4 12h1M6 12h1M9 12h2M14 12h1M4 13h1M6 13h1M9 13h2M14 13h1M4 14h1M6 14h1M9 14h2M14 14h1M4 15h1M9 15h1M13 15h2M4 16h1M11 16h4M5 17h1' /%3E%3Cpath stroke='%23000000' d='M11 3h1M15 6h2M16 7h1M4 8h13M4 9h1M6 9h2M9 9h2M12 9h4M12 10h2M15 10h1M12 11h2M15 11h1M12 12h2M15 12h1M12 13h2M15 13h1M12 14h2M15 14h1M12 15h1M15 15h1M15 16h1M6 17h9' /%3E%3Cpath stroke='%23acacac' d='M6 5h1M8 5h5M4 6h2M7 6h3M4 7h2M8 7h4M5 9h1M5 10h1M8 10h1M5 11h1M8 11h1M11 11h1M5 12h1M8 12h1M11 12h1M5 13h1M8 13h1M11 13h1M5 14h1M8 14h1M11 14h1M5 15h1M8 15h1M10 15h2M5 16h6' /%3E%3Cpath stroke='%23ffffff' d='M7 5h1M6 6h1M6 7h2M7 10h1M7 11h1M7 12h1M7 13h1M7 14h1M6 15h2' /%3E%3C/svg%3E") !important;
-  background-size: 100% !important;
+  background-size: 100%;
 }
 .palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover .swatch:hover {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M9 1h2M8 2h1M11 2h1M6 3h2M9 3h2M12 3h2M4 4h2M14 4h2M3 5h1M16 5h1M2 6h1M17 6h1M2 7h1M17 7h1M2 8h1M17 8h1M3 9h1M16 9h1M3 10h1M16 10h1M3 11h1M16 11h1M3 12h1M16 12h1M3 13h1M16 13h1M3 14h1M16 14h1M3 15h1M16 15h1M3 16h1M16 16h1M4 17h1M15 17h1M5 18h10' /%3E%3Cpath stroke='%23575757' d='M9 2h2M8 3h1M6 4h8M4 5h2M13 5h3M3 6h1M10 6h5M3 7h1M12 7h4M3 8h1M8 9h1M11 9h1M4 10h1M6 10h1M9 10h3M14 10h1M4 11h1M6 11h1M9 11h2M14 11h1M4 12h1M6 12h1M9 12h2M14 12h1M4 13h1M6 13h1M9 13h2M14 13h1M4 14h1M6 14h1M9 14h2M14 14h1M4 15h1M9 15h1M13 15h2M4 16h1M11 16h4M5 17h1' /%3E%3Cpath stroke='%23000000' d='M11 3h1M15 6h2M16 7h1M4 8h13M4 9h1M6 9h2M9 9h2M12 9h4M12 10h2M15 10h1M12 11h2M15 11h1M12 12h2M15 12h1M12 13h2M15 13h1M12 14h2M15 14h1M12 15h1M15 15h1M15 16h1M6 17h9' /%3E%3Cpath stroke='%23acacac' d='M6 5h1M8 5h5M4 6h2M7 6h3M4 7h2M8 7h4M5 9h1M5 10h1M8 10h1M5 11h1M8 11h1M11 11h1M5 12h1M8 12h1M11 12h1M5 13h1M8 13h1M11 13h1M5 14h1M8 14h1M11 14h1M5 15h1M8 15h1M10 15h2M5 16h6' /%3E%3Cpath stroke='%23ffffff' d='M7 5h1M6 6h1M6 7h2M7 10h1M7 11h1M7 12h1M7 13h1M7 14h1M6 15h2' /%3E%3C/svg%3E") !important;
+}
+.palette-interface .palette-container .palette-colors.remove-mode .palette-color:hover .swatch {
+  background-size: 100% !important;
 }
 .palette-interface .palette-container .add-color {
   cursor: pointer;
@@ -2294,7 +2401,6 @@ canvas {
   height: 24px;
   width: 9px;
   border: 2px solid black;
-  box-shadow: 2px 0 rgb(131, 131, 131), -2px 0 rgb(131, 131, 131), 0 -2px rgb(131, 131, 131), 0 2px rgb(131, 131, 131);
 }
 .picker-container .collapsible .picker-interface #left #picker .picker-slider::-moz-range-thumb {
   box-sizing: border-box;
@@ -2302,13 +2408,6 @@ canvas {
   height: 24px;
   width: 9px;
   border: 2px solid black;
-  box-shadow: 2px 0 rgb(131, 131, 131), -2px 0 rgb(131, 131, 131), 0 -2px rgb(131, 131, 131), 0 2px rgb(131, 131, 131);
-}
-.picker-container .collapsible .picker-interface #left #picker .picker-slider:hover::-webkit-slider-thumb, .picker-container .collapsible .picker-interface #left #picker .picker-slider:focus::-webkit-slider-thumb {
-  box-shadow: 2px 0 rgb(255, 255, 255), -2px 0 rgb(255, 255, 255), 0 -2px rgb(255, 255, 255), 0 2px rgb(255, 255, 255);
-}
-.picker-container .collapsible .picker-interface #left #picker .picker-slider:hover::-moz-range-thumb, .picker-container .collapsible .picker-interface #left #picker .picker-slider:focus::-moz-range-thumb {
-  box-shadow: 2px 0 rgb(255, 255, 255), -2px 0 rgb(255, 255, 255), 0 -2px rgb(255, 255, 255), 0 2px rgb(255, 255, 255);
 }
 .picker-container .collapsible .picker-interface #left #picker #hueslider {
   top: 240px;

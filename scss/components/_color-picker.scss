@@ -68,7 +68,7 @@
               height: 24px;
               width: 9px;
               border: 2px solid black;
-              @include inactiveBoxBorder;
+              @extend %inactiveBoxBorder;
             }
             &::-moz-range-thumb {
               box-sizing: border-box;
@@ -76,15 +76,15 @@
               height: 24px;
               width: 9px;
               border: 2px solid black;
-              @include inactiveBoxBorder;
+              @extend %inactiveBoxBorder;
             }
             &:hover,
             &:focus {
               &::-webkit-slider-thumb {
-                @include activeBoxBorder;
+                @extend %activeBoxBorder;
               }
               &::-moz-range-thumb {
-                @include activeBoxBorder;
+                @extend %activeBoxBorder;
               }
             }
           }

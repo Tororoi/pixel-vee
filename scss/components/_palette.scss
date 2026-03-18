@@ -78,14 +78,14 @@
       justify-content: center;
       margin-bottom: 8px;
       .palette-edit {
-        width: 40px;
-        height: 40px;
+        width: $size-button-md;
+        height: $size-button-md;
         cursor: pointer;
         @include paletteKnifeIcon;
       }
       .palette-remove {
-        width: 40px;
-        height: 40px;
+        width: $size-button-md;
+        height: $size-button-md;
         cursor: pointer;
         @include paletteScraperIcon;
       }
@@ -147,9 +147,9 @@
         @include boxBorder;
         &.selected {
           z-index: 105;
-          @include activeBoxBorder;
+          @extend %activeBoxBorder;
           &:hover {
-            @include editBoxBorder;
+            @extend %editBoxBorder;
           }
         }
         &:hover {
@@ -162,14 +162,14 @@
       }
       &.edit-mode {
         .palette-color {
-          @include editBoxBorder;
+          @extend %editBoxBorder;
         }
       }
       &.remove-mode {
         .palette-color {
-          @include removeBoxBorder;
+          @extend %removeBoxBorder;
           &.selected {
-            @include removeBoxBorder;
+            @extend %removeBoxBorder;
           }
           &:hover {
             .swatch {
