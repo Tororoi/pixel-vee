@@ -17,6 +17,7 @@ import {
   initDitherPicker,
   highlightSelectedDitherPattern,
   updateDitherPickerColors,
+  applyDitherOffset,
 } from "../DOM/render.js"
 import { toggleMode, switchTool, initToolGroups } from "./toolbox.js"
 import { ZOOM_LEVELS } from "../utils/constants.js"
@@ -220,16 +221,22 @@ document.getElementById("dither-ctrl-two-color")?.addEventListener("click", () =
   renderDitherOptionsToDOM()
 })
 
-document.getElementById("dither-ctrl-mirror-x")?.addEventListener("click", () => {
+document.getElementById("dither-ctrl-offset-x")?.addEventListener("input", (e) => {
   if (!DITHER_TOOLS.includes(state.tool.current.name)) return
-  state.tool.current.mirrorX = !state.tool.current.mirrorX
-  renderDitherControlsToDOM()
+  state.tool.current.ditherOffsetX = parseInt(e.target.value)
+  const grid = document.querySelector(".dither-grid")
+  if (grid) applyDitherOffset(grid, state.tool.current.ditherOffsetX, state.tool.current.ditherOffsetY ?? 0)
+  const preview = document.querySelector(".dither-preview")
+  if (preview) applyDitherOffset(preview, state.tool.current.ditherOffsetX, state.tool.current.ditherOffsetY ?? 0)
 })
 
-document.getElementById("dither-ctrl-mirror-y")?.addEventListener("click", () => {
+document.getElementById("dither-ctrl-offset-y")?.addEventListener("input", (e) => {
   if (!DITHER_TOOLS.includes(state.tool.current.name)) return
-  state.tool.current.mirrorY = !state.tool.current.mirrorY
-  renderDitherControlsToDOM()
+  state.tool.current.ditherOffsetY = parseInt(e.target.value)
+  const grid = document.querySelector(".dither-grid")
+  if (grid) applyDitherOffset(grid, state.tool.current.ditherOffsetX ?? 0, state.tool.current.ditherOffsetY)
+  const preview = document.querySelector(".dither-preview")
+  if (preview) applyDitherOffset(preview, state.tool.current.ditherOffsetX ?? 0, state.tool.current.ditherOffsetY)
 })
 
 document.getElementById("dither-ctrl-build-up")?.addEventListener("click", () => {

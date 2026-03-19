@@ -100,8 +100,8 @@ export function actionDitherDraw(coordX, coordY, directionalBrushStamp, strokeCt
     ditherPattern,
     twoColorMode,
     secondaryColor,
-    mirrorX,
-    mirrorY,
+    ditherOffsetX,
+    ditherOffsetY,
   } = strokeCtx
   let offsetX = 0
   let offsetY = 0
@@ -137,7 +137,7 @@ export function actionDitherDraw(coordX, coordY, directionalBrushStamp, strokeCt
         seenPixelsSet.add((y << 16) | x)
       }
     }
-    const isOn = isDitherOn(ditherPattern, x, y, mirrorX, mirrorY)
+    const isOn = isDitherOn(ditherPattern, x, y, ditherOffsetX, ditherOffsetY)
     if (isOn) {
       if (currentModes?.eraser || currentModes?.inject) {
         renderCtx.clearRect(x + offsetX, y + offsetY, 1, 1)
@@ -185,8 +185,8 @@ export function actionBuildUpDitherDraw(
     brushSize,
     twoColorMode,
     secondaryColor,
-    mirrorX,
-    mirrorY,
+    ditherOffsetX,
+    ditherOffsetY,
     densityMap,
     buildUpSteps,
   } = strokeCtx
@@ -227,7 +227,7 @@ export function actionBuildUpDitherDraw(
     const count = densityMap ? (densityMap.get((y << 16) | x) ?? 0) : 0
     const stepIndex = Math.min(count, buildUpSteps.length - 1)
     const pattern = ditherPatterns[buildUpSteps[stepIndex]]
-    const isOn = isDitherOn(pattern, x, y, mirrorX, mirrorY)
+    const isOn = isDitherOn(pattern, x, y, ditherOffsetX, ditherOffsetY)
     if (isOn) {
       if (currentModes?.eraser || currentModes?.inject) {
         renderCtx.clearRect(x + offsetX, y + offsetY, 1, 1)

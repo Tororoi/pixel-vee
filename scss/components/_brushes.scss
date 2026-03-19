@@ -71,18 +71,6 @@
       background: $diagonal-stripe-bg;
       cursor: pointer;
       margin-bottom: 8px;
-      &.mirror-x .dither-grid-svg {
-        transform: scaleX(-1);
-        transform-origin: center;
-      }
-      &.mirror-y .dither-grid-svg {
-        transform: scaleY(-1);
-        transform-origin: center;
-      }
-      &.mirror-x.mirror-y .dither-grid-svg {
-        transform: scale(-1, -1);
-        transform-origin: center;
-      }
     }
   }
 }
@@ -175,20 +163,18 @@
       padding: 4px;
     }
   }
+  .dither-offset-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    color: $white;
+    font-size: 12px;
+    width: 100%;
+    padding: 0 4px;
+    box-sizing: border-box;
+  }
   .dither-grid {
     @extend %dither-grid;
-    &.mirror-x .dither-grid-svg {
-      transform: scaleX(-1);
-      transform-origin: center;
-    }
-    &.mirror-y .dither-grid-svg {
-      transform: scaleY(-1);
-      transform-origin: center;
-    }
-    &.mirror-x.mirror-y .dither-grid-svg {
-      transform: scale(-1, -1);
-      transform-origin: center;
-    }
     .dither-grid-btn {
       @extend %dither-grid-btn;
     }

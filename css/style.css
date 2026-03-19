@@ -1929,18 +1929,6 @@ canvas {
   cursor: pointer;
   margin-bottom: 8px;
 }
-.brush-container .dither-options .dither-preview.mirror-x .dither-grid-svg {
-  transform: scaleX(-1);
-  transform-origin: center;
-}
-.brush-container .dither-options .dither-preview.mirror-y .dither-grid-svg {
-  transform: scaleY(-1);
-  transform-origin: center;
-}
-.brush-container .dither-options .dither-preview.mirror-x.mirror-y .dither-grid-svg {
-  transform: scale(-1, -1);
-  transform-origin: center;
-}
 
 /* Dither pattern picker dialog */
 .dither-picker-container {
@@ -2043,17 +2031,15 @@ canvas {
   background: rgb(61, 61, 61);
   padding: 4px;
 }
-.dither-picker-container .dither-grid.mirror-x .dither-grid-svg {
-  transform: scaleX(-1);
-  transform-origin: center;
-}
-.dither-picker-container .dither-grid.mirror-y .dither-grid-svg {
-  transform: scaleY(-1);
-  transform-origin: center;
-}
-.dither-picker-container .dither-grid.mirror-x.mirror-y .dither-grid-svg {
-  transform: scale(-1, -1);
-  transform-origin: center;
+.dither-picker-container .dither-offset-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: rgb(255, 255, 255);
+  font-size: 12px;
+  width: 100%;
+  padding: 0 4px;
+  box-sizing: border-box;
 }
 /* Base styles, mixins, keyframes, variables */
 /* Palette */

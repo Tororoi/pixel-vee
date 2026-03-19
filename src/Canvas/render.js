@@ -252,6 +252,13 @@ export function performAction(
         : ditherPatterns[action.ditherPatternIndex ?? 64]
       // Build context once per stroke; brushSize is updated per-point below
       // since points may have individual brushSizes stored in the timeline.
+      // Effective dither offset accounts for layer movement since stroke was recorded.
+      // Pixels are replayed at (p.x + offsetX), so the tile lookup must shift by
+      // (recordedLayerX - offsetX) to keep the pattern fixed to the pixels.
+      const recordedLayerX = action.recordedLayerX ?? offsetX
+      const recordedLayerY = action.recordedLayerY ?? offsetY
+      const effectiveDitherOffsetX = (((action.ditherOffsetX ?? 0) + recordedLayerX - offsetX) % 8 + 8) % 8
+      const effectiveDitherOffsetY = (((action.ditherOffsetY ?? 0) + recordedLayerY - offsetY) % 8 + 8) % 8
       const strokeCtx = createStrokeContext({
         layer: action.layer,
         customContext: betweenCtx,
@@ -262,8 +269,8 @@ export function performAction(
         seenPixelsSet: seen,
         twoColorMode: action.modes?.twoColor ?? false,
         secondaryColor: action.secondaryColor,
-        mirrorX: action.mirrorX ?? false,
-        mirrorY: action.mirrorY ?? false,
+        ditherOffsetX: effectiveDitherOffsetX,
+        ditherOffsetY: effectiveDitherOffsetY,
         ditherPattern: pattern,
         densityMap: buildUpDensityMap,
         buildUpSteps,
@@ -453,6 +460,12 @@ function renderActionVectors(action, activeCtx = null) {
     const vector = state.vector.all[action.vectorIndices[i]]
     if (vector.hidden || vector.removed) continue
     const vp = vector.vectorProperties
+    const vOffsetX = vector.layer.x
+    const vOffsetY = vector.layer.y
+    const vRecordedLayerX = vector.recordedLayerX ?? vOffsetX
+    const vRecordedLayerY = vector.recordedLayerY ?? vOffsetY
+    const vEffectiveDitherOffsetX = (((vector.ditherOffsetX ?? 0) + vRecordedLayerX - vOffsetX) % 8 + 8) % 8
+    const vEffectiveDitherOffsetY = (((vector.ditherOffsetY ?? 0) + vRecordedLayerY - vOffsetY) % 8 + 8) % 8
     const vectorCtx = createStrokeContext({
       layer: vector.layer,
       customContext: activeCtx,
@@ -464,8 +477,8 @@ function renderActionVectors(action, activeCtx = null) {
       ditherPattern: ditherPatterns[vector.ditherPatternIndex ?? 64],
       twoColorMode: vector.modes?.twoColor ?? false,
       secondaryColor: vector.secondaryColor ?? null,
-      mirrorX: vector.mirrorX ?? false,
-      mirrorY: vector.mirrorY ?? false,
+      ditherOffsetX: vEffectiveDitherOffsetX,
+      ditherOffsetY: vEffectiveDitherOffsetY,
     })
     switch (vp.type) {
       case 'fill': {

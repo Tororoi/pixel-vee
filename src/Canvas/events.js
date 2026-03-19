@@ -682,12 +682,6 @@ dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
       // sync twoColor button in settings dialog if open
       const settingsModeBtn = dom.vectorSettingsContainer?.querySelector('.mode.twoColor')
       if (settingsModeBtn) settingsModeBtn.classList.toggle('selected', vector.modes.twoColor)
-    } else if (toggleBtn.classList.contains('mirrorX')) {
-      vector.mirrorX = !vector.mirrorX
-      updateVectorDitherControls(vector)
-    } else if (toggleBtn.classList.contains('mirrorY')) {
-      vector.mirrorY = !vector.mirrorY
-      updateVectorDitherControls(vector)
     }
     renderCanvas(vector.layer, true)
     return
@@ -699,6 +693,27 @@ dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
   vector.ditherPatternIndex = patternIndex
   updateVectorDitherPreview(vector)
   dom.vectorDitherPickerContainer.style.display = 'none'
+  renderCanvas(vector.layer, true)
+})
+
+// Offset sliders in vector dither picker — update stored offset so effective offset matches
+dom.vectorDitherPickerContainer?.addEventListener('input', (e) => {
+  const { id } = e.target
+  if (id !== 'vector-dither-offset-x' && id !== 'vector-dither-offset-y') return
+  const vector = dom.vectorSettingsContainer?.vectorObj
+  if (!vector) return
+  const displayedValue = parseInt(e.target.value)
+  const currentLayerX = vector.layer?.x ?? 0
+  const currentLayerY = vector.layer?.y ?? 0
+  const recordedLayerX = vector.recordedLayerX ?? currentLayerX
+  const recordedLayerY = vector.recordedLayerY ?? currentLayerY
+  // Invert effective-offset formula: storedOffset = ((displayed - recordedLayer + currentLayer) % 8 + 8) % 8
+  if (id === 'vector-dither-offset-x') {
+    vector.ditherOffsetX = ((displayedValue - recordedLayerX + currentLayerX) % 8 + 8) % 8
+  } else {
+    vector.ditherOffsetY = ((displayedValue - recordedLayerY + currentLayerY) % 8 + 8) % 8
+  }
+  updateVectorDitherControls(vector)
   renderCanvas(vector.layer, true)
 })
 

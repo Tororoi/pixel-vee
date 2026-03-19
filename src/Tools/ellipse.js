@@ -38,8 +38,8 @@ function buildEllipseCtx(isPreview = false) {
     ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
     twoColorMode: state.tool.current.modes?.twoColor ?? false,
     secondaryColor: swatches.secondary.color,
-    mirrorX: state.tool.current.mirrorX ?? false,
-    mirrorY: state.tool.current.mirrorY ?? false,
+    ditherOffsetX: state.tool.current.ditherOffsetX ?? 0,
+    ditherOffsetY: state.tool.current.ditherOffsetY ?? 0,
   })
 }
 
@@ -232,8 +232,10 @@ function ellipseSteps() {
           color: { ...swatches.primary.color },
           secondaryColor: { ...swatches.secondary.color },
           ditherPatternIndex: state.tool.current.ditherPatternIndex,
-          mirrorX: state.tool.current.mirrorX,
-          mirrorY: state.tool.current.mirrorY,
+          ditherOffsetX: state.tool.current.ditherOffsetX ?? 0,
+          ditherOffsetY: state.tool.current.ditherOffsetY ?? 0,
+          recordedLayerX: canvas.currentLayer.x,
+          recordedLayerY: canvas.currentLayer.y,
           brushSize: state.tool.current.brushSize,
           brushType: state.tool.current.brushType,
           vectorProperties: {
@@ -287,8 +289,8 @@ export const ellipse = {
   brushType: "circle",
   brushDisabled: false,
   ditherPatternIndex: 64,
-  mirrorX: false,
-  mirrorY: false,
+  ditherOffsetX: 0,
+  ditherOffsetY: 0,
   options: {
     useSubpixels: {
       active: true,

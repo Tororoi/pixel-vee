@@ -33,12 +33,12 @@ export function createStrokeContext(fields) {
     seenPixelsSet: null, // Set<number> or null
     excludeFromSet: false,
 
-    // Dither (optional — null/false when not dithering)
+    // Dither (optional — null/0 when not dithering)
     ditherPattern: null,
     twoColorMode: false,
     secondaryColor: null,
-    mirrorX: false,
-    mirrorY: false,
+    ditherOffsetX: 0,
+    ditherOffsetY: 0,
 
     // Build-up dither only
     densityMap: null, // Map<(y<<16)|x, count> or null

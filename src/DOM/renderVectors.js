@@ -345,34 +345,51 @@ const createThumbnailImage = (vector, isSelected) => {
 
 const SVG_NS = "http://www.w3.org/2000/svg"
 
+let _vectorDitherSvgCounter = 0
+
 /**
  * Build a dither pattern SVG thumbnail using vector-specific colors.
+ * Uses a <pattern> element so the tile offset can be updated cheaply
+ * by changing the pattern's x/y attributes without rebuilding the SVG.
  * Uses classes vector-dither-bg-rect / vector-dither-on-path so global
  * updateDitherPickerColors() doesn't overwrite vector colors.
  * @param {object} pattern - pattern from ditherPatterns
  * @param {object} vector - the vector whose colors to use
+ * @param {number} [offsetX=0] - dither X offset (0–7)
+ * @param {number} [offsetY=0] - dither Y offset (0–7)
  * @returns {SVGElement} - The created SVG element
  */
-const createVectorDitherPatternSVG = (pattern, vector) => {
+const createVectorDitherPatternSVG = (pattern, vector, offsetX = 0, offsetY = 0) => {
   const primaryColor = vector.color?.color ?? "rgb(0,0,0)"
   const secondaryColor =
     vector.modes?.twoColor && vector.secondaryColor
       ? vector.secondaryColor.color
       : "none"
 
+  const id = `vdtp-${_vectorDitherSvgCounter++}`
   const svg = document.createElementNS(SVG_NS, "svg")
-  svg.setAttribute("viewBox", "0 -0.5 8 8")
+  svg.setAttribute("viewBox", "0 0 8 8")
   svg.setAttribute("shape-rendering", "crispEdges")
   svg.classList.add("dither-grid-svg")
 
+  const defs = document.createElementNS(SVG_NS, "defs")
+  const patternEl = document.createElementNS(SVG_NS, "pattern")
+  patternEl.setAttribute("id", id)
+  patternEl.setAttribute("patternUnits", "userSpaceOnUse")
+  patternEl.setAttribute("x", String(-offsetX))
+  patternEl.setAttribute("y", String(-offsetY))
+  patternEl.setAttribute("width", "8")
+  patternEl.setAttribute("height", "8")
+  patternEl.classList.add("dither-tile-pattern")
+
   const bg = document.createElementNS(SVG_NS, "rect")
   bg.setAttribute("x", "0")
-  bg.setAttribute("y", "-0.5")
+  bg.setAttribute("y", "0")
   bg.setAttribute("width", "8")
   bg.setAttribute("height", "8")
   bg.setAttribute("fill", secondaryColor)
   bg.classList.add("vector-dither-bg-rect")
-  svg.appendChild(bg)
+  patternEl.appendChild(bg)
 
   let d = ""
   for (let y = 0; y < 8; y++) {
@@ -381,12 +398,12 @@ const createVectorDitherPatternSVG = (pattern, vector) => {
       if (pattern.data[y * 8 + x] === 1) {
         if (runStart === -1) runStart = x
       } else if (runStart !== -1) {
-        d += `M${runStart} ${y}h${x - runStart}`
+        d += `M${runStart} ${y + 0.5}h${x - runStart}`
         runStart = -1
       }
     }
     if (runStart !== -1) {
-      d += `M${runStart} ${y}h${8 - runStart}`
+      d += `M${runStart} ${y + 0.5}h${8 - runStart}`
     }
   }
 
@@ -394,9 +411,33 @@ const createVectorDitherPatternSVG = (pattern, vector) => {
   path.setAttribute("stroke", primaryColor)
   path.setAttribute("d", d)
   path.classList.add("vector-dither-on-path")
-  svg.appendChild(path)
+  patternEl.appendChild(path)
+
+  defs.appendChild(patternEl)
+  svg.appendChild(defs)
+
+  const displayRect = document.createElementNS(SVG_NS, "rect")
+  displayRect.setAttribute("x", "0")
+  displayRect.setAttribute("y", "0")
+  displayRect.setAttribute("width", "8")
+  displayRect.setAttribute("height", "8")
+  displayRect.setAttribute("fill", `url(#${id})`)
+  svg.appendChild(displayRect)
 
   return svg
+}
+
+/**
+ * Update the dither tile offset on all pattern elements within a container.
+ * @param {Element} container - DOM element to search within
+ * @param {number} offsetX - dither X offset (0–7)
+ * @param {number} offsetY - dither Y offset (0–7)
+ */
+function applyVectorDitherOffset(container, offsetX, offsetY) {
+  container.querySelectorAll(".dither-tile-pattern").forEach((p) => {
+    p.setAttribute("x", String(-offsetX))
+    p.setAttribute("y", String(-offsetY))
+  })
 }
 
 let vectorDitherPickerInitialized = false
@@ -429,25 +470,28 @@ export function initVectorDitherPicker(vector) {
 }
 
 /**
- * Sync the toggle buttons and grid mirror classes in the vector dither picker.
+ * Sync the toggle buttons and offset sliders in the vector dither picker.
+ * Sliders show the effective dither offset (stored offset corrected for layer movement).
  * @param {object} vector - The vector whose settings to reflect
  */
 export function updateVectorDitherControls(vector) {
   const container = dom.vectorDitherPickerContainer
   if (!container) return
   const twoColorBtn = container.querySelector('.dither-toggle.twoColor')
-  const mirrorXBtn = container.querySelector('.dither-toggle.mirrorX')
-  const mirrorYBtn = container.querySelector('.dither-toggle.mirrorY')
-  const mirrorX = vector.mirrorX ?? false
-  const mirrorY = vector.mirrorY ?? false
   if (twoColorBtn) twoColorBtn.classList.toggle('selected', vector.modes?.twoColor ?? false)
-  if (mirrorXBtn) mirrorXBtn.classList.toggle('selected', mirrorX)
-  if (mirrorYBtn) mirrorYBtn.classList.toggle('selected', mirrorY)
+  // Show effective offset (stored offset corrected for any layer movement since recording)
+  const currentLayerX = vector.layer?.x ?? 0
+  const currentLayerY = vector.layer?.y ?? 0
+  const recordedLayerX = vector.recordedLayerX ?? currentLayerX
+  const recordedLayerY = vector.recordedLayerY ?? currentLayerY
+  const effectiveOffsetX = (((vector.ditherOffsetX ?? 0) + recordedLayerX - currentLayerX) % 8 + 8) % 8
+  const effectiveOffsetY = (((vector.ditherOffsetY ?? 0) + recordedLayerY - currentLayerY) % 8 + 8) % 8
+  const offsetXSlider = container.querySelector('#vector-dither-offset-x')
+  const offsetYSlider = container.querySelector('#vector-dither-offset-y')
+  if (offsetXSlider) offsetXSlider.value = effectiveOffsetX
+  if (offsetYSlider) offsetYSlider.value = effectiveOffsetY
   const grid = container.querySelector('.dither-grid')
-  if (grid) {
-    grid.classList.toggle('mirror-x', mirrorX)
-    grid.classList.toggle('mirror-y', mirrorY)
-  }
+  if (grid) applyVectorDitherOffset(grid, effectiveOffsetX, effectiveOffsetY)
 }
 
 /**
@@ -496,7 +540,13 @@ export function updateVectorDitherPreview(vector) {
   if (!preview) return
   const existing = preview.querySelector(".dither-grid-svg")
   if (existing) existing.remove()
+  const currentLayerX = vector.layer?.x ?? 0
+  const currentLayerY = vector.layer?.y ?? 0
+  const recordedLayerX = vector.recordedLayerX ?? currentLayerX
+  const recordedLayerY = vector.recordedLayerY ?? currentLayerY
+  const effectiveOffsetX = (((vector.ditherOffsetX ?? 0) + recordedLayerX - currentLayerX) % 8 + 8) % 8
+  const effectiveOffsetY = (((vector.ditherOffsetY ?? 0) + recordedLayerY - currentLayerY) % 8 + 8) % 8
   preview.appendChild(
-    createVectorDitherPatternSVG(ditherPatterns[vector.ditherPatternIndex ?? 64], vector)
+    createVectorDitherPatternSVG(ditherPatterns[vector.ditherPatternIndex ?? 64], vector, effectiveOffsetX, effectiveOffsetY)
   )
 }

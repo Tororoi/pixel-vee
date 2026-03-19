@@ -115,8 +115,8 @@ function drawDitherInjectPreview() {
     ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
     twoColorMode: state.tool.current.modes?.twoColor ?? false,
     secondaryColor: swatches.secondary.color,
-    mirrorX: state.tool.current.mirrorX ?? false,
-    mirrorY: state.tool.current.mirrorY ?? false,
+    ditherOffsetX: state.tool.current.ditherOffsetX ?? 0,
+    ditherOffsetY: state.tool.current.ditherOffsetY ?? 0,
     densityMap: state.tool.current._buildUpDensityMap,
     buildUpSteps: state.tool.current.buildUpSteps,
   })
@@ -161,8 +161,8 @@ function drawDitherPreview() {
   const baseX = Math.ceil(state.cursor.x - brushSize / 2)
   const baseY = Math.ceil(state.cursor.y - brushSize / 2)
   const twoColor = state.tool.current.modes?.twoColor ?? false
-  const mirrorX = state.tool.current.mirrorX ?? false
-  const mirrorY = state.tool.current.mirrorY ?? false
+  const ditherOffsetX = state.tool.current.ditherOffsetX ?? 0
+  const ditherOffsetY = state.tool.current.ditherOffsetY ?? 0
   const isBuildUp = state.tool.current.modes?.buildUpDither ?? false
   const densityMap = isBuildUp ? state.tool.current._buildUpDensityMap : null
   const buildUpSteps = state.tool.current.buildUpSteps
@@ -182,7 +182,7 @@ function drawDitherPreview() {
     } else {
       pattern = basePattern
     }
-    if (isDitherOn(pattern, x, y, mirrorX, mirrorY)) {
+    if (isDitherOn(pattern, x, y, ditherOffsetX, ditherOffsetY)) {
       canvas.cursorCTX.fillStyle = swatches.primary.color.color
       canvas.cursorCTX.fillRect(x + canvas.xOffset, y + canvas.yOffset, 1, 1)
     } else if (twoColor) {
