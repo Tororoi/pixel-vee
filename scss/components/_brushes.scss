@@ -167,8 +167,16 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 40px;
+    gap: 6px;
     height: 40px;
+    padding-left: 4px;
+    .dither-offset-values {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      color: $white;
+      font-size: 12px;
+    }
     .dither-offset-control {
       width: 32px;
       height: 32px;

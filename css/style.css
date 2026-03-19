@@ -2035,8 +2035,16 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 40px;
+  gap: 6px;
   height: 40px;
+  padding-left: 4px;
+}
+.dither-picker-container .dither-offset-control-wrap .dither-offset-values {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  color: rgb(255, 255, 255);
+  font-size: 12px;
 }
 .dither-picker-container .dither-offset-control-wrap .dither-offset-control {
   width: 32px;

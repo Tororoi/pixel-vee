@@ -240,7 +240,7 @@ document.querySelector('.dither-picker-container')?.addEventListener('pointerdow
     if (grid) applyDitherOffset(grid, ox, oy)
     const preview = document.querySelector('.dither-preview')
     if (preview) applyDitherOffset(preview, ox, oy)
-    applyDitherOffsetControl(control, ox, oy)
+    applyDitherOffsetControl(control.parentElement, ox, oy)
   }
   control.addEventListener('pointermove', onMove)
   control.addEventListener('pointerup', () => control.removeEventListener('pointermove', onMove), { once: true })

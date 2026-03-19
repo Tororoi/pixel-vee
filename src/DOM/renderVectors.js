@@ -506,6 +506,11 @@ function applyVectorDitherOffsetControl(container, offsetX, offsetY) {
     pattern.setAttribute("x", String(-offsetX))
     pattern.setAttribute("y", String(-offsetY))
   }
+  const spans = container.querySelectorAll(".dither-offset-values span")
+  if (spans.length === 2) {
+    spans[0].textContent = `X: ${offsetX}`
+    spans[1].textContent = `Y: ${offsetY}`
+  }
 }
 
 let vectorDitherPickerInitialized = false
@@ -537,6 +542,10 @@ export function initVectorDitherPicker(vector) {
       control.dataset.tooltip = "Drag to set dither offset"
       control.appendChild(createVectorDitherOffsetControlSVG())
       wrap.appendChild(control)
+      const values = document.createElement("div")
+      values.className = "dither-offset-values"
+      values.innerHTML = "<span>X: 0</span><span>Y: 0</span>"
+      wrap.appendChild(values)
     }
   }
   updateVectorDitherPickerColors(vector)
