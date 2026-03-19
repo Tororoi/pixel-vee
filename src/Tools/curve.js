@@ -4,6 +4,7 @@ import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
 import { actionQuadraticCurve, actionCubicCurve } from '../Actions/pointer/curve.js'
+import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
 import { vectorGui } from '../GUI/vector.js'
 import { renderCanvas } from '../Canvas/render.js'
 import { coordArrayFromSet } from '../utils/maskHelpers.js'
@@ -14,6 +15,29 @@ import { rerouteVectorStepsAction } from './adjust.js'
 //=====================================//
 //=== * * * Curve Controllers * * * ===//
 //=====================================//
+
+/**
+ * Build a StrokeContext from the current tool state
+ * @param {boolean} isPreview
+ * @returns {object} StrokeContext
+ */
+function buildCurveCtx(isPreview = false) {
+  return createStrokeContext({
+    layer: canvas.currentLayer,
+    isPreview,
+    boundaryBox: state.selection.boundaryBox,
+    currentColor: swatches.primary.color,
+    currentModes: state.tool.current.modes,
+    maskSet: state.selection.maskSet,
+    brushStamp: brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+    brushSize: state.tool.current.brushSize,
+    ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
+    twoColorMode: state.tool.current.modes?.twoColor ?? false,
+    secondaryColor: swatches.secondary.color,
+    mirrorX: state.tool.current.mirrorX ?? false,
+    mirrorY: state.tool.current.mirrorY ?? false,
+  })
+}
 
 /**
  * Draw bezier curves
@@ -53,23 +77,9 @@ function quadCurveSteps() {
         state.vector.properties.py2,
         state.vector.properties.px3,
         state.vector.properties.py3,
-        state.selection.boundaryBox,
         state.tool.clickCounter,
-        swatches.primary.color,
-        canvas.currentLayer,
-        state.tool.current.modes,
-        brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
-        state.tool.current.brushSize,
-        state.selection.maskSet,
-        null,
-        true,
-        ditherPatterns[state.tool.current.ditherPatternIndex],
-        state.tool.current.modes?.twoColor ?? false,
-        swatches.secondary.color,
-        state.tool.current.mirrorX ?? false,
-        state.tool.current.mirrorY ?? false,
+        buildCurveCtx(true),
       )
-
       break
     case 'pointermove':
       switch (state.tool.clickCounter) {
@@ -93,23 +103,9 @@ function quadCurveSteps() {
         state.vector.properties.py2,
         state.vector.properties.px3,
         state.vector.properties.py3,
-        state.selection.boundaryBox,
         state.tool.clickCounter,
-        swatches.primary.color,
-        canvas.currentLayer,
-        state.tool.current.modes,
-        brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
-        state.tool.current.brushSize,
-        state.selection.maskSet,
-        null,
-        true,
-        ditherPatterns[state.tool.current.ditherPatternIndex],
-        state.tool.current.modes?.twoColor ?? false,
-        swatches.secondary.color,
-        state.tool.current.mirrorX ?? false,
-        state.tool.current.mirrorY ?? false,
+        buildCurveCtx(true),
       )
-
       break
     case 'pointerup':
       switch (state.tool.clickCounter) {
@@ -133,23 +129,8 @@ function quadCurveSteps() {
           state.vector.properties.py2,
           state.vector.properties.px3,
           state.vector.properties.py3,
-          state.selection.boundaryBox,
           state.tool.clickCounter,
-          swatches.primary.color,
-          canvas.currentLayer,
-          state.tool.current.modes,
-          brushStamps[state.tool.current.brushType][
-            state.tool.current.brushSize
-          ],
-          state.tool.current.brushSize,
-          state.selection.maskSet,
-          null,
-          false,
-          ditherPatterns[state.tool.current.ditherPatternIndex],
-          state.tool.current.modes?.twoColor ?? false,
-          swatches.secondary.color,
-          state.tool.current.mirrorX ?? false,
-          state.tool.current.mirrorY ?? false,
+          buildCurveCtx(false),
         )
         state.tool.clickCounter = 0
         let maskArray = coordArrayFromSet(
@@ -258,21 +239,8 @@ function cubicCurveSteps() {
         state.vector.properties.py3,
         state.vector.properties.px4,
         state.vector.properties.py4,
-        state.selection.boundaryBox,
         state.tool.clickCounter,
-        swatches.primary.color,
-        canvas.currentLayer,
-        state.tool.current.modes,
-        brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
-        state.tool.current.brushSize,
-        state.selection.maskSet,
-        null,
-        true,
-        ditherPatterns[state.tool.current.ditherPatternIndex],
-        state.tool.current.modes?.twoColor ?? false,
-        swatches.secondary.color,
-        state.tool.current.mirrorX ?? false,
-        state.tool.current.mirrorY ?? false,
+        buildCurveCtx(true),
       )
       break
     case 'pointermove':
@@ -303,21 +271,8 @@ function cubicCurveSteps() {
         state.vector.properties.py3,
         state.vector.properties.px4,
         state.vector.properties.py4,
-        state.selection.boundaryBox,
         state.tool.clickCounter,
-        swatches.primary.color,
-        canvas.currentLayer,
-        state.tool.current.modes,
-        brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
-        state.tool.current.brushSize,
-        state.selection.maskSet,
-        null,
-        true,
-        ditherPatterns[state.tool.current.ditherPatternIndex],
-        state.tool.current.modes?.twoColor ?? false,
-        swatches.secondary.color,
-        state.tool.current.mirrorX ?? false,
-        state.tool.current.mirrorY ?? false,
+        buildCurveCtx(true),
       )
       break
     case 'pointerup':
@@ -348,23 +303,8 @@ function cubicCurveSteps() {
           state.vector.properties.py3,
           state.vector.properties.px4,
           state.vector.properties.py4,
-          state.selection.boundaryBox,
           state.tool.clickCounter,
-          swatches.primary.color,
-          canvas.currentLayer,
-          state.tool.current.modes,
-          brushStamps[state.tool.current.brushType][
-            state.tool.current.brushSize
-          ],
-          state.tool.current.brushSize,
-          state.selection.maskSet,
-          null,
-          false,
-          ditherPatterns[state.tool.current.ditherPatternIndex],
-          state.tool.current.modes?.twoColor ?? false,
-          swatches.secondary.color,
-          state.tool.current.mirrorX ?? false,
-          state.tool.current.mirrorY ?? false,
+          buildCurveCtx(false),
         )
         state.tool.clickCounter = 0
         let maskArray = coordArrayFromSet(

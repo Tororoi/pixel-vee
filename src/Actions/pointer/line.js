@@ -8,46 +8,18 @@ import { actionDraw, actionDitherDraw } from './draw.js'
  * @param {number} sy - (Integer)
  * @param {number} tx - (Integer)
  * @param {number} ty - (Integer)
- * @param {object} boundaryBox - {xMin, xMax, yMin, yMax}
- * @param {object} currentColor - {color, r, g, b, a}
- * @param {object} layer - the affected layer
- * @param {object} currentModes - modes to be used for rendering
- * @param {object} brushStamp - entire brushStamp array with all directions
- * @param {number} brushSize - (Integer)
- * @param {Set} maskSet - set of coordinates to draw on if mask is active
- * @param {Set} seenPixelsSet - set of coordinates already drawn on
- * @param {CanvasRenderingContext2D} customContext - use custom context if provided
- * @param {boolean} isPreview - whether the action is a preview (not on main canvas) - used by line tool and brush tool before line is confirmed
- * @param {object} [ditherPattern] - pattern object from ditherPatterns; when provided uses dither drawing
- * @param {boolean} [twoColorMode] - if true, "off" dither pixels use secondaryColor
- * @param {object} [secondaryColor] - {color, r, g, b, a} for two-color dither mode
- * @param {boolean} [mirrorX] - flip the dither pattern horizontally
- * @param {boolean} [mirrorY] - flip the dither pattern vertically
+ * @param {object} ctx - StrokeContext (brushStamp used to select direction per step)
  */
-export function actionLine(
-  sx,
-  sy,
-  tx,
-  ty,
-  boundaryBox,
-  currentColor,
-  layer,
-  currentModes,
-  brushStamp,
-  brushSize,
-  maskSet,
-  seenPixelsSet = null,
-  customContext = null,
-  isPreview = false,
-  ditherPattern = null,
-  twoColorMode = false,
-  secondaryColor = null,
-  mirrorX = false,
-  mirrorY = false,
-) {
+export function actionLine(sx, sy, tx, ty, ctx) {
+  const { brushStamp, seenPixelsSet, ditherPattern } = ctx
+  // actionLine manages its own seen set — it's either a fresh set or a copy of
+  // the caller's seen set so that deduplication works but the caller's set is
+  // not mutated by the line draw.
+  const seen = seenPixelsSet ? new Set(seenPixelsSet) : new Set()
+  const innerCtx = { ...ctx, seenPixelsSet: seen }
+
   let angle = getAngle(tx - sx, ty - sy) // angle of line
   let tri = getTriangle(sx, sy, tx, ty, angle)
-  const seen = seenPixelsSet ? new Set(seenPixelsSet) : new Set()
   let previousX = sx
   let previousY = sy
   let brushDirection = '0,0'
@@ -64,40 +36,9 @@ export function actionLine(
     )
     // for each point along the line
     if (ditherPattern) {
-      actionDitherDraw(
-        thispoint.x,
-        thispoint.y,
-        boundaryBox,
-        currentColor,
-        brushStamp[brushDirection],
-        brushSize,
-        layer,
-        currentModes,
-        maskSet,
-        seen,
-        ditherPattern,
-        twoColorMode,
-        secondaryColor,
-        mirrorX,
-        mirrorY,
-        customContext,
-        isPreview,
-      )
+      actionDitherDraw(thispoint.x, thispoint.y, brushStamp[brushDirection], innerCtx)
     } else {
-      actionDraw(
-        thispoint.x,
-        thispoint.y,
-        boundaryBox,
-        currentColor,
-        brushStamp[brushDirection],
-        brushSize,
-        layer,
-        currentModes,
-        maskSet,
-        seen,
-        customContext,
-        isPreview,
-      )
+      actionDraw(thispoint.x, thispoint.y, brushStamp[brushDirection], innerCtx)
     }
     previousX = thispoint.x
     previousY = thispoint.y
@@ -105,39 +46,8 @@ export function actionLine(
   //fill endpoint
   brushDirection = calculateBrushDirection(tx, ty, previousX, previousY)
   if (ditherPattern) {
-    actionDitherDraw(
-      tx,
-      ty,
-      boundaryBox,
-      currentColor,
-      brushStamp[brushDirection],
-      brushSize,
-      layer,
-      currentModes,
-      maskSet,
-      seen,
-      ditherPattern,
-      twoColorMode,
-      secondaryColor,
-      mirrorX,
-      mirrorY,
-      customContext,
-      isPreview,
-    )
+    actionDitherDraw(tx, ty, brushStamp[brushDirection], innerCtx)
   } else {
-    actionDraw(
-      tx,
-      ty,
-      boundaryBox,
-      currentColor,
-      brushStamp[brushDirection],
-      brushSize,
-      layer,
-      currentModes,
-      maskSet,
-      seen,
-      customContext,
-      isPreview,
-    )
+    actionDraw(tx, ty, brushStamp[brushDirection], innerCtx)
   }
 }

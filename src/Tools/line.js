@@ -4,6 +4,7 @@ import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { ditherPatterns } from "../Context/ditherPatterns.js"
 import { actionLine } from "../Actions/pointer/line.js"
+import { createStrokeContext } from "../Actions/pointer/strokeContext.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo/undoRedo.js"
@@ -38,21 +39,21 @@ function lineSteps() {
         state.vector.properties.py1,
         state.vector.properties.px2,
         state.vector.properties.py2,
-        state.selection.boundaryBox,
-        swatches.primary.color,
-        canvas.currentLayer,
-        state.tool.current.modes,
-        brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
-        state.tool.current.brushSize,
-        state.selection.maskSet,
-        null,
-        null,
-        true,
-        ditherPatterns[state.tool.current.ditherPatternIndex],
-        state.tool.current.modes?.twoColor ?? false,
-        swatches.secondary.color,
-        state.tool.current.mirrorX ?? false,
-        state.tool.current.mirrorY ?? false,
+        createStrokeContext({
+          layer: canvas.currentLayer,
+          isPreview: true,
+          boundaryBox: state.selection.boundaryBox,
+          currentColor: swatches.primary.color,
+          currentModes: state.tool.current.modes,
+          maskSet: state.selection.maskSet,
+          brushStamp: brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+          brushSize: state.tool.current.brushSize,
+          ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
+          twoColorMode: state.tool.current.modes?.twoColor ?? false,
+          secondaryColor: swatches.secondary.color,
+          mirrorX: state.tool.current.mirrorX ?? false,
+          mirrorY: state.tool.current.mirrorY ?? false,
+        }),
       )
       break
     case "pointermove":
@@ -67,21 +68,21 @@ function lineSteps() {
         state.vector.properties.py1,
         state.vector.properties.px2,
         state.vector.properties.py2,
-        state.selection.boundaryBox,
-        swatches.primary.color,
-        canvas.currentLayer,
-        state.tool.current.modes,
-        brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
-        state.tool.current.brushSize,
-        state.selection.maskSet,
-        null,
-        null,
-        true,
-        ditherPatterns[state.tool.current.ditherPatternIndex],
-        state.tool.current.modes?.twoColor ?? false,
-        swatches.secondary.color,
-        state.tool.current.mirrorX ?? false,
-        state.tool.current.mirrorY ?? false,
+        createStrokeContext({
+          layer: canvas.currentLayer,
+          isPreview: true,
+          boundaryBox: state.selection.boundaryBox,
+          currentColor: swatches.primary.color,
+          currentModes: state.tool.current.modes,
+          maskSet: state.selection.maskSet,
+          brushStamp: brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+          brushSize: state.tool.current.brushSize,
+          ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
+          twoColorMode: state.tool.current.modes?.twoColor ?? false,
+          secondaryColor: swatches.secondary.color,
+          mirrorX: state.tool.current.mirrorX ?? false,
+          mirrorY: state.tool.current.mirrorY ?? false,
+        }),
       )
       break
     case "pointerup": {
@@ -111,21 +112,20 @@ function lineSteps() {
         state.vector.properties.py1,
         state.vector.properties.px2,
         state.vector.properties.py2,
-        state.selection.boundaryBox,
-        swatches.primary.color,
-        canvas.currentLayer,
-        state.tool.current.modes,
-        brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
-        state.tool.current.brushSize,
-        state.selection.maskSet,
-        null,
-        null,
-        false,
-        ditherPatterns[state.tool.current.ditherPatternIndex],
-        state.tool.current.modes?.twoColor ?? false,
-        swatches.secondary.color,
-        state.tool.current.mirrorX ?? false,
-        state.tool.current.mirrorY ?? false,
+        createStrokeContext({
+          layer: canvas.currentLayer,
+          boundaryBox: state.selection.boundaryBox,
+          currentColor: swatches.primary.color,
+          currentModes: state.tool.current.modes,
+          maskSet: state.selection.maskSet,
+          brushStamp: brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+          brushSize: state.tool.current.brushSize,
+          ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
+          twoColorMode: state.tool.current.modes?.twoColor ?? false,
+          secondaryColor: swatches.secondary.color,
+          mirrorX: state.tool.current.mirrorX ?? false,
+          mirrorY: state.tool.current.mirrorY ?? false,
+        }),
       )
       state.tool.clickCounter = 0
       let maskArray = coordArrayFromSet(

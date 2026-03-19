@@ -5,6 +5,7 @@ import { swatches } from '../Context/swatch.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
 import { actionDitherDraw, actionBuildUpDitherDraw } from '../Actions/pointer/draw.js'
 import { actionLine } from '../Actions/pointer/line.js'
+import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
 import { getAngle, getTriangle } from '../utils/trig.js'
 import { renderCanvas, scheduleRender } from '../Canvas/render.js'
 import { calculateBrushDirection } from '../utils/drawHelpers.js'
@@ -36,6 +37,25 @@ function brushSteps() {
       if (brush.modes.buildUpDither) {
         rebuildBuildUpDensityMap()
       }
+      //Build stroke context once — reused for every point in this stroke
+      brush._strokeCtx = createStrokeContext({
+        layer: canvas.currentLayer,
+        boundaryBox: state.selection.boundaryBox,
+        currentColor: swatches.primary.color,
+        currentModes: state.tool.current.modes,
+        maskSet: state.selection.maskSet,
+        seenPixelsSet: state.selection.seenPixelsSet,
+        brushStamp: brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+        brushSize: state.tool.current.brushSize,
+        ditherPattern: ditherPatterns[brush.ditherPatternIndex],
+        twoColorMode: brush.modes.twoColor,
+        secondaryColor: swatches.secondary.color,
+        mirrorX: brush.mirrorX,
+        mirrorY: brush.mirrorY,
+        densityMap: brush._buildUpDensityMap,
+        buildUpSteps: brush.buildUpSteps,
+      })
+      brush._previewStrokeCtx = { ...brush._strokeCtx, isPreview: true, excludeFromSet: true }
       //initial point
       drawBrushPoint(state.cursor.x, state.cursor.y, brushDirection)
       //For line
@@ -58,18 +78,7 @@ function brushSteps() {
           state.tool.lineStartY,
           state.cursor.x,
           state.cursor.y,
-          state.selection.boundaryBox,
-          swatches.primary.color,
-          canvas.currentLayer,
-          state.tool.current.modes,
-          brushStamps[state.tool.current.brushType][
-            state.tool.current.brushSize
-          ],
-          state.tool.current.brushSize,
-          state.selection.maskSet,
-          state.selection.seenPixelsSet,
-          null,
-          true,
+          { ...brush._strokeCtx, isPreview: true },
         )
       } else if (shouldDrawLine()) {
         drawLine()
@@ -177,47 +186,11 @@ function addPointToAction(x, y) {
  */
 function drawBrushPoint(x, y, brushDirection) {
   addPointToAction(x, y)
-  const stamp =
-    brushStamps[state.tool.current.brushType][state.tool.current.brushSize][
-      brushDirection
-    ]
+  const stamp = brush._strokeCtx.brushStamp[brushDirection]
   if (brush.modes.buildUpDither) {
-    actionBuildUpDitherDraw(
-      x,
-      y,
-      state.selection.boundaryBox,
-      swatches.primary.color,
-      stamp,
-      state.tool.current.brushSize,
-      canvas.currentLayer,
-      state.tool.current.modes,
-      state.selection.maskSet,
-      state.selection.seenPixelsSet,
-      brush._buildUpDensityMap,
-      brush.buildUpSteps,
-      brush.modes.twoColor,
-      swatches.secondary.color,
-      brush.mirrorX,
-      brush.mirrorY,
-    )
+    actionBuildUpDitherDraw(x, y, stamp, brush._strokeCtx)
   } else {
-    actionDitherDraw(
-      x,
-      y,
-      state.selection.boundaryBox,
-      swatches.primary.color,
-      stamp,
-      state.tool.current.brushSize,
-      canvas.currentLayer,
-      state.tool.current.modes,
-      state.selection.maskSet,
-      state.selection.seenPixelsSet,
-      ditherPatterns[brush.ditherPatternIndex],
-      brush.modes.twoColor,
-      swatches.secondary.color,
-      brush.mirrorX,
-      brush.mirrorY,
-    )
+    actionDitherDraw(x, y, stamp, brush._strokeCtx)
   }
 }
 
@@ -231,53 +204,11 @@ function drawPreviewBrushPoint() {
     state.drawing.lastDrawnX,
     state.drawing.lastDrawnY,
   )
-  const stamp =
-    brushStamps[state.tool.current.brushType][state.tool.current.brushSize][
-      brushDirection
-    ]
+  const stamp = brush._previewStrokeCtx.brushStamp[brushDirection]
   if (brush.modes.buildUpDither) {
-    actionBuildUpDitherDraw(
-      state.cursor.x,
-      state.cursor.y,
-      state.selection.boundaryBox,
-      swatches.primary.color,
-      stamp,
-      state.tool.current.brushSize,
-      canvas.currentLayer,
-      state.tool.current.modes,
-      state.selection.maskSet,
-      state.selection.seenPixelsSet,
-      brush._buildUpDensityMap,
-      brush.buildUpSteps,
-      brush.modes.twoColor,
-      swatches.secondary.color,
-      brush.mirrorX,
-      brush.mirrorY,
-      null,
-      true,
-      true,
-    )
+    actionBuildUpDitherDraw(state.cursor.x, state.cursor.y, stamp, brush._previewStrokeCtx)
   } else {
-    actionDitherDraw(
-      state.cursor.x,
-      state.cursor.y,
-      state.selection.boundaryBox,
-      swatches.primary.color,
-      stamp,
-      state.tool.current.brushSize,
-      canvas.currentLayer,
-      state.tool.current.modes,
-      state.selection.maskSet,
-      state.selection.seenPixelsSet,
-      ditherPatterns[brush.ditherPatternIndex],
-      brush.modes.twoColor,
-      swatches.secondary.color,
-      brush.mirrorX,
-      brush.mirrorY,
-      null,
-      true,
-      true,
-    )
+    actionDitherDraw(state.cursor.x, state.cursor.y, stamp, brush._previewStrokeCtx)
   }
 }
 
@@ -408,6 +339,8 @@ export const brush = {
   buildUpActiveStepSlot: null,
   _buildUpDensityMap: new Map(),
   _buildUpResetAtIndex: 0,
+  _strokeCtx: null,
+  _previewStrokeCtx: null,
   type: 'raster',
   cursor: 'crosshair',
   activeCursor: 'crosshair',

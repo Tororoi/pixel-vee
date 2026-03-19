@@ -10,23 +10,11 @@ import { isOutOfBounds, minLimit, maxLimit } from '../../utils/canvasHelpers.js'
  * User action for process to fill a contiguous color
  * @param {number} startX - (Integer)
  * @param {number} startY - (Integer)
- * @param {object} boundaryBox - {xMin, xMax, yMin, yMax}
- * @param {object} currentColor - {color, r, g, b, a}
- * @param {object} layer - the affected layer
- * @param {object} currentModes - modes to be used for rendering
- * @param {Set} maskSet - set of coordinates to draw on if mask is active
- * @param {CanvasRenderingContext2D} [customContext] - use custom context if provided
+ * @param {object} ctx - StrokeContext
  */
-export function actionFill(
-  startX,
-  startY,
-  boundaryBox,
-  currentColor,
-  layer,
-  currentModes,
-  maskSet,
-  customContext = null,
-) {
+export function actionFill(startX, startY, ctx) {
+  const { boundaryBox, layer, currentModes, customContext } = ctx
+  let { currentColor } = ctx
   //exit if outside borders
   if (isOutOfBounds(startX, startY, 0, layer, boundaryBox)) {
     return
@@ -36,11 +24,11 @@ export function actionFill(
   let yMin = minLimit(boundaryBox.yMin, 0)
   let yMax = maxLimit(boundaryBox.yMax, layer.cvs.height)
   //get imageData
-  let ctx = layer.ctx
+  let renderCtx = layer.ctx
   if (customContext) {
-    ctx = customContext
+    renderCtx = customContext
   }
-  let layerImageData = ctx.getImageData(xMin, yMin, xMax - xMin, yMax - yMin)
+  let layerImageData = renderCtx.getImageData(xMin, yMin, xMax - xMin, yMax - yMin)
   let clickedColor = getColor(layerImageData, startX - xMin, startY - yMin)
 
   if (currentModes?.eraser) {
@@ -124,5 +112,5 @@ export function actionFill(
     }
   }
   //render floodFill result
-  ctx.putImageData(layerImageData, xMin, yMin)
+  renderCtx.putImageData(layerImageData, xMin, yMin)
 }
