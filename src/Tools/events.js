@@ -236,8 +236,8 @@ document.querySelector('.dither-picker-container')?.addEventListener('pointerdow
     const oy = ((startOffsetY - Math.round((ev.clientY - startY) / 4)) % 8 + 8) % 8
     state.tool.current.ditherOffsetX = ox
     state.tool.current.ditherOffsetY = oy
-    const grid = document.querySelector('.dither-grid')
-    if (grid) applyDitherOffset(grid, ox, oy)
+    const picker = document.querySelector('.dither-picker-container')
+    if (picker) applyDitherOffset(picker, ox, oy)
     const preview = document.querySelector('.dither-preview')
     if (preview) applyDitherOffset(preview, ox, oy)
     applyDitherOffsetControl(control.parentElement, ox, oy)

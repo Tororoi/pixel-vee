@@ -128,8 +128,8 @@ export function renderDitherControlsToDOM() {
   renderBuildUpStepsToDOM()
   const offsetX = state.tool.current.ditherOffsetX ?? 0
   const offsetY = state.tool.current.ditherOffsetY ?? 0
-  const grid = document.querySelector('.dither-grid')
-  if (grid) applyDitherOffset(grid, offsetX, offsetY)
+  const picker = document.querySelector('.dither-picker-container')
+  if (picker) applyDitherOffset(picker, offsetX, offsetY)
   const wrap = document.querySelector('.dither-offset-control-wrap')
   if (wrap) applyDitherOffsetControl(wrap, offsetX, offsetY)
 }
