@@ -10,11 +10,11 @@ import { isOutOfBounds, minLimit, maxLimit } from '../../utils/canvasHelpers.js'
  * User action for process to fill a contiguous color
  * @param {number} startX - (Integer)
  * @param {number} startY - (Integer)
- * @param {object} ctx - StrokeContext
+ * @param {object} strokeCtx - StrokeContext
  */
-export function actionFill(startX, startY, ctx) {
-  const { boundaryBox, layer, currentModes, customContext } = ctx
-  let { currentColor } = ctx
+export function actionFill(startX, startY, strokeCtx) {
+  const { boundaryBox, layer, currentModes, customContext } = strokeCtx
+  let { currentColor } = strokeCtx
   //exit if outside borders
   if (isOutOfBounds(startX, startY, 0, layer, boundaryBox)) {
     return

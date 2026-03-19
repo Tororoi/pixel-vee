@@ -8,15 +8,15 @@ import { actionDraw, actionDitherDraw } from './draw.js'
  * @param {number} sy - (Integer)
  * @param {number} tx - (Integer)
  * @param {number} ty - (Integer)
- * @param {object} ctx - StrokeContext (brushStamp used to select direction per step)
+ * @param {object} strokeCtx - StrokeContext (brushStamp used to select direction per step)
  */
-export function actionLine(sx, sy, tx, ty, ctx) {
-  const { brushStamp, seenPixelsSet, ditherPattern } = ctx
+export function actionLine(sx, sy, tx, ty, strokeCtx) {
+  const { brushStamp, seenPixelsSet, ditherPattern } = strokeCtx
   // actionLine manages its own seen set — it's either a fresh set or a copy of
   // the caller's seen set so that deduplication works but the caller's set is
   // not mutated by the line draw.
   const seen = seenPixelsSet ? new Set(seenPixelsSet) : new Set()
-  const innerCtx = { ...ctx, seenPixelsSet: seen }
+  const innerCtx = { ...strokeCtx, seenPixelsSet: seen }
 
   let angle = getAngle(tx - sx, ty - sy) // angle of line
   let tri = getTriangle(sx, sy, tx, ty, angle)

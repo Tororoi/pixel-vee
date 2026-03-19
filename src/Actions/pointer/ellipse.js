@@ -12,7 +12,7 @@ import { renderPoints } from './helpers.js'
  * @param {number} rightTangentY - (Integer)
  * @param {number} bottomTangentX - (Integer)
  * @param {number} bottomTangentY - (Integer)
- * @param {object} ctx - StrokeContext
+ * @param {object} strokeCtx - StrokeContext
  */
 export function actionEllipse(
   weight,
@@ -24,7 +24,7 @@ export function actionEllipse(
   rightTangentY,
   bottomTangentX,
   bottomTangentY,
-  ctx,
+  strokeCtx,
 ) {
   const plotPoints = plotRotatedEllipseConics(
     weight,
@@ -37,5 +37,5 @@ export function actionEllipse(
     bottomTangentX,
     bottomTangentY,
   )
-  renderPoints(plotPoints, ctx)
+  renderPoints(plotPoints, strokeCtx)
 }

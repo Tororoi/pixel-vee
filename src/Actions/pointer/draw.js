@@ -13,9 +13,9 @@ import { isDitherOn, ditherPatterns } from '../../Context/ditherPatterns.js'
  * @param {number} coordX - (Integer)
  * @param {number} coordY - (Integer)
  * @param {object} directionalBrushStamp - brushStamp[brushDirection]
- * @param {object} ctx - StrokeContext
+ * @param {object} strokeCtx - StrokeContext
  */
-export function actionDraw(coordX, coordY, directionalBrushStamp, ctx) {
+export function actionDraw(coordX, coordY, directionalBrushStamp, strokeCtx) {
   const {
     layer,
     customContext,
@@ -27,7 +27,7 @@ export function actionDraw(coordX, coordY, directionalBrushStamp, ctx) {
     currentColor,
     currentModes,
     brushSize,
-  } = ctx
+  } = strokeCtx
   let offsetX = 0
   let offsetY = 0
   let renderCtx = layer.ctx
@@ -83,9 +83,9 @@ export function actionDraw(coordX, coordY, directionalBrushStamp, ctx) {
  * @param {number} coordX - (Integer)
  * @param {number} coordY - (Integer)
  * @param {object} directionalBrushStamp - brushStamp[brushDirection]
- * @param {object} ctx - StrokeContext
+ * @param {object} strokeCtx - StrokeContext
  */
-export function actionDitherDraw(coordX, coordY, directionalBrushStamp, ctx) {
+export function actionDitherDraw(coordX, coordY, directionalBrushStamp, strokeCtx) {
   const {
     layer,
     customContext,
@@ -102,7 +102,7 @@ export function actionDitherDraw(coordX, coordY, directionalBrushStamp, ctx) {
     secondaryColor,
     mirrorX,
     mirrorY,
-  } = ctx
+  } = strokeCtx
   let offsetX = 0
   let offsetY = 0
   let renderCtx = layer.ctx
@@ -164,13 +164,13 @@ export function actionDitherDraw(coordX, coordY, directionalBrushStamp, ctx) {
  * @param {number} coordX - (Integer)
  * @param {number} coordY - (Integer)
  * @param {object} directionalBrushStamp - brushStamp[brushDirection]
- * @param {object} ctx - StrokeContext
+ * @param {object} strokeCtx - StrokeContext
  */
 export function actionBuildUpDitherDraw(
   coordX,
   coordY,
   directionalBrushStamp,
-  ctx,
+  strokeCtx,
 ) {
   const {
     layer,
@@ -189,7 +189,7 @@ export function actionBuildUpDitherDraw(
     mirrorY,
     densityMap,
     buildUpSteps,
-  } = ctx
+  } = strokeCtx
   let offsetX = 0
   let offsetY = 0
   let renderCtx = layer.ctx
