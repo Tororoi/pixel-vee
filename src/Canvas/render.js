@@ -233,15 +233,14 @@ export function performAction(
       //points require 3 entries for every coordinate, x, y, brushSize
       //maskArray requires 2 entries for every coordinate, x, y
       if (action.maskArray) {
-        if (offsetX !== 0 || offsetY !== 0) {
-          mask = new Set(
-            action.maskArray.map(
-              (coord) => `${coord.x + offsetX},${coord.y + offsetY}`,
-            ),
-          )
-        } else {
-          mask = new Set(action.maskArray)
-        }
+        // Rebuild as packed integers (y<<16)|x — the format draw.js expects.
+        // maskArray stores layer-relative {x,y} objects; re-apply the current
+        // layer offset to get absolute canvas coordinates.
+        mask = new Set(
+          action.maskArray.map(
+            (coord) => ((coord.y + offsetY) << 16) | (coord.x + offsetX),
+          ),
+        )
       }
       let previousX = action.points[0].x + offsetX
       let previousY = action.points[0].y + offsetY
