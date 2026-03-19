@@ -953,34 +953,7 @@
               aria-label="Build-Up Dither"
               data-tooltip="Build-Up Dither&#010;&#010;Automatically increase dither density on overlapping strokes"
             ></button>
-            <label class="dither-offset-label">
-              X Offset
-              <input
-                type="range"
-                min="0"
-                max="7"
-                step="1"
-                value="0"
-                id="dither-ctrl-offset-x"
-                class="slider btn"
-                aria-label="Dither Offset X"
-                data-tooltip="Dither Offset X (0–7)"
-              />
-            </label>
-            <label class="dither-offset-label">
-              Y Offset
-              <input
-                type="range"
-                min="0"
-                max="7"
-                step="1"
-                value="0"
-                id="dither-ctrl-offset-y"
-                class="slider btn"
-                aria-label="Dither Offset Y"
-                data-tooltip="Dither Offset Y (0–7)"
-              />
-            </label>
+            <div class="dither-offset-control-wrap"></div>
           </div>
           <div class="build-up-steps" style="display: none">
             <span class="build-up-steps-label">Build-Up Steps</span>
@@ -1517,34 +1490,7 @@
           aria-label="Two-Color"
           data-tooltip="Two-Color"
         ></button>
-        <label class="dither-offset-label">
-          X Offset
-          <input
-            type="range"
-            min="0"
-            max="7"
-            step="1"
-            value="0"
-            id="vector-dither-offset-x"
-            class="slider btn"
-            aria-label="Dither Offset X"
-            data-tooltip="Dither Offset X (0–7)"
-          />
-        </label>
-        <label class="dither-offset-label">
-          Y Offset
-          <input
-            type="range"
-            min="0"
-            max="7"
-            step="1"
-            value="0"
-            id="vector-dither-offset-y"
-            class="slider btn"
-            aria-label="Dither Offset Y"
-            data-tooltip="Dither Offset Y (0–7)"
-          />
-        </label>
+        <div class="dither-offset-control-wrap"></div>
       </div>
       <div class="dither-grid"></div>
     </div>

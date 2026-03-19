@@ -18,6 +18,7 @@ import {
   highlightSelectedDitherPattern,
   updateDitherPickerColors,
   applyDitherOffset,
+  applyDitherOffsetControl,
 } from "../DOM/render.js"
 import { toggleMode, switchTool, initToolGroups } from "./toolbox.js"
 import { ZOOM_LEVELS } from "../utils/constants.js"
@@ -221,22 +222,28 @@ document.getElementById("dither-ctrl-two-color")?.addEventListener("click", () =
   renderDitherOptionsToDOM()
 })
 
-document.getElementById("dither-ctrl-offset-x")?.addEventListener("input", (e) => {
+document.querySelector('.dither-picker-container')?.addEventListener('pointerdown', (e) => {
+  const control = e.target.closest('.dither-offset-control')
+  if (!control) return
   if (!DITHER_TOOLS.includes(state.tool.current.name)) return
-  state.tool.current.ditherOffsetX = parseInt(e.target.value)
-  const grid = document.querySelector(".dither-grid")
-  if (grid) applyDitherOffset(grid, state.tool.current.ditherOffsetX, state.tool.current.ditherOffsetY ?? 0)
-  const preview = document.querySelector(".dither-preview")
-  if (preview) applyDitherOffset(preview, state.tool.current.ditherOffsetX, state.tool.current.ditherOffsetY ?? 0)
-})
-
-document.getElementById("dither-ctrl-offset-y")?.addEventListener("input", (e) => {
-  if (!DITHER_TOOLS.includes(state.tool.current.name)) return
-  state.tool.current.ditherOffsetY = parseInt(e.target.value)
-  const grid = document.querySelector(".dither-grid")
-  if (grid) applyDitherOffset(grid, state.tool.current.ditherOffsetX ?? 0, state.tool.current.ditherOffsetY)
-  const preview = document.querySelector(".dither-preview")
-  if (preview) applyDitherOffset(preview, state.tool.current.ditherOffsetX ?? 0, state.tool.current.ditherOffsetY)
+  control.setPointerCapture(e.pointerId)
+  const startX = e.clientX
+  const startY = e.clientY
+  const startOffsetX = state.tool.current.ditherOffsetX ?? 0
+  const startOffsetY = state.tool.current.ditherOffsetY ?? 0
+  const onMove = (ev) => {
+    const ox = ((startOffsetX - Math.round((ev.clientX - startX) / 4)) % 8 + 8) % 8
+    const oy = ((startOffsetY - Math.round((ev.clientY - startY) / 4)) % 8 + 8) % 8
+    state.tool.current.ditherOffsetX = ox
+    state.tool.current.ditherOffsetY = oy
+    const grid = document.querySelector('.dither-grid')
+    if (grid) applyDitherOffset(grid, ox, oy)
+    const preview = document.querySelector('.dither-preview')
+    if (preview) applyDitherOffset(preview, ox, oy)
+    applyDitherOffsetControl(control, ox, oy)
+  }
+  control.addEventListener('pointermove', onMove)
+  control.addEventListener('pointerup', () => control.removeEventListener('pointermove', onMove), { once: true })
 })
 
 document.getElementById("dither-ctrl-build-up")?.addEventListener("click", () => {

@@ -696,25 +696,33 @@ dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
   renderCanvas(vector.layer, true)
 })
 
-// Offset sliders in vector dither picker — update stored offset so effective offset matches
-dom.vectorDitherPickerContainer?.addEventListener('input', (e) => {
-  const { id } = e.target
-  if (id !== 'vector-dither-offset-x' && id !== 'vector-dither-offset-y') return
+// Offset control drag in vector dither picker — update stored offset so effective offset matches
+dom.vectorDitherPickerContainer?.addEventListener('pointerdown', (e) => {
+  const control = e.target.closest('.dither-offset-control')
+  if (!control) return
   const vector = dom.vectorSettingsContainer?.vectorObj
   if (!vector) return
-  const displayedValue = parseInt(e.target.value)
+  control.setPointerCapture(e.pointerId)
+  const startX = e.clientX
+  const startY = e.clientY
   const currentLayerX = vector.layer?.x ?? 0
   const currentLayerY = vector.layer?.y ?? 0
   const recordedLayerX = vector.recordedLayerX ?? currentLayerX
   const recordedLayerY = vector.recordedLayerY ?? currentLayerY
-  // Invert effective-offset formula: storedOffset = ((displayed - recordedLayer + currentLayer) % 8 + 8) % 8
-  if (id === 'vector-dither-offset-x') {
-    vector.ditherOffsetX = ((displayedValue - recordedLayerX + currentLayerX) % 8 + 8) % 8
-  } else {
-    vector.ditherOffsetY = ((displayedValue - recordedLayerY + currentLayerY) % 8 + 8) % 8
+  // Compute effective offset at drag start
+  const startEffectiveX = (((vector.ditherOffsetX ?? 0) + recordedLayerX - currentLayerX) % 8 + 8) % 8
+  const startEffectiveY = (((vector.ditherOffsetY ?? 0) + recordedLayerY - currentLayerY) % 8 + 8) % 8
+  const onMove = (ev) => {
+    const newEffectiveX = ((startEffectiveX - Math.round((ev.clientX - startX) / 4)) % 8 + 8) % 8
+    const newEffectiveY = ((startEffectiveY - Math.round((ev.clientY - startY) / 4)) % 8 + 8) % 8
+    // Invert effective-offset formula: storedOffset = ((effective - recordedLayer + currentLayer) % 8 + 8) % 8
+    vector.ditherOffsetX = ((newEffectiveX - recordedLayerX + currentLayerX) % 8 + 8) % 8
+    vector.ditherOffsetY = ((newEffectiveY - recordedLayerY + currentLayerY) % 8 + 8) % 8
+    updateVectorDitherControls(vector)
+    renderCanvas(vector.layer, true)
   }
-  updateVectorDitherControls(vector)
-  renderCanvas(vector.layer, true)
+  control.addEventListener('pointermove', onMove)
+  control.addEventListener('pointerup', () => control.removeEventListener('pointermove', onMove), { once: true })
 })
 
 document.addEventListener('pointerdown', (e) => {

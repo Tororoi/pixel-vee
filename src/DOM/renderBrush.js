@@ -112,8 +112,6 @@ export function renderDitherOptionsToDOM() {
  */
 export function renderDitherControlsToDOM() {
   const twoColorBtn = document.getElementById('dither-ctrl-two-color')
-  const offsetXSlider = document.getElementById('dither-ctrl-offset-x')
-  const offsetYSlider = document.getElementById('dither-ctrl-offset-y')
   const buildUpBtn = document.getElementById('dither-ctrl-build-up')
   const isBuildUp = state.tool.current.modes?.buildUpDither ?? false
   if (twoColorBtn) {
@@ -122,26 +120,18 @@ export function renderDitherControlsToDOM() {
       state.tool.current.modes?.twoColor ?? false,
     )
   }
-  if (offsetXSlider) {
-    offsetXSlider.value = state.tool.current.ditherOffsetX ?? 0
-  }
-  if (offsetYSlider) {
-    offsetYSlider.value = state.tool.current.ditherOffsetY ?? 0
-  }
   if (buildUpBtn) {
     buildUpBtn.classList.toggle('selected', isBuildUp)
     buildUpBtn.style.display =
       state.tool.current.name === 'brush' ? '' : 'none'
   }
   renderBuildUpStepsToDOM()
+  const offsetX = state.tool.current.ditherOffsetX ?? 0
+  const offsetY = state.tool.current.ditherOffsetY ?? 0
   const grid = document.querySelector('.dither-grid')
-  if (grid) {
-    applyDitherOffset(
-      grid,
-      state.tool.current.ditherOffsetX ?? 0,
-      state.tool.current.ditherOffsetY ?? 0,
-    )
-  }
+  if (grid) applyDitherOffset(grid, offsetX, offsetY)
+  const wrap = document.querySelector('.dither-offset-control-wrap')
+  if (wrap) applyDitherOffsetControl(wrap, offsetX, offsetY)
 }
 
 /**
@@ -288,6 +278,88 @@ export function applyDitherOffset(container, offsetX, offsetY) {
   })
 }
 
+let _offsetControlCounter = 0
+
+/**
+ * Build the 2D offset control SVG — an 8×8 ring pattern where pixels at even
+ * toroidal Chebyshev distance from (0,0) are drawn in the primary color.
+ * The pattern element's x/y attributes are updated by applyDitherOffsetControl
+ * to shift which pixel appears as the "center" without rebuilding the SVG.
+ * @returns {SVGElement}
+ */
+export function createDitherOffsetControlSVG() {
+  const id = `dor-${_offsetControlCounter++}`
+  const svg = document.createElementNS(SVG_NS, 'svg')
+  svg.setAttribute('viewBox', '0 0 8 8')
+  svg.setAttribute('shape-rendering', 'crispEdges')
+  svg.classList.add('dither-offset-svg')
+
+  const defs = document.createElementNS(SVG_NS, 'defs')
+  const patternEl = document.createElementNS(SVG_NS, 'pattern')
+  patternEl.setAttribute('id', id)
+  patternEl.setAttribute('patternUnits', 'userSpaceOnUse')
+  patternEl.setAttribute('x', '0')
+  patternEl.setAttribute('y', '0')
+  patternEl.setAttribute('width', '8')
+  patternEl.setAttribute('height', '8')
+  patternEl.classList.add('dither-offset-ring-pattern')
+
+  const ringColors = ['rgb(255,255,255)', 'rgb(131,131,131)', 'rgb(61,61,61)', 'rgb(31,31,31)', 'rgb(0,0,0)']
+  const ringPaths = ['', '', '', '', '']
+  for (let y = 0; y < 8; y++) {
+    const dy = Math.min(y, 8 - y)
+    const runs = [[], [], [], [], []]
+    let curDist = -1
+    let runStart = -1
+    for (let x = 0; x <= 8; x++) {
+      const dist = x < 8 ? Math.max(Math.min(x, 8 - x), dy) : -1
+      if (dist === curDist) continue
+      if (runStart !== -1) runs[curDist].push([runStart, x])
+      runStart = x < 8 ? x : -1
+      curDist = dist
+    }
+    for (let dist = 0; dist <= 4; dist++) {
+      for (const [start, end] of runs[dist]) {
+        ringPaths[dist] += `M${start} ${y + 0.5}h${end - start}`
+      }
+    }
+  }
+  for (let dist = 0; dist <= 4; dist++) {
+    const path = document.createElementNS(SVG_NS, 'path')
+    path.setAttribute('stroke', ringColors[dist])
+    path.setAttribute('d', ringPaths[dist])
+    patternEl.appendChild(path)
+  }
+
+  defs.appendChild(patternEl)
+  svg.appendChild(defs)
+
+  const displayRect = document.createElementNS(SVG_NS, 'rect')
+  displayRect.setAttribute('x', '0')
+  displayRect.setAttribute('y', '0')
+  displayRect.setAttribute('width', '8')
+  displayRect.setAttribute('height', '8')
+  displayRect.setAttribute('fill', `url(#${id})`)
+  svg.appendChild(displayRect)
+
+  return svg
+}
+
+/**
+ * Update the offset control's ring pattern phase.
+ * Setting x=offsetX, y=offsetY makes the dist=0 pixel appear at (offsetX, offsetY).
+ * @param {Element} container - element containing the control
+ * @param {number} offsetX
+ * @param {number} offsetY
+ */
+export function applyDitherOffsetControl(container, offsetX, offsetY) {
+  const pattern = container.querySelector('.dither-offset-ring-pattern')
+  if (pattern) {
+    pattern.setAttribute('x', String(-offsetX))
+    pattern.setAttribute('y', String(-offsetY))
+  }
+}
+
 /**
  * Update all dither picker SVG thumbnails to reflect current primary/secondary colors
  * and two-color mode. Call whenever colors change or two-color mode is toggled.
@@ -324,6 +396,14 @@ export function initDitherPicker() {
     btn.dataset.tooltip = i === 32 ? '33/65: Checkerboard' : `${i + 1}/65`
     btn.appendChild(createDitherPatternSVG(ditherPatterns[i]))
     grid.appendChild(btn)
+  }
+  const wrap = document.querySelector('.dither-offset-control-wrap')
+  if (wrap) {
+    const control = document.createElement('div')
+    control.className = 'dither-offset-control'
+    control.dataset.tooltip = 'Drag to set dither offset'
+    control.appendChild(createDitherOffsetControlSVG())
+    wrap.appendChild(control)
   }
   highlightSelectedDitherPattern()
 }

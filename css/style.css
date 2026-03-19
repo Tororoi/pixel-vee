@@ -2031,15 +2031,31 @@ canvas {
   background: rgb(61, 61, 61);
   padding: 4px;
 }
-.dither-picker-container .dither-offset-label {
+.dither-picker-container .dither-offset-control-wrap {
   display: flex;
+  justify-content: center;
   align-items: center;
-  gap: 4px;
-  color: rgb(255, 255, 255);
-  font-size: 12px;
+  width: 40px;
+  height: 40px;
+}
+.dither-picker-container .dither-offset-control-wrap .dither-offset-control {
+  width: 32px;
+  height: 32px;
+  cursor: grab;
+  touch-action: none;
+  background-color: rgb(255, 255, 255);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.dither-picker-container .dither-offset-control-wrap .dither-offset-control:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.dither-picker-container .dither-offset-control-wrap .dither-offset-control:active {
+  cursor: grabbing;
+}
+.dither-picker-container .dither-offset-control-wrap .dither-offset-control .dither-offset-svg {
   width: 100%;
-  padding: 0 4px;
-  box-sizing: border-box;
+  height: 100%;
+  display: block;
 }
 /* Base styles, mixins, keyframes, variables */
 /* Palette */
