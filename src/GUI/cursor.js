@@ -2,7 +2,8 @@ import { brushStamps } from '../Context/brushStamps.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
-import { actionDraw, actionDitherDraw, actionBuildUpDitherDraw } from '../Actions/pointerActions.js'
+import { actionDraw, actionDitherDraw, actionBuildUpDitherDraw } from '../Actions/pointer/draw.js'
+import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
 import { vectorGui } from './vector.js'
 import { renderCanvas } from '../Canvas/render.js'
 import { isOutOfBounds } from '../utils/canvasHelpers.js'
@@ -79,19 +80,18 @@ function drawInjectPreview() {
   actionDraw(
     state.cursor.x,
     state.cursor.y,
-    state.selection.boundaryBox,
-    swatches.primary.color,
-    brushStamps[state.tool.current.brushType][state.tool.current.brushSize][
-      '0,0'
-    ],
-    state.tool.current.brushSize,
-    canvas.currentLayer,
-    state.tool.current.modes,
-    state.selection.maskSet,
-    state.selection.seenPixelsSet,
-    null,
-    true,
-    true,
+    brushStamps[state.tool.current.brushType][state.tool.current.brushSize]['0,0'],
+    createStrokeContext({
+      layer: canvas.currentLayer,
+      isPreview: true,
+      excludeFromSet: true,
+      boundaryBox: state.selection.boundaryBox,
+      currentColor: swatches.primary.color,
+      currentModes: state.tool.current.modes,
+      maskSet: state.selection.maskSet,
+      seenPixelsSet: state.selection.seenPixelsSet,
+      brushSize: state.tool.current.brushSize,
+    }),
   )
 }
 
@@ -102,49 +102,28 @@ function drawInjectPreview() {
 function drawDitherInjectPreview() {
   renderCanvas(canvas.currentLayer)
   const stamp = brushStamps[state.tool.current.brushType][state.tool.current.brushSize]['0,0']
+  const ctx = createStrokeContext({
+    layer: canvas.currentLayer,
+    isPreview: true,
+    excludeFromSet: true,
+    boundaryBox: state.selection.boundaryBox,
+    currentColor: swatches.primary.color,
+    currentModes: state.tool.current.modes,
+    maskSet: state.selection.maskSet,
+    seenPixelsSet: state.selection.seenPixelsSet,
+    brushSize: state.tool.current.brushSize,
+    ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
+    twoColorMode: state.tool.current.modes?.twoColor ?? false,
+    secondaryColor: swatches.secondary.color,
+    ditherOffsetX: state.tool.current.ditherOffsetX ?? 0,
+    ditherOffsetY: state.tool.current.ditherOffsetY ?? 0,
+    densityMap: state.tool.current._buildUpDensityMap,
+    buildUpSteps: state.tool.current.buildUpSteps,
+  })
   if (state.tool.current.modes?.buildUpDither) {
-    actionBuildUpDitherDraw(
-      state.cursor.x,
-      state.cursor.y,
-      state.selection.boundaryBox,
-      swatches.primary.color,
-      stamp,
-      state.tool.current.brushSize,
-      canvas.currentLayer,
-      state.tool.current.modes,
-      state.selection.maskSet,
-      state.selection.seenPixelsSet,
-      state.tool.current._buildUpDensityMap,
-      state.tool.current.buildUpSteps,
-      state.tool.current.modes?.twoColor ?? false,
-      swatches.secondary.color,
-      state.tool.current.mirrorX ?? false,
-      state.tool.current.mirrorY ?? false,
-      null,
-      true,
-      true,
-    )
+    actionBuildUpDitherDraw(state.cursor.x, state.cursor.y, stamp, ctx)
   } else {
-    actionDitherDraw(
-      state.cursor.x,
-      state.cursor.y,
-      state.selection.boundaryBox,
-      swatches.primary.color,
-      stamp,
-      state.tool.current.brushSize,
-      canvas.currentLayer,
-      state.tool.current.modes,
-      state.selection.maskSet,
-      state.selection.seenPixelsSet,
-      ditherPatterns[state.tool.current.ditherPatternIndex],
-      state.tool.current.modes?.twoColor ?? false,
-      swatches.secondary.color,
-      state.tool.current.mirrorX ?? false,
-      state.tool.current.mirrorY ?? false,
-      null,
-      true,
-      true,
-    )
+    actionDitherDraw(state.cursor.x, state.cursor.y, stamp, ctx)
   }
 }
 
@@ -182,8 +161,8 @@ function drawDitherPreview() {
   const baseX = Math.ceil(state.cursor.x - brushSize / 2)
   const baseY = Math.ceil(state.cursor.y - brushSize / 2)
   const twoColor = state.tool.current.modes?.twoColor ?? false
-  const mirrorX = state.tool.current.mirrorX ?? false
-  const mirrorY = state.tool.current.mirrorY ?? false
+  const ditherOffsetX = state.tool.current.ditherOffsetX ?? 0
+  const ditherOffsetY = state.tool.current.ditherOffsetY ?? 0
   const isBuildUp = state.tool.current.modes?.buildUpDither ?? false
   const densityMap = isBuildUp ? state.tool.current._buildUpDensityMap : null
   const buildUpSteps = state.tool.current.buildUpSteps
@@ -203,7 +182,7 @@ function drawDitherPreview() {
     } else {
       pattern = basePattern
     }
-    if (isDitherOn(pattern, x, y, mirrorX, mirrorY)) {
+    if (isDitherOn(pattern, x, y, ditherOffsetX, ditherOffsetY)) {
       canvas.cursorCTX.fillStyle = swatches.primary.color.color
       canvas.cursorCTX.fillRect(x + canvas.xOffset, y + canvas.yOffset, 1, 1)
     } else if (twoColor) {

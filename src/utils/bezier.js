@@ -522,7 +522,7 @@ export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
   //remove duplicate coordinates
   const seen = new Set()
   plotPoints = plotPoints.filter((point) => {
-    let key = `${point.x},${point.y}`
+    let key = (point.y << 16) | point.x
     if (seen.has(key)) {
       return false // skip this item
     }
@@ -661,7 +661,7 @@ export function plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3) {
   //remove duplicate coordinates
   const seen = new Set()
   plotPoints = plotPoints.filter((point) => {
-    let key = `${point.x},${point.y}`
+    let key = (point.y << 16) | point.x
     if (seen.has(key)) {
       return false // skip this item
     }
@@ -800,7 +800,7 @@ export function plotConicBezier(x0, y0, x1, y1, x2, y2, w) {
   //remove duplicate coordinates
   const seen = new Set()
   plotPoints = plotPoints.filter((point) => {
-    let key = `${point.x},${point.y}`
+    let key = (point.y << 16) | point.x
     if (seen.has(key)) {
       return false // skip this item
     }

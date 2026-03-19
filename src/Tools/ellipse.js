@@ -3,7 +3,8 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { ditherPatterns } from "../Context/ditherPatterns.js"
-import { actionEllipse } from "../Actions/pointerActions.js"
+import { actionEllipse } from "../Actions/pointer/ellipse.js"
+import { createStrokeContext } from "../Actions/pointer/strokeContext.js"
 import { vectorGui } from "../GUI/vector.js"
 import {
   getOpposingEllipseVertex,
@@ -11,13 +12,36 @@ import {
 } from "../utils/ellipse.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
-import { addToTimeline } from "../Actions/undoRedo.js"
+import { addToTimeline } from "../Actions/undoRedo/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"
 import { rerouteVectorStepsAction, updateEllipseOffsets } from "./adjust.js"
 
 //======================================//
 //=== * * * Ellipse Controller * * * ===//
 //======================================//
+
+/**
+ * Build a StrokeContext from the current tool state
+ * @param {boolean} isPreview
+ * @returns {object} StrokeContext
+ */
+function buildEllipseCtx(isPreview = false) {
+  return createStrokeContext({
+    layer: canvas.currentLayer,
+    isPreview,
+    boundaryBox: state.selection.boundaryBox,
+    currentColor: swatches.primary.color,
+    currentModes: state.tool.current.modes,
+    maskSet: state.selection.maskSet,
+    brushStamp: brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+    brushSize: state.tool.current.brushSize,
+    ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
+    twoColorMode: state.tool.current.modes?.twoColor ?? false,
+    secondaryColor: swatches.secondary.color,
+    ditherOffsetX: state.tool.current.ditherOffsetX ?? 0,
+    ditherOffsetY: state.tool.current.ditherOffsetY ?? 0,
+  })
+}
 
 /**
  * TODO: (Medium Priority) Add control points on opposite side of point 2 and 3, for a total of 5 control points
@@ -53,12 +77,6 @@ function ellipseSteps() {
         state.vector.properties.radA = Math.sqrt(dxa * dxa + dya * dya)
       }
       updateEllipseOffsets(state.vector.properties)
-      //adjusting p3 should make findHalf on a perpendicular angle rotated -90 degrees, adjusting p1 should maintain offset, no subpixels
-      // let calcAngle = angle - Math.PI / 2 // adjust p3
-
-      // const offset = 1; //instead of subpixels, use manually selected option, would not need quadrant
-      // option could be described as "exclude center point from radius", toggle odd or even, odd being excluding center point and offset = 0
-      //for ellipse, passing the quadrant is also important to make offset go in the right direction
       //onscreen preview
       renderCanvas(canvas.currentLayer)
       state.vector.properties = {
@@ -83,20 +101,7 @@ function ellipseSteps() {
         state.vector.properties.rightTangentY,
         state.vector.properties.bottomTangentX,
         state.vector.properties.bottomTangentY,
-        state.selection.boundaryBox,
-        swatches.primary.color,
-        canvas.currentLayer,
-        state.tool.current.modes,
-        brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
-        state.tool.current.brushSize,
-        state.selection.maskSet,
-        null,
-        true,
-        ditherPatterns[state.tool.current.ditherPatternIndex],
-        state.tool.current.modes?.twoColor ?? false,
-        swatches.secondary.color,
-        state.tool.current.mirrorX ?? false,
-        state.tool.current.mirrorY ?? false,
+        buildEllipseCtx(true),
       )
       break
     case "pointermove":
@@ -140,20 +145,7 @@ function ellipseSteps() {
           state.vector.properties.rightTangentY,
           state.vector.properties.bottomTangentX,
           state.vector.properties.bottomTangentY,
-          state.selection.boundaryBox,
-          swatches.primary.color,
-          canvas.currentLayer,
-          state.tool.current.modes,
-          brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
-          state.tool.current.brushSize,
-          state.selection.maskSet,
-          null,
-          true,
-          ditherPatterns[state.tool.current.ditherPatternIndex],
-          state.tool.current.modes?.twoColor ?? false,
-          swatches.secondary.color,
-          state.tool.current.mirrorX ?? false,
-          state.tool.current.mirrorY ?? false,
+          buildEllipseCtx(true),
         )
       }
       break
@@ -202,20 +194,7 @@ function ellipseSteps() {
           state.vector.properties.rightTangentY,
           state.vector.properties.bottomTangentX,
           state.vector.properties.bottomTangentY,
-          state.selection.boundaryBox,
-          swatches.primary.color,
-          canvas.currentLayer,
-          state.tool.current.modes,
-          brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
-          state.tool.current.brushSize,
-          state.selection.maskSet,
-          null,
-          false,
-          ditherPatterns[state.tool.current.ditherPatternIndex],
-          state.tool.current.modes?.twoColor ?? false,
-          swatches.secondary.color,
-          state.tool.current.mirrorX ?? false,
-          state.tool.current.mirrorY ?? false,
+          buildEllipseCtx(false),
         )
         let maskArray = coordArrayFromSet(
           state.selection.maskSet,
@@ -253,8 +232,10 @@ function ellipseSteps() {
           color: { ...swatches.primary.color },
           secondaryColor: { ...swatches.secondary.color },
           ditherPatternIndex: state.tool.current.ditherPatternIndex,
-          mirrorX: state.tool.current.mirrorX,
-          mirrorY: state.tool.current.mirrorY,
+          ditherOffsetX: state.tool.current.ditherOffsetX ?? 0,
+          ditherOffsetY: state.tool.current.ditherOffsetY ?? 0,
+          recordedLayerX: canvas.currentLayer.x,
+          recordedLayerY: canvas.currentLayer.y,
           brushSize: state.tool.current.brushSize,
           brushType: state.tool.current.brushType,
           vectorProperties: {
@@ -308,8 +289,8 @@ export const ellipse = {
   brushType: "circle",
   brushDisabled: false,
   ditherPatternIndex: 64,
-  mirrorX: false,
-  mirrorY: false,
+  ditherOffsetX: 0,
+  ditherOffsetY: 0,
   options: {
     useSubpixels: {
       active: true,

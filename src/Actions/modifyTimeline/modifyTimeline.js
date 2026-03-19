@@ -1,6 +1,6 @@
-import { state } from "../Context/state.js"
-import { tools } from "../Tools/index.js"
-import { addToTimeline } from "./undoRedo.js"
+import { state } from "../../Context/state.js"
+import { tools } from "../../Tools/index.js"
+import { addToTimeline } from "../undoRedo/undoRedo.js"
 
 //====================================//
 //==== * * * Modify Actions * * * ====//

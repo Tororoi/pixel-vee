@@ -71,18 +71,6 @@
       background: $diagonal-stripe-bg;
       cursor: pointer;
       margin-bottom: 8px;
-      &.mirror-x .dither-grid-svg {
-        transform: scaleX(-1);
-        transform-origin: center;
-      }
-      &.mirror-y .dither-grid-svg {
-        transform: scaleY(-1);
-        transform-origin: center;
-      }
-      &.mirror-x.mirror-y .dither-grid-svg {
-        transform: scale(-1, -1);
-        transform-origin: center;
-      }
     }
   }
 }
@@ -175,20 +163,39 @@
       padding: 4px;
     }
   }
+  .dither-offset-control-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    height: 40px;
+    padding-left: 4px;
+    .dither-offset-values {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      color: $white;
+      font-size: 12px;
+    }
+    .dither-offset-control {
+      width: 32px;
+      height: 32px;
+      cursor: grab;
+      touch-action: none;
+      background-color: $white;
+      @include boxBorder;
+      &:active {
+        cursor: grabbing;
+      }
+      .dither-offset-svg {
+        width: 100%;
+        height: 100%;
+        display: block;
+      }
+    }
+  }
   .dither-grid {
     @extend %dither-grid;
-    &.mirror-x .dither-grid-svg {
-      transform: scaleX(-1);
-      transform-origin: center;
-    }
-    &.mirror-y .dither-grid-svg {
-      transform: scaleY(-1);
-      transform-origin: center;
-    }
-    &.mirror-x.mirror-y .dither-grid-svg {
-      transform: scale(-1, -1);
-      transform-origin: center;
-    }
     .dither-grid-btn {
       @extend %dither-grid-btn;
     }

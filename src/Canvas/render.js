@@ -4,15 +4,12 @@ import { canvas } from '../Context/canvas.js'
 import { tools } from '../Tools/index.js'
 import { vectorGui } from '../GUI/vector.js'
 import { calculateBrushDirection } from '../utils/drawHelpers.js'
-import {
-  actionDitherDraw,
-  actionBuildUpDitherDraw,
-  actionLine,
-  actionFill,
-  actionEllipse,
-  actionQuadraticCurve,
-  actionCubicCurve,
-} from '../Actions/pointerActions.js'
+import { actionDitherDraw, actionBuildUpDitherDraw } from '../Actions/pointer/draw.js'
+import { actionLine } from '../Actions/pointer/line.js'
+import { actionFill } from '../Actions/pointer/fill.js'
+import { actionEllipse } from '../Actions/pointer/ellipse.js'
+import { actionQuadraticCurve, actionCubicCurve } from '../Actions/pointer/curve.js'
+import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
 import { setInitialZoom } from '../utils/canvasHelpers.js'
 import { transformRasterContent } from '../utils/transformHelpers.js'
@@ -236,15 +233,14 @@ export function performAction(
       //points require 3 entries for every coordinate, x, y, brushSize
       //maskArray requires 2 entries for every coordinate, x, y
       if (action.maskArray) {
-        if (offsetX !== 0 || offsetY !== 0) {
-          mask = new Set(
-            action.maskArray.map(
-              (coord) => `${coord.x + offsetX},${coord.y + offsetY}`,
-            ),
-          )
-        } else {
-          mask = new Set(action.maskArray)
-        }
+        // Rebuild as packed integers (y<<16)|x — the format draw.js expects.
+        // maskArray stores layer-relative {x,y} objects; re-apply the current
+        // layer offset to get absolute canvas coordinates.
+        mask = new Set(
+          action.maskArray.map(
+            (coord) => ((coord.y + offsetY) << 16) | (coord.x + offsetX),
+          ),
+        )
       }
       let previousX = action.points[0].x + offsetX
       let previousY = action.points[0].y + offsetY
@@ -254,6 +250,31 @@ export function performAction(
       const pattern = isBuildUp
         ? null
         : ditherPatterns[action.ditherPatternIndex ?? 64]
+      // Build context once per stroke; brushSize is updated per-point below
+      // since points may have individual brushSizes stored in the timeline.
+      // Effective dither offset accounts for layer movement since stroke was recorded.
+      // Pixels are replayed at (p.x + offsetX), so the tile lookup must shift by
+      // (recordedLayerX - offsetX) to keep the pattern fixed to the pixels.
+      const recordedLayerX = action.recordedLayerX ?? offsetX
+      const recordedLayerY = action.recordedLayerY ?? offsetY
+      const effectiveDitherOffsetX = (((action.ditherOffsetX ?? 0) + recordedLayerX - offsetX) % 8 + 8) % 8
+      const effectiveDitherOffsetY = (((action.ditherOffsetY ?? 0) + recordedLayerY - offsetY) % 8 + 8) % 8
+      const strokeCtx = createStrokeContext({
+        layer: action.layer,
+        customContext: betweenCtx,
+        boundaryBox,
+        currentColor: action.color,
+        currentModes: action.modes,
+        maskSet: mask,
+        seenPixelsSet: seen,
+        twoColorMode: action.modes?.twoColor ?? false,
+        secondaryColor: action.secondaryColor,
+        ditherOffsetX: effectiveDitherOffsetX,
+        ditherOffsetY: effectiveDitherOffsetY,
+        ditherPattern: pattern,
+        densityMap: buildUpDensityMap,
+        buildUpSteps,
+      })
       for (const p of action.points) {
         brushDirection = calculateBrushDirection(
           p.x + offsetX,
@@ -261,45 +282,13 @@ export function performAction(
           previousX,
           previousY,
         )
+        // Update per-point brushSize (timeline supports variable sizes per point)
+        strokeCtx.brushSize = p.brushSize
+        const stamp = brushStamps[action.brushType][p.brushSize][brushDirection]
         if (isBuildUp) {
-          actionBuildUpDitherDraw(
-            p.x + offsetX,
-            p.y + offsetY,
-            boundaryBox,
-            action.color,
-            brushStamps[action.brushType][p.brushSize][brushDirection],
-            p.brushSize,
-            action.layer,
-            action.modes,
-            mask,
-            seen,
-            buildUpDensityMap,
-            buildUpSteps,
-            action.modes?.twoColor ?? false,
-            action.secondaryColor,
-            action.mirrorX ?? false,
-            action.mirrorY ?? false,
-            betweenCtx,
-          )
+          actionBuildUpDitherDraw(p.x + offsetX, p.y + offsetY, stamp, strokeCtx)
         } else {
-          actionDitherDraw(
-            p.x + offsetX,
-            p.y + offsetY,
-            boundaryBox,
-            action.color,
-            brushStamps[action.brushType][p.brushSize][brushDirection],
-            p.brushSize,
-            action.layer,
-            action.modes,
-            mask,
-            seen,
-            pattern,
-            action.modes?.twoColor ?? false,
-            action.secondaryColor,
-            action.mirrorX ?? false,
-            action.mirrorY ?? false,
-            betweenCtx,
-          )
+          actionDitherDraw(p.x + offsetX, p.y + offsetY, stamp, strokeCtx)
         }
         previousX = p.x + offsetX
         previousY = p.y + offsetY
@@ -470,124 +459,80 @@ function renderActionVectors(action, activeCtx = null) {
   for (let i = 0; i < action.vectorIndices.length; i++) {
     const vector = state.vector.all[action.vectorIndices[i]]
     if (vector.hidden || vector.removed) continue
-    switch (vector.vectorProperties.type) {
+    const vp = vector.vectorProperties
+    const vOffsetX = vector.layer.x
+    const vOffsetY = vector.layer.y
+    const vRecordedLayerX = vector.recordedLayerX ?? vOffsetX
+    const vRecordedLayerY = vector.recordedLayerY ?? vOffsetY
+    const vEffectiveDitherOffsetX = (((vector.ditherOffsetX ?? 0) + vRecordedLayerX - vOffsetX) % 8 + 8) % 8
+    const vEffectiveDitherOffsetY = (((vector.ditherOffsetY ?? 0) + vRecordedLayerY - vOffsetY) % 8 + 8) % 8
+    const vectorCtx = createStrokeContext({
+      layer: vector.layer,
+      customContext: activeCtx,
+      boundaryBox,
+      currentColor: vector.color,
+      currentModes: vector.modes,
+      brushStamp: brushStamps[vector.brushType][vector.brushSize],
+      brushSize: vector.brushSize,
+      ditherPattern: ditherPatterns[vector.ditherPatternIndex ?? 64],
+      twoColorMode: vector.modes?.twoColor ?? false,
+      secondaryColor: vector.secondaryColor ?? null,
+      ditherOffsetX: vEffectiveDitherOffsetX,
+      ditherOffsetY: vEffectiveDitherOffsetY,
+    })
+    switch (vp.type) {
       case 'fill': {
-        // let tempMask = new Set([
-        //   vector.vectorProperties.px1 + offsetX,
-        //   vector.vectorProperties.py1 + offsetY,
-        // ])
-        actionFill(
-          vector.vectorProperties.px1 + offsetX,
-          vector.vectorProperties.py1 + offsetY,
-          boundaryBox,
-          vector.color,
-          vector.layer,
-          vector.modes,
-          null, //maskSet made from action.maskArray
-          activeCtx,
-        )
+        // let tempMask = new Set([vp.px1 + offsetX, vp.py1 + offsetY])
+        actionFill(vp.px1 + offsetX, vp.py1 + offsetY, vectorCtx)
         break
       }
       case 'line':
         actionLine(
-          vector.vectorProperties.px1 + offsetX,
-          vector.vectorProperties.py1 + offsetY,
-          vector.vectorProperties.px2 + offsetX,
-          vector.vectorProperties.py2 + offsetY,
-          boundaryBox,
-          vector.color,
-          vector.layer,
-          vector.modes,
-          brushStamps[vector.brushType][vector.brushSize],
-          vector.brushSize,
-          null, //maskSet made from action.maskArray
-          null,
-          activeCtx,
-          false,
-          ditherPatterns[vector.ditherPatternIndex ?? 64],
-          vector.modes?.twoColor ?? false,
-          vector.secondaryColor ?? null,
-          vector.mirrorX ?? false,
-          vector.mirrorY ?? false,
+          vp.px1 + offsetX,
+          vp.py1 + offsetY,
+          vp.px2 + offsetX,
+          vp.py2 + offsetY,
+          vectorCtx,
         )
         break
       case 'quadCurve':
         actionQuadraticCurve(
-          vector.vectorProperties.px1 + offsetX,
-          vector.vectorProperties.py1 + offsetY,
-          vector.vectorProperties.px2 + offsetX,
-          vector.vectorProperties.py2 + offsetY,
-          vector.vectorProperties.px3 + offsetX,
-          vector.vectorProperties.py3 + offsetY,
-          boundaryBox,
+          vp.px1 + offsetX,
+          vp.py1 + offsetY,
+          vp.px2 + offsetX,
+          vp.py2 + offsetY,
+          vp.px3 + offsetX,
+          vp.py3 + offsetY,
           2,
-          vector.color,
-          vector.layer,
-          vector.modes,
-          brushStamps[vector.brushType][vector.brushSize],
-          vector.brushSize,
-          null, //maskSet made from action.maskArray
-          activeCtx,
-          false,
-          ditherPatterns[vector.ditherPatternIndex ?? 64],
-          vector.modes?.twoColor ?? false,
-          vector.secondaryColor ?? null,
-          vector.mirrorX ?? false,
-          vector.mirrorY ?? false,
+          vectorCtx,
         )
         break
       case 'cubicCurve':
         actionCubicCurve(
-          vector.vectorProperties.px1 + offsetX,
-          vector.vectorProperties.py1 + offsetY,
-          vector.vectorProperties.px2 + offsetX,
-          vector.vectorProperties.py2 + offsetY,
-          vector.vectorProperties.px3 + offsetX,
-          vector.vectorProperties.py3 + offsetY,
-          vector.vectorProperties.px4 + offsetX,
-          vector.vectorProperties.py4 + offsetY,
-          boundaryBox,
+          vp.px1 + offsetX,
+          vp.py1 + offsetY,
+          vp.px2 + offsetX,
+          vp.py2 + offsetY,
+          vp.px3 + offsetX,
+          vp.py3 + offsetY,
+          vp.px4 + offsetX,
+          vp.py4 + offsetY,
           3,
-          vector.color,
-          vector.layer,
-          vector.modes,
-          brushStamps[vector.brushType][vector.brushSize],
-          vector.brushSize,
-          null, //maskSet made from action.maskArray
-          activeCtx,
-          false,
-          ditherPatterns[vector.ditherPatternIndex ?? 64],
-          vector.modes?.twoColor ?? false,
-          vector.secondaryColor ?? null,
-          vector.mirrorX ?? false,
-          vector.mirrorY ?? false,
+          vectorCtx,
         )
         break
       case 'ellipse':
         actionEllipse(
-          vector.vectorProperties.weight,
-          vector.vectorProperties.leftTangentX + offsetX,
-          vector.vectorProperties.leftTangentY + offsetY,
-          vector.vectorProperties.topTangentX + offsetX,
-          vector.vectorProperties.topTangentY + offsetY,
-          vector.vectorProperties.rightTangentX + offsetX,
-          vector.vectorProperties.rightTangentY + offsetY,
-          vector.vectorProperties.bottomTangentX + offsetX,
-          vector.vectorProperties.bottomTangentY + offsetY,
-          boundaryBox,
-          vector.color,
-          vector.layer,
-          vector.modes,
-          brushStamps[vector.brushType][vector.brushSize],
-          vector.brushSize,
-          null, //maskSet made from action.maskArray
-          activeCtx,
-          false,
-          ditherPatterns[vector.ditherPatternIndex ?? 64],
-          vector.modes?.twoColor ?? false,
-          vector.secondaryColor ?? null,
-          vector.mirrorX ?? false,
-          vector.mirrorY ?? false,
+          vp.weight,
+          vp.leftTangentX + offsetX,
+          vp.leftTangentY + offsetY,
+          vp.topTangentX + offsetX,
+          vp.topTangentY + offsetY,
+          vp.rightTangentX + offsetX,
+          vp.rightTangentY + offsetY,
+          vp.bottomTangentX + offsetX,
+          vp.bottomTangentY + offsetY,
+          vectorCtx,
         )
         break
       default:

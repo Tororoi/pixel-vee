@@ -4,7 +4,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
-import { handleUndo, handleRedo } from "../Actions/undoRedo.js"
+import { handleUndo, handleRedo } from "../Actions/undoRedo/undoRedo.js"
 import { tools } from "../Tools/index.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
@@ -19,13 +19,15 @@ import { renderCursor } from "../GUI/cursor.js"
 import { openSaveDialogBox } from "../Menu/events.js"
 import {
   actionDeselect,
+  actionDeleteSelection,
+} from "../Actions/nonPointer/selectionActions.js"
+import {
   actionCutSelection,
   actionPasteSelection,
   actionConfirmPastedPixels,
-  actionDeleteSelection,
-} from "../Actions/nonPointerActions.js"
-import { actionFlipPixels, actionRotatePixels } from "../Actions/transformActions.js"
-import { actionCopySelection } from "../Actions/untrackedActions.js"
+  actionCopySelection,
+} from "../Actions/nonPointer/clipboardActions.js"
+import { actionFlipPixels, actionRotatePixels } from "../Actions/transform/rasterTransform.js"
 import { toggleMode, switchTool } from "../Tools/toolbox.js"
 import { adjustVectorSteps } from "../Tools/adjust.js"
 

@@ -107,16 +107,12 @@ export function renderDitherOptionsToDOM() {
 }
 
 /**
- * Sync the toggle buttons in the dither picker dialog (Two-Color, Mirror H, Mirror V)
+ * Sync the toggle buttons and offset sliders in the dither picker dialog
  * and the build-up dither toggle in the main toolbar.
  */
 export function renderDitherControlsToDOM() {
   const twoColorBtn = document.getElementById('dither-ctrl-two-color')
-  const mirrorXBtn = document.getElementById('dither-ctrl-mirror-x')
-  const mirrorYBtn = document.getElementById('dither-ctrl-mirror-y')
   const buildUpBtn = document.getElementById('dither-ctrl-build-up')
-  const mirrorX = state.tool.current.mirrorX ?? false
-  const mirrorY = state.tool.current.mirrorY ?? false
   const isBuildUp = state.tool.current.modes?.buildUpDither ?? false
   if (twoColorBtn) {
     twoColorBtn.classList.toggle(
@@ -124,29 +120,18 @@ export function renderDitherControlsToDOM() {
       state.tool.current.modes?.twoColor ?? false,
     )
   }
-  if (mirrorXBtn) {
-    mirrorXBtn.classList.toggle('selected', mirrorX)
-  }
-  if (mirrorYBtn) {
-    mirrorYBtn.classList.toggle('selected', mirrorY)
-  }
   if (buildUpBtn) {
     buildUpBtn.classList.toggle('selected', isBuildUp)
     buildUpBtn.style.display =
       state.tool.current.name === 'brush' ? '' : 'none'
   }
-  // Mirror the SVG thumbnails in the grid and preview via CSS transforms
-  const grid = document.querySelector('.dither-grid')
-  if (grid) {
-    grid.classList.toggle('mirror-x', mirrorX)
-    grid.classList.toggle('mirror-y', mirrorY)
-  }
-  const preview = document.querySelector('.dither-preview')
-  if (preview) {
-    preview.classList.toggle('mirror-x', mirrorX)
-    preview.classList.toggle('mirror-y', mirrorY)
-  }
   renderBuildUpStepsToDOM()
+  const offsetX = state.tool.current.ditherOffsetX ?? 0
+  const offsetY = state.tool.current.ditherOffsetY ?? 0
+  const grid = document.querySelector('.dither-grid')
+  if (grid) applyDitherOffset(grid, offsetX, offsetY)
+  const wrap = document.querySelector('.dither-offset-control-wrap')
+  if (wrap) applyDitherOffsetControl(wrap, offsetX, offsetY)
 }
 
 /**
@@ -174,6 +159,8 @@ export function renderBuildUpStepsToDOM() {
 
   const buildUpSteps = state.tool.current.buildUpSteps ?? [16, 32, 48, 64]
   const activeSlot = state.tool.current.buildUpActiveStepSlot
+  const offsetX = state.tool.current.ditherOffsetX ?? 0
+  const offsetY = state.tool.current.ditherOffsetY ?? 0
   buildUpSteps.forEach((patternIndex, i) => {
     const btn = document.createElement('button')
     btn.type = 'button'
@@ -181,7 +168,7 @@ export function renderBuildUpStepsToDOM() {
     btn.dataset.stepSlot = i
     btn.dataset.tooltip = `Step ${i + 1}: pattern ${patternIndex + 1}/65`
     if (i === activeSlot) btn.classList.add('selected')
-    btn.appendChild(createDitherPatternSVG(ditherPatterns[patternIndex]))
+    btn.appendChild(createDitherPatternSVG(ditherPatterns[patternIndex], offsetX, offsetY))
     slots.appendChild(btn)
   })
   updateDitherPickerColors()
@@ -197,32 +184,49 @@ function renderDitherPreviewSVG() {
   const existing = previewContainer.querySelector('.dither-grid-svg')
   if (existing) existing.remove()
   const pattern = ditherPatterns[state.tool.current.ditherPatternIndex]
-  previewContainer.appendChild(createDitherPatternSVG(pattern))
+  const offsetX = state.tool.current.ditherOffsetX ?? 0
+  const offsetY = state.tool.current.ditherOffsetY ?? 0
+  previewContainer.appendChild(createDitherPatternSVG(pattern, offsetX, offsetY))
 }
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
 
+let _ditherSvgCounter = 0
+
 /**
  * Build an SVG thumbnail for a dither pattern.
- * Uses a background rect and a single stroke path for "on" pixels,
- * matching the horizontal-run format used by brush stamp icons.
+ * Uses a <pattern> element so the tile offset can be updated cheaply
+ * by changing the pattern's x/y attributes without rebuilding the SVG.
  * @param {object} pattern - pattern from ditherPatterns
+ * @param {number} [offsetX=0] - dither X offset (0–7)
+ * @param {number} [offsetY=0] - dither Y offset (0–7)
  * @returns {SVGElement} SVG thumbnail element
  */
-export function createDitherPatternSVG(pattern) {
+export function createDitherPatternSVG(pattern, offsetX = 0, offsetY = 0) {
+  const id = `dtp-${_ditherSvgCounter++}`
   const svg = document.createElementNS(SVG_NS, 'svg')
-  svg.setAttribute('viewBox', '0 -0.5 8 8')
+  svg.setAttribute('viewBox', '0 0 8 8')
   svg.setAttribute('shape-rendering', 'crispEdges')
   svg.classList.add('dither-grid-svg')
 
+  const defs = document.createElementNS(SVG_NS, 'defs')
+  const patternEl = document.createElementNS(SVG_NS, 'pattern')
+  patternEl.setAttribute('id', id)
+  patternEl.setAttribute('patternUnits', 'userSpaceOnUse')
+  patternEl.setAttribute('x', String(-offsetX))
+  patternEl.setAttribute('y', String(-offsetY))
+  patternEl.setAttribute('width', '8')
+  patternEl.setAttribute('height', '8')
+  patternEl.classList.add('dither-tile-pattern')
+
   const bg = document.createElementNS(SVG_NS, 'rect')
   bg.setAttribute('x', '0')
-  bg.setAttribute('y', '-0.5')
+  bg.setAttribute('y', '0')
   bg.setAttribute('width', '8')
   bg.setAttribute('height', '8')
   bg.setAttribute('fill', 'none')
   bg.classList.add('dither-bg-rect')
-  svg.appendChild(bg)
+  patternEl.appendChild(bg)
 
   let d = ''
   for (let y = 0; y < 8; y++) {
@@ -231,12 +235,12 @@ export function createDitherPatternSVG(pattern) {
       if (pattern.data[y * 8 + x] === 1) {
         if (runStart === -1) runStart = x
       } else if (runStart !== -1) {
-        d += `M${runStart} ${y}h${x - runStart}`
+        d += `M${runStart} ${y + 0.5}h${x - runStart}`
         runStart = -1
       }
     }
     if (runStart !== -1) {
-      d += `M${runStart} ${y}h${8 - runStart}`
+      d += `M${runStart} ${y + 0.5}h${8 - runStart}`
     }
   }
   const path = document.createElementNS(SVG_NS, 'path')
@@ -244,9 +248,121 @@ export function createDitherPatternSVG(pattern) {
   path.setAttribute('stroke', primaryColor)
   path.setAttribute('d', d)
   path.classList.add('dither-on-path')
-  svg.appendChild(path)
+  patternEl.appendChild(path)
+
+  defs.appendChild(patternEl)
+  svg.appendChild(defs)
+
+  const displayRect = document.createElementNS(SVG_NS, 'rect')
+  displayRect.setAttribute('x', '0')
+  displayRect.setAttribute('y', '0')
+  displayRect.setAttribute('width', '8')
+  displayRect.setAttribute('height', '8')
+  displayRect.setAttribute('fill', `url(#${id})`)
+  svg.appendChild(displayRect)
 
   return svg
+}
+
+/**
+ * Update the dither tile offset on all pattern elements within a container.
+ * Sets pattern x/y attributes to -offsetX/-offsetY for correct visual shift.
+ * @param {Element} container - DOM element to search within
+ * @param {number} offsetX - dither X offset (0–7)
+ * @param {number} offsetY - dither Y offset (0–7)
+ */
+export function applyDitherOffset(container, offsetX, offsetY) {
+  container.querySelectorAll('.dither-tile-pattern').forEach((p) => {
+    p.setAttribute('x', String(-offsetX))
+    p.setAttribute('y', String(-offsetY))
+  })
+}
+
+let _offsetControlCounter = 0
+
+/**
+ * Build the 2D offset control SVG — an 8×8 ring pattern where pixels at even
+ * toroidal Chebyshev distance from (0,0) are drawn in the primary color.
+ * The pattern element's x/y attributes are updated by applyDitherOffsetControl
+ * to shift which pixel appears as the "center" without rebuilding the SVG.
+ * @returns {SVGElement}
+ */
+export function createDitherOffsetControlSVG() {
+  const id = `dor-${_offsetControlCounter++}`
+  const svg = document.createElementNS(SVG_NS, 'svg')
+  svg.setAttribute('viewBox', '0 0 8 8')
+  svg.setAttribute('shape-rendering', 'crispEdges')
+  svg.classList.add('dither-offset-svg')
+
+  const defs = document.createElementNS(SVG_NS, 'defs')
+  const patternEl = document.createElementNS(SVG_NS, 'pattern')
+  patternEl.setAttribute('id', id)
+  patternEl.setAttribute('patternUnits', 'userSpaceOnUse')
+  patternEl.setAttribute('x', '0')
+  patternEl.setAttribute('y', '0')
+  patternEl.setAttribute('width', '8')
+  patternEl.setAttribute('height', '8')
+  patternEl.classList.add('dither-offset-ring-pattern')
+
+  const ringColors = ['rgb(255,255,255)', 'rgb(131,131,131)', 'rgb(61,61,61)', 'rgb(31,31,31)', 'rgb(0,0,0)']
+  const ringPaths = ['', '', '', '', '']
+  for (let y = 0; y < 8; y++) {
+    const dy = Math.min(y, 8 - y)
+    const runs = [[], [], [], [], []]
+    let curDist = -1
+    let runStart = -1
+    for (let x = 0; x <= 8; x++) {
+      const dist = x < 8 ? Math.max(Math.min(x, 8 - x), dy) : -1
+      if (dist === curDist) continue
+      if (runStart !== -1) runs[curDist].push([runStart, x])
+      runStart = x < 8 ? x : -1
+      curDist = dist
+    }
+    for (let dist = 0; dist <= 4; dist++) {
+      for (const [start, end] of runs[dist]) {
+        ringPaths[dist] += `M${start} ${y + 0.5}h${end - start}`
+      }
+    }
+  }
+  for (let dist = 0; dist <= 4; dist++) {
+    const path = document.createElementNS(SVG_NS, 'path')
+    path.setAttribute('stroke', ringColors[dist])
+    path.setAttribute('d', ringPaths[dist])
+    patternEl.appendChild(path)
+  }
+
+  defs.appendChild(patternEl)
+  svg.appendChild(defs)
+
+  const displayRect = document.createElementNS(SVG_NS, 'rect')
+  displayRect.setAttribute('x', '0')
+  displayRect.setAttribute('y', '0')
+  displayRect.setAttribute('width', '8')
+  displayRect.setAttribute('height', '8')
+  displayRect.setAttribute('fill', `url(#${id})`)
+  svg.appendChild(displayRect)
+
+  return svg
+}
+
+/**
+ * Update the offset control's ring pattern phase.
+ * Setting x=offsetX, y=offsetY makes the dist=0 pixel appear at (offsetX, offsetY).
+ * @param {Element} container - element containing the control
+ * @param {number} offsetX
+ * @param {number} offsetY
+ */
+export function applyDitherOffsetControl(container, offsetX, offsetY) {
+  const pattern = container.querySelector('.dither-offset-ring-pattern')
+  if (pattern) {
+    pattern.setAttribute('x', String(-offsetX))
+    pattern.setAttribute('y', String(-offsetY))
+  }
+  const spans = container.querySelectorAll('.dither-offset-values span')
+  if (spans.length === 2) {
+    spans[0].textContent = `X: ${offsetX}`
+    spans[1].textContent = `Y: ${offsetY}`
+  }
 }
 
 /**
@@ -285,6 +401,18 @@ export function initDitherPicker() {
     btn.dataset.tooltip = i === 32 ? '33/65: Checkerboard' : `${i + 1}/65`
     btn.appendChild(createDitherPatternSVG(ditherPatterns[i]))
     grid.appendChild(btn)
+  }
+  const wrap = document.querySelector('.dither-offset-control-wrap')
+  if (wrap) {
+    const control = document.createElement('div')
+    control.className = 'dither-offset-control'
+    control.dataset.tooltip = 'Drag to set dither offset'
+    control.appendChild(createDitherOffsetControlSVG())
+    wrap.appendChild(control)
+    const values = document.createElement('div')
+    values.className = 'dither-offset-values'
+    values.innerHTML = '<span>X: 0</span><span>Y: 0</span>'
+    wrap.appendChild(values)
   }
   highlightSelectedDitherPattern()
 }
