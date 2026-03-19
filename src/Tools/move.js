@@ -2,9 +2,9 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { vectorGui } from "../GUI/vector.js"
-import { addToTimeline } from "../Actions/undoRedo.js"
+import { addToTimeline } from "../Actions/undoRedo/undoRedo.js"
 import { transformRasterContent } from "../utils/transformHelpers.js"
-import { addTransformToTimeline } from "../Actions/transformActions.js"
+import { addTransformToTimeline } from "../Actions/transform/rasterTransform.js"
 import { transformBoundaries } from "./transform.js"
 
 /**

@@ -12,12 +12,14 @@ import { measureTextWidth } from "../utils/measureHelpers.js"
 import {
   actionSelectAll,
   actionDeselect,
+  actionDeleteSelection,
+} from "../Actions/nonPointer/selectionActions.js"
+import {
   actionCutSelection,
   actionPasteSelection,
-  actionDeleteSelection,
-} from "../Actions/nonPointerActions.js"
-import { actionFlipPixels, actionRotatePixels } from "../Actions/transformActions.js"
-import { actionCopySelection } from "../Actions/untrackedActions.js"
+  actionCopySelection,
+} from "../Actions/nonPointer/clipboardActions.js"
+import { actionFlipPixels, actionRotatePixels } from "../Actions/transform/rasterTransform.js"
 
 //====================================//
 //======= * * * Tooltip * * * ========//

@@ -20,4 +20,6 @@ export {
   highlightSelectedDitherPattern,
   updateDitherPickerColors,
   createDitherPatternSVG,
+  applyDitherOffset,
+  applyDitherOffsetControl,
 } from "./renderBrush.js"

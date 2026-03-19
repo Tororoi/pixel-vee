@@ -2,11 +2,11 @@ import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { tools } from "../Tools/index.js"
-import { handleUndo, handleRedo } from "../Actions/undoRedo.js"
+import { handleUndo, handleRedo } from "../Actions/undoRedo/undoRedo.js"
 import { brush, rebuildBuildUpDensityMap, BAYER_STEPS } from "../Tools/brush.js"
 import { vectorGui } from "../GUI/vector.js"
-import { actionClear } from "../Actions/modifyTimeline.js"
-import { actionZoom, actionRecenter } from "../Actions/untrackedActions.js"
+import { actionClear } from "../Actions/modifyTimeline/modifyTimeline.js"
+import { actionZoom, actionRecenter } from "../Actions/untracked/viewActions.js"
 import { renderCanvas } from "../Canvas/render.js"
 import {
   renderVectorsToDOM,
@@ -17,6 +17,8 @@ import {
   initDitherPicker,
   highlightSelectedDitherPattern,
   updateDitherPickerColors,
+  applyDitherOffset,
+  applyDitherOffsetControl,
 } from "../DOM/render.js"
 import { toggleMode, switchTool, initToolGroups } from "./toolbox.js"
 import { ZOOM_LEVELS } from "../utils/constants.js"
@@ -220,16 +222,28 @@ document.getElementById("dither-ctrl-two-color")?.addEventListener("click", () =
   renderDitherOptionsToDOM()
 })
 
-document.getElementById("dither-ctrl-mirror-x")?.addEventListener("click", () => {
+document.querySelector('.dither-picker-container')?.addEventListener('pointerdown', (e) => {
+  const control = e.target.closest('.dither-offset-control')
+  if (!control) return
   if (!DITHER_TOOLS.includes(state.tool.current.name)) return
-  state.tool.current.mirrorX = !state.tool.current.mirrorX
-  renderDitherControlsToDOM()
-})
-
-document.getElementById("dither-ctrl-mirror-y")?.addEventListener("click", () => {
-  if (!DITHER_TOOLS.includes(state.tool.current.name)) return
-  state.tool.current.mirrorY = !state.tool.current.mirrorY
-  renderDitherControlsToDOM()
+  control.setPointerCapture(e.pointerId)
+  const startX = e.clientX
+  const startY = e.clientY
+  const startOffsetX = state.tool.current.ditherOffsetX ?? 0
+  const startOffsetY = state.tool.current.ditherOffsetY ?? 0
+  const onMove = (ev) => {
+    const ox = ((startOffsetX - Math.round((ev.clientX - startX) / 4)) % 8 + 8) % 8
+    const oy = ((startOffsetY - Math.round((ev.clientY - startY) / 4)) % 8 + 8) % 8
+    state.tool.current.ditherOffsetX = ox
+    state.tool.current.ditherOffsetY = oy
+    const grid = document.querySelector('.dither-grid')
+    if (grid) applyDitherOffset(grid, ox, oy)
+    const preview = document.querySelector('.dither-preview')
+    if (preview) applyDitherOffset(preview, ox, oy)
+    applyDitherOffsetControl(control.parentElement, ox, oy)
+  }
+  control.addEventListener('pointermove', onMove)
+  control.addEventListener('pointerup', () => control.removeEventListener('pointermove', onMove), { once: true })
 })
 
 document.getElementById("dither-ctrl-build-up")?.addEventListener("click", () => {

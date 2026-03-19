@@ -1,7 +1,7 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { keys } from "../Shortcuts/keys.js"
-import { addToTimeline } from "../Actions/undoRedo.js"
+import { addToTimeline } from "../Actions/undoRedo/undoRedo.js"
 import { renderCanvas } from "../Canvas/render.js"
 
 //==========================================//
@@ -130,21 +130,26 @@ function magicWandSteps() {
 
       if (isShift && state.selection.maskSet) {
         //Add to existing selection — changed only if newSet contributes new pixels
+        //Create a new Set so the Path2D cache in select.js invalidates on reference change
+        const merged = new Set(state.selection.maskSet)
         for (const k of newSet) {
-          if (!state.selection.maskSet.has(k)) {
+          if (!merged.has(k)) {
             changed = true
-            state.selection.maskSet.add(k)
+            merged.add(k)
           }
         }
+        if (changed) state.selection.maskSet = merged
       } else if (isAlt && state.selection.maskSet) {
         //Remove from existing selection — changed only if newSet overlaps current selection
+        //Create a new Set so the Path2D cache in select.js invalidates on reference change
+        const trimmed = new Set(state.selection.maskSet)
         for (const k of newSet) {
-          if (state.selection.maskSet.has(k)) {
+          if (trimmed.has(k)) {
             changed = true
-            state.selection.maskSet.delete(k)
+            trimmed.delete(k)
           }
         }
-        if (state.selection.maskSet.size === 0) state.selection.maskSet = null
+        if (changed) state.selection.maskSet = trimmed.size > 0 ? trimmed : null
       } else {
         //Replace selection — changed if new set differs from current
         const old = state.selection.maskSet

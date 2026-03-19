@@ -51,7 +51,7 @@ export function plotEllipse(xm, ym, a, b) {
   //remove duplicate coordinates
   const seen = new Set()
   plotPoints = plotPoints.filter((point) => {
-    let key = `${point.x},${point.y}`
+    let key = (point.y << 16) | point.x
     if (seen.has(key)) {
       return false // skip this item
     }
@@ -120,7 +120,7 @@ export function plotCircle(xm, ym, r, offset) {
   // Deduplicate coordinates
   const seen = new Set()
   plotPoints = plotPoints.filter((point) => {
-    let key = `${point.x},${point.y}`
+    let key = (point.y << 16) | point.x
     if (seen.has(key)) return false
     seen.add(key)
     return true
@@ -223,7 +223,7 @@ export function plotEllipseRect(x0, y0, x1, y1) {
   //remove duplicate coordinates
   const seen = new Set()
   plotPoints = plotPoints.filter((point) => {
-    let key = `${point.x},${point.y}`
+    let key = (point.y << 16) | point.x
     if (seen.has(key)) {
       return false // skip this item
     }
@@ -682,7 +682,7 @@ export function plotRotatedEllipseConics(
   //remove duplicate coordinates
   const seen = new Set()
   plotPoints = plotPoints.filter((point) => {
-    let key = `${point.x},${point.y}`
+    let key = (point.y << 16) | point.x
     if (seen.has(key)) {
       return false // skip this item
     }
@@ -769,23 +769,15 @@ function plotRotatedEllipseRect(
   //remove duplicate coordinates
   const seen = new Set()
   plotPoints = plotPoints.filter((point) => {
-    let key = `${point.x},${point.y}`
+    let key = (point.y << 16) | point.x
     if (seen.has(key)) {
       return false // skip this item
     }
     //remove tangent points for visibility (temporary)
-    if (key === `${x0},${y0 + yd}`) {
-      return false
-    }
-    if (key === `${x0 + xd},${y0}`) {
-      return false
-    }
-    if (key === `${x1 - xd},${y1}`) {
-      return false
-    }
-    if (key === `${x1},${y1 - yd}`) {
-      return false
-    }
+    if (point.x === x0 && point.y === y0 + yd) return false
+    if (point.x === x0 + xd && point.y === y0) return false
+    if (point.x === x1 - xd && point.y === y1) return false
+    if (point.x === x1 && point.y === y1 - yd) return false
     seen.add(key)
     return true // keep this item
   })

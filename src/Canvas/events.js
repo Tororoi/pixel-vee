@@ -18,7 +18,7 @@ import {
 import {
   removeActionVector,
   changeActionVectorMode,
-} from '../Actions/modifyTimeline.js'
+} from '../Actions/modifyTimeline/modifyTimeline.js'
 import { vectorGui } from '../GUI/vector.js'
 import { initializeColorPicker } from '../Swatch/events.js'
 import { constrainElementOffsets } from '../utils/constrainElementOffsets.js'
@@ -27,12 +27,12 @@ import {
   actionSelectVector,
   actionDeselectVector,
   actionDeselect,
-} from '../Actions/nonPointerActions.js'
+} from '../Actions/nonPointer/selectionActions.js'
 import {
   addReferenceLayer,
   addRasterLayer,
   removeLayer,
-} from '../Actions/layerActions.js'
+} from '../Actions/layer/layerActions.js'
 import { createPreviewLayer } from './layers.js'
 import { switchTool } from '../Tools/toolbox.js'
 import { enableActionsForSelection } from '../DOM/disableDomElements.js'
@@ -682,12 +682,6 @@ dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
       // sync twoColor button in settings dialog if open
       const settingsModeBtn = dom.vectorSettingsContainer?.querySelector('.mode.twoColor')
       if (settingsModeBtn) settingsModeBtn.classList.toggle('selected', vector.modes.twoColor)
-    } else if (toggleBtn.classList.contains('mirrorX')) {
-      vector.mirrorX = !vector.mirrorX
-      updateVectorDitherControls(vector)
-    } else if (toggleBtn.classList.contains('mirrorY')) {
-      vector.mirrorY = !vector.mirrorY
-      updateVectorDitherControls(vector)
     }
     renderCanvas(vector.layer, true)
     return
@@ -700,6 +694,35 @@ dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
   updateVectorDitherPreview(vector)
   dom.vectorDitherPickerContainer.style.display = 'none'
   renderCanvas(vector.layer, true)
+})
+
+// Offset control drag in vector dither picker — update stored offset so effective offset matches
+dom.vectorDitherPickerContainer?.addEventListener('pointerdown', (e) => {
+  const control = e.target.closest('.dither-offset-control')
+  if (!control) return
+  const vector = dom.vectorSettingsContainer?.vectorObj
+  if (!vector) return
+  control.setPointerCapture(e.pointerId)
+  const startX = e.clientX
+  const startY = e.clientY
+  const currentLayerX = vector.layer?.x ?? 0
+  const currentLayerY = vector.layer?.y ?? 0
+  const recordedLayerX = vector.recordedLayerX ?? currentLayerX
+  const recordedLayerY = vector.recordedLayerY ?? currentLayerY
+  // Compute effective offset at drag start
+  const startEffectiveX = (((vector.ditherOffsetX ?? 0) + recordedLayerX - currentLayerX) % 8 + 8) % 8
+  const startEffectiveY = (((vector.ditherOffsetY ?? 0) + recordedLayerY - currentLayerY) % 8 + 8) % 8
+  const onMove = (ev) => {
+    const newEffectiveX = ((startEffectiveX - Math.round((ev.clientX - startX) / 4)) % 8 + 8) % 8
+    const newEffectiveY = ((startEffectiveY - Math.round((ev.clientY - startY) / 4)) % 8 + 8) % 8
+    // Invert effective-offset formula: storedOffset = ((effective - recordedLayer + currentLayer) % 8 + 8) % 8
+    vector.ditherOffsetX = ((newEffectiveX - recordedLayerX + currentLayerX) % 8 + 8) % 8
+    vector.ditherOffsetY = ((newEffectiveY - recordedLayerY + currentLayerY) % 8 + 8) % 8
+    updateVectorDitherControls(vector)
+    renderCanvas(vector.layer, true)
+  }
+  control.addEventListener('pointermove', onMove)
+  control.addEventListener('pointerup', () => control.removeEventListener('pointermove', onMove), { once: true })
 })
 
 document.addEventListener('pointerdown', (e) => {

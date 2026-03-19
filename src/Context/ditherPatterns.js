@@ -35,14 +35,12 @@ export const ditherPatterns = Array.from({ length: 65 }, (_, threshold) => ({
  * @param {object} pattern - pattern from ditherPatterns
  * @param {number} x - absolute canvas x coordinate
  * @param {number} y - absolute canvas y coordinate
- * @param {boolean} mirrorX - flip pattern horizontally
- * @param {boolean} mirrorY - flip pattern vertically
+ * @param {number} ditherOffsetX - horizontal shift within 8x8 tile (0-7)
+ * @param {number} ditherOffsetY - vertical shift within 8x8 tile (0-7)
  * @returns {boolean} true if pixel should be drawn with primary color
  */
-export function isDitherOn(pattern, x, y, mirrorX = false, mirrorY = false) {
-  let px = ((x % 8) + 8) % 8
-  let py = ((y % 8) + 8) % 8
-  if (mirrorX) px = 7 - px
-  if (mirrorY) py = 7 - py
+export function isDitherOn(pattern, x, y, ditherOffsetX = 0, ditherOffsetY = 0) {
+  let px = (((x + ditherOffsetX) % 8) + 8) % 8
+  let py = (((y + ditherOffsetY) % 8) + 8) % 8
   return pattern.data[py * 8 + px] === 1
 }

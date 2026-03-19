@@ -1,11 +1,12 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { actionFill } from "../Actions/pointerActions.js"
+import { actionFill } from "../Actions/pointer/fill.js"
+import { createStrokeContext } from "../Actions/pointer/strokeContext.js"
 import { vectorGui } from "../GUI/vector.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
-import { addToTimeline } from "../Actions/undoRedo.js"
+import { addToTimeline } from "../Actions/undoRedo/undoRedo.js"
 // import { enableActionsForSelection } from "../DOM/disableDomElements.js"
 import { rerouteVectorStepsAction } from "./adjust.js"
 
@@ -29,11 +30,13 @@ function fillSteps() {
       actionFill(
         state.vector.properties.px1,
         state.vector.properties.py1,
-        state.selection.boundaryBox,
-        swatches.primary.color,
-        canvas.currentLayer,
-        state.tool.current.modes,
-        state.selection.maskSet
+        createStrokeContext({
+          layer: canvas.currentLayer,
+          boundaryBox: state.selection.boundaryBox,
+          currentColor: swatches.primary.color,
+          currentModes: state.tool.current.modes,
+          maskSet: state.selection.maskSet,
+        }),
       )
       //For undo ability, store starting coords and settings and pass them into actionFill
       let maskArray = coordArrayFromSet(

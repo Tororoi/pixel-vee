@@ -948,25 +948,12 @@
             ></button>
             <button
               type="button"
-              class="dither-toggle mirrorX"
-              id="dither-ctrl-mirror-x"
-              aria-label="Mirror Horizontal"
-              data-tooltip="Mirror Horizontal"
-            ></button>
-            <button
-              type="button"
-              class="dither-toggle mirrorY"
-              id="dither-ctrl-mirror-y"
-              aria-label="Mirror Vertical"
-              data-tooltip="Mirror Vertical"
-            ></button>
-            <button
-              type="button"
               class="dither-toggle buildUpDither"
               id="dither-ctrl-build-up"
               aria-label="Build-Up Dither"
               data-tooltip="Build-Up Dither&#010;&#010;Automatically increase dither density on overlapping strokes"
             ></button>
+            <div class="dither-offset-control-wrap"></div>
           </div>
           <div class="build-up-steps" style="display: none">
             <span class="build-up-steps-label">Build-Up Steps</span>
@@ -1486,7 +1473,11 @@
     </div>
     <div class="layer-settings dialog-box"></div>
     <div class="vector-settings dialog-box"></div>
-    <div id="vector-dither-picker" class="dither-picker-container dialog-box" style="display: none">
+    <div
+      id="vector-dither-picker"
+      class="dither-picker-container dialog-box"
+      style="display: none"
+    >
       <div class="header">
         <div class="drag-btn locked"><div class="grip"></div></div>
         <span>Dither Pattern</span>
@@ -1499,18 +1490,7 @@
           aria-label="Two-Color"
           data-tooltip="Two-Color"
         ></button>
-        <button
-          type="button"
-          class="dither-toggle mirrorX"
-          aria-label="Mirror Horizontal"
-          data-tooltip="Mirror Horizontal"
-        ></button>
-        <button
-          type="button"
-          class="dither-toggle mirrorY"
-          aria-label="Mirror Vertical"
-          data-tooltip="Mirror Vertical"
-        ></button>
+        <div class="dither-offset-control-wrap"></div>
       </div>
       <div class="dither-grid"></div>
     </div>
