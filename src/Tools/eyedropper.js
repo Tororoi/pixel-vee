@@ -1,7 +1,7 @@
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
-import { consolidateLayers } from "../Canvas/layers.js"
+import { consolidateLayers } from "../Canvas/layers/index.js"
 import { getColor } from "../utils/imageDataHelpers.js"
 import { setColor } from "../Swatch/events.js"
 

@@ -3,7 +3,7 @@ import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { tools, toolGroups } from "../Tools/index.js"
 import { vectorGui } from "../GUI/vector.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render/index.js"
 import {
   // renderVectorsToDOM,
   renderBrushModesToDOM,

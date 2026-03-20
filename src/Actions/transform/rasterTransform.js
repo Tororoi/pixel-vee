@@ -3,7 +3,7 @@ import { canvas } from "../../Context/canvas.js"
 import { tools } from "../../Tools/index.js"
 import { vectorGui } from "../../GUI/vector.js"
 import { addToTimeline } from "../undoRedo/undoRedo.js"
-import { renderCanvas } from "../../Canvas/render.js"
+import { renderCanvas } from "../../Canvas/render/index.js"
 import { transformRasterContent } from "../../utils/transformHelpers.js"
 import { actionFlipVectors, actionRotateVectors } from "./vectorTransform.js"
 

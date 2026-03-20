@@ -1,7 +1,7 @@
 import { dom } from "../../Context/dom.js"
 import { state } from "../../Context/state.js"
 import { vectorGui } from "../../GUI/vector.js"
-import { clearOffscreenCanvas, renderCanvas } from "../../Canvas/render.js"
+import { clearOffscreenCanvas, renderCanvas } from "../../Canvas/render/index.js"
 import { renderVectorsToDOM, renderLayersToDOM } from "../../DOM/render.js"
 import { removeTempLayerFromDOM } from "../../DOM/renderLayers.js"
 import { SCALE } from "../../utils/constants.js"

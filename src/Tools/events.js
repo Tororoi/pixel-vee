@@ -7,7 +7,7 @@ import { brush, rebuildBuildUpDensityMap, BAYER_STEPS } from "../Tools/brush.js"
 import { vectorGui } from "../GUI/vector.js"
 import { actionClear } from "../Actions/modifyTimeline/modifyTimeline.js"
 import { actionZoom, actionRecenter } from "../Actions/untracked/viewActions.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render/index.js"
 import {
   renderVectorsToDOM,
   renderBrushStampToDOM,

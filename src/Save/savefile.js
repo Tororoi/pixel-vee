@@ -6,7 +6,7 @@ import { canvas } from "../Context/canvas.js"
 import { swatches } from "../Context/swatch.js"
 //import custom brushStamps when they are implemented
 import { vectorGui } from "../GUI/vector.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render/index.js"
 import {
   renderLayersToDOM,
   renderVectorsToDOM,
@@ -19,8 +19,8 @@ import {
   sanitizeHistory,
   sanitizeVectors,
 } from "../utils/sanitizeObjectsForSave.js"
-import { resizeOffScreenCanvas } from "../Canvas/render.js"
-import { consolidateLayers } from "../Canvas/layers.js"
+import { resizeOffScreenCanvas } from "../Canvas/render/index.js"
+import { consolidateLayers } from "../Canvas/layers/index.js"
 import { calcEllipseConicsFromVertices } from "../utils/ellipse.js"
 
 const currentVersion = "1.1"

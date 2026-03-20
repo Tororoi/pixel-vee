@@ -7,7 +7,7 @@ import {
   createActiveIndexesForRender,
 } from "../GUI/vector.js"
 import { getAngle } from "../utils/trig.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render/index.js"
 import {
   rotateVectors,
   translateVectors,

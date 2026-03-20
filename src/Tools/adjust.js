@@ -15,7 +15,7 @@ import {
   findHalf,
   calcEllipseConicsFromVertices,
 } from "../utils/ellipse.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render/index.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import {
   transformVectorSteps,
