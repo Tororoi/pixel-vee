@@ -316,7 +316,7 @@ const drawOnThumbnailContext = (vector, isSelected, ctx = canvas.thumbnailCTX) =
       )
       break
     }
-    case "rectangle":
+    case "polygon":
       ctx.moveTo(px1 + xOffset, py1 + yOffset)
       ctx.lineTo(px2 + xOffset, py2 + yOffset)
       ctx.lineTo(px3 + xOffset, py3 + yOffset)

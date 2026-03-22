@@ -6,7 +6,7 @@ import { move } from "./move.js"
 import { fill } from "./fill.js"
 import { quadCurve, cubicCurve } from "./curve.js"
 import { ellipse } from "./ellipse.js"
-import { rectangle } from "./rectangle.js"
+import { polygon } from "./polygon.js"
 import { eyedropper } from "./eyedropper.js"
 import { grab } from "./grab.js"
 
@@ -114,7 +114,7 @@ export const tools = {
   quadCurve,
   cubicCurve,
   ellipse,
-  rectangle,
+  polygon,
   //Non-cursor tools
   addLayer: {
     name: "addLayer",
@@ -210,7 +210,7 @@ export const toolGroups = {
     activeTool: "line",
   },
   shapeTools: {
-    tools: ["ellipse", "rectangle"],
+    tools: ["ellipse", "polygon"],
     activeTool: "ellipse",
   },
   selectionTools: {

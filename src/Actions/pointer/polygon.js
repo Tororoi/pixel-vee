@@ -25,7 +25,7 @@ function plotSegment(x0, y0, x1, y1, addPoint) {
 
 /**
  * Draw a quadrilateral outline through 4 corners in order.
- * Works for axis-aligned rectangles and rotated quads.
+ * Works for axis-aligned polygons and rotated quads.
  * @param {number} px1 - corner 1 x
  * @param {number} py1 - corner 1 y
  * @param {number} px2 - corner 2 x
@@ -36,7 +36,7 @@ function plotSegment(x0, y0, x1, y1, addPoint) {
  * @param {number} py4 - corner 4 y
  * @param {object} strokeCtx - StrokeContext
  */
-export function actionRectangle(px1, py1, px2, py2, px3, py3, px4, py4, strokeCtx) {
+export function actionPolygon(px1, py1, px2, py2, px3, py3, px4, py4, strokeCtx) {
   const points = []
   const seen = new Set()
 

@@ -282,7 +282,7 @@ function handlePointerUp(e) {
   //reset action and render vectors
   if (state.timeline.currentAction) {
     if (
-      ['fill', 'line', 'quadCurve', 'cubicCurve', 'ellipse', 'rectangle'].includes(
+      ['fill', 'line', 'quadCurve', 'cubicCurve', 'ellipse', 'polygon'].includes(
         state.tool.current.name,
       )
     ) {

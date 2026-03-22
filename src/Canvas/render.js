@@ -8,7 +8,7 @@ import { actionDitherDraw, actionBuildUpDitherDraw } from '../Actions/pointer/dr
 import { actionLine } from '../Actions/pointer/line.js'
 import { actionFill } from '../Actions/pointer/fill.js'
 import { actionEllipse } from '../Actions/pointer/ellipse.js'
-import { actionRectangle } from '../Actions/pointer/rectangle.js'
+import { actionPolygon } from '../Actions/pointer/polygon.js'
 import { actionQuadraticCurve, actionCubicCurve } from '../Actions/pointer/curve.js'
 import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
@@ -312,7 +312,7 @@ export function performAction(
     case 'ellipse':
       renderActionVectors(action, betweenCtx)
       break
-    case 'rectangle':
+    case 'polygon':
       renderActionVectors(action, betweenCtx)
       break
     case 'cut': {
@@ -539,8 +539,8 @@ function renderActionVectors(action, activeCtx = null) {
           vectorCtx,
         )
         break
-      case 'rectangle':
-        actionRectangle(
+      case 'polygon':
+        actionPolygon(
           vp.px1 + offsetX, vp.py1 + offsetY,
           vp.px2 + offsetX, vp.py2 + offsetY,
           vp.px3 + offsetX, vp.py3 + offsetY,

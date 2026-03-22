@@ -6,7 +6,7 @@ import { getGuiLineWidth, doubleStroke } from '../utils/guiHelpers.js'
  * @param {object} vectorProperties - The properties of the vector
  * @param {object} vector - The vector to be rendered
  */
-export function renderRectangleVector(vectorProperties, vector) {
+export function renderPolygonVector(vectorProperties, vector) {
   const lineWidth = getGuiLineWidth()
   const circleRadius = 20 * lineWidth
 
@@ -39,7 +39,7 @@ export function renderRectangleVector(vectorProperties, vector) {
  * @param {object} vectorProperties - The properties of the vector
  * @param {object} vector - The vector to be rendered
  */
-export function renderRectanglePath(vectorProperties, vector) {
+export function renderPolygonPath(vectorProperties, vector) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
   if (!Number.isInteger(px3)) return
   const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset

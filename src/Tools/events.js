@@ -161,7 +161,7 @@ function updateBrush(e) {
     case "quadCurve":
     case "cubicCurve":
     case "ellipse":
-    case "rectangle":
+    case "polygon":
     case "select":
       state.tool.current.brushSize = parseInt(e.target.value)
       break

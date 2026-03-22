@@ -13,7 +13,7 @@ import {
   renderOffsetEllipseVector,
   renderEllipsePath,
 } from './ellipse.js'
-import { renderRectangleVector, renderRectanglePath } from './rectangle.js'
+import { renderPolygonVector, renderPolygonPath } from './polygon.js'
 import { renderVectorRotationControl } from './transform.js'
 import { renderSelectionCVS } from './select.js'
 import { renderGrid } from './grid.js'
@@ -576,8 +576,8 @@ function renderControlPoints(vectorProperties, vector = null) {
         renderOffsetEllipseVector(vectorProperties, vector)
       }
       break
-    case 'rectangle':
-      renderRectangleVector(vectorProperties, vector)
+    case 'polygon':
+      renderPolygonVector(vectorProperties, vector)
       break
     default:
     //
@@ -603,8 +603,8 @@ function renderPath(vectorProperties, vector = null) {
     case 'ellipse':
       renderEllipsePath(vectorProperties, vector)
       break
-    case 'rectangle':
-      renderRectanglePath(vectorProperties, vector)
+    case 'polygon':
+      renderPolygonPath(vectorProperties, vector)
       break
     default:
     //
