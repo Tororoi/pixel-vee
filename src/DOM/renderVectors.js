@@ -316,14 +316,13 @@ const drawOnThumbnailContext = (vector, isSelected, ctx = canvas.thumbnailCTX) =
       )
       break
     }
-    case "rectangle": {
-      const xMin = Math.min(px1, px2)
-      const yMin = Math.min(py1, py2)
-      const w = Math.abs(px2 - px1) + minD
-      const h = Math.abs(py2 - py1) + minD
-      ctx.rect(xMin + xOffset, yMin + yOffset, w, h)
+    case "rectangle":
+      ctx.moveTo(px1 + xOffset, py1 + yOffset)
+      ctx.lineTo(px2 + xOffset, py2 + yOffset)
+      ctx.lineTo(px3 + xOffset, py3 + yOffset)
+      ctx.lineTo(px4 + xOffset, py4 + yOffset)
+      ctx.closePath()
       break
-    }
     // Add more cases if there are other drawing tools.
   }
 

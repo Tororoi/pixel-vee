@@ -541,10 +541,10 @@ function renderActionVectors(action, activeCtx = null) {
         break
       case 'rectangle':
         actionRectangle(
-          vp.px1 + offsetX,
-          vp.py1 + offsetY,
-          vp.px2 + offsetX,
-          vp.py2 + offsetY,
+          vp.px1 + offsetX, vp.py1 + offsetY,
+          vp.px2 + offsetX, vp.py2 + offsetY,
+          vp.px3 + offsetX, vp.py3 + offsetY,
+          vp.px4 + offsetX, vp.py4 + offsetY,
           vectorCtx,
         )
         break

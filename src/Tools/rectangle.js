@@ -41,19 +41,43 @@ function buildRectangleCtx(isPreview = false) {
 }
 
 /**
- * Update px2/py2 from the current cursor position, clamping to a square if Shift is held.
+ * Compute and store all 4 corners from px1 (anchor) and current cursor,
+ * clamping to a square if Shift is held.
+ * Layout: px1=anchor, px2=adjacent horizontal, px3=opposite, px4=adjacent vertical
  */
-function updateCorner() {
+function updateCorners() {
+  let ex = state.cursor.x
+  let ey = state.cursor.y
   if (keys.ShiftLeft || keys.ShiftRight) {
-    const dx = state.cursor.x - state.vector.properties.px1
-    const dy = state.cursor.y - state.vector.properties.py1
+    const dx = ex - state.vector.properties.px1
+    const dy = ey - state.vector.properties.py1
     const size = Math.min(Math.abs(dx), Math.abs(dy))
-    state.vector.properties.px2 = state.vector.properties.px1 + Math.sign(dx) * size
-    state.vector.properties.py2 = state.vector.properties.py1 + Math.sign(dy) * size
-  } else {
-    state.vector.properties.px2 = state.cursor.x
-    state.vector.properties.py2 = state.cursor.y
+    ex = state.vector.properties.px1 + Math.sign(dx) * size
+    ey = state.vector.properties.py1 + Math.sign(dy) * size
   }
+  const x1 = state.vector.properties.px1
+  const y1 = state.vector.properties.py1
+  state.vector.properties.px2 = ex
+  state.vector.properties.py2 = y1
+  state.vector.properties.px3 = ex
+  state.vector.properties.py3 = ey
+  state.vector.properties.px4 = x1
+  state.vector.properties.py4 = ey
+}
+
+/**
+ * Call actionRectangle with the current vector properties.
+ * @param {boolean} isPreview
+ */
+function drawRectangle(isPreview) {
+  const p = state.vector.properties
+  actionRectangle(
+    p.px1, p.py1,
+    p.px2, p.py2,
+    p.px3, p.py3,
+    p.px4, p.py4,
+    buildRectangleCtx(isPreview),
+  )
 }
 
 /**
@@ -68,41 +92,23 @@ function rectangleSteps() {
       state.vector.properties.type = state.tool.current.name
       state.vector.properties.px1 = state.cursor.x
       state.vector.properties.py1 = state.cursor.y
-      updateCorner()
+      updateCorners()
       renderCanvas(canvas.currentLayer)
-      actionRectangle(
-        state.vector.properties.px1,
-        state.vector.properties.py1,
-        state.vector.properties.px2,
-        state.vector.properties.py2,
-        buildRectangleCtx(true),
-      )
+      drawRectangle(true)
       break
     case "pointermove":
       if (
         state.cursor.x !== state.cursor.prevX ||
         state.cursor.y !== state.cursor.prevY
       ) {
-        updateCorner()
+        updateCorners()
         renderCanvas(canvas.currentLayer)
-        actionRectangle(
-          state.vector.properties.px1,
-          state.vector.properties.py1,
-          state.vector.properties.px2,
-          state.vector.properties.py2,
-          buildRectangleCtx(true),
-        )
+        drawRectangle(true)
       }
       break
     case "pointerup": {
-      updateCorner()
-      actionRectangle(
-        state.vector.properties.px1,
-        state.vector.properties.py1,
-        state.vector.properties.px2,
-        state.vector.properties.py2,
-        buildRectangleCtx(false),
-      )
+      updateCorners()
+      drawRectangle(false)
       const maskArray = coordArrayFromSet(
         state.selection.maskSet,
         canvas.currentLayer.x,
@@ -127,6 +133,9 @@ function rectangleSteps() {
           vectorIndices: [uniqueVectorKey],
         },
       })
+      const lx = canvas.currentLayer.x
+      const ly = canvas.currentLayer.y
+      const p = state.vector.properties
       state.vector.all[uniqueVectorKey] = {
         index: uniqueVectorKey,
         action: state.timeline.currentAction,
@@ -137,16 +146,16 @@ function rectangleSteps() {
         ditherPatternIndex: state.tool.current.ditherPatternIndex,
         ditherOffsetX: state.tool.current.ditherOffsetX ?? 0,
         ditherOffsetY: state.tool.current.ditherOffsetY ?? 0,
-        recordedLayerX: canvas.currentLayer.x,
-        recordedLayerY: canvas.currentLayer.y,
+        recordedLayerX: lx,
+        recordedLayerY: ly,
         brushSize: state.tool.current.brushSize,
         brushType: state.tool.current.brushType,
         vectorProperties: {
-          ...state.vector.properties,
-          px1: state.vector.properties.px1 - canvas.currentLayer.x,
-          py1: state.vector.properties.py1 - canvas.currentLayer.y,
-          px2: state.vector.properties.px2 - canvas.currentLayer.x,
-          py2: state.vector.properties.py2 - canvas.currentLayer.y,
+          ...p,
+          px1: p.px1 - lx, py1: p.py1 - ly,
+          px2: p.px2 - lx, py2: p.py2 - ly,
+          px3: p.px3 - lx, py3: p.py3 - ly,
+          px4: p.px4 - lx, py4: p.py4 - ly,
         },
         hidden: false,
         removed: false,

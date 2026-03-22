@@ -1,19 +1,42 @@
 import { renderPoints } from './helpers.js'
 
 /**
- * Plot the 4 sides of an axis-aligned rectangle outline.
- * @param {number} px1 - first corner x
- * @param {number} py1 - first corner y
- * @param {number} px2 - opposite corner x
- * @param {number} py2 - opposite corner y
+ * Plot a line segment using Bresenham's algorithm and collect points.
+ * @param {number} x0
+ * @param {number} y0
+ * @param {number} x1
+ * @param {number} y1
+ * @param {Function} addPoint - called with (x, y) for each pixel
+ */
+function plotSegment(x0, y0, x1, y1, addPoint) {
+  const dx = Math.abs(x1 - x0)
+  const dy = Math.abs(y1 - y0)
+  const sx = x0 < x1 ? 1 : -1
+  const sy = y0 < y1 ? 1 : -1
+  let err = dx - dy
+  while (true) {
+    addPoint(x0, y0)
+    if (x0 === x1 && y0 === y1) break
+    const e2 = 2 * err
+    if (e2 > -dy) { err -= dy; x0 += sx }
+    if (e2 < dx) { err += dx; y0 += sy }
+  }
+}
+
+/**
+ * Draw a quadrilateral outline through 4 corners in order.
+ * Works for axis-aligned rectangles and rotated quads.
+ * @param {number} px1 - corner 1 x
+ * @param {number} py1 - corner 1 y
+ * @param {number} px2 - corner 2 x
+ * @param {number} py2 - corner 2 y
+ * @param {number} px3 - corner 3 x
+ * @param {number} py3 - corner 3 y
+ * @param {number} px4 - corner 4 x
+ * @param {number} py4 - corner 4 y
  * @param {object} strokeCtx - StrokeContext
  */
-export function actionRectangle(px1, py1, px2, py2, strokeCtx) {
-  const xMin = Math.min(px1, px2)
-  const xMax = Math.max(px1, px2)
-  const yMin = Math.min(py1, py2)
-  const yMax = Math.max(py1, py2)
-
+export function actionRectangle(px1, py1, px2, py2, px3, py3, px4, py4, strokeCtx) {
   const points = []
   const seen = new Set()
 
@@ -29,18 +52,10 @@ export function actionRectangle(px1, py1, px2, py2, strokeCtx) {
     }
   }
 
-  // Top edge: left to right
-  for (let x = xMin; x <= xMax; x++) addPoint(x, yMin)
-  // Right edge: top+1 to bottom
-  for (let y = yMin + 1; y <= yMax; y++) addPoint(xMax, y)
-  // Bottom edge: right-1 to left (only if different row)
-  if (yMax !== yMin) {
-    for (let x = xMax - 1; x >= xMin; x--) addPoint(x, yMax)
-  }
-  // Left edge: bottom-1 to top+1 (only if different column)
-  if (xMax !== xMin) {
-    for (let y = yMax - 1; y >= yMin + 1; y--) addPoint(xMin, y)
-  }
+  plotSegment(px1, py1, px2, py2, addPoint)
+  plotSegment(px2, py2, px3, py3, addPoint)
+  plotSegment(px3, py3, px4, py4, addPoint)
+  plotSegment(px4, py4, px1, py1, addPoint)
 
   if (points.length > 0) {
     renderPoints(points, strokeCtx)
