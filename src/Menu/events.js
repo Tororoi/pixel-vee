@@ -2,7 +2,7 @@ import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
 import { vectorGui } from "../GUI/vector.js"
-import { consolidateLayers } from "../Canvas/layers.js"
+import { consolidateLayers } from "../Canvas/layers/index.js"
 import {
   setSaveFilesizePreview,
   saveDrawing,

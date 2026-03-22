@@ -1,9 +1,9 @@
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
-import { consolidateLayers } from "../Canvas/layers.js"
-import { getColor } from "../utils/imageDataHelpers.js"
-import { setColor } from "../Swatch/events.js"
+import { state } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { swatches } from '../Context/swatch.js'
+import { consolidateLayers } from '../Canvas/layers/layers.js'
+import { getColor } from '../utils/imageDataHelpers.js'
+import { setColor } from '../Swatch/events.js'
 
 /**
  * Eyedropper
@@ -22,23 +22,23 @@ function eyedropperSteps() {
       newColor.g,
       newColor.b,
       newColor.a,
-      swatches.primary.swatch
+      swatches.primary.swatch,
     )
   }
   switch (canvas.pointerEvent) {
-    case "pointerdown":
+    case 'pointerdown':
       //get imageData
       consolidateLayers(true, true)
       state.drawing.colorLayerGlobal = canvas.offScreenCTX.getImageData(
         0,
         0,
         canvas.offScreenCVS.width,
-        canvas.offScreenCVS.height
+        canvas.offScreenCVS.height,
       )
       //set color
       sampleColor(state.cursor.x, state.cursor.y)
       break
-    case "pointermove":
+    case 'pointermove':
       //normalize pointermove to pixelgrid, get color here too
       //get color
       sampleColor(state.cursor.x, state.cursor.y)
@@ -52,14 +52,14 @@ function eyedropperSteps() {
  * Eyedropper Tool
  */
 export const eyedropper = {
-  name: "eyedropper",
+  name: 'eyedropper',
   fn: eyedropperSteps,
   brushSize: 1,
-  brushType: "circle",
+  brushType: 'circle',
   brushDisabled: true,
   options: {},
   modes: {},
-  type: "utility",
-  cursor: "none",
-  activeCursor: "none",
+  type: 'utility',
+  cursor: 'none',
+  activeCursor: 'none',
 }

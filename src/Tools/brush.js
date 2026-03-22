@@ -7,10 +7,10 @@ import { actionDitherDraw, actionBuildUpDitherDraw } from '../Actions/pointer/dr
 import { actionLine } from '../Actions/pointer/line.js'
 import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
 import { getAngle, getTriangle } from '../utils/trig.js'
-import { renderCanvas, scheduleRender } from '../Canvas/render.js'
+import { renderCanvas, scheduleRender } from '../Canvas/render/index.js'
 import { calculateBrushDirection } from '../utils/drawHelpers.js'
 import { coordArrayFromSet } from '../utils/maskHelpers.js'
-import { createColorMaskSet } from '../Canvas/masks.js'
+import { createColorMaskSet } from '../Canvas/masks/index.js'
 import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
 
 //====================================//

@@ -6,7 +6,7 @@ import { swatches } from "../Context/swatch.js"
 import { vectorGui } from "../GUI/vector.js"
 import { handleUndo, handleRedo } from "../Actions/undoRedo/undoRedo.js"
 import { tools } from "../Tools/index.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render/index.js"
 import {
   renderPaletteToolsToDOM,
   renderPaletteToDOM,

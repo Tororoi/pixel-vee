@@ -4,7 +4,7 @@ import { state } from "../Context/state.js"
 import { swatches } from "../Context/swatch.js"
 import { Picker } from "./Picker.js"
 import { generateRandomRGB } from "../utils/colors.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render/index.js"
 import {
   renderVectorsToDOM,
   renderPaletteToolsToDOM,

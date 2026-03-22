@@ -10,7 +10,7 @@ import {
   getOpposingEllipseVertex,
   calcEllipseConicsFromVertices,
 } from "../utils/ellipse.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { renderCanvas } from "../Canvas/render/index.js"
 import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo/undoRedo.js"
 import { enableActionsForSelection } from "../DOM/disableDomElements.js"

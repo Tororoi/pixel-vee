@@ -1,29 +1,29 @@
 //logic to convert undoStack and layers to json
 //logic to read json and construct layers then undoStack with missing data that couldn't be saved as json
-import { dom } from "../Context/dom.js"
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
+import { dom } from '../Context/dom.js'
+import { state } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { swatches } from '../Context/swatch.js'
 //import custom brushStamps when they are implemented
-import { vectorGui } from "../GUI/vector.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { vectorGui } from '../GUI/vector.js'
+import { renderCanvas } from '../Canvas/render/index.js'
 import {
   renderLayersToDOM,
   renderVectorsToDOM,
   renderPaletteToDOM,
-} from "../DOM/render.js"
-import { validatePixelVeeFile } from "../utils/validationHelpers.js"
+} from '../DOM/render.js'
+import { validatePixelVeeFile } from '../utils/validationHelpers.js'
 import {
   sanitizeLayers,
   sanitizePalette,
   sanitizeHistory,
   sanitizeVectors,
-} from "../utils/sanitizeObjectsForSave.js"
-import { resizeOffScreenCanvas } from "../Canvas/render.js"
-import { consolidateLayers } from "../Canvas/layers.js"
-import { calcEllipseConicsFromVertices } from "../utils/ellipse.js"
+} from '../utils/sanitizeObjectsForSave.js'
+import { resizeOffScreenCanvas } from '../Canvas/render/index.js'
+import { consolidateLayers } from '../Canvas/layers/layers.js'
+import { calcEllipseConicsFromVertices } from '../utils/ellipse.js'
 
-const currentVersion = "1.1"
+const currentVersion = '1.1'
 
 /**
  * Save the drawing as a JSON file
@@ -49,24 +49,24 @@ export function prepareDrawingForSave() {
     canvas.layers,
     preserveHistory,
     includeReferenceLayers,
-    includeRemovedActions
+    includeRemovedActions,
   )
   let sanitizedVectors = sanitizeVectors(
     state.timeline.undoStack,
     state.vector.all,
     preserveHistory,
-    includeRemovedActions
+    includeRemovedActions,
   )
   let sanitizedPalette = sanitizePalette(
     swatches.palette,
     preserveHistory,
-    includePalette
+    includePalette,
   )
   let sanitizedUndoStack = sanitizeHistory(
     state.timeline.undoStack,
     preserveHistory,
     includeReferenceLayers,
-    includeRemovedActions
+    includeRemovedActions,
   )
   // Consolidate the layers onto the offscreen canvas for the backup image
   consolidateLayers()
@@ -74,7 +74,7 @@ export function prepareDrawingForSave() {
   let saveJsonString = JSON.stringify({
     metadata: {
       version: currentVersion,
-      application: "Pixel V",
+      application: 'Pixel V',
       timestamp: Date.now(),
       backupImage: canvas.offScreenCVS.toDataURL(),
     },
@@ -89,14 +89,14 @@ export function prepareDrawingForSave() {
     selectProperties: state.selection.properties,
   })
 
-  return new Blob([saveJsonString], { type: "application/json" })
+  return new Blob([saveJsonString], { type: 'application/json' })
 }
 
 /**
  * Set the preview of the file size
  */
 export function setSaveFilesizePreview() {
-  dom.fileSizePreview.innerText = "Calculating..."
+  dom.fileSizePreview.innerText = 'Calculating...'
 
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -123,9 +123,9 @@ export function saveDrawing() {
   // Open the URL in a new tab/window
   // window.open(blobUrl)
   // Create a temporary anchor element
-  const a = document.createElement("a")
+  const a = document.createElement('a')
   a.href = blobUrl
-  a.download = state.ui.saveSettings.saveAsFileName + ".pxv" // Set the file name for the download
+  a.download = state.ui.saveSettings.saveAsFileName + '.pxv' // Set the file name for the download
 
   // Append the anchor to the body, click it, and then remove it
   document.body.appendChild(a)
@@ -161,7 +161,7 @@ export async function loadDrawing(jsonFile) {
   }
 
   // Clear existing layers and undoStack
-  dom.canvasLayers.innerHTML = ""
+  dom.canvasLayers.innerHTML = ''
   canvas.layers = []
   state.timeline.undoStack = []
   state.clearRedoStack()
@@ -180,7 +180,7 @@ export async function loadDrawing(jsonFile) {
   vectorGui.reset()
 
   //Handle old files that don't have the vectors object
-  if (data.metadata.version === "1.0") {
+  if (data.metadata.version === '1.0') {
     data.vectors = {}
   }
 
@@ -190,9 +190,9 @@ export async function loadDrawing(jsonFile) {
   // Recreate layers from the JSON data
   data.layers.forEach((layer) => {
     // Set the contexts
-    if (layer.type === "raster") {
-      let offscreenLayerCVS = document.createElement("canvas")
-      let offscreenLayerCTX = offscreenLayerCVS.getContext("2d", {
+    if (layer.type === 'raster') {
+      let offscreenLayerCVS = document.createElement('canvas')
+      let offscreenLayerCTX = offscreenLayerCVS.getContext('2d', {
         willReadFrequently: true,
       })
       offscreenLayerCVS.width = canvas.offScreenCVS.width
@@ -200,11 +200,11 @@ export async function loadDrawing(jsonFile) {
       layer.cvs = offscreenLayerCVS
       layer.ctx = offscreenLayerCTX
     }
-    let onscreenLayerCVS = document.createElement("canvas")
-    let onscreenLayerCTX = onscreenLayerCVS.getContext("2d", {
+    let onscreenLayerCVS = document.createElement('canvas')
+    let onscreenLayerCTX = onscreenLayerCVS.getContext('2d', {
       willReadFrequently: true,
     })
-    onscreenLayerCVS.className = "onscreen-canvas"
+    onscreenLayerCVS.className = 'onscreen-canvas'
     dom.canvasLayers.appendChild(onscreenLayerCVS)
     onscreenLayerCVS.width = onscreenLayerCVS.offsetWidth * canvas.sharpness
     onscreenLayerCVS.height = onscreenLayerCVS.offsetHeight * canvas.sharpness
@@ -214,13 +214,13 @@ export async function loadDrawing(jsonFile) {
       0,
       canvas.sharpness * canvas.zoom,
       0,
-      0
+      0,
     )
     layer.onscreenCvs = onscreenLayerCVS
     layer.onscreenCtx = onscreenLayerCTX
 
     // For reference layers, load the image
-    if (layer.type === "reference" && layer.dataUrl) {
+    if (layer.type === 'reference' && layer.dataUrl) {
       let img = new Image()
       img.src = layer.dataUrl
 
@@ -260,7 +260,7 @@ export async function loadDrawing(jsonFile) {
     //Handle actions with a pastedLayer
     if (action?.pastedLayer) {
       let correspondingLayer = canvas.layers.find(
-        (layer) => layer.id === action.pastedLayer.id
+        (layer) => layer.id === action.pastedLayer.id,
       )
       if (correspondingLayer) {
         action.pastedLayer = correspondingLayer
@@ -271,7 +271,7 @@ export async function loadDrawing(jsonFile) {
       action.layer = canvas.tempLayer
     } else {
       let correspondingLayer = canvas.layers.find(
-        (layer) => layer.id === action.layer.id
+        (layer) => layer.id === action.layer.id,
       )
 
       if (correspondingLayer) {
@@ -308,10 +308,10 @@ export async function loadDrawing(jsonFile) {
     //Handle actions with canvas data (paste, confirm paste)
     if (action?.canvas) {
       // Convert the stored canvas dataUrl to a canvas
-      let tempCanvas = document.createElement("canvas")
+      let tempCanvas = document.createElement('canvas')
       tempCanvas.width = action.canvasProperties.width
       tempCanvas.height = action.canvasProperties.height
-      let tempCtx = tempCanvas.getContext("2d", {
+      let tempCtx = tempCanvas.getContext('2d', {
         willReadFrequently: true,
       })
       let img = new Image()
@@ -327,7 +327,7 @@ export async function loadDrawing(jsonFile) {
               0,
               0,
               action.canvasProperties.width,
-              action.canvasProperties.height
+              action.canvasProperties.height,
             ),
           }
           resolve() // Resolve the promise after the image has been drawn
@@ -349,7 +349,7 @@ export async function loadDrawing(jsonFile) {
   for (let vectorKey in data.vectors) {
     let vector = data.vectors[vectorKey]
     let correspondingLayer = canvas.layers.find(
-      (layer) => layer.id === vector.layer.id
+      (layer) => layer.id === vector.layer.id,
     )
     if (correspondingLayer) {
       //associate vector's layer
@@ -379,7 +379,7 @@ export async function loadDrawing(jsonFile) {
     //resize the offscreen canvas to match the saved canvas dimensions (includes redraw timeline and vectorGui.render)
     resizeOffScreenCanvas(
       data.canvasProperties.width,
-      data.canvasProperties.height
+      data.canvasProperties.height,
     )
   } else {
     renderCanvas(null, true) //redraw timeline
@@ -396,13 +396,13 @@ export async function loadDrawing(jsonFile) {
  * @param {object} action - The action object to be converted
  */
 function convertActionToNewFormat(data, action) {
-  if (data.metadata.version === "1.0") {
+  if (data.metadata.version === '1.0') {
     if (action.properties) {
       //Handle vector actions
       if (action.properties?.vectorProperties) {
         //restructure vectorProperties to include type
         action.properties.vectorProperties.type = action.tool.name
-        if (action.properties.vectorProperties.type === "ellipse") {
+        if (action.properties.vectorProperties.type === 'ellipse') {
           action.properties.vectorProperties.unifiedOffset =
             action.properties.vectorProperties.offset
           delete action.properties.vectorProperties.offset
@@ -413,7 +413,7 @@ function convertActionToNewFormat(data, action) {
             action.properties.vectorProperties.radB,
             action.properties.vectorProperties.angle,
             action.properties.vectorProperties.x1Offset,
-            action.properties.vectorProperties.y1Offset
+            action.properties.vectorProperties.y1Offset,
           )
           action.properties.vectorProperties.weight = conicControlPoints.weight
           action.properties.vectorProperties.leftTangentX =
@@ -458,7 +458,7 @@ function convertActionToNewFormat(data, action) {
         action.points = action.properties.points
       }
       //Handle line actions
-      if (action.tool.name === "line") {
+      if (action.tool.name === 'line') {
         //convert to a vector tool
         state.vector.highestKey += 1
         let uniqueVectorKey = state.vector.highestKey
@@ -471,7 +471,7 @@ function convertActionToNewFormat(data, action) {
           brushSize: action.tool.brushSize,
           brushType: action.tool.brushType,
           vectorProperties: {
-            type: "line",
+            type: 'line',
             px1: action.properties.px1,
             py1: action.properties.py1,
             px2: action.properties.px2,
@@ -491,7 +491,7 @@ function convertActionToNewFormat(data, action) {
         action.boundaryBox = action.properties.boundaryBox
       }
       //Handle select actions
-      if (action.tool.name === "select") {
+      if (action.tool.name === 'select') {
         action.selectedVectorIndices = []
       }
       //Handle modify actions
