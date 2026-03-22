@@ -43,6 +43,17 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     state.vector.all[latestAction.moddedVectorIndex].modes = {
       ...latestAction[modType],
     }
+  } else if (latestAction.tool === "changeDitherPattern") {
+    state.vector.all[latestAction.moddedVectorIndex].ditherPatternIndex =
+      latestAction[modType]
+  } else if (latestAction.tool === "changeDitherOffset") {
+    state.vector.all[latestAction.moddedVectorIndex].ditherOffsetX =
+      latestAction[modType].x
+    state.vector.all[latestAction.moddedVectorIndex].ditherOffsetY =
+      latestAction[modType].y
+  } else if (latestAction.tool === "changeBrushSize") {
+    state.vector.all[latestAction.moddedVectorIndex].brushSize =
+      latestAction[modType]
   } else if (latestAction.tool === "changeColor") {
     state.vector.all[latestAction.moddedVectorIndex].color = {
       ...latestAction[modType],

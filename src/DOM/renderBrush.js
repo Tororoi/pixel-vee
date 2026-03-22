@@ -75,7 +75,7 @@ export const renderBrushModesToDOM = () => {
 export function renderToolOptionsToDOM() {
   dom.toolOptions.innerHTML = ''
   if (
-    ['line', 'quadCurve', 'cubicCurve', 'ellipse', 'select'].includes(
+    ['line', 'quadCurve', 'cubicCurve', 'ellipse', 'rectangle', 'select'].includes(
       state.tool.current.name,
     )
   ) {
@@ -95,7 +95,7 @@ export function renderDitherOptionsToDOM() {
   const ditherSection = document.querySelector('.dither-options')
   if (!ditherSection) return
 
-  const ditherTools = ['brush', 'line', 'quadCurve', 'cubicCurve', 'ellipse']
+  const ditherTools = ['brush', 'line', 'quadCurve', 'cubicCurve', 'ellipse', 'rectangle']
   if (ditherTools.includes(state.tool.current.name)) {
     ditherSection.style.display = ''
     renderDitherPreviewSVG()

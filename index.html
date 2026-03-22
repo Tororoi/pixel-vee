@@ -637,13 +637,31 @@
                     ></button>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  class="tool ellipse"
-                  id="ellipse"
-                  aria-label="Ellipse (O) Hold Shift to maintain circle"
-                  data-tooltip="Ellipse (O) &#010;&#010;Hold Shift to maintain circle"
-                ></button>
+                <div class="tool-group" data-group="shapeTools">
+                  <button
+                    type="button"
+                    class="tool-group-btn ellipse"
+                    data-group="shapeTools"
+                    aria-label="Shapes"
+                    data-tooltip="Shapes"
+                  ></button>
+                  <div class="tool-group-popout">
+                    <button
+                      type="button"
+                      class="tool ellipse"
+                      id="ellipse"
+                      aria-label="Ellipse (O) Hold Shift to maintain circle"
+                      data-tooltip="Ellipse (O) &#010;&#010;Hold Shift to maintain circle"
+                    ></button>
+                    <button
+                      type="button"
+                      class="tool rectangle"
+                      id="rectangle"
+                      aria-label="Rectangle (U) Hold Shift to maintain square"
+                      data-tooltip="Rectangle (U) &#010;&#010;Hold Shift to maintain square"
+                    ></button>
+                  </div>
+                </div>
                 <div class="tool-group" data-group="selectionTools">
                   <button
                     type="button"
@@ -861,6 +879,20 @@
                   />
                   <span class="checkmark"></span>
                   <div class="icon ellipse"></div>
+                </label>
+                <label
+                  for="toolbox-rectangle-toggle"
+                  id="toolbox-rectangle"
+                  class="toggle"
+                  data-tooltip="Toggle Rectangle tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-rectangle-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon rectangle"></div>
                 </label>
                 <label
                   for="toolbox-select-toggle"

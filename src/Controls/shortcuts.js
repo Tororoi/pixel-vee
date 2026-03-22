@@ -266,7 +266,10 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyU":
-      //
+      if (!state.cursor.clicked) {
+        switchTool("rectangle")
+        renderVectorsToDOM()
+      }
       break
     case "KeyV":
       if (!state.cursor.clicked) {

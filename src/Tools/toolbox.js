@@ -102,6 +102,7 @@ export function switchTool(toolName = null, toolBtn = null) {
           "quadCurve",
           "cubicCurve",
           "ellipse",
+          "rectangle",
           "move",
         ].includes(tools[targetToolBtn.id].name)
       ) {

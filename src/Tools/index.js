@@ -6,6 +6,7 @@ import { move } from "./move.js"
 import { fill } from "./fill.js"
 import { quadCurve, cubicCurve } from "./curve.js"
 import { ellipse } from "./ellipse.js"
+import { rectangle } from "./rectangle.js"
 import { eyedropper } from "./eyedropper.js"
 import { grab } from "./grab.js"
 
@@ -28,6 +29,36 @@ export const tools = {
   },
   changeMode: {
     name: "changeMode",
+    fn: null,
+    brushSize: null,
+    brushType: null,
+    brushDisabled: false,
+    options: {},
+    modes: {},
+    type: "modify",
+  },
+  changeDitherPattern: {
+    name: "changeDitherPattern",
+    fn: null,
+    brushSize: null,
+    brushType: null,
+    brushDisabled: false,
+    options: {},
+    modes: {},
+    type: "modify",
+  },
+  changeDitherOffset: {
+    name: "changeDitherOffset",
+    fn: null,
+    brushSize: null,
+    brushType: null,
+    brushDisabled: false,
+    options: {},
+    modes: {},
+    type: "modify",
+  },
+  changeBrushSize: {
+    name: "changeBrushSize",
     fn: null,
     brushSize: null,
     brushType: null,
@@ -83,6 +114,7 @@ export const tools = {
   quadCurve,
   cubicCurve,
   ellipse,
+  rectangle,
   //Non-cursor tools
   addLayer: {
     name: "addLayer",
@@ -176,6 +208,10 @@ export const toolGroups = {
   curves: {
     tools: ["line", "quadCurve", "cubicCurve"],
     activeTool: "line",
+  },
+  shapeTools: {
+    tools: ["ellipse", "rectangle"],
+    activeTool: "ellipse",
   },
   selectionTools: {
     tools: ["select", "magicWand"],
