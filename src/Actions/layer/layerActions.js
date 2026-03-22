@@ -1,12 +1,15 @@
-import { state } from "../../Context/state.js"
-import { canvas } from "../../Context/canvas.js"
-import { tools } from "../../Tools/index.js"
-import { vectorGui } from "../../GUI/vector.js"
-import { addToTimeline } from "../undoRedo/undoRedo.js"
-import { createRasterLayer, createReferenceLayer } from "../../Canvas/layers/index.js"
-import { renderCanvas } from "../../Canvas/render/index.js"
-import { renderLayersToDOM, renderVectorsToDOM } from "../../DOM/render.js"
-import { dom } from "../../Context/dom.js"
+import { state } from '../../Context/state.js'
+import { canvas } from '../../Context/canvas.js'
+import { tools } from '../../Tools/index.js'
+import { vectorGui } from '../../GUI/vector.js'
+import { addToTimeline } from '../undoRedo/undoRedo.js'
+import {
+  createRasterLayer,
+  createReferenceLayer,
+} from '../../Canvas/layers/layers.js'
+import { renderCanvas } from '../../Canvas/render/index.js'
+import { renderLayersToDOM, renderVectorsToDOM } from '../../DOM/render.js'
+import { dom } from '../../Context/dom.js'
 
 //=============================================//
 //============ * * * Layers * * * =============//
@@ -73,17 +76,17 @@ export function addRasterLayer() {
  */
 export function removeLayer(layer) {
   //set "removed" flag to true on selected layer.
-  if (canvas.activeLayerCount > 1 || layer.type !== "raster") {
+  if (canvas.activeLayerCount > 1 || layer.type !== 'raster') {
     layer.removed = true
     if (layer === canvas.currentLayer) {
-      if (layer.type === "reference") {
+      if (layer.type === 'reference') {
         state.deselect()
       }
       layer.inactiveTools.forEach((tool) => {
         dom[`${tool}Btn`].disabled = false
       })
       canvas.currentLayer = canvas.layers.find(
-        (l) => l.type === "raster" && !l.removed
+        (l) => l.type === 'raster' && !l.removed,
       )
       canvas.currentLayer.inactiveTools.forEach((tool) => {
         dom[`${tool}Btn`].disabled = true
