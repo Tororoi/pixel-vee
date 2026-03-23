@@ -18,6 +18,9 @@ import {
 import {
   removeActionVector,
   changeActionVectorMode,
+  changeActionVectorBrushSize,
+  changeActionVectorDitherPattern,
+  changeActionVectorDitherOffset,
 } from '../Actions/modifyTimeline/modifyTimeline.js'
 import { vectorGui } from '../GUI/vector.js'
 import { initializeColorPicker } from '../Swatch/events.js'
@@ -649,6 +652,12 @@ dom.vectorSettingsContainer.addEventListener('click', (e) => {
   }
 })
 
+dom.vectorSettingsContainer.addEventListener('pointerdown', (e) => {
+  if (e.target.classList.contains('vector-brush-size-slider')) {
+    e.target.dataset.fromValue = e.target.value
+  }
+})
+
 dom.vectorSettingsContainer.addEventListener('input', (e) => {
   const vector = dom.vectorSettingsContainer.vectorObj
   if (!vector) return
@@ -660,6 +669,19 @@ dom.vectorSettingsContainer.addEventListener('input', (e) => {
     )
     if (display) display.textContent = `Size: ${newSize}`
     renderCanvas(vector.layer, true)
+  }
+})
+
+dom.vectorSettingsContainer.addEventListener('change', (e) => {
+  const vector = dom.vectorSettingsContainer.vectorObj
+  if (!vector) return
+  if (e.target.classList.contains('vector-brush-size-slider')) {
+    const oldSize = parseInt(e.target.dataset.fromValue ?? e.target.value)
+    const newSize = parseInt(e.target.value)
+    if (oldSize !== newSize) {
+      changeActionVectorBrushSize(vector, oldSize, newSize)
+      state.clearRedoStack()
+    }
   }
 })
 
@@ -690,10 +712,15 @@ dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
   const btn = e.target.closest('.dither-grid-btn')
   if (!btn) return
   const patternIndex = parseInt(btn.dataset.patternIndex)
+  const oldPatternIndex = vector.ditherPatternIndex
   vector.ditherPatternIndex = patternIndex
   updateVectorDitherPreview(vector)
   dom.vectorDitherPickerContainer.style.display = 'none'
   renderCanvas(vector.layer, true)
+  if (oldPatternIndex !== patternIndex) {
+    changeActionVectorDitherPattern(vector, oldPatternIndex, patternIndex)
+    state.clearRedoStack()
+  }
 })
 
 // Offset control drag in vector dither picker — update stored offset so effective offset matches
@@ -712,6 +739,7 @@ dom.vectorDitherPickerContainer?.addEventListener('pointerdown', (e) => {
   // Compute effective offset at drag start
   const startEffectiveX = (((vector.ditherOffsetX ?? 0) + recordedLayerX - currentLayerX) % 8 + 8) % 8
   const startEffectiveY = (((vector.ditherOffsetY ?? 0) + recordedLayerY - currentLayerY) % 8 + 8) % 8
+  const fromOffset = { x: vector.ditherOffsetX ?? 0, y: vector.ditherOffsetY ?? 0 }
   const onMove = (ev) => {
     const newEffectiveX = ((startEffectiveX - Math.round((ev.clientX - startX) / 4)) % 8 + 8) % 8
     const newEffectiveY = ((startEffectiveY - Math.round((ev.clientY - startY) / 4)) % 8 + 8) % 8
@@ -722,7 +750,14 @@ dom.vectorDitherPickerContainer?.addEventListener('pointerdown', (e) => {
     renderCanvas(vector.layer, true)
   }
   control.addEventListener('pointermove', onMove)
-  control.addEventListener('pointerup', () => control.removeEventListener('pointermove', onMove), { once: true })
+  control.addEventListener('pointerup', () => {
+    control.removeEventListener('pointermove', onMove)
+    const toOffset = { x: vector.ditherOffsetX ?? 0, y: vector.ditherOffsetY ?? 0 }
+    if (fromOffset.x !== toOffset.x || fromOffset.y !== toOffset.y) {
+      changeActionVectorDitherOffset(vector, fromOffset, toOffset)
+      state.clearRedoStack()
+    }
+  }, { once: true })
 })
 
 document.addEventListener('pointerdown', (e) => {

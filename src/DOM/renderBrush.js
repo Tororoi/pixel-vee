@@ -42,8 +42,8 @@ export const renderBrushModesToDOM = () => {
         mode.dataset.tooltip = 'Eraser (E)'
         break
       case 'perfect':
-        mode.ariaLabel = 'Pixel Perfect (P)'
-        mode.dataset.tooltip = 'Pixel Perfect (P)'
+        mode.ariaLabel = 'Pixel Perfect (Y)'
+        mode.dataset.tooltip = 'Pixel Perfect (Y)'
         break
       case 'inject':
         mode.ariaLabel = 'Inject (I)'
@@ -75,9 +75,14 @@ export const renderBrushModesToDOM = () => {
 export function renderToolOptionsToDOM() {
   dom.toolOptions.innerHTML = ''
   if (
-    ['line', 'quadCurve', 'cubicCurve', 'ellipse', 'select'].includes(
-      state.tool.current.name,
-    )
+    [
+      'line',
+      'quadCurve',
+      'cubicCurve',
+      'ellipse',
+      'polygon',
+      'select',
+    ].includes(state.tool.current.name)
   ) {
     //render cubic curve options to menu
     Object.entries(state.tool.current.options).forEach(([name, option]) => {
@@ -95,7 +100,14 @@ export function renderDitherOptionsToDOM() {
   const ditherSection = document.querySelector('.dither-options')
   if (!ditherSection) return
 
-  const ditherTools = ['brush', 'line', 'quadCurve', 'cubicCurve', 'ellipse']
+  const ditherTools = [
+    'brush',
+    'line',
+    'quadCurve',
+    'cubicCurve',
+    'ellipse',
+    'polygon',
+  ]
   if (ditherTools.includes(state.tool.current.name)) {
     ditherSection.style.display = ''
     renderDitherPreviewSVG()
@@ -122,8 +134,7 @@ export function renderDitherControlsToDOM() {
   }
   if (buildUpBtn) {
     buildUpBtn.classList.toggle('selected', isBuildUp)
-    buildUpBtn.style.display =
-      state.tool.current.name === 'brush' ? '' : 'none'
+    buildUpBtn.style.display = state.tool.current.name === 'brush' ? '' : 'none'
   }
   renderBuildUpStepsToDOM()
   const offsetX = state.tool.current.ditherOffsetX ?? 0
@@ -168,7 +179,9 @@ export function renderBuildUpStepsToDOM() {
     btn.dataset.stepSlot = i
     btn.dataset.tooltip = `Step ${i + 1}: pattern ${patternIndex + 1}/65`
     if (i === activeSlot) btn.classList.add('selected')
-    btn.appendChild(createDitherPatternSVG(ditherPatterns[patternIndex], offsetX, offsetY))
+    btn.appendChild(
+      createDitherPatternSVG(ditherPatterns[patternIndex], offsetX, offsetY),
+    )
     slots.appendChild(btn)
   })
   updateDitherPickerColors()
@@ -186,7 +199,9 @@ function renderDitherPreviewSVG() {
   const pattern = ditherPatterns[state.tool.current.ditherPatternIndex]
   const offsetX = state.tool.current.ditherOffsetX ?? 0
   const offsetY = state.tool.current.ditherOffsetY ?? 0
-  previewContainer.appendChild(createDitherPatternSVG(pattern, offsetX, offsetY))
+  previewContainer.appendChild(
+    createDitherPatternSVG(pattern, offsetX, offsetY),
+  )
 }
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
@@ -198,8 +213,8 @@ let _ditherSvgCounter = 0
  * Uses a <pattern> element so the tile offset can be updated cheaply
  * by changing the pattern's x/y attributes without rebuilding the SVG.
  * @param {object} pattern - pattern from ditherPatterns
- * @param {number} [offsetX=0] - dither X offset (0–7)
- * @param {number} [offsetY=0] - dither Y offset (0–7)
+ * @param {number} [offsetX] - dither X offset (0–7)
+ * @param {number} [offsetY] - dither Y offset (0–7)
  * @returns {SVGElement} SVG thumbnail element
  */
 export function createDitherPatternSVG(pattern, offsetX = 0, offsetY = 0) {
@@ -285,7 +300,7 @@ let _offsetControlCounter = 0
  * toroidal Chebyshev distance from (0,0) are drawn in the primary color.
  * The pattern element's x/y attributes are updated by applyDitherOffsetControl
  * to shift which pixel appears as the "center" without rebuilding the SVG.
- * @returns {SVGElement}
+ * @returns {SVGElement} The constructed dither offset control SVG element
  */
 export function createDitherOffsetControlSVG() {
   const id = `dor-${_offsetControlCounter++}`
@@ -304,7 +319,13 @@ export function createDitherOffsetControlSVG() {
   patternEl.setAttribute('height', '8')
   patternEl.classList.add('dither-offset-ring-pattern')
 
-  const ringColors = ['rgb(255,255,255)', 'rgb(131,131,131)', 'rgb(61,61,61)', 'rgb(31,31,31)', 'rgb(0,0,0)']
+  const ringColors = [
+    'rgb(255,255,255)',
+    'rgb(131,131,131)',
+    'rgb(61,61,61)',
+    'rgb(31,31,31)',
+    'rgb(0,0,0)',
+  ]
   const ringPaths = ['', '', '', '', '']
   for (let y = 0; y < 8; y++) {
     const dy = Math.min(y, 8 - y)
@@ -349,8 +370,8 @@ export function createDitherOffsetControlSVG() {
  * Update the offset control's ring pattern phase.
  * Setting x=offsetX, y=offsetY makes the dist=0 pixel appear at (offsetX, offsetY).
  * @param {Element} container - element containing the control
- * @param {number} offsetX
- * @param {number} offsetY
+ * @param {number} offsetX - Horizontal offset value to apply to the ring pattern
+ * @param {number} offsetY - Vertical offset value to apply to the ring pattern
  */
 export function applyDitherOffsetControl(container, offsetX, offsetY) {
   const pattern = container.querySelector('.dither-offset-ring-pattern')
@@ -422,7 +443,7 @@ export function initDitherPicker() {
  * @param {number} [patternIndex] - Pattern index to highlight; defaults to active tool's index
  */
 export function highlightSelectedDitherPattern(
-  patternIndex = state.tool.current.ditherPatternIndex
+  patternIndex = state.tool.current.ditherPatternIndex,
 ) {
   const grid = document.querySelector('.dither-grid')
   if (!grid) return
@@ -430,7 +451,7 @@ export function highlightSelectedDitherPattern(
   buttons.forEach((btn) => {
     btn.classList.toggle(
       'selected',
-      parseInt(btn.dataset.patternIndex) === patternIndex
+      parseInt(btn.dataset.patternIndex) === patternIndex,
     )
   })
 }

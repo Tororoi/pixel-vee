@@ -152,7 +152,7 @@ This app is a work in progress. See the bottom of this page for features that ar
     <td> Chosen as a mode and not a tool in order to allow use with multiple tools (eg. Erase/Fill, Erase/Line). </td>
   </tr>
   <tr>
-    <td colspan="2"> Perfect (P) </td>
+    <td colspan="2"> Perfect (Y) </td>
   </tr>
   <tr>
     <td width="66" height="52"> <img src="public/pixelv-mechanical-pencil.svg" alt="Brush" width="40"/> </td>

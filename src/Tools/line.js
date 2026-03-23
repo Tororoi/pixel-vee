@@ -1,16 +1,16 @@
-import { brushStamps } from "../Context/brushStamps.js"
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { swatches } from "../Context/swatch.js"
-import { ditherPatterns } from "../Context/ditherPatterns.js"
-import { actionLine } from "../Actions/pointer/line.js"
-import { createStrokeContext } from "../Actions/pointer/strokeContext.js"
-import { renderCanvas } from "../Canvas/render.js"
-import { coordArrayFromSet } from "../utils/maskHelpers.js"
-import { addToTimeline } from "../Actions/undoRedo/undoRedo.js"
-import { enableActionsForSelection } from "../DOM/disableDomElements.js"
-import { vectorGui } from "../GUI/vector.js"
-import { rerouteVectorStepsAction } from "./adjust.js"
+import { brushStamps } from '../Context/brushStamps.js'
+import { state } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { swatches } from '../Context/swatch.js'
+import { ditherPatterns } from '../Context/ditherPatterns.js'
+import { actionLine } from '../Actions/pointer/line.js'
+import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
+import { renderCanvas } from '../Canvas/render.js'
+import { coordArrayFromSet } from '../utils/maskHelpers.js'
+import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
+import { enableActionsForSelection } from '../DOM/disableDomElements.js'
+import { vectorGui } from '../GUI/vector.js'
+import { rerouteVectorStepsAction, getChainStartPoint } from './adjust.js'
 
 //===================================//
 //=== * * * Line Controller * * * ===//
@@ -21,9 +21,51 @@ import { rerouteVectorStepsAction } from "./adjust.js"
  * TODO: (Medium Priority) add vector line tool. A raster line tool would still be present for ease of use.
  */
 function lineSteps() {
+  if (
+    state.tool.current.options.chain?.active &&
+    canvas.pointerEvent === 'pointerdown' &&
+    state.tool.clickCounter === 0
+  ) {
+    const chainPoint = getChainStartPoint()
+    if (chainPoint !== null) {
+      state.tool.clickCounter += 1
+      vectorGui.reset()
+      state.vector.properties.type = 'line'
+      state.vector.properties.px1 = chainPoint.x
+      state.vector.properties.py1 = chainPoint.y
+      state.vector.properties.px2 = chainPoint.x
+      state.vector.properties.py2 = chainPoint.y
+      renderCanvas(canvas.currentLayer)
+      actionLine(
+        chainPoint.x,
+        chainPoint.y,
+        chainPoint.x,
+        chainPoint.y,
+        createStrokeContext({
+          layer: canvas.currentLayer,
+          isPreview: true,
+          boundaryBox: state.selection.boundaryBox,
+          currentColor: swatches.primary.color,
+          currentModes: state.tool.current.modes,
+          maskSet: state.selection.maskSet,
+          brushStamp:
+            brushStamps[state.tool.current.brushType][
+              state.tool.current.brushSize
+            ],
+          brushSize: state.tool.current.brushSize,
+          ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
+          twoColorMode: state.tool.current.modes?.twoColor ?? false,
+          secondaryColor: swatches.secondary.color,
+          ditherOffsetX: state.tool.current.ditherOffsetX ?? 0,
+          ditherOffsetY: state.tool.current.ditherOffsetY ?? 0,
+        }),
+      )
+      return
+    }
+  }
   if (rerouteVectorStepsAction()) return
   switch (canvas.pointerEvent) {
-    case "pointerdown":
+    case 'pointerdown':
       state.tool.clickCounter += 1
       //reset control points
       vectorGui.reset()
@@ -46,7 +88,10 @@ function lineSteps() {
           currentColor: swatches.primary.color,
           currentModes: state.tool.current.modes,
           maskSet: state.selection.maskSet,
-          brushStamp: brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+          brushStamp:
+            brushStamps[state.tool.current.brushType][
+              state.tool.current.brushSize
+            ],
           brushSize: state.tool.current.brushSize,
           ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
           twoColorMode: state.tool.current.modes?.twoColor ?? false,
@@ -56,7 +101,7 @@ function lineSteps() {
         }),
       )
       break
-    case "pointermove":
+    case 'pointermove':
       //draw line from origin point to current point onscreen
       state.vector.properties.px2 = state.cursor.x
       state.vector.properties.py2 = state.cursor.y
@@ -75,7 +120,10 @@ function lineSteps() {
           currentColor: swatches.primary.color,
           currentModes: state.tool.current.modes,
           maskSet: state.selection.maskSet,
-          brushStamp: brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+          brushStamp:
+            brushStamps[state.tool.current.brushType][
+              state.tool.current.brushSize
+            ],
           brushSize: state.tool.current.brushSize,
           ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
           twoColorMode: state.tool.current.modes?.twoColor ?? false,
@@ -85,7 +133,7 @@ function lineSteps() {
         }),
       )
       break
-    case "pointerup": {
+    case 'pointerup': {
       state.vector.properties.px2 = state.cursor.x
       state.vector.properties.py2 = state.cursor.y
       //Handle snapping p1 or p2 to other control points. Only snap when there are no linked vectors to selected vector.
@@ -118,7 +166,10 @@ function lineSteps() {
           currentColor: swatches.primary.color,
           currentModes: state.tool.current.modes,
           maskSet: state.selection.maskSet,
-          brushStamp: brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+          brushStamp:
+            brushStamps[state.tool.current.brushType][
+              state.tool.current.brushSize
+            ],
           brushSize: state.tool.current.brushSize,
           ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
           twoColorMode: state.tool.current.modes?.twoColor ?? false,
@@ -131,7 +182,7 @@ function lineSteps() {
       let maskArray = coordArrayFromSet(
         state.selection.maskSet,
         canvas.currentLayer.x,
-        canvas.currentLayer.y
+        canvas.currentLayer.y,
       )
       //correct boundary box for layer offset
       const boundaryBox = { ...state.selection.boundaryBox }
@@ -191,10 +242,10 @@ function lineSteps() {
 }
 
 export const line = {
-  name: "line",
+  name: 'line',
   fn: lineSteps,
   brushSize: 1,
-  brushType: "circle",
+  brushType: 'circle',
   brushDisabled: false,
   options: {
     //Priority hierarchy of options: Equal = Align > Hold > Link
@@ -208,26 +259,31 @@ export const line = {
     //   tooltip:
     //     "Toggle Align (A). \n\nEnsures tangential continuity by moving the control handle to the opposite angle for linked vectors.",
     // }, // Tangential continuity
+    chain: {
+      active: false,
+      tooltip:
+        'Toggle Chain (7). \n\nStart a new line from a colliding line endpoint instead of adjusting it.',
+    },
     hold: {
       active: false,
       tooltip:
-        "Toggle Hold (H). \n\nMaintain relative angles of all control handles attached to selected control point.",
+        'Toggle Hold (H). \n\nMaintain relative angles of all control handles attached to selected control point.',
     },
     link: {
       active: true,
       tooltip:
-        "Toggle Linking (L). \n\nConnected control points of other vectors will move with selected control point.",
+        'Toggle Linking (L). \n\nConnected control points of other vectors will move with selected control point.',
     }, // Positional continuity
     displayPaths: {
       active: false,
-      tooltip: "Toggle Paths. \n\nShow paths for lines.",
+      tooltip: 'Toggle Paths. \n\nShow paths for lines.',
     },
   },
   modes: { eraser: false, inject: false, twoColor: false },
   ditherPatternIndex: 64,
   ditherOffsetX: 0,
   ditherOffsetY: 0,
-  type: "vector",
-  cursor: "crosshair",
-  activeCursor: "crosshair",
+  type: 'vector',
+  cursor: 'crosshair',
+  activeCursor: 'crosshair',
 }

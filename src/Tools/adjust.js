@@ -10,13 +10,10 @@ import {
   createActiveIndexesForRender,
 } from "../GUI/vector.js"
 import { getAngle } from "../utils/trig.js"
-import {
-  getOpposingEllipseVertex,
-  findHalf,
-  calcEllipseConicsFromVertices,
-} from "../utils/ellipse.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
+import { updateEllipseVectorProperties } from "./ellipse.js"
+import { updatePolygonVectorProperties, getUniformCtx } from "./polygon.js"
 import {
   transformVectorSteps,
   scaleVectorSteps,
@@ -27,210 +24,44 @@ import {
 //======== * * * Adjusters * * * ========//
 //=======================================//
 
-//Helper functions for ellipse tool
+const chainableTypes = ["line", "quadCurve", "cubicCurve"]
 
 /**
- * Update the offsets of an ellipse
- * @param {object} vectorProperties - The properties of the vector
- * @param {boolean|null|undefined} overrideForceCircle - force circle if passed in
- * @param {number} angleOffset - angle offset
+ * Returns the canvas-absolute coordinates of the chainable endpoint under the
+ * cursor, or null if no valid chain target is colliding.
+ * Checks the currently selected vector's endpoint first, then any other vector.
+ * @returns {{ x: number, y: number } | null} Canvas-absolute coordinates or null
  */
-export function updateEllipseOffsets(
-  vectorProperties,
-  overrideForceCircle,
-  angleOffset = 0
-) {
-  const forceCircle = overrideForceCircle ?? vectorProperties.forceCircle
-  vectorProperties.angle = getAngle(
-    vectorProperties.px2 - vectorProperties.px1,
-    vectorProperties.py2 - vectorProperties.py1
-  )
-  if (state.tool.current.options.useSubpixels?.active) {
-    vectorProperties.unifiedOffset = findHalf(
-      canvas.subPixelX,
-      canvas.subPixelY,
-      vectorProperties.angle + angleOffset
-    )
-  } else {
-    vectorProperties.unifiedOffset = 0 // TODO: (Medium Priority) need logic to manually select offset values
-  }
-  const directions = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
-  while (vectorProperties.angle < 0) {
-    vectorProperties.angle += 2 * Math.PI
-  }
-  // Determine the slice in which the angle exists
-  let index =
-    Math.floor(
-      (vectorProperties.angle + angleOffset + Math.PI / 2 + Math.PI / 8) /
-        (Math.PI / 4)
-    ) % 8
-  let compassDir = directions[index]
-  //based on direction update x and y offsets in state
-  //TODO: (Medium Priority) keep offset consistent during radius adjustment and use another gui element to control the way radius is handled, drawn as a compass, 8 options plus default center which is no offset
-  //Direction shrinks opposite side. eg. radius 7 goes from diameter 15 to diameter 14
-  //gui element could have 2 sliders, vertical and horizontal with 3 values each, offset -1, 0, 1 (right, none, left)
-  //should only x1 and y1 offsets be available since they represent the center point being part of radius or not?
-  if (forceCircle) {
-    vectorProperties.x1Offset = -vectorProperties.unifiedOffset
-    vectorProperties.y1Offset = -vectorProperties.unifiedOffset
-  } else {
-    switch (compassDir) {
-      case "N":
-        vectorProperties.y1Offset = -vectorProperties.unifiedOffset
-        break
-      case "NE":
-        vectorProperties.x1Offset = -vectorProperties.unifiedOffset
-        vectorProperties.y1Offset = -vectorProperties.unifiedOffset
-        break
-      case "E":
-        vectorProperties.x1Offset = -vectorProperties.unifiedOffset
-        break
-      case "SE":
-        vectorProperties.x1Offset = -vectorProperties.unifiedOffset
-        vectorProperties.y1Offset = -vectorProperties.unifiedOffset
-        break
-      case "S":
-        vectorProperties.y1Offset = -vectorProperties.unifiedOffset
-        break
-      case "SW":
-        vectorProperties.x1Offset = -vectorProperties.unifiedOffset
-        vectorProperties.y1Offset = -vectorProperties.unifiedOffset
-        break
-      case "W":
-        vectorProperties.x1Offset = -vectorProperties.unifiedOffset
-        break
-      case "NW":
-        vectorProperties.x1Offset = -vectorProperties.unifiedOffset
-        vectorProperties.y1Offset = -vectorProperties.unifiedOffset
-        break
-      default:
-      //none
+export function getChainStartPoint() {
+  const endpointKeys = ["px1", "px2"]
+  // Case A: current selected vector's endpoint
+  if (
+    vectorGui.selectedCollisionPresent &&
+    state.vector.currentIndex !== null &&
+    endpointKeys.includes(vectorGui.collidedPoint.xKey)
+  ) {
+    const cv = state.vector.all[state.vector.currentIndex]
+    if (cv && chainableTypes.includes(cv.vectorProperties.type)) {
+      return {
+        x: cv.vectorProperties[vectorGui.collidedPoint.xKey] + cv.layer.x,
+        y: cv.vectorProperties[vectorGui.collidedPoint.yKey] + cv.layer.y,
+      }
     }
   }
-}
-
-/**
- * Update the opposing control points of an ellipse
- * @param {object} vectorProperties - The properties of the vector
- * @param {string} shiftedXKey - The key of the shifted x value
- * @param {string} shiftedYKey - The key of the shifted y value
- * @param {number} newX - The new x value for the shifted point
- * @param {number} newY - The new y value for the shifted point
- */
-export function syncEllipseProperties(
-  vectorProperties,
-  shiftedXKey,
-  shiftedYKey,
-  newX,
-  newY
-) {
-  if (shiftedXKey !== "px1") {
-    vectorProperties[shiftedXKey] = newX
-    vectorProperties[shiftedYKey] = newY
-  }
-  let dxa = vectorProperties.px2 - vectorProperties.px1
-  let dya = vectorProperties.py2 - vectorProperties.py1
-  let dxb = vectorProperties.px3 - vectorProperties.px1
-  let dyb = vectorProperties.py3 - vectorProperties.py1
-  if (shiftedXKey === "px1") {
-    //Moving center point, shift other control points to match
-    vectorProperties[shiftedXKey] = newX
-    vectorProperties[shiftedYKey] = newY
-    vectorProperties.px2 = vectorProperties.px1 + dxa
-    vectorProperties.py2 = vectorProperties.py1 + dya
-    vectorProperties.px3 = vectorProperties.px1 + dxb
-    vectorProperties.py3 = vectorProperties.py1 + dyb
-  } else if (shiftedXKey === "px2") {
-    //Moving px2, adjust radA and px3
-    vectorProperties.radA = Math.sqrt(dxa * dxa + dya * dya)
-    //radB remains constant while radA changes unless forceCircle is true
-    if (vectorProperties.forceCircle) {
-      vectorProperties.radB = vectorProperties.radA
+  // Case B: another vector's endpoint (otherCollidedKeys always set for px1/px2)
+  if (
+    state.vector.collidedIndex !== null &&
+    endpointKeys.includes(vectorGui.otherCollidedKeys.xKey)
+  ) {
+    const ov = state.vector.all[state.vector.collidedIndex]
+    if (ov && chainableTypes.includes(ov.vectorProperties.type)) {
+      return {
+        x: ov.vectorProperties[vectorGui.otherCollidedKeys.xKey] + ov.layer.x,
+        y: ov.vectorProperties[vectorGui.otherCollidedKeys.yKey] + ov.layer.y,
+      }
     }
-    let newVertex = getOpposingEllipseVertex(
-      vectorProperties.px1,
-      vectorProperties.py1,
-      vectorProperties.px2,
-      vectorProperties.py2,
-      -Math.PI / 2,
-      vectorProperties.radB
-    )
-    vectorProperties.px3 = newVertex.x
-    vectorProperties.py3 = newVertex.y
-    updateEllipseOffsets(vectorProperties, vectorProperties.forceCircle, 0)
-  } else if (shiftedXKey === "px3") {
-    //Moving px3, adjust radB and px2
-    vectorProperties.radB = Math.sqrt(dxb * dxb + dyb * dyb)
-    //radA remains constant while radB changes unless forceCircle is true
-    if (vectorProperties.forceCircle) {
-      vectorProperties.radA = vectorProperties.radB
-    }
-    let newVertex = getOpposingEllipseVertex(
-      vectorProperties.px1,
-      vectorProperties.py1,
-      vectorProperties.px3,
-      vectorProperties.py3,
-      Math.PI / 2,
-      vectorProperties.radA
-    )
-    vectorProperties.px2 = newVertex.x
-    vectorProperties.py2 = newVertex.y
-    updateEllipseOffsets(
-      vectorProperties,
-      vectorProperties.forceCircle,
-      1.5 * Math.PI
-    )
   }
-  let conicControlPoints = calcEllipseConicsFromVertices(
-    vectorProperties.px1,
-    vectorProperties.py1,
-    vectorProperties.radA,
-    vectorProperties.radB,
-    vectorProperties.angle,
-    vectorProperties.x1Offset,
-    vectorProperties.y1Offset
-  )
-  vectorProperties.weight = conicControlPoints.weight
-  vectorProperties.leftTangentX = conicControlPoints.leftTangentX
-  vectorProperties.leftTangentY = conicControlPoints.leftTangentY
-  vectorProperties.topTangentX = conicControlPoints.topTangentX
-  vectorProperties.topTangentY = conicControlPoints.topTangentY
-  vectorProperties.rightTangentX = conicControlPoints.rightTangentX
-  vectorProperties.rightTangentY = conicControlPoints.rightTangentY
-  vectorProperties.bottomTangentX = conicControlPoints.bottomTangentX
-  vectorProperties.bottomTangentY = conicControlPoints.bottomTangentY
-}
-
-/**
- * Update ellipse vector properties
- * @param {object} currentVector - The current vector
- */
-function updateEllipseVectorProperties(currentVector) {
-  syncEllipseProperties(
-    state.vector.properties,
-    vectorGui.selectedPoint.xKey,
-    vectorGui.selectedPoint.yKey,
-    state.cursor.x,
-    state.cursor.y
-  )
-  currentVector.vectorProperties = {
-    ...state.vector.properties,
-  }
-  //Keep properties relative to layer offset
-  currentVector.vectorProperties.px1 -= currentVector.layer.x
-  currentVector.vectorProperties.py1 -= currentVector.layer.y
-  currentVector.vectorProperties.px2 -= currentVector.layer.x
-  currentVector.vectorProperties.py2 -= currentVector.layer.y
-  currentVector.vectorProperties.px3 -= currentVector.layer.x
-  currentVector.vectorProperties.py3 -= currentVector.layer.y
-  currentVector.vectorProperties.leftTangentX -= currentVector.layer.x
-  currentVector.vectorProperties.leftTangentY -= currentVector.layer.y
-  currentVector.vectorProperties.topTangentX -= currentVector.layer.x
-  currentVector.vectorProperties.topTangentY -= currentVector.layer.y
-  currentVector.vectorProperties.rightTangentX -= currentVector.layer.x
-  currentVector.vectorProperties.rightTangentY -= currentVector.layer.y
-  currentVector.vectorProperties.bottomTangentX -= currentVector.layer.x
-  currentVector.vectorProperties.bottomTangentY -= currentVector.layer.y
+  return null
 }
 
 /**
@@ -392,6 +223,23 @@ export function adjustVectorSteps() {
             currentVector.vectorProperties.forceCircle
         }
         updateEllipseVectorProperties(currentVector)
+      } else if (currentVector.vectorProperties.type === "polygon") {
+        if (
+          !keys.ShiftLeft &&
+          !keys.ShiftRight &&
+          vectorGui.selectedPoint.xKey !== "px0"
+        ) {
+          state.vector.properties.forceSquare = false
+          currentVector.vectorProperties.forceSquare = false
+        }
+        if (
+          state.tool.current.options.uniform?.active &&
+          vectorGui.selectedPoint.xKey !== "px0"
+        ) {
+          state.vector.savedProperties[state.vector.currentIndex].uniformCtx =
+            getUniformCtx(vectorGui.selectedPoint.xKey)
+        }
+        updatePolygonVectorProperties(currentVector)
       } else {
         state.vector.properties[vectorGui.collidedPoint.xKey] = state.cursor.x
         state.vector.properties[vectorGui.collidedPoint.yKey] = state.cursor.y
@@ -424,6 +272,8 @@ export function adjustVectorSteps() {
       if (vectorGui.selectedPoint.xKey) {
         if (currentVector.vectorProperties.type === "ellipse") {
           updateEllipseVectorProperties(currentVector)
+        } else if (currentVector.vectorProperties.type === "polygon") {
+          updatePolygonVectorProperties(currentVector)
         } else {
           state.vector.properties[vectorGui.selectedPoint.xKey] = state.cursor.x
           state.vector.properties[vectorGui.selectedPoint.yKey] = state.cursor.y
@@ -452,6 +302,8 @@ export function adjustVectorSteps() {
       if (vectorGui.selectedPoint.xKey) {
         if (currentVector.vectorProperties.type === "ellipse") {
           updateEllipseVectorProperties(currentVector)
+        } else if (currentVector.vectorProperties.type === "polygon") {
+          updatePolygonVectorProperties(currentVector)
         } else {
           state.vector.properties[vectorGui.selectedPoint.xKey] = state.cursor.x
           state.vector.properties[vectorGui.selectedPoint.yKey] = state.cursor.y

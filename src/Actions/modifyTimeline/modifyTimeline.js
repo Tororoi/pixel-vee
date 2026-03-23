@@ -53,6 +53,63 @@ export function modifyVectorAction(moddedVector) {
 
 /**
  * Modify action in the timeline
+ * @param {object} moddedVector - The vector to be modified
+ * @param {number} oldIndex - The dither pattern index before the modification
+ * @param {number} newIndex - The dither pattern index after the modification
+ */
+export function changeActionVectorDitherPattern(moddedVector, oldIndex, newIndex) {
+  addToTimeline({
+    tool: tools.changeDitherPattern.name,
+    layer: moddedVector.layer,
+    properties: {
+      moddedActionIndex: moddedVector.action.index,
+      moddedVectorIndex: moddedVector.index,
+      from: oldIndex,
+      to: newIndex,
+    },
+  })
+}
+
+/**
+ * Modify action in the timeline
+ * @param {object} moddedVector - The vector to be modified
+ * @param {{x: number, y: number}} oldOffset - The dither offset before the modification
+ * @param {{x: number, y: number}} newOffset - The dither offset after the modification
+ */
+export function changeActionVectorDitherOffset(moddedVector, oldOffset, newOffset) {
+  addToTimeline({
+    tool: tools.changeDitherOffset.name,
+    layer: moddedVector.layer,
+    properties: {
+      moddedActionIndex: moddedVector.action.index,
+      moddedVectorIndex: moddedVector.index,
+      from: oldOffset,
+      to: newOffset,
+    },
+  })
+}
+
+/**
+ * Modify action in the timeline
+ * @param {object} moddedVector - The vector to be modified
+ * @param {number} oldSize - The brush size before the modification
+ * @param {number} newSize - The brush size after the modification
+ */
+export function changeActionVectorBrushSize(moddedVector, oldSize, newSize) {
+  addToTimeline({
+    tool: tools.changeBrushSize.name,
+    layer: moddedVector.layer,
+    properties: {
+      moddedActionIndex: moddedVector.action.index,
+      moddedVectorIndex: moddedVector.index,
+      from: oldSize,
+      to: newSize,
+    },
+  })
+}
+
+/**
+ * Modify action in the timeline
  * Only good for vector parameters
  * @param {object} moddedVector - The vector to be modified
  * @param {object} oldColor - The color before the modification

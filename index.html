@@ -291,8 +291,8 @@
                   type="button"
                   class="mode perfect"
                   id="perfect"
-                  aria-label="Pixel Perfect (P)"
-                  data-tooltip="Pixel Perfect (P)"
+                  aria-label="Pixel Perfect (Y)"
+                  data-tooltip="Pixel Perfect (Y)"
                 ></button
                 ><button
                   type="button"
@@ -637,13 +637,31 @@
                     ></button>
                   </div>
                 </div>
-                <button
-                  type="button"
-                  class="tool ellipse"
-                  id="ellipse"
-                  aria-label="Ellipse (O) Hold Shift to maintain circle"
-                  data-tooltip="Ellipse (O) &#010;&#010;Hold Shift to maintain circle"
-                ></button>
+                <div class="tool-group" data-group="shapeTools">
+                  <button
+                    type="button"
+                    class="tool-group-btn ellipse"
+                    data-group="shapeTools"
+                    aria-label="Shapes"
+                    data-tooltip="Shapes"
+                  ></button>
+                  <div class="tool-group-popout">
+                    <button
+                      type="button"
+                      class="tool ellipse"
+                      id="ellipse"
+                      aria-label="Ellipse (O) Hold Shift to maintain circle"
+                      data-tooltip="Ellipse (O) &#010;&#010;Hold Shift to maintain circle"
+                    ></button>
+                    <button
+                      type="button"
+                      class="tool polygon"
+                      id="polygon"
+                      aria-label="Polygon (P) Hold Shift to maintain square"
+                      data-tooltip="Polygon (P) &#010;&#010;Hold Shift to maintain square"
+                    ></button>
+                  </div>
+                </div>
                 <div class="tool-group" data-group="selectionTools">
                   <button
                     type="button"
@@ -861,6 +879,20 @@
                   />
                   <span class="checkmark"></span>
                   <div class="icon ellipse"></div>
+                </label>
+                <label
+                  for="toolbox-polygon-toggle"
+                  id="toolbox-polygon"
+                  class="toggle"
+                  data-tooltip="Toggle Polygon tool in toolbox on or off"
+                >
+                  <input
+                    type="checkbox"
+                    checked="true"
+                    id="toolbox-polygon-toggle"
+                  />
+                  <span class="checkmark"></span>
+                  <div class="icon polygon"></div>
                 </label>
                 <label
                   for="toolbox-select-toggle"

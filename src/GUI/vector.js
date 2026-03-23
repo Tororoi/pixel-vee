@@ -13,6 +13,7 @@ import {
   renderOffsetEllipseVector,
   renderEllipsePath,
 } from './ellipse.js'
+import { renderPolygonVector, renderPolygonPath } from './polygon.js'
 import { renderVectorRotationControl } from './transform.js'
 import { renderSelectionCVS } from './select.js'
 import { renderGrid } from './grid.js'
@@ -205,6 +206,7 @@ function resolveOtherVectorCollision(keys, normalizedX, normalizedY, r, radius, 
 
   if (keys.x === 'px1' || keys.x === 'px2') {
     state.vector.collidedIndex = vector.index
+    vectorGui.setOtherVectorCollision(keys)
     //Only allow link if active point for selection is p1 or p2
     let linkingPoint = null
     if (vectorGui.selectedPoint.xKey) {
@@ -214,7 +216,6 @@ function resolveOtherVectorCollision(keys, normalizedX, normalizedY, r, radius, 
     }
     const allowLink = ['px1', 'px2'].includes(linkingPoint?.xKey)
     if (allowLink) {
-      vectorGui.setOtherVectorCollision(keys)
       vectorGui.addLinkedVector(vector, keys.x, linkingPoint)
       if (state.tool.clickCounter === 0) {
         return { r: radius * 3.125, isActive: true }
@@ -385,6 +386,32 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
 }
 
 /**
+ * Returns true if the current collision is on a chainable endpoint (px1/px2 of a line vector).
+ * Used to suppress the grab cursor when chain mode is active.
+ * @returns {boolean}
+ */
+function isChainableCollision() {
+  const chainableTypes = ["line", "quadCurve", "cubicCurve"]
+  const endpointKeys = ["px1", "px2"]
+  if (
+    vectorGui.selectedCollisionPresent &&
+    state.vector.currentIndex !== null &&
+    endpointKeys.includes(vectorGui.collidedPoint.xKey)
+  ) {
+    const cv = state.vector.all[state.vector.currentIndex]
+    if (chainableTypes.includes(cv?.vectorProperties.type)) return true
+  }
+  if (
+    state.vector.collidedIndex !== null &&
+    endpointKeys.includes(vectorGui.otherCollidedKeys.xKey)
+  ) {
+    const ov = state.vector.all[state.vector.collidedIndex]
+    if (chainableTypes.includes(ov?.vectorProperties.type)) return true
+  }
+  return false
+}
+
+/**
  * Set css cursor for vector interaction
  */
 function setCursorStyle() {
@@ -410,6 +437,9 @@ function setCursorStyle() {
     if (state.tool.clickCounter !== 0) {
       //creating new vector, don't use grab cursor
       canvas.vectorGuiCVS.style.cursor = 'move'
+    } else if (state.tool.current.options?.chain?.active && isChainableCollision()) {
+      //chain mode: show normal tool cursor over chainable endpoints
+      canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
     } else if (state.cursor.clicked) {
       canvas.vectorGuiCVS.style.cursor = 'grabbing'
     } else {
@@ -575,6 +605,9 @@ function renderControlPoints(vectorProperties, vector = null) {
         renderOffsetEllipseVector(vectorProperties, vector)
       }
       break
+    case 'polygon':
+      renderPolygonVector(vectorProperties, vector)
+      break
     default:
     //
   }
@@ -598,6 +631,9 @@ function renderPath(vectorProperties, vector = null) {
       break
     case 'ellipse':
       renderEllipsePath(vectorProperties, vector)
+      break
+    case 'polygon':
+      renderPolygonPath(vectorProperties, vector)
       break
     default:
     //
