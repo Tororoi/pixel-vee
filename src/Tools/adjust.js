@@ -13,7 +13,7 @@ import { getAngle } from "../utils/trig.js"
 import { renderCanvas } from "../Canvas/render.js"
 import { updateVectorProperties } from "../utils/vectorHelpers.js"
 import { updateEllipseVectorProperties } from "./ellipse.js"
-import { updatePolygonVectorProperties } from "./polygon.js"
+import { updatePolygonVectorProperties, getUniformCtx } from "./polygon.js"
 import {
   transformVectorSteps,
   scaleVectorSteps,
@@ -191,6 +191,13 @@ export function adjustVectorSteps() {
         ) {
           state.vector.properties.forceSquare = false
           currentVector.vectorProperties.forceSquare = false
+        }
+        if (
+          state.tool.current.options.uniform?.active &&
+          vectorGui.selectedPoint.xKey !== "px0"
+        ) {
+          state.vector.savedProperties[state.vector.currentIndex].uniformCtx =
+            getUniformCtx(vectorGui.selectedPoint.xKey)
         }
         updatePolygonVectorProperties(currentVector)
       } else {

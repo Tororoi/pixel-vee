@@ -73,6 +73,68 @@ function updateVertices() {
 }
 
 /**
+ * Compute the uniform drag context for the given corner at drag-start.
+ * Reads canvas-absolute positions from state.vector.properties.
+ * Must be called at pointerdown before any cursor movement.
+ * @param {string} selectedXKey - the key of the corner being dragged (e.g. "px3")
+ * @returns {object|null} uniform context, or null if selectedXKey is not a corner
+ */
+export function getUniformCtx(selectedXKey) {
+  const cornerMap = {
+    px1: { fixedXKey: 'px3', fixedYKey: 'py3', adj1XKey: 'px2', adj1YKey: 'py2', adj2XKey: 'px4', adj2YKey: 'py4' },
+    px2: { fixedXKey: 'px4', fixedYKey: 'py4', adj1XKey: 'px1', adj1YKey: 'py1', adj2XKey: 'px3', adj2YKey: 'py3' },
+    px3: { fixedXKey: 'px1', fixedYKey: 'py1', adj1XKey: 'px2', adj1YKey: 'py2', adj2XKey: 'px4', adj2YKey: 'py4' },
+    px4: { fixedXKey: 'px2', fixedYKey: 'py2', adj1XKey: 'px1', adj1YKey: 'py1', adj2XKey: 'px3', adj2YKey: 'py3' },
+  }
+  const map = cornerMap[selectedXKey]
+  if (!map) return null
+  const p = state.vector.properties
+  const fx = p[map.fixedXKey]
+  const fy = p[map.fixedYKey]
+  const d1rx = p[map.adj1XKey] - fx
+  const d1ry = p[map.adj1YKey] - fy
+  const d1len = Math.sqrt(d1rx * d1rx + d1ry * d1ry)
+  const d2rx = p[map.adj2XKey] - fx
+  const d2ry = p[map.adj2YKey] - fy
+  const d2len = Math.sqrt(d2rx * d2rx + d2ry * d2ry)
+  return {
+    ...map,
+    d1x: d1len > 0 ? d1rx / d1len : 0,
+    d1y: d1len > 0 ? d1ry / d1len : 0,
+    d2x: d2len > 0 ? d2rx / d2len : 0,
+    d2y: d2len > 0 ? d2ry / d2len : 0,
+  }
+}
+
+/**
+ * Apply uniform constraint: project the dragged corner's new position onto the
+ * saved side directions from the fixed corner to recompute adjacent corners.
+ * @param {object} vectorProperties - the vector's properties object to mutate
+ * @param {string} selectedXKey - key of the dragged x coordinate
+ * @param {string} selectedYKey - key of the dragged y coordinate
+ * @param {number} newX - new x position for the dragged point
+ * @param {number} newY - new y position for the dragged point
+ * @param {object} uniformCtx - context returned by getUniformCtx at drag-start
+ */
+export function syncPolygonUniform(vectorProperties, selectedXKey, selectedYKey, newX, newY, uniformCtx) {
+  const { fixedXKey, fixedYKey, adj1XKey, adj1YKey, adj2XKey, adj2YKey, d1x, d1y, d2x, d2y } = uniformCtx
+  const fx = vectorProperties[fixedXKey]
+  const fy = vectorProperties[fixedYKey]
+  const dx = newX - fx
+  const dy = newY - fy
+  const len1 = dx * d1x + dy * d1y
+  const len2 = dx * d2x + dy * d2y
+  vectorProperties[selectedXKey] = newX
+  vectorProperties[selectedYKey] = newY
+  vectorProperties[adj1XKey] = Math.round(fx + len1 * d1x)
+  vectorProperties[adj1YKey] = Math.round(fy + len1 * d1y)
+  vectorProperties[adj2XKey] = Math.round(fx + len2 * d2x)
+  vectorProperties[adj2YKey] = Math.round(fy + len2 * d2y)
+  vectorProperties.px0 = Math.round((newX + fx) / 2)
+  vectorProperties.py0 = Math.round((newY + fy) / 2)
+}
+
+/**
  * Update polygon corners given a dragged control point and its new position.
  * Dragging px0 (center) translates all 4 corners. Dragging a corner moves it
  * independently; if forceSquare is set, all corners are recomputed as a square
@@ -132,13 +194,27 @@ export function syncPolygonProperties(
  * @param {object} currentVector - The current vector
  */
 export function updatePolygonVectorProperties(currentVector) {
-  syncPolygonProperties(
-    state.vector.properties,
-    vectorGui.selectedPoint.xKey,
-    vectorGui.selectedPoint.yKey,
-    state.cursor.x,
-    state.cursor.y,
-  )
+  const uniformCtx = state.tool.current.options.uniform?.active
+    ? state.vector.savedProperties[state.vector.currentIndex]?.uniformCtx
+    : null
+  if (uniformCtx && vectorGui.selectedPoint.xKey !== 'px0') {
+    syncPolygonUniform(
+      state.vector.properties,
+      vectorGui.selectedPoint.xKey,
+      vectorGui.selectedPoint.yKey,
+      state.cursor.x,
+      state.cursor.y,
+      uniformCtx,
+    )
+  } else {
+    syncPolygonProperties(
+      state.vector.properties,
+      vectorGui.selectedPoint.xKey,
+      vectorGui.selectedPoint.yKey,
+      state.cursor.x,
+      state.cursor.y,
+    )
+  }
   currentVector.vectorProperties = { ...state.vector.properties }
   currentVector.vectorProperties.px0 -= currentVector.layer.x
   currentVector.vectorProperties.py0 -= currentVector.layer.y
@@ -284,6 +360,10 @@ export const polygon = {
   ditherOffsetX: 0,
   ditherOffsetY: 0,
   options: {
+    uniform: {
+      active: false,
+      tooltip: 'Uniform. \n\nMaintain rectangular shape when adjusting corners.',
+    },
     displayPaths: {
       active: false,
       tooltip: 'Toggle Paths. \n\nShow path for polygon.',
