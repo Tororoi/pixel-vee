@@ -92,6 +92,25 @@ export function activateShortcut(keyCode) {
           adjustVectorSteps()
           vectorGui.render()
         }
+      } else if (dom.toolBtn.id === "polygon") {
+        state.vector.properties.forceSquare = true
+        if (
+          vectorGui.selectedPoint.xKey &&
+          state.tool.clickCounter === 0 &&
+          vectorGui.selectedPoint.xKey !== "px0"
+        ) {
+          //while holding control point, readjust polygon without having to move cursor.
+          adjustVectorSteps()
+          vectorGui.render()
+        }
+      }
+      break
+    case "Digit7":
+      if (["line", "quadCurve", "cubicCurve"].includes(dom.toolBtn.id)) {
+        state.tool.current.options.chain.active =
+          !state.tool.current.options.chain.active
+        renderToolOptionsToDOM()
+        vectorGui.render()
       }
       break
     case "Equal":
@@ -223,7 +242,8 @@ export function activateShortcut(keyCode) {
       break
     case "KeyP":
       if (!state.cursor.clicked) {
-        toggleMode("perfect")
+        switchTool("polygon")
+        renderVectorsToDOM()
       }
       break
     case "KeyQ":
@@ -294,7 +314,9 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyY":
-      //
+      if (!state.cursor.clicked) {
+        toggleMode("perfect")
+      }
       break
     case "KeyZ":
       if (!state.cursor.clicked) {
@@ -358,6 +380,7 @@ export function deactivateShortcut(keyCode) {
         state.tool.current.fn()
       }
       state.vector.properties.forceCircle = false
+      state.vector.properties.forceSquare = false
       if (state.tool.current.name === "ellipse") {
         if (
           (vectorGui.selectedPoint.xKey || vectorGui.collidedPoint.xKey) &&
@@ -366,6 +389,15 @@ export function deactivateShortcut(keyCode) {
         ) {
           //while holding control point, readjust ellipse without having to move cursor.
           //TODO: (Medium Priority) update this functionality to have other radii go back to previous radius value when releasing shift
+          adjustVectorSteps()
+          vectorGui.render()
+        }
+      } else if (state.tool.current.name === "polygon") {
+        if (
+          (vectorGui.selectedPoint.xKey || vectorGui.collidedPoint.xKey) &&
+          vectorGui.selectedPoint.xKey !== "px0" &&
+          state.cursor.clicked
+        ) {
           adjustVectorSteps()
           vectorGui.render()
         }

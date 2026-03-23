@@ -1,7 +1,7 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
-import { tools } from "../Tools/index.js"
+import { tools, toolGroups } from "../Tools/index.js"
 import { handleUndo, handleRedo } from "../Actions/undoRedo/undoRedo.js"
 import { brush, rebuildBuildUpDensityMap, BAYER_STEPS } from "../Tools/brush.js"
 import { vectorGui } from "../GUI/vector.js"
@@ -93,7 +93,17 @@ export function handleTools(e) {
   // Handle group button click — toggle popout open/closed
   const groupBtn = e?.target.closest(".tool-group-btn")
   if (groupBtn) {
-    groupBtn.closest(".tool-group")?.classList.toggle("open")
+    const thisGroup = groupBtn.closest(".tool-group")
+    document
+      .querySelectorAll(".tool-group.open")
+      .forEach((g) => { if (g !== thisGroup) g.classList.remove("open") })
+    thisGroup?.classList.toggle("open")
+    const groupName = groupBtn.dataset.group
+    const activeTool = toolGroups[groupName]?.activeTool
+    if (activeTool) {
+      switchTool(activeTool)
+      renderVectorsToDOM()
+    }
     return
   }
   // Handle tool click (works for both regular tools and tools inside popouts)
@@ -151,6 +161,7 @@ function updateBrush(e) {
     case "quadCurve":
     case "cubicCurve":
     case "ellipse":
+    case "polygon":
     case "select":
       state.tool.current.brushSize = parseInt(e.target.value)
       break

@@ -316,6 +316,13 @@ const drawOnThumbnailContext = (vector, isSelected, ctx = canvas.thumbnailCTX) =
       )
       break
     }
+    case "polygon":
+      ctx.moveTo(px1 + xOffset, py1 + yOffset)
+      ctx.lineTo(px2 + xOffset, py2 + yOffset)
+      ctx.lineTo(px3 + xOffset, py3 + yOffset)
+      ctx.lineTo(px4 + xOffset, py4 + yOffset)
+      ctx.closePath()
+      break
     // Add more cases if there are other drawing tools.
   }
 
@@ -442,6 +449,10 @@ function applyVectorDitherOffset(container, offsetX, offsetY) {
 
 let _vectorOffsetControlCounter = 0
 
+/**
+ * Build an SVG dither offset control for vector layers.
+ * @returns {SVGElement} The constructed dither offset control SVG element
+ */
 function createVectorDitherOffsetControlSVG() {
   const id = `vdor-${_vectorOffsetControlCounter++}`
   const svg = document.createElementNS(SVG_NS, "svg")
@@ -500,6 +511,12 @@ function createVectorDitherOffsetControlSVG() {
   return svg
 }
 
+/**
+ * Update the vector offset control's ring pattern phase.
+ * @param {Element} container - Element containing the vector dither offset control
+ * @param {number} offsetX - Horizontal offset value to apply to the ring pattern
+ * @param {number} offsetY - Vertical offset value to apply to the ring pattern
+ */
 function applyVectorDitherOffsetControl(container, offsetX, offsetY) {
   const pattern = container.querySelector(".vector-dither-offset-ring-pattern")
   if (pattern) {
