@@ -105,6 +105,14 @@ export function activateShortcut(keyCode) {
         }
       }
       break
+    case "Digit7":
+      if (["line", "quadCurve", "cubicCurve"].includes(dom.toolBtn.id)) {
+        state.tool.current.options.chain.active =
+          !state.tool.current.options.chain.active
+        renderToolOptionsToDOM()
+        vectorGui.render()
+      }
+      break
     case "Equal":
       if (dom.toolBtn.id === "cubicCurve") {
         tools.cubicCurve.options.equal.active =

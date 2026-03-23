@@ -24,6 +24,46 @@ import {
 //======== * * * Adjusters * * * ========//
 //=======================================//
 
+const chainableTypes = ["line", "quadCurve", "cubicCurve"]
+
+/**
+ * Returns the canvas-absolute coordinates of the chainable endpoint under the
+ * cursor, or null if no valid chain target is colliding.
+ * Checks the currently selected vector's endpoint first, then any other vector.
+ * @returns {{ x: number, y: number } | null} Canvas-absolute coordinates or null
+ */
+export function getChainStartPoint() {
+  const endpointKeys = ["px1", "px2"]
+  // Case A: current selected vector's endpoint
+  if (
+    vectorGui.selectedCollisionPresent &&
+    state.vector.currentIndex !== null &&
+    endpointKeys.includes(vectorGui.collidedPoint.xKey)
+  ) {
+    const cv = state.vector.all[state.vector.currentIndex]
+    if (cv && chainableTypes.includes(cv.vectorProperties.type)) {
+      return {
+        x: cv.vectorProperties[vectorGui.collidedPoint.xKey] + cv.layer.x,
+        y: cv.vectorProperties[vectorGui.collidedPoint.yKey] + cv.layer.y,
+      }
+    }
+  }
+  // Case B: another vector's endpoint (otherCollidedKeys always set for px1/px2)
+  if (
+    state.vector.collidedIndex !== null &&
+    endpointKeys.includes(vectorGui.otherCollidedKeys.xKey)
+  ) {
+    const ov = state.vector.all[state.vector.collidedIndex]
+    if (ov && chainableTypes.includes(ov.vectorProperties.type)) {
+      return {
+        x: ov.vectorProperties[vectorGui.otherCollidedKeys.xKey] + ov.layer.x,
+        y: ov.vectorProperties[vectorGui.otherCollidedKeys.yKey] + ov.layer.y,
+      }
+    }
+  }
+  return null
+}
+
 /**
  * Snap the selected endpoint to a colliding vector's nearest control point and
  * optionally align or equalize the tangent handle's angle and length.

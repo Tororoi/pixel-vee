@@ -3,14 +3,17 @@ import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
-import { actionQuadraticCurve, actionCubicCurve } from '../Actions/pointer/curve.js'
+import {
+  actionQuadraticCurve,
+  actionCubicCurve,
+} from '../Actions/pointer/curve.js'
 import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
 import { vectorGui } from '../GUI/vector.js'
 import { renderCanvas } from '../Canvas/render.js'
 import { coordArrayFromSet } from '../utils/maskHelpers.js'
 import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
 import { enableActionsForSelection } from '../DOM/disableDomElements.js'
-import { rerouteVectorStepsAction } from './adjust.js'
+import { rerouteVectorStepsAction, getChainStartPoint } from './adjust.js'
 
 //=====================================//
 //=== * * * Curve Controllers * * * ===//
@@ -29,7 +32,8 @@ function buildCurveCtx(isPreview = false) {
     currentColor: swatches.primary.color,
     currentModes: state.tool.current.modes,
     maskSet: state.selection.maskSet,
-    brushStamp: brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+    brushStamp:
+      brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
     brushSize: state.tool.current.brushSize,
     ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
     twoColorMode: state.tool.current.modes?.twoColor ?? false,
@@ -44,6 +48,34 @@ function buildCurveCtx(isPreview = false) {
  * Supported modes: "draw, erase",
  */
 function quadCurveSteps() {
+  if (
+    state.tool.current.options.chain?.active &&
+    canvas.pointerEvent === 'pointerdown' &&
+    state.tool.clickCounter === 0
+  ) {
+    const chainPoint = getChainStartPoint()
+    if (chainPoint !== null) {
+      state.tool.clickCounter += 1
+      vectorGui.reset()
+      state.vector.properties.type = state.tool.current.name
+      state.vector.properties.px1 = chainPoint.x
+      state.vector.properties.py1 = chainPoint.y
+      state.vector.properties.px2 = chainPoint.x
+      state.vector.properties.py2 = chainPoint.y
+      renderCanvas(canvas.currentLayer)
+      actionQuadraticCurve(
+        chainPoint.x,
+        chainPoint.y,
+        chainPoint.x,
+        chainPoint.y,
+        state.vector.properties.px3,
+        state.vector.properties.py3,
+        1,
+        buildCurveCtx(true),
+      )
+      return
+    }
+  }
   if (rerouteVectorStepsAction()) return
   switch (canvas.pointerEvent) {
     case 'pointerdown':
@@ -202,6 +234,36 @@ function quadCurveSteps() {
  * Supported modes: "draw, erase",
  */
 function cubicCurveSteps() {
+  if (
+    state.tool.current.options.chain?.active &&
+    canvas.pointerEvent === 'pointerdown' &&
+    state.tool.clickCounter === 0
+  ) {
+    const chainPoint = getChainStartPoint()
+    if (chainPoint !== null) {
+      state.tool.clickCounter += 1
+      vectorGui.reset()
+      state.vector.properties.type = state.tool.current.name
+      state.vector.properties.px1 = chainPoint.x
+      state.vector.properties.py1 = chainPoint.y
+      state.vector.properties.px2 = chainPoint.x
+      state.vector.properties.py2 = chainPoint.y
+      renderCanvas(canvas.currentLayer)
+      actionCubicCurve(
+        chainPoint.x,
+        chainPoint.y,
+        chainPoint.x,
+        chainPoint.y,
+        state.vector.properties.px3,
+        state.vector.properties.py3,
+        state.vector.properties.px4,
+        state.vector.properties.py4,
+        1,
+        buildCurveCtx(true),
+      )
+      return
+    }
+  }
   if (rerouteVectorStepsAction()) return
   switch (canvas.pointerEvent) {
     case 'pointerdown':
@@ -386,6 +448,11 @@ export const quadCurve = {
   ditherOffsetX: 0,
   ditherOffsetY: 0,
   options: {
+    chain: {
+      active: false,
+      tooltip:
+        'Toggle Chain (7). \n\nStart a new curve from a colliding vector endpoint instead of adjusting it.',
+    },
     //Priority hierarchy of options: Equal = Align > Hold > Link
     equal: {
       active: false,
@@ -428,6 +495,11 @@ export const cubicCurve = {
   ditherOffsetX: 0,
   ditherOffsetY: 0,
   options: {
+    chain: {
+      active: false,
+      tooltip:
+        'Toggle Chain (7). \n\nStart a new curve from a colliding vector endpoint instead of adjusting it.',
+    },
     //Priority hierarchy of options: Equal = Align > Hold > Link
     equal: {
       active: false,
