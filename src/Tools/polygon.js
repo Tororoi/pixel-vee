@@ -115,23 +115,32 @@ export function getUniformCtx(selectedXKey) {
  * @param {number} newX - new x position for the dragged point
  * @param {number} newY - new y position for the dragged point
  * @param {object} uniformCtx - context returned by getUniformCtx at drag-start
+ * @param {boolean} forceSquare - when true, clamp both side lengths to their minimum to produce a square
  */
-export function syncPolygonUniform(vectorProperties, selectedXKey, selectedYKey, newX, newY, uniformCtx) {
+export function syncPolygonUniform(vectorProperties, selectedXKey, selectedYKey, newX, newY, uniformCtx, forceSquare = false) {
   const { fixedXKey, fixedYKey, adj1XKey, adj1YKey, adj2XKey, adj2YKey, d1x, d1y, d2x, d2y } = uniformCtx
   const fx = vectorProperties[fixedXKey]
   const fy = vectorProperties[fixedYKey]
   const dx = newX - fx
   const dy = newY - fy
-  const len1 = dx * d1x + dy * d1y
-  const len2 = dx * d2x + dy * d2y
-  vectorProperties[selectedXKey] = newX
-  vectorProperties[selectedYKey] = newY
+  let len1 = dx * d1x + dy * d1y
+  let len2 = dx * d2x + dy * d2y
+  if (forceSquare) {
+    const size = Math.min(Math.abs(len1), Math.abs(len2))
+    len1 = Math.sign(len1) * size
+    len2 = Math.sign(len2) * size
+    vectorProperties[selectedXKey] = Math.round(fx + len1 * d1x + len2 * d2x)
+    vectorProperties[selectedYKey] = Math.round(fy + len1 * d1y + len2 * d2y)
+  } else {
+    vectorProperties[selectedXKey] = newX
+    vectorProperties[selectedYKey] = newY
+  }
   vectorProperties[adj1XKey] = Math.round(fx + len1 * d1x)
   vectorProperties[adj1YKey] = Math.round(fy + len1 * d1y)
   vectorProperties[adj2XKey] = Math.round(fx + len2 * d2x)
   vectorProperties[adj2YKey] = Math.round(fy + len2 * d2y)
-  vectorProperties.px0 = Math.round((newX + fx) / 2)
-  vectorProperties.py0 = Math.round((newY + fy) / 2)
+  vectorProperties.px0 = Math.round((vectorProperties[selectedXKey] + fx) / 2)
+  vectorProperties.py0 = Math.round((vectorProperties[selectedYKey] + fy) / 2)
 }
 
 /**
@@ -205,6 +214,7 @@ export function updatePolygonVectorProperties(currentVector) {
       state.cursor.x,
       state.cursor.y,
       uniformCtx,
+      state.vector.properties.forceSquare,
     )
   } else {
     syncPolygonProperties(
