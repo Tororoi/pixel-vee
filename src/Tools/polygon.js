@@ -68,15 +68,18 @@ function updateVertices() {
   state.vector.properties.py3 = ey
   state.vector.properties.px4 = x1
   state.vector.properties.py4 = ey
+  state.vector.properties.px0 = Math.round((x1 + ex) / 2)
+  state.vector.properties.py0 = Math.round((y1 + ey) / 2)
 }
 
 /**
- * Update all 4 polygon corners given a dragged control point and its new position.
- * If forceSquare is set, recomputes all corners as a square from px1.
- * Moving px1 translates the whole polygon.
+ * Update polygon corners given a dragged control point and its new position.
+ * Dragging px0 (center) translates all 4 corners. Dragging a corner moves it
+ * independently; if forceSquare is set, all corners are recomputed as a square
+ * from px1. The center (px0/py0) is recomputed after any corner move.
  * @param {object} vectorProperties - the vector's properties object to mutate
- * @param {string} selectedXKey - key of the dragged x coordinate (e.g. "px1")
- * @param {string} selectedYKey - key of the dragged y coordinate (e.g. "py1")
+ * @param {string} selectedXKey - key of the dragged x coordinate (e.g. "px0")
+ * @param {string} selectedYKey - key of the dragged y coordinate (e.g. "py0")
  * @param {number} newX - new x position for the dragged point
  * @param {number} newY - new y position for the dragged point
  */
@@ -87,11 +90,13 @@ export function syncPolygonProperties(
   newX,
   newY,
 ) {
-  if (selectedXKey === 'px1') {
-    const dx = newX - vectorProperties.px1
-    const dy = newY - vectorProperties.py1
-    vectorProperties.px1 = newX
-    vectorProperties.py1 = newY
+  if (selectedXKey === 'px0') {
+    const dx = newX - vectorProperties.px0
+    const dy = newY - vectorProperties.py0
+    vectorProperties.px0 = newX
+    vectorProperties.py0 = newY
+    vectorProperties.px1 += dx
+    vectorProperties.py1 += dy
     vectorProperties.px2 += dx
     vectorProperties.py2 += dy
     vectorProperties.px3 += dx
@@ -112,9 +117,13 @@ export function syncPolygonProperties(
     vectorProperties.py3 = ey
     vectorProperties.px4 = vectorProperties.px1
     vectorProperties.py4 = ey
+    vectorProperties.px0 = Math.round((vectorProperties.px1 + ex) / 2)
+    vectorProperties.py0 = Math.round((vectorProperties.py1 + ey) / 2)
   } else {
     vectorProperties[selectedXKey] = newX
     vectorProperties[selectedYKey] = newY
+    vectorProperties.px0 = Math.round((vectorProperties.px1 + vectorProperties.px3) / 2)
+    vectorProperties.py0 = Math.round((vectorProperties.py1 + vectorProperties.py3) / 2)
   }
 }
 
@@ -131,6 +140,8 @@ export function updatePolygonVectorProperties(currentVector) {
     state.cursor.y,
   )
   currentVector.vectorProperties = { ...state.vector.properties }
+  currentVector.vectorProperties.px0 -= currentVector.layer.x
+  currentVector.vectorProperties.py0 -= currentVector.layer.y
   currentVector.vectorProperties.px1 -= currentVector.layer.x
   currentVector.vectorProperties.py1 -= currentVector.layer.y
   currentVector.vectorProperties.px2 -= currentVector.layer.x
@@ -236,6 +247,8 @@ function polygonSteps() {
         brushType: state.tool.current.brushType,
         vectorProperties: {
           ...p,
+          px0: p.px0 - lx,
+          py0: p.py0 - ly,
           px1: p.px1 - lx,
           py1: p.py1 - ly,
           px2: p.px2 - lx,

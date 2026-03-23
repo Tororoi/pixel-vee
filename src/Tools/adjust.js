@@ -187,7 +187,7 @@ export function adjustVectorSteps() {
         if (
           !keys.ShiftLeft &&
           !keys.ShiftRight &&
-          vectorGui.selectedPoint.xKey !== "px1"
+          vectorGui.selectedPoint.xKey !== "px0"
         ) {
           state.vector.properties.forceSquare = false
           currentVector.vectorProperties.forceSquare = false

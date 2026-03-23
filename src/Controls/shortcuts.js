@@ -97,7 +97,7 @@ export function activateShortcut(keyCode) {
         if (
           vectorGui.selectedPoint.xKey &&
           state.tool.clickCounter === 0 &&
-          vectorGui.selectedPoint.xKey !== "px1"
+          vectorGui.selectedPoint.xKey !== "px0"
         ) {
           //while holding control point, readjust polygon without having to move cursor.
           adjustVectorSteps()
@@ -387,7 +387,7 @@ export function deactivateShortcut(keyCode) {
       } else if (state.tool.current.name === "polygon") {
         if (
           (vectorGui.selectedPoint.xKey || vectorGui.collidedPoint.xKey) &&
-          vectorGui.selectedPoint.xKey !== "px1" &&
+          vectorGui.selectedPoint.xKey !== "px0" &&
           state.cursor.clicked
         ) {
           adjustVectorSteps()

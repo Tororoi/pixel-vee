@@ -10,17 +10,24 @@ export function renderPolygonVector(vectorProperties, vector) {
   const lineWidth = getGuiLineWidth()
   const circleRadius = 20 * lineWidth
 
-  const pointsKeys = [
+  const cornerKeys = [
     { x: 'px1', y: 'py1' },
     { x: 'px2', y: 'py2' },
     { x: 'px3', y: 'py3' },
     { x: 'px4', y: 'py4' },
   ]
+  const centerKeys = [{ x: 'px0', y: 'py0' }]
 
   if (!vector) {
     vectorGui.drawControlPoints(
       vectorProperties,
-      pointsKeys,
+      cornerKeys,
+      circleRadius,
+      false,
+    )
+    vectorGui.drawControlPoints(
+      vectorProperties,
+      centerKeys,
       circleRadius,
       false,
     )
@@ -28,7 +35,14 @@ export function renderPolygonVector(vectorProperties, vector) {
 
   vectorGui.drawControlPoints(
     vectorProperties,
-    pointsKeys,
+    cornerKeys,
+    circleRadius / 3,
+    true,
+    vector,
+  )
+  vectorGui.drawControlPoints(
+    vectorProperties,
+    centerKeys,
     circleRadius / 3,
     true,
     vector,
