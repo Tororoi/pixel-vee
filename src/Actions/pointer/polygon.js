@@ -2,10 +2,10 @@ import { renderPoints } from './helpers.js'
 
 /**
  * Plot a line segment using Bresenham's algorithm and collect points.
- * @param {number} x0
- * @param {number} y0
- * @param {number} x1
- * @param {number} y1
+ * @param {number} x0 - start x
+ * @param {number} y0 - start y
+ * @param {number} x1 - end x
+ * @param {number} y1 - end y
  * @param {Function} addPoint - called with (x, y) for each pixel
  */
 function plotSegment(x0, y0, x1, y1, addPoint) {
@@ -14,13 +14,13 @@ function plotSegment(x0, y0, x1, y1, addPoint) {
   const sx = x0 < x1 ? 1 : -1
   const sy = y0 < y1 ? 1 : -1
   let err = dx - dy
-  while (true) {
+  while (x0 !== x1 || y0 !== y1) {
     addPoint(x0, y0)
-    if (x0 === x1 && y0 === y1) break
     const e2 = 2 * err
     if (e2 > -dy) { err -= dy; x0 += sx }
     if (e2 < dx) { err += dx; y0 += sy }
   }
+  addPoint(x0, y0)
 }
 
 /**
@@ -41,8 +41,8 @@ export function actionPolygon(px1, py1, px2, py2, px3, py3, px4, py4, strokeCtx)
   const seen = new Set()
 
   /**
-   * @param {number} x
-   * @param {number} y
+   * @param {number} x - pixel x
+   * @param {number} y - pixel y
    */
   function addPoint(x, y) {
     const key = (y << 16) | (x & 0xffff)

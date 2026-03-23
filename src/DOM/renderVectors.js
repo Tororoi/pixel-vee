@@ -449,6 +449,10 @@ function applyVectorDitherOffset(container, offsetX, offsetY) {
 
 let _vectorOffsetControlCounter = 0
 
+/**
+ * Build an SVG dither offset control for vector layers.
+ * @returns {SVGElement} The constructed dither offset control SVG element
+ */
 function createVectorDitherOffsetControlSVG() {
   const id = `vdor-${_vectorOffsetControlCounter++}`
   const svg = document.createElementNS(SVG_NS, "svg")
@@ -507,6 +511,12 @@ function createVectorDitherOffsetControlSVG() {
   return svg
 }
 
+/**
+ * Update the vector offset control's ring pattern phase.
+ * @param {Element} container - Element containing the vector dither offset control
+ * @param {number} offsetX - Horizontal offset value to apply to the ring pattern
+ * @param {number} offsetY - Vertical offset value to apply to the ring pattern
+ */
 function applyVectorDitherOffsetControl(container, offsetX, offsetY) {
   const pattern = container.querySelector(".vector-dither-offset-ring-pattern")
   if (pattern) {

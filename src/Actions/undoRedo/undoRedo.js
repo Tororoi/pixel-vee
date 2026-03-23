@@ -1,5 +1,4 @@
 import { state } from "../../Context/state.js"
-import { canvas } from "../../Context/canvas.js"
 import { vectorGui } from "../../GUI/vector.js"
 import { setSaveFilesizePreview } from "../../Save/savefile.js"
 import { renderToLatestAction } from "./render.js"

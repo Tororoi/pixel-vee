@@ -220,7 +220,7 @@ export function updateEllipseVectorProperties(currentVector) {
 
 /**
  * Build a StrokeContext from the current tool state
- * @param {boolean} isPreview
+ * @param {boolean} isPreview - Whether this context is for a preview render
  * @returns {object} StrokeContext
  */
 function buildEllipseCtx(isPreview = false) {

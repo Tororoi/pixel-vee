@@ -300,7 +300,7 @@ let _offsetControlCounter = 0
  * toroidal Chebyshev distance from (0,0) are drawn in the primary color.
  * The pattern element's x/y attributes are updated by applyDitherOffsetControl
  * to shift which pixel appears as the "center" without rebuilding the SVG.
- * @returns {SVGElement}
+ * @returns {SVGElement} The constructed dither offset control SVG element
  */
 export function createDitherOffsetControlSVG() {
   const id = `dor-${_offsetControlCounter++}`
@@ -370,8 +370,8 @@ export function createDitherOffsetControlSVG() {
  * Update the offset control's ring pattern phase.
  * Setting x=offsetX, y=offsetY makes the dist=0 pixel appear at (offsetX, offsetY).
  * @param {Element} container - element containing the control
- * @param {number} offsetX
- * @param {number} offsetY
+ * @param {number} offsetX - Horizontal offset value to apply to the ring pattern
+ * @param {number} offsetY - Vertical offset value to apply to the ring pattern
  */
 export function applyDitherOffsetControl(container, offsetX, offsetY) {
   const pattern = container.querySelector('.dither-offset-ring-pattern')

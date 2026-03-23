@@ -19,7 +19,7 @@ import { rerouteVectorStepsAction } from './adjust.js'
 
 /**
  * Build a StrokeContext from the current tool state
- * @param {boolean} isPreview
+ * @param {boolean} isPreview - whether to render as preview
  * @returns {object} StrokeContext
  */
 function buildPolygonCtx(isPreview = false) {
@@ -74,11 +74,11 @@ function updateVertices() {
  * Update all 4 polygon corners given a dragged control point and its new position.
  * If forceSquare is set, recomputes all corners as a square from px1.
  * Moving px1 translates the whole polygon.
- * @param {object} vectorProperties
- * @param {string} selectedXKey
- * @param {string} selectedYKey
- * @param {number} newX
- * @param {number} newY
+ * @param {object} vectorProperties - the vector's properties object to mutate
+ * @param {string} selectedXKey - key of the dragged x coordinate (e.g. "px1")
+ * @param {string} selectedYKey - key of the dragged y coordinate (e.g. "py1")
+ * @param {number} newX - new x position for the dragged point
+ * @param {number} newY - new y position for the dragged point
  */
 export function syncPolygonProperties(
   vectorProperties,
@@ -143,7 +143,7 @@ export function updatePolygonVectorProperties(currentVector) {
 
 /**
  * Call actionPolygon with the current vector properties.
- * @param {boolean} isPreview
+ * @param {boolean} isPreview - whether to render as preview
  */
 function drawPolygon(isPreview) {
   const p = state.vector.properties
