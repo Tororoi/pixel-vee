@@ -241,23 +241,31 @@
               </label>
             </div>
             <div class="collapsible">
-              <div
-                class="brush-preview btn"
-                data-tooltip="Click to switch brush"
-              >
-                <div id="brush-preview">
-                  <svg
-                    class="brush-stamp"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 -0.5 1 1"
-                    shape-rendering="crispEdges"
-                  >
-                    <path
-                      stroke="rgba(255,255,255,255)"
-                      d="M0 0h1M0 0h1M0 0h1M0 0h1"
-                    ></path>
-                  </svg>
+              <div class="brush-preview-row">
+                <div
+                  class="brush-preview btn"
+                  data-tooltip="Click to switch brush"
+                >
+                  <div id="brush-preview">
+                    <svg
+                      class="brush-stamp"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 -0.5 1 1"
+                      shape-rendering="crispEdges"
+                    >
+                      <path
+                        stroke="rgba(255,255,255,255)"
+                        d="M0 0h1M0 0h1M0 0h1M0 0h1"
+                      ></path>
+                    </svg>
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  id="brush-settings-btn"
+                  aria-label="Brush Settings"
+                  data-tooltip="Brush Settings"
+                ></button>
               </div>
               <label for="brush-size" class="brush-size"
                 ><span id="line-weight">1</span>px
@@ -1536,6 +1544,20 @@
     </div>
     <div class="layer-settings dialog-box"></div>
     <div class="vector-settings dialog-box"></div>
+    <div class="brush-settings-container dialog-box" style="display:none">
+      <div class="header">
+        Brush Settings
+        <button type="button" class="close-btn" aria-label="Close"></button>
+      </div>
+      <label class="smooth-setting-label">
+        <span>Smoothing <span id="smooth-epsilon-display">2</span></span>
+        <input type="range" id="smooth-epsilon" class="slider" min="0.5" max="20" step="0.5" value="2" />
+      </label>
+      <label class="smooth-setting-label">
+        <span>Tension <span id="smooth-tension-display">10</span></span>
+        <input type="range" id="smooth-tension" class="slider" min="3" max="30" step="1" value="10" />
+      </label>
+    </div>
     <div
       id="vector-dither-picker"
       class="dither-picker-container dialog-box"

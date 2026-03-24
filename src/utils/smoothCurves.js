@@ -101,9 +101,10 @@ export function catmullRomToBeziers(keyPoints, tension = 10) {
  * When empty, the caller should draw a single dot at the first raw point.
  * @param {Array<{x:number,y:number}>} rawPoints - raw cursor positions
  * @param {number} [epsilon] - RDP tolerance in pixels
+ * @param {number} [tension] - Catmull-Rom tension divisor
  * @returns {Array<{x0:number,y0:number,cp1x:number,cp1y:number,cp2x:number,cp2y:number,x1:number,y1:number}>}
  */
-export function fitSmoothedCurve(rawPoints, epsilon = 2.0) {
+export function fitSmoothedCurve(rawPoints, epsilon = 2.0, tension = 10) {
   if (rawPoints.length < 2) return []
 
   // Strip consecutive duplicate positions
@@ -118,5 +119,5 @@ export function fitSmoothedCurve(rawPoints, epsilon = 2.0) {
   if (deduped.length < 2) return []
 
   const keyPoints = rdpSimplify(deduped, epsilon)
-  return catmullRomToBeziers(keyPoints)
+  return catmullRomToBeziers(keyPoints, tension)
 }

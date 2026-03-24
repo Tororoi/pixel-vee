@@ -131,7 +131,7 @@
   box-shadow: 9px 5px rgb(255, 255, 255), 9px 7px rgb(255, 255, 255), 5px 9px rgb(255, 255, 255), 7px 9px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 11px 9px rgb(255, 255, 255), 13px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 9px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 9px 13px rgb(255, 255, 255);
 }
 
-.vector-settings .header .close-btn, .layer-settings .header .close-btn, .dialog-box .header .close-btn {
+.brush-settings-container .header .close-btn, .vector-settings .header .close-btn, .layer-settings .header .close-btn, .dialog-box .header .close-btn {
   position: absolute;
   right: 0;
   top: 0;
@@ -140,7 +140,7 @@
   cursor: pointer;
   background: transparent;
 }
-.vector-settings .header .close-btn::after, .layer-settings .header .close-btn::after, .dialog-box .header .close-btn::after {
+.brush-settings-container .header .close-btn::after, .vector-settings .header .close-btn::after, .layer-settings .header .close-btn::after, .dialog-box .header .close-btn::after {
   content: "";
   display: block;
   position: absolute;
@@ -150,7 +150,7 @@
   left: 0;
   box-shadow: 5px 5px rgb(131, 131, 131), 13px 5px rgb(131, 131, 131), 7px 7px rgb(131, 131, 131), 11px 7px rgb(131, 131, 131), 9px 9px rgb(131, 131, 131), 7px 11px rgb(131, 131, 131), 11px 11px rgb(131, 131, 131), 5px 13px rgb(131, 131, 131), 13px 13px rgb(131, 131, 131);
 }
-.vector-settings .header .close-btn:hover::after, .layer-settings .header .close-btn:hover::after, .dialog-box .header .close-btn:hover::after {
+.brush-settings-container .header .close-btn:hover::after, .vector-settings .header .close-btn:hover::after, .layer-settings .header .close-btn:hover::after, .dialog-box .header .close-btn:hover::after {
   box-shadow: 5px 5px rgb(255, 255, 255), 13px 5px rgb(255, 255, 255), 7px 7px rgb(255, 255, 255), 11px 7px rgb(255, 255, 255), 9px 9px rgb(255, 255, 255), 7px 11px rgb(255, 255, 255), 11px 11px rgb(255, 255, 255), 5px 13px rgb(255, 255, 255), 13px 13px rgb(255, 255, 255);
 }
 
@@ -1892,6 +1892,24 @@ canvas {
   margin-bottom: 3px;
   font-size: 12px;
 }
+.brush-container .brush-preview-row {
+  position: relative;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.brush-container .brush-preview-row #brush-settings-btn {
+  position: absolute;
+  right: 8px;
+  width: 40px;
+  height: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M8 1h4M7 2h1M12 2h1M7 3h1M12 3h1M3 4h4M13 4h4M2 5h1M17 5h1M1 6h1M18 6h1M1 7h1M18 7h1M2 8h1M9 8h2M17 8h1M3 9h1M8 9h1M11 9h1M16 9h1M3 10h1M8 10h1M11 10h1M16 10h1M2 11h1M9 11h2M17 11h1M1 12h1M18 12h1M1 13h1M18 13h1M2 14h1M17 14h1M3 15h4M13 15h4M7 16h1M12 16h1M7 17h1M12 17h1M8 18h4' /%3E%3Cpath stroke='%23ffffff' d='M8 2h2M9 4h2M3 5h1M16 5h1M2 6h1M6 6h1M5 7h1M3 11h1M11 11h1M2 12h1' /%3E%3Cpath stroke='%23acacac' d='M10 2h1M8 3h1M7 4h2M11 4h1M4 5h4M14 5h2M2 7h1M3 8h2M11 8h1M4 9h1M12 9h1M4 10h1M12 10h1M4 11h1M5 12h1M9 12h2M2 13h1' /%3E%3Cpath stroke='%23575757' d='M11 2h1M9 3h3M12 4h1M8 5h6M3 6h3M7 6h10M3 7h2M6 7h3M11 7h3M15 7h2M5 8h3M12 8h3M5 9h2M13 9h2M5 10h2M13 10h2M5 11h3M12 11h3M3 12h2M6 12h3M11 12h3M3 13h10M7 14h5' /%3E%3Cpath stroke='%23000000' d='M17 6h1M9 7h2M14 7h1M17 7h1M8 8h1M15 8h2M7 9h1M15 9h1M7 10h1M15 10h1M8 11h1M15 11h2M14 12h4M13 13h5M3 14h4M12 14h5M7 15h6M8 16h4M8 17h4' /%3E%3C/svg%3E");
+  background-size: 100%;
+}
+.brush-container .brush-preview-row #brush-settings-btn:hover {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(255, 255, 255)' d='M8 1h4M7 2h1M12 2h1M7 3h1M12 3h1M3 4h4M13 4h4M2 5h1M17 5h1M1 6h1M18 6h1M1 7h1M18 7h1M2 8h1M9 8h2M17 8h1M3 9h1M8 9h1M11 9h1M16 9h1M3 10h1M8 10h1M11 10h1M16 10h1M2 11h1M9 11h2M17 11h1M1 12h1M18 12h1M1 13h1M18 13h1M2 14h1M17 14h1M3 15h4M13 15h4M7 16h1M12 16h1M7 17h1M12 17h1M8 18h4' /%3E%3Cpath stroke='%23ffffff' d='M8 2h2M9 4h2M3 5h1M16 5h1M2 6h1M6 6h1M5 7h1M3 11h1M11 11h1M2 12h1' /%3E%3Cpath stroke='%23acacac' d='M10 2h1M8 3h1M7 4h2M11 4h1M4 5h4M14 5h2M2 7h1M3 8h2M11 8h1M4 9h1M12 9h1M4 10h1M12 10h1M4 11h1M5 12h1M9 12h2M2 13h1' /%3E%3Cpath stroke='%23575757' d='M11 2h1M9 3h3M12 4h1M8 5h6M3 6h3M7 6h10M3 7h2M6 7h3M11 7h3M15 7h2M5 8h3M12 8h3M5 9h2M13 9h2M5 10h2M13 10h2M5 11h3M12 11h3M3 12h2M6 12h3M11 12h3M3 13h10M7 14h5' /%3E%3Cpath stroke='%23000000' d='M17 6h1M9 7h2M14 7h1M17 7h1M8 8h1M15 8h2M7 9h1M15 9h1M7 10h1M15 10h1M8 11h1M15 11h2M14 12h4M13 13h5M3 14h4M12 14h5M7 15h6M8 16h4M8 17h4' /%3E%3C/svg%3E");
+}
 .brush-container .brush-preview {
   width: 64px;
   height: 64px;
@@ -1944,6 +1962,58 @@ canvas {
   background: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   cursor: pointer;
   margin-bottom: 8px;
+}
+
+/* Brush settings dialog */
+.brush-settings-container {
+  z-index: 1000;
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  position: absolute;
+  background: rgb(61, 61, 61);
+  min-width: 180px;
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.brush-settings-container:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.brush-settings-container:after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 2px;
+  position: absolute;
+  top: 14px;
+  background: rgb(131, 131, 131);
+  left: -4px;
+  box-shadow: -2px -2px rgb(131, 131, 131), 0 -2px rgb(61, 61, 61), 0 -4px rgb(131, 131, 131), 2px 0 rgb(61, 61, 61), 2px -2px rgb(61, 61, 61), 2px -4px rgb(61, 61, 61);
+}
+.brush-settings-container:hover:not([disabled]):after {
+  background: rgb(255, 255, 255);
+  box-shadow: -2px -2px rgb(255, 255, 255), 0 -2px rgb(61, 61, 61), 0 -4px rgb(255, 255, 255), 2px 0 rgb(61, 61, 61), 2px -2px rgb(61, 61, 61), 2px -4px rgb(61, 61, 61);
+}
+.brush-settings-container > * {
+  margin: 16px 16px 0 16px;
+}
+.brush-settings-container > :last-child {
+  margin-bottom: 16px;
+}
+.brush-settings-container .header {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  min-height: 20px;
+}
+.brush-settings-container .smooth-setting-label {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 4px;
+  font-size: 12px;
+}
+.brush-settings-container .smooth-setting-label .slider {
+  width: calc(100% - 4px);
 }
 
 /* Dither pattern picker dialog */

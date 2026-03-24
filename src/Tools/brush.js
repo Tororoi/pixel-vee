@@ -135,7 +135,7 @@ function brushSteps() {
         state.timeline.clearPoints()
         brush._strokeCtx.seenPixelsSet = freshSeen
         //fit and draw smooth bezier curves
-        const segments = fitSmoothedCurve(brush._rawSmoothPoints)
+        const segments = fitSmoothedCurve(brush._rawSmoothPoints, brush.smoothCurvesEpsilon, brush.smoothCurvesTension)
         let prevX = brush._rawSmoothPoints[0].x
         let prevY = brush._rawSmoothPoints[0].y
         if (segments.length === 0) {
@@ -397,6 +397,8 @@ export const brush = {
   buildUpActiveStepSlot: null,
   _buildUpDensityMap: new Map(),
   _buildUpResetAtIndex: 0,
+  smoothCurvesEpsilon: 2.0,
+  smoothCurvesTension: 10,
   _strokeCtx: null,
   _previewStrokeCtx: null,
   _rawSmoothPoints: null,

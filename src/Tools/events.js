@@ -196,6 +196,43 @@ dom.modesContainer.addEventListener("click", handleModes)
 dom.brushDisplay.addEventListener("click", switchBrush)
 dom.brushSlider.addEventListener("input", updateBrush)
 
+// * Brush Settings Dialog * //
+dom.brushSettingsBtn?.addEventListener("click", () => {
+  const container = dom.brushSettingsContainer
+  if (container.style.display === "flex") {
+    container.style.display = "none"
+    return
+  }
+  // Sync inputs to current brush values
+  const epsilonInput = document.getElementById("smooth-epsilon")
+  const tensionInput = document.getElementById("smooth-tension")
+  epsilonInput.value = brush.smoothCurvesEpsilon
+  tensionInput.value = brush.smoothCurvesTension
+  document.getElementById("smooth-epsilon-display").textContent = brush.smoothCurvesEpsilon
+  document.getElementById("smooth-tension-display").textContent = brush.smoothCurvesTension
+  // Position to the right of the settings button
+  const btnRect = dom.brushSettingsBtn.getBoundingClientRect()
+  container.style.top = `${btnRect.top - 8}px`
+  container.style.left = `${btnRect.right + 8}px`
+  container.style.display = "flex"
+})
+
+dom.brushSettingsContainer?.addEventListener("click", (e) => {
+  if (e.target.classList.contains("close-btn")) {
+    dom.brushSettingsContainer.style.display = "none"
+  }
+})
+
+dom.brushSettingsContainer?.addEventListener("input", (e) => {
+  if (e.target.id === "smooth-epsilon") {
+    brush.smoothCurvesEpsilon = parseFloat(e.target.value)
+    document.getElementById("smooth-epsilon-display").textContent = e.target.value
+  } else if (e.target.id === "smooth-tension") {
+    brush.smoothCurvesTension = parseInt(e.target.value)
+    document.getElementById("smooth-tension-display").textContent = e.target.value
+  }
+})
+
 // * Dither Brush * //
 document.querySelector(".dither-preview")?.addEventListener("click", () => {
   if (!dom.ditherPickerContainer) return

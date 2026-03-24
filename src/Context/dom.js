@@ -179,6 +179,8 @@ const brushPreview = document.querySelector("#brush-preview")
 const brushSlider = document.querySelector("#brush-size")
 const brushStamp = document.querySelector(".brush-stamp")
 const modesContainer = document.querySelector(".modes-container")
+const brushSettingsBtn = document.querySelector("#brush-settings-btn")
+const brushSettingsContainer = document.querySelector(".brush-settings-container")
 
 // * Palette Interface * //
 const paletteInterfaceContainer = document.querySelector(".palette-interface")
@@ -302,6 +304,8 @@ export const dom = {
   brushSlider,
   brushStamp,
   modesContainer,
+  brushSettingsBtn,
+  brushSettingsContainer,
   paletteInterfaceContainer,
   paletteContainer,
   paletteColors,
