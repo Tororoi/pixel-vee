@@ -13,7 +13,7 @@ import { coordArrayFromSet } from '../utils/maskHelpers.js'
 import { createColorMaskSet } from '../Canvas/masks.js'
 import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
 import { fitSmoothedCurve } from '../utils/smoothCurves.js'
-import { plotCubicBezier } from '../utils/bezier.js'
+import { plotQuadBezier } from '../utils/bezier.js'
 
 //====================================//
 //=== * * * Brush Controller * * * ===//
@@ -143,10 +143,9 @@ function brushSteps() {
           drawBrushPoint(prevX, prevY, '0,0')
         } else {
           for (const seg of segments) {
-            const pts = plotCubicBezier(
+            const pts = plotQuadBezier(
               Math.round(seg.x0), Math.round(seg.y0),
-              Math.round(seg.cp1x), Math.round(seg.cp1y),
-              Math.round(seg.cp2x), Math.round(seg.cp2y),
+              Math.round(seg.cpx), Math.round(seg.cpy),
               Math.round(seg.x1), Math.round(seg.y1),
             )
             for (const pt of pts) {

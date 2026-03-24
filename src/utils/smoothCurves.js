@@ -56,7 +56,7 @@ export function rdpSimplify(points, epsilon = 2.0) {
  * starts/ends tangent to the first/last segment direction.
  * @param {Array<{x:number,y:number}>} keyPoints
  * @param {number} [tension] - controls the "tightness" of the curve
- * @returns {Array<{x0:number,y0:number,cp1x:number,cp1y:number,cp2x:number,cp2y:number,x1:number,y1:number}>}
+ * @returns {Array<{x0:number,y0:number,cpx:number,cpy:number,x1:number,y1:number}>}
  */
 export function catmullRomToBeziers(keyPoints, tension = 10) {
   const n = keyPoints.length
@@ -79,13 +79,17 @@ export function catmullRomToBeziers(keyPoints, tension = 10) {
     const pNext = keyPoints[i + 1]
     const pAfter = i === n - 2 ? phantomEnd : keyPoints[i + 2]
 
+    // Average the two Catmull-Rom cubic control points to get one quadratic control point
+    const cp1x = pCurr.x + (pNext.x - pPrev.x) / tension
+    const cp1y = pCurr.y + (pNext.y - pPrev.y) / tension
+    const cp2x = pNext.x - (pAfter.x - pCurr.x) / tension
+    const cp2y = pNext.y - (pAfter.y - pCurr.y) / tension
+
     segments.push({
       x0: pCurr.x,
       y0: pCurr.y,
-      cp1x: pCurr.x + (pNext.x - pPrev.x) / tension,
-      cp1y: pCurr.y + (pNext.y - pPrev.y) / tension,
-      cp2x: pNext.x - (pAfter.x - pCurr.x) / tension,
-      cp2y: pNext.y - (pAfter.y - pCurr.y) / tension,
+      cpx: (cp1x + cp2x) / 2,
+      cpy: (cp1y + cp2y) / 2,
       x1: pNext.x,
       y1: pNext.y,
     })
@@ -102,7 +106,7 @@ export function catmullRomToBeziers(keyPoints, tension = 10) {
  * @param {Array<{x:number,y:number}>} rawPoints - raw cursor positions
  * @param {number} [epsilon] - RDP tolerance in pixels
  * @param {number} [tension] - Catmull-Rom tension divisor
- * @returns {Array<{x0:number,y0:number,cp1x:number,cp1y:number,cp2x:number,cp2y:number,x1:number,y1:number}>}
+ * @returns {Array<{x0:number,y0:number,cpx:number,cpy:number,x1:number,y1:number}>}
  */
 export function fitSmoothedCurve(rawPoints, epsilon = 2.0, tension = 10) {
   if (rawPoints.length < 2) return []

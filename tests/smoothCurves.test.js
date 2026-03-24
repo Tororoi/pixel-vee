@@ -91,15 +91,12 @@ describe('catmullRomToBeziers', () => {
     }
   })
 
-  it('horizontal straight line has control points lying on the line', () => {
+  it('horizontal straight line has control point lying on the line', () => {
     const pts = [{ x: 0, y: 0 }, { x: 10, y: 0 }]
     const [seg] = catmullRomToBeziers(pts)
-    expect(seg.cp1y).toBeCloseTo(0)
-    expect(seg.cp2y).toBeCloseTo(0)
-    expect(seg.cp1x).toBeGreaterThan(0)
-    expect(seg.cp1x).toBeLessThan(10)
-    expect(seg.cp2x).toBeGreaterThan(0)
-    expect(seg.cp2x).toBeLessThan(10)
+    expect(seg.cpy).toBeCloseTo(0)
+    expect(seg.cpx).toBeGreaterThan(0)
+    expect(seg.cpx).toBeLessThan(10)
   })
 })
 
@@ -141,10 +138,10 @@ describe('fitSmoothedCurve', () => {
     ]
     const segs = fitSmoothedCurve(pts, 0.1) // low epsilon preserves corner
     expect(segs.length).toBeGreaterThan(0)
-    // At least one control point should differ from its segment endpoints
+    // Control point should differ from both segment endpoints
     const seg = segs[0]
-    const cp1OnLine = seg.cp1x === seg.x0 && seg.cp1y === seg.y0
-    const cp2OnLine = seg.cp2x === seg.x1 && seg.cp2y === seg.y1
-    expect(cp1OnLine && cp2OnLine).toBe(false)
+    const cpAtStart = seg.cpx === seg.x0 && seg.cpy === seg.y0
+    const cpAtEnd = seg.cpx === seg.x1 && seg.cpy === seg.y1
+    expect(cpAtStart && cpAtEnd).toBe(false)
   })
 })
