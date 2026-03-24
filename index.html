@@ -1047,6 +1047,30 @@
             data-tooltip="Close"
           ></button>
         </div>
+        <div id="color-ramps-section">
+          <div class="ramps-header" id="ramps-header">
+            Color Ramps
+            <label class="collapse-btn" data-tooltip="Collapse/ Expand">
+              <input
+                type="checkbox"
+                aria-label="Collapse or Expand"
+                class="collapse-checkbox"
+                id="ramps-collapse-checkbox"
+              />
+              <span class="arrow"></span>
+            </label>
+          </div>
+          <div class="collapsible" id="color-ramps-collapsible">
+            <div class="color-group" data-group="shadow">
+              <span class="ramp-label">Shadow/Highlights</span>
+              <div class="ramp-swatches"></div>
+            </div>
+            <div class="color-group" data-group="custom">
+              <span class="ramp-label">Custom</span>
+              <div class="ramp-swatches"></div>
+            </div>
+          </div>
+        </div>
         <div class="collapsible">
           <div id="picker-interface" class="picker-interface">
             <div id="left">

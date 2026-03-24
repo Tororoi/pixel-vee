@@ -240,6 +240,8 @@ function handlePalette(e) {
  * Close the picker window
  */
 function closePickerWindow() {
+  picker.selectedCustomKey = null
+  picker.editingCustomKey = null
   // hide colorpicker
   dom.colorPickerContainer.style.display = "none"
 }
@@ -248,30 +250,18 @@ function closePickerWindow() {
  * This function sets the color according to the currently selected parameters and closes the picker window
  */
 function handleConfirm() {
+  const { red: r, green: g, blue: b } = picker.rgb
+  const a = picker.alpha
   //set color to brush
   document.documentElement.style.setProperty(
     "--old-swatch-color",
-    `${picker.rgb.red},${picker.rgb.green},${picker.rgb.blue}`
+    `${r},${g},${b}`
   )
   document.documentElement.style.setProperty(
     "--old-swatch-alpha",
-    `${picker.alpha / 255}`
+    `${a / 255}`
   )
-  // picker.oldcolor.style.backgroundColor =
-  //   "hsl(" +
-  //   picker.hsl.hue +
-  //   "," +
-  //   picker.hsl.saturation +
-  //   "%," +
-  //   picker.hsl.lightness +
-  //   "%)"
-  setColor(
-    picker.rgb.red,
-    picker.rgb.green,
-    picker.rgb.blue,
-    picker.alpha,
-    picker.swatch
-  )
+  setColor(r, g, b, a, picker.swatch)
   //close window
   closePickerWindow()
 }

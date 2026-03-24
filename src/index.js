@@ -1,5 +1,5 @@
 import { dom } from "./Context/dom.js"
-import { initializeDialogBox } from "./utils/drag.js"
+import { initializeDialogBox, initializeCollapser } from "./utils/drag.js"
 import "./Menu/events.js"
 import "./Swatch/events.js"
 import "./Canvas/events.js"
@@ -55,6 +55,9 @@ initializeDialogBox(dom.ditherPickerContainer)
 
 // * Color Picker * //
 initializeDialogBox(dom.colorPickerContainer)
+
+// * Color Ramps Section * //
+initializeCollapser(document.getElementById("color-ramps-section"))
 
 // * Save * //
 initializeDialogBox(dom.saveContainer)
