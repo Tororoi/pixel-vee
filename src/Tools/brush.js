@@ -12,6 +12,8 @@ import { calculateBrushDirection } from '../utils/drawHelpers.js'
 import { coordArrayFromSet } from '../utils/maskHelpers.js'
 import { createColorMaskSet } from '../Canvas/masks.js'
 import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
+import { fitSmoothedCurve } from '../utils/smoothCurves.js'
+import { plotCubicBezier } from '../utils/bezier.js'
 
 //====================================//
 //=== * * * Brush Controller * * * ===//
@@ -56,6 +58,12 @@ function brushSteps() {
         buildUpSteps: brush.buildUpSteps,
       })
       brush._previewStrokeCtx = { ...brush._strokeCtx, isPreview: true, excludeFromSet: true }
+      //snapshot canvas before stroke for smooth curves restoration
+      if (brush.modes.smoothCurves) {
+        const { width: w, height: h } = canvas.currentLayer.cvs
+        brush._smoothImageData = canvas.currentLayer.ctx.getImageData(0, 0, w, h)
+        brush._rawSmoothPoints = [{ x: state.cursor.x, y: state.cursor.y }]
+      }
       //initial point
       drawBrushPoint(state.cursor.x, state.cursor.y, brushDirection)
       //For line
@@ -98,6 +106,12 @@ function brushSteps() {
           scheduleRender(canvas.currentLayer)
         }
       }
+      if (brush.modes.smoothCurves && brush._rawSmoothPoints) {
+        const last = brush._rawSmoothPoints[brush._rawSmoothPoints.length - 1]
+        if (last.x !== state.cursor.x || last.y !== state.cursor.y) {
+          brush._rawSmoothPoints.push({ x: state.cursor.x, y: state.cursor.y })
+        }
+      }
       break
     case 'pointerup': {
       if (shouldDrawLine()) {
@@ -105,6 +119,47 @@ function brushSteps() {
       }
       //only needed if perfect pixels option is on
       drawBrushPoint(state.cursor.x, state.cursor.y, brushDirection)
+      //smooth curves: restore rough stroke and redraw as fitted bezier curves
+      if (brush.modes.smoothCurves && brush._rawSmoothPoints) {
+        const last = brush._rawSmoothPoints[brush._rawSmoothPoints.length - 1]
+        if (last.x !== state.cursor.x || last.y !== state.cursor.y) {
+          brush._rawSmoothPoints.push({ x: state.cursor.x, y: state.cursor.y })
+        }
+        //restore canvas to pre-stroke state
+        canvas.currentLayer.ctx.putImageData(brush._smoothImageData, 0, 0)
+        //reset per-stroke tracking for clean redraw pass
+        //(do NOT reset boundaryBox — _strokeCtx holds the same object reference and must keep accumulating)
+        const freshSeen = new Set()
+        state.selection.seenPixelsSet = freshSeen
+        state.selection.pointsSet = new Set()
+        state.timeline.clearPoints()
+        brush._strokeCtx.seenPixelsSet = freshSeen
+        //fit and draw smooth bezier curves
+        const segments = fitSmoothedCurve(brush._rawSmoothPoints)
+        let prevX = brush._rawSmoothPoints[0].x
+        let prevY = brush._rawSmoothPoints[0].y
+        if (segments.length === 0) {
+          //single click — redraw the initial dot
+          drawBrushPoint(prevX, prevY, '0,0')
+        } else {
+          for (const seg of segments) {
+            const pts = plotCubicBezier(
+              Math.round(seg.x0), Math.round(seg.y0),
+              Math.round(seg.cp1x), Math.round(seg.cp1y),
+              Math.round(seg.cp2x), Math.round(seg.cp2y),
+              Math.round(seg.x1), Math.round(seg.y1),
+            )
+            for (const pt of pts) {
+              const dir = calculateBrushDirection(pt.x, pt.y, prevX, prevY)
+              drawBrushPoint(pt.x, pt.y, dir)
+              prevX = pt.x
+              prevY = pt.y
+            }
+          }
+        }
+        brush._rawSmoothPoints = null
+        brush._smoothImageData = null
+      }
       scheduleRender(canvas.currentLayer)
       //add action to timeline
       let maskArray = coordArrayFromSet(
@@ -334,6 +389,7 @@ export const brush = {
     colorMask: false,
     twoColor: false,
     buildUpDither: false,
+    smoothCurves: false,
   },
   buildUpMode: 'custom',
   buildUpSteps: [8, 16, 24, 32, 40, 48, 56, 64],
@@ -343,6 +399,8 @@ export const brush = {
   _buildUpResetAtIndex: 0,
   _strokeCtx: null,
   _previewStrokeCtx: null,
+  _rawSmoothPoints: null,
+  _smoothImageData: null,
   type: 'raster',
   cursor: 'crosshair',
   activeCursor: 'crosshair',

@@ -201,6 +201,10 @@
   @include buildUpDitherIcon;
 }
 
+.smoothCurves {
+  @include cubicCurveIcon;
+}
+
 .rotate {
   @include rotateIcon;
 }

@@ -55,6 +55,11 @@ export const renderBrushModesToDOM = () => {
         mode.dataset.tooltip =
           'Color Mask (M) \n\nOnly draw over selected secondary swatch color'
         break
+      case 'smoothCurves':
+        mode.ariaLabel = 'Smooth Curves'
+        mode.dataset.tooltip =
+          'Smooth Curves \n\nFit bezier curves to freehand brush strokes'
+        break
       case 'twoColor':
         mode.ariaLabel = 'Two-Color'
         mode.dataset.tooltip =
