@@ -44,6 +44,9 @@ export function createStrokeContext(fields) {
     densityMap: null, // Map<(y<<16)|x, count> or null
     buildUpSteps: null, // number[] or null
 
+    // Custom stamp full-color mode (null when not in use)
+    customStampColorMap: null, // Map<"x,y", rgba_string> or null
+
     ...fields,
   }
 }

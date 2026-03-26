@@ -1,6 +1,6 @@
 import { dom } from '../Context/dom.js'
 import { state } from '../Context/state.js'
-import { brushStamps } from '../Context/brushStamps.js'
+import { brushStamps, customBrushStamp } from '../Context/brushStamps.js'
 import { updateBrushPreview } from '../utils/brushHelpers.js'
 import { createOptionToggle } from '../utils/optionsInterfaceHelpers.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
@@ -10,15 +10,23 @@ import { swatches } from '../Context/swatch.js'
  * update brush stamp in dom
  */
 export function renderBrushStampToDOM() {
-  dom.lineWeight.textContent = state.tool.current.brushSize
-  dom.brushPreview.style.width = state.tool.current.brushSize * 2 + 'px'
-  dom.brushPreview.style.height = state.tool.current.brushSize * 2 + 'px'
-  updateBrushPreview(
-    brushStamps[state.tool.current.brushType][state.tool.current.brushSize][
-      '0,0'
-    ],
-    state.tool.current.brushSize,
-  )
+  if (state.tool.current.brushType === 'custom') {
+    // Custom stamp is always 32×32; show its pixels in the preview
+    dom.lineWeight.textContent = '32'
+    dom.brushPreview.style.width = '64px'
+    dom.brushPreview.style.height = '64px'
+    updateBrushPreview(customBrushStamp.pixels, 32)
+  } else {
+    dom.lineWeight.textContent = state.tool.current.brushSize
+    dom.brushPreview.style.width = state.tool.current.brushSize * 2 + 'px'
+    dom.brushPreview.style.height = state.tool.current.brushSize * 2 + 'px'
+    updateBrushPreview(
+      brushStamps[state.tool.current.brushType][state.tool.current.brushSize][
+        '0,0'
+      ],
+      state.tool.current.brushSize,
+    )
+  }
 }
 
 /**

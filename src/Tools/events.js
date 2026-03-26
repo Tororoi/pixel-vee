@@ -147,6 +147,11 @@ function switchBrush(e) {
   } else {
     state.tool.current.brushType = "square"
   }
+  // If switching away from custom, hide stamp-specific controls
+  dom.customBrushTypeBtn?.classList.remove("active")
+  if (dom.editStampBtn) dom.editStampBtn.style.display = "none"
+  const fullColorLabel = document.getElementById("stamp-full-color-label")
+  if (fullColorLabel) fullColorLabel.style.display = "none"
   renderBrushStampToDOM()
 }
 

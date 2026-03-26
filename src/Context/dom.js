@@ -204,6 +204,16 @@ const vectorsInterfaceContainer = document.querySelector(".vectors-interface")
 const vectorSettingsContainer = document.querySelector(".vector-settings")
 const vectorDitherPickerContainer = document.querySelector("#vector-dither-picker")
 
+// * Stamp Editor * //
+const stampEditorContainer = document.querySelector(".stamp-editor-container")
+const stampEditorCanvas = document.getElementById("stamp-editor-canvas")
+const stampPreviewCanvas = document.getElementById("stamp-preview-canvas")
+const stampEditorApplyBtn = document.getElementById("stamp-editor-apply-btn")
+const stampEditorClearBtn = document.getElementById("stamp-editor-clear-btn")
+const stampModeToggle = document.getElementById("stamp-mode-toggle")
+const editStampBtn = document.getElementById("edit-stamp-btn")
+const customBrushTypeBtn = document.getElementById("custom-brush-type-btn")
+
 // * Canvas Size Interface * //
 const sizeContainer = document.querySelector(".size-container")
 
@@ -321,6 +331,15 @@ export const dom = {
   vectorsInterfaceContainer,
   vectorSettingsContainer,
   vectorDitherPickerContainer,
+  //stamp editor
+  stampEditorContainer,
+  stampEditorCanvas,
+  stampPreviewCanvas,
+  stampEditorApplyBtn,
+  stampEditorClearBtn,
+  stampModeToggle,
+  editStampBtn,
+  customBrushTypeBtn,
   //canvas size
   sizeContainer,
   dimensionsForm,

@@ -201,6 +201,10 @@
   @include buildUpDitherIcon;
 }
 
+.stampCustom {
+  @include stampCustomIcon;
+}
+
 .rotate {
   @include rotateIcon;
 }

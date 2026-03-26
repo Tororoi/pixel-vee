@@ -13,6 +13,9 @@ import {
   disableActionsForNoSelection,
   enableActionsForSelection,
 } from "./DOM/disableDomElements.js"
+import { initStampEditor, openStampEditor } from "./DOM/stampEditor.js"
+import { brush } from "./Tools/brush.js"
+import { renderBrushStampToDOM } from "./DOM/renderBrush.js"
 
 // Register dependencies that would otherwise create circular imports in state.js
 registerVectorGui(vectorGui)
@@ -67,3 +70,24 @@ initializeDialogBox(dom.saveContainer)
 
 // * Vector Transform * //
 initializeDialogBox(dom.vectorTransformUIContainer, false, actionDeselect)
+
+// * Stamp Editor * //
+initializeDialogBox(dom.stampEditorContainer)
+initStampEditor()
+
+// Open stamp editor when button is clicked
+dom.editStampBtn?.addEventListener("click", openStampEditor)
+
+// Switch to custom brush type
+dom.customBrushTypeBtn?.addEventListener("click", () => {
+  brush.brushType = "custom"
+  dom.customBrushTypeBtn.classList.add("active")
+  dom.editStampBtn.style.display = ""
+  document.getElementById("stamp-full-color-label").style.display = ""
+  renderBrushStampToDOM()
+})
+
+// Toggle full-color stamp mode
+dom.stampModeToggle?.addEventListener("change", (e) => {
+  brush.modes.stampFullColor = e.target.checked
+})
