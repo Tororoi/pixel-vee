@@ -12,7 +12,7 @@ import { calculateBrushDirection } from '../utils/drawHelpers.js'
 import { coordArrayFromSet } from '../utils/maskHelpers.js'
 import { createColorMaskSet } from '../Canvas/masks.js'
 import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
-import { fitSmoothedCurve } from '../utils/smoothCurves.js'
+import { curveFromPoints } from '../utils/smoothCurves.js'
 import { plotCubicBezier } from '../utils/bezier.js'
 
 //====================================//
@@ -135,7 +135,7 @@ function brushSteps() {
         state.timeline.clearPoints()
         brush._strokeCtx.seenPixelsSet = freshSeen
         //fit and draw smooth bezier curves
-        const segments = fitSmoothedCurve(brush._rawSmoothPoints, brush.smoothCurvesEpsilon, brush.smoothCurvesTension)
+        const segments = curveFromPoints(brush._rawSmoothPoints, brush.smoothCurvesEpsilon, brush.smoothCurvesMinDist)
         let prevX = brush._rawSmoothPoints[0].x
         let prevY = brush._rawSmoothPoints[0].y
         if (segments.length === 0) {
@@ -399,6 +399,8 @@ export const brush = {
   _buildUpResetAtIndex: 0,
   smoothCurvesEpsilon: 2.0,
   smoothCurvesTension: 10,
+  smoothCurvesWindow: 3,
+  smoothCurvesMinDist: 0,
   _strokeCtx: null,
   _previewStrokeCtx: null,
   _rawSmoothPoints: null,

@@ -206,10 +206,16 @@ dom.brushSettingsBtn?.addEventListener("click", () => {
   // Sync inputs to current brush values
   const epsilonInput = document.getElementById("smooth-epsilon")
   const tensionInput = document.getElementById("smooth-tension")
+  const windowInput = document.getElementById("smooth-window")
+  const minDistInput = document.getElementById("smooth-mindist")
   epsilonInput.value = brush.smoothCurvesEpsilon
   tensionInput.value = brush.smoothCurvesTension
+  windowInput.value = brush.smoothCurvesWindow
+  minDistInput.value = brush.smoothCurvesMinDist
   document.getElementById("smooth-epsilon-display").textContent = brush.smoothCurvesEpsilon
   document.getElementById("smooth-tension-display").textContent = brush.smoothCurvesTension
+  document.getElementById("smooth-window-display").textContent = brush.smoothCurvesWindow
+  document.getElementById("smooth-mindist-display").textContent = brush.smoothCurvesMinDist
   // Position to the right of the settings button
   const btnRect = dom.brushSettingsBtn.getBoundingClientRect()
   container.style.top = `${btnRect.top - 8}px`
@@ -230,6 +236,12 @@ dom.brushSettingsContainer?.addEventListener("input", (e) => {
   } else if (e.target.id === "smooth-tension") {
     brush.smoothCurvesTension = parseInt(e.target.value)
     document.getElementById("smooth-tension-display").textContent = e.target.value
+  } else if (e.target.id === "smooth-window") {
+    brush.smoothCurvesWindow = parseInt(e.target.value)
+    document.getElementById("smooth-window-display").textContent = e.target.value
+  } else if (e.target.id === "smooth-mindist") {
+    brush.smoothCurvesMinDist = parseInt(e.target.value)
+    document.getElementById("smooth-mindist-display").textContent = e.target.value
   }
 })
 
