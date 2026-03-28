@@ -27,6 +27,7 @@ export function actionDraw(coordX, coordY, directionalBrushStamp, strokeCtx) {
     currentColor,
     currentModes,
     brushSize,
+    customStampColorMap,
   } = strokeCtx
   let offsetX = 0
   let offsetY = 0
@@ -38,7 +39,10 @@ export function actionDraw(coordX, coordY, directionalBrushStamp, strokeCtx) {
     offsetX = canvas.xOffset
     offsetY = canvas.yOffset
   }
-  renderCtx.fillStyle = currentColor.color
+  // Set fillStyle once for non-colormap mode (optimization)
+  if (!customStampColorMap) {
+    renderCtx.fillStyle = currentColor.color
+  }
   //check if brush is outside bounds
   if (isOutOfBounds(coordX, coordY, brushSize, layer, boundaryBox)) {
     //don't iterate brush outside bounds to reduce time cost of render
@@ -71,6 +75,10 @@ export function actionDraw(coordX, coordY, directionalBrushStamp, strokeCtx) {
       renderCtx.clearRect(x + offsetX, y + offsetY, 1, 1)
     }
     if (!currentModes?.eraser) {
+      if (customStampColorMap) {
+        renderCtx.fillStyle =
+          customStampColorMap.get(`${pixel.x},${pixel.y}`) ?? currentColor.color
+      }
       renderCtx.fillRect(x + offsetX, y + offsetY, 1, 1)
     }
   }
