@@ -57,10 +57,7 @@ function brushSteps() {
         ditherOffsetY: brush.ditherOffsetY,
         densityMap: brush._buildUpDensityMap,
         buildUpSteps: brush.buildUpSteps,
-        customStampColorMap:
-          isCustomStamp && brush.modes.stampFullColor
-            ? customBrushStamp.colorMap
-            : null,
+        customStampColorMap: null,
       })
       brush._previewStrokeCtx = { ...brush._strokeCtx, isPreview: true, excludeFromSet: true }
       //initial point
@@ -341,7 +338,6 @@ export const brush = {
     colorMask: false,
     twoColor: false,
     buildUpDither: false,
-    stampFullColor: false,
   },
   buildUpMode: 'custom',
   buildUpSteps: [8, 16, 24, 32, 40, 48, 56, 64],

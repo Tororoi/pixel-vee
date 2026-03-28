@@ -205,13 +205,16 @@ const vectorSettingsContainer = document.querySelector(".vector-settings")
 const vectorDitherPickerContainer = document.querySelector("#vector-dither-picker")
 
 // * Stamp Editor * //
-const stampEditorContainer = document.querySelector(".stamp-editor-container")
+const stampEditorContainer = document.getElementById("stamp-editor")
 const stampEditorCanvas = document.getElementById("stamp-editor-canvas")
 const stampPreviewCanvas = document.getElementById("stamp-preview-canvas")
 const stampEditorApplyBtn = document.getElementById("stamp-editor-apply-btn")
 const stampEditorClearBtn = document.getElementById("stamp-editor-clear-btn")
-const stampModeToggle = document.getElementById("stamp-mode-toggle")
-const editStampBtn = document.getElementById("edit-stamp-btn")
+const stampDrawBtn = document.getElementById("stamp-draw-btn")
+const stampEraseBtn = document.getElementById("stamp-erase-btn")
+const stampMoveBtn = document.getElementById("stamp-move-btn")
+const stampMirrorHBtn = document.getElementById("stamp-mirror-h-btn")
+const stampMirrorVBtn = document.getElementById("stamp-mirror-v-btn")
 const customBrushTypeBtn = document.getElementById("custom-brush-type-btn")
 
 // * Canvas Size Interface * //
@@ -337,8 +340,11 @@ export const dom = {
   stampPreviewCanvas,
   stampEditorApplyBtn,
   stampEditorClearBtn,
-  stampModeToggle,
-  editStampBtn,
+  stampDrawBtn,
+  stampEraseBtn,
+  stampMoveBtn,
+  stampMirrorHBtn,
+  stampMirrorVBtn,
   customBrushTypeBtn,
   //canvas size
   sizeContainer,

@@ -75,19 +75,10 @@ initializeDialogBox(dom.vectorTransformUIContainer, false, actionDeselect)
 initializeDialogBox(dom.stampEditorContainer)
 initStampEditor()
 
-// Open stamp editor when button is clicked
-dom.editStampBtn?.addEventListener("click", openStampEditor)
-
-// Switch to custom brush type
+// Custom stamp button: activate custom brush type and open the editor
 dom.customBrushTypeBtn?.addEventListener("click", () => {
   brush.brushType = "custom"
   dom.customBrushTypeBtn.classList.add("active")
-  dom.editStampBtn.style.display = ""
-  document.getElementById("stamp-full-color-label").style.display = ""
   renderBrushStampToDOM()
-})
-
-// Toggle full-color stamp mode
-dom.stampModeToggle?.addEventListener("change", (e) => {
-  brush.modes.stampFullColor = e.target.checked
+  openStampEditor()
 })

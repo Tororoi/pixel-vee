@@ -15,9 +15,17 @@ const GRID_COLOR = "#333333"
 // Working copy while the editor is open — Map<"x,y", rgba_string>
 const editorPixels = new Map()
 
-// Track pointer state for drag-painting
-let isPainting = false
-let paintMode = "draw" // "draw" | "erase"
+// Track pointer state
+let isDragging = false
+let uiPaintMode = "draw" // "draw" | "erase" | "move"
+let paintMode = "draw"   // resolved per-event (right-click always erases)
+
+// Move tool drag state — tracked in grid cells
+let lastMoveCellX = 0
+let lastMoveCellY = 0
+
+// The continuous-mode tool buttons (for clearing .selected)
+const TOOL_BTNS = () => [dom.stampDrawBtn, dom.stampEraseBtn, dom.stampMoveBtn]
 
 //====================================//
 //=== * * * Rendering * * * ==========//
@@ -94,6 +102,62 @@ function paintCell(ex, ey, mode) {
 }
 
 /**
+ * Shift all pixels by (dx, dy), wrapping at stamp edges.
+ * @param {number} dx
+ * @param {number} dy
+ */
+function movePixels(dx, dy) {
+  if (dx === 0 && dy === 0) return
+  const moved = new Map()
+  for (const [key, color] of editorPixels) {
+    const [x, y] = key.split(",").map(Number)
+    const nx = ((x + dx) % STAMP_SIZE + STAMP_SIZE) % STAMP_SIZE
+    const ny = ((y + dy) % STAMP_SIZE + STAMP_SIZE) % STAMP_SIZE
+    moved.set(`${nx},${ny}`, color)
+  }
+  editorPixels.clear()
+  for (const [key, color] of moved) {
+    editorPixels.set(key, color)
+  }
+  renderEditorCanvas()
+  renderPreviewCanvas()
+}
+
+/**
+ * Mirror all pixels horizontally (flip x).
+ */
+function mirrorH() {
+  const mirrored = new Map()
+  for (const [key, color] of editorPixels) {
+    const [x, y] = key.split(",").map(Number)
+    mirrored.set(`${STAMP_SIZE - 1 - x},${y}`, color)
+  }
+  editorPixels.clear()
+  for (const [key, color] of mirrored) {
+    editorPixels.set(key, color)
+  }
+  renderEditorCanvas()
+  renderPreviewCanvas()
+}
+
+/**
+ * Mirror all pixels vertically (flip y).
+ */
+function mirrorV() {
+  const mirrored = new Map()
+  for (const [key, color] of editorPixels) {
+    const [x, y] = key.split(",").map(Number)
+    mirrored.set(`${x},${STAMP_SIZE - 1 - y}`, color)
+  }
+  editorPixels.clear()
+  for (const [key, color] of mirrored) {
+    editorPixels.set(key, color)
+  }
+  renderEditorCanvas()
+  renderPreviewCanvas()
+}
+
+/**
  * Get editor-local coordinates from a pointer event on the editor canvas.
  * @param {PointerEvent} e
  * @returns {{ex: number, ey: number}}
@@ -109,6 +173,22 @@ function getEditorCoords(e) {
 }
 
 //====================================//
+//=== * * * Toolbar * * * ============//
+//====================================//
+
+/**
+ * Activate a continuous-mode tool button.
+ * @param {HTMLElement} btn
+ * @param {"draw"|"erase"|"move"} mode
+ */
+function setToolMode(btn, mode) {
+  uiPaintMode = mode
+  for (const b of TOOL_BTNS()) b?.classList.remove("selected")
+  btn?.classList.add("selected")
+  dom.stampEditorCanvas.style.cursor = mode === "move" ? "grab" : "crosshair"
+}
+
+//====================================//
 //=== * * * Public API * * * =========//
 //====================================//
 
@@ -116,7 +196,7 @@ function getEditorCoords(e) {
  * Open the stamp editor dialog, loading the current custom stamp data.
  */
 export function openStampEditor() {
-  // Load existing stamp into working copy
+  setToolMode(dom.stampDrawBtn, "draw")
   editorPixels.clear()
   for (const [key, color] of customBrushStamp.colorMap) {
     editorPixels.set(key, color)
@@ -130,7 +210,6 @@ export function openStampEditor() {
  * Apply the editor's working copy to customBrushStamp and close the dialog.
  */
 function applyStamp() {
-  // Rebuild customBrushStamp from editorPixels
   customBrushStamp.pixels = []
   customBrushStamp.pixelSet = new Set()
   customBrushStamp.colorMap = new Map()
@@ -144,7 +223,6 @@ function applyStamp() {
 
   dom.stampEditorContainer.style.display = "none"
 
-  // Update brush preview if custom type is currently active
   if (brush.brushType === "custom") {
     renderBrushStampToDOM()
   }
@@ -170,34 +248,59 @@ export function initStampEditor() {
   const editorCanvas = dom.stampEditorCanvas
   if (!editorCanvas) return
 
-  // Pointer events for drawing/erasing
   editorCanvas.addEventListener("pointerdown", (e) => {
     e.preventDefault()
-    isPainting = true
-    paintMode = e.button === 2 ? "erase" : "draw"
+    isDragging = true
     editorCanvas.setPointerCapture(e.pointerId)
     const { ex, ey } = getEditorCoords(e)
-    paintCell(ex, ey, paintMode)
+    if (uiPaintMode === "move") {
+      lastMoveCellX = Math.floor(ex / CELL_SIZE)
+      lastMoveCellY = Math.floor(ey / CELL_SIZE)
+      editorCanvas.style.cursor = "grabbing"
+    } else {
+      paintMode = e.button === 2 ? "erase" : uiPaintMode
+      paintCell(ex, ey, paintMode)
+    }
   })
 
   editorCanvas.addEventListener("pointermove", (e) => {
-    if (!isPainting) return
+    if (!isDragging) return
     const { ex, ey } = getEditorCoords(e)
-    paintCell(ex, ey, paintMode)
+    if (uiPaintMode === "move") {
+      const cellX = Math.floor(ex / CELL_SIZE)
+      const cellY = Math.floor(ey / CELL_SIZE)
+      const dx = cellX - lastMoveCellX
+      const dy = cellY - lastMoveCellY
+      if (dx !== 0 || dy !== 0) {
+        movePixels(dx, dy)
+        lastMoveCellX = cellX
+        lastMoveCellY = cellY
+      }
+    } else {
+      paintCell(ex, ey, paintMode)
+    }
   })
 
   editorCanvas.addEventListener("pointerup", () => {
-    isPainting = false
+    isDragging = false
+    if (uiPaintMode === "move") editorCanvas.style.cursor = "grab"
   })
 
   editorCanvas.addEventListener("pointercancel", () => {
-    isPainting = false
+    isDragging = false
+    if (uiPaintMode === "move") editorCanvas.style.cursor = "grab"
   })
 
-  // Suppress right-click context menu on the editor canvas
   editorCanvas.addEventListener("contextmenu", (e) => e.preventDefault())
 
-  // Buttons
+  // Continuous-mode tool buttons
+  dom.stampDrawBtn?.addEventListener("click", () => setToolMode(dom.stampDrawBtn, "draw"))
+  dom.stampEraseBtn?.addEventListener("click", () => setToolMode(dom.stampEraseBtn, "erase"))
+  dom.stampMoveBtn?.addEventListener("click", () => setToolMode(dom.stampMoveBtn, "move"))
+
+  // Single-click action buttons
+  dom.stampMirrorHBtn?.addEventListener("click", mirrorH)
+  dom.stampMirrorVBtn?.addEventListener("click", mirrorV)
   dom.stampEditorApplyBtn?.addEventListener("click", applyStamp)
   dom.stampEditorClearBtn?.addEventListener("click", clearStamp)
 }

@@ -310,26 +310,9 @@
                     id="custom-brush-type-btn"
                     class="mode stampCustom"
                     aria-label="Custom Stamp"
-                    data-tooltip="Custom Stamp&#010;&#010;Use a 32×32 user-defined stamp as the brush"
+                    data-tooltip="Custom Stamp&#010;&#010;Open the stamp editor to define a 32×32 brush"
                   ></button>
-                  <button
-                    type="button"
-                    id="edit-stamp-btn"
-                    class="edit-stamp-btn"
-                    aria-label="Edit Stamp"
-                    data-tooltip="Open Stamp Editor"
-                    style="display: none"
-                  >Edit</button>
                 </div>
-                <label
-                  id="stamp-full-color-label"
-                  class="stamp-full-color-label"
-                  data-tooltip="Full Color&#010;&#010;Stamp uses its painted colors instead of the current primary color"
-                  style="display: none"
-                >
-                  <input type="checkbox" id="stamp-mode-toggle" />
-                  Full Color
-                </label>
               </div>
               <div class="dither-options">
                 <span class="modes-title">Dither</span>
@@ -1555,6 +1538,85 @@
           </form>
         </div>
       </div>
+      <div
+        id="stamp-editor"
+        class="stamp-editor-container dialog-box draggable v-drag h-drag free"
+        style="display: none"
+      >
+        <div class="header dragger">
+          <div class="drag-btn"><div class="grip"></div></div>
+          Stamp Editor
+          <button
+            type="button"
+            class="close-btn"
+            aria-label="Close stamp editor"
+          ></button>
+        </div>
+        <div class="collapsible">
+          <div class="stamp-editor-interface">
+            <canvas id="stamp-editor-canvas" width="320" height="320"></canvas>
+            <div class="stamp-editor-footer">
+              <div class="stamp-editor-tools">
+                <div class="stamp-tool-group">
+                  <button
+                    type="button"
+                    id="stamp-draw-btn"
+                    class="stamp-tool brush"
+                    aria-label="Draw"
+                    data-tooltip="Draw"
+                  ></button
+                  ><button
+                    type="button"
+                    id="stamp-erase-btn"
+                    class="stamp-tool eraser"
+                    aria-label="Erase"
+                    data-tooltip="Erase"
+                  ></button
+                  ><button
+                    type="button"
+                    id="stamp-move-btn"
+                    class="stamp-tool move"
+                    aria-label="Move"
+                    data-tooltip="Move&#010;&#010;Wraps pixels at edges"
+                  ></button>
+                </div>
+                <div class="stamp-tool-group">
+                  <button
+                    type="button"
+                    id="stamp-mirror-h-btn"
+                    class="stamp-tool mirrorX"
+                    aria-label="Mirror Horizontal"
+                    data-tooltip="Mirror Horizontal"
+                  ></button
+                  ><button
+                    type="button"
+                    id="stamp-mirror-v-btn"
+                    class="stamp-tool mirrorY"
+                    aria-label="Mirror Vertical"
+                    data-tooltip="Mirror Vertical"
+                  ></button
+                  ><button
+                    type="button"
+                    id="stamp-editor-clear-btn"
+                    class="stamp-tool clear"
+                    aria-label="Clear"
+                    data-tooltip="Clear all pixels"
+                  ></button>
+                </div>
+              </div>
+              <div class="stamp-editor-preview-col">
+                <canvas
+                  id="stamp-preview-canvas"
+                  width="32"
+                  height="32"
+                  title="Stamp preview (1:1)"
+                ></canvas>
+                <button type="button" id="stamp-editor-apply-btn">Apply</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="layer-settings dialog-box"></div>
     <div class="vector-settings dialog-box"></div>
@@ -1578,47 +1640,6 @@
         <div class="dither-offset-control-wrap"></div>
       </div>
       <div class="dither-grid"></div>
-    </div>
-    <div
-      class="stamp-editor-container dialog-box draggable v-drag h-drag free"
-      style="display: none"
-    >
-      <div class="header dragger">
-        <div class="drag-btn"><div class="grip"></div></div>
-        Stamp Editor
-        <button
-          type="button"
-          class="close-btn"
-          aria-label="Close stamp editor"
-        ></button>
-      </div>
-      <div class="collapsible">
-        <p class="stamp-editor-hint">Left-click: draw &nbsp; Right-click: erase</p>
-        <div class="stamp-editor-tools">
-          <button
-            type="button"
-            id="stamp-editor-clear-btn"
-            data-tooltip="Clear all pixels from the stamp"
-          >Clear</button>
-        </div>
-        <canvas
-          id="stamp-editor-canvas"
-          width="320"
-          height="320"
-        ></canvas>
-        <div class="stamp-editor-footer">
-          <canvas
-            id="stamp-preview-canvas"
-            width="32"
-            height="32"
-            title="Stamp preview (1:1)"
-          ></canvas>
-          <button
-            type="button"
-            id="stamp-editor-apply-btn"
-          >Apply</button>
-        </div>
-      </div>
     </div>
     <div id="tooltip" class="tooltip"></div>
   </body>
