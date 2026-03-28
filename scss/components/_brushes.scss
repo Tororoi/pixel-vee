@@ -77,11 +77,18 @@
 
 /* Stamp options in brush container */
 .brush-container {
+  .stamp-dither-row {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-evenly;
+    width: 100%;
+    margin-bottom: 4px;
+  }
+
   .stamp-options {
     display: flex;
     flex-flow: column nowrap;
     align-items: center;
-    margin-bottom: 4px;
 
     .modes-title {
       margin-bottom: 4px;

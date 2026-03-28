@@ -10,8 +10,9 @@ import { swatches } from '../Context/swatch.js'
  * update brush stamp in dom
  */
 export function renderBrushStampToDOM() {
-  if (state.tool.current.brushType === 'custom') {
-    // Custom stamp is always 32×32; show its pixels in the preview
+  const isCustom = state.tool.current.brushType === 'custom'
+  dom.brushSlider.disabled = isCustom
+  if (isCustom) {
     dom.lineWeight.textContent = '32'
     dom.brushPreview.style.width = '64px'
     dom.brushPreview.style.height = '64px'
