@@ -10,6 +10,11 @@ import {
   drawSelector,
   drawHSLGradient,
 } from "../utils/pickerHelpers.js"
+import {
+  calcShadowHighlightRamp,
+  interpolateCustomRamp,
+  makeColor,
+} from "./colorRamps.js"
 //TODO: (Low Priority) Add "lock" toggle to luminance field.
 //This will trigger the hsl grad to become a 2-dimensional gradient
 //where every value has the same luminance. The hue slider can be adjusted
@@ -53,6 +58,11 @@ export class Picker {
     //OK/Cancel
     this.confirmBtn = document.getElementById("confirm-btn")
     this.cancelBtn = document.getElementById("cancel-btn")
+    //color ramps
+    this.colorRampsCollapsible = document.getElementById("color-ramps-collapsible")
+    this.customRampKeys = { start: null, mid: null, end: null }
+    this.selectedCustomKey = null
+    this.editingCustomKey = null
     //color
     this.swatch = "swatch btn"
     this.rgb = {
@@ -103,7 +113,7 @@ export class Picker {
   }
 
   updateHue(e) {
-    this.hsl.hue = e.target.value
+    this.hsl.hue = +e.target.value
     this.propogateHSLColorSpace()
   }
 
@@ -177,6 +187,79 @@ export class Picker {
     //update hue slider
     this.hueRange.value = this.hsl.hue
     this.alphaRange.value = this.alpha
+    this.renderColorRamps()
+  }
+
+  //===================================//
+  //===== * * * Color Ramps * * * =====//
+  //===================================//
+
+  /**
+   * Render 7 color swatches into a .ramp-swatches container
+   * @param {HTMLElement} container - the .ramp-swatches div
+   * @param {Array<{r,g,b,a}>} colors - 7 color objects
+   * @param {boolean} [markBase=true] - add .ramp-base class to index 3
+   */
+  renderRampRow(container, colors, markBase = true) {
+    container.innerHTML = ""
+    colors.forEach((c, i) => {
+      const swatch = document.createElement("div")
+      swatch.className = "swatch ramp-swatch"
+      if (markBase && i === 3) swatch.classList.add("ramp-base")
+      swatch.style.backgroundColor = `rgba(${c.r},${c.g},${c.b},${c.a / 255})`
+      swatch.rampColor = c
+      container.appendChild(swatch)
+    })
+  }
+
+  /**
+   * Update all color ramp rows based on current HSL/alpha.
+   * Custom ramp uses stored key colors and does not recalculate from current color.
+   */
+  renderColorRamps() {
+    if (!this.colorRampsCollapsible) return
+    const groups = this.colorRampsCollapsible.querySelectorAll(".color-group")
+    groups.forEach((group) => {
+      const type = group.dataset.group
+      const swatchContainer = group.querySelector(".ramp-swatches")
+      if (!swatchContainer) return
+      let colors
+      switch (type) {
+        case "shadow":
+          colors = calcShadowHighlightRamp(this.hsl, this.alpha)
+          break
+        case "custom": {
+          // If a key is active, update it live from the current picker color
+          if (this.editingCustomKey) {
+            this.customRampKeys[this.editingCustomKey] = {
+              r: this.rgb.red,
+              g: this.rgb.green,
+              b: this.rgb.blue,
+              a: this.alpha,
+            }
+          }
+          const { start, mid, end } = this.customRampKeys
+          if (!start || !mid || !end) return
+          colors = interpolateCustomRamp(start, mid, end)
+          this.renderRampRow(swatchContainer, colors)
+          // Mark key positions and apply selected/active states
+          const keyMap = { 0: "start", 3: "mid", 6: "end" }
+          swatchContainer.querySelectorAll(".ramp-swatch").forEach((swatch, i) => {
+            const key = keyMap[i]
+            if (key) {
+              swatch.classList.add("ramp-key")
+              swatch.dataset.key = key
+              swatch.classList.toggle("selected", key === this.selectedCustomKey)
+              swatch.classList.toggle("active", key === this.editingCustomKey)
+            }
+          })
+          return
+        }
+        default:
+          return
+      }
+      this.renderRampRow(swatchContainer, colors)
+    })
   }
 
   handleIncrement(e) {
@@ -283,6 +366,10 @@ export class Picker {
     this.initialColor = reference
     this.rgb = { red: reference.r, green: reference.g, blue: reference.b }
     this.alpha = reference.a
+    if (this.customRampKeys.start === null) {
+      const c = makeColor(reference.r, reference.g, reference.b, reference.a)
+      this.customRampKeys = { start: c, mid: { ...c }, end: { ...c } }
+    }
     this.propogateRGBColorSpace()
     //set oldcolor
     // this.oldcolor.style.backgroundColor = reference.color
@@ -358,5 +445,51 @@ export class Picker {
       this.alpha = this.initialColor.a
       this.propogateRGBColorSpace()
     })
+
+    if (this.colorRampsCollapsible) {
+      this.colorRampsCollapsible.addEventListener("click", (e) => {
+        this.handleRampClick(e)
+      })
+    }
+  }
+
+  /**
+   * Handle clicks within the color ramps collapsible area.
+   * Regular ramp swatches set the picker color.
+   * Custom key swatches open the picker to edit that key slot.
+   * @param {PointerEvent} e
+   */
+  handleRampClick(e) {
+    const rampSwatch = e.target.closest(".ramp-swatch")
+    if (!rampSwatch || !rampSwatch.rampColor) return
+
+    const group = rampSwatch.closest(".color-group")
+    const isCustomKey =
+      group?.dataset.group === "custom" && rampSwatch.classList.contains("ramp-key")
+
+    if (isCustomKey) {
+      const key = rampSwatch.dataset.key
+      if (this.editingCustomKey === key) {
+        // 3rd click: deactivate
+        this.editingCustomKey = null
+        this.selectedCustomKey = null
+      } else if (this.selectedCustomKey === key) {
+        // 2nd click: activate live editing
+        this.editingCustomKey = key
+        this.renderColorRamps()
+        return
+      } else {
+        // 1st click: select color and mark as selected
+        this.selectedCustomKey = key
+        this.editingCustomKey = null
+      }
+      this.renderColorRamps()
+      // Fall through to also set the picker color on 1st and 3rd click
+    }
+
+    const { r, g, b, a } = rampSwatch.rampColor
+    this.rgb = { red: r, green: g, blue: b }
+    this.alpha = a
+    this.propogateRGBColorSpace()
   }
 }

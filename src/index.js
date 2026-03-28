@@ -1,5 +1,5 @@
 import { dom } from "./Context/dom.js"
-import { initializeDialogBox } from "./utils/drag.js"
+import { initializeDialogBox, initializeCollapser } from "./utils/drag.js"
 import "./Menu/events.js"
 import "./Swatch/events.js"
 import "./Canvas/events.js"
@@ -13,6 +13,9 @@ import {
   disableActionsForNoSelection,
   enableActionsForSelection,
 } from "./DOM/disableDomElements.js"
+import { initStampEditor, openStampEditor } from "./DOM/stampEditor.js"
+import { brush } from "./Tools/brush.js"
+import { renderBrushStampToDOM } from "./DOM/renderBrush.js"
 
 // Register dependencies that would otherwise create circular imports in state.js
 registerVectorGui(vectorGui)
@@ -56,6 +59,9 @@ initializeDialogBox(dom.ditherPickerContainer)
 // * Color Picker * //
 initializeDialogBox(dom.colorPickerContainer)
 
+// * Color Ramps Section * //
+initializeCollapser(document.getElementById("color-ramps-section"))
+
 // * Save * //
 initializeDialogBox(dom.saveContainer)
 
@@ -64,3 +70,15 @@ initializeDialogBox(dom.saveContainer)
 
 // * Vector Transform * //
 initializeDialogBox(dom.vectorTransformUIContainer, false, actionDeselect)
+
+// * Stamp Editor * //
+initializeDialogBox(dom.stampEditorContainer)
+initStampEditor()
+
+// Custom stamp button: activate custom brush type and open the editor
+dom.customBrushTypeBtn?.addEventListener("click", () => {
+  brush.brushType = "custom"
+  dom.customBrushTypeBtn.classList.add("active")
+  renderBrushStampToDOM()
+  openStampEditor()
+})

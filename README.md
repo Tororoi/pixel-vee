@@ -396,7 +396,6 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
 #### Vectors:
 - Ability to rasterize vectors and remove them from the vectors interface
 - Editable properties display for vectors
-- Rectangle Tool
 - Dithered Gradient Tool
 - Smooth curves mode for brush. When drawing quickly, curves can look choppy and angular. Calculates curvature between points. Bonus: convert entire brush stroke into a series of linked vectors.
 - Shapes which are a collection of vectors that can be easily selected to manipulate together.
@@ -406,7 +405,6 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
 - Mask Tool
 - Amorphous selection tool
 #### Brush:
-- Dithered Brush mode
 - Custom stamp brush
 #### Utility:
 - 9-Grid Mode: Make repeating patterns for selected tile area. Also offer options for brick repeat and half-drop repeat
@@ -416,8 +414,6 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
 #### Layers:
 - Layer Settings: Blend-mode, duplicate layer
 #### Palette:
-- Choose from set of default color palettes
-- Ability to add colors to palette without closing the color picker
 - Color ramps in color picker, along with ability to add an entire color ramp to the palette
 - Optional palette mode with a small canvas for making a palette with a brush, eraser and eyedropper tools instead of the typical way of modifying a palette.
 #### Animation:
