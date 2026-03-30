@@ -696,7 +696,9 @@ export function renderCanvas(
   setImages = false,
 ) {
   //Handle offscreen canvases
-  if (redrawTimeline) {
+  // Skip the clear+redraw when the timeline is empty — this preserves pixel data
+  // that was baked directly into layer canvases (e.g. after a content-shift resize).
+  if (redrawTimeline && state.timeline.undoStack.length > 0) {
     //clear offscreen layers
     clearOffscreenCanvas(activeLayer)
     //render all previous actions
@@ -716,11 +718,35 @@ export function renderCanvas(
 }
 
 /**
- * Resize the offscreen canvas and all layers
+ * Resize the offscreen canvas and all layers.
+ * When contentOffsetX/Y are non-zero the existing art is baked to flat images
+ * and redrawn at the given offset. This clears the undo/redo history because
+ * the stored action coordinates would be invalid after a spatial shift.
  * @param {number} width - (Integer)
  * @param {number} height - (Integer)
+ * @param {number} contentOffsetX - pixels to shift existing art right in new canvas (Integer, default 0)
+ * @param {number} contentOffsetY - pixels to shift existing art down in new canvas (Integer, default 0)
  */
-export const resizeOffScreenCanvas = (width, height) => {
+export const resizeOffScreenCanvas = (
+  width,
+  height,
+  contentOffsetX = 0,
+  contentOffsetY = 0,
+) => {
+  // When shifting content, capture each raster layer before dimensions change
+  let layerSnapshots = null
+  if (contentOffsetX !== 0 || contentOffsetY !== 0) {
+    layerSnapshots = canvas.layers
+      .filter((l) => l.type === 'raster')
+      .map((l) => {
+        const snap = document.createElement('canvas')
+        snap.width = l.cvs.width
+        snap.height = l.cvs.height
+        snap.getContext('2d').drawImage(l.cvs, 0, 0)
+        return { layer: l, snap }
+      })
+  }
+
   canvas.offScreenCVS.width = width
   canvas.offScreenCVS.height = height
   canvas.previewCVS.width = width
@@ -804,6 +830,22 @@ export const resizeOffScreenCanvas = (width, height) => {
       }
     }
   })
-  renderCanvas(null, true) //render all layers and redraw timeline
+
+  if (layerSnapshots) {
+    // Draw captured content at the offset position
+    layerSnapshots.forEach(({ layer, snap }) => {
+      layer.ctx.drawImage(snap, contentOffsetX, contentOffsetY)
+    })
+    // Clear timeline — stored action coordinates are no longer valid after shift
+    state.timeline.undoStack.length = 0
+    state.timeline.redoStack.length = 0
+    state.timeline.currentAction = null
+    state.timeline.clearPoints()
+    state.timeline.clearActiveIndexes()
+    state.timeline.clearSavedBetweenActionImages()
+    renderCanvas() // blit flat layer data to onscreen canvases (no timeline redraw)
+  } else {
+    renderCanvas(null, true) //render all layers and redraw timeline
+  }
   vectorGui.render()
 }

@@ -37,6 +37,13 @@ import {
   removeLayer,
 } from '../Actions/layer/layerActions.js'
 import { createPreviewLayer } from './layers.js'
+import {
+  resizeOverlay,
+  applyFromInputs,
+  applyResize,
+  setAnchor,
+  deactivate as deactivateResizeOverlay,
+} from './resizeOverlay.js'
 import { switchTool } from '../Tools/toolbox.js'
 import { enableActionsForSelection } from '../DOM/disableDomElements.js'
 
@@ -62,6 +69,9 @@ const handleIncrement = (e) => {
     if (newValue > min) {
       dimension.value = newValue - 1
     }
+  }
+  if (resizeOverlay.active) {
+    applyFromInputs(+dom.canvasWidth.value, +dom.canvasHeight.value)
   }
 }
 
@@ -96,7 +106,11 @@ const restrictSize = (e) => {
  */
 const handleDimensionsSubmit = (e) => {
   e.preventDefault()
-  resizeOffScreenCanvas(dom.canvasWidth.value, dom.canvasHeight.value)
+  if (resizeOverlay.active) {
+    applyResize()
+  } else {
+    resizeOffScreenCanvas(dom.canvasWidth.value, dom.canvasHeight.value)
+  }
 }
 
 /**
@@ -514,7 +528,21 @@ dom.dimensionsForm.addEventListener('submit', handleDimensionsSubmit)
 dom.canvasWidth.addEventListener('blur', restrictSize)
 dom.canvasHeight.addEventListener('blur', restrictSize)
 dom.canvasSizeCancelBtn.addEventListener('click', () => {
+  deactivateResizeOverlay()
   dom.sizeContainer.style.display = 'none'
+})
+dom.canvasWidth.addEventListener('input', (e) => {
+  if (resizeOverlay.active) applyFromInputs(+e.target.value, +dom.canvasHeight.value)
+})
+dom.canvasHeight.addEventListener('input', (e) => {
+  if (resizeOverlay.active) applyFromInputs(+dom.canvasWidth.value, +e.target.value)
+})
+dom.anchorGrid.addEventListener('click', (e) => {
+  const btn = e.target.closest('.anchor-btn')
+  if (!btn) return
+  dom.anchorGrid.querySelectorAll('.anchor-btn').forEach((b) => b.classList.remove('active'))
+  btn.classList.add('active')
+  setAnchor(btn.dataset.anchor)
 })
 // * Layers * //
 dom.uploadBtn.addEventListener('click', (e) => {

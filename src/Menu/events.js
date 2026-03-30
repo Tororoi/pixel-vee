@@ -1,6 +1,7 @@
 import { dom } from "../Context/dom.js"
 import { state } from "../Context/state.js"
 import { canvas } from "../Context/canvas.js"
+import { activate as activateResizeOverlay, deactivate as deactivateResizeOverlay } from "../Canvas/resizeOverlay.js"
 import { vectorGui } from "../GUI/vector.js"
 import { consolidateLayers } from "../Canvas/layers.js"
 import {
@@ -316,6 +317,7 @@ dom.canvasSizeBtn.addEventListener("click", () => {
     return
   }
   dom.sizeContainer.style.display = "flex"
+  activateResizeOverlay()
 })
 dom.selectAllBtn.addEventListener("click", actionSelectAll)
 dom.deselectBtn.addEventListener("click", actionDeselect)

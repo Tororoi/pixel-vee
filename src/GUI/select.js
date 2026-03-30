@@ -78,7 +78,7 @@ function startMarchingAnts() {
 /**
  * Stops the marching ants animation loop.
  */
-function stopMarchingAnts() {
+export function stopMarchingAnts() {
   if (marchAnimId !== null) {
     cancelAnimationFrame(marchAnimId)
     marchAnimId = null

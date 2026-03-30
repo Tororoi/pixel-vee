@@ -1,5 +1,6 @@
 import { dom } from "./Context/dom.js"
 import { initializeDialogBox, initializeCollapser } from "./utils/drag.js"
+import { deactivate as deactivateResizeOverlay } from "./Canvas/resizeOverlay.js"
 import "./Menu/events.js"
 import "./Swatch/events.js"
 import "./Canvas/events.js"
@@ -45,7 +46,7 @@ initializeDialogBox(dom.layersInterfaceContainer)
 initializeDialogBox(dom.vectorsInterfaceContainer)
 
 // * Canvas Size * //
-initializeDialogBox(dom.sizeContainer)
+initializeDialogBox(dom.sizeContainer, false, deactivateResizeOverlay)
 
 // * Settings * //
 initializeDialogBox(dom.settingsContainer)

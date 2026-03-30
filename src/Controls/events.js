@@ -3,6 +3,12 @@ import { dom } from '../Context/dom.js'
 import { keys } from '../Shortcuts/keys.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
+import {
+  resizeOverlay,
+  handlePointerDown as resizePointerDown,
+  handlePointerMove as resizePointerMove,
+  handlePointerUp as resizePointerUp,
+} from '../Canvas/resizeOverlay.js'
 import { vectorGui } from '../GUI/vector.js'
 import { renderCursor } from '../GUI/cursor.js'
 import { activateShortcut, deactivateShortcut } from './shortcuts.js'
@@ -139,6 +145,10 @@ function handleWheel(e) {
  * @param {PointerEvent} e - The pointerdown event
  */
 function handlePointerDown(e) {
+  if (resizeOverlay.active) {
+    resizePointerDown(e)
+    return
+  }
   //reset media type, chrome dev tools niche use or computers that have touchscreen capabilities
   e.target.setPointerCapture(e.pointerId)
   canvas.pointerEvent = 'pointerdown'
@@ -181,6 +191,10 @@ function handlePointerDown(e) {
  * @param {PointerEvent} e - The pointermove event
  */
 function handlePointerMove(e) {
+  if (resizeOverlay.active) {
+    resizePointerMove(e)
+    return
+  }
   if (state.cursor.clickDisabled && state.cursor.clicked) {
     return
   }
@@ -259,6 +273,10 @@ function handlePointerMove(e) {
  * @param {PointerEvent} e - The pointerup event
  */
 function handlePointerUp(e) {
+  if (resizeOverlay.active) {
+    resizePointerUp(e)
+    return
+  }
   canvas.pointerEvent = 'pointerup'
   if (state.cursor.clickDisabled || !state.cursor.clicked) {
     return
