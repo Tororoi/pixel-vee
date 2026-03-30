@@ -125,8 +125,10 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         }
         buildUpDensityMap = buildUpLayerMaps.get(action.layer)
       }
-      const cropDX = state.canvas.cropOffsetX - (action.recordedCropOffsetX ?? 0)
-      const cropDY = state.canvas.cropOffsetY - (action.recordedCropOffsetY ?? 0)
+      const cropDX =
+        state.canvas.cropOffsetX - (action.recordedCropOffsetX ?? 0)
+      const cropDY =
+        state.canvas.cropOffsetY - (action.recordedCropOffsetY ?? 0)
       performAction(
         action,
         betweenCtx,
@@ -253,7 +255,9 @@ export function performAction(
         // layer offset and crop delta to get absolute canvas coordinates.
         mask = new Set(
           action.maskArray.map(
-            (coord) => ((coord.y + offsetY + cropDY) << 16) | (coord.x + offsetX + cropDX),
+            (coord) =>
+              ((coord.y + offsetY + cropDY) << 16) |
+              (coord.x + offsetX + cropDX),
           ),
         )
       }
@@ -310,7 +314,12 @@ export function performAction(
             strokeCtx,
           )
         } else {
-          actionDitherDraw(p.x + offsetX + cropDX, p.y + offsetY + cropDY, stamp, strokeCtx)
+          actionDitherDraw(
+            p.x + offsetX + cropDX,
+            p.y + offsetY + cropDY,
+            stamp,
+            strokeCtx,
+          )
         }
         previousX = p.x + offsetX + cropDX
         previousY = p.y + offsetY + cropDY
@@ -806,48 +815,12 @@ export function applyCanvasDimensions(width, height) {
 
 /**
  * Resize the offscreen canvas and all layers.
- * Existing art is baked to flat images and redrawn at the given offset.
- * The undo/redo history is always cleared because stored action coordinates
- * would be invalid after a resize; the caller (applyResize) records the
- * resize as a timeline action instead.
  * @param {number} width - (Integer)
  * @param {number} height - (Integer)
- * @param {number} contentOffsetX - pixels to shift existing art right in new canvas (Integer, default 0)
- * @param {number} contentOffsetY - pixels to shift existing art down in new canvas (Integer, default 0)
  */
-export const resizeOffScreenCanvas = (
-  width,
-  height,
-  contentOffsetX = 0,
-  contentOffsetY = 0,
-) => {
-  // Capture each raster layer before dimensions change
-  // const layerSnapshots = canvas.layers
-  //   .filter((l) => l.type === 'raster')
-  //   .map((l) => {
-  //     const snap = document.createElement('canvas')
-  //     snap.width = l.cvs.width
-  //     snap.height = l.cvs.height
-  //     snap.getContext('2d').drawImage(l.cvs, 0, 0)
-  //     return { layer: l, snap }
-  //   })
-
+export const resizeOffScreenCanvas = (width, height) => {
   applyCanvasDimensions(width, height)
 
-  // // Draw captured content at the offset position (offset 0,0 = same position)
-  // layerSnapshots.forEach(({ layer, snap }) => {
-  //   layer.ctx.drawImage(snap, contentOffsetX, contentOffsetY)
-  // })
-
-  // // Clear timeline — coordinates become invalid after any resize
-  // state.timeline.undoStack.length = 0
-  // state.timeline.redoStack.length = 0
-  // state.timeline.currentAction = null
-  // state.timeline.clearPoints()
-  // state.timeline.clearActiveIndexes()
-  // state.timeline.clearSavedBetweenActionImages()
-
-  // renderCanvas() // blit flat layer data to onscreen canvases (no timeline redraw)
   renderCanvas(null, true)
   vectorGui.render()
 }

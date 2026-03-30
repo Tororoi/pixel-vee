@@ -102,7 +102,6 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   if (state.ui.saveDialogOpen) {
     setSaveFilesizePreview()
   }
-  console.log(state.timeline.undoStack.length, state.timeline.redoStack.length)
 }
 
 /**
