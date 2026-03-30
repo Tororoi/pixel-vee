@@ -1,4 +1,4 @@
-import { brushStamps } from '../Context/brushStamps.js'
+import { brushStamps, buildCustomStampEntry } from '../Context/brushStamps.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
@@ -9,6 +9,19 @@ import { renderCanvas } from '../Canvas/render.js'
 import { isOutOfBounds } from '../utils/canvasHelpers.js'
 import { getGuiLineWidth, doubleStroke } from '../utils/guiHelpers.js'
 import { ditherPatterns, isDitherOn } from '../Context/ditherPatterns.js'
+
+/**
+ * Returns the active brush stamp entry and effective brush size.
+ * Handles the custom stamp as a special case.
+ * @returns {{ entry: object, brushSize: number }}
+ */
+function getActiveBrushStampEntry() {
+  if (state.tool.current.brushType === 'custom') {
+    return { entry: buildCustomStampEntry(), brushSize: 32 }
+  }
+  const brushSize = state.tool.current.brushSize
+  return { entry: brushStamps[state.tool.current.brushType][brushSize], brushSize }
+}
 
 //===========================================//
 //=== * * * Graphics User Interface * * * ===//
@@ -77,10 +90,11 @@ export function renderCursor() {
  */
 function drawInjectPreview() {
   renderCanvas(canvas.currentLayer)
+  const { entry, brushSize } = getActiveBrushStampEntry()
   actionDraw(
     state.cursor.x,
     state.cursor.y,
-    brushStamps[state.tool.current.brushType][state.tool.current.brushSize]['0,0'],
+    entry['0,0'],
     createStrokeContext({
       layer: canvas.currentLayer,
       isPreview: true,
@@ -90,7 +104,7 @@ function drawInjectPreview() {
       currentModes: state.tool.current.modes,
       maskSet: state.selection.maskSet,
       seenPixelsSet: state.selection.seenPixelsSet,
-      brushSize: state.tool.current.brushSize,
+      brushSize,
     }),
   )
 }
@@ -101,7 +115,8 @@ function drawInjectPreview() {
  */
 function drawDitherInjectPreview() {
   renderCanvas(canvas.currentLayer)
-  const stamp = brushStamps[state.tool.current.brushType][state.tool.current.brushSize]['0,0']
+  const { entry, brushSize } = getActiveBrushStampEntry()
+  const stamp = entry['0,0']
   const ctx = createStrokeContext({
     layer: canvas.currentLayer,
     isPreview: true,
@@ -111,7 +126,7 @@ function drawDitherInjectPreview() {
     currentModes: state.tool.current.modes,
     maskSet: state.selection.maskSet,
     seenPixelsSet: state.selection.seenPixelsSet,
-    brushSize: state.tool.current.brushSize,
+    brushSize,
     ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
     twoColorMode: state.tool.current.modes?.twoColor ?? false,
     secondaryColor: swatches.secondary.color,
@@ -132,8 +147,8 @@ function drawDitherInjectPreview() {
  * vectorGui.render() already cleared it — no layer blit needed.
  */
 function drawNormalPreview() {
-  const brushSize = state.tool.current.brushSize
-  const stamp = brushStamps[state.tool.current.brushType][brushSize]['0,0']
+  const { entry, brushSize } = getActiveBrushStampEntry()
+  const stamp = entry['0,0']
   const baseX = Math.ceil(state.cursor.x - brushSize / 2)
   const baseY = Math.ceil(state.cursor.y - brushSize / 2)
   canvas.cursorCTX.fillStyle = swatches.primary.color.color
@@ -156,8 +171,8 @@ function drawNormalPreview() {
  * In build-up dither mode, the pattern is determined per-pixel from the density map.
  */
 function drawDitherPreview() {
-  const brushSize = state.tool.current.brushSize
-  const stamp = brushStamps[state.tool.current.brushType][brushSize]['0,0']
+  const { entry, brushSize } = getActiveBrushStampEntry()
+  const stamp = entry['0,0']
   const baseX = Math.ceil(state.cursor.x - brushSize / 2)
   const baseY = Math.ceil(state.cursor.y - brushSize / 2)
   const twoColor = state.tool.current.modes?.twoColor ?? false
@@ -215,18 +230,15 @@ function clearLayerPreviewIfNeeded() {
  */
 function drawCursorBox(lineWeight) {
   const lineWidth = getGuiLineWidth(lineWeight)
-  let brushOffset = Math.floor(state.tool.current.brushSize / 2)
+  const { entry, brushSize: activeBrushSize } = getActiveBrushStampEntry()
+  let brushOffset = Math.floor(activeBrushSize / 2)
   let ol = lineWidth / 2 // line offset to stroke off-center
 
-  const pixelSet =
-    brushStamps[state.tool.current.brushType][state.tool.current.brushSize]
-      .pixelSet
+  const pixelSet = entry.pixelSet
 
   canvas.vectorGuiCTX.beginPath()
 
-  for (const pixel of brushStamps[state.tool.current.brushType][
-    state.tool.current.brushSize
-  ]['0,0']) {
+  for (const pixel of entry['0,0']) {
     const x = state.cursor.x + canvas.xOffset + pixel.x - brushOffset
     const y = state.cursor.y + canvas.yOffset + pixel.y - brushOffset
 

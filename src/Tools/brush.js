@@ -1,4 +1,4 @@
-import { brushStamps } from '../Context/brushStamps.js'
+import { brushStamps, customBrushStamp, buildCustomStampEntry } from '../Context/brushStamps.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
@@ -38,6 +38,7 @@ function brushSteps() {
         rebuildBuildUpDensityMap()
       }
       //Build stroke context once — reused for every point in this stroke
+      const isCustomStamp = state.tool.current.brushType === 'custom'
       brush._strokeCtx = createStrokeContext({
         layer: canvas.currentLayer,
         boundaryBox: state.selection.boundaryBox,
@@ -45,8 +46,10 @@ function brushSteps() {
         currentModes: state.tool.current.modes,
         maskSet: state.selection.maskSet,
         seenPixelsSet: state.selection.seenPixelsSet,
-        brushStamp: brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
-        brushSize: state.tool.current.brushSize,
+        brushStamp: isCustomStamp
+          ? buildCustomStampEntry()
+          : brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+        brushSize: isCustomStamp ? 32 : state.tool.current.brushSize,
         ditherPattern: ditherPatterns[brush.ditherPatternIndex],
         twoColorMode: brush.modes.twoColor,
         secondaryColor: swatches.secondary.color,
@@ -54,6 +57,7 @@ function brushSteps() {
         ditherOffsetY: brush.ditherOffsetY,
         densityMap: brush._buildUpDensityMap,
         buildUpSteps: brush.buildUpSteps,
+        customStampColorMap: null,
       })
       brush._previewStrokeCtx = { ...brush._strokeCtx, isPreview: true, excludeFromSet: true }
       //initial point

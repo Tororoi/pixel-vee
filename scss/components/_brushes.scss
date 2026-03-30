@@ -75,6 +75,138 @@
   }
 }
 
+/* Stamp options in brush container */
+.brush-container {
+  .stamp-dither-row {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-evenly;
+    width: 100%;
+    margin-bottom: 4px;
+  }
+
+  .stamp-options {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+
+    .modes-title {
+      margin-bottom: 4px;
+    }
+
+    .stamp-type-row {
+      display: flex;
+      flex-flow: row wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 2px;
+      margin-bottom: 4px;
+
+      .mode {
+        cursor: pointer;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        user-select: none;
+        width: 40px;
+        height: 40px;
+      }
+    }
+  }
+}
+
+/* Stamp editor dialog */
+.stamp-editor-container {
+  @extend %floating-dialog;
+  max-width: calc(100% - 4px);
+  max-height: calc(100% - 4px);
+
+  .stamp-editor-interface {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: center;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .stamp-editor-tools {
+    display: flex;
+    flex-flow: column wrap;
+    align-content: center;
+    width: 100%;
+    height: 100%;
+    gap: 16px;
+
+    .stamp-tool-group {
+      display: flex;
+      flex-flow: row nowrap;
+      gap: 16px;
+    }
+
+    .stamp-tool {
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      user-select: none;
+      width: 40px;
+      height: 40px;
+      &.selected {
+        z-index: 105;
+      }
+      &:hover {
+        z-index: 104;
+      }
+    }
+  }
+
+  #stamp-editor-canvas {
+    width: 320px;
+    height: 320px;
+    cursor: crosshair;
+    image-rendering: pixelated;
+    background-image: $diagonal-stripe-bg;
+    @include boxBorder;
+    touch-action: none;
+  }
+
+  .stamp-editor-footer {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    width: 100%;
+    gap: 8px;
+
+    .stamp-editor-preview-col {
+      display: flex;
+      flex-flow: column nowrap;
+      gap: 4px;
+
+      #stamp-preview-canvas {
+        width: 64px;
+        height: 64px;
+        image-rendering: pixelated;
+        background-image: $diagonal-stripe-bg;
+        @include boxBorder;
+      }
+
+      #stamp-editor-apply-btn {
+        width: 64px;
+        padding: 6px 0;
+        cursor: pointer;
+        color: $white;
+        background: $dark-gray;
+        border-color: $border-color;
+        font-size: 13px;
+        @include boxBorder;
+        &:hover {
+          border-color: $white;
+        }
+      }
+    }
+  }
+}
+
 /* Dither pattern picker dialog */
 .dither-picker-container {
   @extend %floating-dialog;

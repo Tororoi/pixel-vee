@@ -213,7 +213,7 @@
   height: 100%;
 }
 
-.vector-transform-ui-container, .export-container, .save-container, .size-container, .picker-container, .settings-container, .dither-picker-container {
+.vector-transform-ui-container, .export-container, .save-container, .size-container, .picker-container, .settings-container, .stamp-editor-container, .dither-picker-container {
   user-select: none;
   position: absolute;
   z-index: 103;
@@ -1259,6 +1259,14 @@ canvas {
   background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'><path stroke='rgb(255, 255, 255)' d='M7 1h6M5 2h2M13 2h2M4 3h1M15 3h1M3 4h1M16 4h1M2 5h1M17 5h1M2 6h1M17 6h1M1 7h1M18 7h1M1 8h1M18 8h1M1 9h1M18 9h1M1 10h1M18 10h1M1 11h1M18 11h1M1 12h1M18 12h1M2 13h1M17 13h1M2 14h1M17 14h1M3 15h1M16 15h1M4 16h1M15 16h1M5 17h2M13 17h2M7 18h6' /><path stroke='%23000000' d='M7 2h6M5 3h3M9 3h1M11 3h1M13 3h2M4 4h1M6 4h1M8 4h1M10 4h1M12 4h4M3 5h1M5 5h1M11 5h1M13 5h1M15 5h2M3 6h2M6 6h1M10 6h1M12 6h1M14 6h3M2 7h2M13 7h1M15 7h1M17 7h1M2 8h1M4 8h1M12 8h1M14 8h4M2 9h2M13 9h1M15 9h3M2 10h1M4 10h1M6 10h1M10 10h1M12 10h1M14 10h4M2 11h2M5 11h1M11 11h1M13 11h3M17 11h1M2 12h3M6 12h1M8 12h1M10 12h1M12 12h6M3 13h1M5 13h1M7 13h1M9 13h1M11 13h3M15 13h2M3 14h14M4 15h2M7 15h1M9 15h1M11 15h1M13 15h3M5 16h10M7 17h6' /><path stroke='%23ffffff' d='M8 3h1M10 3h1M12 3h1M5 4h1M7 4h1M9 4h1M11 4h1M4 5h1M6 5h5M12 5h1M14 5h1M5 6h1M7 6h3M11 6h1M13 6h1M4 7h9M14 7h1M16 7h1M3 8h1M5 8h7M13 8h1M4 9h9M14 9h1M3 10h1M5 10h1M7 10h3M11 10h1M13 10h1M4 11h1M6 11h5M12 11h1M16 11h1M5 12h1M7 12h1M9 12h1M11 12h1M4 13h1M6 13h1M8 13h1M10 13h1M14 13h1M6 15h1M8 15h1M10 15h1M12 15h1' /></svg>");
 }
 
+.stamp {
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'><path stroke='rgb(131, 131, 131)' d='M8 1h4M7 2h1M12 2h1M6 3h1M13 3h1M6 4h1M13 4h1M6 5h1M13 5h1M7 6h1M12 6h1M7 7h1M12 7h1M8 8h1M11 8h1M8 9h1M11 9h1M3 10h5M12 10h5M2 11h1M17 11h1M1 12h1M18 12h1M1 13h1M18 13h1M1 14h1M18 14h1M1 15h1M18 15h1M2 16h1M17 16h1M2 17h1M17 17h1M3 18h14' /><path stroke='%23575757' d='M8 2h4M7 3h1M11 3h2M7 4h1M11 4h1M7 5h1M10 5h1M8 6h2M8 7h2M9 8h1M9 9h1M8 10h1M10 10h1M3 11h5M10 11h2M2 12h1M12 12h1M14 12h2M2 13h1M12 13h1M14 13h2M2 14h1M9 14h1M11 14h2M14 14h2M2 15h1M4 15h1M6 15h1M8 15h1M10 15h4M4 17h5M10 17h1M14 17h1' /><path stroke='%23ffffff' d='M8 3h2M8 4h2M3 12h7M3 13h3M7 13h1M3 14h1M5 14h1M5 15h1' /><path stroke='%23acacac' d='M10 3h1M10 4h1M8 5h2M11 5h1M10 6h1M9 10h1M8 11h2M10 12h2M13 12h1M6 13h1M8 13h4M13 13h1M4 14h1M6 14h3M10 14h1M13 14h1M3 15h1M7 15h1M9 15h1' /><path stroke='%23000000' d='M12 4h1M12 5h1M11 6h1M10 7h2M10 8h1M10 9h1M11 10h1M12 11h5M16 12h2M16 13h2M16 14h2M14 15h4M3 16h14M3 17h1M9 17h1M11 17h3M15 17h2' /></svg>");
+  background-size: 100%;
+}
+.stamp:hover, .stamp.selected {
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'><path stroke='rgb(255, 255, 255)' d='M8 1h4M7 2h1M12 2h1M6 3h1M13 3h1M6 4h1M13 4h1M6 5h1M13 5h1M7 6h1M12 6h1M7 7h1M12 7h1M8 8h1M11 8h1M8 9h1M11 9h1M3 10h5M12 10h5M2 11h1M17 11h1M1 12h1M18 12h1M1 13h1M18 13h1M1 14h1M18 14h1M1 15h1M18 15h1M2 16h1M17 16h1M2 17h1M17 17h1M3 18h14' /><path stroke='%23575757' d='M8 2h4M7 3h1M11 3h2M7 4h1M11 4h1M7 5h1M10 5h1M8 6h2M8 7h2M9 8h1M9 9h1M8 10h1M10 10h1M3 11h5M10 11h2M2 12h1M12 12h1M14 12h2M2 13h1M12 13h1M14 13h2M2 14h1M9 14h1M11 14h2M14 14h2M2 15h1M4 15h1M6 15h1M8 15h1M10 15h4M4 17h5M10 17h1M14 17h1' /><path stroke='%23ffffff' d='M8 3h2M8 4h2M3 12h7M3 13h3M7 13h1M3 14h1M5 14h1M5 15h1' /><path stroke='%23acacac' d='M10 3h1M10 4h1M8 5h2M11 5h1M10 6h1M9 10h1M8 11h2M10 12h2M13 12h1M6 13h1M8 13h4M13 13h1M4 14h1M6 14h3M10 14h1M13 14h1M3 15h1M7 15h1M9 15h1' /><path stroke='%23000000' d='M12 4h1M12 5h1M11 6h1M10 7h2M10 8h1M10 9h1M11 10h1M12 11h5M16 12h2M16 13h2M16 14h2M14 15h4M3 16h14M3 17h1M9 17h1M11 17h3M15 17h2' /></svg>");
+}
+
 .rotate {
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 -0.5 20 20' shape-rendering='crispEdges'%3E%3Cpath stroke='rgb(131, 131, 131)' d='M8 1h4M6 2h2M12 2h2M5 3h1M14 3h1M4 4h1M9 4h2M15 4h1M3 5h1M7 5h2M11 5h2M16 5h1M3 6h1M6 6h1M13 6h1M16 6h1M2 7h1M6 7h1M13 7h1M17 7h1M2 8h1M5 8h1M14 8h1M17 8h1M2 9h1M5 9h1M14 9h1M17 9h1M2 10h1M5 10h1M10 10h1M13 10h1M17 10h1M3 11h2M9 11h1M11 11h1M13 11h1M16 11h1M8 12h1M11 12h2M16 12h1M7 13h1M15 13h1M6 14h1M14 14h1M7 15h1M12 15h2M8 16h1M11 16h1M9 17h1M11 17h1M10 18h1' /%3E%3Cpath stroke='%23000000' d='M8 2h4M6 3h8M5 4h4M11 4h4M4 5h3M13 5h3M4 6h2M14 6h2M3 7h3M14 7h3M3 8h2M15 8h2M3 9h2M15 9h2M3 10h2M14 10h3M10 11h1M14 11h2M9 12h2M13 12h3M8 13h7M7 14h7M8 15h4M9 16h2M10 17h1' /%3E%3C/svg%3E");
   background-size: 100%;
@@ -1936,6 +1944,133 @@ canvas {
   background: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   cursor: pointer;
   margin-bottom: 8px;
+}
+
+/* Stamp options in brush container */
+.brush-container .stamp-dither-row {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-evenly;
+  width: 100%;
+  margin-bottom: 4px;
+}
+.brush-container .stamp-options {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+}
+.brush-container .stamp-options .modes-title {
+  margin-bottom: 4px;
+}
+.brush-container .stamp-options .stamp-type-row {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 4px;
+}
+.brush-container .stamp-options .stamp-type-row .mode {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  width: 40px;
+  height: 40px;
+}
+
+/* Stamp editor dialog */
+.stamp-editor-container {
+  max-width: calc(100% - 4px);
+  max-height: calc(100% - 4px);
+}
+.stamp-editor-container .stamp-editor-interface {
+  display: flex;
+  flex-flow: column nowrap;
+  align-items: center;
+  padding: 16px;
+  gap: 16px;
+}
+.stamp-editor-container .stamp-editor-tools {
+  display: flex;
+  flex-flow: column wrap;
+  align-content: center;
+  width: 100%;
+  height: 100%;
+  gap: 16px;
+}
+.stamp-editor-container .stamp-editor-tools .stamp-tool-group {
+  display: flex;
+  flex-flow: row nowrap;
+  gap: 16px;
+}
+.stamp-editor-container .stamp-editor-tools .stamp-tool {
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  user-select: none;
+  width: 40px;
+  height: 40px;
+}
+.stamp-editor-container .stamp-editor-tools .stamp-tool.selected {
+  z-index: 105;
+}
+.stamp-editor-container .stamp-editor-tools .stamp-tool:hover {
+  z-index: 104;
+}
+.stamp-editor-container #stamp-editor-canvas {
+  width: 320px;
+  height: 320px;
+  cursor: crosshair;
+  image-rendering: pixelated;
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.stamp-editor-container #stamp-editor-canvas:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.stamp-editor-container #stamp-editor-canvas {
+  touch-action: none;
+}
+.stamp-editor-container .stamp-editor-footer {
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: space-between;
+  width: 100%;
+  gap: 8px;
+}
+.stamp-editor-container .stamp-editor-footer .stamp-editor-preview-col {
+  display: flex;
+  flex-flow: column nowrap;
+  gap: 4px;
+}
+.stamp-editor-container .stamp-editor-footer .stamp-editor-preview-col #stamp-preview-canvas {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  background-image: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.stamp-editor-container .stamp-editor-footer .stamp-editor-preview-col #stamp-preview-canvas:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.stamp-editor-container .stamp-editor-footer .stamp-editor-preview-col #stamp-editor-apply-btn {
+  width: 64px;
+  padding: 6px 0;
+  cursor: pointer;
+  color: rgb(255, 255, 255);
+  background: rgb(61, 61, 61);
+  border-color: rgb(131, 131, 131);
+  font-size: 13px;
+  box-shadow: -2px 0 0 0 rgb(131, 131, 131), 2px 0 0 0 rgb(131, 131, 131), 0 -2px 0 0 rgb(131, 131, 131), 0 2px 0 0 rgb(131, 131, 131);
+}
+.stamp-editor-container .stamp-editor-footer .stamp-editor-preview-col #stamp-editor-apply-btn:hover:not([disabled]) {
+  box-shadow: -2px 0 0 0 rgb(255, 255, 255), 2px 0 0 0 rgb(255, 255, 255), 0 -2px 0 0 rgb(255, 255, 255), 0 2px 0 0 rgb(255, 255, 255);
+}
+.stamp-editor-container .stamp-editor-footer .stamp-editor-preview-col #stamp-editor-apply-btn:hover {
+  border-color: rgb(255, 255, 255);
 }
 
 /* Dither pattern picker dialog */

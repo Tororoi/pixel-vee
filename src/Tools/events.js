@@ -4,6 +4,7 @@ import { canvas } from "../Context/canvas.js"
 import { tools, toolGroups } from "../Tools/index.js"
 import { handleUndo, handleRedo } from "../Actions/undoRedo/undoRedo.js"
 import { brush, rebuildBuildUpDensityMap, BAYER_STEPS } from "../Tools/brush.js"
+import { customBrushStamp } from "../Context/brushStamps.js"
 import { vectorGui } from "../GUI/vector.js"
 import { actionClear } from "../Actions/modifyTimeline/modifyTimeline.js"
 import { actionZoom, actionRecenter } from "../Actions/untracked/viewActions.js"
@@ -142,10 +143,21 @@ export function handleModes(e) {
  * @param {PointerEvent} e - click event
  */
 function switchBrush(e) {
-  if (state.tool.current.brushType === "square") {
-    state.tool.current.brushType = "circle"
-  } else {
+  const current = state.tool.current.brushType
+  if (current === "circle") {
     state.tool.current.brushType = "square"
+    dom.customBrushTypeBtn?.classList.remove("active")
+  } else if (current === "square") {
+    if (customBrushStamp.pixels.length === 0) {
+      state.tool.current.brushType = "circle"
+      dom.customBrushTypeBtn?.classList.remove("active")
+    } else {
+      state.tool.current.brushType = "custom"
+      dom.customBrushTypeBtn?.classList.add("active")
+    }
+  } else {
+    state.tool.current.brushType = "circle"
+    dom.customBrushTypeBtn?.classList.remove("active")
   }
   renderBrushStampToDOM()
 }
