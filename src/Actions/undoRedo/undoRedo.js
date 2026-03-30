@@ -1,7 +1,7 @@
-import { state } from "../../Context/state.js"
-import { vectorGui } from "../../GUI/vector.js"
-import { setSaveFilesizePreview } from "../../Save/savefile.js"
-import { renderToLatestAction } from "./render.js"
+import { state } from '../../Context/state.js'
+import { vectorGui } from '../../GUI/vector.js'
+import { setSaveFilesizePreview } from '../../Save/savefile.js'
+import { renderToLatestAction } from './render.js'
 import {
   handleModifyAction,
   handleClearAction,
@@ -9,7 +9,8 @@ import {
   handleConfirmPasteAction,
   handleMoveAction,
   handleTransformAction,
-} from "./helpers.js"
+  handleResizeAction,
+} from './helpers.js'
 
 //====================================//
 //========= * * * Core * * * =========//
@@ -27,70 +28,72 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   vectorGui.reset()
   //newLatestAction is the action that's about to be the most recent action, if the function is "Undo" ("from")
   let newLatestAction =
-    modType === "from" && popStack.length > 1
+    modType === 'from' && popStack.length > 1
       ? popStack[popStack.length - 2]
       : null
-  if (modType === "from" && popStack.length > 1) {
-    if (newLatestAction.tool === "modify") {
+  if (modType === 'from' && popStack.length > 1) {
+    if (newLatestAction.tool === 'modify') {
       //If action is modif, new latest action will be considered the modded action
       newLatestAction = popStack[newLatestAction.moddedActionIndex]
     }
   }
-  if (latestAction.tool === "modify") {
+  if (latestAction.tool === 'modify') {
     handleModifyAction(latestAction, modType)
-  } else if (latestAction.tool === "changeMode") {
+  } else if (latestAction.tool === 'changeMode') {
     state.vector.all[latestAction.moddedVectorIndex].modes = {
       ...latestAction[modType],
     }
-  } else if (latestAction.tool === "changeDitherPattern") {
+  } else if (latestAction.tool === 'changeDitherPattern') {
     state.vector.all[latestAction.moddedVectorIndex].ditherPatternIndex =
       latestAction[modType]
-  } else if (latestAction.tool === "changeDitherOffset") {
+  } else if (latestAction.tool === 'changeDitherOffset') {
     state.vector.all[latestAction.moddedVectorIndex].ditherOffsetX =
       latestAction[modType].x
     state.vector.all[latestAction.moddedVectorIndex].ditherOffsetY =
       latestAction[modType].y
-  } else if (latestAction.tool === "changeBrushSize") {
+  } else if (latestAction.tool === 'changeBrushSize') {
     state.vector.all[latestAction.moddedVectorIndex].brushSize =
       latestAction[modType]
-  } else if (latestAction.tool === "changeColor") {
+  } else if (latestAction.tool === 'changeColor') {
     state.vector.all[latestAction.moddedVectorIndex].color = {
       ...latestAction[modType],
     }
-  } else if (latestAction.tool === "remove") {
+  } else if (latestAction.tool === 'remove') {
     if (latestAction.vectorIndices?.length > 0) {
       latestAction.vectorIndices.forEach((vectorIndex) => {
         state.vector.all[vectorIndex].removed = latestAction[modType]
       })
     }
-  } else if (latestAction.tool === "clear") {
+  } else if (latestAction.tool === 'clear') {
     handleClearAction(latestAction)
-  } else if (latestAction.tool === "addLayer") {
-    if (modType === "from") {
+  } else if (latestAction.tool === 'addLayer') {
+    if (modType === 'from') {
       //If undoing addLayer, remove layer from canvas
       latestAction.layer.removed = true
-    } else if (modType === "to") {
+    } else if (modType === 'to') {
       //If redoing addLayer, add layer to canvas
       latestAction.layer.removed = false
     }
-  } else if (latestAction.tool === "removeLayer") {
-    if (modType === "from") {
+  } else if (latestAction.tool === 'removeLayer') {
+    if (modType === 'from') {
       //If undoing removeLayer, add layer to canvas
       latestAction.layer.removed = false
-    } else if (modType === "to") {
+    } else if (modType === 'to') {
       //If redoing removeLayer, remove layer from canvas
       latestAction.layer.removed = true
     }
-  } else if (latestAction.tool === "paste") {
+  } else if (latestAction.tool === 'paste') {
     if (!latestAction.confirmed) {
       handlePasteAction(latestAction, modType)
     } else {
       handleConfirmPasteAction(latestAction, newLatestAction, modType)
     }
-  } else if (latestAction.tool === "move") {
+  } else if (latestAction.tool === 'move') {
     handleMoveAction(latestAction, modType)
-  } else if (latestAction.tool === "transform") {
+  } else if (latestAction.tool === 'transform') {
     handleTransformAction(latestAction, newLatestAction, modType)
+  } else if (latestAction.tool === 'resize') {
+    handleResizeAction(latestAction, modType)
   }
   pushStack.push(popStack.pop())
   //Render the canvas with the new latest action
@@ -99,6 +102,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   if (state.ui.saveDialogOpen) {
     setSaveFilesizePreview()
   }
+  console.log(state.timeline.undoStack.length, state.timeline.redoStack.length)
 }
 
 /**
@@ -107,7 +111,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
 export function handleUndo() {
   //length 1 prevents initial layer from being undone
   if (state.timeline.undoStack.length > 1) {
-    actionUndoRedo(state.timeline.redoStack, state.timeline.undoStack, "from")
+    actionUndoRedo(state.timeline.redoStack, state.timeline.undoStack, 'from')
   }
 }
 
@@ -116,7 +120,7 @@ export function handleUndo() {
  */
 export function handleRedo() {
   if (state.timeline.redoStack.length >= 1) {
-    actionUndoRedo(state.timeline.undoStack, state.timeline.redoStack, "to")
+    actionUndoRedo(state.timeline.undoStack, state.timeline.redoStack, 'to')
   }
 }
 
@@ -129,19 +133,23 @@ export function addToTimeline(actionObject) {
   const { tool, layer, properties } = actionObject
   //use current state for variables
   //Make selectProperties and selectedVectorIndices part of every action to reduce logic complexity. This means a small decrease in space efficiency for save files.
-  let snapshot = layer.type === "raster" ? layer.cvs.toDataURL() : null
+  let snapshot = layer.type === 'raster' ? layer.cvs.toDataURL() : null
   state.timeline.currentAction = {
     index: state.timeline.undoStack.length,
     tool,
     layer,
     ...properties,
     selectProperties: { ...state.selection.properties },
-    maskSet: state.selection.maskSet ? Array.from(state.selection.maskSet) : null,
+    maskSet: state.selection.maskSet
+      ? Array.from(state.selection.maskSet)
+      : null,
     selectedVectorIndices: Array.from(state.vector.selectedIndices),
     currentVectorIndex: state.vector.currentIndex,
     hidden: false,
     removed: false,
     snapshot,
+    recordedCropOffsetX: state.canvas.cropOffsetX,
+    recordedCropOffsetY: state.canvas.cropOffsetY,
   }
   state.timeline.undoStack.push(state.timeline.currentAction)
   if (state.ui.saveDialogOpen) {

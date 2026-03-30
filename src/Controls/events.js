@@ -5,9 +5,9 @@ import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import {
   resizeOverlay,
-  handlePointerDown as resizePointerDown,
-  handlePointerMove as resizePointerMove,
-  handlePointerUp as resizePointerUp,
+  resizeOverlayPointerDown,
+  resizeOverlayPointerMove,
+  resizeOverlayPointerUp,
 } from '../Canvas/resizeOverlay.js'
 import { vectorGui } from '../GUI/vector.js'
 import { renderCursor } from '../GUI/cursor.js'
@@ -146,7 +146,7 @@ function handleWheel(e) {
  */
 function handlePointerDown(e) {
   if (resizeOverlay.active) {
-    resizePointerDown(e)
+    resizeOverlayPointerDown(e)
     return
   }
   //reset media type, chrome dev tools niche use or computers that have touchscreen capabilities
@@ -192,7 +192,7 @@ function handlePointerDown(e) {
  */
 function handlePointerMove(e) {
   if (resizeOverlay.active) {
-    resizePointerMove(e)
+    resizeOverlayPointerMove(e)
     return
   }
   if (state.cursor.clickDisabled && state.cursor.clicked) {
@@ -274,7 +274,7 @@ function handlePointerMove(e) {
  */
 function handlePointerUp(e) {
   if (resizeOverlay.active) {
-    resizePointerUp(e)
+    resizeOverlayPointerUp(e)
     return
   }
   canvas.pointerEvent = 'pointerup'

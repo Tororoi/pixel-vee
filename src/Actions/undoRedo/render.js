@@ -13,6 +13,17 @@ import { setVectorShapeBoundaryBox } from "../../GUI/transform.js"
  * @param {string} modType - "from" or "to", used to identify undo or redo
  */
 export function renderToLatestAction(latestAction, modType) {
+  // Resize actions: handleResizeAction already applied the correct canvas dimensions
+  // and cropOffset. Replay the full timeline so all layers reflect the new settings.
+  if (latestAction.tool === 'resize') {
+    renderCanvas(null, true)
+    renderLayersToDOM()
+    renderVectorsToDOM()
+    state.reset()
+    vectorGui.render()
+    return
+  }
+
   //clear affected layer and render image from most recent action from the affected layer
   //This avoids having to redraw the timeline for every undo/redo. Close to constant time whereas redrawTimeline is closer to exponential time or worse.
   let mostRecentActionFromSameLayer = null

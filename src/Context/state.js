@@ -217,6 +217,14 @@ export const state = {
     colorLayerGlobal: null, // was: colorLayerGlobal
     localColorLayer: null, // was: localColorLayer
   },
+  // CANVAS — cumulative spatial offset of art within the canvas coordinate space.
+  // cropOffsetX/Y accumulate across resizes: when art shifts right by N px,
+  // cropOffsetX += N. Timeline replay applies (current - recorded) as a delta
+  // so old strokes appear at their correct shifted positions.
+  canvas: {
+    cropOffsetX: 0,
+    cropOffsetY: 0,
+  },
   // Cross-domain methods
   reset,
   deselect,

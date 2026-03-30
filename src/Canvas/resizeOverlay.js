@@ -4,6 +4,7 @@ import { state } from '../Context/state.js'
 import { resizeOffScreenCanvas } from '../Canvas/render.js'
 import { stopMarchingAnts, renderSelectionCVS } from '../GUI/select.js'
 
+
 // Map anchor name to [xFactor, yFactor]: 0 = left/top, 0.5 = center, 1 = right/bottom
 const ANCHOR_FACTORS = {
   'top-left':     [0,   0  ],
@@ -241,7 +242,7 @@ export function deactivate() {
   canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
 }
 
-export function handlePointerDown(e) {
+export function resizeOverlayPointerDown(e) {
   const cx = Math.floor(e.offsetX / canvas.zoom)
   const cy = Math.floor(e.offsetY / canvas.zoom)
   const hit = hitTestHandles(cx, cy)
@@ -254,7 +255,7 @@ export function handlePointerDown(e) {
   }
 }
 
-export function handlePointerMove(e) {
+export function resizeOverlayPointerMove(e) {
   const cx = Math.floor(e.offsetX / canvas.zoom)
   const cy = Math.floor(e.offsetY / canvas.zoom)
   const { dragHandle, prevCx, prevCy } = resizeOverlay
@@ -271,7 +272,7 @@ export function handlePointerMove(e) {
   }
 }
 
-export function handlePointerUp(e) {
+export function resizeOverlayPointerUp(e) {
   resizeOverlay.dragHandle = null
   const cx = Math.floor(e.offsetX / canvas.zoom)
   const cy = Math.floor(e.offsetY / canvas.zoom)
@@ -305,9 +306,48 @@ export function applyFromInputs(w, h) {
 export function applyResize() {
   const w = Math.round(resizeOverlay.newWidth)
   const h = Math.round(resizeOverlay.newHeight)
-  const offsetX = Math.round(resizeOverlay.contentOffsetX)
-  const offsetY = Math.round(resizeOverlay.contentOffsetY)
+  const contentOffsetX = Math.round(resizeOverlay.contentOffsetX)
+  const contentOffsetY = Math.round(resizeOverlay.contentOffsetY)
+
+  // Snapshot current canvas state for the "from" side of the action
+  const fromWidth = canvas.offScreenCVS.width
+  const fromHeight = canvas.offScreenCVS.height
+  const fromCropOffsetX = state.canvas.cropOffsetX
+  const fromCropOffsetY = state.canvas.cropOffsetY
+
+  // The content offset from the overlay is additive to the cumulative crop offset
+  const toCropOffsetX = fromCropOffsetX + contentOffsetX
+  const toCropOffsetY = fromCropOffsetY + contentOffsetY
+
   deactivate()
   dom.sizeContainer.style.display = 'none'
-  resizeOffScreenCanvas(w, h, offsetX, offsetY)
+
+  // Update the crop offset before resizing so the timeline replay uses the new values
+  state.canvas.cropOffsetX = toCropOffsetX
+  state.canvas.cropOffsetY = toCropOffsetY
+
+  // Resize the canvas — applyCanvasDimensions clears layer cvs, then
+  // renderCanvas(null, true) replays the timeline with the new crop delta applied
+  resizeOffScreenCanvas(w, h)
+
+  // Push a resize action so the operation can be undone/redone
+  const resizeAction = {
+    index: state.timeline.undoStack.length,
+    tool: 'resize',
+    layer: canvas.currentLayer,
+    from: { width: fromWidth, height: fromHeight, cropOffsetX: fromCropOffsetX, cropOffsetY: fromCropOffsetY },
+    to: { width: w, height: h, cropOffsetX: toCropOffsetX, cropOffsetY: toCropOffsetY },
+    selectProperties: { ...state.selection.properties },
+    maskSet: null,
+    selectedVectorIndices: Array.from(state.vector.selectedIndices),
+    currentVectorIndex: state.vector.currentIndex,
+    hidden: false,
+    removed: false,
+    snapshot: null,
+    boundaryBox: { xMin: 0, yMin: 0, xMax: w, yMax: h },
+    recordedCropOffsetX: toCropOffsetX,
+    recordedCropOffsetY: toCropOffsetY,
+  }
+  state.timeline.undoStack.push(resizeAction)
+  state.timeline.currentAction = resizeAction
 }
