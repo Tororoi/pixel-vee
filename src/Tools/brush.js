@@ -1,9 +1,12 @@
-import { brushStamps, customBrushStamp, buildCustomStampEntry } from '../Context/brushStamps.js'
+import { brushStamps, buildCustomStampEntry } from '../Context/brushStamps.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
-import { actionDitherDraw, actionBuildUpDitherDraw } from '../Actions/pointer/draw.js'
+import {
+  actionDitherDraw,
+  actionBuildUpDitherDraw,
+} from '../Actions/pointer/draw.js'
 import { actionLine } from '../Actions/pointer/line.js'
 import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
 import { getAngle, getTriangle } from '../utils/trig.js'
@@ -23,7 +26,7 @@ import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
 function brushSteps() {
   let brushDirection = '0,0'
   switch (canvas.pointerEvent) {
-    case 'pointerdown':
+    case 'pointerdown': {
       //initialize sets
       if (state.tool.current.modes?.colorMask) {
         state.selection.maskSet = createColorMaskSet(
@@ -48,7 +51,9 @@ function brushSteps() {
         seenPixelsSet: state.selection.seenPixelsSet,
         brushStamp: isCustomStamp
           ? buildCustomStampEntry()
-          : brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+          : brushStamps[state.tool.current.brushType][
+              state.tool.current.brushSize
+            ],
         brushSize: isCustomStamp ? 32 : state.tool.current.brushSize,
         ditherPattern: ditherPatterns[brush.ditherPatternIndex],
         twoColorMode: brush.modes.twoColor,
@@ -59,7 +64,11 @@ function brushSteps() {
         buildUpSteps: brush.buildUpSteps,
         customStampColorMap: null,
       })
-      brush._previewStrokeCtx = { ...brush._strokeCtx, isPreview: true, excludeFromSet: true }
+      brush._previewStrokeCtx = {
+        ...brush._strokeCtx,
+        isPreview: true,
+        excludeFromSet: true,
+      }
       //initial point
       drawBrushPoint(state.cursor.x, state.cursor.y, brushDirection)
       //For line
@@ -72,6 +81,7 @@ function brushSteps() {
       state.drawing.waitingPixelY = state.cursor.y
       scheduleRender(canvas.currentLayer)
       break
+    }
     case 'pointermove':
       //draw line connecting points that don't touch or if shift is held
       if (state.tool.current.options.line?.active) {
@@ -212,9 +222,19 @@ function drawPreviewBrushPoint() {
   )
   const stamp = brush._previewStrokeCtx.brushStamp[brushDirection]
   if (brush.modes.buildUpDither) {
-    actionBuildUpDitherDraw(state.cursor.x, state.cursor.y, stamp, brush._previewStrokeCtx)
+    actionBuildUpDitherDraw(
+      state.cursor.x,
+      state.cursor.y,
+      stamp,
+      brush._previewStrokeCtx,
+    )
   } else {
-    actionDitherDraw(state.cursor.x, state.cursor.y, stamp, brush._previewStrokeCtx)
+    actionDitherDraw(
+      state.cursor.x,
+      state.cursor.y,
+      stamp,
+      brush._previewStrokeCtx,
+    )
   }
 }
 

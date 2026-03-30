@@ -4,18 +4,17 @@ import { state } from '../Context/state.js'
 import { resizeOffScreenCanvas } from '../Canvas/render.js'
 import { stopMarchingAnts, renderSelectionCVS } from '../GUI/select.js'
 
-
 // Map anchor name to [xFactor, yFactor]: 0 = left/top, 0.5 = center, 1 = right/bottom
 const ANCHOR_FACTORS = {
-  'top-left':     [0,   0  ],
-  'top':          [0.5, 0  ],
-  'top-right':    [1,   0  ],
-  'left':         [0,   0.5],
-  'center':       [0.5, 0.5],
-  'right':        [1,   0.5],
-  'bottom-left':  [0,   1  ],
-  'bottom':       [0.5, 1  ],
-  'bottom-right': [1,   1  ],
+  'top-left': [0, 0],
+  top: [0.5, 0],
+  'top-right': [1, 0],
+  left: [0, 0.5],
+  center: [0.5, 0.5],
+  right: [1, 0.5],
+  'bottom-left': [0, 1],
+  bottom: [0.5, 1],
+  'bottom-right': [1, 1],
 }
 
 export const resizeOverlay = {
@@ -33,33 +32,58 @@ export const resizeOverlay = {
   animId: null,
 }
 
+/**
+ * Returns the new canvas box coordinates in canvas-space (pre-zoom units).
+ * @returns {{left: number, top: number, right: number, bottom: number, newWidth: number, newHeight: number}} The box's bounding coordinates and dimensions
+ */
 function getBoxCoords() {
   const { newWidth, newHeight, contentOffsetX, contentOffsetY } = resizeOverlay
   const left = canvas.xOffset - contentOffsetX
   const top = canvas.yOffset - contentOffsetY
-  return { left, top, right: left + newWidth, bottom: top + newHeight, newWidth, newHeight }
+  return {
+    left,
+    top,
+    right: left + newWidth,
+    bottom: top + newHeight,
+    newWidth,
+    newHeight,
+  }
 }
 
+/**
+ * Returns the hit-test radius for handles in canvas-space pixels.
+ * @returns {number} The radius within which a pointer is considered to have hit a handle
+ */
 function getHandleRadius() {
   return Math.max(5, 8 / canvas.zoom)
 }
 
+/**
+ * Returns the 8 handle positions (canvas-space) for the current resize box.
+ * @returns {Array<{id: string, x: number, y: number}>} The handle descriptors with their canvas-space coordinates
+ */
 function getHandlePositions() {
   const { left, top, right, bottom } = getBoxCoords()
   const midX = (left + right) / 2
   const midY = (top + bottom) / 2
   return [
-    { id: 'tl', x: left,  y: top    },
-    { id: 't',  x: midX,  y: top    },
-    { id: 'tr', x: right, y: top    },
-    { id: 'r',  x: right, y: midY   },
+    { id: 'tl', x: left, y: top },
+    { id: 't', x: midX, y: top },
+    { id: 'tr', x: right, y: top },
+    { id: 'r', x: right, y: midY },
     { id: 'br', x: right, y: bottom },
-    { id: 'b',  x: midX,  y: bottom },
-    { id: 'bl', x: left,  y: bottom },
-    { id: 'l',  x: left,  y: midY   },
+    { id: 'b', x: midX, y: bottom },
+    { id: 'bl', x: left, y: bottom },
+    { id: 'l', x: left, y: midY },
   ]
 }
 
+/**
+ * Hit-tests a canvas-space point against the 8 handles and box interior.
+ * @param {number} cx - canvas-space x
+ * @param {number} cy - canvas-space y
+ * @returns {string|null} handle id, 'move', or null
+ */
 function hitTestHandles(cx, cy) {
   const r = getHandleRadius()
   for (const h of getHandlePositions()) {
@@ -72,17 +96,39 @@ function hitTestHandles(cx, cy) {
   return null
 }
 
+/**
+ * Returns the CSS cursor string for a given handle id.
+ * @param {string|null} handle - Handle id ('tl', 'r', 'move', etc.) or null for no hit
+ * @returns {string} The CSS cursor value appropriate for the hovered handle
+ */
 function getCursorForHandle(handle) {
   switch (handle) {
-    case 'tl': case 'br': return 'nwse-resize'
-    case 'tr': case 'bl': return 'nesw-resize'
-    case 't':  case 'b':  return 'ns-resize'
-    case 'l':  case 'r':  return 'ew-resize'
-    case 'move': return 'move'
-    default: return 'default'
+    case 'tl':
+    case 'br':
+      return 'nwse-resize'
+    case 'tr':
+    case 'bl':
+      return 'nesw-resize'
+    case 't':
+    case 'b':
+      return 'ns-resize'
+    case 'l':
+    case 'r':
+      return 'ew-resize'
+    case 'move':
+      return 'move'
+    default:
+      return 'default'
   }
 }
 
+/**
+ * Applies a drag delta to resizeOverlay state for the given handle.
+ * Enforces a minimum dimension of 8px.
+ * @param {string} handle - handle id ('tl', 'r', 'move', etc.)
+ * @param {number} dx - horizontal delta in canvas pixels
+ * @param {number} dy - vertical delta in canvas pixels
+ */
 function applyDrag(handle, dx, dy) {
   const ro = resizeOverlay
   const MIN = 8
@@ -115,11 +161,24 @@ function applyDrag(handle, dx, dy) {
   }
 }
 
+/**
+ * Writes the current overlay width/height into the canvas size form inputs.
+ */
 function syncFormInputs() {
   dom.canvasWidth.value = Math.round(resizeOverlay.newWidth)
   dom.canvasHeight.value = Math.round(resizeOverlay.newHeight)
 }
 
+/**
+ * Draws a single resize handle onto the given context.
+ * Corner handles are squares; edge handles are diamonds.
+ * @param {CanvasRenderingContext2D} ctx - The rendering context to draw onto
+ * @param {number} cx - center x in canvas-space
+ * @param {number} cy - center y in canvas-space
+ * @param {number} r - handle radius
+ * @param {boolean} isCorner - true for corner handles (square), false for edge (diamond)
+ * @param {number} lw - base line width in canvas-space
+ */
 function drawHandle(ctx, cx, cy, r, isCorner, lw) {
   ctx.lineWidth = lw * 2
   if (isCorner) {
@@ -144,7 +203,12 @@ function drawHandle(ctx, cx, cy, r, isCorner, lw) {
   }
 }
 
-export function render() {
+/**
+ * Renders the resize overlay onto the selection GUI canvas:
+ * dims the viewport, reveals the new canvas area, draws the animated
+ * border around the new bounds, and draws the 8 drag handles.
+ */
+export function renderResizeOverlay() {
   const ctx = canvas.selectionGuiCTX
   const cvs = canvas.selectionGuiCVS
   const { left, top, newWidth, newHeight } = getBoxCoords()
@@ -201,13 +265,20 @@ export function render() {
   ctx.restore()
 }
 
-function animate() {
+/**
+ * Animation loop: advances the marching-ants dash offset and schedules the next frame.
+ */
+function animateResizeOverlay() {
   resizeOverlay.dashOffset = (resizeOverlay.dashOffset + 0.2) % 8
-  render()
-  resizeOverlay.animId = requestAnimationFrame(animate)
+  renderResizeOverlay()
+  resizeOverlay.animId = requestAnimationFrame(animateResizeOverlay)
 }
 
-export function activate() {
+/**
+ * Activates the resize overlay: initializes state from the current canvas size,
+ * resets the anchor grid UI to top-left, syncs form inputs, and starts the animation loop.
+ */
+export function activateResizeOverlay() {
   stopMarchingAnts()
   resizeOverlay.active = true
   resizeOverlay.newWidth = canvas.offScreenCVS.width
@@ -219,17 +290,21 @@ export function activate() {
   resizeOverlay.dashOffset = 0
 
   // Reset anchor grid UI
-  dom.anchorGrid.querySelectorAll('.anchor-btn').forEach((b) =>
-    b.classList.remove('active'),
-  )
+  dom.anchorGrid
+    .querySelectorAll('.anchor-btn')
+    .forEach((b) => b.classList.remove('active'))
   const topLeftBtn = dom.anchorGrid.querySelector('[data-anchor="top-left"]')
   if (topLeftBtn) topLeftBtn.classList.add('active')
 
   syncFormInputs()
-  resizeOverlay.animId = requestAnimationFrame(animate)
+  resizeOverlay.animId = requestAnimationFrame(animateResizeOverlay)
 }
 
-export function deactivate() {
+/**
+ * Deactivates the resize overlay: stops the animation, restores the selection
+ * GUI canvas to its normal state, and resets the cursor.
+ */
+export function deactivateResizeOverlay() {
   if (resizeOverlay.animId !== null) {
     cancelAnimationFrame(resizeOverlay.animId)
     resizeOverlay.animId = null
@@ -242,6 +317,11 @@ export function deactivate() {
   canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
 }
 
+/**
+ * Handles pointerdown on the vector GUI canvas while the resize overlay is active.
+ * Hit-tests handles, begins a drag, and captures the pointer.
+ * @param {PointerEvent} e - The pointerdown event from the vector GUI canvas
+ */
 export function resizeOverlayPointerDown(e) {
   const cx = Math.floor(e.offsetX / canvas.zoom)
   const cy = Math.floor(e.offsetY / canvas.zoom)
@@ -255,6 +335,11 @@ export function resizeOverlayPointerDown(e) {
   }
 }
 
+/**
+ * Handles pointermove on the vector GUI canvas while the resize overlay is active.
+ * Applies drag deltas when dragging, or updates the cursor on hover.
+ * @param {PointerEvent} e - The pointermove event from the vector GUI canvas
+ */
 export function resizeOverlayPointerMove(e) {
   const cx = Math.floor(e.offsetX / canvas.zoom)
   const cy = Math.floor(e.offsetY / canvas.zoom)
@@ -272,6 +357,11 @@ export function resizeOverlayPointerMove(e) {
   }
 }
 
+/**
+ * Handles pointerup on the vector GUI canvas while the resize overlay is active.
+ * Releases the drag and updates the cursor.
+ * @param {PointerEvent} e - The pointerup event from the vector GUI canvas
+ */
 export function resizeOverlayPointerUp(e) {
   resizeOverlay.dragHandle = null
   const cx = Math.floor(e.offsetX / canvas.zoom)
@@ -280,10 +370,22 @@ export function resizeOverlayPointerUp(e) {
   canvas.vectorGuiCVS.style.cursor = getCursorForHandle(hit)
 }
 
+/**
+ * Sets the active anchor without repositioning the overlay box.
+ * The anchor is used by applyFromInputs to determine which edge stays fixed
+ * when the user types new dimensions.
+ * @param {string} anchorName - one of the ANCHOR_FACTORS keys
+ */
 export function setAnchor(anchorName) {
   resizeOverlay.anchor = anchorName
 }
 
+/**
+ * Updates resizeOverlay dimensions from typed form input values, shifting
+ * contentOffsetX/Y so the currently anchored edge remains fixed.
+ * @param {number} w - desired new width
+ * @param {number} h - desired new height
+ */
 export function applyFromInputs(w, h) {
   const MIN = 8,
     MAX = 1024
@@ -293,16 +395,23 @@ export function applyFromInputs(w, h) {
   // Shift the offset by the delta scaled by the anchor factor so the anchored
   // edge stays fixed rather than jumping back to the canonical anchor position.
   resizeOverlay.contentOffsetX = Math.round(
-    resizeOverlay.contentOffsetX + (newWidth - resizeOverlay.newWidth) * xFactor,
+    resizeOverlay.contentOffsetX +
+      (newWidth - resizeOverlay.newWidth) * xFactor,
   )
   resizeOverlay.contentOffsetY = Math.round(
-    resizeOverlay.contentOffsetY + (newHeight - resizeOverlay.newHeight) * yFactor,
+    resizeOverlay.contentOffsetY +
+      (newHeight - resizeOverlay.newHeight) * yFactor,
   )
   resizeOverlay.newWidth = newWidth
   resizeOverlay.newHeight = newHeight
   syncFormInputs()
 }
 
+/**
+ * Commits the resize: deactivates the overlay, updates the cumulative crop offset
+ * in state, resizes the canvas (which replays the timeline with the new offset),
+ * and pushes a resize action onto the undo stack.
+ */
 export function applyResize() {
   const w = Math.round(resizeOverlay.newWidth)
   const h = Math.round(resizeOverlay.newHeight)
@@ -319,7 +428,7 @@ export function applyResize() {
   const toCropOffsetX = fromCropOffsetX + contentOffsetX
   const toCropOffsetY = fromCropOffsetY + contentOffsetY
 
-  deactivate()
+  deactivateResizeOverlay()
   dom.sizeContainer.style.display = 'none'
 
   // Update the crop offset before resizing so the timeline replay uses the new values
@@ -335,8 +444,18 @@ export function applyResize() {
     index: state.timeline.undoStack.length,
     tool: 'resize',
     layer: canvas.currentLayer,
-    from: { width: fromWidth, height: fromHeight, cropOffsetX: fromCropOffsetX, cropOffsetY: fromCropOffsetY },
-    to: { width: w, height: h, cropOffsetX: toCropOffsetX, cropOffsetY: toCropOffsetY },
+    from: {
+      width: fromWidth,
+      height: fromHeight,
+      cropOffsetX: fromCropOffsetX,
+      cropOffsetY: fromCropOffsetY,
+    },
+    to: {
+      width: w,
+      height: h,
+      cropOffsetX: toCropOffsetX,
+      cropOffsetY: toCropOffsetY,
+    },
     selectProperties: { ...state.selection.properties },
     maskSet: null,
     selectedVectorIndices: Array.from(state.vector.selectedIndices),

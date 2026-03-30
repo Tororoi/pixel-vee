@@ -42,7 +42,7 @@ import {
   applyFromInputs,
   applyResize,
   setAnchor,
-  deactivate as deactivateResizeOverlay,
+  deactivateResizeOverlay,
 } from './resizeOverlay.js'
 import { switchTool } from '../Tools/toolbox.js'
 import { enableActionsForSelection } from '../DOM/disableDomElements.js'
@@ -339,9 +339,9 @@ function dropLayer(e) {
 
 /**
  * Stop dragging a layer
- * @param {DragEvent} e - The drag event
+ * @param {DragEvent} _e - The drag event (unused)
  */
-function dragLayerEnd(e) {
+function dragLayerEnd(_e) {
   renderLayersToDOM()
 }
 
@@ -532,15 +532,19 @@ dom.canvasSizeCancelBtn.addEventListener('click', () => {
   dom.sizeContainer.style.display = 'none'
 })
 dom.canvasWidth.addEventListener('input', (e) => {
-  if (resizeOverlay.active) applyFromInputs(+e.target.value, +dom.canvasHeight.value)
+  if (resizeOverlay.active)
+    applyFromInputs(+e.target.value, +dom.canvasHeight.value)
 })
 dom.canvasHeight.addEventListener('input', (e) => {
-  if (resizeOverlay.active) applyFromInputs(+dom.canvasWidth.value, +e.target.value)
+  if (resizeOverlay.active)
+    applyFromInputs(+dom.canvasWidth.value, +e.target.value)
 })
 dom.anchorGrid.addEventListener('click', (e) => {
   const btn = e.target.closest('.anchor-btn')
   if (!btn) return
-  dom.anchorGrid.querySelectorAll('.anchor-btn').forEach((b) => b.classList.remove('active'))
+  dom.anchorGrid
+    .querySelectorAll('.anchor-btn')
+    .forEach((b) => b.classList.remove('active'))
   btn.classList.add('active')
   setAnchor(btn.dataset.anchor)
 })
@@ -613,7 +617,8 @@ dom.vectorSettingsContainer.addEventListener('click', (e) => {
   if (e.target.classList.contains('close-btn')) {
     dom.vectorSettingsContainer.style.display = 'none'
     dom.vectorSettingsContainer.vectorObj = null
-    if (dom.ditherPickerContainer) dom.ditherPickerContainer.editingVector = false
+    if (dom.ditherPickerContainer)
+      dom.ditherPickerContainer.editingVector = false
     return
   }
 
@@ -623,7 +628,7 @@ dom.vectorSettingsContainer.addEventListener('click', (e) => {
   const modeBtn = e.target.closest('.mode')
   if (modeBtn) {
     const modeKey = ['eraser', 'inject', 'twoColor'].find((k) =>
-      modeBtn.classList.contains(k)
+      modeBtn.classList.contains(k),
     )
     if (modeKey) {
       toggleVectorMode(vector, modeKey)
@@ -660,8 +665,7 @@ dom.vectorSettingsContainer.addEventListener('click', (e) => {
 
   const ditherPreviewBtn = e.target.closest('.vector-dither-preview')
   if (ditherPreviewBtn && dom.vectorDitherPickerContainer) {
-    const isOpen =
-      dom.vectorDitherPickerContainer.style.display === 'flex'
+    const isOpen = dom.vectorDitherPickerContainer.style.display === 'flex'
     if (isOpen) {
       dom.vectorDitherPickerContainer.style.display = 'none'
     } else {
@@ -693,7 +697,7 @@ dom.vectorSettingsContainer.addEventListener('input', (e) => {
     const newSize = parseInt(e.target.value)
     vector.brushSize = newSize
     const display = dom.vectorSettingsContainer.querySelector(
-      '.vector-brush-size-display'
+      '.vector-brush-size-display',
     )
     if (display) display.textContent = `Size: ${newSize}`
     renderCanvas(vector.layer, true)
@@ -730,8 +734,10 @@ dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
       updateVectorDitherPickerColors(vector)
       updateVectorDitherPreview(vector)
       // sync twoColor button in settings dialog if open
-      const settingsModeBtn = dom.vectorSettingsContainer?.querySelector('.mode.twoColor')
-      if (settingsModeBtn) settingsModeBtn.classList.toggle('selected', vector.modes.twoColor)
+      const settingsModeBtn =
+        dom.vectorSettingsContainer?.querySelector('.mode.twoColor')
+      if (settingsModeBtn)
+        settingsModeBtn.classList.toggle('selected', vector.modes.twoColor)
     }
     renderCanvas(vector.layer, true)
     return
@@ -765,27 +771,45 @@ dom.vectorDitherPickerContainer?.addEventListener('pointerdown', (e) => {
   const recordedLayerX = vector.recordedLayerX ?? currentLayerX
   const recordedLayerY = vector.recordedLayerY ?? currentLayerY
   // Compute effective offset at drag start
-  const startEffectiveX = (((vector.ditherOffsetX ?? 0) + recordedLayerX - currentLayerX) % 8 + 8) % 8
-  const startEffectiveY = (((vector.ditherOffsetY ?? 0) + recordedLayerY - currentLayerY) % 8 + 8) % 8
-  const fromOffset = { x: vector.ditherOffsetX ?? 0, y: vector.ditherOffsetY ?? 0 }
+  const startEffectiveX =
+    ((((vector.ditherOffsetX ?? 0) + recordedLayerX - currentLayerX) % 8) + 8) %
+    8
+  const startEffectiveY =
+    ((((vector.ditherOffsetY ?? 0) + recordedLayerY - currentLayerY) % 8) + 8) %
+    8
+  const fromOffset = {
+    x: vector.ditherOffsetX ?? 0,
+    y: vector.ditherOffsetY ?? 0,
+  }
   const onMove = (ev) => {
-    const newEffectiveX = ((startEffectiveX - Math.round((ev.clientX - startX) / 4)) % 8 + 8) % 8
-    const newEffectiveY = ((startEffectiveY - Math.round((ev.clientY - startY) / 4)) % 8 + 8) % 8
+    const newEffectiveX =
+      (((startEffectiveX - Math.round((ev.clientX - startX) / 4)) % 8) + 8) % 8
+    const newEffectiveY =
+      (((startEffectiveY - Math.round((ev.clientY - startY) / 4)) % 8) + 8) % 8
     // Invert effective-offset formula: storedOffset = ((effective - recordedLayer + currentLayer) % 8 + 8) % 8
-    vector.ditherOffsetX = ((newEffectiveX - recordedLayerX + currentLayerX) % 8 + 8) % 8
-    vector.ditherOffsetY = ((newEffectiveY - recordedLayerY + currentLayerY) % 8 + 8) % 8
+    vector.ditherOffsetX =
+      (((newEffectiveX - recordedLayerX + currentLayerX) % 8) + 8) % 8
+    vector.ditherOffsetY =
+      (((newEffectiveY - recordedLayerY + currentLayerY) % 8) + 8) % 8
     updateVectorDitherControls(vector)
     renderCanvas(vector.layer, true)
   }
   control.addEventListener('pointermove', onMove)
-  control.addEventListener('pointerup', () => {
-    control.removeEventListener('pointermove', onMove)
-    const toOffset = { x: vector.ditherOffsetX ?? 0, y: vector.ditherOffsetY ?? 0 }
-    if (fromOffset.x !== toOffset.x || fromOffset.y !== toOffset.y) {
-      changeActionVectorDitherOffset(vector, fromOffset, toOffset)
-      state.clearRedoStack()
-    }
-  }, { once: true })
+  control.addEventListener(
+    'pointerup',
+    () => {
+      control.removeEventListener('pointermove', onMove)
+      const toOffset = {
+        x: vector.ditherOffsetX ?? 0,
+        y: vector.ditherOffsetY ?? 0,
+      }
+      if (fromOffset.x !== toOffset.x || fromOffset.y !== toOffset.y) {
+        changeActionVectorDitherOffset(vector, fromOffset, toOffset)
+        state.clearRedoStack()
+      }
+    },
+    { once: true },
+  )
 })
 
 document.addEventListener('pointerdown', (e) => {

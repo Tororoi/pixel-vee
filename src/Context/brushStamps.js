@@ -1,8 +1,8 @@
-import { generateBrushStamps } from "../utils/brushHelpers.js"
+import { generateBrushStamps } from '../utils/brushHelpers.js'
 
 export const brushStamps = {
-  circle: generateBrushStamps("circle"),
-  square: generateBrushStamps("square"),
+  circle: generateBrushStamps('circle'),
+  square: generateBrushStamps('square'),
 }
 
 export const customBrushStamp = {
@@ -12,22 +12,22 @@ export const customBrushStamp = {
 }
 
 const STAMP_DIRECTION_KEYS = [
-  "0,0",
-  "1,0",
-  "1,1",
-  "0,1",
-  "-1,1",
-  "-1,0",
-  "-1,-1",
-  "0,-1",
-  "1,-1",
+  '0,0',
+  '1,0',
+  '1,1',
+  '0,1',
+  '-1,1',
+  '-1,0',
+  '-1,-1',
+  '0,-1',
+  '1,-1',
 ]
 
 /**
  * Returns a brushStamp-compatible entry for the custom stamp.
  * All directional keys share the same pixel array (no edge optimization needed
  * at this stamp size). Shape is compatible with brushStamps[type][size].
- * @returns {object}
+ * @returns {object} A brushStamps entry keyed by direction, each holding the custom pixel array
  */
 export function buildCustomStampEntry() {
   const pts = customBrushStamp.pixels

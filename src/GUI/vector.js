@@ -164,7 +164,13 @@ function drawControlPoints(
  * @param {number} radius - Base radius before touch/active scaling
  * @returns {{ r: number, isActive: boolean }} Updated radius and active state
  */
-function resolveCurrentVectorCollision(keys, normalizedX, normalizedY, r, radius) {
+function resolveCurrentVectorCollision(
+  keys,
+  normalizedX,
+  normalizedY,
+  r,
+  radius,
+) {
   if (
     checkSquarePointCollision(
       state.cursor.x,
@@ -191,7 +197,14 @@ function resolveCurrentVectorCollision(keys, normalizedX, normalizedY, r, radius
  * @param {object} vector - The other vector being checked
  * @returns {{ r: number, isActive: boolean }} Updated radius and active state
  */
-function resolveOtherVectorCollision(keys, normalizedX, normalizedY, r, radius, vector) {
+function resolveOtherVectorCollision(
+  keys,
+  normalizedX,
+  normalizedY,
+  r,
+  radius,
+  vector,
+) {
   if (
     !checkSquarePointCollision(
       state.cursor.x,
@@ -318,7 +331,16 @@ function drawActiveControlPoint(cx, cy, r, lw) {
  * @param {number} normalizedX - Point x plus layer offset
  * @param {number} normalizedY - Point y plus layer offset
  */
-function drawInactiveControlPoint(cx, cy, r, lw, modify, keys, normalizedX, normalizedY) {
+function drawInactiveControlPoint(
+  cx,
+  cy,
+  r,
+  lw,
+  modify,
+  keys,
+  normalizedX,
+  normalizedY,
+) {
   if (modify) {
     canvas.vectorGuiCTX.beginPath()
     canvas.vectorGuiCTX.arc(cx, cy, r, 0, 2 * Math.PI)
@@ -331,7 +353,13 @@ function drawInactiveControlPoint(cx, cy, r, lw, modify, keys, normalizedX, norm
     // Skip if the modify pass will draw a crosshair here
     const wouldBeActive =
       vectorGui.selectedPoint.xKey === keys.x ||
-      checkSquarePointCollision(state.cursor.x, state.cursor.y, normalizedX, normalizedY, r)
+      checkSquarePointCollision(
+        state.cursor.x,
+        state.cursor.y,
+        normalizedX,
+        normalizedY,
+        r,
+      )
     if (!wouldBeActive) {
       canvas.vectorGuiCTX.beginPath()
       canvas.vectorGuiCTX.arc(cx, cy, r, 0, 2 * Math.PI)
@@ -364,11 +392,24 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
       isActive = true
       vectorGui.setCollision(keys)
     } else if (vector) {
-      const result = resolveOtherVectorCollision(keys, normalizedX, normalizedY, r, radius, vector)
+      const result = resolveOtherVectorCollision(
+        keys,
+        normalizedX,
+        normalizedY,
+        r,
+        radius,
+        vector,
+      )
       r = result.r
       isActive = result.isActive
     } else {
-      const result = resolveCurrentVectorCollision(keys, normalizedX, normalizedY, r, radius)
+      const result = resolveCurrentVectorCollision(
+        keys,
+        normalizedX,
+        normalizedY,
+        r,
+        radius,
+      )
       r = result.r
       isActive = result.isActive
     }
@@ -381,18 +422,27 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
   if (isActive) {
     drawActiveControlPoint(cx, cy, r, lw)
   } else {
-    drawInactiveControlPoint(cx, cy, r, lw, modify, keys, normalizedX, normalizedY)
+    drawInactiveControlPoint(
+      cx,
+      cy,
+      r,
+      lw,
+      modify,
+      keys,
+      normalizedX,
+      normalizedY,
+    )
   }
 }
 
 /**
  * Returns true if the current collision is on a chainable endpoint (px1/px2 of a line vector).
  * Used to suppress the grab cursor when chain mode is active.
- * @returns {boolean}
+ * @returns {boolean} True if the collision is on a chainable endpoint, false otherwise
  */
 function isChainableCollision() {
-  const chainableTypes = ["line", "quadCurve", "cubicCurve"]
-  const endpointKeys = ["px1", "px2"]
+  const chainableTypes = ['line', 'quadCurve', 'cubicCurve']
+  const endpointKeys = ['px1', 'px2']
   if (
     vectorGui.selectedCollisionPresent &&
     state.vector.currentIndex !== null &&
@@ -437,7 +487,10 @@ function setCursorStyle() {
     if (state.tool.clickCounter !== 0) {
       //creating new vector, don't use grab cursor
       canvas.vectorGuiCVS.style.cursor = 'move'
-    } else if (state.tool.current.options?.chain?.active && isChainableCollision()) {
+    } else if (
+      state.tool.current.options?.chain?.active &&
+      isChainableCollision()
+    ) {
       //chain mode: show normal tool cursor over chainable endpoints
       canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
     } else if (state.cursor.clicked) {
