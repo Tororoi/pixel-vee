@@ -1,6 +1,6 @@
 import { dom } from '../Context/dom.js'
 import { swatches } from '../Context/swatch.js'
-import { customBrushStamp } from '../Context/brushStamps.js'
+import { customBrushStamp, updateCustomStamp } from '../Context/brushStamps.js'
 import { brush } from '../Tools/brush.js'
 import { renderBrushStampToDOM } from './renderBrush.js'
 
@@ -221,6 +221,7 @@ function applyStamp() {
     customBrushStamp.colorMap.set(key, color)
   }
 
+  updateCustomStamp()
   dom.stampEditorContainer.style.display = 'none'
 
   if (brush.brushType === 'custom') {

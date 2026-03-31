@@ -1,4 +1,4 @@
-import { brushStamps, buildCustomStampEntry } from '../Context/brushStamps.js'
+import { brushStamps } from '../Context/brushStamps.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
@@ -50,7 +50,7 @@ function brushSteps() {
         maskSet: state.selection.maskSet,
         seenPixelsSet: state.selection.seenPixelsSet,
         brushStamp: isCustomStamp
-          ? buildCustomStampEntry()
+          ? brushStamps.custom
           : brushStamps[state.tool.current.brushType][
               state.tool.current.brushSize
             ],
@@ -138,8 +138,9 @@ function brushSteps() {
         modes: { ...brush.modes },
         color: { ...swatches.primary.color },
         secondaryColor: { ...swatches.secondary.color },
-        brushSize: brush.brushSize,
+        brushSize: brush.brushType === 'custom' ? 32 : brush.brushSize,
         brushType: brush.brushType,
+        customStampEntry: brush.brushType === 'custom' ? brushStamps.custom : null,
         ditherPatternIndex: brush.ditherPatternIndex,
         ditherOffsetX: brush.ditherOffsetX,
         ditherOffsetY: brush.ditherOffsetY,
@@ -188,7 +189,7 @@ function addPointToAction(x, y) {
     state.timeline.addPoint({
       x: x - canvas.currentLayer.x,
       y: y - canvas.currentLayer.y,
-      brushSize: state.tool.current.brushSize,
+      brushSize: state.tool.current.brushType === 'custom' ? 32 : state.tool.current.brushSize,
     })
     state.selection.pointsSet.add(key)
   }

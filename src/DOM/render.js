@@ -13,6 +13,7 @@ export {
   renderBrushStampToDOM,
   renderBrushModesToDOM,
   renderToolOptionsToDOM,
+  renderStampOptionsToDOM,
   renderDitherOptionsToDOM,
   renderDitherControlsToDOM,
   renderBuildUpStepsToDOM,

@@ -272,14 +272,20 @@ export function performAction(
       // Build context once per stroke; brushSize is updated per-point below
       // since points may have individual brushSizes stored in the timeline.
       // Effective dither offset accounts for layer movement since stroke was recorded.
-      // Pixels are replayed at (p.x + offsetX), so the tile lookup must shift by
-      // (recordedLayerX - offsetX) to keep the pattern fixed to the pixels.
+      // Pixels are replayed at (p.x + offsetX + cropDX), so the tile lookup must
+      // shift by (recordedLayerX - offsetX - cropDX) to keep the pattern fixed to the pixels.
       const recordedLayerX = action.recordedLayerX ?? offsetX
       const recordedLayerY = action.recordedLayerY ?? offsetY
       const effectiveDitherOffsetX =
-        ((((action.ditherOffsetX ?? 0) + recordedLayerX - offsetX) % 8) + 8) % 8
+        ((((action.ditherOffsetX ?? 0) + recordedLayerX - offsetX - cropDX) %
+          8) +
+          8) %
+        8
       const effectiveDitherOffsetY =
-        ((((action.ditherOffsetY ?? 0) + recordedLayerY - offsetY) % 8) + 8) % 8
+        ((((action.ditherOffsetY ?? 0) + recordedLayerY - offsetY - cropDY) %
+          8) +
+          8) %
+        8
       const strokeCtx = createStrokeContext({
         layer: action.layer,
         customContext: betweenCtx,
@@ -304,8 +310,11 @@ export function performAction(
           previousY,
         )
         // Update per-point brushSize (timeline supports variable sizes per point)
-        strokeCtx.brushSize = p.brushSize
-        const stamp = brushStamps[action.brushType][p.brushSize][brushDirection]
+        const isCustomStamp = action.brushType === 'custom'
+        strokeCtx.brushSize = isCustomStamp ? 32 : p.brushSize
+        const stamp = isCustomStamp
+          ? action.customStampEntry[brushDirection]
+          : brushStamps[action.brushType][p.brushSize][brushDirection]
         if (isBuildUp) {
           actionBuildUpDitherDraw(
             p.x + offsetX + cropDX,
@@ -758,23 +767,24 @@ export function renderCanvas(
 }
 
 /**
- * Apply new canvas dimensions: resize all canvases, recalculate zoom/transforms,
- * center the canvas, and resize raster layer canvases (clearing their pixel data).
+ * Apply new canvas dimensions: resize all canvases, recalculate transforms,
+ * adjust canvas position to stay stable, and resize raster layer canvases (clearing their pixel data).
  * Called by resizeOffScreenCanvas and the undo/redo resize handler.
  * @param {number} width - (Integer)
  * @param {number} height - (Integer)
+ * @param {number} [contentOffsetX] - how far the existing art shifted right in the new canvas (canvas pixels)
+ * @param {number} [contentOffsetY] - how far the existing art shifted down in the new canvas (canvas pixels)
  */
-export function applyCanvasDimensions(width, height) {
+export function applyCanvasDimensions(
+  width,
+  height,
+  contentOffsetX = 0,
+  contentOffsetY = 0,
+) {
   canvas.offScreenCVS.width = width
   canvas.offScreenCVS.height = height
   canvas.previewCVS.width = width
   canvas.previewCVS.height = height
-  canvas.zoom = setInitialZoom(
-    canvas.offScreenCVS.width,
-    canvas.offScreenCVS.height,
-    canvas.vectorGuiCVS.offsetWidth,
-    canvas.vectorGuiCVS.offsetHeight,
-  )
   const t = canvas.sharpness * canvas.zoom
   canvas.vectorGuiCTX.setTransform(t, 0, 0, t, 0, 0)
   canvas.selectionGuiCTX.setTransform(t, 0, 0, t, 0, 0)
@@ -783,16 +793,8 @@ export function applyCanvasDimensions(width, height) {
     layer.onscreenCtx.setTransform(t, 0, 0, t, 0, 0)
   })
   canvas.backgroundCTX.setTransform(t, 0, 0, t, 0, 0)
-  canvas.xOffset = Math.round(
-    (canvas.currentLayer.onscreenCvs.width / canvas.sharpness / canvas.zoom -
-      canvas.offScreenCVS.width) /
-      2,
-  )
-  canvas.yOffset = Math.round(
-    (canvas.currentLayer.onscreenCvs.height / canvas.sharpness / canvas.zoom -
-      canvas.offScreenCVS.height) /
-      2,
-  )
+  canvas.xOffset = Math.round(canvas.xOffset - contentOffsetX)
+  canvas.yOffset = Math.round(canvas.yOffset - contentOffsetY)
   canvas.previousXOffset = canvas.xOffset
   canvas.previousYOffset = canvas.yOffset
   canvas.subPixelX = null
@@ -817,9 +819,16 @@ export function applyCanvasDimensions(width, height) {
  * Resize the offscreen canvas and all layers.
  * @param {number} width - (Integer)
  * @param {number} height - (Integer)
+ * @param {number} [contentOffsetX] - how far the existing art shifted right in the new canvas (canvas pixels)
+ * @param {number} [contentOffsetY] - how far the existing art shifted down in the new canvas (canvas pixels)
  */
-export const resizeOffScreenCanvas = (width, height) => {
-  applyCanvasDimensions(width, height)
+export const resizeOffScreenCanvas = (
+  width,
+  height,
+  contentOffsetX = 0,
+  contentOffsetY = 0,
+) => {
+  applyCanvasDimensions(width, height, contentOffsetX, contentOffsetY)
 
   renderCanvas(null, true)
   vectorGui.render()

@@ -1,4 +1,4 @@
-import { brushStamps, buildCustomStampEntry } from '../Context/brushStamps.js'
+import { brushStamps } from '../Context/brushStamps.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
@@ -21,7 +21,7 @@ import { ditherPatterns, isDitherOn } from '../Context/ditherPatterns.js'
  */
 function getActiveBrushStampEntry() {
   if (state.tool.current.brushType === 'custom') {
-    return { entry: buildCustomStampEntry(), brushSize: 32 }
+    return { entry: brushStamps.custom, brushSize: 32 }
   }
   const brushSize = state.tool.current.brushSize
   return {

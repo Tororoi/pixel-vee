@@ -3,6 +3,7 @@ import { generateBrushStamps } from '../utils/brushHelpers.js'
 export const brushStamps = {
   circle: generateBrushStamps('circle'),
   square: generateBrushStamps('square'),
+  custom: /** @type {object} */ (null), // set by updateCustomStamp() after customBrushStamp is defined
 }
 
 export const customBrushStamp = {
@@ -29,7 +30,7 @@ const STAMP_DIRECTION_KEYS = [
  * at this stamp size). Shape is compatible with brushStamps[type][size].
  * @returns {object} A brushStamps entry keyed by direction, each holding the custom pixel array
  */
-export function buildCustomStampEntry() {
+function buildCustomStampEntry() {
   const pts = customBrushStamp.pixels
   const entry = {}
   for (const k of STAMP_DIRECTION_KEYS) {
@@ -38,3 +39,14 @@ export function buildCustomStampEntry() {
   entry.pixelSet = customBrushStamp.pixelSet
   return entry
 }
+
+/**
+ * Rebuild brushStamps.custom from the current customBrushStamp.
+ * Call this whenever the custom stamp pixels change (e.g. after applyStamp).
+ */
+export function updateCustomStamp() {
+  brushStamps.custom = buildCustomStampEntry()
+}
+
+// Initialize custom entry with the (empty) default stamp
+updateCustomStamp()

@@ -437,7 +437,7 @@ export function applyResize() {
 
   // Resize the canvas — applyCanvasDimensions clears layer cvs, then
   // renderCanvas(null, true) replays the timeline with the new crop delta applied
-  resizeOffScreenCanvas(w, h)
+  resizeOffScreenCanvas(w, h, contentOffsetX, contentOffsetY)
 
   // Push a resize action so the operation can be undone/redone
   const resizeAction = {

@@ -14,9 +14,8 @@ import {
   disableActionsForNoSelection,
   enableActionsForSelection,
 } from './DOM/disableDomElements.js'
-import { initStampEditor, openStampEditor } from './DOM/stampEditor.js'
-import { brush } from './Tools/brush.js'
-import { renderBrushStampToDOM } from './DOM/renderBrush.js'
+import { initStampEditor } from './DOM/stampEditor.js'
+import { initDitherPicker } from './DOM/render.js'
 
 // Register dependencies that would otherwise create circular imports in state.js
 registerVectorGui(vectorGui)
@@ -54,9 +53,6 @@ initializeDialogBox(dom.sizeContainer, false, deactivateResizeOverlay)
 // * Settings * //
 initializeDialogBox(dom.settingsContainer)
 
-// * Dither Picker * //
-initializeDialogBox(dom.ditherPickerContainer)
-
 // * Color Picker * //
 initializeDialogBox(dom.colorPickerContainer)
 
@@ -76,10 +72,6 @@ initializeDialogBox(dom.vectorTransformUIContainer, false, actionDeselect)
 initializeDialogBox(dom.stampEditorContainer)
 initStampEditor()
 
-// Custom stamp button: activate custom brush type and open the editor
-dom.customBrushTypeBtn?.addEventListener('click', () => {
-  brush.brushType = 'custom'
-  dom.customBrushTypeBtn.classList.add('active')
-  renderBrushStampToDOM()
-  openStampEditor()
-})
+// * Dither Picker * //
+initializeDialogBox(dom.ditherPickerContainer)
+initDitherPicker()

@@ -235,7 +235,9 @@ export function handleTransformAction(latestAction, newLatestAction, modType) {
  */
 export function handleResizeAction(latestAction, modType) {
   const targetState = latestAction[modType]
+  const contentOffsetX = targetState.cropOffsetX - state.canvas.cropOffsetX
+  const contentOffsetY = targetState.cropOffsetY - state.canvas.cropOffsetY
   state.canvas.cropOffsetX = targetState.cropOffsetX
   state.canvas.cropOffsetY = targetState.cropOffsetY
-  applyCanvasDimensions(targetState.width, targetState.height)
+  applyCanvasDimensions(targetState.width, targetState.height, contentOffsetX, contentOffsetY)
 }
