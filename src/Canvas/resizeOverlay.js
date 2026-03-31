@@ -125,39 +125,57 @@ function getCursorForHandle(handle) {
 
 /**
  * Applies a drag delta to resizeOverlay state for the given handle.
- * Enforces a minimum dimension of 8px.
+ * Enforces minimum and maximum dimensions.
  * @param {string} handle - handle id ('tl', 'r', 'move', etc.)
  * @param {number} dx - horizontal delta in canvas pixels
  * @param {number} dy - vertical delta in canvas pixels
+ * @returns {{effectiveDx: number, effectiveDy: number}} the delta actually applied (0 when clamped)
  */
 function applyDrag(handle, dx, dy) {
-  const ro = resizeOverlay
+  let effectiveDx = 0
+  let effectiveDy = 0
+
+  // Left edge: moving right shrinks canvas; shift content to keep art in place
   if (handle === 'l' || handle === 'tl' || handle === 'bl') {
-    const newW = ro.newWidth - dx
-    if (newW >= MINIMUM_DIMENSION && newW <= MAXIMUM_DIMENSION) {
-      ro.contentOffsetX -= dx
-      ro.newWidth = newW
-    }
+    const oldW = resizeOverlay.newWidth
+    const newW = Math.max(MINIMUM_DIMENSION, Math.min(MAXIMUM_DIMENSION, oldW - dx))
+    const consumed = oldW - newW
+    resizeOverlay.contentOffsetX -= consumed
+    resizeOverlay.newWidth = newW
+    effectiveDx = consumed
   }
+  // Right edge: moving right grows canvas
   if (handle === 'r' || handle === 'tr' || handle === 'br') {
-    const newW = ro.newWidth + dx
-    if (newW >= MINIMUM_DIMENSION && newW <= MAXIMUM_DIMENSION) ro.newWidth = newW
+    const oldW = resizeOverlay.newWidth
+    const newW = Math.max(MINIMUM_DIMENSION, Math.min(MAXIMUM_DIMENSION, oldW + dx))
+    resizeOverlay.newWidth = newW
+    effectiveDx = newW - oldW
   }
+  // Top edge: moving down shrinks canvas; shift content to keep art in place
   if (handle === 't' || handle === 'tl' || handle === 'tr') {
-    const newH = ro.newHeight - dy
-    if (newH >= MINIMUM_DIMENSION && newH <= MAXIMUM_DIMENSION) {
-      ro.contentOffsetY -= dy
-      ro.newHeight = newH
-    }
+    const oldH = resizeOverlay.newHeight
+    const newH = Math.max(MINIMUM_DIMENSION, Math.min(MAXIMUM_DIMENSION, oldH - dy))
+    const consumed = oldH - newH
+    resizeOverlay.contentOffsetY -= consumed
+    resizeOverlay.newHeight = newH
+    effectiveDy = consumed
   }
+  // Bottom edge: moving down grows canvas
   if (handle === 'b' || handle === 'bl' || handle === 'br') {
-    const newH = ro.newHeight + dy
-    if (newH >= MINIMUM_DIMENSION && newH <= MAXIMUM_DIMENSION) ro.newHeight = newH
+    const oldH = resizeOverlay.newHeight
+    const newH = Math.max(MINIMUM_DIMENSION, Math.min(MAXIMUM_DIMENSION, oldH + dy))
+    resizeOverlay.newHeight = newH
+    effectiveDy = newH - oldH
   }
+  // Move: shift the entire canvas box without changing its dimensions
   if (handle === 'move') {
-    ro.contentOffsetX -= dx
-    ro.contentOffsetY -= dy
+    resizeOverlay.contentOffsetX -= dx
+    resizeOverlay.contentOffsetY -= dy
+    effectiveDx = dx
+    effectiveDy = dy
   }
+
+  return { effectiveDx, effectiveDy }
 }
 
 /**
@@ -346,9 +364,9 @@ export function resizeOverlayPointerMove(e) {
   if (dragHandle) {
     const dx = cx - prevCx
     const dy = cy - prevCy
-    applyDrag(dragHandle, dx, dy)
-    resizeOverlay.prevCx = cx
-    resizeOverlay.prevCy = cy
+    const { effectiveDx, effectiveDy } = applyDrag(dragHandle, dx, dy)
+    resizeOverlay.prevCx += effectiveDx
+    resizeOverlay.prevCy += effectiveDy
     syncFormInputs()
   } else {
     const hit = hitTestHandles(cx, cy)
