@@ -1,4 +1,5 @@
 import { dom } from '../Context/dom.js'
+import { MINIMUM_DIMENSION, MAXIMUM_DIMENSION } from '../utils/constants.js'
 import { keys } from '../Shortcuts/keys.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
@@ -57,16 +58,14 @@ import { enableActionsForSelection } from '../DOM/disableDomElements.js'
  */
 const handleIncrement = (e) => {
   let dimension = e.target.parentNode.previousSibling.previousSibling
-  let max = 1024
-  let min = 8
   if (e.target.id === 'inc') {
     let newValue = Math.floor(+dimension.value)
-    if (newValue < max) {
+    if (newValue < MAXIMUM_DIMENSION) {
       dimension.value = newValue + 1
     }
   } else if (e.target.id === 'dec') {
     let newValue = Math.floor(+dimension.value)
-    if (newValue > min) {
+    if (newValue > MINIMUM_DIMENSION) {
       dimension.value = newValue - 1
     }
   }
@@ -91,12 +90,10 @@ const handleSizeIncrement = (e) => {
  * @param {FocusEvent} e - The focus event
  */
 const restrictSize = (e) => {
-  const max = 1024
-  const min = 8
-  if (e.target.value > max) {
-    e.target.value = max
-  } else if (e.target.value < min) {
-    e.target.value = min
+  if (e.target.value > MAXIMUM_DIMENSION) {
+    e.target.value = MAXIMUM_DIMENSION
+  } else if (e.target.value < MINIMUM_DIMENSION) {
+    e.target.value = MINIMUM_DIMENSION
   }
 }
 

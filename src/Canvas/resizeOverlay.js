@@ -3,6 +3,7 @@ import { dom } from '../Context/dom.js'
 import { state } from '../Context/state.js'
 import { resizeOffScreenCanvas } from '../Canvas/render.js'
 import { stopMarchingAnts, renderSelectionCVS } from '../GUI/select.js'
+import { MINIMUM_DIMENSION, MAXIMUM_DIMENSION } from '../utils/constants.js'
 
 // Map anchor name to [xFactor, yFactor]: 0 = left/top, 0.5 = center, 1 = right/bottom
 const ANCHOR_FACTORS = {
@@ -131,29 +132,27 @@ function getCursorForHandle(handle) {
  */
 function applyDrag(handle, dx, dy) {
   const ro = resizeOverlay
-  const MIN = 8
-
   if (handle === 'l' || handle === 'tl' || handle === 'bl') {
     const newW = ro.newWidth - dx
-    if (newW >= MIN) {
+    if (newW >= MINIMUM_DIMENSION && newW <= MAXIMUM_DIMENSION) {
       ro.contentOffsetX -= dx
       ro.newWidth = newW
     }
   }
   if (handle === 'r' || handle === 'tr' || handle === 'br') {
     const newW = ro.newWidth + dx
-    if (newW >= MIN) ro.newWidth = newW
+    if (newW >= MINIMUM_DIMENSION && newW <= MAXIMUM_DIMENSION) ro.newWidth = newW
   }
   if (handle === 't' || handle === 'tl' || handle === 'tr') {
     const newH = ro.newHeight - dy
-    if (newH >= MIN) {
+    if (newH >= MINIMUM_DIMENSION && newH <= MAXIMUM_DIMENSION) {
       ro.contentOffsetY -= dy
       ro.newHeight = newH
     }
   }
   if (handle === 'b' || handle === 'bl' || handle === 'br') {
     const newH = ro.newHeight + dy
-    if (newH >= MIN) ro.newHeight = newH
+    if (newH >= MINIMUM_DIMENSION && newH <= MAXIMUM_DIMENSION) ro.newHeight = newH
   }
   if (handle === 'move') {
     ro.contentOffsetX -= dx
@@ -387,10 +386,14 @@ export function setAnchor(anchorName) {
  * @param {number} h - desired new height
  */
 export function applyFromInputs(w, h) {
-  const MIN = 8,
-    MAX = 1024
-  const newWidth = Math.max(MIN, Math.min(MAX, Math.round(w) || MIN))
-  const newHeight = Math.max(MIN, Math.min(MAX, Math.round(h) || MIN))
+  const newWidth = Math.max(
+    MINIMUM_DIMENSION,
+    Math.min(MAXIMUM_DIMENSION, Math.round(w) || MINIMUM_DIMENSION),
+  )
+  const newHeight = Math.max(
+    MINIMUM_DIMENSION,
+    Math.min(MAXIMUM_DIMENSION, Math.round(h) || MINIMUM_DIMENSION),
+  )
   const [xFactor, yFactor] = ANCHOR_FACTORS[resizeOverlay.anchor] ?? [0, 0]
   // Shift the offset by the delta scaled by the anchor factor so the anchored
   // edge stays fixed rather than jumping back to the canonical anchor position.
