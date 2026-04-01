@@ -138,7 +138,10 @@ function applyDrag(handle, dx, dy) {
   // Left edge: moving right shrinks canvas; shift content to keep art in place
   if (handle === 'l' || handle === 'tl' || handle === 'bl') {
     const oldW = resizeOverlay.newWidth
-    const newW = Math.max(MINIMUM_DIMENSION, Math.min(MAXIMUM_DIMENSION, oldW - dx))
+    const newW = Math.max(
+      MINIMUM_DIMENSION,
+      Math.min(MAXIMUM_DIMENSION, oldW - dx),
+    )
     const consumed = oldW - newW
     resizeOverlay.contentOffsetX -= consumed
     resizeOverlay.newWidth = newW
@@ -147,14 +150,20 @@ function applyDrag(handle, dx, dy) {
   // Right edge: moving right grows canvas
   if (handle === 'r' || handle === 'tr' || handle === 'br') {
     const oldW = resizeOverlay.newWidth
-    const newW = Math.max(MINIMUM_DIMENSION, Math.min(MAXIMUM_DIMENSION, oldW + dx))
+    const newW = Math.max(
+      MINIMUM_DIMENSION,
+      Math.min(MAXIMUM_DIMENSION, oldW + dx),
+    )
     resizeOverlay.newWidth = newW
     effectiveDx = newW - oldW
   }
   // Top edge: moving down shrinks canvas; shift content to keep art in place
   if (handle === 't' || handle === 'tl' || handle === 'tr') {
     const oldH = resizeOverlay.newHeight
-    const newH = Math.max(MINIMUM_DIMENSION, Math.min(MAXIMUM_DIMENSION, oldH - dy))
+    const newH = Math.max(
+      MINIMUM_DIMENSION,
+      Math.min(MAXIMUM_DIMENSION, oldH - dy),
+    )
     const consumed = oldH - newH
     resizeOverlay.contentOffsetY -= consumed
     resizeOverlay.newHeight = newH
@@ -163,7 +172,10 @@ function applyDrag(handle, dx, dy) {
   // Bottom edge: moving down grows canvas
   if (handle === 'b' || handle === 'bl' || handle === 'br') {
     const oldH = resizeOverlay.newHeight
-    const newH = Math.max(MINIMUM_DIMENSION, Math.min(MAXIMUM_DIMENSION, oldH + dy))
+    const newH = Math.max(
+      MINIMUM_DIMENSION,
+      Math.min(MAXIMUM_DIMENSION, oldH + dy),
+    )
     resizeOverlay.newHeight = newH
     effectiveDy = newH - oldH
   }
