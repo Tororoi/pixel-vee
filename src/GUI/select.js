@@ -62,7 +62,8 @@ function buildMaskPath(maskSet) {
  * Advances the march offset and re-renders the selection canvas each frame.
  */
 function tickMarchingAnts() {
-  marchOffset += 0.015
+  marchOffset += 0.25 / canvas.zoom
+  marchOffset %= 8
   marchAnimId = requestAnimationFrame(tickMarchingAnts)
   renderSelectionCVS()
 }
@@ -108,15 +109,18 @@ function strokeBorderOnTop(ctx, lineWidth, path = null) {
  * Strokes the marching-ants pill pattern: black outer ring + white inner.
  * Sets lineCap, dash, and offset before stroking; resets dash after.
  * @param {CanvasRenderingContext2D} ctx - selection GUI canvas rendering context
- * @param {number} lineWidth - base line width
  * @param {number} dashOffset - current marchOffset
  * @param {Path2D|null} path - optional Path2D; uses current path if omitted
  */
-function strokeMarchingPills(ctx, lineWidth, dashOffset, path = null) {
-  ctx.lineCap = 'round'
-  ctx.setLineDash([0.4, 0.6])
+function strokeMarchingAnts(ctx, dashOffset, path = null) {
+  ctx.lineWidth = 1 / canvas.zoom
+  ctx.setLineDash([8 / canvas.zoom, 8 / canvas.zoom])
+  ctx.strokeStyle = 'white'
   ctx.lineDashOffset = dashOffset
-  strokeBorderOnTop(ctx, lineWidth, path)
+  path ? ctx.stroke(path) : ctx.stroke()
+  ctx.strokeStyle = 'black'
+  ctx.lineDashOffset = dashOffset + 8 / canvas.zoom
+  path ? ctx.stroke(path) : ctx.stroke()
   ctx.setLineDash([])
 }
 
@@ -133,7 +137,6 @@ function renderMaskContourOutline(lineDashOffset) {
   const maskSet = state.selection.maskSet
   if (!maskSet || maskSet.size === 0) return
   const ctx = canvas.selectionGuiCTX
-  const lineWidth = getGuiLineWidth()
   ctx.save()
 
   if (
@@ -147,7 +150,7 @@ function renderMaskContourOutline(lineDashOffset) {
     cachedMaskPath = buildMaskPath(maskSet)
   }
 
-  strokeMarchingPills(ctx, lineWidth, lineDashOffset, cachedMaskPath)
+  strokeMarchingAnts(ctx, lineDashOffset, cachedMaskPath)
   ctx.restore()
 }
 
@@ -171,7 +174,7 @@ export function renderSelectionBoxOutline(lineDashOffset, drawPoints) {
       state.selection.boundaryBox.yMax - state.selection.boundaryBox.yMin,
     )
     if (!canvas.pastedLayer && canvas.currentLayer.type !== 'reference') {
-      strokeMarchingPills(ctx, lineWidth, lineDashOffset)
+      strokeMarchingAnts(ctx, lineDashOffset)
     } else {
       strokeBorderOnTop(ctx, lineWidth)
     }
