@@ -38,7 +38,6 @@ import { renderLinePath, renderLineVector } from './line.js'
 export const vectorGui = {
   grid: false,
   gridSpacing: 8,
-  outlineVectorSelection: false,
   showCursorPreview: true,
   mother: {
     x: null,
@@ -417,8 +416,8 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
   }
 
   const lw = getGuiLineWidth()
-  const cx = canvas.xOffset + xOffset + point.x + 0.5
-  const cy = canvas.yOffset + yOffset + point.y + 0.5
+  const cx = canvas.xOffset + normalizedX + 0.5
+  const cy = canvas.yOffset + normalizedY + 0.5
   if (isActive) {
     drawActiveControlPoint(cx, cy, r, lw)
   } else {

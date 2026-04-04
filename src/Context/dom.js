@@ -73,10 +73,6 @@ const gridBtn = document.getElementById("grid-toggle")
 // * Grid Spacing * //
 const gridSpacingSpinBtn = document.querySelector(".grid-spacing-spin")
 const gridSpacing = document.getElementById("grid-spacing")
-// * Vector Selection Outline * //
-const vectorSelectionOutlineBtn = document.getElementById(
-  "vector-outline-toggle"
-)
 // * Cursor Preview * //
 const cursorPreviewBtn = document.getElementById("cursor-preview-toggle")
 
@@ -277,7 +273,6 @@ export const dom = {
   gridBtn,
   gridSpacingSpinBtn,
   gridSpacing,
-  vectorSelectionOutlineBtn,
   cursorPreviewBtn,
   //save/export
   saveContainer,
