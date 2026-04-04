@@ -13,7 +13,17 @@ import { SCALE } from '../utils/constants.js'
 //=============================================//
 
 let marchOffset = 0
+let marchDashLen = 0
 let marchAnimId = null
+
+/**
+ * Returns the marching-ants dash length in art pixels for the current zoom level.
+ * Always 1/(2n) so two colors tile evenly into 1 art pixel at any zoom.
+ * @returns {number} dash length in art pixels
+ */
+function getMarchDashLen() {
+  return 1 / (2 * Math.max(1, Math.round(canvas.zoom / 20)))
+}
 
 // Path2D cache — rebuilt only when maskSet reference or canvas pan changes
 let cachedMaskPath = null
@@ -62,8 +72,7 @@ function buildMaskPath(maskSet) {
  * Advances the march offset and re-renders the selection canvas each frame.
  */
 function tickMarchingAnts() {
-  marchOffset += 0.25 / canvas.zoom
-  marchOffset %= 8
+  marchOffset = (marchOffset + marchDashLen * 0.03125) % 1
   marchAnimId = requestAnimationFrame(tickMarchingAnts)
   renderSelectionCVS()
 }
@@ -114,12 +123,12 @@ function strokeBorderOnTop(ctx, lineWidth, path = null) {
  */
 function strokeMarchingAnts(ctx, dashOffset, path = null) {
   ctx.lineWidth = 1 / canvas.zoom
-  ctx.setLineDash([8 / canvas.zoom, 8 / canvas.zoom])
+  ctx.setLineDash([marchDashLen, marchDashLen])
   ctx.strokeStyle = 'white'
   ctx.lineDashOffset = dashOffset
   path ? ctx.stroke(path) : ctx.stroke()
   ctx.strokeStyle = 'black'
-  ctx.lineDashOffset = dashOffset + 8 / canvas.zoom
+  ctx.lineDashOffset = dashOffset + marchDashLen
   path ? ctx.stroke(path) : ctx.stroke()
   ctx.setLineDash([])
 }
@@ -266,6 +275,7 @@ function addVectorToPath(ctx, vp, xOffset, yOffset) {
  * loop when a selection is active and stops it when nothing is selected.
  */
 export function renderSelectionCVS() {
+  marchDashLen = getMarchDashLen()
   const ctx = canvas.selectionGuiCTX
   ctx.clearRect(
     0,
