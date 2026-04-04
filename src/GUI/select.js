@@ -13,7 +13,17 @@ import { SCALE } from '../utils/constants.js'
 //=============================================//
 
 let marchOffset = 0
+let marchDashLen = 0
 let marchAnimId = null
+
+/**
+ * Returns the marching-ants dash length in art pixels for the current zoom level.
+ * Always 1/(2n) so two colors tile evenly into 1 art pixel at any zoom.
+ * @returns {number} dash length in art pixels
+ */
+function getMarchDashLen() {
+  return 1 / (2 * Math.max(1, Math.round(canvas.zoom / 20)))
+}
 
 // Path2D cache — rebuilt only when maskSet reference or canvas pan changes
 let cachedMaskPath = null
@@ -62,7 +72,7 @@ function buildMaskPath(maskSet) {
  * Advances the march offset and re-renders the selection canvas each frame.
  */
 function tickMarchingAnts() {
-  marchOffset += 0.015
+  marchOffset = (marchOffset + marchDashLen * 0.03125) % 1
   marchAnimId = requestAnimationFrame(tickMarchingAnts)
   renderSelectionCVS()
 }
@@ -78,7 +88,7 @@ function startMarchingAnts() {
 /**
  * Stops the marching ants animation loop.
  */
-function stopMarchingAnts() {
+export function stopMarchingAnts() {
   if (marchAnimId !== null) {
     cancelAnimationFrame(marchAnimId)
     marchAnimId = null
@@ -108,15 +118,18 @@ function strokeBorderOnTop(ctx, lineWidth, path = null) {
  * Strokes the marching-ants pill pattern: black outer ring + white inner.
  * Sets lineCap, dash, and offset before stroking; resets dash after.
  * @param {CanvasRenderingContext2D} ctx - selection GUI canvas rendering context
- * @param {number} lineWidth - base line width
- * @param {number} dashOffset - current marchOffset
+ * @param {number} lineWidth - line width in art pixels (default 1/canvas.zoom)
  * @param {Path2D|null} path - optional Path2D; uses current path if omitted
  */
-function strokeMarchingPills(ctx, lineWidth, dashOffset, path = null) {
-  ctx.lineCap = 'round'
-  ctx.setLineDash([0.4, 0.6])
-  ctx.lineDashOffset = dashOffset
-  strokeBorderOnTop(ctx, lineWidth, path)
+function strokeMarchingAnts(ctx, lineWidth = 1 / canvas.zoom, path = null) {
+  ctx.lineWidth = lineWidth
+  ctx.setLineDash([marchDashLen, marchDashLen])
+  ctx.strokeStyle = 'white'
+  ctx.lineDashOffset = marchOffset
+  path ? ctx.stroke(path) : ctx.stroke()
+  ctx.strokeStyle = 'black'
+  ctx.lineDashOffset = marchOffset + marchDashLen
+  path ? ctx.stroke(path) : ctx.stroke()
   ctx.setLineDash([])
 }
 
@@ -127,13 +140,11 @@ function strokeMarchingPills(ctx, lineWidth, dashOffset, path = null) {
 /**
  * Renders the marching-ants contour outline for magic wand selections.
  * Uses a cached Path2D rebuilt only when the maskSet or canvas pan changes.
- * @param {number} lineDashOffset - current march offset
  */
-function renderMaskContourOutline(lineDashOffset) {
+function renderMaskContourOutline() {
   const maskSet = state.selection.maskSet
   if (!maskSet || maskSet.size === 0) return
   const ctx = canvas.selectionGuiCTX
-  const lineWidth = getGuiLineWidth()
   ctx.save()
 
   if (
@@ -147,16 +158,15 @@ function renderMaskContourOutline(lineDashOffset) {
     cachedMaskPath = buildMaskPath(maskSet)
   }
 
-  strokeMarchingPills(ctx, lineWidth, lineDashOffset, cachedMaskPath)
+  strokeMarchingAnts(ctx, undefined, cachedMaskPath)
   ctx.restore()
 }
 
 /**
  * Renders the selection box outline and optional transform control points.
- * @param {number} lineDashOffset - current march offset
  * @param {boolean} drawPoints - if true, draw transform control points
  */
-export function renderSelectionBoxOutline(lineDashOffset, drawPoints) {
+export function renderSelectionBoxOutline(drawPoints) {
   const ctx = canvas.selectionGuiCTX
   const lineWidth = getGuiLineWidth()
   ctx.save()
@@ -171,7 +181,7 @@ export function renderSelectionBoxOutline(lineDashOffset, drawPoints) {
       state.selection.boundaryBox.yMax - state.selection.boundaryBox.yMin,
     )
     if (!canvas.pastedLayer && canvas.currentLayer.type !== 'reference') {
-      strokeMarchingPills(ctx, lineWidth, lineDashOffset)
+      strokeMarchingAnts(ctx)
     } else {
       strokeBorderOnTop(ctx, lineWidth)
     }
@@ -201,68 +211,69 @@ export function renderSelectionBoxOutline(lineDashOffset, drawPoints) {
   ctx.restore()
 }
 
-/**
- * Adds a single vector shape's path to the current canvas path.
- * @param {CanvasRenderingContext2D} ctx - selection GUI canvas rendering context
- * @param {object} vp - vectorProperties object
- * @param {number} xOffset - horizontal draw offset
- * @param {number} yOffset - vertical draw offset
- */
-function addVectorToPath(ctx, vp, xOffset, yOffset) {
-  switch (vp.type) {
-    case 'fill':
-      // TODO: (Low Priority) improve visual indicator for fill vector selection
-      ctx.moveTo(xOffset + vp.px1 + 0.5, yOffset + vp.py1 + 0.5)
-      ctx.lineTo(xOffset + vp.px1 + 0.5, yOffset + vp.py1 + 0.5)
-      break
-    case 'line':
-      ctx.moveTo(xOffset + vp.px1 + 0.5, yOffset + vp.py1 + 0.5)
-      ctx.lineTo(xOffset + vp.px2 + 0.5, yOffset + vp.py2 + 0.5)
-      break
-    case 'quadCurve':
-      ctx.moveTo(xOffset + vp.px1 + 0.5, yOffset + vp.py1 + 0.5)
-      ctx.quadraticCurveTo(
-        xOffset + vp.px3 + 0.5,
-        yOffset + vp.py3 + 0.5,
-        xOffset + vp.px2 + 0.5,
-        yOffset + vp.py2 + 0.5,
-      )
-      break
-    case 'cubicCurve':
-      ctx.moveTo(xOffset + vp.px1 + 0.5, yOffset + vp.py1 + 0.5)
-      ctx.bezierCurveTo(
-        xOffset + vp.px3 + 0.5,
-        yOffset + vp.py3 + 0.5,
-        xOffset + vp.px4 + 0.5,
-        yOffset + vp.py4 + 0.5,
-        xOffset + vp.px2 + 0.5,
-        yOffset + vp.py2 + 0.5,
-      )
-      break
-    case 'ellipse': {
-      const { px1, py1, px3, radA, radB, angle, x1Offset, y1Offset } = vp
-      const majorAxis = radA + x1Offset / 2 > 0 ? radA + x1Offset / 2 : 0
-      let minorAxis = radB + y1Offset / 2 > 0 ? radB + y1Offset / 2 : 0
-      if (!Number.isInteger(px3)) minorAxis = majorAxis
-      const centerX = xOffset + px1 + 0.5 + x1Offset / 2
-      const centerY = yOffset + py1 + 0.5 + y1Offset / 2
-      // Start point at angle=0 on the ellipse
-      ctx.moveTo(
-        centerX + majorAxis * Math.cos(angle),
-        centerY + majorAxis * Math.sin(angle),
-      )
-      ctx.ellipse(centerX, centerY, majorAxis, minorAxis, angle, 0, 2 * Math.PI)
-      break
-    }
-    default:
-  }
-}
+// /**
+//  * Adds a single vector shape's path to the current canvas path.
+//  * @param {CanvasRenderingContext2D} ctx - selection GUI canvas rendering context
+//  * @param {object} vp - vectorProperties object
+//  * @param {number} xOffset - horizontal draw offset
+//  * @param {number} yOffset - vertical draw offset
+//  */
+// function addVectorToPath(ctx, vp, xOffset, yOffset) {
+//   switch (vp.type) {
+//     case 'fill':
+//       // TODO: (Low Priority) improve visual indicator for fill vector selection
+//       ctx.moveTo(xOffset + vp.px1 + 0.5, yOffset + vp.py1 + 0.5)
+//       ctx.lineTo(xOffset + vp.px1 + 0.5, yOffset + vp.py1 + 0.5)
+//       break
+//     case 'line':
+//       ctx.moveTo(xOffset + vp.px1 + 0.5, yOffset + vp.py1 + 0.5)
+//       ctx.lineTo(xOffset + vp.px2 + 0.5, yOffset + vp.py2 + 0.5)
+//       break
+//     case 'quadCurve':
+//       ctx.moveTo(xOffset + vp.px1 + 0.5, yOffset + vp.py1 + 0.5)
+//       ctx.quadraticCurveTo(
+//         xOffset + vp.px3 + 0.5,
+//         yOffset + vp.py3 + 0.5,
+//         xOffset + vp.px2 + 0.5,
+//         yOffset + vp.py2 + 0.5,
+//       )
+//       break
+//     case 'cubicCurve':
+//       ctx.moveTo(xOffset + vp.px1 + 0.5, yOffset + vp.py1 + 0.5)
+//       ctx.bezierCurveTo(
+//         xOffset + vp.px3 + 0.5,
+//         yOffset + vp.py3 + 0.5,
+//         xOffset + vp.px4 + 0.5,
+//         yOffset + vp.py4 + 0.5,
+//         xOffset + vp.px2 + 0.5,
+//         yOffset + vp.py2 + 0.5,
+//       )
+//       break
+//     case 'ellipse': {
+//       const { px1, py1, px3, radA, radB, angle, x1Offset, y1Offset } = vp
+//       const majorAxis = radA + x1Offset / 2 > 0 ? radA + x1Offset / 2 : 0
+//       let minorAxis = radB + y1Offset / 2 > 0 ? radB + y1Offset / 2 : 0
+//       if (!Number.isInteger(px3)) minorAxis = majorAxis
+//       const centerX = xOffset + px1 + 0.5 + x1Offset / 2
+//       const centerY = yOffset + py1 + 0.5 + y1Offset / 2
+//       // Start point at angle=0 on the ellipse
+//       ctx.moveTo(
+//         centerX + majorAxis * Math.cos(angle),
+//         centerY + majorAxis * Math.sin(angle),
+//       )
+//       ctx.ellipse(centerX, centerY, majorAxis, minorAxis, angle, 0, 2 * Math.PI)
+//       break
+//     }
+//     default:
+//   }
+// }
 
 /**
  * Renders the selection overlay and outline. Starts the marching ants animation
  * loop when a selection is active and stops it when nothing is selected.
  */
 export function renderSelectionCVS() {
+  marchDashLen = getMarchDashLen()
   const ctx = canvas.selectionGuiCTX
   ctx.clearRect(
     0,
@@ -271,96 +282,48 @@ export function renderSelectionCVS() {
     canvas.selectionGuiCVS.height,
   )
   const isRasterSelection = state.selection.boundaryBox.xMax !== null
-  const isVectorSelection =
-    state.vector.selectedIndices.size > 0 &&
-    state.tool.current.type === 'vector'
+  // const isVectorSelection =
+  //   state.vector.selectedIndices.size > 0 &&
+  //   state.tool.current.type === 'vector'
 
-  if (isRasterSelection || isVectorSelection) {
+  if (isRasterSelection) {
     startMarchingAnts()
     ctx.save()
     ctx.beginPath()
 
-    if (isRasterSelection) {
-      if (!state.selection.maskSet) {
-        // Grey overlay outside the rectangular selection (evenodd clip)
-        ctx.rect(
-          canvas.xOffset,
-          canvas.yOffset,
-          canvas.offScreenCVS.width,
-          canvas.offScreenCVS.height,
-        )
-        ctx.rect(
-          canvas.xOffset + state.selection.boundaryBox.xMin,
-          canvas.yOffset + state.selection.boundaryBox.yMin,
-          state.selection.boundaryBox.xMax - state.selection.boundaryBox.xMin,
-          state.selection.boundaryBox.yMax - state.selection.boundaryBox.yMin,
-        )
-        ctx.clip('evenodd')
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
-        ctx.fillRect(
-          canvas.xOffset,
-          canvas.yOffset,
-          canvas.offScreenCVS.width,
-          canvas.offScreenCVS.height,
-        )
-      }
-      ctx.restore()
-      if (state.selection.maskSet) {
-        renderMaskContourOutline(marchOffset)
-      } else {
-        const shouldRenderPoints =
-          state.tool.current.name === 'select' ||
-          (state.tool.current.name === 'move' && canvas.pastedLayer) ||
-          canvas.currentLayer.type === 'reference' ||
-          state.vector.transformMode === SCALE
-        renderSelectionBoxOutline(marchOffset, shouldRenderPoints)
-      }
-    } else if (isVectorSelection) {
-      if (vectorGui.outlineVectorSelection) {
-        // Grey overlay over entire canvas
-        ctx.rect(
-          canvas.xOffset,
-          canvas.yOffset,
-          canvas.offScreenCVS.width,
-          canvas.offScreenCVS.height,
-        )
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.1)'
-        ctx.fillRect(
-          canvas.xOffset,
-          canvas.yOffset,
-          canvas.offScreenCVS.width,
-          canvas.offScreenCVS.height,
-        )
-
-        // Build combined path for all selected vectors
-        const xOffset = canvas.currentLayer.x + canvas.xOffset
-        const yOffset = canvas.currentLayer.y + canvas.yOffset
-        ctx.beginPath()
-        for (const vectorIndex of state.vector.selectedIndices) {
-          const vector = state.vector.all[vectorIndex]
-          if (vector.hidden || vector.removed) continue
-          addVectorToPath(ctx, vector.vectorProperties, xOffset, yOffset)
-        }
-
-        // Stroke with animated dashed outline + eraser pass to clear grey over vectors
-        const lineWidth = getGuiLineWidth()
-        ctx.lineWidth = lineWidth * 19
-        ctx.lineCap = 'round'
-        ctx.strokeStyle = 'white'
-        ctx.stroke()
-        ctx.lineDashOffset = marchOffset * 2
-        ctx.setLineDash([lineWidth * 12, lineWidth * 12])
-        ctx.lineWidth = lineWidth * 20
-        ctx.lineCap = 'butt'
-        ctx.strokeStyle = 'black'
-        ctx.stroke()
-        ctx.setLineDash([])
-        ctx.lineWidth = lineWidth * 17
-        ctx.lineCap = 'round'
-        ctx.strokeStyle = 'black'
-        ctx.stroke()
-        ctx.restore()
-      }
+    if (!state.selection.maskSet) {
+      // Grey overlay outside the rectangular selection (evenodd clip)
+      ctx.rect(
+        canvas.xOffset,
+        canvas.yOffset,
+        canvas.offScreenCVS.width,
+        canvas.offScreenCVS.height,
+      )
+      ctx.rect(
+        canvas.xOffset + state.selection.boundaryBox.xMin,
+        canvas.yOffset + state.selection.boundaryBox.yMin,
+        state.selection.boundaryBox.xMax - state.selection.boundaryBox.xMin,
+        state.selection.boundaryBox.yMax - state.selection.boundaryBox.yMin,
+      )
+      ctx.clip('evenodd')
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
+      ctx.fillRect(
+        canvas.xOffset,
+        canvas.yOffset,
+        canvas.offScreenCVS.width,
+        canvas.offScreenCVS.height,
+      )
+    }
+    ctx.restore()
+    if (state.selection.maskSet) {
+      renderMaskContourOutline()
+    } else {
+      const shouldRenderPoints =
+        state.tool.current.name === 'select' ||
+        (state.tool.current.name === 'move' && canvas.pastedLayer) ||
+        canvas.currentLayer.type === 'reference' ||
+        state.vector.transformMode === SCALE
+      renderSelectionBoxOutline(shouldRenderPoints)
     }
   } else {
     stopMarchingAnts()

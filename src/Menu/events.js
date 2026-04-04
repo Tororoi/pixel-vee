@@ -1,25 +1,29 @@
-import { dom } from "../Context/dom.js"
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { vectorGui } from "../GUI/vector.js"
-import { consolidateLayers } from "../Canvas/layers.js"
+import { dom } from '../Context/dom.js'
+import { state } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { activateResizeOverlay } from '../Canvas/resizeOverlay.js'
+import { vectorGui } from '../GUI/vector.js'
+import { consolidateLayers } from '../Canvas/layers.js'
 import {
   setSaveFilesizePreview,
   saveDrawing,
   loadDrawing,
-} from "../Save/savefile.js"
-import { measureTextWidth } from "../utils/measureHelpers.js"
+} from '../Save/savefile.js'
+import { measureTextWidth } from '../utils/measureHelpers.js'
 import {
   actionSelectAll,
   actionDeselect,
   actionDeleteSelection,
-} from "../Actions/nonPointer/selectionActions.js"
+} from '../Actions/nonPointer/selectionActions.js'
 import {
   actionCutSelection,
   actionPasteSelection,
   actionCopySelection,
-} from "../Actions/nonPointer/clipboardActions.js"
-import { actionFlipPixels, actionRotatePixels } from "../Actions/transform/rasterTransform.js"
+} from '../Actions/nonPointer/clipboardActions.js'
+import {
+  actionFlipPixels,
+  actionRotatePixels,
+} from '../Actions/transform/rasterTransform.js'
 
 //====================================//
 //======= * * * Tooltip * * * ========//
@@ -32,37 +36,37 @@ import { actionFlipPixels, actionRotatePixels } from "../Actions/transform/raste
 export const generateTooltip = (message, target) => {
   if (message && target) {
     //reset tooltip
-    dom.tooltip.classList.remove("page-left")
-    dom.tooltip.classList.remove("page-center")
+    dom.tooltip.classList.remove('page-left')
+    dom.tooltip.classList.remove('page-center')
     //get location and boundaries of target
     const targetRect = target.getBoundingClientRect()
     const targetCenter = targetRect.left + targetRect.width / 2
     //get location of element relative to page (left, center, right)
-    let location = "left"
+    let location = 'left'
     if (window.innerWidth * (2 / 3) < targetCenter) {
-      location = "right"
+      location = 'right'
     } else if (window.innerWidth / 3 < targetCenter) {
-      location = "center"
+      location = 'center'
     }
     dom.tooltip.innerText = message
     const tooltipRect = dom.tooltip.getBoundingClientRect()
     let tooltipX
-    if (location === "right") {
+    if (location === 'right') {
       tooltipX = targetRect.left - tooltipRect.width
-    } else if (location === "center") {
+    } else if (location === 'center') {
       tooltipX = targetRect.left + targetRect.width / 2 - tooltipRect.width / 2
     } else {
       tooltipX = targetRect.left + targetRect.width
     }
     const tooltipY = targetRect.top + targetRect.height + 16
     // dom.tooltip.classList.add("visible")
-    if (location === "left") {
-      dom.tooltip.classList.add("page-left")
-    } else if (location === "center") {
-      dom.tooltip.classList.add("page-center")
+    if (location === 'left') {
+      dom.tooltip.classList.add('page-left')
+    } else if (location === 'center') {
+      dom.tooltip.classList.add('page-center')
     }
-    dom.tooltip.style.top = tooltipY + "px"
-    dom.tooltip.style.left = tooltipX + "px"
+    dom.tooltip.style.top = tooltipY + 'px'
+    dom.tooltip.style.left = tooltipX + 'px'
   } else {
     // dom.tooltip.classList.remove("visible")
   }
@@ -77,7 +81,7 @@ export const generateTooltip = (message, target) => {
  * TODO: (Low Priority) initialize save dialog box with default settings?
  */
 export function openSaveDialogBox() {
-  dom.saveContainer.style.display = "flex"
+  dom.saveContainer.style.display = 'flex'
   state.ui.saveDialogOpen = true
   setSaveFilesizePreview()
   dom.saveAsFileName.focus()
@@ -98,10 +102,10 @@ function importImage() {
       //1. logic similar to copy selection to put image into clipboard
       img.src = e.target.result
       img.onload = () => {
-        const tempCanvas = document.createElement("canvas")
+        const tempCanvas = document.createElement('canvas')
         tempCanvas.width = img.width
         tempCanvas.height = img.height
-        const tempCTX = tempCanvas.getContext("2d", {
+        const tempCTX = tempCanvas.getContext('2d', {
           willReadFrequently: true,
         })
         tempCTX.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height)
@@ -126,7 +130,7 @@ function importImage() {
           0,
           0,
           img.width,
-          img.height
+          img.height,
         )
         //2. paste clipboard onto canvas
         actionPasteSelection()
@@ -145,10 +149,10 @@ function importImage() {
 function exportImage() {
   //save .png
   consolidateLayers()
-  const a = document.createElement("a")
-  a.style.display = "none"
+  const a = document.createElement('a')
+  a.style.display = 'none'
   a.href = canvas.offScreenCVS.toDataURL()
-  a.download = "pixelvee.png"
+  a.download = 'pixelvee.png'
   document.body.appendChild(a)
   a.click()
 }
@@ -174,30 +178,30 @@ function openSavedDrawing() {
 
 //TODO: (Medium Priority) use event delegation so menu elements can be created dynamically
 
-document.body.addEventListener("mouseover", (e) => {
+document.body.addEventListener('mouseover', (e) => {
   //TODO: (Low Priority) Instead of rendering here, use a timer that resets on mousemove to detect idle time and move this logic to the mousemove event
   if (!state.tool.touch) {
     state.ui.tooltipMessage = e.target.dataset?.tooltip
     if (
       canvas.currentLayer.isPreview &&
-      e.target.classList.contains("deactivate-paste")
+      e.target.classList.contains('deactivate-paste')
     ) {
       state.ui.tooltipMessage =
         state.ui.tooltipMessage +
-        "\n\nCannot use with temporary pasted layer. Selecting will confirm pasted pixels."
+        '\n\nCannot use with temporary pasted layer. Selecting will confirm pasted pixels.'
     }
     generateTooltip(state.ui.tooltipMessage, e.target)
     if (dom.tooltipBtn.checked && state.ui.tooltipMessage) {
-      dom.tooltip.classList.add("visible")
+      dom.tooltip.classList.add('visible')
     } else {
-      dom.tooltip.classList.remove("visible")
+      dom.tooltip.classList.remove('visible')
     }
   }
 })
-document.body.addEventListener("click", (e) => {
+document.body.addEventListener('click', (e) => {
   if (!state.tool.touch) {
     //Hide tooltip on click
-    dom.tooltip.classList.remove("visible")
+    dom.tooltip.classList.remove('visible')
   } else {
     //Handle tooltip for mobile
     let previousTooltipTarget = state.ui.tooltipTarget
@@ -205,11 +209,11 @@ document.body.addEventListener("click", (e) => {
     state.ui.tooltipTarget = e.target
     if (
       canvas.currentLayer.isPreview &&
-      e.target.classList.contains("deactivate-paste")
+      e.target.classList.contains('deactivate-paste')
     ) {
       state.ui.tooltipMessage =
         state.ui.tooltipMessage +
-        "\n\nCannot use with temporary pasted layer. Selecting will confirm pasted pixels."
+        '\n\nCannot use with temporary pasted layer. Selecting will confirm pasted pixels.'
     }
     generateTooltip(state.ui.tooltipMessage, e.target)
     if (
@@ -217,16 +221,16 @@ document.body.addEventListener("click", (e) => {
       state.ui.tooltipMessage &&
       state.ui.tooltipTarget !== previousTooltipTarget
     ) {
-      dom.tooltip.classList.add("visible")
+      dom.tooltip.classList.add('visible')
     } else {
-      dom.tooltip.classList.remove("visible")
+      dom.tooltip.classList.remove('visible')
       state.ui.tooltipTarget = null
     }
   }
 })
-dom.toolOptions.addEventListener("click", (e) => {
-  if (e.target.type === "checkbox") {
-    const optionName = e.target.id.split("-")[0]
+dom.toolOptions.addEventListener('click', (e) => {
+  if (e.target.type === 'checkbox') {
+    const optionName = e.target.id.split('-')[0]
     if (e.target.checked) {
       state.tool.current.options[optionName].active = true
     } else {
@@ -235,14 +239,14 @@ dom.toolOptions.addEventListener("click", (e) => {
     vectorGui.render()
   }
 })
-dom.gridBtn.addEventListener("click", () => {
+dom.gridBtn.addEventListener('click', () => {
   vectorGui.grid = dom.gridBtn.checked
   vectorGui.render()
 })
-dom.cursorPreviewBtn.addEventListener("click", () => {
+dom.cursorPreviewBtn.addEventListener('click', () => {
   vectorGui.showCursorPreview = dom.cursorPreviewBtn.checked
 })
-dom.gridSpacing.addEventListener("input", (e) => {
+dom.gridSpacing.addEventListener('input', (e) => {
   //constrain value to min/max
   if (e.target.value < 1) {
     e.target.value = 1
@@ -252,10 +256,10 @@ dom.gridSpacing.addEventListener("input", (e) => {
   vectorGui.gridSpacing = parseInt(e.target.value)
   vectorGui.render()
 })
-dom.gridSpacingSpinBtn.addEventListener("pointerdown", (e) => {
-  if (e.target.id === "inc") {
+dom.gridSpacingSpinBtn.addEventListener('pointerdown', (e) => {
+  if (e.target.id === 'inc') {
     vectorGui.gridSpacing++
-  } else if (e.target.id === "dec") {
+  } else if (e.target.id === 'dec') {
     vectorGui.gridSpacing--
   }
   //constraint value to min/max
@@ -267,104 +271,101 @@ dom.gridSpacingSpinBtn.addEventListener("pointerdown", (e) => {
   dom.gridSpacing.value = vectorGui.gridSpacing
   vectorGui.render()
 })
-dom.tooltipBtn.addEventListener("click", () => {
+dom.tooltipBtn.addEventListener('click', () => {
   if (dom.tooltipBtn.checked && state.ui.tooltipMessage) {
-    dom.tooltip.classList.add("visible")
+    dom.tooltip.classList.add('visible')
   } else {
-    dom.tooltip.classList.remove("visible")
+    dom.tooltip.classList.remove('visible')
   }
 })
-dom.vectorSelectionOutlineBtn.addEventListener("click", () => {
-  vectorGui.outlineVectorSelection = dom.vectorSelectionOutlineBtn.checked
-  vectorGui.render()
-})
-dom.openSaveBtn.addEventListener("click", (e) => {
+dom.openSaveBtn.addEventListener('click', (e) => {
   //reset value so that the same file can be imported multiple times
   e.target.value = null
 })
-dom.topMenu.addEventListener("click", (e) => {
-  if (e.target.classList.contains("disabled")) {
+dom.topMenu.addEventListener('click', (e) => {
+  if (e.target.classList.contains('disabled')) {
     e.preventDefault()
     return
   }
   //check if active element has class menu-folder and class "active"
-  if (document.activeElement.classList.contains("menu-folder")) {
+  if (document.activeElement.classList.contains('menu-folder')) {
     //if so, toggle the active class
-    if (document.activeElement.classList.contains("active")) {
-      document.activeElement.classList.remove("active")
+    if (document.activeElement.classList.contains('active')) {
+      document.activeElement.classList.remove('active')
     } else {
-      document.activeElement.classList.add("active")
+      document.activeElement.classList.add('active')
     }
   }
 })
-dom.topMenu.addEventListener("focusout", (e) => {
+dom.topMenu.addEventListener('focusout', (e) => {
   //check if active element has class menu-folder
-  if (e.target.classList.contains("menu-folder")) {
+  if (e.target.classList.contains('menu-folder')) {
     //if so, remove the active class
-    e.target.classList.remove("active")
+    e.target.classList.remove('active')
   }
 })
 //File Submenu events
-dom.openSaveBtn.addEventListener("change", openSavedDrawing)
-dom.saveBtn.addEventListener("click", openSaveDialogBox)
-dom.importBtn.addEventListener("change", importImage)
-dom.exportBtn.addEventListener("click", exportImage)
+dom.openSaveBtn.addEventListener('change', openSavedDrawing)
+dom.saveBtn.addEventListener('click', openSaveDialogBox)
+dom.importBtn.addEventListener('change', importImage)
+dom.exportBtn.addEventListener('click', exportImage)
 //Edit Submenu events
-dom.canvasSizeBtn.addEventListener("click", () => {
+dom.canvasSizeBtn.addEventListener('click', () => {
   if (canvas.pastedLayer) {
     //if there is a pasted layer active, do not open canvas size dialog
     return
   }
-  dom.sizeContainer.style.display = "flex"
+  dom.sizeContainer.style.display = 'flex'
+  activateResizeOverlay()
 })
-dom.selectAllBtn.addEventListener("click", actionSelectAll)
-dom.deselectBtn.addEventListener("click", actionDeselect)
-dom.cutBtn.addEventListener("click", actionCutSelection)
-dom.copyBtn.addEventListener("click", actionCopySelection)
-dom.pasteBtn.addEventListener("click", actionPasteSelection)
-dom.deleteBtn.addEventListener("click", actionDeleteSelection)
-dom.flipHorizontalBtn.addEventListener("click", (e) => {
+dom.selectAllBtn.addEventListener('click', actionSelectAll)
+dom.deselectBtn.addEventListener('click', actionDeselect)
+dom.cutBtn.addEventListener('click', actionCutSelection)
+dom.copyBtn.addEventListener('click', actionCopySelection)
+dom.pasteBtn.addEventListener('click', actionPasteSelection)
+dom.deleteBtn.addEventListener('click', actionDeleteSelection)
+dom.flipHorizontalBtn.addEventListener('click', (e) => {
   actionFlipPixels(true)
 })
-dom.flipVerticalBtn.addEventListener("click", (e) => {
+dom.flipVerticalBtn.addEventListener('click', (e) => {
   actionFlipPixels(false)
 })
-dom.rotateBtn.addEventListener("click", actionRotatePixels)
+dom.rotateBtn.addEventListener('click', actionRotatePixels)
 //Settings events
-dom.settingsBtn.addEventListener("click", () => {
+dom.settingsBtn.addEventListener('click', () => {
   //if settings container is already open, close it, else open it
-  if (dom.settingsContainer.style.display === "flex") {
-    dom.settingsContainer.style.display = "none"
+  if (dom.settingsContainer.style.display === 'flex') {
+    dom.settingsContainer.style.display = 'none'
   } else {
-    dom.settingsContainer.style.display = "flex"
+    dom.settingsContainer.style.display = 'flex'
   }
 })
 //Save/Export events
-dom.saveAsForm.addEventListener("change", (e) => {
-  if (e.target.id === "preserve-history-toggle") {
+dom.saveAsForm.addEventListener('change', (e) => {
+  if (e.target.id === 'preserve-history-toggle') {
     if (e.target.checked) {
       state.ui.saveSettings.preserveHistory = true
-      dom.advancedOptionsContainer.classList.add("disabled")
+      dom.advancedOptionsContainer.classList.add('disabled')
     } else {
       state.ui.saveSettings.preserveHistory = false
-      dom.advancedOptionsContainer.classList.remove("disabled")
+      dom.advancedOptionsContainer.classList.remove('disabled')
     }
     setSaveFilesizePreview()
-  } else if (e.target.id === "include-palette-toggle") {
+  } else if (e.target.id === 'include-palette-toggle') {
     if (e.target.checked) {
       state.ui.saveSettings.includePalette = true
     } else {
       state.ui.saveSettings.includePalette = false
     }
     setSaveFilesizePreview()
-  } else if (e.target.id === "include-reference-layers-toggle") {
+  } else if (e.target.id === 'include-reference-layers-toggle') {
     if (e.target.checked) {
       state.ui.saveSettings.includeReferenceLayers = true
     } else {
       state.ui.saveSettings.includeReferenceLayers = false
     }
     setSaveFilesizePreview()
-  } else if (e.target.id === "include-removed-actions-toggle") {
+  } else if (e.target.id === 'include-removed-actions-toggle') {
     if (e.target.checked) {
       state.ui.saveSettings.includeRemovedActions = true
     } else {
@@ -373,21 +374,21 @@ dom.saveAsForm.addEventListener("change", (e) => {
     setSaveFilesizePreview()
   }
 })
-dom.saveAsForm.addEventListener("submit", (e) => {
+dom.saveAsForm.addEventListener('submit', (e) => {
   //prevent default form submission
   e.preventDefault()
   saveDrawing()
-  dom.saveContainer.style.display = "none"
+  dom.saveContainer.style.display = 'none'
   state.ui.saveDialogOpen = false
 })
-dom.saveAsFileName.addEventListener("input", (e) => {
+dom.saveAsFileName.addEventListener('input', (e) => {
   state.ui.saveSettings.saveAsFileName = e.target.value
   dom.saveAsFileName.style.width =
     measureTextWidth(state.ui.saveSettings.saveAsFileName, "16px '04Font'") +
     2 +
-    "px"
+    'px'
 })
-dom.cancelSaveBtn.addEventListener("click", () => {
-  dom.saveContainer.style.display = "none"
+dom.cancelSaveBtn.addEventListener('click', () => {
+  dom.saveContainer.style.display = 'none'
   state.ui.saveDialogOpen = false
 })

@@ -9,6 +9,7 @@ import {
   renderBrushModesToDOM,
   renderBrushStampToDOM,
   renderToolOptionsToDOM,
+  renderStampOptionsToDOM,
   renderDitherOptionsToDOM,
   updateDitherPickerColors,
 } from "../DOM/render.js"
@@ -113,6 +114,7 @@ export function switchTool(toolName = null, toolBtn = null) {
       vectorGui.reset()
       state.reset()
       renderBrushModesToDOM()
+      renderStampOptionsToDOM()
       renderDitherOptionsToDOM()
       renderCursor()
     }

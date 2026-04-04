@@ -1,8 +1,12 @@
-import { brushStamps, buildCustomStampEntry } from '../Context/brushStamps.js'
+import { brushStamps } from '../Context/brushStamps.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
-import { actionDraw, actionDitherDraw, actionBuildUpDitherDraw } from '../Actions/pointer/draw.js'
+import {
+  actionDraw,
+  actionDitherDraw,
+  actionBuildUpDitherDraw,
+} from '../Actions/pointer/draw.js'
 import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
 import { vectorGui } from './vector.js'
 import { renderCanvas } from '../Canvas/render.js'
@@ -13,14 +17,17 @@ import { ditherPatterns, isDitherOn } from '../Context/ditherPatterns.js'
 /**
  * Returns the active brush stamp entry and effective brush size.
  * Handles the custom stamp as a special case.
- * @returns {{ entry: object, brushSize: number }}
+ * @returns {{ entry: object, brushSize: number }} The stamp entry and effective brush size to use for rendering
  */
 function getActiveBrushStampEntry() {
   if (state.tool.current.brushType === 'custom') {
-    return { entry: buildCustomStampEntry(), brushSize: 32 }
+    return { entry: brushStamps.custom, brushSize: 32 }
   }
   const brushSize = state.tool.current.brushSize
-  return { entry: brushStamps[state.tool.current.brushType][brushSize], brushSize }
+  return {
+    entry: brushStamps[state.tool.current.brushType][brushSize],
+    brushSize,
+  }
 }
 
 //===========================================//
@@ -52,7 +59,10 @@ export function renderCursor() {
         !state.vector.collidedIndex &&
         state.vector.selectedIndices.size === 0
       ) {
-        const isDitherActive = (state.tool.current.ditherPatternIndex !== undefined && state.tool.current.ditherPatternIndex < 64) || (state.tool.current.modes?.buildUpDither ?? false)
+        const isDitherActive =
+          (state.tool.current.ditherPatternIndex !== undefined &&
+            state.tool.current.ditherPatternIndex < 64) ||
+          (state.tool.current.modes?.buildUpDither ?? false)
         if (state.tool.current.modes?.eraser) {
           if (vectorGui.showCursorPreview) {
             if (isDitherActive) {
@@ -181,11 +191,15 @@ function drawDitherPreview() {
   const isBuildUp = state.tool.current.modes?.buildUpDither ?? false
   const densityMap = isBuildUp ? state.tool.current._buildUpDensityMap : null
   const buildUpSteps = state.tool.current.buildUpSteps
-  const basePattern = isBuildUp ? null : ditherPatterns[state.tool.current.ditherPatternIndex]
+  const basePattern = isBuildUp
+    ? null
+    : ditherPatterns[state.tool.current.ditherPatternIndex]
   for (const pixel of stamp) {
     const x = baseX + pixel.x
     const y = baseY + pixel.y
-    if (isOutOfBounds(x, y, 0, canvas.currentLayer, state.selection.boundaryBox))
+    if (
+      isOutOfBounds(x, y, 0, canvas.currentLayer, state.selection.boundaryBox)
+    )
       continue
     if (state.selection.maskSet && !state.selection.maskSet.has((y << 16) | x))
       continue

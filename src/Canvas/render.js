@@ -4,12 +4,18 @@ import { canvas } from '../Context/canvas.js'
 import { tools } from '../Tools/index.js'
 import { vectorGui } from '../GUI/vector.js'
 import { calculateBrushDirection } from '../utils/drawHelpers.js'
-import { actionDitherDraw, actionBuildUpDitherDraw } from '../Actions/pointer/draw.js'
+import {
+  actionDitherDraw,
+  actionBuildUpDitherDraw,
+} from '../Actions/pointer/draw.js'
 import { actionLine } from '../Actions/pointer/line.js'
 import { actionFill } from '../Actions/pointer/fill.js'
 import { actionEllipse } from '../Actions/pointer/ellipse.js'
 import { actionPolygon } from '../Actions/pointer/polygon.js'
-import { actionQuadraticCurve, actionCubicCurve } from '../Actions/pointer/curve.js'
+import {
+  actionQuadraticCurve,
+  actionCubicCurve,
+} from '../Actions/pointer/curve.js'
 import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
 import { setInitialZoom } from '../utils/canvasHelpers.js'
@@ -119,12 +125,18 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         }
         buildUpDensityMap = buildUpLayerMaps.get(action.layer)
       }
+      const cropDX =
+        state.canvas.cropOffsetX - (action.recordedCropOffsetX ?? 0)
+      const cropDY =
+        state.canvas.cropOffsetY - (action.recordedCropOffsetY ?? 0)
       performAction(
         action,
         betweenCtx,
         lastPasteAction,
         lastTransformAction,
         buildUpDensityMap,
+        cropDX,
+        cropDY,
       )
       // After rendering, accumulate this action's delta into the layer map
       if (
@@ -204,6 +216,8 @@ function createAndSaveContext() {
  * @param {object|null} lastPasteAction - Most recent paste action for this layer
  * @param {object|null} lastTransformAction - Most recent transform action for this layer
  * @param {Map<number, number>|null} buildUpDensityMap - Accumulated density counts for build-up dither
+ * @param {number} cropDX - horizontal crop offset delta (current - recorded), default 0
+ * @param {number} cropDY - vertical crop offset delta (current - recorded), default 0
  */
 export function performAction(
   action,
@@ -211,6 +225,8 @@ export function performAction(
   lastPasteAction = null,
   lastTransformAction = null,
   buildUpDensityMap = null,
+  cropDX = 0,
+  cropDY = 0,
 ) {
   if (!action?.boundaryBox) {
     return
@@ -223,10 +239,10 @@ export function performAction(
       //correct boundary box for offsets
       const boundaryBox = { ...action.boundaryBox }
       if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin += offsetX
-        boundaryBox.xMax += offsetX
-        boundaryBox.yMin += offsetY
-        boundaryBox.yMax += offsetY
+        boundaryBox.xMin += offsetX + cropDX
+        boundaryBox.xMax += offsetX + cropDX
+        boundaryBox.yMin += offsetY + cropDY
+        boundaryBox.yMax += offsetY + cropDY
       }
       let seen = new Set()
       let mask = null
@@ -236,15 +252,17 @@ export function performAction(
       if (action.maskArray) {
         // Rebuild as packed integers (y<<16)|x — the format draw.js expects.
         // maskArray stores layer-relative {x,y} objects; re-apply the current
-        // layer offset to get absolute canvas coordinates.
+        // layer offset and crop delta to get absolute canvas coordinates.
         mask = new Set(
           action.maskArray.map(
-            (coord) => ((coord.y + offsetY) << 16) | (coord.x + offsetX),
+            (coord) =>
+              ((coord.y + offsetY + cropDY) << 16) |
+              (coord.x + offsetX + cropDX),
           ),
         )
       }
-      let previousX = action.points[0].x + offsetX
-      let previousY = action.points[0].y + offsetY
+      let previousX = action.points[0].x + offsetX + cropDX
+      let previousY = action.points[0].y + offsetY + cropDY
       let brushDirection = '0,0'
       const isBuildUp = action.modes?.buildUpDither ?? false
       const buildUpSteps = action.buildUpSteps ?? [16, 32, 48, 64]
@@ -254,12 +272,20 @@ export function performAction(
       // Build context once per stroke; brushSize is updated per-point below
       // since points may have individual brushSizes stored in the timeline.
       // Effective dither offset accounts for layer movement since stroke was recorded.
-      // Pixels are replayed at (p.x + offsetX), so the tile lookup must shift by
-      // (recordedLayerX - offsetX) to keep the pattern fixed to the pixels.
+      // Pixels are replayed at (p.x + offsetX + cropDX), so the tile lookup must
+      // shift by (recordedLayerX - offsetX - cropDX) to keep the pattern fixed to the pixels.
       const recordedLayerX = action.recordedLayerX ?? offsetX
       const recordedLayerY = action.recordedLayerY ?? offsetY
-      const effectiveDitherOffsetX = (((action.ditherOffsetX ?? 0) + recordedLayerX - offsetX) % 8 + 8) % 8
-      const effectiveDitherOffsetY = (((action.ditherOffsetY ?? 0) + recordedLayerY - offsetY) % 8 + 8) % 8
+      const effectiveDitherOffsetX =
+        ((((action.ditherOffsetX ?? 0) + recordedLayerX - offsetX - cropDX) %
+          8) +
+          8) %
+        8
+      const effectiveDitherOffsetY =
+        ((((action.ditherOffsetY ?? 0) + recordedLayerY - offsetY - cropDY) %
+          8) +
+          8) %
+        8
       const strokeCtx = createStrokeContext({
         layer: action.layer,
         customContext: betweenCtx,
@@ -278,42 +304,55 @@ export function performAction(
       })
       for (const p of action.points) {
         brushDirection = calculateBrushDirection(
-          p.x + offsetX,
-          p.y + offsetY,
+          p.x + offsetX + cropDX,
+          p.y + offsetY + cropDY,
           previousX,
           previousY,
         )
         // Update per-point brushSize (timeline supports variable sizes per point)
-        strokeCtx.brushSize = p.brushSize
-        const stamp = brushStamps[action.brushType][p.brushSize][brushDirection]
+        const isCustomStamp = action.brushType === 'custom'
+        strokeCtx.brushSize = isCustomStamp ? 32 : p.brushSize
+        const stamp = isCustomStamp
+          ? action.customStampEntry[brushDirection]
+          : brushStamps[action.brushType][p.brushSize][brushDirection]
         if (isBuildUp) {
-          actionBuildUpDitherDraw(p.x + offsetX, p.y + offsetY, stamp, strokeCtx)
+          actionBuildUpDitherDraw(
+            p.x + offsetX + cropDX,
+            p.y + offsetY + cropDY,
+            stamp,
+            strokeCtx,
+          )
         } else {
-          actionDitherDraw(p.x + offsetX, p.y + offsetY, stamp, strokeCtx)
+          actionDitherDraw(
+            p.x + offsetX + cropDX,
+            p.y + offsetY + cropDY,
+            stamp,
+            strokeCtx,
+          )
         }
-        previousX = p.x + offsetX
-        previousY = p.y + offsetY
+        previousX = p.x + offsetX + cropDX
+        previousY = p.y + offsetY + cropDY
         //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster. But it sacrifices flexibility with points.
       }
       break
     }
     case 'fill':
-      renderActionVectors(action, betweenCtx)
+      renderActionVectors(action, betweenCtx, cropDX, cropDY)
       break
     case 'line':
-      renderActionVectors(action, betweenCtx)
+      renderActionVectors(action, betweenCtx, cropDX, cropDY)
       break
     case 'quadCurve':
-      renderActionVectors(action, betweenCtx)
+      renderActionVectors(action, betweenCtx, cropDX, cropDY)
       break
     case 'cubicCurve':
-      renderActionVectors(action, betweenCtx)
+      renderActionVectors(action, betweenCtx, cropDX, cropDY)
       break
     case 'ellipse':
-      renderActionVectors(action, betweenCtx)
+      renderActionVectors(action, betweenCtx, cropDX, cropDY)
       break
     case 'polygon':
-      renderActionVectors(action, betweenCtx)
+      renderActionVectors(action, betweenCtx, cropDX, cropDY)
       break
     case 'cut': {
       //Correct action coordinates with layer offsets
@@ -322,10 +361,10 @@ export function performAction(
       //correct boundary box for offsets
       const boundaryBox = { ...action.boundaryBox }
       if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin += offsetX
-        boundaryBox.xMax += offsetX
-        boundaryBox.yMin += offsetY
-        boundaryBox.yMax += offsetY
+        boundaryBox.xMin += offsetX + cropDX
+        boundaryBox.xMax += offsetX + cropDX
+        boundaryBox.yMin += offsetY + cropDY
+        boundaryBox.yMax += offsetY + cropDY
       }
       let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
       if (action.maskSet && action.maskSet.length > 0) {
@@ -371,10 +410,10 @@ export function performAction(
       //correct boundary box for offsets
       const boundaryBox = { ...action.boundaryBox }
       if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin += offsetX
-        boundaryBox.xMax += offsetX
-        boundaryBox.yMin += offsetY
-        boundaryBox.yMax += offsetY
+        boundaryBox.xMin += offsetX + cropDX
+        boundaryBox.xMax += offsetX + cropDX
+        boundaryBox.yMin += offsetY + cropDY
+        boundaryBox.yMax += offsetY + cropDY
       }
       // Determine if the action is the last unconfirmed 'paste' action in the undoStack
       const isLastPasteAction = action === lastPasteAction
@@ -404,7 +443,7 @@ export function performAction(
     }
     case 'vectorPaste': {
       //render vector paste action (only vectors)
-      renderActionVectors(action, betweenCtx)
+      renderActionVectors(action, betweenCtx, cropDX, cropDY)
       break
     }
     case 'transform': {
@@ -419,10 +458,10 @@ export function performAction(
           //correct boundary box for offsets
           const boundaryBox = { ...action.boundaryBox }
           if (boundaryBox.xMax !== null) {
-            boundaryBox.xMin += offsetX
-            boundaryBox.xMax += offsetX
-            boundaryBox.yMin += offsetY
-            boundaryBox.yMax += offsetY
+            boundaryBox.xMin += offsetX + cropDX
+            boundaryBox.xMax += offsetX + cropDX
+            boundaryBox.yMin += offsetY + cropDY
+            boundaryBox.yMax += offsetY + cropDY
           }
           //put transformed image data onto canvas (ok to use put image data because the layer should not have anything else on it at this point)
           transformRasterContent(
@@ -446,18 +485,20 @@ export function performAction(
  * Helper for performAction to render vectors
  * @param {object} action - The vector action to be rendered
  * @param {CanvasRenderingContext2D} activeCtx - The canvas context for saving between actions
+ * @param {number} cropDX - horizontal crop offset delta, default 0
+ * @param {number} cropDY - vertical crop offset delta, default 0
  */
-function renderActionVectors(action, activeCtx = null) {
+function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
   //Correct action coordinates with layer offsets
   const offsetX = action.layer.x
   const offsetY = action.layer.y
   //correct boundary box for offsets
   const boundaryBox = { ...action.boundaryBox }
   if (boundaryBox.xMax !== null) {
-    boundaryBox.xMin += offsetX
-    boundaryBox.xMax += offsetX
-    boundaryBox.yMin += offsetY
-    boundaryBox.yMax += offsetY
+    boundaryBox.xMin += offsetX + cropDX
+    boundaryBox.xMax += offsetX + cropDX
+    boundaryBox.yMin += offsetY + cropDY
+    boundaryBox.yMax += offsetY + cropDY
   }
   //render vectors
   for (let i = 0; i < action.vectorIndices.length; i++) {
@@ -468,8 +509,10 @@ function renderActionVectors(action, activeCtx = null) {
     const vOffsetY = vector.layer.y
     const vRecordedLayerX = vector.recordedLayerX ?? vOffsetX
     const vRecordedLayerY = vector.recordedLayerY ?? vOffsetY
-    const vEffectiveDitherOffsetX = (((vector.ditherOffsetX ?? 0) + vRecordedLayerX - vOffsetX) % 8 + 8) % 8
-    const vEffectiveDitherOffsetY = (((vector.ditherOffsetY ?? 0) + vRecordedLayerY - vOffsetY) % 8 + 8) % 8
+    const vEffectiveDitherOffsetX =
+      ((((vector.ditherOffsetX ?? 0) + vRecordedLayerX - vOffsetX) % 8) + 8) % 8
+    const vEffectiveDitherOffsetY =
+      ((((vector.ditherOffsetY ?? 0) + vRecordedLayerY - vOffsetY) % 8) + 8) % 8
     const vectorCtx = createStrokeContext({
       layer: vector.layer,
       customContext: activeCtx,
@@ -484,43 +527,45 @@ function renderActionVectors(action, activeCtx = null) {
       ditherOffsetX: vEffectiveDitherOffsetX,
       ditherOffsetY: vEffectiveDitherOffsetY,
     })
+    const ox = offsetX + cropDX
+    const oy = offsetY + cropDY
     switch (vp.type) {
       case 'fill': {
-        // let tempMask = new Set([vp.px1 + offsetX, vp.py1 + offsetY])
-        actionFill(vp.px1 + offsetX, vp.py1 + offsetY, vectorCtx)
+        // let tempMask = new Set([vp.px1 + ox, vp.py1 + oy])
+        actionFill(vp.px1 + ox, vp.py1 + oy, vectorCtx)
         break
       }
       case 'line':
         actionLine(
-          vp.px1 + offsetX,
-          vp.py1 + offsetY,
-          vp.px2 + offsetX,
-          vp.py2 + offsetY,
+          vp.px1 + ox,
+          vp.py1 + oy,
+          vp.px2 + ox,
+          vp.py2 + oy,
           vectorCtx,
         )
         break
       case 'quadCurve':
         actionQuadraticCurve(
-          vp.px1 + offsetX,
-          vp.py1 + offsetY,
-          vp.px2 + offsetX,
-          vp.py2 + offsetY,
-          vp.px3 + offsetX,
-          vp.py3 + offsetY,
+          vp.px1 + ox,
+          vp.py1 + oy,
+          vp.px2 + ox,
+          vp.py2 + oy,
+          vp.px3 + ox,
+          vp.py3 + oy,
           2,
           vectorCtx,
         )
         break
       case 'cubicCurve':
         actionCubicCurve(
-          vp.px1 + offsetX,
-          vp.py1 + offsetY,
-          vp.px2 + offsetX,
-          vp.py2 + offsetY,
-          vp.px3 + offsetX,
-          vp.py3 + offsetY,
-          vp.px4 + offsetX,
-          vp.py4 + offsetY,
+          vp.px1 + ox,
+          vp.py1 + oy,
+          vp.px2 + ox,
+          vp.py2 + oy,
+          vp.px3 + ox,
+          vp.py3 + oy,
+          vp.px4 + ox,
+          vp.py4 + oy,
           3,
           vectorCtx,
         )
@@ -528,23 +573,27 @@ function renderActionVectors(action, activeCtx = null) {
       case 'ellipse':
         actionEllipse(
           vp.weight,
-          vp.leftTangentX + offsetX,
-          vp.leftTangentY + offsetY,
-          vp.topTangentX + offsetX,
-          vp.topTangentY + offsetY,
-          vp.rightTangentX + offsetX,
-          vp.rightTangentY + offsetY,
-          vp.bottomTangentX + offsetX,
-          vp.bottomTangentY + offsetY,
+          vp.leftTangentX + ox,
+          vp.leftTangentY + oy,
+          vp.topTangentX + ox,
+          vp.topTangentY + oy,
+          vp.rightTangentX + ox,
+          vp.rightTangentY + oy,
+          vp.bottomTangentX + ox,
+          vp.bottomTangentY + oy,
           vectorCtx,
         )
         break
       case 'polygon':
         actionPolygon(
-          vp.px1 + offsetX, vp.py1 + offsetY,
-          vp.px2 + offsetX, vp.py2 + offsetY,
-          vp.px3 + offsetX, vp.py3 + offsetY,
-          vp.px4 + offsetX, vp.py4 + offsetY,
+          vp.px1 + ox,
+          vp.py1 + oy,
+          vp.px2 + ox,
+          vp.py2 + oy,
+          vp.px3 + ox,
+          vp.py3 + oy,
+          vp.px4 + ox,
+          vp.py4 + oy,
           vectorCtx,
         )
         break
@@ -696,7 +745,9 @@ export function renderCanvas(
   setImages = false,
 ) {
   //Handle offscreen canvases
-  if (redrawTimeline) {
+  // Skip the clear+redraw when the timeline is empty — this preserves pixel data
+  // that was baked directly into layer canvases (e.g. after a content-shift resize).
+  if (redrawTimeline && state.timeline.undoStack.length > 0) {
     //clear offscreen layers
     clearOffscreenCanvas(activeLayer)
     //render all previous actions
@@ -716,83 +767,41 @@ export function renderCanvas(
 }
 
 /**
- * Resize the offscreen canvas and all layers
+ * Apply new canvas dimensions: resize all canvases, recalculate transforms,
+ * adjust canvas position to stay stable, and resize raster layer canvases (clearing their pixel data).
+ * Called by resizeOffScreenCanvas and the undo/redo resize handler.
  * @param {number} width - (Integer)
  * @param {number} height - (Integer)
+ * @param {number} [contentOffsetX] - how far the existing art shifted right in the new canvas (canvas pixels)
+ * @param {number} [contentOffsetY] - how far the existing art shifted down in the new canvas (canvas pixels)
  */
-export const resizeOffScreenCanvas = (width, height) => {
+export function applyCanvasDimensions(
+  width,
+  height,
+  contentOffsetX = 0,
+  contentOffsetY = 0,
+) {
   canvas.offScreenCVS.width = width
   canvas.offScreenCVS.height = height
   canvas.previewCVS.width = width
   canvas.previewCVS.height = height
-  // canvas.thumbnailCVS.width = canvas.offScreenCVS.width
-  // canvas.thumbnailCVS.height = canvas.offScreenCVS.height
-  //reset canvas state
-  canvas.zoom = setInitialZoom(
-    canvas.offScreenCVS.width,
-    canvas.offScreenCVS.height,
-    canvas.vectorGuiCVS.offsetWidth,
-    canvas.vectorGuiCVS.offsetHeight,
-  )
-  canvas.vectorGuiCTX.setTransform(
-    canvas.sharpness * canvas.zoom,
-    0,
-    0,
-    canvas.sharpness * canvas.zoom,
-    0,
-    0,
-  )
-  canvas.selectionGuiCTX.setTransform(
-    canvas.sharpness * canvas.zoom,
-    0,
-    0,
-    canvas.sharpness * canvas.zoom,
-    0,
-    0,
-  )
-  canvas.cursorCTX.setTransform(
-    canvas.sharpness * canvas.zoom,
-    0,
-    0,
-    canvas.sharpness * canvas.zoom,
-    0,
-    0,
-  )
+  const t = canvas.sharpness * canvas.zoom
+  canvas.vectorGuiCTX.setTransform(t, 0, 0, t, 0, 0)
+  canvas.selectionGuiCTX.setTransform(t, 0, 0, t, 0, 0)
+  canvas.cursorCTX.setTransform(t, 0, 0, t, 0, 0)
   canvas.layers.forEach((layer) => {
-    layer.onscreenCtx.setTransform(
-      canvas.sharpness * canvas.zoom,
-      0,
-      0,
-      canvas.sharpness * canvas.zoom,
-      0,
-      0,
-    )
+    layer.onscreenCtx.setTransform(t, 0, 0, t, 0, 0)
   })
-  canvas.backgroundCTX.setTransform(
-    canvas.sharpness * canvas.zoom,
-    0,
-    0,
-    canvas.sharpness * canvas.zoom,
-    0,
-    0,
-  )
-  canvas.xOffset = Math.round(
-    (canvas.currentLayer.onscreenCvs.width / canvas.sharpness / canvas.zoom -
-      canvas.offScreenCVS.width) /
-      2,
-  )
-  canvas.yOffset = Math.round(
-    (canvas.currentLayer.onscreenCvs.height / canvas.sharpness / canvas.zoom -
-      canvas.offScreenCVS.height) /
-      2,
-  )
+  canvas.backgroundCTX.setTransform(t, 0, 0, t, 0, 0)
+  canvas.xOffset = Math.round(canvas.xOffset - contentOffsetX)
+  canvas.yOffset = Math.round(canvas.yOffset - contentOffsetY)
   canvas.previousXOffset = canvas.xOffset
   canvas.previousYOffset = canvas.yOffset
   canvas.subPixelX = null
   canvas.subPixelY = null
   canvas.zoomPixelX = null
   canvas.zoomPixelY = null
-  //resize layers. Per function, it's cheaper to run this inside the existing iterator in drawLayers, but since drawLayers runs so often, it's preferable to only run this here where it's needed.
+  // Resize raster layer canvases (this clears their pixel data)
   canvas.layers.forEach((layer) => {
     if (layer.type === 'raster') {
       if (
@@ -804,6 +813,23 @@ export const resizeOffScreenCanvas = (width, height) => {
       }
     }
   })
-  renderCanvas(null, true) //render all layers and redraw timeline
+}
+
+/**
+ * Resize the offscreen canvas and all layers.
+ * @param {number} width - (Integer)
+ * @param {number} height - (Integer)
+ * @param {number} [contentOffsetX] - how far the existing art shifted right in the new canvas (canvas pixels)
+ * @param {number} [contentOffsetY] - how far the existing art shifted down in the new canvas (canvas pixels)
+ */
+export const resizeOffScreenCanvas = (
+  width,
+  height,
+  contentOffsetX = 0,
+  contentOffsetY = 0,
+) => {
+  applyCanvasDimensions(width, height, contentOffsetX, contentOffsetY)
+
+  renderCanvas(null, true)
   vectorGui.render()
 }

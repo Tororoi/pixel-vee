@@ -2806,6 +2806,58 @@ canvas {
 .size-container .dimensions-form label input {
   margin-left: 8px;
 }
+.size-container .dimensions-form .anchor-section {
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+.size-container .dimensions-form .anchor-section .anchor-label {
+  font-size: 12px;
+  color: rgb(255, 255, 255);
+  white-space: nowrap;
+}
+.size-container .dimensions-form .anchor-section .anchor-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 16px);
+  grid-template-rows: repeat(3, 16px);
+  gap: 2px;
+}
+.size-container .dimensions-form .anchor-section .anchor-grid .anchor-btn {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  position: relative;
+}
+.size-container .dimensions-form .anchor-section .anchor-grid .anchor-btn::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.35);
+  border-radius: 50%;
+}
+.size-container .dimensions-form .anchor-section .anchor-grid .anchor-btn.active {
+  border-color: rgb(255, 255, 255);
+}
+.size-container .dimensions-form .anchor-section .anchor-grid .anchor-btn.active::after {
+  background: rgb(255, 255, 255);
+}
+.size-container .dimensions-form .anchor-section .anchor-grid .anchor-btn:hover:not(.active) {
+  border-color: rgba(255, 255, 255, 0.7);
+}
+.size-container .dimensions-form .anchor-section .anchor-grid .anchor-btn:hover:not(.active)::after {
+  background: rgba(255, 255, 255, 0.7);
+}
 .size-container .dimensions-form .buttons-container {
   display: flex;
   flex-flow: row nowrap;

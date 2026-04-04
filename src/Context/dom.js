@@ -73,10 +73,6 @@ const gridBtn = document.getElementById("grid-toggle")
 // * Grid Spacing * //
 const gridSpacingSpinBtn = document.querySelector(".grid-spacing-spin")
 const gridSpacing = document.getElementById("grid-spacing")
-// * Vector Selection Outline * //
-const vectorSelectionOutlineBtn = document.getElementById(
-  "vector-outline-toggle"
-)
 // * Cursor Preview * //
 const cursorPreviewBtn = document.getElementById("cursor-preview-toggle")
 
@@ -224,6 +220,7 @@ const dimensionsForm = document.querySelector(".dimensions-form")
 const canvasWidth = document.getElementById("canvas-width")
 const canvasHeight = document.getElementById("canvas-height")
 const canvasSizeCancelBtn = document.getElementById("cancel-resize-button")
+const anchorGrid = document.getElementById("anchor-grid")
 
 //====================================//
 //=== * * Vector Transform UI * * ====//
@@ -276,7 +273,6 @@ export const dom = {
   gridBtn,
   gridSpacingSpinBtn,
   gridSpacing,
-  vectorSelectionOutlineBtn,
   cursorPreviewBtn,
   //save/export
   saveContainer,
@@ -352,6 +348,7 @@ export const dom = {
   canvasWidth,
   canvasHeight,
   canvasSizeCancelBtn,
+  anchorGrid,
   //vector transform
   vectorTransformUIContainer,
   vectorTransformModeContainer,

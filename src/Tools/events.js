@@ -12,21 +12,23 @@ import { renderCanvas } from "../Canvas/render.js"
 import {
   renderVectorsToDOM,
   renderBrushStampToDOM,
+  renderStampOptionsToDOM,
   renderDitherOptionsToDOM,
   renderDitherControlsToDOM,
   renderBuildUpStepsToDOM,
-  initDitherPicker,
   highlightSelectedDitherPattern,
   updateDitherPickerColors,
   applyDitherOffset,
   applyDitherOffsetControl,
 } from "../DOM/render.js"
 import { toggleMode, switchTool, initToolGroups } from "./toolbox.js"
+import { openStampEditor } from "../DOM/stampEditor.js"
 import { ZOOM_LEVELS } from "../utils/constants.js"
 
 //Initialize default tool
 state.tool.current = tools.brush
 initToolGroups()
+renderStampOptionsToDOM()
 renderDitherOptionsToDOM()
 
 //=========================================//
@@ -211,7 +213,6 @@ dom.brushSlider.addEventListener("input", updateBrush)
 // * Dither Brush * //
 document.querySelector(".dither-preview")?.addEventListener("click", () => {
   if (!dom.ditherPickerContainer) return
-  initDitherPicker()
   updateDitherPickerColors()
   dom.ditherPickerContainer.style.display =
     dom.ditherPickerContainer.style.display === "flex" ? "none" : "flex"
@@ -316,9 +317,19 @@ document.querySelector(".build-up-step-slots")?.addEventListener("click", (e) =>
   renderBuildUpStepsToDOM()
   // Ensure the picker is open for pattern selection
   if (brush.buildUpActiveStepSlot !== null && dom.ditherPickerContainer) {
-    initDitherPicker()
     updateDitherPickerColors()
     dom.ditherPickerContainer.style.display = "flex"
   }
 })
 
+// Custom stamp button: activate custom brush type and toggle the editor
+dom.customBrushTypeBtn?.addEventListener('click', () => {
+  brush.brushType = 'custom'
+  dom.customBrushTypeBtn.classList.add('active')
+  renderBrushStampToDOM()
+  if (dom.stampEditorContainer.style.display === 'none' || !dom.stampEditorContainer.style.display) {
+    openStampEditor()
+  } else {
+    dom.stampEditorContainer.style.display = 'none'
+  }
+})

@@ -178,6 +178,16 @@ export const tools = {
     modes: {},
     type: "raster",
   },
+  resize: {
+    name: "resize",
+    fn: null,
+    brushSize: null,
+    brushType: null,
+    brushDisabled: false,
+    options: {},
+    modes: {},
+    type: "settings",
+  },
   //Utility Tools (does not affect timeline)
   eyedropper,
   grab,

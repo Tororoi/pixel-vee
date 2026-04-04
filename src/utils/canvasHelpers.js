@@ -17,8 +17,8 @@ export const setInitialZoom = (
   for (let i = ZOOM_LEVELS.length - 1; i >= 0; i--) {
     const zoom = ZOOM_LEVELS[i]
     if (
-      canvasWidth * zoom <= containerWidth &&
-      canvasHeight * zoom <= containerHeight
+      canvasWidth * zoom <= containerWidth * 0.5 &&
+      canvasHeight * zoom <= containerHeight * 0.85
     ) {
       return zoom
     }
