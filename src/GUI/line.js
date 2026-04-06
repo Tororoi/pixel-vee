@@ -1,6 +1,7 @@
 import { canvas } from '../Context/canvas.js'
 import { vectorGui } from './vector.js'
 import { getGuiLineWidth, doubleStroke } from '../utils/guiHelpers.js'
+import { getRenderXOffset, getRenderYOffset } from '../utils/coordinateHelpers.js'
 
 /**
  * @param {object} vectorProperties - The properties of the vector
@@ -41,8 +42,8 @@ export function renderLineVector(vectorProperties, vector) {
  */
 export function renderLinePath(vectorProperties, vector) {
   const { px1, py1, px2, py2 } = vectorProperties
-  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
-  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
+  const xOffset = getRenderXOffset(vector)
+  const yOffset = getRenderYOffset(vector)
   // Setting of context attributes.
   const lineWidth = getGuiLineWidth()
   if (!Number.isInteger(px2)) return

@@ -84,7 +84,6 @@ function handleKeyUp(e) {
   deactivateShortcut(e.code)
 }
 
-
 let wheelAccumulator = 0
 let wheelGestureActive = false
 let wheelLastDirection = 0
@@ -300,9 +299,14 @@ function handlePointerUp(e) {
   //reset action and render vectors
   if (state.timeline.currentAction) {
     if (
-      ['fill', 'line', 'quadCurve', 'cubicCurve', 'ellipse', 'polygon'].includes(
-        state.tool.current.name,
-      )
+      [
+        'fill',
+        'line',
+        'quadCurve',
+        'cubicCurve',
+        'ellipse',
+        'polygon',
+      ].includes(state.tool.current.name)
     ) {
       renderVectorsToDOM()
     }

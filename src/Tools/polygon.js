@@ -12,6 +12,10 @@ import { coordArrayFromSet } from '../utils/maskHelpers.js'
 import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
 import { enableActionsForSelection } from '../DOM/disableDomElements.js'
 import { rerouteVectorStepsAction } from './adjust.js'
+import {
+  getCropNormalizedCursorX,
+  getCropNormalizedCursorY,
+} from '../utils/coordinateHelpers.js'
 
 //============================================//
 //==== * * * Polygon Adjust Helpers * * * ====//
@@ -47,8 +51,8 @@ function buildPolygonCtx(isPreview = false) {
  * Layout: px1=anchor, px2=adjacent horizontal, px3=opposite, px4=adjacent vertical
  */
 function updateVertices() {
-  let ex = state.cursor.x
-  let ey = state.cursor.y
+  let ex = state.cursor.x - state.canvas.cropOffsetX
+  let ey = state.cursor.y - state.canvas.cropOffsetY
   if (
     keys.ShiftLeft ||
     keys.ShiftRight ||
@@ -81,10 +85,38 @@ function updateVertices() {
  */
 export function getUniformCtx(selectedXKey) {
   const cornerMap = {
-    px1: { fixedXKey: 'px3', fixedYKey: 'py3', adj1XKey: 'px2', adj1YKey: 'py2', adj2XKey: 'px4', adj2YKey: 'py4' },
-    px2: { fixedXKey: 'px4', fixedYKey: 'py4', adj1XKey: 'px1', adj1YKey: 'py1', adj2XKey: 'px3', adj2YKey: 'py3' },
-    px3: { fixedXKey: 'px1', fixedYKey: 'py1', adj1XKey: 'px2', adj1YKey: 'py2', adj2XKey: 'px4', adj2YKey: 'py4' },
-    px4: { fixedXKey: 'px2', fixedYKey: 'py2', adj1XKey: 'px1', adj1YKey: 'py1', adj2XKey: 'px3', adj2YKey: 'py3' },
+    px1: {
+      fixedXKey: 'px3',
+      fixedYKey: 'py3',
+      adj1XKey: 'px2',
+      adj1YKey: 'py2',
+      adj2XKey: 'px4',
+      adj2YKey: 'py4',
+    },
+    px2: {
+      fixedXKey: 'px4',
+      fixedYKey: 'py4',
+      adj1XKey: 'px1',
+      adj1YKey: 'py1',
+      adj2XKey: 'px3',
+      adj2YKey: 'py3',
+    },
+    px3: {
+      fixedXKey: 'px1',
+      fixedYKey: 'py1',
+      adj1XKey: 'px2',
+      adj1YKey: 'py2',
+      adj2XKey: 'px4',
+      adj2YKey: 'py4',
+    },
+    px4: {
+      fixedXKey: 'px2',
+      fixedYKey: 'py2',
+      adj1XKey: 'px1',
+      adj1YKey: 'py1',
+      adj2XKey: 'px3',
+      adj2YKey: 'py3',
+    },
   }
   const map = cornerMap[selectedXKey]
   if (!map) return null
@@ -117,8 +149,27 @@ export function getUniformCtx(selectedXKey) {
  * @param {object} uniformCtx - context returned by getUniformCtx at drag-start
  * @param {boolean} forceSquare - when true, clamp both side lengths to their minimum to produce a square
  */
-export function syncPolygonUniform(vectorProperties, selectedXKey, selectedYKey, newX, newY, uniformCtx, forceSquare = false) {
-  const { fixedXKey, fixedYKey, adj1XKey, adj1YKey, adj2XKey, adj2YKey, d1x, d1y, d2x, d2y } = uniformCtx
+export function syncPolygonUniform(
+  vectorProperties,
+  selectedXKey,
+  selectedYKey,
+  newX,
+  newY,
+  uniformCtx,
+  forceSquare = false,
+) {
+  const {
+    fixedXKey,
+    fixedYKey,
+    adj1XKey,
+    adj1YKey,
+    adj2XKey,
+    adj2YKey,
+    d1x,
+    d1y,
+    d2x,
+    d2y,
+  } = uniformCtx
   const fx = vectorProperties[fixedXKey]
   const fy = vectorProperties[fixedYKey]
   const dx = newX - fx
@@ -193,16 +244,26 @@ export function syncPolygonProperties(
   } else {
     vectorProperties[selectedXKey] = newX
     vectorProperties[selectedYKey] = newY
-    vectorProperties.px0 = Math.round((vectorProperties.px1 + vectorProperties.px3) / 2)
-    vectorProperties.py0 = Math.round((vectorProperties.py1 + vectorProperties.py3) / 2)
+    vectorProperties.px0 = Math.round(
+      (vectorProperties.px1 + vectorProperties.px3) / 2,
+    )
+    vectorProperties.py0 = Math.round(
+      (vectorProperties.py1 + vectorProperties.py3) / 2,
+    )
   }
 }
 
 /**
  * Update polygon vector properties for the current selected point and cursor position.
  * @param {object} currentVector - The current vector
+ * @param {number} normalizedX - The normalized X coordinate
+ * @param {number} normalizedY - The normalized Y coordinate
  */
-export function updatePolygonVectorProperties(currentVector) {
+export function updatePolygonVectorProperties(
+  currentVector,
+  normalizedX,
+  normalizedY,
+) {
   const uniformCtx = state.tool.current.options.uniform?.active
     ? state.vector.savedProperties[state.vector.currentIndex]?.uniformCtx
     : null
@@ -211,8 +272,8 @@ export function updatePolygonVectorProperties(currentVector) {
       state.vector.properties,
       vectorGui.selectedPoint.xKey,
       vectorGui.selectedPoint.yKey,
-      state.cursor.x,
-      state.cursor.y,
+      normalizedX,
+      normalizedY,
       uniformCtx,
       state.vector.properties.forceSquare,
     )
@@ -221,8 +282,8 @@ export function updatePolygonVectorProperties(currentVector) {
       state.vector.properties,
       vectorGui.selectedPoint.xKey,
       vectorGui.selectedPoint.yKey,
-      state.cursor.x,
-      state.cursor.y,
+      normalizedX,
+      normalizedY,
     )
   }
   currentVector.vectorProperties = { ...state.vector.properties }
@@ -241,18 +302,20 @@ export function updatePolygonVectorProperties(currentVector) {
 /**
  * Call actionPolygon with the current vector properties.
  * @param {boolean} isPreview - whether to render as preview
+ * @param {number} cropOffsetX - crop offset X to translate to canvas-absolute space
+ * @param {number} cropOffsetY - crop offset Y to translate to canvas-absolute space
  */
-function drawPolygon(isPreview) {
+function drawPolygon(isPreview, cropOffsetX, cropOffsetY) {
   const p = state.vector.properties
   actionPolygon(
-    p.px1,
-    p.py1,
-    p.px2,
-    p.py2,
-    p.px3,
-    p.py3,
-    p.px4,
-    p.py4,
+    p.px1 + cropOffsetX,
+    p.py1 + cropOffsetY,
+    p.px2 + cropOffsetX,
+    p.py2 + cropOffsetY,
+    p.px3 + cropOffsetX,
+    p.py3 + cropOffsetY,
+    p.px4 + cropOffsetX,
+    p.py4 + cropOffsetY,
     buildPolygonCtx(isPreview),
   )
 }
@@ -267,15 +330,18 @@ function drawPolygon(isPreview) {
  */
 function polygonSteps() {
   if (rerouteVectorStepsAction()) return
+  const normalizedX = getCropNormalizedCursorX()
+  const normalizedY = getCropNormalizedCursorY()
+  const { cropOffsetX, cropOffsetY } = state.canvas
   switch (canvas.pointerEvent) {
     case 'pointerdown':
       vectorGui.reset()
       state.vector.properties.type = state.tool.current.name
-      state.vector.properties.px1 = state.cursor.x
-      state.vector.properties.py1 = state.cursor.y
+      state.vector.properties.px1 = normalizedX
+      state.vector.properties.py1 = normalizedY
       updateVertices()
       renderCanvas(canvas.currentLayer)
-      drawPolygon(true)
+      drawPolygon(true, cropOffsetX, cropOffsetY)
       break
     case 'pointermove':
       if (
@@ -284,12 +350,12 @@ function polygonSteps() {
       ) {
         updateVertices()
         renderCanvas(canvas.currentLayer)
-        drawPolygon(true)
+        drawPolygon(true, cropOffsetX, cropOffsetY)
       }
       break
     case 'pointerup': {
       updateVertices()
-      drawPolygon(false)
+      drawPolygon(false, cropOffsetX, cropOffsetY)
       const maskArray = coordArrayFromSet(
         state.selection.maskSet,
         canvas.currentLayer.x,
@@ -372,7 +438,8 @@ export const polygon = {
   options: {
     uniform: {
       active: false,
-      tooltip: 'Uniform. \n\nMaintain rectangular shape when adjusting corners.',
+      tooltip:
+        'Uniform. \n\nMaintain rectangular shape when adjusting corners.',
     },
     displayPaths: {
       active: false,

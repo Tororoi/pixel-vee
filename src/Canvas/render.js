@@ -125,10 +125,8 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         }
         buildUpDensityMap = buildUpLayerMaps.get(action.layer)
       }
-      const cropDX =
-        state.canvas.cropOffsetX - (action.recordedCropOffsetX ?? 0)
-      const cropDY =
-        state.canvas.cropOffsetY - (action.recordedCropOffsetY ?? 0)
+      const cropDX = state.canvas.cropOffsetX
+      const cropDY = state.canvas.cropOffsetY
       performAction(
         action,
         betweenCtx,

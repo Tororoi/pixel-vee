@@ -6,6 +6,12 @@ import {
   getGuiLineWidth,
   doubleStroke,
 } from '../utils/guiHelpers.js'
+import {
+  getControlPointXOffset,
+  getControlPointYOffset,
+  getRenderXOffset,
+  getRenderYOffset,
+} from '../utils/coordinateHelpers.js'
 import { renderFillVector } from './fill.js'
 import { renderCurveVector, renderCurvePath } from './curve.js'
 import {
@@ -378,19 +384,28 @@ function drawInactiveControlPoint(
  * @param {object} vector - The vector to be rendered
  */
 function handleCollisionAndDraw(keys, point, radius, modify, vector) {
+  // Double the radius on touch devices so control points are easier to tap.
   let r = state.tool.touch ? radius * 2 : radius
-  const xOffset = vector ? vector.layer.x : 0
-  const yOffset = vector ? vector.layer.y : 0
+
+  // Translate the stored layer-relative point into cursor space (art-pixel,
+  // pan-agnostic) so it can be compared directly with state.cursor.x/y.
+  const xOffset = getControlPointXOffset(vector)
+  const yOffset = getControlPointYOffset(vector)
   const normalizedX = point.x + xOffset
   const normalizedY = point.y + yOffset
 
+  // Collision detection — only when modify=true (i.e. an adjustable tool is active).
   let isActive = false
   if (modify) {
     if (vectorGui.selectedPoint.xKey === keys.x && !vector) {
+      // This point is already selected on the current (in-progress) vector —
+      // mark active and record the collision without doing a proximity check.
       r = radius * 3.125 // increase radius of fill to match stroked circle
       isActive = true
       vectorGui.setCollision(keys)
     } else if (vector) {
+      // Point belongs to a stored (non-current) vector — check whether the
+      // cursor is close enough to register a collision with it.
       const result = resolveOtherVectorCollision(
         keys,
         normalizedX,
@@ -402,6 +417,8 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
       r = result.r
       isActive = result.isActive
     } else {
+      // Point belongs to the current (in-progress) vector — check proximity
+      // to determine whether this point should be considered hovered/grabbed.
       const result = resolveCurrentVectorCollision(
         keys,
         normalizedX,
@@ -412,12 +429,18 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
       r = result.r
       isActive = result.isActive
     }
+    // Update any vectors that share an endpoint with this point so their
+    // collision state stays in sync (used for chaining/linking).
     resolveLinkedVectors(keys, normalizedX, normalizedY, vector)
   }
 
+  // Compute the final on-screen position (cursor space + pan offset + half-pixel
+  // snap) and draw the control point as active (filled) or inactive (stroked).
   const lw = getGuiLineWidth()
-  const cx = canvas.xOffset + normalizedX + 0.5
-  const cy = canvas.yOffset + normalizedY + 0.5
+  const renderXOffset = getRenderXOffset(vector)
+  const renderYOffset = getRenderYOffset(vector)
+  const cx = point.x + renderXOffset + 0.5
+  const cy = point.y + renderYOffset + 0.5
   if (isActive) {
     drawActiveControlPoint(cx, cy, r, lw)
   } else {
@@ -528,22 +551,24 @@ function setVectorProperties(vector) {
     state.vector.properties = { ...vector.vectorProperties }
     //Keep properties relative to layer offset
     //All vector types have at least one control point
-    state.vector.properties.px1 += vector.layer.x
-    state.vector.properties.py1 += vector.layer.y
+    const lx = vector.layer.x
+    const ly = vector.layer.y
+    state.vector.properties.px1 += lx
+    state.vector.properties.py1 += ly
     //line, quadCurve, cubicCurve, ellipse
     if (state.vector.properties.px2 !== undefined) {
-      state.vector.properties.px2 += vector.layer.x
-      state.vector.properties.py2 += vector.layer.y
+      state.vector.properties.px2 += lx
+      state.vector.properties.py2 += ly
     }
     //quadCurve, cubicCurve, ellipse
     if (state.vector.properties.px3 !== undefined) {
-      state.vector.properties.px3 += vector.layer.x
-      state.vector.properties.py3 += vector.layer.y
+      state.vector.properties.px3 += lx
+      state.vector.properties.py3 += ly
     }
     //cubicCurve
     if (state.vector.properties.px4 !== undefined) {
-      state.vector.properties.px4 += vector.layer.x
-      state.vector.properties.py4 += vector.layer.y
+      state.vector.properties.px4 += lx
+      state.vector.properties.py4 += ly
     }
     state.vector.setCurrentIndex(vector.index)
     // switchTool(vector.vectorProperties.type)
@@ -817,8 +842,8 @@ export function updateLinkedVectors(
         linkedPoints.linkingPoint,
       )
 
-    let x = state.cursor.x
-    let y = state.cursor.y
+    let x = state.cursor.x - state.canvas.cropOffsetX
+    let y = state.cursor.y - state.canvas.cropOffsetY
     const linkedVector = state.vector.all[linkedVectorIndex]
 
     //As long as linked vector is quadCurve, must propogate linking to connected vectors

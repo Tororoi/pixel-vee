@@ -14,6 +14,7 @@ import { coordArrayFromSet } from '../utils/maskHelpers.js'
 import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
 import { enableActionsForSelection } from '../DOM/disableDomElements.js'
 import { rerouteVectorStepsAction, getChainStartPoint } from './adjust.js'
+import { getCropNormalizedCursorX, getCropNormalizedCursorY } from '../utils/coordinateHelpers.js'
 
 //=====================================//
 //=== * * * Curve Controllers * * * ===//
@@ -48,6 +49,9 @@ function buildCurveCtx(isPreview = false) {
  * Supported modes: "draw, erase",
  */
 function quadCurveSteps() {
+  const normalizedX = getCropNormalizedCursorX()
+  const normalizedY = getCropNormalizedCursorY()
+  const { cropOffsetX, cropOffsetY } = state.canvas
   if (
     state.tool.current.options.chain?.active &&
     canvas.pointerEvent === 'pointerdown' &&
@@ -64,12 +68,12 @@ function quadCurveSteps() {
       state.vector.properties.py2 = chainPoint.y
       renderCanvas(canvas.currentLayer)
       actionQuadraticCurve(
-        chainPoint.x,
-        chainPoint.y,
-        chainPoint.x,
-        chainPoint.y,
-        state.vector.properties.px3,
-        state.vector.properties.py3,
+        chainPoint.x + cropOffsetX,
+        chainPoint.y + cropOffsetY,
+        chainPoint.x + cropOffsetX,
+        chainPoint.y + cropOffsetY,
+        state.vector.properties.px3 + cropOffsetX,
+        state.vector.properties.py3 + cropOffsetY,
         1,
         buildCurveCtx(true),
       )
@@ -87,15 +91,15 @@ function quadCurveSteps() {
           //reset control points
           vectorGui.reset()
           state.vector.properties.type = state.tool.current.name
-          state.vector.properties.px1 = state.cursor.x
-          state.vector.properties.py1 = state.cursor.y
+          state.vector.properties.px1 = normalizedX
+          state.vector.properties.py1 = normalizedY
           //endpoint starts at same point as startpoint
-          state.vector.properties.px2 = state.cursor.x
-          state.vector.properties.py2 = state.cursor.y
+          state.vector.properties.px2 = normalizedX
+          state.vector.properties.py2 = normalizedY
           break
         case 2:
-          state.vector.properties.px3 = state.cursor.x
-          state.vector.properties.py3 = state.cursor.y
+          state.vector.properties.px3 = normalizedX
+          state.vector.properties.py3 = normalizedY
           break
         default:
         //do nothing
@@ -103,12 +107,12 @@ function quadCurveSteps() {
       //onscreen preview
       renderCanvas(canvas.currentLayer)
       actionQuadraticCurve(
-        state.vector.properties.px1,
-        state.vector.properties.py1,
-        state.vector.properties.px2,
-        state.vector.properties.py2,
-        state.vector.properties.px3,
-        state.vector.properties.py3,
+        state.vector.properties.px1 + cropOffsetX,
+        state.vector.properties.py1 + cropOffsetY,
+        state.vector.properties.px2 + cropOffsetX,
+        state.vector.properties.py2 + cropOffsetY,
+        state.vector.properties.px3 + cropOffsetX,
+        state.vector.properties.py3 + cropOffsetY,
         state.tool.clickCounter,
         buildCurveCtx(true),
       )
@@ -116,12 +120,12 @@ function quadCurveSteps() {
     case 'pointermove':
       switch (state.tool.clickCounter) {
         case 1:
-          state.vector.properties.px2 = state.cursor.x
-          state.vector.properties.py2 = state.cursor.y
+          state.vector.properties.px2 = normalizedX
+          state.vector.properties.py2 = normalizedY
           break
         case 2:
-          state.vector.properties.px3 = state.cursor.x
-          state.vector.properties.py3 = state.cursor.y
+          state.vector.properties.px3 = normalizedX
+          state.vector.properties.py3 = normalizedY
           break
         default:
         //do nothing
@@ -129,12 +133,12 @@ function quadCurveSteps() {
       //onscreen preview
       renderCanvas(canvas.currentLayer)
       actionQuadraticCurve(
-        state.vector.properties.px1,
-        state.vector.properties.py1,
-        state.vector.properties.px2,
-        state.vector.properties.py2,
-        state.vector.properties.px3,
-        state.vector.properties.py3,
+        state.vector.properties.px1 + cropOffsetX,
+        state.vector.properties.py1 + cropOffsetY,
+        state.vector.properties.px2 + cropOffsetX,
+        state.vector.properties.py2 + cropOffsetY,
+        state.vector.properties.px3 + cropOffsetX,
+        state.vector.properties.py3 + cropOffsetY,
         state.tool.clickCounter,
         buildCurveCtx(true),
       )
@@ -142,12 +146,12 @@ function quadCurveSteps() {
     case 'pointerup':
       switch (state.tool.clickCounter) {
         case 1:
-          state.vector.properties.px2 = state.cursor.x
-          state.vector.properties.py2 = state.cursor.y
+          state.vector.properties.px2 = normalizedX
+          state.vector.properties.py2 = normalizedY
           break
         case 2:
-          state.vector.properties.px3 = state.cursor.x
-          state.vector.properties.py3 = state.cursor.y
+          state.vector.properties.px3 = normalizedX
+          state.vector.properties.py3 = normalizedY
           break
         default:
         //do nothing
@@ -155,12 +159,12 @@ function quadCurveSteps() {
       //Solidify curve
       if (state.tool.clickCounter === 2) {
         actionQuadraticCurve(
-          state.vector.properties.px1,
-          state.vector.properties.py1,
-          state.vector.properties.px2,
-          state.vector.properties.py2,
-          state.vector.properties.px3,
-          state.vector.properties.py3,
+          state.vector.properties.px1 + cropOffsetX,
+          state.vector.properties.py1 + cropOffsetY,
+          state.vector.properties.px2 + cropOffsetX,
+          state.vector.properties.py2 + cropOffsetY,
+          state.vector.properties.px3 + cropOffsetX,
+          state.vector.properties.py3 + cropOffsetY,
           state.tool.clickCounter,
           buildCurveCtx(false),
         )
@@ -234,6 +238,9 @@ function quadCurveSteps() {
  * Supported modes: "draw, erase",
  */
 function cubicCurveSteps() {
+  const normalizedX = getCropNormalizedCursorX()
+  const normalizedY = getCropNormalizedCursorY()
+  const { cropOffsetX, cropOffsetY } = state.canvas
   if (
     state.tool.current.options.chain?.active &&
     canvas.pointerEvent === 'pointerdown' &&
@@ -250,14 +257,14 @@ function cubicCurveSteps() {
       state.vector.properties.py2 = chainPoint.y
       renderCanvas(canvas.currentLayer)
       actionCubicCurve(
-        chainPoint.x,
-        chainPoint.y,
-        chainPoint.x,
-        chainPoint.y,
-        state.vector.properties.px3,
-        state.vector.properties.py3,
-        state.vector.properties.px4,
-        state.vector.properties.py4,
+        chainPoint.x + cropOffsetX,
+        chainPoint.y + cropOffsetY,
+        chainPoint.x + cropOffsetX,
+        chainPoint.y + cropOffsetY,
+        state.vector.properties.px3 + cropOffsetX,
+        state.vector.properties.py3 + cropOffsetY,
+        state.vector.properties.px4 + cropOffsetX,
+        state.vector.properties.py4 + cropOffsetY,
         1,
         buildCurveCtx(true),
       )
@@ -275,19 +282,19 @@ function cubicCurveSteps() {
           //reset control points
           vectorGui.reset()
           state.vector.properties.type = state.tool.current.name
-          state.vector.properties.px1 = state.cursor.x
-          state.vector.properties.py1 = state.cursor.y
+          state.vector.properties.px1 = normalizedX
+          state.vector.properties.py1 = normalizedY
           //endpoint starts at same point as startpoint
-          state.vector.properties.px2 = state.cursor.x
-          state.vector.properties.py2 = state.cursor.y
+          state.vector.properties.px2 = normalizedX
+          state.vector.properties.py2 = normalizedY
           break
         case 2:
-          state.vector.properties.px3 = state.cursor.x
-          state.vector.properties.py3 = state.cursor.y
+          state.vector.properties.px3 = normalizedX
+          state.vector.properties.py3 = normalizedY
           break
         case 3:
-          state.vector.properties.px4 = state.cursor.x
-          state.vector.properties.py4 = state.cursor.y
+          state.vector.properties.px4 = normalizedX
+          state.vector.properties.py4 = normalizedY
           break
         default:
         //do nothing
@@ -295,14 +302,14 @@ function cubicCurveSteps() {
       //onscreen preview
       renderCanvas(canvas.currentLayer)
       actionCubicCurve(
-        state.vector.properties.px1,
-        state.vector.properties.py1,
-        state.vector.properties.px2,
-        state.vector.properties.py2,
-        state.vector.properties.px3,
-        state.vector.properties.py3,
-        state.vector.properties.px4,
-        state.vector.properties.py4,
+        state.vector.properties.px1 + cropOffsetX,
+        state.vector.properties.py1 + cropOffsetY,
+        state.vector.properties.px2 + cropOffsetX,
+        state.vector.properties.py2 + cropOffsetY,
+        state.vector.properties.px3 + cropOffsetX,
+        state.vector.properties.py3 + cropOffsetY,
+        state.vector.properties.px4 + cropOffsetX,
+        state.vector.properties.py4 + cropOffsetY,
         state.tool.clickCounter,
         buildCurveCtx(true),
       )
@@ -310,16 +317,16 @@ function cubicCurveSteps() {
     case 'pointermove':
       switch (state.tool.clickCounter) {
         case 1:
-          state.vector.properties.px2 = state.cursor.x
-          state.vector.properties.py2 = state.cursor.y
+          state.vector.properties.px2 = normalizedX
+          state.vector.properties.py2 = normalizedY
           break
         case 2:
-          state.vector.properties.px3 = state.cursor.x
-          state.vector.properties.py3 = state.cursor.y
+          state.vector.properties.px3 = normalizedX
+          state.vector.properties.py3 = normalizedY
           break
         case 3:
-          state.vector.properties.px4 = state.cursor.x
-          state.vector.properties.py4 = state.cursor.y
+          state.vector.properties.px4 = normalizedX
+          state.vector.properties.py4 = normalizedY
           break
         default:
         //do nothing
@@ -327,14 +334,14 @@ function cubicCurveSteps() {
       //onscreen preview
       renderCanvas(canvas.currentLayer)
       actionCubicCurve(
-        state.vector.properties.px1,
-        state.vector.properties.py1,
-        state.vector.properties.px2,
-        state.vector.properties.py2,
-        state.vector.properties.px3,
-        state.vector.properties.py3,
-        state.vector.properties.px4,
-        state.vector.properties.py4,
+        state.vector.properties.px1 + cropOffsetX,
+        state.vector.properties.py1 + cropOffsetY,
+        state.vector.properties.px2 + cropOffsetX,
+        state.vector.properties.py2 + cropOffsetY,
+        state.vector.properties.px3 + cropOffsetX,
+        state.vector.properties.py3 + cropOffsetY,
+        state.vector.properties.px4 + cropOffsetX,
+        state.vector.properties.py4 + cropOffsetY,
         state.tool.clickCounter,
         buildCurveCtx(true),
       )
@@ -342,16 +349,16 @@ function cubicCurveSteps() {
     case 'pointerup':
       switch (state.tool.clickCounter) {
         case 1:
-          state.vector.properties.px2 = state.cursor.x
-          state.vector.properties.py2 = state.cursor.y
+          state.vector.properties.px2 = normalizedX
+          state.vector.properties.py2 = normalizedY
           break
         case 2:
-          state.vector.properties.px3 = state.cursor.x
-          state.vector.properties.py3 = state.cursor.y
+          state.vector.properties.px3 = normalizedX
+          state.vector.properties.py3 = normalizedY
           break
         case 3:
-          state.vector.properties.px4 = state.cursor.x
-          state.vector.properties.py4 = state.cursor.y
+          state.vector.properties.px4 = normalizedX
+          state.vector.properties.py4 = normalizedY
           break
         default:
         //do nothing
@@ -359,14 +366,14 @@ function cubicCurveSteps() {
       //Solidify curve
       if (state.tool.clickCounter === 3) {
         actionCubicCurve(
-          state.vector.properties.px1,
-          state.vector.properties.py1,
-          state.vector.properties.px2,
-          state.vector.properties.py2,
-          state.vector.properties.px3,
-          state.vector.properties.py3,
-          state.vector.properties.px4,
-          state.vector.properties.py4,
+          state.vector.properties.px1 + cropOffsetX,
+          state.vector.properties.py1 + cropOffsetY,
+          state.vector.properties.px2 + cropOffsetX,
+          state.vector.properties.py2 + cropOffsetY,
+          state.vector.properties.px3 + cropOffsetX,
+          state.vector.properties.py3 + cropOffsetY,
+          state.vector.properties.px4 + cropOffsetX,
+          state.vector.properties.py4 + cropOffsetY,
           state.tool.clickCounter,
           buildCurveCtx(false),
         )

@@ -11,6 +11,10 @@ import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
 import { enableActionsForSelection } from '../DOM/disableDomElements.js'
 import { vectorGui } from '../GUI/vector.js'
 import { rerouteVectorStepsAction, getChainStartPoint } from './adjust.js'
+import {
+  getCropNormalizedCursorX,
+  getCropNormalizedCursorY,
+} from '../utils/coordinateHelpers.js'
 
 //===================================//
 //=== * * * Line Controller * * * ===//
@@ -21,6 +25,9 @@ import { rerouteVectorStepsAction, getChainStartPoint } from './adjust.js'
  * TODO: (Medium Priority) add vector line tool. A raster line tool would still be present for ease of use.
  */
 function lineSteps() {
+  const normalizedX = getCropNormalizedCursorX()
+  const normalizedY = getCropNormalizedCursorY()
+  const { cropOffsetX, cropOffsetY } = state.canvas
   if (
     state.tool.current.options.chain?.active &&
     canvas.pointerEvent === 'pointerdown' &&
@@ -37,10 +44,10 @@ function lineSteps() {
       state.vector.properties.py2 = chainPoint.y
       renderCanvas(canvas.currentLayer)
       actionLine(
-        chainPoint.x,
-        chainPoint.y,
-        chainPoint.x,
-        chainPoint.y,
+        chainPoint.x + cropOffsetX,
+        chainPoint.y + cropOffsetY,
+        chainPoint.x + cropOffsetX,
+        chainPoint.y + cropOffsetY,
         createStrokeContext({
           layer: canvas.currentLayer,
           isPreview: true,
@@ -70,17 +77,17 @@ function lineSteps() {
       //reset control points
       vectorGui.reset()
       state.vector.properties.type = state.tool.current.name
-      state.vector.properties.px1 = state.cursor.x
-      state.vector.properties.py1 = state.cursor.y
-      state.vector.properties.px2 = state.cursor.x
-      state.vector.properties.py2 = state.cursor.y
+      state.vector.properties.px1 = normalizedX
+      state.vector.properties.py1 = normalizedY
+      state.vector.properties.px2 = normalizedX
+      state.vector.properties.py2 = normalizedY
       renderCanvas(canvas.currentLayer)
       //preview line
       actionLine(
-        state.vector.properties.px1,
-        state.vector.properties.py1,
-        state.vector.properties.px2,
-        state.vector.properties.py2,
+        state.vector.properties.px1 + cropOffsetX,
+        state.vector.properties.py1 + cropOffsetY,
+        state.vector.properties.px2 + cropOffsetX,
+        state.vector.properties.py2 + cropOffsetY,
         createStrokeContext({
           layer: canvas.currentLayer,
           isPreview: true,
@@ -103,16 +110,16 @@ function lineSteps() {
       break
     case 'pointermove':
       //draw line from origin point to current point onscreen
-      state.vector.properties.px2 = state.cursor.x
-      state.vector.properties.py2 = state.cursor.y
+      state.vector.properties.px2 = normalizedX
+      state.vector.properties.py2 = normalizedY
       //only draw when necessary
       renderCanvas(canvas.currentLayer)
       //preview line
       actionLine(
-        state.vector.properties.px1,
-        state.vector.properties.py1,
-        state.vector.properties.px2,
-        state.vector.properties.py2,
+        state.vector.properties.px1 + cropOffsetX,
+        state.vector.properties.py1 + cropOffsetY,
+        state.vector.properties.px2 + cropOffsetX,
+        state.vector.properties.py2 + cropOffsetY,
         createStrokeContext({
           layer: canvas.currentLayer,
           isPreview: true,
@@ -134,8 +141,8 @@ function lineSteps() {
       )
       break
     case 'pointerup': {
-      state.vector.properties.px2 = state.cursor.x
-      state.vector.properties.py2 = state.cursor.y
+      state.vector.properties.px2 = normalizedX
+      state.vector.properties.py2 = normalizedY
       //Handle snapping p1 or p2 to other control points. Only snap when there are no linked vectors to selected vector.
       if (
         state.tool.current.options.align?.active ||
@@ -156,10 +163,10 @@ function lineSteps() {
         }
       }
       actionLine(
-        state.vector.properties.px1,
-        state.vector.properties.py1,
-        state.vector.properties.px2,
-        state.vector.properties.py2,
+        state.vector.properties.px1 + cropOffsetX,
+        state.vector.properties.py1 + cropOffsetY,
+        state.vector.properties.px2 + cropOffsetX,
+        state.vector.properties.py2 + cropOffsetY,
         createStrokeContext({
           layer: canvas.currentLayer,
           boundaryBox: state.selection.boundaryBox,

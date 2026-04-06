@@ -1,30 +1,34 @@
-import { SCALE } from "../utils/constants.js"
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { keys } from "../Shortcuts/keys.js"
-import { modifyVectorAction } from "../Actions/modifyTimeline/modifyTimeline.js"
+import { SCALE } from '../utils/constants.js'
+import { state } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { keys } from '../Shortcuts/keys.js'
+import { modifyVectorAction } from '../Actions/modifyTimeline/modifyTimeline.js'
 import {
   vectorGui,
   updateLinkedVectors,
   updateLockedCurrentVectorControlHandle,
   createActiveIndexesForRender,
-} from "../GUI/vector.js"
-import { getAngle } from "../utils/trig.js"
-import { renderCanvas } from "../Canvas/render.js"
-import { updateVectorProperties } from "../utils/vectorHelpers.js"
-import { updateEllipseVectorProperties } from "./ellipse.js"
-import { updatePolygonVectorProperties, getUniformCtx } from "./polygon.js"
+} from '../GUI/vector.js'
+import { getAngle } from '../utils/trig.js'
+import { renderCanvas } from '../Canvas/render.js'
+import { updateVectorProperties } from '../utils/vectorHelpers.js'
+import { updateEllipseVectorProperties } from './ellipse.js'
+import { updatePolygonVectorProperties, getUniformCtx } from './polygon.js'
 import {
   transformVectorSteps,
   scaleVectorSteps,
   moveVectorRotationPointSteps,
-} from "./transform.js"
+} from './transform.js'
+import {
+  getCropNormalizedCursorX,
+  getCropNormalizedCursorY,
+} from '../utils/coordinateHelpers.js'
 
 //=======================================//
 //======== * * * Adjusters * * * ========//
 //=======================================//
 
-const chainableTypes = ["line", "quadCurve", "cubicCurve"]
+const chainableTypes = ['line', 'quadCurve', 'cubicCurve']
 
 /**
  * Returns the canvas-absolute coordinates of the chainable endpoint under the
@@ -33,7 +37,7 @@ const chainableTypes = ["line", "quadCurve", "cubicCurve"]
  * @returns {{ x: number, y: number } | null} Canvas-absolute coordinates or null
  */
 export function getChainStartPoint() {
-  const endpointKeys = ["px1", "px2"]
+  const endpointKeys = ['px1', 'px2']
   // Case A: current selected vector's endpoint
   if (
     vectorGui.selectedCollisionPresent &&
@@ -73,8 +77,8 @@ export function getChainStartPoint() {
 function snapEndpointToCollidedVector(currentVector) {
   let collidedVector = state.vector.all[state.vector.collidedIndex]
   if (
-    ["fill", "ellipse"].includes(collidedVector.vectorProperties.type) ||
-    ["fill", "ellipse"].includes(currentVector.vectorProperties.type)
+    ['fill', 'ellipse'].includes(collidedVector.vectorProperties.type) ||
+    ['fill', 'ellipse'].includes(currentVector.vectorProperties.type)
   ) {
     return
   }
@@ -92,10 +96,14 @@ function snapEndpointToCollidedVector(currentVector) {
     snappedToX,
     snappedToY,
     vectorGui.selectedPoint.xKey,
-    vectorGui.selectedPoint.yKey
+    vectorGui.selectedPoint.yKey,
   )
   if (state.tool.current.options.hold?.active) {
-    updateLockedCurrentVectorControlHandle(currentVector, snappedToX, snappedToY)
+    updateLockedCurrentVectorControlHandle(
+      currentVector,
+      snappedToX,
+      snappedToY,
+    )
   }
   // Handle align/equal options: adjust tangent handle after snapping
   if (
@@ -103,30 +111,34 @@ function snapEndpointToCollidedVector(currentVector) {
       state.tool.current.options.align?.active ||
       state.tool.current.options.equal?.active
     ) ||
-    !["px1", "px2"].includes(vectorGui.selectedPoint.xKey)
+    !['px1', 'px2'].includes(vectorGui.selectedPoint.xKey)
   ) {
     return
   }
   // Determine the endpoint and handle key pairs for the current vector
-  let selectedEndpointXKey, selectedEndpointYKey, selectedHandleXKey, selectedHandleYKey
-  if (vectorGui.selectedPoint.xKey === "px1") {
-    selectedEndpointXKey = "px1"
-    selectedEndpointYKey = "py1"
-    selectedHandleXKey = "px3"
-    selectedHandleYKey = "py3"
+  let selectedEndpointXKey,
+    selectedEndpointYKey,
+    selectedHandleXKey,
+    selectedHandleYKey
+  if (vectorGui.selectedPoint.xKey === 'px1') {
+    selectedEndpointXKey = 'px1'
+    selectedEndpointYKey = 'py1'
+    selectedHandleXKey = 'px3'
+    selectedHandleYKey = 'py3'
   } else {
-    selectedEndpointXKey = "px2"
-    selectedEndpointYKey = "py2"
-    if (currentVector.vectorProperties.type === "quadCurve") {
-      selectedHandleXKey = "px3"
-      selectedHandleYKey = "py3"
+    selectedEndpointXKey = 'px2'
+    selectedEndpointYKey = 'py2'
+    if (currentVector.vectorProperties.type === 'quadCurve') {
+      selectedHandleXKey = 'px3'
+      selectedHandleYKey = 'py3'
     } else {
-      selectedHandleXKey = "px4"
-      selectedHandleYKey = "py4"
+      selectedHandleXKey = 'px4'
+      selectedHandleYKey = 'py4'
     }
   }
   // Compute deltas for handle length and angle calculations
-  const savedCurrentProperties = state.vector.savedProperties[currentVector.index]
+  const savedCurrentProperties =
+    state.vector.savedProperties[currentVector.index]
   const currentHandleDeltaX =
     savedCurrentProperties[selectedEndpointXKey] -
     savedCurrentProperties[selectedHandleXKey]
@@ -141,22 +153,26 @@ function snapEndpointToCollidedVector(currentVector) {
     state.vector.properties[selectedEndpointYKey]
   // Compute the collided vector's handle delta (relative to its snapped endpoint)
   let collidedHandleDeltaX, collidedHandleDeltaY
-  if (vectorGui.otherCollidedKeys.xKey === "px1") {
+  if (vectorGui.otherCollidedKeys.xKey === 'px1') {
     collidedHandleDeltaX =
       collidedVector.vectorProperties.px3 - collidedVector.vectorProperties.px1
     collidedHandleDeltaY =
       collidedVector.vectorProperties.py3 - collidedVector.vectorProperties.py1
-  } else if (vectorGui.otherCollidedKeys.xKey === "px2") {
-    if (collidedVector.vectorProperties.type === "quadCurve") {
+  } else if (vectorGui.otherCollidedKeys.xKey === 'px2') {
+    if (collidedVector.vectorProperties.type === 'quadCurve') {
       collidedHandleDeltaX =
-        collidedVector.vectorProperties.px3 - collidedVector.vectorProperties.px2
+        collidedVector.vectorProperties.px3 -
+        collidedVector.vectorProperties.px2
       collidedHandleDeltaY =
-        collidedVector.vectorProperties.py3 - collidedVector.vectorProperties.py2
+        collidedVector.vectorProperties.py3 -
+        collidedVector.vectorProperties.py2
     } else {
       collidedHandleDeltaX =
-        collidedVector.vectorProperties.px4 - collidedVector.vectorProperties.px2
+        collidedVector.vectorProperties.px4 -
+        collidedVector.vectorProperties.px2
       collidedHandleDeltaY =
-        collidedVector.vectorProperties.py4 - collidedVector.vectorProperties.py2
+        collidedVector.vectorProperties.py4 -
+        collidedVector.vectorProperties.py2
     }
   }
   // Handle length: equal mode uses collided handle length, otherwise maintain current
@@ -168,10 +184,10 @@ function snapEndpointToCollidedVector(currentVector) {
     ? getAngle(collidedHandleDeltaX, collidedHandleDeltaY) + Math.PI
     : getAngle(selectedHandleDeltaX, selectedHandleDeltaY)
   const newSelectedHandleDeltaX = -Math.round(
-    Math.cos(newSelectedAngle) * selectedHandleLength
+    Math.cos(newSelectedAngle) * selectedHandleLength,
   )
   const newSelectedHandleDeltaY = -Math.round(
-    Math.sin(newSelectedAngle) * selectedHandleLength
+    Math.sin(newSelectedAngle) * selectedHandleLength,
   )
   state.vector.properties[selectedHandleXKey] =
     state.vector.properties[selectedEndpointXKey] - newSelectedHandleDeltaX
@@ -182,7 +198,7 @@ function snapEndpointToCollidedVector(currentVector) {
     state.vector.properties[selectedHandleXKey],
     state.vector.properties[selectedHandleYKey],
     selectedHandleXKey,
-    selectedHandleYKey
+    selectedHandleYKey,
   )
 }
 
@@ -197,8 +213,10 @@ function snapEndpointToCollidedVector(currentVector) {
  */
 export function adjustVectorSteps() {
   let currentVector = state.vector.all[state.vector.currentIndex]
+  const normalizedX = getCropNormalizedCursorX()
+  const normalizedY = getCropNormalizedCursorY()
   switch (canvas.pointerEvent) {
-    case "pointerdown":
+    case 'pointerdown':
       //TODO: (Medium Priority) If holding shift, add or remove vector from selected vectors set and return
       vectorGui.selectedPoint = {
         xKey: vectorGui.collidedPoint.xKey,
@@ -207,55 +225,55 @@ export function adjustVectorSteps() {
       state.vector.savedProperties[state.vector.currentIndex] = {
         ...currentVector.vectorProperties,
       }
-      if (currentVector.vectorProperties.type === "ellipse") {
+      if (currentVector.vectorProperties.type === 'ellipse') {
         if (
           !keys.ShiftLeft &&
           !keys.ShiftRight &&
-          vectorGui.selectedPoint.xKey !== "px1"
+          vectorGui.selectedPoint.xKey !== 'px1'
         ) {
           //if shift key is not being held and selected point is not the center, reset forceCircle
           state.vector.properties.forceCircle = false
           currentVector.vectorProperties.forceCircle = false
         }
-        if (vectorGui.selectedPoint.xKey === "px1") {
+        if (vectorGui.selectedPoint.xKey === 'px1') {
           //if center point is selected, use current vector's forceCircle value
           state.vector.properties.forceCircle =
             currentVector.vectorProperties.forceCircle
         }
-        updateEllipseVectorProperties(currentVector)
-      } else if (currentVector.vectorProperties.type === "polygon") {
+        updateEllipseVectorProperties(currentVector, normalizedX, normalizedY)
+      } else if (currentVector.vectorProperties.type === 'polygon') {
         if (
           !keys.ShiftLeft &&
           !keys.ShiftRight &&
-          vectorGui.selectedPoint.xKey !== "px0"
+          vectorGui.selectedPoint.xKey !== 'px0'
         ) {
           state.vector.properties.forceSquare = false
           currentVector.vectorProperties.forceSquare = false
         }
         if (
           state.tool.current.options.uniform?.active &&
-          vectorGui.selectedPoint.xKey !== "px0"
+          vectorGui.selectedPoint.xKey !== 'px0'
         ) {
           state.vector.savedProperties[state.vector.currentIndex].uniformCtx =
             getUniformCtx(vectorGui.selectedPoint.xKey)
         }
-        updatePolygonVectorProperties(currentVector)
+        updatePolygonVectorProperties(currentVector, normalizedX, normalizedY)
       } else {
-        state.vector.properties[vectorGui.collidedPoint.xKey] = state.cursor.x
-        state.vector.properties[vectorGui.collidedPoint.yKey] = state.cursor.y
+        state.vector.properties[vectorGui.collidedPoint.xKey] = normalizedX
+        state.vector.properties[vectorGui.collidedPoint.yKey] = normalizedY
         //save linked vectors too
         updateVectorProperties(
           currentVector,
-          state.cursor.x,
-          state.cursor.y,
+          normalizedX,
+          normalizedY,
           vectorGui.selectedPoint.xKey,
-          vectorGui.selectedPoint.yKey
+          vectorGui.selectedPoint.yKey,
         )
         if (state.tool.current.options.hold?.active) {
           updateLockedCurrentVectorControlHandle(
             currentVector,
-            state.cursor.x,
-            state.cursor.y
+            normalizedX,
+            normalizedY,
           )
         }
         if (state.tool.current.options.link?.active) {
@@ -264,31 +282,36 @@ export function adjustVectorSteps() {
       }
       state.timeline.activeIndexes = createActiveIndexesForRender(
         currentVector,
-        state.vector.savedProperties
+        state.vector.savedProperties,
       )
-      renderCanvas(currentVector.layer, true, state.timeline.activeIndexes, true)
+      renderCanvas(
+        currentVector.layer,
+        true,
+        state.timeline.activeIndexes,
+        true,
+      )
       break
-    case "pointermove":
+    case 'pointermove':
       if (vectorGui.selectedPoint.xKey) {
-        if (currentVector.vectorProperties.type === "ellipse") {
-          updateEllipseVectorProperties(currentVector)
-        } else if (currentVector.vectorProperties.type === "polygon") {
-          updatePolygonVectorProperties(currentVector)
+        if (currentVector.vectorProperties.type === 'ellipse') {
+          updateEllipseVectorProperties(currentVector, normalizedX, normalizedY)
+        } else if (currentVector.vectorProperties.type === 'polygon') {
+          updatePolygonVectorProperties(currentVector, normalizedX, normalizedY)
         } else {
-          state.vector.properties[vectorGui.selectedPoint.xKey] = state.cursor.x
-          state.vector.properties[vectorGui.selectedPoint.yKey] = state.cursor.y
+          state.vector.properties[vectorGui.selectedPoint.xKey] = normalizedX
+          state.vector.properties[vectorGui.selectedPoint.yKey] = normalizedY
           updateVectorProperties(
             currentVector,
-            state.cursor.x,
-            state.cursor.y,
+            normalizedX,
+            normalizedY,
             vectorGui.selectedPoint.xKey,
-            vectorGui.selectedPoint.yKey
+            vectorGui.selectedPoint.yKey,
           )
           if (state.tool.current.options.hold?.active) {
             updateLockedCurrentVectorControlHandle(
               currentVector,
-              state.cursor.x,
-              state.cursor.y
+              normalizedX,
+              normalizedY,
             )
           }
           if (state.tool.current.options.link?.active) {
@@ -298,27 +321,27 @@ export function adjustVectorSteps() {
         renderCanvas(currentVector.layer, true, state.timeline.activeIndexes)
       }
       break
-    case "pointerup":
+    case 'pointerup':
       if (vectorGui.selectedPoint.xKey) {
-        if (currentVector.vectorProperties.type === "ellipse") {
-          updateEllipseVectorProperties(currentVector)
-        } else if (currentVector.vectorProperties.type === "polygon") {
-          updatePolygonVectorProperties(currentVector)
+        if (currentVector.vectorProperties.type === 'ellipse') {
+          updateEllipseVectorProperties(currentVector, normalizedX, normalizedY)
+        } else if (currentVector.vectorProperties.type === 'polygon') {
+          updatePolygonVectorProperties(currentVector, normalizedX, normalizedY)
         } else {
-          state.vector.properties[vectorGui.selectedPoint.xKey] = state.cursor.x
-          state.vector.properties[vectorGui.selectedPoint.yKey] = state.cursor.y
+          state.vector.properties[vectorGui.selectedPoint.xKey] = normalizedX
+          state.vector.properties[vectorGui.selectedPoint.yKey] = normalizedY
           updateVectorProperties(
             currentVector,
-            state.cursor.x,
-            state.cursor.y,
+            normalizedX,
+            normalizedY,
             vectorGui.selectedPoint.xKey,
-            vectorGui.selectedPoint.yKey
+            vectorGui.selectedPoint.yKey,
           )
           if (state.tool.current.options.hold?.active) {
             updateLockedCurrentVectorControlHandle(
               currentVector,
-              state.cursor.x,
-              state.cursor.y
+              normalizedX,
+              normalizedY,
             )
           }
           if (state.tool.current.options.link?.active) {
@@ -330,7 +353,7 @@ export function adjustVectorSteps() {
               state.tool.current.options.equal?.active ||
               state.tool.current.options.link?.active) &&
             Object.keys(state.vector.savedProperties).length === 1 &&
-            ["px1", "px2"].includes(vectorGui.selectedPoint.xKey) &&
+            ['px1', 'px2'].includes(vectorGui.selectedPoint.xKey) &&
             state.vector.collidedIndex !== null &&
             state.vector.currentIndex !== null
           ) {
@@ -369,9 +392,9 @@ export function rerouteVectorStepsAction() {
     vectorGui.render()
   }
   if (
-    ((vectorGui.collidedPoint.xKey === "rotationx" &&
+    ((vectorGui.collidedPoint.xKey === 'rotationx' &&
       vectorGui.selectedPoint.xKey === null) ||
-      vectorGui.selectedPoint.xKey === "rotationx") &&
+      vectorGui.selectedPoint.xKey === 'rotationx') &&
     state.tool.clickCounter === 0
   ) {
     moveVectorRotationPointSteps()

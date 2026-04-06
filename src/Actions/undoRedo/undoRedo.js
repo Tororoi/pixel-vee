@@ -147,8 +147,6 @@ export function addToTimeline(actionObject) {
     hidden: false,
     removed: false,
     snapshot,
-    recordedCropOffsetX: state.canvas.cropOffsetX,
-    recordedCropOffsetY: state.canvas.cropOffsetY,
   }
   state.timeline.undoStack.push(state.timeline.currentAction)
   if (state.ui.saveDialogOpen) {

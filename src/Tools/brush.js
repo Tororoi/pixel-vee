@@ -140,7 +140,8 @@ function brushSteps() {
         secondaryColor: { ...swatches.secondary.color },
         brushSize: brush.brushType === 'custom' ? 32 : brush.brushSize,
         brushType: brush.brushType,
-        customStampEntry: brush.brushType === 'custom' ? brushStamps.custom : null,
+        customStampEntry:
+          brush.brushType === 'custom' ? brushStamps.custom : null,
         ditherPatternIndex: brush.ditherPatternIndex,
         ditherOffsetX: brush.ditherOffsetX,
         ditherOffsetY: brush.ditherOffsetY,
@@ -189,7 +190,10 @@ function addPointToAction(x, y) {
     state.timeline.addPoint({
       x: x - canvas.currentLayer.x,
       y: y - canvas.currentLayer.y,
-      brushSize: state.tool.current.brushType === 'custom' ? 32 : state.tool.current.brushSize,
+      brushSize:
+        state.tool.current.brushType === 'custom'
+          ? 32
+          : state.tool.current.brushSize,
     })
     state.selection.pointsSet.add(key)
   }

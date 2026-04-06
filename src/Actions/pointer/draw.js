@@ -93,7 +93,12 @@ export function actionDraw(coordX, coordY, directionalBrushStamp, strokeCtx) {
  * @param {object} directionalBrushStamp - brushStamp[brushDirection]
  * @param {object} strokeCtx - StrokeContext
  */
-export function actionDitherDraw(coordX, coordY, directionalBrushStamp, strokeCtx) {
+export function actionDitherDraw(
+  coordX,
+  coordY,
+  directionalBrushStamp,
+  strokeCtx,
+) {
   const {
     layer,
     customContext,

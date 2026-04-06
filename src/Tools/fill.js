@@ -9,6 +9,7 @@ import { coordArrayFromSet } from "../utils/maskHelpers.js"
 import { addToTimeline } from "../Actions/undoRedo/undoRedo.js"
 // import { enableActionsForSelection } from "../DOM/disableDomElements.js"
 import { rerouteVectorStepsAction } from "./adjust.js"
+import { getCropNormalizedCursorX, getCropNormalizedCursorY } from "../utils/coordinateHelpers.js"
 
 //===================================//
 //=== * * * Fill Controller * * * ===//
@@ -20,16 +21,19 @@ import { rerouteVectorStepsAction } from "./adjust.js"
  */
 function fillSteps() {
   if (rerouteVectorStepsAction()) return
+  const normalizedX = getCropNormalizedCursorX()
+  const normalizedY = getCropNormalizedCursorY()
+  const { cropOffsetX, cropOffsetY } = state.canvas
   switch (canvas.pointerEvent) {
     case "pointerdown": {
       //reset control points
       vectorGui.reset()
       state.vector.properties.type = state.tool.current.name
-      state.vector.properties.px1 = state.cursor.x
-      state.vector.properties.py1 = state.cursor.y
+      state.vector.properties.px1 = normalizedX
+      state.vector.properties.py1 = normalizedY
       actionFill(
-        state.vector.properties.px1,
-        state.vector.properties.py1,
+        state.vector.properties.px1 + cropOffsetX,
+        state.vector.properties.py1 + cropOffsetY,
         createStrokeContext({
           layer: canvas.currentLayer,
           boundaryBox: state.selection.boundaryBox,
