@@ -232,15 +232,15 @@ export function performAction(
   switch (action.tool) {
     case 'brush': {
       //Correct action coordinates with layer offsets
-      const offsetX = action.layer.x
-      const offsetY = action.layer.y
+      const offsetX = action.layer.x + cropDX
+      const offsetY = action.layer.y + cropDY
       //correct boundary box for offsets
       const boundaryBox = { ...action.boundaryBox }
       if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin += offsetX + cropDX
-        boundaryBox.xMax += offsetX + cropDX
-        boundaryBox.yMin += offsetY + cropDY
-        boundaryBox.yMax += offsetY + cropDY
+        boundaryBox.xMin += offsetX
+        boundaryBox.xMax += offsetX
+        boundaryBox.yMin += offsetY
+        boundaryBox.yMax += offsetY
       }
       let seen = new Set()
       let mask = null
@@ -253,14 +253,12 @@ export function performAction(
         // layer offset and crop delta to get absolute canvas coordinates.
         mask = new Set(
           action.maskArray.map(
-            (coord) =>
-              ((coord.y + offsetY + cropDY) << 16) |
-              (coord.x + offsetX + cropDX),
+            (coord) => ((coord.y + offsetY) << 16) | (coord.x + offsetX),
           ),
         )
       }
-      let previousX = action.points[0].x + offsetX + cropDX
-      let previousY = action.points[0].y + offsetY + cropDY
+      let previousX = action.points[0].x + offsetX
+      let previousY = action.points[0].y + offsetY
       let brushDirection = '0,0'
       const isBuildUp = action.modes?.buildUpDither ?? false
       const buildUpSteps = action.buildUpSteps ?? [16, 32, 48, 64]
@@ -275,15 +273,9 @@ export function performAction(
       const recordedLayerX = action.recordedLayerX ?? offsetX
       const recordedLayerY = action.recordedLayerY ?? offsetY
       const effectiveDitherOffsetX =
-        ((((action.ditherOffsetX ?? 0) + recordedLayerX - offsetX - cropDX) %
-          8) +
-          8) %
-        8
+        ((((action.ditherOffsetX ?? 0) + recordedLayerX - offsetX) % 8) + 8) % 8
       const effectiveDitherOffsetY =
-        ((((action.ditherOffsetY ?? 0) + recordedLayerY - offsetY - cropDY) %
-          8) +
-          8) %
-        8
+        ((((action.ditherOffsetY ?? 0) + recordedLayerY - offsetY) % 8) + 8) % 8
       const strokeCtx = createStrokeContext({
         layer: action.layer,
         customContext: betweenCtx,
@@ -302,8 +294,8 @@ export function performAction(
       })
       for (const p of action.points) {
         brushDirection = calculateBrushDirection(
-          p.x + offsetX + cropDX,
-          p.y + offsetY + cropDY,
+          p.x + offsetX,
+          p.y + offsetY,
           previousX,
           previousY,
         )
@@ -315,21 +307,16 @@ export function performAction(
           : brushStamps[action.brushType][p.brushSize][brushDirection]
         if (isBuildUp) {
           actionBuildUpDitherDraw(
-            p.x + offsetX + cropDX,
-            p.y + offsetY + cropDY,
+            p.x + offsetX,
+            p.y + offsetY,
             stamp,
             strokeCtx,
           )
         } else {
-          actionDitherDraw(
-            p.x + offsetX + cropDX,
-            p.y + offsetY + cropDY,
-            stamp,
-            strokeCtx,
-          )
+          actionDitherDraw(p.x + offsetX, p.y + offsetY, stamp, strokeCtx)
         }
-        previousX = p.x + offsetX + cropDX
-        previousY = p.y + offsetY + cropDY
+        previousX = p.x + offsetX
+        previousY = p.y + offsetY
         //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster. But it sacrifices flexibility with points.
       }
       break

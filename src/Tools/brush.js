@@ -188,8 +188,8 @@ function addPointToAction(x, y) {
   const key = (y << 16) | x
   if (!state.selection.pointsSet.has(key)) {
     state.timeline.addPoint({
-      x: x - canvas.currentLayer.x,
-      y: y - canvas.currentLayer.y,
+      x: x - canvas.currentLayer.x - state.canvas.cropOffsetX,
+      y: y - canvas.currentLayer.y - state.canvas.cropOffsetY,
       brushSize:
         state.tool.current.brushType === 'custom'
           ? 32
