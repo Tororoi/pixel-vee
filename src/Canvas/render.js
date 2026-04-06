@@ -270,8 +270,8 @@ export function performAction(
       // Effective dither offset accounts for layer movement since stroke was recorded.
       // Pixels are replayed at (p.x + offsetX + cropDX), so the tile lookup must
       // shift by (recordedLayerX - offsetX - cropDX) to keep the pattern fixed to the pixels.
-      const recordedLayerX = action.recordedLayerX ?? offsetX
-      const recordedLayerY = action.recordedLayerY ?? offsetY
+      const recordedLayerX = action.recordedLayerX
+      const recordedLayerY = action.recordedLayerY
       const effectiveDitherOffsetX =
         ((((action.ditherOffsetX ?? 0) + recordedLayerX - offsetX) % 8) + 8) % 8
       const effectiveDitherOffsetY =
@@ -475,29 +475,27 @@ export function performAction(
  */
 function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
   //Correct action coordinates with layer offsets
-  const offsetX = action.layer.x
-  const offsetY = action.layer.y
+  const offsetX = action.layer.x + cropDX
+  const offsetY = action.layer.y + cropDY
   //correct boundary box for offsets
   const boundaryBox = { ...action.boundaryBox }
   if (boundaryBox.xMax !== null) {
-    boundaryBox.xMin += offsetX + cropDX
-    boundaryBox.xMax += offsetX + cropDX
-    boundaryBox.yMin += offsetY + cropDY
-    boundaryBox.yMax += offsetY + cropDY
+    boundaryBox.xMin += offsetX
+    boundaryBox.xMax += offsetX
+    boundaryBox.yMin += offsetY
+    boundaryBox.yMax += offsetY
   }
   //render vectors
   for (let i = 0; i < action.vectorIndices.length; i++) {
     const vector = state.vector.all[action.vectorIndices[i]]
     if (vector.hidden || vector.removed) continue
     const vp = vector.vectorProperties
-    const vOffsetX = vector.layer.x
-    const vOffsetY = vector.layer.y
-    const vRecordedLayerX = vector.recordedLayerX ?? vOffsetX
-    const vRecordedLayerY = vector.recordedLayerY ?? vOffsetY
+    const vRecordedLayerX = vector.recordedLayerX
+    const vRecordedLayerY = vector.recordedLayerY
     const vEffectiveDitherOffsetX =
-      ((((vector.ditherOffsetX ?? 0) + vRecordedLayerX - vOffsetX) % 8) + 8) % 8
+      ((((vector.ditherOffsetX ?? 0) + vRecordedLayerX - offsetX) % 8) + 8) % 8
     const vEffectiveDitherOffsetY =
-      ((((vector.ditherOffsetY ?? 0) + vRecordedLayerY - vOffsetY) % 8) + 8) % 8
+      ((((vector.ditherOffsetY ?? 0) + vRecordedLayerY - offsetY) % 8) + 8) % 8
     const vectorCtx = createStrokeContext({
       layer: vector.layer,
       customContext: activeCtx,
@@ -512,8 +510,8 @@ function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
       ditherOffsetX: vEffectiveDitherOffsetX,
       ditherOffsetY: vEffectiveDitherOffsetY,
     })
-    const ox = offsetX + cropDX
-    const oy = offsetY + cropDY
+    const ox = offsetX
+    const oy = offsetY
     switch (vp.type) {
       case 'fill': {
         // let tempMask = new Set([vp.px1 + ox, vp.py1 + oy])

@@ -143,8 +143,8 @@ function brushSteps() {
         customStampEntry:
           brush.brushType === 'custom' ? brushStamps.custom : null,
         ditherPatternIndex: brush.ditherPatternIndex,
-        ditherOffsetX: brush.ditherOffsetX,
-        ditherOffsetY: brush.ditherOffsetY,
+        ditherOffsetX: ((brush.ditherOffsetX + state.canvas.cropOffsetX) % 8 + 8) % 8,
+        ditherOffsetY: ((brush.ditherOffsetY + state.canvas.cropOffsetY) % 8 + 8) % 8,
         recordedLayerX: canvas.currentLayer.x,
         recordedLayerY: canvas.currentLayer.y,
         points: state.timeline.points,

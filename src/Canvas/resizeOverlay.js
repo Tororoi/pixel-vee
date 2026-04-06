@@ -4,6 +4,8 @@ import { state } from '../Context/state.js'
 import { resizeOffScreenCanvas } from '../Canvas/render.js'
 import { stopMarchingAnts, renderSelectionCVS } from '../GUI/select.js'
 import { MINIMUM_DIMENSION, MAXIMUM_DIMENSION } from '../utils/constants.js'
+import { brush } from '../Tools/brush.js'
+import { applyDitherOffset, applyDitherOffsetControl } from '../DOM/renderBrush.js'
 
 // Map anchor name to [xFactor, yFactor]: 0 = left/top, 0.5 = center, 1 = right/bottom
 const ANCHOR_FACTORS = {
@@ -467,6 +469,16 @@ export function applyResize() {
   // Update the crop offset before resizing so the timeline replay uses the new values
   state.canvas.cropOffsetX = toCropOffsetX
   state.canvas.cropOffsetY = toCropOffsetY
+
+  // Adjust brush dither offset so the pattern stays locked to art pixels after the content shift
+  brush.ditherOffsetX = ((brush.ditherOffsetX - contentOffsetX) % 8 + 8) % 8
+  brush.ditherOffsetY = ((brush.ditherOffsetY - contentOffsetY) % 8 + 8) % 8
+  const picker = document.querySelector('.dither-picker-container')
+  if (picker) applyDitherOffset(picker, brush.ditherOffsetX, brush.ditherOffsetY)
+  const preview = document.querySelector('.dither-preview')
+  if (preview) applyDitherOffset(preview, brush.ditherOffsetX, brush.ditherOffsetY)
+  const control = document.querySelector('.dither-offset-control')
+  if (control) applyDitherOffsetControl(control.parentElement, brush.ditherOffsetX, brush.ditherOffsetY)
 
   // Resize the canvas — applyCanvasDimensions clears layer cvs, then
   // renderCanvas(null, true) replays the timeline with the new crop delta applied

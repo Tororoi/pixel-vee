@@ -222,8 +222,14 @@ function lineSteps() {
         color: { ...swatches.primary.color },
         secondaryColor: { ...swatches.secondary.color },
         ditherPatternIndex: state.tool.current.ditherPatternIndex,
-        ditherOffsetX: state.tool.current.ditherOffsetX ?? 0,
-        ditherOffsetY: state.tool.current.ditherOffsetY ?? 0,
+        ditherOffsetX:
+          (((state.tool.current.ditherOffsetX + state.canvas.cropOffsetX) % 8) +
+            8) %
+          8,
+        ditherOffsetY:
+          (((state.tool.current.ditherOffsetY + state.canvas.cropOffsetY) % 8) +
+            8) %
+          8,
         recordedLayerX: canvas.currentLayer.x,
         recordedLayerY: canvas.currentLayer.y,
         brushSize: state.tool.current.brushSize,

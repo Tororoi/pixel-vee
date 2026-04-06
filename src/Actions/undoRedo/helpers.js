@@ -1,6 +1,8 @@
 import { dom } from "../../Context/dom.js"
 import { state } from "../../Context/state.js"
 import { canvas } from "../../Context/canvas.js"
+import { brush } from "../../Tools/brush.js"
+import { applyDitherOffset, applyDitherOffsetControl } from "../../DOM/renderBrush.js"
 import { pasteSelectedPixels } from "../../Menu/edit.js"
 import { switchTool } from "../../Tools/toolbox.js"
 import {
@@ -239,5 +241,13 @@ export function handleResizeAction(latestAction, modType) {
   const contentOffsetY = targetState.cropOffsetY - state.canvas.cropOffsetY
   state.canvas.cropOffsetX = targetState.cropOffsetX
   state.canvas.cropOffsetY = targetState.cropOffsetY
+  brush.ditherOffsetX = ((brush.ditherOffsetX - contentOffsetX) % 8 + 8) % 8
+  brush.ditherOffsetY = ((brush.ditherOffsetY - contentOffsetY) % 8 + 8) % 8
+  const picker = document.querySelector('.dither-picker-container')
+  if (picker) applyDitherOffset(picker, brush.ditherOffsetX, brush.ditherOffsetY)
+  const preview = document.querySelector('.dither-preview')
+  if (preview) applyDitherOffset(preview, brush.ditherOffsetX, brush.ditherOffsetY)
+  const control = document.querySelector('.dither-offset-control')
+  if (control) applyDitherOffsetControl(control.parentElement, brush.ditherOffsetX, brush.ditherOffsetY)
   applyCanvasDimensions(targetState.width, targetState.height, contentOffsetX, contentOffsetY)
 }
