@@ -268,15 +268,16 @@ function resolveLinkedVectors(keys, normalizedX, normalizedY, vector) {
 
   if (vectorGui.collidedPoint.xKey === 'px3') {
     if (
-      normalizedX === state.vector.properties.px1 &&
-      normalizedY === state.vector.properties.py1
+      normalizedX === state.vector.properties.px1 + state.canvas.cropOffsetX &&
+      normalizedY === state.vector.properties.py1 + state.canvas.cropOffsetY
     ) {
       vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px1', yKey: 'py1' })
     }
     if (state.tool.current.name === 'quadCurve') {
       if (
-        normalizedX === state.vector.properties.px2 &&
-        normalizedY === state.vector.properties.py2
+        normalizedX ===
+          state.vector.properties.px2 + state.canvas.cropOffsetX &&
+        normalizedY === state.vector.properties.py2 + state.canvas.cropOffsetY
       ) {
         vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px2', yKey: 'py2' })
       }
@@ -284,8 +285,8 @@ function resolveLinkedVectors(keys, normalizedX, normalizedY, vector) {
   }
   if (vectorGui.collidedPoint.xKey === 'px4') {
     if (
-      normalizedX === state.vector.properties.px2 &&
-      normalizedY === state.vector.properties.py2
+      normalizedX === state.vector.properties.px2 + state.canvas.cropOffsetX &&
+      normalizedY === state.vector.properties.py2 + state.canvas.cropOffsetY
     ) {
       vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px2', yKey: 'py2' })
     }
