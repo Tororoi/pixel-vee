@@ -321,6 +321,8 @@ export function deactivateResizeOverlay() {
     canvas.resizeOverlayCVS.width,
     canvas.resizeOverlayCVS.height,
   )
+  // Clear stale collision from the last animation frame so tools don't misread it
+  vectorGui.resetCollision()
   // Restore the selection canvas and restart its animation if needed
   renderSelectionCVS()
   // Restore cursor
