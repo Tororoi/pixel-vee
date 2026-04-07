@@ -102,6 +102,16 @@ export function renderToolOptionsToDOM() {
 }
 
 /**
+ * Show or hide stamp options based on active tool (brush only).
+ */
+export function renderStampOptionsToDOM() {
+  const stampSection = document.querySelector('.stamp-options')
+  if (!stampSection) return
+  stampSection.style.display =
+    state.tool.current.name === 'brush' ? '' : 'none'
+}
+
+/**
  * Show or hide dither-specific options based on active tool.
  * Also updates the preview canvas to show the current pattern.
  */

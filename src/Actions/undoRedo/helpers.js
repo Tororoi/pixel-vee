@@ -1,6 +1,8 @@
 import { dom } from "../../Context/dom.js"
 import { state } from "../../Context/state.js"
 import { canvas } from "../../Context/canvas.js"
+import { brush } from "../../Tools/brush.js"
+import { applyDitherOffset, applyDitherOffsetControl } from "../../DOM/renderBrush.js"
 import { pasteSelectedPixels } from "../../Menu/edit.js"
 import { switchTool } from "../../Tools/toolbox.js"
 import {
@@ -8,6 +10,7 @@ import {
   enableActionsForNoPaste,
 } from "../../DOM/disableDomElements.js"
 import { transformRasterContent } from "../../utils/transformHelpers.js"
+import { applyCanvasDimensions } from "../../Canvas/render.js"
 
 /**
  * @description This function is used to handle the modify action. It is used in the undo and redo functions.
@@ -223,4 +226,48 @@ export function handleTransformAction(latestAction, newLatestAction, modType) {
     state.transform.isMirroredHorizontally = latestAction.isMirroredHorizontally
     state.transform.isMirroredVertically = latestAction.isMirroredVertically
   }
+}
+
+/**
+ * Undo or redo a canvas resize action.
+ * Restores the canvas dimensions and cropOffset from the appropriate snapshot,
+ * then lets renderToLatestAction replay the timeline with the restored settings.
+ * @param {object} latestAction - The resize action being undone or redone
+ * @param {string} modType - "from" (undo) or "to" (redo)
+ */
+export function handleResizeAction(latestAction, modType) {
+  const targetState = latestAction[modType]
+  const contentOffsetX = targetState.cropOffsetX - state.canvas.cropOffsetX
+  const contentOffsetY = targetState.cropOffsetY - state.canvas.cropOffsetY
+  state.canvas.cropOffsetX = targetState.cropOffsetX
+  state.canvas.cropOffsetY = targetState.cropOffsetY
+  brush.ditherOffsetX = ((brush.ditherOffsetX - contentOffsetX) % 8 + 8) % 8
+  brush.ditherOffsetY = ((brush.ditherOffsetY - contentOffsetY) % 8 + 8) % 8
+  const picker = document.querySelector('.dither-picker-container')
+  if (picker) applyDitherOffset(picker, brush.ditherOffsetX, brush.ditherOffsetY)
+  const preview = document.querySelector('.dither-preview')
+  if (preview) applyDitherOffset(preview, brush.ditherOffsetX, brush.ditherOffsetY)
+  const control = document.querySelector('.dither-offset-control')
+  if (control) applyDitherOffsetControl(control.parentElement, brush.ditherOffsetX, brush.ditherOffsetY)
+  if (state.selection.properties.px1 !== null) {
+    state.selection.properties.px1 += contentOffsetX
+    state.selection.properties.py1 += contentOffsetY
+    state.selection.properties.px2 += contentOffsetX
+    state.selection.properties.py2 += contentOffsetY
+    state.selection.setBoundaryBox(state.selection.properties)
+  }
+  if (state.selection.maskSet) {
+    const newMaskSet = new Set()
+    const w = targetState.width
+    const h = targetState.height
+    for (const key of state.selection.maskSet) {
+      const nx = (key & 0xffff) + contentOffsetX
+      const ny = ((key >> 16) & 0xffff) + contentOffsetY
+      if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+        newMaskSet.add((ny << 16) | nx)
+      }
+    }
+    state.selection.maskSet = newMaskSet
+  }
+  applyCanvasDimensions(targetState.width, targetState.height, contentOffsetX, contentOffsetY)
 }

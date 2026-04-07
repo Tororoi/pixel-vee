@@ -18,6 +18,10 @@ const selectionGuiCVS = document.getElementById('selection-gui-canvas')
 const selectionGuiCTX = selectionGuiCVS.getContext('2d', {
   desynchronized: true,
 })
+const resizeOverlayCVS = document.getElementById('resize-overlay-canvas')
+const resizeOverlayCTX = resizeOverlayCVS.getContext('2d', {
+  desynchronized: true,
+})
 const cursorCVS = document.getElementById('cursor-canvas')
 const cursorCTX = cursorCVS.getContext('2d', {
   desynchronized: true,
@@ -49,6 +53,8 @@ export const canvas = {
   vectorGuiCTX,
   selectionGuiCVS,
   selectionGuiCTX,
+  resizeOverlayCVS,
+  resizeOverlayCTX,
   cursorCVS,
   cursorCTX,
   backgroundCVS,
@@ -91,13 +97,13 @@ export const canvas = {
 
 //Initialize state
 //Set the dimensions of the drawing canvas
-canvas.offScreenCVS.width = 256
-canvas.offScreenCVS.height = 256
+canvas.offScreenCVS.width = 128
+canvas.offScreenCVS.height = 128
 canvas.previewCVS.width = canvas.offScreenCVS.width
 canvas.previewCVS.height = canvas.offScreenCVS.height
-//set the dimensions of the thumbnail canvas (NOTE: this is hardcoded based on an initial canvas width of 256)
-canvas.thumbnailCVS.width = canvas.offScreenCVS.width + 344
-canvas.thumbnailCVS.height = canvas.offScreenCVS.height
+//set the dimensions of the thumbnail canvas
+canvas.thumbnailCVS.width = 600
+canvas.thumbnailCVS.height = 256
 //improve sharpness
 //window.devicePixelRatio is typically 2.
 //Other than performance issues, any sharpness greater than the devicePixelRatio can actually look bad because the device cannot render the fidelity expected by the canvas.
@@ -109,6 +115,10 @@ canvas.selectionGuiCVS.width =
   canvas.selectionGuiCVS.offsetWidth * canvas.sharpness
 canvas.selectionGuiCVS.height =
   canvas.selectionGuiCVS.offsetHeight * canvas.sharpness
+canvas.resizeOverlayCVS.width =
+  canvas.resizeOverlayCVS.offsetWidth * canvas.sharpness
+canvas.resizeOverlayCVS.height =
+  canvas.resizeOverlayCVS.offsetHeight * canvas.sharpness
 canvas.cursorCVS.width = canvas.cursorCVS.offsetWidth * canvas.sharpness
 canvas.cursorCVS.height = canvas.cursorCVS.offsetHeight * canvas.sharpness
 canvas.backgroundCVS.width = canvas.backgroundCVS.offsetWidth * canvas.sharpness
@@ -127,6 +137,10 @@ vectorGuiCTX.scale(
   canvas.sharpness * canvas.zoom,
 )
 selectionGuiCTX.scale(
+  canvas.sharpness * canvas.zoom,
+  canvas.sharpness * canvas.zoom,
+)
+resizeOverlayCTX.scale(
   canvas.sharpness * canvas.zoom,
   canvas.sharpness * canvas.zoom,
 )

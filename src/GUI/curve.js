@@ -5,6 +5,7 @@ import {
   getGuiLineWidth,
   doubleStroke,
 } from '../utils/guiHelpers.js'
+import { getRenderXOffset, getRenderYOffset } from '../utils/coordinateHelpers.js'
 
 /**
  * @param {object} vectorProperties - The properties of the vector
@@ -12,8 +13,8 @@ import {
  */
 export function renderCurveVector(vectorProperties, vector) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
-  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
-  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
+  const xOffset = getRenderXOffset(vector)
+  const yOffset = getRenderYOffset(vector)
   const lineWidth = getGuiLineWidth()
   let circleRadius = 20 * lineWidth
 
@@ -55,8 +56,8 @@ export function renderCurveVector(vectorProperties, vector) {
  */
 export function renderCurvePath(vectorProperties, vector) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
-  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
-  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
+  const xOffset = getRenderXOffset(vector)
+  const yOffset = getRenderYOffset(vector)
   const lineWidth = getGuiLineWidth()
 
   canvas.vectorGuiCTX.beginPath()

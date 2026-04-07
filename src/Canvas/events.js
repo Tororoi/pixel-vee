@@ -1,4 +1,5 @@
 import { dom } from '../Context/dom.js'
+import { MINIMUM_DIMENSION, MAXIMUM_DIMENSION } from '../utils/constants.js'
 import { keys } from '../Shortcuts/keys.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
@@ -37,6 +38,12 @@ import {
   removeLayer,
 } from '../Actions/layer/layerActions.js'
 import { createPreviewLayer } from './layers.js'
+import {
+  applyFromInputs,
+  applyResize,
+  setAnchor,
+  deactivateResizeOverlay,
+} from './resizeOverlay.js'
 import { switchTool } from '../Tools/toolbox.js'
 import { enableActionsForSelection } from '../DOM/disableDomElements.js'
 
@@ -50,18 +57,19 @@ import { enableActionsForSelection } from '../DOM/disableDomElements.js'
  */
 const handleIncrement = (e) => {
   let dimension = e.target.parentNode.previousSibling.previousSibling
-  let max = 1024
-  let min = 8
   if (e.target.id === 'inc') {
     let newValue = Math.floor(+dimension.value)
-    if (newValue < max) {
+    if (newValue < MAXIMUM_DIMENSION) {
       dimension.value = newValue + 1
     }
   } else if (e.target.id === 'dec') {
     let newValue = Math.floor(+dimension.value)
-    if (newValue > min) {
+    if (newValue > MINIMUM_DIMENSION) {
       dimension.value = newValue - 1
     }
+  }
+  if (state.canvas.resizeOverlayActive) {
+    applyFromInputs(+dom.canvasWidth.value, +dom.canvasHeight.value)
   }
 }
 
@@ -81,12 +89,10 @@ const handleSizeIncrement = (e) => {
  * @param {FocusEvent} e - The focus event
  */
 const restrictSize = (e) => {
-  const max = 1024
-  const min = 8
-  if (e.target.value > max) {
-    e.target.value = max
-  } else if (e.target.value < min) {
-    e.target.value = min
+  if (e.target.value > MAXIMUM_DIMENSION) {
+    e.target.value = MAXIMUM_DIMENSION
+  } else if (e.target.value < MINIMUM_DIMENSION) {
+    e.target.value = MINIMUM_DIMENSION
   }
 }
 
@@ -96,7 +102,11 @@ const restrictSize = (e) => {
  */
 const handleDimensionsSubmit = (e) => {
   e.preventDefault()
-  resizeOffScreenCanvas(dom.canvasWidth.value, dom.canvasHeight.value)
+  if (state.canvas.resizeOverlayActive) {
+    applyResize()
+  } else {
+    resizeOffScreenCanvas(dom.canvasWidth.value, dom.canvasHeight.value)
+  }
 }
 
 /**
@@ -121,6 +131,18 @@ const resizeOnScreenCanvas = () => {
   canvas.selectionGuiCVS.height =
     canvas.selectionGuiCVS.offsetHeight * canvas.sharpness
   canvas.selectionGuiCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+  )
+  canvas.resizeOverlayCVS.width =
+    canvas.resizeOverlayCVS.offsetWidth * canvas.sharpness
+  canvas.resizeOverlayCVS.height =
+    canvas.resizeOverlayCVS.offsetHeight * canvas.sharpness
+  canvas.resizeOverlayCTX.setTransform(
     canvas.sharpness * canvas.zoom,
     0,
     0,
@@ -325,9 +347,9 @@ function dropLayer(e) {
 
 /**
  * Stop dragging a layer
- * @param {DragEvent} e - The drag event
+ * @param {DragEvent} _e - The drag event (unused)
  */
-function dragLayerEnd(e) {
+function dragLayerEnd(_e) {
   renderLayersToDOM()
 }
 
@@ -514,7 +536,25 @@ dom.dimensionsForm.addEventListener('submit', handleDimensionsSubmit)
 dom.canvasWidth.addEventListener('blur', restrictSize)
 dom.canvasHeight.addEventListener('blur', restrictSize)
 dom.canvasSizeCancelBtn.addEventListener('click', () => {
+  deactivateResizeOverlay()
   dom.sizeContainer.style.display = 'none'
+})
+dom.canvasWidth.addEventListener('input', (e) => {
+  if (state.canvas.resizeOverlayActive)
+    applyFromInputs(+e.target.value, +dom.canvasHeight.value)
+})
+dom.canvasHeight.addEventListener('input', (e) => {
+  if (state.canvas.resizeOverlayActive)
+    applyFromInputs(+dom.canvasWidth.value, +e.target.value)
+})
+dom.anchorGrid.addEventListener('click', (e) => {
+  const btn = e.target.closest('.anchor-btn')
+  if (!btn) return
+  dom.anchorGrid
+    .querySelectorAll('.anchor-btn')
+    .forEach((b) => b.classList.remove('active'))
+  btn.classList.add('active')
+  setAnchor(btn.dataset.anchor)
 })
 // * Layers * //
 dom.uploadBtn.addEventListener('click', (e) => {
@@ -585,7 +625,8 @@ dom.vectorSettingsContainer.addEventListener('click', (e) => {
   if (e.target.classList.contains('close-btn')) {
     dom.vectorSettingsContainer.style.display = 'none'
     dom.vectorSettingsContainer.vectorObj = null
-    if (dom.ditherPickerContainer) dom.ditherPickerContainer.editingVector = false
+    if (dom.ditherPickerContainer)
+      dom.ditherPickerContainer.editingVector = false
     return
   }
 
@@ -595,7 +636,7 @@ dom.vectorSettingsContainer.addEventListener('click', (e) => {
   const modeBtn = e.target.closest('.mode')
   if (modeBtn) {
     const modeKey = ['eraser', 'inject', 'twoColor'].find((k) =>
-      modeBtn.classList.contains(k)
+      modeBtn.classList.contains(k),
     )
     if (modeKey) {
       toggleVectorMode(vector, modeKey)
@@ -632,8 +673,7 @@ dom.vectorSettingsContainer.addEventListener('click', (e) => {
 
   const ditherPreviewBtn = e.target.closest('.vector-dither-preview')
   if (ditherPreviewBtn && dom.vectorDitherPickerContainer) {
-    const isOpen =
-      dom.vectorDitherPickerContainer.style.display === 'flex'
+    const isOpen = dom.vectorDitherPickerContainer.style.display === 'flex'
     if (isOpen) {
       dom.vectorDitherPickerContainer.style.display = 'none'
     } else {
@@ -665,7 +705,7 @@ dom.vectorSettingsContainer.addEventListener('input', (e) => {
     const newSize = parseInt(e.target.value)
     vector.brushSize = newSize
     const display = dom.vectorSettingsContainer.querySelector(
-      '.vector-brush-size-display'
+      '.vector-brush-size-display',
     )
     if (display) display.textContent = `Size: ${newSize}`
     renderCanvas(vector.layer, true)
@@ -702,8 +742,10 @@ dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
       updateVectorDitherPickerColors(vector)
       updateVectorDitherPreview(vector)
       // sync twoColor button in settings dialog if open
-      const settingsModeBtn = dom.vectorSettingsContainer?.querySelector('.mode.twoColor')
-      if (settingsModeBtn) settingsModeBtn.classList.toggle('selected', vector.modes.twoColor)
+      const settingsModeBtn =
+        dom.vectorSettingsContainer?.querySelector('.mode.twoColor')
+      if (settingsModeBtn)
+        settingsModeBtn.classList.toggle('selected', vector.modes.twoColor)
     }
     renderCanvas(vector.layer, true)
     return
@@ -737,27 +779,45 @@ dom.vectorDitherPickerContainer?.addEventListener('pointerdown', (e) => {
   const recordedLayerX = vector.recordedLayerX ?? currentLayerX
   const recordedLayerY = vector.recordedLayerY ?? currentLayerY
   // Compute effective offset at drag start
-  const startEffectiveX = (((vector.ditherOffsetX ?? 0) + recordedLayerX - currentLayerX) % 8 + 8) % 8
-  const startEffectiveY = (((vector.ditherOffsetY ?? 0) + recordedLayerY - currentLayerY) % 8 + 8) % 8
-  const fromOffset = { x: vector.ditherOffsetX ?? 0, y: vector.ditherOffsetY ?? 0 }
+  const startEffectiveX =
+    ((((vector.ditherOffsetX ?? 0) + recordedLayerX - currentLayerX) % 8) + 8) %
+    8
+  const startEffectiveY =
+    ((((vector.ditherOffsetY ?? 0) + recordedLayerY - currentLayerY) % 8) + 8) %
+    8
+  const fromOffset = {
+    x: vector.ditherOffsetX ?? 0,
+    y: vector.ditherOffsetY ?? 0,
+  }
   const onMove = (ev) => {
-    const newEffectiveX = ((startEffectiveX - Math.round((ev.clientX - startX) / 4)) % 8 + 8) % 8
-    const newEffectiveY = ((startEffectiveY - Math.round((ev.clientY - startY) / 4)) % 8 + 8) % 8
+    const newEffectiveX =
+      (((startEffectiveX - Math.round((ev.clientX - startX) / 4)) % 8) + 8) % 8
+    const newEffectiveY =
+      (((startEffectiveY - Math.round((ev.clientY - startY) / 4)) % 8) + 8) % 8
     // Invert effective-offset formula: storedOffset = ((effective - recordedLayer + currentLayer) % 8 + 8) % 8
-    vector.ditherOffsetX = ((newEffectiveX - recordedLayerX + currentLayerX) % 8 + 8) % 8
-    vector.ditherOffsetY = ((newEffectiveY - recordedLayerY + currentLayerY) % 8 + 8) % 8
+    vector.ditherOffsetX =
+      (((newEffectiveX - recordedLayerX + currentLayerX) % 8) + 8) % 8
+    vector.ditherOffsetY =
+      (((newEffectiveY - recordedLayerY + currentLayerY) % 8) + 8) % 8
     updateVectorDitherControls(vector)
     renderCanvas(vector.layer, true)
   }
   control.addEventListener('pointermove', onMove)
-  control.addEventListener('pointerup', () => {
-    control.removeEventListener('pointermove', onMove)
-    const toOffset = { x: vector.ditherOffsetX ?? 0, y: vector.ditherOffsetY ?? 0 }
-    if (fromOffset.x !== toOffset.x || fromOffset.y !== toOffset.y) {
-      changeActionVectorDitherOffset(vector, fromOffset, toOffset)
-      state.clearRedoStack()
-    }
-  }, { once: true })
+  control.addEventListener(
+    'pointerup',
+    () => {
+      control.removeEventListener('pointermove', onMove)
+      const toOffset = {
+        x: vector.ditherOffsetX ?? 0,
+        y: vector.ditherOffsetY ?? 0,
+      }
+      if (fromOffset.x !== toOffset.x || fromOffset.y !== toOffset.y) {
+        changeActionVectorDitherOffset(vector, fromOffset, toOffset)
+        state.clearRedoStack()
+      }
+    },
+    { once: true },
+  )
 })
 
 document.addEventListener('pointerdown', (e) => {
