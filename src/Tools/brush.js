@@ -1,9 +1,12 @@
-import { brushStamps, customBrushStamp, buildCustomStampEntry } from '../Context/brushStamps.js'
+import { brushStamps } from '../Context/brushStamps.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
-import { actionDitherDraw, actionBuildUpDitherDraw } from '../Actions/pointer/draw.js'
+import {
+  actionDitherDraw,
+  actionBuildUpDitherDraw,
+} from '../Actions/pointer/draw.js'
 import { actionLine } from '../Actions/pointer/line.js'
 import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
 import { getAngle, getTriangle } from '../utils/trig.js'
@@ -23,7 +26,7 @@ import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
 function brushSteps() {
   let brushDirection = '0,0'
   switch (canvas.pointerEvent) {
-    case 'pointerdown':
+    case 'pointerdown': {
       //initialize sets
       if (state.tool.current.modes?.colorMask) {
         state.selection.maskSet = createColorMaskSet(
@@ -47,8 +50,10 @@ function brushSteps() {
         maskSet: state.selection.maskSet,
         seenPixelsSet: state.selection.seenPixelsSet,
         brushStamp: isCustomStamp
-          ? buildCustomStampEntry()
-          : brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
+          ? brushStamps.custom
+          : brushStamps[state.tool.current.brushType][
+              state.tool.current.brushSize
+            ],
         brushSize: isCustomStamp ? 32 : state.tool.current.brushSize,
         ditherPattern: ditherPatterns[brush.ditherPatternIndex],
         twoColorMode: brush.modes.twoColor,
@@ -59,7 +64,11 @@ function brushSteps() {
         buildUpSteps: brush.buildUpSteps,
         customStampColorMap: null,
       })
-      brush._previewStrokeCtx = { ...brush._strokeCtx, isPreview: true, excludeFromSet: true }
+      brush._previewStrokeCtx = {
+        ...brush._strokeCtx,
+        isPreview: true,
+        excludeFromSet: true,
+      }
       //initial point
       drawBrushPoint(state.cursor.x, state.cursor.y, brushDirection)
       //For line
@@ -72,6 +81,7 @@ function brushSteps() {
       state.drawing.waitingPixelY = state.cursor.y
       scheduleRender(canvas.currentLayer)
       break
+    }
     case 'pointermove':
       //draw line connecting points that don't touch or if shift is held
       if (state.tool.current.options.line?.active) {
@@ -113,26 +123,30 @@ function brushSteps() {
       //add action to timeline
       let maskArray = coordArrayFromSet(
         state.selection.maskSet,
-        canvas.currentLayer.x,
-        canvas.currentLayer.y,
+        canvas.currentLayer.x + state.canvas.cropOffsetX,
+        canvas.currentLayer.y + state.canvas.cropOffsetY,
       )
-      //correct boundary box for layer offset
+      //correct boundary box for layer offset and crop offset
       const boundaryBox = { ...state.selection.boundaryBox }
       if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin -= canvas.currentLayer.x
-        boundaryBox.xMax -= canvas.currentLayer.x
-        boundaryBox.yMin -= canvas.currentLayer.y
-        boundaryBox.yMax -= canvas.currentLayer.y
+        boundaryBox.xMin -= canvas.currentLayer.x + state.canvas.cropOffsetX
+        boundaryBox.xMax -= canvas.currentLayer.x + state.canvas.cropOffsetX
+        boundaryBox.yMin -= canvas.currentLayer.y + state.canvas.cropOffsetY
+        boundaryBox.yMax -= canvas.currentLayer.y + state.canvas.cropOffsetY
       }
       const timelineProperties = {
         modes: { ...brush.modes },
         color: { ...swatches.primary.color },
         secondaryColor: { ...swatches.secondary.color },
-        brushSize: brush.brushSize,
+        brushSize: brush.brushType === 'custom' ? 32 : brush.brushSize,
         brushType: brush.brushType,
+        customStampEntry:
+          brush.brushType === 'custom' ? brushStamps.custom : null,
         ditherPatternIndex: brush.ditherPatternIndex,
-        ditherOffsetX: brush.ditherOffsetX,
-        ditherOffsetY: brush.ditherOffsetY,
+        ditherOffsetX:
+          (((brush.ditherOffsetX + state.canvas.cropOffsetX) % 8) + 8) % 8,
+        ditherOffsetY:
+          (((brush.ditherOffsetY + state.canvas.cropOffsetY) % 8) + 8) % 8,
         recordedLayerX: canvas.currentLayer.x,
         recordedLayerY: canvas.currentLayer.y,
         points: state.timeline.points,
@@ -176,9 +190,12 @@ function addPointToAction(x, y) {
   const key = (y << 16) | x
   if (!state.selection.pointsSet.has(key)) {
     state.timeline.addPoint({
-      x: x - canvas.currentLayer.x,
-      y: y - canvas.currentLayer.y,
-      brushSize: state.tool.current.brushSize,
+      x: x - canvas.currentLayer.x - state.canvas.cropOffsetX,
+      y: y - canvas.currentLayer.y - state.canvas.cropOffsetY,
+      brushSize:
+        state.tool.current.brushType === 'custom'
+          ? 32
+          : state.tool.current.brushSize,
     })
     state.selection.pointsSet.add(key)
   }
@@ -212,9 +229,19 @@ function drawPreviewBrushPoint() {
   )
   const stamp = brush._previewStrokeCtx.brushStamp[brushDirection]
   if (brush.modes.buildUpDither) {
-    actionBuildUpDitherDraw(state.cursor.x, state.cursor.y, stamp, brush._previewStrokeCtx)
+    actionBuildUpDitherDraw(
+      state.cursor.x,
+      state.cursor.y,
+      stamp,
+      brush._previewStrokeCtx,
+    )
   } else {
-    actionDitherDraw(state.cursor.x, state.cursor.y, stamp, brush._previewStrokeCtx)
+    actionDitherDraw(
+      state.cursor.x,
+      state.cursor.y,
+      stamp,
+      brush._previewStrokeCtx,
+    )
   }
 }
 

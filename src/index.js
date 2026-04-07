@@ -1,21 +1,21 @@
-import { dom } from "./Context/dom.js"
-import { initializeDialogBox, initializeCollapser } from "./utils/drag.js"
-import "./Menu/events.js"
-import "./Swatch/events.js"
-import "./Canvas/events.js"
-import "./Tools/events.js"
-import "./Controls/events.js"
-import "./GUI/events.js"
-import { actionDeselect } from "./Actions/nonPointer/selectionActions.js"
-import { vectorGui } from "./GUI/vector.js"
-import { registerVectorGui, registerDOMHelpers } from "./Context/state.js"
+import { dom } from './Context/dom.js'
+import { initializeDialogBox, initializeCollapser } from './utils/drag.js'
+import { deactivateResizeOverlay } from './Canvas/resizeOverlay.js'
+import './Menu/events.js'
+import './Swatch/events.js'
+import './Canvas/events.js'
+import './Tools/events.js'
+import './Controls/events.js'
+import './GUI/events.js'
+import { actionDeselect } from './Actions/nonPointer/selectionActions.js'
+import { vectorGui } from './GUI/vector.js'
+import { registerVectorGui, registerDOMHelpers } from './Context/state.js'
 import {
   disableActionsForNoSelection,
   enableActionsForSelection,
-} from "./DOM/disableDomElements.js"
-import { initStampEditor, openStampEditor } from "./DOM/stampEditor.js"
-import { brush } from "./Tools/brush.js"
-import { renderBrushStampToDOM } from "./DOM/renderBrush.js"
+} from './DOM/disableDomElements.js'
+import { initStampEditor } from './DOM/stampEditor.js'
+import { initDitherPicker } from './DOM/render.js'
 
 // Register dependencies that would otherwise create circular imports in state.js
 registerVectorGui(vectorGui)
@@ -48,19 +48,16 @@ initializeDialogBox(dom.layersInterfaceContainer)
 initializeDialogBox(dom.vectorsInterfaceContainer)
 
 // * Canvas Size * //
-initializeDialogBox(dom.sizeContainer)
+initializeDialogBox(dom.sizeContainer, false, deactivateResizeOverlay)
 
 // * Settings * //
 initializeDialogBox(dom.settingsContainer)
-
-// * Dither Picker * //
-initializeDialogBox(dom.ditherPickerContainer)
 
 // * Color Picker * //
 initializeDialogBox(dom.colorPickerContainer)
 
 // * Color Ramps Section * //
-initializeCollapser(document.getElementById("color-ramps-section"))
+initializeCollapser(document.getElementById('color-ramps-section'))
 
 // * Save * //
 initializeDialogBox(dom.saveContainer)
@@ -75,10 +72,6 @@ initializeDialogBox(dom.vectorTransformUIContainer, false, actionDeselect)
 initializeDialogBox(dom.stampEditorContainer)
 initStampEditor()
 
-// Custom stamp button: activate custom brush type and open the editor
-dom.customBrushTypeBtn?.addEventListener("click", () => {
-  brush.brushType = "custom"
-  dom.customBrushTypeBtn.classList.add("active")
-  renderBrushStampToDOM()
-  openStampEditor()
-})
+// * Dither Picker * //
+initializeDialogBox(dom.ditherPickerContainer)
+initDitherPicker()

@@ -1,4 +1,40 @@
 import { canvas } from '../Context/canvas.js'
+import { state } from '../Context/state.js'
+
+/**
+ * Renders the grey dim overlay on the given context, clipping out the
+ * provided box so only the area outside it is dimmed.
+ * Pass a box in art-pixel coords (relative to canvas.xOffset/yOffset).
+ * When no box is provided, falls back to state.selection.boundaryBox.
+ * @param {CanvasRenderingContext2D} ctx
+ * @param {{xMin: number, yMin: number, xMax: number, yMax: number}} [box]
+ */
+export function renderSelectionDimOverlay(ctx, box) {
+  const bb = box ?? state.selection.boundaryBox
+  ctx.save()
+  ctx.beginPath()
+  ctx.rect(
+    canvas.xOffset,
+    canvas.yOffset,
+    canvas.offScreenCVS.width,
+    canvas.offScreenCVS.height,
+  )
+  ctx.rect(
+    canvas.xOffset + bb.xMin,
+    canvas.yOffset + bb.yMin,
+    bb.xMax - bb.xMin,
+    bb.yMax - bb.yMin,
+  )
+  ctx.clip('evenodd')
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
+  ctx.fillRect(
+    canvas.xOffset,
+    canvas.yOffset,
+    canvas.offScreenCVS.width,
+    canvas.offScreenCVS.height,
+  )
+  ctx.restore()
+}
 
 /**
  * Returns the standard lineWidth for vector GUI elements.

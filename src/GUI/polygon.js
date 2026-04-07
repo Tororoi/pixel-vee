@@ -1,6 +1,7 @@
 import { canvas } from '../Context/canvas.js'
 import { vectorGui } from './vector.js'
 import { getGuiLineWidth, doubleStroke } from '../utils/guiHelpers.js'
+import { getRenderXOffset, getRenderYOffset } from '../utils/coordinateHelpers.js'
 
 /**
  * @param {object} vectorProperties - The properties of the vector
@@ -56,8 +57,8 @@ export function renderPolygonVector(vectorProperties, vector) {
 export function renderPolygonPath(vectorProperties, vector) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
   if (!Number.isInteger(px3)) return
-  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
-  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
+  const xOffset = getRenderXOffset(vector)
+  const yOffset = getRenderYOffset(vector)
   const lineWidth = getGuiLineWidth()
 
   canvas.vectorGuiCTX.beginPath()

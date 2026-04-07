@@ -3,6 +3,11 @@ import { dom } from '../Context/dom.js'
 import { keys } from '../Shortcuts/keys.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
+import {
+  resizeOverlayPointerDown,
+  resizeOverlayPointerMove,
+  resizeOverlayPointerUp,
+} from '../Canvas/resizeOverlay.js'
 import { vectorGui } from '../GUI/vector.js'
 import { renderCursor } from '../GUI/cursor.js'
 import { activateShortcut, deactivateShortcut } from './shortcuts.js'
@@ -78,7 +83,6 @@ function handleKeyUp(e) {
   deactivateShortcut(e.code)
 }
 
-
 let wheelAccumulator = 0
 let wheelGestureActive = false
 let wheelLastDirection = 0
@@ -139,6 +143,10 @@ function handleWheel(e) {
  * @param {PointerEvent} e - The pointerdown event
  */
 function handlePointerDown(e) {
+  if (state.canvas.resizeOverlayActive) {
+    resizeOverlayPointerDown(e)
+    return
+  }
   //reset media type, chrome dev tools niche use or computers that have touchscreen capabilities
   e.target.setPointerCapture(e.pointerId)
   canvas.pointerEvent = 'pointerdown'
@@ -181,6 +189,10 @@ function handlePointerDown(e) {
  * @param {PointerEvent} e - The pointermove event
  */
 function handlePointerMove(e) {
+  if (state.canvas.resizeOverlayActive) {
+    resizeOverlayPointerMove(e)
+    return
+  }
   if (state.cursor.clickDisabled && state.cursor.clicked) {
     return
   }
@@ -259,6 +271,10 @@ function handlePointerMove(e) {
  * @param {PointerEvent} e - The pointerup event
  */
 function handlePointerUp(e) {
+  if (state.canvas.resizeOverlayActive) {
+    resizeOverlayPointerUp(e)
+    return
+  }
   canvas.pointerEvent = 'pointerup'
   if (state.cursor.clickDisabled || !state.cursor.clicked) {
     return
@@ -282,9 +298,14 @@ function handlePointerUp(e) {
   //reset action and render vectors
   if (state.timeline.currentAction) {
     if (
-      ['fill', 'line', 'quadCurve', 'cubicCurve', 'ellipse', 'polygon'].includes(
-        state.tool.current.name,
-      )
+      [
+        'fill',
+        'line',
+        'quadCurve',
+        'cubicCurve',
+        'ellipse',
+        'polygon',
+      ].includes(state.tool.current.name)
     ) {
       renderVectorsToDOM()
     }

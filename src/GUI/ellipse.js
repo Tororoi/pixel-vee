@@ -5,6 +5,7 @@ import {
   getGuiLineWidth,
   doubleStroke,
 } from '../utils/guiHelpers.js'
+import { getRenderXOffset, getRenderYOffset } from '../utils/coordinateHelpers.js'
 
 /**
  * @param {object} vectorProperties - The properties of the vector
@@ -24,8 +25,8 @@ export function renderEllipseVector(vectorProperties, vector) {
     // x1Offset,
     // y1Offset,
   } = vectorProperties
-  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
-  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
+  const xOffset = getRenderXOffset(vector)
+  const yOffset = getRenderYOffset(vector)
   const lineWidth = getGuiLineWidth()
   let circleRadius = 20 * lineWidth
 
@@ -78,8 +79,8 @@ export function renderOffsetEllipseVector(vectorProperties, vector) {
     x1Offset,
     y1Offset,
   } = vectorProperties
-  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
-  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
+  const xOffset = getRenderXOffset(vector)
+  const yOffset = getRenderYOffset(vector)
   const lw = getGuiLineWidth()
   const circleRadius = 20 * lw
 
@@ -152,8 +153,8 @@ export function renderEllipsePath(vectorProperties, vector) {
     x1Offset,
     y1Offset,
   } = vectorProperties
-  const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
-  const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
+  const xOffset = getRenderXOffset(vector)
+  const yOffset = getRenderYOffset(vector)
   const lineWidth = getGuiLineWidth()
 
   //Don't let radii be negative with offset
