@@ -515,7 +515,7 @@ export function applyResize() {
       cropOffsetY: toCropOffsetY,
     },
     selectProperties: { ...state.selection.properties },
-    maskSet: null,
+    maskSet: state.selection.maskSet ? Array.from(state.selection.maskSet) : null,
     selectedVectorIndices: Array.from(state.vector.selectedIndices),
     currentVectorIndex: state.vector.currentIndex,
     hidden: false,

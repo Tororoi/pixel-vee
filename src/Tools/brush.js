@@ -123,16 +123,16 @@ function brushSteps() {
       //add action to timeline
       let maskArray = coordArrayFromSet(
         state.selection.maskSet,
-        canvas.currentLayer.x,
-        canvas.currentLayer.y,
+        canvas.currentLayer.x + state.canvas.cropOffsetX,
+        canvas.currentLayer.y + state.canvas.cropOffsetY,
       )
-      //correct boundary box for layer offset
+      //correct boundary box for layer offset and crop offset
       const boundaryBox = { ...state.selection.boundaryBox }
       if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin -= canvas.currentLayer.x
-        boundaryBox.xMax -= canvas.currentLayer.x
-        boundaryBox.yMin -= canvas.currentLayer.y
-        boundaryBox.yMax -= canvas.currentLayer.y
+        boundaryBox.xMin -= canvas.currentLayer.x + state.canvas.cropOffsetX
+        boundaryBox.xMax -= canvas.currentLayer.x + state.canvas.cropOffsetX
+        boundaryBox.yMin -= canvas.currentLayer.y + state.canvas.cropOffsetY
+        boundaryBox.yMax -= canvas.currentLayer.y + state.canvas.cropOffsetY
       }
       const timelineProperties = {
         modes: { ...brush.modes },
@@ -143,8 +143,10 @@ function brushSteps() {
         customStampEntry:
           brush.brushType === 'custom' ? brushStamps.custom : null,
         ditherPatternIndex: brush.ditherPatternIndex,
-        ditherOffsetX: ((brush.ditherOffsetX + state.canvas.cropOffsetX) % 8 + 8) % 8,
-        ditherOffsetY: ((brush.ditherOffsetY + state.canvas.cropOffsetY) % 8 + 8) % 8,
+        ditherOffsetX:
+          (((brush.ditherOffsetX + state.canvas.cropOffsetX) % 8) + 8) % 8,
+        ditherOffsetY:
+          (((brush.ditherOffsetY + state.canvas.cropOffsetY) % 8) + 8) % 8,
         recordedLayerX: canvas.currentLayer.x,
         recordedLayerY: canvas.currentLayer.y,
         points: state.timeline.points,

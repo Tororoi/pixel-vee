@@ -188,16 +188,16 @@ function lineSteps() {
       state.tool.clickCounter = 0
       let maskArray = coordArrayFromSet(
         state.selection.maskSet,
-        canvas.currentLayer.x,
-        canvas.currentLayer.y,
+        canvas.currentLayer.x + state.canvas.cropOffsetX,
+        canvas.currentLayer.y + state.canvas.cropOffsetY,
       )
-      //correct boundary box for layer offset
+      //correct boundary box for layer offset and crop offset
       const boundaryBox = { ...state.selection.boundaryBox }
       if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin -= canvas.currentLayer.x
-        boundaryBox.xMax -= canvas.currentLayer.x
-        boundaryBox.yMin -= canvas.currentLayer.y
-        boundaryBox.yMax -= canvas.currentLayer.y
+        boundaryBox.xMin -= canvas.currentLayer.x + state.canvas.cropOffsetX
+        boundaryBox.xMax -= canvas.currentLayer.x + state.canvas.cropOffsetX
+        boundaryBox.yMin -= canvas.currentLayer.y + state.canvas.cropOffsetY
+        boundaryBox.yMax -= canvas.currentLayer.y + state.canvas.cropOffsetY
       }
       //generate new unique key for vector
       const uniqueVectorKey = state.vector.nextKey()

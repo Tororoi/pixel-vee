@@ -174,16 +174,16 @@ function quadCurveSteps() {
         state.tool.clickCounter = 0
         let maskArray = coordArrayFromSet(
           state.selection.maskSet,
-          canvas.currentLayer.x,
-          canvas.currentLayer.y,
+          canvas.currentLayer.x + state.canvas.cropOffsetX,
+          canvas.currentLayer.y + state.canvas.cropOffsetY,
         )
-        //correct boundary box for layer offset
+        //correct boundary box for layer offset and crop offset
         const boundaryBox = { ...state.selection.boundaryBox }
         if (boundaryBox.xMax !== null) {
-          boundaryBox.xMin -= canvas.currentLayer.x
-          boundaryBox.xMax -= canvas.currentLayer.x
-          boundaryBox.yMin -= canvas.currentLayer.y
-          boundaryBox.yMax -= canvas.currentLayer.y
+          boundaryBox.xMin -= canvas.currentLayer.x + state.canvas.cropOffsetX
+          boundaryBox.xMax -= canvas.currentLayer.x + state.canvas.cropOffsetX
+          boundaryBox.yMin -= canvas.currentLayer.y + state.canvas.cropOffsetY
+          boundaryBox.yMax -= canvas.currentLayer.y + state.canvas.cropOffsetY
         }
         //generate new unique key for vector
         const uniqueVectorKey = state.vector.nextKey()
@@ -209,11 +209,13 @@ function quadCurveSteps() {
           secondaryColor: { ...swatches.secondary.color },
           ditherPatternIndex: state.tool.current.ditherPatternIndex,
           ditherOffsetX:
-            (((state.tool.current.ditherOffsetX + state.canvas.cropOffsetX) % 8) +
+            (((state.tool.current.ditherOffsetX + state.canvas.cropOffsetX) %
+              8) +
               8) %
             8,
           ditherOffsetY:
-            (((state.tool.current.ditherOffsetY + state.canvas.cropOffsetY) % 8) +
+            (((state.tool.current.ditherOffsetY + state.canvas.cropOffsetY) %
+              8) +
               8) %
             8,
           recordedLayerX: canvas.currentLayer.x,
@@ -389,16 +391,16 @@ function cubicCurveSteps() {
         state.tool.clickCounter = 0
         let maskArray = coordArrayFromSet(
           state.selection.maskSet,
-          canvas.currentLayer.x,
-          canvas.currentLayer.y,
+          canvas.currentLayer.x + state.canvas.cropOffsetX,
+          canvas.currentLayer.y + state.canvas.cropOffsetY,
         )
-        //correct boundary box for layer offset
+        //correct boundary box for layer offset and crop offset
         const boundaryBox = { ...state.selection.boundaryBox }
         if (boundaryBox.xMax !== null) {
-          boundaryBox.xMin -= canvas.currentLayer.x
-          boundaryBox.xMax -= canvas.currentLayer.x
-          boundaryBox.yMin -= canvas.currentLayer.y
-          boundaryBox.yMax -= canvas.currentLayer.y
+          boundaryBox.xMin -= canvas.currentLayer.x + state.canvas.cropOffsetX
+          boundaryBox.xMax -= canvas.currentLayer.x + state.canvas.cropOffsetX
+          boundaryBox.yMin -= canvas.currentLayer.y + state.canvas.cropOffsetY
+          boundaryBox.yMax -= canvas.currentLayer.y + state.canvas.cropOffsetY
         }
         //generate new unique key for vector
         const uniqueVectorKey = state.vector.nextKey()
@@ -424,11 +426,13 @@ function cubicCurveSteps() {
           secondaryColor: { ...swatches.secondary.color },
           ditherPatternIndex: state.tool.current.ditherPatternIndex,
           ditherOffsetX:
-            (((state.tool.current.ditherOffsetX + state.canvas.cropOffsetX) % 8) +
+            (((state.tool.current.ditherOffsetX + state.canvas.cropOffsetX) %
+              8) +
               8) %
             8,
           ditherOffsetY:
-            (((state.tool.current.ditherOffsetY + state.canvas.cropOffsetY) % 8) +
+            (((state.tool.current.ditherOffsetY + state.canvas.cropOffsetY) %
+              8) +
               8) %
             8,
           recordedLayerX: canvas.currentLayer.x,

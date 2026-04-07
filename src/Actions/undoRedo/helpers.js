@@ -249,5 +249,25 @@ export function handleResizeAction(latestAction, modType) {
   if (preview) applyDitherOffset(preview, brush.ditherOffsetX, brush.ditherOffsetY)
   const control = document.querySelector('.dither-offset-control')
   if (control) applyDitherOffsetControl(control.parentElement, brush.ditherOffsetX, brush.ditherOffsetY)
+  if (state.selection.properties.px1 !== null) {
+    state.selection.properties.px1 += contentOffsetX
+    state.selection.properties.py1 += contentOffsetY
+    state.selection.properties.px2 += contentOffsetX
+    state.selection.properties.py2 += contentOffsetY
+    state.selection.setBoundaryBox(state.selection.properties)
+  }
+  if (state.selection.maskSet) {
+    const newMaskSet = new Set()
+    const w = targetState.width
+    const h = targetState.height
+    for (const key of state.selection.maskSet) {
+      const nx = (key & 0xffff) + contentOffsetX
+      const ny = ((key >> 16) & 0xffff) + contentOffsetY
+      if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+        newMaskSet.add((ny << 16) | nx)
+      }
+    }
+    state.selection.maskSet = newMaskSet
+  }
   applyCanvasDimensions(targetState.width, targetState.height, contentOffsetX, contentOffsetY)
 }

@@ -358,15 +358,15 @@ function polygonSteps() {
       drawPolygon(false, cropOffsetX, cropOffsetY)
       const maskArray = coordArrayFromSet(
         state.selection.maskSet,
-        canvas.currentLayer.x,
-        canvas.currentLayer.y,
+        canvas.currentLayer.x + state.canvas.cropOffsetX,
+        canvas.currentLayer.y + state.canvas.cropOffsetY,
       )
       const boundaryBox = { ...state.selection.boundaryBox }
       if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin -= canvas.currentLayer.x
-        boundaryBox.xMax -= canvas.currentLayer.x
-        boundaryBox.yMin -= canvas.currentLayer.y
-        boundaryBox.yMax -= canvas.currentLayer.y
+        boundaryBox.xMin -= canvas.currentLayer.x + state.canvas.cropOffsetX
+        boundaryBox.xMax -= canvas.currentLayer.x + state.canvas.cropOffsetX
+        boundaryBox.yMin -= canvas.currentLayer.y + state.canvas.cropOffsetY
+        boundaryBox.yMax -= canvas.currentLayer.y + state.canvas.cropOffsetY
       }
       const uniqueVectorKey = state.vector.nextKey()
       state.vector.setCurrentIndex(uniqueVectorKey)
