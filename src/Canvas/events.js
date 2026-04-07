@@ -139,6 +139,18 @@ const resizeOnScreenCanvas = () => {
     0,
     0,
   )
+  canvas.resizeOverlayCVS.width =
+    canvas.resizeOverlayCVS.offsetWidth * canvas.sharpness
+  canvas.resizeOverlayCVS.height =
+    canvas.resizeOverlayCVS.offsetHeight * canvas.sharpness
+  canvas.resizeOverlayCTX.setTransform(
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+    canvas.sharpness * canvas.zoom,
+    0,
+    0,
+  )
   canvas.cursorCVS.width = canvas.cursorCVS.offsetWidth * canvas.sharpness
   canvas.cursorCVS.height = canvas.cursorCVS.offsetHeight * canvas.sharpness
   canvas.cursorCTX.setTransform(

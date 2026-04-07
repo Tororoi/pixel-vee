@@ -2,10 +2,30 @@ import { canvas } from '../Context/canvas.js'
 import { dom } from '../Context/dom.js'
 import { state } from '../Context/state.js'
 import { resizeOffScreenCanvas } from '../Canvas/render.js'
-import { stopMarchingAnts, renderSelectionCVS } from '../GUI/select.js'
+import {
+  stopMarchingAnts,
+  startMarchingAnts,
+  strokeMarchingAnts,
+  renderSelectionCVS,
+  drawSelectControlPoints,
+} from '../GUI/select.js'
+import { vectorGui } from '../GUI/vector.js'
+import { renderSelectionDimOverlay } from '../utils/guiHelpers.js'
 import { MINIMUM_DIMENSION, MAXIMUM_DIMENSION } from '../utils/constants.js'
 import { brush } from '../Tools/brush.js'
 import { applyDitherOffset, applyDitherOffsetControl } from '../DOM/renderBrush.js'
+
+// Map handle ID to the pxN key pair used by drawSelectControlPoints
+const HANDLE_TO_KEYS = {
+  tl: { x: 'px1', y: 'py1' },
+  t:  { x: 'px2', y: 'py2' },
+  tr: { x: 'px3', y: 'py3' },
+  r:  { x: 'px4', y: 'py4' },
+  br: { x: 'px5', y: 'py5' },
+  b:  { x: 'px6', y: 'py6' },
+  bl: { x: 'px7', y: 'py7' },
+  l:  { x: 'px8', y: 'py8' },
+}
 
 // Map anchor name to [xFactor, yFactor]: 0 = left/top, 0.5 = center, 1 = right/bottom
 const ANCHOR_FACTORS = {
@@ -31,8 +51,6 @@ export const resizeOverlay = {
   dragHandle: null, // null | 'tl'|'t'|'tr'|'r'|'br'|'b'|'bl'|'l'|'move'
   prevCx: 0,
   prevCy: 0,
-  dashOffset: 0,
-  animId: null,
 }
 
 /**
@@ -89,40 +107,28 @@ function getHandlePositions() {
  */
 function hitTestHandles(cx, cy) {
   const r = getHandleRadius()
+  const { left, top, right, bottom } = getBoxCoords()
+
+  // Corner handles take priority over edge strips
   for (const h of getHandlePositions()) {
-    if (Math.abs(cx - h.x) <= r && Math.abs(cy - h.y) <= r) {
+    if (
+      ['tl', 'tr', 'br', 'bl'].includes(h.id) &&
+      Math.abs(cx - h.x) <= r &&
+      Math.abs(cy - h.y) <= r
+    ) {
       return h.id
     }
   }
-  const { left, top, right, bottom } = getBoxCoords()
+
+  // Edge handles: hit anywhere along the edge strip
+  if (Math.abs(cy - top) <= r && cx >= left - r && cx <= right + r) return 't'
+  if (Math.abs(cy - bottom) <= r && cx >= left - r && cx <= right + r) return 'b'
+  if (Math.abs(cx - left) <= r && cy >= top - r && cy <= bottom + r) return 'l'
+  if (Math.abs(cx - right) <= r && cy >= top - r && cy <= bottom + r) return 'r'
+
+  // Interior
   if (cx >= left && cx <= right && cy >= top && cy <= bottom) return 'move'
   return null
-}
-
-/**
- * Returns the CSS cursor string for a given handle id.
- * @param {string|null} handle - Handle id ('tl', 'r', 'move', etc.) or null for no hit
- * @returns {string} The CSS cursor value appropriate for the hovered handle
- */
-function getCursorForHandle(handle) {
-  switch (handle) {
-    case 'tl':
-    case 'br':
-      return 'nwse-resize'
-    case 'tr':
-    case 'bl':
-      return 'nesw-resize'
-    case 't':
-    case 'b':
-      return 'ns-resize'
-    case 'l':
-    case 'r':
-      return 'ew-resize'
-    case 'move':
-      return 'move'
-    default:
-      return 'default'
-  }
 }
 
 /**
@@ -201,124 +207,68 @@ function syncFormInputs() {
 }
 
 /**
- * Draws a single resize handle onto the given context.
- * Corner handles are squares; edge handles are diamonds.
- * @param {CanvasRenderingContext2D} ctx - The rendering context to draw onto
- * @param {number} cx - center x in canvas-space
- * @param {number} cy - center y in canvas-space
- * @param {number} r - handle radius
- * @param {boolean} isCorner - true for corner handles (square), false for edge (diamond)
- * @param {number} lw - base line width in canvas-space
- */
-function drawHandle(ctx, cx, cy, r, isCorner, lw) {
-  ctx.lineWidth = lw * 2
-  if (isCorner) {
-    ctx.beginPath()
-    ctx.rect(cx - r, cy - r, r * 2, r * 2)
-    ctx.strokeStyle = 'black'
-    ctx.stroke()
-    ctx.fillStyle = 'white'
-    ctx.fill()
-  } else {
-    const dr = r * Math.SQRT2
-    ctx.beginPath()
-    ctx.moveTo(cx, cy - dr)
-    ctx.lineTo(cx + dr, cy)
-    ctx.lineTo(cx, cy + dr)
-    ctx.lineTo(cx - dr, cy)
-    ctx.closePath()
-    ctx.strokeStyle = 'black'
-    ctx.stroke()
-    ctx.fillStyle = 'white'
-    ctx.fill()
-  }
-}
-
-/**
- * Renders the resize overlay onto the selection GUI canvas:
- * dims the viewport, reveals the new canvas area, draws the animated
- * border around the new bounds, and draws the 8 drag handles.
+ * Renders the resize overlay onto resizeOverlayCVS:
+ * dims the viewport with a hole for the new canvas area, draws the
+ * marching-ants border around the new bounds, and draws the 8 drag handles.
  */
 export function renderResizeOverlay() {
-  const ctx = canvas.selectionGuiCTX
-  const cvs = canvas.selectionGuiCVS
-  const { left, top, newWidth, newHeight } = getBoxCoords()
+  const ctx = canvas.resizeOverlayCTX
+  const cvs = canvas.resizeOverlayCVS
+  const { left, top, right, bottom, newWidth, newHeight } = getBoxCoords()
   const zoom = canvas.zoom
-  // Use cvs physical dimensions — intentional overflow is clipped by canvas bounds
-  const fullW = cvs.width
-  const fullH = cvs.height
 
   ctx.save()
-  ctx.clearRect(0, 0, fullW, fullH)
+  ctx.clearRect(0, 0, cvs.width, cvs.height)
 
-  // Dim the entire viewport
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.45)'
-  ctx.fillRect(0, 0, fullW, fullH)
+  const artBoundaryBox = {
+    xMin: left - canvas.xOffset,
+    yMin: top - canvas.yOffset,
+    xMax: right - canvas.xOffset,
+    yMax: bottom - canvas.yOffset,
+  }
 
-  // Reveal the new canvas area (clear the dim)
-  ctx.clearRect(left, top, newWidth, newHeight)
+  // Dim the viewport with a hole for the new canvas area
+  renderSelectionDimOverlay(ctx, artBoundaryBox)
 
-  // Existing canvas boundary (dashed reference)
+  // Marching-ants border for new canvas box (shared with select tool)
   ctx.save()
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)'
-  ctx.lineWidth = 1 / zoom
-  ctx.setLineDash([4 / zoom, 4 / zoom])
-  ctx.strokeRect(
-    canvas.xOffset + 0.5 / zoom,
-    canvas.yOffset + 0.5 / zoom,
-    canvas.offScreenCVS.width,
-    canvas.offScreenCVS.height,
-  )
+  ctx.lineCap = 'round'
+  ctx.beginPath()
+  ctx.rect(left, top, newWidth, newHeight)
+  strokeMarchingAnts(ctx)
   ctx.restore()
 
-  // Animated border for new canvas box (two-pass: white + black offset)
-  const lw = 1 / zoom
-  ctx.lineWidth = lw
-  ctx.setLineDash([4 / zoom, 4 / zoom])
-
-  ctx.strokeStyle = 'white'
-  ctx.lineDashOffset = resizeOverlay.dashOffset / zoom
-  ctx.strokeRect(left + lw, top + lw, newWidth - lw * 2, newHeight - lw * 2)
-
-  ctx.strokeStyle = 'black'
-  ctx.lineDashOffset = (resizeOverlay.dashOffset + 4) / zoom
-  ctx.strokeRect(left + lw, top + lw, newWidth - lw * 2, newHeight - lw * 2)
-
-  ctx.setLineDash([])
-
-  // Draw 8 handles
-  const r = getHandleRadius()
-  for (const h of getHandlePositions()) {
-    const isCorner = ['tl', 'tr', 'br', 'bl'].includes(h.id)
-    drawHandle(ctx, h.x, h.y, r, isCorner, lw)
+  // Draw 8 handles using the same function as the select tool (hover enlargement included)
+  const pointsKeys = [
+    { x: 'px1', y: 'py1' }, { x: 'px2', y: 'py2' }, { x: 'px3', y: 'py3' },
+    { x: 'px4', y: 'py4' }, { x: 'px5', y: 'py5' }, { x: 'px6', y: 'py6' },
+    { x: 'px7', y: 'py7' }, { x: 'px8', y: 'py8' },
+  ]
+  const circleRadius = zoom <= 4 ? 8 / zoom : 1.5
+  vectorGui.resetCollision()
+  drawSelectControlPoints(artBoundaryBox, pointsKeys, circleRadius / 2, true, 0.5)
+  if (!vectorGui.selectedCollisionPresent) {
+    canvas.vectorGuiCVS.style.cursor = 'default'
   }
 
   ctx.restore()
-}
-
-/**
- * Animation loop: advances the marching-ants dash offset and schedules the next frame.
- */
-function animateResizeOverlay() {
-  resizeOverlay.dashOffset = (resizeOverlay.dashOffset + 0.2) % 8
-  renderResizeOverlay()
-  resizeOverlay.animId = requestAnimationFrame(animateResizeOverlay)
 }
 
 /**
  * Activates the resize overlay: initializes state from the current canvas size,
- * resets the anchor grid UI to top-left, syncs form inputs, and starts the animation loop.
+ * resets the anchor grid UI to top-left, syncs form inputs, and starts the
+ * shared marching-ants loop pointed at renderResizeOverlay.
  */
 export function activateResizeOverlay() {
   stopMarchingAnts()
   resizeOverlay.active = true
+  state.canvas.resizeOverlayActive = true
   resizeOverlay.newWidth = canvas.offScreenCVS.width
   resizeOverlay.newHeight = canvas.offScreenCVS.height
   resizeOverlay.contentOffsetX = 0
   resizeOverlay.contentOffsetY = 0
   resizeOverlay.anchor = 'top-left'
   resizeOverlay.dragHandle = null
-  resizeOverlay.dashOffset = 0
 
   // Reset anchor grid UI
   dom.anchorGrid
@@ -328,21 +278,33 @@ export function activateResizeOverlay() {
   if (topLeftBtn) topLeftBtn.classList.add('active')
 
   syncFormInputs()
-  resizeOverlay.animId = requestAnimationFrame(animateResizeOverlay)
+  // Clear the selection canvas (its dim is suppressed while resize is active)
+  canvas.selectionGuiCTX.clearRect(
+    0,
+    0,
+    canvas.selectionGuiCVS.width,
+    canvas.selectionGuiCVS.height,
+  )
+  startMarchingAnts(renderResizeOverlay)
 }
 
 /**
- * Deactivates the resize overlay: stops the animation, restores the selection
- * GUI canvas to its normal state, and resets the cursor.
+ * Deactivates the resize overlay: stops the animation, clears the overlay canvas,
+ * restores the selection GUI canvas to its normal state, and resets the cursor.
  */
 export function deactivateResizeOverlay() {
-  if (resizeOverlay.animId !== null) {
-    cancelAnimationFrame(resizeOverlay.animId)
-    resizeOverlay.animId = null
-  }
+  stopMarchingAnts()
   resizeOverlay.active = false
+  state.canvas.resizeOverlayActive = false
   resizeOverlay.dragHandle = null
-  // Restore the selection GUI canvas to its normal state
+  // Clear the resize overlay canvas
+  canvas.resizeOverlayCTX.clearRect(
+    0,
+    0,
+    canvas.resizeOverlayCVS.width,
+    canvas.resizeOverlayCVS.height,
+  )
+  // Restore the selection canvas and restart its animation if needed
   renderSelectionCVS()
   // Restore cursor
   canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
@@ -356,12 +318,17 @@ export function deactivateResizeOverlay() {
 export function resizeOverlayPointerDown(e) {
   const cx = Math.floor(e.offsetX / canvas.zoom)
   const cy = Math.floor(e.offsetY / canvas.zoom)
+  state.cursor.x = Math.round(cx - canvas.previousXOffset)
+  state.cursor.y = Math.round(cy - canvas.previousYOffset)
   const hit = hitTestHandles(cx, cy)
   resizeOverlay.dragHandle = hit
   resizeOverlay.prevCx = cx
   resizeOverlay.prevCy = cy
   if (hit) {
-    canvas.vectorGuiCVS.style.cursor = getCursorForHandle(hit)
+    const keys = HANDLE_TO_KEYS[hit]
+    vectorGui.selectedPoint = keys
+      ? { xKey: keys.x, yKey: keys.y }
+      : { xKey: null, yKey: null }
     e.target.setPointerCapture(e.pointerId)
   }
 }
@@ -374,6 +341,8 @@ export function resizeOverlayPointerDown(e) {
 export function resizeOverlayPointerMove(e) {
   const cx = Math.floor(e.offsetX / canvas.zoom)
   const cy = Math.floor(e.offsetY / canvas.zoom)
+  state.cursor.x = Math.round(cx - canvas.previousXOffset)
+  state.cursor.y = Math.round(cy - canvas.previousYOffset)
   const { dragHandle, prevCx, prevCy } = resizeOverlay
   if (dragHandle) {
     const dx = cx - prevCx
@@ -382,10 +351,8 @@ export function resizeOverlayPointerMove(e) {
     resizeOverlay.prevCx += effectiveDx
     resizeOverlay.prevCy += effectiveDy
     syncFormInputs()
-  } else {
-    const hit = hitTestHandles(cx, cy)
-    canvas.vectorGuiCVS.style.cursor = getCursorForHandle(hit)
   }
+  // Cursor is now set by setSelectionCursorStyle inside drawSelectControlPoints on each animation frame
 }
 
 /**
@@ -395,10 +362,12 @@ export function resizeOverlayPointerMove(e) {
  */
 export function resizeOverlayPointerUp(e) {
   resizeOverlay.dragHandle = null
+  vectorGui.selectedPoint = { xKey: null, yKey: null }
   const cx = Math.floor(e.offsetX / canvas.zoom)
   const cy = Math.floor(e.offsetY / canvas.zoom)
-  const hit = hitTestHandles(cx, cy)
-  canvas.vectorGuiCVS.style.cursor = getCursorForHandle(hit)
+  state.cursor.x = Math.round(cx - canvas.previousXOffset)
+  state.cursor.y = Math.round(cy - canvas.previousYOffset)
+  // Cursor will be updated on next animation frame by drawSelectControlPoints
 }
 
 /**

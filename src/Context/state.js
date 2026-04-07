@@ -224,6 +224,7 @@ export const state = {
   canvas: {
     cropOffsetX: 0,
     cropOffsetY: 0,
+    resizeOverlayActive: false,
   },
   // Cross-domain methods
   reset,

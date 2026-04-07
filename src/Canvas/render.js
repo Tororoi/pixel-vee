@@ -771,6 +771,7 @@ export function applyCanvasDimensions(
   const t = canvas.sharpness * canvas.zoom
   canvas.vectorGuiCTX.setTransform(t, 0, 0, t, 0, 0)
   canvas.selectionGuiCTX.setTransform(t, 0, 0, t, 0, 0)
+  canvas.resizeOverlayCTX.setTransform(t, 0, 0, t, 0, 0)
   canvas.cursorCTX.setTransform(t, 0, 0, t, 0, 0)
   canvas.layers.forEach((layer) => {
     layer.onscreenCtx.setTransform(t, 0, 0, t, 0, 0)

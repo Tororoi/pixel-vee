@@ -5,6 +5,7 @@ import {
   checkSquarePointCollision,
   checkAreaCollision,
   getGuiLineWidth,
+  renderSelectionDimOverlay,
 } from '../utils/guiHelpers.js'
 import { SCALE } from '../utils/constants.js'
 
@@ -68,19 +69,25 @@ function buildMaskPath(maskSet) {
   return path
 }
 
+let marchRenderer = renderSelectionCVS
+
 /**
- * Advances the march offset and re-renders the selection canvas each frame.
+ * Advances the march offset and re-renders via the active renderer each frame.
  */
 function tickMarchingAnts() {
+  marchDashLen = getMarchDashLen()
   marchOffset = (marchOffset + marchDashLen * 0.03125) % 1
   marchAnimId = requestAnimationFrame(tickMarchingAnts)
-  renderSelectionCVS()
+  marchRenderer()
 }
 
 /**
- * Starts the marching ants animation loop if not already running.
+ * Starts the marching ants animation loop.
+ * Updates the renderer and starts the loop if not already running.
+ * @param {Function} [renderer] - called each animation frame; defaults to renderSelectionCVS
  */
-function startMarchingAnts() {
+export function startMarchingAnts(renderer = renderSelectionCVS) {
+  marchRenderer = renderer
   if (marchAnimId !== null) return
   marchAnimId = requestAnimationFrame(tickMarchingAnts)
 }
@@ -121,7 +128,7 @@ function strokeBorderOnTop(ctx, lineWidth, path = null) {
  * @param {number} lineWidth - line width in art pixels (default 1/canvas.zoom)
  * @param {Path2D|null} path - optional Path2D; uses current path if omitted
  */
-function strokeMarchingAnts(ctx, lineWidth = 1 / canvas.zoom, path = null) {
+export function strokeMarchingAnts(ctx, lineWidth = 1 / canvas.zoom, path = null) {
   ctx.lineWidth = lineWidth
   ctx.setLineDash([marchDashLen, marchDashLen])
   ctx.strokeStyle = 'white'
@@ -273,7 +280,6 @@ export function renderSelectionBoxOutline(drawPoints) {
  * loop when a selection is active and stops it when nothing is selected.
  */
 export function renderSelectionCVS() {
-  marchDashLen = getMarchDashLen()
   const ctx = canvas.selectionGuiCTX
   ctx.clearRect(
     0,
@@ -288,33 +294,9 @@ export function renderSelectionCVS() {
 
   if (isRasterSelection) {
     startMarchingAnts()
-    ctx.save()
-    ctx.beginPath()
-
-    if (!state.selection.maskSet) {
-      // Grey overlay outside the rectangular selection (evenodd clip)
-      ctx.rect(
-        canvas.xOffset,
-        canvas.yOffset,
-        canvas.offScreenCVS.width,
-        canvas.offScreenCVS.height,
-      )
-      ctx.rect(
-        canvas.xOffset + state.selection.boundaryBox.xMin,
-        canvas.yOffset + state.selection.boundaryBox.yMin,
-        state.selection.boundaryBox.xMax - state.selection.boundaryBox.xMin,
-        state.selection.boundaryBox.yMax - state.selection.boundaryBox.yMin,
-      )
-      ctx.clip('evenodd')
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'
-      ctx.fillRect(
-        canvas.xOffset,
-        canvas.yOffset,
-        canvas.offScreenCVS.width,
-        canvas.offScreenCVS.height,
-      )
+    if (!state.selection.maskSet && !state.canvas.resizeOverlayActive) {
+      renderSelectionDimOverlay(ctx)
     }
-    ctx.restore()
     if (state.selection.maskSet) {
       renderMaskContourOutline()
     } else {
@@ -383,6 +365,7 @@ export function drawSelectControlPoints(
       modify,
       offset,
       vectorAction,
+      boundaryBox,
     )
   }
 
@@ -405,6 +388,7 @@ function handleSelectCollisionAndDraw(
   modify,
   offset,
   vectorAction,
+  boundaryBox,
 ) {
   const ctx = canvas.selectionGuiCTX
   let r = state.tool.touch ? radius * 2 : radius
@@ -424,9 +408,9 @@ function handleSelectCollisionAndDraw(
         checkAreaCollision(
           state.cursor.x,
           state.cursor.y,
-          state.selection.boundaryBox.xMin + r * 2,
+          boundaryBox.xMin + r * 2,
           point.y - offset + yOffset - r * 2,
-          state.selection.boundaryBox.xMax - r * 2 - 1,
+          boundaryBox.xMax - r * 2 - 1,
           point.y - offset + yOffset + r * 2,
         )) ||
       (['px4', 'px8'].includes(keys.x) &&
@@ -434,9 +418,9 @@ function handleSelectCollisionAndDraw(
           state.cursor.x,
           state.cursor.y,
           point.x - offset + xOffset - r * 2,
-          state.selection.boundaryBox.yMin + r * 2,
+          boundaryBox.yMin + r * 2,
           point.x - offset + xOffset + r * 2,
-          state.selection.boundaryBox.yMax - r * 2 - 1,
+          boundaryBox.yMax - r * 2 - 1,
         ))
     if (collisionPresent) {
       r = radius * 2.125

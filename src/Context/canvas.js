@@ -18,6 +18,10 @@ const selectionGuiCVS = document.getElementById('selection-gui-canvas')
 const selectionGuiCTX = selectionGuiCVS.getContext('2d', {
   desynchronized: true,
 })
+const resizeOverlayCVS = document.getElementById('resize-overlay-canvas')
+const resizeOverlayCTX = resizeOverlayCVS.getContext('2d', {
+  desynchronized: true,
+})
 const cursorCVS = document.getElementById('cursor-canvas')
 const cursorCTX = cursorCVS.getContext('2d', {
   desynchronized: true,
@@ -49,6 +53,8 @@ export const canvas = {
   vectorGuiCTX,
   selectionGuiCVS,
   selectionGuiCTX,
+  resizeOverlayCVS,
+  resizeOverlayCTX,
   cursorCVS,
   cursorCTX,
   backgroundCVS,
@@ -109,6 +115,10 @@ canvas.selectionGuiCVS.width =
   canvas.selectionGuiCVS.offsetWidth * canvas.sharpness
 canvas.selectionGuiCVS.height =
   canvas.selectionGuiCVS.offsetHeight * canvas.sharpness
+canvas.resizeOverlayCVS.width =
+  canvas.resizeOverlayCVS.offsetWidth * canvas.sharpness
+canvas.resizeOverlayCVS.height =
+  canvas.resizeOverlayCVS.offsetHeight * canvas.sharpness
 canvas.cursorCVS.width = canvas.cursorCVS.offsetWidth * canvas.sharpness
 canvas.cursorCVS.height = canvas.cursorCVS.offsetHeight * canvas.sharpness
 canvas.backgroundCVS.width = canvas.backgroundCVS.offsetWidth * canvas.sharpness
@@ -127,6 +137,10 @@ vectorGuiCTX.scale(
   canvas.sharpness * canvas.zoom,
 )
 selectionGuiCTX.scale(
+  canvas.sharpness * canvas.zoom,
+  canvas.sharpness * canvas.zoom,
+)
+resizeOverlayCTX.scale(
   canvas.sharpness * canvas.zoom,
   canvas.sharpness * canvas.zoom,
 )
