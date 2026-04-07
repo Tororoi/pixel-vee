@@ -39,7 +39,6 @@ import {
 } from '../Actions/layer/layerActions.js'
 import { createPreviewLayer } from './layers.js'
 import {
-  resizeOverlay,
   applyFromInputs,
   applyResize,
   setAnchor,
@@ -69,7 +68,7 @@ const handleIncrement = (e) => {
       dimension.value = newValue - 1
     }
   }
-  if (resizeOverlay.active) {
+  if (state.canvas.resizeOverlayActive) {
     applyFromInputs(+dom.canvasWidth.value, +dom.canvasHeight.value)
   }
 }
@@ -103,7 +102,7 @@ const restrictSize = (e) => {
  */
 const handleDimensionsSubmit = (e) => {
   e.preventDefault()
-  if (resizeOverlay.active) {
+  if (state.canvas.resizeOverlayActive) {
     applyResize()
   } else {
     resizeOffScreenCanvas(dom.canvasWidth.value, dom.canvasHeight.value)
@@ -541,11 +540,11 @@ dom.canvasSizeCancelBtn.addEventListener('click', () => {
   dom.sizeContainer.style.display = 'none'
 })
 dom.canvasWidth.addEventListener('input', (e) => {
-  if (resizeOverlay.active)
+  if (state.canvas.resizeOverlayActive)
     applyFromInputs(+e.target.value, +dom.canvasHeight.value)
 })
 dom.canvasHeight.addEventListener('input', (e) => {
-  if (resizeOverlay.active)
+  if (state.canvas.resizeOverlayActive)
     applyFromInputs(+dom.canvasWidth.value, +e.target.value)
 })
 dom.anchorGrid.addEventListener('click', (e) => {

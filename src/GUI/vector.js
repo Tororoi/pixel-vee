@@ -34,7 +34,7 @@ import {
   enableActionsForSelection,
 } from '../DOM/disableDomElements.js'
 import { renderLinePath, renderLineVector } from './line.js'
-import { renderResizeOverlay } from '../Canvas/resizeOverlay.js'
+import { renderResizeOverlayCVS } from '../Canvas/resizeOverlay.js'
 // import { switchTool } from "../Tools/toolbox.js"
 
 //==================================================//

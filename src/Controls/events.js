@@ -4,7 +4,6 @@ import { keys } from '../Shortcuts/keys.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import {
-  resizeOverlay,
   resizeOverlayPointerDown,
   resizeOverlayPointerMove,
   resizeOverlayPointerUp,
@@ -144,7 +143,7 @@ function handleWheel(e) {
  * @param {PointerEvent} e - The pointerdown event
  */
 function handlePointerDown(e) {
-  if (resizeOverlay.active) {
+  if (state.canvas.resizeOverlayActive) {
     resizeOverlayPointerDown(e)
     return
   }
@@ -190,7 +189,7 @@ function handlePointerDown(e) {
  * @param {PointerEvent} e - The pointermove event
  */
 function handlePointerMove(e) {
-  if (resizeOverlay.active) {
+  if (state.canvas.resizeOverlayActive) {
     resizeOverlayPointerMove(e)
     return
   }
@@ -272,7 +271,7 @@ function handlePointerMove(e) {
  * @param {PointerEvent} e - The pointerup event
  */
 function handlePointerUp(e) {
-  if (resizeOverlay.active) {
+  if (state.canvas.resizeOverlayActive) {
     resizeOverlayPointerUp(e)
     return
   }

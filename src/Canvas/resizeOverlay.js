@@ -44,7 +44,6 @@ const ANCHOR_FACTORS = {
 }
 
 export const resizeOverlay = {
-  active: false,
   newWidth: 0,
   newHeight: 0,
   // Where existing art's top-left corner sits in the new canvas (canvas pixels)
@@ -215,7 +214,7 @@ function syncFormInputs() {
  * dims the viewport with a hole for the new canvas area, draws the
  * marching-ants border around the new bounds, and draws the 8 drag handles.
  */
-export function renderResizeOverlay() {
+export function renderResizeOverlayCVS() {
   const ctx = canvas.resizeOverlayCTX
   const cvs = canvas.resizeOverlayCVS
   const { left, top, right, bottom, newWidth, newHeight } = getBoxCoords()
@@ -277,11 +276,10 @@ export function renderResizeOverlay() {
 /**
  * Activates the resize overlay: initializes state from the current canvas size,
  * resets the anchor grid UI to top-left, syncs form inputs, and starts the
- * shared marching-ants loop pointed at renderResizeOverlay.
+ * shared marching-ants loop pointed at renderResizeOverlayCVS.
  */
 export function activateResizeOverlay() {
   stopMarchingAnts()
-  resizeOverlay.active = true
   state.canvas.resizeOverlayActive = true
   resizeOverlay.newWidth = canvas.offScreenCVS.width
   resizeOverlay.newHeight = canvas.offScreenCVS.height
@@ -300,7 +298,7 @@ export function activateResizeOverlay() {
   syncFormInputs()
   // Re-render selection canvas without dim (dim suppressed while resize is active)
   renderSelectionCVS()
-  startMarchingAnts(renderResizeOverlay)
+  startMarchingAnts(renderResizeOverlayCVS)
 }
 
 /**
@@ -309,7 +307,6 @@ export function activateResizeOverlay() {
  */
 export function deactivateResizeOverlay() {
   stopMarchingAnts()
-  resizeOverlay.active = false
   state.canvas.resizeOverlayActive = false
   resizeOverlay.dragHandle = null
   // Clear the resize overlay canvas
@@ -515,7 +512,9 @@ export function applyResize() {
       cropOffsetY: toCropOffsetY,
     },
     selectProperties: { ...state.selection.properties },
-    maskSet: state.selection.maskSet ? Array.from(state.selection.maskSet) : null,
+    maskSet: state.selection.maskSet
+      ? Array.from(state.selection.maskSet)
+      : null,
     selectedVectorIndices: Array.from(state.vector.selectedIndices),
     currentVectorIndex: state.vector.currentIndex,
     hidden: false,
