@@ -269,6 +269,9 @@ export function renderResizeOverlay() {
   }
 
   ctx.restore()
+
+  // Keep the selection outline visible during resize (dim suppressed via resizeOverlayActive)
+  renderSelectionCVS()
 }
 
 /**
@@ -295,13 +298,8 @@ export function activateResizeOverlay() {
   if (topLeftBtn) topLeftBtn.classList.add('active')
 
   syncFormInputs()
-  // Clear the selection canvas (its dim is suppressed while resize is active)
-  canvas.selectionGuiCTX.clearRect(
-    0,
-    0,
-    canvas.selectionGuiCVS.width,
-    canvas.selectionGuiCVS.height,
-  )
+  // Re-render selection canvas without dim (dim suppressed while resize is active)
+  renderSelectionCVS()
   startMarchingAnts(renderResizeOverlay)
 }
 
@@ -478,6 +476,26 @@ export function applyResize() {
   // Resize the canvas — applyCanvasDimensions clears layer cvs, then
   // renderCanvas(null, true) replays the timeline with the new crop delta applied
   resizeOffScreenCanvas(w, h, contentOffsetX, contentOffsetY)
+
+  // Shift selection coordinates to match the new canvas space
+  if (state.selection.properties.px1 !== null) {
+    state.selection.properties.px1 += contentOffsetX
+    state.selection.properties.py1 += contentOffsetY
+    state.selection.properties.px2 += contentOffsetX
+    state.selection.properties.py2 += contentOffsetY
+    state.selection.setBoundaryBox(state.selection.properties)
+  }
+  if (state.selection.maskSet) {
+    const newMaskSet = new Set()
+    for (const key of state.selection.maskSet) {
+      const nx = (key & 0xffff) + contentOffsetX
+      const ny = ((key >> 16) & 0xffff) + contentOffsetY
+      if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+        newMaskSet.add((ny << 16) | nx)
+      }
+    }
+    state.selection.maskSet = newMaskSet
+  }
 
   // Push a resize action so the operation can be undone/redone
   const resizeAction = {
