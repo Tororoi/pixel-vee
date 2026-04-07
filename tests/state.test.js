@@ -304,6 +304,40 @@ describe("state.timeline", () => {
   })
 })
 
+// ─── state.canvas ─────────────────────────────────────────────────────────────
+
+describe("state.canvas", () => {
+  it("has cropOffsetX initialized to 0", () => {
+    expect(state.canvas.cropOffsetX).toBe(0)
+  })
+
+  it("has cropOffsetY initialized to 0", () => {
+    expect(state.canvas.cropOffsetY).toBe(0)
+  })
+
+  it("has resizeOverlayActive initialized to false", () => {
+    expect(state.canvas.resizeOverlayActive).toBe(false)
+  })
+
+  it("allows cropOffsetX and cropOffsetY to be mutated directly", () => {
+    const prev = state.canvas.cropOffsetX
+    state.canvas.cropOffsetX = 16
+    state.canvas.cropOffsetY = 8
+    expect(state.canvas.cropOffsetX).toBe(16)
+    expect(state.canvas.cropOffsetY).toBe(8)
+    // restore
+    state.canvas.cropOffsetX = prev
+    state.canvas.cropOffsetY = 0
+  })
+
+  it("allows resizeOverlayActive to be toggled", () => {
+    state.canvas.resizeOverlayActive = true
+    expect(state.canvas.resizeOverlayActive).toBe(true)
+    state.canvas.resizeOverlayActive = false
+    expect(state.canvas.resizeOverlayActive).toBe(false)
+  })
+})
+
 // ─── state.deselect() ─────────────────────────────────────────────────────────
 
 describe("state.deselect()", () => {
