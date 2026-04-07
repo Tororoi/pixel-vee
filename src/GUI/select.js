@@ -87,8 +87,12 @@ function tickMarchingAnts() {
  * @param {Function} [renderer] - called each animation frame; defaults to renderSelectionCVS
  */
 export function startMarchingAnts(renderer = renderSelectionCVS) {
+  if (marchAnimId !== null) {
+    // Loop already running — only update renderer if an explicit one is passed
+    if (renderer !== renderSelectionCVS) marchRenderer = renderer
+    return
+  }
   marchRenderer = renderer
-  if (marchAnimId !== null) return
   marchAnimId = requestAnimationFrame(tickMarchingAnts)
 }
 
@@ -307,7 +311,7 @@ export function renderSelectionCVS() {
         state.vector.transformMode === SCALE
       renderSelectionBoxOutline(shouldRenderPoints)
     }
-  } else {
+  } else if (!state.canvas.resizeOverlayActive) {
     stopMarchingAnts()
   }
 }
@@ -324,6 +328,7 @@ export function renderSelectionCVS() {
  * @param {boolean} modify - if true, check for collision with cursor and modify radius
  * @param {number} offset - (Integer)
  * @param {object} vectorAction - The vector action to be rendered (NOTE: Not certain if ever needed for this function)
+ * @param {CanvasRenderingContext2D} [ctx] - rendering context; defaults to selectionGuiCTX
  */
 export function drawSelectControlPoints(
   boundaryBox,
@@ -332,6 +337,7 @@ export function drawSelectControlPoints(
   modify = false,
   offset = 0,
   vectorAction = null,
+  ctx = canvas.selectionGuiCTX,
 ) {
   const { xMin, yMin, xMax, yMax } = boundaryBox
   const midX = xMin + (xMax - xMin) / 2
@@ -366,6 +372,7 @@ export function drawSelectControlPoints(
       offset,
       vectorAction,
       boundaryBox,
+      ctx,
     )
   }
 
@@ -380,6 +387,8 @@ export function drawSelectControlPoints(
  * @param {boolean} modify - if true, check for collision with cursor and modify radius
  * @param {number} offset - (Float)
  * @param {object} vectorAction - The vector action to be rendered
+ * @param {object} boundaryBox - The boundary box used for edge-strip collision
+ * @param {CanvasRenderingContext2D} ctx - rendering context to draw onto
  */
 function handleSelectCollisionAndDraw(
   keys,
@@ -389,8 +398,8 @@ function handleSelectCollisionAndDraw(
   offset,
   vectorAction,
   boundaryBox,
+  ctx,
 ) {
-  const ctx = canvas.selectionGuiCTX
   let r = state.tool.touch ? radius * 2 : radius
   const xOffset = vectorAction ? vectorAction.layer.x : 0
   const yOffset = vectorAction ? vectorAction.layer.y : 0

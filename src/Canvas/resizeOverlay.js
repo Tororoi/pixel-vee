@@ -13,18 +13,21 @@ import { vectorGui } from '../GUI/vector.js'
 import { renderSelectionDimOverlay } from '../utils/guiHelpers.js'
 import { MINIMUM_DIMENSION, MAXIMUM_DIMENSION } from '../utils/constants.js'
 import { brush } from '../Tools/brush.js'
-import { applyDitherOffset, applyDitherOffsetControl } from '../DOM/renderBrush.js'
+import {
+  applyDitherOffset,
+  applyDitherOffsetControl,
+} from '../DOM/renderBrush.js'
 
 // Map handle ID to the pxN key pair used by drawSelectControlPoints
 const HANDLE_TO_KEYS = {
   tl: { x: 'px1', y: 'py1' },
-  t:  { x: 'px2', y: 'py2' },
+  t: { x: 'px2', y: 'py2' },
   tr: { x: 'px3', y: 'py3' },
-  r:  { x: 'px4', y: 'py4' },
+  r: { x: 'px4', y: 'py4' },
   br: { x: 'px5', y: 'py5' },
-  b:  { x: 'px6', y: 'py6' },
+  b: { x: 'px6', y: 'py6' },
   bl: { x: 'px7', y: 'py7' },
-  l:  { x: 'px8', y: 'py8' },
+  l: { x: 'px8', y: 'py8' },
 }
 
 // Map anchor name to [xFactor, yFactor]: 0 = left/top, 0.5 = center, 1 = right/bottom
@@ -122,7 +125,8 @@ function hitTestHandles(cx, cy) {
 
   // Edge handles: hit anywhere along the edge strip
   if (Math.abs(cy - top) <= r && cx >= left - r && cx <= right + r) return 't'
-  if (Math.abs(cy - bottom) <= r && cx >= left - r && cx <= right + r) return 'b'
+  if (Math.abs(cy - bottom) <= r && cx >= left - r && cx <= right + r)
+    return 'b'
   if (Math.abs(cx - left) <= r && cy >= top - r && cy <= bottom + r) return 'l'
   if (Math.abs(cx - right) <= r && cy >= top - r && cy <= bottom + r) return 'r'
 
@@ -240,13 +244,26 @@ export function renderResizeOverlay() {
 
   // Draw 8 handles using the same function as the select tool (hover enlargement included)
   const pointsKeys = [
-    { x: 'px1', y: 'py1' }, { x: 'px2', y: 'py2' }, { x: 'px3', y: 'py3' },
-    { x: 'px4', y: 'py4' }, { x: 'px5', y: 'py5' }, { x: 'px6', y: 'py6' },
-    { x: 'px7', y: 'py7' }, { x: 'px8', y: 'py8' },
+    { x: 'px1', y: 'py1' },
+    { x: 'px2', y: 'py2' },
+    { x: 'px3', y: 'py3' },
+    { x: 'px4', y: 'py4' },
+    { x: 'px5', y: 'py5' },
+    { x: 'px6', y: 'py6' },
+    { x: 'px7', y: 'py7' },
+    { x: 'px8', y: 'py8' },
   ]
   const circleRadius = zoom <= 4 ? 8 / zoom : 1.5
   vectorGui.resetCollision()
-  drawSelectControlPoints(artBoundaryBox, pointsKeys, circleRadius / 2, true, 0.5)
+  drawSelectControlPoints(
+    artBoundaryBox,
+    pointsKeys,
+    circleRadius / 2,
+    true,
+    0.5,
+    null,
+    canvas.resizeOverlayCTX,
+  )
   if (!vectorGui.selectedCollisionPresent) {
     canvas.vectorGuiCVS.style.cursor = 'default'
   }
@@ -440,14 +457,21 @@ export function applyResize() {
   state.canvas.cropOffsetY = toCropOffsetY
 
   // Adjust brush dither offset so the pattern stays locked to art pixels after the content shift
-  brush.ditherOffsetX = ((brush.ditherOffsetX - contentOffsetX) % 8 + 8) % 8
-  brush.ditherOffsetY = ((brush.ditherOffsetY - contentOffsetY) % 8 + 8) % 8
+  brush.ditherOffsetX = (((brush.ditherOffsetX - contentOffsetX) % 8) + 8) % 8
+  brush.ditherOffsetY = (((brush.ditherOffsetY - contentOffsetY) % 8) + 8) % 8
   const picker = document.querySelector('.dither-picker-container')
-  if (picker) applyDitherOffset(picker, brush.ditherOffsetX, brush.ditherOffsetY)
+  if (picker)
+    applyDitherOffset(picker, brush.ditherOffsetX, brush.ditherOffsetY)
   const preview = document.querySelector('.dither-preview')
-  if (preview) applyDitherOffset(preview, brush.ditherOffsetX, brush.ditherOffsetY)
+  if (preview)
+    applyDitherOffset(preview, brush.ditherOffsetX, brush.ditherOffsetY)
   const control = document.querySelector('.dither-offset-control')
-  if (control) applyDitherOffsetControl(control.parentElement, brush.ditherOffsetX, brush.ditherOffsetY)
+  if (control)
+    applyDitherOffsetControl(
+      control.parentElement,
+      brush.ditherOffsetX,
+      brush.ditherOffsetY,
+    )
 
   // Resize the canvas — applyCanvasDimensions clears layer cvs, then
   // renderCanvas(null, true) replays the timeline with the new crop delta applied
