@@ -274,7 +274,7 @@ function resolveLinkedVectors(keys, normalizedX, normalizedY, vector) {
     ) {
       vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px1', yKey: 'py1' })
     }
-    if (state.tool.current.name === 'quadCurve') {
+    if (state.vector.properties.type === 'quadCurve') {
       if (
         normalizedX ===
           state.vector.properties.px2 + state.canvas.cropOffsetX &&

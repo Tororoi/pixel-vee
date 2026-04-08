@@ -45,6 +45,20 @@ export const renderBrushModesToDOM = () => {
     mode.className = `mode ${key}`
     mode.id = key
     switch (key) {
+      case 'line':
+        mode.ariaLabel = 'Line'
+        mode.dataset.tooltip = 'Line \n\nDraw straight lines.'
+        break
+      case 'quadCurve':
+        mode.ariaLabel = 'Quadratic Curve'
+        mode.dataset.tooltip =
+          'Quadratic Curve \n\nDraw curves with one control handle.'
+        break
+      case 'cubicCurve':
+        mode.ariaLabel = 'Cubic Curve'
+        mode.dataset.tooltip =
+          'Cubic Curve \n\nDraw curves with two control handles.'
+        break
       case 'eraser':
         //add aria label
         mode.ariaLabel = 'Eraser (E)'
@@ -85,16 +99,16 @@ export function renderToolOptionsToDOM() {
   dom.toolOptions.innerHTML = ''
   if (
     [
-      'line',
-      'quadCurve',
-      'cubicCurve',
+      'vector',
       'ellipse',
       'polygon',
       'select',
     ].includes(state.tool.current.name)
   ) {
-    //render cubic curve options to menu
+    const isLineMode =
+      state.tool.current.name === 'vector' && state.tool.current.modes?.line
     Object.entries(state.tool.current.options).forEach(([name, option]) => {
+      if (isLineMode && (name === 'align' || name === 'equal')) return
       let optionToggle = createOptionToggle(name, option)
       dom.toolOptions.appendChild(optionToggle)
     })

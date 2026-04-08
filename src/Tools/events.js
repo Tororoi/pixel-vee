@@ -171,9 +171,7 @@ function updateBrush(e) {
   switch (state.tool.current.name) {
     case "brush":
     case "colorMask":
-    case "line":
-    case "quadCurve":
-    case "cubicCurve":
+    case "vector":
     case "ellipse":
     case "polygon":
     case "select":
@@ -218,7 +216,7 @@ document.querySelector(".dither-preview")?.addEventListener("click", () => {
     dom.ditherPickerContainer.style.display === "flex" ? "none" : "flex"
 })
 
-const DITHER_TOOLS = ["brush", "line", "quadCurve", "cubicCurve", "ellipse"]
+const DITHER_TOOLS = ["brush", "vector", "ellipse"]
 
 document.querySelector(".dither-grid")?.addEventListener("click", (e) => {
   const btn = e.target.closest(".dither-grid-btn")

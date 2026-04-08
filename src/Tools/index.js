@@ -1,10 +1,9 @@
 import { brush } from "./brush.js"
-import { line } from "./line.js"
 import { select } from "./select.js"
 import { magicWand } from "./magicWand.js"
 import { move } from "./move.js"
 import { fill } from "./fill.js"
-import { quadCurve, cubicCurve } from "./curve.js"
+import { vector } from "./vector.js"
 import { ellipse } from "./ellipse.js"
 import { polygon } from "./polygon.js"
 import { eyedropper } from "./eyedropper.js"
@@ -99,7 +98,6 @@ export const tools = {
   },
   //Raster Tools
   brush,
-  line,
   // shading: {
   // user selects hsl shading color which mixes with colors that the user draws on to create dynamic shading
   // },
@@ -111,8 +109,7 @@ export const tools = {
   // },
   //Vector Tools
   fill,
-  quadCurve,
-  cubicCurve,
+  vector,
   ellipse,
   polygon,
   //Non-cursor tools
@@ -216,8 +213,8 @@ export const tools = {
  */
 export const toolGroups = {
   curves: {
-    tools: ["line", "quadCurve", "cubicCurve"],
-    activeTool: "line",
+    tools: ["vector"],
+    activeTool: "vector",
   },
   shapeTools: {
     tools: ["ellipse", "polygon"],

@@ -628,32 +628,18 @@
                 <div class="tool-group" data-group="curves">
                   <button
                     type="button"
-                    class="tool-group-btn line"
+                    class="tool-group-btn vector"
                     data-group="curves"
-                    aria-label="Curves"
-                    data-tooltip="Curves"
+                    aria-label="Vector"
+                    data-tooltip="Vector"
                   ></button>
                   <div class="tool-group-popout">
                     <button
                       type="button"
-                      class="tool line"
-                      id="line"
-                      aria-label="Line (/ or Hold Shift & Brush)"
-                      data-tooltip="Line (/ or Hold Shift & Brush)"
-                    ></button>
-                    <button
-                      type="button"
-                      class="tool quadCurve"
-                      id="quadCurve"
-                      aria-label="Quadratic Curve (Q)"
-                      data-tooltip="Quadratic Curve (Q)"
-                    ></button>
-                    <button
-                      type="button"
                       class="tool cubicCurve"
-                      id="cubicCurve"
-                      aria-label="Cubic Curve (C)"
-                      data-tooltip="Cubic Curve (C)"
+                      id="vector"
+                      aria-label="Vector (/ Q C)"
+                      data-tooltip="Vector (/ Q C)"
                     ></button>
                   </div>
                 </div>
@@ -845,43 +831,15 @@
                   <div class="icon fill"></div>
                 </label>
                 <label
-                  for="toolbox-line-toggle"
-                  id="toolbox-line"
+                  for="toolbox-vector-toggle"
+                  id="toolbox-vector"
                   class="toggle"
-                  data-tooltip="Toggle Line tool in toolbox on or off"
+                  data-tooltip="Toggle Vector tool in toolbox on or off"
                 >
                   <input
                     type="checkbox"
                     checked="true"
-                    id="toolbox-line-toggle"
-                  />
-                  <span class="checkmark"></span>
-                  <div class="icon line"></div>
-                </label>
-                <label
-                  for="toolbox-quadCurve-toggle"
-                  id="toolbox-quadCurve"
-                  class="toggle"
-                  data-tooltip="Toggle Quadratic Curve tool in toolbox on or off"
-                >
-                  <input
-                    type="checkbox"
-                    checked="true"
-                    id="toolbox-quadCurve-toggle"
-                  />
-                  <span class="checkmark"></span>
-                  <div class="icon quadCurve"></div>
-                </label>
-                <label
-                  for="toolbox-cubicCurve-toggle"
-                  id="toolbox-cubicCurve"
-                  class="toggle"
-                  data-tooltip="Toggle Cubic Curve tool in toolbox on or off"
-                >
-                  <input
-                    type="checkbox"
-                    checked="true"
-                    id="toolbox-cubicCurve-toggle"
+                    id="toolbox-vector-toggle"
                   />
                   <span class="checkmark"></span>
                   <div class="icon cubicCurve"></div>

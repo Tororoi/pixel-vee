@@ -106,7 +106,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case "Digit7":
-      if (["line", "quadCurve", "cubicCurve"].includes(dom.toolBtn.id)) {
+      if (dom.toolBtn.id === "vector") {
         state.tool.current.options.chain.active =
           !state.tool.current.options.chain.active
         renderToolOptionsToDOM()
@@ -114,23 +114,23 @@ export function activateShortcut(keyCode) {
       }
       break
     case "Equal":
-      if (dom.toolBtn.id === "cubicCurve") {
-        tools.cubicCurve.options.equal.active =
-          !tools.cubicCurve.options.equal.active
+      if (dom.toolBtn.id === "vector" && !state.tool.current.modes?.line) {
+        state.tool.current.options.equal.active =
+          !state.tool.current.options.equal.active
         renderToolOptionsToDOM()
         vectorGui.render()
       }
       break
     case "Slash":
       if (!state.cursor.clicked) {
-        switchTool("line")
+        switchTool("vector")
         renderVectorsToDOM()
       }
       break
     case "KeyA":
-      if (dom.toolBtn.id === "cubicCurve") {
-        tools.cubicCurve.options.align.active =
-          !tools.cubicCurve.options.align.active
+      if (dom.toolBtn.id === "vector" && !state.tool.current.modes?.line) {
+        state.tool.current.options.align.active =
+          !state.tool.current.options.align.active
         renderToolOptionsToDOM()
         vectorGui.render()
       }
@@ -146,7 +146,8 @@ export function activateShortcut(keyCode) {
         if (keys.MetaLeft || keys.MetaRight) {
           actionCopySelection()
         } else {
-          switchTool("cubicCurve")
+          switchTool("vector")
+          toggleMode("cubicCurve")
           renderVectorsToDOM()
         }
       }
@@ -196,10 +197,10 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyH":
-      //Locking shortcut for curve tool
-      if (dom.toolBtn.id === "cubicCurve") {
-        tools.cubicCurve.options.hold.active =
-          !tools.cubicCurve.options.hold.active
+      //Locking shortcut for vector tool
+      if (dom.toolBtn.id === "vector") {
+        state.tool.current.options.hold.active =
+          !state.tool.current.options.hold.active
         renderToolOptionsToDOM()
       }
       break
@@ -219,9 +220,9 @@ export function activateShortcut(keyCode) {
       }
       break
     case "KeyL":
-      if (dom.toolBtn.id === "cubicCurve") {
-        tools.cubicCurve.options.link.active =
-          !tools.cubicCurve.options.link.active
+      if (dom.toolBtn.id === "vector") {
+        state.tool.current.options.link.active =
+          !state.tool.current.options.link.active
         renderToolOptionsToDOM()
         vectorGui.render()
       }
@@ -248,7 +249,8 @@ export function activateShortcut(keyCode) {
       break
     case "KeyQ":
       if (!state.cursor.clicked) {
-        switchTool("quadCurve")
+        switchTool("vector")
+        toggleMode("quadCurve")
         renderVectorsToDOM()
       }
       break
