@@ -40,30 +40,30 @@ let cachedPathYOffset = null
  */
 function buildMaskPath(maskSet) {
   const path = new Path2D()
-  const ox = canvas.xOffset
-  const oy = canvas.yOffset
+  const canvasOffsetX = canvas.xOffset
+  const canvasOffsetY = canvas.yOffset
   for (const key of maskSet) {
     const x = key & 0xffff
     const y = (key >> 16) & 0xffff
     // Top edge: left to right for clockwise marching
     if (!maskSet.has(((y - 1) << 16) | x)) {
-      path.moveTo(ox + x, oy + y)
-      path.lineTo(ox + x + 1, oy + y)
+      path.moveTo(canvasOffsetX + x, canvasOffsetY + y)
+      path.lineTo(canvasOffsetX + x + 1, canvasOffsetY + y)
     }
     // Bottom edge: right to left for clockwise marching
     if (!maskSet.has(((y + 1) << 16) | x)) {
-      path.moveTo(ox + x + 1, oy + y + 1)
-      path.lineTo(ox + x, oy + y + 1)
+      path.moveTo(canvasOffsetX + x + 1, canvasOffsetY + y + 1)
+      path.lineTo(canvasOffsetX + x, canvasOffsetY + y + 1)
     }
     // Left edge: bottom to top for clockwise marching
     if (!maskSet.has((y << 16) | (x - 1))) {
-      path.moveTo(ox + x, oy + y + 1)
-      path.lineTo(ox + x, oy + y)
+      path.moveTo(canvasOffsetX + x, canvasOffsetY + y + 1)
+      path.lineTo(canvasOffsetX + x, canvasOffsetY + y)
     }
     // Right edge: top to bottom for clockwise marching
     if (!maskSet.has((y << 16) | (x + 1))) {
-      path.moveTo(ox + x + 1, oy + y)
-      path.lineTo(ox + x + 1, oy + y + 1)
+      path.moveTo(canvasOffsetX + x + 1, canvasOffsetY + y)
+      path.lineTo(canvasOffsetX + x + 1, canvasOffsetY + y + 1)
     }
   }
   return path

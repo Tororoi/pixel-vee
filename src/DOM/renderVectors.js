@@ -217,15 +217,15 @@ const createVectorElement = (vector) => {
  */
 const calculateDrawingDimensions = () => {
   let border = 32
-  let wd =
+  let widthDivisor =
     canvas.thumbnailCVS.width /
     canvas.sharpness /
     (canvas.offScreenCVS.width + border)
-  let hd =
+  let heightDivisor =
     canvas.thumbnailCVS.height /
     canvas.sharpness /
     (canvas.offScreenCVS.height + border)
-  let minD = Math.min(wd, hd)
+  let minD = Math.min(widthDivisor, heightDivisor)
   let xOffset =
     (canvas.thumbnailCVS.width / 2 -
       (minD * canvas.offScreenCVS.width * canvas.sharpness) / 2) /

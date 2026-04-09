@@ -557,24 +557,24 @@ function setVectorProperties(vector) {
     state.vector.properties = { ...vector.vectorProperties }
     //Keep properties relative to layer offset
     //All vector types have at least one control point
-    const lx = vector.layer.x
-    const ly = vector.layer.y
-    state.vector.properties.px1 += lx
-    state.vector.properties.py1 += ly
+    const layerX = vector.layer.x
+    const layerY = vector.layer.y
+    state.vector.properties.px1 += layerX
+    state.vector.properties.py1 += layerY
     //line, quadCurve, cubicCurve, ellipse
     if (state.vector.properties.px2 !== undefined) {
-      state.vector.properties.px2 += lx
-      state.vector.properties.py2 += ly
+      state.vector.properties.px2 += layerX
+      state.vector.properties.py2 += layerY
     }
     //quadCurve, cubicCurve, ellipse
     if (state.vector.properties.px3 !== undefined) {
-      state.vector.properties.px3 += lx
-      state.vector.properties.py3 += ly
+      state.vector.properties.px3 += layerX
+      state.vector.properties.py3 += layerY
     }
     //cubicCurve
     if (state.vector.properties.px4 !== undefined) {
-      state.vector.properties.px4 += lx
-      state.vector.properties.py4 += ly
+      state.vector.properties.px4 += layerX
+      state.vector.properties.py4 += layerY
     }
     state.vector.setCurrentIndex(vector.index)
     // switchTool(vector.vectorProperties.tool)

@@ -79,11 +79,11 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
   let lastPasteAction = null
   let lastTransformAction = null
   for (let i = state.timeline.undoStack.length - 1; i >= 0; i--) {
-    const a = state.timeline.undoStack[i]
-    if (lastPasteAction === null && a.tool === 'paste' && !a.confirmed)
-      lastPasteAction = a
-    if (lastTransformAction === null && a.tool === 'transform')
-      lastTransformAction = a
+    const action = state.timeline.undoStack[i]
+    if (lastPasteAction === null && action.tool === 'paste' && !action.confirmed)
+      lastPasteAction = action
+    if (lastTransformAction === null && action.tool === 'transform')
+      lastTransformAction = action
     if (lastPasteAction !== null && lastTransformAction !== null) break
   }
   // Per-layer density maps for build-up dither replay.

@@ -277,25 +277,25 @@ export function createDitherPatternSVG(pattern, offsetX = 0, offsetY = 0) {
   bg.classList.add('dither-bg-rect')
   patternEl.appendChild(bg)
 
-  let d = ''
+  let pathData = ''
   for (let y = 0; y < 8; y++) {
     let runStart = -1
     for (let x = 0; x < 8; x++) {
       if (pattern.data[y * 8 + x] === 1) {
         if (runStart === -1) runStart = x
       } else if (runStart !== -1) {
-        d += `M${runStart} ${y + 0.5}h${x - runStart}`
+        pathData += `M${runStart} ${y + 0.5}h${x - runStart}`
         runStart = -1
       }
     }
     if (runStart !== -1) {
-      d += `M${runStart} ${y + 0.5}h${8 - runStart}`
+      pathData += `M${runStart} ${y + 0.5}h${8 - runStart}`
     }
   }
   const path = document.createElementNS(SVG_NS, 'path')
   const primaryColor = swatches.primary.color.color
   path.setAttribute('stroke', primaryColor)
-  path.setAttribute('d', d)
+  path.setAttribute('d', pathData)
   path.classList.add('dither-on-path')
   patternEl.appendChild(path)
 

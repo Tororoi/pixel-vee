@@ -15,15 +15,15 @@ export function renderPoints(points, strokeCtx) {
   let previousY = Math.floor(points[0].y)
   for (const { x, y } of points) {
     //rounded values
-    let xt = Math.floor(x)
-    let yt = Math.floor(y)
-    let brushDirection = calculateBrushDirection(xt, yt, previousX, previousY)
+    let truncatedX = Math.floor(x)
+    let truncatedY = Math.floor(y)
+    let brushDirection = calculateBrushDirection(truncatedX, truncatedY, previousX, previousY)
     if (ditherPattern) {
-      actionDitherDraw(xt, yt, brushStamp[brushDirection], innerCtx)
+      actionDitherDraw(truncatedX, truncatedY, brushStamp[brushDirection], innerCtx)
     } else {
-      actionDraw(xt, yt, brushStamp[brushDirection], innerCtx)
+      actionDraw(truncatedX, truncatedY, brushStamp[brushDirection], innerCtx)
     }
-    previousX = xt
-    previousY = yt
+    previousX = truncatedX
+    previousY = truncatedY
   }
 }
