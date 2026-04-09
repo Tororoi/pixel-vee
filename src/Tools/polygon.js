@@ -336,7 +336,7 @@ function polygonSteps() {
   switch (canvas.pointerEvent) {
     case 'pointerdown':
       vectorGui.reset()
-      state.vector.properties.type = state.tool.current.name
+      state.vector.properties.tool = state.tool.current.name
       state.vector.properties.px1 = normalizedX
       state.vector.properties.py1 = normalizedY
       updateVertices()

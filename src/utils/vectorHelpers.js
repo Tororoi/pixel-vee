@@ -247,7 +247,7 @@ export function translateVectors(
         )
       }
     })
-    if (originalVectorProperties.type === 'ellipse') {
+    if (originalVectorProperties.tool === 'ellipse') {
       const conicControlPoints = calcEllipseConicsFromVertices(
         vector.vectorProperties.px1,
         vector.vectorProperties.py1,
@@ -321,7 +321,7 @@ export function rotateVectors(
         updateVectorProperties(vector, newX, newY, xKey, yKey)
       }
     }
-    if (originalVectorProperties.type === 'ellipse') {
+    if (originalVectorProperties.tool === 'ellipse') {
       //updateVectorProperties is not enough for ellipses. The angle and radii must be updated as well as the values for conic segments.
       vector.vectorProperties.angle = getAngle(
         vector.vectorProperties.px2 - vector.vectorProperties.px1,
@@ -399,7 +399,7 @@ export function findVectorShapeBoundaryBox(vectorIndicesSet, vectors) {
     const vector = vectors[vectorIndex]
     const vectorXPoints = []
     const vectorYPoints = []
-    if (vector.vectorProperties.type === 'ellipse') {
+    if (vector.vectorProperties.tool === 'ellipse') {
       //Ellipse has a center point and a radius. The boundary box is calculated differently.
       const ellipseBoundingBox = calculateEllipseBoundingBox(
         vector.vectorProperties,

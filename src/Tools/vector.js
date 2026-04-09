@@ -80,7 +80,7 @@ function vectorSteps() {
     if (chainPoint !== null) {
       state.tool.clickCounter += 1
       vectorGui.reset()
-      state.vector.properties.type = state.tool.current.name
+      state.vector.properties.tool = state.tool.current.name
       state.vector.properties.px1 = chainPoint.x
       state.vector.properties.py1 = chainPoint.y
       state.vector.properties.px2 = chainPoint.x
@@ -112,7 +112,7 @@ function vectorSteps() {
         case 1:
           //reset control points
           vectorGui.reset()
-          state.vector.properties.type = state.tool.current.name
+          state.vector.properties.tool = state.tool.current.name
           state.vector.properties.px1 = normalizedX
           state.vector.properties.py1 = normalizedY
           //endpoint starts at same point as startpoint

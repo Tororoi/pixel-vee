@@ -1,9 +1,9 @@
-import { dom } from "../Context/dom.js"
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { tools, toolGroups } from "../Tools/index.js"
-import { vectorGui } from "../GUI/vector.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { dom } from '../Context/dom.js'
+import { state } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { tools, toolGroups } from '../Tools/index.js'
+import { vectorGui } from '../GUI/vector.js'
+import { renderCanvas } from '../Canvas/render.js'
 import {
   // renderVectorsToDOM,
   renderBrushModesToDOM,
@@ -12,24 +12,29 @@ import {
   renderStampOptionsToDOM,
   renderDitherOptionsToDOM,
   updateDitherPickerColors,
-} from "../DOM/render.js"
-import { renderCursor } from "../GUI/cursor.js"
-import { actionDeselect } from "../Actions/nonPointer/selectionActions.js"
-import { actionConfirmPastedPixels } from "../Actions/nonPointer/clipboardActions.js"
-import { CURVE_TYPES } from "../utils/constants.js"
+} from '../DOM/render.js'
+import { renderCursor } from '../GUI/cursor.js'
+import { actionDeselect } from '../Actions/nonPointer/selectionActions.js'
+import { actionConfirmPastedPixels } from '../Actions/nonPointer/clipboardActions.js'
+import { CURVE_TYPES } from '../utils/constants.js'
 
 /**
  * Sync each tool group button to its default active tool on page load
  */
 export function initToolGroups() {
   for (const [groupName, group] of Object.entries(toolGroups)) {
-    const groupBtn = document.querySelector(`.tool-group-btn[data-group="${groupName}"]`)
+    const groupBtn = document.querySelector(
+      `.tool-group-btn[data-group="${groupName}"]`,
+    )
     const activeToolBtn = document.querySelector(`#${group.activeTool}`)
     if (groupBtn && activeToolBtn) {
       group.tools.forEach((t) => groupBtn.classList.remove(t))
       groupBtn.classList.add(group.activeTool)
       groupBtn.dataset.tooltip = activeToolBtn.dataset.tooltip
-      groupBtn.setAttribute("aria-label", activeToolBtn.getAttribute("aria-label"))
+      groupBtn.setAttribute(
+        'aria-label',
+        activeToolBtn.getAttribute('aria-label'),
+      )
     }
   }
 }
@@ -52,33 +57,36 @@ export function switchTool(toolName = null, toolBtn = null) {
         }
       }
       //reset old button
-      dom.toolBtn.classList.remove("selected")
+      dom.toolBtn.classList.remove('selected')
       //remove selected from old tool's group button if applicable
       for (const [groupName, group] of Object.entries(toolGroups)) {
         if (group.tools.includes(dom.toolBtn.id)) {
           document
             .querySelector(`.tool-group-btn[data-group="${groupName}"]`)
-            ?.classList.remove("selected")
+            ?.classList.remove('selected')
           break
         }
       }
       //get new button and select it
       dom.toolBtn = targetToolBtn
-      dom.toolBtn.classList.add("selected")
+      dom.toolBtn.classList.add('selected')
       state.tool.current = tools[dom.toolBtn.id]
       //sync group state if new tool belongs to a group
       for (const [groupName, group] of Object.entries(toolGroups)) {
         if (group.tools.includes(dom.toolBtn.id)) {
           group.activeTool = dom.toolBtn.id
           const groupBtn = document.querySelector(
-            `.tool-group-btn[data-group="${groupName}"]`
+            `.tool-group-btn[data-group="${groupName}"]`,
           )
           if (groupBtn) {
             group.tools.forEach((t) => groupBtn.classList.remove(t))
             groupBtn.classList.add(dom.toolBtn.id)
-            groupBtn.classList.add("selected")
+            groupBtn.classList.add('selected')
             groupBtn.dataset.tooltip = dom.toolBtn.dataset.tooltip
-            groupBtn.setAttribute("aria-label", dom.toolBtn.getAttribute("aria-label"))
+            groupBtn.setAttribute(
+              'aria-label',
+              dom.toolBtn.getAttribute('aria-label'),
+            )
           }
           break
         }
@@ -90,7 +98,7 @@ export function switchTool(toolName = null, toolBtn = null) {
       dom.brushSlider.disabled = state.tool.current.brushDisabled
       //update cursor
       if (state.tool.current.modes?.eraser) {
-        canvas.vectorGuiCVS.style.cursor = "none"
+        canvas.vectorGuiCVS.style.cursor = 'none'
       } else {
         canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
       }
@@ -99,14 +107,14 @@ export function switchTool(toolName = null, toolBtn = null) {
       //If the tool is not a vector tool, clear the selected vector indices
       if (
         ![
-          "fill",
-          "line",
-          "quadCurve",
-          "cubicCurve",
-          "vector",
-          "ellipse",
-          "polygon",
-          "move",
+          'fill',
+          'line',
+          'quadCurve',
+          'cubicCurve',
+          'vector',
+          'ellipse',
+          'polygon',
+          'move',
         ].includes(tools[targetToolBtn.id].name)
       ) {
         if (state.vector.selectedIndices.size > 0) {
@@ -132,19 +140,27 @@ export function switchTool(toolName = null, toolBtn = null) {
 function updateSelectedVectorCurveType(newType) {
   if (state.vector.currentIndex === null) return
   const vector = state.vector.all[state.vector.currentIndex]
-  if (!vector || !CURVE_TYPES.includes(vector.vectorProperties.type)) return
-  const vp = vector.vectorProperties
-  vp.type = newType
+  if (!vector) return
+  const vectorProperties = vector.vectorProperties
+  if (vectorProperties.tool !== 'vector') return
   if (newType === 'quadCurve' || newType === 'cubicCurve') {
-    if (vp.px3 == null || vp.py3 == null) {
-      vp.px3 = Math.round((vp.px1 + vp.px2) / 2)
-      vp.py3 = Math.round((vp.py1 + vp.py2) / 2)
+    if (vectorProperties.px3 == null || vectorProperties.py3 == null) {
+      vectorProperties.px3 = Math.round(
+        (vectorProperties.px1 + vectorProperties.px2) / 2,
+      )
+      vectorProperties.py3 = Math.round(
+        (vectorProperties.py1 + vectorProperties.py2) / 2,
+      )
     }
   }
   if (newType === 'cubicCurve') {
-    if (vp.px4 == null || vp.py4 == null) {
-      vp.px4 = Math.round((vp.px1 + vp.px2) / 2)
-      vp.py4 = Math.round((vp.py1 + vp.py2) / 2)
+    if (vectorProperties.px4 == null || vectorProperties.py4 == null) {
+      vectorProperties.px4 = Math.round(
+        (vectorProperties.px1 + vectorProperties.px2) / 2,
+      )
+      vectorProperties.py4 = Math.round(
+        (vectorProperties.py1 + vectorProperties.py2) / 2,
+      )
     }
   }
   renderCanvas(canvas.currentLayer)
@@ -187,7 +203,7 @@ export function toggleMode(modeName = null, modeBtn = null) {
         }
       }
       if (state.tool.current.modes?.eraser) {
-        canvas.vectorGuiCVS.style.cursor = "none"
+        canvas.vectorGuiCVS.style.cursor = 'none'
       } else {
         canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
       }

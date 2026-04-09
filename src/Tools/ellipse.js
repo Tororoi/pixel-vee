@@ -272,7 +272,7 @@ function ellipseSteps() {
         case 1:
           //reset control points
           vectorGui.reset()
-          state.vector.properties.type = state.tool.current.name
+          state.vector.properties.tool = state.tool.current.name
           state.vector.properties.px1 = normalizedX
           state.vector.properties.py1 = normalizedY
           state.vector.properties.forceCircle = true //force circle initially

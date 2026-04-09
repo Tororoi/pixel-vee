@@ -477,7 +477,7 @@ function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
   for (let i = 0; i < action.vectorIndices.length; i++) {
     const vector = state.vector.all[action.vectorIndices[i]]
     if (vector.hidden || vector.removed) continue
-    const vp = vector.vectorProperties
+    const vectorProperties = vector.vectorProperties
     const vRecordedLayerX = vector.recordedLayerX
     const vRecordedLayerY = vector.recordedLayerY
     const vEffectiveDitherOffsetX =
@@ -498,45 +498,47 @@ function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
       ditherOffsetX: vEffectiveDitherOffsetX,
       ditherOffsetY: vEffectiveDitherOffsetY,
     })
-    const ox = offsetX
-    const oy = offsetY
-    switch (vp.type) {
+    switch (vectorProperties.tool) {
       case 'fill': {
-        // let tempMask = new Set([vp.px1 + ox, vp.py1 + oy])
-        actionFill(vp.px1 + ox, vp.py1 + oy, vectorCtx)
+        // let tempMask = new Set([vectorProperties.px1 + offsetX, vectorProperties.py1 + offsetY])
+        actionFill(
+          vectorProperties.px1 + offsetX,
+          vectorProperties.py1 + offsetY,
+          vectorCtx,
+        )
         break
       }
       case 'line':
         actionLine(
-          vp.px1 + ox,
-          vp.py1 + oy,
-          vp.px2 + ox,
-          vp.py2 + oy,
+          vectorProperties.px1 + offsetX,
+          vectorProperties.py1 + offsetY,
+          vectorProperties.px2 + offsetX,
+          vectorProperties.py2 + offsetY,
           vectorCtx,
         )
         break
       case 'quadCurve':
         actionQuadraticCurve(
-          vp.px1 + ox,
-          vp.py1 + oy,
-          vp.px2 + ox,
-          vp.py2 + oy,
-          vp.px3 + ox,
-          vp.py3 + oy,
+          vectorProperties.px1 + offsetX,
+          vectorProperties.py1 + offsetY,
+          vectorProperties.px2 + offsetX,
+          vectorProperties.py2 + offsetY,
+          vectorProperties.px3 + offsetX,
+          vectorProperties.py3 + offsetY,
           2,
           vectorCtx,
         )
         break
       case 'cubicCurve':
         actionCubicCurve(
-          vp.px1 + ox,
-          vp.py1 + oy,
-          vp.px2 + ox,
-          vp.py2 + oy,
-          vp.px3 + ox,
-          vp.py3 + oy,
-          vp.px4 + ox,
-          vp.py4 + oy,
+          vectorProperties.px1 + offsetX,
+          vectorProperties.py1 + offsetY,
+          vectorProperties.px2 + offsetX,
+          vectorProperties.py2 + offsetY,
+          vectorProperties.px3 + offsetX,
+          vectorProperties.py3 + offsetY,
+          vectorProperties.px4 + offsetX,
+          vectorProperties.py4 + offsetY,
           3,
           vectorCtx,
         )
@@ -548,14 +550,14 @@ function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
             ? 2
             : 1
         actionVector(
-          vp.px1 + ox,
-          vp.py1 + oy,
-          vp.px2 + ox,
-          vp.py2 + oy,
-          vp.px3 + ox,
-          vp.py3 + oy,
-          vp.px4 + ox,
-          vp.py4 + oy,
+          vectorProperties.px1 + offsetX,
+          vectorProperties.py1 + offsetY,
+          vectorProperties.px2 + offsetX,
+          vectorProperties.py2 + offsetY,
+          vectorProperties.px3 + offsetX,
+          vectorProperties.py3 + offsetY,
+          vectorProperties.px4 + offsetX,
+          vectorProperties.py4 + offsetY,
           stepNum,
           vectorCtx,
         )
@@ -563,28 +565,28 @@ function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
       }
       case 'ellipse':
         actionEllipse(
-          vp.weight,
-          vp.leftTangentX + ox,
-          vp.leftTangentY + oy,
-          vp.topTangentX + ox,
-          vp.topTangentY + oy,
-          vp.rightTangentX + ox,
-          vp.rightTangentY + oy,
-          vp.bottomTangentX + ox,
-          vp.bottomTangentY + oy,
+          vectorProperties.weight,
+          vectorProperties.leftTangentX + offsetX,
+          vectorProperties.leftTangentY + offsetY,
+          vectorProperties.topTangentX + offsetX,
+          vectorProperties.topTangentY + offsetY,
+          vectorProperties.rightTangentX + offsetX,
+          vectorProperties.rightTangentY + offsetY,
+          vectorProperties.bottomTangentX + offsetX,
+          vectorProperties.bottomTangentY + offsetY,
           vectorCtx,
         )
         break
       case 'polygon':
         actionPolygon(
-          vp.px1 + ox,
-          vp.py1 + oy,
-          vp.px2 + ox,
-          vp.py2 + oy,
-          vp.px3 + ox,
-          vp.py3 + oy,
-          vp.px4 + ox,
-          vp.py4 + oy,
+          vectorProperties.px1 + offsetX,
+          vectorProperties.py1 + offsetY,
+          vectorProperties.px2 + offsetX,
+          vectorProperties.py2 + offsetY,
+          vectorProperties.px3 + offsetX,
+          vectorProperties.py3 + offsetY,
+          vectorProperties.px4 + offsetX,
+          vectorProperties.py4 + offsetY,
           vectorCtx,
         )
         break

@@ -31,7 +31,7 @@ function fillSteps() {
     case 'pointerdown': {
       //reset control points
       vectorGui.reset()
-      state.vector.properties.type = state.tool.current.name
+      state.vector.properties.tool = state.tool.current.name
       state.vector.properties.px1 = normalizedX
       state.vector.properties.py1 = normalizedY
       actionFill(

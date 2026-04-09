@@ -427,7 +427,7 @@ function vectorInteract(e) {
     }
     if (vector.index !== state.vector.currentIndex) {
       //switch tool
-      switchTool(vector.vectorProperties.type)
+      switchTool(vector.vectorProperties.tool)
       // vectorGui.reset()
       vectorGui.setVectorProperties(vector)
       canvas.currentLayer.inactiveTools.forEach((tool) => {

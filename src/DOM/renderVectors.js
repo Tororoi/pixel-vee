@@ -63,7 +63,7 @@ const renderVectorElement = (vector) => {
   const left = document.createElement('div')
   left.className = 'left'
   left.appendChild(
-    createToolElement(vector.vectorProperties.type, isCurrentVector),
+    createToolElement(vector.vectorProperties.tool, isCurrentVector),
   )
   left.appendChild(createColorElement(vector.color))
   left.appendChild(createHideElement(vector.hidden, 'Hide/Show Vector'))
@@ -274,7 +274,7 @@ const drawOnThumbnailContext = (
   let py3 = minD * (vector.vectorProperties.py3 + vector.layer.y)
   let px4 = minD * (vector.vectorProperties.px4 + vector.layer.x)
   let py4 = minD * (vector.vectorProperties.py4 + vector.layer.y)
-  switch (vector.vectorProperties.type) {
+  switch (vector.vectorProperties.tool) {
     case 'fill':
       ctx.arc(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset, 1, 0, 2 * Math.PI, true)
       break

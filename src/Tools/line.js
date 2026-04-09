@@ -37,7 +37,7 @@ function lineSteps() {
     if (chainPoint !== null) {
       state.tool.clickCounter += 1
       vectorGui.reset()
-      state.vector.properties.type = 'line'
+      state.vector.properties.tool = state.tool.current.name
       state.vector.properties.px1 = chainPoint.x
       state.vector.properties.py1 = chainPoint.y
       state.vector.properties.px2 = chainPoint.x
@@ -76,7 +76,7 @@ function lineSteps() {
       state.tool.clickCounter += 1
       //reset control points
       vectorGui.reset()
-      state.vector.properties.type = state.tool.current.name
+      state.vector.properties.tool = state.tool.current.name
       state.vector.properties.px1 = normalizedX
       state.vector.properties.py1 = normalizedY
       state.vector.properties.px2 = normalizedX

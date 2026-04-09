@@ -90,8 +90,8 @@ export const vectorGui = {
   addLinkedVector(vector, xKey, linkingPoint) {
     if (
       this.selectedPoint.xKey ||
-      ['fill', 'ellipse'].includes(vector.vectorProperties.type) ||
-      ['fill', 'ellipse'].includes(state.vector.properties.type)
+      ['fill', 'ellipse'].includes(vector.vectorProperties.tool) ||
+      ['fill', 'ellipse'].includes(state.vector.properties.tool)
     ) {
       //Don't link a point to itself and don't link to fill or ellipse vectors.
       return
@@ -477,14 +477,14 @@ function isChainableCollision() {
     endpointKeys.includes(vectorGui.collidedPoint.xKey)
   ) {
     const currentVector = state.vector.all[state.vector.currentIndex]
-    if (currentVector?.vectorProperties.type === 'vector') return true
+    if (currentVector?.vectorProperties.tool === 'vector') return true
   }
   if (
     state.vector.collidedIndex !== null &&
     endpointKeys.includes(vectorGui.otherCollidedKeys.xKey)
   ) {
     const otherVector = state.vector.all[state.vector.collidedIndex]
-    if (otherVector?.vectorProperties.type === 'vector') return true
+    if (otherVector?.vectorProperties.tool === 'vector') return true
   }
   return false
 }
@@ -577,7 +577,7 @@ function setVectorProperties(vector) {
       state.vector.properties.py4 += ly
     }
     state.vector.setCurrentIndex(vector.index)
-    // switchTool(vector.vectorProperties.type)
+    // switchTool(vector.vectorProperties.tool)
     enableActionsForSelection()
   }
 }
@@ -671,7 +671,7 @@ function render() {
  * @param {object|null} vector - The vector action to base the properties on
  */
 function renderControlPoints(vectorProperties, vector = null) {
-  switch (vectorProperties.type) {
+  switch (vectorProperties.tool) {
     case 'fill':
       renderFillVector(vectorProperties, vector)
       break
@@ -704,7 +704,7 @@ function renderControlPoints(vectorProperties, vector = null) {
  * @param {object|null} vector - The vector to be rendered
  */
 function renderPath(vectorProperties, vector = null) {
-  switch (vectorProperties.type) {
+  switch (vectorProperties.tool) {
     case 'fill':
       // renderFillVector(state.vector.properties)
       break
@@ -748,7 +748,7 @@ function renderLayerVectors(layer) {
     ) {
       //For each vector, render paths
       if (
-        (vector.vectorProperties.type === state.tool.current.name &&
+        (vector.vectorProperties.tool === state.tool.current.name &&
           state.vector.selectedIndices.size === 0) ||
         state.vector.selectedIndices.has(vector.index)
       ) {
@@ -800,7 +800,7 @@ function renderLayerVectors(layer) {
     ) {
       //For each vector, render control points
       if (
-        ((vector.vectorProperties.type === state.tool.current.name &&
+        ((vector.vectorProperties.tool === state.tool.current.name &&
           state.vector.selectedIndices.size === 0) ||
           state.vector.selectedIndices.has(vector.index)) &&
         vector !== selectedVector
@@ -863,6 +863,7 @@ export function updateLinkedVectors(
     if (saveVectorProperties) {
       state.vector.savedProperties[linkedVectorIndex] = {
         ...linkedVector.vectorProperties,
+        modes: { ...linkedVector.modes },
       }
     } else if (!state.vector.savedProperties[linkedVectorIndex]) {
       //prevent linking vectors during pointermove

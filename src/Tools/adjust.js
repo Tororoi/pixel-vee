@@ -43,7 +43,7 @@ export function getChainStartPoint() {
     endpointKeys.includes(vectorGui.collidedPoint.xKey)
   ) {
     const currentVector = state.vector.all[state.vector.currentIndex]
-    if (currentVector && currentVector.vectorProperties.type === 'vector') {
+    if (currentVector && currentVector.vectorProperties.tool === 'vector') {
       return {
         x:
           currentVector.vectorProperties[vectorGui.collidedPoint.xKey] +
@@ -60,7 +60,7 @@ export function getChainStartPoint() {
     endpointKeys.includes(vectorGui.otherCollidedKeys.xKey)
   ) {
     const collidedVector = state.vector.all[state.vector.collidedIndex]
-    if (collidedVector && collidedVector.vectorProperties.type === 'vector') {
+    if (collidedVector && collidedVector.vectorProperties.tool === 'vector') {
       return {
         x:
           collidedVector.vectorProperties[vectorGui.otherCollidedKeys.xKey] +
@@ -83,8 +83,8 @@ export function getChainStartPoint() {
 function snapEndpointToCollidedVector(currentVector) {
   let collidedVector = state.vector.all[state.vector.collidedIndex]
   if (
-    ['fill', 'ellipse'].includes(collidedVector.vectorProperties.type) ||
-    ['fill', 'ellipse'].includes(currentVector.vectorProperties.type)
+    ['fill', 'ellipse'].includes(collidedVector.vectorProperties.tool) ||
+    ['fill', 'ellipse'].includes(currentVector.vectorProperties.tool)
   ) {
     return
   }
@@ -231,8 +231,9 @@ export function adjustVectorSteps() {
       }
       state.vector.savedProperties[state.vector.currentIndex] = {
         ...currentVector.vectorProperties,
+        modes: { ...currentVector.modes },
       }
-      if (currentVector.vectorProperties.type === 'ellipse') {
+      if (currentVector.vectorProperties.tool === 'ellipse') {
         if (
           !keys.ShiftLeft &&
           !keys.ShiftRight &&
@@ -248,7 +249,7 @@ export function adjustVectorSteps() {
             currentVector.vectorProperties.forceCircle
         }
         updateEllipseVectorProperties(currentVector, normalizedX, normalizedY)
-      } else if (currentVector.vectorProperties.type === 'polygon') {
+      } else if (currentVector.vectorProperties.tool === 'polygon') {
         if (
           !keys.ShiftLeft &&
           !keys.ShiftRight &&
@@ -300,9 +301,9 @@ export function adjustVectorSteps() {
       break
     case 'pointermove':
       if (vectorGui.selectedPoint.xKey) {
-        if (currentVector.vectorProperties.type === 'ellipse') {
+        if (currentVector.vectorProperties.tool === 'ellipse') {
           updateEllipseVectorProperties(currentVector, normalizedX, normalizedY)
-        } else if (currentVector.vectorProperties.type === 'polygon') {
+        } else if (currentVector.vectorProperties.tool === 'polygon') {
           updatePolygonVectorProperties(currentVector, normalizedX, normalizedY)
         } else {
           state.vector.properties[vectorGui.selectedPoint.xKey] = normalizedX
@@ -330,9 +331,9 @@ export function adjustVectorSteps() {
       break
     case 'pointerup':
       if (vectorGui.selectedPoint.xKey) {
-        if (currentVector.vectorProperties.type === 'ellipse') {
+        if (currentVector.vectorProperties.tool === 'ellipse') {
           updateEllipseVectorProperties(currentVector, normalizedX, normalizedY)
-        } else if (currentVector.vectorProperties.type === 'polygon') {
+        } else if (currentVector.vectorProperties.tool === 'polygon') {
           updatePolygonVectorProperties(currentVector, normalizedX, normalizedY)
         } else {
           state.vector.properties[vectorGui.selectedPoint.xKey] = normalizedX
