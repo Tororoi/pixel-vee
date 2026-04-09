@@ -15,6 +15,7 @@ import { actionPolygon } from '../Actions/pointer/polygon.js'
 import {
   actionQuadraticCurve,
   actionCubicCurve,
+  actionVector,
 } from '../Actions/pointer/curve.js'
 import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
@@ -322,21 +323,13 @@ export function performAction(
       break
     }
     case 'fill':
-      renderActionVectors(action, betweenCtx, cropDX, cropDY)
-      break
     case 'line':
-      renderActionVectors(action, betweenCtx, cropDX, cropDY)
-      break
     case 'quadCurve':
-      renderActionVectors(action, betweenCtx, cropDX, cropDY)
-      break
     case 'cubicCurve':
-      renderActionVectors(action, betweenCtx, cropDX, cropDY)
-      break
+    case 'vector':
     case 'ellipse':
-      renderActionVectors(action, betweenCtx, cropDX, cropDY)
-      break
     case 'polygon':
+    case 'vectorPaste':
       renderActionVectors(action, betweenCtx, cropDX, cropDY)
       break
     case 'cut': {
@@ -424,11 +417,6 @@ export function performAction(
           boundaryBox.yMax - boundaryBox.yMin,
         )
       }
-      break
-    }
-    case 'vectorPaste': {
-      //render vector paste action (only vectors)
-      renderActionVectors(action, betweenCtx, cropDX, cropDY)
       break
     }
     case 'transform': {
@@ -553,6 +541,26 @@ function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
           vectorCtx,
         )
         break
+      case 'vector': {
+        const stepNum = vector.modes.cubicCurve
+          ? 3
+          : vector.modes.quadCurve
+            ? 2
+            : 1
+        actionVector(
+          vp.px1 + ox,
+          vp.py1 + oy,
+          vp.px2 + ox,
+          vp.py2 + oy,
+          vp.px3 + ox,
+          vp.py3 + oy,
+          vp.px4 + ox,
+          vp.py4 + oy,
+          stepNum,
+          vectorCtx,
+        )
+        break
+      }
       case 'ellipse':
         actionEllipse(
           vp.weight,

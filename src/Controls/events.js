@@ -257,7 +257,8 @@ function handlePointerMove(e) {
       //no active tool, just render cursor
       if (
         !(
-          ['quadCurve', 'cubicCurve'].includes(state.tool.current.name) &&
+          state.tool.current.name === 'vector' &&
+          !state.tool.current.modes?.line &&
           state.tool.clickCounter > 0
         )
       ) {
@@ -303,6 +304,7 @@ function handlePointerUp(e) {
         'line',
         'quadCurve',
         'cubicCurve',
+        'vector',
         'ellipse',
         'polygon',
       ].includes(state.tool.current.name)

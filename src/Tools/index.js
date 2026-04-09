@@ -1,14 +1,15 @@
-import { brush } from "./brush.js"
-import { line } from "./line.js"
-import { select } from "./select.js"
-import { magicWand } from "./magicWand.js"
-import { move } from "./move.js"
-import { fill } from "./fill.js"
-import { quadCurve, cubicCurve } from "./curve.js"
-import { ellipse } from "./ellipse.js"
-import { polygon } from "./polygon.js"
-import { eyedropper } from "./eyedropper.js"
-import { grab } from "./grab.js"
+import { brush } from './brush.js'
+import { line } from './line.js'
+import { select } from './select.js'
+import { magicWand } from './magicWand.js'
+import { move } from './move.js'
+import { fill } from './fill.js'
+import { quadCurve, cubicCurve } from './curve.js'
+import { vector } from './vector.js'
+import { ellipse } from './ellipse.js'
+import { polygon } from './polygon.js'
+import { eyedropper } from './eyedropper.js'
+import { grab } from './grab.js'
 
 //====================================//
 //===== * * * Tools Object * * * =====//
@@ -18,84 +19,84 @@ import { grab } from "./grab.js"
 export const tools = {
   //Modify history Tool
   modify: {
-    name: "modify",
+    name: 'modify',
     fn: null,
     brushSize: null,
     brushType: null,
     brushDisabled: false,
     options: {},
     modes: {},
-    type: "modify",
+    type: 'modify',
   },
   changeMode: {
-    name: "changeMode",
+    name: 'changeMode',
     fn: null,
     brushSize: null,
     brushType: null,
     brushDisabled: false,
     options: {},
     modes: {},
-    type: "modify",
+    type: 'modify',
   },
   changeDitherPattern: {
-    name: "changeDitherPattern",
+    name: 'changeDitherPattern',
     fn: null,
     brushSize: null,
     brushType: null,
     brushDisabled: false,
     options: {},
     modes: {},
-    type: "modify",
+    type: 'modify',
   },
   changeDitherOffset: {
-    name: "changeDitherOffset",
+    name: 'changeDitherOffset',
     fn: null,
     brushSize: null,
     brushType: null,
     brushDisabled: false,
     options: {},
     modes: {},
-    type: "modify",
+    type: 'modify',
   },
   changeBrushSize: {
-    name: "changeBrushSize",
+    name: 'changeBrushSize',
     fn: null,
     brushSize: null,
     brushType: null,
     brushDisabled: false,
     options: {},
     modes: {},
-    type: "modify",
+    type: 'modify',
   },
   changeColor: {
-    name: "changeColor",
+    name: 'changeColor',
     fn: null,
     brushSize: null,
     brushType: null,
     brushDisabled: false,
     options: {},
     modes: {},
-    type: "modify",
+    type: 'modify',
   },
   remove: {
-    name: "remove",
+    name: 'remove',
     fn: null,
     brushSize: null,
     brushType: null,
     brushDisabled: false,
     options: {},
     modes: {},
-    type: "modify",
+    type: 'modify',
   },
   clear: {
-    name: "clear",
+    name: 'clear',
     fn: null,
     brushSize: null,
     brushType: null,
     brushDisabled: false,
     options: {},
     modes: {},
-    type: "modify",
+    type: 'modify',
   },
   //Raster Tools
   brush,
@@ -113,31 +114,32 @@ export const tools = {
   fill,
   quadCurve,
   cubicCurve,
+  vector,
   ellipse,
   polygon,
   //Non-cursor tools
   addLayer: {
-    name: "addLayer",
+    name: 'addLayer',
     fn: null,
     brushSize: null,
     brushType: null,
     brushDisabled: false,
     options: {},
     modes: {},
-    type: "settings",
+    type: 'settings',
   },
   removeLayer: {
-    name: "removeLayer",
+    name: 'removeLayer',
     fn: null,
     brushSize: null,
     brushType: null,
     brushDisabled: false,
     options: {},
     modes: {},
-    type: "settings",
+    type: 'settings',
   },
   cut: {
-    name: "cut",
+    name: 'cut',
     fn: null,
     brushSize: null,
     brushType: null,
@@ -146,47 +148,47 @@ export const tools = {
       //copy vectors/ actions?
     },
     modes: {},
-    type: "raster",
+    type: 'raster',
   },
   paste: {
-    name: "paste",
+    name: 'paste',
     fn: null,
     brushSize: null,
     brushType: null,
     brushDisabled: true,
     options: {},
     modes: {},
-    type: "raster",
+    type: 'raster',
   },
   vectorPaste: {
-    name: "vectorPaste",
+    name: 'vectorPaste',
     fn: null,
     brushSize: null,
     brushType: null,
     brushDisabled: true,
     options: {},
     modes: {},
-    type: "vector",
+    type: 'vector',
   },
   transform: {
-    name: "transform",
+    name: 'transform',
     fn: null, //used for stretch and flip functionality
     brushSize: null,
     brushType: null,
     brushDisabled: true,
     options: {},
     modes: {},
-    type: "raster",
+    type: 'raster',
   },
   resize: {
-    name: "resize",
+    name: 'resize',
     fn: null,
     brushSize: null,
     brushType: null,
     brushDisabled: false,
     options: {},
     modes: {},
-    type: "settings",
+    type: 'settings',
   },
   //Utility Tools (does not affect timeline)
   eyedropper,
@@ -216,15 +218,15 @@ export const tools = {
  */
 export const toolGroups = {
   curves: {
-    tools: ["line", "quadCurve", "cubicCurve"],
-    activeTool: "line",
+    tools: ['line', 'quadCurve', 'cubicCurve'],
+    activeTool: 'line',
   },
   shapeTools: {
-    tools: ["ellipse", "polygon"],
-    activeTool: "ellipse",
+    tools: ['ellipse', 'polygon'],
+    activeTool: 'ellipse',
   },
   selectionTools: {
-    tools: ["select", "magicWand"],
-    activeTool: "select",
+    tools: ['select', 'magicWand'],
+    activeTool: 'select',
   },
 }

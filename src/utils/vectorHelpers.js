@@ -1,6 +1,6 @@
-import { calcEllipseConicsFromVertices } from "./ellipse.js"
-import { calculateEllipseBoundingBox } from "./transformHelpers.js"
-import { getAngle } from "./trig.js"
+import { calcEllipseConicsFromVertices } from './ellipse.js'
+import { calculateEllipseBoundingBox } from './transformHelpers.js'
+import { getAngle } from './trig.js'
 
 /**
  * WARNING: This function directly manipulates the vector's properties in the history.
@@ -32,13 +32,13 @@ export function calculateCurrentVectorDeltas(
   selectedPoint,
   toolOptions,
   vectorsSavedProperties,
-  linkingEndpoint
+  linkingEndpoint,
 ) {
   let currentDeltaX = 0
   let currentDeltaY = 0
   let currentDeltaAngle = 0 // Default to 0 if alignment is active
 
-  if (!["px1", "px2"].includes(selectedPoint.xKey)) {
+  if (!['px1', 'px2'].includes(selectedPoint.xKey)) {
     currentDeltaX =
       currentVector.vectorProperties[linkingEndpoint.xKey] -
       currentVector.vectorProperties[selectedPoint.xKey]
@@ -86,35 +86,35 @@ export function handleOptionsAndUpdateVector(
   linkedVector,
   linkedPoints,
   vectorsSavedProperties,
-  toolOptions
+  toolOptions,
 ) {
   //Set linked keys
   let linkedEndpointXKey, linkedEndpointYKey, linkedHandleXKey, linkedHandleYKey
   if (linkedPoints.px1) {
-    linkedEndpointXKey = "px1"
-    linkedEndpointYKey = "py1"
-    linkedHandleXKey = "px3"
-    linkedHandleYKey = "py3"
+    linkedEndpointXKey = 'px1'
+    linkedEndpointYKey = 'py1'
+    linkedHandleXKey = 'px3'
+    linkedHandleYKey = 'py3'
   } else if (linkedPoints.px2) {
-    linkedEndpointXKey = "px2"
-    linkedEndpointYKey = "py2"
-    if (linkedVector.vectorProperties.type === "quadCurve") {
-      linkedHandleXKey = "px3"
-      linkedHandleYKey = "py3"
+    linkedEndpointXKey = 'px2'
+    linkedEndpointYKey = 'py2'
+    if (linkedVector.modes.quadCurve) {
+      linkedHandleXKey = 'px3'
+      linkedHandleYKey = 'py3'
     } else {
-      linkedHandleXKey = "px4"
-      linkedHandleYKey = "py4"
+      linkedHandleXKey = 'px4'
+      linkedHandleYKey = 'py4'
     }
   }
   // If vector is linked via px1 or px2, update vector properties
   if (linkedEndpointXKey) {
-    if (["px1", "px2"].includes(selectedXKey)) {
+    if (['px1', 'px2'].includes(selectedXKey)) {
       updateVectorProperties(
         linkedVector,
         x,
         y,
         linkedEndpointXKey,
-        linkedEndpointYKey
+        linkedEndpointYKey,
       )
       //If hold option enabled, maintain relative angle of control handles
       if (toolOptions.hold?.active) {
@@ -130,11 +130,11 @@ export function handleOptionsAndUpdateVector(
           x - linkedDeltaX,
           y - linkedDeltaY,
           linkedHandleXKey,
-          linkedHandleYKey
+          linkedHandleYKey,
         )
       }
     } else if (
-      ["px3", "px4"].includes(selectedXKey) &&
+      ['px3', 'px4'].includes(selectedXKey) &&
       (toolOptions.align?.active ||
         toolOptions.hold?.active ||
         toolOptions.equal?.active)
@@ -178,7 +178,7 @@ export function handleOptionsAndUpdateVector(
         x + newLinkedDeltaX,
         y + newLinkedDeltaY,
         linkedHandleXKey,
-        linkedHandleYKey
+        linkedHandleYKey,
       )
     }
   }
@@ -222,10 +222,10 @@ export function translateVectors(
   vectorsSavedProperties,
   vectors,
   xDiff,
-  yDiff
+  yDiff,
 ) {
   for (const [vectorIndex, originalVectorProperties] of Object.entries(
-    vectorsSavedProperties
+    vectorsSavedProperties,
   )) {
     //Use diffs between cursorX/ cursorY and previousX/ previousY to update all selected vectors
     const vector = vectors[parseInt(vectorIndex)]
@@ -243,11 +243,11 @@ export function translateVectors(
           originalVectorProperties[pxProp] + xDiff + layer.x,
           originalVectorProperties[pyProp] + yDiff + layer.y,
           pxProp,
-          pyProp
+          pyProp,
         )
       }
     })
-    if (originalVectorProperties.type === "ellipse") {
+    if (originalVectorProperties.type === 'ellipse') {
       const conicControlPoints = calcEllipseConicsFromVertices(
         vector.vectorProperties.px1,
         vector.vectorProperties.py1,
@@ -255,7 +255,7 @@ export function translateVectors(
         vector.vectorProperties.radB,
         vector.vectorProperties.angle,
         vector.vectorProperties.x1Offset,
-        vector.vectorProperties.y1Offset
+        vector.vectorProperties.y1Offset,
       )
       vector.vectorProperties.weight = conicControlPoints.weight
       vector.vectorProperties.leftTangentX = conicControlPoints.leftTangentX
@@ -291,20 +291,20 @@ export function rotateVectors(
   startX,
   startY,
   centerX,
-  centerY
+  centerY,
 ) {
   const absoluteRadians = getAngle(cursorX - centerX, cursorY - centerY)
   const originalRadians = getAngle(startX - centerX, startY - centerY)
   const radians = absoluteRadians - originalRadians
   //Freely rotate selected vectors at any angle around origin point (default center of vectors bounding box)
   for (const [vectorIndex, originalVectorProperties] of Object.entries(
-    vectorsSavedProperties
+    vectorsSavedProperties,
   )) {
     const vector = vectors[vectorIndex]
     for (let i = 1; i <= 4; i++) {
       if (
-        "px" + i in originalVectorProperties &&
-        "py" + i in originalVectorProperties
+        'px' + i in originalVectorProperties &&
+        'py' + i in originalVectorProperties
       ) {
         const xKey = `px${i}`
         const yKey = `py${i}`
@@ -313,31 +313,31 @@ export function rotateVectors(
         const oldX = originalVectorProperties[xKey] + layer.x
         const oldY = originalVectorProperties[yKey] + layer.y
         const newX = Math.floor(
-          cos * (oldX - centerX) - sin * (oldY - centerY) + centerX
+          cos * (oldX - centerX) - sin * (oldY - centerY) + centerX,
         )
         const newY = Math.floor(
-          sin * (oldX - centerX) + cos * (oldY - centerY) + centerY
+          sin * (oldX - centerX) + cos * (oldY - centerY) + centerY,
         )
         updateVectorProperties(vector, newX, newY, xKey, yKey)
       }
     }
-    if (originalVectorProperties.type === "ellipse") {
+    if (originalVectorProperties.type === 'ellipse') {
       //updateVectorProperties is not enough for ellipses. The angle and radii must be updated as well as the values for conic segments.
       vector.vectorProperties.angle = getAngle(
         vector.vectorProperties.px2 - vector.vectorProperties.px1,
-        vector.vectorProperties.py2 - vector.vectorProperties.py1
+        vector.vectorProperties.py2 - vector.vectorProperties.py1,
       )
       while (vector.vectorProperties.angle < 0) {
         vector.vectorProperties.angle += 2 * Math.PI
       }
       vector.vectorProperties.radA = Math.sqrt(
         (vector.vectorProperties.px1 - vector.vectorProperties.px2) ** 2 +
-          (vector.vectorProperties.py1 - vector.vectorProperties.py2) ** 2
+          (vector.vectorProperties.py1 - vector.vectorProperties.py2) ** 2,
       )
       //TODO: (Medium Priority) Should p3 be recalculated here to maintain integrity of rotated ellipse?
       vector.vectorProperties.radB = Math.sqrt(
         (vector.vectorProperties.px1 - vector.vectorProperties.px3) ** 2 +
-          (vector.vectorProperties.py1 - vector.vectorProperties.py3) ** 2
+          (vector.vectorProperties.py1 - vector.vectorProperties.py3) ** 2,
       )
       const conicControlPoints = calcEllipseConicsFromVertices(
         vector.vectorProperties.px1,
@@ -346,7 +346,7 @@ export function rotateVectors(
         vector.vectorProperties.radB,
         vector.vectorProperties.angle,
         vector.vectorProperties.x1Offset,
-        vector.vectorProperties.y1Offset
+        vector.vectorProperties.y1Offset,
       )
       vector.vectorProperties.weight = conicControlPoints.weight
       vector.vectorProperties.leftTangentX = conicControlPoints.leftTangentX
@@ -373,7 +373,7 @@ export function findVectorShapeCentroid(vectorIndicesSet, vectors) {
     const vectorProperties = vectors[index].vectorProperties
     //Get points for center point calculation.
     for (let i = 1; i <= 4; i++) {
-      if ("px" + i in vectorProperties && "py" + i in vectorProperties) {
+      if ('px' + i in vectorProperties && 'py' + i in vectorProperties) {
         const xKey = `px${i}`
         const yKey = `py${i}`
         vectorPoints.push([vectorProperties[xKey], vectorProperties[yKey]])
@@ -399,18 +399,18 @@ export function findVectorShapeBoundaryBox(vectorIndicesSet, vectors) {
     const vector = vectors[vectorIndex]
     const vectorXPoints = []
     const vectorYPoints = []
-    if (vector.vectorProperties.type === "ellipse") {
+    if (vector.vectorProperties.type === 'ellipse') {
       //Ellipse has a center point and a radius. The boundary box is calculated differently.
       const ellipseBoundingBox = calculateEllipseBoundingBox(
-        vector.vectorProperties
+        vector.vectorProperties,
       )
       vectorXPoints.push(ellipseBoundingBox.xMin, ellipseBoundingBox.xMax)
       vectorYPoints.push(ellipseBoundingBox.yMin, ellipseBoundingBox.yMax)
     } else {
       for (let i = 1; i <= 4; i++) {
         if (
-          "px" + i in vector.vectorProperties &&
-          "py" + i in vector.vectorProperties
+          'px' + i in vector.vectorProperties &&
+          'py' + i in vector.vectorProperties
         ) {
           vectorXPoints.push(vector.vectorProperties[`px${i}`])
           vectorYPoints.push(vector.vectorProperties[`py${i}`])

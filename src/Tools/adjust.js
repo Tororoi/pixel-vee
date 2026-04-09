@@ -28,8 +28,6 @@ import {
 //======== * * * Adjusters * * * ========//
 //=======================================//
 
-const chainableTypes = ['line', 'quadCurve', 'cubicCurve']
-
 /**
  * Returns the canvas-absolute coordinates of the chainable endpoint under the
  * cursor, or null if no valid chain target is colliding.
@@ -44,11 +42,15 @@ export function getChainStartPoint() {
     state.vector.currentIndex !== null &&
     endpointKeys.includes(vectorGui.collidedPoint.xKey)
   ) {
-    const cv = state.vector.all[state.vector.currentIndex]
-    if (cv && chainableTypes.includes(cv.vectorProperties.type)) {
+    const currentVector = state.vector.all[state.vector.currentIndex]
+    if (currentVector && currentVector.vectorProperties.type === 'vector') {
       return {
-        x: cv.vectorProperties[vectorGui.collidedPoint.xKey] + cv.layer.x,
-        y: cv.vectorProperties[vectorGui.collidedPoint.yKey] + cv.layer.y,
+        x:
+          currentVector.vectorProperties[vectorGui.collidedPoint.xKey] +
+          currentVector.layer.x,
+        y:
+          currentVector.vectorProperties[vectorGui.collidedPoint.yKey] +
+          currentVector.layer.y,
       }
     }
   }
@@ -57,11 +59,15 @@ export function getChainStartPoint() {
     state.vector.collidedIndex !== null &&
     endpointKeys.includes(vectorGui.otherCollidedKeys.xKey)
   ) {
-    const ov = state.vector.all[state.vector.collidedIndex]
-    if (ov && chainableTypes.includes(ov.vectorProperties.type)) {
+    const collidedVector = state.vector.all[state.vector.collidedIndex]
+    if (collidedVector && collidedVector.vectorProperties.type === 'vector') {
       return {
-        x: ov.vectorProperties[vectorGui.otherCollidedKeys.xKey] + ov.layer.x,
-        y: ov.vectorProperties[vectorGui.otherCollidedKeys.yKey] + ov.layer.y,
+        x:
+          collidedVector.vectorProperties[vectorGui.otherCollidedKeys.xKey] +
+          collidedVector.layer.x,
+        y:
+          collidedVector.vectorProperties[vectorGui.otherCollidedKeys.yKey] +
+          collidedVector.layer.y,
       }
     }
   }
@@ -111,7 +117,8 @@ function snapEndpointToCollidedVector(currentVector) {
       state.tool.current.options.align?.active ||
       state.tool.current.options.equal?.active
     ) ||
-    !['px1', 'px2'].includes(vectorGui.selectedPoint.xKey)
+    !['px1', 'px2'].includes(vectorGui.selectedPoint.xKey) ||
+    state.tool.current.modes.line
   ) {
     return
   }
@@ -128,7 +135,7 @@ function snapEndpointToCollidedVector(currentVector) {
   } else {
     selectedEndpointXKey = 'px2'
     selectedEndpointYKey = 'py2'
-    if (currentVector.vectorProperties.type === 'quadCurve') {
+    if (currentVector.modes.quadCurve) {
       selectedHandleXKey = 'px3'
       selectedHandleYKey = 'py3'
     } else {
@@ -159,7 +166,7 @@ function snapEndpointToCollidedVector(currentVector) {
     collidedHandleDeltaY =
       collidedVector.vectorProperties.py3 - collidedVector.vectorProperties.py1
   } else if (vectorGui.otherCollidedKeys.xKey === 'px2') {
-    if (collidedVector.vectorProperties.type === 'quadCurve') {
+    if (collidedVector.modes.quadCurve) {
       collidedHandleDeltaX =
         collidedVector.vectorProperties.px3 -
         collidedVector.vectorProperties.px2

@@ -16,6 +16,7 @@ import {
 import { renderCursor } from "../GUI/cursor.js"
 import { actionDeselect } from "../Actions/nonPointer/selectionActions.js"
 import { actionConfirmPastedPixels } from "../Actions/nonPointer/clipboardActions.js"
+import { CURVE_TYPES } from "../utils/constants.js"
 
 /**
  * Sync each tool group button to its default active tool on page load
@@ -102,6 +103,7 @@ export function switchTool(toolName = null, toolBtn = null) {
           "line",
           "quadCurve",
           "cubicCurve",
+          "vector",
           "ellipse",
           "polygon",
           "move",
@@ -122,6 +124,34 @@ export function switchTool(toolName = null, toolBtn = null) {
 }
 
 /**
+ * Update a selected vector's curve type and compute any missing control points.
+ * When upgrading to a type that needs more points, missing px3/py3 or px4/py4 are
+ * calculated as the midpoint of p1 and p2.
+ * @param {string} newType - 'line' | 'quadCurve' | 'cubicCurve'
+ */
+function updateSelectedVectorCurveType(newType) {
+  if (state.vector.currentIndex === null) return
+  const vector = state.vector.all[state.vector.currentIndex]
+  if (!vector || !CURVE_TYPES.includes(vector.vectorProperties.type)) return
+  const vp = vector.vectorProperties
+  vp.type = newType
+  if (newType === 'quadCurve' || newType === 'cubicCurve') {
+    if (vp.px3 == null || vp.py3 == null) {
+      vp.px3 = Math.round((vp.px1 + vp.px2) / 2)
+      vp.py3 = Math.round((vp.py1 + vp.py2) / 2)
+    }
+  }
+  if (newType === 'cubicCurve') {
+    if (vp.px4 == null || vp.py4 == null) {
+      vp.px4 = Math.round((vp.px1 + vp.px2) / 2)
+      vp.py4 = Math.round((vp.py1 + vp.py2) / 2)
+    }
+  }
+  renderCanvas(canvas.currentLayer)
+  vectorGui.render()
+}
+
+/**
  * Toggle active mode
  * TODO: (Low Priority) add multi-touch mode for drawing with multiple fingers
  * TODO: (Medium Priority) add curve brush mode for freehand drawing splines
@@ -132,15 +162,28 @@ export function toggleMode(modeName = null, modeBtn = null) {
   const targetModeBtn = modeBtn || document.querySelector(`#${modeName}`)
   if (targetModeBtn) {
     if (state.tool.current.modes[targetModeBtn.id] !== undefined) {
-      if (targetModeBtn.classList.contains("selected")) {
+      if (targetModeBtn.classList.contains('selected')) {
+        // Curve type modes cannot be deselected — one must always be active
+        if (CURVE_TYPES.includes(targetModeBtn.id)) return
         state.tool.current.modes[targetModeBtn.id] = false
       } else {
         state.tool.current.modes[targetModeBtn.id] = true
         //eraser and inject modes cannot be selected at the same time
-        if (targetModeBtn.id === "eraser" && state.tool.current.modes?.inject) {
+        if (targetModeBtn.id === 'eraser' && state.tool.current.modes?.inject) {
           state.tool.current.modes.inject = false
-        } else if (targetModeBtn.id === "inject" && state.tool.current.modes?.eraser) {
+        } else if (
+          targetModeBtn.id === 'inject' &&
+          state.tool.current.modes?.eraser
+        ) {
           state.tool.current.modes.eraser = false
+        }
+        //line, quadCurve, cubicCurve modes are mutually exclusive
+        if (CURVE_TYPES.includes(targetModeBtn.id)) {
+          CURVE_TYPES.forEach((t) => {
+            if (t !== targetModeBtn.id) state.tool.current.modes[t] = false
+          })
+          updateSelectedVectorCurveType(targetModeBtn.id)
+          renderToolOptionsToDOM()
         }
       }
       if (state.tool.current.modes?.eraser) {

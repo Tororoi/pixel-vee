@@ -45,8 +45,21 @@ export const renderBrushModesToDOM = () => {
     mode.className = `mode ${key}`
     mode.id = key
     switch (key) {
+      case 'line':
+        mode.ariaLabel = 'Line Mode (/)'
+        mode.dataset.tooltip = 'Line (/) \n\nDraw straight lines'
+        break
+      case 'quadCurve':
+        mode.ariaLabel = 'Quadratic Curve Mode (Q)'
+        mode.dataset.tooltip =
+          'Quadratic Curve (Q) \n\nDraw smooth curves with one control handle'
+        break
+      case 'cubicCurve':
+        mode.ariaLabel = 'Cubic Curve Mode (C)'
+        mode.dataset.tooltip =
+          'Cubic Curve (C) \n\nDraw smooth curves with two control handles'
+        break
       case 'eraser':
-        //add aria label
         mode.ariaLabel = 'Eraser (E)'
         mode.dataset.tooltip = 'Eraser (E)'
         break
@@ -88,13 +101,16 @@ export function renderToolOptionsToDOM() {
       'line',
       'quadCurve',
       'cubicCurve',
+      'vector',
       'ellipse',
       'polygon',
       'select',
     ].includes(state.tool.current.name)
   ) {
-    //render cubic curve options to menu
+    const isLineMode =
+      state.tool.current.name === 'vector' && state.tool.current.modes?.line
     Object.entries(state.tool.current.options).forEach(([name, option]) => {
+      if (isLineMode && (name === 'align' || name === 'equal')) return
       let optionToggle = createOptionToggle(name, option)
       dom.toolOptions.appendChild(optionToggle)
     })
@@ -107,8 +123,7 @@ export function renderToolOptionsToDOM() {
 export function renderStampOptionsToDOM() {
   const stampSection = document.querySelector('.stamp-options')
   if (!stampSection) return
-  stampSection.style.display =
-    state.tool.current.name === 'brush' ? '' : 'none'
+  stampSection.style.display = state.tool.current.name === 'brush' ? '' : 'none'
 }
 
 /**
