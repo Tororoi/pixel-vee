@@ -125,42 +125,6 @@ export function switchTool(toolName = null, toolBtn = null) {
 }
 
 /**
- * Update a selected vector's curve type and compute any missing control points.
- * When upgrading to a type that needs more points, missing px3/py3 or px4/py4 are
- * calculated as the midpoint of p1 and p2.
- * @param {string} newType - 'line' | 'quadCurve' | 'cubicCurve'
- */
-function updateSelectedVectorCurveType(newType) {
-  if (state.vector.currentIndex === null) return
-  const vector = state.vector.all[state.vector.currentIndex]
-  if (!vector) return
-  const vectorProperties = vector.vectorProperties
-  if (vectorProperties.tool !== 'curve') return
-  if (newType === 'quadCurve' || newType === 'cubicCurve') {
-    if (vectorProperties.px3 == null || vectorProperties.py3 == null) {
-      vectorProperties.px3 = Math.round(
-        (vectorProperties.px1 + vectorProperties.px2) / 2,
-      )
-      vectorProperties.py3 = Math.round(
-        (vectorProperties.py1 + vectorProperties.py2) / 2,
-      )
-    }
-  }
-  if (newType === 'cubicCurve') {
-    if (vectorProperties.px4 == null || vectorProperties.py4 == null) {
-      vectorProperties.px4 = Math.round(
-        (vectorProperties.px1 + vectorProperties.px2) / 2,
-      )
-      vectorProperties.py4 = Math.round(
-        (vectorProperties.py1 + vectorProperties.py2) / 2,
-      )
-    }
-  }
-  renderCanvas(canvas.currentLayer)
-  vectorGui.render()
-}
-
-/**
  * Toggle active mode
  * TODO: (Low Priority) add multi-touch mode for drawing with multiple fingers
  * TODO: (Medium Priority) add curve brush mode for freehand drawing splines
@@ -191,7 +155,6 @@ export function toggleMode(modeName = null, modeBtn = null) {
           CURVE_TYPES.forEach((t) => {
             if (t !== targetModeBtn.id) state.tool.current.modes[t] = false
           })
-          updateSelectedVectorCurveType(targetModeBtn.id)
           renderToolOptionsToDOM()
         }
       }

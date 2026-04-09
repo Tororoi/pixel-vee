@@ -113,11 +113,14 @@ export function renderVectorSettingsToDOM(domVector) {
   const modesRow = document.createElement('div')
   modesRow.className = 'vector-settings-modes'
   const modeTooltips = {
+    line: 'Line',
+    quadCurve: 'Quad Curve',
+    cubicCurve: 'Cubic Curve',
     eraser: 'Eraser',
     inject: 'Inject',
     twoColor: 'Two-Color',
   }
-  for (const modeKey of ['eraser', 'inject', 'twoColor']) {
+  for (const modeKey of ['line', 'quadCurve', 'cubicCurve', 'eraser', 'inject', 'twoColor']) {
     if (!(modeKey in vector.modes)) continue
     const btn = createModeElement(modeKey, vector.modes[modeKey])
     btn.dataset.tooltip = modeTooltips[modeKey]
