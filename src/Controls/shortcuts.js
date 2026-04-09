@@ -109,7 +109,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'Digit7':
-      if (dom.toolBtn.id === 'vector') {
+      if (dom.toolBtn.id === 'curve') {
         state.tool.current.options.chain.active =
           !state.tool.current.options.chain.active
         renderToolOptionsToDOM()
@@ -117,7 +117,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'Equal':
-      if (dom.toolBtn.id === 'vector' && !state.tool.current.modes?.line) {
+      if (dom.toolBtn.id === 'curve' && !state.tool.current.modes?.line) {
         state.tool.current.options.equal.active =
           !state.tool.current.options.equal.active
         renderToolOptionsToDOM()
@@ -126,13 +126,13 @@ export function activateShortcut(keyCode) {
       break
     case 'Slash':
       if (!state.cursor.clicked) {
-        switchTool('vector')
+        switchTool('curve')
         toggleMode('line')
         renderVectorsToDOM()
       }
       break
     case 'KeyA':
-      if (dom.toolBtn.id === 'vector' && !state.tool.current.modes?.line) {
+      if (dom.toolBtn.id === 'curve' && !state.tool.current.modes?.line) {
         state.tool.current.options.align.active =
           !state.tool.current.options.align.active
         renderToolOptionsToDOM()
@@ -150,7 +150,7 @@ export function activateShortcut(keyCode) {
         if (keys.MetaLeft || keys.MetaRight) {
           actionCopySelection()
         } else {
-          switchTool('vector')
+          switchTool('curve')
           toggleMode('cubicCurve')
           renderVectorsToDOM()
         }
@@ -201,8 +201,8 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'KeyH':
-      //Locking shortcut for vector tool
-      if (dom.toolBtn.id === 'vector') {
+      //Locking shortcut for curve tool
+      if (dom.toolBtn.id === 'curve') {
         state.tool.current.options.hold.active =
           !state.tool.current.options.hold.active
         renderToolOptionsToDOM()
@@ -224,7 +224,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'KeyL':
-      if (dom.toolBtn.id === 'vector') {
+      if (dom.toolBtn.id === 'curve') {
         state.tool.current.options.link.active =
           !state.tool.current.options.link.active
         renderToolOptionsToDOM()
@@ -253,7 +253,7 @@ export function activateShortcut(keyCode) {
       break
     case 'KeyQ':
       if (!state.cursor.clicked) {
-        switchTool('vector')
+        switchTool('curve')
         toggleMode('quadCurve')
         renderVectorsToDOM()
       }
@@ -299,6 +299,9 @@ export function activateShortcut(keyCode) {
         if (keys.MetaLeft || keys.MetaRight) {
           //Will not do anything if already in the midst of a paste action (meaning the canvas.currentLayer is the canvas.tempLayer)
           actionPasteSelection()
+        } else {
+          switchTool('curve')
+          renderVectorsToDOM()
         }
       }
       break

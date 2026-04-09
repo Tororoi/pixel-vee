@@ -34,7 +34,6 @@ export const state = {
   vector: {
     properties: {
       // tool: null,
-      // type: null, // e.g. 'quadCurve', 'ellipse'
       // px1: null,
       // py1: null,
       // px2: null,

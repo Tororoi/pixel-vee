@@ -43,7 +43,7 @@ export function getChainStartPoint() {
     endpointKeys.includes(vectorGui.collidedPoint.xKey)
   ) {
     const currentVector = state.vector.all[state.vector.currentIndex]
-    if (currentVector && currentVector.vectorProperties.tool === 'vector') {
+    if (currentVector && currentVector.vectorProperties.tool === 'curve') {
       return {
         x:
           currentVector.vectorProperties[vectorGui.collidedPoint.xKey] +
@@ -60,7 +60,7 @@ export function getChainStartPoint() {
     endpointKeys.includes(vectorGui.otherCollidedKeys.xKey)
   ) {
     const collidedVector = state.vector.all[state.vector.collidedIndex]
-    if (collidedVector && collidedVector.vectorProperties.tool === 'vector') {
+    if (collidedVector && collidedVector.vectorProperties.tool === 'curve') {
       return {
         x:
           collidedVector.vectorProperties[vectorGui.otherCollidedKeys.xKey] +

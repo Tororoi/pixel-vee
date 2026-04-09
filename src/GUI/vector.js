@@ -13,12 +13,7 @@ import {
   getRenderYOffset,
 } from '../utils/coordinateHelpers.js'
 import { renderFillVector } from './fill.js'
-import {
-  renderCurveVector,
-  renderCurvePath,
-  renderVector,
-  renderVectorPath,
-} from './curve.js'
+import { renderCurvePath, renderCurveVector } from './curve.js'
 import {
   renderEllipseVector,
   renderOffsetEllipseVector,
@@ -272,6 +267,8 @@ function resolveOtherVectorCollision(
 function resolveLinkedVectors(keys, normalizedX, normalizedY, vector) {
   if (!vector) return
 
+  const currentVectorModes = state.vector.all[state.vector.currentIndex]?.modes
+
   if (vectorGui.collidedPoint.xKey === 'px3') {
     if (
       normalizedX === state.vector.properties.px1 + state.canvas.cropOffsetX &&
@@ -279,7 +276,10 @@ function resolveLinkedVectors(keys, normalizedX, normalizedY, vector) {
     ) {
       vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px1', yKey: 'py1' })
     }
-    if (state.tool.current.name === 'quadCurve') {
+    // A quadCurve's px3 is its only handle and affects both endpoints,
+    // so also propagate to vectors linked at px2.
+    // A cubicCurve's px3 only governs p1, so skip this check for cubics.
+    if (currentVectorModes?.quadCurve) {
       if (
         normalizedX ===
           state.vector.properties.px2 + state.canvas.cropOffsetX &&
@@ -477,14 +477,14 @@ function isChainableCollision() {
     endpointKeys.includes(vectorGui.collidedPoint.xKey)
   ) {
     const currentVector = state.vector.all[state.vector.currentIndex]
-    if (currentVector?.vectorProperties.tool === 'vector') return true
+    if (currentVector?.vectorProperties.tool === 'curve') return true
   }
   if (
     state.vector.collidedIndex !== null &&
     endpointKeys.includes(vectorGui.otherCollidedKeys.xKey)
   ) {
-    const otherVector = state.vector.all[state.vector.collidedIndex]
-    if (otherVector?.vectorProperties.tool === 'vector') return true
+    const collidedVector = state.vector.all[state.vector.collidedIndex]
+    if (collidedVector?.vectorProperties.tool === 'curve') return true
   }
   return false
 }
@@ -675,15 +675,8 @@ function renderControlPoints(vectorProperties, vector = null) {
     case 'fill':
       renderFillVector(vectorProperties, vector)
       break
-    case 'line':
-      renderLineVector(vectorProperties, vector)
-      break
-    case 'quadCurve':
-    case 'cubicCurve':
+    case 'curve':
       renderCurveVector(vectorProperties, vector)
-      break
-    case 'vector':
-      renderVector(vectorProperties, vector)
       break
     case 'ellipse':
       renderEllipseVector(vectorProperties, vector)
@@ -708,15 +701,8 @@ function renderPath(vectorProperties, vector = null) {
     case 'fill':
       // renderFillVector(state.vector.properties)
       break
-    case 'line':
-      renderLinePath(vectorProperties, vector)
-      break
-    case 'quadCurve':
-    case 'cubicCurve':
+    case 'curve':
       renderCurvePath(vectorProperties, vector)
-      break
-    case 'vector':
-      renderVectorPath(vectorProperties, vector)
       break
     case 'ellipse':
       renderEllipsePath(vectorProperties, vector)

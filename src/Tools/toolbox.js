@@ -106,16 +106,9 @@ export function switchTool(toolName = null, toolBtn = null) {
       renderToolOptionsToDOM()
       //If the tool is not a vector tool, clear the selected vector indices
       if (
-        ![
-          'fill',
-          'line',
-          'quadCurve',
-          'cubicCurve',
-          'vector',
-          'ellipse',
-          'polygon',
-          'move',
-        ].includes(tools[targetToolBtn.id].name)
+        !['fill', 'curve', 'ellipse', 'polygon', 'move'].includes(
+          tools[targetToolBtn.id].name,
+        )
       ) {
         if (state.vector.selectedIndices.size > 0) {
           actionDeselect()
@@ -142,7 +135,7 @@ function updateSelectedVectorCurveType(newType) {
   const vector = state.vector.all[state.vector.currentIndex]
   if (!vector) return
   const vectorProperties = vector.vectorProperties
-  if (vectorProperties.tool !== 'vector') return
+  if (vectorProperties.tool !== 'curve') return
   if (newType === 'quadCurve' || newType === 'cubicCurve') {
     if (vectorProperties.px3 == null || vectorProperties.py3 == null) {
       vectorProperties.px3 = Math.round(

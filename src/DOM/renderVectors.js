@@ -278,31 +278,7 @@ const drawOnThumbnailContext = (
     case 'fill':
       ctx.arc(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset, 1, 0, 2 * Math.PI, true)
       break
-    case 'line':
-      ctx.moveTo(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset)
-      ctx.lineTo(px2 + 0.5 + xOffset, py2 + 0.5 + yOffset)
-      break
-    case 'quadCurve':
-      ctx.moveTo(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset)
-      ctx.quadraticCurveTo(
-        px3 + 0.5 + xOffset,
-        py3 + 0.5 + yOffset,
-        px2 + 0.5 + xOffset,
-        py2 + 0.5 + yOffset,
-      )
-      break
-    case 'cubicCurve':
-      ctx.moveTo(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset)
-      ctx.bezierCurveTo(
-        px3 + 0.5 + xOffset,
-        py3 + 0.5 + yOffset,
-        px4 + 0.5 + xOffset,
-        py4 + 0.5 + yOffset,
-        px2 + 0.5 + xOffset,
-        py2 + 0.5 + yOffset,
-      )
-      break
-    case 'vector': {
+    case 'curve': {
       ctx.moveTo(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset)
       if (vector.modes.cubicCurve) {
         ctx.bezierCurveTo(

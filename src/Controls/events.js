@@ -227,8 +227,7 @@ function handlePointerMove(e) {
       if (
         state.cursor.clicked
         // ||
-        // ((state.tool.current.name === "quadCurve" ||
-        //   state.tool.current.name === "cubicCurve" ||
+        // ((state.tool.current.name === "curve" ||
         //   state.tool.current.name === "fill") &&
         //   state.tool.clickCounter > 0)
       ) {
@@ -257,7 +256,7 @@ function handlePointerMove(e) {
       //no active tool, just render cursor
       if (
         !(
-          state.tool.current.name === 'vector' &&
+          state.tool.current.name === 'curve' &&
           !state.tool.current.modes?.line &&
           state.tool.clickCounter > 0
         )
@@ -299,15 +298,7 @@ function handlePointerUp(e) {
   //reset action and render vectors
   if (state.timeline.currentAction) {
     if (
-      [
-        'fill',
-        'line',
-        'quadCurve',
-        'cubicCurve',
-        'vector',
-        'ellipse',
-        'polygon',
-      ].includes(state.tool.current.name)
+      ['fill', 'curve', 'ellipse', 'polygon'].includes(state.tool.current.name)
     ) {
       renderVectorsToDOM()
     }

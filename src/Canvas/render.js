@@ -8,18 +8,12 @@ import {
   actionDitherDraw,
   actionBuildUpDitherDraw,
 } from '../Actions/pointer/draw.js'
-import { actionLine } from '../Actions/pointer/line.js'
 import { actionFill } from '../Actions/pointer/fill.js'
 import { actionEllipse } from '../Actions/pointer/ellipse.js'
 import { actionPolygon } from '../Actions/pointer/polygon.js'
-import {
-  actionQuadraticCurve,
-  actionCubicCurve,
-  actionVector,
-} from '../Actions/pointer/curve.js'
+import { actionCurve } from '../Actions/pointer/curve.js'
 import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
-import { setInitialZoom } from '../utils/canvasHelpers.js'
 import { transformRasterContent } from '../utils/transformHelpers.js'
 
 // rAF batching for brush stroke renders
@@ -80,7 +74,11 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
   let lastTransformAction = null
   for (let i = state.timeline.undoStack.length - 1; i >= 0; i--) {
     const action = state.timeline.undoStack[i]
-    if (lastPasteAction === null && action.tool === 'paste' && !action.confirmed)
+    if (
+      lastPasteAction === null &&
+      action.tool === 'paste' &&
+      !action.confirmed
+    )
       lastPasteAction = action
     if (lastTransformAction === null && action.tool === 'transform')
       lastTransformAction = action
@@ -323,10 +321,7 @@ export function performAction(
       break
     }
     case 'fill':
-    case 'line':
-    case 'quadCurve':
-    case 'cubicCurve':
-    case 'vector':
+    case 'curve':
     case 'ellipse':
     case 'polygon':
     case 'vectorPaste':
@@ -508,48 +503,13 @@ function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
         )
         break
       }
-      case 'line':
-        actionLine(
-          vectorProperties.px1 + offsetX,
-          vectorProperties.py1 + offsetY,
-          vectorProperties.px2 + offsetX,
-          vectorProperties.py2 + offsetY,
-          vectorCtx,
-        )
-        break
-      case 'quadCurve':
-        actionQuadraticCurve(
-          vectorProperties.px1 + offsetX,
-          vectorProperties.py1 + offsetY,
-          vectorProperties.px2 + offsetX,
-          vectorProperties.py2 + offsetY,
-          vectorProperties.px3 + offsetX,
-          vectorProperties.py3 + offsetY,
-          2,
-          vectorCtx,
-        )
-        break
-      case 'cubicCurve':
-        actionCubicCurve(
-          vectorProperties.px1 + offsetX,
-          vectorProperties.py1 + offsetY,
-          vectorProperties.px2 + offsetX,
-          vectorProperties.py2 + offsetY,
-          vectorProperties.px3 + offsetX,
-          vectorProperties.py3 + offsetY,
-          vectorProperties.px4 + offsetX,
-          vectorProperties.py4 + offsetY,
-          3,
-          vectorCtx,
-        )
-        break
-      case 'vector': {
+      case 'curve': {
         const stepNum = vector.modes.cubicCurve
           ? 3
           : vector.modes.quadCurve
             ? 2
             : 1
-        actionVector(
+        actionCurve(
           vectorProperties.px1 + offsetX,
           vectorProperties.py1 + offsetY,
           vectorProperties.px2 + offsetX,
