@@ -37,10 +37,10 @@ export function validatePixelVeeFile(data) {
     if (!data.metadata.version) {
       missingProperties.push("metadata.version")
     } else {
-      if (!["1.0", "1.1"].includes(data.metadata.version)) {
+      if (!["1.0", "1.1", "1.2"].includes(data.metadata.version)) {
         invalidProperties.push("metadata.version")
       }
-      if (data.metadata.version === "1.1") {
+      if (["1.1", "1.2"].includes(data.metadata.version)) {
         if (!data.vectors) {
           missingProperties.push("vectors")
           //TODO: (Low Priority) Add message: Expected vectors object in version 1.1 file
