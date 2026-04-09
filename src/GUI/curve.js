@@ -20,14 +20,13 @@ export function renderVector(vectorProperties, vector) {
   const yOffset = getRenderYOffset(vector)
   const lineWidth = getGuiLineWidth()
   let circleRadius = 20 * lineWidth
+  const cubicCurveActive = vector?.modes.cubicCurve || !vector
+  const quadCurveActive = vector?.modes.quadCurve || !vector
 
-  if (vector.modes.cubicCurve && Number.isInteger(px4)) {
+  if (cubicCurveActive && Number.isInteger(px4)) {
     drawControlPointHandle(canvas, xOffset, yOffset, px1, py1, px3, py3)
     drawControlPointHandle(canvas, xOffset, yOffset, px2, py2, px4, py4)
-  } else if (
-    (vector.modes.cubicCurve || vector.modes.quadCurve) &&
-    Number.isInteger(px3)
-  ) {
+  } else if ((cubicCurveActive || quadCurveActive) && Number.isInteger(px3)) {
     drawControlPointHandle(canvas, xOffset, yOffset, px1, py1, px3, py3)
   }
 
@@ -68,8 +67,10 @@ export function renderVectorPath(vectorProperties, vector) {
 
   canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
+  const cubicCurveActive = vector?.modes.cubicCurve || !vector
+  const quadCurveActive = vector?.modes.quadCurve || !vector
 
-  if (vector.modes.cubicCurve && Number.isInteger(px4)) {
+  if (cubicCurveActive && Number.isInteger(px4)) {
     canvas.vectorGuiCTX.bezierCurveTo(
       xOffset + px3 + 0.5,
       yOffset + py3 + 0.5,
@@ -78,10 +79,7 @@ export function renderVectorPath(vectorProperties, vector) {
       xOffset + px2 + 0.5,
       yOffset + py2 + 0.5,
     )
-  } else if (
-    (vector.modes.cubicCurve || vector.modes.quadCurve) &&
-    Number.isInteger(px3)
-  ) {
+  } else if ((cubicCurveActive || quadCurveActive) && Number.isInteger(px3)) {
     canvas.vectorGuiCTX.quadraticCurveTo(
       xOffset + px3 + 0.5,
       yOffset + py3 + 0.5,
