@@ -1,6 +1,6 @@
 {
   "name": "pixel-vee",
-  "version": "1.0.0",
+  "version": "1.2.3",
   "description": "### Drawing application for pixel art",
   "main": "index.js",
   "scripts": {
@@ -12,14 +12,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Tororoi/undo-button.git"
+    "url": "git+https://github.com/Tororoi/pixel-vee.git"
   },
   "author": "Thomas Cantwell",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Tororoi/undo-button/issues"
+    "url": "https://github.com/Tororoi/pixel-vee/issues"
   },
-  "homepage": "https://github.com/Tororoi/undo-button#readme",
+  "homepage": "https://github.com/Tororoi/pixel-vee#readme",
   "dependencies": {
     "sass": "^1.66.1",
     "sass-loader": "^13.0.0",
