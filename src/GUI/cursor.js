@@ -61,7 +61,7 @@ export function renderCursor() {
       ) {
         const isDitherActive =
           (state.tool.current.ditherPatternIndex !== undefined &&
-            state.tool.current.ditherPatternIndex < 64) ||
+            state.tool.current.ditherPatternIndex < 63) ||
           (state.tool.current.modes?.buildUpDither ?? false)
         if (state.tool.current.modes?.eraser) {
           if (vectorGui.showCursorPreview) {

@@ -183,7 +183,7 @@
 
 .dither-picker-container .dither-grid {
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   gap: 2px;
   padding: 4px 2px 2px 2px;
 }
@@ -2083,7 +2083,7 @@ canvas {
 
 /* Dither pattern picker dialog */
 .dither-picker-container {
-  width: 308px;
+  width: 274px;
   max-width: calc(100% - 4px);
   max-height: calc(100% - 4px);
 }
