@@ -167,7 +167,7 @@ export function renderVectorSettingsToDOM(domVector) {
   ditherPreview.className = 'vector-dither-preview'
   ditherPreview.appendChild(
     createVectorDitherPatternSVG(
-      ditherPatterns[vector.ditherPatternIndex ?? 64],
+      ditherPatterns[vector.ditherPatternIndex ?? 63],
       vector,
     ),
   )
@@ -548,7 +548,7 @@ function applyVectorDitherOffsetControl(container, offsetX, offsetY) {
 let vectorDitherPickerInitialized = false
 
 /**
- * Populate the vector dither picker grid with 65 pattern thumbnails.
+ * Populate the vector dither picker grid with 64 pattern thumbnails.
  * Called once on first open.
  * @param {object} vector - the vector whose colors to use
  */
@@ -563,7 +563,7 @@ export function initVectorDitherPicker(vector) {
       btn.type = 'button'
       btn.className = 'dither-grid-btn'
       btn.dataset.patternIndex = i
-      btn.dataset.tooltip = i === 32 ? '33/65: Checkerboard' : `${i + 1}/65`
+      btn.dataset.tooltip = i === 31 ? '32/64: Checkerboard' : `${i + 1}/64`
       btn.appendChild(createVectorDitherPatternSVG(ditherPatterns[i], vector))
       grid.appendChild(btn)
     }
@@ -582,7 +582,7 @@ export function initVectorDitherPicker(vector) {
   }
   updateVectorDitherPickerColors(vector)
   updateVectorDitherControls(vector)
-  highlightVectorDitherPattern(vector.ditherPatternIndex ?? 64)
+  highlightVectorDitherPattern(vector.ditherPatternIndex ?? 63)
 }
 
 /**
@@ -670,7 +670,7 @@ export function updateVectorDitherPreview(vector) {
     8
   preview.appendChild(
     createVectorDitherPatternSVG(
-      ditherPatterns[vector.ditherPatternIndex ?? 64],
+      ditherPatterns[vector.ditherPatternIndex ?? 63],
       vector,
       effectiveOffsetX,
       effectiveOffsetY,

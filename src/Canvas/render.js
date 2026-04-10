@@ -260,10 +260,10 @@ export function performAction(
       let previousY = action.points[0].y + offsetY
       let brushDirection = '0,0'
       const isBuildUp = action.modes?.buildUpDither ?? false
-      const buildUpSteps = action.buildUpSteps ?? [16, 32, 48, 64]
+      const buildUpSteps = action.buildUpSteps ?? [15, 31, 47, 63]
       const pattern = isBuildUp
         ? null
-        : ditherPatterns[action.ditherPatternIndex ?? 64]
+        : ditherPatterns[action.ditherPatternIndex ?? 63]
       // Build context once per stroke; brushSize is updated per-point below
       // since points may have individual brushSizes stored in the timeline.
       // Effective dither offset accounts for layer movement since stroke was recorded.
@@ -487,7 +487,7 @@ function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
       currentModes: vector.modes,
       brushStamp: brushStamps[vector.brushType][vector.brushSize],
       brushSize: vector.brushSize,
-      ditherPattern: ditherPatterns[vector.ditherPatternIndex ?? 64],
+      ditherPattern: ditherPatterns[vector.ditherPatternIndex ?? 63],
       twoColorMode: vector.modes?.twoColor ?? false,
       secondaryColor: vector.secondaryColor ?? null,
       ditherOffsetX: vEffectiveDitherOffsetX,

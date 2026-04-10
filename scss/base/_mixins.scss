@@ -430,10 +430,10 @@
   }
 }
 
-// 9-column dither pattern grid layout
+// 8-column dither pattern grid layout
 %dither-grid {
   display: grid;
-  grid-template-columns: repeat(9, 1fr);
+  grid-template-columns: repeat(8, 1fr);
   gap: $spacing-xs;
   padding: $spacing-sm $spacing-xs $spacing-xs $spacing-xs;
 }

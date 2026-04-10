@@ -343,9 +343,9 @@ function handlePerfectPixels() {
 //====================================//
 
 export const BAYER_STEPS = {
-  '2x2': [16, 32, 48, 64],
-  '4x4': [4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64],
-  '8x8': Array.from({ length: 64 }, (_, i) => i + 1),
+  '2x2': [15, 31, 47, 63],
+  '4x4': [3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 43, 47, 51, 55, 59, 63],
+  '8x8': Array.from({ length: 64 }, (_, i) => i),
 }
 
 export const brush = {
@@ -354,7 +354,7 @@ export const brush = {
   brushSize: 1,
   brushType: 'circle',
   brushDisabled: false,
-  ditherPatternIndex: 64,
+  ditherPatternIndex: 63,
   ditherOffsetX: 0,
   ditherOffsetY: 0,
   options: { line: { active: false } },
@@ -367,8 +367,8 @@ export const brush = {
     buildUpDither: false,
   },
   buildUpMode: 'custom',
-  buildUpSteps: [8, 16, 24, 32, 40, 48, 56, 64],
-  _customBuildUpSteps: [8, 16, 24, 32, 40, 48, 56, 64],
+  buildUpSteps: [7, 15, 23, 31, 39, 47, 55, 63],
+  _customBuildUpSteps: [7, 15, 23, 31, 39, 47, 55, 63],
   buildUpActiveStepSlot: null,
   _buildUpDensityMap: new Map(),
   _buildUpResetAtIndex: 0,
