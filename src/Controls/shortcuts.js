@@ -117,7 +117,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'Equal':
-      if (dom.toolBtn.id === 'curve' && !state.tool.current.modes?.line) {
+      if (dom.toolBtn.id === 'curve') {
         state.tool.current.options.equal.active =
           !state.tool.current.options.equal.active
         renderToolOptionsToDOM()
@@ -132,7 +132,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'KeyA':
-      if (dom.toolBtn.id === 'curve' && !state.tool.current.modes?.line) {
+      if (dom.toolBtn.id === 'curve') {
         state.tool.current.options.align.active =
           !state.tool.current.options.align.active
         renderToolOptionsToDOM()

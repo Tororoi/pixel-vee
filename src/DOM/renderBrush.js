@@ -100,10 +100,7 @@ export function renderToolOptionsToDOM() {
   if (
     ['curve', 'ellipse', 'polygon', 'select'].includes(state.tool.current.name)
   ) {
-    const isLineMode =
-      state.tool.current.name === 'curve' && state.tool.current.modes?.line
     Object.entries(state.tool.current.options).forEach(([name, option]) => {
-      if (isLineMode && (name === 'align' || name === 'equal')) return
       let optionToggle = createOptionToggle(name, option)
       dom.toolOptions.appendChild(optionToggle)
     })
