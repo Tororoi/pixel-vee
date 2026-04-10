@@ -40,30 +40,30 @@ let cachedPathYOffset = null
  */
 function buildMaskPath(maskSet) {
   const path = new Path2D()
-  const ox = canvas.xOffset
-  const oy = canvas.yOffset
+  const canvasOffsetX = canvas.xOffset
+  const canvasOffsetY = canvas.yOffset
   for (const key of maskSet) {
     const x = key & 0xffff
     const y = (key >> 16) & 0xffff
     // Top edge: left to right for clockwise marching
     if (!maskSet.has(((y - 1) << 16) | x)) {
-      path.moveTo(ox + x, oy + y)
-      path.lineTo(ox + x + 1, oy + y)
+      path.moveTo(canvasOffsetX + x, canvasOffsetY + y)
+      path.lineTo(canvasOffsetX + x + 1, canvasOffsetY + y)
     }
     // Bottom edge: right to left for clockwise marching
     if (!maskSet.has(((y + 1) << 16) | x)) {
-      path.moveTo(ox + x + 1, oy + y + 1)
-      path.lineTo(ox + x, oy + y + 1)
+      path.moveTo(canvasOffsetX + x + 1, canvasOffsetY + y + 1)
+      path.lineTo(canvasOffsetX + x, canvasOffsetY + y + 1)
     }
     // Left edge: bottom to top for clockwise marching
     if (!maskSet.has((y << 16) | (x - 1))) {
-      path.moveTo(ox + x, oy + y + 1)
-      path.lineTo(ox + x, oy + y)
+      path.moveTo(canvasOffsetX + x, canvasOffsetY + y + 1)
+      path.lineTo(canvasOffsetX + x, canvasOffsetY + y)
     }
     // Right edge: top to bottom for clockwise marching
     if (!maskSet.has((y << 16) | (x + 1))) {
-      path.moveTo(ox + x + 1, oy + y)
-      path.lineTo(ox + x + 1, oy + y + 1)
+      path.moveTo(canvasOffsetX + x + 1, canvasOffsetY + y)
+      path.lineTo(canvasOffsetX + x + 1, canvasOffsetY + y + 1)
     }
   }
   return path
@@ -132,7 +132,11 @@ function strokeBorderOnTop(ctx, lineWidth, path = null) {
  * @param {number} lineWidth - line width in art pixels (default 1/canvas.zoom)
  * @param {Path2D|null} path - optional Path2D; uses current path if omitted
  */
-export function strokeMarchingAnts(ctx, lineWidth = 1 / canvas.zoom, path = null) {
+export function strokeMarchingAnts(
+  ctx,
+  lineWidth = 1 / canvas.zoom,
+  path = null,
+) {
   ctx.lineWidth = lineWidth
   ctx.setLineDash([marchDashLen, marchDashLen])
   ctx.strokeStyle = 'white'
@@ -221,63 +225,6 @@ export function renderSelectionBoxOutline(drawPoints) {
 
   ctx.restore()
 }
-
-// /**
-//  * Adds a single vector shape's path to the current canvas path.
-//  * @param {CanvasRenderingContext2D} ctx - selection GUI canvas rendering context
-//  * @param {object} vp - vectorProperties object
-//  * @param {number} xOffset - horizontal draw offset
-//  * @param {number} yOffset - vertical draw offset
-//  */
-// function addVectorToPath(ctx, vp, xOffset, yOffset) {
-//   switch (vp.type) {
-//     case 'fill':
-//       // TODO: (Low Priority) improve visual indicator for fill vector selection
-//       ctx.moveTo(xOffset + vp.px1 + 0.5, yOffset + vp.py1 + 0.5)
-//       ctx.lineTo(xOffset + vp.px1 + 0.5, yOffset + vp.py1 + 0.5)
-//       break
-//     case 'line':
-//       ctx.moveTo(xOffset + vp.px1 + 0.5, yOffset + vp.py1 + 0.5)
-//       ctx.lineTo(xOffset + vp.px2 + 0.5, yOffset + vp.py2 + 0.5)
-//       break
-//     case 'quadCurve':
-//       ctx.moveTo(xOffset + vp.px1 + 0.5, yOffset + vp.py1 + 0.5)
-//       ctx.quadraticCurveTo(
-//         xOffset + vp.px3 + 0.5,
-//         yOffset + vp.py3 + 0.5,
-//         xOffset + vp.px2 + 0.5,
-//         yOffset + vp.py2 + 0.5,
-//       )
-//       break
-//     case 'cubicCurve':
-//       ctx.moveTo(xOffset + vp.px1 + 0.5, yOffset + vp.py1 + 0.5)
-//       ctx.bezierCurveTo(
-//         xOffset + vp.px3 + 0.5,
-//         yOffset + vp.py3 + 0.5,
-//         xOffset + vp.px4 + 0.5,
-//         yOffset + vp.py4 + 0.5,
-//         xOffset + vp.px2 + 0.5,
-//         yOffset + vp.py2 + 0.5,
-//       )
-//       break
-//     case 'ellipse': {
-//       const { px1, py1, px3, radA, radB, angle, x1Offset, y1Offset } = vp
-//       const majorAxis = radA + x1Offset / 2 > 0 ? radA + x1Offset / 2 : 0
-//       let minorAxis = radB + y1Offset / 2 > 0 ? radB + y1Offset / 2 : 0
-//       if (!Number.isInteger(px3)) minorAxis = majorAxis
-//       const centerX = xOffset + px1 + 0.5 + x1Offset / 2
-//       const centerY = yOffset + py1 + 0.5 + y1Offset / 2
-//       // Start point at angle=0 on the ellipse
-//       ctx.moveTo(
-//         centerX + majorAxis * Math.cos(angle),
-//         centerY + majorAxis * Math.sin(angle),
-//       )
-//       ctx.ellipse(centerX, centerY, majorAxis, minorAxis, angle, 0, 2 * Math.PI)
-//       break
-//     }
-//     default:
-//   }
-// }
 
 /**
  * Renders the selection overlay and outline. Starts the marching ants animation

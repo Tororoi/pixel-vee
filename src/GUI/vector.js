@@ -13,7 +13,7 @@ import {
   getRenderYOffset,
 } from '../utils/coordinateHelpers.js'
 import { renderFillVector } from './fill.js'
-import { renderCurveVector, renderCurvePath } from './curve.js'
+import { renderCurvePath, renderCurveVector } from './curve.js'
 import {
   renderEllipseVector,
   renderOffsetEllipseVector,
@@ -85,8 +85,8 @@ export const vectorGui = {
   addLinkedVector(vector, xKey, linkingPoint) {
     if (
       this.selectedPoint.xKey ||
-      ['fill', 'ellipse'].includes(vector.vectorProperties.type) ||
-      ['fill', 'ellipse'].includes(state.vector.properties.type)
+      ['fill', 'ellipse'].includes(vector.vectorProperties.tool) ||
+      ['fill', 'ellipse'].includes(state.vector.properties.tool)
     ) {
       //Don't link a point to itself and don't link to fill or ellipse vectors.
       return
@@ -94,7 +94,7 @@ export const vectorGui = {
     if (!this.linkedVectors[vector.index]) {
       this.linkedVectors[vector.index] = {}
     }
-    if (vector.vectorProperties.type === 'quadCurve') {
+    if (vector.modes.quadCurve) {
       //prevent linking to same vector on px2 if px1 is already linked and vector is quadCurve
       if (xKey === 'px2' && this.linkedVectors[vector.index]['px1']) {
         return
@@ -267,6 +267,8 @@ function resolveOtherVectorCollision(
 function resolveLinkedVectors(keys, normalizedX, normalizedY, vector) {
   if (!vector) return
 
+  const currentVectorModes = state.vector.all[state.vector.currentIndex]?.modes
+
   if (vectorGui.collidedPoint.xKey === 'px3') {
     if (
       normalizedX === state.vector.properties.px1 + state.canvas.cropOffsetX &&
@@ -274,7 +276,10 @@ function resolveLinkedVectors(keys, normalizedX, normalizedY, vector) {
     ) {
       vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px1', yKey: 'py1' })
     }
-    if (state.tool.current.name === 'quadCurve') {
+    // A quadCurve's px3 is its only handle and affects both endpoints,
+    // so also propagate to vectors linked at px2.
+    // A cubicCurve's px3 only governs p1, so skip this check for cubics.
+    if (currentVectorModes?.quadCurve) {
       if (
         normalizedX ===
           state.vector.properties.px2 + state.canvas.cropOffsetX &&
@@ -465,22 +470,21 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
  * @returns {boolean} True if the collision is on a chainable endpoint, false otherwise
  */
 function isChainableCollision() {
-  const chainableTypes = ['line', 'quadCurve', 'cubicCurve']
   const endpointKeys = ['px1', 'px2']
   if (
     vectorGui.selectedCollisionPresent &&
     state.vector.currentIndex !== null &&
     endpointKeys.includes(vectorGui.collidedPoint.xKey)
   ) {
-    const cv = state.vector.all[state.vector.currentIndex]
-    if (chainableTypes.includes(cv?.vectorProperties.type)) return true
+    const currentVector = state.vector.all[state.vector.currentIndex]
+    if (currentVector?.vectorProperties.tool === 'curve') return true
   }
   if (
     state.vector.collidedIndex !== null &&
     endpointKeys.includes(vectorGui.otherCollidedKeys.xKey)
   ) {
-    const ov = state.vector.all[state.vector.collidedIndex]
-    if (chainableTypes.includes(ov?.vectorProperties.type)) return true
+    const collidedVector = state.vector.all[state.vector.collidedIndex]
+    if (collidedVector?.vectorProperties.tool === 'curve') return true
   }
   return false
 }
@@ -553,27 +557,27 @@ function setVectorProperties(vector) {
     state.vector.properties = { ...vector.vectorProperties }
     //Keep properties relative to layer offset
     //All vector types have at least one control point
-    const lx = vector.layer.x
-    const ly = vector.layer.y
-    state.vector.properties.px1 += lx
-    state.vector.properties.py1 += ly
+    const layerX = vector.layer.x
+    const layerY = vector.layer.y
+    state.vector.properties.px1 += layerX
+    state.vector.properties.py1 += layerY
     //line, quadCurve, cubicCurve, ellipse
     if (state.vector.properties.px2 !== undefined) {
-      state.vector.properties.px2 += lx
-      state.vector.properties.py2 += ly
+      state.vector.properties.px2 += layerX
+      state.vector.properties.py2 += layerY
     }
     //quadCurve, cubicCurve, ellipse
     if (state.vector.properties.px3 !== undefined) {
-      state.vector.properties.px3 += lx
-      state.vector.properties.py3 += ly
+      state.vector.properties.px3 += layerX
+      state.vector.properties.py3 += layerY
     }
     //cubicCurve
     if (state.vector.properties.px4 !== undefined) {
-      state.vector.properties.px4 += lx
-      state.vector.properties.py4 += ly
+      state.vector.properties.px4 += layerX
+      state.vector.properties.py4 += layerY
     }
     state.vector.setCurrentIndex(vector.index)
-    // switchTool(vector.vectorProperties.type)
+    // switchTool(vector.vectorProperties.tool)
     enableActionsForSelection()
   }
 }
@@ -667,15 +671,11 @@ function render() {
  * @param {object|null} vector - The vector action to base the properties on
  */
 function renderControlPoints(vectorProperties, vector = null) {
-  switch (vectorProperties.type) {
+  switch (vectorProperties.tool) {
     case 'fill':
       renderFillVector(vectorProperties, vector)
       break
-    case 'line':
-      renderLineVector(vectorProperties, vector)
-      break
-    case 'quadCurve':
-    case 'cubicCurve':
+    case 'curve':
       renderCurveVector(vectorProperties, vector)
       break
     case 'ellipse':
@@ -697,15 +697,11 @@ function renderControlPoints(vectorProperties, vector = null) {
  * @param {object|null} vector - The vector to be rendered
  */
 function renderPath(vectorProperties, vector = null) {
-  switch (vectorProperties.type) {
+  switch (vectorProperties.tool) {
     case 'fill':
       // renderFillVector(state.vector.properties)
       break
-    case 'line':
-      renderLinePath(vectorProperties, vector)
-      break
-    case 'quadCurve':
-    case 'cubicCurve':
+    case 'curve':
       renderCurvePath(vectorProperties, vector)
       break
     case 'ellipse':
@@ -738,7 +734,7 @@ function renderLayerVectors(layer) {
     ) {
       //For each vector, render paths
       if (
-        (vector.vectorProperties.type === state.tool.current.name &&
+        (vector.vectorProperties.tool === state.tool.current.name &&
           state.vector.selectedIndices.size === 0) ||
         state.vector.selectedIndices.has(vector.index)
       ) {
@@ -790,7 +786,7 @@ function renderLayerVectors(layer) {
     ) {
       //For each vector, render control points
       if (
-        ((vector.vectorProperties.type === state.tool.current.name &&
+        ((vector.vectorProperties.tool === state.tool.current.name &&
           state.vector.selectedIndices.size === 0) ||
           state.vector.selectedIndices.has(vector.index)) &&
         vector !== selectedVector
@@ -853,6 +849,7 @@ export function updateLinkedVectors(
     if (saveVectorProperties) {
       state.vector.savedProperties[linkedVectorIndex] = {
         ...linkedVector.vectorProperties,
+        modes: { ...linkedVector.modes },
       }
     } else if (!state.vector.savedProperties[linkedVectorIndex]) {
       //prevent linking vectors during pointermove
@@ -916,63 +913,37 @@ function updateVectorControl(
 export function updateLockedCurrentVectorControlHandle(currentVector, x, y) {
   const savedProperties =
     state.vector.savedProperties[state.vector.currentIndex]
-  //cubic curve
-  switch (savedProperties.type) {
-    case 'cubicCurve': {
-      const currentPointNumber = parseInt(vectorGui.selectedPoint.xKey[2])
-      //point 1 holds point 3, point 2 holds point 4, point 3 and 4 don't hold any points
-      let targetPointNumber = currentPointNumber
-      switch (currentPointNumber) {
-        case 1:
-          targetPointNumber = 3
-          break
-        case 2:
-          targetPointNumber = 4
-          break
-        default:
-        //do nothing
-      }
-      updateVectorControl(
-        currentVector,
-        x,
-        y,
-        savedProperties,
-        currentPointNumber,
-        targetPointNumber,
-      )
-      break
+  let currentPointNumber, targetPointNumber
+  if (savedProperties.modes.cubicCurve) {
+    currentPointNumber = parseInt(vectorGui.selectedPoint.xKey[2])
+    //point 1 holds point 3, point 2 holds point 4, point 3 and 4 don't hold any points
+    switch (currentPointNumber) {
+      case 1:
+        targetPointNumber = 3
+        break
+      case 2:
+        targetPointNumber = 4
+        break
+      default:
+        targetPointNumber = currentPointNumber
     }
-    case 'quadCurve': {
-      const currentPointNumber = parseInt(vectorGui.selectedPoint.xKey[2])
-      //both point 1 and 2 hold point 3
-      const targetPointNumber = 3
-      updateVectorControl(
-        currentVector,
-        x,
-        y,
-        savedProperties,
-        currentPointNumber,
-        targetPointNumber,
-      )
-      break
-    }
-    case 'line': {
-      const currentPointNumber = parseInt(vectorGui.selectedPoint.xKey[2])
-      //point 1 holds point 2, point 2 holds point 1
-      const targetPointNumber = currentPointNumber === 1 ? 2 : 1
-      updateVectorControl(
-        currentVector,
-        x,
-        y,
-        savedProperties,
-        currentPointNumber,
-        targetPointNumber,
-      )
-      break
-    }
-    default:
-    //do nothing
+  } else if (savedProperties.modes.quadCurve) {
+    currentPointNumber = parseInt(vectorGui.selectedPoint.xKey[2])
+    //both point 1 and 2 hold point 3
+    targetPointNumber = 3
+  } else {
+    currentPointNumber = parseInt(vectorGui.selectedPoint.xKey[2])
+    //point 1 holds point 2, point 2 holds point 1
+    targetPointNumber = currentPointNumber === 1 ? 2 : 1
   }
+  updateVectorControl(
+    currentVector,
+    x,
+    y,
+    savedProperties,
+    currentPointNumber,
+    targetPointNumber,
+  )
 }
 
 /**

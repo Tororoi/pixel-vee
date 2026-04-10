@@ -43,6 +43,13 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     state.vector.all[latestAction.moddedVectorIndex].modes = {
       ...latestAction[modType],
     }
+    const vectorPropertiesSnapshot = modType === 'from' ? latestAction.fromVectorProperties : latestAction.toVectorProperties
+    if (vectorPropertiesSnapshot) {
+      Object.assign(
+        state.vector.all[latestAction.moddedVectorIndex].vectorProperties,
+        vectorPropertiesSnapshot,
+      )
+    }
   } else if (latestAction.tool === 'changeDitherPattern') {
     state.vector.all[latestAction.moddedVectorIndex].ditherPatternIndex =
       latestAction[modType]

@@ -1,3 +1,4 @@
+import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { vectorGui } from './vector.js'
 import {
@@ -5,7 +6,10 @@ import {
   getGuiLineWidth,
   doubleStroke,
 } from '../utils/guiHelpers.js'
-import { getRenderXOffset, getRenderYOffset } from '../utils/coordinateHelpers.js'
+import {
+  getRenderXOffset,
+  getRenderYOffset,
+} from '../utils/coordinateHelpers.js'
 
 /**
  * @param {object} vectorProperties - The properties of the vector
@@ -17,25 +21,31 @@ export function renderCurveVector(vectorProperties, vector) {
   const yOffset = getRenderYOffset(vector)
   const lineWidth = getGuiLineWidth()
   let circleRadius = 20 * lineWidth
+  const currentVectorModes =
+    vector?.modes ??
+    state.vector.all[state.vector.currentIndex]?.modes ??
+    state.tool.current.modes
+  const cubicCurveActive = currentVectorModes?.cubicCurve
+  const quadCurveActive = currentVectorModes?.quadCurve
 
-  if (Number.isInteger(px4)) {
+  if (cubicCurveActive && Number.isInteger(px4)) {
     drawControlPointHandle(canvas, xOffset, yOffset, px1, py1, px3, py3)
     drawControlPointHandle(canvas, xOffset, yOffset, px2, py2, px4, py4)
-  } else if (Number.isInteger(px3)) {
+  } else if ((cubicCurveActive || quadCurveActive) && Number.isInteger(px3)) {
     drawControlPointHandle(canvas, xOffset, yOffset, px1, py1, px3, py3)
   }
 
-  let pointsKeys = [
+  const activePointsKeys = [
     { x: 'px1', y: 'py1' },
     { x: 'px2', y: 'py2' },
-    { x: 'px3', y: 'py3' },
-    { x: 'px4', y: 'py4' },
+    ...(quadCurveActive || cubicCurveActive ? [{ x: 'px3', y: 'py3' }] : []),
+    ...(cubicCurveActive ? [{ x: 'px4', y: 'py4' }] : []),
   ]
 
   if (!vector) {
     vectorGui.drawControlPoints(
       vectorProperties,
-      pointsKeys,
+      activePointsKeys,
       circleRadius,
       false,
     )
@@ -43,7 +53,7 @@ export function renderCurveVector(vectorProperties, vector) {
 
   vectorGui.drawControlPoints(
     vectorProperties,
-    pointsKeys,
+    activePointsKeys,
     circleRadius / 3,
     true, // modify
     vector,
@@ -62,8 +72,14 @@ export function renderCurvePath(vectorProperties, vector) {
 
   canvas.vectorGuiCTX.beginPath()
   canvas.vectorGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
+  const currentVectorModes =
+    vector?.modes ??
+    state.vector.all[state.vector.currentIndex]?.modes ??
+    state.tool.current.modes
+  const cubicCurveActive = currentVectorModes?.cubicCurve
+  const quadCurveActive = currentVectorModes?.quadCurve
 
-  if (Number.isInteger(px4)) {
+  if (cubicCurveActive && Number.isInteger(px4)) {
     canvas.vectorGuiCTX.bezierCurveTo(
       xOffset + px3 + 0.5,
       yOffset + py3 + 0.5,
@@ -72,7 +88,7 @@ export function renderCurvePath(vectorProperties, vector) {
       xOffset + px2 + 0.5,
       yOffset + py2 + 0.5,
     )
-  } else if (Number.isInteger(px3)) {
+  } else if ((cubicCurveActive || quadCurveActive) && Number.isInteger(px3)) {
     canvas.vectorGuiCTX.quadraticCurveTo(
       xOffset + px3 + 0.5,
       yOffset + py3 + 0.5,

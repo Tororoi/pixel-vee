@@ -18,109 +18,118 @@ This app is a work in progress. See the bottom of this page for features that ar
   </tr>
   <tr>
     <td width="66" height="52"> <img src="public/pixelv-undo.svg" alt="Undo" width="40"/><img src="public/pixelv-redo.svg" alt="Redo" width="40"/> </td>
-    <td> Actions that make a change to the canvas can be undone. Only affects actions which are non-reversible. Things like changing canvas dimensions, layer opacity, etc. are inherently reversible so do not qualify to be part of the undo functionality.</td>
+    <td> Actions that make a change to the canvas can be undone and redone. Only affects actions which are non-reversible. Things like changing canvas dimensions, layer opacity, etc. are inherently reversible so do not qualify to be part of the undo functionality.</td>
   </tr>
   <tr>
     <td colspan="2"> Color Picker </td>
   </tr>
   <tr>
     <td width="66" height="52"> <img src="public/pixelv-swatches.svg" alt="Swatches" width="40"/> </td>
-    <td> Foreground and background color swatches can be clicked to open a color picker. Color picker uses an HSL gradient selector for intuitive color changing. Ability to adjust individual color channels or type in a hexcode. </td>
+    <td> Primary and secondary color swatches can be clicked to open a color picker. The color picker uses an HSL gradient selector. Individual color channels and hex codes can also be typed in directly. </td>
   </tr>
   <tr>
     <td colspan="2"> Zoom </td>
   </tr>
   <tr>
     <td width="66" height="52"> <img src="public/pixelv-plus.svg" alt="Plus" width="20" hspace="10"/> <img src="public/pixelv-minus.svg" alt="Minus" width="20" hspace="10" /> </td>
-    <td> Zoom with buttons or with the mouse's scrollwheel.  </td>
+    <td> Zoom with buttons or with the mouse's scrollwheel. </td>
   </tr>
   <tr>
     <td colspan="2"> Recenter </td>
   </tr>
   <tr>
     <td width="66" height="52"> <img src="public/pixelv-recenter.svg" alt="Recenter" width="40"/> </td>
-    <td colspan="2"> Sometimes zooming can get out of hand. Press Recenter to bring the canvas back to normal size and starting position. </td>
+    <td> Press Recenter to bring the canvas back to normal size and starting position. </td>
   </tr>
   <tr>
     <td colspan="2"> Clear </td>
   </tr>
   <tr>
     <td width="66" height="52"> <img src="public/pixelv-clear.svg" alt="Clear" width="40"/> </td>
-    <td> Clears canvas layer and removes any vectors that were on that layer. </td>
+    <td> Clears the current canvas layer and removes any vectors on that layer. </td>
   </tr>
 </table>
 
 ## Tools
+
 <table>
   <tr>
     <td colspan="2"> Brush (B) </td>
   </tr>
   <tr>
     <td width="66" height="52"> <img src="public/pixelv-brush.svg" alt="Brush" width="40"/> </td>
-    <td> Draws a pixel where your pointer goes. </td>
+    <td> Draws pixels where your pointer goes. </td>
   </tr>
   <tr>
     <td colspan="2"> Fill (F) </td>
   </tr>
   <tr>
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-fill.svg" alt="Fill" width="40"/> </td>
-    <td> Fill in contiguous spaces of color. This tool is a vector type tool so the position and color can be adjusted at any time. </td>
+    <td> Fill contiguous areas of color. This is a vector tool so the position and color can be adjusted at any time. </td>
   </tr>
   <tr>
-    <td colspan="2"> Line (/ or Hold Shift with Brush) </td>
+    <td colspan="2"> Curve (V) </td>
   </tr>
   <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-line.svg" alt="Line" width="40"/> </td>
-    <td> Draw straight, pixel perfect lines. Click and hold to draw lines. </td>
-  </tr>
-  <tr>
-    <td colspan="2"> Quadratic Bezier Curve (Q) </td>
-  </tr>
-  <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-quadratic-curve.svg" alt="Quadratic Bezier Curve" width="40"/> </td>
-    <td> Draws a quadratic bezier curve (3 control points). Click for each control point of the bezier curve, starting with the two endpoints. This tool is a vector type tool so the control points and color can be adjusted at any time. </td>
-  </tr>
-  <tr>
-    <td colspan="2"> Cubic Bezier Curve (C) </td>
-  </tr>
-  <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-cubic-curve.svg" alt="Cubic Bezier Curve" width="40"/> </td>
-    <td> Draws a cubic bezier curve (4 control points). Click for each control point of the bezier curve, starting with the two endpoints. This tool is a vector type tool so the control points and color can be adjusted at any time. </td>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-cubic-curve.svg" alt="Curve" width="40"/> </td>
+    <td>
+      Draw pixel-perfect lines and bezier curves. The curve type is selected via mode toggles:
+      <ul>
+        <li><strong>Line (/)</strong> — straight line between two endpoints.</li>
+        <li><strong>Quadratic Curve (Q)</strong> — bezier curve with one control point (3 clicks total).</li>
+        <li><strong>Cubic Curve (C)</strong> — bezier curve with two control points (4 clicks total). Connected vectors can be linked for smooth continuity.</li>
+      </ul>
+      All curve types are vector tools — control points and color can be adjusted at any time.
+    </td>
   </tr>
   <tr>
     <td colspan="2"> Ellipse (O) </td>
   </tr>
   <tr>
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-ellipse.svg" alt="Ellipse" width="40"/> </td>
-    <td> Draws an ellipse. Click down to place the center point and then drag to set the first radius. Initially this tool will draw a circle. Afterwards both radii can be adjusted separately to create an ellipse at any angle. By moving the cursor at the subpixel level you can adjust the way the center point behaves. For example, if the center is considered the center of the center pixel, a circle with a radius of 15 pixels will have a diameter of 31 pixels, but if the center is considered the top left corner of the center pixel, that circle will have a diameter of 30 pixels. Both the x and y components of this can be adjusted. This tool is a vector type tool so the control points and color can be adjusted at any time. Hold shift to force a circle. </td>
+    <td> Draws an ellipse. Click to place the center, then drag to set the first radius. Hold Shift to force a circle. Both radii and angle can be adjusted separately after drawing. Subpixel center offset can be adjusted to control how the center pixel behaves. This is a vector tool so control points and color can be adjusted at any time. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Polygon (P) </td>
+  </tr>
+  <tr>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-polygon.svg" alt="Polygon" width="40"/> </td>
+    <td> Draws a quadrilateral by placing four corner points. Hold Shift to force a square. This is a vector tool so control points and color can be adjusted at any time. </td>
   </tr>
   <tr>
     <td colspan="2"> Select (S) </td>
   </tr>
   <tr>
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-select.svg" alt="Select" width="40"/> </td>
-    <td> Select a rectangular area. Restricts other tools to only draw inside selection area. Can be cut or copied via the edit menu. Can be adjusted via 8 control points or moved by clicking inside the selection area while the Select tool is active.</td>
+    <td> Select a rectangular area. Restricts other tools to only draw inside the selection. Can be cut or copied via the Edit menu. The selection can be adjusted via 8 control points or moved by clicking inside it while Select is active. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Magic Wand (W) </td>
+  </tr>
+  <tr>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-magic-wand.svg" alt="Magic Wand" width="40"/> </td>
+    <td> Select pixels by color. Click to select a contiguous region of matching color. Hold Shift to add to the existing selection; hold Alt to subtract from it. </td>
   </tr>
   <tr>
     <td colspan="2"> Eyedropper (Hold Alt) </td>
   </tr>
   <tr>
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-eyedropper.svg" alt="Eyedropper" width="40"/> </td>
-    <td> Select a color that already exists on the canvas. </td>
+    <td> Pick a color from the canvas. Hold Alt with any drawing tool to temporarily activate the eyedropper. </td>
   </tr>
   <tr>
     <td colspan="2"> Grab (Hold Space) </td>
   </tr>
   <tr>
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-grab.svg" alt="Grab" width="40"/> </td>
-    <td> Move the canvas position freely. </td>
+    <td> Pan the canvas view freely. Hold Space with any tool to temporarily activate grab. </td>
   </tr>
-    <tr>
+  <tr>
     <td colspan="2"> Move </td>
   </tr>
   <tr>
-    <td width="66" height="52" valign="middle"> <img src="public/pixelv-move.svg" alt="Grab" width="40"/> </td>
-    <td> Move a layer relative to other layers. </td>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-move.svg" alt="Move" width="40"/> </td>
+    <td> Move the current layer relative to other layers. </td>
   </tr>
 </table>
 
@@ -128,16 +137,28 @@ This app is a work in progress. See the bottom of this page for features that ar
 
 <table>
   <tr>
-    <td colspan="2"> Change Brush Type </td>
+    <td colspan="2"> Brush Type </td>
   </tr>
   <tr>
-    <td colspan="2"> Click the brush preview to toggle between circle and square brushes. </td>
+    <td colspan="2"> Click the brush preview to cycle between circle, square, and custom stamp brush types. </td>
   </tr>
   <tr>
-    <td colspan="2"> Change Brush Size </td>
+    <td colspan="2"> Brush Size </td>
   </tr>
   <tr>
-    <td colspan="2"> Change brush size by moving the slider between 1 and 32 pixels diameter. </td>
+    <td colspan="2"> Adjust brush size using the slider (1–32 pixels diameter). </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Custom Stamp Brush </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Draw a custom shape in the stamp editor to use as a brush. The stamp is applied directionally as the pointer moves. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Dither Pattern </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Choose from 65 dither patterns, applied as a tiled overlay on brush strokes. The dither tile offset (X and Y) can be adjusted to control pattern alignment. </td>
   </tr>
 </table>
 
@@ -148,29 +169,41 @@ This app is a work in progress. See the bottom of this page for features that ar
     <td colspan="2"> Erase (E) </td>
   </tr>
   <tr>
-    <td width="66" height="52"> <img src="public/pixelv-eraser.svg" alt="Brush" width="40"/> </td>
-    <td> Chosen as a mode and not a tool in order to allow use with multiple tools (eg. Erase/Fill, Erase/Line). </td>
+    <td width="66" height="52"> <img src="public/pixelv-eraser.svg" alt="Eraser" width="40"/> </td>
+    <td> Erase instead of draw. Available across multiple tools (e.g. Erase with Fill, Erase with Curve). </td>
   </tr>
   <tr>
     <td colspan="2"> Perfect (Y) </td>
   </tr>
   <tr>
-    <td width="66" height="52"> <img src="public/pixelv-mechanical-pencil.svg" alt="Brush" width="40"/> </td>
-    <td> Perfect pixel mode. Currently only works with pencil tool and enables smooth pixel perfect lines, even while drawing slowly. </td>
+    <td width="66" height="52"> <img src="public/pixelv-mechanical-pencil.svg" alt="Perfect" width="40"/> </td>
+    <td> Perfect pixel mode for the brush tool. Produces smooth pixel-perfect lines even when drawing slowly. </td>
   </tr>
-    <tr>
+  <tr>
     <td colspan="2"> Inject (I) </td>
   </tr>
   <tr>
-    <td width="66" height="52"> <img src="public/pixelv-inject.svg" alt="Brush" width="40"/> </td>
-    <td> Translucent colors will be applied directly instead of placed on top of other colors. </td>
+    <td width="66" height="52"> <img src="public/pixelv-inject.svg" alt="Inject" width="40"/> </td>
+    <td> Translucent colors are applied directly to the canvas instead of being composited on top of existing colors. </td>
   </tr>
-    <tr>
+  <tr>
     <td colspan="2"> Color Mask (M) </td>
   </tr>
   <tr>
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-color-mask.svg" alt="Color Mask" width="40"/> </td>
-    <td> Drawing will only put color down on top of the selected background color (eg. If the background color swatch is red, it will only draw on top of red pixels). </td>
+    <td> Only draws on pixels that match the secondary color (e.g. if the secondary swatch is red, only red pixels will be painted over). </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Two-Color </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Uses the dither pattern to blend between the primary and secondary colors. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Build-Up Dither </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Dither density increases with each overlapping stroke. </td>
   </tr>
 </table>
 
@@ -178,39 +211,39 @@ This app is a work in progress. See the bottom of this page for features that ar
 
 <table>
   <tr>
-    <td colspan="2"> Primary/ Secondary Swatches </td>
+    <td colspan="2"> Primary / Secondary Swatches </td>
   </tr>
   <tr>
     <td width="66" height="52"> <img src="public/pixelv-swatches.svg" alt="Swatches" width="40"/> </td>
-    <td > Primary and secondary swatch. Click a swatch to open the color picker or press (R) to randomize the primary swatch color. </td>
+    <td> Click a swatch to open the color picker. Press (R) to randomize the primary color. </td>
   </tr>
   <tr>
-    <td colspan="2"> Switch Primary/ Secondary Swatches </td>
+    <td colspan="2"> Switch Primary / Secondary </td>
   </tr>
   <tr>
     <td width="66" height="52"> <img src="public/pixelv-switch.svg" alt="Color Switch" width="40"/> </td>
-    <td > Click to switch primary and secondary swatch colors. </td>
+    <td> Click to swap the primary and secondary swatch colors. </td>
   </tr>
   <tr>
-    <td colspan="2"> Palette Knife (Hold K or click on the selected color)</td>
+    <td colspan="2"> Palette Knife (Hold K or click the selected color) </td>
   </tr>
   <tr>
     <td width="66" height="52"> <img src="public/pixelv-palette-knife.svg" alt="Palette Knife" width="40"/> </td>
-    <td> Edit a palette swatch. Click the palette knife then click the color swatch you want to edit to open the color picker. </td>
+    <td> Edit a palette swatch. Click the knife, then click a swatch to open the color picker for that color. </td>
   </tr>
   <tr>
-    <td colspan="2"> Palette Scraper (Hold X)</td>
+    <td colspan="2"> Palette Scraper (Hold X) </td>
   </tr>
   <tr>
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-palette-scraper.svg" alt="Palette Scraper" width="40"/> </td>
-    <td> Remove a palette swatch. Click the palette scraper then click the color swatch you want to remove from the color palette. </td>
+    <td> Remove a palette swatch. Click the scraper, then click a swatch to remove it. </td>
   </tr>
   <tr>
-    <td colspan="2"> Add Color to Palette</td>
+    <td colspan="2"> Add Color to Palette </td>
   </tr>
   <tr>
     <td width="66" height="52"> <img src="public/pixelv-plus.svg" alt="Plus" width="20" hspace="10"/> </td>
-    <td> Click to open the color picker and add the selected color to the palette.  </td>
+    <td> Click to open the color picker and add the selected color to the palette. </td>
   </tr>
 </table>
 
@@ -229,7 +262,7 @@ This app is a work in progress. See the bottom of this page for features that ar
   </tr>
   <tr>
     <td width="66" height="52" valign="middle"> <img src="public/pixelv-reference.svg" alt="Add Reference Layer" width="40"/> </td>
-    <td> Add a new layer to be used for a background reference, such as for tracing. Reference layers cannot be drawn on. </td>
+    <td> Add a non-editable background image layer for use as a tracing reference. </td>
   </tr>
   <tr>
     <td colspan="2"> Remove Layer </td>
@@ -238,52 +271,52 @@ This app is a work in progress. See the bottom of this page for features that ar
     <td width="66" height="52"> <img src="public/pixelv-trash.svg" alt="Remove Layer" width="40"/> </td>
     <td> Click the trash icon to remove the selected layer. </td>
   </tr>
-</table>
-<table>
   <tr>
     <td colspan="2"> Toggle Layer Visibility </td>
   </tr>
   <tr>
     <td width="66" height="52"> <img src="public/pixelv-eyeopen.svg" alt="Toggle Visibility" width="40"/> </td>
-    <td> Click the eye icon to hide/show the layer. </td>
+    <td> Click the eye icon to hide or show the layer. </td>
   </tr>
   <tr>
     <td colspan="2"> Layer Settings </td>
   </tr>
   <tr>
-    <td width="66" height="52"> <img src="public/pixelv-gear.svg" alt="Open Layer Settings" width="40"/> </td>
-    <td> Click the gear icon to open layer settings. The layer's name and opacity can be changed in the layer settings. </td>
+    <td width="66" height="52"> <img src="public/pixelv-gear.svg" alt="Layer Settings" width="40"/> </td>
+    <td> Click the gear icon to open layer settings. The layer's name and opacity can be changed here. </td>
   </tr>
   <tr>
     <td colspan="2"> Change Layer Order </td>
   </tr>
   <tr>
-    <td colspan="2"> Drag a layer to change its position in the layer stack. </td>
+    <td colspan="2"> Drag a layer to reposition it in the layer stack. </td>
   </tr>
 </table>
 
 ## Vectors
-List of vectors in the order they were drawn, newest at the top. The preview image reflects the vector's placement on the entire canvas area.
+
+A panel lists all vectors in the order they were drawn, newest at the top. The thumbnail reflects the vector's placement on the canvas.
 
 <table>
   <tr>
     <td colspan="2"> Select Vector </td>
   </tr>
   <tr>
-    <td colspan="2"> Click on a vector via the vectors dialog box to select or deselect it. Selecting a vector changes the active tool to match the vector. While using the cubic curve tool, vectors can also be selected via the canvas if using an option that shows other cubic curve vectors. </td>
+    <td colspan="2"> Click a vector in the panel to select or deselect it. Selecting a vector switches the active tool to match it and shows its control points on the canvas. </td>
   </tr>
   <tr>
-    <td colspan="2"> Change Color </td>
+    <td colspan="2"> Vector Settings </td>
   </tr>
   <tr>
-    <td colspan="2"> Click on the color to open the color picker and change the vector's color. </td>
+    <td width="66" height="52"> <img src="public/pixelv-gear.svg" alt="Vector Settings" width="40"/> </td>
+    <td> Click the gear icon to open per-vector settings: primary color, secondary color, dither pattern, dither offset, brush size, and mode toggles (eraser, inject, two-color, etc.). </td>
   </tr>
   <tr>
     <td colspan="2"> Toggle Vector Visibility </td>
   </tr>
   <tr>
     <td width="66" height="52"> <img src="public/pixelv-eyeopen.svg" alt="Toggle Visibility" width="40"/> </td>
-    <td> Click the eye icon to hide/show the vector. </td>
+    <td> Click the eye icon to hide or show the vector. </td>
   </tr>
   <tr>
     <td colspan="2"> Remove Vector </td>
@@ -294,6 +327,49 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
   </tr>
 </table>
 
+## Curve Tool Options
+
+Options specific to the Curve tool for controlling how connected vectors interact:
+
+<table>
+  <tr>
+    <td colspan="2"> Chain (7) </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Start a new vector from a colliding endpoint instead of adjusting it. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Link (L) </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Connected control points of other vectors move with the selected point (positional continuity). </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Align (A) </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Moves the opposing handle to the opposite angle for smooth tangential continuity. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Equal (=) </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Enforces equal handle lengths on linked vectors (magnitude continuity). </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Hold (H) </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Maintains the relative angles of all handles attached to the selected control point. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Display Paths </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Toggle the display of vector paths on the canvas. </td>
+  </tr>
+</table>
+
 ## File Menu
 
 <table>
@@ -301,13 +377,13 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
     <td colspan="2"> Open </td>
   </tr>
   <tr>
-    <td colspan="2"> Open saved drawing from your desktop. </td>
+    <td colspan="2"> Open a saved <code>.pxv</code> drawing file from your computer. Supports save file versions 1.0, 1.1, and 1.2 with automatic migration. </td>
   </tr>
   <tr>
-    <td colspan="2"> Save As... </td>
+    <td colspan="2"> Save As... (Cmd + S) </td>
   </tr>
   <tr>
-    <td colspan="2"> Open dialog box to download file with current drawing progress. </td>
+    <td colspan="2"> Download the current drawing as a <code>.pxv</code> file. Save options include whether to preserve history, include the palette, include reference layers, and include removed actions. </td>
   </tr>
   <tr>
     <td colspan="2"> Import </td>
@@ -319,7 +395,7 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
     <td colspan="2"> Export </td>
   </tr>
   <tr>
-    <td colspan="2"> Download the image as .png. </td>
+    <td colspan="2"> Download the drawing as a <code>.png</code> file. </td>
   </tr>
 </table>
 
@@ -330,96 +406,180 @@ List of vectors in the order they were drawn, newest at the top. The preview ima
     <td colspan="2"> Resize Canvas... </td>
   </tr>
   <tr>
-    <td colspan="2"> Open a dialog box to change the canvas dimensions. Canvas dimensions are limited to between 8 and 1024 pixels. </td>
+    <td colspan="2"> Open a dialog to change the canvas dimensions (8–1024 pixels). An overlay lets you drag to reposition existing art within the new bounds before confirming. </td>
   </tr>
   <tr>
     <td colspan="2"> Select All (Cmd + A) </td>
   </tr>
   <tr>
-    <td colspan="2"> Select entire canvas area. </td>
+    <td colspan="2"> Select the entire canvas area. </td>
   </tr>
   <tr>
     <td colspan="2"> Deselect (Cmd + D) </td>
   </tr>
   <tr>
-    <td colspan="2"> Deselect selection area. </td>
+    <td colspan="2"> Deselect the current selection. </td>
   </tr>
   <tr>
     <td colspan="2"> Cut (Cmd + X) </td>
   </tr>
   <tr>
-    <td colspan="2"> Cut selection. </td>
+    <td colspan="2"> Cut the selected area. </td>
   </tr>
   <tr>
     <td colspan="2"> Copy (Cmd + C) </td>
   </tr>
   <tr>
-    <td colspan="2"> Copy selection. </td>
+    <td colspan="2"> Copy the selected area. </td>
   </tr>
-    <tr>
+  <tr>
     <td colspan="2"> Paste (Cmd + V) </td>
   </tr>
   <tr>
-    <td colspan="2"> Paste copied selection. </td>
+    <td colspan="2"> Paste the copied selection. The pasted content can be moved and transformed before confirming with Enter. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Flip Horizontal (Cmd + F) </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Flip the pasted selection horizontally. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Flip Vertical (Cmd + Shift + F) </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Flip the pasted selection vertically. </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Rotate (Cmd + R) </td>
+  </tr>
+  <tr>
+    <td colspan="2"> Rotate the pasted selection 90° clockwise. </td>
   </tr>
 </table>
 
-## <img src="public/pixelv-gear.svg" alt="Settings" width="40" height="40"/>
+## <img src="public/pixelv-gear.svg" alt="Settings" width="40" height="40"/> Settings
 
 <table>
   <tr>
-    <td colspan="2"> Tooltips (T)</td>
+    <td colspan="2"> Tooltips (T) </td>
   </tr>
   <tr>
-    <td colspan="2"> Toggle tooltips on or off. Hover to see a tooltip. </td>
+    <td colspan="2"> Toggle tooltips on or off. Hover over any element to see its tooltip. </td>
   </tr>
   <tr>
-    <td colspan="2"> Grid </td>
+    <td colspan="2"> Grid (G) </td>
   </tr>
   <tr>
-    <td colspan="2"> Toggle the grid on or off. Only displays at higher zoom levels. </td>
+    <td colspan="2"> Toggle the pixel grid on or off. Only displays at higher zoom levels. </td>
   </tr>
   <tr>
     <td colspan="2"> Subgrid Spacing </td>
   </tr>
   <tr>
-    <td colspan="2"> Define the number of pixels between the subgrid overlaid onto the main grid. At a value of 1 no subgrid will be rendered. </td>
+    <td colspan="2"> Set the number of pixels between subgrid lines overlaid on the main grid. At a value of 1, no subgrid is rendered. </td>
   </tr>
 </table>
 
-### Key Features to be added
+## Keyboard Shortcuts
 
-- Dedicated Mobile/ Tablet UI
+| Key | Action |
+|---|---|
+| B | Brush |
+| F | Fill |
+| V | Curve |
+| / | Curve — Line mode |
+| Q | Curve — Quadratic mode |
+| C | Curve — Cubic mode |
+| O | Ellipse |
+| P | Polygon |
+| S | Select |
+| W | Magic Wand |
+| E | Toggle Eraser mode |
+| I | Toggle Inject mode |
+| Y | Toggle Perfect mode |
+| M | Toggle Color Mask mode |
+| G | Toggle Grid |
+| T | Toggle Tooltips |
+| R | Randomize primary color |
+| K (hold) | Palette edit mode |
+| X (hold) | Palette remove mode |
+| Space (hold) | Grab / pan view |
+| Alt (hold) | Eyedropper |
+| Shift (hold) | Constrain (line for Brush, circle for Ellipse, square for Polygon) |
+| 7 | Toggle Chain (Curve tool) |
+| = | Toggle Equal (Curve tool) |
+| A | Toggle Align (Curve tool) |
+| H | Toggle Hold (Curve tool) |
+| L | Toggle Link (Curve tool) |
+| Cmd + Z | Undo |
+| Cmd + Shift + Z | Redo |
+| Cmd + S | Save As |
+| Cmd + A | Select All |
+| Cmd + D | Deselect |
+| Cmd + C | Copy |
+| Cmd + X | Cut |
+| Cmd + V | Paste |
+| Cmd + F | Flip Horizontal |
+| Cmd + Shift + F | Flip Vertical |
+| Cmd + R | Rotate 90° |
+| Enter | Confirm paste |
+| Backspace | Delete selection |
 
-### Stretch Features to be added
+### Features to be added
+
+- Dedicated Mobile / Tablet UI
+
+### Stretch features
 
 #### Vectors:
 - Ability to rasterize vectors and remove them from the vectors interface
-- Editable properties display for vectors
 - Dithered Gradient Tool
-- Smooth curves mode for brush. When drawing quickly, curves can look choppy and angular. Calculates curvature between points. Bonus: convert entire brush stroke into a series of linked vectors.
-- Shapes which are a collection of vectors that can be easily selected to manipulate together.
-- "Cut" vectors at any point to subdivide it into 2 separate curves.
+- Smooth curves mode for brush — calculates curvature between points; bonus: convert a brush stroke into a series of linked vectors
+- Shapes: collections of vectors that can be selected and manipulated together
+- "Cut" a vector at any point to subdivide it into two separate curves
 
 #### Raster Tools:
 - Mask Tool
 - Amorphous selection tool
-#### Brush:
-- Custom stamp brush
+
 #### Utility:
-- 9-Grid Mode: Make repeating patterns for selected tile area. Also offer options for brick repeat and half-drop repeat
+- 9-Grid Mode: make repeating patterns for a selected tile area, with options for brick repeat and half-drop repeat
 - Preview window
 - Toggle magnify pointer area for precise placement of pixels: move magnifier on canvas and then work in magnified window to place pixels. Useful for any tools that use subpixels, and for precise placement of vectors.
 - Perspective Tool: Acts as a custom overlay on the canvas with user defined vanishing points and adjustable lines. 1-point, 2-point, 3-point, multipoint, 4-point curvilinear, 5-point curvilinear, isometric
+
 #### Layers:
-- Layer Settings: Blend-mode, duplicate layer
+- Layer Settings: blend mode, duplicate layer
+
 #### Palette:
-- Color ramps in color picker, along with ability to add an entire color ramp to the palette
-- Optional palette mode with a small canvas for making a palette with a brush, eraser and eyedropper tools instead of the typical way of modifying a palette.
+- Color ramps in color picker, with ability to add an entire ramp to the palette
+- Optional palette canvas mode (small canvas with brush/eraser/eyedropper for building palettes by hand)
+
 #### Animation:
 - Spritesheet options: custom grid to subdivide canvas
-- Animation options: preview spritesheet animation, onion skins as sublayers, preview animation of layers with onion skins individually and simultaneously, set framerate for animation layer, export animation
+- Animation preview, onion skins, per-layer frame rate, export animation
 
-# Run locally
+# Development
+
+## Run locally
 1. Run `npm install`
-2. Start a local server. For example, `php -S localhost:8000` or `serve`
+2. Start a local server: `serve` or `php -S localhost:8000`
+
+## Scripts
+
+| Command | Description |
+|---|---|
+| `npm run sass` | Watch and compile SCSS → CSS |
+| `npm run eslint` | Lint source files (dry run) |
+| `npm run eslintfix` | Lint and auto-fix source files |
+| `npm test` | Run tests once |
+| `npm run test:watch` | Run tests in watch mode |
+
+## Tech Stack
+
+- Vanilla JavaScript (ES modules, no bundler)
+- HTML5 Canvas API
+- SCSS compiled via `npm run sass`
+- Vitest for testing
+- ESLint with jsdoc plugin

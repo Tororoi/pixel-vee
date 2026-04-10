@@ -1,5 +1,9 @@
 import { dom } from '../Context/dom.js'
-import { MINIMUM_DIMENSION, MAXIMUM_DIMENSION } from '../utils/constants.js'
+import {
+  MINIMUM_DIMENSION,
+  MAXIMUM_DIMENSION,
+  CURVE_TYPES,
+} from '../utils/constants.js'
 import { keys } from '../Shortcuts/keys.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
@@ -45,6 +49,7 @@ import {
   deactivateResizeOverlay,
 } from './resizeOverlay.js'
 import { switchTool } from '../Tools/toolbox.js'
+import { changeActionVectorCurveType } from '../Actions/modifyTimeline/modifyTimeline.js'
 import { enableActionsForSelection } from '../DOM/disableDomElements.js'
 
 //====================================//
@@ -427,7 +432,7 @@ function vectorInteract(e) {
     }
     if (vector.index !== state.vector.currentIndex) {
       //switch tool
-      switchTool(vector.vectorProperties.type)
+      switchTool(vector.vectorProperties.tool)
       // vectorGui.reset()
       vectorGui.setVectorProperties(vector)
       canvas.currentLayer.inactiveTools.forEach((tool) => {
@@ -635,6 +640,21 @@ dom.vectorSettingsContainer.addEventListener('click', (e) => {
 
   const modeBtn = e.target.closest('.mode')
   if (modeBtn) {
+    const curveTypeKey = CURVE_TYPES.find((k) => modeBtn.classList.contains(k))
+    if (curveTypeKey) {
+      if (!vector.modes[curveTypeKey]) {
+        changeActionVectorCurveType(vector, curveTypeKey)
+        const modesRow = dom.vectorSettingsContainer.querySelector(
+          '.vector-settings-modes',
+        )
+        CURVE_TYPES.forEach((t) => {
+          modesRow
+            ?.querySelector(`.mode.${t}`)
+            ?.classList.toggle('selected', vector.modes[t])
+        })
+      }
+      return
+    }
     const modeKey = ['eraser', 'inject', 'twoColor'].find((k) =>
       modeBtn.classList.contains(k),
     )

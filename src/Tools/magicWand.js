@@ -28,10 +28,10 @@ function floodFill(startX, startY, containMask = null) {
   )
   const { data, width, height } = imageData
   const startIdx = (startY * width + startX) * 4
-  const tr = data[startIdx]
-  const tg = data[startIdx + 1]
-  const tb = data[startIdx + 2]
-  const ta = data[startIdx + 3]
+  const targetRed = data[startIdx]
+  const targetGreen = data[startIdx + 1]
+  const targetBlue = data[startIdx + 2]
+  const targetAlpha = data[startIdx + 3]
 
   //Determine which "side" of the selection boundary the start pixel is on
   const startIsSelected =
@@ -49,14 +49,14 @@ function floodFill(startX, startY, containMask = null) {
     const i = pos * 4
 
     //Check if pixel color matches target
-    if (ta === 0) {
+    if (targetAlpha === 0) {
       if (data[i + 3] !== 0) continue
     } else {
       if (
-        data[i] !== tr ||
-        data[i + 1] !== tg ||
-        data[i + 2] !== tb ||
-        data[i + 3] !== ta
+        data[i] !== targetRed ||
+        data[i + 1] !== targetGreen ||
+        data[i + 2] !== targetBlue ||
+        data[i + 3] !== targetAlpha
       )
         continue
     }

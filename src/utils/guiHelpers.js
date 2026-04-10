@@ -10,7 +10,7 @@ import { state } from '../Context/state.js'
  * @param {{xMin: number, yMin: number, xMax: number, yMax: number}} [box]
  */
 export function renderSelectionDimOverlay(ctx, box) {
-  const bb = box ?? state.selection.boundaryBox
+  const boundaryBox = box ?? state.selection.boundaryBox
   ctx.save()
   ctx.beginPath()
   ctx.rect(
@@ -20,10 +20,10 @@ export function renderSelectionDimOverlay(ctx, box) {
     canvas.offScreenCVS.height,
   )
   ctx.rect(
-    canvas.xOffset + bb.xMin,
-    canvas.yOffset + bb.yMin,
-    bb.xMax - bb.xMin,
-    bb.yMax - bb.yMin,
+    canvas.xOffset + boundaryBox.xMin,
+    canvas.yOffset + boundaryBox.yMin,
+    boundaryBox.xMax - boundaryBox.xMin,
+    boundaryBox.yMax - boundaryBox.yMin,
   )
   ctx.clip('evenodd')
   ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'

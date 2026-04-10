@@ -1,5 +1,5 @@
-import { dom } from "../Context/dom.js"
-import { canvas } from "../Context/canvas.js"
+import { dom } from '../Context/dom.js'
+import { canvas } from '../Context/canvas.js'
 
 //====================================//
 //======== * * * Layers * * * ========//
@@ -12,13 +12,13 @@ import { canvas } from "../Context/canvas.js"
  */
 export function consolidateLayers(
   includeReference = false,
-  includePreview = false
+  includePreview = false,
 ) {
   canvas.offScreenCTX.clearRect(
     0,
     0,
     canvas.offScreenCVS.width,
-    canvas.offScreenCVS.height
+    canvas.offScreenCVS.height,
   )
   canvas.offScreenCTX.imageSmoothingEnabled = false
   canvas.layers.forEach((layer) => {
@@ -26,21 +26,21 @@ export function consolidateLayers(
       if (!layer.isPreview || includePreview) {
         canvas.offScreenCTX.save()
         canvas.offScreenCTX.globalAlpha = layer.opacity
-        if (layer.type === "raster") {
+        if (layer.type === 'raster') {
           canvas.offScreenCTX.drawImage(
             layer.cvs,
             0,
             0,
             canvas.offScreenCVS.width,
-            canvas.offScreenCVS.height
+            canvas.offScreenCVS.height,
           )
-        } else if (includeReference && layer.type === "reference") {
+        } else if (includeReference && layer.type === 'reference') {
           canvas.offScreenCTX.drawImage(
             layer.img,
             layer.x,
             layer.y,
             layer.img.width * layer.scale,
-            layer.img.height * layer.scale
+            layer.img.height * layer.scale,
           )
         }
         canvas.offScreenCTX.restore()
@@ -54,17 +54,17 @@ export function consolidateLayers(
  * @returns {object} layer
  */
 export function createRasterLayer() {
-  let offscreenLayerCVS = document.createElement("canvas")
-  let offscreenLayerCTX = offscreenLayerCVS.getContext("2d", {
+  let offscreenLayerCVS = document.createElement('canvas')
+  let offscreenLayerCTX = offscreenLayerCVS.getContext('2d', {
     willReadFrequently: true,
   })
   offscreenLayerCVS.width = canvas.offScreenCVS.width
   offscreenLayerCVS.height = canvas.offScreenCVS.height
-  let onscreenLayerCVS = document.createElement("canvas")
-  let onscreenLayerCTX = onscreenLayerCVS.getContext("2d", {
+  let onscreenLayerCVS = document.createElement('canvas')
+  let onscreenLayerCTX = onscreenLayerCVS.getContext('2d', {
     desynchronized: true,
   })
-  onscreenLayerCVS.className = "onscreen-canvas"
+  onscreenLayerCVS.className = 'onscreen-canvas'
   dom.canvasLayers.appendChild(onscreenLayerCVS)
   onscreenLayerCVS.width = onscreenLayerCVS.offsetWidth * canvas.sharpness
   onscreenLayerCVS.height = onscreenLayerCVS.offsetHeight * canvas.sharpness
@@ -74,15 +74,15 @@ export function createRasterLayer() {
     0,
     canvas.sharpness * canvas.zoom,
     0,
-    0
+    0,
   )
   let highestId = canvas.layers.reduce(
     (max, layer) => (layer.id > max ? layer.id : max),
-    0
+    0,
   )
   return {
     id: highestId + 1,
-    type: "raster",
+    type: 'raster',
     title: `Layer ${highestId + 1}`,
     cvs: offscreenLayerCVS,
     ctx: offscreenLayerCTX,
@@ -104,11 +104,11 @@ export function createRasterLayer() {
  * @returns {object} layer
  */
 export function createReferenceLayer(img) {
-  let onscreenLayerCVS = document.createElement("canvas")
-  let onscreenLayerCTX = onscreenLayerCVS.getContext("2d", {
+  let onscreenLayerCVS = document.createElement('canvas')
+  let onscreenLayerCTX = onscreenLayerCVS.getContext('2d', {
     desynchronized: true,
   })
-  onscreenLayerCVS.className = "onscreen-canvas"
+  onscreenLayerCVS.className = 'onscreen-canvas'
   dom.canvasLayers.insertBefore(onscreenLayerCVS, dom.canvasLayers.children[0])
   onscreenLayerCVS.width = onscreenLayerCVS.offsetWidth * canvas.sharpness
   onscreenLayerCVS.height = onscreenLayerCVS.offsetHeight * canvas.sharpness
@@ -118,7 +118,7 @@ export function createReferenceLayer(img) {
     0,
     canvas.sharpness * canvas.zoom,
     0,
-    0
+    0,
   )
   //constrain background image to canvas with scale
   let scale =
@@ -128,11 +128,11 @@ export function createReferenceLayer(img) {
       : canvas.offScreenCVS.width / img.width //TODO: (Low Priority) should be method, not var so width and height can be adjusted without having to set scale again
   let highestId = canvas.layers.reduce(
     (max, layer) => (layer.id > max ? layer.id : max),
-    0
+    0,
   )
   return {
     id: highestId + 1,
-    type: "reference",
+    type: 'reference',
     title: `Reference ${highestId + 1}`,
     img: img,
     dataUrl: img.src,
@@ -142,15 +142,7 @@ export function createReferenceLayer(img) {
     y: 0,
     scale: scale,
     opacity: 1,
-    inactiveTools: [
-      "brush",
-      "fill",
-      "line",
-      "quadCurve",
-      "cubicCurve",
-      "ellipse",
-      "select",
-    ],
+    inactiveTools: ['brush', 'fill', 'curve', 'ellipse', 'select'],
     hidden: false,
     removed: false,
   }
@@ -161,21 +153,21 @@ export function createReferenceLayer(img) {
  * @returns {object} layer
  */
 export function createPreviewLayer() {
-  let offscreenLayerCVS = document.createElement("canvas")
-  let offscreenLayerCTX = offscreenLayerCVS.getContext("2d", {
+  let offscreenLayerCVS = document.createElement('canvas')
+  let offscreenLayerCTX = offscreenLayerCVS.getContext('2d', {
     willReadFrequently: true,
   })
   offscreenLayerCVS.width = canvas.offScreenCVS.width
   offscreenLayerCVS.height = canvas.offScreenCVS.height
-  let onscreenLayerCVS = document.createElement("canvas")
-  let onscreenLayerCTX = onscreenLayerCVS.getContext("2d", {
+  let onscreenLayerCVS = document.createElement('canvas')
+  let onscreenLayerCTX = onscreenLayerCVS.getContext('2d', {
     desynchronized: true,
   })
-  onscreenLayerCVS.className = "onscreen-canvas"
+  onscreenLayerCVS.className = 'onscreen-canvas'
   return {
     id: 0, //preview layer id is always 0. This layer may sometimes be part of canvas.layers and sometimes not, so it's not reliable to use the length of canvas.layers to determine the id. Other layers will always have an id of 1 or greater.
-    type: "raster",
-    title: "Preview Layer",
+    type: 'raster',
+    title: 'Preview Layer',
     cvs: offscreenLayerCVS,
     ctx: offscreenLayerCTX,
     onscreenCvs: onscreenLayerCVS,
@@ -184,15 +176,7 @@ export function createPreviewLayer() {
     y: 0,
     scale: 1,
     opacity: 1,
-    inactiveTools: [
-      "brush",
-      "fill",
-      "line",
-      "quadCurve",
-      "cubicCurve",
-      "ellipse",
-      "select",
-    ],
+    inactiveTools: ['brush', 'fill', 'curve', 'ellipse', 'select'],
     hidden: false,
     removed: false,
     isPreview: true,

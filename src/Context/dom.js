@@ -3,134 +3,132 @@
 //===================================//
 
 // * Raster Layers Container * //
-const canvasLayers = document.querySelector(".canvas-layers")
+const canvasLayers = document.querySelector('.canvas-layers')
 
 // * Tooltip * //
-const tooltip = document.getElementById("tooltip")
+const tooltip = document.getElementById('tooltip')
 
 //====================================//
 //========= * * * Menu * * * =========//
 //====================================//
 
 // * Nav * //
-const navBar = document.querySelector(".nav")
+const navBar = document.querySelector('.nav')
 
-const topMenu = document.getElementById("top-menu")
+const topMenu = document.getElementById('top-menu')
 
 // * Tool Options * //
-const toolOptions = document.querySelector(".tool-options") //TODO: (Medium Priority) Will become quick menu
+const toolOptions = document.querySelector('.tool-options') //TODO: (Medium Priority) Will become quick menu
 
 // * File Menu * //
-const fileSubMenu = document.getElementById("file-submenu")
+const fileSubMenu = document.getElementById('file-submenu')
 // * Save * //
-const saveBtn = document.getElementById("save")
+const saveBtn = document.getElementById('save')
 // * Open Save * //
-const openSaveBtn = document.getElementById("drawing-upload")
+const openSaveBtn = document.getElementById('drawing-upload')
 // * Import * //
-const importBtn = document.getElementById("import")
+const importBtn = document.getElementById('import')
 // * Export * //
-const exportBtn = document.getElementById("export")
+const exportBtn = document.getElementById('export')
 
 // * Edit Menu * //
-const editSubMenu = document.getElementById("edit-submenu")
+const editSubMenu = document.getElementById('edit-submenu')
 // * Canvas Size * //
-const canvasSizeBtn = document.getElementById("canvas-size")
+const canvasSizeBtn = document.getElementById('canvas-size')
 // * Select All * //
-const selectAllBtn = document.getElementById("select-all")
+const selectAllBtn = document.getElementById('select-all')
 // * Deselect * //
-const deselectBtn = document.getElementById("deselect")
+const deselectBtn = document.getElementById('deselect')
 // * Cut * //
-const cutBtn = document.getElementById("cut-selection")
+const cutBtn = document.getElementById('cut-selection')
 // * Copy * //
-const copyBtn = document.getElementById("copy-selection")
+const copyBtn = document.getElementById('copy-selection')
 // * Paste * //
-const pasteBtn = document.getElementById("paste-selection")
+const pasteBtn = document.getElementById('paste-selection')
 // * Delete * //
-const deleteBtn = document.getElementById("delete-selection")
+const deleteBtn = document.getElementById('delete-selection')
 // * Flip Horizontal * //
-const flipHorizontalBtn = document.getElementById("flip-horizontal")
+const flipHorizontalBtn = document.getElementById('flip-horizontal')
 // * Flip Vertical * //
-const flipVerticalBtn = document.getElementById("flip-vertical")
+const flipVerticalBtn = document.getElementById('flip-vertical')
 // * Rotate * //
-const rotateBtn = document.getElementById("rotate-right")
+const rotateBtn = document.getElementById('rotate-right')
 
 // * Settings Button * //
-const settingsBtn = document.getElementById("settings-btn")
+const settingsBtn = document.getElementById('settings-btn')
 
 //====================================//
 //========= * * * Settings * * * =====//
 //====================================//
 
 // * Settings Container * //
-const settingsContainer = document.querySelector(".settings-container")
+const settingsContainer = document.querySelector('.settings-container')
 
 // * Settings Form * //
 //TODO: (Medium Priority) options dialog box where user can set default options such as display vectors, paths, or auto select most recently created vector, custom shortcuts, etc.
 // * Toggle Tooltips * //
-const tooltipBtn = document.getElementById("tooltips-toggle")
+const tooltipBtn = document.getElementById('tooltips-toggle')
 // * Toggle Grid * //
-const gridBtn = document.getElementById("grid-toggle")
+const gridBtn = document.getElementById('grid-toggle')
 // * Grid Spacing * //
-const gridSpacingSpinBtn = document.querySelector(".grid-spacing-spin")
-const gridSpacing = document.getElementById("grid-spacing")
+const gridSpacingSpinBtn = document.querySelector('.grid-spacing-spin')
+const gridSpacing = document.getElementById('grid-spacing')
 // * Cursor Preview * //
-const cursorPreviewBtn = document.getElementById("cursor-preview-toggle")
+const cursorPreviewBtn = document.getElementById('cursor-preview-toggle')
 
 //====================================//
 //====== * * * Save/Export * * * =====//
 //====================================//
 
 // * Save Container * //
-const saveContainer = document.querySelector(".save-container")
+const saveContainer = document.querySelector('.save-container')
 // * Save Form * //
-const saveAsForm = document.querySelector("#save-interface")
+const saveAsForm = document.querySelector('#save-interface')
 // * File Name * //
-const saveAsFileName = document.querySelector("#save-file-name")
+const saveAsFileName = document.querySelector('#save-file-name')
 // * File Size Preview * //
-const fileSizePreview = document.querySelector("#savefile-size")
+const fileSizePreview = document.querySelector('#savefile-size')
 // * Advanced Options * //
 const advancedOptionsContainer = document.querySelector(
-  "#save-advanced-options"
+  '#save-advanced-options',
 )
 // * Cancel Button * //
-const cancelSaveBtn = document.querySelector("#cancel-save-button")
+const cancelSaveBtn = document.querySelector('#cancel-save-button')
 
 // * Export Container * //
-const exportContainer = document.querySelector(".export-container")
+const exportContainer = document.querySelector('.export-container')
 
 //====================================//
 //======= * * * Toolbox * * * ========//
 //====================================//
 
 // * Toolbox Interface * //
-const toolboxContainer = document.querySelector(".toolbox")
+const toolboxContainer = document.querySelector('.toolbox')
 
 // * Undo buttons * //
-const undoBtn = document.getElementById("undo")
-const redoBtn = document.getElementById("redo")
+const undoBtn = document.getElementById('undo')
+const redoBtn = document.getElementById('redo')
 
 // * Reset buttons * //
-const recenterBtn = document.querySelector(".recenter")
-const clearBtn = document.querySelector(".clear")
+const recenterBtn = document.querySelector('.recenter')
+const clearBtn = document.querySelector('.clear')
 
 // * Zoom buttons * //
-const zoomContainer = document.querySelector(".zoom")
+const zoomContainer = document.querySelector('.zoom')
 
 // * Tool buttons * //
-const toolsContainer = document.querySelector(".tools")
+const toolsContainer = document.querySelector('.tools')
 
 const tools = [
-  "brush",
-  "colorMask",
-  "fill",
-  "line",
-  "quadCurve",
-  "cubicCurve",
-  "ellipse",
-  "select",
-  "eyedropper",
-  "grab",
-  "move",
+  'brush',
+  'colorMask',
+  'fill',
+  'curve',
+  'ellipse',
+  'select',
+  'eyedropper',
+  'grab',
+  'move',
 ]
 
 const toolButtons = {}
@@ -139,88 +137,90 @@ tools.forEach((tool) => {
   toolButtons[`${tool}Btn`] = toolsContainer.querySelector(`#${tool}`)
 })
 
-const toolBtn = document.querySelector("#brush")
-toolBtn.classList.add("selected")
+const toolBtn = document.querySelector('#brush')
+toolBtn.classList.add('selected')
 
 //====================================//
 //===== * * * Color Picker * * * =====//
 //====================================//
 
 // * Swatches * //
-const swatch = document.querySelector(".swatch")
-const backSwatch = document.querySelector(".back-swatch")
-const colorSwitch = document.querySelector(".color-switch")
+const swatch = document.querySelector('.swatch')
+const backSwatch = document.querySelector('.back-swatch')
+const colorSwitch = document.querySelector('.color-switch')
 
 // * Dither Picker * //
-const ditherPickerContainer = document.querySelector(".dither-picker-container")
+const ditherPickerContainer = document.querySelector('.dither-picker-container')
 
 // * Color Picker * //
-const colorPickerContainer = document.querySelector(".picker-container")
-const confirmBtn = document.getElementById("confirm-btn")
-const cancelBtn = document.getElementById("cancel-btn")
-const newColorBtn = document.getElementById("newcolor-btn")
+const colorPickerContainer = document.querySelector('.picker-container')
+const confirmBtn = document.getElementById('confirm-btn')
+const cancelBtn = document.getElementById('cancel-btn')
+const newColorBtn = document.getElementById('newcolor-btn')
 
 //====================================//
 //======= * * * Sidebar * * * ========//
 //====================================//
 
 // * Sidebar Menu * //
-const sidebarContainer = document.querySelector(".sidebar")
+const sidebarContainer = document.querySelector('.sidebar')
 
 // * Brush Interface * //
-const brushContainer = document.querySelector(".brush-container")
-const lineWeight = document.querySelector("#line-weight")
-const brushDisplay = document.querySelector(".brush-preview")
-const brushPreview = document.querySelector("#brush-preview")
-const brushSlider = document.querySelector("#brush-size")
-const brushStamp = document.querySelector(".brush-stamp")
-const modesContainer = document.querySelector(".modes-container")
+const brushContainer = document.querySelector('.brush-container')
+const lineWeight = document.querySelector('#line-weight')
+const brushDisplay = document.querySelector('.brush-preview')
+const brushPreview = document.querySelector('#brush-preview')
+const brushSlider = document.querySelector('#brush-size')
+const brushStamp = document.querySelector('.brush-stamp')
+const modesContainer = document.querySelector('.modes-container')
 
 // * Palette Interface * //
-const paletteInterfaceContainer = document.querySelector(".palette-interface")
-const paletteContainer = document.querySelector(".palette-container")
-const paletteColors = document.querySelector(".palette-colors")
-const paletteEditBtn = document.querySelector(".palette-edit")
-const paletteRemoveBtn = document.querySelector(".palette-remove")
-const palettePresetsBtn = document.querySelector(".palette-presets-btn")
-const palettePresetsList = document.querySelector(".palette-presets-list")
+const paletteInterfaceContainer = document.querySelector('.palette-interface')
+const paletteContainer = document.querySelector('.palette-container')
+const paletteColors = document.querySelector('.palette-colors')
+const paletteEditBtn = document.querySelector('.palette-edit')
+const paletteRemoveBtn = document.querySelector('.palette-remove')
+const palettePresetsBtn = document.querySelector('.palette-presets-btn')
+const palettePresetsList = document.querySelector('.palette-presets-list')
 // TODO: (Low Priority) button to create palette from colors on canvas
 
 // * Layers Interface * //
-const layersInterfaceContainer = document.querySelector(".layers-interface")
-const uploadBtn = document.querySelector("#file-upload")
-const newLayerBtn = document.querySelector(".add-layer")
-const deleteLayerBtn = document.querySelector("#delete-layer")
-const layersContainer = document.querySelector(".layers")
-const layerSettingsContainer = document.querySelector(".layer-settings")
+const layersInterfaceContainer = document.querySelector('.layers-interface')
+const uploadBtn = document.querySelector('#file-upload')
+const newLayerBtn = document.querySelector('.add-layer')
+const deleteLayerBtn = document.querySelector('#delete-layer')
+const layersContainer = document.querySelector('.layers')
+const layerSettingsContainer = document.querySelector('.layer-settings')
 
 // * Vectors Interface * //
-const vectorsThumbnails = document.querySelector(".vectors")
-const vectorsInterfaceContainer = document.querySelector(".vectors-interface")
-const vectorSettingsContainer = document.querySelector(".vector-settings")
-const vectorDitherPickerContainer = document.querySelector("#vector-dither-picker")
+const vectorsThumbnails = document.querySelector('.vectors')
+const vectorsInterfaceContainer = document.querySelector('.vectors-interface')
+const vectorSettingsContainer = document.querySelector('.vector-settings')
+const vectorDitherPickerContainer = document.querySelector(
+  '#vector-dither-picker',
+)
 
 // * Stamp Editor * //
-const stampEditorContainer = document.getElementById("stamp-editor")
-const stampEditorCanvas = document.getElementById("stamp-editor-canvas")
-const stampPreviewCanvas = document.getElementById("stamp-preview-canvas")
-const stampEditorApplyBtn = document.getElementById("stamp-editor-apply-btn")
-const stampEditorClearBtn = document.getElementById("stamp-editor-clear-btn")
-const stampDrawBtn = document.getElementById("stamp-draw-btn")
-const stampEraseBtn = document.getElementById("stamp-erase-btn")
-const stampMoveBtn = document.getElementById("stamp-move-btn")
-const stampMirrorHBtn = document.getElementById("stamp-mirror-h-btn")
-const stampMirrorVBtn = document.getElementById("stamp-mirror-v-btn")
-const customBrushTypeBtn = document.getElementById("custom-brush-type-btn")
+const stampEditorContainer = document.getElementById('stamp-editor')
+const stampEditorCanvas = document.getElementById('stamp-editor-canvas')
+const stampPreviewCanvas = document.getElementById('stamp-preview-canvas')
+const stampEditorApplyBtn = document.getElementById('stamp-editor-apply-btn')
+const stampEditorClearBtn = document.getElementById('stamp-editor-clear-btn')
+const stampDrawBtn = document.getElementById('stamp-draw-btn')
+const stampEraseBtn = document.getElementById('stamp-erase-btn')
+const stampMoveBtn = document.getElementById('stamp-move-btn')
+const stampMirrorHBtn = document.getElementById('stamp-mirror-h-btn')
+const stampMirrorVBtn = document.getElementById('stamp-mirror-v-btn')
+const customBrushTypeBtn = document.getElementById('custom-brush-type-btn')
 
 // * Canvas Size Interface * //
-const sizeContainer = document.querySelector(".size-container")
+const sizeContainer = document.querySelector('.size-container')
 
-const dimensionsForm = document.querySelector(".dimensions-form")
-const canvasWidth = document.getElementById("canvas-width")
-const canvasHeight = document.getElementById("canvas-height")
-const canvasSizeCancelBtn = document.getElementById("cancel-resize-button")
-const anchorGrid = document.getElementById("anchor-grid")
+const dimensionsForm = document.querySelector('.dimensions-form')
+const canvasWidth = document.getElementById('canvas-width')
+const canvasHeight = document.getElementById('canvas-height')
+const canvasSizeCancelBtn = document.getElementById('cancel-resize-button')
+const anchorGrid = document.getElementById('anchor-grid')
 
 //====================================//
 //=== * * Vector Transform UI * * ====//
@@ -228,12 +228,12 @@ const anchorGrid = document.getElementById("anchor-grid")
 
 // * Vector Transform UI Mother * //
 const vectorTransformUIContainer = document.querySelector(
-  ".vector-transform-ui-container"
+  '.vector-transform-ui-container',
 )
 
 // * Vector Transform UI * //
 const vectorTransformModeContainer = document.querySelector(
-  ".vector-transform-modes"
+  '.vector-transform-modes',
 )
 
 //====================================//

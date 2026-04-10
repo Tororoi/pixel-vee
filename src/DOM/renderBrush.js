@@ -45,8 +45,22 @@ export const renderBrushModesToDOM = () => {
     mode.className = `mode ${key}`
     mode.id = key
     switch (key) {
+      case 'line':
+        mode.ariaLabel = 'Line (/ or Hold Shift & Brush)'
+        mode.dataset.tooltip =
+          'Line (/ or Hold Shift & Brush) \n\nDraw straight lines'
+        break
+      case 'quadCurve':
+        mode.ariaLabel = 'Quadratic Curve (Q)'
+        mode.dataset.tooltip =
+          'Quadratic Curve (Q) \n\nDraw smooth curves with one control handle'
+        break
+      case 'cubicCurve':
+        mode.ariaLabel = 'Cubic Curve (C)'
+        mode.dataset.tooltip =
+          'Cubic Curve (C) \n\nDraw smooth curves with two control handles'
+        break
       case 'eraser':
-        //add aria label
         mode.ariaLabel = 'Eraser (E)'
         mode.dataset.tooltip = 'Eraser (E)'
         break
@@ -84,16 +98,8 @@ export const renderBrushModesToDOM = () => {
 export function renderToolOptionsToDOM() {
   dom.toolOptions.innerHTML = ''
   if (
-    [
-      'line',
-      'quadCurve',
-      'cubicCurve',
-      'ellipse',
-      'polygon',
-      'select',
-    ].includes(state.tool.current.name)
+    ['curve', 'ellipse', 'polygon', 'select'].includes(state.tool.current.name)
   ) {
-    //render cubic curve options to menu
     Object.entries(state.tool.current.options).forEach(([name, option]) => {
       let optionToggle = createOptionToggle(name, option)
       dom.toolOptions.appendChild(optionToggle)
@@ -107,8 +113,7 @@ export function renderToolOptionsToDOM() {
 export function renderStampOptionsToDOM() {
   const stampSection = document.querySelector('.stamp-options')
   if (!stampSection) return
-  stampSection.style.display =
-    state.tool.current.name === 'brush' ? '' : 'none'
+  stampSection.style.display = state.tool.current.name === 'brush' ? '' : 'none'
 }
 
 /**
@@ -119,14 +124,7 @@ export function renderDitherOptionsToDOM() {
   const ditherSection = document.querySelector('.dither-options')
   if (!ditherSection) return
 
-  const ditherTools = [
-    'brush',
-    'line',
-    'quadCurve',
-    'cubicCurve',
-    'ellipse',
-    'polygon',
-  ]
+  const ditherTools = ['brush', 'curve', 'ellipse', 'polygon']
   if (ditherTools.includes(state.tool.current.name)) {
     ditherSection.style.display = ''
     renderDitherPreviewSVG()
@@ -262,25 +260,25 @@ export function createDitherPatternSVG(pattern, offsetX = 0, offsetY = 0) {
   bg.classList.add('dither-bg-rect')
   patternEl.appendChild(bg)
 
-  let d = ''
+  let pathData = ''
   for (let y = 0; y < 8; y++) {
     let runStart = -1
     for (let x = 0; x < 8; x++) {
       if (pattern.data[y * 8 + x] === 1) {
         if (runStart === -1) runStart = x
       } else if (runStart !== -1) {
-        d += `M${runStart} ${y + 0.5}h${x - runStart}`
+        pathData += `M${runStart} ${y + 0.5}h${x - runStart}`
         runStart = -1
       }
     }
     if (runStart !== -1) {
-      d += `M${runStart} ${y + 0.5}h${8 - runStart}`
+      pathData += `M${runStart} ${y + 0.5}h${8 - runStart}`
     }
   }
   const path = document.createElementNS(SVG_NS, 'path')
   const primaryColor = swatches.primary.color.color
   path.setAttribute('stroke', primaryColor)
-  path.setAttribute('d', d)
+  path.setAttribute('d', pathData)
   path.classList.add('dither-on-path')
   patternEl.appendChild(path)
 
