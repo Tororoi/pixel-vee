@@ -290,7 +290,7 @@ export const curve = {
   brushSize: 1,
   brushType: 'circle',
   brushDisabled: false,
-  ditherPatternIndex: 64,
+  ditherPatternIndex: 63,
   ditherOffsetX: 0,
   ditherOffsetY: 0,
   options: {

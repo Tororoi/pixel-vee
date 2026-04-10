@@ -185,7 +185,7 @@ export function renderBuildUpStepsToDOM() {
   slots.innerHTML = ''
   if (buildUpMode !== 'custom') return
 
-  const buildUpSteps = state.tool.current.buildUpSteps ?? [16, 32, 48, 64]
+  const buildUpSteps = state.tool.current.buildUpSteps ?? [15, 31, 47, 63]
   const activeSlot = state.tool.current.buildUpActiveStepSlot
   const offsetX = state.tool.current.ditherOffsetX ?? 0
   const offsetY = state.tool.current.ditherOffsetY ?? 0
@@ -194,7 +194,7 @@ export function renderBuildUpStepsToDOM() {
     btn.type = 'button'
     btn.className = 'build-up-step-btn'
     btn.dataset.stepSlot = i
-    btn.dataset.tooltip = `Step ${i + 1}: pattern ${patternIndex + 1}/65`
+    btn.dataset.tooltip = `Step ${i + 1}: pattern ${patternIndex + 1}/64`
     if (i === activeSlot) btn.classList.add('selected')
     btn.appendChild(
       createDitherPatternSVG(ditherPatterns[patternIndex], offsetX, offsetY),
@@ -423,7 +423,7 @@ export function updateDitherPickerColors() {
 let ditherPickerInitialized = false
 
 /**
- * Populate the dither picker grid with 65 pattern thumbnails.
+ * Populate the dither picker grid with 64 pattern thumbnails.
  * Called once on first open.
  */
 export function initDitherPicker() {
@@ -436,7 +436,7 @@ export function initDitherPicker() {
     btn.type = 'button'
     btn.className = 'dither-grid-btn'
     btn.dataset.patternIndex = i
-    btn.dataset.tooltip = i === 32 ? '33/65: Checkerboard' : `${i + 1}/65`
+    btn.dataset.tooltip = i === 31 ? '32/64: Checkerboard' : `${i + 1}/64`
     btn.appendChild(createDitherPatternSVG(ditherPatterns[i]))
     grid.appendChild(btn)
   }

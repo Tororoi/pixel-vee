@@ -1,6 +1,6 @@
 /**
  * 8x8 Bayer ordered dithering matrix and pattern generation.
- * Generates 65 threshold levels (0-64) for dither brush patterns.
+ * Generates 64 threshold levels (1-64) for dither brush patterns.
  */
 
 // Standard 8x8 Bayer matrix (values 0-63)
@@ -18,16 +18,16 @@ const bayerMatrix = [
 const flatBayer = bayerMatrix.flat()
 
 /**
- * Generate 65 dither patterns from the Bayer matrix.
- * Level 0: all pixels off
- * Level N (1-63): pixels where bayerMatrix value < N are "on"
- * Level 64: all pixels on
+ * Generate 64 dither patterns from the Bayer matrix.
+ * Index 0: 1 pixel on (threshold=1)
+ * Index N: pixels where bayerMatrix value < N+1 are "on"
+ * Index 63: all pixels on (threshold=64)
  * @type {Array<{width: number, height: number, data: number[]}>}
  */
-export const ditherPatterns = Array.from({ length: 65 }, (_, threshold) => ({
+export const ditherPatterns = Array.from({ length: 64 }, (_, threshold) => ({
   width: 8,
   height: 8,
-  data: flatBayer.map((v) => (v < threshold ? 1 : 0)),
+  data: flatBayer.map((v) => (v < threshold + 1 ? 1 : 0)),
 }))
 
 /**
