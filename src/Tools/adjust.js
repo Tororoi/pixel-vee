@@ -381,6 +381,13 @@ function updateLineLinkedCurveHandles(currentVector) {
   } of lineLinkedCurvesInfo) {
     const savedProps = state.vector.savedProperties[linkedVector.index]
     if (!savedProps) continue
+    // When hold is active, moving the opposite endpoint should not affect the linked curve
+    if (
+      state.tool.current.options.hold?.active &&
+      selectedXKey !== lineJunctionXKey
+    ) {
+      continue
+    }
     const junctionX = lineJunctionXKey === 'px1' ? px1X : px2X
     const junctionY = lineJunctionXKey === 'px1' ? px1Y : px2Y
     // Line direction from the junction toward the other endpoint
