@@ -336,7 +336,7 @@ function polygonSteps() {
   switch (canvas.pointerEvent) {
     case 'pointerdown':
       vectorGui.reset()
-      state.vector.properties.type = state.tool.current.name
+      state.vector.properties.tool = state.tool.current.name
       state.vector.properties.px1 = normalizedX
       state.vector.properties.py1 = normalizedY
       updateVertices()
@@ -380,9 +380,9 @@ function polygonSteps() {
           vectorIndices: [uniqueVectorKey],
         },
       })
-      const lx = canvas.currentLayer.x
-      const ly = canvas.currentLayer.y
-      const p = state.vector.properties
+      const layerX = canvas.currentLayer.x
+      const layerY = canvas.currentLayer.y
+      const vectorProperties = state.vector.properties
       state.vector.all[uniqueVectorKey] = {
         index: uniqueVectorKey,
         action: state.timeline.currentAction,
@@ -399,22 +399,22 @@ function polygonSteps() {
           (((state.tool.current.ditherOffsetY + state.canvas.cropOffsetY) % 8) +
             8) %
           8,
-        recordedLayerX: lx,
-        recordedLayerY: ly,
+        recordedLayerX: layerX,
+        recordedLayerY: layerY,
         brushSize: state.tool.current.brushSize,
         brushType: state.tool.current.brushType,
         vectorProperties: {
-          ...p,
-          px0: p.px0 - lx,
-          py0: p.py0 - ly,
-          px1: p.px1 - lx,
-          py1: p.py1 - ly,
-          px2: p.px2 - lx,
-          py2: p.py2 - ly,
-          px3: p.px3 - lx,
-          py3: p.py3 - ly,
-          px4: p.px4 - lx,
-          py4: p.py4 - ly,
+          ...vectorProperties,
+          px0: vectorProperties.px0 - layerX,
+          py0: vectorProperties.py0 - layerY,
+          px1: vectorProperties.px1 - layerX,
+          py1: vectorProperties.py1 - layerY,
+          px2: vectorProperties.px2 - layerX,
+          py2: vectorProperties.py2 - layerY,
+          px3: vectorProperties.px3 - layerX,
+          py3: vectorProperties.py3 - layerY,
+          px4: vectorProperties.px4 - layerX,
+          py4: vectorProperties.py4 - layerY,
         },
         hidden: false,
         removed: false,

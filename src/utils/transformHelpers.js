@@ -199,7 +199,7 @@ export function transformVectorContent(
   for (let vectorIndex in vectorsSavedProperties) {
     let originalProperties = { ...vectorsSavedProperties[vectorIndex] }
     let vector = vectors[vectorIndex]
-    if (originalProperties.type === "ellipse") {
+    if (originalProperties.tool === "ellipse") {
       // Calculate the new tangent points
       transformControlPoint(
         vector,

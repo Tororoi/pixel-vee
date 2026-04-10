@@ -119,19 +119,19 @@ export function syncEllipseProperties(
     vectorProperties[shiftedXKey] = newX
     vectorProperties[shiftedYKey] = newY
   }
-  let dxa = vectorProperties.px2 - vectorProperties.px1
-  let dya = vectorProperties.py2 - vectorProperties.py1
-  let dxb = vectorProperties.px3 - vectorProperties.px1
-  let dyb = vectorProperties.py3 - vectorProperties.py1
+  let deltaXa = vectorProperties.px2 - vectorProperties.px1
+  let deltaYa = vectorProperties.py2 - vectorProperties.py1
+  let deltaXb = vectorProperties.px3 - vectorProperties.px1
+  let deltaYb = vectorProperties.py3 - vectorProperties.py1
   if (shiftedXKey === 'px1') {
     vectorProperties[shiftedXKey] = newX
     vectorProperties[shiftedYKey] = newY
-    vectorProperties.px2 = vectorProperties.px1 + dxa
-    vectorProperties.py2 = vectorProperties.py1 + dya
-    vectorProperties.px3 = vectorProperties.px1 + dxb
-    vectorProperties.py3 = vectorProperties.py1 + dyb
+    vectorProperties.px2 = vectorProperties.px1 + deltaXa
+    vectorProperties.py2 = vectorProperties.py1 + deltaYa
+    vectorProperties.px3 = vectorProperties.px1 + deltaXb
+    vectorProperties.py3 = vectorProperties.py1 + deltaYb
   } else if (shiftedXKey === 'px2') {
-    vectorProperties.radA = Math.sqrt(dxa * dxa + dya * dya)
+    vectorProperties.radA = Math.sqrt(deltaXa * deltaXa + deltaYa * deltaYa)
     if (vectorProperties.forceCircle) {
       vectorProperties.radB = vectorProperties.radA
     }
@@ -147,7 +147,7 @@ export function syncEllipseProperties(
     vectorProperties.py3 = newVertex.y
     updateEllipseOffsets(vectorProperties, vectorProperties.forceCircle, 0)
   } else if (shiftedXKey === 'px3') {
-    vectorProperties.radB = Math.sqrt(dxb * dxb + dyb * dyb)
+    vectorProperties.radB = Math.sqrt(deltaXb * deltaXb + deltaYb * deltaYb)
     if (vectorProperties.forceCircle) {
       vectorProperties.radA = vectorProperties.radB
     }
@@ -272,7 +272,7 @@ function ellipseSteps() {
         case 1:
           //reset control points
           vectorGui.reset()
-          state.vector.properties.type = state.tool.current.name
+          state.vector.properties.tool = state.tool.current.name
           state.vector.properties.px1 = normalizedX
           state.vector.properties.py1 = normalizedY
           state.vector.properties.forceCircle = true //force circle initially
@@ -284,9 +284,11 @@ function ellipseSteps() {
         //initialize circle with radius 15 by default?
         state.vector.properties.px2 = normalizedX
         state.vector.properties.py2 = normalizedY
-        let dxa = state.vector.properties.px2 - state.vector.properties.px1
-        let dya = state.vector.properties.py2 - state.vector.properties.py1
-        state.vector.properties.radA = Math.sqrt(dxa * dxa + dya * dya)
+        let deltaXa = state.vector.properties.px2 - state.vector.properties.px1
+        let deltaYa = state.vector.properties.py2 - state.vector.properties.py1
+        state.vector.properties.radA = Math.sqrt(
+          deltaXa * deltaXa + deltaYa * deltaYa,
+        )
       }
       updateEllipseOffsets(state.vector.properties)
       //onscreen preview
@@ -328,9 +330,13 @@ function ellipseSteps() {
         if (state.tool.clickCounter === 1) {
           state.vector.properties.px2 = normalizedX
           state.vector.properties.py2 = normalizedY
-          let dxa = state.vector.properties.px2 - state.vector.properties.px1
-          let dya = state.vector.properties.py2 - state.vector.properties.py1
-          state.vector.properties.radA = Math.sqrt(dxa * dxa + dya * dya)
+          let deltaXa =
+            state.vector.properties.px2 - state.vector.properties.px1
+          let deltaYa =
+            state.vector.properties.py2 - state.vector.properties.py1
+          state.vector.properties.radA = Math.sqrt(
+            deltaXa * deltaXa + deltaYa * deltaYa,
+          )
         }
         updateEllipseOffsets(state.vector.properties)
         //onscreen preview
@@ -363,9 +369,11 @@ function ellipseSteps() {
       break
     case 'pointerup':
       if (state.tool.clickCounter === 1) {
-        let dxa = state.vector.properties.px2 - state.vector.properties.px1
-        let dya = state.vector.properties.py2 - state.vector.properties.py1
-        state.vector.properties.radA = Math.sqrt(dxa * dxa + dya * dya)
+        let deltaXa = state.vector.properties.px2 - state.vector.properties.px1
+        let deltaYa = state.vector.properties.py2 - state.vector.properties.py1
+        state.vector.properties.radA = Math.sqrt(
+          deltaXa * deltaXa + deltaYa * deltaYa,
+        )
 
         //set px3 at right angle on the circle
         let newVertex = getOpposingEllipseVertex(
@@ -379,9 +387,11 @@ function ellipseSteps() {
         state.vector.properties.px3 = newVertex.x
         state.vector.properties.py3 = newVertex.y
         //set rb
-        let dxb = state.vector.properties.px3 - state.vector.properties.px1
-        let dyb = state.vector.properties.py3 - state.vector.properties.py1
-        state.vector.properties.radB = Math.sqrt(dxb * dxb + dyb * dyb)
+        let deltaXb = state.vector.properties.px3 - state.vector.properties.px1
+        let deltaYb = state.vector.properties.py3 - state.vector.properties.py1
+        state.vector.properties.radB = Math.sqrt(
+          deltaXb * deltaXb + deltaYb * deltaYb,
+        )
 
         updateEllipseOffsets(state.vector.properties)
         state.vector.properties = {

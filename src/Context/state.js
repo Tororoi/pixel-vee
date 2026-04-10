@@ -33,7 +33,7 @@ export const state = {
   // VECTOR — vector/shape storage and editing state
   vector: {
     properties: {
-      // type: null,
+      // tool: null,
       // px1: null,
       // py1: null,
       // px2: null,

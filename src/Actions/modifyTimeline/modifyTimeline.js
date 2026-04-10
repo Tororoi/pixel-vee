@@ -1,6 +1,10 @@
-import { state } from "../../Context/state.js"
-import { tools } from "../../Tools/index.js"
-import { addToTimeline } from "../undoRedo/undoRedo.js"
+import { state } from '../../Context/state.js'
+import { tools } from '../../Tools/index.js'
+import { vectorGui } from '../../GUI/vector.js'
+import { addToTimeline } from '../undoRedo/undoRedo.js'
+import { renderCanvas } from '../../Canvas/render.js'
+import { renderVectorsToDOM } from '../../DOM/render.js'
+import { CURVE_TYPES } from '../../utils/constants.js'
 
 //====================================//
 //==== * * * Modify Actions * * * ====//
@@ -57,7 +61,11 @@ export function modifyVectorAction(moddedVector) {
  * @param {number} oldIndex - The dither pattern index before the modification
  * @param {number} newIndex - The dither pattern index after the modification
  */
-export function changeActionVectorDitherPattern(moddedVector, oldIndex, newIndex) {
+export function changeActionVectorDitherPattern(
+  moddedVector,
+  oldIndex,
+  newIndex,
+) {
   addToTimeline({
     tool: tools.changeDitherPattern.name,
     layer: moddedVector.layer,
@@ -76,7 +84,11 @@ export function changeActionVectorDitherPattern(moddedVector, oldIndex, newIndex
  * @param {{x: number, y: number}} oldOffset - The dither offset before the modification
  * @param {{x: number, y: number}} newOffset - The dither offset after the modification
  */
-export function changeActionVectorDitherOffset(moddedVector, oldOffset, newOffset) {
+export function changeActionVectorDitherOffset(
+  moddedVector,
+  oldOffset,
+  newOffset,
+) {
   addToTimeline({
     tool: tools.changeDitherOffset.name,
     layer: moddedVector.layer,
@@ -156,8 +168,16 @@ export function removeActionVector(moddedVector) {
  * @param {object} moddedVector - The vector to be modified
  * @param {object} oldModes - The modes before the modification
  * @param {object} newModes - The modes after the modification
+ * @param {object|null} oldVectorProperties - Snapshot of vectorProperties before the modification (optional)
+ * @param {object|null} newVectorProperties - Snapshot of vectorProperties after the modification (optional)
  */
-export function changeActionVectorMode(moddedVector, oldModes, newModes) {
+export function changeActionVectorMode(
+  moddedVector,
+  oldModes,
+  newModes,
+  oldVectorProperties = null,
+  newVectorProperties = null,
+) {
   addToTimeline({
     tool: tools.changeMode.name,
     layer: moddedVector.layer,
@@ -167,8 +187,70 @@ export function changeActionVectorMode(moddedVector, oldModes, newModes) {
       moddedVectorIndex: moddedVector.index,
       from: oldModes,
       to: newModes,
+      fromVectorProperties: oldVectorProperties,
+      toVectorProperties: newVectorProperties,
     },
   })
+}
+
+/**
+ * Atomically switch a curve vector's curve type (line | quadCurve | cubicCurve),
+ * initializing any missing control points and recording the full change for undo/redo.
+ * @param {object} targetVector - The curve vector to update
+ * @param {string} newCurveType - 'line' | 'quadCurve' | 'cubicCurve'
+ */
+export function changeActionVectorCurveType(targetVector, newCurveType) {
+  const oldModes = { ...targetVector.modes }
+  const oldVectorProperties = {
+    px3: targetVector.vectorProperties.px3,
+    py3: targetVector.vectorProperties.py3,
+    px4: targetVector.vectorProperties.px4,
+    py4: targetVector.vectorProperties.py4,
+  }
+  CURVE_TYPES.forEach((curveType) => {
+    targetVector.modes[curveType] = curveType === newCurveType
+  })
+  const vectorProperties = targetVector.vectorProperties
+  if (newCurveType === 'quadCurve' || newCurveType === 'cubicCurve') {
+    if (vectorProperties.px3 == null || vectorProperties.py3 == null) {
+      vectorProperties.px3 = Math.round(
+        (vectorProperties.px1 + vectorProperties.px2) / 2,
+      )
+      vectorProperties.py3 = Math.round(
+        (vectorProperties.py1 + vectorProperties.py2) / 2,
+      )
+    }
+  }
+  if (newCurveType === 'cubicCurve') {
+    if (vectorProperties.px4 == null || vectorProperties.py4 == null) {
+      vectorProperties.px4 = Math.round(
+        (vectorProperties.px1 + vectorProperties.px2) / 2,
+      )
+      vectorProperties.py4 = Math.round(
+        (vectorProperties.py1 + vectorProperties.py2) / 2,
+      )
+    }
+  }
+  const newVectorProperties = {
+    px3: targetVector.vectorProperties.px3,
+    py3: targetVector.vectorProperties.py3,
+    px4: targetVector.vectorProperties.px4,
+    py4: targetVector.vectorProperties.py4,
+  }
+  if (state.vector.currentIndex === targetVector.index) {
+    state.vector.properties = { ...targetVector.vectorProperties }
+  }
+  changeActionVectorMode(
+    targetVector,
+    oldModes,
+    { ...targetVector.modes },
+    oldVectorProperties,
+    newVectorProperties,
+  )
+  state.clearRedoStack()
+  renderCanvas(targetVector.layer, true)
+  vectorGui.render()
+  renderVectorsToDOM()
 }
 
 /**

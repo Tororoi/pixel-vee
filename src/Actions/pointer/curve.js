@@ -3,36 +3,7 @@ import { actionLine } from './line.js'
 import { renderPoints } from './helpers.js'
 
 /**
- * User action for process to set control points for quadratic bezier
- * @param {number} startx - (Integer)
- * @param {number} starty - (Integer)
- * @param {number} endx - (Integer)
- * @param {number} endy - (Integer)
- * @param {number} controlx - (Integer)
- * @param {number} controly - (Integer)
- * @param {number} stepNum - (Integer)
- * @param {object} strokeCtx - StrokeContext
- */
-export function actionQuadraticCurve(
-  startx,
-  starty,
-  endx,
-  endy,
-  controlx,
-  controly,
-  stepNum,
-  strokeCtx,
-) {
-  if (stepNum === 1) {
-    actionLine(startx, starty, endx, endy, strokeCtx)
-  } else if (stepNum === 2) {
-    let plotPoints = plotQuadBezier(startx, starty, controlx, controly, endx, endy)
-    renderPoints(plotPoints, strokeCtx)
-  }
-}
-
-/**
- * User action for process to set control points for cubic bezier
+ * User action for process to set control points for curve (line, quadratic, cubic bezier)
  * @param {number} startx - (Integer)
  * @param {number} starty - (Integer)
  * @param {number} endx - (Integer)
@@ -44,7 +15,7 @@ export function actionQuadraticCurve(
  * @param {number} stepNum - (Integer)
  * @param {object} strokeCtx - StrokeContext
  */
-export function actionCubicCurve(
+export function actionCurve(
   startx,
   starty,
   endx,
@@ -59,7 +30,14 @@ export function actionCubicCurve(
   if (stepNum === 1) {
     actionLine(startx, starty, endx, endy, strokeCtx)
   } else if (stepNum === 2) {
-    let plotPoints = plotQuadBezier(startx, starty, controlx1, controly1, endx, endy)
+    let plotPoints = plotQuadBezier(
+      startx,
+      starty,
+      controlx1,
+      controly1,
+      endx,
+      endy,
+    )
     renderPoints(plotPoints, strokeCtx)
   } else if (stepNum === 3) {
     let plotPoints = plotCubicBezier(

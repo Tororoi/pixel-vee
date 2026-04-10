@@ -1,12 +1,12 @@
-import { state } from "../../Context/state.js"
-import { canvas } from "../../Context/canvas.js"
-import { vectorGui } from "../../GUI/vector.js"
-import { renderCanvas } from "../../Canvas/render.js"
+import { state } from '../../Context/state.js'
+import { canvas } from '../../Context/canvas.js'
+import { vectorGui } from '../../GUI/vector.js'
+import { renderCanvas } from '../../Canvas/render.js'
 import {
   findVectorShapeCentroid,
   updateVectorProperties,
-} from "../../utils/vectorHelpers.js"
-import { modifyVectorAction } from "../modifyTimeline/modifyTimeline.js"
+} from '../../utils/vectorHelpers.js'
+import { modifyVectorAction } from '../modifyTimeline/modifyTimeline.js'
 
 //=============================================//
 //======== * * * Vector Transform * * * =======//
@@ -30,8 +30,8 @@ export function actionFlipVectors(flipHorizontally) {
 
     for (let i = 1; i <= 4; i++) {
       if (
-        "px" + i in vector.vectorProperties &&
-        "py" + i in vector.vectorProperties
+        'px' + i in vector.vectorProperties &&
+        'py' + i in vector.vectorProperties
       ) {
         vectorXPoints.push(vector.vectorProperties[`px${i}`])
         vectorYPoints.push(vector.vectorProperties[`py${i}`])
@@ -53,11 +53,12 @@ export function actionFlipVectors(flipHorizontally) {
     referenceVector = vector //TODO: (Low Priority) Determine a better method for setting a reference vector or remove the need for one.
     state.vector.savedProperties[vectorIndex] = {
       ...vector.vectorProperties,
+      modes: { ...vector.modes },
     }
     for (let i = 1; i <= 4; i++) {
       if (
-        "px" + i in vector.vectorProperties &&
-        "py" + i in vector.vectorProperties
+        'px' + i in vector.vectorProperties &&
+        'py' + i in vector.vectorProperties
       ) {
         const xKey = `px${i}`
         const yKey = `py${i}`
@@ -97,7 +98,7 @@ export function actionRotateVectors(degrees) {
     //Update shape center
     const [centerX, centerY] = findVectorShapeCentroid(
       vectorIndicesSet,
-      state.vector.all
+      state.vector.all,
     )
     state.vector.shapeCenterX = centerX + canvas.currentLayer.x
     state.vector.shapeCenterY = centerY + canvas.currentLayer.y
@@ -110,11 +111,12 @@ export function actionRotateVectors(degrees) {
     referenceVector = vector //TODO: (Low Priority) Determine a better method for setting a reference vector or remove the need for one.
     state.vector.savedProperties[vectorIndex] = {
       ...vector.vectorProperties,
+      modes: { ...vector.modes },
     }
     for (let i = 1; i <= 4; i++) {
       if (
-        "px" + i in vector.vectorProperties &&
-        "py" + i in vector.vectorProperties
+        'px' + i in vector.vectorProperties &&
+        'py' + i in vector.vectorProperties
       ) {
         const xKey = `px${i}`
         const yKey = `py${i}`
@@ -126,12 +128,12 @@ export function actionRotateVectors(degrees) {
         newX = Math.floor(
           cos * (vector.vectorProperties[xKey] - rotationOriginX) -
             sin * (vector.vectorProperties[yKey] - rotationOriginY) +
-            rotationOriginX
+            rotationOriginX,
         )
         newY = Math.floor(
           sin * (vector.vectorProperties[xKey] - rotationOriginX) +
             cos * (vector.vectorProperties[yKey] - rotationOriginY) +
-            rotationOriginY
+            rotationOriginY,
         )
         updateVectorProperties(vector, newX, newY, xKey, yKey)
       }

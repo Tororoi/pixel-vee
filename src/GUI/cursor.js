@@ -246,7 +246,7 @@ function drawCursorBox(lineWeight) {
   const lineWidth = getGuiLineWidth(lineWeight)
   const { entry, brushSize: activeBrushSize } = getActiveBrushStampEntry()
   let brushOffset = Math.floor(activeBrushSize / 2)
-  let ol = lineWidth / 2 // line offset to stroke off-center
+  let lineOffsetToCenter = lineWidth / 2 // line offset to stroke off-center
 
   const pixelSet = entry.pixelSet
 
@@ -264,20 +264,20 @@ function drawCursorBox(lineWeight) {
 
     // Draw lines only for sides that don't have neighboring pixels
     if (!hasTopNeighbor) {
-      canvas.vectorGuiCTX.moveTo(x, y - ol)
-      canvas.vectorGuiCTX.lineTo(x + 1, y - ol)
+      canvas.vectorGuiCTX.moveTo(x, y - lineOffsetToCenter)
+      canvas.vectorGuiCTX.lineTo(x + 1, y - lineOffsetToCenter)
     }
     if (!hasRightNeighbor) {
-      canvas.vectorGuiCTX.moveTo(x + 1 + ol, y)
-      canvas.vectorGuiCTX.lineTo(x + 1 + ol, y + 1)
+      canvas.vectorGuiCTX.moveTo(x + 1 + lineOffsetToCenter, y)
+      canvas.vectorGuiCTX.lineTo(x + 1 + lineOffsetToCenter, y + 1)
     }
     if (!hasBottomNeighbor) {
-      canvas.vectorGuiCTX.moveTo(x, y + 1 + ol)
-      canvas.vectorGuiCTX.lineTo(x + 1, y + 1 + ol)
+      canvas.vectorGuiCTX.moveTo(x, y + 1 + lineOffsetToCenter)
+      canvas.vectorGuiCTX.lineTo(x + 1, y + 1 + lineOffsetToCenter)
     }
     if (!hasLeftNeighbor) {
-      canvas.vectorGuiCTX.moveTo(x - ol, y)
-      canvas.vectorGuiCTX.lineTo(x - ol, y + 1)
+      canvas.vectorGuiCTX.moveTo(x - lineOffsetToCenter, y)
+      canvas.vectorGuiCTX.lineTo(x - lineOffsetToCenter, y + 1)
     }
   }
 
