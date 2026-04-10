@@ -48,16 +48,6 @@ const setCoordinates = (e) => {
  */
 function handleKeyDown(e) {
   // e.preventDefault() - May conditionally need this for certain shortcuts, but try to avoid doing so
-  //Prevent default bookmark behavior (KeyD)
-  //Prevent default find behavior (KeyF)
-  //Prevent default reload behavior (KeyR)
-  //Prevent default save behavior (KeyS)
-  if (
-    ['KeyD', 'KeyF', 'KeyR', 'KeyS'].includes(e.code) &&
-    (keys.MetaLeft || keys.MetaRight)
-  ) {
-    e.preventDefault()
-  }
   //Prevent repeated activations while holding a key down
   if (e.repeat) {
     return
@@ -68,6 +58,16 @@ function handleKeyDown(e) {
     document.activeElement.type === 'text'
   ) {
     return
+  }
+  //Prevent default bookmark behavior (KeyD)
+  //Prevent default find behavior (KeyF)
+  //Prevent default reload behavior (KeyR)
+  //Prevent default save behavior (KeyS)
+  if (
+    ['KeyD', 'KeyF', 'KeyR', 'KeyS'].includes(e.code) &&
+    (keys.MetaLeft || keys.MetaRight)
+  ) {
+    e.preventDefault()
   }
   if (state.ui.shortcuts) {
     keys[e.code] = true //set active key globally
