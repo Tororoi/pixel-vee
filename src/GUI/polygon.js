@@ -8,9 +8,6 @@ import { getRenderXOffset, getRenderYOffset } from '../utils/coordinateHelpers.j
  * @param {object} vector - The vector to be rendered
  */
 export function renderPolygonVector(vectorProperties, vector) {
-  const lineWidth = getGuiLineWidth()
-  const circleRadius = 20 * lineWidth
-
   const cornerKeys = [
     { x: 'px1', y: 'py1' },
     { x: 'px2', y: 'py2' },
@@ -20,34 +17,12 @@ export function renderPolygonVector(vectorProperties, vector) {
   const centerKeys = [{ x: 'px0', y: 'py0' }]
 
   if (!vector) {
-    vectorGui.drawControlPoints(
-      vectorProperties,
-      cornerKeys,
-      circleRadius,
-      false,
-    )
-    vectorGui.drawControlPoints(
-      vectorProperties,
-      centerKeys,
-      circleRadius,
-      false,
-    )
+    vectorGui.drawControlPoints(vectorProperties, cornerKeys, false)
+    vectorGui.drawControlPoints(vectorProperties, centerKeys, false)
   }
 
-  vectorGui.drawControlPoints(
-    vectorProperties,
-    cornerKeys,
-    circleRadius / 3,
-    true,
-    vector,
-  )
-  vectorGui.drawControlPoints(
-    vectorProperties,
-    centerKeys,
-    circleRadius / 3,
-    true,
-    vector,
-  )
+  vectorGui.drawControlPoints(vectorProperties, cornerKeys, true, vector)
+  vectorGui.drawControlPoints(vectorProperties, centerKeys, true, vector)
 }
 
 /**

@@ -8,32 +8,16 @@ import { getRenderXOffset, getRenderYOffset } from '../utils/coordinateHelpers.j
  * @param {object} vector - The vector to be rendered
  */
 export function renderLineVector(vectorProperties, vector) {
-  // const xOffset = vector ? vector.layer.x + canvas.xOffset : canvas.xOffset
-  // const yOffset = vector ? vector.layer.y + canvas.yOffset : canvas.yOffset
-  const lineWidth = getGuiLineWidth()
-  let circleRadius = 20 * lineWidth
-
   let pointsKeys = [
     { x: 'px1', y: 'py1' },
     { x: 'px2', y: 'py2' },
   ]
 
   if (!vector) {
-    vectorGui.drawControlPoints(
-      vectorProperties,
-      pointsKeys,
-      circleRadius,
-      false,
-    )
+    vectorGui.drawControlPoints(vectorProperties, pointsKeys, false)
   }
 
-  vectorGui.drawControlPoints(
-    vectorProperties,
-    pointsKeys,
-    circleRadius / 3,
-    true, // modify
-    vector,
-  )
+  vectorGui.drawControlPoints(vectorProperties, pointsKeys, true, vector)
 }
 
 /**

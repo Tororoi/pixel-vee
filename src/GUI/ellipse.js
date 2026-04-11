@@ -27,9 +27,6 @@ export function renderEllipseVector(vectorProperties, vector) {
   } = vectorProperties
   const xOffset = getRenderXOffset(vector)
   const yOffset = getRenderYOffset(vector)
-  const lineWidth = getGuiLineWidth()
-  let circleRadius = 20 * lineWidth
-
   if (Number.isInteger(px3)) {
     drawControlPointHandle(canvas, xOffset, yOffset, px1, py1, px3, py3)
     drawControlPointHandle(canvas, xOffset, yOffset, px1, py1, px2, py2)
@@ -44,21 +41,10 @@ export function renderEllipseVector(vectorProperties, vector) {
   ]
 
   if (!vector) {
-    vectorGui.drawControlPoints(
-      vectorProperties,
-      pointsKeys,
-      circleRadius,
-      false,
-    )
+    vectorGui.drawControlPoints(vectorProperties, pointsKeys, false)
   }
 
-  vectorGui.drawControlPoints(
-    vectorProperties,
-    pointsKeys,
-    circleRadius / 3,
-    true,
-    vector,
-  )
+  vectorGui.drawControlPoints(vectorProperties, pointsKeys, true, vector)
 }
 
 /**

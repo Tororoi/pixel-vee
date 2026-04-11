@@ -1,6 +1,6 @@
-import { TRANSLATE } from "../utils/constants.js"
-import { dom } from "./dom.js"
-import { tools } from "../Tools/index.js"
+import { TRANSLATE } from '../utils/constants.js'
+import { dom } from './dom.js'
+import { tools } from '../Tools/index.js'
 
 //====================================//
 //======== * * * State * * * =========//
@@ -64,12 +64,25 @@ export const state = {
     grabStartShapeCenterY: null, // was: grabStartShapeCenterY
     grabStartAngle: null, // was: grabStartAngle
     // Setters
-    setCurrentIndex(idx) { this.currentIndex = idx },
-    nextKey() { this.highestKey += 1; return this.highestKey },
-    addSelected(idx) { this.selectedIndices.add(idx) },
-    removeSelected(idx) { this.selectedIndices.delete(idx) },
-    clearSelected() { this.selectedIndices.clear() },
-    setTransformMode(mode) { this.transformMode = mode },
+    setCurrentIndex(idx) {
+      this.currentIndex = idx
+    },
+    nextKey() {
+      this.highestKey += 1
+      return this.highestKey
+    },
+    addSelected(idx) {
+      this.selectedIndices.add(idx)
+    },
+    removeSelected(idx) {
+      this.selectedIndices.delete(idx)
+    },
+    clearSelected() {
+      this.selectedIndices.clear()
+    },
+    setTransformMode(mode) {
+      this.transformMode = mode
+    },
   },
   // SELECTION — selection area, boundary box, and masks
   selection: {
@@ -115,19 +128,19 @@ export const state = {
       ) {
         this.boundaryBox.xMin = Math.min(
           selectProperties.px1,
-          selectProperties.px2
+          selectProperties.px2,
         )
         this.boundaryBox.yMin = Math.min(
           selectProperties.py1,
-          selectProperties.py2
+          selectProperties.py2,
         )
         this.boundaryBox.xMax = Math.max(
           selectProperties.px2,
-          selectProperties.px1
+          selectProperties.px1,
         )
         this.boundaryBox.yMax = Math.max(
           selectProperties.py2,
-          selectProperties.py1
+          selectProperties.py1,
         )
         if (_enableActionsForSelection) _enableActionsForSelection()
       } else {
@@ -145,10 +158,18 @@ export const state = {
     savedBetweenActionImages: [], // was: savedBetweenActionImages
     points: [], // was: points
     // Setters
-    clearPoints() { this.points = [] },
-    addPoint(pt) { this.points.push(pt) },
-    clearActiveIndexes() { this.activeIndexes = [] },
-    clearSavedBetweenActionImages() { this.savedBetweenActionImages = [] },
+    clearPoints() {
+      this.points = []
+    },
+    addPoint(pt) {
+      this.points.push(pt)
+    },
+    clearActiveIndexes() {
+      this.activeIndexes = []
+    },
+    clearSavedBetweenActionImages() {
+      this.savedBetweenActionImages = []
+    },
   },
   // UI — drag, tooltip, shortcuts, and save dialog
   ui: {
@@ -162,7 +183,7 @@ export const state = {
     shortcuts: true, // was: shortcuts
     saveDialogOpen: false, // was: saveDialogOpen
     saveSettings: {
-      saveAsFileName: "my drawing",
+      saveAsFileName: 'my drawing',
       preserveHistory: true,
       includePalette: true,
       includeReferenceLayers: true,
@@ -290,7 +311,7 @@ function deselect() {
   }
   state.vector.setCurrentIndex(null)
   state.vector.clearSelected()
-  dom.vectorTransformUIContainer.style.display = "none"
+  dom.vectorTransformUIContainer.style.display = 'none'
   if (_vectorGui) {
     //reset vectorGui mother object
     _vectorGui.mother.newRotation = 0
@@ -316,13 +337,13 @@ function clearRedoStack() {
   state.timeline.currentAction = null
   for (const action of state.timeline.redoStack) {
     //remove vectors from state.vector.all that has creation action as part of redoStack
-    if (action.vectorIndices && tools[action.tool].type === "vector") {
+    if (action.vectorIndices && tools[action.tool].type === 'vector') {
       action.vectorIndices.forEach((index) => {
         delete state.vector.all[index]
       })
     }
     //remove pastedImages from state.clipboard.pastedImages that has creation action as part of redoStack
-    if (action.pastedImageKey && action.tool === "paste" && !action.confirmed) {
+    if (action.pastedImageKey && action.tool === 'paste' && !action.confirmed) {
       delete state.clipboard.pastedImages[action.pastedImageKey]
     }
   }
