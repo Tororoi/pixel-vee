@@ -1,5 +1,4 @@
 import { vectorGui } from './vector.js'
-import { getGuiLineWidth } from '../utils/guiHelpers.js'
 
 /**
  * Render fill vector gui
@@ -8,21 +7,8 @@ import { getGuiLineWidth } from '../utils/guiHelpers.js'
  */
 export function renderFillVector(vectorProperties, vector) {
   let pointsKeys = [{ x: 'px1', y: 'py1' }]
-  const lineWidth = getGuiLineWidth()
-  const circleRadius = 20 * lineWidth
   if (!vector) {
-    vectorGui.drawControlPoints(
-      vectorProperties,
-      pointsKeys,
-      circleRadius,
-      false,
-    )
+    vectorGui.drawControlPoints(vectorProperties, pointsKeys, false)
   }
-  vectorGui.drawControlPoints(
-    vectorProperties,
-    pointsKeys,
-    circleRadius / 3,
-    true,
-    vector,
-  )
+  vectorGui.drawControlPoints(vectorProperties, pointsKeys, true, vector)
 }

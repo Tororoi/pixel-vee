@@ -19,8 +19,6 @@ export function renderCurveVector(vectorProperties, vector) {
   const { px1, py1, px2, py2, px3, py3, px4, py4 } = vectorProperties
   const xOffset = getRenderXOffset(vector)
   const yOffset = getRenderYOffset(vector)
-  const lineWidth = getGuiLineWidth()
-  let circleRadius = 20 * lineWidth
   const currentVectorModes =
     vector?.modes ??
     state.vector.all[state.vector.currentIndex]?.modes ??
@@ -43,21 +41,10 @@ export function renderCurveVector(vectorProperties, vector) {
   ]
 
   if (!vector) {
-    vectorGui.drawControlPoints(
-      vectorProperties,
-      activePointsKeys,
-      circleRadius,
-      false,
-    )
+    vectorGui.drawControlPoints(vectorProperties, activePointsKeys, false)
   }
 
-  vectorGui.drawControlPoints(
-    vectorProperties,
-    activePointsKeys,
-    circleRadius / 3,
-    true, // modify
-    vector,
-  )
+  vectorGui.drawControlPoints(vectorProperties, activePointsKeys, true, vector)
 }
 
 /**

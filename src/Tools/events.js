@@ -46,13 +46,15 @@ function handleZoom(e) {
   if (idx === -1) idx = ZOOM_LEVELS.length - 1
   const nextIdx = zoomBtn.id === 'minus' ? idx - 1 : idx + 1
   if (nextIdx < 0 || nextIdx >= ZOOM_LEVELS.length) return
-  const z = ZOOM_LEVELS[nextIdx] / canvas.zoom
+  const targetZoom = ZOOM_LEVELS[nextIdx]
+  // Calculate the zoom ratio between the new zoom level and the current zoom level
+  const zoomRatio = targetZoom / canvas.zoom
   //get new expected centered offsets based on center of canvas
-  const zoomedX = (canvas.xOffset + canvas.offScreenCVS.width / 2) / z
-  const zoomedY = (canvas.yOffset + canvas.offScreenCVS.height / 2) / z
+  const zoomedX = (canvas.xOffset + canvas.offScreenCVS.width / 2) / zoomRatio
+  const zoomedY = (canvas.yOffset + canvas.offScreenCVS.height / 2) / zoomRatio
   const nox = zoomedX - canvas.offScreenCVS.width / 2
   const noy = zoomedY - canvas.offScreenCVS.height / 2
-  actionZoom(z, nox, noy)
+  actionZoom(targetZoom, nox, noy)
 }
 
 /**

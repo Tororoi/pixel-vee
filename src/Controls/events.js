@@ -125,14 +125,16 @@ function handleWheel(e) {
   //step one level at a time: direction < 0 zooms out, direction > 0 zooms in
   const nextIdx = idx + (direction < 0 ? -1 : 1)
   if (nextIdx < 0 || nextIdx >= ZOOM_LEVELS.length) return
-  const z = ZOOM_LEVELS[nextIdx] / canvas.zoom
+  const targetZoom = ZOOM_LEVELS[nextIdx]
+  // Calculate the zoom ratio between the new zoom level and the current zoom level
+  const zoomRatio = targetZoom / canvas.zoom
   //zoom based on pointer coords
-  const zoomedX = state.cursor.withOffsetX / z
-  const zoomedY = state.cursor.withOffsetY / z
+  const zoomedX = state.cursor.withOffsetX / zoomRatio
+  const zoomedY = state.cursor.withOffsetY / zoomRatio
   //offset by cursor coords
   const nox = zoomedX - state.cursor.x
   const noy = zoomedY - state.cursor.y
-  actionZoom(z, nox, noy)
+  actionZoom(targetZoom, nox, noy)
 }
 
 //========================================//
@@ -364,6 +366,8 @@ function handlePointerOut(e) {
  */
 function handleTouchStart(e) {
   state.tool.touch = true
+  canvas.gui.renderRadius *= 2
+  canvas.gui.collisionRadius *= 2
 }
 
 /**
