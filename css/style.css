@@ -492,6 +492,11 @@ svg {
   margin-top: 2px;
   flex: 1 1 0;
   min-height: 0;
+  align-items: stretch;
+  overflow-y: auto;
+}
+.sidebar.dialog-box > .collapsible > .dialog-box {
+  margin: 0;
 }
 
 .page {
@@ -582,7 +587,7 @@ svg {
   visibility: hidden;
   opacity: 0;
   pointer-events: none;
-  position: absolute;
+  position: fixed;
   max-width: 150px;
   color: black;
   background: rgb(255, 255, 199);
@@ -1952,6 +1957,10 @@ canvas {
   background: repeating-linear-gradient(-45deg, rgb(255, 255, 255), rgb(255, 255, 255) 5px, rgb(216, 216, 216) 5px, rgb(216, 216, 216) 10px);
   cursor: pointer;
   margin-bottom: 8px;
+}
+.brush-container .dither-options .dither-preview svg {
+  width: 32px;
+  height: 32px;
 }
 
 /* Stamp options in brush container */

@@ -1,4 +1,5 @@
 import { state } from "../../Context/state.js"
+import { bump } from "../../hooks/useAppState.js"
 import { canvas } from "../../Context/canvas.js"
 import { tools } from "../../Tools/index.js"
 import { vectorGui } from "../../GUI/vector.js"
@@ -162,7 +163,7 @@ export function actionPasteSelection() {
       }
       //clear any selected vectors
       state.vector.clearSelected()
-      dom.vectorTransformUIContainer.style.display = "none"
+      state.ui.vectorTransformOpen = false; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "none"
       //add to timeline
       addToTimeline({
         tool: tools.paste.name,
@@ -211,12 +212,12 @@ export function actionPasteSelection() {
         state.vector.addSelected(parseInt(vectorIndex))
       })
       if (state.vector.selectedIndices.size > 0) {
-        dom.vectorTransformUIContainer.style.display = "flex"
+        state.ui.vectorTransformOpen = true; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "flex"
         if (state.vector.transformMode === SCALE) {
           setVectorShapeBoundaryBox()
         }
       } else {
-        dom.vectorTransformUIContainer.style.display = "none"
+        state.ui.vectorTransformOpen = false; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "none"
       }
       //add to timeline
       addToTimeline({

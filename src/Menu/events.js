@@ -1,5 +1,6 @@
 import { dom } from '../Context/dom.js'
 import { state } from '../Context/state.js'
+import { bump } from '../hooks/useAppState.js'
 import { canvas } from '../Context/canvas.js'
 import { activateResizeOverlay } from '../Canvas/resizeOverlay.js'
 import { vectorGui } from '../GUI/vector.js'
@@ -81,10 +82,11 @@ export const generateTooltip = (message, target) => {
  * TODO: (Low Priority) initialize save dialog box with default settings?
  */
 export function openSaveDialogBox() {
-  dom.saveContainer.style.display = 'flex'
   state.ui.saveDialogOpen = true
+  if (dom.saveContainer) dom.saveContainer.style.display = 'flex'
+  bump()
   setSaveFilesizePreview()
-  dom.saveAsFileName.focus()
+  if (dom.saveAsFileName) dom.saveAsFileName.focus()
 }
 
 /**
@@ -191,7 +193,7 @@ document.body.addEventListener('mouseover', (e) => {
         '\n\nCannot use with temporary pasted layer. Selecting will confirm pasted pixels.'
     }
     generateTooltip(state.ui.tooltipMessage, e.target)
-    if (dom.tooltipBtn.checked && state.ui.tooltipMessage) {
+    if (state.ui.showTooltips && state.ui.tooltipMessage) {
       dom.tooltip.classList.add('visible')
     } else {
       dom.tooltip.classList.remove('visible')
@@ -217,7 +219,7 @@ document.body.addEventListener('click', (e) => {
     }
     generateTooltip(state.ui.tooltipMessage, e.target)
     if (
-      dom.tooltipBtn.checked &&
+      state.ui.showTooltips &&
       state.ui.tooltipMessage &&
       state.ui.tooltipTarget !== previousTooltipTarget
     ) {
@@ -228,68 +230,59 @@ document.body.addEventListener('click', (e) => {
     }
   }
 })
-dom.toolOptions.addEventListener('click', (e) => {
-  if (e.target.type === 'checkbox') {
-    const optionName = e.target.id.split('-')[0]
-    if (e.target.checked) {
-      state.tool.current.options[optionName].active = true
-    } else {
-      state.tool.current.options[optionName].active = false
+// tool-options click handled by NavBar React component
+if (dom.toolOptions) {
+  dom.toolOptions.addEventListener('click', (e) => {
+    if (e.target.type === 'checkbox') {
+      const optionName = e.target.id.split('-')[0]
+      if (e.target.checked) {
+        state.tool.current.options[optionName].active = true
+      } else {
+        state.tool.current.options[optionName].active = false
+      }
+      vectorGui.render()
     }
-    vectorGui.render()
-  }
-})
-dom.gridBtn.addEventListener('click', () => {
+  })
+}
+// Settings/grid/cursor handled by SettingsDialog React component
+if (dom.gridBtn) dom.gridBtn.addEventListener('click', () => {
   vectorGui.grid = dom.gridBtn.checked
   vectorGui.render()
 })
-dom.cursorPreviewBtn.addEventListener('click', () => {
+if (dom.cursorPreviewBtn) dom.cursorPreviewBtn.addEventListener('click', () => {
   vectorGui.showCursorPreview = dom.cursorPreviewBtn.checked
 })
-dom.gridSpacing.addEventListener('input', (e) => {
-  //constrain value to min/max
-  if (e.target.value < 1) {
-    e.target.value = 1
-  } else if (e.target.value > 64) {
-    e.target.value = 64
-  }
+if (dom.gridSpacing) dom.gridSpacing.addEventListener('input', (e) => {
+  if (e.target.value < 1) e.target.value = 1
+  else if (e.target.value > 64) e.target.value = 64
   vectorGui.gridSpacing = parseInt(e.target.value)
   vectorGui.render()
 })
-dom.gridSpacingSpinBtn.addEventListener('pointerdown', (e) => {
-  if (e.target.id === 'inc') {
-    vectorGui.gridSpacing++
-  } else if (e.target.id === 'dec') {
-    vectorGui.gridSpacing--
-  }
-  //constraint value to min/max
-  if (vectorGui.gridSpacing < 1) {
-    vectorGui.gridSpacing = 1
-  } else if (vectorGui.gridSpacing > 64) {
-    vectorGui.gridSpacing = 64
-  }
-  dom.gridSpacing.value = vectorGui.gridSpacing
+if (dom.gridSpacingSpinBtn) dom.gridSpacingSpinBtn.addEventListener('pointerdown', (e) => {
+  if (e.target.id === 'inc') vectorGui.gridSpacing++
+  else if (e.target.id === 'dec') vectorGui.gridSpacing--
+  if (vectorGui.gridSpacing < 1) vectorGui.gridSpacing = 1
+  else if (vectorGui.gridSpacing > 64) vectorGui.gridSpacing = 64
+  if (dom.gridSpacing) dom.gridSpacing.value = vectorGui.gridSpacing
   vectorGui.render()
 })
-dom.tooltipBtn.addEventListener('click', () => {
+if (dom.tooltipBtn) dom.tooltipBtn.addEventListener('click', () => {
   if (dom.tooltipBtn.checked && state.ui.tooltipMessage) {
     dom.tooltip.classList.add('visible')
   } else {
     dom.tooltip.classList.remove('visible')
   }
 })
-dom.openSaveBtn.addEventListener('click', (e) => {
-  //reset value so that the same file can be imported multiple times
+// File menu events — handled by NavBar React component; guard until migrated
+if (dom.openSaveBtn) dom.openSaveBtn.addEventListener('click', (e) => {
   e.target.value = null
 })
-dom.topMenu.addEventListener('click', (e) => {
+if (dom.topMenu) dom.topMenu.addEventListener('click', (e) => {
   if (e.target.classList.contains('disabled')) {
     e.preventDefault()
     return
   }
-  //check if active element has class menu-folder and class "active"
   if (document.activeElement.classList.contains('menu-folder')) {
-    //if so, toggle the active class
     if (document.activeElement.classList.contains('active')) {
       document.activeElement.classList.remove('active')
     } else {
@@ -297,98 +290,68 @@ dom.topMenu.addEventListener('click', (e) => {
     }
   }
 })
-dom.topMenu.addEventListener('focusout', (e) => {
-  //check if active element has class menu-folder
+if (dom.topMenu) dom.topMenu.addEventListener('focusout', (e) => {
   if (e.target.classList.contains('menu-folder')) {
-    //if so, remove the active class
     e.target.classList.remove('active')
   }
 })
-//File Submenu events
-dom.openSaveBtn.addEventListener('change', openSavedDrawing)
-dom.saveBtn.addEventListener('click', openSaveDialogBox)
-dom.importBtn.addEventListener('change', importImage)
-dom.exportBtn.addEventListener('click', exportImage)
-//Edit Submenu events
-dom.canvasSizeBtn.addEventListener('click', () => {
-  if (canvas.pastedLayer) {
-    //if there is a pasted layer active, do not open canvas size dialog
-    return
-  }
-  dom.sizeContainer.style.display = 'flex'
+if (dom.openSaveBtn) dom.openSaveBtn.addEventListener('change', openSavedDrawing)
+if (dom.saveBtn) dom.saveBtn.addEventListener('click', openSaveDialogBox)
+if (dom.importBtn) dom.importBtn.addEventListener('change', importImage)
+if (dom.exportBtn) dom.exportBtn.addEventListener('click', exportImage)
+if (dom.canvasSizeBtn) dom.canvasSizeBtn.addEventListener('click', () => {
+  if (canvas.pastedLayer) return
+  state.ui.canvasSizeOpen = true
+  if (dom.sizeContainer) dom.sizeContainer.style.display = 'flex'
+  bump()
   activateResizeOverlay()
 })
-dom.selectAllBtn.addEventListener('click', actionSelectAll)
-dom.deselectBtn.addEventListener('click', actionDeselect)
-dom.cutBtn.addEventListener('click', actionCutSelection)
-dom.copyBtn.addEventListener('click', actionCopySelection)
-dom.pasteBtn.addEventListener('click', actionPasteSelection)
-dom.deleteBtn.addEventListener('click', actionDeleteSelection)
-dom.flipHorizontalBtn.addEventListener('click', (e) => {
-  actionFlipPixels(true)
+if (dom.selectAllBtn) dom.selectAllBtn.addEventListener('click', actionSelectAll)
+if (dom.deselectBtn) dom.deselectBtn.addEventListener('click', actionDeselect)
+if (dom.cutBtn) dom.cutBtn.addEventListener('click', actionCutSelection)
+if (dom.copyBtn) dom.copyBtn.addEventListener('click', actionCopySelection)
+if (dom.pasteBtn) dom.pasteBtn.addEventListener('click', actionPasteSelection)
+if (dom.deleteBtn) dom.deleteBtn.addEventListener('click', actionDeleteSelection)
+if (dom.flipHorizontalBtn) dom.flipHorizontalBtn.addEventListener('click', () => actionFlipPixels(true))
+if (dom.flipVerticalBtn) dom.flipVerticalBtn.addEventListener('click', () => actionFlipPixels(false))
+if (dom.rotateBtn) dom.rotateBtn.addEventListener('click', actionRotatePixels)
+// Settings button handled by NavBar React component; guard until migrated
+if (dom.settingsBtn) dom.settingsBtn.addEventListener('click', () => {
+  state.ui.settingsOpen = !state.ui.settingsOpen
+  bump()
 })
-dom.flipVerticalBtn.addEventListener('click', (e) => {
-  actionFlipPixels(false)
-})
-dom.rotateBtn.addEventListener('click', actionRotatePixels)
-//Settings events
-dom.settingsBtn.addEventListener('click', () => {
-  //if settings container is already open, close it, else open it
-  if (dom.settingsContainer.style.display === 'flex') {
-    dom.settingsContainer.style.display = 'none'
-  } else {
-    dom.settingsContainer.style.display = 'flex'
-  }
-})
-//Save/Export events
-dom.saveAsForm.addEventListener('change', (e) => {
+// Save form events — handled by SaveDialog React component; guard until migrated
+if (dom.saveAsForm) dom.saveAsForm.addEventListener('change', (e) => {
   if (e.target.id === 'preserve-history-toggle') {
-    if (e.target.checked) {
-      state.ui.saveSettings.preserveHistory = true
-      dom.advancedOptionsContainer.classList.add('disabled')
-    } else {
-      state.ui.saveSettings.preserveHistory = false
-      dom.advancedOptionsContainer.classList.remove('disabled')
-    }
+    state.ui.saveSettings.preserveHistory = e.target.checked
     setSaveFilesizePreview()
   } else if (e.target.id === 'include-palette-toggle') {
-    if (e.target.checked) {
-      state.ui.saveSettings.includePalette = true
-    } else {
-      state.ui.saveSettings.includePalette = false
-    }
+    state.ui.saveSettings.includePalette = e.target.checked
     setSaveFilesizePreview()
   } else if (e.target.id === 'include-reference-layers-toggle') {
-    if (e.target.checked) {
-      state.ui.saveSettings.includeReferenceLayers = true
-    } else {
-      state.ui.saveSettings.includeReferenceLayers = false
-    }
+    state.ui.saveSettings.includeReferenceLayers = e.target.checked
     setSaveFilesizePreview()
   } else if (e.target.id === 'include-removed-actions-toggle') {
-    if (e.target.checked) {
-      state.ui.saveSettings.includeRemovedActions = true
-    } else {
-      state.ui.saveSettings.includeRemovedActions = false
-    }
+    state.ui.saveSettings.includeRemovedActions = e.target.checked
     setSaveFilesizePreview()
   }
 })
-dom.saveAsForm.addEventListener('submit', (e) => {
-  //prevent default form submission
+if (dom.saveAsForm) dom.saveAsForm.addEventListener('submit', (e) => {
   e.preventDefault()
   saveDrawing()
-  dom.saveContainer.style.display = 'none'
   state.ui.saveDialogOpen = false
+  if (dom.saveContainer) dom.saveContainer.style.display = 'none'
+  bump()
 })
-dom.saveAsFileName.addEventListener('input', (e) => {
+if (dom.saveAsFileName) dom.saveAsFileName.addEventListener('input', (e) => {
   state.ui.saveSettings.saveAsFileName = e.target.value
   dom.saveAsFileName.style.width =
     measureTextWidth(state.ui.saveSettings.saveAsFileName, "16px '04Font'") +
     2 +
     'px'
 })
-dom.cancelSaveBtn.addEventListener('click', () => {
-  dom.saveContainer.style.display = 'none'
+if (dom.cancelSaveBtn) dom.cancelSaveBtn.addEventListener('click', () => {
   state.ui.saveDialogOpen = false
+  if (dom.saveContainer) dom.saveContainer.style.display = 'none'
+  bump()
 })

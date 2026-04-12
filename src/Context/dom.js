@@ -134,11 +134,10 @@ const tools = [
 const toolButtons = {}
 
 tools.forEach((tool) => {
-  toolButtons[`${tool}Btn`] = toolsContainer.querySelector(`#${tool}`)
+  toolButtons[`${tool}Btn`] = toolsContainer?.querySelector(`#${tool}`) ?? null
 })
 
 const toolBtn = document.querySelector('#brush')
-toolBtn.classList.add('selected')
 
 //====================================//
 //===== * * * Color Picker * * * =====//

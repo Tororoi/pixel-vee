@@ -97,11 +97,10 @@ export function prepareDrawingForSave() {
 }
 
 /**
- * Set the preview of the file size
+ * Compute formatted filesize string asynchronously.
+ * @returns {Promise<string>} formatted size like "42 KB" or "1.3 MB"
  */
-export function setSaveFilesizePreview() {
-  dom.fileSizePreview.innerText = 'Calculating...'
-
+export function computeFileSizePreview() {
   return new Promise((resolve) => {
     setTimeout(() => {
       let saveBlob = prepareDrawingForSave()
@@ -109,10 +108,18 @@ export function setSaveFilesizePreview() {
       const sizeInKB = saveBlob.size / 1000
       const formattedSize =
         sizeInMB > 1 ? `${sizeInMB.toFixed(1)} MB` : `${sizeInKB.toFixed(0)} KB`
-
-      dom.fileSizePreview.innerText = formattedSize
-      resolve()
+      resolve(formattedSize)
     }, 0)
+  })
+}
+
+/**
+ * Set the preview of the file size (writes to DOM element if present)
+ */
+export function setSaveFilesizePreview() {
+  if (dom.fileSizePreview) dom.fileSizePreview.innerText = 'Calculating...'
+  return computeFileSizePreview().then((formattedSize) => {
+    if (dom.fileSizePreview) dom.fileSizePreview.innerText = formattedSize
   })
 }
 

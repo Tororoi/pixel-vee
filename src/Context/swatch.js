@@ -27,5 +27,5 @@ export const swatches = {
 //TODO: (Low Priority) Add Mixing palette that consists of a small canvas with basic paint, sample, fill and erase tools.
 //TODO: (Low Priority) Add color mixer that consists of a small canvas that can be painted upon and cleared. At any time the user can click "Mix" and the colors on the canvas will be used to generate a mixed color.
 
-dom.swatch.color = swatches.primary.color
-dom.backSwatch.color = swatches.secondary.color
+if (dom.swatch) dom.swatch.color = swatches.primary.color
+if (dom.backSwatch) dom.backSwatch.color = swatches.secondary.color

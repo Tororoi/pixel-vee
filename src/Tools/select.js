@@ -1,4 +1,5 @@
 import { state } from "../Context/state.js"
+import { bump } from "../hooks/useAppState.js"
 import { canvas } from "../Context/canvas.js"
 import { addToTimeline } from "../Actions/undoRedo/undoRedo.js"
 import { vectorGui } from "../GUI/vector.js"
@@ -29,7 +30,7 @@ function selectSteps() {
       state.tool.clickCounter += 1
       //reset selected vectors
       state.vector.clearSelected()
-      dom.vectorTransformUIContainer.style.display = "none"
+      state.ui.vectorTransformOpen = false; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "none"
       renderVectorsToDOM()
       //set initial properties
       state.selection.properties.px1 = state.cursor.x

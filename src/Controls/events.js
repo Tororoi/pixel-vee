@@ -163,12 +163,12 @@ function handlePointerDown(e) {
   }
   renderCanvas(canvas.currentLayer)
   //if drawing on hidden layer, flash hide btn
-  if (canvas.currentLayer.hidden) {
+  if (canvas.currentLayer.hidden && dom.layersContainer) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
       if (dom.layersContainer.children[i].layerObj === canvas.currentLayer) {
         dom.layersContainer.children[i]
           .querySelector('.hide')
-          .classList.add('warning')
+          ?.classList.add('warning')
       }
     }
   }
@@ -285,12 +285,12 @@ function handlePointerUp(e) {
   canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
   setCoordinates(e)
   //if drawing on hidden layer, stop flashing hide btn
-  if (canvas.currentLayer.hidden) {
+  if (canvas.currentLayer.hidden && dom.layersContainer) {
     for (let i = 0; i < dom.layersContainer.children.length; i += 1) {
       if (dom.layersContainer.children[i].layerObj === canvas.currentLayer) {
         dom.layersContainer.children[i]
           .querySelector('.hide')
-          .classList.remove('warning')
+          ?.classList.remove('warning')
       }
     }
   }
@@ -312,7 +312,7 @@ function handlePointerUp(e) {
     state.clearRedoStack()
   }
   //Deactivate pending shortcuts
-  if (state.tool.current.name !== dom.toolBtn.id) {
+  if (state.tool.current.name !== state.tool.selectedName) {
     if (
       !keys.AltLeft &&
       !keys.AltRight &&

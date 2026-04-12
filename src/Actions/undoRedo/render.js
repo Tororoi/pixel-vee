@@ -1,5 +1,6 @@
 import { dom } from "../../Context/dom.js"
 import { state } from "../../Context/state.js"
+import { bump } from "../../hooks/useAppState.js"
 import { vectorGui } from "../../GUI/vector.js"
 import { clearOffscreenCanvas, renderCanvas } from "../../Canvas/render.js"
 import { renderVectorsToDOM, renderLayersToDOM } from "../../DOM/render.js"
@@ -50,12 +51,12 @@ export function renderToLatestAction(latestAction, modType) {
     mostRecentAction.selectedVectorIndices
   )
   if (state.vector.selectedIndices.size > 0) {
-    dom.vectorTransformUIContainer.style.display = "flex"
+    state.ui.vectorTransformOpen = true; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "flex"
     if (state.vector.transformMode === SCALE) {
       setVectorShapeBoundaryBox()
     }
   } else {
-    dom.vectorTransformUIContainer.style.display = "none"
+    state.ui.vectorTransformOpen = false; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "none"
   }
   //set current vector index
   if (mostRecentAction.currentVectorIndex !== null) {

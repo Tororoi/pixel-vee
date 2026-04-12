@@ -1,6 +1,7 @@
 import { dom } from "../Context/dom.js"
 import { keys } from "../Shortcuts/keys.js"
 import { state } from "../Context/state.js"
+import { bump } from "../hooks/useAppState.js"
 import { swatches } from "../Context/swatch.js"
 import { Picker } from "./Picker.js"
 import { generateRandomRGB } from "../utils/colors.js"
@@ -123,17 +124,21 @@ export function randomizeColor(target) {
  * @param {Element} target - The swatch to initialize the color picker with
  */
 export function initializeColorPicker(target) {
+  if (!picker) return
   picker.swatch = target
   const initialColorReference = target.color
   picker.update(initialColorReference)
-  //show colorpicker
-  dom.colorPickerContainer.style.display = "flex"
-  dom.colorPickerContainer.style.top =
-    dom.colorPickerContainer.offsetTop - 2 + "px"
-  //allow colorPickerContainer events
-  dom.colorPickerContainer.style.pointerEvents = "auto"
-  if (dom.colorPickerContainer.offsetHeight !== 0) {
-    constrainElementOffsets(dom.colorPickerContainer)
+  //show colorpicker — React reads state.ui.colorPickerOpen via bump()
+  state.ui.colorPickerOpen = true
+  bump()
+  if (dom.colorPickerContainer) {
+    dom.colorPickerContainer.style.display = "flex"
+    dom.colorPickerContainer.style.top =
+      dom.colorPickerContainer.offsetTop - 2 + "px"
+    dom.colorPickerContainer.style.pointerEvents = "auto"
+    if (dom.colorPickerContainer.offsetHeight !== 0) {
+      constrainElementOffsets(dom.colorPickerContainer)
+    }
   }
 }
 
@@ -240,16 +245,20 @@ function handlePalette(e) {
  * Close the picker window
  */
 function closePickerWindow() {
+  if (!picker) return
   picker.selectedCustomKey = null
   picker.editingCustomKey = null
   // hide colorpicker
-  dom.colorPickerContainer.style.display = "none"
+  state.ui.colorPickerOpen = false
+  bump()
+  if (dom.colorPickerContainer) dom.colorPickerContainer.style.display = "none"
 }
 
 /**
  * This function sets the color according to the currently selected parameters and closes the picker window
  */
 function handleConfirm() {
+  if (!picker) return
   const { red: r, green: g, blue: b } = picker.rgb
   const a = picker.alpha
   //set color to brush
@@ -270,17 +279,19 @@ function handleConfirm() {
 //=== * * * Initialization * * * ====//
 //===================================//
 
-//Initialize Color Picker
-//Create an instance passing it the canvas, width, height, and setColor fn
-let picker = new Picker(
-  document.getElementById("color-picker"),
-  250,
-  250,
-  swatches.primary.color
-)
+// Picker is initialized lazily — the canvas element (#color-picker) is
+// rendered by ColorPickerDialog (React). registerPicker() is called from
+// ColorPickerDialog's useEffect after the canvas is in the DOM.
+let picker = null
 
-//Construct picker
-picker.build()
+/**
+ * Register the Picker instance created by ColorPickerDialog.
+ * Must be called once after the picker canvas has been mounted.
+ * @param {Picker} p
+ */
+export function registerPicker(p) {
+  picker = p
+}
 
 //===================================//
 //=== * * * Event Listeners * * * ===//
@@ -290,6 +301,7 @@ picker.build()
  * Add the current picker color to the palette without closing the picker
  */
 function handleAddToPalette() {
+  if (!picker) return
   const { red: r, green: g, blue: b } = picker.rgb
   const a = picker.alpha
   swatches.palette.push({ color: `rgba(${r},${g},${b},${a / 255})`, r, g, b, a })
@@ -339,29 +351,25 @@ function onPaletteModified() {
   renderPalettePresetsToDOM()
 }
 
-dom.swatch.addEventListener("click", openColorPicker)
-dom.backSwatch.addEventListener("click", openColorPicker)
-dom.colorSwitch.addEventListener("click", switchColors)
-//Palette
-dom.paletteContainer.addEventListener("click", handlePalette)
-dom.palettePresetsBtn.addEventListener("click", (e) => {
+// * Swatch / Palette * — handled by PalettePanel React component; guard until migrated
+if (dom.swatch) dom.swatch.addEventListener("click", openColorPicker)
+if (dom.backSwatch) dom.backSwatch.addEventListener("click", openColorPicker)
+if (dom.colorSwitch) dom.colorSwitch.addEventListener("click", switchColors)
+if (dom.paletteContainer) dom.paletteContainer.addEventListener("click", handlePalette)
+if (dom.palettePresetsBtn) dom.palettePresetsBtn.addEventListener("click", (e) => {
   e.stopPropagation()
   const container = dom.palettePresetsBtn.parentElement
   const isOpen = container.classList.toggle("open")
-  dom.paletteInterfaceContainer.style.zIndex = isOpen ? "200" : ""
+  if (dom.paletteInterfaceContainer) dom.paletteInterfaceContainer.style.zIndex = isOpen ? "200" : ""
 })
-dom.palettePresetsList.addEventListener("click", (e) => {
+if (dom.palettePresetsList) dom.palettePresetsList.addEventListener("click", (e) => {
   const li = e.target.closest("li[data-id]")
   if (!li) return
   handlePresetSelect(li.dataset.id)
   dom.palettePresetsBtn.parentElement.classList.remove("open")
-  dom.paletteInterfaceContainer.style.zIndex = ""
+  if (dom.paletteInterfaceContainer) dom.paletteInterfaceContainer.style.zIndex = ""
 })
-document.addEventListener("click", () => {
-  dom.palettePresetsBtn.parentElement.classList.remove("open")
-  dom.paletteInterfaceContainer.style.zIndex = ""
-})
-//Color Picker
-dom.confirmBtn.addEventListener("click", handleConfirm)
-dom.cancelBtn.addEventListener("click", closePickerWindow)
-dom.newColorBtn.addEventListener("click", handleAddToPalette)
+// * Color Picker * — handled by ColorPickerDialog React component; guard until migrated
+if (dom.confirmBtn) dom.confirmBtn.addEventListener("click", handleConfirm)
+if (dom.cancelBtn) dom.cancelBtn.addEventListener("click", closePickerWindow)
+if (dom.newColorBtn) dom.newColorBtn.addEventListener("click", handleAddToPalette)

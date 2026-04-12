@@ -1,110 +1,27 @@
-import { dom } from '../Context/dom.js'
+import { bump } from '../hooks/useAppState.js'
 import { state } from '../Context/state.js'
-import { brushStamps, customBrushStamp } from '../Context/brushStamps.js'
-import { updateBrushPreview } from '../utils/brushHelpers.js'
-import { createOptionToggle } from '../utils/optionsInterfaceHelpers.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
 import { swatches } from '../Context/swatch.js'
 
 /**
- * update brush stamp in dom
+ * Brush stamp display — React reads state.tool.current via useAppState().
  */
 export function renderBrushStampToDOM() {
-  const isCustom = state.tool.current.brushType === 'custom'
-  dom.brushSlider.disabled = isCustom
-  if (isCustom) {
-    dom.lineWeight.textContent = '32'
-    dom.brushPreview.style.width = '64px'
-    dom.brushPreview.style.height = '64px'
-    updateBrushPreview(customBrushStamp.pixels, 32)
-  } else {
-    dom.lineWeight.textContent = state.tool.current.brushSize
-    dom.brushPreview.style.width = state.tool.current.brushSize * 2 + 'px'
-    dom.brushPreview.style.height = state.tool.current.brushSize * 2 + 'px'
-    updateBrushPreview(
-      brushStamps[state.tool.current.brushType][state.tool.current.brushSize][
-        '0,0'
-      ],
-      state.tool.current.brushSize,
-    )
-  }
+  bump()
 }
 
 /**
- * Render palette interface in DOM
+ * Brush modes row — React reads state.tool.current.modes via useAppState().
  */
 export const renderBrushModesToDOM = () => {
-  dom.modesContainer.innerHTML = ''
-
-  //iterate through object keys in state.tool.current.modes
-  for (const [key, value] of Object.entries(state.tool.current.modes)) {
-    // twoColor and buildUpDither live in the dither dialog, not the modes row
-    if (key === 'twoColor' || key === 'buildUpDither') continue
-    const mode = document.createElement('button')
-    mode.type = 'button'
-    mode.className = `mode ${key}`
-    mode.id = key
-    switch (key) {
-      case 'line':
-        mode.ariaLabel = 'Line (/ or Hold Shift & Brush)'
-        mode.dataset.tooltip =
-          'Line (/ or Hold Shift & Brush) \n\nDraw straight lines'
-        break
-      case 'quadCurve':
-        mode.ariaLabel = 'Quadratic Curve (Q)'
-        mode.dataset.tooltip =
-          'Quadratic Curve (Q) \n\nDraw smooth curves with one control handle'
-        break
-      case 'cubicCurve':
-        mode.ariaLabel = 'Cubic Curve (C)'
-        mode.dataset.tooltip =
-          'Cubic Curve (C) \n\nDraw smooth curves with two control handles'
-        break
-      case 'eraser':
-        mode.ariaLabel = 'Eraser (E)'
-        mode.dataset.tooltip = 'Eraser (E)'
-        break
-      case 'perfect':
-        mode.ariaLabel = 'Pixel Perfect (Y)'
-        mode.dataset.tooltip = 'Pixel Perfect (Y)'
-        break
-      case 'inject':
-        mode.ariaLabel = 'Inject (I)'
-        mode.dataset.tooltip =
-          'Inject (I) \n\nTranslucent colors will be applied directly'
-        break
-      case 'colorMask':
-        mode.ariaLabel = 'Color Mask (M)'
-        mode.dataset.tooltip =
-          'Color Mask (M) \n\nOnly draw over selected secondary swatch color'
-        break
-      case 'twoColor':
-        mode.ariaLabel = 'Two-Color'
-        mode.dataset.tooltip =
-          'Two-Color \n\nUse secondary color instead of transparency for dither'
-        break
-      default:
-      //
-    }
-    // mode.innerHTML = key
-    if (value) mode.classList.add('selected')
-    dom.modesContainer.appendChild(mode)
-  }
+  bump()
 }
 
 /**
- *
+ * Tool options row — React reads state.tool.current.options via useAppState().
  */
 export function renderToolOptionsToDOM() {
-  dom.toolOptions.innerHTML = ''
-  if (
-    ['curve', 'ellipse', 'polygon', 'select'].includes(state.tool.current.name)
-  ) {
-    Object.entries(state.tool.current.options).forEach(([name, option]) => {
-      let optionToggle = createOptionToggle(name, option)
-      dom.toolOptions.appendChild(optionToggle)
-    })
-  }
+  bump()
 }
 
 /**

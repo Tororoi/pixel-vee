@@ -21,13 +21,12 @@ import {
   applyDitherOffset,
   applyDitherOffsetControl,
 } from '../DOM/render.js'
-import { toggleMode, switchTool, initToolGroups } from './toolbox.js'
+import { toggleMode, switchTool } from './toolbox.js'
 import { openStampEditor } from '../DOM/stampEditor.js'
 import { ZOOM_LEVELS } from '../utils/constants.js'
 
 //Initialize default tool
 state.tool.current = tools.brush
-initToolGroups()
 renderStampOptionsToDOM()
 renderDitherOptionsToDOM()
 
@@ -189,26 +188,27 @@ function updateBrush(e) {
 //=== * * * Event Listeners * * * ===//
 //===================================//
 
-dom.undoBtn.addEventListener('click', () => {
+// * Toolbox * — handled by Toolbox React component; guard until migrated
+if (dom.undoBtn) dom.undoBtn.addEventListener('click', () => {
   handleUndo()
   if (brush.modes.buildUpDither) rebuildBuildUpDensityMap()
 })
-dom.redoBtn.addEventListener('click', () => {
+if (dom.redoBtn) dom.redoBtn.addEventListener('click', () => {
   handleRedo()
   if (brush.modes.buildUpDither) rebuildBuildUpDensityMap()
 })
 
-dom.recenterBtn.addEventListener('click', handleRecenter)
-dom.clearBtn.addEventListener('click', handleClearCanvas)
+if (dom.recenterBtn) dom.recenterBtn.addEventListener('click', handleRecenter)
+if (dom.clearBtn) dom.clearBtn.addEventListener('click', handleClearCanvas)
 
-dom.zoomContainer.addEventListener('click', handleZoom)
+if (dom.zoomContainer) dom.zoomContainer.addEventListener('click', handleZoom)
 
-dom.toolsContainer.addEventListener('click', handleTools)
-dom.modesContainer.addEventListener('click', handleModes)
+if (dom.toolsContainer) dom.toolsContainer.addEventListener('click', handleTools)
+if (dom.modesContainer) dom.modesContainer.addEventListener('click', handleModes)
 
-// * Brush * //
-dom.brushDisplay.addEventListener('click', switchBrush)
-dom.brushSlider.addEventListener('input', updateBrush)
+// * Brush * — handled by Sidebar/BrushPanel React component; guard until migrated
+if (dom.brushDisplay) dom.brushDisplay.addEventListener('click', switchBrush)
+if (dom.brushSlider) dom.brushSlider.addEventListener('input', updateBrush)
 
 // * Dither Brush * //
 document.querySelector('.dither-preview')?.addEventListener('click', () => {

@@ -162,7 +162,7 @@ canvas.backgroundCTX.scale(
 canvas.thumbnailCTX.scale(canvas.sharpness, canvas.sharpness)
 
 //for adjusting canvas size, adjust onscreen canvas dimensions in proportion to offscreen
-//Initialize size values
-dom.canvasWidth.value = canvas.offScreenCVS.width
-dom.canvasHeight.value = canvas.offScreenCVS.height
-dom.gridSpacing.value = 8
+//Initialize size values (guarded: CanvasSizeDialog React component reads canvas.offScreenCVS directly)
+if (dom.canvasWidth) dom.canvasWidth.value = canvas.offScreenCVS.width
+if (dom.canvasHeight) dom.canvasHeight.value = canvas.offScreenCVS.height
+if (dom.gridSpacing) dom.gridSpacing.value = 8

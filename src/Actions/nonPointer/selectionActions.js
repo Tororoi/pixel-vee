@@ -1,4 +1,5 @@
 import { state } from "../../Context/state.js"
+import { bump } from "../../hooks/useAppState.js"
 import { canvas } from "../../Context/canvas.js"
 import { tools } from "../../Tools/index.js"
 import { vectorGui } from "../../GUI/vector.js"
@@ -54,7 +55,7 @@ export function actionSelectAll() {
 export function actionSelectVector(vectorIndex) {
   if (!state.vector.selectedIndices.has(vectorIndex)) {
     state.vector.addSelected(vectorIndex)
-    dom.vectorTransformUIContainer.style.display = "flex"
+    state.ui.vectorTransformOpen = true; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "flex"
     if (state.vector.transformMode === SCALE) {
       setVectorShapeBoundaryBox()
     }
@@ -87,7 +88,7 @@ export function actionDeselectVector(vectorIndex) {
   if (state.vector.selectedIndices.has(vectorIndex)) {
     state.vector.removeSelected(vectorIndex)
     if (state.vector.selectedIndices.size === 0) {
-      dom.vectorTransformUIContainer.style.display = "none"
+      state.ui.vectorTransformOpen = false; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "none"
       state.deselect()
     } else if (state.vector.selectedIndices.size > 0) {
       if (state.vector.transformMode === SCALE) {

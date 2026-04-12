@@ -1,6 +1,7 @@
 import { TRANSLATE } from '../utils/constants.js'
 import { dom } from './dom.js'
 import { tools } from '../Tools/index.js'
+import { bump } from '../hooks/useAppState.js'
 
 //====================================//
 //======== * * * State * * * =========//
@@ -22,6 +23,7 @@ export const state = {
   // TOOL — active tool and in-progress draw state
   tool: {
     current: null, // was: tool
+    selectedName: 'brush', // tracks the explicitly selected tool (not shortcut-overrides)
     clickCounter: 0, // was: clickCounter
     lineStartX: null, // was: lineStartX
     lineStartY: null, // was: lineStartY
@@ -175,6 +177,12 @@ export const state = {
   ui: {
     tooltipMessage: null, // was: tooltipMessage
     tooltipTarget: null, // was: tooltipTarget
+    showTooltips: true, // was: dom.tooltipBtn.checked
+    settingsOpen: false, // was: dom.settingsContainer.style.display
+    canvasSizeOpen: false, // was: dom.sizeContainer.style.display
+    exportOpen: false,
+    colorPickerOpen: false,
+    vectorTransformOpen: false,
     dragging: false, // was: dragging
     dragX: null, // was: dragX
     dragY: null, // was: dragY
@@ -311,7 +319,7 @@ function deselect() {
   }
   state.vector.setCurrentIndex(null)
   state.vector.clearSelected()
-  dom.vectorTransformUIContainer.style.display = 'none'
+  state.ui.vectorTransformOpen = false; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = 'none'
   if (_vectorGui) {
     //reset vectorGui mother object
     _vectorGui.mother.newRotation = 0

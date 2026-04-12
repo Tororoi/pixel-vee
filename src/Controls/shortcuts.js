@@ -10,10 +10,10 @@ import { renderCanvas } from '../Canvas/render.js'
 import {
   renderPaletteToolsToDOM,
   renderPaletteToDOM,
-  renderBrushStampToDOM,
   renderToolOptionsToDOM,
   renderVectorsToDOM,
 } from '../DOM/render.js'
+import { bump } from '../hooks/useAppState.js'
 import { randomizeColor } from '../Swatch/events.js'
 import { renderCursor } from '../GUI/cursor.js'
 import { openSaveDialogBox } from '../Menu/events.js'
@@ -59,7 +59,7 @@ export function activateShortcut(keyCode) {
       if (!state.cursor.clicked) {
         state.tool.current = tools['grab']
         canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
-        renderBrushStampToDOM()
+        bump()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
         renderCursor()
@@ -69,10 +69,10 @@ export function activateShortcut(keyCode) {
     case 'AltRight':
       //option key
       //magicWand uses Alt as a subtract-from-selection modifier, not for eyedropper
-      if (!state.cursor.clicked && dom.toolBtn.id !== 'magicWand') {
+      if (!state.cursor.clicked && state.tool.selectedName !== 'magicWand') {
         state.tool.current = tools['eyedropper']
         canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
-        renderBrushStampToDOM()
+        bump()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
         renderCursor()
@@ -80,11 +80,11 @@ export function activateShortcut(keyCode) {
       break
     case 'ShiftLeft':
     case 'ShiftRight':
-      if (dom.toolBtn.id === 'brush') {
+      if (state.tool.selectedName === 'brush') {
         tools.brush.options.line.active = true
         state.tool.lineStartX = state.cursor.x
         state.tool.lineStartY = state.cursor.y
-      } else if (dom.toolBtn.id === 'ellipse') {
+      } else if (state.tool.selectedName === 'ellipse') {
         state.vector.properties.forceCircle = true
         if (
           vectorGui.selectedPoint.xKey &&
@@ -95,7 +95,7 @@ export function activateShortcut(keyCode) {
           adjustVectorSteps()
           vectorGui.render()
         }
-      } else if (dom.toolBtn.id === 'polygon') {
+      } else if (state.tool.selectedName === 'polygon') {
         state.vector.properties.forceSquare = true
         if (
           vectorGui.selectedPoint.xKey &&
@@ -109,7 +109,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'Digit7':
-      if (dom.toolBtn.id === 'curve') {
+      if (state.tool.selectedName === 'curve') {
         state.tool.current.options.chain.active =
           !state.tool.current.options.chain.active
         renderToolOptionsToDOM()
@@ -117,7 +117,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'Equal':
-      if (dom.toolBtn.id === 'curve') {
+      if (state.tool.selectedName === 'curve') {
         state.tool.current.options.equal.active =
           !state.tool.current.options.equal.active
         renderToolOptionsToDOM()
@@ -132,7 +132,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'KeyA':
-      if (dom.toolBtn.id === 'curve') {
+      if (state.tool.selectedName === 'curve') {
         state.tool.current.options.align.active =
           !state.tool.current.options.align.active
         renderToolOptionsToDOM()
@@ -190,19 +190,14 @@ export function activateShortcut(keyCode) {
     case 'KeyG':
       if (!state.cursor.clicked) {
         //Toggle grid
-        if (vectorGui.grid) {
-          dom.gridBtn.checked = false
-          vectorGui.grid = false
-        } else {
-          dom.gridBtn.checked = true
-          vectorGui.grid = true
-        }
+        vectorGui.grid = !vectorGui.grid
         vectorGui.render()
+        bump()
       }
       break
     case 'KeyH':
       //Locking shortcut for curve tool
-      if (dom.toolBtn.id === 'curve') {
+      if (state.tool.selectedName === 'curve') {
         state.tool.current.options.hold.active =
           !state.tool.current.options.hold.active
         renderToolOptionsToDOM()
@@ -224,7 +219,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'KeyL':
-      if (dom.toolBtn.id === 'curve') {
+      if (state.tool.selectedName === 'curve') {
         state.tool.current.options.link.active =
           !state.tool.current.options.link.active
         renderToolOptionsToDOM()
@@ -283,8 +278,9 @@ export function activateShortcut(keyCode) {
       if (!state.cursor.clicked && (keys.MetaLeft || keys.MetaRight)) {
         //shortcut for transform - cuts and pastes selection to allow free transform
       } else {
-        dom.tooltipBtn.checked = !dom.tooltipBtn.checked
-        if (dom.tooltipBtn.checked && state.ui.tooltipMessage) {
+        state.ui.showTooltips = !state.ui.showTooltips
+        bump()
+        if (state.ui.showTooltips && state.ui.tooltipMessage) {
           dom.tooltip.classList.add('visible')
         } else {
           dom.tooltip.classList.remove('visible')
@@ -359,8 +355,8 @@ export function deactivateShortcut(keyCode) {
     case 'Space':
       //only deactivate while not clicked
       if (!state.cursor.clicked) {
-        state.tool.current = tools[dom.toolBtn.id]
-        renderBrushStampToDOM()
+        state.tool.current = tools[state.tool.selectedName]
+        bump()
         canvas.previousXOffset = canvas.xOffset
         canvas.previousYOffset = canvas.yOffset
         vectorGui.render()
@@ -374,8 +370,8 @@ export function deactivateShortcut(keyCode) {
       //option key
       //only deactivate while not clicked
       if (!state.cursor.clicked) {
-        state.tool.current = tools[dom.toolBtn.id]
-        renderBrushStampToDOM()
+        state.tool.current = tools[state.tool.selectedName]
+        bump()
         vectorGui.render()
         renderCursor()
         setToolCssCursor()
@@ -383,7 +379,7 @@ export function deactivateShortcut(keyCode) {
       break
     case 'ShiftLeft':
     case 'ShiftRight':
-      state.tool.current = tools[dom.toolBtn.id]
+      state.tool.current = tools[state.tool.selectedName]
       tools.brush.options.line.active = false
       if (state.tool.current.name === 'brush' && state.cursor.clicked) {
         state.tool.current.fn()

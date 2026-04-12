@@ -5,6 +5,8 @@ import { state } from '../Context/state.js'
  * @param {HTMLElement} dragTarget - The element to drag
  */
 export const initializeDragger = (dragTarget) => {
+  if (!dragTarget || dragTarget.dataset.dragInitialized) return
+  dragTarget.dataset.dragInitialized = 'true'
   const dragBtn = dragTarget.querySelector('.dragger')
   if (dragBtn) {
     dragBtn.addEventListener('pointerdown', (e) => dragStart(e, dragTarget))
