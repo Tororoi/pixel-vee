@@ -135,17 +135,10 @@ export const vectorGui = {
 /**
  * @param {object} vectorProperties - The properties of the vector
  * @param {object} pointsKeys - The keys of the control points
- * @param {number} radius - (Float)
- * @param {boolean} modify - if true, check for collision with cursor and modify radius
+ * @param {boolean} modify - if true, check for collision with cursor
  * @param {object} vector - The vector to be rendered
  */
-function drawControlPoints(
-  vectorProperties,
-  pointsKeys,
-  radius,
-  modify = false,
-  vector = null,
-) {
+function drawControlPoints(vectorProperties, pointsKeys, modify = false, vector = null) {
   for (let keys of pointsKeys) {
     const point = {
       x: vectorProperties[keys.x],
@@ -154,7 +147,7 @@ function drawControlPoints(
 
     if (point.x == null || point.y == null) continue
 
-    handleCollisionAndDraw(keys, point, radius, modify, vector)
+    handleCollisionAndDraw(keys, point, modify, vector)
   }
 
   setCursorStyle()
@@ -166,30 +159,23 @@ function drawControlPoints(
  * @param {object} keys - The x/y property keys for this control point
  * @param {number} normalizedX - Point x plus layer offset
  * @param {number} normalizedY - Point y plus layer offset
- * @param {number} r - Current effective radius
- * @param {number} radius - Base radius before touch/active scaling
- * @returns {{ r: number, isActive: boolean }} Updated radius and active state
+ * @param {number} collisionRadius - Collision half-width in art pixels
+ * @returns {{ isActive: boolean }} Whether the point is active
  */
-function resolveCurrentVectorCollision(
-  keys,
-  normalizedX,
-  normalizedY,
-  r,
-  radius,
-) {
+function resolveCurrentVectorCollision(keys, normalizedX, normalizedY, collisionRadius) {
   if (
     checkSquarePointCollision(
       state.cursor.x,
       state.cursor.y,
       normalizedX,
       normalizedY,
-      r * 3.125,
+      collisionRadius,
     )
   ) {
     vectorGui.setCollision(keys)
-    return { r: radius * 3.125, isActive: true }
+    return { isActive: true }
   }
-  return { r, isActive: false }
+  return { isActive: false }
 }
 
 /**
@@ -198,17 +184,15 @@ function resolveCurrentVectorCollision(
  * @param {object} keys - The x/y property keys for this control point
  * @param {number} normalizedX - Point x plus layer offset
  * @param {number} normalizedY - Point y plus layer offset
- * @param {number} r - Current effective radius
- * @param {number} radius - Base radius before touch/active scaling
+ * @param {number} collisionRadius - Collision half-width in art pixels
  * @param {object} vector - The other vector being checked
- * @returns {{ r: number, isActive: boolean }} Updated radius and active state
+ * @returns {{ isActive: boolean }} Whether the point is active
  */
 function resolveOtherVectorCollision(
   keys,
   normalizedX,
   normalizedY,
-  r,
-  radius,
+  collisionRadius,
   vector,
 ) {
   if (
@@ -217,10 +201,10 @@ function resolveOtherVectorCollision(
       state.cursor.y,
       normalizedX,
       normalizedY,
-      r * 3.125,
+      collisionRadius,
     )
   ) {
-    return { r, isActive: false }
+    return { isActive: false }
   }
 
   if (keys.x === 'px1' || keys.x === 'px2') {
@@ -237,11 +221,11 @@ function resolveOtherVectorCollision(
     if (allowLink) {
       vectorGui.addLinkedVector(vector, keys.x, linkingPoint)
       if (state.tool.clickCounter === 0) {
-        return { r: radius * 3.125, isActive: true }
+        return { isActive: true }
       }
     } else if (!vectorGui.selectedPoint.xKey) {
       if (state.tool.clickCounter === 0) {
-        return { r: radius * 3.125, isActive: true }
+        return { isActive: true }
       }
     }
   } else if (
@@ -251,10 +235,10 @@ function resolveOtherVectorCollision(
     state.vector.collidedIndex = vector.index
     //only set new radius if selected vector is not a new vector being drawn
     if (state.tool.clickCounter === 0) {
-      return { r: radius * 3.125, isActive: true }
+      return { isActive: true }
     }
   }
-  return { r, isActive: false }
+  return { isActive: false }
 }
 
 /**
@@ -336,26 +320,28 @@ function drawActiveControlPoint(cx, cy, r, lw) {
  * draw a crosshair instead.
  * @param {number} cx - Canvas x coordinate (with offsets and 0.5 subpixel adjustment)
  * @param {number} cy - Canvas y coordinate (with offsets and 0.5 subpixel adjustment)
- * @param {number} r - Effective radius
+ * @param {number} renderRadius - Radius used for visual circle drawing
  * @param {number} lw - GUI line width
  * @param {boolean} modify - If true, draw interactive filled circle; otherwise draw outline circle
  * @param {object} keys - The x/y property keys for this control point
  * @param {number} normalizedX - Point x plus layer offset
  * @param {number} normalizedY - Point y plus layer offset
+ * @param {number} collisionRadius - Collision half-width in art pixels (used for wouldBeActive check)
  */
 function drawInactiveControlPoint(
   cx,
   cy,
-  r,
+  renderRadius,
   lw,
   modify,
   keys,
   normalizedX,
   normalizedY,
+  collisionRadius,
 ) {
   if (modify) {
     canvas.vectorGuiCTX.beginPath()
-    canvas.vectorGuiCTX.arc(cx, cy, r, 0, 2 * Math.PI)
+    canvas.vectorGuiCTX.arc(cx, cy, renderRadius * 1.5, 0, 2 * Math.PI)
     canvas.vectorGuiCTX.lineWidth = lw * 2
     canvas.vectorGuiCTX.strokeStyle = 'black'
     canvas.vectorGuiCTX.stroke()
@@ -370,11 +356,11 @@ function drawInactiveControlPoint(
         state.cursor.y,
         normalizedX,
         normalizedY,
-        r,
+        collisionRadius,
       )
     if (!wouldBeActive) {
       canvas.vectorGuiCTX.beginPath()
-      canvas.vectorGuiCTX.arc(cx, cy, r, 0, 2 * Math.PI)
+      canvas.vectorGuiCTX.arc(cx, cy, renderRadius * 1.5, 0, 2 * Math.PI)
       doubleStroke(canvas.vectorGuiCTX, lw, 'black', 'white')
     }
   }
@@ -386,13 +372,15 @@ function drawInactiveControlPoint(
  * with an expanded radius.
  * @param {object} keys - The keys of the control points
  * @param {object} point - The coordinates of the control point
- * @param {number} radius - (Float)
- * @param {boolean} modify - if true, check for collision with cursor and modify radius
+ * @param {boolean} modify - if true, check for collision with cursor
  * @param {object} vector - The vector to be rendered
  */
-function handleCollisionAndDraw(keys, point, radius, modify, vector) {
-  // Double the radius on touch devices so control points are easier to tap.
-  let r = state.tool.touch ? radius * 2 : radius
+function handleCollisionAndDraw(keys, point, modify, vector) {
+  // Preview (modify=false) circles are 3× larger than interactive circles.
+  // renderRadius is a multiplier against lineWidth so circles stay proportional across zoom levels.
+  // Touch devices have pre-doubled canvas.gui.renderRadius and canvas.gui.collisionRadius.
+  const renderRadius = canvas.gui.renderRadius * canvas.gui.lineWidth * (modify ? 1 : 3)
+  const collisionRadius = canvas.gui.collisionRadius
 
   // Translate the stored layer-relative point into cursor space (art-pixel,
   // pan-agnostic) so it can be compared directly with state.cursor.x/y.
@@ -407,7 +395,6 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
     if (vectorGui.selectedPoint.xKey === keys.x && !vector) {
       // This point is already selected on the current (in-progress) vector —
       // mark active and record the collision without doing a proximity check.
-      r = radius * 3.125 // increase radius of fill to match stroked circle
       isActive = true
       vectorGui.setCollision(keys)
     } else if (vector) {
@@ -417,11 +404,9 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
         keys,
         normalizedX,
         normalizedY,
-        r,
-        radius,
+        collisionRadius,
         vector,
       )
-      r = result.r
       isActive = result.isActive
     } else {
       // Point belongs to the current (in-progress) vector — check proximity
@@ -430,10 +415,8 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
         keys,
         normalizedX,
         normalizedY,
-        r,
-        radius,
+        collisionRadius,
       )
-      r = result.r
       isActive = result.isActive
     }
     // Update any vectors that share an endpoint with this point so their
@@ -449,17 +432,18 @@ function handleCollisionAndDraw(keys, point, radius, modify, vector) {
   const cx = point.x + renderXOffset + 0.5
   const cy = point.y + renderYOffset + 0.5
   if (isActive) {
-    drawActiveControlPoint(cx, cy, r, lw)
+    drawActiveControlPoint(cx, cy, renderRadius * 5, lw)
   } else {
     drawInactiveControlPoint(
       cx,
       cy,
-      r,
+      renderRadius,
       lw,
       modify,
       keys,
       normalizedX,
       normalizedY,
+      collisionRadius,
     )
   }
 }
@@ -601,7 +585,7 @@ function render() {
   //Prevent blurring
   canvas.vectorGuiCTX.imageSmoothingEnabled = false
   //if linking, render all vectors in the layer
-  if (canvas.currentLayer.type === 'reference') {
+  if (canvas.currentLayer.type === 'reference' && canvas.currentLayer.img) {
     vectorGui.resetCollision()
     let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
     state.selection.properties.px1 = canvas.currentLayer.x - lineWidth

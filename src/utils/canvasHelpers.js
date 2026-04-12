@@ -40,9 +40,9 @@ export const isOutOfBounds = (x, y, brushSize, layer, boundaryBox) => {
   // Precomputed values for efficiency
   const halfBrushSize = Math.floor(brushSize / 2)
   const xOutOfBounds =
-    x >= layer.cvs.width + halfBrushSize || x < -halfBrushSize
+    !layer.cvs || x >= layer.cvs.width + halfBrushSize || x < -halfBrushSize
   const yOutOfBounds =
-    y >= layer.cvs.height + halfBrushSize || y < -halfBrushSize
+    !layer.cvs || y >= layer.cvs.height + halfBrushSize || y < -halfBrushSize
 
   // Early exit if out of canvas bounds
   if (xOutOfBounds || yOutOfBounds) return true

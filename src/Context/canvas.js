@@ -93,6 +93,11 @@ export const canvas = {
   previousSubPixelY: null,
   zoomPixelX: null,
   zoomPixelY: null,
+  gui: {
+    lineWidth: null,
+    renderRadius: null,
+    collisionRadius: null,
+  },
 }
 
 //Initialize state
@@ -132,6 +137,11 @@ canvas.zoom = setInitialZoom(
   canvas.vectorGuiCVS.offsetHeight,
 )
 canvas.zoomAtLastDraw = canvas.zoom
+canvas.gui = {
+  lineWidth: canvas.zoom <= 8 ? 0.5 / canvas.zoom : 0.5 / 8,
+  renderRadius: 4,
+  collisionRadius: canvas.zoom <= 6 ? 1 : 0.5,
+}
 vectorGuiCTX.scale(
   canvas.sharpness * canvas.zoom,
   canvas.sharpness * canvas.zoom,
