@@ -109,7 +109,6 @@ export default function NavBar() {
   function handleCanvasSize() {
     if (hasPaste) return
     state.ui.canvasSizeOpen = true
-    bump()
     activateResizeOverlay()
   }
 

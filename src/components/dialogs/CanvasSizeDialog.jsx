@@ -3,6 +3,7 @@ import { useAppState, bump } from '../../hooks/useAppState.js'
 import { state } from '../../Context/state.js'
 import { canvas } from '../../Context/canvas.js'
 import {
+  resizeOverlay,
   applyFromInputs,
   applyResize,
   setAnchor,
@@ -26,17 +27,27 @@ export default function CanvasSizeDialog() {
   const [activeAnchor, setActiveAnchor] = useState('top-left')
   const [width, setWidth] = useState(canvas.offScreenCVS.width)
   const [height, setHeight] = useState(canvas.offScreenCVS.height)
+  const widthFocusedRef = useRef(false)
+  const heightFocusedRef = useRef(false)
 
-  // Sync dimensions from canvas when dialog opens
+  // Reset dimensions and anchor when dialog opens
   const isOpen = state.ui.canvasSizeOpen
   const prevOpenRef = useRef(false)
   useEffect(() => {
     if (isOpen && !prevOpenRef.current) {
       setWidth(canvas.offScreenCVS.width)
       setHeight(canvas.offScreenCVS.height)
+      setActiveAnchor('top-left')
     }
     prevOpenRef.current = isOpen
   }, [isOpen])
+
+  // Sync dimensions from resizeOverlay when bump() fires (e.g. from drag handles)
+  useEffect(() => {
+    if (!state.canvas.resizeOverlayActive) return
+    if (!widthFocusedRef.current) setWidth(resizeOverlay.newWidth)
+    if (!heightFocusedRef.current) setHeight(resizeOverlay.newHeight)
+  })
 
   useEffect(() => {
     if (!ref.current) return
@@ -153,7 +164,8 @@ export default function CanvasSizeDialog() {
                   max="1024"
                   value={width}
                   onChange={handleWidthChange}
-                  onBlur={handleWidthBlur}
+                  onFocus={() => { widthFocusedRef.current = true }}
+                  onBlur={(e) => { widthFocusedRef.current = false; handleWidthBlur(e) }}
                 />
                 <span className="spin-btn" onPointerDown={handleWidthSpin}>
                   <span id="inc" className="channel-btn">
@@ -175,7 +187,8 @@ export default function CanvasSizeDialog() {
                   max="1024"
                   value={height}
                   onChange={handleHeightChange}
-                  onBlur={handleHeightBlur}
+                  onFocus={() => { heightFocusedRef.current = true }}
+                  onBlur={(e) => { heightFocusedRef.current = false; handleHeightBlur(e) }}
                 />
                 <span className="spin-btn" onPointerDown={handleHeightSpin}>
                   <span id="inc" className="channel-btn">

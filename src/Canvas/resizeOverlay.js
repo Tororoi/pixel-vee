@@ -1,6 +1,7 @@
 import { canvas } from '../Context/canvas.js'
 import { dom } from '../Context/dom.js'
 import { state } from '../Context/state.js'
+import { bump } from '../hooks/useAppState.js'
 import { resizeOffScreenCanvas } from '../Canvas/render.js'
 import {
   stopMarchingAnts,
@@ -205,8 +206,9 @@ function applyDrag(handle, dx, dy) {
  * Writes the current overlay width/height into the canvas size form inputs.
  */
 function syncFormInputs() {
-  dom.canvasWidth.value = Math.round(resizeOverlay.newWidth)
-  dom.canvasHeight.value = Math.round(resizeOverlay.newHeight)
+  if (dom.canvasWidth) dom.canvasWidth.value = Math.round(resizeOverlay.newWidth)
+  if (dom.canvasHeight) dom.canvasHeight.value = Math.round(resizeOverlay.newHeight)
+  bump()
 }
 
 /**
@@ -288,12 +290,14 @@ export function activateResizeOverlay() {
   resizeOverlay.anchor = 'top-left'
   resizeOverlay.dragHandle = null
 
-  // Reset anchor grid UI
-  dom.anchorGrid
-    .querySelectorAll('.anchor-btn')
-    .forEach((b) => b.classList.remove('active'))
-  const topLeftBtn = dom.anchorGrid.querySelector('[data-anchor="top-left"]')
-  if (topLeftBtn) topLeftBtn.classList.add('active')
+  // Reset anchor grid UI (legacy DOM path; React dialog handles this via state)
+  if (dom.anchorGrid) {
+    dom.anchorGrid
+      .querySelectorAll('.anchor-btn')
+      .forEach((b) => b.classList.remove('active'))
+    const topLeftBtn = dom.anchorGrid.querySelector('[data-anchor="top-left"]')
+    if (topLeftBtn) topLeftBtn.classList.add('active')
+  }
 
   syncFormInputs()
   // Re-render selection canvas without dim (dim suppressed while resize is active)
