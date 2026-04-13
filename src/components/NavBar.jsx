@@ -118,9 +118,24 @@ export default function NavBar() {
     bump()
   }
 
+  function handleTopMenuClick() {
+    const activeEl = document.activeElement
+    if (activeEl?.classList.contains('menu-folder')) {
+      if (activeEl.classList.contains('active')) {
+        activeEl.classList.remove('active')
+      } else {
+        activeEl.classList.add('active')
+      }
+    }
+  }
+
+  function handleMenuFolderBlur(e) {
+    e.currentTarget.classList.remove('active')
+  }
+
   return (
     <div id="options" className="nav">
-      <div className="nav-menu">
+      <div className="nav-menu" style={{ alignSelf: 'stretch' }}>
         <div className="title">
           <a
             href="https://github.com/Tororoi/pixel-vee"
@@ -131,9 +146,9 @@ export default function NavBar() {
             <img src="./public/pixel-vee.png" alt="Github Repo" />
           </a>
         </div>
-        <ul role="menu" aria-label="functions" id="top-menu">
+        <ul role="menu" aria-label="functions" id="top-menu" onClick={handleTopMenuClick}>
           {/* File menu */}
-          <li role="menuitem" aria-haspopup="true" className="menu-folder" tabIndex={0}>
+          <li role="menuitem" aria-haspopup="true" className="menu-folder" tabIndex={0} onBlur={handleMenuFolderBlur}>
             <span className="menu-folder-title">File</span>
             <ul role="menu" id="file-submenu">
               <li role="menuitem" className="open-save">
@@ -177,7 +192,7 @@ export default function NavBar() {
             </ul>
           </li>
           {/* Edit menu */}
-          <li role="menuitem" aria-haspopup="true" className="menu-folder" tabIndex={1}>
+          <li role="menuitem" aria-haspopup="true" className="menu-folder" tabIndex={1} onBlur={handleMenuFolderBlur}>
             <span className="menu-folder-title">Edit</span>
             <ul role="menu" id="edit-submenu">
               <li
