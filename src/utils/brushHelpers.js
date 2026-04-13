@@ -1,4 +1,4 @@
-import { dom } from "../Context/dom.js"
+import { dom } from '../Context/dom.js'
 
 /**
  * update the brush preview in the dom
@@ -6,7 +6,7 @@ import { dom } from "../Context/dom.js"
  * @param {number} brushSize - (Integer)
  */
 export function updateBrushPreview(brushPixels, brushSize) {
-  dom.brushStamp.setAttribute("viewBox", `0 -0.5 ${brushSize} ${brushSize}`)
+  dom.brushStamp.setAttribute('viewBox', `0 -0.5 ${brushSize} ${brushSize}`)
   dom.brushStamp.style.width = brushSize * 2
   dom.brushStamp.style.height = brushSize * 2
 
@@ -17,7 +17,7 @@ export function updateBrushPreview(brushPixels, brushSize) {
    * @returns {string} - path data
    */
   function makePathData(x, y, w) {
-    return "M" + x + " " + y + "h" + w + ""
+    return 'M' + x + ' ' + y + 'h' + w + ''
   }
 
   /**
@@ -34,8 +34,8 @@ export function updateBrushPreview(brushPixels, brushSize) {
     paths.push(makePathData(r.x, r.y, 1))
   })
 
-  dom.brushStamp.innerHTML = makePath("rgba(255,255,255,255)", paths.join(""))
-  dom.brushStamp.setAttribute("stroke-width", 1)
+  dom.brushStamp.innerHTML = makePath('rgba(255,255,255,255)', paths.join(''))
+  dom.brushStamp.setAttribute('stroke-width', 1)
 }
 
 /**
@@ -188,7 +188,7 @@ function createBrushStamp(generatorFn, brushSize) {
     [1, -1],
   ]
   const directions = {
-    "0,0": base,
+    '0,0': base,
     // Pre-built Set for O(1) neighbor lookups in drawCursorBox (avoids rebuilding every frame)
     pixelSet: new Set(base.map((p) => (p.y << 16) | p.x)),
   }
@@ -223,11 +223,11 @@ export function createSquareBrush(brushSize) {
  */
 export function generateBrushStamps(brushType) {
   let brushStamp = {}
-  if (brushType === "circle") {
+  if (brushType === 'circle') {
     for (let i = 1; i <= 32; i++) {
       brushStamp[i] = createCircleBrush(i)
     }
-  } else if (brushType === "square") {
+  } else if (brushType === 'square') {
     for (let i = 1; i <= 32; i++) {
       brushStamp[i] = createSquareBrush(i)
     }

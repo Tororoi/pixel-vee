@@ -1,9 +1,9 @@
-import { TRANSLATE, ROTATE, SCALE } from "../utils/constants.js"
-import { dom } from "../Context/dom.js"
-import { state } from "../Context/state.js"
-import { vectorGui } from "./vector.js"
-import { setVectorShapeBoundaryBox } from "./transform.js"
-import { bump } from "../hooks/useAppState.js"
+import { TRANSLATE, ROTATE, SCALE } from '../utils/constants.js'
+import { dom } from '../Context/dom.js'
+import { state } from '../Context/state.js'
+import { vectorGui } from './vector.js'
+import { setVectorShapeBoundaryBox } from './transform.js'
+import { bump } from '../hooks/useAppState.js'
 
 /**
  * Switches the vector transform mode
@@ -21,7 +21,7 @@ export function switchVectorTransformMode(mode) {
 
 // Only wire up the legacy DOM listener if the element exists (pre-React fallback).
 if (dom.vectorTransformModeContainer) {
-  dom.vectorTransformModeContainer.addEventListener("click", (e) => {
+  dom.vectorTransformModeContainer.addEventListener('click', (e) => {
     switch (e.target.id) {
       case TRANSLATE:
         state.selection.resetProperties()

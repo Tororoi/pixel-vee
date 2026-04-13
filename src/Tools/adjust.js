@@ -126,7 +126,11 @@ function snapEndpointToCollidedVector(currentVector) {
   }
   // Line-to-curve snap: update the collided curve's handle instead of the current (line) vector's
   if (state.tool.current.modes.line) {
-    if (collidedVector.modes.line || collidedVector.vectorProperties.tool !== 'curve') return
+    if (
+      collidedVector.modes.line ||
+      collidedVector.vectorProperties.tool !== 'curve'
+    )
+      return
     const otherXKey = vectorGui.selectedPoint.xKey === 'px1' ? 'px2' : 'px1'
     const otherYKey = vectorGui.selectedPoint.yKey === 'py1' ? 'py2' : 'py1'
     const otherX = state.vector.properties[otherXKey]
@@ -138,9 +142,17 @@ function snapEndpointToCollidedVector(currentVector) {
     const collidedEpXKey = vectorGui.otherCollidedKeys.xKey
     const collidedEpYKey = vectorGui.otherCollidedKeys.yKey
     const collidedHandleXKey =
-      collidedEpXKey === 'px1' ? 'px3' : collidedVector.modes.quadCurve ? 'px3' : 'px4'
+      collidedEpXKey === 'px1'
+        ? 'px3'
+        : collidedVector.modes.quadCurve
+          ? 'px3'
+          : 'px4'
     const collidedHandleYKey =
-      collidedEpXKey === 'px1' ? 'py3' : collidedVector.modes.quadCurve ? 'py3' : 'py4'
+      collidedEpXKey === 'px1'
+        ? 'py3'
+        : collidedVector.modes.quadCurve
+          ? 'py3'
+          : 'py4'
     // Save collided vector's properties for undo/redo
     state.vector.savedProperties[collidedVector.index] = {
       ...collidedVector.vectorProperties,
@@ -272,8 +284,10 @@ function initLineLinkedCurvesInfo(currentVector) {
   if (!['px1', 'px2'].includes(selectedXKey)) return
   const otherXKey = selectedXKey === 'px1' ? 'px2' : 'px1'
   const otherYKey = selectedXKey === 'px1' ? 'py2' : 'py1'
-  const otherX = currentVector.vectorProperties[otherXKey] + currentVector.layer.x
-  const otherY = currentVector.vectorProperties[otherYKey] + currentVector.layer.y
+  const otherX =
+    currentVector.vectorProperties[otherXKey] + currentVector.layer.x
+  const otherY =
+    currentVector.vectorProperties[otherYKey] + currentVector.layer.y
 
   // Curves at the selected endpoint — already tracked in vectorGui.linkedVectors
   for (const [linkedVectorIndex, linkedPoints] of Object.entries(
@@ -395,7 +409,8 @@ function updateLineLinkedCurveHandles(currentVector) {
     const dirDeltaY = lineJunctionXKey === 'px1' ? lineDeltaY : -lineDeltaY
     // Equal applies only when the selected endpoint is the opposite of the junction
     const applyEqual =
-      state.tool.current.options.equal?.active && selectedXKey !== lineJunctionXKey
+      state.tool.current.options.equal?.active &&
+      selectedXKey !== lineJunctionXKey
     const curveEndpointYKey = curveEndpointXKey.replace('px', 'py')
     const savedHDX = savedProps[curveHandleXKey] - savedProps[curveEndpointXKey]
     const savedHDY = savedProps[curveHandleYKey] - savedProps[curveEndpointYKey]

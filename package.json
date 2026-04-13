@@ -10,6 +10,7 @@
     "sass": "sass --watch scss/style.scss:css/style.css",
     "eslint": "eslint --fix-dry-run src --ext jsx,js",
     "eslintfix": "eslint --fix src --ext jsx,js",
+    "pretty": "prettier --write src/**/*.{js,jsx}",
     "test": "vitest run",
     "test:watch": "vitest"
   },

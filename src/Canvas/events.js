@@ -683,7 +683,13 @@ dom.vectorSettingsContainer?.addEventListener('click', (e) => {
   const secondaryBtn = e.target.closest('.secondary-color')
   if (secondaryBtn) {
     if (!vector.secondaryColor) {
-      vector.secondaryColor = { r: 0, g: 0, b: 0, a: 0, color: 'rgba(0,0,0,0)' }
+      vector.secondaryColor = {
+        r: 0,
+        g: 0,
+        b: 0,
+        a: 0,
+        color: 'rgba(0,0,0,0)',
+      }
     }
     secondaryBtn.color = vector.secondaryColor
     secondaryBtn.vector = vector

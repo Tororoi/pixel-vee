@@ -17,7 +17,6 @@ import { initializeDragger, initializeCollapser } from '../utils/drag.js'
 const COLUMN1_TOOLS = ['brush', 'fill', 'curve', 'shapeTools', 'selectionTools']
 const COLUMN2_TOOLS = ['eyedropper', 'grab', 'move']
 
-
 export default function Toolbox() {
   useAppState()
   const ref = useRef(null)
@@ -50,7 +49,12 @@ export default function Toolbox() {
 
   function handleClear() {
     if (canvas.pastedLayer) return
-    canvas.currentLayer.ctx.clearRect(0, 0, canvas.offScreenCVS.width, canvas.offScreenCVS.height)
+    canvas.currentLayer.ctx.clearRect(
+      0,
+      0,
+      canvas.offScreenCVS.width,
+      canvas.offScreenCVS.height,
+    )
     state.selection.pointsSet = null
     state.selection.seenPixelsSet = null
     state.timeline.clearPoints()
@@ -72,7 +76,8 @@ export default function Toolbox() {
     const targetZoom = ZOOM_LEVELS[nextIdx]
     const zoomRatio = targetZoom / canvas.zoom
     const zoomedX = (canvas.xOffset + canvas.offScreenCVS.width / 2) / zoomRatio
-    const zoomedY = (canvas.yOffset + canvas.offScreenCVS.height / 2) / zoomRatio
+    const zoomedY =
+      (canvas.yOffset + canvas.offScreenCVS.height / 2) / zoomRatio
     const nox = zoomedX - canvas.offScreenCVS.width / 2
     const noy = zoomedY - canvas.offScreenCVS.height / 2
     actionZoom(targetZoom, nox, noy)
@@ -99,17 +104,25 @@ export default function Toolbox() {
   function renderToolBtn(toolName) {
     const isSelected = selectedName === toolName
     const LABELS = {
-      brush: 'Brush (B)', fill: 'Fill (F)', curve: 'Curve (V)',
-      eyedropper: 'Eyedropper (Hold Alt)', grab: 'Grab (Hold Space)', move: 'Move',
+      brush: 'Brush (B)',
+      fill: 'Fill (F)',
+      curve: 'Curve (V)',
+      eyedropper: 'Eyedropper (Hold Alt)',
+      grab: 'Grab (Hold Space)',
+      move: 'Move',
     }
     const TOOLTIPS = {
-      brush: 'Brush (B)', fill: 'Fill (F)', curve: 'Curve (V)',
-      eyedropper: 'Eyedropper (Hold Alt)', grab: 'Grab (Hold Space)', move: 'Move',
+      brush: 'Brush (B)',
+      fill: 'Fill (F)',
+      curve: 'Curve (V)',
+      eyedropper: 'Eyedropper (Hold Alt)',
+      grab: 'Grab (Hold Space)',
+      move: 'Move',
     }
     return (
       <button
         key={toolName}
-        type="button"
+        type='button'
         className={`tool ${toolName}${isSelected ? ' selected' : ''}`}
         id={toolName}
         aria-label={LABELS[toolName] ?? toolName}
@@ -132,16 +145,26 @@ export default function Toolbox() {
     }
 
     const TOOL_INFO = {
-      ellipse: { label: 'Ellipse (O) Hold Shift to maintain circle', tooltip: 'Ellipse (O)\n\nHold Shift to maintain circle' },
-      polygon: { label: 'Polygon (P) Hold Shift to maintain square', tooltip: 'Polygon (P)\n\nHold Shift to maintain square' },
+      ellipse: {
+        label: 'Ellipse (O) Hold Shift to maintain circle',
+        tooltip: 'Ellipse (O)\n\nHold Shift to maintain circle',
+      },
+      polygon: {
+        label: 'Polygon (P) Hold Shift to maintain square',
+        tooltip: 'Polygon (P)\n\nHold Shift to maintain square',
+      },
       select: { label: 'Select (S)', tooltip: 'Select (S)' },
       magicWand: { label: 'Magic Wand (W)', tooltip: 'Magic Wand (W)' },
     }
 
     return (
-      <div key={groupKey} className={`tool-group${isOpen ? ' open' : ''}`} data-group={groupKey}>
+      <div
+        key={groupKey}
+        className={`tool-group${isOpen ? ' open' : ''}`}
+        data-group={groupKey}
+      >
         <button
-          type="button"
+          type='button'
           className={`tool-group-btn ${groupBtnClass}${isGroupSelected ? ' selected' : ''}`}
           data-group={groupKey}
           aria-label={GROUP_LABELS[groupKey] ?? groupKey}
@@ -149,13 +172,16 @@ export default function Toolbox() {
           onClick={() => handleGroupBtnClick(groupKey)}
         />
         {isOpen && (
-          <div className="tool-group-popout">
+          <div className='tool-group-popout'>
             {group.tools.map((toolName) => {
-              const info = TOOL_INFO[toolName] ?? { label: toolName, tooltip: toolName }
+              const info = TOOL_INFO[toolName] ?? {
+                label: toolName,
+                tooltip: toolName,
+              }
               return (
                 <button
                   key={toolName}
-                  type="button"
+                  type='button'
                   className={`tool ${toolName}${selectedName === toolName ? ' selected' : ''}`}
                   id={toolName}
                   aria-label={info.label}
@@ -171,87 +197,87 @@ export default function Toolbox() {
   }
 
   return (
-    <div ref={ref} className="toolbox dialog-box h-drag free locked">
-      <div id="toolbox-header" className="header dragger">
-        <div className="drag-btn locked">
-          <div className="grip"></div>
+    <div ref={ref} className='toolbox dialog-box h-drag free locked'>
+      <div id='toolbox-header' className='header dragger'>
+        <div className='drag-btn locked'>
+          <div className='grip'></div>
         </div>
         Toolbox
         <label
-          htmlFor="toolbox-collapse-btn"
-          id="toolbox-collapser"
-          className="collapse-btn"
-          data-tooltip="Collapse/ Expand"
+          htmlFor='toolbox-collapse-btn'
+          id='toolbox-collapser'
+          className='collapse-btn'
+          data-tooltip='Collapse/ Expand'
         >
           <input
-            type="checkbox"
-            aria-label="Collapse or Expand"
-            className="collapse-checkbox"
-            id="toolbox-collapse-btn"
+            type='checkbox'
+            aria-label='Collapse or Expand'
+            className='collapse-checkbox'
+            id='toolbox-collapse-btn'
           />
-          <span className="arrow"></span>
+          <span className='arrow'></span>
         </label>
       </div>
-      <div className="collapsible">
-        <div className="btn-pair">
+      <div className='collapsible'>
+        <div className='btn-pair'>
           <button
-            type="button"
-            className="tool undo custom-shape"
-            id="undo"
-            aria-label="Undo (Cmd + Z)"
-            data-tooltip="Undo (Cmd + Z)"
+            type='button'
+            className='tool undo custom-shape'
+            id='undo'
+            aria-label='Undo (Cmd + Z)'
+            data-tooltip='Undo (Cmd + Z)'
             onClick={handleUndo_}
           />
           <button
-            type="button"
-            className="tool redo custom-shape"
-            id="redo"
-            aria-label="Redo (Cmd + Shift + Z)"
-            data-tooltip="Redo (Cmd + Shift + Z)"
+            type='button'
+            className='tool redo custom-shape'
+            id='redo'
+            aria-label='Redo (Cmd + Shift + Z)'
+            data-tooltip='Redo (Cmd + Shift + Z)'
             onClick={handleRedo_}
           />
         </div>
-        <div className="btn-pair">
+        <div className='btn-pair'>
           <button
-            type="button"
-            className="tool recenter custom-shape"
-            aria-label="Recenter Canvas"
-            data-tooltip="Recenter Canvas"
+            type='button'
+            className='tool recenter custom-shape'
+            aria-label='Recenter Canvas'
+            data-tooltip='Recenter Canvas'
             onClick={handleRecenter}
           />
           <button
-            type="button"
+            type='button'
             className={`tool clear custom-shape${canvas.pastedLayer ? ' disabled' : ''}`}
-            aria-label="Clear Canvas"
-            data-tooltip="Clear Canvas"
+            aria-label='Clear Canvas'
+            data-tooltip='Clear Canvas'
             onClick={handleClear}
           />
         </div>
-        <div className="zoom btn-pair" onClick={handleZoom}>
+        <div className='zoom btn-pair' onClick={handleZoom}>
           <button
-            type="button"
-            id="minus"
-            className="zoombtn minus"
-            aria-label="Zoom Out (Mouse Wheel)"
-            data-tooltip="Zoom Out (Mouse Wheel)"
+            type='button'
+            id='minus'
+            className='zoombtn minus'
+            aria-label='Zoom Out (Mouse Wheel)'
+            data-tooltip='Zoom Out (Mouse Wheel)'
           />
           <button
-            type="button"
-            id="plus"
-            className="zoombtn plus"
-            aria-label="Zoom In (Mouse Wheel)"
-            data-tooltip="Zoom In (Mouse Wheel)"
+            type='button'
+            id='plus'
+            className='zoombtn plus'
+            aria-label='Zoom In (Mouse Wheel)'
+            data-tooltip='Zoom In (Mouse Wheel)'
           />
         </div>
-        <div className="tools">
+        <div className='tools'>
           <h4>Tools</h4>
-          <div className="columns">
-            <div className="column">
+          <div className='columns'>
+            <div className='column'>
               {COLUMN1_TOOLS.map((item) =>
-                toolGroups[item] ? renderGroup(item) : renderToolBtn(item)
+                toolGroups[item] ? renderGroup(item) : renderToolBtn(item),
               )}
             </div>
-            <div className="column">
+            <div className='column'>
               {COLUMN2_TOOLS.map((name) => renderToolBtn(name))}
             </div>
           </div>

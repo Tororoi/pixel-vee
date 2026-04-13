@@ -319,7 +319,10 @@ function deselect() {
   }
   state.vector.setCurrentIndex(null)
   state.vector.clearSelected()
-  state.ui.vectorTransformOpen = false; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = 'none'
+  state.ui.vectorTransformOpen = false
+  bump()
+  if (dom.vectorTransformUIContainer)
+    dom.vectorTransformUIContainer.style.display = 'none'
   if (_vectorGui) {
     //reset vectorGui mother object
     _vectorGui.mother.newRotation = 0

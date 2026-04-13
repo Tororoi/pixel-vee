@@ -48,7 +48,9 @@ function resolveRotationActiveState(motherPoints, r) {
   const isActive = isSelected || isHovered
   if (isActive) {
     vectorGui.setCollision({ x: 'rotationx', y: 'rotationy' })
-    canvas.vectorGuiCVS.style.cursor = state.cursor.clicked ? 'grabbing' : 'grab'
+    canvas.vectorGuiCVS.style.cursor = state.cursor.clicked
+      ? 'grabbing'
+      : 'grab'
   }
   return isActive
 }

@@ -136,7 +136,12 @@ export const vectorGui = {
  * @param {boolean} modify - if true, check for collision with cursor
  * @param {object} vector - The vector to be rendered
  */
-function drawControlPoints(vectorProperties, pointsKeys, modify = false, vector = null) {
+function drawControlPoints(
+  vectorProperties,
+  pointsKeys,
+  modify = false,
+  vector = null,
+) {
   for (let keys of pointsKeys) {
     const point = {
       x: vectorProperties[keys.x],
@@ -160,7 +165,12 @@ function drawControlPoints(vectorProperties, pointsKeys, modify = false, vector 
  * @param {number} collisionRadius - Collision half-width in art pixels
  * @returns {{ isActive: boolean }} Whether the point is active
  */
-function resolveCurrentVectorCollision(keys, normalizedX, normalizedY, collisionRadius) {
+function resolveCurrentVectorCollision(
+  keys,
+  normalizedX,
+  normalizedY,
+  collisionRadius,
+) {
   if (
     checkSquarePointCollision(
       state.cursor.x,
@@ -377,7 +387,8 @@ function handleCollisionAndDraw(keys, point, modify, vector) {
   // Preview (modify=false) circles are 3× larger than interactive circles.
   // renderRadius is a multiplier against lineWidth so circles stay proportional across zoom levels.
   // Touch devices have pre-doubled canvas.gui.renderRadius and canvas.gui.collisionRadius.
-  const renderRadius = canvas.gui.renderRadius * canvas.gui.lineWidth * (modify ? 1 : 3)
+  const renderRadius =
+    canvas.gui.renderRadius * canvas.gui.lineWidth * (modify ? 1 : 3)
   const collisionRadius = canvas.gui.collisionRadius
 
   // Translate the stored layer-relative point into cursor space (art-pixel,

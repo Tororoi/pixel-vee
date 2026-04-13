@@ -1,8 +1,8 @@
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { keys } from "../Shortcuts/keys.js"
-import { addToTimeline } from "../Actions/undoRedo/undoRedo.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { state } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { keys } from '../Shortcuts/keys.js'
+import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
+import { renderCanvas } from '../Canvas/render.js'
 
 //==========================================//
 //=== * * * Magic Wand Controller * * * ===//
@@ -110,7 +110,7 @@ export function boundaryBoxFromMaskSet(maskSet) {
  */
 function magicWandSteps() {
   switch (canvas.pointerEvent) {
-    case "pointerdown": {
+    case 'pointerdown': {
       const x = state.cursor.x
       const y = state.cursor.y
       const w = canvas.offScreenCVS.width
@@ -197,14 +197,14 @@ function magicWandSteps() {
 }
 
 export const magicWand = {
-  name: "magicWand",
+  name: 'magicWand',
   fn: magicWandSteps,
   brushSize: 1,
-  brushType: "circle",
+  brushType: 'circle',
   brushDisabled: true,
   options: {},
   modes: {},
-  type: "utility",
-  cursor: "default",
-  activeCursor: "default",
+  type: 'utility',
+  cursor: 'default',
+  activeCursor: 'default',
 }

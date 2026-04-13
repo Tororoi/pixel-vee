@@ -1,11 +1,11 @@
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { renderCanvas } from "../Canvas/render.js"
-import { vectorGui } from "../GUI/vector.js"
-import { addToTimeline } from "../Actions/undoRedo/undoRedo.js"
-import { transformRasterContent } from "../utils/transformHelpers.js"
-import { addTransformToTimeline } from "../Actions/transform/rasterTransform.js"
-import { transformBoundaries } from "./transform.js"
+import { state } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { renderCanvas } from '../Canvas/render.js'
+import { vectorGui } from '../GUI/vector.js'
+import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
+import { transformRasterContent } from '../utils/transformHelpers.js'
+import { addTransformToTimeline } from '../Actions/transform/rasterTransform.js'
+import { transformBoundaries } from './transform.js'
 
 /**
  * Move the contents of a layer relative to other layers
@@ -15,7 +15,7 @@ function moveSteps() {
   // default selection is entire canvas contents
   // move raster layer or reference layer
   switch (canvas.pointerEvent) {
-    case "pointerdown":
+    case 'pointerdown':
       //TODO: (Low Priority) Make distinction for user that for general move, it's moving the layer, but for a selection, it's moving the selection area with the contents (only works for active paste)
       state.tool.grabStartX = canvas.currentLayer.x
       state.tool.grabStartY = canvas.currentLayer.y
@@ -25,7 +25,7 @@ function moveSteps() {
         transformSteps()
       }
       break
-    case "pointermove":
+    case 'pointermove':
       if (vectorGui.selectedPoint.xKey) {
         transformSteps()
       } else {
@@ -59,7 +59,7 @@ function moveSteps() {
         renderCanvas(canvas.currentLayer, true)
       }
       break
-    case "pointerup":
+    case 'pointerup':
       if (vectorGui.selectedPoint.xKey) {
         transformSteps()
       } else {
@@ -97,58 +97,65 @@ function transformSteps() {
   // default selection is entire canvas contents
   //move raster layer or reference layer
   switch (canvas.pointerEvent) {
-    case "pointerdown":
+    case 'pointerdown':
       if (vectorGui.selectedCollisionPresent) {
         vectorGui.selectedPoint = {
           xKey: vectorGui.collidedPoint.xKey,
           yKey: vectorGui.collidedPoint.yKey,
         }
-        if (canvas.currentLayer.type === "raster") {
-          state.selection.previousBoundaryBox = { ...state.selection.boundaryBox }
+        if (canvas.currentLayer.type === 'raster') {
+          state.selection.previousBoundaryBox = {
+            ...state.selection.boundaryBox,
+          }
         }
       }
       break
-    case "pointermove":
+    case 'pointermove':
       if (vectorGui.selectedPoint.xKey) {
-        if (canvas.currentLayer.type === "reference") {
+        if (canvas.currentLayer.type === 'reference') {
           scaleReference()
         } else if (
-          canvas.currentLayer.type === "raster" &&
+          canvas.currentLayer.type === 'raster' &&
           canvas.currentLayer.isPreview
         ) {
           transformBoundaries()
           let isMirroredHorizontally = state.transform.isMirroredHorizontally
           let isMirroredVertically = state.transform.isMirroredVertically
-          if (vectorGui.selectedPoint.xKey !== "px9") {
+          if (vectorGui.selectedPoint.xKey !== 'px9') {
             //Don't check for mirroring when moving whole selection
             if (
-              state.selection.boundaryBox.xMax === state.selection.previousBoundaryBox.xMin ||
-              state.selection.boundaryBox.xMin === state.selection.previousBoundaryBox.xMax
+              state.selection.boundaryBox.xMax ===
+                state.selection.previousBoundaryBox.xMin ||
+              state.selection.boundaryBox.xMin ===
+                state.selection.previousBoundaryBox.xMax
             ) {
               isMirroredHorizontally = !state.transform.isMirroredHorizontally
             }
             if (
-              state.selection.boundaryBox.yMax === state.selection.previousBoundaryBox.yMin ||
-              state.selection.boundaryBox.yMin === state.selection.previousBoundaryBox.yMax
+              state.selection.boundaryBox.yMax ===
+                state.selection.previousBoundaryBox.yMin ||
+              state.selection.boundaryBox.yMin ===
+                state.selection.previousBoundaryBox.yMax
             ) {
               isMirroredVertically = !state.transform.isMirroredVertically
             }
           }
           transformRasterContent(
             canvas.currentLayer,
-            state.clipboard.pastedImages[state.clipboard.currentPastedImageKey].imageData,
+            state.clipboard.pastedImages[state.clipboard.currentPastedImageKey]
+              .imageData,
             state.selection.boundaryBox,
             state.transform.rotationDegrees % 360,
             isMirroredHorizontally,
-            isMirroredVertically
+            isMirroredVertically,
           )
         }
         renderCanvas(canvas.currentLayer)
       }
       break
-    case "pointerup":
+    case 'pointerup':
       if (vectorGui.selectedPoint.xKey) {
-        if (canvas.currentLayer.type === "reference") {
+        if (canvas.currentLayer.type === 'reference') {
           addToTimeline({
             tool: state.tool.current.name,
             layer: canvas.currentLayer,
@@ -167,20 +174,26 @@ function transformSteps() {
             },
           })
         } else if (
-          canvas.currentLayer.type === "raster" &&
+          canvas.currentLayer.type === 'raster' &&
           canvas.currentLayer.isPreview
         ) {
           if (
-            state.selection.boundaryBox.xMax === state.selection.previousBoundaryBox.xMin ||
-            state.selection.boundaryBox.xMin === state.selection.previousBoundaryBox.xMax
+            state.selection.boundaryBox.xMax ===
+              state.selection.previousBoundaryBox.xMin ||
+            state.selection.boundaryBox.xMin ===
+              state.selection.previousBoundaryBox.xMax
           ) {
-            state.transform.isMirroredHorizontally = !state.transform.isMirroredHorizontally
+            state.transform.isMirroredHorizontally =
+              !state.transform.isMirroredHorizontally
           }
           if (
-            state.selection.boundaryBox.yMax === state.selection.previousBoundaryBox.yMin ||
-            state.selection.boundaryBox.yMin === state.selection.previousBoundaryBox.yMax
+            state.selection.boundaryBox.yMax ===
+              state.selection.previousBoundaryBox.yMin ||
+            state.selection.boundaryBox.yMin ===
+              state.selection.previousBoundaryBox.yMax
           ) {
-            state.transform.isMirroredVertically = !state.transform.isMirroredVertically
+            state.transform.isMirroredVertically =
+              !state.transform.isMirroredVertically
           }
           state.selection.normalize()
           state.selection.setBoundaryBox(state.selection.properties)
@@ -203,7 +216,7 @@ function transformSteps() {
  */
 function scaleReference() {
   switch (vectorGui.selectedPoint.xKey) {
-    case "px1": {
+    case 'px1': {
       //top left corner
       let newWidth =
         state.tool.grabStartX +
@@ -221,7 +234,7 @@ function scaleReference() {
       canvas.currentLayer.y = state.tool.grabStartY + changeInHeight
       break
     }
-    case "px2": {
+    case 'px2': {
       //top middle, expand or contract width
       let newHeight =
         state.tool.grabStartY +
@@ -238,7 +251,7 @@ function scaleReference() {
       canvas.currentLayer.y = state.cursor.y
       break
     }
-    case "px3": {
+    case 'px3': {
       //top right corner
       let newWidth = state.cursor.x - state.tool.grabStartX
       let scaleFactor = newWidth / canvas.currentLayer.img.width
@@ -251,7 +264,7 @@ function scaleReference() {
       canvas.currentLayer.y = state.tool.grabStartY + changeInHeight
       break
     }
-    case "px4": {
+    case 'px4': {
       //middle right, expand or contract height
       let newWidth = state.cursor.x - state.tool.grabStartX
       let scaleFactor = newWidth / canvas.currentLayer.img.width
@@ -264,7 +277,7 @@ function scaleReference() {
       canvas.currentLayer.y = state.tool.grabStartY + changeInHeight / 2
       break
     }
-    case "px5": {
+    case 'px5': {
       //lower right corner
       let newWidth = state.cursor.x - state.tool.grabStartX
       let newHeight = state.cursor.y - state.tool.grabStartY
@@ -275,7 +288,7 @@ function scaleReference() {
           : newWidth / canvas.currentLayer.img.width
       break
     }
-    case "px6": {
+    case 'px6': {
       //lower middle, expand or contract width
       let newHeight = state.cursor.y - state.tool.grabStartY
       let scaleFactor = newHeight / canvas.currentLayer.img.height
@@ -288,7 +301,7 @@ function scaleReference() {
       canvas.currentLayer.x = state.tool.grabStartX + changeInWidth / 2
       break
     }
-    case "px7": {
+    case 'px7': {
       //bottom left corner
       let newWidth =
         state.tool.grabStartX +
@@ -305,7 +318,7 @@ function scaleReference() {
       canvas.currentLayer.x = state.cursor.x
       break
     }
-    case "px8": {
+    case 'px8': {
       //middle left, expand or contract height
       let newWidth =
         state.tool.grabStartX +
@@ -322,7 +335,7 @@ function scaleReference() {
       canvas.currentLayer.y = state.tool.grabStartY + changeInHeight / 2
       break
     }
-    case "px9": {
+    case 'px9': {
       //Move layer
       canvas.currentLayer.x += state.cursor.x - state.cursor.prevX
       canvas.currentLayer.y += state.cursor.y - state.cursor.prevY
@@ -334,14 +347,14 @@ function scaleReference() {
 }
 
 export const move = {
-  name: "move",
+  name: 'move',
   fn: moveSteps,
   brushSize: 1,
-  brushType: "circle",
+  brushType: 'circle',
   brushDisabled: true,
   options: {},
   modes: {},
-  type: "utility",
-  cursor: "move",
-  activeCursor: "move",
+  type: 'utility',
+  cursor: 'move',
+  activeCursor: 'move',
 }

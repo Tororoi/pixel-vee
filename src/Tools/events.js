@@ -189,22 +189,26 @@ function updateBrush(e) {
 //===================================//
 
 // * Toolbox * — handled by Toolbox React component; guard until migrated
-if (dom.undoBtn) dom.undoBtn.addEventListener('click', () => {
-  handleUndo()
-  if (brush.modes.buildUpDither) rebuildBuildUpDensityMap()
-})
-if (dom.redoBtn) dom.redoBtn.addEventListener('click', () => {
-  handleRedo()
-  if (brush.modes.buildUpDither) rebuildBuildUpDensityMap()
-})
+if (dom.undoBtn)
+  dom.undoBtn.addEventListener('click', () => {
+    handleUndo()
+    if (brush.modes.buildUpDither) rebuildBuildUpDensityMap()
+  })
+if (dom.redoBtn)
+  dom.redoBtn.addEventListener('click', () => {
+    handleRedo()
+    if (brush.modes.buildUpDither) rebuildBuildUpDensityMap()
+  })
 
 if (dom.recenterBtn) dom.recenterBtn.addEventListener('click', handleRecenter)
 if (dom.clearBtn) dom.clearBtn.addEventListener('click', handleClearCanvas)
 
 if (dom.zoomContainer) dom.zoomContainer.addEventListener('click', handleZoom)
 
-if (dom.toolsContainer) dom.toolsContainer.addEventListener('click', handleTools)
-if (dom.modesContainer) dom.modesContainer.addEventListener('click', handleModes)
+if (dom.toolsContainer)
+  dom.toolsContainer.addEventListener('click', handleTools)
+if (dom.modesContainer)
+  dom.modesContainer.addEventListener('click', handleModes)
 
 // * Brush * — handled by Sidebar/BrushPanel React component; guard until migrated
 if (dom.brushDisplay) dom.brushDisplay.addEventListener('click', switchBrush)

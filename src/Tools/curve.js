@@ -265,10 +265,22 @@ function curveSteps() {
             py1: state.vector.properties.py1 - canvas.currentLayer.y,
             px2: state.vector.properties.px2 - canvas.currentLayer.x,
             py2: state.vector.properties.py2 - canvas.currentLayer.y,
-            px3: state.tool.current.modes.line ? null : state.vector.properties.px3 - canvas.currentLayer.x,
-            py3: state.tool.current.modes.line ? null : state.vector.properties.py3 - canvas.currentLayer.y,
-            px4: (state.tool.current.modes.line || state.tool.current.modes.quadCurve) ? null : state.vector.properties.px4 - canvas.currentLayer.x,
-            py4: (state.tool.current.modes.line || state.tool.current.modes.quadCurve) ? null : state.vector.properties.py4 - canvas.currentLayer.y,
+            px3: state.tool.current.modes.line
+              ? null
+              : state.vector.properties.px3 - canvas.currentLayer.x,
+            py3: state.tool.current.modes.line
+              ? null
+              : state.vector.properties.py3 - canvas.currentLayer.y,
+            px4:
+              state.tool.current.modes.line ||
+              state.tool.current.modes.quadCurve
+                ? null
+                : state.vector.properties.px4 - canvas.currentLayer.x,
+            py4:
+              state.tool.current.modes.line ||
+              state.tool.current.modes.quadCurve
+                ? null
+                : state.vector.properties.py4 - canvas.currentLayer.y,
           },
           // maskArray, //default to action's maskArray
           // boundaryBox, //default to action's boundaryBox

@@ -39,7 +39,13 @@ export const ditherPatterns = Array.from({ length: 64 }, (_, threshold) => ({
  * @param {number} ditherOffsetY - vertical shift within 8x8 tile (0-7)
  * @returns {boolean} true if pixel should be drawn with primary color
  */
-export function isDitherOn(pattern, x, y, ditherOffsetX = 0, ditherOffsetY = 0) {
+export function isDitherOn(
+  pattern,
+  x,
+  y,
+  ditherOffsetX = 0,
+  ditherOffsetY = 0,
+) {
   let px = (((x + ditherOffsetX) % 8) + 8) % 8
   let py = (((y + ditherOffsetY) % 8) + 8) % 8
   return pattern.data[py * 8 + px] === 1

@@ -206,8 +206,10 @@ function applyDrag(handle, dx, dy) {
  * Writes the current overlay width/height into the canvas size form inputs.
  */
 function syncFormInputs() {
-  if (dom.canvasWidth) dom.canvasWidth.value = Math.round(resizeOverlay.newWidth)
-  if (dom.canvasHeight) dom.canvasHeight.value = Math.round(resizeOverlay.newHeight)
+  if (dom.canvasWidth)
+    dom.canvasWidth.value = Math.round(resizeOverlay.newWidth)
+  if (dom.canvasHeight)
+    dom.canvasHeight.value = Math.round(resizeOverlay.newHeight)
   bump()
 }
 

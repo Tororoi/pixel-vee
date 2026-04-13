@@ -245,113 +245,132 @@ if (dom.toolOptions) {
   })
 }
 // Settings/grid/cursor handled by SettingsDialog React component
-if (dom.gridBtn) dom.gridBtn.addEventListener('click', () => {
-  vectorGui.grid = dom.gridBtn.checked
-  vectorGui.render()
-})
-if (dom.cursorPreviewBtn) dom.cursorPreviewBtn.addEventListener('click', () => {
-  vectorGui.showCursorPreview = dom.cursorPreviewBtn.checked
-})
-if (dom.gridSpacing) dom.gridSpacing.addEventListener('input', (e) => {
-  if (e.target.value < 1) e.target.value = 1
-  else if (e.target.value > 64) e.target.value = 64
-  vectorGui.gridSpacing = parseInt(e.target.value)
-  vectorGui.render()
-})
-if (dom.gridSpacingSpinBtn) dom.gridSpacingSpinBtn.addEventListener('pointerdown', (e) => {
-  if (e.target.id === 'inc') vectorGui.gridSpacing++
-  else if (e.target.id === 'dec') vectorGui.gridSpacing--
-  if (vectorGui.gridSpacing < 1) vectorGui.gridSpacing = 1
-  else if (vectorGui.gridSpacing > 64) vectorGui.gridSpacing = 64
-  if (dom.gridSpacing) dom.gridSpacing.value = vectorGui.gridSpacing
-  vectorGui.render()
-})
-if (dom.tooltipBtn) dom.tooltipBtn.addEventListener('click', () => {
-  if (dom.tooltipBtn.checked && state.ui.tooltipMessage) {
-    dom.tooltip.classList.add('visible')
-  } else {
-    dom.tooltip.classList.remove('visible')
-  }
-})
-// File menu events — handled by NavBar React component; guard until migrated
-if (dom.openSaveBtn) dom.openSaveBtn.addEventListener('click', (e) => {
-  e.target.value = null
-})
-if (dom.topMenu) dom.topMenu.addEventListener('click', (e) => {
-  if (e.target.classList.contains('disabled')) {
-    e.preventDefault()
-    return
-  }
-  if (document.activeElement.classList.contains('menu-folder')) {
-    if (document.activeElement.classList.contains('active')) {
-      document.activeElement.classList.remove('active')
+if (dom.gridBtn)
+  dom.gridBtn.addEventListener('click', () => {
+    vectorGui.grid = dom.gridBtn.checked
+    vectorGui.render()
+  })
+if (dom.cursorPreviewBtn)
+  dom.cursorPreviewBtn.addEventListener('click', () => {
+    vectorGui.showCursorPreview = dom.cursorPreviewBtn.checked
+  })
+if (dom.gridSpacing)
+  dom.gridSpacing.addEventListener('input', (e) => {
+    if (e.target.value < 1) e.target.value = 1
+    else if (e.target.value > 64) e.target.value = 64
+    vectorGui.gridSpacing = parseInt(e.target.value)
+    vectorGui.render()
+  })
+if (dom.gridSpacingSpinBtn)
+  dom.gridSpacingSpinBtn.addEventListener('pointerdown', (e) => {
+    if (e.target.id === 'inc') vectorGui.gridSpacing++
+    else if (e.target.id === 'dec') vectorGui.gridSpacing--
+    if (vectorGui.gridSpacing < 1) vectorGui.gridSpacing = 1
+    else if (vectorGui.gridSpacing > 64) vectorGui.gridSpacing = 64
+    if (dom.gridSpacing) dom.gridSpacing.value = vectorGui.gridSpacing
+    vectorGui.render()
+  })
+if (dom.tooltipBtn)
+  dom.tooltipBtn.addEventListener('click', () => {
+    if (dom.tooltipBtn.checked && state.ui.tooltipMessage) {
+      dom.tooltip.classList.add('visible')
     } else {
-      document.activeElement.classList.add('active')
+      dom.tooltip.classList.remove('visible')
     }
-  }
-})
-if (dom.topMenu) dom.topMenu.addEventListener('focusout', (e) => {
-  if (e.target.classList.contains('menu-folder')) {
-    e.target.classList.remove('active')
-  }
-})
-if (dom.openSaveBtn) dom.openSaveBtn.addEventListener('change', openSavedDrawing)
+  })
+// File menu events — handled by NavBar React component; guard until migrated
+if (dom.openSaveBtn)
+  dom.openSaveBtn.addEventListener('click', (e) => {
+    e.target.value = null
+  })
+if (dom.topMenu)
+  dom.topMenu.addEventListener('click', (e) => {
+    if (e.target.classList.contains('disabled')) {
+      e.preventDefault()
+      return
+    }
+    if (document.activeElement.classList.contains('menu-folder')) {
+      if (document.activeElement.classList.contains('active')) {
+        document.activeElement.classList.remove('active')
+      } else {
+        document.activeElement.classList.add('active')
+      }
+    }
+  })
+if (dom.topMenu)
+  dom.topMenu.addEventListener('focusout', (e) => {
+    if (e.target.classList.contains('menu-folder')) {
+      e.target.classList.remove('active')
+    }
+  })
+if (dom.openSaveBtn)
+  dom.openSaveBtn.addEventListener('change', openSavedDrawing)
 if (dom.saveBtn) dom.saveBtn.addEventListener('click', openSaveDialogBox)
 if (dom.importBtn) dom.importBtn.addEventListener('change', importImage)
 if (dom.exportBtn) dom.exportBtn.addEventListener('click', exportImage)
-if (dom.canvasSizeBtn) dom.canvasSizeBtn.addEventListener('click', () => {
-  if (canvas.pastedLayer) return
-  state.ui.canvasSizeOpen = true
-  if (dom.sizeContainer) dom.sizeContainer.style.display = 'flex'
-  bump()
-  activateResizeOverlay()
-})
-if (dom.selectAllBtn) dom.selectAllBtn.addEventListener('click', actionSelectAll)
+if (dom.canvasSizeBtn)
+  dom.canvasSizeBtn.addEventListener('click', () => {
+    if (canvas.pastedLayer) return
+    state.ui.canvasSizeOpen = true
+    if (dom.sizeContainer) dom.sizeContainer.style.display = 'flex'
+    bump()
+    activateResizeOverlay()
+  })
+if (dom.selectAllBtn)
+  dom.selectAllBtn.addEventListener('click', actionSelectAll)
 if (dom.deselectBtn) dom.deselectBtn.addEventListener('click', actionDeselect)
 if (dom.cutBtn) dom.cutBtn.addEventListener('click', actionCutSelection)
 if (dom.copyBtn) dom.copyBtn.addEventListener('click', actionCopySelection)
 if (dom.pasteBtn) dom.pasteBtn.addEventListener('click', actionPasteSelection)
-if (dom.deleteBtn) dom.deleteBtn.addEventListener('click', actionDeleteSelection)
-if (dom.flipHorizontalBtn) dom.flipHorizontalBtn.addEventListener('click', () => actionFlipPixels(true))
-if (dom.flipVerticalBtn) dom.flipVerticalBtn.addEventListener('click', () => actionFlipPixels(false))
+if (dom.deleteBtn)
+  dom.deleteBtn.addEventListener('click', actionDeleteSelection)
+if (dom.flipHorizontalBtn)
+  dom.flipHorizontalBtn.addEventListener('click', () => actionFlipPixels(true))
+if (dom.flipVerticalBtn)
+  dom.flipVerticalBtn.addEventListener('click', () => actionFlipPixels(false))
 if (dom.rotateBtn) dom.rotateBtn.addEventListener('click', actionRotatePixels)
 // Settings button handled by NavBar React component; guard until migrated
-if (dom.settingsBtn) dom.settingsBtn.addEventListener('click', () => {
-  state.ui.settingsOpen = !state.ui.settingsOpen
-  bump()
-})
+if (dom.settingsBtn)
+  dom.settingsBtn.addEventListener('click', () => {
+    state.ui.settingsOpen = !state.ui.settingsOpen
+    bump()
+  })
 // Save form events — handled by SaveDialog React component; guard until migrated
-if (dom.saveAsForm) dom.saveAsForm.addEventListener('change', (e) => {
-  if (e.target.id === 'preserve-history-toggle') {
-    state.ui.saveSettings.preserveHistory = e.target.checked
-    setSaveFilesizePreview()
-  } else if (e.target.id === 'include-palette-toggle') {
-    state.ui.saveSettings.includePalette = e.target.checked
-    setSaveFilesizePreview()
-  } else if (e.target.id === 'include-reference-layers-toggle') {
-    state.ui.saveSettings.includeReferenceLayers = e.target.checked
-    setSaveFilesizePreview()
-  } else if (e.target.id === 'include-removed-actions-toggle') {
-    state.ui.saveSettings.includeRemovedActions = e.target.checked
-    setSaveFilesizePreview()
-  }
-})
-if (dom.saveAsForm) dom.saveAsForm.addEventListener('submit', (e) => {
-  e.preventDefault()
-  saveDrawing()
-  state.ui.saveDialogOpen = false
-  if (dom.saveContainer) dom.saveContainer.style.display = 'none'
-  bump()
-})
-if (dom.saveAsFileName) dom.saveAsFileName.addEventListener('input', (e) => {
-  state.ui.saveSettings.saveAsFileName = e.target.value
-  dom.saveAsFileName.style.width =
-    measureTextWidth(state.ui.saveSettings.saveAsFileName, "16px '04Font'") +
-    2 +
-    'px'
-})
-if (dom.cancelSaveBtn) dom.cancelSaveBtn.addEventListener('click', () => {
-  state.ui.saveDialogOpen = false
-  if (dom.saveContainer) dom.saveContainer.style.display = 'none'
-  bump()
-})
+if (dom.saveAsForm)
+  dom.saveAsForm.addEventListener('change', (e) => {
+    if (e.target.id === 'preserve-history-toggle') {
+      state.ui.saveSettings.preserveHistory = e.target.checked
+      setSaveFilesizePreview()
+    } else if (e.target.id === 'include-palette-toggle') {
+      state.ui.saveSettings.includePalette = e.target.checked
+      setSaveFilesizePreview()
+    } else if (e.target.id === 'include-reference-layers-toggle') {
+      state.ui.saveSettings.includeReferenceLayers = e.target.checked
+      setSaveFilesizePreview()
+    } else if (e.target.id === 'include-removed-actions-toggle') {
+      state.ui.saveSettings.includeRemovedActions = e.target.checked
+      setSaveFilesizePreview()
+    }
+  })
+if (dom.saveAsForm)
+  dom.saveAsForm.addEventListener('submit', (e) => {
+    e.preventDefault()
+    saveDrawing()
+    state.ui.saveDialogOpen = false
+    if (dom.saveContainer) dom.saveContainer.style.display = 'none'
+    bump()
+  })
+if (dom.saveAsFileName)
+  dom.saveAsFileName.addEventListener('input', (e) => {
+    state.ui.saveSettings.saveAsFileName = e.target.value
+    dom.saveAsFileName.style.width =
+      measureTextWidth(state.ui.saveSettings.saveAsFileName, "16px '04Font'") +
+      2 +
+      'px'
+  })
+if (dom.cancelSaveBtn)
+  dom.cancelSaveBtn.addEventListener('click', () => {
+    state.ui.saveDialogOpen = false
+    if (dom.saveContainer) dom.saveContainer.style.display = 'none'
+    bump()
+  })

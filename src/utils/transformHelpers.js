@@ -1,6 +1,6 @@
-import { calcEllipseParamsFromConics } from "./ellipse.js"
-import { getAngle } from "./trig.js"
-import { updateVectorProperties } from "./vectorHelpers.js"
+import { calcEllipseParamsFromConics } from './ellipse.js'
+import { getAngle } from './trig.js'
+import { updateVectorProperties } from './vectorHelpers.js'
 
 /**
  * Transforms raster content by rotating and stretching/shrinking.
@@ -19,7 +19,7 @@ export function transformRasterContent(
   newBoundaryBox,
   degrees,
   isMirroredHorizontally = false,
-  isMirroredVertically = false
+  isMirroredVertically = false,
 ) {
   const originalWidth = originalPixels.width
   const originalHeight = originalPixels.height
@@ -28,10 +28,10 @@ export function transformRasterContent(
   const sin = Math.sin(radians)
   // Calculate rotated width and height
   const rotatedWidth = Math.round(
-    Math.abs(originalWidth * cos) + Math.abs(originalHeight * sin)
+    Math.abs(originalWidth * cos) + Math.abs(originalHeight * sin),
   )
   const rotatedHeight = Math.round(
-    Math.abs(originalWidth * sin) + Math.abs(originalHeight * cos)
+    Math.abs(originalWidth * sin) + Math.abs(originalHeight * cos),
   )
   const newWidth = Math.abs(newBoundaryBox.xMax - newBoundaryBox.xMin)
   const newHeight = Math.abs(newBoundaryBox.yMax - newBoundaryBox.yMin)
@@ -117,7 +117,7 @@ export function transformRasterContent(
   layer.ctx.putImageData(
     adjustedPixels,
     Math.min(newBoundaryBox.xMin, newBoundaryBox.xMax),
-    Math.min(newBoundaryBox.yMin, newBoundaryBox.yMax)
+    Math.min(newBoundaryBox.yMin, newBoundaryBox.yMax),
   )
 }
 
@@ -142,10 +142,10 @@ export function calculateEllipseBoundingBox(properties) {
   const cosTheta = Math.cos(theta)
   const sinTheta = Math.sin(theta)
   const xMaxFromCenter = Math.sqrt(
-    radA * radA * cosTheta * cosTheta + radB * radB * sinTheta * sinTheta
+    radA * radA * cosTheta * cosTheta + radB * radB * sinTheta * sinTheta,
   )
   const yMaxFromCenter = Math.sqrt(
-    radA * radA * sinTheta * sinTheta + radB * radB * cosTheta * cosTheta
+    radA * radA * sinTheta * sinTheta + radB * radB * cosTheta * cosTheta,
   )
 
   // Calculate the bounding box by translating these maxima by the ellipse's center coordinates
@@ -173,13 +173,13 @@ export function transformVectorContent(
   previousBoundaryBox,
   newBoundaryBox,
   isMirroredHorizontally = false,
-  isMirroredVertically = false
+  isMirroredVertically = false,
 ) {
   const originalWidth = Math.abs(
-    previousBoundaryBox.xMax - 1 - previousBoundaryBox.xMin
+    previousBoundaryBox.xMax - 1 - previousBoundaryBox.xMin,
   )
   const originalHeight = Math.abs(
-    previousBoundaryBox.yMax - 1 - previousBoundaryBox.yMin
+    previousBoundaryBox.yMax - 1 - previousBoundaryBox.yMin,
   )
   const newWidth = Math.abs(newBoundaryBox.xMax - 1 - newBoundaryBox.xMin)
   const newHeight = Math.abs(newBoundaryBox.yMax - 1 - newBoundaryBox.yMin)
@@ -199,55 +199,55 @@ export function transformVectorContent(
   for (let vectorIndex in vectorsSavedProperties) {
     let originalProperties = { ...vectorsSavedProperties[vectorIndex] }
     let vector = vectors[vectorIndex]
-    if (originalProperties.tool === "ellipse") {
+    if (originalProperties.tool === 'ellipse') {
       // Calculate the new tangent points
       transformControlPoint(
         vector,
         originalProperties,
-        "leftTangentX",
-        "leftTangentY",
+        'leftTangentX',
+        'leftTangentY',
         scaleX,
         scaleY,
         xOffset,
         yOffset,
         isMirroredHorizontally,
-        isMirroredVertically
+        isMirroredVertically,
       )
       transformControlPoint(
         vector,
         originalProperties,
-        "topTangentX",
-        "topTangentY",
+        'topTangentX',
+        'topTangentY',
         scaleX,
         scaleY,
         xOffset,
         yOffset,
         isMirroredHorizontally,
-        isMirroredVertically
+        isMirroredVertically,
       )
       transformControlPoint(
         vector,
         originalProperties,
-        "rightTangentX",
-        "rightTangentY",
+        'rightTangentX',
+        'rightTangentY',
         scaleX,
         scaleY,
         xOffset,
         yOffset,
         isMirroredHorizontally,
-        isMirroredVertically
+        isMirroredVertically,
       )
       transformControlPoint(
         vector,
         originalProperties,
-        "bottomTangentX",
-        "bottomTangentY",
+        'bottomTangentX',
+        'bottomTangentY',
         scaleX,
         scaleY,
         xOffset,
         yOffset,
         isMirroredHorizontally,
-        isMirroredVertically
+        isMirroredVertically,
       )
       if ((originalProperties.angle % Math.PI) / 2 === 0) {
         //For right angles, angle remains the same and vertices can be stretched same way as center point
@@ -255,38 +255,38 @@ export function transformVectorContent(
         transformControlPoint(
           vector,
           originalProperties,
-          "px1",
-          "py1",
+          'px1',
+          'py1',
           scaleX,
           scaleY,
           xOffset,
           yOffset,
           isMirroredHorizontally,
-          isMirroredVertically
+          isMirroredVertically,
         )
         transformControlPoint(
           vector,
           originalProperties,
-          "px2",
-          "py2",
+          'px2',
+          'py2',
           scaleX,
           scaleY,
           xOffset,
           yOffset,
           isMirroredHorizontally,
-          isMirroredVertically
+          isMirroredVertically,
         )
         transformControlPoint(
           vector,
           originalProperties,
-          "px3",
-          "py3",
+          'px3',
+          'py3',
           scaleX,
           scaleY,
           xOffset,
           yOffset,
           isMirroredHorizontally,
-          isMirroredVertically
+          isMirroredVertically,
         )
         //recalculate radA and radB
         let dxa = vector.vectorProperties.px2 - vector.vectorProperties.px1
@@ -300,13 +300,13 @@ export function transformVectorContent(
           vector.vectorProperties.leftTangentX +
             (vector.vectorProperties.rightTangentX -
               vector.vectorProperties.leftTangentX) /
-              2
+              2,
         )
         const py1 = Math.round(
           vector.vectorProperties.topTangentY +
             (vector.vectorProperties.bottomTangentY -
               vector.vectorProperties.topTangentY) /
-              2
+              2,
         )
         const { px2, py2, px3, py3 } = calcEllipseParamsFromConics(
           vector.vectorProperties.weight,
@@ -320,7 +320,7 @@ export function transformVectorContent(
           vector.vectorProperties.bottomTangentY,
           px1,
           py1,
-          originalProperties.angle
+          originalProperties.angle,
         )
         //Don't need to use updateVectorProperties function as values are already corrected for the layer offsets
         vector.vectorProperties.px1 = px1
@@ -366,50 +366,50 @@ export function transformVectorContent(
       transformControlPoint(
         vector,
         originalProperties,
-        "px1",
-        "py1",
+        'px1',
+        'py1',
         scaleX,
         scaleY,
         xOffset,
         yOffset,
         isMirroredHorizontally,
-        isMirroredVertically
+        isMirroredVertically,
       )
       transformControlPoint(
         vector,
         originalProperties,
-        "px2",
-        "py2",
+        'px2',
+        'py2',
         scaleX,
         scaleY,
         xOffset,
         yOffset,
         isMirroredHorizontally,
-        isMirroredVertically
+        isMirroredVertically,
       )
       transformControlPoint(
         vector,
         originalProperties,
-        "px3",
-        "py3",
+        'px3',
+        'py3',
         scaleX,
         scaleY,
         xOffset,
         yOffset,
         isMirroredHorizontally,
-        isMirroredVertically
+        isMirroredVertically,
       )
       transformControlPoint(
         vector,
         originalProperties,
-        "px4",
-        "py4",
+        'px4',
+        'py4',
         scaleX,
         scaleY,
         xOffset,
         yOffset,
         isMirroredHorizontally,
-        isMirroredVertically
+        isMirroredVertically,
       )
     }
   }
@@ -437,7 +437,7 @@ export function transformVectorContent(
     xOffset,
     yOffset,
     isMirroredHorizontally,
-    isMirroredVertically
+    isMirroredVertically,
   ) {
     if (Object.hasOwn(originalProperties, xKey)) {
       let originalX = originalProperties[xKey] + vector.layer.x

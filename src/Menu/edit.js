@@ -1,8 +1,8 @@
-import { dom } from "../Context/dom.js"
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { vectorGui } from "../GUI/vector.js"
-import { enableActionsForClipboard } from "../DOM/disableDomElements.js"
+import { dom } from '../Context/dom.js'
+import { state } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { vectorGui } from '../GUI/vector.js'
+import { enableActionsForClipboard } from '../DOM/disableDomElements.js'
 
 //===================================//
 //========= * * * Edit * * * ========//
@@ -16,10 +16,10 @@ export function copySelectedPixels() {
   const { xMin, yMin, xMax, yMax } = state.selection.boundaryBox
   const w = xMax - xMin
   const h = yMax - yMin
-  const tempCanvas = document.createElement("canvas")
+  const tempCanvas = document.createElement('canvas')
   tempCanvas.width = w
   tempCanvas.height = h
-  const tempCTX = tempCanvas.getContext("2d", {
+  const tempCTX = tempCanvas.getContext('2d', {
     willReadFrequently: true,
   })
   if (state.selection.maskSet) {
@@ -52,7 +52,7 @@ export function copySelectedPixels() {
     xMin,
     yMin,
     w,
-    h
+    h,
   )
   state.clipboard.select.vectors = {}
   //Store the layer offset at copy time so paste can correctly position content
@@ -155,7 +155,7 @@ export function pasteSelectedPixels(clipboard, layer, offsetX, offsetY) {
     0,
     canvas.sharpness * canvas.zoom,
     0,
-    0
+    0,
   )
   canvas.tempLayer.x = layer.x
   canvas.tempLayer.y = layer.y
@@ -169,7 +169,7 @@ export function pasteSelectedPixels(clipboard, layer, offsetX, offsetY) {
   canvas.pastedLayer = layer
   canvas.currentLayer = canvas.tempLayer
   canvas.currentLayer.inactiveTools.forEach((tool) => {
-    if (dom[`${tool}Btn`]) dom[`${tool}Btn`].classList.add("deactivate-paste")
+    if (dom[`${tool}Btn`]) dom[`${tool}Btn`].classList.add('deactivate-paste')
   })
 
   // if raster paste, adjust selectProperties and boundaryBox
@@ -212,6 +212,6 @@ function renderPaste(clipboard, layer, offsetX, offsetY) {
     boundaryBox.xMin + offsetX,
     boundaryBox.yMin + offsetY,
     boundaryBox.xMax - boundaryBox.xMin,
-    boundaryBox.yMax - boundaryBox.yMin
+    boundaryBox.yMax - boundaryBox.yMin,
   )
 }

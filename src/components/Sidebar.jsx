@@ -18,27 +18,27 @@ export default function Sidebar() {
   }, [])
 
   return (
-    <div ref={ref} className="sidebar dialog-box h-drag free locked">
-      <div id="sidebar-header" className="header dragger">
-        <div className="drag-btn locked">
-          <div className="grip"></div>
+    <div ref={ref} className='sidebar dialog-box h-drag free locked'>
+      <div id='sidebar-header' className='header dragger'>
+        <div className='drag-btn locked'>
+          <div className='grip'></div>
         </div>
         Tools
         <label
-          htmlFor="sidebar-collapse-btn"
-          className="collapse-btn"
-          data-tooltip="Collapse/ Expand"
+          htmlFor='sidebar-collapse-btn'
+          className='collapse-btn'
+          data-tooltip='Collapse/ Expand'
         >
           <input
-            type="checkbox"
-            aria-label="Collapse or Expand"
-            className="collapse-checkbox"
-            id="sidebar-collapse-btn"
+            type='checkbox'
+            aria-label='Collapse or Expand'
+            className='collapse-checkbox'
+            id='sidebar-collapse-btn'
           />
-          <span className="arrow"></span>
+          <span className='arrow'></span>
         </label>
       </div>
-      <div className="collapsible">
+      <div className='collapsible'>
         <BrushPanel />
         <PalettePanel />
         <LayersPanel />

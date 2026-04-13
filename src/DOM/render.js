@@ -1,4 +1,4 @@
-export { renderLayersToDOM, renderLayerSettingsToDOM } from "./renderLayers.js"
+export { renderLayersToDOM, renderLayerSettingsToDOM } from './renderLayers.js'
 export {
   renderVectorsToDOM,
   renderVectorSettingsToDOM,
@@ -7,8 +7,12 @@ export {
   updateVectorDitherControls,
   highlightVectorDitherPattern,
   updateVectorDitherPreview,
-} from "./renderVectors.js"
-export { renderPaletteToolsToDOM, renderPaletteToDOM, renderPalettePresetsToDOM } from "./renderPalette.js"
+} from './renderVectors.js'
+export {
+  renderPaletteToolsToDOM,
+  renderPaletteToDOM,
+  renderPalettePresetsToDOM,
+} from './renderPalette.js'
 export {
   renderBrushStampToDOM,
   renderBrushModesToDOM,
@@ -23,4 +27,4 @@ export {
   createDitherPatternSVG,
   applyDitherOffset,
   applyDitherOffsetControl,
-} from "./renderBrush.js"
+} from './renderBrush.js'

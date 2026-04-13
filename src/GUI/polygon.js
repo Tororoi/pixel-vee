@@ -1,7 +1,10 @@
 import { canvas } from '../Context/canvas.js'
 import { vectorGui } from './vector.js'
 import { getGuiLineWidth, doubleStroke } from '../utils/guiHelpers.js'
-import { getRenderXOffset, getRenderYOffset } from '../utils/coordinateHelpers.js'
+import {
+  getRenderXOffset,
+  getRenderYOffset,
+} from '../utils/coordinateHelpers.js'
 
 /**
  * @param {object} vectorProperties - The properties of the vector
