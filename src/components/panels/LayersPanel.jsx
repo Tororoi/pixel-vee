@@ -11,18 +11,10 @@ import { switchTool } from '../../Tools/toolbox.js'
 import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
 import { dom } from '../../Context/dom.js'
 
-function LayerSettingsPopout({ layer, anchorEl, onClose }) {
+function LayerSettingsPopout({ layer, pos, onClose }) {
   const [title, setTitle] = useState(layer.title ?? '')
   const [opacity, setOpacity] = useState(Math.round((layer.opacity ?? 1) * 255))
   const ref = useRef(null)
-
-  // Compute portal position
-  const [pos, setPos] = useState({ top: 0, left: 0 })
-  useEffect(() => {
-    if (!anchorEl) return
-    const rect = anchorEl.getBoundingClientRect()
-    setPos({ top: rect.top + window.scrollY, left: rect.right + window.scrollX + 4 })
-  }, [anchorEl])
 
   // Close on outside pointerdown
   useEffect(() => {
@@ -52,10 +44,11 @@ function LayerSettingsPopout({ layer, anchorEl, onClose }) {
   return ReactDOM.createPortal(
     <div
       ref={ref}
-      className="layer-settings"
-      style={{ display: 'flex', position: 'fixed', top: pos.top, left: pos.left, zIndex: 1000 }}
+      className="layer-settings dialog-box"
+      style={{ display: 'flex', position: 'fixed', top: pos.top, left: pos.left, transform: 'translateY(-50%)', zIndex: 1000 }}
     >
       <div className="header">
+        <div className="drag-btn locked"><div className="grip"></div></div>
         Layer Settings
         <button type="button" className="close-btn" data-tooltip="Close" onClick={onClose} />
       </div>
@@ -90,7 +83,7 @@ export default function LayersPanel() {
   const ref = useRef(null)
   const uploadRef = useRef(null)
   const [settingsLayer, setSettingsLayer] = useState(null)
-  const [settingsAnchor, setSettingsAnchor] = useState(null)
+  const [settingsPos, setSettingsPos] = useState({ top: 0, left: 0 })
   const dragIndexRef = useRef(null)
 
   useEffect(() => {
@@ -159,10 +152,10 @@ export default function LayersPanel() {
     e.stopPropagation()
     if (settingsLayer === layer) {
       setSettingsLayer(null)
-      setSettingsAnchor(null)
     } else {
+      const rect = e.currentTarget.getBoundingClientRect()
+      setSettingsPos({ top: rect.top + rect.height / 2, left: rect.right + 16 })
       setSettingsLayer(layer)
-      setSettingsAnchor(e.currentTarget)
     }
   }
 
@@ -292,8 +285,8 @@ export default function LayersPanel() {
       {settingsLayer && (
         <LayerSettingsPopout
           layer={settingsLayer}
-          anchorEl={settingsAnchor}
-          onClose={() => { setSettingsLayer(null); setSettingsAnchor(null) }}
+          pos={settingsPos}
+          onClose={() => setSettingsLayer(null)}
         />
       )}
     </div>

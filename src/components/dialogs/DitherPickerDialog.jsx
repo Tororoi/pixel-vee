@@ -1,8 +1,9 @@
 import React, { useEffect, useRef } from 'react'
-import { useAppState } from '../../hooks/useAppState.js'
+import { useAppState, bump } from '../../hooks/useAppState.js'
 import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
 import { state } from '../../Context/state.js'
 import { brush, rebuildBuildUpDensityMap, BAYER_STEPS } from '../../Tools/brush.js'
+import { renderCanvas } from '../../Canvas/render.js'
 import {
   initDitherPicker,
   highlightSelectedDitherPattern,
@@ -29,6 +30,9 @@ export default function DitherPickerDialog() {
 
     // Close button
     el.querySelector('.close-btn')?.addEventListener('click', () => {
+      el._vectorTarget = null
+      const buildUpBtn = el.querySelector('#dither-ctrl-build-up')
+      if (buildUpBtn) buildUpBtn.style.display = ''
       el.style.display = 'none'
     })
 
@@ -37,6 +41,14 @@ export default function DitherPickerDialog() {
       const btn = e.target.closest('.dither-grid-btn')
       if (!btn) return
       const patternIndex = parseInt(btn.dataset.patternIndex)
+      // Vector mode: apply to vector target, keep picker open
+      if (el._vectorTarget) {
+        const v = el._vectorTarget
+        v.ditherPatternIndex = patternIndex
+        renderCanvas(v.layer, true)
+        bump()
+        return
+      }
       if (!DITHER_TOOLS.includes(state.tool.current?.name)) return
       if (brush.buildUpActiveStepSlot !== null) {
         brush.buildUpSteps[brush.buildUpActiveStepSlot] = patternIndex
@@ -100,20 +112,27 @@ export default function DitherPickerDialog() {
     el.addEventListener('pointerdown', (e) => {
       const control = e.target.closest('.dither-offset-control')
       if (!control) return
-      if (!DITHER_TOOLS.includes(state.tool.current?.name)) return
+      const vectorTarget = el._vectorTarget
+      if (!vectorTarget && !DITHER_TOOLS.includes(state.tool.current?.name)) return
       control.setPointerCapture(e.pointerId)
       const startX = e.clientX
       const startY = e.clientY
-      const startOffsetX = state.tool.current.ditherOffsetX ?? 0
-      const startOffsetY = state.tool.current.ditherOffsetY ?? 0
+      const target = vectorTarget ?? state.tool.current
+      const startOffsetX = target.ditherOffsetX ?? 0
+      const startOffsetY = target.ditherOffsetY ?? 0
       const onMove = (ev) => {
         const ox = (((startOffsetX - Math.round((ev.clientX - startX) / 4)) % 8) + 8) % 8
         const oy = (((startOffsetY - Math.round((ev.clientY - startY) / 4)) % 8) + 8) % 8
-        state.tool.current.ditherOffsetX = ox
-        state.tool.current.ditherOffsetY = oy
+        target.ditherOffsetX = ox
+        target.ditherOffsetY = oy
+        if (vectorTarget) {
+          renderCanvas(vectorTarget.layer, true)
+        }
         applyDitherOffset(el, ox, oy)
-        const preview = document.querySelector('.dither-preview')
-        if (preview) applyDitherOffset(preview, ox, oy)
+        if (!vectorTarget) {
+          const preview = document.querySelector('.dither-preview')
+          if (preview) applyDitherOffset(preview, ox, oy)
+        }
         applyDitherOffsetControl(control.parentElement, ox, oy)
       }
       control.addEventListener('pointermove', onMove)
@@ -128,7 +147,7 @@ export default function DitherPickerDialog() {
   return (
     <div
       ref={ref}
-      className="dither-picker-container dialog-box v-drag h-drag free"
+      className="dither-picker-container dialog-box draggable v-drag h-drag free"
       style={{ display: 'none' }}
     >
       <div className="header dragger">

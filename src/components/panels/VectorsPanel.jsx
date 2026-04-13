@@ -7,6 +7,7 @@ import { vectorGui } from '../../GUI/vector.js'
 import { renderCanvas } from '../../Canvas/render.js'
 import { renderLayersToDOM, renderVectorsToDOM } from '../../DOM/render.js'
 import { isValidVector } from '../../DOM/renderVectors.js'
+import { getAngle } from '../../utils/trig.js'
 import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
 import { dom } from '../../Context/dom.js'
 import { switchTool } from '../../Tools/toolbox.js'
@@ -20,35 +21,114 @@ import {
   changeActionVectorMode,
 } from '../../Actions/modifyTimeline/modifyTimeline.js'
 import { keys } from '../../Shortcuts/keys.js'
+import { initializeColorPicker } from '../../Swatch/events.js'
+import { ditherPatterns } from '../../Context/ditherPatterns.js'
+import { createVectorDitherPatternSVG } from '../../DOM/renderVectors.js'
+import { initDitherPicker } from '../../DOM/renderBrush.js'
 
 function VectorThumbnail({ vector }) {
   const ref = useRef(null)
   useEffect(() => {
     const cvs = ref.current
     if (!cvs) return
-    const ctx = cvs.getContext('2d', { willReadFrequently: true })
-    ctx.clearRect(0, 0, cvs.width, cvs.height)
-    const src = vector.layer?.onscreenCvs
-    if (src) {
-      ctx.drawImage(src, 0, 0, cvs.width, cvs.height)
+    const ctx = cvs.getContext('2d')
+    const isSelected =
+      vector.index === state.vector.currentIndex ||
+      state.vector.selectedIndices.has(vector.index)
+
+    // calculateDrawingDimensions (ported from legacy renderVectors.js)
+    const border = 32
+    const wd = canvas.thumbnailCVS.width / canvas.sharpness / (canvas.offScreenCVS.width + border)
+    const hd = canvas.thumbnailCVS.height / canvas.sharpness / (canvas.offScreenCVS.height + border)
+    const minD = Math.min(wd, hd)
+    const xOffset =
+      (canvas.thumbnailCVS.width / 2 - (minD * canvas.offScreenCVS.width * canvas.sharpness) / 2) /
+      canvas.sharpness
+    const yOffset =
+      (canvas.thumbnailCVS.height / 2 - (minD * canvas.offScreenCVS.height * canvas.sharpness) / 2) /
+      canvas.sharpness
+
+    // drawOnThumbnailContext (ported from legacy renderVectors.js)
+    ctx.setTransform(canvas.sharpness, 0, 0, canvas.sharpness, 0, 0)
+    ctx.clearRect(0, 0, canvas.thumbnailCVS.width, canvas.thumbnailCVS.height)
+    ctx.lineWidth = 3
+    ctx.fillStyle = isSelected ? 'rgb(0, 0, 0)' : 'rgb(51, 51, 51)'
+    ctx.fillRect(0, 0, canvas.thumbnailCVS.width, canvas.thumbnailCVS.height)
+    ctx.clearRect(xOffset, yOffset, minD * canvas.offScreenCVS.width, minD * canvas.offScreenCVS.height)
+
+    ctx.strokeStyle = 'black'
+    ctx.beginPath()
+
+    const vp = vector.vectorProperties
+    const lx = vector.layer?.x ?? 0
+    const ly = vector.layer?.y ?? 0
+    const px1 = minD * (vp.px1 + lx)
+    const py1 = minD * (vp.py1 + ly)
+    const px2 = minD * (vp.px2 + lx)
+    const py2 = minD * (vp.py2 + ly)
+    const px3 = minD * (vp.px3 + lx)
+    const py3 = minD * (vp.py3 + ly)
+    const px4 = minD * (vp.px4 + lx)
+    const py4 = minD * (vp.py4 + ly)
+
+    switch (vp.tool) {
+      case 'fill':
+        ctx.arc(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset, 1, 0, 2 * Math.PI, true)
+        break
+      case 'curve': {
+        const modes = vector.modes ?? {}
+        ctx.moveTo(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset)
+        if (modes.cubicCurve) {
+          ctx.bezierCurveTo(
+            px3 + 0.5 + xOffset, py3 + 0.5 + yOffset,
+            px4 + 0.5 + xOffset, py4 + 0.5 + yOffset,
+            px2 + 0.5 + xOffset, py2 + 0.5 + yOffset
+          )
+        } else if (modes.quadCurve) {
+          ctx.quadraticCurveTo(px3 + 0.5 + xOffset, py3 + 0.5 + yOffset, px2 + 0.5 + xOffset, py2 + 0.5 + yOffset)
+        } else {
+          ctx.lineTo(px2 + 0.5 + xOffset, py2 + 0.5 + yOffset)
+        }
+        break
+      }
+      case 'ellipse': {
+        const ltx = minD * (vp.leftTangentX + lx) + xOffset
+        const lty = minD * (vp.leftTangentY + ly) + yOffset
+        const rtx = minD * (vp.rightTangentX + lx) + xOffset
+        const rty = minD * (vp.rightTangentY + ly) + yOffset
+        const ttx = minD * (vp.topTangentX + lx) + xOffset
+        const tty = minD * (vp.topTangentY + ly) + yOffset
+        const btx = minD * (vp.bottomTangentX + lx) + xOffset
+        const bty = minD * (vp.bottomTangentY + ly) + yOffset
+        const cx = (ltx + rtx) / 2
+        const cy = (tty + bty) / 2
+        const radA = Math.sqrt((rtx - ltx) ** 2 + (rty - lty) ** 2) / 2
+        const radB = Math.sqrt((btx - ttx) ** 2 + (bty - tty) ** 2) / 2
+        const angle = getAngle(rtx - ltx, rty - lty)
+        ctx.ellipse(cx, cy, radA, radB, angle, 0, 2 * Math.PI)
+        break
+      }
     }
+
+    ctx.globalCompositeOperation = 'xor'
+    ctx.stroke()
+    ctx.globalCompositeOperation = 'source-over'
   })
-  return <canvas ref={ref} />
+  return <canvas ref={ref} width={canvas.thumbnailCVS.width} height={canvas.thumbnailCVS.height} />
 }
 
-function VectorSettingsPopout({ vector, anchorEl, onClose }) {
+function VectorSettingsPopout({ vector, pos, onClose }) {
   const ref = useRef(null)
-  const [pos, setPos] = useState({ top: 0, left: 0 })
-
-  useEffect(() => {
-    if (!anchorEl) return
-    const rect = anchorEl.getBoundingClientRect()
-    setPos({ top: rect.top + window.scrollY, left: rect.right + window.scrollX + 4 })
-  }, [anchorEl])
+  const ditherPreviewRef = useRef(null)
 
   useEffect(() => {
     function handleOutside(e) {
-      if (ref.current && !ref.current.contains(e.target) && !e.target.classList.contains('gear')) {
+      if (
+        ref.current &&
+        !ref.current.contains(e.target) &&
+        !e.target.classList.contains('gear') &&
+        !e.target.closest('.dither-picker-container')
+      ) {
         onClose()
       }
     }
@@ -56,18 +136,55 @@ function VectorSettingsPopout({ vector, anchorEl, onClose }) {
     return () => document.removeEventListener('pointerdown', handleOutside)
   }, [onClose])
 
+  // Render dither preview SVG imperatively
+  useEffect(() => {
+    const el = ditherPreviewRef.current
+    if (!el) return
+    el.innerHTML = ''
+    const pattern = ditherPatterns[vector.ditherPatternIndex ?? 63]
+    if (pattern) el.appendChild(createVectorDitherPatternSVG(pattern, vector))
+  })
+
   function handleModeToggle(modeKey) {
     const oldModes = { ...vector.modes }
+    const isCurveType = ['line', 'quadCurve', 'cubicCurve'].includes(modeKey)
+    if (isCurveType && vector.modes[modeKey]) return
     vector.modes[modeKey] = !vector.modes[modeKey]
     if (vector.modes[modeKey]) {
-      if (modeKey === 'eraser' && vector.modes.inject) vector.modes.inject = false
-      else if (modeKey === 'inject' && vector.modes.eraser) vector.modes.eraser = false
+      if (modeKey === 'eraser' && vector.modes.inject)
+        vector.modes.inject = false
+      else if (modeKey === 'inject' && vector.modes.eraser)
+        vector.modes.eraser = false
+      if (isCurveType) {
+        ;['line', 'quadCurve', 'cubicCurve'].forEach((t) => {
+          if (t !== modeKey) vector.modes[t] = false
+        })
+      }
     }
     const newModes = { ...vector.modes }
     renderCanvas(vector.layer, true)
     changeActionVectorMode(vector, oldModes, newModes)
     state.clearRedoStack()
     renderVectorsToDOM()
+  }
+
+  function handlePrimaryColorClick(e) {
+    e.stopPropagation()
+    const fakeSwatch = { color: vector.color, vector, isSecondaryColor: false }
+    initializeColorPicker(fakeSwatch)
+  }
+
+  function handleSecondaryColorClick(e) {
+    e.stopPropagation()
+    if (!vector.secondaryColor) {
+      vector.secondaryColor = { r: 0, g: 0, b: 0, a: 0, color: 'rgba(0,0,0,0)' }
+    }
+    const fakeSwatch = {
+      color: vector.secondaryColor,
+      vector,
+      isSecondaryColor: true,
+    }
+    initializeColorPicker(fakeSwatch)
   }
 
   function handleBrushSizeChange(e) {
@@ -78,20 +195,38 @@ function VectorSettingsPopout({ vector, anchorEl, onClose }) {
 
   const modes = vector.modes ?? {}
   const tool = vector.vectorProperties?.tool
-  const showCurveTypes = ['curve'].includes(tool)
+  const isCurveTool = tool === 'curve'
+  const curveTypes = ['line', 'quadCurve', 'cubicCurve']
+  const generalModes = ['eraser', 'inject', 'twoColor']
+  const allModes = isCurveTool ? [...curveTypes, ...generalModes] : generalModes
 
   return ReactDOM.createPortal(
     <div
       ref={ref}
-      className="vector-settings"
-      style={{ display: 'flex', position: 'fixed', top: pos.top, left: pos.left, zIndex: 1000 }}
+      className="vector-settings dialog-box"
+      style={{
+        display: 'flex',
+        position: 'fixed',
+        top: pos.top,
+        left: pos.left,
+        transform: 'translateY(-50%)',
+        zIndex: 1000,
+      }}
     >
       <div className="header">
+        <div className="drag-btn locked">
+          <div className="grip"></div>
+        </div>
         Vector Settings
-        <button type="button" className="close-btn" data-tooltip="Close" onClick={onClose} />
+        <button
+          type="button"
+          className="close-btn"
+          data-tooltip="Close"
+          onClick={onClose}
+        />
       </div>
       <div className="vector-settings-modes">
-        {['eraser', 'inject', 'twoColor'].map((modeKey) => (
+        {allModes.map((modeKey) => (
           <button
             key={modeKey}
             type="button"
@@ -102,10 +237,70 @@ function VectorSettingsPopout({ vector, anchorEl, onClose }) {
           />
         ))}
       </div>
-      <div className="brush-size-label">
-        <label htmlFor="vector-brush-size" className="input-label">Size: {vector.brushSize ?? 1}px</label>
+      <div className="vector-settings-color-row">
+        <span>Primary</span>
+        <button
+          type="button"
+          className="actionColor primary-color"
+          aria-label="Primary Color"
+          data-tooltip="Primary Color"
+          onClick={handlePrimaryColorClick}
+        >
+          <div
+            className="swatch"
+            style={{ backgroundColor: vector.color?.color }}
+          />
+        </button>
+      </div>
+      <div className="vector-settings-color-row">
+        <span>Secondary</span>
+        <button
+          type="button"
+          className="actionColor secondary-color"
+          aria-label="Secondary Color"
+          data-tooltip="Secondary Color"
+          onClick={handleSecondaryColorClick}
+        >
+          <div
+            className="swatch"
+            style={{
+              backgroundColor: vector.secondaryColor?.color ?? 'rgba(0,0,0,0)',
+            }}
+          />
+        </button>
+      </div>
+      <div className="vector-settings-dither-row">
+        <span>Dither</span>
+        <div
+          ref={ditherPreviewRef}
+          className="vector-dither-preview"
+          data-tooltip="Select dither pattern"
+          onClick={() => {
+            const picker = document.querySelector('.dither-picker-container')
+            if (!picker) return
+            if (
+              picker.style.display === 'flex' &&
+              picker._vectorTarget === vector
+            ) {
+              picker._vectorTarget = null
+              picker.style.display = 'none'
+              const buildUpBtn = picker.querySelector('#dither-ctrl-build-up')
+              if (buildUpBtn) buildUpBtn.style.display = ''
+            } else {
+              picker._vectorTarget = vector
+              initDitherPicker()
+              const buildUpBtn = picker.querySelector('#dither-ctrl-build-up')
+              if (buildUpBtn) buildUpBtn.style.display = 'none'
+              const buildUpSteps = picker.querySelector('.build-up-steps')
+              if (buildUpSteps) buildUpSteps.style.display = 'none'
+              picker.style.display = 'flex'
+            }
+          }}
+        />
+      </div>
+      <div className="vector-settings-brush-row">
+        <span>Size: {vector.brushSize ?? 1}px</span>
         <input
-          id="vector-brush-size"
           type="range"
           className="slider"
           min="1"
@@ -115,7 +310,7 @@ function VectorSettingsPopout({ vector, anchorEl, onClose }) {
         />
       </div>
     </div>,
-    document.body
+    document.body,
   )
 }
 
@@ -123,7 +318,7 @@ export default function VectorsPanel() {
   useAppState()
   const ref = useRef(null)
   const [settingsVector, setSettingsVector] = useState(null)
-  const [settingsAnchor, setSettingsAnchor] = useState(null)
+  const [settingsPos, setSettingsPos] = useState({ top: 0, left: 0 })
 
   useEffect(() => {
     if (!ref.current) return
@@ -137,11 +332,14 @@ export default function VectorsPanel() {
   const isPasted = !!canvas.pastedLayer
   const undoStackSet = new Set(state.timeline.undoStack)
   const visibleVectors = Object.values(state.vector.all).filter((v) =>
-    isValidVector(v, undoStackSet)
+    isValidVector(v, undoStackSet),
   )
 
   function handleVectorClick(e, vector) {
-    if (isPasted) { e.preventDefault(); return }
+    if (isPasted) {
+      e.preventDefault()
+      return
+    }
     if (keys.ShiftLeft || keys.ShiftRight) {
       if (!state.vector.selectedIndices.has(vector.index)) {
         actionSelectVector(vector.index)
@@ -188,21 +386,28 @@ export default function VectorsPanel() {
     e.stopPropagation()
     if (settingsVector === vector) {
       setSettingsVector(null)
-      setSettingsAnchor(null)
     } else {
+      const rect = e.currentTarget.getBoundingClientRect()
+      setSettingsPos({ top: rect.top + rect.height / 2, left: rect.right + 16 })
       setSettingsVector(vector)
-      setSettingsAnchor(e.currentTarget)
     }
   }
 
   return (
-    <div ref={ref} className={`vectors-interface dialog-box draggable v-drag settings-box smooth-shift${isPasted ? ' disabled' : ''}`}>
+    <div
+      ref={ref}
+      className={`vectors-interface dialog-box draggable v-drag settings-box smooth-shift${isPasted ? ' disabled' : ''}`}
+    >
       <div className="header dragger">
         <div className="drag-btn">
           <div className="grip"></div>
         </div>
         Vectors
-        <label htmlFor="vectors-collapse-btn" className="collapse-btn" data-tooltip="Collapse/ Expand">
+        <label
+          htmlFor="vectors-collapse-btn"
+          className="collapse-btn"
+          data-tooltip="Collapse/ Expand"
+        >
           <input
             type="checkbox"
             aria-label="Collapse or Expand"
@@ -232,20 +437,40 @@ export default function VectorsPanel() {
                   <div className="left">
                     <button
                       type="button"
-                      className={toolName}
+                      className={`tool ${toolName}`}
                       aria-label={toolName}
                       data-tooltip={toolName}
                       onClick={(e) => e.stopPropagation()}
                     />
                     <button
                       type="button"
+                      className="actionColor primary-color"
+                      aria-label="Action Color"
+                      data-tooltip="Action Color"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        const fakeSwatch = {
+                          color: vector.color,
+                          vector,
+                          isSecondaryColor: false,
+                        }
+                        initializeColorPicker(fakeSwatch)
+                      }}
+                    >
+                      <div
+                        className="swatch"
+                        style={{ backgroundColor: vector.color?.color }}
+                      />
+                    </button>
+                    <button
+                      type="button"
                       className={`hide ${vector.hidden ? 'eyeclosed' : 'eyeopen'}`}
                       aria-label={vector.hidden ? 'Show Vector' : 'Hide Vector'}
-                      data-tooltip={vector.hidden ? 'Show Vector' : 'Hide Vector'}
+                      data-tooltip={
+                        vector.hidden ? 'Show Vector' : 'Hide Vector'
+                      }
                       onClick={(e) => handleHideToggle(e, vector)}
                     />
-                  </div>
-                  <div className="right">
                     <button
                       type="button"
                       className="trash"
@@ -253,14 +478,14 @@ export default function VectorsPanel() {
                       data-tooltip="Remove Vector"
                       onClick={(e) => handleRemove(e, vector)}
                     />
-                    <button
-                      type="button"
-                      className={`gear${isSettingsOpen ? ' active' : ''}`}
-                      aria-label="Vector Settings"
-                      data-tooltip="Vector Settings"
-                      onClick={(e) => handleGearClick(e, vector)}
-                    />
                   </div>
+                  <button
+                    type="button"
+                    className={`gear${isSettingsOpen ? ' active' : ''}`}
+                    aria-label="Vector Settings"
+                    data-tooltip="Vector Settings"
+                    onClick={(e) => handleGearClick(e, vector)}
+                  />
                 </div>
               )
             })}
@@ -270,8 +495,8 @@ export default function VectorsPanel() {
       {settingsVector && (
         <VectorSettingsPopout
           vector={settingsVector}
-          anchorEl={settingsAnchor}
-          onClose={() => { setSettingsVector(null); setSettingsAnchor(null) }}
+          pos={settingsPos}
+          onClose={() => setSettingsVector(null)}
         />
       )}
     </div>

@@ -172,7 +172,7 @@ export default function PalettePanel() {
       : customPalettes[currentPreset]?.label ?? currentPreset
 
   return (
-    <div ref={ref} className="palette-interface dialog-box draggable v-drag settings-box smooth-shift">
+    <div ref={ref} className="palette-interface dialog-box draggable v-drag settings-box smooth-shift" style={presetsOpen ? { zIndex: 201 } : undefined}>
       <div className="header dragger">
         <div className="drag-btn">
           <div className="grip"></div>
@@ -190,34 +190,31 @@ export default function PalettePanel() {
       </div>
       <div className="collapsible">
         <div className="colors">
-          <button
+          <div
             ref={primarySwatchRef}
-            type="button"
-            className="swatch"
-            aria-label="Primary Color"
-            data-tooltip="Primary Color"
+            className="primary swatch btn"
+            data-tooltip="Primary Swatch&#10;&#10;(R) to randomize&#10;&#10;Click to open Color Picker"
             onClick={handlePrimarySwatchClick}
           >
             <div className="swatch-color" />
-          </button>
-          <button
+          </div>
+          <div
             ref={secondarySwatchRef}
-            type="button"
-            className="back-swatch"
-            aria-label="Secondary Color"
-            data-tooltip="Secondary Color"
+            className="secondary back-swatch btn"
+            data-tooltip="Secondary Swatch&#10;&#10;Click to open Color Picker"
             onClick={handleSecondarySwatchClick}
           >
             <div className="swatch-color" />
-          </button>
-          <button
-            type="button"
-            className="color-switch"
-            aria-label="Switch Colors (X)"
-            data-tooltip="Switch Colors (X)"
-            onClick={handleColorSwitch}
-          />
+          </div>
         </div>
+        <button
+          type="button"
+          className="switch color-switch custom-shape"
+          id="color-switch"
+          aria-label="Switch primary/ secondary colors"
+          data-tooltip="Switch primary/ secondary colors"
+          onClick={handleColorSwitch}
+        />
         <div className="palette-container">
           <div className="palette-tools">
             <button
@@ -288,7 +285,7 @@ export default function PalettePanel() {
             ))}
             <button
               type="button"
-              className="add-color"
+              className="add-color plus"
               aria-label="Add Color"
               data-tooltip="Add current primary color to palette"
               onClick={handleAddColor}

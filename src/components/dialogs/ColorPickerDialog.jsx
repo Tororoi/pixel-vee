@@ -3,17 +3,17 @@ import { useAppState } from '../../hooks/useAppState.js'
 import { state } from '../../Context/state.js'
 import { swatches } from '../../Context/swatch.js'
 import { Picker } from '../../Swatch/Picker.js'
-import { registerPicker } from '../../Swatch/events.js'
+import { registerPicker, confirmColor, closePickerWindow, addToPalette } from '../../Swatch/events.js'
 import { initializeDragger } from '../../utils/drag.js'
 
 function SpinBtn() {
   return (
     <div className="spin-btn">
       <button type="button" className="channel-btn" id="inc">
-        <span className="spin-content">▲</span>
+        <span className="spin-content">+</span>
       </button>
       <button type="button" className="channel-btn" id="dec">
-        <span className="spin-content">▼</span>
+        <span className="spin-content">-</span>
       </button>
     </div>
   )
@@ -47,22 +47,24 @@ export default function ColorPickerDialog() {
   useEffect(() => {
     if (!ref.current) return
     initializeDragger(ref.current)
+
+    // Wire up the color ramps collapse separately (initializeCollapser only handles the first)
+    const ramsCheckbox = ref.current.querySelector('#ramps-collapse-btn')
+    const ramsCollapsible = ref.current.querySelector('#color-ramps-collapsible')
+    if (ramsCheckbox && ramsCollapsible) {
+      ramsCheckbox.addEventListener('click', () => {
+        ramsCollapsible.style.display = ramsCheckbox.checked ? 'none' : 'flex'
+      })
+    }
+
     return () => {
       delete ref.current?.dataset.dragInitialized
     }
   }, [])
 
-  function handleConfirm() {
-    document.getElementById('confirm-btn')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
-  }
-
-  function handleCancel() {
-    document.getElementById('cancel-btn')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
-  }
-
-  function handleAddToPalette() {
-    document.getElementById('newcolor-btn')?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
-  }
+  function handleConfirm() { confirmColor() }
+  function handleCancel() { closePickerWindow() }
+  function handleAddToPalette() { addToPalette() }
 
   return (
     <div
@@ -74,49 +76,37 @@ export default function ColorPickerDialog() {
         <div className="drag-btn">
           <div className="grip"></div>
         </div>
-        <h3>Color Picker</h3>
-        <label
-          htmlFor="picker-collapse-btn"
-          className="collapse-btn"
-          data-tooltip="Collapse/ Expand"
-        >
-          <input
-            type="checkbox"
-            aria-label="Collapse or Expand"
-            className="collapse-checkbox"
-            id="picker-collapse-btn"
-          />
-          <span className="arrow"></span>
-        </label>
-      </div>
-      <div id="color-ramps-section">
-        <div className="ramps-header">
-          Color Ramps
-          <label htmlFor="ramps-collapse-btn" className="collapse-btn">
-            <input
-              type="checkbox"
-              className="collapse-checkbox"
-              id="ramps-collapse-btn"
-            />
-            <span className="arrow"></span>
-          </label>
-        </div>
-        <div id="color-ramps-collapsible">
-          <div className="color-group" data-group="shadow">
-            <div className="ramp-label">Shadow / Highlight</div>
-            <div className="ramp-row">
-              <div className="ramp-swatches"></div>
-            </div>
-          </div>
-          <div className="color-group" data-group="custom">
-            <div className="ramp-label">Custom Ramp</div>
-            <div className="ramp-row">
-              <div className="ramp-swatches"></div>
-            </div>
-          </div>
-        </div>
+        Color Picker
+        <button type="button" className="close-btn" data-tooltip="Close" onClick={handleCancel} />
       </div>
       <div className="collapsible">
+        <div id="color-ramps-section">
+          <div className="ramps-header">
+            Color Ramps
+            <label htmlFor="ramps-collapse-btn" className="collapse-btn">
+              <input
+                type="checkbox"
+                className="collapse-checkbox"
+                id="ramps-collapse-btn"
+              />
+              <span className="arrow"></span>
+            </label>
+          </div>
+          <div id="color-ramps-collapsible">
+            <div className="color-group" data-group="shadow">
+              <div className="ramp-label">Shadow / Highlight</div>
+              <div className="ramp-row">
+                <div className="ramp-swatches"></div>
+              </div>
+            </div>
+            <div className="color-group" data-group="custom">
+              <div className="ramp-label">Custom Ramp</div>
+              <div className="ramp-row">
+                <div className="ramp-swatches"></div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div className="picker-interface">
           <div id="left">
             <div id="picker">
@@ -141,11 +131,11 @@ export default function ColorPickerDialog() {
               </div>
             </div>
             <div id="buttons">
-              <button type="button" className="btn" id="cancel-btn" onClick={handleCancel}>
-                Cancel
-              </button>
               <button type="button" className="btn" id="confirm-btn" onClick={handleConfirm}>
                 OK
+              </button>
+              <button type="button" className="btn" id="cancel-btn" onClick={handleCancel}>
+                Cancel
               </button>
             </div>
           </div>

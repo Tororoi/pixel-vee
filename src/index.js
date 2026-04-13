@@ -14,7 +14,6 @@ import {
   disableActionsForNoSelection,
   enableActionsForSelection,
 } from './DOM/disableDomElements.js'
-import { initStampEditor } from './DOM/stampEditor.js'
 import { initDitherPicker } from './DOM/render.js'
 
 // Register dependencies that would otherwise create circular imports in state.js
@@ -69,8 +68,7 @@ initializeDialogBox(dom.saveContainer)
 initializeDialogBox(dom.vectorTransformUIContainer, false, actionDeselect)
 
 // * Stamp Editor * //
-initializeDialogBox(dom.stampEditorContainer)
-initStampEditor()
+// initializeDialogBox and initStampEditor are called by StampEditorDialog after mount
 
 // * Dither Picker * //
 initializeDialogBox(dom.ditherPickerContainer)

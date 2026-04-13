@@ -65,7 +65,7 @@ export function setColor(r, g, b, a, target) {
   } else {
     let color = { color: `rgba(${r},${g},${b},${a / 255})`, r, g, b, a }
     target.color = color
-    target.style.backgroundColor = color.color
+    if (target.style) target.style.backgroundColor = color.color
     // Update inner swatch div if present (e.g. vector settings dialog color buttons)
     const innerSwatch = target.querySelector?.('.swatch')
     if (innerSwatch) innerSwatch.style.backgroundColor = color.color
@@ -89,12 +89,6 @@ export function setColor(r, g, b, a, target) {
     if (swatches.activePaletteIndex !== null) {
       if (swatches.activePaletteIndex > swatches.palette.length - 1) {
         swatches.palette.push(color)
-        let paletteColor = document.createElement("div")
-        paletteColor.className = "palette-color"
-        paletteColor.appendChild(target)
-
-        let lastChild = dom.paletteColors.lastElementChild
-        dom.paletteColors.insertBefore(paletteColor, lastChild)
       } else {
         swatches.palette[swatches.activePaletteIndex] = target.color
       }
@@ -244,7 +238,7 @@ function handlePalette(e) {
 /**
  * Close the picker window
  */
-function closePickerWindow() {
+export function closePickerWindow() {
   if (!picker) return
   picker.selectedCustomKey = null
   picker.editingCustomKey = null
@@ -257,7 +251,7 @@ function closePickerWindow() {
 /**
  * This function sets the color according to the currently selected parameters and closes the picker window
  */
-function handleConfirm() {
+export function confirmColor() {
   if (!picker) return
   const { red: r, green: g, blue: b } = picker.rgb
   const a = picker.alpha
@@ -300,7 +294,7 @@ export function registerPicker(p) {
 /**
  * Add the current picker color to the palette without closing the picker
  */
-function handleAddToPalette() {
+export function addToPalette() {
   if (!picker) return
   const { red: r, green: g, blue: b } = picker.rgb
   const a = picker.alpha
@@ -370,6 +364,6 @@ if (dom.palettePresetsList) dom.palettePresetsList.addEventListener("click", (e)
   if (dom.paletteInterfaceContainer) dom.paletteInterfaceContainer.style.zIndex = ""
 })
 // * Color Picker * — handled by ColorPickerDialog React component; guard until migrated
-if (dom.confirmBtn) dom.confirmBtn.addEventListener("click", handleConfirm)
+if (dom.confirmBtn) dom.confirmBtn.addEventListener("click", confirmColor)
 if (dom.cancelBtn) dom.cancelBtn.addEventListener("click", closePickerWindow)
-if (dom.newColorBtn) dom.newColorBtn.addEventListener("click", handleAddToPalette)
+if (dom.newColorBtn) dom.newColorBtn.addEventListener("click", addToPalette)

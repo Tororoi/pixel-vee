@@ -16,10 +16,13 @@ const BRUSH_TOOLS = ['brush', 'curve', 'ellipse', 'polygon', 'select']
 
 // Maps mode key → CSS class and label for the mode button
 const MODE_BTN_INFO = {
-  eraser:     { cls: 'eraser',     label: 'Eraser (E)',        tools: ['brush', 'curve', 'ellipse', 'polygon'] },
-  inject:     { cls: 'inject',     label: 'Inject (I)',        tools: ['brush', 'curve', 'ellipse', 'polygon'] },
-  perfect:    { cls: 'perfect',    label: 'Pixel Perfect (Y)', tools: ['brush'] },
-  colorMask:  { cls: 'colorMask',  label: 'Color Mask (M)',    tools: ['brush'] },
+  line:        { cls: 'line',        label: 'Line',              tools: ['curve'] },
+  quadCurve:   { cls: 'quadCurve',   label: 'Quadratic Curve',   tools: ['curve'] },
+  cubicCurve:  { cls: 'cubicCurve',  label: 'Cubic Curve',       tools: ['curve'] },
+  eraser:      { cls: 'eraser',      label: 'Eraser (E)',        tools: ['brush', 'curve', 'ellipse', 'polygon'] },
+  inject:      { cls: 'inject',      label: 'Inject (I)',        tools: ['brush', 'curve', 'ellipse', 'polygon'] },
+  perfect:     { cls: 'perfect',     label: 'Pixel Perfect (Y)', tools: ['brush'] },
+  colorMask:   { cls: 'colorMask',   label: 'Color Mask (M)',    tools: ['brush'] },
 }
 
 function buildBrushStampSVG(tool) {
@@ -28,15 +31,33 @@ function buildBrushStampSVG(tool) {
   const brushSize = tool.brushSize ?? 1
   const stamp = brushStamps[brushType]?.[brushSize]
   const pixels = stamp?.['0,0'] ?? (brushType === 'custom' ? customBrushStamp.pixels : null)
-  if (!pixels) return null
+  if (!pixels || pixels.length === 0) return null
 
   // Each pixel renders as a 2×2 block, centered in the 64×64 container
   const cellSize = 2
-  const margin = (64 - brushSize * cellSize) / 2
+
+  // For custom stamps compute actual bounding box; for standard brushes use [0, brushSize)
+  let minX, minY, spanW, spanH
+  if (brushType === 'custom') {
+    minX = Math.min(...pixels.map((p) => p.x))
+    minY = Math.min(...pixels.map((p) => p.y))
+    const maxX = Math.max(...pixels.map((p) => p.x))
+    const maxY = Math.max(...pixels.map((p) => p.y))
+    spanW = maxX - minX + 1
+    spanH = maxY - minY + 1
+  } else {
+    minX = 0
+    minY = 0
+    spanW = brushSize
+    spanH = brushSize
+  }
+
+  const offsetX = (64 - spanW * cellSize) / 2
+  const offsetY = (64 - spanH * cellSize) / 2
   let pathData = ''
   for (const px of pixels) {
-    const x = margin + px.x * cellSize
-    const y = margin + px.y * cellSize
+    const x = offsetX + (px.x - minX) * cellSize
+    const y = offsetY + (px.y - minY) * cellSize
     pathData += `M${x} ${y}h${cellSize}v${cellSize}h${-cellSize}z`
   }
 
@@ -191,6 +212,7 @@ export default function BrushPanel() {
             return (
               <button
                 key={key}
+                id={key}
                 type="button"
                 className={`mode ${info.cls}${isActive ? ' selected' : ''}`}
                 aria-label={info.label}
