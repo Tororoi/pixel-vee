@@ -22,7 +22,7 @@ import {
 
 /**
  * Returns the active curve type name based on the current tool modes.
- * @returns {'line'|'quadCurve'|'cubicCurve'}
+ * @returns {'line'|'quadCurve'|'cubicCurve'} The active curve mode name
  */
 export function getActiveCurveMode() {
   const modes = state.tool.current.modes

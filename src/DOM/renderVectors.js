@@ -42,9 +42,9 @@ export function updateVectorDitherPreview() {
 
 /**
  * Check if a vector action should be shown in the vectors list.
- * @param {object} vector
- * @param {Set} undoStackSet
- * @returns {boolean}
+ * @param {object} vector - The vector action to check
+ * @param {Set} undoStackSet - Set of actions currently in the undo stack
+ * @returns {boolean} True if the vector should be displayed
  */
 export const isValidVector = (vector, undoStackSet) =>
   !vector.removed &&
@@ -57,7 +57,7 @@ export const isValidVector = (vector, undoStackSet) =>
  * Build an SVG thumbnail for a vector's dither pattern.
  * @param {object} pattern - pattern from ditherPatterns
  * @param {object} vector - the vector object
- * @returns {SVGElement}
+ * @returns {SVGElement} SVG element showing the dither pattern
  */
 export function createVectorDitherPatternSVG(pattern, vector) {
   const offsetX = vector.ditherOffsetX ?? 0

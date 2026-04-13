@@ -5,7 +5,6 @@ import { state } from '../../Context/state.js'
 import { brush, rebuildBuildUpDensityMap, BAYER_STEPS } from '../../Tools/brush.js'
 import { renderCanvas } from '../../Canvas/render.js'
 import {
-  initDitherPicker,
   highlightSelectedDitherPattern,
   renderDitherControlsToDOM,
   renderDitherOptionsToDOM,

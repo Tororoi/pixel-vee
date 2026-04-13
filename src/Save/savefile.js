@@ -115,6 +115,7 @@ export function computeFileSizePreview() {
 
 /**
  * Set the preview of the file size (writes to DOM element if present)
+ * @returns {Promise<void>}
  */
 export function setSaveFilesizePreview() {
   if (dom.fileSizePreview) dom.fileSizePreview.innerText = 'Calculating...'
@@ -460,9 +461,9 @@ export async function loadDrawing(jsonFile) {
 const OLD_CURVE_TOOL_NAMES = ['line', 'quadCurve', 'cubicCurve']
 
 /**
- *
- * @param data
- * @param action
+ * Converts a saved action to the current format for backward compatibility.
+ * @param {object} data - The full save file data object
+ * @param {object} action - The individual action to convert
  */
 function convertActionToNewFormat(data, action) {
   if (data.metadata.version === '1.1') {

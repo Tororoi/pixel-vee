@@ -33,8 +33,6 @@ import {
   disableActionsForNoSelection,
   enableActionsForSelection,
 } from '../DOM/disableDomElements.js'
-import { renderLinePath, renderLineVector } from './line.js'
-import { renderResizeOverlayCVS } from '../Canvas/resizeOverlay.js'
 // import { switchTool } from "../Tools/toolbox.js"
 
 //==================================================//

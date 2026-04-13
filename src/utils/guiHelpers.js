@@ -6,8 +6,8 @@ import { state } from '../Context/state.js'
  * provided box so only the area outside it is dimmed.
  * Pass a box in art-pixel coords (relative to canvas.xOffset/yOffset).
  * When no box is provided, falls back to state.selection.boundaryBox.
- * @param {CanvasRenderingContext2D} ctx
- * @param {{xMin: number, yMin: number, xMax: number, yMax: number}} [box]
+ * @param {CanvasRenderingContext2D} ctx - The rendering context to draw on
+ * @param {{xMin: number, yMin: number, xMax: number, yMax: number}} [box] - Optional bounding box in art-pixel coords
  */
 export function renderSelectionDimOverlay(ctx, box) {
   const boundaryBox = box ?? state.selection.boundaryBox

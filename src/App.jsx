@@ -20,21 +20,22 @@ export default function App() {
   return (
     <>
       <NavBar />
-      {pageEl && ReactDOM.createPortal(
-        <>
-          <Toolbox />
-          <Sidebar />
-          <SettingsDialog />
-          <CanvasSizeDialog />
-          <SaveDialog />
-          <ExportDialog />
-          <VectorTransformDialog />
-          <ColorPickerDialog />
-          <DitherPickerDialog />
-          <StampEditorDialog />
-        </>,
-        pageEl
-      )}
+      {pageEl &&
+        ReactDOM.createPortal(
+          <>
+            <Toolbox />
+            <Sidebar />
+            <SettingsDialog />
+            <CanvasSizeDialog />
+            <SaveDialog />
+            <ExportDialog />
+            <VectorTransformDialog />
+            <ColorPickerDialog />
+            <DitherPickerDialog />
+            <StampEditorDialog />
+          </>,
+          pageEl,
+        )}
     </>
   )
 }

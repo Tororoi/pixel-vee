@@ -58,10 +58,6 @@ export default function NavBar() {
     bump()
   }
 
-  function handleOpenFile(e) {
-    // handled by input change
-  }
-
   function handleLoadDrawing(e) {
     if (!e.target.files?.[0]) return
     const reader = new FileReader()

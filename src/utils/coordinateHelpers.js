@@ -5,7 +5,7 @@ import { state } from '../Context/state.js'
  * Returns the base X render offset for a vector path (canvas pan + layer offset).
  * Add a stored art-pixel coordinate to get the final canvas draw position.
  * @param {object|null} vector - The vector being rendered, or null for in-progress
- * @returns {number}
+ * @returns {number} The computed offset value
  */
 export function getRenderXOffset(vector) {
   return (
@@ -16,7 +16,7 @@ export function getRenderXOffset(vector) {
 /**
  * Returns the base Y render offset for a vector path (canvas pan + layer offset).
  * @param {object|null} vector - The vector being rendered, or null for in-progress
- * @returns {number}
+ * @returns {number} The computed offset value
  */
 export function getRenderYOffset(vector) {
   return (
@@ -29,7 +29,7 @@ export function getRenderYOffset(vector) {
  * Used for both collision detection (compared against state.cursor.x) and as the
  * base for computing cx = canvas.xOffset + normalizedX + 0.5.
  * @param {object|null} vector - The vector being rendered, or null for in-progress
- * @returns {number}
+ * @returns {number} The computed offset value
  */
 export function getControlPointXOffset(vector) {
   return (vector?.layer?.x ?? 0) + (state.canvas.cropOffsetX ?? 0)

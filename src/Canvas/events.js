@@ -851,6 +851,7 @@ document.addEventListener('pointerdown', (e) => {
   ) {
     dom.vectorSettingsContainer.style.display = 'none'
     dom.vectorSettingsContainer.vectorObj = null
-    if (dom.vectorDitherPickerContainer) dom.vectorDitherPickerContainer.style.display = 'none'
+    if (dom.vectorDitherPickerContainer)
+      dom.vectorDitherPickerContainer.style.display = 'none'
   }
 })

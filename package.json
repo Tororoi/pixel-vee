@@ -34,6 +34,8 @@
     "@vitejs/plugin-react": "^5.2.0",
     "eslint": "^8.56.0",
     "eslint-plugin-jsdoc": "^48.1.0",
+    "eslint-plugin-react": "^7.37.5",
+    "prettier": "^3.8.2",
     "vitest": "^4.0.18"
   }
 }

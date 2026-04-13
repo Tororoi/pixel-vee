@@ -19,15 +19,6 @@ function SpinBtn() {
   )
 }
 
-function ChannelInput({ id, min, max, defaultValue = 0 }) {
-  return (
-    <label>
-      {id.toUpperCase()}
-      <input type="number" id={id} min={min} max={max} defaultValue={defaultValue} />
-      <SpinBtn />
-    </label>
-  )
-}
 
 export default function ColorPickerDialog() {
   useAppState()
