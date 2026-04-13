@@ -20,7 +20,7 @@
     display: flex;
     flex-flow: row nowrap;
     margin: 2px;
-    input[type="file"] {
+    input[type='file'] {
       display: none;
     }
     .reference {
@@ -28,7 +28,7 @@
       height: $size-button-md;
       cursor: pointer;
     }
-    input[type="file"]:disabled + .reference {
+    input[type='file']:disabled + .reference {
       cursor: not-allowed;
       opacity: 0.5;
       @include referenceIcon($border-color, $border-color);
@@ -68,7 +68,6 @@
     .layers {
       display: flex;
       flex-flow: column-reverse nowrap;
-      justify-content: flex-end;
       .layer {
         cursor: grab;
         height: $size-button-lg;
@@ -77,8 +76,7 @@
         line-height: 40px;
         font-size: 12px;
         display: flex;
-        flex-flow: row-reverse nowrap;
-        justify-content: flex-end;
+        flex-flow: row nowrap;
         align-items: center;
         @include boxBorder($border-color, $white, true);
         &.raster {

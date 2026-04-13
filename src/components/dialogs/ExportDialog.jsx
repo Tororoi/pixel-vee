@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useAppState, bump } from '../../hooks/useAppState.js'
 import { state } from '../../Context/state.js'
 import { canvas } from '../../Context/canvas.js'

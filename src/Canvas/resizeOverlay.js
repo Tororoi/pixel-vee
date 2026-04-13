@@ -451,7 +451,7 @@ export function applyResize() {
   const toCropOffsetY = fromCropOffsetY + contentOffsetY
 
   deactivateResizeOverlay()
-  dom.sizeContainer.style.display = 'none'
+  if (dom.sizeContainer) dom.sizeContainer.style.display = 'none'
 
   // Update the crop offset before resizing so the timeline replay uses the new values
   state.canvas.cropOffsetX = toCropOffsetX

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAppState, bump } from '../../hooks/useAppState.js'
 import { state } from '../../Context/state.js'
 import { saveDrawing, computeFileSizePreview } from '../../Save/savefile.js'

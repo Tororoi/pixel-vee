@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { dom } from '../../Context/dom.js'
 import { initializeDragger } from '../../utils/drag.js'
 import { initStampEditor } from '../../DOM/stampEditor.js'

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useAppState, bump } from '../../hooks/useAppState.js'
 import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
 import { state } from '../../Context/state.js'

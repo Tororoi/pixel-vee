@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAppState, bump } from '../hooks/useAppState.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
@@ -18,11 +18,6 @@ import { initializeDragger, initializeCollapser } from '../utils/drag.js'
 const COLUMN1_TOOLS = ['brush', 'fill', 'curve', 'shapeTools', 'selectionTools']
 const COLUMN2_TOOLS = ['eyedropper', 'grab', 'move']
 
-// Maps group keys to their CSS class for the group button icon
-const GROUP_BTN_CLASS = {
-  shapeTools: 'ellipse',
-  selectionTools: 'select',
-}
 
 export default function Toolbox() {
   useAppState()
@@ -85,11 +80,20 @@ export default function Toolbox() {
   }
 
   function handleToolClick(toolName) {
+    // Update the group's activeTool so the button remembers the last-used tool
+    for (const [groupKey, group] of Object.entries(toolGroups)) {
+      if (group.tools.includes(toolName)) {
+        group.activeTool = toolName
+        break
+      }
+    }
     switchTool(toolName)
     setOpenGroup(null)
   }
 
   function handleGroupBtnClick(groupKey) {
+    const group = toolGroups[groupKey]
+    switchTool(group.activeTool)
     setOpenGroup(openGroup === groupKey ? null : groupKey)
   }
 
@@ -120,7 +124,7 @@ export default function Toolbox() {
     const group = toolGroups[groupKey]
     const activeToolName = group.activeTool
     const isGroupSelected = group.tools.includes(selectedName)
-    const groupBtnClass = isGroupSelected ? selectedName : (GROUP_BTN_CLASS[groupKey] ?? activeToolName)
+    const groupBtnClass = isGroupSelected ? selectedName : activeToolName
     const isOpen = openGroup === groupKey
 
     const GROUP_LABELS = {
@@ -139,7 +143,7 @@ export default function Toolbox() {
       <div key={groupKey} className={`tool-group${isOpen ? ' open' : ''}`} data-group={groupKey}>
         <button
           type="button"
-          className={`tool-group-btn ${groupBtnClass}`}
+          className={`tool-group-btn ${groupBtnClass}${isGroupSelected ? ' selected' : ''}`}
           data-group={groupKey}
           aria-label={GROUP_LABELS[groupKey] ?? groupKey}
           data-tooltip={GROUP_LABELS[groupKey] ?? groupKey}

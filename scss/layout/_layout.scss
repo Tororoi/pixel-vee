@@ -126,7 +126,7 @@
   align-self: flex-start;
   // transition: opacity 0.3s;
   // transition-delay: 0.3s;
-  z-index: 1000;
+  z-index: 10000;
   @include boxBorder($tooltip-color, $tooltip-color);
   &:after {
     //Speech bubble pointer

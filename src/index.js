@@ -10,15 +10,12 @@ import './GUI/events.js'
 import { actionDeselect } from './Actions/nonPointer/selectionActions.js'
 import { vectorGui } from './GUI/vector.js'
 import { registerVectorGui, registerDOMHelpers } from './Context/state.js'
-import {
-  disableActionsForNoSelection,
-  enableActionsForSelection,
-} from './DOM/disableDomElements.js'
+import { bump } from './hooks/useAppState.js'
 import { initDitherPicker } from './DOM/render.js'
 
 // Register dependencies that would otherwise create circular imports in state.js
 registerVectorGui(vectorGui)
-registerDOMHelpers({ disableActionsForNoSelection, enableActionsForSelection })
+registerDOMHelpers({ disableActionsForNoSelection: bump, enableActionsForSelection: bump })
 
 //===================================//
 //===== * * * Initialize * * * ======//

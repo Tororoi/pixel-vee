@@ -80,13 +80,13 @@ export function removeLayer(layer) {
         state.deselect()
       }
       layer.inactiveTools.forEach((tool) => {
-        dom[`${tool}Btn`].disabled = false
+        if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = false
       })
       canvas.currentLayer = canvas.layers.find(
         (l) => l.type === "raster" && !l.removed
       )
       canvas.currentLayer.inactiveTools.forEach((tool) => {
-        dom[`${tool}Btn`].disabled = true
+        if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = true
       })
       vectorGui.reset()
     }

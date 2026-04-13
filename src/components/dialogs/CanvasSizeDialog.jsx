@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useAppState, bump } from '../../hooks/useAppState.js'
 import { state } from '../../Context/state.js'
 import { canvas } from '../../Context/canvas.js'
@@ -136,7 +136,7 @@ export default function CanvasSizeDialog() {
   return (
     <div
       ref={ref}
-      className="size-container dialog-box v-drag h-drag free"
+      className="size-container dialog-box draggable v-drag h-drag free"
       style={{ display: isOpen ? 'flex' : 'none' }}
     >
       <div id="size-header" className="header dragger">

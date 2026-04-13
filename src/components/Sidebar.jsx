@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { initializeDragger, initializeCollapser } from '../utils/drag.js'
 import BrushPanel from './panels/BrushPanel.jsx'
 import PalettePanel from './panels/PalettePanel.jsx'

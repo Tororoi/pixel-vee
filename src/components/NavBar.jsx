@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import { useRef } from 'react'
 import { useAppState, bump } from '../hooks/useAppState.js'
 import { state } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
@@ -32,18 +32,18 @@ export default function NavBar() {
 
   // Derive disabled states
   const hasPaste = !!canvas.pastedLayer
-  const hasSelection =
-    !hasPaste &&
-    (state.vector.currentIndex !== null ||
-      state.vector.selectedIndices.size > 0)
+  const hasRasterSelection = state.selection.boundaryBox.xMin !== null
+  const hasVectorSelection =
+    state.vector.currentIndex !== null ||
+    state.vector.selectedIndices.size > 0
+  const hasSelection = !hasPaste && (hasRasterSelection || hasVectorSelection)
   const hasClipboard =
     !hasPaste &&
     (state.clipboard.select.canvas !== null ||
       Object.keys(state.clipboard.select.vectors).length > 0)
   const canFlipRotate =
     hasPaste ||
-    state.vector.currentIndex !== null ||
-    state.vector.selectedIndices.size > 0
+    hasVectorSelection
 
   // Tool options (only show for curve, ellipse, polygon, select)
   const toolName = state.tool.current?.name

@@ -590,7 +590,7 @@ svg {
   text-align: center;
   padding: 5px;
   align-self: flex-start;
-  z-index: 1000;
+  z-index: 10000;
   box-shadow: -2px 0 0 0 rgb(255, 255, 199), 2px 0 0 0 rgb(255, 255, 199), 0 -2px 0 0 rgb(255, 255, 199), 0 2px 0 0 rgb(255, 255, 199);
 }
 .tooltip:hover:not([disabled]) {
@@ -1498,7 +1498,6 @@ canvas {
 .layers-interface .layers-container .layers {
   display: flex;
   flex-flow: column-reverse nowrap;
-  justify-content: flex-end;
 }
 .layers-interface .layers-container .layers .layer {
   cursor: grab;
@@ -1508,8 +1507,7 @@ canvas {
   line-height: 40px;
   font-size: 12px;
   display: flex;
-  flex-flow: row-reverse nowrap;
-  justify-content: flex-end;
+  flex-flow: row nowrap;
   align-items: center;
   box-shadow: inset -2px 0 0 0 rgb(131, 131, 131), inset 2px 0 0 0 rgb(131, 131, 131), inset 0 -2px 0 0 rgb(131, 131, 131), inset 0 2px 0 0 rgb(131, 131, 131);
 }

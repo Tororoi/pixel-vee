@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import ReactDOM from 'react-dom'
 import { useAppState, bump } from '../../hooks/useAppState.js'
 import { state } from '../../Context/state.js'
@@ -60,16 +60,16 @@ function VectorThumbnail({ vector }) {
     ctx.beginPath()
 
     const vp = vector.vectorProperties
-    const lx = vector.layer?.x ?? 0
-    const ly = vector.layer?.y ?? 0
-    const px1 = minD * (vp.px1 + lx)
-    const py1 = minD * (vp.py1 + ly)
-    const px2 = minD * (vp.px2 + lx)
-    const py2 = minD * (vp.py2 + ly)
-    const px3 = minD * (vp.px3 + lx)
-    const py3 = minD * (vp.py3 + ly)
-    const px4 = minD * (vp.px4 + lx)
-    const py4 = minD * (vp.py4 + ly)
+    const ox = (vector.layer?.x ?? 0) + state.canvas.cropOffsetX
+    const oy = (vector.layer?.y ?? 0) + state.canvas.cropOffsetY
+    const px1 = minD * (vp.px1 + ox)
+    const py1 = minD * (vp.py1 + oy)
+    const px2 = minD * (vp.px2 + ox)
+    const py2 = minD * (vp.py2 + oy)
+    const px3 = minD * (vp.px3 + ox)
+    const py3 = minD * (vp.py3 + oy)
+    const px4 = minD * (vp.px4 + ox)
+    const py4 = minD * (vp.py4 + oy)
 
     switch (vp.tool) {
       case 'fill':
@@ -92,14 +92,14 @@ function VectorThumbnail({ vector }) {
         break
       }
       case 'ellipse': {
-        const ltx = minD * (vp.leftTangentX + lx) + xOffset
-        const lty = minD * (vp.leftTangentY + ly) + yOffset
-        const rtx = minD * (vp.rightTangentX + lx) + xOffset
-        const rty = minD * (vp.rightTangentY + ly) + yOffset
-        const ttx = minD * (vp.topTangentX + lx) + xOffset
-        const tty = minD * (vp.topTangentY + ly) + yOffset
-        const btx = minD * (vp.bottomTangentX + lx) + xOffset
-        const bty = minD * (vp.bottomTangentY + ly) + yOffset
+        const ltx = minD * (vp.leftTangentX + ox) + xOffset
+        const lty = minD * (vp.leftTangentY + oy) + yOffset
+        const rtx = minD * (vp.rightTangentX + ox) + xOffset
+        const rty = minD * (vp.rightTangentY + oy) + yOffset
+        const ttx = minD * (vp.topTangentX + ox) + xOffset
+        const tty = minD * (vp.topTangentY + oy) + yOffset
+        const btx = minD * (vp.bottomTangentX + ox) + xOffset
+        const bty = minD * (vp.bottomTangentY + oy) + yOffset
         const cx = (ltx + rtx) / 2
         const cy = (tty + bty) / 2
         const radA = Math.sqrt((rtx - ltx) ** 2 + (rty - lty) ** 2) / 2
@@ -108,6 +108,13 @@ function VectorThumbnail({ vector }) {
         ctx.ellipse(cx, cy, radA, radB, angle, 0, 2 * Math.PI)
         break
       }
+      case 'polygon':
+        ctx.moveTo(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset)
+        ctx.lineTo(px2 + 0.5 + xOffset, py2 + 0.5 + yOffset)
+        ctx.lineTo(px3 + 0.5 + xOffset, py3 + 0.5 + yOffset)
+        ctx.lineTo(px4 + 0.5 + xOffset, py4 + 0.5 + yOffset)
+        ctx.closePath()
+        break
     }
 
     ctx.globalCompositeOperation = 'xor'

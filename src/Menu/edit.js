@@ -163,16 +163,13 @@ export function pasteSelectedPixels(clipboard, layer, offsetX, offsetY) {
   //splice the tempLayer just after the layer index
   canvas.layers.splice(canvas.layers.indexOf(layer) + 1, 0, canvas.tempLayer)
   layer.inactiveTools.forEach((tool) => {
-    dom[`${tool}Btn`].disabled = false
+    if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = false
   })
   //Store current layer in a separate variable to restore it after confirming pasted content
   canvas.pastedLayer = layer
   canvas.currentLayer = canvas.tempLayer
-  // canvas.currentLayer.inactiveTools.forEach((tool) => {
-  //   dom[`${tool}Btn`].disabled = true
-  // })
   canvas.currentLayer.inactiveTools.forEach((tool) => {
-    dom[`${tool}Btn`].classList.add("deactivate-paste")
+    if (dom[`${tool}Btn`]) dom[`${tool}Btn`].classList.add("deactivate-paste")
   })
 
   // if raster paste, adjust selectProperties and boundaryBox

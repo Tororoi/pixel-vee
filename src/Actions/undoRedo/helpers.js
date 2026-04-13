@@ -65,14 +65,16 @@ export function handlePasteAction(latestAction, modType) {
     canvas.layers.splice(canvas.layers.indexOf(canvas.tempLayer), 1)
     dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
     canvas.tempLayer.inactiveTools.forEach((tool) => {
-      dom[`${tool}Btn`].disabled = false
-      dom[`${tool}Btn`].classList.remove("deactivate-paste")
+      if (dom[`${tool}Btn`]) {
+        dom[`${tool}Btn`].disabled = false
+        dom[`${tool}Btn`].classList.remove("deactivate-paste")
+      }
     })
     //restore the original layer
     canvas.currentLayer = latestAction.pastedLayer
     canvas.pastedLayer = null
     canvas.currentLayer.inactiveTools.forEach((tool) => {
-      dom[`${tool}Btn`].disabled = true
+      if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = true
     })
     enableActionsForNoPaste()
   } else if (modType === "to") {

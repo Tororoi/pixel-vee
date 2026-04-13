@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useAppState } from '../../hooks/useAppState.js'
 import { bump } from '../../hooks/useAppState.js'
 import { state } from '../../Context/state.js'
@@ -37,9 +37,9 @@ export default function SettingsDialog() {
     let val = parseInt(e.target.value)
     if (val < 1) val = 1
     else if (val > 64) val = 64
-    e.target.value = val
     vectorGui.gridSpacing = val
     vectorGui.render()
+    bump()
   }
 
   function handleGridSpacingSpin(e) {
@@ -60,7 +60,7 @@ export default function SettingsDialog() {
   return (
     <div
       ref={ref}
-      className="settings-container dialog-box v-drag h-drag free"
+      className="settings-container dialog-box draggable v-drag h-drag free"
       style={{ display: state.ui.settingsOpen ? 'flex' : 'none' }}
     >
       <div id="settings-header" className="header dragger">
@@ -118,8 +118,8 @@ export default function SettingsDialog() {
                     id="grid-spacing"
                     min="1"
                     max="64"
-                    defaultValue={vectorGui.gridSpacing}
-                    onInput={handleGridSpacingInput}
+                    value={vectorGui.gridSpacing}
+                    onChange={handleGridSpacingInput}
                   />
                   <span className="grid-spacing-spin spin-btn" onPointerDown={handleGridSpacingSpin}>
                     <span id="inc" className="channel-btn">
