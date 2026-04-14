@@ -1,5 +1,5 @@
 import { brushStamps } from '../Context/brushStamps.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { tools } from '../Tools/index.js'
 import { vectorGui } from '../GUI/vector.js'
@@ -72,8 +72,8 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
   // can do an O(1) reference check instead of an O(n) reverse scan per action.
   let lastPasteAction = null
   let lastTransformAction = null
-  for (let i = state.timeline.undoStack.length - 1; i >= 0; i--) {
-    const action = state.timeline.undoStack[i]
+  for (let i = globalState.timeline.undoStack.length - 1; i >= 0; i--) {
+    const action = globalState.timeline.undoStack[i]
     if (
       lastPasteAction === null &&
       action.tool === 'paste' &&
@@ -88,8 +88,8 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
   // Keys are layer objects; values are Map<(y<<16)|x, count>.
   const buildUpLayerMaps = new Map()
   //loop through all actions
-  for (let i = startIndex; i < state.timeline.undoStack.length; i++) {
-    let action = state.timeline.undoStack[i]
+  for (let i = startIndex; i < globalState.timeline.undoStack.length; i++) {
+    let action = globalState.timeline.undoStack[i]
     //if layer is passed in, only redraw for that layer
     if (layer) {
       if (action.layer !== layer) continue
@@ -100,7 +100,7 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         let activeIndex = activeIndexMap.get(i)
         //draw accumulated canvas actions from previous betweenCanvas to action.layer.ctx
         action.layer.ctx.drawImage(
-          state.timeline.savedBetweenActionImages[activeIndex].cvs,
+          globalState.timeline.savedBetweenActionImages[activeIndex].cvs,
           0,
           0,
         )
@@ -124,8 +124,8 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         }
         buildUpDensityMap = buildUpLayerMaps.get(action.layer)
       }
-      const cropDX = state.canvas.cropOffsetX
-      const cropDY = state.canvas.cropOffsetY
+      const cropDX = globalState.canvas.cropOffsetX
+      const cropDY = globalState.canvas.cropOffsetY
       performAction(
         action,
         betweenCtx,
@@ -150,7 +150,7 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
     if (activeIndexMap) {
       if (activeIndexMap.has(i)) {
         if (setImages) {
-          //if activeIndexes and setImages, loop through all actions and set image from previous active index to current active index to state.timeline.savedBetweenActionImages[i].betweenImage
+          //if activeIndexes and setImages, loop through all actions and set image from previous active index to current active index to globalState.timeline.savedBetweenActionImages[i].betweenImage
           betweenCtx = createAndSaveContext()
           //actions rendered in loop beyond this point will render onto this cvs until a new one is set
         } else {
@@ -166,20 +166,20 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         //Finished rendering active indexes, finish by rendering last betweenCanvas to avoid rendering actions unnecessarily.
         //draw accumulated canvas actions from previous betweenCanvas to action.layer.ctx
         action.layer.ctx.drawImage(
-          state.timeline.savedBetweenActionImages[
-            state.timeline.savedBetweenActionImages.length - 1
+          globalState.timeline.savedBetweenActionImages[
+            globalState.timeline.savedBetweenActionImages.length - 1
           ].cvs,
           0,
           0,
         )
         //exit for loop
         break
-      } else if (i === state.timeline.undoStack.length - 1 && setImages) {
+      } else if (i === globalState.timeline.undoStack.length - 1 && setImages) {
         //Finished rendering all actions but last set exists only on betweenCanvas at this point, so render it to the layer
         //draw accumulated canvas actions from previous betweenCanvas to action.layer.ctx
         action.layer.ctx.drawImage(
-          state.timeline.savedBetweenActionImages[
-            state.timeline.savedBetweenActionImages.length - 1
+          globalState.timeline.savedBetweenActionImages[
+            globalState.timeline.savedBetweenActionImages.length - 1
           ].cvs,
           0,
           0,
@@ -202,7 +202,7 @@ function createAndSaveContext() {
   })
   cvs.width = canvas.offScreenCVS.width
   cvs.height = canvas.offScreenCVS.height
-  state.timeline.savedBetweenActionImages.push({ cvs, ctx })
+  globalState.timeline.savedBetweenActionImages.push({ cvs, ctx })
   return ctx
 }
 
@@ -417,7 +417,7 @@ export function performAction(
     case 'transform': {
       if (
         canvas.tempLayer === canvas.currentLayer &&
-        action.pastedImageKey === state.clipboard.currentPastedImageKey
+        action.pastedImageKey === globalState.clipboard.currentPastedImageKey
       ) {
         if (action === lastTransformAction) {
           //Correct action coordinates with layer offsets
@@ -434,7 +434,7 @@ export function performAction(
           //put transformed image data onto canvas (ok to use put image data because the layer should not have anything else on it at this point)
           transformRasterContent(
             action.layer,
-            state.clipboard.pastedImages[action.pastedImageKey].imageData,
+            globalState.clipboard.pastedImages[action.pastedImageKey].imageData,
             boundaryBox,
             action.transformationRotationDegrees % 360,
             action.isMirroredHorizontally,
@@ -470,7 +470,7 @@ function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
   }
   //render vectors
   for (let i = 0; i < action.vectorIndices.length; i++) {
-    const vector = state.vector.all[action.vectorIndices[i]]
+    const vector = globalState.vector.all[action.vectorIndices[i]]
     if (vector.hidden || vector.removed) continue
     const vectorProperties = vector.vectorProperties
     const vRecordedLayerX = vector.recordedLayerX
@@ -700,7 +700,7 @@ export function renderCanvas(
   //Handle offscreen canvases
   // Skip the clear+redraw when the timeline is empty — this preserves pixel data
   // that was baked directly into layer canvases (e.g. after a content-shift resize).
-  if (redrawTimeline && state.timeline.undoStack.length > 0) {
+  if (redrawTimeline && globalState.timeline.undoStack.length > 0) {
     //clear offscreen layers
     clearOffscreenCanvas(activeLayer)
     //render all previous actions

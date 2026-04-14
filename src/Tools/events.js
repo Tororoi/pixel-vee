@@ -1,5 +1,5 @@
 import { dom } from '../Context/dom.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { tools, toolGroups } from '../Tools/index.js'
 import { handleUndo, handleRedo } from '../Actions/undoRedo/undoRedo.js'
@@ -26,7 +26,7 @@ import { openStampEditor } from '../DOM/stampEditor.js'
 import { ZOOM_LEVELS } from '../utils/constants.js'
 
 //Initialize default tool
-state.tool.current = tools.brush
+globalState.tool.current = tools.brush
 renderStampOptionsToDOM()
 renderDitherOptionsToDOM()
 
@@ -77,14 +77,14 @@ function handleClearCanvas() {
     canvas.offScreenCVS.width,
     canvas.offScreenCVS.height,
   )
-  state.selection.pointsSet = null
-  state.selection.seenPixelsSet = null
-  state.timeline.clearPoints()
+  globalState.selection.pointsSet = null
+  globalState.selection.seenPixelsSet = null
+  globalState.timeline.clearPoints()
   vectorGui.reset()
-  state.reset()
+  globalState.reset()
   actionClear(canvas.currentLayer)
 
-  state.clearRedoStack()
+  globalState.clearRedoStack()
   renderCanvas(canvas.currentLayer)
   renderVectorsToDOM()
 }
@@ -146,20 +146,20 @@ export function handleModes(e) {
  * @param {PointerEvent} e - click event
  */
 function switchBrush(e) {
-  const current = state.tool.current.brushType
+  const current = globalState.tool.current.brushType
   if (current === 'circle') {
-    state.tool.current.brushType = 'square'
+    globalState.tool.current.brushType = 'square'
     dom.customBrushTypeBtn?.classList.remove('active')
   } else if (current === 'square') {
     if (customBrushStamp.pixels.length === 0) {
-      state.tool.current.brushType = 'circle'
+      globalState.tool.current.brushType = 'circle'
       dom.customBrushTypeBtn?.classList.remove('active')
     } else {
-      state.tool.current.brushType = 'custom'
+      globalState.tool.current.brushType = 'custom'
       dom.customBrushTypeBtn?.classList.add('active')
     }
   } else {
-    state.tool.current.brushType = 'circle'
+    globalState.tool.current.brushType = 'circle'
     dom.customBrushTypeBtn?.classList.remove('active')
   }
   renderBrushStampToDOM()
@@ -169,14 +169,14 @@ function switchBrush(e) {
  * @param {InputEvent} e - input event
  */
 function updateBrush(e) {
-  switch (state.tool.current.name) {
+  switch (globalState.tool.current.name) {
     case 'brush':
     case 'colorMask':
     case 'curve':
     case 'ellipse':
     case 'polygon':
     case 'select':
-      state.tool.current.brushSize = parseInt(e.target.value)
+      globalState.tool.current.brushSize = parseInt(e.target.value)
       break
     default:
     //do nothing for other tools
@@ -229,14 +229,14 @@ document.querySelector('.dither-grid')?.addEventListener('click', (e) => {
   if (!btn) return
   const patternIndex = parseInt(btn.dataset.patternIndex)
 
-  if (!DITHER_TOOLS.includes(state.tool.current.name)) return
+  if (!DITHER_TOOLS.includes(globalState.tool.current.name)) return
   if (brush.buildUpActiveStepSlot !== null) {
     // Assign the selected pattern to the active build-up step slot
     brush.buildUpSteps[brush.buildUpActiveStepSlot] = patternIndex
     brush.buildUpActiveStepSlot = null
     renderBuildUpStepsToDOM()
   } else {
-    state.tool.current.ditherPatternIndex = patternIndex
+    globalState.tool.current.ditherPatternIndex = patternIndex
     highlightSelectedDitherPattern()
     renderDitherOptionsToDOM()
   }
@@ -245,8 +245,8 @@ document.querySelector('.dither-grid')?.addEventListener('click', (e) => {
 document
   .getElementById('dither-ctrl-two-color')
   ?.addEventListener('click', () => {
-    if (!DITHER_TOOLS.includes(state.tool.current.name)) return
-    state.tool.current.modes.twoColor = !state.tool.current.modes.twoColor
+    if (!DITHER_TOOLS.includes(globalState.tool.current.name)) return
+    globalState.tool.current.modes.twoColor = !globalState.tool.current.modes.twoColor
     renderDitherControlsToDOM()
     updateDitherPickerColors()
     renderDitherOptionsToDOM()
@@ -257,19 +257,19 @@ document
   ?.addEventListener('pointerdown', (e) => {
     const control = e.target.closest('.dither-offset-control')
     if (!control) return
-    if (!DITHER_TOOLS.includes(state.tool.current.name)) return
+    if (!DITHER_TOOLS.includes(globalState.tool.current.name)) return
     control.setPointerCapture(e.pointerId)
     const startX = e.clientX
     const startY = e.clientY
-    const startOffsetX = state.tool.current.ditherOffsetX ?? 0
-    const startOffsetY = state.tool.current.ditherOffsetY ?? 0
+    const startOffsetX = globalState.tool.current.ditherOffsetX ?? 0
+    const startOffsetY = globalState.tool.current.ditherOffsetY ?? 0
     const onMove = (ev) => {
       const ox =
         (((startOffsetX - Math.round((ev.clientX - startX) / 4)) % 8) + 8) % 8
       const oy =
         (((startOffsetY - Math.round((ev.clientY - startY) / 4)) % 8) + 8) % 8
-      state.tool.current.ditherOffsetX = ox
-      state.tool.current.ditherOffsetY = oy
+      globalState.tool.current.ditherOffsetX = ox
+      globalState.tool.current.ditherOffsetY = oy
       const picker = document.querySelector('.dither-picker-container')
       if (picker) applyDitherOffset(picker, ox, oy)
       const preview = document.querySelector('.dither-preview')
@@ -287,7 +287,7 @@ document
 document
   .getElementById('dither-ctrl-build-up')
   ?.addEventListener('click', () => {
-    if (state.tool.current.name !== 'brush') return
+    if (globalState.tool.current.name !== 'brush') return
     brush.modes.buildUpDither = !brush.modes.buildUpDither
     if (brush.modes.buildUpDither) {
       rebuildBuildUpDensityMap()
@@ -302,8 +302,8 @@ document
 document
   .getElementById('dither-ctrl-build-up-reset')
   ?.addEventListener('click', () => {
-    if (state.tool.current.name !== 'brush') return
-    brush._buildUpResetAtIndex = state.timeline.undoStack.length
+    if (globalState.tool.current.name !== 'brush') return
+    brush._buildUpResetAtIndex = globalState.timeline.undoStack.length
     brush._buildUpDensityMap = new Map()
   })
 
@@ -312,7 +312,7 @@ document
   .querySelector('.build-up-mode-selector')
   ?.addEventListener('click', (e) => {
     const btn = e.target.closest('.build-up-mode-btn')
-    if (!btn || state.tool.current.name !== 'brush') return
+    if (!btn || globalState.tool.current.name !== 'brush') return
     const mode = btn.dataset.mode
     // Save custom steps before leaving custom mode
     if (brush.buildUpMode === 'custom' && mode !== 'custom') {

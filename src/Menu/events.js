@@ -1,6 +1,6 @@
 import { dom } from '../Context/dom.js'
-import { state } from '../Context/state.js'
-import { bump } from '../hooks/useAppState.js'
+import { globalState } from '../Context/state.js'
+import { bump } from '../hooks/appState.svelte.js'
 import { canvas } from '../Context/canvas.js'
 import { activateResizeOverlay } from '../Canvas/resizeOverlay.js'
 import { vectorGui } from '../GUI/vector.js'
@@ -82,7 +82,7 @@ export const generateTooltip = (message, target) => {
  * TODO: (Low Priority) initialize save dialog box with default settings?
  */
 export function openSaveDialogBox() {
-  state.ui.saveDialogOpen = true
+  globalState.ui.saveDialogOpen = true
   if (dom.saveContainer) dom.saveContainer.style.display = 'flex'
   bump()
   setSaveFilesizePreview()
@@ -111,24 +111,24 @@ function importImage() {
           willReadFrequently: true,
         })
         tempCTX.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height)
-        const previousClipboard = { ...state.clipboard.select }
+        const previousClipboard = { ...globalState.clipboard.select }
         previousClipboard.selectProperties = {
-          ...state.clipboard.select.selectProperties,
+          ...globalState.clipboard.select.selectProperties,
         }
-        state.clipboard.select.selectProperties = {
+        globalState.clipboard.select.selectProperties = {
           px1: 0,
           py1: 0,
           px2: img.width,
           py2: img.height,
         }
-        state.clipboard.select.boundaryBox = {
+        globalState.clipboard.select.boundaryBox = {
           xMin: 0,
           yMin: 0,
           xMax: img.width,
           yMax: img.height,
         }
-        state.clipboard.select.canvas = tempCanvas
-        state.clipboard.select.imageData = tempCTX.getImageData(
+        globalState.clipboard.select.canvas = tempCanvas
+        globalState.clipboard.select.imageData = tempCTX.getImageData(
           0,
           0,
           img.width,
@@ -137,7 +137,7 @@ function importImage() {
         //2. paste clipboard onto canvas
         actionPasteSelection()
         //3. clear clipboard
-        state.clipboard.select = previousClipboard
+        globalState.clipboard.select = previousClipboard
       }
     }
     reader.readAsDataURL(this.files[0])
@@ -182,18 +182,18 @@ function openSavedDrawing() {
 
 document.body.addEventListener('mouseover', (e) => {
   //TODO: (Low Priority) Instead of rendering here, use a timer that resets on mousemove to detect idle time and move this logic to the mousemove event
-  if (!state.tool.touch) {
-    state.ui.tooltipMessage = e.target.dataset?.tooltip
+  if (!globalState.tool.touch) {
+    globalState.ui.tooltipMessage = e.target.dataset?.tooltip
     if (
       canvas.currentLayer.isPreview &&
       e.target.classList.contains('deactivate-paste')
     ) {
-      state.ui.tooltipMessage =
-        state.ui.tooltipMessage +
+      globalState.ui.tooltipMessage =
+        globalState.ui.tooltipMessage +
         '\n\nCannot use with temporary pasted layer. Selecting will confirm pasted pixels.'
     }
-    generateTooltip(state.ui.tooltipMessage, e.target)
-    if (state.ui.showTooltips && state.ui.tooltipMessage) {
+    generateTooltip(globalState.ui.tooltipMessage, e.target)
+    if (globalState.ui.showTooltips && globalState.ui.tooltipMessage) {
       dom.tooltip.classList.add('visible')
     } else {
       dom.tooltip.classList.remove('visible')
@@ -201,32 +201,32 @@ document.body.addEventListener('mouseover', (e) => {
   }
 })
 document.body.addEventListener('click', (e) => {
-  if (!state.tool.touch) {
+  if (!globalState.tool.touch) {
     //Hide tooltip on click
     dom.tooltip.classList.remove('visible')
   } else {
     //Handle tooltip for mobile
-    let previousTooltipTarget = state.ui.tooltipTarget
-    state.ui.tooltipMessage = e.target.dataset?.tooltip
-    state.ui.tooltipTarget = e.target
+    let previousTooltipTarget = globalState.ui.tooltipTarget
+    globalState.ui.tooltipMessage = e.target.dataset?.tooltip
+    globalState.ui.tooltipTarget = e.target
     if (
       canvas.currentLayer.isPreview &&
       e.target.classList.contains('deactivate-paste')
     ) {
-      state.ui.tooltipMessage =
-        state.ui.tooltipMessage +
+      globalState.ui.tooltipMessage =
+        globalState.ui.tooltipMessage +
         '\n\nCannot use with temporary pasted layer. Selecting will confirm pasted pixels.'
     }
-    generateTooltip(state.ui.tooltipMessage, e.target)
+    generateTooltip(globalState.ui.tooltipMessage, e.target)
     if (
-      state.ui.showTooltips &&
-      state.ui.tooltipMessage &&
-      state.ui.tooltipTarget !== previousTooltipTarget
+      globalState.ui.showTooltips &&
+      globalState.ui.tooltipMessage &&
+      globalState.ui.tooltipTarget !== previousTooltipTarget
     ) {
       dom.tooltip.classList.add('visible')
     } else {
       dom.tooltip.classList.remove('visible')
-      state.ui.tooltipTarget = null
+      globalState.ui.tooltipTarget = null
     }
   }
 })
@@ -236,9 +236,9 @@ if (dom.toolOptions) {
     if (e.target.type === 'checkbox') {
       const optionName = e.target.id.split('-')[0]
       if (e.target.checked) {
-        state.tool.current.options[optionName].active = true
+        globalState.tool.current.options[optionName].active = true
       } else {
-        state.tool.current.options[optionName].active = false
+        globalState.tool.current.options[optionName].active = false
       }
       vectorGui.render()
     }
@@ -272,7 +272,7 @@ if (dom.gridSpacingSpinBtn)
   })
 if (dom.tooltipBtn)
   dom.tooltipBtn.addEventListener('click', () => {
-    if (dom.tooltipBtn.checked && state.ui.tooltipMessage) {
+    if (dom.tooltipBtn.checked && globalState.ui.tooltipMessage) {
       dom.tooltip.classList.add('visible')
     } else {
       dom.tooltip.classList.remove('visible')
@@ -311,7 +311,7 @@ if (dom.exportBtn) dom.exportBtn.addEventListener('click', exportImage)
 if (dom.canvasSizeBtn)
   dom.canvasSizeBtn.addEventListener('click', () => {
     if (canvas.pastedLayer) return
-    state.ui.canvasSizeOpen = true
+    globalState.ui.canvasSizeOpen = true
     if (dom.sizeContainer) dom.sizeContainer.style.display = 'flex'
     bump()
     activateResizeOverlay()
@@ -332,23 +332,23 @@ if (dom.rotateBtn) dom.rotateBtn.addEventListener('click', actionRotatePixels)
 // Settings button handled by NavBar React component; guard until migrated
 if (dom.settingsBtn)
   dom.settingsBtn.addEventListener('click', () => {
-    state.ui.settingsOpen = !state.ui.settingsOpen
+    globalState.ui.settingsOpen = !globalState.ui.settingsOpen
     bump()
   })
 // Save form events — handled by SaveDialog React component; guard until migrated
 if (dom.saveAsForm)
   dom.saveAsForm.addEventListener('change', (e) => {
     if (e.target.id === 'preserve-history-toggle') {
-      state.ui.saveSettings.preserveHistory = e.target.checked
+      globalState.ui.saveSettings.preserveHistory = e.target.checked
       setSaveFilesizePreview()
     } else if (e.target.id === 'include-palette-toggle') {
-      state.ui.saveSettings.includePalette = e.target.checked
+      globalState.ui.saveSettings.includePalette = e.target.checked
       setSaveFilesizePreview()
     } else if (e.target.id === 'include-reference-layers-toggle') {
-      state.ui.saveSettings.includeReferenceLayers = e.target.checked
+      globalState.ui.saveSettings.includeReferenceLayers = e.target.checked
       setSaveFilesizePreview()
     } else if (e.target.id === 'include-removed-actions-toggle') {
-      state.ui.saveSettings.includeRemovedActions = e.target.checked
+      globalState.ui.saveSettings.includeRemovedActions = e.target.checked
       setSaveFilesizePreview()
     }
   })
@@ -356,21 +356,21 @@ if (dom.saveAsForm)
   dom.saveAsForm.addEventListener('submit', (e) => {
     e.preventDefault()
     saveDrawing()
-    state.ui.saveDialogOpen = false
+    globalState.ui.saveDialogOpen = false
     if (dom.saveContainer) dom.saveContainer.style.display = 'none'
     bump()
   })
 if (dom.saveAsFileName)
   dom.saveAsFileName.addEventListener('input', (e) => {
-    state.ui.saveSettings.saveAsFileName = e.target.value
+    globalState.ui.saveSettings.saveAsFileName = e.target.value
     dom.saveAsFileName.style.width =
-      measureTextWidth(state.ui.saveSettings.saveAsFileName, "16px '04Font'") +
+      measureTextWidth(globalState.ui.saveSettings.saveAsFileName, "16px '04Font'") +
       2 +
       'px'
   })
 if (dom.cancelSaveBtn)
   dom.cancelSaveBtn.addEventListener('click', () => {
-    state.ui.saveDialogOpen = false
+    globalState.ui.saveDialogOpen = false
     if (dom.saveContainer) dom.saveContainer.style.display = 'none'
     bump()
   })

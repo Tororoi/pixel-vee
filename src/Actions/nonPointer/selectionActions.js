@@ -1,5 +1,5 @@
-import { state } from "../../Context/state.js"
-import { bump } from "../../hooks/useAppState.js"
+import { globalState } from "../../Context/state.js"
+import { bump } from "../../hooks/appState.svelte.js"
 import { canvas } from "../../Context/canvas.js"
 import { tools } from "../../Tools/index.js"
 import { vectorGui } from "../../GUI/vector.js"
@@ -27,13 +27,13 @@ export function actionSelectAll() {
   }
   //select all pixels on canvas
   if (canvas.currentLayer.type === "raster" && !canvas.currentLayer.isPreview) {
-    state.deselect()
+    globalState.deselect()
     //set initial properties
-    state.selection.properties.px1 = 0
-    state.selection.properties.py1 = 0
-    state.selection.properties.px2 = canvas.currentLayer.cvs.width
-    state.selection.properties.py2 = canvas.currentLayer.cvs.height
-    state.selection.setBoundaryBox(state.selection.properties)
+    globalState.selection.properties.px1 = 0
+    globalState.selection.properties.py1 = 0
+    globalState.selection.properties.px2 = canvas.currentLayer.cvs.width
+    globalState.selection.properties.py2 = canvas.currentLayer.cvs.height
+    globalState.selection.setBoundaryBox(globalState.selection.properties)
     addToTimeline({
       tool: tools.select.name,
       layer: canvas.currentLayer,
@@ -41,7 +41,7 @@ export function actionSelectAll() {
         deselect: false,
       },
     })
-    state.clearRedoStack()
+    globalState.clearRedoStack()
     //re-render vectors in DOM and GUI
     renderVectorsToDOM()
     vectorGui.render()
@@ -53,10 +53,10 @@ export function actionSelectAll() {
  * @param {number} vectorIndex - The vector index
  */
 export function actionSelectVector(vectorIndex) {
-  if (!state.vector.selectedIndices.has(vectorIndex)) {
-    state.vector.addSelected(vectorIndex)
-    state.ui.vectorTransformOpen = true; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "flex"
-    if (state.vector.transformMode === SCALE) {
+  if (!globalState.vector.selectedIndices.has(vectorIndex)) {
+    globalState.vector.addSelected(vectorIndex)
+    globalState.ui.vectorTransformOpen = true; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "flex"
+    if (globalState.vector.transformMode === SCALE) {
       setVectorShapeBoundaryBox()
     }
     addToTimeline({
@@ -66,14 +66,14 @@ export function actionSelectVector(vectorIndex) {
         deselect: false,
       },
     })
-    state.clearRedoStack()
+    globalState.clearRedoStack()
     //Update shape center
     const [centerX, centerY] = findVectorShapeCentroid(
-      state.vector.selectedIndices,
-      state.vector.all
+      globalState.vector.selectedIndices,
+      globalState.vector.all
     )
-    state.vector.shapeCenterX = centerX + canvas.currentLayer.x
-    state.vector.shapeCenterY = centerY + canvas.currentLayer.y
+    globalState.vector.shapeCenterX = centerX + canvas.currentLayer.x
+    globalState.vector.shapeCenterY = centerY + canvas.currentLayer.y
     //reset vectorGui mother object
     vectorGui.mother.newRotation = 0
     vectorGui.mother.currentRotation = 0
@@ -85,13 +85,13 @@ export function actionSelectVector(vectorIndex) {
  * @param {number} vectorIndex - The vector index
  */
 export function actionDeselectVector(vectorIndex) {
-  if (state.vector.selectedIndices.has(vectorIndex)) {
-    state.vector.removeSelected(vectorIndex)
-    if (state.vector.selectedIndices.size === 0) {
-      state.ui.vectorTransformOpen = false; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "none"
-      state.deselect()
-    } else if (state.vector.selectedIndices.size > 0) {
-      if (state.vector.transformMode === SCALE) {
+  if (globalState.vector.selectedIndices.has(vectorIndex)) {
+    globalState.vector.removeSelected(vectorIndex)
+    if (globalState.vector.selectedIndices.size === 0) {
+      globalState.ui.vectorTransformOpen = false; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "none"
+      globalState.deselect()
+    } else if (globalState.vector.selectedIndices.size > 0) {
+      if (globalState.vector.transformMode === SCALE) {
         setVectorShapeBoundaryBox()
       }
     }
@@ -102,14 +102,14 @@ export function actionDeselectVector(vectorIndex) {
         deselect: false,
       },
     })
-    state.clearRedoStack()
+    globalState.clearRedoStack()
     //Update shape center
     const [centerX, centerY] = findVectorShapeCentroid(
-      state.vector.selectedIndices,
-      state.vector.all
+      globalState.vector.selectedIndices,
+      globalState.vector.all
     )
-    state.vector.shapeCenterX = centerX + canvas.currentLayer.x
-    state.vector.shapeCenterY = centerY + canvas.currentLayer.y
+    globalState.vector.shapeCenterX = centerX + canvas.currentLayer.x
+    globalState.vector.shapeCenterY = centerY + canvas.currentLayer.y
     //reset vectorGui mother object
     vectorGui.mother.newRotation = 0
     vectorGui.mother.currentRotation = 0
@@ -124,18 +124,18 @@ export function actionDeselectVector(vectorIndex) {
 export function actionDeselect() {
   if (
     !canvas.currentLayer.isPreview &&
-    (state.selection.boundaryBox.xMax !== null ||
-      state.vector.selectedIndices.size > 0 ||
-      state.vector.currentIndex !== null)
+    (globalState.selection.boundaryBox.xMax !== null ||
+      globalState.vector.selectedIndices.size > 0 ||
+      globalState.vector.currentIndex !== null)
   ) {
-    state.deselect()
+    globalState.deselect()
     addToTimeline({
       tool: tools.select.name,
       layer: canvas.currentLayer,
       properties: {},
     })
 
-    state.clearRedoStack()
+    globalState.clearRedoStack()
     vectorGui.render()
     renderVectorsToDOM()
   }

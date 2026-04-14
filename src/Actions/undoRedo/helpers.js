@@ -1,5 +1,5 @@
 import { dom } from "../../Context/dom.js"
-import { state } from "../../Context/state.js"
+import { globalState } from "../../Context/state.js"
 import { canvas } from "../../Context/canvas.js"
 import { brush } from "../../Tools/brush.js"
 import { applyDitherOffset, applyDitherOffsetControl } from "../../DOM/renderBrush.js"
@@ -21,7 +21,7 @@ export function handleModifyAction(latestAction, modType) {
   //for each processed action,
   latestAction.processedActions.forEach((mod) => {
     //find the action in the undoStack
-    const moddedVector = state.vector.all[mod.moddedVectorIndex] // need to check if this is a vector action and if it is, set the vector properties for the appropriate vector
+    const moddedVector = globalState.vector.all[mod.moddedVectorIndex] // need to check if this is a vector action and if it is, set the vector properties for the appropriate vector
     //set the vectorProperties to the modded action's vectorProperties
     moddedVector.vectorProperties = {
       ...mod[modType],
@@ -37,7 +37,7 @@ export function handleClearAction(latestAction) {
   let upToIndex = latestAction.upToIndex
   let i = 0
   //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
-  state.timeline.undoStack.forEach((action) => {
+  globalState.timeline.undoStack.forEach((action) => {
     if (i > upToIndex) {
       return
     }
@@ -46,8 +46,8 @@ export function handleClearAction(latestAction) {
       action.removed = !action.removed
       if (action.vectorIndices) {
         action.vectorIndices.forEach((vectorIndex) => {
-          state.vector.all[vectorIndex].removed =
-            !state.vector.all[vectorIndex].removed
+          globalState.vector.all[vectorIndex].removed =
+            !globalState.vector.all[vectorIndex].removed
         })
       }
     }
@@ -102,9 +102,9 @@ export function handlePasteAction(latestAction, modType) {
     let offsetY = 0
     //BUG: raster gui not rendering properly from here
     pasteSelectedPixels(clipboard, latestAction.pastedLayer, offsetX, offsetY)
-    // state.vector.clearSelected()
+    // globalState.vector.clearSelected()
     //set currentPastedImageKey
-    state.clipboard.currentPastedImageKey = latestAction.pastedImageKey
+    globalState.clipboard.currentPastedImageKey = latestAction.pastedImageKey
     switchTool("move")
     disableActionsForPaste()
   }
@@ -134,7 +134,7 @@ export function handleConfirmPasteAction(latestAction, newLatestAction, modType)
       canvas.currentLayer.y = newLatestAction.to.y
     }
     //set currentPastedImageKey
-    state.clipboard.currentPastedImageKey = latestAction.pastedImageKey
+    globalState.clipboard.currentPastedImageKey = latestAction.pastedImageKey
     switchTool("move")
     disableActionsForPaste()
   } else if (modType === "to") {
@@ -156,21 +156,21 @@ export function handleMoveAction(latestAction, modType) {
   latestAction.layer.y = latestAction[modType].y
   latestAction.layer.scale = latestAction[modType].scale
   //Keep properties relative to layer offset
-  if (state.vector.properties.px1) {
-    state.vector.properties.px1 += deltaX
-    state.vector.properties.py1 += deltaY
+  if (globalState.vector.properties.px1) {
+    globalState.vector.properties.px1 += deltaX
+    globalState.vector.properties.py1 += deltaY
   }
-  if (state.vector.properties.px2) {
-    state.vector.properties.px2 += deltaX
-    state.vector.properties.py2 += deltaY
+  if (globalState.vector.properties.px2) {
+    globalState.vector.properties.px2 += deltaX
+    globalState.vector.properties.py2 += deltaY
   }
-  if (state.vector.properties.px3) {
-    state.vector.properties.px3 += deltaX
-    state.vector.properties.py3 += deltaY
+  if (globalState.vector.properties.px3) {
+    globalState.vector.properties.px3 += deltaX
+    globalState.vector.properties.py3 += deltaY
   }
-  if (state.vector.properties.px4) {
-    state.vector.properties.px4 += deltaX
-    state.vector.properties.py4 += deltaY
+  if (globalState.vector.properties.px4) {
+    globalState.vector.properties.px4 += deltaX
+    globalState.vector.properties.py4 += deltaY
   }
 }
 
@@ -187,22 +187,22 @@ export function handleTransformAction(latestAction, newLatestAction, modType) {
     selectProperties.px2 += newLatestAction.layer.x
     selectProperties.py1 += newLatestAction.layer.y
     selectProperties.py2 += newLatestAction.layer.y
-    state.selection.properties = { ...selectProperties }
-    state.selection.setBoundaryBox(state.selection.properties)
+    globalState.selection.properties = { ...selectProperties }
+    globalState.selection.setBoundaryBox(globalState.selection.properties)
     //Eventually undoing transform actions will result in the newLatestAction being a paste action. In that case, don't render a transformation
     if (newLatestAction.tool === "transform") {
       transformRasterContent(
         newLatestAction.layer,
-        state.clipboard.pastedImages[newLatestAction.pastedImageKey].imageData,
-        state.selection.boundaryBox,
+        globalState.clipboard.pastedImages[newLatestAction.pastedImageKey].imageData,
+        globalState.selection.boundaryBox,
         newLatestAction.transformationRotationDegrees % 360,
         newLatestAction.isMirroredHorizontally,
         newLatestAction.isMirroredVertically
       )
-      state.transform.rotationDegrees =
+      globalState.transform.rotationDegrees =
         newLatestAction.transformationRotationDegrees
-      state.transform.isMirroredHorizontally = newLatestAction.isMirroredHorizontally
-      state.transform.isMirroredVertically = newLatestAction.isMirroredVertically
+      globalState.transform.isMirroredHorizontally = newLatestAction.isMirroredHorizontally
+      globalState.transform.isMirroredVertically = newLatestAction.isMirroredVertically
     }
   } else if (modType === "to") {
     //offset selectProperties by layer x and y
@@ -211,22 +211,22 @@ export function handleTransformAction(latestAction, newLatestAction, modType) {
     selectProperties.px2 += latestAction.layer.x
     selectProperties.py1 += latestAction.layer.y
     selectProperties.py2 += latestAction.layer.y
-    state.selection.properties = {
+    globalState.selection.properties = {
       ...selectProperties,
     }
-    state.selection.setBoundaryBox(state.selection.properties)
+    globalState.selection.setBoundaryBox(globalState.selection.properties)
     transformRasterContent(
       latestAction.layer,
-      state.clipboard.pastedImages[latestAction.pastedImageKey].imageData,
-      state.selection.boundaryBox,
+      globalState.clipboard.pastedImages[latestAction.pastedImageKey].imageData,
+      globalState.selection.boundaryBox,
       latestAction.transformationRotationDegrees % 360,
       latestAction.isMirroredHorizontally,
       latestAction.isMirroredVertically
     )
-    state.transform.rotationDegrees =
+    globalState.transform.rotationDegrees =
       latestAction.transformationRotationDegrees
-    state.transform.isMirroredHorizontally = latestAction.isMirroredHorizontally
-    state.transform.isMirroredVertically = latestAction.isMirroredVertically
+    globalState.transform.isMirroredHorizontally = latestAction.isMirroredHorizontally
+    globalState.transform.isMirroredVertically = latestAction.isMirroredVertically
   }
 }
 
@@ -239,10 +239,10 @@ export function handleTransformAction(latestAction, newLatestAction, modType) {
  */
 export function handleResizeAction(latestAction, modType) {
   const targetState = latestAction[modType]
-  const contentOffsetX = targetState.cropOffsetX - state.canvas.cropOffsetX
-  const contentOffsetY = targetState.cropOffsetY - state.canvas.cropOffsetY
-  state.canvas.cropOffsetX = targetState.cropOffsetX
-  state.canvas.cropOffsetY = targetState.cropOffsetY
+  const contentOffsetX = targetState.cropOffsetX - globalState.canvas.cropOffsetX
+  const contentOffsetY = targetState.cropOffsetY - globalState.canvas.cropOffsetY
+  globalState.canvas.cropOffsetX = targetState.cropOffsetX
+  globalState.canvas.cropOffsetY = targetState.cropOffsetY
   brush.ditherOffsetX = ((brush.ditherOffsetX - contentOffsetX) % 8 + 8) % 8
   brush.ditherOffsetY = ((brush.ditherOffsetY - contentOffsetY) % 8 + 8) % 8
   const picker = document.querySelector('.dither-picker-container')
@@ -251,25 +251,25 @@ export function handleResizeAction(latestAction, modType) {
   if (preview) applyDitherOffset(preview, brush.ditherOffsetX, brush.ditherOffsetY)
   const control = document.querySelector('.dither-offset-control')
   if (control) applyDitherOffsetControl(control.parentElement, brush.ditherOffsetX, brush.ditherOffsetY)
-  if (state.selection.properties.px1 !== null) {
-    state.selection.properties.px1 += contentOffsetX
-    state.selection.properties.py1 += contentOffsetY
-    state.selection.properties.px2 += contentOffsetX
-    state.selection.properties.py2 += contentOffsetY
-    state.selection.setBoundaryBox(state.selection.properties)
+  if (globalState.selection.properties.px1 !== null) {
+    globalState.selection.properties.px1 += contentOffsetX
+    globalState.selection.properties.py1 += contentOffsetY
+    globalState.selection.properties.px2 += contentOffsetX
+    globalState.selection.properties.py2 += contentOffsetY
+    globalState.selection.setBoundaryBox(globalState.selection.properties)
   }
-  if (state.selection.maskSet) {
+  if (globalState.selection.maskSet) {
     const newMaskSet = new Set()
     const w = targetState.width
     const h = targetState.height
-    for (const key of state.selection.maskSet) {
+    for (const key of globalState.selection.maskSet) {
       const nx = (key & 0xffff) + contentOffsetX
       const ny = ((key >> 16) & 0xffff) + contentOffsetY
       if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
         newMaskSet.add((ny << 16) | nx)
       }
     }
-    state.selection.maskSet = newMaskSet
+    globalState.selection.maskSet = newMaskSet
   }
   applyCanvasDimensions(targetState.width, targetState.height, contentOffsetX, contentOffsetY)
 }

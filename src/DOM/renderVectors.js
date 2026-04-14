@@ -1,4 +1,4 @@
-import { bump } from '../hooks/useAppState.js'
+import { bump } from '../hooks/appState.svelte.js'
 import { canvas } from '../Context/canvas.js'
 import { createDitherPatternSVG } from './renderBrush.js'
 

@@ -1,5 +1,5 @@
 import { dom } from '../Context/dom.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { vectorGui } from '../GUI/vector.js'
 import { enableActionsForClipboard } from '../DOM/disableDomElements.js'
@@ -13,7 +13,7 @@ import { enableActionsForClipboard } from '../DOM/disableDomElements.js'
  * Not dependent on pointer events
  */
 export function copySelectedPixels() {
-  const { xMin, yMin, xMax, yMax } = state.selection.boundaryBox
+  const { xMin, yMin, xMax, yMax } = globalState.selection.boundaryBox
   const w = xMax - xMin
   const h = yMax - yMin
   const tempCanvas = document.createElement('canvas')
@@ -22,13 +22,13 @@ export function copySelectedPixels() {
   const tempCTX = tempCanvas.getContext('2d', {
     willReadFrequently: true,
   })
-  if (state.selection.maskSet) {
+  if (globalState.selection.maskSet) {
     //Only copy pixels that are in the maskSet — leave the rest transparent
     const srcImageData = canvas.currentLayer.ctx.getImageData(xMin, yMin, w, h)
     const dstImageData = tempCTX.createImageData(w, h)
     const src = srcImageData.data
     const dst = dstImageData.data
-    for (const key of state.selection.maskSet) {
+    for (const key of globalState.selection.maskSet) {
       const cx = key & 0xffff
       const cy = (key >> 16) & 0xffff
       const bx = cx - xMin
@@ -43,22 +43,22 @@ export function copySelectedPixels() {
   } else {
     tempCTX.drawImage(canvas.currentLayer.cvs, xMin, yMin, w, h, 0, 0, w, h)
   }
-  state.clipboard.select.selectProperties = { ...state.selection.properties }
-  state.clipboard.select.boundaryBox = {
-    ...state.selection.boundaryBox,
+  globalState.clipboard.select.selectProperties = { ...globalState.selection.properties }
+  globalState.clipboard.select.boundaryBox = {
+    ...globalState.selection.boundaryBox,
   }
-  state.clipboard.select.canvas = tempCanvas
-  state.clipboard.select.imageData = canvas.currentLayer.ctx.getImageData(
+  globalState.clipboard.select.canvas = tempCanvas
+  globalState.clipboard.select.imageData = canvas.currentLayer.ctx.getImageData(
     xMin,
     yMin,
     w,
     h,
   )
-  state.clipboard.select.vectors = {}
+  globalState.clipboard.select.vectors = {}
   //Store the layer offset at copy time so paste can correctly position content
   //even if the layer is moved between copy and paste
-  state.clipboard.select.layerX = canvas.currentLayer.x
-  state.clipboard.select.layerY = canvas.currentLayer.y
+  globalState.clipboard.select.layerX = canvas.currentLayer.x
+  globalState.clipboard.select.layerY = canvas.currentLayer.y
   enableActionsForClipboard()
 }
 
@@ -67,27 +67,27 @@ export function copySelectedPixels() {
  */
 export function copySelectedVectors() {
   let selectedVectors = {}
-  state.vector.selectedIndices.forEach((vectorIndex) => {
-    let vector = state.vector.all[vectorIndex]
+  globalState.vector.selectedIndices.forEach((vectorIndex) => {
+    let vector = globalState.vector.all[vectorIndex]
     selectedVectors[vectorIndex] = {
       ...vector,
     }
   })
-  if (state.vector.selectedIndices.size === 0) {
-    let currentVector = state.vector.all[state.vector.currentIndex]
-    selectedVectors[state.vector.currentIndex] = {
+  if (globalState.vector.selectedIndices.size === 0) {
+    let currentVector = globalState.vector.all[globalState.vector.currentIndex]
+    selectedVectors[globalState.vector.currentIndex] = {
       ...currentVector,
     }
   }
-  state.clipboard.select.selectProperties = { ...state.selection.properties }
-  state.clipboard.select.boundaryBox = {
+  globalState.clipboard.select.selectProperties = { ...globalState.selection.properties }
+  globalState.clipboard.select.boundaryBox = {
     xMin: null,
     yMin: null,
     xMax: null,
     yMax: null,
   }
-  state.clipboard.select.canvas = null
-  state.clipboard.select.vectors = selectedVectors
+  globalState.clipboard.select.canvas = null
+  globalState.clipboard.select.vectors = selectedVectors
   enableActionsForClipboard()
 }
 
@@ -100,14 +100,14 @@ export function cutSelectedPixels(copyToClipboard) {
   if (copyToClipboard) {
     copySelectedPixels()
   }
-  if (state.selection.maskSet) {
+  if (globalState.selection.maskSet) {
     //Only clear pixels that are in the maskSet
-    const { xMin, yMin, xMax, yMax } = state.selection.boundaryBox
+    const { xMin, yMin, xMax, yMax } = globalState.selection.boundaryBox
     const w = xMax - xMin
     const h = yMax - yMin
     const imageData = canvas.currentLayer.ctx.getImageData(xMin, yMin, w, h)
     const { data } = imageData
-    for (const key of state.selection.maskSet) {
+    for (const key of globalState.selection.maskSet) {
       const bx = (key & 0xffff) - xMin
       const by = ((key >> 16) & 0xffff) - yMin
       const idx = (by * w + bx) * 4
@@ -115,7 +115,7 @@ export function cutSelectedPixels(copyToClipboard) {
     }
     canvas.currentLayer.ctx.putImageData(imageData, xMin, yMin)
   } else {
-    const { xMin, yMin, xMax, yMax } = state.selection.boundaryBox
+    const { xMin, yMin, xMax, yMax } = globalState.selection.boundaryBox
     //Clear boundaryBox area
     canvas.currentLayer.ctx.clearRect(xMin, yMin, xMax - xMin, yMax - yMin)
   }
@@ -173,12 +173,12 @@ export function pasteSelectedPixels(clipboard, layer, offsetX, offsetY) {
   })
 
   // if raster paste, adjust selectProperties and boundaryBox
-  state.selection.properties = { ...clipboard.selectProperties }
-  state.selection.properties.px1 += offsetX
-  state.selection.properties.px2 += offsetX
-  state.selection.properties.py1 += offsetY
-  state.selection.properties.py2 += offsetY
-  state.selection.setBoundaryBox(state.selection.properties)
+  globalState.selection.properties = { ...clipboard.selectProperties }
+  globalState.selection.properties.px1 += offsetX
+  globalState.selection.properties.px2 += offsetX
+  globalState.selection.properties.py1 += offsetY
+  globalState.selection.properties.py2 += offsetY
+  globalState.selection.setBoundaryBox(globalState.selection.properties)
   renderPaste(clipboard, canvas.tempLayer, offsetX, offsetY)
   //TODO: (Medium Priority) include transform control points for resizing, rotating, etc. (not currently implemented)
   vectorGui.render()

@@ -1,24 +1,24 @@
-import { bump } from '../hooks/useAppState.js'
-import { state } from '../Context/state.js'
+import { bump } from '../hooks/appState.svelte.js'
+import { globalState } from '../Context/state.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
 import { swatches } from '../Context/swatch.js'
 
 /**
- * Brush stamp display — React reads state.tool.current via useAppState().
+ * Brush stamp display — React reads globalState.tool.current via useAppState().
  */
 export function renderBrushStampToDOM() {
   bump()
 }
 
 /**
- * Brush modes row — React reads state.tool.current.modes via useAppState().
+ * Brush modes row — React reads globalState.tool.current.modes via useAppState().
  */
 export const renderBrushModesToDOM = () => {
   bump()
 }
 
 /**
- * Tool options row — React reads state.tool.current.options via useAppState().
+ * Tool options row — React reads globalState.tool.current.options via useAppState().
  */
 export function renderToolOptionsToDOM() {
   bump()
@@ -30,7 +30,7 @@ export function renderToolOptionsToDOM() {
 export function renderStampOptionsToDOM() {
   const stampSection = document.querySelector('.stamp-options')
   if (!stampSection) return
-  stampSection.style.display = state.tool.current.name === 'brush' ? '' : 'none'
+  stampSection.style.display = globalState.tool.current.name === 'brush' ? '' : 'none'
 }
 
 /**
@@ -42,7 +42,7 @@ export function renderDitherOptionsToDOM() {
   if (!ditherSection) return
 
   const ditherTools = ['brush', 'curve', 'ellipse', 'polygon']
-  if (ditherTools.includes(state.tool.current.name)) {
+  if (ditherTools.includes(globalState.tool.current.name)) {
     ditherSection.style.display = ''
     renderDitherPreviewSVG()
     updateDitherPickerColors()
@@ -59,20 +59,20 @@ export function renderDitherOptionsToDOM() {
 export function renderDitherControlsToDOM() {
   const twoColorBtn = document.getElementById('dither-ctrl-two-color')
   const buildUpBtn = document.getElementById('dither-ctrl-build-up')
-  const isBuildUp = state.tool.current.modes?.buildUpDither ?? false
+  const isBuildUp = globalState.tool.current.modes?.buildUpDither ?? false
   if (twoColorBtn) {
     twoColorBtn.classList.toggle(
       'selected',
-      state.tool.current.modes?.twoColor ?? false,
+      globalState.tool.current.modes?.twoColor ?? false,
     )
   }
   if (buildUpBtn) {
     buildUpBtn.classList.toggle('selected', isBuildUp)
-    buildUpBtn.style.display = state.tool.current.name === 'brush' ? '' : 'none'
+    buildUpBtn.style.display = globalState.tool.current.name === 'brush' ? '' : 'none'
   }
   renderBuildUpStepsToDOM()
-  const offsetX = state.tool.current.ditherOffsetX ?? 0
-  const offsetY = state.tool.current.ditherOffsetY ?? 0
+  const offsetX = globalState.tool.current.ditherOffsetX ?? 0
+  const offsetY = globalState.tool.current.ditherOffsetY ?? 0
   const picker = document.querySelector('.dither-picker-container')
   if (picker) applyDitherOffset(picker, offsetX, offsetY)
   const wrap = document.querySelector('.dither-offset-control-wrap')
@@ -86,12 +86,12 @@ export function renderDitherControlsToDOM() {
 export function renderBuildUpStepsToDOM() {
   const section = document.querySelector('.build-up-steps')
   if (!section) return
-  const isBuildUp = state.tool.current.modes?.buildUpDither ?? false
+  const isBuildUp = globalState.tool.current.modes?.buildUpDither ?? false
   section.style.display = isBuildUp ? '' : 'none'
   if (!isBuildUp) return
 
   // Sync mode selector buttons
-  const buildUpMode = state.tool.current.buildUpMode ?? 'custom'
+  const buildUpMode = globalState.tool.current.buildUpMode ?? 'custom'
   section.querySelectorAll('.build-up-mode-btn').forEach((btn) => {
     btn.classList.toggle('selected', btn.dataset.mode === buildUpMode)
   })
@@ -102,10 +102,10 @@ export function renderBuildUpStepsToDOM() {
   slots.innerHTML = ''
   if (buildUpMode !== 'custom') return
 
-  const buildUpSteps = state.tool.current.buildUpSteps ?? [15, 31, 47, 63]
-  const activeSlot = state.tool.current.buildUpActiveStepSlot
-  const offsetX = state.tool.current.ditherOffsetX ?? 0
-  const offsetY = state.tool.current.ditherOffsetY ?? 0
+  const buildUpSteps = globalState.tool.current.buildUpSteps ?? [15, 31, 47, 63]
+  const activeSlot = globalState.tool.current.buildUpActiveStepSlot
+  const offsetX = globalState.tool.current.ditherOffsetX ?? 0
+  const offsetY = globalState.tool.current.ditherOffsetY ?? 0
   buildUpSteps.forEach((patternIndex, i) => {
     const btn = document.createElement('button')
     btn.type = 'button'
@@ -130,9 +130,9 @@ function renderDitherPreviewSVG() {
   if (!previewContainer) return
   const existing = previewContainer.querySelector('.dither-grid-svg')
   if (existing) existing.remove()
-  const pattern = ditherPatterns[state.tool.current.ditherPatternIndex]
-  const offsetX = state.tool.current.ditherOffsetX ?? 0
-  const offsetY = state.tool.current.ditherOffsetY ?? 0
+  const pattern = ditherPatterns[globalState.tool.current.ditherPatternIndex]
+  const offsetX = globalState.tool.current.ditherOffsetX ?? 0
+  const offsetY = globalState.tool.current.ditherOffsetY ?? 0
   previewContainer.appendChild(
     createDitherPatternSVG(pattern, offsetX, offsetY),
   )
@@ -327,7 +327,7 @@ export function applyDitherOffsetControl(container, offsetX, offsetY) {
 export function updateDitherPickerColors() {
   const primaryColor = swatches.primary.color.color
   const secondaryColor = swatches.secondary.color.color
-  const twoColor = state.tool.current.modes?.twoColor ?? false
+  const twoColor = globalState.tool.current.modes?.twoColor ?? false
   const bgFill = twoColor ? secondaryColor : 'none'
   document.querySelectorAll('.dither-bg-rect').forEach((rect) => {
     rect.setAttribute('fill', bgFill)
@@ -377,7 +377,7 @@ export function initDitherPicker() {
  * @param {number} [patternIndex] - Pattern index to highlight; defaults to active tool's index
  */
 export function highlightSelectedDitherPattern(
-  patternIndex = state.tool.current.ditherPatternIndex,
+  patternIndex = globalState.tool.current.ditherPatternIndex,
 ) {
   const grid = document.querySelector('.dither-grid')
   if (!grid) return

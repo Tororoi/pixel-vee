@@ -5,7 +5,7 @@ import {
   CURVE_TYPES,
 } from '../utils/constants.js'
 import { keys } from '../Shortcuts/keys.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { renderCanvas, resizeOffScreenCanvas } from '../Canvas/render.js'
 import {
@@ -18,7 +18,7 @@ import {
   updateVectorDitherPickerColors,
   updateVectorDitherControls,
 } from '../DOM/render.js'
-import { bump } from '../hooks/useAppState.js'
+import { bump } from '../hooks/appState.svelte.js'
 import {
   removeActionVector,
   changeActionVectorMode,
@@ -72,7 +72,7 @@ const handleIncrement = (e) => {
       dimension.value = newValue - 1
     }
   }
-  if (state.canvas.resizeOverlayActive) {
+  if (globalState.canvas.resizeOverlayActive) {
     applyFromInputs(+dom.canvasWidth.value, +dom.canvasHeight.value)
   }
 }
@@ -106,7 +106,7 @@ const restrictSize = (e) => {
  */
 const handleDimensionsSubmit = (e) => {
   e.preventDefault()
-  if (state.canvas.resizeOverlayActive) {
+  if (globalState.canvas.resizeOverlayActive) {
     applyResize()
   } else {
     resizeOffScreenCanvas(dom.canvasWidth.value, dom.canvasHeight.value)
@@ -248,7 +248,7 @@ function layerInteract(e) {
     //select current layer
     if (layer !== canvas.currentLayer) {
       if (canvas.currentLayer.type === 'reference') {
-        state.deselect()
+        globalState.deselect()
       }
       canvas.currentLayer.inactiveTools.forEach((tool) => {
         if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = false
@@ -423,17 +423,17 @@ function vectorInteract(e) {
     //select current vector
     //Only manipulate timeline if selection is happening
     if (keys.ShiftLeft || keys.ShiftRight) {
-      if (!state.vector.selectedIndices.has(vector.index)) {
+      if (!globalState.vector.selectedIndices.has(vector.index)) {
         //select if shift key held down
         actionSelectVector(vector.index)
         // enableActionsForSelection()
       } else {
         actionDeselectVector(vector.index)
       }
-    } else if (state.vector.selectedIndices.size > 0) {
+    } else if (globalState.vector.selectedIndices.size > 0) {
       actionDeselect()
     }
-    if (vector.index !== state.vector.currentIndex) {
+    if (vector.index !== globalState.vector.currentIndex) {
       //switch tool
       switchTool(vector.vectorProperties.tool)
       // vectorGui.reset()
@@ -459,13 +459,13 @@ function vectorInteract(e) {
  */
 function removeVector(vector) {
   vector.removed = true
-  if (state.vector.currentIndex === vector.index) {
+  if (globalState.vector.currentIndex === vector.index) {
     vectorGui.reset()
   }
   renderCanvas(vector.layer, true)
   removeActionVector(vector)
 
-  state.clearRedoStack()
+  globalState.clearRedoStack()
   renderVectorsToDOM()
 }
 
@@ -489,7 +489,7 @@ function toggleVectorMode(vector, modeKey) {
   renderCanvas(vector.layer, true)
   changeActionVectorMode(vector, oldModes, newModes)
 
-  state.clearRedoStack()
+  globalState.clearRedoStack()
   renderVectorsToDOM()
 }
 
@@ -546,11 +546,11 @@ dom.canvasSizeCancelBtn?.addEventListener('click', () => {
   if (dom.sizeContainer) dom.sizeContainer.style.display = 'none'
 })
 dom.canvasWidth?.addEventListener('input', (e) => {
-  if (state.canvas.resizeOverlayActive)
+  if (globalState.canvas.resizeOverlayActive)
     applyFromInputs(+e.target.value, +(dom.canvasHeight?.value ?? 0))
 })
 dom.canvasHeight?.addEventListener('input', (e) => {
-  if (state.canvas.resizeOverlayActive)
+  if (globalState.canvas.resizeOverlayActive)
     applyFromInputs(+(dom.canvasWidth?.value ?? 0), +e.target.value)
 })
 dom.anchorGrid?.addEventListener('click', (e) => {
@@ -747,7 +747,7 @@ dom.vectorSettingsContainer?.addEventListener('change', (e) => {
     const newSize = parseInt(e.target.value)
     if (oldSize !== newSize) {
       changeActionVectorBrushSize(vector, oldSize, newSize)
-      state.clearRedoStack()
+      globalState.clearRedoStack()
     }
   }
 })
@@ -788,7 +788,7 @@ dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
   renderCanvas(vector.layer, true)
   if (oldPatternIndex !== patternIndex) {
     changeActionVectorDitherPattern(vector, oldPatternIndex, patternIndex)
-    state.clearRedoStack()
+    globalState.clearRedoStack()
   }
 })
 
@@ -840,7 +840,7 @@ dom.vectorDitherPickerContainer?.addEventListener('pointerdown', (e) => {
       }
       if (fromOffset.x !== toOffset.x || fromOffset.y !== toOffset.y) {
         changeActionVectorDitherOffset(vector, fromOffset, toOffset)
-        state.clearRedoStack()
+        globalState.clearRedoStack()
       }
     },
     { once: true },

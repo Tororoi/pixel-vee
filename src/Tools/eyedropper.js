@@ -1,4 +1,4 @@
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
 import { consolidateLayers } from '../Canvas/layers.js'
@@ -15,7 +15,7 @@ function eyedropperSteps() {
    * @param {number} y - (Integer)
    */
   function sampleColor(x, y) {
-    let newColor = getColor(state.drawing.colorLayerGlobal, x, y)
+    let newColor = getColor(globalState.drawing.colorLayerGlobal, x, y)
     //not simply passing whole color in until random color function is refined
     setColor(
       newColor.r,
@@ -29,19 +29,19 @@ function eyedropperSteps() {
     case 'pointerdown':
       //get imageData
       consolidateLayers(true, true)
-      state.drawing.colorLayerGlobal = canvas.offScreenCTX.getImageData(
+      globalState.drawing.colorLayerGlobal = canvas.offScreenCTX.getImageData(
         0,
         0,
         canvas.offScreenCVS.width,
         canvas.offScreenCVS.height,
       )
       //set color
-      sampleColor(state.cursor.x, state.cursor.y)
+      sampleColor(globalState.cursor.x, globalState.cursor.y)
       break
     case 'pointermove':
       //normalize pointermove to pixelgrid, get color here too
       //get color
-      sampleColor(state.cursor.x, state.cursor.y)
+      sampleColor(globalState.cursor.x, globalState.cursor.y)
       break
     default:
     //do nothing

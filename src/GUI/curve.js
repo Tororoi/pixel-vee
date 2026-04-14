@@ -1,4 +1,4 @@
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { vectorGui } from './vector.js'
 import {
@@ -21,8 +21,8 @@ export function renderCurveVector(vectorProperties, vector) {
   const yOffset = getRenderYOffset(vector)
   const currentVectorModes =
     vector?.modes ??
-    state.vector.all[state.vector.currentIndex]?.modes ??
-    state.tool.current.modes
+    globalState.vector.all[globalState.vector.currentIndex]?.modes ??
+    globalState.tool.current.modes
   const cubicCurveActive = currentVectorModes?.cubicCurve
   const quadCurveActive = currentVectorModes?.quadCurve
 
@@ -61,8 +61,8 @@ export function renderCurvePath(vectorProperties, vector) {
   canvas.vectorGuiCTX.moveTo(xOffset + px1 + 0.5, yOffset + py1 + 0.5)
   const currentVectorModes =
     vector?.modes ??
-    state.vector.all[state.vector.currentIndex]?.modes ??
-    state.tool.current.modes
+    globalState.vector.all[globalState.vector.currentIndex]?.modes ??
+    globalState.tool.current.modes
   const cubicCurveActive = currentVectorModes?.cubicCurve
   const quadCurveActive = currentVectorModes?.quadCurve
 

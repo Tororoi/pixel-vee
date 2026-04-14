@@ -1,4 +1,4 @@
-import { state } from "../../Context/state.js"
+import { globalState } from "../../Context/state.js"
 import { canvas } from "../../Context/canvas.js"
 import { tools } from "../../Tools/index.js"
 import { vectorGui } from "../../GUI/vector.js"
@@ -16,7 +16,7 @@ import { actionFlipVectors, actionRotateVectors } from "./vectorTransform.js"
  */
 export function addTransformToTimeline() {
   //save to timeline
-  const boundaryBox = { ...state.selection.boundaryBox }
+  const boundaryBox = { ...globalState.selection.boundaryBox }
   //create canvas with transformed pixels
   const transformedCanvas = document.createElement("canvas")
   transformedCanvas.width = boundaryBox.xMax - boundaryBox.xMin
@@ -38,8 +38,8 @@ export function addTransformToTimeline() {
     boundaryBox.yMin -= canvas.currentLayer.y
     boundaryBox.yMax -= canvas.currentLayer.y
   }
-  const selectProperties = { ...state.selection.properties }
-  if (state.selection.properties.px2 !== null) {
+  const selectProperties = { ...globalState.selection.properties }
+  if (globalState.selection.properties.px2 !== null) {
     selectProperties.px1 -= canvas.currentLayer.x
     selectProperties.px2 -= canvas.currentLayer.x
     selectProperties.py1 -= canvas.currentLayer.y
@@ -51,13 +51,13 @@ export function addTransformToTimeline() {
     properties: {
       boundaryBox,
       selectProperties,
-      pastedImageKey: state.clipboard.currentPastedImageKey,
-      transformationRotationDegrees: state.transform.rotationDegrees,
-      isMirroredHorizontally: state.transform.isMirroredHorizontally,
-      isMirroredVertically: state.transform.isMirroredVertically,
+      pastedImageKey: globalState.clipboard.currentPastedImageKey,
+      transformationRotationDegrees: globalState.transform.rotationDegrees,
+      isMirroredHorizontally: globalState.transform.isMirroredHorizontally,
+      isMirroredVertically: globalState.transform.isMirroredVertically,
     },
   })
-  state.clearRedoStack()
+  globalState.clearRedoStack()
 }
 
 /**
@@ -70,29 +70,29 @@ export function actionFlipPixels(flipHorizontally) {
   //raster flip
   if (canvas.currentLayer.isPreview) {
     //flip pixels
-    const transformedBoundaryBox = { ...state.selection.boundaryBox }
+    const transformedBoundaryBox = { ...globalState.selection.boundaryBox }
     if (flipHorizontally) {
-      transformedBoundaryBox.xMin = state.selection.boundaryBox.xMax
-      transformedBoundaryBox.xMax = state.selection.boundaryBox.xMin
-      state.transform.isMirroredHorizontally = !state.transform.isMirroredHorizontally
+      transformedBoundaryBox.xMin = globalState.selection.boundaryBox.xMax
+      transformedBoundaryBox.xMax = globalState.selection.boundaryBox.xMin
+      globalState.transform.isMirroredHorizontally = !globalState.transform.isMirroredHorizontally
     } else {
-      transformedBoundaryBox.yMin = state.selection.boundaryBox.yMax
-      transformedBoundaryBox.yMax = state.selection.boundaryBox.yMin
-      state.transform.isMirroredVertically = !state.transform.isMirroredVertically
+      transformedBoundaryBox.yMin = globalState.selection.boundaryBox.yMax
+      transformedBoundaryBox.yMax = globalState.selection.boundaryBox.yMin
+      globalState.transform.isMirroredVertically = !globalState.transform.isMirroredVertically
     }
     transformRasterContent(
       canvas.currentLayer,
-      state.clipboard.pastedImages[state.clipboard.currentPastedImageKey].imageData,
+      globalState.clipboard.pastedImages[globalState.clipboard.currentPastedImageKey].imageData,
       transformedBoundaryBox,
-      state.transform.rotationDegrees % 360,
-      state.transform.isMirroredHorizontally,
-      state.transform.isMirroredVertically
+      globalState.transform.rotationDegrees % 360,
+      globalState.transform.isMirroredHorizontally,
+      globalState.transform.isMirroredVertically
     )
     addTransformToTimeline()
     renderCanvas(canvas.currentLayer)
   } else if (
-    state.vector.currentIndex !== null ||
-    state.vector.selectedIndices.size > 0
+    globalState.vector.currentIndex !== null ||
+    globalState.vector.selectedIndices.size > 0
   ) {
     //vector flip
     actionFlipVectors(flipHorizontally)
@@ -129,29 +129,29 @@ export function actionRotatePixels() {
       }
     }
 
-    state.selection.properties = rotateBoundaryBox90Clockwise(state.selection.boundaryBox)
-    state.selection.setBoundaryBox(state.selection.properties)
-    state.transform.rotationDegrees += 90
-    if (state.transform.isMirroredHorizontally) {
-      state.transform.rotationDegrees += 180
+    globalState.selection.properties = rotateBoundaryBox90Clockwise(globalState.selection.boundaryBox)
+    globalState.selection.setBoundaryBox(globalState.selection.properties)
+    globalState.transform.rotationDegrees += 90
+    if (globalState.transform.isMirroredHorizontally) {
+      globalState.transform.rotationDegrees += 180
     }
-    if (state.transform.isMirroredVertically) {
-      state.transform.rotationDegrees += 180
+    if (globalState.transform.isMirroredVertically) {
+      globalState.transform.rotationDegrees += 180
     }
     transformRasterContent(
       canvas.currentLayer,
-      state.clipboard.pastedImages[state.clipboard.currentPastedImageKey].imageData,
-      state.selection.boundaryBox,
-      state.transform.rotationDegrees % 360,
-      state.transform.isMirroredHorizontally,
-      state.transform.isMirroredVertically
+      globalState.clipboard.pastedImages[globalState.clipboard.currentPastedImageKey].imageData,
+      globalState.selection.boundaryBox,
+      globalState.transform.rotationDegrees % 360,
+      globalState.transform.isMirroredHorizontally,
+      globalState.transform.isMirroredVertically
     )
     addTransformToTimeline()
     vectorGui.render()
     renderCanvas(canvas.currentLayer)
   } else if (
-    state.vector.currentIndex !== null ||
-    state.vector.selectedIndices.size > 0
+    globalState.vector.currentIndex !== null ||
+    globalState.vector.selectedIndices.size > 0
   ) {
     //vector flip
     actionRotateVectors(90)

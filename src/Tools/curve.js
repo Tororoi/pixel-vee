@@ -1,5 +1,5 @@
 import { brushStamps } from '../Context/brushStamps.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
@@ -25,7 +25,7 @@ import {
  * @returns {'line'|'quadCurve'|'cubicCurve'} The active curve mode name
  */
 export function getActiveCurveMode() {
-  const modes = state.tool.current.modes
+  const modes = globalState.tool.current.modes
   if (modes.cubicCurve) return 'cubicCurve'
   if (modes.quadCurve) return 'quadCurve'
   return 'line'
@@ -40,18 +40,18 @@ function buildCurveCtx(isPreview = false) {
   return createStrokeContext({
     layer: canvas.currentLayer,
     isPreview,
-    boundaryBox: state.selection.boundaryBox,
+    boundaryBox: globalState.selection.boundaryBox,
     currentColor: swatches.primary.color,
-    currentModes: state.tool.current.modes,
-    maskSet: state.selection.maskSet,
+    currentModes: globalState.tool.current.modes,
+    maskSet: globalState.selection.maskSet,
     brushStamp:
-      brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
-    brushSize: state.tool.current.brushSize,
-    ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
-    twoColorMode: state.tool.current.modes?.twoColor ?? false,
+      brushStamps[globalState.tool.current.brushType][globalState.tool.current.brushSize],
+    brushSize: globalState.tool.current.brushSize,
+    ditherPattern: ditherPatterns[globalState.tool.current.ditherPatternIndex],
+    twoColorMode: globalState.tool.current.modes?.twoColor ?? false,
     secondaryColor: swatches.secondary.color,
-    ditherOffsetX: state.tool.current.ditherOffsetX ?? 0,
-    ditherOffsetY: state.tool.current.ditherOffsetY ?? 0,
+    ditherOffsetX: globalState.tool.current.ditherOffsetX ?? 0,
+    ditherOffsetY: globalState.tool.current.ditherOffsetY ?? 0,
   })
 }
 
@@ -70,21 +70,21 @@ function curveSteps() {
       : activeCurveMode === 'quadCurve'
         ? 2
         : 1
-  const { cropOffsetX, cropOffsetY } = state.canvas
+  const { cropOffsetX, cropOffsetY } = globalState.canvas
   if (
-    state.tool.current.options.chain?.active &&
+    globalState.tool.current.options.chain?.active &&
     canvas.pointerEvent === 'pointerdown' &&
-    state.tool.clickCounter === 0
+    globalState.tool.clickCounter === 0
   ) {
     const chainPoint = getChainStartPoint()
     if (chainPoint !== null) {
-      state.tool.clickCounter += 1
+      globalState.tool.clickCounter += 1
       vectorGui.reset()
-      state.vector.properties.tool = state.tool.current.name
-      state.vector.properties.px1 = chainPoint.x
-      state.vector.properties.py1 = chainPoint.y
-      state.vector.properties.px2 = chainPoint.x
-      state.vector.properties.py2 = chainPoint.y
+      globalState.vector.properties.tool = globalState.tool.current.name
+      globalState.vector.properties.px1 = chainPoint.x
+      globalState.vector.properties.py1 = chainPoint.y
+      globalState.vector.properties.px2 = chainPoint.x
+      globalState.vector.properties.py2 = chainPoint.y
       renderCanvas(canvas.currentLayer)
       actionCurve(
         chainPoint.x + cropOffsetX,
@@ -92,10 +92,10 @@ function curveSteps() {
         chainPoint.x + cropOffsetX,
         chainPoint.y + cropOffsetY,
         // do the control points need to be set to chain point as well? or just start and end?
-        state.vector.properties.px3 + cropOffsetX,
-        state.vector.properties.py3 + cropOffsetY,
-        state.vector.properties.px4 + cropOffsetX,
-        state.vector.properties.py4 + cropOffsetY,
+        globalState.vector.properties.px3 + cropOffsetX,
+        globalState.vector.properties.py3 + cropOffsetY,
+        globalState.vector.properties.px4 + cropOffsetX,
+        globalState.vector.properties.py4 + cropOffsetY,
         1,
         buildCurveCtx(true),
       )
@@ -106,26 +106,26 @@ function curveSteps() {
   switch (canvas.pointerEvent) {
     case 'pointerdown':
       //solidify end points
-      state.tool.clickCounter += 1
-      if (state.tool.clickCounter > maxClicks) state.tool.clickCounter = 1
-      switch (state.tool.clickCounter) {
+      globalState.tool.clickCounter += 1
+      if (globalState.tool.clickCounter > maxClicks) globalState.tool.clickCounter = 1
+      switch (globalState.tool.clickCounter) {
         case 1:
           //reset control points
           vectorGui.reset()
-          state.vector.properties.tool = state.tool.current.name
-          state.vector.properties.px1 = normalizedX
-          state.vector.properties.py1 = normalizedY
+          globalState.vector.properties.tool = globalState.tool.current.name
+          globalState.vector.properties.px1 = normalizedX
+          globalState.vector.properties.py1 = normalizedY
           //endpoint starts at same point as startpoint
-          state.vector.properties.px2 = normalizedX
-          state.vector.properties.py2 = normalizedY
+          globalState.vector.properties.px2 = normalizedX
+          globalState.vector.properties.py2 = normalizedY
           break
         case 2:
-          state.vector.properties.px3 = normalizedX
-          state.vector.properties.py3 = normalizedY
+          globalState.vector.properties.px3 = normalizedX
+          globalState.vector.properties.py3 = normalizedY
           break
         case 3:
-          state.vector.properties.px4 = normalizedX
-          state.vector.properties.py4 = normalizedY
+          globalState.vector.properties.px4 = normalizedX
+          globalState.vector.properties.py4 = normalizedY
           break
         default:
         //do nothing
@@ -133,31 +133,31 @@ function curveSteps() {
       //onscreen preview
       renderCanvas(canvas.currentLayer)
       actionCurve(
-        state.vector.properties.px1 + cropOffsetX,
-        state.vector.properties.py1 + cropOffsetY,
-        state.vector.properties.px2 + cropOffsetX,
-        state.vector.properties.py2 + cropOffsetY,
-        state.vector.properties.px3 + cropOffsetX,
-        state.vector.properties.py3 + cropOffsetY,
-        state.vector.properties.px4 + cropOffsetX,
-        state.vector.properties.py4 + cropOffsetY,
-        state.tool.clickCounter,
+        globalState.vector.properties.px1 + cropOffsetX,
+        globalState.vector.properties.py1 + cropOffsetY,
+        globalState.vector.properties.px2 + cropOffsetX,
+        globalState.vector.properties.py2 + cropOffsetY,
+        globalState.vector.properties.px3 + cropOffsetX,
+        globalState.vector.properties.py3 + cropOffsetY,
+        globalState.vector.properties.px4 + cropOffsetX,
+        globalState.vector.properties.py4 + cropOffsetY,
+        globalState.tool.clickCounter,
         buildCurveCtx(true),
       )
       break
     case 'pointermove':
-      switch (state.tool.clickCounter) {
+      switch (globalState.tool.clickCounter) {
         case 1:
-          state.vector.properties.px2 = normalizedX
-          state.vector.properties.py2 = normalizedY
+          globalState.vector.properties.px2 = normalizedX
+          globalState.vector.properties.py2 = normalizedY
           break
         case 2:
-          state.vector.properties.px3 = normalizedX
-          state.vector.properties.py3 = normalizedY
+          globalState.vector.properties.px3 = normalizedX
+          globalState.vector.properties.py3 = normalizedY
           break
         case 3:
-          state.vector.properties.px4 = normalizedX
-          state.vector.properties.py4 = normalizedY
+          globalState.vector.properties.px4 = normalizedX
+          globalState.vector.properties.py4 = normalizedY
           break
         default:
         //do nothing
@@ -165,70 +165,70 @@ function curveSteps() {
       //onscreen preview
       renderCanvas(canvas.currentLayer)
       actionCurve(
-        state.vector.properties.px1 + cropOffsetX,
-        state.vector.properties.py1 + cropOffsetY,
-        state.vector.properties.px2 + cropOffsetX,
-        state.vector.properties.py2 + cropOffsetY,
-        state.vector.properties.px3 + cropOffsetX,
-        state.vector.properties.py3 + cropOffsetY,
-        state.vector.properties.px4 + cropOffsetX,
-        state.vector.properties.py4 + cropOffsetY,
-        state.tool.clickCounter,
+        globalState.vector.properties.px1 + cropOffsetX,
+        globalState.vector.properties.py1 + cropOffsetY,
+        globalState.vector.properties.px2 + cropOffsetX,
+        globalState.vector.properties.py2 + cropOffsetY,
+        globalState.vector.properties.px3 + cropOffsetX,
+        globalState.vector.properties.py3 + cropOffsetY,
+        globalState.vector.properties.px4 + cropOffsetX,
+        globalState.vector.properties.py4 + cropOffsetY,
+        globalState.tool.clickCounter,
         buildCurveCtx(true),
       )
       break
     case 'pointerup':
-      switch (state.tool.clickCounter) {
+      switch (globalState.tool.clickCounter) {
         case 1:
-          state.vector.properties.px2 = normalizedX
-          state.vector.properties.py2 = normalizedY
+          globalState.vector.properties.px2 = normalizedX
+          globalState.vector.properties.py2 = normalizedY
           break
         case 2:
-          state.vector.properties.px3 = normalizedX
-          state.vector.properties.py3 = normalizedY
+          globalState.vector.properties.px3 = normalizedX
+          globalState.vector.properties.py3 = normalizedY
           break
         case 3:
-          state.vector.properties.px4 = normalizedX
-          state.vector.properties.py4 = normalizedY
+          globalState.vector.properties.px4 = normalizedX
+          globalState.vector.properties.py4 = normalizedY
           break
         default:
         //do nothing
       }
       //Solidify vector
-      if (state.tool.clickCounter === maxClicks) {
+      if (globalState.tool.clickCounter === maxClicks) {
         actionCurve(
-          state.vector.properties.px1 + cropOffsetX,
-          state.vector.properties.py1 + cropOffsetY,
-          state.vector.properties.px2 + cropOffsetX,
-          state.vector.properties.py2 + cropOffsetY,
-          state.vector.properties.px3 + cropOffsetX,
-          state.vector.properties.py3 + cropOffsetY,
-          state.vector.properties.px4 + cropOffsetX,
-          state.vector.properties.py4 + cropOffsetY,
-          state.tool.clickCounter,
+          globalState.vector.properties.px1 + cropOffsetX,
+          globalState.vector.properties.py1 + cropOffsetY,
+          globalState.vector.properties.px2 + cropOffsetX,
+          globalState.vector.properties.py2 + cropOffsetY,
+          globalState.vector.properties.px3 + cropOffsetX,
+          globalState.vector.properties.py3 + cropOffsetY,
+          globalState.vector.properties.px4 + cropOffsetX,
+          globalState.vector.properties.py4 + cropOffsetY,
+          globalState.tool.clickCounter,
           buildCurveCtx(false),
         )
-        state.tool.clickCounter = 0
+        globalState.tool.clickCounter = 0
         let maskArray = coordArrayFromSet(
-          state.selection.maskSet,
-          canvas.currentLayer.x + state.canvas.cropOffsetX,
-          canvas.currentLayer.y + state.canvas.cropOffsetY,
+          globalState.selection.maskSet,
+          canvas.currentLayer.x + globalState.canvas.cropOffsetX,
+          canvas.currentLayer.y + globalState.canvas.cropOffsetY,
         )
         //correct boundary box for layer offset and crop offset
-        const boundaryBox = { ...state.selection.boundaryBox }
+        const boundaryBox = { ...globalState.selection.boundaryBox }
         if (boundaryBox.xMax !== null) {
-          boundaryBox.xMin -= canvas.currentLayer.x + state.canvas.cropOffsetX
-          boundaryBox.xMax -= canvas.currentLayer.x + state.canvas.cropOffsetX
-          boundaryBox.yMin -= canvas.currentLayer.y + state.canvas.cropOffsetY
-          boundaryBox.yMax -= canvas.currentLayer.y + state.canvas.cropOffsetY
+          boundaryBox.xMin -= canvas.currentLayer.x + globalState.canvas.cropOffsetX
+          boundaryBox.xMax -= canvas.currentLayer.x + globalState.canvas.cropOffsetX
+          boundaryBox.yMin -= canvas.currentLayer.y + globalState.canvas.cropOffsetY
+          boundaryBox.yMax -= canvas.currentLayer.y + globalState.canvas.cropOffsetY
         }
         //generate new unique key for vector
-        const uniqueVectorKey = state.vector.nextKey()
-        state.vector.setCurrentIndex(uniqueVectorKey)
+        const uniqueVectorKey = globalState.vector.nextKey()
+        globalState.vector.setCurrentIndex(uniqueVectorKey)
         enableActionsForSelection()
         //store control points for timeline
         addToTimeline({
-          tool: state.tool.current.name,
+          tool: globalState.tool.current.name,
           layer: canvas.currentLayer,
           properties: {
             maskArray,
@@ -237,50 +237,50 @@ function curveSteps() {
           },
         })
         //Store vector in state
-        state.vector.all[uniqueVectorKey] = {
+        globalState.vector.all[uniqueVectorKey] = {
           index: uniqueVectorKey,
-          action: state.timeline.currentAction,
+          action: globalState.timeline.currentAction,
           layer: canvas.currentLayer,
-          modes: { ...state.tool.current.modes },
+          modes: { ...globalState.tool.current.modes },
           color: { ...swatches.primary.color },
           secondaryColor: { ...swatches.secondary.color },
-          ditherPatternIndex: state.tool.current.ditherPatternIndex,
+          ditherPatternIndex: globalState.tool.current.ditherPatternIndex,
           ditherOffsetX:
-            (((state.tool.current.ditherOffsetX + state.canvas.cropOffsetX) %
+            (((globalState.tool.current.ditherOffsetX + globalState.canvas.cropOffsetX) %
               8) +
               8) %
             8,
           ditherOffsetY:
-            (((state.tool.current.ditherOffsetY + state.canvas.cropOffsetY) %
+            (((globalState.tool.current.ditherOffsetY + globalState.canvas.cropOffsetY) %
               8) +
               8) %
             8,
           recordedLayerX: canvas.currentLayer.x,
           recordedLayerY: canvas.currentLayer.y,
-          brushSize: state.tool.current.brushSize,
-          brushType: state.tool.current.brushType,
+          brushSize: globalState.tool.current.brushSize,
+          brushType: globalState.tool.current.brushType,
           vectorProperties: {
-            ...state.vector.properties,
-            px1: state.vector.properties.px1 - canvas.currentLayer.x,
-            py1: state.vector.properties.py1 - canvas.currentLayer.y,
-            px2: state.vector.properties.px2 - canvas.currentLayer.x,
-            py2: state.vector.properties.py2 - canvas.currentLayer.y,
-            px3: state.tool.current.modes.line
+            ...globalState.vector.properties,
+            px1: globalState.vector.properties.px1 - canvas.currentLayer.x,
+            py1: globalState.vector.properties.py1 - canvas.currentLayer.y,
+            px2: globalState.vector.properties.px2 - canvas.currentLayer.x,
+            py2: globalState.vector.properties.py2 - canvas.currentLayer.y,
+            px3: globalState.tool.current.modes.line
               ? null
-              : state.vector.properties.px3 - canvas.currentLayer.x,
-            py3: state.tool.current.modes.line
+              : globalState.vector.properties.px3 - canvas.currentLayer.x,
+            py3: globalState.tool.current.modes.line
               ? null
-              : state.vector.properties.py3 - canvas.currentLayer.y,
+              : globalState.vector.properties.py3 - canvas.currentLayer.y,
             px4:
-              state.tool.current.modes.line ||
-              state.tool.current.modes.quadCurve
+              globalState.tool.current.modes.line ||
+              globalState.tool.current.modes.quadCurve
                 ? null
-                : state.vector.properties.px4 - canvas.currentLayer.x,
+                : globalState.vector.properties.px4 - canvas.currentLayer.x,
             py4:
-              state.tool.current.modes.line ||
-              state.tool.current.modes.quadCurve
+              globalState.tool.current.modes.line ||
+              globalState.tool.current.modes.quadCurve
                 ? null
-                : state.vector.properties.py4 - canvas.currentLayer.y,
+                : globalState.vector.properties.py4 - canvas.currentLayer.y,
           },
           // maskArray, //default to action's maskArray
           // boundaryBox, //default to action's boundaryBox

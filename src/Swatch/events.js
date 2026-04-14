@@ -1,7 +1,7 @@
 import { dom } from '../Context/dom.js'
 import { keys } from '../Shortcuts/keys.js'
-import { state } from '../Context/state.js'
-import { bump } from '../hooks/useAppState.js'
+import { globalState } from '../Context/state.js'
+import { bump } from '../hooks/appState.svelte.js'
 import { swatches } from '../Context/swatch.js'
 import { Picker } from './Picker.js'
 import { generateRandomRGB } from '../utils/colors.js'
@@ -74,13 +74,13 @@ export function setColor(r, g, b, a, target) {
       if (target.isSecondaryColor) {
         vector.secondaryColor = color
         renderCanvas(vector.layer, true)
-        state.clearRedoStack()
+        globalState.clearRedoStack()
       } else {
         let oldColor = { ...vector.color }
         vector.color = color
         renderCanvas(vector.layer, true)
         changeActionVectorColor(vector, oldColor)
-        state.clearRedoStack()
+        globalState.clearRedoStack()
         renderVectorsToDOM()
       }
       updateVectorDitherPreview(vector)
@@ -122,8 +122,8 @@ export function initializeColorPicker(target) {
   picker.swatch = target
   const initialColorReference = target.color
   picker.update(initialColorReference)
-  //show colorpicker — React reads state.ui.colorPickerOpen via bump()
-  state.ui.colorPickerOpen = true
+  //show colorpicker — React reads globalState.ui.colorPickerOpen via bump()
+  globalState.ui.colorPickerOpen = true
   bump()
   if (dom.colorPickerContainer) {
     dom.colorPickerContainer.style.display = 'flex'
@@ -243,7 +243,7 @@ export function closePickerWindow() {
   picker.selectedCustomKey = null
   picker.editingCustomKey = null
   // hide colorpicker
-  state.ui.colorPickerOpen = false
+  globalState.ui.colorPickerOpen = false
   bump()
   if (dom.colorPickerContainer) dom.colorPickerContainer.style.display = 'none'
 }

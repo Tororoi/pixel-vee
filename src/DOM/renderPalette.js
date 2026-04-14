@@ -1,4 +1,4 @@
-import { bump } from '../hooks/useAppState.js'
+import { bump } from '../hooks/appState.svelte.js'
 
 /**
  * Render palette tools — React reads swatches.paletteMode via useAppState().

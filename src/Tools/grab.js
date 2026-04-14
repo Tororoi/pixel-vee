@@ -1,4 +1,4 @@
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { renderCanvas } from '../Canvas/render.js'
 
@@ -10,14 +10,14 @@ function grabSteps() {
     case 'pointerdown':
       canvas.previousXOffset = canvas.xOffset
       canvas.previousYOffset = canvas.yOffset
-      state.tool.grabStartX = state.cursor.x
-      state.tool.grabStartY = state.cursor.y
+      globalState.tool.grabStartX = globalState.cursor.x
+      globalState.tool.grabStartY = globalState.cursor.y
       break
     case 'pointermove':
       canvas.xOffset =
-        state.cursor.x - state.tool.grabStartX + canvas.previousXOffset
+        globalState.cursor.x - globalState.tool.grabStartX + canvas.previousXOffset
       canvas.yOffset =
-        state.cursor.y - state.tool.grabStartY + canvas.previousYOffset
+        globalState.cursor.y - globalState.tool.grabStartY + canvas.previousYOffset
       renderCanvas() //affect all layers
       break
     case 'pointerup':

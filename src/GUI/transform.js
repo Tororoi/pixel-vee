@@ -1,4 +1,4 @@
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { vectorGui } from './vector.js'
 import { getAngle } from '../utils/trig.js'
@@ -15,15 +15,15 @@ import { findVectorShapeBoundaryBox } from '../utils/vectorHelpers.js'
  */
 function updateRotationAngle() {
   //for now, mother ui is always in the shape center
-  vectorGui.mother.rotationOrigin.x = state.vector.shapeCenterX
-  vectorGui.mother.rotationOrigin.y = state.vector.shapeCenterY
-  if (state.cursor.clicked && state.vector.grabStartAngle !== null) {
+  vectorGui.mother.rotationOrigin.x = globalState.vector.shapeCenterX
+  vectorGui.mother.rotationOrigin.y = globalState.vector.shapeCenterY
+  if (globalState.cursor.clicked && globalState.vector.grabStartAngle !== null) {
     vectorGui.mother.newRotation =
       getAngle(
-        vectorGui.mother.rotationOrigin.x - state.cursor.x,
-        vectorGui.mother.rotationOrigin.y - state.cursor.y,
+        vectorGui.mother.rotationOrigin.x - globalState.cursor.x,
+        vectorGui.mother.rotationOrigin.y - globalState.cursor.y,
       ) -
-      state.vector.grabStartAngle +
+      globalState.vector.grabStartAngle +
       vectorGui.mother.currentRotation
   }
 }
@@ -39,8 +39,8 @@ function resolveRotationActiveState(motherPoints, r) {
   const isHovered =
     !isSelected &&
     checkSquarePointCollision(
-      state.cursor.x,
-      state.cursor.y,
+      globalState.cursor.x,
+      globalState.cursor.y,
       motherPoints.rotationx,
       motherPoints.rotationy,
       r,
@@ -48,7 +48,7 @@ function resolveRotationActiveState(motherPoints, r) {
   const isActive = isSelected || isHovered
   if (isActive) {
     vectorGui.setCollision({ x: 'rotationx', y: 'rotationy' })
-    canvas.vectorGuiCVS.style.cursor = state.cursor.clicked
+    canvas.vectorGuiCVS.style.cursor = globalState.cursor.clicked
       ? 'grabbing'
       : 'grab'
   }
@@ -183,12 +183,12 @@ export function renderVectorRotationControl() {
 export function setVectorShapeBoundaryBox() {
   //Update shape boundary box
   const shapeBoundaryBox = findVectorShapeBoundaryBox(
-    state.vector.selectedIndices,
-    state.vector.all,
+    globalState.vector.selectedIndices,
+    globalState.vector.all,
   )
-  state.selection.properties.px1 = shapeBoundaryBox.xMin
-  state.selection.properties.py1 = shapeBoundaryBox.yMin
-  state.selection.properties.px2 = shapeBoundaryBox.xMax + 1
-  state.selection.properties.py2 = shapeBoundaryBox.yMax + 1
-  state.selection.setBoundaryBox(state.selection.properties)
+  globalState.selection.properties.px1 = shapeBoundaryBox.xMin
+  globalState.selection.properties.py1 = shapeBoundaryBox.yMin
+  globalState.selection.properties.px2 = shapeBoundaryBox.xMax + 1
+  globalState.selection.properties.py2 = shapeBoundaryBox.yMax + 1
+  globalState.selection.setBoundaryBox(globalState.selection.properties)
 }

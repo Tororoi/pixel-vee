@@ -1,14 +1,14 @@
 import { TRANSLATE } from '../utils/constants.js'
 import { dom } from './dom.js'
 import { tools } from '../Tools/index.js'
-import { bump } from '../hooks/useAppState.js'
+import { bump } from '../hooks/appState.svelte.js'
 
 //====================================//
 //======== * * * State * * * =========//
 //====================================//
 
 //Main state object to keep track of global vars
-export const state = {
+export const globalState = {
   // CURSOR — position and click state
   cursor: {
     x: null, // was: cursorX
@@ -260,6 +260,9 @@ export const state = {
   deselect,
   clearRedoStack,
 }
+
+// Internal alias so method bodies can reference the object by its original name
+const state = globalState
 
 // ─── Circular dependency injection ────────────────────────────────────────────
 // state.js previously imported vectorGui and DOM helpers directly, creating

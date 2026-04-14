@@ -1,6 +1,6 @@
 import { dom } from '../Context/dom.js'
 import { keys } from '../Shortcuts/keys.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
 import { vectorGui } from '../GUI/vector.js'
@@ -13,7 +13,7 @@ import {
   renderToolOptionsToDOM,
   renderVectorsToDOM,
 } from '../DOM/render.js'
-import { bump } from '../hooks/useAppState.js'
+import { bump } from '../hooks/appState.svelte.js'
 import { randomizeColor } from '../Swatch/events.js'
 import { renderCursor } from '../GUI/cursor.js'
 import { openSaveDialogBox } from '../Menu/events.js'
@@ -42,12 +42,12 @@ export function activateShortcut(keyCode) {
   switch (keyCode) {
     case 'Enter':
       //handle confirm paste
-      if (!state.cursor.clicked && canvas.pastedLayer) {
+      if (!globalState.cursor.clicked && canvas.pastedLayer) {
         actionConfirmPastedPixels()
       }
       break
     case 'Backspace':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         actionDeleteSelection()
       }
       break
@@ -56,9 +56,9 @@ export function activateShortcut(keyCode) {
       //command key
       break
     case 'Space':
-      if (!state.cursor.clicked) {
-        state.tool.current = tools['grab']
-        canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
+      if (!globalState.cursor.clicked) {
+        globalState.tool.current = tools['grab']
+        canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
         bump()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
@@ -69,9 +69,9 @@ export function activateShortcut(keyCode) {
     case 'AltRight':
       //option key
       //magicWand uses Alt as a subtract-from-selection modifier, not for eyedropper
-      if (!state.cursor.clicked && state.tool.selectedName !== 'magicWand') {
-        state.tool.current = tools['eyedropper']
-        canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
+      if (!globalState.cursor.clicked && globalState.tool.selectedName !== 'magicWand') {
+        globalState.tool.current = tools['eyedropper']
+        canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
         bump()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
@@ -80,26 +80,26 @@ export function activateShortcut(keyCode) {
       break
     case 'ShiftLeft':
     case 'ShiftRight':
-      if (state.tool.selectedName === 'brush') {
+      if (globalState.tool.selectedName === 'brush') {
         tools.brush.options.line.active = true
-        state.tool.lineStartX = state.cursor.x
-        state.tool.lineStartY = state.cursor.y
-      } else if (state.tool.selectedName === 'ellipse') {
-        state.vector.properties.forceCircle = true
+        globalState.tool.lineStartX = globalState.cursor.x
+        globalState.tool.lineStartY = globalState.cursor.y
+      } else if (globalState.tool.selectedName === 'ellipse') {
+        globalState.vector.properties.forceCircle = true
         if (
           vectorGui.selectedPoint.xKey &&
-          state.tool.clickCounter === 0 &&
+          globalState.tool.clickCounter === 0 &&
           vectorGui.selectedPoint.xKey !== 'px1'
         ) {
           //while holding control point, readjust ellipse without having to move cursor.
           adjustVectorSteps()
           vectorGui.render()
         }
-      } else if (state.tool.selectedName === 'polygon') {
-        state.vector.properties.forceSquare = true
+      } else if (globalState.tool.selectedName === 'polygon') {
+        globalState.vector.properties.forceSquare = true
         if (
           vectorGui.selectedPoint.xKey &&
-          state.tool.clickCounter === 0 &&
+          globalState.tool.clickCounter === 0 &&
           vectorGui.selectedPoint.xKey !== 'px0'
         ) {
           //while holding control point, readjust polygon without having to move cursor.
@@ -109,44 +109,44 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'Digit7':
-      if (state.tool.selectedName === 'curve') {
-        state.tool.current.options.chain.active =
-          !state.tool.current.options.chain.active
+      if (globalState.tool.selectedName === 'curve') {
+        globalState.tool.current.options.chain.active =
+          !globalState.tool.current.options.chain.active
         renderToolOptionsToDOM()
         vectorGui.render()
       }
       break
     case 'Equal':
-      if (state.tool.selectedName === 'curve') {
-        state.tool.current.options.equal.active =
-          !state.tool.current.options.equal.active
+      if (globalState.tool.selectedName === 'curve') {
+        globalState.tool.current.options.equal.active =
+          !globalState.tool.current.options.equal.active
         renderToolOptionsToDOM()
         vectorGui.render()
       }
       break
     case 'Slash':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         switchTool('curve')
         toggleMode('line')
         renderVectorsToDOM()
       }
       break
     case 'KeyA':
-      if (state.tool.selectedName === 'curve') {
-        state.tool.current.options.align.active =
-          !state.tool.current.options.align.active
+      if (globalState.tool.selectedName === 'curve') {
+        globalState.tool.current.options.align.active =
+          !globalState.tool.current.options.align.active
         renderToolOptionsToDOM()
         vectorGui.render()
       }
       break
     case 'KeyB':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         switchTool('brush')
         renderVectorsToDOM()
       }
       break
     case 'KeyC':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           actionCopySelection()
         } else {
@@ -157,7 +157,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'KeyD':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           //deselect
           actionDeselect()
@@ -165,12 +165,12 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'KeyE':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         toggleMode('eraser')
       }
       break
     case 'KeyF':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           if (keys.ShiftLeft || keys.ShiftRight) {
             //meta+shift+f
@@ -188,7 +188,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'KeyG':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         //Toggle grid
         vectorGui.grid = !vectorGui.grid
         vectorGui.render()
@@ -197,14 +197,14 @@ export function activateShortcut(keyCode) {
       break
     case 'KeyH':
       //Locking shortcut for curve tool
-      if (state.tool.selectedName === 'curve') {
-        state.tool.current.options.hold.active =
-          !state.tool.current.options.hold.active
+      if (globalState.tool.selectedName === 'curve') {
+        globalState.tool.current.options.hold.active =
+          !globalState.tool.current.options.hold.active
         renderToolOptionsToDOM()
       }
       break
     case 'KeyI':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         toggleMode('inject')
       }
       break
@@ -212,22 +212,22 @@ export function activateShortcut(keyCode) {
       //
       break
     case 'KeyK':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         swatches.paletteMode = 'edit'
         renderPaletteToolsToDOM()
         renderPaletteToDOM()
       }
       break
     case 'KeyL':
-      if (state.tool.selectedName === 'curve') {
-        state.tool.current.options.link.active =
-          !state.tool.current.options.link.active
+      if (globalState.tool.selectedName === 'curve') {
+        globalState.tool.current.options.link.active =
+          !globalState.tool.current.options.link.active
         renderToolOptionsToDOM()
         vectorGui.render()
       }
       break
     case 'KeyM':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         toggleMode('colorMask')
       }
       break
@@ -235,26 +235,26 @@ export function activateShortcut(keyCode) {
       //
       break
     case 'KeyO':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         switchTool('ellipse')
         renderVectorsToDOM()
       }
       break
     case 'KeyP':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         switchTool('polygon')
         renderVectorsToDOM()
       }
       break
     case 'KeyQ':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         switchTool('curve')
         toggleMode('quadCurve')
         renderVectorsToDOM()
       }
       break
     case 'KeyR':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           //Rotate right
           actionRotatePixels()
@@ -265,7 +265,7 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'KeyS':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           openSaveDialogBox()
         } else {
@@ -275,12 +275,12 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'KeyT':
-      if (!state.cursor.clicked && (keys.MetaLeft || keys.MetaRight)) {
+      if (!globalState.cursor.clicked && (keys.MetaLeft || keys.MetaRight)) {
         //shortcut for transform - cuts and pastes selection to allow free transform
       } else {
-        state.ui.showTooltips = !state.ui.showTooltips
+        globalState.ui.showTooltips = !globalState.ui.showTooltips
         bump()
-        if (state.ui.showTooltips && state.ui.tooltipMessage) {
+        if (globalState.ui.showTooltips && globalState.ui.tooltipMessage) {
           dom.tooltip.classList.add('visible')
         } else {
           dom.tooltip.classList.remove('visible')
@@ -291,7 +291,7 @@ export function activateShortcut(keyCode) {
       //
       break
     case 'KeyV':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           //Will not do anything if already in the midst of a paste action (meaning the canvas.currentLayer is the canvas.tempLayer)
           actionPasteSelection()
@@ -302,13 +302,13 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'KeyW':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         switchTool('magicWand')
         renderVectorsToDOM()
       }
       break
     case 'KeyX':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           actionCutSelection()
         } else {
@@ -319,12 +319,12 @@ export function activateShortcut(keyCode) {
       }
       break
     case 'KeyY':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         toggleMode('perfect')
       }
       break
     case 'KeyZ':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
           if (keys.ShiftLeft || keys.ShiftRight) {
             //shift+meta+z
@@ -354,8 +354,8 @@ export function deactivateShortcut(keyCode) {
       break
     case 'Space':
       //only deactivate while not clicked
-      if (!state.cursor.clicked) {
-        state.tool.current = tools[state.tool.selectedName]
+      if (!globalState.cursor.clicked) {
+        globalState.tool.current = tools[globalState.tool.selectedName]
         bump()
         canvas.previousXOffset = canvas.xOffset
         canvas.previousYOffset = canvas.yOffset
@@ -369,8 +369,8 @@ export function deactivateShortcut(keyCode) {
     case 'AltRight':
       //option key
       //only deactivate while not clicked
-      if (!state.cursor.clicked) {
-        state.tool.current = tools[state.tool.selectedName]
+      if (!globalState.cursor.clicked) {
+        globalState.tool.current = tools[globalState.tool.selectedName]
         bump()
         vectorGui.render()
         renderCursor()
@@ -379,29 +379,29 @@ export function deactivateShortcut(keyCode) {
       break
     case 'ShiftLeft':
     case 'ShiftRight':
-      state.tool.current = tools[state.tool.selectedName]
+      globalState.tool.current = tools[globalState.tool.selectedName]
       tools.brush.options.line.active = false
-      if (state.tool.current.name === 'brush' && state.cursor.clicked) {
-        state.tool.current.fn()
+      if (globalState.tool.current.name === 'brush' && globalState.cursor.clicked) {
+        globalState.tool.current.fn()
       }
-      state.vector.properties.forceCircle = false
-      state.vector.properties.forceSquare = false
-      if (state.tool.current.name === 'ellipse') {
+      globalState.vector.properties.forceCircle = false
+      globalState.vector.properties.forceSquare = false
+      if (globalState.tool.current.name === 'ellipse') {
         if (
           (vectorGui.selectedPoint.xKey || vectorGui.collidedPoint.xKey) &&
           vectorGui.selectedPoint.xKey !== 'px1' &&
-          state.cursor.clicked
+          globalState.cursor.clicked
         ) {
           //while holding control point, readjust ellipse without having to move cursor.
           //TODO: (Medium Priority) update this functionality to have other radii go back to previous radius value when releasing shift
           adjustVectorSteps()
           vectorGui.render()
         }
-      } else if (state.tool.current.name === 'polygon') {
+      } else if (globalState.tool.current.name === 'polygon') {
         if (
           (vectorGui.selectedPoint.xKey || vectorGui.collidedPoint.xKey) &&
           vectorGui.selectedPoint.xKey !== 'px0' &&
-          state.cursor.clicked
+          globalState.cursor.clicked
         ) {
           adjustVectorSteps()
           vectorGui.render()
@@ -439,7 +439,7 @@ export function deactivateShortcut(keyCode) {
       //
       break
     case 'KeyK':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         swatches.paletteMode = 'select'
         renderPaletteToolsToDOM()
         renderPaletteToDOM()
@@ -482,7 +482,7 @@ export function deactivateShortcut(keyCode) {
       //
       break
     case 'KeyX':
-      if (!state.cursor.clicked) {
+      if (!globalState.cursor.clicked) {
         swatches.paletteMode = 'select'
         renderPaletteToolsToDOM()
         renderPaletteToDOM()
@@ -503,9 +503,9 @@ export function deactivateShortcut(keyCode) {
  * Set tool cursor. TODO: (Low Priority) move to utils file
  */
 function setToolCssCursor() {
-  if (state.tool.current.modes?.eraser) {
+  if (globalState.tool.current.modes?.eraser) {
     canvas.vectorGuiCVS.style.cursor = 'none'
   } else {
-    canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
+    canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
   }
 }

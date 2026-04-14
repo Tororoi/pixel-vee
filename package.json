@@ -8,9 +8,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "sass": "sass --watch scss/style.scss:css/style.css",
-    "eslint": "eslint --fix-dry-run src --ext jsx,js",
-    "eslintfix": "eslint --fix src --ext jsx,js",
-    "pretty": "prettier --write src/**/*.{js,jsx}",
+    "eslint": "eslint --fix-dry-run src --ext svelte,js",
+    "eslintfix": "eslint --fix src --ext svelte,js",
+    "pretty": "prettier --write src/**/*.{js,svelte}",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -25,17 +25,15 @@
   },
   "homepage": "https://github.com/Tororoi/pixel-vee#readme",
   "dependencies": {
-    "react": "^19.2.5",
-    "react-dom": "^19.2.5",
     "sass": "^1.66.1",
     "sass-loader": "^13.0.0",
-    "serve": "^14.0.1"
+    "serve": "^14.0.1",
+    "svelte": "^5.0.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^5.2.0",
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "eslint": "^8.56.0",
     "eslint-plugin-jsdoc": "^48.1.0",
-    "eslint-plugin-react": "^7.37.5",
     "prettier": "^3.8.2",
     "vitest": "^4.0.18"
   }

@@ -1,4 +1,4 @@
-import { state } from "../../Context/state.js"
+import { globalState } from "../../Context/state.js"
 import { canvas } from "../../Context/canvas.js"
 import { tools } from "../../Tools/index.js"
 import { vectorGui } from "../../GUI/vector.js"
@@ -36,7 +36,7 @@ export function addReferenceLayer() {
           tool: tools.addLayer.name,
           layer,
         })
-        state.clearRedoStack()
+        globalState.clearRedoStack()
         renderLayersToDOM()
         renderCanvas()
       }
@@ -63,7 +63,7 @@ export function addRasterLayer() {
     tool: tools.addLayer.name,
     layer,
   })
-  state.clearRedoStack()
+  globalState.clearRedoStack()
   renderLayersToDOM()
 }
 
@@ -77,7 +77,7 @@ export function removeLayer(layer) {
     layer.removed = true
     if (layer === canvas.currentLayer) {
       if (layer.type === "reference") {
-        state.deselect()
+        globalState.deselect()
       }
       layer.inactiveTools.forEach((tool) => {
         if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = false
@@ -94,7 +94,7 @@ export function removeLayer(layer) {
       tool: tools.removeLayer.name,
       layer,
     })
-    state.clearRedoStack()
+    globalState.clearRedoStack()
     renderLayersToDOM()
     renderVectorsToDOM()
   }

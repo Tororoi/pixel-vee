@@ -1,4 +1,4 @@
-import { bump } from '../hooks/useAppState.js'
+import { bump } from '../hooks/appState.svelte.js'
 
 // All enable/disable states are now derived in React components via useAppState().
 // These stubs keep callers working while components are being built.

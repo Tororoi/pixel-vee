@@ -1,6 +1,6 @@
 import { dom } from "../../Context/dom.js"
-import { state } from "../../Context/state.js"
-import { bump } from "../../hooks/useAppState.js"
+import { globalState } from "../../Context/state.js"
+import { bump } from "../../hooks/appState.svelte.js"
 import { vectorGui } from "../../GUI/vector.js"
 import { clearOffscreenCanvas, renderCanvas } from "../../Canvas/render.js"
 import { renderVectorsToDOM, renderLayersToDOM } from "../../DOM/render.js"
@@ -20,7 +20,7 @@ export function renderToLatestAction(latestAction, modType) {
     renderCanvas(null, true)
     renderLayersToDOM()
     renderVectorsToDOM()
-    state.reset()
+    globalState.reset()
     vectorGui.render()
     return
   }
@@ -28,40 +28,40 @@ export function renderToLatestAction(latestAction, modType) {
   //clear affected layer and render image from most recent action from the affected layer
   //This avoids having to redraw the timeline for every undo/redo. Close to constant time whereas redrawTimeline is closer to exponential time or worse.
   let mostRecentActionFromSameLayer = null
-  for (let i = state.timeline.undoStack.length - 1; i >= 0; i--) {
-    if (state.timeline.undoStack[i].layer === latestAction.layer) {
-      mostRecentActionFromSameLayer = state.timeline.undoStack[i]
+  for (let i = globalState.timeline.undoStack.length - 1; i >= 0; i--) {
+    if (globalState.timeline.undoStack[i].layer === latestAction.layer) {
+      mostRecentActionFromSameLayer = globalState.timeline.undoStack[i]
       break
     }
   }
   //Set selection state based on absolute most recent action
-  const mostRecentAction = state.timeline.undoStack[state.timeline.undoStack.length - 1]
+  const mostRecentAction = globalState.timeline.undoStack[globalState.timeline.undoStack.length - 1]
   //set select properties
-  state.selection.properties = {
+  globalState.selection.properties = {
     ...mostRecentAction.selectProperties,
   }
   //set boundary box
-  state.selection.setBoundaryBox(state.selection.properties)
+  globalState.selection.setBoundaryBox(globalState.selection.properties)
   //set mask set
-  state.selection.maskSet = mostRecentAction.maskSet
+  globalState.selection.maskSet = mostRecentAction.maskSet
     ? new Set(mostRecentAction.maskSet)
     : null
   //set selected vectors
-  state.vector.selectedIndices = new Set(
+  globalState.vector.selectedIndices = new Set(
     mostRecentAction.selectedVectorIndices
   )
-  if (state.vector.selectedIndices.size > 0) {
-    state.ui.vectorTransformOpen = true; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "flex"
-    if (state.vector.transformMode === SCALE) {
+  if (globalState.vector.selectedIndices.size > 0) {
+    globalState.ui.vectorTransformOpen = true; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "flex"
+    if (globalState.vector.transformMode === SCALE) {
       setVectorShapeBoundaryBox()
     }
   } else {
-    state.ui.vectorTransformOpen = false; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "none"
+    globalState.ui.vectorTransformOpen = false; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "none"
   }
   //set current vector index
   if (mostRecentAction.currentVectorIndex !== null) {
     vectorGui.setVectorProperties(
-      state.vector.all[mostRecentAction.currentVectorIndex]
+      globalState.vector.all[mostRecentAction.currentVectorIndex]
     )
   }
   //Confirm a valid snapshot (may need to be updated for some actions)
@@ -85,7 +85,7 @@ export function renderToLatestAction(latestAction, modType) {
       }
       renderLayersToDOM()
       renderVectorsToDOM()
-      state.reset()
+      globalState.reset()
       vectorGui.render()
     }
   } else {
@@ -116,7 +116,7 @@ export function renderToLatestAction(latestAction, modType) {
     }
     renderLayersToDOM()
     renderVectorsToDOM()
-    state.reset()
+    globalState.reset()
     vectorGui.render()
   }
 }

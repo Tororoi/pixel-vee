@@ -1,7 +1,7 @@
 //Import order is important. 1. DOM initialization, 2. state managers
 import { dom } from '../Context/dom.js'
 import { keys } from '../Shortcuts/keys.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import {
   resizeOverlayPointerDown,
@@ -28,11 +28,11 @@ const setCoordinates = (e) => {
   const zoom = canvas.zoom
   const xOverZoom = Math.floor(x / zoom)
   const yOverZoom = Math.floor(y / zoom)
-  state.cursor.withOffsetX = xOverZoom
-  state.cursor.withOffsetY = yOverZoom
-  state.cursor.x = Math.round(xOverZoom - canvas.previousXOffset)
-  state.cursor.y = Math.round(yOverZoom - canvas.previousYOffset)
-  if (state.tool.current.options.useSubpixels?.active) {
+  globalState.cursor.withOffsetX = xOverZoom
+  globalState.cursor.withOffsetY = yOverZoom
+  globalState.cursor.x = Math.round(xOverZoom - canvas.previousXOffset)
+  globalState.cursor.y = Math.round(yOverZoom - canvas.previousYOffset)
+  if (globalState.tool.current.options.useSubpixels?.active) {
     const fidelity = zoom / 16
     canvas.subPixelX = Math.floor((x - xOverZoom * zoom) / fidelity)
     canvas.subPixelY = Math.floor((y - yOverZoom * zoom) / fidelity)
@@ -69,7 +69,7 @@ function handleKeyDown(e) {
   ) {
     e.preventDefault()
   }
-  if (state.ui.shortcuts) {
+  if (globalState.ui.shortcuts) {
     keys[e.code] = true //set active key globally
     activateShortcut(e.code)
   }
@@ -129,11 +129,11 @@ function handleWheel(e) {
   // Calculate the zoom ratio between the new zoom level and the current zoom level
   const zoomRatio = targetZoom / canvas.zoom
   //zoom based on pointer coords
-  const zoomedX = state.cursor.withOffsetX / zoomRatio
-  const zoomedY = state.cursor.withOffsetY / zoomRatio
+  const zoomedX = globalState.cursor.withOffsetX / zoomRatio
+  const zoomedY = globalState.cursor.withOffsetY / zoomRatio
   //offset by cursor coords
-  const nox = zoomedX - state.cursor.x
-  const noy = zoomedY - state.cursor.y
+  const nox = zoomedX - globalState.cursor.x
+  const noy = zoomedY - globalState.cursor.y
   actionZoom(targetZoom, nox, noy)
 }
 
@@ -145,21 +145,21 @@ function handleWheel(e) {
  * @param {PointerEvent} e - The pointerdown event
  */
 function handlePointerDown(e) {
-  if (state.canvas.resizeOverlayActive) {
+  if (globalState.canvas.resizeOverlayActive) {
     resizeOverlayPointerDown(e)
     return
   }
   //reset media type, chrome dev tools niche use or computers that have touchscreen capabilities
   e.target.setPointerCapture(e.pointerId)
   canvas.pointerEvent = 'pointerdown'
-  state.cursor.clicked = true
-  if (state.cursor.clickDisabled) {
+  globalState.cursor.clicked = true
+  if (globalState.cursor.clickDisabled) {
     return
   }
-  canvas.vectorGuiCVS.style.cursor = state.tool.current.activeCursor
+  canvas.vectorGuiCVS.style.cursor = globalState.tool.current.activeCursor
   setCoordinates(e)
-  if (state.tool.touch) {
-    vectorGui.render() // For tablets, vectors must be rendered before running state.tool.current.fn in order to check control points collision logic
+  if (globalState.tool.touch) {
+    vectorGui.render() // For tablets, vectors must be rendered before running globalState.tool.current.fn in order to check control points collision logic
   }
   renderCanvas(canvas.currentLayer)
   //if drawing on hidden layer, flash hide btn
@@ -173,15 +173,15 @@ function handlePointerDown(e) {
     }
   }
   //run selected tool step function
-  state.tool.current.fn()
+  globalState.tool.current.fn()
   // save last point
-  state.cursor.prevX = state.cursor.x
-  state.cursor.prevY = state.cursor.y
+  globalState.cursor.prevX = globalState.cursor.x
+  globalState.cursor.prevY = globalState.cursor.y
   //Re-render GUI
   vectorGui.render()
   if (
-    (state.tool.current.name === 'brush' && state.tool.current.modes?.eraser) ||
-    state.tool.current.name === 'eyedropper'
+    (globalState.tool.current.name === 'brush' && globalState.tool.current.modes?.eraser) ||
+    globalState.tool.current.name === 'eyedropper'
   ) {
     renderCursor()
   }
@@ -191,15 +191,15 @@ function handlePointerDown(e) {
  * @param {PointerEvent} e - The pointermove event
  */
 function handlePointerMove(e) {
-  if (state.canvas.resizeOverlayActive) {
+  if (globalState.canvas.resizeOverlayActive) {
     resizeOverlayPointerMove(e)
     return
   }
-  if (state.cursor.clickDisabled && state.cursor.clicked) {
+  if (globalState.cursor.clickDisabled && globalState.cursor.clicked) {
     return
   }
   canvas.pointerEvent = 'pointermove'
-  state.cursor.clickDisabled = false
+  globalState.cursor.clickDisabled = false
   //currently only square dimensions work
   canvas.zoomAtLastDraw = canvas.zoom //* */
 
@@ -210,35 +210,35 @@ function handlePointerMove(e) {
   const events = e.getCoalescedEvents?.() ?? [e]
   // Uncomment to use predicted events
   // const coalesced = e.getCoalescedEvents?.() ?? [e]
-  // const predicted = state.cursor.clicked ? (e.getPredictedEvents?.() ?? []) : []
+  // const predicted = globalState.cursor.clicked ? (e.getPredictedEvents?.() ?? []) : []
   // const events = [...coalesced, ...predicted]
   let cursorMoved = false
 
   for (const evt of events) {
     setCoordinates(evt)
     const moved =
-      state.cursor.prevX !== state.cursor.x ||
-      state.cursor.prevY !== state.cursor.y
+      globalState.cursor.prevX !== globalState.cursor.x ||
+      globalState.cursor.prevY !== globalState.cursor.y
     const subpixelMoved =
-      state.tool.current.options.useSubpixels?.active &&
+      globalState.tool.current.options.useSubpixels?.active &&
       (canvas.previousSubPixelX !== canvas.subPixelX ||
         canvas.previousSubPixelY !== canvas.subPixelY)
 
     if (moved || subpixelMoved) {
       cursorMoved = true
       if (
-        state.cursor.clicked
+        globalState.cursor.clicked
         // ||
-        // ((state.tool.current.name === "curve" ||
-        //   state.tool.current.name === "fill") &&
-        //   state.tool.clickCounter > 0)
+        // ((globalState.tool.current.name === "curve" ||
+        //   globalState.tool.current.name === "fill") &&
+        //   globalState.tool.clickCounter > 0)
       ) {
         //run selected tool step function
-        state.tool.current.fn()
+        globalState.tool.current.fn()
       }
       // save last point
-      state.cursor.prevX = state.cursor.x
-      state.cursor.prevY = state.cursor.y
+      globalState.cursor.prevX = globalState.cursor.x
+      globalState.cursor.prevY = globalState.cursor.y
       canvas.previousSubPixelX = canvas.subPixelX
       canvas.previousSubPixelY = canvas.subPixelY
     }
@@ -246,11 +246,11 @@ function handlePointerMove(e) {
 
   if (cursorMoved) {
     vectorGui.render()
-    if (state.cursor.clicked) {
+    if (globalState.cursor.clicked) {
       if (
-        (state.tool.current.name === 'brush' &&
-          state.tool.current.modes?.eraser) ||
-        state.tool.current.name === 'eyedropper'
+        (globalState.tool.current.name === 'brush' &&
+          globalState.tool.current.modes?.eraser) ||
+        globalState.tool.current.name === 'eyedropper'
       ) {
         renderCursor()
       }
@@ -258,9 +258,9 @@ function handlePointerMove(e) {
       //no active tool, just render cursor
       if (
         !(
-          state.tool.current.name === 'curve' &&
-          !state.tool.current.modes?.line &&
-          state.tool.clickCounter > 0
+          globalState.tool.current.name === 'curve' &&
+          !globalState.tool.current.modes?.line &&
+          globalState.tool.clickCounter > 0
         )
       ) {
         renderCursor()
@@ -273,16 +273,16 @@ function handlePointerMove(e) {
  * @param {PointerEvent} e - The pointerup event
  */
 function handlePointerUp(e) {
-  if (state.canvas.resizeOverlayActive) {
+  if (globalState.canvas.resizeOverlayActive) {
     resizeOverlayPointerUp(e)
     return
   }
   canvas.pointerEvent = 'pointerup'
-  if (state.cursor.clickDisabled || !state.cursor.clicked) {
+  if (globalState.cursor.clickDisabled || !globalState.cursor.clicked) {
     return
   }
-  state.cursor.clicked = false
-  canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
+  globalState.cursor.clicked = false
+  canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
   setCoordinates(e)
   //if drawing on hidden layer, stop flashing hide btn
   if (canvas.currentLayer.hidden && dom.layersContainer) {
@@ -296,31 +296,31 @@ function handlePointerUp(e) {
   }
 
   //run selected tool step function
-  state.tool.current.fn()
+  globalState.tool.current.fn()
   //reset action and render vectors
-  if (state.timeline.currentAction) {
+  if (globalState.timeline.currentAction) {
     if (
-      ['fill', 'curve', 'ellipse', 'polygon'].includes(state.tool.current.name)
+      ['fill', 'curve', 'ellipse', 'polygon'].includes(globalState.tool.current.name)
     ) {
       renderVectorsToDOM()
     }
 
-    state.selection.pointsSet = null
-    state.selection.seenPixelsSet = null
-    state.timeline.clearPoints()
+    globalState.selection.pointsSet = null
+    globalState.selection.seenPixelsSet = null
+    globalState.timeline.clearPoints()
     //Reset redostack
-    state.clearRedoStack()
+    globalState.clearRedoStack()
   }
   //Deactivate pending shortcuts
-  if (state.tool.current.name !== state.tool.selectedName) {
+  if (globalState.tool.current.name !== globalState.tool.selectedName) {
     if (
       !keys.AltLeft &&
       !keys.AltRight &&
-      state.tool.current.name === 'eyedropper'
+      globalState.tool.current.name === 'eyedropper'
     ) {
       deactivateShortcut('AltLeft')
     }
-    if (!keys.Space && state.tool.current.name === 'grab') {
+    if (!keys.Space && globalState.tool.current.name === 'grab') {
       deactivateShortcut('Space')
     }
   }
@@ -328,7 +328,7 @@ function handlePointerUp(e) {
   if (!e.targetTouches) {
     vectorGui.render()
     if (
-      ['brush', 'colorMask', 'eyedropper'].includes(state.tool.current.name)
+      ['brush', 'colorMask', 'eyedropper'].includes(globalState.tool.current.name)
     ) {
       renderCursor()
     }
@@ -341,7 +341,7 @@ function handlePointerUp(e) {
 function handlePointerOut(e) {
   //TODO: (Low Priority) if touchscreen, need to handle differently. Currently cannot reach next code since clicked will be false.
   //Only purpose is to rerender with multi step tools such as curve when moving out or in the case of touch, lifting finger
-  if (!state.tool.touch && state.tool.clickCounter === 0) {
+  if (!globalState.tool.touch && globalState.tool.clickCounter === 0) {
     renderCanvas(canvas.currentLayer)
     vectorGui.render()
     canvas.pointerEvent = 'none'
@@ -365,7 +365,7 @@ function handlePointerOut(e) {
  * //TODO: (Medium Priority) Prevent default pinch zoom behavior and replace it with a custom pinch zoom on the canvas only
  */
 function handleTouchStart(e) {
-  state.tool.touch = true
+  globalState.tool.touch = true
   canvas.gui.renderRadius *= 2
   canvas.gui.collisionRadius *= 2
 }
@@ -376,7 +376,7 @@ function handleTouchStart(e) {
  */
 function handleMouseDown(e) {
   if (e.type === 'mousedown') {
-    // state.tool.touch = false // NOTE: this also triggers when in tablet mode in chrome. Comment this out while testing
+    // globalState.tool.touch = false // NOTE: this also triggers when in tablet mode in chrome. Comment this out while testing
   }
 }
 
