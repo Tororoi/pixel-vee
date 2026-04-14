@@ -18,22 +18,37 @@ export function renderVectorSettingsToDOM() {
 
 // ─── Vector dither picker helpers (used by Canvas/events.js) ──────────────────
 
+/**
+ * Notify React to re-render the vector dither picker.
+ */
 export function initVectorDitherPicker() {
   bump()
 }
 
+/**
+ * Notify React to refresh vector dither picker color previews.
+ */
 export function updateVectorDitherPickerColors() {
   bump()
 }
 
+/**
+ * Notify React to update dither control states for the current vector.
+ */
 export function updateVectorDitherControls() {
   bump()
 }
 
+/**
+ * Notify React to highlight the active dither pattern in the vector picker.
+ */
 export function highlightVectorDitherPattern() {
   bump()
 }
 
+/**
+ * Notify React to refresh the dither preview for the current vector.
+ */
 export function updateVectorDitherPreview() {
   bump()
 }

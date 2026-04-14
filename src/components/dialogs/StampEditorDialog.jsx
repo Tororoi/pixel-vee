@@ -3,6 +3,10 @@ import { dom } from '../../Context/dom.js'
 import { initializeDragger } from '../../utils/drag.js'
 import { initStampEditor } from '../../DOM/stampEditor.js'
 
+/**
+ * Stamp editor dialog for painting custom brush stamps.
+ * @returns {import('react').ReactElement} The stamp editor dialog element
+ */
 export default function StampEditorDialog() {
   const containerRef = useRef(null)
   const editorCanvasRef = useRef(null)
@@ -32,63 +36,29 @@ export default function StampEditorDialog() {
     initStampEditor()
   }, [])
 
+  function handleClose() {
+    if (containerRef.current) containerRef.current.style.display = 'none'
+  }
+
   return (
     <div
       ref={containerRef}
       id="stamp-editor"
-      className="stamp-editor-container draggable"
+      className="stamp-editor-container dialog-box draggable v-drag h-drag free"
     >
       <div className="header dragger">
-        <div className="drag-btn"><div className="grip"></div></div>
+        <div className="drag-btn">
+          <div className="grip"></div>
+        </div>
         Stamp Editor
+        <button
+          type="button"
+          className="close-btn"
+          data-tooltip="Close"
+          onClick={handleClose}
+        />
       </div>
       <div className="stamp-editor-interface">
-        <div className="stamp-editor-tools">
-          <div className="stamp-tool-group">
-            <button
-              ref={drawBtnRef}
-              id="stamp-draw-btn"
-              type="button"
-              className="stamp-tool selected"
-              aria-label="Draw"
-              data-tooltip="Draw"
-            />
-            <button
-              ref={eraseBtnRef}
-              id="stamp-erase-btn"
-              type="button"
-              className="stamp-tool"
-              aria-label="Erase"
-              data-tooltip="Erase"
-            />
-            <button
-              ref={moveBtnRef}
-              id="stamp-move-btn"
-              type="button"
-              className="stamp-tool"
-              aria-label="Move"
-              data-tooltip="Move"
-            />
-          </div>
-          <div className="stamp-tool-group">
-            <button
-              ref={mirrorHBtnRef}
-              id="stamp-mirror-h-btn"
-              type="button"
-              className="stamp-tool"
-              aria-label="Mirror Horizontal"
-              data-tooltip="Mirror Horizontal"
-            />
-            <button
-              ref={mirrorVBtnRef}
-              id="stamp-mirror-v-btn"
-              type="button"
-              className="stamp-tool"
-              aria-label="Mirror Vertical"
-              data-tooltip="Mirror Vertical"
-            />
-          </div>
-        </div>
         <canvas
           ref={editorCanvasRef}
           id="stamp-editor-canvas"
@@ -96,6 +66,60 @@ export default function StampEditorDialog() {
           height="320"
         />
         <div className="stamp-editor-footer">
+          <div className="stamp-editor-tools">
+            <div className="stamp-tool-group">
+              <button
+                ref={drawBtnRef}
+                id="stamp-draw-btn"
+                type="button"
+                className="stamp-tool brush selected"
+                aria-label="Draw"
+                data-tooltip="Draw"
+              />
+              <button
+                ref={eraseBtnRef}
+                id="stamp-erase-btn"
+                type="button"
+                className="stamp-tool eraser"
+                aria-label="Erase"
+                data-tooltip="Erase"
+              />
+              <button
+                ref={moveBtnRef}
+                id="stamp-move-btn"
+                type="button"
+                className="stamp-tool move"
+                aria-label="Move"
+                data-tooltip="Move"
+              />
+            </div>
+            <div className="stamp-tool-group">
+              <button
+                ref={mirrorHBtnRef}
+                id="stamp-mirror-h-btn"
+                type="button"
+                className="stamp-tool mirrorX"
+                aria-label="Mirror Horizontal"
+                data-tooltip="Mirror Horizontal"
+              />
+              <button
+                ref={mirrorVBtnRef}
+                id="stamp-mirror-v-btn"
+                type="button"
+                className="stamp-tool mirrorY"
+                aria-label="Mirror Vertical"
+                data-tooltip="Mirror Vertical"
+              />
+              <button
+                ref={clearBtnRef}
+                id="stamp-editor-clear-btn"
+                type="button"
+                className="stamp-tool clear"
+                aria-label="Clear"
+                data-tooltip="Clear"
+              />
+            </div>
+          </div>
           <div className="stamp-editor-preview-col">
             <canvas
               ref={previewCanvasRef}
@@ -111,13 +135,6 @@ export default function StampEditorDialog() {
               Apply
             </button>
           </div>
-          <button
-            ref={clearBtnRef}
-            id="stamp-editor-clear-btn"
-            type="button"
-          >
-            Clear
-          </button>
         </div>
       </div>
     </div>

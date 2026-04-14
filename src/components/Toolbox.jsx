@@ -85,7 +85,7 @@ export default function Toolbox() {
 
   function handleToolClick(toolName) {
     // Update the group's activeTool so the button remembers the last-used tool
-    for (const [groupKey, group] of Object.entries(toolGroups)) {
+    for (const [, group] of Object.entries(toolGroups)) {
       if (group.tools.includes(toolName)) {
         group.activeTool = toolName
         break
