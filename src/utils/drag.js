@@ -264,7 +264,14 @@ export const dragMove = (e) => {
     if (globalState.ui.dragTarget.className.includes('v-drag')) {
       globalState.ui.dragTarget.style.top = e.clientY - globalState.ui.dragY + 'px'
     }
-    let pRect = parentElement.getBoundingClientRect()
+    // Walk up to the first ancestor with actual dimensions — skips display:contents wrappers
+    // which report a 0×0 bounding rect and would otherwise snap the dialog off-screen.
+    let boundsEl = parentElement
+    let pRect = boundsEl.getBoundingClientRect()
+    while (boundsEl.parentElement && pRect.width === 0 && pRect.height === 0) {
+      boundsEl = boundsEl.parentElement
+      pRect = boundsEl.getBoundingClientRect()
+    }
     let tgtRect = globalState.ui.dragTarget.getBoundingClientRect()
     let dragTargetMargin = 0
     if (globalState.ui.dragTarget.className.includes('dialog-box')) {

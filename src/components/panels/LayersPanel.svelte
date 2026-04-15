@@ -14,7 +14,7 @@
 
   let ref = $state(null)
   let uploadRef = $state(null)
-  let settingsLayer = $state(null)
+  let settingsLayer = $state.raw(null)
   let settingsPos = $state({ top: 0, left: 0 })
   let dragIndex = null
 
@@ -189,6 +189,7 @@
     <div class="layers-container">
       <div class="layers">
         {#each visibleLayers as layer (layer.id ?? layer.title)}
+          {@const isHidden = getVersion() >= 0 && layer.hidden}
           {@const isSelected = layer === currentLayer}
           {@const isSettingsOpen = settingsLayer === layer}
           <div
@@ -201,9 +202,9 @@
           >
             <button
               type="button"
-              class="hide {layer.hidden ? 'eyeclosed' : 'eyeopen'}"
-              aria-label={layer.hidden ? 'Show Layer' : 'Hide Layer'}
-              data-tooltip={layer.hidden ? 'Show Layer' : 'Hide Layer'}
+              class="hide {isHidden ? 'eyeclosed' : 'eyeopen'}"
+              aria-label={isHidden ? 'Show Layer' : 'Hide Layer'}
+              data-tooltip={isHidden ? 'Show Layer' : 'Hide Layer'}
               onclick={(e) => handleHideToggle(e, layer)}
             ></button>
             <span class="layer-title">{layer.title}</span>

@@ -132,16 +132,6 @@
             </label>
           </div>
           <label
-            for="vector-outline-toggle"
-            id="vector-outline"
-            class="toggle"
-            data-tooltip="Toggle vector selection outline"
-          >
-            <input type="checkbox" id="vector-outline-toggle" />
-            <span class="checkmark"></span>
-            <span>Vector Selection Outline</span>
-          </label>
-          <label
             for="cursor-preview-toggle"
             id="cursor-preview"
             class="toggle"

@@ -3,6 +3,7 @@
   import { bump } from '../../hooks/appState.svelte.js'
   import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
   import { globalState } from '../../Context/state.js'
+  import { dom } from '../../Context/dom.js'
   import { brush, rebuildBuildUpDensityMap, BAYER_STEPS } from '../../Tools/brush.js'
   import { renderCanvas } from '../../Canvas/render.js'
   import {
@@ -14,6 +15,10 @@
     applyDitherOffset,
     applyDitherOffsetControl,
   } from '../../DOM/renderBrush.js'
+  import {
+    updateVectorDitherPickerColors,
+    updateVectorDitherControls,
+  } from '../../DOM/renderVectors.js'
 
   const DITHER_TOOLS = ['brush', 'curve', 'ellipse']
 
@@ -22,6 +27,9 @@
   onMount(() => {
     if (!ref) return
     const el = ref
+    // Patch dom reference — dom.js queried this at module load before Svelte rendered
+    dom.ditherPickerContainer = el
+    el.style.display = 'none'
     initializeDragger(el)
     initializeCollapser(el)
 
@@ -59,6 +67,16 @@
 
     // Two-color toggle
     el.querySelector('#dither-ctrl-two-color')?.addEventListener('click', () => {
+      if (el._vectorTarget) {
+        const v = el._vectorTarget
+        if (!v.modes) v.modes = {}
+        v.modes.twoColor = !v.modes.twoColor
+        renderCanvas(v.layer, true)
+        updateVectorDitherControls(v)
+        updateVectorDitherPickerColors(v)
+        bump()
+        return
+      }
       if (!DITHER_TOOLS.includes(globalState.tool.current?.name)) return
       globalState.tool.current.modes.twoColor = !globalState.tool.current.modes.twoColor
       renderDitherControlsToDOM()
@@ -150,7 +168,6 @@
 <div
   bind:this={ref}
   class="dither-picker-container dialog-box draggable v-drag h-drag free"
-  style="display: none"
 >
   <div class="header dragger">
     <div class="drag-btn">

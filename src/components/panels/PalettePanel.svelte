@@ -12,10 +12,16 @@
   let secondarySwatchRef = $state(null)
   let presetsOpen = $state(false)
 
-  const palette = $derived(getVersion() >= 0 ? swatches.palette : [])
+  const palette = $derived.by(() => {
+    getVersion()
+    return [...swatches.palette]
+  })
   const paletteMode = $derived(getVersion() >= 0 ? swatches.paletteMode : 'select')
   const currentPreset = $derived(getVersion() >= 0 ? swatches.currentPreset : '')
-  const customPalettes = $derived(getVersion() >= 0 ? swatches.customPalettes : {})
+  const customPalettes = $derived.by(() => {
+    getVersion()
+    return { ...swatches.customPalettes }
+  })
   const presetLabel = $derived(
     currentPreset in DEFAULT_PALETTES
       ? (PRESETS.find((p) => p.id === currentPreset)?.label ?? currentPreset)

@@ -29,13 +29,26 @@
 
   const tool = $derived(getVersion() >= 0 ? globalState.tool.current : null)
   const toolName = $derived(tool?.name ?? '')
-  const brushSize = $derived(tool?.brushSize ?? 1)
-  const brushType = $derived(tool?.brushType ?? 'circle')
+  const brushSize = $derived.by(() => {
+    getVersion()
+    return globalState.tool.current?.brushSize ?? 1
+  })
+  const brushType = $derived.by(() => {
+    getVersion()
+    return globalState.tool.current?.brushType ?? 'circle'
+  })
   const showBrushControls = $derived(BRUSH_TOOLS.includes(toolName))
   const showStamp = $derived(STAMP_TOOLS.includes(toolName))
   const showDither = $derived(DITHER_TOOLS.includes(toolName))
-  const isBrushDisabled = $derived(tool?.brushDisabled ?? false)
+  const isBrushDisabled = $derived.by(() => {
+    getVersion()
+    return globalState.tool.current?.brushDisabled ?? false
+  })
   const isCustomBrush = $derived(brushType === 'custom')
+  const modes = $derived.by(() => {
+    getVersion()
+    return { ...globalState.tool.current?.modes }
+  })
 
   onMount(() => {
     if (!ref) return
@@ -82,7 +95,10 @@
     return pathData
   }
 
-  const stampPathData = $derived(buildBrushStampSVGData(tool))
+  const stampPathData = $derived.by(() => {
+    getVersion()
+    return buildBrushStampSVGData(globalState.tool.current)
+  })
 
   function handleBrushTypeClick() {
     const current = tool.brushType
@@ -192,7 +208,7 @@
     <div class="modes-container">
       {#each Object.entries(MODE_BTN_INFO) as [key, info] (key)}
         {#if info.tools.includes(toolName)}
-          {@const isActive = tool?.modes?.[key] ?? false}
+          {@const isActive = modes[key] ?? false}
           <button
             id={key}
             type="button"

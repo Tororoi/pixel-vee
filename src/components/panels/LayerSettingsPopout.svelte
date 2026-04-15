@@ -6,7 +6,7 @@
 
   const { layer, pos, onclose } = $props()
 
-  let title = $state(layer.title ?? '')
+  const initialTitle = layer.title ?? ''
   let opacity = $state(Math.round((layer.opacity ?? 1) * 255))
   let ref = $state(null)
 
@@ -25,9 +25,7 @@
   })
 
   function handleTitleChange(e) {
-    const val = e.target.value.slice(0, 12)
-    title = val
-    layer.title = val
+    layer.title = e.target.value.slice(0, 12)
     renderLayersToDOM()
   }
 
@@ -56,12 +54,12 @@
       id="layer-name"
       type="text"
       maxlength="12"
-      value={title}
+      placeholder={initialTitle}
       oninput={handleTitleChange}
     />
   </div>
   <div class="layer-opacity-label">
-    <span class="input-label">Opacity: {opacity}</span>
+    <span class="input-label">Opacity: <span style="display:inline-block;min-width:3ch;text-align:right">{opacity}</span></span>
     <input
       type="range"
       class="slider"

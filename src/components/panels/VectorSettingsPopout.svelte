@@ -23,7 +23,8 @@
         ref &&
         !ref.contains(e.target) &&
         !e.target.classList.contains('gear') &&
-        !e.target.closest('.dither-picker-container')
+        !e.target.closest('.dither-picker-container') &&
+        !e.target.closest('.picker-container')
       ) {
         onclose()
       }
@@ -101,7 +102,18 @@
     }
   }
 
-  const modes = $derived(getVersion() >= 0 ? (vector.modes ?? {}) : {})
+  const modes = $derived.by(() => {
+    getVersion()
+    return { ...(vector.modes ?? {}) }
+  })
+  const primaryColor = $derived.by(() => {
+    getVersion()
+    return vector.color?.color
+  })
+  const secondaryColor = $derived.by(() => {
+    getVersion()
+    return vector.secondaryColor?.color ?? 'rgba(0,0,0,0)'
+  })
   const tool = $derived(vector.vectorProperties?.tool)
   const isCurveTool = $derived(tool === 'curve')
   const curveTypes = ['line', 'quadCurve', 'cubicCurve']
@@ -141,7 +153,7 @@
       data-tooltip="Primary Color"
       onclick={handlePrimaryColorClick}
     >
-      <div class="swatch" style="background-color: {vector.color?.color}"></div>
+      <div class="swatch" style="background-color: {primaryColor}"></div>
     </button>
   </div>
   <div class="vector-settings-color-row">
@@ -155,7 +167,7 @@
     >
       <div
         class="swatch"
-        style="background-color: {vector.secondaryColor?.color ?? 'rgba(0,0,0,0)'}"
+        style="background-color: {secondaryColor}"
       ></div>
     </button>
   </div>

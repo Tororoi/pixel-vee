@@ -22,7 +22,7 @@
   import VectorSettingsPopout from './VectorSettingsPopout.svelte'
 
   let ref = $state(null)
-  let settingsVector = $state(null)
+  let settingsVector = $state.raw(null)
   let settingsPos = $state({ top: 0, left: 0 })
 
   const isPasted = $derived(getVersion() >= 0 && !!canvas.pastedLayer)
@@ -127,6 +127,7 @@
     <div class="vectors-container">
       <div class="vectors">
         {#each visibleVectors as vector (vector.index)}
+          {@const isVectorHidden = getVersion() >= 0 && vector.hidden}
           {@const isSelected =
             vector.index === currentVectorIndex ||
             selectedIndices.has(vector.index)}
@@ -156,9 +157,9 @@
               </button>
               <button
                 type="button"
-                class="hide {vector.hidden ? 'eyeclosed' : 'eyeopen'}"
-                aria-label={vector.hidden ? 'Show Vector' : 'Hide Vector'}
-                data-tooltip={vector.hidden ? 'Show Vector' : 'Hide Vector'}
+                class="hide {isVectorHidden ? 'eyeclosed' : 'eyeopen'}"
+                aria-label={isVectorHidden ? 'Show Vector' : 'Hide Vector'}
+                data-tooltip={isVectorHidden ? 'Show Vector' : 'Hide Vector'}
                 onclick={(e) => handleHideToggle(e, vector)}
               ></button>
               <button
