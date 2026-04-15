@@ -240,6 +240,9 @@ export function changeActionVectorCurveType(targetVector, newCurveType) {
   if (globalState.vector.currentIndex === targetVector.index) {
     globalState.vector.properties = { ...targetVector.vectorProperties }
   }
+  // Render before recording so addToTimeline's snapshot captures the post-render pixels.
+  // If snapshot is taken first (pre-render), undoing restores stale pixels.
+  renderCanvas(targetVector.layer, true)
   changeActionVectorMode(
     targetVector,
     oldModes,
@@ -248,7 +251,6 @@ export function changeActionVectorCurveType(targetVector, newCurveType) {
     newVectorProperties,
   )
   globalState.clearRedoStack()
-  renderCanvas(targetVector.layer, true)
   vectorGui.render()
   renderVectorsToDOM()
 }

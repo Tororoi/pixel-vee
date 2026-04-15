@@ -45,7 +45,8 @@ export function getChainStartPoint() {
     globalState.vector.currentIndex !== null &&
     endpointKeys.includes(vectorGui.collidedPoint.xKey)
   ) {
-    const currentVector = globalState.vector.all[globalState.vector.currentIndex]
+    const currentVector =
+      globalState.vector.all[globalState.vector.currentIndex]
     if (currentVector && currentVector.vectorProperties.tool === 'curve') {
       return {
         x:
@@ -62,7 +63,8 @@ export function getChainStartPoint() {
     globalState.vector.collidedIndex !== null &&
     endpointKeys.includes(vectorGui.otherCollidedKeys.xKey)
   ) {
-    const collidedVector = globalState.vector.all[globalState.vector.collidedIndex]
+    const collidedVector =
+      globalState.vector.all[globalState.vector.collidedIndex]
     if (collidedVector && collidedVector.vectorProperties.tool === 'curve') {
       return {
         x:
@@ -254,9 +256,11 @@ function snapEndpointToCollidedVector(currentVector) {
     Math.sin(newSelectedAngle) * selectedHandleLength,
   )
   globalState.vector.properties[selectedHandleXKey] =
-    globalState.vector.properties[selectedEndpointXKey] - newSelectedHandleDeltaX
+    globalState.vector.properties[selectedEndpointXKey] -
+    newSelectedHandleDeltaX
   globalState.vector.properties[selectedHandleYKey] =
-    globalState.vector.properties[selectedEndpointYKey] - newSelectedHandleDeltaY
+    globalState.vector.properties[selectedEndpointYKey] -
+    newSelectedHandleDeltaY
   updateVectorProperties(
     currentVector,
     globalState.vector.properties[selectedHandleXKey],
@@ -483,13 +487,16 @@ export function adjustVectorSteps() {
           globalState.tool.current.options.uniform?.active &&
           vectorGui.selectedPoint.xKey !== 'px0'
         ) {
-          globalState.vector.savedProperties[globalState.vector.currentIndex].uniformCtx =
-            getUniformCtx(vectorGui.selectedPoint.xKey)
+          globalState.vector.savedProperties[
+            globalState.vector.currentIndex
+          ].uniformCtx = getUniformCtx(vectorGui.selectedPoint.xKey)
         }
         updatePolygonVectorProperties(currentVector, normalizedX, normalizedY)
       } else {
-        globalState.vector.properties[vectorGui.collidedPoint.xKey] = normalizedX
-        globalState.vector.properties[vectorGui.collidedPoint.yKey] = normalizedY
+        globalState.vector.properties[vectorGui.collidedPoint.xKey] =
+          normalizedX
+        globalState.vector.properties[vectorGui.collidedPoint.yKey] =
+          normalizedY
         //save linked vectors too
         updateVectorProperties(
           currentVector,
@@ -531,8 +538,10 @@ export function adjustVectorSteps() {
         } else if (currentVector.vectorProperties.tool === 'polygon') {
           updatePolygonVectorProperties(currentVector, normalizedX, normalizedY)
         } else {
-          globalState.vector.properties[vectorGui.selectedPoint.xKey] = normalizedX
-          globalState.vector.properties[vectorGui.selectedPoint.yKey] = normalizedY
+          globalState.vector.properties[vectorGui.selectedPoint.xKey] =
+            normalizedX
+          globalState.vector.properties[vectorGui.selectedPoint.yKey] =
+            normalizedY
           updateVectorProperties(
             currentVector,
             normalizedX,
@@ -554,7 +563,11 @@ export function adjustVectorSteps() {
             updateLineLinkedCurveHandles(currentVector)
           }
         }
-        renderCanvas(currentVector.layer, true, globalState.timeline.activeIndexes)
+        renderCanvas(
+          currentVector.layer,
+          true,
+          globalState.timeline.activeIndexes,
+        )
       }
       break
     case 'pointerup':
@@ -564,8 +577,10 @@ export function adjustVectorSteps() {
         } else if (currentVector.vectorProperties.tool === 'polygon') {
           updatePolygonVectorProperties(currentVector, normalizedX, normalizedY)
         } else {
-          globalState.vector.properties[vectorGui.selectedPoint.xKey] = normalizedX
-          globalState.vector.properties[vectorGui.selectedPoint.yKey] = normalizedY
+          globalState.vector.properties[vectorGui.selectedPoint.xKey] =
+            normalizedX
+          globalState.vector.properties[vectorGui.selectedPoint.yKey] =
+            normalizedY
           updateVectorProperties(
             currentVector,
             normalizedX,
@@ -599,7 +614,11 @@ export function adjustVectorSteps() {
             snapEndpointToCollidedVector(currentVector)
           }
         }
-        renderCanvas(currentVector.layer, true, globalState.timeline.activeIndexes)
+        renderCanvas(
+          currentVector.layer,
+          true,
+          globalState.timeline.activeIndexes,
+        )
         modifyVectorAction(currentVector)
         vectorGui.selectedPoint = {
           xKey: null,
@@ -623,7 +642,8 @@ export function rerouteVectorStepsAction() {
     !vectorGui.selectedCollisionPresent &&
     globalState.tool.clickCounter === 0
   ) {
-    let collidedVector = globalState.vector.all[globalState.vector.collidedIndex]
+    let collidedVector =
+      globalState.vector.all[globalState.vector.collidedIndex]
     vectorGui.setVectorProperties(collidedVector)
     //Render new selected vector before running standard render routine
     //First render makes the new selected vector collidable with other vectors and the next render handles the collision normally.

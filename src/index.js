@@ -11,7 +11,6 @@ import { actionDeselect } from './Actions/nonPointer/selectionActions.js'
 import { vectorGui } from './GUI/vector.js'
 import { registerVectorGui, registerDOMHelpers } from './Context/state.js'
 import { bump } from './hooks/appState.svelte.js'
-import { initDitherPicker } from './DOM/render.js'
 
 // Register dependencies that would otherwise create circular imports in globalState.js
 registerVectorGui(vectorGui)
@@ -69,4 +68,3 @@ initializeDialogBox(dom.vectorTransformUIContainer, false, actionDeselect)
 
 // * Dither Picker * //
 initializeDialogBox(dom.ditherPickerContainer)
-initDitherPicker()

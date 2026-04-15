@@ -180,7 +180,8 @@ function handlePointerDown(e) {
   //Re-render GUI
   vectorGui.render()
   if (
-    (globalState.tool.current.name === 'brush' && globalState.tool.current.modes?.eraser) ||
+    (globalState.tool.current.name === 'brush' &&
+      globalState.tool.current.modes?.eraser) ||
     globalState.tool.current.name === 'eyedropper'
   ) {
     renderCursor()
@@ -300,7 +301,9 @@ function handlePointerUp(e) {
   //reset action and render vectors
   if (globalState.timeline.currentAction) {
     if (
-      ['fill', 'curve', 'ellipse', 'polygon'].includes(globalState.tool.current.name)
+      ['fill', 'curve', 'ellipse', 'polygon'].includes(
+        globalState.tool.current.name,
+      )
     ) {
       renderVectorsToDOM()
     }
@@ -328,7 +331,9 @@ function handlePointerUp(e) {
   if (!e.targetTouches) {
     vectorGui.render()
     if (
-      ['brush', 'colorMask', 'eyedropper'].includes(globalState.tool.current.name)
+      ['brush', 'colorMask', 'eyedropper'].includes(
+        globalState.tool.current.name,
+      )
     ) {
       renderCursor()
     }

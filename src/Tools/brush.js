@@ -108,7 +108,11 @@ function brushSteps() {
             globalState.cursor.prevX,
             globalState.cursor.prevY,
           )
-          drawBrushPoint(globalState.cursor.x, globalState.cursor.y, brushDirection)
+          drawBrushPoint(
+            globalState.cursor.x,
+            globalState.cursor.y,
+            brushDirection,
+          )
           scheduleRender(canvas.currentLayer)
         }
       }
@@ -129,10 +133,14 @@ function brushSteps() {
       //correct boundary box for layer offset and crop offset
       const boundaryBox = { ...globalState.selection.boundaryBox }
       if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin -= canvas.currentLayer.x + globalState.canvas.cropOffsetX
-        boundaryBox.xMax -= canvas.currentLayer.x + globalState.canvas.cropOffsetX
-        boundaryBox.yMin -= canvas.currentLayer.y + globalState.canvas.cropOffsetY
-        boundaryBox.yMax -= canvas.currentLayer.y + globalState.canvas.cropOffsetY
+        boundaryBox.xMin -=
+          canvas.currentLayer.x + globalState.canvas.cropOffsetX
+        boundaryBox.xMax -=
+          canvas.currentLayer.x + globalState.canvas.cropOffsetX
+        boundaryBox.yMin -=
+          canvas.currentLayer.y + globalState.canvas.cropOffsetY
+        boundaryBox.yMax -=
+          canvas.currentLayer.y + globalState.canvas.cropOffsetY
       }
       const timelineProperties = {
         modes: { ...brush.modes },
@@ -144,9 +152,11 @@ function brushSteps() {
           brush.brushType === 'custom' ? brushStamps.custom : null,
         ditherPatternIndex: brush.ditherPatternIndex,
         ditherOffsetX:
-          (((brush.ditherOffsetX + globalState.canvas.cropOffsetX) % 8) + 8) % 8,
+          (((brush.ditherOffsetX + globalState.canvas.cropOffsetX) % 8) + 8) %
+          8,
         ditherOffsetY:
-          (((brush.ditherOffsetY + globalState.canvas.cropOffsetY) % 8) + 8) % 8,
+          (((brush.ditherOffsetY + globalState.canvas.cropOffsetY) % 8) + 8) %
+          8,
         recordedLayerX: canvas.currentLayer.x,
         recordedLayerY: canvas.currentLayer.y,
         points: globalState.timeline.points,
@@ -253,7 +263,8 @@ function shouldDrawLine() {
   return (
     Math.abs(globalState.cursor.x - globalState.cursor.prevX) > 1 ||
     Math.abs(globalState.cursor.y - globalState.cursor.prevY) > 1 ||
-    (globalState.tool.lineStartX !== null && globalState.tool.lineStartY !== null)
+    (globalState.tool.lineStartX !== null &&
+      globalState.tool.lineStartY !== null)
   )
 }
 
@@ -262,10 +273,17 @@ function shouldDrawLine() {
  */
 function drawLine() {
   let lineStartX =
-    globalState.tool.lineStartX !== null ? globalState.tool.lineStartX : globalState.cursor.prevX
+    globalState.tool.lineStartX !== null
+      ? globalState.tool.lineStartX
+      : globalState.cursor.prevX
   let lineStartY =
-    globalState.tool.lineStartY !== null ? globalState.tool.lineStartY : globalState.cursor.prevY
-  let angle = getAngle(globalState.cursor.x - lineStartX, globalState.cursor.y - lineStartY)
+    globalState.tool.lineStartY !== null
+      ? globalState.tool.lineStartY
+      : globalState.cursor.prevY
+  let angle = getAngle(
+    globalState.cursor.x - lineStartX,
+    globalState.cursor.y - lineStartY,
+  )
   let tri = getTriangle(
     lineStartX,
     lineStartY,

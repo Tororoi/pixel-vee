@@ -69,7 +69,10 @@ export function activateShortcut(keyCode) {
     case 'AltRight':
       //option key
       //magicWand uses Alt as a subtract-from-selection modifier, not for eyedropper
-      if (!globalState.cursor.clicked && globalState.tool.selectedName !== 'magicWand') {
+      if (
+        !globalState.cursor.clicked &&
+        globalState.tool.selectedName !== 'magicWand'
+      ) {
         globalState.tool.current = tools['eyedropper']
         canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
         bump()
@@ -381,7 +384,10 @@ export function deactivateShortcut(keyCode) {
     case 'ShiftRight':
       globalState.tool.current = tools[globalState.tool.selectedName]
       tools.brush.options.line.active = false
-      if (globalState.tool.current.name === 'brush' && globalState.cursor.clicked) {
+      if (
+        globalState.tool.current.name === 'brush' &&
+        globalState.cursor.clicked
+      ) {
         globalState.tool.current.fn()
       }
       globalState.vector.properties.forceCircle = false

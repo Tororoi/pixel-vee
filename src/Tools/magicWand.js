@@ -149,7 +149,8 @@ function magicWandSteps() {
             trimmed.delete(k)
           }
         }
-        if (changed) globalState.selection.maskSet = trimmed.size > 0 ? trimmed : null
+        if (changed)
+          globalState.selection.maskSet = trimmed.size > 0 ? trimmed : null
       } else {
         //Replace selection — changed if new set differs from current
         const old = globalState.selection.maskSet

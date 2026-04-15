@@ -161,7 +161,9 @@ function reorderElements(e) {
         let offset = 0
         for (let j = 0; j < globalState.ui.dragSiblings.length; j++) {
           globalState.ui.dragSiblings[j].element.style.order = j + 1
-          if (globalState.ui.dragSiblings[j].element !== globalState.ui.dragTarget) {
+          if (
+            globalState.ui.dragSiblings[j].element !== globalState.ui.dragTarget
+          ) {
             globalState.ui.dragSiblings[j].element.style.top = offset + 'px'
             globalState.ui.dragSiblings[j].top = offset
           }
@@ -259,10 +261,12 @@ export const dragMove = (e) => {
     }
     globalState.ui.dragTarget.style.position = 'absolute'
     if (globalState.ui.dragTarget.className.includes('h-drag')) {
-      globalState.ui.dragTarget.style.left = e.clientX - globalState.ui.dragX + 'px'
+      globalState.ui.dragTarget.style.left =
+        e.clientX - globalState.ui.dragX + 'px'
     }
     if (globalState.ui.dragTarget.className.includes('v-drag')) {
-      globalState.ui.dragTarget.style.top = e.clientY - globalState.ui.dragY + 'px'
+      globalState.ui.dragTarget.style.top =
+        e.clientY - globalState.ui.dragY + 'px'
     }
     // Walk up to the first ancestor with actual dimensions — skips display:contents wrappers
     // which report a 0×0 bounding rect and would otherwise snap the dialog off-screen.

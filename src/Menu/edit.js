@@ -43,7 +43,9 @@ export function copySelectedPixels() {
   } else {
     tempCTX.drawImage(canvas.currentLayer.cvs, xMin, yMin, w, h, 0, 0, w, h)
   }
-  globalState.clipboard.select.selectProperties = { ...globalState.selection.properties }
+  globalState.clipboard.select.selectProperties = {
+    ...globalState.selection.properties,
+  }
   globalState.clipboard.select.boundaryBox = {
     ...globalState.selection.boundaryBox,
   }
@@ -79,7 +81,9 @@ export function copySelectedVectors() {
       ...currentVector,
     }
   }
-  globalState.clipboard.select.selectProperties = { ...globalState.selection.properties }
+  globalState.clipboard.select.selectProperties = {
+    ...globalState.selection.properties,
+  }
   globalState.clipboard.select.boundaryBox = {
     xMin: null,
     yMin: null,

@@ -32,9 +32,12 @@
   )
   const hasVectorSelection = $derived(
     getVersion() >= 0 &&
-      (globalState.vector.currentIndex !== null || globalState.vector.selectedIndices.size > 0),
+      (globalState.vector.currentIndex !== null ||
+        globalState.vector.selectedIndices.size > 0),
   )
-  const hasSelection = $derived(!hasPaste && (hasRasterSelection || hasVectorSelection))
+  const hasSelection = $derived(
+    !hasPaste && (hasRasterSelection || hasVectorSelection),
+  )
   const hasClipboard = $derived(
     getVersion() >= 0 &&
       !hasPaste &&
@@ -42,7 +45,9 @@
         Object.keys(globalState.clipboard.select.vectors).length > 0),
   )
   const canFlipRotate = $derived(hasPaste || hasVectorSelection)
-  const toolName = $derived(getVersion() >= 0 ? (globalState.tool.current?.name ?? '') : '')
+  const toolName = $derived(
+    getVersion() >= 0 ? (globalState.tool.current?.name ?? '') : '',
+  )
   const toolOptions = $derived(
     getVersion() >= 0 ? (globalState.tool.current?.options ?? {}) : {},
   )
@@ -83,7 +88,9 @@
         const ctx = tempCanvas.getContext('2d', { willReadFrequently: true })
         ctx.drawImage(img, 0, 0)
         const prev = { ...globalState.clipboard.select }
-        prev.selectProperties = { ...globalState.clipboard.select.selectProperties }
+        prev.selectProperties = {
+          ...globalState.clipboard.select.selectProperties,
+        }
         globalState.clipboard.select.selectProperties = {
           px1: 0,
           py1: 0,
@@ -97,7 +104,12 @@
           yMax: img.height,
         }
         globalState.clipboard.select.canvas = tempCanvas
-        globalState.clipboard.select.imageData = ctx.getImageData(0, 0, img.width, img.height)
+        globalState.clipboard.select.imageData = ctx.getImageData(
+          0,
+          0,
+          img.width,
+          img.height,
+        )
         actionPasteSelection()
         globalState.clipboard.select = prev
       }
@@ -153,7 +165,12 @@
         <img src="./public/pixel-vee.png" alt="Github Repo" />
       </a>
     </div>
-    <ul role="menu" aria-label="functions" id="top-menu" onclick={handleTopMenuClick}>
+    <ul
+      role="menu"
+      aria-label="functions"
+      id="top-menu"
+      onclick={handleTopMenuClick}
+    >
       <!-- File menu -->
       <li
         role="menuitem"
@@ -165,13 +182,17 @@
         <span class="menu-folder-title">File</span>
         <ul role="menu" id="file-submenu">
           <li role="menuitem" class="open-save">
-            <label for="drawing-upload" data-tooltip="Open saved drawing">Open</label>
+            <label for="drawing-upload" data-tooltip="Open saved drawing"
+              >Open</label
+            >
             <input
               type="file"
               accept=".pxv"
               id="drawing-upload"
               onchange={handleLoadDrawing}
-              onclick={(e) => { e.target.value = null }}
+              onclick={(e) => {
+                e.target.value = null
+              }}
             />
           </li>
           <li

@@ -77,7 +77,10 @@ export function toggleMode(modeName = null, modeBtn = null) {
         globalState.tool.current.modes[targetModeBtn.id] = false
       } else {
         globalState.tool.current.modes[targetModeBtn.id] = true
-        if (targetModeBtn.id === 'eraser' && globalState.tool.current.modes?.inject) {
+        if (
+          targetModeBtn.id === 'eraser' &&
+          globalState.tool.current.modes?.inject
+        ) {
           globalState.tool.current.modes.inject = false
         } else if (
           targetModeBtn.id === 'inject' &&
@@ -87,7 +90,8 @@ export function toggleMode(modeName = null, modeBtn = null) {
         }
         if (CURVE_TYPES.includes(targetModeBtn.id)) {
           CURVE_TYPES.forEach((t) => {
-            if (t !== targetModeBtn.id) globalState.tool.current.modes[t] = false
+            if (t !== targetModeBtn.id)
+              globalState.tool.current.modes[t] = false
           })
         }
       }

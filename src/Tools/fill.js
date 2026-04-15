@@ -54,10 +54,14 @@ function fillSteps() {
       //correct boundary box for layer offset and crop offset
       const boundaryBox = { ...globalState.selection.boundaryBox }
       if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin -= canvas.currentLayer.x + globalState.canvas.cropOffsetX
-        boundaryBox.xMax -= canvas.currentLayer.x + globalState.canvas.cropOffsetX
-        boundaryBox.yMin -= canvas.currentLayer.y + globalState.canvas.cropOffsetY
-        boundaryBox.yMax -= canvas.currentLayer.y + globalState.canvas.cropOffsetY
+        boundaryBox.xMin -=
+          canvas.currentLayer.x + globalState.canvas.cropOffsetX
+        boundaryBox.xMax -=
+          canvas.currentLayer.x + globalState.canvas.cropOffsetX
+        boundaryBox.yMin -=
+          canvas.currentLayer.y + globalState.canvas.cropOffsetY
+        boundaryBox.yMax -=
+          canvas.currentLayer.y + globalState.canvas.cropOffsetY
       }
       //generate new unique key for vector
       globalState.vector.highestKey += 1

@@ -146,7 +146,12 @@ function drawDitherInjectPreview() {
     buildUpSteps: globalState.tool.current.buildUpSteps,
   })
   if (globalState.tool.current.modes?.buildUpDither) {
-    actionBuildUpDitherDraw(globalState.cursor.x, globalState.cursor.y, stamp, ctx)
+    actionBuildUpDitherDraw(
+      globalState.cursor.x,
+      globalState.cursor.y,
+      stamp,
+      ctx,
+    )
   } else {
     actionDitherDraw(globalState.cursor.x, globalState.cursor.y, stamp, ctx)
   }
@@ -166,10 +171,19 @@ function drawNormalPreview() {
     const x = baseX + pixel.x
     const y = baseY + pixel.y
     if (
-      isOutOfBounds(x, y, 0, canvas.currentLayer, globalState.selection.boundaryBox)
+      isOutOfBounds(
+        x,
+        y,
+        0,
+        canvas.currentLayer,
+        globalState.selection.boundaryBox,
+      )
     )
       continue
-    if (globalState.selection.maskSet && !globalState.selection.maskSet.has((y << 16) | x))
+    if (
+      globalState.selection.maskSet &&
+      !globalState.selection.maskSet.has((y << 16) | x)
+    )
       continue
     canvas.cursorCTX.fillRect(x + canvas.xOffset, y + canvas.yOffset, 1, 1)
   }
@@ -189,7 +203,9 @@ function drawDitherPreview() {
   const ditherOffsetX = globalState.tool.current.ditherOffsetX ?? 0
   const ditherOffsetY = globalState.tool.current.ditherOffsetY ?? 0
   const isBuildUp = globalState.tool.current.modes?.buildUpDither ?? false
-  const densityMap = isBuildUp ? globalState.tool.current._buildUpDensityMap : null
+  const densityMap = isBuildUp
+    ? globalState.tool.current._buildUpDensityMap
+    : null
   const buildUpSteps = globalState.tool.current.buildUpSteps
   const basePattern = isBuildUp
     ? null
@@ -198,10 +214,19 @@ function drawDitherPreview() {
     const x = baseX + pixel.x
     const y = baseY + pixel.y
     if (
-      isOutOfBounds(x, y, 0, canvas.currentLayer, globalState.selection.boundaryBox)
+      isOutOfBounds(
+        x,
+        y,
+        0,
+        canvas.currentLayer,
+        globalState.selection.boundaryBox,
+      )
     )
       continue
-    if (globalState.selection.maskSet && !globalState.selection.maskSet.has((y << 16) | x))
+    if (
+      globalState.selection.maskSet &&
+      !globalState.selection.maskSet.has((y << 16) | x)
+    )
       continue
     let pattern
     if (isBuildUp) {
@@ -232,7 +257,8 @@ function drawDitherPreview() {
 function clearLayerPreviewIfNeeded() {
   if (
     vectorGui.showCursorPreview &&
-    (globalState.tool.current.modes?.eraser || globalState.tool.current.modes?.inject)
+    (globalState.tool.current.modes?.eraser ||
+      globalState.tool.current.modes?.inject)
   ) {
     renderCanvas(canvas.currentLayer)
   }

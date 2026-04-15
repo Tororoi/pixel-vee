@@ -8,20 +8,31 @@
   import { handleUndo, handleRedo } from '../Actions/undoRedo/undoRedo.js'
   import { brush, rebuildBuildUpDensityMap } from '../Tools/brush.js'
   import { actionClear } from '../Actions/modifyTimeline/modifyTimeline.js'
-  import { actionZoom, actionRecenter } from '../Actions/untracked/viewActions.js'
+  import {
+    actionZoom,
+    actionRecenter,
+  } from '../Actions/untracked/viewActions.js'
   import { vectorGui } from '../GUI/vector.js'
   import { renderCanvas } from '../Canvas/render.js'
   import { renderVectorsToDOM } from '../DOM/renderVectors.js'
   import { ZOOM_LEVELS } from '../utils/constants.js'
   import { initializeDragger, initializeCollapser } from '../utils/drag.js'
 
-  const COLUMN1_TOOLS = ['brush', 'fill', 'curve', 'shapeTools', 'selectionTools']
+  const COLUMN1_TOOLS = [
+    'brush',
+    'fill',
+    'curve',
+    'shapeTools',
+    'selectionTools',
+  ]
   const COLUMN2_TOOLS = ['eyedropper', 'grab', 'move']
 
   let ref = $state(null)
   let openGroup = $state(null)
 
-  const selectedName = $derived(getVersion() >= 0 ? globalState.tool.selectedName : '')
+  const selectedName = $derived(
+    getVersion() >= 0 ? globalState.tool.selectedName : '',
+  )
   const pastedLayer = $derived(getVersion() >= 0 && !!canvas.pastedLayer)
 
   onMount(() => {
@@ -76,7 +87,8 @@
     const targetZoom = ZOOM_LEVELS[nextIdx]
     const zoomRatio = targetZoom / canvas.zoom
     const zoomedX = (canvas.xOffset + canvas.offScreenCVS.width / 2) / zoomRatio
-    const zoomedY = (canvas.yOffset + canvas.offScreenCVS.height / 2) / zoomRatio
+    const zoomedY =
+      (canvas.yOffset + canvas.offScreenCVS.height / 2) / zoomRatio
     const nox = zoomedX - canvas.offScreenCVS.width / 2
     const noy = zoomedY - canvas.offScreenCVS.height / 2
     actionZoom(targetZoom, nox, noy)
@@ -209,12 +221,16 @@
               {@const group = toolGroups[item]}
               {@const activeToolName = group.activeTool}
               {@const isGroupSelected = group.tools.includes(selectedName)}
-              {@const groupBtnClass = isGroupSelected ? selectedName : activeToolName}
+              {@const groupBtnClass = isGroupSelected
+                ? selectedName
+                : activeToolName}
               {@const isOpen = openGroup === item}
               <div class="tool-group{isOpen ? ' open' : ''}" data-group={item}>
                 <button
                   type="button"
-                  class="tool-group-btn {groupBtnClass}{isGroupSelected ? ' selected' : ''}"
+                  class="tool-group-btn {groupBtnClass}{isGroupSelected
+                    ? ' selected'
+                    : ''}"
                   data-group={item}
                   aria-label={GROUP_LABELS[item] ?? item}
                   data-tooltip={GROUP_LABELS[item] ?? item}
@@ -223,10 +239,15 @@
                 {#if isOpen}
                   <div class="tool-group-popout">
                     {#each group.tools as toolName (toolName)}
-                      {@const info = TOOL_INFO[toolName] ?? { label: toolName, tooltip: toolName }}
+                      {@const info = TOOL_INFO[toolName] ?? {
+                        label: toolName,
+                        tooltip: toolName,
+                      }}
                       <button
                         type="button"
-                        class="tool {toolName}{selectedName === toolName ? ' selected' : ''}"
+                        class="tool {toolName}{selectedName === toolName
+                          ? ' selected'
+                          : ''}"
                         id={toolName}
                         aria-label={info.label}
                         data-tooltip={info.tooltip}

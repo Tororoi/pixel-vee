@@ -5,23 +5,22 @@
 
   const { tool, onclick } = $props()
 
-  let ref = $state(null)
-
-  // Re-run whenever tool props change or bump() fires
-  $effect(() => {
+  const svgMarkup = $derived.by(() => {
     getVersion()
-    if (!ref) return
-    ref.innerHTML = ''
     const pattern = ditherPatterns[tool.ditherPatternIndex ?? 63]
     const offsetX = tool.ditherOffsetX ?? 0
     const offsetY = tool.ditherOffsetY ?? 0
-    ref.appendChild(createDitherPatternSVG(pattern, offsetX, offsetY))
+    const svgEl = createDitherPatternSVG(pattern, offsetX, offsetY)
+    return new XMLSerializer().serializeToString(svgEl)
   })
 </script>
 
-<div
-  bind:this={ref}
+<button
+  type="button"
   class="dither-preview btn"
   data-tooltip="Click to select dither pattern"
   {onclick}
-></div>
+>
+  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+  {@html svgMarkup}
+</button>

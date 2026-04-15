@@ -22,7 +22,9 @@ import { transformVectorContent } from '../utils/transformHelpers.js'
 export function transformVectorSteps() {
   //Doesn't really matter which selected vector is used since all selected vectors will be transformed, but one is needed for keeping track of the right layer, etc. so use the first one.
   let currentVector =
-    globalState.vector.all[globalState.vector.selectedIndices.values().next().value]
+    globalState.vector.all[
+      globalState.vector.selectedIndices.values().next().value
+    ]
   switch (canvas.pointerEvent) {
     case 'pointerdown': {
       //Incrementing click counter stops vector adjustment from triggering when cursor hovers over a vector control point while transforming. TODO: (Low Priority) Implement a clearer way to handle this specific to transform.
@@ -91,10 +93,16 @@ export function transformVectorSteps() {
           yDiff,
         )
         //Update shape center
-        globalState.vector.shapeCenterX = globalState.vector.grabStartShapeCenterX + xDiff
-        globalState.vector.shapeCenterY = globalState.vector.grabStartShapeCenterY + yDiff
+        globalState.vector.shapeCenterX =
+          globalState.vector.grabStartShapeCenterX + xDiff
+        globalState.vector.shapeCenterY =
+          globalState.vector.grabStartShapeCenterY + yDiff
       }
-      renderCanvas(currentVector.layer, true, globalState.timeline.activeIndexes)
+      renderCanvas(
+        currentVector.layer,
+        true,
+        globalState.timeline.activeIndexes,
+      )
       break
     }
     case 'pointerup': {
@@ -127,13 +135,19 @@ export function transformVectorSteps() {
           yDiff,
         )
         //Update shape center
-        globalState.vector.shapeCenterX = globalState.vector.grabStartShapeCenterX + xDiff
-        globalState.vector.shapeCenterY = globalState.vector.grabStartShapeCenterY + yDiff
+        globalState.vector.shapeCenterX =
+          globalState.vector.grabStartShapeCenterX + xDiff
+        globalState.vector.shapeCenterY =
+          globalState.vector.grabStartShapeCenterY + yDiff
       }
       globalState.vector.grabStartShapeCenterX = null
       globalState.vector.grabStartShapeCenterY = null
       globalState.tool.clickCounter = 0
-      renderCanvas(currentVector.layer, true, globalState.timeline.activeIndexes)
+      renderCanvas(
+        currentVector.layer,
+        true,
+        globalState.timeline.activeIndexes,
+      )
       modifyVectorAction(currentVector)
       vectorGui.selectedPoint = {
         xKey: null,
@@ -152,14 +166,18 @@ export function transformVectorSteps() {
  */
 export function scaleVectorSteps() {
   let currentVector =
-    globalState.vector.all[globalState.vector.selectedIndices.values().next().value]
+    globalState.vector.all[
+      globalState.vector.selectedIndices.values().next().value
+    ]
   switch (canvas.pointerEvent) {
     case 'pointerdown':
       vectorGui.selectedPoint = {
         xKey: vectorGui.collidedPoint.xKey,
         yKey: vectorGui.collidedPoint.yKey,
       }
-      globalState.selection.previousBoundaryBox = { ...globalState.selection.boundaryBox }
+      globalState.selection.previousBoundaryBox = {
+        ...globalState.selection.boundaryBox,
+      }
       //reset current vector properties (this also resets the globalState.vector.currentIndex if there is one)
       vectorGui.reset()
       //Set globalState.vector.savedProperties for all selected vectors
@@ -215,13 +233,21 @@ export function scaleVectorSteps() {
         isMirroredHorizontally,
         isMirroredVertically,
       )
-      renderCanvas(currentVector.layer, true, globalState.timeline.activeIndexes)
+      renderCanvas(
+        currentVector.layer,
+        true,
+        globalState.timeline.activeIndexes,
+      )
       break
     }
     case 'pointerup':
       globalState.selection.normalize()
       globalState.selection.setBoundaryBox(globalState.selection.properties)
-      renderCanvas(currentVector.layer, true, globalState.timeline.activeIndexes)
+      renderCanvas(
+        currentVector.layer,
+        true,
+        globalState.timeline.activeIndexes,
+      )
       modifyVectorAction(currentVector)
       vectorGui.selectedPoint = {
         xKey: null,

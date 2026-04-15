@@ -221,10 +221,12 @@
     </div>
   </div>
   {#if settingsLayer}
-    <LayerSettingsPopout
-      layer={settingsLayer}
-      pos={settingsPos}
-      onclose={() => { settingsLayer = null }}
-    />
+    {#key settingsLayer}
+      <LayerSettingsPopout
+        layer={settingsLayer}
+        pos={settingsPos}
+        onclose={() => { settingsLayer = null }}
+      />
+    {/key}
   {/if}
 </div>

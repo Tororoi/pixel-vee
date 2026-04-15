@@ -119,7 +119,8 @@ function transformSteps() {
           canvas.currentLayer.isPreview
         ) {
           transformBoundaries()
-          let isMirroredHorizontally = globalState.transform.isMirroredHorizontally
+          let isMirroredHorizontally =
+            globalState.transform.isMirroredHorizontally
           let isMirroredVertically = globalState.transform.isMirroredVertically
           if (vectorGui.selectedPoint.xKey !== 'px9') {
             //Don't check for mirroring when moving whole selection
@@ -129,7 +130,8 @@ function transformSteps() {
               globalState.selection.boundaryBox.xMin ===
                 globalState.selection.previousBoundaryBox.xMax
             ) {
-              isMirroredHorizontally = !globalState.transform.isMirroredHorizontally
+              isMirroredHorizontally =
+                !globalState.transform.isMirroredHorizontally
             }
             if (
               globalState.selection.boundaryBox.yMax ===
@@ -142,8 +144,9 @@ function transformSteps() {
           }
           transformRasterContent(
             canvas.currentLayer,
-            globalState.clipboard.pastedImages[globalState.clipboard.currentPastedImageKey]
-              .imageData,
+            globalState.clipboard.pastedImages[
+              globalState.clipboard.currentPastedImageKey
+            ].imageData,
             globalState.selection.boundaryBox,
             globalState.transform.rotationDegrees % 360,
             isMirroredHorizontally,

@@ -21,7 +21,10 @@ import { dom } from '../Context/dom.js'
  * TODO: (Medium Priority) Allow selecting all vectors within box by checking if control points fall within selection area
  */
 function selectSteps() {
-  if (vectorGui.selectedCollisionPresent && globalState.tool.clickCounter === 0) {
+  if (
+    vectorGui.selectedCollisionPresent &&
+    globalState.tool.clickCounter === 0
+  ) {
     adjustSelectSteps()
     return
   }

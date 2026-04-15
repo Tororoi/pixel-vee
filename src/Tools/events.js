@@ -3,32 +3,19 @@ import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { tools, toolGroups } from '../Tools/index.js'
 import { handleUndo, handleRedo } from '../Actions/undoRedo/undoRedo.js'
-import { brush, rebuildBuildUpDensityMap, BAYER_STEPS } from '../Tools/brush.js'
+import { brush, rebuildBuildUpDensityMap } from '../Tools/brush.js'
 import { customBrushStamp } from '../Context/brushStamps.js'
 import { vectorGui } from '../GUI/vector.js'
 import { actionClear } from '../Actions/modifyTimeline/modifyTimeline.js'
 import { actionZoom, actionRecenter } from '../Actions/untracked/viewActions.js'
 import { renderCanvas } from '../Canvas/render.js'
-import {
-  renderVectorsToDOM,
-  renderBrushStampToDOM,
-  renderStampOptionsToDOM,
-  renderDitherOptionsToDOM,
-  renderDitherControlsToDOM,
-  renderBuildUpStepsToDOM,
-  highlightSelectedDitherPattern,
-  updateDitherPickerColors,
-  applyDitherOffset,
-  applyDitherOffsetControl,
-} from '../DOM/render.js'
+import { renderVectorsToDOM, renderBrushStampToDOM } from '../DOM/render.js'
 import { toggleMode, switchTool } from './toolbox.js'
 import { openStampEditor } from '../DOM/stampEditor.js'
 import { ZOOM_LEVELS } from '../utils/constants.js'
 
 //Initialize default tool
 globalState.tool.current = tools.brush
-renderStampOptionsToDOM()
-renderDitherOptionsToDOM()
 
 //=========================================//
 //=== * * * Button Event Handlers * * * ===//
@@ -214,136 +201,6 @@ if (dom.modesContainer)
 if (dom.brushDisplay) dom.brushDisplay.addEventListener('click', switchBrush)
 if (dom.brushSlider) dom.brushSlider.addEventListener('input', updateBrush)
 
-// * Dither Brush * //
-document.querySelector('.dither-preview')?.addEventListener('click', () => {
-  if (!dom.ditherPickerContainer) return
-  updateDitherPickerColors()
-  dom.ditherPickerContainer.style.display =
-    dom.ditherPickerContainer.style.display === 'flex' ? 'none' : 'flex'
-})
-
-const DITHER_TOOLS = ['brush', 'curve', 'ellipse']
-
-document.querySelector('.dither-grid')?.addEventListener('click', (e) => {
-  const btn = e.target.closest('.dither-grid-btn')
-  if (!btn) return
-  const patternIndex = parseInt(btn.dataset.patternIndex)
-
-  if (!DITHER_TOOLS.includes(globalState.tool.current.name)) return
-  if (brush.buildUpActiveStepSlot !== null) {
-    // Assign the selected pattern to the active build-up step slot
-    brush.buildUpSteps[brush.buildUpActiveStepSlot] = patternIndex
-    brush.buildUpActiveStepSlot = null
-    renderBuildUpStepsToDOM()
-  } else {
-    globalState.tool.current.ditherPatternIndex = patternIndex
-    highlightSelectedDitherPattern()
-    renderDitherOptionsToDOM()
-  }
-})
-
-document
-  .getElementById('dither-ctrl-two-color')
-  ?.addEventListener('click', () => {
-    if (!DITHER_TOOLS.includes(globalState.tool.current.name)) return
-    globalState.tool.current.modes.twoColor = !globalState.tool.current.modes.twoColor
-    renderDitherControlsToDOM()
-    updateDitherPickerColors()
-    renderDitherOptionsToDOM()
-  })
-
-document
-  .querySelector('.dither-picker-container')
-  ?.addEventListener('pointerdown', (e) => {
-    const control = e.target.closest('.dither-offset-control')
-    if (!control) return
-    if (!DITHER_TOOLS.includes(globalState.tool.current.name)) return
-    control.setPointerCapture(e.pointerId)
-    const startX = e.clientX
-    const startY = e.clientY
-    const startOffsetX = globalState.tool.current.ditherOffsetX ?? 0
-    const startOffsetY = globalState.tool.current.ditherOffsetY ?? 0
-    const onMove = (ev) => {
-      const ox =
-        (((startOffsetX - Math.round((ev.clientX - startX) / 4)) % 8) + 8) % 8
-      const oy =
-        (((startOffsetY - Math.round((ev.clientY - startY) / 4)) % 8) + 8) % 8
-      globalState.tool.current.ditherOffsetX = ox
-      globalState.tool.current.ditherOffsetY = oy
-      const picker = document.querySelector('.dither-picker-container')
-      if (picker) applyDitherOffset(picker, ox, oy)
-      const preview = document.querySelector('.dither-preview')
-      if (preview) applyDitherOffset(preview, ox, oy)
-      applyDitherOffsetControl(control.parentElement, ox, oy)
-    }
-    control.addEventListener('pointermove', onMove)
-    control.addEventListener(
-      'pointerup',
-      () => control.removeEventListener('pointermove', onMove),
-      { once: true },
-    )
-  })
-
-document
-  .getElementById('dither-ctrl-build-up')
-  ?.addEventListener('click', () => {
-    if (globalState.tool.current.name !== 'brush') return
-    brush.modes.buildUpDither = !brush.modes.buildUpDither
-    if (brush.modes.buildUpDither) {
-      rebuildBuildUpDensityMap()
-    } else {
-      brush._buildUpDensityMap = new Map()
-      brush.buildUpActiveStepSlot = null
-    }
-    renderDitherControlsToDOM()
-    renderDitherOptionsToDOM()
-  })
-
-document
-  .getElementById('dither-ctrl-build-up-reset')
-  ?.addEventListener('click', () => {
-    if (globalState.tool.current.name !== 'brush') return
-    brush._buildUpResetAtIndex = globalState.timeline.undoStack.length
-    brush._buildUpDensityMap = new Map()
-  })
-
-// Build-up mode selector (Custom / 2×2 / 4×4 / 8×8)
-document
-  .querySelector('.build-up-mode-selector')
-  ?.addEventListener('click', (e) => {
-    const btn = e.target.closest('.build-up-mode-btn')
-    if (!btn || globalState.tool.current.name !== 'brush') return
-    const mode = btn.dataset.mode
-    // Save custom steps before leaving custom mode
-    if (brush.buildUpMode === 'custom' && mode !== 'custom') {
-      brush._customBuildUpSteps = [...brush.buildUpSteps]
-    }
-    brush.buildUpMode = mode
-    if (mode === 'custom') {
-      brush.buildUpSteps = [...brush._customBuildUpSteps]
-    } else {
-      brush.buildUpSteps = [...BAYER_STEPS[mode]]
-    }
-    brush.buildUpActiveStepSlot = null
-    renderBuildUpStepsToDOM()
-  })
-
-// Step slot clicks: set the active slot index then open the dither picker
-document
-  .querySelector('.build-up-step-slots')
-  ?.addEventListener('click', (e) => {
-    const btn = e.target.closest('.build-up-step-btn')
-    if (!btn) return
-    const slotIndex = parseInt(btn.dataset.stepSlot)
-    brush.buildUpActiveStepSlot =
-      brush.buildUpActiveStepSlot === slotIndex ? null : slotIndex
-    renderBuildUpStepsToDOM()
-    // Ensure the picker is open for pattern selection
-    if (brush.buildUpActiveStepSlot !== null && dom.ditherPickerContainer) {
-      updateDitherPickerColors()
-      dom.ditherPickerContainer.style.display = 'flex'
-    }
-  })
 
 // Custom stamp button: activate custom brush type and toggle the editor
 dom.customBrushTypeBtn?.addEventListener('click', () => {

@@ -9,7 +9,9 @@ import { globalState } from '../Context/state.js'
  */
 export function getRenderXOffset(vector) {
   return (
-    canvas.xOffset + (vector?.layer?.x ?? 0) + (globalState.canvas.cropOffsetX ?? 0)
+    canvas.xOffset +
+    (vector?.layer?.x ?? 0) +
+    (globalState.canvas.cropOffsetX ?? 0)
   )
 }
 
@@ -20,7 +22,9 @@ export function getRenderXOffset(vector) {
  */
 export function getRenderYOffset(vector) {
   return (
-    canvas.yOffset + (vector?.layer?.y ?? 0) + (globalState.canvas.cropOffsetY ?? 0)
+    canvas.yOffset +
+    (vector?.layer?.y ?? 0) +
+    (globalState.canvas.cropOffsetY ?? 0)
   )
 }
 

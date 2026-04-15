@@ -364,7 +364,10 @@ if (dom.saveAsFileName)
   dom.saveAsFileName.addEventListener('input', (e) => {
     globalState.ui.saveSettings.saveAsFileName = e.target.value
     dom.saveAsFileName.style.width =
-      measureTextWidth(globalState.ui.saveSettings.saveAsFileName, "16px '04Font'") +
+      measureTextWidth(
+        globalState.ui.saveSettings.saveAsFileName,
+        "16px '04Font'",
+      ) +
       2 +
       'px'
   })

@@ -35,7 +35,9 @@ function buildPolygonCtx(isPreview = false) {
     currentModes: globalState.tool.current.modes,
     maskSet: globalState.selection.maskSet,
     brushStamp:
-      brushStamps[globalState.tool.current.brushType][globalState.tool.current.brushSize],
+      brushStamps[globalState.tool.current.brushType][
+        globalState.tool.current.brushSize
+      ],
     brushSize: globalState.tool.current.brushSize,
     ditherPattern: ditherPatterns[globalState.tool.current.ditherPatternIndex],
     twoColorMode: globalState.tool.current.modes?.twoColor ?? false,
@@ -265,7 +267,8 @@ export function updatePolygonVectorProperties(
   normalizedY,
 ) {
   const uniformCtx = globalState.tool.current.options.uniform?.active
-    ? globalState.vector.savedProperties[globalState.vector.currentIndex]?.uniformCtx
+    ? globalState.vector.savedProperties[globalState.vector.currentIndex]
+        ?.uniformCtx
     : null
   if (uniformCtx && vectorGui.selectedPoint.xKey !== 'px0') {
     syncPolygonUniform(
@@ -363,10 +366,14 @@ function polygonSteps() {
       )
       const boundaryBox = { ...globalState.selection.boundaryBox }
       if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin -= canvas.currentLayer.x + globalState.canvas.cropOffsetX
-        boundaryBox.xMax -= canvas.currentLayer.x + globalState.canvas.cropOffsetX
-        boundaryBox.yMin -= canvas.currentLayer.y + globalState.canvas.cropOffsetY
-        boundaryBox.yMax -= canvas.currentLayer.y + globalState.canvas.cropOffsetY
+        boundaryBox.xMin -=
+          canvas.currentLayer.x + globalState.canvas.cropOffsetX
+        boundaryBox.xMax -=
+          canvas.currentLayer.x + globalState.canvas.cropOffsetX
+        boundaryBox.yMin -=
+          canvas.currentLayer.y + globalState.canvas.cropOffsetY
+        boundaryBox.yMax -=
+          canvas.currentLayer.y + globalState.canvas.cropOffsetY
       }
       const uniqueVectorKey = globalState.vector.nextKey()
       globalState.vector.setCurrentIndex(uniqueVectorKey)
@@ -392,11 +399,15 @@ function polygonSteps() {
         secondaryColor: { ...swatches.secondary.color },
         ditherPatternIndex: globalState.tool.current.ditherPatternIndex,
         ditherOffsetX:
-          (((globalState.tool.current.ditherOffsetX + globalState.canvas.cropOffsetX) % 8) +
+          (((globalState.tool.current.ditherOffsetX +
+            globalState.canvas.cropOffsetX) %
+            8) +
             8) %
           8,
         ditherOffsetY:
-          (((globalState.tool.current.ditherOffsetY + globalState.canvas.cropOffsetY) % 8) +
+          (((globalState.tool.current.ditherOffsetY +
+            globalState.canvas.cropOffsetY) %
+            8) +
             8) %
           8,
         recordedLayerX: layerX,

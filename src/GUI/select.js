@@ -192,8 +192,10 @@ export function renderSelectionBoxOutline(drawPoints) {
     ctx.rect(
       canvas.xOffset + globalState.selection.boundaryBox.xMin,
       canvas.yOffset + globalState.selection.boundaryBox.yMin,
-      globalState.selection.boundaryBox.xMax - globalState.selection.boundaryBox.xMin,
-      globalState.selection.boundaryBox.yMax - globalState.selection.boundaryBox.yMin,
+      globalState.selection.boundaryBox.xMax -
+        globalState.selection.boundaryBox.xMin,
+      globalState.selection.boundaryBox.yMax -
+        globalState.selection.boundaryBox.yMin,
     )
     if (!canvas.pastedLayer && canvas.currentLayer.type !== 'reference') {
       strokeMarchingAnts(ctx)
@@ -245,7 +247,10 @@ export function renderSelectionCVS() {
 
   if (isRasterSelection) {
     startMarchingAnts()
-    if (!globalState.selection.maskSet && !globalState.canvas.resizeOverlayActive) {
+    if (
+      !globalState.selection.maskSet &&
+      !globalState.canvas.resizeOverlayActive
+    ) {
       renderSelectionDimOverlay(ctx)
     }
     if (globalState.selection.maskSet) {

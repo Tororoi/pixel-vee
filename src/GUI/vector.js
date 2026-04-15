@@ -259,12 +259,15 @@ function resolveOtherVectorCollision(
 function resolveLinkedVectors(keys, normalizedX, normalizedY, vector) {
   if (!vector) return
 
-  const currentVectorModes = globalState.vector.all[globalState.vector.currentIndex]?.modes
+  const currentVectorModes =
+    globalState.vector.all[globalState.vector.currentIndex]?.modes
 
   if (vectorGui.collidedPoint.xKey === 'px3') {
     if (
-      normalizedX === globalState.vector.properties.px1 + globalState.canvas.cropOffsetX &&
-      normalizedY === globalState.vector.properties.py1 + globalState.canvas.cropOffsetY
+      normalizedX ===
+        globalState.vector.properties.px1 + globalState.canvas.cropOffsetX &&
+      normalizedY ===
+        globalState.vector.properties.py1 + globalState.canvas.cropOffsetY
     ) {
       vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px1', yKey: 'py1' })
     }
@@ -275,7 +278,8 @@ function resolveLinkedVectors(keys, normalizedX, normalizedY, vector) {
       if (
         normalizedX ===
           globalState.vector.properties.px2 + globalState.canvas.cropOffsetX &&
-        normalizedY === globalState.vector.properties.py2 + globalState.canvas.cropOffsetY
+        normalizedY ===
+          globalState.vector.properties.py2 + globalState.canvas.cropOffsetY
       ) {
         vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px2', yKey: 'py2' })
       }
@@ -283,8 +287,10 @@ function resolveLinkedVectors(keys, normalizedX, normalizedY, vector) {
   }
   if (vectorGui.collidedPoint.xKey === 'px4') {
     if (
-      normalizedX === globalState.vector.properties.px2 + globalState.canvas.cropOffsetX &&
-      normalizedY === globalState.vector.properties.py2 + globalState.canvas.cropOffsetY
+      normalizedX ===
+        globalState.vector.properties.px2 + globalState.canvas.cropOffsetX &&
+      normalizedY ===
+        globalState.vector.properties.py2 + globalState.canvas.cropOffsetY
     ) {
       vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px2', yKey: 'py2' })
     }
@@ -469,14 +475,16 @@ function isChainableCollision() {
     globalState.vector.currentIndex !== null &&
     endpointKeys.includes(vectorGui.collidedPoint.xKey)
   ) {
-    const currentVector = globalState.vector.all[globalState.vector.currentIndex]
+    const currentVector =
+      globalState.vector.all[globalState.vector.currentIndex]
     if (currentVector?.vectorProperties.tool === 'curve') return true
   }
   if (
     globalState.vector.collidedIndex !== null &&
     endpointKeys.includes(vectorGui.otherCollidedKeys.xKey)
   ) {
-    const collidedVector = globalState.vector.all[globalState.vector.collidedIndex]
+    const collidedVector =
+      globalState.vector.all[globalState.vector.collidedIndex]
     if (collidedVector?.vectorProperties.tool === 'curve') return true
   }
   return false
@@ -486,7 +494,10 @@ function isChainableCollision() {
  * Set css cursor for vector interaction
  */
 function setCursorStyle() {
-  if (!vectorGui.selectedCollisionPresent && !globalState.vector.collidedIndex) {
+  if (
+    !vectorGui.selectedCollisionPresent &&
+    !globalState.vector.collidedIndex
+  ) {
     if (
       globalState.vector.selectedIndices.size > 0 &&
       globalState.tool.current.type === 'vector'
@@ -848,7 +859,8 @@ export function updateLinkedVectors(
       //prevent linking vectors during pointermove
       continue
     }
-    const savedProperties = globalState.vector.savedProperties[linkedVectorIndex]
+    const savedProperties =
+      globalState.vector.savedProperties[linkedVectorIndex]
     handleOptionsAndUpdateVector(
       x,
       y,
@@ -957,7 +969,11 @@ export function createActiveIndexesForRender(
   let startActionIndex = Math.min(...vectorsSavedPropertiesActionKeys)
   let activeIndexes = []
 
-  for (let i = startActionIndex; i < globalState.timeline.undoStack.length; i++) {
+  for (
+    let i = startActionIndex;
+    i < globalState.timeline.undoStack.length;
+    i++
+  ) {
     let action = globalState.timeline.undoStack[i]
     if (
       action.layer === currentVector.layer &&

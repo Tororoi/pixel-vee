@@ -6,14 +6,13 @@
   import { brush, rebuildBuildUpDensityMap } from '../../Tools/brush.js'
   import { toggleMode } from '../../Tools/toolbox.js'
   import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
-  import { initDitherPicker } from '../../DOM/renderBrush.js'
-  import { updateDitherPickerColors } from '../../DOM/render.js'
   import { openStampEditor } from '../../DOM/stampEditor.js'
   import BrushDitherPreview from './BrushDitherPreview.svelte'
 
+  const NO_PANEL_TOOLS = ['eyedropper', 'grab', 'move', 'select', 'magicWand']
   const DITHER_TOOLS = ['brush', 'curve', 'ellipse', 'polygon']
   const STAMP_TOOLS = ['brush']
-  const BRUSH_TOOLS = ['brush', 'curve', 'ellipse', 'polygon', 'select']
+  const BRUSH_TOOLS = ['brush', 'curve', 'ellipse', 'polygon']
 
   const MODE_BTN_INFO = {
     line:        { cls: 'line',        label: 'Line',              tools: ['curve'] },
@@ -37,6 +36,7 @@
     getVersion()
     return globalState.tool.current?.brushType ?? 'circle'
   })
+  const showContent = $derived(!NO_PANEL_TOOLS.includes(toolName))
   const showBrushControls = $derived(BRUSH_TOOLS.includes(toolName))
   const showStamp = $derived(STAMP_TOOLS.includes(toolName))
   const showDither = $derived(DITHER_TOOLS.includes(toolName))
@@ -143,13 +143,7 @@
   function handleDitherPreviewClick() {
     const picker = document.querySelector('.dither-picker-container')
     if (!picker) return
-    if (picker.style.display === 'flex') {
-      picker.style.display = 'none'
-    } else {
-      updateDitherPickerColors()
-      initDitherPicker()
-      picker.style.display = 'flex'
-    }
+    picker.style.display = picker.style.display === 'flex' ? 'none' : 'flex'
   }
 </script>
 
@@ -173,6 +167,7 @@
     </label>
   </div>
   <div class="collapsible">
+    {#if showContent}
     {#if showBrushControls}
       <div
         class="brush-preview btn"
@@ -243,5 +238,6 @@
         </div>
       {/if}
     </div>
+    {/if}
   </div>
 </div>

@@ -6,7 +6,6 @@
  * free of per-call GC pressure. Only the truly per-pixel values
  * (coordX, coordY, directionalBrushStamp) are passed as positional args
  * alongside the context.
- *
  * @param {object} fields - Override any defaults
  * @returns {object} strokeContext
  */

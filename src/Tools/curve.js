@@ -45,7 +45,9 @@ function buildCurveCtx(isPreview = false) {
     currentModes: globalState.tool.current.modes,
     maskSet: globalState.selection.maskSet,
     brushStamp:
-      brushStamps[globalState.tool.current.brushType][globalState.tool.current.brushSize],
+      brushStamps[globalState.tool.current.brushType][
+        globalState.tool.current.brushSize
+      ],
     brushSize: globalState.tool.current.brushSize,
     ditherPattern: ditherPatterns[globalState.tool.current.ditherPatternIndex],
     twoColorMode: globalState.tool.current.modes?.twoColor ?? false,
@@ -107,7 +109,8 @@ function curveSteps() {
     case 'pointerdown':
       //solidify end points
       globalState.tool.clickCounter += 1
-      if (globalState.tool.clickCounter > maxClicks) globalState.tool.clickCounter = 1
+      if (globalState.tool.clickCounter > maxClicks)
+        globalState.tool.clickCounter = 1
       switch (globalState.tool.clickCounter) {
         case 1:
           //reset control points
@@ -217,10 +220,14 @@ function curveSteps() {
         //correct boundary box for layer offset and crop offset
         const boundaryBox = { ...globalState.selection.boundaryBox }
         if (boundaryBox.xMax !== null) {
-          boundaryBox.xMin -= canvas.currentLayer.x + globalState.canvas.cropOffsetX
-          boundaryBox.xMax -= canvas.currentLayer.x + globalState.canvas.cropOffsetX
-          boundaryBox.yMin -= canvas.currentLayer.y + globalState.canvas.cropOffsetY
-          boundaryBox.yMax -= canvas.currentLayer.y + globalState.canvas.cropOffsetY
+          boundaryBox.xMin -=
+            canvas.currentLayer.x + globalState.canvas.cropOffsetX
+          boundaryBox.xMax -=
+            canvas.currentLayer.x + globalState.canvas.cropOffsetX
+          boundaryBox.yMin -=
+            canvas.currentLayer.y + globalState.canvas.cropOffsetY
+          boundaryBox.yMax -=
+            canvas.currentLayer.y + globalState.canvas.cropOffsetY
         }
         //generate new unique key for vector
         const uniqueVectorKey = globalState.vector.nextKey()
@@ -246,12 +253,14 @@ function curveSteps() {
           secondaryColor: { ...swatches.secondary.color },
           ditherPatternIndex: globalState.tool.current.ditherPatternIndex,
           ditherOffsetX:
-            (((globalState.tool.current.ditherOffsetX + globalState.canvas.cropOffsetX) %
+            (((globalState.tool.current.ditherOffsetX +
+              globalState.canvas.cropOffsetX) %
               8) +
               8) %
             8,
           ditherOffsetY:
-            (((globalState.tool.current.ditherOffsetY + globalState.canvas.cropOffsetY) %
+            (((globalState.tool.current.ditherOffsetY +
+              globalState.canvas.cropOffsetY) %
               8) +
               8) %
             8,

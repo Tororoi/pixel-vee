@@ -17,7 +17,10 @@ function updateRotationAngle() {
   //for now, mother ui is always in the shape center
   vectorGui.mother.rotationOrigin.x = globalState.vector.shapeCenterX
   vectorGui.mother.rotationOrigin.y = globalState.vector.shapeCenterY
-  if (globalState.cursor.clicked && globalState.vector.grabStartAngle !== null) {
+  if (
+    globalState.cursor.clicked &&
+    globalState.vector.grabStartAngle !== null
+  ) {
     vectorGui.mother.newRotation =
       getAngle(
         vectorGui.mother.rotationOrigin.x - globalState.cursor.x,

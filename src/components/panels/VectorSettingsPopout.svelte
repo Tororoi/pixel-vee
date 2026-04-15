@@ -1,16 +1,16 @@
 <script>
   import { onMount } from 'svelte'
-  import { getVersion, bump } from '../../hooks/appState.svelte.js'
+  import { getVersion, bump, getDitherVectorTarget, setDitherVectorTarget } from '../../hooks/appState.svelte.js'
   import { portal } from '../../utils/portal.js'
   import { globalState } from '../../Context/state.js'
-  import { canvas } from '../../Context/canvas.js'
-  import { renderCanvas } from '../../Canvas/render.js'
+import { renderCanvas } from '../../Canvas/render.js'
   import { renderVectorsToDOM } from '../../DOM/render.js'
-  import { changeActionVectorMode } from '../../Actions/modifyTimeline/modifyTimeline.js'
+  import { changeActionVectorMode, changeActionVectorBrushSize, changeActionVectorCurveType } from '../../Actions/modifyTimeline/modifyTimeline.js'
   import { initializeColorPicker } from '../../Swatch/events.js'
   import { ditherPatterns } from '../../Context/ditherPatterns.js'
   import { createVectorDitherPatternSVG } from '../../DOM/renderVectors.js'
-  import { initDitherPicker } from '../../DOM/renderBrush.js'
+  import { applyDitherOffset, applyDitherOffsetControl } from '../../DOM/renderBrush.js'
+  import { vectorGui } from '../../GUI/vector.js'
 
   const { vector, pos, onclose } = $props()
 
@@ -44,23 +44,27 @@
   })
 
   function handleModeToggle(modeKey) {
-    const oldModes = { ...vector.modes }
     const isCurveType = ['line', 'quadCurve', 'cubicCurve'].includes(modeKey)
     if (isCurveType && vector.modes[modeKey]) return
+    if (isCurveType) {
+      // Delegates to changeActionVectorCurveType which handles control point
+      // initialization (averaging px1/px2), timeline recording, and vectorGui.render()
+      changeActionVectorCurveType(vector, modeKey)
+      renderVectorsToDOM()
+      bump()
+      return
+    }
+    const oldModes = { ...vector.modes }
     vector.modes[modeKey] = !vector.modes[modeKey]
     if (vector.modes[modeKey]) {
       if (modeKey === 'eraser' && vector.modes.inject) vector.modes.inject = false
       else if (modeKey === 'inject' && vector.modes.eraser) vector.modes.eraser = false
-      if (isCurveType) {
-        ;['line', 'quadCurve', 'cubicCurve'].forEach((t) => {
-          if (t !== modeKey) vector.modes[t] = false
-        })
-      }
     }
     const newModes = { ...vector.modes }
     renderCanvas(vector.layer, true)
     changeActionVectorMode(vector, oldModes, newModes)
     globalState.clearRedoStack()
+    vectorGui.render()
     renderVectorsToDOM()
   }
 
@@ -77,27 +81,39 @@
     initializeColorPicker({ color: vector.secondaryColor, vector, isSecondaryColor: true })
   }
 
-  function handleBrushSizeChange(e) {
+  let brushSizeFromValue = 1
+
+  function handleBrushSizePointerDown() {
+    brushSizeFromValue = vector.brushSize ?? 1
+  }
+
+  function handleBrushSizeInput(e) {
     vector.brushSize = parseInt(e.target.value)
     renderCanvas(vector.layer, true)
     bump()
   }
 
+  function handleBrushSizeChange(e) {
+    const newSize = parseInt(e.target.value)
+    if (brushSizeFromValue !== newSize) {
+      changeActionVectorBrushSize(vector, brushSizeFromValue, newSize)
+      globalState.clearRedoStack()
+    }
+  }
+
   function handleDitherClick() {
     const picker = document.querySelector('.dither-picker-container')
     if (!picker) return
-    if (picker.style.display === 'flex' && picker._vectorTarget === vector) {
-      picker._vectorTarget = null
+    if (picker.style.display === 'flex' && getDitherVectorTarget() === vector) {
+      setDitherVectorTarget(null)
       picker.style.display = 'none'
-      const buildUpBtn = picker.querySelector('#dither-ctrl-build-up')
-      if (buildUpBtn) buildUpBtn.style.display = ''
     } else {
-      picker._vectorTarget = vector
-      initDitherPicker()
-      const buildUpBtn = picker.querySelector('#dither-ctrl-build-up')
-      if (buildUpBtn) buildUpBtn.style.display = 'none'
-      const buildUpSteps = picker.querySelector('.build-up-steps')
-      if (buildUpSteps) buildUpSteps.style.display = 'none'
+      setDitherVectorTarget(vector)
+      const ox = vector.ditherOffsetX ?? 0
+      const oy = vector.ditherOffsetY ?? 0
+      applyDitherOffset(picker, ox, oy)
+      const wrap = picker.querySelector('.dither-offset-control-wrap')
+      if (wrap) applyDitherOffsetControl(wrap, ox, oy)
       picker.style.display = 'flex'
     }
   }
@@ -131,7 +147,7 @@
   <div class="header">
     <div class="drag-btn locked"><div class="grip"></div></div>
     Vector Settings
-    <button type="button" class="close-btn" data-tooltip="Close" onclick={onclose}></button>
+    <button type="button" class="close-btn" aria-label="Close" data-tooltip="Close" onclick={onclose}></button>
   </div>
   <div class="vector-settings-modes">
     {#each allModes as modeKey (modeKey)}
@@ -173,12 +189,14 @@
   </div>
   <div class="vector-settings-dither-row">
     <span>Dither</span>
-    <div
+    <button
+      type="button"
       bind:this={ditherPreviewRef}
       class="vector-dither-preview"
+      aria-label="Select dither pattern"
       data-tooltip="Select dither pattern"
       onclick={handleDitherClick}
-    ></div>
+    ></button>
   </div>
   <div class="vector-settings-brush-row">
     <span>Size: {brushSize}px</span>
@@ -188,7 +206,9 @@
       min="1"
       max="32"
       value={brushSize}
-      oninput={handleBrushSizeChange}
+      onpointerdown={handleBrushSizePointerDown}
+      oninput={handleBrushSizeInput}
+      onchange={handleBrushSizeChange}
     />
   </div>
 </div>

@@ -8,8 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "sass": "sass --watch scss/style.scss:css/style.css",
-    "eslint": "eslint --fix-dry-run src --ext svelte,js",
-    "eslintfix": "eslint --fix src --ext svelte,js",
+    "eslint": "eslint src",
+    "eslintfix": "eslint --fix src",
     "pretty": "prettier --write src/**/*.{js,svelte}",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -31,10 +31,15 @@
     "svelte": "^5.0.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
-    "eslint": "^8.56.0",
+    "eslint": "^9.39.4",
     "eslint-plugin-jsdoc": "^48.1.0",
+    "eslint-plugin-svelte": "^3.17.0",
+    "globals": "^17.5.0",
     "prettier": "^3.8.2",
+    "prettier-plugin-svelte": "^3.5.1",
+    "svelte-eslint-parser": "^1.6.0",
     "vitest": "^4.0.18"
   }
 }
