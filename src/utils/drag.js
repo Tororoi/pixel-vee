@@ -262,11 +262,11 @@ export const dragMove = (e) => {
     globalState.ui.dragTarget.style.position = 'absolute'
     if (globalState.ui.dragTarget.className.includes('h-drag')) {
       globalState.ui.dragTarget.style.left =
-        e.clientX - globalState.ui.dragX + 'px'
+        Math.round(e.clientX - globalState.ui.dragX) + 'px'
     }
     if (globalState.ui.dragTarget.className.includes('v-drag')) {
       globalState.ui.dragTarget.style.top =
-        e.clientY - globalState.ui.dragY + 'px'
+        Math.round(e.clientY - globalState.ui.dragY) + 'px'
     }
     // Walk up to the first ancestor with actual dimensions — skips display:contents wrappers
     // which report a 0×0 bounding rect and would otherwise snap the dialog off-screen.
