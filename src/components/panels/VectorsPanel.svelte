@@ -135,7 +135,10 @@
           {@const isSettingsOpen = settingsVector === vector}
           <div
             class="vector{isSelected ? ' selected' : ''}"
+            role="button"
+            tabindex="0"
             onclick={(e) => handleVectorClick(e, vector)}
+            onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleVectorClick(e, vector) }}
           >
             <VectorThumbnail {vector} />
             <div class="left">

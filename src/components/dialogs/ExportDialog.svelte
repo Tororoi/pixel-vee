@@ -53,7 +53,7 @@
       <div class="grip"></div>
     </div>
     <span>Export</span>
-    <button type="button" class="close-btn" data-tooltip="Close" onclick={handleClose}></button>
+    <button type="button" class="close-btn" aria-label="Close" data-tooltip="Close" onclick={handleClose}></button>
   </div>
   <div class="collapsible">
     <div id="export-interface" class="export-interface">

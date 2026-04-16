@@ -151,6 +151,10 @@
   function handleMenuFolderBlur(e) {
     e.currentTarget.classList.remove('active')
   }
+
+  function handleMenuKeydown(e) {
+    if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click()
+  }
 </script>
 
 <div id="options" class="nav">
@@ -170,6 +174,7 @@
       aria-label="functions"
       id="top-menu"
       onclick={handleTopMenuClick}
+      onkeydown={handleTopMenuClick}
     >
       <!-- File menu -->
       <li
@@ -200,6 +205,7 @@
             id="save"
             data-tooltip="Open dialog box to download file with current progress"
             onclick={openSaveDialogBox}
+            onkeydown={handleMenuKeydown}
           >
             Save As... (Cmd + S)
           </li>
@@ -218,6 +224,7 @@
             id="export"
             data-tooltip="Download as .png"
             onclick={handleExport}
+            onkeydown={handleMenuKeydown}
           >
             Export
           </li>
@@ -228,7 +235,7 @@
         role="menuitem"
         aria-haspopup="true"
         class="menu-folder"
-        tabindex="1"
+        tabindex="0"
         onblur={handleMenuFolderBlur}
       >
         <span class="menu-folder-title">Edit</span>
@@ -239,6 +246,7 @@
             class={hasPaste ? 'disabled' : ''}
             data-tooltip="Open dialog box to resize canvas area"
             onclick={handleCanvasSize}
+            onkeydown={handleMenuKeydown}
           >
             Resize Canvas...
           </li>
@@ -248,6 +256,7 @@
             class={hasPaste ? 'disabled' : ''}
             data-tooltip="Select entire canvas (Cmd + A)"
             onclick={hasPaste ? undefined : actionSelectAll}
+            onkeydown={handleMenuKeydown}
           >
             Select All (Cmd + A)
           </li>
@@ -257,6 +266,7 @@
             class={!hasSelection ? 'disabled' : ''}
             data-tooltip="Deselect selection area (Cmd + D)"
             onclick={hasSelection ? actionDeselect : undefined}
+            onkeydown={handleMenuKeydown}
           >
             Deselect (Cmd + D)
           </li>
@@ -266,6 +276,7 @@
             class={!hasSelection ? 'disabled' : ''}
             data-tooltip="Cut selection (Cmd + X)"
             onclick={hasSelection ? actionCutSelection : undefined}
+            onkeydown={handleMenuKeydown}
           >
             Cut (Cmd + X)
           </li>
@@ -275,6 +286,7 @@
             class={!hasSelection ? 'disabled' : ''}
             data-tooltip="Copy selection (Cmd + C)"
             onclick={hasSelection ? actionCopySelection : undefined}
+            onkeydown={handleMenuKeydown}
           >
             Copy (Cmd + C)
           </li>
@@ -284,6 +296,7 @@
             class={!hasClipboard ? 'disabled' : ''}
             data-tooltip="Paste copied selection (Cmd + V)"
             onclick={hasClipboard ? actionPasteSelection : undefined}
+            onkeydown={handleMenuKeydown}
           >
             Paste (Cmd + V)
           </li>
@@ -293,6 +306,7 @@
             class={!hasSelection ? 'disabled' : ''}
             data-tooltip="Delete selection (Backspace)"
             onclick={hasSelection ? actionDeleteSelection : undefined}
+            onkeydown={handleMenuKeydown}
           >
             Clear (Backspace)
           </li>
@@ -302,6 +316,7 @@
             class={!canFlipRotate ? 'disabled' : ''}
             data-tooltip="Flip selection horizontally (Cmd + F)"
             onclick={canFlipRotate ? () => actionFlipPixels(true) : undefined}
+            onkeydown={handleMenuKeydown}
           >
             Flip Horizontal (Cmd + F)
           </li>
@@ -311,6 +326,7 @@
             class={!canFlipRotate ? 'disabled' : ''}
             data-tooltip="Flip selection vertically (Cmd + Shift + F)"
             onclick={canFlipRotate ? () => actionFlipPixels(false) : undefined}
+            onkeydown={handleMenuKeydown}
           >
             Flip Vertical (Cmd + Shift + F)
           </li>
@@ -320,6 +336,7 @@
             class={!canFlipRotate ? 'disabled' : ''}
             data-tooltip="Rotate selection 90 degrees clockwise (Cmd + R)"
             onclick={canFlipRotate ? actionRotatePixels : undefined}
+            onkeydown={handleMenuKeydown}
           >
             Rotate Right (Cmd + R)
           </li>

@@ -142,7 +142,7 @@
       <div class="grip"></div>
     </div>
     Canvas Size
-    <button type="button" class="close-btn" data-tooltip="Close" onclick={handleClose}></button>
+    <button type="button" class="close-btn" aria-label="Close" data-tooltip="Close" onclick={handleClose}></button>
   </div>
   <div class="collapsible">
     <form class="dimensions-form" onsubmit={handleSubmit}>
@@ -160,7 +160,7 @@
               onfocus={() => { widthFocused = true }}
               onblur={handleWidthBlur}
             />
-            <span class="spin-btn" onpointerdown={handleWidthSpin}>
+            <span class="spin-btn" role="group" onpointerdown={handleWidthSpin}>
               <span id="inc" class="channel-btn"><span class="spin-content">+</span></span>
               <span id="dec" class="channel-btn"><span class="spin-content">-</span></span>
             </span>
@@ -179,7 +179,7 @@
               onfocus={() => { heightFocused = true }}
               onblur={handleHeightBlur}
             />
-            <span class="spin-btn" onpointerdown={handleHeightSpin}>
+            <span class="spin-btn" role="group" onpointerdown={handleHeightSpin}>
               <span id="inc" class="channel-btn"><span class="spin-content">+</span></span>
               <span id="dec" class="channel-btn"><span class="spin-content">-</span></span>
             </span>

@@ -203,16 +203,22 @@
       <div
         bind:this={primarySwatchRef}
         class="primary swatch btn"
+        role="button"
+        tabindex="0"
         data-tooltip="Primary Swatch&#10;&#10;(R) to randomize&#10;&#10;Click to open Color Picker"
         onclick={handlePrimarySwatchClick}
+        onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handlePrimarySwatchClick(e) }}
       >
         <div class="swatch-color"></div>
       </div>
       <div
         bind:this={secondarySwatchRef}
         class="secondary back-swatch btn"
+        role="button"
+        tabindex="0"
         data-tooltip="Secondary Swatch&#10;&#10;Click to open Color Picker"
         onclick={handleSecondarySwatchClick}
+        onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSecondarySwatchClick(e) }}
       >
         <div class="swatch-color"></div>
       </div>
@@ -256,9 +262,11 @@
           {#each PRESETS as preset (preset.id)}
             <li
               role="option"
+              aria-selected={currentPreset === preset.id}
               data-id={preset.id}
               class={currentPreset === preset.id ? 'selected' : ''}
               onclick={(e) => { e.stopPropagation(); handlePresetSelect(preset.id) }}
+              onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); handlePresetSelect(preset.id) } }}
             >
               {preset.label}
             </li>
@@ -266,9 +274,11 @@
           {#each Object.entries(customPalettes) as [id, p] (id)}
             <li
               role="option"
+              aria-selected={currentPreset === id}
               data-id={id}
               class={currentPreset === id ? 'selected' : ''}
               onclick={(e) => { e.stopPropagation(); handlePresetSelect(id) }}
+              onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); handlePresetSelect(id) } }}
             >
               {p.label}
             </li>

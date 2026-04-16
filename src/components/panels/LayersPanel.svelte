@@ -194,11 +194,14 @@
           {@const isSettingsOpen = settingsLayer === layer}
           <div
             class="layer {layer.type}{isSelected ? ' selected' : ''}"
+            role="button"
+            tabindex="0"
             draggable={!isPasted}
             ondragstart={(e) => handleDragStart(e, layer)}
             ondragover={handleDragOver}
             ondrop={(e) => handleDrop(e, layer)}
             onclick={() => handleLayerClick(layer)}
+            onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleLayerClick(layer) }}
           >
             <button
               type="button"

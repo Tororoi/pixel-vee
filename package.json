@@ -10,6 +10,7 @@
     "sass": "sass --watch scss/style.scss:css/style.css",
     "eslint": "eslint src",
     "eslintfix": "eslint --fix src",
+    "check": "svelte-check",
     "pretty": "prettier --write src/**/*.{js,svelte}",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -39,6 +40,7 @@
     "globals": "^17.5.0",
     "prettier": "^3.8.2",
     "prettier-plugin-svelte": "^3.5.1",
+    "svelte-check": "^4.4.6",
     "svelte-eslint-parser": "^1.6.0",
     "vitest": "^4.0.18"
   }

@@ -70,7 +70,7 @@
       <div class="grip"></div>
     </div>
     Settings
-    <button type="button" class="close-btn" data-tooltip="Close" onclick={handleClose}></button>
+    <button type="button" class="close-btn" aria-label="Close" data-tooltip="Close" onclick={handleClose}></button>
   </div>
   <div class="collapsible">
     <div class="settings-interface">
@@ -120,6 +120,7 @@
               />
               <span
                 class="grid-spacing-spin spin-btn"
+                role="group"
                 onpointerdown={handleGridSpacingSpin}
               >
                 <span id="inc" class="channel-btn">

@@ -47,7 +47,7 @@
       <div class="grip"></div>
     </div>
     Stamp Editor
-    <button type="button" class="close-btn" data-tooltip="Close" onclick={handleClose}></button>
+    <button type="button" class="close-btn" aria-label="Close" data-tooltip="Close" onclick={handleClose}></button>
   </div>
   <div class="stamp-editor-interface">
     <canvas

@@ -6,7 +6,9 @@
 
   const { layer, pos, onclose } = $props()
 
+  // svelte-ignore state_referenced_locally
   const initialTitle = layer.title ?? ''
+  // svelte-ignore state_referenced_locally
   let opacity = $state(Math.round((layer.opacity ?? 1) * 255))
   let ref = $state(null)
 
@@ -46,7 +48,7 @@
   <div class="header">
     <div class="drag-btn locked"><div class="grip"></div></div>
     Layer Settings
-    <button type="button" class="close-btn" data-tooltip="Close" onclick={onclose}></button>
+    <button type="button" class="close-btn" aria-label="Close" data-tooltip="Close" onclick={onclose}></button>
   </div>
   <div class="layer-name-label">
     <label for="layer-name" class="input-label">Name</label>

@@ -171,8 +171,11 @@
     {#if showBrushControls}
       <div
         class="brush-preview btn"
+        role="button"
+        tabindex="0"
         data-tooltip="Click to switch brush"
         onclick={handleBrushTypeClick}
+        onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleBrushTypeClick(e) }}
       >
         {#if stampPathData}
           <svg

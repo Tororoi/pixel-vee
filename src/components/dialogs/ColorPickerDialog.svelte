@@ -56,6 +56,7 @@
     <button
       type="button"
       class="close-btn"
+      aria-label="Close"
       data-tooltip="Close"
       onclick={closePickerWindow}
     ></button>
@@ -120,14 +121,14 @@
         <div id="colors">
           <div class="color">
             <h5>New</h5>
-            <button type="button" class="swatch" id="newcolor-btn" onclick={addToPalette}>
+            <button type="button" class="swatch" id="newcolor-btn" aria-label="New color – click to add to palette" onclick={addToPalette}>
               <div class="swatch-color" id="newcolor"></div>
               <div id="newcolor-plus"></div>
             </button>
           </div>
           <div class="color">
             <h5>Old</h5>
-            <button type="button" class="swatch" id="oldcolor-btn">
+            <button type="button" class="swatch" id="oldcolor-btn" aria-label="Old color">
               <div class="swatch-color" id="oldcolor"></div>
             </button>
           </div>

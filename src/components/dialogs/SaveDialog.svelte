@@ -83,7 +83,7 @@
       <div class="grip"></div>
     </div>
     <span>Save Options</span>
-    <button type="button" class="close-btn" data-tooltip="Close" onclick={handleClose}></button>
+    <button type="button" class="close-btn" aria-label="Close" data-tooltip="Close" onclick={handleClose}></button>
   </div>
   <div class="collapsible">
     <form id="save-interface" class="save-interface" onsubmit={handleSubmit}>

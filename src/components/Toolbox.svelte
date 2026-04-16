@@ -196,13 +196,14 @@
         onclick={handleClear}
       ></button>
     </div>
-    <div class="zoom btn-pair" onclick={handleZoom}>
+    <div class="zoom btn-pair">
       <button
         type="button"
         id="minus"
         class="zoombtn minus"
         aria-label="Zoom Out (Mouse Wheel)"
         data-tooltip="Zoom Out (Mouse Wheel)"
+        onclick={handleZoom}
       ></button>
       <button
         type="button"
@@ -210,6 +211,7 @@
         class="zoombtn plus"
         aria-label="Zoom In (Mouse Wheel)"
         data-tooltip="Zoom In (Mouse Wheel)"
+        onclick={handleZoom}
       ></button>
     </div>
     <div class="tools">

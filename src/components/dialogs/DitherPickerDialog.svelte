@@ -358,7 +358,7 @@
       </div>
       <div class="build-up-step-slots">
         {#if buildUpMode === 'custom'}
-          {#each buildUpSteps as patternIndex, i}
+          {#each buildUpSteps as patternIndex, i (i)}
             <button
               type="button"
               class="build-up-step-btn"
@@ -384,7 +384,7 @@
       </button>
     </div>
     <div class="dither-grid">
-      {#each ditherPatterns as pattern, i}
+      {#each ditherPatterns as pattern, i (i)}
         <button
           type="button"
           class="dither-grid-btn"
