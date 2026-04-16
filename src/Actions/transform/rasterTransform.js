@@ -1,11 +1,11 @@
-import { globalState } from "../../Context/state.js"
-import { canvas } from "../../Context/canvas.js"
-import { tools } from "../../Tools/index.js"
-import { vectorGui } from "../../GUI/vector.js"
-import { addToTimeline } from "../undoRedo/undoRedo.js"
-import { renderCanvas } from "../../Canvas/render.js"
-import { transformRasterContent } from "../../utils/transformHelpers.js"
-import { actionFlipVectors, actionRotateVectors } from "./vectorTransform.js"
+import { globalState } from '../../Context/state.js'
+import { canvas } from '../../Context/canvas.js'
+import { tools } from '../../Tools/index.js'
+import { vectorGui } from '../../GUI/vector.js'
+import { addToTimeline } from '../undoRedo/undoRedo.js'
+import { renderCanvas } from '../../Canvas/render.js'
+import { transformRasterContent } from '../../utils/transformHelpers.js'
+import { actionFlipVectors, actionRotateVectors } from './vectorTransform.js'
 
 //=============================================//
 //======== * * * Raster Transform * * * =======//
@@ -18,19 +18,19 @@ export function addTransformToTimeline() {
   //save to timeline
   const boundaryBox = { ...globalState.selection.boundaryBox }
   //create canvas with transformed pixels
-  const transformedCanvas = document.createElement("canvas")
+  const transformedCanvas = document.createElement('canvas')
   transformedCanvas.width = boundaryBox.xMax - boundaryBox.xMin
   transformedCanvas.height = boundaryBox.yMax - boundaryBox.yMin
-  const transformedCtx = transformedCanvas.getContext("2d")
+  const transformedCtx = transformedCanvas.getContext('2d')
   transformedCtx.putImageData(
     canvas.currentLayer.ctx.getImageData(
       boundaryBox.xMin,
       boundaryBox.yMin,
       boundaryBox.xMax - boundaryBox.xMin,
-      boundaryBox.yMax - boundaryBox.yMin
+      boundaryBox.yMax - boundaryBox.yMin,
     ),
     0,
-    0
+    0,
   )
   if (boundaryBox.xMax !== null) {
     boundaryBox.xMin -= canvas.currentLayer.x
@@ -74,19 +74,23 @@ export function actionFlipPixels(flipHorizontally) {
     if (flipHorizontally) {
       transformedBoundaryBox.xMin = globalState.selection.boundaryBox.xMax
       transformedBoundaryBox.xMax = globalState.selection.boundaryBox.xMin
-      globalState.transform.isMirroredHorizontally = !globalState.transform.isMirroredHorizontally
+      globalState.transform.isMirroredHorizontally =
+        !globalState.transform.isMirroredHorizontally
     } else {
       transformedBoundaryBox.yMin = globalState.selection.boundaryBox.yMax
       transformedBoundaryBox.yMax = globalState.selection.boundaryBox.yMin
-      globalState.transform.isMirroredVertically = !globalState.transform.isMirroredVertically
+      globalState.transform.isMirroredVertically =
+        !globalState.transform.isMirroredVertically
     }
     transformRasterContent(
       canvas.currentLayer,
-      globalState.clipboard.pastedImages[globalState.clipboard.currentPastedImageKey].imageData,
+      globalState.clipboard.pastedImages[
+        globalState.clipboard.currentPastedImageKey
+      ].imageData,
       transformedBoundaryBox,
       globalState.transform.rotationDegrees % 360,
       globalState.transform.isMirroredHorizontally,
-      globalState.transform.isMirroredVertically
+      globalState.transform.isMirroredVertically,
     )
     addTransformToTimeline()
     renderCanvas(canvas.currentLayer)
@@ -129,7 +133,9 @@ export function actionRotatePixels() {
       }
     }
 
-    globalState.selection.properties = rotateBoundaryBox90Clockwise(globalState.selection.boundaryBox)
+    globalState.selection.properties = rotateBoundaryBox90Clockwise(
+      globalState.selection.boundaryBox,
+    )
     globalState.selection.setBoundaryBox(globalState.selection.properties)
     globalState.transform.rotationDegrees += 90
     if (globalState.transform.isMirroredHorizontally) {
@@ -140,11 +146,13 @@ export function actionRotatePixels() {
     }
     transformRasterContent(
       canvas.currentLayer,
-      globalState.clipboard.pastedImages[globalState.clipboard.currentPastedImageKey].imageData,
+      globalState.clipboard.pastedImages[
+        globalState.clipboard.currentPastedImageKey
+      ].imageData,
       globalState.selection.boundaryBox,
       globalState.transform.rotationDegrees % 360,
       globalState.transform.isMirroredHorizontally,
-      globalState.transform.isMirroredVertically
+      globalState.transform.isMirroredVertically,
     )
     addTransformToTimeline()
     vectorGui.render()

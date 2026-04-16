@@ -201,7 +201,6 @@ if (dom.modesContainer)
 if (dom.brushDisplay) dom.brushDisplay.addEventListener('click', switchBrush)
 if (dom.brushSlider) dom.brushSlider.addEventListener('input', updateBrush)
 
-
 // Custom stamp button: activate custom brush type and toggle the editor
 dom.customBrushTypeBtn?.addEventListener('click', () => {
   brush.brushType = 'custom'

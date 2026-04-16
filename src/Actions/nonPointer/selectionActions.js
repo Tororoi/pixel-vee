@@ -1,15 +1,15 @@
-import { globalState } from "../../Context/state.js"
-import { bump } from "../../hooks/appState.svelte.js"
-import { canvas } from "../../Context/canvas.js"
-import { tools } from "../../Tools/index.js"
-import { vectorGui } from "../../GUI/vector.js"
-import { addToTimeline } from "../undoRedo/undoRedo.js"
-import { renderVectorsToDOM } from "../../DOM/render.js"
-import { findVectorShapeCentroid } from "../../utils/vectorHelpers.js"
-import { dom } from "../../Context/dom.js"
-import { SCALE } from "../../utils/constants.js"
-import { setVectorShapeBoundaryBox } from "../../GUI/transform.js"
-import { actionCutSelection } from "./clipboardActions.js"
+import { globalState } from '../../Context/state.js'
+import { bump } from '../../hooks/appState.svelte.js'
+import { canvas } from '../../Context/canvas.js'
+import { tools } from '../../Tools/index.js'
+import { vectorGui } from '../../GUI/vector.js'
+import { addToTimeline } from '../undoRedo/undoRedo.js'
+import { renderVectorsToDOM } from '../../DOM/render.js'
+import { findVectorShapeCentroid } from '../../utils/vectorHelpers.js'
+import { dom } from '../../Context/dom.js'
+import { SCALE } from '../../utils/constants.js'
+import { setVectorShapeBoundaryBox } from '../../GUI/transform.js'
+import { actionCutSelection } from './clipboardActions.js'
 
 //=============================================//
 //=========== * * * Selection * * * ===========//
@@ -26,7 +26,7 @@ export function actionSelectAll() {
     return
   }
   //select all pixels on canvas
-  if (canvas.currentLayer.type === "raster" && !canvas.currentLayer.isPreview) {
+  if (canvas.currentLayer.type === 'raster' && !canvas.currentLayer.isPreview) {
     globalState.deselect()
     //set initial properties
     globalState.selection.properties.px1 = 0
@@ -55,7 +55,10 @@ export function actionSelectAll() {
 export function actionSelectVector(vectorIndex) {
   if (!globalState.vector.selectedIndices.has(vectorIndex)) {
     globalState.vector.addSelected(vectorIndex)
-    globalState.ui.vectorTransformOpen = true; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "flex"
+    globalState.ui.vectorTransformOpen = true
+    bump()
+    if (dom.vectorTransformUIContainer)
+      dom.vectorTransformUIContainer.style.display = 'flex'
     if (globalState.vector.transformMode === SCALE) {
       setVectorShapeBoundaryBox()
     }
@@ -70,7 +73,7 @@ export function actionSelectVector(vectorIndex) {
     //Update shape center
     const [centerX, centerY] = findVectorShapeCentroid(
       globalState.vector.selectedIndices,
-      globalState.vector.all
+      globalState.vector.all,
     )
     globalState.vector.shapeCenterX = centerX + canvas.currentLayer.x
     globalState.vector.shapeCenterY = centerY + canvas.currentLayer.y
@@ -88,7 +91,10 @@ export function actionDeselectVector(vectorIndex) {
   if (globalState.vector.selectedIndices.has(vectorIndex)) {
     globalState.vector.removeSelected(vectorIndex)
     if (globalState.vector.selectedIndices.size === 0) {
-      globalState.ui.vectorTransformOpen = false; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "none"
+      globalState.ui.vectorTransformOpen = false
+      bump()
+      if (dom.vectorTransformUIContainer)
+        dom.vectorTransformUIContainer.style.display = 'none'
       globalState.deselect()
     } else if (globalState.vector.selectedIndices.size > 0) {
       if (globalState.vector.transformMode === SCALE) {
@@ -106,7 +112,7 @@ export function actionDeselectVector(vectorIndex) {
     //Update shape center
     const [centerX, centerY] = findVectorShapeCentroid(
       globalState.vector.selectedIndices,
-      globalState.vector.all
+      globalState.vector.all,
     )
     globalState.vector.shapeCenterX = centerX + canvas.currentLayer.x
     globalState.vector.shapeCenterY = centerY + canvas.currentLayer.y

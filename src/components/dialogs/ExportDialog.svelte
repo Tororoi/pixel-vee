@@ -32,7 +32,13 @@
     scaledCanvas.height = canvas.offScreenCVS.height * scale
     const ctx = scaledCanvas.getContext('2d')
     ctx.imageSmoothingEnabled = false
-    ctx.drawImage(canvas.offScreenCVS, 0, 0, scaledCanvas.width, scaledCanvas.height)
+    ctx.drawImage(
+      canvas.offScreenCVS,
+      0,
+      0,
+      scaledCanvas.width,
+      scaledCanvas.height,
+    )
     const a = document.createElement('a')
     a.style.display = 'none'
     a.href = scaledCanvas.toDataURL()
@@ -53,7 +59,13 @@
       <div class="grip"></div>
     </div>
     <span>Export</span>
-    <button type="button" class="close-btn" aria-label="Close" data-tooltip="Close" onclick={handleClose}></button>
+    <button
+      type="button"
+      class="close-btn"
+      aria-label="Close"
+      data-tooltip="Close"
+      onclick={handleClose}
+    ></button>
   </div>
   <div class="collapsible">
     <div id="export-interface" class="export-interface">

@@ -1,15 +1,27 @@
 <script>
   import { onMount } from 'svelte'
-  import { getVersion, bump, getDitherVectorTarget, setDitherVectorTarget } from '../../hooks/appState.svelte.js'
+  import {
+    getVersion,
+    bump,
+    getDitherVectorTarget,
+    setDitherVectorTarget,
+  } from '../../hooks/appState.svelte.js'
   import { portal } from '../../utils/portal.js'
   import { globalState } from '../../Context/state.js'
-import { renderCanvas } from '../../Canvas/render.js'
+  import { renderCanvas } from '../../Canvas/render.js'
   import { renderVectorsToDOM } from '../../DOM/render.js'
-  import { changeActionVectorMode, changeActionVectorBrushSize, changeActionVectorCurveType } from '../../Actions/modifyTimeline/modifyTimeline.js'
+  import {
+    changeActionVectorMode,
+    changeActionVectorBrushSize,
+    changeActionVectorCurveType,
+  } from '../../Actions/modifyTimeline/modifyTimeline.js'
   import { initializeColorPicker } from '../../Swatch/events.js'
   import { ditherPatterns } from '../../Context/ditherPatterns.js'
   import { createVectorDitherPatternSVG } from '../../DOM/renderVectors.js'
-  import { applyDitherOffset, applyDitherOffsetControl } from '../../DOM/renderBrush.js'
+  import {
+    applyDitherOffset,
+    applyDitherOffsetControl,
+  } from '../../DOM/renderBrush.js'
   import { vectorGui } from '../../GUI/vector.js'
 
   const { vector, pos, onclose } = $props()
@@ -57,8 +69,10 @@ import { renderCanvas } from '../../Canvas/render.js'
     const oldModes = { ...vector.modes }
     vector.modes[modeKey] = !vector.modes[modeKey]
     if (vector.modes[modeKey]) {
-      if (modeKey === 'eraser' && vector.modes.inject) vector.modes.inject = false
-      else if (modeKey === 'inject' && vector.modes.eraser) vector.modes.eraser = false
+      if (modeKey === 'eraser' && vector.modes.inject)
+        vector.modes.inject = false
+      else if (modeKey === 'inject' && vector.modes.eraser)
+        vector.modes.eraser = false
     }
     const newModes = { ...vector.modes }
     renderCanvas(vector.layer, true)
@@ -70,7 +84,11 @@ import { renderCanvas } from '../../Canvas/render.js'
 
   function handlePrimaryColorClick(e) {
     e.stopPropagation()
-    initializeColorPicker({ color: vector.color, vector, isSecondaryColor: false })
+    initializeColorPicker({
+      color: vector.color,
+      vector,
+      isSecondaryColor: false,
+    })
   }
 
   function handleSecondaryColorClick(e) {
@@ -78,7 +96,11 @@ import { renderCanvas } from '../../Canvas/render.js'
     if (!vector.secondaryColor) {
       vector.secondaryColor = { r: 0, g: 0, b: 0, a: 0, color: 'rgba(0,0,0,0)' }
     }
-    initializeColorPicker({ color: vector.secondaryColor, vector, isSecondaryColor: true })
+    initializeColorPicker({
+      color: vector.secondaryColor,
+      vector,
+      isSecondaryColor: true,
+    })
   }
 
   let brushSizeFromValue = 1
@@ -134,7 +156,9 @@ import { renderCanvas } from '../../Canvas/render.js'
   const isCurveTool = $derived(tool === 'curve')
   const curveTypes = ['line', 'quadCurve', 'cubicCurve']
   const generalModes = ['eraser', 'inject', 'twoColor']
-  const allModes = $derived(isCurveTool ? [...curveTypes, ...generalModes] : generalModes)
+  const allModes = $derived(
+    isCurveTool ? [...curveTypes, ...generalModes] : generalModes,
+  )
   const brushSize = $derived(getVersion() >= 0 ? (vector.brushSize ?? 1) : 1)
 </script>
 
@@ -147,7 +171,13 @@ import { renderCanvas } from '../../Canvas/render.js'
   <div class="header">
     <div class="drag-btn locked"><div class="grip"></div></div>
     Vector Settings
-    <button type="button" class="close-btn" aria-label="Close" data-tooltip="Close" onclick={onclose}></button>
+    <button
+      type="button"
+      class="close-btn"
+      aria-label="Close"
+      data-tooltip="Close"
+      onclick={onclose}
+    ></button>
   </div>
   <div class="vector-settings-modes">
     {#each allModes as modeKey (modeKey)}
@@ -181,10 +211,7 @@ import { renderCanvas } from '../../Canvas/render.js'
       data-tooltip="Secondary Color"
       onclick={handleSecondaryColorClick}
     >
-      <div
-        class="swatch"
-        style="background-color: {secondaryColor}"
-      ></div>
+      <div class="swatch" style="background-color: {secondaryColor}"></div>
     </button>
   </div>
   <div class="vector-settings-dither-row">

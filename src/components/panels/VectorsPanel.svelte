@@ -29,10 +29,16 @@
   const visibleVectors = $derived.by(() => {
     getVersion()
     const undoStackSet = new Set(globalState.timeline.undoStack)
-    return Object.values(globalState.vector.all).filter((v) => isValidVector(v, undoStackSet))
+    return Object.values(globalState.vector.all).filter((v) =>
+      isValidVector(v, undoStackSet),
+    )
   })
-  const currentVectorIndex = $derived(getVersion() >= 0 ? globalState.vector.currentIndex : null)
-  const selectedIndices = $derived(getVersion() >= 0 ? globalState.vector.selectedIndices : new Set())
+  const currentVectorIndex = $derived(
+    getVersion() >= 0 ? globalState.vector.currentIndex : null,
+  )
+  const selectedIndices = $derived(
+    getVersion() >= 0 ? globalState.vector.selectedIndices : new Set(),
+  )
 
   onMount(() => {
     if (!ref) return
@@ -44,7 +50,10 @@
   })
 
   function handleVectorClick(e, vector) {
-    if (isPasted) { e.preventDefault(); return }
+    if (isPasted) {
+      e.preventDefault()
+      return
+    }
     if (keys.ShiftLeft || keys.ShiftRight) {
       if (!globalState.vector.selectedIndices.has(vector.index)) {
         actionSelectVector(vector.index)
@@ -100,20 +109,30 @@
 
   function handleColorClick(e, vector) {
     e.stopPropagation()
-    initializeColorPicker({ color: vector.color, vector, isSecondaryColor: false })
+    initializeColorPicker({
+      color: vector.color,
+      vector,
+      isSecondaryColor: false,
+    })
   }
 </script>
 
 <div
   bind:this={ref}
-  class="vectors-interface dialog-box draggable v-drag settings-box smooth-shift{isPasted ? ' disabled' : ''}"
+  class="vectors-interface dialog-box draggable v-drag settings-box smooth-shift{isPasted
+    ? ' disabled'
+    : ''}"
 >
   <div class="header dragger">
     <div class="drag-btn">
       <div class="grip"></div>
     </div>
     Vectors
-    <label for="vectors-collapse-btn" class="collapse-btn" data-tooltip="Collapse/ Expand">
+    <label
+      for="vectors-collapse-btn"
+      class="collapse-btn"
+      data-tooltip="Collapse/ Expand"
+    >
       <input
         type="checkbox"
         aria-label="Collapse or Expand"
@@ -138,7 +157,10 @@
             role="button"
             tabindex="0"
             onclick={(e) => handleVectorClick(e, vector)}
-            onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleVectorClick(e, vector) }}
+            onkeydown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ')
+                handleVectorClick(e, vector)
+            }}
           >
             <VectorThumbnail {vector} />
             <div class="left">
@@ -156,7 +178,10 @@
                 data-tooltip="Action Color"
                 onclick={(e) => handleColorClick(e, vector)}
               >
-                <div class="swatch" style="background-color: {vector.color?.color}"></div>
+                <div
+                  class="swatch"
+                  style="background-color: {vector.color?.color}"
+                ></div>
               </button>
               <button
                 type="button"
@@ -189,7 +214,9 @@
     <VectorSettingsPopout
       vector={settingsVector}
       pos={settingsPos}
-      onclose={() => { settingsVector = null }}
+      onclose={() => {
+        settingsVector = null
+      }}
     />
   {/if}
 </div>

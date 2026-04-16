@@ -11,7 +11,7 @@
     "eslint": "eslint src",
     "eslintfix": "eslint --fix src",
     "check": "svelte-check",
-    "pretty": "prettier --write src/**/*.{js,svelte}",
+    "pretty": "prettier --write 'src/**/*.{js,svelte}'",
     "test": "vitest run",
     "test:watch": "vitest"
   },

@@ -5,7 +5,10 @@
   import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
   import { initializeColorPicker } from '../../Swatch/events.js'
   import { DEFAULT_PALETTES, PRESETS } from '../../utils/palettes.js'
-  import { renderPaletteToDOM, renderPalettePresetsToDOM } from '../../DOM/renderPalette.js'
+  import {
+    renderPaletteToDOM,
+    renderPalettePresetsToDOM,
+  } from '../../DOM/renderPalette.js'
 
   let ref = $state(null)
   let primarySwatchRef = $state(null)
@@ -16,8 +19,12 @@
     getVersion()
     return [...swatches.palette]
   })
-  const paletteMode = $derived(getVersion() >= 0 ? swatches.paletteMode : 'select')
-  const currentPreset = $derived(getVersion() >= 0 ? swatches.currentPreset : '')
+  const paletteMode = $derived(
+    getVersion() >= 0 ? swatches.paletteMode : 'select',
+  )
+  const currentPreset = $derived(
+    getVersion() >= 0 ? swatches.currentPreset : '',
+  )
   const customPalettes = $derived.by(() => {
     getVersion()
     return { ...swatches.customPalettes }
@@ -55,7 +62,9 @@
   // Close presets dropdown on outside click
   $effect(() => {
     if (!presetsOpen) return
-    function handleOutsideClick() { presetsOpen = false }
+    function handleOutsideClick() {
+      presetsOpen = false
+    }
     document.addEventListener('click', handleOutsideClick)
     return () => document.removeEventListener('click', handleOutsideClick)
   })
@@ -76,7 +85,9 @@
       }
       swatches.currentPreset = customId
     } else if (id in swatches.customPalettes) {
-      swatches.customPalettes[id].colors = swatches.palette.map((c) => ({ ...c }))
+      swatches.customPalettes[id].colors = swatches.palette.map((c) => ({
+        ...c,
+      }))
     }
     renderPalettePresetsToDOM()
   }
@@ -95,7 +106,8 @@
     e.stopPropagation()
     const temp = { ...swatches.primary.color }
     swatches.primary.color = swatches.secondary.color
-    if (swatches.primary.swatch) swatches.primary.swatch.color = swatches.secondary.color
+    if (swatches.primary.swatch)
+      swatches.primary.swatch.color = swatches.secondary.color
     document.documentElement.style.setProperty(
       '--primary-swatch-color',
       `${swatches.primary.color.r},${swatches.primary.color.g},${swatches.primary.color.b}`,
@@ -123,7 +135,8 @@
   }
 
   function handlePaletteRemoveClick() {
-    swatches.paletteMode = swatches.paletteMode === 'remove' ? 'select' : 'remove'
+    swatches.paletteMode =
+      swatches.paletteMode === 'remove' ? 'select' : 'remove'
     bump()
   }
 
@@ -136,7 +149,9 @@
     if (id in DEFAULT_PALETTES) {
       swatches.palette = DEFAULT_PALETTES[id].map((c) => ({ ...c }))
     } else if (id in swatches.customPalettes) {
-      swatches.palette = swatches.customPalettes[id].colors.map((c) => ({ ...c }))
+      swatches.palette = swatches.customPalettes[id].colors.map((c) => ({
+        ...c,
+      }))
     } else {
       return
     }
@@ -161,8 +176,14 @@
         initializeColorPicker({ color })
       } else {
         const { r, g, b, a } = color
-        document.documentElement.style.setProperty('--primary-swatch-color', `${r},${g},${b}`)
-        document.documentElement.style.setProperty('--primary-swatch-alpha', `${a / 255}`)
+        document.documentElement.style.setProperty(
+          '--primary-swatch-color',
+          `${r},${g},${b}`,
+        )
+        document.documentElement.style.setProperty(
+          '--primary-swatch-alpha',
+          `${a / 255}`,
+        )
         swatches.primary.color = color
         if (swatches.primary.swatch) swatches.primary.swatch.color = color
         swatches.selectedPaletteIndex = index
@@ -188,7 +209,11 @@
       <div class="grip"></div>
     </div>
     Palette
-    <label for="palette-collapse-btn" class="collapse-btn" data-tooltip="Collapse/ Expand">
+    <label
+      for="palette-collapse-btn"
+      class="collapse-btn"
+      data-tooltip="Collapse/ Expand"
+    >
       <input
         type="checkbox"
         aria-label="Collapse or Expand"
@@ -207,7 +232,9 @@
         tabindex="0"
         data-tooltip="Primary Swatch&#10;&#10;(R) to randomize&#10;&#10;Click to open Color Picker"
         onclick={handlePrimarySwatchClick}
-        onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handlePrimarySwatchClick(e) }}
+        onkeydown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') handlePrimarySwatchClick(e)
+        }}
       >
         <div class="swatch-color"></div>
       </div>
@@ -218,7 +245,9 @@
         tabindex="0"
         data-tooltip="Secondary Swatch&#10;&#10;Click to open Color Picker"
         onclick={handleSecondarySwatchClick}
-        onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleSecondarySwatchClick(e) }}
+        onkeydown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') handleSecondarySwatchClick(e)
+        }}
       >
         <div class="swatch-color"></div>
       </div>
@@ -265,8 +294,16 @@
               aria-selected={currentPreset === preset.id}
               data-id={preset.id}
               class={currentPreset === preset.id ? 'selected' : ''}
-              onclick={(e) => { e.stopPropagation(); handlePresetSelect(preset.id) }}
-              onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); handlePresetSelect(preset.id) } }}
+              onclick={(e) => {
+                e.stopPropagation()
+                handlePresetSelect(preset.id)
+              }}
+              onkeydown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.stopPropagation()
+                  handlePresetSelect(preset.id)
+                }
+              }}
             >
               {preset.label}
             </li>
@@ -277,8 +314,16 @@
               aria-selected={currentPreset === id}
               data-id={id}
               class={currentPreset === id ? 'selected' : ''}
-              onclick={(e) => { e.stopPropagation(); handlePresetSelect(id) }}
-              onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.stopPropagation(); handlePresetSelect(id) } }}
+              onclick={(e) => {
+                e.stopPropagation()
+                handlePresetSelect(id)
+              }}
+              onkeydown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.stopPropagation()
+                  handlePresetSelect(id)
+                }
+              }}
             >
               {p.label}
             </li>
@@ -289,7 +334,9 @@
         {#each palette as color, index (index)}
           <button
             type="button"
-            class="palette-color{index === selectedPaletteIndex ? ' selected' : ''}"
+            class="palette-color{index === selectedPaletteIndex
+              ? ' selected'
+              : ''}"
             aria-label="Color {index + 1}"
             data-tooltip={color.color}
             onclick={() => handlePaletteColorClick(color, index)}

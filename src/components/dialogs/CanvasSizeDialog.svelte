@@ -17,9 +17,15 @@
   const MAXIMUM_DIMENSION = 1024
 
   const ANCHORS = [
-    'top-left', 'top', 'top-right',
-    'left',     'center', 'right',
-    'bottom-left', 'bottom', 'bottom-right',
+    'top-left',
+    'top',
+    'top-right',
+    'left',
+    'center',
+    'right',
+    'bottom-left',
+    'bottom',
+    'bottom-right',
   ]
 
   let ref = $state(null)
@@ -142,7 +148,13 @@
       <div class="grip"></div>
     </div>
     Canvas Size
-    <button type="button" class="close-btn" aria-label="Close" data-tooltip="Close" onclick={handleClose}></button>
+    <button
+      type="button"
+      class="close-btn"
+      aria-label="Close"
+      data-tooltip="Close"
+      onclick={handleClose}
+    ></button>
   </div>
   <div class="collapsible">
     <form class="dimensions-form" onsubmit={handleSubmit}>
@@ -157,12 +169,18 @@
               max="1024"
               value={width}
               oninput={handleWidthChange}
-              onfocus={() => { widthFocused = true }}
+              onfocus={() => {
+                widthFocused = true
+              }}
               onblur={handleWidthBlur}
             />
             <span class="spin-btn" role="group" onpointerdown={handleWidthSpin}>
-              <span id="inc" class="channel-btn"><span class="spin-content">+</span></span>
-              <span id="dec" class="channel-btn"><span class="spin-content">-</span></span>
+              <span id="inc" class="channel-btn"
+                ><span class="spin-content">+</span></span
+              >
+              <span id="dec" class="channel-btn"
+                ><span class="spin-content">-</span></span
+              >
             </span>
           </span>
         </label>
@@ -176,12 +194,22 @@
               max="1024"
               value={height}
               oninput={handleHeightChange}
-              onfocus={() => { heightFocused = true }}
+              onfocus={() => {
+                heightFocused = true
+              }}
               onblur={handleHeightBlur}
             />
-            <span class="spin-btn" role="group" onpointerdown={handleHeightSpin}>
-              <span id="inc" class="channel-btn"><span class="spin-content">+</span></span>
-              <span id="dec" class="channel-btn"><span class="spin-content">-</span></span>
+            <span
+              class="spin-btn"
+              role="group"
+              onpointerdown={handleHeightSpin}
+            >
+              <span id="inc" class="channel-btn"
+                ><span class="spin-content">+</span></span
+              >
+              <span id="dec" class="channel-btn"
+                ><span class="spin-content">-</span></span
+              >
             </span>
           </span>
         </label>

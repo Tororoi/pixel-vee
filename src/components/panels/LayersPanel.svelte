@@ -6,7 +6,11 @@
   import { vectorGui } from '../../GUI/vector.js'
   import { renderCanvas } from '../../Canvas/render.js'
   import { renderLayersToDOM, renderVectorsToDOM } from '../../DOM/render.js'
-  import { addRasterLayer, addReferenceLayer, removeLayer } from '../../Actions/layer/layerActions.js'
+  import {
+    addRasterLayer,
+    addReferenceLayer,
+    removeLayer,
+  } from '../../Actions/layer/layerActions.js'
   import { switchTool } from '../../Tools/toolbox.js'
   import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
   import { dom } from '../../Context/dom.js'
@@ -100,7 +104,10 @@
   }
 
   function handleDragStart(e, layer) {
-    if (isPasted) { e.preventDefault(); return }
+    if (isPasted) {
+      e.preventDefault()
+      return
+    }
     dragIndex = canvas.layers.indexOf(layer)
     e.dataTransfer.setData('text', String(dragIndex))
   }
@@ -134,14 +141,20 @@
 
 <div
   bind:this={ref}
-  class="layers-interface dialog-box draggable v-drag settings-box smooth-shift{isPasted ? ' disabled' : ''}"
+  class="layers-interface dialog-box draggable v-drag settings-box smooth-shift{isPasted
+    ? ' disabled'
+    : ''}"
 >
   <div class="header dragger">
     <div class="drag-btn">
       <div class="grip"></div>
     </div>
     Layers
-    <label for="layers-collapse-btn" class="collapse-btn" data-tooltip="Collapse/ Expand">
+    <label
+      for="layers-collapse-btn"
+      class="collapse-btn"
+      data-tooltip="Collapse/ Expand"
+    >
       <input
         type="checkbox"
         aria-label="Collapse or Expand"
@@ -174,7 +187,9 @@
         accept="image/*"
         disabled={isPasted}
         onchange={handleUploadRef}
-        onclick={(e) => { e.target.value = null }}
+        onclick={(e) => {
+          e.target.value = null
+        }}
       />
       <button
         type="button"
@@ -201,7 +216,9 @@
             ondragover={handleDragOver}
             ondrop={(e) => handleDrop(e, layer)}
             onclick={() => handleLayerClick(layer)}
-            onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleLayerClick(layer) }}
+            onkeydown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') handleLayerClick(layer)
+            }}
           >
             <button
               type="button"
@@ -228,7 +245,9 @@
       <LayerSettingsPopout
         layer={settingsLayer}
         pos={settingsPos}
-        onclose={() => { settingsLayer = null }}
+        onclose={() => {
+          settingsLayer = null
+        }}
       />
     {/key}
   {/if}

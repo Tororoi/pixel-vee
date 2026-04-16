@@ -1,5 +1,9 @@
 import { mount } from 'svelte'
-import { globalState, registerVectorGui, registerDOMHelpers } from './Context/state.js'
+import {
+  globalState,
+  registerVectorGui,
+  registerDOMHelpers,
+} from './Context/state.js'
 import { tools } from './Tools/index.js'
 import { vectorGui } from './GUI/vector.js'
 import { bump } from './hooks/appState.svelte.js'

@@ -10,8 +10,12 @@
 
   let ref = $state(null)
 
-  const isOpen = $derived(getVersion() >= 0 && globalState.ui.vectorTransformOpen)
-  const mode = $derived(getVersion() >= 0 ? globalState.vector.transformMode : null)
+  const isOpen = $derived(
+    getVersion() >= 0 && globalState.ui.vectorTransformOpen,
+  )
+  const mode = $derived(
+    getVersion() >= 0 ? globalState.vector.transformMode : null,
+  )
 
   onMount(() => {
     if (!ref) return
@@ -54,14 +58,25 @@
       <div class="grip"></div>
     </div>
     <span>Transform</span>
-    <button type="button" class="close-btn" aria-label="Close" data-tooltip="Close" onclick={handleClose}></button>
+    <button
+      type="button"
+      class="close-btn"
+      aria-label="Close"
+      data-tooltip="Close"
+      onclick={handleClose}
+    ></button>
   </div>
   <div class="collapsible">
-    <div id="vector-transform-ui-interface" class="vector-transform-ui-interface">
+    <div
+      id="vector-transform-ui-interface"
+      class="vector-transform-ui-interface"
+    >
       <div class="vector-transform-modes">
         <button
           type="button"
-          class="transform-mode tool move custom-shape{mode === TRANSLATE ? ' selected' : ''}"
+          class="transform-mode tool move custom-shape{mode === TRANSLATE
+            ? ' selected'
+            : ''}"
           id="translate"
           aria-label="Translate"
           data-tooltip="Translate"
@@ -69,7 +84,9 @@
         ></button>
         <button
           type="button"
-          class="transform-mode tool rotate custom-shape{mode === ROTATE ? ' selected' : ''}"
+          class="transform-mode tool rotate custom-shape{mode === ROTATE
+            ? ' selected'
+            : ''}"
           id="rotate"
           aria-label="Rotate"
           data-tooltip="Rotate"
@@ -77,7 +94,9 @@
         ></button>
         <button
           type="button"
-          class="transform-mode tool scale custom-shape{mode === SCALE ? ' selected' : ''}"
+          class="transform-mode tool scale custom-shape{mode === SCALE
+            ? ' selected'
+            : ''}"
           id="scale"
           aria-label="Scale"
           data-tooltip="Scale"

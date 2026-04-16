@@ -92,7 +92,12 @@
     <div class="picker-interface">
       <div id="left">
         <div id="picker">
-          <canvas bind:this={canvasRef} id="color-picker" width="250" height="250"></canvas>
+          <canvas
+            bind:this={canvasRef}
+            id="color-picker"
+            width="250"
+            height="250"
+          ></canvas>
           <div class="slider-container">
             <input
               type="range"
@@ -113,44 +118,130 @@
           </div>
         </div>
         <div id="buttons">
-          <button type="button" class="btn" id="confirm-btn" onclick={confirmColor}>OK</button>
-          <button type="button" class="btn" id="cancel-btn" onclick={closePickerWindow}>Cancel</button>
+          <button
+            type="button"
+            class="btn"
+            id="confirm-btn"
+            onclick={confirmColor}>OK</button
+          >
+          <button
+            type="button"
+            class="btn"
+            id="cancel-btn"
+            onclick={closePickerWindow}>Cancel</button
+          >
         </div>
       </div>
       <div id="right">
         <div id="colors">
           <div class="color">
             <h5>New</h5>
-            <button type="button" class="swatch" id="newcolor-btn" aria-label="New color – click to add to palette" onclick={addToPalette}>
+            <button
+              type="button"
+              class="swatch"
+              id="newcolor-btn"
+              aria-label="New color – click to add to palette"
+              onclick={addToPalette}
+            >
               <div class="swatch-color" id="newcolor"></div>
               <div id="newcolor-plus"></div>
             </button>
           </div>
           <div class="color">
             <h5>Old</h5>
-            <button type="button" class="swatch" id="oldcolor-btn" aria-label="Old color">
+            <button
+              type="button"
+              class="swatch"
+              id="oldcolor-btn"
+              aria-label="Old color"
+            >
               <div class="swatch-color" id="oldcolor"></div>
             </button>
           </div>
         </div>
         <div id="rgbahsl">
           <div class="channel-container" id="rgba-container">
-            <label>R <input type="number" id="r" min="0" max="255" value="0" /><div class="spin-btn"><button type="button" class="channel-btn" id="inc"><span class="spin-content">+</span></button><button type="button" class="channel-btn" id="dec"><span class="spin-content">-</span></button></div></label>
-            <label>G <input type="number" id="g" min="0" max="255" value="0" /><div class="spin-btn"><button type="button" class="channel-btn" id="inc"><span class="spin-content">+</span></button><button type="button" class="channel-btn" id="dec"><span class="spin-content">-</span></button></div></label>
-            <label>B <input type="number" id="b" min="0" max="255" value="0" /><div class="spin-btn"><button type="button" class="channel-btn" id="inc"><span class="spin-content">+</span></button><button type="button" class="channel-btn" id="dec"><span class="spin-content">-</span></button></div></label>
-            <label>A <input type="number" id="a" min="0" max="255" value="255" /><div class="spin-btn"><button type="button" class="channel-btn" id="inc"><span class="spin-content">+</span></button><button type="button" class="channel-btn" id="dec"><span class="spin-content">-</span></button></div></label>
+            <label
+              >R <input type="number" id="r" min="0" max="255" value="0" />
+              <div class="spin-btn">
+                <button type="button" class="channel-btn" id="inc"
+                  ><span class="spin-content">+</span></button
+                ><button type="button" class="channel-btn" id="dec"
+                  ><span class="spin-content">-</span></button
+                >
+              </div></label
+            >
+            <label
+              >G <input type="number" id="g" min="0" max="255" value="0" />
+              <div class="spin-btn">
+                <button type="button" class="channel-btn" id="inc"
+                  ><span class="spin-content">+</span></button
+                ><button type="button" class="channel-btn" id="dec"
+                  ><span class="spin-content">-</span></button
+                >
+              </div></label
+            >
+            <label
+              >B <input type="number" id="b" min="0" max="255" value="0" />
+              <div class="spin-btn">
+                <button type="button" class="channel-btn" id="inc"
+                  ><span class="spin-content">+</span></button
+                ><button type="button" class="channel-btn" id="dec"
+                  ><span class="spin-content">-</span></button
+                >
+              </div></label
+            >
+            <label
+              >A <input type="number" id="a" min="0" max="255" value="255" />
+              <div class="spin-btn">
+                <button type="button" class="channel-btn" id="inc"
+                  ><span class="spin-content">+</span></button
+                ><button type="button" class="channel-btn" id="dec"
+                  ><span class="spin-content">-</span></button
+                >
+              </div></label
+            >
           </div>
           <div class="channel-container" id="hsl-container">
-            <label>H <input type="number" id="h" min="0" max="359" value="0" /><div class="spin-btn"><button type="button" class="channel-btn" id="inc"><span class="spin-content">+</span></button><button type="button" class="channel-btn" id="dec"><span class="spin-content">-</span></button></div></label>
-            <label>S <input type="number" id="s" min="0" max="100" value="0" /><div class="spin-btn"><button type="button" class="channel-btn" id="inc"><span class="spin-content">+</span></button><button type="button" class="channel-btn" id="dec"><span class="spin-content">-</span></button></div></label>
-            <label>L <input type="number" id="l" min="0" max="100" value="0" /><div class="spin-btn"><button type="button" class="channel-btn" id="inc"><span class="spin-content">+</span></button><button type="button" class="channel-btn" id="dec"><span class="spin-content">-</span></button></div></label>
+            <label
+              >H <input type="number" id="h" min="0" max="359" value="0" />
+              <div class="spin-btn">
+                <button type="button" class="channel-btn" id="inc"
+                  ><span class="spin-content">+</span></button
+                ><button type="button" class="channel-btn" id="dec"
+                  ><span class="spin-content">-</span></button
+                >
+              </div></label
+            >
+            <label
+              >S <input type="number" id="s" min="0" max="100" value="0" />
+              <div class="spin-btn">
+                <button type="button" class="channel-btn" id="inc"
+                  ><span class="spin-content">+</span></button
+                ><button type="button" class="channel-btn" id="dec"
+                  ><span class="spin-content">-</span></button
+                >
+              </div></label
+            >
+            <label
+              >L <input type="number" id="l" min="0" max="100" value="0" />
+              <div class="spin-btn">
+                <button type="button" class="channel-btn" id="inc"
+                  ><span class="spin-content">+</span></button
+                ><button type="button" class="channel-btn" id="dec"
+                  ><span class="spin-content">-</span></button
+                >
+              </div></label
+            >
           </div>
         </div>
         <div id="hex">
           <label>Hex <input type="text" id="hexcode" value="000000" /></label>
         </div>
         <div id="lumi">
-          <label>Lumi <input type="text" id="luminance" readonly value="0" /></label>
+          <label
+            >Lumi <input type="text" id="luminance" readonly value="0" /></label
+          >
         </div>
       </div>
     </div>

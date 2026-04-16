@@ -14,7 +14,10 @@ import { bump } from './hooks/appState.svelte.js'
 
 // Register dependencies that would otherwise create circular imports in globalState.js
 registerVectorGui(vectorGui)
-registerDOMHelpers({ disableActionsForNoSelection: bump, enableActionsForSelection: bump })
+registerDOMHelpers({
+  disableActionsForNoSelection: bump,
+  enableActionsForSelection: bump,
+})
 
 //===================================//
 //===== * * * Initialize * * * ======//

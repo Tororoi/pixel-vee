@@ -47,7 +47,13 @@
       <div class="grip"></div>
     </div>
     Stamp Editor
-    <button type="button" class="close-btn" aria-label="Close" data-tooltip="Close" onclick={handleClose}></button>
+    <button
+      type="button"
+      class="close-btn"
+      aria-label="Close"
+      data-tooltip="Close"
+      onclick={handleClose}
+    ></button>
   </div>
   <div class="stamp-editor-interface">
     <canvas
@@ -118,7 +124,11 @@
           width="32"
           height="32"
         ></canvas>
-        <button bind:this={applyBtnRef} id="stamp-editor-apply-btn" type="button">
+        <button
+          bind:this={applyBtnRef}
+          id="stamp-editor-apply-btn"
+          type="button"
+        >
           Apply
         </button>
       </div>

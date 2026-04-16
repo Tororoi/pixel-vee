@@ -9,7 +9,11 @@
   import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
   import { globalState } from '../../Context/state.js'
   import { dom } from '../../Context/dom.js'
-  import { brush, rebuildBuildUpDensityMap, BAYER_STEPS } from '../../Tools/brush.js'
+  import {
+    brush,
+    rebuildBuildUpDensityMap,
+    BAYER_STEPS,
+  } from '../../Tools/brush.js'
   import { renderCanvas } from '../../Canvas/render.js'
   import {
     applyDitherOffset,
@@ -19,7 +23,10 @@
   } from '../../DOM/renderBrush.js'
   import { ditherPatterns } from '../../Context/ditherPatterns.js'
   import { swatches } from '../../Context/swatch.js'
-  import { changeActionVectorDitherPattern, changeActionVectorDitherOffset } from '../../Actions/modifyTimeline/modifyTimeline.js'
+  import {
+    changeActionVectorDitherPattern,
+    changeActionVectorDitherOffset,
+  } from '../../Actions/modifyTimeline/modifyTimeline.js'
 
   const DITHER_TOOLS = ['brush', 'curve', 'ellipse']
 
@@ -32,27 +39,38 @@
 
   const activePatternIndex = $derived(
     getVersion() >= 0 &&
-      (vectorTarget?.ditherPatternIndex ?? globalState.tool.current?.ditherPatternIndex),
+      (vectorTarget?.ditherPatternIndex ??
+        globalState.tool.current?.ditherPatternIndex),
   )
   const twoColorActive = $derived(
     getVersion() >= 0 &&
-      !!(vectorTarget ? vectorTarget.modes?.twoColor : globalState.tool.current?.modes?.twoColor),
+      !!(vectorTarget
+        ? vectorTarget.modes?.twoColor
+        : globalState.tool.current?.modes?.twoColor),
   )
   const buildUpActive = $derived(
-    getVersion() >= 0 && !vectorTarget && !!(globalState.tool.current?.modes?.buildUpDither),
+    getVersion() >= 0 &&
+      !vectorTarget &&
+      !!globalState.tool.current?.modes?.buildUpDither,
   )
   const showBuildUpBtn = $derived(
-    getVersion() >= 0 && !vectorTarget && globalState.tool.current?.name === 'brush',
+    getVersion() >= 0 &&
+      !vectorTarget &&
+      globalState.tool.current?.name === 'brush',
   )
   const buildUpMode = $derived(
-    getVersion() >= 0 ? (globalState.tool.current?.buildUpMode ?? 'custom') : 'custom',
+    getVersion() >= 0
+      ? (globalState.tool.current?.buildUpMode ?? 'custom')
+      : 'custom',
   )
   const buildUpSteps = $derived.by(() => {
     getVersion()
     return [...(globalState.tool.current?.buildUpSteps ?? [15, 31, 47, 63])]
   })
   const buildUpActiveSlot = $derived(
-    getVersion() >= 0 ? (globalState.tool.current?.buildUpActiveStepSlot ?? null) : null,
+    getVersion() >= 0
+      ? (globalState.tool.current?.buildUpActiveStepSlot ?? null)
+      : null,
   )
   const ditherOffsetX = $derived(
     getVersion() >= 0
@@ -89,8 +107,12 @@
     const primary = swatches.primary.color.color
     const secondary = swatches.secondary.color.color
     const bgFill = twoColorActive ? secondary : 'none'
-    ref.querySelectorAll('.dither-bg-rect').forEach((r) => r.setAttribute('fill', bgFill))
-    ref.querySelectorAll('.dither-on-path').forEach((p) => p.setAttribute('stroke', primary))
+    ref
+      .querySelectorAll('.dither-bg-rect')
+      .forEach((r) => r.setAttribute('fill', bgFill))
+    ref
+      .querySelectorAll('.dither-on-path')
+      .forEach((p) => p.setAttribute('stroke', primary))
   })
 
   function appendPatternSVG(node, pattern) {
@@ -104,11 +126,14 @@
   }
 
   function serializePatternSVG(pattern, ox = 0, oy = 0) {
-    return new XMLSerializer().serializeToString(createDitherPatternSVG(pattern, ox, oy))
+    return new XMLSerializer().serializeToString(
+      createDitherPatternSVG(pattern, ox, oy),
+    )
   }
 
   function handleStepSlotClick(slotIndex) {
-    brush.buildUpActiveStepSlot = brush.buildUpActiveStepSlot === slotIndex ? null : slotIndex
+    brush.buildUpActiveStepSlot =
+      brush.buildUpActiveStepSlot === slotIndex ? null : slotIndex
     bump()
   }
 
@@ -155,19 +180,23 @@
     })
 
     // Two-color toggle
-    el.querySelector('#dither-ctrl-two-color')?.addEventListener('click', () => {
-      const vt = getDitherVectorTarget()
-      if (vt) {
-        if (!vt.modes) vt.modes = {}
-        vt.modes.twoColor = !vt.modes.twoColor
-        renderCanvas(vt.layer, true)
+    el.querySelector('#dither-ctrl-two-color')?.addEventListener(
+      'click',
+      () => {
+        const vt = getDitherVectorTarget()
+        if (vt) {
+          if (!vt.modes) vt.modes = {}
+          vt.modes.twoColor = !vt.modes.twoColor
+          renderCanvas(vt.layer, true)
+          bump()
+          return
+        }
+        if (!DITHER_TOOLS.includes(globalState.tool.current?.name)) return
+        globalState.tool.current.modes.twoColor =
+          !globalState.tool.current.modes.twoColor
         bump()
-        return
-      }
-      if (!DITHER_TOOLS.includes(globalState.tool.current?.name)) return
-      globalState.tool.current.modes.twoColor = !globalState.tool.current.modes.twoColor
-      bump()
-    })
+      },
+    )
 
     // Build-up dither toggle
     el.querySelector('#dither-ctrl-build-up')?.addEventListener('click', () => {
@@ -183,28 +212,36 @@
     })
 
     // Build-up reset
-    el.querySelector('#dither-ctrl-build-up-reset')?.addEventListener('click', () => {
-      if (globalState.tool.current?.name !== 'brush') return
-      brush._buildUpResetAtIndex = globalState.timeline.undoStack.length
-      brush._buildUpDensityMap = new Map()
-    })
+    el.querySelector('#dither-ctrl-build-up-reset')?.addEventListener(
+      'click',
+      () => {
+        if (globalState.tool.current?.name !== 'brush') return
+        brush._buildUpResetAtIndex = globalState.timeline.undoStack.length
+        brush._buildUpDensityMap = new Map()
+      },
+    )
 
     // Build-up mode selector
-    el.querySelector('.build-up-mode-selector')?.addEventListener('click', (e) => {
-      const btn = e.target.closest('.build-up-mode-btn')
-      if (!btn || globalState.tool.current?.name !== 'brush') return
-      const mode = btn.dataset.mode
-      if (brush.buildUpMode === 'custom' && mode !== 'custom') {
-        brush._customBuildUpSteps = [...brush.buildUpSteps]
-      }
-      brush.buildUpMode = mode
-      if (mode === 'custom') {
-        brush.buildUpSteps = [...brush._customBuildUpSteps]
-      } else {
-        brush.buildUpSteps = BAYER_STEPS[mode] ? [...BAYER_STEPS[mode]] : brush.buildUpSteps
-      }
-      bump()
-    })
+    el.querySelector('.build-up-mode-selector')?.addEventListener(
+      'click',
+      (e) => {
+        const btn = e.target.closest('.build-up-mode-btn')
+        if (!btn || globalState.tool.current?.name !== 'brush') return
+        const mode = btn.dataset.mode
+        if (brush.buildUpMode === 'custom' && mode !== 'custom') {
+          brush._customBuildUpSteps = [...brush.buildUpSteps]
+        }
+        brush.buildUpMode = mode
+        if (mode === 'custom') {
+          brush.buildUpSteps = [...brush._customBuildUpSteps]
+        } else {
+          brush.buildUpSteps = BAYER_STEPS[mode]
+            ? [...BAYER_STEPS[mode]]
+            : brush.buildUpSteps
+        }
+        bump()
+      },
+    )
 
     // Dither offset drag
     el.addEventListener('pointerdown', (e) => {
@@ -222,26 +259,51 @@
         const currentLayerY = vt.layer?.y ?? 0
         const recordedLayerX = vt.recordedLayerX ?? currentLayerX
         const recordedLayerY = vt.recordedLayerY ?? currentLayerY
-        const startEffectiveX = ((((vt.ditherOffsetX ?? 0) + recordedLayerX - currentLayerX) % 8) + 8) % 8
-        const startEffectiveY = ((((vt.ditherOffsetY ?? 0) + recordedLayerY - currentLayerY) % 8) + 8) % 8
-        const fromOffset = { x: vt.ditherOffsetX ?? 0, y: vt.ditherOffsetY ?? 0 }
+        const startEffectiveX =
+          ((((vt.ditherOffsetX ?? 0) + recordedLayerX - currentLayerX) % 8) +
+            8) %
+          8
+        const startEffectiveY =
+          ((((vt.ditherOffsetY ?? 0) + recordedLayerY - currentLayerY) % 8) +
+            8) %
+          8
+        const fromOffset = {
+          x: vt.ditherOffsetX ?? 0,
+          y: vt.ditherOffsetY ?? 0,
+        }
         const onMove = (ev) => {
-          const newEffectiveX = (((startEffectiveX - Math.round((ev.clientX - startX) / 4)) % 8) + 8) % 8
-          const newEffectiveY = (((startEffectiveY - Math.round((ev.clientY - startY) / 4)) % 8) + 8) % 8
-          vt.ditherOffsetX = (((newEffectiveX - recordedLayerX + currentLayerX) % 8) + 8) % 8
-          vt.ditherOffsetY = (((newEffectiveY - recordedLayerY + currentLayerY) % 8) + 8) % 8
+          const newEffectiveX =
+            (((startEffectiveX - Math.round((ev.clientX - startX) / 4)) % 8) +
+              8) %
+            8
+          const newEffectiveY =
+            (((startEffectiveY - Math.round((ev.clientY - startY) / 4)) % 8) +
+              8) %
+            8
+          vt.ditherOffsetX =
+            (((newEffectiveX - recordedLayerX + currentLayerX) % 8) + 8) % 8
+          vt.ditherOffsetY =
+            (((newEffectiveY - recordedLayerY + currentLayerY) % 8) + 8) % 8
           renderCanvas(vt.layer, true)
           applyDitherOffset(el, vt.ditherOffsetX, vt.ditherOffsetY)
           const vectorPreview = document.querySelector('.vector-dither-preview')
-          if (vectorPreview) applyDitherOffset(vectorPreview, vt.ditherOffsetX, vt.ditherOffsetY)
-          applyDitherOffsetControl(control.parentElement, vt.ditherOffsetX, vt.ditherOffsetY)
+          if (vectorPreview)
+            applyDitherOffset(vectorPreview, vt.ditherOffsetX, vt.ditherOffsetY)
+          applyDitherOffsetControl(
+            control.parentElement,
+            vt.ditherOffsetX,
+            vt.ditherOffsetY,
+          )
         }
         control.addEventListener('pointermove', onMove)
         control.addEventListener(
           'pointerup',
           () => {
             control.removeEventListener('pointermove', onMove)
-            const toOffset = { x: vt.ditherOffsetX ?? 0, y: vt.ditherOffsetY ?? 0 }
+            const toOffset = {
+              x: vt.ditherOffsetX ?? 0,
+              y: vt.ditherOffsetY ?? 0,
+            }
             if (fromOffset.x !== toOffset.x || fromOffset.y !== toOffset.y) {
               changeActionVectorDitherOffset(vt, fromOffset, toOffset)
               globalState.clearRedoStack()
@@ -256,8 +318,12 @@
         const startOffsetX = target.ditherOffsetX ?? 0
         const startOffsetY = target.ditherOffsetY ?? 0
         const onMove = (ev) => {
-          const ox = (((startOffsetX - Math.round((ev.clientX - startX) / 4)) % 8) + 8) % 8
-          const oy = (((startOffsetY - Math.round((ev.clientY - startY) / 4)) % 8) + 8) % 8
+          const ox =
+            (((startOffsetX - Math.round((ev.clientX - startX) / 4)) % 8) + 8) %
+            8
+          const oy =
+            (((startOffsetY - Math.round((ev.clientY - startY) / 4)) % 8) + 8) %
+            8
           target.ditherOffsetX = ox
           target.ditherOffsetY = oy
           applyDitherOffset(el, ox, oy)
@@ -292,7 +358,12 @@
       <div class="grip"></div>
     </div>
     Dither Pattern
-    <button type="button" class="close-btn" aria-label="Close" data-tooltip="Close"></button>
+    <button
+      type="button"
+      class="close-btn"
+      aria-label="Close"
+      data-tooltip="Close"
+    ></button>
   </div>
   <div class="collapsible">
     <div class="dither-controls">
@@ -332,29 +403,29 @@
           class="build-up-mode-btn"
           class:selected={buildUpMode === 'custom'}
           data-mode="custom"
-          data-tooltip="Custom build-up steps"
-        >Custom</button>
+          data-tooltip="Custom build-up steps">Custom</button
+        >
         <button
           type="button"
           class="build-up-mode-btn"
           class:selected={buildUpMode === '2x2'}
           data-mode="2x2"
-          data-tooltip="4 steps from a 2x2 Bayer Matrix"
-        >2×2</button>
+          data-tooltip="4 steps from a 2x2 Bayer Matrix">2×2</button
+        >
         <button
           type="button"
           class="build-up-mode-btn"
           class:selected={buildUpMode === '4x4'}
           data-mode="4x4"
-          data-tooltip="16 steps from a 4x4 Bayer Matrix"
-        >4×4</button>
+          data-tooltip="16 steps from a 4x4 Bayer Matrix">4×4</button
+        >
         <button
           type="button"
           class="build-up-mode-btn"
           class:selected={buildUpMode === '8x8'}
           data-mode="8x8"
-          data-tooltip="64 steps from an 8x8 Bayer Matrix"
-        >8×8</button>
+          data-tooltip="64 steps from an 8x8 Bayer Matrix">8×8</button
+        >
       </div>
       <div class="build-up-step-slots">
         {#if buildUpMode === 'custom'}
@@ -369,7 +440,11 @@
               onclick={() => handleStepSlotClick(i)}
             >
               <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-              {@html serializePatternSVG(ditherPatterns[patternIndex], ditherOffsetX, ditherOffsetY)}
+              {@html serializePatternSVG(
+                ditherPatterns[patternIndex],
+                ditherOffsetX,
+                ditherOffsetY,
+              )}
             </button>
           {/each}
         {/if}

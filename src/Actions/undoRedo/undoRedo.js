@@ -43,7 +43,10 @@ export function actionUndoRedo(pushStack, popStack, modType) {
     globalState.vector.all[latestAction.moddedVectorIndex].modes = {
       ...latestAction[modType],
     }
-    const vectorPropertiesSnapshot = modType === 'from' ? latestAction.fromVectorProperties : latestAction.toVectorProperties
+    const vectorPropertiesSnapshot =
+      modType === 'from'
+        ? latestAction.fromVectorProperties
+        : latestAction.toVectorProperties
     if (vectorPropertiesSnapshot) {
       Object.assign(
         globalState.vector.all[latestAction.moddedVectorIndex].vectorProperties,
@@ -117,7 +120,11 @@ export function actionUndoRedo(pushStack, popStack, modType) {
 export function handleUndo() {
   //length 1 prevents initial layer from being undone
   if (globalState.timeline.undoStack.length > 1) {
-    actionUndoRedo(globalState.timeline.redoStack, globalState.timeline.undoStack, 'from')
+    actionUndoRedo(
+      globalState.timeline.redoStack,
+      globalState.timeline.undoStack,
+      'from',
+    )
   }
 }
 
@@ -126,7 +133,11 @@ export function handleUndo() {
  */
 export function handleRedo() {
   if (globalState.timeline.redoStack.length >= 1) {
-    actionUndoRedo(globalState.timeline.undoStack, globalState.timeline.redoStack, 'to')
+    actionUndoRedo(
+      globalState.timeline.undoStack,
+      globalState.timeline.redoStack,
+      'to',
+    )
   }
 }
 

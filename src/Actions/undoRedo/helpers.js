@@ -1,16 +1,19 @@
-import { dom } from "../../Context/dom.js"
-import { globalState } from "../../Context/state.js"
-import { canvas } from "../../Context/canvas.js"
-import { brush } from "../../Tools/brush.js"
-import { applyDitherOffset, applyDitherOffsetControl } from "../../DOM/renderBrush.js"
-import { pasteSelectedPixels } from "../../Menu/edit.js"
-import { switchTool } from "../../Tools/toolbox.js"
+import { dom } from '../../Context/dom.js'
+import { globalState } from '../../Context/state.js'
+import { canvas } from '../../Context/canvas.js'
+import { brush } from '../../Tools/brush.js'
+import {
+  applyDitherOffset,
+  applyDitherOffsetControl,
+} from '../../DOM/renderBrush.js'
+import { pasteSelectedPixels } from '../../Menu/edit.js'
+import { switchTool } from '../../Tools/toolbox.js'
 import {
   disableActionsForPaste,
   enableActionsForNoPaste,
-} from "../../DOM/disableDomElements.js"
-import { transformRasterContent } from "../../utils/transformHelpers.js"
-import { applyCanvasDimensions } from "../../Canvas/render.js"
+} from '../../DOM/disableDomElements.js'
+import { transformRasterContent } from '../../utils/transformHelpers.js'
+import { applyCanvasDimensions } from '../../Canvas/render.js'
 
 /**
  * @description This function is used to handle the modify action. It is used in the undo and redo functions.
@@ -61,13 +64,13 @@ export function handleClearAction(latestAction) {
  */
 export function handlePasteAction(latestAction, modType) {
   // if modType is "from" (undoing paste action), remove the templayer
-  if (modType === "from") {
+  if (modType === 'from') {
     canvas.layers.splice(canvas.layers.indexOf(canvas.tempLayer), 1)
     dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
     canvas.tempLayer.inactiveTools.forEach((tool) => {
       if (dom[`${tool}Btn`]) {
         dom[`${tool}Btn`].disabled = false
-        dom[`${tool}Btn`].classList.remove("deactivate-paste")
+        dom[`${tool}Btn`].classList.remove('deactivate-paste')
       }
     })
     //restore the original layer
@@ -77,7 +80,7 @@ export function handlePasteAction(latestAction, modType) {
       if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = true
     })
     enableActionsForNoPaste()
-  } else if (modType === "to") {
+  } else if (modType === 'to') {
     //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
     const selectProperties = {
       ...latestAction.selectProperties,
@@ -105,7 +108,7 @@ export function handlePasteAction(latestAction, modType) {
     // globalState.vector.clearSelected()
     //set currentPastedImageKey
     globalState.clipboard.currentPastedImageKey = latestAction.pastedImageKey
-    switchTool("move")
+    switchTool('move')
     disableActionsForPaste()
   }
 }
@@ -115,9 +118,13 @@ export function handlePasteAction(latestAction, modType) {
  * @param {object} newLatestAction - The action that's about to be the most recent action, if the function is "Undo" ("from")
  * @param {string} modType - "from" or "to", used to identify undo or redo
  */
-export function handleConfirmPasteAction(latestAction, newLatestAction, modType) {
+export function handleConfirmPasteAction(
+  latestAction,
+  newLatestAction,
+  modType,
+) {
   //if modType is "from" (undoing confirm paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
-  if (modType === "from") {
+  if (modType === 'from') {
     const clipboard = {
       selectProperties: latestAction.selectProperties,
       boundaryBox: latestAction.boundaryBox,
@@ -128,16 +135,16 @@ export function handleConfirmPasteAction(latestAction, newLatestAction, modType)
     let offsetY = latestAction.layer.y
     //vector offset
     pasteSelectedPixels(clipboard, latestAction.layer, offsetX, offsetY)
-    if (newLatestAction?.tool?.name === "move") {
+    if (newLatestAction?.tool?.name === 'move') {
       //templayer's x and y coords are often reset to 0, so set them to last move action's x and y
       canvas.currentLayer.x = newLatestAction.to.x
       canvas.currentLayer.y = newLatestAction.to.y
     }
     //set currentPastedImageKey
     globalState.clipboard.currentPastedImageKey = latestAction.pastedImageKey
-    switchTool("move")
+    switchTool('move')
     disableActionsForPaste()
-  } else if (modType === "to") {
+  } else if (modType === 'to') {
     //if modType is "to" (redoing confirm paste action), enable actions for no temp pasted layer
     enableActionsForNoPaste()
   }
@@ -181,7 +188,7 @@ export function handleMoveAction(latestAction, modType) {
  * @param {string} modType - "from" or "to", used to identify undo or redo
  */
 export function handleTransformAction(latestAction, newLatestAction, modType) {
-  if (modType === "from") {
+  if (modType === 'from') {
     const selectProperties = { ...newLatestAction.selectProperties }
     selectProperties.px1 += newLatestAction.layer.x
     selectProperties.px2 += newLatestAction.layer.x
@@ -190,21 +197,24 @@ export function handleTransformAction(latestAction, newLatestAction, modType) {
     globalState.selection.properties = { ...selectProperties }
     globalState.selection.setBoundaryBox(globalState.selection.properties)
     //Eventually undoing transform actions will result in the newLatestAction being a paste action. In that case, don't render a transformation
-    if (newLatestAction.tool === "transform") {
+    if (newLatestAction.tool === 'transform') {
       transformRasterContent(
         newLatestAction.layer,
-        globalState.clipboard.pastedImages[newLatestAction.pastedImageKey].imageData,
+        globalState.clipboard.pastedImages[newLatestAction.pastedImageKey]
+          .imageData,
         globalState.selection.boundaryBox,
         newLatestAction.transformationRotationDegrees % 360,
         newLatestAction.isMirroredHorizontally,
-        newLatestAction.isMirroredVertically
+        newLatestAction.isMirroredVertically,
       )
       globalState.transform.rotationDegrees =
         newLatestAction.transformationRotationDegrees
-      globalState.transform.isMirroredHorizontally = newLatestAction.isMirroredHorizontally
-      globalState.transform.isMirroredVertically = newLatestAction.isMirroredVertically
+      globalState.transform.isMirroredHorizontally =
+        newLatestAction.isMirroredHorizontally
+      globalState.transform.isMirroredVertically =
+        newLatestAction.isMirroredVertically
     }
-  } else if (modType === "to") {
+  } else if (modType === 'to') {
     //offset selectProperties by layer x and y
     const selectProperties = { ...latestAction.selectProperties }
     selectProperties.px1 += latestAction.layer.x
@@ -221,12 +231,14 @@ export function handleTransformAction(latestAction, newLatestAction, modType) {
       globalState.selection.boundaryBox,
       latestAction.transformationRotationDegrees % 360,
       latestAction.isMirroredHorizontally,
-      latestAction.isMirroredVertically
+      latestAction.isMirroredVertically,
     )
     globalState.transform.rotationDegrees =
       latestAction.transformationRotationDegrees
-    globalState.transform.isMirroredHorizontally = latestAction.isMirroredHorizontally
-    globalState.transform.isMirroredVertically = latestAction.isMirroredVertically
+    globalState.transform.isMirroredHorizontally =
+      latestAction.isMirroredHorizontally
+    globalState.transform.isMirroredVertically =
+      latestAction.isMirroredVertically
   }
 }
 
@@ -239,18 +251,27 @@ export function handleTransformAction(latestAction, newLatestAction, modType) {
  */
 export function handleResizeAction(latestAction, modType) {
   const targetState = latestAction[modType]
-  const contentOffsetX = targetState.cropOffsetX - globalState.canvas.cropOffsetX
-  const contentOffsetY = targetState.cropOffsetY - globalState.canvas.cropOffsetY
+  const contentOffsetX =
+    targetState.cropOffsetX - globalState.canvas.cropOffsetX
+  const contentOffsetY =
+    targetState.cropOffsetY - globalState.canvas.cropOffsetY
   globalState.canvas.cropOffsetX = targetState.cropOffsetX
   globalState.canvas.cropOffsetY = targetState.cropOffsetY
-  brush.ditherOffsetX = ((brush.ditherOffsetX - contentOffsetX) % 8 + 8) % 8
-  brush.ditherOffsetY = ((brush.ditherOffsetY - contentOffsetY) % 8 + 8) % 8
+  brush.ditherOffsetX = (((brush.ditherOffsetX - contentOffsetX) % 8) + 8) % 8
+  brush.ditherOffsetY = (((brush.ditherOffsetY - contentOffsetY) % 8) + 8) % 8
   const picker = document.querySelector('.dither-picker-container')
-  if (picker) applyDitherOffset(picker, brush.ditherOffsetX, brush.ditherOffsetY)
+  if (picker)
+    applyDitherOffset(picker, brush.ditherOffsetX, brush.ditherOffsetY)
   const preview = document.querySelector('.dither-preview')
-  if (preview) applyDitherOffset(preview, brush.ditherOffsetX, brush.ditherOffsetY)
+  if (preview)
+    applyDitherOffset(preview, brush.ditherOffsetX, brush.ditherOffsetY)
   const control = document.querySelector('.dither-offset-control')
-  if (control) applyDitherOffsetControl(control.parentElement, brush.ditherOffsetX, brush.ditherOffsetY)
+  if (control)
+    applyDitherOffsetControl(
+      control.parentElement,
+      brush.ditherOffsetX,
+      brush.ditherOffsetY,
+    )
   if (globalState.selection.properties.px1 !== null) {
     globalState.selection.properties.px1 += contentOffsetX
     globalState.selection.properties.py1 += contentOffsetY
@@ -271,5 +292,10 @@ export function handleResizeAction(latestAction, modType) {
     }
     globalState.selection.maskSet = newMaskSet
   }
-  applyCanvasDimensions(targetState.width, targetState.height, contentOffsetX, contentOffsetY)
+  applyCanvasDimensions(
+    targetState.width,
+    targetState.height,
+    contentOffsetX,
+    contentOffsetY,
+  )
 }

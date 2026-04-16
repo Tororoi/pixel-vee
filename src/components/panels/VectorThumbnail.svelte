@@ -65,7 +65,14 @@
 
     switch (vp.tool) {
       case 'fill':
-        ctx.arc(px1 + 0.5 + xOffset, py1 + 0.5 + yOffset, 1, 0, 2 * Math.PI, true)
+        ctx.arc(
+          px1 + 0.5 + xOffset,
+          py1 + 0.5 + yOffset,
+          1,
+          0,
+          2 * Math.PI,
+          true,
+        )
         break
       case 'curve': {
         const modes = vector.modes ?? {}

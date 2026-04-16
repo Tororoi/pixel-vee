@@ -1,12 +1,12 @@
-import { dom } from "../../Context/dom.js"
-import { globalState } from "../../Context/state.js"
-import { bump } from "../../hooks/appState.svelte.js"
-import { vectorGui } from "../../GUI/vector.js"
-import { clearOffscreenCanvas, renderCanvas } from "../../Canvas/render.js"
-import { renderVectorsToDOM, renderLayersToDOM } from "../../DOM/render.js"
-import { removeTempLayerFromDOM } from "../../DOM/renderLayers.js"
-import { SCALE } from "../../utils/constants.js"
-import { setVectorShapeBoundaryBox } from "../../GUI/transform.js"
+import { dom } from '../../Context/dom.js'
+import { globalState } from '../../Context/state.js'
+import { bump } from '../../hooks/appState.svelte.js'
+import { vectorGui } from '../../GUI/vector.js'
+import { clearOffscreenCanvas, renderCanvas } from '../../Canvas/render.js'
+import { renderVectorsToDOM, renderLayersToDOM } from '../../DOM/render.js'
+import { removeTempLayerFromDOM } from '../../DOM/renderLayers.js'
+import { SCALE } from '../../utils/constants.js'
+import { setVectorShapeBoundaryBox } from '../../GUI/transform.js'
 
 /**
  * @description This function is used to render the canvas to the most recent action in the undoStack. It is used in the undo and redo functions.
@@ -35,7 +35,8 @@ export function renderToLatestAction(latestAction, modType) {
     }
   }
   //Set selection state based on absolute most recent action
-  const mostRecentAction = globalState.timeline.undoStack[globalState.timeline.undoStack.length - 1]
+  const mostRecentAction =
+    globalState.timeline.undoStack[globalState.timeline.undoStack.length - 1]
   //set select properties
   globalState.selection.properties = {
     ...mostRecentAction.selectProperties,
@@ -48,20 +49,26 @@ export function renderToLatestAction(latestAction, modType) {
     : null
   //set selected vectors
   globalState.vector.selectedIndices = new Set(
-    mostRecentAction.selectedVectorIndices
+    mostRecentAction.selectedVectorIndices,
   )
   if (globalState.vector.selectedIndices.size > 0) {
-    globalState.ui.vectorTransformOpen = true; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "flex"
+    globalState.ui.vectorTransformOpen = true
+    bump()
+    if (dom.vectorTransformUIContainer)
+      dom.vectorTransformUIContainer.style.display = 'flex'
     if (globalState.vector.transformMode === SCALE) {
       setVectorShapeBoundaryBox()
     }
   } else {
-    globalState.ui.vectorTransformOpen = false; bump(); if (dom.vectorTransformUIContainer) dom.vectorTransformUIContainer.style.display = "none"
+    globalState.ui.vectorTransformOpen = false
+    bump()
+    if (dom.vectorTransformUIContainer)
+      dom.vectorTransformUIContainer.style.display = 'none'
   }
   //set current vector index
   if (mostRecentAction.currentVectorIndex !== null) {
     vectorGui.setVectorProperties(
-      globalState.vector.all[mostRecentAction.currentVectorIndex]
+      globalState.vector.all[mostRecentAction.currentVectorIndex],
     )
   }
   //Confirm a valid snapshot (may need to be updated for some actions)
@@ -76,9 +83,9 @@ export function renderToLatestAction(latestAction, modType) {
       renderCanvas(mostRecentActionFromSameLayer.layer)
       //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
       if (
-        latestAction.tool === "paste" &&
+        latestAction.tool === 'paste' &&
         latestAction.confirmed &&
-        modType === "to"
+        modType === 'to'
       ) {
         //remove temp layer from DOM and restore current layer
         removeTempLayerFromDOM()
@@ -90,7 +97,7 @@ export function renderToLatestAction(latestAction, modType) {
     }
   } else {
     //no snapshot
-    if (latestAction.layer.type === "reference") {
+    if (latestAction.layer.type === 'reference') {
       renderCanvas(latestAction.layer)
     } else {
       renderCanvas(latestAction.layer, true)
@@ -99,7 +106,7 @@ export function renderToLatestAction(latestAction, modType) {
       //On subsequent undo and redo calls, the timeline will not have to be redrawn for the affected action since it will have a snapshot.
       if (mostRecentActionFromSameLayer) {
         let snapshot =
-          mostRecentActionFromSameLayer.layer.type === "raster"
+          mostRecentActionFromSameLayer.layer.type === 'raster'
             ? mostRecentActionFromSameLayer.layer.cvs.toDataURL()
             : null
         mostRecentActionFromSameLayer.snapshot = snapshot
@@ -107,9 +114,9 @@ export function renderToLatestAction(latestAction, modType) {
     }
     //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
     if (
-      latestAction.tool === "paste" &&
+      latestAction.tool === 'paste' &&
       latestAction.confirmed &&
-      modType === "to"
+      modType === 'to'
     ) {
       //remove temp layer from DOM and restore current layer
       removeTempLayerFromDOM()
