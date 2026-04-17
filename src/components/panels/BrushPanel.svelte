@@ -7,6 +7,7 @@
   import { toggleMode } from '../../Tools/toolbox.js'
   import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
   import { openStampEditor } from '../../DOM/stampEditor.js'
+  import { dom } from '../../Context/dom.js'
   import BrushDitherPreview from './BrushDitherPreview.svelte'
 
   const NO_PANEL_TOOLS = ['eyedropper', 'grab', 'move', 'select', 'magicWand']
@@ -137,22 +138,21 @@
   function handleStampBtnClick() {
     tool.brushType = 'custom'
     bump()
-    const stampEditorContainer = document.getElementById('stamp-editor')
-    if (!stampEditorContainer) return
+    if (!dom.stampEditorContainer) return
     if (
-      !stampEditorContainer.style.display ||
-      stampEditorContainer.style.display === 'none'
+      !dom.stampEditorContainer.style.display ||
+      dom.stampEditorContainer.style.display === 'none'
     ) {
       openStampEditor()
     } else {
-      stampEditorContainer.style.display = 'none'
+      dom.stampEditorContainer.style.display = 'none'
     }
   }
 
   function handleDitherPreviewClick() {
-    const picker = document.querySelector('.dither-picker-container')
-    if (!picker) return
-    picker.style.display = picker.style.display === 'flex' ? 'none' : 'flex'
+    if (!dom.ditherPickerContainer) return
+    dom.ditherPickerContainer.style.display =
+      dom.ditherPickerContainer.style.display === 'flex' ? 'none' : 'flex'
   }
 </script>
 

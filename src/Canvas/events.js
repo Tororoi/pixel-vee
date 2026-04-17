@@ -10,7 +10,6 @@ import { canvas } from '../Context/canvas.js'
 import { renderCanvas, resizeOffScreenCanvas } from '../Canvas/render.js'
 import {
   renderLayersToDOM,
-  renderLayerSettingsToDOM,
   renderVectorsToDOM,
   renderVectorSettingsToDOM,
   initVectorDitherPicker,
@@ -49,7 +48,6 @@ import {
 } from './resizeOverlay.js'
 import { switchTool } from '../Tools/toolbox.js'
 import { changeActionVectorCurveType } from '../Actions/modifyTimeline/modifyTimeline.js'
-import { enableActionsForSelection } from '../DOM/disableDomElements.js'
 
 //====================================//
 //==== * * * Canvas Resize * * * =====//
@@ -198,7 +196,7 @@ const resizeOnScreenCanvas = () => {
     dom.sidebarContainer.style.left = ''
     dom.sidebarContainer.style.top = ''
   }
-  if (dom.colorPickerContainer?.offsetHeight !== 0) {
+  if (dom.colorPickerContainer && dom.colorPickerContainer.offsetHeight !== 0) {
     constrainElementOffsets(dom.colorPickerContainer)
   }
 }
@@ -229,7 +227,6 @@ function layerInteract(e) {
     layer.hidden = false
   } else if (e.target.className.includes('gear')) {
     //open settings dialog
-    const domLayer = e.target.closest('.layer')
     //set top offset of layer settings container to match
     if (
       dom.layerSettingsContainer.style.display === 'flex' &&
@@ -241,7 +238,7 @@ function layerInteract(e) {
     } else {
       dom.layerSettingsContainer.style.display = 'flex'
       dom.layerSettingsContainer.layerObj = layer
-      renderLayerSettingsToDOM(domLayer)
+      bump()
     }
   } else {
     //TODO: (Low Priority) allow selecting multiple layers for moving purposes only
@@ -446,7 +443,7 @@ function vectorInteract(e) {
         if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = true
       })
     }
-    enableActionsForSelection() //If code reaches this case, either vector is selected or is current vector
+    bump() //If code reaches this case, either vector is selected or is current vector
     vectorGui.render()
     renderLayersToDOM()
     renderVectorsToDOM()

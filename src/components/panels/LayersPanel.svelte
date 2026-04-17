@@ -20,7 +20,7 @@
   let uploadRef = $state(null)
   let settingsLayer = $state.raw(null)
   let settingsPos = $state({ top: 0, left: 0 })
-  let dragIndex = null
+  let dragIndex = $state(null)
 
   const isPasted = $derived(getVersion() >= 0 && !!canvas.pastedLayer)
   const visibleLayers = $derived(

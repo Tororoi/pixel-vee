@@ -5,7 +5,11 @@ import { tools } from '../../Tools/index.js'
 import { vectorGui } from '../../GUI/vector.js'
 import { addToTimeline } from '../undoRedo/undoRedo.js'
 import { renderCanvas } from '../../Canvas/render.js'
-import { renderLayersToDOM, renderVectorsToDOM } from '../../DOM/render.js'
+import {
+  renderLayersToDOM,
+  renderVectorsToDOM,
+  removeTempLayerFromDOM,
+} from '../../DOM/render.js'
 import {
   confirmPastedPixels,
   copySelectedPixels,
@@ -14,12 +18,6 @@ import {
   pasteSelectedPixels,
 } from '../../Menu/edit.js'
 import { switchTool } from '../../Tools/toolbox.js'
-import { removeTempLayerFromDOM } from '../../DOM/renderLayers.js'
-import {
-  disableActionsForPaste,
-  enableActionsForNoPaste,
-  enableActionsForSelection,
-} from '../../DOM/disableDomElements.js'
 import { dom } from '../../Context/dom.js'
 import { SCALE } from '../../utils/constants.js'
 import { setVectorShapeBoundaryBox } from '../../GUI/transform.js'
@@ -197,7 +195,7 @@ export function actionPasteSelection() {
       switchTool('move') //TODO: (Medium Priority) Instead of move tool being selected, automatically use temporary transform tool which is not in the toolbox.
       renderLayersToDOM()
       renderVectorsToDOM()
-      disableActionsForPaste()
+      bump()
     } else if (Object.keys(globalState.clipboard.select.vectors).length > 0) {
       //Make deep copy of clipboard vectors:
       const clipboardVectors = JSON.parse(
@@ -251,7 +249,7 @@ export function actionPasteSelection() {
       renderCanvas(canvas.currentLayer, true) //Must occur after adding to timeline. Once direct render is implemented, render canvas can be before add to timeline
       renderLayersToDOM()
       renderVectorsToDOM()
-      enableActionsForSelection()
+      bump()
       vectorGui.render()
     }
   }
@@ -349,7 +347,7 @@ export function actionConfirmPastedPixels() {
     renderCanvas(canvas.currentLayer)
     renderLayersToDOM()
     renderVectorsToDOM()
-    enableActionsForNoPaste()
+    bump()
   }
 }
 

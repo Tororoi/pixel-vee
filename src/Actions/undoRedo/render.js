@@ -3,8 +3,11 @@ import { globalState } from '../../Context/state.js'
 import { bump } from '../../hooks/appState.svelte.js'
 import { vectorGui } from '../../GUI/vector.js'
 import { clearOffscreenCanvas, renderCanvas } from '../../Canvas/render.js'
-import { renderVectorsToDOM, renderLayersToDOM } from '../../DOM/render.js'
-import { removeTempLayerFromDOM } from '../../DOM/renderLayers.js'
+import {
+  renderVectorsToDOM,
+  renderLayersToDOM,
+  removeTempLayerFromDOM,
+} from '../../DOM/render.js'
 import { SCALE } from '../../utils/constants.js'
 import { setVectorShapeBoundaryBox } from '../../GUI/transform.js'
 

@@ -10,7 +10,7 @@ import { vectorGui } from '../GUI/vector.js'
 import { renderCanvas } from '../Canvas/render.js'
 import { coordArrayFromSet } from '../utils/maskHelpers.js'
 import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
-import { enableActionsForSelection } from '../DOM/disableDomElements.js'
+import { bump } from '../hooks/appState.svelte.js'
 import { rerouteVectorStepsAction } from './adjust.js'
 import {
   getCropNormalizedCursorX,
@@ -377,7 +377,7 @@ function polygonSteps() {
       }
       const uniqueVectorKey = globalState.vector.nextKey()
       globalState.vector.setCurrentIndex(uniqueVectorKey)
-      enableActionsForSelection()
+      bump()
       addToTimeline({
         tool: globalState.tool.current.name,
         layer: canvas.currentLayer,

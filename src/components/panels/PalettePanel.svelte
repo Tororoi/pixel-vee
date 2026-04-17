@@ -5,10 +5,6 @@
   import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
   import { initializeColorPicker } from '../../Swatch/events.js'
   import { DEFAULT_PALETTES, PRESETS } from '../../utils/palettes.js'
-  import {
-    renderPaletteToDOM,
-    renderPalettePresetsToDOM,
-  } from '../../DOM/renderPalette.js'
 
   let ref = $state(null)
   let primarySwatchRef = $state(null)
@@ -89,7 +85,7 @@
         ...c,
       }))
     }
-    renderPalettePresetsToDOM()
+    bump()
   }
 
   function handlePrimarySwatchClick(e) {
@@ -157,8 +153,7 @@
     }
     swatches.currentPreset = id
     presetsOpen = false
-    renderPaletteToDOM()
-    renderPalettePresetsToDOM()
+    bump()
   }
 
   function handlePaletteColorClick(color, index) {
@@ -169,7 +164,7 @@
       swatches.palette.splice(index, 1)
       onPaletteModified()
       swatches.paletteMode = 'select'
-      renderPaletteToDOM()
+      bump()
     } else {
       if (index === swatches.selectedPaletteIndex) {
         swatches.activePaletteIndex = index

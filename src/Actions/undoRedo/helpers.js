@@ -8,10 +8,7 @@ import {
 } from '../../DOM/renderBrush.js'
 import { pasteSelectedPixels } from '../../Menu/edit.js'
 import { switchTool } from '../../Tools/toolbox.js'
-import {
-  disableActionsForPaste,
-  enableActionsForNoPaste,
-} from '../../DOM/disableDomElements.js'
+import { bump } from '../../hooks/appState.svelte.js'
 import { transformRasterContent } from '../../utils/transformHelpers.js'
 import { applyCanvasDimensions } from '../../Canvas/render.js'
 
@@ -79,7 +76,7 @@ export function handlePasteAction(latestAction, modType) {
     canvas.currentLayer.inactiveTools.forEach((tool) => {
       if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = true
     })
-    enableActionsForNoPaste()
+    bump()
   } else if (modType === 'to') {
     //if modType is "to" (redoing paste action), basically do the pasteSelectedPixels function except use the action properties instead of the clipboard and don't add to timeline
     const selectProperties = {
@@ -109,7 +106,7 @@ export function handlePasteAction(latestAction, modType) {
     //set currentPastedImageKey
     globalState.clipboard.currentPastedImageKey = latestAction.pastedImageKey
     switchTool('move')
-    disableActionsForPaste()
+    bump()
   }
 }
 
@@ -143,10 +140,10 @@ export function handleConfirmPasteAction(
     //set currentPastedImageKey
     globalState.clipboard.currentPastedImageKey = latestAction.pastedImageKey
     switchTool('move')
-    disableActionsForPaste()
+    bump()
   } else if (modType === 'to') {
     //if modType is "to" (redoing confirm paste action), enable actions for no temp pasted layer
-    enableActionsForNoPaste()
+    bump()
   }
 }
 

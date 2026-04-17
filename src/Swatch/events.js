@@ -8,9 +8,6 @@ import { generateRandomRGB } from '../utils/colors.js'
 import { renderCanvas } from '../Canvas/render.js'
 import {
   renderVectorsToDOM,
-  renderPaletteToolsToDOM,
-  renderPaletteToDOM,
-  renderPalettePresetsToDOM,
   updateDitherPickerColors,
   updateVectorDitherPreview,
   updateVectorDitherPickerColors,
@@ -100,7 +97,7 @@ export function setColor(r, g, b, a, target) {
   swatches.selectedPaletteIndex = null
   //only render when s key (randomize color) is not being pressed
   if (!keys.KeyR) {
-    renderPaletteToDOM()
+    bump()
   }
   updateDitherPickerColors()
 }
@@ -168,7 +165,7 @@ function switchColors() {
     '--secondary-swatch-alpha',
     `${temp.a / 255}`,
   )
-  renderPaletteToDOM()
+  bump()
   updateDitherPickerColors()
 }
 
@@ -190,9 +187,8 @@ function handlePalette(e) {
         if (!keys['KeyX']) {
           //reset paletteMode unless holding x
           swatches.paletteMode = 'select'
-          renderPaletteToolsToDOM()
         }
-        renderPaletteToDOM()
+        bump()
       }
     } else {
       //select mode
@@ -224,14 +220,14 @@ function handlePalette(e) {
     } else {
       swatches.paletteMode = 'select'
     }
-    renderPaletteToolsToDOM()
+    bump()
   } else if (e.target.className.includes('palette-edit')) {
     if (swatches.paletteMode !== 'edit') {
       swatches.paletteMode = 'edit'
     } else {
       swatches.paletteMode = 'select'
     }
-    renderPaletteToolsToDOM()
+    bump()
   }
 }
 
@@ -303,7 +299,7 @@ export function addToPalette() {
     a,
   })
   onPaletteModified()
-  renderPaletteToDOM()
+  bump()
 }
 
 /**
@@ -321,8 +317,7 @@ function handlePresetSelect(id) {
     return
   }
   swatches.currentPreset = id
-  renderPaletteToDOM()
-  renderPalettePresetsToDOM()
+  bump()
 }
 
 /**
@@ -349,7 +344,7 @@ function onPaletteModified() {
       ...c,
     }))
   }
-  renderPalettePresetsToDOM()
+  bump()
 }
 
 // * Swatch / Palette * — handled by PalettePanel React component; guard until migrated

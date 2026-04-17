@@ -29,10 +29,7 @@ import {
   handleOptionsAndUpdateVector,
   // findVectorShapeBoundaryBox,
 } from '../utils/vectorHelpers.js'
-import {
-  disableActionsForNoSelection,
-  enableActionsForSelection,
-} from '../DOM/disableDomElements.js'
+import { bump } from '../hooks/appState.svelte.js'
 // import { switchTool } from "../Tools/toolbox.js"
 
 //==================================================//
@@ -548,7 +545,7 @@ function reset() {
   globalState.vector.properties = {}
   //reset selectedpoint and collided keys
   globalState.vector.setCurrentIndex(null)
-  disableActionsForNoSelection()
+  bump()
   vectorGui.render()
 }
 
@@ -582,7 +579,7 @@ function setVectorProperties(vector) {
     }
     globalState.vector.setCurrentIndex(vector.index)
     // switchTool(vector.vectorProperties.tool)
-    enableActionsForSelection()
+    bump()
   }
 }
 

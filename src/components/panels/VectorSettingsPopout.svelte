@@ -8,6 +8,7 @@
   } from '../../hooks/appState.svelte.js'
   import { portal } from '../../utils/portal.js'
   import { globalState } from '../../Context/state.js'
+  import { dom } from '../../Context/dom.js'
   import { renderCanvas } from '../../Canvas/render.js'
   import { renderVectorsToDOM } from '../../DOM/render.js'
   import {
@@ -27,7 +28,6 @@
   const { vector, pos, onclose } = $props()
 
   let ref = $state(null)
-  let ditherPreviewRef = $state(null)
 
   onMount(() => {
     function handleOutside(e) {
@@ -45,14 +45,13 @@
     return () => document.removeEventListener('pointerdown', handleOutside)
   })
 
-  // Re-render dither preview on every bump()
-  $effect(() => {
+  const ditherPreviewSVG = $derived.by(() => {
     getVersion()
-    const el = ditherPreviewRef
-    if (!el) return
-    el.innerHTML = ''
     const pattern = ditherPatterns[vector.ditherPatternIndex ?? 63]
-    if (pattern) el.appendChild(createVectorDitherPatternSVG(pattern, vector))
+    if (!pattern) return ''
+    return new XMLSerializer().serializeToString(
+      createVectorDitherPatternSVG(pattern, vector),
+    )
   })
 
   function handleModeToggle(modeKey) {
@@ -124,19 +123,23 @@
   }
 
   function handleDitherClick() {
-    const picker = document.querySelector('.dither-picker-container')
-    if (!picker) return
-    if (picker.style.display === 'flex' && getDitherVectorTarget() === vector) {
+    if (!dom.ditherPickerContainer) return
+    if (
+      dom.ditherPickerContainer.style.display === 'flex' &&
+      getDitherVectorTarget() === vector
+    ) {
       setDitherVectorTarget(null)
-      picker.style.display = 'none'
+      dom.ditherPickerContainer.style.display = 'none'
     } else {
       setDitherVectorTarget(vector)
       const ox = vector.ditherOffsetX ?? 0
       const oy = vector.ditherOffsetY ?? 0
-      applyDitherOffset(picker, ox, oy)
-      const wrap = picker.querySelector('.dither-offset-control-wrap')
+      applyDitherOffset(dom.ditherPickerContainer, ox, oy)
+      const wrap = dom.ditherPickerContainer.querySelector(
+        '.dither-offset-control-wrap',
+      )
       if (wrap) applyDitherOffsetControl(wrap, ox, oy)
-      picker.style.display = 'flex'
+      dom.ditherPickerContainer.style.display = 'flex'
     }
   }
 
@@ -218,12 +221,14 @@
     <span>Dither</span>
     <button
       type="button"
-      bind:this={ditherPreviewRef}
       class="vector-dither-preview"
       aria-label="Select dither pattern"
       data-tooltip="Select dither pattern"
       onclick={handleDitherClick}
-    ></button>
+    >
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+      {@html ditherPreviewSVG}
+    </button>
   </div>
   <div class="vector-settings-brush-row">
     <span>Size: {brushSize}px</span>

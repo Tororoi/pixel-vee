@@ -8,8 +8,6 @@ import { handleUndo, handleRedo } from '../Actions/undoRedo/undoRedo.js'
 import { tools } from '../Tools/index.js'
 import { renderCanvas } from '../Canvas/render.js'
 import {
-  renderPaletteToolsToDOM,
-  renderPaletteToDOM,
   renderToolOptionsToDOM,
   renderVectorsToDOM,
 } from '../DOM/render.js'
@@ -217,8 +215,7 @@ export function activateShortcut(keyCode) {
     case 'KeyK':
       if (!globalState.cursor.clicked) {
         swatches.paletteMode = 'edit'
-        renderPaletteToolsToDOM()
-        renderPaletteToDOM()
+        bump()
       }
       break
     case 'KeyL':
@@ -263,7 +260,7 @@ export function activateShortcut(keyCode) {
           actionRotatePixels()
         } else {
           randomizeColor(swatches.primary.swatch)
-          renderPaletteToDOM()
+          bump()
         }
       }
       break
@@ -316,8 +313,7 @@ export function activateShortcut(keyCode) {
           actionCutSelection()
         } else {
           swatches.paletteMode = 'remove'
-          renderPaletteToolsToDOM()
-          renderPaletteToDOM()
+          bump()
         }
       }
       break
@@ -447,8 +443,7 @@ export function deactivateShortcut(keyCode) {
     case 'KeyK':
       if (!globalState.cursor.clicked) {
         swatches.paletteMode = 'select'
-        renderPaletteToolsToDOM()
-        renderPaletteToDOM()
+        bump()
       }
       break
     case 'KeyL':
@@ -490,8 +485,7 @@ export function deactivateShortcut(keyCode) {
     case 'KeyX':
       if (!globalState.cursor.clicked) {
         swatches.paletteMode = 'select'
-        renderPaletteToolsToDOM()
-        renderPaletteToDOM()
+        bump()
       }
       break
     case 'KeyY':
