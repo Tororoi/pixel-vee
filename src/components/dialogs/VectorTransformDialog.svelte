@@ -1,6 +1,5 @@
 <script>
   import { onMount } from 'svelte'
-  import { getVersion, bump } from '../../hooks/appState.svelte.js'
   import { globalState } from '../../Context/state.js'
   import { switchVectorTransformMode } from '../../GUI/events.js'
   import { setVectorShapeBoundaryBox } from '../../GUI/transform.js'
@@ -10,12 +9,8 @@
 
   let ref = $state(null)
 
-  const isOpen = $derived(
-    getVersion() >= 0 && globalState.ui.vectorTransformOpen,
-  )
-  const mode = $derived(
-    getVersion() >= 0 ? globalState.vector.transformMode : null,
-  )
+  const isOpen = $derived(globalState.ui.vectorTransformOpen)
+  const mode = $derived(globalState.vector.transformMode)
 
   onMount(() => {
     if (!ref) return
@@ -27,7 +22,6 @@
 
   function handleClose() {
     actionDeselect()
-    bump()
   }
 
   function handleTranslate() {

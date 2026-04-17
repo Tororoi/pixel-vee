@@ -1,4 +1,3 @@
-import { bump } from '../hooks/appState.svelte.js'
 import { dom } from '../Context/dom.js'
 import { canvas } from '../Context/canvas.js'
 
@@ -12,7 +11,6 @@ export const renderLayersToDOM = () => {
   canvas.activeLayerCount = canvas.layers.filter(
     (l) => !l.removed && !l.isPreview && l.type === 'raster',
   ).length
-  bump()
 }
 
 export function removeTempLayerFromDOM() {

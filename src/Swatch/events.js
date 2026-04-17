@@ -1,7 +1,6 @@
 import { dom } from '../Context/dom.js'
 import { keys } from '../Shortcuts/keys.js'
 import { globalState } from '../Context/state.js'
-import { bump } from '../hooks/appState.svelte.js'
 import { swatches } from '../Context/swatch.js'
 import { Picker } from './Picker.js'
 import { generateRandomRGB } from '../utils/colors.js'
@@ -97,7 +96,6 @@ export function setColor(r, g, b, a, target) {
   swatches.selectedPaletteIndex = null
   //only render when s key (randomize color) is not being pressed
   if (!keys.KeyR) {
-    bump()
   }
   updateDitherPickerColors()
 }
@@ -119,9 +117,8 @@ export function initializeColorPicker(target) {
   picker.swatch = target
   const initialColorReference = target.color
   picker.update(initialColorReference)
-  //show colorpicker — React reads globalState.ui.colorPickerOpen via bump()
+  //show colorpicker — React reads globalState.ui.colorPickerOpen via 
   globalState.ui.colorPickerOpen = true
-  bump()
   if (dom.colorPickerContainer) {
     dom.colorPickerContainer.style.display = 'flex'
     dom.colorPickerContainer.style.top =
@@ -165,7 +162,6 @@ function switchColors() {
     '--secondary-swatch-alpha',
     `${temp.a / 255}`,
   )
-  bump()
   updateDitherPickerColors()
 }
 
@@ -188,7 +184,6 @@ function handlePalette(e) {
           //reset paletteMode unless holding x
           swatches.paletteMode = 'select'
         }
-        bump()
       }
     } else {
       //select mode
@@ -220,14 +215,12 @@ function handlePalette(e) {
     } else {
       swatches.paletteMode = 'select'
     }
-    bump()
   } else if (e.target.className.includes('palette-edit')) {
     if (swatches.paletteMode !== 'edit') {
       swatches.paletteMode = 'edit'
     } else {
       swatches.paletteMode = 'select'
     }
-    bump()
   }
 }
 
@@ -240,7 +233,6 @@ export function closePickerWindow() {
   picker.editingCustomKey = null
   // hide colorpicker
   globalState.ui.colorPickerOpen = false
-  bump()
   if (dom.colorPickerContainer) dom.colorPickerContainer.style.display = 'none'
 }
 
@@ -299,7 +291,6 @@ export function addToPalette() {
     a,
   })
   onPaletteModified()
-  bump()
 }
 
 /**
@@ -317,7 +308,6 @@ function handlePresetSelect(id) {
     return
   }
   swatches.currentPreset = id
-  bump()
 }
 
 /**
@@ -344,7 +334,6 @@ function onPaletteModified() {
       ...c,
     }))
   }
-  bump()
 }
 
 // * Swatch / Palette * — handled by PalettePanel React component; guard until migrated

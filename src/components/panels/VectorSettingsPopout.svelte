@@ -1,8 +1,6 @@
 <script>
   import { onMount } from 'svelte'
   import {
-    getVersion,
-    bump,
     getDitherVectorTarget,
     setDitherVectorTarget,
   } from '../../hooks/appState.svelte.js'
@@ -25,7 +23,7 @@
   } from '../../DOM/renderBrush.js'
   import { vectorGui } from '../../GUI/vector.js'
 
-  const { vector, pos, onclose } = $props()
+  const { vector = $bindable(), pos, onclose } = $props()
 
   let ref = $state(null)
 
@@ -46,23 +44,23 @@
   })
 
   const ditherPreviewSVG = $derived.by(() => {
-    getVersion()
     const pattern = ditherPatterns[vector.ditherPatternIndex ?? 63]
     if (!pattern) return ''
-    return new XMLSerializer().serializeToString(
-      createVectorDitherPatternSVG(pattern, vector),
-    )
+    const twoColor = vector.modes?.twoColor ?? false
+    const svgEl = createVectorDitherPatternSVG(pattern, vector)
+    if (twoColor) {
+      const bg = svgEl.querySelector('.dither-bg-rect')
+      if (bg) bg.setAttribute('fill', vector.secondaryColor?.color ?? 'rgba(0,0,0,0)')
+    }
+    return new XMLSerializer().serializeToString(svgEl)
   })
 
   function handleModeToggle(modeKey) {
     const isCurveType = ['line', 'quadCurve', 'cubicCurve'].includes(modeKey)
     if (isCurveType && vector.modes[modeKey]) return
     if (isCurveType) {
-      // Delegates to changeActionVectorCurveType which handles control point
-      // initialization (averaging px1/px2), timeline recording, and vectorGui.render()
       changeActionVectorCurveType(vector, modeKey)
       renderVectorsToDOM()
-      bump()
       return
     }
     const oldModes = { ...vector.modes }
@@ -111,7 +109,6 @@
   function handleBrushSizeInput(e) {
     vector.brushSize = parseInt(e.target.value)
     renderCanvas(vector.layer, true)
-    bump()
   }
 
   function handleBrushSizeChange(e) {
@@ -143,18 +140,9 @@
     }
   }
 
-  const modes = $derived.by(() => {
-    getVersion()
-    return { ...(vector.modes ?? {}) }
-  })
-  const primaryColor = $derived.by(() => {
-    getVersion()
-    return vector.color?.color
-  })
-  const secondaryColor = $derived.by(() => {
-    getVersion()
-    return vector.secondaryColor?.color ?? 'rgba(0,0,0,0)'
-  })
+  const modes = $derived({ ...(vector.modes ?? {}) })
+  const primaryColor = $derived(vector.color?.color)
+  const secondaryColor = $derived(vector.secondaryColor?.color ?? 'rgba(0,0,0,0)')
   const tool = $derived(vector.vectorProperties?.tool)
   const isCurveTool = $derived(tool === 'curve')
   const curveTypes = ['line', 'quadCurve', 'cubicCurve']
@@ -162,7 +150,7 @@
   const allModes = $derived(
     isCurveTool ? [...curveTypes, ...generalModes] : generalModes,
   )
-  const brushSize = $derived(getVersion() >= 0 ? (vector.brushSize ?? 1) : 1)
+  const brushSize = $derived(vector.brushSize ?? 1)
 </script>
 
 <div

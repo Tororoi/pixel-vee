@@ -7,7 +7,6 @@ import { renderCursor } from '../GUI/cursor.js'
 import { actionDeselect } from '../Actions/nonPointer/selectionActions.js'
 import { actionConfirmPastedPixels } from '../Actions/nonPointer/clipboardActions.js'
 import { CURVE_TYPES } from '../utils/constants.js'
-import { bump } from '../hooks/appState.svelte.js'
 
 /**
  * Switch active tool
@@ -60,7 +59,6 @@ export function switchTool(toolName = null, toolBtn = null) {
   vectorGui.reset()
   globalState.reset()
   renderCursor()
-  bump()
 }
 
 /**
@@ -101,7 +99,6 @@ export function toggleMode(modeName = null, modeBtn = null) {
         canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
       }
       renderCursor()
-      bump()
     }
   }
 }

@@ -52,9 +52,13 @@ export function transformVectorSteps() {
       )
       if (globalState.vector.transformMode === ROTATE) {
         //Rotation
+        // grabStartX/Y are in canvas-pixel space (includes cropOffset); shapeCenterX/Y is in
+        // layer-absolute space (no cropOffset). Normalize cursor to layer-absolute before comparing.
         globalState.vector.grabStartAngle = getAngle(
-          globalState.vector.shapeCenterX - globalState.tool.grabStartX,
-          globalState.vector.shapeCenterY - globalState.tool.grabStartY,
+          globalState.vector.shapeCenterX -
+            (globalState.tool.grabStartX - globalState.canvas.cropOffsetX),
+          globalState.vector.shapeCenterY -
+            (globalState.tool.grabStartY - globalState.canvas.cropOffsetY),
         )
       }
       renderCanvas(
@@ -70,14 +74,15 @@ export function transformVectorSteps() {
       //Based on the action being taken, update the vector properties for all selected vectors.
       if (globalState.vector.transformMode === ROTATE) {
         //Rotation
+        // Normalize canvas-pixel cursor positions to layer-absolute space to match shapeCenterX/Y.
         rotateVectors(
           currentVector.layer,
           globalState.vector.savedProperties,
           globalState.vector.all,
-          globalState.cursor.x,
-          globalState.cursor.y,
-          globalState.tool.grabStartX,
-          globalState.tool.grabStartY,
+          globalState.cursor.x - globalState.canvas.cropOffsetX,
+          globalState.cursor.y - globalState.canvas.cropOffsetY,
+          globalState.tool.grabStartX - globalState.canvas.cropOffsetX,
+          globalState.tool.grabStartY - globalState.canvas.cropOffsetY,
           globalState.vector.shapeCenterX,
           globalState.vector.shapeCenterY,
         )
@@ -114,10 +119,10 @@ export function transformVectorSteps() {
           currentVector.layer,
           globalState.vector.savedProperties,
           globalState.vector.all,
-          globalState.cursor.x,
-          globalState.cursor.y,
-          globalState.tool.grabStartX,
-          globalState.tool.grabStartY,
+          globalState.cursor.x - globalState.canvas.cropOffsetX,
+          globalState.cursor.y - globalState.canvas.cropOffsetY,
+          globalState.tool.grabStartX - globalState.canvas.cropOffsetX,
+          globalState.tool.grabStartY - globalState.canvas.cropOffsetY,
           globalState.vector.shapeCenterX,
           globalState.vector.shapeCenterY,
         )
@@ -225,11 +230,27 @@ export function scaleVectorSteps() {
           isMirroredVertically = !isMirroredVertically
         }
       }
+      // boundaryBoxes are in canvas-pixel space; transformVectorContent uses stored+layer.x
+      // (layer-absolute). Subtract cropOffset so both sides are in the same space.
+      const cox = globalState.canvas.cropOffsetX
+      const coy = globalState.canvas.cropOffsetY
+      const prevBB = {
+        xMin: globalState.selection.previousBoundaryBox.xMin - cox,
+        yMin: globalState.selection.previousBoundaryBox.yMin - coy,
+        xMax: globalState.selection.previousBoundaryBox.xMax - cox,
+        yMax: globalState.selection.previousBoundaryBox.yMax - coy,
+      }
+      const newBB = {
+        xMin: globalState.selection.boundaryBox.xMin - cox,
+        yMin: globalState.selection.boundaryBox.yMin - coy,
+        xMax: globalState.selection.boundaryBox.xMax - cox,
+        yMax: globalState.selection.boundaryBox.yMax - coy,
+      }
       transformVectorContent(
         globalState.vector.all,
         globalState.vector.savedProperties,
-        globalState.selection.previousBoundaryBox,
-        globalState.selection.boundaryBox,
+        prevBB,
+        newBB,
         isMirroredHorizontally,
         isMirroredVertically,
       )
@@ -271,16 +292,23 @@ export function moveVectorRotationPointSteps() {
         xKey: vectorGui.collidedPoint.xKey,
         yKey: vectorGui.collidedPoint.yKey,
       }
-      globalState.vector.shapeCenterX = globalState.cursor.x
-      globalState.vector.shapeCenterY = globalState.cursor.y
+      // shapeCenterX/Y is kept in layer-absolute space; subtract cropOffset to normalize cursor.
+      globalState.vector.shapeCenterX =
+        globalState.cursor.x - globalState.canvas.cropOffsetX
+      globalState.vector.shapeCenterY =
+        globalState.cursor.y - globalState.canvas.cropOffsetY
       break
     case 'pointermove':
-      globalState.vector.shapeCenterX = globalState.cursor.x
-      globalState.vector.shapeCenterY = globalState.cursor.y
+      globalState.vector.shapeCenterX =
+        globalState.cursor.x - globalState.canvas.cropOffsetX
+      globalState.vector.shapeCenterY =
+        globalState.cursor.y - globalState.canvas.cropOffsetY
       break
     case 'pointerup':
-      globalState.vector.shapeCenterX = globalState.cursor.x
-      globalState.vector.shapeCenterY = globalState.cursor.y
+      globalState.vector.shapeCenterX =
+        globalState.cursor.x - globalState.canvas.cropOffsetX
+      globalState.vector.shapeCenterY =
+        globalState.cursor.y - globalState.canvas.cropOffsetY
       vectorGui.selectedPoint = {
         xKey: null,
         yKey: null,

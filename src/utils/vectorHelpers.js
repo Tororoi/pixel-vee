@@ -235,8 +235,8 @@ export function translateVectors(
       const pxProp = `px${n}`
       const pyProp = `py${n}`
       if (
-        originalVectorProperties[pxProp] !== undefined &&
-        originalVectorProperties[pyProp] !== undefined
+        originalVectorProperties[pxProp] != null &&
+        originalVectorProperties[pyProp] != null
       ) {
         updateVectorProperties(
           vector,
@@ -247,6 +247,14 @@ export function translateVectors(
         )
       }
     })
+    if ('px0' in originalVectorProperties) {
+      vector.vectorProperties.px0 = Math.round(
+        (vector.vectorProperties.px1 + vector.vectorProperties.px3) / 2,
+      )
+      vector.vectorProperties.py0 = Math.round(
+        (vector.vectorProperties.py1 + vector.vectorProperties.py3) / 2,
+      )
+    }
     if (originalVectorProperties.tool === 'ellipse') {
       const conicControlPoints = calcEllipseConicsFromVertices(
         vector.vectorProperties.px1,
@@ -303,8 +311,8 @@ export function rotateVectors(
     const vector = vectors[vectorIndex]
     for (let i = 1; i <= 4; i++) {
       if (
-        'px' + i in originalVectorProperties &&
-        'py' + i in originalVectorProperties
+        originalVectorProperties[`px${i}`] != null &&
+        originalVectorProperties[`py${i}`] != null
       ) {
         const xKey = `px${i}`
         const yKey = `py${i}`
@@ -320,6 +328,14 @@ export function rotateVectors(
         )
         updateVectorProperties(vector, newX, newY, xKey, yKey)
       }
+    }
+    if ('px0' in originalVectorProperties) {
+      vector.vectorProperties.px0 = Math.round(
+        (vector.vectorProperties.px1 + vector.vectorProperties.px3) / 2,
+      )
+      vector.vectorProperties.py0 = Math.round(
+        (vector.vectorProperties.py1 + vector.vectorProperties.py3) / 2,
+      )
     }
     if (originalVectorProperties.tool === 'ellipse') {
       //updateVectorProperties is not enough for ellipses. The angle and radii must be updated as well as the values for conic segments.
@@ -373,7 +389,7 @@ export function findVectorShapeCentroid(vectorIndicesSet, vectors) {
     const vectorProperties = vectors[index].vectorProperties
     //Get points for center point calculation.
     for (let i = 1; i <= 4; i++) {
-      if ('px' + i in vectorProperties && 'py' + i in vectorProperties) {
+      if (vectorProperties[`px${i}`] != null && vectorProperties[`py${i}`] != null) {
         const xKey = `px${i}`
         const yKey = `py${i}`
         vectorPoints.push([vectorProperties[xKey], vectorProperties[yKey]])
@@ -409,8 +425,8 @@ export function findVectorShapeBoundaryBox(vectorIndicesSet, vectors) {
     } else {
       for (let i = 1; i <= 4; i++) {
         if (
-          'px' + i in vector.vectorProperties &&
-          'py' + i in vector.vectorProperties
+          vector.vectorProperties[`px${i}`] != null &&
+          vector.vectorProperties[`py${i}`] != null
         ) {
           vectorXPoints.push(vector.vectorProperties[`px${i}`])
           vectorYPoints.push(vector.vectorProperties[`py${i}`])

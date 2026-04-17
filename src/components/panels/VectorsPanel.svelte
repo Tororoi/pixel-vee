@@ -1,6 +1,5 @@
 <script>
   import { onMount } from 'svelte'
-  import { getVersion, bump } from '../../hooks/appState.svelte.js'
   import { globalState } from '../../Context/state.js'
   import { canvas } from '../../Context/canvas.js'
   import { vectorGui } from '../../GUI/vector.js'
@@ -25,20 +24,15 @@
   let settingsVector = $state.raw(null)
   let settingsPos = $state({ top: 0, left: 0 })
 
-  const isPasted = $derived(getVersion() >= 0 && !!canvas.pastedLayer)
+  const isPasted = $derived(!!canvas.pastedLayer)
   const visibleVectors = $derived.by(() => {
-    getVersion()
     const undoStackSet = new Set(globalState.timeline.undoStack)
     return Object.values(globalState.vector.all).filter((v) =>
       isValidVector(v, undoStackSet),
     )
   })
-  const currentVectorIndex = $derived(
-    getVersion() >= 0 ? globalState.vector.currentIndex : null,
-  )
-  const selectedIndices = $derived(
-    getVersion() >= 0 ? globalState.vector.selectedIndices : new Set(),
-  )
+  const currentVectorIndex = $derived(globalState.vector.currentIndex)
+  const selectedIndices = $derived(globalState.vector.selectedIndices)
 
   onMount(() => {
     if (!ref) return
@@ -83,7 +77,6 @@
     e.stopPropagation()
     vector.hidden = !vector.hidden
     renderCanvas(vector.layer, true)
-    bump()
   }
 
   function handleRemove(e, vector) {
@@ -146,7 +139,7 @@
     <div class="vectors-container">
       <div class="vectors">
         {#each visibleVectors as vector (vector.index)}
-          {@const isVectorHidden = getVersion() >= 0 && vector.hidden}
+          {@const isVectorHidden = vector.hidden}
           {@const isSelected =
             vector.index === currentVectorIndex ||
             selectedIndices.has(vector.index)}
@@ -212,7 +205,7 @@
   </div>
   {#if settingsVector}
     <VectorSettingsPopout
-      vector={settingsVector}
+      bind:vector={settingsVector}
       pos={settingsPos}
       onclose={() => {
         settingsVector = null

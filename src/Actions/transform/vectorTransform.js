@@ -30,8 +30,8 @@ export function actionFlipVectors(flipHorizontally) {
 
     for (let i = 1; i <= 4; i++) {
       if (
-        'px' + i in vector.vectorProperties &&
-        'py' + i in vector.vectorProperties
+        vector.vectorProperties[`px${i}`] != null &&
+        vector.vectorProperties[`py${i}`] != null
       ) {
         vectorXPoints.push(vector.vectorProperties[`px${i}`])
         vectorYPoints.push(vector.vectorProperties[`py${i}`])
@@ -57,8 +57,8 @@ export function actionFlipVectors(flipHorizontally) {
     }
     for (let i = 1; i <= 4; i++) {
       if (
-        'px' + i in vector.vectorProperties &&
-        'py' + i in vector.vectorProperties
+        vector.vectorProperties[`px${i}`] != null &&
+        vector.vectorProperties[`py${i}`] != null
       ) {
         const xKey = `px${i}`
         const yKey = `py${i}`
@@ -71,6 +71,14 @@ export function actionFlipVectors(flipHorizontally) {
         }
         updateVectorProperties(vector, newX, newY, xKey, yKey)
       }
+    }
+    if ('px0' in vector.vectorProperties) {
+      vector.vectorProperties.px0 = Math.round(
+        (vector.vectorProperties.px1 + vector.vectorProperties.px3) / 2,
+      )
+      vector.vectorProperties.py0 = Math.round(
+        (vector.vectorProperties.py1 + vector.vectorProperties.py3) / 2,
+      )
     }
     if (vectorIndex === globalState.vector.currentIndex) {
       vectorGui.setVectorProperties(vector)
@@ -115,8 +123,8 @@ export function actionRotateVectors(degrees) {
     }
     for (let i = 1; i <= 4; i++) {
       if (
-        'px' + i in vector.vectorProperties &&
-        'py' + i in vector.vectorProperties
+        vector.vectorProperties[`px${i}`] != null &&
+        vector.vectorProperties[`py${i}`] != null
       ) {
         const xKey = `px${i}`
         const yKey = `py${i}`
@@ -137,6 +145,14 @@ export function actionRotateVectors(degrees) {
         )
         updateVectorProperties(vector, newX, newY, xKey, yKey)
       }
+    }
+    if ('px0' in vector.vectorProperties) {
+      vector.vectorProperties.px0 = Math.round(
+        (vector.vectorProperties.px1 + vector.vectorProperties.px3) / 2,
+      )
+      vector.vectorProperties.py0 = Math.round(
+        (vector.vectorProperties.py1 + vector.vectorProperties.py3) / 2,
+      )
     }
     if (vectorIndex === globalState.vector.currentIndex) {
       vectorGui.setVectorProperties(vector)

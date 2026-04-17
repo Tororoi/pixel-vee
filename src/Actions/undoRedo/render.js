@@ -1,6 +1,5 @@
 import { dom } from '../../Context/dom.js'
 import { globalState } from '../../Context/state.js'
-import { bump } from '../../hooks/appState.svelte.js'
 import { vectorGui } from '../../GUI/vector.js'
 import { clearOffscreenCanvas, renderCanvas } from '../../Canvas/render.js'
 import {
@@ -56,7 +55,6 @@ export function renderToLatestAction(latestAction, modType) {
   )
   if (globalState.vector.selectedIndices.size > 0) {
     globalState.ui.vectorTransformOpen = true
-    bump()
     if (dom.vectorTransformUIContainer)
       dom.vectorTransformUIContainer.style.display = 'flex'
     if (globalState.vector.transformMode === SCALE) {
@@ -64,7 +62,6 @@ export function renderToLatestAction(latestAction, modType) {
     }
   } else {
     globalState.ui.vectorTransformOpen = false
-    bump()
     if (dom.vectorTransformUIContainer)
       dom.vectorTransformUIContainer.style.display = 'none'
   }

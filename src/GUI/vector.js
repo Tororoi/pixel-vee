@@ -29,7 +29,6 @@ import {
   handleOptionsAndUpdateVector,
   // findVectorShapeBoundaryBox,
 } from '../utils/vectorHelpers.js'
-import { bump } from '../hooks/appState.svelte.js'
 // import { switchTool } from "../Tools/toolbox.js"
 
 //==================================================//
@@ -545,7 +544,6 @@ function reset() {
   globalState.vector.properties = {}
   //reset selectedpoint and collided keys
   globalState.vector.setCurrentIndex(null)
-  bump()
   vectorGui.render()
 }
 
@@ -579,7 +577,6 @@ function setVectorProperties(vector) {
     }
     globalState.vector.setCurrentIndex(vector.index)
     // switchTool(vector.vectorProperties.tool)
-    bump()
   }
 }
 

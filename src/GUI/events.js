@@ -3,7 +3,6 @@ import { dom } from '../Context/dom.js'
 import { globalState } from '../Context/state.js'
 import { vectorGui } from './vector.js'
 import { setVectorShapeBoundaryBox } from './transform.js'
-import { bump } from '../hooks/appState.svelte.js'
 
 /**
  * Switches the vector transform mode
@@ -12,7 +11,6 @@ import { bump } from '../hooks/appState.svelte.js'
 export function switchVectorTransformMode(mode) {
   globalState.vector.transformMode = mode
   vectorGui.render()
-  bump()
 }
 
 //===================================//

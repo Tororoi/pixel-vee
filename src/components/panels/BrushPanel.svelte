@@ -1,9 +1,9 @@
 <script>
   import { onMount } from 'svelte'
-  import { getVersion, bump } from '../../hooks/appState.svelte.js'
+  import { setDitherVectorTarget } from '../../hooks/appState.svelte.js'
   import { globalState } from '../../Context/state.js'
   import { brushStamps, customBrushStamp } from '../../Context/brushStamps.js'
-  import { brush, rebuildBuildUpDensityMap } from '../../Tools/brush.js'
+  import { rebuildBuildUpDensityMap } from '../../Tools/brush.js'
   import { toggleMode } from '../../Tools/toolbox.js'
   import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
   import { openStampEditor } from '../../DOM/stampEditor.js'
@@ -35,29 +35,17 @@
 
   let ref = $state(null)
 
-  const tool = $derived(getVersion() >= 0 ? globalState.tool.current : null)
+  const tool = $derived(globalState.tool.current)
   const toolName = $derived(tool?.name ?? '')
-  const brushSize = $derived.by(() => {
-    getVersion()
-    return globalState.tool.current?.brushSize ?? 1
-  })
-  const brushType = $derived.by(() => {
-    getVersion()
-    return globalState.tool.current?.brushType ?? 'circle'
-  })
+  const brushSize = $derived(globalState.tool.current?.brushSize ?? 1)
+  const brushType = $derived(globalState.tool.current?.brushType ?? 'circle')
   const showContent = $derived(!NO_PANEL_TOOLS.includes(toolName))
   const showBrushControls = $derived(BRUSH_TOOLS.includes(toolName))
   const showStamp = $derived(STAMP_TOOLS.includes(toolName))
   const showDither = $derived(DITHER_TOOLS.includes(toolName))
-  const isBrushDisabled = $derived.by(() => {
-    getVersion()
-    return globalState.tool.current?.brushDisabled ?? false
-  })
+  const isBrushDisabled = $derived(globalState.tool.current?.brushDisabled ?? false)
   const isCustomBrush = $derived(brushType === 'custom')
-  const modes = $derived.by(() => {
-    getVersion()
-    return { ...globalState.tool.current?.modes }
-  })
+  const modes = $derived({ ...globalState.tool.current?.modes })
 
   onMount(() => {
     if (!ref) return
@@ -104,10 +92,7 @@
     return pathData
   }
 
-  const stampPathData = $derived.by(() => {
-    getVersion()
-    return buildBrushStampSVGData(globalState.tool.current)
-  })
+  const stampPathData = $derived(buildBrushStampSVGData(globalState.tool.current))
 
   function handleBrushTypeClick() {
     const current = tool.brushType
@@ -119,25 +104,21 @@
     } else {
       tool.brushType = 'circle'
     }
-    bump()
   }
 
   function handleSizeChange(e) {
     tool.brushSize = parseInt(e.target.value)
-    bump()
   }
 
   function handleModeClick(modeKey) {
     toggleMode(modeKey)
-    if (modeKey === 'buildUpDither' && !brush.modes.buildUpDither) {
+    if (modeKey === 'buildUpDither' && !globalState.tool.current?.modes?.buildUpDither) {
       rebuildBuildUpDensityMap()
     }
-    bump()
   }
 
   function handleStampBtnClick() {
     tool.brushType = 'custom'
-    bump()
     if (!dom.stampEditorContainer) return
     if (
       !dom.stampEditorContainer.style.display ||
@@ -151,8 +132,12 @@
 
   function handleDitherPreviewClick() {
     if (!dom.ditherPickerContainer) return
-    dom.ditherPickerContainer.style.display =
-      dom.ditherPickerContainer.style.display === 'flex' ? 'none' : 'flex'
+    if (dom.ditherPickerContainer.style.display === 'flex') {
+      dom.ditherPickerContainer.style.display = 'none'
+    } else {
+      setDitherVectorTarget(null)
+      dom.ditherPickerContainer.style.display = 'flex'
+    }
   }
 </script>
 

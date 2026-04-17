@@ -11,7 +11,6 @@ import {
   renderToolOptionsToDOM,
   renderVectorsToDOM,
 } from '../DOM/render.js'
-import { bump } from '../hooks/appState.svelte.js'
 import { randomizeColor } from '../Swatch/events.js'
 import { renderCursor } from '../GUI/cursor.js'
 import { openSaveDialogBox } from '../Menu/events.js'
@@ -57,7 +56,6 @@ export function activateShortcut(keyCode) {
       if (!globalState.cursor.clicked) {
         globalState.tool.current = tools['grab']
         canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
-        bump()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
         renderCursor()
@@ -73,7 +71,6 @@ export function activateShortcut(keyCode) {
       ) {
         globalState.tool.current = tools['eyedropper']
         canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
-        bump()
         renderCanvas(canvas.currentLayer)
         vectorGui.render()
         renderCursor()
@@ -193,7 +190,6 @@ export function activateShortcut(keyCode) {
         //Toggle grid
         vectorGui.grid = !vectorGui.grid
         vectorGui.render()
-        bump()
       }
       break
     case 'KeyH':
@@ -215,7 +211,6 @@ export function activateShortcut(keyCode) {
     case 'KeyK':
       if (!globalState.cursor.clicked) {
         swatches.paletteMode = 'edit'
-        bump()
       }
       break
     case 'KeyL':
@@ -260,7 +255,6 @@ export function activateShortcut(keyCode) {
           actionRotatePixels()
         } else {
           randomizeColor(swatches.primary.swatch)
-          bump()
         }
       }
       break
@@ -279,7 +273,6 @@ export function activateShortcut(keyCode) {
         //shortcut for transform - cuts and pastes selection to allow free transform
       } else {
         globalState.ui.showTooltips = !globalState.ui.showTooltips
-        bump()
         if (globalState.ui.showTooltips && globalState.ui.tooltipMessage) {
           dom.tooltip.classList.add('visible')
         } else {
@@ -313,7 +306,6 @@ export function activateShortcut(keyCode) {
           actionCutSelection()
         } else {
           swatches.paletteMode = 'remove'
-          bump()
         }
       }
       break
@@ -355,7 +347,6 @@ export function deactivateShortcut(keyCode) {
       //only deactivate while not clicked
       if (!globalState.cursor.clicked) {
         globalState.tool.current = tools[globalState.tool.selectedName]
-        bump()
         canvas.previousXOffset = canvas.xOffset
         canvas.previousYOffset = canvas.yOffset
         vectorGui.render()
@@ -370,7 +361,6 @@ export function deactivateShortcut(keyCode) {
       //only deactivate while not clicked
       if (!globalState.cursor.clicked) {
         globalState.tool.current = tools[globalState.tool.selectedName]
-        bump()
         vectorGui.render()
         renderCursor()
         setToolCssCursor()
@@ -443,7 +433,6 @@ export function deactivateShortcut(keyCode) {
     case 'KeyK':
       if (!globalState.cursor.clicked) {
         swatches.paletteMode = 'select'
-        bump()
       }
       break
     case 'KeyL':
@@ -485,7 +474,6 @@ export function deactivateShortcut(keyCode) {
     case 'KeyX':
       if (!globalState.cursor.clicked) {
         swatches.paletteMode = 'select'
-        bump()
       }
       break
     case 'KeyY':

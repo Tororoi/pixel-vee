@@ -2,7 +2,6 @@ import { dom } from '../Context/dom.js'
 import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { vectorGui } from '../GUI/vector.js'
-import { bump } from '../hooks/appState.svelte.js'
 
 //===================================//
 //========= * * * Edit * * * ========//
@@ -61,7 +60,6 @@ export function copySelectedPixels() {
   //even if the layer is moved between copy and paste
   globalState.clipboard.select.layerX = canvas.currentLayer.x
   globalState.clipboard.select.layerY = canvas.currentLayer.y
-  bump()
 }
 
 /**
@@ -92,7 +90,6 @@ export function copySelectedVectors() {
   }
   globalState.clipboard.select.canvas = null
   globalState.clipboard.select.vectors = selectedVectors
-  bump()
 }
 
 /**

@@ -1,6 +1,5 @@
 <script>
   import { onMount } from 'svelte'
-  import { getVersion } from '../../hooks/appState.svelte.js'
   import { globalState } from '../../Context/state.js'
   import { swatches } from '../../Context/swatch.js'
   import { Picker } from '../../Swatch/Picker.js'
@@ -15,7 +14,7 @@
   let ref = $state(null)
   let canvasRef = $state(null)
 
-  const isOpen = $derived(getVersion() >= 0 && globalState.ui.colorPickerOpen)
+  const isOpen = $derived(globalState.ui.colorPickerOpen)
 
   onMount(() => {
     if (!canvasRef) return

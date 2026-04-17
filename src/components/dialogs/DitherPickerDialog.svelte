@@ -1,8 +1,6 @@
 <script>
   import { onMount } from 'svelte'
   import {
-    bump,
-    getVersion,
     getDitherVectorTarget,
     setDitherVectorTarget,
   } from '../../hooks/appState.svelte.js'
@@ -28,59 +26,41 @@
     changeActionVectorDitherOffset,
   } from '../../Actions/modifyTimeline/modifyTimeline.js'
 
-  const DITHER_TOOLS = ['brush', 'curve', 'ellipse']
+  const DITHER_TOOLS = ['brush', 'curve', 'ellipse', 'polygon']
 
   let ref = $state(null)
 
-  // Reactive state replacing all render*ToDOM calls.
-  // Each derived reads getVersion() directly so bump() always forces re-evaluation,
-  // even when globalState.tool.current is the same object reference.
   const vectorTarget = $derived(getDitherVectorTarget())
 
   const activePatternIndex = $derived(
-    getVersion() >= 0 &&
-      (vectorTarget?.ditherPatternIndex ??
-        globalState.tool.current?.ditherPatternIndex),
+    vectorTarget?.ditherPatternIndex ??
+      globalState.tool.current?.ditherPatternIndex,
   )
   const twoColorActive = $derived(
-    getVersion() >= 0 &&
-      !!(vectorTarget
-        ? vectorTarget.modes?.twoColor
-        : globalState.tool.current?.modes?.twoColor),
+    !!(vectorTarget
+      ? vectorTarget.modes?.twoColor
+      : globalState.tool.current?.modes?.twoColor),
   )
   const buildUpActive = $derived(
-    getVersion() >= 0 &&
-      !vectorTarget &&
-      !!globalState.tool.current?.modes?.buildUpDither,
+    !vectorTarget && !!globalState.tool.current?.modes?.buildUpDither,
   )
   const showBuildUpBtn = $derived(
-    getVersion() >= 0 &&
-      !vectorTarget &&
-      globalState.tool.current?.name === 'brush',
+    !vectorTarget && globalState.tool.current?.name === 'brush',
   )
   const buildUpMode = $derived(
-    getVersion() >= 0
-      ? (globalState.tool.current?.buildUpMode ?? 'custom')
-      : 'custom',
+    globalState.tool.current?.buildUpMode ?? 'custom',
   )
-  const buildUpSteps = $derived.by(() => {
-    getVersion()
-    return [...(globalState.tool.current?.buildUpSteps ?? [15, 31, 47, 63])]
-  })
+  const buildUpSteps = $derived([
+    ...(globalState.tool.current?.buildUpSteps ?? [15, 31, 47, 63]),
+  ])
   const buildUpActiveSlot = $derived(
-    getVersion() >= 0
-      ? (globalState.tool.current?.buildUpActiveStepSlot ?? null)
-      : null,
+    globalState.tool.current?.buildUpActiveStepSlot ?? null,
   )
   const ditherOffsetX = $derived(
-    getVersion() >= 0
-      ? ((vectorTarget ?? globalState.tool.current)?.ditherOffsetX ?? 0)
-      : 0,
+    (vectorTarget ?? globalState.tool.current)?.ditherOffsetX ?? 0,
   )
   const ditherOffsetY = $derived(
-    getVersion() >= 0
-      ? ((vectorTarget ?? globalState.tool.current)?.ditherOffsetY ?? 0)
-      : 0,
+    (vectorTarget ?? globalState.tool.current)?.ditherOffsetY ?? 0,
   )
 
   // Sync offset to SVG attributes for state-driven changes.
@@ -102,7 +82,6 @@
 
   // Sync SVG colors whenever swatches or two-color mode changes
   $effect(() => {
-    getVersion()
     if (!ref) return
     const primary = swatches.primary.color.color
     const secondary = swatches.secondary.color.color
@@ -132,9 +111,11 @@
   }
 
   function handleStepSlotClick(slotIndex) {
-    brush.buildUpActiveStepSlot =
-      brush.buildUpActiveStepSlot === slotIndex ? null : slotIndex
-    bump()
+    if (!globalState.tool.current) return
+    globalState.tool.current.buildUpActiveStepSlot =
+      globalState.tool.current.buildUpActiveStepSlot === slotIndex
+        ? null
+        : slotIndex
   }
 
   onMount(() => {
@@ -166,17 +147,17 @@
           changeActionVectorDitherPattern(vt, oldPatternIndex, patternIndex)
           globalState.clearRedoStack()
         }
-        bump()
         return
       }
       if (!DITHER_TOOLS.includes(globalState.tool.current?.name)) return
-      if (brush.buildUpActiveStepSlot !== null) {
-        brush.buildUpSteps[brush.buildUpActiveStepSlot] = patternIndex
-        brush.buildUpActiveStepSlot = null
+      if (globalState.tool.current.buildUpActiveStepSlot != null) {
+        globalState.tool.current.buildUpSteps[
+          globalState.tool.current.buildUpActiveStepSlot
+        ] = patternIndex
+        globalState.tool.current.buildUpActiveStepSlot = null
       } else {
         globalState.tool.current.ditherPatternIndex = patternIndex
       }
-      bump()
     })
 
     // Two-color toggle
@@ -188,27 +169,25 @@
           if (!vt.modes) vt.modes = {}
           vt.modes.twoColor = !vt.modes.twoColor
           renderCanvas(vt.layer, true)
-          bump()
           return
         }
         if (!DITHER_TOOLS.includes(globalState.tool.current?.name)) return
         globalState.tool.current.modes.twoColor =
           !globalState.tool.current.modes.twoColor
-        bump()
       },
     )
 
     // Build-up dither toggle
     el.querySelector('#dither-ctrl-build-up')?.addEventListener('click', () => {
       if (globalState.tool.current?.name !== 'brush') return
-      brush.modes.buildUpDither = !brush.modes.buildUpDither
-      if (brush.modes.buildUpDither) {
+      globalState.tool.current.modes.buildUpDither =
+        !globalState.tool.current.modes.buildUpDither
+      if (globalState.tool.current.modes.buildUpDither) {
         rebuildBuildUpDensityMap()
       } else {
         brush._buildUpDensityMap = new Map()
-        brush.buildUpActiveStepSlot = null
+        globalState.tool.current.buildUpActiveStepSlot = null
       }
-      bump()
     })
 
     // Build-up reset
@@ -228,18 +207,22 @@
         const btn = e.target.closest('.build-up-mode-btn')
         if (!btn || globalState.tool.current?.name !== 'brush') return
         const mode = btn.dataset.mode
-        if (brush.buildUpMode === 'custom' && mode !== 'custom') {
-          brush._customBuildUpSteps = [...brush.buildUpSteps]
+        if (
+          globalState.tool.current.buildUpMode === 'custom' &&
+          mode !== 'custom'
+        ) {
+          brush._customBuildUpSteps = [...globalState.tool.current.buildUpSteps]
         }
-        brush.buildUpMode = mode
+        globalState.tool.current.buildUpMode = mode
         if (mode === 'custom') {
-          brush.buildUpSteps = [...brush._customBuildUpSteps]
+          globalState.tool.current.buildUpSteps = [
+            ...brush._customBuildUpSteps,
+          ]
         } else {
-          brush.buildUpSteps = BAYER_STEPS[mode]
+          globalState.tool.current.buildUpSteps = BAYER_STEPS[mode]
             ? [...BAYER_STEPS[mode]]
-            : brush.buildUpSteps
+            : globalState.tool.current.buildUpSteps
         }
-        bump()
       },
     )
 
@@ -254,7 +237,6 @@
       const startY = e.clientY
 
       if (vt) {
-        // Vector branch — accounts for layer position, records timeline action on release
         const currentLayerX = vt.layer?.x ?? 0
         const currentLayerY = vt.layer?.y ?? 0
         const recordedLayerX = vt.recordedLayerX ?? currentLayerX
@@ -308,12 +290,10 @@
               changeActionVectorDitherOffset(vt, fromOffset, toOffset)
               globalState.clearRedoStack()
             }
-            bump()
           },
           { once: true },
         )
       } else {
-        // Tool branch — no timeline recording needed
         const target = globalState.tool.current
         const startOffsetX = target.ditherOffsetX ?? 0
         const startOffsetY = target.ditherOffsetY ?? 0
@@ -336,7 +316,6 @@
           'pointerup',
           () => {
             control.removeEventListener('pointermove', onMove)
-            bump()
           },
           { once: true },
         )

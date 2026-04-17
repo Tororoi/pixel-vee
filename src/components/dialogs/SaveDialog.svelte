@@ -1,6 +1,5 @@
 <script>
   import { onMount } from 'svelte'
-  import { getVersion, bump } from '../../hooks/appState.svelte.js'
   import { globalState } from '../../Context/state.js'
   import { saveDrawing, computeFileSizePreview } from '../../Save/savefile.js'
   import { measureTextWidth } from '../../utils/measureHelpers.js'
@@ -9,10 +8,8 @@
   let ref = $state(null)
   let fileSize = $state('')
 
-  const isOpen = $derived(getVersion() >= 0 && globalState.ui.saveDialogOpen)
-  const settings = $derived(
-    getVersion() >= 0 ? globalState.ui.saveSettings : {},
-  )
+  const isOpen = $derived(globalState.ui.saveDialogOpen)
+  const settings = $derived(globalState.ui.saveSettings)
 
   // Recompute filesize whenever dialog opens or settings change
   $effect(() => {
@@ -38,7 +35,6 @@
 
   function handleClose() {
     globalState.ui.saveDialogOpen = false
-    bump()
   }
 
   function handleFileNameInput(e) {
@@ -49,29 +45,24 @@
 
   function handlePreserveHistory(e) {
     globalState.ui.saveSettings.preserveHistory = e.target.checked
-    bump()
   }
 
   function handleIncludePalette(e) {
     globalState.ui.saveSettings.includePalette = e.target.checked
-    bump()
   }
 
   function handleIncludeReferenceLayers(e) {
     globalState.ui.saveSettings.includeReferenceLayers = e.target.checked
-    bump()
   }
 
   function handleIncludeRemovedActions(e) {
     globalState.ui.saveSettings.includeRemovedActions = e.target.checked
-    bump()
   }
 
   function handleSubmit(e) {
     e.preventDefault()
     saveDrawing()
     globalState.ui.saveDialogOpen = false
-    bump()
   }
 
   const advancedDisabled = $derived(settings.preserveHistory)

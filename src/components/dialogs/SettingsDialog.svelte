@@ -1,15 +1,24 @@
 <script>
   import { onMount } from 'svelte'
-  import { getVersion, bump } from '../../hooks/appState.svelte.js'
   import { globalState } from '../../Context/state.js'
   import { vectorGui } from '../../GUI/vector.js'
   import { initializeDragger } from '../../utils/drag.js'
 
   let ref = $state(null)
 
-  const isOpen = $derived(getVersion() >= 0 && globalState.ui.settingsOpen)
-  const gridEnabled = $derived(getVersion() >= 0 && vectorGui.grid)
-  const gridSpacing = $derived(getVersion() >= 0 ? vectorGui.gridSpacing : 1)
+  const isOpen = $derived(globalState.ui.settingsOpen)
+
+  // Local state mirrors for non-reactive vectorGui properties
+  let gridEnabled = $state(vectorGui.grid ?? false)
+  let gridSpacing = $state(vectorGui.gridSpacing ?? 8)
+
+  // Sync from vectorGui when dialog opens
+  $effect(() => {
+    if (isOpen) {
+      gridEnabled = vectorGui.grid ?? false
+      gridSpacing = vectorGui.gridSpacing ?? 8
+    }
+  })
 
   onMount(() => {
     if (!ref) return
@@ -21,38 +30,36 @@
 
   function handleClose() {
     globalState.ui.settingsOpen = false
-    bump()
   }
 
   function handleTooltips(e) {
     globalState.ui.showTooltips = e.target.checked
-    bump()
   }
 
   function handleGrid(e) {
-    vectorGui.grid = e.target.checked
+    gridEnabled = e.target.checked
+    vectorGui.grid = gridEnabled
     vectorGui.render()
-    bump()
   }
 
   function handleGridSpacingInput(e) {
     let val = parseInt(e.target.value)
     if (val < 1) val = 1
     else if (val > 64) val = 64
+    gridSpacing = val
     vectorGui.gridSpacing = val
     vectorGui.render()
-    bump()
   }
 
   function handleGridSpacingSpin(e) {
     const id = e.target.id || e.target.closest('[id]')?.id
     if (id === 'inc') {
-      vectorGui.gridSpacing = Math.min(64, vectorGui.gridSpacing + 1)
+      gridSpacing = Math.min(64, gridSpacing + 1)
     } else if (id === 'dec') {
-      vectorGui.gridSpacing = Math.max(1, vectorGui.gridSpacing - 1)
+      gridSpacing = Math.max(1, gridSpacing - 1)
     }
+    vectorGui.gridSpacing = gridSpacing
     vectorGui.render()
-    bump()
   }
 
   function handleCursorPreview(e) {

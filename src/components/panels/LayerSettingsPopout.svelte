@@ -4,7 +4,7 @@
   import { renderLayersToDOM } from '../../DOM/render.js'
   import { renderCanvas } from '../../Canvas/render.js'
 
-  const { layer, pos, onclose } = $props()
+  const { layer = $bindable(), pos, onclose } = $props()
 
   // svelte-ignore state_referenced_locally
   const initialTitle = layer.title ?? ''

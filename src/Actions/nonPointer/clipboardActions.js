@@ -1,5 +1,4 @@
 import { globalState } from '../../Context/state.js'
-import { bump } from '../../hooks/appState.svelte.js'
 import { canvas } from '../../Context/canvas.js'
 import { tools } from '../../Tools/index.js'
 import { vectorGui } from '../../GUI/vector.js'
@@ -167,7 +166,6 @@ export function actionPasteSelection() {
       //clear any selected vectors
       globalState.vector.clearSelected()
       globalState.ui.vectorTransformOpen = false
-      bump()
       if (dom.vectorTransformUIContainer)
         dom.vectorTransformUIContainer.style.display = 'none'
       //add to timeline
@@ -195,7 +193,6 @@ export function actionPasteSelection() {
       switchTool('move') //TODO: (Medium Priority) Instead of move tool being selected, automatically use temporary transform tool which is not in the toolbox.
       renderLayersToDOM()
       renderVectorsToDOM()
-      bump()
     } else if (Object.keys(globalState.clipboard.select.vectors).length > 0) {
       //Make deep copy of clipboard vectors:
       const clipboardVectors = JSON.parse(
@@ -219,7 +216,6 @@ export function actionPasteSelection() {
       })
       if (globalState.vector.selectedIndices.size > 0) {
         globalState.ui.vectorTransformOpen = true
-        bump()
         if (dom.vectorTransformUIContainer)
           dom.vectorTransformUIContainer.style.display = 'flex'
         if (globalState.vector.transformMode === SCALE) {
@@ -227,7 +223,6 @@ export function actionPasteSelection() {
         }
       } else {
         globalState.ui.vectorTransformOpen = false
-        bump()
         if (dom.vectorTransformUIContainer)
           dom.vectorTransformUIContainer.style.display = 'none'
       }
@@ -249,7 +244,6 @@ export function actionPasteSelection() {
       renderCanvas(canvas.currentLayer, true) //Must occur after adding to timeline. Once direct render is implemented, render canvas can be before add to timeline
       renderLayersToDOM()
       renderVectorsToDOM()
-      bump()
       vectorGui.render()
     }
   }
@@ -347,7 +341,6 @@ export function actionConfirmPastedPixels() {
     renderCanvas(canvas.currentLayer)
     renderLayersToDOM()
     renderVectorsToDOM()
-    bump()
   }
 }
 

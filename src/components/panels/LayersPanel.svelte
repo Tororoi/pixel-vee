@@ -1,6 +1,5 @@
 <script>
   import { onMount } from 'svelte'
-  import { getVersion, bump } from '../../hooks/appState.svelte.js'
   import { globalState } from '../../Context/state.js'
   import { canvas } from '../../Context/canvas.js'
   import { vectorGui } from '../../GUI/vector.js'
@@ -22,17 +21,15 @@
   let settingsPos = $state({ top: 0, left: 0 })
   let dragIndex = $state(null)
 
-  const isPasted = $derived(getVersion() >= 0 && !!canvas.pastedLayer)
+  const isPasted = $derived(!!canvas.pastedLayer)
   const visibleLayers = $derived(
-    getVersion() >= 0
-      ? canvas.layers.filter((l) => !l.removed && !l.isPreview)
-      : [],
+    canvas.layers.filter((l) => !l.removed && !l.isPreview),
   )
   const canDelete = $derived(
     !isPasted &&
       (canvas.activeLayerCount > 1 || canvas.currentLayer?.type !== 'raster'),
   )
-  const currentLayer = $derived(getVersion() >= 0 ? canvas.currentLayer : null)
+  const currentLayer = $derived(canvas.currentLayer)
 
   onMount(() => {
     if (!ref) return
@@ -89,7 +86,6 @@
     e.stopPropagation()
     layer.hidden = !layer.hidden
     renderCanvas(layer)
-    bump()
   }
 
   function handleGearClick(e, layer) {
@@ -204,7 +200,7 @@
     <div class="layers-container">
       <div class="layers">
         {#each visibleLayers as layer (layer.id ?? layer.title)}
-          {@const isHidden = getVersion() >= 0 && layer.hidden}
+          {@const isHidden = layer.hidden}
           {@const isSelected = layer === currentLayer}
           {@const isSettingsOpen = settingsLayer === layer}
           <div
@@ -243,7 +239,7 @@
   {#if settingsLayer}
     {#key settingsLayer}
       <LayerSettingsPopout
-        layer={settingsLayer}
+        bind:layer={settingsLayer}
         pos={settingsPos}
         onclose={() => {
           settingsLayer = null

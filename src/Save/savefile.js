@@ -7,7 +7,6 @@ import { swatches } from '../Context/swatch.js'
 import { vectorGui } from '../GUI/vector.js'
 import { renderCanvas } from '../Canvas/render.js'
 import { renderLayersToDOM, renderVectorsToDOM } from '../DOM/render.js'
-import { bump } from '../hooks/appState.svelte.js'
 import { validatePixelVeeFile } from '../utils/validationHelpers.js'
 import {
   sanitizeLayers,
@@ -445,7 +444,6 @@ export async function loadDrawing(jsonFile) {
     vectorGui.render()
   }
   renderLayersToDOM()
-  bump()
   renderVectorsToDOM()
 }
 

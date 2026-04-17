@@ -1,6 +1,5 @@
 <script>
   import { onMount } from 'svelte'
-  import { getVersion, bump } from '../../hooks/appState.svelte.js'
   import { globalState } from '../../Context/state.js'
   import { canvas } from '../../Context/canvas.js'
   import {
@@ -35,7 +34,7 @@
   let widthFocused = false
   let heightFocused = false
 
-  const isOpen = $derived(getVersion() >= 0 && globalState.ui.canvasSizeOpen)
+  const isOpen = $derived(globalState.ui.canvasSizeOpen)
 
   // Track when dialog opens to reset dimensions
   let prevOpen = false
@@ -49,9 +48,8 @@
     prevOpen = open
   })
 
-  // Sync from resize overlay drag handles on bump()
+  // Sync from resize overlay drag handles
   $effect(() => {
-    getVersion()
     if (!globalState.canvas.resizeOverlayActive) return
     if (!widthFocused) width = resizeOverlay.newWidth
     if (!heightFocused) height = resizeOverlay.newHeight
@@ -122,19 +120,16 @@
       resizeOffScreenCanvas(+width, +height)
     }
     globalState.ui.canvasSizeOpen = false
-    bump()
   }
 
   function handleCancel() {
     deactivateResizeOverlay()
     globalState.ui.canvasSizeOpen = false
-    bump()
   }
 
   function handleClose() {
     deactivateResizeOverlay()
     globalState.ui.canvasSizeOpen = false
-    bump()
   }
 </script>
 

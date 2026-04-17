@@ -9,7 +9,6 @@ import { vectorGui } from '../GUI/vector.js'
 import { renderCanvas } from '../Canvas/render.js'
 import { coordArrayFromSet } from '../utils/maskHelpers.js'
 import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
-import { bump } from '../hooks/appState.svelte.js'
 import { rerouteVectorStepsAction, getChainStartPoint } from './adjust.js'
 import {
   getCropNormalizedCursorX,
@@ -232,7 +231,6 @@ function curveSteps() {
         //generate new unique key for vector
         const uniqueVectorKey = globalState.vector.nextKey()
         globalState.vector.setCurrentIndex(uniqueVectorKey)
-        bump()
         //store control points for timeline
         addToTimeline({
           tool: globalState.tool.current.name,

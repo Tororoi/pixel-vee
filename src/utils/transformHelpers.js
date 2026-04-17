@@ -411,6 +411,14 @@ export function transformVectorContent(
         isMirroredHorizontally,
         isMirroredVertically,
       )
+      if (Object.hasOwn(originalProperties, 'px0')) {
+        vector.vectorProperties.px0 = Math.round(
+          (vector.vectorProperties.px1 + vector.vectorProperties.px3) / 2,
+        )
+        vector.vectorProperties.py0 = Math.round(
+          (vector.vectorProperties.py1 + vector.vectorProperties.py3) / 2,
+        )
+      }
     }
   }
 
@@ -439,7 +447,7 @@ export function transformVectorContent(
     isMirroredHorizontally,
     isMirroredVertically,
   ) {
-    if (Object.hasOwn(originalProperties, xKey)) {
+    if (originalProperties[xKey] != null) {
       let originalX = originalProperties[xKey] + vector.layer.x
       let originalY = originalProperties[yKey] + vector.layer.y
       let newX = originalX * scaleX + xOffset

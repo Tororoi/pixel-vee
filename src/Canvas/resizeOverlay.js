@@ -1,7 +1,6 @@
 import { canvas } from '../Context/canvas.js'
 import { dom } from '../Context/dom.js'
 import { globalState } from '../Context/state.js'
-import { bump } from '../hooks/appState.svelte.js'
 import { resizeOffScreenCanvas } from '../Canvas/render.js'
 import {
   stopMarchingAnts,
@@ -210,7 +209,6 @@ function syncFormInputs() {
     dom.canvasWidth.value = Math.round(resizeOverlay.newWidth)
   if (dom.canvasHeight)
     dom.canvasHeight.value = Math.round(resizeOverlay.newHeight)
-  bump()
 }
 
 /**

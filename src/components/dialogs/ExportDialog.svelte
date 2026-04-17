@@ -1,6 +1,5 @@
 <script>
   import { onMount } from 'svelte'
-  import { getVersion, bump } from '../../hooks/appState.svelte.js'
   import { globalState } from '../../Context/state.js'
   import { canvas } from '../../Context/canvas.js'
   import { consolidateLayers } from '../../Canvas/layers.js'
@@ -10,7 +9,7 @@
 
   let ref = $state(null)
 
-  const isOpen = $derived(getVersion() >= 0 && globalState.ui.exportOpen)
+  const isOpen = $derived(globalState.ui.exportOpen)
 
   onMount(() => {
     if (!ref) return
@@ -22,7 +21,6 @@
 
   function handleClose() {
     globalState.ui.exportOpen = false
-    bump()
   }
 
   function handleExport(scale) {

@@ -1,6 +1,5 @@
 <script>
   import { onMount } from 'svelte'
-  import { getVersion } from '../hooks/appState.svelte.js'
   import { globalState } from '../Context/state.js'
   import { canvas } from '../Context/canvas.js'
   import { toolGroups } from '../Tools/index.js'
@@ -30,10 +29,8 @@
   let ref = $state(null)
   let openGroup = $state(null)
 
-  const selectedName = $derived(
-    getVersion() >= 0 ? globalState.tool.selectedName : '',
-  )
-  const pastedLayer = $derived(getVersion() >= 0 && !!canvas.pastedLayer)
+  const selectedName = $derived(globalState.tool.selectedName)
+  const pastedLayer = $derived(!!canvas.pastedLayer)
 
   onMount(() => {
     if (!ref) return

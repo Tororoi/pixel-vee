@@ -1,6 +1,5 @@
 <script>
   import { onMount } from 'svelte'
-  import { getVersion, bump } from '../../hooks/appState.svelte.js'
   import { swatches } from '../../Context/swatch.js'
   import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
   import { initializeColorPicker } from '../../Swatch/events.js'
@@ -11,28 +10,16 @@
   let secondarySwatchRef = $state(null)
   let presetsOpen = $state(false)
 
-  const palette = $derived.by(() => {
-    getVersion()
-    return [...swatches.palette]
-  })
-  const paletteMode = $derived(
-    getVersion() >= 0 ? swatches.paletteMode : 'select',
-  )
-  const currentPreset = $derived(
-    getVersion() >= 0 ? swatches.currentPreset : '',
-  )
-  const customPalettes = $derived.by(() => {
-    getVersion()
-    return { ...swatches.customPalettes }
-  })
+  const palette = $derived([...swatches.palette])
+  const paletteMode = $derived(swatches.paletteMode)
+  const currentPreset = $derived(swatches.currentPreset)
+  const customPalettes = $derived({ ...swatches.customPalettes })
   const presetLabel = $derived(
     currentPreset in DEFAULT_PALETTES
       ? (PRESETS.find((p) => p.id === currentPreset)?.label ?? currentPreset)
       : (customPalettes[currentPreset]?.label ?? currentPreset),
   )
-  const selectedPaletteIndex = $derived(
-    getVersion() >= 0 ? swatches.selectedPaletteIndex : -1,
-  )
+  const selectedPaletteIndex = $derived(swatches.selectedPaletteIndex)
 
   onMount(() => {
     if (!ref) return
@@ -85,7 +72,6 @@
         ...c,
       }))
     }
-    bump()
   }
 
   function handlePrimarySwatchClick(e) {
@@ -122,18 +108,15 @@
       '--secondary-swatch-alpha',
       `${temp.a / 255}`,
     )
-    bump()
   }
 
   function handlePaletteEditClick() {
     swatches.paletteMode = swatches.paletteMode === 'edit' ? 'select' : 'edit'
-    bump()
   }
 
   function handlePaletteRemoveClick() {
     swatches.paletteMode =
       swatches.paletteMode === 'remove' ? 'select' : 'remove'
-    bump()
   }
 
   function handlePresetsToggle(e) {
@@ -153,7 +136,6 @@
     }
     swatches.currentPreset = id
     presetsOpen = false
-    bump()
   }
 
   function handlePaletteColorClick(color, index) {
@@ -164,7 +146,6 @@
       swatches.palette.splice(index, 1)
       onPaletteModified()
       swatches.paletteMode = 'select'
-      bump()
     } else {
       if (index === swatches.selectedPaletteIndex) {
         swatches.activePaletteIndex = index
@@ -182,7 +163,6 @@
         swatches.primary.color = color
         if (swatches.primary.swatch) swatches.primary.swatch.color = color
         swatches.selectedPaletteIndex = index
-        bump()
       }
     }
   }

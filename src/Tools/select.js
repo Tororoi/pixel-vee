@@ -1,5 +1,4 @@
 import { globalState } from '../Context/state.js'
-import { bump } from '../hooks/appState.svelte.js'
 import { canvas } from '../Context/canvas.js'
 import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
 import { vectorGui } from '../GUI/vector.js'
@@ -34,7 +33,6 @@ function selectSteps() {
       //reset selected vectors
       globalState.vector.clearSelected()
       globalState.ui.vectorTransformOpen = false
-      bump()
       if (dom.vectorTransformUIContainer)
         dom.vectorTransformUIContainer.style.display = 'none'
       renderVectorsToDOM()

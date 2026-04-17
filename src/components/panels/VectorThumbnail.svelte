@@ -1,5 +1,4 @@
 <script>
-  import { getVersion } from '../../hooks/appState.svelte.js'
   import { globalState } from '../../Context/state.js'
   import { canvas } from '../../Context/canvas.js'
   import { getAngle } from '../../utils/trig.js'
@@ -9,7 +8,6 @@
   let ref = $state(null)
 
   $effect(() => {
-    getVersion()
     const cvs = ref
     if (!cvs) return
     const ctx = cvs.getContext('2d')

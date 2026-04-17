@@ -37,7 +37,7 @@ function brushSteps() {
       globalState.selection.pointsSet = new Set()
       globalState.selection.seenPixelsSet = new Set()
       //rebuild build-up density map from timeline so drawing is always correct
-      if (brush.modes.buildUpDither) {
+      if (globalState.tool.current.modes?.buildUpDither) {
         rebuildBuildUpDensityMap()
       }
       //Build stroke context once — reused for every point in this stroke
@@ -55,13 +55,13 @@ function brushSteps() {
               globalState.tool.current.brushSize
             ],
         brushSize: isCustomStamp ? 32 : globalState.tool.current.brushSize,
-        ditherPattern: ditherPatterns[brush.ditherPatternIndex],
-        twoColorMode: brush.modes.twoColor,
+        ditherPattern: ditherPatterns[globalState.tool.current.ditherPatternIndex],
+        twoColorMode: globalState.tool.current.modes?.twoColor,
         secondaryColor: swatches.secondary.color,
-        ditherOffsetX: brush.ditherOffsetX,
-        ditherOffsetY: brush.ditherOffsetY,
+        ditherOffsetX: globalState.tool.current.ditherOffsetX,
+        ditherOffsetY: globalState.tool.current.ditherOffsetY,
         densityMap: brush._buildUpDensityMap,
-        buildUpSteps: brush.buildUpSteps,
+        buildUpSteps: globalState.tool.current.buildUpSteps,
         customStampColorMap: null,
       })
       brush._previewStrokeCtx = {
@@ -143,19 +143,19 @@ function brushSteps() {
           canvas.currentLayer.y + globalState.canvas.cropOffsetY
       }
       const timelineProperties = {
-        modes: { ...brush.modes },
+        modes: { ...globalState.tool.current.modes },
         color: { ...swatches.primary.color },
         secondaryColor: { ...swatches.secondary.color },
-        brushSize: brush.brushType === 'custom' ? 32 : brush.brushSize,
-        brushType: brush.brushType,
+        brushSize: globalState.tool.current.brushType === 'custom' ? 32 : globalState.tool.current.brushSize,
+        brushType: globalState.tool.current.brushType,
         customStampEntry:
-          brush.brushType === 'custom' ? brushStamps.custom : null,
-        ditherPatternIndex: brush.ditherPatternIndex,
+          globalState.tool.current.brushType === 'custom' ? brushStamps.custom : null,
+        ditherPatternIndex: globalState.tool.current.ditherPatternIndex,
         ditherOffsetX:
-          (((brush.ditherOffsetX + globalState.canvas.cropOffsetX) % 8) + 8) %
+          (((globalState.tool.current.ditherOffsetX + globalState.canvas.cropOffsetX) % 8) + 8) %
           8,
         ditherOffsetY:
-          (((brush.ditherOffsetY + globalState.canvas.cropOffsetY) % 8) + 8) %
+          (((globalState.tool.current.ditherOffsetY + globalState.canvas.cropOffsetY) % 8) + 8) %
           8,
         recordedLayerX: canvas.currentLayer.x,
         recordedLayerY: canvas.currentLayer.y,
@@ -163,18 +163,18 @@ function brushSteps() {
         maskArray,
         boundaryBox,
       }
-      if (brush.modes.buildUpDither) {
+      if (globalState.tool.current.modes?.buildUpDither) {
         timelineProperties.buildUpDensityDelta = [
           ...globalState.selection.seenPixelsSet,
         ]
-        timelineProperties.buildUpSteps = [...brush.buildUpSteps]
+        timelineProperties.buildUpSteps = [...globalState.tool.current.buildUpSteps]
       }
       addToTimeline({
         tool: brush.name,
         layer: canvas.currentLayer,
         properties: timelineProperties,
       })
-      if (brush.modes.buildUpDither) {
+      if (globalState.tool.current.modes?.buildUpDither) {
         rebuildBuildUpDensityMap()
       }
       if (globalState.tool.current.modes?.colorMask) {
@@ -220,7 +220,7 @@ function addPointToAction(x, y) {
 function drawBrushPoint(x, y, brushDirection) {
   addPointToAction(x, y)
   const stamp = brush._strokeCtx.brushStamp[brushDirection]
-  if (brush.modes.buildUpDither) {
+  if (globalState.tool.current.modes?.buildUpDither) {
     actionBuildUpDitherDraw(x, y, stamp, brush._strokeCtx)
   } else {
     actionDitherDraw(x, y, stamp, brush._strokeCtx)
@@ -238,7 +238,7 @@ function drawPreviewBrushPoint() {
     globalState.drawing.lastDrawnY,
   )
   const stamp = brush._previewStrokeCtx.brushStamp[brushDirection]
-  if (brush.modes.buildUpDither) {
+  if (globalState.tool.current.modes?.buildUpDither) {
     actionBuildUpDitherDraw(
       globalState.cursor.x,
       globalState.cursor.y,

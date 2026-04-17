@@ -1,5 +1,4 @@
 import { globalState } from '../../Context/state.js'
-import { bump } from '../../hooks/appState.svelte.js'
 import { canvas } from '../../Context/canvas.js'
 import { tools } from '../../Tools/index.js'
 import { vectorGui } from '../../GUI/vector.js'
@@ -56,7 +55,6 @@ export function actionSelectVector(vectorIndex) {
   if (!globalState.vector.selectedIndices.has(vectorIndex)) {
     globalState.vector.addSelected(vectorIndex)
     globalState.ui.vectorTransformOpen = true
-    bump()
     if (dom.vectorTransformUIContainer)
       dom.vectorTransformUIContainer.style.display = 'flex'
     if (globalState.vector.transformMode === SCALE) {
@@ -92,7 +90,6 @@ export function actionDeselectVector(vectorIndex) {
     globalState.vector.removeSelected(vectorIndex)
     if (globalState.vector.selectedIndices.size === 0) {
       globalState.ui.vectorTransformOpen = false
-      bump()
       if (dom.vectorTransformUIContainer)
         dom.vectorTransformUIContainer.style.display = 'none'
       globalState.deselect()

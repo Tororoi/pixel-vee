@@ -9,15 +9,10 @@ import './Controls/events.js'
 import './GUI/events.js'
 import { actionDeselect } from './Actions/nonPointer/selectionActions.js'
 import { vectorGui } from './GUI/vector.js'
-import { registerVectorGui, registerDOMHelpers } from './Context/state.js'
-import { bump } from './hooks/appState.svelte.js'
+import { registerVectorGui } from './Context/state.js'
 
 // Register dependencies that would otherwise create circular imports in globalState.js
 registerVectorGui(vectorGui)
-registerDOMHelpers({
-  disableActionsForNoSelection: bump,
-  enableActionsForSelection: bump,
-})
 
 //===================================//
 //===== * * * Initialize * * * ======//

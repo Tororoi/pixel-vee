@@ -1,5 +1,4 @@
 <script>
-  import { getVersion, bump } from '../hooks/appState.svelte.js'
   import { globalState } from '../Context/state.js'
   import { canvas } from '../Context/canvas.js'
   import { vectorGui } from '../GUI/vector.js'
@@ -25,32 +24,25 @@
     return (result.charAt(0).toUpperCase() + result.slice(1)).trim()
   }
 
-  // getVersion() >= 0 is always true — it's here to subscribe to bump() updates
-  const hasPaste = $derived(getVersion() >= 0 && !!canvas.pastedLayer)
+  const hasPaste = $derived(!!canvas.pastedLayer)
   const hasRasterSelection = $derived(
-    getVersion() >= 0 && globalState.selection.boundaryBox.xMin !== null,
+    globalState.selection.boundaryBox.xMin !== null,
   )
   const hasVectorSelection = $derived(
-    getVersion() >= 0 &&
-      (globalState.vector.currentIndex !== null ||
-        globalState.vector.selectedIndices.size > 0),
+    globalState.vector.currentIndex !== null ||
+      globalState.vector.selectedIndices.size > 0,
   )
   const hasSelection = $derived(
     !hasPaste && (hasRasterSelection || hasVectorSelection),
   )
   const hasClipboard = $derived(
-    getVersion() >= 0 &&
-      !hasPaste &&
+    !hasPaste &&
       (globalState.clipboard.select.canvas !== null ||
         Object.keys(globalState.clipboard.select.vectors).length > 0),
   )
   const canFlipRotate = $derived(hasPaste || hasVectorSelection)
-  const toolName = $derived(
-    getVersion() >= 0 ? (globalState.tool.current?.name ?? '') : '',
-  )
-  const toolOptions = $derived(
-    getVersion() >= 0 ? (globalState.tool.current?.options ?? {}) : {},
-  )
+  const toolName = $derived(globalState.tool.current?.name ?? '')
+  const toolOptions = $derived(globalState.tool.current?.options ?? {})
   const showOptions = $derived(
     ['curve', 'ellipse', 'polygon', 'select'].includes(toolName),
   )
@@ -60,7 +52,6 @@
       globalState.tool.current.options[optionName].active = checked
     }
     vectorGui.render()
-    bump()
   }
 
   function handleLoadDrawing(e) {
@@ -122,7 +113,6 @@
     import('../Canvas/layers.js').then(({ consolidateLayers }) => {
       consolidateLayers()
       globalState.ui.exportOpen = true
-      bump()
     })
   }
 
@@ -134,7 +124,6 @@
 
   function handleSettings() {
     globalState.ui.settingsOpen = !globalState.ui.settingsOpen
-    bump()
   }
 
   function handleTopMenuClick() {

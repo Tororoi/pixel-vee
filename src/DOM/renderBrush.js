@@ -1,4 +1,3 @@
-import { bump } from '../hooks/appState.svelte.js'
 import { globalState } from '../Context/state.js'
 import { swatches } from '../Context/swatch.js'
 
@@ -6,21 +5,18 @@ import { swatches } from '../Context/swatch.js'
  * Brush stamp display — React reads globalState.tool.current via useAppState().
  */
 export function renderBrushStampToDOM() {
-  bump()
 }
 
 /**
  * Brush modes row — React reads globalState.tool.current.modes via useAppState().
  */
 export const renderBrushModesToDOM = () => {
-  bump()
 }
 
 /**
  * Tool options row — React reads globalState.tool.current.options via useAppState().
  */
 export function renderToolOptionsToDOM() {
-  bump()
 }
 
 const SVG_NS = 'http://www.w3.org/2000/svg'

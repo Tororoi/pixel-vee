@@ -17,7 +17,6 @@ import {
   updateVectorDitherPickerColors,
   updateVectorDitherControls,
 } from '../DOM/render.js'
-import { bump } from '../hooks/appState.svelte.js'
 import {
   removeActionVector,
   changeActionVectorMode,
@@ -238,7 +237,6 @@ function layerInteract(e) {
     } else {
       dom.layerSettingsContainer.style.display = 'flex'
       dom.layerSettingsContainer.layerObj = layer
-      bump()
     }
   } else {
     //TODO: (Low Priority) allow selecting multiple layers for moving purposes only
@@ -443,7 +441,7 @@ function vectorInteract(e) {
         if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = true
       })
     }
-    bump() //If code reaches this case, either vector is selected or is current vector
+ //If code reaches this case, either vector is selected or is current vector
     vectorGui.render()
     renderLayersToDOM()
     renderVectorsToDOM()
@@ -512,7 +510,6 @@ canvas.previousXOffset = canvas.xOffset
 canvas.previousYOffset = canvas.yOffset
 renderCanvas(canvas.currentLayer)
 // React components read canvas.layers / swatches directly via useAppState()
-bump()
 
 //Initialize temp layer, not added to layers array
 canvas.tempLayer = createPreviewLayer()

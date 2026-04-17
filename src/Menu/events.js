@@ -1,6 +1,5 @@
 import { dom } from '../Context/dom.js'
 import { globalState } from '../Context/state.js'
-import { bump } from '../hooks/appState.svelte.js'
 import { canvas } from '../Context/canvas.js'
 import { activateResizeOverlay } from '../Canvas/resizeOverlay.js'
 import { vectorGui } from '../GUI/vector.js'
@@ -84,7 +83,6 @@ export const generateTooltip = (message, target) => {
 export function openSaveDialogBox() {
   globalState.ui.saveDialogOpen = true
   if (dom.saveContainer) dom.saveContainer.style.display = 'flex'
-  bump()
   setSaveFilesizePreview()
   if (dom.saveAsFileName) dom.saveAsFileName.focus()
 }
@@ -313,7 +311,6 @@ if (dom.canvasSizeBtn)
     if (canvas.pastedLayer) return
     globalState.ui.canvasSizeOpen = true
     if (dom.sizeContainer) dom.sizeContainer.style.display = 'flex'
-    bump()
     activateResizeOverlay()
   })
 if (dom.selectAllBtn)
@@ -333,7 +330,6 @@ if (dom.rotateBtn) dom.rotateBtn.addEventListener('click', actionRotatePixels)
 if (dom.settingsBtn)
   dom.settingsBtn.addEventListener('click', () => {
     globalState.ui.settingsOpen = !globalState.ui.settingsOpen
-    bump()
   })
 // Save form events — handled by SaveDialog React component; guard until migrated
 if (dom.saveAsForm)
@@ -358,7 +354,6 @@ if (dom.saveAsForm)
     saveDrawing()
     globalState.ui.saveDialogOpen = false
     if (dom.saveContainer) dom.saveContainer.style.display = 'none'
-    bump()
   })
 if (dom.saveAsFileName)
   dom.saveAsFileName.addEventListener('input', (e) => {
@@ -375,5 +370,4 @@ if (dom.cancelSaveBtn)
   dom.cancelSaveBtn.addEventListener('click', () => {
     globalState.ui.saveDialogOpen = false
     if (dom.saveContainer) dom.saveContainer.style.display = 'none'
-    bump()
   })
