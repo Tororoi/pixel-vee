@@ -13,6 +13,7 @@ export const renderLayersToDOM = () => {
   ).length
 }
 
+/** @returns {void} */
 export function removeTempLayerFromDOM() {
   if (!canvas.layers.includes(canvas.tempLayer)) {
     return

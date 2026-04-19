@@ -79,6 +79,11 @@ export function toggleMode(modeName = null, modeBtn = null) {
   const toolName = globalState.tool.selectedName
   const directModes = tools[toolName]?.modes
 
+  /**
+   * @param {string} key - Mode key
+   * @param {*} value - Mode value
+   * @returns {void}
+   */
   function setMode(key, value) {
     modes[key] = value
     if (directModes) directModes[key] = value

@@ -7,10 +7,7 @@ import { vectorGui } from '../GUI/vector.js'
 import { handleUndo, handleRedo } from '../Actions/undoRedo/undoRedo.js'
 import { tools } from '../Tools/index.js'
 import { renderCanvas } from '../Canvas/render.js'
-import {
-  renderToolOptionsToDOM,
-  renderVectorsToDOM,
-} from '../DOM/render.js'
+import { renderToolOptionsToDOM, renderVectorsToDOM } from '../DOM/render.js'
 import { randomizeColor } from '../Swatch/events.js'
 import { renderCursor } from '../GUI/cursor.js'
 import { openSaveDialogBox } from '../Menu/events.js'

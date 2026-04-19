@@ -1,3 +1,4 @@
+import { SvelteSet } from 'svelte/reactivity'
 import { TRANSLATE } from '../utils/constants.js'
 
 export const vectorStore = $state({
@@ -5,7 +6,7 @@ export const vectorStore = $state({
   all: {},
   currentIndex: null,
   collidedIndex: null,
-  selectedIndices: new Set(),
+  selectedIndices: new SvelteSet(),
   savedProperties: {},
   transformMode: TRANSLATE,
   highestKey: 0,

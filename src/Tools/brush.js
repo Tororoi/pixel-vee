@@ -55,7 +55,8 @@ function brushSteps() {
               globalState.tool.current.brushSize
             ],
         brushSize: isCustomStamp ? 32 : globalState.tool.current.brushSize,
-        ditherPattern: ditherPatterns[globalState.tool.current.ditherPatternIndex],
+        ditherPattern:
+          ditherPatterns[globalState.tool.current.ditherPatternIndex],
         twoColorMode: globalState.tool.current.modes?.twoColor,
         secondaryColor: swatches.secondary.color,
         ditherOffsetX: globalState.tool.current.ditherOffsetX,
@@ -146,16 +147,27 @@ function brushSteps() {
         modes: { ...globalState.tool.current.modes },
         color: { ...swatches.primary.color },
         secondaryColor: { ...swatches.secondary.color },
-        brushSize: globalState.tool.current.brushType === 'custom' ? 32 : globalState.tool.current.brushSize,
+        brushSize:
+          globalState.tool.current.brushType === 'custom'
+            ? 32
+            : globalState.tool.current.brushSize,
         brushType: globalState.tool.current.brushType,
         customStampEntry:
-          globalState.tool.current.brushType === 'custom' ? brushStamps.custom : null,
+          globalState.tool.current.brushType === 'custom'
+            ? brushStamps.custom
+            : null,
         ditherPatternIndex: globalState.tool.current.ditherPatternIndex,
         ditherOffsetX:
-          (((globalState.tool.current.ditherOffsetX + globalState.canvas.cropOffsetX) % 8) + 8) %
+          (((globalState.tool.current.ditherOffsetX +
+            globalState.canvas.cropOffsetX) %
+            8) +
+            8) %
           8,
         ditherOffsetY:
-          (((globalState.tool.current.ditherOffsetY + globalState.canvas.cropOffsetY) % 8) + 8) %
+          (((globalState.tool.current.ditherOffsetY +
+            globalState.canvas.cropOffsetY) %
+            8) +
+            8) %
           8,
         recordedLayerX: canvas.currentLayer.x,
         recordedLayerY: canvas.currentLayer.y,
@@ -167,7 +179,9 @@ function brushSteps() {
         timelineProperties.buildUpDensityDelta = [
           ...globalState.selection.seenPixelsSet,
         ]
-        timelineProperties.buildUpSteps = [...globalState.tool.current.buildUpSteps]
+        timelineProperties.buildUpSteps = [
+          ...globalState.tool.current.buildUpSteps,
+        ]
       }
       addToTimeline({
         tool: brush.name,

@@ -4,46 +4,39 @@ import { createDitherPatternSVG } from './renderBrush.js'
 /**
  * Render vectors interface — React reads state.vector.all via useAppState().
  */
-export const renderVectorsToDOM = () => {
-}
+export const renderVectorsToDOM = () => {}
 
 /**
  * Open vector settings popout — React component handles via state.
  */
-export function renderVectorSettingsToDOM() {
-}
+export function renderVectorSettingsToDOM() {}
 
 // ─── Vector dither picker helpers (used by Canvas/events.js) ──────────────────
 
 /**
  * Notify React to re-render the vector dither picker.
  */
-export function initVectorDitherPicker() {
-}
+export function initVectorDitherPicker() {}
 
 /**
  * Notify React to refresh vector dither picker color previews.
  */
-export function updateVectorDitherPickerColors() {
-}
+export function updateVectorDitherPickerColors() {}
 
 /**
  * Notify React to update dither control states for the current vector.
  */
-export function updateVectorDitherControls() {
-}
+export function updateVectorDitherControls() {}
 
 /**
  * Notify React to highlight the active dither pattern in the vector picker.
  */
-export function highlightVectorDitherPattern() {
-}
+export function highlightVectorDitherPattern() {}
 
 /**
  * Notify React to refresh the dither preview for the current vector.
  */
-export function updateVectorDitherPreview() {
-}
+export function updateVectorDitherPreview() {}
 
 // ─── Helpers preserved for React components ───────────────────────────────────
 

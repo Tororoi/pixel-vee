@@ -17,7 +17,11 @@ import {
 import { resizeOffScreenCanvas } from '../Canvas/render.js'
 import { consolidateLayers } from '../Canvas/layers.js'
 import { calcEllipseConicsFromVertices } from '../utils/ellipse.js'
-import { customBrushStamp, updateCustomStamp } from '../Context/brushStamps.js'
+import {
+  customBrushStamp,
+  customBrushData,
+  updateCustomStamp,
+} from '../Context/brushStamps.js'
 
 const currentVersion = '1.2'
 
@@ -428,7 +432,7 @@ export async function loadDrawing(jsonFile) {
   //restore custom brush stamp before timeline replay so custom brush strokes render correctly
   if (data.customBrushStamp && Array.isArray(data.customBrushStamp)) {
     customBrushStamp.pixels = data.customBrushStamp
-    customBrushStamp.pixelSet = new Set(
+    customBrushData.pixelSet = new Set(
       data.customBrushStamp.map(({ x, y }) => (y << 16) | x),
     )
     updateCustomStamp()

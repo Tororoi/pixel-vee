@@ -94,9 +94,6 @@ export function setColor(r, g, b, a, target) {
   }
   //reset selected index before render method calculates it
   swatches.selectedPaletteIndex = null
-  //only render when s key (randomize color) is not being pressed
-  if (!keys.KeyR) {
-  }
   updateDitherPickerColors()
 }
 
@@ -117,7 +114,7 @@ export function initializeColorPicker(target) {
   picker.swatch = target
   const initialColorReference = target.color
   picker.update(initialColorReference)
-  //show colorpicker — React reads globalState.ui.colorPickerOpen via 
+  //show colorpicker — React reads globalState.ui.colorPickerOpen via
   globalState.ui.colorPickerOpen = true
   if (dom.colorPickerContainer) {
     dom.colorPickerContainer.style.display = 'flex'

@@ -389,7 +389,10 @@ export function findVectorShapeCentroid(vectorIndicesSet, vectors) {
     const vectorProperties = vectors[index].vectorProperties
     //Get points for center point calculation.
     for (let i = 1; i <= 4; i++) {
-      if (vectorProperties[`px${i}`] != null && vectorProperties[`py${i}`] != null) {
+      if (
+        vectorProperties[`px${i}`] != null &&
+        vectorProperties[`py${i}`] != null
+      ) {
         const xKey = `px${i}`
         const yKey = `py${i}`
         vectorPoints.push([vectorProperties[xKey], vectorProperties[yKey]])

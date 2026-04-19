@@ -47,6 +47,7 @@ export function registerVectorGui(vg) {
 
 // ─── State methods ─────────────────────────────────────────────────────────────
 
+/** @returns {void} */
 function reset() {
   state.tool.clickCounter = 0
   if (state.vector.properties.forceCircle) {
@@ -54,6 +55,7 @@ function reset() {
   }
 }
 
+/** @returns {void} */
 function deselect() {
   state.selection.resetProperties()
   state.selection.resetBoundaryBox()
@@ -78,6 +80,7 @@ function deselect() {
   }
 }
 
+/** @returns {void} */
 function clearRedoStack() {
   state.timeline.currentAction = null
   for (const action of state.timeline.redoStack) {

@@ -441,7 +441,7 @@ function vectorInteract(e) {
         if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = true
       })
     }
- //If code reaches this case, either vector is selected or is current vector
+    //If code reaches this case, either vector is selected or is current vector
     vectorGui.render()
     renderLayersToDOM()
     renderVectorsToDOM()

@@ -326,7 +326,10 @@
           lastOx = ox
           lastOy = oy
           // Write only to underlying during drag — avoids triggering Svelte re-renders on every move
-          if (underlying) { underlying.ditherOffsetX = ox; underlying.ditherOffsetY = oy }
+          if (underlying) {
+            underlying.ditherOffsetX = ox
+            underlying.ditherOffsetY = oy
+          }
           applyDitherOffset(el, ox, oy)
           const preview = document.querySelector('.dither-preview')
           if (preview) applyDitherOffset(preview, ox, oy)
@@ -340,7 +343,10 @@
             // Sync final value to proxy once on release
             target.ditherOffsetX = lastOx
             target.ditherOffsetY = lastOy
-            if (underlying) { underlying.ditherOffsetX = lastOx; underlying.ditherOffsetY = lastOy }
+            if (underlying) {
+              underlying.ditherOffsetX = lastOx
+              underlying.ditherOffsetY = lastOy
+            }
           },
           { once: true },
         )

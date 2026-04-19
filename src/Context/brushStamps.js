@@ -2,6 +2,11 @@ import { generateBrushStamps } from '../utils/brushHelpers.js'
 import { customBrushStamp } from './brushStamps.svelte.js'
 export { customBrushStamp }
 
+export const customBrushData = {
+  pixelSet: new Set(),
+  colorMap: new Map(),
+}
+
 export const brushStamps = {
   circle: generateBrushStamps('circle'),
   square: generateBrushStamps('square'),
@@ -32,7 +37,7 @@ function buildCustomStampEntry() {
   for (const k of STAMP_DIRECTION_KEYS) {
     entry[k] = pts
   }
-  entry.pixelSet = customBrushStamp.pixelSet
+  entry.pixelSet = customBrushData.pixelSet
   return entry
 }
 

@@ -169,9 +169,15 @@ export function renderVectorRotationControl() {
   }
   // rotationOrigin is layer-absolute; add cropOffset to reach canvas-pixel space for rendering.
   const cx =
-    canvas.xOffset + motherPoints.rotationx + globalState.canvas.cropOffsetX + 0.5
+    canvas.xOffset +
+    motherPoints.rotationx +
+    globalState.canvas.cropOffsetX +
+    0.5
   const cy =
-    canvas.yOffset + motherPoints.rotationy + globalState.canvas.cropOffsetY + 0.5
+    canvas.yOffset +
+    motherPoints.rotationy +
+    globalState.canvas.cropOffsetY +
+    0.5
   const minRadius = lineWidth
   const maxRadius = circleRadius - lineWidth * 2
 

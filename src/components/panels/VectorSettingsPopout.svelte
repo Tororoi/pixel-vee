@@ -50,7 +50,8 @@
     const svgEl = createVectorDitherPatternSVG(pattern, vector)
     if (twoColor) {
       const bg = svgEl.querySelector('.dither-bg-rect')
-      if (bg) bg.setAttribute('fill', vector.secondaryColor?.color ?? 'rgba(0,0,0,0)')
+      if (bg)
+        bg.setAttribute('fill', vector.secondaryColor?.color ?? 'rgba(0,0,0,0)')
     }
     return new XMLSerializer().serializeToString(svgEl)
   })
@@ -142,7 +143,9 @@
 
   const modes = $derived({ ...(vector.modes ?? {}) })
   const primaryColor = $derived(vector.color?.color)
-  const secondaryColor = $derived(vector.secondaryColor?.color ?? 'rgba(0,0,0,0)')
+  const secondaryColor = $derived(
+    vector.secondaryColor?.color ?? 'rgba(0,0,0,0)',
+  )
   const tool = $derived(vector.vectorProperties?.tool)
   const isCurveTool = $derived(tool === 'curve')
   const curveTypes = ['line', 'quadCurve', 'cubicCurve']

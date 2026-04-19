@@ -117,7 +117,10 @@
     if (current === 'circle') {
       setToolProp('brushType', 'square')
     } else if (current === 'square') {
-      setToolProp('brushType', customBrushStamp.pixels.length === 0 ? 'circle' : 'custom')
+      setToolProp(
+        'brushType',
+        customBrushStamp.pixels.length === 0 ? 'circle' : 'custom',
+      )
     } else {
       setToolProp('brushType', 'circle')
     }
