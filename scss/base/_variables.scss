@@ -46,6 +46,10 @@ $tooltip-color: $light-yellow !default;
 $border-color: $neutral-gray !default;
 $active-color: $white !default;
 $button-color: $neutral-gray !default;
+
+/* SVG data URI colors (URL-encoded hex — keeps stroke format consistent with crispEdges paths) */
+$svg-border-color: '%23838383' !default;
+$svg-white: '%23ffffff' !default;
 $warning-color: $red !default;
 $edit-color: rgb(71, 255, 47) !default;
 $remove-color: $red !default;

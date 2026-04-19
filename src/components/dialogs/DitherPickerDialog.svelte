@@ -25,6 +25,7 @@
     changeActionVectorDitherPattern,
     changeActionVectorDitherOffset,
   } from '../../Actions/modifyTimeline/modifyTimeline.js'
+  import { tools } from '../../Tools/index.js'
 
   const DITHER_TOOLS = ['brush', 'curve', 'ellipse', 'polygon']
 
@@ -112,10 +113,12 @@
 
   function handleStepSlotClick(slotIndex) {
     if (!globalState.tool.current) return
-    globalState.tool.current.buildUpActiveStepSlot =
+    const newSlot =
       globalState.tool.current.buildUpActiveStepSlot === slotIndex
         ? null
         : slotIndex
+    globalState.tool.current.buildUpActiveStepSlot = newSlot
+    brush.buildUpActiveStepSlot = newSlot
   }
 
   onMount(() => {
@@ -150,13 +153,19 @@
         return
       }
       if (!DITHER_TOOLS.includes(globalState.tool.current?.name)) return
+      const toolName = globalState.tool.selectedName
+      const underlying = tools[toolName]
       if (globalState.tool.current.buildUpActiveStepSlot != null) {
-        globalState.tool.current.buildUpSteps[
-          globalState.tool.current.buildUpActiveStepSlot
-        ] = patternIndex
+        const slot = globalState.tool.current.buildUpActiveStepSlot
+        globalState.tool.current.buildUpSteps[slot] = patternIndex
         globalState.tool.current.buildUpActiveStepSlot = null
+        if (underlying) {
+          underlying.buildUpSteps[slot] = patternIndex
+          underlying.buildUpActiveStepSlot = null
+        }
       } else {
         globalState.tool.current.ditherPatternIndex = patternIndex
+        if (underlying) underlying.ditherPatternIndex = patternIndex
       }
     })
 
@@ -172,21 +181,25 @@
           return
         }
         if (!DITHER_TOOLS.includes(globalState.tool.current?.name)) return
-        globalState.tool.current.modes.twoColor =
-          !globalState.tool.current.modes.twoColor
+        const newTwoColor = !globalState.tool.current.modes.twoColor
+        globalState.tool.current.modes.twoColor = newTwoColor
+        const toolName = globalState.tool.selectedName
+        if (tools[toolName]?.modes) tools[toolName].modes.twoColor = newTwoColor
       },
     )
 
     // Build-up dither toggle
     el.querySelector('#dither-ctrl-build-up')?.addEventListener('click', () => {
       if (globalState.tool.current?.name !== 'brush') return
-      globalState.tool.current.modes.buildUpDither =
-        !globalState.tool.current.modes.buildUpDither
+      const newBuildUp = !globalState.tool.current.modes.buildUpDither
+      globalState.tool.current.modes.buildUpDither = newBuildUp
+      brush.modes.buildUpDither = newBuildUp
       if (globalState.tool.current.modes.buildUpDither) {
         rebuildBuildUpDensityMap()
       } else {
         brush._buildUpDensityMap = new Map()
         globalState.tool.current.buildUpActiveStepSlot = null
+        brush.buildUpActiveStepSlot = null
       }
     })
 
@@ -214,14 +227,17 @@
           brush._customBuildUpSteps = [...globalState.tool.current.buildUpSteps]
         }
         globalState.tool.current.buildUpMode = mode
+        brush.buildUpMode = mode
         if (mode === 'custom') {
-          globalState.tool.current.buildUpSteps = [
-            ...brush._customBuildUpSteps,
-          ]
+          const steps = [...brush._customBuildUpSteps]
+          globalState.tool.current.buildUpSteps = steps
+          brush.buildUpSteps = steps
         } else {
-          globalState.tool.current.buildUpSteps = BAYER_STEPS[mode]
+          const steps = BAYER_STEPS[mode]
             ? [...BAYER_STEPS[mode]]
             : globalState.tool.current.buildUpSteps
+          globalState.tool.current.buildUpSteps = steps
+          brush.buildUpSteps = steps
         }
       },
     )
@@ -295,8 +311,11 @@
         )
       } else {
         const target = globalState.tool.current
+        const underlying = tools[globalState.tool.selectedName]
         const startOffsetX = target.ditherOffsetX ?? 0
         const startOffsetY = target.ditherOffsetY ?? 0
+        let lastOx = startOffsetX
+        let lastOy = startOffsetY
         const onMove = (ev) => {
           const ox =
             (((startOffsetX - Math.round((ev.clientX - startX) / 4)) % 8) + 8) %
@@ -304,8 +323,10 @@
           const oy =
             (((startOffsetY - Math.round((ev.clientY - startY) / 4)) % 8) + 8) %
             8
-          target.ditherOffsetX = ox
-          target.ditherOffsetY = oy
+          lastOx = ox
+          lastOy = oy
+          // Write only to underlying during drag — avoids triggering Svelte re-renders on every move
+          if (underlying) { underlying.ditherOffsetX = ox; underlying.ditherOffsetY = oy }
           applyDitherOffset(el, ox, oy)
           const preview = document.querySelector('.dither-preview')
           if (preview) applyDitherOffset(preview, ox, oy)
@@ -316,6 +337,10 @@
           'pointerup',
           () => {
             control.removeEventListener('pointermove', onMove)
+            // Sync final value to proxy once on release
+            target.ditherOffsetX = lastOx
+            target.ditherOffsetY = lastOy
+            if (underlying) { underlying.ditherOffsetX = lastOx; underlying.ditherOffsetY = lastOy }
           },
           { once: true },
         )

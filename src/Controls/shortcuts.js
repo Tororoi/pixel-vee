@@ -110,6 +110,8 @@ export function activateShortcut(keyCode) {
       if (globalState.tool.selectedName === 'curve') {
         globalState.tool.current.options.chain.active =
           !globalState.tool.current.options.chain.active
+        tools.curve.options.chain.active =
+          globalState.tool.current.options.chain.active
         renderToolOptionsToDOM()
         vectorGui.render()
       }
@@ -118,6 +120,8 @@ export function activateShortcut(keyCode) {
       if (globalState.tool.selectedName === 'curve') {
         globalState.tool.current.options.equal.active =
           !globalState.tool.current.options.equal.active
+        tools.curve.options.equal.active =
+          globalState.tool.current.options.equal.active
         renderToolOptionsToDOM()
         vectorGui.render()
       }
@@ -133,6 +137,8 @@ export function activateShortcut(keyCode) {
       if (globalState.tool.selectedName === 'curve') {
         globalState.tool.current.options.align.active =
           !globalState.tool.current.options.align.active
+        tools.curve.options.align.active =
+          globalState.tool.current.options.align.active
         renderToolOptionsToDOM()
         vectorGui.render()
       }
@@ -197,6 +203,8 @@ export function activateShortcut(keyCode) {
       if (globalState.tool.selectedName === 'curve') {
         globalState.tool.current.options.hold.active =
           !globalState.tool.current.options.hold.active
+        tools.curve.options.hold.active =
+          globalState.tool.current.options.hold.active
         renderToolOptionsToDOM()
       }
       break
@@ -217,6 +225,8 @@ export function activateShortcut(keyCode) {
       if (globalState.tool.selectedName === 'curve') {
         globalState.tool.current.options.link.active =
           !globalState.tool.current.options.link.active
+        tools.curve.options.link.active =
+          globalState.tool.current.options.link.active
         renderToolOptionsToDOM()
         vectorGui.render()
       }

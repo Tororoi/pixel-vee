@@ -5,12 +5,20 @@
   import { brushStamps, customBrushStamp } from '../../Context/brushStamps.js'
   import { rebuildBuildUpDensityMap } from '../../Tools/brush.js'
   import { toggleMode } from '../../Tools/toolbox.js'
+  import { tools } from '../../Tools/index.js'
   import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
   import { openStampEditor } from '../../DOM/stampEditor.js'
   import { dom } from '../../Context/dom.js'
   import BrushDitherPreview from './BrushDitherPreview.svelte'
 
-  const NO_PANEL_TOOLS = ['eyedropper', 'grab', 'move', 'select', 'magicWand']
+  const NO_PANEL_TOOLS = [
+    'eyedropper',
+    'grab',
+    'move',
+    'select',
+    'magicWand',
+    'fill',
+  ]
   const DITHER_TOOLS = ['brush', 'curve', 'ellipse', 'polygon']
   const STAMP_TOOLS = ['brush']
   const BRUSH_TOOLS = ['brush', 'curve', 'ellipse', 'polygon']
@@ -43,7 +51,9 @@
   const showBrushControls = $derived(BRUSH_TOOLS.includes(toolName))
   const showStamp = $derived(STAMP_TOOLS.includes(toolName))
   const showDither = $derived(DITHER_TOOLS.includes(toolName))
-  const isBrushDisabled = $derived(globalState.tool.current?.brushDisabled ?? false)
+  const isBrushDisabled = $derived(
+    globalState.tool.current?.brushDisabled ?? false,
+  )
   const isCustomBrush = $derived(brushType === 'custom')
   const modes = $derived({ ...globalState.tool.current?.modes })
 
@@ -92,33 +102,43 @@
     return pathData
   }
 
-  const stampPathData = $derived(buildBrushStampSVGData(globalState.tool.current))
+  const stampPathData = $derived(
+    buildBrushStampSVGData(globalState.tool.current),
+  )
+
+  function setToolProp(key, value) {
+    tool[key] = value
+    const underlying = tools[globalState.tool.selectedName]
+    if (underlying) underlying[key] = value
+  }
 
   function handleBrushTypeClick() {
     const current = tool.brushType
     if (current === 'circle') {
-      tool.brushType = 'square'
+      setToolProp('brushType', 'square')
     } else if (current === 'square') {
-      tool.brushType =
-        customBrushStamp.pixels.length === 0 ? 'circle' : 'custom'
+      setToolProp('brushType', customBrushStamp.pixels.length === 0 ? 'circle' : 'custom')
     } else {
-      tool.brushType = 'circle'
+      setToolProp('brushType', 'circle')
     }
   }
 
   function handleSizeChange(e) {
-    tool.brushSize = parseInt(e.target.value)
+    setToolProp('brushSize', parseInt(e.target.value))
   }
 
   function handleModeClick(modeKey) {
     toggleMode(modeKey)
-    if (modeKey === 'buildUpDither' && !globalState.tool.current?.modes?.buildUpDither) {
+    if (
+      modeKey === 'buildUpDither' &&
+      !globalState.tool.current?.modes?.buildUpDither
+    ) {
       rebuildBuildUpDensityMap()
     }
   }
 
   function handleStampBtnClick() {
-    tool.brushType = 'custom'
+    setToolProp('brushType', 'custom')
     if (!dom.stampEditorContainer) return
     if (
       !dom.stampEditorContainer.style.display ||

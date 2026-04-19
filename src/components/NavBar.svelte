@@ -18,6 +18,7 @@
     actionRotatePixels,
   } from '../Actions/transform/rasterTransform.js'
   import { openSaveDialogBox } from '../Menu/events.js'
+  import { tools } from '../Tools/index.js'
 
   function camelCaseToWords(str) {
     let result = str.replace(/([A-Z])/g, ' $1')
@@ -50,6 +51,10 @@
   function handleOptionChange(optionName, checked) {
     if (globalState.tool.current.options[optionName]) {
       globalState.tool.current.options[optionName].active = checked
+      const underlying = tools[globalState.tool.selectedName]
+      if (underlying?.options?.[optionName]) {
+        underlying.options[optionName].active = checked
+      }
     }
     vectorGui.render()
   }

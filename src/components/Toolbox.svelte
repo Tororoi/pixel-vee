@@ -32,6 +32,23 @@
   const selectedName = $derived(globalState.tool.selectedName)
   const pastedLayer = $derived(!!canvas.pastedLayer)
 
+  // Track the last-selected tool per group reactively (plain group.activeTool
+  // isn't reactive so Svelte captures a stale value after the first render).
+  let groupActiveTools = $state(
+    Object.fromEntries(
+      Object.entries(toolGroups).map(([k, v]) => [k, v.activeTool]),
+    ),
+  )
+
+  $effect(() => {
+    for (const [groupKey, group] of Object.entries(toolGroups)) {
+      if (group.tools.includes(selectedName)) {
+        groupActiveTools[groupKey] = selectedName
+        break
+      }
+    }
+  })
+
   onMount(() => {
     if (!ref) return
     initializeDragger(ref)
@@ -218,7 +235,7 @@
           {#each COLUMN1_TOOLS as item (item)}
             {#if toolGroups[item]}
               {@const group = toolGroups[item]}
-              {@const activeToolName = group.activeTool}
+              {@const activeToolName = groupActiveTools[item]}
               {@const isGroupSelected = group.tools.includes(selectedName)}
               {@const groupBtnClass = isGroupSelected
                 ? selectedName

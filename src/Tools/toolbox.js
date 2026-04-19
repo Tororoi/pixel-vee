@@ -26,7 +26,9 @@ export function switchTool(toolName = null, toolBtn = null) {
     }
   }
 
-  globalState.tool.current = tools[targetId]
+  if (globalState.tool.current?.name !== targetId) {
+    globalState.tool.current = tools[targetId]
+  }
   globalState.tool.selectedName = targetId
 
   // Sync active tool within its group
@@ -67,38 +69,41 @@ export function switchTool(toolName = null, toolBtn = null) {
  * @param {HTMLElement|null} modeBtn - The mode button
  */
 export function toggleMode(modeName = null, modeBtn = null) {
-  const targetModeBtn = modeBtn || document.querySelector(`#${modeName}`)
-  if (targetModeBtn) {
-    if (globalState.tool.current.modes[targetModeBtn.id] !== undefined) {
-      if (targetModeBtn.classList.contains('selected')) {
-        if (CURVE_TYPES.includes(targetModeBtn.id)) return
-        globalState.tool.current.modes[targetModeBtn.id] = false
-      } else {
-        globalState.tool.current.modes[targetModeBtn.id] = true
-        if (
-          targetModeBtn.id === 'eraser' &&
-          globalState.tool.current.modes?.inject
-        ) {
-          globalState.tool.current.modes.inject = false
-        } else if (
-          targetModeBtn.id === 'inject' &&
-          globalState.tool.current.modes?.eraser
-        ) {
-          globalState.tool.current.modes.eraser = false
-        }
-        if (CURVE_TYPES.includes(targetModeBtn.id)) {
-          CURVE_TYPES.forEach((t) => {
-            if (t !== targetModeBtn.id)
-              globalState.tool.current.modes[t] = false
-          })
-        }
-      }
-      if (globalState.tool.current.modes?.eraser) {
-        canvas.vectorGuiCVS.style.cursor = 'none'
-      } else {
-        canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
-      }
-      renderCursor()
+  const targetId = modeBtn?.id ?? modeName
+  if (!targetId) return
+  const modes = globalState.tool.current?.modes
+  if (!modes || modes[targetId] === undefined) return
+
+  // Also write directly to the underlying tool object so the value persists
+  // when the tool is re-selected (Svelte 5's proxy may not write through)
+  const toolName = globalState.tool.selectedName
+  const directModes = tools[toolName]?.modes
+
+  function setMode(key, value) {
+    modes[key] = value
+    if (directModes) directModes[key] = value
+  }
+
+  if (modes[targetId]) {
+    if (CURVE_TYPES.includes(targetId)) return
+    setMode(targetId, false)
+  } else {
+    setMode(targetId, true)
+    if (targetId === 'eraser' && modes.inject) {
+      setMode('inject', false)
+    } else if (targetId === 'inject' && modes.eraser) {
+      setMode('eraser', false)
+    }
+    if (CURVE_TYPES.includes(targetId)) {
+      CURVE_TYPES.forEach((t) => {
+        if (t !== targetId) setMode(t, false)
+      })
     }
   }
+  if (modes.eraser) {
+    canvas.vectorGuiCVS.style.cursor = 'none'
+  } else {
+    canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
+  }
+  renderCursor()
 }
