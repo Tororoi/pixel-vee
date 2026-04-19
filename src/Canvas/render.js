@@ -187,8 +187,7 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
       }
     }
   }
-  // renderLayersToDOM()
-  // renderVectorsToDOM()
+  // updateActiveLayerState()
 }
 
 /**

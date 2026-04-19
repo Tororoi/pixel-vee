@@ -1,21 +1,6 @@
 import { globalState } from '../Context/state.js'
 import { swatches } from '../Context/swatch.js'
 
-/**
- * Brush stamp display — React reads globalState.tool.current via useAppState().
- */
-export function renderBrushStampToDOM() {}
-
-/**
- * Brush modes row — React reads globalState.tool.current.modes via useAppState().
- */
-export const renderBrushModesToDOM = () => {}
-
-/**
- * Tool options row — React reads globalState.tool.current.options via useAppState().
- */
-export function renderToolOptionsToDOM() {}
-
 const SVG_NS = 'http://www.w3.org/2000/svg'
 
 let _ditherSvgCounter = 0

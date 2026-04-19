@@ -4,7 +4,7 @@
   import { canvas } from '../../Context/canvas.js'
   import { vectorGui } from '../../GUI/vector.js'
   import { renderCanvas } from '../../Canvas/render.js'
-  import { renderLayersToDOM, renderVectorsToDOM } from '../../DOM/render.js'
+  import { updateActiveLayerState } from '../../DOM/render.js'
   import {
     addRasterLayer,
     addReferenceLayer,
@@ -77,8 +77,8 @@
     if (layer.type === 'reference') {
       switchTool('move')
     }
-    renderLayersToDOM()
-    renderVectorsToDOM()
+    updateActiveLayerState()
+
     renderCanvas(layer)
   }
 
@@ -131,7 +131,7 @@
         dom.canvasLayers.children[newIndex],
       )
     }
-    renderLayersToDOM()
+    updateActiveLayerState()
   }
 </script>
 

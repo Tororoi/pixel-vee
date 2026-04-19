@@ -3,7 +3,7 @@ import { canvas } from '../../Context/canvas.js'
 import { tools } from '../../Tools/index.js'
 import { vectorGui } from '../../GUI/vector.js'
 import { addToTimeline } from '../undoRedo/undoRedo.js'
-import { renderVectorsToDOM } from '../../DOM/render.js'
+
 import { findVectorShapeCentroid } from '../../utils/vectorHelpers.js'
 import { dom } from '../../Context/dom.js'
 import { SCALE } from '../../utils/constants.js'
@@ -41,8 +41,6 @@ export function actionSelectAll() {
       },
     })
     globalState.clearRedoStack()
-    //re-render vectors in DOM and GUI
-    renderVectorsToDOM()
     vectorGui.render()
   }
 }
@@ -140,7 +138,6 @@ export function actionDeselect() {
 
     globalState.clearRedoStack()
     vectorGui.render()
-    renderVectorsToDOM()
   }
 }
 

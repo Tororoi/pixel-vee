@@ -5,7 +5,7 @@ import { vectorGui } from '../../GUI/vector.js'
 import { addToTimeline } from '../undoRedo/undoRedo.js'
 import { createRasterLayer, createReferenceLayer } from '../../Canvas/layers.js'
 import { renderCanvas } from '../../Canvas/render.js'
-import { renderLayersToDOM, renderVectorsToDOM } from '../../DOM/render.js'
+import { updateActiveLayerState } from '../../DOM/render.js'
 import { dom } from '../../Context/dom.js'
 
 //=============================================//
@@ -37,7 +37,7 @@ export function addReferenceLayer() {
           layer,
         })
         globalState.clearRedoStack()
-        renderLayersToDOM()
+        updateActiveLayerState()
         renderCanvas()
       }
     }
@@ -64,7 +64,7 @@ export function addRasterLayer() {
     layer,
   })
   globalState.clearRedoStack()
-  renderLayersToDOM()
+  updateActiveLayerState()
 }
 
 /**
@@ -95,7 +95,6 @@ export function removeLayer(layer) {
       layer,
     })
     globalState.clearRedoStack()
-    renderLayersToDOM()
-    renderVectorsToDOM()
+    updateActiveLayerState()
   }
 }

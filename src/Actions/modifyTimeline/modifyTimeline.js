@@ -3,7 +3,7 @@ import { tools } from '../../Tools/index.js'
 import { vectorGui } from '../../GUI/vector.js'
 import { addToTimeline } from '../undoRedo/undoRedo.js'
 import { renderCanvas } from '../../Canvas/render.js'
-import { renderVectorsToDOM } from '../../DOM/render.js'
+
 import { CURVE_TYPES } from '../../utils/constants.js'
 
 //====================================//
@@ -252,7 +252,6 @@ export function changeActionVectorCurveType(targetVector, newCurveType) {
   )
   globalState.clearRedoStack()
   vectorGui.render()
-  renderVectorsToDOM()
 }
 
 /**

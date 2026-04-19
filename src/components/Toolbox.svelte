@@ -13,7 +13,7 @@
   } from '../Actions/untracked/viewActions.js'
   import { vectorGui } from '../GUI/vector.js'
   import { renderCanvas } from '../Canvas/render.js'
-  import { renderVectorsToDOM } from '../DOM/renderVectors.js'
+
   import { ZOOM_LEVELS } from '../utils/constants.js'
   import { initializeDragger, initializeCollapser } from '../utils/drag.js'
 
@@ -88,7 +88,7 @@
     actionClear(canvas.currentLayer)
     globalState.clearRedoStack()
     renderCanvas(canvas.currentLayer)
-    renderVectorsToDOM()
+
   }
 
   function handleZoom(e) {

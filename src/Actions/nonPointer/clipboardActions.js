@@ -5,9 +5,8 @@ import { vectorGui } from '../../GUI/vector.js'
 import { addToTimeline } from '../undoRedo/undoRedo.js'
 import { renderCanvas } from '../../Canvas/render.js'
 import {
-  renderLayersToDOM,
-  renderVectorsToDOM,
-  removeTempLayerFromDOM,
+  updateActiveLayerState,
+  removeTempLayer,
 } from '../../DOM/render.js'
 import {
   confirmPastedPixels,
@@ -95,7 +94,6 @@ export function actionCutSelection(copyToClipboard = true) {
 
       globalState.clearRedoStack()
       vectorGui.render()
-      renderVectorsToDOM()
     }
   }
 }
@@ -191,8 +189,7 @@ export function actionPasteSelection() {
 
       renderCanvas(canvas.currentLayer)
       switchTool('move') //TODO: (Medium Priority) Instead of move tool being selected, automatically use temporary transform tool which is not in the toolbox.
-      renderLayersToDOM()
-      renderVectorsToDOM()
+      updateActiveLayerState()
     } else if (Object.keys(globalState.clipboard.select.vectors).length > 0) {
       //Make deep copy of clipboard vectors:
       const clipboardVectors = JSON.parse(
@@ -242,8 +239,7 @@ export function actionPasteSelection() {
       })
       globalState.clearRedoStack()
       renderCanvas(canvas.currentLayer, true) //Must occur after adding to timeline. Once direct render is implemented, render canvas can be before add to timeline
-      renderLayersToDOM()
-      renderVectorsToDOM()
+      updateActiveLayerState()
       vectorGui.render()
     }
   }
@@ -310,7 +306,7 @@ export function actionConfirmPastedPixels() {
     }
     confirmPastedPixels(confirmedClipboard, canvas.pastedLayer)
     //remove temp layer from DOM and restore current layer
-    removeTempLayerFromDOM()
+    removeTempLayer()
     //add to timeline
     addToTimeline({
       tool: tools.paste.name,
@@ -339,8 +335,7 @@ export function actionConfirmPastedPixels() {
     //render
     vectorGui.render()
     renderCanvas(canvas.currentLayer)
-    renderLayersToDOM()
-    renderVectorsToDOM()
+    updateActiveLayerState()
   }
 }
 

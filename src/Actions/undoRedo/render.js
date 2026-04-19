@@ -3,9 +3,8 @@ import { globalState } from '../../Context/state.js'
 import { vectorGui } from '../../GUI/vector.js'
 import { clearOffscreenCanvas, renderCanvas } from '../../Canvas/render.js'
 import {
-  renderVectorsToDOM,
-  renderLayersToDOM,
-  removeTempLayerFromDOM,
+  updateActiveLayerState,
+  removeTempLayer,
 } from '../../DOM/render.js'
 import { SCALE } from '../../utils/constants.js'
 import { setVectorShapeBoundaryBox } from '../../GUI/transform.js'
@@ -20,8 +19,7 @@ export function renderToLatestAction(latestAction, modType) {
   // and cropOffset. Replay the full timeline so all layers reflect the new settings.
   if (latestAction.tool === 'resize') {
     renderCanvas(null, true)
-    renderLayersToDOM()
-    renderVectorsToDOM()
+    updateActiveLayerState()
     globalState.reset()
     vectorGui.render()
     return
@@ -88,10 +86,9 @@ export function renderToLatestAction(latestAction, modType) {
         modType === 'to'
       ) {
         //remove temp layer from DOM and restore current layer
-        removeTempLayerFromDOM()
+        removeTempLayer()
       }
-      renderLayersToDOM()
-      renderVectorsToDOM()
+      updateActiveLayerState()
       globalState.reset()
       vectorGui.render()
     }
@@ -119,10 +116,9 @@ export function renderToLatestAction(latestAction, modType) {
       modType === 'to'
     ) {
       //remove temp layer from DOM and restore current layer
-      removeTempLayerFromDOM()
+      removeTempLayer()
     }
-    renderLayersToDOM()
-    renderVectorsToDOM()
+    updateActiveLayerState()
     globalState.reset()
     vectorGui.render()
   }

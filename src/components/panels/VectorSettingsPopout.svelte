@@ -8,7 +8,6 @@
   import { globalState } from '../../Context/state.js'
   import { dom } from '../../Context/dom.js'
   import { renderCanvas } from '../../Canvas/render.js'
-  import { renderVectorsToDOM } from '../../DOM/render.js'
   import {
     changeActionVectorMode,
     changeActionVectorBrushSize,
@@ -61,7 +60,7 @@
     if (isCurveType && vector.modes[modeKey]) return
     if (isCurveType) {
       changeActionVectorCurveType(vector, modeKey)
-      renderVectorsToDOM()
+
       return
     }
     const oldModes = { ...vector.modes }
@@ -77,7 +76,6 @@
     changeActionVectorMode(vector, oldModes, newModes)
     globalState.clearRedoStack()
     vectorGui.render()
-    renderVectorsToDOM()
   }
 
   function handlePrimaryColorClick(e) {

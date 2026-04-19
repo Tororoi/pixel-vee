@@ -1,7 +1,7 @@
 <script>
   import { onMount } from 'svelte'
   import { portal } from '../../utils/portal.js'
-  import { renderLayersToDOM } from '../../DOM/render.js'
+  import { updateActiveLayerState } from '../../DOM/render.js'
   import { renderCanvas } from '../../Canvas/render.js'
 
   const { layer = $bindable(), pos, onclose } = $props()
@@ -26,7 +26,7 @@
 
   function handleTitleChange(e) {
     layer.title = e.target.value.slice(0, 12)
-    renderLayersToDOM()
+    updateActiveLayerState()
   }
 
   function handleOpacityChange(e) {

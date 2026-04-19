@@ -12,7 +12,7 @@ import { vectorGui } from '../GUI/vector.js'
 import { renderCursor } from '../GUI/cursor.js'
 import { activateShortcut, deactivateShortcut } from './shortcuts.js'
 import { renderCanvas } from '../Canvas/render.js'
-import { renderVectorsToDOM } from '../DOM/render.js'
+
 import { actionZoom } from '../Actions/untracked/viewActions.js'
 import { debounce } from '../utils/eventHelpers.js'
 import { ZOOM_LEVELS, WHEEL_THRESHOLD } from '../utils/constants.js'
@@ -305,7 +305,6 @@ function handlePointerUp(e) {
         globalState.tool.current.name,
       )
     ) {
-      renderVectorsToDOM()
     }
 
     globalState.selection.pointsSet = null

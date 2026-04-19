@@ -5,12 +5,7 @@ import { swatches } from '../Context/swatch.js'
 import { Picker } from './Picker.js'
 import { generateRandomRGB } from '../utils/colors.js'
 import { renderCanvas } from '../Canvas/render.js'
-import {
-  renderVectorsToDOM,
-  updateDitherPickerColors,
-  updateVectorDitherPreview,
-  updateVectorDitherPickerColors,
-} from '../DOM/render.js'
+import { updateDitherPickerColors } from '../DOM/render.js'
 import { changeActionVectorColor } from '../Actions/modifyTimeline/modifyTimeline.js'
 import { constrainElementOffsets } from '../utils/constrainElementOffsets.js'
 import { DEFAULT_PALETTES, PRESETS } from '../utils/palettes.js'
@@ -77,10 +72,7 @@ export function setColor(r, g, b, a, target) {
         renderCanvas(vector.layer, true)
         changeActionVectorColor(vector, oldColor)
         globalState.clearRedoStack()
-        renderVectorsToDOM()
       }
-      updateVectorDitherPreview(vector)
-      updateVectorDitherPickerColors(vector)
     }
     if (swatches.activePaletteIndex !== null) {
       if (swatches.activePaletteIndex > swatches.palette.length - 1) {

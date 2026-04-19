@@ -7,7 +7,7 @@ import { vectorGui } from '../GUI/vector.js'
 import { handleUndo, handleRedo } from '../Actions/undoRedo/undoRedo.js'
 import { tools } from '../Tools/index.js'
 import { renderCanvas } from '../Canvas/render.js'
-import { renderToolOptionsToDOM, renderVectorsToDOM } from '../DOM/render.js'
+
 import { randomizeColor } from '../Swatch/events.js'
 import { renderCursor } from '../GUI/cursor.js'
 import { openSaveDialogBox } from '../Menu/events.js'
@@ -109,7 +109,7 @@ export function activateShortcut(keyCode) {
           !globalState.tool.current.options.chain.active
         tools.curve.options.chain.active =
           globalState.tool.current.options.chain.active
-        renderToolOptionsToDOM()
+
         vectorGui.render()
       }
       break
@@ -119,7 +119,7 @@ export function activateShortcut(keyCode) {
           !globalState.tool.current.options.equal.active
         tools.curve.options.equal.active =
           globalState.tool.current.options.equal.active
-        renderToolOptionsToDOM()
+
         vectorGui.render()
       }
       break
@@ -127,7 +127,7 @@ export function activateShortcut(keyCode) {
       if (!globalState.cursor.clicked) {
         switchTool('curve')
         toggleMode('line')
-        renderVectorsToDOM()
+
       }
       break
     case 'KeyA':
@@ -136,14 +136,14 @@ export function activateShortcut(keyCode) {
           !globalState.tool.current.options.align.active
         tools.curve.options.align.active =
           globalState.tool.current.options.align.active
-        renderToolOptionsToDOM()
+
         vectorGui.render()
       }
       break
     case 'KeyB':
       if (!globalState.cursor.clicked) {
         switchTool('brush')
-        renderVectorsToDOM()
+
       }
       break
     case 'KeyC':
@@ -153,7 +153,7 @@ export function activateShortcut(keyCode) {
         } else {
           switchTool('curve')
           toggleMode('cubicCurve')
-          renderVectorsToDOM()
+  
         }
       }
       break
@@ -184,7 +184,7 @@ export function activateShortcut(keyCode) {
           }
         } else {
           switchTool('fill')
-          renderVectorsToDOM()
+  
         }
       }
       break
@@ -202,7 +202,7 @@ export function activateShortcut(keyCode) {
           !globalState.tool.current.options.hold.active
         tools.curve.options.hold.active =
           globalState.tool.current.options.hold.active
-        renderToolOptionsToDOM()
+
       }
       break
     case 'KeyI':
@@ -224,7 +224,7 @@ export function activateShortcut(keyCode) {
           !globalState.tool.current.options.link.active
         tools.curve.options.link.active =
           globalState.tool.current.options.link.active
-        renderToolOptionsToDOM()
+
         vectorGui.render()
       }
       break
@@ -239,20 +239,20 @@ export function activateShortcut(keyCode) {
     case 'KeyO':
       if (!globalState.cursor.clicked) {
         switchTool('ellipse')
-        renderVectorsToDOM()
+
       }
       break
     case 'KeyP':
       if (!globalState.cursor.clicked) {
         switchTool('polygon')
-        renderVectorsToDOM()
+
       }
       break
     case 'KeyQ':
       if (!globalState.cursor.clicked) {
         switchTool('curve')
         toggleMode('quadCurve')
-        renderVectorsToDOM()
+
       }
       break
     case 'KeyR':
@@ -271,7 +271,7 @@ export function activateShortcut(keyCode) {
           openSaveDialogBox()
         } else {
           switchTool('select')
-          renderVectorsToDOM()
+  
         }
       }
       break
@@ -297,14 +297,14 @@ export function activateShortcut(keyCode) {
           actionPasteSelection()
         } else {
           switchTool('curve')
-          renderVectorsToDOM()
+  
         }
       }
       break
     case 'KeyW':
       if (!globalState.cursor.clicked) {
         switchTool('magicWand')
-        renderVectorsToDOM()
+
       }
       break
     case 'KeyX':

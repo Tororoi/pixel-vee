@@ -8,15 +8,7 @@ import { keys } from '../Shortcuts/keys.js'
 import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { renderCanvas, resizeOffScreenCanvas } from '../Canvas/render.js'
-import {
-  renderLayersToDOM,
-  renderVectorsToDOM,
-  renderVectorSettingsToDOM,
-  initVectorDitherPicker,
-  updateVectorDitherPreview,
-  updateVectorDitherPickerColors,
-  updateVectorDitherControls,
-} from '../DOM/render.js'
+import { updateActiveLayerState } from '../DOM/render.js'
 import {
   removeActionVector,
   changeActionVectorMode,
@@ -257,8 +249,7 @@ function layerInteract(e) {
       if (layer.type === 'reference') {
         switchTool('move')
       }
-      renderLayersToDOM()
-      renderVectorsToDOM()
+      updateActiveLayerState()
     }
   }
   renderCanvas(layer)
@@ -344,7 +335,7 @@ function dropLayer(e) {
         }
       }
     }
-    renderLayersToDOM()
+    updateActiveLayerState()
   }
 }
 
@@ -353,7 +344,7 @@ function dropLayer(e) {
  * @param {DragEvent} _e - The drag event (unused)
  */
 function dragLayerEnd(_e) {
-  renderLayersToDOM()
+  updateActiveLayerState()
 }
 
 //====================================//
@@ -402,7 +393,6 @@ function vectorInteract(e) {
     removeVector(vector)
   } else if (e.target.className.includes('gear')) {
     //open/close vector settings dialog
-    const domVector = e.target.closest('.vector')
     if (
       dom.vectorSettingsContainer.style.display === 'flex' &&
       dom.vectorSettingsContainer.vectorObj === vector
@@ -412,7 +402,6 @@ function vectorInteract(e) {
     } else {
       dom.vectorSettingsContainer.style.display = 'flex'
       dom.vectorSettingsContainer.vectorObj = vector
-      renderVectorSettingsToDOM(domVector)
     }
   } else {
     //select current vector
@@ -443,8 +432,7 @@ function vectorInteract(e) {
     }
     //If code reaches this case, either vector is selected or is current vector
     vectorGui.render()
-    renderLayersToDOM()
-    renderVectorsToDOM()
+    updateActiveLayerState()
   }
 }
 
@@ -461,7 +449,6 @@ function removeVector(vector) {
   removeActionVector(vector)
 
   globalState.clearRedoStack()
-  renderVectorsToDOM()
 }
 
 /**
@@ -485,7 +472,6 @@ function toggleVectorMode(vector, modeKey) {
   changeActionVectorMode(vector, oldModes, newModes)
 
   globalState.clearRedoStack()
-  renderVectorsToDOM()
 }
 
 //===================================//
@@ -594,7 +580,7 @@ dom.layerSettingsContainer?.addEventListener('input', (e) => {
       renderCanvas(layer)
     } else if (e.target.matches('#layer-name')) {
       layer.title = e.target.value
-      renderLayersToDOM()
+      updateActiveLayerState()
     }
   }
 })
@@ -657,10 +643,6 @@ dom.vectorSettingsContainer?.addEventListener('click', (e) => {
       toggleVectorMode(vector, modeKey)
       // toggleVectorMode already updated vector.modes[modeKey]; sync the button
       modeBtn.classList.toggle('selected', vector.modes[modeKey])
-      if (modeKey === 'twoColor') {
-        updateVectorDitherPreview(vector)
-        updateVectorDitherPickerColors(vector)
-      }
     }
     return
   }
@@ -698,7 +680,6 @@ dom.vectorSettingsContainer?.addEventListener('click', (e) => {
     if (isOpen) {
       dom.vectorDitherPickerContainer.style.display = 'none'
     } else {
-      initVectorDitherPicker(vector)
       const settingsRect = dom.vectorSettingsContainer.getBoundingClientRect()
       dom.vectorDitherPickerContainer.style.display = 'flex'
       dom.vectorDitherPickerContainer.style.top = `${
@@ -759,9 +740,6 @@ dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
   if (toggleBtn) {
     if (toggleBtn.classList.contains('twoColor')) {
       toggleVectorMode(vector, 'twoColor')
-      updateVectorDitherControls(vector)
-      updateVectorDitherPickerColors(vector)
-      updateVectorDitherPreview(vector)
       // sync twoColor button in settings dialog if open
       const settingsModeBtn =
         dom.vectorSettingsContainer?.querySelector('.mode.twoColor')
@@ -777,7 +755,6 @@ dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
   const patternIndex = parseInt(btn.dataset.patternIndex)
   const oldPatternIndex = vector.ditherPatternIndex
   vector.ditherPatternIndex = patternIndex
-  updateVectorDitherPreview(vector)
   dom.vectorDitherPickerContainer.style.display = 'none'
   renderCanvas(vector.layer, true)
   if (oldPatternIndex !== patternIndex) {
@@ -820,7 +797,6 @@ dom.vectorDitherPickerContainer?.addEventListener('pointerdown', (e) => {
       (((newEffectiveX - recordedLayerX + currentLayerX) % 8) + 8) % 8
     vector.ditherOffsetY =
       (((newEffectiveY - recordedLayerY + currentLayerY) % 8) + 8) % 8
-    updateVectorDitherControls(vector)
     renderCanvas(vector.layer, true)
   }
   control.addEventListener('pointermove', onMove)

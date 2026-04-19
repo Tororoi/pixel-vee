@@ -4,7 +4,7 @@
   import { canvas } from '../../Context/canvas.js'
   import { vectorGui } from '../../GUI/vector.js'
   import { renderCanvas } from '../../Canvas/render.js'
-  import { renderLayersToDOM, renderVectorsToDOM } from '../../DOM/render.js'
+  import { updateActiveLayerState } from '../../DOM/render.js'
   import { isValidVector } from '../../DOM/renderVectors.js'
   import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
   import { dom } from '../../Context/dom.js'
@@ -69,8 +69,8 @@
       })
     }
     vectorGui.render()
-    renderLayersToDOM()
-    renderVectorsToDOM()
+    updateActiveLayerState()
+
   }
 
   function handleHideToggle(e, vector) {
@@ -86,7 +86,7 @@
     renderCanvas(vector.layer, true)
     removeActionVector(vector)
     globalState.clearRedoStack()
-    renderVectorsToDOM()
+
   }
 
   function handleGearClick(e, vector) {

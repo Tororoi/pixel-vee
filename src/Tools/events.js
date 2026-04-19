@@ -9,7 +9,6 @@ import { vectorGui } from '../GUI/vector.js'
 import { actionClear } from '../Actions/modifyTimeline/modifyTimeline.js'
 import { actionZoom, actionRecenter } from '../Actions/untracked/viewActions.js'
 import { renderCanvas } from '../Canvas/render.js'
-import { renderVectorsToDOM, renderBrushStampToDOM } from '../DOM/render.js'
 import { toggleMode, switchTool } from './toolbox.js'
 import { openStampEditor } from '../DOM/stampEditor.js'
 import { ZOOM_LEVELS } from '../utils/constants.js'
@@ -73,7 +72,6 @@ function handleClearCanvas() {
 
   globalState.clearRedoStack()
   renderCanvas(canvas.currentLayer)
-  renderVectorsToDOM()
 }
 
 /**
@@ -93,7 +91,6 @@ export function handleTools(e) {
     const activeTool = toolGroups[groupName]?.activeTool
     if (activeTool) {
       switchTool(activeTool)
-      renderVectorsToDOM()
     }
     return
   }
@@ -105,7 +102,6 @@ export function handleTools(e) {
     .querySelectorAll('.tool-group.open')
     .forEach((g) => g.classList.remove('open'))
   switchTool(null, targetTool)
-  renderVectorsToDOM()
 }
 
 // Close open popouts when clicking outside any tool group
@@ -149,7 +145,6 @@ function switchBrush(e) {
     globalState.tool.current.brushType = 'circle'
     dom.customBrushTypeBtn?.classList.remove('active')
   }
-  renderBrushStampToDOM()
 }
 
 /**
@@ -168,7 +163,6 @@ function updateBrush(e) {
     default:
     //do nothing for other tools
   }
-  renderBrushStampToDOM()
 }
 
 //===================================//
@@ -205,7 +199,6 @@ if (dom.brushSlider) dom.brushSlider.addEventListener('input', updateBrush)
 dom.customBrushTypeBtn?.addEventListener('click', () => {
   brush.brushType = 'custom'
   dom.customBrushTypeBtn.classList.add('active')
-  renderBrushStampToDOM()
   if (
     dom.stampEditorContainer.style.display === 'none' ||
     !dom.stampEditorContainer.style.display

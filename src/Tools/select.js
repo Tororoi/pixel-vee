@@ -2,7 +2,7 @@ import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
 import { vectorGui } from '../GUI/vector.js'
-import { renderVectorsToDOM } from '../DOM/renderVectors.js'
+
 import { dom } from '../Context/dom.js'
 
 //=====================================//
@@ -35,7 +35,6 @@ function selectSteps() {
       globalState.ui.vectorTransformOpen = false
       if (dom.vectorTransformUIContainer)
         dom.vectorTransformUIContainer.style.display = 'none'
-      renderVectorsToDOM()
       //set initial properties
       globalState.selection.properties.px1 = globalState.cursor.x
       globalState.selection.properties.py1 = globalState.cursor.y

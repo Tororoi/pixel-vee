@@ -1,7 +1,7 @@
 import { dom } from '../Context/dom.js'
 import { canvas } from '../Context/canvas.js'
 
-export const renderLayersToDOM = () => {
+export const updateActiveLayerState = () => {
   if (canvas.currentLayer?.removed) {
     const validLayer = canvas.layers.find(
       (l) => l.type === 'raster' && !l.removed,
@@ -14,7 +14,7 @@ export const renderLayersToDOM = () => {
 }
 
 /** @returns {void} */
-export function removeTempLayerFromDOM() {
+export function removeTempLayer() {
   if (!canvas.layers.includes(canvas.tempLayer)) {
     return
   }
@@ -34,18 +34,6 @@ export function removeTempLayerFromDOM() {
 }
 
 export {
-  renderVectorsToDOM,
-  renderVectorSettingsToDOM,
-  initVectorDitherPicker,
-  updateVectorDitherPickerColors,
-  updateVectorDitherControls,
-  highlightVectorDitherPattern,
-  updateVectorDitherPreview,
-} from './renderVectors.js'
-export {
-  renderBrushStampToDOM,
-  renderBrushModesToDOM,
-  renderToolOptionsToDOM,
   updateDitherPickerColors,
   createDitherPatternSVG,
   applyDitherOffset,

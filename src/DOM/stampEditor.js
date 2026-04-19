@@ -5,8 +5,6 @@ import {
   customBrushData,
   updateCustomStamp,
 } from '../Context/brushStamps.js'
-import { brush } from '../Tools/brush.js'
-import { renderBrushStampToDOM } from './renderBrush.js'
 
 //====================================//
 //=== * * * Stamp Editor * * * =======//
@@ -228,10 +226,8 @@ function applyStamp() {
   updateCustomStamp()
   dom.stampEditorContainer.style.display = 'none'
 
-  if (brush.brushType === 'custom') {
-    renderBrushStampToDOM()
-  }
 }
+
 
 /**
  * Clear all pixels from the working copy.

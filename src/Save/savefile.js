@@ -6,7 +6,7 @@ import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
 import { vectorGui } from '../GUI/vector.js'
 import { renderCanvas } from '../Canvas/render.js'
-import { renderLayersToDOM, renderVectorsToDOM } from '../DOM/render.js'
+import { updateActiveLayerState } from '../DOM/render.js'
 import { validatePixelVeeFile } from '../utils/validationHelpers.js'
 import {
   sanitizeLayers,
@@ -447,8 +447,7 @@ export async function loadDrawing(jsonFile) {
     renderCanvas(null, true) //redraw timeline
     vectorGui.render()
   }
-  renderLayersToDOM()
-  renderVectorsToDOM()
+  updateActiveLayerState()
 }
 
 /**
