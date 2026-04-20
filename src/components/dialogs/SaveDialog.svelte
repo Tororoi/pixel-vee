@@ -3,6 +3,7 @@
   import { saveDrawing, computeFileSizePreview } from '../../Save/savefile.js'
   import { measureTextWidth } from '../../utils/measureHelpers.js'
   import DialogBox from '../DialogBox.svelte'
+  import ToggleCheckbox from '../shared/ToggleCheckbox.svelte'
 
   let fileSize = $state('')
 
@@ -87,22 +88,15 @@
       </div>
 
       <div class="save-setting">
-        <label
-          for="preserve-history-toggle"
-          id="preserve-history"
-          class="toggle"
-          data-tooltip="Preserve all actions in history, palette, and reference images"
-        >
-          <input
-            type="checkbox"
-            id="preserve-history-toggle"
-            name="preserve-history"
-            checked={settings.preserveHistory}
-            onchange={handlePreserveHistory}
-          />
-          <span class="checkmark"></span>
-          <span>Preserve Entire History</span>
-        </label>
+        <ToggleCheckbox
+          id="preserve-history-toggle"
+          labelId="preserve-history"
+          name="preserve-history"
+          label="Preserve Entire History"
+          checked={settings.preserveHistory}
+          onchange={handlePreserveHistory}
+          tooltip="Preserve all actions in history, palette, and reference images"
+        />
       </div>
 
       <div
@@ -110,60 +104,39 @@
         id="save-advanced-options"
       >
         <div class="save-setting">
-          <label
-            for="include-palette-toggle"
-            id="include-palette"
-            class="toggle"
-            data-tooltip="Save colors in palette"
-          >
-            <input
-              type="checkbox"
-              id="include-palette-toggle"
-              name="include-palette"
-              checked={settings.includePalette}
-              onchange={handleIncludePalette}
-            />
-            <span class="checkmark"></span>
-            <span>Palette</span>
-          </label>
+          <ToggleCheckbox
+            id="include-palette-toggle"
+            labelId="include-palette"
+            name="include-palette"
+            label="Palette"
+            checked={settings.includePalette}
+            onchange={handleIncludePalette}
+            tooltip="Save colors in palette"
+          />
         </div>
 
         <div class="save-setting">
-          <label
-            for="include-reference-layers-toggle"
-            id="include-reference-layers"
-            class="toggle"
-            data-tooltip="Save all reference images, including any transformations applied to them."
-          >
-            <input
-              type="checkbox"
-              id="include-reference-layers-toggle"
-              name="include-reference-layers"
-              checked={settings.includeReferenceLayers}
-              onchange={handleIncludeReferenceLayers}
-            />
-            <span class="checkmark"></span>
-            <span>Reference Layers</span>
-          </label>
+          <ToggleCheckbox
+            id="include-reference-layers-toggle"
+            labelId="include-reference-layers"
+            name="include-reference-layers"
+            label="Reference Layers"
+            checked={settings.includeReferenceLayers}
+            onchange={handleIncludeReferenceLayers}
+            tooltip="Save all reference images, including any transformations applied to them."
+          />
         </div>
 
         <div class="save-setting">
-          <label
-            for="include-removed-actions-toggle"
-            id="include-removed-actions"
-            class="toggle"
-            data-tooltip="If a layer or vector was trashed or layer was cleared, those actions are still recoverable by using undo. If you're certain those actions won't be missed, you can remove them permanently by unchecking this box."
-          >
-            <input
-              type="checkbox"
-              id="include-removed-actions-toggle"
-              name="include-removed-actions"
-              checked={settings.includeRemovedActions}
-              onchange={handleIncludeRemovedActions}
-            />
-            <span class="checkmark"></span>
-            <span>Removed Actions</span>
-          </label>
+          <ToggleCheckbox
+            id="include-removed-actions-toggle"
+            labelId="include-removed-actions"
+            name="include-removed-actions"
+            label="Removed Actions"
+            checked={settings.includeRemovedActions}
+            onchange={handleIncludeRemovedActions}
+            tooltip="If a layer or vector was trashed or layer was cleared, those actions are still recoverable by using undo. If you're certain those actions won't be missed, you can remove them permanently by unchecking this box."
+          />
         </div>
       </div>
 

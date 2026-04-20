@@ -206,7 +206,7 @@
   {#if settingsLayer}
     {#key settingsLayer}
       <LayerSettingsPopout
-        layer={settingsLayer}
+        bind:layer={settingsLayer}
         pos={settingsPos}
         onclose={() => {
           settingsLayer = null

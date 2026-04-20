@@ -1,28 +1,12 @@
 <script>
-  import { onMount } from 'svelte'
-  import { portal } from '../../utils/portal.js'
   import { updateActiveLayerState } from '../../DOM/render.js'
   import { renderCanvas } from '../../Canvas/render.js'
+  import SettingsPopout from '../shared/SettingsPopout.svelte'
 
-  const { layer, pos, onclose } = $props()
+  let { layer = $bindable(), pos, onclose } = $props()
 
   const initialTitle = layer.title ?? ''
   let opacity = $state(Math.round((layer.opacity ?? 1) * 255))
-  let ref = $state(null)
-
-  onMount(() => {
-    function handleOutside(e) {
-      if (
-        ref &&
-        !ref.contains(e.target) &&
-        !e.target.classList.contains('gear')
-      ) {
-        onclose()
-      }
-    }
-    document.addEventListener('pointerdown', handleOutside)
-    return () => document.removeEventListener('pointerdown', handleOutside)
-  })
 
   function handleTitleChange(e) {
     layer.title = e.target.value.slice(0, 12)
@@ -37,23 +21,13 @@
   }
 </script>
 
-<div
-  use:portal={document.body}
-  bind:this={ref}
-  class="layer-settings dialog-box"
-  style="display:flex; position:fixed; top:{pos.top}px; left:{pos.left}px; transform:translateY(-50%); z-index:1000"
+<SettingsPopout
+  class="layer-settings"
+  {pos}
+  {onclose}
+  title="Layer Settings"
+  excludeClasses={['gear']}
 >
-  <div class="header">
-    <div class="drag-btn locked"><div class="grip"></div></div>
-    Layer Settings
-    <button
-      type="button"
-      class="close-btn"
-      aria-label="Close"
-      data-tooltip="Close"
-      onclick={onclose}
-    ></button>
-  </div>
   <div class="layer-name-label">
     <label for="layer-name" class="input-label">Name</label>
     <input
@@ -80,4 +54,4 @@
       oninput={handleOpacityChange}
     />
   </div>
-</div>
+</SettingsPopout>

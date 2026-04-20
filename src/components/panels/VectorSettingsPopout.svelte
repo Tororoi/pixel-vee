@@ -1,7 +1,5 @@
 <script>
-  import { onMount } from 'svelte'
   import { appState } from '../../hooks/appState.svelte.js'
-  import { portal } from '../../utils/portal.js'
   import { globalState } from '../../Context/state.js'
   import { dom } from '../../Context/dom.js'
   import { renderCanvas } from '../../Canvas/render.js'
@@ -18,26 +16,9 @@
     applyDitherOffsetControl,
   } from '../../DOM/renderBrush.js'
   import { vectorGui } from '../../GUI/vector.js'
+  import SettingsPopout from '../shared/SettingsPopout.svelte'
 
-  const { vector, pos, onclose } = $props()
-
-  let ref = $state(null)
-
-  onMount(() => {
-    function handleOutside(e) {
-      if (
-        ref &&
-        !ref.contains(e.target) &&
-        !e.target.classList.contains('gear') &&
-        !e.target.closest('.dither-picker-container') &&
-        !e.target.closest('.picker-container')
-      ) {
-        onclose()
-      }
-    }
-    document.addEventListener('pointerdown', handleOutside)
-    return () => document.removeEventListener('pointerdown', handleOutside)
-  })
+  let { vector = $bindable(), pos, onclose } = $props()
 
   const ditherPreviewSVG = $derived.by(() => {
     const pattern = ditherPatterns[vector.ditherPatternIndex ?? 63]
@@ -57,7 +38,6 @@
     if (isCurveType && vector.modes[modeKey]) return
     if (isCurveType) {
       changeActionVectorCurveType(vector, modeKey)
-
       return
     }
     const oldModes = { ...vector.modes }
@@ -147,23 +127,14 @@
   const brushSize = $derived(vector.brushSize ?? 1)
 </script>
 
-<div
-  use:portal={document.body}
-  bind:this={ref}
-  class="vector-settings dialog-box"
-  style="display:flex; position:fixed; top:{pos.top}px; left:{pos.left}px; transform:translateY(-50%); z-index:1000"
+<SettingsPopout
+  class="vector-settings"
+  {pos}
+  {onclose}
+  title="Vector Settings"
+  excludeClasses={['gear']}
+  excludeSelectors={['.dither-picker-container', '.picker-container']}
 >
-  <div class="header">
-    <div class="drag-btn locked"><div class="grip"></div></div>
-    Vector Settings
-    <button
-      type="button"
-      class="close-btn"
-      aria-label="Close"
-      data-tooltip="Close"
-      onclick={onclose}
-    ></button>
-  </div>
   <div class="vector-settings-modes">
     {#each allModes as modeKey (modeKey)}
       <button
@@ -225,4 +196,4 @@
       onchange={handleBrushSizeChange}
     />
   </div>
-</div>
+</SettingsPopout>

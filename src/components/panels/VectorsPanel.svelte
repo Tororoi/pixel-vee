@@ -172,7 +172,7 @@
     </div>
   {#if settingsVector}
     <VectorSettingsPopout
-      vector={settingsVector}
+      bind:vector={settingsVector}
       pos={settingsPos}
       onclose={() => {
         settingsVector = null

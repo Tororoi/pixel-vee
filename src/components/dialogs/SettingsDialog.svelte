@@ -2,6 +2,8 @@
   import { globalState } from '../../Context/state.js'
   import { vectorGui } from '../../GUI/vector.js'
   import DialogBox from '../DialogBox.svelte'
+  import SpinInput from '../shared/SpinInput.svelte'
+  import ToggleCheckbox from '../shared/ToggleCheckbox.svelte'
 
   const isOpen = $derived(globalState.ui.settingsOpen)
 
@@ -40,18 +42,6 @@
     vectorGui.render()
   }
 
-  function handleGridSpacingSpin(e) {
-    const action =
-      e.target.dataset.action || e.target.closest('[data-action]')?.dataset.action
-    if (action === 'inc') {
-      gridSpacing = Math.min(64, gridSpacing + 1)
-    } else if (action === 'dec') {
-      gridSpacing = Math.max(1, gridSpacing - 1)
-    }
-    vectorGui.gridSpacing = gridSpacing
-    vectorGui.render()
-  }
-
   function handleCursorPreview(e) {
     vectorGui.showCursorPreview = e.target.checked
   }
@@ -67,36 +57,22 @@
       <div class="settings-group">
         <div class="settings-section-header">Display</div>
         <div class="settings-options">
-          <label
-            for="tooltips-toggle"
-            id="tooltips"
-            class="toggle"
-            data-tooltip="Toggle tooltips (T)"
-          >
-            <input
-              type="checkbox"
-              id="tooltips-toggle"
-              checked={globalState.ui.showTooltips}
-              onchange={handleTooltips}
-            />
-            <span class="checkmark"></span>
-            <span>Tooltips</span>
-          </label>
-          <label
-            for="grid-toggle"
-            id="grid"
-            class="toggle"
-            data-tooltip="Toggle grid (G)\n\nDisplays at higher zoom levels only."
-          >
-            <input
-              type="checkbox"
-              id="grid-toggle"
-              checked={gridEnabled}
-              onchange={handleGrid}
-            />
-            <span class="checkmark"></span>
-            <span>Grid</span>
-          </label>
+          <ToggleCheckbox
+            id="tooltips-toggle"
+            labelId="tooltips"
+            label="Tooltips"
+            checked={globalState.ui.showTooltips}
+            onchange={handleTooltips}
+            tooltip="Toggle tooltips (T)"
+          />
+          <ToggleCheckbox
+            id="grid-toggle"
+            labelId="grid"
+            label="Grid"
+            checked={gridEnabled}
+            onchange={handleGrid}
+            tooltip="Toggle grid (G)\n\nDisplays at higher zoom levels only."
+          />
           <div class="grid-spacing-container">
             <label for="grid-spacing">
               <span>Subgrid Spacing:&nbsp;</span>
@@ -108,35 +84,23 @@
                 value={gridSpacing}
                 oninput={handleGridSpacingInput}
               />
-              <span
-                class="grid-spacing-spin spin-btn"
-                role="group"
-                onpointerdown={handleGridSpacingSpin}
-              >
-                <span data-action="inc" class="channel-btn">
-                  <span class="spin-content">+</span>
-                </span>
-                <span data-action="dec" class="channel-btn">
-                  <span class="spin-content">-</span>
-                </span>
-              </span>
+              <SpinInput
+                bind:value={gridSpacing}
+                min={1}
+                max={64}
+                class="grid-spacing-spin"
+                onspin={(val) => { vectorGui.gridSpacing = val; vectorGui.render() }}
+              />
             </label>
           </div>
-          <label
-            for="cursor-preview-toggle"
-            id="cursor-preview"
-            class="toggle"
-            data-tooltip="Show brush color preview under cursor instead of an outline"
-          >
-            <input
-              type="checkbox"
-              id="cursor-preview-toggle"
-              checked={vectorGui.showCursorPreview ?? true}
-              onchange={handleCursorPreview}
-            />
-            <span class="checkmark"></span>
-            <span>Cursor Preview</span>
-          </label>
+          <ToggleCheckbox
+            id="cursor-preview-toggle"
+            labelId="cursor-preview"
+            label="Cursor Preview"
+            checked={vectorGui.showCursorPreview ?? true}
+            onchange={handleCursorPreview}
+            tooltip="Show brush color preview under cursor instead of an outline"
+          />
         </div>
       </div>
     </div>

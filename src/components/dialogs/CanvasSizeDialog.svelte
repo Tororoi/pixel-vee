@@ -12,6 +12,7 @@
   import { resizeOffScreenCanvas } from '../../Canvas/render.js'
   import { dom } from '../../Context/dom.js'
   import DialogBox from '../DialogBox.svelte'
+  import SpinInput from '../shared/SpinInput.svelte'
 
   const MINIMUM_DIMENSION = 8
   const MAXIMUM_DIMENSION = 1024
@@ -90,26 +91,6 @@
     heightFocused = false
   }
 
-  function handleWidthSpin(e) {
-    const action =
-      e.target.dataset.action || e.target.closest('[data-action]')?.dataset.action
-    let val = Math.floor(+width)
-    if (action === 'inc' && val < MAXIMUM_DIMENSION) val++
-    else if (action === 'dec' && val > MINIMUM_DIMENSION) val--
-    width = val
-    if (globalState.canvas.resizeOverlayActive) applyFromInputs(val, +height)
-  }
-
-  function handleHeightSpin(e) {
-    const action =
-      e.target.dataset.action || e.target.closest('[data-action]')?.dataset.action
-    let val = Math.floor(+height)
-    if (action === 'inc' && val < MAXIMUM_DIMENSION) val++
-    else if (action === 'dec' && val > MINIMUM_DIMENSION) val--
-    height = val
-    if (globalState.canvas.resizeOverlayActive) applyFromInputs(+width, val)
-  }
-
   function handleAnchorClick(anchor) {
     activeAnchor = anchor
     setAnchor(anchor)
@@ -160,14 +141,14 @@
               }}
               onblur={handleWidthBlur}
             />
-            <span class="spin-btn" role="group" onpointerdown={handleWidthSpin}>
-              <span data-action="inc" class="channel-btn"
-                ><span class="spin-content">+</span></span
-              >
-              <span data-action="dec" class="channel-btn"
-                ><span class="spin-content">-</span></span
-              >
-            </span>
+            <SpinInput
+              bind:value={width}
+              min={MINIMUM_DIMENSION}
+              max={MAXIMUM_DIMENSION}
+              onspin={(val) => {
+                if (globalState.canvas.resizeOverlayActive) applyFromInputs(val, +height)
+              }}
+            />
           </span>
         </label>
         <label for="canvas-height">
@@ -186,18 +167,14 @@
               }}
               onblur={handleHeightBlur}
             />
-            <span
-              class="spin-btn"
-              role="group"
-              onpointerdown={handleHeightSpin}
-            >
-              <span data-action="inc" class="channel-btn"
-                ><span class="spin-content">+</span></span
-              >
-              <span data-action="dec" class="channel-btn"
-                ><span class="spin-content">-</span></span
-              >
-            </span>
+            <SpinInput
+              bind:value={height}
+              min={MINIMUM_DIMENSION}
+              max={MAXIMUM_DIMENSION}
+              onspin={(val) => {
+                if (globalState.canvas.resizeOverlayActive) applyFromInputs(+width, val)
+              }}
+            />
           </span>
         </label>
       </div>
