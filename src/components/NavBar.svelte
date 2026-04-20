@@ -160,7 +160,7 @@
         rel="noreferrer"
         aria-label="Visit the Github Repo in a new tab"
       >
-        <img src="./public/pixel-vee.png" alt="Github Repo" />
+        <img src="/pixel-vee.png" alt="Github Repo" />
       </a>
     </div>
     <ul
