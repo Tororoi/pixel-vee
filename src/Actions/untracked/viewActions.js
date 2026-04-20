@@ -1,5 +1,5 @@
 import { canvas } from '../../Context/canvas.js'
-import { state } from '../../Context/state.js'
+import { globalState } from '../../Context/state.js'
 import { vectorGui } from '../../GUI/vector.js'
 import { renderCanvas } from '../../Canvas/render.js'
 import { setInitialZoom } from '../../utils/canvasHelpers.js'
@@ -69,7 +69,7 @@ export function actionZoom(targetZoom, xOriginOffset, yOriginOffset) {
   )
   canvas.gui.lineWidth = canvas.zoom <= 8 ? 0.5 / canvas.zoom : 0.5 / 8
   canvas.gui.collisionRadius =
-    (canvas.zoom <= 8 ? 1 : 0.5) * (state.tool.touch ? 2 : 1)
+    (canvas.zoom <= 8 ? 1 : 0.5) * (globalState.tool.touch ? 2 : 1)
   renderCanvas() //render all layers
   vectorGui.render()
 }
@@ -148,7 +148,7 @@ export function actionRecenter() {
   canvas.previousYOffset = canvas.yOffset
   canvas.gui.lineWidth = canvas.zoom <= 8 ? 0.5 / canvas.zoom : 0.5 / 8
   canvas.gui.collisionRadius =
-    (canvas.zoom <= 6 ? 1 : 0.5) * (state.tool.touch ? 2 : 1)
+    (canvas.zoom <= 6 ? 1 : 0.5) * (globalState.tool.touch ? 2 : 1)
   renderCanvas() //render all layers
   vectorGui.render()
 }

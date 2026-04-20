@@ -1,9 +1,9 @@
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { addToTimeline } from "../Actions/undoRedo/undoRedo.js"
-import { vectorGui } from "../GUI/vector.js"
-import { renderVectorsToDOM } from "../DOM/renderVectors.js"
-import { dom } from "../Context/dom.js"
+import { globalState } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
+import { vectorGui } from '../GUI/vector.js'
+
+import { dom } from '../Context/dom.js'
 
 //=====================================//
 //=== * * * Select Controller * * * ===//
@@ -20,44 +20,48 @@ import { dom } from "../Context/dom.js"
  * TODO: (Medium Priority) Allow selecting all vectors within box by checking if control points fall within selection area
  */
 function selectSteps() {
-  if (vectorGui.selectedCollisionPresent && state.tool.clickCounter === 0) {
+  if (
+    vectorGui.selectedCollisionPresent &&
+    globalState.tool.clickCounter === 0
+  ) {
     adjustSelectSteps()
     return
   }
   switch (canvas.pointerEvent) {
-    case "pointerdown":
-      state.tool.clickCounter += 1
+    case 'pointerdown':
+      globalState.tool.clickCounter += 1
       //reset selected vectors
-      state.vector.clearSelected()
-      dom.vectorTransformUIContainer.style.display = "none"
-      renderVectorsToDOM()
+      globalState.vector.clearSelected()
+      globalState.ui.vectorTransformOpen = false
+      if (dom.vectorTransformUIContainer)
+        dom.vectorTransformUIContainer.style.display = 'none'
       //set initial properties
-      state.selection.properties.px1 = state.cursor.x
-      state.selection.properties.py1 = state.cursor.y
-      state.selection.properties.px2 = state.cursor.x
-      state.selection.properties.py2 = state.cursor.y
-      state.selection.setBoundaryBox(state.selection.properties)
+      globalState.selection.properties.px1 = globalState.cursor.x
+      globalState.selection.properties.py1 = globalState.cursor.y
+      globalState.selection.properties.px2 = globalState.cursor.x
+      globalState.selection.properties.py2 = globalState.cursor.y
+      globalState.selection.setBoundaryBox(globalState.selection.properties)
       break
-    case "pointermove":
-      state.selection.properties.px2 = state.cursor.x
-      state.selection.properties.py2 = state.cursor.y
-      state.selection.setBoundaryBox(state.selection.properties)
+    case 'pointermove':
+      globalState.selection.properties.px2 = globalState.cursor.x
+      globalState.selection.properties.py2 = globalState.cursor.y
+      globalState.selection.setBoundaryBox(globalState.selection.properties)
       break
-    case "pointerup":
-      state.tool.clickCounter = 0
-      state.selection.normalize()
-      state.selection.setBoundaryBox(state.selection.properties)
+    case 'pointerup':
+      globalState.tool.clickCounter = 0
+      globalState.selection.normalize()
+      globalState.selection.setBoundaryBox(globalState.selection.properties)
       addToTimeline({
-        tool: state.tool.current.name,
+        tool: globalState.tool.current.name,
         layer: canvas.currentLayer,
         properties: {
           deselect: false,
-          // selectProperties: { ...state.selection.properties },
+          // selectProperties: { ...globalState.selection.properties },
           // selectedVectorIndices: [],
         },
       })
       break
-    case "pointerout":
+    case 'pointerout':
       //TODO: (Low Priority) handle pointerout?
       break
     default:
@@ -71,30 +75,30 @@ function selectSteps() {
  */
 function adjustSelectSteps() {
   switch (canvas.pointerEvent) {
-    case "pointerdown":
+    case 'pointerdown':
       vectorGui.selectedPoint = {
         xKey: vectorGui.collidedPoint.xKey,
         yKey: vectorGui.collidedPoint.yKey,
       }
       //Ensure moving the selection area has the correct origin point (important for mobile, doesn't affect desktop)
-      state.cursor.prevX = state.cursor.x
-      state.cursor.prevY = state.cursor.y
+      globalState.cursor.prevX = globalState.cursor.x
+      globalState.cursor.prevY = globalState.cursor.y
       adjustBoundaries()
       break
-    case "pointermove":
+    case 'pointermove':
       if (vectorGui.selectedPoint.xKey) {
         adjustBoundaries()
       }
       break
-    case "pointerup":
-      state.selection.normalize()
-      state.selection.setBoundaryBox(state.selection.properties)
+    case 'pointerup':
+      globalState.selection.normalize()
+      globalState.selection.setBoundaryBox(globalState.selection.properties)
       addToTimeline({
-        tool: state.tool.current.name,
+        tool: globalState.tool.current.name,
         layer: canvas.currentLayer,
         properties: {
           deselect: false,
-          // selectProperties: { ...state.selection.properties },
+          // selectProperties: { ...globalState.selection.properties },
           // maskArray,
           // selectedVectorIndices: [],
         },
@@ -104,7 +108,7 @@ function adjustSelectSteps() {
         yKey: null,
       }
       break
-    case "pointerout":
+    case 'pointerout':
       break
     default:
     //do nothing
@@ -118,55 +122,55 @@ function adjustSelectSteps() {
 function adjustBoundaries() {
   //selectedPoint does not correspond to the selectProperties key. Based on selected point, adjust boundaryBox.
   switch (vectorGui.selectedPoint.xKey) {
-    case "px1":
-      state.selection.properties.px1 = state.cursor.x
-      state.selection.properties.py1 = state.cursor.y
+    case 'px1':
+      globalState.selection.properties.px1 = globalState.cursor.x
+      globalState.selection.properties.py1 = globalState.cursor.y
       break
-    case "px2":
-      state.selection.properties.py1 = state.cursor.y
+    case 'px2':
+      globalState.selection.properties.py1 = globalState.cursor.y
       break
-    case "px3":
-      state.selection.properties.px2 = state.cursor.x
-      state.selection.properties.py1 = state.cursor.y
+    case 'px3':
+      globalState.selection.properties.px2 = globalState.cursor.x
+      globalState.selection.properties.py1 = globalState.cursor.y
       break
-    case "px4":
-      state.selection.properties.px2 = state.cursor.x
+    case 'px4':
+      globalState.selection.properties.px2 = globalState.cursor.x
       break
-    case "px5":
-      state.selection.properties.px2 = state.cursor.x
-      state.selection.properties.py2 = state.cursor.y
+    case 'px5':
+      globalState.selection.properties.px2 = globalState.cursor.x
+      globalState.selection.properties.py2 = globalState.cursor.y
       break
-    case "px6":
-      state.selection.properties.py2 = state.cursor.y
+    case 'px6':
+      globalState.selection.properties.py2 = globalState.cursor.y
       break
-    case "px7":
-      state.selection.properties.px1 = state.cursor.x
-      state.selection.properties.py2 = state.cursor.y
+    case 'px7':
+      globalState.selection.properties.px1 = globalState.cursor.x
+      globalState.selection.properties.py2 = globalState.cursor.y
       break
-    case "px8":
-      state.selection.properties.px1 = state.cursor.x
+    case 'px8':
+      globalState.selection.properties.px1 = globalState.cursor.x
       break
-    case "px9": {
+    case 'px9': {
       //move selected area
-      const deltaX = state.cursor.x - state.cursor.prevX
-      const deltaY = state.cursor.y - state.cursor.prevY
-      state.selection.properties.px1 += deltaX
-      state.selection.properties.py1 += deltaY
-      state.selection.properties.px2 += deltaX
-      state.selection.properties.py2 += deltaY
+      const deltaX = globalState.cursor.x - globalState.cursor.prevX
+      const deltaY = globalState.cursor.y - globalState.cursor.prevY
+      globalState.selection.properties.px1 += deltaX
+      globalState.selection.properties.py1 += deltaY
+      globalState.selection.properties.px2 += deltaX
+      globalState.selection.properties.py2 += deltaY
       break
     }
     default:
     //do nothing
   }
-  state.selection.setBoundaryBox(state.selection.properties)
+  globalState.selection.setBoundaryBox(globalState.selection.properties)
 }
 
 export const select = {
-  name: "select",
+  name: 'select',
   fn: selectSteps,
   brushSize: 1,
-  brushType: "circle",
+  brushType: 'circle',
   brushDisabled: true,
   options: {
     // rasterOnly: {
@@ -176,7 +180,7 @@ export const select = {
     // },
   },
   modes: {},
-  type: "utility",
-  cursor: "default",
-  activeCursor: "default",
+  type: 'utility',
+  cursor: 'default',
+  activeCursor: 'default',
 }

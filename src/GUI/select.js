@@ -1,4 +1,4 @@
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { vectorGui } from '../GUI/vector.js'
 import {
@@ -157,7 +157,7 @@ export function strokeMarchingAnts(
  * Uses a cached Path2D rebuilt only when the maskSet or canvas pan changes.
  */
 function renderMaskContourOutline() {
-  const maskSet = state.selection.maskSet
+  const maskSet = globalState.selection.maskSet
   if (!maskSet || maskSet.size === 0) return
   const ctx = canvas.selectionGuiCTX
   ctx.save()
@@ -187,13 +187,15 @@ export function renderSelectionBoxOutline(drawPoints) {
   ctx.save()
   ctx.lineCap = 'round'
 
-  if (state.selection.boundaryBox.xMax !== null) {
+  if (globalState.selection.boundaryBox.xMax !== null) {
     ctx.beginPath()
     ctx.rect(
-      canvas.xOffset + state.selection.boundaryBox.xMin,
-      canvas.yOffset + state.selection.boundaryBox.yMin,
-      state.selection.boundaryBox.xMax - state.selection.boundaryBox.xMin,
-      state.selection.boundaryBox.yMax - state.selection.boundaryBox.yMin,
+      canvas.xOffset + globalState.selection.boundaryBox.xMin,
+      canvas.yOffset + globalState.selection.boundaryBox.yMin,
+      globalState.selection.boundaryBox.xMax -
+        globalState.selection.boundaryBox.xMin,
+      globalState.selection.boundaryBox.yMax -
+        globalState.selection.boundaryBox.yMin,
     )
     if (!canvas.pastedLayer && canvas.currentLayer.type !== 'reference') {
       strokeMarchingAnts(ctx)
@@ -215,7 +217,7 @@ export function renderSelectionBoxOutline(drawPoints) {
       { x: 'px8', y: 'py8' },
     ]
     drawSelectControlPoints(
-      state.selection.boundaryBox,
+      globalState.selection.boundaryBox,
       pointsKeys,
       circleRadius / 2,
       true,
@@ -238,27 +240,30 @@ export function renderSelectionCVS() {
     canvas.selectionGuiCVS.width,
     canvas.selectionGuiCVS.height,
   )
-  const isRasterSelection = state.selection.boundaryBox.xMax !== null
+  const isRasterSelection = globalState.selection.boundaryBox.xMax !== null
   // const isVectorSelection =
-  //   state.vector.selectedIndices.size > 0 &&
-  //   state.tool.current.type === 'vector'
+  //   globalState.vector.selectedIndices.size > 0 &&
+  //   globalState.tool.current.type === 'vector'
 
   if (isRasterSelection) {
     startMarchingAnts()
-    if (!state.selection.maskSet && !state.canvas.resizeOverlayActive) {
+    if (
+      !globalState.selection.maskSet &&
+      !globalState.canvas.resizeOverlayActive
+    ) {
       renderSelectionDimOverlay(ctx)
     }
-    if (state.selection.maskSet) {
+    if (globalState.selection.maskSet) {
       renderMaskContourOutline()
     } else {
       const shouldRenderPoints =
-        state.tool.current.name === 'select' ||
-        (state.tool.current.name === 'move' && canvas.pastedLayer) ||
+        globalState.tool.current.name === 'select' ||
+        (globalState.tool.current.name === 'move' && canvas.pastedLayer) ||
         canvas.currentLayer.type === 'reference' ||
-        state.vector.transformMode === SCALE
+        globalState.vector.transformMode === SCALE
       renderSelectionBoxOutline(shouldRenderPoints)
     }
-  } else if (!state.canvas.resizeOverlayActive) {
+  } else if (!globalState.canvas.resizeOverlayActive) {
     stopMarchingAnts()
   }
 }
@@ -291,10 +296,10 @@ export function drawSelectControlPoints(
   const midY = yMin + (yMax - yMin) / 2
 
   if (
-    state.cursor.x >= xMin &&
-    state.cursor.x < xMax &&
-    state.cursor.y >= yMin &&
-    state.cursor.y < yMax
+    globalState.cursor.x >= xMin &&
+    globalState.cursor.x < xMax &&
+    globalState.cursor.y >= yMin &&
+    globalState.cursor.y < yMax
   ) {
     vectorGui.setCollision({ x: 'px9', y: 'py9' })
   }
@@ -347,23 +352,23 @@ function handleSelectCollisionAndDraw(
   boundaryBox,
   ctx,
 ) {
-  let r = state.tool.touch ? radius * 2 : radius
+  let r = globalState.tool.touch ? radius * 2 : radius
   const xOffset = vectorAction ? vectorAction.layer.x : 0
   const yOffset = vectorAction ? vectorAction.layer.y : 0
 
   if (modify) {
     const collisionPresent =
       checkSquarePointCollision(
-        state.cursor.x,
-        state.cursor.y,
+        globalState.cursor.x,
+        globalState.cursor.y,
         point.x - offset + xOffset,
         point.y - offset + yOffset,
         r * 2.125,
       ) ||
       (['px2', 'px6'].includes(keys.x) &&
         checkAreaCollision(
-          state.cursor.x,
-          state.cursor.y,
+          globalState.cursor.x,
+          globalState.cursor.y,
           boundaryBox.xMin + r * 2,
           point.y - offset + yOffset - r * 2,
           boundaryBox.xMax - r * 2 - 1,
@@ -371,8 +376,8 @@ function handleSelectCollisionAndDraw(
         )) ||
       (['px4', 'px8'].includes(keys.x) &&
         checkAreaCollision(
-          state.cursor.x,
-          state.cursor.y,
+          globalState.cursor.x,
+          globalState.cursor.y,
           point.x - offset + xOffset - r * 2,
           boundaryBox.yMin + r * 2,
           point.x - offset + xOffset + r * 2,
@@ -421,7 +426,7 @@ function handleSelectCollisionAndDraw(
  */
 function setSelectionCursorStyle() {
   if (!vectorGui.selectedCollisionPresent) {
-    canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
+    canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
     return
   }
   const xKey = vectorGui.collidedPoint.xKey

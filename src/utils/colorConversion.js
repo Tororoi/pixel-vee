@@ -114,13 +114,13 @@ export const hexToRGB = (hexcode) => {
     g = 0,
     b = 0
   if (hexcode.length == 4) {
-    r = "0x" + hexcode[1] + hexcode[1]
-    g = "0x" + hexcode[2] + hexcode[2]
-    b = "0x" + hexcode[3] + hexcode[3]
+    r = '0x' + hexcode[1] + hexcode[1]
+    g = '0x' + hexcode[2] + hexcode[2]
+    b = '0x' + hexcode[3] + hexcode[3]
   } else if (hexcode.length == 7) {
-    r = "0x" + hexcode[1] + hexcode[2]
-    g = "0x" + hexcode[3] + hexcode[4]
-    b = "0x" + hexcode[5] + hexcode[6]
+    r = '0x' + hexcode[1] + hexcode[2]
+    g = '0x' + hexcode[3] + hexcode[4]
+    b = '0x' + hexcode[5] + hexcode[6]
   }
   r = +r
   g = +g
@@ -140,11 +140,11 @@ export const RGBToHex = ({ red, green, blue }) => {
   let g = green.toString(16)
   let b = blue.toString(16)
 
-  if (r.length == 1) r = "0" + r
-  if (g.length == 1) g = "0" + g
-  if (b.length == 1) b = "0" + b
+  if (r.length == 1) r = '0' + r
+  if (g.length == 1) g = '0' + g
+  if (b.length == 1) b = '0' + b
 
-  return "#" + r + g + b
+  return '#' + r + g + b
 }
 
 /**

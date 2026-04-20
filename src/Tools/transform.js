@@ -1,5 +1,5 @@
 import { TRANSLATE, ROTATE } from '../utils/constants.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { modifyVectorAction } from '../Actions/modifyTimeline/modifyTimeline.js'
 import { vectorGui, createActiveIndexesForRender } from '../GUI/vector.js'
@@ -22,43 +22,49 @@ import { transformVectorContent } from '../utils/transformHelpers.js'
 export function transformVectorSteps() {
   //Doesn't really matter which selected vector is used since all selected vectors will be transformed, but one is needed for keeping track of the right layer, etc. so use the first one.
   let currentVector =
-    state.vector.all[state.vector.selectedIndices.values().next().value]
+    globalState.vector.all[
+      globalState.vector.selectedIndices.values().next().value
+    ]
   switch (canvas.pointerEvent) {
     case 'pointerdown': {
       //Incrementing click counter stops vector adjustment from triggering when cursor hovers over a vector control point while transforming. TODO: (Low Priority) Implement a clearer way to handle this specific to transform.
-      state.tool.clickCounter += 1
-      state.tool.grabStartX = state.cursor.x
-      state.tool.grabStartY = state.cursor.y
-      state.vector.grabStartShapeCenterX = state.vector.shapeCenterX
-      state.vector.grabStartShapeCenterY = state.vector.shapeCenterY
-      //reset current vector properties (this also resets the state.vector.currentIndex if there is one)
+      globalState.tool.clickCounter += 1
+      globalState.tool.grabStartX = globalState.cursor.x
+      globalState.tool.grabStartY = globalState.cursor.y
+      globalState.vector.grabStartShapeCenterX = globalState.vector.shapeCenterX
+      globalState.vector.grabStartShapeCenterY = globalState.vector.shapeCenterY
+      //reset current vector properties (this also resets the globalState.vector.currentIndex if there is one)
       vectorGui.reset()
-      //Set state.vector.savedProperties for all selected vectors
-      state.vector.savedProperties = {}
-      state.vector.selectedIndices.forEach((index) => {
-        const vector = state.vector.all[index]
+      //Set globalState.vector.savedProperties for all selected vectors
+      globalState.vector.savedProperties = {}
+      globalState.vector.selectedIndices.forEach((index) => {
+        const vector = globalState.vector.all[index]
         const vectorProperties = vector.vectorProperties
-        state.vector.savedProperties[index] = {
+        globalState.vector.savedProperties[index] = {
           ...vectorProperties,
           modes: { ...vector.modes },
         }
       })
       //Set activeIndexes for all selected vectors
-      state.timeline.activeIndexes = createActiveIndexesForRender(
+      globalState.timeline.activeIndexes = createActiveIndexesForRender(
         currentVector,
-        state.vector.savedProperties,
+        globalState.vector.savedProperties,
       )
-      if (state.vector.transformMode === ROTATE) {
+      if (globalState.vector.transformMode === ROTATE) {
         //Rotation
-        state.vector.grabStartAngle = getAngle(
-          state.vector.shapeCenterX - state.tool.grabStartX,
-          state.vector.shapeCenterY - state.tool.grabStartY,
+        // grabStartX/Y are in canvas-pixel space (includes cropOffset); shapeCenterX/Y is in
+        // layer-absolute space (no cropOffset). Normalize cursor to layer-absolute before comparing.
+        globalState.vector.grabStartAngle = getAngle(
+          globalState.vector.shapeCenterX -
+            (globalState.tool.grabStartX - globalState.canvas.cropOffsetX),
+          globalState.vector.shapeCenterY -
+            (globalState.tool.grabStartY - globalState.canvas.cropOffsetY),
         )
       }
       renderCanvas(
         currentVector.layer,
         true,
-        state.timeline.activeIndexes,
+        globalState.timeline.activeIndexes,
         true,
       )
       break
@@ -66,74 +72,87 @@ export function transformVectorSteps() {
     case 'pointermove': {
       //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
       //Based on the action being taken, update the vector properties for all selected vectors.
-      if (state.vector.transformMode === ROTATE) {
+      if (globalState.vector.transformMode === ROTATE) {
         //Rotation
+        // Normalize canvas-pixel cursor positions to layer-absolute space to match shapeCenterX/Y.
         rotateVectors(
           currentVector.layer,
-          state.vector.savedProperties,
-          state.vector.all,
-          state.cursor.x,
-          state.cursor.y,
-          state.tool.grabStartX,
-          state.tool.grabStartY,
-          state.vector.shapeCenterX,
-          state.vector.shapeCenterY,
+          globalState.vector.savedProperties,
+          globalState.vector.all,
+          globalState.cursor.x - globalState.canvas.cropOffsetX,
+          globalState.cursor.y - globalState.canvas.cropOffsetY,
+          globalState.tool.grabStartX - globalState.canvas.cropOffsetX,
+          globalState.tool.grabStartY - globalState.canvas.cropOffsetY,
+          globalState.vector.shapeCenterX,
+          globalState.vector.shapeCenterY,
         )
-      } else if (state.vector.transformMode === TRANSLATE) {
+      } else if (globalState.vector.transformMode === TRANSLATE) {
         //Translation
-        const xDiff = state.cursor.x - state.tool.grabStartX
-        const yDiff = state.cursor.y - state.tool.grabStartY
+        const xDiff = globalState.cursor.x - globalState.tool.grabStartX
+        const yDiff = globalState.cursor.y - globalState.tool.grabStartY
         translateVectors(
           currentVector.layer,
-          state.vector.savedProperties,
-          state.vector.all,
+          globalState.vector.savedProperties,
+          globalState.vector.all,
           xDiff,
           yDiff,
         )
         //Update shape center
-        state.vector.shapeCenterX = state.vector.grabStartShapeCenterX + xDiff
-        state.vector.shapeCenterY = state.vector.grabStartShapeCenterY + yDiff
+        globalState.vector.shapeCenterX =
+          globalState.vector.grabStartShapeCenterX + xDiff
+        globalState.vector.shapeCenterY =
+          globalState.vector.grabStartShapeCenterY + yDiff
       }
-      renderCanvas(currentVector.layer, true, state.timeline.activeIndexes)
+      renderCanvas(
+        currentVector.layer,
+        true,
+        globalState.timeline.activeIndexes,
+      )
       break
     }
     case 'pointerup': {
       //Determine action being taken somehow (rotation, scaling, translation), default is translation. Special UI will be implemented for scaling and rotation.
       //Based on the action being taken, update the vector properties for all selected vectors.
-      if (state.vector.transformMode === ROTATE) {
+      if (globalState.vector.transformMode === ROTATE) {
         //Rotation
         rotateVectors(
           currentVector.layer,
-          state.vector.savedProperties,
-          state.vector.all,
-          state.cursor.x,
-          state.cursor.y,
-          state.tool.grabStartX,
-          state.tool.grabStartY,
-          state.vector.shapeCenterX,
-          state.vector.shapeCenterY,
+          globalState.vector.savedProperties,
+          globalState.vector.all,
+          globalState.cursor.x - globalState.canvas.cropOffsetX,
+          globalState.cursor.y - globalState.canvas.cropOffsetY,
+          globalState.tool.grabStartX - globalState.canvas.cropOffsetX,
+          globalState.tool.grabStartY - globalState.canvas.cropOffsetY,
+          globalState.vector.shapeCenterX,
+          globalState.vector.shapeCenterY,
         )
         vectorGui.mother.currentRotation = vectorGui.mother.newRotation
-        state.vector.grabStartAngle = null
-      } else if (state.vector.transformMode === TRANSLATE) {
+        globalState.vector.grabStartAngle = null
+      } else if (globalState.vector.transformMode === TRANSLATE) {
         //Translation
-        const xDiff = state.cursor.x - state.tool.grabStartX
-        const yDiff = state.cursor.y - state.tool.grabStartY
+        const xDiff = globalState.cursor.x - globalState.tool.grabStartX
+        const yDiff = globalState.cursor.y - globalState.tool.grabStartY
         translateVectors(
           currentVector.layer,
-          state.vector.savedProperties,
-          state.vector.all,
+          globalState.vector.savedProperties,
+          globalState.vector.all,
           xDiff,
           yDiff,
         )
         //Update shape center
-        state.vector.shapeCenterX = state.vector.grabStartShapeCenterX + xDiff
-        state.vector.shapeCenterY = state.vector.grabStartShapeCenterY + yDiff
+        globalState.vector.shapeCenterX =
+          globalState.vector.grabStartShapeCenterX + xDiff
+        globalState.vector.shapeCenterY =
+          globalState.vector.grabStartShapeCenterY + yDiff
       }
-      state.vector.grabStartShapeCenterX = null
-      state.vector.grabStartShapeCenterY = null
-      state.tool.clickCounter = 0
-      renderCanvas(currentVector.layer, true, state.timeline.activeIndexes)
+      globalState.vector.grabStartShapeCenterX = null
+      globalState.vector.grabStartShapeCenterY = null
+      globalState.tool.clickCounter = 0
+      renderCanvas(
+        currentVector.layer,
+        true,
+        globalState.timeline.activeIndexes,
+      )
       modifyVectorAction(currentVector)
       vectorGui.selectedPoint = {
         xKey: null,
@@ -152,35 +171,39 @@ export function transformVectorSteps() {
  */
 export function scaleVectorSteps() {
   let currentVector =
-    state.vector.all[state.vector.selectedIndices.values().next().value]
+    globalState.vector.all[
+      globalState.vector.selectedIndices.values().next().value
+    ]
   switch (canvas.pointerEvent) {
     case 'pointerdown':
       vectorGui.selectedPoint = {
         xKey: vectorGui.collidedPoint.xKey,
         yKey: vectorGui.collidedPoint.yKey,
       }
-      state.selection.previousBoundaryBox = { ...state.selection.boundaryBox }
-      //reset current vector properties (this also resets the state.vector.currentIndex if there is one)
+      globalState.selection.previousBoundaryBox = {
+        ...globalState.selection.boundaryBox,
+      }
+      //reset current vector properties (this also resets the globalState.vector.currentIndex if there is one)
       vectorGui.reset()
-      //Set state.vector.savedProperties for all selected vectors
-      state.vector.savedProperties = {}
-      state.vector.selectedIndices.forEach((index) => {
-        const vector = state.vector.all[index]
+      //Set globalState.vector.savedProperties for all selected vectors
+      globalState.vector.savedProperties = {}
+      globalState.vector.selectedIndices.forEach((index) => {
+        const vector = globalState.vector.all[index]
         const vectorProperties = vector.vectorProperties
-        state.vector.savedProperties[index] = {
+        globalState.vector.savedProperties[index] = {
           ...vectorProperties,
           modes: { ...vector.modes },
         }
       })
       //Set activeIndexes for all selected vectors
-      state.timeline.activeIndexes = createActiveIndexesForRender(
+      globalState.timeline.activeIndexes = createActiveIndexesForRender(
         currentVector,
-        state.vector.savedProperties,
+        globalState.vector.savedProperties,
       )
       renderCanvas(
         currentVector.layer,
         true,
-        state.timeline.activeIndexes,
+        globalState.timeline.activeIndexes,
         true,
       )
       break
@@ -191,37 +214,61 @@ export function scaleVectorSteps() {
       if (vectorGui.selectedPoint.xKey !== 'px9') {
         //Don't check for mirroring when moving whole selection
         if (
-          state.selection.boundaryBox.xMax ===
-            state.selection.previousBoundaryBox.xMin ||
-          state.selection.boundaryBox.xMin ===
-            state.selection.previousBoundaryBox.xMax
+          globalState.selection.boundaryBox.xMax ===
+            globalState.selection.previousBoundaryBox.xMin ||
+          globalState.selection.boundaryBox.xMin ===
+            globalState.selection.previousBoundaryBox.xMax
         ) {
           isMirroredHorizontally = !isMirroredHorizontally
         }
         if (
-          state.selection.boundaryBox.yMax ===
-            state.selection.previousBoundaryBox.yMin ||
-          state.selection.boundaryBox.yMin ===
-            state.selection.previousBoundaryBox.yMax
+          globalState.selection.boundaryBox.yMax ===
+            globalState.selection.previousBoundaryBox.yMin ||
+          globalState.selection.boundaryBox.yMin ===
+            globalState.selection.previousBoundaryBox.yMax
         ) {
           isMirroredVertically = !isMirroredVertically
         }
       }
+      // boundaryBoxes are in canvas-pixel space; transformVectorContent uses stored+layer.x
+      // (layer-absolute). Subtract cropOffset so both sides are in the same space.
+      const cox = globalState.canvas.cropOffsetX
+      const coy = globalState.canvas.cropOffsetY
+      const prevBB = {
+        xMin: globalState.selection.previousBoundaryBox.xMin - cox,
+        yMin: globalState.selection.previousBoundaryBox.yMin - coy,
+        xMax: globalState.selection.previousBoundaryBox.xMax - cox,
+        yMax: globalState.selection.previousBoundaryBox.yMax - coy,
+      }
+      const newBB = {
+        xMin: globalState.selection.boundaryBox.xMin - cox,
+        yMin: globalState.selection.boundaryBox.yMin - coy,
+        xMax: globalState.selection.boundaryBox.xMax - cox,
+        yMax: globalState.selection.boundaryBox.yMax - coy,
+      }
       transformVectorContent(
-        state.vector.all,
-        state.vector.savedProperties,
-        state.selection.previousBoundaryBox,
-        state.selection.boundaryBox,
+        globalState.vector.all,
+        globalState.vector.savedProperties,
+        prevBB,
+        newBB,
         isMirroredHorizontally,
         isMirroredVertically,
       )
-      renderCanvas(currentVector.layer, true, state.timeline.activeIndexes)
+      renderCanvas(
+        currentVector.layer,
+        true,
+        globalState.timeline.activeIndexes,
+      )
       break
     }
     case 'pointerup':
-      state.selection.normalize()
-      state.selection.setBoundaryBox(state.selection.properties)
-      renderCanvas(currentVector.layer, true, state.timeline.activeIndexes)
+      globalState.selection.normalize()
+      globalState.selection.setBoundaryBox(globalState.selection.properties)
+      renderCanvas(
+        currentVector.layer,
+        true,
+        globalState.timeline.activeIndexes,
+      )
       modifyVectorAction(currentVector)
       vectorGui.selectedPoint = {
         xKey: null,
@@ -245,16 +292,23 @@ export function moveVectorRotationPointSteps() {
         xKey: vectorGui.collidedPoint.xKey,
         yKey: vectorGui.collidedPoint.yKey,
       }
-      state.vector.shapeCenterX = state.cursor.x
-      state.vector.shapeCenterY = state.cursor.y
+      // shapeCenterX/Y is kept in layer-absolute space; subtract cropOffset to normalize cursor.
+      globalState.vector.shapeCenterX =
+        globalState.cursor.x - globalState.canvas.cropOffsetX
+      globalState.vector.shapeCenterY =
+        globalState.cursor.y - globalState.canvas.cropOffsetY
       break
     case 'pointermove':
-      state.vector.shapeCenterX = state.cursor.x
-      state.vector.shapeCenterY = state.cursor.y
+      globalState.vector.shapeCenterX =
+        globalState.cursor.x - globalState.canvas.cropOffsetX
+      globalState.vector.shapeCenterY =
+        globalState.cursor.y - globalState.canvas.cropOffsetY
       break
     case 'pointerup':
-      state.vector.shapeCenterX = state.cursor.x
-      state.vector.shapeCenterY = state.cursor.y
+      globalState.vector.shapeCenterX =
+        globalState.cursor.x - globalState.canvas.cropOffsetX
+      globalState.vector.shapeCenterY =
+        globalState.cursor.y - globalState.canvas.cropOffsetY
       vectorGui.selectedPoint = {
         xKey: null,
         yKey: null,
@@ -273,45 +327,45 @@ export function transformBoundaries() {
   //selectedPoint does not correspond to the selectProperties key. Based on selected point, adjust boundaryBox.
   switch (vectorGui.selectedPoint.xKey) {
     case 'px1':
-      state.selection.properties.px1 = state.cursor.x
-      state.selection.properties.py1 = state.cursor.y
+      globalState.selection.properties.px1 = globalState.cursor.x
+      globalState.selection.properties.py1 = globalState.cursor.y
       break
     case 'px2':
-      state.selection.properties.py1 = state.cursor.y
+      globalState.selection.properties.py1 = globalState.cursor.y
       break
     case 'px3':
-      state.selection.properties.px2 = state.cursor.x
-      state.selection.properties.py1 = state.cursor.y
+      globalState.selection.properties.px2 = globalState.cursor.x
+      globalState.selection.properties.py1 = globalState.cursor.y
       break
     case 'px4':
-      state.selection.properties.px2 = state.cursor.x
+      globalState.selection.properties.px2 = globalState.cursor.x
       break
     case 'px5':
-      state.selection.properties.px2 = state.cursor.x
-      state.selection.properties.py2 = state.cursor.y
+      globalState.selection.properties.px2 = globalState.cursor.x
+      globalState.selection.properties.py2 = globalState.cursor.y
       break
     case 'px6':
-      state.selection.properties.py2 = state.cursor.y
+      globalState.selection.properties.py2 = globalState.cursor.y
       break
     case 'px7':
-      state.selection.properties.px1 = state.cursor.x
-      state.selection.properties.py2 = state.cursor.y
+      globalState.selection.properties.px1 = globalState.cursor.x
+      globalState.selection.properties.py2 = globalState.cursor.y
       break
     case 'px8':
-      state.selection.properties.px1 = state.cursor.x
+      globalState.selection.properties.px1 = globalState.cursor.x
       break
     case 'px9': {
       //move selected contents
-      const deltaX = state.cursor.x - state.cursor.prevX
-      const deltaY = state.cursor.y - state.cursor.prevY
-      state.selection.properties.px1 += deltaX
-      state.selection.properties.py1 += deltaY
-      state.selection.properties.px2 += deltaX
-      state.selection.properties.py2 += deltaY
+      const deltaX = globalState.cursor.x - globalState.cursor.prevX
+      const deltaY = globalState.cursor.y - globalState.cursor.prevY
+      globalState.selection.properties.px1 += deltaX
+      globalState.selection.properties.py1 += deltaY
+      globalState.selection.properties.px2 += deltaX
+      globalState.selection.properties.py2 += deltaY
       break
     }
     default:
     //do nothing
   }
-  state.selection.setBoundaryBox(state.selection.properties)
+  globalState.selection.setBoundaryBox(globalState.selection.properties)
 }

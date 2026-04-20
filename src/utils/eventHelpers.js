@@ -36,12 +36,15 @@ export function throttle(fn, limit) {
       inThrottle = true
     } else {
       clearTimeout(lastFunc)
-      lastFunc = setTimeout(function () {
-        if (Date.now() - lastRan >= limit) {
-          fn.apply(context, args)
-          lastRan = Date.now()
-        }
-      }, limit - (Date.now() - lastRan))
+      lastFunc = setTimeout(
+        function () {
+          if (Date.now() - lastRan >= limit) {
+            fn.apply(context, args)
+            lastRan = Date.now()
+          }
+        },
+        limit - (Date.now() - lastRan),
+      )
     }
   }
 }

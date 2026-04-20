@@ -36,7 +36,12 @@ export function actionLine(sx, sy, tx, ty, strokeCtx) {
     )
     // for each point along the line
     if (ditherPattern) {
-      actionDitherDraw(thispoint.x, thispoint.y, brushStamp[brushDirection], innerCtx)
+      actionDitherDraw(
+        thispoint.x,
+        thispoint.y,
+        brushStamp[brushDirection],
+        innerCtx,
+      )
     } else {
       actionDraw(thispoint.x, thispoint.y, brushStamp[brushDirection], innerCtx)
     }

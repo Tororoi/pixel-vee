@@ -1,0 +1,182 @@
+<script>
+  import { globalState } from '../../Context/state.js'
+  import { canvas } from '../../Context/canvas.js'
+  import { vectorGui } from '../../GUI/vector.js'
+  import { renderCanvas } from '../../Canvas/render.js'
+  import { updateActiveLayerState } from '../../DOM/render.js'
+  import { isValidVector } from '../../DOM/renderVectors.js'
+  import { dom } from '../../Context/dom.js'
+  import DialogBox from '../DialogBox.svelte'
+  import { switchTool } from '../../Tools/toolbox.js'
+  import {
+    actionSelectVector,
+    actionDeselectVector,
+    actionDeselect,
+  } from '../../Actions/nonPointer/selectionActions.js'
+  import { removeActionVector } from '../../Actions/modifyTimeline/modifyTimeline.js'
+  import { keys } from '../../Shortcuts/keys.js'
+  import { initializeColorPicker } from '../../Swatch/events.js'
+  import VectorThumbnail from './VectorThumbnail.svelte'
+  import VectorSettingsPopout from './VectorSettingsPopout.svelte'
+
+  let settingsVector = $state.raw(null)
+  let settingsPos = $state({ top: 0, left: 0 })
+
+  const isPasted = $derived(!!canvas.pastedLayer)
+  const visibleVectors = $derived.by(() => {
+    const undoStackSet = new Set(globalState.timeline.undoStack)
+    return Object.values(globalState.vector.all).filter((v) =>
+      isValidVector(v, undoStackSet),
+    )
+  })
+  const currentVectorIndex = $derived(globalState.vector.currentIndex)
+  const selectedIndices = $derived(globalState.vector.selectedIndices)
+
+  function handleVectorClick(e, vector) {
+    if (isPasted) {
+      e.preventDefault()
+      return
+    }
+    if (keys.ShiftLeft || keys.ShiftRight) {
+      if (!globalState.vector.selectedIndices.has(vector.index)) {
+        actionSelectVector(vector.index)
+      } else {
+        actionDeselectVector(vector.index)
+      }
+    } else if (globalState.vector.selectedIndices.size > 0) {
+      actionDeselect()
+    }
+    if (vector.index !== globalState.vector.currentIndex) {
+      switchTool(vector.vectorProperties.tool)
+      vectorGui.setVectorProperties(vector)
+      canvas.currentLayer.inactiveTools?.forEach((tool) => {
+        if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = false
+      })
+      canvas.currentLayer = vector.layer
+      canvas.currentLayer.inactiveTools?.forEach((tool) => {
+        if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = true
+      })
+    }
+    vectorGui.render()
+    updateActiveLayerState()
+
+  }
+
+  function handleHideToggle(e, vector) {
+    e.stopPropagation()
+    vector.hidden = !vector.hidden
+    renderCanvas(vector.layer, true)
+  }
+
+  function handleRemove(e, vector) {
+    e.stopPropagation()
+    vector.removed = true
+    if (globalState.vector.currentIndex === vector.index) vectorGui.reset()
+    renderCanvas(vector.layer, true)
+    removeActionVector(vector)
+    globalState.clearRedoStack()
+
+  }
+
+  function handleGearClick(e, vector) {
+    e.stopPropagation()
+    if (settingsVector === vector) {
+      settingsVector = null
+    } else {
+      const rect = e.currentTarget.getBoundingClientRect()
+      settingsPos = { top: rect.top + rect.height / 2, left: rect.right + 16 }
+      settingsVector = vector
+    }
+  }
+
+  function handleColorClick(e, vector) {
+    e.stopPropagation()
+    initializeColorPicker({
+      color: vector.color,
+      vector,
+      isSecondaryColor: false,
+    })
+  }
+</script>
+
+<DialogBox
+  title="Vectors"
+  class="vectors-interface draggable v-drag settings-box smooth-shift{isPasted ? ' disabled' : ''}"
+  collapsible
+>
+    <div class="vectors-container">
+      <div class="vectors">
+        {#each visibleVectors as vector (vector.index)}
+          {@const isVectorHidden = vector.hidden}
+          {@const isSelected =
+            vector.index === currentVectorIndex ||
+            selectedIndices.has(vector.index)}
+          {@const toolName = vector.vectorProperties?.tool ?? ''}
+          {@const isSettingsOpen = settingsVector === vector}
+          <div
+            class="vector{isSelected ? ' selected' : ''}"
+            role="button"
+            tabindex="0"
+            onclick={(e) => handleVectorClick(e, vector)}
+            onkeydown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ')
+                handleVectorClick(e, vector)
+            }}
+          >
+            <VectorThumbnail {vector} />
+            <div class="left">
+              <button
+                type="button"
+                class="tool {toolName}"
+                aria-label={toolName}
+                data-tooltip={toolName}
+                onclick={(e) => e.stopPropagation()}
+              ></button>
+              <button
+                type="button"
+                class="actionColor primary-color"
+                aria-label="Action Color"
+                data-tooltip="Action Color"
+                onclick={(e) => handleColorClick(e, vector)}
+              >
+                <div
+                  class="swatch"
+                  style="background-color: {vector.color?.color}"
+                ></div>
+              </button>
+              <button
+                type="button"
+                class="hide {isVectorHidden ? 'eyeclosed' : 'eyeopen'}"
+                aria-label={isVectorHidden ? 'Show Vector' : 'Hide Vector'}
+                data-tooltip={isVectorHidden ? 'Show Vector' : 'Hide Vector'}
+                onclick={(e) => handleHideToggle(e, vector)}
+              ></button>
+              <button
+                type="button"
+                class="trash"
+                aria-label="Remove Vector"
+                data-tooltip="Remove Vector"
+                onclick={(e) => handleRemove(e, vector)}
+              ></button>
+            </div>
+            <button
+              type="button"
+              class="gear{isSettingsOpen ? ' active' : ''}"
+              aria-label="Vector Settings"
+              data-tooltip="Vector Settings"
+              onclick={(e) => handleGearClick(e, vector)}
+            ></button>
+          </div>
+        {/each}
+      </div>
+    </div>
+  {#if settingsVector}
+    <VectorSettingsPopout
+      bind:vector={settingsVector}
+      pos={settingsPos}
+      onclose={() => {
+        settingsVector = null
+      }}
+    />
+  {/if}
+</DialogBox>

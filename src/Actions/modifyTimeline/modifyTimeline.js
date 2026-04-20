@@ -1,9 +1,9 @@
-import { state } from '../../Context/state.js'
+import { globalState } from '../../Context/state.js'
 import { tools } from '../../Tools/index.js'
 import { vectorGui } from '../../GUI/vector.js'
 import { addToTimeline } from '../undoRedo/undoRedo.js'
 import { renderCanvas } from '../../Canvas/render.js'
-import { renderVectorsToDOM } from '../../DOM/render.js'
+
 import { CURVE_TYPES } from '../../utils/constants.js'
 
 //====================================//
@@ -19,15 +19,15 @@ import { CURVE_TYPES } from '../../utils/constants.js'
  * @param {object} moddedVector - The vector action that was modified
  */
 export function modifyVectorAction(moddedVector) {
-  //loop through the object state.vector.savedProperties and create an array of objects with the required properties
+  //loop through the object globalState.vector.savedProperties and create an array of objects with the required properties
   let processedActions = []
 
-  for (let vectorIndex in state.vector.savedProperties) {
+  for (let vectorIndex in globalState.vector.savedProperties) {
     // Extract the saved properties
-    let fromProperties = { ...state.vector.savedProperties[vectorIndex] }
+    let fromProperties = { ...globalState.vector.savedProperties[vectorIndex] }
 
     // Extract the new properties
-    let vector = state.vector.all[vectorIndex]
+    let vector = globalState.vector.all[vectorIndex]
     let toProperties = {
       ...vector.vectorProperties,
     }
@@ -41,9 +41,9 @@ export function modifyVectorAction(moddedVector) {
       to: toProperties,
     })
   }
-  state.vector.savedProperties = {}
-  state.timeline.clearActiveIndexes()
-  state.timeline.clearSavedBetweenActionImages()
+  globalState.vector.savedProperties = {}
+  globalState.timeline.clearActiveIndexes()
+  globalState.timeline.clearSavedBetweenActionImages()
   addToTimeline({
     tool: tools.modify.name,
     layer: moddedVector.layer,
@@ -237,9 +237,25 @@ export function changeActionVectorCurveType(targetVector, newCurveType) {
     px4: targetVector.vectorProperties.px4,
     py4: targetVector.vectorProperties.py4,
   }
-  if (state.vector.currentIndex === targetVector.index) {
-    state.vector.properties = { ...targetVector.vectorProperties }
+  if (globalState.vector.currentIndex === targetVector.index) {
+    const layerX = targetVector.layer.x
+    const layerY = targetVector.layer.y
+    if (targetVector.vectorProperties.px3 !== undefined) {
+      globalState.vector.properties.px3 =
+        targetVector.vectorProperties.px3 + layerX
+      globalState.vector.properties.py3 =
+        targetVector.vectorProperties.py3 + layerY
+    }
+    if (targetVector.vectorProperties.px4 !== undefined) {
+      globalState.vector.properties.px4 =
+        targetVector.vectorProperties.px4 + layerX
+      globalState.vector.properties.py4 =
+        targetVector.vectorProperties.py4 + layerY
+    }
   }
+  // Render before recording so addToTimeline's snapshot captures the post-render pixels.
+  // If snapshot is taken first (pre-render), undoing restores stale pixels.
+  renderCanvas(targetVector.layer, true)
   changeActionVectorMode(
     targetVector,
     oldModes,
@@ -247,10 +263,8 @@ export function changeActionVectorCurveType(targetVector, newCurveType) {
     oldVectorProperties,
     newVectorProperties,
   )
-  state.clearRedoStack()
-  renderCanvas(targetVector.layer, true)
+  globalState.clearRedoStack()
   vectorGui.render()
-  renderVectorsToDOM()
 }
 
 /**
@@ -259,10 +273,10 @@ export function changeActionVectorCurveType(targetVector, newCurveType) {
  * @param {object} layer - The layer with actions to be modified
  */
 export function actionClear(layer) {
-  let upToIndex = state.timeline.undoStack.length - 1
+  let upToIndex = globalState.timeline.undoStack.length - 1
   let i = 0
   //follows stored instructions to reassemble drawing. Costly, but only called upon undo/redo
-  state.timeline.undoStack.forEach((action) => {
+  globalState.timeline.undoStack.forEach((action) => {
     if (i > upToIndex) {
       return
     }
@@ -271,7 +285,7 @@ export function actionClear(layer) {
       action.removed = true
       if (action.vectorIndices) {
         action.vectorIndices.forEach((vectorIndex) => {
-          state.vector.all[vectorIndex].removed = true
+          globalState.vector.all[vectorIndex].removed = true
         })
       }
       //TODO: (Low Priority) Should group actions also have each sub action removed set to true?

@@ -4,9 +4,14 @@
   "description": "### Drawing application for pixel art",
   "main": "index.js",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "sass": "sass --watch scss/style.scss:css/style.css",
-    "eslint": "eslint --fix-dry-run src --ext jsx,js",
-    "eslintfix": "eslint --fix src --ext jsx,js",
+    "eslint": "eslint src",
+    "eslintfix": "eslint --fix src",
+    "check": "svelte-check",
+    "pretty": "prettier --write 'src/**/*.{js,svelte}'",
     "test": "vitest run",
     "test:watch": "vitest"
   },
@@ -21,13 +26,22 @@
   },
   "homepage": "https://github.com/Tororoi/pixel-vee#readme",
   "dependencies": {
-    "sass": "^1.66.1",
-    "sass-loader": "^13.0.0",
-    "serve": "^14.0.1"
+    "serve": "^14.0.1",
+    "svelte": "^5.0.0"
   },
   "devDependencies": {
-    "eslint": "^8.56.0",
+    "sass": "^1.66.1",
+    "sass-loader": "^13.0.0",
+    "@eslint/js": "^9.39.4",
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "eslint": "^9.39.4",
     "eslint-plugin-jsdoc": "^48.1.0",
+    "eslint-plugin-svelte": "^3.17.0",
+    "globals": "^17.5.0",
+    "prettier": "^3.8.2",
+    "prettier-plugin-svelte": "^3.5.1",
+    "svelte-check": "^4.4.6",
+    "svelte-eslint-parser": "^1.6.0",
     "vitest": "^4.0.18"
   }
 }

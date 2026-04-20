@@ -16,7 +16,7 @@ vi.mock("../src/Tools/index.js", () => ({
   },
 }))
 
-import { state, registerDOMHelpers, registerVectorGui } from "../src/Context/state.js"
+import { globalState as state, registerVectorGui } from "../src/Context/state.js"
 
 // ─── state.selection ──────────────────────────────────────────────────────────
 
@@ -140,30 +140,6 @@ describe("state.selection", () => {
         xMax: null,
         yMax: null,
       })
-    })
-
-    it("calls enableActionsForSelection when registered and coords are valid", () => {
-      const enableFn = vi.fn()
-      registerDOMHelpers({
-        disableActionsForNoSelection: vi.fn(),
-        enableActionsForSelection: enableFn,
-      })
-
-      state.selection.setBoundaryBox({ px1: 10, py1: 20, px2: 50, py2: 80 })
-
-      expect(enableFn).toHaveBeenCalledOnce()
-    })
-
-    it("does not call enableActionsForSelection when coords are null", () => {
-      const enableFn = vi.fn()
-      registerDOMHelpers({
-        disableActionsForNoSelection: vi.fn(),
-        enableActionsForSelection: enableFn,
-      })
-
-      state.selection.setBoundaryBox({ px1: null, py1: null, px2: null, py2: null })
-
-      expect(enableFn).not.toHaveBeenCalled()
     })
   })
 })
@@ -396,18 +372,6 @@ describe("state.deselect()", () => {
     state.deselect()
 
     expect(state.vector.selectedIndices.size).toBe(0)
-  })
-
-  it("calls disableActionsForNoSelection when registered", () => {
-    const disableFn = vi.fn()
-    registerDOMHelpers({
-      disableActionsForNoSelection: disableFn,
-      enableActionsForSelection: vi.fn(),
-    })
-
-    state.deselect()
-
-    expect(disableFn).toHaveBeenCalledOnce()
   })
 
   it("calls vectorGui methods when registered", () => {

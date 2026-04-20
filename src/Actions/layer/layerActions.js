@@ -1,12 +1,12 @@
-import { state } from "../../Context/state.js"
-import { canvas } from "../../Context/canvas.js"
-import { tools } from "../../Tools/index.js"
-import { vectorGui } from "../../GUI/vector.js"
-import { addToTimeline } from "../undoRedo/undoRedo.js"
-import { createRasterLayer, createReferenceLayer } from "../../Canvas/layers.js"
-import { renderCanvas } from "../../Canvas/render.js"
-import { renderLayersToDOM, renderVectorsToDOM } from "../../DOM/render.js"
-import { dom } from "../../Context/dom.js"
+import { globalState } from '../../Context/state.js'
+import { canvas } from '../../Context/canvas.js'
+import { tools } from '../../Tools/index.js'
+import { vectorGui } from '../../GUI/vector.js'
+import { addToTimeline } from '../undoRedo/undoRedo.js'
+import { createRasterLayer, createReferenceLayer } from '../../Canvas/layers.js'
+import { renderCanvas } from '../../Canvas/render.js'
+import { updateActiveLayerState } from '../../DOM/render.js'
+import { dom } from '../../Context/dom.js'
 
 //=============================================//
 //============ * * * Layers * * * =============//
@@ -36,8 +36,8 @@ export function addReferenceLayer() {
           tool: tools.addLayer.name,
           layer,
         })
-        state.clearRedoStack()
-        renderLayersToDOM()
+        globalState.clearRedoStack()
+        updateActiveLayerState()
         renderCanvas()
       }
     }
@@ -63,8 +63,8 @@ export function addRasterLayer() {
     tool: tools.addLayer.name,
     layer,
   })
-  state.clearRedoStack()
-  renderLayersToDOM()
+  globalState.clearRedoStack()
+  updateActiveLayerState()
 }
 
 /**
@@ -73,20 +73,20 @@ export function addRasterLayer() {
  */
 export function removeLayer(layer) {
   //set "removed" flag to true on selected layer.
-  if (canvas.activeLayerCount > 1 || layer.type !== "raster") {
+  if (canvas.activeLayerCount > 1 || layer.type !== 'raster') {
     layer.removed = true
     if (layer === canvas.currentLayer) {
-      if (layer.type === "reference") {
-        state.deselect()
+      if (layer.type === 'reference') {
+        globalState.deselect()
       }
       layer.inactiveTools.forEach((tool) => {
-        dom[`${tool}Btn`].disabled = false
+        if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = false
       })
       canvas.currentLayer = canvas.layers.find(
-        (l) => l.type === "raster" && !l.removed
+        (l) => l.type === 'raster' && !l.removed,
       )
       canvas.currentLayer.inactiveTools.forEach((tool) => {
-        dom[`${tool}Btn`].disabled = true
+        if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = true
       })
       vectorGui.reset()
     }
@@ -94,8 +94,7 @@ export function removeLayer(layer) {
       tool: tools.removeLayer.name,
       layer,
     })
-    state.clearRedoStack()
-    renderLayersToDOM()
-    renderVectorsToDOM()
+    globalState.clearRedoStack()
+    updateActiveLayerState()
   }
 }

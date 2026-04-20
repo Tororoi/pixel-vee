@@ -1,5 +1,5 @@
 import { TRANSLATE, ROTATE, SCALE } from '../utils/constants.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import {
   checkSquarePointCollision,
@@ -29,12 +29,6 @@ import {
   handleOptionsAndUpdateVector,
   // findVectorShapeBoundaryBox,
 } from '../utils/vectorHelpers.js'
-import {
-  disableActionsForNoSelection,
-  enableActionsForSelection,
-} from '../DOM/disableDomElements.js'
-import { renderLinePath, renderLineVector } from './line.js'
-import { renderResizeOverlayCVS } from '../Canvas/resizeOverlay.js'
 // import { switchTool } from "../Tools/toolbox.js"
 
 //==================================================//
@@ -69,7 +63,7 @@ export const vectorGui = {
     this.collidedPoint.yKey = keys.y
   },
   resetOtherVectorCollision() {
-    state.vector.collidedIndex = null
+    globalState.vector.collidedIndex = null
     this.otherCollidedKeys = { xKey: null, yKey: null }
   },
   setOtherVectorCollision(keys) {
@@ -86,7 +80,7 @@ export const vectorGui = {
     if (
       this.selectedPoint.xKey ||
       ['fill', 'ellipse'].includes(vector.vectorProperties.tool) ||
-      ['fill', 'ellipse'].includes(state.vector.properties.tool)
+      ['fill', 'ellipse'].includes(globalState.vector.properties.tool)
     ) {
       //Don't link a point to itself and don't link to fill or ellipse vectors.
       return
@@ -138,7 +132,12 @@ export const vectorGui = {
  * @param {boolean} modify - if true, check for collision with cursor
  * @param {object} vector - The vector to be rendered
  */
-function drawControlPoints(vectorProperties, pointsKeys, modify = false, vector = null) {
+function drawControlPoints(
+  vectorProperties,
+  pointsKeys,
+  modify = false,
+  vector = null,
+) {
   for (let keys of pointsKeys) {
     const point = {
       x: vectorProperties[keys.x],
@@ -162,11 +161,16 @@ function drawControlPoints(vectorProperties, pointsKeys, modify = false, vector 
  * @param {number} collisionRadius - Collision half-width in art pixels
  * @returns {{ isActive: boolean }} Whether the point is active
  */
-function resolveCurrentVectorCollision(keys, normalizedX, normalizedY, collisionRadius) {
+function resolveCurrentVectorCollision(
+  keys,
+  normalizedX,
+  normalizedY,
+  collisionRadius,
+) {
   if (
     checkSquarePointCollision(
-      state.cursor.x,
-      state.cursor.y,
+      globalState.cursor.x,
+      globalState.cursor.y,
       normalizedX,
       normalizedY,
       collisionRadius,
@@ -197,8 +201,8 @@ function resolveOtherVectorCollision(
 ) {
   if (
     !checkSquarePointCollision(
-      state.cursor.x,
-      state.cursor.y,
+      globalState.cursor.x,
+      globalState.cursor.y,
       normalizedX,
       normalizedY,
       collisionRadius,
@@ -208,7 +212,7 @@ function resolveOtherVectorCollision(
   }
 
   if (keys.x === 'px1' || keys.x === 'px2') {
-    state.vector.collidedIndex = vector.index
+    globalState.vector.collidedIndex = vector.index
     vectorGui.setOtherVectorCollision(keys)
     //Only allow link if active point for selection is p1 or p2
     let linkingPoint = null
@@ -220,11 +224,11 @@ function resolveOtherVectorCollision(
     const allowLink = ['px1', 'px2'].includes(linkingPoint?.xKey)
     if (allowLink) {
       vectorGui.addLinkedVector(vector, keys.x, linkingPoint)
-      if (state.tool.clickCounter === 0) {
+      if (globalState.tool.clickCounter === 0) {
         return { isActive: true }
       }
     } else if (!vectorGui.selectedPoint.xKey) {
-      if (state.tool.clickCounter === 0) {
+      if (globalState.tool.clickCounter === 0) {
         return { isActive: true }
       }
     }
@@ -232,9 +236,9 @@ function resolveOtherVectorCollision(
     (keys.x === 'px3' || keys.x === 'px4') &&
     !vectorGui.selectedPoint.xKey
   ) {
-    state.vector.collidedIndex = vector.index
+    globalState.vector.collidedIndex = vector.index
     //only set new radius if selected vector is not a new vector being drawn
-    if (state.tool.clickCounter === 0) {
+    if (globalState.tool.clickCounter === 0) {
       return { isActive: true }
     }
   }
@@ -251,12 +255,15 @@ function resolveOtherVectorCollision(
 function resolveLinkedVectors(keys, normalizedX, normalizedY, vector) {
   if (!vector) return
 
-  const currentVectorModes = state.vector.all[state.vector.currentIndex]?.modes
+  const currentVectorModes =
+    globalState.vector.all[globalState.vector.currentIndex]?.modes
 
   if (vectorGui.collidedPoint.xKey === 'px3') {
     if (
-      normalizedX === state.vector.properties.px1 + state.canvas.cropOffsetX &&
-      normalizedY === state.vector.properties.py1 + state.canvas.cropOffsetY
+      normalizedX ===
+        globalState.vector.properties.px1 + globalState.canvas.cropOffsetX &&
+      normalizedY ===
+        globalState.vector.properties.py1 + globalState.canvas.cropOffsetY
     ) {
       vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px1', yKey: 'py1' })
     }
@@ -266,8 +273,9 @@ function resolveLinkedVectors(keys, normalizedX, normalizedY, vector) {
     if (currentVectorModes?.quadCurve) {
       if (
         normalizedX ===
-          state.vector.properties.px2 + state.canvas.cropOffsetX &&
-        normalizedY === state.vector.properties.py2 + state.canvas.cropOffsetY
+          globalState.vector.properties.px2 + globalState.canvas.cropOffsetX &&
+        normalizedY ===
+          globalState.vector.properties.py2 + globalState.canvas.cropOffsetY
       ) {
         vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px2', yKey: 'py2' })
       }
@@ -275,8 +283,10 @@ function resolveLinkedVectors(keys, normalizedX, normalizedY, vector) {
   }
   if (vectorGui.collidedPoint.xKey === 'px4') {
     if (
-      normalizedX === state.vector.properties.px2 + state.canvas.cropOffsetX &&
-      normalizedY === state.vector.properties.py2 + state.canvas.cropOffsetY
+      normalizedX ===
+        globalState.vector.properties.px2 + globalState.canvas.cropOffsetX &&
+      normalizedY ===
+        globalState.vector.properties.py2 + globalState.canvas.cropOffsetY
     ) {
       vectorGui.addLinkedVector(vector, keys.x, { xKey: 'px2', yKey: 'py2' })
     }
@@ -352,8 +362,8 @@ function drawInactiveControlPoint(
     const wouldBeActive =
       vectorGui.selectedPoint.xKey === keys.x ||
       checkSquarePointCollision(
-        state.cursor.x,
-        state.cursor.y,
+        globalState.cursor.x,
+        globalState.cursor.y,
         normalizedX,
         normalizedY,
         collisionRadius,
@@ -379,11 +389,12 @@ function handleCollisionAndDraw(keys, point, modify, vector) {
   // Preview (modify=false) circles are 3× larger than interactive circles.
   // renderRadius is a multiplier against lineWidth so circles stay proportional across zoom levels.
   // Touch devices have pre-doubled canvas.gui.renderRadius and canvas.gui.collisionRadius.
-  const renderRadius = canvas.gui.renderRadius * canvas.gui.lineWidth * (modify ? 1 : 3)
+  const renderRadius =
+    canvas.gui.renderRadius * canvas.gui.lineWidth * (modify ? 1 : 3)
   const collisionRadius = canvas.gui.collisionRadius
 
   // Translate the stored layer-relative point into cursor space (art-pixel,
-  // pan-agnostic) so it can be compared directly with state.cursor.x/y.
+  // pan-agnostic) so it can be compared directly with globalState.cursor.x/y.
   const xOffset = getControlPointXOffset(vector)
   const yOffset = getControlPointYOffset(vector)
   const normalizedX = point.x + xOffset
@@ -457,17 +468,19 @@ function isChainableCollision() {
   const endpointKeys = ['px1', 'px2']
   if (
     vectorGui.selectedCollisionPresent &&
-    state.vector.currentIndex !== null &&
+    globalState.vector.currentIndex !== null &&
     endpointKeys.includes(vectorGui.collidedPoint.xKey)
   ) {
-    const currentVector = state.vector.all[state.vector.currentIndex]
+    const currentVector =
+      globalState.vector.all[globalState.vector.currentIndex]
     if (currentVector?.vectorProperties.tool === 'curve') return true
   }
   if (
-    state.vector.collidedIndex !== null &&
+    globalState.vector.collidedIndex !== null &&
     endpointKeys.includes(vectorGui.otherCollidedKeys.xKey)
   ) {
-    const collidedVector = state.vector.all[state.vector.collidedIndex]
+    const collidedVector =
+      globalState.vector.all[globalState.vector.collidedIndex]
     if (collidedVector?.vectorProperties.tool === 'curve') return true
   }
   return false
@@ -477,35 +490,38 @@ function isChainableCollision() {
  * Set css cursor for vector interaction
  */
 function setCursorStyle() {
-  if (!vectorGui.selectedCollisionPresent && !state.vector.collidedIndex) {
+  if (
+    !vectorGui.selectedCollisionPresent &&
+    !globalState.vector.collidedIndex
+  ) {
     if (
-      state.vector.selectedIndices.size > 0 &&
-      state.tool.current.type === 'vector'
+      globalState.vector.selectedIndices.size > 0 &&
+      globalState.tool.current.type === 'vector'
     ) {
       //For transform actions
       canvas.vectorGuiCVS.style.cursor = 'move'
       return
     }
-    canvas.vectorGuiCVS.style.cursor = state.tool.current.modes?.eraser
+    canvas.vectorGuiCVS.style.cursor = globalState.tool.current.modes?.eraser
       ? 'none'
-      : state.cursor.clicked
-        ? state.tool.current.activeCursor
-        : state.tool.current.cursor
+      : globalState.cursor.clicked
+        ? globalState.tool.current.activeCursor
+        : globalState.tool.current.cursor
     return
   }
 
   //If pointer is colliding with a vector control point:
-  if (state.tool.current.name !== 'move') {
-    if (state.tool.clickCounter !== 0) {
+  if (globalState.tool.current.name !== 'move') {
+    if (globalState.tool.clickCounter !== 0) {
       //creating new vector, don't use grab cursor
       canvas.vectorGuiCVS.style.cursor = 'move'
     } else if (
-      state.tool.current.options?.chain?.active &&
+      globalState.tool.current.options?.chain?.active &&
       isChainableCollision()
     ) {
       //chain mode: show normal tool cursor over chainable endpoints
-      canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
-    } else if (state.cursor.clicked) {
+      canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
+    } else if (globalState.cursor.clicked) {
       canvas.vectorGuiCVS.style.cursor = 'grabbing'
     } else {
       canvas.vectorGuiCVS.style.cursor = 'grab'
@@ -525,10 +541,9 @@ function setCursorStyle() {
  * Reset vector state
  */
 function reset() {
-  state.vector.properties = {}
+  globalState.vector.properties = {}
   //reset selectedpoint and collided keys
-  state.vector.setCurrentIndex(null)
-  disableActionsForNoSelection()
+  globalState.vector.setCurrentIndex(null)
   vectorGui.render()
 }
 
@@ -538,31 +553,30 @@ function reset() {
  */
 function setVectorProperties(vector) {
   if (vector.layer === canvas.currentLayer) {
-    state.vector.properties = { ...vector.vectorProperties }
+    globalState.vector.properties = { ...vector.vectorProperties }
     //Keep properties relative to layer offset
     //All vector types have at least one control point
     const layerX = vector.layer.x
     const layerY = vector.layer.y
-    state.vector.properties.px1 += layerX
-    state.vector.properties.py1 += layerY
+    globalState.vector.properties.px1 += layerX
+    globalState.vector.properties.py1 += layerY
     //line, quadCurve, cubicCurve, ellipse
-    if (state.vector.properties.px2 !== undefined) {
-      state.vector.properties.px2 += layerX
-      state.vector.properties.py2 += layerY
+    if (globalState.vector.properties.px2 !== undefined) {
+      globalState.vector.properties.px2 += layerX
+      globalState.vector.properties.py2 += layerY
     }
     //quadCurve, cubicCurve, ellipse
-    if (state.vector.properties.px3 !== undefined) {
-      state.vector.properties.px3 += layerX
-      state.vector.properties.py3 += layerY
+    if (globalState.vector.properties.px3 !== undefined) {
+      globalState.vector.properties.px3 += layerX
+      globalState.vector.properties.py3 += layerY
     }
     //cubicCurve
-    if (state.vector.properties.px4 !== undefined) {
-      state.vector.properties.px4 += layerX
-      state.vector.properties.py4 += layerY
+    if (globalState.vector.properties.px4 !== undefined) {
+      globalState.vector.properties.px4 += layerX
+      globalState.vector.properties.py4 += layerY
     }
-    state.vector.setCurrentIndex(vector.index)
+    globalState.vector.setCurrentIndex(vector.index)
     // switchTool(vector.vectorProperties.tool)
-    enableActionsForSelection()
   }
 }
 
@@ -588,37 +602,37 @@ function render() {
   if (canvas.currentLayer.type === 'reference' && canvas.currentLayer.img) {
     vectorGui.resetCollision()
     let lineWidth = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
-    state.selection.properties.px1 = canvas.currentLayer.x - lineWidth
-    state.selection.properties.py1 = canvas.currentLayer.y - lineWidth
-    state.selection.properties.px2 =
+    globalState.selection.properties.px1 = canvas.currentLayer.x - lineWidth
+    globalState.selection.properties.py1 = canvas.currentLayer.y - lineWidth
+    globalState.selection.properties.px2 =
       canvas.currentLayer.x +
       canvas.currentLayer.img.width * canvas.currentLayer.scale +
       lineWidth
-    state.selection.properties.py2 =
+    globalState.selection.properties.py2 =
       canvas.currentLayer.y +
       canvas.currentLayer.img.height * canvas.currentLayer.scale +
       lineWidth
-    state.selection.setBoundaryBox(state.selection.properties)
+    globalState.selection.setBoundaryBox(globalState.selection.properties)
   }
   if (
-    state.tool.current.options.displayVectors?.active ||
-    state.tool.current.options.equal?.active ||
-    state.tool.current.options.align?.active ||
-    state.tool.current.options.link?.active ||
-    (state.vector.selectedIndices.size > 0 &&
-      state.tool.current.type === 'vector')
+    globalState.tool.current.options.displayVectors?.active ||
+    globalState.tool.current.options.equal?.active ||
+    globalState.tool.current.options.align?.active ||
+    globalState.tool.current.options.link?.active ||
+    (globalState.vector.selectedIndices.size > 0 &&
+      globalState.tool.current.type === 'vector')
   ) {
     renderLayerVectors(canvas.currentLayer)
-  } else if (state.tool.current.type === 'vector') {
+  } else if (globalState.tool.current.type === 'vector') {
     //else render only the current vector
     renderCurrentVector()
   }
   //Render vector transform ui
   if (
-    state.vector.selectedIndices.size > 0 &&
-    state.vector.shapeCenterX !== null
+    globalState.vector.selectedIndices.size > 0 &&
+    globalState.vector.shapeCenterX !== null
   ) {
-    switch (state.vector.transformMode) {
+    switch (globalState.vector.transformMode) {
       case ROTATE:
         renderVectorRotationControl()
         break
@@ -628,14 +642,14 @@ function render() {
       case SCALE: {
         //Update shape boundary box TODO: (Medium Priority) Instead of updating shapeBoundaryBox here, update it when the vectors are changed or when the scale mode is toggled.
         // const shapeBoundaryBox = findVectorShapeBoundaryBox(
-        //   state.vector.selectedIndices,
-        //   state.vector.all
+        //   globalState.vector.selectedIndices,
+        //   globalState.vector.all
         // )
-        // state.selection.properties.px1 = shapeBoundaryBox.xMin
-        // state.selection.properties.py1 = shapeBoundaryBox.yMin
-        // state.selection.properties.px2 = shapeBoundaryBox.xMax
-        // state.selection.properties.py2 = shapeBoundaryBox.yMax
-        // state.selection.setBoundaryBox(state.selection.properties)
+        // globalState.selection.properties.px1 = shapeBoundaryBox.xMin
+        // globalState.selection.properties.py1 = shapeBoundaryBox.yMin
+        // globalState.selection.properties.px2 = shapeBoundaryBox.xMax
+        // globalState.selection.properties.py2 = shapeBoundaryBox.yMax
+        // globalState.selection.setBoundaryBox(globalState.selection.properties)
         break
       }
       default:
@@ -683,7 +697,7 @@ function renderControlPoints(vectorProperties, vector = null) {
 function renderPath(vectorProperties, vector = null) {
   switch (vectorProperties.tool) {
     case 'fill':
-      // renderFillVector(state.vector.properties)
+      // renderFillVector(globalState.vector.properties)
       break
     case 'curve':
       renderCurvePath(vectorProperties, vector)
@@ -705,22 +719,22 @@ function renderPath(vectorProperties, vector = null) {
  */
 function renderLayerVectors(layer) {
   let selectedVector = null
-  if (state.vector.currentIndex !== null) {
-    selectedVector = state.vector.all[state.vector.currentIndex]
+  if (globalState.vector.currentIndex !== null) {
+    selectedVector = globalState.vector.all[globalState.vector.currentIndex]
   }
   //iterate through and render all vectors in the layer except the selected vector which will always be rendered last
   //render paths
-  for (let vector of Object.values(state.vector.all)) {
+  for (let vector of Object.values(globalState.vector.all)) {
     if (
       !vector.removed &&
       vector.layer === layer &&
-      state.timeline.undoStack.includes(vector.action)
+      globalState.timeline.undoStack.includes(vector.action)
     ) {
       //For each vector, render paths
       if (
-        (vector.vectorProperties.tool === state.tool.current.name &&
-          state.vector.selectedIndices.size === 0) ||
-        state.vector.selectedIndices.has(vector.index)
+        (vector.vectorProperties.tool === globalState.tool.current.name &&
+          globalState.vector.selectedIndices.size === 0) ||
+        globalState.vector.selectedIndices.has(vector.index)
       ) {
         renderPath(vector.vectorProperties, vector)
       }
@@ -729,16 +743,16 @@ function renderLayerVectors(layer) {
   //render vector path for in progress vectors
   if (
     !(
-      state.vector.selectedIndices.size > 0 &&
-      !state.vector.selectedIndices.has(state.vector.currentIndex)
+      globalState.vector.selectedIndices.size > 0 &&
+      !globalState.vector.selectedIndices.has(globalState.vector.currentIndex)
     )
   ) {
     //Only render path for selected vector if it is in the selectedVectorIndicesSet
-    renderPath(state.vector.properties)
+    renderPath(globalState.vector.properties)
   }
   if (
-    !state.tool.current.options.displayPaths?.active &&
-    state.vector.selectedIndices.size === 0
+    !globalState.tool.current.options.displayPaths?.active &&
+    globalState.vector.selectedIndices.size === 0
   ) {
     // Clear strokes from drawing area
     canvas.vectorGuiCTX.clearRect(
@@ -752,27 +766,27 @@ function renderLayerVectors(layer) {
   vectorGui.resetCollision()
   if (
     !(
-      state.vector.selectedIndices.size > 0 &&
-      !state.vector.selectedIndices.has(state.vector.currentIndex)
+      globalState.vector.selectedIndices.size > 0 &&
+      !globalState.vector.selectedIndices.has(globalState.vector.currentIndex)
     )
   ) {
     //Only render control points for selected vector if it is in the selectedVectorIndicesSet
-    renderControlPoints(state.vector.properties)
+    renderControlPoints(globalState.vector.properties)
   }
   //render control points
   vectorGui.resetOtherVectorCollision()
   vectorGui.resetLinkedVectors()
-  for (let vector of Object.values(state.vector.all)) {
+  for (let vector of Object.values(globalState.vector.all)) {
     if (
       !vector.removed &&
       vector.layer === layer &&
-      state.timeline.undoStack.includes(vector.action)
+      globalState.timeline.undoStack.includes(vector.action)
     ) {
       //For each vector, render control points
       if (
-        ((vector.vectorProperties.tool === state.tool.current.name &&
-          state.vector.selectedIndices.size === 0) ||
-          state.vector.selectedIndices.has(vector.index)) &&
+        ((vector.vectorProperties.tool === globalState.tool.current.name &&
+          globalState.vector.selectedIndices.size === 0) ||
+          globalState.vector.selectedIndices.has(vector.index)) &&
         vector !== selectedVector
       ) {
         renderControlPoints(vector.vectorProperties, vector)
@@ -786,8 +800,8 @@ function renderLayerVectors(layer) {
  */
 export function renderCurrentVector() {
   //render paths
-  renderPath(state.vector.properties)
-  if (!state.tool.current.options.displayPaths?.active) {
+  renderPath(globalState.vector.properties)
+  if (!globalState.tool.current.options.displayPaths?.active) {
     // Clear strokes from drawing area
     canvas.vectorGuiCTX.clearRect(
       canvas.xOffset,
@@ -798,7 +812,7 @@ export function renderCurrentVector() {
   }
   vectorGui.resetCollision()
   //render control points
-  renderControlPoints(state.vector.properties)
+  renderControlPoints(globalState.vector.properties)
 }
 
 /**
@@ -819,27 +833,28 @@ export function updateLinkedVectors(
       calculateCurrentVectorDeltas(
         currentVector,
         vectorGui.selectedPoint,
-        state.tool.current.options,
-        state.vector.savedProperties,
+        globalState.tool.current.options,
+        globalState.vector.savedProperties,
         linkedPoints.linkingPoint,
       )
 
-    let x = state.cursor.x - state.canvas.cropOffsetX
-    let y = state.cursor.y - state.canvas.cropOffsetY
-    const linkedVector = state.vector.all[linkedVectorIndex]
+    let x = globalState.cursor.x - globalState.canvas.cropOffsetX
+    let y = globalState.cursor.y - globalState.canvas.cropOffsetY
+    const linkedVector = globalState.vector.all[linkedVectorIndex]
 
     //As long as linked vector is quadCurve, must propogate linking to connected vectors
 
     if (saveVectorProperties) {
-      state.vector.savedProperties[linkedVectorIndex] = {
+      globalState.vector.savedProperties[linkedVectorIndex] = {
         ...linkedVector.vectorProperties,
         modes: { ...linkedVector.modes },
       }
-    } else if (!state.vector.savedProperties[linkedVectorIndex]) {
+    } else if (!globalState.vector.savedProperties[linkedVectorIndex]) {
       //prevent linking vectors during pointermove
       continue
     }
-    const savedProperties = state.vector.savedProperties[linkedVectorIndex]
+    const savedProperties =
+      globalState.vector.savedProperties[linkedVectorIndex]
     handleOptionsAndUpdateVector(
       x,
       y,
@@ -850,7 +865,7 @@ export function updateLinkedVectors(
       linkedVector,
       linkedPoints,
       savedProperties,
-      state.tool.current.options,
+      globalState.tool.current.options,
     )
   }
 }
@@ -878,8 +893,8 @@ function updateVectorControl(
   const targetYKey = `py${targetPointNumber}`
   const xDiff = savedProperties[currentXKey] - savedProperties[targetXKey]
   const yDiff = savedProperties[currentYKey] - savedProperties[targetYKey]
-  state.vector.properties[targetXKey] = x - xDiff
-  state.vector.properties[targetYKey] = y - yDiff
+  globalState.vector.properties[targetXKey] = x - xDiff
+  globalState.vector.properties[targetYKey] = y - yDiff
   updateVectorProperties(
     currentVector,
     x - xDiff,
@@ -896,7 +911,7 @@ function updateVectorControl(
  */
 export function updateLockedCurrentVectorControlHandle(currentVector, x, y) {
   const savedProperties =
-    state.vector.savedProperties[state.vector.currentIndex]
+    globalState.vector.savedProperties[globalState.vector.currentIndex]
   let currentPointNumber, targetPointNumber
   if (savedProperties.modes.cubicCurve) {
     currentPointNumber = parseInt(vectorGui.selectedPoint.xKey[2])
@@ -944,12 +959,16 @@ export function createActiveIndexesForRender(
 ) {
   const vectorsSavedPropertiesActionKeys = Object.keys(
     vectorsSavedProperties,
-  ).map((key) => state.vector.all[key].action.index)
+  ).map((key) => globalState.vector.all[key].action.index)
   let startActionIndex = Math.min(...vectorsSavedPropertiesActionKeys)
   let activeIndexes = []
 
-  for (let i = startActionIndex; i < state.timeline.undoStack.length; i++) {
-    let action = state.timeline.undoStack[i]
+  for (
+    let i = startActionIndex;
+    i < globalState.timeline.undoStack.length;
+    i++
+  ) {
+    let action = globalState.timeline.undoStack[i]
     if (
       action.layer === currentVector.layer &&
       (action.tool === 'fill' ||

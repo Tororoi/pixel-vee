@@ -1,16 +1,12 @@
 //logic to convert undoStack and layers to json
 //logic to read json and construct layers then undoStack with missing data that couldn't be saved as json
 import { dom } from '../Context/dom.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
 import { vectorGui } from '../GUI/vector.js'
 import { renderCanvas } from '../Canvas/render.js'
-import {
-  renderLayersToDOM,
-  renderVectorsToDOM,
-  renderPaletteToDOM,
-} from '../DOM/render.js'
+import { updateActiveLayerState } from '../DOM/render.js'
 import { validatePixelVeeFile } from '../utils/validationHelpers.js'
 import {
   sanitizeLayers,
@@ -21,7 +17,11 @@ import {
 import { resizeOffScreenCanvas } from '../Canvas/render.js'
 import { consolidateLayers } from '../Canvas/layers.js'
 import { calcEllipseConicsFromVertices } from '../utils/ellipse.js'
-import { customBrushStamp, updateCustomStamp } from '../Context/brushStamps.js'
+import {
+  customBrushStamp,
+  customBrushData,
+  updateCustomStamp,
+} from '../Context/brushStamps.js'
 
 const currentVersion = '1.2'
 
@@ -43,7 +43,7 @@ export function prepareDrawingForSave() {
     includePalette,
     includeReferenceLayers,
     includeRemovedActions,
-  } = state.ui.saveSettings
+  } = globalState.ui.saveSettings
 
   let sanitizedLayers = sanitizeLayers(
     canvas.layers,
@@ -52,8 +52,8 @@ export function prepareDrawingForSave() {
     includeRemovedActions,
   )
   let sanitizedVectors = sanitizeVectors(
-    state.timeline.undoStack,
-    state.vector.all,
+    globalState.timeline.undoStack,
+    globalState.vector.all,
     preserveHistory,
     includeRemovedActions,
   )
@@ -63,7 +63,7 @@ export function prepareDrawingForSave() {
     includePalette,
   )
   let sanitizedUndoStack = sanitizeHistory(
-    state.timeline.undoStack,
+    globalState.timeline.undoStack,
     preserveHistory,
     includeReferenceLayers,
     includeRemovedActions,
@@ -85,23 +85,22 @@ export function prepareDrawingForSave() {
     canvasProperties: {
       width: canvas.offScreenCVS.width,
       height: canvas.offScreenCVS.height,
-      cropOffsetX: state.canvas.cropOffsetX,
-      cropOffsetY: state.canvas.cropOffsetY,
+      cropOffsetX: globalState.canvas.cropOffsetX,
+      cropOffsetY: globalState.canvas.cropOffsetY,
     },
     customBrushStamp:
       customBrushStamp.pixels.length > 0 ? customBrushStamp.pixels : null,
-    selectProperties: state.selection.properties,
+    selectProperties: globalState.selection.properties,
   })
 
   return new Blob([saveJsonString], { type: 'application/json' })
 }
 
 /**
- * Set the preview of the file size
+ * Compute formatted filesize string asynchronously.
+ * @returns {Promise<string>} formatted size like "42 KB" or "1.3 MB"
  */
-export function setSaveFilesizePreview() {
-  dom.fileSizePreview.innerText = 'Calculating...'
-
+export function computeFileSizePreview() {
   return new Promise((resolve) => {
     setTimeout(() => {
       let saveBlob = prepareDrawingForSave()
@@ -109,10 +108,19 @@ export function setSaveFilesizePreview() {
       const sizeInKB = saveBlob.size / 1000
       const formattedSize =
         sizeInMB > 1 ? `${sizeInMB.toFixed(1)} MB` : `${sizeInKB.toFixed(0)} KB`
-
-      dom.fileSizePreview.innerText = formattedSize
-      resolve()
+      resolve(formattedSize)
     }, 0)
+  })
+}
+
+/**
+ * Set the preview of the file size (writes to DOM element if present)
+ * @returns {Promise<void>}
+ */
+export function setSaveFilesizePreview() {
+  if (dom.fileSizePreview) dom.fileSizePreview.innerText = 'Calculating...'
+  return computeFileSizePreview().then((formattedSize) => {
+    if (dom.fileSizePreview) dom.fileSizePreview.innerText = formattedSize
   })
 }
 
@@ -129,7 +137,7 @@ export function saveDrawing() {
   // Create a temporary anchor element
   const a = document.createElement('a')
   a.href = blobUrl
-  a.download = state.ui.saveSettings.saveAsFileName + '.pxv' // Set the file name for the download
+  a.download = globalState.ui.saveSettings.saveAsFileName + '.pxv' // Set the file name for the download
 
   // Append the anchor to the body, click it, and then remove it
   document.body.appendChild(a)
@@ -167,20 +175,20 @@ export async function loadDrawing(jsonFile) {
   // Clear existing layers and undoStack
   dom.canvasLayers.innerHTML = ''
   canvas.layers = []
-  state.timeline.undoStack = []
-  state.clearRedoStack()
+  globalState.timeline.undoStack = []
+  globalState.clearRedoStack()
   //Not likely to be an issue, but reset just in case
-  state.timeline.clearPoints()
+  globalState.timeline.clearPoints()
   //pasted images
-  state.clipboard.pastedImages = {}
+  globalState.clipboard.pastedImages = {}
   //vectors
-  state.vector.all = {}
-  state.vector.highestKey = 0
-  state.vector.savedProperties = {}
-  state.timeline.clearActiveIndexes()
-  state.timeline.clearSavedBetweenActionImages()
+  globalState.vector.all = {}
+  globalState.vector.highestKey = 0
+  globalState.vector.savedProperties = {}
+  globalState.timeline.clearActiveIndexes()
+  globalState.timeline.clearSavedBetweenActionImages()
   //reset selection state
-  state.deselect()
+  globalState.deselect()
   vectorGui.reset()
 
   //Handle old files that don't have the vectors object
@@ -332,8 +340,8 @@ export async function loadDrawing(jsonFile) {
       let drawImagePromise = new Promise((resolve, reject) => {
         img.onload = () => {
           tempCtx.drawImage(img, 0, 0)
-          //IN PROGRESS: Construct the state.clipboard.pastedImages by using the canvas from each paste action, set at action.pastedImageKey. If no key, set it to the highestPastedImageKey
-          state.clipboard.pastedImages[action.pastedImageKey] = {
+          //IN PROGRESS: Construct the globalState.clipboard.pastedImages by using the canvas from each paste action, set at action.pastedImageKey. If no key, set it to the highestPastedImageKey
+          globalState.clipboard.pastedImages[action.pastedImageKey] = {
             imageData: tempCtx.getImageData(
               0,
               0,
@@ -353,7 +361,7 @@ export async function loadDrawing(jsonFile) {
     }
 
     // Add the action to the undo stack
-    state.timeline.undoStack.push(action)
+    globalState.timeline.undoStack.push(action)
   })
 
   //Reconstruct vectors (object, not array) by iterating through it and assigning the proper layer to each vector
@@ -365,11 +373,11 @@ export async function loadDrawing(jsonFile) {
     if (correspondingLayer) {
       //associate vector's layer
       vector.layer = correspondingLayer
-      if (state.timeline.undoStack[vector.action.index]) {
+      if (globalState.timeline.undoStack[vector.action.index]) {
         //associate vector's action
-        vector.action = state.timeline.undoStack[vector.action.index]
-        //add vector to state.vector.all if valid layer and action present
-        state.vector.all[vectorKey] = vector
+        vector.action = globalState.timeline.undoStack[vector.action.index]
+        //add vector to globalState.vector.all if valid layer and action present
+        globalState.vector.all[vectorKey] = vector
         // v1.1 stored vectorProperties.type; v1.2+ uses vectorProperties.tool
         if (!vector.vectorProperties.tool) {
           const type = vector.vectorProperties.type
@@ -401,8 +409,8 @@ export async function loadDrawing(jsonFile) {
           vector.recordedLayerY = vector.layer.y ?? 0
         }
         //find the highest vector key
-        if (Number(vectorKey) > state.vector.highestKey) {
-          state.vector.highestKey = Number(vectorKey)
+        if (Number(vectorKey) > globalState.vector.highestKey) {
+          globalState.vector.highestKey = Number(vectorKey)
         }
       }
     }
@@ -413,18 +421,18 @@ export async function loadDrawing(jsonFile) {
 
   // Additional logic to update the UI, refresh the canvas, etc.
   if (data.selectProperties && data.selectProperties.px1 !== null) {
-    state.selection.properties = { ...data.selectProperties }
-    state.selection.setBoundaryBox(state.selection.properties)
+    globalState.selection.properties = { ...data.selectProperties }
+    globalState.selection.setBoundaryBox(globalState.selection.properties)
   }
   if (data.canvasProperties) {
     //restore cropOffsetX/Y before timeline replay so strokes replay at correct positions
-    state.canvas.cropOffsetX = data.canvasProperties.cropOffsetX ?? 0
-    state.canvas.cropOffsetY = data.canvasProperties.cropOffsetY ?? 0
+    globalState.canvas.cropOffsetX = data.canvasProperties.cropOffsetX ?? 0
+    globalState.canvas.cropOffsetY = data.canvasProperties.cropOffsetY ?? 0
   }
   //restore custom brush stamp before timeline replay so custom brush strokes render correctly
   if (data.customBrushStamp && Array.isArray(data.customBrushStamp)) {
     customBrushStamp.pixels = data.customBrushStamp
-    customBrushStamp.pixelSet = new Set(
+    customBrushData.pixelSet = new Set(
       data.customBrushStamp.map(({ x, y }) => (y << 16) | x),
     )
     updateCustomStamp()
@@ -439,9 +447,7 @@ export async function loadDrawing(jsonFile) {
     renderCanvas(null, true) //redraw timeline
     vectorGui.render()
   }
-  renderLayersToDOM()
-  renderPaletteToDOM()
-  renderVectorsToDOM()
+  updateActiveLayerState()
 }
 
 /**
@@ -453,9 +459,9 @@ export async function loadDrawing(jsonFile) {
 const OLD_CURVE_TOOL_NAMES = ['line', 'quadCurve', 'cubicCurve']
 
 /**
- *
- * @param data
- * @param action
+ * Converts a saved action to the current format for backward compatibility.
+ * @param {object} data - The full save file data object
+ * @param {object} action - The individual action to convert
  */
 function convertActionToNewFormat(data, action) {
   if (data.metadata.version === '1.1') {
@@ -515,8 +521,8 @@ function convertActionToNewFormat(data, action) {
             conicControlPoints.bottomTangentY
         }
         //restructure how vectorProperties are stored
-        state.vector.highestKey += 1
-        let uniqueVectorKey = state.vector.highestKey
+        globalState.vector.highestKey += 1
+        let uniqueVectorKey = globalState.vector.highestKey
         data.vectors[uniqueVectorKey] = {
           index: uniqueVectorKey,
           action: { index: action.index }, //formatted with index for saving, mapped to action later
@@ -541,8 +547,8 @@ function convertActionToNewFormat(data, action) {
       //Handle line actions
       if (action.tool.name === 'line') {
         //convert to a vector tool
-        state.vector.highestKey += 1
-        let uniqueVectorKey = state.vector.highestKey
+        globalState.vector.highestKey += 1
+        let uniqueVectorKey = globalState.vector.highestKey
         data.vectors[uniqueVectorKey] = {
           index: uniqueVectorKey,
           action: { index: action.index },

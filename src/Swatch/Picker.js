@@ -270,7 +270,10 @@ export class Picker {
   }
 
   handleIncrement(e) {
-    const channel = e.target.parentNode.previousSibling.previousSibling
+    // Use previousElementSibling to skip text nodes (works in both legacy HTML and JSX-rendered DOM)
+    const spinBtn = e.target.closest('.spin-btn')
+    if (!spinBtn) return
+    const channel = spinBtn.previousElementSibling
     let maxvalue
     switch (channel) {
       case this.h:

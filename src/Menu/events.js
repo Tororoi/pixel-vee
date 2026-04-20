@@ -1,5 +1,5 @@
 import { dom } from '../Context/dom.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { activateResizeOverlay } from '../Canvas/resizeOverlay.js'
 import { vectorGui } from '../GUI/vector.js'
@@ -81,10 +81,10 @@ export const generateTooltip = (message, target) => {
  * TODO: (Low Priority) initialize save dialog box with default settings?
  */
 export function openSaveDialogBox() {
-  dom.saveContainer.style.display = 'flex'
-  state.ui.saveDialogOpen = true
+  globalState.ui.saveDialogOpen = true
+  if (dom.saveContainer) dom.saveContainer.style.display = 'flex'
   setSaveFilesizePreview()
-  dom.saveAsFileName.focus()
+  if (dom.saveAsFileName) dom.saveAsFileName.focus()
 }
 
 /**
@@ -109,24 +109,24 @@ function importImage() {
           willReadFrequently: true,
         })
         tempCTX.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height)
-        const previousClipboard = { ...state.clipboard.select }
+        const previousClipboard = { ...globalState.clipboard.select }
         previousClipboard.selectProperties = {
-          ...state.clipboard.select.selectProperties,
+          ...globalState.clipboard.select.selectProperties,
         }
-        state.clipboard.select.selectProperties = {
+        globalState.clipboard.select.selectProperties = {
           px1: 0,
           py1: 0,
           px2: img.width,
           py2: img.height,
         }
-        state.clipboard.select.boundaryBox = {
+        globalState.clipboard.select.boundaryBox = {
           xMin: 0,
           yMin: 0,
           xMax: img.width,
           yMax: img.height,
         }
-        state.clipboard.select.canvas = tempCanvas
-        state.clipboard.select.imageData = tempCTX.getImageData(
+        globalState.clipboard.select.canvas = tempCanvas
+        globalState.clipboard.select.imageData = tempCTX.getImageData(
           0,
           0,
           img.width,
@@ -135,7 +135,7 @@ function importImage() {
         //2. paste clipboard onto canvas
         actionPasteSelection()
         //3. clear clipboard
-        state.clipboard.select = previousClipboard
+        globalState.clipboard.select = previousClipboard
       }
     }
     reader.readAsDataURL(this.files[0])
@@ -180,18 +180,18 @@ function openSavedDrawing() {
 
 document.body.addEventListener('mouseover', (e) => {
   //TODO: (Low Priority) Instead of rendering here, use a timer that resets on mousemove to detect idle time and move this logic to the mousemove event
-  if (!state.tool.touch) {
-    state.ui.tooltipMessage = e.target.dataset?.tooltip
+  if (!globalState.tool.touch) {
+    globalState.ui.tooltipMessage = e.target.dataset?.tooltip
     if (
       canvas.currentLayer.isPreview &&
       e.target.classList.contains('deactivate-paste')
     ) {
-      state.ui.tooltipMessage =
-        state.ui.tooltipMessage +
+      globalState.ui.tooltipMessage =
+        globalState.ui.tooltipMessage +
         '\n\nCannot use with temporary pasted layer. Selecting will confirm pasted pixels.'
     }
-    generateTooltip(state.ui.tooltipMessage, e.target)
-    if (dom.tooltipBtn.checked && state.ui.tooltipMessage) {
+    generateTooltip(globalState.ui.tooltipMessage, e.target)
+    if (globalState.ui.showTooltips && globalState.ui.tooltipMessage) {
       dom.tooltip.classList.add('visible')
     } else {
       dom.tooltip.classList.remove('visible')
@@ -199,196 +199,175 @@ document.body.addEventListener('mouseover', (e) => {
   }
 })
 document.body.addEventListener('click', (e) => {
-  if (!state.tool.touch) {
+  if (!globalState.tool.touch) {
     //Hide tooltip on click
     dom.tooltip.classList.remove('visible')
   } else {
     //Handle tooltip for mobile
-    let previousTooltipTarget = state.ui.tooltipTarget
-    state.ui.tooltipMessage = e.target.dataset?.tooltip
-    state.ui.tooltipTarget = e.target
+    let previousTooltipTarget = globalState.ui.tooltipTarget
+    globalState.ui.tooltipMessage = e.target.dataset?.tooltip
+    globalState.ui.tooltipTarget = e.target
     if (
       canvas.currentLayer.isPreview &&
       e.target.classList.contains('deactivate-paste')
     ) {
-      state.ui.tooltipMessage =
-        state.ui.tooltipMessage +
+      globalState.ui.tooltipMessage =
+        globalState.ui.tooltipMessage +
         '\n\nCannot use with temporary pasted layer. Selecting will confirm pasted pixels.'
     }
-    generateTooltip(state.ui.tooltipMessage, e.target)
+    generateTooltip(globalState.ui.tooltipMessage, e.target)
     if (
-      dom.tooltipBtn.checked &&
-      state.ui.tooltipMessage &&
-      state.ui.tooltipTarget !== previousTooltipTarget
+      globalState.ui.showTooltips &&
+      globalState.ui.tooltipMessage &&
+      globalState.ui.tooltipTarget !== previousTooltipTarget
     ) {
       dom.tooltip.classList.add('visible')
     } else {
       dom.tooltip.classList.remove('visible')
-      state.ui.tooltipTarget = null
+      globalState.ui.tooltipTarget = null
     }
   }
 })
-dom.toolOptions.addEventListener('click', (e) => {
-  if (e.target.type === 'checkbox') {
-    const optionName = e.target.id.split('-')[0]
-    if (e.target.checked) {
-      state.tool.current.options[optionName].active = true
-    } else {
-      state.tool.current.options[optionName].active = false
+// tool-options click handled by NavBar React component
+if (dom.toolOptions) {
+  dom.toolOptions.addEventListener('click', (e) => {
+    if (e.target.type === 'checkbox') {
+      const optionName = e.target.id.split('-')[0]
+      if (e.target.checked) {
+        globalState.tool.current.options[optionName].active = true
+      } else {
+        globalState.tool.current.options[optionName].active = false
+      }
+      vectorGui.render()
     }
+  })
+}
+// Settings/grid/cursor handled by SettingsDialog React component
+if (dom.gridBtn)
+  dom.gridBtn.addEventListener('click', () => {
+    vectorGui.grid = dom.gridBtn.checked
     vectorGui.render()
-  }
-})
-dom.gridBtn.addEventListener('click', () => {
-  vectorGui.grid = dom.gridBtn.checked
-  vectorGui.render()
-})
-dom.cursorPreviewBtn.addEventListener('click', () => {
-  vectorGui.showCursorPreview = dom.cursorPreviewBtn.checked
-})
-dom.gridSpacing.addEventListener('input', (e) => {
-  //constrain value to min/max
-  if (e.target.value < 1) {
-    e.target.value = 1
-  } else if (e.target.value > 64) {
-    e.target.value = 64
-  }
-  vectorGui.gridSpacing = parseInt(e.target.value)
-  vectorGui.render()
-})
-dom.gridSpacingSpinBtn.addEventListener('pointerdown', (e) => {
-  if (e.target.id === 'inc') {
-    vectorGui.gridSpacing++
-  } else if (e.target.id === 'dec') {
-    vectorGui.gridSpacing--
-  }
-  //constraint value to min/max
-  if (vectorGui.gridSpacing < 1) {
-    vectorGui.gridSpacing = 1
-  } else if (vectorGui.gridSpacing > 64) {
-    vectorGui.gridSpacing = 64
-  }
-  dom.gridSpacing.value = vectorGui.gridSpacing
-  vectorGui.render()
-})
-dom.tooltipBtn.addEventListener('click', () => {
-  if (dom.tooltipBtn.checked && state.ui.tooltipMessage) {
-    dom.tooltip.classList.add('visible')
-  } else {
-    dom.tooltip.classList.remove('visible')
-  }
-})
-dom.openSaveBtn.addEventListener('click', (e) => {
-  //reset value so that the same file can be imported multiple times
-  e.target.value = null
-})
-dom.topMenu.addEventListener('click', (e) => {
-  if (e.target.classList.contains('disabled')) {
+  })
+if (dom.cursorPreviewBtn)
+  dom.cursorPreviewBtn.addEventListener('click', () => {
+    vectorGui.showCursorPreview = dom.cursorPreviewBtn.checked
+  })
+if (dom.gridSpacing)
+  dom.gridSpacing.addEventListener('input', (e) => {
+    if (e.target.value < 1) e.target.value = 1
+    else if (e.target.value > 64) e.target.value = 64
+    vectorGui.gridSpacing = parseInt(e.target.value)
+    vectorGui.render()
+  })
+if (dom.gridSpacingSpinBtn)
+  dom.gridSpacingSpinBtn.addEventListener('pointerdown', (e) => {
+    if (e.target.id === 'inc') vectorGui.gridSpacing++
+    else if (e.target.id === 'dec') vectorGui.gridSpacing--
+    if (vectorGui.gridSpacing < 1) vectorGui.gridSpacing = 1
+    else if (vectorGui.gridSpacing > 64) vectorGui.gridSpacing = 64
+    if (dom.gridSpacing) dom.gridSpacing.value = vectorGui.gridSpacing
+    vectorGui.render()
+  })
+if (dom.tooltipBtn)
+  dom.tooltipBtn.addEventListener('click', () => {
+    if (dom.tooltipBtn.checked && globalState.ui.tooltipMessage) {
+      dom.tooltip.classList.add('visible')
+    } else {
+      dom.tooltip.classList.remove('visible')
+    }
+  })
+// File menu events — handled by NavBar React component; guard until migrated
+if (dom.openSaveBtn)
+  dom.openSaveBtn.addEventListener('click', (e) => {
+    e.target.value = null
+  })
+if (dom.topMenu)
+  dom.topMenu.addEventListener('click', (e) => {
+    if (e.target.classList.contains('disabled')) {
+      e.preventDefault()
+      return
+    }
+    if (document.activeElement.classList.contains('menu-folder')) {
+      if (document.activeElement.classList.contains('active')) {
+        document.activeElement.classList.remove('active')
+      } else {
+        document.activeElement.classList.add('active')
+      }
+    }
+  })
+if (dom.topMenu)
+  dom.topMenu.addEventListener('focusout', (e) => {
+    if (e.target.classList.contains('menu-folder')) {
+      e.target.classList.remove('active')
+    }
+  })
+if (dom.openSaveBtn)
+  dom.openSaveBtn.addEventListener('change', openSavedDrawing)
+if (dom.saveBtn) dom.saveBtn.addEventListener('click', openSaveDialogBox)
+if (dom.importBtn) dom.importBtn.addEventListener('change', importImage)
+if (dom.exportBtn) dom.exportBtn.addEventListener('click', exportImage)
+if (dom.canvasSizeBtn)
+  dom.canvasSizeBtn.addEventListener('click', () => {
+    if (canvas.pastedLayer) return
+    globalState.ui.canvasSizeOpen = true
+    if (dom.sizeContainer) dom.sizeContainer.style.display = 'flex'
+    activateResizeOverlay()
+  })
+if (dom.selectAllBtn)
+  dom.selectAllBtn.addEventListener('click', actionSelectAll)
+if (dom.deselectBtn) dom.deselectBtn.addEventListener('click', actionDeselect)
+if (dom.cutBtn) dom.cutBtn.addEventListener('click', actionCutSelection)
+if (dom.copyBtn) dom.copyBtn.addEventListener('click', actionCopySelection)
+if (dom.pasteBtn) dom.pasteBtn.addEventListener('click', actionPasteSelection)
+if (dom.deleteBtn)
+  dom.deleteBtn.addEventListener('click', actionDeleteSelection)
+if (dom.flipHorizontalBtn)
+  dom.flipHorizontalBtn.addEventListener('click', () => actionFlipPixels(true))
+if (dom.flipVerticalBtn)
+  dom.flipVerticalBtn.addEventListener('click', () => actionFlipPixels(false))
+if (dom.rotateBtn) dom.rotateBtn.addEventListener('click', actionRotatePixels)
+// Settings button handled by NavBar React component; guard until migrated
+if (dom.settingsBtn)
+  dom.settingsBtn.addEventListener('click', () => {
+    globalState.ui.settingsOpen = !globalState.ui.settingsOpen
+  })
+// Save form events — handled by SaveDialog React component; guard until migrated
+if (dom.saveAsForm)
+  dom.saveAsForm.addEventListener('change', (e) => {
+    if (e.target.id === 'preserve-history-toggle') {
+      globalState.ui.saveSettings.preserveHistory = e.target.checked
+      setSaveFilesizePreview()
+    } else if (e.target.id === 'include-palette-toggle') {
+      globalState.ui.saveSettings.includePalette = e.target.checked
+      setSaveFilesizePreview()
+    } else if (e.target.id === 'include-reference-layers-toggle') {
+      globalState.ui.saveSettings.includeReferenceLayers = e.target.checked
+      setSaveFilesizePreview()
+    } else if (e.target.id === 'include-removed-actions-toggle') {
+      globalState.ui.saveSettings.includeRemovedActions = e.target.checked
+      setSaveFilesizePreview()
+    }
+  })
+if (dom.saveAsForm)
+  dom.saveAsForm.addEventListener('submit', (e) => {
     e.preventDefault()
-    return
-  }
-  //check if active element has class menu-folder and class "active"
-  if (document.activeElement.classList.contains('menu-folder')) {
-    //if so, toggle the active class
-    if (document.activeElement.classList.contains('active')) {
-      document.activeElement.classList.remove('active')
-    } else {
-      document.activeElement.classList.add('active')
-    }
-  }
-})
-dom.topMenu.addEventListener('focusout', (e) => {
-  //check if active element has class menu-folder
-  if (e.target.classList.contains('menu-folder')) {
-    //if so, remove the active class
-    e.target.classList.remove('active')
-  }
-})
-//File Submenu events
-dom.openSaveBtn.addEventListener('change', openSavedDrawing)
-dom.saveBtn.addEventListener('click', openSaveDialogBox)
-dom.importBtn.addEventListener('change', importImage)
-dom.exportBtn.addEventListener('click', exportImage)
-//Edit Submenu events
-dom.canvasSizeBtn.addEventListener('click', () => {
-  if (canvas.pastedLayer) {
-    //if there is a pasted layer active, do not open canvas size dialog
-    return
-  }
-  dom.sizeContainer.style.display = 'flex'
-  activateResizeOverlay()
-})
-dom.selectAllBtn.addEventListener('click', actionSelectAll)
-dom.deselectBtn.addEventListener('click', actionDeselect)
-dom.cutBtn.addEventListener('click', actionCutSelection)
-dom.copyBtn.addEventListener('click', actionCopySelection)
-dom.pasteBtn.addEventListener('click', actionPasteSelection)
-dom.deleteBtn.addEventListener('click', actionDeleteSelection)
-dom.flipHorizontalBtn.addEventListener('click', (e) => {
-  actionFlipPixels(true)
-})
-dom.flipVerticalBtn.addEventListener('click', (e) => {
-  actionFlipPixels(false)
-})
-dom.rotateBtn.addEventListener('click', actionRotatePixels)
-//Settings events
-dom.settingsBtn.addEventListener('click', () => {
-  //if settings container is already open, close it, else open it
-  if (dom.settingsContainer.style.display === 'flex') {
-    dom.settingsContainer.style.display = 'none'
-  } else {
-    dom.settingsContainer.style.display = 'flex'
-  }
-})
-//Save/Export events
-dom.saveAsForm.addEventListener('change', (e) => {
-  if (e.target.id === 'preserve-history-toggle') {
-    if (e.target.checked) {
-      state.ui.saveSettings.preserveHistory = true
-      dom.advancedOptionsContainer.classList.add('disabled')
-    } else {
-      state.ui.saveSettings.preserveHistory = false
-      dom.advancedOptionsContainer.classList.remove('disabled')
-    }
-    setSaveFilesizePreview()
-  } else if (e.target.id === 'include-palette-toggle') {
-    if (e.target.checked) {
-      state.ui.saveSettings.includePalette = true
-    } else {
-      state.ui.saveSettings.includePalette = false
-    }
-    setSaveFilesizePreview()
-  } else if (e.target.id === 'include-reference-layers-toggle') {
-    if (e.target.checked) {
-      state.ui.saveSettings.includeReferenceLayers = true
-    } else {
-      state.ui.saveSettings.includeReferenceLayers = false
-    }
-    setSaveFilesizePreview()
-  } else if (e.target.id === 'include-removed-actions-toggle') {
-    if (e.target.checked) {
-      state.ui.saveSettings.includeRemovedActions = true
-    } else {
-      state.ui.saveSettings.includeRemovedActions = false
-    }
-    setSaveFilesizePreview()
-  }
-})
-dom.saveAsForm.addEventListener('submit', (e) => {
-  //prevent default form submission
-  e.preventDefault()
-  saveDrawing()
-  dom.saveContainer.style.display = 'none'
-  state.ui.saveDialogOpen = false
-})
-dom.saveAsFileName.addEventListener('input', (e) => {
-  state.ui.saveSettings.saveAsFileName = e.target.value
-  dom.saveAsFileName.style.width =
-    measureTextWidth(state.ui.saveSettings.saveAsFileName, "16px '04Font'") +
-    2 +
-    'px'
-})
-dom.cancelSaveBtn.addEventListener('click', () => {
-  dom.saveContainer.style.display = 'none'
-  state.ui.saveDialogOpen = false
-})
+    saveDrawing()
+    globalState.ui.saveDialogOpen = false
+    if (dom.saveContainer) dom.saveContainer.style.display = 'none'
+  })
+if (dom.saveAsFileName)
+  dom.saveAsFileName.addEventListener('input', (e) => {
+    globalState.ui.saveSettings.saveAsFileName = e.target.value
+    dom.saveAsFileName.style.width =
+      measureTextWidth(
+        globalState.ui.saveSettings.saveAsFileName,
+        "16px '04Font'",
+      ) +
+      2 +
+      'px'
+  })
+if (dom.cancelSaveBtn)
+  dom.cancelSaveBtn.addEventListener('click', () => {
+    globalState.ui.saveDialogOpen = false
+    if (dom.saveContainer) dom.saveContainer.style.display = 'none'
+  })

@@ -17,9 +17,19 @@ export function renderPoints(points, strokeCtx) {
     //rounded values
     let truncatedX = Math.floor(x)
     let truncatedY = Math.floor(y)
-    let brushDirection = calculateBrushDirection(truncatedX, truncatedY, previousX, previousY)
+    let brushDirection = calculateBrushDirection(
+      truncatedX,
+      truncatedY,
+      previousX,
+      previousY,
+    )
     if (ditherPattern) {
-      actionDitherDraw(truncatedX, truncatedY, brushStamp[brushDirection], innerCtx)
+      actionDitherDraw(
+        truncatedX,
+        truncatedY,
+        brushStamp[brushDirection],
+        innerCtx,
+      )
     } else {
       actionDraw(truncatedX, truncatedY, brushStamp[brushDirection], innerCtx)
     }

@@ -1,4 +1,4 @@
-import { state } from '../../Context/state.js'
+import { globalState } from '../../Context/state.js'
 import { vectorGui } from '../../GUI/vector.js'
 import { setSaveFilesizePreview } from '../../Save/savefile.js'
 import { renderToLatestAction } from './render.js'
@@ -40,35 +40,38 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   if (latestAction.tool === 'modify') {
     handleModifyAction(latestAction, modType)
   } else if (latestAction.tool === 'changeMode') {
-    state.vector.all[latestAction.moddedVectorIndex].modes = {
+    globalState.vector.all[latestAction.moddedVectorIndex].modes = {
       ...latestAction[modType],
     }
-    const vectorPropertiesSnapshot = modType === 'from' ? latestAction.fromVectorProperties : latestAction.toVectorProperties
+    const vectorPropertiesSnapshot =
+      modType === 'from'
+        ? latestAction.fromVectorProperties
+        : latestAction.toVectorProperties
     if (vectorPropertiesSnapshot) {
       Object.assign(
-        state.vector.all[latestAction.moddedVectorIndex].vectorProperties,
+        globalState.vector.all[latestAction.moddedVectorIndex].vectorProperties,
         vectorPropertiesSnapshot,
       )
     }
   } else if (latestAction.tool === 'changeDitherPattern') {
-    state.vector.all[latestAction.moddedVectorIndex].ditherPatternIndex =
+    globalState.vector.all[latestAction.moddedVectorIndex].ditherPatternIndex =
       latestAction[modType]
   } else if (latestAction.tool === 'changeDitherOffset') {
-    state.vector.all[latestAction.moddedVectorIndex].ditherOffsetX =
+    globalState.vector.all[latestAction.moddedVectorIndex].ditherOffsetX =
       latestAction[modType].x
-    state.vector.all[latestAction.moddedVectorIndex].ditherOffsetY =
+    globalState.vector.all[latestAction.moddedVectorIndex].ditherOffsetY =
       latestAction[modType].y
   } else if (latestAction.tool === 'changeBrushSize') {
-    state.vector.all[latestAction.moddedVectorIndex].brushSize =
+    globalState.vector.all[latestAction.moddedVectorIndex].brushSize =
       latestAction[modType]
   } else if (latestAction.tool === 'changeColor') {
-    state.vector.all[latestAction.moddedVectorIndex].color = {
+    globalState.vector.all[latestAction.moddedVectorIndex].color = {
       ...latestAction[modType],
     }
   } else if (latestAction.tool === 'remove') {
     if (latestAction.vectorIndices?.length > 0) {
       latestAction.vectorIndices.forEach((vectorIndex) => {
-        state.vector.all[vectorIndex].removed = latestAction[modType]
+        globalState.vector.all[vectorIndex].removed = latestAction[modType]
       })
     }
   } else if (latestAction.tool === 'clear') {
@@ -106,7 +109,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   //Render the canvas with the new latest action
   renderToLatestAction(latestAction, modType)
   //Recalculate size of file if save dialog is open
-  if (state.ui.saveDialogOpen) {
+  if (globalState.ui.saveDialogOpen) {
     setSaveFilesizePreview()
   }
 }
@@ -116,8 +119,12 @@ export function actionUndoRedo(pushStack, popStack, modType) {
  */
 export function handleUndo() {
   //length 1 prevents initial layer from being undone
-  if (state.timeline.undoStack.length > 1) {
-    actionUndoRedo(state.timeline.redoStack, state.timeline.undoStack, 'from')
+  if (globalState.timeline.undoStack.length > 1) {
+    actionUndoRedo(
+      globalState.timeline.redoStack,
+      globalState.timeline.undoStack,
+      'from',
+    )
   }
 }
 
@@ -125,8 +132,12 @@ export function handleUndo() {
  * Redo an action
  */
 export function handleRedo() {
-  if (state.timeline.redoStack.length >= 1) {
-    actionUndoRedo(state.timeline.undoStack, state.timeline.redoStack, 'to')
+  if (globalState.timeline.redoStack.length >= 1) {
+    actionUndoRedo(
+      globalState.timeline.undoStack,
+      globalState.timeline.redoStack,
+      'to',
+    )
   }
 }
 
@@ -140,23 +151,23 @@ export function addToTimeline(actionObject) {
   //use current state for variables
   //Make selectProperties and selectedVectorIndices part of every action to reduce logic complexity. This means a small decrease in space efficiency for save files.
   let snapshot = layer.type === 'raster' ? layer.cvs.toDataURL() : null
-  state.timeline.currentAction = {
-    index: state.timeline.undoStack.length,
+  globalState.timeline.currentAction = {
+    index: globalState.timeline.undoStack.length,
     tool,
     layer,
     ...properties,
-    selectProperties: { ...state.selection.properties },
-    maskSet: state.selection.maskSet
-      ? Array.from(state.selection.maskSet)
+    selectProperties: { ...globalState.selection.properties },
+    maskSet: globalState.selection.maskSet
+      ? Array.from(globalState.selection.maskSet)
       : null,
-    selectedVectorIndices: Array.from(state.vector.selectedIndices),
-    currentVectorIndex: state.vector.currentIndex,
+    selectedVectorIndices: Array.from(globalState.vector.selectedIndices),
+    currentVectorIndex: globalState.vector.currentIndex,
     hidden: false,
     removed: false,
     snapshot,
   }
-  state.timeline.undoStack.push(state.timeline.currentAction)
-  if (state.ui.saveDialogOpen) {
+  globalState.timeline.undoStack.push(globalState.timeline.currentAction)
+  if (globalState.ui.saveDialogOpen) {
     //TODO: (Low Priority) refactor to add it to a queue of filesize calculations so that calculations do not happen concurrently
     setSaveFilesizePreview()
   }

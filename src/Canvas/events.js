@@ -5,21 +5,10 @@ import {
   CURVE_TYPES,
 } from '../utils/constants.js'
 import { keys } from '../Shortcuts/keys.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { renderCanvas, resizeOffScreenCanvas } from '../Canvas/render.js'
-import {
-  renderLayersToDOM,
-  renderLayerSettingsToDOM,
-  renderVectorsToDOM,
-  renderVectorSettingsToDOM,
-  renderPaletteToDOM,
-  renderPalettePresetsToDOM,
-  initVectorDitherPicker,
-  updateVectorDitherPreview,
-  updateVectorDitherPickerColors,
-  updateVectorDitherControls,
-} from '../DOM/render.js'
+import { updateActiveLayerState } from '../DOM/render.js'
 import {
   removeActionVector,
   changeActionVectorMode,
@@ -50,7 +39,6 @@ import {
 } from './resizeOverlay.js'
 import { switchTool } from '../Tools/toolbox.js'
 import { changeActionVectorCurveType } from '../Actions/modifyTimeline/modifyTimeline.js'
-import { enableActionsForSelection } from '../DOM/disableDomElements.js'
 
 //====================================//
 //==== * * * Canvas Resize * * * =====//
@@ -73,7 +61,7 @@ const handleIncrement = (e) => {
       dimension.value = newValue - 1
     }
   }
-  if (state.canvas.resizeOverlayActive) {
+  if (globalState.canvas.resizeOverlayActive) {
     applyFromInputs(+dom.canvasWidth.value, +dom.canvasHeight.value)
   }
 }
@@ -107,7 +95,7 @@ const restrictSize = (e) => {
  */
 const handleDimensionsSubmit = (e) => {
   e.preventDefault()
-  if (state.canvas.resizeOverlayActive) {
+  if (globalState.canvas.resizeOverlayActive) {
     applyResize()
   } else {
     resizeOffScreenCanvas(dom.canvasWidth.value, dom.canvasHeight.value)
@@ -191,11 +179,15 @@ const resizeOnScreenCanvas = () => {
   )
   renderCanvas() // render all layers
   // reset positioning styles for free moving dialog boxes
-  dom.toolboxContainer.style.left = ''
-  dom.toolboxContainer.style.top = ''
-  dom.sidebarContainer.style.left = ''
-  dom.sidebarContainer.style.top = ''
-  if (dom.colorPickerContainer.offsetHeight !== 0) {
+  if (dom.toolboxContainer) {
+    dom.toolboxContainer.style.left = ''
+    dom.toolboxContainer.style.top = ''
+  }
+  if (dom.sidebarContainer) {
+    dom.sidebarContainer.style.left = ''
+    dom.sidebarContainer.style.top = ''
+  }
+  if (dom.colorPickerContainer && dom.colorPickerContainer.offsetHeight !== 0) {
     constrainElementOffsets(dom.colorPickerContainer)
   }
 }
@@ -226,7 +218,6 @@ function layerInteract(e) {
     layer.hidden = false
   } else if (e.target.className.includes('gear')) {
     //open settings dialog
-    const domLayer = e.target.closest('.layer')
     //set top offset of layer settings container to match
     if (
       dom.layerSettingsContainer.style.display === 'flex' &&
@@ -238,29 +229,27 @@ function layerInteract(e) {
     } else {
       dom.layerSettingsContainer.style.display = 'flex'
       dom.layerSettingsContainer.layerObj = layer
-      renderLayerSettingsToDOM(domLayer)
     }
   } else {
     //TODO: (Low Priority) allow selecting multiple layers for moving purposes only
     //select current layer
     if (layer !== canvas.currentLayer) {
       if (canvas.currentLayer.type === 'reference') {
-        state.deselect()
+        globalState.deselect()
       }
       canvas.currentLayer.inactiveTools.forEach((tool) => {
-        dom[`${tool}Btn`].disabled = false
+        if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = false
       })
       canvas.currentLayer = layer
       canvas.currentLayer.inactiveTools.forEach((tool) => {
-        dom[`${tool}Btn`].disabled = true
+        if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = true
       })
       vectorGui.reset()
       vectorGui.render()
       if (layer.type === 'reference') {
         switchTool('move')
       }
-      renderLayersToDOM()
-      renderVectorsToDOM()
+      updateActiveLayerState()
     }
   }
   renderCanvas(layer)
@@ -346,7 +335,7 @@ function dropLayer(e) {
         }
       }
     }
-    renderLayersToDOM()
+    updateActiveLayerState()
   }
 }
 
@@ -355,7 +344,7 @@ function dropLayer(e) {
  * @param {DragEvent} _e - The drag event (unused)
  */
 function dragLayerEnd(_e) {
-  renderLayersToDOM()
+  updateActiveLayerState()
 }
 
 //====================================//
@@ -404,7 +393,6 @@ function vectorInteract(e) {
     removeVector(vector)
   } else if (e.target.className.includes('gear')) {
     //open/close vector settings dialog
-    const domVector = e.target.closest('.vector')
     if (
       dom.vectorSettingsContainer.style.display === 'flex' &&
       dom.vectorSettingsContainer.vectorObj === vector
@@ -414,39 +402,37 @@ function vectorInteract(e) {
     } else {
       dom.vectorSettingsContainer.style.display = 'flex'
       dom.vectorSettingsContainer.vectorObj = vector
-      renderVectorSettingsToDOM(domVector)
     }
   } else {
     //select current vector
     //Only manipulate timeline if selection is happening
     if (keys.ShiftLeft || keys.ShiftRight) {
-      if (!state.vector.selectedIndices.has(vector.index)) {
+      if (!globalState.vector.selectedIndices.has(vector.index)) {
         //select if shift key held down
         actionSelectVector(vector.index)
         // enableActionsForSelection()
       } else {
         actionDeselectVector(vector.index)
       }
-    } else if (state.vector.selectedIndices.size > 0) {
+    } else if (globalState.vector.selectedIndices.size > 0) {
       actionDeselect()
     }
-    if (vector.index !== state.vector.currentIndex) {
+    if (vector.index !== globalState.vector.currentIndex) {
       //switch tool
       switchTool(vector.vectorProperties.tool)
       // vectorGui.reset()
       vectorGui.setVectorProperties(vector)
       canvas.currentLayer.inactiveTools.forEach((tool) => {
-        dom[`${tool}Btn`].disabled = false
+        if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = false
       })
       canvas.currentLayer = vector.layer
       canvas.currentLayer.inactiveTools.forEach((tool) => {
-        dom[`${tool}Btn`].disabled = true
+        if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = true
       })
     }
-    enableActionsForSelection() //If code reaches this case, either vector is selected or is current vector
+    //If code reaches this case, either vector is selected or is current vector
     vectorGui.render()
-    renderLayersToDOM()
-    renderVectorsToDOM()
+    updateActiveLayerState()
   }
 }
 
@@ -456,14 +442,13 @@ function vectorInteract(e) {
  */
 function removeVector(vector) {
   vector.removed = true
-  if (state.vector.currentIndex === vector.index) {
+  if (globalState.vector.currentIndex === vector.index) {
     vectorGui.reset()
   }
   renderCanvas(vector.layer, true)
   removeActionVector(vector)
 
-  state.clearRedoStack()
-  renderVectorsToDOM()
+  globalState.clearRedoStack()
 }
 
 /**
@@ -486,8 +471,7 @@ function toggleVectorMode(vector, modeKey) {
   renderCanvas(vector.layer, true)
   changeActionVectorMode(vector, oldModes, newModes)
 
-  state.clearRedoStack()
-  renderVectorsToDOM()
+  globalState.clearRedoStack()
 }
 
 //===================================//
@@ -511,10 +495,7 @@ canvas.yOffset = Math.round(
 canvas.previousXOffset = canvas.xOffset
 canvas.previousYOffset = canvas.yOffset
 renderCanvas(canvas.currentLayer)
-renderLayersToDOM()
-renderPaletteToDOM()
-renderPalettePresetsToDOM()
-// renderBrushModesToDOM()
+// React components read canvas.layers / swatches directly via useAppState()
 
 //Initialize temp layer, not added to layers array
 canvas.tempLayer = createPreviewLayer()
@@ -526,33 +507,33 @@ canvas.tempLayer = createPreviewLayer()
 // UI Canvas * //
 window.addEventListener('resize', resizeOnScreenCanvas)
 
-// * Canvas Size * //
-dom.dimensionsForm.addEventListener('pointerdown', (e) => {
+// * Canvas Size * — handled by CanvasSizeDialog React component; guard until migrated
+dom.dimensionsForm?.addEventListener('pointerdown', (e) => {
   canvas.sizePointerState = e.type
   handleSizeIncrement(e)
 })
-dom.dimensionsForm.addEventListener('pointerup', (e) => {
+dom.dimensionsForm?.addEventListener('pointerup', (e) => {
   canvas.sizePointerState = e.type
 })
-dom.dimensionsForm.addEventListener('pointerout', (e) => {
+dom.dimensionsForm?.addEventListener('pointerout', (e) => {
   canvas.sizePointerState = e.type
 })
-dom.dimensionsForm.addEventListener('submit', handleDimensionsSubmit)
-dom.canvasWidth.addEventListener('blur', restrictSize)
-dom.canvasHeight.addEventListener('blur', restrictSize)
-dom.canvasSizeCancelBtn.addEventListener('click', () => {
+dom.dimensionsForm?.addEventListener('submit', handleDimensionsSubmit)
+dom.canvasWidth?.addEventListener('blur', restrictSize)
+dom.canvasHeight?.addEventListener('blur', restrictSize)
+dom.canvasSizeCancelBtn?.addEventListener('click', () => {
   deactivateResizeOverlay()
-  dom.sizeContainer.style.display = 'none'
+  if (dom.sizeContainer) dom.sizeContainer.style.display = 'none'
 })
-dom.canvasWidth.addEventListener('input', (e) => {
-  if (state.canvas.resizeOverlayActive)
-    applyFromInputs(+e.target.value, +dom.canvasHeight.value)
+dom.canvasWidth?.addEventListener('input', (e) => {
+  if (globalState.canvas.resizeOverlayActive)
+    applyFromInputs(+e.target.value, +(dom.canvasHeight?.value ?? 0))
 })
-dom.canvasHeight.addEventListener('input', (e) => {
-  if (state.canvas.resizeOverlayActive)
-    applyFromInputs(+dom.canvasWidth.value, +e.target.value)
+dom.canvasHeight?.addEventListener('input', (e) => {
+  if (globalState.canvas.resizeOverlayActive)
+    applyFromInputs(+(dom.canvasWidth?.value ?? 0), +e.target.value)
 })
-dom.anchorGrid.addEventListener('click', (e) => {
+dom.anchorGrid?.addEventListener('click', (e) => {
   const btn = e.target.closest('.anchor-btn')
   if (!btn) return
   dom.anchorGrid
@@ -561,34 +542,34 @@ dom.anchorGrid.addEventListener('click', (e) => {
   btn.classList.add('active')
   setAnchor(btn.dataset.anchor)
 })
-// * Layers * //
-dom.uploadBtn.addEventListener('click', (e) => {
+// * Layers * — handled by LayersPanel React component; guard until migrated
+dom.uploadBtn?.addEventListener('click', (e) => {
   //reset value so that the same file can be uploaded multiple times
   e.target.value = null
 })
-dom.uploadBtn.addEventListener('change', addReferenceLayer)
-dom.newLayerBtn.addEventListener('click', addRasterLayer)
-dom.deleteLayerBtn.addEventListener('click', () => {
+dom.uploadBtn?.addEventListener('change', addReferenceLayer)
+dom.newLayerBtn?.addEventListener('click', addRasterLayer)
+dom.deleteLayerBtn?.addEventListener('click', () => {
   let layer = canvas.currentLayer
   removeLayer(layer)
   renderCanvas(layer)
 })
 
 //TODO: (Medium Priority) Make similar to functionality of dragging dialog boxes. To make fancier dragging work, must be made compatible with a scrolling container
-dom.layersContainer.addEventListener('click', layerInteract)
-dom.layersContainer.addEventListener('dragstart', dragLayerStart)
-dom.layersContainer.addEventListener('dragover', dragLayerOver)
-dom.layersContainer.addEventListener('dragenter', dragLayerEnter)
-dom.layersContainer.addEventListener('dragleave', dragLayerLeave)
-dom.layersContainer.addEventListener('drop', dropLayer)
-dom.layersContainer.addEventListener('dragend', dragLayerEnd)
-// dom.layersContainer.addEventListener("pointerdown", () =>
+dom.layersContainer?.addEventListener('click', layerInteract)
+dom.layersContainer?.addEventListener('dragstart', dragLayerStart)
+dom.layersContainer?.addEventListener('dragover', dragLayerOver)
+dom.layersContainer?.addEventListener('dragenter', dragLayerEnter)
+dom.layersContainer?.addEventListener('dragleave', dragLayerLeave)
+dom.layersContainer?.addEventListener('drop', dropLayer)
+dom.layersContainer?.addEventListener('dragend', dragLayerEnd)
+// dom.layersContainer?.addEventListener("pointerdown", () =>
 //   dragStart(e, e.target.closest(".layer"))
 // )
-// dom.layersContainer.addEventListener("pointerup", dragStop)
-// dom.layersContainer.addEventListener("pointerout", dragStop)
-// dom.layersContainer.addEventListener("pointermove", dragMove)
-dom.layerSettingsContainer.addEventListener('input', (e) => {
+// dom.layersContainer?.addEventListener("pointerup", dragStop)
+// dom.layersContainer?.addEventListener("pointerout", dragStop)
+// dom.layersContainer?.addEventListener("pointermove", dragMove)
+dom.layerSettingsContainer?.addEventListener('input', (e) => {
   const layer = dom.layerSettingsContainer.layerObj
   if (layer) {
     if (e.target.matches('.slider')) {
@@ -599,14 +580,14 @@ dom.layerSettingsContainer.addEventListener('input', (e) => {
       renderCanvas(layer)
     } else if (e.target.matches('#layer-name')) {
       layer.title = e.target.value
-      renderLayersToDOM()
+      updateActiveLayerState()
     }
   }
 })
 //TODO: (Low Priority) maybe dynamically generate layer settings container when needed and only bind this event listener when it is open
 document.addEventListener('pointerdown', (e) => {
   if (
-    dom.layerSettingsContainer.layerObj &&
+    dom.layerSettingsContainer?.layerObj &&
     !e.target.classList.contains('gear') &&
     !dom.layerSettingsContainer.contains(e.target)
   ) {
@@ -616,17 +597,17 @@ document.addEventListener('pointerdown', (e) => {
 })
 
 // * Vectors * //
-dom.vectorsThumbnails.addEventListener('click', vectorInteract)
+dom.vectorsThumbnails?.addEventListener('click', vectorInteract)
 
 // * Vector Settings Dialog * //
-dom.layerSettingsContainer.addEventListener('click', (e) => {
+dom.layerSettingsContainer?.addEventListener('click', (e) => {
   if (e.target.classList.contains('close-btn')) {
     dom.layerSettingsContainer.style.display = 'none'
     dom.layerSettingsContainer.layerObj = null
   }
 })
 
-dom.vectorSettingsContainer.addEventListener('click', (e) => {
+dom.vectorSettingsContainer?.addEventListener('click', (e) => {
   if (e.target.classList.contains('close-btn')) {
     dom.vectorSettingsContainer.style.display = 'none'
     dom.vectorSettingsContainer.vectorObj = null
@@ -662,10 +643,6 @@ dom.vectorSettingsContainer.addEventListener('click', (e) => {
       toggleVectorMode(vector, modeKey)
       // toggleVectorMode already updated vector.modes[modeKey]; sync the button
       modeBtn.classList.toggle('selected', vector.modes[modeKey])
-      if (modeKey === 'twoColor') {
-        updateVectorDitherPreview(vector)
-        updateVectorDitherPickerColors(vector)
-      }
     }
     return
   }
@@ -682,7 +659,13 @@ dom.vectorSettingsContainer.addEventListener('click', (e) => {
   const secondaryBtn = e.target.closest('.secondary-color')
   if (secondaryBtn) {
     if (!vector.secondaryColor) {
-      vector.secondaryColor = { r: 0, g: 0, b: 0, a: 0, color: 'rgba(0,0,0,0)' }
+      vector.secondaryColor = {
+        r: 0,
+        g: 0,
+        b: 0,
+        a: 0,
+        color: 'rgba(0,0,0,0)',
+      }
     }
     secondaryBtn.color = vector.secondaryColor
     secondaryBtn.vector = vector
@@ -697,7 +680,6 @@ dom.vectorSettingsContainer.addEventListener('click', (e) => {
     if (isOpen) {
       dom.vectorDitherPickerContainer.style.display = 'none'
     } else {
-      initVectorDitherPicker(vector)
       const settingsRect = dom.vectorSettingsContainer.getBoundingClientRect()
       dom.vectorDitherPickerContainer.style.display = 'flex'
       dom.vectorDitherPickerContainer.style.top = `${
@@ -712,13 +694,13 @@ dom.vectorSettingsContainer.addEventListener('click', (e) => {
   }
 })
 
-dom.vectorSettingsContainer.addEventListener('pointerdown', (e) => {
+dom.vectorSettingsContainer?.addEventListener('pointerdown', (e) => {
   if (e.target.classList.contains('vector-brush-size-slider')) {
     e.target.dataset.fromValue = e.target.value
   }
 })
 
-dom.vectorSettingsContainer.addEventListener('input', (e) => {
+dom.vectorSettingsContainer?.addEventListener('input', (e) => {
   const vector = dom.vectorSettingsContainer.vectorObj
   if (!vector) return
   if (e.target.classList.contains('vector-brush-size-slider')) {
@@ -732,7 +714,7 @@ dom.vectorSettingsContainer.addEventListener('input', (e) => {
   }
 })
 
-dom.vectorSettingsContainer.addEventListener('change', (e) => {
+dom.vectorSettingsContainer?.addEventListener('change', (e) => {
   const vector = dom.vectorSettingsContainer.vectorObj
   if (!vector) return
   if (e.target.classList.contains('vector-brush-size-slider')) {
@@ -740,7 +722,7 @@ dom.vectorSettingsContainer.addEventListener('change', (e) => {
     const newSize = parseInt(e.target.value)
     if (oldSize !== newSize) {
       changeActionVectorBrushSize(vector, oldSize, newSize)
-      state.clearRedoStack()
+      globalState.clearRedoStack()
     }
   }
 })
@@ -758,9 +740,6 @@ dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
   if (toggleBtn) {
     if (toggleBtn.classList.contains('twoColor')) {
       toggleVectorMode(vector, 'twoColor')
-      updateVectorDitherControls(vector)
-      updateVectorDitherPickerColors(vector)
-      updateVectorDitherPreview(vector)
       // sync twoColor button in settings dialog if open
       const settingsModeBtn =
         dom.vectorSettingsContainer?.querySelector('.mode.twoColor')
@@ -776,12 +755,11 @@ dom.vectorDitherPickerContainer?.addEventListener('click', (e) => {
   const patternIndex = parseInt(btn.dataset.patternIndex)
   const oldPatternIndex = vector.ditherPatternIndex
   vector.ditherPatternIndex = patternIndex
-  updateVectorDitherPreview(vector)
   dom.vectorDitherPickerContainer.style.display = 'none'
   renderCanvas(vector.layer, true)
   if (oldPatternIndex !== patternIndex) {
     changeActionVectorDitherPattern(vector, oldPatternIndex, patternIndex)
-    state.clearRedoStack()
+    globalState.clearRedoStack()
   }
 })
 
@@ -819,7 +797,6 @@ dom.vectorDitherPickerContainer?.addEventListener('pointerdown', (e) => {
       (((newEffectiveX - recordedLayerX + currentLayerX) % 8) + 8) % 8
     vector.ditherOffsetY =
       (((newEffectiveY - recordedLayerY + currentLayerY) % 8) + 8) % 8
-    updateVectorDitherControls(vector)
     renderCanvas(vector.layer, true)
   }
   control.addEventListener('pointermove', onMove)
@@ -833,7 +810,7 @@ dom.vectorDitherPickerContainer?.addEventListener('pointerdown', (e) => {
       }
       if (fromOffset.x !== toOffset.x || fromOffset.y !== toOffset.y) {
         changeActionVectorDitherOffset(vector, fromOffset, toOffset)
-        state.clearRedoStack()
+        globalState.clearRedoStack()
       }
     },
     { once: true },
@@ -842,7 +819,7 @@ dom.vectorDitherPickerContainer?.addEventListener('pointerdown', (e) => {
 
 document.addEventListener('pointerdown', (e) => {
   if (
-    dom.vectorSettingsContainer.vectorObj &&
+    dom.vectorSettingsContainer?.vectorObj &&
     !e.target.classList.contains('gear') &&
     !dom.vectorSettingsContainer.contains(e.target) &&
     !dom.colorPickerContainer?.contains(e.target) &&
@@ -850,6 +827,7 @@ document.addEventListener('pointerdown', (e) => {
   ) {
     dom.vectorSettingsContainer.style.display = 'none'
     dom.vectorSettingsContainer.vectorObj = null
-    dom.vectorDitherPickerContainer.style.display = 'none'
+    if (dom.vectorDitherPickerContainer)
+      dom.vectorDitherPickerContainer.style.display = 'none'
   }
 })

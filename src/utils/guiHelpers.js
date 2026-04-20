@@ -1,16 +1,16 @@
 import { canvas } from '../Context/canvas.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 
 /**
  * Renders the grey dim overlay on the given context, clipping out the
  * provided box so only the area outside it is dimmed.
  * Pass a box in art-pixel coords (relative to canvas.xOffset/yOffset).
- * When no box is provided, falls back to state.selection.boundaryBox.
- * @param {CanvasRenderingContext2D} ctx
- * @param {{xMin: number, yMin: number, xMax: number, yMax: number}} [box]
+ * When no box is provided, falls back to globalState.selection.boundaryBox.
+ * @param {CanvasRenderingContext2D} ctx - The rendering context to draw on
+ * @param {{xMin: number, yMin: number, xMax: number, yMax: number}} [box] - Optional bounding box in art-pixel coords
  */
 export function renderSelectionDimOverlay(ctx, box) {
-  const boundaryBox = box ?? state.selection.boundaryBox
+  const boundaryBox = box ?? globalState.selection.boundaryBox
   ctx.save()
   ctx.beginPath()
   ctx.rect(

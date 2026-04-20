@@ -27,7 +27,7 @@ export function calculateBrushDirection(
   currentX,
   currentY,
   previousX,
-  previousY
+  previousY,
 ) {
   let xDir = currentX - previousX
   let yDir = currentY - previousY
