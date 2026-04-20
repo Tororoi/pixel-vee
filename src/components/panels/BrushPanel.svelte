@@ -51,7 +51,7 @@
     globalState.tool.current?.brushDisabled ?? false,
   )
   const isCustomBrush = $derived(brushType === 'custom')
-  const modes = $derived({ ...globalState.tool.current?.modes })
+  const modes = $derived(globalState.tool.current?.modes ?? {})
 
   function buildBrushStampSVGData(t) {
     if (!t) return null
