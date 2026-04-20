@@ -1,8 +1,11 @@
 import { dom } from '../Context/dom.js'
+import { globalState } from '../Context/state.js'
 import { swatches } from '../Context/swatch.js'
-import { customBrushStamp, updateCustomStamp } from '../Context/brushStamps.js'
-import { brush } from '../Tools/brush.js'
-import { renderBrushStampToDOM } from './renderBrush.js'
+import {
+  customBrushStamp,
+  customBrushData,
+  updateCustomStamp,
+} from '../Context/brushStamps.js'
 
 //====================================//
 //=== * * * Stamp Editor * * * =======//
@@ -198,10 +201,10 @@ function setToolMode(btn, mode) {
 export function openStampEditor() {
   setToolMode(dom.stampDrawBtn, 'draw')
   editorPixels.clear()
-  for (const [key, color] of customBrushStamp.colorMap) {
+  for (const [key, color] of customBrushData.colorMap) {
     editorPixels.set(key, color)
   }
-  dom.stampEditorContainer.style.display = 'flex'
+  globalState.ui.stampEditorOpen = true
   renderEditorCanvas()
   renderPreviewCanvas()
 }
@@ -211,23 +214,21 @@ export function openStampEditor() {
  */
 function applyStamp() {
   customBrushStamp.pixels = []
-  customBrushStamp.pixelSet = new Set()
-  customBrushStamp.colorMap = new Map()
+  customBrushData.pixelSet = new Set()
+  customBrushData.colorMap = new Map()
 
   for (const [key, color] of editorPixels) {
     const [x, y] = key.split(',').map(Number)
     customBrushStamp.pixels.push({ x, y })
-    customBrushStamp.pixelSet.add((y << 16) | x)
-    customBrushStamp.colorMap.set(key, color)
+    customBrushData.pixelSet.add((y << 16) | x)
+    customBrushData.colorMap.set(key, color)
   }
 
   updateCustomStamp()
-  dom.stampEditorContainer.style.display = 'none'
+  globalState.ui.stampEditorOpen = false
 
-  if (brush.brushType === 'custom') {
-    renderBrushStampToDOM()
-  }
 }
+
 
 /**
  * Clear all pixels from the working copy.

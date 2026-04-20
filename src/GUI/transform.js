@@ -1,4 +1,4 @@
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { vectorGui } from './vector.js'
 import { getAngle } from '../utils/trig.js'
@@ -15,15 +15,21 @@ import { findVectorShapeBoundaryBox } from '../utils/vectorHelpers.js'
  */
 function updateRotationAngle() {
   //for now, mother ui is always in the shape center
-  vectorGui.mother.rotationOrigin.x = state.vector.shapeCenterX
-  vectorGui.mother.rotationOrigin.y = state.vector.shapeCenterY
-  if (state.cursor.clicked && state.vector.grabStartAngle !== null) {
+  vectorGui.mother.rotationOrigin.x = globalState.vector.shapeCenterX
+  vectorGui.mother.rotationOrigin.y = globalState.vector.shapeCenterY
+  if (
+    globalState.cursor.clicked &&
+    globalState.vector.grabStartAngle !== null
+  ) {
+    // rotationOrigin is layer-absolute; cursor is canvas-pixel. Normalize cursor to match.
     vectorGui.mother.newRotation =
       getAngle(
-        vectorGui.mother.rotationOrigin.x - state.cursor.x,
-        vectorGui.mother.rotationOrigin.y - state.cursor.y,
+        vectorGui.mother.rotationOrigin.x -
+          (globalState.cursor.x - globalState.canvas.cropOffsetX),
+        vectorGui.mother.rotationOrigin.y -
+          (globalState.cursor.y - globalState.canvas.cropOffsetY),
       ) -
-      state.vector.grabStartAngle +
+      globalState.vector.grabStartAngle +
       vectorGui.mother.currentRotation
   }
 }
@@ -36,19 +42,22 @@ function updateRotationAngle() {
  */
 function resolveRotationActiveState(motherPoints, r) {
   const isSelected = vectorGui.selectedPoint.xKey === 'rotationx'
+  // motherPoints coords are layer-absolute; cursor is canvas-pixel. Add cropOffset to match.
   const isHovered =
     !isSelected &&
     checkSquarePointCollision(
-      state.cursor.x,
-      state.cursor.y,
-      motherPoints.rotationx,
-      motherPoints.rotationy,
+      globalState.cursor.x,
+      globalState.cursor.y,
+      motherPoints.rotationx + globalState.canvas.cropOffsetX,
+      motherPoints.rotationy + globalState.canvas.cropOffsetY,
       r,
     )
   const isActive = isSelected || isHovered
   if (isActive) {
     vectorGui.setCollision({ x: 'rotationx', y: 'rotationy' })
-    canvas.vectorGuiCVS.style.cursor = state.cursor.clicked ? 'grabbing' : 'grab'
+    canvas.vectorGuiCVS.style.cursor = globalState.cursor.clicked
+      ? 'grabbing'
+      : 'grab'
   }
   return isActive
 }
@@ -158,8 +167,17 @@ export function renderVectorRotationControl() {
     rotationx: vectorGui.mother.rotationOrigin.x,
     rotationy: vectorGui.mother.rotationOrigin.y,
   }
-  const cx = canvas.xOffset + motherPoints.rotationx + 0.5
-  const cy = canvas.yOffset + motherPoints.rotationy + 0.5
+  // rotationOrigin is layer-absolute; add cropOffset to reach canvas-pixel space for rendering.
+  const cx =
+    canvas.xOffset +
+    motherPoints.rotationx +
+    globalState.canvas.cropOffsetX +
+    0.5
+  const cy =
+    canvas.yOffset +
+    motherPoints.rotationy +
+    globalState.canvas.cropOffsetY +
+    0.5
   const minRadius = lineWidth
   const maxRadius = circleRadius - lineWidth * 2
 
@@ -181,12 +199,13 @@ export function renderVectorRotationControl() {
 export function setVectorShapeBoundaryBox() {
   //Update shape boundary box
   const shapeBoundaryBox = findVectorShapeBoundaryBox(
-    state.vector.selectedIndices,
-    state.vector.all,
+    globalState.vector.selectedIndices,
+    globalState.vector.all,
   )
-  state.selection.properties.px1 = shapeBoundaryBox.xMin
-  state.selection.properties.py1 = shapeBoundaryBox.yMin
-  state.selection.properties.px2 = shapeBoundaryBox.xMax + 1
-  state.selection.properties.py2 = shapeBoundaryBox.yMax + 1
-  state.selection.setBoundaryBox(state.selection.properties)
+  const { cropOffsetX, cropOffsetY } = globalState.canvas
+  globalState.selection.properties.px1 = shapeBoundaryBox.xMin + cropOffsetX
+  globalState.selection.properties.py1 = shapeBoundaryBox.yMin + cropOffsetY
+  globalState.selection.properties.px2 = shapeBoundaryBox.xMax + 1 + cropOffsetX
+  globalState.selection.properties.py2 = shapeBoundaryBox.yMax + 1 + cropOffsetY
+  globalState.selection.setBoundaryBox(globalState.selection.properties)
 }

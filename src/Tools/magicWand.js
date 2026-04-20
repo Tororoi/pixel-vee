@@ -1,8 +1,8 @@
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { keys } from "../Shortcuts/keys.js"
-import { addToTimeline } from "../Actions/undoRedo/undoRedo.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { globalState } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { keys } from '../Shortcuts/keys.js'
+import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
+import { renderCanvas } from '../Canvas/render.js'
 
 //==========================================//
 //=== * * * Magic Wand Controller * * * ===//
@@ -110,9 +110,9 @@ export function boundaryBoxFromMaskSet(maskSet) {
  */
 function magicWandSteps() {
   switch (canvas.pointerEvent) {
-    case "pointerdown": {
-      const x = state.cursor.x
-      const y = state.cursor.y
+    case 'pointerdown': {
+      const x = globalState.cursor.x
+      const y = globalState.cursor.y
       const w = canvas.offScreenCVS.width
       const h = canvas.offScreenCVS.height
       if (x < 0 || x >= w || y < 0 || y >= h) return
@@ -122,37 +122,38 @@ function magicWandSteps() {
       //When modifying an existing selection, pass it as a containment boundary so the
       //flood fill cannot cross the selection edge (selected pixels wall off unselected ones)
       const containMask =
-        (isShift || isAlt) && state.selection.maskSet
-          ? state.selection.maskSet
+        (isShift || isAlt) && globalState.selection.maskSet
+          ? globalState.selection.maskSet
           : null
       const newSet = floodFill(x, y, containMask)
       let changed = false
 
-      if (isShift && state.selection.maskSet) {
+      if (isShift && globalState.selection.maskSet) {
         //Add to existing selection — changed only if newSet contributes new pixels
         //Create a new Set so the Path2D cache in select.js invalidates on reference change
-        const merged = new Set(state.selection.maskSet)
+        const merged = new Set(globalState.selection.maskSet)
         for (const k of newSet) {
           if (!merged.has(k)) {
             changed = true
             merged.add(k)
           }
         }
-        if (changed) state.selection.maskSet = merged
-      } else if (isAlt && state.selection.maskSet) {
+        if (changed) globalState.selection.maskSet = merged
+      } else if (isAlt && globalState.selection.maskSet) {
         //Remove from existing selection — changed only if newSet overlaps current selection
         //Create a new Set so the Path2D cache in select.js invalidates on reference change
-        const trimmed = new Set(state.selection.maskSet)
+        const trimmed = new Set(globalState.selection.maskSet)
         for (const k of newSet) {
           if (trimmed.has(k)) {
             changed = true
             trimmed.delete(k)
           }
         }
-        if (changed) state.selection.maskSet = trimmed.size > 0 ? trimmed : null
+        if (changed)
+          globalState.selection.maskSet = trimmed.size > 0 ? trimmed : null
       } else {
         //Replace selection — changed if new set differs from current
-        const old = state.selection.maskSet
+        const old = globalState.selection.maskSet
         if (newSet.size === 0) {
           changed = old !== null && old.size > 0
         } else if (old === null || old.size !== newSet.size) {
@@ -165,26 +166,26 @@ function magicWandSteps() {
             }
           }
         }
-        state.selection.maskSet = newSet.size > 0 ? newSet : null
+        globalState.selection.maskSet = newSet.size > 0 ? newSet : null
       }
 
       //Update selection properties and boundary box
-      if (state.selection.maskSet) {
-        const bb = boundaryBoxFromMaskSet(state.selection.maskSet)
-        state.selection.properties.px1 = bb.xMin
-        state.selection.properties.py1 = bb.yMin
-        state.selection.properties.px2 = bb.xMax
-        state.selection.properties.py2 = bb.yMax
-        state.selection.setBoundaryBox(state.selection.properties)
+      if (globalState.selection.maskSet) {
+        const bb = boundaryBoxFromMaskSet(globalState.selection.maskSet)
+        globalState.selection.properties.px1 = bb.xMin
+        globalState.selection.properties.py1 = bb.yMin
+        globalState.selection.properties.px2 = bb.xMax
+        globalState.selection.properties.py2 = bb.yMax
+        globalState.selection.setBoundaryBox(globalState.selection.properties)
       } else {
-        state.selection.resetProperties()
-        state.selection.setBoundaryBox(state.selection.properties)
+        globalState.selection.resetProperties()
+        globalState.selection.setBoundaryBox(globalState.selection.properties)
       }
 
       if (!changed) break
 
       addToTimeline({
-        tool: state.tool.current.name,
+        tool: globalState.tool.current.name,
         layer: canvas.currentLayer,
         properties: { deselect: false },
       })
@@ -197,14 +198,14 @@ function magicWandSteps() {
 }
 
 export const magicWand = {
-  name: "magicWand",
+  name: 'magicWand',
   fn: magicWandSteps,
   brushSize: 1,
-  brushType: "circle",
+  brushType: 'circle',
   brushDisabled: true,
   options: {},
   modes: {},
-  type: "utility",
-  cursor: "default",
-  activeCursor: "default",
+  type: 'utility',
+  cursor: 'default',
+  activeCursor: 'default',
 }

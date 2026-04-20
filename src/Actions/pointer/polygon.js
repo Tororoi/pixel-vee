@@ -17,8 +17,14 @@ function plotSegment(x0, y0, x1, y1, addPoint) {
   while (x0 !== x1 || y0 !== y1) {
     addPoint(x0, y0)
     const e2 = 2 * err
-    if (e2 > -dy) { err -= dy; x0 += sx }
-    if (e2 < dx) { err += dx; y0 += sy }
+    if (e2 > -dy) {
+      err -= dy
+      x0 += sx
+    }
+    if (e2 < dx) {
+      err += dx
+      y0 += sy
+    }
   }
   addPoint(x0, y0)
 }
@@ -36,7 +42,17 @@ function plotSegment(x0, y0, x1, y1, addPoint) {
  * @param {number} py4 - corner 4 y
  * @param {object} strokeCtx - StrokeContext
  */
-export function actionPolygon(px1, py1, px2, py2, px3, py3, px4, py4, strokeCtx) {
+export function actionPolygon(
+  px1,
+  py1,
+  px2,
+  py2,
+  px3,
+  py3,
+  px4,
+  py4,
+  strokeCtx,
+) {
   const points = []
   const seen = new Set()
 

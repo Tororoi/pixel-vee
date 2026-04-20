@@ -1,4 +1,4 @@
-import { getTriangle, getAngle } from "../utils/trig.js"
+import { getTriangle, getAngle } from '../utils/trig.js'
 
 //================================================================//
 //== * Thanks to Alois Zingl for curve rasterizing algorithms * ==//
@@ -15,7 +15,7 @@ import { getTriangle, getAngle } from "../utils/trig.js"
  */
 export function assert(condition, message) {
   if (!condition) {
-    throw new Error(message || "Assertion failed")
+    throw new Error(message || 'Assertion failed')
   }
 }
 
@@ -46,7 +46,7 @@ function plotQuadBezierSeg(x0, y0, x1, y1, x2, y2, color) {
 
   assert(
     xx * sx <= 0 && yy * sy <= 0,
-    "sign of gradient must not change"
+    'sign of gradient must not change',
   ) /* sign of gradient must not change */
 
   if (sx * sx + sy * sy > xx * xx + yy * yy) {
@@ -163,12 +163,12 @@ function plotCubicBezierSeg(x0, y0, x1, y1, x2, y2, x3, y3, color) {
   assert(
     (x1 - x0) * (x2 - x3) < EP &&
       ((x3 - x0) * (x1 - x2) < EP || xb * xb < xa * xc + EP),
-    "Curve constraint violation"
+    'Curve constraint violation',
   )
   assert(
     (y1 - y0) * (y2 - y3) < EP &&
       ((y3 - y0) * (y1 - y2) < EP || yb * yb < ya * yc + EP),
-    "Curve constraint violation"
+    'Curve constraint violation',
   )
 
   if (xa == 0 && ya == 0)
@@ -180,7 +180,7 @@ function plotCubicBezierSeg(x0, y0, x1, y1, x2, y2, x3, y3, color) {
       (3 * y1 - y0) >> 1,
       x3,
       y3,
-      color
+      color,
     )
   x1 = (x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0) + 1 /* line lengths */
   x2 = (x2 - x3) * (x2 - x3) + (y2 - y3) * (y2 - y3) + 1
@@ -338,7 +338,7 @@ export function plotConicBezierSeg(x0, y0, x1, y1, x2, y2, w) {
     err /* curvature */
 
   assert(
-    xx * sx <= 0.0 && yy * sy <= 0.0
+    xx * sx <= 0.0 && yy * sy <= 0.0,
   ) /* sign of gradient must not change */
 
   if (cur != 0.0 && w > 0.0) {
@@ -376,7 +376,7 @@ export function plotConicBezierSeg(x0, y0, x1, y1, x2, y2, w) {
       w = Math.sqrt(w)
       xy = 1.0 / (w + 1.0)
       sx = Math.floor(
-        ((x0 + 2.0 * w * x1 + x2) * xy) / 2.0 + 0.5
+        ((x0 + 2.0 * w * x1 + x2) * xy) / 2.0 + 0.5,
       ) /*subdivide curve in half */
       sy = Math.floor(((y0 + 2.0 * w * y1 + y2) * xy) / 2.0 + 0.5)
       dx = Math.floor((w * x1 + x0) * xy + 0.5)
@@ -479,7 +479,7 @@ export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
         Math.floor(r + 0.5),
         deltaX,
         deltaY,
-        `rgba(255,0,0,255)`
+        `rgba(255,0,0,255)`,
       ),
     ]
     r = ((y1 - y2) * (t - x2)) / (x1 - x2) + y2 /* intersect P4 | P1 P2 */
@@ -506,7 +506,7 @@ export function plotQuadBezier(x0, y0, x1, y1, x2, y2) {
         deltaY,
         deltaX,
         deltaY,
-        `rgba(0,255,0,255)`
+        `rgba(0,255,0,255)`,
       ),
     ]
     r = ((x1 - x2) * (t - y2)) / (y1 - y2) + x2 /* intersect P7 | P1 P2 */
@@ -647,7 +647,7 @@ export function plotCubicBezier(x0, y0, x1, y1, x2, y2, x3, y3) {
           y0 + fy2,
           x3,
           y3,
-          colorShifts[i]
+          colorShifts[i],
         ),
       ]
     }

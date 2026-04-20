@@ -1,5 +1,5 @@
 import { brushStamps } from '../Context/brushStamps.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
 import {
@@ -20,12 +20,12 @@ import { ditherPatterns, isDitherOn } from '../Context/ditherPatterns.js'
  * @returns {{ entry: object, brushSize: number }} The stamp entry and effective brush size to use for rendering
  */
 function getActiveBrushStampEntry() {
-  if (state.tool.current.brushType === 'custom') {
+  if (globalState.tool.current.brushType === 'custom') {
     return { entry: brushStamps.custom, brushSize: 32 }
   }
-  const brushSize = state.tool.current.brushSize
+  const brushSize = globalState.tool.current.brushSize
   return {
-    entry: brushStamps[state.tool.current.brushType][brushSize],
+    entry: brushStamps[globalState.tool.current.brushType][brushSize],
     brushSize,
   }
 }
@@ -39,7 +39,7 @@ function getActiveBrushStampEntry() {
  * TODO: (Low Priority) Render vectorGui cursor for vector tools with remaining control points indicator
  */
 export function renderCursor() {
-  switch (state.tool.current.name) {
+  switch (globalState.tool.current.name) {
     case 'grab':
       //show nothing
       break
@@ -56,14 +56,14 @@ export function renderCursor() {
     default:
       if (
         !vectorGui.selectedCollisionPresent &&
-        !state.vector.collidedIndex &&
-        state.vector.selectedIndices.size === 0
+        !globalState.vector.collidedIndex &&
+        globalState.vector.selectedIndices.size === 0
       ) {
         const isDitherActive =
-          (state.tool.current.ditherPatternIndex !== undefined &&
-            state.tool.current.ditherPatternIndex < 63) ||
-          (state.tool.current.modes?.buildUpDither ?? false)
-        if (state.tool.current.modes?.eraser) {
+          (globalState.tool.current.ditherPatternIndex !== undefined &&
+            globalState.tool.current.ditherPatternIndex < 63) ||
+          (globalState.tool.current.modes?.buildUpDither ?? false)
+        if (globalState.tool.current.modes?.eraser) {
           if (vectorGui.showCursorPreview) {
             if (isDitherActive) {
               drawDitherInjectPreview()
@@ -74,12 +74,12 @@ export function renderCursor() {
           drawCursorBox(0.5)
         } else if (vectorGui.showCursorPreview) {
           if (isDitherActive) {
-            if (state.tool.current.modes?.inject) {
+            if (globalState.tool.current.modes?.inject) {
               drawDitherInjectPreview()
             } else {
               drawDitherPreview()
             }
-          } else if (state.tool.current.modes?.inject) {
+          } else if (globalState.tool.current.modes?.inject) {
             drawInjectPreview()
           } else {
             drawNormalPreview()
@@ -102,18 +102,18 @@ function drawInjectPreview() {
   renderCanvas(canvas.currentLayer)
   const { entry, brushSize } = getActiveBrushStampEntry()
   actionDraw(
-    state.cursor.x,
-    state.cursor.y,
+    globalState.cursor.x,
+    globalState.cursor.y,
     entry['0,0'],
     createStrokeContext({
       layer: canvas.currentLayer,
       isPreview: true,
       excludeFromSet: true,
-      boundaryBox: state.selection.boundaryBox,
+      boundaryBox: globalState.selection.boundaryBox,
       currentColor: swatches.primary.color,
-      currentModes: state.tool.current.modes,
-      maskSet: state.selection.maskSet,
-      seenPixelsSet: state.selection.seenPixelsSet,
+      currentModes: globalState.tool.current.modes,
+      maskSet: globalState.selection.maskSet,
+      seenPixelsSet: globalState.selection.seenPixelsSet,
       brushSize,
     }),
   )
@@ -131,24 +131,29 @@ function drawDitherInjectPreview() {
     layer: canvas.currentLayer,
     isPreview: true,
     excludeFromSet: true,
-    boundaryBox: state.selection.boundaryBox,
+    boundaryBox: globalState.selection.boundaryBox,
     currentColor: swatches.primary.color,
-    currentModes: state.tool.current.modes,
-    maskSet: state.selection.maskSet,
-    seenPixelsSet: state.selection.seenPixelsSet,
+    currentModes: globalState.tool.current.modes,
+    maskSet: globalState.selection.maskSet,
+    seenPixelsSet: globalState.selection.seenPixelsSet,
     brushSize,
-    ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
-    twoColorMode: state.tool.current.modes?.twoColor ?? false,
+    ditherPattern: ditherPatterns[globalState.tool.current.ditherPatternIndex],
+    twoColorMode: globalState.tool.current.modes?.twoColor ?? false,
     secondaryColor: swatches.secondary.color,
-    ditherOffsetX: state.tool.current.ditherOffsetX ?? 0,
-    ditherOffsetY: state.tool.current.ditherOffsetY ?? 0,
-    densityMap: state.tool.current._buildUpDensityMap,
-    buildUpSteps: state.tool.current.buildUpSteps,
+    ditherOffsetX: globalState.tool.current.ditherOffsetX ?? 0,
+    ditherOffsetY: globalState.tool.current.ditherOffsetY ?? 0,
+    densityMap: globalState.tool.current._buildUpDensityMap,
+    buildUpSteps: globalState.tool.current.buildUpSteps,
   })
-  if (state.tool.current.modes?.buildUpDither) {
-    actionBuildUpDitherDraw(state.cursor.x, state.cursor.y, stamp, ctx)
+  if (globalState.tool.current.modes?.buildUpDither) {
+    actionBuildUpDitherDraw(
+      globalState.cursor.x,
+      globalState.cursor.y,
+      stamp,
+      ctx,
+    )
   } else {
-    actionDitherDraw(state.cursor.x, state.cursor.y, stamp, ctx)
+    actionDitherDraw(globalState.cursor.x, globalState.cursor.y, stamp, ctx)
   }
 }
 
@@ -159,17 +164,26 @@ function drawDitherInjectPreview() {
 function drawNormalPreview() {
   const { entry, brushSize } = getActiveBrushStampEntry()
   const stamp = entry['0,0']
-  const baseX = Math.ceil(state.cursor.x - brushSize / 2)
-  const baseY = Math.ceil(state.cursor.y - brushSize / 2)
+  const baseX = Math.ceil(globalState.cursor.x - brushSize / 2)
+  const baseY = Math.ceil(globalState.cursor.y - brushSize / 2)
   canvas.cursorCTX.fillStyle = swatches.primary.color.color
   for (const pixel of stamp) {
     const x = baseX + pixel.x
     const y = baseY + pixel.y
     if (
-      isOutOfBounds(x, y, 0, canvas.currentLayer, state.selection.boundaryBox)
+      isOutOfBounds(
+        x,
+        y,
+        0,
+        canvas.currentLayer,
+        globalState.selection.boundaryBox,
+      )
     )
       continue
-    if (state.selection.maskSet && !state.selection.maskSet.has((y << 16) | x))
+    if (
+      globalState.selection.maskSet &&
+      !globalState.selection.maskSet.has((y << 16) | x)
+    )
       continue
     canvas.cursorCTX.fillRect(x + canvas.xOffset, y + canvas.yOffset, 1, 1)
   }
@@ -183,25 +197,36 @@ function drawNormalPreview() {
 function drawDitherPreview() {
   const { entry, brushSize } = getActiveBrushStampEntry()
   const stamp = entry['0,0']
-  const baseX = Math.ceil(state.cursor.x - brushSize / 2)
-  const baseY = Math.ceil(state.cursor.y - brushSize / 2)
-  const twoColor = state.tool.current.modes?.twoColor ?? false
-  const ditherOffsetX = state.tool.current.ditherOffsetX ?? 0
-  const ditherOffsetY = state.tool.current.ditherOffsetY ?? 0
-  const isBuildUp = state.tool.current.modes?.buildUpDither ?? false
-  const densityMap = isBuildUp ? state.tool.current._buildUpDensityMap : null
-  const buildUpSteps = state.tool.current.buildUpSteps
+  const baseX = Math.ceil(globalState.cursor.x - brushSize / 2)
+  const baseY = Math.ceil(globalState.cursor.y - brushSize / 2)
+  const twoColor = globalState.tool.current.modes?.twoColor ?? false
+  const ditherOffsetX = globalState.tool.current.ditherOffsetX ?? 0
+  const ditherOffsetY = globalState.tool.current.ditherOffsetY ?? 0
+  const isBuildUp = globalState.tool.current.modes?.buildUpDither ?? false
+  const densityMap = isBuildUp
+    ? globalState.tool.current._buildUpDensityMap
+    : null
+  const buildUpSteps = globalState.tool.current.buildUpSteps
   const basePattern = isBuildUp
     ? null
-    : ditherPatterns[state.tool.current.ditherPatternIndex]
+    : ditherPatterns[globalState.tool.current.ditherPatternIndex]
   for (const pixel of stamp) {
     const x = baseX + pixel.x
     const y = baseY + pixel.y
     if (
-      isOutOfBounds(x, y, 0, canvas.currentLayer, state.selection.boundaryBox)
+      isOutOfBounds(
+        x,
+        y,
+        0,
+        canvas.currentLayer,
+        globalState.selection.boundaryBox,
+      )
     )
       continue
-    if (state.selection.maskSet && !state.selection.maskSet.has((y << 16) | x))
+    if (
+      globalState.selection.maskSet &&
+      !globalState.selection.maskSet.has((y << 16) | x)
+    )
       continue
     let pattern
     if (isBuildUp) {
@@ -232,7 +257,8 @@ function drawDitherPreview() {
 function clearLayerPreviewIfNeeded() {
   if (
     vectorGui.showCursorPreview &&
-    (state.tool.current.modes?.eraser || state.tool.current.modes?.inject)
+    (globalState.tool.current.modes?.eraser ||
+      globalState.tool.current.modes?.inject)
   ) {
     renderCanvas(canvas.currentLayer)
   }
@@ -253,8 +279,8 @@ function drawCursorBox(lineWeight) {
   canvas.vectorGuiCTX.beginPath()
 
   for (const pixel of entry['0,0']) {
-    const x = state.cursor.x + canvas.xOffset + pixel.x - brushOffset
-    const y = state.cursor.y + canvas.yOffset + pixel.y - brushOffset
+    const x = globalState.cursor.x + canvas.xOffset + pixel.x - brushOffset
+    const y = globalState.cursor.y + canvas.yOffset + pixel.y - brushOffset
 
     // Check for neighboring pixels using the Set
     const hasTopNeighbor = pixelSet.has(((pixel.y - 1) << 16) | pixel.x)

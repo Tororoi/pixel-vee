@@ -1,28 +1,34 @@
-import { state } from "../Context/state.js"
-import { canvas } from "../Context/canvas.js"
-import { renderCanvas } from "../Canvas/render.js"
+import { globalState } from '../Context/state.js'
+import { canvas } from '../Context/canvas.js'
+import { renderCanvas } from '../Canvas/render.js'
 
 /**
  * Grab and move entire canvas around
  */
 function grabSteps() {
   switch (canvas.pointerEvent) {
-    case "pointerdown":
+    case 'pointerdown':
       canvas.previousXOffset = canvas.xOffset
       canvas.previousYOffset = canvas.yOffset
-      state.tool.grabStartX = state.cursor.x
-      state.tool.grabStartY = state.cursor.y
+      globalState.tool.grabStartX = globalState.cursor.x
+      globalState.tool.grabStartY = globalState.cursor.y
       break
-    case "pointermove":
-      canvas.xOffset = state.cursor.x - state.tool.grabStartX + canvas.previousXOffset
-      canvas.yOffset = state.cursor.y - state.tool.grabStartY + canvas.previousYOffset
+    case 'pointermove':
+      canvas.xOffset =
+        globalState.cursor.x -
+        globalState.tool.grabStartX +
+        canvas.previousXOffset
+      canvas.yOffset =
+        globalState.cursor.y -
+        globalState.tool.grabStartY +
+        canvas.previousYOffset
       renderCanvas() //affect all layers
       break
-    case "pointerup":
+    case 'pointerup':
       canvas.previousXOffset = canvas.xOffset
       canvas.previousYOffset = canvas.yOffset
       break
-    case "pointerout":
+    case 'pointerout':
       canvas.previousXOffset = canvas.xOffset
       canvas.previousYOffset = canvas.yOffset
       break
@@ -32,14 +38,14 @@ function grabSteps() {
 }
 
 export const grab = {
-  name: "grab",
+  name: 'grab',
   fn: grabSteps,
   brushSize: 1,
-  brushType: "circle",
+  brushType: 'circle',
   brushDisabled: true,
   options: {},
   modes: {},
-  type: "utility",
-  cursor: "grab",
-  activeCursor: "grabbing",
+  type: 'utility',
+  cursor: 'grab',
+  activeCursor: 'grabbing',
 }

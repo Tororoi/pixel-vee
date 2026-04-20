@@ -1,5 +1,5 @@
-import { getAngle } from "../utils/trig.js"
-import { assert, plotConicBezierSeg } from "./bezier.js"
+import { getAngle } from '../utils/trig.js'
+import { assert, plotConicBezierSeg } from './bezier.js'
 
 //================================================================//
 //== * Thanks to Alois Zingl for curve rasterizing algorithms * ==//
@@ -256,15 +256,15 @@ export function plotRotatedEllipse(
   xa,
   ya,
   x1Offset,
-  y1Offset
+  y1Offset,
 ) {
   /* plot ellipse rotated by angle (radian) */
   let xd = a * a,
     yd = b * b
   let s = Math.sin(angle),
     zd = (xd - yd) * s /* ellipse rotation */
-  ;(xd = Math.sqrt(xd - zd * s)),
-    (yd = Math.sqrt(yd + zd * s)) /* surrounding rect */
+  ;((xd = Math.sqrt(xd - zd * s)),
+    (yd = Math.sqrt(yd + zd * s))) /* surrounding rect */
   a = Math.floor(xd + 0.5)
   b = Math.floor(yd + 0.5)
   zd = (zd * a * b) / (xd * yd)
@@ -276,7 +276,7 @@ export function plotRotatedEllipse(
     4 * zd * Math.cos(angle),
     x === xa || y === ya,
     x1Offset,
-    y1Offset
+    y1Offset,
   )
 }
 
@@ -298,14 +298,14 @@ export function calcEllipseConicsFromVertices(
   b,
   angle,
   x1Offset,
-  y1Offset
+  y1Offset,
 ) {
   let aa = a * a,
     bb = b * b
   let s = Math.sin(angle),
     zd = (aa - bb) * s /* ellipse rotation */
-  ;(aa = Math.sqrt(aa - zd * s)),
-    (bb = Math.sqrt(bb + zd * s)) /* surrounding rect */
+  ;((aa = Math.sqrt(aa - zd * s)),
+    (bb = Math.sqrt(bb + zd * s))) /* surrounding rect */
   a = Math.floor(aa + 0.5)
   b = Math.floor(bb + 0.5)
   zd = (zd * a * b) / (aa * bb)
@@ -372,7 +372,7 @@ export function calcEllipseParamsFromConics(
   bottomTangentY,
   centerX,
   centerY,
-  originalAngle
+  originalAngle,
 ) {
   //top-left corner
   const topLeftVertex = () =>
@@ -385,7 +385,7 @@ export function calcEllipseParamsFromConics(
       topTangentX,
       topTangentY,
       centerX,
-      centerY
+      centerY,
     )
   //top-right corner
   const topRightVertex = () =>
@@ -398,7 +398,7 @@ export function calcEllipseParamsFromConics(
       rightTangentX,
       rightTangentY,
       centerX,
-      centerY
+      centerY,
     )
   //bottom-right corner
   const bottomRightVertex = () =>
@@ -411,7 +411,7 @@ export function calcEllipseParamsFromConics(
       bottomTangentX,
       bottomTangentY,
       centerX,
-      centerY
+      centerY,
     )
   //bottom-left corner
   const bottomLeftVertex = () =>
@@ -424,7 +424,7 @@ export function calcEllipseParamsFromConics(
       leftTangentX,
       leftTangentY,
       centerX,
-      centerY
+      centerY,
     )
   let px2, py2, px3, py3, vertexA, vertexB
   switch (true) {
@@ -548,7 +548,7 @@ function findConicSegmentVertex(
   px2,
   py2,
   centerX,
-  centerY
+  centerY,
 ) {
   /**
    * Check radius of ellipse at given t on the conic segment
@@ -558,7 +558,7 @@ function findConicSegmentVertex(
   const radiusFunction = (t) => {
     const pointOnCurve = evaluateBezier(t, px0, py0, px1, py1, px2, py2, weight)
     const distanceToPointFromCenter = Math.sqrt(
-      (pointOnCurve.x - centerX) ** 2 + (pointOnCurve.y - centerY) ** 2
+      (pointOnCurve.x - centerX) ** 2 + (pointOnCurve.y - centerY) ** 2,
     )
     return distanceToPointFromCenter
   }
@@ -576,7 +576,7 @@ function findConicSegmentVertex(
     py1,
     px2,
     py2,
-    weight
+    weight,
   )
   const minorPoint = evaluateBezier(
     minorT,
@@ -586,7 +586,7 @@ function findConicSegmentVertex(
     py1,
     px2,
     py2,
-    weight
+    weight,
   )
   return {
     majorRadius: radiusFunction(majorT),
@@ -620,7 +620,7 @@ export function plotRotatedEllipseConics(
   rightTangentX,
   rightTangentY,
   bottomTangentX,
-  bottomTangentY
+  bottomTangentY,
 ) {
   //weight is 0.5 for rotation angles multiple of pi/2
   if (weight === 0.5)
@@ -628,7 +628,7 @@ export function plotRotatedEllipseConics(
       leftTangentX,
       topTangentY,
       rightTangentX,
-      bottomTangentY
+      bottomTangentY,
     ) /* looks nicer */
   let plotPoints = []
   plotPoints = [
@@ -640,7 +640,7 @@ export function plotRotatedEllipseConics(
       topTangentY,
       topTangentX,
       topTangentY,
-      1.0 - weight
+      1.0 - weight,
     ), //top-left corner
   ]
   plotPoints = [
@@ -652,7 +652,7 @@ export function plotRotatedEllipseConics(
       bottomTangentY,
       bottomTangentX,
       bottomTangentY,
-      weight
+      weight,
     ), //top-right corner
   ]
   plotPoints = [
@@ -664,7 +664,7 @@ export function plotRotatedEllipseConics(
       bottomTangentY,
       bottomTangentX,
       bottomTangentY,
-      1.0 - weight
+      1.0 - weight,
     ), //bottom-right corner
   ]
   plotPoints = [
@@ -676,7 +676,7 @@ export function plotRotatedEllipseConics(
       topTangentY,
       topTangentX,
       topTangentY,
-      weight
+      weight,
     ), //bottom-left corner
   ]
   //remove duplicate coordinates
@@ -712,7 +712,7 @@ function plotRotatedEllipseRect(
   zd,
   isRightAngle,
   x1Offset,
-  y1Offset
+  y1Offset,
 ) {
   x1 = x1 + x1Offset
   y1 = y1 + y1Offset
@@ -815,7 +815,7 @@ export function getOpposingEllipseVertex(
   px2,
   py2,
   radians,
-  opposingRadius
+  opposingRadius,
 ) {
   let angle = getAngle(px2 - px1, py2 - py1)
   let newVertex = pointOnCircle(px1, py1, opposingRadius, angle + radians)

@@ -1,6 +1,6 @@
 import { canvas } from '../Context/canvas.js'
 import { dom } from '../Context/dom.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { resizeOffScreenCanvas } from '../Canvas/render.js'
 import {
   stopMarchingAnts,
@@ -205,8 +205,10 @@ function applyDrag(handle, dx, dy) {
  * Writes the current overlay width/height into the canvas size form inputs.
  */
 function syncFormInputs() {
-  dom.canvasWidth.value = Math.round(resizeOverlay.newWidth)
-  dom.canvasHeight.value = Math.round(resizeOverlay.newHeight)
+  if (dom.canvasWidth)
+    dom.canvasWidth.value = Math.round(resizeOverlay.newWidth)
+  if (dom.canvasHeight)
+    dom.canvasHeight.value = Math.round(resizeOverlay.newHeight)
 }
 
 /**
@@ -280,7 +282,7 @@ export function renderResizeOverlayCVS() {
  */
 export function activateResizeOverlay() {
   stopMarchingAnts()
-  state.canvas.resizeOverlayActive = true
+  globalState.canvas.resizeOverlayActive = true
   resizeOverlay.newWidth = canvas.offScreenCVS.width
   resizeOverlay.newHeight = canvas.offScreenCVS.height
   resizeOverlay.contentOffsetX = 0
@@ -288,12 +290,14 @@ export function activateResizeOverlay() {
   resizeOverlay.anchor = 'top-left'
   resizeOverlay.dragHandle = null
 
-  // Reset anchor grid UI
-  dom.anchorGrid
-    .querySelectorAll('.anchor-btn')
-    .forEach((b) => b.classList.remove('active'))
-  const topLeftBtn = dom.anchorGrid.querySelector('[data-anchor="top-left"]')
-  if (topLeftBtn) topLeftBtn.classList.add('active')
+  // Reset anchor grid UI (legacy DOM path; React dialog handles this via state)
+  if (dom.anchorGrid) {
+    dom.anchorGrid
+      .querySelectorAll('.anchor-btn')
+      .forEach((b) => b.classList.remove('active'))
+    const topLeftBtn = dom.anchorGrid.querySelector('[data-anchor="top-left"]')
+    if (topLeftBtn) topLeftBtn.classList.add('active')
+  }
 
   syncFormInputs()
   // Re-render selection canvas without dim (dim suppressed while resize is active)
@@ -307,7 +311,7 @@ export function activateResizeOverlay() {
  */
 export function deactivateResizeOverlay() {
   stopMarchingAnts()
-  state.canvas.resizeOverlayActive = false
+  globalState.canvas.resizeOverlayActive = false
   resizeOverlay.dragHandle = null
   // Clear the resize overlay canvas
   canvas.resizeOverlayCTX.clearRect(
@@ -321,7 +325,7 @@ export function deactivateResizeOverlay() {
   // Restore the selection canvas and restart its animation if needed
   renderSelectionCVS()
   // Restore cursor
-  canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
+  canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
 }
 
 /**
@@ -332,8 +336,8 @@ export function deactivateResizeOverlay() {
 export function resizeOverlayPointerDown(e) {
   const cx = Math.floor(e.offsetX / canvas.zoom)
   const cy = Math.floor(e.offsetY / canvas.zoom)
-  state.cursor.x = Math.round(cx - canvas.previousXOffset)
-  state.cursor.y = Math.round(cy - canvas.previousYOffset)
+  globalState.cursor.x = Math.round(cx - canvas.previousXOffset)
+  globalState.cursor.y = Math.round(cy - canvas.previousYOffset)
   const hit = hitTestHandles(cx, cy)
   resizeOverlay.dragHandle = hit
   resizeOverlay.prevCx = cx
@@ -355,8 +359,8 @@ export function resizeOverlayPointerDown(e) {
 export function resizeOverlayPointerMove(e) {
   const cx = Math.floor(e.offsetX / canvas.zoom)
   const cy = Math.floor(e.offsetY / canvas.zoom)
-  state.cursor.x = Math.round(cx - canvas.previousXOffset)
-  state.cursor.y = Math.round(cy - canvas.previousYOffset)
+  globalState.cursor.x = Math.round(cx - canvas.previousXOffset)
+  globalState.cursor.y = Math.round(cy - canvas.previousYOffset)
   const { dragHandle, prevCx, prevCy } = resizeOverlay
   if (dragHandle) {
     const dx = cx - prevCx
@@ -379,8 +383,8 @@ export function resizeOverlayPointerUp(e) {
   vectorGui.selectedPoint = { xKey: null, yKey: null }
   const cx = Math.floor(e.offsetX / canvas.zoom)
   const cy = Math.floor(e.offsetY / canvas.zoom)
-  state.cursor.x = Math.round(cx - canvas.previousXOffset)
-  state.cursor.y = Math.round(cy - canvas.previousYOffset)
+  globalState.cursor.x = Math.round(cx - canvas.previousXOffset)
+  globalState.cursor.y = Math.round(cy - canvas.previousYOffset)
   // Cursor will be updated on next animation frame by drawSelectControlPoints
 }
 
@@ -439,19 +443,19 @@ export function applyResize() {
   // Snapshot current canvas state for the "from" side of the action
   const fromWidth = canvas.offScreenCVS.width
   const fromHeight = canvas.offScreenCVS.height
-  const fromCropOffsetX = state.canvas.cropOffsetX
-  const fromCropOffsetY = state.canvas.cropOffsetY
+  const fromCropOffsetX = globalState.canvas.cropOffsetX
+  const fromCropOffsetY = globalState.canvas.cropOffsetY
 
   // The content offset from the overlay is additive to the cumulative crop offset
   const toCropOffsetX = fromCropOffsetX + contentOffsetX
   const toCropOffsetY = fromCropOffsetY + contentOffsetY
 
   deactivateResizeOverlay()
-  dom.sizeContainer.style.display = 'none'
+  if (dom.sizeContainer) dom.sizeContainer.style.display = 'none'
 
   // Update the crop offset before resizing so the timeline replay uses the new values
-  state.canvas.cropOffsetX = toCropOffsetX
-  state.canvas.cropOffsetY = toCropOffsetY
+  globalState.canvas.cropOffsetX = toCropOffsetX
+  globalState.canvas.cropOffsetY = toCropOffsetY
 
   // Adjust brush dither offset so the pattern stays locked to art pixels after the content shift
   brush.ditherOffsetX = (((brush.ditherOffsetX - contentOffsetX) % 8) + 8) % 8
@@ -475,28 +479,28 @@ export function applyResize() {
   resizeOffScreenCanvas(w, h, contentOffsetX, contentOffsetY)
 
   // Shift selection coordinates to match the new canvas space
-  if (state.selection.properties.px1 !== null) {
-    state.selection.properties.px1 += contentOffsetX
-    state.selection.properties.py1 += contentOffsetY
-    state.selection.properties.px2 += contentOffsetX
-    state.selection.properties.py2 += contentOffsetY
-    state.selection.setBoundaryBox(state.selection.properties)
+  if (globalState.selection.properties.px1 !== null) {
+    globalState.selection.properties.px1 += contentOffsetX
+    globalState.selection.properties.py1 += contentOffsetY
+    globalState.selection.properties.px2 += contentOffsetX
+    globalState.selection.properties.py2 += contentOffsetY
+    globalState.selection.setBoundaryBox(globalState.selection.properties)
   }
-  if (state.selection.maskSet) {
+  if (globalState.selection.maskSet) {
     const newMaskSet = new Set()
-    for (const key of state.selection.maskSet) {
+    for (const key of globalState.selection.maskSet) {
       const nx = (key & 0xffff) + contentOffsetX
       const ny = ((key >> 16) & 0xffff) + contentOffsetY
       if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
         newMaskSet.add((ny << 16) | nx)
       }
     }
-    state.selection.maskSet = newMaskSet
+    globalState.selection.maskSet = newMaskSet
   }
 
   // Push a resize action so the operation can be undone/redone
   const resizeAction = {
-    index: state.timeline.undoStack.length,
+    index: globalState.timeline.undoStack.length,
     tool: 'resize',
     layer: canvas.currentLayer,
     from: {
@@ -511,12 +515,12 @@ export function applyResize() {
       cropOffsetX: toCropOffsetX,
       cropOffsetY: toCropOffsetY,
     },
-    selectProperties: { ...state.selection.properties },
-    maskSet: state.selection.maskSet
-      ? Array.from(state.selection.maskSet)
+    selectProperties: { ...globalState.selection.properties },
+    maskSet: globalState.selection.maskSet
+      ? Array.from(globalState.selection.maskSet)
       : null,
-    selectedVectorIndices: Array.from(state.vector.selectedIndices),
-    currentVectorIndex: state.vector.currentIndex,
+    selectedVectorIndices: Array.from(globalState.vector.selectedIndices),
+    currentVectorIndex: globalState.vector.currentIndex,
     hidden: false,
     removed: false,
     snapshot: null,
@@ -524,6 +528,6 @@ export function applyResize() {
     recordedCropOffsetX: toCropOffsetX,
     recordedCropOffsetY: toCropOffsetY,
   }
-  state.timeline.undoStack.push(resizeAction)
-  state.timeline.currentAction = resizeAction
+  globalState.timeline.undoStack.push(resizeAction)
+  globalState.timeline.currentAction = resizeAction
 }

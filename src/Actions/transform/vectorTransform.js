@@ -1,4 +1,4 @@
-import { state } from '../../Context/state.js'
+import { globalState } from '../../Context/state.js'
 import { canvas } from '../../Context/canvas.js'
 import { vectorGui } from '../../GUI/vector.js'
 import { renderCanvas } from '../../Canvas/render.js'
@@ -19,19 +19,19 @@ import { modifyVectorAction } from '../modifyTimeline/modifyTimeline.js'
 export function actionFlipVectors(flipHorizontally) {
   //get bounding box of all vectors
   let [xMin, xMax, yMin, yMax] = [null, null, null, null]
-  const vectorIndicesSet = new Set(state.vector.selectedIndices)
+  const vectorIndicesSet = new Set(globalState.vector.selectedIndices)
   if (vectorIndicesSet.size === 0) {
-    vectorIndicesSet.add(state.vector.currentIndex)
+    vectorIndicesSet.add(globalState.vector.currentIndex)
   }
   for (const vectorIndex of vectorIndicesSet) {
-    const vector = state.vector.all[vectorIndex]
+    const vector = globalState.vector.all[vectorIndex]
     const vectorXPoints = []
     const vectorYPoints = []
 
     for (let i = 1; i <= 4; i++) {
       if (
-        'px' + i in vector.vectorProperties &&
-        'py' + i in vector.vectorProperties
+        vector.vectorProperties[`px${i}`] != null &&
+        vector.vectorProperties[`py${i}`] != null
       ) {
         vectorXPoints.push(vector.vectorProperties[`px${i}`])
         vectorYPoints.push(vector.vectorProperties[`py${i}`])
@@ -49,16 +49,16 @@ export function actionFlipVectors(flipHorizontally) {
   let referenceVector
   //flip vectors horizontally around center point
   for (const vectorIndex of vectorIndicesSet) {
-    const vector = state.vector.all[vectorIndex]
+    const vector = globalState.vector.all[vectorIndex]
     referenceVector = vector //TODO: (Low Priority) Determine a better method for setting a reference vector or remove the need for one.
-    state.vector.savedProperties[vectorIndex] = {
+    globalState.vector.savedProperties[vectorIndex] = {
       ...vector.vectorProperties,
       modes: { ...vector.modes },
     }
     for (let i = 1; i <= 4; i++) {
       if (
-        'px' + i in vector.vectorProperties &&
-        'py' + i in vector.vectorProperties
+        vector.vectorProperties[`px${i}`] != null &&
+        vector.vectorProperties[`py${i}`] != null
       ) {
         const xKey = `px${i}`
         const yKey = `py${i}`
@@ -72,14 +72,22 @@ export function actionFlipVectors(flipHorizontally) {
         updateVectorProperties(vector, newX, newY, xKey, yKey)
       }
     }
-    if (vectorIndex === state.vector.currentIndex) {
+    if ('px0' in vector.vectorProperties) {
+      vector.vectorProperties.px0 = Math.round(
+        (vector.vectorProperties.px1 + vector.vectorProperties.px3) / 2,
+      )
+      vector.vectorProperties.py0 = Math.round(
+        (vector.vectorProperties.py1 + vector.vectorProperties.py3) / 2,
+      )
+    }
+    if (vectorIndex === globalState.vector.currentIndex) {
       vectorGui.setVectorProperties(vector)
     }
   }
   renderCanvas(canvas.currentLayer, true)
   //Get any selected vector to use for modifyVectorAction
   modifyVectorAction(referenceVector)
-  state.clearRedoStack()
+  globalState.clearRedoStack()
   vectorGui.render()
 }
 
@@ -89,34 +97,34 @@ export function actionFlipVectors(flipHorizontally) {
  */
 export function actionRotateVectors(degrees) {
   //get bounding box of all vectors
-  const vectorIndicesSet = new Set(state.vector.selectedIndices)
+  const vectorIndicesSet = new Set(globalState.vector.selectedIndices)
   if (vectorIndicesSet.size === 0) {
-    vectorIndicesSet.add(state.vector.currentIndex)
+    vectorIndicesSet.add(globalState.vector.currentIndex)
   }
   //get center point of selected vectors
-  if (state.vector.shapeCenterX === null) {
+  if (globalState.vector.shapeCenterX === null) {
     //Update shape center
     const [centerX, centerY] = findVectorShapeCentroid(
       vectorIndicesSet,
-      state.vector.all,
+      globalState.vector.all,
     )
-    state.vector.shapeCenterX = centerX + canvas.currentLayer.x
-    state.vector.shapeCenterY = centerY + canvas.currentLayer.y
+    globalState.vector.shapeCenterX = centerX + canvas.currentLayer.x
+    globalState.vector.shapeCenterY = centerY + canvas.currentLayer.y
   }
-  const rotationOriginX = state.vector.shapeCenterX
-  const rotationOriginY = state.vector.shapeCenterY
+  const rotationOriginX = globalState.vector.shapeCenterX
+  const rotationOriginY = globalState.vector.shapeCenterY
   let referenceVector
   for (const vectorIndex of vectorIndicesSet) {
-    const vector = state.vector.all[vectorIndex]
+    const vector = globalState.vector.all[vectorIndex]
     referenceVector = vector //TODO: (Low Priority) Determine a better method for setting a reference vector or remove the need for one.
-    state.vector.savedProperties[vectorIndex] = {
+    globalState.vector.savedProperties[vectorIndex] = {
       ...vector.vectorProperties,
       modes: { ...vector.modes },
     }
     for (let i = 1; i <= 4; i++) {
       if (
-        'px' + i in vector.vectorProperties &&
-        'py' + i in vector.vectorProperties
+        vector.vectorProperties[`px${i}`] != null &&
+        vector.vectorProperties[`py${i}`] != null
       ) {
         const xKey = `px${i}`
         const yKey = `py${i}`
@@ -138,14 +146,22 @@ export function actionRotateVectors(degrees) {
         updateVectorProperties(vector, newX, newY, xKey, yKey)
       }
     }
-    if (vectorIndex === state.vector.currentIndex) {
+    if ('px0' in vector.vectorProperties) {
+      vector.vectorProperties.px0 = Math.round(
+        (vector.vectorProperties.px1 + vector.vectorProperties.px3) / 2,
+      )
+      vector.vectorProperties.py0 = Math.round(
+        (vector.vectorProperties.py1 + vector.vectorProperties.py3) / 2,
+      )
+    }
+    if (vectorIndex === globalState.vector.currentIndex) {
       vectorGui.setVectorProperties(vector)
     }
   }
   renderCanvas(canvas.currentLayer, true)
   //Get any selected vector to use for modifyVectorAction
   modifyVectorAction(referenceVector)
-  state.clearRedoStack()
+  globalState.clearRedoStack()
   vectorGui.render()
 }
 

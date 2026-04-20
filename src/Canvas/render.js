@@ -1,5 +1,5 @@
 import { brushStamps } from '../Context/brushStamps.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { tools } from '../Tools/index.js'
 import { vectorGui } from '../GUI/vector.js'
@@ -13,7 +13,7 @@ import { actionEllipse } from '../Actions/pointer/ellipse.js'
 import { actionPolygon } from '../Actions/pointer/polygon.js'
 import { actionCurve } from '../Actions/pointer/curve.js'
 import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
-import { ditherPatterns } from '../Context/ditherPatterns.js'
+import { isDitherOn, ditherPatterns } from '../Context/ditherPatterns.js'
 import { transformRasterContent } from '../utils/transformHelpers.js'
 
 // rAF batching for brush stroke renders
@@ -36,6 +36,77 @@ export function scheduleRender(layer) {
       renderCanvas(_scheduledLayer)
       _scheduledLayer = null
     })
+  }
+}
+
+/**
+ * Render a contiguous block of build-up dither actions in a single pass.
+ * Instead of replaying every stroke point-by-point (O(actions × points × stamp)),
+ * this pre-scans the buildUpDensityDelta arrays to build a final density map and
+ * writes each unique pixel exactly once — O(total_delta_pixels).
+ *
+ * Correctness: the final pixel at position (x,y) is determined by the last action
+ * that touched it. That action saw a pre-hit density of (totalDensity - 1), so the
+ * step index is min(totalDensity - 1, buildUpSteps.length - 1), matching sequential replay.
+ * @param {object[]} actions - Consecutive build-up dither actions on the same layer
+ * @param {object} layer - The shared layer object
+ * @param {Map} buildUpLayerMaps - Accumulated density from all prior build-up actions (for cross-segment density)
+ * @param {CanvasRenderingContext2D|null} betweenCtx - Override render target (null → use layer.ctx)
+ * @param {number} cropDX - Canvas crop x offset
+ * @param {number} cropDY - Canvas crop y offset
+ */
+function renderBuildUpDitherSegment(
+  actions,
+  layer,
+  buildUpLayerMaps,
+  betweenCtx,
+  cropDX,
+  cropDY,
+) {
+  const offsetX = layer.x + cropDX
+  const offsetY = layer.y + cropDY
+  const renderCtx = betweenCtx ?? layer.ctx
+
+  // Phase 1: scan all deltas to build segment density count and lastAction per pixel
+  const segmentDelta = new Map() // absolute_pos → count within this segment
+  const lastActionMap = new Map() // absolute_pos → last action touching that pixel
+
+  for (const action of actions) {
+    if (!action.buildUpDensityDelta) continue
+    const lx = action.layer.x + cropDX
+    const ly = action.layer.y + cropDY
+    for (const coord of action.buildUpDensityDelta) {
+      const px = (coord & 0xffff) + lx
+      const py = ((coord >>> 16) & 0xffff) + ly
+      const key = (py << 16) | px
+      segmentDelta.set(key, (segmentDelta.get(key) ?? 0) + 1)
+      lastActionMap.set(key, action)
+    }
+  }
+
+  // Phase 2: write each pixel once using final density (prior sessions + this segment)
+  const priorDensityMap = buildUpLayerMaps.get(layer)
+  for (const [key, segmentCount] of segmentDelta) {
+    const x = key & 0xffff
+    const y = (key >>> 16) & 0xffff
+    const action = lastActionMap.get(key)
+    const buildUpSteps = action.buildUpSteps ?? [15, 31, 47, 63]
+    const priorDensity = priorDensityMap ? (priorDensityMap.get(key) ?? 0) : 0
+    const totalDensity = priorDensity + segmentCount
+    const stepIndex = Math.min(totalDensity - 1, buildUpSteps.length - 1)
+    const pattern = ditherPatterns[buildUpSteps[stepIndex]]
+    const effectiveDitherOffsetX =
+      ((((action.ditherOffsetX ?? 0) + action.recordedLayerX - offsetX) % 8) + 8) % 8
+    const effectiveDitherOffsetY =
+      ((((action.ditherOffsetY ?? 0) + action.recordedLayerY - offsetY) % 8) + 8) % 8
+    const isOn = isDitherOn(pattern, x, y, effectiveDitherOffsetX, effectiveDitherOffsetY)
+    if (isOn) {
+      renderCtx.fillStyle = action.color.color
+      renderCtx.fillRect(x, y, 1, 1)
+    } else if (action.modes?.twoColor && action.secondaryColor) {
+      renderCtx.fillStyle = action.secondaryColor.color
+      renderCtx.fillRect(x, y, 1, 1)
+    }
   }
 }
 
@@ -72,8 +143,8 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
   // can do an O(1) reference check instead of an O(n) reverse scan per action.
   let lastPasteAction = null
   let lastTransformAction = null
-  for (let i = state.timeline.undoStack.length - 1; i >= 0; i--) {
-    const action = state.timeline.undoStack[i]
+  for (let i = globalState.timeline.undoStack.length - 1; i >= 0; i--) {
+    const action = globalState.timeline.undoStack[i]
     if (
       lastPasteAction === null &&
       action.tool === 'paste' &&
@@ -87,9 +158,48 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
   // Per-layer density maps for build-up dither replay.
   // Keys are layer objects; values are Map<(y<<16)|x, count>.
   const buildUpLayerMaps = new Map()
+  const cropDX = globalState.canvas.cropOffsetX
+  const cropDY = globalState.canvas.cropOffsetY
+
+  // Pending segment of consecutive build-up dither actions on the same layer.
+  // When a non-build-up action (or layer boundary) is reached, the segment is
+  // flushed via renderBuildUpDitherSegment() — a single O(pixels) pass instead
+  // of the O(actions × points × stamp) per-action replay. Only used on the
+  // common path (no activeIndexes); the activeIndexes path keeps sequential replay.
+  let pendingSegment = []
+  let pendingSegmentLayer = null
+
+  /** Render and clear the pending build-up dither segment. */
+  function flushBuildUpSegment() {
+    if (pendingSegment.length === 0) return
+    renderBuildUpDitherSegment(
+      pendingSegment,
+      pendingSegmentLayer,
+      buildUpLayerMaps,
+      betweenCtx,
+      cropDX,
+      cropDY,
+    )
+    // Accumulate deltas into buildUpLayerMaps so any subsequent build-up actions
+    // on the same layer see the correct cross-segment density.
+    for (const a of pendingSegment) {
+      if (!a.buildUpDensityDelta) continue
+      if (!buildUpLayerMaps.has(a.layer)) buildUpLayerMaps.set(a.layer, new Map())
+      const layerMap = buildUpLayerMaps.get(a.layer)
+      const lx = a.layer.x + cropDX
+      const ly = a.layer.y + cropDY
+      for (const coord of a.buildUpDensityDelta) {
+        const key = (((coord >>> 16) & 0xffff) + ly) << 16 | ((coord & 0xffff) + lx)
+        layerMap.set(key, (layerMap.get(key) ?? 0) + 1)
+      }
+    }
+    pendingSegment = []
+    pendingSegmentLayer = null
+  }
+
   //loop through all actions
-  for (let i = startIndex; i < state.timeline.undoStack.length; i++) {
-    let action = state.timeline.undoStack[i]
+  for (let i = startIndex; i < globalState.timeline.undoStack.length; i++) {
+    let action = globalState.timeline.undoStack[i]
     //if layer is passed in, only redraw for that layer
     if (layer) {
       if (action.layer !== layer) continue
@@ -100,7 +210,7 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         let activeIndex = activeIndexMap.get(i)
         //draw accumulated canvas actions from previous betweenCanvas to action.layer.ctx
         action.layer.ctx.drawImage(
-          state.timeline.savedBetweenActionImages[activeIndex].cvs,
+          globalState.timeline.savedBetweenActionImages[activeIndex].cvs,
           0,
           0,
         )
@@ -116,41 +226,51 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
       !action.removed &&
       ['raster', 'vector'].includes(tool.type)
     ) {
-      // Resolve the density map for this action (only relevant for buildUpDither brush actions)
-      let buildUpDensityMap = null
-      if (action.tool === 'brush' && action.modes?.buildUpDither) {
-        if (!buildUpLayerMaps.has(action.layer)) {
-          buildUpLayerMaps.set(action.layer, new Map())
+      const isBuildUp = action.tool === 'brush' && action.modes?.buildUpDither
+
+      if (!activeIndexMap && isBuildUp) {
+        // Buffer for batch rendering. Flush first if this action is on a different layer.
+        if (pendingSegmentLayer !== null && pendingSegmentLayer !== action.layer) {
+          flushBuildUpSegment()
         }
-        buildUpDensityMap = buildUpLayerMaps.get(action.layer)
-      }
-      const cropDX = state.canvas.cropOffsetX
-      const cropDY = state.canvas.cropOffsetY
-      performAction(
-        action,
-        betweenCtx,
-        lastPasteAction,
-        lastTransformAction,
-        buildUpDensityMap,
-        cropDX,
-        cropDY,
-      )
-      // After rendering, accumulate this action's delta into the layer map
-      if (
-        action.tool === 'brush' &&
-        action.modes?.buildUpDither &&
-        action.buildUpDensityDelta
-      ) {
-        const layerMap = buildUpLayerMaps.get(action.layer)
-        for (const coord of action.buildUpDensityDelta) {
-          layerMap.set(coord, (layerMap.get(coord) ?? 0) + 1)
+        pendingSegment.push(action)
+        pendingSegmentLayer = action.layer
+      } else {
+        // Non-build-up action (or activeIndexes path) — flush any pending segment first.
+        flushBuildUpSegment()
+        // Resolve the density map for this action (activeIndexes path only for build-up)
+        let buildUpDensityMap = null
+        if (isBuildUp) {
+          if (!buildUpLayerMaps.has(action.layer)) {
+            buildUpLayerMaps.set(action.layer, new Map())
+          }
+          buildUpDensityMap = buildUpLayerMaps.get(action.layer)
+        }
+        performAction(
+          action,
+          betweenCtx,
+          lastPasteAction,
+          lastTransformAction,
+          buildUpDensityMap,
+          cropDX,
+          cropDY,
+        )
+        // After rendering, accumulate this action's delta into the layer map
+        if (isBuildUp && action.buildUpDensityDelta) {
+          const layerMap = buildUpLayerMaps.get(action.layer)
+          const lx = action.layer.x + cropDX
+          const ly = action.layer.y + cropDY
+          for (const coord of action.buildUpDensityDelta) {
+            const key = (((coord >>> 16) & 0xffff) + ly) << 16 | ((coord & 0xffff) + lx)
+            layerMap.set(key, (layerMap.get(key) ?? 0) + 1)
+          }
         }
       }
     }
     if (activeIndexMap) {
       if (activeIndexMap.has(i)) {
         if (setImages) {
-          //if activeIndexes and setImages, loop through all actions and set image from previous active index to current active index to state.timeline.savedBetweenActionImages[i].betweenImage
+          //if activeIndexes and setImages, loop through all actions and set image from previous active index to current active index to globalState.timeline.savedBetweenActionImages[i].betweenImage
           betweenCtx = createAndSaveContext()
           //actions rendered in loop beyond this point will render onto this cvs until a new one is set
         } else {
@@ -166,20 +286,20 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         //Finished rendering active indexes, finish by rendering last betweenCanvas to avoid rendering actions unnecessarily.
         //draw accumulated canvas actions from previous betweenCanvas to action.layer.ctx
         action.layer.ctx.drawImage(
-          state.timeline.savedBetweenActionImages[
-            state.timeline.savedBetweenActionImages.length - 1
+          globalState.timeline.savedBetweenActionImages[
+            globalState.timeline.savedBetweenActionImages.length - 1
           ].cvs,
           0,
           0,
         )
         //exit for loop
         break
-      } else if (i === state.timeline.undoStack.length - 1 && setImages) {
+      } else if (i === globalState.timeline.undoStack.length - 1 && setImages) {
         //Finished rendering all actions but last set exists only on betweenCanvas at this point, so render it to the layer
         //draw accumulated canvas actions from previous betweenCanvas to action.layer.ctx
         action.layer.ctx.drawImage(
-          state.timeline.savedBetweenActionImages[
-            state.timeline.savedBetweenActionImages.length - 1
+          globalState.timeline.savedBetweenActionImages[
+            globalState.timeline.savedBetweenActionImages.length - 1
           ].cvs,
           0,
           0,
@@ -187,8 +307,9 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
       }
     }
   }
-  // renderLayersToDOM()
-  // renderVectorsToDOM()
+  // Flush any remaining build-up segment after the loop ends
+  flushBuildUpSegment()
+  // updateActiveLayerState()
 }
 
 /**
@@ -202,7 +323,7 @@ function createAndSaveContext() {
   })
   cvs.width = canvas.offScreenCVS.width
   cvs.height = canvas.offScreenCVS.height
-  state.timeline.savedBetweenActionImages.push({ cvs, ctx })
+  globalState.timeline.savedBetweenActionImages.push({ cvs, ctx })
   return ctx
 }
 
@@ -417,7 +538,7 @@ export function performAction(
     case 'transform': {
       if (
         canvas.tempLayer === canvas.currentLayer &&
-        action.pastedImageKey === state.clipboard.currentPastedImageKey
+        action.pastedImageKey === globalState.clipboard.currentPastedImageKey
       ) {
         if (action === lastTransformAction) {
           //Correct action coordinates with layer offsets
@@ -434,7 +555,7 @@ export function performAction(
           //put transformed image data onto canvas (ok to use put image data because the layer should not have anything else on it at this point)
           transformRasterContent(
             action.layer,
-            state.clipboard.pastedImages[action.pastedImageKey].imageData,
+            globalState.clipboard.pastedImages[action.pastedImageKey].imageData,
             boundaryBox,
             action.transformationRotationDegrees % 360,
             action.isMirroredHorizontally,
@@ -470,7 +591,7 @@ function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
   }
   //render vectors
   for (let i = 0; i < action.vectorIndices.length; i++) {
-    const vector = state.vector.all[action.vectorIndices[i]]
+    const vector = globalState.vector.all[action.vectorIndices[i]]
     if (vector.hidden || vector.removed) continue
     const vectorProperties = vector.vectorProperties
     const vRecordedLayerX = vector.recordedLayerX
@@ -700,7 +821,7 @@ export function renderCanvas(
   //Handle offscreen canvases
   // Skip the clear+redraw when the timeline is empty — this preserves pixel data
   // that was baked directly into layer canvases (e.g. after a content-shift resize).
-  if (redrawTimeline && state.timeline.undoStack.length > 0) {
+  if (redrawTimeline && globalState.timeline.undoStack.length > 0) {
     //clear offscreen layers
     clearOffscreenCanvas(activeLayer)
     //render all previous actions

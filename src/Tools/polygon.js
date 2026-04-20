@@ -1,5 +1,5 @@
 import { brushStamps } from '../Context/brushStamps.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
 import { ditherPatterns } from '../Context/ditherPatterns.js'
@@ -10,7 +10,6 @@ import { vectorGui } from '../GUI/vector.js'
 import { renderCanvas } from '../Canvas/render.js'
 import { coordArrayFromSet } from '../utils/maskHelpers.js'
 import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
-import { enableActionsForSelection } from '../DOM/disableDomElements.js'
 import { rerouteVectorStepsAction } from './adjust.js'
 import {
   getCropNormalizedCursorX,
@@ -30,18 +29,20 @@ function buildPolygonCtx(isPreview = false) {
   return createStrokeContext({
     layer: canvas.currentLayer,
     isPreview,
-    boundaryBox: state.selection.boundaryBox,
+    boundaryBox: globalState.selection.boundaryBox,
     currentColor: swatches.primary.color,
-    currentModes: state.tool.current.modes,
-    maskSet: state.selection.maskSet,
+    currentModes: globalState.tool.current.modes,
+    maskSet: globalState.selection.maskSet,
     brushStamp:
-      brushStamps[state.tool.current.brushType][state.tool.current.brushSize],
-    brushSize: state.tool.current.brushSize,
-    ditherPattern: ditherPatterns[state.tool.current.ditherPatternIndex],
-    twoColorMode: state.tool.current.modes?.twoColor ?? false,
+      brushStamps[globalState.tool.current.brushType][
+        globalState.tool.current.brushSize
+      ],
+    brushSize: globalState.tool.current.brushSize,
+    ditherPattern: ditherPatterns[globalState.tool.current.ditherPatternIndex],
+    twoColorMode: globalState.tool.current.modes?.twoColor ?? false,
     secondaryColor: swatches.secondary.color,
-    ditherOffsetX: state.tool.current.ditherOffsetX ?? 0,
-    ditherOffsetY: state.tool.current.ditherOffsetY ?? 0,
+    ditherOffsetX: globalState.tool.current.ditherOffsetX ?? 0,
+    ditherOffsetY: globalState.tool.current.ditherOffsetY ?? 0,
   })
 }
 
@@ -51,34 +52,34 @@ function buildPolygonCtx(isPreview = false) {
  * Layout: px1=anchor, px2=adjacent horizontal, px3=opposite, px4=adjacent vertical
  */
 function updateVertices() {
-  let ex = state.cursor.x - state.canvas.cropOffsetX
-  let ey = state.cursor.y - state.canvas.cropOffsetY
+  let ex = globalState.cursor.x - globalState.canvas.cropOffsetX
+  let ey = globalState.cursor.y - globalState.canvas.cropOffsetY
   if (
     keys.ShiftLeft ||
     keys.ShiftRight ||
-    state.vector.properties.forceSquare
+    globalState.vector.properties.forceSquare
   ) {
-    const dx = ex - state.vector.properties.px1
-    const dy = ey - state.vector.properties.py1
+    const dx = ex - globalState.vector.properties.px1
+    const dy = ey - globalState.vector.properties.py1
     const size = Math.min(Math.abs(dx), Math.abs(dy))
-    ex = state.vector.properties.px1 + Math.sign(dx) * size
-    ey = state.vector.properties.py1 + Math.sign(dy) * size
+    ex = globalState.vector.properties.px1 + Math.sign(dx) * size
+    ey = globalState.vector.properties.py1 + Math.sign(dy) * size
   }
-  const x1 = state.vector.properties.px1
-  const y1 = state.vector.properties.py1
-  state.vector.properties.px2 = ex
-  state.vector.properties.py2 = y1
-  state.vector.properties.px3 = ex
-  state.vector.properties.py3 = ey
-  state.vector.properties.px4 = x1
-  state.vector.properties.py4 = ey
-  state.vector.properties.px0 = Math.round((x1 + ex) / 2)
-  state.vector.properties.py0 = Math.round((y1 + ey) / 2)
+  const x1 = globalState.vector.properties.px1
+  const y1 = globalState.vector.properties.py1
+  globalState.vector.properties.px2 = ex
+  globalState.vector.properties.py2 = y1
+  globalState.vector.properties.px3 = ex
+  globalState.vector.properties.py3 = ey
+  globalState.vector.properties.px4 = x1
+  globalState.vector.properties.py4 = ey
+  globalState.vector.properties.px0 = Math.round((x1 + ex) / 2)
+  globalState.vector.properties.py0 = Math.round((y1 + ey) / 2)
 }
 
 /**
  * Compute the uniform drag context for the given corner at drag-start.
- * Reads canvas-absolute positions from state.vector.properties.
+ * Reads canvas-absolute positions from globalState.vector.properties.
  * Must be called at pointerdown before any cursor movement.
  * @param {string} selectedXKey - the key of the corner being dragged (e.g. "px3")
  * @returns {object|null} uniform context, or null if selectedXKey is not a corner
@@ -120,7 +121,7 @@ export function getUniformCtx(selectedXKey) {
   }
   const map = cornerMap[selectedXKey]
   if (!map) return null
-  const p = state.vector.properties
+  const p = globalState.vector.properties
   const fx = p[map.fixedXKey]
   const fy = p[map.fixedYKey]
   const d1rx = p[map.adj1XKey] - fx
@@ -264,29 +265,30 @@ export function updatePolygonVectorProperties(
   normalizedX,
   normalizedY,
 ) {
-  const uniformCtx = state.tool.current.options.uniform?.active
-    ? state.vector.savedProperties[state.vector.currentIndex]?.uniformCtx
+  const uniformCtx = globalState.tool.current.options.uniform?.active
+    ? globalState.vector.savedProperties[globalState.vector.currentIndex]
+        ?.uniformCtx
     : null
   if (uniformCtx && vectorGui.selectedPoint.xKey !== 'px0') {
     syncPolygonUniform(
-      state.vector.properties,
+      globalState.vector.properties,
       vectorGui.selectedPoint.xKey,
       vectorGui.selectedPoint.yKey,
       normalizedX,
       normalizedY,
       uniformCtx,
-      state.vector.properties.forceSquare,
+      globalState.vector.properties.forceSquare,
     )
   } else {
     syncPolygonProperties(
-      state.vector.properties,
+      globalState.vector.properties,
       vectorGui.selectedPoint.xKey,
       vectorGui.selectedPoint.yKey,
       normalizedX,
       normalizedY,
     )
   }
-  currentVector.vectorProperties = { ...state.vector.properties }
+  currentVector.vectorProperties = { ...globalState.vector.properties }
   currentVector.vectorProperties.px0 -= currentVector.layer.x
   currentVector.vectorProperties.py0 -= currentVector.layer.y
   currentVector.vectorProperties.px1 -= currentVector.layer.x
@@ -306,7 +308,7 @@ export function updatePolygonVectorProperties(
  * @param {number} cropOffsetY - crop offset Y to translate to canvas-absolute space
  */
 function drawPolygon(isPreview, cropOffsetX, cropOffsetY) {
-  const p = state.vector.properties
+  const p = globalState.vector.properties
   actionPolygon(
     p.px1 + cropOffsetX,
     p.py1 + cropOffsetY,
@@ -332,21 +334,21 @@ function polygonSteps() {
   if (rerouteVectorStepsAction()) return
   const normalizedX = getCropNormalizedCursorX()
   const normalizedY = getCropNormalizedCursorY()
-  const { cropOffsetX, cropOffsetY } = state.canvas
+  const { cropOffsetX, cropOffsetY } = globalState.canvas
   switch (canvas.pointerEvent) {
     case 'pointerdown':
       vectorGui.reset()
-      state.vector.properties.tool = state.tool.current.name
-      state.vector.properties.px1 = normalizedX
-      state.vector.properties.py1 = normalizedY
+      globalState.vector.properties.tool = globalState.tool.current.name
+      globalState.vector.properties.px1 = normalizedX
+      globalState.vector.properties.py1 = normalizedY
       updateVertices()
       renderCanvas(canvas.currentLayer)
       drawPolygon(true, cropOffsetX, cropOffsetY)
       break
     case 'pointermove':
       if (
-        state.cursor.x !== state.cursor.prevX ||
-        state.cursor.y !== state.cursor.prevY
+        globalState.cursor.x !== globalState.cursor.prevX ||
+        globalState.cursor.y !== globalState.cursor.prevY
       ) {
         updateVertices()
         renderCanvas(canvas.currentLayer)
@@ -357,22 +359,25 @@ function polygonSteps() {
       updateVertices()
       drawPolygon(false, cropOffsetX, cropOffsetY)
       const maskArray = coordArrayFromSet(
-        state.selection.maskSet,
-        canvas.currentLayer.x + state.canvas.cropOffsetX,
-        canvas.currentLayer.y + state.canvas.cropOffsetY,
+        globalState.selection.maskSet,
+        canvas.currentLayer.x + globalState.canvas.cropOffsetX,
+        canvas.currentLayer.y + globalState.canvas.cropOffsetY,
       )
-      const boundaryBox = { ...state.selection.boundaryBox }
+      const boundaryBox = { ...globalState.selection.boundaryBox }
       if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin -= canvas.currentLayer.x + state.canvas.cropOffsetX
-        boundaryBox.xMax -= canvas.currentLayer.x + state.canvas.cropOffsetX
-        boundaryBox.yMin -= canvas.currentLayer.y + state.canvas.cropOffsetY
-        boundaryBox.yMax -= canvas.currentLayer.y + state.canvas.cropOffsetY
+        boundaryBox.xMin -=
+          canvas.currentLayer.x + globalState.canvas.cropOffsetX
+        boundaryBox.xMax -=
+          canvas.currentLayer.x + globalState.canvas.cropOffsetX
+        boundaryBox.yMin -=
+          canvas.currentLayer.y + globalState.canvas.cropOffsetY
+        boundaryBox.yMax -=
+          canvas.currentLayer.y + globalState.canvas.cropOffsetY
       }
-      const uniqueVectorKey = state.vector.nextKey()
-      state.vector.setCurrentIndex(uniqueVectorKey)
-      enableActionsForSelection()
+      const uniqueVectorKey = globalState.vector.nextKey()
+      globalState.vector.setCurrentIndex(uniqueVectorKey)
       addToTimeline({
-        tool: state.tool.current.name,
+        tool: globalState.tool.current.name,
         layer: canvas.currentLayer,
         properties: {
           maskArray,
@@ -382,27 +387,31 @@ function polygonSteps() {
       })
       const layerX = canvas.currentLayer.x
       const layerY = canvas.currentLayer.y
-      const vectorProperties = state.vector.properties
-      state.vector.all[uniqueVectorKey] = {
+      const vectorProperties = globalState.vector.properties
+      globalState.vector.all[uniqueVectorKey] = {
         index: uniqueVectorKey,
-        action: state.timeline.currentAction,
+        action: globalState.timeline.currentAction,
         layer: canvas.currentLayer,
-        modes: { ...state.tool.current.modes },
+        modes: { ...globalState.tool.current.modes },
         color: { ...swatches.primary.color },
         secondaryColor: { ...swatches.secondary.color },
-        ditherPatternIndex: state.tool.current.ditherPatternIndex,
+        ditherPatternIndex: globalState.tool.current.ditherPatternIndex,
         ditherOffsetX:
-          (((state.tool.current.ditherOffsetX + state.canvas.cropOffsetX) % 8) +
+          (((globalState.tool.current.ditherOffsetX +
+            globalState.canvas.cropOffsetX) %
+            8) +
             8) %
           8,
         ditherOffsetY:
-          (((state.tool.current.ditherOffsetY + state.canvas.cropOffsetY) % 8) +
+          (((globalState.tool.current.ditherOffsetY +
+            globalState.canvas.cropOffsetY) %
+            8) +
             8) %
           8,
         recordedLayerX: layerX,
         recordedLayerY: layerY,
-        brushSize: state.tool.current.brushSize,
-        brushType: state.tool.current.brushType,
+        brushSize: globalState.tool.current.brushSize,
+        brushType: globalState.tool.current.brushType,
         vectorProperties: {
           ...vectorProperties,
           px0: vectorProperties.px0 - layerX,
@@ -419,7 +428,7 @@ function polygonSteps() {
         hidden: false,
         removed: false,
       }
-      state.reset()
+      globalState.reset()
       renderCanvas(canvas.currentLayer)
       vectorGui.render()
       break

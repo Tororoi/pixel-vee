@@ -9,7 +9,7 @@ export function sanitizeLayers(
   layers,
   preserveHistory,
   includeReferenceLayers,
-  includeRemovedActions
+  includeRemovedActions,
 ) {
   let sanitizedLayers = JSON.parse(JSON.stringify(layers))
   for (let i = sanitizedLayers.length - 1; i >= 0; i--) {
@@ -19,16 +19,16 @@ export function sanitizeLayers(
     } else if (layer.removed && !preserveHistory && !includeRemovedActions) {
       sanitizedLayers.splice(i, 1)
     } else if (
-      layer.type === "reference" &&
+      layer.type === 'reference' &&
       !preserveHistory &&
       !includeReferenceLayers
     ) {
       sanitizedLayers.splice(i, 1)
     } else {
-      if (layer.type === "reference") {
+      if (layer.type === 'reference') {
         delete layer.img
       }
-      if (layer.type === "raster") {
+      if (layer.type === 'raster') {
         delete layer.cvs
         delete layer.ctx
       }
@@ -50,7 +50,7 @@ export function sanitizeVectors(
   undoStack,
   vectors,
   preserveHistory,
-  includeRemovedActions
+  includeRemovedActions,
 ) {
   let sanitizedVectors = JSON.parse(JSON.stringify(vectors))
   const validActionIndices = new Set(undoStack.map((a) => a.index))
@@ -95,22 +95,22 @@ export function sanitizeHistory(
   undoStack,
   preserveHistory,
   includeReferenceLayers,
-  includeRemovedActions
+  includeRemovedActions,
 ) {
   let sanitizedUndoStack
   try {
     sanitizedUndoStack = JSON.parse(JSON.stringify(undoStack))
   } catch (error) {
-    console.error("#1: ", error)
+    console.error('#1: ', error)
     for (let i = 0; i < undoStack.length; i++) {
       const action = undoStack[i]
       delete action.snapshot
     }
-    console.warn("try without snapshots: ")
+    console.warn('try without snapshots: ')
     try {
       sanitizedUndoStack = JSON.parse(JSON.stringify(undoStack))
     } catch (error) {
-      console.error("#2: ", error)
+      console.error('#2: ', error)
     }
   }
   let lastPasteActionIndex
@@ -118,7 +118,7 @@ export function sanitizeHistory(
     const action = sanitizedUndoStack[i]
     //if active paste action, find the latest unconfirmed paste action and remove it and all actions after it
     if (
-      ["paste", "vectorPaste"].includes(action.tool) &&
+      ['paste', 'vectorPaste'].includes(action.tool) &&
       !lastPasteActionIndex
     ) {
       lastPasteActionIndex = i
@@ -134,7 +134,7 @@ export function sanitizeHistory(
       //TODO: (Medium Priority) Should also remove actions that marked the action as removed?
       sanitizedUndoStack.splice(i, 1)
     } else if (
-      action.layer.type === "reference" &&
+      action.layer.type === 'reference' &&
       !preserveHistory &&
       !includeReferenceLayers
     ) {

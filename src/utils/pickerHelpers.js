@@ -13,7 +13,7 @@ export const calcHSLSelectorCoordinates = (
   pickerCircle,
   hsl,
   width,
-  height
+  height,
 ) => {
   pickerCircle.x =
     Math.round((hsl.saturation * width) / 100) - pickerCircle.width / 2
@@ -63,11 +63,11 @@ const drawSelectorSides = (ctx, pickerCircle, color, offset = 0) => {
 export const drawSelector = (ctx, pickerCircle) => {
   const { x, y, width, height } = pickerCircle
   // draw selector
-  drawSelectorSides(ctx, pickerCircle, "black")
+  drawSelectorSides(ctx, pickerCircle, 'black')
   //draw contrasting outline
-  drawSelectorSides(ctx, pickerCircle, "white", 1)
+  drawSelectorSides(ctx, pickerCircle, 'white', 1)
   //corners
-  ctx.fillStyle = "white"
+  ctx.fillStyle = 'white'
   ctx.fillRect(x - 1, y - 1, 1, 1)
   ctx.fillRect(x + width, y - 1, 1, 1)
   ctx.fillRect(x - 1, y + height, 1, 1)

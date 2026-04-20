@@ -1,27 +1,24 @@
-import { state } from "../../Context/state.js"
-import { canvas } from "../../Context/canvas.js"
-import { tools } from "../../Tools/index.js"
-import { vectorGui } from "../../GUI/vector.js"
-import { addToTimeline } from "../undoRedo/undoRedo.js"
-import { renderCanvas } from "../../Canvas/render.js"
-import { renderLayersToDOM, renderVectorsToDOM } from "../../DOM/render.js"
+import { globalState } from '../../Context/state.js'
+import { canvas } from '../../Context/canvas.js'
+import { tools } from '../../Tools/index.js'
+import { vectorGui } from '../../GUI/vector.js'
+import { addToTimeline } from '../undoRedo/undoRedo.js'
+import { renderCanvas } from '../../Canvas/render.js'
+import {
+  updateActiveLayerState,
+  removeTempLayer,
+} from '../../DOM/render.js'
 import {
   confirmPastedPixels,
   copySelectedPixels,
   copySelectedVectors,
   cutSelectedPixels,
   pasteSelectedPixels,
-} from "../../Menu/edit.js"
-import { switchTool } from "../../Tools/toolbox.js"
-import { removeTempLayerFromDOM } from "../../DOM/renderLayers.js"
-import {
-  disableActionsForPaste,
-  enableActionsForNoPaste,
-  enableActionsForSelection,
-} from "../../DOM/disableDomElements.js"
-import { dom } from "../../Context/dom.js"
-import { SCALE } from "../../utils/constants.js"
-import { setVectorShapeBoundaryBox } from "../../GUI/transform.js"
+} from '../../Menu/edit.js'
+import { switchTool } from '../../Tools/toolbox.js'
+import { dom } from '../../Context/dom.js'
+import { SCALE } from '../../utils/constants.js'
+import { setVectorShapeBoundaryBox } from '../../GUI/transform.js'
 
 //=============================================//
 //=========== * * * Clipboard * * * ===========//
@@ -35,17 +32,17 @@ import { setVectorShapeBoundaryBox } from "../../GUI/transform.js"
  */
 export function actionCutSelection(copyToClipboard = true) {
   if (
-    canvas.currentLayer.type === "raster" &&
+    canvas.currentLayer.type === 'raster' &&
     !canvas.currentLayer.isPreview &&
-    (state.selection.boundaryBox.xMax !== null ||
-      state.vector.currentIndex !== null ||
-      state.vector.selectedIndices.size > 0)
+    (globalState.selection.boundaryBox.xMax !== null ||
+      globalState.vector.currentIndex !== null ||
+      globalState.vector.selectedIndices.size > 0)
   ) {
-    if (state.selection.boundaryBox.xMax !== null) {
+    if (globalState.selection.boundaryBox.xMax !== null) {
       //Cut raster content
       cutSelectedPixels(copyToClipboard)
       //correct boundary box for layer offset
-      const boundaryBox = { ...state.selection.boundaryBox }
+      const boundaryBox = { ...globalState.selection.boundaryBox }
       if (boundaryBox.xMax !== null) {
         boundaryBox.xMin -= canvas.currentLayer.x
         boundaryBox.xMax -= canvas.currentLayer.x
@@ -62,28 +59,28 @@ export function actionCutSelection(copyToClipboard = true) {
         },
       })
 
-      state.clearRedoStack()
+      globalState.clearRedoStack()
       renderCanvas(canvas.currentLayer)
       vectorGui.render()
     } else if (
-      state.vector.currentIndex !== null ||
-      state.vector.selectedIndices.size > 0
+      globalState.vector.currentIndex !== null ||
+      globalState.vector.selectedIndices.size > 0
     ) {
       //Cut selected vectors (mark as removed)
       if (copyToClipboard) {
         copySelectedVectors()
       }
       let vectorIndices = []
-      if (state.vector.selectedIndices.size > 0) {
-        state.vector.selectedIndices.forEach((vectorIndex) => {
-          state.vector.all[vectorIndex].removed = true
+      if (globalState.vector.selectedIndices.size > 0) {
+        globalState.vector.selectedIndices.forEach((vectorIndex) => {
+          globalState.vector.all[vectorIndex].removed = true
         })
-        vectorIndices = Array.from(state.vector.selectedIndices)
+        vectorIndices = Array.from(globalState.vector.selectedIndices)
       } else {
-        state.vector.all[state.vector.currentIndex].removed = true
-        vectorIndices = [state.vector.currentIndex]
+        globalState.vector.all[globalState.vector.currentIndex].removed = true
+        vectorIndices = [globalState.vector.currentIndex]
       }
-      state.deselect()
+      globalState.deselect()
       renderCanvas(canvas.currentLayer, true)
       addToTimeline({
         tool: tools.remove.name,
@@ -95,9 +92,8 @@ export function actionCutSelection(copyToClipboard = true) {
         },
       })
 
-      state.clearRedoStack()
+      globalState.clearRedoStack()
       vectorGui.render()
-      renderVectorsToDOM()
     }
   }
 }
@@ -112,18 +108,18 @@ export function actionCutSelection(copyToClipboard = true) {
  */
 export function actionPasteSelection() {
   if (
-    canvas.currentLayer.type === "raster" &&
+    canvas.currentLayer.type === 'raster' &&
     !canvas.currentLayer.isPreview &&
-    (state.clipboard.select.canvas ||
-      Object.keys(state.clipboard.select.vectors).length > 0)
+    (globalState.clipboard.select.canvas ||
+      Object.keys(globalState.clipboard.select.vectors).length > 0)
   ) {
-    //if state.clipboard.select.canvas, run pasteSelectedPixels
+    //if globalState.clipboard.select.canvas, run pasteSelectedPixels
     //Compute layer-relative coords by subtracting the layer offset AT COPY TIME (not now).
     //This keeps the paste anchored to the same layer-relative position as the copied pixels,
     //so moving the layer between copy and paste shifts the paste with the content.
-    const clipboardLayerX = state.clipboard.select.layerX ?? 0
-    const clipboardLayerY = state.clipboard.select.layerY ?? 0
-    const boundaryBox = { ...state.clipboard.select.boundaryBox }
+    const clipboardLayerX = globalState.clipboard.select.layerX ?? 0
+    const clipboardLayerY = globalState.clipboard.select.layerY ?? 0
+    const boundaryBox = { ...globalState.clipboard.select.boundaryBox }
     if (boundaryBox.xMax !== null) {
       boundaryBox.xMin -= clipboardLayerX
       boundaryBox.xMax -= clipboardLayerX
@@ -131,7 +127,7 @@ export function actionPasteSelection() {
       boundaryBox.yMax -= clipboardLayerY
     }
     const selectProperties = {
-      ...state.clipboard.select.selectProperties,
+      ...globalState.clipboard.select.selectProperties,
     }
     if (selectProperties.px2 !== null) {
       selectProperties.px1 -= clipboardLayerX
@@ -139,30 +135,37 @@ export function actionPasteSelection() {
       selectProperties.py1 -= clipboardLayerY
       selectProperties.py2 -= clipboardLayerY
     }
-    if (state.clipboard.select.canvas) {
+    if (globalState.clipboard.select.canvas) {
       //paste selected pixels (creates temporary canvas layer for pasting)
       //Pass adjusted clipboard and current layer offset so the live paste draws at the
       //correct canvas position (layer-relative + current layer.x = canvas position)
       const adjustedClipboard = {
-        ...state.clipboard.select,
+        ...globalState.clipboard.select,
         boundaryBox,
         selectProperties,
       }
-      pasteSelectedPixels(adjustedClipboard, canvas.currentLayer, canvas.currentLayer.x, canvas.currentLayer.y)
+      pasteSelectedPixels(
+        adjustedClipboard,
+        canvas.currentLayer,
+        canvas.currentLayer.x,
+        canvas.currentLayer.y,
+      )
       let uniquePastedImageKey = null
-      if (state.clipboard.select.canvas) {
-        state.clipboard.highestPastedImageKey += 1
-        uniquePastedImageKey = state.clipboard.highestPastedImageKey
+      if (globalState.clipboard.select.canvas) {
+        globalState.clipboard.highestPastedImageKey += 1
+        uniquePastedImageKey = globalState.clipboard.highestPastedImageKey
       }
-      if (state.clipboard.select.imageData) {
-        state.clipboard.pastedImages[uniquePastedImageKey] = {
-          imageData: state.clipboard.select.imageData,
+      if (globalState.clipboard.select.imageData) {
+        globalState.clipboard.pastedImages[uniquePastedImageKey] = {
+          imageData: globalState.clipboard.select.imageData,
         }
-        state.clipboard.currentPastedImageKey = uniquePastedImageKey
+        globalState.clipboard.currentPastedImageKey = uniquePastedImageKey
       }
       //clear any selected vectors
-      state.vector.clearSelected()
-      dom.vectorTransformUIContainer.style.display = "none"
+      globalState.vector.clearSelected()
+      globalState.ui.vectorTransformOpen = false
+      if (dom.vectorTransformUIContainer)
+        dom.vectorTransformUIContainer.style.display = 'none'
       //add to timeline
       addToTimeline({
         tool: tools.paste.name,
@@ -172,51 +175,53 @@ export function actionPasteSelection() {
           boundaryBox,
           selectProperties,
           pastedImageKey: uniquePastedImageKey,
-          canvas: state.clipboard.select.canvas,
+          canvas: globalState.clipboard.select.canvas,
           canvasProperties: {
-            dataUrl: state.clipboard.select.canvas?.toDataURL(),
-            width: state.clipboard.select.canvas?.width,
-            height: state.clipboard.select.canvas?.height,
+            dataUrl: globalState.clipboard.select.canvas?.toDataURL(),
+            width: globalState.clipboard.select.canvas?.width,
+            height: globalState.clipboard.select.canvas?.height,
           },
           pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
         },
       })
 
-      state.clearRedoStack()
+      globalState.clearRedoStack()
 
       renderCanvas(canvas.currentLayer)
-      switchTool("move") //TODO: (Medium Priority) Instead of move tool being selected, automatically use temporary transform tool which is not in the toolbox.
-      renderLayersToDOM()
-      renderVectorsToDOM()
-      disableActionsForPaste()
-    } else if (Object.keys(state.clipboard.select.vectors).length > 0) {
+      switchTool('move') //TODO: (Medium Priority) Instead of move tool being selected, automatically use temporary transform tool which is not in the toolbox.
+      updateActiveLayerState()
+    } else if (Object.keys(globalState.clipboard.select.vectors).length > 0) {
       //Make deep copy of clipboard vectors:
       const clipboardVectors = JSON.parse(
-        JSON.stringify(state.clipboard.select.vectors)
+        JSON.stringify(globalState.clipboard.select.vectors),
       )
       //correct offset coords for vectors to make agnostic to layer coords
       for (const [vectorIndex, vector] of Object.entries(clipboardVectors)) {
         vector.layer = canvas.currentLayer
         //update vector index and action index
-        const uniqueVectorKey = state.vector.nextKey()
+        const uniqueVectorKey = globalState.vector.nextKey()
         vector.index = uniqueVectorKey
         delete clipboardVectors[vectorIndex] // Remove old key-value pair
         clipboardVectors[uniqueVectorKey] = vector // Assign vector to new key
-        //add to state.vector.all
-        state.vector.all[uniqueVectorKey] = vector
+        //add to globalState.vector.all
+        globalState.vector.all[uniqueVectorKey] = vector
       }
-      state.vector.clearSelected()
+      globalState.vector.clearSelected()
       const vectorIndices = Object.keys(clipboardVectors)
       vectorIndices.forEach((vectorIndex) => {
-        state.vector.addSelected(parseInt(vectorIndex))
+        globalState.vector.addSelected(parseInt(vectorIndex))
       })
-      if (state.vector.selectedIndices.size > 0) {
-        dom.vectorTransformUIContainer.style.display = "flex"
-        if (state.vector.transformMode === SCALE) {
+      if (globalState.vector.selectedIndices.size > 0) {
+        globalState.ui.vectorTransformOpen = true
+        if (dom.vectorTransformUIContainer)
+          dom.vectorTransformUIContainer.style.display = 'flex'
+        if (globalState.vector.transformMode === SCALE) {
           setVectorShapeBoundaryBox()
         }
       } else {
-        dom.vectorTransformUIContainer.style.display = "none"
+        globalState.ui.vectorTransformOpen = false
+        if (dom.vectorTransformUIContainer)
+          dom.vectorTransformUIContainer.style.display = 'none'
       }
       //add to timeline
       addToTimeline({
@@ -229,13 +234,12 @@ export function actionPasteSelection() {
         },
       })
       vectorIndices.forEach((vectorIndex) => {
-        state.vector.all[vectorIndex].action = state.timeline.currentAction
+        globalState.vector.all[vectorIndex].action =
+          globalState.timeline.currentAction
       })
-      state.clearRedoStack()
+      globalState.clearRedoStack()
       renderCanvas(canvas.currentLayer, true) //Must occur after adding to timeline. Once direct render is implemented, render canvas can be before add to timeline
-      renderLayersToDOM()
-      renderVectorsToDOM()
-      enableActionsForSelection()
+      updateActiveLayerState()
       vectorGui.render()
     }
   }
@@ -252,22 +256,25 @@ export function actionPasteSelection() {
  */
 export function actionConfirmPastedPixels() {
   let lastPasteAction = null
-  for (let i = state.timeline.undoStack.length - 1; i >= 0; i--) {
-    if (state.timeline.undoStack[i].tool === "paste" && !state.timeline.undoStack[i].confirmed) {
-      lastPasteAction = state.timeline.undoStack[i]
+  for (let i = globalState.timeline.undoStack.length - 1; i >= 0; i--) {
+    if (
+      globalState.timeline.undoStack[i].tool === 'paste' &&
+      !globalState.timeline.undoStack[i].confirmed
+    ) {
+      lastPasteAction = globalState.timeline.undoStack[i]
       break // Stop searching once the first 'paste' action is found
     }
   }
-  if (canvas.currentLayer.type === "raster" && lastPasteAction) {
+  if (canvas.currentLayer.type === 'raster' && lastPasteAction) {
     const xOffset = canvas.tempLayer.x
     const yOffset = canvas.tempLayer.y
-    const boundaryBox = { ...state.selection.boundaryBox }
-    const selectProperties = { ...state.selection.properties }
+    const boundaryBox = { ...globalState.selection.boundaryBox }
+    const selectProperties = { ...globalState.selection.properties }
     //create copy of current canvas
-    const confirmedCanvas = document.createElement("canvas")
+    const confirmedCanvas = document.createElement('canvas')
     confirmedCanvas.width = boundaryBox.xMax - boundaryBox.xMin
     confirmedCanvas.height = boundaryBox.yMax - boundaryBox.yMin
-    const confirmedCTX = confirmedCanvas.getContext("2d")
+    const confirmedCTX = confirmedCanvas.getContext('2d')
     confirmedCTX.drawImage(
       canvas.currentLayer.cvs,
       boundaryBox.xMin,
@@ -277,7 +284,7 @@ export function actionConfirmPastedPixels() {
       0,
       0,
       confirmedCanvas.width,
-      confirmedCanvas.height
+      confirmedCanvas.height,
     )
     //adjust boundaryBox for layer offset
     if (boundaryBox.xMax !== null) {
@@ -299,7 +306,7 @@ export function actionConfirmPastedPixels() {
     }
     confirmPastedPixels(confirmedClipboard, canvas.pastedLayer)
     //remove temp layer from DOM and restore current layer
-    removeTempLayerFromDOM()
+    removeTempLayer()
     //add to timeline
     addToTimeline({
       tool: tools.paste.name,
@@ -310,7 +317,7 @@ export function actionConfirmPastedPixels() {
         preConfirmYOffset: yOffset,
         boundaryBox,
         selectProperties,
-        pastedImageKey: state.clipboard.currentPastedImageKey, //needed for reference on undo?
+        pastedImageKey: globalState.clipboard.currentPastedImageKey, //needed for reference on undo?
         canvas: confirmedCanvas,
         canvasProperties: {
           dataUrl: confirmedCanvas?.toDataURL(),
@@ -319,18 +326,16 @@ export function actionConfirmPastedPixels() {
         },
       },
     })
-    state.clearRedoStack()
+    globalState.clearRedoStack()
     //Reset transform properties
-    state.clipboard.currentPastedImageKey = null
-    state.transform.rotationDegrees = 0
-    state.transform.isMirroredHorizontally = false
-    state.transform.isMirroredVertically = false
+    globalState.clipboard.currentPastedImageKey = null
+    globalState.transform.rotationDegrees = 0
+    globalState.transform.isMirroredHorizontally = false
+    globalState.transform.isMirroredVertically = false
     //render
     vectorGui.render()
     renderCanvas(canvas.currentLayer)
-    renderLayersToDOM()
-    renderVectorsToDOM()
-    enableActionsForNoPaste()
+    updateActiveLayerState()
   }
 }
 
@@ -340,12 +345,12 @@ export function actionConfirmPastedPixels() {
  */
 export function actionCopySelection() {
   if (
-    canvas.currentLayer.type === "raster" &&
-    (state.selection.boundaryBox.xMax !== null ||
-      state.vector.currentIndex !== null ||
-      state.vector.selectedIndices.size > 0)
+    canvas.currentLayer.type === 'raster' &&
+    (globalState.selection.boundaryBox.xMax !== null ||
+      globalState.vector.currentIndex !== null ||
+      globalState.vector.selectedIndices.size > 0)
   ) {
-    if (state.selection.boundaryBox.xMax !== null) {
+    if (globalState.selection.boundaryBox.xMax !== null) {
       copySelectedPixels()
     } else {
       copySelectedVectors()

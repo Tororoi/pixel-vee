@@ -28,7 +28,12 @@ export function actionFill(startX, startY, strokeCtx) {
   if (customContext) {
     renderCtx = customContext
   }
-  let layerImageData = renderCtx.getImageData(xMin, yMin, xMax - xMin, yMax - yMin)
+  let layerImageData = renderCtx.getImageData(
+    xMin,
+    yMin,
+    xMax - xMin,
+    yMax - yMin,
+  )
   let clickedColor = getColor(layerImageData, startX - xMin, startY - yMin)
 
   if (currentModes?.eraser) {

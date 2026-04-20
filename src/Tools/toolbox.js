@@ -1,171 +1,114 @@
-import { dom } from '../Context/dom.js'
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { tools, toolGroups } from '../Tools/index.js'
 import { vectorGui } from '../GUI/vector.js'
 import { renderCanvas } from '../Canvas/render.js'
-import {
-  // renderVectorsToDOM,
-  renderBrushModesToDOM,
-  renderBrushStampToDOM,
-  renderToolOptionsToDOM,
-  renderStampOptionsToDOM,
-  renderDitherOptionsToDOM,
-  updateDitherPickerColors,
-} from '../DOM/render.js'
 import { renderCursor } from '../GUI/cursor.js'
 import { actionDeselect } from '../Actions/nonPointer/selectionActions.js'
 import { actionConfirmPastedPixels } from '../Actions/nonPointer/clipboardActions.js'
 import { CURVE_TYPES } from '../utils/constants.js'
 
 /**
- * Sync each tool group button to its default active tool on page load
- */
-export function initToolGroups() {
-  for (const [groupName, group] of Object.entries(toolGroups)) {
-    const groupBtn = document.querySelector(
-      `.tool-group-btn[data-group="${groupName}"]`,
-    )
-    const activeToolBtn = document.querySelector(`#${group.activeTool}`)
-    if (groupBtn && activeToolBtn) {
-      group.tools.forEach((t) => groupBtn.classList.remove(t))
-      groupBtn.classList.add(group.activeTool)
-      groupBtn.dataset.tooltip = activeToolBtn.dataset.tooltip
-      groupBtn.setAttribute(
-        'aria-label',
-        activeToolBtn.getAttribute('aria-label'),
-      )
-    }
-  }
-}
-
-/**
  * Switch active tool
  * @param {string|null} toolName - The tool name
- * @param {HTMLElement|null} toolBtn - The tool button
+ * @param {HTMLElement|null} toolBtn - Unused — kept for call-site compatibility
  */
 export function switchTool(toolName = null, toolBtn = null) {
-  const targetToolBtn = toolBtn || document.querySelector(`#${toolName}`)
-  if (targetToolBtn) {
-    //failsafe for hacking tool ids
-    if (tools[targetToolBtn?.id]) {
-      if (canvas.currentLayer.inactiveTools.includes(targetToolBtn?.id)) {
-        if (canvas.currentLayer.isPreview) {
-          actionConfirmPastedPixels()
-        } else {
-          return
-        }
-      }
-      //reset old button
-      dom.toolBtn.classList.remove('selected')
-      //remove selected from old tool's group button if applicable
-      for (const [groupName, group] of Object.entries(toolGroups)) {
-        if (group.tools.includes(dom.toolBtn.id)) {
-          document
-            .querySelector(`.tool-group-btn[data-group="${groupName}"]`)
-            ?.classList.remove('selected')
-          break
-        }
-      }
-      //get new button and select it
-      dom.toolBtn = targetToolBtn
-      dom.toolBtn.classList.add('selected')
-      state.tool.current = tools[dom.toolBtn.id]
-      //sync group state if new tool belongs to a group
-      for (const [groupName, group] of Object.entries(toolGroups)) {
-        if (group.tools.includes(dom.toolBtn.id)) {
-          group.activeTool = dom.toolBtn.id
-          const groupBtn = document.querySelector(
-            `.tool-group-btn[data-group="${groupName}"]`,
-          )
-          if (groupBtn) {
-            group.tools.forEach((t) => groupBtn.classList.remove(t))
-            groupBtn.classList.add(dom.toolBtn.id)
-            groupBtn.classList.add('selected')
-            groupBtn.dataset.tooltip = dom.toolBtn.dataset.tooltip
-            groupBtn.setAttribute(
-              'aria-label',
-              dom.toolBtn.getAttribute('aria-label'),
-            )
-          }
-          break
-        }
-      }
-      renderCanvas(canvas.currentLayer)
-      //update options
-      renderBrushStampToDOM()
-      dom.brushSlider.value = state.tool.current.brushSize
-      dom.brushSlider.disabled = state.tool.current.brushDisabled
-      //update cursor
-      if (state.tool.current.modes?.eraser) {
-        canvas.vectorGuiCVS.style.cursor = 'none'
-      } else {
-        canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
-      }
-      //render menu options
-      renderToolOptionsToDOM()
-      //If the tool is not a vector tool, clear the selected vector indices
-      if (
-        !['fill', 'curve', 'ellipse', 'polygon', 'move'].includes(
-          tools[targetToolBtn.id].name,
-        )
-      ) {
-        if (state.vector.selectedIndices.size > 0) {
-          actionDeselect()
-        }
-      }
-      vectorGui.reset()
-      state.reset()
-      renderBrushModesToDOM()
-      renderStampOptionsToDOM()
-      renderDitherOptionsToDOM()
-      renderCursor()
+  const targetId = toolBtn?.id ?? toolName
+  if (!targetId) return
+  if (!tools[targetId]) return
+
+  if (canvas.currentLayer?.inactiveTools?.includes(targetId)) {
+    if (canvas.currentLayer.isPreview) {
+      actionConfirmPastedPixels()
+    } else {
+      return
     }
   }
+
+  if (globalState.tool.current?.name !== targetId) {
+    globalState.tool.current = tools[targetId]
+  }
+  globalState.tool.selectedName = targetId
+
+  // Sync active tool within its group
+  for (const [, group] of Object.entries(toolGroups)) {
+    if (group.tools.includes(targetId)) {
+      group.activeTool = targetId
+      break
+    }
+  }
+
+  renderCanvas(canvas.currentLayer)
+
+  // Update cursor
+  if (globalState.tool.current.modes?.eraser) {
+    canvas.vectorGuiCVS.style.cursor = 'none'
+  } else {
+    canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
+  }
+
+  // If the tool is not a vector tool, clear the selected vector indices
+  if (
+    !['fill', 'curve', 'ellipse', 'polygon', 'move'].includes(
+      tools[targetId].name,
+    )
+  ) {
+    if (globalState.vector.selectedIndices.size > 0) {
+      actionDeselect()
+    }
+  }
+  vectorGui.reset()
+  globalState.reset()
+  renderCursor()
 }
 
 /**
  * Toggle active mode
- * TODO: (Low Priority) add multi-touch mode for drawing with multiple fingers
- * TODO: (Medium Priority) add curve brush mode for freehand drawing splines
  * @param {string|null} modeName - The mode name
  * @param {HTMLElement|null} modeBtn - The mode button
  */
 export function toggleMode(modeName = null, modeBtn = null) {
-  const targetModeBtn = modeBtn || document.querySelector(`#${modeName}`)
-  if (targetModeBtn) {
-    if (state.tool.current.modes[targetModeBtn.id] !== undefined) {
-      if (targetModeBtn.classList.contains('selected')) {
-        // Curve type modes cannot be deselected — one must always be active
-        if (CURVE_TYPES.includes(targetModeBtn.id)) return
-        state.tool.current.modes[targetModeBtn.id] = false
-      } else {
-        state.tool.current.modes[targetModeBtn.id] = true
-        //eraser and inject modes cannot be selected at the same time
-        if (targetModeBtn.id === 'eraser' && state.tool.current.modes?.inject) {
-          state.tool.current.modes.inject = false
-        } else if (
-          targetModeBtn.id === 'inject' &&
-          state.tool.current.modes?.eraser
-        ) {
-          state.tool.current.modes.eraser = false
-        }
-        //line, quadCurve, cubicCurve modes are mutually exclusive
-        if (CURVE_TYPES.includes(targetModeBtn.id)) {
-          CURVE_TYPES.forEach((t) => {
-            if (t !== targetModeBtn.id) state.tool.current.modes[t] = false
-          })
-          renderToolOptionsToDOM()
-        }
-      }
-      if (state.tool.current.modes?.eraser) {
-        canvas.vectorGuiCVS.style.cursor = 'none'
-      } else {
-        canvas.vectorGuiCVS.style.cursor = state.tool.current.cursor
-      }
-      renderBrushModesToDOM()
-      renderCursor()
-      updateDitherPickerColors()
+  const targetId = modeBtn?.id ?? modeName
+  if (!targetId) return
+  const modes = globalState.tool.current?.modes
+  if (!modes || modes[targetId] === undefined) return
+
+  // Also write directly to the underlying tool object so the value persists
+  // when the tool is re-selected (Svelte 5's proxy may not write through)
+  const toolName = globalState.tool.selectedName
+  const directModes = tools[toolName]?.modes
+
+  /**
+   * @param {string} key - Mode key
+   * @param {*} value - Mode value
+   * @returns {void}
+   */
+  function setMode(key, value) {
+    modes[key] = value
+    if (directModes) directModes[key] = value
+  }
+
+  if (modes[targetId]) {
+    if (CURVE_TYPES.includes(targetId)) return
+    setMode(targetId, false)
+  } else {
+    setMode(targetId, true)
+    if (targetId === 'eraser' && modes.inject) {
+      setMode('inject', false)
+    } else if (targetId === 'inject' && modes.eraser) {
+      setMode('eraser', false)
+    }
+    if (CURVE_TYPES.includes(targetId)) {
+      CURVE_TYPES.forEach((t) => {
+        if (t !== targetId) setMode(t, false)
+      })
     }
   }
+  if (modes.eraser) {
+    canvas.vectorGuiCVS.style.cursor = 'none'
+  } else {
+    canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
+  }
+  renderCursor()
 }

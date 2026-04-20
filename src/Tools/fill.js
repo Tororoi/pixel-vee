@@ -1,4 +1,4 @@
-import { state } from '../Context/state.js'
+import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { swatches } from '../Context/swatch.js'
 import { actionFill } from '../Actions/pointer/fill.js'
@@ -26,45 +26,49 @@ function fillSteps() {
   if (rerouteVectorStepsAction()) return
   const normalizedX = getCropNormalizedCursorX()
   const normalizedY = getCropNormalizedCursorY()
-  const { cropOffsetX, cropOffsetY } = state.canvas
+  const { cropOffsetX, cropOffsetY } = globalState.canvas
   switch (canvas.pointerEvent) {
     case 'pointerdown': {
       //reset control points
       vectorGui.reset()
-      state.vector.properties.tool = state.tool.current.name
-      state.vector.properties.px1 = normalizedX
-      state.vector.properties.py1 = normalizedY
+      globalState.vector.properties.tool = globalState.tool.current.name
+      globalState.vector.properties.px1 = normalizedX
+      globalState.vector.properties.py1 = normalizedY
       actionFill(
-        state.vector.properties.px1 + cropOffsetX,
-        state.vector.properties.py1 + cropOffsetY,
+        globalState.vector.properties.px1 + cropOffsetX,
+        globalState.vector.properties.py1 + cropOffsetY,
         createStrokeContext({
           layer: canvas.currentLayer,
-          boundaryBox: state.selection.boundaryBox,
+          boundaryBox: globalState.selection.boundaryBox,
           currentColor: swatches.primary.color,
-          currentModes: state.tool.current.modes,
-          maskSet: state.selection.maskSet,
+          currentModes: globalState.tool.current.modes,
+          maskSet: globalState.selection.maskSet,
         }),
       )
       //For undo ability, store starting coords and settings and pass them into actionFill
       let maskArray = coordArrayFromSet(
-        state.selection.maskSet,
-        canvas.currentLayer.x + state.canvas.cropOffsetX,
-        canvas.currentLayer.y + state.canvas.cropOffsetY,
+        globalState.selection.maskSet,
+        canvas.currentLayer.x + globalState.canvas.cropOffsetX,
+        canvas.currentLayer.y + globalState.canvas.cropOffsetY,
       )
       //correct boundary box for layer offset and crop offset
-      const boundaryBox = { ...state.selection.boundaryBox }
+      const boundaryBox = { ...globalState.selection.boundaryBox }
       if (boundaryBox.xMax !== null) {
-        boundaryBox.xMin -= canvas.currentLayer.x + state.canvas.cropOffsetX
-        boundaryBox.xMax -= canvas.currentLayer.x + state.canvas.cropOffsetX
-        boundaryBox.yMin -= canvas.currentLayer.y + state.canvas.cropOffsetY
-        boundaryBox.yMax -= canvas.currentLayer.y + state.canvas.cropOffsetY
+        boundaryBox.xMin -=
+          canvas.currentLayer.x + globalState.canvas.cropOffsetX
+        boundaryBox.xMax -=
+          canvas.currentLayer.x + globalState.canvas.cropOffsetX
+        boundaryBox.yMin -=
+          canvas.currentLayer.y + globalState.canvas.cropOffsetY
+        boundaryBox.yMax -=
+          canvas.currentLayer.y + globalState.canvas.cropOffsetY
       }
       //generate new unique key for vector
-      state.vector.highestKey += 1
-      let uniqueVectorKey = state.vector.highestKey
+      globalState.vector.highestKey += 1
+      let uniqueVectorKey = globalState.vector.highestKey
       //store control points for timeline
       addToTimeline({
-        tool: state.tool.current.name,
+        tool: globalState.tool.current.name,
         layer: canvas.currentLayer,
         properties: {
           maskArray,
@@ -73,25 +77,25 @@ function fillSteps() {
         },
       })
       //Store vector in state
-      state.vector.all[uniqueVectorKey] = {
+      globalState.vector.all[uniqueVectorKey] = {
         index: uniqueVectorKey,
-        action: state.timeline.currentAction,
+        action: globalState.timeline.currentAction,
         layer: canvas.currentLayer,
-        modes: { ...state.tool.current.modes },
+        modes: { ...globalState.tool.current.modes },
         color: { ...swatches.primary.color },
-        brushSize: state.tool.current.brushSize,
-        brushType: state.tool.current.brushType,
+        brushSize: globalState.tool.current.brushSize,
+        brushType: globalState.tool.current.brushType,
         vectorProperties: {
-          ...state.vector.properties,
-          px1: state.vector.properties.px1 - canvas.currentLayer.x,
-          py1: state.vector.properties.py1 - canvas.currentLayer.y,
+          ...globalState.vector.properties,
+          px1: globalState.vector.properties.px1 - canvas.currentLayer.x,
+          py1: globalState.vector.properties.py1 - canvas.currentLayer.y,
         },
         // maskArray,
         // boundaryBox,
         hidden: false,
         removed: false,
       }
-      // state.vector.currentIndex = uniqueVectorKey
+      // globalState.vector.currentIndex = uniqueVectorKey
       // enableActionsForSelection()
       renderCanvas(canvas.currentLayer)
       vectorGui.reset()
