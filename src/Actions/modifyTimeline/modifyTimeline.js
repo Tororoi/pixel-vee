@@ -238,7 +238,20 @@ export function changeActionVectorCurveType(targetVector, newCurveType) {
     py4: targetVector.vectorProperties.py4,
   }
   if (globalState.vector.currentIndex === targetVector.index) {
-    globalState.vector.properties = { ...targetVector.vectorProperties }
+    const layerX = targetVector.layer.x
+    const layerY = targetVector.layer.y
+    if (targetVector.vectorProperties.px3 !== undefined) {
+      globalState.vector.properties.px3 =
+        targetVector.vectorProperties.px3 + layerX
+      globalState.vector.properties.py3 =
+        targetVector.vectorProperties.py3 + layerY
+    }
+    if (targetVector.vectorProperties.px4 !== undefined) {
+      globalState.vector.properties.px4 =
+        targetVector.vectorProperties.px4 + layerX
+      globalState.vector.properties.py4 =
+        targetVector.vectorProperties.py4 + layerY
+    }
   }
   // Render before recording so addToTimeline's snapshot captures the post-render pixels.
   // If snapshot is taken first (pre-render), undoing restores stale pixels.
