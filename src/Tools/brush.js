@@ -176,9 +176,15 @@ function brushSteps() {
         boundaryBox,
       }
       if (globalState.tool.current.modes?.buildUpDither) {
+        const lx = canvas.currentLayer.x + globalState.canvas.cropOffsetX
+        const ly = canvas.currentLayer.y + globalState.canvas.cropOffsetY
         timelineProperties.buildUpDensityDelta = [
           ...globalState.selection.seenPixelsSet,
-        ]
+        ].map((coord) => {
+          const rx = (coord & 0xffff) - lx
+          const ry = ((coord >>> 16) & 0xffff) - ly
+          return (ry << 16) | rx
+        })
         timelineProperties.buildUpSteps = [
           ...globalState.tool.current.buildUpSteps,
         ]
@@ -428,8 +434,11 @@ export function rebuildBuildUpDensityMap() {
       action.layer === layer &&
       action.buildUpDensityDelta
     ) {
+      const lx = layer.x + globalState.canvas.cropOffsetX
+      const ly = layer.y + globalState.canvas.cropOffsetY
       for (const coord of action.buildUpDensityDelta) {
-        map.set(coord, (map.get(coord) ?? 0) + 1)
+        const key = (((coord >>> 16) & 0xffff) + ly) << 16 | ((coord & 0xffff) + lx)
+        map.set(key, (map.get(key) ?? 0) + 1)
       }
     }
   }

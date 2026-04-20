@@ -142,8 +142,11 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         action.buildUpDensityDelta
       ) {
         const layerMap = buildUpLayerMaps.get(action.layer)
+        const lx = action.layer.x + cropDX
+        const ly = action.layer.y + cropDY
         for (const coord of action.buildUpDensityDelta) {
-          layerMap.set(coord, (layerMap.get(coord) ?? 0) + 1)
+          const key = (((coord >>> 16) & 0xffff) + ly) << 16 | ((coord & 0xffff) + lx)
+          layerMap.set(key, (layerMap.get(key) ?? 0) + 1)
         }
       }
     }
