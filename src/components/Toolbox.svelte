@@ -1,5 +1,4 @@
 <script>
-  import { onMount } from 'svelte'
   import { globalState } from '../Context/state.js'
   import { canvas } from '../Context/canvas.js'
   import { toolGroups } from '../Tools/index.js'
@@ -15,7 +14,7 @@
   import { renderCanvas } from '../Canvas/render.js'
 
   import { ZOOM_LEVELS } from '../utils/constants.js'
-  import { initializeDragger, initializeCollapser } from '../utils/drag.js'
+  import DialogBox from './DialogBox.svelte'
 
   const COLUMN1_TOOLS = [
     'brush',
@@ -26,7 +25,6 @@
   ]
   const COLUMN2_TOOLS = ['eyedropper', 'grab', 'move']
 
-  let ref = $state(null)
   let openGroup = $state(null)
 
   const selectedName = $derived(globalState.tool.selectedName)
@@ -46,15 +44,6 @@
         groupActiveTools[groupKey] = selectedName
         break
       }
-    }
-  })
-
-  onMount(() => {
-    if (!ref) return
-    initializeDragger(ref)
-    initializeCollapser(ref)
-    return () => {
-      delete ref?.dataset.dragInitialized
     }
   })
 
@@ -154,28 +143,8 @@
   }
 </script>
 
-<div bind:this={ref} class="toolbox dialog-box h-drag free locked">
-  <div id="toolbox-header" class="header dragger">
-    <div class="drag-btn locked">
-      <div class="grip"></div>
-    </div>
-    Toolbox
-    <label
-      for="toolbox-collapse-btn"
-      id="toolbox-collapser"
-      class="collapse-btn"
-      data-tooltip="Collapse/ Expand"
-    >
-      <input
-        type="checkbox"
-        aria-label="Collapse or Expand"
-        class="collapse-checkbox"
-        id="toolbox-collapse-btn"
-      />
-      <span class="arrow"></span>
-    </label>
-  </div>
-  <div class="collapsible">
+<DialogBox title="Toolbox" class="toolbox h-drag free locked" collapsible locked>
+
     <div class="btn-pair">
       <button
         type="button"
@@ -299,5 +268,4 @@
         </div>
       </div>
     </div>
-  </div>
-</div>
+</DialogBox>

@@ -9,71 +9,42 @@
     closePickerWindow,
     addToPalette,
   } from '../../Swatch/events.js'
-  import { initializeDragger } from '../../utils/drag.js'
+  import DialogBox from '../DialogBox.svelte'
 
-  let ref = $state(null)
   let canvasRef = $state(null)
+  let rampsCollapsed = $state(false)
 
   const isOpen = $derived(globalState.ui.colorPickerOpen)
 
   onMount(() => {
-    if (!canvasRef) return
-    const p = new Picker(canvasRef, 250, 250, swatches.primary.color)
-    p.build()
-    registerPicker(p)
-  })
-
-  onMount(() => {
-    if (!ref) return
-    initializeDragger(ref)
-
-    // Wire up color ramps collapse
-    const ramsCheckbox = ref.querySelector('#ramps-collapse-btn')
-    const ramsCollapsible = ref.querySelector('#color-ramps-collapsible')
-    if (ramsCheckbox && ramsCollapsible) {
-      ramsCheckbox.addEventListener('click', () => {
-        ramsCollapsible.style.display = ramsCheckbox.checked ? 'none' : 'flex'
-      })
-    }
-
-    return () => {
-      delete ref?.dataset.dragInitialized
+    if (canvasRef) {
+      const p = new Picker(canvasRef, 250, 250, swatches.primary.color)
+      p.build()
+      registerPicker(p)
     }
   })
 </script>
 
-<div
-  bind:this={ref}
-  class="picker-container dialog-box v-drag h-drag free"
+<DialogBox
+  title="Color Picker"
+  class="picker-container v-drag h-drag free"
   style="display: {isOpen ? 'flex' : 'none'}"
+  onclose={closePickerWindow}
 >
-  <div class="header dragger">
-    <div class="drag-btn">
-      <div class="grip"></div>
-    </div>
-    Color Picker
-    <button
-      type="button"
-      class="close-btn"
-      aria-label="Close"
-      data-tooltip="Close"
-      onclick={closePickerWindow}
-    ></button>
-  </div>
-  <div class="collapsible">
     <div id="color-ramps-section">
       <div class="ramps-header">
         Color Ramps
-        <label for="ramps-collapse-btn" class="collapse-btn">
+        <label class="collapse-btn">
           <input
             type="checkbox"
             class="collapse-checkbox"
-            id="ramps-collapse-btn"
+            checked={rampsCollapsed}
+            onchange={(e) => { rampsCollapsed = e.target.checked }}
           />
           <span class="arrow"></span>
         </label>
       </div>
-      <div id="color-ramps-collapsible">
+      <div id="color-ramps-collapsible" style="display: {rampsCollapsed ? 'none' : 'flex'}">
         <div class="color-group" data-group="shadow">
           <div class="ramp-label">Shadow / Highlight</div>
           <div class="ramp-row">
@@ -244,5 +215,4 @@
         </div>
       </div>
     </div>
-  </div>
-</div>
+</DialogBox>

@@ -1,23 +1,12 @@
 <script>
-  import { onMount } from 'svelte'
   import { globalState } from '../../Context/state.js'
   import { canvas } from '../../Context/canvas.js'
   import { consolidateLayers } from '../../Canvas/layers.js'
-  import { initializeDragger } from '../../utils/drag.js'
+  import DialogBox from '../DialogBox.svelte'
 
   const SCALES = [1, 2, 4, 8]
 
-  let ref = $state(null)
-
   const isOpen = $derived(globalState.ui.exportOpen)
-
-  onMount(() => {
-    if (!ref) return
-    initializeDragger(ref)
-    return () => {
-      delete ref?.dataset.dragInitialized
-    }
-  })
 
   function handleClose() {
     globalState.ui.exportOpen = false
@@ -47,31 +36,17 @@
   }
 </script>
 
-<div
-  bind:this={ref}
-  class="export-container dialog-box v-drag h-drag free"
+<DialogBox
+  title="Export"
+  class="export-container v-drag h-drag free"
   style="display: {isOpen ? 'flex' : 'none'}"
+  onclose={handleClose}
 >
-  <div id="export-header" class="header dragger">
-    <div class="drag-btn">
-      <div class="grip"></div>
-    </div>
-    <span>Export</span>
-    <button
-      type="button"
-      class="close-btn"
-      aria-label="Close"
-      data-tooltip="Close"
-      onclick={handleClose}
-    ></button>
+  <div id="export-interface" class="export-interface">
+    {#each SCALES as scale (scale)}
+      <button type="button" class="btn" onclick={() => handleExport(scale)}>
+        {scale}x
+      </button>
+    {/each}
   </div>
-  <div class="collapsible">
-    <div id="export-interface" class="export-interface">
-      {#each SCALES as scale (scale)}
-        <button type="button" class="btn" onclick={() => handleExport(scale)}>
-          {scale}x
-        </button>
-      {/each}
-    </div>
-  </div>
-</div>
+</DialogBox>

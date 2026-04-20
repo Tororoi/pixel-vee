@@ -1,5 +1,4 @@
 <script>
-  import { onMount } from 'svelte'
   import { globalState } from '../../Context/state.js'
   import { canvas } from '../../Context/canvas.js'
   import { vectorGui } from '../../GUI/vector.js'
@@ -11,11 +10,10 @@
     removeLayer,
   } from '../../Actions/layer/layerActions.js'
   import { switchTool } from '../../Tools/toolbox.js'
-  import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
   import { dom } from '../../Context/dom.js'
   import LayerSettingsPopout from './LayerSettingsPopout.svelte'
+  import DialogBox from '../DialogBox.svelte'
 
-  let ref = $state(null)
   let uploadRef = $state(null)
   let settingsLayer = $state.raw(null)
   let settingsPos = $state({ top: 0, left: 0 })
@@ -30,15 +28,6 @@
       (canvas.activeLayerCount > 1 || canvas.currentLayer?.type !== 'raster'),
   )
   const currentLayer = $derived(canvas.currentLayer)
-
-  onMount(() => {
-    if (!ref) return
-    initializeDragger(ref)
-    initializeCollapser(ref)
-    return () => {
-      delete ref?.dataset.dragInitialized
-    }
-  })
 
   function handleAddLayer() {
     if (isPasted) return
@@ -135,32 +124,11 @@
   }
 </script>
 
-<div
-  bind:this={ref}
-  class="layers-interface dialog-box draggable v-drag settings-box smooth-shift{isPasted
-    ? ' disabled'
-    : ''}"
+<DialogBox
+  title="Layers"
+  class="layers-interface draggable v-drag settings-box smooth-shift{isPasted ? ' disabled' : ''}"
+  collapsible
 >
-  <div class="header dragger">
-    <div class="drag-btn">
-      <div class="grip"></div>
-    </div>
-    Layers
-    <label
-      for="layers-collapse-btn"
-      class="collapse-btn"
-      data-tooltip="Collapse/ Expand"
-    >
-      <input
-        type="checkbox"
-        aria-label="Collapse or Expand"
-        class="collapse-checkbox"
-        id="layers-collapse-btn"
-      />
-      <span class="arrow"></span>
-    </label>
-  </div>
-  <div class="collapsible">
     <div class="layers-control">
       <button
         type="button"
@@ -235,11 +203,10 @@
         {/each}
       </div>
     </div>
-  </div>
   {#if settingsLayer}
     {#key settingsLayer}
       <LayerSettingsPopout
-        bind:layer={settingsLayer}
+        layer={settingsLayer}
         pos={settingsPos}
         onclose={() => {
           settingsLayer = null
@@ -247,4 +214,4 @@
       />
     {/key}
   {/if}
-</div>
+</DialogBox>

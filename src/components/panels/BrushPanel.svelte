@@ -1,14 +1,12 @@
 <script>
-  import { onMount } from 'svelte'
-  import { setDitherVectorTarget } from '../../hooks/appState.svelte.js'
+  import { appState } from '../../hooks/appState.svelte.js'
   import { globalState } from '../../Context/state.js'
   import { brushStamps, customBrushStamp } from '../../Context/brushStamps.js'
   import { rebuildBuildUpDensityMap } from '../../Tools/brush.js'
   import { toggleMode } from '../../Tools/toolbox.js'
   import { tools } from '../../Tools/index.js'
-  import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
+  import DialogBox from '../DialogBox.svelte'
   import { openStampEditor } from '../../DOM/stampEditor.js'
-  import { dom } from '../../Context/dom.js'
   import BrushDitherPreview from './BrushDitherPreview.svelte'
 
   const NO_PANEL_TOOLS = [
@@ -41,8 +39,6 @@
     colorMask: { cls: 'colorMask', label: 'Color Mask (M)', tools: ['brush'] },
   }
 
-  let ref = $state(null)
-
   const tool = $derived(globalState.tool.current)
   const toolName = $derived(tool?.name ?? '')
   const brushSize = $derived(globalState.tool.current?.brushSize ?? 1)
@@ -56,15 +52,6 @@
   )
   const isCustomBrush = $derived(brushType === 'custom')
   const modes = $derived({ ...globalState.tool.current?.modes })
-
-  onMount(() => {
-    if (!ref) return
-    initializeDragger(ref)
-    initializeCollapser(ref)
-    return () => {
-      delete ref?.dataset.dragInitialized
-    }
-  })
 
   function buildBrushStampSVGData(t) {
     if (!t) return null
@@ -142,52 +129,28 @@
 
   function handleStampBtnClick() {
     setToolProp('brushType', 'custom')
-    if (!dom.stampEditorContainer) return
-    if (
-      !dom.stampEditorContainer.style.display ||
-      dom.stampEditorContainer.style.display === 'none'
-    ) {
-      openStampEditor()
+    if (globalState.ui.stampEditorOpen) {
+      globalState.ui.stampEditorOpen = false
     } else {
-      dom.stampEditorContainer.style.display = 'none'
+      openStampEditor()
     }
   }
 
   function handleDitherPreviewClick() {
-    if (!dom.ditherPickerContainer) return
-    if (dom.ditherPickerContainer.style.display === 'flex') {
-      dom.ditherPickerContainer.style.display = 'none'
+    if (globalState.ui.ditherPickerOpen) {
+      globalState.ui.ditherPickerOpen = false
     } else {
-      setDitherVectorTarget(null)
-      dom.ditherPickerContainer.style.display = 'flex'
+      appState.ditherVectorTarget = null
+      globalState.ui.ditherPickerOpen = true
     }
   }
 </script>
 
-<div
-  bind:this={ref}
-  class="brush-container dialog-box draggable v-drag settings-box smooth-shift"
+<DialogBox
+  title="Brush"
+  class="brush-container draggable v-drag settings-box smooth-shift"
+  collapsible
 >
-  <div class="header dragger">
-    <div class="drag-btn">
-      <div class="grip"></div>
-    </div>
-    Brush
-    <label
-      for="brush-collapse-btn"
-      class="collapse-btn"
-      data-tooltip="Collapse/ Expand"
-    >
-      <input
-        type="checkbox"
-        aria-label="Collapse or Expand"
-        class="collapse-checkbox"
-        id="brush-collapse-btn"
-      />
-      <span class="arrow"></span>
-    </label>
-  </div>
-  <div class="collapsible">
     {#if showContent}
       {#if showBrushControls}
         <div
@@ -265,5 +228,4 @@
         {/if}
       </div>
     {/if}
-  </div>
-</div>
+</DialogBox>

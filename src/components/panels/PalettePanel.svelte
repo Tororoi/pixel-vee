@@ -1,11 +1,10 @@
 <script>
   import { onMount } from 'svelte'
   import { swatches } from '../../Context/swatch.js'
-  import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
   import { initializeColorPicker } from '../../Swatch/events.js'
+  import DialogBox from '../DialogBox.svelte'
   import { DEFAULT_PALETTES, PRESETS } from '../../utils/palettes.js'
 
-  let ref = $state(null)
   let primarySwatchRef = $state(null)
   let secondarySwatchRef = $state(null)
   let presetsOpen = $state(false)
@@ -21,16 +20,6 @@
   )
   const selectedPaletteIndex = $derived(swatches.selectedPaletteIndex)
 
-  onMount(() => {
-    if (!ref) return
-    initializeDragger(ref)
-    initializeCollapser(ref)
-    return () => {
-      delete ref?.dataset.dragInitialized
-    }
-  })
-
-  // Register React-rendered swatch DOM elements with swatches context
   onMount(() => {
     if (primarySwatchRef) {
       primarySwatchRef.color = swatches.primary.color
@@ -174,31 +163,12 @@
   }
 </script>
 
-<div
-  bind:this={ref}
-  class="palette-interface dialog-box draggable v-drag settings-box smooth-shift"
+<DialogBox
+  title="Palette"
+  class="palette-interface draggable v-drag settings-box smooth-shift"
   style={presetsOpen ? 'z-index: 201' : undefined}
+  collapsible
 >
-  <div class="header dragger">
-    <div class="drag-btn">
-      <div class="grip"></div>
-    </div>
-    Palette
-    <label
-      for="palette-collapse-btn"
-      class="collapse-btn"
-      data-tooltip="Collapse/ Expand"
-    >
-      <input
-        type="checkbox"
-        aria-label="Collapse or Expand"
-        class="collapse-checkbox"
-        id="palette-collapse-btn"
-      />
-      <span class="arrow"></span>
-    </label>
-  </div>
-  <div class="collapsible">
     <div class="colors">
       <div
         bind:this={primarySwatchRef}
@@ -331,5 +301,4 @@
         ></button>
       </div>
     </div>
-  </div>
-</div>
+</DialogBox>

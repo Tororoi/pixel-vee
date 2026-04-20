@@ -4,7 +4,7 @@
   import { updateActiveLayerState } from '../../DOM/render.js'
   import { renderCanvas } from '../../Canvas/render.js'
 
-  const { layer = $bindable(), pos, onclose } = $props()
+  const { layer, pos, onclose } = $props()
 
   const initialTitle = layer.title ?? ''
   let opacity = $state(Math.round((layer.opacity ?? 1) * 255))

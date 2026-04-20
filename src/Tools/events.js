@@ -199,12 +199,9 @@ if (dom.brushSlider) dom.brushSlider.addEventListener('input', updateBrush)
 dom.customBrushTypeBtn?.addEventListener('click', () => {
   brush.brushType = 'custom'
   dom.customBrushTypeBtn.classList.add('active')
-  if (
-    dom.stampEditorContainer.style.display === 'none' ||
-    !dom.stampEditorContainer.style.display
-  ) {
-    openStampEditor()
+  if (globalState.ui.stampEditorOpen) {
+    globalState.ui.stampEditorOpen = false
   } else {
-    dom.stampEditorContainer.style.display = 'none'
+    openStampEditor()
   }
 })

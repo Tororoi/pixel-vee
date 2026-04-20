@@ -10,7 +10,8 @@
     deactivateResizeOverlay,
   } from '../../Canvas/resizeOverlay.js'
   import { resizeOffScreenCanvas } from '../../Canvas/render.js'
-  import { initializeDragger } from '../../utils/drag.js'
+  import { dom } from '../../Context/dom.js'
+  import DialogBox from '../DialogBox.svelte'
 
   const MINIMUM_DIMENSION = 8
   const MAXIMUM_DIMENSION = 1024
@@ -27,7 +28,9 @@
     'bottom-right',
   ]
 
-  let ref = $state(null)
+  let widthInputRef = $state(null)
+  let heightInputRef = $state(null)
+  let anchorGridRef = $state(null)
   let activeAnchor = $state('top-left')
   let width = $state(canvas.offScreenCVS.width)
   let height = $state(canvas.offScreenCVS.height)
@@ -56,11 +59,9 @@
   })
 
   onMount(() => {
-    if (!ref) return
-    initializeDragger(ref)
-    return () => {
-      delete ref?.dataset.dragInitialized
-    }
+    dom.canvasWidth = widthInputRef
+    dom.canvasHeight = heightInputRef
+    dom.anchorGrid = anchorGridRef
   })
 
   function handleWidthChange(e) {
@@ -90,19 +91,21 @@
   }
 
   function handleWidthSpin(e) {
-    const id = e.target.id || e.target.closest('[id]')?.id
+    const action =
+      e.target.dataset.action || e.target.closest('[data-action]')?.dataset.action
     let val = Math.floor(+width)
-    if (id === 'inc' && val < MAXIMUM_DIMENSION) val++
-    else if (id === 'dec' && val > MINIMUM_DIMENSION) val--
+    if (action === 'inc' && val < MAXIMUM_DIMENSION) val++
+    else if (action === 'dec' && val > MINIMUM_DIMENSION) val--
     width = val
     if (globalState.canvas.resizeOverlayActive) applyFromInputs(val, +height)
   }
 
   function handleHeightSpin(e) {
-    const id = e.target.id || e.target.closest('[id]')?.id
+    const action =
+      e.target.dataset.action || e.target.closest('[data-action]')?.dataset.action
     let val = Math.floor(+height)
-    if (id === 'inc' && val < MAXIMUM_DIMENSION) val++
-    else if (id === 'dec' && val > MINIMUM_DIMENSION) val--
+    if (action === 'inc' && val < MAXIMUM_DIMENSION) val++
+    else if (action === 'dec' && val > MINIMUM_DIMENSION) val--
     height = val
     if (globalState.canvas.resizeOverlayActive) applyFromInputs(+width, val)
   }
@@ -133,31 +136,19 @@
   }
 </script>
 
-<div
-  bind:this={ref}
-  class="size-container dialog-box draggable v-drag h-drag free"
+<DialogBox
+  title="Canvas Size"
+  class="size-container draggable v-drag h-drag free"
   style="display: {isOpen ? 'flex' : 'none'}"
+  onclose={handleClose}
 >
-  <div id="size-header" class="header dragger">
-    <div class="drag-btn">
-      <div class="grip"></div>
-    </div>
-    Canvas Size
-    <button
-      type="button"
-      class="close-btn"
-      aria-label="Close"
-      data-tooltip="Close"
-      onclick={handleClose}
-    ></button>
-  </div>
-  <div class="collapsible">
     <form class="dimensions-form" onsubmit={handleSubmit}>
       <div class="inputs">
         <label for="canvas-width">
           Width:
           <span class="input">
             <input
+              bind:this={widthInputRef}
               type="number"
               id="canvas-width"
               min="8"
@@ -170,10 +161,10 @@
               onblur={handleWidthBlur}
             />
             <span class="spin-btn" role="group" onpointerdown={handleWidthSpin}>
-              <span id="inc" class="channel-btn"
+              <span data-action="inc" class="channel-btn"
                 ><span class="spin-content">+</span></span
               >
-              <span id="dec" class="channel-btn"
+              <span data-action="dec" class="channel-btn"
                 ><span class="spin-content">-</span></span
               >
             </span>
@@ -183,6 +174,7 @@
           Height:
           <span class="input">
             <input
+              bind:this={heightInputRef}
               type="number"
               id="canvas-height"
               min="8"
@@ -199,10 +191,10 @@
               role="group"
               onpointerdown={handleHeightSpin}
             >
-              <span id="inc" class="channel-btn"
+              <span data-action="inc" class="channel-btn"
                 ><span class="spin-content">+</span></span
               >
-              <span id="dec" class="channel-btn"
+              <span data-action="dec" class="channel-btn"
                 ><span class="spin-content">-</span></span
               >
             </span>
@@ -211,7 +203,7 @@
       </div>
       <div class="anchor-section">
         <span class="anchor-label">Anchor:</span>
-        <div class="anchor-grid" id="anchor-grid">
+        <div bind:this={anchorGridRef} class="anchor-grid" id="anchor-grid">
           {#each ANCHORS as anchor (anchor)}
             <button
               type="button"
@@ -243,5 +235,4 @@
         </button>
       </div>
     </form>
-  </div>
-</div>
+</DialogBox>

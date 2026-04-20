@@ -7,6 +7,8 @@ export const uiStore = $state({
   exportOpen: false,
   colorPickerOpen: false,
   vectorTransformOpen: false,
+  ditherPickerOpen: false,
+  stampEditorOpen: false,
   dragging: false,
   dragX: null,
   dragY: null,

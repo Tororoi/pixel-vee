@@ -1,10 +1,13 @@
 <script>
   import { onMount } from 'svelte'
+  import { globalState } from '../../Context/state.js'
   import { dom } from '../../Context/dom.js'
-  import { initializeDragger } from '../../utils/drag.js'
   import { initStampEditor } from '../../DOM/stampEditor.js'
+  import DialogBox from '../DialogBox.svelte'
 
   let containerRef = $state(null)
+
+  const isOpen = $derived(globalState.ui.stampEditorOpen)
   let editorCanvasRef = $state(null)
   let previewCanvasRef = $state(null)
   let applyBtnRef = $state(null)
@@ -16,7 +19,6 @@
   let mirrorVBtnRef = $state(null)
 
   onMount(() => {
-    // Patch dom references — dom.js queried these at module load before Svelte rendered
     dom.stampEditorContainer = containerRef
     dom.stampEditorCanvas = editorCanvasRef
     dom.stampPreviewCanvas = previewCanvasRef
@@ -27,34 +29,21 @@
     dom.stampMoveBtn = moveBtnRef
     dom.stampMirrorHBtn = mirrorHBtnRef
     dom.stampMirrorVBtn = mirrorVBtnRef
-
-    initializeDragger(containerRef)
     initStampEditor()
   })
 
   function handleClose() {
-    if (containerRef) containerRef.style.display = 'none'
+    globalState.ui.stampEditorOpen = false
   }
 </script>
 
-<div
-  bind:this={containerRef}
-  id="stamp-editor"
-  class="stamp-editor-container dialog-box draggable v-drag h-drag free"
+<DialogBox
+  bind:ref={containerRef}
+  title="Stamp Editor"
+  class="stamp-editor-container draggable v-drag h-drag free"
+  style="display: {isOpen ? 'flex' : 'none'}"
+  onclose={handleClose}
 >
-  <div class="header dragger">
-    <div class="drag-btn">
-      <div class="grip"></div>
-    </div>
-    Stamp Editor
-    <button
-      type="button"
-      class="close-btn"
-      aria-label="Close"
-      data-tooltip="Close"
-      onclick={handleClose}
-    ></button>
-  </div>
   <div class="stamp-editor-interface">
     <canvas
       bind:this={editorCanvasRef}
@@ -134,4 +123,4 @@
       </div>
     </div>
   </div>
-</div>
+</DialogBox>

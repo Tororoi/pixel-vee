@@ -1,9 +1,6 @@
 <script>
   import { onMount } from 'svelte'
-  import {
-    getDitherVectorTarget,
-    setDitherVectorTarget,
-  } from '../../hooks/appState.svelte.js'
+  import { appState } from '../../hooks/appState.svelte.js'
   import { portal } from '../../utils/portal.js'
   import { globalState } from '../../Context/state.js'
   import { dom } from '../../Context/dom.js'
@@ -22,7 +19,7 @@
   } from '../../DOM/renderBrush.js'
   import { vectorGui } from '../../GUI/vector.js'
 
-  const { vector = $bindable(), pos, onclose } = $props()
+  const { vector, pos, onclose } = $props()
 
   let ref = $state(null)
 
@@ -119,23 +116,19 @@
   }
 
   function handleDitherClick() {
-    if (!dom.ditherPickerContainer) return
-    if (
-      dom.ditherPickerContainer.style.display === 'flex' &&
-      getDitherVectorTarget() === vector
-    ) {
-      setDitherVectorTarget(null)
-      dom.ditherPickerContainer.style.display = 'none'
+    if (globalState.ui.ditherPickerOpen && appState.ditherVectorTarget === vector) {
+      appState.ditherVectorTarget = null
+      globalState.ui.ditherPickerOpen = false
     } else {
-      setDitherVectorTarget(vector)
+      appState.ditherVectorTarget = vector
       const ox = vector.ditherOffsetX ?? 0
       const oy = vector.ditherOffsetY ?? 0
-      applyDitherOffset(dom.ditherPickerContainer, ox, oy)
-      const wrap = dom.ditherPickerContainer.querySelector(
-        '.dither-offset-control-wrap',
-      )
-      if (wrap) applyDitherOffsetControl(wrap, ox, oy)
-      dom.ditherPickerContainer.style.display = 'flex'
+      if (dom.ditherPickerContainer) {
+        applyDitherOffset(dom.ditherPickerContainer, ox, oy)
+        const wrap = dom.ditherPickerContainer.querySelector('.dither-offset-control-wrap')
+        if (wrap) applyDitherOffsetControl(wrap, ox, oy)
+      }
+      globalState.ui.ditherPickerOpen = true
     }
   }
 

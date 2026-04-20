@@ -1,11 +1,8 @@
 <script>
   import { onMount } from 'svelte'
-  import {
-    getDitherVectorTarget,
-    setDitherVectorTarget,
-  } from '../../hooks/appState.svelte.js'
-  import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
+  import { appState } from '../../hooks/appState.svelte.js'
   import { globalState } from '../../Context/state.js'
+  import DialogBox from '../DialogBox.svelte'
   import { dom } from '../../Context/dom.js'
   import {
     brush,
@@ -31,7 +28,8 @@
 
   let ref = $state(null)
 
-  const vectorTarget = $derived(getDitherVectorTarget())
+  const isOpen = $derived(globalState.ui.ditherPickerOpen)
+  const vectorTarget = $derived(appState.ditherVectorTarget)
 
   const activePatternIndex = $derived(
     vectorTarget?.ditherPatternIndex ??
@@ -97,12 +95,73 @@
 
   function appendPatternSVG(node, pattern) {
     node.appendChild(createDitherPatternSVG(pattern))
-    return {}
   }
 
   function appendOffsetControlSVG(node) {
     node.appendChild(createDitherOffsetControlSVG())
-    return {}
+  }
+
+  function handleClose() {
+    appState.ditherVectorTarget = null
+    globalState.ui.ditherPickerOpen = false
+  }
+
+  function handleTwoColorToggle() {
+    const vt = appState.ditherVectorTarget
+    if (vt) {
+      if (!vt.modes) vt.modes = {}
+      vt.modes.twoColor = !vt.modes.twoColor
+      renderCanvas(vt.layer, true)
+      return
+    }
+    if (!DITHER_TOOLS.includes(globalState.tool.current?.name)) return
+    const newTwoColor = !globalState.tool.current.modes.twoColor
+    globalState.tool.current.modes.twoColor = newTwoColor
+    const toolName = globalState.tool.selectedName
+    if (tools[toolName]?.modes) tools[toolName].modes.twoColor = newTwoColor
+  }
+
+  function handleBuildUpToggle() {
+    if (globalState.tool.current?.name !== 'brush') return
+    const newBuildUp = !globalState.tool.current.modes.buildUpDither
+    globalState.tool.current.modes.buildUpDither = newBuildUp
+    brush.modes.buildUpDither = newBuildUp
+    if (globalState.tool.current.modes.buildUpDither) {
+      rebuildBuildUpDensityMap()
+    } else {
+      brush._buildUpDensityMap = new Map()
+      globalState.tool.current.buildUpActiveStepSlot = null
+      brush.buildUpActiveStepSlot = null
+    }
+  }
+
+  function handleBuildUpReset() {
+    if (globalState.tool.current?.name !== 'brush') return
+    brush._buildUpResetAtIndex = globalState.timeline.undoStack.length
+    brush._buildUpDensityMap = new Map()
+  }
+
+  function handleBuildUpModeClick(mode) {
+    if (globalState.tool.current?.name !== 'brush') return
+    if (
+      globalState.tool.current.buildUpMode === 'custom' &&
+      mode !== 'custom'
+    ) {
+      brush._customBuildUpSteps = [...globalState.tool.current.buildUpSteps]
+    }
+    globalState.tool.current.buildUpMode = mode
+    brush.buildUpMode = mode
+    if (mode === 'custom') {
+      const steps = [...brush._customBuildUpSteps]
+      globalState.tool.current.buildUpSteps = steps
+      brush.buildUpSteps = steps
+    } else {
+      const steps = BAYER_STEPS[mode]
+        ? [...BAYER_STEPS[mode]]
+        : globalState.tool.current.buildUpSteps
+      globalState.tool.current.buildUpSteps = steps
+      brush.buildUpSteps = steps
+    }
   }
 
   function serializePatternSVG(pattern, ox = 0, oy = 0) {
@@ -124,24 +183,14 @@
   onMount(() => {
     if (!ref) return
     const el = ref
-    // Patch dom reference — dom.js queried this at module load before Svelte rendered
     dom.ditherPickerContainer = el
-    el.style.display = 'none'
-    initializeDragger(el)
-    initializeCollapser(el)
-
-    // Close button
-    el.querySelector('.close-btn')?.addEventListener('click', () => {
-      setDitherVectorTarget(null)
-      el.style.display = 'none'
-    })
 
     // Dither grid — pattern selection
     el.querySelector('.dither-grid')?.addEventListener('click', (e) => {
       const btn = e.target.closest('.dither-grid-btn')
       if (!btn) return
       const patternIndex = parseInt(btn.dataset.patternIndex)
-      const vt = getDitherVectorTarget()
+      const vt = appState.ditherVectorTarget
       if (vt) {
         const oldPatternIndex = vt.ditherPatternIndex
         vt.ditherPatternIndex = patternIndex
@@ -169,84 +218,11 @@
       }
     })
 
-    // Two-color toggle
-    el.querySelector('#dither-ctrl-two-color')?.addEventListener(
-      'click',
-      () => {
-        const vt = getDitherVectorTarget()
-        if (vt) {
-          if (!vt.modes) vt.modes = {}
-          vt.modes.twoColor = !vt.modes.twoColor
-          renderCanvas(vt.layer, true)
-          return
-        }
-        if (!DITHER_TOOLS.includes(globalState.tool.current?.name)) return
-        const newTwoColor = !globalState.tool.current.modes.twoColor
-        globalState.tool.current.modes.twoColor = newTwoColor
-        const toolName = globalState.tool.selectedName
-        if (tools[toolName]?.modes) tools[toolName].modes.twoColor = newTwoColor
-      },
-    )
-
-    // Build-up dither toggle
-    el.querySelector('#dither-ctrl-build-up')?.addEventListener('click', () => {
-      if (globalState.tool.current?.name !== 'brush') return
-      const newBuildUp = !globalState.tool.current.modes.buildUpDither
-      globalState.tool.current.modes.buildUpDither = newBuildUp
-      brush.modes.buildUpDither = newBuildUp
-      if (globalState.tool.current.modes.buildUpDither) {
-        rebuildBuildUpDensityMap()
-      } else {
-        brush._buildUpDensityMap = new Map()
-        globalState.tool.current.buildUpActiveStepSlot = null
-        brush.buildUpActiveStepSlot = null
-      }
-    })
-
-    // Build-up reset
-    el.querySelector('#dither-ctrl-build-up-reset')?.addEventListener(
-      'click',
-      () => {
-        if (globalState.tool.current?.name !== 'brush') return
-        brush._buildUpResetAtIndex = globalState.timeline.undoStack.length
-        brush._buildUpDensityMap = new Map()
-      },
-    )
-
-    // Build-up mode selector
-    el.querySelector('.build-up-mode-selector')?.addEventListener(
-      'click',
-      (e) => {
-        const btn = e.target.closest('.build-up-mode-btn')
-        if (!btn || globalState.tool.current?.name !== 'brush') return
-        const mode = btn.dataset.mode
-        if (
-          globalState.tool.current.buildUpMode === 'custom' &&
-          mode !== 'custom'
-        ) {
-          brush._customBuildUpSteps = [...globalState.tool.current.buildUpSteps]
-        }
-        globalState.tool.current.buildUpMode = mode
-        brush.buildUpMode = mode
-        if (mode === 'custom') {
-          const steps = [...brush._customBuildUpSteps]
-          globalState.tool.current.buildUpSteps = steps
-          brush.buildUpSteps = steps
-        } else {
-          const steps = BAYER_STEPS[mode]
-            ? [...BAYER_STEPS[mode]]
-            : globalState.tool.current.buildUpSteps
-          globalState.tool.current.buildUpSteps = steps
-          brush.buildUpSteps = steps
-        }
-      },
-    )
-
     // Dither offset drag
     el.addEventListener('pointerdown', (e) => {
       const control = e.target.closest('.dither-offset-control')
       if (!control) return
-      const vt = getDitherVectorTarget()
+      const vt = appState.ditherVectorTarget
       if (!vt && !DITHER_TOOLS.includes(globalState.tool.current?.name)) return
       control.setPointerCapture(e.pointerId)
       const startX = e.clientX
@@ -353,29 +329,17 @@
       }
     })
 
-    return () => {
-      delete el.dataset.dragInitialized
-    }
   })
 </script>
 
-<div
-  bind:this={ref}
-  class="dither-picker-container dialog-box draggable v-drag h-drag free"
+<DialogBox
+  bind:ref
+  title="Dither Pattern"
+  class="dither-picker-container draggable v-drag h-drag free"
+  style="display: {isOpen ? 'flex' : 'none'}"
+  collapsible
+  onclose={handleClose}
 >
-  <div class="header dragger">
-    <div class="drag-btn">
-      <div class="grip"></div>
-    </div>
-    Dither Pattern
-    <button
-      type="button"
-      class="close-btn"
-      aria-label="Close"
-      data-tooltip="Close"
-    ></button>
-  </div>
-  <div class="collapsible">
     <div class="dither-controls">
       <button
         type="button"
@@ -384,6 +348,7 @@
         aria-label="Two-Color"
         data-tooltip="Two-Color"
         class:selected={twoColorActive}
+        onclick={handleTwoColorToggle}
       ></button>
       <button
         type="button"
@@ -393,6 +358,7 @@
         data-tooltip="Build-Up Dither&#10;&#10;Automatically increase dither density on overlapping strokes"
         class:selected={buildUpActive}
         style:display={showBuildUpBtn ? '' : 'none'}
+        onclick={handleBuildUpToggle}
       ></button>
       <div class="dither-offset-control-wrap">
         <div
@@ -412,29 +378,29 @@
           type="button"
           class="build-up-mode-btn"
           class:selected={buildUpMode === 'custom'}
-          data-mode="custom"
-          data-tooltip="Custom build-up steps">Custom</button
+          data-tooltip="Custom build-up steps"
+          onclick={() => handleBuildUpModeClick('custom')}>Custom</button
         >
         <button
           type="button"
           class="build-up-mode-btn"
           class:selected={buildUpMode === '2x2'}
-          data-mode="2x2"
-          data-tooltip="4 steps from a 2x2 Bayer Matrix">2×2</button
+          data-tooltip="4 steps from a 2x2 Bayer Matrix"
+          onclick={() => handleBuildUpModeClick('2x2')}>2×2</button
         >
         <button
           type="button"
           class="build-up-mode-btn"
           class:selected={buildUpMode === '4x4'}
-          data-mode="4x4"
-          data-tooltip="16 steps from a 4x4 Bayer Matrix">4×4</button
+          data-tooltip="16 steps from a 4x4 Bayer Matrix"
+          onclick={() => handleBuildUpModeClick('4x4')}>4×4</button
         >
         <button
           type="button"
           class="build-up-mode-btn"
           class:selected={buildUpMode === '8x8'}
-          data-mode="8x8"
-          data-tooltip="64 steps from an 8x8 Bayer Matrix">8×8</button
+          data-tooltip="64 steps from an 8x8 Bayer Matrix"
+          onclick={() => handleBuildUpModeClick('8x8')}>8×8</button
         >
       </div>
       <div class="build-up-step-slots">
@@ -464,6 +430,7 @@
         id="dither-ctrl-build-up-reset"
         class="btn build-up-reset-btn"
         data-tooltip="Reset build-up density"
+        onclick={handleBuildUpReset}
       >
         Reset Density Map
       </button>
@@ -481,5 +448,4 @@
         ></button>
       {/each}
     </div>
-  </div>
-</div>
+</DialogBox>

@@ -1,10 +1,7 @@
 <script>
-  import { onMount } from 'svelte'
   import { globalState } from '../../Context/state.js'
   import { vectorGui } from '../../GUI/vector.js'
-  import { initializeDragger } from '../../utils/drag.js'
-
-  let ref = $state(null)
+  import DialogBox from '../DialogBox.svelte'
 
   const isOpen = $derived(globalState.ui.settingsOpen)
 
@@ -17,14 +14,6 @@
     if (isOpen) {
       gridEnabled = vectorGui.grid ?? false
       gridSpacing = vectorGui.gridSpacing ?? 8
-    }
-  })
-
-  onMount(() => {
-    if (!ref) return
-    initializeDragger(ref)
-    return () => {
-      delete ref?.dataset.dragInitialized
     }
   })
 
@@ -52,10 +41,11 @@
   }
 
   function handleGridSpacingSpin(e) {
-    const id = e.target.id || e.target.closest('[id]')?.id
-    if (id === 'inc') {
+    const action =
+      e.target.dataset.action || e.target.closest('[data-action]')?.dataset.action
+    if (action === 'inc') {
       gridSpacing = Math.min(64, gridSpacing + 1)
-    } else if (id === 'dec') {
+    } else if (action === 'dec') {
       gridSpacing = Math.max(1, gridSpacing - 1)
     }
     vectorGui.gridSpacing = gridSpacing
@@ -67,25 +57,12 @@
   }
 </script>
 
-<div
-  bind:this={ref}
-  class="settings-container dialog-box draggable v-drag h-drag free"
+<DialogBox
+  title="Settings"
+  class="settings-container draggable v-drag h-drag free"
   style="display: {isOpen ? 'flex' : 'none'}"
+  onclose={handleClose}
 >
-  <div id="settings-header" class="header dragger">
-    <div class="drag-btn">
-      <div class="grip"></div>
-    </div>
-    Settings
-    <button
-      type="button"
-      class="close-btn"
-      aria-label="Close"
-      data-tooltip="Close"
-      onclick={handleClose}
-    ></button>
-  </div>
-  <div class="collapsible">
     <div class="settings-interface">
       <div class="settings-group">
         <div class="settings-section-header">Display</div>
@@ -99,7 +76,7 @@
             <input
               type="checkbox"
               id="tooltips-toggle"
-              checked={true}
+              checked={globalState.ui.showTooltips}
               onchange={handleTooltips}
             />
             <span class="checkmark"></span>
@@ -136,10 +113,10 @@
                 role="group"
                 onpointerdown={handleGridSpacingSpin}
               >
-                <span id="inc" class="channel-btn">
+                <span data-action="inc" class="channel-btn">
                   <span class="spin-content">+</span>
                 </span>
-                <span id="dec" class="channel-btn">
+                <span data-action="dec" class="channel-btn">
                   <span class="spin-content">-</span>
                 </span>
               </span>
@@ -154,7 +131,7 @@
             <input
               type="checkbox"
               id="cursor-preview-toggle"
-              checked={true}
+              checked={vectorGui.showCursorPreview ?? true}
               onchange={handleCursorPreview}
             />
             <span class="checkmark"></span>
@@ -163,5 +140,4 @@
         </div>
       </div>
     </div>
-  </div>
-</div>
+</DialogBox>

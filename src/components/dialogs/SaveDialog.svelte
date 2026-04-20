@@ -1,11 +1,9 @@
 <script>
-  import { onMount } from 'svelte'
   import { globalState } from '../../Context/state.js'
   import { saveDrawing, computeFileSizePreview } from '../../Save/savefile.js'
   import { measureTextWidth } from '../../utils/measureHelpers.js'
-  import { initializeDragger } from '../../utils/drag.js'
+  import DialogBox from '../DialogBox.svelte'
 
-  let ref = $state(null)
   let fileSize = $state('')
 
   const isOpen = $derived(globalState.ui.saveDialogOpen)
@@ -23,14 +21,6 @@
     computeFileSizePreview().then((s) => {
       fileSize = s
     })
-  })
-
-  onMount(() => {
-    if (!ref) return
-    initializeDragger(ref)
-    return () => {
-      delete ref?.dataset.dragInitialized
-    }
   })
 
   function handleClose() {
@@ -68,25 +58,12 @@
   const advancedDisabled = $derived(settings.preserveHistory)
 </script>
 
-<div
-  bind:this={ref}
-  class="save-container dialog-box v-drag h-drag free"
+<DialogBox
+  title="Save Options"
+  class="save-container v-drag h-drag free"
   style="display: {isOpen ? 'flex' : 'none'}"
+  onclose={handleClose}
 >
-  <div id="save-header" class="header dragger">
-    <div class="drag-btn">
-      <div class="grip"></div>
-    </div>
-    <span>Save Options</span>
-    <button
-      type="button"
-      class="close-btn"
-      aria-label="Close"
-      data-tooltip="Close"
-      onclick={handleClose}
-    ></button>
-  </div>
-  <div class="collapsible">
     <form id="save-interface" class="save-interface" onsubmit={handleSubmit}>
       <div class="save-setting">
         <label for="save-file-name" class="save-file-name-label">
@@ -211,5 +188,4 @@
         </button>
       </div>
     </form>
-  </div>
-</div>
+</DialogBox>

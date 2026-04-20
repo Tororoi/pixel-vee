@@ -1,4 +1,5 @@
 import { dom } from '../Context/dom.js'
+import { globalState } from '../Context/state.js'
 import { swatches } from '../Context/swatch.js'
 import {
   customBrushStamp,
@@ -203,7 +204,7 @@ export function openStampEditor() {
   for (const [key, color] of customBrushData.colorMap) {
     editorPixels.set(key, color)
   }
-  dom.stampEditorContainer.style.display = 'flex'
+  globalState.ui.stampEditorOpen = true
   renderEditorCanvas()
   renderPreviewCanvas()
 }
@@ -224,7 +225,7 @@ function applyStamp() {
   }
 
   updateCustomStamp()
-  dom.stampEditorContainer.style.display = 'none'
+  globalState.ui.stampEditorOpen = false
 
 }
 

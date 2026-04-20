@@ -1,13 +1,12 @@
 <script>
-  import { onMount } from 'svelte'
   import { globalState } from '../../Context/state.js'
   import { canvas } from '../../Context/canvas.js'
   import { vectorGui } from '../../GUI/vector.js'
   import { renderCanvas } from '../../Canvas/render.js'
   import { updateActiveLayerState } from '../../DOM/render.js'
   import { isValidVector } from '../../DOM/renderVectors.js'
-  import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
   import { dom } from '../../Context/dom.js'
+  import DialogBox from '../DialogBox.svelte'
   import { switchTool } from '../../Tools/toolbox.js'
   import {
     actionSelectVector,
@@ -20,7 +19,6 @@
   import VectorThumbnail from './VectorThumbnail.svelte'
   import VectorSettingsPopout from './VectorSettingsPopout.svelte'
 
-  let ref = $state(null)
   let settingsVector = $state.raw(null)
   let settingsPos = $state({ top: 0, left: 0 })
 
@@ -33,15 +31,6 @@
   })
   const currentVectorIndex = $derived(globalState.vector.currentIndex)
   const selectedIndices = $derived(globalState.vector.selectedIndices)
-
-  onMount(() => {
-    if (!ref) return
-    initializeDragger(ref)
-    initializeCollapser(ref)
-    return () => {
-      delete ref?.dataset.dragInitialized
-    }
-  })
 
   function handleVectorClick(e, vector) {
     if (isPasted) {
@@ -110,32 +99,11 @@
   }
 </script>
 
-<div
-  bind:this={ref}
-  class="vectors-interface dialog-box draggable v-drag settings-box smooth-shift{isPasted
-    ? ' disabled'
-    : ''}"
+<DialogBox
+  title="Vectors"
+  class="vectors-interface draggable v-drag settings-box smooth-shift{isPasted ? ' disabled' : ''}"
+  collapsible
 >
-  <div class="header dragger">
-    <div class="drag-btn">
-      <div class="grip"></div>
-    </div>
-    Vectors
-    <label
-      for="vectors-collapse-btn"
-      class="collapse-btn"
-      data-tooltip="Collapse/ Expand"
-    >
-      <input
-        type="checkbox"
-        aria-label="Collapse or Expand"
-        class="collapse-checkbox"
-        id="vectors-collapse-btn"
-      />
-      <span class="arrow"></span>
-    </label>
-  </div>
-  <div class="collapsible">
     <div class="vectors-container">
       <div class="vectors">
         {#each visibleVectors as vector (vector.index)}
@@ -202,14 +170,13 @@
         {/each}
       </div>
     </div>
-  </div>
   {#if settingsVector}
     <VectorSettingsPopout
-      bind:vector={settingsVector}
+      vector={settingsVector}
       pos={settingsPos}
       onclose={() => {
         settingsVector = null
       }}
     />
   {/if}
-</div>
+</DialogBox>
