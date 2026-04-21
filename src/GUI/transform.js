@@ -8,7 +8,7 @@ import {
   getGuiLineWidth,
 } from '../utils/guiHelpers.js'
 // import { drawSelectControlPoints, renderSelectionBoxOutline } from "./select.js"
-import { findVectorShapeBoundaryBox } from '../utils/vectorHelpers.js'
+import { findVectorShapeBoundaryBox } from '../utils/vectorTransformHelpers.js'
 
 /**
  * Updates the rotation angle while the user is dragging.

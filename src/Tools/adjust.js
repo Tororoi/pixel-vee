@@ -3,12 +3,12 @@ import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { keys } from '../Shortcuts/keys.js'
 import { modifyVectorAction } from '../Actions/modifyTimeline/modifyTimeline.js'
+import { vectorGui } from '../GUI/vector.js'
 import {
-  vectorGui,
   updateLinkedVectors,
   updateLockedCurrentVectorControlHandle,
   createActiveIndexesForRender,
-} from '../GUI/vector.js'
+} from '../GUI/vectorLinkedUpdates.js'
 import { getAngle } from '../utils/trig.js'
 import { renderCanvas } from '../Canvas/render.js'
 import { updateVectorProperties } from '../utils/vectorHelpers.js'

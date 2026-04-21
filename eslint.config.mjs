@@ -19,6 +19,7 @@ export default [
       },
     },
     rules: {
+      "max-lines": ["warn", { max: 400, skipBlankLines: false, skipComments: false }],
       "no-unused-vars": ["warn", { args: "none" }],
       "no-case-declarations": "warn",
       "jsdoc/require-jsdoc": [

@@ -17,7 +17,7 @@ export function switchVectorTransformMode(mode) {
 //=== * * * Event Listeners * * * ===//
 //===================================//
 
-// Only wire up the legacy DOM listener if the element exists (pre-React fallback).
+// Only wire up the legacy DOM listener if the element exists.
 if (dom.vectorTransformModeContainer) {
   dom.vectorTransformModeContainer.addEventListener('click', (e) => {
     switch (e.target.id) {
