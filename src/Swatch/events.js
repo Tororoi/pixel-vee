@@ -1,5 +1,4 @@
 import { dom } from '../Context/dom.js'
-import { keys } from '../Shortcuts/keys.js'
 import { globalState } from '../Context/state.js'
 import { swatches } from '../Context/swatch.js'
 import { Picker } from './Picker.js'
@@ -119,99 +118,6 @@ export function initializeColorPicker(target) {
   }
 }
 
-/**
- * @param {PointerEvent} e - pointer event on the swatch
- */
-function openColorPicker(e) {
-  initializeColorPicker(e.target)
-}
-
-/**
- * Switch primary and secondary swatches
- */
-function switchColors() {
-  let temp = { ...swatches.primary.color }
-  swatches.primary.color = swatches.secondary.color
-  swatches.primary.swatch.color = swatches.secondary.color
-  document.documentElement.style.setProperty(
-    '--primary-swatch-color',
-    `${swatches.primary.color.r},${swatches.primary.color.g},${swatches.primary.color.b}`,
-  )
-  document.documentElement.style.setProperty(
-    '--primary-swatch-alpha',
-    `${swatches.primary.color.a / 255}`,
-  )
-  swatches.secondary.color = temp
-  swatches.secondary.swatch.color = temp
-  document.documentElement.style.setProperty(
-    '--secondary-swatch-color',
-    `${temp.r},${temp.g},${temp.b}`,
-  )
-  document.documentElement.style.setProperty(
-    '--secondary-swatch-alpha',
-    `${temp.a / 255}`,
-  )
-  updateDitherPickerColors()
-}
-
-/**
- * @param {PointerEvent} e - pointer event on the palette
- */
-function handlePalette(e) {
-  if (e.target.className.includes('swatch')) {
-    //if palette-color and edit mode, open color picker, else
-    if (swatches.paletteMode === 'edit') {
-      swatches.activePaletteIndex = swatches.palette.indexOf(e.target.color)
-      initializeColorPicker(e.target)
-    } else if (swatches.paletteMode === 'remove') {
-      let activePaletteIndex = swatches.palette.indexOf(e.target.color)
-      if (activePaletteIndex !== -1) {
-        // Ensure the color is found in the palette
-        swatches.palette.splice(activePaletteIndex, 1)
-        onPaletteModified()
-        if (!keys['KeyX']) {
-          //reset paletteMode unless holding x
-          swatches.paletteMode = 'select'
-        }
-      }
-    } else {
-      //select mode
-      if (
-        swatches.palette.indexOf(e.target.color) ===
-        swatches.selectedPaletteIndex
-      ) {
-        //selecting color that's already selected opens color picker
-        swatches.activePaletteIndex = swatches.selectedPaletteIndex
-        initializeColorPicker(e.target)
-      } else {
-        const { r, g, b, a } = e.target.color
-        setColor(r, g, b, a, swatches.primary.swatch)
-      }
-    }
-  } else if (e.target.className.includes('add-color')) {
-    //add new color to palette
-    let swatch = document.createElement('div')
-    swatch.className = 'swatch'
-
-    //associate object
-    swatch.color = swatches.primary.color
-
-    swatches.activePaletteIndex = swatches.palette.length
-    initializeColorPicker(swatch)
-  } else if (e.target.className.includes('palette-remove')) {
-    if (swatches.paletteMode !== 'remove') {
-      swatches.paletteMode = 'remove'
-    } else {
-      swatches.paletteMode = 'select'
-    }
-  } else if (e.target.className.includes('palette-edit')) {
-    if (swatches.paletteMode !== 'edit') {
-      swatches.paletteMode = 'edit'
-    } else {
-      swatches.paletteMode = 'select'
-    }
-  }
-}
 
 /**
  * Close the picker window
@@ -283,23 +189,6 @@ export function addToPalette() {
 }
 
 /**
- * Load a preset or custom palette by id
- * @param {string} id - preset or custom palette id
- */
-function handlePresetSelect(id) {
-  if (id in DEFAULT_PALETTES) {
-    swatches.palette = DEFAULT_PALETTES[id].map((c) => ({ ...c }))
-  } else if (id in swatches.customPalettes) {
-    swatches.palette = swatches.customPalettes[id].colors.map((c) => ({
-      ...c,
-    }))
-  } else {
-    return
-  }
-  swatches.currentPreset = id
-}
-
-/**
  * Track palette modifications: create a new custom entry when on a preset,
  * or update the existing custom entry in place.
  */
@@ -325,30 +214,3 @@ function onPaletteModified() {
   }
 }
 
-// * Swatch / Palette * — handled by PalettePanel React component; guard until migrated
-if (dom.swatch) dom.swatch.addEventListener('click', openColorPicker)
-if (dom.backSwatch) dom.backSwatch.addEventListener('click', openColorPicker)
-if (dom.colorSwitch) dom.colorSwitch.addEventListener('click', switchColors)
-if (dom.paletteContainer)
-  dom.paletteContainer.addEventListener('click', handlePalette)
-if (dom.palettePresetsBtn)
-  dom.palettePresetsBtn.addEventListener('click', (e) => {
-    e.stopPropagation()
-    const container = dom.palettePresetsBtn.parentElement
-    const isOpen = container.classList.toggle('open')
-    if (dom.paletteInterfaceContainer)
-      dom.paletteInterfaceContainer.style.zIndex = isOpen ? '200' : ''
-  })
-if (dom.palettePresetsList)
-  dom.palettePresetsList.addEventListener('click', (e) => {
-    const li = e.target.closest('li[data-id]')
-    if (!li) return
-    handlePresetSelect(li.dataset.id)
-    dom.palettePresetsBtn.parentElement.classList.remove('open')
-    if (dom.paletteInterfaceContainer)
-      dom.paletteInterfaceContainer.style.zIndex = ''
-  })
-// * Color Picker * — handled by ColorPickerDialog React component; guard until migrated
-if (dom.confirmBtn) dom.confirmBtn.addEventListener('click', confirmColor)
-if (dom.cancelBtn) dom.cancelBtn.addEventListener('click', closePickerWindow)
-if (dom.newColorBtn) dom.newColorBtn.addEventListener('click', addToPalette)
