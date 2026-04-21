@@ -1,7 +1,9 @@
 <script>
   import { globalState } from '../../Context/state.js'
-  import { switchVectorTransformMode } from '../../GUI/events.js'
-  import { setVectorShapeBoundaryBox } from '../../GUI/transform.js'
+  import {
+    switchVectorTransformMode,
+    setVectorShapeBoundaryBox,
+  } from '../../GUI/transform.js'
   import { actionDeselect } from '../../Actions/nonPointer/selectionActions.js'
   import { TRANSLATE, ROTATE, SCALE } from '../../utils/constants.js'
   import DialogBox from '../DialogBox.svelte'
@@ -37,10 +39,7 @@
   style="display: {isOpen ? 'flex' : 'none'}"
   onclose={handleClose}
 >
-  <div
-    id="vector-transform-ui-interface"
-    class="vector-transform-ui-interface"
-  >
+  <div id="vector-transform-ui-interface" class="vector-transform-ui-interface">
     <div class="vector-transform-modes">
       <button
         type="button"

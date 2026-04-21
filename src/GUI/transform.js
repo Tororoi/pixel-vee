@@ -11,6 +11,15 @@ import {
 import { findVectorShapeBoundaryBox } from '../utils/vectorTransformHelpers.js'
 
 /**
+ * Switches the vector transform mode
+ * @param {string} mode - translate, rotate, or scale
+ */
+export function switchVectorTransformMode(mode) {
+  globalState.vector.transformMode = mode
+  vectorGui.render()
+}
+
+/**
  * Updates the rotation angle while the user is dragging.
  */
 function updateRotationAngle() {

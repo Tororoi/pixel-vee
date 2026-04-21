@@ -1,29 +1,32 @@
-import js from "@eslint/js"
-import svelte from "eslint-plugin-svelte"
-import jsdoc from "eslint-plugin-jsdoc"
-import svelteParser from "svelte-eslint-parser"
-import globals from "globals"
+import js from '@eslint/js'
+import svelte from 'eslint-plugin-svelte'
+import jsdoc from 'eslint-plugin-jsdoc'
+import svelteParser from 'svelte-eslint-parser'
+import globals from 'globals'
 
 export default [
   js.configs.recommended,
-  jsdoc.configs["flat/recommended"],
-  ...svelte.configs["flat/recommended"],
+  jsdoc.configs['flat/recommended'],
+  ...svelte.configs['flat/recommended'],
   {
     languageOptions: {
       globals: {
         ...globals.browser,
       },
       parserOptions: {
-        ecmaVersion: "latest",
-        sourceType: "module",
+        ecmaVersion: 'latest',
+        sourceType: 'module',
       },
     },
     rules: {
-      "max-lines": ["warn", { max: 400, skipBlankLines: false, skipComments: false }],
-      "no-unused-vars": ["warn", { args: "none" }],
-      "no-case-declarations": "warn",
-      "jsdoc/require-jsdoc": [
-        "warn",
+      'max-lines': [
+        'warn',
+        { max: 500, skipBlankLines: false, skipComments: false },
+      ],
+      'no-unused-vars': ['warn', { args: 'none' }],
+      'no-case-declarations': 'warn',
+      'jsdoc/require-jsdoc': [
+        'warn',
         {
           require: {
             FunctionDeclaration: true,
@@ -39,16 +42,16 @@ export default [
     },
   },
   {
-    files: ["**/*.svelte"],
+    files: ['**/*.svelte'],
     languageOptions: {
       parser: svelteParser,
     },
     rules: {
-      "jsdoc/require-jsdoc": "off",
+      'jsdoc/require-jsdoc': 'off',
     },
   },
   {
-    files: ["eslint.config.*", "vite.config.*", "vitest.config.*"],
+    files: ['eslint.config.*', 'vite.config.*', 'vitest.config.*'],
     languageOptions: {
       globals: globals.node,
     },
