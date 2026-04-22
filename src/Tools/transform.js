@@ -2,10 +2,11 @@ import { TRANSLATE, ROTATE } from '../utils/constants.js'
 import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { modifyVectorAction } from '../Actions/modifyTimeline/modifyTimeline.js'
-import { vectorGui, createActiveIndexesForRender } from '../GUI/vector.js'
+import { vectorGui } from '../GUI/vector.js'
+import { createActiveIndexesForRender } from '../GUI/vectorLinkedUpdates.js'
 import { getAngle } from '../utils/trig.js'
 import { renderCanvas } from '../Canvas/render.js'
-import { rotateVectors, translateVectors } from '../utils/vectorHelpers.js'
+import { rotateVectors, translateVectors } from '../utils/vectorTransformHelpers.js'
 import { transformVectorContent } from '../utils/transformHelpers.js'
 
 //=======================================//

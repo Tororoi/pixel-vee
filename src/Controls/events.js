@@ -300,12 +300,12 @@ function handlePointerUp(e) {
   globalState.tool.current.fn()
   //reset action and render vectors
   if (globalState.timeline.currentAction) {
-    if (
-      ['fill', 'curve', 'ellipse', 'polygon'].includes(
-        globalState.tool.current.name,
-      )
-    ) {
-    }
+    // if (
+    //   ['fill', 'curve', 'ellipse', 'polygon'].includes(
+    //     globalState.tool.current.name,
+    //   )
+    // ) {
+    // }
 
     globalState.selection.pointsSet = null
     globalState.selection.seenPixelsSet = null

@@ -9,7 +9,8 @@ import { vectorGui } from '../GUI/vector.js'
 import { renderCanvas } from '../Canvas/render.js'
 import { coordArrayFromSet } from '../utils/maskHelpers.js'
 import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
-import { rerouteVectorStepsAction, getChainStartPoint } from './adjust.js'
+import { rerouteVectorStepsAction } from './adjust.js'
+import { getChainStartPoint } from '../GUI/vectorLinkedUpdates.js'
 import {
   getCropNormalizedCursorX,
   getCropNormalizedCursorY,

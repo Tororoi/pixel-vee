@@ -2,10 +2,8 @@ import { globalState } from '../../Context/state.js'
 import { canvas } from '../../Context/canvas.js'
 import { vectorGui } from '../../GUI/vector.js'
 import { renderCanvas } from '../../Canvas/render.js'
-import {
-  findVectorShapeCentroid,
-  updateVectorProperties,
-} from '../../utils/vectorHelpers.js'
+import { updateVectorProperties } from '../../utils/vectorHelpers.js'
+import { findVectorShapeCentroid } from '../../utils/vectorTransformHelpers.js'
 import { modifyVectorAction } from '../modifyTimeline/modifyTimeline.js'
 
 //=============================================//

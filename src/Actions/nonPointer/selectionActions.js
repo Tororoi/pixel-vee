@@ -4,7 +4,7 @@ import { tools } from '../../Tools/index.js'
 import { vectorGui } from '../../GUI/vector.js'
 import { addToTimeline } from '../undoRedo/undoRedo.js'
 
-import { findVectorShapeCentroid } from '../../utils/vectorHelpers.js'
+import { findVectorShapeCentroid } from '../../utils/vectorTransformHelpers.js'
 import { dom } from '../../Context/dom.js'
 import { SCALE } from '../../utils/constants.js'
 import { setVectorShapeBoundaryBox } from '../../GUI/transform.js'

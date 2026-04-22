@@ -8,7 +8,16 @@ import {
   getGuiLineWidth,
 } from '../utils/guiHelpers.js'
 // import { drawSelectControlPoints, renderSelectionBoxOutline } from "./select.js"
-import { findVectorShapeBoundaryBox } from '../utils/vectorHelpers.js'
+import { findVectorShapeBoundaryBox } from '../utils/vectorTransformHelpers.js'
+
+/**
+ * Switches the vector transform mode
+ * @param {string} mode - translate, rotate, or scale
+ */
+export function switchVectorTransformMode(mode) {
+  globalState.vector.transformMode = mode
+  vectorGui.render()
+}
 
 /**
  * Updates the rotation angle while the user is dragging.
