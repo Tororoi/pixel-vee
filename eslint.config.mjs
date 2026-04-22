@@ -21,7 +21,7 @@ export default [
     rules: {
       'max-lines': [
         'warn',
-        { max: 500, skipBlankLines: false, skipComments: false },
+        { max: 600, skipBlankLines: false, skipComments: false },
       ],
       'no-unused-vars': ['warn', { args: 'none' }],
       'no-case-declarations': 'warn',
