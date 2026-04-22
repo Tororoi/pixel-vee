@@ -197,12 +197,14 @@ This app is a work in progress. See the bottom of this page for features that ar
     <td colspan="2"> Two-Color </td>
   </tr>
   <tr>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-two-color-dither.svg" alt="Two-Color" width="40"/> </td>
     <td colspan="2"> Uses the dither pattern to blend between the primary and secondary colors. </td>
   </tr>
   <tr>
     <td colspan="2"> Build-Up Dither </td>
   </tr>
   <tr>
+    <td width="66" height="52" valign="middle"> <img src="public/pixelv-build-up-dither.svg" alt="Build-Up Dither" width="40"/> </td>
     <td colspan="2"> Dither density increases with each overlapping stroke. </td>
   </tr>
 </table>
