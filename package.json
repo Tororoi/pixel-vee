@@ -30,8 +30,6 @@
     "svelte": "^5.0.0"
   },
   "devDependencies": {
-    "sass": "^1.66.1",
-    "sass-loader": "^13.0.0",
     "@eslint/js": "^9.39.4",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "eslint": "^9.39.4",
@@ -40,8 +38,12 @@
     "globals": "^17.5.0",
     "prettier": "^3.8.2",
     "prettier-plugin-svelte": "^3.5.1",
+    "sass": "^1.66.1",
+    "sass-loader": "^13.0.0",
     "svelte-check": "^4.4.6",
     "svelte-eslint-parser": "^1.6.0",
+    "vite-plugin-top-level-await": "^1.6.0",
+    "vite-plugin-wasm": "^3.6.0",
     "vitest": "^4.0.18"
   }
 }

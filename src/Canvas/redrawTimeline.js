@@ -2,6 +2,7 @@ import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { tools } from '../Tools/index.js'
 import { performAction, renderBuildUpDitherSegment } from './performAction.js'
+import { getWasm } from '../wasm.js'
 
 /**
  * Create canvas for saving between actions
@@ -90,15 +91,22 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
     )
     // Accumulate deltas into buildUpLayerMaps so any subsequent build-up actions
     // on the same layer see the correct cross-segment density.
+    const cw = canvas.offScreenCVS.width
+    const ch = canvas.offScreenCVS.height
     for (const a of pendingSegment) {
       if (!a.buildUpDensityDelta) continue
-      if (!buildUpLayerMaps.has(a.layer)) buildUpLayerMaps.set(a.layer, new Map())
+      if (!buildUpLayerMaps.has(a.layer)) {
+        buildUpLayerMaps.set(a.layer, new Int32Array(cw * ch))
+      }
       const layerMap = buildUpLayerMaps.get(a.layer)
       const lx = a.layer.x + cropDX
       const ly = a.layer.y + cropDY
       for (const coord of a.buildUpDensityDelta) {
-        const key = (((coord >>> 16) & 0xffff) + ly) << 16 | ((coord & 0xffff) + lx)
-        layerMap.set(key, (layerMap.get(key) ?? 0) + 1)
+        const ax = (coord & 0xffff) + lx
+        const ay = ((coord >>> 16) & 0xffff) + ly
+        if (ax >= 0 && ax < cw && ay >= 0 && ay < ch) {
+          layerMap[ay * cw + ax] += 1
+        }
       }
     }
     pendingSegment = []
@@ -150,7 +158,10 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         let buildUpDensityMap = null
         if (isBuildUp) {
           if (!buildUpLayerMaps.has(action.layer)) {
-            buildUpLayerMaps.set(action.layer, new Map())
+            buildUpLayerMaps.set(
+              action.layer,
+              new Int32Array(canvas.offScreenCVS.width * canvas.offScreenCVS.height),
+            )
           }
           buildUpDensityMap = buildUpLayerMaps.get(action.layer)
         }
@@ -168,9 +179,14 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
           const layerMap = buildUpLayerMaps.get(action.layer)
           const lx = action.layer.x + cropDX
           const ly = action.layer.y + cropDY
+          const cw2 = canvas.offScreenCVS.width
+          const ch2 = canvas.offScreenCVS.height
           for (const coord of action.buildUpDensityDelta) {
-            const key = (((coord >>> 16) & 0xffff) + ly) << 16 | ((coord & 0xffff) + lx)
-            layerMap.set(key, (layerMap.get(key) ?? 0) + 1)
+            const ax = (coord & 0xffff) + lx
+            const ay = ((coord >>> 16) & 0xffff) + ly
+            if (ax >= 0 && ax < cw2 && ay >= 0 && ay < ch2) {
+              layerMap[ay * cw2 + ax] += 1
+            }
           }
         }
       }

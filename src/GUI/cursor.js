@@ -230,7 +230,7 @@ function drawDitherPreview() {
       continue
     let pattern
     if (isBuildUp) {
-      const count = densityMap ? (densityMap.get((y << 16) | x) ?? 0) : 0
+      const count = densityMap ? (densityMap[y * canvas.offScreenCVS.width + x] || 0) : 0
       const stepIndex = Math.min(count, buildUpSteps.length - 1)
       pattern = ditherPatterns[buildUpSteps[stepIndex]]
     } else {

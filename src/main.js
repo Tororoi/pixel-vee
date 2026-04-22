@@ -2,6 +2,7 @@ import { mount } from 'svelte'
 import { globalState, registerVectorGui } from './Context/state.js'
 import { tools } from './Tools/index.js'
 import { vectorGui } from './GUI/vector.js'
+import { initWasm } from './wasm.js'
 // Canvas / input event wiring — these run addRasterLayer() + attach listeners at module load
 import './Canvas/events.js'
 import './Controls/events.js'
@@ -14,4 +15,7 @@ registerVectorGui(vectorGui)
 globalState.tool.current = tools.brush
 globalState.tool.selectedName = 'brush'
 
-mount(App, { target: document.getElementById('root') })
+// Initialize WASM before mounting so all modules can use getWasm() synchronously
+initWasm().then(() => {
+  mount(App, { target: document.getElementById('root') })
+})

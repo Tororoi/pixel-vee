@@ -1,4 +1,5 @@
 import { canvas } from '../Context/canvas.js'
+import { getWasm } from '../wasm.js'
 
 /**
  * Create a mask set for a given color
@@ -40,25 +41,38 @@ export function createColorMaskSet(matchColor) {
       a: sampledColor[3],
     }
   }
-  // Single linear scan through the raw typed array — avoids per-pixel object
-  // allocations from getColor() and is cache-friendly on the Uint8ClampedArray.
-  // Keys are packed as (y << 16) | x — no string allocation, no GC pressure.
-  const { data, width } = layerImageData
   const { r: mr, g: mg, b: mb, a: ma } = matchColor
-  let x = 0
-  let y = 0
-  for (let i = 0; i < data.length; i += 4) {
-    if (
-      data[i] === mr &&
-      data[i + 1] === mg &&
-      data[i + 2] === mb &&
-      data[i + 3] === ma
-    ) {
-      maskSet.add((y << 16) | x)
+  const wasm = getWasm()
+  if (wasm) {
+    const packed = wasm.build_color_mask(
+      layerImageData.data,
+      canvas.currentLayer.cvs.width,
+      canvas.currentLayer.cvs.height,
+      mr,
+      mg,
+      mb,
+      ma,
+    )
+    for (const coord of packed) {
+      maskSet.add(coord)
     }
-    if (++x === width) {
-      x = 0
-      y++
+  } else {
+    const { data, width } = layerImageData
+    let x = 0
+    let y = 0
+    for (let i = 0; i < data.length; i += 4) {
+      if (
+        data[i] === mr &&
+        data[i + 1] === mg &&
+        data[i + 2] === mb &&
+        data[i + 3] === ma
+      ) {
+        maskSet.add((y << 16) | x)
+      }
+      if (++x === width) {
+        x = 0
+        y++
+      }
     }
   }
   return maskSet

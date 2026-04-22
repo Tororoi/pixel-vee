@@ -13,6 +13,7 @@ import { actionCurve } from '../Actions/pointer/curve.js'
 import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
 import { isDitherOn, ditherPatterns } from '../Context/ditherPatterns.js'
 import { transformRasterContent } from '../utils/transformHelpers.js'
+import { getWasm } from '../wasm.js'
 
 /**
  * Render a contiguous block of build-up dither actions in a single pass.
@@ -41,7 +42,125 @@ export function renderBuildUpDitherSegment(
   const offsetX = layer.x + cropDX
   const offsetY = layer.y + cropDY
   const renderCtx = betweenCtx ?? layer.ctx
+  const wasm = getWasm()
 
+  if (wasm) {
+    _renderBuildUpDitherSegmentWasm(
+      wasm,
+      actions,
+      layer,
+      buildUpLayerMaps,
+      renderCtx,
+      offsetX,
+      offsetY,
+      cropDX,
+      cropDY,
+    )
+  } else {
+    _renderBuildUpDitherSegmentJS(
+      actions,
+      layer,
+      buildUpLayerMaps,
+      renderCtx,
+      offsetX,
+      offsetY,
+      cropDX,
+      cropDY,
+    )
+  }
+}
+
+function _renderBuildUpDitherSegmentWasm(
+  wasm,
+  actions,
+  layer,
+  buildUpLayerMaps,
+  renderCtx,
+  offsetX,
+  offsetY,
+  cropDX,
+  cropDY,
+) {
+  const cw = canvas.offScreenCVS.width
+  const ch = canvas.offScreenCVS.height
+
+  // Build per-action flat arrays for WASM
+  const deltaFlat = []
+  const actionR = [], actionG = [], actionB = [], actionA = []
+  const actionSR = [], actionSG = [], actionSB = [], actionSA = []
+  const actionTwoColor = []
+  const actionSteps = []
+  const actionStepCounts = []
+  const actionOffX = [], actionOffY = []
+
+  for (const action of actions) {
+    const lx = action.layer.x + cropDX
+    const ly = action.layer.y + cropDY
+    for (const coord of action.buildUpDensityDelta ?? []) {
+      const px = (coord & 0xffff) + lx
+      const py = ((coord >>> 16) & 0xffff) + ly
+      if (px >= 0 && px < cw && py >= 0 && py < ch) {
+        deltaFlat.push((py << 16) | px)
+      }
+    }
+    deltaFlat.push(0xffffffff) // sentinel
+    actionR.push(action.color.r)
+    actionG.push(action.color.g)
+    actionB.push(action.color.b)
+    actionA.push(action.color.a)
+    const sec = action.secondaryColor
+    actionSR.push(sec ? sec.r : 0)
+    actionSG.push(sec ? sec.g : 0)
+    actionSB.push(sec ? sec.b : 0)
+    actionSA.push(sec ? sec.a : 0)
+    actionTwoColor.push(action.modes?.twoColor && sec ? 1 : 0)
+    const steps = action.buildUpSteps ?? [15, 31, 47, 63]
+    for (const s of steps) actionSteps.push(s)
+    actionStepCounts.push(steps.length)
+    const effX = ((((action.ditherOffsetX ?? 0) + action.recordedLayerX - offsetX) % 8) + 8) % 8
+    const effY = ((((action.ditherOffsetY ?? 0) + action.recordedLayerY - offsetY) % 8) + 8) % 8
+    actionOffX.push(effX)
+    actionOffY.push(effY)
+  }
+
+  const priorMap = buildUpLayerMaps.get(layer) ?? new Int32Array(cw * ch)
+  const imgData = renderCtx.getImageData(0, 0, cw, ch)
+
+  wasm.render_buildup_segment(
+    imgData.data,
+    priorMap,
+    cw,
+    ch,
+    new Uint32Array(deltaFlat),
+    new Uint8Array(actionR),
+    new Uint8Array(actionG),
+    new Uint8Array(actionB),
+    new Uint8Array(actionA),
+    new Uint8Array(actionSR),
+    new Uint8Array(actionSG),
+    new Uint8Array(actionSB),
+    new Uint8Array(actionSA),
+    new Uint8Array(actionTwoColor),
+    new Uint8Array(actionSteps),
+    new Uint32Array(actionStepCounts),
+    new Int32Array(actionOffX),
+    new Int32Array(actionOffY),
+    false,
+  )
+
+  renderCtx.putImageData(imgData, 0, 0)
+}
+
+function _renderBuildUpDitherSegmentJS(
+  actions,
+  layer,
+  buildUpLayerMaps,
+  renderCtx,
+  offsetX,
+  offsetY,
+  cropDX,
+  cropDY,
+) {
   // Phase 1: scan all deltas to build segment density count and lastAction per pixel
   const segmentDelta = new Map() // absolute_pos → count within this segment
   const lastActionMap = new Map() // absolute_pos → last action touching that pixel
@@ -61,12 +180,13 @@ export function renderBuildUpDitherSegment(
 
   // Phase 2: write each pixel once using final density (prior sessions + this segment)
   const priorDensityMap = buildUpLayerMaps.get(layer)
+  const cw = canvas.offScreenCVS.width
   for (const [key, segmentCount] of segmentDelta) {
     const x = key & 0xffff
     const y = (key >>> 16) & 0xffff
     const action = lastActionMap.get(key)
     const buildUpSteps = action.buildUpSteps ?? [15, 31, 47, 63]
-    const priorDensity = priorDensityMap ? (priorDensityMap.get(key) ?? 0) : 0
+    const priorDensity = priorDensityMap ? (priorDensityMap[y * cw + x] || 0) : 0
     const totalDensity = priorDensity + segmentCount
     const stepIndex = Math.min(totalDensity - 1, buildUpSteps.length - 1)
     const pattern = ditherPatterns[buildUpSteps[stepIndex]]

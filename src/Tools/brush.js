@@ -408,7 +408,7 @@ export const brush = {
   buildUpSteps: [7, 15, 23, 31, 39, 47, 55, 63],
   _customBuildUpSteps: [7, 15, 23, 31, 39, 47, 55, 63],
   buildUpActiveStepSlot: null,
-  _buildUpDensityMap: new Map(),
+  _buildUpDensityMap: null,
   _buildUpResetAtIndex: 0,
   _strokeCtx: null,
   _previewStrokeCtx: null,
@@ -424,7 +424,9 @@ export const brush = {
  */
 export function rebuildBuildUpDensityMap() {
   const layer = canvas.currentLayer
-  const map = new Map()
+  const cw = canvas.offScreenCVS.width
+  const ch = canvas.offScreenCVS.height
+  const map = new Int32Array(cw * ch)
   const startIndex = brush._buildUpResetAtIndex ?? 0
   for (let i = startIndex; i < globalState.timeline.undoStack.length; i++) {
     const action = globalState.timeline.undoStack[i]
@@ -437,8 +439,11 @@ export function rebuildBuildUpDensityMap() {
       const lx = layer.x + globalState.canvas.cropOffsetX
       const ly = layer.y + globalState.canvas.cropOffsetY
       for (const coord of action.buildUpDensityDelta) {
-        const key = (((coord >>> 16) & 0xffff) + ly) << 16 | ((coord & 0xffff) + lx)
-        map.set(key, (map.get(key) ?? 0) + 1)
+        const ax = (coord & 0xffff) + lx
+        const ay = ((coord >>> 16) & 0xffff) + ly
+        if (ax >= 0 && ax < cw && ay >= 0 && ay < ch) {
+          map[ay * cw + ax] += 1
+        }
       }
     }
   }
