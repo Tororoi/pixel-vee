@@ -5,7 +5,6 @@ import { vectorGui } from './GUI/vector.js'
 // Canvas / input event wiring — these run addRasterLayer() + attach listeners at module load
 import './Canvas/events.js'
 import './Controls/events.js'
-import './GUI/events.js'
 import App from './App.svelte'
 
 // Register circular-dep helpers
