@@ -7,9 +7,29 @@ import { SCALE } from '../../utils/constants.js'
 import { setVectorShapeBoundaryBox } from '../../GUI/transform.js'
 
 /**
- * @description This function is used to render the canvas to the most recent action in the undoStack. It is used in the undo and redo functions.
- * @param {object} latestAction - The action about to be undone or redone
- * @param {string} modType - "from" or "to", used to identify undo or redo
+ * Re-render the canvas and restore all UI state after an undo or redo step.
+ *
+ * After the undo/redo state machine mutates the relevant data (vectors,
+ * layers, selection, etc.), this function is responsible for making the
+ * canvas visually reflect the new state and restoring all selection and
+ * vector GUI properties to match the action now at the top of the undo stack.
+ *
+ * Performance strategy: instead of replaying the entire timeline from scratch
+ * (which grows more expensive as history lengthens), this function finds the
+ * most recent action from the SAME layer and restores its pixel snapshot
+ * directly. This is close to constant-time. Full timeline replay is only used
+ * as a fallback when no valid snapshot exists (e.g. after loading a saved file
+ * that does not store snapshots).
+ *
+ * Special cases:
+ *  - Resize actions always trigger a full timeline replay because every layer
+ *    must be redrawn against the new canvas dimensions.
+ *  - When redoing a confirmed paste, the temporary floating layer is removed
+ *    after the snapshot is applied so the DOM is left in a clean state.
+ *  - When no snapshot is found, a new one is generated from the resulting
+ *    canvas state so subsequent undo/redo operations can use the fast path.
+ * @param {object} latestAction - The action that was just undone or redone.
+ * @param {string} modType - `"from"` for undo; `"to"` for redo.
  */
 export function renderToLatestAction(latestAction, modType) {
   // Resize actions: handleResizeAction already applied the correct canvas dimensions
@@ -22,8 +42,8 @@ export function renderToLatestAction(latestAction, modType) {
     return
   }
 
-  //clear affected layer and render image from most recent action from the affected layer
-  //This avoids having to redraw the timeline for every undo/redo. Close to constant time whereas redrawTimeline is closer to exponential time or worse.
+  // Find the most recent action targeting the same layer so its snapshot can
+  // be used to restore pixels without replaying the full timeline.
   let mostRecentActionFromSameLayer = null
   for (let i = globalState.timeline.undoStack.length - 1; i >= 0; i--) {
     if (globalState.timeline.undoStack[i].layer === latestAction.layer) {
@@ -31,7 +51,8 @@ export function renderToLatestAction(latestAction, modType) {
       break
     }
   }
-  //Set selection state based on absolute most recent action
+  // Restore selection, mask, and vector state from the action now at the
+  // very top of the undo stack (the new "current" state).
   const mostRecentAction =
     globalState.timeline.undoStack[globalState.timeline.undoStack.length - 1]
   //set select properties
@@ -48,6 +69,8 @@ export function renderToLatestAction(latestAction, modType) {
   globalState.vector.selectedIndices = new Set(
     mostRecentAction.selectedVectorIndices,
   )
+  // Show or hide the vector transform panel depending on whether any
+  // vectors are selected in the restored state.
   if (globalState.vector.selectedIndices.size > 0) {
     globalState.ui.vectorTransformOpen = true
     if (dom.vectorTransformUIContainer)
@@ -70,13 +93,15 @@ export function renderToLatestAction(latestAction, modType) {
   const snapshotIsValid = mostRecentActionFromSameLayer?.snapshot
   //Re-render the layer that was associated with the undone/redone action
   if (snapshotIsValid) {
+    // Fast path: restore pixels directly from the stored snapshot image.
     clearOffscreenCanvas(mostRecentActionFromSameLayer.layer)
     let img = new Image()
     img.src = mostRecentActionFromSameLayer.snapshot
     img.onload = function () {
       mostRecentActionFromSameLayer.layer.ctx.drawImage(img, 0, 0)
       renderCanvas(mostRecentActionFromSameLayer.layer)
-      //remove temporary layer if redoing a confirm paste action. Must be done after the action is pushed to the undoStack and rendered on canvas layer for render to look clean
+      // Remove the temp layer only after rendering to keep the transition
+      // visually clean when redoing a confirmed paste.
       if (
         latestAction.tool === 'paste' &&
         latestAction.confirmed &&
@@ -90,14 +115,14 @@ export function renderToLatestAction(latestAction, modType) {
       vectorGui.render()
     }
   } else {
-    //no snapshot
+    // Slow path: replay the full timeline for this layer to reconstruct the
+    // pixel content, then cache the result as a new snapshot.
     if (latestAction.layer.type === 'reference') {
       renderCanvas(latestAction.layer)
     } else {
       renderCanvas(latestAction.layer, true)
-      //create snapshot for latest action. Normally actions will have a snapshot
-      //but since snapshots are discarded when saving a file, this code remakes the correct snapshot for an action.
-      //On subsequent undo and redo calls, the timeline will not have to be redrawn for the affected action since it will have a snapshot.
+      // Cache the result so future undo/redo steps can use the fast path
+      // instead of replaying the timeline again.
       if (mostRecentActionFromSameLayer) {
         let snapshot =
           mostRecentActionFromSameLayer.layer.type === 'raster'

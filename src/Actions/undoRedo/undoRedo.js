@@ -17,10 +17,30 @@ import {
 //====================================//
 
 /**
- * Main pillar of the code structure - command pattern
- * @param {Array} pushStack - The stack to push the action to
+ * Core undo/redo engine implementing the command pattern.
+ *
+ * Pops the top action from `popStack`, applies the state change described by
+ * that action in the direction specified by `modType`, pushes the action onto
+ * `pushStack`, and then delegates to `renderToLatestAction` to update the
+ * canvas and UI.
+ *
+ * The `modType` string controls which snapshot a reversible action uses:
+ *  - `"from"` → undo: restore the state that existed BEFORE the action.
+ *  - `"to"`   → redo: restore the state that existed AFTER the action.
+ *
+ * Most tool-specific side effects (modify, paste, move, transform, resize,
+ * etc.) are handled by the dedicated helpers imported from `./helpers.js`.
+ * Simpler reversals (addLayer, removeLayer, remove, changeDitherPattern, etc.)
+ * are handled inline because they require only a single property assignment.
+ *
+ * `newLatestAction` is the action that will sit at the top of the undo stack
+ * after the pop, i.e. the new "current" state when undoing. Some helpers
+ * (confirmPaste, transform) need it to reconstruct intermediate states.
+ * @param {Array} pushStack - The stack to push the processed action onto
+ *   (redo stack when undoing; undo stack when redoing).
  * @param {Array} popStack - The stack to pop the action from
- * @param {string} modType - "from" or "to", used to identify undo or redo
+ *   (undo stack when undoing; redo stack when redoing).
+ * @param {string} modType - `"from"` for undo; `"to"` for redo.
  */
 export function actionUndoRedo(pushStack, popStack, modType) {
   //latest action is the action about to be undone or redone
@@ -33,16 +53,21 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       : null
   if (modType === 'from' && popStack.length > 1) {
     if (newLatestAction.tool === 'modify') {
-      //If action is modif, new latest action will be considered the modded action
+      // When the action beneath the one being undone is itself a "modify",
+      // the relevant state is the action that was modified, not the modify
+      // action wrapper — look it up by its recorded index.
       newLatestAction = popStack[newLatestAction.moddedActionIndex]
     }
   }
   if (latestAction.tool === 'modify') {
     handleModifyAction(latestAction, modType)
   } else if (latestAction.tool === 'changeMode') {
+    // Restore the modes object for the affected vector.
     globalState.vector.all[latestAction.moddedVectorIndex].modes = {
       ...latestAction[modType],
     }
+    // If the mode change also stored a geometry snapshot (e.g. a curve type
+    // switch that initialized new control points), restore those too.
     const vectorPropertiesSnapshot =
       modType === 'from'
         ? latestAction.fromVectorProperties
@@ -69,6 +94,7 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       ...latestAction[modType],
     }
   } else if (latestAction.tool === 'remove') {
+    // Flip the `removed` flag on each affected vector to the stored value.
     if (latestAction.vectorIndices?.length > 0) {
       latestAction.vectorIndices.forEach((vectorIndex) => {
         globalState.vector.all[vectorIndex].removed = latestAction[modType]
@@ -115,7 +141,11 @@ export function actionUndoRedo(pushStack, popStack, modType) {
 }
 
 /**
- * Undo an action
+ * Undo the most recent undoable action.
+ *
+ * Pops from the undo stack and pushes onto the redo stack. The initial
+ * "empty canvas" action at index 0 is never undone so there is always at
+ * least one entry remaining.
  */
 export function handleUndo() {
   //length 1 prevents initial layer from being undone
@@ -129,7 +159,11 @@ export function handleUndo() {
 }
 
 /**
- * Redo an action
+ * Redo the most recently undone action.
+ *
+ * Pops from the redo stack and pushes back onto the undo stack. The redo
+ * stack is cleared whenever a new action is added, so this only has entries
+ * if the user has previously undone without performing any new actions.
  */
 export function handleRedo() {
   if (globalState.timeline.redoStack.length >= 1) {
@@ -142,20 +176,40 @@ export function handleRedo() {
 }
 
 /**
- * This sets the action which is then pushed to the undoStack for the command pattern
- * action and redoStack are not reset here in order to allow some functionality based around checking if an action was just added to the timeline. TODO: (Low Priority) refactor to use a different method for this
- * @param {object} actionObject - The action object to be added to the timeline
+ * Record a new action on the undo/redo timeline (the command pattern push).
+ *
+ * Constructs a timeline entry from the provided tool, layer, and properties,
+ * enriched with the current selection state, mask, vector selection, and a
+ * pixel snapshot of the layer canvas. The snapshot enables fast undo/redo
+ * without replaying the full timeline.
+ *
+ * The constructed action is stored as `globalState.timeline.currentAction`
+ * and pushed onto the undo stack. Some calling code checks `currentAction`
+ * immediately after this call to associate newly-created vectors with their
+ * originating action, so `currentAction` is intentionally not reset here.
+ *
+ * NOTE: redo stack clearing is NOT done here — callers are expected to call
+ * `globalState.clearRedoStack()` after `addToTimeline` so that some code can
+ * inspect whether an action was just added before the stack is cleared.
+ * @param {object} actionObject - Descriptor for the new action.
+ * @param {string} actionObject.tool - Tool name string (e.g. `'draw'`).
+ * @param {object} actionObject.layer - The layer this action belongs to.
+ * @param {object} [actionObject.properties] - Additional tool-specific
+ *   properties to merge into the timeline entry.
  */
 export function addToTimeline(actionObject) {
   const { tool, layer, properties } = actionObject
-  //use current state for variables
-  //Make selectProperties and selectedVectorIndices part of every action to reduce logic complexity. This means a small decrease in space efficiency for save files.
+  // Snapshot the raster layer pixels now so undo/redo can restore them
+  // without replaying the full timeline. Reference layers store null
+  // because their content is the original image and never changes.
   let snapshot = layer.type === 'raster' ? layer.cvs.toDataURL() : null
   globalState.timeline.currentAction = {
     index: globalState.timeline.undoStack.length,
     tool,
     layer,
     ...properties,
+    // Embed selection state in every action so undo/redo can restore the
+    // exact selection that existed when the action was recorded.
     selectProperties: { ...globalState.selection.properties },
     maskSet: globalState.selection.maskSet
       ? Array.from(globalState.selection.maskSet)

@@ -15,9 +15,14 @@ import { actionCutSelection } from './clipboardActions.js'
 //=============================================//
 
 /**
- * Select All
- * Not dependent on pointer events
- * Conditions: Layer is a raster layer, layer is not a preview layer
+ * Select the entire drawable area of the current raster layer.
+ *
+ * Sets the selection boundary to cover every pixel on the layer canvas
+ * (0,0 to canvas width/height), clears any existing selection first, and
+ * records a timeline entry so the action can be undone.
+ *
+ * Preconditions: no paste in progress, current layer must be a non-preview
+ * raster layer.
  */
 export function actionSelectAll() {
   if (canvas.pastedLayer) {
@@ -46,8 +51,15 @@ export function actionSelectAll() {
 }
 
 /**
+ * Add a vector to the active selection set.
  *
- * @param {number} vectorIndex - The vector index
+ * If the vector is not already selected, it is added to
+ * `globalState.vector.selectedIndices` and the transform UI panel is shown.
+ * In SCALE transform mode the bounding box is recalculated to include the
+ * newly added vector. The shape centroid is also recalculated so that
+ * rotation and scale operations use the correct geometric center.
+ * @param {number} vectorIndex - The index into `globalState.vector.all` of
+ *   the vector to add to the selection.
  */
 export function actionSelectVector(vectorIndex) {
   if (!globalState.vector.selectedIndices.has(vectorIndex)) {
@@ -66,27 +78,36 @@ export function actionSelectVector(vectorIndex) {
       },
     })
     globalState.clearRedoStack()
-    //Update shape center
+    // Recompute the centroid with the newly added vector included so that
+    // rotation and scale transforms pivot around the correct center point.
     const [centerX, centerY] = findVectorShapeCentroid(
       globalState.vector.selectedIndices,
       globalState.vector.all,
     )
     globalState.vector.shapeCenterX = centerX + canvas.currentLayer.x
     globalState.vector.shapeCenterY = centerY + canvas.currentLayer.y
-    //reset vectorGui mother object
+    // Reset rotation tracking so the next drag starts from a clean angle.
     vectorGui.mother.newRotation = 0
     vectorGui.mother.currentRotation = 0
   }
 }
 
 /**
+ * Remove a vector from the active selection set.
  *
- * @param {number} vectorIndex - The vector index
+ * If the vector is currently selected, it is removed from
+ * `globalState.vector.selectedIndices`. When the selection set becomes
+ * empty the transform UI panel is hidden and the full selection is cleared.
+ * If vectors remain selected in SCALE mode the bounding box is recalculated
+ * to exclude the deselected vector. The shape centroid is updated either way.
+ * @param {number} vectorIndex - The index into `globalState.vector.all` of
+ *   the vector to remove from the selection.
  */
 export function actionDeselectVector(vectorIndex) {
   if (globalState.vector.selectedIndices.has(vectorIndex)) {
     globalState.vector.removeSelected(vectorIndex)
     if (globalState.vector.selectedIndices.size === 0) {
+      // No vectors remain selected — hide the transform UI entirely.
       globalState.ui.vectorTransformOpen = false
       if (dom.vectorTransformUIContainer)
         dom.vectorTransformUIContainer.style.display = 'none'
@@ -104,23 +125,29 @@ export function actionDeselectVector(vectorIndex) {
       },
     })
     globalState.clearRedoStack()
-    //Update shape center
+    // Recompute the centroid without the deselected vector so transforms
+    // remain anchored to the correct center of the remaining selection.
     const [centerX, centerY] = findVectorShapeCentroid(
       globalState.vector.selectedIndices,
       globalState.vector.all,
     )
     globalState.vector.shapeCenterX = centerX + canvas.currentLayer.x
     globalState.vector.shapeCenterY = centerY + canvas.currentLayer.y
-    //reset vectorGui mother object
     vectorGui.mother.newRotation = 0
     vectorGui.mother.currentRotation = 0
   }
 }
 
 /**
- * Deselect
- * Not dependent on pointer events
- * Conditions: Layer is not a preview layer, and there is a selection
+ * Clear the current pixel or vector selection.
+ *
+ * Resets `globalState.selection` and clears any active vector selection
+ * indices, then records a select timeline entry. The canvas is re-rendered
+ * to remove any selection overlay indicators.
+ *
+ * Preconditions: current layer must not be a preview layer and there must
+ * be an active selection (boundary box, selected vector indices, or a
+ * current vector index).
  */
 export function actionDeselect() {
   if (
@@ -142,7 +169,10 @@ export function actionDeselect() {
 }
 
 /**
+ * Delete the current pixel or vector selection without copying it.
  *
+ * Delegates to `actionCutSelection` with `copyToClipboard = false` so the
+ * selected content is erased but the clipboard is left unchanged.
  */
 export function actionDeleteSelection() {
   //1. check for selected raster or vector
