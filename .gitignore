@@ -1,6 +1,17 @@
 # Dependency directories
 node_modules/
 
+# Build output
+dist/
+css/style.css
+css/style.css.map
+
+# Rust build artifacts
+wasm/target/
+
+# macOS metadata
+.DS_Store
+
 # Other
 .VSCodeCounter
 .claude
