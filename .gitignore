@@ -3,8 +3,7 @@ node_modules/
 
 # Build output
 dist/
-css/style.css
-css/style.css.map
+css/
 
 # Rust build artifacts
 wasm/target/
