@@ -6,11 +6,22 @@ import { addRasterLayer } from '../Actions/layer/layerActions.js'
 import { createPreviewLayer } from './layers.js'
 
 /**
- * Resize the onscreen canvas when adjusting the window size
- * UIEvent listener
+ * Synchronises every onscreen canvas with the current window after a resize
+ * event. Setting `.width` or `.height` on a canvas element fully resets its
+ * 2D context transform, so the sharpness×zoom matrix must be reapplied to
+ * every context immediately after each dimension assignment. All GUI overlay
+ * canvases (vector, selection, resize, cursor) and every layer canvas go
+ * through the same sequence so the composited display stays pixel-crisp
+ * across the whole stack. Saved free-position styles are cleared from
+ * floating panels because pixel offsets stored before the resize are
+ * meaningless in the new viewport; the color picker is constrained rather
+ * than reset because it retains a valid screen position and only needs
+ * nudging back inside the viewport if it was clipped.
  */
 const resizeOnScreenCanvas = () => {
-  //Keep canvas dimensions at 100% (requires css style width/ height 100%)
+  // offsetWidth × sharpness gives the physical pixel count for crisp
+  // rendering on HiDPI displays. Each .width/.height assignment also resets
+  // the context transform, so sharpness×zoom must be reapplied right after.
   canvas.vectorGuiCVS.width = canvas.vectorGuiCVS.offsetWidth * canvas.sharpness
   canvas.vectorGuiCVS.height =
     canvas.vectorGuiCVS.offsetHeight * canvas.sharpness
@@ -80,8 +91,10 @@ const resizeOnScreenCanvas = () => {
     0,
     0,
   )
-  renderCanvas() // render all layers
-  // reset positioning styles for free moving dialog boxes
+  // Recompose all layers; the dimension assignments above cleared every canvas.
+  renderCanvas()
+  // Saved left/top values become invalid when the viewport changes shape;
+  // clearing them lets CSS recompute the natural resting position.
   if (dom.toolboxContainer) {
     dom.toolboxContainer.style.left = ''
     dom.toolboxContainer.style.top = ''
@@ -90,6 +103,8 @@ const resizeOnScreenCanvas = () => {
     dom.sidebarContainer.style.left = ''
     dom.sidebarContainer.style.top = ''
   }
+  // offsetHeight is 0 when the picker is hidden; constraining a hidden
+  // element would force it to 0,0, so only act when it is visible.
   if (dom.colorPickerContainer && dom.colorPickerContainer.offsetHeight !== 0) {
     constrainElementOffsets(dom.colorPickerContainer)
   }

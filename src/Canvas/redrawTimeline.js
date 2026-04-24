@@ -4,12 +4,17 @@ import { tools } from '../Tools/index.js'
 import { performAction, renderBuildUpDitherSegment } from './performAction.js'
 
 /**
- * Create canvas for saving between actions
+ * Allocates an offscreen canvas and saves it into the shared
+ * `savedBetweenActionImages` array so that timeline replay can accumulate
+ * multiple actions before committing them to a layer. Storing the canvas
+ * reference rather than image data keeps allocation costs low — the caller
+ * draws directly onto the returned context rather than copying pixels.
  * @returns {CanvasRenderingContext2D} betweenCtx
  */
 function createAndSaveContext() {
   let cvs = document.createElement('canvas')
   let ctx = cvs.getContext('2d', {
+    // This canvas is read back when blitting accumulated layers to the target.
     willReadFrequently: true,
   })
   cvs.width = canvas.offScreenCVS.width
@@ -19,16 +24,31 @@ function createAndSaveContext() {
 }
 
 /**
- * Redraw all timeline actions
- * Critical function for the timeline to work
- * For handling activeIndexes, the idea is to save images of multiple actions that aren't changing to save time redrawing.
- * The current problem is that later actions "fill" or "draw" with a mask are affected by earlier actions.
- * TODO: (Low Priority) Another efficiency improvement would be to perform incremental rendering with caching so only the affected region of the canvas is rerendered.
- * TODO: (Medium Priority) Use OffscreenCanvas in a web worker to offload rendering to a separate thread.
- * BUG: Can't simply save images and draw them for the betweenCvs because this will ignore actions use erase or inject modes.
- * @param {object} layer - optional parameter to limit render to a specific layer
- * @param {Array} activeIndexes - optional parameter to limit render to specific actions. If not passed in, all actions will be rendered.
- * @param {boolean} setImages - optional parameter to set images for actions. Will be used when history is modified to update action images.
+ * Replays all (or a subset of) timeline actions to reconstruct the current
+ * canvas state from scratch. This is the critical hot path for undo, redo,
+ * and any operation that invalidates the offscreen canvas. The function is
+ * deliberately kept expensive to call — callers should batch or minimise
+ * invocations. The `activeIndexes` path supports incremental rendering:
+ * pre-saved images between indexes are blitted directly so only the changed
+ * region needs full replay. Build-up dither actions on the same layer are
+ * batched into contiguous segments and handed to `renderBuildUpDitherSegment`
+ * for an O(pixels) single-pass render instead of O(actions × points × stamp).
+ * A `buildUpDensityReset` action in the undo stack signals that accumulated
+ * density for a layer should be zeroed — used when a density-clearing
+ * operation such as an erase has been committed.
+ *
+ * BUG: Can't simply save images and draw them for the betweenCvs because
+ * this will ignore actions use erase or inject modes.
+ * TODO: (Low Priority) Incremental rendering with caching so only the
+ * affected region is rerendered.
+ * TODO: (Medium Priority) Use OffscreenCanvas in a web worker to offload
+ * rendering to a separate thread.
+ * @param {object} layer - optional parameter to limit render to a specific
+ *   layer
+ * @param {Array} activeIndexes - optional parameter to limit render to
+ *   specific actions; if omitted, all actions are rendered
+ * @param {boolean} setImages - set images for actions between indexes; used
+ *   when history is modified to update cached between-action images
  */
 export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
   //follows stored instructions to reassemble drawing. Costly operation. Minimize usage as much as possible.
@@ -77,7 +97,12 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
   let pendingSegment = []
   let pendingSegmentLayer = null
 
-  /** Render and clear the pending build-up dither segment. */
+  /**
+   * Renders the accumulated build-up dither segment in one pass and resets
+   * the pending buffer. Density deltas are folded into `buildUpLayerMaps`
+   * after flushing so that subsequent segments on the same layer see the
+   * correct cumulative density and produce consistent step indices.
+   */
   function flushBuildUpSegment() {
     if (pendingSegment.length === 0) return
     renderBuildUpDitherSegment(
@@ -157,6 +182,9 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         if (pendingSegmentLayer !== null) {
           const layerChanged = pendingSegmentLayer !== action.layer
           const prevAction = pendingSegment[pendingSegment.length - 1]
+          // Mode changes require a flush because the segment renderer uses a
+          // single mode set for the whole batch; mixing modes would corrupt
+          // the output.
           const modesChanged =
             prevAction &&
             (!!action.modes?.eraser !== !!prevAction.modes?.eraser ||
