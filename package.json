@@ -4,8 +4,9 @@
   "description": "### Drawing application for pixel art",
   "main": "index.js",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "build:wasm": "cd wasm && wasm-pack build --target web",
+    "dev": "npm run build:wasm && vite",
+    "build": "npm run build:wasm && vite build",
     "preview": "vite preview",
     "sass": "sass --watch scss/style.scss:css/style.css",
     "eslint": "eslint src",

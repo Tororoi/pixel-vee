@@ -146,7 +146,10 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
 
       if (!activeIndexMap && isBuildUp) {
         // Buffer for batch rendering. Flush first if this action is on a different layer.
-        if (pendingSegmentLayer !== null && pendingSegmentLayer !== action.layer) {
+        if (
+          pendingSegmentLayer !== null &&
+          pendingSegmentLayer !== action.layer
+        ) {
           flushBuildUpSegment()
         }
         pendingSegment.push(action)
@@ -160,7 +163,9 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
           if (!buildUpLayerMaps.has(action.layer)) {
             buildUpLayerMaps.set(
               action.layer,
-              new Int32Array(canvas.offScreenCVS.width * canvas.offScreenCVS.height),
+              new Int32Array(
+                canvas.offScreenCVS.width * canvas.offScreenCVS.height,
+              ),
             )
           }
           buildUpDensityMap = buildUpLayerMaps.get(action.layer)

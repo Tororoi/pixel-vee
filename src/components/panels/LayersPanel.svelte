@@ -126,83 +126,85 @@
 
 <DialogBox
   title="Layers"
-  class="layers-interface draggable v-drag settings-box smooth-shift{isPasted ? ' disabled' : ''}"
+  class="layers-interface draggable v-drag settings-box smooth-shift{isPasted
+    ? ' disabled'
+    : ''}"
   collapsible
 >
-    <div class="layers-control">
-      <button
-        type="button"
-        class="add-layer"
-        aria-label="New Layer"
-        data-tooltip="New Layer"
-        disabled={isPasted}
-        onclick={handleAddLayer}
-      ></button>
-      <label
-        for="file-upload"
-        class="reference{isPasted ? ' disabled' : ''}"
-        aria-label="Add Reference Layer"
-        data-tooltip="Add Reference Layer"
-      ></label>
-      <input
-        type="file"
-        id="file-upload"
-        bind:this={uploadRef}
-        accept="image/*"
-        disabled={isPasted}
-        onchange={handleUploadRef}
-        onclick={(e) => {
-          e.target.value = null
-        }}
-      />
-      <button
-        type="button"
-        id="delete-layer"
-        class="trash"
-        aria-label="Delete Layer"
-        data-tooltip="Delete Layer"
-        disabled={!canDelete}
-        onclick={handleDeleteLayer}
-      ></button>
+  <div class="layers-control">
+    <button
+      type="button"
+      class="add-layer"
+      aria-label="New Layer"
+      data-tooltip="New Layer"
+      disabled={isPasted}
+      onclick={handleAddLayer}
+    ></button>
+    <label
+      for="file-upload"
+      class="reference{isPasted ? ' disabled' : ''}"
+      aria-label="Add Reference Layer"
+      data-tooltip="Add Reference Layer"
+    ></label>
+    <input
+      type="file"
+      id="file-upload"
+      bind:this={uploadRef}
+      accept="image/*"
+      disabled={isPasted}
+      onchange={handleUploadRef}
+      onclick={(e) => {
+        e.target.value = null
+      }}
+    />
+    <button
+      type="button"
+      id="delete-layer"
+      class="trash"
+      aria-label="Delete Layer"
+      data-tooltip="Delete Layer"
+      disabled={!canDelete}
+      onclick={handleDeleteLayer}
+    ></button>
+  </div>
+  <div class="layers-container">
+    <div class="layers">
+      {#each visibleLayers as layer (layer.id ?? layer.title)}
+        {@const isHidden = layer.hidden}
+        {@const isSelected = layer === currentLayer}
+        {@const isSettingsOpen = settingsLayer === layer}
+        <div
+          class="layer {layer.type}{isSelected ? ' selected' : ''}"
+          role="button"
+          tabindex="0"
+          draggable={!isPasted}
+          ondragstart={(e) => handleDragStart(e, layer)}
+          ondragover={handleDragOver}
+          ondrop={(e) => handleDrop(e, layer)}
+          onclick={() => handleLayerClick(layer)}
+          onkeydown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') handleLayerClick(layer)
+          }}
+        >
+          <button
+            type="button"
+            class="hide {isHidden ? 'eyeclosed' : 'eyeopen'}"
+            aria-label={isHidden ? 'Show Layer' : 'Hide Layer'}
+            data-tooltip={isHidden ? 'Show Layer' : 'Hide Layer'}
+            onclick={(e) => handleHideToggle(e, layer)}
+          ></button>
+          <span class="layer-title">{layer.title}</span>
+          <button
+            type="button"
+            class="gear{isSettingsOpen ? ' active' : ''}"
+            aria-label="Layer Settings"
+            data-tooltip="Layer Settings"
+            onclick={(e) => handleGearClick(e, layer)}
+          ></button>
+        </div>
+      {/each}
     </div>
-    <div class="layers-container">
-      <div class="layers">
-        {#each visibleLayers as layer (layer.id ?? layer.title)}
-          {@const isHidden = layer.hidden}
-          {@const isSelected = layer === currentLayer}
-          {@const isSettingsOpen = settingsLayer === layer}
-          <div
-            class="layer {layer.type}{isSelected ? ' selected' : ''}"
-            role="button"
-            tabindex="0"
-            draggable={!isPasted}
-            ondragstart={(e) => handleDragStart(e, layer)}
-            ondragover={handleDragOver}
-            ondrop={(e) => handleDrop(e, layer)}
-            onclick={() => handleLayerClick(layer)}
-            onkeydown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') handleLayerClick(layer)
-            }}
-          >
-            <button
-              type="button"
-              class="hide {isHidden ? 'eyeclosed' : 'eyeopen'}"
-              aria-label={isHidden ? 'Show Layer' : 'Hide Layer'}
-              data-tooltip={isHidden ? 'Show Layer' : 'Hide Layer'}
-              onclick={(e) => handleHideToggle(e, layer)}
-            ></button>
-            <span class="layer-title">{layer.title}</span>
-            <button
-              type="button"
-              class="gear{isSettingsOpen ? ' active' : ''}"
-              aria-label="Layer Settings"
-              data-tooltip="Layer Settings"
-              onclick={(e) => handleGearClick(e, layer)}
-            ></button>
-          </div>
-        {/each}
-      </div>
-    </div>
+  </div>
   {#if settingsLayer}
     {#key settingsLayer}
       <LayerSettingsPopout

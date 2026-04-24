@@ -175,7 +175,6 @@ pub fn render_buildup_segment(
 ) {
     let w = canvas_width as usize;
     let h = canvas_height as usize;
-    let stride = w * 4;
     let map_size = w * h;
 
     // Phase 1: build segment_delta (count within this segment) and last_action_idx per pixel.
@@ -325,7 +324,7 @@ pub fn flood_fill(
             && pixels[base + 3] == ta
     };
 
-    while let Some((mut x, mut y)) = stack.pop() {
+    while let Some((x, mut y)) = stack.pop() {
         let mut base = y * stride + x * 4;
         // Walk up while matching
         while y > 0 && matches(pixels, base - stride) {

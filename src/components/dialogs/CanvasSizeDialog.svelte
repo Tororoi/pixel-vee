@@ -123,93 +123,95 @@
   style="display: {isOpen ? 'flex' : 'none'}"
   onclose={handleClose}
 >
-    <form class="dimensions-form" onsubmit={handleSubmit}>
-      <div class="inputs">
-        <label for="canvas-width">
-          Width:
-          <span class="input">
-            <input
-              bind:this={widthInputRef}
-              type="number"
-              id="canvas-width"
-              min="8"
-              max="1024"
-              value={width}
-              oninput={handleWidthChange}
-              onfocus={() => {
-                widthFocused = true
-              }}
-              onblur={handleWidthBlur}
-            />
-            <SpinInput
-              bind:value={width}
-              min={MINIMUM_DIMENSION}
-              max={MAXIMUM_DIMENSION}
-              onspin={(val) => {
-                if (globalState.canvas.resizeOverlayActive) applyFromInputs(val, +height)
-              }}
-            />
-          </span>
-        </label>
-        <label for="canvas-height">
-          Height:
-          <span class="input">
-            <input
-              bind:this={heightInputRef}
-              type="number"
-              id="canvas-height"
-              min="8"
-              max="1024"
-              value={height}
-              oninput={handleHeightChange}
-              onfocus={() => {
-                heightFocused = true
-              }}
-              onblur={handleHeightBlur}
-            />
-            <SpinInput
-              bind:value={height}
-              min={MINIMUM_DIMENSION}
-              max={MAXIMUM_DIMENSION}
-              onspin={(val) => {
-                if (globalState.canvas.resizeOverlayActive) applyFromInputs(+width, val)
-              }}
-            />
-          </span>
-        </label>
+  <form class="dimensions-form" onsubmit={handleSubmit}>
+    <div class="inputs">
+      <label for="canvas-width">
+        Width:
+        <span class="input">
+          <input
+            bind:this={widthInputRef}
+            type="number"
+            id="canvas-width"
+            min="8"
+            max="1024"
+            value={width}
+            oninput={handleWidthChange}
+            onfocus={() => {
+              widthFocused = true
+            }}
+            onblur={handleWidthBlur}
+          />
+          <SpinInput
+            bind:value={width}
+            min={MINIMUM_DIMENSION}
+            max={MAXIMUM_DIMENSION}
+            onspin={(val) => {
+              if (globalState.canvas.resizeOverlayActive)
+                applyFromInputs(val, +height)
+            }}
+          />
+        </span>
+      </label>
+      <label for="canvas-height">
+        Height:
+        <span class="input">
+          <input
+            bind:this={heightInputRef}
+            type="number"
+            id="canvas-height"
+            min="8"
+            max="1024"
+            value={height}
+            oninput={handleHeightChange}
+            onfocus={() => {
+              heightFocused = true
+            }}
+            onblur={handleHeightBlur}
+          />
+          <SpinInput
+            bind:value={height}
+            min={MINIMUM_DIMENSION}
+            max={MAXIMUM_DIMENSION}
+            onspin={(val) => {
+              if (globalState.canvas.resizeOverlayActive)
+                applyFromInputs(+width, val)
+            }}
+          />
+        </span>
+      </label>
+    </div>
+    <div class="anchor-section">
+      <span class="anchor-label">Anchor:</span>
+      <div bind:this={anchorGridRef} class="anchor-grid" id="anchor-grid">
+        {#each ANCHORS as anchor (anchor)}
+          <button
+            type="button"
+            class="anchor-btn{activeAnchor === anchor ? ' active' : ''}"
+            data-anchor={anchor}
+            aria-label="Anchor {anchor}"
+            onclick={() => handleAnchorClick(anchor)}
+          ></button>
+        {/each}
       </div>
-      <div class="anchor-section">
-        <span class="anchor-label">Anchor:</span>
-        <div bind:this={anchorGridRef} class="anchor-grid" id="anchor-grid">
-          {#each ANCHORS as anchor (anchor)}
-            <button
-              type="button"
-              class="anchor-btn{activeAnchor === anchor ? ' active' : ''}"
-              data-anchor={anchor}
-              aria-label="Anchor {anchor}"
-              onclick={() => handleAnchorClick(anchor)}
-            ></button>
-          {/each}
-        </div>
-      </div>
-      <div class="buttons-container">
-        <button
-          type="submit"
-          id="update-size"
-          class="update-size"
-          aria-label="Update Canvas Size"
-        >
-          Submit
-        </button>
-        <button
-          type="button"
-          id="cancel-resize-button"
-          class="update-size"
-          aria-label="Close canvas resize dialog box"
-          onclick={handleCancel}
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
+    </div>
+    <div class="buttons-container">
+      <button
+        type="submit"
+        id="update-size"
+        class="update-size"
+        aria-label="Update Canvas Size"
+      >
+        Submit
+      </button>
+      <button
+        type="button"
+        id="cancel-resize-button"
+        class="update-size"
+        aria-label="Close canvas resize dialog box"
+        onclick={handleCancel}
+      >
+        Cancel
+      </button>
+    </div>
+  </form>
 </DialogBox>

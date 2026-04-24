@@ -6,7 +6,10 @@ import { vectorGui } from '../GUI/vector.js'
 import { createActiveIndexesForRender } from '../GUI/vectorLinkedUpdates.js'
 import { getAngle } from '../utils/trig.js'
 import { renderCanvas } from '../Canvas/render.js'
-import { rotateVectors, translateVectors } from '../utils/vectorTransformHelpers.js'
+import {
+  rotateVectors,
+  translateVectors,
+} from '../utils/vectorTransformHelpers.js'
 import { transformVectorContent } from '../utils/transformHelpers.js'
 
 //=======================================//

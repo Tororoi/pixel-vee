@@ -59,7 +59,6 @@
     }
     vectorGui.render()
     updateActiveLayerState()
-
   }
 
   function handleHideToggle(e, vector) {
@@ -75,7 +74,6 @@
     renderCanvas(vector.layer, true)
     removeActionVector(vector)
     globalState.clearRedoStack()
-
   }
 
   function handleGearClick(e, vector) {
@@ -101,75 +99,76 @@
 
 <DialogBox
   title="Vectors"
-  class="vectors-interface draggable v-drag settings-box smooth-shift{isPasted ? ' disabled' : ''}"
+  class="vectors-interface draggable v-drag settings-box smooth-shift{isPasted
+    ? ' disabled'
+    : ''}"
   collapsible
 >
-    <div class="vectors-container">
-      <div class="vectors">
-        {#each visibleVectors as vector (vector.index)}
-          {@const isVectorHidden = vector.hidden}
-          {@const isSelected =
-            vector.index === currentVectorIndex ||
-            selectedIndices.has(vector.index)}
-          {@const toolName = vector.vectorProperties?.tool ?? ''}
-          {@const isSettingsOpen = settingsVector === vector}
-          <div
-            class="vector{isSelected ? ' selected' : ''}"
-            role="button"
-            tabindex="0"
-            onclick={(e) => handleVectorClick(e, vector)}
-            onkeydown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ')
-                handleVectorClick(e, vector)
-            }}
-          >
-            <VectorThumbnail {vector} />
-            <div class="left">
-              <button
-                type="button"
-                class="tool {toolName}"
-                aria-label={toolName}
-                data-tooltip={toolName}
-                onclick={(e) => e.stopPropagation()}
-              ></button>
-              <button
-                type="button"
-                class="actionColor primary-color"
-                aria-label="Action Color"
-                data-tooltip="Action Color"
-                onclick={(e) => handleColorClick(e, vector)}
-              >
-                <div
-                  class="swatch"
-                  style="background-color: {vector.color?.color}"
-                ></div>
-              </button>
-              <button
-                type="button"
-                class="hide {isVectorHidden ? 'eyeclosed' : 'eyeopen'}"
-                aria-label={isVectorHidden ? 'Show Vector' : 'Hide Vector'}
-                data-tooltip={isVectorHidden ? 'Show Vector' : 'Hide Vector'}
-                onclick={(e) => handleHideToggle(e, vector)}
-              ></button>
-              <button
-                type="button"
-                class="trash"
-                aria-label="Remove Vector"
-                data-tooltip="Remove Vector"
-                onclick={(e) => handleRemove(e, vector)}
-              ></button>
-            </div>
+  <div class="vectors-container">
+    <div class="vectors">
+      {#each visibleVectors as vector (vector.index)}
+        {@const isVectorHidden = vector.hidden}
+        {@const isSelected =
+          vector.index === currentVectorIndex ||
+          selectedIndices.has(vector.index)}
+        {@const toolName = vector.vectorProperties?.tool ?? ''}
+        {@const isSettingsOpen = settingsVector === vector}
+        <div
+          class="vector{isSelected ? ' selected' : ''}"
+          role="button"
+          tabindex="0"
+          onclick={(e) => handleVectorClick(e, vector)}
+          onkeydown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') handleVectorClick(e, vector)
+          }}
+        >
+          <VectorThumbnail {vector} />
+          <div class="left">
             <button
               type="button"
-              class="gear{isSettingsOpen ? ' active' : ''}"
-              aria-label="Vector Settings"
-              data-tooltip="Vector Settings"
-              onclick={(e) => handleGearClick(e, vector)}
+              class="tool {toolName}"
+              aria-label={toolName}
+              data-tooltip={toolName}
+              onclick={(e) => e.stopPropagation()}
+            ></button>
+            <button
+              type="button"
+              class="actionColor primary-color"
+              aria-label="Action Color"
+              data-tooltip="Action Color"
+              onclick={(e) => handleColorClick(e, vector)}
+            >
+              <div
+                class="swatch"
+                style="background-color: {vector.color?.color}"
+              ></div>
+            </button>
+            <button
+              type="button"
+              class="hide {isVectorHidden ? 'eyeclosed' : 'eyeopen'}"
+              aria-label={isVectorHidden ? 'Show Vector' : 'Hide Vector'}
+              data-tooltip={isVectorHidden ? 'Show Vector' : 'Hide Vector'}
+              onclick={(e) => handleHideToggle(e, vector)}
+            ></button>
+            <button
+              type="button"
+              class="trash"
+              aria-label="Remove Vector"
+              data-tooltip="Remove Vector"
+              onclick={(e) => handleRemove(e, vector)}
             ></button>
           </div>
-        {/each}
-      </div>
+          <button
+            type="button"
+            class="gear{isSettingsOpen ? ' active' : ''}"
+            aria-label="Vector Settings"
+            data-tooltip="Vector Settings"
+            onclick={(e) => handleGearClick(e, vector)}
+          ></button>
+        </div>
+      {/each}
     </div>
+  </div>
   {#if settingsVector}
     <VectorSettingsPopout
       bind:vector={settingsVector}

@@ -237,7 +237,7 @@ export function actionBuildUpDitherDraw(
         seenPixelsSet.add((y << 16) | x)
       }
     }
-    const count = densityMap ? (densityMap[y * layer.cvs.width + x] || 0) : 0
+    const count = densityMap ? densityMap[y * layer.cvs.width + x] || 0 : 0
     const stepIndex = Math.min(count, buildUpSteps.length - 1)
     const pattern = ditherPatterns[buildUpSteps[stepIndex]]
     const isOn = isDitherOn(pattern, x, y, ditherOffsetX, ditherOffsetY)

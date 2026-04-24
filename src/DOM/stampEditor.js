@@ -226,9 +226,7 @@ function applyStamp() {
 
   updateCustomStamp()
   globalState.ui.stampEditorOpen = false
-
 }
-
 
 /**
  * Clear all pixels from the working copy.

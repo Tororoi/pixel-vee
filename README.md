@@ -6,9 +6,14 @@ Visit here: https://pixelvee.netlify.app/
 
 ## Concept
 
-The goal of this drawing app is to combine a vector art workflow with a typical raster art workflow. This app especially makes drawing pixellated curves and ellipses very easy. Lines made with vector tools can also be modified at any time, even on the same layer as rasterized pixels. The aim is to make a faster, smoother workflow for pixel artists.
+The goal of this drawing app is to combine a vector art workflow with a typical
+raster art workflow. This app especially makes drawing pixellated curves and
+ellipses very easy. Lines made with vector tools can also be modified at any
+time, even on the same layer as rasterized pixels. The aim is to make a faster,
+smoother workflow for pixel artists.
 
-This app is a work in progress. See the bottom of this page for features that are planned to be added in the future.
+This app is a work in progress. See the bottom of this page for features that
+are planned to be added in the future.
 
 ## Functions
 
@@ -297,7 +302,8 @@ This app is a work in progress. See the bottom of this page for features that ar
 
 ## Vectors
 
-A panel lists all vectors in the order they were drawn, newest at the top. The thumbnail reflects the vector's placement on the canvas.
+A panel lists all vectors in the order they were drawn, newest at the top. The
+thumbnail reflects the vector's placement on the canvas.
 
 <table>
   <tr>
@@ -331,7 +337,8 @@ A panel lists all vectors in the order they were drawn, newest at the top. The t
 
 ## Curve Tool Options
 
-Options specific to the Curve tool for controlling how connected vectors interact:
+Options specific to the Curve tool for controlling how connected vectors
+interact:
 
 <table>
   <tr>
@@ -485,48 +492,48 @@ Options specific to the Curve tool for controlling how connected vectors interac
 
 ## Keyboard Shortcuts
 
-| Key | Action |
-|---|---|
-| B | Brush |
-| F | Fill |
-| V | Curve |
-| / | Curve — Line mode |
-| Q | Curve — Quadratic mode |
-| C | Curve — Cubic mode |
-| O | Ellipse |
-| P | Polygon |
-| S | Select |
-| W | Magic Wand |
-| E | Toggle Eraser mode |
-| I | Toggle Inject mode |
-| Y | Toggle Perfect mode |
-| M | Toggle Color Mask mode |
-| G | Toggle Grid |
-| T | Toggle Tooltips |
-| R | Randomize primary color |
-| K (hold) | Palette edit mode |
-| X (hold) | Palette remove mode |
-| Space (hold) | Grab / pan view |
-| Alt (hold) | Eyedropper |
-| Shift (hold) | Constrain (line for Brush, circle for Ellipse, square for Polygon) |
-| 7 | Toggle Chain (Curve tool) |
-| = | Toggle Equal (Curve tool) |
-| A | Toggle Align (Curve tool) |
-| H | Toggle Hold (Curve tool) |
-| L | Toggle Link (Curve tool) |
-| Cmd + Z | Undo |
-| Cmd + Shift + Z | Redo |
-| Cmd + S | Save As |
-| Cmd + A | Select All |
-| Cmd + D | Deselect |
-| Cmd + C | Copy |
-| Cmd + X | Cut |
-| Cmd + V | Paste |
-| Cmd + F | Flip Horizontal |
-| Cmd + Shift + F | Flip Vertical |
-| Cmd + R | Rotate 90° |
-| Enter | Confirm paste |
-| Backspace | Delete selection |
+| Key             | Action                                                             |
+| --------------- | ------------------------------------------------------------------ |
+| B               | Brush                                                              |
+| F               | Fill                                                               |
+| V               | Curve                                                              |
+| /               | Curve — Line mode                                                  |
+| Q               | Curve — Quadratic mode                                             |
+| C               | Curve — Cubic mode                                                 |
+| O               | Ellipse                                                            |
+| P               | Polygon                                                            |
+| S               | Select                                                             |
+| W               | Magic Wand                                                         |
+| E               | Toggle Eraser mode                                                 |
+| I               | Toggle Inject mode                                                 |
+| Y               | Toggle Perfect mode                                                |
+| M               | Toggle Color Mask mode                                             |
+| G               | Toggle Grid                                                        |
+| T               | Toggle Tooltips                                                    |
+| R               | Randomize primary color                                            |
+| K (hold)        | Palette edit mode                                                  |
+| X (hold)        | Palette remove mode                                                |
+| Space (hold)    | Grab / pan view                                                    |
+| Alt (hold)      | Eyedropper                                                         |
+| Shift (hold)    | Constrain (line for Brush, circle for Ellipse, square for Polygon) |
+| 7               | Toggle Chain (Curve tool)                                          |
+| =               | Toggle Equal (Curve tool)                                          |
+| A               | Toggle Align (Curve tool)                                          |
+| H               | Toggle Hold (Curve tool)                                           |
+| L               | Toggle Link (Curve tool)                                           |
+| Cmd + Z         | Undo                                                               |
+| Cmd + Shift + Z | Redo                                                               |
+| Cmd + S         | Save As                                                            |
+| Cmd + A         | Select All                                                         |
+| Cmd + D         | Deselect                                                           |
+| Cmd + C         | Copy                                                               |
+| Cmd + X         | Cut                                                                |
+| Cmd + V         | Paste                                                              |
+| Cmd + F         | Flip Horizontal                                                    |
+| Cmd + Shift + F | Flip Vertical                                                      |
+| Cmd + R         | Rotate 90°                                                         |
+| Enter           | Confirm paste                                                      |
+| Backspace       | Delete selection                                                   |
 
 ### Features to be added
 
@@ -535,53 +542,86 @@ Options specific to the Curve tool for controlling how connected vectors interac
 ### Stretch features
 
 #### Vectors:
+
 - Ability to rasterize vectors and remove them from the vectors interface
 - Dithered Gradient Tool
-- Smooth curves mode for brush — calculates curvature between points; bonus: convert a brush stroke into a series of linked vectors
+- Smooth curves mode for brush — calculates curvature between points; bonus:
+  convert a brush stroke into a series of linked vectors
 - Shapes: collections of vectors that can be selected and manipulated together
 - "Cut" a vector at any point to subdivide it into two separate curves
 
 #### Raster Tools:
+
 - Mask Tool
 - Amorphous selection tool
 
 #### Utility:
-- 9-Grid Mode: make repeating patterns for a selected tile area, with options for brick repeat and half-drop repeat
+
+- 9-Grid Mode: make repeating patterns for a selected tile area, with options
+  for brick repeat and half-drop repeat
 - Preview window
-- Toggle magnify pointer area for precise placement of pixels: move magnifier on canvas and then work in magnified window to place pixels. Useful for any tools that use subpixels, and for precise placement of vectors.
-- Perspective Tool: Acts as a custom overlay on the canvas with user defined vanishing points and adjustable lines. 1-point, 2-point, 3-point, multipoint, 4-point curvilinear, 5-point curvilinear, isometric
+- Toggle magnify pointer area for precise placement of pixels: move magnifier on
+  canvas and then work in magnified window to place pixels. Useful for any tools
+  that use subpixels, and for precise placement of vectors.
+- Perspective Tool: Acts as a custom overlay on the canvas with user defined
+  vanishing points and adjustable lines. 1-point, 2-point, 3-point, multipoint,
+  4-point curvilinear, 5-point curvilinear, isometric
 
 #### Layers:
+
 - Layer Settings: blend mode, duplicate layer
 
 #### Palette:
+
 - Color ramps in color picker, with ability to add an entire ramp to the palette
-- Optional palette canvas mode (small canvas with brush/eraser/eyedropper for building palettes by hand)
+- Optional palette canvas mode (small canvas with brush/eraser/eyedropper for
+  building palettes by hand)
 
 #### Animation:
+
 - Spritesheet options: custom grid to subdivide canvas
 - Animation preview, onion skins, per-layer frame rate, export animation
 
 # Development
 
+## System Requirements
+
+- [Node.js](https://nodejs.org/) (v18+)
+- [Rust](https://rustup.rs/) (via rustup)
+- [wasm-pack](https://rustwasm.github.io/wasm-pack/)
+
+After installing Rust via rustup:
+
+```sh
+rustup target add wasm32-unknown-unknown
+cargo install wasm-pack
+```
+
 ## Run locally
+
 1. Run `npm install`
-2. Start a local server: `serve` or `php -S localhost:8000`
+2. Run `npm run dev`
 
 ## Scripts
 
-| Command | Description |
-|---|---|
-| `npm run sass` | Watch and compile SCSS → CSS |
-| `npm run eslint` | Lint source files (dry run) |
-| `npm run eslintfix` | Lint and auto-fix source files |
-| `npm test` | Run tests once |
-| `npm run test:watch` | Run tests in watch mode |
+| Command              | Description                          |
+| -------------------- | ------------------------------------ |
+| `npm run dev`        | Build WASM and start Vite dev server |
+| `npm run build`      | Build WASM and bundle for production |
+| `npm run build:wasm` | Build WASM only                      |
+| `npm run sass`       | Watch and compile SCSS → CSS         |
+| `npm run eslint`     | Lint source files (dry run)          |
+| `npm run eslintfix`  | Lint and auto-fix source files       |
+| `npm test`           | Run tests once                       |
+| `npm run test:watch` | Run tests in watch mode              |
 
 ## Tech Stack
 
-- Vanilla JavaScript (ES modules, no bundler)
+- Plain Javascript
+- Svelte 5
+- Vite
+- WebAssembly (Rust via wasm-pack)
 - HTML5 Canvas API
-- SCSS compiled via `npm run sass`
+- SCSS
 - Vitest for testing
 - ESLint with jsdoc plugin

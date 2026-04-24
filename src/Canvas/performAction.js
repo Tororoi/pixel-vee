@@ -86,12 +86,19 @@ function _renderBuildUpDitherSegmentWasm(
 
   // Build per-action flat arrays for WASM
   const deltaFlat = []
-  const actionR = [], actionG = [], actionB = [], actionA = []
-  const actionSR = [], actionSG = [], actionSB = [], actionSA = []
+  const actionR = [],
+    actionG = [],
+    actionB = [],
+    actionA = []
+  const actionSR = [],
+    actionSG = [],
+    actionSB = [],
+    actionSA = []
   const actionTwoColor = []
   const actionSteps = []
   const actionStepCounts = []
-  const actionOffX = [], actionOffY = []
+  const actionOffX = [],
+    actionOffY = []
 
   for (const action of actions) {
     const lx = action.layer.x + cropDX
@@ -117,8 +124,14 @@ function _renderBuildUpDitherSegmentWasm(
     const steps = action.buildUpSteps ?? [15, 31, 47, 63]
     for (const s of steps) actionSteps.push(s)
     actionStepCounts.push(steps.length)
-    const effX = ((((action.ditherOffsetX ?? 0) + action.recordedLayerX - offsetX) % 8) + 8) % 8
-    const effY = ((((action.ditherOffsetY ?? 0) + action.recordedLayerY - offsetY) % 8) + 8) % 8
+    const effX =
+      ((((action.ditherOffsetX ?? 0) + action.recordedLayerX - offsetX) % 8) +
+        8) %
+      8
+    const effY =
+      ((((action.ditherOffsetY ?? 0) + action.recordedLayerY - offsetY) % 8) +
+        8) %
+      8
     actionOffX.push(effX)
     actionOffY.push(effY)
   }
@@ -186,15 +199,25 @@ function _renderBuildUpDitherSegmentJS(
     const y = (key >>> 16) & 0xffff
     const action = lastActionMap.get(key)
     const buildUpSteps = action.buildUpSteps ?? [15, 31, 47, 63]
-    const priorDensity = priorDensityMap ? (priorDensityMap[y * cw + x] || 0) : 0
+    const priorDensity = priorDensityMap ? priorDensityMap[y * cw + x] || 0 : 0
     const totalDensity = priorDensity + segmentCount
     const stepIndex = Math.min(totalDensity - 1, buildUpSteps.length - 1)
     const pattern = ditherPatterns[buildUpSteps[stepIndex]]
     const effectiveDitherOffsetX =
-      ((((action.ditherOffsetX ?? 0) + action.recordedLayerX - offsetX) % 8) + 8) % 8
+      ((((action.ditherOffsetX ?? 0) + action.recordedLayerX - offsetX) % 8) +
+        8) %
+      8
     const effectiveDitherOffsetY =
-      ((((action.ditherOffsetY ?? 0) + action.recordedLayerY - offsetY) % 8) + 8) % 8
-    const isOn = isDitherOn(pattern, x, y, effectiveDitherOffsetX, effectiveDitherOffsetY)
+      ((((action.ditherOffsetY ?? 0) + action.recordedLayerY - offsetY) % 8) +
+        8) %
+      8
+    const isOn = isDitherOn(
+      pattern,
+      x,
+      y,
+      effectiveDitherOffsetX,
+      effectiveDitherOffsetY,
+    )
     if (isOn) {
       renderCtx.fillStyle = action.color.color
       renderCtx.fillRect(x, y, 1, 1)

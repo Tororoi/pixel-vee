@@ -77,7 +77,6 @@
     actionClear(canvas.currentLayer)
     globalState.clearRedoStack()
     renderCanvas(canvas.currentLayer)
-
   }
 
   function handleZoom(e) {
@@ -143,129 +142,133 @@
   }
 </script>
 
-<DialogBox title="Toolbox" class="toolbox h-drag free locked" collapsible locked>
-
-    <div class="btn-pair">
-      <button
-        type="button"
-        class="tool undo custom-shape"
-        id="undo"
-        aria-label="Undo (Cmd + Z)"
-        data-tooltip="Undo (Cmd + Z)"
-        onclick={handleUndo_}
-      ></button>
-      <button
-        type="button"
-        class="tool redo custom-shape"
-        id="redo"
-        aria-label="Redo (Cmd + Shift + Z)"
-        data-tooltip="Redo (Cmd + Shift + Z)"
-        onclick={handleRedo_}
-      ></button>
-    </div>
-    <div class="btn-pair">
-      <button
-        type="button"
-        class="tool recenter custom-shape"
-        aria-label="Recenter Canvas"
-        data-tooltip="Recenter Canvas"
-        onclick={handleRecenter}
-      ></button>
-      <button
-        type="button"
-        class="tool clear custom-shape{pastedLayer ? ' disabled' : ''}"
-        aria-label="Clear Canvas"
-        data-tooltip="Clear Canvas"
-        onclick={handleClear}
-      ></button>
-    </div>
-    <div class="zoom btn-pair">
-      <button
-        type="button"
-        id="minus"
-        class="zoombtn minus"
-        aria-label="Zoom Out (Mouse Wheel)"
-        data-tooltip="Zoom Out (Mouse Wheel)"
-        onclick={handleZoom}
-      ></button>
-      <button
-        type="button"
-        id="plus"
-        class="zoombtn plus"
-        aria-label="Zoom In (Mouse Wheel)"
-        data-tooltip="Zoom In (Mouse Wheel)"
-        onclick={handleZoom}
-      ></button>
-    </div>
-    <div class="tools">
-      <h4>Tools</h4>
-      <div class="columns">
-        <div class="column">
-          {#each COLUMN1_TOOLS as item (item)}
-            {#if toolGroups[item]}
-              {@const group = toolGroups[item]}
-              {@const activeToolName = groupActiveTools[item]}
-              {@const isGroupSelected = group.tools.includes(selectedName)}
-              {@const groupBtnClass = isGroupSelected
-                ? selectedName
-                : activeToolName}
-              {@const isOpen = openGroup === item}
-              <div class="tool-group{isOpen ? ' open' : ''}" data-group={item}>
-                <button
-                  type="button"
-                  class="tool-group-btn {groupBtnClass}{isGroupSelected
-                    ? ' selected'
-                    : ''}"
-                  data-group={item}
-                  aria-label={GROUP_LABELS[item] ?? item}
-                  data-tooltip={GROUP_LABELS[item] ?? item}
-                  onclick={() => handleGroupBtnClick(item)}
-                ></button>
-                {#if isOpen}
-                  <div class="tool-group-popout">
-                    {#each group.tools as toolName (toolName)}
-                      {@const info = TOOL_INFO[toolName] ?? {
-                        label: toolName,
-                        tooltip: toolName,
-                      }}
-                      <button
-                        type="button"
-                        class="tool {toolName}{selectedName === toolName
-                          ? ' selected'
-                          : ''}"
-                        id={toolName}
-                        aria-label={info.label}
-                        data-tooltip={info.tooltip}
-                        onclick={() => handleToolClick(toolName)}
-                      ></button>
-                    {/each}
-                  </div>
-                {/if}
-              </div>
-            {:else}
+<DialogBox
+  title="Toolbox"
+  class="toolbox h-drag free locked"
+  collapsible
+  locked
+>
+  <div class="btn-pair">
+    <button
+      type="button"
+      class="tool undo custom-shape"
+      id="undo"
+      aria-label="Undo (Cmd + Z)"
+      data-tooltip="Undo (Cmd + Z)"
+      onclick={handleUndo_}
+    ></button>
+    <button
+      type="button"
+      class="tool redo custom-shape"
+      id="redo"
+      aria-label="Redo (Cmd + Shift + Z)"
+      data-tooltip="Redo (Cmd + Shift + Z)"
+      onclick={handleRedo_}
+    ></button>
+  </div>
+  <div class="btn-pair">
+    <button
+      type="button"
+      class="tool recenter custom-shape"
+      aria-label="Recenter Canvas"
+      data-tooltip="Recenter Canvas"
+      onclick={handleRecenter}
+    ></button>
+    <button
+      type="button"
+      class="tool clear custom-shape{pastedLayer ? ' disabled' : ''}"
+      aria-label="Clear Canvas"
+      data-tooltip="Clear Canvas"
+      onclick={handleClear}
+    ></button>
+  </div>
+  <div class="zoom btn-pair">
+    <button
+      type="button"
+      id="minus"
+      class="zoombtn minus"
+      aria-label="Zoom Out (Mouse Wheel)"
+      data-tooltip="Zoom Out (Mouse Wheel)"
+      onclick={handleZoom}
+    ></button>
+    <button
+      type="button"
+      id="plus"
+      class="zoombtn plus"
+      aria-label="Zoom In (Mouse Wheel)"
+      data-tooltip="Zoom In (Mouse Wheel)"
+      onclick={handleZoom}
+    ></button>
+  </div>
+  <div class="tools">
+    <h4>Tools</h4>
+    <div class="columns">
+      <div class="column">
+        {#each COLUMN1_TOOLS as item (item)}
+          {#if toolGroups[item]}
+            {@const group = toolGroups[item]}
+            {@const activeToolName = groupActiveTools[item]}
+            {@const isGroupSelected = group.tools.includes(selectedName)}
+            {@const groupBtnClass = isGroupSelected
+              ? selectedName
+              : activeToolName}
+            {@const isOpen = openGroup === item}
+            <div class="tool-group{isOpen ? ' open' : ''}" data-group={item}>
               <button
                 type="button"
-                class="tool {item}{selectedName === item ? ' selected' : ''}"
-                id={item}
-                aria-label={LABELS[item] ?? item}
-                data-tooltip={TOOLTIPS[item] ?? item}
-                onclick={() => handleToolClick(item)}
+                class="tool-group-btn {groupBtnClass}{isGroupSelected
+                  ? ' selected'
+                  : ''}"
+                data-group={item}
+                aria-label={GROUP_LABELS[item] ?? item}
+                data-tooltip={GROUP_LABELS[item] ?? item}
+                onclick={() => handleGroupBtnClick(item)}
               ></button>
-            {/if}
-          {/each}
-        </div>
-        <div class="column">
-          {#each COLUMN2_TOOLS as name (name)}
+              {#if isOpen}
+                <div class="tool-group-popout">
+                  {#each group.tools as toolName (toolName)}
+                    {@const info = TOOL_INFO[toolName] ?? {
+                      label: toolName,
+                      tooltip: toolName,
+                    }}
+                    <button
+                      type="button"
+                      class="tool {toolName}{selectedName === toolName
+                        ? ' selected'
+                        : ''}"
+                      id={toolName}
+                      aria-label={info.label}
+                      data-tooltip={info.tooltip}
+                      onclick={() => handleToolClick(toolName)}
+                    ></button>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+          {:else}
             <button
               type="button"
-              class="tool {name}{selectedName === name ? ' selected' : ''}"
-              id={name}
-              aria-label={LABELS[name] ?? name}
-              data-tooltip={TOOLTIPS[name] ?? name}
-              onclick={() => handleToolClick(name)}
+              class="tool {item}{selectedName === item ? ' selected' : ''}"
+              id={item}
+              aria-label={LABELS[item] ?? item}
+              data-tooltip={TOOLTIPS[item] ?? item}
+              onclick={() => handleToolClick(item)}
             ></button>
-          {/each}
-        </div>
+          {/if}
+        {/each}
+      </div>
+      <div class="column">
+        {#each COLUMN2_TOOLS as name (name)}
+          <button
+            type="button"
+            class="tool {name}{selectedName === name ? ' selected' : ''}"
+            id={name}
+            aria-label={LABELS[name] ?? name}
+            data-tooltip={TOOLTIPS[name] ?? name}
+            onclick={() => handleToolClick(name)}
+          ></button>
+        {/each}
       </div>
     </div>
+  </div>
 </DialogBox>

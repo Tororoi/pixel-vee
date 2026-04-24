@@ -5,7 +5,6 @@ import { constrainElementOffsets } from '../utils/constrainElementOffsets.js'
 import { addRasterLayer } from '../Actions/layer/layerActions.js'
 import { createPreviewLayer } from './layers.js'
 
-
 /**
  * Resize the onscreen canvas when adjusting the window size
  * UIEvent listener

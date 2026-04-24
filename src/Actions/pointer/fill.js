@@ -86,14 +86,38 @@ export function actionFill(startX, startY, strokeCtx) {
       ) {
         colorPixel(layerImageData, pixelPos, currentColor)
         if (x > 0) {
-          if (matchStartColor(layerImageData, pixelPos - 4, clickedColor, boundaryBox)) {
-            if (!reachLeft) { pixelStack.push([x - 1, y]); reachLeft = true }
-          } else if (reachLeft) { reachLeft = false }
+          if (
+            matchStartColor(
+              layerImageData,
+              pixelPos - 4,
+              clickedColor,
+              boundaryBox,
+            )
+          ) {
+            if (!reachLeft) {
+              pixelStack.push([x - 1, y])
+              reachLeft = true
+            }
+          } else if (reachLeft) {
+            reachLeft = false
+          }
         }
         if (x < width - 1) {
-          if (matchStartColor(layerImageData, pixelPos + 4, clickedColor, boundaryBox)) {
-            if (!reachRight) { pixelStack.push([x + 1, y]); reachRight = true }
-          } else if (reachRight) { reachRight = false }
+          if (
+            matchStartColor(
+              layerImageData,
+              pixelPos + 4,
+              clickedColor,
+              boundaryBox,
+            )
+          ) {
+            if (!reachRight) {
+              pixelStack.push([x + 1, y])
+              reachRight = true
+            }
+          } else if (reachRight) {
+            reachRight = false
+          }
         }
         y++
         pixelPos += width * 4

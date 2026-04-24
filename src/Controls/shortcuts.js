@@ -127,7 +127,6 @@ export function activateShortcut(keyCode) {
       if (!globalState.cursor.clicked) {
         switchTool('curve')
         toggleMode('line')
-
       }
       break
     case 'KeyA':
@@ -143,7 +142,6 @@ export function activateShortcut(keyCode) {
     case 'KeyB':
       if (!globalState.cursor.clicked) {
         switchTool('brush')
-
       }
       break
     case 'KeyC':
@@ -153,7 +151,6 @@ export function activateShortcut(keyCode) {
         } else {
           switchTool('curve')
           toggleMode('cubicCurve')
-  
         }
       }
       break
@@ -184,7 +181,6 @@ export function activateShortcut(keyCode) {
           }
         } else {
           switchTool('fill')
-  
         }
       }
       break
@@ -202,7 +198,6 @@ export function activateShortcut(keyCode) {
           !globalState.tool.current.options.hold.active
         tools.curve.options.hold.active =
           globalState.tool.current.options.hold.active
-
       }
       break
     case 'KeyI':
@@ -239,20 +234,17 @@ export function activateShortcut(keyCode) {
     case 'KeyO':
       if (!globalState.cursor.clicked) {
         switchTool('ellipse')
-
       }
       break
     case 'KeyP':
       if (!globalState.cursor.clicked) {
         switchTool('polygon')
-
       }
       break
     case 'KeyQ':
       if (!globalState.cursor.clicked) {
         switchTool('curve')
         toggleMode('quadCurve')
-
       }
       break
     case 'KeyR':
@@ -271,7 +263,6 @@ export function activateShortcut(keyCode) {
           openSaveDialogBox()
         } else {
           switchTool('select')
-  
         }
       }
       break
@@ -297,14 +288,12 @@ export function activateShortcut(keyCode) {
           actionPasteSelection()
         } else {
           switchTool('curve')
-  
         }
       }
       break
     case 'KeyW':
       if (!globalState.cursor.clicked) {
         switchTool('magicWand')
-
       }
       break
     case 'KeyX':

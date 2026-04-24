@@ -4,10 +4,7 @@ import { tools } from '../../Tools/index.js'
 import { vectorGui } from '../../GUI/vector.js'
 import { addToTimeline } from '../undoRedo/undoRedo.js'
 import { renderCanvas } from '../../Canvas/render.js'
-import {
-  updateActiveLayerState,
-  removeTempLayer,
-} from '../../DOM/render.js'
+import { updateActiveLayerState, removeTempLayer } from '../../DOM/render.js'
 import {
   confirmPastedPixels,
   copySelectedPixels,

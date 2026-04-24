@@ -2,10 +2,7 @@ import { dom } from '../../Context/dom.js'
 import { globalState } from '../../Context/state.js'
 import { vectorGui } from '../../GUI/vector.js'
 import { clearOffscreenCanvas, renderCanvas } from '../../Canvas/render.js'
-import {
-  updateActiveLayerState,
-  removeTempLayer,
-} from '../../DOM/render.js'
+import { updateActiveLayerState, removeTempLayer } from '../../DOM/render.js'
 import { SCALE } from '../../utils/constants.js'
 import { setVectorShapeBoundaryBox } from '../../GUI/transform.js'
 
