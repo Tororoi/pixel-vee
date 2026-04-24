@@ -113,12 +113,8 @@ pub fn render_dither_stroke(
                 } else {
                     composite_over(&mut pixels[pixel_base..pixel_base + 4], r, g, b, a);
                 }
-            } else if two_color_mode {
-                if erase {
-                    pixels[pixel_base + 3] = 0;
-                } else {
-                    composite_over(&mut pixels[pixel_base..pixel_base + 4], sr, sg, sb, sa);
-                }
+            } else if two_color_mode && !erase {
+                composite_over(&mut pixels[pixel_base..pixel_base + 4], sr, sg, sb, sa);
             }
         }
     }
@@ -172,6 +168,7 @@ pub fn render_buildup_segment(
     action_dither_offset_x: &[i32],
     action_dither_offset_y: &[i32],
     erase: bool,
+    inject: bool,
 ) {
     let w = canvas_width as usize;
     let h = canvas_height as usize;
@@ -198,6 +195,12 @@ pub fn render_buildup_segment(
         last_action[idx] = action_idx as u32;
     }
 
+    // Pre-compute prefix sums so step_start lookup is O(1) per pixel instead of O(n).
+    let mut step_offsets = vec![0usize; action_step_counts.len() + 1];
+    for (i, &c) in action_step_counts.iter().enumerate() {
+        step_offsets[i + 1] = step_offsets[i] + c as usize;
+    }
+
     // Phase 2: write each touched pixel once using final density.
     for idx in 0..map_size {
         let seg_count = segment_delta[idx];
@@ -219,8 +222,7 @@ pub fn render_buildup_segment(
         };
         let total_density = prior_density + seg_count;
 
-        // Look up buildUpSteps for this action
-        let step_start: usize = action_step_counts[..act].iter().map(|&c| c as usize).sum();
+        let step_start = step_offsets[act];
         let step_count = action_step_counts[act] as usize;
         let steps = &action_buildup_steps[step_start..step_start + step_count];
         let step_idx = (total_density as usize - 1).min(steps.len() - 1);
@@ -228,31 +230,83 @@ pub fn render_buildup_segment(
 
         let off_x = action_dither_offset_x[act];
         let off_y = action_dither_offset_y[act];
-        let is_on = is_dither_on(x, y, threshold, off_x, off_y);
-
         let pixel_base = idx * 4;
-        if is_on {
-            if erase {
+
+        if inject {
+            // Clear-before-draw: set the pixel to the final-density color directly.
+            // Matches the clearRect+fillRect sequence in actionBuildUpDitherDraw.
+            let is_on = is_dither_on(x, y, threshold, off_x, off_y);
+            if is_on || action_two_color[act] != 0 {
+                pixels[pixel_base] = 0;
+                pixels[pixel_base + 1] = 0;
+                pixels[pixel_base + 2] = 0;
                 pixels[pixel_base + 3] = 0;
-            } else {
-                composite_over(
-                    &mut pixels[pixel_base..pixel_base + 4],
-                    action_r[act],
-                    action_g[act],
-                    action_b[act],
-                    action_a[act],
-                );
             }
-        } else if action_two_color[act] != 0 {
-            if erase {
+            if is_on {
+                pixels[pixel_base] = action_r[act];
+                pixels[pixel_base + 1] = action_g[act];
+                pixels[pixel_base + 2] = action_b[act];
+                pixels[pixel_base + 3] = action_a[act];
+            } else if action_two_color[act] != 0 {
+                pixels[pixel_base] = action_sr[act];
+                pixels[pixel_base + 1] = action_sg[act];
+                pixels[pixel_base + 2] = action_sb[act];
+                pixels[pixel_base + 3] = action_sa[act];
+            }
+        } else if erase {
+            if is_dither_on(x, y, threshold, off_x, off_y) {
                 pixels[pixel_base + 3] = 0;
-            } else {
+            }
+        } else {
+            // Normal draw: composite once per density hit where the pixel was "on".
+            // A pixel turns on at its Bayer threshold and stays on, so we find the
+            // turn-on density and composite (total - max(turn_on, prior+1) + 1) times.
+            // Secondary-color composites (lower densities) are applied first to
+            // match the sequential per-stroke ordering.
+            let bv = {
+                let px = ((x + off_x).rem_euclid(8)) as usize;
+                let py = ((y + off_y).rem_euclid(8)) as usize;
+                BAYER[py * 8 + px]
+            };
+            let turn_on_step = steps.iter().position(|&t| bv < t + 1);
+
+            let (secondary_composites, primary_composites) = match turn_on_step {
+                None => {
+                    // Pixel never turns on; only secondary applies in two-color mode.
+                    let sec = if action_two_color[act] != 0 { seg_count as usize } else { 0 };
+                    (sec, 0usize)
+                }
+                Some(ts) => {
+                    let turn_on_density = ts as i32 + 1;
+                    let primary_start = turn_on_density.max(prior_density + 1);
+                    let primary =
+                        ((prior_density + seg_count) - primary_start + 1).max(0) as usize;
+                    let sec = if action_two_color[act] != 0 {
+                        let sec_end = (turn_on_density - 1).min(prior_density + seg_count);
+                        (sec_end - prior_density).max(0) as usize
+                    } else {
+                        0
+                    };
+                    (sec, primary)
+                }
+            };
+
+            for _ in 0..secondary_composites {
                 composite_over(
                     &mut pixels[pixel_base..pixel_base + 4],
                     action_sr[act],
                     action_sg[act],
                     action_sb[act],
                     action_sa[act],
+                );
+            }
+            for _ in 0..primary_composites {
+                composite_over(
+                    &mut pixels[pixel_base..pixel_base + 4],
+                    action_r[act],
+                    action_g[act],
+                    action_b[act],
+                    action_a[act],
                 );
             }
         }
@@ -382,7 +436,7 @@ pub fn build_color_mask(
 ) -> Vec<u32> {
     let w = width as usize;
     let h = height as usize;
-    let mut out = Vec::new();
+    let mut out = Vec::with_capacity((w * h) / 16);
     for y in 0..h {
         for x in 0..w {
             let base = (y * w + x) * 4;
@@ -495,11 +549,11 @@ pub fn flip_vertical(pixels: &mut [u8], width: u32, height: u32) {
     let w = width as usize;
     let h = height as usize;
     let row_bytes = w * 4;
+    // Allocate once; can't borrow two slices from pixels simultaneously
+    let mut tmp = vec![0u8; row_bytes];
     for y in 0..h / 2 {
         let top = y * row_bytes;
         let bot = (h - 1 - y) * row_bytes;
-        // Can't borrow two slices from pixels at once, so use a temp copy
-        let mut tmp = vec![0u8; row_bytes];
         tmp.copy_from_slice(&pixels[top..top + row_bytes]);
         pixels.copy_within(bot..bot + row_bytes, top);
         pixels[bot..bot + row_bytes].copy_from_slice(&tmp);

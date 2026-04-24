@@ -2,7 +2,6 @@ import { globalState } from '../Context/state.js'
 import { canvas } from '../Context/canvas.js'
 import { tools } from '../Tools/index.js'
 import { performAction, renderBuildUpDitherSegment } from './performAction.js'
-import { getWasm } from '../wasm.js'
 
 /**
  * Create canvas for saving between actions
@@ -136,6 +135,15 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
         }
       }
     }
+    // Density reset: flush segment and clear this layer's accumulated density.
+    if (action.tool === 'buildUpDensityReset') {
+      flushBuildUpSegment()
+      if (buildUpLayerMaps.has(action.layer)) {
+        buildUpLayerMaps.get(action.layer).fill(0)
+      }
+      continue
+    }
+
     const tool = tools[action.tool]
     if (
       !action.hidden &&
@@ -145,12 +153,18 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
       const isBuildUp = action.tool === 'brush' && action.modes?.buildUpDither
 
       if (!activeIndexMap && isBuildUp) {
-        // Buffer for batch rendering. Flush first if this action is on a different layer.
-        if (
-          pendingSegmentLayer !== null &&
-          pendingSegmentLayer !== action.layer
-        ) {
-          flushBuildUpSegment()
+        // Flush if layer changed or rendering-relevant modes changed between actions.
+        if (pendingSegmentLayer !== null) {
+          const layerChanged = pendingSegmentLayer !== action.layer
+          const prevAction = pendingSegment[pendingSegment.length - 1]
+          const modesChanged =
+            prevAction &&
+            (!!action.modes?.eraser !== !!prevAction.modes?.eraser ||
+              !!action.modes?.inject !== !!prevAction.modes?.inject ||
+              !!action.modes?.twoColor !== !!prevAction.modes?.twoColor)
+          if (layerChanged || modesChanged) {
+            flushBuildUpSegment()
+          }
         }
         pendingSegment.push(action)
         pendingSegmentLayer = action.layer

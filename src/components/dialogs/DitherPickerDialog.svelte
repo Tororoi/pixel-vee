@@ -7,6 +7,7 @@
   import {
     brush,
     rebuildBuildUpDensityMap,
+    resetBuildUpDensityMap,
     BAYER_STEPS,
   } from '../../Tools/brush.js'
   import { renderCanvas } from '../../Canvas/render.js'
@@ -129,7 +130,7 @@
     if (globalState.tool.current.modes.buildUpDither) {
       rebuildBuildUpDensityMap()
     } else {
-      brush._buildUpDensityMap = new Map()
+      brush._buildUpDensityMap = null
       globalState.tool.current.buildUpActiveStepSlot = null
       brush.buildUpActiveStepSlot = null
     }
@@ -137,8 +138,7 @@
 
   function handleBuildUpReset() {
     if (globalState.tool.current?.name !== 'brush') return
-    brush._buildUpResetAtIndex = globalState.timeline.undoStack.length
-    brush._buildUpDensityMap = new Map()
+    resetBuildUpDensityMap()
   }
 
   function handleBuildUpModeClick(mode) {

@@ -419,15 +419,24 @@ export const brush = {
 
 /**
  * Rebuild brush._buildUpDensityMap by scanning the undo stack for all
- * build-up dither brush actions on the current layer.
- * Call this whenever strokes are added, undone, or redone.
+ * build-up dither brush actions on the current layer since the last density
+ * reset action. Call this whenever strokes are added, undone, or redone.
  */
 export function rebuildBuildUpDensityMap() {
   const layer = canvas.currentLayer
   const cw = canvas.offScreenCVS.width
   const ch = canvas.offScreenCVS.height
   const map = new Int32Array(cw * ch)
-  const startIndex = brush._buildUpResetAtIndex ?? 0
+  // Scan backwards for the most recent density reset on this layer so that
+  // only post-reset strokes contribute to the current density.
+  let startIndex = 0
+  for (let i = globalState.timeline.undoStack.length - 1; i >= 0; i--) {
+    const a = globalState.timeline.undoStack[i]
+    if (a.tool === 'buildUpDensityReset' && a.layer === layer) {
+      startIndex = i + 1
+      break
+    }
+  }
   for (let i = startIndex; i < globalState.timeline.undoStack.length; i++) {
     const action = globalState.timeline.undoStack[i]
     if (
@@ -448,4 +457,20 @@ export function rebuildBuildUpDensityMap() {
     }
   }
   brush._buildUpDensityMap = map
+}
+
+/**
+ * Record a density reset as a timeline action and rebuild the density map.
+ * After this call, build-up strokes will accumulate from zero for the current
+ * layer. Wire this to a UI button or keyboard shortcut.
+ */
+export function resetBuildUpDensityMap() {
+  addToTimeline({
+    tool: 'buildUpDensityReset',
+    layer: canvas.currentLayer,
+    properties: {
+      boundaryBox: { xMin: null, xMax: null, yMin: null, yMax: null },
+    },
+  })
+  rebuildBuildUpDensityMap()
 }

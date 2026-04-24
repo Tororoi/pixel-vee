@@ -158,7 +158,8 @@ function _renderBuildUpDitherSegmentWasm(
     new Uint32Array(actionStepCounts),
     new Int32Array(actionOffX),
     new Int32Array(actionOffY),
-    false,
+    actions[0]?.modes?.eraser ?? false,
+    actions[0]?.modes?.inject ?? false,
   )
 
   renderCtx.putImageData(imgData, 0, 0)
@@ -191,7 +192,7 @@ function _renderBuildUpDitherSegmentJS(
     }
   }
 
-  // Phase 2: write each pixel once using final density (prior sessions + this segment)
+  // Phase 2: write each pixel using the correct number of composites per density hit.
   const priorDensityMap = buildUpLayerMaps.get(layer)
   const cw = canvas.offScreenCVS.width
   for (const [key, segmentCount] of segmentDelta) {
@@ -202,7 +203,7 @@ function _renderBuildUpDitherSegmentJS(
     const priorDensity = priorDensityMap ? priorDensityMap[y * cw + x] || 0 : 0
     const totalDensity = priorDensity + segmentCount
     const stepIndex = Math.min(totalDensity - 1, buildUpSteps.length - 1)
-    const pattern = ditherPatterns[buildUpSteps[stepIndex]]
+    const finalPattern = ditherPatterns[buildUpSteps[stepIndex]]
     const effectiveDitherOffsetX =
       ((((action.ditherOffsetX ?? 0) + action.recordedLayerX - offsetX) % 8) +
         8) %
@@ -212,18 +213,77 @@ function _renderBuildUpDitherSegmentJS(
         8) %
       8
     const isOn = isDitherOn(
-      pattern,
+      finalPattern,
       x,
       y,
       effectiveDitherOffsetX,
       effectiveDitherOffsetY,
     )
-    if (isOn) {
-      renderCtx.fillStyle = action.color.color
-      renderCtx.fillRect(x, y, 1, 1)
-    } else if (action.modes?.twoColor && action.secondaryColor) {
-      renderCtx.fillStyle = action.secondaryColor.color
-      renderCtx.fillRect(x, y, 1, 1)
+    const isErase = action.modes?.eraser ?? false
+    const isInject = action.modes?.inject ?? false
+    const hasTwoColor = !!(action.modes?.twoColor && action.secondaryColor)
+
+    if (isInject) {
+      // Clear-before-draw: matches clearRect+fillRect in actionBuildUpDitherDraw.
+      if (isOn || hasTwoColor) {
+        renderCtx.clearRect(x, y, 1, 1)
+      }
+      if (isOn) {
+        renderCtx.fillStyle = action.color.color
+        renderCtx.fillRect(x, y, 1, 1)
+      } else if (hasTwoColor) {
+        renderCtx.fillStyle = action.secondaryColor.color
+        renderCtx.fillRect(x, y, 1, 1)
+      }
+    } else if (isErase) {
+      if (isOn) {
+        renderCtx.clearRect(x, y, 1, 1)
+      }
+    } else {
+      // Normal draw: composite once per density hit where the pixel was "on".
+      // Find the turn-on step (first buildUpSteps index where pixel is on).
+      let turnOnStepIdx = -1
+      for (let d = 0; d < buildUpSteps.length; d++) {
+        if (
+          isDitherOn(
+            ditherPatterns[buildUpSteps[d]],
+            x,
+            y,
+            effectiveDitherOffsetX,
+            effectiveDitherOffsetY,
+          )
+        ) {
+          turnOnStepIdx = d
+          break
+        }
+      }
+
+      let secondaryComposites = 0
+      let primaryComposites = 0
+      if (turnOnStepIdx === -1) {
+        secondaryComposites = hasTwoColor ? segmentCount : 0
+      } else {
+        const turnOnDensity = turnOnStepIdx + 1
+        const primaryStart = Math.max(turnOnDensity, priorDensity + 1)
+        primaryComposites = Math.max(0, totalDensity - primaryStart + 1)
+        if (hasTwoColor) {
+          const secEnd = Math.min(turnOnDensity - 1, totalDensity)
+          secondaryComposites = Math.max(0, secEnd - priorDensity)
+        }
+      }
+
+      if (secondaryComposites > 0) {
+        renderCtx.fillStyle = action.secondaryColor.color
+        for (let i = 0; i < secondaryComposites; i++) {
+          renderCtx.fillRect(x, y, 1, 1)
+        }
+      }
+      if (primaryComposites > 0) {
+        renderCtx.fillStyle = action.color.color
+        for (let i = 0; i < primaryComposites; i++) {
+          renderCtx.fillRect(x, y, 1, 1)
+        }
+      }
     }
   }
 }
