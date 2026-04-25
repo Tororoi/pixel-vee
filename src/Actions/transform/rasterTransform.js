@@ -12,12 +12,20 @@ import { actionFlipVectors, actionRotateVectors } from './vectorTransform.js'
 //=============================================//
 
 /**
- * Helper function to add a transform action to the timeline
+ * Snapshot the current transformed pixel content and push a transform action
+ * onto the undo/redo timeline.
+ *
+ * Called after every flip or rotate operation to record the resulting pixel
+ * state. It captures the pixels inside the current selection boundary into a
+ * temporary canvas (used for undo reconstruction), converts the boundary box
+ * and selection properties to layer-relative coordinates, and then writes the
+ * full transform metadata (rotation degrees, mirror flags, pasted-image key)
+ * to the timeline so undo/redo can reconstruct any transform state exactly.
  */
 export function addTransformToTimeline() {
-  //save to timeline
   const boundaryBox = { ...globalState.selection.boundaryBox }
-  //create canvas with transformed pixels
+  // Capture the current pixel content within the selection so it can be
+  // restored accurately when this action is undone.
   const transformedCanvas = document.createElement('canvas')
   transformedCanvas.width = boundaryBox.xMax - boundaryBox.xMin
   transformedCanvas.height = boundaryBox.yMax - boundaryBox.yMin
@@ -32,6 +40,8 @@ export function addTransformToTimeline() {
     0,
     0,
   )
+  // Convert to layer-relative coords before storing in the timeline so the
+  // action remains correct if the layer is moved after this operation.
   if (boundaryBox.xMax !== null) {
     boundaryBox.xMin -= canvas.currentLayer.x
     boundaryBox.xMax -= canvas.currentLayer.x
@@ -61,22 +71,31 @@ export function addTransformToTimeline() {
 }
 
 /**
- * Stretch Layer Content
- * Not dependent on pointer events
- * Conditions: Layer is a raster layer, layer is a preview layer, and there is a selection
- * @param {boolean} flipHorizontally - Whether to flip horizontally
+ * Flip the current selection or selected vectors horizontally or vertically.
+ *
+ * Raster path: operates only when the current layer is a preview layer
+ * (i.e. an active paste is in progress). The boundary box is inverted on
+ * the relevant axis, the cumulative mirror flag is toggled, and then
+ * `transformRasterContent` re-draws the pasted image with the new flip state
+ * applied on top of any existing rotation. A timeline entry is recorded.
+ *
+ * Vector path: delegates to `actionFlipVectors` when no preview layer is
+ * active but one or more vectors are selected or focused.
+ * @param {boolean} flipHorizontally - `true` to flip left/right;
+ *   `false` to flip top/bottom.
  */
 export function actionFlipPixels(flipHorizontally) {
   //raster flip
   if (canvas.currentLayer.isPreview) {
-    //flip pixels
     const transformedBoundaryBox = { ...globalState.selection.boundaryBox }
     if (flipHorizontally) {
+      // Swap xMin and xMax to signal a horizontal reflection to the renderer.
       transformedBoundaryBox.xMin = globalState.selection.boundaryBox.xMax
       transformedBoundaryBox.xMax = globalState.selection.boundaryBox.xMin
       globalState.transform.isMirroredHorizontally =
         !globalState.transform.isMirroredHorizontally
     } else {
+      // Swap yMin and yMax to signal a vertical reflection.
       transformedBoundaryBox.yMin = globalState.selection.boundaryBox.yMax
       transformedBoundaryBox.yMax = globalState.selection.boundaryBox.yMin
       globalState.transform.isMirroredVertically =
@@ -104,7 +123,18 @@ export function actionFlipPixels(flipHorizontally) {
 }
 
 /**
+ * Rotate the current selection or selected vectors 90 degrees clockwise.
  *
+ * Raster path: operates only when the current layer is a preview layer.
+ * Computes the new bounding box after a 90-degree clockwise rotation around
+ * the center of the current box (width and height swap, and the center is
+ * preserved). Mirror flags are taken into account — when the content is
+ * already mirrored, an additional 180-degree adjustment is applied to keep
+ * the perceived direction consistent. The pixel content is then re-rendered
+ * via `transformRasterContent` and a timeline entry is recorded.
+ *
+ * Vector path: delegates to `actionRotateVectors(90)` when no preview layer
+ * is active but one or more vectors are selected or focused.
  */
 export function actionRotatePixels() {
   if (canvas.currentLayer.isPreview) {
@@ -112,14 +142,15 @@ export function actionRotatePixels() {
       const { xMin, xMax, yMin, yMax } = boundaryBox
       const centerX = Math.floor((xMin + xMax) / 2)
       const centerY = Math.floor((yMin + yMax) / 2)
-      //if side is odd, center is the middle pixel
-      //if side is even, center is the pixel to the left and above the middle
+      // For odd-sized dimensions the center is the true middle pixel.
+      // For even-sized dimensions the center is the pixel just left of / above
+      // the mathematical midpoint — this keeps the selection stable.
 
-      // Calculate distances of the original edges from the center
       const width = xMax - xMin
       const height = yMax - yMin
 
-      // After rotation, the box's width becomes its height and vice versa
+      // After a 90-degree rotation the former width becomes the new height
+      // and vice versa. Recalculate the box edges from the preserved center.
       const px1 = centerX - Math.floor(height / 2)
       const px2 = centerX + Math.ceil(height / 2)
       const py1 = centerY - Math.floor(width / 2)
@@ -138,6 +169,9 @@ export function actionRotatePixels() {
     )
     globalState.selection.setBoundaryBox(globalState.selection.properties)
     globalState.transform.rotationDegrees += 90
+    // Mirror transforms affect the visual rotation direction. Compensate so
+    // that "rotate 90 CW" always appears clockwise to the user regardless of
+    // the current mirror state.
     if (globalState.transform.isMirroredHorizontally) {
       globalState.transform.rotationDegrees += 180
     }

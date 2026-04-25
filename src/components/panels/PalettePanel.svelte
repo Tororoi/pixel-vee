@@ -169,136 +169,136 @@
   style={presetsOpen ? 'z-index: 201' : undefined}
   collapsible
 >
-    <div class="colors">
-      <div
-        bind:this={primarySwatchRef}
-        class="primary swatch btn"
-        role="button"
-        tabindex="0"
-        data-tooltip="Primary Swatch&#10;&#10;(R) to randomize&#10;&#10;Click to open Color Picker"
-        onclick={handlePrimarySwatchClick}
-        onkeydown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') handlePrimarySwatchClick(e)
-        }}
-      >
-        <div class="swatch-color"></div>
-      </div>
-      <div
-        bind:this={secondarySwatchRef}
-        class="secondary back-swatch btn"
-        role="button"
-        tabindex="0"
-        data-tooltip="Secondary Swatch&#10;&#10;Click to open Color Picker"
-        onclick={handleSecondarySwatchClick}
-        onkeydown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') handleSecondarySwatchClick(e)
-        }}
-      >
-        <div class="swatch-color"></div>
-      </div>
+  <div class="colors">
+    <div
+      bind:this={primarySwatchRef}
+      class="primary swatch btn"
+      role="button"
+      tabindex="0"
+      data-tooltip="Primary Swatch&#10;&#10;(R) to randomize&#10;&#10;Click to open Color Picker"
+      onclick={handlePrimarySwatchClick}
+      onkeydown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') handlePrimarySwatchClick(e)
+      }}
+    >
+      <div class="swatch-color"></div>
     </div>
-    <button
-      type="button"
-      class="switch color-switch custom-shape"
-      id="color-switch"
-      aria-label="Switch primary/ secondary colors"
-      data-tooltip="Switch primary/ secondary colors"
-      onclick={handleColorSwitch}
-    ></button>
-    <div class="palette-container">
-      <div class="palette-tools">
-        <button
-          type="button"
-          class="palette-edit{paletteMode === 'edit' ? ' selected' : ''}"
-          aria-label="Edit Palette Color (Hold K)"
-          data-tooltip="Edit Palette Color (Hold K)"
-          onclick={handlePaletteEditClick}
-        ></button>
-        <button
-          type="button"
-          class="palette-remove{paletteMode === 'remove' ? ' selected' : ''}"
-          aria-label="Remove Palette Color (Hold X)"
-          data-tooltip="Remove Palette Color (Hold X)"
-          onclick={handlePaletteRemoveClick}
-        ></button>
-      </div>
-      <div class="palette-presets{presetsOpen ? ' open' : ''}">
-        <button
-          type="button"
-          class="palette-presets-btn"
-          aria-label="Palette Presets"
-          data-tooltip="Palette Presets"
-          onclick={handlePresetsToggle}
-        >
-          {presetLabel}
-        </button>
-        <ul class="palette-presets-list" role="listbox">
-          {#each PRESETS as preset (preset.id)}
-            <li
-              role="option"
-              aria-selected={currentPreset === preset.id}
-              data-id={preset.id}
-              class={currentPreset === preset.id ? 'selected' : ''}
-              onclick={(e) => {
+    <div
+      bind:this={secondarySwatchRef}
+      class="secondary back-swatch btn"
+      role="button"
+      tabindex="0"
+      data-tooltip="Secondary Swatch&#10;&#10;Click to open Color Picker"
+      onclick={handleSecondarySwatchClick}
+      onkeydown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') handleSecondarySwatchClick(e)
+      }}
+    >
+      <div class="swatch-color"></div>
+    </div>
+  </div>
+  <button
+    type="button"
+    class="switch color-switch custom-shape"
+    id="color-switch"
+    aria-label="Switch primary/ secondary colors"
+    data-tooltip="Switch primary/ secondary colors"
+    onclick={handleColorSwitch}
+  ></button>
+  <div class="palette-container">
+    <div class="palette-tools">
+      <button
+        type="button"
+        class="palette-edit{paletteMode === 'edit' ? ' selected' : ''}"
+        aria-label="Edit Palette Color (Hold K)"
+        data-tooltip="Edit Palette Color (Hold K)"
+        onclick={handlePaletteEditClick}
+      ></button>
+      <button
+        type="button"
+        class="palette-remove{paletteMode === 'remove' ? ' selected' : ''}"
+        aria-label="Remove Palette Color (Hold X)"
+        data-tooltip="Remove Palette Color (Hold X)"
+        onclick={handlePaletteRemoveClick}
+      ></button>
+    </div>
+    <div class="palette-presets{presetsOpen ? ' open' : ''}">
+      <button
+        type="button"
+        class="palette-presets-btn"
+        aria-label="Palette Presets"
+        data-tooltip="Palette Presets"
+        onclick={handlePresetsToggle}
+      >
+        {presetLabel}
+      </button>
+      <ul class="palette-presets-list" role="listbox">
+        {#each PRESETS as preset (preset.id)}
+          <li
+            role="option"
+            aria-selected={currentPreset === preset.id}
+            data-id={preset.id}
+            class={currentPreset === preset.id ? 'selected' : ''}
+            onclick={(e) => {
+              e.stopPropagation()
+              handlePresetSelect(preset.id)
+            }}
+            onkeydown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
                 e.stopPropagation()
                 handlePresetSelect(preset.id)
-              }}
-              onkeydown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.stopPropagation()
-                  handlePresetSelect(preset.id)
-                }
-              }}
-            >
-              {preset.label}
-            </li>
-          {/each}
-          {#each Object.entries(customPalettes) as [id, p] (id)}
-            <li
-              role="option"
-              aria-selected={currentPreset === id}
-              data-id={id}
-              class={currentPreset === id ? 'selected' : ''}
-              onclick={(e) => {
+              }
+            }}
+          >
+            {preset.label}
+          </li>
+        {/each}
+        {#each Object.entries(customPalettes) as [id, p] (id)}
+          <li
+            role="option"
+            aria-selected={currentPreset === id}
+            data-id={id}
+            class={currentPreset === id ? 'selected' : ''}
+            onclick={(e) => {
+              e.stopPropagation()
+              handlePresetSelect(id)
+            }}
+            onkeydown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
                 e.stopPropagation()
                 handlePresetSelect(id)
-              }}
-              onkeydown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.stopPropagation()
-                  handlePresetSelect(id)
-                }
-              }}
-            >
-              {p.label}
-            </li>
-          {/each}
-        </ul>
-      </div>
-      <div class="palette-colors">
-        {#each palette as color, index (index)}
-          <button
-            type="button"
-            class="palette-color{index === selectedPaletteIndex
-              ? ' selected'
-              : ''}"
-            aria-label="Color {index + 1}"
-            data-tooltip={color.color}
-            onclick={() => handlePaletteColorClick(color, index)}
+              }
+            }}
           >
-            <div
-              class="swatch"
-              style="background-color: {color.color}; width: 100%; height: 100%"
-            ></div>
-          </button>
+            {p.label}
+          </li>
         {/each}
+      </ul>
+    </div>
+    <div class="palette-colors">
+      {#each palette as color, index (index)}
         <button
           type="button"
-          class="add-color plus"
-          aria-label="Add Color"
-          data-tooltip="Add current primary color to palette"
-          onclick={handleAddColor}
-        ></button>
-      </div>
+          class="palette-color{index === selectedPaletteIndex
+            ? ' selected'
+            : ''}"
+          aria-label="Color {index + 1}"
+          data-tooltip={color.color}
+          onclick={() => handlePaletteColorClick(color, index)}
+        >
+          <div
+            class="swatch"
+            style="background-color: {color.color}; width: 100%; height: 100%"
+          ></div>
+        </button>
+      {/each}
+      <button
+        type="button"
+        class="add-color plus"
+        aria-label="Add Color"
+        data-tooltip="Add current primary color to palette"
+        onclick={handleAddColor}
+      ></button>
     </div>
+  </div>
 </DialogBox>

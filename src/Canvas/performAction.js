@@ -13,20 +13,25 @@ import { actionCurve } from '../Actions/pointer/curve.js'
 import { createStrokeContext } from '../Actions/pointer/strokeContext.js'
 import { isDitherOn, ditherPatterns } from '../Context/ditherPatterns.js'
 import { transformRasterContent } from '../utils/transformHelpers.js'
+import { getWasm } from '../wasm.js'
 
 /**
- * Render a contiguous block of build-up dither actions in a single pass.
- * Instead of replaying every stroke point-by-point (O(actions × points × stamp)),
- * this pre-scans the buildUpDensityDelta arrays to build a final density map and
- * writes each unique pixel exactly once — O(total_delta_pixels).
- *
- * Correctness: the final pixel at position (x,y) is determined by the last action
- * that touched it. That action saw a pre-hit density of (totalDensity - 1), so the
- * step index is min(totalDensity - 1, buildUpSteps.length - 1), matching sequential replay.
- * @param {object[]} actions - Consecutive build-up dither actions on the same layer
+ * Renders a contiguous block of build-up dither actions in a single pass.
+ * Rather than replaying every stroke point-by-point, this pre-scans all
+ * `buildUpDensityDelta` arrays to build a final density map and writes each
+ * unique pixel exactly once — O(total_delta_pixels) instead of the naive
+ * O(actions × points × stamp). Correctness holds because the final pixel
+ * state at (x,y) is determined by the last action that touched it, which
+ * saw a pre-hit density of (totalDensity - 1), yielding the same step index
+ * as sequential replay: min(totalDensity - 1, buildUpSteps.length - 1).
+ * Delegates to the WASM implementation when available, falling back to JS.
+ * @param {object[]} actions - Consecutive build-up dither actions on the
+ *   same layer
  * @param {object} layer - The shared layer object
- * @param {Map} buildUpLayerMaps - Accumulated density from all prior build-up actions (for cross-segment density)
- * @param {CanvasRenderingContext2D|null} betweenCtx - Override render target (null → use layer.ctx)
+ * @param {Map} buildUpLayerMaps - Accumulated density from all prior
+ *   build-up actions, for cross-segment density continuity
+ * @param {CanvasRenderingContext2D|null} betweenCtx - Override render
+ *   target; null uses layer.ctx
  * @param {number} cropDX - Canvas crop x offset
  * @param {number} cropDY - Canvas crop y offset
  */
@@ -41,8 +46,183 @@ export function renderBuildUpDitherSegment(
   const offsetX = layer.x + cropDX
   const offsetY = layer.y + cropDY
   const renderCtx = betweenCtx ?? layer.ctx
+  const wasm = getWasm()
 
-  // Phase 1: scan all deltas to build segment density count and lastAction per pixel
+  if (wasm) {
+    _renderBuildUpDitherSegmentWasm(
+      wasm,
+      actions,
+      layer,
+      buildUpLayerMaps,
+      renderCtx,
+      offsetX,
+      offsetY,
+      cropDX,
+      cropDY,
+    )
+  } else {
+    _renderBuildUpDitherSegmentJS(
+      actions,
+      layer,
+      buildUpLayerMaps,
+      renderCtx,
+      offsetX,
+      offsetY,
+      cropDX,
+      cropDY,
+    )
+  }
+}
+
+/**
+ * WASM implementation of `renderBuildUpDitherSegment`. Packs all per-action
+ * delta coordinates and color/mode parameters into flat typed arrays so the
+ * WASM module can scan them without a JS→WASM call per element. A sentinel
+ * value (0xffffffff) separates each action's coordinate list in the flat
+ * delta array so the WASM side knows where one action ends and the next
+ * begins. Effective dither offsets are computed in JS before the call
+ * because the modulo math is straightforward here and avoids round-trips.
+ * All actions in a segment share eraser/inject modes, so only the first
+ * action's flags are passed — the flush logic in redrawTimeline guarantees
+ * that mode changes always start a new segment.
+ * @param {object} wasm - The WASM module
+ * @param {object[]} actions - The build-up dither actions to render
+ * @param {object} layer - The shared layer object
+ * @param {Map} buildUpLayerMaps - Prior density from earlier segments
+ * @param {CanvasRenderingContext2D} renderCtx - Target render context
+ * @param {number} offsetX - Effective x offset (layer.x + cropDX)
+ * @param {number} offsetY - Effective y offset (layer.y + cropDY)
+ * @param {number} cropDX - Canvas crop x offset
+ * @param {number} cropDY - Canvas crop y offset
+ */
+function _renderBuildUpDitherSegmentWasm(
+  wasm,
+  actions,
+  layer,
+  buildUpLayerMaps,
+  renderCtx,
+  offsetX,
+  offsetY,
+  cropDX,
+  cropDY,
+) {
+  const cw = canvas.offScreenCVS.width
+  const ch = canvas.offScreenCVS.height
+
+  // Flat typed arrays avoid per-element JS→WASM overhead.
+  const deltaFlat = []
+  const actionR = [],
+    actionG = [],
+    actionB = [],
+    actionA = []
+  const actionSR = [],
+    actionSG = [],
+    actionSB = [],
+    actionSA = []
+  const actionTwoColor = []
+  const actionSteps = []
+  const actionStepCounts = []
+  const actionOffX = [],
+    actionOffY = []
+
+  for (const action of actions) {
+    const lx = action.layer.x + cropDX
+    const ly = action.layer.y + cropDY
+    for (const coord of action.buildUpDensityDelta ?? []) {
+      const px = ((coord << 16) >> 16) + lx
+      const py = (coord >> 16) + ly
+      if (px >= 0 && px < cw && py >= 0 && py < ch) {
+        deltaFlat.push((py << 16) | px)
+      }
+    }
+    // Sentinel marks the boundary between actions in the flat coordinate list.
+    deltaFlat.push(0xffffffff)
+    actionR.push(action.color.r)
+    actionG.push(action.color.g)
+    actionB.push(action.color.b)
+    actionA.push(action.color.a)
+    const sec = action.secondaryColor
+    actionSR.push(sec ? sec.r : 0)
+    actionSG.push(sec ? sec.g : 0)
+    actionSB.push(sec ? sec.b : 0)
+    actionSA.push(sec ? sec.a : 0)
+    actionTwoColor.push(action.modes?.twoColor && sec ? 1 : 0)
+    const steps = action.buildUpSteps ?? [15, 31, 47, 63]
+    for (const s of steps) actionSteps.push(s)
+    actionStepCounts.push(steps.length)
+    // Dither patterns tile on an 8×8 grid. The effective offset keeps the
+    // pattern anchored to art pixels even after the layer has been moved or
+    // the canvas cropped since the stroke was recorded.
+    const effX =
+      ((((action.ditherOffsetX ?? 0) + action.recordedLayerX - offsetX) % 8) +
+        8) %
+      8
+    const effY =
+      ((((action.ditherOffsetY ?? 0) + action.recordedLayerY - offsetY) % 8) +
+        8) %
+      8
+    actionOffX.push(effX)
+    actionOffY.push(effY)
+  }
+
+  const priorMap = buildUpLayerMaps.get(layer) ?? new Int32Array(cw * ch)
+  const imgData = renderCtx.getImageData(0, 0, cw, ch)
+
+  wasm.render_buildup_segment(
+    imgData.data,
+    priorMap,
+    cw,
+    ch,
+    new Uint32Array(deltaFlat),
+    new Uint8Array(actionR),
+    new Uint8Array(actionG),
+    new Uint8Array(actionB),
+    new Uint8Array(actionA),
+    new Uint8Array(actionSR),
+    new Uint8Array(actionSG),
+    new Uint8Array(actionSB),
+    new Uint8Array(actionSA),
+    new Uint8Array(actionTwoColor),
+    new Uint8Array(actionSteps),
+    new Uint32Array(actionStepCounts),
+    new Int32Array(actionOffX),
+    new Int32Array(actionOffY),
+    actions[0]?.modes?.eraser ?? false,
+    actions[0]?.modes?.inject ?? false,
+  )
+
+  renderCtx.putImageData(imgData, 0, 0)
+}
+
+/**
+ * JS fallback implementation of `renderBuildUpDitherSegment`. Works in two
+ * phases to write each pixel exactly once rather than replaying every stroke
+ * point. Phase 1 scans all delta arrays to build a segment density count
+ * and track the last action that touched each pixel — the last action
+ * determines the final color and mode. Phase 2 uses the density count to
+ * look up the correct dither step and emits the right number of composite
+ * fillRect calls per pixel, matching what sequential replay would produce.
+ * @param {object[]} actions - The build-up dither actions to render
+ * @param {object} layer - The shared layer object
+ * @param {Map} buildUpLayerMaps - Prior density from earlier segments
+ * @param {CanvasRenderingContext2D} renderCtx - Target render context
+ * @param {number} offsetX - Effective x offset (layer.x + cropDX)
+ * @param {number} offsetY - Effective y offset (layer.y + cropDY)
+ * @param {number} cropDX - Canvas crop x offset
+ * @param {number} cropDY - Canvas crop y offset
+ */
+function _renderBuildUpDitherSegmentJS(
+  actions,
+  layer,
+  buildUpLayerMaps,
+  renderCtx,
+  offsetX,
+  offsetY,
+  cropDX,
+  cropDY,
+) {
+  // Phase 1: one pass over all deltas to count hits per pixel and record
+  // which action last touched each pixel (it determines color and mode).
   const segmentDelta = new Map() // absolute_pos → count within this segment
   const lastActionMap = new Map() // absolute_pos → last action touching that pixel
 
@@ -51,44 +231,135 @@ export function renderBuildUpDitherSegment(
     const lx = action.layer.x + cropDX
     const ly = action.layer.y + cropDY
     for (const coord of action.buildUpDensityDelta) {
-      const px = (coord & 0xffff) + lx
-      const py = ((coord >>> 16) & 0xffff) + ly
+      const px = ((coord << 16) >> 16) + lx
+      const py = (coord >> 16) + ly
       const key = (py << 16) | px
       segmentDelta.set(key, (segmentDelta.get(key) ?? 0) + 1)
       lastActionMap.set(key, action)
     }
   }
 
-  // Phase 2: write each pixel once using final density (prior sessions + this segment)
+  // Phase 2: write each unique pixel once using the correct composite count.
   const priorDensityMap = buildUpLayerMaps.get(layer)
+  const cw = canvas.offScreenCVS.width
   for (const [key, segmentCount] of segmentDelta) {
     const x = key & 0xffff
     const y = (key >>> 16) & 0xffff
     const action = lastActionMap.get(key)
     const buildUpSteps = action.buildUpSteps ?? [15, 31, 47, 63]
-    const priorDensity = priorDensityMap ? (priorDensityMap.get(key) ?? 0) : 0
+    const priorDensity = priorDensityMap ? priorDensityMap[y * cw + x] || 0 : 0
     const totalDensity = priorDensity + segmentCount
     const stepIndex = Math.min(totalDensity - 1, buildUpSteps.length - 1)
-    const pattern = ditherPatterns[buildUpSteps[stepIndex]]
+    const finalPattern = ditherPatterns[buildUpSteps[stepIndex]]
+    // Keep the dither pattern anchored to art pixels even after layer moves
+    // or canvas crops since the stroke was recorded.
     const effectiveDitherOffsetX =
-      ((((action.ditherOffsetX ?? 0) + action.recordedLayerX - offsetX) % 8) + 8) % 8
+      ((((action.ditherOffsetX ?? 0) + action.recordedLayerX - offsetX) % 8) +
+        8) %
+      8
     const effectiveDitherOffsetY =
-      ((((action.ditherOffsetY ?? 0) + action.recordedLayerY - offsetY) % 8) + 8) % 8
-    const isOn = isDitherOn(pattern, x, y, effectiveDitherOffsetX, effectiveDitherOffsetY)
-    if (isOn) {
-      renderCtx.fillStyle = action.color.color
-      renderCtx.fillRect(x, y, 1, 1)
-    } else if (action.modes?.twoColor && action.secondaryColor) {
-      renderCtx.fillStyle = action.secondaryColor.color
-      renderCtx.fillRect(x, y, 1, 1)
+      ((((action.ditherOffsetY ?? 0) + action.recordedLayerY - offsetY) % 8) +
+        8) %
+      8
+    const isOn = isDitherOn(
+      finalPattern,
+      x,
+      y,
+      effectiveDitherOffsetX,
+      effectiveDitherOffsetY,
+    )
+    const isErase = action.modes?.eraser ?? false
+    const isInject = action.modes?.inject ?? false
+    const hasTwoColor = !!(action.modes?.twoColor && action.secondaryColor)
+
+    if (isInject) {
+      // Clear-before-draw: matches clearRect+fillRect in actionBuildUpDitherDraw.
+      if (isOn || hasTwoColor) {
+        renderCtx.clearRect(x, y, 1, 1)
+      }
+      if (isOn) {
+        renderCtx.fillStyle = action.color.color
+        renderCtx.fillRect(x, y, 1, 1)
+      } else if (hasTwoColor) {
+        renderCtx.fillStyle = action.secondaryColor.color
+        renderCtx.fillRect(x, y, 1, 1)
+      }
+    } else if (isErase) {
+      if (isOn) {
+        renderCtx.clearRect(x, y, 1, 1)
+      } else if (hasTwoColor) {
+        renderCtx.fillStyle = action.secondaryColor.color
+        for (let i = 0; i < segmentCount; i++) {
+          renderCtx.fillRect(x, y, 1, 1)
+        }
+      }
+    } else {
+      // Each fillRect call composites one density hit; the count must match
+      // sequential replay so opacity builds up identically to live drawing.
+      // Find the turn-on step — the first density where this pixel is "on"
+      // in the dither pattern — to split composites between colors correctly.
+      let turnOnStepIdx = -1
+      for (let d = 0; d < buildUpSteps.length; d++) {
+        if (
+          isDitherOn(
+            ditherPatterns[buildUpSteps[d]],
+            x,
+            y,
+            effectiveDitherOffsetX,
+            effectiveDitherOffsetY,
+          )
+        ) {
+          turnOnStepIdx = d
+          break
+        }
+      }
+
+      let secondaryComposites = 0
+      let primaryComposites = 0
+      if (turnOnStepIdx === -1) {
+        secondaryComposites = hasTwoColor ? segmentCount : 0
+      } else {
+        // primaryStart skips density levels already accounted for by prior
+        // segments so we don't double-composite what was rendered before.
+        const turnOnDensity = turnOnStepIdx + 1
+        const primaryStart = Math.max(turnOnDensity, priorDensity + 1)
+        primaryComposites = Math.max(0, totalDensity - primaryStart + 1)
+        if (hasTwoColor) {
+          const secEnd = Math.min(turnOnDensity - 1, totalDensity)
+          secondaryComposites = Math.max(0, secEnd - priorDensity)
+        }
+      }
+
+      if (secondaryComposites > 0) {
+        renderCtx.fillStyle = action.secondaryColor.color
+        for (let i = 0; i < secondaryComposites; i++) {
+          renderCtx.fillRect(x, y, 1, 1)
+        }
+      }
+      if (primaryComposites > 0) {
+        renderCtx.fillStyle = action.color.color
+        for (let i = 0; i < primaryComposites; i++) {
+          renderCtx.fillRect(x, y, 1, 1)
+        }
+      }
     }
   }
 }
 
 /**
- * Helper for performAction to render vectors
+ * Renders all vector shapes recorded in an action onto the given context.
+ * Layer offsets and the optional crop delta are folded into every coordinate
+ * before drawing so that vector positions remain correct when the layer has
+ * been moved or the canvas has been cropped since the stroke was recorded.
+ * The effective dither offset is recalculated per vector for the same
+ * reason: the pattern must stay anchored to art pixels regardless of how
+ * much the layer has shifted. Vectors that are hidden or removed are
+ * skipped at the individual vector level rather than the action level
+ * because a single action can reference multiple vectors with independent
+ * visibility states.
  * @param {object} action - The vector action to be rendered
- * @param {CanvasRenderingContext2D} activeCtx - The canvas context for saving between actions
+ * @param {CanvasRenderingContext2D} activeCtx - Render target; null uses
+ *   the layer's own context
  * @param {number} cropDX - horizontal crop offset delta, default 0
  * @param {number} cropDY - vertical crop offset delta, default 0
  */
@@ -96,7 +367,8 @@ function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
   //Correct action coordinates with layer offsets
   const offsetX = action.layer.x + cropDX
   const offsetY = action.layer.y + cropDY
-  //correct boundary box for offsets
+  // Spread to avoid mutating the action's stored boundaryBox when applying
+  // offsets — the original must remain accurate for future replays.
   const boundaryBox = { ...action.boundaryBox }
   if (boundaryBox.xMax !== null) {
     boundaryBox.xMin += offsetX
@@ -111,6 +383,8 @@ function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
     const vectorProperties = vector.vectorProperties
     const vRecordedLayerX = vector.recordedLayerX
     const vRecordedLayerY = vector.recordedLayerY
+    // Recompute the effective dither offset per vector because each vector
+    // may have been recorded when the layer was at a different position.
     const vEffectiveDitherOffsetX =
       ((((vector.ditherOffsetX ?? 0) + vRecordedLayerX - offsetX) % 8) + 8) % 8
     const vEffectiveDitherOffsetY =
@@ -193,14 +467,25 @@ function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
 }
 
 /**
- * Helper for redrawTimelineActions
+ * Replays a single recorded action onto its target canvas context. This is
+ * the core of the timeline playback system — every undo, redo, and canvas
+ * redraw depends on this function producing a result identical to the
+ * original drawing operation. Actions without a `boundaryBox` are skipped
+ * because they represent in-progress strokes that have not been committed
+ * to the timeline yet. `betweenCtx` acts as an accumulation buffer during
+ * batch replay so intermediate composites can be captured before a specific
+ * index; when null, the action writes directly to its layer context.
+ * The `cropDX`/`cropDY` parameters account for canvas resize operations
+ * that shift all recorded coordinates relative to the new canvas origin.
  * @param {object} action - The action to be performed
- * @param {CanvasRenderingContext2D} betweenCtx - The canvas context for saving between actions
- * @param {object|null} lastPasteAction - Most recent paste action for this layer
- * @param {object|null} lastTransformAction - Most recent transform action for this layer
- * @param {Map<number, number>|null} buildUpDensityMap - Accumulated density counts for build-up dither
- * @param {number} cropDX - horizontal crop offset delta (current - recorded), default 0
- * @param {number} cropDY - vertical crop offset delta (current - recorded), default 0
+ * @param {CanvasRenderingContext2D} betweenCtx - Accumulation buffer; null
+ *   writes directly to action.layer.ctx
+ * @param {object|null} lastPasteAction - Most recent unconfirmed paste action
+ * @param {object|null} lastTransformAction - Most recent transform action
+ * @param {Map<number, number>|null} buildUpDensityMap - Accumulated density
+ *   counts for build-up dither
+ * @param {number} cropDX - horizontal crop offset delta (current - recorded)
+ * @param {number} cropDY - vertical crop offset delta (current - recorded)
  */
 export function performAction(
   action,
@@ -211,6 +496,8 @@ export function performAction(
   cropDX = 0,
   cropDY = 0,
 ) {
+  // An absent boundaryBox means the action is still being drawn and has not
+  // been committed; replaying an incomplete action would corrupt the canvas.
   if (!action?.boundaryBox) {
     return
   }
@@ -219,7 +506,7 @@ export function performAction(
       //Correct action coordinates with layer offsets
       const offsetX = action.layer.x + cropDX
       const offsetY = action.layer.y + cropDY
-      //correct boundary box for offsets
+      // Spread to avoid mutating the stored boundaryBox during offset application.
       const boundaryBox = { ...action.boundaryBox }
       if (boundaryBox.xMax !== null) {
         boundaryBox.xMin += offsetX
@@ -244,6 +531,8 @@ export function performAction(
       }
       let previousX = action.points[0].x + offsetX
       let previousY = action.points[0].y + offsetY
+      // '0,0' is the safe initial direction; the first point has no prior
+      // position to compute a real direction from.
       let brushDirection = '0,0'
       const isBuildUp = action.modes?.buildUpDither ?? false
       const buildUpSteps = action.buildUpSteps ?? [15, 31, 47, 63]
@@ -286,6 +575,7 @@ export function performAction(
         )
         // Update per-point brushSize (timeline supports variable sizes per point)
         const isCustomStamp = action.brushType === 'custom'
+        // Custom stamps are always 32px regardless of the recorded brushSize.
         strokeCtx.brushSize = isCustomStamp ? 32 : p.brushSize
         const stamp = isCustomStamp
           ? action.customStampEntry[brushDirection]
@@ -401,6 +691,9 @@ export function performAction(
       break
     }
     case 'transform': {
+      // Only render transforms while on the temp layer with the matching
+      // clipboard key; stale transforms from previous paste sessions must
+      // not re-appear during timeline replay.
       if (
         canvas.tempLayer === canvas.currentLayer &&
         action.pastedImageKey === globalState.clipboard.currentPastedImageKey

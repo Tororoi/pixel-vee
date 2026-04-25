@@ -13,6 +13,7 @@ import { renderCanvas } from '../Canvas/render.js'
 import { isOutOfBounds } from '../utils/canvasHelpers.js'
 import { getGuiLineWidth, doubleStroke } from '../utils/guiHelpers.js'
 import { ditherPatterns, isDitherOn } from '../Context/ditherPatterns.js'
+import { brush, rebuildBuildUpDensityMap } from '../Tools/brush.js'
 
 /**
  * Returns the active brush stamp entry and effective brush size.
@@ -74,7 +75,10 @@ export function renderCursor() {
           drawCursorBox(0.5)
         } else if (vectorGui.showCursorPreview) {
           if (isDitherActive) {
-            if (globalState.tool.current.modes?.inject) {
+            if (
+              globalState.tool.current.modes?.inject ||
+              globalState.tool.current.modes?.buildUpDither
+            ) {
               drawDitherInjectPreview()
             } else {
               drawDitherPreview()
@@ -124,6 +128,9 @@ function drawInjectPreview() {
  * the appropriate dither draw in preview mode so only dither-pattern pixels are affected.
  */
 function drawDitherInjectPreview() {
+  if (brush._buildUpDensityMap === null) {
+    rebuildBuildUpDensityMap()
+  }
   renderCanvas(canvas.currentLayer)
   const { entry, brushSize } = getActiveBrushStampEntry()
   const stamp = entry['0,0']
@@ -142,8 +149,8 @@ function drawDitherInjectPreview() {
     secondaryColor: swatches.secondary.color,
     ditherOffsetX: globalState.tool.current.ditherOffsetX ?? 0,
     ditherOffsetY: globalState.tool.current.ditherOffsetY ?? 0,
-    densityMap: globalState.tool.current._buildUpDensityMap,
-    buildUpSteps: globalState.tool.current.buildUpSteps,
+    densityMap: brush._buildUpDensityMap,
+    buildUpSteps: brush.buildUpSteps,
   })
   if (globalState.tool.current.modes?.buildUpDither) {
     actionBuildUpDitherDraw(
@@ -203,10 +210,11 @@ function drawDitherPreview() {
   const ditherOffsetX = globalState.tool.current.ditherOffsetX ?? 0
   const ditherOffsetY = globalState.tool.current.ditherOffsetY ?? 0
   const isBuildUp = globalState.tool.current.modes?.buildUpDither ?? false
-  const densityMap = isBuildUp
-    ? globalState.tool.current._buildUpDensityMap
-    : null
-  const buildUpSteps = globalState.tool.current.buildUpSteps
+  if (isBuildUp && brush._buildUpDensityMap === null) {
+    rebuildBuildUpDensityMap()
+  }
+  const densityMap = isBuildUp ? brush._buildUpDensityMap : null
+  const buildUpSteps = brush.buildUpSteps
   const basePattern = isBuildUp
     ? null
     : ditherPatterns[globalState.tool.current.ditherPatternIndex]
@@ -230,7 +238,9 @@ function drawDitherPreview() {
       continue
     let pattern
     if (isBuildUp) {
-      const count = densityMap ? (densityMap.get((y << 16) | x) ?? 0) : 0
+      const count = densityMap
+        ? densityMap[y * canvas.offScreenCVS.width + x] || 0
+        : 0
       const stepIndex = Math.min(count, buildUpSteps.length - 1)
       pattern = ditherPatterns[buildUpSteps[stepIndex]]
     } else {
@@ -248,8 +258,8 @@ function drawDitherPreview() {
 
 /**
  * Collision present — no cursor preview drawn.
- * If the preview was drawn on layer.onscreenCtx (eraser or inject with
- * preview enabled), blit the layer to clear it.
+ * If the preview was drawn on layer.onscreenCtx (eraser, inject, or
+ * build-up dither with preview enabled), blit the layer to clear it.
  * Normal mode cursor lives on the cursor canvas (auto-cleared by
  * vectorGui.render()), and box outline is on vectorGuiCTX (also
  * auto-cleared), so nothing extra needed for those cases.
@@ -258,7 +268,8 @@ function clearLayerPreviewIfNeeded() {
   if (
     vectorGui.showCursorPreview &&
     (globalState.tool.current.modes?.eraser ||
-      globalState.tool.current.modes?.inject)
+      globalState.tool.current.modes?.inject ||
+      globalState.tool.current.modes?.buildUpDither)
   ) {
     renderCanvas(canvas.currentLayer)
   }

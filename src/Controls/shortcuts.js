@@ -29,7 +29,17 @@ import { toggleMode, switchTool } from '../Tools/toolbox.js'
 import { adjustVectorSteps } from '../Tools/adjust.js'
 
 /**
- * Activate Shortcut for any key. Separating this from the keyDown event allows shortcuts to be triggered manually, such as by a tutorial
+ * Dispatches a key code to the appropriate shortcut action. Kept
+ * separate from the keydown handler so shortcuts can be triggered
+ * programmatically — e.g., from a tutorial sequence — without
+ * synthesizing a KeyboardEvent. Most cases guard on
+ * !globalState.cursor.clicked to prevent tool switches from
+ * interrupting an in-progress stroke. Hold-to-activate tools
+ * (Space→grab, Alt→eyedropper) override globalState.tool.current
+ * without changing globalState.tool.selectedName so deactivation
+ * can restore the prior tool. Cmd-key combinations are detected
+ * via the keys map rather than e.metaKey so the same logic works
+ * for both native events and programmatic calls.
  * @param {string} keyCode - The key code of the key that was pressed
  */
 export function activateShortcut(keyCode) {
@@ -107,6 +117,8 @@ export function activateShortcut(keyCode) {
       if (globalState.tool.selectedName === 'curve') {
         globalState.tool.current.options.chain.active =
           !globalState.tool.current.options.chain.active
+        // Mirror to tools.curve so the canonical store stays in sync
+        // in case current gets reassigned to a transient tool later.
         tools.curve.options.chain.active =
           globalState.tool.current.options.chain.active
 
@@ -127,7 +139,6 @@ export function activateShortcut(keyCode) {
       if (!globalState.cursor.clicked) {
         switchTool('curve')
         toggleMode('line')
-
       }
       break
     case 'KeyA':
@@ -143,7 +154,6 @@ export function activateShortcut(keyCode) {
     case 'KeyB':
       if (!globalState.cursor.clicked) {
         switchTool('brush')
-
       }
       break
     case 'KeyC':
@@ -153,7 +163,6 @@ export function activateShortcut(keyCode) {
         } else {
           switchTool('curve')
           toggleMode('cubicCurve')
-  
         }
       }
       break
@@ -184,7 +193,6 @@ export function activateShortcut(keyCode) {
           }
         } else {
           switchTool('fill')
-  
         }
       }
       break
@@ -202,7 +210,6 @@ export function activateShortcut(keyCode) {
           !globalState.tool.current.options.hold.active
         tools.curve.options.hold.active =
           globalState.tool.current.options.hold.active
-
       }
       break
     case 'KeyI':
@@ -239,20 +246,17 @@ export function activateShortcut(keyCode) {
     case 'KeyO':
       if (!globalState.cursor.clicked) {
         switchTool('ellipse')
-
       }
       break
     case 'KeyP':
       if (!globalState.cursor.clicked) {
         switchTool('polygon')
-
       }
       break
     case 'KeyQ':
       if (!globalState.cursor.clicked) {
         switchTool('curve')
         toggleMode('quadCurve')
-
       }
       break
     case 'KeyR':
@@ -271,7 +275,6 @@ export function activateShortcut(keyCode) {
           openSaveDialogBox()
         } else {
           switchTool('select')
-  
         }
       }
       break
@@ -297,14 +300,12 @@ export function activateShortcut(keyCode) {
           actionPasteSelection()
         } else {
           switchTool('curve')
-  
         }
       }
       break
     case 'KeyW':
       if (!globalState.cursor.clicked) {
         switchTool('magicWand')
-
       }
       break
     case 'KeyX':
@@ -339,9 +340,19 @@ export function activateShortcut(keyCode) {
 }
 
 /**
- * Deactivate Shortcut for any key.
- * Some shortcuts are active while a key is held.
- * This can be called on keyUp or on pointerUp so it is not directly tied to the keyUp event.
+ * Deactivates the shortcut associated with a key code. Called on
+ * both keyUp and pointerUp, because the mouse button can be
+ * released while a modifier key is still physically held — the
+ * pointerUp handler must retire transient tools independently of
+ * any key event. Hold-to-activate tools (Space→grab,
+ * Alt→eyedropper) restore globalState.tool.current to the
+ * selected tool and apply side effects: Space commits the new pan
+ * offset into previousXOffset so the next stroke uses the updated
+ * origin; Shift clears line mode and constrained geometry, and
+ * fires the brush fn() mid-stroke to finalize the constrained
+ * line segment before free drawing resumes. KeyK and KeyX use a
+ * momentary hold pattern for palette modes — each restores
+ * paletteMode to 'select' on release.
  * @param {string} keyCode - The key code of the key that was released
  */
 export function deactivateShortcut(keyCode) {
@@ -354,6 +365,8 @@ export function deactivateShortcut(keyCode) {
       //only deactivate while not clicked
       if (!globalState.cursor.clicked) {
         globalState.tool.current = tools[globalState.tool.selectedName]
+        // Commit the pan so the next stroke's coordinate math
+        // uses the updated origin rather than the pre-grab origin.
         canvas.previousXOffset = canvas.xOffset
         canvas.previousYOffset = canvas.yOffset
         vectorGui.render()
@@ -381,6 +394,8 @@ export function deactivateShortcut(keyCode) {
         globalState.tool.current.name === 'brush' &&
         globalState.cursor.clicked
       ) {
+        // Finalize the constrained line segment so the stroke does
+        // not hang open when free drawing resumes.
         globalState.tool.current.fn()
       }
       globalState.vector.properties.forceCircle = false
@@ -495,7 +510,13 @@ export function deactivateShortcut(keyCode) {
 }
 
 /**
- * Set tool cursor. TODO: (Low Priority) move to utils file
+ * Applies the correct CSS cursor for the current tool to the
+ * vector GUI canvas. Eraser mode sets the cursor to 'none' because
+ * the eraser renders its own circular overlay on the canvas;
+ * leaving the OS cursor visible would create a confusing double-
+ * cursor. All other tools use the CSS cursor string defined on
+ * the tool object.
+ * TODO: (Low Priority) move to utils file
  */
 function setToolCssCursor() {
   if (globalState.tool.current.modes?.eraser) {

@@ -118,7 +118,6 @@ export function initializeColorPicker(target) {
   }
 }
 
-
 /**
  * Close the picker window
  */
@@ -213,4 +212,3 @@ function onPaletteModified() {
     }))
   }
 }
-

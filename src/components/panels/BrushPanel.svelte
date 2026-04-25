@@ -151,81 +151,81 @@
   class="brush-container draggable v-drag settings-box smooth-shift"
   collapsible
 >
-    {#if showContent}
-      {#if showBrushControls}
-        <div
-          class="brush-preview btn"
-          role="button"
-          tabindex="0"
-          data-tooltip="Click to switch brush"
-          onclick={handleBrushTypeClick}
-          onkeydown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') handleBrushTypeClick(e)
-          }}
-        >
-          {#if stampPathData}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 64 64"
-              shape-rendering="crispEdges"
-              style="display:block;width:64px;height:64px"
-            >
-              <path fill="rgba(255,255,255,255)" d={stampPathData} />
-            </svg>
-          {/if}
-        </div>
-        <div class="brush-size">
-          <span id="line-weight">{isCustomBrush ? 32 : brushSize}px</span>
-        </div>
-        <input
-          type="range"
-          class="slider"
-          id="brush-size"
-          min="1"
-          max="32"
-          value={isCustomBrush ? 32 : brushSize}
-          disabled={isBrushDisabled || isCustomBrush}
-          oninput={handleSizeChange}
-        />
-      {/if}
-      <span class="modes-title">Modes</span>
-      <div class="modes-container">
-        {#each Object.entries(MODE_BTN_INFO) as [key, info] (key)}
-          {#if info.tools.includes(toolName)}
-            {@const isActive = modes[key] ?? false}
-            <button
-              id={key}
-              type="button"
-              class="mode {info.cls}{isActive ? ' selected' : ''}"
-              aria-label={info.label}
-              data-tooltip={info.label}
-              onclick={() => handleModeClick(key)}
-            ></button>
-          {/if}
-        {/each}
-      </div>
-      <div class="stamp-dither-row">
-        {#if showStamp}
-          <div class="stamp-options">
-            <span class="modes-title">Stamp</span>
-            <div class="stamp-type-row">
-              <button
-                type="button"
-                id="custom-brush-type-btn"
-                class="mode stamp{isCustomBrush ? ' active' : ''}"
-                aria-label="Custom Stamp"
-                data-tooltip="Custom Stamp"
-                onclick={handleStampBtnClick}
-              ></button>
-            </div>
-          </div>
-        {/if}
-        {#if showDither && tool}
-          <div class="dither-options">
-            <span class="modes-title">Dither</span>
-            <BrushDitherPreview {tool} onclick={handleDitherPreviewClick} />
-          </div>
+  {#if showContent}
+    {#if showBrushControls}
+      <div
+        class="brush-preview btn"
+        role="button"
+        tabindex="0"
+        data-tooltip="Click to switch brush"
+        onclick={handleBrushTypeClick}
+        onkeydown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') handleBrushTypeClick(e)
+        }}
+      >
+        {#if stampPathData}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 64 64"
+            shape-rendering="crispEdges"
+            style="display:block;width:64px;height:64px"
+          >
+            <path fill="rgba(255,255,255,255)" d={stampPathData} />
+          </svg>
         {/if}
       </div>
+      <div class="brush-size">
+        <span id="line-weight">{isCustomBrush ? 32 : brushSize}px</span>
+      </div>
+      <input
+        type="range"
+        class="slider"
+        id="brush-size"
+        min="1"
+        max="32"
+        value={isCustomBrush ? 32 : brushSize}
+        disabled={isBrushDisabled || isCustomBrush}
+        oninput={handleSizeChange}
+      />
     {/if}
+    <span class="modes-title">Modes</span>
+    <div class="modes-container">
+      {#each Object.entries(MODE_BTN_INFO) as [key, info] (key)}
+        {#if info.tools.includes(toolName)}
+          {@const isActive = modes[key] ?? false}
+          <button
+            id={key}
+            type="button"
+            class="mode {info.cls}{isActive ? ' selected' : ''}"
+            aria-label={info.label}
+            data-tooltip={info.label}
+            onclick={() => handleModeClick(key)}
+          ></button>
+        {/if}
+      {/each}
+    </div>
+    <div class="stamp-dither-row">
+      {#if showStamp}
+        <div class="stamp-options">
+          <span class="modes-title">Stamp</span>
+          <div class="stamp-type-row">
+            <button
+              type="button"
+              id="custom-brush-type-btn"
+              class="mode stamp{isCustomBrush ? ' active' : ''}"
+              aria-label="Custom Stamp"
+              data-tooltip="Custom Stamp"
+              onclick={handleStampBtnClick}
+            ></button>
+          </div>
+        </div>
+      {/if}
+      {#if showDither && tool}
+        <div class="dither-options">
+          <span class="modes-title">Dither</span>
+          <BrushDitherPreview {tool} onclick={handleDitherPreviewClick} />
+        </div>
+      {/if}
+    </div>
+  {/if}
 </DialogBox>

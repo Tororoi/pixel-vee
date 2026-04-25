@@ -7,6 +7,7 @@
   import {
     brush,
     rebuildBuildUpDensityMap,
+    resetBuildUpDensityMap,
     BAYER_STEPS,
   } from '../../Tools/brush.js'
   import { renderCanvas } from '../../Canvas/render.js'
@@ -129,7 +130,7 @@
     if (globalState.tool.current.modes.buildUpDither) {
       rebuildBuildUpDensityMap()
     } else {
-      brush._buildUpDensityMap = new Map()
+      brush._buildUpDensityMap = null
       globalState.tool.current.buildUpActiveStepSlot = null
       brush.buildUpActiveStepSlot = null
     }
@@ -137,8 +138,7 @@
 
   function handleBuildUpReset() {
     if (globalState.tool.current?.name !== 'brush') return
-    brush._buildUpResetAtIndex = globalState.timeline.undoStack.length
-    brush._buildUpDensityMap = new Map()
+    resetBuildUpDensityMap()
   }
 
   function handleBuildUpModeClick(mode) {
@@ -328,7 +328,6 @@
         )
       }
     })
-
   })
 </script>
 
@@ -340,112 +339,112 @@
   collapsible
   onclose={handleClose}
 >
-    <div class="dither-controls">
-      <button
-        type="button"
-        class="dither-toggle twoColor"
-        id="dither-ctrl-two-color"
-        aria-label="Two-Color"
-        data-tooltip="Two-Color"
-        class:selected={twoColorActive}
-        onclick={handleTwoColorToggle}
-      ></button>
-      <button
-        type="button"
-        class="dither-toggle buildUpDither"
-        id="dither-ctrl-build-up"
-        aria-label="Build-Up Dither"
-        data-tooltip="Build-Up Dither&#10;&#10;Automatically increase dither density on overlapping strokes"
-        class:selected={buildUpActive}
-        style:display={showBuildUpBtn ? '' : 'none'}
-        onclick={handleBuildUpToggle}
-      ></button>
-      <div class="dither-offset-control-wrap">
-        <div
-          class="dither-offset-control"
-          data-tooltip="Drag to set dither offset"
-          use:appendOffsetControlSVG
-        ></div>
-        <div class="dither-offset-values">
-          <span>X: {ditherOffsetX}</span><span>Y: {ditherOffsetY}</span>
-        </div>
+  <div class="dither-controls">
+    <button
+      type="button"
+      class="dither-toggle twoColor"
+      id="dither-ctrl-two-color"
+      aria-label="Two-Color"
+      data-tooltip="Two-Color"
+      class:selected={twoColorActive}
+      onclick={handleTwoColorToggle}
+    ></button>
+    <button
+      type="button"
+      class="dither-toggle buildUpDither"
+      id="dither-ctrl-build-up"
+      aria-label="Build-Up Dither"
+      data-tooltip="Build-Up Dither&#10;&#10;Automatically increase dither density on overlapping strokes"
+      class:selected={buildUpActive}
+      style:display={showBuildUpBtn ? '' : 'none'}
+      onclick={handleBuildUpToggle}
+    ></button>
+    <div class="dither-offset-control-wrap">
+      <div
+        class="dither-offset-control"
+        data-tooltip="Drag to set dither offset"
+        use:appendOffsetControlSVG
+      ></div>
+      <div class="dither-offset-values">
+        <span>X: {ditherOffsetX}</span><span>Y: {ditherOffsetY}</span>
       </div>
     </div>
-    <div class="build-up-steps" style:display={buildUpActive ? 'flex' : 'none'}>
-      <span class="build-up-steps-label">Build-Up Steps</span>
-      <div class="build-up-mode-selector">
-        <button
-          type="button"
-          class="build-up-mode-btn"
-          class:selected={buildUpMode === 'custom'}
-          data-tooltip="Custom build-up steps"
-          onclick={() => handleBuildUpModeClick('custom')}>Custom</button
-        >
-        <button
-          type="button"
-          class="build-up-mode-btn"
-          class:selected={buildUpMode === '2x2'}
-          data-tooltip="4 steps from a 2x2 Bayer Matrix"
-          onclick={() => handleBuildUpModeClick('2x2')}>2×2</button
-        >
-        <button
-          type="button"
-          class="build-up-mode-btn"
-          class:selected={buildUpMode === '4x4'}
-          data-tooltip="16 steps from a 4x4 Bayer Matrix"
-          onclick={() => handleBuildUpModeClick('4x4')}>4×4</button
-        >
-        <button
-          type="button"
-          class="build-up-mode-btn"
-          class:selected={buildUpMode === '8x8'}
-          data-tooltip="64 steps from an 8x8 Bayer Matrix"
-          onclick={() => handleBuildUpModeClick('8x8')}>8×8</button
-        >
-      </div>
-      <div class="build-up-step-slots">
-        {#if buildUpMode === 'custom'}
-          {#each buildUpSteps as patternIndex, i (i)}
-            <button
-              type="button"
-              class="build-up-step-btn"
-              class:selected={i === buildUpActiveSlot}
-              data-step-slot={i}
-              data-tooltip="Step {i + 1}: pattern {patternIndex + 1}/64"
-              aria-label="Step {i + 1}: pattern {patternIndex + 1}/64"
-              onclick={() => handleStepSlotClick(i)}
-            >
-              <!-- eslint-disable-next-line svelte/no-at-html-tags -->
-              {@html serializePatternSVG(
-                ditherPatterns[patternIndex],
-                ditherOffsetX,
-                ditherOffsetY,
-              )}
-            </button>
-          {/each}
-        {/if}
-      </div>
+  </div>
+  <div class="build-up-steps" style:display={buildUpActive ? 'flex' : 'none'}>
+    <span class="build-up-steps-label">Build-Up Steps</span>
+    <div class="build-up-mode-selector">
       <button
         type="button"
-        id="dither-ctrl-build-up-reset"
-        class="btn build-up-reset-btn"
-        data-tooltip="Reset build-up density"
-        onclick={handleBuildUpReset}
+        class="build-up-mode-btn"
+        class:selected={buildUpMode === 'custom'}
+        data-tooltip="Custom build-up steps"
+        onclick={() => handleBuildUpModeClick('custom')}>Custom</button
       >
-        Reset Density Map
-      </button>
+      <button
+        type="button"
+        class="build-up-mode-btn"
+        class:selected={buildUpMode === '2x2'}
+        data-tooltip="4 steps from a 2x2 Bayer Matrix"
+        onclick={() => handleBuildUpModeClick('2x2')}>2×2</button
+      >
+      <button
+        type="button"
+        class="build-up-mode-btn"
+        class:selected={buildUpMode === '4x4'}
+        data-tooltip="16 steps from a 4x4 Bayer Matrix"
+        onclick={() => handleBuildUpModeClick('4x4')}>4×4</button
+      >
+      <button
+        type="button"
+        class="build-up-mode-btn"
+        class:selected={buildUpMode === '8x8'}
+        data-tooltip="64 steps from an 8x8 Bayer Matrix"
+        onclick={() => handleBuildUpModeClick('8x8')}>8×8</button
+      >
     </div>
-    <div class="dither-grid">
-      {#each ditherPatterns as pattern, i (i)}
-        <button
-          type="button"
-          class="dither-grid-btn"
-          class:selected={i === activePatternIndex}
-          data-pattern-index={i}
-          data-tooltip={i === 31 ? '32/64: Checkerboard' : `${i + 1}/64`}
-          aria-label={i === 31 ? '32/64: Checkerboard' : `${i + 1}/64`}
-          use:appendPatternSVG={pattern}
-        ></button>
-      {/each}
+    <div class="build-up-step-slots">
+      {#if buildUpMode === 'custom'}
+        {#each buildUpSteps as patternIndex, i (i)}
+          <button
+            type="button"
+            class="build-up-step-btn"
+            class:selected={i === buildUpActiveSlot}
+            data-step-slot={i}
+            data-tooltip="Step {i + 1}: pattern {patternIndex + 1}/64"
+            aria-label="Step {i + 1}: pattern {patternIndex + 1}/64"
+            onclick={() => handleStepSlotClick(i)}
+          >
+            <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+            {@html serializePatternSVG(
+              ditherPatterns[patternIndex],
+              ditherOffsetX,
+              ditherOffsetY,
+            )}
+          </button>
+        {/each}
+      {/if}
     </div>
+    <button
+      type="button"
+      id="dither-ctrl-build-up-reset"
+      class="btn build-up-reset-btn"
+      data-tooltip="Reset build-up density"
+      onclick={handleBuildUpReset}
+    >
+      Reset Density Map
+    </button>
+  </div>
+  <div class="dither-grid">
+    {#each ditherPatterns as pattern, i (i)}
+      <button
+        type="button"
+        class="dither-grid-btn"
+        class:selected={i === activePatternIndex}
+        data-pattern-index={i}
+        data-tooltip={i === 31 ? '32/64: Checkerboard' : `${i + 1}/64`}
+        aria-label={i === 31 ? '32/64: Checkerboard' : `${i + 1}/64`}
+        use:appendPatternSVG={pattern}
+      ></button>
+    {/each}
+  </div>
 </DialogBox>

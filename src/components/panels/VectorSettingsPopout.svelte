@@ -96,7 +96,10 @@
   }
 
   function handleDitherClick() {
-    if (globalState.ui.ditherPickerOpen && appState.ditherVectorTarget === vector) {
+    if (
+      globalState.ui.ditherPickerOpen &&
+      appState.ditherVectorTarget === vector
+    ) {
       appState.ditherVectorTarget = null
       globalState.ui.ditherPickerOpen = false
     } else {
@@ -105,7 +108,9 @@
       const oy = vector.ditherOffsetY ?? 0
       if (dom.ditherPickerContainer) {
         applyDitherOffset(dom.ditherPickerContainer, ox, oy)
-        const wrap = dom.ditherPickerContainer.querySelector('.dither-offset-control-wrap')
+        const wrap = dom.ditherPickerContainer.querySelector(
+          '.dither-offset-control-wrap',
+        )
         if (wrap) applyDitherOffsetControl(wrap, ox, oy)
       }
       globalState.ui.ditherPickerOpen = true
