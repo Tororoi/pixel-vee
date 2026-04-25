@@ -11,6 +11,7 @@ import {
   handleTransformAction,
   handleResizeAction,
 } from './helpers.js'
+import { brush, rebuildBuildUpDensityMap } from '../../Tools/brush.js'
 
 //====================================//
 //========= * * * Core * * * =========//
@@ -134,6 +135,11 @@ export function actionUndoRedo(pushStack, popStack, modType) {
   pushStack.push(popStack.pop())
   //Render the canvas with the new latest action
   renderToLatestAction(latestAction, modType)
+  // Keep the build-up density map in sync after every undo/redo so the cursor
+  // preview reflects the correct density step without waiting for pointerdown.
+  if (brush.modes?.buildUpDither) {
+    rebuildBuildUpDensityMap()
+  }
   //Recalculate size of file if save dialog is open
   if (globalState.ui.saveDialogOpen) {
     setSaveFilesizePreview()

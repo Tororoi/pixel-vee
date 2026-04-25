@@ -6,6 +6,11 @@ import { addToTimeline } from '../Actions/undoRedo/undoRedo.js'
 import { transformRasterContent } from '../utils/transformHelpers.js'
 import { addTransformToTimeline } from '../Actions/transform/rasterTransform.js'
 import { transformBoundaries } from './transform.js'
+import { brush, rebuildBuildUpDensityMap } from './brush.js'
+import {
+  applyDitherOffset,
+  applyDitherOffsetControl,
+} from '../DOM/renderBrush.js'
 
 /**
  * Move the contents of a layer relative to other layers
@@ -82,6 +87,32 @@ function moveSteps() {
             },
           },
         })
+        if (canvas.currentLayer.type === 'raster') {
+          const dx = canvas.currentLayer.x - globalState.tool.grabStartX
+          const dy = canvas.currentLayer.y - globalState.tool.grabStartY
+          brush.ditherOffsetX = (((brush.ditherOffsetX - dx) % 8) + 8) % 8
+          brush.ditherOffsetY = (((brush.ditherOffsetY - dy) % 8) + 8) % 8
+          const picker = document.querySelector('.dither-picker-container')
+          if (picker)
+            applyDitherOffset(picker, brush.ditherOffsetX, brush.ditherOffsetY)
+          const preview = document.querySelector('.dither-preview')
+          if (preview)
+            applyDitherOffset(
+              preview,
+              brush.ditherOffsetX,
+              brush.ditherOffsetY,
+            )
+          const control = document.querySelector('.dither-offset-control')
+          if (control)
+            applyDitherOffsetControl(
+              control.parentElement,
+              brush.ditherOffsetX,
+              brush.ditherOffsetY,
+            )
+          if (brush.modes?.buildUpDither) {
+            rebuildBuildUpDensityMap()
+          }
+        }
       }
       break
     default:

@@ -183,7 +183,7 @@ function brushSteps() {
         ].map((coord) => {
           const rx = (coord & 0xffff) - lx
           const ry = ((coord >>> 16) & 0xffff) - ly
-          return (ry << 16) | rx
+          return (ry << 16) | (rx & 0xffff)
         })
         timelineProperties.buildUpSteps = [
           ...globalState.tool.current.buildUpSteps,
@@ -448,8 +448,8 @@ export function rebuildBuildUpDensityMap() {
       const lx = layer.x + globalState.canvas.cropOffsetX
       const ly = layer.y + globalState.canvas.cropOffsetY
       for (const coord of action.buildUpDensityDelta) {
-        const ax = (coord & 0xffff) + lx
-        const ay = ((coord >>> 16) & 0xffff) + ly
+        const ax = ((coord << 16) >> 16) + lx
+        const ay = (coord >> 16) + ly
         if (ax >= 0 && ax < cw && ay >= 0 && ay < ch) {
           map[ay * cw + ax] += 1
         }

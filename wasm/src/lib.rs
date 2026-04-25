@@ -113,7 +113,7 @@ pub fn render_dither_stroke(
                 } else {
                     composite_over(&mut pixels[pixel_base..pixel_base + 4], r, g, b, a);
                 }
-            } else if two_color_mode && !erase {
+            } else if two_color_mode {
                 composite_over(&mut pixels[pixel_base..pixel_base + 4], sr, sg, sb, sa);
             }
         }
@@ -256,6 +256,16 @@ pub fn render_buildup_segment(
         } else if erase {
             if is_dither_on(x, y, threshold, off_x, off_y) {
                 pixels[pixel_base + 3] = 0;
+            } else if action_two_color[act] != 0 {
+                for _ in 0..seg_count as usize {
+                    composite_over(
+                        &mut pixels[pixel_base..pixel_base + 4],
+                        action_sr[act],
+                        action_sg[act],
+                        action_sb[act],
+                        action_sa[act],
+                    );
+                }
             }
         } else {
             // Normal draw: composite once per density hit where the pixel was "on".

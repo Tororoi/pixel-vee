@@ -194,13 +194,8 @@ export function actionDitherDraw(
         renderCtx.fillRect(x + offsetX, y + offsetY, 1, 1)
       }
     } else if (twoColorMode && secondaryColor) {
-      if (currentModes?.eraser || currentModes?.inject) {
-        renderCtx.clearRect(x + offsetX, y + offsetY, 1, 1)
-      }
-      if (!currentModes?.eraser) {
-        renderCtx.fillStyle = secondaryColor.color
-        renderCtx.fillRect(x + offsetX, y + offsetY, 1, 1)
-      }
+      renderCtx.fillStyle = secondaryColor.color
+      renderCtx.fillRect(x + offsetX, y + offsetY, 1, 1)
     }
   }
 }
@@ -301,13 +296,8 @@ export function actionBuildUpDitherDraw(
         renderCtx.fillRect(x + offsetX, y + offsetY, 1, 1)
       }
     } else if (twoColorMode) {
-      if (currentModes?.eraser || currentModes?.inject) {
-        renderCtx.clearRect(x + offsetX, y + offsetY, 1, 1)
-      }
-      if (!currentModes?.eraser) {
-        renderCtx.fillStyle = secondaryColor.color
-        renderCtx.fillRect(x + offsetX, y + offsetY, 1, 1)
-      }
+      renderCtx.fillStyle = secondaryColor.color
+      renderCtx.fillRect(x + offsetX, y + offsetY, 1, 1)
     }
   }
 }

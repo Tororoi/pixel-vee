@@ -208,6 +208,24 @@ export function handleMoveAction(latestAction, modType) {
   latestAction.layer.x = latestAction[modType].x
   latestAction.layer.y = latestAction[modType].y
   latestAction.layer.scale = latestAction[modType].scale
+  // Keep the dither grid aligned with the moved layer's content.
+  if (latestAction.layer.type === 'raster') {
+    brush.ditherOffsetX = (((brush.ditherOffsetX - deltaX) % 8) + 8) % 8
+    brush.ditherOffsetY = (((brush.ditherOffsetY - deltaY) % 8) + 8) % 8
+    const picker = document.querySelector('.dither-picker-container')
+    if (picker)
+      applyDitherOffset(picker, brush.ditherOffsetX, brush.ditherOffsetY)
+    const preview = document.querySelector('.dither-preview')
+    if (preview)
+      applyDitherOffset(preview, brush.ditherOffsetX, brush.ditherOffsetY)
+    const control = document.querySelector('.dither-offset-control')
+    if (control)
+      applyDitherOffsetControl(
+        control.parentElement,
+        brush.ditherOffsetX,
+        brush.ditherOffsetY,
+      )
+  }
   // Shift live vector handle coordinates by the same delta so they stay
   // aligned with the layer content after the position change.
   if (globalState.vector.properties.px1) {

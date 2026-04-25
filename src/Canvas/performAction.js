@@ -129,8 +129,8 @@ function _renderBuildUpDitherSegmentWasm(
     const lx = action.layer.x + cropDX
     const ly = action.layer.y + cropDY
     for (const coord of action.buildUpDensityDelta ?? []) {
-      const px = (coord & 0xffff) + lx
-      const py = ((coord >>> 16) & 0xffff) + ly
+      const px = ((coord << 16) >> 16) + lx
+      const py = (coord >> 16) + ly
       if (px >= 0 && px < cw && py >= 0 && py < ch) {
         deltaFlat.push((py << 16) | px)
       }
@@ -231,8 +231,8 @@ function _renderBuildUpDitherSegmentJS(
     const lx = action.layer.x + cropDX
     const ly = action.layer.y + cropDY
     for (const coord of action.buildUpDensityDelta) {
-      const px = (coord & 0xffff) + lx
-      const py = ((coord >>> 16) & 0xffff) + ly
+      const px = ((coord << 16) >> 16) + lx
+      const py = (coord >> 16) + ly
       const key = (py << 16) | px
       segmentDelta.set(key, (segmentDelta.get(key) ?? 0) + 1)
       lastActionMap.set(key, action)
@@ -287,6 +287,11 @@ function _renderBuildUpDitherSegmentJS(
     } else if (isErase) {
       if (isOn) {
         renderCtx.clearRect(x, y, 1, 1)
+      } else if (hasTwoColor) {
+        renderCtx.fillStyle = action.secondaryColor.color
+        for (let i = 0; i < segmentCount; i++) {
+          renderCtx.fillRect(x, y, 1, 1)
+        }
       }
     } else {
       // Each fillRect call composites one density hit; the count must match

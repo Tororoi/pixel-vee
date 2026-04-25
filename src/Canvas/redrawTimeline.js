@@ -126,8 +126,8 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
       const lx = a.layer.x + cropDX
       const ly = a.layer.y + cropDY
       for (const coord of a.buildUpDensityDelta) {
-        const ax = (coord & 0xffff) + lx
-        const ay = ((coord >>> 16) & 0xffff) + ly
+        const ax = ((coord << 16) >> 16) + lx
+        const ay = (coord >> 16) + ly
         if (ax >= 0 && ax < cw && ay >= 0 && ay < ch) {
           layerMap[ay * cw + ax] += 1
         }
@@ -169,6 +169,16 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
       continue
     }
 
+    // Canvas resize changes the coordinate system for all layers; a layer move
+    // changes it for that layer. Flush any pending segment so that actions
+    // recorded under the old origin are not batched with post-change actions.
+    if (
+      action.tool === 'resize' ||
+      (action.tool === 'move' && action.layer === pendingSegmentLayer)
+    ) {
+      flushBuildUpSegment()
+    }
+
     const tool = tools[action.tool]
     if (
       !action.hidden &&
@@ -190,7 +200,15 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
             (!!action.modes?.eraser !== !!prevAction.modes?.eraser ||
               !!action.modes?.inject !== !!prevAction.modes?.inject ||
               !!action.modes?.twoColor !== !!prevAction.modes?.twoColor)
-          if (layerChanged || modesChanged) {
+          // A dither offset change between strokes requires a flush because the
+          // segment renderer uses the last action's offset for all density-level
+          // checks (turnOnStepIdx). Different offsets per stroke produce wrong
+          // compositing counts when batched together.
+          const ditherOffsetChanged =
+            prevAction &&
+            (action.ditherOffsetX !== prevAction.ditherOffsetX ||
+              action.ditherOffsetY !== prevAction.ditherOffsetY)
+          if (layerChanged || modesChanged || ditherOffsetChanged) {
             flushBuildUpSegment()
           }
         }
@@ -229,8 +247,8 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
           const cw2 = canvas.offScreenCVS.width
           const ch2 = canvas.offScreenCVS.height
           for (const coord of action.buildUpDensityDelta) {
-            const ax = (coord & 0xffff) + lx
-            const ay = ((coord >>> 16) & 0xffff) + ly
+            const ax = ((coord << 16) >> 16) + lx
+            const ay = (coord >> 16) + ly
             if (ax >= 0 && ax < cw2 && ay >= 0 && ay < ch2) {
               layerMap[ay * cw2 + ax] += 1
             }
