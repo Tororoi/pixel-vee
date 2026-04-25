@@ -5,8 +5,9 @@
   "main": "index.js",
   "scripts": {
     "build:wasm": "cd wasm && wasm-pack build --target web",
+    "build:css": "sass scss/style.scss css/style.css",
     "dev": "npm run build:wasm && vite",
-    "build": "npm run build:wasm && vite build",
+    "build": "npm run build:css && npm run build:wasm && vite build",
     "preview": "vite preview",
     "sass": "sass --watch scss/style.scss:css/style.css",
     "eslint": "eslint src",
