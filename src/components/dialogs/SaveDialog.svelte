@@ -65,100 +65,100 @@
   style="display: {isOpen ? 'flex' : 'none'}"
   onclose={handleClose}
 >
-    <form id="save-interface" class="save-interface" onsubmit={handleSubmit}>
-      <div class="save-setting">
-        <label for="save-file-name" class="save-file-name-label">
-          <span class="input-label">Save As:</span>
-          <input
-            type="text"
-            id="save-file-name"
-            name="save-file-name"
-            placeholder="my drawing"
-            maxlength="24"
-            value={settings.saveAsFileName ?? ''}
-            oninput={handleFileNameInput}
-          />
-          <span>.pxv</span>
-        </label>
-      </div>
+  <form id="save-interface" class="save-interface" onsubmit={handleSubmit}>
+    <div class="save-setting">
+      <label for="save-file-name" class="save-file-name-label">
+        <span class="input-label">Save As:</span>
+        <input
+          type="text"
+          id="save-file-name"
+          name="save-file-name"
+          placeholder="my drawing"
+          maxlength="24"
+          value={settings.saveAsFileName ?? ''}
+          oninput={handleFileNameInput}
+        />
+        <span>.pxv</span>
+      </label>
+    </div>
 
-      <div id="filesize-preview" class="save-setting">
-        <span>Filesize:&nbsp;</span>
-        <span id="savefile-size">{fileSize}</span>
+    <div id="filesize-preview" class="save-setting">
+      <span>Filesize:&nbsp;</span>
+      <span id="savefile-size">{fileSize}</span>
+    </div>
+
+    <div class="save-setting">
+      <ToggleCheckbox
+        id="preserve-history-toggle"
+        labelId="preserve-history"
+        name="preserve-history"
+        label="Preserve Entire History"
+        checked={settings.preserveHistory}
+        onchange={handlePreserveHistory}
+        tooltip="Preserve all actions in history, palette, and reference images"
+      />
+    </div>
+
+    <div
+      class="advanced-options{advancedDisabled ? ' disabled' : ''}"
+      id="save-advanced-options"
+    >
+      <div class="save-setting">
+        <ToggleCheckbox
+          id="include-palette-toggle"
+          labelId="include-palette"
+          name="include-palette"
+          label="Palette"
+          checked={settings.includePalette}
+          onchange={handleIncludePalette}
+          tooltip="Save colors in palette"
+        />
       </div>
 
       <div class="save-setting">
         <ToggleCheckbox
-          id="preserve-history-toggle"
-          labelId="preserve-history"
-          name="preserve-history"
-          label="Preserve Entire History"
-          checked={settings.preserveHistory}
-          onchange={handlePreserveHistory}
-          tooltip="Preserve all actions in history, palette, and reference images"
+          id="include-reference-layers-toggle"
+          labelId="include-reference-layers"
+          name="include-reference-layers"
+          label="Reference Layers"
+          checked={settings.includeReferenceLayers}
+          onchange={handleIncludeReferenceLayers}
+          tooltip="Save all reference images, including any transformations applied to them."
         />
       </div>
 
-      <div
-        class="advanced-options{advancedDisabled ? ' disabled' : ''}"
-        id="save-advanced-options"
+      <div class="save-setting">
+        <ToggleCheckbox
+          id="include-removed-actions-toggle"
+          labelId="include-removed-actions"
+          name="include-removed-actions"
+          label="Removed Actions"
+          checked={settings.includeRemovedActions}
+          onchange={handleIncludeRemovedActions}
+          tooltip="If a layer or vector was trashed or layer was cleared, those actions are still recoverable by using undo. If you're certain those actions won't be missed, you can remove them permanently by unchecking this box."
+        />
+      </div>
+    </div>
+
+    <div class="save-buttons">
+      <button
+        type="submit"
+        id="save-button"
+        class="btn"
+        aria-label="Save offline as a .pxv file"
+        data-tooltip="Save offline as a .pxv file"
       >
-        <div class="save-setting">
-          <ToggleCheckbox
-            id="include-palette-toggle"
-            labelId="include-palette"
-            name="include-palette"
-            label="Palette"
-            checked={settings.includePalette}
-            onchange={handleIncludePalette}
-            tooltip="Save colors in palette"
-          />
-        </div>
-
-        <div class="save-setting">
-          <ToggleCheckbox
-            id="include-reference-layers-toggle"
-            labelId="include-reference-layers"
-            name="include-reference-layers"
-            label="Reference Layers"
-            checked={settings.includeReferenceLayers}
-            onchange={handleIncludeReferenceLayers}
-            tooltip="Save all reference images, including any transformations applied to them."
-          />
-        </div>
-
-        <div class="save-setting">
-          <ToggleCheckbox
-            id="include-removed-actions-toggle"
-            labelId="include-removed-actions"
-            name="include-removed-actions"
-            label="Removed Actions"
-            checked={settings.includeRemovedActions}
-            onchange={handleIncludeRemovedActions}
-            tooltip="If a layer or vector was trashed or layer was cleared, those actions are still recoverable by using undo. If you're certain those actions won't be missed, you can remove them permanently by unchecking this box."
-          />
-        </div>
-      </div>
-
-      <div class="save-buttons">
-        <button
-          type="submit"
-          id="save-button"
-          class="btn"
-          aria-label="Save offline as a .pxv file"
-          data-tooltip="Save offline as a .pxv file"
-        >
-          Save
-        </button>
-        <button
-          type="button"
-          id="cancel-save-button"
-          class="btn"
-          aria-label="Close save dialog box"
-          onclick={handleClose}
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
+        Save
+      </button>
+      <button
+        type="button"
+        id="cancel-save-button"
+        class="btn"
+        aria-label="Close save dialog box"
+        onclick={handleClose}
+      >
+        Cancel
+      </button>
+    </div>
+  </form>
 </DialogBox>

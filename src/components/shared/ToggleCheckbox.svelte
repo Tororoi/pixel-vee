@@ -1,5 +1,13 @@
 <script>
-  let { id, labelId = undefined, label, checked, onchange, tooltip = undefined, name = undefined } = $props()
+  let {
+    id,
+    labelId = undefined,
+    label,
+    checked,
+    onchange,
+    tooltip = undefined,
+    name = undefined,
+  } = $props()
 </script>
 
 <label for={id} id={labelId} class="toggle" data-tooltip={tooltip}>

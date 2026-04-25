@@ -53,55 +53,58 @@
   style="display: {isOpen ? 'flex' : 'none'}"
   onclose={handleClose}
 >
-    <div class="settings-interface">
-      <div class="settings-group">
-        <div class="settings-section-header">Display</div>
-        <div class="settings-options">
-          <ToggleCheckbox
-            id="tooltips-toggle"
-            labelId="tooltips"
-            label="Tooltips"
-            checked={globalState.ui.showTooltips}
-            onchange={handleTooltips}
-            tooltip="Toggle tooltips (T)"
-          />
-          <ToggleCheckbox
-            id="grid-toggle"
-            labelId="grid"
-            label="Grid"
-            checked={gridEnabled}
-            onchange={handleGrid}
-            tooltip="Toggle grid (G)\n\nDisplays at higher zoom levels only."
-          />
-          <div class="grid-spacing-container">
-            <label for="grid-spacing">
-              <span>Subgrid Spacing:&nbsp;</span>
-              <input
-                type="number"
-                id="grid-spacing"
-                min="1"
-                max="64"
-                value={gridSpacing}
-                oninput={handleGridSpacingInput}
-              />
-              <SpinInput
-                bind:value={gridSpacing}
-                min={1}
-                max={64}
-                class="grid-spacing-spin"
-                onspin={(val) => { vectorGui.gridSpacing = val; vectorGui.render() }}
-              />
-            </label>
-          </div>
-          <ToggleCheckbox
-            id="cursor-preview-toggle"
-            labelId="cursor-preview"
-            label="Cursor Preview"
-            checked={vectorGui.showCursorPreview ?? true}
-            onchange={handleCursorPreview}
-            tooltip="Show brush color preview under cursor instead of an outline"
-          />
+  <div class="settings-interface">
+    <div class="settings-group">
+      <div class="settings-section-header">Display</div>
+      <div class="settings-options">
+        <ToggleCheckbox
+          id="tooltips-toggle"
+          labelId="tooltips"
+          label="Tooltips"
+          checked={globalState.ui.showTooltips}
+          onchange={handleTooltips}
+          tooltip="Toggle tooltips (T)"
+        />
+        <ToggleCheckbox
+          id="grid-toggle"
+          labelId="grid"
+          label="Grid"
+          checked={gridEnabled}
+          onchange={handleGrid}
+          tooltip="Toggle grid (G)\n\nDisplays at higher zoom levels only."
+        />
+        <div class="grid-spacing-container">
+          <label for="grid-spacing">
+            <span>Subgrid Spacing:&nbsp;</span>
+            <input
+              type="number"
+              id="grid-spacing"
+              min="1"
+              max="64"
+              value={gridSpacing}
+              oninput={handleGridSpacingInput}
+            />
+            <SpinInput
+              bind:value={gridSpacing}
+              min={1}
+              max={64}
+              class="grid-spacing-spin"
+              onspin={(val) => {
+                vectorGui.gridSpacing = val
+                vectorGui.render()
+              }}
+            />
+          </label>
         </div>
+        <ToggleCheckbox
+          id="cursor-preview-toggle"
+          labelId="cursor-preview"
+          label="Cursor Preview"
+          checked={vectorGui.showCursorPreview ?? true}
+          onchange={handleCursorPreview}
+          tooltip="Show brush color preview under cursor instead of an outline"
+        />
       </div>
     </div>
+  </div>
 </DialogBox>

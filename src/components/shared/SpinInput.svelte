@@ -1,9 +1,16 @@
 <script>
-  let { value = $bindable(), min, max, onspin, class: extraClass = '' } = $props()
+  let {
+    value = $bindable(),
+    min,
+    max,
+    onspin,
+    class: extraClass = '',
+  } = $props()
 
   function handleSpin(e) {
     const action =
-      e.target.dataset.action || e.target.closest('[data-action]')?.dataset.action
+      e.target.dataset.action ||
+      e.target.closest('[data-action]')?.dataset.action
     let val = Math.floor(+value)
     if (action === 'inc' && val < max) val++
     else if (action === 'dec' && val > min) val--

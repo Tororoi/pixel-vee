@@ -4,10 +4,7 @@ import { tools } from '../../Tools/index.js'
 import { vectorGui } from '../../GUI/vector.js'
 import { addToTimeline } from '../undoRedo/undoRedo.js'
 import { renderCanvas } from '../../Canvas/render.js'
-import {
-  updateActiveLayerState,
-  removeTempLayer,
-} from '../../DOM/render.js'
+import { updateActiveLayerState, removeTempLayer } from '../../DOM/render.js'
 import {
   confirmPastedPixels,
   copySelectedPixels,
@@ -25,10 +22,21 @@ import { setVectorShapeBoundaryBox } from '../../GUI/transform.js'
 //=============================================//
 
 /**
- * Cut Selection
- * Not dependent on pointer events
- * Conditions: Layer is a raster layer, layer is not a preview layer, and there is a selection
- * @param {boolean} copyToClipboard - Whether to copy the selection to the clipboard (delete action doesn't copy)
+ * Cut the current selection from the active raster layer.
+ *
+ * Handles both raster pixel selections and vector selections:
+ *  - Raster: erases pixels within the boundary box and, if
+ *    `copyToClipboard` is true, copies them to the state clipboard.
+ *    The boundary box is adjusted to be layer-relative before being
+ *    recorded in the timeline so it remains correct if the layer moves.
+ *  - Vector: marks selected vectors as removed and, if `copyToClipboard`
+ *    is true, serializes them to the clipboard.
+ *
+ * Preconditions: current layer must be a non-preview raster layer and
+ * there must be an active pixel selection, a current vector, or at least
+ * one selected vector index.
+ * @param {boolean} [copyToClipboard=true] - Pass `false` to delete the
+ *   selection without copying it (used by the Delete key action).
  */
 export function actionCutSelection(copyToClipboard = true) {
   if (
@@ -41,7 +49,8 @@ export function actionCutSelection(copyToClipboard = true) {
     if (globalState.selection.boundaryBox.xMax !== null) {
       //Cut raster content
       cutSelectedPixels(copyToClipboard)
-      //correct boundary box for layer offset
+      // Store layer-relative coords so the action is portable if the
+      // layer is later moved before an undo/redo is triggered.
       const boundaryBox = { ...globalState.selection.boundaryBox }
       if (boundaryBox.xMax !== null) {
         boundaryBox.xMin -= canvas.currentLayer.x
@@ -99,12 +108,24 @@ export function actionCutSelection(copyToClipboard = true) {
 }
 
 /**
- * Paste Selection
- * Not dependent on pointer events
- * Action will not fire if there is no selection in the clipboard,
- * the current layer is not a raster layer, or if the current layer is a preview layer
- * Always uses the state clipboard for pasting, which is the last clipboard used for copying or cutting
- * Conditions: Layer is a raster layer, layer is not a preview layer, and there is something in the clipboard to be pasted
+ * Paste the contents of the state clipboard onto the current raster layer.
+ *
+ * Handles two clipboard formats:
+ *  - Pixel clipboard (`globalState.clipboard.select.canvas`): creates a
+ *    temporary floating canvas layer so the user can reposition the pasted
+ *    content before confirming. The paste is stored as unconfirmed in the
+ *    timeline until `actionConfirmPastedPixels` is called.
+ *  - Vector clipboard (`globalState.clipboard.select.vectors`): deep-copies
+ *    the serialized vectors, assigns them new unique indices, adds them to
+ *    `globalState.vector.all`, and records the paste as a timeline action.
+ *
+ * Boundary box and select-property coordinates are adjusted to be
+ * layer-relative at the time of copy (using the layer offset that was
+ * active when the content was copied) so that moving the layer between
+ * copy and paste does not shift the pasted content unexpectedly.
+ *
+ * Preconditions: current layer must be a non-preview raster layer and
+ * the clipboard must contain pixels or vectors.
  */
 export function actionPasteSelection() {
   if (
@@ -114,9 +135,8 @@ export function actionPasteSelection() {
       Object.keys(globalState.clipboard.select.vectors).length > 0)
   ) {
     //if globalState.clipboard.select.canvas, run pasteSelectedPixels
-    //Compute layer-relative coords by subtracting the layer offset AT COPY TIME (not now).
-    //This keeps the paste anchored to the same layer-relative position as the copied pixels,
-    //so moving the layer between copy and paste shifts the paste with the content.
+    // Use the layer offset that was active at copy time so the paste lands
+    // at the same layer-relative position regardless of where the layer is now.
     const clipboardLayerX = globalState.clipboard.select.layerX ?? 0
     const clipboardLayerY = globalState.clipboard.select.layerY ?? 0
     const boundaryBox = { ...globalState.clipboard.select.boundaryBox }
@@ -150,6 +170,8 @@ export function actionPasteSelection() {
         canvas.currentLayer.x,
         canvas.currentLayer.y,
       )
+      // Assign a unique key to this paste so undo/redo can retrieve the
+      // correct pixel snapshot even if multiple pastes occur in a session.
       let uniquePastedImageKey = null
       if (globalState.clipboard.select.canvas) {
         globalState.clipboard.highestPastedImageKey += 1
@@ -195,7 +217,8 @@ export function actionPasteSelection() {
       const clipboardVectors = JSON.parse(
         JSON.stringify(globalState.clipboard.select.vectors),
       )
-      //correct offset coords for vectors to make agnostic to layer coords
+      // Re-key every pasted vector with a fresh unique index so it does not
+      // collide with existing vectors from a prior copy or undo cycle.
       for (const [vectorIndex, vector] of Object.entries(clipboardVectors)) {
         vector.layer = canvas.currentLayer
         //update vector index and action index
@@ -246,15 +269,26 @@ export function actionPasteSelection() {
 }
 
 /**
- * Confirm Pasted Pixels
- * Not dependent on pointer events
- * Action will not fire if the current layer is not a raster layer
- * or if there is no selection in the clipboard
- * clipboard used is from last paste action in order to decouple from the state clipboard, which may be empty when using undo/redo to go to an unconfirmed paste action.
- * Alternatively, the state clipboard may have other content which the user should not have overridden without them explicitly copying the new content.
- * Conditions: Layer is a raster layer, and the most recent paste action is unconfirmed
+ * Confirm and commit the active floating paste to the target raster layer.
+ *
+ * While a paste is unconfirmed, the pasted pixels live on a temporary canvas
+ * layer (`canvas.tempLayer`) so the user can move them freely. Confirming
+ * merges the visible pasted content into the permanent layer, removes the
+ * temporary layer, and records the confirmed state in the timeline.
+ *
+ * The clipboard used here is derived from the most recent unconfirmed paste
+ * action in the undo stack — NOT from the live state clipboard. This
+ * decouples confirmation from whatever the user may have copied since then,
+ * and ensures undo/redo restores the correct pixels.
+ *
+ * Transform state (rotation, mirror flags) is reset to defaults after
+ * confirmation because the transformation has now been baked into pixels.
+ *
+ * Preconditions: current layer must be a raster layer and there must be
+ * at least one unconfirmed paste action in the undo stack.
  */
 export function actionConfirmPastedPixels() {
+  // Walk the undo stack in reverse to find the most recent unconfirmed paste.
   let lastPasteAction = null
   for (let i = globalState.timeline.undoStack.length - 1; i >= 0; i--) {
     if (
@@ -270,7 +304,8 @@ export function actionConfirmPastedPixels() {
     const yOffset = canvas.tempLayer.y
     const boundaryBox = { ...globalState.selection.boundaryBox }
     const selectProperties = { ...globalState.selection.properties }
-    //create copy of current canvas
+    // Capture the merged pixel content from the permanent layer canvas
+    // so it can be restored accurately on undo.
     const confirmedCanvas = document.createElement('canvas')
     confirmedCanvas.width = boundaryBox.xMax - boundaryBox.xMin
     confirmedCanvas.height = boundaryBox.yMax - boundaryBox.yMin
@@ -286,7 +321,8 @@ export function actionConfirmPastedPixels() {
       confirmedCanvas.width,
       confirmedCanvas.height,
     )
-    //adjust boundaryBox for layer offset
+    // Convert to layer-relative coords before storing in the timeline so the
+    // action remains correct if the layer is moved later.
     if (boundaryBox.xMax !== null) {
       boundaryBox.xMin -= canvas.pastedLayer.x
       boundaryBox.xMax -= canvas.pastedLayer.x
@@ -340,8 +376,15 @@ export function actionConfirmPastedPixels() {
 }
 
 /**
- * Copy Selection to clipboard
- * Not dependent on pointer events
+ * Copy the current pixel or vector selection to the state clipboard.
+ *
+ * Does not modify the canvas or timeline — copy is not an undoable action.
+ * Delegates to `copySelectedPixels` for raster selections or
+ * `copySelectedVectors` for vector selections.
+ *
+ * Preconditions: current layer must be a raster layer and there must be
+ * either an active boundary-box selection, a current vector, or at least
+ * one selected vector index.
  */
 export function actionCopySelection() {
   if (
