@@ -1,5 +1,5 @@
-import { canvas } from '../Context/canvas.js'
-import { globalState } from '../Context/state.js'
+import { canvas } from '../context/canvas.js'
+import { globalState } from '../context/state.js'
 
 /**
  * Returns the base X render offset for a vector path (canvas pan + layer offset).

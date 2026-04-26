@@ -30,20 +30,20 @@ Place test files in `tests/` at the project root. Name them `<topic>.test.js`.
 
 ### 1. Mock browser-dependent modules first
 
-`state.js` imports `dom.js` and `Tools/index.js`, which both reference browser globals at module evaluation time. Mock them **before** importing anything that depends on them. Vitest hoists `vi.mock()` calls automatically.
+`state.js` imports `dom.js` and `tools/index.js`, which both reference browser globals at module evaluation time. Mock them **before** importing anything that depends on them. Vitest hoists `vi.mock()` calls automatically.
 
 ```js
 import { describe, it, expect, beforeEach, vi } from "vitest"
 
 // These mocks are hoisted — they intercept imports in all downstream modules
-vi.mock("../src/Context/dom.js", () => ({
+vi.mock("../src/context/dom.js", () => ({
   dom: {
     vectorTransformUIContainer: { style: { display: "" } },
     // Add any other dom properties your code under test touches
   },
 }))
 
-vi.mock("../src/Tools/index.js", () => ({
+vi.mock("../src/tools/index.js", () => ({
   tools: {
     brush: { name: "brush", type: "raster" },
     line:  { name: "line",  type: "vector" },
@@ -52,7 +52,7 @@ vi.mock("../src/Tools/index.js", () => ({
 }))
 
 // Imports come after mocks
-import { state, registerDOMHelpers, registerVectorGui } from "../src/Context/state.js"
+import { state, registerDOMHelpers, registerVectorGui } from "../src/context/state.js"
 ```
 
 If your test file does not import `state.js` (e.g. you're testing a pure utility), you may not need any mocks at all.
