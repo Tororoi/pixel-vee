@@ -1,4 +1,13 @@
 <script>
+  /**
+   * @component
+   * Top navigation bar containing File and Edit menus, a contextual
+   * tool options bar, and the settings gear button. Handles all file
+   * I/O (open/save/import/export), selection and clipboard operations,
+   * canvas resize, flip/rotate transforms, and tool option toggles.
+   * The File and Edit menus use a CSS :focus-within dropdown approach
+   * with a small JS layer for click-to-close toggling.
+   */
   import { globalState } from '../../context/state.js'
   import { canvas } from '../../context/canvas.js'
   import { vectorGui } from '../../gui/vector.js'
@@ -20,6 +29,14 @@
   import { openSaveDialogBox } from '../../menu/events.js'
   import { tools } from '../../tools/index.js'
 
+  /**
+   * Converts a camelCase option key into a space-separated display
+   * label with a capitalised first letter. Used to render tool option
+   * names from the options object without requiring separate label
+   * strings per option.
+   * @param {string} str - A camelCase string (e.g. 'snapToGrid').
+   * @returns {string} A human-readable label (e.g. 'Snap To Grid').
+   */
   function camelCaseToWords(str) {
     let result = str.replace(/([A-Z])/g, ' $1')
     return (result.charAt(0).toUpperCase() + result.slice(1)).trim()
@@ -48,6 +65,15 @@
     ['curve', 'ellipse', 'polygon', 'select'].includes(toolName),
   )
 
+  /**
+   * Toggles a tool option and re-renders the vector GUI. Written to
+   * both the reactive proxy and the underlying tool singleton to prevent
+   * divergence across tool-switch cycles. The vector GUI re-render
+   * applies the option's visual effect immediately rather than waiting
+   * for the next pointer event.
+   * @param {string} optionName - The option key on the tool's options map.
+   * @param {boolean} checked - The new active state for the option.
+   */
   function handleOptionChange(optionName, checked) {
     if (globalState.tool.current.options[optionName]) {
       globalState.tool.current.options[optionName].active = checked
@@ -59,6 +85,13 @@
     vectorGui.render()
   }
 
+  /**
+   * Reads a `.pxv` save file and loads it into the application. The
+   * save module is lazily imported to avoid including it in the initial
+   * bundle. The file input value is cleared after reading so selecting
+   * the same file again re-triggers the change event.
+   * @param {Event} e - The change event from the file input.
+   */
   function handleLoadDrawing(e) {
     if (!e.target.files?.[0]) return
     const reader = new FileReader()
@@ -71,6 +104,17 @@
     e.target.value = null
   }
 
+  /**
+   * Imports a raster image as a paste layer. The image is decoded into
+   * a temporary canvas, the clipboard's select state is temporarily
+   * overwritten with the image's geometry and pixel data, and
+   * `actionPasteSelection` commits it as a floating paste. The original
+   * clipboard state is restored immediately after so the import does
+   * not replace whatever the user had previously copied. `willReadFrequently`
+   * is set on the temp context because `getImageData` is called once
+   * immediately after drawing.
+   * @param {Event} e - The change event from the import file input.
+   */
   function handleImport(e) {
     if (!e.target.files?.[0]) return
     const reader = new FileReader()
@@ -114,6 +158,12 @@
     e.target.value = null
   }
 
+  /**
+   * Consolidates all layers into a composite then opens the export
+   * dialog. Consolidation runs before the dialog opens so the export
+   * always reflects the fully merged artwork. The layers module is
+   * lazily imported for the same bundle-size reason as `handleLoadDrawing`.
+   */
   function handleExport() {
     import('../../canvas/layers.js').then(({ consolidateLayers }) => {
       consolidateLayers()
@@ -121,16 +171,32 @@
     })
   }
 
+  /**
+   * Opens the canvas size dialog and activates the drag-handle resize
+   * overlay together. Both must be activated as a pair — the dialog
+   * manages the numeric inputs while the overlay manages the on-canvas
+   * drag handles; neither is useful without the other.
+   */
   function handleCanvasSize() {
     if (hasPaste) return
     globalState.ui.canvasSizeOpen = true
     activateResizeOverlay()
   }
 
+  /**
+   * Toggles the settings dialog open and closed.
+   */
   function handleSettings() {
     globalState.ui.settingsOpen = !globalState.ui.settingsOpen
   }
 
+  /**
+   * Handles clicks on the top menu bar to toggle the `.active` class
+   * on focused menu folder items. The menus use CSS `:focus-within` for
+   * their dropdowns; this class toggle provides the click-to-close
+   * behavior that `:focus-within` alone cannot express — without it,
+   * clicking an already-open folder would not close it.
+   */
   function handleTopMenuClick() {
     const activeEl = document.activeElement
     if (activeEl?.classList.contains('menu-folder')) {
@@ -142,10 +208,22 @@
     }
   }
 
+  /**
+   * Removes the `.active` class when a menu folder loses focus,
+   * ensuring the folder's expanded state is cleared even when the user
+   * dismisses the menu by tabbing away rather than clicking elsewhere.
+   * @param {FocusEvent} e - The blur event from the menu folder element.
+   */
   function handleMenuFolderBlur(e) {
     e.currentTarget.classList.remove('active')
   }
 
+  /**
+   * Activates a menu item via keyboard by forwarding Enter/Space to a
+   * `.click()` call. Menu items use `onclick` rather than being `button`
+   * elements, so keyboard activation must be wired manually.
+   * @param {KeyboardEvent} e - The keydown event from a menu item.
+   */
   function handleMenuKeydown(e) {
     if (e.key === 'Enter' || e.key === ' ') e.currentTarget.click()
   }

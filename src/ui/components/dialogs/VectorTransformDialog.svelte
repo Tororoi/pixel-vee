@@ -1,4 +1,15 @@
 <script>
+  /**
+   * @component
+   * Toolbar dialog for switching between vector transform modes:
+   * Translate, Rotate, and Scale. The dialog's visibility is driven by
+   * selection state rather than a dedicated open flag — it shows whenever
+   * a vector is selected and closes by calling `actionDeselect`. Each
+   * mode switch resets or initialises the boundary box differently
+   * because translate and rotate operate on individual control points
+   * while scale requires a pre-computed bounding box as its transform
+   * origin.
+   */
   import { globalState } from '../../../context/state.js'
   import {
     switchVectorTransformMode,
@@ -11,22 +22,47 @@
   const isOpen = $derived(globalState.ui.vectorTransformOpen)
   const mode = $derived(globalState.vector.transformMode)
 
+  /**
+   * Closes the transform dialog by deselecting the active vector.
+   * `actionDeselect` is the semantic close action here: the dialog's
+   * visibility is a function of selection state, so deselecting is the
+   * correct way to hide it rather than toggling an open flag directly.
+   */
   function handleClose() {
     actionDeselect()
   }
 
+  /**
+   * Switches to Translate mode and clears selection properties and the
+   * boundary box. Translate operates on individual control points, so
+   * any stale boundary box from a previous Scale session would produce
+   * incorrect transform origin calculations; resetting it first ensures
+   * a clean state.
+   */
   function handleTranslate() {
     globalState.selection.resetProperties()
     globalState.selection.resetBoundaryBox()
     switchVectorTransformMode(TRANSLATE)
   }
 
+  /**
+   * Switches to Rotate mode and clears selection properties and the
+   * boundary box. Mirrors `handleTranslate` — rotation also works on
+   * control points and must not inherit a stale boundary box.
+   */
   function handleRotate() {
     globalState.selection.resetProperties()
     globalState.selection.resetBoundaryBox()
     switchVectorTransformMode(ROTATE)
   }
 
+  /**
+   * Computes the shape's bounding box and switches to Scale mode.
+   * Unlike translate/rotate, scale requires an accurate bounding box
+   * as its transform origin before the mode switch, so
+   * `setVectorShapeBoundaryBox` is called first rather than resetting
+   * the box as the other modes do.
+   */
   function handleScale() {
     setVectorShapeBoundaryBox()
     switchVectorTransformMode(SCALE)

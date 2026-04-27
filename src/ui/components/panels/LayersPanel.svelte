@@ -1,4 +1,12 @@
 <script>
+  /**
+   * @component
+   * Panel listing all visible (non-removed, non-preview) canvas layers
+   * with controls to add raster layers, upload reference images, delete,
+   * toggle visibility, reorder via drag-and-drop, and open per-layer
+   * settings. All controls are disabled while a paste operation is
+   * active to prevent structural changes mid-paste.
+   */
   import { globalState } from '../../../context/state.js'
   import { canvas } from '../../../context/canvas.js'
   import { vectorGui } from '../../../gui/vector.js'
@@ -29,11 +37,23 @@
   )
   const currentLayer = $derived(canvas.currentLayer)
 
+  /**
+   * Adds a new raster layer, guarded against paste state to prevent
+   * structural changes while a paste operation is in progress.
+   */
   function handleAddLayer() {
     if (isPasted) return
     addRasterLayer()
   }
 
+  /**
+   * Triggers a reference layer upload after a file is selected.
+   * `addReferenceLayer` is called with `uploadRef` as `this` because
+   * the function reads the file from `this.files` rather than taking it
+   * as an argument. The input value is cleared after each upload so
+   * selecting the same file again re-triggers the change event.
+   * @param {Event} e - The change event from the file input.
+   */
   function handleUploadRef(e) {
     if (e.target.files?.[0]) {
       addReferenceLayer.call(uploadRef)
@@ -41,6 +61,11 @@
     }
   }
 
+  /**
+   * Removes the current layer and re-renders. The paste guard prevents
+   * deletion mid-paste, which would leave the paste layer in an invalid
+   * state with no target to commit to.
+   */
   function handleDeleteLayer() {
     if (isPasted) return
     const layer = canvas.currentLayer
@@ -48,6 +73,17 @@
     renderCanvas(layer)
   }
 
+  /**
+   * Switches the active canvas layer. Deselects vector state when
+   * leaving a reference layer because reference layers cannot host
+   * vectors, so any active selection would be invalid on the new layer.
+   * Re-enables tool buttons disabled by the previous layer's
+   * `inactiveTools` list before disabling those of the incoming layer,
+   * so the toolbar always reflects exactly the new layer's constraints.
+   * Forces 'move' tool when the target is a reference layer because
+   * drawing tools have no effect on reference layers.
+   * @param {object} layer - The layer object to activate.
+   */
   function handleLayerClick(layer) {
     if (isPasted) return
     if (layer === canvas.currentLayer) return
@@ -71,12 +107,28 @@
     renderCanvas(layer)
   }
 
+  /**
+   * Toggles a layer's visibility and re-renders. Propagation is stopped
+   * so the parent layer-row click handler does not also fire and switch
+   * the active layer as a side effect of clicking the eye button.
+   * @param {MouseEvent} e - The click event from the hide button.
+   * @param {object} layer - The layer to show or hide.
+   */
   function handleHideToggle(e, layer) {
     e.stopPropagation()
     layer.hidden = !layer.hidden
     renderCanvas(layer)
   }
 
+  /**
+   * Toggles the per-layer settings popout. A second click on the same
+   * layer's gear closes the popout rather than reopening it. Popout
+   * position is computed from the gear button's bounding rect so it
+   * appears anchored to the right of the button regardless of scroll
+   * position.
+   * @param {MouseEvent} e - The click event from the gear button.
+   * @param {object} layer - The layer whose settings to show.
+   */
   function handleGearClick(e, layer) {
     e.stopPropagation()
     if (settingsLayer === layer) {
@@ -88,6 +140,13 @@
     }
   }
 
+  /**
+   * Begins a drag-reorder gesture by recording the layer's index and
+   * writing it to dataTransfer for retrieval in `handleDrop`. Prevented
+   * during paste state to avoid reordering while a commit is pending.
+   * @param {DragEvent} e - The dragstart event.
+   * @param {object} layer - The layer being dragged.
+   */
   function handleDragStart(e, layer) {
     if (isPasted) {
       e.preventDefault()
@@ -97,10 +156,24 @@
     e.dataTransfer.setData('text', String(dragIndex))
   }
 
+  /**
+   * Allows drops by preventing the browser's default reject behavior.
+   * Without this, ondrop never fires on the target element.
+   * @param {DragEvent} e - The dragover event.
+   */
   function handleDragOver(e) {
     e.preventDefault()
   }
 
+  /**
+   * Reorders the layer data array and the corresponding DOM canvas
+   * stack in a single operation. Both must stay in sync because the
+   * compositor renders layers in DOM order; reordering only the data
+   * array would leave the visual stack unchanged until a full page
+   * reload.
+   * @param {DragEvent} e - The drop event on the target layer row.
+   * @param {object} targetLayer - The layer at the drop target position.
+   */
   function handleDrop(e, targetLayer) {
     e.preventDefault()
     const draggedIndex = parseInt(e.dataTransfer.getData('text'))

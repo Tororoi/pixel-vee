@@ -1,4 +1,13 @@
 <script>
+  /**
+   * @component
+   * Popout settings panel for a specific vector action. Edits modes
+   * (eraser, inject, twoColor; line/quadCurve/cubicCurve for curve
+   * vectors), primary and secondary colors, brush size, and dither
+   * pattern. All mutations record undo-history entries via changeAction*
+   * helpers. Does not own open/close logic — the parent mounts and
+   * unmounts this component directly.
+   */
   import { appState } from '../../hooks/appState.svelte.js'
   import { globalState } from '../../../context/state.js'
   import { dom } from '../../../context/dom.js'
@@ -20,6 +29,10 @@
 
   let { vector = $bindable(), pos, onclose } = $props()
 
+  // A fresh SVG element is constructed on each derive so color and
+  // offset attributes reflect the vector's current state. Serializing
+  // a cached element would produce stale colors after a swatch or
+  // offset change without re-generating the markup.
   const ditherPreviewSVG = $derived.by(() => {
     const pattern = ditherPatterns[vector.ditherPatternIndex ?? 63]
     if (!pattern) return ''
@@ -33,6 +46,15 @@
     return new XMLSerializer().serializeToString(svgEl)
   })
 
+  /**
+   * Toggles a vector mode or switches curve type, recording an undo
+   * entry. Curve types (line/quadCurve/cubicCurve) are mutually
+   * exclusive — clicking the active type is a no-op to avoid creating
+   * a spurious history entry for a no-change action. Eraser and inject
+   * are mutually exclusive general modes; enabling one clears the other
+   * before the new modes object is snapshotted for the undo entry.
+   * @param {string} modeKey - The mode or curve-type key to toggle.
+   */
   function handleModeToggle(modeKey) {
     const isCurveType = ['line', 'quadCurve', 'cubicCurve'].includes(modeKey)
     if (isCurveType && vector.modes[modeKey]) return
@@ -55,6 +77,12 @@
     vectorGui.render()
   }
 
+  /**
+   * Opens the color picker bound to this vector's primary color slot.
+   * Propagation is stopped so parent click handlers (e.g. the vector
+   * row click) do not fire alongside the picker open.
+   * @param {MouseEvent} e - The click event from the primary color swatch.
+   */
   function handlePrimaryColorClick(e) {
     e.stopPropagation()
     initializeColorPicker({
@@ -64,6 +92,13 @@
     })
   }
 
+  /**
+   * Opens the color picker bound to this vector's secondary color slot.
+   * Lazily initialises `secondaryColor` to transparent black on first
+   * access so vectors don't allocate a secondary color object until the
+   * user explicitly opens the picker for it.
+   * @param {MouseEvent} e - The click event from the secondary color swatch.
+   */
   function handleSecondaryColorClick(e) {
     e.stopPropagation()
     if (!vector.secondaryColor) {
@@ -78,15 +113,31 @@
 
   let brushSizeFromValue = 1
 
+  /**
+   * Captures the brush size at the start of a drag so `handleBrushSizeChange`
+   * can create a from→to undo entry rather than a from→same no-op.
+   */
   function handleBrushSizePointerDown() {
     brushSizeFromValue = vector.brushSize ?? 1
   }
 
+  /**
+   * Applies the new brush size and re-renders on every input event so
+   * the canvas updates continuously while the user drags the slider,
+   * rather than only on release.
+   * @param {Event} e - The input event from the brush size slider.
+   */
   function handleBrushSizeInput(e) {
     vector.brushSize = parseInt(e.target.value)
     renderCanvas(vector.layer, true)
   }
 
+  /**
+   * Records an undo entry for the brush size change on slider release.
+   * Only records if the value actually changed; a click with no drag
+   * would otherwise pollute the undo stack with a no-op entry.
+   * @param {Event} e - The change event from the brush size slider.
+   */
   function handleBrushSizeChange(e) {
     const newSize = parseInt(e.target.value)
     if (brushSizeFromValue !== newSize) {
@@ -95,6 +146,13 @@
     }
   }
 
+  /**
+   * Toggles the dither picker for this specific vector. If the picker
+   * is already open for this vector, closes it and clears the target.
+   * On open, the picker's offset control is synced to the vector's
+   * current offset before the dialog opens so the control visually
+   * reflects the stored state from the moment it appears.
+   */
   function handleDitherClick() {
     if (
       globalState.ui.ditherPickerOpen &&

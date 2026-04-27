@@ -1,4 +1,12 @@
 <script>
+  /**
+   * @component
+   * Contextual brush settings panel that adapts its controls to the
+   * active tool. Shows brush size and type for brush-family tools, mode
+   * toggle buttons for applicable tools, stamp editor access for the
+   * brush tool, and a dither pattern preview for dither-capable tools.
+   * Tools listed in NO_PANEL_TOOLS render no content at all.
+   */
   import { appState } from '../../hooks/appState.svelte.js'
   import { globalState } from '../../../context/state.js'
   import {
@@ -55,6 +63,16 @@
   const isCustomBrush = $derived(brushType === 'custom')
   const modes = $derived(globalState.tool.current?.modes ?? {})
 
+  /**
+   * Builds SVG path data for the brush stamp preview button. Custom
+   * stamps normalize pixel coordinates to bounding-box-relative space
+   * so the preview is always centered regardless of where the stamp
+   * pixels sit in absolute 32×32 grid space. Standard stamps use size-
+   * derived extents directly. The 64×64 SVG viewport with 2px cells
+   * gives enough resolution to distinguish individual pixels clearly.
+   * @param {object|null} t - The tool object to read stamp data from.
+   * @returns {string|null} SVG path data string, or null if no pixels.
+   */
   function buildBrushStampSVGData(t) {
     if (!t) return null
     const bt = t.brushType ?? 'circle'
@@ -95,12 +113,27 @@
     buildBrushStampSVGData(globalState.tool.current),
   )
 
+  /**
+   * Writes a property to both the reactive tool proxy and the
+   * underlying tool singleton. Both must be kept in sync because the
+   * proxy drives Svelte re-renders while the singleton is what the
+   * drawing engine reads; divergence across a tool-switch cycle would
+   * cause the panel to show stale values after switching away and back.
+   * @param {string} key - The property name to set.
+   * @param {*} value - The value to assign.
+   */
   function setToolProp(key, value) {
     tool[key] = value
     const underlying = tools[globalState.tool.selectedName]
     if (underlying) underlying[key] = value
   }
 
+  /**
+   * Cycles through brush types: circle → square → custom (only if a
+   * custom stamp exists) → circle. Skipping directly to circle when no
+   * stamp is defined prevents the user from getting stuck in a custom
+   * mode with an empty stamp, which would render nothing.
+   */
   function handleBrushTypeClick() {
     const current = tool.brushType
     if (current === 'circle') {
@@ -115,10 +148,21 @@
     }
   }
 
+  /**
+   * Updates the brush size from the slider on each input event.
+   * @param {Event} e - The input event from the brush size range slider.
+   */
   function handleSizeChange(e) {
     setToolProp('brushSize', parseInt(e.target.value))
   }
 
+  /**
+   * Toggles a tool mode and, if build-up dither was just enabled,
+   * triggers an immediate density-map rebuild. The rebuild must happen
+   * after the toggle so the new mode state is already reflected when
+   * rebuildBuildUpDensityMap reads it.
+   * @param {string} modeKey - The mode key to toggle (e.g. 'eraser').
+   */
   function handleModeClick(modeKey) {
     toggleMode(modeKey)
     if (
@@ -129,6 +173,12 @@
     }
   }
 
+  /**
+   * Switches to the custom brush type and toggles the stamp editor
+   * dialog. Setting the brush type first ensures the editor always
+   * opens with the tool already in custom mode, so the stamp rendered
+   * in the brush preview updates immediately on apply.
+   */
   function handleStampBtnClick() {
     setToolProp('brushType', 'custom')
     if (globalState.ui.stampEditorOpen) {
@@ -138,6 +188,12 @@
     }
   }
 
+  /**
+   * Toggles the dither picker dialog in live-tool mode. The vector
+   * target is explicitly cleared on open so the picker operates on the
+   * live tool state rather than a previously targeted vector that may
+   * still be set from an earlier interaction.
+   */
   function handleDitherPreviewClick() {
     if (globalState.ui.ditherPickerOpen) {
       globalState.ui.ditherPickerOpen = false

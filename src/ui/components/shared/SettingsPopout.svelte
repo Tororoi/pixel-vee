@@ -1,4 +1,13 @@
 <script>
+  /**
+   * @component
+   * Floating popout panel rendered into document.body via a portal,
+   * positioned at a fixed (top, left) coordinate supplied by the
+   * parent. Closes automatically when the user clicks outside it, with
+   * optional class and selector exclusion lists for elements that should
+   * not trigger a close — e.g. the gear button that opened the popout,
+   * or linked dialogs that should coexist with it while open.
+   */
   import { onMount } from 'svelte'
   import { portal } from '../../../utils/portal.js'
 
@@ -14,6 +23,17 @@
 
   let ref = $state(null)
 
+  /**
+   * Attaches a document-level pointerdown listener for outside-click
+   * detection. pointerdown is used rather than click so the popout
+   * dismisses on the initial press instead of after a full click-
+   * release cycle, giving tighter perceived responsiveness. Class and
+   * selector exclusions let parents whitelist elements that should not
+   * trigger a close — the gear button that opened the popout needs
+   * `excludeClasses`, while sibling dialogs that should coexist while
+   * open need `excludeSelectors`. The listener is returned as a cleanup
+   * function so Svelte removes it when the component is destroyed.
+   */
   onMount(() => {
     function handleOutside(e) {
       if (!ref || ref.contains(e.target)) return

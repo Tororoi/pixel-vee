@@ -1,4 +1,12 @@
 <script>
+  /**
+   * @component
+   * Styled toggle checkbox wrapping a native checkbox input with a
+   * custom visual checkmark. All behaviour — checked state, change
+   * handler, tooltip, and accessible label — is controlled by the
+   * parent via props. The optional `labelId` prop lets external
+   * elements reference this label by id for aria relationships.
+   */
   let {
     id,
     labelId = undefined,

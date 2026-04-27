@@ -1,4 +1,12 @@
 <script>
+  /**
+   * @component
+   * Miniature canvas rendering a wireframe preview of a single vector's
+   * shape, scaled to fit within a padded viewport of the canvas
+   * dimensions. XOR compositing makes the stroke invert the background
+   * so the wireframe is readable against both the dark fill and the
+   * transparent canvas cutout without needing separate stroke colors.
+   */
   import { globalState } from '../../../context/state.js'
   import { canvas } from '../../../context/canvas.js'
   import { getAngle } from '../../../utils/trig.js'
@@ -7,6 +15,14 @@
 
   let ref = $state(null)
 
+  // Re-draw the thumbnail canvas whenever the vector or selection state
+  // changes. $effect is used instead of $derived because the output is
+  // a series of imperative 2D canvas draw calls — there is no reactive
+  // equivalent. The border padding ensures vector coordinates near the
+  // canvas edge are never clipped in the thumbnail viewport. XOR
+  // compositing inverts whatever is beneath the stroke so the wireframe
+  // is readable against both the dark background fill and the
+  // transparent canvas cutout without needing two stroke colors.
   $effect(() => {
     const cvs = ref
     if (!cvs) return

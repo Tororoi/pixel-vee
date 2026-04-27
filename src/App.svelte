@@ -1,4 +1,14 @@
 <script>
+  /**
+   * @component
+   * Root application component. Renders the NavBar outside the portal
+   * and portals all panels and dialogs into the `.page` element, which
+   * lives in the DOM alongside the canvas stack. Portaling into `.page`
+   * gives every panel the same positioning parent as the canvases, so
+   * fixed/absolute coordinates resolve consistently. The portaled
+   * subtree is withheld via `{#if pageEl}` until the target element is
+   * confirmed to exist in the DOM.
+   */
   import { onMount } from 'svelte'
   import { portal } from './utils/portal.js'
   import NavBar from './ui/components/NavBar.svelte'
@@ -17,6 +27,13 @@
   // the same positioning parent as the canvas stack.
   let pageEl = $state(null)
 
+  /**
+   * Resolves the portal target element after mount. `.page` cannot be
+   * queried during component initialization because the host DOM is not
+   * available before mount. Setting `pageEl` here unblocks the `{#if}`
+   * gate in the template, causing all panels and dialogs to render into
+   * the target on the first post-mount tick.
+   */
   onMount(() => {
     pageEl = document.querySelector('.page')
   })

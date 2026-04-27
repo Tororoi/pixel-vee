@@ -1,4 +1,14 @@
 <script>
+  /**
+   * @component
+   * Pixel editor for authoring a custom brush stamp. Provides a zoomed
+   * 32×32 canvas where the user can draw, erase, or drag-move pixels,
+   * plus mirror and clear operations. A 1:1 preview canvas shows the
+   * stamp at its true size. Applying commits the working pixel state to
+   * the global custom brush; cancelling discards unsaved edits. The
+   * editor's working state is a local Map that is loaded from the
+   * committed brush on each open and pushed back only on Apply.
+   */
   import { globalState } from '../../../context/state.js'
   import { swatches } from '../../../context/swatch.js'
   import {
@@ -30,10 +40,11 @@
     uiPaintMode === 'move' ? (isDragging ? 'grabbing' : 'grab') : 'crosshair',
   )
 
-  // Syncs the editor's working pixel state from the committed brush each
-  // time the dialog opens. The isOpen guard prevents the clear and
-  // repopulate from running on close, so editor state is only reset at
-  // the start of a new session, not discarded on dismiss.
+  // Reset the editor to the committed brush state each time the dialog
+  // opens. The guard runs only on open (not close) so unsaved edits are
+  // never discarded mid-session by a spurious isOpen false-then-true
+  // transition. uiPaintMode is reset to 'draw' so every session starts
+  // from a known mode rather than resuming whatever was active last time.
   $effect(() => {
     if (isOpen) {
       editorPixels.clear()

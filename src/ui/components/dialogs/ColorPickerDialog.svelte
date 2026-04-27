@@ -1,4 +1,15 @@
 <script>
+  /**
+   * @component
+   * Full-featured HSL/RGB/hex/alpha color picker dialog. Wraps an
+   * imperative Picker class that owns a canvas gradient and all channel
+   * inputs (R/G/B/A, H/S/L, hex, luminance). The Picker is constructed
+   * once on mount and reused across open/close cycles; `display:none`
+   * toggling rather than conditional rendering keeps the canvas context
+   * and all wired inputs alive so the Picker never needs to be rebuilt.
+   * Opened and closed externally via `events.js` through the registered
+   * Picker instance.
+   */
   import { onMount } from 'svelte'
   import { globalState } from '../../../context/state.js'
   import { swatches } from '../../../context/swatch.js'
@@ -16,7 +27,18 @@
 
   const isOpen = $derived(globalState.ui.colorPickerOpen)
 
+  /**
+   * Instantiate and wire the Picker once the canvas is in the DOM. Picker's
+   * constructor immediately queries channel inputs by ID (hueslider,
+   * alphaslider, r/g/b/a, h/s/l, hexcode, etc.), so the canvas bind must
+   * resolve before Picker is built. Seeding from swatches.primary.color
+   * sets the correct "old color" reference for whichever swatch was active
+   * at mount time. Registering via registerPicker lets events.js drive
+   * open/close/confirm without coupling to Svelte internals.
+   */
   onMount(() => {
+    // Defensive: bind:this resolves before onMount in the browser, but
+    // SSR or a failed binding would yield null here.
     if (canvasRef) {
       const p = new Picker(canvasRef, 250, 250, swatches.primary.color)
       p.build()
@@ -25,6 +47,10 @@
   })
 </script>
 
+<!-- display:none/flex rather than {#if isOpen} keeps the Picker's DOM event
+     listeners alive across open/close cycles. Conditional rendering would
+     destroy the canvas and all wired channel inputs on close, requiring a
+     full Picker rebuild on every open. -->
 <DialogBox
   title="Color Picker"
   class="picker-container v-drag h-drag free"
@@ -35,6 +61,9 @@
     <div class="ramps-header">
       Color Ramps
       <label class="collapse-btn">
+        <!-- Svelte's reactive style binding owns visibility here; Picker.js
+             reads colorRampsCollapsible only to query child swatches, it
+             does not toggle display itself. -->
         <input
           type="checkbox"
           class="collapse-checkbox"
@@ -67,9 +96,14 @@
   <div class="picker-interface">
     <div id="left">
       <div id="picker">
+        <!-- bind:this passes the element directly to the Picker constructor
+             so it can acquire the 2D context. The id="color-picker" is not
+             queried by Picker.js — it exists for CSS targeting only. -->
         <canvas bind:this={canvasRef} id="color-picker" width="250" height="250"
         ></canvas>
         <div class="slider-container">
+          <!-- Picker.js fetches these elements by id in its constructor;
+               renaming them breaks hue and alpha tracking. -->
           <input
             type="range"
             id="hueslider"
@@ -130,6 +164,11 @@
           </button>
         </div>
       </div>
+      <!-- All channel input ids (r, g, b, a, h, s, l, hexcode, luminance)
+           and container ids (rgba-container, hsl-container) are fetched by
+           Picker.js at construction time via getElementById. The HTML initial
+           values are placeholder seeds; Picker.update() overwrites them on
+           every open. -->
       <div id="rgbahsl">
         <div class="channel-container" id="rgba-container">
           <label

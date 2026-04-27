@@ -1,4 +1,17 @@
 <script>
+  /**
+   * @component
+   * Dialog for selecting and configuring dither patterns. Supports
+   * pattern selection from a 64-pattern grid, two-color mode, build-up
+   * dither (density accumulation across overlapping strokes), and a drag
+   * control for setting the pattern's pixel offset. Works in two modes:
+   * live-tool mode (mutations go to the active tool and both the reactive
+   * proxy and the underlying singleton) and vector-target mode (mutations
+   * go to a specific vector, triggering an immediate canvas re-render and
+   * an undo-history entry). Pattern and offset SVGs are injected via
+   * Svelte use-actions after mount and wired imperatively in `onMount`
+   * because they are outside Svelte's reactive template tree.
+   */
   import { onMount } from 'svelte'
   import { appState } from '../../hooks/appState.svelte.js'
   import { globalState } from '../../../context/state.js'
@@ -63,8 +76,11 @@
     (vectorTarget ?? globalState.tool.current)?.ditherOffsetY ?? 0,
   )
 
-  // Sync offset to SVG attributes for state-driven changes.
-  // Drag still calls applyDitherOffset directly for immediate feedback.
+  // Mirror reactive offset changes into the injected SVG DOM attributes.
+  // Drag bypasses this path and calls applyDitherOffset directly for
+  // immediate feedback without queuing a Svelte re-render per event.
+  // State-driven changes (undo, vector-target switch) need this path
+  // because they update reactive state rather than calling applyDitherOffset.
   $effect(() => {
     const x = ditherOffsetX
     const y = ditherOffsetY
@@ -80,7 +96,10 @@
     }
   })
 
-  // Sync SVG colors whenever swatches or two-color mode changes
+  // Re-colour the injected SVGs whenever swatches or two-color mode
+  // changes. Because the SVGs are injected via use-actions outside
+  // Svelte's template tree, attribute mutation must be done imperatively
+  // rather than through reactive bindings in the template.
   $effect(() => {
     if (!ref) return
     const primary = swatches.primary.color.color
@@ -94,19 +113,50 @@
       .forEach((p) => p.setAttribute('stroke', primary))
   })
 
+  /**
+   * Svelte use-action that injects a dither pattern SVG into a grid
+   * button. Called once per button at mount; Svelte passes the DOM node
+   * automatically. The SVG is generated at mount time rather than stored
+   * statically so that the swatch $effect can later update the embedded
+   * color attributes in-place without re-generating the whole grid.
+   * @param {HTMLElement} node - The element the action is attached to.
+   * @param {object} pattern - Dither pattern descriptor.
+   */
   function appendPatternSVG(node, pattern) {
     node.appendChild(createDitherPatternSVG(pattern))
   }
 
+  /**
+   * Svelte use-action that injects the dither offset drag-control SVG.
+   * Separated from appendPatternSVG because the control is a singleton
+   * UI element, not a repeated grid item, and its pointer-event handling
+   * is registered separately in onMount rather than inline on the node.
+   * @param {HTMLElement} node - The element the action is attached to.
+   */
   function appendOffsetControlSVG(node) {
     node.appendChild(createDitherOffsetControlSVG())
   }
 
+  /**
+   * Closes the dither picker dialog and clears any pending vector target.
+   * The vector target is cleared on close rather than on open so that
+   * derived state (pattern index, offsets) still resolves correctly
+   * during the same frame the dialog hides itself.
+   */
   function handleClose() {
     appState.ditherVectorTarget = null
     globalState.ui.ditherPickerOpen = false
   }
 
+  /**
+   * Toggles two-color dither mode for the active context — either a
+   * vector target or the live tool. When a vector target is present, only
+   * that vector is mutated and the canvas is re-rendered immediately.
+   * For live tools, both the reactive proxy (globalState.tool.current)
+   * and the underlying tool object (tools[toolName]) are updated so the
+   * change survives tool-switch cycles. The guard against non-dither tools
+   * prevents accidental state mutation on tools that ignore this flag.
+   */
   function handleTwoColorToggle() {
     const vt = appState.ditherVectorTarget
     if (vt) {
@@ -119,9 +169,19 @@
     const newTwoColor = !globalState.tool.current.modes.twoColor
     globalState.tool.current.modes.twoColor = newTwoColor
     const toolName = globalState.tool.selectedName
+    // Mirror to the underlying tool so the toggle survives a tool switch.
     if (tools[toolName]?.modes) tools[toolName].modes.twoColor = newTwoColor
   }
 
+  /**
+   * Toggles build-up dither mode on the brush tool. Build-up dither
+   * accumulates density across overlapping strokes, so enabling it
+   * triggers an immediate density-map rebuild from existing stroke data.
+   * Disabling clears both the map and the active slot so the next enable
+   * always starts from a blank state rather than resuming a partial
+   * accumulation. This is brush-only; the guard prevents the toggle from
+   * having any effect while a different tool is selected.
+   */
   function handleBuildUpToggle() {
     if (globalState.tool.current?.name !== 'brush') return
     const newBuildUp = !globalState.tool.current.modes.buildUpDither
@@ -130,23 +190,42 @@
     if (globalState.tool.current.modes.buildUpDither) {
       rebuildBuildUpDensityMap()
     } else {
+      // Null out the map and slot so re-enabling starts clean.
       brush._buildUpDensityMap = null
       globalState.tool.current.buildUpActiveStepSlot = null
       brush.buildUpActiveStepSlot = null
     }
   }
 
+  /**
+   * Resets the build-up density accumulation map to zero. The brush-name
+   * guard prevents this from corrupting state when called while a non-
+   * brush tool is active, since resetBuildUpDensityMap writes directly to
+   * the brush singleton regardless of which tool is currently selected.
+   */
   function handleBuildUpReset() {
     if (globalState.tool.current?.name !== 'brush') return
     resetBuildUpDensityMap()
   }
 
+  /**
+   * Switches the build-up mode between a named Bayer preset and the
+   * user's custom step list. Leaving custom mode stashes the current
+   * steps to brush._customBuildUpSteps so they are restored if the user
+   * switches back. Entering custom mode reloads that stash. Bayer presets
+   * replace the step list from BAYER_STEPS; an unrecognized mode falls
+   * back to the existing steps to avoid blanking the slot array. Both the
+   * reactive proxy and the brush singleton are kept in sync to prevent
+   * divergence across tool-switch cycles.
+   * @param {string} mode - One of 'custom' | '2x2' | '4x4' | '8x8'.
+   */
   function handleBuildUpModeClick(mode) {
     if (globalState.tool.current?.name !== 'brush') return
     if (
       globalState.tool.current.buildUpMode === 'custom' &&
       mode !== 'custom'
     ) {
+      // Stash custom steps before overwriting with a Bayer preset.
       brush._customBuildUpSteps = [...globalState.tool.current.buildUpSteps]
     }
     globalState.tool.current.buildUpMode = mode
@@ -164,12 +243,32 @@
     }
   }
 
+  /**
+   * Serializes a dither pattern into an HTML-safe SVG string for use in
+   * build-up step-slot buttons via {@html}. A fresh element is constructed
+   * on each render so offset and color attributes are always current;
+   * caching the string would require manual invalidation on every swatch
+   * or offset change.
+   * @param {object} pattern - Dither pattern descriptor.
+   * @param {number} [ox=0] - Horizontal pattern offset in pixels.
+   * @param {number} [oy=0] - Vertical pattern offset in pixels.
+   * @returns {string} Serialized SVG markup.
+   */
   function serializePatternSVG(pattern, ox = 0, oy = 0) {
     return new XMLSerializer().serializeToString(
       createDitherPatternSVG(pattern, ox, oy),
     )
   }
 
+  /**
+   * Selects or deselects a build-up step slot for pattern assignment.
+   * Clicking the active slot a second time deselects it (sets slot to
+   * null) so the user can dismiss selection without choosing a new
+   * pattern. Both the reactive proxy and the brush singleton track the
+   * slot so the dither grid's click handler can write the correct slot
+   * index without re-reading globalState.
+   * @param {number} slotIndex - Zero-based index of the step slot.
+   */
   function handleStepSlotClick(slotIndex) {
     if (!globalState.tool.current) return
     const newSlot =
@@ -180,9 +279,20 @@
     brush.buildUpActiveStepSlot = newSlot
   }
 
+  /**
+   * Registers the dialog container with the global dom registry and
+   * attaches the two primary imperative event listeners: pattern-grid
+   * click handling and offset-control pointer-drag handling. These are
+   * wired imperatively rather than declaratively in the template because
+   * the dither grid and offset control SVGs are injected by Svelte use-
+   * actions after mount and are not part of Svelte's reactive tree, so
+   * inline event directives would not reach them.
+   */
   onMount(() => {
     if (!ref) return
     const el = ref
+    // Expose this node so other components can call applyDitherOffset
+    // on the picker container directly via the dom registry.
     dom.ditherPickerContainer = el
 
     // Dither grid — pattern selection
@@ -205,6 +315,8 @@
       const toolName = globalState.tool.selectedName
       const underlying = tools[toolName]
       if (globalState.tool.current.buildUpActiveStepSlot != null) {
+        // A step slot is active: assign the pattern to that slot instead
+        // of changing the active pattern, then deselect the slot.
         const slot = globalState.tool.current.buildUpActiveStepSlot
         globalState.tool.current.buildUpSteps[slot] = patternIndex
         globalState.tool.current.buildUpActiveStepSlot = null
@@ -224,11 +336,16 @@
       if (!control) return
       const vt = appState.ditherVectorTarget
       if (!vt && !DITHER_TOOLS.includes(globalState.tool.current?.name)) return
+      // Pointer capture keeps move/up events on this element even when
+      // the cursor leaves the control during a fast drag.
       control.setPointerCapture(e.pointerId)
       const startX = e.clientX
       const startY = e.clientY
 
       if (vt) {
+        // The stored offset is relative to the layer position at record
+        // time. Account for any subsequent layer movement so dragging
+        // from the current visual position feels natural.
         const currentLayerX = vt.layer?.x ?? 0
         const currentLayerY = vt.layer?.y ?? 0
         const recordedLayerX = vt.recordedLayerX ?? currentLayerX
@@ -254,6 +371,8 @@
             (((startEffectiveY - Math.round((ev.clientY - startY) / 4)) % 8) +
               8) %
             8
+          // Convert canvas-space effective offset back to layer-relative
+          // stored offset before writing to the vector target.
           vt.ditherOffsetX =
             (((newEffectiveX - recordedLayerX + currentLayerX) % 8) + 8) % 8
           vt.ditherOffsetY =
@@ -301,7 +420,8 @@
             8
           lastOx = ox
           lastOy = oy
-          // Write only to underlying during drag — avoids triggering Svelte re-renders on every move
+          // Write only to underlying during drag — avoids triggering
+          // Svelte re-renders on every pointermove event.
           if (underlying) {
             underlying.ditherOffsetX = ox
             underlying.ditherOffsetY = oy

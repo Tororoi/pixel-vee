@@ -1,10 +1,23 @@
 <script>
+  /**
+   * @component
+   * Button that renders the active dither pattern for a given tool as
+   * an inline SVG preview. Reacts to changes in pattern index, offset,
+   * two-color mode, and primary/secondary swatch colors. A fresh SVG
+   * element is constructed on each derive so color attributes always
+   * reflect the current swatch values; serializing a stale cached
+   * element would produce incorrect colors after a swatch change.
+   */
   import { createDitherPatternSVG } from '../../../utils/ditherPreview.js'
   import { ditherPatterns } from '../../../context/ditherPatterns.js'
   import { swatches } from '../../../context/swatch.js'
 
   const { tool, onclick } = $props()
 
+  // A fresh SVG element is constructed on each derive so color
+  // attributes always reflect the current swatch values. Serializing a
+  // stale cached element would produce incorrect colors after a swatch
+  // change without re-generating the markup.
   const svgMarkup = $derived.by(() => {
     const pattern = ditherPatterns[tool.ditherPatternIndex ?? 63]
     const offsetX = tool.ditherOffsetX ?? 0

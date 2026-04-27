@@ -1,4 +1,12 @@
 <script>
+  /**
+   * @component
+   * Panel listing all valid (non-removed) vectors with controls to
+   * select, multi-select (Shift-click), hide, soft-delete, open the
+   * color picker, and open per-vector settings. Validity is determined
+   * against the current undo stack so vectors from future redo branches
+   * are filtered out. Disabled entirely while a pasted layer is active.
+   */
   import { globalState } from '../../../context/state.js'
   import { canvas } from '../../../context/canvas.js'
   import { vectorGui } from '../../../gui/vector.js'
@@ -23,6 +31,9 @@
   let settingsPos = $state({ top: 0, left: 0 })
 
   const isPasted = $derived(!!canvas.pastedLayer)
+  // Build a Set from the undo stack for O(1) membership tests inside
+  // isValidVector. A linear scan per vector against the full undo array
+  // would be O(n²) and the undo stack can be long.
   const visibleVectors = $derived.by(() => {
     const undoStackSet = new Set(globalState.timeline.undoStack)
     return Object.values(globalState.vector.all).filter((v) =>
@@ -32,6 +43,17 @@
   const currentVectorIndex = $derived(globalState.vector.currentIndex)
   const selectedIndices = $derived(globalState.vector.selectedIndices)
 
+  /**
+   * Handles selection of a vector row. Shift-click toggles multi-
+   * selection membership. A plain click while a multi-selection is
+   * active first deselects all before proceeding, so clicking a single
+   * item always results in exactly one active vector. When the clicked
+   * vector differs from the current one, the tool is switched to match
+   * the vector's recorded tool and the layer is switched to the vector's
+   * host layer, with toolbar button disabled states updated accordingly.
+   * @param {MouseEvent} e - The click or keydown event.
+   * @param {object} vector - The vector that was clicked.
+   */
   function handleVectorClick(e, vector) {
     if (isPasted) {
       e.preventDefault()
@@ -61,12 +83,27 @@
     updateActiveLayerState()
   }
 
+  /**
+   * Toggles a vector's visibility and re-renders. Propagation is
+   * stopped so the parent row click handler does not also fire and
+   * switch the active vector as a side effect of clicking the eye.
+   * @param {MouseEvent} e - The click event from the hide button.
+   * @param {object} vector - The vector to show or hide.
+   */
   function handleHideToggle(e, vector) {
     e.stopPropagation()
     vector.hidden = !vector.hidden
     renderCanvas(vector.layer, true)
   }
 
+  /**
+   * Soft-deletes a vector by marking it removed rather than splicing it
+   * from the array, preserving undo history. The GUI is reset if the
+   * removed vector was active to avoid leaving stale control handles on
+   * the canvas.
+   * @param {MouseEvent} e - The click event from the remove button.
+   * @param {object} vector - The vector to soft-delete.
+   */
   function handleRemove(e, vector) {
     e.stopPropagation()
     vector.removed = true
@@ -76,6 +113,13 @@
     globalState.clearRedoStack()
   }
 
+  /**
+   * Toggles the per-vector settings popout. A second click on the same
+   * vector's gear closes the popout. Position is computed from the gear
+   * button's bounding rect so it appears anchored to its right edge.
+   * @param {MouseEvent} e - The click event from the gear button.
+   * @param {object} vector - The vector whose settings to show.
+   */
   function handleGearClick(e, vector) {
     e.stopPropagation()
     if (settingsVector === vector) {
@@ -87,6 +131,13 @@
     }
   }
 
+  /**
+   * Opens the color picker bound to this vector's primary color slot
+   * directly from the row, without opening the full settings popout.
+   * Propagation is stopped so the row click handler does not also fire.
+   * @param {MouseEvent} e - The click event from the color swatch button.
+   * @param {object} vector - The vector whose color to edit.
+   */
   function handleColorClick(e, vector) {
     e.stopPropagation()
     initializeColorPicker({

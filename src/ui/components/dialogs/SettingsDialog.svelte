@@ -1,4 +1,14 @@
 <script>
+  /**
+   * @component
+   * Application settings dialog. Currently exposes display settings:
+   * tooltips, the pixel grid (toggle and subgrid spacing), and cursor
+   * preview. Grid state is mirrored into local `$state` variables
+   * because `vectorGui` is a plain object, not a reactive Svelte store,
+   * so its properties do not trigger re-renders on their own; the local
+   * mirrors allow the UI to reflect the current values and keep them in
+   * sync when written back.
+   */
   import { globalState } from '../../../context/state.js'
   import { vectorGui } from '../../../gui/vector.js'
   import DialogBox from '../DialogBox.svelte'
@@ -11,7 +21,12 @@
   let gridEnabled = $state(vectorGui.grid ?? false)
   let gridSpacing = $state(vectorGui.gridSpacing ?? 8)
 
-  // Sync from vectorGui when dialog opens
+  // Re-read grid state from vectorGui whenever the dialog opens. Because
+  // vectorGui is not reactive, its grid properties can drift from the
+  // local mirrors if another code path mutates them while the dialog is
+  // closed. Reading on open rather than continuously avoids constant
+  // polling; the dialog's own handlers are the only writers while it is
+  // visible, so the mirrors stay valid for the entire open session.
   $effect(() => {
     if (isOpen) {
       gridEnabled = vectorGui.grid ?? false
@@ -19,20 +34,43 @@
     }
   })
 
+  /**
+   * Closes the settings dialog.
+   */
   function handleClose() {
     globalState.ui.settingsOpen = false
   }
 
+  /**
+   * Toggles tooltip visibility globally. The setting lives in reactive
+   * state so all tooltip-reading components pick up the change without
+   * an explicit render call.
+   * @param {Event} e - The change event from the checkbox input.
+   */
   function handleTooltips(e) {
     globalState.ui.showTooltips = e.target.checked
   }
 
+  /**
+   * Toggles the pixel grid and re-renders the vector GUI immediately.
+   * The local mirror is updated first so the checkbox reflects the new
+   * value before the render call, preventing a one-frame flash where the
+   * toggle appears unchanged while the canvas already shows the grid.
+   * @param {Event} e - The change event from the checkbox input.
+   */
   function handleGrid(e) {
     gridEnabled = e.target.checked
     vectorGui.grid = gridEnabled
     vectorGui.render()
   }
 
+  /**
+   * Updates the subgrid spacing and re-renders. The value is clamped
+   * on input rather than on blur so the grid never renders at an invalid
+   * spacing even briefly; a blank field or out-of-range value always
+   * resolves to a valid pixel spacing before the render call.
+   * @param {Event} e - The input event from the spacing number field.
+   */
   function handleGridSpacingInput(e) {
     let val = parseInt(e.target.value)
     if (val < 1) val = 1
@@ -42,6 +80,12 @@
     vectorGui.render()
   }
 
+  /**
+   * Toggles the brush cursor preview on the vector GUI. Written directly
+   * to `vectorGui` rather than reactive state because the preview is read
+   * by the GUI renderer imperatively at render time, not via a binding.
+   * @param {Event} e - The change event from the checkbox input.
+   */
   function handleCursorPreview(e) {
     vectorGui.showCursorPreview = e.target.checked
   }
