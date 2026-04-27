@@ -18,11 +18,16 @@ let marchDashLen = 0
 let marchAnimId = null
 
 /**
- * Returns the marching-ants dash length in art pixels for the current zoom level.
- * Always 1/(2n) so two colors tile evenly into 1 art pixel at any zoom.
+ * Returns the marching-ants dash length in art pixels for the current zoom
+ * level. The length is always 1/(2n) so a dash pair (one white, one black)
+ * spans exactly one art pixel, keeping the pattern visually crisp at any
+ * zoom. The divisor grows with zoom so individual dashes never shrink below
+ * one screen pixel at very high zoom levels.
  * @returns {number} dash length in art pixels
  */
 function getMarchDashLen() {
+  // zoom/20 steps the divisor up at 20×, 40×, 60× etc., keeping each
+  // dash at least one screen pixel wide as zoom increases.
   return 1 / (2 * Math.max(1, Math.round(canvas.zoom / 20)))
 }
 
@@ -33,10 +38,14 @@ let cachedPathXOffset = null
 let cachedPathYOffset = null
 
 /**
- * Builds a Path2D from the maskSet edge segments.
- * Each edge is oriented clockwise so a single marchOffset animates all borders correctly.
- * @param {Set<number>} maskSet - packed (y<<16)|x pixel set
- * @returns {Path2D} path of all border segments
+ * Builds a Path2D from the exposed edges of every pixel in the mask set.
+ * Each edge is emitted as a directed segment wound clockwise so a single
+ * ascending marchOffset drives the animation in the same visual direction
+ * around every contiguous island of selected pixels. Coordinates are in
+ * canvas space (art pixels plus pan offset) so the path strokes correctly
+ * without an additional transform.
+ * @param {Set<number>} maskSet - packed (y<<16)|x pixel coordinates
+ * @returns {Path2D} path composed of all exposed border segments
  */
 function buildMaskPath(maskSet) {
   const path = new Path2D()
@@ -72,23 +81,34 @@ function buildMaskPath(maskSet) {
 let marchRenderer = renderSelectionCVS
 
 /**
- * Advances the march offset and re-renders via the active renderer each frame.
+ * Single animation frame callback for the marching-ants loop. The dash
+ * length is recalculated every frame so zoom changes take effect
+ * immediately. marchOffset advances at a fixed fraction of a dash per
+ * frame, wrapping to [0, 1) to keep arithmetic well-behaved.
  */
 function tickMarchingAnts() {
   marchDashLen = getMarchDashLen()
+  // 0.03125 = 1/32; advances by 1/32 of a dash per frame (~0.5 s/cycle
+  // at 60 fps), giving a smooth but clearly perceptible crawl speed.
   marchOffset = (marchOffset + marchDashLen * 0.03125) % 1
   marchAnimId = requestAnimationFrame(tickMarchingAnts)
   marchRenderer()
 }
 
 /**
- * Starts the marching ants animation loop.
- * Updates the renderer and starts the loop if not already running.
- * @param {Function} [renderer] - called each animation frame; defaults to renderSelectionCVS
+ * Starts the marching-ants animation loop, registering a renderer that
+ * will be called once per frame. If the loop is already running, a
+ * non-default renderer is still accepted so callers can redirect drawing
+ * to a different canvas without restarting the RAF chain — restarting
+ * would cause a one-frame flash and reset marchOffset mid-animation.
+ * @param {Function} [renderer] - called each animation frame;
+ *   defaults to renderSelectionCVS
  */
 export function startMarchingAnts(renderer = renderSelectionCVS) {
   if (marchAnimId !== null) {
-    // Loop already running — only update renderer if an explicit one is passed
+    // Loop already running — only update renderer if an explicit one is
+    // passed, so callers that just want "ensure it's running" don't
+    // silently replace a custom renderer set by another caller.
     if (renderer !== renderSelectionCVS) marchRenderer = renderer
     return
   }
@@ -97,7 +117,9 @@ export function startMarchingAnts(renderer = renderSelectionCVS) {
 }
 
 /**
- * Stops the marching ants animation loop.
+ * Cancels the marching-ants animation loop. Safe to call when the loop
+ * is not running; the null guard prevents a spurious cancelAnimationFrame
+ * call that would produce a console warning in some browsers.
  */
 export function stopMarchingAnts() {
   if (marchAnimId !== null) {
@@ -111,10 +133,14 @@ export function stopMarchingAnts() {
 //=============================================//
 
 /**
- * Strokes the current path (or a Path2D) with a black outer ring and white inner.
- * @param {CanvasRenderingContext2D} ctx - selection GUI canvas rendering context
- * @param {number} lineWidth - base line width
- * @param {Path2D|null} path - optional Path2D; uses current path if omitted
+ * Strokes the current path with a thick black outer ring and a narrower
+ * white inner ring, producing a high-contrast outline legible over any
+ * background color. The 4× outer / 2× inner width ratio leaves exactly
+ * one line-width of black visible on each side of the white stroke.
+ * @param {CanvasRenderingContext2D} ctx - selection GUI canvas context
+ * @param {number} lineWidth - base line width in canvas units
+ * @param {Path2D|null} [path] - explicit path to stroke; uses the
+ *   current path when omitted
  */
 function strokeBorderOnTop(ctx, lineWidth, path = null) {
   ctx.lineWidth = lineWidth * 4
@@ -126,11 +152,17 @@ function strokeBorderOnTop(ctx, lineWidth, path = null) {
 }
 
 /**
- * Strokes the marching-ants pill pattern: black outer ring + white inner.
- * Sets lineCap, dash, and offset before stroking; resets dash after.
- * @param {CanvasRenderingContext2D} ctx - selection GUI canvas rendering context
- * @param {number} lineWidth - line width in art pixels (default 1/canvas.zoom)
- * @param {Path2D|null} path - optional Path2D; uses current path if omitted
+ * Strokes the marching-ants pattern onto the given context path. Two
+ * passes are made with the same dash array: first white, then black
+ * phase-shifted by one dash length so black fills the gaps left by
+ * white. Animating marchOffset each frame makes the interleaved border
+ * appear to crawl. The dash array is cleared after both passes so
+ * subsequent drawing calls on the same context are unaffected.
+ * @param {CanvasRenderingContext2D} ctx - selection GUI canvas context
+ * @param {number} [lineWidth] - line width; defaults to one art pixel
+ *   at current zoom
+ * @param {Path2D|null} [path] - explicit path to stroke; uses the
+ *   current path when omitted
  */
 export function strokeMarchingAnts(
   ctx,
@@ -143,6 +175,7 @@ export function strokeMarchingAnts(
   ctx.lineDashOffset = marchOffset
   path ? ctx.stroke(path) : ctx.stroke()
   ctx.strokeStyle = 'black'
+  // Shift by one dash so black lands exactly in the white gaps.
   ctx.lineDashOffset = marchOffset + marchDashLen
   path ? ctx.stroke(path) : ctx.stroke()
   ctx.setLineDash([])
@@ -153,8 +186,13 @@ export function strokeMarchingAnts(
 //=============================================//
 
 /**
- * Renders the marching-ants contour outline for magic wand selections.
- * Uses a cached Path2D rebuilt only when the maskSet or canvas pan changes.
+ * Draws the animated marching-ants border around a magic-wand (mask-set)
+ * selection. The Path2D is rebuilt only when the maskSet reference
+ * changes or the canvas is panned, because path coordinates are in
+ * canvas space: a pan shifts all art pixels, so the cached path would
+ * stroke at the wrong position without a rebuild. Caching avoids
+ * iterating the full pixel set on every animation frame, which is
+ * expensive for large selections.
  */
 function renderMaskContourOutline() {
   const maskSet = globalState.selection.maskSet
@@ -178,8 +216,14 @@ function renderMaskContourOutline() {
 }
 
 /**
- * Renders the selection box outline and optional transform control points.
- * @param {boolean} drawPoints - if true, draw transform control points
+ * Draws the rectangular selection outline and, optionally, the eight
+ * transform-handle control points. Pasted layers and reference layers
+ * receive a static solid border rather than marching ants because they
+ * are not true pixel-mask selections — they behave as floating objects,
+ * and the solid border communicates that distinction to the user.
+ * Control-point radius is larger at low zoom so handles remain
+ * comfortably clickable when art pixels are small on screen.
+ * @param {boolean} drawPoints - when true, render the eight resize handles
  */
 export function renderSelectionBoxOutline(drawPoints) {
   const ctx = canvas.selectionGuiCTX
@@ -200,11 +244,15 @@ export function renderSelectionBoxOutline(drawPoints) {
     if (!canvas.pastedLayer && canvas.currentLayer.type !== 'reference') {
       strokeMarchingAnts(ctx)
     } else {
+      // Pasted/reference layers are floating objects, not pixel masks;
+      // use a static border to signal they move as a unit.
       strokeBorderOnTop(ctx, lineWidth)
     }
   }
 
   if (drawPoints) {
+    // Below zoom 4 the art pixels are tiny; grow handles proportionally
+    // so they stay at least 8 screen pixels across and remain clickable.
     const circleRadius = canvas.zoom <= 4 ? 8 / canvas.zoom : 1.5
     const pointsKeys = [
       { x: 'px1', y: 'py1' },
@@ -229,8 +277,14 @@ export function renderSelectionBoxOutline(drawPoints) {
 }
 
 /**
- * Renders the selection overlay and outline. Starts the marching ants animation
- * loop when a selection is active and stops it when nothing is selected.
+ * Main entry point for repainting the selection overlay canvas. Clears
+ * the entire canvas first, then renders a dim overlay, mask contour, or
+ * bounding-box outline depending on the active selection type. The
+ * marching-ants loop is started here when a raster selection becomes
+ * active and stopped when it clears, so animation lifetime is tied
+ * directly to selection visibility. The resizeOverlayActive guard
+ * suppresses the stop call and the dim overlay so the resize-handle
+ * canvas layer can operate independently on the same element.
  */
 export function renderSelectionCVS() {
   const ctx = canvas.selectionGuiCTX
@@ -256,6 +310,9 @@ export function renderSelectionCVS() {
     if (globalState.selection.maskSet) {
       renderMaskContourOutline()
     } else {
+      // Show resize handles for the select tool, move tool with a pasted
+      // layer, reference layers, and vector scale mode — these are the
+      // contexts where the user can resize or reposition the selection.
       const shouldRenderPoints =
         globalState.tool.current.name === 'select' ||
         (globalState.tool.current.name === 'move' && canvas.pastedLayer) ||
@@ -264,6 +321,8 @@ export function renderSelectionCVS() {
       renderSelectionBoxOutline(shouldRenderPoints)
     }
   } else if (!globalState.canvas.resizeOverlayActive) {
+    // Only stop the loop when not in resize mode; the canvas clear at
+    // the top still runs and is needed during resize.
     stopMarchingAnts()
   }
 }
@@ -273,14 +332,25 @@ export function renderSelectionCVS() {
 //=============================================//
 
 /**
- * Renders transform control points for the selection boundary box.
- * @param {object} boundaryBox - The boundary box of the selection
- * @param {Array} pointsKeys - The keys of the control points
- * @param {number} radius - (Float)
- * @param {boolean} modify - if true, check for collision with cursor and modify radius
- * @param {number} offset - (Integer)
- * @param {object} vectorAction - The vector action to be rendered (NOTE: Not certain if ever needed for this function)
- * @param {CanvasRenderingContext2D} [ctx] - rendering context; defaults to selectionGuiCTX
+ * Draws the eight resize handles around the selection bounding box and
+ * registers a px9 interior collision zone so the pointer cursor switches
+ * to "move" when hovering anywhere inside the box. The interior check
+ * runs before the handle loop so px9 is always registered even when the
+ * cursor is not near any edge handle. Handle positions are derived from
+ * the box corners and axis midpoints; pointsKeys controls which subset
+ * of the eight positions are drawn and their collision key names.
+ * @param {object} boundaryBox - bounding box with xMin/yMin/xMax/yMax
+ * @param {Array} pointsKeys - ordered {x, y} key-name pairs mapping to
+ *   the eight handle positions
+ * @param {number} radius - base hit-test and draw radius in art pixels
+ * @param {boolean} [modify] - when true, run cursor collision detection
+ *   and enlarge the radius on hit
+ * @param {number} [offset] - sub-pixel offset applied to each handle
+ *   center for crisp rendering
+ * @param {object|null} [vectorAction] - optional vector action whose
+ *   layer offset is added to all handle coordinates
+ * @param {CanvasRenderingContext2D} [ctx] - rendering context; defaults
+ *   to selectionGuiCTX
  */
 export function drawSelectControlPoints(
   boundaryBox,
@@ -295,6 +365,8 @@ export function drawSelectControlPoints(
   const midX = xMin + (xMax - xMin) / 2
   const midY = yMin + (yMax - yMin) / 2
 
+  // Register the interior as the px9 "move" zone before processing edge
+  // handles so the zone exists even when no edge handle is hovered.
   if (
     globalState.cursor.x >= xMin &&
     globalState.cursor.x < xMax &&
@@ -315,6 +387,8 @@ export function drawSelectControlPoints(
     { x: xMin, y: midY }, // Left-center
   ]
   for (const keys of pointsKeys) {
+    // indexOf maps each keys entry to its position in points — the two
+    // arrays are intentionally parallel.
     const point = points[pointsKeys.indexOf(keys)]
     handleSelectCollisionAndDraw(
       keys,
@@ -332,14 +406,23 @@ export function drawSelectControlPoints(
 }
 
 /**
- * TODO: (Low Priority) move drawing logic to separate function so modify param doesn't need to be used
- * @param {object} keys - The keys of the control point
- * @param {object} point - The control point
- * @param {number} radius - (Float)
- * @param {boolean} modify - if true, check for collision with cursor and modify radius
- * @param {number} offset - (Float)
- * @param {object} vectorAction - The vector action to be rendered
- * @param {object} boundaryBox - The boundary box used for edge-strip collision
+ * Runs cursor-collision detection for one control-point handle and draws
+ * it. Corner handles (px1/3/5/7) render as squares; edge handles
+ * (px2/4/6/8) render as 45°-rotated diamonds to visually communicate
+ * their single-axis resize direction. Edge handles also receive a
+ * full-axis hit strip so users can grab them anywhere along the edge
+ * rather than only on the small diamond center. Touch mode doubles the
+ * radius because finger targets require a larger hit area than a mouse
+ * cursor. When a handle is the currently selected (dragged) point and no
+ * vectorAction override is present, collision is forced on to keep the
+ * cursor style correct during drags that wander off the handle center.
+ * @param {object} keys - {x, y} key names identifying this control point
+ * @param {object} point - {x, y} art-pixel coordinates of the handle
+ * @param {number} radius - base radius in art pixels
+ * @param {boolean} modify - when true, run collision detection
+ * @param {number} offset - sub-pixel centering offset
+ * @param {object|null} vectorAction - optional layer-offset source
+ * @param {object} boundaryBox - bounding box for edge-strip hit bounds
  * @param {CanvasRenderingContext2D} ctx - rendering context to draw onto
  */
 function handleSelectCollisionAndDraw(
@@ -352,6 +435,7 @@ function handleSelectCollisionAndDraw(
   boundaryBox,
   ctx,
 ) {
+  // Touch targets need twice the radius to be reliably tappable.
   let r = globalState.tool.touch ? radius * 2 : radius
   const xOffset = vectorAction ? vectorAction.layer.x : 0
   const yOffset = vectorAction ? vectorAction.layer.y : 0
@@ -387,10 +471,14 @@ function handleSelectCollisionAndDraw(
       r = radius * 2.125
       vectorGui.setCollision(keys)
     } else if (vectorGui.selectedPoint.xKey === keys.x && !vectorAction) {
+      // Force collision active for the dragged point so the cursor does
+      // not flicker back to the default style mid-drag.
       vectorGui.setCollision(keys)
     }
   }
 
+  // Cap line-width growth at zoom 8 to prevent handles from becoming
+  // visually overwhelming at very high zoom levels.
   const lw = canvas.zoom <= 8 ? 1 / canvas.zoom : 1 / 8
   const cx = canvas.xOffset + xOffset + point.x - offset + 0.5
   const cy = canvas.yOffset + yOffset + point.y - offset + 0.5
@@ -405,7 +493,8 @@ function handleSelectCollisionAndDraw(
     ctx.fillStyle = 'white'
     ctx.fill()
   } else if (['px2', 'px4', 'px6', 'px8'].includes(keys.x)) {
-    // Side points: diamond
+    // Side points: diamond — scale r by √2 so the tip-to-center distance
+    // matches the corner handle's half-width before the 45° rotation.
     r *= Math.sqrt(2)
     ctx.beginPath()
     ctx.moveTo(cx - r, cy)
@@ -422,7 +511,13 @@ function handleSelectCollisionAndDraw(
 }
 
 /**
- * Sets the CSS cursor style based on which selection control point is being hovered.
+ * Updates the vector-GUI canvas CSS cursor to reflect which selection
+ * handle the pointer is currently over. The cursor reverts to the active
+ * tool's default when no collision is present. Diagonal corners map to
+ * nwse/nesw to match their physical orientation on screen; edge handles
+ * use single-axis ns/ew cursors. The interior zone (px9) shows "move"
+ * because dragging from inside the box translates the selection rather
+ * than resizing it.
  */
 function setSelectionCursorStyle() {
   if (!vectorGui.selectedCollisionPresent) {

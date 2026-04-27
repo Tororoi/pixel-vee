@@ -8,10 +8,18 @@ import {
 import { getAngle } from '../utils/trig.js'
 
 /**
- *
- * @param {object} currentVector - The vector action to base other vector handling on
- * @param {boolean} saveVectorProperties - if true, save the properties of the vector
- * quadCurve must run this twice. Two sets of linked vectors should be maintained, one for p1 and one for p2 of the quad curve.
+ * Propagates the current drag delta to every vector recorded in
+ * vectorGui.linkedVectors, keeping linked endpoints synchronized during
+ * a pointer interaction. Pass saveVectorProperties=true at pointerdown to
+ * snapshot each linked vector's state; subsequent pointermove calls use
+ * those snapshots to compute deltas. Any linked vector without a saved
+ * snapshot is skipped to prevent mid-drag linkage from corrupting state.
+ * QuadCurve must call this twice — once per endpoint — because each
+ * endpoint maintains its own independent set of linked vectors.
+ * @param {object} currentVector - The vector action to base other vector
+ *   handling on
+ * @param {boolean} saveVectorProperties - When true, snapshot each
+ *   linked vector's current properties for delta calculations
  */
 export function updateLinkedVectors(
   currentVector,
@@ -20,7 +28,8 @@ export function updateLinkedVectors(
   for (const [linkedVectorIndex, linkedPoints] of Object.entries(
     vectorGui.linkedVectors,
   )) {
-    //Values are 0 across the board for p1 or p2 as selected point
+    // Endpoint deltas are zero for p1/p2; linked vectors at those points
+    // update by absolute cursor position, not by a handle offset.
     const { currentDeltaX, currentDeltaY, currentDeltaAngle } =
       calculateCurrentVectorDeltas(
         currentVector,
@@ -34,7 +43,8 @@ export function updateLinkedVectors(
     let y = globalState.cursor.y - globalState.canvas.cropOffsetY
     const linkedVector = globalState.vector.all[linkedVectorIndex]
 
-    //As long as linked vector is quadCurve, must propogate linking to connected vectors
+    // If the linked vector is a quadCurve, its own linked vectors must
+    // also be propagated — that responsibility falls to a separate call.
 
     if (saveVectorProperties) {
       globalState.vector.savedProperties[linkedVectorIndex] = {
@@ -42,7 +52,7 @@ export function updateLinkedVectors(
         modes: { ...linkedVector.modes },
       }
     } else if (!globalState.vector.savedProperties[linkedVectorIndex]) {
-      //prevent linking vectors during pointermove
+      // Without a pointerdown snapshot, deltas cannot be computed safely.
       continue
     }
     const savedProperties =
@@ -63,13 +73,18 @@ export function updateLinkedVectors(
 }
 
 /**
- * Helper function to update vector properties based on the control handle selection.
+ * Translates a target control point by the same canvas displacement as the
+ * point currently being dragged, using the pre-drag offset stored in
+ * savedProperties to keep the two points rigidly coupled. Writing directly
+ * to globalState.vector.properties before calling updateVectorProperties
+ * keeps the live property state consistent with the committed vector state.
  * @param {object} currentVector - The vector action to update
- * @param {number} x - The new x coordinate
- * @param {number} y - The new y coordinate
- * @param {object} savedProperties - Previously saved properties of the vector
- * @param {number} currentPointNumber - The number of the currently selected control point
- * @param {number} targetPointNumber - The number of the target control point to update
+ * @param {number} x - The new x coordinate of the dragged point
+ * @param {number} y - The new y coordinate of the dragged point
+ * @param {object} savedProperties - Pre-drag snapshot of the vector's
+ *   properties
+ * @param {number} currentPointNumber - Control point number being dragged
+ * @param {number} targetPointNumber - Control point number to keep in sync
  */
 function updateVectorControl(
   currentVector,
@@ -97,9 +112,15 @@ function updateVectorControl(
 }
 
 /**
+ * Determines which target control point must move in tandem with the
+ * currently dragged endpoint when the "hold" constraint is active, then
+ * delegates to updateVectorControl. The mapping differs by curve type:
+ * cubicCurve links p1→p3 and p2→p4 (p3/p4 are already at the cursor so
+ * they map to themselves); quadCurve links both endpoints to the shared p3
+ * handle; lines link p1↔p2 so the opposite endpoint tracks the drag.
  * @param {object} currentVector - The vector action to update
- * @param {number} x - The x coordinate of new endpoint
- * @param {number} y - The y coordinate of new endpoint
+ * @param {number} x - The new x coordinate of the dragged endpoint
+ * @param {number} y - The new y coordinate of the dragged endpoint
  */
 export function updateLockedCurrentVectorControlHandle(currentVector, x, y) {
   const savedProperties =
@@ -107,7 +128,7 @@ export function updateLockedCurrentVectorControlHandle(currentVector, x, y) {
   let currentPointNumber, targetPointNumber
   if (savedProperties.modes.cubicCurve) {
     currentPointNumber = parseInt(vectorGui.selectedPoint.xKey[2])
-    //point 1 holds point 3, point 2 holds point 4, point 3 and 4 don't hold any points
+    // p3 and p4 are handle points; dragging them directly maps to themselves.
     switch (currentPointNumber) {
       case 1:
         targetPointNumber = 3
@@ -120,11 +141,11 @@ export function updateLockedCurrentVectorControlHandle(currentVector, x, y) {
     }
   } else if (savedProperties.modes.quadCurve) {
     currentPointNumber = parseInt(vectorGui.selectedPoint.xKey[2])
-    //both point 1 and 2 hold point 3
+    // quadCurve has one shared handle (p3) for both endpoints.
     targetPointNumber = 3
   } else {
     currentPointNumber = parseInt(vectorGui.selectedPoint.xKey[2])
-    //point 1 holds point 2, point 2 holds point 1
+    // For lines, dragging one endpoint keeps the other endpoint locked.
     targetPointNumber = currentPointNumber === 1 ? 2 : 1
   }
   updateVectorControl(
@@ -137,14 +158,19 @@ export function updateLockedCurrentVectorControlHandle(currentVector, x, y) {
   )
 }
 
-// Stores metadata for curves linked to the current line's endpoints, populated at pointerdown.
+// Stores metadata for curves linked to the current line's endpoints,
+// populated at pointerdown.
 let lineLinkedCurvesInfo = []
 
 /**
- * Returns the canvas-absolute coordinates of the chainable endpoint under the
- * cursor, or null if no valid chain target is colliding.
- * Checks the currently selected vector's endpoint first, then any other vector.
- * @returns {{ x: number, y: number } | null} Canvas-absolute coordinates or null
+ * Returns the canvas-absolute coordinates of the chainable endpoint under
+ * the cursor, or null if no valid chain target is colliding. Checks the
+ * currently selected vector's collided endpoint first (Case A), then falls
+ * back to any other colliding vector (Case B). Only curve-tool vectors
+ * qualify; lines and fills lack the bezier endpoint structure that chaining
+ * depends on.
+ * @returns {{ x: number, y: number } | null} Canvas-absolute coordinates
+ *   or null
  */
 export function getChainStartPoint() {
   const endpointKeys = ['px1', 'px2']
@@ -189,9 +215,15 @@ export function getChainStartPoint() {
 }
 
 /**
- * Snap the selected endpoint to a colliding vector's nearest control point and
- * optionally align or equalize the tangent handle's angle and length.
- * Only called from adjustVectorSteps pointerup when the snapping conditions are met.
+ * Snaps the selected endpoint to the collided vector's nearest control point
+ * and, when align or equal options are active, adjusts the tangent handle
+ * for C1 continuity. Fill and ellipse tools are excluded because they lack
+ * the bezier handle structure this function relies on. For a line snapping
+ * onto a curve the collided curve's handle is updated (lines have no bezier
+ * handle of their own), after which the function returns early to skip the
+ * curve-on-curve alignment path. The +Math.PI applied to the angle mirrors
+ * the reference direction, producing the opposing tangent needed for a
+ * smooth join.
  * @param {object} currentVector - The current vector being adjusted
  */
 export function snapEndpointToCollidedVector(currentVector) {
@@ -219,6 +251,8 @@ export function snapEndpointToCollidedVector(currentVector) {
     vectorGui.selectedPoint.yKey,
   )
   if (globalState.tool.current.options.hold?.active) {
+    // hold mode locks the handle relative to the endpoint; apply it before
+    // align/equal so the handle starts from the correct snapped position.
     updateLockedCurrentVectorControlHandle(
       currentVector,
       snappedToX,
@@ -235,7 +269,8 @@ export function snapEndpointToCollidedVector(currentVector) {
   ) {
     return
   }
-  // Line-to-curve snap: update the collided curve's handle instead of the current (line) vector's
+  // Line-to-curve snap: update the collided curve's handle instead of
+  // the current (line) vector's
   if (globalState.tool.current.modes.line) {
     if (
       collidedVector.modes.line ||
@@ -275,9 +310,11 @@ export function snapEndpointToCollidedVector(currentVector) {
     const existingHDY =
       collidedVector.vectorProperties[collidedHandleYKey] -
       collidedVector.vectorProperties[collidedEpYKey]
+    // equal borrows the line's length so handle reach matches the segment.
     const handleLength = globalState.tool.current.options.equal?.active
       ? lineLength
       : Math.sqrt(existingHDX ** 2 + existingHDY ** 2)
+    // +π mirrors the direction so the handle points away for a smooth join.
     const handleAngle = globalState.tool.current.options.align?.active
       ? getAngle(lineDeltaX, lineDeltaY) + Math.PI
       : getAngle(existingHDX, existingHDY)
@@ -326,7 +363,7 @@ export function snapEndpointToCollidedVector(currentVector) {
   const selectedHandleDeltaY =
     globalState.vector.properties[selectedHandleYKey] -
     globalState.vector.properties[selectedEndpointYKey]
-  // Compute the collided vector's handle delta (relative to its snapped endpoint)
+  // Compute collided vector's handle delta relative to its snapped endpoint
   let collidedHandleDeltaX, collidedHandleDeltaY
   if (vectorGui.otherCollidedKeys.xKey === 'px1') {
     collidedHandleDeltaX =
@@ -350,11 +387,11 @@ export function snapEndpointToCollidedVector(currentVector) {
         collidedVector.vectorProperties.py2
     }
   }
-  // Handle length: equal mode uses collided handle length, otherwise maintain current
+  // equal: borrow the collided handle's magnitude for matching reach.
   const selectedHandleLength = globalState.tool.current.options.equal?.active
     ? Math.sqrt(collidedHandleDeltaX ** 2 + collidedHandleDeltaY ** 2)
     : Math.sqrt(currentHandleDeltaX ** 2 + currentHandleDeltaY ** 2)
-  // Handle angle: align takes priority over equal
+  // align takes priority over equal: only the angle is overridden.
   const newSelectedAngle = globalState.tool.current.options.align?.active
     ? getAngle(collidedHandleDeltaX, collidedHandleDeltaY) + Math.PI
     : getAngle(selectedHandleDeltaX, selectedHandleDeltaY)
@@ -380,9 +417,14 @@ export function snapEndpointToCollidedVector(currentVector) {
 }
 
 /**
- * At pointerdown for a line vector with align/equal active, collect all curves whose
- * endpoints coincide with the line's endpoints. Saves their properties for undo/redo
- * and populates lineLinkedCurvesInfo for use in updateLineLinkedCurveHandles.
+ * At pointerdown for a line vector, collects every curve whose endpoint
+ * coincides with either of the line's endpoints, then snapshots those
+ * curves' properties for undo/redo. The first pass covers curves at the
+ * selected endpoint by reading from the already-computed
+ * vectorGui.linkedVectors; the second pass covers the other endpoint via a
+ * spatial scan because linkedVectors only tracks the selected endpoint.
+ * Early-exits when neither align nor equal is active, since handle
+ * adjustments are only needed for those modes.
  * @param {object} currentVector - The current line vector being adjusted
  */
 export function initLineLinkedCurvesInfo(currentVector) {
@@ -434,6 +476,7 @@ export function initLineLinkedCurvesInfo(currentVector) {
       curveHandleYKey,
     })
     if (!globalState.vector.savedProperties[linkedVector.index]) {
+      // Avoid overwriting a snapshot already captured earlier in this loop.
       globalState.vector.savedProperties[linkedVector.index] = {
         ...linkedVector.vectorProperties,
         modes: { ...linkedVector.modes },
@@ -470,6 +513,7 @@ export function initLineLinkedCurvesInfo(currentVector) {
           curveHandleYKey,
         })
         if (!globalState.vector.savedProperties[vector.index]) {
+          // Same guard as the first pass: preserve any earlier snapshot.
           globalState.vector.savedProperties[vector.index] = {
             ...vector.vectorProperties,
             modes: { ...vector.modes },
@@ -482,10 +526,15 @@ export function initLineLinkedCurvesInfo(currentVector) {
 }
 
 /**
- * Updates control handles of curves linked to the current line's endpoints.
- * Align adjusts the handle angle to be opposite the line direction.
- * Equal adjusts the handle length to match the line length (only when the opposite
- * endpoint from the curve's junction is selected).
+ * Updates the tangent handles of curves linked to the dragged line's
+ * endpoints on every pointermove. Align orients each handle in the
+ * direction opposite the line at the junction for C1 continuity; equal
+ * scales the handle length to match the current line length, but only when
+ * dragging the endpoint opposite the curve's junction (dragging the
+ * junction itself relocates the attachment without changing line length, so
+ * applying equal there would produce incorrect scaling). When hold is
+ * active, curves whose junction is not the selected endpoint are skipped
+ * because their junction position is fixed.
  * @param {object} currentVector - The current line vector being adjusted
  */
 export function updateLineLinkedCurveHandles(currentVector) {
@@ -508,7 +557,8 @@ export function updateLineLinkedCurveHandles(currentVector) {
   } of lineLinkedCurvesInfo) {
     const savedProps = globalState.vector.savedProperties[linkedVector.index]
     if (!savedProps) continue
-    // When hold is active, moving the opposite endpoint should not affect the linked curve
+    // hold locks the junction; dragging the far endpoint translates the
+    // line without changing tangent, so skip handle updates for those curves.
     if (
       globalState.tool.current.options.hold?.active &&
       selectedXKey !== lineJunctionXKey
@@ -517,10 +567,11 @@ export function updateLineLinkedCurveHandles(currentVector) {
     }
     const junctionX = lineJunctionXKey === 'px1' ? px1X : px2X
     const junctionY = lineJunctionXKey === 'px1' ? px1Y : px2Y
-    // Line direction from the junction toward the other endpoint
+    // lineDeltaX is always px2-px1; negate for px2 so dirDelta always
+    // points away from the junction toward the other endpoint.
     const dirDeltaX = lineJunctionXKey === 'px1' ? lineDeltaX : -lineDeltaX
     const dirDeltaY = lineJunctionXKey === 'px1' ? lineDeltaY : -lineDeltaY
-    // Equal applies only when the selected endpoint is the opposite of the junction
+    // equal scales by line length only when the opposite endpoint is selected
     const applyEqual =
       globalState.tool.current.options.equal?.active &&
       selectedXKey !== lineJunctionXKey
@@ -544,11 +595,16 @@ export function updateLineLinkedCurveHandles(currentVector) {
 }
 
 /**
- * For efficient rendering, create an array of indexes of vectors that need to be re-rendered.
- * Other actions will be saved to between canvases to avoid multiple ununecessary renders in redrawTimelineActions
- * Can't simply save images and draw them for the betweenCvs because this will ignore actions using erase or inject modes.
- * @param {object} currentVector - The vector action to base the active indexes on
- * @param {object} vectorsSavedProperties - will have at least one entry, corresponding to currentVector
+ * Builds the minimal list of action indexes that must be actively re-rendered
+ * when a vector property changes. Starting from the earliest affected action
+ * ensures pixel-level ordering is preserved. Fill, cut, eraser, and inject
+ * actions on the same layer are always included even when they are not
+ * themselves being edited, because those operations blend pixel data in ways
+ * that cannot be safely flattened onto the betweenCvs cache canvas.
+ * @param {object} currentVector - The vector action to base the active
+ *   indexes on
+ * @param {object} vectorsSavedProperties - Saved properties for all vectors
+ *   being modified; must contain at least the entry for currentVector
  * @returns {Array} activeIndexes
  */
 export function createActiveIndexesForRender(

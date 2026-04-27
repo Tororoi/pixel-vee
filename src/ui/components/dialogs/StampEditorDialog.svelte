@@ -30,18 +30,29 @@
     uiPaintMode === 'move' ? (isDragging ? 'grabbing' : 'grab') : 'crosshair',
   )
 
+  // Syncs the editor's working pixel state from the committed brush each
+  // time the dialog opens. The isOpen guard prevents the clear and
+  // repopulate from running on close, so editor state is only reset at
+  // the start of a new session, not discarded on dismiss.
   $effect(() => {
     if (isOpen) {
       editorPixels.clear()
       for (const [key, color] of customBrushData.colorMap) {
         editorPixels.set(key, color)
       }
+      // Reset to draw mode so every session starts from a known state.
       uiPaintMode = 'draw'
       renderEditorCanvas()
       renderPreviewCanvas()
     }
   })
 
+  /**
+   * Draws the current pixel state onto the large zoomed editor canvas.
+   * Grid lines are rendered after pixels so they remain visible on top
+   * of any filled cell, giving the user a clear cell boundary even when
+   * a pixel colour fills to the edge of its cell.
+   */
   function renderEditorCanvas() {
     const canvas = editorCanvasRef
     if (!canvas) return
@@ -54,6 +65,7 @@
       ctx.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE)
     }
 
+    // Draw grid on top so lines are never obscured by pixel fills.
     ctx.strokeStyle = GRID_COLOR
     ctx.lineWidth = 0.5
     for (let i = 0; i <= STAMP_SIZE; i++) {
@@ -68,6 +80,12 @@
     }
   }
 
+  /**
+   * Renders the stamp at its true 1-px-per-cell scale in the preview
+   * canvas. The preview canvas is sized to STAMP_SIZE × STAMP_SIZE so
+   * each fillRect(x, y, 1, 1) call maps one logical pixel of the stamp
+   * to exactly one canvas pixel, producing a 1:1 preview.
+   */
   function renderPreviewCanvas() {
     const canvas = previewCanvasRef
     if (!canvas) return
@@ -80,6 +98,16 @@
     }
   }
 
+  /**
+   * Converts a pointer event's client position to canvas-space pixel
+   * coordinates, accounting for any CSS scaling applied to the element.
+   * getBoundingClientRect reflects the rendered display size; dividing
+   * by it normalises the offset back to the canvas's intrinsic
+   * resolution so coordinate math in callers can use canvas pixels
+   * directly.
+   * @param {PointerEvent} e - The pointer event to convert.
+   * @returns {{ ex: number, ey: number }} Canvas-space x/y coordinates.
+   */
   function getEditorCoords(e) {
     const canvas = editorCanvasRef
     const rect = canvas.getBoundingClientRect()
@@ -91,6 +119,17 @@
     }
   }
 
+  /**
+   * Paints or erases the grid cell under canvas point (ex, ey). The
+   * bounds check is a hard guard because pointer capture keeps delivering
+   * events even after the pointer leaves the canvas element, making
+   * out-of-range coordinates possible during a drag. The primary swatch
+   * colour is sampled at call time so a mid-stroke colour change applies
+   * to subsequent cells immediately.
+   * @param {number} ex - Canvas-space x coordinate.
+   * @param {number} ey - Canvas-space y coordinate.
+   * @param {'draw'|'erase'} mode - Whether to paint or remove the cell.
+   */
   function paintCell(ex, ey, mode) {
     const x = Math.floor(ex / CELL_SIZE)
     const y = Math.floor(ey / CELL_SIZE)
@@ -105,11 +144,23 @@
     renderPreviewCanvas()
   }
 
+  /**
+   * Shifts every painted pixel by (dx, dy) cells with toroidal wrapping
+   * so pixels that exit one edge reappear on the opposite side. A fresh
+   * accumulator Map is built before the source is cleared to prevent
+   * overwrite collisions: two source pixels could map to the same target
+   * key, and clearing the original first would lose pixels not yet
+   * processed in the loop.
+   * @param {number} dx - Horizontal shift in cells (negative = left).
+   * @param {number} dy - Vertical shift in cells (negative = up).
+   */
   function movePixels(dx, dy) {
     if (dx === 0 && dy === 0) return
     const moved = new Map()
     for (const [key, color] of editorPixels) {
       const [x, y] = key.split(',').map(Number)
+      // Double-modulo keeps the result non-negative when dx/dy is
+      // negative, since JS's % operator can return negative remainders.
       const nx = (((x + dx) % STAMP_SIZE) + STAMP_SIZE) % STAMP_SIZE
       const ny = (((y + dy) % STAMP_SIZE) + STAMP_SIZE) % STAMP_SIZE
       moved.set(`${nx},${ny}`, color)
@@ -122,6 +173,13 @@
     renderPreviewCanvas()
   }
 
+  /**
+   * Reflects all pixels horizontally around the vertical centre axis.
+   * A separate accumulator Map is built before the source is cleared to
+   * prevent mid-iteration aliasing: if two source pixels collide on the
+   * same reflected key, the accumulator lets JS resolve the last-write-
+   * wins conflict cleanly before any key is removed from the live map.
+   */
   function mirrorH() {
     const mirrored = new Map()
     for (const [key, color] of editorPixels) {
@@ -136,6 +194,12 @@
     renderPreviewCanvas()
   }
 
+  /**
+   * Reflects all pixels vertically around the horizontal centre axis.
+   * Uses the same separate-accumulator pattern as mirrorH to avoid
+   * mid-iteration aliasing when two source pixels map to the same
+   * reflected key.
+   */
   function mirrorV() {
     const mirrored = new Map()
     for (const [key, color] of editorPixels) {
@@ -150,6 +214,13 @@
     renderPreviewCanvas()
   }
 
+  /**
+   * Commits the editor's working pixel state to the global custom brush
+   * and closes the dialog. All three brush data structures — the pixels
+   * array, the bitpacked pixelSet, and the colorMap — are rebuilt from
+   * scratch rather than diffed to guarantee they stay in sync even if
+   * the prior committed state was inconsistent.
+   */
   function applyStamp() {
     customBrushStamp.pixels = []
     customBrushData.pixelSet = new Set()
@@ -157,6 +228,8 @@
     for (const [key, color] of editorPixels) {
       const [x, y] = key.split(',').map(Number)
       customBrushStamp.pixels.push({ x, y })
+      // Bitpack coordinates into a single integer for fast membership
+      // checks: y occupies the upper 16 bits, x the lower 16.
       customBrushData.pixelSet.add((y << 16) | x)
       customBrushData.colorMap.set(key, color)
     }
@@ -164,12 +237,27 @@
     globalState.ui.stampEditorOpen = false
   }
 
+  /**
+   * Removes all pixels from the editor and re-renders both canvases.
+   * Does not affect the committed brush — Apply must be called to push
+   * the cleared state through to the global brush.
+   */
   function clearStamp() {
     editorPixels.clear()
     renderEditorCanvas()
     renderPreviewCanvas()
   }
 
+  /**
+   * Begins a paint or move gesture on pointer press. Pointer capture is
+   * acquired immediately so move and up events keep firing on this canvas
+   * even if the pointer leaves its bounds mid-gesture. Right-click
+   * (button 2) forces erase mode regardless of the active tool, matching
+   * common pixel-editor conventions. In move mode the starting cell is
+   * recorded instead of painting, enabling delta-based dragging in
+   * handlePointerMove.
+   * @param {PointerEvent} e - The triggering pointer event.
+   */
   function handlePointerDown(e) {
     e.preventDefault()
     isDragging = true
@@ -179,11 +267,22 @@
       lastMoveCellX = Math.floor(ex / CELL_SIZE)
       lastMoveCellY = Math.floor(ey / CELL_SIZE)
     } else {
+      // Snapshot mode into a plain variable so a mid-stroke tool switch
+      // in the UI does not change the current stroke's behaviour.
       paintMode = e.button === 2 ? 'erase' : uiPaintMode
       paintCell(ex, ey, paintMode)
     }
   }
 
+  /**
+   * Continues a paint or move gesture as the pointer travels. In move
+   * mode, movement is quantised to whole cells: pixels shift only when
+   * the pointer crosses a cell boundary, preventing visual thrash from
+   * sub-cell pointer jitter. In draw/erase mode every event repaints the
+   * cell under the cursor, producing continuous stroke coverage even at
+   * fast pointer speeds.
+   * @param {PointerEvent} e - The triggering pointer event.
+   */
   function handlePointerMove(e) {
     if (!isDragging) return
     const { ex, ey } = getEditorCoords(e)
@@ -202,10 +301,20 @@
     }
   }
 
+  /**
+   * Ends the active paint or move gesture. The browser automatically
+   * releases pointer capture when pointerup fires, so no explicit
+   * releasePointerCapture call is needed here.
+   */
   function handlePointerUp() {
     isDragging = false
   }
 
+  /**
+   * Closes the stamp editor without committing changes. The next open
+   * will reload editor state from the committed brush via the $effect,
+   * discarding any unsaved edits from this session.
+   */
   function handleClose() {
     globalState.ui.stampEditorOpen = false
   }
@@ -290,7 +399,9 @@
           width="32"
           height="32"
         ></canvas>
-        <button type="button" onclick={applyStamp}>Apply</button>
+        <button type="button" id="stamp-editor-apply-btn" onclick={applyStamp}
+          >Apply</button
+        >
       </div>
     </div>
   </div>

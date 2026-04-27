@@ -16,9 +16,10 @@ import { ditherPatterns, isDitherOn } from '../context/ditherPatterns.js'
 import { brush, rebuildBuildUpDensityMap } from '../tools/brush.js'
 
 /**
- * Returns the active brush stamp entry and effective brush size.
- * Handles the custom stamp as a special case.
- * @returns {{ entry: object, brushSize: number }} The stamp entry and effective brush size to use for rendering
+ * Returns the active brush stamp entry and effective brush size. Custom
+ * stamps always occupy a fixed 32×32 tile regardless of the user-selected
+ * brush size, so they bypass the regular size-keyed stamp table.
+ * @returns {{ entry: object, brushSize: number }} Stamp entry and size
  */
 function getActiveBrushStampEntry() {
   if (globalState.tool.current.brushType === 'custom') {
@@ -36,23 +37,27 @@ function getActiveBrushStampEntry() {
 //===========================================//
 
 /**
- * Render cursor based on active tool
- * TODO: (Low Priority) Render vectorGui cursor for vector tools with remaining control points indicator
+ * Routes cursor rendering based on the active tool and current vector
+ * interaction state. Grab, select, and move suppress the cursor because
+ * they provide their own visual feedback; the eyedropper always shows a
+ * box outline. For drawing tools, an active vector collision takes
+ * priority — when a control point is under the cursor the pixel preview
+ * is suppressed to avoid implying paint will be applied. The dither-active
+ * check spans two conditions because build-up dither mode does not use a
+ * static pattern index.
+ * TODO: (Low Priority) Render vectorGui cursor for vector tools with
+ * remaining control points indicator
  */
 export function renderCursor() {
   switch (globalState.tool.current.name) {
     case 'grab':
-      //show nothing
       break
     case 'eyedropper':
-      //empty square
       drawCursorBox(0.5)
       break
     case 'select':
-      //show nothing
       break
     case 'move':
-      //show nothing
       break
     default:
       if (
@@ -60,6 +65,8 @@ export function renderCursor() {
         !globalState.vector.collidedIndex &&
         globalState.vector.selectedIndices.size === 0
       ) {
+        // patternIndex 63 is the "dither off" sentinel; buildUpDither
+        // also activates dither behavior without a static pattern index.
         const isDitherActive =
           (globalState.tool.current.ditherPatternIndex !== undefined &&
             globalState.tool.current.ditherPatternIndex < 63) ||
@@ -72,6 +79,8 @@ export function renderCursor() {
               drawInjectPreview()
             }
           }
+          // Always show the box outline for eraser so the affected
+          // area is visible even when preview is off.
           drawCursorBox(0.5)
         } else if (vectorGui.showCursorPreview) {
           if (isDitherActive) {
@@ -89,7 +98,8 @@ export function renderCursor() {
             drawNormalPreview()
           }
         } else {
-          // Cursor preview disabled (default): show box outline for all modes.
+          // No preview: fall back to box outline so the cursor is
+          // still visible without writing any layer pixels.
           drawCursorBox(0.5)
         }
       } else {
@@ -99,10 +109,14 @@ export function renderCursor() {
 }
 
 /**
- * Inject mode preview: accurate preview on layer.onscreenCtx because
- * clearRect+fillRect compositing must happen on the actual layer canvas.
+ * Renders a preview of the inject draw operation directly on the layer's
+ * onscreen context. The layer is re-blitted first to wipe the previous
+ * frame's preview; inject compositing (clearRect + fillRect) must happen
+ * against real layer data rather than the isolated cursor canvas.
  */
 function drawInjectPreview() {
+  // Re-blit committed layer pixels to wipe the prior preview frame;
+  // inject draws on layer.onscreenCtx so it can't self-clear.
   renderCanvas(canvas.currentLayer)
   const { entry, brushSize } = getActiveBrushStampEntry()
   actionDraw(
@@ -124,13 +138,18 @@ function drawInjectPreview() {
 }
 
 /**
- * Inject/eraser preview for dither brush: blits the layer then applies
- * the appropriate dither draw in preview mode so only dither-pattern pixels are affected.
+ * Renders the dither or build-up dither preview on the layer's onscreen
+ * context, where inject compositing must happen against real pixel data.
+ * The density map is rebuilt lazily here rather than on every settings
+ * change to avoid redundant work during rapid parameter adjustments.
  */
 function drawDitherInjectPreview() {
+  // Density map is built lazily to avoid thrashing during rapid
+  // brush-settings changes.
   if (brush._buildUpDensityMap === null) {
     rebuildBuildUpDensityMap()
   }
+  // Re-blit to wipe the prior preview frame before painting.
   renderCanvas(canvas.currentLayer)
   const { entry, brushSize } = getActiveBrushStampEntry()
   const stamp = entry['0,0']
@@ -165,8 +184,11 @@ function drawDitherInjectPreview() {
 }
 
 /**
- * Normal mode preview: draw brush stamp directly on the cursor canvas.
- * vectorGui.render() already cleared it — no layer blit needed.
+ * Paints the brush stamp preview directly onto the cursor canvas rather
+ * than the layer. This is safe because vectorGui.render() already cleared
+ * the cursor canvas on every frame, so no layer re-blit is needed.
+ * Pixels are written individually instead of delegating to actionDraw so
+ * the operation targets the cursor canvas without touching layer data.
  */
 function drawNormalPreview() {
   const { entry, brushSize } = getActiveBrushStampEntry()
@@ -187,6 +209,7 @@ function drawNormalPreview() {
       )
     )
       continue
+    // maskSet uses the same (y << 16) | x encoding for O(1) lookup.
     if (
       globalState.selection.maskSet &&
       !globalState.selection.maskSet.has((y << 16) | x)
@@ -197,9 +220,11 @@ function drawNormalPreview() {
 }
 
 /**
- * Dither brush preview: draw each stamp pixel on the cursor canvas,
- * filtering by the current dither pattern using absolute canvas coordinates.
- * In build-up dither mode, the pattern is determined per-pixel from the density map.
+ * Paints the dithered brush stamp preview onto the cursor canvas. Like
+ * drawNormalPreview, it writes directly to the cursor canvas so no layer
+ * re-blit is needed. In build-up dither mode the pattern tier is resolved
+ * per pixel from the density map because each canvas position can have a
+ * different accumulated stroke count, requiring a different threshold.
  */
 function drawDitherPreview() {
   const { entry, brushSize } = getActiveBrushStampEntry()
@@ -211,6 +236,8 @@ function drawDitherPreview() {
   const ditherOffsetY = globalState.tool.current.ditherOffsetY ?? 0
   const isBuildUp = globalState.tool.current.modes?.buildUpDither ?? false
   if (isBuildUp && brush._buildUpDensityMap === null) {
+    // Rebuild lazily; rapid settings changes would thrash the map if
+    // rebuilt on every parameter update.
     rebuildBuildUpDensityMap()
   }
   const densityMap = isBuildUp ? brush._buildUpDensityMap : null
@@ -241,11 +268,14 @@ function drawDitherPreview() {
       const count = densityMap
         ? densityMap[y * canvas.offScreenCVS.width + x] || 0
         : 0
+      // Clamp so strokes beyond peak density don't exceed array bounds.
       const stepIndex = Math.min(count, buildUpSteps.length - 1)
       pattern = ditherPatterns[buildUpSteps[stepIndex]]
     } else {
       pattern = basePattern
     }
+    // Absolute canvas coords ensure the pattern tiles continuously
+    // across the canvas, not relative to each brush stamp position.
     if (isDitherOn(pattern, x, y, ditherOffsetX, ditherOffsetY)) {
       canvas.cursorCTX.fillStyle = swatches.primary.color.color
       canvas.cursorCTX.fillRect(x + canvas.xOffset, y + canvas.yOffset, 1, 1)
@@ -257,12 +287,11 @@ function drawDitherPreview() {
 }
 
 /**
- * Collision present — no cursor preview drawn.
- * If the preview was drawn on layer.onscreenCtx (eraser, inject, or
- * build-up dither with preview enabled), blit the layer to clear it.
- * Normal mode cursor lives on the cursor canvas (auto-cleared by
- * vectorGui.render()), and box outline is on vectorGuiCTX (also
- * auto-cleared), so nothing extra needed for those cases.
+ * Clears any stale preview painted on the layer's onscreen context by
+ * re-blitting the committed layer data. Only eraser, inject, and
+ * build-up dither write their previews to the layer's onscreen context;
+ * other preview modes use the auto-cleared cursor canvas or vectorGuiCTX,
+ * so no cleanup is needed for those.
  */
 function clearLayerPreviewIfNeeded() {
   if (
@@ -276,14 +305,22 @@ function clearLayerPreviewIfNeeded() {
 }
 
 /**
- * Used to render eyedropper cursor and eraser
- * @param {number} lineWeight - (Float)
+ * Renders an outline tracing the visible perimeter of the brush stamp
+ * by stroking only the exposed edges of each stamp pixel, so the outline
+ * hugs the actual brush shape rather than its bounding box. Edge
+ * detection queries a pre-built pixelSet using bit-packed coordinates for
+ * O(1) neighbor lookups. The outline is drawn into vectorGuiCTX so it
+ * composites with vector GUI elements and is auto-cleared each frame. A
+ * double stroke (black then white) ensures visibility over any background.
+ * @param {number} lineWeight - Stroke weight multiplier (float)
  */
 function drawCursorBox(lineWeight) {
   const lineWidth = getGuiLineWidth(lineWeight)
   const { entry, brushSize: activeBrushSize } = getActiveBrushStampEntry()
   let brushOffset = Math.floor(activeBrushSize / 2)
-  let lineOffsetToCenter = lineWidth / 2 // line offset to stroke off-center
+  // Half-width offset centers the stroke on the pixel boundary rather
+  // than bleeding it into the pixel interior or exterior.
+  let lineOffsetToCenter = lineWidth / 2
 
   const pixelSet = entry.pixelSet
 
@@ -293,13 +330,13 @@ function drawCursorBox(lineWeight) {
     const x = globalState.cursor.x + canvas.xOffset + pixel.x - brushOffset
     const y = globalState.cursor.y + canvas.yOffset + pixel.y - brushOffset
 
-    // Check for neighboring pixels using the Set
+    // Bit-packing into a single int mirrors how pixelSet was built,
+    // giving O(1) membership checks for each of the four neighbors.
     const hasTopNeighbor = pixelSet.has(((pixel.y - 1) << 16) | pixel.x)
     const hasRightNeighbor = pixelSet.has((pixel.y << 16) | (pixel.x + 1))
     const hasBottomNeighbor = pixelSet.has(((pixel.y + 1) << 16) | pixel.x)
     const hasLeftNeighbor = pixelSet.has((pixel.y << 16) | (pixel.x - 1))
 
-    // Draw lines only for sides that don't have neighboring pixels
     if (!hasTopNeighbor) {
       canvas.vectorGuiCTX.moveTo(x, y - lineOffsetToCenter)
       canvas.vectorGuiCTX.lineTo(x + 1, y - lineOffsetToCenter)
@@ -318,5 +355,7 @@ function drawCursorBox(lineWeight) {
     }
   }
 
+  // Double stroke (black + white) keeps the cursor visible over any
+  // background color.
   doubleStroke(canvas.vectorGuiCTX, lineWidth, 'black', 'white')
 }
