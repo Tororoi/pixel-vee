@@ -1,10 +1,10 @@
-import './Menu/events.js'
-import './Swatch/events.js'
-import './Canvas/events.js'
-import './Tools/events.js'
-import './Controls/events.js'
-import { vectorGui } from './GUI/vector.js'
-import { registerVectorGui } from './Context/state.js'
+import './menu/events.js'
+import './swatch/events.js'
+import './canvas/events.js'
+import './tools/events.js'
+import './controls/events.js'
+import { vectorGui } from './gui/vector.js'
+import { registerVectorGui } from './context/state.js'
 
 // Register dependencies that would otherwise create circular imports in globalState.js
 registerVectorGui(vectorGui)

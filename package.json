@@ -3,6 +3,7 @@
   "version": "1.2.3",
   "description": "### Drawing application for pixel art",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "build:wasm": "cd wasm && wasm-pack build --target web",
     "build:css": "sass scss/style.scss css/style.css",
@@ -35,6 +36,7 @@
     "@eslint/js": "^9.39.4",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "eslint": "^9.39.4",
+    "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsdoc": "^48.1.0",
     "eslint-plugin-svelte": "^3.17.0",
     "globals": "^17.5.0",

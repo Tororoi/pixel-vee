@@ -1,5 +1,5 @@
-import { canvas } from '../Context/canvas.js'
-import { globalState } from '../Context/state.js'
+import { canvas } from '../context/canvas.js'
+import { globalState } from '../context/state.js'
 
 /**
  * Renders the grey dim overlay on the given context, clipping out the

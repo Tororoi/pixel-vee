@@ -433,7 +433,7 @@ pub fn flood_fill(
 
 /// Scan a canvas ImageData for pixels that exactly match a given RGBA colour.
 /// Returns a flat array of packed (y << 16 | x) coordinates — same encoding as
-/// maskSet in src/Canvas/masks.js.
+/// maskSet in src/canvas/masks.js.
 #[wasm_bindgen]
 pub fn build_color_mask(
     pixels: &[u8],

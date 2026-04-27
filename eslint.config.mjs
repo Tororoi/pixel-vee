@@ -2,6 +2,7 @@ import js from '@eslint/js'
 import svelte from 'eslint-plugin-svelte'
 import jsdoc from 'eslint-plugin-jsdoc'
 import svelteParser from 'svelte-eslint-parser'
+import importPlugin from 'eslint-plugin-import'
 import globals from 'globals'
 
 export default [
@@ -9,6 +10,9 @@ export default [
   jsdoc.configs['flat/recommended'],
   ...svelte.configs['flat/recommended'],
   {
+    plugins: {
+      import: importPlugin,
+    },
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -21,10 +25,11 @@ export default [
     rules: {
       'max-lines': [
         'warn',
-        { max: 600, skipBlankLines: false, skipComments: false },
+        { max: 1000, skipBlankLines: false, skipComments: false },
       ],
       'no-unused-vars': ['warn', { args: 'none' }],
       'no-case-declarations': 'warn',
+      'import/extensions': ['error', 'ignorePackages', { js: 'always' }],
       'jsdoc/require-jsdoc': [
         'warn',
         {
@@ -48,6 +53,7 @@ export default [
     },
     rules: {
       'jsdoc/require-jsdoc': 'off',
+      'jsdoc/check-tag-names': ['warn', { definedTags: ['component'] }],
     },
   },
   {

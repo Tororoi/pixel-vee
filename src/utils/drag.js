@@ -1,4 +1,4 @@
-import { globalState } from '../Context/state.js'
+import { globalState } from '../context/state.js'
 
 /**
  * Initialize dragger
