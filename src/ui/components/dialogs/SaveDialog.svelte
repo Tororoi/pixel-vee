@@ -9,7 +9,10 @@
    * since turning it on already includes everything they control.
    */
   import { globalState } from '../../../context/state.js'
-  import { saveDrawing, computeFileSizePreview } from '../../../save/savefile.js'
+  import {
+    saveDrawing,
+    computeFileSizePreview,
+  } from '../../../save/savefile.js'
   import { measureTextWidth } from '../../../utils/measureHelpers.js'
   import DialogBox from '../DialogBox.svelte'
   import ToggleCheckbox from '../shared/ToggleCheckbox.svelte'

@@ -97,11 +97,7 @@ function moveSteps() {
             applyDitherOffset(picker, brush.ditherOffsetX, brush.ditherOffsetY)
           const preview = document.querySelector('.dither-preview')
           if (preview)
-            applyDitherOffset(
-              preview,
-              brush.ditherOffsetX,
-              brush.ditherOffsetY,
-            )
+            applyDitherOffset(preview, brush.ditherOffsetX, brush.ditherOffsetY)
           const control = document.querySelector('.dither-offset-control')
           if (control)
             applyDitherOffsetControl(

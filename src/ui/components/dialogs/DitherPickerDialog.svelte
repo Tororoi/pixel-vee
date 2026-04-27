@@ -250,8 +250,8 @@
    * caching the string would require manual invalidation on every swatch
    * or offset change.
    * @param {object} pattern - Dither pattern descriptor.
-   * @param {number} [ox=0] - Horizontal pattern offset in pixels.
-   * @param {number} [oy=0] - Vertical pattern offset in pixels.
+   * @param {number} [ox] - Horizontal pattern offset in pixels.
+   * @param {number} [oy] - Vertical pattern offset in pixels.
    * @returns {string} Serialized SVG markup.
    */
   function serializePatternSVG(pattern, ox = 0, oy = 0) {

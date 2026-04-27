@@ -1,6 +1,5 @@
 import { globalState } from '../context/state.js'
 import { swatches } from '../context/swatch.js'
-import { canvas } from '../context/canvas.js'
 
 const SVG_NS = 'http://www.w3.org/2000/svg'
 

@@ -53,6 +53,7 @@ export default [
     },
     rules: {
       'jsdoc/require-jsdoc': 'off',
+      'jsdoc/check-tag-names': ['warn', { definedTags: ['component'] }],
     },
   },
   {

@@ -22,6 +22,7 @@
   const CELL_SIZE = 10
   const GRID_COLOR = '#333333'
 
+  // eslint-disable-next-line svelte/prefer-svelte-reactivity
   const editorPixels = new Map()
 
   let containerRef = $state(null)
@@ -167,6 +168,7 @@
    */
   function movePixels(dx, dy) {
     if (dx === 0 && dy === 0) return
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity
     const moved = new Map()
     for (const [key, color] of editorPixels) {
       const [x, y] = key.split(',').map(Number)
@@ -192,6 +194,7 @@
    * wins conflict cleanly before any key is removed from the live map.
    */
   function mirrorH() {
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity
     const mirrored = new Map()
     for (const [key, color] of editorPixels) {
       const [x, y] = key.split(',').map(Number)
@@ -212,6 +215,7 @@
    * reflected key.
    */
   function mirrorV() {
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity
     const mirrored = new Map()
     for (const [key, color] of editorPixels) {
       const [x, y] = key.split(',').map(Number)
