@@ -1,18 +1,18 @@
-import { describe, bench } from "vitest"
+import { describe, bench } from 'vitest'
 
 /**
  * Benchmarks for rebuildBuildUpDensityMap logic.
  *
- * The actual function (src/Tools/brush.js) imports canvas/state which need
+ * The actual function (src/tools/brush.js) imports canvas/state which need
  * a DOM, so the core algorithm is inlined here — same pattern as brush.bench.js.
  */
 
-// ─── Constants (from src/Tools/brush.js) ─────────────────────────────────────
+// ─── Constants (from src/tools/brush.js) ─────────────────────────────────────
 
 const BAYER_STEPS = {
-  "2x2": [16, 32, 48, 64],
-  "4x4": [4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64],
-  "8x8": Array.from({ length: 64 }, (_, i) => i + 1),
+  '2x2': [16, 32, 48, 64],
+  '4x4': [4, 8, 12, 16, 20, 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64],
+  '8x8': Array.from({ length: 64 }, (_, i) => i + 1),
 }
 
 // ─── Inlined algorithm (mirrors rebuildBuildUpDensityMap) ────────────────────
@@ -29,7 +29,7 @@ function rebuildDensityMap(undoStack, layer, startIndex) {
   for (let i = startIndex; i < undoStack.length; i++) {
     const action = undoStack[i]
     if (
-      action.tool === "brush" &&
+      action.tool === 'brush' &&
       action.modes?.buildUpDither &&
       action.layer === layer &&
       action.buildUpDensityDelta
@@ -66,7 +66,6 @@ function makeStrokeRegion(x0, y0, w, h) {
  * Build a simulated undo stack where every pixel in a region accumulates
  * exactly `strokeCount` overlapping strokes — enough to reach every step
  * in a given Bayer mode.
- *
  * @param {number} strokeCount - number of strokes (= number of Bayer steps)
  * @param {number} pixelsPerStroke - pixels touched per stroke
  * @param {object} layer - shared layer reference
@@ -78,7 +77,7 @@ function buildUndoStack(strokeCount, pixelsPerStroke, layer) {
   const stack = []
   for (let s = 0; s < strokeCount; s++) {
     stack.push({
-      tool: "brush",
+      tool: 'brush',
       modes: { buildUpDither: true },
       layer,
       buildUpDensityDelta: region,
@@ -91,6 +90,9 @@ function buildUndoStack(strokeCount, pixelsPerStroke, layer) {
  * Build a mixed undo stack: build-up dither strokes interleaved with
  * non-dither actions (lines, fills, other brush strokes) that the
  * rebuild loop must skip over.
+ * @param strokeCount
+ * @param pixelsPerStroke
+ * @param layer
  */
 function buildMixedUndoStack(strokeCount, pixelsPerStroke, layer) {
   const side = Math.ceil(Math.sqrt(pixelsPerStroke))
@@ -98,12 +100,12 @@ function buildMixedUndoStack(strokeCount, pixelsPerStroke, layer) {
   const stack = []
   for (let s = 0; s < strokeCount; s++) {
     // non-dither actions to skip
-    stack.push({ tool: "brush", modes: { buildUpDither: false }, layer })
-    stack.push({ tool: "line", layer })
-    stack.push({ tool: "fill", layer })
+    stack.push({ tool: 'brush', modes: { buildUpDither: false }, layer })
+    stack.push({ tool: 'line', layer })
+    stack.push({ tool: 'fill', layer })
     // the actual build-up dither action
     stack.push({
-      tool: "brush",
+      tool: 'brush',
       modes: { buildUpDither: true },
       layer,
       buildUpDensityDelta: region,
@@ -117,12 +119,12 @@ function buildMixedUndoStack(strokeCount, pixelsPerStroke, layer) {
 const layer = {} // reference equality for matching
 
 // Small region (16x16 = 256 pixels per stroke) — typical detail work
-describe("rebuildDensityMap — 256 px/stroke (16×16 region)", () => {
+describe('rebuildDensityMap — 256 px/stroke (16×16 region)', () => {
   const px = 256
 
-  const stack2x2 = buildUndoStack(BAYER_STEPS["2x2"].length, px, layer)
-  const stack4x4 = buildUndoStack(BAYER_STEPS["4x4"].length, px, layer)
-  const stack8x8 = buildUndoStack(BAYER_STEPS["8x8"].length, px, layer)
+  const stack2x2 = buildUndoStack(BAYER_STEPS['2x2'].length, px, layer)
+  const stack4x4 = buildUndoStack(BAYER_STEPS['4x4'].length, px, layer)
+  const stack8x8 = buildUndoStack(BAYER_STEPS['8x8'].length, px, layer)
 
   bench(`2×2 Bayer (${stack2x2.length} strokes)`, () => {
     rebuildDensityMap(stack2x2, layer, 0)
@@ -136,12 +138,12 @@ describe("rebuildDensityMap — 256 px/stroke (16×16 region)", () => {
 })
 
 // Medium region (64x64 = 4096 pixels per stroke) — broad shading
-describe("rebuildDensityMap — 4096 px/stroke (64×64 region)", () => {
+describe('rebuildDensityMap — 4096 px/stroke (64×64 region)', () => {
   const px = 4096
 
-  const stack2x2 = buildUndoStack(BAYER_STEPS["2x2"].length, px, layer)
-  const stack4x4 = buildUndoStack(BAYER_STEPS["4x4"].length, px, layer)
-  const stack8x8 = buildUndoStack(BAYER_STEPS["8x8"].length, px, layer)
+  const stack2x2 = buildUndoStack(BAYER_STEPS['2x2'].length, px, layer)
+  const stack4x4 = buildUndoStack(BAYER_STEPS['4x4'].length, px, layer)
+  const stack8x8 = buildUndoStack(BAYER_STEPS['8x8'].length, px, layer)
 
   bench(`2×2 Bayer (${stack2x2.length} strokes)`, () => {
     rebuildDensityMap(stack2x2, layer, 0)
@@ -155,12 +157,12 @@ describe("rebuildDensityMap — 4096 px/stroke (64×64 region)", () => {
 })
 
 // Large region (128x128 = 16384 pixels per stroke) — stress test
-describe("rebuildDensityMap — 16384 px/stroke (128×128 region)", () => {
+describe('rebuildDensityMap — 16384 px/stroke (128×128 region)', () => {
   const px = 16384
 
-  const stack2x2 = buildUndoStack(BAYER_STEPS["2x2"].length, px, layer)
-  const stack4x4 = buildUndoStack(BAYER_STEPS["4x4"].length, px, layer)
-  const stack8x8 = buildUndoStack(BAYER_STEPS["8x8"].length, px, layer)
+  const stack2x2 = buildUndoStack(BAYER_STEPS['2x2'].length, px, layer)
+  const stack4x4 = buildUndoStack(BAYER_STEPS['4x4'].length, px, layer)
+  const stack8x8 = buildUndoStack(BAYER_STEPS['8x8'].length, px, layer)
 
   bench(`2×2 Bayer (${stack2x2.length} strokes)`, () => {
     rebuildDensityMap(stack2x2, layer, 0)
@@ -174,12 +176,12 @@ describe("rebuildDensityMap — 16384 px/stroke (128×128 region)", () => {
 })
 
 // Mixed stack — measures the cost of skipping non-dither actions
-describe("rebuildDensityMap — mixed stack (4096 px/stroke, 64×64)", () => {
+describe('rebuildDensityMap — mixed stack (4096 px/stroke, 64×64)', () => {
   const px = 4096
 
-  const mixed2x2 = buildMixedUndoStack(BAYER_STEPS["2x2"].length, px, layer)
-  const mixed4x4 = buildMixedUndoStack(BAYER_STEPS["4x4"].length, px, layer)
-  const mixed8x8 = buildMixedUndoStack(BAYER_STEPS["8x8"].length, px, layer)
+  const mixed2x2 = buildMixedUndoStack(BAYER_STEPS['2x2'].length, px, layer)
+  const mixed4x4 = buildMixedUndoStack(BAYER_STEPS['4x4'].length, px, layer)
+  const mixed8x8 = buildMixedUndoStack(BAYER_STEPS['8x8'].length, px, layer)
 
   bench(`2×2 Bayer mixed (${mixed2x2.length} total actions)`, () => {
     rebuildDensityMap(mixed2x2, layer, 0)
@@ -193,10 +195,10 @@ describe("rebuildDensityMap — mixed stack (4096 px/stroke, 64×64)", () => {
 })
 
 // _buildUpResetAtIndex — measures partial rebuild (skipping early history)
-describe("rebuildDensityMap — partial rebuild with startIndex", () => {
+describe('rebuildDensityMap — partial rebuild with startIndex', () => {
   const px = 4096
   // Full 8x8 stack (64 strokes), but only rebuild from halfway
-  const stack = buildUndoStack(BAYER_STEPS["8x8"].length, px, layer)
+  const stack = buildUndoStack(BAYER_STEPS['8x8'].length, px, layer)
   const halfIndex = Math.floor(stack.length / 2)
 
   bench(`8×8 full rebuild (${stack.length} strokes)`, () => {

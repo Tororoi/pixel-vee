@@ -1,4 +1,5 @@
 import { getAngle } from './trig.js'
+import { canvas } from '../context/canvas.js'
 
 /**
  * WARNING: This function directly manipulates the vector's properties in the history.
@@ -181,3 +182,16 @@ export function handleOptionsAndUpdateVector(
     }
   }
 }
+
+/**
+ * Check if a vector action should be shown in the vectors list.
+ * @param {object} vector - The vector action to check
+ * @param {Set} undoStackSet - Set of actions currently in the undo stack
+ * @returns {boolean} True if the vector should be displayed
+ */
+export const isValidVector = (vector, undoStackSet) =>
+  !vector.removed &&
+  !vector.layer?.removed &&
+  undoStackSet.has(vector.action) &&
+  (vector.layer === canvas.currentLayer ||
+    (vector.layer === canvas.pastedLayer && canvas.currentLayer?.isPreview))

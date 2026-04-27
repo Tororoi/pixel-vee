@@ -1,7 +1,7 @@
 import { describe, bench } from "vitest"
 
 /**
- * Inline of the pixel scan loop from src/Canvas/masks.js.
+ * Inline of the pixel scan loop from src/canvas/masks.js.
  * Two variants to compare directly:
  *   scanString — original string key `"${x},${y}"` (pre-fix baseline)
  *   scanNumeric — new integer key (y << 16) | x (post-fix)

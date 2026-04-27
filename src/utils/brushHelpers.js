@@ -1,4 +1,4 @@
-import { dom } from '../Context/dom.js'
+import { dom } from '../context/dom.js'
 
 /**
  * update the brush preview in the dom

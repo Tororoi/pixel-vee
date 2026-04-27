@@ -1,13 +1,13 @@
 import { describe, it, expect, beforeEach, vi } from "vitest"
 
 // Mock DOM and Tools before importing state — vi.mock is hoisted automatically
-vi.mock("../src/Context/dom.js", () => ({
+vi.mock("../src/context/dom.js", () => ({
   dom: {
     vectorTransformUIContainer: { style: { display: "" } },
   },
 }))
 
-vi.mock("../src/Tools/index.js", () => ({
+vi.mock("../src/tools/index.js", () => ({
   tools: {
     brush: { name: "brush", type: "raster" },
     line: { name: "line", type: "vector" },
@@ -16,7 +16,7 @@ vi.mock("../src/Tools/index.js", () => ({
   },
 }))
 
-import { globalState as state, registerVectorGui } from "../src/Context/state.js"
+import { globalState as state, registerVectorGui } from "../src/context/state.js"
 
 // ─── state.selection ──────────────────────────────────────────────────────────
 

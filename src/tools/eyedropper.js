@@ -1,0 +1,65 @@
+import { globalState } from '../context/state.js'
+import { canvas } from '../context/canvas.js'
+import { swatches } from '../context/swatch.js'
+import { consolidateLayers } from '../canvas/layers.js'
+import { getColor } from '../utils/imageDataHelpers.js'
+import { setColor } from '../swatch/events.js'
+
+/**
+ * Eyedropper
+ * TODO: (Low Priority) add magnifying glass view that shows zoomed in view of area being sampled
+ */
+function eyedropperSteps() {
+  /**
+   * @param {number} x - (Integer)
+   * @param {number} y - (Integer)
+   */
+  function sampleColor(x, y) {
+    let newColor = getColor(globalState.drawing.colorLayerGlobal, x, y)
+    //not simply passing whole color in until random color function is refined
+    setColor(
+      newColor.r,
+      newColor.g,
+      newColor.b,
+      newColor.a,
+      swatches.primary.swatch,
+    )
+  }
+  switch (canvas.pointerEvent) {
+    case 'pointerdown':
+      //get imageData
+      consolidateLayers(true, true)
+      globalState.drawing.colorLayerGlobal = canvas.offScreenCTX.getImageData(
+        0,
+        0,
+        canvas.offScreenCVS.width,
+        canvas.offScreenCVS.height,
+      )
+      //set color
+      sampleColor(globalState.cursor.x, globalState.cursor.y)
+      break
+    case 'pointermove':
+      //normalize pointermove to pixelgrid, get color here too
+      //get color
+      sampleColor(globalState.cursor.x, globalState.cursor.y)
+      break
+    default:
+    //do nothing
+  }
+}
+
+/**
+ * Eyedropper Tool
+ */
+export const eyedropper = {
+  name: 'eyedropper',
+  fn: eyedropperSteps,
+  brushSize: 1,
+  brushType: 'circle',
+  brushDisabled: true,
+  options: {},
+  modes: {},
+  type: 'utility',
+  cursor: 'none',
+  activeCursor: 'none',
+}

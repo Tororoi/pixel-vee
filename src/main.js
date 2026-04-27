@@ -1,11 +1,11 @@
 import { mount } from 'svelte'
-import { globalState, registerVectorGui } from './Context/state.js'
-import { tools } from './Tools/index.js'
-import { vectorGui } from './GUI/vector.js'
+import { globalState, registerVectorGui } from './context/state.js'
+import { tools } from './tools/index.js'
+import { vectorGui } from './gui/vector.js'
 import { initWasm } from './wasm.js'
 // Canvas / input event wiring — these run addRasterLayer() + attach listeners at module load
-import './Canvas/events.js'
-import './Controls/events.js'
+import './canvas/events.js'
+import './controls/events.js'
 import App from './App.svelte'
 
 // Register circular-dep helpers
