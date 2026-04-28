@@ -24,6 +24,7 @@
   import StampEditorDialog from './ui/components/dialogs/StampEditorDialog.svelte'
   import CanvasArea from './ui/components/CanvasArea.svelte'
   import KeyboardShortcuts from './ui/components/KeyboardShortcuts.svelte'
+  import Tooltip from './ui/components/Tooltip.svelte'
 
   // .page is outside #root — portal all panels/dialogs into it so they share
   // the same positioning parent as the canvas stack.
@@ -43,6 +44,7 @@
 
 <NavBar />
 <KeyboardShortcuts />
+<Tooltip />
 
 {#if pageEl}
   <!-- CanvasArea portals .canvas-container directly into .page (no wrapper) so it is a

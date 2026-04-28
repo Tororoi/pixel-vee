@@ -1,4 +1,3 @@
-import { dom } from '../context/dom.js'
 import { keys } from '../shortcuts/keys.js'
 import { globalState } from '../context/state.js'
 import { canvas } from '../context/canvas.js'
@@ -10,7 +9,6 @@ import { renderCanvas } from '../canvas/render.js'
 
 import { randomizeColor } from '../swatch/events.js'
 import { renderCursor } from '../gui/cursor.js'
-import { openSaveDialogBox } from '../menu/events.js'
 import {
   actionDeselect,
   actionDeleteSelection,
@@ -272,7 +270,7 @@ export function activateShortcut(keyCode) {
     case 'KeyS':
       if (!globalState.cursor.clicked) {
         if (keys.MetaLeft || keys.MetaRight) {
-          openSaveDialogBox()
+          globalState.ui.saveDialogOpen = true
         } else {
           switchTool('select')
         }
@@ -283,11 +281,6 @@ export function activateShortcut(keyCode) {
         //shortcut for transform - cuts and pastes selection to allow free transform
       } else {
         globalState.ui.showTooltips = !globalState.ui.showTooltips
-        if (globalState.ui.showTooltips && globalState.ui.tooltipMessage) {
-          dom.tooltip.classList.add('visible')
-        } else {
-          dom.tooltip.classList.remove('visible')
-        }
       }
       break
     case 'KeyU':

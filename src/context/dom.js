@@ -6,9 +6,6 @@
 // Set by CanvasArea.svelte onMount before addRasterLayer() runs
 let canvasLayers = null
 
-// * Tooltip * //
-const tooltip = document.getElementById('tooltip')
-
 //====================================//
 //========= * * * Menu * * * =========//
 //====================================//
@@ -231,7 +228,6 @@ const vectorTransformModeContainer = document.querySelector(
 
 export const dom = {
   canvasLayers,
-  tooltip,
   //menu
   navBar,
   topMenu,

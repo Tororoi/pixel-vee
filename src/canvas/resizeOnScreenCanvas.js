@@ -1,6 +1,6 @@
 import { dom } from '../context/dom.js'
 import { canvas } from '../context/canvas.js'
-import { renderCanvas } from '../canvas/render.js'
+import { renderCanvas } from './render.js'
 import { constrainElementOffsets } from '../utils/constrainElementOffsets.js'
 
 /**
