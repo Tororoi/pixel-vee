@@ -4,10 +4,10 @@
    * Full-featured HSL/RGB/hex/alpha color picker dialog. All picker logic
    * previously in Picker.js lives here as reactive Svelte state. Core color
    * values (rgb, hsl, alpha) are plain variables updated imperatively through
-   * the propagate* functions; $state variables drive the channel input displays
-   * and color ramp swatches. A picker interface object is registered with
-   * events.js on mount so external callers can update and confirm colors without
-   * coupling to Svelte internals.
+   * the propagate* functions; $state variables drive the channel input
+   * displays and color ramp swatches. A picker interface object is registered
+   * with events.js on mount so external callers can update and confirm colors
+   * without coupling to Svelte internals.
    */
   import { onMount } from 'svelte'
   import { globalState } from '../../../context/state.js'
@@ -88,6 +88,12 @@
   // Color-space propagation
   // ─────────────────────────────────────────────────────────────────────────────
 
+  /**
+   * Derives all non-RGB representations from the current `rgb` object and
+   * flushes every value to the display. Call this whenever RGB is the
+   * authoritative source — e.g. after RGBA inputs change or a ramp swatch
+   * is clicked.
+   */
   function propagateRGBColorSpace() {
     hsl = RGBToHSL(rgb)
     hexcode = RGBToHex(rgb)
@@ -95,6 +101,11 @@
     updateColor()
   }
 
+  /**
+   * Derives all non-HSL representations from the current `hsl` object and
+   * flushes every value to the display. Called whenever HSL is authoritative
+   * — e.g. after the hue slider moves or the canvas gradient is dragged.
+   */
   function propagateHSLColorSpace() {
     rgb = HSLToRGB(hsl)
     hexcode = RGBToHex(rgb)
@@ -102,6 +113,11 @@
     updateColor()
   }
 
+  /**
+   * Parses `hexcode` back into RGB and HSL, recomputes luminance, then
+   * flushes display state. Hex cannot be derived from the other two spaces
+   * without a round-trip parse, so it has its own propagation path.
+   */
   function propagateHexColorSpace() {
     rgb = hexToRGB(hexcode)
     hsl = RGBToHSL(rgb)
@@ -109,27 +125,57 @@
     updateColor()
   }
 
+  /**
+   * Commits the four $state display variables (rVal, gVal, bVal, aVal) into
+   * the core `rgb` and `alpha` plain vars before propagating. The indirection
+   * is necessary because number inputs bind to the $state vars, not to the
+   * plain vars that the propagation chain reads.
+   */
   function updateRGBA() {
     rgb = { red: rVal, green: gVal, blue: bVal }
     alpha = aVal
     propagateRGBColorSpace()
   }
 
+  /**
+   * Commits the three HSL $state display variables into the core `hsl`
+   * object before propagating. Same two-tier pattern as updateRGBA: $state
+   * vars are bound to inputs; core vars drive all canvas and ramp logic.
+   */
   function updateHSL() {
     hsl = { hue: hVal, saturation: sVal, lightness: lVal }
     propagateHSLColorSpace()
   }
 
+  /**
+   * Commits the hex $state display variable into the core `hexcode` string
+   * before propagating. The hex input binds to hexVal, not hexcode, so the
+   * copy is required before the propagation chain can read the new value.
+   */
   function updateHex() {
     hexcode = hexVal
     propagateHexColorSpace()
   }
 
+  /**
+   * Responds to hue-slider input events by writing hsl.hue directly from
+   * the event value and repropagating through HSL space. The hue slider
+   * drives HSL rather than RGB because the canvas gradient is rendered in
+   * HSL space, making hue a first-class independent axis.
+   * @param {Event} e - Input event from the hue range slider.
+   */
   function updateHue(e) {
     hsl.hue = +e.target.value
     propagateHSLColorSpace()
   }
 
+  /**
+   * Responds to alpha-slider input events. Alpha is stored separately from
+   * rgb and hsl and is not recalculated by any propagate* function, so it
+   * must be synced to both the core var and the two display vars before
+   * calling updateColor directly — full propagation is unnecessary here.
+   * @param {Event} e - Input event from the alpha range slider.
+   */
   function updateAlpha(e) {
     alpha = +e.target.value
     aVal = alpha
@@ -141,6 +187,13 @@
   // Canvas draw + display sync
   // ─────────────────────────────────────────────────────────────────────────────
 
+  /**
+   * Central display-sync function: redraws the HSL gradient canvas and
+   * selector, updates the CSS custom properties that drive the new-color
+   * swatch, and writes every $state display variable. All propagate*
+   * functions terminate here. The ctx guard prevents calls that arrive
+   * before onMount has initialized the canvas context.
+   */
   function updateColor() {
     if (!ctx) return
     drawHSLGradient(ctx, WIDTH, HEIGHT, hsl.hue)
@@ -149,6 +202,9 @@
 
     const { hue, saturation, lightness } = hsl
     const { red, green, blue } = rgb
+    // CSS vars drive the new-color swatch via the template; writing them
+    // here ensures every color-change path (RGB, HSL, hex) keeps the swatch
+    // in sync without duplicating the style write in each propagate* call.
     document.documentElement.style.setProperty(
       '--new-swatch-color',
       `${red},${green},${blue}`,
@@ -176,10 +232,19 @@
   // Color ramps
   // ─────────────────────────────────────────────────────────────────────────────
 
+  /**
+   * Recomputes the shadow/highlight ramp from the current HSL+alpha and,
+   * when a custom key is being live-edited, bakes the current RGB+alpha into
+   * that key slot before regenerating the interpolated custom ramp. The key
+   * update must precede interpolation so the ramp immediately reflects the
+   * in-progress edit rather than the previously committed key value.
+   */
   function renderColorRamps() {
     shadowColors = calcShadowHighlightRamp(hsl, alpha)
 
     if (editingCustomKey) {
+      // Bake the live picker color into the active key before interpolating
+      // so the custom ramp tracks the picker in real time during live-edit.
       customRampKeys[editingCustomKey] = {
         r: rgb.red,
         g: rgb.green,
@@ -197,13 +262,28 @@
   // Ramp swatch click handlers
   // ─────────────────────────────────────────────────────────────────────────────
 
+  /**
+   * Loads a shadow/highlight ramp color into the picker by overwriting rgb
+   * and alpha and repropagating through RGB space. No ramp-key state changes
+   * are needed because shadow swatches are not part of the custom ramp cycle.
+   * @param {{ r: number, g: number, b: number, a: number }} color - RGBA color.
+   */
   function handleShadowSwatchClick(color) {
     rgb = { red: color.r, green: color.g, blue: color.b }
     alpha = color.a
     propagateRGBColorSpace()
   }
 
-  // key is null for non-key custom swatches
+  /**
+   * Implements a three-state click cycle for custom ramp key swatches: first
+   * click selects (highlights) the key, second click activates live editing
+   * so the ramp tracks the picker color in real time, third click deactivates
+   * it. Non-key swatches (key === null) bypass the cycle and simply load the
+   * color. The early return on the second click prevents the picker from
+   * jumping to the key's stored color when live-edit mode is being entered.
+   * @param {{ r: number, g: number, b: number, a: number }} color - RGBA color.
+   * @param {string | null} key - 'start' | 'mid' | 'end' | null
+   */
   function handleCustomSwatchClick(color, key) {
     if (key) {
       if (editingCustomKey === key) {
@@ -231,14 +311,34 @@
   // Canvas pointer interaction
   // ─────────────────────────────────────────────────────────────────────────────
 
+  /**
+   * Begins drag selection on the HSL canvas. Pointer capture is set so that
+   * move and up events are routed to this element even when the pointer
+   * leaves the canvas bounds, preventing drag selection from stalling
+   * mid-gesture.
+   * @param {PointerEvent} e - Pointer event from the canvas element.
+   */
   function handleCanvasPointerDown(e) {
+    // Capture keeps move/up events on this target after the pointer leaves
+    // the canvas so drag selection continues when the cursor exits the edge.
     e.target.setPointerCapture(e.pointerId)
     clickedCanvas = true
     selectSL(e.offsetX, e.offsetY)
   }
 
+  /**
+   * Continues drag selection while the pointer button is held. Uses
+   * pageX/pageY plus bounding-rect math rather than offsetX/offsetY because
+   * pointer capture routes events with coordinates relative to the capturing
+   * element even when the pointer is outside it — offsetX/offsetY become
+   * unreliable in that situation. Clamps coordinates to canvas bounds so
+   * dragging outside does not produce out-of-range S/L values.
+   * @param {PointerEvent} e - Pointer event from the canvas element.
+   */
   function handleCanvasPointerMove(e) {
     if (!clickedCanvas) return
+    // offsetX/offsetY are unreliable under pointer capture when the cursor
+    // has left the element; pageX/pageY + bounding rect give stable coords.
     const rect = canvasRef.getBoundingClientRect()
     const docRect = document.documentElement.getBoundingClientRect()
     const x = e.pageX - (rect.left - docRect.left)
@@ -249,10 +349,22 @@
     )
   }
 
+  /**
+   * Ends drag selection by clearing the clickedCanvas flag. The pointerup
+   * event arrives reliably here because pointer capture set in
+   * handleCanvasPointerDown keeps all pointer events on this target.
+   */
   function handleCanvasPointerUp() {
     clickedCanvas = false
   }
 
+  /**
+   * Maps raw pixel coordinates from the HSL canvas to saturation (x-axis)
+   * and lightness (y-axis), then repropagates through HSL space. Rounding
+   * to the nearest integer keeps all channel display values as whole numbers.
+   * @param {number} x - Pixel x within [0, WIDTH].
+   * @param {number} y - Pixel y within [0, HEIGHT].
+   */
   function selectSL(x, y) {
     hsl.saturation = Math.round((x / WIDTH) * 100)
     hsl.lightness = Math.round((y / HEIGHT) * 100)
@@ -263,12 +375,32 @@
   // Channel spin buttons (with auto-repeat while held)
   // ─────────────────────────────────────────────────────────────────────────────
 
+  /**
+   * Returns the next integer step in `direction` for `value`, clamped to
+   * [0, max]. Flooring before stepping prevents a fractional value typed
+   * into a channel input from expanding by a fraction rather than a whole
+   * unit on the first spin press.
+   * @param {number} value - Current channel value (may be fractional).
+   * @param {number} max - Upper bound (inclusive).
+   * @param {'inc' | 'dec'} direction - Which direction to step.
+   * @returns {number} Next stepped value, clamped within range.
+   */
   function clampedStep(value, max, direction) {
     const v = Math.floor(value)
     if (direction === 'inc') return v < max ? v + 1 : v
     return v > 0 ? v - 1 : v
   }
 
+  /**
+   * Starts an auto-repeating increment/decrement tick for an RGB or alpha
+   * channel when a spin button is held. The inner tick function reschedules
+   * itself at 150 ms intervals and exits when pointerState is no longer
+   * 'pointerdown'. A single shared pointerState string ensures only one spin
+   * loop is active at a time — starting a new spin implicitly cancels the
+   * previous one.
+   * @param {'r' | 'g' | 'b' | 'a'} channel - Channel to spin.
+   * @param {'inc' | 'dec'} direction - Direction of the spin.
+   */
   function handleRGBSpinDown(channel, direction) {
     pointerState = 'pointerdown'
     function tick() {
@@ -283,6 +415,14 @@
     tick()
   }
 
+  /**
+   * Starts an auto-repeating increment/decrement tick for an HSL channel.
+   * Shares the same pointerState sentinel and 150 ms cadence as
+   * handleRGBSpinDown. The channel-to-max map is defined locally so callers
+   * cannot accidentally spin an HSL channel past its valid range.
+   * @param {'h' | 's' | 'l'} channel - Channel to spin.
+   * @param {'inc' | 'dec'} direction - Direction of the spin.
+   */
   function handleHSLSpinDown(channel, direction) {
     pointerState = 'pointerdown'
     const maxVals = { h: 359, s: 100, l: 100 }
@@ -298,6 +438,12 @@
     tick()
   }
 
+  /**
+   * Breaks any active auto-repeat loop by setting pointerState to
+   * 'pointerup'. Both onpointerup and onpointerout bind to this so that
+   * releasing the pointer or moving outside a spin button both terminate
+   * the loop, preventing runaway increments when the cursor drifts off.
+   */
   function stopSpin() {
     pointerState = 'pointerup'
   }
@@ -306,6 +452,11 @@
   // Restore initial color (old-color button)
   // ─────────────────────────────────────────────────────────────────────────────
 
+  /**
+   * Reverts the picker to the color captured when `update` was last called.
+   * The null guard prevents a crash during the brief window between component
+   * mount and the first `update` call when initialColor is not yet set.
+   */
   function restoreInitialColor() {
     if (!initialColor) return
     rgb = { red: initialColor.r, green: initialColor.g, blue: initialColor.b }
@@ -317,11 +468,23 @@
   // External API (registered with events.js)
   // ─────────────────────────────────────────────────────────────────────────────
 
+  /**
+   * Loads a reference color into the picker and stores it as the initial
+   * color so restoreInitialColor can revert to it. Custom ramp keys are
+   * seeded from this color only when all three are null (the very first
+   * open), preserving any ramp the user has already built. The
+   * --old-swatch-color and --old-swatch-alpha CSS vars are written here
+   * rather than in updateColor because they must reflect the reference
+   * color, not the live picker color.
+   * @param {{ r: number, g: number, b: number, a: number }} reference - Color.
+   */
   function update(reference) {
     initialColor = reference
     rgb = { red: reference.r, green: reference.g, blue: reference.b }
     alpha = reference.a
     if (customRampKeys.start === null) {
+      // Seed all three keys from the reference color only on first open so
+      // a previously built custom ramp is not reset on subsequent opens.
       const c = makeColor(reference.r, reference.g, reference.b, reference.a)
       customRampKeys = { start: c, mid: { ...c }, end: { ...c } }
     }
@@ -338,8 +501,12 @@
 
   onMount(() => {
     if (!canvasRef) return
+    // willReadFrequently avoids GPU/CPU round-trips; the gradient is redrawn
+    // on every color change so a CPU-backed context is appropriate here.
     ctx = canvasRef.getContext('2d', { willReadFrequently: true })
 
+    // Register a live-getter object so events.js always reads current state
+    // rather than holding a stale snapshot of picker values at mount time.
     registerPicker({
       get rgb() {
         return rgb
