@@ -3,7 +3,8 @@
 //===================================//
 
 // * Raster Layers Container * //
-const canvasLayers = document.querySelector('.canvas-layers')
+// Set by CanvasArea.svelte onMount before addRasterLayer() runs
+let canvasLayers = null
 
 // * Tooltip * //
 const tooltip = document.getElementById('tooltip')

@@ -63,7 +63,7 @@ const setCoordinates = (e) => {
  * shortcut system processes the code.
  * @param {KeyboardEvent} e - The keydown event
  */
-function handleKeyDown(e) {
+export function handleKeyDown(e) {
   // e.preventDefault() - May conditionally need this for certain shortcuts, but try to avoid doing so
   //Prevent repeated activations while holding a key down
   if (e.repeat) {
@@ -98,7 +98,7 @@ function handleKeyDown(e) {
  * held, such as Space for grab or Alt for eyedropper.
  * @param {KeyboardEvent} e - The keyup event
  */
-function handleKeyUp(e) {
+export function handleKeyUp(e) {
   keys[e.code] = false //unset active key globally
   deactivateShortcut(e.code)
 }
@@ -132,7 +132,7 @@ const resetWheelGesture = debounce(() => {
  * after applying the zoom ratio.
  * @param {WheelEvent} e - The scroll wheel event
  */
-function handleWheel(e) {
+export function handleWheel(e) {
   //normalize delta: lines → ~40px, pages → ~800px
   let rawDelta = e.deltaY
   if (e.deltaMode === 1) rawDelta *= 40
@@ -194,7 +194,7 @@ function handleWheel(e) {
  * user immediate feedback that their stroke is invisible.
  * @param {PointerEvent} e - The pointerdown event
  */
-function handlePointerDown(e) {
+export function handlePointerDown(e) {
   if (globalState.canvas.resizeOverlayActive) {
     resizeOverlayPointerDown(e)
     return
@@ -254,7 +254,7 @@ function handlePointerDown(e) {
  * preview.
  * @param {PointerEvent} e - The pointermove event
  */
-function handlePointerMove(e) {
+export function handlePointerMove(e) {
   if (globalState.canvas.resizeOverlayActive) {
     resizeOverlayPointerMove(e)
     return
@@ -348,7 +348,7 @@ function handlePointerMove(e) {
  * subsequent touch events manage their own display updates.
  * @param {PointerEvent} e - The pointerup event
  */
-function handlePointerUp(e) {
+export function handlePointerUp(e) {
   if (globalState.canvas.resizeOverlayActive) {
     resizeOverlayPointerUp(e)
     return
@@ -426,7 +426,7 @@ function handlePointerUp(e) {
  * occurs mid-gesture does not discard partially-committed state.
  * @param {PointerEvent} e - The pointerout event
  */
-function handlePointerOut(e) {
+export function handlePointerOut(e) {
   //TODO: (Low Priority) if touchscreen, need to handle differently. Currently cannot reach next code since clicked will be false.
   //Only purpose is to rerender with multi step tools such as curve when moving out or in the case of touch, lifting finger
   if (!globalState.tool.touch && globalState.tool.clickCounter === 0) {
@@ -459,7 +459,7 @@ function handlePointerOut(e) {
  * and replace it with a custom pinch zoom on the canvas only
  * @param {TouchEvent} e - The touchstart event
  */
-function handleTouchStart(e) {
+export function handleTouchStart(e) {
   globalState.tool.touch = true
   canvas.gui.renderRadius *= 2
   canvas.gui.collisionRadius *= 2
@@ -474,30 +474,8 @@ function handleTouchStart(e) {
  * reliable device-type signal is available.
  * @param {MouseEvent} e - The mousedown event
  */
-function handleMouseDown(e) {
+export function handleMouseDown(e) {
   if (e.type === 'mousedown') {
     // globalState.tool.touch = false // NOTE: this also triggers when in tablet mode in chrome. Comment this out while testing
   }
 }
-
-//===================================//
-//=== * * * Event Listeners * * * ===//
-//===================================//
-
-//Shortcuts
-document.addEventListener('keydown', handleKeyDown)
-document.addEventListener('keyup', handleKeyUp)
-canvas.vectorGuiCVS.addEventListener('wheel', handleWheel, {
-  passive: true,
-})
-
-//Pointer
-canvas.vectorGuiCVS.addEventListener('pointermove', handlePointerMove)
-canvas.vectorGuiCVS.addEventListener('pointerdown', handlePointerDown)
-canvas.vectorGuiCVS.addEventListener('pointerup', handlePointerUp)
-canvas.vectorGuiCVS.addEventListener('pointerout', handlePointerOut) //NOTE: Deprecated? May need to rewrite just for multistep tools such as curve that can be in use while pointer is up
-
-canvas.vectorGuiCVS.addEventListener('touchstart', handleTouchStart, {
-  passive: true,
-})
-canvas.vectorGuiCVS.addEventListener('mousedown', handleMouseDown)
