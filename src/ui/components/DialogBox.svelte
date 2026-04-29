@@ -4,44 +4,42 @@
    * Base panel/dialog container used throughout the application. Renders
    * a header with a drag grip, title, and either a close button (when
    * `onclose` is provided), a collapse toggle (when `collapsible` is
-   * true), or nothing. Drag and collapse behaviors are initialized
-   * imperatively via utility functions on mount rather than declaratively
-   * because they need direct DOM access to attach pointer listeners.
+   * true), or nothing. Drag behavior is wired via Svelte event handlers
+   * on the dragger element; collapse is local reactive state.
    */
-  import { onMount } from 'svelte'
-  import { initializeDragger, initializeCollapser } from '../../utils/drag.js'
+  import { untrack } from 'svelte'
+  import { dragStart, dragStop, dragMove } from '../../utils/drag.js'
 
   let {
     title,
     class: extraClass = '',
     style = undefined,
     collapsible = false,
+    startCollapsed = false,
     onclose = null,
     locked = false,
     ref = $bindable(null),
     children,
   } = $props()
 
-  /**
-   * Registers drag and collapse behaviors with the panel element.
-   * Deferred to onMount because both utilities attach pointer listeners
-   * that require a live DOM node. The cleanup deletes `data-dragInitialized`
-   * so the dragger can be re-registered if the component is remounted
-   * (e.g. in a keyed block) without the guard inside initializeDragger
-   * treating it as already initialized and skipping setup.
-   */
-  onMount(() => {
-    if (!ref) return
-    initializeDragger(ref)
-    if (collapsible) initializeCollapser(ref)
-    return () => {
-      delete ref?.dataset.dragInitialized
-    }
-  })
+  let collapsed = $state(untrack(() => startCollapsed))
 </script>
 
-<div bind:this={ref} class="dialog-box {extraClass}" {style}>
-  <div class="header dragger">
+<div
+  bind:this={ref}
+  class="dialog-box {extraClass}"
+  style:min-height={collapsed ? '20px' : null}
+  style:flex-grow={collapsed ? '0' : null}
+  {style}
+>
+  <div
+    class="header dragger"
+    role="presentation"
+    onpointerdown={(e) => dragStart(e, ref)}
+    onpointerup={dragStop}
+    onpointerout={dragStop}
+    onpointermove={dragMove}
+  >
     <div class="drag-btn{locked ? ' locked' : ''}">
       <div class="grip"></div>
     </div>
@@ -60,12 +58,13 @@
           type="checkbox"
           aria-label="Collapse or Expand"
           class="collapse-checkbox"
+          bind:checked={collapsed}
         />
         <span class="arrow"></span>
       </label>
     {/if}
   </div>
-  <div class="collapsible">
+  <div class="collapsible" style:display={collapsed ? 'none' : null}>
     {@render children?.()}
   </div>
 </div>

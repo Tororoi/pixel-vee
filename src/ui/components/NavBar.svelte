@@ -26,7 +26,6 @@
     actionFlipPixels,
     actionRotatePixels,
   } from '../../actions/transform/rasterTransform.js'
-  import { openSaveDialogBox } from '../../menu/events.js'
   import { tools } from '../../tools/index.js'
 
   /**
@@ -102,6 +101,14 @@
     }
     reader.readAsText(e.target.files[0])
     e.target.value = null
+  }
+
+  /**
+   * Open save dialog box
+   * TODO: (Low Priority) initialize save dialog box with default settings?
+   */
+  export function handleSaveAs() {
+    globalState.ui.saveDialogOpen = true
   }
 
   /**
@@ -276,7 +283,7 @@
             role="menuitem"
             id="save"
             data-tooltip="Open dialog box to download file with current progress"
-            onclick={openSaveDialogBox}
+            onclick={handleSaveAs}
             onkeydown={handleMenuKeydown}
           >
             Save As... (Cmd + S)

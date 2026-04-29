@@ -41,8 +41,8 @@
   let heightInputRef = $state(null)
   let anchorGridRef = $state(null)
   let activeAnchor = $state('top-left')
-  let width = $state(canvas.offScreenCVS.width)
-  let height = $state(canvas.offScreenCVS.height)
+  let width = $state(canvas.offScreenCVS?.width ?? 0)
+  let height = $state(canvas.offScreenCVS?.height ?? 0)
   let widthFocused = false
   let heightFocused = false
 

@@ -1,7 +1,6 @@
 import { dom } from '../context/dom.js'
 import { globalState } from '../context/state.js'
 import { swatches } from '../context/swatch.js'
-import { Picker } from './Picker.js'
 import { generateRandomRGB } from '../utils/colors.js'
 import { renderCanvas } from '../canvas/render.js'
 import { updateDitherPickerColors } from '../utils/ditherPreview.js'

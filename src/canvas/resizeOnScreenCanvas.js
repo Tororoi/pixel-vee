@@ -1,9 +1,7 @@
 import { dom } from '../context/dom.js'
 import { canvas } from '../context/canvas.js'
-import { renderCanvas } from '../canvas/render.js'
+import { renderCanvas } from './render.js'
 import { constrainElementOffsets } from '../utils/constrainElementOffsets.js'
-import { addRasterLayer } from '../actions/layer/layerActions.js'
-import { createPreviewLayer } from './layers.js'
 
 /**
  * Synchronises every onscreen canvas with the current window after a resize
@@ -18,7 +16,7 @@ import { createPreviewLayer } from './layers.js'
  * than reset because it retains a valid screen position and only needs
  * nudging back inside the viewport if it was clipped.
  */
-const resizeOnScreenCanvas = () => {
+export const resizeOnScreenCanvas = () => {
   // offsetWidth × sharpness gives the physical pixel count for crisp
   // rendering on HiDPI displays. Each .width/.height assignment also resets
   // the context transform, so sharpness×zoom must be reapplied right after.
@@ -109,36 +107,3 @@ const resizeOnScreenCanvas = () => {
     constrainElementOffsets(dom.colorPickerContainer)
   }
 }
-
-//===================================//
-//=== * * * Initialization * * * ====//
-//===================================//
-
-//Initialize first layer
-addRasterLayer()
-canvas.currentLayer = canvas.layers[0]
-//Initialize offset, must be integer
-canvas.xOffset = Math.round(
-  (canvas.currentLayer.onscreenCvs.width / canvas.sharpness / canvas.zoom -
-    canvas.offScreenCVS.width) /
-    2,
-)
-canvas.yOffset = Math.round(
-  (canvas.currentLayer.onscreenCvs.height / canvas.sharpness / canvas.zoom -
-    canvas.offScreenCVS.height) /
-    2,
-)
-canvas.previousXOffset = canvas.xOffset
-canvas.previousYOffset = canvas.yOffset
-renderCanvas(canvas.currentLayer)
-// React components read canvas.layers / swatches directly via useAppState()
-
-//Initialize temp layer, not added to layers array
-canvas.tempLayer = createPreviewLayer()
-
-//===================================//
-//=== * * * Event Listeners * * * ===//
-//===================================//
-
-// UI Canvas * //
-window.addEventListener('resize', resizeOnScreenCanvas)

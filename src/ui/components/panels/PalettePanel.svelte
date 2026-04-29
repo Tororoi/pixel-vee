@@ -47,19 +47,10 @@
     }
   })
 
-  // Attach a document click listener to dismiss the presets dropdown
-  // on an outside click. The listener is returned as a Svelte cleanup
-  // function so it is removed when presetsOpen becomes false or the
-  // component is destroyed, preventing listener accumulation across
-  // multiple open cycles.
-  $effect(() => {
+  function handleOutsideClick() {
     if (!presetsOpen) return
-    function handleOutsideClick() {
-      presetsOpen = false
-    }
-    document.addEventListener('click', handleOutsideClick)
-    return () => document.removeEventListener('click', handleOutsideClick)
-  })
+    presetsOpen = false
+  }
 
   /**
    * Forks the current preset into a new custom palette on the first
@@ -247,6 +238,8 @@
     initializeColorPicker({ color: swatches.primary.color })
   }
 </script>
+
+<svelte:document onclick={handleOutsideClick} />
 
 <DialogBox
   title="Palette"

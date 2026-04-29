@@ -3,10 +3,8 @@
 //===================================//
 
 // * Raster Layers Container * //
-const canvasLayers = document.querySelector('.canvas-layers')
-
-// * Tooltip * //
-const tooltip = document.getElementById('tooltip')
+// Set by CanvasArea.svelte onMount before addRasterLayer() runs
+let canvasLayers = null
 
 //====================================//
 //========= * * * Menu * * * =========//
@@ -230,7 +228,6 @@ const vectorTransformModeContainer = document.querySelector(
 
 export const dom = {
   canvasLayers,
-  tooltip,
   //menu
   navBar,
   topMenu,
