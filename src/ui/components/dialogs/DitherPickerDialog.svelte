@@ -280,174 +280,200 @@
   }
 
   /**
-   * Registers the dialog container with the global dom registry and
-   * attaches the two primary imperative event listeners: pattern-grid
-   * click handling and offset-control pointer-drag handling. These are
-   * wired imperatively rather than declaratively in the template because
-   * the dither grid and offset control SVGs are injected by Svelte use-
-   * actions after mount and are not part of Svelte's reactive tree, so
-   * inline event directives would not reach them.
+   * Handles a click on a dither grid button. Bound via onclick in the
+   * template; the pattern index comes from the loop variable so no
+   * dataset lookup is needed.
+   * @param {number} patternIndex - Zero-based index of the clicked pattern.
    */
-  onMount(() => {
-    if (!ref) return
-    const el = ref
-    // Expose this node so other components can call applyDitherOffset
-    // on the picker container directly via the dom registry.
-    dom.ditherPickerContainer = el
-
-    // Dither grid — pattern selection
-    el.querySelector('.dither-grid')?.addEventListener('click', (e) => {
-      const btn = e.target.closest('.dither-grid-btn')
-      if (!btn) return
-      const patternIndex = parseInt(btn.dataset.patternIndex)
-      const vt = appState.ditherVectorTarget
-      if (vt) {
-        const oldPatternIndex = vt.ditherPatternIndex
-        vt.ditherPatternIndex = patternIndex
-        renderCanvas(vt.layer, true)
-        if (oldPatternIndex !== patternIndex) {
-          changeActionVectorDitherPattern(vt, oldPatternIndex, patternIndex)
-          globalState.clearRedoStack()
-        }
-        return
+  function handleGridBtnClick(patternIndex) {
+    const vt = appState.ditherVectorTarget
+    if (vt) {
+      const oldPatternIndex = vt.ditherPatternIndex
+      vt.ditherPatternIndex = patternIndex
+      renderCanvas(vt.layer, true)
+      if (oldPatternIndex !== patternIndex) {
+        changeActionVectorDitherPattern(vt, oldPatternIndex, patternIndex)
+        globalState.clearRedoStack()
       }
-      if (!DITHER_TOOLS.includes(globalState.tool.current?.name)) return
-      const toolName = globalState.tool.selectedName
-      const underlying = tools[toolName]
-      if (globalState.tool.current.buildUpActiveStepSlot != null) {
-        // A step slot is active: assign the pattern to that slot instead
-        // of changing the active pattern, then deselect the slot.
-        const slot = globalState.tool.current.buildUpActiveStepSlot
-        globalState.tool.current.buildUpSteps[slot] = patternIndex
-        globalState.tool.current.buildUpActiveStepSlot = null
-        if (underlying) {
-          underlying.buildUpSteps[slot] = patternIndex
-          underlying.buildUpActiveStepSlot = null
-        }
-      } else {
-        globalState.tool.current.ditherPatternIndex = patternIndex
-        if (underlying) underlying.ditherPatternIndex = patternIndex
+      return
+    }
+    if (!DITHER_TOOLS.includes(globalState.tool.current?.name)) return
+    const toolName = globalState.tool.selectedName
+    const underlying = tools[toolName]
+    if (globalState.tool.current.buildUpActiveStepSlot != null) {
+      // A step slot is active: assign the pattern to that slot instead
+      // of changing the active pattern, then deselect the slot.
+      const slot = globalState.tool.current.buildUpActiveStepSlot
+      globalState.tool.current.buildUpSteps[slot] = patternIndex
+      globalState.tool.current.buildUpActiveStepSlot = null
+      if (underlying) {
+        underlying.buildUpSteps[slot] = patternIndex
+        underlying.buildUpActiveStepSlot = null
       }
-    })
+    } else {
+      globalState.tool.current.ditherPatternIndex = patternIndex
+      if (underlying) underlying.ditherPatternIndex = patternIndex
+    }
+  }
 
-    // Dither offset drag
-    el.addEventListener('pointerdown', (e) => {
-      const control = e.target.closest('.dither-offset-control')
-      if (!control) return
-      const vt = appState.ditherVectorTarget
-      if (!vt && !DITHER_TOOLS.includes(globalState.tool.current?.name)) return
-      // Pointer capture keeps move/up events on this element even when
-      // the cursor leaves the control during a fast drag.
-      control.setPointerCapture(e.pointerId)
-      const startX = e.clientX
-      const startY = e.clientY
+  // Plain (non-reactive) drag state — kept out of $state so pointermove
+  // handlers never trigger Svelte re-renders.
+  let dragState = null
 
-      if (vt) {
-        // The stored offset is relative to the layer position at record
-        // time. Account for any subsequent layer movement so dragging
-        // from the current visual position feels natural.
-        const currentLayerX = vt.layer?.x ?? 0
-        const currentLayerY = vt.layer?.y ?? 0
-        const recordedLayerX = vt.recordedLayerX ?? currentLayerX
-        const recordedLayerY = vt.recordedLayerY ?? currentLayerY
-        const startEffectiveX =
+  /**
+   * Handles pointerdown on the dither offset drag control. Captures the
+   * pointer so move/up events stay on this element during fast drags, then
+   * records the starting geometry into dragState for the move/up handlers.
+   * @param {PointerEvent} e
+   */
+  function handleOffsetPointerDown(e) {
+    const control = e.currentTarget
+    const vt = appState.ditherVectorTarget
+    if (!vt && !DITHER_TOOLS.includes(globalState.tool.current?.name)) return
+    control.setPointerCapture(e.pointerId)
+    const startX = e.clientX
+    const startY = e.clientY
+
+    if (vt) {
+      // The stored offset is relative to the layer position at record
+      // time. Account for any subsequent layer movement so dragging
+      // from the current visual position feels natural.
+      const currentLayerX = vt.layer?.x ?? 0
+      const currentLayerY = vt.layer?.y ?? 0
+      const recordedLayerX = vt.recordedLayerX ?? currentLayerX
+      const recordedLayerY = vt.recordedLayerY ?? currentLayerY
+      dragState = {
+        mode: 'vector',
+        vt,
+        startX,
+        startY,
+        currentLayerX,
+        currentLayerY,
+        recordedLayerX,
+        recordedLayerY,
+        startEffectiveX:
           ((((vt.ditherOffsetX ?? 0) + recordedLayerX - currentLayerX) % 8) +
             8) %
-          8
-        const startEffectiveY =
+          8,
+        startEffectiveY:
           ((((vt.ditherOffsetY ?? 0) + recordedLayerY - currentLayerY) % 8) +
             8) %
-          8
-        const fromOffset = {
-          x: vt.ditherOffsetX ?? 0,
-          y: vt.ditherOffsetY ?? 0,
-        }
-        const onMove = (ev) => {
-          const newEffectiveX =
-            (((startEffectiveX - Math.round((ev.clientX - startX) / 4)) % 8) +
-              8) %
-            8
-          const newEffectiveY =
-            (((startEffectiveY - Math.round((ev.clientY - startY) / 4)) % 8) +
-              8) %
-            8
-          // Convert canvas-space effective offset back to layer-relative
-          // stored offset before writing to the vector target.
-          vt.ditherOffsetX =
-            (((newEffectiveX - recordedLayerX + currentLayerX) % 8) + 8) % 8
-          vt.ditherOffsetY =
-            (((newEffectiveY - recordedLayerY + currentLayerY) % 8) + 8) % 8
-          renderCanvas(vt.layer, true)
-          applyDitherOffset(el, vt.ditherOffsetX, vt.ditherOffsetY)
-          const vectorPreview = document.querySelector('.vector-dither-preview')
-          if (vectorPreview)
-            applyDitherOffset(vectorPreview, vt.ditherOffsetX, vt.ditherOffsetY)
-          applyDitherOffsetControl(
-            control.parentElement,
-            vt.ditherOffsetX,
-            vt.ditherOffsetY,
-          )
-        }
-        control.addEventListener('pointermove', onMove)
-        control.addEventListener(
-          'pointerup',
-          () => {
-            control.removeEventListener('pointermove', onMove)
-            const toOffset = {
-              x: vt.ditherOffsetX ?? 0,
-              y: vt.ditherOffsetY ?? 0,
-            }
-            if (fromOffset.x !== toOffset.x || fromOffset.y !== toOffset.y) {
-              changeActionVectorDitherOffset(vt, fromOffset, toOffset)
-              globalState.clearRedoStack()
-            }
-          },
-          { once: true },
-        )
-      } else {
-        const target = globalState.tool.current
-        const underlying = tools[globalState.tool.selectedName]
-        const startOffsetX = target.ditherOffsetX ?? 0
-        const startOffsetY = target.ditherOffsetY ?? 0
-        let lastOx = startOffsetX
-        let lastOy = startOffsetY
-        const onMove = (ev) => {
-          const ox =
-            (((startOffsetX - Math.round((ev.clientX - startX) / 4)) % 8) + 8) %
-            8
-          const oy =
-            (((startOffsetY - Math.round((ev.clientY - startY) / 4)) % 8) + 8) %
-            8
-          lastOx = ox
-          lastOy = oy
-          // Write only to underlying during drag — avoids triggering
-          // Svelte re-renders on every pointermove event.
-          if (underlying) {
-            underlying.ditherOffsetX = ox
-            underlying.ditherOffsetY = oy
-          }
-          applyDitherOffset(el, ox, oy)
-          const preview = document.querySelector('.dither-preview')
-          if (preview) applyDitherOffset(preview, ox, oy)
-          applyDitherOffsetControl(control.parentElement, ox, oy)
-        }
-        control.addEventListener('pointermove', onMove)
-        control.addEventListener(
-          'pointerup',
-          () => {
-            control.removeEventListener('pointermove', onMove)
-            // Sync final value to proxy once on release
-            target.ditherOffsetX = lastOx
-            target.ditherOffsetY = lastOy
-            if (underlying) {
-              underlying.ditherOffsetX = lastOx
-              underlying.ditherOffsetY = lastOy
-            }
-          },
-          { once: true },
-        )
+          8,
+        fromOffset: { x: vt.ditherOffsetX ?? 0, y: vt.ditherOffsetY ?? 0 },
       }
-    })
+    } else {
+      const target = globalState.tool.current
+      dragState = {
+        mode: 'tool',
+        target,
+        underlying: tools[globalState.tool.selectedName],
+        startX,
+        startY,
+        startOffsetX: target.ditherOffsetX ?? 0,
+        startOffsetY: target.ditherOffsetY ?? 0,
+        lastOx: target.ditherOffsetX ?? 0,
+        lastOy: target.ditherOffsetY ?? 0,
+      }
+    }
+  }
+
+  /**
+   * Handles pointermove during an offset drag. Only runs while dragState is
+   * set; writes directly to the underlying tool singleton during the drag to
+   * avoid triggering Svelte re-renders on every event.
+   * @param {PointerEvent} e
+   */
+  function handleOffsetPointerMove(e) {
+    if (!dragState) return
+    const control = e.currentTarget
+    if (dragState.mode === 'vector') {
+      const {
+        vt,
+        startX,
+        startY,
+        startEffectiveX,
+        startEffectiveY,
+        currentLayerX,
+        currentLayerY,
+        recordedLayerX,
+        recordedLayerY,
+      } = dragState
+      const newEffectiveX =
+        (((startEffectiveX - Math.round((e.clientX - startX) / 4)) % 8) + 8) %
+        8
+      const newEffectiveY =
+        (((startEffectiveY - Math.round((e.clientY - startY) / 4)) % 8) + 8) %
+        8
+      // Convert canvas-space effective offset back to layer-relative
+      // stored offset before writing to the vector target.
+      vt.ditherOffsetX =
+        (((newEffectiveX - recordedLayerX + currentLayerX) % 8) + 8) % 8
+      vt.ditherOffsetY =
+        (((newEffectiveY - recordedLayerY + currentLayerY) % 8) + 8) % 8
+      renderCanvas(vt.layer, true)
+      applyDitherOffset(ref, vt.ditherOffsetX, vt.ditherOffsetY)
+      const vectorPreview = document.querySelector('.vector-dither-preview')
+      if (vectorPreview)
+        applyDitherOffset(vectorPreview, vt.ditherOffsetX, vt.ditherOffsetY)
+      applyDitherOffsetControl(
+        control.parentElement,
+        vt.ditherOffsetX,
+        vt.ditherOffsetY,
+      )
+    } else {
+      const { underlying, startX, startY, startOffsetX, startOffsetY } =
+        dragState
+      const ox =
+        (((startOffsetX - Math.round((e.clientX - startX) / 4)) % 8) + 8) % 8
+      const oy =
+        (((startOffsetY - Math.round((e.clientY - startY) / 4)) % 8) + 8) % 8
+      dragState.lastOx = ox
+      dragState.lastOy = oy
+      // Write only to underlying during drag — avoids triggering
+      // Svelte re-renders on every pointermove event.
+      if (underlying) {
+        underlying.ditherOffsetX = ox
+        underlying.ditherOffsetY = oy
+      }
+      applyDitherOffset(ref, ox, oy)
+      const preview = document.querySelector('.dither-preview')
+      if (preview) applyDitherOffset(preview, ox, oy)
+      applyDitherOffsetControl(control.parentElement, ox, oy)
+    }
+  }
+
+  /**
+   * Handles pointerup to commit the drag result. For the tool mode, syncs
+   * the final offset to the reactive proxy once on release. For vector mode,
+   * records an undo entry if the offset changed.
+   */
+  function handleOffsetPointerUp() {
+    if (!dragState) return
+    if (dragState.mode === 'vector') {
+      const { vt, fromOffset } = dragState
+      const toOffset = { x: vt.ditherOffsetX ?? 0, y: vt.ditherOffsetY ?? 0 }
+      if (fromOffset.x !== toOffset.x || fromOffset.y !== toOffset.y) {
+        changeActionVectorDitherOffset(vt, fromOffset, toOffset)
+        globalState.clearRedoStack()
+      }
+    } else {
+      const { target, underlying, lastOx, lastOy } = dragState
+      // Sync final value to proxy once on release
+      target.ditherOffsetX = lastOx
+      target.ditherOffsetY = lastOy
+      if (underlying) {
+        underlying.ditherOffsetX = lastOx
+        underlying.ditherOffsetY = lastOy
+      }
+    }
+    dragState = null
+  }
+
+  onMount(() => {
+    if (!ref) return
+    // Expose this node so other components can call applyDitherOffset
+    // on the picker container directly via the dom registry.
+    dom.ditherPickerContainer = ref
   })
 </script>
 
@@ -482,8 +508,13 @@
     <div class="dither-offset-control-wrap">
       <div
         class="dither-offset-control"
+        role="application"
+        aria-label="Drag to set dither offset"
         data-tooltip="Drag to set dither offset"
         use:appendOffsetControlSVG
+        onpointerdown={handleOffsetPointerDown}
+        onpointermove={handleOffsetPointerMove}
+        onpointerup={handleOffsetPointerUp}
       ></div>
       <div class="dither-offset-values">
         <span>X: {ditherOffsetX}</span><span>Y: {ditherOffsetY}</span>
@@ -564,6 +595,7 @@
         data-tooltip={i === 31 ? '32/64: Checkerboard' : `${i + 1}/64`}
         aria-label={i === 31 ? '32/64: Checkerboard' : `${i + 1}/64`}
         use:appendPatternSVG={pattern}
+        onclick={() => handleGridBtnClick(i)}
       ></button>
     {/each}
   </div>

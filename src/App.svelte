@@ -22,6 +22,9 @@
   import ColorPickerDialog from './ui/components/dialogs/ColorPickerDialog.svelte'
   import DitherPickerDialog from './ui/components/dialogs/DitherPickerDialog.svelte'
   import StampEditorDialog from './ui/components/dialogs/StampEditorDialog.svelte'
+  import CanvasArea from './ui/components/CanvasArea.svelte'
+  import KeyboardShortcuts from './ui/components/KeyboardShortcuts.svelte'
+  import Tooltip from './ui/components/Tooltip.svelte'
 
   // .page is outside #root — portal all panels/dialogs into it so they share
   // the same positioning parent as the canvas stack.
@@ -40,9 +43,14 @@
 </script>
 
 <NavBar />
+<KeyboardShortcuts />
+<Tooltip />
 
 {#if pageEl}
-  <!-- display:contents removes the wrapper from layout while portaling children into .page -->
+  <!-- CanvasArea portals .canvas-container directly into .page (no wrapper) so it is a
+       first-class flex child of .page and height:100% resolves correctly. -->
+  <CanvasArea {pageEl} />
+  <!-- display:contents removes the wrapper from layout while portaling panels into .page -->
   <div use:portal={pageEl} style="display:contents">
     <Toolbox />
     <Sidebar />
