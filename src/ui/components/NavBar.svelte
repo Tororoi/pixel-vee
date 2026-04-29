@@ -191,6 +191,13 @@
   }
 
   /**
+   * Toggles the navigator dialog open and closed.
+   */
+  function handleNavigator() {
+    globalState.ui.navigatorOpen = !globalState.ui.navigatorOpen
+  }
+
+  /**
    * Toggles the settings dialog open and closed.
    */
   function handleSettings() {
@@ -449,6 +456,14 @@
       <div class="tool-options"></div>
     {/if}
     <div class="settings">
+      <button
+        type="button"
+        class="navigator-icon"
+        id="navigator-btn"
+        aria-label="Open navigator"
+        data-tooltip="Open navigator"
+        onclick={handleNavigator}
+      ></button>
       <button
         type="button"
         class="gear"

@@ -22,6 +22,8 @@
   import ColorPickerDialog from './ui/components/dialogs/ColorPickerDialog.svelte'
   import DitherPickerDialog from './ui/components/dialogs/DitherPickerDialog.svelte'
   import StampEditorDialog from './ui/components/dialogs/StampEditorDialog.svelte'
+  import NavigatorDialog from './ui/components/dialogs/NavigatorDialog.svelte'
+  import NavigatorCanvas from './navigator/NavigatorCanvas.svelte'
   import CanvasArea from './ui/components/CanvasArea.svelte'
   import KeyboardShortcuts from './ui/components/KeyboardShortcuts.svelte'
   import Tooltip from './ui/components/Tooltip.svelte'
@@ -50,6 +52,8 @@
   <!-- CanvasArea portals .canvas-container directly into .page (no wrapper) so it is a
        first-class flex child of .page and height:100% resolves correctly. -->
   <CanvasArea {pageEl} />
+  <!-- NavigatorCanvas mounts itself into .bg-space imperatively — no portal needed. -->
+  <NavigatorCanvas />
   <!-- display:contents removes the wrapper from layout while portaling panels into .page -->
   <div use:portal={pageEl} style="display:contents">
     <Toolbox />
@@ -62,5 +66,6 @@
     <ColorPickerDialog />
     <DitherPickerDialog />
     <StampEditorDialog />
+    <NavigatorDialog />
   </div>
 {/if}

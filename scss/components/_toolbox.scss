@@ -272,6 +272,10 @@
   @include gearIcon;
 }
 
+.navigator-icon {
+  @include navigatorIcon;
+}
+
 .lock {
   @include lockIcon;
 }

@@ -44,6 +44,11 @@ canvas {
     #selection-gui-canvas {
       // mix-blend-mode: difference;
     }
+    .nav-canvas-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
   }
 }
 
