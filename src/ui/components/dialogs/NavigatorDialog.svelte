@@ -17,6 +17,8 @@
   let scripts = $state([])
   let selectedIndex = $state(null)
   let recordingName = $state('untitled')
+  // Speed multiplier for event-mode playback. stepMs = 32 / multiplier.
+  let speedMultiplier = $state(1)
 
   const selectedScript = $derived(
     selectedIndex !== null ? scripts[selectedIndex] : null,
@@ -89,7 +91,7 @@
     if (!selectedScript) return
     playing = true
     activateNavigatorCanvas()
-    await playEventMode(selectedScript)
+    await playEventMode(selectedScript, { stepMs: Math.round(32 / speedMultiplier) })
     restoreRealCanvas()
     playing = false
   }
@@ -183,6 +185,21 @@
         <li class="navigator-script-empty">No scripts loaded</li>
       {/each}
     </ul>
+
+    <div class="navigator-speed-row">
+      <label for="nav-speed" class="navigator-speed-label">Speed</label>
+      <input
+        type="range"
+        id="nav-speed"
+        class="slider navigator-speed-slider"
+        min="0.25"
+        max="4"
+        step="0.25"
+        bind:value={speedMultiplier}
+        disabled={recording || playing}
+      />
+      <span class="navigator-speed-value">{speedMultiplier}×</span>
+    </div>
 
     <div class="navigator-play-row">
       <button

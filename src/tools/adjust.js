@@ -1,6 +1,7 @@
 import { SCALE } from '../utils/constants.js'
 import { globalState } from '../context/state.js'
 import { canvas } from '../context/canvas.js'
+import { navigatorState } from '../navigator/navigatorState.js'
 import { keys } from '../shortcuts/keys.js'
 import { modifyVectorAction } from '../actions/modifyTimeline/modifyTimeline.js'
 import { vectorGui } from '../gui/vector.js'
@@ -232,6 +233,9 @@ export function adjustVectorSteps() {
  * @returns {boolean} - True if an action was taken, false if not
  */
 export function rerouteVectorStepsAction() {
+  // Navigator canvas has no real vectors and no timeline entries, so all
+  // rerouting paths would crash on null action references.
+  if (navigatorState.active) return false
   //for selecting another vector via the canvas, collisionPresent is false since it is currently based on collision with selected vector.
   if (
     globalState.vector.collidedIndex !== null &&

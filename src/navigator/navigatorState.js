@@ -8,6 +8,17 @@ export const navigatorState = {
   offScreenCTX: null,
   previewCVS: null,
   previewCTX: null,
+  backgroundCVS: null,
+  backgroundCTX: null,
+  // GUI overlay canvases — cursor, selection, and vector GUI
+  cursorCVS: null,
+  cursorCTX: null,
+  selectionGuiCVS: null,
+  selectionGuiCTX: null,
+  vectorGuiCTX: null,
+  // DOM references for playback control
+  overlayEl: null,
+  simCursorEl: null,
   // Saved real canvas properties for restoration after swap
   _saved: null,
 }

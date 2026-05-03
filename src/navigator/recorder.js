@@ -1,7 +1,23 @@
 import { canvas } from '../context/canvas.js'
+import { globalState } from '../context/state.js'
+import { swatches } from '../context/swatch.js'
 
 let recording = false
+let isDrawing = false
 let script = null
+
+function captureSnapshot() {
+  const tool = globalState.tool.current
+  return {
+    toolName: globalState.tool.selectedName,
+    modes: tool?.modes ? { ...tool.modes } : {},
+    brushSize: tool?.brushSize ?? null,
+    brushType: tool?.brushType ?? null,
+    ditherPatternIndex: tool?.ditherPatternIndex ?? null,
+    primaryColor: { ...swatches.primary.color },
+    secondaryColor: { ...swatches.secondary.color },
+  }
+}
 
 // Mirrors setCoordinates() in controls/events.js — same formula so recorded
 // coords are always in canvas space, independent of zoom or pan at record time.
@@ -19,12 +35,20 @@ function computeCanvasCoords(e) {
 
 function onPointerDown(e) {
   if (!recording) return
+  isDrawing = true
   const coords = computeCanvasCoords(e)
-  script.actions.push({ type: 'canvas', action: 'pointerdown', ...coords })
+  script.actions.push({
+    type: 'canvas',
+    action: 'pointerdown',
+    ...coords,
+    snapshot: captureSnapshot(),
+  })
 }
 
 function onPointerMove(e) {
-  if (!recording) return
+  // Only record moves that are part of an active stroke. Idle cursor movement
+  // between actions is not stored — playback interpolates it instead.
+  if (!recording || !isDrawing) return
   const events = e.getCoalescedEvents?.() ?? [e]
   for (const evt of events) {
     const coords = computeCanvasCoords(evt)
@@ -39,9 +63,11 @@ function onPointerMove(e) {
   }
 }
 
-function onPointerUp() {
+function onPointerUp(e) {
   if (!recording) return
-  script.actions.push({ type: 'canvas', action: 'pointerup' })
+  isDrawing = false
+  const coords = computeCanvasCoords(e)
+  script.actions.push({ type: 'canvas', action: 'pointerup', ...coords })
 }
 
 // Capture-phase click listener for UI interactions. Records the nearest
@@ -74,6 +100,7 @@ export function startRecording(scriptObj) {
 
 export function stopRecording() {
   recording = false
+  isDrawing = false
   canvas.vectorGuiCVS.removeEventListener('pointerdown', onPointerDown)
   canvas.vectorGuiCVS.removeEventListener('pointermove', onPointerMove)
   canvas.vectorGuiCVS.removeEventListener('pointerup', onPointerUp)

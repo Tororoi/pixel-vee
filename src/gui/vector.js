@@ -269,6 +269,13 @@ function render() {
     renderLayerVectors(canvas.currentLayer)
   } else if (globalState.tool.current.type === 'vector') {
     renderCurrentVector()
+  } else {
+    // Non-vector tools (move, grab, etc.) don't render control points, so
+    // stale collision state from a prior vector-tool render must be cleared
+    // here. Without this, selectedCollisionPresent can remain true after
+    // switching away from a vector tool, causing moveSteps to incorrectly
+    // enter transformSteps() instead of moving the layer.
+    vectorGui.resetCollision()
   }
   //Render vector transform ui
   if (

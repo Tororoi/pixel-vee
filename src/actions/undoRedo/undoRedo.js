@@ -1,7 +1,6 @@
 import { globalState } from '../../context/state.js'
 import { vectorGui } from '../../gui/vector.js'
 import { setSaveFilesizePreview } from '../../save/savefile.js'
-import { navigatorState } from '../../navigator/navigatorState.js'
 import { renderToLatestAction } from './render.js'
 import {
   handleModifyAction,
@@ -205,7 +204,6 @@ export function handleRedo() {
  *   properties to merge into the timeline entry.
  */
 export function addToTimeline(actionObject) {
-  if (navigatorState.active) return
   const { tool, layer, properties } = actionObject
   // Snapshot the raster layer pixels now so undo/redo can restore them
   // without replaying the full timeline. Reference layers store null

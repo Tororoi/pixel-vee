@@ -138,12 +138,15 @@ export function pasteSelectedPixels(clipboard, layer, offsetX, offsetY) {
   canvas.tempLayer.cvs.width = layer.cvs.width
   canvas.tempLayer.cvs.height = layer.cvs.height
   //insert temp canvas right after the current layer's canvas in the DOM
-  let nextSibling = layer.onscreenCvs.nextSibling // Get the next sibling of the current onscreen canvas
-  // Check if there is a next sibling; if so, insert before it, otherwise append to canvas layers
+  // Use the layer's actual parent so this works in both normal mode (dom.canvasLayers)
+  // and navigator mode (the nav overlay), where layer.onscreenCvs is not a child of
+  // dom.canvasLayers and any naive dom.canvasLayers.insertBefore call would throw.
+  const layerParent = layer.onscreenCvs.parentElement || dom.canvasLayers
+  const nextSibling = layer.onscreenCvs.nextSibling
   if (nextSibling) {
-    dom.canvasLayers.insertBefore(canvas.tempLayer.onscreenCvs, nextSibling)
+    layerParent.insertBefore(canvas.tempLayer.onscreenCvs, nextSibling)
   } else {
-    dom.canvasLayers.appendChild(canvas.tempLayer.onscreenCvs)
+    layerParent.appendChild(canvas.tempLayer.onscreenCvs)
   }
   // set onscreen canvas dimensions and scale
   canvas.tempLayer.onscreenCvs.width =
