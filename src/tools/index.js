@@ -221,3 +221,34 @@ export const toolGroups = {
     activeTool: 'select',
   },
 }
+
+export function snapshotToolsState() {
+  const toolsSnap = {}
+  for (const [name, tool] of Object.entries(tools)) {
+    toolsSnap[name] = {
+      modes: tool.modes ? { ...tool.modes } : {},
+      brushSize: tool.brushSize,
+      brushType: tool.brushType,
+      ditherPatternIndex: tool.ditherPatternIndex,
+    }
+  }
+  const groupsSnap = {}
+  for (const [name, group] of Object.entries(toolGroups)) {
+    groupsSnap[name] = group.activeTool
+  }
+  return { tools: toolsSnap, groups: groupsSnap }
+}
+
+export function restoreToolsState(snap) {
+  for (const [name, state] of Object.entries(snap.tools)) {
+    const tool = tools[name]
+    if (!tool) continue
+    if (tool.modes && state.modes) Object.assign(tool.modes, state.modes)
+    if (state.brushSize !== undefined) tool.brushSize = state.brushSize
+    if (state.brushType !== undefined) tool.brushType = state.brushType
+    if (state.ditherPatternIndex !== undefined) tool.ditherPatternIndex = state.ditherPatternIndex
+  }
+  for (const [name, activeTool] of Object.entries(snap.groups)) {
+    if (toolGroups[name]) toolGroups[name].activeTool = activeTool
+  }
+}

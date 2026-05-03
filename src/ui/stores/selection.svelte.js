@@ -59,3 +59,27 @@ export const selectionStore = $state({
     }
   },
 })
+
+export function snapshotSelection() {
+  return {
+    properties: { ...selectionStore.properties },
+    boundaryBox: { ...selectionStore.boundaryBox },
+    previousBoundaryBox: selectionStore.previousBoundaryBox,
+    maskSet: selectionStore.maskSet,
+    seenPixelsSet: selectionStore.seenPixelsSet,
+    pointsSet: selectionStore.pointsSet,
+    pixelPoints: selectionStore.pixelPoints,
+    cornersSet: selectionStore.cornersSet,
+  }
+}
+
+export function restoreSelection(snap) {
+  Object.assign(selectionStore.properties, snap.properties)
+  Object.assign(selectionStore.boundaryBox, snap.boundaryBox)
+  selectionStore.previousBoundaryBox = snap.previousBoundaryBox
+  selectionStore.maskSet = snap.maskSet
+  selectionStore.seenPixelsSet = snap.seenPixelsSet
+  selectionStore.pointsSet = snap.pointsSet
+  selectionStore.pixelPoints = snap.pixelPoints
+  selectionStore.cornersSet = snap.cornersSet
+}

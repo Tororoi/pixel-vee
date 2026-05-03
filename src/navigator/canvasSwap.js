@@ -3,12 +3,29 @@ import { navigatorState } from './navigatorState.js'
 import { renderCanvas } from '../canvas/render.js'
 import { globalState } from '../context/state.js'
 import { vectorGui } from '../gui/vector.js'
-import { swatches } from '../context/swatch.js'
-import { tools } from '../tools/index.js'
+import { tools, snapshotToolsState, restoreToolsState } from '../tools/index.js'
+import { dom } from '../context/dom.js'
 import {
   stopMarchingAnts,
   renderSelectionCVS,
 } from '../gui/select.js'
+import {
+  snapshotTimeline,
+  restoreTimeline,
+} from '../ui/stores/timeline.svelte.js'
+import { snapshotTool, restoreTool } from '../ui/stores/tool.svelte.js'
+import {
+  snapshotSelection,
+  restoreSelection,
+} from '../ui/stores/selection.svelte.js'
+import {
+  snapshotVector,
+  restoreVector,
+} from '../ui/stores/vector.svelte.js'
+import {
+  snapshotSwatches,
+  restoreSwatches,
+} from '../context/swatch.svelte.js'
 
 // Replaces the active canvas state with the navigator canvas so all drawing
 // operations target the overlay instead of the user's real artwork.
@@ -16,8 +33,12 @@ export function activateNavigatorCanvas() {
   if (navigatorState.active) return
   if (!navigatorState.layer) return // NavigatorCanvas not yet mounted
 
-  // Save real canvas state for restoration
+  // Save real canvas state for restoration. Store snapshots are owned by their
+  // respective store modules so adding a new store property automatically
+  // includes it here without touching canvasSwap.
   navigatorState._saved = {
+    toolsState: snapshotToolsState(),
+    canvasLayers: dom.canvasLayers,
     layers: canvas.layers,
     currentLayer: canvas.currentLayer,
     offScreenCVS: canvas.offScreenCVS,
@@ -33,58 +54,12 @@ export function activateNavigatorCanvas() {
     selectionGuiCVS: canvas.selectionGuiCVS,
     selectionGuiCTX: canvas.selectionGuiCTX,
     vectorGuiCTX: canvas.vectorGuiCTX,
-    // Save values (not references) from the reactive stores so they can be
-    // mutated to nav-fresh state and restored exactly on exit.
     stores: {
-      timeline: {
-        undoStack: globalState.timeline.undoStack,
-        redoStack: globalState.timeline.redoStack,
-        currentAction: globalState.timeline.currentAction,
-        sanitizedUndoStack: globalState.timeline.sanitizedUndoStack,
-        activeIndexes: globalState.timeline.activeIndexes,
-        savedBetweenActionImages: globalState.timeline.savedBetweenActionImages,
-        points: globalState.timeline.points,
-      },
-      tool: {
-        current: globalState.tool.current,
-        selectedName: globalState.tool.selectedName,
-        clickCounter: globalState.tool.clickCounter,
-        lineStartX: globalState.tool.lineStartX,
-        lineStartY: globalState.tool.lineStartY,
-        grabStartX: globalState.tool.grabStartX,
-        grabStartY: globalState.tool.grabStartY,
-        startScale: globalState.tool.startScale,
-      },
-      selection: {
-        properties: { ...globalState.selection.properties },
-        boundaryBox: { ...globalState.selection.boundaryBox },
-        previousBoundaryBox: globalState.selection.previousBoundaryBox,
-        maskSet: globalState.selection.maskSet,
-        seenPixelsSet: globalState.selection.seenPixelsSet,
-        pointsSet: globalState.selection.pointsSet,
-        pixelPoints: globalState.selection.pixelPoints,
-        cornersSet: globalState.selection.cornersSet,
-      },
-      vector: {
-        properties: { ...globalState.vector.properties },
-        all: { ...globalState.vector.all },
-        currentIndex: globalState.vector.currentIndex,
-        collidedIndex: globalState.vector.collidedIndex,
-        selectedIndices: new Set(globalState.vector.selectedIndices),
-        savedProperties: { ...globalState.vector.savedProperties },
-        transformMode: globalState.vector.transformMode,
-        highestKey: globalState.vector.highestKey,
-        redoStackHeld: { ...globalState.vector.redoStackHeld },
-        shapeCenterX: globalState.vector.shapeCenterX,
-        shapeCenterY: globalState.vector.shapeCenterY,
-        grabStartShapeCenterX: globalState.vector.grabStartShapeCenterX,
-        grabStartShapeCenterY: globalState.vector.grabStartShapeCenterY,
-        grabStartAngle: globalState.vector.grabStartAngle,
-      },
-      swatches: {
-        primaryColor: { ...swatches.primary.color },
-        secondaryColor: { ...swatches.secondary.color },
-      },
+      timeline: snapshotTimeline(),
+      tool: snapshotTool(),
+      selection: snapshotSelection(),
+      vector: snapshotVector(),
+      swatches: snapshotSwatches(),
     },
   }
 
@@ -141,6 +116,19 @@ export function activateNavigatorCanvas() {
   canvas.selectionGuiCVS = navigatorState.selectionGuiCVS
   canvas.selectionGuiCTX = navigatorState.selectionGuiCTX
   canvas.vectorGuiCTX = navigatorState.vectorGuiCTX
+
+  // Swap dom.canvasLayers so all layer DOM operations (append/remove layer
+  // onscreen canvases) target the navigator overlay rather than the real canvas
+  // area. Ensure the nav layer's onscreen canvas is inside navCanvasLayers —
+  // it may have been removed when navCanvasLayers was drained at the end of
+  // a previous session.
+  dom.canvasLayers = navigatorState.navCanvasLayers
+  if (
+    navigatorState.layer?.onscreenCvs &&
+    !navigatorState.navCanvasLayers.contains(navigatorState.layer.onscreenCvs)
+  ) {
+    navigatorState.navCanvasLayers.appendChild(navigatorState.layer.onscreenCvs)
+  }
 
   navigatorState.active = true
 
@@ -212,6 +200,16 @@ export function activateNavigatorCanvas() {
   // Reset vector GUI collision flags for the new nav session.
   vectorGui.resetCollision()
 
+  // Apply the navigator's own persistent UI state if it exists, so each
+  // session picks up the tool/color settings from the previous nav session
+  // rather than inheriting the real mode's current settings.
+  if (navigatorState.ownUI) {
+    restoreToolsState(navigatorState.ownUI.toolsState)
+    globalState.tool.selectedName = navigatorState.ownUI.tool.selectedName
+    globalState.tool.current = navigatorState.ownUI.tool.current
+    restoreSwatches(navigatorState.ownUI.swatches)
+  }
+
   // Render the background immediately so the overlay is opaque as soon as
   // the session starts — the gray surround + transparent hole fill in here,
   // and the CSS diagonal-stripe pattern on the bg-canvas element shows
@@ -239,46 +237,36 @@ export function restoreRealCanvas() {
   canvas.selectionGuiCTX = s.selectionGuiCTX
   canvas.vectorGuiCTX = s.vectorGuiCTX
 
-  // Restore reactive store values saved before the nav session.
+  // Restore dom.canvasLayers and drain navCanvasLayers so the next session
+  // starts with a clean container (the base nav layer canvas is re-added in
+  // activateNavigatorCanvas when the next session starts).
+  dom.canvasLayers = s.canvasLayers
+  while (navigatorState.navCanvasLayers?.firstChild) {
+    navigatorState.navCanvasLayers.removeChild(
+      navigatorState.navCanvasLayers.firstChild,
+    )
+  }
+
+  // Persist the navigator's current UI state so the next session restores it.
+  navigatorState.ownUI = {
+    toolsState: snapshotToolsState(),
+    tool: snapshotTool(),
+    swatches: snapshotSwatches(),
+  }
+
+  // Restore tool object state (modes, brushSize, etc.) before restoring stores,
+  // since restoreTool sets current to the same tool object reference.
+  restoreToolsState(s.toolsState)
+
+  // Restore reactive store values via each store's own restore function.
+  // Adding a new property to any store's snapshot() automatically includes
+  // it here without touching canvasSwap.
   const st = s.stores
-
-  globalState.timeline.undoStack = st.timeline.undoStack
-  globalState.timeline.redoStack = st.timeline.redoStack
-  globalState.timeline.currentAction = st.timeline.currentAction
-  globalState.timeline.sanitizedUndoStack = st.timeline.sanitizedUndoStack
-  globalState.timeline.activeIndexes = st.timeline.activeIndexes
-  globalState.timeline.savedBetweenActionImages = st.timeline.savedBetweenActionImages
-  globalState.timeline.points = st.timeline.points
-
-  Object.assign(globalState.tool, st.tool)
-
-  Object.assign(globalState.selection.properties, st.selection.properties)
-  Object.assign(globalState.selection.boundaryBox, st.selection.boundaryBox)
-  globalState.selection.previousBoundaryBox = st.selection.previousBoundaryBox
-  globalState.selection.maskSet = st.selection.maskSet
-  globalState.selection.seenPixelsSet = st.selection.seenPixelsSet
-  globalState.selection.pointsSet = st.selection.pointsSet
-  globalState.selection.pixelPoints = st.selection.pixelPoints
-  globalState.selection.cornersSet = st.selection.cornersSet
-
-  globalState.vector.properties = st.vector.properties
-  globalState.vector.all = st.vector.all
-  globalState.vector.setCurrentIndex(st.vector.currentIndex)
-  globalState.vector.collidedIndex = st.vector.collidedIndex
-  globalState.vector.clearSelected()
-  st.vector.selectedIndices.forEach((idx) => globalState.vector.addSelected(idx))
-  globalState.vector.savedProperties = st.vector.savedProperties
-  globalState.vector.transformMode = st.vector.transformMode
-  globalState.vector.highestKey = st.vector.highestKey
-  globalState.vector.redoStackHeld = st.vector.redoStackHeld
-  globalState.vector.shapeCenterX = st.vector.shapeCenterX
-  globalState.vector.shapeCenterY = st.vector.shapeCenterY
-  globalState.vector.grabStartShapeCenterX = st.vector.grabStartShapeCenterX
-  globalState.vector.grabStartShapeCenterY = st.vector.grabStartShapeCenterY
-  globalState.vector.grabStartAngle = st.vector.grabStartAngle
-
-  Object.assign(swatches.primary.color, st.swatches.primaryColor)
-  Object.assign(swatches.secondary.color, st.swatches.secondaryColor)
+  restoreTimeline(st.timeline)
+  restoreTool(st.tool)
+  restoreSelection(st.selection)
+  restoreVector(st.vector)
+  restoreSwatches(st.swatches)
 
   vectorGui.resetCollision()
   // Re-render the selection canvas now that selectionGuiCTX is the real one

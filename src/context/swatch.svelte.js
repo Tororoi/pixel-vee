@@ -26,3 +26,47 @@ export const swatches = $state({
 
 if (dom.swatch) dom.swatch.color = swatches.primary.color
 if (dom.backSwatch) dom.backSwatch.color = swatches.secondary.color
+
+export function snapshotSwatches() {
+  return {
+    primaryColor: { ...swatches.primary.color },
+    secondaryColor: { ...swatches.secondary.color },
+    activePaletteIndex: swatches.activePaletteIndex,
+    selectedPaletteIndex: swatches.selectedPaletteIndex,
+    paletteMode: swatches.paletteMode,
+    currentPreset: swatches.currentPreset,
+    palette: swatches.palette.map((c) => ({ ...c })),
+  }
+}
+
+export function restoreSwatches(snap) {
+  Object.assign(swatches.primary.color, snap.primaryColor)
+  Object.assign(swatches.secondary.color, snap.secondaryColor)
+  swatches.activePaletteIndex = snap.activePaletteIndex
+  swatches.selectedPaletteIndex = snap.selectedPaletteIndex
+  swatches.paletteMode = snap.paletteMode
+  swatches.currentPreset = snap.currentPreset
+  swatches.palette = snap.palette
+  syncSwatchCSSVars()
+}
+
+export function syncSwatchCSSVars() {
+  const p = swatches.primary.color
+  const s = swatches.secondary.color
+  document.documentElement.style.setProperty(
+    '--primary-swatch-color',
+    `${p.r},${p.g},${p.b}`,
+  )
+  document.documentElement.style.setProperty(
+    '--primary-swatch-alpha',
+    `${p.a / 255}`,
+  )
+  document.documentElement.style.setProperty(
+    '--secondary-swatch-color',
+    `${s.r},${s.g},${s.b}`,
+  )
+  document.documentElement.style.setProperty(
+    '--secondary-swatch-alpha',
+    `${s.a / 255}`,
+  )
+}

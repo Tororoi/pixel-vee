@@ -9,6 +9,7 @@
     activateNavigatorCanvas,
     restoreRealCanvas,
   } from '../../../navigator/canvasSwap.js'
+  import { navigatorState } from '../../../navigator/navigatorState.js'
 
   const isOpen = $derived(globalState.ui.navigatorOpen)
 
@@ -27,13 +28,28 @@
     recording ? 'Recording...' : playing ? 'Playing...' : 'Idle',
   )
 
+  // Activate the navigator canvas as soon as the dialog opens so the overlay
+  // immediately shows the canvas background rather than a blank state.
+  // navigatorState is a plain object so this effect only fires when isOpen
+  // changes — there is no reactive cycle risk.
+  $effect(() => {
+    if (isOpen && navigatorState.layer && !navigatorState.active) {
+      activateNavigatorCanvas()
+    }
+  })
+
   function handleClose() {
     if (recording) handleStopRecording()
     if (playing) handleStopPlay()
+    // Restore in case the nav canvas is still active (e.g. showing a playback result).
+    restoreRealCanvas()
     globalState.ui.navigatorOpen = false
   }
 
   function handleRecord() {
+    // Restore any current session (auto-open activation or previous result)
+    // so recording always starts on a fresh canvas.
+    restoreRealCanvas()
     const script = createScript(recordingName || 'untitled')
     activateNavigatorCanvas()
     startRecording(script)
@@ -42,7 +58,6 @@
 
   function handleStopRecording() {
     const script = stopRecording()
-    restoreRealCanvas()
     recording = false
     if (script?.actions.length > 0) {
       scripts = [...scripts, script]
@@ -80,19 +95,23 @@
 
   function handlePlayApi() {
     if (!selectedScript) return
+    // Restore any current session so playback always starts on a fresh canvas.
+    restoreRealCanvas()
     playing = true
     activateNavigatorCanvas()
     playApiMode(selectedScript)
-    restoreRealCanvas()
+    // Do NOT restore after completion — leave the result visible on the nav canvas.
     playing = false
   }
 
   async function handlePlayEvent() {
     if (!selectedScript) return
+    // Restore any current session so playback always starts on a fresh canvas.
+    restoreRealCanvas()
     playing = true
     activateNavigatorCanvas()
     await playEventMode(selectedScript, { stepMs: Math.round(32 / speedMultiplier) })
-    restoreRealCanvas()
+    // Do NOT restore after completion — leave the result visible on the nav canvas.
     playing = false
   }
 

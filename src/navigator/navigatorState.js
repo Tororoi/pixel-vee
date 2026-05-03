@@ -19,6 +19,9 @@ export const navigatorState = {
   // DOM references for playback control
   overlayEl: null,
   simCursorEl: null,
+  navCanvasLayers: null,
+  // Persistent UI state for the navigator (survives across sessions)
+  ownUI: null,
   // Saved real canvas properties for restoration after swap
   _saved: null,
 }

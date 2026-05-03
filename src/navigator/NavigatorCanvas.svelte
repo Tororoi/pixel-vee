@@ -91,10 +91,22 @@
     const bgCTX = bgCVS.getContext('2d', { desynchronized: true })
     bgCTX.setTransform(t, 0, 0, t, 0, 0)
 
-    // Onscreen display canvas for the nav raster layer — lives in our overlay
+    // Canvas layers container — mirrors dom.canvasLayers so all layer DOM
+    // operations (append/remove onscreen canvases) target the overlay instead
+    // of the real canvas area. canvasSwap.js swaps dom.canvasLayers to this
+    // div for the duration of each navigator session.
+    const navCanvasLayers = document.createElement('div')
+    navCanvasLayers.style.position = 'absolute'
+    navCanvasLayers.style.width = '100%'
+    navCanvasLayers.style.height = '100%'
+    overlayEl.appendChild(navCanvasLayers)
+    navigatorState.navCanvasLayers = navCanvasLayers
+
+    // Onscreen display canvas for the nav raster layer — lives in navCanvasLayers
+    // so it participates in the same dom.canvasLayers swap as any other layer.
     const onscreenCVS = document.createElement('canvas')
     onscreenCVS.className = 'onscreen-canvas'
-    overlayEl.appendChild(onscreenCVS)
+    navCanvasLayers.appendChild(onscreenCVS)
     onscreenCVS.width = pw
     onscreenCVS.height = ph
     const onscreenCTX = onscreenCVS.getContext('2d', { desynchronized: true })
