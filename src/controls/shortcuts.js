@@ -62,11 +62,20 @@ export const keyBindings = {
   'KeyQ':            'curveQuad',
   'KeyV':            'curve',
   'Slash':           'curveLine',
+  // Curve tool options
+  'Digit7':          'curveChain',
+  'Equal':           'curveEqual',
+  'KeyA':            'curveAlign',
+  'KeyH':            'curveHold',
+  'KeyL':            'curveLink',
 }
 
 // Maps action names to handler functions. The navigator players import this
 // to execute recorded shortcuts without a switch statement — adding a new
 // recordable action only requires updating this file.
+// Handlers receive the full recorded action object as an argument; most ignore
+// it, but setPrimaryColor reads action.color to deterministically restore the
+// swatch that was randomized during recording.
 export const actionHandlers = {
   undo:            handleUndo,
   redo:            handleRedo,
@@ -93,26 +102,200 @@ export const actionHandlers = {
   curveQuad:       () => { switchTool('curve'); toggleMode('quadCurve') },
   curve:           () => switchTool('curve'),
   curveLine:       () => { switchTool('curve'); toggleMode('line') },
+  curveChain: () => {
+    if (globalState.tool.selectedName === 'curve') {
+      globalState.tool.current.options.chain.active =
+        !globalState.tool.current.options.chain.active
+      // Mirror to tools.curve so the canonical store stays in sync
+      // in case current gets reassigned to a transient tool later.
+      tools.curve.options.chain.active = globalState.tool.current.options.chain.active
+      vectorGui.render()
+    }
+  },
+  curveEqual: () => {
+    if (globalState.tool.selectedName === 'curve') {
+      globalState.tool.current.options.equal.active =
+        !globalState.tool.current.options.equal.active
+      tools.curve.options.equal.active = globalState.tool.current.options.equal.active
+      vectorGui.render()
+    }
+  },
+  curveAlign: () => {
+    if (globalState.tool.selectedName === 'curve') {
+      globalState.tool.current.options.align.active =
+        !globalState.tool.current.options.align.active
+      tools.curve.options.align.active = globalState.tool.current.options.align.active
+      vectorGui.render()
+    }
+  },
+  curveHold: () => {
+    if (globalState.tool.selectedName === 'curve') {
+      globalState.tool.current.options.hold.active =
+        !globalState.tool.current.options.hold.active
+      tools.curve.options.hold.active = globalState.tool.current.options.hold.active
+    }
+  },
+  curveLink: () => {
+    if (globalState.tool.selectedName === 'curve') {
+      globalState.tool.current.options.link.active =
+        !globalState.tool.current.options.link.active
+      tools.curve.options.link.active = globalState.tool.current.options.link.active
+      vectorGui.render()
+    }
+  },
+  // Recorded with the resulting color baked in so playback is deterministic.
+  // action.color is { ...swatches.primary.swatch } captured after randomizeColor ran.
+  setPrimaryColor: ({ color }) => {
+    Object.assign(swatches.primary.swatch, color)
+  },
 }
+
+// Maps key codes to hold-to-activate handlers. These keys change tool.current
+// without changing tool.selectedName so deactivation can restore the prior tool.
+// Each handler contains its own guards (cursor.clicked, tool name) since hold
+// behaviors don't all share the same preconditions.
+export const holdHandlers = {
+  Space: () => {
+    if (!globalState.cursor.clicked) {
+      globalState.tool.current = tools['grab']
+      canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
+      renderCanvas(canvas.currentLayer)
+      vectorGui.render()
+      renderCursor()
+    }
+  },
+  AltLeft: () => {
+    // magicWand uses Alt as subtract-from-selection modifier, not eyedropper
+    if (
+      !globalState.cursor.clicked &&
+      globalState.tool.selectedName !== 'magicWand'
+    ) {
+      globalState.tool.current = tools['eyedropper']
+      canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
+      renderCanvas(canvas.currentLayer)
+      vectorGui.render()
+      renderCursor()
+    }
+  },
+  // Shift fires even mid-stroke so line constraints take effect immediately.
+  ShiftLeft: () => {
+    if (globalState.tool.selectedName === 'brush') {
+      tools.brush.options.line.active = true
+      globalState.tool.lineStartX = globalState.cursor.x
+      globalState.tool.lineStartY = globalState.cursor.y
+    } else if (globalState.tool.selectedName === 'ellipse') {
+      globalState.vector.properties.forceCircle = true
+      if (
+        vectorGui.selectedPoint.xKey &&
+        globalState.tool.clickCounter === 0 &&
+        vectorGui.selectedPoint.xKey !== 'px1'
+      ) {
+        adjustVectorSteps()
+        vectorGui.render()
+      }
+    } else if (globalState.tool.selectedName === 'polygon') {
+      globalState.vector.properties.forceSquare = true
+      if (
+        vectorGui.selectedPoint.xKey &&
+        globalState.tool.clickCounter === 0 &&
+        vectorGui.selectedPoint.xKey !== 'px0'
+      ) {
+        adjustVectorSteps()
+        vectorGui.render()
+      }
+    }
+  },
+  KeyK: () => {
+    if (!globalState.cursor.clicked) swatches.paletteMode = 'edit'
+  },
+  KeyX: () => {
+    if (!globalState.cursor.clicked) swatches.paletteMode = 'remove'
+  },
+}
+holdHandlers.AltRight = holdHandlers.AltLeft
+holdHandlers.ShiftRight = holdHandlers.ShiftLeft
+
+// Maps key codes to release handlers. Called by deactivateShortcut (on keyUp
+// and pointerUp) and by navigator players to restore transient tool state.
+// setToolCssCursor is a function declaration below, so it is hoisted and
+// accessible here even though it appears later in the file.
+export const releaseHandlers = {
+  Space: () => {
+    if (!globalState.cursor.clicked) {
+      globalState.tool.current = tools[globalState.tool.selectedName]
+      // Commit the pan so the next stroke's coordinate math uses the
+      // updated origin rather than the pre-grab origin.
+      canvas.previousXOffset = canvas.xOffset
+      canvas.previousYOffset = canvas.yOffset
+      vectorGui.render()
+      renderCursor()
+      setToolCssCursor()
+    }
+  },
+  AltLeft: () => {
+    if (!globalState.cursor.clicked) {
+      globalState.tool.current = tools[globalState.tool.selectedName]
+      vectorGui.render()
+      renderCursor()
+      setToolCssCursor()
+    }
+  },
+  ShiftLeft: () => {
+    globalState.tool.current = tools[globalState.tool.selectedName]
+    tools.brush.options.line.active = false
+    if (
+      globalState.tool.current.name === 'brush' &&
+      globalState.cursor.clicked
+    ) {
+      // Finalize the constrained line segment so the stroke does
+      // not hang open when free drawing resumes.
+      globalState.tool.current.fn()
+    }
+    globalState.vector.properties.forceCircle = false
+    globalState.vector.properties.forceSquare = false
+    if (globalState.tool.current.name === 'ellipse') {
+      if (
+        (vectorGui.selectedPoint.xKey || vectorGui.collidedPoint.xKey) &&
+        vectorGui.selectedPoint.xKey !== 'px1' &&
+        globalState.cursor.clicked
+      ) {
+        adjustVectorSteps()
+        vectorGui.render()
+      }
+    } else if (globalState.tool.current.name === 'polygon') {
+      if (
+        (vectorGui.selectedPoint.xKey || vectorGui.collidedPoint.xKey) &&
+        vectorGui.selectedPoint.xKey !== 'px0' &&
+        globalState.cursor.clicked
+      ) {
+        adjustVectorSteps()
+        vectorGui.render()
+      }
+    }
+  },
+  KeyK: () => {
+    if (!globalState.cursor.clicked) swatches.paletteMode = 'select'
+  },
+  KeyX: () => {
+    if (!globalState.cursor.clicked) swatches.paletteMode = 'select'
+  },
+}
+releaseHandlers.AltRight = releaseHandlers.AltLeft
+releaseHandlers.ShiftRight = releaseHandlers.ShiftLeft
 
 /**
  * Dispatches a key code to the appropriate shortcut action. Kept
  * separate from the keydown handler so shortcuts can be triggered
  * programmatically — e.g., from a tutorial sequence — without
- * synthesizing a KeyboardEvent. Most cases guard on
- * !globalState.cursor.clicked to prevent tool switches from
- * interrupting an in-progress stroke. Hold-to-activate tools
- * (Space→grab, Alt→eyedropper) override globalState.tool.current
- * without changing globalState.tool.selectedName so deactivation
- * can restore the prior tool. Cmd-key combinations are detected
+ * synthesizing a KeyboardEvent. Cmd-key combinations are detected
  * via the keys map rather than e.metaKey so the same logic works
  * for both native events and programmatic calls.
  * @param {string} keyCode - The key code of the key that was pressed
  */
 export function activateShortcut(keyCode) {
-  // Dispatch discrete actions via the registry. Specific combo (with shift)
-  // takes precedence; falls back to general combo (without shift) so that
-  // e.g. accidental Shift+B still triggers 'brush'.
+  // 1. Registry: discrete actions that produce a recorded action entry.
+  // Specific combo (with shift) takes precedence; falls back to general
+  // combo (without shift) so e.g. accidental Shift+B still triggers 'brush'.
   const meta = keys.MetaLeft || keys.MetaRight
   const shift = keys.ShiftLeft || keys.ShiftRight
   const specific = `${meta ? 'meta+' : ''}${shift ? 'shift+' : ''}${keyCode}`
@@ -123,95 +306,17 @@ export function activateShortcut(keyCode) {
     return
   }
 
-  // Non-registry cases: transient hold-to-activate tools, curve tool-specific
-  // option toggles, and UI-only shortcuts that don't affect recorded output.
+  // 2. Hold/release behaviours: transient tool overrides and palette modes.
+  // Each holdHandler guards its own cursor.clicked check as needed.
+  if (holdHandlers[keyCode]) {
+    holdHandlers[keyCode]()
+    return
+  }
+
+  // 3. Remaining UI-only shortcuts that don't need recording.
   switch (keyCode) {
     case 'MetaLeft':
     case 'MetaRight':
-      //command key
-      break
-    case 'Space':
-      if (!globalState.cursor.clicked) {
-        globalState.tool.current = tools['grab']
-        canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
-        renderCanvas(canvas.currentLayer)
-        vectorGui.render()
-        renderCursor()
-      }
-      break
-    case 'AltLeft':
-    case 'AltRight':
-      //option key
-      //magicWand uses Alt as a subtract-from-selection modifier, not for eyedropper
-      if (
-        !globalState.cursor.clicked &&
-        globalState.tool.selectedName !== 'magicWand'
-      ) {
-        globalState.tool.current = tools['eyedropper']
-        canvas.vectorGuiCVS.style.cursor = globalState.tool.current.cursor
-        renderCanvas(canvas.currentLayer)
-        vectorGui.render()
-        renderCursor()
-      }
-      break
-    case 'ShiftLeft':
-    case 'ShiftRight':
-      if (globalState.tool.selectedName === 'brush') {
-        tools.brush.options.line.active = true
-        globalState.tool.lineStartX = globalState.cursor.x
-        globalState.tool.lineStartY = globalState.cursor.y
-      } else if (globalState.tool.selectedName === 'ellipse') {
-        globalState.vector.properties.forceCircle = true
-        if (
-          vectorGui.selectedPoint.xKey &&
-          globalState.tool.clickCounter === 0 &&
-          vectorGui.selectedPoint.xKey !== 'px1'
-        ) {
-          //while holding control point, readjust ellipse without having to move cursor.
-          adjustVectorSteps()
-          vectorGui.render()
-        }
-      } else if (globalState.tool.selectedName === 'polygon') {
-        globalState.vector.properties.forceSquare = true
-        if (
-          vectorGui.selectedPoint.xKey &&
-          globalState.tool.clickCounter === 0 &&
-          vectorGui.selectedPoint.xKey !== 'px0'
-        ) {
-          //while holding control point, readjust polygon without having to move cursor.
-          adjustVectorSteps()
-          vectorGui.render()
-        }
-      }
-      break
-    case 'Digit7':
-      if (globalState.tool.selectedName === 'curve') {
-        globalState.tool.current.options.chain.active =
-          !globalState.tool.current.options.chain.active
-        // Mirror to tools.curve so the canonical store stays in sync
-        // in case current gets reassigned to a transient tool later.
-        tools.curve.options.chain.active =
-          globalState.tool.current.options.chain.active
-        vectorGui.render()
-      }
-      break
-    case 'Equal':
-      if (globalState.tool.selectedName === 'curve') {
-        globalState.tool.current.options.equal.active =
-          !globalState.tool.current.options.equal.active
-        tools.curve.options.equal.active =
-          globalState.tool.current.options.equal.active
-        vectorGui.render()
-      }
-      break
-    case 'KeyA':
-      if (globalState.tool.selectedName === 'curve') {
-        globalState.tool.current.options.align.active =
-          !globalState.tool.current.options.align.active
-        tools.curve.options.align.active =
-          globalState.tool.current.options.align.active
-        vectorGui.render()
-      }
       break
     case 'KeyG':
       if (!globalState.cursor.clicked) {
@@ -219,42 +324,18 @@ export function activateShortcut(keyCode) {
         vectorGui.render()
       }
       break
-    case 'KeyH':
-      if (globalState.tool.selectedName === 'curve') {
-        globalState.tool.current.options.hold.active =
-          !globalState.tool.current.options.hold.active
-        tools.curve.options.hold.active =
-          globalState.tool.current.options.hold.active
-      }
-      break
     case 'KeyJ':
-      //
-      break
-    case 'KeyK':
-      if (!globalState.cursor.clicked) {
-        swatches.paletteMode = 'edit'
-      }
-      break
-    case 'KeyL':
-      if (globalState.tool.selectedName === 'curve') {
-        globalState.tool.current.options.link.active =
-          !globalState.tool.current.options.link.active
-        tools.curve.options.link.active =
-          globalState.tool.current.options.link.active
-        vectorGui.render()
-      }
-      break
     case 'KeyN':
-      //
+    case 'KeyU':
       break
     case 'KeyR':
-      // meta+KeyR (rotate) is handled by the registry above; only plain R reaches here.
+      // meta+KeyR (rotate) handled by registry; only plain R reaches here.
       if (!globalState.cursor.clicked && !meta) {
         randomizeColor(swatches.primary.swatch)
       }
       break
     case 'KeyS':
-      // plain S (select tool) is handled by the registry above; only meta+S reaches here.
+      // plain S (select) handled by registry; only meta+S reaches here.
       if (!globalState.cursor.clicked && meta) {
         globalState.ui.saveDialogOpen = true
       }
@@ -266,197 +347,25 @@ export function activateShortcut(keyCode) {
         globalState.ui.showTooltips = !globalState.ui.showTooltips
       }
       break
-    case 'KeyU':
-      //
-      break
-    case 'KeyX':
-      // meta+KeyX (cut) is handled by the registry above; only plain X reaches here.
-      if (!globalState.cursor.clicked && !meta) {
-        swatches.paletteMode = 'remove'
-      }
-      break
     default:
-    //do nothing
+      break
   }
 }
 
 /**
  * Deactivates the shortcut associated with a key code. Called on
- * both keyUp and pointerUp, because the mouse button can be
- * released while a modifier key is still physically held — the
- * pointerUp handler must retire transient tools independently of
- * any key event. Hold-to-activate tools (Space→grab,
- * Alt→eyedropper) restore globalState.tool.current to the
- * selected tool and apply side effects: Space commits the new pan
- * offset into previousXOffset so the next stroke uses the updated
- * origin; Shift clears line mode and constrained geometry, and
- * fires the brush fn() mid-stroke to finalize the constrained
- * line segment before free drawing resumes. KeyK and KeyX use a
- * momentary hold pattern for palette modes — each restores
- * paletteMode to 'select' on release.
+ * both keyUp and pointerUp, because the mouse button can be released
+ * while a modifier key is still physically held.
  * @param {string} keyCode - The key code of the key that was released
  */
 export function deactivateShortcut(keyCode) {
-  switch (keyCode) {
-    case 'MetaLeft':
-    case 'MetaRight':
-      //command key
-      break
-    case 'Space':
-      //only deactivate while not clicked
-      if (!globalState.cursor.clicked) {
-        globalState.tool.current = tools[globalState.tool.selectedName]
-        // Commit the pan so the next stroke's coordinate math
-        // uses the updated origin rather than the pre-grab origin.
-        canvas.previousXOffset = canvas.xOffset
-        canvas.previousYOffset = canvas.yOffset
-        vectorGui.render()
-        renderCursor()
-        setToolCssCursor()
-        //TODO: (Low Priority) refactor so grabSteps can be called instead with a manually supplied pointer event pointerup
-      }
-      break
-    case 'AltLeft':
-    case 'AltRight':
-      //option key
-      //only deactivate while not clicked
-      if (!globalState.cursor.clicked) {
-        globalState.tool.current = tools[globalState.tool.selectedName]
-        vectorGui.render()
-        renderCursor()
-        setToolCssCursor()
-      }
-      break
-    case 'ShiftLeft':
-    case 'ShiftRight':
-      globalState.tool.current = tools[globalState.tool.selectedName]
-      tools.brush.options.line.active = false
-      if (
-        globalState.tool.current.name === 'brush' &&
-        globalState.cursor.clicked
-      ) {
-        // Finalize the constrained line segment so the stroke does
-        // not hang open when free drawing resumes.
-        globalState.tool.current.fn()
-      }
-      globalState.vector.properties.forceCircle = false
-      globalState.vector.properties.forceSquare = false
-      if (globalState.tool.current.name === 'ellipse') {
-        if (
-          (vectorGui.selectedPoint.xKey || vectorGui.collidedPoint.xKey) &&
-          vectorGui.selectedPoint.xKey !== 'px1' &&
-          globalState.cursor.clicked
-        ) {
-          //while holding control point, readjust ellipse without having to move cursor.
-          //TODO: (Medium Priority) update this functionality to have other radii go back to previous radius value when releasing shift
-          adjustVectorSteps()
-          vectorGui.render()
-        }
-      } else if (globalState.tool.current.name === 'polygon') {
-        if (
-          (vectorGui.selectedPoint.xKey || vectorGui.collidedPoint.xKey) &&
-          vectorGui.selectedPoint.xKey !== 'px0' &&
-          globalState.cursor.clicked
-        ) {
-          adjustVectorSteps()
-          vectorGui.render()
-        }
-      }
-      break
-    case 'KeyA':
-      //
-      break
-    case 'KeyB':
-      //
-      break
-    case 'KeyC':
-      //
-      break
-    case 'KeyD':
-      //
-      break
-    case 'KeyE':
-      //
-      break
-    case 'KeyF':
-      //
-      break
-    case 'KeyG':
-      //
-      break
-    case 'KeyH':
-      //
-      break
-    case 'KeyI':
-      //
-      break
-    case 'KeyJ':
-      //
-      break
-    case 'KeyK':
-      if (!globalState.cursor.clicked) {
-        swatches.paletteMode = 'select'
-      }
-      break
-    case 'KeyL':
-      //
-      break
-    case 'KeyM':
-      //
-      break
-    case 'KeyN':
-      //
-      break
-    case 'KeyO':
-      //
-      break
-    case 'KeyP':
-      //
-      break
-    case 'KeyQ':
-      //
-      break
-    case 'KeyR':
-      //
-      break
-    case 'KeyS':
-      //
-      break
-    case 'KeyT':
-      //
-      break
-    case 'KeyU':
-      //
-      break
-    case 'KeyV':
-      //
-      break
-    case 'KeyW':
-      //
-      break
-    case 'KeyX':
-      if (!globalState.cursor.clicked) {
-        swatches.paletteMode = 'select'
-      }
-      break
-    case 'KeyY':
-      //
-      break
-    case 'KeyZ':
-      //
-      break
-    default:
-    //do nothing
-  }
+  releaseHandlers[keyCode]?.()
 }
 
 /**
  * Applies the correct CSS cursor for the current tool to the
  * vector GUI canvas. Eraser mode sets the cursor to 'none' because
- * the eraser renders its own circular overlay on the canvas;
- * leaving the OS cursor visible would create a confusing double-
- * cursor. All other tools use the CSS cursor string defined on
- * the tool object.
+ * the eraser renders its own circular overlay on the canvas.
  * TODO: (Low Priority) move to utils file
  */
 function setToolCssCursor() {

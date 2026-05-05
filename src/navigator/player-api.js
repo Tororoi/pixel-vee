@@ -5,7 +5,8 @@ import {
   handlePointerUp,
 } from '../controls/events.js'
 import { applySnapshot } from './applySnapshot.js'
-import { actionHandlers } from '../controls/shortcuts.js'
+import { actionHandlers, holdHandlers, releaseHandlers } from '../controls/shortcuts.js'
+import { vectorGui } from '../gui/vector.js'
 
 // Builds a minimal event-like object accepted by the pointer handlers.
 // offsetX/offsetY are the values setCoordinates() reads, computed by
@@ -28,6 +29,14 @@ export function playApiMode(script) {
       const e = makeMockEvent(action.x ?? 0, action.y ?? 0)
       if (action.action === 'pointerdown') {
         applySnapshot(action.snapshot)
+        // Update cursor position then force a full vectorGui render so collision
+        // state (collidedPoint, selectedCollisionPresent, collidedIndex) is freshly
+        // computed at the target position. handlePointerMove alone is not enough —
+        // it skips vectorGui.render() when cursor coordinates haven't changed, which
+        // leaves stale selectedCollisionPresent=true from the previous stroke's last
+        // control point, causing the curve tool to adjust the wrong vector.
+        handlePointerMove(e)
+        vectorGui.render()
         handlePointerDown(e)
       } else if (action.action === 'pointermove') {
         handlePointerMove(e)
@@ -45,7 +54,11 @@ export function playApiMode(script) {
         document.getElementById(action.targetId)?.click()
       }
     } else if (action.type === 'shortcut') {
-      actionHandlers[action.action]?.()
+      actionHandlers[action.action]?.(action)
+    } else if (action.type === 'hold') {
+      holdHandlers[action.key]?.()
+    } else if (action.type === 'release') {
+      releaseHandlers[action.key]?.()
     }
   }
 }

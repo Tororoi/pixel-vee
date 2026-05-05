@@ -8,7 +8,8 @@ import { renderCursor } from '../gui/cursor.js'
 import { applySnapshot } from './applySnapshot.js'
 import { navigatorState } from './navigatorState.js'
 import { tools } from '../tools/index.js'
-import { actionHandlers } from '../controls/shortcuts.js'
+import { actionHandlers, holdHandlers, releaseHandlers } from '../controls/shortcuts.js'
+import { vectorGui } from '../gui/vector.js'
 
 const DEFAULT_STEP_MS = 32
 const CANVAS_STEP_SIZE = 8  // canvas units per travel step
@@ -251,6 +252,14 @@ export async function playEventMode(script, { stepMs = DEFAULT_STEP_MS } = {}) {
           }
           if (cancelFlag) break
           applySnapshot(action.snapshot)
+          // Position the canvas cursor at the target before rendering.
+          // When the previous action was a UI click, animateViewportTravel
+          // ran instead of animateCanvasTravel, so canvas.x/y were never
+          // updated. Without this move, vectorGui.render() uses a stale
+          // cursor position and rerouteVectorStepsAction misses the correct
+          // collision, sending the adjustment to the wrong vector.
+          handlePointerMove(makeMockEvent(x, y))
+          vectorGui.render()
           handlePointerDown(makeMockEvent(x, y))
           const { vx, vy } = canvasToViewport(x, y)
           moveSimCursor(vx, vy)
@@ -299,7 +308,15 @@ export async function playEventMode(script, { stepMs = DEFAULT_STEP_MS } = {}) {
         prevWasCanvas = false
       } else if (action.type === 'shortcut') {
         // Execute directly — no cursor travel needed for keyboard shortcuts.
-        actionHandlers[action.action]?.()
+        actionHandlers[action.action]?.(action)
+        await sleep(stepMs)
+      } else if (action.type === 'hold') {
+        holdHandlers[action.key]?.()
+        setSimCursorShape(canvas.vectorGuiCVS.style.cursor || 'crosshair')
+        await sleep(stepMs)
+      } else if (action.type === 'release') {
+        releaseHandlers[action.key]?.()
+        setSimCursorShape(canvas.vectorGuiCVS.style.cursor || 'crosshair')
         await sleep(stepMs)
       }
     }

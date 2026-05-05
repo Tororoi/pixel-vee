@@ -2,7 +2,9 @@ import { canvas } from '../context/canvas.js'
 import { globalState } from '../context/state.js'
 import { snapshotToolsState } from '../tools/index.js'
 import { snapshotSwatches } from '../context/swatch.svelte.js'
-import { keyBindings } from '../controls/shortcuts.js'
+import { swatches } from '../context/swatch.js'
+import { keyBindings, holdHandlers } from '../controls/shortcuts.js'
+import { vectorGui } from '../gui/vector.js'
 
 let recording = false
 let isDrawing = false
@@ -12,11 +14,19 @@ let script = null
 // by canvasSwap.js, so any new tool property added to the tools object is
 // automatically captured without updating this function.
 function captureSnapshot() {
-  return {
+  const snap = {
     selectedName: globalState.tool.selectedName,
     toolsState: snapshotToolsState(),
     swatches: snapshotSwatches(),
+    vectorCurrentIndex: globalState.vector.currentIndex,
+    // Captured after handlePointerDown runs (Svelte listener fires first), so
+    // selectedPoint already reflects the grabbed control point. Playback
+    // restores this directly, bypassing position-ambiguous collision detection.
+    selectedCollisionPoint: vectorGui.selectedPoint.xKey
+      ? { xKey: vectorGui.selectedPoint.xKey, yKey: vectorGui.selectedPoint.yKey }
+      : null,
   }
+  return snap
 }
 
 // Mirrors setCoordinates() in controls/events.js — same formula so recorded
@@ -37,11 +47,17 @@ function onPointerDown(e) {
   if (!recording) return
   isDrawing = true
   const coords = computeCanvasCoords(e)
-  script.actions.push({
-    type: 'canvas',
-    action: 'pointerdown',
-    ...coords,
-    snapshot: captureSnapshot(),
+  // Defer snapshot capture until after all synchronous event handlers (including
+  // Svelte's handlePointerDown / rerouteVectorStepsAction) have run, so that
+  // vectorCurrentIndex and selectedPoint reflect the post-switch state.
+  queueMicrotask(() => {
+    if (!recording) return
+    script.actions.push({
+      type: 'canvas',
+      action: 'pointerdown',
+      ...coords,
+      snapshot: captureSnapshot(),
+    })
   })
 }
 
@@ -88,9 +104,35 @@ function onDocKeydown(e) {
   const specific = `${meta ? 'meta+' : ''}${shift ? 'shift+' : ''}${e.code}`
   const general  = `${meta ? 'meta+' : ''}${e.code}`
   const action = keyBindings[specific] ?? keyBindings[general]
-  if (!action) return
+  if (action) {
+    script.actions.push({ type: 'shortcut', action })
+    return
+  }
 
-  script.actions.push({ type: 'shortcut', action })
+  if (holdHandlers[e.code]) {
+    script.actions.push({ type: 'hold', key: e.code })
+    return
+  }
+
+  // Plain KeyR = randomize color. Use queueMicrotask so the snapshot is taken
+  // after the app's keydown handler (not capture phase) has run randomizeColor.
+  if (e.code === 'KeyR' && !meta) {
+    queueMicrotask(() => {
+      if (!recording) return
+      script.actions.push({
+        type: 'shortcut',
+        action: 'setPrimaryColor',
+        color: { ...swatches.primary.swatch },
+      })
+    })
+  }
+}
+
+function onDocKeyup(e) {
+  if (!recording) return
+  if (holdHandlers[e.code]) {
+    script.actions.push({ type: 'release', key: e.code })
+  }
 }
 
 // Capture-phase click listener for UI interactions. Records the nearest
@@ -133,6 +175,7 @@ export function startRecording(scriptObj) {
   canvas.vectorGuiCVS.addEventListener('pointermove', onPointerMove)
   canvas.vectorGuiCVS.addEventListener('pointerup', onPointerUp)
   document.addEventListener('keydown', onDocKeydown, true)
+  document.addEventListener('keyup', onDocKeyup, true)
   document.addEventListener('click', onDocClick, true)
   document.addEventListener('input', onDocInput, true)
 }
@@ -144,6 +187,7 @@ export function stopRecording() {
   canvas.vectorGuiCVS.removeEventListener('pointermove', onPointerMove)
   canvas.vectorGuiCVS.removeEventListener('pointerup', onPointerUp)
   document.removeEventListener('keydown', onDocKeydown, true)
+  document.removeEventListener('keyup', onDocKeyup, true)
   document.removeEventListener('click', onDocClick, true)
   document.removeEventListener('input', onDocInput, true)
   const result = script
