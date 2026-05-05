@@ -5,6 +5,7 @@ import {
   handlePointerUp,
 } from '../controls/events.js'
 import { applySnapshot } from './applySnapshot.js'
+import { actionHandlers } from '../controls/shortcuts.js'
 
 // Builds a minimal event-like object accepted by the pointer handlers.
 // offsetX/offsetY are the values setCoordinates() reads, computed by
@@ -34,7 +35,17 @@ export function playApiMode(script) {
         handlePointerUp(e)
       }
     } else if (action.type === 'ui') {
-      document.getElementById(action.targetId)?.click()
+      if (action.action === 'input') {
+        const el = document.getElementById(action.targetId)
+        if (el) {
+          el.value = action.value
+          el.dispatchEvent(new Event('input', { bubbles: true }))
+        }
+      } else {
+        document.getElementById(action.targetId)?.click()
+      }
+    } else if (action.type === 'shortcut') {
+      actionHandlers[action.action]?.()
     }
   }
 }

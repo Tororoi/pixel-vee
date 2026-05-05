@@ -1,5 +1,5 @@
-export function createScript(name = 'untitled') {
-  return { version: '1.0', name, actions: [] }
+export function createScript(name = 'untitled', canvasWidth = null, canvasHeight = null) {
+  return { version: '1.0', name, canvasWidth, canvasHeight, actions: [] }
 }
 
 export function loadScript(json) {

@@ -1,5 +1,6 @@
 <script>
   import { globalState } from '../../../context/state.js'
+  import { canvas } from '../../../context/canvas.js'
   import DialogBox from '../DialogBox.svelte'
   import { createScript, loadScript, saveScript } from '../../../navigator/script.js'
   import { startRecording, stopRecording } from '../../../navigator/recorder.js'
@@ -38,9 +39,9 @@
     }
   })
 
-  function handleClose() {
+  async function handleClose() {
     if (recording) handleStopRecording()
-    if (playing) handleStopPlay()
+    if (playing) await handleStopPlay()
     // Restore in case the nav canvas is still active (e.g. showing a playback result).
     restoreRealCanvas()
     globalState.ui.navigatorOpen = false
@@ -50,10 +51,26 @@
     // Restore any current session (auto-open activation or previous result)
     // so recording always starts on a fresh canvas.
     restoreRealCanvas()
-    const script = createScript(recordingName || 'untitled')
+    const script = createScript(
+      recordingName || 'untitled',
+      canvas.offScreenCVS.width,
+      canvas.offScreenCVS.height,
+    )
     activateNavigatorCanvas()
     startRecording(script)
     recording = true
+  }
+
+  function warnDimensionMismatch(script) {
+    if (!script.canvasWidth) return
+    const w = canvas.offScreenCVS.width
+    const h = canvas.offScreenCVS.height
+    if (script.canvasWidth !== w || script.canvasHeight !== h) {
+      console.warn(
+        `Navigator: script was recorded at ${script.canvasWidth}×${script.canvasHeight},` +
+        ` current canvas is ${w}×${h} — coordinates may be incorrect`,
+      )
+    }
   }
 
   function handleStopRecording() {
@@ -95,6 +112,7 @@
 
   function handlePlayApi() {
     if (!selectedScript) return
+    warnDimensionMismatch(selectedScript)
     // Restore any current session so playback always starts on a fresh canvas.
     restoreRealCanvas()
     playing = true
@@ -106,6 +124,7 @@
 
   async function handlePlayEvent() {
     if (!selectedScript) return
+    warnDimensionMismatch(selectedScript)
     // Restore any current session so playback always starts on a fresh canvas.
     restoreRealCanvas()
     playing = true
@@ -115,8 +134,8 @@
     playing = false
   }
 
-  function handleStopPlay() {
-    stopEventPlay()
+  async function handleStopPlay() {
+    await stopEventPlay()
     restoreRealCanvas()
     playing = false
   }

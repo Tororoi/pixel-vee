@@ -8,12 +8,14 @@ import { renderCursor } from '../gui/cursor.js'
 import { applySnapshot } from './applySnapshot.js'
 import { navigatorState } from './navigatorState.js'
 import { tools } from '../tools/index.js'
+import { actionHandlers } from '../controls/shortcuts.js'
 
 const DEFAULT_STEP_MS = 32
 const CANVAS_STEP_SIZE = 8  // canvas units per travel step
 const UI_STEP_SIZE = 10     // viewport px per travel step (UI travel is already in screen space)
 
 let cancelFlag = false
+let stopResolve = null
 let currentShape = null
 // Tracks the sim cursor's current position in viewport (fixed) coordinates.
 let curVx = 0
@@ -275,7 +277,7 @@ export async function playEventMode(script, { stepMs = DEFAULT_STEP_MS } = {}) {
         }
       } else if (action.type === 'ui') {
         setSimCursorShape('pointer')
-        // Animate the cursor to the UI element before clicking it
+        // Animate the cursor to the UI element before interacting with it
         const targetEl = document.getElementById(action.targetId)
         if (targetEl) {
           const rect = targetEl.getBoundingClientRect()
@@ -284,16 +286,36 @@ export async function playEventMode(script, { stepMs = DEFAULT_STEP_MS } = {}) {
           await animateViewportTravel(vx, vy, stepMs)
           if (cancelFlag) break
         }
-        document.getElementById(action.targetId)?.click()
+        if (action.action === 'input') {
+          const el = document.getElementById(action.targetId)
+          if (el) {
+            el.value = action.value
+            el.dispatchEvent(new Event('input', { bubbles: true }))
+          }
+        } else {
+          document.getElementById(action.targetId)?.click()
+        }
         await sleep(stepMs)
         prevWasCanvas = false
+      } else if (action.type === 'shortcut') {
+        // Execute directly — no cursor travel needed for keyboard shortcuts.
+        actionHandlers[action.action]?.()
+        await sleep(stepMs)
       }
     }
   } finally {
     endPlayback()
+    stopResolve?.()
+    stopResolve = null
   }
 }
 
+// Returns a Promise that resolves once the playback loop has fully stopped and
+// endPlayback() has run. Callers must await this before calling restoreRealCanvas
+// so no actions fire on the restored real canvas after cancellation.
 export function stopEventPlay() {
   cancelFlag = true
+  return new Promise((r) => {
+    stopResolve = r
+  })
 }

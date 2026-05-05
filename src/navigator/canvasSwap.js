@@ -41,6 +41,7 @@ export function activateNavigatorCanvas() {
     canvasLayers: dom.canvasLayers,
     layers: canvas.layers,
     currentLayer: canvas.currentLayer,
+    pastedLayer: canvas.pastedLayer,
     offScreenCVS: canvas.offScreenCVS,
     offScreenCTX: canvas.offScreenCTX,
     previewCVS: canvas.previewCVS,
@@ -103,6 +104,9 @@ export function activateNavigatorCanvas() {
   // layers[0] — assigning the raw object twice would create two separate
   // proxies and trigger state_proxy_equality_mismatch warnings.
   canvas.currentLayer = canvas.layers[0]
+  // Clear any stale pastedLayer from a previous session so hasPaste is false
+  // and the NavBar's cut/paste onclick handlers are not disabled at session start.
+  canvas.pastedLayer = null
   canvas.offScreenCVS = navigatorState.offScreenCVS
   canvas.offScreenCTX = navigatorState.offScreenCTX
   canvas.previewCVS = navigatorState.previewCVS
@@ -223,6 +227,7 @@ export function restoreRealCanvas() {
   const s = navigatorState._saved
   canvas.layers = s.layers
   canvas.currentLayer = s.currentLayer
+  canvas.pastedLayer = s.pastedLayer
   canvas.offScreenCVS = s.offScreenCVS
   canvas.offScreenCTX = s.offScreenCTX
   canvas.previewCVS = s.previewCVS

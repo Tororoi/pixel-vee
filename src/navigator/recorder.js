@@ -1,21 +1,21 @@
 import { canvas } from '../context/canvas.js'
 import { globalState } from '../context/state.js'
-import { swatches } from '../context/swatch.js'
+import { snapshotToolsState } from '../tools/index.js'
+import { snapshotSwatches } from '../context/swatch.svelte.js'
+import { keyBindings } from '../controls/shortcuts.js'
 
 let recording = false
 let isDrawing = false
 let script = null
 
+// Captures complete tool configuration using the same snapshot functions used
+// by canvasSwap.js, so any new tool property added to the tools object is
+// automatically captured without updating this function.
 function captureSnapshot() {
-  const tool = globalState.tool.current
   return {
-    toolName: globalState.tool.selectedName,
-    modes: tool?.modes ? { ...tool.modes } : {},
-    brushSize: tool?.brushSize ?? null,
-    brushType: tool?.brushType ?? null,
-    ditherPatternIndex: tool?.ditherPatternIndex ?? null,
-    primaryColor: { ...swatches.primary.color },
-    secondaryColor: { ...swatches.secondary.color },
+    selectedName: globalState.tool.selectedName,
+    toolsState: snapshotToolsState(),
+    swatches: snapshotSwatches(),
   }
 }
 
@@ -70,6 +70,29 @@ function onPointerUp(e) {
   script.actions.push({ type: 'canvas', action: 'pointerup', ...coords })
 }
 
+// Capture-phase keydown listener for modifier-key shortcuts that affect canvas
+// state. These never appear as click events so they must be recorded separately.
+// We record only the logical action name, not the raw key, so playback calls the
+// action function directly and is immune to the conditional onclick bindings in
+// the NavBar (hasSelection, hasClipboard, etc.).
+function onDocKeydown(e) {
+  if (!recording) return
+  if (e.repeat) return
+  // Don't capture shortcuts while the user is typing in a text field.
+  const active = document.activeElement
+  if (active?.tagName === 'INPUT' && active.type === 'text') return
+  if (active?.tagName === 'TEXTAREA') return
+
+  const meta = e.metaKey || e.ctrlKey
+  const shift = e.shiftKey
+  const specific = `${meta ? 'meta+' : ''}${shift ? 'shift+' : ''}${e.code}`
+  const general  = `${meta ? 'meta+' : ''}${e.code}`
+  const action = keyBindings[specific] ?? keyBindings[general]
+  if (!action) return
+
+  script.actions.push({ type: 'shortcut', action })
+}
+
 // Capture-phase click listener for UI interactions. Records the nearest
 // ancestor element ID so playback can locate the element by ID without
 // hardcoded coordinates.
@@ -89,13 +112,29 @@ function onDocClick(e) {
   script.actions.push({ type: 'ui', action: 'click', targetId: id })
 }
 
+// Capture-phase input listener for range sliders. Clicks on range inputs don't
+// fire a `click` event — they fire `input`. Recording the value here means
+// playback can restore slider state between strokes, ensuring brush size,
+// opacity, etc. are correct even when no stroke follows the slider change.
+function onDocInput(e) {
+  if (!recording) return
+  const target = e.target
+  if (target.type !== 'range') return
+  if (target.closest?.('.navigator-container')) return
+  const id = target.id || target.closest?.('[id]')?.id
+  if (!id) return
+  script.actions.push({ type: 'ui', action: 'input', targetId: id, value: target.value })
+}
+
 export function startRecording(scriptObj) {
   script = scriptObj
   recording = true
   canvas.vectorGuiCVS.addEventListener('pointerdown', onPointerDown)
   canvas.vectorGuiCVS.addEventListener('pointermove', onPointerMove)
   canvas.vectorGuiCVS.addEventListener('pointerup', onPointerUp)
+  document.addEventListener('keydown', onDocKeydown, true)
   document.addEventListener('click', onDocClick, true)
+  document.addEventListener('input', onDocInput, true)
 }
 
 export function stopRecording() {
@@ -104,7 +143,9 @@ export function stopRecording() {
   canvas.vectorGuiCVS.removeEventListener('pointerdown', onPointerDown)
   canvas.vectorGuiCVS.removeEventListener('pointermove', onPointerMove)
   canvas.vectorGuiCVS.removeEventListener('pointerup', onPointerUp)
+  document.removeEventListener('keydown', onDocKeydown, true)
   document.removeEventListener('click', onDocClick, true)
+  document.removeEventListener('input', onDocInput, true)
   const result = script
   script = null
   return result

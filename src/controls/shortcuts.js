@@ -26,6 +26,75 @@ import {
 import { toggleMode, switchTool } from '../tools/toolbox.js'
 import { adjustVectorSteps } from '../tools/adjust.js'
 
+// Maps key combo strings to action names. Format: '[meta+][shift+]KeyCode'.
+// Specific combos (with shift) take precedence over general ones in the lookup
+// inside activateShortcut, so meta+shift+KeyZ resolves to 'redo' before the
+// general meta+KeyZ fallback would reach 'undo'.
+// The navigator recorder and players import this to avoid duplicating the list.
+export const keyBindings = {
+  // Clipboard / history
+  'meta+KeyZ':       'undo',
+  'meta+shift+KeyZ': 'redo',
+  'meta+KeyX':       'cut',
+  'meta+KeyC':       'copy',
+  'meta+KeyV':       'paste',
+  'meta+KeyD':       'deselect',
+  'Enter':           'confirm',
+  'Backspace':       'deleteSelection',
+  // Transforms
+  'meta+KeyF':       'flipHorizontal',
+  'meta+shift+KeyF': 'flipVertical',
+  'meta+KeyR':       'rotate',
+  // Tool switches
+  'KeyB':            'brush',
+  'KeyF':            'fill',
+  'KeyO':            'ellipse',
+  'KeyP':            'polygon',
+  'KeyS':            'select',
+  'KeyW':            'magicWand',
+  // Mode toggles
+  'KeyE':            'eraser',
+  'KeyI':            'inject',
+  'KeyM':            'colorMask',
+  'KeyY':            'perfect',
+  // Curve variants
+  'KeyC':            'curveCubic',
+  'KeyQ':            'curveQuad',
+  'KeyV':            'curve',
+  'Slash':           'curveLine',
+}
+
+// Maps action names to handler functions. The navigator players import this
+// to execute recorded shortcuts without a switch statement — adding a new
+// recordable action only requires updating this file.
+export const actionHandlers = {
+  undo:            handleUndo,
+  redo:            handleRedo,
+  cut:             actionCutSelection,
+  copy:            actionCopySelection,
+  paste:           actionPasteSelection,
+  confirm:         actionConfirmPastedPixels,
+  deselect:        actionDeselect,
+  deleteSelection: actionDeleteSelection,
+  flipHorizontal:  () => actionFlipPixels(true),
+  flipVertical:    () => actionFlipPixels(false),
+  rotate:          actionRotatePixels,
+  brush:           () => switchTool('brush'),
+  fill:            () => switchTool('fill'),
+  ellipse:         () => switchTool('ellipse'),
+  polygon:         () => switchTool('polygon'),
+  select:          () => switchTool('select'),
+  magicWand:       () => switchTool('magicWand'),
+  eraser:          () => toggleMode('eraser'),
+  inject:          () => toggleMode('inject'),
+  colorMask:       () => toggleMode('colorMask'),
+  perfect:         () => toggleMode('perfect'),
+  curveCubic:      () => { switchTool('curve'); toggleMode('cubicCurve') },
+  curveQuad:       () => { switchTool('curve'); toggleMode('quadCurve') },
+  curve:           () => switchTool('curve'),
+  curveLine:       () => { switchTool('curve'); toggleMode('line') },
+}
+
 /**
  * Dispatches a key code to the appropriate shortcut action. Kept
  * separate from the keydown handler so shortcuts can be triggered
@@ -41,18 +110,22 @@ import { adjustVectorSteps } from '../tools/adjust.js'
  * @param {string} keyCode - The key code of the key that was pressed
  */
 export function activateShortcut(keyCode) {
+  // Dispatch discrete actions via the registry. Specific combo (with shift)
+  // takes precedence; falls back to general combo (without shift) so that
+  // e.g. accidental Shift+B still triggers 'brush'.
+  const meta = keys.MetaLeft || keys.MetaRight
+  const shift = keys.ShiftLeft || keys.ShiftRight
+  const specific = `${meta ? 'meta+' : ''}${shift ? 'shift+' : ''}${keyCode}`
+  const general  = `${meta ? 'meta+' : ''}${keyCode}`
+  const action = keyBindings[specific] ?? keyBindings[general]
+  if (action && !globalState.cursor.clicked) {
+    actionHandlers[action]()
+    return
+  }
+
+  // Non-registry cases: transient hold-to-activate tools, curve tool-specific
+  // option toggles, and UI-only shortcuts that don't affect recorded output.
   switch (keyCode) {
-    case 'Enter':
-      //handle confirm paste
-      if (!globalState.cursor.clicked && canvas.pastedLayer) {
-        actionConfirmPastedPixels()
-      }
-      break
-    case 'Backspace':
-      if (!globalState.cursor.clicked) {
-        actionDeleteSelection()
-      }
-      break
     case 'MetaLeft':
     case 'MetaRight':
       //command key
@@ -119,7 +192,6 @@ export function activateShortcut(keyCode) {
         // in case current gets reassigned to a transient tool later.
         tools.curve.options.chain.active =
           globalState.tool.current.options.chain.active
-
         vectorGui.render()
       }
       break
@@ -129,14 +201,7 @@ export function activateShortcut(keyCode) {
           !globalState.tool.current.options.equal.active
         tools.curve.options.equal.active =
           globalState.tool.current.options.equal.active
-
         vectorGui.render()
-      }
-      break
-    case 'Slash':
-      if (!globalState.cursor.clicked) {
-        switchTool('curve')
-        toggleMode('line')
       }
       break
     case 'KeyA':
@@ -145,74 +210,21 @@ export function activateShortcut(keyCode) {
           !globalState.tool.current.options.align.active
         tools.curve.options.align.active =
           globalState.tool.current.options.align.active
-
         vectorGui.render()
-      }
-      break
-    case 'KeyB':
-      if (!globalState.cursor.clicked) {
-        switchTool('brush')
-      }
-      break
-    case 'KeyC':
-      if (!globalState.cursor.clicked) {
-        if (keys.MetaLeft || keys.MetaRight) {
-          actionCopySelection()
-        } else {
-          switchTool('curve')
-          toggleMode('cubicCurve')
-        }
-      }
-      break
-    case 'KeyD':
-      if (!globalState.cursor.clicked) {
-        if (keys.MetaLeft || keys.MetaRight) {
-          //deselect
-          actionDeselect()
-        }
-      }
-      break
-    case 'KeyE':
-      if (!globalState.cursor.clicked) {
-        toggleMode('eraser')
-      }
-      break
-    case 'KeyF':
-      if (!globalState.cursor.clicked) {
-        if (keys.MetaLeft || keys.MetaRight) {
-          if (keys.ShiftLeft || keys.ShiftRight) {
-            //meta+shift+f
-            //Flip vertical
-            actionFlipPixels(false)
-          } else {
-            //meta+f
-            //Flip horizontal
-            actionFlipPixels(true)
-          }
-        } else {
-          switchTool('fill')
-        }
       }
       break
     case 'KeyG':
       if (!globalState.cursor.clicked) {
-        //Toggle grid
         vectorGui.grid = !vectorGui.grid
         vectorGui.render()
       }
       break
     case 'KeyH':
-      //Locking shortcut for curve tool
       if (globalState.tool.selectedName === 'curve') {
         globalState.tool.current.options.hold.active =
           !globalState.tool.current.options.hold.active
         tools.curve.options.hold.active =
           globalState.tool.current.options.hold.active
-      }
-      break
-    case 'KeyI':
-      if (!globalState.cursor.clicked) {
-        toggleMode('inject')
       }
       break
     case 'KeyJ':
@@ -229,55 +241,26 @@ export function activateShortcut(keyCode) {
           !globalState.tool.current.options.link.active
         tools.curve.options.link.active =
           globalState.tool.current.options.link.active
-
         vectorGui.render()
-      }
-      break
-    case 'KeyM':
-      if (!globalState.cursor.clicked) {
-        toggleMode('colorMask')
       }
       break
     case 'KeyN':
       //
       break
-    case 'KeyO':
-      if (!globalState.cursor.clicked) {
-        switchTool('ellipse')
-      }
-      break
-    case 'KeyP':
-      if (!globalState.cursor.clicked) {
-        switchTool('polygon')
-      }
-      break
-    case 'KeyQ':
-      if (!globalState.cursor.clicked) {
-        switchTool('curve')
-        toggleMode('quadCurve')
-      }
-      break
     case 'KeyR':
-      if (!globalState.cursor.clicked) {
-        if (keys.MetaLeft || keys.MetaRight) {
-          //Rotate right
-          actionRotatePixels()
-        } else {
-          randomizeColor(swatches.primary.swatch)
-        }
+      // meta+KeyR (rotate) is handled by the registry above; only plain R reaches here.
+      if (!globalState.cursor.clicked && !meta) {
+        randomizeColor(swatches.primary.swatch)
       }
       break
     case 'KeyS':
-      if (!globalState.cursor.clicked) {
-        if (keys.MetaLeft || keys.MetaRight) {
-          globalState.ui.saveDialogOpen = true
-        } else {
-          switchTool('select')
-        }
+      // plain S (select tool) is handled by the registry above; only meta+S reaches here.
+      if (!globalState.cursor.clicked && meta) {
+        globalState.ui.saveDialogOpen = true
       }
       break
     case 'KeyT':
-      if (!globalState.cursor.clicked && (keys.MetaLeft || keys.MetaRight)) {
+      if (!globalState.cursor.clicked && meta) {
         //shortcut for transform - cuts and pastes selection to allow free transform
       } else {
         globalState.ui.showTooltips = !globalState.ui.showTooltips
@@ -286,45 +269,10 @@ export function activateShortcut(keyCode) {
     case 'KeyU':
       //
       break
-    case 'KeyV':
-      if (!globalState.cursor.clicked) {
-        if (keys.MetaLeft || keys.MetaRight) {
-          //Will not do anything if already in the midst of a paste action (meaning the canvas.currentLayer is the canvas.tempLayer)
-          actionPasteSelection()
-        } else {
-          switchTool('curve')
-        }
-      }
-      break
-    case 'KeyW':
-      if (!globalState.cursor.clicked) {
-        switchTool('magicWand')
-      }
-      break
     case 'KeyX':
-      if (!globalState.cursor.clicked) {
-        if (keys.MetaLeft || keys.MetaRight) {
-          actionCutSelection()
-        } else {
-          swatches.paletteMode = 'remove'
-        }
-      }
-      break
-    case 'KeyY':
-      if (!globalState.cursor.clicked) {
-        toggleMode('perfect')
-      }
-      break
-    case 'KeyZ':
-      if (!globalState.cursor.clicked) {
-        if (keys.MetaLeft || keys.MetaRight) {
-          if (keys.ShiftLeft || keys.ShiftRight) {
-            //shift+meta+z
-            handleRedo()
-          } else {
-            handleUndo()
-          }
-        }
+      // meta+KeyX (cut) is handled by the registry above; only plain X reaches here.
+      if (!globalState.cursor.clicked && !meta) {
+        swatches.paletteMode = 'remove'
       }
       break
     default:
