@@ -27,8 +27,17 @@ import {
   restoreSwatches,
 } from '../context/swatch.svelte.js'
 
-// Replaces the active canvas state with the navigator canvas so all drawing
-// operations target the overlay instead of the user's real artwork.
+/**
+ * Redirects all drawing operations to the navigator overlay canvas,
+ * completely replacing the live canvas context so tools, renders, and
+ * DOM layer operations all target the navigator instead of the user's
+ * real artwork. Before doing so it snapshots every piece of reactive
+ * store state and DOM state, enabling {@link restoreRealCanvas} to
+ * perform a lossless teardown when the session ends. Seeds a minimal
+ * timeline so redrawTimelineActions has a valid base action to work
+ * from. Guards against double-activation and against being called
+ * before the overlay DOM node has mounted.
+ */
 export function activateNavigatorCanvas() {
   if (navigatorState.active) return
   if (!navigatorState.layer) return // NavigatorCanvas not yet mounted
@@ -64,7 +73,8 @@ export function activateNavigatorCanvas() {
     },
   }
 
-  // Sync nav canvas dimensions to match real canvas pixel dimensions
+  // Match nav canvas pixel dimensions to the real artwork so tool
+  // coordinates stay correct when the pipeline targets the navigator.
   const w = canvas.offScreenCVS.width
   const h = canvas.offScreenCVS.height
   // Reset nav layer position so each session starts from a clean default state.
@@ -86,7 +96,8 @@ export function activateNavigatorCanvas() {
   navigatorState.previewCVS.width = w
   navigatorState.previewCVS.height = h
 
-  // Clear nav layer and GUI canvases so each session starts fresh
+  // The nav layer and GUI canvases persist between sessions; clear them
+  // so stale pixel data from a previous recording does not appear.
   navigatorState.layer.ctx.clearRect(0, 0, w, h)
   navigatorState.layer.onscreenCtx.clearRect(
     0,
@@ -105,7 +116,8 @@ export function activateNavigatorCanvas() {
   // proxies and trigger state_proxy_equality_mismatch warnings.
   canvas.currentLayer = canvas.layers[0]
   // Clear any stale pastedLayer from a previous session so hasPaste is false
-  // and the NavBar's cut/paste onclick handlers are not disabled at session start.
+  // and the NavBar's cut/paste onclick handlers are not disabled at
+  // session start.
   canvas.pastedLayer = null
   canvas.offScreenCVS = navigatorState.offScreenCVS
   canvas.offScreenCTX = navigatorState.offScreenCTX
@@ -136,7 +148,9 @@ export function activateNavigatorCanvas() {
 
   navigatorState.active = true
 
-  // Stop the marching-ants RAF loop before mutating selection state.
+  // The marching-ants RAF reads selectionGuiCTX on every frame; stopping
+  // it before mutating the selection store prevents a mid-frame clear on
+  // the wrong context.
   stopMarchingAnts()
 
   // Reset reactive stores to fresh nav state (store references stay the same
@@ -201,7 +215,9 @@ export function activateNavigatorCanvas() {
   globalState.vector.grabStartShapeCenterY = null
   globalState.vector.grabStartAngle = null
 
-  // Reset vector GUI collision flags for the new nav session.
+  // vectorGui collision state is module-level and not captured in the
+  // vector store snapshot, so it must be explicitly cleared to prevent
+  // stale cursor-collision hints from a previous session.
   vectorGui.resetCollision()
 
   // Apply the navigator's own persistent UI state if it exists, so each
@@ -221,7 +237,14 @@ export function activateNavigatorCanvas() {
   renderCanvas(canvas.currentLayer)
 }
 
-// Restores the real canvas state after a navigator session ends.
+/**
+ * Tears down the navigator session and restores every canvas, DOM, and
+ * reactive store pointer that {@link activateNavigatorCanvas} replaced.
+ * Captures the navigator's current UI state first so the next session
+ * can resume from the tool and color settings the user left it in.
+ * Returns immediately if the navigator is not currently active, making
+ * the function safe to call defensively on cleanup paths.
+ */
 export function restoreRealCanvas() {
   if (!navigatorState.active || !navigatorState._saved) return
   const s = navigatorState._saved
@@ -273,6 +296,8 @@ export function restoreRealCanvas() {
   restoreVector(st.vector)
   restoreSwatches(st.swatches)
 
+  // vectorGui collision state is module-level and excluded from the vector
+  // snapshot; clear it so stale nav-session hints do not bleed into real mode.
   vectorGui.resetCollision()
   // Re-render the selection canvas now that selectionGuiCTX is the real one
   renderSelectionCVS()

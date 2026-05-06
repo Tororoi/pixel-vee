@@ -13,32 +13,58 @@ import { vectorGui } from '../gui/vector.js'
 
 const DEFAULT_STEP_MS = 32
 const CANVAS_STEP_SIZE = 8  // canvas units per travel step
-const UI_STEP_SIZE = 10     // viewport px per travel step (UI travel is already in screen space)
+const UI_STEP_SIZE = 10     // viewport px per step (already in screen space)
 
 let cancelFlag = false
 let stopResolve = null
 let currentShape = null
-// Tracks the sim cursor's current position in viewport (fixed) coordinates.
+// animateViewportTravel reads these to interpolate from the current cursor
+// position without reading style.left/top back from the DOM.
 let curVx = 0
 let curVy = 0
 
+/**
+ * Returns a promise that resolves after `ms` milliseconds. Used as the
+ * per-step delay throughout the playback loop so each simulated action
+ * has a visible pause rather than executing instantaneously.
+ * @param {number} ms - Milliseconds to wait.
+ * @returns {Promise<void>}
+ */
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+/**
+ * Builds a minimal synthetic pointer-event object for a canvas-space
+ * coordinate. offsetX/Y are converted to the same screen-space values
+ * the real browser produces so existing event handlers require no
+ * special-casing for simulated input. getCoalescedEvents is deliberately
+ * omitted so handlePointerMove's `?.()` returns undefined and falls back
+ * to `?? [e]`, processing this event directly rather than an empty list.
+ * @param {number} x - Canvas-space X coordinate.
+ * @param {number} y - Canvas-space Y coordinate.
+ * @returns {object} Synthetic event compatible with pointer handlers.
+ */
 function makeMockEvent(x, y) {
   return {
     offsetX: (x + canvas.previousXOffset) * canvas.zoom,
     offsetY: (y + canvas.previousYOffset) * canvas.zoom,
     pointerId: 1,
     target: { setPointerCapture: () => {} },
-    // Omitting getCoalescedEvents so handlePointerMove's `?.()` returns
-    // undefined and falls back to `?? [e]`, processing this event itself.
   }
 }
 
-// Converts canvas-space coordinates to viewport (fixed) coordinates so the
-// body-level sim cursor can be positioned correctly over the canvas.
+/**
+ * Converts a canvas-space coordinate to viewport (fixed) coordinates so
+ * the body-level sim cursor element can be positioned over the correct
+ * spot on the canvas. Reads the overlay's bounding rect at call time
+ * rather than caching it because the rect changes on any pan or resize.
+ * Returns zeroes when the overlay is absent to fail gracefully before
+ * the DOM is mounted.
+ * @param {number} x - Canvas-space X coordinate.
+ * @param {number} y - Canvas-space Y coordinate.
+ * @returns {{ vx: number, vy: number }} Viewport-space coordinates.
+ */
 function canvasToViewport(x, y) {
   const ov = navigatorState.overlayEl
   if (!ov) return { vx: 0, vy: 0 }
@@ -130,6 +156,14 @@ const CURSOR_SHAPES = {
 // eyedropper uses cursor:'none' (renders its own pixel cursor) — fall back to crosshair
 CURSOR_SHAPES.none = CURSOR_SHAPES.crosshair
 
+/**
+ * Swaps the sim cursor element's SVG to match the given CSS cursor string.
+ * Falls back to 'crosshair' for unknown or falsy values, including 'none'
+ * (used by the eyedropper's own pixel cursor). The early-return on an
+ * unchanged shape avoids redundant innerHTML writes during high-frequency
+ * pointermove sequences where the cursor type rarely changes.
+ * @param {string} cursorStr - CSS cursor value to represent.
+ */
 function setSimCursorShape(cursorStr) {
   const el = navigatorState.simCursorEl
   const key = (cursorStr && CURSOR_SHAPES[cursorStr]) ? cursorStr : 'crosshair'
@@ -144,6 +178,15 @@ function setSimCursorShape(cursorStr) {
   el.style.height = shape.h + 'px'
 }
 
+/**
+ * Positions the sim cursor element at the given viewport-space coordinates
+ * and records them in curVx/curVy so animateViewportTravel can interpolate
+ * from the current position. Uses left/top rather than transform because
+ * the hotspot offset is already baked into each shape's own transform
+ * property, and stacking a second translate would double-apply it.
+ * @param {number} vx - Viewport X (left) in CSS pixels.
+ * @param {number} vy - Viewport Y (top) in CSS pixels.
+ */
 function moveSimCursor(vx, vy) {
   const el = navigatorState.simCursorEl
   if (!el) return
@@ -153,8 +196,14 @@ function moveSimCursor(vx, vy) {
   curVy = vy
 }
 
-// Blocks real pointer events from reaching the canvas (overlay intercepts them).
-// The real OS cursor stays visible — only canvas input is suppressed.
+/**
+ * Prepares the UI for simulated playback by enabling pointer-event capture
+ * on the overlay element so real mouse input is blocked from reaching the
+ * canvas. The sim cursor is shown and reset to a known initial shape because
+ * currentShape may hold a stale value from the previous playback run,
+ * which would cause setSimCursorShape's no-op guard to skip the first
+ * shape assignment.
+ */
 function beginPlayback() {
   const ov = navigatorState.overlayEl
   if (ov) ov.style.pointerEvents = 'all'
@@ -164,6 +213,14 @@ function beginPlayback() {
   if (sc) sc.style.display = 'block'
 }
 
+/**
+ * Tears down the playback state once a run completes or is cancelled.
+ * Restores pass-through pointer events on the overlay so the user can
+ * interact with the canvas normally, and hides the sim cursor. Resetting
+ * currentShape ensures the next beginPlayback always re-renders the
+ * initial cursor shape rather than treating it as a no-op if the shape
+ * happened to match the stale value.
+ */
 function endPlayback() {
   const ov = navigatorState.overlayEl
   if (ov) ov.style.pointerEvents = 'none'
@@ -172,8 +229,19 @@ function endPlayback() {
   currentShape = null
 }
 
-// Animates the sim cursor in canvas space, firing handlePointerMove at each
-// step so the pixel cursor on the nav canvas updates in sync.
+/**
+ * Animates the sim cursor from (x1,y1) to (x2,y2) in canvas space, firing
+ * handlePointerMove at each step so tools that rely on continuous move
+ * events (e.g. line preview, pixel cursor tracking) update in sync with
+ * the visible cursor. Step count is capped at 120 so very long drags
+ * finish in a reasonable time; CANVAS_STEP_SIZE controls granularity.
+ * @param {number} x1 - Start X in canvas coordinates.
+ * @param {number} y1 - Start Y in canvas coordinates.
+ * @param {number} x2 - End X in canvas coordinates.
+ * @param {number} y2 - End Y in canvas coordinates.
+ * @param {number} stepMs - Milliseconds to wait between steps.
+ * @returns {Promise<void>}
+ */
 async function animateCanvasTravel(x1, y1, x2, y2, stepMs) {
   const dist = Math.hypot(x2 - x1, y2 - y1)
   if (dist < 1) return
@@ -191,8 +259,18 @@ async function animateCanvasTravel(x1, y1, x2, y2, stepMs) {
   }
 }
 
-// Animates the sim cursor purely in viewport space (no canvas events).
-// Used for canvas→UI and UI→canvas transitions, and UI→UI.
+/**
+ * Moves the sim cursor from its current viewport position to (vx2, vy2)
+ * without firing any canvas pointer events. Used for canvas-to-UI,
+ * UI-to-canvas, and UI-to-UI transitions where only the visible cursor
+ * position should change. The start coordinates are snapshotted into
+ * locals at call time so that a re-entrant call cannot corrupt the
+ * interpolation start point mid-animation.
+ * @param {number} vx2 - Target viewport X in CSS pixels.
+ * @param {number} vy2 - Target viewport Y in CSS pixels.
+ * @param {number} stepMs - Milliseconds to wait between steps.
+ * @returns {Promise<void>}
+ */
 async function animateViewportTravel(vx2, vy2, stepMs) {
   const dist = Math.hypot(vx2 - curVx, vy2 - curVy)
   if (dist < 1) return
@@ -207,9 +285,21 @@ async function animateViewportTravel(vx2, vy2, stepMs) {
   }
 }
 
-// Plays the script in real time. The sim cursor travels to each canvas position
-// and to each UI element before interacting, mirroring how the real cursor would
-// move. Cursor shape changes to match the tool in use (crosshair, grab, etc.).
+/**
+ * Plays a recorded script of canvas and UI actions in real time, animating
+ * the sim cursor between each interaction to mirror natural user movement.
+ * beginPlayback blocks real pointer input for the duration, and endPlayback
+ * runs in a finally block to guarantee cleanup even when cancelled.
+ * prevWasCanvas tracks which coordinate space the preceding action used so
+ * travel animates via handlePointerMove (canvas) or viewport interpolation
+ * (UI/off-canvas). The cursor is seeded at the first pointerdown location
+ * so it appears on-canvas from the first frame rather than teleporting in
+ * from (0,0).
+ * @param {object} script - Recorded script with an `actions` array.
+ * @param {object} [options] - Playback timing options.
+ * @param {number} [options.stepMs] - Per-step delay in milliseconds.
+ * @returns {Promise<void>}
+ */
 export async function playEventMode(script, { stepMs = DEFAULT_STEP_MS } = {}) {
   cancelFlag = false
   beginPlayback()
@@ -220,12 +310,12 @@ export async function playEventMode(script, { stepMs = DEFAULT_STEP_MS } = {}) {
     )
     let lastX = firstDown?.x ?? 0
     let lastY = firstDown?.y ?? 0
-    // Seed the sim cursor at the first canvas position in viewport space
+    // Avoids a visible teleport from (0,0) when the overlay first appears.
     const { vx: initVx, vy: initVy } = canvasToViewport(lastX, lastY)
     moveSimCursor(initVx, initVy)
 
-    // Track whether the previous action was canvas or UI so we know whether to
-    // animate travel in canvas space (with handlePointerMove) or viewport space.
+    // Canvas-space travel fires handlePointerMove; viewport travel does
+    // not — the preceding action's space determines which path to take.
     let prevWasCanvas = true
     // Tool cursor from the last pointerdown snapshot — used at pointerup to
     // restore the non-dragging state (e.g. grab after grabbing).
@@ -243,10 +333,10 @@ export async function playEventMode(script, { stepMs = DEFAULT_STEP_MS } = {}) {
           lastToolCursor = toolCursor
           setSimCursorShape(toolCursor === 'grab' ? 'grabbing' : toolCursor)
           if (prevWasCanvas) {
-            // Canvas-to-canvas: animate with handlePointerMove so pixel cursor updates
+            // Canvas-to-canvas: handlePointerMove keeps the pixel cursor live.
             await animateCanvasTravel(lastX, lastY, x, y, stepMs)
           } else {
-            // UI-to-canvas: animate in viewport space (cursor is off-canvas)
+            // UI-to-canvas: cursor is in viewport space, not canvas space.
             const { vx, vy } = canvasToViewport(x, y)
             await animateViewportTravel(vx, vy, stepMs)
           }
@@ -286,7 +376,7 @@ export async function playEventMode(script, { stepMs = DEFAULT_STEP_MS } = {}) {
         }
       } else if (action.type === 'ui') {
         setSimCursorShape('pointer')
-        // Animate the cursor to the UI element before interacting with it
+        // Cursor must visually arrive before the click to feel authentic.
         const targetEl = document.getElementById(action.targetId)
         if (targetEl) {
           const rect = targetEl.getBoundingClientRect()
@@ -327,9 +417,15 @@ export async function playEventMode(script, { stepMs = DEFAULT_STEP_MS } = {}) {
   }
 }
 
-// Returns a Promise that resolves once the playback loop has fully stopped and
-// endPlayback() has run. Callers must await this before calling restoreRealCanvas
-// so no actions fire on the restored real canvas after cancellation.
+/**
+ * Signals the active playback loop to stop by setting cancelFlag and returns
+ * a promise that resolves once endPlayback has run. Callers must await this
+ * before restoring the real canvas so no queued actions can fire on it after
+ * the snapshot is replaced. stopResolve is cleared inside playEventMode's
+ * finally block so the promise is never left dangling if the loop exits
+ * naturally before stopEventPlay is called.
+ * @returns {Promise<void>}
+ */
 export function stopEventPlay() {
   cancelFlag = true
   return new Promise((r) => {

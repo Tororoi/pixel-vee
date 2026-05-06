@@ -10,9 +10,19 @@ let recording = false
 let isDrawing = false
 let script = null
 
-// Captures complete tool configuration using the same snapshot functions used
-// by canvasSwap.js, so any new tool property added to the tools object is
-// automatically captured without updating this function.
+/**
+ * Builds a point-in-time snapshot of tool, swatch, and vector-GUI state.
+ * Delegates to the same helpers used by canvasSwap.js so any new tool
+ * property is captured automatically without updating this function.
+ * selectedCollisionPoint is read after the caller's queueMicrotask fires,
+ * meaning handlePointerDown has already settled and the grabbed control
+ * point is known — playback restores it directly, bypassing
+ * position-ambiguous collision detection.
+ * @returns {{ selectedName: string, toolsState: object, swatches: object,
+ *   vectorCurrentIndex: number,
+ *   selectedCollisionPoint: {xKey: string, yKey: string}|null }} Current
+ *   tool/swatch/vector state frozen at the moment of the call.
+ */
 function captureSnapshot() {
   const snap = {
     selectedName: globalState.tool.selectedName,
@@ -29,8 +39,14 @@ function captureSnapshot() {
   return snap
 }
 
-// Mirrors setCoordinates() in controls/events.js — same formula so recorded
-// coords are always in canvas space, independent of zoom or pan at record time.
+/**
+ * Converts a pointer event's offset coords to integer canvas-space coords.
+ * Mirrors the formula in controls/events.js setCoordinates() exactly so
+ * recorded coordinates are always in canvas space, independent of the
+ * zoom or pan values at record time.
+ * @param {PointerEvent} e - The source pointer event.
+ * @returns {{ x: number, y: number }} Canvas-space pixel coordinates.
+ */
 function computeCanvasCoords(e) {
   const x = Math.floor(e.offsetX)
   const y = Math.floor(e.offsetY)
@@ -43,6 +59,15 @@ function computeCanvasCoords(e) {
   }
 }
 
+/**
+ * Records the start of a stroke when a pointer is pressed on the canvas.
+ * Sets isDrawing so subsequent move events are captured. Snapshot capture
+ * is deferred with queueMicrotask so Svelte's handlePointerDown and
+ * rerouteVectorStepsAction have fully settled, ensuring vectorCurrentIndex
+ * and selectedPoint reflect the post-event state rather than the
+ * pre-event state.
+ * @param {PointerEvent} e - The canvas pointerdown event.
+ */
 function onPointerDown(e) {
   if (!recording) return
   isDrawing = true
@@ -61,6 +86,14 @@ function onPointerDown(e) {
   })
 }
 
+/**
+ * Records coalesced pointer-move events while a stroke is in progress.
+ * Guards on isDrawing so idle cursor movement between strokes is not
+ * stored. Uses getCoalescedEvents when available to capture all sub-frame
+ * positions. Consecutive duplicate canvas-space pixels are skipped to keep
+ * script size down without affecting visual fidelity.
+ * @param {PointerEvent} e - The canvas pointermove event.
+ */
 function onPointerMove(e) {
   // Only record moves that are part of an active stroke. Idle cursor movement
   // between actions is not stored — playback interpolates it instead.
@@ -79,6 +112,12 @@ function onPointerMove(e) {
   }
 }
 
+/**
+ * Records the end of a stroke and clears the isDrawing flag. No snapshot
+ * is taken here because pointer-up does not mutate tool or swatch state;
+ * the snapshot from the preceding pointerdown covers the full stroke.
+ * @param {PointerEvent} e - The canvas pointerup event.
+ */
 function onPointerUp(e) {
   if (!recording) return
   isDrawing = false
@@ -86,11 +125,16 @@ function onPointerUp(e) {
   script.actions.push({ type: 'canvas', action: 'pointerup', ...coords })
 }
 
-// Capture-phase keydown listener for modifier-key shortcuts that affect canvas
-// state. These never appear as click events so they must be recorded separately.
-// We record only the logical action name, not the raw key, so playback calls the
-// action function directly and is immune to the conditional onclick bindings in
-// the NavBar (hasSelection, hasClipboard, etc.).
+/**
+ * Capture-phase keydown listener that records keyboard shortcuts and hold
+ * keys. Records the logical action name rather than the raw key so
+ * playback calls the action function directly and is immune to conditional
+ * NavBar bindings (hasSelection, hasClipboard, etc.). Repeated keydown
+ * events and keypresses inside text inputs are ignored. KeyR (randomize
+ * color) is recorded via queueMicrotask so the snapshot captures the
+ * post-randomization color rather than the pre-randomization value.
+ * @param {KeyboardEvent} e - The document keydown event.
+ */
 function onDocKeydown(e) {
   if (!recording) return
   if (e.repeat) return
@@ -128,6 +172,12 @@ function onDocKeydown(e) {
   }
 }
 
+/**
+ * Capture-phase keyup listener that records the release of held modifier
+ * keys. Only fires when the released key is registered in holdHandlers,
+ * keeping the script free of unrelated keyup noise.
+ * @param {KeyboardEvent} e - The document keyup event.
+ */
 function onDocKeyup(e) {
   if (!recording) return
   if (holdHandlers[e.code]) {
@@ -135,9 +185,14 @@ function onDocKeyup(e) {
   }
 }
 
-// Capture-phase click listener for UI interactions. Records the nearest
-// ancestor element ID so playback can locate the element by ID without
-// hardcoded coordinates.
+/**
+ * Capture-phase click listener for UI button interactions. Records the
+ * nearest ancestor element ID so playback can locate the element without
+ * hardcoded coordinates. Ignores clicks on the vector-GUI canvas (handled
+ * by pointer listeners) and clicks inside the navigator dialog itself to
+ * avoid recording meta-interactions that would corrupt the script.
+ * @param {MouseEvent} e - The document click event.
+ */
 function onDocClick(e) {
   if (!recording) return
   const target = e.target
@@ -154,10 +209,14 @@ function onDocClick(e) {
   script.actions.push({ type: 'ui', action: 'click', targetId: id })
 }
 
-// Capture-phase input listener for range sliders. Clicks on range inputs don't
-// fire a `click` event — they fire `input`. Recording the value here means
-// playback can restore slider state between strokes, ensuring brush size,
-// opacity, etc. are correct even when no stroke follows the slider change.
+/**
+ * Capture-phase input listener for range sliders. Range inputs emit
+ * `input` rather than `click`, so they require a dedicated listener. The
+ * recorded value lets playback restore slider state between strokes,
+ * ensuring brush size, opacity, etc. are correct even when no stroke
+ * immediately follows a slider change.
+ * @param {InputEvent} e - The document input event.
+ */
 function onDocInput(e) {
   if (!recording) return
   const target = e.target
@@ -168,6 +227,13 @@ function onDocInput(e) {
   script.actions.push({ type: 'ui', action: 'input', targetId: id, value: target.value })
 }
 
+/**
+ * Attaches all capture-phase event listeners and marks the module as
+ * actively recording. The caller owns scriptObj; this module only appends
+ * action entries to its actions array. All listeners use capture phase so
+ * they fire before any stopPropagation calls inside the app.
+ * @param {object} scriptObj - Script object with an empty actions array.
+ */
 export function startRecording(scriptObj) {
   script = scriptObj
   recording = true
@@ -180,6 +246,13 @@ export function startRecording(scriptObj) {
   document.addEventListener('input', onDocInput, true)
 }
 
+/**
+ * Detaches all event listeners, clears module state, and returns the
+ * populated script object. Nulling script after capturing the return
+ * value prevents any in-flight queueMicrotask callbacks from appending
+ * to the script after recording has stopped.
+ * @returns {object} The completed script object.
+ */
 export function stopRecording() {
   recording = false
   isDrawing = false
@@ -195,6 +268,12 @@ export function stopRecording() {
   return result
 }
 
+/**
+ * Returns whether a recording session is currently active. Exposed for
+ * other modules that need to suppress or gate behavior during recording,
+ * such as the player skipping undo stack manipulation.
+ * @returns {boolean} True if a recording session is currently active.
+ */
 export function isRecording() {
   return recording
 }

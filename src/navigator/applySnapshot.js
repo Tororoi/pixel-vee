@@ -5,15 +5,25 @@ import { swatches } from '../context/swatch.js'
 import { switchTool } from '../tools/toolbox.js'
 import { vectorGui } from '../gui/vector.js'
 
-// Restores tool settings captured at record time so each played-back stroke
-// uses exactly the same tool, modes, brush size/type, and colors as when it
-// was originally drawn — regardless of what is currently active at playback.
+/**
+ * Restores the tool state captured at record time so each played-back
+ * stroke uses the same tool, modes, brush size/type, and colors as when
+ * it was originally drawn, regardless of what is currently active at
+ * playback. Guards early on a falsy snapshot so callers need no null
+ * checks of their own. Handles both the current store-based snapshot
+ * format and a legacy per-property format so scripts recorded before
+ * the store refactor continue to play back correctly.
+ * @param {object|null|undefined} snapshot - Serialised tool state from
+ *   record time; null or undefined skips all restoration.
+ */
 export function applySnapshot(snapshot) {
   if (!snapshot) return
 
-  // Support both the new store-based format ({ selectedName, toolsState, swatches })
-  // and the legacy per-property format ({ toolName, modes, brushSize, ... }) so that
-  // scripts recorded before this refactor continue to play back correctly.
+  // Support both the new store-based format
+  // ({ selectedName, toolsState, swatches }) and the legacy
+  // per-property format ({ toolName, modes, brushSize, ... })
+  // so that scripts recorded before this refactor continue to
+  // play back correctly.
   if (snapshot.toolsState) {
     const name = snapshot.selectedName
     // Only call switchTool when the tool actually changes. switchTool calls
@@ -44,7 +54,8 @@ export function applySnapshot(snapshot) {
       vectorGui.selectedPoint = { xKey: null, yKey: null }
     }
   } else {
-    // Legacy format: manually apply individual properties for backwards compatibility.
+    // Legacy format: manually apply individual properties for
+    // backwards compatibility.
     const { toolName, modes, brushSize, brushType, ditherPatternIndex, primaryColor, secondaryColor } = snapshot
     if (globalState.tool.selectedName !== toolName) {
       switchTool(toolName)

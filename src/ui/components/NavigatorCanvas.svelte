@@ -1,16 +1,21 @@
 <script>
   /**
    * @component
-   * Creates and manages an overlay canvas stack for the navigator. Appends a
-   * div to `.bg-space` that holds the navigator layer's onscreen canvas.
-   * Visibility mirrors `navigatorOpen`. Canvas dimensions are copied from
-   * `canvas.vectorGuiCVS` rather than `offsetWidth/Height` so they are
-   * correct even while the overlay is hidden (hidden elements return 0).
+   * Creates and manages the full overlay canvas stack the navigator uses to
+   * replay pixel-art sessions without touching the real canvas area. On mount
+   * it appends a `.nav-canvas-overlay` div to `.bg-space` and populates it
+   * with background, layer, preview, and GUI canvases that mirror CanvasArea's
+   * structure, registering every canvas and context on `navigatorState`. A
+   * `$effect` keeps the overlay's CSS `display` in sync with `navigatorOpen`.
+   * Canvas pixel dimensions are read from `canvas.offScreenCVS` (logical art
+   * size) and `canvas.vectorGuiCVS` (physical, already DPR-scaled) rather
+   * than the overlay's own layout metrics, which return zero while the
+   * element is `display:none`.
    */
   import { onMount } from 'svelte'
-  import { canvas } from '../context/canvas.js'
-  import { globalState } from '../context/state.js'
-  import { navigatorState } from './navigatorState.js'
+  import { canvas } from '../../context/canvas.js'
+  import { globalState } from '../../context/state.js'
+  import { navigatorState } from '../../navigator/navigatorState.js'
 
   let overlayEl = null
 
@@ -45,27 +50,43 @@
   })
 
   $effect(() => {
-    // Read navigatorOpen unconditionally so Svelte tracks it as a dependency
-    // even on the first effect run, when overlayEl is still null (onMount
-    // hasn't fired yet).
+    // Mirrors navigatorOpen to the overlay's CSS display. isOpen is read
+    // before the guard so Svelte tracks navigatorOpen as a reactive
+    // dependency on the very first synchronous run, when overlayEl is
+    // still null because onMount has not yet fired.
     const isOpen = globalState.ui.navigatorOpen
     if (overlayEl) {
       overlayEl.style.display = isOpen ? 'block' : 'none'
     }
   })
 
+  /**
+   * Builds every canvas and context the navigator needs and registers them
+   * on `navigatorState`. Called once from `onMount` after
+   * `canvas.offScreenCVS` is confirmed available — the overlay's layout
+   * metrics are all zero at that point because it is still `display:none`,
+   * so pixel dimensions must come from the offscreen canvas (logical art
+   * size) and `canvas.vectorGuiCVS` (physical, already DPR-scaled).
+   * Children are appended in deliberate order — bgCVS first, then the
+   * navCanvasLayers container, then GUI overlay canvases — so CSS paint
+   * order matches the real canvas area's stacking without explicit
+   * `z-index` values. `navigatorState.layer` and `.previewLayer` are
+   * plain objects rather than reactive state so the rendering pipeline
+   * treats them identically to normal raster layers.
+   */
   function setupNavCanvases() {
     const w = canvas.offScreenCVS.width
     const h = canvas.offScreenCVS.height
 
-    // Use vectorGuiCVS pixel dimensions — already set to offsetWidth * sharpness
-    // by CanvasArea. Reading offsetWidth here would return 0 because overlayEl
-    // is display:none at setup time.
+    // vectorGuiCVS dimensions are already offsetWidth * sharpness, set by
+    // CanvasArea. Reading offsetWidth on overlayEl would return 0 because
+    // the overlay is display:none at setup time.
     const pw = canvas.vectorGuiCVS.width
     const ph = canvas.vectorGuiCVS.height
     const t = canvas.sharpness * canvas.zoom
 
-    // Offscreen composite canvas (mirrors canvas.offScreenCVS role)
+    // Needs its own compositing target so navigator rendering stays isolated
+    // from canvas.offScreenCVS, which the main editor owns.
     const offScreenCVS = document.createElement('canvas')
     offScreenCVS.width = w
     offScreenCVS.height = h
@@ -73,16 +94,18 @@
       willReadFrequently: true,
     })
 
-    // Offscreen canvas for the nav raster layer (pixel data storage)
+    // willReadFrequently because tool code calls getImageData on layer.cvs
+    // during stroke operations, same as on the main editor's layer canvases.
     const layerCVS = document.createElement('canvas')
     layerCVS.width = w
     layerCVS.height = h
     const layerCTX = layerCVS.getContext('2d', { willReadFrequently: true })
 
-    // Background canvas — must be first child so it sits behind the layer canvas.
-    // The bg-canvas CSS class gives it the diagonal-stripe background-image;
-    // renderBackgroundCanvas() then draws the gray surround + transparent hole
-    // on top of that CSS pattern, exactly replicating the real canvas background.
+    // Must be first child so it sits behind the layer canvas in paint
+    // order. The bg-canvas CSS class gives it the diagonal-stripe
+    // background-image; renderBackgroundCanvas() then draws the gray
+    // surround and transparent hole on top, replicating the real canvas
+    // background without needing a separate DOM layer.
     const bgCVS = document.createElement('canvas')
     bgCVS.className = 'bg-canvas'
     overlayEl.appendChild(bgCVS)
@@ -91,9 +114,9 @@
     const bgCTX = bgCVS.getContext('2d', { desynchronized: true })
     bgCTX.setTransform(t, 0, 0, t, 0, 0)
 
-    // Canvas layers container — mirrors dom.canvasLayers so all layer DOM
-    // operations (append/remove onscreen canvases) target the overlay instead
-    // of the real canvas area. canvasSwap.js swaps dom.canvasLayers to this
+    // Mirrors dom.canvasLayers so that all layer DOM operations
+    // (append/remove of onscreen canvases) target the overlay instead of
+    // the real canvas area. canvasSwap.js swaps dom.canvasLayers to this
     // div for the duration of each navigator session.
     const navCanvasLayers = document.createElement('div')
     navCanvasLayers.style.position = 'absolute'
@@ -102,8 +125,10 @@
     overlayEl.appendChild(navCanvasLayers)
     navigatorState.navCanvasLayers = navCanvasLayers
 
-    // Onscreen display canvas for the nav raster layer — lives in navCanvasLayers
-    // so it participates in the same dom.canvasLayers swap as any other layer.
+    // Lives inside navCanvasLayers so it participates in the
+    // dom.canvasLayers swap the same way any other layer's onscreen canvas
+    // does, keeping the navigator's render loop agnostic to whether it is
+    // in normal or navigator mode.
     const onscreenCVS = document.createElement('canvas')
     onscreenCVS.className = 'onscreen-canvas'
     navCanvasLayers.appendChild(onscreenCVS)
@@ -112,14 +137,16 @@
     const onscreenCTX = onscreenCVS.getContext('2d', { desynchronized: true })
     onscreenCTX.setTransform(t, 0, 0, t, 0, 0)
 
-    // Offscreen canvas for navigator preview strokes (live feedback)
+    // willReadFrequently because live-stroke compositing reads preview
+    // pixel data during playback, matching the main editor's previewCVS.
     const previewCVS = document.createElement('canvas')
     previewCVS.width = w
     previewCVS.height = h
     const previewCTX = previewCVS.getContext('2d', { willReadFrequently: true })
 
-    // Onscreen canvas for navigator preview — the tool system appends/removes
-    // this to dom.canvasLayers during an active stroke, same as tempLayer.
+    // The tool system appends and removes this from dom.canvasLayers
+    // during an active stroke, exactly as it does for the main tempLayer,
+    // so no tool-side changes are needed when running in navigator mode.
     const prevOnscreenCVS = document.createElement('canvas')
     prevOnscreenCVS.className = 'onscreen-canvas'
     prevOnscreenCVS.width = pw
@@ -129,9 +156,9 @@
     })
     prevOnscreenCTX.setTransform(t, 0, 0, t, 0, 0)
 
-    // GUI overlay canvases — mirror the cursor, selection-gui, and vector-gui
-    // canvases from CanvasArea so that GUI rendering during a nav session goes
-    // to the overlay instead of the real (hidden-under-overlay) canvases.
+    // Mirror the cursor, selection-gui, and vector-gui canvases from
+    // CanvasArea so GUI rendering during a navigator session targets the
+    // overlay instead of the real (hidden-under-overlay) canvases.
     const navCursorCVS = document.createElement('canvas')
     navCursorCVS.className = 'onscreen-canvas'
     navCursorCVS.width = pw
@@ -169,9 +196,9 @@
     navigatorState.selectionGuiCTX = navSelectionGuiCTX
     navigatorState.vectorGuiCTX = navVectorGuiCTX
 
-    // Simulated cursor — appended to body with position:fixed so it can travel
-    // outside the canvas overlay to reach UI elements. Shape is set dynamically
-    // by player-event.js at playback start.
+    // Appended to document.body with position:fixed so it can travel
+    // outside the canvas overlay to reach UI elements during playback.
+    // Shape is set dynamically by player-event.js at playback start.
     const simCursor = document.createElement('div')
     simCursor.className = 'nav-sim-cursor'
     document.body.appendChild(simCursor)

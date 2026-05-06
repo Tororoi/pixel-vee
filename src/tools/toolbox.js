@@ -112,3 +112,16 @@ export function toggleMode(modeName = null, modeBtn = null) {
   }
   renderCursor()
 }
+
+/**
+ * Toggle tool options
+ * @param {string} toolName - tool name
+ * @param {string} toolOption - tool option name
+ */
+export function toggleToolOption(toolName, toolOption) {
+  //Guard to ensure tool option exists on tool
+  if (tools[toolName]?.options?.[toolOption]) {
+    globalState.tool.current.options[`${toolOption}`].active =
+      !globalState.tool.current.options[`${toolOption}`].active
+  }
+}

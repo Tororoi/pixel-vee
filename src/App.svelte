@@ -23,7 +23,7 @@
   import DitherPickerDialog from './ui/components/dialogs/DitherPickerDialog.svelte'
   import StampEditorDialog from './ui/components/dialogs/StampEditorDialog.svelte'
   import NavigatorDialog from './ui/components/dialogs/NavigatorDialog.svelte'
-  import NavigatorCanvas from './navigator/NavigatorCanvas.svelte'
+  import NavigatorCanvas from './ui/components/NavigatorCanvas.svelte'
   import CanvasArea from './ui/components/CanvasArea.svelte'
   import KeyboardShortcuts from './ui/components/KeyboardShortcuts.svelte'
   import Tooltip from './ui/components/Tooltip.svelte'
