@@ -5,10 +5,7 @@ import { globalState } from '../context/state.js'
 import { vectorGui } from '../gui/vector.js'
 import { tools, snapshotToolsState, restoreToolsState } from '../tools/index.js'
 import { dom } from '../context/dom.js'
-import {
-  stopMarchingAnts,
-  renderSelectionCVS,
-} from '../gui/select.js'
+import { stopMarchingAnts, renderSelectionCVS } from '../gui/select.js'
 import {
   snapshotTimeline,
   restoreTimeline,
@@ -18,14 +15,8 @@ import {
   snapshotSelection,
   restoreSelection,
 } from '../ui/stores/selection.svelte.js'
-import {
-  snapshotVector,
-  restoreVector,
-} from '../ui/stores/vector.svelte.js'
-import {
-  snapshotSwatches,
-  restoreSwatches,
-} from '../context/swatch.svelte.js'
+import { snapshotVector, restoreVector } from '../ui/stores/vector.svelte.js'
+import { snapshotSwatches, restoreSwatches } from '../context/swatch.svelte.js'
 
 /**
  * Redirects all drawing operations to the navigator overlay canvas,

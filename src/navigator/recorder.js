@@ -33,7 +33,10 @@ function captureSnapshot() {
     // selectedPoint already reflects the grabbed control point. Playback
     // restores this directly, bypassing position-ambiguous collision detection.
     selectedCollisionPoint: vectorGui.selectedPoint.xKey
-      ? { xKey: vectorGui.selectedPoint.xKey, yKey: vectorGui.selectedPoint.yKey }
+      ? {
+          xKey: vectorGui.selectedPoint.xKey,
+          yKey: vectorGui.selectedPoint.yKey,
+        }
       : null,
   }
   return snap
@@ -146,7 +149,7 @@ function onDocKeydown(e) {
   const meta = e.metaKey || e.ctrlKey
   const shift = e.shiftKey
   const specific = `${meta ? 'meta+' : ''}${shift ? 'shift+' : ''}${e.code}`
-  const general  = `${meta ? 'meta+' : ''}${e.code}`
+  const general = `${meta ? 'meta+' : ''}${e.code}`
   const action = keyBindings[specific] ?? keyBindings[general]
   if (action) {
     script.actions.push({ type: 'shortcut', action })
@@ -224,7 +227,12 @@ function onDocInput(e) {
   if (target.closest?.('.navigator-container')) return
   const id = target.id || target.closest?.('[id]')?.id
   if (!id) return
-  script.actions.push({ type: 'ui', action: 'input', targetId: id, value: target.value })
+  script.actions.push({
+    type: 'ui',
+    action: 'input',
+    targetId: id,
+    value: target.value,
+  })
 }
 
 /**

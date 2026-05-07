@@ -8,12 +8,16 @@ import { renderCursor } from '../gui/cursor.js'
 import { applySnapshot } from './applySnapshot.js'
 import { navigatorState } from './navigatorState.js'
 import { tools } from '../tools/index.js'
-import { actionHandlers, holdHandlers, releaseHandlers } from '../controls/shortcuts.js'
+import {
+  actionHandlers,
+  holdHandlers,
+  releaseHandlers,
+} from '../controls/shortcuts.js'
 import { vectorGui } from '../gui/vector.js'
 
 const DEFAULT_STEP_MS = 32
-const CANVAS_STEP_SIZE = 8  // canvas units per travel step
-const UI_STEP_SIZE = 10     // viewport px per step (already in screen space)
+const CANVAS_STEP_SIZE = 8 // canvas units per travel step
+const UI_STEP_SIZE = 10 // viewport px per step (already in screen space)
 
 let cancelFlag = false
 let stopResolve = null
@@ -84,7 +88,8 @@ function canvasToViewport(x, y) {
 const CURSOR_SHAPES = {
   // Gap crosshair, 13×13, hotspot at center
   crosshair: {
-    w: 13, h: 13,
+    w: 13,
+    h: 13,
     transform: 'translate(-7px, -7px)',
     html: `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 13 13" style="display:block;width:13px;height:13px">
       <line x1="6.5" y1="0.5" x2="6.5" y2="4.5"  stroke="rgba(0,0,0,0.85)" stroke-width="2"/>
@@ -99,7 +104,8 @@ const CURSOR_SHAPES = {
   },
   // Classic arrow, 9×14, tip at top-left
   pointer: {
-    w: 9, h: 14,
+    w: 9,
+    h: 14,
     transform: 'translate(-1px, -1px)',
     html: `<svg xmlns="http://www.w3.org/2000/svg" width="9" height="14" viewBox="0 0 9 14" style="display:block;width:9px;height:14px">
       <path d="M1.5 1.5 L1.5 10.5 L3.5 8.5 L5 12.5 L6.5 12 L5 8 L8 8 Z"
@@ -109,7 +115,8 @@ const CURSOR_SHAPES = {
   },
   // Open grab hand, 13×14, hotspot at upper-center
   grab: {
-    w: 13, h: 14,
+    w: 13,
+    h: 14,
     transform: 'translate(-6px, -7px)',
     html: `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="14" viewBox="0 0 13 14" style="display:block;width:13px;height:14px">
       <rect x="1.5" y="3.5" width="2" height="5.5" rx="1"   fill="white" stroke="rgba(0,0,0,0.75)" stroke-width="0.9"/>
@@ -121,7 +128,8 @@ const CURSOR_SHAPES = {
   },
   // Closed grab hand — same shape for simplicity
   grabbing: {
-    w: 13, h: 14,
+    w: 13,
+    h: 14,
     transform: 'translate(-6px, -7px)',
     html: `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="14" viewBox="0 0 13 14" style="display:block;width:13px;height:14px">
       <rect x="1.5" y="3.5" width="2" height="5.5" rx="1"   fill="white" stroke="rgba(0,0,0,0.75)" stroke-width="0.9"/>
@@ -133,7 +141,8 @@ const CURSOR_SHAPES = {
   },
   // Four-way move arrows, 13×13, hotspot at center
   move: {
-    w: 13, h: 13,
+    w: 13,
+    h: 13,
     transform: 'translate(-7px, -7px)',
     html: `<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 13 13" style="display:block;width:13px;height:13px">
       <polygon points="6.5,0.5 4,4   9,4"   fill="white" stroke="rgba(0,0,0,0.8)" stroke-width="0.75" stroke-linejoin="round"/>
@@ -144,7 +153,8 @@ const CURSOR_SHAPES = {
   },
   // Default arrow — select/magic-wand tools
   default: {
-    w: 9, h: 14,
+    w: 9,
+    h: 14,
     transform: 'translate(-1px, -1px)',
     html: `<svg xmlns="http://www.w3.org/2000/svg" width="9" height="14" viewBox="0 0 9 14" style="display:block;width:9px;height:14px">
       <path d="M1.5 1.5 L1.5 10.5 L3.5 8.5 L5 12.5 L6.5 12 L5 8 L8 8 Z"
@@ -166,7 +176,7 @@ CURSOR_SHAPES.none = CURSOR_SHAPES.crosshair
  */
 function setSimCursorShape(cursorStr) {
   const el = navigatorState.simCursorEl
-  const key = (cursorStr && CURSOR_SHAPES[cursorStr]) ? cursorStr : 'crosshair'
+  const key = cursorStr && CURSOR_SHAPES[cursorStr] ? cursorStr : 'crosshair'
   if (!el || currentShape === key) return
   currentShape = key
   const shape = CURSOR_SHAPES[key]
@@ -329,7 +339,8 @@ export async function playEventMode(script, { stepMs = DEFAULT_STEP_MS } = {}) {
         const y = action.y ?? 0
 
         if (action.action === 'pointerdown') {
-          const toolCursor = tools[action.snapshot?.toolName]?.cursor ?? 'crosshair'
+          const toolCursor =
+            tools[action.snapshot?.toolName]?.cursor ?? 'crosshair'
           lastToolCursor = toolCursor
           setSimCursorShape(toolCursor === 'grab' ? 'grabbing' : toolCursor)
           if (prevWasCanvas) {

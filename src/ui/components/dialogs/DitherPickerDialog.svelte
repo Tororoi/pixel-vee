@@ -324,7 +324,7 @@
    * Handles pointerdown on the dither offset drag control. Captures the
    * pointer so move/up events stay on this element during fast drags, then
    * records the starting geometry into dragState for the move/up handlers.
-   * @param {PointerEvent} e
+   * @param {PointerEvent} e - The pointerdown event from the drag control.
    */
   function handleOffsetPointerDown(e) {
     const control = e.currentTarget
@@ -381,7 +381,7 @@
    * Handles pointermove during an offset drag. Only runs while dragState is
    * set; writes directly to the underlying tool singleton during the drag to
    * avoid triggering Svelte re-renders on every event.
-   * @param {PointerEvent} e
+   * @param {PointerEvent} e - The pointermove event from the drag control.
    */
   function handleOffsetPointerMove(e) {
     if (!dragState) return
@@ -399,11 +399,9 @@
         recordedLayerY,
       } = dragState
       const newEffectiveX =
-        (((startEffectiveX - Math.round((e.clientX - startX) / 4)) % 8) + 8) %
-        8
+        (((startEffectiveX - Math.round((e.clientX - startX) / 4)) % 8) + 8) % 8
       const newEffectiveY =
-        (((startEffectiveY - Math.round((e.clientY - startY) / 4)) % 8) + 8) %
-        8
+        (((startEffectiveY - Math.round((e.clientY - startY) / 4)) % 8) + 8) % 8
       // Convert canvas-space effective offset back to layer-relative
       // stored offset before writing to the vector target.
       vt.ditherOffsetX =

@@ -5,7 +5,11 @@ import {
   handlePointerUp,
 } from '../controls/events.js'
 import { applySnapshot } from './applySnapshot.js'
-import { actionHandlers, holdHandlers, releaseHandlers } from '../controls/shortcuts.js'
+import {
+  actionHandlers,
+  holdHandlers,
+  releaseHandlers,
+} from '../controls/shortcuts.js'
 import { vectorGui } from '../gui/vector.js'
 
 /**

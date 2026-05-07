@@ -12,10 +12,17 @@
   import { globalState } from '../../../context/state.js'
   import { canvas } from '../../../context/canvas.js'
   import DialogBox from '../DialogBox.svelte'
-  import { createScript, loadScript, saveScript } from '../../../navigator/script.js'
+  import {
+    createScript,
+    loadScript,
+    saveScript,
+  } from '../../../navigator/script.js'
   import { startRecording, stopRecording } from '../../../navigator/recorder.js'
   import { playApiMode } from '../../../navigator/player-api.js'
-  import { playEventMode, stopEventPlay } from '../../../navigator/player-event.js'
+  import {
+    playEventMode,
+    stopEventPlay,
+  } from '../../../navigator/player-event.js'
   import {
     activateNavigatorCanvas,
     restoreRealCanvas,
@@ -105,7 +112,7 @@
     if (script.canvasWidth !== w || script.canvasHeight !== h) {
       console.warn(
         `Navigator: script was recorded at ${script.canvasWidth}×${script.canvasHeight},` +
-        ` current canvas is ${w}×${h} — coordinates may be incorrect`,
+          ` current canvas is ${w}×${h} — coordinates may be incorrect`,
       )
     }
   }
@@ -209,7 +216,9 @@
     restoreRealCanvas()
     playing = true
     activateNavigatorCanvas()
-    await playEventMode(selectedScript, { stepMs: Math.round(32 / speedMultiplier) })
+    await playEventMode(selectedScript, {
+      stepMs: Math.round(32 / speedMultiplier),
+    })
     // Do NOT restore after completion — leave the result visible on
     // the nav canvas.
     playing = false
@@ -289,7 +298,7 @@
     </div>
 
     <ul class="navigator-script-list" role="listbox" aria-label="Scripts">
-      {#each scripts as script, i}
+      {#each scripts as script, i (script)}
         <li
           class="navigator-script-item"
           class:selected={selectedIndex === i}

@@ -98,6 +98,7 @@ export function snapshotVector() {
     collidedIndex: vectorStore.collidedIndex,
     // Plain Set, not SvelteSet — snapshots live outside the reactive
     // graph and must not hold dangling reactive subscriptions.
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity
     selectedIndices: new Set(vectorStore.selectedIndices),
     savedProperties: { ...vectorStore.savedProperties },
     transformMode: vectorStore.transformMode,

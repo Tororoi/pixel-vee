@@ -56,7 +56,15 @@ export function applySnapshot(snapshot) {
   } else {
     // Legacy format: manually apply individual properties for
     // backwards compatibility.
-    const { toolName, modes, brushSize, brushType, ditherPatternIndex, primaryColor, secondaryColor } = snapshot
+    const {
+      toolName,
+      modes,
+      brushSize,
+      brushType,
+      ditherPatternIndex,
+      primaryColor,
+      secondaryColor,
+    } = snapshot
     if (globalState.tool.selectedName !== toolName) {
       switchTool(toolName)
     }
@@ -64,7 +72,8 @@ export function applySnapshot(snapshot) {
     if (toolObj?.modes && modes) Object.assign(toolObj.modes, modes)
     if (brushSize != null && toolObj) toolObj.brushSize = brushSize
     if (brushType != null && toolObj) toolObj.brushType = brushType
-    if (ditherPatternIndex != null && toolObj) toolObj.ditherPatternIndex = ditherPatternIndex
+    if (ditherPatternIndex != null && toolObj)
+      toolObj.ditherPatternIndex = ditherPatternIndex
     if (primaryColor) Object.assign(swatches.primary.color, primaryColor)
     if (secondaryColor) Object.assign(swatches.secondary.color, secondaryColor)
   }

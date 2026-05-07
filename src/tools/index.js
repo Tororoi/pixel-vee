@@ -275,7 +275,8 @@ export function restoreToolsState(snap) {
     if (tool.modes && state.modes) Object.assign(tool.modes, state.modes)
     if (state.brushSize !== undefined) tool.brushSize = state.brushSize
     if (state.brushType !== undefined) tool.brushType = state.brushType
-    if (state.ditherPatternIndex !== undefined) tool.ditherPatternIndex = state.ditherPatternIndex
+    if (state.ditherPatternIndex !== undefined)
+      tool.ditherPatternIndex = state.ditherPatternIndex
   }
   for (const [name, activeTool] of Object.entries(snap.groups)) {
     if (toolGroups[name]) toolGroups[name].activeTool = activeTool
