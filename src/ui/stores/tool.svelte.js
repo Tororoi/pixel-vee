@@ -19,6 +19,10 @@ export const toolStore = $state({
   touch: false,
 })
 
+//==================================================//
+//========= * * * Navigator Features * * * =========//
+//==================================================//
+
 /**
  * Captures a plain-object snapshot of the tool store for later
  * restoration. The returned value is intentionally non-reactive —

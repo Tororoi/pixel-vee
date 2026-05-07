@@ -50,6 +50,10 @@ export const timelineStore = $state({
   },
 })
 
+//==================================================//
+//========= * * * Navigator Features * * * =========//
+//==================================================//
+
 /**
  * Captures the current timeline state as a plain object. Svelte $state
  * proxies cannot be reliably serialized or compared by identity, so the

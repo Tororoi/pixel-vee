@@ -36,6 +36,10 @@ export const swatches = $state({
 if (dom.swatch) dom.swatch.color = swatches.primary.color
 if (dom.backSwatch) dom.backSwatch.color = swatches.secondary.color
 
+//==================================================//
+//========= * * * Navigator Features * * * =========//
+//==================================================//
+
 /**
  * Produces a plain-object snapshot of all mutable swatch state. Color
  * objects are shallow-copied so that subsequent mutations to the live state

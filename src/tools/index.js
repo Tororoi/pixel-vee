@@ -222,6 +222,10 @@ export const toolGroups = {
   },
 }
 
+//==================================================//
+//========= * * * Navigator Features * * * =========//
+//==================================================//
+
 /**
  * Captures the mutable runtime state of every tool and tool group into a
  * plain object suitable for later restoration. Only the four properties

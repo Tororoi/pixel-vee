@@ -103,6 +103,10 @@ export const selectionStore = $state({
   },
 })
 
+//==================================================//
+//========= * * * Navigator Features * * * =========//
+//==================================================//
+
 /**
  * Produces a point-in-time shallow copy of the selection store for use
  * in undo history or navigator snapshots. The nested coordinate objects

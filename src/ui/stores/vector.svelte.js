@@ -82,6 +82,10 @@ export const vectorStore = $state({
   },
 })
 
+//==================================================//
+//========= * * * Navigator Features * * * =========//
+//==================================================//
+
 /**
  * Captures a shallow copy of `vectorStore` as a plain object safe for
  * storage in undo/redo history. Object fields are spread so later
