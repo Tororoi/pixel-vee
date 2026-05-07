@@ -297,12 +297,48 @@ export const releaseHandlers = {
 releaseHandlers.AltRight = releaseHandlers.AltLeft
 releaseHandlers.ShiftRight = releaseHandlers.ShiftLeft
 
+// Maps key codes to UI-only handlers that bypass the action registry, so
+// they aren't recorded by the navigator. Each handler reads modifier state
+// from `keys` directly and carries its own cursor.clicked guard, matching
+// the holdHandlers convention.
+export const unregisteredHandlers = {
+  KeyG: () => {
+    if (!globalState.cursor.clicked) {
+      vectorGui.grid = !vectorGui.grid
+      vectorGui.render()
+    }
+  },
+  // meta+KeyR (rotate) handled by registry; only plain R reaches here.
+  KeyR: () => {
+    const meta = keys.MetaLeft || keys.MetaRight
+    if (!globalState.cursor.clicked && !meta) {
+      randomizeColor(swatches.primary.swatch)
+    }
+  },
+  // plain S (select) handled by registry; only meta+S reaches here.
+  KeyS: () => {
+    const meta = keys.MetaLeft || keys.MetaRight
+    if (!globalState.cursor.clicked && meta) {
+      globalState.ui.saveDialogOpen = true
+    }
+  },
+  KeyT: () => {
+    const meta = keys.MetaLeft || keys.MetaRight
+    if (!globalState.cursor.clicked && meta) {
+      // Transform stub — will cut and paste the selection into a
+      // free-transform layer when implemented.
+    } else {
+      globalState.ui.showTooltips = !globalState.ui.showTooltips
+    }
+  },
+}
+
 /**
  * Dispatches a key code through a three-tier priority chain: (1) the
  * keyBindings registry for recordable discrete actions, gated by
  * cursor.clicked so actions never fire mid-stroke; (2) holdHandlers
  * for transient tool overrides that each manage their own guards;
- * (3) a switch for UI-only shortcuts that bypass the action log.
+ * (3) unregisteredHandlers for UI-only shortcuts that bypass the action log.
  * Kept separate from the keydown listener so the navigator and any
  * future programmatic caller can trigger shortcuts without synthesizing
  * a KeyboardEvent. Meta/Shift state is read from the keys map rather
@@ -330,44 +366,8 @@ export function activateShortcut(keyCode) {
     return
   }
 
-  // 3. Remaining UI-only shortcuts that don't need recording.
-  switch (keyCode) {
-    case 'MetaLeft':
-    case 'MetaRight':
-      break
-    case 'KeyG':
-      if (!globalState.cursor.clicked) {
-        vectorGui.grid = !vectorGui.grid
-        vectorGui.render()
-      }
-      break
-    case 'KeyJ':
-    case 'KeyN':
-    case 'KeyU':
-      break
-    case 'KeyR':
-      // meta+KeyR (rotate) handled by registry; only plain R reaches here.
-      if (!globalState.cursor.clicked && !meta) {
-        randomizeColor(swatches.primary.swatch)
-      }
-      break
-    case 'KeyS':
-      // plain S (select) handled by registry; only meta+S reaches here.
-      if (!globalState.cursor.clicked && meta) {
-        globalState.ui.saveDialogOpen = true
-      }
-      break
-    case 'KeyT':
-      if (!globalState.cursor.clicked && meta) {
-        // Transform stub — will cut and paste the selection into a
-        // free-transform layer when implemented.
-      } else {
-        globalState.ui.showTooltips = !globalState.ui.showTooltips
-      }
-      break
-    default:
-      break
-  }
+  // 3. Remaining UI-only shortcuts that bypass the action registry.
+  unregisteredHandlers[keyCode]?.()
 }
 
 /**
