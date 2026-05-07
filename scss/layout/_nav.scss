@@ -176,6 +176,10 @@
     display: flex;
     flex-flow: row nowrap;
     align-items: center;
+    .navigator-icon {
+      width: 40px;
+      height: 40px;
+    }
     .gear {
       width: 40px;
       height: 40px;

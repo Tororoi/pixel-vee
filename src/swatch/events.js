@@ -159,7 +159,7 @@ let picker = null
 /**
  * Register the Picker instance created by ColorPickerDialog.
  * Must be called once after the picker canvas has been mounted.
- * @param {Picker} p - The Picker instance to register
+ * @param {object} p - The Picker instance to register
  */
 export function registerPicker(p) {
   picker = p

@@ -2,6 +2,7 @@ export const uiStore = $state({
   tooltipMessage: null,
   tooltipTarget: null,
   showTooltips: true,
+  navigatorOpen: false,
   settingsOpen: false,
   canvasSizeOpen: false,
   exportOpen: false,

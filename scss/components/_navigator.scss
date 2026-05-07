@@ -1,0 +1,156 @@
+@use '../base/variables' as *;
+@use '../base/mixins' as *;
+
+.navigator-container {
+  @extend %floating-dialog;
+  top: 15%;
+  width: 240px;
+  max-width: calc(100% - 4px);
+  max-height: calc(100% - 4px);
+  .collapsible {
+    padding: 8px 0;
+  }
+  .navigator-interface {
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: stretch;
+    width: 100%;
+    padding: 0 12px;
+    box-sizing: border-box;
+    gap: 8px;
+    .navigator-status {
+      font-size: 11px;
+      color: $border-color;
+      padding: 2px 0;
+      .status-recording {
+        color: $red;
+      }
+      .status-playing {
+        color: $edit-color;
+      }
+    }
+    .navigator-record-row,
+    .navigator-play-row,
+    .navigator-file-row {
+      display: flex;
+      flex-flow: row nowrap;
+      gap: 4px;
+      align-items: center;
+    }
+    .navigator-speed-row {
+      display: flex;
+      flex-flow: row nowrap;
+      align-items: center;
+      gap: 6px;
+      .navigator-speed-label {
+        font-size: 11px;
+        color: $border-color;
+        flex-shrink: 0;
+      }
+      .navigator-speed-slider {
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+      .navigator-speed-value {
+        font-size: 11px;
+        min-width: 30px;
+        text-align: right;
+        flex-shrink: 0;
+      }
+    }
+    .navigator-name-input {
+      flex: 1 1 auto;
+      min-width: 0;
+      height: 22px;
+      background: $darkest-gray;
+      color: $white;
+      border: none;
+      padding: 0 6px;
+      @include boxBorder;
+      &:focus {
+        outline: none;
+        @include boxBorder($white);
+      }
+    }
+    .navigator-btn {
+      height: 24px;
+      padding: 0 8px;
+      font-size: 11px;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .load-btn {
+      input[type='file'] {
+        display: none;
+      }
+      &.disabled {
+        opacity: 0.4;
+        pointer-events: none;
+      }
+    }
+    .record-btn {
+      background: rgb(160, 50, 50);
+      &:hover:not([disabled]) {
+        box-shadow: -2px 0 0 0 rgb(220, 80, 80), 2px 0 0 0 rgb(220, 80, 80),
+          0 -2px 0 0 rgb(220, 80, 80), 0 2px 0 0 rgb(220, 80, 80);
+      }
+    }
+    .stop-btn {
+      background: rgb(120, 80, 30);
+    }
+    .navigator-script-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      max-height: 100px;
+      overflow-y: auto;
+      background: $darkest-gray;
+      @include boxBorder;
+      .navigator-script-item {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        align-items: center;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 11px;
+        gap: 6px;
+        &:hover {
+          background: $gray;
+        }
+        &.selected {
+          background: rgb(80, 80, 120);
+        }
+        .script-name {
+          flex: 1 1 auto;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        .script-count {
+          flex-shrink: 0;
+          color: $border-color;
+          font-size: 10px;
+        }
+      }
+      .navigator-script-empty {
+        padding: 8px;
+        font-size: 11px;
+        color: $mid-gray;
+        text-align: center;
+      }
+    }
+  }
+}
+
+// Simulated playback cursor — appended to body, travels across the whole page.
+// Shape and transform are set dynamically by player-event.js.
+.nav-sim-cursor {
+  position: fixed;
+  pointer-events: none;
+  display: none;
+  // width/height are also set as inline styles by player-event.js per shape
+  // to guarantee the correct size regardless of CSS specificity issues.
+  z-index: 99999;
+  overflow: hidden;
+}

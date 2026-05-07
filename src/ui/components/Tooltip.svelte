@@ -1,4 +1,5 @@
 <script>
+  import { tick } from 'svelte'
   import { uiStore } from '../stores/ui.svelte.js'
   import { toolStore } from '../stores/tool.svelte.js'
   import { canvas } from '../../context/canvas.js'
@@ -8,6 +9,7 @@
 
   let tooltipEl = $state(null)
   let eligible = $state(false)
+  let message = $state('')
   let x = $state(0)
   let y = $state(0)
   let location = $state('left')
@@ -15,19 +17,22 @@
   let visible = $derived(uiStore.showTooltips && eligible)
 
   function getMessage(target) {
-    let message = target.dataset?.tooltip
+    let msg = target.dataset?.tooltip
     if (
-      message &&
+      msg &&
       canvas.currentLayer?.isPreview &&
       target.classList.contains('deactivate-paste')
     ) {
-      message += PASTE_WARNING
+      msg += PASTE_WARNING
     }
-    return message || null
+    return msg || null
   }
 
-  function position(message, target) {
-    tooltipEl.innerText = message
+  async function position(msg, target) {
+    // Wait for Svelte to render the new text before measuring so
+    // getBoundingClientRect reflects the actual rendered tooltip size.
+    message = msg
+    await tick()
 
     const targetRect = target.getBoundingClientRect()
     const targetCenter = targetRect.left + targetRect.width / 2
@@ -86,4 +91,7 @@
   class:page-center={location === 'center'}
   style:top="{y}px"
   style:left="{x}px"
-></div>
+  style:white-space="pre-line"
+>
+  {message}
+</div>

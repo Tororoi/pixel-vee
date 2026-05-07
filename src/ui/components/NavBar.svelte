@@ -27,6 +27,7 @@
     actionRotatePixels,
   } from '../../actions/transform/rasterTransform.js'
   import { tools } from '../../tools/index.js'
+  import { NAVIGATOR_ENABLED } from '../../utils/constants.js'
 
   /**
    * Converts a camelCase option key into a space-separated display
@@ -188,6 +189,13 @@
     if (hasPaste) return
     globalState.ui.canvasSizeOpen = true
     activateResizeOverlay()
+  }
+
+  /**
+   * Toggles the navigator dialog open and closed.
+   */
+  function handleNavigator() {
+    globalState.ui.navigatorOpen = !globalState.ui.navigatorOpen
   }
 
   /**
@@ -449,6 +457,16 @@
       <div class="tool-options"></div>
     {/if}
     <div class="settings">
+      {#if NAVIGATOR_ENABLED}
+        <button
+          type="button"
+          class="navigator-icon"
+          id="navigator-btn"
+          aria-label="Open navigator"
+          data-tooltip="Open navigator"
+          onclick={handleNavigator}
+        ></button>
+      {/if}
       <button
         type="button"
         class="gear"

@@ -7,6 +7,7 @@ const WHEEL_THRESHOLD = 20 // accumulated pixels required to trigger each zoom s
 const MINIMUM_DIMENSION = 8 // minimum canvas width or height in pixels
 const MAXIMUM_DIMENSION = 1024 // maximum canvas width or height in pixels
 const CURVE_TYPES = ['line', 'quadCurve', 'cubicCurve']
+const NAVIGATOR_ENABLED = false
 
 // Export the constants
 export {
@@ -18,4 +19,5 @@ export {
   MINIMUM_DIMENSION,
   MAXIMUM_DIMENSION,
   CURVE_TYPES,
+  NAVIGATOR_ENABLED,
 }

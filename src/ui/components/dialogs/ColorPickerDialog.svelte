@@ -343,10 +343,7 @@
     const docRect = document.documentElement.getBoundingClientRect()
     const x = e.pageX - (rect.left - docRect.left)
     const y = e.pageY - (rect.top - docRect.top)
-    selectSL(
-      Math.min(Math.max(x, 0), WIDTH),
-      Math.min(Math.max(y, 0), HEIGHT),
-    )
+    selectSL(Math.min(Math.max(x, 0), WIDTH), Math.min(Math.max(y, 0), HEIGHT))
   }
 
   /**
@@ -570,7 +567,7 @@
         <div class="ramp-label">Shadow / Highlight</div>
         <div class="ramp-row">
           <div class="ramp-swatches">
-            {#each shadowColors as color, i}
+            {#each shadowColors as color, i (i)}
               <button
                 type="button"
                 class="swatch ramp-swatch{i === 3 ? ' ramp-base' : ''}"
@@ -587,14 +584,13 @@
         <div class="ramp-label">Custom Ramp</div>
         <div class="ramp-row">
           <div class="ramp-swatches">
-            {#each customColors as color, i}
+            {#each customColors as color, i (i)}
               {@const keyMap = { 0: 'start', 3: 'mid', 6: 'end' }}
               {@const key = keyMap[i] ?? null}
               <button
                 type="button"
-                class="swatch ramp-swatch{key
-                  ? ' ramp-key'
-                  : ''}{key === selectedCustomKey
+                class="swatch ramp-swatch{key ? ' ramp-key' : ''}{key ===
+                selectedCustomKey
                   ? ' selected'
                   : ''}{key === editingCustomKey ? ' active' : ''}"
                 style="background-color: rgba({color.r},{color.g},{color.b},{color.a /
@@ -644,8 +640,11 @@
         </div>
       </div>
       <div id="buttons">
-        <button type="button" class="btn" id="confirm-btn" onclick={confirmColor}
-          >OK</button
+        <button
+          type="button"
+          class="btn"
+          id="confirm-btn"
+          onclick={confirmColor}>OK</button
         >
         <button
           type="button"
@@ -889,7 +888,14 @@
         >
       </div>
       <div id="lumi">
-        <label>Lumi <input type="text" id="luminance" readonly value={lumiVal} /></label>
+        <label
+          >Lumi <input
+            type="text"
+            id="luminance"
+            readonly
+            value={lumiVal}
+          /></label
+        >
       </div>
     </div>
   </div>

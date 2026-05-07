@@ -142,7 +142,9 @@ export function redrawTimelineActions(layer, activeIndexes, setImages = false) {
     let action = globalState.timeline.undoStack[i]
     //if layer is passed in, only redraw for that layer
     if (layer) {
-      if (action.layer !== layer) continue
+      if (action.layer !== layer) {
+        continue
+      }
     }
     if (activeIndexMap) {
       if (activeIndexMap.has(i)) {
