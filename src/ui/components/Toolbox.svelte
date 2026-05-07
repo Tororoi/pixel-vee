@@ -23,6 +23,7 @@
   import { renderCanvas } from '../../canvas/render.js'
 
   import { ZOOM_LEVELS } from '../../utils/constants.js'
+  import { TOOLTIPS, getTooltip } from '../../utils/tooltips.js'
   import DialogBox from './DialogBox.svelte'
 
   const COLUMN1_TOOLS = [
@@ -174,34 +175,6 @@
     switchTool(group.activeTool)
     openGroup = openGroup === groupKey ? null : groupKey
   }
-
-  const LABELS = {
-    brush: 'Brush (B)',
-    fill: 'Fill (F)',
-    curve: 'Curve (V)',
-    eyedropper: 'Eyedropper (Hold Alt)',
-    grab: 'Grab (Hold Space)',
-    move: 'Move',
-  }
-  const TOOLTIPS = { ...LABELS }
-
-  const GROUP_LABELS = {
-    shapeTools: 'Shapes',
-    selectionTools: 'Select (S)',
-  }
-
-  const TOOL_INFO = {
-    ellipse: {
-      label: 'Ellipse (O) Hold Shift to maintain circle',
-      tooltip: 'Ellipse (O)\n\nHold Shift to maintain circle',
-    },
-    polygon: {
-      label: 'Polygon (P) Hold Shift to maintain square',
-      tooltip: 'Polygon (P)\n\nHold Shift to maintain square',
-    },
-    select: { label: 'Select (S)', tooltip: 'Select (S)' },
-    magicWand: { label: 'Magic Wand (W)', tooltip: 'Magic Wand (W)' },
-  }
 </script>
 
 <DialogBox
@@ -215,16 +188,16 @@
       type="button"
       class="tool undo custom-shape"
       id="undo"
-      aria-label="Undo (Cmd + Z)"
-      data-tooltip="Undo (Cmd + Z)"
+      aria-label={TOOLTIPS.undo.label}
+      data-tooltip={TOOLTIPS.undo.tooltip}
       onclick={handleUndo_}
     ></button>
     <button
       type="button"
       class="tool redo custom-shape"
       id="redo"
-      aria-label="Redo (Cmd + Shift + Z)"
-      data-tooltip="Redo (Cmd + Shift + Z)"
+      aria-label={TOOLTIPS.redo.label}
+      data-tooltip={TOOLTIPS.redo.tooltip}
       onclick={handleRedo_}
     ></button>
   </div>
@@ -232,15 +205,15 @@
     <button
       type="button"
       class="tool recenter custom-shape"
-      aria-label="Recenter Canvas"
-      data-tooltip="Recenter Canvas"
+      aria-label={TOOLTIPS.recenter.label}
+      data-tooltip={TOOLTIPS.recenter.tooltip}
       onclick={handleRecenter}
     ></button>
     <button
       type="button"
       class="tool clear custom-shape{pastedLayer ? ' disabled' : ''}"
-      aria-label="Clear Canvas"
-      data-tooltip="Clear Canvas"
+      aria-label={TOOLTIPS.clearCanvas.label}
+      data-tooltip={TOOLTIPS.clearCanvas.tooltip}
       onclick={handleClear}
     ></button>
   </div>
@@ -249,16 +222,16 @@
       type="button"
       id="minus"
       class="zoombtn minus"
-      aria-label="Zoom Out (Mouse Wheel)"
-      data-tooltip="Zoom Out (Mouse Wheel)"
+      aria-label={TOOLTIPS.zoomOut.label}
+      data-tooltip={TOOLTIPS.zoomOut.tooltip}
       onclick={handleZoom}
     ></button>
     <button
       type="button"
       id="plus"
       class="zoombtn plus"
-      aria-label="Zoom In (Mouse Wheel)"
-      data-tooltip="Zoom In (Mouse Wheel)"
+      aria-label={TOOLTIPS.zoomIn.label}
+      data-tooltip={TOOLTIPS.zoomIn.tooltip}
       onclick={handleZoom}
     ></button>
   </div>
@@ -275,6 +248,7 @@
               ? selectedName
               : activeToolName}
             {@const isOpen = openGroup === item}
+            {@const groupTip = getTooltip(item)}
             <div class="tool-group{isOpen ? ' open' : ''}" data-group={item}>
               <button
                 type="button"
@@ -282,25 +256,22 @@
                   ? ' selected'
                   : ''}"
                 data-group={item}
-                aria-label={GROUP_LABELS[item] ?? item}
-                data-tooltip={GROUP_LABELS[item] ?? item}
+                aria-label={groupTip.label}
+                data-tooltip={groupTip.tooltip}
                 onclick={() => handleGroupBtnClick(item)}
               ></button>
               {#if isOpen}
                 <div class="tool-group-popout">
                   {#each group.tools as toolName (toolName)}
-                    {@const info = TOOL_INFO[toolName] ?? {
-                      label: toolName,
-                      tooltip: toolName,
-                    }}
+                    {@const tip = getTooltip(toolName)}
                     <button
                       type="button"
                       class="tool {toolName}{selectedName === toolName
                         ? ' selected'
                         : ''}"
                       id={toolName}
-                      aria-label={info.label}
-                      data-tooltip={info.tooltip}
+                      aria-label={tip.label}
+                      data-tooltip={tip.tooltip}
                       onclick={() => handleToolClick(toolName)}
                     ></button>
                   {/each}
@@ -308,12 +279,13 @@
               {/if}
             </div>
           {:else}
+            {@const tip = getTooltip(item)}
             <button
               type="button"
               class="tool {item}{selectedName === item ? ' selected' : ''}"
               id={item}
-              aria-label={LABELS[item] ?? item}
-              data-tooltip={TOOLTIPS[item] ?? item}
+              aria-label={tip.label}
+              data-tooltip={tip.tooltip}
               onclick={() => handleToolClick(item)}
             ></button>
           {/if}
@@ -321,12 +293,13 @@
       </div>
       <div class="column">
         {#each COLUMN2_TOOLS as name (name)}
+          {@const tip = getTooltip(name)}
           <button
             type="button"
             class="tool {name}{selectedName === name ? ' selected' : ''}"
             id={name}
-            aria-label={LABELS[name] ?? name}
-            data-tooltip={TOOLTIPS[name] ?? name}
+            aria-label={tip.label}
+            data-tooltip={tip.tooltip}
             onclick={() => handleToolClick(name)}
           ></button>
         {/each}

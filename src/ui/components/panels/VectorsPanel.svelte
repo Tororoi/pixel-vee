@@ -23,6 +23,7 @@
   } from '../../../actions/nonPointer/selectionActions.js'
   import { removeActionVector } from '../../../actions/modifyTimeline/modifyTimeline.js'
   import { keys } from '../../../shortcuts/keys.js'
+  import { TOOLTIPS } from '../../../utils/tooltips.js'
   import { initializeColorPicker } from '../../../swatch/events.js'
   import VectorThumbnail from './VectorThumbnail.svelte'
   import VectorSettingsPopout from './VectorSettingsPopout.svelte'
@@ -164,6 +165,9 @@
           selectedIndices.has(vector.index)}
         {@const toolName = vector.vectorProperties?.tool ?? ''}
         {@const isSettingsOpen = settingsVector === vector}
+        {@const hideTip = isVectorHidden
+          ? TOOLTIPS.showVector
+          : TOOLTIPS.hideVector}
         <div
           class="vector{isSelected ? ' selected' : ''}"
           role="button"
@@ -185,8 +189,8 @@
             <button
               type="button"
               class="actionColor primary-color"
-              aria-label="Action Color"
-              data-tooltip="Action Color"
+              aria-label={TOOLTIPS.actionColor.label}
+              data-tooltip={TOOLTIPS.actionColor.tooltip}
               onclick={(e) => handleColorClick(e, vector)}
             >
               <div
@@ -197,23 +201,23 @@
             <button
               type="button"
               class="hide {isVectorHidden ? 'eyeclosed' : 'eyeopen'}"
-              aria-label={isVectorHidden ? 'Show Vector' : 'Hide Vector'}
-              data-tooltip={isVectorHidden ? 'Show Vector' : 'Hide Vector'}
+              aria-label={hideTip.label}
+              data-tooltip={hideTip.tooltip}
               onclick={(e) => handleHideToggle(e, vector)}
             ></button>
             <button
               type="button"
               class="trash"
-              aria-label="Remove Vector"
-              data-tooltip="Remove Vector"
+              aria-label={TOOLTIPS.removeVector.label}
+              data-tooltip={TOOLTIPS.removeVector.tooltip}
               onclick={(e) => handleRemove(e, vector)}
             ></button>
           </div>
           <button
             type="button"
             class="gear{isSettingsOpen ? ' active' : ''}"
-            aria-label="Vector Settings"
-            data-tooltip="Vector Settings"
+            aria-label={TOOLTIPS.vectorSettings.label}
+            data-tooltip={TOOLTIPS.vectorSettings.tooltip}
             onclick={(e) => handleGearClick(e, vector)}
           ></button>
         </div>

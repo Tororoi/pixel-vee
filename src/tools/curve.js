@@ -314,37 +314,14 @@ export const curve = {
   ditherOffsetX: 0,
   ditherOffsetY: 0,
   options: {
-    chain: {
-      active: false,
-      tooltip:
-        'Toggle Chain (7). \n\nStart a new vector from a colliding vector endpoint instead of adjusting it.',
-    },
+    chain: { active: false },
     //Priority hierarchy of options: Equal = Align > Hold > Link
-    equal: {
-      active: false,
-      tooltip:
-        'Toggle Equal Length (=). \n\nEnsures magnitude continuity of control handles for linked vectors.',
-    }, // Magnitude continuity
-    align: {
-      active: true,
-      tooltip:
-        'Toggle Align (A). \n\nEnsures tangential continuity by moving the control handle to the opposite angle for linked vectors.',
-    }, // Tangential continuity
-    hold: {
-      active: false,
-      tooltip:
-        'Toggle Hold (H). \n\nMaintain relative angles of all control handles attached to selected control point.',
-    },
-    link: {
-      active: true,
-      tooltip:
-        'Toggle Linking (L). \n\nConnected control points of other vectors will move with selected control point.',
-    }, // Positional continuity
+    equal: { active: false }, // Magnitude continuity
+    align: { active: true }, // Tangential continuity
+    hold: { active: false },
+    link: { active: true }, // Positional continuity
     // displayVectors: false,
-    displayPaths: {
-      active: false,
-      tooltip: 'Toggle Paths. \n\nShow paths for vectors.',
-    },
+    displayPaths: { active: false },
   },
   modes: {
     line: true,

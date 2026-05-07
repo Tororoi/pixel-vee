@@ -9,6 +9,7 @@
    * or linked dialogs that should coexist with it while open.
    */
   import { portal } from '../../../utils/portal.js'
+  import { TOOLTIPS } from '../../../utils/tooltips.js'
 
   let {
     pos,
@@ -44,8 +45,8 @@
     <button
       type="button"
       class="close-btn"
-      aria-label="Close"
-      data-tooltip="Close"
+      aria-label={TOOLTIPS.close.label}
+      data-tooltip={TOOLTIPS.close.tooltip}
       onclick={onclose}
     ></button>
   </div>

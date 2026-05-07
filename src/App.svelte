@@ -27,6 +27,7 @@
   import NavigatorCanvas from './ui/components/NavigatorCanvas.svelte'
   import CanvasArea from './ui/components/CanvasArea.svelte'
   import KeyboardShortcuts from './ui/components/KeyboardShortcuts.svelte'
+  import KeyDisplay from './ui/components/KeyDisplay.svelte'
   import Tooltip from './ui/components/Tooltip.svelte'
 
   // .page is outside #root — portal all panels/dialogs into it so they share
@@ -61,6 +62,7 @@
   <div use:portal={pageEl} style="display:contents">
     <Toolbox />
     <Sidebar />
+    <KeyDisplay />
     <SettingsDialog />
     <CanvasSizeDialog />
     <SaveDialog />

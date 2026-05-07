@@ -25,6 +25,7 @@ import {
 } from '../actions/transform/rasterTransform.js'
 import { toggleMode, switchTool, toggleToolOption } from '../tools/toolbox.js'
 import { adjustVectorSteps } from '../tools/adjust.js'
+import { keyDisplayStore } from '../ui/stores/keyDisplay.svelte.js'
 
 // Maps key combo strings to action names. Format: '[meta+][shift+]KeyCode'.
 // Specific combos (with shift) take precedence over general ones in the lookup
@@ -178,7 +179,10 @@ export const holdHandlers = {
   // Shift fires even mid-stroke so line constraints take effect immediately.
   ShiftLeft: () => {
     if (globalState.tool.selectedName === 'brush') {
-      tools.brush.options.line.active = true
+      // Write through the $state proxy so brush.js's read of
+      // globalState.tool.current.options.line.active sees the change;
+      // a direct mutation of tools.brush bypasses the proxy.
+      globalState.tool.current.options.line.active = true
       // Pin the constraint origin to where Shift was pressed; recapturing
       // it on each event would let the locked axis drift mid-stroke.
       globalState.tool.lineStartX = globalState.cursor.x
@@ -255,6 +259,11 @@ export const releaseHandlers = {
     // and must restore the tool immediately so free drawing resumes.
     globalState.tool.current = tools[globalState.tool.selectedName]
     tools.brush.options.line.active = false
+    // Mirror the reset through the $state proxy so brush.js's reactive read
+    // sees it; a direct mutation of tools.brush alone bypasses the proxy.
+    if (globalState.tool.current.name === 'brush') {
+      globalState.tool.current.options.line.active = false
+    }
     if (
       globalState.tool.current.name === 'brush' &&
       globalState.cursor.clicked
@@ -356,6 +365,7 @@ export function activateShortcut(keyCode) {
   const action = keyBindings[specific] ?? keyBindings[general]
   if (action && !globalState.cursor.clicked) {
     actionHandlers[action]()
+    keyDisplayStore.show(meta, shift, keyCode)
     return
   }
 
@@ -363,11 +373,15 @@ export function activateShortcut(keyCode) {
   // Each holdHandler guards its own cursor.clicked check as needed.
   if (holdHandlers[keyCode]) {
     holdHandlers[keyCode]()
+    keyDisplayStore.show(meta, shift, keyCode)
     return
   }
 
   // 3. Remaining UI-only shortcuts that bypass the action registry.
-  unregisteredHandlers[keyCode]?.()
+  if (unregisteredHandlers[keyCode]) {
+    unregisteredHandlers[keyCode]()
+    keyDisplayStore.show(meta, shift, keyCode)
+  }
 }
 
 /**

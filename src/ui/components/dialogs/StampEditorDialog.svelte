@@ -17,6 +17,7 @@
     updateCustomStamp,
   } from '../../../context/brushStamps.js'
   import DialogBox from '../DialogBox.svelte'
+  import { TOOLTIPS } from '../../../utils/tooltips.js'
 
   const STAMP_SIZE = 32
   const CELL_SIZE = 10
@@ -362,24 +363,24 @@
             type="button"
             class="stamp-tool brush"
             class:selected={uiPaintMode === 'draw'}
-            aria-label="Draw"
-            data-tooltip="Draw"
+            aria-label={TOOLTIPS.stampDraw.label}
+            data-tooltip={TOOLTIPS.stampDraw.tooltip}
             onclick={() => (uiPaintMode = 'draw')}
           ></button>
           <button
             type="button"
             class="stamp-tool eraser"
             class:selected={uiPaintMode === 'erase'}
-            aria-label="Erase"
-            data-tooltip="Erase"
+            aria-label={TOOLTIPS.stampErase.label}
+            data-tooltip={TOOLTIPS.stampErase.tooltip}
             onclick={() => (uiPaintMode = 'erase')}
           ></button>
           <button
             type="button"
             class="stamp-tool move"
             class:selected={uiPaintMode === 'move'}
-            aria-label="Move"
-            data-tooltip="Move"
+            aria-label={TOOLTIPS.stampMove.label}
+            data-tooltip={TOOLTIPS.stampMove.tooltip}
             onclick={() => (uiPaintMode = 'move')}
           ></button>
         </div>
@@ -387,22 +388,22 @@
           <button
             type="button"
             class="stamp-tool mirrorX"
-            aria-label="Mirror Horizontal"
-            data-tooltip="Mirror Horizontal"
+            aria-label={TOOLTIPS.mirrorHorizontal.label}
+            data-tooltip={TOOLTIPS.mirrorHorizontal.tooltip}
             onclick={mirrorH}
           ></button>
           <button
             type="button"
             class="stamp-tool mirrorY"
-            aria-label="Mirror Vertical"
-            data-tooltip="Mirror Vertical"
+            aria-label={TOOLTIPS.mirrorVertical.label}
+            data-tooltip={TOOLTIPS.mirrorVertical.tooltip}
             onclick={mirrorV}
           ></button>
           <button
             type="button"
             class="stamp-tool clear"
-            aria-label="Clear"
-            data-tooltip="Clear"
+            aria-label={TOOLTIPS.stampClear.label}
+            data-tooltip={TOOLTIPS.stampClear.tooltip}
             onclick={clearStamp}
           ></button>
         </div>

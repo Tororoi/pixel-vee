@@ -14,6 +14,7 @@
     computeFileSizePreview,
   } from '../../../save/savefile.js'
   import { measureTextWidth } from '../../../utils/measureHelpers.js'
+  import { TOOLTIPS } from '../../../utils/tooltips.js'
   import DialogBox from '../DialogBox.svelte'
   import ToggleCheckbox from '../shared/ToggleCheckbox.svelte'
 
@@ -151,7 +152,7 @@
         label="Preserve Entire History"
         checked={settings.preserveHistory}
         onchange={handlePreserveHistory}
-        tooltip="Preserve all actions in history, palette, and reference images"
+        tooltip={TOOLTIPS.preserveHistory.tooltip}
       />
     </div>
 
@@ -167,7 +168,7 @@
           label="Palette"
           checked={settings.includePalette}
           onchange={handleIncludePalette}
-          tooltip="Save colors in palette"
+          tooltip={TOOLTIPS.includePalette.tooltip}
         />
       </div>
 
@@ -179,7 +180,7 @@
           label="Reference Layers"
           checked={settings.includeReferenceLayers}
           onchange={handleIncludeReferenceLayers}
-          tooltip="Save all reference images, including any transformations applied to them."
+          tooltip={TOOLTIPS.includeReferenceLayers.tooltip}
         />
       </div>
 
@@ -191,7 +192,7 @@
           label="Removed Actions"
           checked={settings.includeRemovedActions}
           onchange={handleIncludeRemovedActions}
-          tooltip="If a layer or vector was trashed or layer was cleared, those actions are still recoverable by using undo. If you're certain those actions won't be missed, you can remove them permanently by unchecking this box."
+          tooltip={TOOLTIPS.includeRemovedActions.tooltip}
         />
       </div>
     </div>
@@ -201,8 +202,8 @@
         type="submit"
         id="save-button"
         class="btn"
-        aria-label="Save offline as a .pxv file"
-        data-tooltip="Save offline as a .pxv file"
+        aria-label={TOOLTIPS.saveAsPxv.label}
+        data-tooltip={TOOLTIPS.saveAsPxv.tooltip}
       >
         Save
       </button>

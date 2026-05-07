@@ -172,13 +172,7 @@ export const select = {
   brushSize: 1,
   brushType: 'circle',
   brushDisabled: true,
-  options: {
-    // rasterOnly: {
-    //   active: true,
-    //   tooltip:
-    //     "Paste will rasterize any vectors that intersect with selected area",
-    // },
-  },
+  options: {},
   modes: {},
   type: 'utility',
   cursor: 'default',
