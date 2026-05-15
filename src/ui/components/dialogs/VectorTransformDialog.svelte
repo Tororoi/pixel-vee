@@ -17,6 +17,7 @@
   } from '../../../gui/transform.js'
   import { actionDeselect } from '../../../actions/nonPointer/selectionActions.js'
   import { TRANSLATE, ROTATE, SCALE } from '../../../utils/constants.js'
+  import { TOOLTIPS } from '../../../utils/tooltips.js'
   import DialogBox from '../DialogBox.svelte'
 
   const isOpen = $derived(globalState.ui.vectorTransformOpen)
@@ -83,8 +84,8 @@
           ? ' selected'
           : ''}"
         id="translate"
-        aria-label="Translate"
-        data-tooltip="Translate"
+        aria-label={TOOLTIPS.translate.label}
+        data-tooltip={TOOLTIPS.translate.tooltip}
         onclick={handleTranslate}
       ></button>
       <button
@@ -93,8 +94,8 @@
           ? ' selected'
           : ''}"
         id="rotate"
-        aria-label="Rotate"
-        data-tooltip="Rotate"
+        aria-label={TOOLTIPS.rotate.label}
+        data-tooltip={TOOLTIPS.rotate.tooltip}
         onclick={handleRotate}
       ></button>
       <button
@@ -103,8 +104,8 @@
           ? ' selected'
           : ''}"
         id="scale"
-        aria-label="Scale"
-        data-tooltip="Scale"
+        aria-label={TOOLTIPS.scale.label}
+        data-tooltip={TOOLTIPS.scale.tooltip}
         onclick={handleScale}
       ></button>
     </div>

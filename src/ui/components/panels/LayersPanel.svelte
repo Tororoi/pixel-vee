@@ -21,6 +21,7 @@
   import { dom } from '../../../context/dom.js'
   import LayerSettingsPopout from './LayerSettingsPopout.svelte'
   import DialogBox from '../DialogBox.svelte'
+  import { TOOLTIPS } from '../../../utils/tooltips.js'
 
   let uploadRef = $state(null)
   let settingsLayer = $state.raw(null)
@@ -208,16 +209,16 @@
     <button
       type="button"
       class="add-layer"
-      aria-label="New Layer"
-      data-tooltip="New Layer"
+      aria-label={TOOLTIPS.newLayer.label}
+      data-tooltip={TOOLTIPS.newLayer.tooltip}
       disabled={isPasted}
       onclick={handleAddLayer}
     ></button>
     <label
       for="file-upload"
       class="reference{isPasted ? ' disabled' : ''}"
-      aria-label="Add Reference Layer"
-      data-tooltip="Add Reference Layer"
+      aria-label={TOOLTIPS.addReferenceLayer.label}
+      data-tooltip={TOOLTIPS.addReferenceLayer.tooltip}
     ></label>
     <input
       type="file"
@@ -234,8 +235,8 @@
       type="button"
       id="delete-layer"
       class="trash"
-      aria-label="Delete Layer"
-      data-tooltip="Delete Layer"
+      aria-label={TOOLTIPS.deleteLayer.label}
+      data-tooltip={TOOLTIPS.deleteLayer.tooltip}
       disabled={!canDelete}
       onclick={handleDeleteLayer}
     ></button>
@@ -246,6 +247,7 @@
         {@const isHidden = layer.hidden}
         {@const isSelected = layer === currentLayer}
         {@const isSettingsOpen = settingsLayer === layer}
+        {@const hideTip = isHidden ? TOOLTIPS.showLayer : TOOLTIPS.hideLayer}
         <div
           class="layer {layer.type}{isSelected ? ' selected' : ''}"
           role="button"
@@ -262,16 +264,16 @@
           <button
             type="button"
             class="hide {isHidden ? 'eyeclosed' : 'eyeopen'}"
-            aria-label={isHidden ? 'Show Layer' : 'Hide Layer'}
-            data-tooltip={isHidden ? 'Show Layer' : 'Hide Layer'}
+            aria-label={hideTip.label}
+            data-tooltip={hideTip.tooltip}
             onclick={(e) => handleHideToggle(e, layer)}
           ></button>
           <span class="layer-title">{layer.title}</span>
           <button
             type="button"
             class="gear{isSettingsOpen ? ' active' : ''}"
-            aria-label="Layer Settings"
-            data-tooltip="Layer Settings"
+            aria-label={TOOLTIPS.layerSettings.label}
+            data-tooltip={TOOLTIPS.layerSettings.tooltip}
             onclick={(e) => handleGearClick(e, layer)}
           ></button>
         </div>

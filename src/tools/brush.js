@@ -380,12 +380,6 @@ function handlePerfectPixels() {
 //===== * * * Brush Object * * * =====//
 //====================================//
 
-export const BAYER_STEPS = {
-  '2x2': [15, 31, 47, 63],
-  '4x4': [3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 43, 47, 51, 55, 59, 63],
-  '8x8': Array.from({ length: 64 }, (_, i) => i),
-}
-
 export const brush = {
   name: 'brush',
   fn: brushSteps,

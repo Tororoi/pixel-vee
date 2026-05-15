@@ -451,15 +451,8 @@ export const polygon = {
   ditherOffsetX: 0,
   ditherOffsetY: 0,
   options: {
-    uniform: {
-      active: false,
-      tooltip:
-        'Uniform. \n\nMaintain rectangular shape when adjusting corners.',
-    },
-    displayPaths: {
-      active: false,
-      tooltip: 'Toggle Paths. \n\nShow path for polygon.',
-    },
+    uniform: { active: false },
+    displayPaths: { active: false },
   },
   modes: { eraser: false, inject: false, twoColor: false },
   type: 'vector',

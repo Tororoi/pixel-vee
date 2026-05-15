@@ -11,6 +11,7 @@
    */
   import { onMount } from 'svelte'
   import { portal } from './utils/portal.js'
+  import { NAVIGATOR_ENABLED, KEY_DISPLAY_ENABLED } from './utils/constants.js'
   import NavBar from './ui/components/NavBar.svelte'
   import Toolbox from './ui/components/Toolbox.svelte'
   import Sidebar from './ui/components/Sidebar.svelte'
@@ -22,8 +23,11 @@
   import ColorPickerDialog from './ui/components/dialogs/ColorPickerDialog.svelte'
   import DitherPickerDialog from './ui/components/dialogs/DitherPickerDialog.svelte'
   import StampEditorDialog from './ui/components/dialogs/StampEditorDialog.svelte'
+  import NavigatorDialog from './ui/components/dialogs/NavigatorDialog.svelte'
+  import NavigatorCanvas from './ui/components/NavigatorCanvas.svelte'
   import CanvasArea from './ui/components/CanvasArea.svelte'
   import KeyboardShortcuts from './ui/components/KeyboardShortcuts.svelte'
+  import KeyDisplay from './ui/components/KeyDisplay.svelte'
   import Tooltip from './ui/components/Tooltip.svelte'
 
   // .page is outside #root — portal all panels/dialogs into it so they share
@@ -50,10 +54,17 @@
   <!-- CanvasArea portals .canvas-container directly into .page (no wrapper) so it is a
        first-class flex child of .page and height:100% resolves correctly. -->
   <CanvasArea {pageEl} />
+  {#if NAVIGATOR_ENABLED}
+    <!-- NavigatorCanvas mounts itself into .bg-space imperatively — no portal needed. -->
+    <NavigatorCanvas />
+  {/if}
   <!-- display:contents removes the wrapper from layout while portaling panels into .page -->
   <div use:portal={pageEl} style="display:contents">
     <Toolbox />
     <Sidebar />
+    {#if KEY_DISPLAY_ENABLED}
+      <KeyDisplay />
+    {/if}
     <SettingsDialog />
     <CanvasSizeDialog />
     <SaveDialog />
@@ -62,5 +73,8 @@
     <ColorPickerDialog />
     <DitherPickerDialog />
     <StampEditorDialog />
+    {#if NAVIGATOR_ENABLED}
+      <NavigatorDialog />
+    {/if}
   </div>
 {/if}

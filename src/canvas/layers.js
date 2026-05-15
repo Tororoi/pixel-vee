@@ -279,7 +279,11 @@ export function removeTempLayer() {
     return
   }
   canvas.layers.splice(canvas.layers.indexOf(canvas.tempLayer), 1)
-  dom.canvasLayers.removeChild(canvas.tempLayer.onscreenCvs)
+  // Remove from wherever it was inserted — normally dom.canvasLayers, but during
+  // navigator mode it is inside the nav overlay instead.
+  canvas.tempLayer.onscreenCvs.parentElement?.removeChild(
+    canvas.tempLayer.onscreenCvs,
+  )
   // Re-enable tools that the paste operation locked at temp-layer
   // insertion time.
   canvas.tempLayer.inactiveTools.forEach((tool) => {

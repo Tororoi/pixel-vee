@@ -221,3 +221,68 @@ export const toolGroups = {
     activeTool: 'select',
   },
 }
+
+//==================================================//
+//========= * * * Navigator Features * * * =========//
+//==================================================//
+
+/**
+ * Captures the mutable runtime state of every tool and tool group into a
+ * plain object suitable for later restoration. Only the four properties
+ * that vary at runtime are recorded — modes, brushSize, brushType, and
+ * ditherPatternIndex; structural fields like `fn`, `type`, and
+ * `brushDisabled` are intentionally excluded. For groups, only
+ * `activeTool` is captured because it is the sole group field that
+ * changes. The result is a value snapshot, not a live reference — modes
+ * are shallow-copied so that subsequent mode changes do not retroactively
+ * alter it.
+ * @returns {{ tools: object, groups: object }} Snapshot of per-tool
+ *   drawable state and per-group active-tool selection.
+ */
+export function snapshotToolsState() {
+  const toolsSnap = {}
+  for (const [name, tool] of Object.entries(tools)) {
+    toolsSnap[name] = {
+      // Shallow copy decouples the snapshot from the live modes object;
+      // tools with no modes get {} so restoreToolsState can assign safely.
+      modes: tool.modes ? { ...tool.modes } : {},
+      brushSize: tool.brushSize,
+      brushType: tool.brushType,
+      ditherPatternIndex: tool.ditherPatternIndex,
+    }
+  }
+  const groupsSnap = {}
+  for (const [name, group] of Object.entries(toolGroups)) {
+    groupsSnap[name] = group.activeTool
+  }
+  return { tools: toolsSnap, groups: groupsSnap }
+}
+
+/**
+ * Restores tool and group state from a snapshot produced by
+ * `snapshotToolsState`, mutating the live tool objects in place. Tools
+ * absent from the current registry are skipped — a snapshot taken on a
+ * different build may reference tools that have since been added or
+ * removed. Modes are merged via Object.assign rather than replaced so
+ * keys absent from the snapshot are left intact on the live object. The
+ * `!== undefined` guards intentionally let null through: null is a valid
+ * "disabled" state for brushSize, brushType, and ditherPatternIndex on
+ * tools that don't use those properties.
+ * @param {{ tools: object, groups: object }} snap Snapshot returned by
+ *   `snapshotToolsState`.
+ */
+export function restoreToolsState(snap) {
+  for (const [name, state] of Object.entries(snap.tools)) {
+    const tool = tools[name]
+    // Snapshot may reference a tool removed in a later build.
+    if (!tool) continue
+    if (tool.modes && state.modes) Object.assign(tool.modes, state.modes)
+    if (state.brushSize !== undefined) tool.brushSize = state.brushSize
+    if (state.brushType !== undefined) tool.brushType = state.brushType
+    if (state.ditherPatternIndex !== undefined)
+      tool.ditherPatternIndex = state.ditherPatternIndex
+  }
+  for (const [name, activeTool] of Object.entries(snap.groups)) {
+    if (toolGroups[name]) toolGroups[name].activeTool = activeTool
+  }
+}
