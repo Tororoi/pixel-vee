@@ -11,7 +11,7 @@
    */
   import { onMount } from 'svelte'
   import { portal } from './utils/portal.js'
-  import { NAVIGATOR_ENABLED } from './utils/constants.js'
+  import { NAVIGATOR_ENABLED, KEY_DISPLAY_ENABLED } from './utils/constants.js'
   import NavBar from './ui/components/NavBar.svelte'
   import Toolbox from './ui/components/Toolbox.svelte'
   import Sidebar from './ui/components/Sidebar.svelte'
@@ -27,6 +27,7 @@
   import NavigatorCanvas from './ui/components/NavigatorCanvas.svelte'
   import CanvasArea from './ui/components/CanvasArea.svelte'
   import KeyboardShortcuts from './ui/components/KeyboardShortcuts.svelte'
+  import KeyDisplay from './ui/components/KeyDisplay.svelte'
   import Tooltip from './ui/components/Tooltip.svelte'
 
   // .page is outside #root — portal all panels/dialogs into it so they share
@@ -61,6 +62,9 @@
   <div use:portal={pageEl} style="display:contents">
     <Toolbox />
     <Sidebar />
+    {#if KEY_DISPLAY_ENABLED}
+      <KeyDisplay />
+    {/if}
     <SettingsDialog />
     <CanvasSizeDialog />
     <SaveDialog />

@@ -12,6 +12,7 @@
   import { initializeColorPicker } from '../../../swatch/events.js'
   import DialogBox from '../DialogBox.svelte'
   import { DEFAULT_PALETTES, PRESETS } from '../../../utils/palettes.js'
+  import { TOOLTIPS } from '../../../utils/tooltips.js'
 
   let primarySwatchRef = $state(null)
   let secondarySwatchRef = $state(null)
@@ -253,7 +254,7 @@
       class="primary swatch btn"
       role="button"
       tabindex="0"
-      data-tooltip="Primary Swatch&#10;&#10;(R) to randomize&#10;&#10;Click to open Color Picker"
+      data-tooltip={TOOLTIPS.primarySwatch.tooltip}
       onclick={handlePrimarySwatchClick}
       onkeydown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') handlePrimarySwatchClick(e)
@@ -266,7 +267,7 @@
       class="secondary back-swatch btn"
       role="button"
       tabindex="0"
-      data-tooltip="Secondary Swatch&#10;&#10;Click to open Color Picker"
+      data-tooltip={TOOLTIPS.secondarySwatch.tooltip}
       onclick={handleSecondarySwatchClick}
       onkeydown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') handleSecondarySwatchClick(e)
@@ -279,8 +280,8 @@
     type="button"
     class="switch color-switch custom-shape"
     id="color-switch"
-    aria-label="Switch primary/ secondary colors"
-    data-tooltip="Switch primary/ secondary colors"
+    aria-label={TOOLTIPS.colorSwitch.label}
+    data-tooltip={TOOLTIPS.colorSwitch.tooltip}
     onclick={handleColorSwitch}
   ></button>
   <div class="palette-container">
@@ -288,15 +289,15 @@
       <button
         type="button"
         class="palette-edit{paletteMode === 'edit' ? ' selected' : ''}"
-        aria-label="Edit Palette Color (Hold K)"
-        data-tooltip="Edit Palette Color (Hold K)"
+        aria-label={TOOLTIPS.editPaletteColor.label}
+        data-tooltip={TOOLTIPS.editPaletteColor.tooltip}
         onclick={handlePaletteEditClick}
       ></button>
       <button
         type="button"
         class="palette-remove{paletteMode === 'remove' ? ' selected' : ''}"
-        aria-label="Remove Palette Color (Hold X)"
-        data-tooltip="Remove Palette Color (Hold X)"
+        aria-label={TOOLTIPS.removePaletteColor.label}
+        data-tooltip={TOOLTIPS.removePaletteColor.tooltip}
         onclick={handlePaletteRemoveClick}
       ></button>
     </div>
@@ -304,8 +305,8 @@
       <button
         type="button"
         class="palette-presets-btn"
-        aria-label="Palette Presets"
-        data-tooltip="Palette Presets"
+        aria-label={TOOLTIPS.palettePresets.label}
+        data-tooltip={TOOLTIPS.palettePresets.tooltip}
         onclick={handlePresetsToggle}
       >
         {presetLabel}
@@ -373,8 +374,8 @@
       <button
         type="button"
         class="add-color plus"
-        aria-label="Add Color"
-        data-tooltip="Add current primary color to palette"
+        aria-label={TOOLTIPS.addPaletteColor.label}
+        data-tooltip={TOOLTIPS.addPaletteColor.tooltip}
         onclick={handleAddColor}
       ></button>
     </div>

@@ -26,6 +26,7 @@
   } from '../../../utils/ditherPreview.js'
   import { vectorGui } from '../../../gui/vector.js'
   import SettingsPopout from '../shared/SettingsPopout.svelte'
+  import { TOOLTIPS } from '../../../utils/tooltips.js'
 
   let { vector = $bindable(), pos, onclose } = $props()
 
@@ -214,8 +215,8 @@
     <button
       type="button"
       class="actionColor primary-color"
-      aria-label="Primary Color"
-      data-tooltip="Primary Color"
+      aria-label={TOOLTIPS.primaryColor.label}
+      data-tooltip={TOOLTIPS.primaryColor.tooltip}
       onclick={handlePrimaryColorClick}
     >
       <div class="swatch" style="background-color: {primaryColor}"></div>
@@ -226,8 +227,8 @@
     <button
       type="button"
       class="actionColor secondary-color"
-      aria-label="Secondary Color"
-      data-tooltip="Secondary Color"
+      aria-label={TOOLTIPS.secondaryColor.label}
+      data-tooltip={TOOLTIPS.secondaryColor.tooltip}
       onclick={handleSecondaryColorClick}
     >
       <div class="swatch" style="background-color: {secondaryColor}"></div>
@@ -238,8 +239,8 @@
     <button
       type="button"
       class="vector-dither-preview"
-      aria-label="Select dither pattern"
-      data-tooltip="Select dither pattern"
+      aria-label={TOOLTIPS.selectDitherPattern.label}
+      data-tooltip={TOOLTIPS.selectDitherPattern.tooltip}
       onclick={handleDitherClick}
     >
       <!-- eslint-disable-next-line svelte/no-at-html-tags -->

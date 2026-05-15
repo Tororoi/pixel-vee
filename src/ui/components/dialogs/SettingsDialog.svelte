@@ -14,6 +14,7 @@
   import DialogBox from '../DialogBox.svelte'
   import SpinInput from '../shared/SpinInput.svelte'
   import ToggleCheckbox from '../shared/ToggleCheckbox.svelte'
+  import { TOOLTIPS } from '../../../utils/tooltips.js'
 
   const isOpen = $derived(globalState.ui.settingsOpen)
 
@@ -107,7 +108,7 @@
           label="Tooltips"
           checked={globalState.ui.showTooltips}
           onchange={handleTooltips}
-          tooltip="Toggle tooltips (T)"
+          tooltip={TOOLTIPS.toggleTooltips.tooltip}
         />
         <ToggleCheckbox
           id="grid-toggle"
@@ -115,7 +116,7 @@
           label="Grid"
           checked={gridEnabled}
           onchange={handleGrid}
-          tooltip="Toggle grid (G)\n\nDisplays at higher zoom levels only."
+          tooltip={TOOLTIPS.toggleGrid.tooltip}
         />
         <div class="grid-spacing-container">
           <label for="grid-spacing">
@@ -146,7 +147,7 @@
           label="Cursor Preview"
           checked={vectorGui.showCursorPreview ?? true}
           onchange={handleCursorPreview}
-          tooltip="Show brush color preview under cursor instead of an outline"
+          tooltip={TOOLTIPS.cursorPreview.tooltip}
         />
       </div>
     </div>

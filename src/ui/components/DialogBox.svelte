@@ -9,6 +9,7 @@
    */
   import { untrack } from 'svelte'
   import { dragStart, dragStop, dragMove } from '../../utils/drag.js'
+  import { TOOLTIPS } from '../../utils/tooltips.js'
 
   let {
     title,
@@ -48,15 +49,18 @@
       <button
         type="button"
         class="close-btn"
-        aria-label="Close"
-        data-tooltip="Close"
+        aria-label={TOOLTIPS.close.label}
+        data-tooltip={TOOLTIPS.close.tooltip}
         onclick={onclose}
       ></button>
     {:else if collapsible}
-      <label class="collapse-btn" data-tooltip="Collapse/ Expand">
+      <label
+        class="collapse-btn"
+        data-tooltip={TOOLTIPS.collapseExpand.tooltip}
+      >
         <input
           type="checkbox"
-          aria-label="Collapse or Expand"
+          aria-label={TOOLTIPS.collapseExpand.label}
           class="collapse-checkbox"
           bind:checked={collapsed}
         />

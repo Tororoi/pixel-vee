@@ -542,16 +542,9 @@ export const ellipse = {
   ditherOffsetX: 0,
   ditherOffsetY: 0,
   options: {
-    useSubpixels: {
-      active: true,
-      tooltip:
-        'Toggle use subpixels. \n\nUse subpixels to control handling of origin point for radii. Determines odd or even length bounding box for ellipse.',
-    },
+    useSubpixels: { active: true },
     // radiusExcludesCenter: false,
-    displayPaths: {
-      active: false,
-      tooltip: 'Toggle Paths. \n\nShow paths for ellipse.',
-    },
+    displayPaths: { active: false },
     //forceCircle: {active: false} //affects timeline, may need to handle this in a way that controls vectorProperties.forceCircle instead of replacing vectorProperties.forceCircle
   }, // need to expand radiusExcludesCenter to cover multiple scenarios, centerx = 0 or 1 and centery = 0 or 1
   modes: { eraser: false, inject: false, twoColor: false },

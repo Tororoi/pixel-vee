@@ -28,6 +28,7 @@
   } from '../../actions/transform/rasterTransform.js'
   import { tools } from '../../tools/index.js'
   import { NAVIGATOR_ENABLED } from '../../utils/constants.js'
+  import { TOOLTIPS, getTooltip } from '../../utils/tooltips.js'
 
   /**
    * Converts a camelCase option key into a space-separated display
@@ -274,8 +275,9 @@
         <span class="menu-folder-title">File</span>
         <ul role="menu" id="file-submenu">
           <li role="menuitem" class="open-save">
-            <label for="drawing-upload" data-tooltip="Open saved drawing"
-              >Open</label
+            <label
+              for="drawing-upload"
+              data-tooltip={TOOLTIPS.openDrawing.tooltip}>Open</label
             >
             <input
               type="file"
@@ -290,14 +292,16 @@
           <li
             role="menuitem"
             id="save"
-            data-tooltip="Open dialog box to download file with current progress"
+            data-tooltip={TOOLTIPS.saveAs.tooltip}
             onclick={handleSaveAs}
             onkeydown={handleMenuKeydown}
           >
             Save As... (Cmd + S)
           </li>
           <li role="menuitem" class="import-image{hasPaste ? ' disabled' : ''}">
-            <label for="import" data-tooltip="Import image">Import</label>
+            <label for="import" data-tooltip={TOOLTIPS.importImage.tooltip}
+              >Import</label
+            >
             <input
               type="file"
               accept="image/*"
@@ -309,7 +313,7 @@
           <li
             role="menuitem"
             id="export"
-            data-tooltip="Download as .png"
+            data-tooltip={TOOLTIPS.exportPng.tooltip}
             onclick={handleExport}
             onkeydown={handleMenuKeydown}
           >
@@ -331,7 +335,7 @@
             role="menuitem"
             id="canvas-size"
             class={hasPaste ? 'disabled' : ''}
-            data-tooltip="Open dialog box to resize canvas area"
+            data-tooltip={TOOLTIPS.canvasResize.tooltip}
             onclick={handleCanvasSize}
             onkeydown={handleMenuKeydown}
           >
@@ -341,7 +345,7 @@
             role="menuitem"
             id="select-all"
             class={hasPaste ? 'disabled' : ''}
-            data-tooltip="Select entire canvas (Cmd + A)"
+            data-tooltip={TOOLTIPS.selectAll.tooltip}
             onclick={hasPaste ? undefined : actionSelectAll}
             onkeydown={handleMenuKeydown}
           >
@@ -351,7 +355,7 @@
             role="menuitem"
             id="deselect"
             class={!hasSelection ? 'disabled' : ''}
-            data-tooltip="Deselect selection area (Cmd + D)"
+            data-tooltip={TOOLTIPS.deselect.tooltip}
             onclick={hasSelection ? actionDeselect : undefined}
             onkeydown={handleMenuKeydown}
           >
@@ -361,7 +365,7 @@
             role="menuitem"
             id="cut-selection"
             class={!hasSelection ? 'disabled' : ''}
-            data-tooltip="Cut selection (Cmd + X)"
+            data-tooltip={TOOLTIPS.cutSelection.tooltip}
             onclick={hasSelection ? actionCutSelection : undefined}
             onkeydown={handleMenuKeydown}
           >
@@ -371,7 +375,7 @@
             role="menuitem"
             id="copy-selection"
             class={!hasSelection ? 'disabled' : ''}
-            data-tooltip="Copy selection (Cmd + C)"
+            data-tooltip={TOOLTIPS.copySelection.tooltip}
             onclick={hasSelection ? actionCopySelection : undefined}
             onkeydown={handleMenuKeydown}
           >
@@ -381,7 +385,7 @@
             role="menuitem"
             id="paste-selection"
             class={!hasClipboard ? 'disabled' : ''}
-            data-tooltip="Paste copied selection (Cmd + V)"
+            data-tooltip={TOOLTIPS.pasteSelection.tooltip}
             onclick={hasClipboard ? actionPasteSelection : undefined}
             onkeydown={handleMenuKeydown}
           >
@@ -391,7 +395,7 @@
             role="menuitem"
             id="delete-selection"
             class={!hasSelection ? 'disabled' : ''}
-            data-tooltip="Delete selection (Backspace)"
+            data-tooltip={TOOLTIPS.deleteSelection.tooltip}
             onclick={hasSelection ? actionDeleteSelection : undefined}
             onkeydown={handleMenuKeydown}
           >
@@ -401,7 +405,7 @@
             role="menuitem"
             id="flip-horizontal"
             class={!canFlipRotate ? 'disabled' : ''}
-            data-tooltip="Flip selection horizontally (Cmd + F)"
+            data-tooltip={TOOLTIPS.flipHorizontal.tooltip}
             onclick={canFlipRotate ? () => actionFlipPixels(true) : undefined}
             onkeydown={handleMenuKeydown}
           >
@@ -411,7 +415,7 @@
             role="menuitem"
             id="flip-vertical"
             class={!canFlipRotate ? 'disabled' : ''}
-            data-tooltip="Flip selection vertically (Cmd + Shift + F)"
+            data-tooltip={TOOLTIPS.flipVertical.tooltip}
             onclick={canFlipRotate ? () => actionFlipPixels(false) : undefined}
             onkeydown={handleMenuKeydown}
           >
@@ -421,7 +425,7 @@
             role="menuitem"
             id="rotate-right"
             class={!canFlipRotate ? 'disabled' : ''}
-            data-tooltip="Rotate selection 90 degrees clockwise (Cmd + R)"
+            data-tooltip={TOOLTIPS.rotateRight.tooltip}
             onclick={canFlipRotate ? actionRotatePixels : undefined}
             onkeydown={handleMenuKeydown}
           >
@@ -436,11 +440,14 @@
     {#if showOptions}
       <div class="tool-options">
         {#each Object.entries(toolOptions) as [optionName, option] (optionName)}
+          {@const tip = getTooltip(
+            toolName + optionName[0].toUpperCase() + optionName.slice(1),
+          )}
           <label
             for="{optionName}-toggle"
             id={optionName}
             class="toggle"
-            data-tooltip={option.tooltip}
+            data-tooltip={tip.tooltip}
           >
             <input
               type="checkbox"
@@ -462,8 +469,8 @@
           type="button"
           class="navigator-icon"
           id="navigator-btn"
-          aria-label="Open navigator"
-          data-tooltip="Open navigator"
+          aria-label={TOOLTIPS.navigator.label}
+          data-tooltip={TOOLTIPS.navigator.tooltip}
           onclick={handleNavigator}
         ></button>
       {/if}
@@ -471,8 +478,8 @@
         type="button"
         class="gear"
         id="settings-btn"
-        aria-label="Open settings menu"
-        data-tooltip="Open settings menu"
+        aria-label={TOOLTIPS.settings.label}
+        data-tooltip={TOOLTIPS.settings.tooltip}
         onclick={handleSettings}
       ></button>
     </div>

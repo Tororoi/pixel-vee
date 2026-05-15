@@ -18,6 +18,7 @@
   import { tools } from '../../../tools/index.js'
   import DialogBox from '../DialogBox.svelte'
   import BrushDitherPreview from './BrushDitherPreview.svelte'
+  import { TOOLTIPS } from '../../../utils/tooltips.js'
 
   const NO_PANEL_TOOLS = [
     'eyedropper',
@@ -32,21 +33,33 @@
   const BRUSH_TOOLS = ['brush', 'curve', 'ellipse', 'polygon']
 
   const MODE_BTN_INFO = {
-    line: { cls: 'line', label: 'Line', tools: ['curve'] },
-    quadCurve: { cls: 'quadCurve', label: 'Quadratic Curve', tools: ['curve'] },
-    cubicCurve: { cls: 'cubicCurve', label: 'Cubic Curve', tools: ['curve'] },
+    line: { cls: 'line', tip: TOOLTIPS.modeLine, tools: ['curve'] },
+    quadCurve: {
+      cls: 'quadCurve',
+      tip: TOOLTIPS.modeQuadCurve,
+      tools: ['curve'],
+    },
+    cubicCurve: {
+      cls: 'cubicCurve',
+      tip: TOOLTIPS.modeCubicCurve,
+      tools: ['curve'],
+    },
     eraser: {
       cls: 'eraser',
-      label: 'Eraser (E)',
+      tip: TOOLTIPS.modeEraser,
       tools: ['brush', 'curve', 'ellipse', 'polygon'],
     },
     inject: {
       cls: 'inject',
-      label: 'Inject (I)',
+      tip: TOOLTIPS.modeInject,
       tools: ['brush', 'curve', 'ellipse', 'polygon'],
     },
-    perfect: { cls: 'perfect', label: 'Pixel Perfect (Y)', tools: ['brush'] },
-    colorMask: { cls: 'colorMask', label: 'Color Mask (M)', tools: ['brush'] },
+    perfect: { cls: 'perfect', tip: TOOLTIPS.modePerfect, tools: ['brush'] },
+    colorMask: {
+      cls: 'colorMask',
+      tip: TOOLTIPS.modeColorMask,
+      tools: ['brush'],
+    },
   }
 
   const tool = $derived(globalState.tool.current)
@@ -215,7 +228,7 @@
         class="brush-preview btn"
         role="button"
         tabindex="0"
-        data-tooltip="Click to switch brush"
+        data-tooltip={TOOLTIPS.switchBrush.tooltip}
         onclick={handleBrushTypeClick}
         onkeydown={(e) => {
           if (e.key === 'Enter' || e.key === ' ') handleBrushTypeClick(e)
@@ -255,8 +268,8 @@
             id={key}
             type="button"
             class="mode {info.cls}{isActive ? ' selected' : ''}"
-            aria-label={info.label}
-            data-tooltip={info.label}
+            aria-label={info.tip.label}
+            data-tooltip={info.tip.tooltip}
             onclick={() => handleModeClick(key)}
           ></button>
         {/if}
@@ -271,8 +284,8 @@
               type="button"
               id="custom-brush-type-btn"
               class="mode stamp{isCustomBrush ? ' active' : ''}"
-              aria-label="Custom Stamp"
-              data-tooltip="Custom Stamp"
+              aria-label={TOOLTIPS.customStamp.label}
+              data-tooltip={TOOLTIPS.customStamp.tooltip}
               onclick={handleStampBtnClick}
             ></button>
           </div>

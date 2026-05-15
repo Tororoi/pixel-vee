@@ -11,6 +11,7 @@
   import { createDitherPatternSVG } from '../../../utils/ditherPreview.js'
   import { ditherPatterns } from '../../../context/ditherPatterns.js'
   import { swatches } from '../../../context/swatch.js'
+  import { TOOLTIPS } from '../../../utils/tooltips.js'
 
   const { tool, onclick } = $props()
 
@@ -35,7 +36,7 @@
 <button
   type="button"
   class="dither-preview btn"
-  data-tooltip="Click to select dither pattern"
+  data-tooltip={TOOLTIPS.ditherPreview.tooltip}
   {onclick}
 >
   <!-- eslint-disable-next-line svelte/no-at-html-tags -->

@@ -21,7 +21,6 @@
     brush,
     rebuildBuildUpDensityMap,
     resetBuildUpDensityMap,
-    BAYER_STEPS,
   } from '../../../tools/brush.js'
   import { renderCanvas } from '../../../canvas/render.js'
   import {
@@ -37,8 +36,14 @@
     changeActionVectorDitherOffset,
   } from '../../../actions/modifyTimeline/modifyTimeline.js'
   import { tools } from '../../../tools/index.js'
+  import { TOOLTIPS } from '../../../utils/tooltips.js'
 
   const DITHER_TOOLS = ['brush', 'curve', 'ellipse', 'polygon']
+  const BAYER_STEPS = {
+    '2x2': [15, 31, 47, 63],
+    '4x4': [3, 7, 11, 15, 19, 23, 27, 31, 35, 39, 43, 47, 51, 55, 59, 63],
+    '8x8': Array.from({ length: 64 }, (_, i) => i),
+  }
 
   let ref = $state(null)
 
@@ -488,8 +493,8 @@
       type="button"
       class="dither-toggle twoColor"
       id="dither-ctrl-two-color"
-      aria-label="Two-Color"
-      data-tooltip="Two-Color"
+      aria-label={TOOLTIPS.ditherTwoColor.label}
+      data-tooltip={TOOLTIPS.ditherTwoColor.tooltip}
       class:selected={twoColorActive}
       onclick={handleTwoColorToggle}
     ></button>
@@ -497,8 +502,8 @@
       type="button"
       class="dither-toggle buildUpDither"
       id="dither-ctrl-build-up"
-      aria-label="Build-Up Dither"
-      data-tooltip="Build-Up Dither&#10;&#10;Automatically increase dither density on overlapping strokes"
+      aria-label={TOOLTIPS.buildUpDither.label}
+      data-tooltip={TOOLTIPS.buildUpDither.tooltip}
       class:selected={buildUpActive}
       style:display={showBuildUpBtn ? '' : 'none'}
       onclick={handleBuildUpToggle}
@@ -507,8 +512,8 @@
       <div
         class="dither-offset-control"
         role="application"
-        aria-label="Drag to set dither offset"
-        data-tooltip="Drag to set dither offset"
+        aria-label={TOOLTIPS.ditherOffsetControl.label}
+        data-tooltip={TOOLTIPS.ditherOffsetControl.tooltip}
         use:appendOffsetControlSVG
         onpointerdown={handleOffsetPointerDown}
         onpointermove={handleOffsetPointerMove}
@@ -526,28 +531,28 @@
         type="button"
         class="build-up-mode-btn"
         class:selected={buildUpMode === 'custom'}
-        data-tooltip="Custom build-up steps"
+        data-tooltip={TOOLTIPS.buildUpModeCustom.tooltip}
         onclick={() => handleBuildUpModeClick('custom')}>Custom</button
       >
       <button
         type="button"
         class="build-up-mode-btn"
         class:selected={buildUpMode === '2x2'}
-        data-tooltip="4 steps from a 2x2 Bayer Matrix"
+        data-tooltip={TOOLTIPS.buildUpMode2x2.tooltip}
         onclick={() => handleBuildUpModeClick('2x2')}>2×2</button
       >
       <button
         type="button"
         class="build-up-mode-btn"
         class:selected={buildUpMode === '4x4'}
-        data-tooltip="16 steps from a 4x4 Bayer Matrix"
+        data-tooltip={TOOLTIPS.buildUpMode4x4.tooltip}
         onclick={() => handleBuildUpModeClick('4x4')}>4×4</button
       >
       <button
         type="button"
         class="build-up-mode-btn"
         class:selected={buildUpMode === '8x8'}
-        data-tooltip="64 steps from an 8x8 Bayer Matrix"
+        data-tooltip={TOOLTIPS.buildUpMode8x8.tooltip}
         onclick={() => handleBuildUpModeClick('8x8')}>8×8</button
       >
     </div>
@@ -577,7 +582,7 @@
       type="button"
       id="dither-ctrl-build-up-reset"
       class="btn build-up-reset-btn"
-      data-tooltip="Reset build-up density"
+      data-tooltip={TOOLTIPS.buildUpReset.tooltip}
       onclick={handleBuildUpReset}
     >
       Reset Density Map
