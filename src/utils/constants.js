@@ -8,6 +8,7 @@ const MINIMUM_DIMENSION = 8 // minimum canvas width or height in pixels
 const MAXIMUM_DIMENSION = 1024 // maximum canvas width or height in pixels
 const CURVE_TYPES = ['line', 'quadCurve', 'cubicCurve']
 const NAVIGATOR_ENABLED = false
+const KEY_DISPLAY_ENABLED = false
 
 // Export the constants
 export {
@@ -20,4 +21,5 @@ export {
   MAXIMUM_DIMENSION,
   CURVE_TYPES,
   NAVIGATOR_ENABLED,
+  KEY_DISPLAY_ENABLED,
 }

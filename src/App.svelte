@@ -11,7 +11,7 @@
    */
   import { onMount } from 'svelte'
   import { portal } from './utils/portal.js'
-  import { NAVIGATOR_ENABLED } from './utils/constants.js'
+  import { NAVIGATOR_ENABLED, KEY_DISPLAY_ENABLED } from './utils/constants.js'
   import NavBar from './ui/components/NavBar.svelte'
   import Toolbox from './ui/components/Toolbox.svelte'
   import Sidebar from './ui/components/Sidebar.svelte'
@@ -62,7 +62,9 @@
   <div use:portal={pageEl} style="display:contents">
     <Toolbox />
     <Sidebar />
-    <KeyDisplay />
+    {#if KEY_DISPLAY_ENABLED}
+      <KeyDisplay />
+    {/if}
     <SettingsDialog />
     <CanvasSizeDialog />
     <SaveDialog />
