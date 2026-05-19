@@ -11,6 +11,36 @@ export function sanitizeLayers(
   includeReferenceLayers,
   includeRemovedActions,
 ) {
+  // Capture mask pixel data as PNG dataUrls before the JSON deep clone,
+  // because the deep clone reduces canvas elements to empty objects and
+  // we cannot recover pixel data after that point. Keyed by layer id so
+  // the matching sanitized entry can pick up its mask data below.
+  const maskDataById = new Map()
+  for (const layer of layers) {
+    if (layer.type === 'raster' && layer.mask) {
+      // The dataUrl carries the in-bounds visual; out-of-bounds
+      // members (left by a previous off-canvas mask move) live only
+      // in the set and would otherwise be lost across save/load, so
+      // they're serialized separately.
+      const w = layer.mask.cvs.width
+      const h = layer.mask.cvs.height
+      const oobCoords = []
+      for (const key of layer.mask.blockedSet) {
+        const px = (key << 16) >> 16
+        const py = key >> 16
+        if (px < 0 || px >= w || py < 0 || py >= h) {
+          oobCoords.push(key)
+        }
+      }
+      maskDataById.set(layer.id, {
+        enabled: layer.mask.enabled,
+        overlayVisible: layer.mask.overlayVisible,
+        inverted: layer.mask.inverted,
+        dataUrl: layer.mask.cvs.toDataURL(),
+        oobCoords,
+      })
+    }
+  }
   let sanitizedLayers = JSON.parse(JSON.stringify(layers))
   for (let i = sanitizedLayers.length - 1; i >= 0; i--) {
     const layer = sanitizedLayers[i]
@@ -34,6 +64,14 @@ export function sanitizeLayers(
       }
       delete layer.onscreenCvs
       delete layer.onscreenCtx
+      // The clone left a `mask` entry with empty-canvas placeholders.
+      // Replace it with the pre-captured serializable form, or drop the
+      // field if no mask data was captured for this layer.
+      if (maskDataById.has(layer.id)) {
+        layer.mask = maskDataById.get(layer.id)
+      } else {
+        delete layer.mask
+      }
     }
   }
   return sanitizedLayers

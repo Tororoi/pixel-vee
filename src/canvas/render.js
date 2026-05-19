@@ -76,6 +76,24 @@ function drawLayer(layer) {
         canvas.offScreenCVS.width,
         canvas.offScreenCVS.height,
       )
+      // Mask overlay: the mask canvas is opaque (white background, red
+      // where the user has painted). When the user toggles invert, the
+      // canvas itself is recolored in-place so the same drawImage path
+      // produces the inverted overlay — no second canvas, no
+      // globalCompositeOperation (which has a significant perf cost in
+      // some browsers). The overlay is also suppressed when the mask
+      // is disabled — the user's toggle state is preserved, but the
+      // logic treats "show overlay" as off until the mask is re-enabled.
+      if (layer.mask?.enabled && layer.mask?.overlayVisible) {
+        layer.onscreenCtx.globalAlpha = 0.25
+        layer.onscreenCtx.drawImage(
+          layer.mask.cvs,
+          canvas.xOffset,
+          canvas.yOffset,
+          canvas.offScreenCVS.width,
+          canvas.offScreenCVS.height,
+        )
+      }
     }
   }
   layer.onscreenCtx.restore()
@@ -167,6 +185,22 @@ export function clearOffscreenCanvas(activeLayer = null) {
         canvas.offScreenCVS.width,
         canvas.offScreenCVS.height,
       )
+      // Mask shares the layer's coordinate space; if the timeline is
+      // being replayed for this layer, the mask must also start from
+      // a clean slate so mask-targeting actions replay correctly.
+      // The `inverted` flag resets to false because invertMask
+      // actions in the timeline toggle it — leaving it at its
+      // current value would mean each replay flips the final state.
+      if (activeLayer.mask) {
+        activeLayer.mask.ctx.clearRect(
+          0,
+          0,
+          activeLayer.mask.cvs.width,
+          activeLayer.mask.cvs.height,
+        )
+        activeLayer.mask.blockedSet = new Set()
+        activeLayer.mask.inverted = false
+      }
     }
   } else {
     //clear all offscreen layers
@@ -178,6 +212,16 @@ export function clearOffscreenCanvas(activeLayer = null) {
           canvas.offScreenCVS.width,
           canvas.offScreenCVS.height,
         )
+        if (layer.mask) {
+          layer.mask.ctx.clearRect(
+            0,
+            0,
+            layer.mask.cvs.width,
+            layer.mask.cvs.height,
+          )
+          layer.mask.blockedSet = new Set()
+          layer.mask.inverted = false
+        }
       }
     })
   }
@@ -287,6 +331,33 @@ export function applyCanvasDimensions(
       ) {
         layer.cvs.width = canvas.offScreenCVS.width
         layer.cvs.height = canvas.offScreenCVS.height
+      }
+      // Mirror the resize on the mask canvas so it remains aligned
+      // with the layer it gates. Assigning width/height clears the
+      // bitmap to fully transparent (the natural "no marks" state).
+      // blockedSet entries that were already out-of-bounds relative
+      // to the OLD dimensions stay alive — they may come back into
+      // view if the canvas grows. In-bounds entries are dropped here
+      // because the canvas reset wipes them visually; the subsequent
+      // timeline replay repopulates them from recorded actions.
+      if (
+        layer.mask &&
+        (layer.mask.cvs.width !== canvas.offScreenCVS.width ||
+          layer.mask.cvs.height !== canvas.offScreenCVS.height)
+      ) {
+        const oldW = layer.mask.cvs.width
+        const oldH = layer.mask.cvs.height
+        const surviving = new Set()
+        for (const key of layer.mask.blockedSet) {
+          const px = (key << 16) >> 16
+          const py = key >> 16
+          if (px < 0 || px >= oldW || py < 0 || py >= oldH) {
+            surviving.add(key)
+          }
+        }
+        layer.mask.cvs.width = canvas.offScreenCVS.width
+        layer.mask.cvs.height = canvas.offScreenCVS.height
+        layer.mask.blockedSet = surviving
       }
     }
   })

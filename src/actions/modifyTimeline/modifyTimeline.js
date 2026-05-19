@@ -3,6 +3,7 @@ import { tools } from '../../tools/index.js'
 import { vectorGui } from '../../gui/vector.js'
 import { addToTimeline } from '../undoRedo/undoRedo.js'
 import { renderCanvas } from '../../canvas/render.js'
+import { resetMaskCanvas, renderMaskFromSet } from '../../canvas/layers.js'
 
 import { CURVE_TYPES } from '../../utils/constants.js'
 
@@ -354,6 +355,61 @@ export function actionClear(layer) {
     properties: {
       //normally properties don't contain objects as values, but the modify action is a special case because a modify action itself will never be modified
       upToIndex,
+    },
+  })
+}
+
+/**
+ * Clear a layer's mask canvas, leaving the layer's pixel data untouched.
+ * Used by the "Clear Canvas" button when mask-edit mode is active so the
+ * user can wipe their mask without losing their drawing.
+ *
+ * Implementation mirrors `actionClear` but is scoped to the mask: the
+ * mask canvas is physically cleared and the blocked set is reset, then
+ * an undoable `clearMask` action is recorded. Subsequent timeline
+ * replays (e.g. after a canvas resize) re-run `performAction` for this
+ * entry, which performs the same physical clear at that point in
+ * history, preserving the visual outcome.
+ * @param {object} layer - The layer whose mask should be cleared.
+ */
+export function actionClearMask(layer) {
+  if (!layer.mask) return
+  resetMaskCanvas(layer)
+  addToTimeline({
+    tool: 'clearMask',
+    layer,
+    properties: {
+      // performAction's `!action.boundaryBox` guard rejects actions
+      // without a boundary. Supply a null one — clearMask uses no
+      // per-pixel bounds itself.
+      boundaryBox: { xMin: null, xMax: null, yMin: null, yMax: null },
+    },
+  })
+}
+
+/**
+ * Toggle a layer mask's inverted flag, swap the canvas colors in
+ * place to match the new visual state, and record an undoable
+ * `invertMask` timeline entry. The blockedSet is intentionally
+ * preserved across the toggle: it represents the user's painted
+ * coords semantically, and the gate flips its interpretation based on
+ * the inverted flag — only the visual canvas (and the flag) changes
+ * here.
+ * @param {object} layer - The layer whose mask should be inverted.
+ */
+export function actionInvertMask(layer) {
+  if (!layer.mask) return
+  // Flag-based invert: the blockedSet is not touched, so any
+  // out-of-bounds work survives. Toggling the flag flips the gate's
+  // interpretation of the set, and the canvas is repainted in the
+  // mode's color so the visible cue matches the new state.
+  layer.mask.inverted = !layer.mask.inverted
+  renderMaskFromSet(layer)
+  addToTimeline({
+    tool: 'invertMask',
+    layer,
+    properties: {
+      boundaryBox: { xMin: null, xMax: null, yMin: null, yMax: null },
     },
   })
 }

@@ -119,6 +119,15 @@ export function actionUndoRedo(pushStack, popStack, modType) {
       //If redoing removeLayer, remove layer from canvas
       latestAction.layer.removed = true
     }
+  } else if (latestAction.tool === 'invertMask') {
+    // Inversion is its own inverse — toggling the flag in either
+    // direction (undo or redo) restores the matching state. The
+    // canvas bitmap is restored separately via the maskSnapshot
+    // path in renderToLatestAction, so painting in the right color
+    // happens automatically.
+    if (latestAction.layer.mask) {
+      latestAction.layer.mask.inverted = !latestAction.layer.mask.inverted
+    }
   } else if (latestAction.tool === 'paste') {
     if (!latestAction.confirmed) {
       handlePasteAction(latestAction, modType)
@@ -209,6 +218,13 @@ export function addToTimeline(actionObject) {
   // without replaying the full timeline. Reference layers store null
   // because their content is the original image and never changes.
   let snapshot = layer.type === 'raster' ? layer.cvs.toDataURL() : null
+  // Always capture the post-action mask state when the layer has a mask
+  // so undo/redo can restore it via the same most-recent-action lookup
+  // used for the layer snapshot. Layers without a mask store null.
+  let maskSnapshot =
+    layer.type === 'raster' && layer.mask
+      ? layer.mask.cvs.toDataURL()
+      : null
   globalState.timeline.currentAction = {
     index: globalState.timeline.undoStack.length,
     tool,
@@ -225,6 +241,7 @@ export function addToTimeline(actionObject) {
     hidden: false,
     removed: false,
     snapshot,
+    maskSnapshot,
   }
   globalState.timeline.undoStack.push(globalState.timeline.currentAction)
   if (globalState.ui.saveDialogOpen) {

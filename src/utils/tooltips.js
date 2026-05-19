@@ -203,6 +203,26 @@ export const TOOLTIPS = {
     label: 'Layer Settings',
     tooltip: 'Layer Settings',
   },
+  editMask: {
+    label: 'Edit Mask',
+    tooltip:
+      'Edit Mask\n\nRoute drawing tools to the mask canvas instead of the layer',
+  },
+  enableMask: {
+    label: 'Enable Mask',
+    tooltip:
+      'Enable Mask\n\nWhen off, the mask is ignored and drawing is unrestricted',
+  },
+  showMaskOverlay: {
+    label: 'Show Mask Overlay',
+    tooltip:
+      'Show Mask Overlay\n\nDisplay the overlay where the mask is set',
+  },
+  invertMask: {
+    label: 'Invert Mask',
+    tooltip:
+      'Invert Mask\n\nFlip the gate: in-set pixels become the drawable area instead of blocked',
+  },
 
   // ─── VectorsPanel ───────────────────────────────────────────────
   actionColor: {

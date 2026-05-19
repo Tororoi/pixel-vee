@@ -40,6 +40,9 @@ export function actionDraw(coordX, coordY, directionalBrushStamp, strokeCtx) {
     isPreview,
     boundaryBox,
     maskSet,
+    layerMaskBlockedSet,
+    layerMaskInverted,
+    targetMask,
     seenPixelsSet,
     excludeFromSet,
     currentColor,
@@ -50,7 +53,15 @@ export function actionDraw(coordX, coordY, directionalBrushStamp, strokeCtx) {
   let offsetX = 0
   let offsetY = 0
   let renderCtx = layer.ctx
-  if (customContext) {
+  if (isPreview && targetMask) {
+    // Interactive previews during mask edit route to the onscreen canvas
+    // rather than the mask canvas, so cursor-tracking feedback (e.g. line
+    // and vector previews) stays ephemeral. Without this, every preview
+    // frame would bake red pixels into the mask permanently.
+    renderCtx = layer.onscreenCtx
+    offsetX = canvas.xOffset
+    offsetY = canvas.yOffset
+  } else if (customContext) {
     renderCtx = customContext
   } else if (isPreview) {
     // Preview renders to the visible canvas; apply the viewport offset so
@@ -80,6 +91,15 @@ export function actionDraw(coordX, coordY, directionalBrushStamp, strokeCtx) {
     //if maskSet exists, only draw if it contains coordinates
     if (maskSet) {
       if (!maskSet.has((y << 16) | x)) {
+        continue
+      }
+    }
+    // Layer mask: block drawing where the layer's own mask has marked
+    // pixels (or, when inverted, where it does NOT). Skipped when the
+    // stroke is itself editing the mask so the user can repaint freely.
+    if (!targetMask && layerMaskBlockedSet) {
+      const inMask = layerMaskBlockedSet.has((y << 16) | x)
+      if (layerMaskInverted ? !inMask : inMask) {
         continue
       }
     }
@@ -139,6 +159,9 @@ export function actionDitherDraw(
     isPreview,
     boundaryBox,
     maskSet,
+    layerMaskBlockedSet,
+    layerMaskInverted,
+    targetMask,
     seenPixelsSet,
     excludeFromSet,
     currentColor,
@@ -153,7 +176,14 @@ export function actionDitherDraw(
   let offsetX = 0
   let offsetY = 0
   let renderCtx = layer.ctx
-  if (customContext) {
+  if (isPreview && targetMask) {
+    // Previews during mask edit must stay ephemeral; route them to the
+    // onscreen canvas instead of the mask canvas (where customContext
+    // would otherwise send them).
+    renderCtx = layer.onscreenCtx
+    offsetX = canvas.xOffset
+    offsetY = canvas.yOffset
+  } else if (customContext) {
     renderCtx = customContext
   } else if (isPreview) {
     renderCtx = layer.onscreenCtx
@@ -173,6 +203,12 @@ export function actionDitherDraw(
     }
     if (maskSet) {
       if (!maskSet.has((y << 16) | x)) {
+        continue
+      }
+    }
+    if (!targetMask && layerMaskBlockedSet) {
+      const inMask = layerMaskBlockedSet.has((y << 16) | x)
+      if (layerMaskInverted ? !inMask : inMask) {
         continue
       }
     }
@@ -235,6 +271,9 @@ export function actionBuildUpDitherDraw(
     isPreview,
     boundaryBox,
     maskSet,
+    layerMaskBlockedSet,
+    layerMaskInverted,
+    targetMask,
     seenPixelsSet,
     excludeFromSet,
     currentColor,
@@ -250,7 +289,14 @@ export function actionBuildUpDitherDraw(
   let offsetX = 0
   let offsetY = 0
   let renderCtx = layer.ctx
-  if (customContext) {
+  if (isPreview && targetMask) {
+    // Previews during mask edit must stay ephemeral; route them to the
+    // onscreen canvas instead of the mask canvas (where customContext
+    // would otherwise send them).
+    renderCtx = layer.onscreenCtx
+    offsetX = canvas.xOffset
+    offsetY = canvas.yOffset
+  } else if (customContext) {
     renderCtx = customContext
   } else if (isPreview) {
     renderCtx = layer.onscreenCtx
@@ -270,6 +316,12 @@ export function actionBuildUpDitherDraw(
     }
     if (maskSet) {
       if (!maskSet.has((y << 16) | x)) {
+        continue
+      }
+    }
+    if (!targetMask && layerMaskBlockedSet) {
+      const inMask = layerMaskBlockedSet.has((y << 16) | x)
+      if (layerMaskInverted ? !inMask : inMask) {
         continue
       }
     }

@@ -4,7 +4,11 @@ import { canvas } from '../context/canvas.js'
 import { swatches } from '../context/swatch.js'
 import { ditherPatterns } from '../context/ditherPatterns.js'
 import { actionEllipse } from '../actions/pointer/ellipse.js'
-import { createStrokeContext } from '../actions/pointer/strokeContext.js'
+import {
+  createStrokeContext,
+  getMaskRoutingFields,
+} from '../actions/pointer/strokeContext.js'
+import { recomputeMaskBlockedSet } from '../canvas/layers.js'
 import { vectorGui } from '../gui/vector.js'
 import {
   getOpposingEllipseVertex,
@@ -250,6 +254,7 @@ function buildEllipseCtx(isPreview = false) {
     secondaryColor: swatches.secondary.color,
     ditherOffsetX: globalState.tool.current.ditherOffsetX ?? 0,
     ditherOffsetY: globalState.tool.current.ditherOffsetY ?? 0,
+    ...getMaskRoutingFields(canvas.currentLayer),
   })
 }
 
@@ -415,6 +420,7 @@ function ellipseSteps() {
             globalState.vector.properties.y1Offset,
           ),
         }
+        const ellipseStrokeCtx = buildEllipseCtx(false)
         actionEllipse(
           globalState.vector.properties.weight,
           globalState.vector.properties.leftTangentX + cropOffsetX,
@@ -425,8 +431,12 @@ function ellipseSteps() {
           globalState.vector.properties.rightTangentY + cropOffsetY,
           globalState.vector.properties.bottomTangentX + cropOffsetX,
           globalState.vector.properties.bottomTangentY + cropOffsetY,
-          buildEllipseCtx(false),
+          ellipseStrokeCtx,
         )
+        const targetMask = ellipseStrokeCtx.targetMask === true
+        if (targetMask) {
+          recomputeMaskBlockedSet(canvas.currentLayer)
+        }
         let maskArray = coordArrayFromSet(
           globalState.selection.maskSet,
           canvas.currentLayer.x + globalState.canvas.cropOffsetX,
@@ -455,6 +465,7 @@ function ellipseSteps() {
             maskArray,
             boundaryBox,
             vectorIndices: [uniqueVectorKey],
+            targetMask,
           },
         })
         //Store vector in state

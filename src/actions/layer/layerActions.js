@@ -6,6 +6,7 @@ import { addToTimeline } from '../undoRedo/undoRedo.js'
 import {
   createRasterLayer,
   createReferenceLayer,
+  createMaskFor,
   updateActiveLayerState,
 } from '../../canvas/layers.js'
 import { renderCanvas } from '../../canvas/render.js'
@@ -78,6 +79,11 @@ export function addRasterLayer() {
   // Once a layer is drawn on and recorded in the timeline it cannot be
   // fully deleted — only flagged as removed so undo can restore it.
   const layer = createRasterLayer()
+  // Every raster layer ships with a mask attached. The mask is empty
+  // (no blocked pixels), with overlay visible and gating enabled, so a
+  // freshly created layer behaves identically to a layer without a
+  // mask until the user paints on it.
+  createMaskFor(layer)
   canvas.layers.push(layer)
   addToTimeline({
     tool: tools.addLayer.name,

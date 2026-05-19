@@ -14,11 +14,18 @@
     checked,
     onchange,
     tooltip = undefined,
+    tooltipPosition = undefined,
     name = undefined,
   } = $props()
 </script>
 
-<label for={id} id={labelId} class="toggle" data-tooltip={tooltip}>
+<label
+  for={id}
+  id={labelId}
+  class="toggle"
+  data-tooltip={tooltip}
+  data-tooltip-position={tooltipPosition}
+>
   <input type="checkbox" {id} {name} {checked} {onchange} />
   <span class="checkmark"></span>
   <span>{label}</span>

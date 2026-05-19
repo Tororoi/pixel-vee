@@ -14,7 +14,12 @@ import {
   sanitizeVectors,
 } from '../utils/sanitizeObjectsForSave.js'
 import { resizeOffScreenCanvas } from '../canvas/render.js'
-import { consolidateLayers, updateActiveLayerState } from '../canvas/layers.js'
+import {
+  consolidateLayers,
+  updateActiveLayerState,
+  recomputeMaskBlockedSet,
+  createMaskFor,
+} from '../canvas/layers.js'
 import { calcEllipseConicsFromVertices } from '../utils/ellipse.js'
 import {
   customBrushStamp,
@@ -22,7 +27,7 @@ import {
   updateCustomStamp,
 } from '../context/brushStamps.js'
 
-const currentVersion = '1.2'
+const currentVersion = '1.3'
 
 /**
  * Save the drawing as a JSON file
@@ -253,6 +258,51 @@ export async function loadDrawing(jsonFile) {
 
       // Add the promise to the array
       imageLoadPromises.push(imageLoadPromise)
+    }
+
+    // For raster layers, reconstruct the layer mask (if any) before the
+    // first render so the gate sees the correct blockedSet from the start.
+    // The serialized form is `{ enabled, overlayVisible, dataUrl }`; older
+    // files have no `mask` field, which leaves `layer.mask` undefined and
+    // means the layer is loaded without a mask.
+    if (layer.type === 'raster' && layer.mask && layer.mask.dataUrl) {
+      // Allocate a fresh live mask via createMaskFor (which sets up
+      // the opaque white background), then restore the serialized
+      // flags. The dataUrl carries the opaque canvas state at save
+      // time (white/red mix), so painting it replaces the fresh
+      // white background. blockedSet is rebuilt from the dataUrl
+      // pixels — recomputeMaskBlockedSet uses the loaded `inverted`
+      // flag to know which color counts as "in set".
+      const serialized = layer.mask
+      createMaskFor(layer)
+      layer.mask.enabled = serialized.enabled ?? true
+      layer.mask.overlayVisible = serialized.overlayVisible ?? true
+      layer.mask.inverted = serialized.inverted ?? false
+      const maskImg = new Image()
+      const maskLoadPromise = new Promise((resolve, reject) => {
+        maskImg.onload = () => {
+          layer.mask.ctx.drawImage(maskImg, 0, 0)
+          recomputeMaskBlockedSet(layer)
+          // Restore out-of-bounds members preserved across save/
+          // load. Legacy files omit this field; recomputeMask...
+          // alone yields the same behaviour as today's loader.
+          if (Array.isArray(serialized.oobCoords)) {
+            for (const key of serialized.oobCoords) {
+              layer.mask.blockedSet.add(key)
+            }
+          }
+          resolve()
+        }
+        maskImg.onerror = reject
+      })
+      maskImg.src = serialized.dataUrl
+      imageLoadPromises.push(maskLoadPromise)
+    } else if (layer.type === 'raster') {
+      // Every raster layer now ships with a mask. Older save files
+      // (or layers without a serialized mask) get a fresh empty mask
+      // here so loaded files have the same shape as freshly created
+      // layers.
+      createMaskFor(layer)
     }
 
     // Add the layer to canvas
