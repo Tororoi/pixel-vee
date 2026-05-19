@@ -8,6 +8,49 @@ let _scheduledLayer = null
 let _rafId = null
 
 /**
+ * Snapshot a layer's mask state (canvas bitmap + blockedSet +
+ * inverted flag) so it can be restored after a partial-replay
+ * clear+redraw that wouldn't otherwise reproduce it. blockedSet is
+ * copied because callers later swap the live set during replay; the
+ * snapshot must be independent.
+ * @param {object} layer - The layer whose mask to snapshot.
+ * @returns {object|null} Snapshot, or null if no mask.
+ */
+function captureMaskSnapshot(layer) {
+  if (!layer?.mask) return null
+  const { cvs, ctx, blockedSet, inverted } = layer.mask
+  const cache = document.createElement('canvas')
+  cache.width = cvs.width
+  cache.height = cvs.height
+  cache.getContext('2d').drawImage(cvs, 0, 0)
+  return {
+    bitmap: cache,
+    blockedSet: new Set(blockedSet),
+    inverted,
+    width: cvs.width,
+    height: cvs.height,
+    sourceCtx: ctx,
+  }
+}
+
+/**
+ * Restore a previously captured mask snapshot back onto a layer.
+ * Used by `renderCanvas` to keep the mask untouched across partial
+ * replays that target the layer canvas but can't reproduce the
+ * mask's state.
+ * @param {object} layer - Target layer.
+ * @param {object} snap - Result of `captureMaskSnapshot`.
+ */
+function restoreMaskSnapshot(layer, snap) {
+  if (!layer?.mask || !snap) return
+  const { ctx, cvs } = layer.mask
+  ctx.clearRect(0, 0, cvs.width, cvs.height)
+  ctx.drawImage(snap.bitmap, 0, 0)
+  layer.mask.blockedSet = snap.blockedSet
+  layer.mask.inverted = snap.inverted
+}
+
+/**
  * Schedules a `renderCanvas` call for the next animation frame, coalescing
  * multiple calls that arrive within the same frame into a single render.
  * This prevents wasted redraws on high-frequency pointermove events where
@@ -254,10 +297,23 @@ export function renderCanvas(
   // Skip the clear+redraw when the timeline is empty — this preserves pixel data
   // that was baked directly into layer canvases (e.g. after a content-shift resize).
   if (redrawTimeline && globalState.timeline.undoStack.length > 0) {
+    // Partial replay (activeIndexes provided, setImages=false) only
+    // re-visits the action being adjusted — it relies on cached
+    // between-images to keep the rest of the layer canvas correct.
+    // The mask has no equivalent cache, so wiping it here would lose
+    // every mask edit (invert, move, brush) since none of them sit
+    // in the activeIndexes list. Snapshot the mask, clear, replay,
+    // then restore so the mask stays untouched across the adjust.
+    const preserveMask =
+      activeLayer?.mask && activeIndexes && !setImages
+    const maskSnapshot = preserveMask
+      ? captureMaskSnapshot(activeLayer)
+      : null
     //clear offscreen layers
     clearOffscreenCanvas(activeLayer)
     //render all previous actions
     redrawTimelineActions(activeLayer, activeIndexes, setImages)
+    if (maskSnapshot) restoreMaskSnapshot(activeLayer, maskSnapshot)
   }
   //Handle onscreen canvases
   //render background canvas

@@ -49,11 +49,22 @@ export function transformVectorSteps() {
           modes: { ...vector.modes },
         }
       })
-      //Set activeIndexes for all selected vectors
-      globalState.timeline.activeIndexes = createActiveIndexesForRender(
-        currentVector,
+      // Set activeIndexes for all selected vectors. If any of them
+      // was recorded in mask-edit mode, fall back to a full replay —
+      // the activeIndexes/between-image cache only models the layer
+      // canvas, so partial replay of a mask-targeting vector would
+      // leave the prior render on the mask (ghost trail) and the
+      // restoreMaskSnapshot path in renderCanvas would overwrite
+      // the new positions with the pre-transform mask state.
+      const anyTargetMask = Object.keys(
         globalState.vector.savedProperties,
-      )
+      ).some((key) => globalState.vector.all[key].action?.targetMask)
+      globalState.timeline.activeIndexes = anyTargetMask
+        ? null
+        : createActiveIndexesForRender(
+            currentVector,
+            globalState.vector.savedProperties,
+          )
       if (globalState.vector.transformMode === ROTATE) {
         //Rotation
         // grabStartX/Y are in canvas-pixel space (includes cropOffset); shapeCenterX/Y is in
@@ -179,7 +190,7 @@ export function scaleVectorSteps() {
       globalState.vector.selectedIndices.values().next().value
     ]
   switch (canvas.pointerEvent) {
-    case 'pointerdown':
+    case 'pointerdown': {
       vectorGui.selectedPoint = {
         xKey: vectorGui.collidedPoint.xKey,
         yKey: vectorGui.collidedPoint.yKey,
@@ -199,11 +210,22 @@ export function scaleVectorSteps() {
           modes: { ...vector.modes },
         }
       })
-      //Set activeIndexes for all selected vectors
-      globalState.timeline.activeIndexes = createActiveIndexesForRender(
-        currentVector,
+      // Set activeIndexes for all selected vectors. If any of them
+      // was recorded in mask-edit mode, fall back to a full replay —
+      // the activeIndexes/between-image cache only models the layer
+      // canvas, so partial replay of a mask-targeting vector would
+      // leave the prior render on the mask (ghost trail) and the
+      // restoreMaskSnapshot path in renderCanvas would overwrite
+      // the new positions with the pre-transform mask state.
+      const anyTargetMask = Object.keys(
         globalState.vector.savedProperties,
-      )
+      ).some((key) => globalState.vector.all[key].action?.targetMask)
+      globalState.timeline.activeIndexes = anyTargetMask
+        ? null
+        : createActiveIndexesForRender(
+            currentVector,
+            globalState.vector.savedProperties,
+          )
       renderCanvas(
         currentVector.layer,
         true,
@@ -211,6 +233,7 @@ export function scaleVectorSteps() {
         true,
       )
       break
+    }
     case 'pointermove': {
       transformBoundaries()
       let isMirroredHorizontally = false
