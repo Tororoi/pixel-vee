@@ -756,7 +756,15 @@ export function performAction(
         boundaryBox.yMin += offsetY + cropDY
         boundaryBox.yMax += offsetY + cropDY
       }
-      let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
+      // Cuts recorded in mask-edit mode wipe pixels from the mask
+      // canvas instead of the layer canvas. The between-image
+      // (betweenCtx) is layer-only, so route past it when the cut
+      // was originally aimed at the mask.
+      const maskCutTarget =
+        action.targetMask && action.layer.mask?.ctx
+          ? action.layer.mask.ctx
+          : null
+      let activeCtx = maskCutTarget ?? (betweenCtx ? betweenCtx : action.layer.ctx)
       if (action.maskSet && action.maskSet.length > 0) {
         // maskSet pixels are stored as offscreen canvas coords at the time of the cut.
         // Recover the original bounding box origin in offscreen canvas coords so that
@@ -790,6 +798,11 @@ export function performAction(
           boundaryBox.yMax - boundaryBox.yMin,
         )
       }
+      // Mask cuts change the mask canvas; rebuild blockedSet so the
+      // draw gate sees the new state on subsequent replayed strokes.
+      if (action.targetMask && action.layer.mask) {
+        recomputeMaskBlockedSet(action.layer)
+      }
       break
     }
     case 'paste': {
@@ -809,7 +822,14 @@ export function performAction(
       const isLastPasteAction = action === lastPasteAction
       //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
       if (action.confirmed) {
-        let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
+        // Pastes committed while editing the mask go onto the mask
+        // canvas, not the layer canvas.
+        const maskPasteTarget =
+          action.targetMask && action.layer.mask?.ctx
+            ? action.layer.mask.ctx
+            : null
+        let activeCtx =
+          maskPasteTarget ?? (betweenCtx ? betweenCtx : action.layer.ctx)
         activeCtx.drawImage(
           action.canvas,
           boundaryBox.xMin,
@@ -817,6 +837,9 @@ export function performAction(
           boundaryBox.xMax - boundaryBox.xMin,
           boundaryBox.yMax - boundaryBox.yMin,
         )
+        if (action.targetMask && action.layer.mask) {
+          recomputeMaskBlockedSet(action.layer)
+        }
       } else if (
         canvas.tempLayer === canvas.currentLayer && //only render if the current layer is the temp layer (active paste action)
         isLastPasteAction //only render if this action is the last paste action in the stack

@@ -3,6 +3,7 @@ import { canvas } from '../context/canvas.js'
 import { keys } from '../shortcuts/keys.js'
 import { addToTimeline } from '../actions/undoRedo/undoRedo.js'
 import { renderCanvas } from '../canvas/render.js'
+import { getMaskEditTarget } from '../menu/edit.js'
 
 //==========================================//
 //=== * * * Magic Wand Controller * * * ===//
@@ -20,7 +21,12 @@ import { renderCanvas } from '../canvas/render.js'
  * @returns {Set<number>} set of packed coordinates matching the flood fill
  */
 function floodFill(startX, startY, containMask = null) {
-  const imageData = canvas.currentLayer.ctx.getImageData(
+  // In mask-edit mode the magic wand picks contiguous regions of the
+  // mask canvas, not the layer underneath — otherwise the layer's
+  // pixels would dictate the boundary even though the user is
+  // editing the mask.
+  const source = getMaskEditTarget(canvas.currentLayer)
+  const imageData = source.ctx.getImageData(
     0,
     0,
     canvas.offScreenCVS.width,
