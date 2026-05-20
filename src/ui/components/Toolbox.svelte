@@ -14,7 +14,10 @@
   import { switchTool } from '../../tools/toolbox.js'
   import { handleUndo, handleRedo } from '../../actions/undoRedo/undoRedo.js'
   import { brush, rebuildBuildUpDensityMap } from '../../tools/brush.js'
-  import { actionClear } from '../../actions/modifyTimeline/modifyTimeline.js'
+  import {
+    actionClear,
+    actionClearMask,
+  } from '../../actions/modifyTimeline/modifyTimeline.js'
   import {
     actionZoom,
     actionRecenter,
@@ -102,6 +105,20 @@
    */
   function handleClear() {
     if (canvas.pastedLayer) return
+    // While the user is editing the layer mask, "Clear Canvas" targets
+    // the mask only — the underlying layer pixels are preserved. This
+    // matches the user's mental model that mask edits are a separate
+    // concern from layer edits.
+    if (
+      globalState.maskEdit.active &&
+      canvas.currentLayer.mask &&
+      globalState.maskEdit.layerId === canvas.currentLayer.id
+    ) {
+      actionClearMask(canvas.currentLayer)
+      globalState.clearRedoStack()
+      renderCanvas(canvas.currentLayer)
+      return
+    }
     canvas.currentLayer.ctx.clearRect(
       0,
       0,

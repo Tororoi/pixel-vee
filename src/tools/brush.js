@@ -8,12 +8,16 @@ import {
   actionBuildUpDitherDraw,
 } from '../actions/pointer/draw.js'
 import { actionLine } from '../actions/pointer/line.js'
-import { createStrokeContext } from '../actions/pointer/strokeContext.js'
+import {
+  createStrokeContext,
+  getMaskRoutingFields,
+} from '../actions/pointer/strokeContext.js'
 import { getAngle, getTriangle } from '../utils/trig.js'
 import { renderCanvas, scheduleRender } from '../canvas/render.js'
 import { calculateBrushDirection } from '../utils/drawHelpers.js'
 import { coordArrayFromSet } from '../utils/maskHelpers.js'
 import { createColorMaskSet } from '../canvas/masks.js'
+import { recomputeMaskBlockedSet } from '../canvas/layers.js'
 import { addToTimeline } from '../actions/undoRedo/undoRedo.js'
 
 //====================================//
@@ -64,6 +68,9 @@ function brushSteps() {
         densityMap: brush._buildUpDensityMap,
         buildUpSteps: globalState.tool.current.buildUpSteps,
         customStampColorMap: null,
+        // Mask routing must come last so it overrides currentColor and
+        // injects customContext when the user is editing the layer mask.
+        ...getMaskRoutingFields(canvas.currentLayer),
       })
       brush._previewStrokeCtx = {
         ...brush._strokeCtx,
@@ -143,6 +150,12 @@ function brushSteps() {
         boundaryBox.yMax -=
           canvas.currentLayer.y + globalState.canvas.cropOffsetY
       }
+      const targetMask = brush._strokeCtx?.targetMask === true
+      // Mask edits change the layer's mask canvas; refresh blockedSet so the
+      // gate sees the new state on the next non-mask stroke.
+      if (targetMask) {
+        recomputeMaskBlockedSet(canvas.currentLayer)
+      }
       const timelineProperties = {
         modes: { ...globalState.tool.current.modes },
         color: { ...swatches.primary.color },
@@ -174,6 +187,7 @@ function brushSteps() {
         points: globalState.timeline.points,
         maskArray,
         boundaryBox,
+        targetMask,
       }
       if (globalState.tool.current.modes?.buildUpDither) {
         const lx = canvas.currentLayer.x + globalState.canvas.cropOffsetX

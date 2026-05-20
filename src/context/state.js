@@ -10,6 +10,7 @@ import { clipboardStore } from '../ui/stores/clipboard.svelte.js'
 import { transformStore } from '../ui/stores/transform.svelte.js'
 import { drawingStore } from '../ui/stores/drawing.svelte.js'
 import { canvasOffsetsStore } from '../ui/stores/canvasOffsets.svelte.js'
+import { maskEditStore } from '../ui/stores/maskEdit.svelte.js'
 
 //====================================//
 //======== * * * State * * * =========//
@@ -26,10 +27,12 @@ export const globalState = {
   transform: transformStore,
   drawing: drawingStore,
   canvas: canvasOffsetsStore,
+  maskEdit: maskEditStore,
   // Cross-domain methods
   reset,
   deselect,
   clearRedoStack,
+  clearMaskEdit,
 }
 
 // Internal alias so method bodies can reference the object by its original name
@@ -78,6 +81,18 @@ function deselect() {
     _vectorGui.mother.rotationOrigin.x = null
     _vectorGui.mother.rotationOrigin.y = null
   }
+}
+
+/**
+ * Exit mask-edit mode without changing layer state. Called when the user
+ * switches the active layer, deletes the mask, or toggles edit off in the
+ * gear popout. Resetting both fields together prevents `layerId` from
+ * pointing at a no-longer-edited layer while `active` is false.
+ * @returns {void}
+ */
+function clearMaskEdit() {
+  state.maskEdit.active = false
+  state.maskEdit.layerId = null
 }
 
 /** @returns {void} */

@@ -2,9 +2,40 @@ import { dom } from '../../context/dom.js'
 import { globalState } from '../../context/state.js'
 import { vectorGui } from '../../gui/vector.js'
 import { clearOffscreenCanvas, renderCanvas } from '../../canvas/render.js'
-import { updateActiveLayerState, removeTempLayer } from '../../canvas/layers.js'
+import {
+  updateActiveLayerState,
+  removeTempLayer,
+  recomputeMaskBlockedSet,
+} from '../../canvas/layers.js'
 import { SCALE } from '../../utils/constants.js'
 import { setVectorShapeBoundaryBox } from '../../gui/transform.js'
+
+/**
+ * Restore a layer's mask canvas pixels from a dataURL snapshot, then
+ * rebuild `blockedSet` so the draw gate reflects the restored state.
+ * If the layer no longer has a mask (e.g. addMask was just undone), or
+ * the action did not record a maskSnapshot, this is a no-op. The render
+ * pass that follows the undo/redo will redraw the layer overlay against
+ * whatever state results.
+ * @param {object} layer - The raster layer whose mask should be restored.
+ * @param {string|null} maskSnapshot - DataURL of the mask canvas, or null.
+ * @param {Function} [onLoaded] - Optional callback invoked after the
+ *   image has decoded and blockedSet has been rebuilt.
+ */
+function restoreMaskSnapshot(layer, maskSnapshot, onLoaded) {
+  if (!layer.mask || !maskSnapshot) {
+    onLoaded?.()
+    return
+  }
+  const img = new Image()
+  img.onload = () => {
+    layer.mask.ctx.clearRect(0, 0, layer.mask.cvs.width, layer.mask.cvs.height)
+    layer.mask.ctx.drawImage(img, 0, 0)
+    recomputeMaskBlockedSet(layer)
+    onLoaded?.()
+  }
+  img.src = maskSnapshot
+}
 
 /**
  * Re-render the canvas and restore all UI state after an undo or redo step.
@@ -99,6 +130,15 @@ export function renderToLatestAction(latestAction, modType) {
     img.src = mostRecentActionFromSameLayer.snapshot
     img.onload = function () {
       mostRecentActionFromSameLayer.layer.ctx.drawImage(img, 0, 0)
+      // Restore the mask state to match the same snapshot in time so
+      // mask-edit actions can be undone without replaying the timeline.
+      restoreMaskSnapshot(
+        mostRecentActionFromSameLayer.layer,
+        mostRecentActionFromSameLayer.maskSnapshot,
+        () => {
+          renderCanvas(mostRecentActionFromSameLayer.layer)
+        },
+      )
       renderCanvas(mostRecentActionFromSameLayer.layer)
       // Remove the temp layer only after rendering to keep the transition
       // visually clean when redoing a confirmed paste.

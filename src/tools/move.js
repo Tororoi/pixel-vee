@@ -7,10 +7,20 @@ import { transformRasterContent } from '../utils/transformHelpers.js'
 import { addTransformToTimeline } from '../actions/transform/rasterTransform.js'
 import { transformBoundaries } from './transform.js'
 import { brush, rebuildBuildUpDensityMap } from './brush.js'
+import { renderMaskFromSet } from '../canvas/layers.js'
 import {
   applyDitherOffset,
   applyDitherOffsetControl,
 } from '../utils/ditherPreview.js'
+
+// In-flight mask-move state. The blockedSet is captured on
+// pointerdown and each pointermove translates it by the cumulative
+// drag delta — the set is the source of truth, and renderMaskFromSet
+// repaints the canvas to match. Module-level rather than on
+// globalState because no other code needs to read it — the move
+// tool owns the entire lifecycle.
+let _maskMoveSetSnapshot = null
+let _maskMoveStartCursor = null
 
 /**
  * Move the contents of a layer relative to other layers
@@ -19,6 +29,8 @@ function moveSteps() {
   // move contents of selection around canvas
   // default selection is entire canvas contents
   // move raster layer or reference layer
+  const isMaskMove =
+    globalState.maskEdit.active && !!canvas.currentLayer.mask
   switch (canvas.pointerEvent) {
     case 'pointerdown':
       //TODO: (Low Priority) Make distinction for user that for general move, it's moving the layer, but for a selection, it's moving the selection area with the contents (only works for active paste)
@@ -28,11 +40,40 @@ function moveSteps() {
       vectorGui.render()
       if (vectorGui.selectedCollisionPresent) {
         transformSteps()
+      } else if (isMaskMove) {
+        // Snapshot the blockedSet once so each pointermove can
+        // translate from the original coords rather than accumulating
+        // compounded shifts.
+        _maskMoveSetSnapshot = new Set(canvas.currentLayer.mask.blockedSet)
+        _maskMoveStartCursor = {
+          x: globalState.cursor.x,
+          y: globalState.cursor.y,
+        }
       }
       break
     case 'pointermove':
       if (vectorGui.selectedPoint.xKey) {
         transformSteps()
+      } else if (isMaskMove && _maskMoveSetSnapshot) {
+        // Mask-only move: translate each marked coord by the cumulative
+        // drag delta, then re-render the canvas from the new set.
+        // Out-of-bounds coords are preserved in the set so moving the
+        // mask off an edge doesn't discard work — they just don't
+        // render until they come back into view.
+        const dx = globalState.cursor.x - _maskMoveStartCursor.x
+        const dy = globalState.cursor.y - _maskMoveStartCursor.y
+        const m = canvas.currentLayer.mask
+        const newSet = new Set()
+        for (const key of _maskMoveSetSnapshot) {
+          const nx = ((key << 16) >> 16) + dx
+          const ny = (key >> 16) + dy
+          // Mask `nx` to 16 bits so the packed key uses the same
+          // sign-friendly encoding `renderMaskFromSet` decodes.
+          newSet.add((ny << 16) | (nx & 0xffff))
+        }
+        m.blockedSet = newSet
+        renderMaskFromSet(canvas.currentLayer)
+        renderCanvas(canvas.currentLayer)
       } else {
         const dx = globalState.cursor.x - globalState.cursor.prevX
         const dy = globalState.cursor.y - globalState.cursor.prevY
@@ -67,6 +108,30 @@ function moveSteps() {
     case 'pointerup':
       if (vectorGui.selectedPoint.xKey) {
         transformSteps()
+      } else if (isMaskMove && _maskMoveSetSnapshot) {
+        // Finalize the translation: the canvas and blockedSet were
+        // already updated in pointermove via renderMaskFromSet, so the
+        // gate sees the new mask state immediately. Record the action
+        // for undo/redo with the final delta so a future full timeline
+        // replay can reproduce the translation.
+        const dx = globalState.cursor.x - _maskMoveStartCursor.x
+        const dy = globalState.cursor.y - _maskMoveStartCursor.y
+        renderCanvas(canvas.currentLayer)
+        addToTimeline({
+          tool: 'moveMask',
+          layer: canvas.currentLayer,
+          properties: {
+            dx,
+            dy,
+            // performAction's `!action.boundaryBox` guard rejects actions
+            // without a boundary. Supply an empty one — moveMask uses no
+            // per-pixel bounds itself.
+            boundaryBox: { xMin: null, xMax: null, yMin: null, yMax: null },
+          },
+        })
+        globalState.clearRedoStack()
+        _maskMoveSetSnapshot = null
+        _maskMoveStartCursor = null
       } else {
         renderCanvas(canvas.currentLayer, true)
         //save start and end coordinates

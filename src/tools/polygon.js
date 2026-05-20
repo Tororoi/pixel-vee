@@ -5,7 +5,11 @@ import { swatches } from '../context/swatch.js'
 import { ditherPatterns } from '../context/ditherPatterns.js'
 import { keys } from '../shortcuts/keys.js'
 import { actionPolygon } from '../actions/pointer/polygon.js'
-import { createStrokeContext } from '../actions/pointer/strokeContext.js'
+import {
+  createStrokeContext,
+  getMaskRoutingFields,
+} from '../actions/pointer/strokeContext.js'
+import { recomputeMaskBlockedSet } from '../canvas/layers.js'
 import { vectorGui } from '../gui/vector.js'
 import { renderCanvas } from '../canvas/render.js'
 import { coordArrayFromSet } from '../utils/maskHelpers.js'
@@ -43,6 +47,7 @@ function buildPolygonCtx(isPreview = false) {
     secondaryColor: swatches.secondary.color,
     ditherOffsetX: globalState.tool.current.ditherOffsetX ?? 0,
     ditherOffsetY: globalState.tool.current.ditherOffsetY ?? 0,
+    ...getMaskRoutingFields(canvas.currentLayer),
   })
 }
 
@@ -358,6 +363,11 @@ function polygonSteps() {
     case 'pointerup': {
       updateVertices()
       drawPolygon(false, cropOffsetX, cropOffsetY)
+      const targetMask =
+        globalState.maskEdit.active && !!canvas.currentLayer.mask
+      if (targetMask) {
+        recomputeMaskBlockedSet(canvas.currentLayer)
+      }
       const maskArray = coordArrayFromSet(
         globalState.selection.maskSet,
         canvas.currentLayer.x + globalState.canvas.cropOffsetX,
@@ -383,6 +393,7 @@ function polygonSteps() {
           maskArray,
           boundaryBox,
           vectorIndices: [uniqueVectorKey],
+          targetMask,
         },
       })
       const layerX = canvas.currentLayer.x

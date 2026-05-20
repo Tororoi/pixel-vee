@@ -2,7 +2,11 @@ import { globalState } from '../context/state.js'
 import { canvas } from '../context/canvas.js'
 import { swatches } from '../context/swatch.js'
 import { actionFill } from '../actions/pointer/fill.js'
-import { createStrokeContext } from '../actions/pointer/strokeContext.js'
+import {
+  createStrokeContext,
+  getMaskRoutingFields,
+} from '../actions/pointer/strokeContext.js'
+import { recomputeMaskBlockedSet } from '../canvas/layers.js'
 import { vectorGui } from '../gui/vector.js'
 import { renderCanvas } from '../canvas/render.js'
 import { coordArrayFromSet } from '../utils/maskHelpers.js'
@@ -34,17 +38,25 @@ function fillSteps() {
       globalState.vector.properties.tool = globalState.tool.current.name
       globalState.vector.properties.px1 = normalizedX
       globalState.vector.properties.py1 = normalizedY
+      const fillStrokeCtx = createStrokeContext({
+        layer: canvas.currentLayer,
+        boundaryBox: globalState.selection.boundaryBox,
+        currentColor: swatches.primary.color,
+        currentModes: globalState.tool.current.modes,
+        maskSet: globalState.selection.maskSet,
+        ...getMaskRoutingFields(canvas.currentLayer),
+      })
       actionFill(
         globalState.vector.properties.px1 + cropOffsetX,
         globalState.vector.properties.py1 + cropOffsetY,
-        createStrokeContext({
-          layer: canvas.currentLayer,
-          boundaryBox: globalState.selection.boundaryBox,
-          currentColor: swatches.primary.color,
-          currentModes: globalState.tool.current.modes,
-          maskSet: globalState.selection.maskSet,
-        }),
+        fillStrokeCtx,
       )
+      const targetMask = fillStrokeCtx.targetMask === true
+      // Mask fills change the layer's mask canvas; refresh blockedSet so the
+      // gate sees the new state on the next non-mask stroke.
+      if (targetMask) {
+        recomputeMaskBlockedSet(canvas.currentLayer)
+      }
       //For undo ability, store starting coords and settings and pass them into actionFill
       let maskArray = coordArrayFromSet(
         globalState.selection.maskSet,
@@ -74,6 +86,7 @@ function fillSteps() {
           maskArray,
           boundaryBox,
           vectorIndices: [uniqueVectorKey],
+          targetMask,
         },
       })
       //Store vector in state
