@@ -8,6 +8,49 @@ let _scheduledLayer = null
 let _rafId = null
 
 /**
+ * Snapshot a layer's mask state (canvas bitmap + blockedSet +
+ * inverted flag) so it can be restored after a partial-replay
+ * clear+redraw that wouldn't otherwise reproduce it. blockedSet is
+ * copied because callers later swap the live set during replay; the
+ * snapshot must be independent.
+ * @param {object} layer - The layer whose mask to snapshot.
+ * @returns {object|null} Snapshot, or null if no mask.
+ */
+function captureMaskSnapshot(layer) {
+  if (!layer?.mask) return null
+  const { cvs, ctx, blockedSet, inverted } = layer.mask
+  const cache = document.createElement('canvas')
+  cache.width = cvs.width
+  cache.height = cvs.height
+  cache.getContext('2d').drawImage(cvs, 0, 0)
+  return {
+    bitmap: cache,
+    blockedSet: new Set(blockedSet),
+    inverted,
+    width: cvs.width,
+    height: cvs.height,
+    sourceCtx: ctx,
+  }
+}
+
+/**
+ * Restore a previously captured mask snapshot back onto a layer.
+ * Used by `renderCanvas` to keep the mask untouched across partial
+ * replays that target the layer canvas but can't reproduce the
+ * mask's state.
+ * @param {object} layer - Target layer.
+ * @param {object} snap - Result of `captureMaskSnapshot`.
+ */
+function restoreMaskSnapshot(layer, snap) {
+  if (!layer?.mask || !snap) return
+  const { ctx, cvs } = layer.mask
+  ctx.clearRect(0, 0, cvs.width, cvs.height)
+  ctx.drawImage(snap.bitmap, 0, 0)
+  layer.mask.blockedSet = snap.blockedSet
+  layer.mask.inverted = snap.inverted
+}
+
+/**
  * Schedules a `renderCanvas` call for the next animation frame, coalescing
  * multiple calls that arrive within the same frame into a single render.
  * This prevents wasted redraws on high-frequency pointermove events where
@@ -76,6 +119,24 @@ function drawLayer(layer) {
         canvas.offScreenCVS.width,
         canvas.offScreenCVS.height,
       )
+      // Mask overlay: the mask canvas is opaque (white background, red
+      // where the user has painted). When the user toggles invert, the
+      // canvas itself is recolored in-place so the same drawImage path
+      // produces the inverted overlay — no second canvas, no
+      // globalCompositeOperation (which has a significant perf cost in
+      // some browsers). The overlay is also suppressed when the mask
+      // is disabled — the user's toggle state is preserved, but the
+      // logic treats "show overlay" as off until the mask is re-enabled.
+      if (layer.mask?.enabled && layer.mask?.overlayVisible) {
+        layer.onscreenCtx.globalAlpha = 0.25
+        layer.onscreenCtx.drawImage(
+          layer.mask.cvs,
+          canvas.xOffset,
+          canvas.yOffset,
+          canvas.offScreenCVS.width,
+          canvas.offScreenCVS.height,
+        )
+      }
     }
   }
   layer.onscreenCtx.restore()
@@ -167,6 +228,22 @@ export function clearOffscreenCanvas(activeLayer = null) {
         canvas.offScreenCVS.width,
         canvas.offScreenCVS.height,
       )
+      // Mask shares the layer's coordinate space; if the timeline is
+      // being replayed for this layer, the mask must also start from
+      // a clean slate so mask-targeting actions replay correctly.
+      // The `inverted` flag resets to false because invertMask
+      // actions in the timeline toggle it — leaving it at its
+      // current value would mean each replay flips the final state.
+      if (activeLayer.mask) {
+        activeLayer.mask.ctx.clearRect(
+          0,
+          0,
+          activeLayer.mask.cvs.width,
+          activeLayer.mask.cvs.height,
+        )
+        activeLayer.mask.blockedSet = new Set()
+        activeLayer.mask.inverted = false
+      }
     }
   } else {
     //clear all offscreen layers
@@ -178,6 +255,16 @@ export function clearOffscreenCanvas(activeLayer = null) {
           canvas.offScreenCVS.width,
           canvas.offScreenCVS.height,
         )
+        if (layer.mask) {
+          layer.mask.ctx.clearRect(
+            0,
+            0,
+            layer.mask.cvs.width,
+            layer.mask.cvs.height,
+          )
+          layer.mask.blockedSet = new Set()
+          layer.mask.inverted = false
+        }
       }
     })
   }
@@ -210,10 +297,23 @@ export function renderCanvas(
   // Skip the clear+redraw when the timeline is empty — this preserves pixel data
   // that was baked directly into layer canvases (e.g. after a content-shift resize).
   if (redrawTimeline && globalState.timeline.undoStack.length > 0) {
+    // Partial replay (activeIndexes provided, setImages=false) only
+    // re-visits the action being adjusted — it relies on cached
+    // between-images to keep the rest of the layer canvas correct.
+    // The mask has no equivalent cache, so wiping it here would lose
+    // every mask edit (invert, move, brush) since none of them sit
+    // in the activeIndexes list. Snapshot the mask, clear, replay,
+    // then restore so the mask stays untouched across the adjust.
+    const preserveMask =
+      activeLayer?.mask && activeIndexes && !setImages
+    const maskSnapshot = preserveMask
+      ? captureMaskSnapshot(activeLayer)
+      : null
     //clear offscreen layers
     clearOffscreenCanvas(activeLayer)
     //render all previous actions
     redrawTimelineActions(activeLayer, activeIndexes, setImages)
+    if (maskSnapshot) restoreMaskSnapshot(activeLayer, maskSnapshot)
   }
   //Handle onscreen canvases
   //render background canvas
@@ -287,6 +387,33 @@ export function applyCanvasDimensions(
       ) {
         layer.cvs.width = canvas.offScreenCVS.width
         layer.cvs.height = canvas.offScreenCVS.height
+      }
+      // Mirror the resize on the mask canvas so it remains aligned
+      // with the layer it gates. Assigning width/height clears the
+      // bitmap to fully transparent (the natural "no marks" state).
+      // blockedSet entries that were already out-of-bounds relative
+      // to the OLD dimensions stay alive — they may come back into
+      // view if the canvas grows. In-bounds entries are dropped here
+      // because the canvas reset wipes them visually; the subsequent
+      // timeline replay repopulates them from recorded actions.
+      if (
+        layer.mask &&
+        (layer.mask.cvs.width !== canvas.offScreenCVS.width ||
+          layer.mask.cvs.height !== canvas.offScreenCVS.height)
+      ) {
+        const oldW = layer.mask.cvs.width
+        const oldH = layer.mask.cvs.height
+        const surviving = new Set()
+        for (const key of layer.mask.blockedSet) {
+          const px = (key << 16) >> 16
+          const py = key >> 16
+          if (px < 0 || px >= oldW || py < 0 || py >= oldH) {
+            surviving.add(key)
+          }
+        }
+        layer.mask.cvs.width = canvas.offScreenCVS.width
+        layer.mask.cvs.height = canvas.offScreenCVS.height
+        layer.mask.blockedSet = surviving
       }
     }
   })

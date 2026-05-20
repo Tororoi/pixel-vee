@@ -179,4 +179,24 @@
       width: calc(100% - 4px);
     }
   }
+  .mask-section {
+    display: flex;
+    flex-flow: column nowrap;
+    // Children only take their content width — keeps the toggles
+    // narrow so tooltips can sit centered below their actual hit
+    // area rather than centered under the full popout column.
+    align-items: flex-start;
+    gap: 8px;
+    .input-label {
+      margin-bottom: 4px;
+    }
+    .btn {
+      padding: 6px 14px;
+    }
+    .mask-enable-btn {
+      width: 40px;
+      height: 40px;
+      cursor: pointer;
+    }
+  }
 }

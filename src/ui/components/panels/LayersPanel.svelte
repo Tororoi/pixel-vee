@@ -91,6 +91,10 @@
     if (canvas.currentLayer.type === 'reference') {
       globalState.deselect()
     }
+    // Exit mask-edit mode whenever the active layer changes so drawing
+    // does not accidentally target the previous layer's mask after the
+    // switch.
+    globalState.clearMaskEdit()
     canvas.currentLayer.inactiveTools?.forEach((tool) => {
       if (dom[`${tool}Btn`]) dom[`${tool}Btn`].disabled = false
     })

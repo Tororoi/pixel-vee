@@ -14,6 +14,88 @@ import { createStrokeContext } from '../actions/pointer/strokeContext.js'
 import { isDitherOn, ditherPatterns } from '../context/ditherPatterns.js'
 import { transformRasterContent } from '../utils/transformHelpers.js'
 import { getWasm } from '../wasm.js'
+import {
+  recomputeMaskBlockedSet,
+  resetMaskCanvas,
+  renderMaskFromSet,
+} from './layers.js'
+
+/**
+ * Opaque mask colors used during timeline replay. Two variants so
+ * the rendered overlay subtly signals which mode the mask is in.
+ */
+const MASK_RED = { color: 'rgba(255,0,0,1)', r: 255, g: 0, b: 0, a: 255 }
+const MASK_RED_INVERTED = {
+  color: 'rgba(0,0,255,1)',
+  r: 0,
+  g: 0,
+  b: 255,
+  a: 255,
+}
+
+/**
+ * Resolve where a replayed action should write and which mask gate
+ * to apply. Mask edits route to `layer.mask.ctx` (overriding any
+ * caching betweenCtx) so the recorded pixels land on the mask
+ * canvas; the brush color is forced to red and `inject` is
+ * suppressed since the mask is a binary marked/un-marked surface.
+ * Regular actions on a layer with an enabled mask receive the
+ * layer's blockedSet so the gate prevents painting over masked
+ * pixels — identical to how a live stroke is gated. Returns
+ * `skip: true` for mask actions whose mask has since been removed,
+ * so the action becomes a no-op rather than throwing on a null
+ * mask reference.
+ * @param {object} action - The timeline action being replayed.
+ * @param {CanvasRenderingContext2D|null} betweenCtx - Active-indexes
+ *   caching context, or null for direct-to-layer replay.
+ * @returns {{customContext: CanvasRenderingContext2D|null,
+ *   layerMaskBlockedSet: Set<number>|null,
+ *   targetMask: boolean,
+ *   currentColorOverride: object|null,
+ *   currentModesOverride: object|null,
+ *   skip: boolean}} Routing fields to spread into the replay strokeContext.
+ */
+function resolveMaskRoutingForReplay(action, betweenCtx) {
+  if (action.targetMask) {
+    if (!action.layer.mask) {
+      return {
+        customContext: null,
+        layerMaskBlockedSet: null,
+        layerMaskInverted: false,
+        targetMask: false,
+        currentColorOverride: null,
+        currentModesOverride: null,
+        skip: true,
+      }
+    }
+    const inverted = !!action.layer.mask.inverted
+    return {
+      customContext: action.layer.mask.ctx,
+      layerMaskBlockedSet: null,
+      layerMaskInverted: false,
+      targetMask: true,
+      currentColorOverride: inverted ? MASK_RED_INVERTED : MASK_RED,
+      currentModesOverride: {
+        ...(action.modes ?? {}),
+        inject: false,
+      },
+      skip: false,
+    }
+  }
+  return {
+    customContext: betweenCtx,
+    layerMaskBlockedSet: action.layer.mask?.enabled
+      ? action.layer.mask.blockedSet
+      : null,
+    layerMaskInverted: !!(
+      action.layer.mask?.enabled && action.layer.mask?.inverted
+    ),
+    targetMask: false,
+    currentColorOverride: null,
+    currentModesOverride: null,
+    skip: false,
+  }
+}
 
 /**
  * Renders a contiguous block of build-up dither actions in a single pass.
@@ -364,6 +446,8 @@ function _renderBuildUpDitherSegmentJS(
  * @param {number} cropDY - vertical crop offset delta, default 0
  */
 function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
+  const routing = resolveMaskRoutingForReplay(action, activeCtx)
+  if (routing.skip) return
   //Correct action coordinates with layer offsets
   const offsetX = action.layer.x + cropDX
   const offsetY = action.layer.y + cropDY
@@ -391,17 +475,22 @@ function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
       ((((vector.ditherOffsetY ?? 0) + vRecordedLayerY - offsetY) % 8) + 8) % 8
     const vectorCtx = createStrokeContext({
       layer: vector.layer,
-      customContext: activeCtx,
+      customContext: routing.customContext,
       boundaryBox,
-      currentColor: vector.color,
-      currentModes: vector.modes,
+      currentColor: routing.currentColorOverride ?? vector.color,
+      currentModes: routing.currentModesOverride ?? vector.modes,
       brushStamp: brushStamps[vector.brushType][vector.brushSize],
       brushSize: vector.brushSize,
       ditherPattern: ditherPatterns[vector.ditherPatternIndex ?? 63],
       twoColorMode: vector.modes?.twoColor ?? false,
-      secondaryColor: vector.secondaryColor ?? null,
+      secondaryColor: routing.targetMask
+        ? MASK_RED
+        : (vector.secondaryColor ?? null),
       ditherOffsetX: vEffectiveDitherOffsetX,
       ditherOffsetY: vEffectiveDitherOffsetY,
+      layerMaskBlockedSet: routing.layerMaskBlockedSet,
+      layerMaskInverted: routing.layerMaskInverted,
+      targetMask: routing.targetMask,
     })
     switch (vectorProperties.tool) {
       case 'fill': {
@@ -464,6 +553,12 @@ function renderActionVectors(action, activeCtx = null, cropDX = 0, cropDY = 0) {
       //do nothing
     }
   }
+  // Refresh the layer-mask blocked set after a mask edit so any
+  // subsequent non-mask actions in this same replay pass see the
+  // current mask state and get gated correctly.
+  if (routing.targetMask) {
+    recomputeMaskBlockedSet(action.layer)
+  }
 }
 
 /**
@@ -496,6 +591,41 @@ export function performAction(
   cropDX = 0,
   cropDY = 0,
 ) {
+  // moveMask carries no boundaryBox of its own — it's a pure
+  // translation on the mask, so handle it before the guard below.
+  // Out-of-bounds coords are preserved so off-canvas mask work
+  // survives the round trip; the signed-friendly pack mirrors the
+  // live move-tool encoding.
+  if (action.tool === 'moveMask') {
+    if (!action.layer.mask) return
+    const m = action.layer.mask
+    const newSet = new Set()
+    for (const key of m.blockedSet) {
+      const nx = ((key << 16) >> 16) + action.dx
+      const ny = (key >> 16) + action.dy
+      newSet.add((ny << 16) | (nx & 0xffff))
+    }
+    m.blockedSet = newSet
+    renderMaskFromSet(action.layer)
+    return
+  }
+  // clearMask wipes the mask canvas at this point in history; subsequent
+  // mask-targeting actions in the replay will repaint onto the cleared
+  // canvas, reproducing the user's post-clear strokes correctly.
+  if (action.tool === 'clearMask') {
+    if (!action.layer.mask) return
+    resetMaskCanvas(action.layer)
+    return
+  }
+  // invertMask flips `mask.inverted` and re-renders the canvas in
+  // the matching color. The blockedSet is not touched, so any
+  // out-of-bounds work survives the round trip.
+  if (action.tool === 'invertMask') {
+    if (!action.layer.mask) return
+    action.layer.mask.inverted = !action.layer.mask.inverted
+    renderMaskFromSet(action.layer)
+    return
+  }
   // An absent boundaryBox means the action is still being drawn and has not
   // been committed; replaying an incomplete action would corrupt the canvas.
   if (!action?.boundaryBox) {
@@ -550,16 +680,21 @@ export function performAction(
         ((((action.ditherOffsetX ?? 0) + recordedLayerX - offsetX) % 8) + 8) % 8
       const effectiveDitherOffsetY =
         ((((action.ditherOffsetY ?? 0) + recordedLayerY - offsetY) % 8) + 8) % 8
+      const routing = resolveMaskRoutingForReplay(action, betweenCtx)
+      if (routing.skip) break
       const strokeCtx = createStrokeContext({
         layer: action.layer,
-        customContext: betweenCtx,
+        customContext: routing.customContext,
         boundaryBox,
-        currentColor: action.color,
-        currentModes: action.modes,
+        currentColor: routing.currentColorOverride ?? action.color,
+        currentModes: routing.currentModesOverride ?? action.modes,
         maskSet: mask,
+        layerMaskBlockedSet: routing.layerMaskBlockedSet,
+        layerMaskInverted: routing.layerMaskInverted,
+        targetMask: routing.targetMask,
         seenPixelsSet: seen,
         twoColorMode: action.modes?.twoColor ?? false,
-        secondaryColor: action.secondaryColor,
+        secondaryColor: routing.targetMask ? MASK_RED : action.secondaryColor,
         ditherOffsetX: effectiveDitherOffsetX,
         ditherOffsetY: effectiveDitherOffsetY,
         ditherPattern: pattern,
@@ -594,6 +729,12 @@ export function performAction(
         previousY = p.y + offsetY
         //If points are saved as individual pixels instead of the cursor points so that the brushStamp does not need to be iterated over, it is much faster. But it sacrifices flexibility with points.
       }
+      // Refresh the layer-mask blocked set after a mask edit so any
+      // subsequent non-mask actions in this same replay pass see the
+      // current mask state and get gated correctly.
+      if (routing.targetMask) {
+        recomputeMaskBlockedSet(action.layer)
+      }
       break
     }
     case 'fill':
@@ -615,7 +756,15 @@ export function performAction(
         boundaryBox.yMin += offsetY + cropDY
         boundaryBox.yMax += offsetY + cropDY
       }
-      let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
+      // Cuts recorded in mask-edit mode wipe pixels from the mask
+      // canvas instead of the layer canvas. The between-image
+      // (betweenCtx) is layer-only, so route past it when the cut
+      // was originally aimed at the mask.
+      const maskCutTarget =
+        action.targetMask && action.layer.mask?.ctx
+          ? action.layer.mask.ctx
+          : null
+      let activeCtx = maskCutTarget ?? (betweenCtx ? betweenCtx : action.layer.ctx)
       if (action.maskSet && action.maskSet.length > 0) {
         // maskSet pixels are stored as offscreen canvas coords at the time of the cut.
         // Recover the original bounding box origin in offscreen canvas coords so that
@@ -649,6 +798,11 @@ export function performAction(
           boundaryBox.yMax - boundaryBox.yMin,
         )
       }
+      // Mask cuts change the mask canvas; rebuild blockedSet so the
+      // draw gate sees the new state on subsequent replayed strokes.
+      if (action.targetMask && action.layer.mask) {
+        recomputeMaskBlockedSet(action.layer)
+      }
       break
     }
     case 'paste': {
@@ -668,7 +822,14 @@ export function performAction(
       const isLastPasteAction = action === lastPasteAction
       //if action is latest paste action and not confirmed, render it (account for actions that may be later but do not have the tool name "paste")
       if (action.confirmed) {
-        let activeCtx = betweenCtx ? betweenCtx : action.layer.ctx
+        // Pastes committed while editing the mask go onto the mask
+        // canvas, not the layer canvas.
+        const maskPasteTarget =
+          action.targetMask && action.layer.mask?.ctx
+            ? action.layer.mask.ctx
+            : null
+        let activeCtx =
+          maskPasteTarget ?? (betweenCtx ? betweenCtx : action.layer.ctx)
         activeCtx.drawImage(
           action.canvas,
           boundaryBox.xMin,
@@ -676,6 +837,9 @@ export function performAction(
           boundaryBox.xMax - boundaryBox.xMin,
           boundaryBox.yMax - boundaryBox.yMin,
         )
+        if (action.targetMask && action.layer.mask) {
+          recomputeMaskBlockedSet(action.layer)
+        }
       } else if (
         canvas.tempLayer === canvas.currentLayer && //only render if the current layer is the temp layer (active paste action)
         isLastPasteAction //only render if this action is the last paste action in the stack

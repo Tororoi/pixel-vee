@@ -116,10 +116,19 @@ export function adjustVectorSteps() {
           updateLineLinkedCurveHandles(currentVector)
         }
       }
-      globalState.timeline.activeIndexes = createActiveIndexesForRender(
-        currentVector,
-        globalState.vector.savedProperties,
-      )
+      // Vectors recorded in mask-edit mode render to the mask canvas
+      // rather than the layer. The activeIndexes/between-image cache
+      // only covers the layer canvas, so a partial replay can't undo
+      // the prior position of a mask-targeting vector — it would
+      // leave a ghost trail. Fall back to a full replay for these.
+      if (currentVector.action?.targetMask) {
+        globalState.timeline.activeIndexes = null
+      } else {
+        globalState.timeline.activeIndexes = createActiveIndexesForRender(
+          currentVector,
+          globalState.vector.savedProperties,
+        )
+      }
       renderCanvas(
         currentVector.layer,
         true,

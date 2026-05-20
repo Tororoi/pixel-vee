@@ -133,6 +133,43 @@ export const tools = {
     modes: {},
     type: 'settings',
   },
+  // moveMask is type 'raster' so the redraw timeline iterates it and
+  // performAction can apply the destructive in-place translation to the
+  // mask canvas. Without 'raster' the full-replay path (e.g. after
+  // canvas resize) would silently skip moveMask and the mask would
+  // snap back to its un-translated position. Same reasoning for
+  // clearMask — it needs to clear the mask canvas at the right point
+  // in history during a full replay.
+  moveMask: {
+    name: 'moveMask',
+    fn: null,
+    brushSize: null,
+    brushType: null,
+    brushDisabled: false,
+    options: {},
+    modes: {},
+    type: 'raster',
+  },
+  clearMask: {
+    name: 'clearMask',
+    fn: null,
+    brushSize: null,
+    brushType: null,
+    brushDisabled: false,
+    options: {},
+    modes: {},
+    type: 'raster',
+  },
+  invertMask: {
+    name: 'invertMask',
+    fn: null,
+    brushSize: null,
+    brushType: null,
+    brushDisabled: false,
+    options: {},
+    modes: {},
+    type: 'raster',
+  },
   cut: {
     name: 'cut',
     fn: null,

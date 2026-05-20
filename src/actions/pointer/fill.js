@@ -31,7 +31,15 @@ import { getWasm } from '../../wasm.js'
  *   `customContext` fields are used.
  */
 export function actionFill(startX, startY, strokeCtx) {
-  const { boundaryBox, layer, currentModes, customContext } = strokeCtx
+  const {
+    boundaryBox,
+    layer,
+    currentModes,
+    customContext,
+    layerMaskBlockedSet,
+    layerMaskInverted,
+    targetMask,
+  } = strokeCtx
   let { currentColor } = strokeCtx
   //exit if outside borders
   if (isOutOfBounds(startX, startY, 0, layer, boundaryBox)) {
@@ -49,6 +57,12 @@ export function actionFill(startX, startY, strokeCtx) {
   const width = xMax - xMin
   const height = yMax - yMin
   let layerImageData = renderCtx.getImageData(xMin, yMin, width, height)
+  // Snapshot the original pixel bytes when a layer mask is in force. The
+  // fill primitives (WASM and JS) do not know about per-pixel mask gating,
+  // so the cheapest correct implementation is to let the fill run and then
+  // restore blocked pixels from this snapshot afterward.
+  const maskActive = !targetMask && layerMaskBlockedSet
+  const originalData = maskActive ? new Uint8ClampedArray(layerImageData.data) : null
   let clickedColor = getColor(layerImageData, startX - xMin, startY - yMin)
 
   // In eraser mode, replace the clicked color with full transparency.
@@ -143,6 +157,37 @@ export function actionFill(startX, startY, strokeCtx) {
         }
         y++
         pixelPos += width * 4
+      }
+    }
+  }
+  // If a layer mask is in force, restore the blocked pixels inside
+  // the fill region from the pre-fill snapshot so the fill behaves
+  // exactly as if those pixels were unreachable. The "blocked" set
+  // is `layerMaskBlockedSet` when not inverted, or its complement
+  // within the fill region when inverted.
+  if (maskActive) {
+    const dst = layerImageData.data
+    if (layerMaskInverted) {
+      for (let py = yMin; py < yMax; py++) {
+        for (let px = xMin; px < xMax; px++) {
+          if (layerMaskBlockedSet.has((py << 16) | px)) continue
+          const localIndex = ((py - yMin) * width + (px - xMin)) * 4
+          dst[localIndex] = originalData[localIndex]
+          dst[localIndex + 1] = originalData[localIndex + 1]
+          dst[localIndex + 2] = originalData[localIndex + 2]
+          dst[localIndex + 3] = originalData[localIndex + 3]
+        }
+      }
+    } else {
+      for (const key of layerMaskBlockedSet) {
+        const x = key & 0xffff
+        const y = (key >> 16) & 0xffff
+        if (x < xMin || x >= xMax || y < yMin || y >= yMax) continue
+        const localIndex = ((y - yMin) * width + (x - xMin)) * 4
+        dst[localIndex] = originalData[localIndex]
+        dst[localIndex + 1] = originalData[localIndex + 1]
+        dst[localIndex + 2] = originalData[localIndex + 2]
+        dst[localIndex + 3] = originalData[localIndex + 3]
       }
     }
   }

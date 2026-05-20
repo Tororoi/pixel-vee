@@ -2,6 +2,31 @@ import { dom } from '../context/dom.js'
 import { globalState } from '../context/state.js'
 import { canvas } from '../context/canvas.js'
 import { vectorGui } from '../gui/vector.js'
+import { recomputeMaskBlockedSet } from '../canvas/layers.js'
+
+/**
+ * Returns the canvas + context that copy/cut/paste should operate on
+ * for the given layer. When the user is editing the layer's mask and
+ * the mask is enabled, those operations target the mask canvas
+ * instead of the layer canvas so a selection lifted in mask-edit
+ * mode picks up the mask marks (not the layer pixels) — matching
+ * the brush's mask-edit routing.
+ * @param {object} layer - The layer being read from / written to.
+ * @returns {{cvs: HTMLCanvasElement, ctx: CanvasRenderingContext2D,
+ *   isMask: boolean}} The canvas + context to use, plus a flag
+ *   indicating which surface was chosen.
+ */
+export function getMaskEditTarget(layer) {
+  if (
+    layer &&
+    globalState.maskEdit.active &&
+    globalState.maskEdit.layerId === layer.id &&
+    layer.mask?.enabled
+  ) {
+    return { cvs: layer.mask.cvs, ctx: layer.mask.ctx, isMask: true }
+  }
+  return { cvs: layer?.cvs, ctx: layer?.ctx, isMask: false }
+}
 
 //===================================//
 //========= * * * Edit * * * ========//
@@ -21,9 +46,13 @@ export function copySelectedPixels() {
   const tempCTX = tempCanvas.getContext('2d', {
     willReadFrequently: true,
   })
+  // In mask-edit mode the selection lifts pixels from the mask
+  // canvas rather than the layer canvas, matching the brush's
+  // mask-edit routing.
+  const source = getMaskEditTarget(canvas.currentLayer)
   if (globalState.selection.maskSet) {
     //Only copy pixels that are in the maskSet — leave the rest transparent
-    const srcImageData = canvas.currentLayer.ctx.getImageData(xMin, yMin, w, h)
+    const srcImageData = source.ctx.getImageData(xMin, yMin, w, h)
     const dstImageData = tempCTX.createImageData(w, h)
     const src = srcImageData.data
     const dst = dstImageData.data
@@ -40,7 +69,7 @@ export function copySelectedPixels() {
     }
     tempCTX.putImageData(dstImageData, 0, 0)
   } else {
-    tempCTX.drawImage(canvas.currentLayer.cvs, xMin, yMin, w, h, 0, 0, w, h)
+    tempCTX.drawImage(source.cvs, xMin, yMin, w, h, 0, 0, w, h)
   }
   globalState.clipboard.select.selectProperties = {
     ...globalState.selection.properties,
@@ -49,7 +78,7 @@ export function copySelectedPixels() {
     ...globalState.selection.boundaryBox,
   }
   globalState.clipboard.select.canvas = tempCanvas
-  globalState.clipboard.select.imageData = canvas.currentLayer.ctx.getImageData(
+  globalState.clipboard.select.imageData = source.ctx.getImageData(
     xMin,
     yMin,
     w,
@@ -60,6 +89,9 @@ export function copySelectedPixels() {
   //even if the layer is moved between copy and paste
   globalState.clipboard.select.layerX = canvas.currentLayer.x
   globalState.clipboard.select.layerY = canvas.currentLayer.y
+  // Remember whether the clipboard content came from a mask so paste
+  // can default to the same target when committing.
+  globalState.clipboard.select.sourceWasMask = source.isMask
 }
 
 /**
@@ -101,12 +133,14 @@ export function cutSelectedPixels(copyToClipboard) {
   if (copyToClipboard) {
     copySelectedPixels()
   }
+  // Cut targets the mask canvas in mask-edit mode (matching copy).
+  const target = getMaskEditTarget(canvas.currentLayer)
   if (globalState.selection.maskSet) {
     //Only clear pixels that are in the maskSet
     const { xMin, yMin, xMax, yMax } = globalState.selection.boundaryBox
     const w = xMax - xMin
     const h = yMax - yMin
-    const imageData = canvas.currentLayer.ctx.getImageData(xMin, yMin, w, h)
+    const imageData = target.ctx.getImageData(xMin, yMin, w, h)
     const { data } = imageData
     for (const key of globalState.selection.maskSet) {
       const bx = (key & 0xffff) - xMin
@@ -114,12 +148,15 @@ export function cutSelectedPixels(copyToClipboard) {
       const idx = (by * w + bx) * 4
       data[idx] = data[idx + 1] = data[idx + 2] = data[idx + 3] = 0
     }
-    canvas.currentLayer.ctx.putImageData(imageData, xMin, yMin)
+    target.ctx.putImageData(imageData, xMin, yMin)
   } else {
     const { xMin, yMin, xMax, yMax } = globalState.selection.boundaryBox
     //Clear boundaryBox area
-    canvas.currentLayer.ctx.clearRect(xMin, yMin, xMax - xMin, yMax - yMin)
+    target.ctx.clearRect(xMin, yMin, xMax - xMin, yMax - yMin)
   }
+  // When the cut hit the mask, refresh blockedSet so the draw gate
+  // sees the new state on the next stroke.
+  if (target.isMask) recomputeMaskBlockedSet(canvas.currentLayer)
 }
 
 /**
@@ -183,7 +220,9 @@ export function pasteSelectedPixels(clipboard, layer, offsetX, offsetY) {
   globalState.selection.properties.py1 += offsetY
   globalState.selection.properties.py2 += offsetY
   globalState.selection.setBoundaryBox(globalState.selection.properties)
-  renderPaste(clipboard, canvas.tempLayer, offsetX, offsetY)
+  // The live floating paste always renders onto the tempLayer
+  // canvas; the mask-edit redirect only applies at confirm time.
+  renderPaste(clipboard, canvas.tempLayer.ctx, offsetX, offsetY)
   //TODO: (Medium Priority) include transform control points for resizing, rotating, etc. (not currently implemented)
   vectorGui.render()
 }
@@ -198,20 +237,27 @@ export function confirmPastedPixels(clipboard, layer) {
   // const { boundaryBox, vectors } = clipboard
   const offsetX = layer.x
   const offsetY = layer.y
-  renderPaste(clipboard, layer, offsetX, offsetY)
+  // Confirm targets the mask canvas in mask-edit mode so a paste
+  // started while editing the mask commits onto the mask. The
+  // tempLayer used for floating positioning is unchanged.
+  const target = getMaskEditTarget(layer)
+  renderPaste(clipboard, target.ctx, offsetX, offsetY)
+  if (target.isMask) recomputeMaskBlockedSet(layer)
 }
 
 /**
- *
+ * Draw the clipboard canvas onto the given context at the paste
+ * offset. Used both for the live tempLayer preview during a paste
+ * and for committing the pasted pixels onto the destination
+ * (layer.ctx or mask.ctx).
  * @param {object} clipboard - clipboard object
- * @param {object} layer - layer to paste onto
+ * @param {CanvasRenderingContext2D} ctx - destination context
  * @param {number} offsetX - x offset
  * @param {number} offsetY - y offset
  */
-function renderPaste(clipboard, layer, offsetX, offsetY) {
+function renderPaste(clipboard, ctx, offsetX, offsetY) {
   const { boundaryBox } = clipboard
-  //render the clipboard canvas onto the temporary layer
-  layer.ctx.drawImage(
+  ctx.drawImage(
     clipboard.canvas,
     boundaryBox.xMin + offsetX,
     boundaryBox.yMin + offsetY,

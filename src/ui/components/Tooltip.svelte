@@ -37,7 +37,15 @@
     const targetRect = target.getBoundingClientRect()
     const targetCenter = targetRect.left + targetRect.width / 2
 
-    if (window.innerWidth * (2 / 3) < targetCenter) {
+    // Callers can pin tooltip location via `data-tooltip-position`
+    // when the auto rule (window-thirds) would land in the wrong
+    // bucket — e.g. popouts anchored on one side whose toggles
+    // should still render the same speech-bubble centered below
+    // like the global settings dialog.
+    const forced = target.dataset?.tooltipPosition
+    if (forced === 'left' || forced === 'center' || forced === 'right') {
+      location = forced
+    } else if (window.innerWidth * (2 / 3) < targetCenter) {
       location = 'right'
     } else if (window.innerWidth / 3 < targetCenter) {
       location = 'center'

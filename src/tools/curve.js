@@ -4,7 +4,11 @@ import { canvas } from '../context/canvas.js'
 import { swatches } from '../context/swatch.js'
 import { ditherPatterns } from '../context/ditherPatterns.js'
 import { actionCurve } from '../actions/pointer/curve.js'
-import { createStrokeContext } from '../actions/pointer/strokeContext.js'
+import {
+  createStrokeContext,
+  getMaskRoutingFields,
+} from '../actions/pointer/strokeContext.js'
+import { recomputeMaskBlockedSet } from '../canvas/layers.js'
 import { vectorGui } from '../gui/vector.js'
 import { renderCanvas } from '../canvas/render.js'
 import { coordArrayFromSet } from '../utils/maskHelpers.js'
@@ -54,6 +58,7 @@ function buildCurveCtx(isPreview = false) {
     secondaryColor: swatches.secondary.color,
     ditherOffsetX: globalState.tool.current.ditherOffsetX ?? 0,
     ditherOffsetY: globalState.tool.current.ditherOffsetY ?? 0,
+    ...getMaskRoutingFields(canvas.currentLayer),
   })
 }
 
@@ -199,6 +204,7 @@ function curveSteps() {
       }
       //Solidify vector
       if (globalState.tool.clickCounter === maxClicks) {
+        const curveStrokeCtx = buildCurveCtx(false)
         actionCurve(
           globalState.vector.properties.px1 + cropOffsetX,
           globalState.vector.properties.py1 + cropOffsetY,
@@ -209,8 +215,12 @@ function curveSteps() {
           globalState.vector.properties.px4 + cropOffsetX,
           globalState.vector.properties.py4 + cropOffsetY,
           globalState.tool.clickCounter,
-          buildCurveCtx(false),
+          curveStrokeCtx,
         )
+        const targetMask = curveStrokeCtx.targetMask === true
+        if (targetMask) {
+          recomputeMaskBlockedSet(canvas.currentLayer)
+        }
         globalState.tool.clickCounter = 0
         let maskArray = coordArrayFromSet(
           globalState.selection.maskSet,
@@ -240,6 +250,7 @@ function curveSteps() {
             maskArray,
             boundaryBox,
             vectorIndices: [uniqueVectorKey],
+            targetMask,
           },
         })
         //Store vector in state

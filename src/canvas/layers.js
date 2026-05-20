@@ -125,6 +125,168 @@ export function createRasterLayer() {
     inactiveTools: [],
     hidden: false,
     removed: false,
+    mask: null,
+  }
+}
+
+/**
+ * Opaque colors used to mark mask pixels. The canvas uses
+ * transparency for the "un-marked" state so the rendered overlay is
+ * naturally clean — drawImage at 25% globalAlpha lets the layer
+ * show through everywhere the mask is transparent.
+ *
+ * Two colors so the visible overlay subtly signals which mode the
+ * mask is in: red when the painted set blocks drawing, orange-red
+ * when the painted set is inverted and instead allows drawing.
+ */
+export const MASK_PAINT_COLOR = 'rgba(255,0,0,1)'
+export const MASK_PAINT_COLOR_INVERTED = 'rgba(0,0,255,1)'
+
+/**
+ * Return the paint color appropriate for the mask's current
+ * inverted flag. Callers use this any time they need to fillRect
+ * the mask canvas (live brush in mask-edit, renderMaskFromSet,
+ * recomputeMaskBlockedSet refresh, etc.) so the visible cue stays
+ * consistent.
+ * @param {object} mask - The mask object (`layer.mask`).
+ * @returns {string} CSS color string for fillStyle.
+ */
+export function maskPaintColor(mask) {
+  return mask?.inverted ? MASK_PAINT_COLOR_INVERTED : MASK_PAINT_COLOR
+}
+
+/**
+ * Allocate a mask for a layer. The mask is a single canvas: red
+ * pixels where the user has marked, transparent everywhere else.
+ * `drawImage` at 25% globalAlpha produces the transparent-red
+ * overlay without any extra canvas and without
+ * `globalCompositeOperation` (which has a notable perf cost in some
+ * browsers).
+ *
+ * `blockedSet` is the lookup the draw gate consults; it is the set
+ * of pixels the user has marked. The `inverted` flag flips the
+ * gate's interpretation of the set (in-set → allowed instead of
+ * blocked) and shifts the overlay color so the visible cue matches
+ * the mode. The set itself is never rewritten on invert, so any
+ * out-of-bounds members left by a previous off-canvas mask move
+ * survive both invert and move round trips.
+ *
+ * Every raster layer is created with a mask, so this function runs
+ * once per layer creation rather than being gated on a UI action.
+ * @param {object} layer - The layer to attach a mask to.
+ * @returns {object} The newly created mask object (also assigned to
+ *   `layer.mask`).
+ */
+export function createMaskFor(layer) {
+  const maskCVS = document.createElement('canvas')
+  const maskCTX = maskCVS.getContext('2d', {
+    // imageData is read on every mask edit to refresh blockedSet.
+    willReadFrequently: true,
+  })
+  maskCVS.width = canvas.offScreenCVS.width
+  maskCVS.height = canvas.offScreenCVS.height
+  // Canvas starts fully transparent — no marks, no overlay.
+  layer.mask = {
+    cvs: maskCVS,
+    ctx: maskCTX,
+    blockedSet: new Set(),
+    enabled: true,
+    overlayVisible: true,
+    // When inverted, the gate flips its interpretation of blockedSet
+    // (in-set = allowed) and the overlay color shifts to signal the
+    // mode. The set itself never changes on toggle, which keeps
+    // out-of-bounds work lossless.
+    inverted: false,
+  }
+  return layer.mask
+}
+
+/**
+ * Reset the mask canvas to the "no marks" state — fully transparent
+ * and an empty blockedSet.
+ * @param {object} layer - The layer whose mask should be reset.
+ */
+export function resetMaskCanvas(layer) {
+  if (!layer.mask) return
+  const { cvs, ctx } = layer.mask
+  ctx.clearRect(0, 0, cvs.width, cvs.height)
+  layer.mask.blockedSet = new Set()
+}
+
+/**
+ * Rebuild `mask.blockedSet` by scanning `mask.cvs` imageData. The
+ * mask uses opaque marks on a transparent background, so the alpha
+ * channel alone distinguishes marked from un-marked pixels (the
+ * specific color depends on `mask.inverted`).
+ *
+ * Out-of-bounds members from the prior set — produced by a mask
+ * move that pushed pixels off the visible canvas — are carried over
+ * intact. They can't be detected from the canvas (which only holds
+ * in-bounds pixels) so they must be preserved explicitly to avoid
+ * losing the user's work.
+ *
+ * Coordinates use the same `(y << 16) | x` encoding the draw-pixel
+ * gate in `draw.js` consults; in-bounds coords (0 ≤ x,y < 65535)
+ * pack identically with or without the sign-friendly mask.
+ * @param {object} layer - The layer whose mask should be scanned.
+ */
+export function recomputeMaskBlockedSet(layer) {
+  if (!layer.mask) return
+  const { cvs, ctx, blockedSet: previous } = layer.mask
+  const { width, height } = cvs
+  const imageData = ctx.getImageData(0, 0, width, height)
+  const data = imageData.data
+  const set = new Set()
+  // Carry over any out-of-bounds members from the previous set.
+  for (const key of previous) {
+    const px = (key << 16) >> 16
+    const py = key >> 16
+    if (px < 0 || px >= width || py < 0 || py >= height) {
+      set.add(key)
+    }
+  }
+  // Add in-bounds opaque pixels from the canvas.
+  let x = 0
+  let y = 0
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] !== 0) {
+      set.add((y << 16) | x)
+    }
+    if (++x === width) {
+      x = 0
+      y++
+    }
+  }
+  layer.mask.blockedSet = set
+}
+
+/**
+ * Re-render the mask canvas from `blockedSet`. The set is the source
+ * of truth; this paints the canvas to match. Operations that mutate
+ * the set directly (mask-move, invert toggle) call this to refresh
+ * the canvas without going through the brush path.
+ *
+ * The fill color tracks the inverted flag so toggling alone is
+ * enough to update the on-screen cue. Coords outside the canvas
+ * area (left by a previous off-canvas mask move) are skipped — they
+ * stay in the set but have nowhere to render until the canvas grows
+ * or the mask is moved back.
+ *
+ * Coords are unpacked with arithmetic right-shifts so negative
+ * components survive a round-trip through the packed-int encoding.
+ * @param {object} layer - The layer whose mask should be re-rendered.
+ */
+export function renderMaskFromSet(layer) {
+  if (!layer.mask) return
+  const { cvs, ctx, blockedSet } = layer.mask
+  ctx.clearRect(0, 0, cvs.width, cvs.height)
+  ctx.fillStyle = maskPaintColor(layer.mask)
+  const { width, height } = cvs
+  for (const key of blockedSet) {
+    const x = (key << 16) >> 16
+    const y = key >> 16
+    if (x < 0 || x >= width || y < 0 || y >= height) continue
+    ctx.fillRect(x, y, 1, 1)
   }
 }
 

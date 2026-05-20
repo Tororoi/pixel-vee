@@ -11,6 +11,7 @@ import {
   copySelectedVectors,
   cutSelectedPixels,
   pasteSelectedPixels,
+  getMaskEditTarget,
 } from '../../menu/edit.js'
 import { switchTool } from '../../tools/toolbox.js'
 import { dom } from '../../context/dom.js'
@@ -48,6 +49,7 @@ export function actionCutSelection(copyToClipboard = true) {
   ) {
     if (globalState.selection.boundaryBox.xMax !== null) {
       //Cut raster content
+      const targetMask = getMaskEditTarget(canvas.currentLayer).isMask
       cutSelectedPixels(copyToClipboard)
       // Store layer-relative coords so the action is portable if the
       // layer is later moved before an undo/redo is triggered.
@@ -65,6 +67,7 @@ export function actionCutSelection(copyToClipboard = true) {
           boundaryBox,
           originalLayerX: canvas.currentLayer.x,
           originalLayerY: canvas.currentLayer.y,
+          targetMask,
         },
       })
 
@@ -188,6 +191,12 @@ export function actionPasteSelection() {
       globalState.ui.vectorTransformOpen = false
       if (dom.vectorTransformUIContainer)
         dom.vectorTransformUIContainer.style.display = 'none'
+      // Remember the target so confirm and replay can commit the
+      // paste onto the mask canvas when it was started in mask-edit
+      // mode. canvas.currentLayer has already been switched to
+      // tempLayer above, so consult the original target via
+      // canvas.pastedLayer.
+      const pasteTargetMask = getMaskEditTarget(canvas.pastedLayer).isMask
       //add to timeline
       addToTimeline({
         tool: tools.paste.name,
@@ -204,6 +213,7 @@ export function actionPasteSelection() {
             height: globalState.clipboard.select.canvas?.height,
           },
           pastedLayer: canvas.pastedLayer, //important to know intended target layer for pasting, will be used by undo/redo
+          targetMask: pasteTargetMask,
         },
       })
 
@@ -340,6 +350,9 @@ export function actionConfirmPastedPixels() {
       selectProperties,
       canvas: confirmedCanvas,
     }
+    // Capture the confirm's target before the helper runs so the
+    // recorded action carries the right targetMask flag for replay.
+    const confirmTargetMask = getMaskEditTarget(canvas.pastedLayer).isMask
     confirmPastedPixels(confirmedClipboard, canvas.pastedLayer)
     //remove temp layer from DOM and restore current layer
     removeTempLayer()
@@ -360,6 +373,7 @@ export function actionConfirmPastedPixels() {
           width: confirmedCanvas?.width,
           height: confirmedCanvas?.height,
         },
+        targetMask: confirmTargetMask,
       },
     })
     globalState.clearRedoStack()
